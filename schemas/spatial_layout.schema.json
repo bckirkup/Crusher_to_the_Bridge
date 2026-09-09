@@ -141,7 +141,7 @@
         "meal_seatings": {
           "type": "integer",
           "minimum": 1,
-          "description": "Number of successive diner cohorts a Dining zone serves per meal (1 = the whole complement sits at once; 2 = early/late seatings). Each cohort's meal block is offset by one block length."
+          "description": "Number of successive sittings a Dining zone serves per meal (1 = the whole assigned complement sits at once). Diners are dealt to sittings in rotation; each meal block is cut into seat-turns of max(block_hours // sittings, 1) hours and sitting k takes the k-th turn, so a sitting holds at most ceil(assigned / sittings) diners. Declared so a venue never runs at or over max_occupancy in any hour."
         }
       }
     }

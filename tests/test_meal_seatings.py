@@ -1,14 +1,16 @@
-"""SEAT-01: a dining venue serves its declared number of successive seatings.
+"""SEAT-01/02: a dining venue serves its declared number of successive seatings.
 
-Before this change every agent on a hull entered its meal block at the same
-hour, so a venue's hourly occupancy was its whole assigned complement — on the
+Before SEAT-01 every agent on a hull entered its meal block at the same hour,
+so a venue's hourly occupancy was its whole assigned complement — on the
 classic and spirit hulls more diners than the venue declares seats. A Dining
-zone now declares ``meal_seatings``; each diner is dealt a cohort at spawn and
-each meal block is cut into seat-turns (a 2-hour block in two sittings is two
-1-hour turns) so at any hour one cohort is in the room and the venue's service
-window is unchanged. These tests hold the schedule transform's invariants,
-the per-hour occupancy bound, the hull declarations against their complements,
-and bit-identity where a venue declares a single sitting. No epidemiological
+zone declares ``meal_seatings``; diners are dealt to a venue's sittings in
+rotation at spawn and each meal block is cut into seat-turns (a 2-hour block
+in two sittings is two 1-hour turns) so at any hour one cohort is in the room.
+SEAT-02 gives every venue on every hull at least two sittings and enough that
+no venue runs at or over its declared ``max_occupancy`` in any hour. These
+tests hold the schedule transform's invariants, the per-hour occupancy bound
+against the declared seats, the hull declarations against their complements,
+and bit-identity where a venue declares no sittings. No epidemiological
 outcome is asserted.
 """
 
@@ -31,6 +33,7 @@ from engines.infection_dynamics_bridge import (
 from orchestrator_init import load_spatial_layout
 
 REPO = Path(__file__).resolve().parents[1]
+DINER_SERVICE_TYPES = PASSENGER_DINING_SERVICE_TYPES | {"crew_mess"}
 HULLS = [
     "expedition_cruise_450",
     "classic_cruise_1900",
@@ -126,22 +129,36 @@ class TestDeclarationsAgainstComplements:
         assert seats >= pax, f"{hull}: {seats} passenger seat-turns for {pax} passengers"
 
     @pytest.mark.parametrize("hull", HULLS)
-    def test_every_crew_mess_declares_more_than_one_seating(self, hull: str) -> None:
+    def test_every_dining_venue_declares_more_than_one_seating(self, hull: str) -> None:
         for z in _layout(hull)["zones"]:
-            if z.get("dining_service_type") == "crew_mess":
-                assert z.get("meal_seatings", 1) >= 2
+            if z.get("dining_service_type") in DINER_SERVICE_TYPES:
+                assert z.get("meal_seatings", 1) >= 2, z["id"]
 
-    def test_expedition_passenger_venues_are_a_single_sitting(self) -> None:
-        for z in _layout("expedition_cruise_450")["zones"]:
-            if z.get("dining_service_type") in PASSENGER_DINING_SERVICE_TYPES:
-                assert z.get("meal_seatings", 1) == 1
+    @pytest.mark.parametrize("hull", HULLS)
+    def test_expected_diners_per_sitting_stay_under_the_declared_seats(self, hull: str) -> None:
+        """Venues are drawn by capacity, so a venue's expected share of its
+        role's complement is complement * seats / role seats; one sitting of
+        that must fit the room with headroom for the draw's variance."""
+        doc = _layout(hull)
+        for role, types in (("passengers", PASSENGER_DINING_SERVICE_TYPES),
+                            ("crew", frozenset({"crew_mess"}))):
+            venues = [z for z in doc["zones"] if z.get("dining_service_type") in types]
+            role_seats = sum(z["max_occupancy"] for z in venues)
+            complement = doc["nominal_complement"][role]
+            for z in venues:
+                expected = complement * z["max_occupancy"] / role_seats
+                per_sitting = expected / z["meal_seatings"]
+                assert per_sitting <= 0.9 * z["max_occupancy"], (
+                    f"{hull}/{z['id']}: {per_sitting:.0f} expected per sitting "
+                    f"in {z['max_occupancy']} seats"
+                )
 
 
 def _peak_hourly_diners(engine: KorkinShipEngine, venue: str) -> int:
     diners = [a for a in engine.agents if a.dining_zone == venue]
     peak = 0
     for hour in range(24):
-        n = sum(1 for a in diners if a.schedule[hour].startswith("Meal"))
+        n = sum(1 for a in diners if a.schedule[hour % len(a.schedule)].startswith("Meal"))
         peak = max(peak, n)
     return peak
 
@@ -163,6 +180,43 @@ class TestOccupancyPerHour:
             assert peak >= 0.4 * assigned - 5
             seatings = {a.meal_seating for a in engine.agents if a.dining_zone == z["id"]}
             assert seatings == {0, 1}
+
+    @pytest.mark.parametrize("hull", HULLS)
+    @pytest.mark.parametrize("seed", [1, 2, 3])
+    def test_no_venue_runs_at_or_over_its_declared_seats_in_any_hour(
+        self, hull: str, seed: int,
+    ) -> None:
+        graph = load_config()["ship_graph"]
+        doc = _layout(hull)
+        pax = doc["nominal_complement"]["passengers"]
+        crew = doc["nominal_complement"]["crew"]
+        engine = _engine(_hull_zones(hull), seed, graph["agent_classes"], pax, crew)
+        for z in doc["zones"]:
+            if z.get("dining_service_type") not in DINER_SERVICE_TYPES:
+                continue
+            assigned = sum(1 for a in engine.agents if a.dining_zone == z["id"])
+            peak = _peak_hourly_diners(engine, z["id"])
+            assert peak <= -(-assigned // z["meal_seatings"]), z["id"]
+            assert peak < z["max_occupancy"], (
+                f"{hull}/{z['id']}: {peak} diners in {z['max_occupancy']} seats"
+            )
+
+    def test_sittings_are_dealt_in_rotation_so_cohorts_differ_by_at_most_one(self) -> None:
+        zones = [
+            {"name": "Berthing", "type": "Room"},
+            {"name": "MDR", "type": "Dining", "dining_service_type": "mdr",
+             "max_occupancy": 100, "meal_seatings": 3},
+            {"name": "Mess", "type": "Dining", "dining_service_type": "crew_mess",
+             "max_occupancy": 40, "meal_seatings": 2},
+            {"name": "Deck", "type": "Free"},
+        ]
+        engine = _engine(zones, 11, None, num_passengers=301, num_crew=75)
+        for venue, seatings in (("MDR", 3), ("Mess", 2)):
+            counts = [0] * seatings
+            for a in engine.agents:
+                if a.dining_zone == venue:
+                    counts[a.meal_seating] += 1
+            assert max(counts) - min(counts) <= 1, (venue, counts)
 
     def test_more_seatings_lower_the_peak_monotonically(self) -> None:
         peaks = []
@@ -195,9 +249,10 @@ class TestSingleSittingIsUnchanged:
             template = PASSENGER_SCHEDULE if a.role == "passenger" else CREW_SCHEDULE
             assert a.schedule == template
 
-    def test_expedition_passengers_all_eat_in_one_sitting(self) -> None:
+    def test_expedition_deals_both_roles_across_their_sittings(self) -> None:
         graph = load_config()["ship_graph"]
         engine = _engine(_hull_zones("expedition_cruise_450"), 3, graph["agent_classes"])
-        assert all(a.meal_seating == 0 for a in engine.agents if a.role == "passenger")
+        pax_seatings = {a.meal_seating for a in engine.agents if a.role == "passenger"}
         crew_seatings = {a.meal_seating for a in engine.agents if a.role == "crew"}
-        assert crew_seatings == {0, 1}
+        assert pax_seatings == {0, 1}
+        assert crew_seatings == {0, 1, 2}
