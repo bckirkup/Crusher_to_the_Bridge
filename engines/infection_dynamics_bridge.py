@@ -186,6 +186,13 @@ DEFAULT_AGENT_BEHAVIOR: dict[str, Any] = {
     },
 }
 
+# Dining venues by side of the crew/passenger line. Cruise crew eat in the
+# crew mess (the mechanism the outbreak record credits for the crew attack-rate
+# deficit: segregated crew sleeping, dining and boarding areas); passengers eat
+# in the passenger venues and never in a galley or crew mess.
+CREW_DINING_SERVICE_TYPES = frozenset({"crew_mess"})
+PASSENGER_DINING_SERVICE_TYPES = frozenset({"mdr", "buffet", "specialty"})
+
 # Passenger leisure access. No zone record on any platform carries an access
 # field, so crew-only machinery and service spaces are identified from tokens
 # their own name, deck and description already use. Interim measure; the
@@ -710,11 +717,14 @@ class KorkinAgent:
 
         candidates: list[str] = []
         weights: list[float] = []
+        allowed = (
+            CREW_DINING_SERVICE_TYPES if self.role == "crew"
+            else PASSENGER_DINING_SERVICE_TYPES
+        )
         for entry in dining_catalog:
             name = str(entry["name"])
             stype = str(entry.get("service_type") or "mdr")
-            # Skip galleys for passenger dining rotation.
-            if self.role != "crew" and stype == "galley":
+            if stype not in allowed:
                 continue
             cap = entry.get("max_occupancy")
             try:
@@ -1504,6 +1514,10 @@ class KorkinShipEngine:
                     "food_contamination_multiplier",
                 ),
             })
+        self._crew_dining_catalog = self._dining_catalog_for(CREW_DINING_SERVICE_TYPES)
+        self._passenger_dining_catalog = self._dining_catalog_for(
+            PASSENGER_DINING_SERVICE_TYPES,
+        )
 
         self.agents: list[KorkinAgent] = []
         self.epoch: int = 0
@@ -1528,6 +1542,31 @@ class KorkinShipEngine:
             return "unknown"
         probs = [w / total for w in weights]
         return str(self.rng.choice(labels, p=probs))
+
+    def _dining_catalog_for(self, service_types: frozenset[str]) -> list[dict[str, Any]]:
+        """Dining venues of the given service types, or every non-galley venue."""
+        venues = [
+            e for e in self._dining_catalog if e["service_type"] in service_types
+        ]
+        if not venues:
+            venues = [
+                e for e in self._dining_catalog if e["service_type"] != "galley"
+            ]
+        return venues or list(self._dining_catalog)
+
+    def _draw_dining_zone(self, role_group: str) -> str:
+        """A fixed meal venue on the role's side of the crew/passenger line.
+
+        Crew eat in the crew mess and passengers in the passenger venues, so
+        the two roles never share a dining room as diners; a crew member
+        *working* a passenger venue still does so through its work zone.
+        Venues are drawn by declared capacity, as leisure venues are.
+        """
+        catalog = (
+            self._crew_dining_catalog if role_group == "crew"
+            else self._passenger_dining_catalog
+        )
+        return weighted_zone_choice(catalog, self.rng) or "unknown"
 
     def _resolve_zone(self, preference: str, fallback_zones: list[str]) -> str:
         """Pick a zone matching *preference* substring, or fall back."""
@@ -1679,7 +1718,7 @@ class KorkinShipEngine:
                     immune_remaining -= 1
             agents_left -= 1
 
-            dining = str(self.rng.choice(self._dining_zones))
+            dining = self._draw_dining_zone(role_group)
             if duty_zone:
                 work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
             elif role_group == "crew":
@@ -1750,7 +1789,7 @@ class KorkinShipEngine:
                 if any("Pax_" in z or "Passenger" in z for z in self._room_zones)
                 else self._room_zones
             )
-            dining = self.rng.choice(self._dining_zones)
+            dining = self._draw_dining_zone("passenger")
             free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones)
             gender = self._assign_gender()
@@ -1789,7 +1828,7 @@ class KorkinShipEngine:
                 if any("Crew_Corridor" in z or "Crew" in z for z in self._room_zones)
                 else self._room_zones
             )
-            dining = self.rng.choice(self._dining_zones)
+            dining = self._draw_dining_zone("crew")
             free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
             work = self.rng.choice(self._free_zones + self._dining_zones)
             gender = self._assign_gender()

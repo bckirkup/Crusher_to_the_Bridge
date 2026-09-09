@@ -35,7 +35,58 @@ crew attack rates (2–5× the observed crew medians on posted voyages), A5 rati
 (1.0–1.5 against a measured 4.3) and crew-only posting shares (23% against 1 of
 208 observed) are not the declared model's and must be re-measured. Their
 passenger-channel results are affected in an unmeasured direction through the
-shared surface and food pools.
+shared surface and food pools. **Measured on expedition (Batch `9004cb26`,
+image `bounded-design-v10`, expedition stage 0 re-run voyage-for-voyage: 256
+points × 6 seeds, seed base 500, design seed 37):** the repair changed nothing
+the anchors can see — 173 → 174 postings of 1,536, mean crew infection AR
+3.78% → 3.75%, passenger 6.05% → 6.02%, A5 1.60 → 1.61; 844 voyages
+bit-identical, the rest differ by RNG divergence only (paired Δ crew AR −0.04
+pp, sd 2.6). The withdrawal stands as written — those results were measured on
+a defective structure — but on this hull the numbers are unchanged, so the
+food-handler channel was not what over-infects crew; whatever does is a route
+crew share with passengers.
+
+**`BERTH-01` (PR #475) made the cabin the night mixing unit and its toilet its
+own fomite pool, and it was measured the same way (Batch `0271ba38`, image
+`bounded-design-v11`, same 1,536 matched voyages against the `FOOD-ROLE-01`
+reprise):** postings 174 → 143 (11.3% → 9.3%; paired flips 44 off / 13 on,
+exact two-sided p ≈ 5e-5), crew-only postings 13 → 7, mean passenger infection
+AR 6.02% → 5.51% (paired Δ −0.51 pp, se 0.08), crew 3.75% → 3.59% (Δ −0.15
+pp, se 0.08), A5 1.61 → 1.53, points at 0/6 204 → 218 of 256; posted
+passenger AR median 11.1% → 12.0%. Read: dissolving the 25-berth passenger
+"ward" lowers passenger infection by about a twelfth and postings by about a
+sixth, but crew — whose 37-berth ward became 2–3-berth cabins — barely move,
+so A5 falls further from the measured 4.3 rather than toward it. Night mixing
+was not the crew's route; the posting frequency on this hull stays 6–15× above
+its 0.59–1.60% band. Every pre-`BERTH-01` frequency and attack rate is
+therefore also superseded, on every hull, in a direction measured only on
+expedition.
+
+**`DINE-SEG-01` (PR #476) seats crew in the crew mess and passengers in the
+passenger venues** (§4 item 8), which ends the shared-dining-room structure
+every result above was measured on, **and it was measured the same way (Batch
+`da6275de`, image `bounded-design-v12`, same 1,536 matched voyages against the
+`BERTH-01` reprise):** postings 143 → 169 (9.3% → 11.0%; paired flips 9 off /
+35 on, exact two-sided p ≈ 1e-4), crew-only postings 7 → 6, mean passenger
+infection AR 5.51% → 5.82% (paired Δ +0.31 pp, se 0.08), crew 3.59% → 3.55%
+(Δ −0.05 pp, se 0.09 — indistinguishable from zero), A5 1.53 → 1.64, points at
+0/6 218 → 211 of 256; posted passenger AR median 12.0% → 12.7%, posted crew AR
+median 10.1% → 9.0%; 660 voyages bit-identical. Read: taking the quarter of
+passengers out of the CrewMess and Galley puts the whole complement into two
+passenger dining rooms, which are denser and infect passengers slightly more;
+taking three quarters of crew out of those rooms does **not** lower crew
+infection at all. So crew were not catching it as fellow diners either. Of the
+routes crew share with passengers, berthing (`BERTH-01`) and dining are now
+both eliminated as the source of the crew excess on this hull; what remains
+shared is the work shift in passenger service zones (with the Jin 545/h
+service-surface rate), the leisure catalogue (no crew recreation zone is
+declared), and hallway residuals. A5 has moved 1.61 → 1.53 → 1.64 across two
+structural repairs against a measured 4.3, so the asymmetry is not going to
+come out of topology repairs of the size that remain; the finite-sample
+reading is that the model's crew route is on the work shift. The posting
+frequency stays 7–19× above expedition's 0.59–1.60% band. Every pre-`DINE-SEG-01`
+frequency and attack rate is superseded, on every hull, in a direction measured
+only on expedition.
 
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
@@ -1197,10 +1248,29 @@ Roughly in dependency order.
    showing up as a scored consequence; it must be repaired in the observation
    model, and A4 re-read afterwards, before an A1/A4 incompatibility means
    anything about transmission.
-8. **Cabin-level environmental compartments.** The finest mixing compartment is
+8. **Cabin-level environmental compartments — landed as `BERTH-01` (#475),
+   measured in §1.** Before it the finest mixing compartment was
    `Cabin_Corridor`: ~37 people in 800 m³ where reality is 2 people in ~40 m³
-   (crew 3). `cabin_size` and `cabin_mate_ids` exist but only exempt a mate from
-   confinement attenuation. **Sourced in
+   (crew 3); `cabin_size` and `cabin_mate_ids` existed but only exempted a mate
+   from confinement attenuation. Now each stateroom is a direct-contact unit at
+   full strength and its own surface pool, the corridor is a hallway residual
+   at the unchanged 0.15, and each hull declares its berthing per class
+   (expedition 2/2, crew_galley 3; classic 2/3, galley 4, medical and
+   engineering 2; spirit 2/3, medical and engineering 2; mega 2/2) from the
+   tranche-35 envelopes. **`DINE-SEG-01`** then drew the daytime half of the
+   line: before it every agent's fixed dining venue was drawn uniformly across
+   all Dining zones, so on expedition three quarters of crew took every meal in
+   the passenger dining rooms and a quarter of passengers ate in the CrewMess
+   or Galley. Now crew are seated in the hull's `crew_mess` venues and
+   passengers in its `mdr`/`buffet`/`specialty` venues, each by declared
+   capacity, and the per-meal rotation (off in every campaign) respects the
+   same line; crew *working* a passenger venue still do so through their work
+   zone. No constant moves; the matched expedition reprise is in §1 (crew
+   infection unchanged, passenger infection up a third of a point). Still
+   open: crew leisure is drawn from the passenger leisure
+   catalogue because no hull declares a crew recreation space (crew bar, crew
+   deck) — that is a zone declaration to source, not an assignment defect.
+   **Sourced in
    [tranche 35](../literature/consensus_tranche_35_crew_berthing.md):** MLC
    2006 caps passenger-ship crew rooms at four; the documented norm is two
    (all Icon-class crew staterooms), two to four on 1990s hulls, two to three
