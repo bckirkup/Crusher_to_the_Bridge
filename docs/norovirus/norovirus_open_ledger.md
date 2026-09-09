@@ -1638,6 +1638,38 @@ Roughly in dependency order.
     Off by default and bit-identical when off; sourcing precedes any value; no
     constant here is chosen against a scored quantity.
 
+    **Sourced, [tranche 36](../literature/consensus_tranche_36_near_field_air.md)**
+    (Consensus exhausted for the period; retrieved by the approved open-full-text
+    fallback). The structure is licensed and the magnitude is not. Licensed: the
+    two-compartment near/far form, time-dependent (a breath tracer at a seated
+    0.76 m runs **~36–44%** above other distances in the first 20 min and only
+    **~18%** above the volume average by 60 min in a 27 m³ chamber at ~3 ACH,
+    Parhizkar 2022); **two rings and no third** at a meal, bounded by Li 2021's
+    Guangzhou restaurant — **31.25%** attack rate at the immediate neighbouring
+    tables against **0%** remote, **45.45%** inside the recirculating
+    air-conditioning zone against **0%** outside, with per-table exposure ratios
+    (index = 1) of **0.76–1.04** same air stream, **0.40–0.47** same HVAC zone,
+    **0.04–0.23** remote — those ratios being **CFD predictions in a room at
+    0.9 L/s/person**, an envelope for the ordering test and not a dose; and the
+    cabin as an air compartment, with four convergent infection estimates for
+    sharing a sleeping compartment (**aOR 2.99**, Brown 2023; **≈×4.5**,
+    Sun 2023; **RR 3.0** / **aOR 3.27** in the cruise cohorts of tranche 35)
+    reserved as the **post-repair check**, since three routes already share the
+    cabin and adopting ×3 as an aerosol multiplier would double-count them.
+    **∅ null on search:** the near-field effective volume / exchange rate for a
+    table or a cabin (nobody measures it — it ships as declared geometry plus a
+    swept axis), and any influenza bedroom-sharing magnitude. **Null that
+    narrows the norovirus arm, and is a finding:** the record supports no
+    continuous respiratory norovirus emission — airborne material is
+    emesis-conditioned (Alsved 2020: 21/86 samples, **OR 8.1** within 3 h of
+    vomiting, 5–215 copies/m³) — so the norovirus near-field unit is whoever
+    shares air with a vomiting host, and the out-of-sample check for this change
+    is Marks 2000's attack rate by table around one vomiting diner,
+    **91 / 71 / 56 / 50 / 40 / 25%** (trend P ≈ 0.0007). Two channels the 2024
+    review lists as unresolved remain **absent and unlicensed**: toilet-flush
+    aerosol (which would attach to the cabin toilet `BERTH-01` already
+    compartmented) and diarrhoea-associated aerosolisation.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
