@@ -219,6 +219,17 @@ crew_duty_exclusion:
   # minimum and longer reviews are a declared arm.
   medical_clearance_delay_hours: 0
 
+# ── SURF-KO-01: service-surface knockout ─────────────────────
+# A diagnostic knockout, not a parameter. Jin et al. 2022 measured restaurant
+# staff touching shared surfaces 545.4 times an hour against a diner's 42.8,
+# and that one rate is the largest crew-specific term in the model. Enabling
+# this puts a food employee on shift onto the diner rate, so a matched-seed
+# pair measures how much of the crew arm that rate carries. The staff rate
+# itself is untouched, the arm is off in every production run, and neither
+# state may be selected by which one reproduces an anchor.
+service_surface_knockout:
+  enabled: false
+
 # ── EMOD-Style Clinical Progression ──────────────────────────
 emod_progression:
   # Advisory values only; progression uses pathogen profiles, not this block.

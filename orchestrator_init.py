@@ -616,6 +616,14 @@ def build_engine(
     engine_kwargs: dict[str, Any] = {}
     if "immune_fraction" in graph_cfg:
         engine_kwargs["immune_ratio"] = float(graph_cfg["immune_fraction"])
+    # IMMUNE-ROLE-01. A second, crew-only fraction, and only when declared:
+    # crew sail for years where a passenger sails for a week, so prior
+    # exposure is the one thing the two roles do not share. Unset leaves one
+    # role-blind pool, which is the shipped run.
+    if "crew_immune_fraction" in graph_cfg:
+        engine_kwargs["crew_immune_ratio"] = float(
+            graph_cfg["crew_immune_fraction"],
+        )
 
     # VSP threshold confinement is handled by configurable infection counters
     # in the orchestrator, not by the engine's internal check.  The

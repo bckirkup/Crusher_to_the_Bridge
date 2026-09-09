@@ -94,6 +94,42 @@ def test_the_duty_exclusion_arm_defaults_to_the_baseline() -> None:
     assert "--crew-duty-exclusion" not in argv
 
 
+@pytest.mark.parametrize(
+    ("arm", "flagged"),
+    [("off", False), ("on", True)],
+)
+def test_the_surface_knockout_arm_is_off_unless_the_submission_asks_for_it(
+    arm: str,
+    flagged: bool,
+) -> None:
+    argv = _region_argv(
+        _region_args("--service-surface-knockout", arm),
+        0,
+        Path("/tmp/out.json"),
+        Path("/tmp/rows.jsonl"),
+    )
+    assert ("--service-surface-knockout" in argv) is flagged
+
+
+def test_the_shard_names_the_box_it_samples() -> None:
+    default = _region_argv(
+        _region_args(), 0, Path("/tmp/out.json"), Path("/tmp/rows.jsonl"),
+    )
+    assert default[default.index("--factor-set") + 1] == "norovirus"
+    wide = _region_argv(
+        _region_args("--factor-set", "expedition_sensitivity"),
+        0,
+        Path("/tmp/out.json"),
+        Path("/tmp/rows.jsonl"),
+    )
+    assert wide[wide.index("--factor-set") + 1] == "expedition_sensitivity"
+
+
+def test_an_unknown_box_is_refused_at_submission() -> None:
+    with pytest.raises(SystemExit):
+        _region_args("--factor-set", "everything")
+
+
 def test_the_screen_shard_is_unaffected_by_the_region_subset_flags() -> None:
     args = parse_args([
         "--design", "screen",

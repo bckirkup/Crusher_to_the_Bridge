@@ -807,6 +807,30 @@ def _parse_dining_party_share(tx: dict[str, Any]) -> float:
     return share
 
 
+def _parse_service_surface_knockout(cfg: dict[str, Any]) -> bool:
+    """Whether this run knocks out the service-surface rate (SURF-KO-01).
+
+    A diagnostic arm, off unless a run declares ``service_surface_knockout:
+    {enabled: true}``. On, a food employee on shift in its service zone touches
+    shared surfaces at the diner rate rather than the staff rate, which
+    measures how much of the crew arm that one rate carries. It is not a
+    production setting and the staff rate itself is unchanged.
+    """
+    block = cfg.get("service_surface_knockout")
+    if block is None:
+        return False
+    if not isinstance(block, dict):
+        raise ValueError(
+            "service_surface_knockout must be a mapping with an 'enabled' key",
+        )
+    enabled = block.get("enabled", False)
+    if not isinstance(enabled, bool):
+        raise ValueError(
+            f"service_surface_knockout.enabled must be a bool, got {enabled!r}",
+        )
+    return enabled
+
+
 def _parse_density_cfg(tx: dict[str, Any]) -> dict[str, float]:
     provided = tx.get("density_dependent") or {}
     if not isinstance(provided, dict):
@@ -1020,6 +1044,9 @@ class TransmissionCore:
         self.food_zone_multipliers = food_zone_multipliers or {}
         self.dining_party_contact_share = _parse_dining_party_share(
             (cfg or {}).get("transmission", {}) or {},
+        )
+        self.service_surface_knockout = _parse_service_surface_knockout(
+            cfg or {},
         )
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
@@ -3381,11 +3408,19 @@ class TransmissionCore:
         agent: KorkinAgent | None,
         epoch: int,
     ) -> float:
-        zone_class = self._fomite_zone_class(zone_name)
         if agent is not None and self._on_service_duty(agent, zone_name, epoch):
-            hourly = CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR
+            # SURF-KO-01 knocks the shift out, not the zone: an on-duty food
+            # employee takes the diner rate Jin measured in the same
+            # restaurant in the same hour, rather than falling back on its
+            # zone's class -- a service zone classes as ``galley``, which is
+            # the staff rate again and would knock nothing out.
+            hourly = (
+                SURFACE_CONTACTS_PER_HOUR["dining"]
+                if self.service_surface_knockout
+                else CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR
+            )
         else:
-            hourly = SURFACE_CONTACTS_PER_HOUR[zone_class]
+            hourly = SURFACE_CONTACTS_PER_HOUR[self._fomite_zone_class(zone_name)]
         return hourly * self.clock.hours_per_epoch
 
     def _fomite_is_eating(self, target: KorkinAgent, epoch: int) -> bool:

@@ -258,6 +258,62 @@ structure has no representation while partners are redrawn independently each
 epoch. The finite-sample statement is what is recorded here: on this grid, with
 this seed set, no effect resolved.
 
+**The three-arm expedition sensitivity: one knockout and two axes, none of them
+a proposed value.** Five structural repairs have moved the crew arm by nothing
+(`FOOD-ROLE-01`, `BERTH-01`, `DINE-SEG-01` and `DINE-PARTY-01` all null on crew;
+`SEAT-01`/`SEAT-02` moved passengers only), so the next question is not another
+topology repair but *which non-structural quantities the crew excess is even
+sensitive to*. Three arms are built, and each is a diagnostic or a declared
+axis, because none of the three has a cruise measurement to adopt:
+
+- **`SURF-KO-01`** — `service_surface_knockout.enabled`, **off by default**.
+  When on, a food employee **on service duty** takes the ordinary diner
+  surface-touch rate (42.8/h) rather than the staff rate it was measured at
+  (`CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR` 545.4/h, Jin 2022). Neither constant
+  moves, `_on_service_duty` is untouched, and food-handler dose, direct contact,
+  every other fomite class, off-shift crew, non-service crew, diners and
+  unrelated zones are unchanged. This is the per-multiplier knockout of tranche
+  33 applied to the one channel that survived those repairs; 42.8 is **not** a
+  claim about what a waiter touches, and a knockout result may not be converted
+  into a shipped rate.
+- **Boarding prevalence, independently by role.** `engines/initiation.py`
+  already draws passenger and crew boarding prevalence as separate per-person
+  probabilities, so the arm needs no new mechanism — it sweeps the two sourced
+  intervals independently: passenger **[0.025, 0.040]**, crew **[0.007, 0.030]**
+  (Grade B, asymptomatic faecal RNA carriage on its own denominator, Kobayashi
+  2021 / Qi 2018 / Jeong 2021; outbreak-population positivity excluded as
+  circular). The shipped 0.0325 / 0.0185 are interval midpoints, i.e. defaults,
+  not measured point estimates. The arm stays distinct from sentinel/wastewater
+  positivity, from post-boarding spreading efficiency, from symptom-conditioned
+  transmission and from explicit scenario seeds.
+- **`IMMUNE-ROLE-01`** — `ship_graph.crew_immune_fraction`, **absent by
+  default**. Unset, embarkation immunity stays one role-blind pool at
+  `IMMUNE_RATIO` 0.2 and the run is bit-identical; declared, passengers and crew
+  draw from separate pools. **No crew-specific level is sourced and none is
+  adopted**: tranche 34 returns zero measurements of crew norovirus
+  seroprevalence, crew prior-infection history, or any voyage-to-voyage carried
+  immune state. What exists is analogous — Yu 2023's 2.3–4.8 yr GI
+  blockade-antibody duration at 3.6–5.9 %/yr decay, on a correlate rather than a
+  protection fraction — and career length and cumulative shipboard exposure are
+  documentary, not immunological. Composing the three would multiply three
+  quantities none of which is measured on this population, so the axis is
+  declared over the whole unit interval **[0, 1]** precisely so it cannot read as
+  sourced.
+
+**The structural gap stays open.** The immunity this axis varies is
+*embarkation-time* immunity: the pool is drawn at voyage start and nothing
+carries across voyages. Real crew immune state would be a function of the
+voyages that host has already worked, and the model has no host that persists
+between voyages, so that mechanism is **absent, and is recorded as absent** —
+not substituted with a crew multiplier. Whatever the sweep returns is a
+statement about a declared axis, never a measurement of crew immunity.
+
+No value in any of the three arms may be selected because it moves A5, A9, the
+posting rate or an attack rate toward its anchor. `CONTACT-SCALE-01` (the
+class-directed `N_target^φ` scaling from Shirreff 2024) and `AERO-NEAR-01` (the
+sub-room air compartment, §4 item 16) are separate and are **not** included
+here; the buffet/table-service fomite topology is separate too.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
