@@ -29,7 +29,8 @@
       },
       "description": "Main dining lower. Deck 4.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "MainDining_U",
@@ -44,7 +45,8 @@
       },
       "description": "Main dining upper. Deck 5.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "LidoBuffet",
@@ -59,7 +61,8 @@
       },
       "description": "Lido buffet. Deck 10.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "PizzaGrill",
@@ -74,7 +77,8 @@
       },
       "description": "Pizzeria / grill quick-service. Deck 10.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "SpecialtyA",
@@ -89,7 +93,8 @@
       },
       "description": "Specialty steakhouse. Deck 5.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "SpecialtyB",
@@ -104,7 +109,8 @@
       },
       "description": "Specialty Italian. Deck 5.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "SpecialtyC",
@@ -119,7 +125,8 @@
       },
       "description": "Specialty Asian. Deck 11.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "CrewMessMain",
@@ -134,7 +141,8 @@
       },
       "description": "Crew mess main. Deck 1.",
       "dining_service_type": "crew_mess",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "CrewMessOff",
@@ -149,7 +157,8 @@
       },
       "description": "Officers mess. Deck 2.",
       "dining_service_type": "crew_mess",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "MainGalley",

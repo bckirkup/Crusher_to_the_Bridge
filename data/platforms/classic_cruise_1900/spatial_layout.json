@@ -29,7 +29,8 @@
       },
       "description": "Main dining room lower level. Deck 4. ~400 seats.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "MainDining_U",
@@ -44,7 +45,8 @@
       },
       "description": "Main dining room upper level. Deck 5. ~400 seats.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "LidoBuffet",
@@ -59,7 +61,8 @@
       },
       "description": "Open Lido buffet. Deck 9. ~350 seats.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "Specialty",
@@ -74,7 +77,8 @@
       },
       "description": "Specialty restaurant. Deck 5. ~80 seats.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "CrewMess",
@@ -89,7 +93,8 @@
       },
       "description": "Crew mess. Deck 1. ~200 seats.",
       "dining_service_type": "crew_mess",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "MainGalley",

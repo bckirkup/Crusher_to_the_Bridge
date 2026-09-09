@@ -91,7 +91,8 @@
       },
       "description": "Pool bars and grill / casual service. ~400 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "SpaFitness",
@@ -210,7 +211,8 @@
       },
       "description": "Main dining room lower tier. ~3,000 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "MainDining_U",
@@ -225,7 +227,8 @@
       },
       "description": "Main dining room upper tier/balcony. ~2,400 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "mdr",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "Windjammer",
@@ -240,7 +243,8 @@
       },
       "description": "Large buffet/lido restaurant. ~3,000 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "SpecRest_A",
@@ -255,7 +259,8 @@
       },
       "description": "Central Park specialty restaurants group. ~800 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "SpecRest_B",
@@ -270,7 +275,8 @@
       },
       "description": "Promenade/Boardwalk specialty restaurants group. ~700 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "CafeBakery",
@@ -285,7 +291,8 @@
       },
       "description": "Cafes, bakery, and quick-service venues. ~360 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "buffet",
-      "food_contamination_multiplier": 3.0
+      "food_contamination_multiplier": 3.0,
+      "meal_seatings": 2
     },
     {
       "id": "Crew_Mess_Main",
@@ -300,7 +307,8 @@
       },
       "description": "Primary crew mess for multiple sittings. ~600 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "crew_mess",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "CrewMess_Fwd",
@@ -315,7 +323,8 @@
       },
       "description": "Forward crew mess / staff cafeteria. ~300 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "crew_mess",
-      "food_contamination_multiplier": 1.0
+      "food_contamination_multiplier": 1.0,
+      "meal_seatings": 2
     },
     {
       "id": "Main_Theater",
@@ -369,7 +378,8 @@
       },
       "description": "Comedy club, nightclub, and lounges. ~600 m\u00b2 \u00d7 3.5m.",
       "dining_service_type": "specialty",
-      "food_contamination_multiplier": 0.5
+      "food_contamination_multiplier": 0.5,
+      "meal_seatings": 2
     },
     {
       "id": "Medical_Center",
