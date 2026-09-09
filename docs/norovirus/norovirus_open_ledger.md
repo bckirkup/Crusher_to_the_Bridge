@@ -314,6 +314,68 @@ class-directed `N_target^φ` scaling from Shirreff 2024) and `AERO-NEAR-01` (the
 sub-room air compartment, §4 item 16) are separate and are **not** included
 here; the buffet/table-service fomite topology is separate too.
 
+**Measured (Batch `cede0027` baseline / `799bfafc` knockout, image
+`bounded-design-v17`).** Expedition, Sobol m = 8 over the 13-factor
+`expedition_sensitivity` box (the ten Norovirus factors plus the two boarding
+intervals and the `[0, 1]` immunity axis), design seed 37, 6 seeds a point, seed
+base 500 — 1,536 voyages per arm, matched run-for-run between the two arms.
+This is a **new box**, so its levels are not comparable with the 256-point
+ten-factor grid the six topology reprises above share: the immunity axis alone
+spreads crew infection from ~5 % to under 1 % across the design, and the pooled
+means below average over that spread.
+
+*SURF-KO-01 is a null.* Against baseline (postings 221 = 14.39 %, crew-only 8,
+mean pax infection AR 6.213 %, crew 2.651 %), the knockout gives 216 (14.06 %),
+crew-only 10, pax 6.196 %, crew 2.597 %; paired over 1,536 voyages, 882
+bit-identical, posting flips 33 off / 28 on (sign p = 0.61), Δ pax −0.017 pp
+(se 0.067), Δ crew −0.054 pp (se 0.046). Taking a food employee on service
+duty from 545.4 to 42.8 surface touches an hour, all shift, every day, does not
+move crew infection on this hull. Read: the service-surface channel is not the
+crew arm's dose — the same verdict tranche 33's per-multiplier knockout gave
+the fomite route. Nothing here licenses touching either rate.
+
+*The two boarding intervals resolve, each on its own role.* By quartile of the
+sampled unit interval (baseline arm, 384 voyages a quartile):
+
+| axis quartile | pax AR % | crew AR % | postings % |
+|---|---:|---:|---:|
+| `boarding_prevalence_passenger` [0.025 → 0.040] | 5.70 / 5.96 / 6.18 / 7.02 | 3.24 / 2.15 / 2.04 / 3.17 | 13.0 / 15.9 / 10.7 / 18.0 |
+| `boarding_prevalence_crew` [0.007 → 0.030] | 6.26 / 6.31 / 5.94 / 6.34 | 1.78 / 2.52 / 2.65 / 3.66 | 13.8 / 14.6 / 14.1 / 15.1 |
+
+Spearman over the 256 point means: passenger prevalence ρ = +0.46 on pax AR,
++0.07 on crew; crew prevalence ρ = +0.08 on pax, +0.39 on crew. Each role's
+boarding prevalence drives mainly its own arm, and on a 134-crew, 7-day hull
+the crew arm's *level* is set by how many crew board carrying it as much as by
+anything caught aboard — the crew interval's low end halves crew infection
+relative to its high end. Within the sourced intervals neither axis reaches the
+posting-rate or A5 record, and the intervals are not to be narrowed on that
+account.
+
+*`IMMUNE-ROLE-01` is the one axis that spans the record, and it does so by
+construction.* Crew infection AR by quartile of the unit axis: 5.08 / 3.01 /
+1.90 / 0.61 %; pax 6.10 / 6.18 / 6.48 / 6.08 % (unmoved); A5 1.20 / 2.05 / 3.41
+/ 10.05; postings 15.4 / 16.4 / 14.6 / 11.2 %; crew-only postings 6 / 2 / 0 / 0.
+Spearman ρ = −0.72 on crew AR, +0.04 on pax. The relation is close to
+`crew AR ≈ (1 − f) × crew AR at f = 0`: an immune host is removed from the
+crew numerator, so A5 rises as `1/(1 − f)` and passes 4.3 somewhere near
+f ≈ 0.6–0.7 on this grid. That number is an **inversion of the anchor, not a
+measurement**, and it is recorded here only so that it cannot later be presented
+as one. Two things it does establish: (i) with no crew immunity at all (first
+quartile) the model's crew are infected at ~5 %, i.e. about five-sixths as
+often as passengers — the crew excess is not a 20 % effect to be found in a
+route, it is a factor of ~3.5 in crew *susceptibility or exposure* that no
+represented mechanism supplies; (ii) the posting rate barely moves along the
+axis (postings are passenger-channel), so crew immunity is not where the
+frequency excess lives either. The structural gap recorded above stands: the
+model has no host that persists between voyages, so whether real crew carry
+that much immunity is unmeasured and unmeasurable in this tree. No value of
+`crew_immune_fraction` is adopted; the default remains unset.
+
+Finite-sample statements, all of them: over this design and this seed set, the
+knockout resolved no effect, the boarding intervals resolved role-specific
+effects, and the immunity axis resolved a near-linear one. None of it is a
+statement about the continuous box.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
