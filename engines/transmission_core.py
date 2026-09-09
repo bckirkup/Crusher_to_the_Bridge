@@ -1091,6 +1091,9 @@ class TransmissionCore:
         self.contact_class_exponent = _parse_contact_class_exponent(
             (cfg or {}).get("transmission", {}) or {},
         )
+        # phi is only ever exactly 0.0 by default or declaration; any other
+        # value, however small, is a declared class-directed kernel.
+        self._class_directed_contacts = abs(self.contact_class_exponent) > 0.0
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
         self.voyage_contact_multiplier: float = 1.0
@@ -2932,7 +2935,7 @@ class TransmissionCore:
         before. Non-zero phi routes through ``_sample_partners_by_class``,
         which divides the *same* draw between the classes present.
         """
-        if class_counts and self.contact_class_exponent != 0.0:
+        if class_counts and self._class_directed_contacts:
             return self._sample_partners_by_class(
                 shedders, class_counts, r0_draw,
             )
@@ -3013,7 +3016,7 @@ class TransmissionCore:
         None keeps the caller on the uniform draw without iterating the pool,
         so the default run does no extra work and consumes no extra RNG.
         """
-        if self.contact_class_exponent == 0.0:
+        if not self._class_directed_contacts:
             return None
         counts: dict[str, int] = {}
         for agent in occupants:
