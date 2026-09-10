@@ -87,6 +87,7 @@ python3 presidio_runner.py \
 |-----|--------|
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Implemented — per-agent shedding variance, cabin-mate pairing |
 | [density_contact_spec.md](density_contact_spec.md) | Implemented — `per_partner_contact` is the default; the zone-average mode it replaced was superseded by #329 |
+| [contact_architecture_spec.md](contact_architecture_spec.md) | Implemented, off by default — `transmission.activity_contacts` derives the contact draw from schedule, zone type, mixing unit and duty state; no rate adopted, no campaign run |
 | [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Implemented (Phase A route weights / dose / FUT2; Phase B dining, food, source zones) |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented — SOP policy, decision latency, bimodal compliance |
 | [ship_operations_spec.md](ship_operations_spec.md) | Implemented — data model and config hooks; `effects_enabled` flag-gated |

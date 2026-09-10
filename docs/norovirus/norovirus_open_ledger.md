@@ -476,6 +476,72 @@ effect. This says nothing about the continuous box, about other hull classes
 frequent), or about a `φ` that differs by pool type, which Shirreff's
 pair-specific exponents would license and this sweep did not vary.
 
+**`CONTACT-ARCH-01`: the contact draw is derived from the schedule and the
+architecture, and POLYMOD 13.4 becomes the reference and the control, not the
+generator.** The uniform draw is a citation-only adoption with no register row:
+Mossong et al. 2008 (PLoS Med 5:e74; 7,290 one-day diaries in 8 countries,
+97,904 contacts) counts *distinct persons per day* met by skin-to-skin contact
+**or** a two-way conversation of ≥ 3 words — only ~⅓ physical outside the home,
+country means 7.95–19.77, weekdays 30–40% above Sundays, professional contacts
+excluded in four countries, pulled up by 10–19-year-olds and falling after 50 —
+in a general population that goes home at night. As the generator of a
+faecal-oral hand-transfer route on a confined ship it is **Grade C**: wrong
+contact definition, wrong population, wrong setting, and role- and
+activity-blind by construction, so a waiter on a ten-hour shift and a passenger
+asleep drew the same count, nine `Sleep` hours carried 37.5% of the day's draw
+against a measured ~6% of institutional contacts at night (Vanhems 2013), and
+no zone could change *how many* partners a host met, only *who*. That last
+point is why every reallocation since `BERTH-01` returned a null on the crew
+arm. The 13.4 is **kept** — at its definition, in this ledger, and in
+`density_contact_spec.md` — as the general-population whole-day reference and
+the paired control arm of any campaign.
+
+The repair is a generator, not a number. `transmission.activity_contacts`
+(off by default; absent or `enabled: false` is the uniform draw on its old code
+path and RNG) resolves each susceptible, per mixing unit, per epoch, into one of
+eight activities from state the engine already holds — the unit the
+architecture placed it in (cabin compartment, hallway residual), the zone type
+(`Dining`), the schedule token (`Sleep`, `Work`, `Free`, `Meal:*`), the duty
+state (`_on_service_duty`) and the seating (`dining_party_ids`): `cabin`,
+`corridor`, `work_service`, `work_other`, `dining_table`, `dining_venue`,
+`leisure`, `other`. The run declares each activity's rate in distinct partners
+per hour, a number or a `{passenger, crew}` mapping; the clock converts it, the
+voyage multiplier applies, the Poisson draw is capped by the unit's eligible
+pool, and the unchanged sampler (table party, cabin, class exponent `φ`) picks
+the partners. Role therefore enters **through the schedule and the duty
+assignment** — crew `Work` hours are passengers' `Free` hours, `work_service`
+is crew by construction — and through a per-role rate only where a setting's
+evidence distinguishes the roles. Occupancy does not enter the rate (Shirreff
+2024's aggregate is frequency-dependent); it enters through the pool and `φ`.
+
+**No rate is adopted, and none can be defaulted.** Enabling the block requires
+all eight activities declared; a missing activity, an unknown one, a rate
+outside the refusal band `[0, 30]`/h (Duval 2018's individual maximum is
+47.3/day), a role mapping missing a role, or any `contact_mode` other than
+`per_partner_contact` is refused at load with the key named. The sourcing is
+[tranche 37](../literature/consensus_tranche_37_contact_architecture.md) and
+the intervals to declare are in
+[`contact_architecture_spec.md` §4](../contact_architecture_spec.md): Pung et
+al. 2022 (*Nat Commun* 13:1956; the only cruise proximity-sensor record, four
+3-day sailings at 50% capacity under COVID-era controls, so a **floor**, not a
+rate) — passengers median **20** and crew **10** unique close contacts/day,
+F&B visits plateauing at **3** (IQR 2–5) after ≥ 1 h, **71%** of
+passenger–passenger episodes in F&B locations, cabins explicitly not measured;
+Jiang 2017 and Duval 2018 for working roles (Grade B analogues); Vanhems 2013
+for the night share; Mossong's location split (home 23%, work 21%, leisure
+16%, travel 3%) as the reference decomposition. A first campaign should hold
+every role split at 1 so that any crew:passenger difference is *produced* by
+the schedule and the architecture, which is the point; the §6 checks (per-role
+daily totals against 20/10 and 13.4, night share against 5.9%, dining share
+against 71%) are out-of-sample reports, never targets, and tranche 37's finding
+that instrumented crew made half the passengers' contacts means this change is
+expected, if anything, to move A5 *away* from 4.3. Nothing has run under it
+(§4 item 17). Invariants held by `tests/test_contact_architecture.py`: absent
+and disabled run-identical; the control still draws the POLYMOD mean; every §2
+resolution rule; every refusal; a rising rate raises the draw in its own
+activity and nowhere else; `n_contacts ≤ r0_draw ≤` pool; partners distinct and
+present; doses finite.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
@@ -1831,6 +1897,21 @@ Roughly in dependency order.
     review lists as unresolved remain **absent and unlicensed**: toilet-flush
     aerosol (which would attach to the cabin toilet `BERTH-01` already
     compartmented) and diarrhoea-associated aerosolisation.
+
+17. **`CONTACT-ARCH-01`: implemented, off by default, unmeasured.** The
+    activity-derived contact generator (§1) has no design arm in the bounded
+    gate and no campaign has run under it. Outstanding, in order: (a) plumb
+    `activity_contacts` as a design arm the way `contact_class_exponent` was
+    (#487), (b) a matched expedition campaign with the uniform 13.4 arm as the
+    paired control and every role split held at 1, declaring the tranche-37
+    intervals of `contact_architecture_spec.md` §4 as the swept vector, (c)
+    the §6 out-of-sample checks recorded in that document before A5 or the
+    posting rate is read, (d) a per-role `dining_venue` mapping as a second
+    arm only if the first resolves anything, and (e) `CONTACT-ARCH-02`, a
+    dwell-tracking saturating form, only if the readout shows that a constant
+    per-hour rate over multi-hour `Free` blocks matters. Every readout from
+    `BERTH-01` through `CONTACT-SCALE-01` is conditional on the uniform draw
+    and stands as recorded; none is re-run by this item.
 
 ## 5. Held fixed by assumption
 

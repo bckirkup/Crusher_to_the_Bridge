@@ -396,8 +396,40 @@ def surface_fraction_per_day(log10_per_day: float) -> float:
 # R0-calibrated contact pool (from Person.java avgR array) — legacy contact_mode
 AVG_R_POOL = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
 # Mean daily contacts, POLYMOD 8-country diary study (Mossong et al. 2008,
-# PLoS Med). Supersedes the avgR pool inherited from Korkin's Person.java.
+# PLoS Med; 7,290 diaries, 97,904 contacts; a contact is skin-to-skin or a
+# two-way conversation of >= 3 words; distinct persons per day). Supersedes
+# the avgR pool inherited from Korkin's Person.java. Grade C for this
+# setting: a general European population, not a confined ship, and role- and
+# activity-blind by construction. Kept as the whole-day reference and as the
+# uniform control arm; CONTACT-ARCH-01 (``activity_contacts`` below) derives
+# the draw from the schedule and the architecture instead when a run declares
+# it. docs/literature/consensus_tranche_37_contact_architecture.md.
 POLYMOD_CONTACTS_PER_DAY = 13.4
+
+# CONTACT-ARCH-01: the contact draw as a property of the activity the schedule
+# and the ship's architecture put a host in, not of the day. Each activity's
+# rate is distinct partners per hour, declared by the run; there is no engine
+# default for any of them because none is measured on a cruise ship under
+# ordinary operations (Pung et al. 2022, Nat Commun 13:1956, is the only
+# cruise sensor record and a COVID-era floor: passengers median 20 close
+# contacts/day, crew 10; ~3 per >=1 h F&B visit). A run that enables the block
+# must declare all eight. Absent, the uniform POLYMOD draw above runs on its
+# old RNG path. docs/contact_architecture_spec.md.
+CONTACT_ACTIVITIES: tuple[str, ...] = (
+    "cabin",
+    "corridor",
+    "work_service",
+    "work_other",
+    "dining_table",
+    "dining_venue",
+    "leisure",
+    "other",
+)
+# Refusal band on a declared per-hour rate, not an interval: the largest
+# individual daily count in the institutional sensor record is 47.3 (Duval et
+# al. 2018), so 30/h admits any measured rate and refuses a units error.
+CONTACT_RATE_PER_HOUR_BOUNDS = (0.0, 30.0)
+CONTACT_RATE_ROLES: tuple[str, ...] = ("passenger", "crew")
 
 # Defaults for density_dependent contact_mode (partial overrides merge onto these)
 DEFAULT_DENSITY_CFG: dict[str, float] = {
@@ -847,6 +879,78 @@ def _parse_contact_class_exponent(tx: dict[str, Any]) -> float:
     return phi
 
 
+def _parse_contact_rate(activity: str, raw: Any) -> dict[str, float]:
+    """One activity's declared rate as a per-role mapping (CONTACT-ARCH-01).
+
+    A bare number applies to every role; a mapping must name every role in
+    ``CONTACT_RATE_ROLES``. Either way each value is finite and inside
+    ``CONTACT_RATE_PER_HOUR_BOUNDS``.
+    """
+    key = f"transmission.activity_contacts.rates_per_hour.{activity}"
+    if isinstance(raw, Mapping):
+        missing = [r for r in CONTACT_RATE_ROLES if r not in raw]
+        unknown = [r for r in raw if r not in CONTACT_RATE_ROLES]
+        if missing or unknown:
+            raise ValueError(
+                f"{key} must map exactly the roles {list(CONTACT_RATE_ROLES)}; "
+                f"missing {missing}, unknown {unknown}",
+            )
+        items = {str(r): raw[r] for r in CONTACT_RATE_ROLES}
+    else:
+        items = {r: raw for r in CONTACT_RATE_ROLES}
+    low, high = CONTACT_RATE_PER_HOUR_BOUNDS
+    out: dict[str, float] = {}
+    for role, value in items.items():
+        try:
+            rate = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(f"{key}[{role}] must be a number, got {value!r}") from exc
+        if not math.isfinite(rate) or not low <= rate <= high:
+            raise ValueError(
+                f"{key}[{role}] must be finite in [{low}, {high}] per hour, "
+                f"got {value!r}",
+            )
+        out[role] = rate
+    return out
+
+
+def _parse_activity_contacts(tx: dict[str, Any]) -> dict[str, dict[str, float]] | None:
+    """Read ``transmission.activity_contacts`` (CONTACT-ARCH-01), or None.
+
+    None -- the block absent or ``enabled: false`` -- keeps the uniform
+    POLYMOD draw on its old code path and RNG. Enabled, every activity in
+    ``CONTACT_ACTIVITIES`` must be declared: there is no default rate for any
+    of them, and the block is only read under ``per_partner_contact``.
+    """
+    block = tx.get("activity_contacts")
+    if not block:
+        return None
+    if not isinstance(block, Mapping):
+        raise ValueError("transmission.activity_contacts must be a mapping")
+    if not bool(block.get("enabled", False)):
+        return None
+    if _parse_contact_mode(tx) != "per_partner_contact":
+        raise ValueError(
+            "transmission.activity_contacts requires contact_mode "
+            "per_partner_contact",
+        )
+    rates = block.get("rates_per_hour")
+    if not isinstance(rates, Mapping):
+        raise ValueError(
+            "transmission.activity_contacts.rates_per_hour must be a mapping "
+            f"over {list(CONTACT_ACTIVITIES)}",
+        )
+    missing = [a for a in CONTACT_ACTIVITIES if a not in rates]
+    unknown = [a for a in rates if a not in CONTACT_ACTIVITIES]
+    if missing or unknown:
+        raise ValueError(
+            "transmission.activity_contacts.rates_per_hour must declare every "
+            f"activity in {list(CONTACT_ACTIVITIES)}; missing {missing}, "
+            f"unknown {unknown}",
+        )
+    return {a: _parse_contact_rate(a, rates[a]) for a in CONTACT_ACTIVITIES}
+
+
 def _parse_service_surface_knockout(cfg: dict[str, Any]) -> bool:
     """Whether this run knocks out the service-surface rate (SURF-KO-01).
 
@@ -1094,6 +1198,9 @@ class TransmissionCore:
         # phi is only ever exactly 0.0 by default or declaration; any other
         # value, however small, is a declared class-directed kernel.
         self._class_directed_contacts = abs(self.contact_class_exponent) > 0.0
+        self.activity_contacts = _parse_activity_contacts(
+            (cfg or {}).get("transmission", {}) or {},
+        )
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
         self.voyage_contact_multiplier: float = 1.0
@@ -3120,6 +3227,70 @@ class TransmissionCore:
             return min(math.ceil(max_c), draw)
         return draw
 
+    def _contact_activity(
+        self,
+        target: KorkinAgent,
+        unit_name: str,
+        zone_name: str,
+        hallway: bool,
+        epoch: int,
+    ) -> str:
+        """The contact activity a target is in, for one mixing unit (CONTACT-ARCH-01).
+
+        Resolved from state the engine already holds -- the unit the
+        architecture placed the target in, the zone's type, the schedule token
+        and the duty state -- so role enters through the schedule and the
+        duty assignment, not through the role label.
+        """
+        if hallway:
+            return "corridor"
+        if unit_name != zone_name:
+            return "cabin"
+        token = self._scheduled_activity(target, epoch).split(":", 1)[0]
+        if self.zone_types.get(zone_name) == "Dining":
+            if self._on_service_duty(target, zone_name, epoch):
+                return "work_service"
+            if target.dining_party_ids and zone_name == target.dining_zone:
+                return "dining_table"
+            return "dining_venue"
+        if token == "Sleep":
+            return "cabin"
+        if token == "Work":
+            return (
+                "work_service"
+                if self._on_service_duty(target, zone_name, epoch)
+                else "work_other"
+            )
+        if token == "Free":
+            return "leisure"
+        return "other"
+
+    def _activity_contact_draw(
+        self,
+        target: KorkinAgent,
+        unit_name: str,
+        zone_name: str,
+        hallway: bool,
+        epoch: int,
+    ) -> int:
+        """Contact draw from the declared per-activity rate (CONTACT-ARCH-01)."""
+        rates = self.activity_contacts or {}
+        activity = self._contact_activity(
+            target, unit_name, zone_name, hallway, epoch,
+        )
+        by_role = rates[activity]
+        if target.role not in by_role:
+            raise ValueError(
+                f"activity_contacts has no rate for role {target.role!r} in "
+                f"activity {activity!r}",
+            )
+        per_hour = by_role[target.role]
+        mean = self.clock.amount_per_epoch(per_hour * HOURS_PER_DAY)
+        mean *= float(self.voyage_contact_multiplier)
+        if mean <= 0.0:
+            return 0
+        return max(0, int(self.rng.poisson(mean)))
+
     def _draw_contact_multiplier(
         self,
         n_occupants: int,
@@ -3274,10 +3445,16 @@ class TransmissionCore:
         )
         present_ids = frozenset(a.agent_id for a in occupants)
 
+        by_activity = use_partner and self.activity_contacts is not None
         for target in susceptible:
-            r0_draw = self._draw_contact_multiplier(
-                n_occupants, target, epoch,
-            )
+            if by_activity:
+                r0_draw = self._activity_contact_draw(
+                    target, unit_name, zone_name, hallway, epoch,
+                )
+            else:
+                r0_draw = self._draw_contact_multiplier(
+                    n_occupants, target, epoch,
+                )
             sampled_shedders = shedders
             n_contacts = r0_draw
             if use_partner:
