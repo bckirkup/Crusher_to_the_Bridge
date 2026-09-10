@@ -376,6 +376,52 @@ knockout resolved no effect, the boarding intervals resolved role-specific
 effects, and the immunity axis resolved a near-linear one. None of it is a
 statement about the continuous box.
 
+**`CONTACT-SCALE-01` divides a contact draw between the classes present, and
+does not change its size.** Every topology repair so far reallocated *who* a
+host could meet while `per_partner_contact` drew the same POLYMOD 13.4
+contacts/day whatever the room held, so occupancy could not reach the dose at
+all. Shirreff et al. 2024 (*Epidemics* 47:100807, DOI
+10.1016/j.epidem.2024.100807; 2,114 proximity-sensor wearers, 15 hospital wards,
+33,946 contacts, contact rate fitted against the number of persons actually
+present as `c = a(φ)·N^φ` with `a(φ)` renormalised so total contact time is
+conserved) measures **both halves of that question and they answer differently**:
+a person's contacts with *everyone* present are frequency-dependent — most
+wards' credibility intervals include zero and the aggregate favours `φ = 0`, so
+the fixed daily total is the measured answer and is left alone — while contacts
+*directed at a subpopulation* scale with that subpopulation's density,
+superlinearly (`φ > 1`) in several wards for patient→patient and
+nurse→patient pairs and negatively in a few. Grade **B** (analogous confined
+institution: an acute-care ward standing in for a dining room and a service
+zone), origin **R + Fig 1/3** (read from the Results text; the ward-level figure
+values are not digitized).
+
+What lands is that second half only. `transmission.contact_class_exponent`
+(default **0**) allocates a target's existing draw over the classes in its pool
+as `N_class^(1+φ)` normalised — the `+1` because a class of `N` eligible
+partners already holds `N` of the uniform draw's weight, so `φ = 0` is exactly
+the share-of-the-room draw the model has always made and takes the same code
+path, RNG included. It applies inside whichever pool the target is drawing from,
+so a table party, the rest of a dining room, a cabin and a corridor each divide
+their own share. A pool holding one class is untouched at every `φ`. The number
+of contacts is never changed: the allocation is renormalised over the classes
+present, and a class can only *lose* an allocated contact by having fewer
+eligible members than its share, which is the same cap a whole-room draw has
+always had.
+
+**No value is adopted.** Nothing measures `φ` for a dining room, a crew mess or
+a cruise ship of any class, and the ward exponents differ by pair type, by ward
+and between day and night, so a single number would be invented. It is a
+declared swept axis, and the default reproduces the shipped model exactly. The
+configured range **[−2, 3]** is a *refusal* band — wide enough to contain the
+reported ward posteriors, which run from below zero to above one, and narrow
+enough that a typo cannot enter as a kernel — not an interval and not a prior;
+any campaign sweeps a sub-range it states. `φ` may not be selected because it
+moves A5, A9, the posting rate or an attack rate: this is the first mechanism by
+which passenger density can reach the *crew* arm (a crew member's contacts with
+passengers scale with passenger density), which makes the sweep a test and would
+make a fitted `φ` the destruction of that test. The measured readout is recorded
+when the matched campaign lands; until then nothing is claimed about direction.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
