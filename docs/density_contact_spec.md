@@ -283,3 +283,24 @@ run-identical; one class present identical at every `φ`; a rising `φ` directs
 monotonically fewer contacts at the sparser class; `n_contacts ≤ r0_draw`
 always, with equality whenever no class's pool is exhausted; doses finite and
 non-negative; partners distinct and present; weights normalised.
+
+---
+
+## `CONTACT-ARCH-01`: the draw derived from the schedule and the architecture
+
+**Status: implemented, off by default** (`transmission.activity_contacts`;
+absent or `enabled: false` is the uniform POLYMOD draw above on the same code
+path). Specified in [contact_architecture_spec.md](contact_architecture_spec.md)
+with the sourcing in
+[tranche 37](literature/consensus_tranche_37_contact_architecture.md).
+
+POLYMOD 13.4/day stays in this document, and in the tree, as the
+general-population reference and the control arm. What `CONTACT-ARCH-01` adds
+is the alternative generator: the schedule token, the zone type, the mixing
+unit and the duty state resolve one of eight activities (`cabin`, `corridor`,
+`work_service`, `work_other`, `dining_table`, `dining_venue`, `leisure`,
+`other`), and the run declares each activity's rate in distinct partners per
+hour — a number or a `{passenger, crew}` mapping. Enabling the block without
+every activity declared is refused; nothing in the engine supplies a default
+rate. The partner sampler, table party, cabin compartment, hallway residual
+and `φ` are unchanged; only the count a target draws in each unit differs.
