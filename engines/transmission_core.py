@@ -672,6 +672,28 @@ CABIN_COMPARTMENT_SEPARATOR = "::cabin"
 # the model made before parties existed (bit-identical), not a fitted value.
 DEFAULT_DINING_PARTY_CONTACT_SHARE = 1.0
 
+# AERO-NEAR-01: the near-field air compartment over the co-located unit (the
+# cabin in a Cabin_Corridor, the table party in a seated Dining venue). The
+# short-range inhalation route is a two-compartment form (Nicas & Jones 2009):
+# the far field is the zone's well-mixed pool exactly as before, and a share
+# ``retained_fraction`` (kappa) of each unit-affiliated shedder's aerosol is
+# breathed at the unit's own volume before it reaches the room. kappa = 0 is
+# the pre-change route, same code path, bit-identical. The near-field volume
+# and exchange rate are measured nowhere for a table or a bedroom (literature
+# tranche 36, docs/literature/consensus_tranche_36_near_field_air.md, all four
+# questions), so kappa ships as a declared swept axis on [0, 1] with no
+# default level, and the unit volume is declared geometry: a per-berth and a
+# per-seat volume the run must state when it turns the near field on.
+# ``neighbour_table_ratio`` (rho) is the second ring of the dining record:
+# the exposure at a neighbouring table relative to the index table, which is
+# the quantity Li et al. 2021 Table 3 tabulates (CFD exposure 0.76-1.04 in the
+# same air stream, 0.40-0.47 downstream, 0.04-0.23 remote; Grade B, analogous
+# setting, an ordering envelope and not a dose). rho on [0, 1] keeps the
+# ordering same table >= neighbour table >= far table for every admissible
+# value. Nothing here may be chosen against A5, A9 or a posting rate.
+DEFAULT_NEAR_FIELD_RETAINED_FRACTION = 0.0
+DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO = 0.0
+
 # Hand → food transfer efficiency per bare-hand contact with communal or
 # served food. Span of the measured means across food matrices and studies:
 # finger → tomato 0.3 ± 0.5 % and → cucumber 7 ± 8 % (Tuladhar 2013, MNV-1),
@@ -858,6 +880,73 @@ def _parse_dining_party_share(tx: dict[str, Any]) -> float:
             f"got {raw!r}",
         )
     return share
+
+
+@dataclass(frozen=True)
+class NearFieldAir:
+    """Declared near-field air compartment (AERO-NEAR-01); off at kappa 0."""
+
+    retained_fraction: float = DEFAULT_NEAR_FIELD_RETAINED_FRACTION
+    neighbour_table_ratio: float = DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO
+    cabin_berth_volume_m3: float | None = None
+    table_seat_volume_m3: float | None = None
+
+    @property
+    def active(self) -> bool:
+        return self.retained_fraction > 0.0
+
+
+def _near_field_unit_fraction(block: dict[str, Any], key: str, default: float) -> float:
+    raw = block.get(key, default)
+    value = float(raw)
+    if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(
+            f"transmission.near_field_air.{key} must be finite in [0, 1], got {raw!r}",
+        )
+    return value
+
+
+def _near_field_volume(block: dict[str, Any], key: str, required: bool) -> float | None:
+    raw = block.get(key)
+    if raw is None:
+        if required:
+            raise ValueError(
+                f"transmission.near_field_air.{key} must be declared when "
+                "retained_fraction is above 0: the near-field volume is "
+                "declared geometry, not a default",
+            )
+        return None
+    value = float(raw)
+    if not math.isfinite(value) or value <= 0.0:
+        raise ValueError(
+            f"transmission.near_field_air.{key} must be finite and positive, got {raw!r}",
+        )
+    return value
+
+
+def _parse_near_field_air(tx: dict[str, Any]) -> NearFieldAir:
+    """Read the near-field air declaration (AERO-NEAR-01).
+
+    Absent, or ``retained_fraction`` 0, is the pre-change well-mixed route and
+    takes the same code path. A run that turns the near field on must declare
+    both unit volumes; there is no measured default to fall back on.
+    """
+    block = tx.get("near_field_air") or {}
+    if not isinstance(block, dict):
+        raise ValueError("transmission.near_field_air must be a mapping")
+    kappa = _near_field_unit_fraction(
+        block, "retained_fraction", DEFAULT_NEAR_FIELD_RETAINED_FRACTION,
+    )
+    rho = _near_field_unit_fraction(
+        block, "neighbour_table_ratio", DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO,
+    )
+    required = kappa > 0.0
+    return NearFieldAir(
+        retained_fraction=kappa,
+        neighbour_table_ratio=rho,
+        cabin_berth_volume_m3=_near_field_volume(block, "cabin_berth_volume_m3", required),
+        table_seat_volume_m3=_near_field_volume(block, "table_seat_volume_m3", required),
+    )
 
 
 def _parse_contact_class_exponent(tx: dict[str, Any]) -> float:
@@ -1199,6 +1288,9 @@ class TransmissionCore:
         # value, however small, is a declared class-directed kernel.
         self._class_directed_contacts = abs(self.contact_class_exponent) > 0.0
         self.activity_contacts = _parse_activity_contacts(
+            (cfg or {}).get("transmission", {}) or {},
+        )
+        self.near_field_air = _parse_near_field_air(
             (cfg or {}).get("transmission", {}) or {},
         )
         self._quarantined_ids: set[int] = set()
@@ -2540,6 +2632,117 @@ class TransmissionCore:
             )
         return addback
 
+    def _near_field_unit(
+        self,
+        zone_name: str,
+        target: KorkinAgent,
+        shedder: KorkinAgent,
+    ) -> tuple[float, float] | None:
+        """Weight and effective volume of the near field target shares with shedder.
+
+        Three units, in the order the record resolves them: the stateroom a pair
+        of cabin mates share at night, the table a seated party shares at a meal,
+        and the neighbouring table as the second ring, weighted by the declared
+        ``neighbour_table_ratio``. Anyone else in the room is far field only.
+        """
+        near = self.near_field_air
+        if shedder.agent_id == target.agent_id:
+            return None
+        if shedder.agent_id in target.cabin_mate_ids:
+            if self.zone_types.get(zone_name) != "Cabin_Corridor":
+                return None
+            berth = near.cabin_berth_volume_m3
+            if berth is None:
+                return None
+            return 1.0, berth * (len(target.cabin_mate_ids) + 1)
+        if zone_name != target.dining_zone or not target.dining_party_ids:
+            return None
+        seat = near.table_seat_volume_m3
+        if seat is None:
+            return None
+        table_volume = seat * (len(target.dining_party_ids) + 1)
+        if shedder.agent_id in target.dining_party_ids:
+            return 1.0, table_volume
+        if self._adjacent_table(target, shedder):
+            return near.neighbour_table_ratio, table_volume
+        return None
+
+    def _adjacent_table(self, target: KorkinAgent, shedder: KorkinAgent) -> bool:
+        """Whether the two are seated at neighbouring tables in one sitting.
+
+        Declared topology, not a distance kernel: tables are dealt in
+        consecutive slices of a sitting, so consecutive indices are the pair the
+        dining record calls adjacent, and no third ring exists.
+        """
+        index = target.dining_table_index
+        other = shedder.dining_table_index
+        return (
+            index >= 0
+            and other >= 0
+            and abs(index - other) == 1
+            and shedder.dining_zone == target.dining_zone
+            and shedder.meal_seating == target.meal_seating
+        )
+
+    def _near_field_admits(self, profile: dict | None) -> bool:
+        """Whether this pathogen's continuous emission may take a near field.
+
+        The near field concentrates *continuous respiratory* emission, and an
+        ``emesis_conditioned`` arm has none: the record supports norovirus in
+        air only from a vomiting episode (tranche 36 §5), so enhancing that
+        arm's continuous droplet term would amplify a route the literature does
+        not license at any magnitude. Such an arm keeps the far field it has
+        today; its emesis-aerosol near field is a separate item.
+        """
+        if not self.near_field_air.active:
+            return False
+        return (profile or {}).get(
+            "airborne_emission_mode",
+        ) != "emesis_conditioned"
+
+    def _near_field_droplet_dose(
+        self,
+        zone_name: str,
+        target: KorkinAgent,
+        emitted_shedders: list[tuple[KorkinAgent, float]],
+        volume: float,
+        vent_factor: float,
+        target_factor: float,
+    ) -> float:
+        """AERO-NEAR-01: the short-range term of the two-compartment air route.
+
+        No emission is created. A share ``retained_fraction`` of the aerosol a
+        near-field partner already emitted into this zone's pool is breathed at
+        the unit's own volume instead of the room's, so the term is the
+        difference of the two concentrations and vanishes when the unit is no
+        smaller than the room. The far-field term above is untouched, and the
+        zone pool the drift route reads keeps the whole emitted mass.
+        """
+        near = self.near_field_air
+        if not near.active:
+            return 0.0
+        room_concentration_per_unit_mass = 1.0 / max(volume, 1.0)
+        dose = 0.0
+        for shedder, emitted in emitted_shedders:
+            unit = self._near_field_unit(zone_name, target, shedder)
+            if unit is None:
+                continue
+            weight, unit_volume = unit
+            gain = 1.0 / unit_volume - room_concentration_per_unit_mass
+            if weight <= 0.0 or gain <= 0.0:
+                continue
+            dose += (
+                near.retained_fraction
+                * weight
+                * emitted * DROPLET_AEROSOL_FRACTION
+                * gain
+                * self.inhaled_air_volume_m3_per_epoch
+                * self.droplet_scalar
+                * vent_factor
+                * target_factor
+            )
+        return dose
+
     def _cabin_pair_contact_factor(
         self, shedder: KorkinAgent, target: KorkinAgent,
     ) -> float:
@@ -3539,6 +3742,7 @@ class TransmissionCore:
         ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Immediate aerosol exposure from shedders in the same room."""
+        near_field_on = self._near_field_admits(profile)
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             susceptible = self._get_susceptible(occupants, pathogen_id)
@@ -3581,13 +3785,20 @@ class TransmissionCore:
                 dose += self._cabin_mate_droplet_addback(
                     target, shedders, volume, vent_factor, target_factor,
                 )
+                near_dose = 0.0
+                if near_field_on:
+                    near_dose = self._near_field_droplet_dose(
+                        zone_name, target, emitted_shedders, volume,
+                        vent_factor, target_factor,
+                    )
+                dose += near_dose
                 dose = self._accumulate(
                     target.agent_id, "droplet", dose,
                     agent_doses, agent_pathway_doses,
                     attribution(ledger, mix),
                 )
 
-                matrix.droplet_exposures.append({
+                exposure: dict[str, Any] = {
                     "target_id": target.agent_id,
                     "zone": zone_name,
                     "source_ids": shedder_ids,
@@ -3595,7 +3806,12 @@ class TransmissionCore:
                     "dose": round(dose, 4),
                     "aerosol_mass": round(total_aerosol, 4),
                     "concentration_per_m3": round(concentration, 6),
-                })
+                }
+                if near_dose > 0.0:
+                    # Written only when the near field is on, so the payload of
+                    # a run without it is the pre-change payload.
+                    exposure["near_field_dose"] = round(near_dose, 4)
+                matrix.droplet_exposures.append(exposure)
 
     # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────────
 

@@ -195,6 +195,20 @@ def _region_argv(
     # CONTACT-SCALE-01: phi is a number, not a switch, and 0 is the matched
     # control; it is passed through as given so the report records the arm.
     argv += ["--contact-class-exponent", args.contact_class_exponent]
+    # AERO-NEAR-01: kappa and the declared geometry travel the same way. kappa
+    # 0 is the matched control, and the two volumes are only sent when the arm
+    # states them, so an off arm's command line is the pre-change one.
+    argv += ["--near-field-retained-fraction", args.near_field_retained_fraction]
+    argv += [
+        "--near-field-neighbour-table-ratio",
+        args.near_field_neighbour_table_ratio,
+    ]
+    for flag, value in (
+        ("--near-field-cabin-berth-volume-m3", args.near_field_cabin_berth_volume_m3),
+        ("--near-field-table-seat-volume-m3", args.near_field_table_seat_volume_m3),
+    ):
+        if value:
+            argv += [flag, value]
     argv += ["--factor-set", args.factor_set]
     return argv
 
@@ -222,6 +236,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # A string, like the other arm parameters: Batch parameters arrive as
     # text and the gate parses the float itself.
     parser.add_argument("--contact-class-exponent", default="0")
+    # Numbers, like phi, and empty for a volume the arm does not declare.
+    parser.add_argument("--near-field-retained-fraction", default="0")
+    parser.add_argument("--near-field-neighbour-table-ratio", default="0")
+    parser.add_argument("--near-field-cabin-berth-volume-m3", default="")
+    parser.add_argument("--near-field-table-seat-volume-m3", default="")
     parser.add_argument(
         "--factor-set", default="norovirus", choices=sorted(FACTOR_SETS),
     )

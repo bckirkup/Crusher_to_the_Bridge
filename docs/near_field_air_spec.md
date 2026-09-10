@@ -1,13 +1,16 @@
 # AERO-NEAR-01: a near-field air compartment over the seating unit and the cabin
 
-> **Status:** Proposed, **sourced**. Nothing here exists in-tree. No constant
-> is adopted and no value is fitted. The §6 sourcing tranche **has now been
-> run** — [tranche 36](../literature/consensus_tranche_36_near_field_air.md) —
-> and its result is that the *structure* below is licensed, the two rings of §5
-> are bounded by measurement, and the one magnitude the structure needs (the
-> near-field effective volume, equivalently the near/far exchange rate) is
-> **∅ null on search** and ships as declared geometry plus a swept axis. Filed
-> for every active pathogen arm, not for norovirus alone.
+> **Status:** **Implemented, off by default** — `transmission.near_field_air`
+> in `engines/transmission_core.py`, with `retained_fraction` 0 (and an absent
+> block) taking the pre-change well-mixed code path. §§1–7 below are the
+> requirement as sourced; **§10 records what landed and how it differs from
+> the requirement**. No constant is adopted and no value is fitted: the §6
+> sourcing tranche ([tranche 36](literature/consensus_tranche_36_near_field_air.md))
+> licenses the *structure*, bounds the two rings of §5, and returns **∅ null**
+> on the one magnitude the structure needs (the near-field effective volume,
+> equivalently the near/far exchange rate), so that ships as declared geometry
+> plus a swept axis. Filed for every active pathogen arm, not for norovirus
+> alone.
 
 ## 1. The defect
 
@@ -57,11 +60,11 @@ them:
   studies cited for `DINE-PARTY-01` are the same setting's close-contact and
   surface record. A well-mixed dining room cannot produce that pattern.
   Now retrieved and quantified in
-  [tranche 36](../literature/consensus_tranche_36_near_field_air.md) §2:
+  [tranche 36](literature/consensus_tranche_36_near_field_air.md) §2:
   31.25% at the immediate neighbouring tables against 0% remote, 45.45% inside
   the recirculating air-conditioning zone against 0% outside it.
 - **Influenza** (`influenza_a`, inactive; see
-  `influenza_arm_activation_plan.md`): same physics as SARS-CoV-2 with a
+  `proposals/influenza_arm_activation_plan.md`): same physics as SARS-CoV-2 with a
   different emission spectrum; the arm must not activate onto a route that
   cannot represent seating.
 - **Norovirus** (`norwalk_gi`, `airborne_emission_mode: emesis_conditioned`):
@@ -131,7 +134,7 @@ operator's second lever — enters as the neighbour ring's near/far exchange
 rate, not as a fitted distance. Buffet venues have no fixed tables and are
 out of scope for adjacency; their seating half, if any, is a separate item.
 
-## 6. Sourcing tranche — **run**, in [tranche 36](../literature/consensus_tranche_36_near_field_air.md)
+## 6. Sourcing tranche — **run**, in [tranche 36](literature/consensus_tranche_36_near_field_air.md)
 
 Consensus was **exhausted for the period**, so every row was retrieved by the
 approved open-full-text fallback (Europe PMC `fullTextXML`; the Cambridge Core
@@ -194,6 +197,10 @@ anchor.
 ## 7. Out of scope, recorded
 
 - Buffet queue near field (a moving line at ~0.5 m, rotating partners).
+- The **emesis** pool's near field, which is norovirus's only licensed airborne
+  pathway (§6 question 4) and an episodic, event-conditioned term rather than
+  the continuous one this item adds — so `norwalk_gi` takes no near field here
+  (§10).
 - Service-surface / utensil fomite class for buffets (the fomite half of
   the service-model question, not yet filed as its own item).
 - Per-venue exhaust/recirculation in Contam; the far field stays as declared.
@@ -215,5 +222,71 @@ anchor.
 
 After the `DINE-PARTY-01` matched reprise is recorded (Batch `14dfa232`). The
 sourcing tranche (§6) precedes implementation; implementation ships off by
-default; the matched expedition reprise measures it under norovirus, and the
-SARS-CoV-2 arm's restaurant pattern is the out-of-sample structural check.
+default. What the implementation then changed about this sequence: because the
+continuous near field admits only continuously emitting arms (§10), a norovirus
+κ sweep is a null by construction, so the measurement is a `sars_cov2_resp`
+campaign and the restaurant pattern is its out-of-sample structural check.
+Norovirus reaches this route only through the emesis pool item of §7.
+
+## 10. What landed
+
+`transmission.near_field_air`, read in `TransmissionCore` and applied inside
+`_pathway_droplet`; `tests/test_near_field_air.py` carries the §8 list.
+
+```yaml
+transmission:
+  near_field_air:
+    retained_fraction: 0.0      # κ, the swept axis; 0 = the well-mixed route
+    neighbour_table_ratio: 0.0  # ρ, the second dining ring
+    cabin_berth_volume_m3: null # declared geometry, required when κ > 0
+    table_seat_volume_m3: null  #   ditto; there is no measured default
+```
+
+For a susceptible `t` and a shedder `s` in the same zone and epoch, with `m`
+the aerosol mass `s` already emits into this zone's pool
+(`emission × DROPLET_AEROSOL_FRACTION`, unchanged), the near field adds
+
+```text
+near(t) = Σ_s  κ · w(t,s) · m_s · (1/V_unit(t) − 1/V_zone) · inhaled × droplet_scalar × vent × confinement
+```
+
+with the same three multipliers the far-field term already carries, and
+
+- `V_unit` = `cabin_berth_volume_m3 × berths` in a `Cabin_Corridor` for a cabin
+  mate; `table_seat_volume_m3 × seats` in the target's dining zone for a seated
+  party; nothing anywhere else, so a corridor neighbour, a buffet queue and a
+  crew-mess diner stay far field only;
+- `w = 1` at the same table or in the same cabin, `w = ρ` at a neighbouring
+  table, `0` beyond — the two rings of §5 and no third;
+- **adjacency is declared, not a distance kernel.** `assign_dining_parties`
+  deals a sitting into consecutive tables and records
+  `KorkinAgent.dining_table_index`; consecutive indices within one zone and one
+  sitting are the neighbour pair. `-1` (unseated, buffet, crew mess) has no
+  neighbour.
+
+Four things worth reading twice, because they differ from a naïve reading of
+§4:
+
+1. **The far field is untouched, and that is the conservation statement.** The
+   zone pool keeps the *whole* emitted mass, as in the nested Nicas–Jones form
+   where the near field sits inside the far field and drains into it; the near
+   field is the *difference* of the two concentrations, so no emission is
+   created, the drift route reads the same pool as before, and the room-summed
+   inhaled dose rises only because near partners breathe above the room
+   average.
+2. **The term vanishes when the unit is not smaller than the room** (`gain ≤ 0`),
+   so a declared geometry larger than the zone cannot reduce anyone's dose
+   below today's — the change is one-sided by construction.
+3. **Norovirus is excluded, and by its own emission mode.** `_near_field_admits`
+   refuses `airborne_emission_mode: emesis_conditioned`, because §6 question 4
+   returned no support for *continuous* norovirus respiratory emission; the
+   arm's licensed airborne pathway is the emesis pool, whose near field is a
+   separate item (§7). So a norovirus campaign over κ is a **null by
+   construction**: this change is measurable on the `sars_cov2_resp` arm, and
+   Marks 2000's by-table gradient remains its out-of-sample check.
+4. **Both magnitudes are swept, neither is chosen.** κ and ρ are design fields
+   of the bounded gate (`Design`, `build_run_spec`, `--near-field-*` on the gate
+   CLI and the Batch entrypoint), and a κ = 0 arm writes no `transmission`
+   override at all, so the control arm is the shipped model. Turning the near
+   field on without declaring both unit volumes is a load error rather than a
+   defaulted geometry.
