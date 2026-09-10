@@ -419,8 +419,62 @@ any campaign sweeps a sub-range it states. `φ` may not be selected because it
 moves A5, A9, the posting rate or an attack rate: this is the first mechanism by
 which passenger density can reach the *crew* arm (a crew member's contacts with
 passengers scale with passenger density), which makes the sweep a test and would
-make a fitted `φ` the destruction of that test. The measured readout is recorded
-when the matched campaign lands; until then nothing is claimed about direction.
+make a fitted `φ` the destruction of that test.
+
+**Measured (Batch `1d0b8693` φ = 0, `81e7a57e` φ = −1, `ac5ff0b7` φ = 0.5,
+`15c01df4` φ = 1, `7a58b0a6` φ = 2; image `bounded-design-v18`).** Expedition,
+the same 256-point Sobol design over the 13-factor `expedition_sensitivity`
+box as the three-arm campaign (design seed 37, 6 seeds a point, seed base 500),
+1,536 voyages per arm, five arms differing in `contact_class_exponent` alone
+and matched run-for-run. The sub-range swept is stated: {−1, 0, 0.5, 1, 2},
+the span of the ward exponents Shirreff reports, and nothing outside it.
+
+*The control is the shipped model.* The φ = 0 arm is bit-identical to the
+three-arm baseline (`cede0027`, image v17, pre-`CONTACT-SCALE-01` code) in
+1,536 of 1,536 voyages, every row equal — the kernel's activation check, on the
+campaign path and not only in the unit tests.
+
+*Every φ in the swept range is a null on the crew arm, and near one on the
+passenger arm.*
+
+| φ | postings | crew-only | pax AR % | crew AR % | A5 (inf) | vs φ = 0: Δ pax pp (se) | Δ crew pp (se) | flips off/on, sign p |
+|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| −1 | 208 (13.54 %) | 8 | 5.928 | 2.543 | 2.33 | −0.285 (0.079) | −0.107 (0.049) | 42/29, 0.15 |
+| 0 | 221 (14.39 %) | 8 | 6.213 | 2.651 | 2.34 | — | — | — |
+| 0.5 | 215 (14.00 %) | 10 | 6.280 | 2.719 | 2.31 | +0.067 (0.080) | +0.068 (0.055) | 39/33, 0.56 |
+| 1 | 217 (14.13 %) | 13 | 6.196 | 2.581 | 2.40 | −0.017 (0.077) | −0.070 (0.052) | 39/35, 0.73 |
+| 2 | 219 (14.26 %) | 12 | 6.209 | 2.627 | 2.36 | −0.004 (0.076) | −0.024 (0.052) | 42/40, 0.91 |
+
+Between 769 and 794 of 1,536 voyages are bit-identical to the control in each
+arm (a pool holding one class draws the same partners at any φ, and the extra
+multinomial only fires in a mixed pool). Across the whole range A5 sits in
+2.31–2.40 against 4.3, postings in 13.5–14.4 % against 0.6–1.6 %. The one arm
+that resolves anything is φ = −1, where the classes present share a draw
+*equally* regardless of size, so a passenger's contacts are pulled toward the
+smaller crew class: passenger infection falls 0.29 pp (3.6 se) and crew falls,
+not rises, by 0.11 pp (2.2 se) — the direction is against the naive reading
+that giving crew a larger share of passenger contacts should raise crew
+infection, and at 2 se it is not resolved on this sample. At φ ≥ 0.5, where a
+crew member's contacts are concentrated onto the larger passenger class and a
+passenger's onto other passengers, nothing moves in either arm beyond 1.3 se.
+
+Read: on this hull, *which class* a host's fixed 13.4 contacts land on is not
+where the crew excess lives, over this design. The same verdict every
+reallocation of partners has returned since BERTH-01 — the cabin, the crew
+mess, the sitting, the table party, and now the class — and for the same reason
+stated at the head of this entry: the aggregate draw is frequency-dependent by
+measurement, so no reallocation of it changes how many contacts a host has, and
+the model's direct-contact dose is evidently insensitive to whom they are with.
+Whether that insensitivity is itself a defect (a shedding distribution too flat
+across hosts for the identity of the partner to matter) is a separate question
+this sweep does not answer.
+
+No `φ` is adopted; the default stays 0. Finite-sample statements only: over
+these 256 points and 6 seeds, no arm in the stated sub-range resolved a crew
+effect. This says nothing about the continuous box, about other hull classes
+(the mixed pools on a 1,900- or 2,100-passenger hull are larger and more
+frequent), or about a `φ` that differs by pool type, which Shirreff's
+pair-specific exponents would license and this sweep did not vary.
 
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
