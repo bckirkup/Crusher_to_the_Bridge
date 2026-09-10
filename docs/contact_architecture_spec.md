@@ -152,7 +152,7 @@ The first campaign brackets the §4 vector rather than sampling it: three arms
 at the interval lows, midpoints and highs (`other` = 0, then the leisure
 midpoint and high), each matched run-for-run to the uniform control over the
 13-factor `expedition_sensitivity` box (256 Sobol' points × 6 seeds, design
-seed 17, seed base 500 — the grid of the three-arm and φ campaigns). Three
+seed 37, seed base 500 — the grid of the three-arm and φ campaigns). Three
 corners of an eight-dimensional interval box are a finite sample of it and
 are reported as one; a Sobol' sweep of the eight rates as factors is a
 different grid and a later campaign if the bracket resolves anything.
