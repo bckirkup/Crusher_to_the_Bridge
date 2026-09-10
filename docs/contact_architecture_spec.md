@@ -7,8 +7,9 @@
 > activity's per-hour rate to be declared by the run, and the declared values
 > are swept axes with the provenance of
 > [tranche 37](literature/consensus_tranche_37_contact_architecture.md).
-> No campaign has run under it; the §6 checks are to be recorded here before
-> anything is read against them.
+> The block is a design arm of the bounded gate (`--activity-contacts`, §4a);
+> the first matched expedition campaign is submitted and its readout and the
+> §6 checks are to be recorded here before anything is read against them.
 
 ## 1. The defect
 
@@ -130,6 +131,31 @@ campaign should hold role splits at 1 (no per-role mapping) so that any
 crew:passenger difference in the readout is **produced by the schedule and the
 architecture**, which is the point of the change; a per-role mapping on
 `dining_venue` is a second arm.
+
+### 4a. The design arm
+
+`admissible_region.py --activity-contacts 'cabin=<r>,corridor=<r>,...'` carries
+one complete eight-rate declaration on a `Design`, the way φ (#487) and κ
+carry theirs; the shard entrypoint forwards the string as the Batch parameter
+`activity_contacts` (`off` is the control, because a Batch parameter cannot be
+empty). Absent, the design writes no `transmission` override and the run is
+the uniform 13.4 draw on its old RNG path — the paired control for the same
+grid, design seed and seed base. Present, `build_run_spec` writes
+`contact_mode: per_partner_contact` and an `enabled` block whose
+`rates_per_hour` lists every activity, scalar across roles; a partial,
+duplicated or malformed declaration is refused before the grid runs. A rate is
+a scalar on purpose: the arm has no per-role field, so the first campaign's
+role splits are 1 by construction and a crew:passenger difference in its
+readout is the schedule's.
+
+The first campaign brackets the §4 vector rather than sampling it: three arms
+at the interval lows, midpoints and highs (`other` = 0, then the leisure
+midpoint and high), each matched run-for-run to the uniform control over the
+13-factor `expedition_sensitivity` box (256 Sobol' points × 6 seeds, design
+seed 37, seed base 500 — the grid of the three-arm and φ campaigns). Three
+corners of an eight-dimensional interval box are a finite sample of it and
+are reported as one; a Sobol' sweep of the eight rates as factors is a
+different grid and a later campaign if the bracket resolves anything.
 
 ## 5. What this change does not do
 
