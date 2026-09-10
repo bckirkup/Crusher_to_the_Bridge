@@ -678,3 +678,167 @@ class TestTheActivityArmOfTheGate:
         assert core.activity_contacts["work_service"] == {
             "passenger": pytest.approx(3.5), "crew": pytest.approx(3.5),
         }
+
+
+TAUS = "leisure=2.0,work_service=4.0,dining_venue=1.0"
+
+
+class TestTheSaturationArmOfTheGate:
+    """CONTACT-ARCH-02 plumbing: tau rides beside the activity arm, partially."""
+
+    def _design(self, rates: str | None, taus: str | None):
+        from telemetry_buffer.observation_model.admissible_region import (
+            Design,
+            parse_activity_contacts,
+            parse_activity_saturation,
+        )
+        contacts = parse_activity_contacts(rates)
+        return Design(
+            factor_set="expedition_sensitivity",
+            platform="expedition_cruise_450",
+            activity_contacts=contacts,
+            activity_saturation_hours=parse_activity_saturation(taus, contacts),
+        )
+
+    def _spec(self, rates: str | None, taus: str | None) -> dict:
+        from telemetry_buffer.observation_model.bounded_screen import (
+            build_run_spec,
+        )
+        design = self._design(rates, taus)
+        units = [0.5] * len(design.factors)
+        return build_run_spec(
+            design.factors, units, seed=3, description="tau_probe",
+            **design.run_kwargs(),
+        )
+
+    def test_an_unsaturated_activity_arm_is_the_first_campaign_spec(self) -> None:
+        for taus in (None, ""):
+            block = self._spec(ARM, taus)["config_overrides"]["transmission"]
+            assert "saturation_hours" not in block["activity_contacts"]
+            assert self._design(ARM, taus).run_kwargs()["activity_saturation_hours"] is None
+
+    def test_the_arm_writes_only_the_activities_it_names(self) -> None:
+        unsat = self._spec(ARM, None)
+        sat = self._spec(ARM, TAUS)
+        u = dict(unsat["config_overrides"]["transmission"]["activity_contacts"])
+        s = dict(sat["config_overrides"]["transmission"]["activity_contacts"])
+        assert s.pop("saturation_hours") == {
+            "work_service": pytest.approx(4.0),
+            "dining_venue": pytest.approx(1.0),
+            "leisure": pytest.approx(2.0),
+        }
+        assert s == u
+
+    def test_the_arm_is_recorded_in_the_report_kwargs_as_json(self) -> None:
+        import json
+        kwargs = self._design(ARM, TAUS).run_kwargs()
+        assert json.loads(json.dumps(kwargs))["activity_saturation_hours"] == {
+            "work_service": 4.0, "dining_venue": 1.0, "leisure": 2.0,
+        }
+
+    def test_distinct_taus_are_distinct_specs(self) -> None:
+        arms = [self._spec(ARM, f"leisure={t}") for t in (0.5, 1.0, 2.0)]
+        assert len({repr(a["config_overrides"]) for a in arms}) == 3
+
+    def test_saturation_without_an_activity_arm_is_refused(self) -> None:
+        from telemetry_buffer.observation_model.admissible_region import (
+            parse_activity_saturation,
+        )
+        from telemetry_buffer.observation_model.bounded_screen import (
+            build_run_spec,
+        )
+        with pytest.raises(ValueError, match="activity arm"):
+            parse_activity_saturation(TAUS, None)
+        design = self._design(None, None)
+        with pytest.raises(ValueError, match="activity_contacts"):
+            build_run_spec(
+                design.factors, [0.5] * len(design.factors), seed=3,
+                description="x", **{
+                    **design.run_kwargs(),
+                    "activity_saturation_hours": {"leisure": 2.0},
+                },
+            )
+
+    @pytest.mark.parametrize("bad", [
+        "lounge=2.0",
+        "leisure",
+        "leisure=soon",
+        TAUS + ",leisure=1.0",
+    ])
+    def test_a_malformed_or_duplicated_arm_is_refused(self, bad: str) -> None:
+        from telemetry_buffer.observation_model.admissible_region import (
+            parse_activity_contacts,
+            parse_activity_saturation,
+        )
+        with pytest.raises(ValueError):
+            parse_activity_saturation(bad, parse_activity_contacts(ARM))
+
+    def test_the_engine_refuses_an_out_of_band_tau_the_arm_lets_through(self) -> None:
+        from picard_framework.run_spec import merge_config_overrides
+        spec = self._spec(ARM, "leisure=25")
+        merged = merge_config_overrides(
+            {"transmission": {"contact_mode": "per_partner_contact"}},
+            spec["config_overrides"],
+        )
+        with pytest.raises(ValueError, match="saturation_hours"):
+            TransmissionCore(
+                cfg={"transmission": merged["transmission"]},
+                rng=np.random.default_rng(1),
+                clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+            )
+
+    def test_the_arm_reaches_the_engine_through_the_merged_config(self) -> None:
+        from picard_framework.run_spec import merge_config_overrides
+        merged = merge_config_overrides(
+            {"transmission": {"contact_mode": "per_partner_contact"}},
+            self._spec(ARM, TAUS)["config_overrides"],
+        )
+        core = TransmissionCore(
+            cfg={"transmission": merged["transmission"]},
+            rng=np.random.default_rng(1),
+            clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        )
+        assert core.activity_saturation_hours == {
+            "leisure": pytest.approx(2.0),
+            "work_service": pytest.approx(4.0),
+            "dining_venue": pytest.approx(1.0),
+        }
+
+    def test_the_gate_cli_parses_the_arm_and_the_shard_passes_it(self) -> None:
+        from pathlib import Path
+
+        from deploy.aws.bounded_design_entrypoint import _region_argv, parse_args
+        from telemetry_buffer.observation_model.admissible_region import (
+            parse_args as gate_parse_args,
+        )
+        args = parse_args([
+            "--design", "region", "--s3-prefix", "s3://b/p/", "--shard-count", "2",
+            "--activity-contacts", ARM, "--activity-saturation-hours", TAUS,
+        ])
+        argv = _region_argv(args, 0, Path("/tmp/o.json"), Path("/tmp/r.jsonl"))
+        assert argv[argv.index("--activity-saturation-hours") + 1] == TAUS
+        gate = gate_parse_args([
+            "--out", "o.json", "--activity-contacts", ARM,
+            "--activity-saturation-hours", TAUS,
+        ])
+        assert gate.activity_saturation_hours == TAUS
+
+    def test_the_unsaturated_shard_sends_no_arm(self) -> None:
+        from pathlib import Path
+
+        from deploy.aws.bounded_design_entrypoint import _region_argv, parse_args
+        for text in ([], ["--activity-saturation-hours", "off"]):
+            args = parse_args([
+                "--design", "region", "--s3-prefix", "s3://b/p/",
+                "--shard-count", "2", "--activity-contacts", ARM, *text,
+            ])
+            argv = _region_argv(args, 0, Path("/tmp/o.json"), Path("/tmp/r.jsonl"))
+            assert "--activity-saturation-hours" not in argv
+
+    def test_the_job_definition_carries_the_parameter_off(self) -> None:
+        import json
+        from pathlib import Path
+        jd = json.loads(Path("deploy/aws/batch_job_definition_bounded_design.json").read_text())
+        assert jd["parameters"]["activity_saturation_hours"] == "off"
+        cmd = jd["containerProperties"]["command"]
+        assert cmd[cmd.index("--activity-saturation-hours") + 1] == "Ref::activity_saturation_hours"

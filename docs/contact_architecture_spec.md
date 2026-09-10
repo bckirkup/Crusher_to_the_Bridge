@@ -211,6 +211,14 @@ corners of an eight-dimensional interval box are a finite sample of it and
 are reported as one; a Sobol' sweep of the eight rates as factors is a
 different grid and a later campaign if the bracket resolves anything.
 
+`--activity-saturation-hours 'leisure=<h>,work_service=<h>,...'` (Batch
+parameter `activity_saturation_hours`, `off` = unsaturated) carries the §3a
+`tau` arm beside the rate arm: partial, so an activity left out keeps its
+constant rate; refused without `--activity-contacts`, since the uniform
+control has no per-activity rate to saturate; the `(0, 24]` h band is the
+engine's to enforce. An activity arm with no `tau` arm writes the first
+campaign's block exactly.
+
 ## 5. What this change does not do
 
 - It does not move `POLYMOD_CONTACTS_PER_DAY`, which remains the reference and

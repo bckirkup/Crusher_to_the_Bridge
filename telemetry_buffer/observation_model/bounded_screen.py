@@ -559,6 +559,7 @@ def build_run_spec(
     near_field_cabin_berth_volume_m3: float | None = None,
     near_field_table_seat_volume_m3: float | None = None,
     activity_contacts: Mapping[str, float] | None = None,
+    activity_saturation_hours: Mapping[str, float] | None = None,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -620,18 +621,32 @@ def build_run_spec(
         # activity the resolver can return must carry a rate: the engine
         # refuses a partial declaration rather than defaulting the rest, so no
         # rate can enter a run without having been stated by the arm.
+        block: dict[str, object] = {
+            "enabled": True,
+            "rates_per_hour": {
+                activity: float(activity_contacts[activity])
+                for activity in CONTACT_ACTIVITIES
+            },
+        }
+        if activity_saturation_hours:
+            # CONTACT-ARCH-02: tau per saturating activity, written only when
+            # the arm states it, so an unsaturated activity arm is the first
+            # campaign's spec and an activity left out keeps its constant rate.
+            block["saturation_hours"] = {
+                activity: float(tau)
+                for activity, tau in activity_saturation_hours.items()
+            }
         _merge_run_overrides(
             config_overrides,
             {"transmission": {
                 "contact_mode": "per_partner_contact",
-                "activity_contacts": {
-                    "enabled": True,
-                    "rates_per_hour": {
-                        activity: float(activity_contacts[activity])
-                        for activity in CONTACT_ACTIVITIES
-                    },
-                },
+                "activity_contacts": block,
             }},
+        )
+    elif activity_saturation_hours:
+        raise ValueError(
+            "activity_saturation_hours declared without activity_contacts: "
+            "the uniform control has no per-activity rate to saturate",
         )
     return {
         "schema_version": "1.0.0",
@@ -671,6 +686,7 @@ def run_point(
     near_field_cabin_berth_volume_m3: float | None = None,
     near_field_table_seat_volume_m3: float | None = None,
     activity_contacts: Mapping[str, float] | None = None,
+    activity_saturation_hours: Mapping[str, float] | None = None,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -692,6 +708,7 @@ def run_point(
         near_field_cabin_berth_volume_m3=near_field_cabin_berth_volume_m3,
         near_field_table_seat_volume_m3=near_field_table_seat_volume_m3,
         activity_contacts=activity_contacts,
+        activity_saturation_hours=activity_saturation_hours,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"

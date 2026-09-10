@@ -215,6 +215,10 @@ def _region_argv(
     # parameter cannot be empty, so the control spells itself 'off'.
     if args.activity_contacts and args.activity_contacts != "off":
         argv += ["--activity-contacts", args.activity_contacts]
+    # CONTACT-ARCH-02: the saturation arm, 'activity=tau,...', sent the same
+    # way; 'off' is the activity arm unsaturated.
+    if args.activity_saturation_hours and args.activity_saturation_hours != "off":
+        argv += ["--activity-saturation-hours", args.activity_saturation_hours]
     argv += ["--factor-set", args.factor_set]
     return argv
 
@@ -249,6 +253,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--near-field-table-seat-volume-m3", default="")
     # 'off' for the control; 'activity=rate,...' for an activity arm.
     parser.add_argument("--activity-contacts", default="off")
+    parser.add_argument("--activity-saturation-hours", default="off")
     parser.add_argument(
         "--factor-set", default="norovirus", choices=sorted(FACTOR_SETS),
     )
