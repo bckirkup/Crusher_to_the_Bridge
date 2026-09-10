@@ -177,6 +177,10 @@ class Design:
     # surface-touch rate, off unless a run asks, so the knocked-out arm and
     # its baseline differ in this field and nothing else.
     service_surface_knockout: bool = False
+    # CONTACT-SCALE-01: the class-directed contact exponent phi, a declared
+    # arm of a sweep. 0.0 is the pre-change kernel and the matched control;
+    # a design carries it so arms differ in this field alone.
+    contact_class_exponent: float = 0.0
     # Which box the design's coordinates are coordinates *of*. Carried here
     # rather than passed alongside because every work unit already carries a
     # design: a shard that resolved its own factor list could sample a
@@ -206,6 +210,7 @@ class Design:
             "observation_scenario": self.observation_scenario,
             "crew_duty_exclusion": self.crew_duty_exclusion,
             "service_surface_knockout": self.service_surface_knockout,
+            "contact_class_exponent": self.contact_class_exponent,
         }
 
 
@@ -1247,6 +1252,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--contact-class-exponent",
+        type=float,
+        default=0.0,
+        help=(
+            "CONTACT-SCALE-01: phi, the class-directed contact exponent; a "
+            "target's unchanged contact draw is divided between the classes "
+            "present as N_class^(1+phi). 0 (default) is the pre-change "
+            "kernel, so the same design and seeds give the matched control"
+        ),
+    )
+    parser.add_argument(
         "--factor-set",
         default="norovirus",
         choices=sorted(FACTOR_SETS),
@@ -1325,6 +1341,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         observation_scenario=args.observation_scenario,
         crew_duty_exclusion=args.crew_duty_exclusion,
         service_surface_knockout=args.service_surface_knockout,
+        contact_class_exponent=args.contact_class_exponent,
         factor_set=args.factor_set,
     )
     factors = design.factors

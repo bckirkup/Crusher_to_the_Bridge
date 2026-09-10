@@ -203,3 +203,69 @@ class TestInvariants:
     def test_an_empty_pool_draws_nothing(self) -> None:
         core = _core(1.0)
         assert core._sample_partners_by_class([], {}, 5) == ([], 0)
+
+
+class TestPhiIsADesignArm:
+    """The sweep plumbing: a design carries phi, and phi=0 writes nothing."""
+
+    def _spec(self, phi: float) -> dict:
+        from telemetry_buffer.observation_model.admissible_region import Design
+        from telemetry_buffer.observation_model.bounded_screen import (
+            build_run_spec,
+        )
+        design = Design(
+            factor_set="expedition_sensitivity",
+            platform="expedition_cruise_450",
+            contact_class_exponent=phi,
+        )
+        units = [0.5] * len(design.factors)
+        return build_run_spec(
+            design.factors, units, seed=3, description="phi_probe",
+            **design.run_kwargs(),
+        )
+
+    def test_the_control_arm_is_the_pre_change_spec(self) -> None:
+        assert "transmission" not in self._spec(0.0)["config_overrides"]
+
+    @pytest.mark.parametrize("phi", [-1.0, 0.5, 2.0])
+    def test_a_swept_arm_writes_phi_and_only_phi(self, phi: float) -> None:
+        control = self._spec(0.0)
+        arm = self._spec(phi)
+        overrides = dict(arm["config_overrides"])
+        assert overrides.pop("transmission") == {"contact_class_exponent": phi}
+        assert overrides == control["config_overrides"]
+        assert {k: v for k, v in arm.items() if k != "config_overrides"} == {
+            k: v for k, v in control.items() if k != "config_overrides"
+        }
+
+    def test_distinct_arms_are_distinct_specs(self) -> None:
+        arms = [self._spec(phi)["config_overrides"] for phi in (-1.0, 0.5, 2.0)]
+        assert len({repr(a) for a in arms}) == 3
+
+    def test_the_gate_cli_parses_phi_and_the_shard_passes_it(self) -> None:
+        from pathlib import Path
+
+        from deploy.aws.bounded_design_entrypoint import (
+            _region_argv,
+            parse_args,
+        )
+        args = parse_args([
+            "--design", "region", "--s3-prefix", "s3://b/p/",
+            "--shard-count", "2", "--contact-class-exponent", "1.5",
+        ])
+        argv = _region_argv(args, 0, Path("/tmp/o.json"), Path("/tmp/r.jsonl"))
+        i = argv.index("--contact-class-exponent")
+        assert argv[i + 1] == "1.5"
+
+    def test_the_arm_reaches_the_engine_through_the_merged_config(self) -> None:
+        from picard_framework.run_spec import merge_config_overrides
+        merged = merge_config_overrides(
+            {"transmission": {"contact_mode": "per_partner_contact"}},
+            self._spec(0.5)["config_overrides"],
+        )
+        assert merged["transmission"]["contact_mode"] == "per_partner_contact"
+        core = TransmissionCore(
+            cfg={"transmission": merged["transmission"]},
+            rng=np.random.default_rng(1),
+        )
+        assert core.contact_class_exponent == pytest.approx(0.5)

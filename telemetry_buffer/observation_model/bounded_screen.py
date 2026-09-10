@@ -550,6 +550,7 @@ def build_run_spec(
     co_seeded: str = "isolated",
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
+    contact_class_exponent: float = 0.0,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -578,6 +579,17 @@ def build_run_spec(
         # was measured at, so a matched-seed difference is what that one rate
         # carries -- a knockout to read, not a rate to adopt.
         config_overrides["service_surface_knockout"] = {"enabled": True}
+    if contact_class_exponent:
+        # CONTACT-SCALE-01: phi is a declared arm of a sweep, never a level.
+        # Zero writes nothing, so the phi=0 arm is the pre-change spec and
+        # the matched control; the block joins any transmission overrides a
+        # run factor already wrote rather than replacing them.
+        _merge_run_overrides(
+            config_overrides,
+            {"transmission": {
+                "contact_class_exponent": float(contact_class_exponent),
+            }},
+        )
     return {
         "schema_version": "1.0.0",
         "description": description,
@@ -610,6 +622,7 @@ def run_point(
     co_seeded: str = "isolated",
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
+    contact_class_exponent: float = 0.0,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -625,6 +638,7 @@ def run_point(
         co_seeded=co_seeded,
         crew_duty_exclusion=crew_duty_exclusion,
         service_surface_knockout=service_surface_knockout,
+        contact_class_exponent=contact_class_exponent,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
