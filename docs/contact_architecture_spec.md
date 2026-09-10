@@ -10,7 +10,10 @@
 > The block is a design arm of the bounded gate (`--activity-contacts`, §4a);
 > the first matched expedition campaign has run and is read out in §8, with the
 > §6 checks in §8a. **The interval box as declared is refused by its own §6
-> criterion above the low corner**, and no arm brings an anchor nearer.
+> criterion above the low corner**, and no arm brings an anchor nearer. The
+> dwell-saturating form of §3a (`CONTACT-ARCH-02`) is its own design arm
+> (`--activity-saturation-hours`) and has now run as the matched nine-arm
+> reprise of §9; **no `tau` is adopted** there either.
 
 ## 1. The defect
 
@@ -321,8 +324,9 @@ figures measured over short dwells (Pung's F&B plateau is *per visit* after
 multi-hour leisure block with no saturation. That is `CONTACT-ARCH-02`
 (dwell-tracking saturation, now implemented as §3a and off unless declared),
 and it is the prerequisite for reading the upper corners of this box at all —
-not a licence to lower the rates until a total matches. Nothing has run under
-it yet.
+not a licence to lower the rates until a total matches. It has since run as the
+matched reprise of §9; that campaign is a separate finite sample and does not
+reinterpret the constant-rate numbers above.
 
 Night share (§6.2) is 8.0% passenger / 11.9% crew at the midpoint against
 Vanhems's 5.9% — the same absent saturation, since `Sleep` hours are capped
@@ -355,3 +359,99 @@ true food-handler duty verdicts — both of which are live in the shipped defaul
 configuration, not only under `activity_contacts`. Every readout that depends on
 the duty state or the eating check therefore predates the repair, and no rate,
 interval or kernel moved with it.
+
+## 9. The matched reprise under dwell saturation (`CONTACT-ARCH-02`), measured
+
+Nine matched expedition arms, image `bounded-design-v20`, job definition rev 20,
+all built from the `CONTACT-ARCH-01b` resolver repair: the uniform control
+(`activity_contacts=off`), the §4 interval lows, midpoints and highs unsaturated,
+and a declared `tau` sweep on the two upper corners — midpoint × {1, 2} h and
+high × {0.5, 1, 2} h, the same `tau` applied to all eight activities. Same
+13-factor `expedition_sensitivity` box as §8 (256 Sobol' points × 6 seeds,
+design seed 37, seed base 500), 1,536 voyages per arm, 16/16 shards each, no
+failed child. This campaign is a **separate finite sample** from §8: its control
+is the post-repair model (see below) and its numbers do not replace §8's.
+
+| Arm | postings | crew-only | pax inf AR | crew inf AR | A5 (inf) | Δ pax pp (se) vs control | Δ crew pp (se) vs control | flips off/on | sign p |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| control (13.4 uniform) | 220 (14.32%) | 10 | 6.262% | 2.646% | 2.366 | — | — | — | — |
+| low | 243 (15.82%) | 14 | 6.543% | 2.954% | 2.215 | +0.281 (0.091) | +0.307 (0.075) | 27 / 50 | 0.012 |
+| midpoint | 276 (17.97%) | 12 | 7.829% | 3.809% | 2.055 | +1.567 (0.122) | +1.163 (0.119) | 21 / 77 | <10⁻⁶ |
+| high | 285 (18.55%) | 14 | 8.568% | 4.249% | 2.016 | +2.305 (0.157) | +1.603 (0.142) | 21 / 86 | <10⁻⁶ |
+| midpoint, τ = 1 h | 218 (14.19%) | 13 | 5.986% | 2.810% | 2.130 | −0.276 (0.090) | +0.164 (0.071) | 35 / 33 | 0.90 |
+| midpoint, τ = 2 h | 239 (15.56%) | 19 | 6.566% | 3.089% | 2.126 | +0.304 (0.091) | +0.443 (0.081) | 34 / 53 | 0.053 |
+| high, τ = 0.5 h | 212 (13.80%) | 14 | 5.819% | 2.683% | 2.168 | −0.443 (0.098) | +0.037 (0.071) | 45 / 37 | 0.44 |
+| high, τ = 1 h | 223 (14.52%) | 6 | 6.533% | 3.156% | 2.070 | +0.270 (0.087) | +0.510 (0.083) | 38 / 41 | 0.82 |
+| high, τ = 2 h | 249 (16.21%) | 10 | 7.258% | 3.580% | 2.027 | +0.995 (0.101) | +0.933 (0.109) | 24 / 53 | 0.0013 |
+
+Within-corner contrasts (saturated arm minus its unsaturated corner, matched):
+
+| Contrast | Δ pax pp (se) | Δ crew pp (se) | flips off/on | sign p |
+|---|---:|---:|---:|---:|
+| midpoint → τ = 1 h | −1.843 (0.138) | −0.999 (0.107) | 78 / 20 | <10⁻⁶ |
+| midpoint → τ = 2 h | −1.263 (0.115) | −0.720 (0.087) | 63 / 26 | 1×10⁻⁴ |
+| high → τ = 0.5 h | −2.749 (0.186) | −1.566 (0.142) | 97 / 24 | <10⁻⁶ |
+| high → τ = 1 h | −2.035 (0.146) | −1.093 (0.108) | 80 / 18 | <10⁻⁶ |
+| high → τ = 2 h | −1.310 (0.114) | −0.670 (0.086) | 56 / 20 | 4×10⁻⁵ |
+
+Read as a finite sample of the submitted design and seeds only:
+
+1. **The control moved with the resolver repair, within error.** Against the
+   §8 (v19) control on the same points and seeds: Δ pax +0.049 pp (se 0.075),
+   Δ crew −0.004 pp (se 0.054), flips 36 off / 35 on, p = 1.0, 804/1,536
+   voyages bit-identical. The repair changed nearly half the voyages and left
+   the aggregate where it was; both facts are recorded.
+2. **Unsaturated, the ordering of §8 reproduces.** Low, midpoint and high are
+   again monotone in both roles; the low corner is now a small positive on both
+   (+0.28 / +0.31 pp) rather than a null, which is the resolver repair moving
+   waiting diners out of `other` and into `leisure`. A5 again falls 2.37 → 2.02,
+   away from 4.3; postings again rise, 14.3% → 18.6%.
+3. **Saturation pulls every upper corner down, monotonically in `tau`.** Each
+   declared `tau` lowers both roles relative to its unsaturated corner, and the
+   shorter the `tau` the larger the fall, as the form requires. At τ = 0.5–1 h
+   the high and midpoint corners return to within ~0.5 pp of the uniform
+   control on both roles; at τ = 2 h they sit between.
+4. **No arm approaches an anchor, and none is selected.** Across all nine arms
+   A5 (infection) lies in 2.02–2.37 against 4.3 and postings in 13.8–18.6%
+   against the hull's 0.6–1.6%. Crew-only postings stay 6–19 of 1,536. The
+   `tau` values are the declared sweep and nothing more: a `tau` that returns a
+   corner to the control is a statement about the corner, not a measurement of
+   the ship, and the proximity of some saturated arms to Pung's 20/10 medians
+   (§9a) was not aimed at and is not adopted.
+
+### 9a. The §6 checks under saturation
+
+Same instrument as §8a, on the same representative expedition point, after the
+resolver repair (per pathogen profile invoking the person-to-person path):
+
+| Arm | passenger/day | crew/day | crew:passenger | pax dining share | crew `work_service`/day |
+|---|---:|---:|---:|---:|---:|
+| low | 21.4 | 13.0 | 0.61 | 40% | 3.5 |
+| midpoint | 42.4 | 27.0 | 0.64 | 35% | 4.7 |
+| high | 63.4 | 41.0 | 0.65 | 34% | 6.0 |
+| midpoint, τ = 1 h | 16.7 | 10.6 | 0.63 | 57% | 1.0 |
+| midpoint, τ = 2 h | 23.8 | 15.2 | 0.64 | 50% | 1.7 |
+| high, τ = 0.5 h | 15.2 | 9.7 | 0.64 | 61% | 0.7 |
+| high, τ = 1 h | 24.5 | 15.8 | 0.64 | 56% | 1.2 |
+| high, τ = 2 h | 35.1 | 22.7 | 0.65 | 48% | 2.2 |
+
+Against §6: the resolver repair alone turned the crew:passenger ratio from
+1.1–1.5 (§8a, inverted) to 0.61–0.65, on the same side as Pung's 0.5, because
+`Meal`-token passengers waiting for a sitting now carry the leisure rate and
+crew scheduled `Work` in a `Dining` zone are workers. Unsaturated, the high
+corner (63 / 41) and the midpoint's passengers (42) still lie outside the
+5–40 band and remain declaration errors by the pre-registered criterion; the
+low corner (21 / 13) now sits inside it on both roles. Every saturated arm
+lies inside the band, and the passenger dining share rises from ~35% to
+48–61%, toward Pung's 71%, because saturation cuts a multi-hour leisure block
+harder than a one-hour sitting.
+
+One consequence is reported, not tuned, and it is the reason `tau` remains a
+per-activity map rather than a scalar: a single `tau` applied to every activity
+saturates a ten-hour `work_service` shift like a one-hour meal, so a food
+employee's on-duty contacts fall to 0.7–2.2/day under the sweep. A waiter's
+partners turn over across a shift in a way a diner's do not, so a per-visit
+plateau is the wrong shape for that activity; the architecture allows
+`work_service` to be left unsaturated or given its own `tau`, and no arm in
+this campaign did so. That is an open declaration question, recorded here and
+in the ledger, not a magnitude to fix.
