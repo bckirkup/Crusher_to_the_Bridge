@@ -209,6 +209,12 @@ def _region_argv(
     ):
         if value:
             argv += [flag, value]
+    # CONTACT-ARCH-01: the activity arm is one 'activity=rate,...' string,
+    # sent only when the arm states it, so the control arm's command line is
+    # the pre-change one and the gate parses the declaration itself. A Batch
+    # parameter cannot be empty, so the control spells itself 'off'.
+    if args.activity_contacts and args.activity_contacts != "off":
+        argv += ["--activity-contacts", args.activity_contacts]
     argv += ["--factor-set", args.factor_set]
     return argv
 
@@ -241,6 +247,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--near-field-neighbour-table-ratio", default="0")
     parser.add_argument("--near-field-cabin-berth-volume-m3", default="")
     parser.add_argument("--near-field-table-seat-volume-m3", default="")
+    # 'off' for the control; 'activity=rate,...' for an activity arm.
+    parser.add_argument("--activity-contacts", default="off")
     parser.add_argument(
         "--factor-set", default="norovirus", choices=sorted(FACTOR_SETS),
     )

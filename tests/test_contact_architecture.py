@@ -309,3 +309,124 @@ class TestInvariants:
         lo = np.mean(_draws(_rows(base, _room(LOUNGE, "Free", n=100), epochs=120)))
         hi = np.mean(_draws(_rows(boosted, _room(LOUNGE, "Free", n=100), epochs=120)))
         assert hi > 2 * lo
+
+
+ARM = ",".join(f"{a}={r}" for a, r in zip(
+    CONTACT_ACTIVITIES, (0.3, 0.2, 3.5, 1.5, 3.0, 3.0, 2.0, 0.5), strict=True,
+))
+
+
+class TestTheActivityArmOfTheGate:
+    """Sweep plumbing: a design carries the arm, and absent writes nothing."""
+
+    def _design(self, text: str | None):
+        from telemetry_buffer.observation_model.admissible_region import (
+            Design,
+            parse_activity_contacts,
+        )
+        return Design(
+            factor_set="expedition_sensitivity",
+            platform="expedition_cruise_450",
+            activity_contacts=parse_activity_contacts(text),
+        )
+
+    def _spec(self, text: str | None) -> dict:
+        from telemetry_buffer.observation_model.bounded_screen import (
+            build_run_spec,
+        )
+        design = self._design(text)
+        units = [0.5] * len(design.factors)
+        return build_run_spec(
+            design.factors, units, seed=3, description="arch_probe",
+            **design.run_kwargs(),
+        )
+
+    def test_the_control_arm_is_the_pre_change_spec(self) -> None:
+        assert "transmission" not in self._spec(None)["config_overrides"]
+        assert "transmission" not in self._spec("")["config_overrides"]
+        assert self._design(None).run_kwargs()["activity_contacts"] is None
+
+    def test_the_arm_writes_a_complete_enabled_declaration_and_nothing_else(self) -> None:
+        control = self._spec(None)
+        arm = self._spec(ARM)
+        overrides = dict(arm["config_overrides"])
+        tx = overrides.pop("transmission")
+        assert overrides == control["config_overrides"]
+        assert tx["contact_mode"] == "per_partner_contact"
+        assert tx["activity_contacts"]["enabled"] is True
+        rates = tx["activity_contacts"]["rates_per_hour"]
+        assert tuple(rates) == CONTACT_ACTIVITIES
+        assert rates["work_service"] == pytest.approx(3.5)
+        assert rates["other"] == pytest.approx(0.5)
+
+    def test_the_arm_is_recorded_in_the_report_kwargs_as_json(self) -> None:
+        import json
+        kwargs = self._design(ARM).run_kwargs()
+        assert json.loads(json.dumps(kwargs))["activity_contacts"] == dict(
+            zip(CONTACT_ACTIVITIES, (0.3, 0.2, 3.5, 1.5, 3.0, 3.0, 2.0, 0.5), strict=True),
+        )
+
+    def test_distinct_arms_are_distinct_specs(self) -> None:
+        arms = [
+            self._spec(",".join(f"{a}={r}" for a in CONTACT_ACTIVITIES))
+            for r in (0.5, 1.0, 2.0)
+        ]
+        assert len({repr(a["config_overrides"]) for a in arms}) == 3
+
+    @pytest.mark.parametrize("bad", [
+        "cabin=0.3",
+        ARM + ",cabin=0.1",
+        ARM.replace("leisure=2.0", "lounge=2.0"),
+        ARM.replace("leisure=2.0", "leisure"),
+        ARM.replace("leisure=2.0", "leisure=abc"),
+    ])
+    def test_a_partial_duplicated_or_malformed_arm_is_refused(self, bad: str) -> None:
+        from telemetry_buffer.observation_model.admissible_region import (
+            parse_activity_contacts,
+        )
+        with pytest.raises(ValueError):
+            parse_activity_contacts(bad)
+
+    def test_the_gate_cli_parses_the_arm_and_the_shard_passes_it(self) -> None:
+        from pathlib import Path
+
+        from deploy.aws.bounded_design_entrypoint import _region_argv, parse_args
+        from telemetry_buffer.observation_model.admissible_region import (
+            parse_args as gate_parse_args,
+        )
+        args = parse_args([
+            "--design", "region", "--s3-prefix", "s3://b/p/",
+            "--shard-count", "2", "--activity-contacts", ARM,
+        ])
+        argv = _region_argv(args, 0, Path("/tmp/o.json"), Path("/tmp/r.jsonl"))
+        i = argv.index("--activity-contacts")
+        assert argv[i + 1] == ARM
+        gate = gate_parse_args(["--out", "o.json", "--activity-contacts", ARM])
+        assert gate.activity_contacts == ARM
+
+    def test_the_control_shard_sends_no_arm(self) -> None:
+        from pathlib import Path
+
+        from deploy.aws.bounded_design_entrypoint import _region_argv, parse_args
+        for text in ([], ["--activity-contacts", "off"]):
+            args = parse_args([
+                "--design", "region", "--s3-prefix", "s3://b/p/",
+                "--shard-count", "2", *text,
+            ])
+            argv = _region_argv(args, 0, Path("/tmp/o.json"), Path("/tmp/r.jsonl"))
+            assert "--activity-contacts" not in argv
+
+    def test_the_arm_reaches_the_engine_through_the_merged_config(self) -> None:
+        from picard_framework.run_spec import merge_config_overrides
+        merged = merge_config_overrides(
+            {"transmission": {"contact_mode": "per_partner_contact"}},
+            self._spec(ARM)["config_overrides"],
+        )
+        core = TransmissionCore(
+            cfg={"transmission": merged["transmission"]},
+            rng=np.random.default_rng(1),
+        )
+        assert core.activity_contacts is not None
+        assert core.activity_contacts["work_service"] == {
+            "passenger": pytest.approx(3.5), "crew": pytest.approx(3.5),
+        }

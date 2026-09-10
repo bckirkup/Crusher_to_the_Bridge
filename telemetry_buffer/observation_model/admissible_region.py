@@ -87,6 +87,7 @@ from simulation_utils.platform_complement import (  # noqa: E402
 )
 from telemetry_buffer.observation_model import score_anchors  # noqa: E402
 from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
+    CONTACT_ACTIVITIES,
     DEFAULT_PLATFORM,
     FACTOR_SETS,
     Factor,
@@ -188,6 +189,12 @@ class Design:
     near_field_neighbour_table_ratio: float = 0.0
     near_field_cabin_berth_volume_m3: float | None = None
     near_field_table_seat_volume_m3: float | None = None
+    # CONTACT-ARCH-01: the activity-derived contact arm, one declared rate per
+    # activity as (activity, contacts/hour) pairs. ``None`` is the uniform
+    # 13.4-a-day draw and the matched control. A rate is a scalar across roles
+    # on purpose: a role split is a second arm, declared separately, so that a
+    # crew:passenger difference this arm produces comes from the schedule.
+    activity_contacts: tuple[tuple[str, float], ...] | None = None
     # Which box the design's coordinates are coordinates *of*. Carried here
     # rather than passed alongside because every work unit already carries a
     # design: a shard that resolved its own factor list could sample a
@@ -228,7 +235,43 @@ class Design:
             "near_field_table_seat_volume_m3": (
                 self.near_field_table_seat_volume_m3
             ),
+            "activity_contacts": (
+                None if self.activity_contacts is None
+                else dict(self.activity_contacts)
+            ),
         }
+
+
+def parse_activity_contacts(
+    text: str | None,
+) -> tuple[tuple[str, float], ...] | None:
+    """Read an activity arm from ``activity=rate,...``; empty is the control.
+
+    Every activity the engine's resolver can return must be stated once, so
+    the arm is a complete declaration and not a partial one the engine would
+    have to complete. The rate's own admissibility (finite, inside the
+    refusal band) is the engine's to judge; this only settles what was said.
+    """
+    if text is None or not text.strip():
+        return None
+    rates: dict[str, float] = {}
+    for item in text.split(","):
+        activity, sep, value = item.partition("=")
+        activity = activity.strip()
+        if not sep or activity not in CONTACT_ACTIVITIES:
+            raise ValueError(
+                f"activity contacts entry {item.strip()!r} is not "
+                f"'<activity>=<rate>' for an activity in {CONTACT_ACTIVITIES}",
+            )
+        if activity in rates:
+            raise ValueError(f"activity {activity!r} is declared twice")
+        rates[activity] = float(value)
+    missing = [a for a in CONTACT_ACTIVITIES if a not in rates]
+    if missing:
+        raise ValueError(
+            f"activity contacts must declare every activity; missing {missing}",
+        )
+    return tuple((activity, rates[activity]) for activity in CONTACT_ACTIVITIES)
 
 
 def _design_factors(
@@ -1320,6 +1363,17 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--activity-contacts",
+        default=None,
+        help=(
+            "CONTACT-ARCH-01: the activity arm, as 'activity=rate,...' in "
+            "contacts per hour for every one of "
+            + ", ".join(CONTACT_ACTIVITIES)
+            + ". Absent (default) is the uniform 13.4-a-day draw, so the same "
+            "design and seeds give the matched control"
+        ),
+    )
+    parser.add_argument(
         "--factor-set",
         default="norovirus",
         choices=sorted(FACTOR_SETS),
@@ -1403,6 +1457,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         near_field_neighbour_table_ratio=args.near_field_neighbour_table_ratio,
         near_field_cabin_berth_volume_m3=args.near_field_cabin_berth_volume_m3,
         near_field_table_seat_volume_m3=args.near_field_table_seat_volume_m3,
+        activity_contacts=parse_activity_contacts(args.activity_contacts),
         factor_set=args.factor_set,
     )
     factors = design.factors

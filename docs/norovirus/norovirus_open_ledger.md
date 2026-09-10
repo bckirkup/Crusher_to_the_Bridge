@@ -1938,13 +1938,17 @@ Roughly in dependency order.
     host, with Marks 2000's by-table gradient as its out-of-sample check. Until
     that lands, the norovirus inhalation route is still zone-well-mixed.
 
-17. **`CONTACT-ARCH-01`: implemented, off by default, unmeasured.** The
-    activity-derived contact generator (§1) has no design arm in the bounded
-    gate and no campaign has run under it. Outstanding, in order: (a) plumb
-    `activity_contacts` as a design arm the way `contact_class_exponent` was
-    (#487), (b) a matched expedition campaign with the uniform 13.4 arm as the
-    paired control and every role split held at 1, declaring the tranche-37
-    intervals of `contact_architecture_spec.md` §4 as the swept vector, (c)
+17. **`CONTACT-ARCH-01`: implemented, off by default, campaign submitted,
+    unread.** The activity-derived contact generator (§1) is a design arm of
+    the bounded gate (`--activity-contacts`, one complete eight-rate scalar
+    declaration; absent is the uniform control on its old RNG path; Batch
+    parameter `activity_contacts`, `off` for the control —
+    `contact_architecture_spec.md` §4a). Done: (a) the arm. Submitted, not
+    read: (b) a matched expedition campaign with the uniform 13.4 arm as the
+    paired control and every role split held at 1 by construction, bracketing
+    the tranche-37 intervals of `contact_architecture_spec.md` §4 at their
+    lows, midpoints and highs (three corners of the eight-rate box, a finite
+    sample and reported as one). Outstanding: (c)
     the §6 out-of-sample checks recorded in that document before A5 or the
     posting rate is read, (d) a per-role `dining_venue` mapping as a second
     arm only if the first resolves anything, and (e) `CONTACT-ARCH-02`, a

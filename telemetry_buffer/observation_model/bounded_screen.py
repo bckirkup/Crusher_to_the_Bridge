@@ -90,7 +90,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from engines.transmission_core import EMESIS_TOTAL_SHED_GEC_RANGE  # noqa: E402
+from engines.transmission_core import (  # noqa: E402
+    CONTACT_ACTIVITIES,
+    EMESIS_TOTAL_SHED_GEC_RANGE,
+)
 from orchestrator_init import SCENARIO_VECTORS  # noqa: E402
 from picard_framework.catalog.registry import CatalogRegistry  # noqa: E402
 from picard_framework.pathogen_overrides import (  # noqa: E402
@@ -555,6 +558,7 @@ def build_run_spec(
     near_field_neighbour_table_ratio: float = 0.0,
     near_field_cabin_berth_volume_m3: float | None = None,
     near_field_table_seat_volume_m3: float | None = None,
+    activity_contacts: Mapping[str, float] | None = None,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -609,6 +613,26 @@ def build_run_spec(
                 "table_seat_volume_m3": near_field_table_seat_volume_m3,
             }}},
         )
+    if activity_contacts:
+        # CONTACT-ARCH-01: the activity arm. Absent, the run draws Mossong's
+        # uniform 13.4 a day and is the paired control, so the control arm's
+        # spec is the pre-change one and consumes the same RNG. Present, every
+        # activity the resolver can return must carry a rate: the engine
+        # refuses a partial declaration rather than defaulting the rest, so no
+        # rate can enter a run without having been stated by the arm.
+        _merge_run_overrides(
+            config_overrides,
+            {"transmission": {
+                "contact_mode": "per_partner_contact",
+                "activity_contacts": {
+                    "enabled": True,
+                    "rates_per_hour": {
+                        activity: float(activity_contacts[activity])
+                        for activity in CONTACT_ACTIVITIES
+                    },
+                },
+            }},
+        )
     return {
         "schema_version": "1.0.0",
         "description": description,
@@ -646,6 +670,7 @@ def run_point(
     near_field_neighbour_table_ratio: float = 0.0,
     near_field_cabin_berth_volume_m3: float | None = None,
     near_field_table_seat_volume_m3: float | None = None,
+    activity_contacts: Mapping[str, float] | None = None,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -666,6 +691,7 @@ def run_point(
         near_field_neighbour_table_ratio=near_field_neighbour_table_ratio,
         near_field_cabin_berth_volume_m3=near_field_cabin_berth_volume_m3,
         near_field_table_seat_volume_m3=near_field_table_seat_volume_m3,
+        activity_contacts=activity_contacts,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
