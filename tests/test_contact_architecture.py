@@ -410,6 +410,155 @@ class TestInvariants:
         assert hi > 2 * lo
 
 
+def _saturating(rates: dict, taus: object) -> dict:
+    block = _block(rates)
+    block["activity_contacts"]["saturation_hours"] = taus
+    return block
+
+
+def _dwelling_rows(core: TransmissionCore, agents: list[KorkinAgent], epochs: int) -> list[dict]:
+    """Like ``_rows`` but the target dwells: epoch ``k`` finds it ``k - 1`` epochs in."""
+    rows: list[dict] = []
+    for epoch in range(1, epochs + 1):
+        agents[0].dwell_epochs = epoch - 1
+        rows.extend(_rows(core, agents, 1))
+    return rows
+
+
+class TestDwellSaturation:
+    """CONTACT-ARCH-02: a visit's contacts saturate with the dwell.
+
+    The declared rate is the initial slope; ``rate * tau`` is the plateau;
+    no ``tau`` is the constant-rate CONTACT-ARCH-01 path on the same RNG.
+    """
+
+    def test_absent_means_no_activity_saturates(self) -> None:
+        assert _core(_block(FLAT)).activity_saturation_hours == {}
+
+    def test_a_partial_declaration_saturates_only_what_it_names(self) -> None:
+        core = _core(_saturating(FLAT, {"leisure": 2.0, "dining_venue": 1.0}))
+        assert core.activity_saturation_hours == {"leisure": 2.0, "dining_venue": 1.0}
+
+    def test_the_declaration_is_not_read_when_the_block_is_off(self) -> None:
+        block = _saturating(FLAT, {"leisure": 2.0})
+        block["activity_contacts"]["enabled"] = False
+        assert _core(block).activity_saturation_hours == {}
+
+    def test_an_unknown_activity_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="unknown activities"):
+            _core(_saturating(FLAT, {"buffet": 1.0}))
+
+    @pytest.mark.parametrize("bad", [0.0, -1.0, 25.0, float("inf"), float("nan"), "soon"])
+    def test_a_time_scale_outside_the_band_is_refused(self, bad: object) -> None:
+        with pytest.raises(ValueError, match="saturation_hours"):
+            _core(_saturating(FLAT, {"leisure": bad}))
+
+    def test_a_not_a_mapping_declaration_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="mapping"):
+            _core(_saturating(FLAT, 2.0))
+
+    def test_a_day_long_epoch_cannot_time_a_visit(self) -> None:
+        with pytest.raises(ValueError, match="hourly clock"):
+            TransmissionCore(
+                rng=np.random.default_rng(0),
+                zone_types=dict(ZONE_TYPES),
+                cfg={"transmission": _saturating(FLAT, {"leisure": 2.0})},
+                clock=SimClock(),
+            )
+
+    def test_the_first_hour_starts_at_the_declared_rate(self) -> None:
+        core = _core(_saturating(FLAT, {"leisure": 2.0}))
+        a = _agent(0, "passenger", ["Free"] * 24, LOUNGE)
+        first = core._saturated_visit_contacts(a, 3.0, 2.0)
+        assert first == pytest.approx(3.0 * 2.0 * (1 - np.exp(-0.5)))
+        assert first < 3.0
+        assert core._saturated_visit_contacts(a, 3.0, 1e6) == pytest.approx(3.0, rel=1e-5)
+
+    def test_new_contacts_fall_with_the_dwell_and_sum_to_the_plateau(self) -> None:
+        core = _core(_saturating(FLAT, {"leisure": 2.0}))
+        a = _agent(0, "passenger", ["Free"] * 24, LOUNGE)
+        increments = []
+        for dwelt in range(0, 24):
+            a.dwell_epochs = dwelt
+            increments.append(core._saturated_visit_contacts(a, 3.0, 2.0))
+        assert all(x > y > 0.0 for x, y in zip(increments, increments[1:], strict=False))
+        assert sum(increments) == pytest.approx(3.0 * 2.0, rel=1e-3)
+
+    def test_a_longer_time_scale_saturates_later(self) -> None:
+        core = _core(_saturating(FLAT, {"leisure": 2.0}))
+        a = _agent(0, "passenger", ["Free"] * 24, LOUNGE)
+        a.dwell_epochs = 3
+        short, long = (core._saturated_visit_contacts(a, 3.0, t) for t in (0.5, 4.0))
+        assert short < long
+
+    def test_a_saturated_visit_draws_no_more_than_a_constant_rate(self) -> None:
+        flat = _core(_block(dict(FLAT, leisure=4.0)))
+        sat = _core(_saturating(dict(FLAT, leisure=4.0), {"leisure": 1.0}))
+        room_a, room_b = _room(LOUNGE, "Free", n=200), _room(LOUNGE, "Free", n=200)
+        flat_draws = _draws(_dwelling_rows(flat, room_a, epochs=6))
+        sat_draws = _draws(_dwelling_rows(sat, room_b, epochs=6))
+        assert len(flat_draws) == len(sat_draws) == 6
+        assert sum(sat_draws) < sum(flat_draws)
+
+    def test_the_saturated_draw_grades_with_the_dwell(self) -> None:
+        rates = dict(FLAT, leisure=6.0)
+        means = []
+        for dwelt in (0, 2, 8):
+            core = _core(_saturating(rates, {"leisure": 1.0}))
+            room = _room(LOUNGE, "Free", n=100)
+            room[0].dwell_epochs = dwelt
+            means.append(np.mean(_draws(_rows(core, room, epochs=120))))
+        assert means[0] > means[1] > means[2]
+
+    def test_a_time_scale_for_another_activity_leaves_this_draw_unchanged(self) -> None:
+        a = _rows(_core(_block(FLAT)), _room(LOUNGE, "Free", n=40), epochs=40)
+        b = _rows(_core(_saturating(FLAT, {"work_service": 0.5})), _room(LOUNGE, "Free", n=40), epochs=40)
+        assert a == b
+
+    def test_the_draw_stays_a_non_negative_integer_within_the_pool(self) -> None:
+        core = _core(_saturating(dict(FLAT, leisure=12.0), {"leisure": 0.25}))
+        for r in _dwelling_rows(core, _room(LOUNGE, "Free", n=8), epochs=30):
+            assert isinstance(r["r0_draw"], int)
+            assert r["r0_draw"] >= 0
+            assert 0 <= r["n_contacts"] <= min(r["r0_draw"], 7)
+
+
+class TestTheEngineRecordsTheDwell:
+    def _engine(self) -> KorkinShipEngine:
+        cfg = {"ship_graph": {
+            "spatial_layout": "data/platforms/expedition_cruise_450/spatial_layout.json",
+        }}
+        zones = load_spatial_layout(cfg)
+        assert zones is not None
+        return KorkinShipEngine(
+            num_passengers=60, num_crew=30, initial_infected=0,
+            zones=zones, seed=11,
+            clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        )
+
+    def test_a_new_agent_has_not_dwelt_anywhere(self) -> None:
+        assert _agent(1, "passenger", ["Free"] * 24, LOUNGE).dwell_epochs == 0
+
+    def test_the_dwell_counts_consecutive_epochs_of_the_same_placement(self) -> None:
+        engine = self._engine()
+        engine.step()
+        assert all(a.dwell_epochs == 0 for a in engine.agents)
+        before = {a.agent_id: (a.current_activity, a.current_location, a.dwell_epochs) for a in engine.agents}
+        longest = 0
+        for _ in range(47):
+            engine.step()
+            for a in engine.agents:
+                token, where, dwelt = before[a.agent_id]
+                if (a.current_activity, a.current_location) == (token, where):
+                    assert a.dwell_epochs == dwelt + 1
+                else:
+                    assert a.dwell_epochs == 0
+                longest = max(longest, a.dwell_epochs)
+            before = {a.agent_id: (a.current_activity, a.current_location, a.dwell_epochs) for a in engine.agents}
+        assert longest >= 2
+        assert longest < 24
+
+
 ARM = ",".join(f"{a}={r}" for a, r in zip(
     CONTACT_ACTIVITIES, (0.3, 0.2, 3.5, 1.5, 3.0, 3.0, 2.0, 0.5), strict=True,
 ))
