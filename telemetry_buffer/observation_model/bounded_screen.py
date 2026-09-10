@@ -551,6 +551,10 @@ def build_run_spec(
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
     contact_class_exponent: float = 0.0,
+    near_field_retained_fraction: float = 0.0,
+    near_field_neighbour_table_ratio: float = 0.0,
+    near_field_cabin_berth_volume_m3: float | None = None,
+    near_field_table_seat_volume_m3: float | None = None,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -590,6 +594,21 @@ def build_run_spec(
                 "contact_class_exponent": float(contact_class_exponent),
             }},
         )
+    if near_field_retained_fraction:
+        # AERO-NEAR-01: kappa is an arm, and the two volumes are the geometry
+        # the arm declares. kappa 0 writes nothing, so that arm is the
+        # pre-change well-mixed spec and the matched control.
+        _merge_run_overrides(
+            config_overrides,
+            {"transmission": {"near_field_air": {
+                "retained_fraction": float(near_field_retained_fraction),
+                "neighbour_table_ratio": float(
+                    near_field_neighbour_table_ratio,
+                ),
+                "cabin_berth_volume_m3": near_field_cabin_berth_volume_m3,
+                "table_seat_volume_m3": near_field_table_seat_volume_m3,
+            }}},
+        )
     return {
         "schema_version": "1.0.0",
         "description": description,
@@ -623,6 +642,10 @@ def run_point(
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
     contact_class_exponent: float = 0.0,
+    near_field_retained_fraction: float = 0.0,
+    near_field_neighbour_table_ratio: float = 0.0,
+    near_field_cabin_berth_volume_m3: float | None = None,
+    near_field_table_seat_volume_m3: float | None = None,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
     spec = build_run_spec(
@@ -639,6 +662,10 @@ def run_point(
         crew_duty_exclusion=crew_duty_exclusion,
         service_surface_knockout=service_surface_knockout,
         contact_class_exponent=contact_class_exponent,
+        near_field_retained_fraction=near_field_retained_fraction,
+        near_field_neighbour_table_ratio=near_field_neighbour_table_ratio,
+        near_field_cabin_berth_volume_m3=near_field_cabin_berth_volume_m3,
+        near_field_table_seat_volume_m3=near_field_table_seat_volume_m3,
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"

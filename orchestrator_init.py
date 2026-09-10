@@ -229,11 +229,17 @@ def assign_dining_parties(
     booking shares a table as fixed seating does. Table size is the venue's
     ``dining_table_size`` or ``DEFAULT_DINING_TABLE_SIZE``; the last table of
     a sitting takes the remainder. Deterministic: no random draw.
+
+    ``dining_table_index`` records the order a table was dealt in, which is the
+    venue's adjacency declaration: consecutive tables are neighbours, which is
+    the second ring the near-field air route (AERO-NEAR-01) reads. It stays -1
+    for anyone without a seat.
     """
     table_size_by_zone = _table_size_by_zone(zones)
     sittings: dict[tuple[str, int], list[KorkinAgent]] = defaultdict(list)
     for agent in agents:
         agent.dining_party_ids = frozenset()
+        agent.dining_table_index = -1
         if agent.dining_zone in table_size_by_zone:
             sittings[(agent.dining_zone, agent.meal_seating)].append(agent)
 
@@ -245,6 +251,7 @@ def assign_dining_parties(
             table_ids = {a.agent_id for a in table}
             for agent in table:
                 agent.dining_party_ids = frozenset(table_ids - {agent.agent_id})
+                agent.dining_table_index = i // size
 
 
 def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
