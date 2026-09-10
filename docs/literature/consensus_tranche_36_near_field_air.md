@@ -1,7 +1,7 @@
 # Tranche 36 — the near field is a two-ring seating structure and a shared bedroom, both bounded by measurement; its effective volume is measured nowhere
 
 **Register rows fed / supersession.** Runs §6 of
-[`../proposals/near_field_air_spec.md`](../proposals/near_field_air_spec.md)
+[`../near_field_air_spec.md`](../near_field_air_spec.md)
 (`AERO-NEAR-01`) and feeds the open ledger's §4 item 16. It **supersedes
 nothing** and **withdraws no measurement**. It moves no constant, and it adopts
 none: the near-field structure it licenses is topology, and the one magnitude
@@ -11,6 +11,11 @@ geometry with a swept exchange axis.
 
 **Status:** Evidence assembled and interpreted. Nothing implemented in this
 tranche; `CONTACT-SCALE-01` is unblocked by it, not decided by it.
+`AERO-NEAR-01` has since landed on the structure licensed here, off by default
+and with no magnitude adopted — the two rings became `retained_fraction` and
+`neighbour_table_ratio` as swept axes over declared geometry, and question 4's
+null kept `norwalk_gi` out of the continuous near field
+([`../near_field_air_spec.md`](../near_field_air_spec.md) §10).
 
 **Source discipline.** The Consensus MCP account is **exhausted for the
 period** ("You've used all 500 included searches this month; resets on

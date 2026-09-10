@@ -659,7 +659,7 @@ class KorkinAgent:
         # incoming dose, by route, and which measures reached it
         "dose_reduction_multipliers", "npi_measures",
         "shedding_multiplier", "cabin_mate_ids", "ashore", "meal_seating",
-        "dining_party_ids",
+        "dining_party_ids", "dining_table_index",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
@@ -769,6 +769,11 @@ class KorkinAgent:
         # empty in a venue whose service is not seated at a fixed table (a
         # buffet) and for anyone with no seat there (staff on shift).
         self.dining_party_ids: frozenset[int] = frozenset()
+        # Which table of its sitting this host is seated at, counted from the
+        # order the venue's diners are dealt, and -1 where it has no seat.
+        # Declared adjacency, not a distance: consecutive indices are the
+        # neighbouring tables the dining record's second ring is measured over.
+        self.dining_table_index: int = -1
         # Voyage layer: passenger ashore during port/disembark windows
         self.ashore: bool = False
 
@@ -1602,6 +1607,8 @@ class KorkinAgent:
             result["cabin_mate_ids"] = sorted(self.cabin_mate_ids)
         if self.dining_party_ids:
             result["dining_party_ids"] = sorted(self.dining_party_ids)
+        if self.dining_table_index >= 0:
+            result["dining_table_index"] = self.dining_table_index
         return result
 
 

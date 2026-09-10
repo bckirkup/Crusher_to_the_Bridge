@@ -181,6 +181,13 @@ class Design:
     # arm of a sweep. 0.0 is the pre-change kernel and the matched control;
     # a design carries it so arms differ in this field alone.
     contact_class_exponent: float = 0.0
+    # AERO-NEAR-01: the near-field air arm. kappa 0.0 is the well-mixed route
+    # and the matched control; above 0 the two volumes are declared geometry
+    # the arm must carry, because no measurement of either exists (tranche 36).
+    near_field_retained_fraction: float = 0.0
+    near_field_neighbour_table_ratio: float = 0.0
+    near_field_cabin_berth_volume_m3: float | None = None
+    near_field_table_seat_volume_m3: float | None = None
     # Which box the design's coordinates are coordinates *of*. Carried here
     # rather than passed alongside because every work unit already carries a
     # design: a shard that resolved its own factor list could sample a
@@ -211,6 +218,16 @@ class Design:
             "crew_duty_exclusion": self.crew_duty_exclusion,
             "service_surface_knockout": self.service_surface_knockout,
             "contact_class_exponent": self.contact_class_exponent,
+            "near_field_retained_fraction": self.near_field_retained_fraction,
+            "near_field_neighbour_table_ratio": (
+                self.near_field_neighbour_table_ratio
+            ),
+            "near_field_cabin_berth_volume_m3": (
+                self.near_field_cabin_berth_volume_m3
+            ),
+            "near_field_table_seat_volume_m3": (
+                self.near_field_table_seat_volume_m3
+            ),
         }
 
 
@@ -1263,6 +1280,46 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--near-field-retained-fraction",
+        type=float,
+        default=0.0,
+        help=(
+            "AERO-NEAR-01: kappa, the share of a near-field partner's aerosol "
+            "breathed at the shared unit's volume rather than the room's. "
+            "0 (default) is the well-mixed route and the matched control; "
+            "above 0 both near-field volumes must be declared"
+        ),
+    )
+    parser.add_argument(
+        "--near-field-neighbour-table-ratio",
+        type=float,
+        default=0.0,
+        help=(
+            "AERO-NEAR-01: rho, the near-field exposure at a neighbouring "
+            "table relative to the diner's own table; keeps the ordering "
+            "same table >= neighbour >= far for any value in [0, 1]"
+        ),
+    )
+    parser.add_argument(
+        "--near-field-cabin-berth-volume-m3",
+        type=float,
+        default=None,
+        help=(
+            "AERO-NEAR-01: declared near-field air volume per berth in a "
+            "stateroom. No measurement of this quantity exists (tranche 36), "
+            "so a run that turns the near field on must state it"
+        ),
+    )
+    parser.add_argument(
+        "--near-field-table-seat-volume-m3",
+        type=float,
+        default=None,
+        help=(
+            "AERO-NEAR-01: declared near-field air volume per seat at a "
+            "dining table, stated for the same reason as the berth volume"
+        ),
+    )
+    parser.add_argument(
         "--factor-set",
         default="norovirus",
         choices=sorted(FACTOR_SETS),
@@ -1342,6 +1399,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         crew_duty_exclusion=args.crew_duty_exclusion,
         service_surface_knockout=args.service_surface_knockout,
         contact_class_exponent=args.contact_class_exponent,
+        near_field_retained_fraction=args.near_field_retained_fraction,
+        near_field_neighbour_table_ratio=args.near_field_neighbour_table_ratio,
+        near_field_cabin_berth_volume_m3=args.near_field_cabin_berth_volume_m3,
+        near_field_table_seat_volume_m3=args.near_field_table_seat_volume_m3,
         factor_set=args.factor_set,
     )
     factors = design.factors

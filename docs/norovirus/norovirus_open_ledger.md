@@ -476,6 +476,34 @@ effect. This says nothing about the continuous box, about other hull classes
 frequent), or about a `φ` that differs by pool type, which Shirreff's
 pair-specific exponents would license and this sweep did not vary.
 
+**`AERO-NEAR-01` gives the air route a sub-room compartment, and gives this arm
+nothing.** The short-range inhalation route now has a near field over the
+co-located unit — the cabin at night, the table party at a meal, adjacent tables
+as the second ring — added to the unchanged zone-well-mixed far field:
+`κ · w · m · (1/V_unit − 1/V_zone)` per near partner, where `m` is the aerosol
+mass that partner already emits into the same pool. No emission is created (the
+zone pool keeps the whole mass, the near field being nested inside the far field
+and draining into it), the term vanishes when the declared unit is not smaller
+than the room, and `retained_fraction = 0` or an absent block is the pre-change
+route on the same code path. Geometry is **declared** (a per-berth and a per-seat
+volume the run must state when it turns the near field on; a run that turns it
+on without them is a load error) and both magnitudes — `κ` and the neighbouring
+table's ratio `ρ`, whose ordering envelope is Li 2021's CFD column — are
+**declared swept axes with no adopted value**, because tranche 36 returned ∅ on
+the near-field volume and exchange rate for a table or a bedroom. Adjacency is a
+declaration, not a distance kernel: tables are dealt in consecutive slices of a
+sitting and consecutive indices are the neighbour pair, so there is no third
+ring. The cabin's four convergent ×3–4.5 estimates stay the post-repair check
+they were, not a multiplier.
+
+**Nothing in §2 or §3 of this file moves.** The near field admits only arms with
+*continuous* airborne emission, and `norwalk_gi` is `emesis_conditioned` because
+the record supports no continuous respiratory norovirus emission (§4 item 16).
+So a norovirus sweep over `κ` is a **null by construction** — not a measurement
+— and this change is measurable on the `sars_cov2_resp` arm, whose restaurant
+record is the out-of-sample structural check. The norovirus half of the defect
+is the **emesis** pool's near field, which is still outstanding.
+
 **Every screen and gate result to date belongs to no ship class, before
 `COMPLEMENT-01` (history §9m).** They ran `mega_cruise_5000` — a hull declaring
 5,000 passengers and 2,000 crew — with `num_agents = 450`, i.e. 316 passengers
@@ -1796,7 +1824,7 @@ Roughly in dependency order.
     cannot produce. The requirement is filed pathogen-general, with the
     seating declarations (`meal_seatings`, occupancy bound,
     `dining_table_size`, table adjacency) as operator levers:
-    [`../proposals/near_field_air_spec.md`](../proposals/near_field_air_spec.md).
+    [`../near_field_air_spec.md`](../near_field_air_spec.md).
     Off by default and bit-identical when off; sourcing precedes any value; no
     constant here is chosen against a scored quantity.
 
@@ -1831,6 +1859,18 @@ Roughly in dependency order.
     review lists as unresolved remain **absent and unlicensed**: toilet-flush
     aerosol (which would attach to the cabin toilet `BERTH-01` already
     compartmented) and diarrhoea-associated aerosolisation.
+
+    **Implemented, off by default, and a null for this arm by construction.**
+    `transmission.near_field_air` landed (§1 of this file; the spec's §10 is
+    what shipped): the cabin and the table are near-field units, adjacent
+    tables are the second ring, geometry is declared and the retained fraction
+    is a swept axis with no adopted value. It admits only *continuously*
+    emitting arms, so `norwalk_gi` — `emesis_conditioned` on the strength of
+    the null above — takes no near field, and no norovirus figure in this file
+    moves. **What remains outstanding for this arm is the emesis pool's own
+    near field**: the episodic term over whoever shares air with a vomiting
+    host, with Marks 2000's by-table gradient as its out-of-sample check. Until
+    that lands, the norovirus inhalation route is still zone-well-mixed.
 
 ## 5. Held fixed by assumption
 
