@@ -636,7 +636,7 @@ class KorkinAgent:
         "infection_status", "illness_status",
         "time_infected", "acquired_particles",
         "home_zone", "dining_zone", "work_zone", "free_zone",
-        "current_location", "current_activity", "schedule",
+        "current_location", "current_activity", "dwell_epochs", "schedule",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "secretor_negative_by_pathogen",
@@ -707,6 +707,10 @@ class KorkinAgent:
         # agent's activity reads the hour it was placed for, not an hour it
         # re-derives from an epoch counter of its own. Empty until placed.
         self.current_activity: str = ""
+        # Whole epochs this agent has already spent in the same place doing
+        # the same thing before the current one: 0 on arrival, so a visit's
+        # dwell time is ``dwell_epochs`` epochs at the start of an epoch.
+        self.dwell_epochs: int = 0
         self.schedule = list(schedule)
         # Which of the dining venue's successive cohorts this agent eats with.
         self.meal_seating: int = 0
@@ -2142,6 +2146,24 @@ class KorkinShipEngine:
         if self.rng.random() < ill_prob:
             agent.illness_status = IllnessStatus.SYMPTOMATIC
 
+    def _record_dwell(
+        self,
+        placed_before: dict[int, tuple[str, str]],
+    ) -> None:
+        """Count how long each agent has been where it now is, doing what it does.
+
+        An agent placed by the same token in the same location as last epoch
+        has dwelt one epoch longer; any change of either starts a new visit at
+        zero. Read by ``TransmissionCore`` for the dwell-saturating contact
+        draw (CONTACT-ARCH-02).
+        """
+        for agent in self.agents:
+            now = (agent.current_activity, agent.current_location)
+            if placed_before.get(agent.agent_id) == now:
+                agent.dwell_epochs += 1
+            else:
+                agent.dwell_epochs = 0
+
     def step(self) -> dict[str, Any]:
         """Advance the simulation by one epoch.
 
@@ -2188,6 +2210,10 @@ class KorkinShipEngine:
         # 1. Update agent locations. The token is recorded beside the location
         # so a downstream reader of "what is this agent doing" sees the token
         # that placed it, on the same hour, whatever epoch counter it holds.
+        placed_before = {
+            agent.agent_id: (agent.current_activity, agent.current_location)
+            for agent in self.agents
+        }
         for agent in self.agents:
             agent.current_activity = agent.scheduled_token(hour)
             if getattr(agent, "ashore", False):
@@ -2219,6 +2245,7 @@ class KorkinShipEngine:
                 rng=self.rng,
                 dining_catalog=self._dining_catalog,
             )
+        self._record_dwell(placed_before)
 
         # 2. Infection transmission
         # When TransmissionCore is active (_external_transmission=True),

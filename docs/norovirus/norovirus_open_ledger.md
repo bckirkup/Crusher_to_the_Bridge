@@ -2001,6 +2001,27 @@ Roughly in dependency order.
     quoted against post-repair runs. Nothing was re-run to make a number come
     out; nothing is retuned here.**
 
+19. **`CONTACT-ARCH-02`: a visit's contacts saturate with dwell, when a run
+    declares so; nothing runs under it yet.** Item 17 (d) is implemented, off
+    unless declared, and reads `contact_architecture_spec.md` §3a. The engine
+    counts, per agent, the consecutive epochs it has been placed by the same
+    token in the same room (`KorkinAgent.dwell_epochs`; any change of token,
+    room or override starts a visit at zero), and an optional
+    `activity_contacts.saturation_hours` map declares a time-scale `tau` per
+    activity: cumulative contacts over a visit of `t` hours are
+    `rate * tau * (1 - exp(-t / tau))`, so the declared per-hour rate is the
+    initial slope and `rate * tau` the plateau. An activity with no `tau`
+    keeps the constant-rate CONTACT-ARCH-01 arithmetic and RNG exactly; absent
+    or disabled `activity_contacts` keeps the uniform 13.4 control. Provenance:
+    Pung licenses the *form* (F&B plateau after about an hour; sports still
+    rising at two hours) and no magnitude; `tau` is a declared swept axis with
+    a `(0, 24]` h refusal band, and the spec forbids choosing it by the §6
+    total, Pung's 20/10, A5 or a posting rate. Consequence for the record: the
+    item 17 readout stands as a constant-rate result and is not reinterpreted;
+    the upper-corner declaration error it recorded is now *readable* under a
+    declared `tau` sweep, which is the matched reprise item 18 already
+    requires. No rate, `tau` or kernel adopted.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

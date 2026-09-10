@@ -119,6 +119,52 @@ Rules, enforced at load:
 - The block is read only under `per_partner_contact`; a run that enables it
   under any other `contact_mode` is refused at load.
 
+### 3a. Dwell saturation (`CONTACT-ARCH-02`)
+
+The per-hour rates in §4 are measured over short dwells (Pung Fig. 2a: an F&B
+visit's close contacts plateau after ≥ 1 h; Fig. 2c: sports ~2 at 30–60 min,
+~4 at ≥ 2 h). Applied as a constant to every hour of a ten-hour shift or a
+four-hour leisure block they over-count by construction (§8a). The block may
+therefore declare, per activity, a saturation time-scale `tau` in hours:
+
+```yaml
+  activity_contacts:
+    enabled: true
+    rates_per_hour: {...}          # as above
+    saturation_hours:              # optional, partial
+      leisure: 2.0
+      work_service: 4.0
+      dining_venue: 1.0
+```
+
+The expected *cumulative* new contacts over a visit of `t` hours are
+`rate * tau * (1 - exp(-t / tau))`: the declared rate is the initial slope and
+`rate * tau` is the per-visit plateau. Each epoch's draw is Poisson on that
+curve's increment over the hours the epoch spans, from the dwell the engine has
+recorded. Rules, enforced at load:
+
+- A visit is a run of consecutive epochs in which the engine placed the host
+  by the same schedule token in the same location (`KorkinAgent.dwell_epochs`,
+  counted by the engine after placement and after the embarkation surge).
+  Any change of token *or* room starts a new visit; so does an ashore,
+  isolation or quarantine override, and the return from one.
+- `saturation_hours` is optional and partial: an activity not named accrues at
+  the constant per-hour rate, which is the `tau → ∞` limit and the
+  `CONTACT-ARCH-01` path bit for bit (same arithmetic, same RNG).
+- Each `tau` is finite in `(0, 24]` hours — a refusal band, not an interval;
+  a visit cannot outlast a day of schedule.
+- The block is refused under the legacy day-long epoch: a visit cannot be
+  timed on a 24-hour step.
+- **No `tau` is measured for any setting.** Pung licenses the *form*
+  (plateau after about an hour in F&B; still rising at two hours in sports)
+  and nothing more; every `tau` is a declared swept axis. In particular no
+  `tau` may be chosen because the §6 daily total, Pung's 20/10, the A5 ratio
+  or any posting rate comes out right under it.
+- With one-hour sittings (`SEAT-02`) a `dining_table` / `dining_venue` visit
+  is one epoch long, so `tau` there changes the sitting's draw only through
+  `tau * (1 - exp(-1/tau))`, and the multi-hour activities (`work_*`,
+  `leisure`, `cabin`) are where saturation does its work.
+
 ## 4. What is sourced, and how it should be swept
 
 From tranche 37, per activity — each a declared interval, midpoint stated,
@@ -173,11 +219,9 @@ different grid and a later campaign if the bracket resolves anything.
   hallway residuals, φ, or any dose term. The `direct_contact` partner still
   receives the partner's full per-epoch shedding; the register's grading of
   that semantics stands.
-- It does not implement per-visit saturation. With one-hour seat-turns
-  (`SEAT-02`) the dining visit *is* an hour, so the per-hour rate and the
-  per-visit plateau coincide there; leisure blocks of two to four `Free` hours
-  do not saturate under a constant per-hour rate. A dwell-tracking saturating
-  form is `CONTACT-ARCH-02` if the first readout shows it matters.
+- Per-visit saturation is opt-in (§3a, `CONTACT-ARCH-02`). A run that
+  declares no `saturation_hours` applies the per-hour rate to every dwell hour,
+  exactly as the first campaign (§8) did.
 - It does not touch `density_dependent`, `heterogeneous_zone_dose` or
   `legacy`.
 
@@ -267,9 +311,10 @@ The failure is structural, not a magnitude to retune: the §4 rates are per-hour
 figures measured over short dwells (Pung's F&B plateau is *per visit* after
 ≥ 1 h), applied here to every resolved hour of a ten-hour work day and a
 multi-hour leisure block with no saturation. That is `CONTACT-ARCH-02`
-(dwell-tracking saturation), and it is now the prerequisite for reading the
-upper corners of this box at all — not a licence to lower the rates until a
-total matches.
+(dwell-tracking saturation, now implemented as §3a and off unless declared),
+and it is the prerequisite for reading the upper corners of this box at all —
+not a licence to lower the rates until a total matches. Nothing has run under
+it yet.
 
 Night share (§6.2) is 8.0% passenger / 11.9% crew at the midpoint against
 Vanhems's 5.9% — the same absent saturation, since `Sleep` hours are capped

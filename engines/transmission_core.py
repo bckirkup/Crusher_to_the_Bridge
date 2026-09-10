@@ -431,6 +431,18 @@ CONTACT_ACTIVITIES: tuple[str, ...] = (
 CONTACT_RATE_PER_HOUR_BOUNDS = (0.0, 30.0)
 CONTACT_RATE_ROLES: tuple[str, ...] = ("passenger", "crew")
 
+# CONTACT-ARCH-02: a visit's contacts saturate with dwell time. The per-hour
+# rates above are measured over short dwells (Pung Fig. 2a: an F&B visit's
+# close contacts plateau after >= 1 h), so a run may declare, per activity, a
+# saturation time-scale tau in hours: the expected new contacts over a dwell
+# of t hours is rate * tau * (1 - exp(-t / tau)), whose initial slope is the
+# declared rate and whose plateau is rate * tau. An activity with no tau
+# declared accrues at the constant rate, which is the tau -> infinity limit
+# and the CONTACT-ARCH-01 path bit for bit. No tau is measured for any
+# setting; each is a declared swept axis. Refusal band, not an interval: a
+# visit cannot outlast a day of schedule.
+CONTACT_SATURATION_HOURS_BOUNDS = (0.0, HOURS_PER_DAY)
+
 # Defaults for density_dependent contact_mode (partial overrides merge onto these)
 DEFAULT_DENSITY_CFG: dict[str, float] = {
     "reference_occupancy": 50.0,
@@ -1003,6 +1015,40 @@ def _parse_contact_rate(activity: str, raw: Any) -> dict[str, float]:
     return out
 
 
+def _parse_activity_saturation(block: Mapping[str, Any]) -> dict[str, float]:
+    """Read ``activity_contacts.saturation_hours`` (CONTACT-ARCH-02).
+
+    Optional and partial: only the activities named saturate; each value is
+    a finite time-scale in hours inside ``CONTACT_SATURATION_HOURS_BOUNDS``,
+    exclusive at zero. Absent, no activity saturates.
+    """
+    raw = block.get("saturation_hours")
+    if raw is None:
+        return {}
+    key = "transmission.activity_contacts.saturation_hours"
+    if not isinstance(raw, Mapping):
+        raise ValueError(f"{key} must be a mapping over activities")
+    unknown = [a for a in raw if a not in CONTACT_ACTIVITIES]
+    if unknown:
+        raise ValueError(f"{key} names unknown activities {unknown}")
+    low, high = CONTACT_SATURATION_HOURS_BOUNDS
+    out: dict[str, float] = {}
+    for activity, value in raw.items():
+        try:
+            tau = float(value)
+        except (TypeError, ValueError) as exc:
+            raise ValueError(
+                f"{key}.{activity} must be a number of hours, got {value!r}",
+            ) from exc
+        if not math.isfinite(tau) or not low < tau <= high:
+            raise ValueError(
+                f"{key}.{activity} must be finite in ({low}, {high}] hours, "
+                f"got {value!r}",
+            )
+        out[str(activity)] = tau
+    return out
+
+
 def _parse_activity_contacts(tx: dict[str, Any]) -> dict[str, dict[str, float]] | None:
     """Read ``transmission.activity_contacts`` (CONTACT-ARCH-01), or None.
 
@@ -1290,6 +1336,19 @@ class TransmissionCore:
         self.activity_contacts = _parse_activity_contacts(
             (cfg or {}).get("transmission", {}) or {},
         )
+        self.activity_saturation_hours: dict[str, float] = (
+            _parse_activity_saturation(
+                ((cfg or {}).get("transmission", {}) or {}).get(
+                    "activity_contacts", {},
+                ) or {},
+            )
+            if self.activity_contacts is not None else {}
+        )
+        if self.activity_saturation_hours and self.clock.mode == LEGACY_EPOCH_DAY:
+            raise ValueError(
+                "transmission.activity_contacts.saturation_hours needs an "
+                "hourly clock: a visit cannot be timed on a day-long epoch",
+            )
         self.near_field_air = _parse_near_field_air(
             (cfg or {}).get("transmission", {}) or {},
         )
@@ -3501,11 +3560,34 @@ class TransmissionCore:
                 f"activity {activity!r}",
             )
         per_hour = by_role[target.role]
-        mean = self.clock.amount_per_epoch(per_hour * HOURS_PER_DAY)
+        tau = self.activity_saturation_hours.get(activity)
+        if tau is None:
+            mean = self.clock.amount_per_epoch(per_hour * HOURS_PER_DAY)
+        else:
+            mean = self._saturated_visit_contacts(target, per_hour, tau)
         mean *= float(self.voyage_contact_multiplier)
         if mean <= 0.0:
             return 0
         return max(0, int(self.rng.poisson(mean)))
+
+    def _saturated_visit_contacts(
+        self,
+        target: KorkinAgent,
+        per_hour: float,
+        tau: float,
+    ) -> float:
+        """Expected new contacts this epoch, *tau* hours into saturation.
+
+        Cumulative contacts over a visit of ``t`` hours are
+        ``per_hour * tau * (1 - exp(-t / tau))``; this epoch's share is that
+        curve's increment over the hours the epoch spans, from the dwell the
+        engine has recorded for the target (CONTACT-ARCH-02).
+        """
+        dwelt = self.clock.hours_elapsed(getattr(target, "dwell_epochs", 0))
+        span = self.clock.hours_per_epoch
+        return per_hour * tau * (
+            math.exp(-dwelt / tau) - math.exp(-(dwelt + span) / tau)
+        )
 
     def _draw_contact_multiplier(
         self,
