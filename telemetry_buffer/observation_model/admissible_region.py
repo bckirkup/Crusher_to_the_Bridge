@@ -195,6 +195,10 @@ class Design:
     # on purpose: a role split is a second arm, declared separately, so that a
     # crew:passenger difference this arm produces comes from the schedule.
     activity_contacts: tuple[tuple[str, float], ...] | None = None
+    # CONTACT-ARCH-02: the dwell-saturation arm, (activity, tau hours) pairs
+    # for the activities that saturate; the rest keep the constant rate. Only
+    # meaningful beside an activity arm, and ``None`` is that arm unsaturated.
+    activity_saturation_hours: tuple[tuple[str, float], ...] | None = None
     # Which box the design's coordinates are coordinates *of*. Carried here
     # rather than passed alongside because every work unit already carries a
     # design: a shard that resolved its own factor list could sample a
@@ -239,6 +243,10 @@ class Design:
                 None if self.activity_contacts is None
                 else dict(self.activity_contacts)
             ),
+            "activity_saturation_hours": (
+                None if self.activity_saturation_hours is None
+                else dict(self.activity_saturation_hours)
+            ),
         }
 
 
@@ -272,6 +280,42 @@ def parse_activity_contacts(
             f"activity contacts must declare every activity; missing {missing}",
         )
     return tuple((activity, rates[activity]) for activity in CONTACT_ACTIVITIES)
+
+
+def parse_activity_saturation(
+    text: str | None,
+    activity_contacts: tuple[tuple[str, float], ...] | None,
+) -> tuple[tuple[str, float], ...] | None:
+    """Read a saturation arm from ``activity=tau,...``; empty is unsaturated.
+
+    Partial by design: an activity left out keeps CONTACT-ARCH-01's constant
+    rate, so the arm states exactly the visits it saturates. It needs an
+    activity arm to saturate -- the uniform control has no per-activity rate
+    for a ``tau`` to apply to -- and the bounds on ``tau`` are the engine's.
+    """
+    if text is None or not text.strip():
+        return None
+    if activity_contacts is None:
+        raise ValueError(
+            "activity saturation hours need an activity arm: the uniform "
+            "control has no per-activity rate to saturate",
+        )
+    taus: dict[str, float] = {}
+    for item in text.split(","):
+        activity, sep, value = item.partition("=")
+        activity = activity.strip()
+        if not sep or activity not in CONTACT_ACTIVITIES:
+            raise ValueError(
+                f"activity saturation entry {item.strip()!r} is not "
+                f"'<activity>=<hours>' for an activity in {CONTACT_ACTIVITIES}",
+            )
+        if activity in taus:
+            raise ValueError(f"activity {activity!r} is declared twice")
+        taus[activity] = float(value)
+    return tuple(
+        (activity, taus[activity])
+        for activity in CONTACT_ACTIVITIES if activity in taus
+    )
 
 
 def _design_factors(
@@ -1374,6 +1418,16 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
+        "--activity-saturation-hours",
+        default=None,
+        help=(
+            "CONTACT-ARCH-02: the dwell-saturation arm, as 'activity=tau,...' "
+            "in hours for the activities that saturate (the rest keep their "
+            "constant rate). Needs --activity-contacts. Absent (default) is "
+            "the activity arm unsaturated, as the first campaign ran it"
+        ),
+    )
+    parser.add_argument(
         "--factor-set",
         default="norovirus",
         choices=sorted(FACTOR_SETS),
@@ -1442,6 +1496,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     # Resolved before the grid runs: an unwritable destination is a typo, and
     # discovering it after the last Sobol' point discards the whole run.
     out = _validated_cli_path(args.out, REPO_ROOT)
+    activity_contacts = parse_activity_contacts(args.activity_contacts)
     design = Design(
         pathogen_id=args.pathogen_id,
         bundle=args.bundle,
@@ -1457,7 +1512,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         near_field_neighbour_table_ratio=args.near_field_neighbour_table_ratio,
         near_field_cabin_berth_volume_m3=args.near_field_cabin_berth_volume_m3,
         near_field_table_seat_volume_m3=args.near_field_table_seat_volume_m3,
-        activity_contacts=parse_activity_contacts(args.activity_contacts),
+        activity_contacts=activity_contacts,
+        activity_saturation_hours=parse_activity_saturation(
+            args.activity_saturation_hours, activity_contacts,
+        ),
         factor_set=args.factor_set,
     )
     factors = design.factors
