@@ -8,8 +8,9 @@
 > are swept axes with the provenance of
 > [tranche 37](literature/consensus_tranche_37_contact_architecture.md).
 > The block is a design arm of the bounded gate (`--activity-contacts`, §4a);
-> the first matched expedition campaign is submitted and its readout and the
-> §6 checks are to be recorded here before anything is read against them.
+> the first matched expedition campaign has run and is read out in §8, with the
+> §6 checks in §8a. **The interval box as declared is refused by its own §6
+> criterion above the low corner**, and no arm brings an anchor nearer.
 
 ## 1. The defect
 
@@ -201,3 +202,86 @@ Out-of-sample, **not targets**:
   a non-`per_partner_contact` mode are refused with a message naming the key.
 - Graded sensitivity: raising one activity's rate raises the expected draw in
   that activity's units and nowhere else.
+
+## 8. The first campaign, measured
+
+Four matched expedition arms, image `bounded-design-v19`, job definition rev 19:
+the uniform control (`activity_contacts=off`) and the §4 interval lows,
+midpoints and highs, each over the same 13-factor `expedition_sensitivity` box
+(256 Sobol' points × 6 seeds, design seed 37, seed base 500), 1,536 voyages per
+arm, 16/16 shards each. The control is bit-identical to the `φ=0` arm of
+`CONTACT-SCALE-01` in 1,536/1,536 voyages, so the control is the shipped model
+and every difference below is the activity generator's.
+
+| Arm | postings | crew-only | pax inf AR | crew inf AR | A5 (inf) | Δ pax pp (se) | Δ crew pp (se) | flips off/on | sign p |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| control (13.4 uniform) | 221 (14.39%) | 8 | 6.213% | 2.651% | 2.344 | — | — | — | — |
+| low | 227 (14.78%) | 12 | 6.080% | 2.822% | 2.155 | −0.133 (0.097) | +0.171 (0.066) | 43 / 49 | 0.60 |
+| midpoint | 258 (16.80%) | 11 | 7.654% | 3.727% | 2.054 | +1.441 (0.117) | +1.077 (0.110) | 24 / 61 | 7×10⁻⁵ |
+| high | 273 (17.77%) | 12 | 8.424% | 4.172% | 2.019 | +2.211 (0.149) | +1.522 (0.132) | 18 / 70 | <10⁻⁶ |
+
+Read as a finite sample of the submitted design and seeds only:
+
+1. **The generator moves both arms, and the low corner is the null.** At the
+   interval lows the whole change is within error on passengers and +0.17 pp on
+   crew; the midpoint and high arms raise both roles monotonically, i.e. the
+   declared per-hour rates over the schedule's dwell hours exceed the uniform
+   13.4/day in aggregate (§8a).
+2. **No arm approaches an anchor.** A5 (infection) falls 2.344 → 2.019 across
+   the bracket, i.e. *away* from 4.3 in the direction tranche 37 predicted, and
+   postings rise 14.4% → 17.8% against the hull's observed 0.6–1.6%. Crew-only
+   postings stay 8–12 of 1,536. The crew excess is not produced by giving crew
+   a schedule-derived contact count: the crew arm rises, but the passenger arm
+   rises with it.
+3. **Nothing here selects a rate.** The bracket is three corners of an
+   eight-dimensional interval box; the monotone ordering is what a bracket can
+   show, and §8a's totals are the reason the box's upper corners are refused
+   rather than preferred.
+
+### 8a. The §6 checks
+
+Measured on a representative expedition point by instrumenting the resolved
+activity hours of every host over one seven-day voyage and summing each host's
+expected draw (`rate × hours`), then dividing by the number of pathogen profiles
+that invoke the person-to-person path:
+
+| Arm | passenger/day | crew/day | crew:passenger |
+|---|---:|---:|---:|
+| low | 13.7 | 20.0 | 1.46 |
+| midpoint | 36.7 | 42.0 | 1.14 |
+| high | 56.8 | 62.0 | 1.09 |
+
+Against §6: Pung's medians are 20 (passenger) and 10 (crew), Mossong's
+reference 13.4, and a total far outside 5–40 is *declared* a declaration error.
+By that pre-registered criterion the **high** arm fails on both roles and the
+**midpoint** fails on crew; only the low corner sits inside the band, and it
+lands on Mossong's reference for passengers without having been aimed at it.
+The failure is structural, not a magnitude to retune: the §4 rates are per-hour
+figures measured over short dwells (Pung's F&B plateau is *per visit* after
+≥ 1 h), applied here to every resolved hour of a ten-hour work day and a
+multi-hour leisure block with no saturation. That is `CONTACT-ARCH-02`
+(dwell-tracking saturation), and it is now the prerequisite for reading the
+upper corners of this box at all — not a licence to lower the rates until a
+total matches.
+
+Night share (§6.2) is 8.0% passenger / 11.9% crew at the midpoint against
+Vanhems's 5.9% — the same absent saturation, since `Sleep` hours are capped
+only by the cabin's 1–3 eligible mates. Passenger dining share (§6.3) is 28.6%
+at the midpoint against Pung's 71%: the schedule puts passengers in one
+sitting-hour a meal, so a per-hour dining rate cannot reach a share measured
+where dining is most of what a passenger does with company.
+
+The crew:passenger ratio is reported, not adjusted: 1.09–1.46 against Pung's
+0.5. It is inverted because the expedition schedule leaves crew ~4.5 h/day in
+`Dining` zones at the box's highest rates, which is what "derived from the
+architecture and operations" means on this hull.
+
+Two resolver observations recorded, not tuned:
+
+- a `Meal` token host waiting for its sitting is outside a `Dining` zone and so
+  resolves to `other` (~2 h/day), where the box declares 0 or the leisure
+  interval;
+- a crew member scheduled `Work` inside a `Dining` zone but not on food-handler
+  duty resolves to `dining_venue`, i.e. as a diner, because `_on_service_duty`
+  is the only duty signal the resolver has. Both are §2 consequences, and both
+  are candidates for a resolver change rather than a rate change.

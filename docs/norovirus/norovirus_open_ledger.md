@@ -563,8 +563,9 @@ the schedule and the architecture, which is the point; the §6 checks (per-role
 daily totals against 20/10 and 13.4, night share against 5.9%, dining share
 against 71%) are out-of-sample reports, never targets, and tranche 37's finding
 that instrumented crew made half the passengers' contacts means this change is
-expected, if anything, to move A5 *away* from 4.3. Nothing has run under it
-(§4 item 17). Invariants held by `tests/test_contact_architecture.py`: absent
+expected, if anything, to move A5 *away* from 4.3 — which the first matched
+campaign then did, 2.34 → 2.02 across the interval bracket, with the box's
+upper corners refused by the §6 totals (§4 item 17). Invariants held by `tests/test_contact_architecture.py`: absent
 and disabled run-identical; the control still draws the POLYMOD mean; every §2
 resolution rule; every refusal; a rising rate raises the draw in its own
 activity and nowhere else; `n_contacts ≤ r0_draw ≤` pool; partners distinct and
@@ -1938,24 +1939,38 @@ Roughly in dependency order.
     host, with Marks 2000's by-table gradient as its out-of-sample check. Until
     that lands, the norovirus inhalation route is still zone-well-mixed.
 
-17. **`CONTACT-ARCH-01`: implemented, off by default, campaign submitted,
-    unread.** The activity-derived contact generator (§1) is a design arm of
-    the bounded gate (`--activity-contacts`, one complete eight-rate scalar
+17. **`CONTACT-ARCH-01`: implemented, off by default, first campaign read;
+    the interval box is refused above its low corner by its own §6 check.**
+    The activity-derived contact generator (§1) is a design arm of the
+    bounded gate (`--activity-contacts`, one complete eight-rate scalar
     declaration; absent is the uniform control on its old RNG path; Batch
     parameter `activity_contacts`, `off` for the control —
-    `contact_architecture_spec.md` §4a). Done: (a) the arm. Submitted, not
-    read: (b) a matched expedition campaign with the uniform 13.4 arm as the
-    paired control and every role split held at 1 by construction, bracketing
-    the tranche-37 intervals of `contact_architecture_spec.md` §4 at their
-    lows, midpoints and highs (three corners of the eight-rate box, a finite
-    sample and reported as one). Outstanding: (c)
-    the §6 out-of-sample checks recorded in that document before A5 or the
-    posting rate is read, (d) a per-role `dining_venue` mapping as a second
-    arm only if the first resolves anything, and (e) `CONTACT-ARCH-02`, a
-    dwell-tracking saturating form, only if the readout shows that a constant
-    per-hour rate over multi-hour `Free` blocks matters. Every readout from
-    `BERTH-01` through `CONTACT-SCALE-01` is conditional on the uniform draw
-    and stands as recorded; none is re-run by this item.
+    `contact_architecture_spec.md` §4a). Done: (a) the arm; (b) the matched
+    expedition campaign (image v19, 4 arms × 1,536 voyages, uniform 13.4 as
+    paired control, role splits 1 by construction, tranche-37 interval lows /
+    midpoints / highs), read in `contact_architecture_spec.md` §8; (c) the §6
+    checks, §8a. Finite-sample findings: the control is bit-identical to the
+    φ=0 arm of `CONTACT-SCALE-01` in 1,536/1,536; the low corner is a null on
+    passengers (−0.13 pp, se 0.10) and +0.17 pp (se 0.07) on crew; the
+    midpoint and high corners raise **both** roles (pax +1.44 / +2.21 pp, crew
+    +1.08 / +1.52 pp), so A5 falls 2.34 → 2.02 (away from 4.3, as tranche 37
+    predicted) and postings rise 14.4% → 17.8% against 0.6–1.6%. The §6
+    per-role totals are 13.7/20.0 (low), 36.7/42.0 (mid), 56.8/62.0 (high)
+    passenger/crew per day: the high corner and the midpoint's crew are
+    outside the pre-registered 5–40 band, i.e. a **declaration error** —
+    per-hour rates measured over short dwells applied to every resolved hour
+    without saturation — not a magnitude to lower until a total matches.
+    Crew:passenger is 1.1–1.5 against Pung's 0.5 (reported, not adjusted; the
+    expedition schedule puts crew ~4.5 h/day in `Dining` zones); night share
+    8.0/11.9% against 5.9%; passenger dining share 28.6% against 71%. Two
+    resolver consequences recorded for a resolver change, not a rate change:
+    `Meal`-token hosts awaiting a sitting resolve to `other`; crew scheduled
+    `Work` in a `Dining` zone off food-handler duty resolve as diners.
+    Outstanding: (d) `CONTACT-ARCH-02`, a dwell-tracking saturating form, now
+    the prerequisite for reading the upper corners of the box at all; (e) a
+    per-role `dining_venue` mapping only after (d). No rate is adopted. Every
+    readout from `BERTH-01` through `CONTACT-SCALE-01` is conditional on the
+    uniform draw and stands as recorded; none is re-run by this item.
 
 ## 5. Held fixed by assumption
 
