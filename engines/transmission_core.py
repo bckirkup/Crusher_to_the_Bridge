@@ -3583,7 +3583,7 @@ class TransmissionCore:
         curve's increment over the hours the epoch spans, from the dwell the
         engine has recorded for the target (CONTACT-ARCH-02).
         """
-        dwelt = self.clock.hours_elapsed(getattr(target, "dwell_epochs", 0))
+        dwelt = self.clock.hours_elapsed(target.dwell_epochs)
         span = self.clock.hours_per_epoch
         return per_hour * tau * (
             math.exp(-dwelt / tau) - math.exp(-(dwelt + span) / tau)
