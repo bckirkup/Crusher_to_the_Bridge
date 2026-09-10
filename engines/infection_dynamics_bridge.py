@@ -636,7 +636,7 @@ class KorkinAgent:
         "infection_status", "illness_status",
         "time_infected", "acquired_particles",
         "home_zone", "dining_zone", "work_zone", "free_zone",
-        "current_location", "schedule",
+        "current_location", "current_activity", "schedule",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "secretor_negative_by_pathogen",
@@ -702,6 +702,11 @@ class KorkinAgent:
         self.work_zone = work_zone
         self.free_zone = free_zone
         self.current_location = home_zone
+        # The schedule token that placed this agent at ``current_location``,
+        # recorded by the engine at placement so that anything reading the
+        # agent's activity reads the hour it was placed for, not an hour it
+        # re-derives from an epoch counter of its own. Empty until placed.
+        self.current_activity: str = ""
         self.schedule = list(schedule)
         # Which of the dining venue's successive cohorts this agent eats with.
         self.meal_seating: int = 0
@@ -848,9 +853,7 @@ class KorkinAgent:
         Mirrors Agent.getProjectedDestination() in the Java source.
         Optional dining/free rotation uses engine RNG + zone catalog.
         """
-        adjusted_hour = int((hour + randomness + 24.0) % 24.0)
-        adjusted_hour %= len(self.schedule)
-        activity = self.schedule[adjusted_hour]
+        activity = self.scheduled_token(hour, randomness)
         if activity == "Sleep":
             return self.home_zone
         if activity.startswith("Meal"):
@@ -869,6 +872,13 @@ class KorkinAgent:
         if activity == "Work":
             return self.work_zone
         return self.home_zone
+
+    def scheduled_token(self, hour: int, randomness: float = 0.0) -> str:
+        """The schedule token that governs this agent at *hour* (with jitter)."""
+        if not self.schedule:
+            return ""
+        adjusted_hour = int((hour + randomness + 24.0) % 24.0)
+        return str(self.schedule[adjusted_hour % len(self.schedule)])
 
     def _meal_type_for_activity(self, activity: str) -> str:
         if "Breakfast" in activity:
@@ -2175,8 +2185,11 @@ class KorkinShipEngine:
         else:
             behavior = self.agent_behavior
 
-        # 1. Update agent locations
+        # 1. Update agent locations. The token is recorded beside the location
+        # so a downstream reader of "what is this agent doing" sees the token
+        # that placed it, on the same hour, whatever epoch counter it holds.
         for agent in self.agents:
+            agent.current_activity = agent.scheduled_token(hour)
             if getattr(agent, "ashore", False):
                 agent.current_location = LOCATION_ASHORE
                 continue
@@ -2189,6 +2202,7 @@ class KorkinShipEngine:
             randomness = self.rng.uniform(-1.0, 1.0)
             if self.clock.mode != LEGACY_EPOCH_DAY:
                 randomness = 0.0
+            agent.current_activity = agent.scheduled_token(hour, randomness)
             agent.current_location = agent.get_location_for_hour(
                 hour,
                 randomness,
