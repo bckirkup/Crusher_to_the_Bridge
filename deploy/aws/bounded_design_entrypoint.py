@@ -192,6 +192,9 @@ def _region_argv(
     # differing in this string alone.
     if args.service_surface_knockout == "on":
         argv += ["--service-surface-knockout"]
+    # CONTACT-SCALE-01: phi is a number, not a switch, and 0 is the matched
+    # control; it is passed through as given so the report records the arm.
+    argv += ["--contact-class-exponent", args.contact_class_exponent]
     argv += ["--factor-set", args.factor_set]
     return argv
 
@@ -216,6 +219,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--service-surface-knockout", default="off", choices=("on", "off"),
     )
+    # A string, like the other arm parameters: Batch parameters arrive as
+    # text and the gate parses the float itself.
+    parser.add_argument("--contact-class-exponent", default="0")
     parser.add_argument(
         "--factor-set", default="norovirus", choices=sorted(FACTOR_SETS),
     )
