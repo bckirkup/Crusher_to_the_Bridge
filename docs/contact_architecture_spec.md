@@ -60,11 +60,18 @@ from state the engine already holds — nothing new is assigned to an agent:
 | `cabin` | the mixing unit is a cabin compartment of a `Cabin_Corridor`, or the schedule token is `Sleep` in any other zone | the cabin (`BERTH-01`) |
 | `corridor` | the mixing unit is a `Cabin_Corridor`'s hallway residual | the corridor, cabin mates excluded |
 | `work_service` | `_on_service_duty`: a food employee, on `Work`, in its own service zone | the venue floor |
-| `work_other` | schedule token `Work`, anywhere else | the work zone |
-| `dining_table` | a `Dining` zone that is the target's own venue and the target has a table party | table party + floor by `dining_party_contact_share` (`DINE-PARTY-01`) |
-| `dining_venue` | any other presence in a `Dining` zone (buffet, crew mess, a diner away from its venue) | the venue |
+| `work_other` | schedule token `Work`, anywhere else — including a `Dining` zone off food-handler duty | the work zone |
+| `dining_table` | a `Meal` token or a `Dining` zone, the zone is the target's own venue, and the target has a table party | table party + floor by `dining_party_contact_share` (`DINE-PARTY-01`) |
+| `dining_venue` | any other meal: a `Meal` token anywhere, or presence in a `Dining` zone off `Work` and off `Sleep` (buffet, crew mess, a diner away from its venue) | the venue |
 | `leisure` | schedule token `Free` outside a `Dining` zone | the leisure zone |
-| `other` | anything unresolved (a `Meal` token outside a `Dining` zone, an empty schedule) | the zone |
+| `other` | anything unresolved (a token the schedule vocabulary does not cover, an empty schedule) | the zone |
+
+The token is resolved in that order — `Sleep`, then `Work`, then the meal, then
+`Free` — so the schedule state and the room are separate signals and neither
+overrides the other by accident: a room for eating does not make a working crew
+member a diner, and a meal is a meal wherever the host is placed to take it.
+The token itself is the one the engine recorded when it placed the agent
+(`current_activity`), not one re-derived from the reader's own epoch counter.
 
 Role enters three ways, in this order of preference: **through the schedule**
 (crew `Work` hours are passengers' `Free` hours), **through the duty state**
@@ -276,12 +283,22 @@ The crew:passenger ratio is reported, not adjusted: 1.09–1.46 against Pung's
 `Dining` zones at the box's highest rates, which is what "derived from the
 architecture and operations" means on this hull.
 
-Two resolver observations recorded, not tuned:
+Two resolver observations were recorded on this campaign, both since repaired
+(`CONTACT-ARCH-01b`), and the campaign above therefore predates the repair:
 
-- a `Meal` token host waiting for its sitting is outside a `Dining` zone and so
-  resolves to `other` (~2 h/day), where the box declares 0 or the leisure
-  interval;
+- a `Meal` token host waiting for its sitting resolved to `other` (~2 h/day),
+  where the box declares 0 or the leisure interval. A `Meal` token now resolves
+  as a meal wherever the host stands, and a host whose sitting is inactive
+  carries the `Free` the seating rewrite gave it, i.e. `leisure`;
 - a crew member scheduled `Work` inside a `Dining` zone but not on food-handler
-  duty resolves to `dining_venue`, i.e. as a diner, because `_on_service_duty`
-  is the only duty signal the resolver has. Both are §2 consequences, and both
-  are candidates for a resolver change rather than a rate change.
+  duty resolved to `dining_venue`, i.e. as a diner. Scheduled `Work` is now
+  resolved before the room, so such a host is `work_other`.
+
+The repair also closed the defect underneath both: the reader re-derived the
+schedule hour from its own epoch counter, which runs one behind the engine's, so
+it read the previous hour's token against this hour's location. On one 168-epoch
+expedition point that changed 46% of the fomite eating verdicts and 25% of the
+true food-handler duty verdicts — both of which are live in the shipped default
+configuration, not only under `activity_contacts`. Every readout that depends on
+the duty state or the eating check therefore predates the repair, and no rate,
+interval or kernel moved with it.

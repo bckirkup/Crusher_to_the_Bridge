@@ -1963,14 +1963,43 @@ Roughly in dependency order.
     Crew:passenger is 1.1–1.5 against Pung's 0.5 (reported, not adjusted; the
     expedition schedule puts crew ~4.5 h/day in `Dining` zones); night share
     8.0/11.9% against 5.9%; passenger dining share 28.6% against 71%. Two
-    resolver consequences recorded for a resolver change, not a rate change:
-    `Meal`-token hosts awaiting a sitting resolve to `other`; crew scheduled
-    `Work` in a `Dining` zone off food-handler duty resolve as diners.
+    resolver consequences were recorded on this campaign, for a resolver change
+    and not a rate change, and both are repaired by item 18: `Meal`-token hosts
+    awaiting a sitting resolved to `other`; crew scheduled `Work` in a `Dining`
+    zone off food-handler duty resolved as diners.
     Outstanding: (d) `CONTACT-ARCH-02`, a dwell-tracking saturating form, now
     the prerequisite for reading the upper corners of the box at all; (e) a
     per-role `dining_venue` mapping only after (d). No rate is adopted. Every
     readout from `BERTH-01` through `CONTACT-SCALE-01` is conditional on the
     uniform draw and stands as recorded; none is re-run by this item.
+
+18. **`CONTACT-ARCH-01b`: the schedule token a reader gets is the one that
+    placed the agent, and the two resolver consequences of item 17 are
+    repaired. This one moves the shipped model.** Three changes, no rate,
+    interval or kernel among them. (a) The engine records the token it placed
+    an agent by (`KorkinAgent.current_activity`) beside `current_location`, and
+    `TransmissionCore` reads that record instead of re-deriving the hour from
+    its own epoch counter. Those counters differ: measured, the core's epoch
+    runs exactly one behind the engine's (48/48 calls on a 48-epoch expedition
+    point), so the reader was matching the *previous* hour's token to this
+    hour's location. On a 168-epoch point that wrong token changed **46% of the
+    fomite eating verdicts** (9,790 of 21,119 calls) and **25% of the true
+    food-handler duty verdicts** (116 of 459), and both of those predicates are
+    live in the default configuration — the hand-to-mouth eating channel
+    (`FOOD-ARCH-01`) and the food-handler deposition and surface class
+    (`FOOD-ROLE-01`). (b) Scheduled `Work` is now resolved before the room, so
+    a crew member at work in a `Dining` zone off food-handler duty is
+    `work_other`, not a diner. (c) A `Meal` token resolves as a meal wherever
+    the host stands, so no meal falls to `other`; a host whose sitting is
+    inactive carries the `Free` the seating rewrite gave it. On a representative
+    expedition point the resolver now emits no `other` at all, and no
+    off-duty-`Work`-as-diner. **Consequence for the record: the uniform control
+    is no longer bit-identical to the stored arms, so every readout that depends
+    on the eating check or the duty state — the `FOOD-*` items, `SURF-KO-01`,
+    and the control arms of `CONTACT-SCALE-01` and item 17 — was computed with
+    the off-by-one token and needs a matched reprise before its numbers are
+    quoted against post-repair runs. Nothing was re-run to make a number come
+    out; nothing is retuned here.**
 
 ## 5. Held fixed by assumption
 

@@ -1450,7 +1450,17 @@ class TransmissionCore:
         return frozenset(self._service_zones)
 
     def _scheduled_activity(self, agent: KorkinAgent, epoch: int) -> str:
-        """This agent's scheduled activity at *epoch*."""
+        """The schedule token governing *agent* where it currently stands.
+
+        The engine records the token it placed the agent by, and that record
+        is the activity: it and ``current_location`` were resolved for the
+        same hour, whereas the core's *epoch* counter need not agree with the
+        engine's. Re-deriving the hour from *epoch* is the fallback for an
+        agent nothing has placed yet.
+        """
+        recorded = getattr(agent, "current_activity", "")
+        if recorded:
+            return str(recorded)
         schedule = getattr(agent, "schedule", None)
         if not schedule:
             return ""
@@ -3450,20 +3460,23 @@ class TransmissionCore:
         if unit_name != zone_name:
             return "cabin"
         token = self._scheduled_activity(target, epoch).split(":", 1)[0]
-        if self.zone_types.get(zone_name) == "Dining":
-            if self._on_service_duty(target, zone_name, epoch):
-                return "work_service"
-            if target.dining_party_ids and zone_name == target.dining_zone:
-                return "dining_table"
-            return "dining_venue"
         if token == "Sleep":
             return "cabin"
         if token == "Work":
+            # Working is what the schedule says a host is doing, whatever the
+            # room is for: a crew member in a Dining zone who is not a food
+            # employee on shift there is at work, not at a meal.
             return (
                 "work_service"
                 if self._on_service_duty(target, zone_name, epoch)
                 else "work_other"
             )
+        # A meal is a meal wherever it is taken, and a Dining zone is a meal
+        # for whoever is in it off `Work` and off `Sleep`.
+        if token == "Meal" or self.zone_types.get(zone_name) == "Dining":
+            if target.dining_party_ids and zone_name == target.dining_zone:
+                return "dining_table"
+            return "dining_venue"
         if token == "Free":
             return "leisure"
         return "other"

@@ -17,12 +17,17 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
+    KorkinShipEngine,
 )
+from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
     CONTACT_ACTIVITIES,
     CONTACT_RATE_PER_HOUR_BOUNDS,
     TransmissionCore,
 )
+from engines.voyage_itinerary import LOCATION_ASHORE
+from orchestrator_init import load_spatial_layout
+
 
 LOUNGE = "Lounge"
 DINING = "MainDining"
@@ -214,6 +219,33 @@ class TestActivityResolution:
         a = _agent(1, "crew", ["Meal:Lunch"] * 24, DINING, work_zone=DINING)
         assert self._activity(core, a, DINING, DINING) == "dining_venue"
 
+    def test_crew_working_in_a_dining_zone_off_food_duty_is_work_other(self) -> None:
+        # The room is a Dining zone but this crew member is not a food employee
+        # on shift there: the schedule says at work, so at work, not at a meal.
+        core = _core(_block(FLAT))
+        a = _agent(1, "crew", ["Work"] * 24, DINING, work_zone=LOUNGE)
+        assert not core._on_service_duty(a, DINING, 1)
+        assert self._activity(core, a, DINING, DINING) == "work_other"
+
+    def test_the_same_work_token_resolves_by_duty_not_by_room(self) -> None:
+        core = _core(_block(FLAT))
+        on_duty = _agent(1, "crew", ["Work"] * 24, DINING, work_zone=DINING)
+        off_duty = _agent(2, "crew", ["Work"] * 24, DINING, work_zone=LOUNGE)
+        elsewhere = _agent(3, "crew", ["Work"] * 24, LOUNGE, work_zone=LOUNGE)
+        assert self._activity(core, on_duty, DINING, DINING) == "work_service"
+        assert self._activity(core, off_duty, DINING, DINING) == "work_other"
+        assert self._activity(core, elsewhere, LOUNGE, LOUNGE) == "work_other"
+
+    def test_the_recorded_placement_token_wins_over_the_epoch(self) -> None:
+        # The engine records the token it placed the agent by; the core reads
+        # that, not a token re-derived from its own epoch counter.
+        core = _core(_block(FLAT))
+        a = _agent(1, "passenger", ["Sleep"] * 24, DINING)
+        a.current_activity = "Meal:Dinner"
+        assert self._activity(core, a, DINING, DINING) == "dining_venue"
+        a.current_activity = "Sleep"
+        assert self._activity(core, a, DINING, DINING) == "cabin"
+
     def test_a_seated_party_is_dining_table(self) -> None:
         core = _core(_block(FLAT))
         a = _agent(1, "passenger", ["Meal:Lunch"] * 24, DINING)
@@ -224,6 +256,18 @@ class TestActivityResolution:
         core = _core(_block(FLAT))
         a = _agent(1, "passenger", ["Meal:Lunch"] * 24, DINING)
         assert self._activity(core, a, DINING, DINING) == "dining_venue"
+
+    def test_a_meal_taken_outside_a_dining_zone_is_still_a_meal(self) -> None:
+        core = _core(_block(FLAT))
+        a = _agent(1, "passenger", ["Meal:Lunch"] * 24, LOUNGE)
+        assert self._activity(core, a, LOUNGE, LOUNGE) == "dining_venue"
+
+    def test_a_party_seated_away_from_its_venue_is_the_venue_not_the_table(self) -> None:
+        core = _core(_block(FLAT))
+        a = _agent(1, "passenger", ["Meal:Lunch"] * 24, LOUNGE)
+        a.dining_party_ids = (2, 3, 4)
+        assert self._activity(core, a, LOUNGE, LOUNGE) == "dining_venue"
+        assert self._activity(core, a, DINING, DINING) == "dining_table"
 
     def test_an_unscheduled_hour_is_other(self) -> None:
         core = _core(_block(FLAT))
@@ -240,6 +284,61 @@ class TestActivityResolution:
         ]
         for agent, unit, zone, hallway in cases:
             assert self._activity(core, agent, unit, zone, hallway) in CONTACT_ACTIVITIES
+
+
+class TestPlacementAndActivityAgree:
+    """The token the engine places an agent by is the token the core reads.
+
+    The core's epoch counter runs one behind the engine's, so re-deriving the
+    hour from it would read the previous hour's token against this hour's
+    location: a meal token in a lounge, a sleep token in the dining room.
+    """
+
+    def _engine(self) -> KorkinShipEngine:
+        cfg = {"ship_graph": {
+            "spatial_layout": "data/platforms/expedition_cruise_450/spatial_layout.json",
+        }}
+        zones = load_spatial_layout(cfg)
+        assert zones is not None
+        return KorkinShipEngine(
+            num_passengers=60, num_crew=30, initial_infected=0,
+            zones=zones, seed=11,
+            clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        )
+
+    def test_the_recorded_token_is_the_one_that_placed_the_agent(self) -> None:
+        engine = self._engine()
+        dining = {z["name"] for z in engine.zones if z["type"] == "Dining"}
+        core = TransmissionCore(
+            rng=np.random.default_rng(0),
+            zone_types={z["name"]: z["type"] for z in engine.zones},
+            clock=engine.clock,
+        )
+        seen: set[str] = set()
+        for epoch in range(48):
+            engine.step()
+            overridden = engine.isolated_ids | engine.quarantined_ids
+            for a in engine.agents:
+                if a.agent_id in overridden or a.current_location == LOCATION_ASHORE:
+                    continue
+                token = core._scheduled_activity(a, epoch)
+                assert token == a.current_activity
+                assert token in a.schedule
+                seen.add(token.split(":", 1)[0])
+                if token.startswith("Meal"):
+                    assert a.current_location in dining
+                elif token == "Work":
+                    assert a.current_location == a.work_zone
+                elif token == "Sleep":
+                    assert a.current_location == a.home_zone
+        assert {"Meal", "Work", "Sleep", "Free"} <= seen
+
+    def test_an_unplaced_agent_falls_back_to_its_schedule(self) -> None:
+        core = _core(_block(FLAT))
+        a = _agent(1, "passenger", ["Sleep"] * 12 + ["Free"] * 12, LOUNGE)
+        assert a.current_activity == ""
+        assert core._scheduled_activity(a, 1) == "Sleep"
+        assert core._scheduled_activity(a, 13) == "Free"
 
 
 class TestGradedSensitivity:
