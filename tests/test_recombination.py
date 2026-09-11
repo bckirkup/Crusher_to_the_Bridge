@@ -458,7 +458,10 @@ def _recombinants(core: TransmissionCore) -> tuple[str, ...]:
 
 class TestWholeRun:
     def test_recombinants_appear_once_co_infection_does(self) -> None:
-        core, _ = _run(recombination_rate=1.0, susceptibility=1.0)
+        # epochs=24: the composed direct route delivers co-infection by
+        # transmission more slowly than the emission-scale route this
+        # budget was calibrated to (6 epochs yields no co-infection).
+        core, _ = _run(recombination_rate=1.0, susceptibility=1.0, epochs=24)
         assert _recombinants(core)
 
     def test_no_recombinants_without_co_infection(self) -> None:

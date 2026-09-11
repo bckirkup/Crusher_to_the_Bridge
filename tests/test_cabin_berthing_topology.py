@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import (
+    HAND_LOAD_LOG10_GEC,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -25,6 +26,11 @@ from engines.transmission_core import (
 from orchestrator_init import assign_cabin_mates
 
 CORRIDOR = "PC_D6_P_F"
+
+# The symptomatic-peak hand target get_pathogen_hand_target returns
+# (10**3.86 GEC); the composed direct route doses only what the donor's
+# hands carry, so fixture shedders hold a reservoir of this magnitude.
+HAND_LOAD = 10.0 ** HAND_LOAD_LOG10_GEC
 
 
 def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
@@ -42,6 +48,7 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
         a.infection_status = InfectionStatus.INFECTED
         a.illness_status = IllnessStatus.SYMPTOMATIC
         a.time_infected = 1
+        a.hand_load_by_pathogen = {"_default": HAND_LOAD}
     a.current_location = loc
     return a
 
@@ -68,11 +75,17 @@ def _core(seed: int = 7) -> TransmissionCore:
 
 
 def _reset_susceptibles(agents: list[KorkinAgent], shedder: int = 1) -> None:
-    """Keep every non-index agent susceptible so exposures keep being recorded."""
+    """Reset per-epoch state: susceptibles stay susceptible with an empty
+    hand (so each row measures one epoch's acquired load, not a carried
+    residue), and the shedder's reservoir is refilled because every
+    contact and the fomite arm's decay draw it down."""
     for a in agents:
         if a.agent_id != shedder:
             a.infection_status = InfectionStatus.SUSCEPTIBLE
             a.illness_status = IllnessStatus.NOT_ILL
+            a.hand_load_by_pathogen = {}
+        else:
+            a.hand_load_by_pathogen["_default"] = HAND_LOAD
 
 
 def _exposures(
@@ -117,13 +130,19 @@ class TestDirectContactUnits:
         assert max(_doses_from(other, 1)) > 0
 
     def test_cabin_contact_is_full_strength_and_hallway_keeps_corridor_factor(self) -> None:
-        """Same pair, same contact: cabin dose / hallway dose = 1 / corridor factor."""
-        berthed = _exposures(_corridor([{1, 2}, {3, 4}]), epochs=300)
+        """Same pair, same contact: cabin dose / hallway dose = 1 / corridor factor.
+
+        Under the composed route the corridor factor scales the mouth dose,
+        which is concave in the transferred load, so the realised ratio sits
+        a few percent below 1/factor rather than on it; rel=0.10 at 2000
+        epochs still fails if the factor is dropped (ratio -> 1) or doubled.
+        """
+        berthed = _exposures(_corridor([{1, 2}, {3, 4}]), epochs=2000)
         cabin_doses = [
             r["dose"] for r in berthed
             if r["target_id"] == 2 and "compartment" in r and r["source_ids"] == [1]
         ]
-        unberthed = _exposures(_corridor([{1}, {2}, {3}, {4}]), epochs=300)
+        unberthed = _exposures(_corridor([{1}, {2}, {3}, {4}]), epochs=2000)
         hallway_doses = [
             r["dose"] for r in unberthed
             if r["target_id"] == 2 and r["source_ids"] == [1]
@@ -132,7 +151,7 @@ class TestDirectContactUnits:
         assert hallway_doses
         core = _core()
         ratio = np.median(cabin_doses) / np.median(hallway_doses)
-        assert ratio == pytest.approx(1.0 / core.corridor_direct_contact_factor, rel=0.05)
+        assert ratio == pytest.approx(1.0 / core.corridor_direct_contact_factor, rel=0.10)
 
     def test_more_berths_per_cabin_means_fewer_units_and_more_cabin_partners(self) -> None:
         agents_by_two = _corridor([{1, 2}, {3, 4}, {5, 6}])
@@ -175,7 +194,7 @@ class TestConfinementStillHolds:
     def _doses(quarantined: set[int], cabin_mates: bool) -> tuple[float, float]:
         """Median per-contact dose to agent 2 from agent 1: (cabin, hallway)."""
         cabins = [{1, 2}] if cabin_mates else [{1}, {2}]
-        rows = _exposures(_corridor(cabins), epochs=200, quarantined=quarantined)
+        rows = _exposures(_corridor(cabins), epochs=2000, quarantined=quarantined)
         met = [r for r in rows if r["target_id"] == 2 and r["source_ids"] == [1]]
         cabin = [r["dose"] for r in met if "compartment" in r]
         hallway = [r["dose"] for r in met if "compartment" not in r]
@@ -188,7 +207,10 @@ class TestConfinementStillHolds:
         free_cabin, _ = self._doses(set(), cabin_mates=True)
         confined_cabin, _ = self._doses({1}, cabin_mates=True)
         assert free_cabin > 0
-        assert confined_cabin == pytest.approx(free_cabin)
+        # The pair factor is exactly 1 for a mate; the medians differ only
+        # because quarantining the shedder diverts the rng stream, so the
+        # two arms are different realisations of one distribution.
+        assert confined_cabin == pytest.approx(free_cabin, rel=0.10)
 
     def test_confined_shedder_is_attenuated_for_non_mates(self) -> None:
         _, free_hall = self._doses(set(), cabin_mates=False)
