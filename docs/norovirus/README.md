@@ -17,6 +17,7 @@ void pending a refit.
 | [bounded_screen_isolated_36.md](bounded_screen_isolated_36.md) | Measurement of a retired initial condition (2026-09-05) | The Morris screen on the current six-factor box, isolated: one factor resolves above the noise floor, five do not, and nothing is bounded. Superseded on arrival by #54/#440's boarding migration, which replaced its one fiat index case; §0 records what that changes and why neither the ranking nor the floor carries forward |
 | [bounded_screen_results.md](bounded_screen_results.md) | Superseded measurement (2026-09-01) | The Morris screen over the old seven-factor box. Superseded by `bounded_screen_isolated_36.md`; kept as the record of what that box measured — no ranking in it describes the current one |
 | [c1_reported_case_bracket_result.md](c1_reported_case_bracket_result.md) | Measurement (2026-09-05) | Why the 2,880-run C1 dose bracket is withdrawn: every rung of the 12.0-14.0 ladder produced identical output at every seed, so the sweep measured its own replication |
+| [adj_stratified_readout.md](adj_stratified_readout.md) | Measurement (2026-09-11) | The four expedition campaigns re-read within a dose regime, on arrays already on disk: the large contact arms were diluted ~8× by the inert part of the box rather than null, A5 is flat at 2.56–2.75 in **every** regime against ≈3.5, and the import-only stratum still posts 4.5% against A9's 0.6–1.6% — so no transmission-side change reaches the posting anchor. Nothing adopted, no stratum declared |
 | [norovirus_parameter_freedom_audit.md](norovirus_parameter_freedom_audit.md) | Audit (2026-08-30) | Which parameters are still free, which are set away from a literature value, and which anchors are circular |
 | [cruise_pathogen_severity_observation_priors_v2.md](cruise_pathogen_severity_observation_priors_v2.md) | Living — prior elicitation | Severity and observation priors for all ten pathogen profiles. Grades its own vectors `[A]` = assumption |
 | `vsp_covid_discontinuity.png` | Figure | The VSP discontinuity plot. **The numbers read off this image are withdrawn** — see the ledger; use the measured series instead |
@@ -41,7 +42,7 @@ What is over there:
 | Surfaces & cleaning | `park_surface_check.py`, `park_surface_findings.md`, `park_emesis_findings.md`, `cleaning_schedule_sweep.py`, `cleaning_schedule_sweep_spec.md` |
 | Routes | `fomite_food_rederivation.md`, `route_clearance_efficiency.py`, `route_clearance_findings.md`, `clearance_additivity_check.py`, `clearance_additivity_findings.md`, `emesis_deposition_spec.md` |
 | Observation model | `observation_model_design.md`, `observation_model_calibration.md`, `five_state_severity_spec.md`, `severity_prior_sensitivity_findings.md` |
-| Diagnostics | `a5_role_asymmetry_diagnosis.md`, `dose_accumulation_defect.md` |
+| Diagnostics | `a5_role_asymmetry_diagnosis.md`, `dose_accumulation_defect.md`, `adj_stratified_readout.py` |
 | Pilot runs | `PILOT_SPEC.md`, `postfix_anchor_pilot_*/`, `postmerge_anchor_pilot_*/` |
 
 Consolidating those markdown files here, leaving the `.py` and `.csv` in place,
