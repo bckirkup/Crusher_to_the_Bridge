@@ -231,6 +231,15 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
         "linear",
         "C",
     ),
+    # environmental_faecal_release_log10_g_per_epoch: the void dose normaliser,
+    # subtracted from the shedding curve in log10 space, so this interval
+    # sweeps released material over twenty orders of magnitude. It is not a
+    # sensitivity range around a value -- no value survives the refit the
+    # ledger is waiting on. Read any campaign on this box knowing where its
+    # points fell: the switch between a runaway epidemic and no onboard
+    # transmission at all sits near 6-7, i.e. in the bottom seventh of the
+    # interval, so a design that marginalises over it reports a mixture of two
+    # regimes rather than a response (ledger section 1, 2026-09-05).
     Factor(
         "environmental_faecal_release_log10_g_per_epoch",
         ("environmental_faecal_release_log10_g_per_epoch",),
