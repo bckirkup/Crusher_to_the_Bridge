@@ -2685,6 +2685,42 @@ Roughly in dependency order.
     9.
     (d) **Nothing was changed.** No default, gate, profile key or constant
     moved in recording this.
+30. **CONTACT-ARCH-01 ships on at the §4 interval lows, and the shipped
+    `corridor` rate does not mean what its name says.**
+    (a) **The shipped vector and the pre-registered §6 check, measured.** All
+    eight activities declared in `crusher_labs/config.yaml`
+    (`cabin 0.25, corridor 0.25, work_service 2.9, work_other 0.5,
+    dining_table 2.0, dining_venue 2.0, leisure 1.0, other 0.0` per hour;
+    `cabin`/`corridor` at their 0–0.5 interval midpoints rather than the 0
+    endpoint, which would ship the cabin-mate and hallway pathways inert;
+    `other` 0 as §4 permits; no `saturation_hours`, no τ measured). Measured
+    by `telemetry_buffer/observation_model/contact_arch_readout.py` on the
+    shipped mega_cruise_5000 configuration over one 7-day voyage, expected
+    draws summed per host over the engine's own resolver (rate × hours, the
+    §8a method): **passengers 19.7/day, crew 31.2/day** — both inside the
+    5–40 declaration band; **crew:passenger 1.58** against Pung's 0.5
+    (inverted, and it is the schedule's, as §6.4 predicted); **night share
+    12.3% passenger / 7.0% crew** against Vanhems's 5.9%; **passenger dining
+    share 30.4%** against Pung's 71% (the §8a argument stands: a per-hour
+    rate cannot reach a share measured where dining is a visit, not an hour).
+    Reported; no rate adjusted.
+    (b) **The hallway residual is a cabin-zone background rate, not a transit
+    rate.** `_direct_contact_units` yields the Cabin_Corridor zone itself as a
+    hallway unit containing **every** occupant every epoch, and single-
+    occupancy cabins form no cabin unit (`len(members) > 1` required), so a
+    host asleep alone in its cabin draws at the `corridor` rate all night.
+    On the shipped vector passengers accrue ~2.4 corridor-labelled
+    contacts/day, most of them in `Sleep` hours — the 12.3% night share in
+    (a) is largely this. The direct-contact defect this block sits inside is
+    that `corridor`'s interval was sourced to *transit* contact frequency
+    (Mossong "travel" ≈ 3% of 13.4/day) and the engine spends it on cabin
+    residency. **Flagged, not repaired**: separating hallway-transit draws
+    from cabin residency needs an occupancy model for time-in-corridor,
+    which nothing measures; item 29's inert-mechanism discipline applies —
+    record the semantics, do not tune the rate.
+    (c) **Nothing was tuned.** The vector is the declaration recorded in the
+    commit; the readout is the measurement of it. Any repair to (b) is an
+    architecture change with its own entry.
 
 ## 5. Held fixed by assumption
 
