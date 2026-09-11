@@ -84,9 +84,10 @@ were reported as nulls and remain small, but the honest statement is now a
 bound inside a regime, not a null over a box most of which was inert.
 
 **The import-only stratum is still above the posting anchor.** It posts 4.5%
-of voyages against A9's 0.6–1.6%, so the model over-posts by ~3–7× *with
-essentially no onboard transmission*. Splitting it by the swept boarding
-prevalence:
+of voyages against A9's **0.42–0.56%** — the interval `admissible_region.py`
+scores against, not the 0.6–1.6% that items 19–21 and this file's first draft
+quoted — so the model over-posts by ~8–10× *with essentially no onboard
+transmission*. Splitting it by the swept boarding prevalence:
 
 | passenger boarding prevalence | pax inf AR | posted |
 |---|---|---|
@@ -97,16 +98,56 @@ prevalence:
 
 Even the lowest sourced quartile posts 2.4%. **No reduction in transmission of
 any size reaches A9 from here**; the binding terms are the boarding-prevalence
-interval and the observation model, which is where `#467`'s posting floor came
-from and where item 00 did not look. Two further readings: the infection attack
-rate exceeds the boarding prevalence in every quartile (3.00% against 2.69%,
-4.61% against 3.81%), so the "import-only" stratum is not transmission-free —
-that residue is the hand/surface/food chain, which
-`fomite_pool_denominator_reconciliation.md` shows `adj` never scales; and
-because of that, stratifying by `adj` can never test a fomite-side arm, whose
-strata differ only in routes it does not touch.
+interval and the observation model — but see §3, which locates it elsewhere
+again. Two further readings: the infection attack rate exceeds the boarding
+prevalence in every quartile (3.00% against 2.69%, 4.61% against 3.81%), so the
+"import-only" stratum is not transmission-free — that residue is the
+hand/surface/food chain, which `fomite_pool_denominator_reconciliation.md`
+shows `adj` never scales; and because of that, stratifying by `adj` can never
+test a fomite-side arm, whose strata differ only in routes it does not touch.
 
-## 3. What this does not license
+## 3. The posting floor is a hand-route denominator, not an import
+
+Follow-up probe (`floor_probe` in the readout module), splitting the top
+stratum by dose band. The passenger channel is A9's numerator (item 11), so it
+is reported separately from the or-rule the model posts on:
+
+| adj band | voyages | pax inf AR | boarding | posted (pax) | posted (any) |
+|---|---|---|---|---|---|
+| 6.5–7.5 | 78 | 7.10% | 3.34% | 20.51% | 23.08% |
+| 7.5–8.5 | 78 | 3.97% | 3.07% | 7.69% | 10.26% |
+| 8.5–10 | 114 | 3.31% | 3.27% | 1.75% | 1.75% |
+| ≥ 10 | 1,074 | 3.40% | 3.25% | 2.51% | 2.98% |
+
+The 4.5% of §2 is therefore not one regime: the cut at 6.5 kept a decade of
+still-transmitting points, and the floor proper is the ≥ 10 band. At `adj` = 17
+a host's profiled emission is ~10⁻⁶ of a copy per epoch, and **696 of 1,074
+voyages still took off, 35 exceeded 8% passenger infection attack rate against
+a 3.25% boarding prevalence, and 2.51% posted on the passenger channel** — 4–6×
+A9's 0.42–0.56%. Crew-only postings are 15% of the or-rule total, so removing
+them does not close it either.
+
+What separates those 35 voyages from their band is descriptive and
+not causal — a space-filling box, 35 rows — but it is one-sided:
+`food_ingestion_fraction_per_day` 1.53×, `hand_to_surface_drying_multiplier`
+1.28×, `secretor_negative_relative_susceptibility` 1.17×,
+`food_hand_contacts_per_day` 1.12×, while boarding prevalence is 1.07× and
+`adj` itself 1.00×. That is the hand → surface → food chain, and it runs
+because it has a release normaliser of its own: `HAND_LOAD_LOG10_GEC` = 3.86
+(Liu 2013, Grade B) is read against `HAND_LOAD_REFERENCE_PEAK_LOG10` = 11.0, so
+the hand route carries an implicit **−7.14 log10 g of stool per hand** — the
+Class X convention its own comment declares, never swept, and an
+`adj`-equivalent sitting at the top of the 6–7 switch. Whatever the design does
+to the profiled channel, every voyage keeps one channel at 7.14.
+
+So A9's floor is neither an ascertainment defect nor a boarding one: it is the
+same unsourced-denominator defect `#498` found from the surface side, in the
+channel the campaigns never varied. Every arm run since BERTH-01 swept the dead
+channel and held the live one fixed. Nothing here sources the bridge or moves
+it; the requirement is that the hand and environmental channels be put on one
+measured scale before either is fitted.
+
+## 4. What this does not license
 
 The transmitting strata are not a regime the model has been shown to belong
 in; they are the corner of an unsourced interval where arithmetic permits
