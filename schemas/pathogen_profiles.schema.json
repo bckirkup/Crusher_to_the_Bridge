@@ -596,7 +596,7 @@
           "type": "array",
           "items": {
             "type": "string",
-            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne", "water_aerosol", "food", "water", "bodily_fluids"]
+            "enum": ["direct_contact", "fomite", "droplet", "hvac_airborne", "emesis_aerosol", "water_aerosol", "food", "water", "bodily_fluids"]
           },
           "minItems": 1
         },
@@ -691,6 +691,7 @@
             "direct_contact": {"type": "number", "minimum": 0},
             "droplet": {"type": "number", "minimum": 0},
             "hvac_airborne": {"type": "number", "minimum": 0},
+            "emesis_aerosol": {"type": "number", "minimum": 0},
             "fomite": {"type": "number", "minimum": 0},
             "food_contamination": {"type": "number", "minimum": 0},
             "environmental_source": {"type": "number", "minimum": 0}
@@ -704,6 +705,7 @@
             "direct_contact": {"type": "number", "minimum": 0},
             "droplet": {"type": "number", "minimum": 0},
             "hvac_airborne": {"type": "number", "minimum": 0},
+            "emesis_aerosol": {"type": "number", "minimum": 0},
             "fomite": {"type": "number", "minimum": 0},
             "food_contamination": {"type": "number", "minimum": 0},
             "environmental_source": {"type": "number", "minimum": 0}

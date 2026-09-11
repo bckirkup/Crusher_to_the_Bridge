@@ -508,6 +508,7 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
     "direct_contact": 1.0,
     "droplet": 1.0,
     "hvac_airborne": 1.0,
+    "emesis_aerosol": 1.0,
     "fomite": 1.0,
     "food_contamination": 1.0,
     "environmental_source": 1.0,
@@ -520,6 +521,7 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "direct_contact": "direct_contact",
     "droplet": "droplet",
     "hvac_airborne": "hvac_airborne",
+    "emesis_aerosol": "emesis_aerosol",
     "fomite": "fomite",
     "food": "food_contamination",
     "environmental": "environmental_source",
@@ -645,6 +647,9 @@ class ContactTracingMatrix:
     # Pathway 4: Fomite trailing — who entered a room after an infectious
     # agent left, contacting contaminated surfaces
     fomite_trailing_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 3b: Emesis aerosol — inhalation dose in the zone an emesis
+    # event happened in, in the epoch it happened
+    emesis_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 5: Food contamination — ingestion dose from contaminated
     # food in Dining-type zones
     food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -662,6 +667,7 @@ class ContactTracingMatrix:
             "shared_room_exposures": self.shared_room_exposures,
             "droplet_exposures": self.droplet_exposures,
             "hvac_downstream_exposures": self.hvac_downstream_exposures,
+            "emesis_aerosol_exposures": self.emesis_aerosol_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
             "food_contamination_exposures": self.food_contamination_exposures,
             "environmental_exposures": self.environmental_exposures,
@@ -1426,6 +1432,12 @@ class TransmissionCore:
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
         self.emesis_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
+        # This epoch's emesis aerosol, per emitting zone as (emitter, mass)
+        # pairs: the source-zone pathway doses it in the event epoch, and the
+        # per-emitter weight is what the strain attribution shares over.
+        self._emesis_aerosol_emitted_by_pathogen: dict[
+            str, dict[str, list[tuple[KorkinAgent, float]]],
+        ] = {}
 
         # Pathway 5: food contamination pools per Dining zone per pathogen
         self.food_pools: dict[str, dict[str, float]] = {}
@@ -3155,6 +3167,13 @@ class TransmissionCore:
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
+            # After fomite because _emit_emesis runs inside it: the emitted
+            # accumulator holds exactly this epoch's events when it is read.
+            self._pathway_emesis_aerosol(
+                zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
 
         fc = profile.get("food_contamination", {})
         if fc.get("enabled", False):
@@ -4514,6 +4533,10 @@ class TransmissionCore:
                 pathogen_id, {},
             )
             pending[zone_name] = pending.get(zone_name, 0.0) + aerosol_load
+            emitted = self._emesis_aerosol_emitted_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            emitted.setdefault(zone_name, []).append((agent, aerosol_load))
             pool_gain = surface_load * touchable_fraction
             records.append({
                 "epoch": int(epoch),
@@ -4540,6 +4563,85 @@ class TransmissionCore:
         zone reservoir exactly once per epoch.
         """
         return self.emesis_aerosol_pending_by_pathogen.pop(pathogen_id, {})
+
+    def _pathway_emesis_aerosol(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
+    ) -> None:
+        """Airborne dose in the zone an emesis event happened in, that epoch.
+
+        ``_pathway_hvac_airborne`` skips ``target_zone == source_zone``, so
+        without this pathway the most concentrated emission in the model
+        dosed only HVAC-downstream zones and never the room it happened in.
+        The mass is read from ``_emesis_aerosol_emitted_by_pathogen``, which
+        ``_emit_emesis`` fills during ``_pathway_fomite`` and this pathway
+        pops whole: a zone's entry lives exactly one epoch and cannot dose
+        again. The same mass still stands in ``emesis_aerosol_pending_by_
+        pathogen`` for the next epoch's drain into the zone reservoir — that
+        is transport of one mass, not two emissions: inhalation nowhere
+        depletes a zone reservoir, and continuous shedding is treated the
+        same way (it doses locally through the droplet route while also
+        loading the reservoir for downstream).
+
+        The source zone gets no ``hvac_airborne_scalar``: that scalar is
+        duct-transport attenuation and does not apply to the room the bolus
+        was expelled in.
+        """
+        emitted = self._emesis_aerosol_emitted_by_pathogen.pop(
+            pathogen_id, {},
+        )
+        if not emitted:
+            return
+        # The aerosol arm exists only on an emesis_conditioned profile — the
+        # same gate the orchestrator's drain applies downstream.
+        if (profile or {}).get("airborne_emission_mode") != "emesis_conditioned":
+            return
+        # Emission is keyed by the compartment the event happened in, so the
+        # occupants are looked up in the compartmented map a cabin corridor
+        # produces; a volume lookup falls back to the engine default.
+        units = self._cabin_compartments(zone_occupants)
+        for zone_name, entries in emitted.items():
+            mass = sum(load for _, load in entries)
+            if mass <= 0.0:
+                continue
+            susceptible = self._get_susceptible(
+                units.get(zone_name, []), pathogen_id,
+            )
+            if not susceptible:
+                continue
+            volume = max(self.zone_volumes.get(zone_name, 100.0), 1.0)
+            concentration = mass / volume
+            ventilation = self._aerosol_ventilation_factor(zone_name)
+            source_attribution = attribution(
+                ledger, self._shedder_mix(entries, pathogen_id),
+            )
+            source_ids = [agent.agent_id for agent, _ in entries]
+            for target in susceptible:
+                dose = (
+                    concentration
+                    * self.inhaled_air_volume_m3_per_epoch
+                    * ventilation
+                )
+                dose = self._accumulate(
+                    target.agent_id, "emesis_aerosol", dose,
+                    agent_doses, agent_pathway_doses, source_attribution,
+                )
+                matrix.emesis_aerosol_exposures.append({
+                    "target_id": target.agent_id,
+                    "target_zone": zone_name,
+                    "source_zone": zone_name,
+                    "source_agent_ids": source_ids,
+                    "pathogen_id": pathogen_id,
+                    "dose": round(dose, 4),
+                    "airborne_mass": round(mass, 4),
+                    "concentration_per_m3": round(concentration, 6),
+                })
 
     def _deposit_emesis(
         self,

@@ -1178,7 +1178,8 @@ def _check_logical_contradictions(
             if efficiencies:
                 allowed = {
                     "direct_contact", "droplet", "hvac_airborne",
-                    "fomite", "food_contamination", "environmental_source",
+                    "emesis_aerosol", "fomite", "food_contamination",
+                    "environmental_source",
                 }
                 unknown = set(efficiencies) - allowed
                 if unknown:

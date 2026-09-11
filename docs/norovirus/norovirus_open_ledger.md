@@ -2697,18 +2697,13 @@ Roughly in dependency order.
     deconvolution; and `aerosol_pools` / `aerosol_pools_by_pathogen`, which are
     written and aged every epoch with **no production reader** — every dose
     reads `zone_pathogen_mass` / `multi_pathogen_mass`.
-    (c) **Item 9 reads stale, and the residual gap is sharper than the entry
-    says.** `step_infection_progression` now receives `tx_core` as
-    `confinement_core` (`picard_framework/simulation/ship_simulation.py`) and
-    `orchestrator_epoch.py` drains `emesis_aerosol_pending_by_pathogen` into
-    the per-pathogen zone mass, which `_pathway_hvac_airborne` consumes. So the
-    emesis aerosol **is** routed, contra item 9's "does not route it into the
-    airborne reservoir" — but only to **HVAC-downstream** zones and one epoch
-    late, so **the vomiting cabin's own air receives nothing**. That is the
-    recurring archetype again, in its sharpest form yet: the most concentrated
-    event in the model deposits nothing where it happened. Recorded from the
-    call chain, **not** from a live run; confirm on a run before rewriting item
-    9.
+    (c) **Item 9 reads stale — superseded.** Since this entry was written the
+    gap it describes has been closed: `_pathway_emesis_aerosol` doses the
+    emitting zone's susceptible occupants in the epoch of the event, under
+    its own `emesis_aerosol` route key, while the orchestrator drain keeps
+    feeding the zone reservoir for **HVAC-downstream** transport one epoch
+    later — the lag is now transport timing, not a missing dose. The
+    mechanics and the record of it live in item 31.
     (d) **Nothing was changed.** No default, gate, profile key or constant
     moved in recording this.
 30. **CONTACT-ARCH-01 ships on at the §4 interval lows, and the shipped
@@ -2747,6 +2742,50 @@ Roughly in dependency order.
     (c) **Nothing was tuned.** The vector is the declaration recorded in the
     commit; the readout is the measurement of it. Any repair to (b) is an
     architecture change with its own entry.
+31. **Emesis aerosol doses the zone it happened in, in the epoch it happened —
+    the last same-zone airborne gap, closed structurally.**
+    `_pathway_hvac_airborne` skips `target_zone == source_zone` by design, so
+    an emesis event's aerosol fraction used to reach only HVAC-downstream
+    zones, one epoch later. `_pathway_emesis_aerosol` now runs inside
+    `execute_transmission` directly after `_pathway_fomite` — the pathway the
+    emission site (`_emit_emesis` → `_deposit_emesis`) sits inside — and
+    doses every susceptible occupant of the emitting zone at
+    `mass / volume × inhaled_air_volume_m3_per_epoch ×
+    _aerosol_ventilation_factor(zone)`.
+    (a) **A separate single-epoch accumulator, because the two pools cannot
+    share one.** `_emit_emesis` writes each event's `aerosol_load` into both
+    `emesis_aerosol_pending_by_pathogen` — which `step_infection_progression`
+    drains once into the zone reservoir for downstream transport, untouched —
+    and `_emesis_aerosol_emitted_by_pathogen`, which the source-zone pathway
+    pops whole each epoch. The emitted mass must not be merged into the
+    continuous-derived zone reservoir: `zone_pathogen_mass` is aged and its
+    composition tracks continuous shedding, and dosing a same-zone exposure
+    out of it would either double-count the continuous route's own local
+    dose convention (proximity is covered by droplet/shared-room, not by a
+    same-zone reservoir dose) or smear the event across epochs.
+    (b) **No attenuation at the source and no new constant.** The source zone
+    gets no `hvac_airborne_scalar`: that scalar is duct-transport
+    attenuation, and the room the bolus was expelled in has no duct. The
+    pathway introduces no constant at all — fraction, episode load, volume
+    and inhaled volume are all existing terms.
+    (c) **One mass, not two emissions.** The same emitted mass doses the
+    room's occupants this epoch *and* feeds the reservoir that transports it
+    downstream next epoch. Inhalation nowhere in this engine depletes a zone
+    reservoir, and continuous shedding already works this way (a droplet
+    dose locally plus a reservoir deposit for downstream); what is forbidden
+    is double-draining `emesis_aerosol_pending_by_pathogen` or letting the
+    emitted accumulator survive an epoch, and the pathway pops the entry it
+    reads.
+    (d) **The 3-hour window stays unrepresentable.** Tranche 28 §3.4 noted
+    the Alsved/Bonifait emesis-to-air association is a ~3 h window the
+    shipped one-epoch clock cannot resolve; this change makes the mode
+    structurally present — the emitting zone is now dosed at all — without
+    resolving that window. The lag itself was not repaired: the drain call
+    still sits in `step_infection_progression` before `execute_transmission`,
+    and moving it is a phase-ordering change with a much larger blast radius,
+    recorded rather than done.
+    (e) **Nothing adopted.** Every dose figure stays withdrawn; the
+    measurements above are measurements of the model.
 
 ## 5. Held fixed by assumption
 

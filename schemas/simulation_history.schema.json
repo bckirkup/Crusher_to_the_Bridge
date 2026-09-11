@@ -247,6 +247,10 @@
           "type": "array",
           "items": {"type": "object"}
         },
+        "emesis_aerosol_exposures": {
+          "type": "array",
+          "items": {"type": "object"}
+        },
         "fomite_trailing_exposures": {
           "type": "array",
           "items": {"type": "object"}

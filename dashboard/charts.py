@@ -776,6 +776,7 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
         "direct_contact": "Direct Contact",
         "droplet": "Droplet",
         "hvac_airborne": "HVAC Airborne",
+        "emesis_aerosol": "Emesis Aerosol",
         "fomite": "Fomite Surface",
         "food_contamination": "Food Contamination",
         "environmental": "Environmental (HVAC Colonization)",
