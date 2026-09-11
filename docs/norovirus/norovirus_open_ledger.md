@@ -1593,6 +1593,33 @@ Roughly in dependency order.
    pool has its own declared area, and that denominator must be reconciled
    before any of this becomes a parameter.
 
+   **The reconciliation, and the correction it forces.**
+   [The denominator reconciliation](fomite_pool_denominator_reconciliation.md)
+   settles the area question and overturns the paragraph above it. **The
+   release scalar never reaches the surface pool**: in the profiled path the
+   pool is fed only by the hand (Liu's measured 3.86 log10 gc/hand ceiling,
+   through `get_pathogen_hand_target`) and by emesis (an absolute per-event
+   load), and the food route deposits from the same hand — `adj` scales only
+   direct contact, aerosol, HVAC, the environmental reservoir and wastewater.
+   A seeded-flush deposition measurement therefore **cannot** set, narrow or
+   justify `adj`, and the `adj ≈ 6–7` switch is a switch in the contact and
+   air routes, with the fully sourced faecal chain left running above it.
+   On the common denominator the two sides **do** reconcile — the pool enters
+   a pickup only as `mass / HIGH_TOUCH_AREA_M2`, an areal density, which is
+   Goforth's unit, and the PFU→gc conversion is not needed because the
+   deposition fraction is a ratio of two PFU readings (carried across on an
+   unmeasured MS2/norovirus partition assumption, Grade C). The comparison at
+   the curve peak: the model's cabin surfaces reach at most **1.68–2.43 log10
+   gc/100 cm² per day** (a ceiling — no decay, no cleaning, no depletion),
+   against **4.24–9.38 log10 gc/100 cm² for one flush**, so the model's
+   surfaces are **1.8 to 7.7 logs low, per day against per event**. The hand
+   is simply the wrong-sized reservoir for a faecal channel: 10^3.86 copies
+   against a bowl's 10^13. Still **nothing adopted**, and the flush is **not**
+   entered as a pool gain, because the toilet's touchable area is unsourced
+   and the pool has no within-zone structure — a seat hotspot would be smeared
+   over the cabin's declared 1.5 m² on arrival, which is the recurring defect
+   archetype reproduced by the repair.
+
 0. **`SYMP-EFF-01`: the missing term now exists as a rate, and the shared
    quantity is narrowed rather than separated.** Norovirus boards at
    a prevalence of **asymptomatic faecal RNA carriage** (Grade B on its own

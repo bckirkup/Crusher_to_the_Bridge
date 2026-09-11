@@ -39,7 +39,7 @@ What is over there:
 | VSP series | `vsp_outbreak_series.csv`, `vsp_series_spec.md`, `vsp_outbreak_series_extraction_log.md`, `fetch_vsp_outbreaks.py` |
 | COVID discontinuity | `vsp_covid_discontinuity_design.md`, `vsp_covid_discontinuity_findings.md`, `vsp_discontinuity_analysis.py`, `post_covid_configuration_sources.md` |
 | Surfaces & cleaning | `park_surface_check.py`, `park_surface_findings.md`, `park_emesis_findings.md`, `cleaning_schedule_sweep.py`, `cleaning_schedule_sweep_spec.md` |
-| Routes | `fomite_food_rederivation.md`, `route_clearance_efficiency.py`, `route_clearance_findings.md`, `clearance_additivity_check.py`, `clearance_additivity_findings.md`, `emesis_deposition_spec.md` |
+| Routes | `fomite_food_rederivation.md`, `route_clearance_efficiency.py`, `route_clearance_findings.md`, `clearance_additivity_check.py`, `clearance_additivity_findings.md`, `emesis_deposition_spec.md`, `fomite_pool_denominator_reconciliation.md` |
 | Observation model | `observation_model_design.md`, `observation_model_calibration.md`, `five_state_severity_spec.md`, `severity_prior_sensitivity_findings.md` |
 | Diagnostics | `a5_role_asymmetry_diagnosis.md`, `dose_accumulation_defect.md` |
 | Pilot runs | `PILOT_SPEC.md`, `postfix_anchor_pilot_*/`, `postmerge_anchor_pilot_*/` |

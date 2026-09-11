@@ -9,7 +9,13 @@ it is surrogate, and where it is empty.
 
 **Status:** Evidence assembled and interpreted. Nothing implemented. The
 event-structured release model this licenses is not designed here and is not
-approved.
+approved. **Partly corrected downstream:** the
+[denominator reconciliation](../norovirus/fomite_pool_denominator_reconciliation.md)
+finds that this chain is *not* a replacement for
+`environmental_faecal_release_log10_g_per_epoch` — the release scalar does not
+feed the surface pool in any profiled run — and that the model's surfaces sit
+1.8 to 7.7 logs below one seeded flush on the reconciled denominator. The
+evidence in this tranche stands; its framing as an `adj` substitute does not.
 
 **Scope.** Four questions, in the order they were asked:
 
