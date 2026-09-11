@@ -48,6 +48,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 import zipfile
 from collections import defaultdict
@@ -173,7 +174,10 @@ def _spread(values: list[float]) -> dict[str, float | None]:
 def _is_report_free(rows: list[dict[str, Any]]) -> bool:
     """True when the branch models no sick-call reporting at all."""
     return all(
-        row["sick_call_probability_per_day"] == 0.0
+        row["sick_call_probability_per_day"] is not None
+        and math.isclose(
+            row["sick_call_probability_per_day"], 0.0, abs_tol=0.0,
+        )
         for row in rows
     )
 

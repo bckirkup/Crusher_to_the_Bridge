@@ -22,6 +22,8 @@ from telemetry_buffer.observation_model.expedition_posting_readout import (
     build_report,
     collect_rows,
     jeffreys_interval,
+    main,
+    render_markdown,
     summarise_cell,
 )
 
@@ -249,3 +251,45 @@ class TestCollectRows:
         assert sorted(row["run_id"] for row in rows) == [
             "run_a1", "run_b1", "run_b2",
         ]
+
+
+class TestRenderAndMain:
+    """End-to-end: zips in, JSON report and markdown table out."""
+
+    def test_render_markdown_emits_one_row_per_cell(self) -> None:
+        report = build_report(
+            [
+                _row(pax_ar=0.05, crew_ar=0.0),
+                _row(pax_ar=0.0, crew_ar=0.0),
+            ],
+            era="pre",
+        )
+        markdown = render_markdown(report)
+        assert "| surveillance | release | days |" in markdown
+        assert "| sentinel | -4.0 | 10.0 | 2 | 1 |" in markdown
+        assert "P(post)" in markdown
+
+    def test_main_writes_report_and_markdown(self, tmp_path: Path) -> None:
+        _write_zip(
+            tmp_path, "runs.zip",
+            [
+                _summary("r1", pax_ar=0.05, crew_ar=0.0),
+                _summary("r2", pax_ar=0.01, crew_ar=0.0),
+            ],
+        )
+        out = Path("telemetry_buffer/_test_expedition_readout.json")
+        md = Path("telemetry_buffer/_test_expedition_readout.md")
+        try:
+            assert main([
+                str(tmp_path), "--out", str(out), "--markdown", str(md),
+            ]) == 0
+            report = json.loads(
+                (Path.cwd() / out).read_text(encoding="utf-8"),
+            )
+            assert report["n_cells"] == 1
+            assert report["cells"][0]["posting_frequency"] == pytest.approx(0.5)
+            text = (Path.cwd() / md).read_text(encoding="utf-8")
+            assert "median pax AR" in text
+        finally:
+            (Path.cwd() / out).unlink(missing_ok=True)
+            (Path.cwd() / md).unlink(missing_ok=True)
