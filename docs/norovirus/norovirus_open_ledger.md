@@ -2507,6 +2507,58 @@ Roughly in dependency order.
     (g) **Nothing changed.** No constant, interval, profile field or default
     moved; the harness patches two `TransmissionCore` methods in-process for
     the diagnostic only.
+27. **The level question 26(f) left open is answered, and the answer is that
+    the direct-contact route has no physical composition at all.** Closed form
+    on shipped constants, no simulation:
+    `telemetry_buffer/observation_model/route_conservation_check.py`; written
+    up in [`../proposals/direct_contact_hand_composition.md`](../proposals/direct_contact_hand_composition.md).
+    (a) **What the route computes.** `_per_partner_contact_dose` sums each
+    sampled partner's **whole-body per-epoch faecal emission** and
+    `_apply_route_efficiencies` multiplies by
+    `route_efficiency_multipliers["direct_contact"] = 0.35`. There is no hand
+    reservoir, no per-contact transfer fraction, no hand-to-mouth step and no
+    conservation: every partner receives the donor's full emission
+    independently in the same epoch. The engine's sourced, hygiene-responsive,
+    stool-event-replenished `hand_load_by_pathogen` reservoir exists and the
+    pathway **never reads it**. So `0.35` stands for the fraction of
+    everything a host sheds in an hour that one person it touches ingests —
+    the exact quantity tranche 12 §6.3/§6.4 returned two unfiltered nulls on.
+    (b) **The overdelivery factor is constant in illness day.**
+    `D(c)/H(c) = 0.35 · 10^(7.14 − 4.0) / 24 = 20.1` for every shedding-curve
+    value `c`: one close contact ingests about twenty times the entire virus
+    population on the donor's hands, and each further partner ingests it again.
+    At the peak that is 1.46e5 gc ingested against a 7.24e3 gc reservoir.
+    (c) **The level is 4.3–5.8 logs high.** Composing the same contact through
+    the reservoir and the existing `_hand_to_mouth_dose` puts it 4.66 logs
+    below shipped at the wet-deposit central transfer. The **independent
+    cross-check** is item 26's own realised per-draw medians — direct contact
+    9.9e-6 against the sourced fomite chain's 1.3e-10, a gap of **4.88 logs**
+    for the same hosts on the same voyage. Two derivations, 0.2 log apart.
+    Per-contact establishment falls from **0.61** at the peak to 0.010, and to
+    1e-3 a log down the curve — out of saturation and into the band where the
+    dose-response is informative.
+    (d) **This is sufficient for the record.** 99.7% of all delivered dose
+    flows through this one uncomposed route, which is why it is
+    contact-count-limited (26e), why 97% of its potential is spent (26d), why
+    every mean-preserving dispersion arm is null (26), why the
+    symptomatic/asymptomatic ratio must sit at 1.0 (§3), and why far too many
+    expedition voyages post: near-certainty per contact makes posting a
+    ceiling rather than a rate, which A9 cannot be tested against.
+    (e) **Why the release sweep found a switch and not a gradient.**
+    `environmental_release_log10_per_day` normalises *every* route at once, so
+    no value makes a handshake plausible while leaving the environment loaded.
+    The equivalent `adj` at which the shipped direct route would deliver the
+    hand-composed dose is **8.66**, past the far edge of the transmitting arm.
+    Item 00's switch is a one-dimensional slice through two dimensions that are
+    currently the same number.
+    (f) **Nothing changed and nothing is proposed for adoption.** The repair
+    (`DIRECT-HAND-01`, proposal §6) is unbuilt and awaits a decision. Its
+    declared exposures are stated there rather than hidden: the
+    donor→recipient hand transfer step is a graded analogy over an explicit
+    person-to-person null, and the repair makes the −7.14 log10 g hand bridge
+    of items 22(f)/23 the single scale controlling all person-mediated
+    transmission. Proposal §7 records the falsifiable predictions in advance;
+    an overshoot is to be reported, not rescued by widening the interval.
 
 ## 5. Held fixed by assumption
 
