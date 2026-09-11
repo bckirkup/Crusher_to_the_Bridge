@@ -110,6 +110,21 @@ HAND_TO_SURFACE_LOGNORMAL = (-2.1, 1.4)
 # axis it opens is screened, not asserted (see bounded_screen.py).
 HAND_TO_SURFACE_DRYING_MULTIPLIER = 1.0
 HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
+# Donor hand -> recipient hand transfer efficiency: the fraction of a
+# contaminated hand's load moved to a clean hand in one interpersonal hand
+# contact. Wa human rotavirus suspended in 10% faeces on volunteers'
+# fingerpads, donor held against recipient for 10 s at ~1 kg/cm2: 6.6% of the
+# input infectious virus transferred 20 min after inoculation and 2.8% at
+# 60 min. Ansari et al. 1988, J Clin Microbiol 26:1513-1518, read from the
+# Abstract -- the 1988 issue is a scanned PDF with no machine-readable full
+# text and no OCR available, so the Results dispersion was not retrievable.
+# Grade B: measured hand-to-hand, right direction, right matrix (faeces),
+# wrong virus. The same experiment's hand -> steel (16.1%) and steel -> hand
+# (16.8%) arms bracket this engine's fomite transfer distributions, which is
+# the cross-check that it is the same measurement family. The two time points
+# are the frozen interval; neither is a stated central value, so a contact
+# draws uniformly across them. Origin: Ab.
+HAND_TO_HAND_TRANSFER_RANGE = (0.028, 0.066)
 HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
 # Defecation events per day: the frequency at which a faecally shedding host
 # recontaminates its own hands, and so the only quantity through which symptom
@@ -3290,14 +3305,17 @@ class TransmissionCore:
         n_occupants: int,
         r0_draw: int,
         cabin_confinement: bool,
+        pathogen_id: str = "_default",
+        epoch: int = 0,
     ) -> float:
         if self.contact_mode == "per_partner_contact":
             sampled, _ = self._sample_contact_partners(
                 shedders, n_occupants, r0_draw,
             )
-            return self._per_partner_contact_dose(
-                target, sampled, cabin_confinement,
+            dose, _moved = self._per_partner_contact_dose(
+                target, sampled, cabin_confinement, pathogen_id, epoch,
             )
+            return dose
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
@@ -3460,19 +3478,61 @@ class TransmissionCore:
         )
         return at_table + on_floor, n_table + n_floor
 
+    def _hand_contact_transfers(
+        self,
+        target: KorkinAgent,
+        sampled_shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+        cabin_confinement: bool,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Debit each donor's hand and return what each moved to the recipient.
+
+        The donor's reservoir is finite and shared: N partners in one epoch draw
+        down the same pair of hands, so the route cannot deliver more than the
+        donor is carrying however many contacts it makes.
+        """
+        moved: list[tuple[KorkinAgent, float]] = []
+        for shedder, _shedding in sampled_shedders:
+            donor = shedder.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            if donor <= 0.0:
+                continue
+            fraction = self.rng.uniform(*HAND_TO_HAND_TRANSFER_RANGE)
+            if cabin_confinement:
+                fraction *= self._cabin_pair_contact_factor(shedder, target)
+            amount = min(donor, donor * fraction)
+            if amount <= 0.0:
+                continue
+            shedder.hand_load_by_pathogen[pathogen_id] = donor - amount
+            moved.append((shedder, amount))
+        return moved
+
     def _per_partner_contact_dose(
         self,
         target: KorkinAgent,
         sampled_shedders: list[tuple[KorkinAgent, float]],
         cabin_confinement: bool,
-    ) -> float:
-        """Sum sampled partner shedding without zone-average dilution."""
-        dose = 0.0
-        for shedder, shedding in sampled_shedders:
-            if cabin_confinement:
-                shedding *= self._cabin_pair_contact_factor(shedder, target)
-            dose += shedding
-        return dose * self._confinement_factor(target)
+        pathogen_id: str,
+        epoch: int,
+    ) -> tuple[float, list[tuple[KorkinAgent, float]]]:
+        """Compose interpersonal contact through the donor's hand reservoir.
+
+        Hand-mediated close contact -- a handshake is the iconic instance, not the
+        only one -- moves a measured fraction of the donor's *hand* load onto the
+        recipient's hand, which then reaches the mouth through the same
+        hand-to-mouth process the fomite chain uses. Droplet, emesis aerosol,
+        fomite and food keep their own pathways and are not folded in here.
+        """
+        moved = self._hand_contact_transfers(
+            target, sampled_shedders, pathogen_id, cabin_confinement,
+        )
+        acquired = sum(amount for _, amount in moved)
+        if acquired <= 0.0:
+            return 0.0, moved
+        hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        target.hand_load_by_pathogen[pathogen_id] = hand + acquired
+        dose = self._hand_to_mouth_dose(target, epoch, hand + acquired)
+        target.hand_load_by_pathogen[pathogen_id] = hand + acquired - dose
+        return dose * self._confinement_factor(target), moved
 
     def _effective_contacts(
         self,
@@ -3762,6 +3822,7 @@ class TransmissionCore:
                     n_occupants, target, epoch,
                 )
             sampled_shedders = shedders
+            moved: list[tuple[KorkinAgent, float]] = []
             n_contacts = r0_draw
             if use_partner:
                 seated = self._seated_partner_sample(
@@ -3779,8 +3840,9 @@ class TransmissionCore:
                     sampled_shedders = self._hallway_shedders(
                         target, sampled_shedders,
                     )
-                dose = self._per_partner_contact_dose(
+                dose, moved = self._per_partner_contact_dose(
                     target, sampled_shedders, cabin_confinement,
+                    pathogen_id, epoch,
                 )
             else:
                 unit_shedders = shedders
@@ -3790,7 +3852,7 @@ class TransmissionCore:
                     unit_shedding = sum(sv for _, sv in unit_shedders)
                 dose = self._direct_contact_dose(
                     target, unit_shedders, unit_shedding, n_occupants, r0_draw,
-                    cabin_confinement,
+                    cabin_confinement, pathogen_id, epoch,
                 )
             dose *= self.direct_contact_scalar
             dose *= zone_dc_factor
@@ -3798,11 +3860,13 @@ class TransmissionCore:
             if use_het:
                 exposure_factor = self._zone_exposure_factor(zone_name)
                 dose *= exposure_factor
-            mix = self._direct_contact_mix(
-                target,
-                sampled_shedders,
-                pathogen_id,
-                None if use_partner else zone_mix,
+            # Under composition a donor's contribution is what came off its
+            # hands, not what it emitted, so the shares are transfer-weighted.
+            mix = (
+                self._shedder_mix(moved, pathogen_id) if use_partner
+                else self._direct_contact_mix(
+                    target, sampled_shedders, pathogen_id, zone_mix,
+                )
             )
             dose = self._accumulate(
                 target.agent_id, "direct_contact", dose,
@@ -3823,7 +3887,7 @@ class TransmissionCore:
                 rec["compartment"] = unit_name
             if use_partner:
                 rec["source_ids"] = [
-                    shedder.agent_id for shedder, _ in sampled_shedders
+                    shedder.agent_id for shedder, _ in moved
                 ]
                 rec["n_contacts"] = n_contacts
             if use_het:
