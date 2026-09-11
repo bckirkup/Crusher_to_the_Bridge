@@ -2193,6 +2193,61 @@ Roughly in dependency order.
     for its distance from Pung's 20/10, A5, VSP or a posting rate.** Every dose
     figure remains void pending refit.
 
+21. **The retained arrays re-read within a dose regime: the contact arms were
+    diluted, not null; A5 is deficient in every regime; and the posting anchor
+    is unreachable by any reduction in transmission.** Item 00 closed with a
+    precondition — stratify the readout by `adj` or sweep at a declared scale.
+    The first half needs no new voyages: each retained point carries its own
+    `adj`, so the four expedition campaigns (`SURF-KO-01`, `CONTACT-SCALE-01`,
+    `CONTACT-ARCH-01`, `CONTACT-ARCH-02`, fifteen arms) were re-cut at item
+    00's switch into live (`adj` < 5.5, 19 points), transition (5.5–6.5, 13)
+    and import-only (≥ 6.5, 224) strata and the paired contrasts re-read
+    inside each. Readout `telemetry_buffer/observation_model/`
+    `adj_stratified_readout.py`; tables in `adj_stratified_readout.md`.
+    Finite-sample, and a stratum is a seventh of the design, so every
+    stratified bound is ~8× wider than the marginal one it replaces.
+    (a) **Item 00's second consequence is corrected.** A5 was recorded there as
+    a mixture of an import-only 1.81 and an explosive-corner 2.2. On the
+    reported channel the anchor scores, the ratio is flat across all three
+    regimes — 2.56 / 2.75 / 2.61 against ≈ 3.5 — so the crew deficit is
+    reproduced identically on a dead ship, a transitional ship and a burning
+    one. It is a missing-structure result, not a resolution artefact, and
+    resolving the dose scale will not produce it.
+    (b) **The large contact arms were diluted by roughly the live fraction of
+    the box.** `CONTACT-ARCH-01` high reads +15.19 ± 0.70 pp pax (live) and
+    +12.95 ± 0.89 (transition) against +2.21 marginal; the low corner is
+    −2.56 ± 0.79 (live) against −0.13 ± 0.10 marginal, i.e. signed and
+    negative where the marginal readout called it a null. Dwell saturation is
+    likewise a signed mechanism rather than a return to the control: against
+    the control, `high` at τ = 0.5 h is −4.65 ± 0.75 pp pax in the live
+    stratum, overshooting the uniform rate rather than restoring it. Item 17's
+    and item 20's *marginal* magnitudes therefore understate these arms by
+    about 8×; their orderings stand.
+    (c) **The small arms stay small, and become bounds.** `SURF-KO-01`
+    +0.12 ± 0.49 pp (live), −1.46 ± 0.69 (transition); the φ arms within
+    ±2.5 pp, only φ = −1 signed in both strata and in the direction of *less*
+    infection. Item 00 withdrew these as uninterpretable; they are reinstated
+    as bounds inside a transmitting regime, not as nulls over the box.
+    (d) **The posting anchor is out of reach from below.** The import-only
+    stratum posts 4.5% of voyages against A9's 0.6–1.6% with essentially no
+    onboard transmission, and splitting it by the swept boarding prevalence
+    gives 2.38 / 4.46 / 3.27 / 7.74% by quartile — the lowest sourced quartile
+    is still above the band. No transmission-side change of any size reaches
+    A9; the binding terms are the boarding-prevalence interval and the
+    observation model. This is `#467`'s posting floor, measured on the
+    stratified arrays.
+    (e) **The import-only stratum is not transmission-free**, and stratifying
+    by `adj` cannot test a fomite arm. Passenger infection attack rate exceeds
+    passenger boarding prevalence in every quartile (3.00% against 2.69%;
+    4.61% against 3.81%). That residue is the hand/surface/food chain, which
+    `adj` does not scale at all (item 00a, `fomite_pool_denominator_`
+    `reconciliation.md`), so for a fomite-side arm the strata differ only in
+    the routes the arm does not touch. **Nothing is adopted and no stratum is
+    declared**: the transmitting corner is where arithmetic permits
+    transmission, not where the ship has been shown to sit, and standing there
+    because the anchors improve would fit `adj` to an anchor indirectly. The
+    interval stays [4, 24] pending the refit.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
