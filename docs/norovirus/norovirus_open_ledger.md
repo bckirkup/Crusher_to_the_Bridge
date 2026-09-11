@@ -2454,6 +2454,60 @@ Roughly in dependency order.
     moves this channel. (g) **Nothing changed.** No constant, interval,
     profile field or default moved; the readout imports no engine module.
 
+26. **The exposure stream is already maximally patchy, and the dose-response is
+    in a regime where no mean-preserving dispersion can move it.** Measured
+    directly at the establishment draw over one instrumented expedition voyage
+    by
+    [`dose_concentration_readout.py`](../../telemetry_buffer/observation_model/dose_concentration_readout.py)
+    ([findings](../../telemetry_buffer/observation_model/dose_concentration_findings.md)),
+    with `environmental_faecal_release_log10_g_per_epoch` swept across the live
+    span of the box.
+    (a) **The sweep has no informative regime.** Curvature utilisation
+    `sum(1 − exp(−sD))/sum(sD)` is **0.013** at `adj = 4`, **0.29** at 6,
+    **0.61** at 7 and **≥ 0.993** from 8 up. The share of draws with `sD` in
+    [0.01, 10] — the band where a dose-response is informative at all —
+    peaks at **1.9%** and falls to **0.09%** at the switch. The model passes
+    from saturating straight to linear, with no third regime.
+    (b) **The dispersion mechanisms are therefore inert by construction, in
+    both directions.** In the linear limit a mean-preserving redistribution
+    cannot change `Σ P_i`; in the saturating one it lowers it. This covers the
+    per-host `shedding_variance_log10` multiplier, the
+    `heterogeneous_zone_dose` sigma, the surface/hand transfer lognormals and
+    the proposed
+    [HAND-EVENT-01](../proposals/hand_event_release_spec.md) §3 point process
+    alike, and it is a sufficient explanation for the topology and dispersion
+    nulls since BERTH-01. HAND-EVENT-01 is **not withdrawn** — it is a
+    fidelity repair to Liu's measured process — but it must be expected to
+    leave every anchor where it is.
+    (c) **Patchiness is not missing.** Gini of effective dose per host-epoch
+    is **0.997** overall and **0.87–0.999** on every individual route; the top
+    1% of host-epochs carry **98.8%** of all effective dose.
+    (d) **One route has curvature, and it wastes 97% of its own mass.**
+    Against the same total spread flat over the same host-epochs, direct
+    contact delivers **95** establishments where a flat allocation would
+    deliver **2,840** (ratio 0.034); fomite 0.76, droplet 0.94, food and HVAC
+    **1.000** to three decimals. Three of five routes are exactly in the
+    linear limit.
+    (e) **The saturating draws are solitary.** Sixty of 35,929 draws sit at
+    `sD ≥ 1`, spread over 59 distinct `(epoch, zone)` cells, at most two in
+    any one cell — while the heavy cells themselves are crowded (top 1% of
+    cells average **18.1** exposed hosts against **12.9** overall). Under
+    `per_partner_contact` the mass goes to the partner, not to the cell, so
+    the epidemic is a chain of isolated near-certainties and is
+    **contact-count-limited, not dose-limited**, over at least three logs of
+    dose either side.
+    (f) **What this re-poses, adopting nothing.** The open questions are the
+    *level* of the direct-contact per-contact transfer (sourced separately
+    from the release scalar and never swept beside it) and **coincidence** —
+    the number of hosts a patch reaches at `sD ≈ 1` — which the engine cannot
+    currently express, since the surface, food and air pools are one scalar
+    per zone per pathogen and the within-zone multiplier is redrawn
+    independently per host-epoch. No anchor is read in any of it, and A5/A9
+    are not evidence about any of it.
+    (g) **Nothing changed.** No constant, interval, profile field or default
+    moved; the harness patches two `TransmissionCore` methods in-process for
+    the diagnostic only.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
