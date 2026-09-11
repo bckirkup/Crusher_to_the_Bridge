@@ -2406,6 +2406,54 @@ Roughly in dependency order.
     together; (d) is a structural result and may not be retimed by what moves
     A9.
 
+25. **The shipped hand process measured against the measurement that sources
+    it: the baseline arm passes, the diarrhoeal arm is 2–3× over-occupied, and
+    every arm is 0.6–0.8 log10 short on amplitude — and the repair raises the
+    load.** Liu 2013 reports two stationary moments of exactly the process
+    `_replenish_hand` implements, and neither had ever been computed for the
+    engine.
+    [`hand_occupancy_readout.py`](../../telemetry_buffer/observation_model/hand_occupancy_readout.py)
+    reproduces the recurrence on the shipped values — ceiling **3.86**,
+    `stool_events_per_day` **1.0 / 5.63**, `hand_inactivation_rate_per_hour`
+    **[0.61, 1.7]**, hygiene at its shipped **0.0**/h — and reports occupancy
+    above Liu's **2.15 log10 GEC/rinse** limit and the mean over those epochs.
+    No anchor is read anywhere in it.
+    (a) **The baseline arm passes an out-of-sample check, unaimed.** Occupancy
+    **0.116 (k = 1.7) to 0.249 (k = 0.61)** brackets Liu's **0.254**. That is
+    `λ/k` falling out of tranche 32's event rate and an independently sourced
+    die-off, and it is the first such check the hand route has passed.
+    (b) **The diarrhoeal arm fails high, and it is the arm that carries the
+    dose.** Occupancy **0.503–0.805**, i.e. **1.98–3.17×** Liu, whose subjects
+    were themselves symptomatic challenge cases.
+    (c) **Every arm fails low on amplitude.** `E[log10 L | L > LOD]` is
+    **3.11–3.30** against Liu's **3.86**, a shortfall of **0.56–0.75 log10**.
+    This is item 24(c) made quantitative: a load decaying from the conditional
+    mean spends its supra-limit time below it, so a conditional mean used as a
+    ceiling cannot reproduce itself.
+    (d) **The two failures have opposite signs and the joint solve is
+    infeasible.** Searching (per-event peak × post-toilet wash probability)
+    over wash efficacies **1.06** and **1.89 log10** and `σ ∈ {0, 0.5, 1.0}`
+    returns **no cell** reproducing both moments: the best reach the
+    conditional mean only at occupancies **0.29–0.86**, with a per-event peak
+    of **4.0–6.2 log10** in place of 3.86 and a time-averaged hand mass
+    **+0.8 to +1.7 log10** above shipped. Tranche 32's diarrhoeal event rate,
+    the inactivation interval and Liu's two moments are **jointly infeasible
+    under decay-plus-reset with the sourced removals** — a structural
+    refutation, not a parameter error.
+    (e) **The direction is against the anchor, and is recorded before any
+    implementation.** The amplitude repair raises the hand mass by 0.8–1.7
+    log10; the occupancy repair lowers it by at most
+    `log10(5.63/1.5) ≈ 0.57`. The residual is positive, all three hand
+    consumers are linear in `L`, and A9 is already **4.5–6× above** target, so
+    a hand route reconciled with Liu is expected to make A9 **worse**. Per the
+    provenance rule that is a result; it may not be used to prefer a different
+    structure. (f) **Also measured, as a negative control:** replacing
+    `max(decayed, target)` with additive arrivals moves the mass by
+    **< 0.1 log10** at these rates, so the structural idiom in
+    [HAND-EVENT-01](../proposals/hand_event_release_spec.md) §3.1 is not what
+    moves this channel. (g) **Nothing changed.** No constant, interval,
+    profile field or default moved; the readout imports no engine module.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
