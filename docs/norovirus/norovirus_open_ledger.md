@@ -2767,7 +2767,17 @@ Roughly in dependency order.
     gets no `hvac_airborne_scalar`: that scalar is duct-transport
     attenuation, and the room the bolus was expelled in has no duct. The
     pathway introduces no constant at all — fraction, episode load, volume
-    and inhaled volume are all existing terms.
+    and inhaled volume are all existing terms. **Flagged gap:** an emesis
+    event in a cabin is emitted under a `zone::cabinN` compartment key, for
+    which the platform data carries neither a room volume nor a ventilation
+    entry. Ventilation resolves to the compartment's **parent corridor** —
+    correct, since a cabin sits on its corridor's HVAC branch — and volume
+    falls back to the named default
+    `EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0`, the engine's standing
+    zone default standing in for an unmeasured cabin volume. A cabin is
+    smaller than 100 m³, so the fallback biases a cabin-compartment dose
+    **down**; the repair is per-cabin volumes in the platform layout, which
+    is its own change and is not done here.
     (c) **One mass, not two emissions.** The same emitted mass doses the
     room's occupants this epoch *and* feeds the reservoir that transports it
     downstream next epoch. Inhalation nowhere in this engine depletes a zone

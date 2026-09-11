@@ -161,6 +161,45 @@ class TestSensitivity:
             doses.append(_emesis_dose_rows(matrix)[0]["dose"])
         assert doses[0] > doses[1] > doses[2]
 
+    def test_cabin_compartment_doses_through_the_parent_zones_ventilation(
+        self,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        """An emesis event under a ``deck::cabinN`` compartment key doses the
+        compartment's occupants, and the ventilation lookup resolves the
+        compartment's parent zone — a cabin sits on its corridor's HVAC
+        branch. Patching the balcony reduction gives a monotone-down sweep;
+        a ventilation entry on the compartment key itself must do nothing."""
+        import engines.transmission_core as tc
+
+        deck = "Cabin_Deck"
+
+        def compartment_dose(reduction: float) -> float:
+            monkeypatch.setattr(tc, "BALCONY_AEROSOL_REDUCTION", reduction)
+            core = TransmissionCore(
+                rng=np.random.default_rng(11),
+                zone_volumes={deck: 500.0},
+                pathogen_profiles={PATHOGEN: _profile()},
+                zone_types={deck: "Cabin_Corridor"},
+                zone_ventilation={deck: "balcony_partial"},
+                clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+            )
+            core.initialize_zones([deck])
+            shedder = _emetic_shedder(core)
+            shedder.current_location = deck
+            shedder.cabin_mate_ids = frozenset({2})
+            target = _agent(2, zone=deck)
+            target.cabin_mate_ids = frozenset({1})
+            matrix, _ = _run_epoch(core, [shedder, target], epoch=1)
+            rows = _emesis_dose_rows(matrix)
+            assert len(rows) == 1
+            assert rows[0]["target_zone"] == f"{deck}::cabin1"
+            return rows[0]["dose"]
+
+        doses = [compartment_dose(r) for r in (0.9, 0.5, 0.1)]
+        assert all(d > 0.0 for d in doses)
+        assert doses[0] > doses[1] > doses[2]
+
     def test_no_emesis_no_source_zone_dose(self) -> None:
         core = _core(_profile())
         shedder = _agent(1, infected=True)

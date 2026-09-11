@@ -289,6 +289,15 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # Forward/lateral deposition footprint from Booth 2014 and Booth & Frost 2019;
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
+# Volume a source-zone emesis dose is diluted into when the emitting key is
+# absent from ``zone_volumes`` — the case for every cabin compartment
+# (``zone::cabinN``), since no platform data carries a per-cabin room volume.
+# The value is the engine's standing zone-volume default, not a measurement:
+# a cabin is smaller than 100 m3, so the fallback biases the source-zone dose
+# DOWN, opposite to the upward bias the un-corrected ventilation lookup
+# produced. The correct repair is per-cabin volumes in the platform layout —
+# its own change, recorded in the open ledger item 31.
+EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0
 
 
 VOMITING_AXIS = "vomiting"
@@ -4604,7 +4613,9 @@ class TransmissionCore:
             return
         # Emission is keyed by the compartment the event happened in, so the
         # occupants are looked up in the compartmented map a cabin corridor
-        # produces; a volume lookup falls back to the engine default.
+        # produces; a cabin compartment has no measured volume, so the
+        # lookup falls back to EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3, which
+        # biases the dose down — recorded in ledger item 31.
         units = self._cabin_compartments(zone_occupants)
         for zone_name, entries in emitted.items():
             mass = sum(load for _, load in entries)
@@ -4615,9 +4626,18 @@ class TransmissionCore:
             )
             if not susceptible:
                 continue
-            volume = max(self.zone_volumes.get(zone_name, 100.0), 1.0)
+            volume = max(
+                self.zone_volumes.get(
+                    zone_name, EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3,
+                ),
+                1.0,
+            )
             concentration = mass / volume
-            ventilation = self._aerosol_ventilation_factor(zone_name)
+            # A cabin compartment sits on its parent corridor's HVAC branch,
+            # so ventilation resolves through the parent zone key.
+            ventilation = self._aerosol_ventilation_factor(
+                self.compartment_parent(zone_name),
+            )
             source_attribution = attribution(
                 ledger, self._shedder_mix(entries, pathogen_id),
             )
