@@ -23,6 +23,12 @@ holds roughly a seventh of the design, so a contrast that was bounded at
 (``docs/norovirus/fomite_pool_denominator_reconciliation.md``), so for a
 fomite-side arm the strata differ only in the routes the arm does not touch.
 
+That second limit is also why the top stratum is not an import-only regime, and
+``floor_probe`` reads it directly: the hand route carries its own release
+normaliser (``HAND_LOAD_LOG10_GEC`` read against ``HAND_LOAD_REFERENCE_PEAK``,
+an implicit -7.14 log10 g of stool per hand), so a voyage keeps a transmitting
+channel at a fixed scale however far ``adj`` shuts the profiled one down.
+
 Finite-sample over the submitted designs. Nothing is selected or adopted by it.
 
     python3 -m telemetry_buffer.observation_model.adj_stratified_readout
@@ -182,6 +188,60 @@ def boarding_split(rows, factors, root: str = BASE) -> None:
         )
 
 
+FLOOR_BANDS = ((6.5, 7.5), (7.5, 8.5), (8.5, 10.0), (10.0, 99.0))
+FLOOR_DEAD = 10.0
+BIG_VOYAGE_PAX_AR = 0.08
+
+
+def _band_line(rows, factors, low, high) -> str:
+    sub = [row for row in rows.values()
+           if low <= float(factors[row["point_index"]][ADJ]) < high]
+    if not sub:
+        return f"adj {low:4.1f}-{high:4.1f} | empty"
+    pax_posted = sum(
+        row["reported_case_attack_rate_passenger"] >= POSTING_THRESHOLD
+        for row in sub
+    )
+    return (
+        f"adj {low:4.1f}-{high:4.1f} | n={len(sub):5d} "
+        f"pax_infAR={100 * st.mean(r['infection_attack_rate_passenger'] for r in sub):5.2f}% "
+        f"boarding={100 * st.mean(float(factors[r['point_index']][BOARDING_PAX]) for r in sub):5.2f}% "
+        f"post_pax={100 * pax_posted / len(sub):5.2f}% "
+        f"post_any={100 * sum(posted(r) for r in sub) / len(sub):5.2f}%"
+    )
+
+
+def floor_probe(rows, factors) -> None:
+    """What still transmits where the profiled release is arithmetically dead.
+
+    Above ``adj ~ 8.5`` a host's profiled emission is below one copy per epoch,
+    so any voyage whose passenger infection attack rate exceeds its boarding
+    prevalence transmitted through a route the scalar never entered. The factor
+    contrast is descriptive: the design is a space-filling box, the subsets are
+    small, and no association here is causal or adopted.
+    """
+    print("\nposting floor by dose band (passenger channel is A9's numerator)")
+    for low, high in FLOOR_BANDS:
+        print(f"{'':>13}{_band_line(rows, factors, low, high)}")
+    dead = [row for row in rows.values()
+            if float(factors[row["point_index"]][ADJ]) >= FLOOR_DEAD]
+    if not dead:
+        return
+    big = [row for row in dead
+           if row["infection_attack_rate_passenger"] > BIG_VOYAGE_PAX_AR]
+    print(f"\nadj >= {FLOOR_DEAD:.0f}: {sum(r['took_off'] for r in dead)} of "
+          f"{len(dead)} voyages took off, {len(big)} exceeded "
+          f"{100 * BIG_VOYAGE_PAX_AR:.0f}% passenger infection AR")
+    if not big:
+        return
+    for key in sorted(next(iter(factors.values()))):
+        whole = st.mean(float(factors[r["point_index"]][key]) for r in dead)
+        if not whole:
+            continue
+        part = st.mean(float(factors[r["point_index"]][key]) for r in big)
+        print(f"{key:>52} | {part / whole:5.2f}x the band mean")
+
+
 def read_campaign(name, control_stage, arm_stages, root: str = BASE) -> dict:
     control, factors = load(control_stage, root)
     if not control:
@@ -223,6 +283,7 @@ def main() -> None:
         last = read or last
     if last:
         boarding_split(last["control"], last["factors"], args.root)
+        floor_probe(last["control"], last["factors"])
 
 
 if __name__ == "__main__":

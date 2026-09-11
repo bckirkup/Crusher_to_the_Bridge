@@ -2229,13 +2229,15 @@ Roughly in dependency order.
     infection. Item 00 withdrew these as uninterpretable; they are reinstated
     as bounds inside a transmitting regime, not as nulls over the box.
     (d) **The posting anchor is out of reach from below.** The import-only
-    stratum posts 4.5% of voyages against A9's 0.6–1.6% with essentially no
+    stratum posts 4.5% of voyages against A9's 0.42–0.56% with essentially no
     onboard transmission, and splitting it by the swept boarding prevalence
     gives 2.38 / 4.46 / 3.27 / 7.74% by quartile — the lowest sourced quartile
     is still above the band. No transmission-side change of any size reaches
-    A9; the binding terms are the boarding-prevalence interval and the
-    observation model. This is `#467`'s posting floor, measured on the
-    stratified arrays.
+    A9. This is `#467`'s posting floor, measured on the stratified arrays.
+    Two corrections to this sub-item, both in item 22: the binding term is
+    **not** the boarding interval or the observation model, and the band is
+    0.42–0.56% (`a9_targets("pre")["fleet"]`, i.e. 4.187–5.583 per 1,000
+    eligible voyages), not the 0.6–1.6% quoted here and in items 19 and 20.
     (e) **The import-only stratum is not transmission-free**, and stratifying
     by `adj` cannot test a fomite arm. Passenger infection attack rate exceeds
     passenger boarding prevalence in every quartile (3.00% against 2.69%;
@@ -2247,6 +2249,54 @@ Roughly in dependency order.
     transmission, not where the ship has been shown to sit, and standing there
     because the anchors improve would fit `adj` to an anchor indirectly. The
     interval stays [4, 24] pending the refit.
+
+22. **A9's floor is the hand route's own release normaliser, not an import,
+    an ascertainment rule or the boarding interval — and the band A9 has been
+    scored against in the last three items was wrong.** Item 21(d) attributed
+    the 4.5% posting floor to boarding prevalence and the observation model.
+    Splitting the same retained rows by dose band (`floor_probe` in
+    `adj_stratified_readout.py`; tables in `adj_stratified_readout.md` §3)
+    refutes both attributions.
+    (a) **The cut at `adj` ≥ 6.5 was not an import-only stratum.** Posting
+    falls 20.5 → 7.7 → 1.8% across 6.5–7.5, 7.5–8.5 and 8.5–10, so item 21's
+    top stratum averaged a still-transmitting decade into the floor. The floor
+    proper is `adj` ≥ 10 (n = 1,074), where a host's profiled emission is
+    below 10⁻⁶ of one copy per epoch.
+    (b) **That band still transmits.** 696 of 1,074 voyages took off, mean
+    passenger infection attack rate 3.40% against a mean boarding prevalence
+    of 3.25%, 35 voyages (3.3%) exceeded 8% passenger infection attack rate,
+    and 2.51% posted on the passenger channel — A9's own numerator (item 11) —
+    against 0.42–0.56%. Crew-only postings are 15% of the or-rule total, so
+    the crew channel is not the excess either.
+    (c) **What separates those 35 voyages is one-sided and it is the hand
+    chain.** Relative to their band: `food_ingestion_fraction_per_day` 1.53×,
+    `hand_to_surface_drying_multiplier` 1.28×,
+    `secretor_negative_relative_susceptibility` 1.17×,
+    `food_hand_contacts_per_day` 1.12×, passenger boarding prevalence 1.07×,
+    `adj` 1.00×. Descriptive only — a space-filling box and 35 rows — and no
+    factor here is adopted, narrowed or fitted.
+    (d) **The mechanism is a second, unswept release normaliser.**
+    `engines/infection_dynamics_bridge.py` reads `HAND_LOAD_LOG10_GEC` = 3.86
+    (Liu 2013 hand rinses, Grade B, origin Ab) against
+    `HAND_LOAD_REFERENCE_PEAK_LOG10` = 11.0, so the hand route carries an
+    implicit **−7.14 log10 g of stool per hand** — a Class X convention, as
+    its own comment declares, that no study has measured. `adj` never touches
+    it (item 00a). Every voyage therefore keeps one transmitting channel at an
+    `adj`-equivalent of 7.14, at the top of item 00's 6–7 switch, whatever the
+    design does to the profiled channel; every arm run since BERTH-01 swept
+    the dead channel and held the live one fixed at an unsourced value.
+    (e) **Correction to the scored band.** A9's fleet target is 4.187–5.583
+    postings per 1,000 eligible voyages — 0.42–0.56%, as
+    `admissible_region.py` and items 11–13 have it. Items 19, 20 and 21(d)
+    quote 0.6–1.6%, which is in no source and no code path; the campaign
+    readouts under it understate the over-posting (item 21(d) is 8–10× over,
+    not 3–7×). The orderings and contrasts in those items are unaffected.
+    (f) **Open, and not closed by this item.** The bridge is not sourced here
+    and is not moved here: what is required is the mass of faecal material on
+    a contaminated hand, read independently of A9, so the hand and
+    environmental channels sit on one measured scale. Sourcing it by which
+    value lowers the posting rate is forbidden by `AGENTS.md` and would
+    destroy the only test available afterwards.
 
 ## 5. Held fixed by assumption
 
