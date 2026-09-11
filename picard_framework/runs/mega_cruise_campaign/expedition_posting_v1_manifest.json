@@ -1,0 +1,156 @@
+{
+  "campaign": "expedition_posting_v1",
+  "description": "Measure, on the merged post-#506 model, two quantities on the expedition hull and nothing else: (1) how often a voyage reaches the VSP reporting threshold, and (2) the reported passenger attack rate among the voyages that do. The composed direct-contact route (#506) replaced whole-body per-epoch emission with a finite donor-hand reservoir, added Liu-derived host-level hand-carriage intermittency, switched activity-resolved contact generation on, and gave the emesis aerosol a source-zone dose, so every posting frequency and conditional attack rate recorded before that merge was measured on a different transmission chain and none of them is carried forward here. Nothing in this manifest is fitted: the dose scale is swept as a declared physical release rate (environmental_faecal_release_log10_g_per_epoch, the legacy dose_adjustment key, -log10 grams of stool released to the environment per epoch) and the readout is reported stratified by it, because the ledger's item 00 records a switch in that exponent near adj 6-7 on the pre-merge chain and forbids reading a posting frequency marginalised across it. The shipped norwalk_gi value (4.0) is one rung of the ladder and carries no privileged status. Voyage length is swept because the observed A9 posting probability is strongly length-dependent (0.33 per 1,000 voyages at 6-7 days against 18.3 at 11-14; midrs_incidence_targets.a9_targets), so a single 168-epoch arm cannot be compared with a fleet-pooled target. Comparators are reported and never optimised against: A4 expedition pre-2020 reported passenger AR over postings (median 5.32 percent, IQR 4.00-10.45, n=21) and the A9 fleet interval (4.19-5.58 per 1,000 voyages) with its length-resolved rows. Containment is a separate axis at the shipped rung so that a change in posting frequency stays attributable to either transmission or quarantine compliance rather than to their product; none_response carries sick_call_probability_per_day 0.0 and is the transmission-only counterfactual, not a posting arm. Sixty voyages per cell (780 runs) is a wall-clock choice, not a power calculation, and it is the campaign's binding limitation: a cell resolves a posting frequency to roughly plus or minus 0.06 near 0.5 and cannot distinguish A9's few-percent target from zero at all, so this campaign can locate the release rung at which posting stops being a near-certainty and can measure the conditional attack rate, and cannot confirm a posting frequency of a few per hundred. Seed blocks are contiguous from 3000 so that an extension re-runs nothing.",
+  "platform": "expedition_cruise_450",
+  "default_epochs": 168,
+  "default_num_agents": 450,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "none_response": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "syndromic": {
+        "sick_call_probability_per_day": 0.0,
+        "background_noise_rate": 0.0
+      },
+      "fred_behavior": {
+        "healthy_noise_categories": []
+      },
+      "observation": {
+        "enabled": false
+      },
+      "wearable_monitoring": {
+        "enabled": false
+      },
+      "ship_graph": {
+        "counter_confinement_enabled": false
+      },
+      "escalation": {
+        "alert_sick_call_threshold": 1000000,
+        "suspect_attack_rate": 2.0,
+        "confirm_attack_rate": 2.0,
+        "lockdown_attack_rate": "never"
+      }
+    },
+    "syndromic_comp85": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.85,
+        "compliance_by_class": {
+          "crew": 0.85,
+          "passenger_elderly": 0.7,
+          "passenger_young": 0.45
+        }
+      }
+    },
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    },
+    "syndromic_comp45": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.45,
+        "compliance_by_class": {
+          "crew": 0.45,
+          "passenger_elderly": 0.37,
+          "passenger_young": 0.24
+        }
+      }
+    },
+    "syndromic_comp25": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.25,
+        "compliance_by_class": {
+          "crew": 0.25,
+          "passenger_elderly": 0.21,
+          "passenger_young": 0.13
+        }
+      }
+    }
+  },
+  "tiers": {
+    "c1_exp_posting_curve_7d": {
+      "description": "Posting curve against the declared release scale on a 7-day voyage, one containment level held fixed at mid compliance. Six rungs one log apart bracket the shipped 4.0 on both sides and span the pre-merge switch region (adj 6-7); the ladder locates where posting frequency crosses realistic values on the merged chain rather than asserting a value.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+      "fiat_index_case": true,
+      "initial_infected_values": [1],
+      "surveillance_strategies": ["syndromic_comp65"],
+      "epoch_durations": [168],
+      "seeds": [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009,
+                3010, 3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019,
+                3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029,
+                3030, 3031, 3032, 3033, 3034, 3035, 3036, 3037, 3038, 3039,
+                3040, 3041, 3042, 3043, 3044, 3045, 3046, 3047, 3048, 3049,
+                3050, 3051, 3052, 3053, 3054, 3055, 3056, 3057, 3058, 3059]
+    },
+    "c1_exp_posting_curve_12d": {
+      "description": "The same curve at 288 epochs (12 days), which is the voyage length band whose observed A9 posting probability is 18.3 per 1,000 rather than 0.33. Three rungs, because the 7-day arm carries the resolution of the ladder shape and this arm carries the length contrast.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [2.0, 4.0, 6.0],
+      "fiat_index_case": true,
+      "initial_infected_values": [1],
+      "surveillance_strategies": ["syndromic_comp65"],
+      "epoch_durations": [288],
+      "seeds": [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009,
+                3010, 3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019,
+                3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029,
+                3030, 3031, 3032, 3033, 3034, 3035, 3036, 3037, 3038, 3039,
+                3040, 3041, 3042, 3043, 3044, 3045, 3046, 3047, 3048, 3049,
+                3050, 3051, 3052, 3053, 3054, 3055, 3056, 3057, 3058, 3059]
+    },
+    "c1_exp_containment_7d": {
+      "description": "Containment axis at the shipped rung (adj 4.0) on a 7-day voyage: three further compliance levels plus the transmission-only counterfactual. none_response reports no sick calls, so its posting frequency is not a posting measurement and the readout marks it as such; it is here to keep a containment effect separable from a transmission effect.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [4.0],
+      "fiat_index_case": true,
+      "initial_infected_values": [1],
+      "surveillance_strategies": [
+        "syndromic_comp85",
+        "syndromic_comp45",
+        "syndromic_comp25",
+        "none_response"
+      ],
+      "epoch_durations": [168],
+      "seeds": [3000, 3001, 3002, 3003, 3004, 3005, 3006, 3007, 3008, 3009,
+                3010, 3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019,
+                3020, 3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029,
+                3030, 3031, 3032, 3033, 3034, 3035, 3036, 3037, 3038, 3039,
+                3040, 3041, 3042, 3043, 3044, 3045, 3046, 3047, 3048, 3049,
+                3050, 3051, 3052, 3053, 3054, 3055, 3056, 3057, 3058, 3059]
+    }
+  }
+}
