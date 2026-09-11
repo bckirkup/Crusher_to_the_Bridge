@@ -2559,10 +2559,21 @@ Roughly in dependency order.
     of items 22(f)/23 the single scale controlling all person-mediated
     transmission. Proposal §7 records the falsifiable predictions in advance;
     an overshoot is to be reported, not rescued by widening the interval.
-28. **The hand bridge is sourceable within one subject at a time, the shipped
-    `−7.14` is a cross-cohort quotient rather than a measurement, and sourcing
-    it moves the hand load the wrong way for A9.** Closed form on the paper's
-    own table, no simulation:
+28. **The within-subject hand bridge is REFUTED for this engine — withdrawn.**
+    The original version of this item claimed (i) that the shipped `−7.14` is
+    "a cross-cohort quotient rather than a measurement", (ii) that Liu Table 3
+    supplies a within-subject bridge of `−4.14` log10 g/hand that "closes item
+    23(f)'s first option", and (iii) that sourcing it moves the hand load up
+    by 3.00 logs. All three are withdrawn; the subsections below keep the
+    arithmetic that produced them and record why it was misread. The correct
+    reading: `HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0` is **the shipped shedding
+    curve's own peak** (`max(SYMPTOMATIC_SHEDDING)`), not Atmar's cohort peak —
+    so `curve − 11.0` is "how far below this host's own peak today is", and
+    `HAND_LOAD_LOG10_GEC = 3.86` is the hand load **at peak**, which is exactly
+    the quantity Liu measures in the subjects she measures it in. The pair is a
+    peak-normalised anchor; the `−7.14` difference is the Class X
+    normalisation convention its own definition comment already declares, not
+    a quotient of two disagreeing cohorts. Arithmetic and harness:
     `telemetry_buffer/observation_model/hand_bridge_pairing.py`; written up in
     [`../literature/consensus_tranche_41_hand_bridge_within_subject.md`](../literature/consensus_tranche_41_hand_bridge_within_subject.md).
     (a) **The definitional check that item 24(b) never ran, passed.** Liu 2013
@@ -2573,55 +2584,70 @@ Roughly in dependency order.
     same genogroup, same unit class, both experimental GI.1 challenge. **There
     is no unit defect here**, which is what licenses the rest of this item
     against the standing prior that a three-log gap is a units error.
-    (b) **The bridge, paired within subject.** Liu Table 3 (origin **T3**) gives
-    each subject's own maximum stool titre beside that subject's own mean
-    positive hand load. Four of six subjects have both: 34 (8.3, 3.94), 36
-    (8.1, 3.74), 46 (7.4, 3.30), 54 (8.2, 4.45). Differences: **−4.14 log10 g
-    of stool per hand, range −4.36 … −3.75, SD 0.29, n = 4.** Grade **B** —
-    right pathogen, genogroup and unit in experimentally infected humans, wrong
-    setting. This **closes item 23(f)'s first option** and supersedes the null
-    tranche 26 recorded and tranche 39 carried forward.
-    (c) **What the shipped constant actually is.** `−7.14` is
-    `HAND_LOAD_LOG10_GEC` (3.86, Liu's hands) minus
-    `HAND_LOAD_REFERENCE_PEAK_LOG10` (11.0, *Atmar's* peak) — a quotient of two
-    cohorts whose stool titres do not overlap. **Every one of Liu's six maxima
-    (7.4–8.3) falls below Atmar's sixteen-subject minimum (8.7)**, median 11.0.
-    Six below sixteen is not sampling noise and (a) excludes a unit error, so
-    the shipped constant is the width of an unreconciled cohort or
-    assay-standard discrepancy between the two papers that jointly define the
-    hand route. Item 22(d) called it a Class X convention; that stands, and
-    this is *why* it takes the value it does. Two bounds act on the
-    within-subject figure in **opposite** directions and neither is quantified:
-    Liu's stool window is days 0–4 while Atmar's peaks fell at a median of day
-    4 and were highest *after* clinical resolution in 11/16 subjects, so Liu's
-    maxima are lower bounds and the bridge is biased **high**; hand-rinse
-    recovery efficiency is unmeasured, so 3.86 is a lower bound and the bridge
-    is biased **low**. Do not read the coincidence that Liu-over-Atmar-median
-    reproduces `−7.14` as support for either bound.
-    (d) **The functional form, tested for the first time and underpowered.**
-    The engine asserts `hand ∝ 10^(curve)`, a log-log slope of exactly 1. Liu's
-    four paired subjects give slope **+0.93**, r **+0.80**, p **0.20** across a
-    total stool span of 0.9 log10. **Direction supported, magnitude
-    unestablished** — not refuted, and not sourced either.
-    (e) **The sign, recorded before implementation.** Sourcing the bridge
-    **raises** the hand load by **+3.00 log10**, against item 27(c)'s −4.66
-    from composing the route: net **≈ −1.7 logs, not −4.66**. At the curve peak
-    on the 0.13 transfer arm, per-contact establishment goes 0.6064 (shipped,
-    uncomposed) → 0.3987 (composed, sourced bridge), not → 0.0103 (composed,
-    shipped bridge). **A level repair alone does not turn posting from a
-    ceiling into a rate.** Item 25(e) predicted this sign; it is confirmed, and
-    per the first rule of `model-parameter-provenance` it is written here in
-    advance so that it cannot later be read off A9. A sourced value that makes
-    A9 worse is a result about what is still missing.
-    (f) **What carries the rest is in the same table and is not a level.**
-    25.4% (18/71) rinse positivity from symptomatic stool-positive hosts at a
-    2.15 log10 limit; **two of six infected subjects never hand-positive**;
-    per-subject positivity 0–54.5%. Item 24(c) already refuted the non-event
-    hand mode on these grounds. The addition here is that the intermittency and
-    the host-level heterogeneity are not refinements to add after the level is
-    fixed — they are the part of Liu that does the work, and a composed route
-    built on the mean alone would deliver 0.40 per contact to every partner of
-    every shedder.
+    (b) **The bridge, paired within subject — computed, then refuted.** Liu
+    Table 3 (origin **T3**) gives each subject's own maximum stool titre
+    beside that subject's own mean positive hand load. Four of six subjects
+    have both: 34 (8.3, 3.94), 36 (8.1, 3.74), 46 (7.4, 3.30), 54 (8.2,
+    4.45). Differences: **−4.14 log10 g of stool per hand, range −4.36 …
+    −3.75, SD 0.29, n = 4.** As a measured pairing this arithmetic stands,
+    but as a candidate offset for this engine it is **refuted**: applied to
+    the shipped curve it predicts 11.0 − 4.14 = **6.86 log10 GEC/hand at
+    peak**, while the highest per-subject mean hand load Liu reports is
+    **4.45** — the proposed bridge contradicts the hand column it was
+    derived from, because it would put every subject's peak-day hand above
+    every hand Liu ever measured. Item 23(f)'s first option stays open; the
+    tranche-26 null and tranche-39 carry-forward are not superseded by this
+    figure. What the table does supply is recorded in (f).
+    (c) **What the shipped constant actually is — corrected.** The original
+    claim that `−7.14` is a quotient of two cohorts is withdrawn.
+    `HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0` is the **shipped curve's own
+    peak** — `max(SYMPTOMATIC_SHEDDING)` — so the difference of 3.86 is a
+    peak-normalised anchor: Liu's pooled hand load at the host's own peak,
+    exactly the quantity and the subjects Liu measures. Item 22(d) called it
+    a Class X convention; that stands, and it is a normalisation convention,
+    not a cross-cohort quotient. The cohort-gap observation remains true as
+    data — **every one of Liu's six stool maxima (7.4–8.3) falls below
+    Atmar's sixteen-subject minimum (8.7)**, median 11.0, and (a) excludes a
+    unit error — but it does not make the shipped pair a quotient of the two
+    studies, and it was wrongly invoked as one. Two bounds act on any
+    within-subject offset in **opposite** directions and neither is
+    quantified: Liu's stool window is days 0–4 while Atmar's peaks fell at a
+    median of day 4 and were highest *after* clinical resolution in 11/16
+    subjects, so Liu's maxima are lower bounds and a within-subject offset
+    is biased **high**; hand-rinse recovery efficiency is unmeasured, so
+    3.86 is a lower bound and such an offset is biased **low**. Do not read
+    the coincidence that Liu-over-Atmar-median reproduces `−7.14` as support
+    for either bound — or, as this item once did, as an explanation of the
+    constant.
+    (d) **The functional form was never tested here.** The engine asserts
+    `hand ∝ 10^(curve)` — a log-log slope of 1 between a host's *today*
+    stool titre and its *today* hand load. Liu's four paired subjects give
+    slope **+0.93**, r **+0.80**, p **0.20** across a total stool span of
+    0.9 log10 — but that slope is measured **across subjects, each at its
+    own peak**: it is a between-subject level relation, not a within-host
+    time course, so it was never a test of the engine's curve-tracking
+    assumption at all. The original "direction supported, magnitude
+    unestablished" verdict is withdrawn — the number is real and the test it
+    was claimed to perform does not exist in this data.
+    (e) **The sign calculation is withdrawn with its premise.** The
+    "sourcing raises the hand load by +3.00 log10" framing assumed the
+    refuted −4.14 offset replaces a cross-cohort −7.14; neither half of that
+    framing survives (c). The recorded arithmetic — per-contact
+    establishment 0.6064 (shipped, uncomposed) → 0.3987 (composed, at the
+    rejected offset) → 0.0103 (composed, shipped anchor) — stays as the
+    record of what was computed, not as a comparison of candidate values.
+    No hand-load constant moved, and none may move on this evidence.
+    (f) **What carries the rest is in the same table and is not a level —
+    and it is now implemented.** 25.4% (18/71) rinse positivity from
+    symptomatic stool-positive hosts at a 2.15 log10 limit; **two of six
+    infected subjects never hand-positive**; per-subject positivity 0–54.5%.
+    Item 24(c) already refuted the non-event hand mode on these grounds, and
+    this host-level carriage heterogeneity is the part of Table 3 that
+    survives the bridge's refutation as actionable evidence: it is what
+    `HAND_CARRIAGE_PROPENSITY_BETA` = (0.911, 3.489) implements as a
+    per-host-per-infection beta-binomial draw thinning the defecation rate
+    inside `_replenish_hand` (mean 0.207, ICC 0.185; homogeneity rejected —
+    exact Monte Carlo p = 0.021, beta-binomial LRT p = 0.0022).
     (g) **Rows that stay shut.** Gravimetric faecal mass on a hand remains
     **∅ null** (two further phrasings; the field does not weigh faeces on
     hands). Oie's per-gram denominator stays **`?nr-term`** and the route is now
@@ -2631,8 +2657,8 @@ Roughly in dependency order.
     quantity in genome copies without a surrogate. Spend no further queries
     there.
     (h) **Nothing changed.** `HAND_LOAD_LOG10_GEC` and
-    `HAND_LOAD_REFERENCE_PEAK_LOG10` are untouched, no interval was widened and
-    no default moved.
+    `HAND_LOAD_REFERENCE_PEAK_LOG10` are untouched, no interval was widened
+    and no default moved — before the retraction and after it.
 29. **Inventory of mechanisms that are implemented, tested, and inert in the
     shipped norovirus arm — and one ledger entry that reads stale.** Swept from
     the defaults and `.get` sites in `engines/transmission_core.py`,

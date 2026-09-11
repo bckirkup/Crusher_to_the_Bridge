@@ -1,12 +1,20 @@
-"""The hand release bridge, paired within Liu's own subjects instead of across studies.
+"""The hand release bridge, paired within Liu's own subjects -- a refutation, not a candidate.
 
-`HAND_LOAD_LOG10_GEC` (3.86, Liu 2013) is currently read against
-`HAND_LOAD_REFERENCE_PEAK_LOG10` (11.0, the GI.1 peak of the Atmar 2008 curve),
-and their difference is the -7.14 log10 g/hand bridge that ledger items 22(d),
-23 and 24 record as an unsourced Class X convention. This harness computes the
-same bridge from the pairing Liu's Table 3 actually reports -- each subject's
-own maximum stool titre against that subject's own mean positive hand load --
-and prints what the substitution does to a hand-composed contact.
+`HAND_LOAD_LOG10_GEC` (3.86, Liu 2013) is read against
+`HAND_LOAD_REFERENCE_PEAK_LOG10` (11.0), and their -7.14 difference is the
+peak-normalised anchor ledger items 22(d), 23 and 24 record as a Class X
+convention: 11.0 is the shipped curve's own peak (`max(SYMPTOMATIC_SHEDDING)`),
+so `curve - 11.0` is the distance below the host's own peak and 3.86 is the
+hand load AT peak -- the quantity Liu measures in the subjects she measures it
+in. This harness computes the within-subject pairing Liu's Table 3 reports --
+each subject's own maximum stool titre against that subject's own mean
+positive hand load -- as the REFUTATION input, not a candidate offset:
+applied to the shipped curve the -4.14 mean difference would put a peak-day
+hand at 6.86 log10 GEC, above the largest per-subject mean Liu ever measured
+(4.45), so the pairing contradicts the hand column it was read from. What
+survives Table 3 is host-level carriage heterogeneity, which
+HAND_CARRIAGE_PROPENSITY_BETA implements; the printed comparison below keeps
+the -4.14 arm visible only as the record of the rejected value.
 
 Definitional check, from Liu's Statistical analysis section, quoted verbatim:
 "NV concentrations in stool samples and hand rinse samples were expressed as
@@ -154,17 +162,22 @@ def report_bridge() -> tuple[float, float, float]:
         f"n = {len(bridges)} subjects)",
     )
     shipped = HAND_LOAD_LOG10_GEC - HAND_LOAD_REFERENCE_PEAK_LOG10
-    print(f"shipped cross-study     {shipped:+.2f} log10 g/hand")
+    print(f"shipped anchor          {shipped:+.2f} log10 g/hand")
     print(
         f"                        = {HAND_LOAD_LOG10_GEC:.2f} (Liu, hands) "
-        f"- {HAND_LOAD_REFERENCE_PEAK_LOG10:.2f} (Atmar, curve peak)",
+        f"- {HAND_LOAD_REFERENCE_PEAK_LOG10:.2f} (shipped curve's own peak)",
     )
     print(f"difference              {mean_bridge - shipped:+.2f} log10")
+    print(
+        "  REFUTED as an engine offset: shipped onto the curve it predicts "
+        f"{11.0 + mean_bridge:.2f} log10 GEC/hand at peak,",
+    )
+    print("  above Liu's largest measured per-subject mean (4.45).")
     return mean_bridge, min(bridges), max(bridges)
 
 
 def report_scaling() -> None:
-    """Test the proportionality the bridge's functional form assumes."""
+    """Report the paired log-log slope, which does not reach the form the engine assumes."""
     rows = _paired_rows()
     xs = [stool for _, stool, _ in rows]
     ys = [hand for _, _, hand in rows]
@@ -173,7 +186,7 @@ def report_scaling() -> None:
 
     print()
     print("=" * 74)
-    print("THE SCALING ASSUMPTION, TESTED IN LIU'S OWN SUBJECTS")
+    print("A SLOPE THAT IS NOT A TEST OF THE SCALING ASSUMPTION")
     print("=" * 74)
     print("The engine assumes hand load tracks the stool titre one-for-one:")
     print("  hand_gec = 10^HAND_LOAD_LOG10_GEC * 10^(curve - REFERENCE_PEAK)")
@@ -183,9 +196,9 @@ def report_scaling() -> None:
     print(f"  intercept   {intercept:+.2f}")
     print(f"  Pearson r   {r:+.2f}   n = {len(rows)} subjects   p = {p:.2f}")
     print()
-    print("  Consistent with a slope of 1 and far too small to establish it.")
-    print("  The stool titres span 0.9 log10 in total, so this sample cannot")
-    print("  distinguish proportional scaling from a fixed hand load.")
+    print("  But this slope is ACROSS subjects, each at its own peak -- a")
+    print("  between-subject level relation, not a within-host time course.")
+    print("  It never tested the engine's curve-tracking assumption.")
 
 
 def report_cohort_gap() -> None:
@@ -231,10 +244,11 @@ def report_composed_contact(mean_bridge: float) -> None:
 
     print()
     print("=" * 74)
-    print("A HAND-COMPOSED CONTACT AT THE CURVE PEAK, UNDER EACH BRIDGE")
+    print("A HAND-COMPOSED CONTACT AT THE CURVE PEAK, SHIPPED VS REFUTED")
     print("=" * 74)
     print(f"curve peak {peak:.1f} log10 GEC/g; hand-to-mouth midpoint {h2m:.5f}")
     print("Transfer arms are explicit analogies over a literature null.")
+    print("The Liu-paired column is the refutation record, not a candidate.")
     print()
     header = (
         f"{'bridge':>8}  {'hand load':>11}  {'transfer':>8}  "
@@ -242,7 +256,7 @@ def report_composed_contact(mean_bridge: float) -> None:
     )
     for label, bridge in (
         ("shipped", shipped_bridge),
-        ("Liu-paired", mean_bridge),
+        ("refuted", mean_bridge),
     ):
         hand_load = math.pow(10.0, peak + bridge)
         print(f"-- {label}, bridge {bridge:+.2f} log10 g/hand")
@@ -263,10 +277,9 @@ def report_composed_contact(mean_bridge: float) -> None:
         f"P(inf) {_p_infection(shipped_dose):.4f}",
     )
     print()
-    print("So the two corrections act against each other: composing the route")
-    print("lowers the per-contact dose, and sourcing the bridge within Liu's")
-    print("own subjects raises it by")
-    print(f"  {mean_bridge - shipped_bridge:+.2f} log10.")
+    print("The composed route's dose stands on the shipped anchor; the")
+    print("Liu-paired offset is not a value the model can carry -- it would")
+    print("put every peak-day hand above every hand Liu measured.")
 
 
 def report_intermittency() -> None:
