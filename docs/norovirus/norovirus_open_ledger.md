@@ -2298,6 +2298,57 @@ Roughly in dependency order.
     value lowers the posting rate is forbidden by `AGENTS.md` and would
     destroy the only test available afterwards.
 
+23. **The hand bridge is a literature null, and the indicator arithmetic that
+    stands in for it puts the shipped convention at the bottom of its band —
+    so the A9 floor may not be read as "the constant is too high".**
+    [Tranche 39](../literature/consensus_tranche_39_hand_release_bridge.md)
+    answers item 22(f) as far as the record allows. Nothing is adopted,
+    narrowed or moved.
+    (a) **The direct quantity does not exist.** No study weighs faecal
+    material on a hand; none measures stool titre and hand load in the same
+    subjects (tranche 26, unchanged). The closest published quantity is
+    derived, not measured: Mattioli 2015 (*Environ Sci Technol*) models
+    **0.93 mg of faeces ingested per day** by hand-to-mouth in Tanzanian
+    children under five, an integrated daily dose over many contacts whose own
+    indicator→mass conversion factor is `?nr`.
+    (b) **The indicator bridge, composed from independently retrieved halves.**
+    Numerator: E. coli **2.1–2.2 log10 CFU per two hands** on mothers'
+    hands (Mattioli 2015, *Am J Trop Med Hyg*, Results table), with
+    2.25–1.55 × 10⁵ CFU/pair across SaniPath's 287 rinses and > 2 log10
+    CFU/pair in EXCAM. Denominator: total E. coli **undetectable to 8.75 log10
+    CFU/g faeces** in 41 healthy adults (McOrist 2005) and **6.86 ± 1.56
+    log10 CFU/g** in infants (Islam 2019). The quotient is
+    **10⁻⁶·⁹ … 10⁻⁴·¹ g of stool per hand** for a *routine* contaminated hand
+    in a heavily contaminated household setting.
+    (c) **The shipped convention sits at or below the bottom of that band.**
+    `10^(3.86 − 11.0)` = 10⁻⁷·¹⁴ g/hand. It is therefore **not** shown to be
+    too high, and item 22(d) must not be read as claiming it is: an
+    independently sourced replacement drawn from this envelope would *raise*
+    the hand load and *raise* the posting floor. The envelope and the anchor
+    point in opposite directions, and `AGENTS.md` forbids resolving that by
+    following the anchor.
+    (d) **It is an envelope, not a measurement.** Two stacked surrogates
+    (E. coli for norovirus, culturable CFU for genome copies); E. coli is not
+    conserved on skin; the denominator is left-censored at *undetectable*; the
+    setting is low/lower-middle-income households, where Cantrell 2022 puts
+    hand E. coli prevalence at 49% against **6% [1–12%]** in upper-middle/high
+    -income settings — the cruise analogue is mostly non-detects; and hand
+    rinse recovery efficiency is unmeasured, so every numerator is a lower
+    bound.
+    (e) **The event arm is unconvertible.** Oie 2021's **39,499 ± 77,768
+    CFU/glove** after defecation is the only retrieved measurement at the
+    event the engine actually models (`_replenish_hand` re-attains the target
+    at a stool event), but it counts total culturable microbes and the
+    matching per-gram denominator is **`?nr`**. Dividing it by an E. coli
+    per-gram figure would be a unit error and is not done. As an ordering only
+    it puts a post-defecation hand 2–3 logs above the routine band.
+    (f) **Still open.** The row closes on one of: norovirus copies per hand
+    *and* stool titre in the same subjects; a gravimetric or tracer study of
+    faecal residue transferred at defecation; or Oie's per-gram denominator.
+    None was found. `HAND_LOAD_LOG10_GEC`, `HAND_LOAD_REFERENCE_PEAK_LOG10`,
+    `environmental_faecal_release_log10_g_per_epoch`, the dose-response rows
+    and `POSTING_THRESHOLD` are all unchanged by this item.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

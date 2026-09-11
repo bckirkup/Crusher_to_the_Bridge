@@ -121,6 +121,14 @@ Three nulls worth stating as nulls rather than as gaps in the reading:
 3. **No stool peak in a cruise population.** Grade A remains unreachable for
    the peak from the demand side as well as the supply side.
 
+All three stand. [Tranche 39](consensus_tranche_39_hand_release_bridge.md)
+re-asked null 1 and null 2 from the mass side and adds a third: no study
+weighs faecal material on a hand. What it does return is an *indicator*
+envelope — faecal-indicator counts per hand over indicator counts per gram of
+stool — which puts a routine contaminated hand at 10⁻⁶·⁹ … 10⁻⁴·¹ g, i.e. at
+or above the −7.14 bridge rather than below it. That envelope is a bound, not
+a replacement, and nothing there is adopted.
+
 Two families returned repeatedly and are recorded as **not** answering the
 question, so they are not re-retrieved:
 
