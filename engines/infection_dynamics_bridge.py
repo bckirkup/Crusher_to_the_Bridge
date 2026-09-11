@@ -59,6 +59,19 @@ HAND_LOAD_LOG10_GEC = 3.86
 # curve, and their difference (-7.14 log10 g of stool per hand) is a derived
 # bridge no study has measured. Class X (convention). Origin: Sec.
 HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0
+# Between-host dispersion in hand carriage: the probability that one host's
+# defecation event leaves virus on that host's hands. Liu's 71 hand rinses are
+# not a common rate -- per-subject positives are 2/8, 12/22, 0/12, 0/9, 2/8
+# and 2/12, which rejects homogeneity (exact Monte Carlo p = 0.021;
+# beta-binomial against pooled binomial, LRT p = 0.0022, ICC 0.185), and two
+# of the six infected hosts were never hand-positive at all. Maximum-
+# likelihood beta-binomial fit to those six counts, drawn once per host per
+# infection. Liu et al. 2013, Appl Environ Microbiol 79:7875, Table 3.
+# Grade B for the quantity and the dispersion; the setting is GI.1 challenge
+# volunteers, not a cruise. Origin: Cx -- derived from the tabulated counts,
+# not a value the paper states. It is a property of the sourcing dataset and
+# was not chosen against any model output.
+HAND_CARRIAGE_PROPENSITY_BETA = (0.911, 3.489)
 
 
 def environmental_release_log10_per_day(
@@ -643,6 +656,7 @@ class KorkinAgent:
         "dose_response_susceptibility", "cumulative_exposure",
         "cumulative_exposure_by_route",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
+        "hand_carriage_propensity_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
         "emesis_episode_load_by_pathogen",
         "emesis_deposition_records_by_pathogen",
@@ -736,6 +750,8 @@ class KorkinAgent:
         self.hand_load_by_pathogen: dict[str, float] = {}
         # Per-host/pathogen hand inactivation draws, sampled lazily.
         self.hand_inactivation_rate_by_pathogen: dict[str, float] = {}
+        # Per-host/pathogen hand-carriage propensity, drawn once per infection.
+        self.hand_carriage_propensity_by_pathogen: dict[str, float] = {}
         # Elapsed days since onset, drawn once for each symptomatic illness.
         self.emesis_episode_schedule_by_pathogen: dict[str, list[float]] = {}
         # Per-episode share of the illness's cumulative emesis shed, drawn with
@@ -1018,6 +1034,7 @@ class KorkinAgent:
         self.emesis_episode_schedule_by_pathogen.pop(pathogen_id, None)
         self.emesis_episode_load_by_pathogen.pop(pathogen_id, None)
         self.emesis_deposition_records_by_pathogen.pop(pathogen_id, None)
+        self.hand_carriage_propensity_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
             if rng is not None

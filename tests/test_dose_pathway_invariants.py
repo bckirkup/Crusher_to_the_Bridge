@@ -491,34 +491,45 @@ def test_emitted_and_direct_contact_dose_are_clock_invariant() -> None:
     hourly = _agent(1, infected=True, clock=hourly_clock)
     legacy = _agent(1, infected=True, clock=legacy_clock)
     hourly_emission = 0.0
-    hourly_dose = 0.0
-    hourly_core = _core(clock=hourly_clock)
-    legacy_core = _core(clock=legacy_clock)
-    target_hourly = _agent(2, clock=hourly_clock)
-    target_legacy = _agent(2, clock=legacy_clock)
     for epoch in range(24):
         hourly.infections[PATHOGEN]["time_infected"] = epoch
-        emitted = hourly.get_pathogen_shedding(PATHOGEN, profile)
-        hourly_emission += emitted
-        hourly_dose += hourly_core._direct_contact_dose(
-            target_hourly,
-            [(hourly, emitted)],
-            emitted,
-            1,
-            1,
-            False,
-        )
+        hourly_emission += hourly.get_pathogen_shedding(PATHOGEN, profile)
     legacy_emission = legacy.get_pathogen_shedding(PATHOGEN, profile)
-    legacy_dose = legacy_core._direct_contact_dose(
-        target_legacy,
-        [(legacy, legacy_emission)],
-        legacy_emission,
-        1,
-        1,
-        False,
-    )
     assert hourly_emission == pytest.approx(legacy_emission)
-    assert hourly_dose == pytest.approx(legacy_dose)
+    # The direct-dose equality that stood here is gone: the composed route is
+    # per-contact, and its clock scaling lives in the contact draw upstream
+    # (_activity_contact_draw / r0_draw), never inside the dose, so 24 hourly
+    # calls are 24 contacts with nothing to equate to a day-long call.
+
+
+def test_the_composed_route_mouth_step_is_clock_scaled() -> None:
+    """A fixed acquired hand load must pay the same mouth dose per hour.
+
+    The mouth step is clock-scaled through ``_fomite_mouth_contacts``: one
+    1.0 h epoch and two 0.5 h epochs draw different stochastic quantities
+    with the same expectation, so the check is on means.
+    """
+    replicates = 4000
+    one_epoch = 0.0
+    two_epochs = 0.0
+    for replicate in range(replicates):
+        hourly_core = _core(
+            clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+        )
+        half_core = _core(
+            clock=SimClock(epoch_duration_hours=0.5, mode="hours"),
+        )
+        hourly_core.rng = np.random.default_rng(replicate)
+        half_core.rng = np.random.default_rng(replicate)
+        target = _agent(9)
+        one_epoch += hourly_core._hand_to_mouth_dose(target, 0, 1.0e6)
+        two_epochs += (
+            half_core._hand_to_mouth_dose(target, 0, 1.0e6)
+            + half_core._hand_to_mouth_dose(target, 0, 1.0e6)
+        )
+    assert two_epochs / replicates == pytest.approx(
+        one_epoch / replicates, rel=0.05,
+    )
 
 
 def test_doses_and_dose_response_are_bounded_and_monotone() -> None:

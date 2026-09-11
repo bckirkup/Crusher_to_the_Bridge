@@ -46,6 +46,7 @@ NPI_ROUTE_KEYS: frozenset[str] = frozenset(
         "direct_contact",
         "droplet",
         "hvac_airborne",
+        "emesis_aerosol",
         "fomite",
         "food_contamination",
         "environmental_source",

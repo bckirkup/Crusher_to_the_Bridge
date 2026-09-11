@@ -50,6 +50,7 @@ from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+    HAND_CARRIAGE_PROPENSITY_BETA,
     SURFACE_DEPOSITION_FRACTION,
     IllnessStatus,
     InfectionStatus,
@@ -110,6 +111,21 @@ HAND_TO_SURFACE_LOGNORMAL = (-2.1, 1.4)
 # axis it opens is screened, not asserted (see bounded_screen.py).
 HAND_TO_SURFACE_DRYING_MULTIPLIER = 1.0
 HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
+# Donor hand -> recipient hand transfer efficiency: the fraction of a
+# contaminated hand's load moved to a clean hand in one interpersonal hand
+# contact. Wa human rotavirus suspended in 10% faeces on volunteers'
+# fingerpads, donor held against recipient for 10 s at ~1 kg/cm2: 6.6% of the
+# input infectious virus transferred 20 min after inoculation and 2.8% at
+# 60 min. Ansari et al. 1988, J Clin Microbiol 26:1513-1518, read from the
+# Abstract -- the 1988 issue is a scanned PDF with no machine-readable full
+# text and no OCR available, so the Results dispersion was not retrievable.
+# Grade B: measured hand-to-hand, right direction, right matrix (faeces),
+# wrong virus. The same experiment's hand -> steel (16.1%) and steel -> hand
+# (16.8%) arms bracket this engine's fomite transfer distributions, which is
+# the cross-check that it is the same measurement family. The two time points
+# are the frozen interval; neither is a stated central value, so a contact
+# draws uniformly across them. Origin: Ab.
+HAND_TO_HAND_TRANSFER_RANGE = (0.028, 0.066)
 HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
 # Defecation events per day: the frequency at which a faecally shedding host
 # recontaminates its own hands, and so the only quantity through which symptom
@@ -273,6 +289,15 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # Forward/lateral deposition footprint from Booth 2014 and Booth & Frost 2019;
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
+# Volume a source-zone emesis dose is diluted into when the emitting key is
+# absent from ``zone_volumes`` — the case for every cabin compartment
+# (``zone::cabinN``), since no platform data carries a per-cabin room volume.
+# The value is the engine's standing zone-volume default, not a measurement:
+# a cabin is smaller than 100 m3, so the fallback biases the source-zone dose
+# DOWN, opposite to the upward bias the un-corrected ventilation lookup
+# produced. The correct repair is per-cabin volumes in the platform layout —
+# its own change, recorded in the open ledger item 31.
+EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0
 
 
 VOMITING_AXIS = "vomiting"
@@ -492,6 +517,7 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
     "direct_contact": 1.0,
     "droplet": 1.0,
     "hvac_airborne": 1.0,
+    "emesis_aerosol": 1.0,
     "fomite": 1.0,
     "food_contamination": 1.0,
     "environmental_source": 1.0,
@@ -504,6 +530,7 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "direct_contact": "direct_contact",
     "droplet": "droplet",
     "hvac_airborne": "hvac_airborne",
+    "emesis_aerosol": "emesis_aerosol",
     "fomite": "fomite",
     "food": "food_contamination",
     "environmental": "environmental_source",
@@ -629,6 +656,9 @@ class ContactTracingMatrix:
     # Pathway 4: Fomite trailing — who entered a room after an infectious
     # agent left, contacting contaminated surfaces
     fomite_trailing_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 3b: Emesis aerosol — inhalation dose in the zone an emesis
+    # event happened in, in the epoch it happened
+    emesis_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 5: Food contamination — ingestion dose from contaminated
     # food in Dining-type zones
     food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -646,6 +676,7 @@ class ContactTracingMatrix:
             "shared_room_exposures": self.shared_room_exposures,
             "droplet_exposures": self.droplet_exposures,
             "hvac_downstream_exposures": self.hvac_downstream_exposures,
+            "emesis_aerosol_exposures": self.emesis_aerosol_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
             "food_contamination_exposures": self.food_contamination_exposures,
             "environmental_exposures": self.environmental_exposures,
@@ -1410,6 +1441,12 @@ class TransmissionCore:
         self.aerosol_pools: dict[str, float] = {}  # aggregate (legacy)
         self.aerosol_pools_by_pathogen: dict[str, dict[str, float]] = {}
         self.emesis_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
+        # This epoch's emesis aerosol, per emitting zone as (emitter, mass)
+        # pairs: the source-zone pathway doses it in the event epoch, and the
+        # per-emitter weight is what the strain attribution shares over.
+        self._emesis_aerosol_emitted_by_pathogen: dict[
+            str, dict[str, list[tuple[KorkinAgent, float]]],
+        ] = {}
 
         # Pathway 5: food contamination pools per Dining zone per pathogen
         self.food_pools: dict[str, dict[str, float]] = {}
@@ -3139,6 +3176,13 @@ class TransmissionCore:
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
+            # After fomite because _emit_emesis runs inside it: the emitted
+            # accumulator holds exactly this epoch's events when it is read.
+            self._pathway_emesis_aerosol(
+                zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
 
         fc = profile.get("food_contamination", {})
         if fc.get("enabled", False):
@@ -3290,14 +3334,17 @@ class TransmissionCore:
         n_occupants: int,
         r0_draw: int,
         cabin_confinement: bool,
+        pathogen_id: str,
+        epoch: int,
     ) -> float:
         if self.contact_mode == "per_partner_contact":
             sampled, _ = self._sample_contact_partners(
                 shedders, n_occupants, r0_draw,
             )
-            return self._per_partner_contact_dose(
-                target, sampled, cabin_confinement,
+            dose, _moved = self._per_partner_contact_dose(
+                target, sampled, cabin_confinement, pathogen_id, epoch,
             )
+            return dose
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
@@ -3460,19 +3507,61 @@ class TransmissionCore:
         )
         return at_table + on_floor, n_table + n_floor
 
+    def _hand_contact_transfers(
+        self,
+        target: KorkinAgent,
+        sampled_shedders: list[tuple[KorkinAgent, float]],
+        pathogen_id: str,
+        cabin_confinement: bool,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Debit each donor's hand and return what each moved to the recipient.
+
+        The donor's reservoir is finite and shared: N partners in one epoch draw
+        down the same pair of hands, so the route cannot deliver more than the
+        donor is carrying however many contacts it makes.
+        """
+        moved: list[tuple[KorkinAgent, float]] = []
+        for shedder, _shedding in sampled_shedders:
+            donor = shedder.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            if donor <= 0.0:
+                continue
+            fraction = self.rng.uniform(*HAND_TO_HAND_TRANSFER_RANGE)
+            if cabin_confinement:
+                fraction *= self._cabin_pair_contact_factor(shedder, target)
+            amount = min(donor, donor * fraction)
+            if amount <= 0.0:
+                continue
+            shedder.hand_load_by_pathogen[pathogen_id] = donor - amount
+            moved.append((shedder, amount))
+        return moved
+
     def _per_partner_contact_dose(
         self,
         target: KorkinAgent,
         sampled_shedders: list[tuple[KorkinAgent, float]],
         cabin_confinement: bool,
-    ) -> float:
-        """Sum sampled partner shedding without zone-average dilution."""
-        dose = 0.0
-        for shedder, shedding in sampled_shedders:
-            if cabin_confinement:
-                shedding *= self._cabin_pair_contact_factor(shedder, target)
-            dose += shedding
-        return dose * self._confinement_factor(target)
+        pathogen_id: str,
+        epoch: int,
+    ) -> tuple[float, list[tuple[KorkinAgent, float]]]:
+        """Compose interpersonal contact through the donor's hand reservoir.
+
+        Hand-mediated close contact -- a handshake is the iconic instance, not the
+        only one -- moves a measured fraction of the donor's *hand* load onto the
+        recipient's hand, which then reaches the mouth through the same
+        hand-to-mouth process the fomite chain uses. Droplet, emesis aerosol,
+        fomite and food keep their own pathways and are not folded in here.
+        """
+        moved = self._hand_contact_transfers(
+            target, sampled_shedders, pathogen_id, cabin_confinement,
+        )
+        acquired = sum(amount for _, amount in moved)
+        if acquired <= 0.0:
+            return 0.0, moved
+        hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        target.hand_load_by_pathogen[pathogen_id] = hand + acquired
+        dose = self._hand_to_mouth_dose(target, epoch, hand + acquired)
+        target.hand_load_by_pathogen[pathogen_id] = hand + acquired - dose
+        return dose * self._confinement_factor(target), moved
 
     def _effective_contacts(
         self,
@@ -3762,6 +3851,7 @@ class TransmissionCore:
                     n_occupants, target, epoch,
                 )
             sampled_shedders = shedders
+            moved: list[tuple[KorkinAgent, float]] = []
             n_contacts = r0_draw
             if use_partner:
                 seated = self._seated_partner_sample(
@@ -3779,8 +3869,9 @@ class TransmissionCore:
                     sampled_shedders = self._hallway_shedders(
                         target, sampled_shedders,
                     )
-                dose = self._per_partner_contact_dose(
+                dose, moved = self._per_partner_contact_dose(
                     target, sampled_shedders, cabin_confinement,
+                    pathogen_id, epoch,
                 )
             else:
                 unit_shedders = shedders
@@ -3790,7 +3881,7 @@ class TransmissionCore:
                     unit_shedding = sum(sv for _, sv in unit_shedders)
                 dose = self._direct_contact_dose(
                     target, unit_shedders, unit_shedding, n_occupants, r0_draw,
-                    cabin_confinement,
+                    cabin_confinement, pathogen_id, epoch,
                 )
             dose *= self.direct_contact_scalar
             dose *= zone_dc_factor
@@ -3798,11 +3889,13 @@ class TransmissionCore:
             if use_het:
                 exposure_factor = self._zone_exposure_factor(zone_name)
                 dose *= exposure_factor
-            mix = self._direct_contact_mix(
-                target,
-                sampled_shedders,
-                pathogen_id,
-                None if use_partner else zone_mix,
+            # Under composition a donor's contribution is what came off its
+            # hands, not what it emitted, so the shares are transfer-weighted.
+            mix = (
+                self._shedder_mix(moved, pathogen_id) if use_partner
+                else self._direct_contact_mix(
+                    target, sampled_shedders, pathogen_id, zone_mix,
+                )
             )
             dose = self._accumulate(
                 target.agent_id, "direct_contact", dose,
@@ -3823,7 +3916,7 @@ class TransmissionCore:
                 rec["compartment"] = unit_name
             if use_partner:
                 rec["source_ids"] = [
-                    shedder.agent_id for shedder, _ in sampled_shedders
+                    shedder.agent_id for shedder, _ in moved
                 ]
                 rec["n_contacts"] = n_contacts
             if use_het:
@@ -4139,6 +4232,24 @@ class TransmissionCore:
         agent.hand_inactivation_rate_by_pathogen[pathogen_id] = max(rate, 0.0)
         return agent.hand_inactivation_rate_by_pathogen[pathogen_id]
 
+    def _hand_carriage_propensity(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """This host's probability that a defecation contaminates its hand.
+
+        A per-host-per-infection beta-binomial draw (Liu 2013 Table 3): some
+        infected hosts never carry at all, which a per-event common rate
+        cannot express.
+        """
+        existing = agent.hand_carriage_propensity_by_pathogen.get(pathogen_id)
+        if existing is not None:
+            return existing
+        propensity = float(self.rng.beta(*HAND_CARRIAGE_PROPENSITY_BETA))
+        agent.hand_carriage_propensity_by_pathogen[pathogen_id] = propensity
+        return propensity
+
     def _hand_hygiene_efficacy(self, profile: dict | None) -> float:
         configured = (profile or {}).get(
             "hand_hygiene_efficacy_log10_reduction",
@@ -4180,6 +4291,14 @@ class TransmissionCore:
                 target + (current - target) * survival
             )
             return
+        # Thin the defecation rate by this host's carriage propensity here and
+        # not in _stool_event_rate_per_day: the accessor reports a physical
+        # quantity the profile declares (defecation frequency), while carriage
+        # is a separate mechanism conditioned on defecation. Bernoulli
+        # thinning of a Poisson rate is distributionally identical to gating
+        # each event, and doing it before both uses keeps the stationary-load
+        # initialisation consistent with the event stream.
+        events_per_day *= self._hand_carriage_propensity(agent, pathogen_id)
         if pathogen_id not in agent.hand_load_by_pathogen:
             current = self._stationary_hand_load(
                 target, rate, events_per_day,
@@ -4423,6 +4542,10 @@ class TransmissionCore:
                 pathogen_id, {},
             )
             pending[zone_name] = pending.get(zone_name, 0.0) + aerosol_load
+            emitted = self._emesis_aerosol_emitted_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            emitted.setdefault(zone_name, []).append((agent, aerosol_load))
             pool_gain = surface_load * touchable_fraction
             records.append({
                 "epoch": int(epoch),
@@ -4449,6 +4572,96 @@ class TransmissionCore:
         zone reservoir exactly once per epoch.
         """
         return self.emesis_aerosol_pending_by_pathogen.pop(pathogen_id, {})
+
+    def _pathway_emesis_aerosol(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
+    ) -> None:
+        """Airborne dose in the zone an emesis event happened in, that epoch.
+
+        ``_pathway_hvac_airborne`` skips ``target_zone == source_zone``, so
+        without this pathway the most concentrated emission in the model
+        dosed only HVAC-downstream zones and never the room it happened in.
+        The mass is read from ``_emesis_aerosol_emitted_by_pathogen``, which
+        ``_emit_emesis`` fills during ``_pathway_fomite`` and this pathway
+        pops whole: a zone's entry lives exactly one epoch and cannot dose
+        again. The same mass still stands in ``emesis_aerosol_pending_by_
+        pathogen`` for the next epoch's drain into the zone reservoir — that
+        is transport of one mass, not two emissions: inhalation nowhere
+        depletes a zone reservoir, and continuous shedding is treated the
+        same way (it doses locally through the droplet route while also
+        loading the reservoir for downstream).
+
+        The source zone gets no ``hvac_airborne_scalar``: that scalar is
+        duct-transport attenuation and does not apply to the room the bolus
+        was expelled in.
+        """
+        emitted = self._emesis_aerosol_emitted_by_pathogen.pop(
+            pathogen_id, {},
+        )
+        if not emitted:
+            return
+        # The aerosol arm exists only on an emesis_conditioned profile — the
+        # same gate the orchestrator's drain applies downstream.
+        if (profile or {}).get("airborne_emission_mode") != "emesis_conditioned":
+            return
+        # Emission is keyed by the compartment the event happened in, so the
+        # occupants are looked up in the compartmented map a cabin corridor
+        # produces; a cabin compartment has no measured volume, so the
+        # lookup falls back to EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3, which
+        # biases the dose down — recorded in ledger item 31.
+        units = self._cabin_compartments(zone_occupants)
+        for zone_name, entries in emitted.items():
+            mass = sum(load for _, load in entries)
+            if mass <= 0.0:
+                continue
+            susceptible = self._get_susceptible(
+                units.get(zone_name, []), pathogen_id,
+            )
+            if not susceptible:
+                continue
+            volume = max(
+                self.zone_volumes.get(
+                    zone_name, EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3,
+                ),
+                1.0,
+            )
+            concentration = mass / volume
+            # A cabin compartment sits on its parent corridor's HVAC branch,
+            # so ventilation resolves through the parent zone key.
+            ventilation = self._aerosol_ventilation_factor(
+                self.compartment_parent(zone_name),
+            )
+            source_attribution = attribution(
+                ledger, self._shedder_mix(entries, pathogen_id),
+            )
+            source_ids = [agent.agent_id for agent, _ in entries]
+            for target in susceptible:
+                dose = (
+                    concentration
+                    * self.inhaled_air_volume_m3_per_epoch
+                    * ventilation
+                )
+                dose = self._accumulate(
+                    target.agent_id, "emesis_aerosol", dose,
+                    agent_doses, agent_pathway_doses, source_attribution,
+                )
+                matrix.emesis_aerosol_exposures.append({
+                    "target_id": target.agent_id,
+                    "target_zone": zone_name,
+                    "source_zone": zone_name,
+                    "source_agent_ids": source_ids,
+                    "pathogen_id": pathogen_id,
+                    "dose": round(dose, 4),
+                    "airborne_mass": round(mass, 4),
+                    "concentration_per_m3": round(concentration, 6),
+                })
 
     def _deposit_emesis(
         self,

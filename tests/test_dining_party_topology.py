@@ -14,6 +14,7 @@ import pytest
 
 from engines.infection_dynamics_bridge import (
     DEFAULT_DINING_TABLE_SIZE,
+    HAND_LOAD_LOG10_GEC,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -27,6 +28,11 @@ from orchestrator_init import assign_dining_parties
 MDR = "MainDining"
 BUFFET = "LidoBuffet"
 MESS = "CrewMess"
+
+# The symptomatic-peak hand target get_pathogen_hand_target returns
+# (10**3.86 GEC); the composed direct route records as a source only a
+# donor whose hands carried virus, so fixture shedders hold this load.
+HAND_LOAD = 10.0 ** HAND_LOAD_LOG10_GEC
 
 ZONES = [
     {"name": MDR, "type": "Dining", "dining_service_type": "mdr"},
@@ -56,6 +62,7 @@ def _agent(
         a.infection_status = InfectionStatus.INFECTED
         a.illness_status = IllnessStatus.SYMPTOMATIC
         a.time_infected = 1
+        a.hand_load_by_pathogen = {"_default": HAND_LOAD}
     a.current_location = at or dining
     return a
 
@@ -153,6 +160,8 @@ def _partner_rows(core: TransmissionCore, agents: list[KorkinAgent], epochs: int
             if a.agent_id not in shedders:
                 a.infection_status = InfectionStatus.SUSCEPTIBLE
                 a.illness_status = IllnessStatus.NOT_ILL
+            else:
+                a.hand_load_by_pathogen["_default"] = HAND_LOAD
     return rows
 
 

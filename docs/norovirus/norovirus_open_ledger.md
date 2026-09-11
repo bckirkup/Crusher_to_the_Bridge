@@ -2559,6 +2559,243 @@ Roughly in dependency order.
     of items 22(f)/23 the single scale controlling all person-mediated
     transmission. Proposal §7 records the falsifiable predictions in advance;
     an overshoot is to be reported, not rescued by widening the interval.
+28. **The within-subject hand bridge is REFUTED for this engine — withdrawn.**
+    The original version of this item claimed (i) that the shipped `−7.14` is
+    "a cross-cohort quotient rather than a measurement", (ii) that Liu Table 3
+    supplies a within-subject bridge of `−4.14` log10 g/hand that "closes item
+    23(f)'s first option", and (iii) that sourcing it moves the hand load up
+    by 3.00 logs. All three are withdrawn; the subsections below keep the
+    arithmetic that produced them and record why it was misread. The correct
+    reading: `HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0` is **the shipped shedding
+    curve's own peak** (`max(SYMPTOMATIC_SHEDDING)`), not Atmar's cohort peak —
+    so `curve − 11.0` is "how far below this host's own peak today is", and
+    `HAND_LOAD_LOG10_GEC = 3.86` is the hand load **at peak**, which is exactly
+    the quantity Liu measures in the subjects she measures it in. The pair is a
+    peak-normalised anchor; the `−7.14` difference is the Class X
+    normalisation convention its own definition comment already declares, not
+    a quotient of two disagreeing cohorts. Arithmetic and harness:
+    `telemetry_buffer/observation_model/hand_bridge_pairing.py`; written up in
+    [`../literature/consensus_tranche_41_hand_bridge_within_subject.md`](../literature/consensus_tranche_41_hand_bridge_within_subject.md).
+    (a) **The definitional check that item 24(b) never ran, passed.** Liu 2013
+    *Statistical analysis*, verbatim: "NV concentrations in stool samples and
+    hand rinse samples were expressed as **log10 GEC per gram of feces** and
+    **total log10 GEC per hand**, respectively." Atmar 2008 — the source of
+    `SYMPTOMATIC_SHEDDING` — reports genomic copies/g faeces. Same analyte,
+    same genogroup, same unit class, both experimental GI.1 challenge. **There
+    is no unit defect here**, which is what licenses the rest of this item
+    against the standing prior that a three-log gap is a units error.
+    (b) **The bridge, paired within subject — computed, then refuted.** Liu
+    Table 3 (origin **T3**) gives each subject's own maximum stool titre
+    beside that subject's own mean positive hand load. Four of six subjects
+    have both: 34 (8.3, 3.94), 36 (8.1, 3.74), 46 (7.4, 3.30), 54 (8.2,
+    4.45). Differences: **−4.14 log10 g of stool per hand, range −4.36 …
+    −3.75, SD 0.29, n = 4.** As a measured pairing this arithmetic stands,
+    but as a candidate offset for this engine it is **refuted**: applied to
+    the shipped curve it predicts 11.0 − 4.14 = **6.86 log10 GEC/hand at
+    peak**, while the highest per-subject mean hand load Liu reports is
+    **4.45** — the proposed bridge contradicts the hand column it was
+    derived from, because it would put every subject's peak-day hand above
+    every hand Liu ever measured. Item 23(f)'s first option stays open; the
+    tranche-26 null and tranche-39 carry-forward are not superseded by this
+    figure. What the table does supply is recorded in (f).
+    (c) **What the shipped constant actually is — corrected.** The original
+    claim that `−7.14` is a quotient of two cohorts is withdrawn.
+    `HAND_LOAD_REFERENCE_PEAK_LOG10 = 11.0` is the **shipped curve's own
+    peak** — `max(SYMPTOMATIC_SHEDDING)` — so the difference of 3.86 is a
+    peak-normalised anchor: Liu's pooled hand load at the host's own peak,
+    exactly the quantity and the subjects Liu measures. Item 22(d) called it
+    a Class X convention; that stands, and it is a normalisation convention,
+    not a cross-cohort quotient. The cohort-gap observation remains true as
+    data — **every one of Liu's six stool maxima (7.4–8.3) falls below
+    Atmar's sixteen-subject minimum (8.7)**, median 11.0, and (a) excludes a
+    unit error — but it does not make the shipped pair a quotient of the two
+    studies, and it was wrongly invoked as one. Two bounds act on any
+    within-subject offset in **opposite** directions and neither is
+    quantified: Liu's stool window is days 0–4 while Atmar's peaks fell at a
+    median of day 4 and were highest *after* clinical resolution in 11/16
+    subjects, so Liu's maxima are lower bounds and a within-subject offset
+    is biased **high**; hand-rinse recovery efficiency is unmeasured, so
+    3.86 is a lower bound and such an offset is biased **low**. Do not read
+    the coincidence that Liu-over-Atmar-median reproduces `−7.14` as support
+    for either bound — or, as this item once did, as an explanation of the
+    constant.
+    (d) **The functional form was never tested here.** The engine asserts
+    `hand ∝ 10^(curve)` — a log-log slope of 1 between a host's *today*
+    stool titre and its *today* hand load. Liu's four paired subjects give
+    slope **+0.93**, r **+0.80**, p **0.20** across a total stool span of
+    0.9 log10 — but that slope is measured **across subjects, each at its
+    own peak**: it is a between-subject level relation, not a within-host
+    time course, so it was never a test of the engine's curve-tracking
+    assumption at all. The original "direction supported, magnitude
+    unestablished" verdict is withdrawn — the number is real and the test it
+    was claimed to perform does not exist in this data.
+    (e) **The sign calculation is withdrawn with its premise.** The
+    "sourcing raises the hand load by +3.00 log10" framing assumed the
+    refuted −4.14 offset replaces a cross-cohort −7.14; neither half of that
+    framing survives (c). The recorded arithmetic — per-contact
+    establishment 0.6064 (shipped, uncomposed) → 0.3987 (composed, at the
+    rejected offset) → 0.0103 (composed, shipped anchor) — stays as the
+    record of what was computed, not as a comparison of candidate values.
+    No hand-load constant moved, and none may move on this evidence.
+    (f) **What carries the rest is in the same table and is not a level —
+    and it is now implemented.** 25.4% (18/71) rinse positivity from
+    symptomatic stool-positive hosts at a 2.15 log10 limit; **two of six
+    infected subjects never hand-positive**; per-subject positivity 0–54.5%.
+    Item 24(c) already refuted the non-event hand mode on these grounds, and
+    this host-level carriage heterogeneity is the part of Table 3 that
+    survives the bridge's refutation as actionable evidence: it is what
+    `HAND_CARRIAGE_PROPENSITY_BETA` = (0.911, 3.489) implements as a
+    per-host-per-infection beta-binomial draw thinning the defecation rate
+    inside `_replenish_hand` (mean 0.207, ICC 0.185; homogeneity rejected —
+    exact Monte Carlo p = 0.021, beta-binomial LRT p = 0.0022).
+    (g) **Rows that stay shut.** Gravimetric faecal mass on a hand remains
+    **∅ null** (two further phrasings; the field does not weigh faeces on
+    hands). Oie's per-gram denominator stays **`?nr-term`** and the route is now
+    **moot** — Van Houte & Gibbons 1966 puts *Bacteroides* at ≈10¹⁰/g against
+    10⁶–10⁸/g for coliforms, streptococci and lactobacilli, so the conversion
+    turns on Oie's unretrieved culture conditions to 2–3 logs; (b) supplies the
+    quantity in genome copies without a surrogate. Spend no further queries
+    there.
+    (h) **Nothing changed.** `HAND_LOAD_LOG10_GEC` and
+    `HAND_LOAD_REFERENCE_PEAK_LOG10` are untouched, no interval was widened
+    and no default moved — before the retraction and after it.
+29. **Inventory of mechanisms that are implemented, tested, and inert in the
+    shipped norovirus arm — and one ledger entry that reads stale.** Swept from
+    the defaults and `.get` sites in `engines/transmission_core.py`,
+    `initiation.py` and `infection_dynamics_bridge.py` against all three
+    profiles in `active_profiles.json` and shipped `crusher_labs/config.yaml`,
+    with each consumer's gate checked for reachability. Seventeen mechanisms are
+    inert; the ones already recorded here are 1 (item 25), 3 (item 16), 4 (item
+    17) and 13.
+    (a) **Ranked by plausible leverage on person-to-person norovirus, the top
+    set is partner selection, not dose.** `transmission.activity_contacts`
+    absent → `_parse_activity_contacts` returns `None` and the eight-rate
+    POLYMOD activity generator (`CONTACT-ARCH-01`) never runs; the
+    `density_dependent` and `heterogeneous_zone_dose` blocks in config.yaml are
+    only read under contact modes the shipped `per_partner_contact` is not; and
+    both `agent_behavior` rotation probabilities ship at 0.0, so no agent
+    re-rotates through dining or leisure zones. Item 26(e) found the direct
+    route **contact-count-limited rather than dose-limited**, and item 27
+    found it carries 99.7% of delivered dose, so the machinery that decides
+    *who contacts whom* is where the remaining structural error most plausibly
+    lives. This is a hypothesis about where to look next, not a measurement.
+    (b) **Also inert:** hand hygiene (`hand_hygiene_rate_per_hour` default 0.0,
+    key absent from every profile); the whole heritable-strain stack
+    (`variant_surveillance.enabled: false` → no `StrainRegistry`,
+    `MutationOperator`, cross-immunity, recombination, superinfection, waning or
+    strain-resolved dose ledger, despite `strain_evolution` blocks on
+    norwalk_gi and sars_cov2); near-field air (`near_field_air` absent →
+    retained fraction 0.0, and `_near_field_admits` refuses
+    `emesis_conditioned` arms, so norovirus is excluded **by construction**
+    even switched on); NPI and pharmaceutical blocks (both commented out in
+    config.yaml); the environmental source pathway
+    (`environmental_contamination` absent from every profile, and norwalk_gi's
+    `environmental_source` efficiency is 0.0 as well); `hand_to_surface_drying_multiplier`
+    (1.0, swept not valued); food-pool growth (norwalk_gi ships
+    `growth_rate_per_day: 0.0`, the pathway itself live); `party` boarding;
+    `service_surface_knockout`; active screening; wastewater ops and strain
+    deconvolution; and `aerosol_pools` / `aerosol_pools_by_pathogen`, which are
+    written and aged every epoch with **no production reader** — every dose
+    reads `zone_pathogen_mass` / `multi_pathogen_mass`.
+    (c) **Item 9 reads stale — superseded.** Since this entry was written the
+    gap it describes has been closed: `_pathway_emesis_aerosol` doses the
+    emitting zone's susceptible occupants in the epoch of the event, under
+    its own `emesis_aerosol` route key, while the orchestrator drain keeps
+    feeding the zone reservoir for **HVAC-downstream** transport one epoch
+    later — the lag is now transport timing, not a missing dose. The
+    mechanics and the record of it live in item 31.
+    (d) **Nothing was changed.** No default, gate, profile key or constant
+    moved in recording this.
+30. **CONTACT-ARCH-01 ships on at the §4 interval lows, and the shipped
+    `corridor` rate does not mean what its name says.**
+    (a) **The shipped vector and the pre-registered §6 check, measured.** All
+    eight activities declared in `crusher_labs/config.yaml`
+    (`cabin 0.25, corridor 0.25, work_service 2.9, work_other 0.5,
+    dining_table 2.0, dining_venue 2.0, leisure 1.0, other 0.0` per hour;
+    `cabin`/`corridor` at their 0–0.5 interval midpoints rather than the 0
+    endpoint, which would ship the cabin-mate and hallway pathways inert;
+    `other` 0 as §4 permits; no `saturation_hours`, no τ measured). Measured
+    by `telemetry_buffer/observation_model/contact_arch_readout.py` on the
+    shipped mega_cruise_5000 configuration over one 7-day voyage, expected
+    draws summed per host over the engine's own resolver (rate × hours, the
+    §8a method): **passengers 19.7/day, crew 31.2/day** — both inside the
+    5–40 declaration band; **crew:passenger 1.58** against Pung's 0.5
+    (inverted, and it is the schedule's, as §6.4 predicted); **night share
+    12.3% passenger / 7.0% crew** against Vanhems's 5.9%; **passenger dining
+    share 30.4%** against Pung's 71% (the §8a argument stands: a per-hour
+    rate cannot reach a share measured where dining is a visit, not an hour).
+    Reported; no rate adjusted.
+    (b) **The hallway residual is a cabin-zone background rate, not a transit
+    rate.** `_direct_contact_units` yields the Cabin_Corridor zone itself as a
+    hallway unit containing **every** occupant every epoch, and single-
+    occupancy cabins form no cabin unit (`len(members) > 1` required), so a
+    host asleep alone in its cabin draws at the `corridor` rate all night.
+    On the shipped vector passengers accrue ~2.4 corridor-labelled
+    contacts/day, most of them in `Sleep` hours — the 12.3% night share in
+    (a) is largely this. The direct-contact defect this block sits inside is
+    that `corridor`'s interval was sourced to *transit* contact frequency
+    (Mossong "travel" ≈ 3% of 13.4/day) and the engine spends it on cabin
+    residency. **Flagged, not repaired**: separating hallway-transit draws
+    from cabin residency needs an occupancy model for time-in-corridor,
+    which nothing measures; item 29's inert-mechanism discipline applies —
+    record the semantics, do not tune the rate.
+    (c) **Nothing was tuned.** The vector is the declaration recorded in the
+    commit; the readout is the measurement of it. Any repair to (b) is an
+    architecture change with its own entry.
+31. **Emesis aerosol doses the zone it happened in, in the epoch it happened —
+    the last same-zone airborne gap, closed structurally.**
+    `_pathway_hvac_airborne` skips `target_zone == source_zone` by design, so
+    an emesis event's aerosol fraction used to reach only HVAC-downstream
+    zones, one epoch later. `_pathway_emesis_aerosol` now runs inside
+    `execute_transmission` directly after `_pathway_fomite` — the pathway the
+    emission site (`_emit_emesis` → `_deposit_emesis`) sits inside — and
+    doses every susceptible occupant of the emitting zone at
+    `mass / volume × inhaled_air_volume_m3_per_epoch ×
+    _aerosol_ventilation_factor(zone)`.
+    (a) **A separate single-epoch accumulator, because the two pools cannot
+    share one.** `_emit_emesis` writes each event's `aerosol_load` into both
+    `emesis_aerosol_pending_by_pathogen` — which `step_infection_progression`
+    drains once into the zone reservoir for downstream transport, untouched —
+    and `_emesis_aerosol_emitted_by_pathogen`, which the source-zone pathway
+    pops whole each epoch. The emitted mass must not be merged into the
+    continuous-derived zone reservoir: `zone_pathogen_mass` is aged and its
+    composition tracks continuous shedding, and dosing a same-zone exposure
+    out of it would either double-count the continuous route's own local
+    dose convention (proximity is covered by droplet/shared-room, not by a
+    same-zone reservoir dose) or smear the event across epochs.
+    (b) **No attenuation at the source and no new constant.** The source zone
+    gets no `hvac_airborne_scalar`: that scalar is duct-transport
+    attenuation, and the room the bolus was expelled in has no duct. The
+    pathway introduces no constant at all — fraction, episode load, volume
+    and inhaled volume are all existing terms. **Flagged gap:** an emesis
+    event in a cabin is emitted under a `zone::cabinN` compartment key, for
+    which the platform data carries neither a room volume nor a ventilation
+    entry. Ventilation resolves to the compartment's **parent corridor** —
+    correct, since a cabin sits on its corridor's HVAC branch — and volume
+    falls back to the named default
+    `EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0`, the engine's standing
+    zone default standing in for an unmeasured cabin volume. A cabin is
+    smaller than 100 m³, so the fallback biases a cabin-compartment dose
+    **down**; the repair is per-cabin volumes in the platform layout, which
+    is its own change and is not done here.
+    (c) **One mass, not two emissions.** The same emitted mass doses the
+    room's occupants this epoch *and* feeds the reservoir that transports it
+    downstream next epoch. Inhalation nowhere in this engine depletes a zone
+    reservoir, and continuous shedding already works this way (a droplet
+    dose locally plus a reservoir deposit for downstream); what is forbidden
+    is double-draining `emesis_aerosol_pending_by_pathogen` or letting the
+    emitted accumulator survive an epoch, and the pathway pops the entry it
+    reads.
+    (d) **The 3-hour window stays unrepresentable.** Tranche 28 §3.4 noted
+    the Alsved/Bonifait emesis-to-air association is a ~3 h window the
+    shipped one-epoch clock cannot resolve; this change makes the mode
+    structurally present — the emitting zone is now dosed at all — without
+    resolving that window. The lag itself was not repaired: the drain call
+    still sits in `step_infection_progression` before `execute_transmission`,
+    and moving it is a phase-ordering change with a much larger blast radius,
+    recorded rather than done.
+    (e) **Nothing adopted.** Every dose figure stays withdrawn; the
+    measurements above are measurements of the model.
 
 ## 5. Held fixed by assumption
 

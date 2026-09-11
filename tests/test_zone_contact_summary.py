@@ -6,6 +6,7 @@ import numpy as np
 
 from crusher_labs.modalities.syndromic import SyndromicSurveillance
 from engines.infection_dynamics_bridge import (
+    HAND_LOAD_LOG10_GEC,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -48,7 +49,11 @@ class TestZoneContactSummary:
         """Two agents colocated with one shedder → expected zone summary."""
         berthing = "Berthing"
         medbay = "MedBay"
+        # The composed direct route doses only what a donor's hands carry;
+        # 10**3.86 is the symptomatic-peak hand target get_pathogen_hand_target
+        # returns.
         shedder = _agent(1, berthing, infected=True)
+        shedder.hand_load_by_pathogen = {"_default": 10.0 ** HAND_LOAD_LOG10_GEC}
         target = _agent(2, berthing)
         # MedBay registered but empty — must not appear in summary
         core = TransmissionCore(
@@ -72,8 +77,30 @@ class TestZoneContactSummary:
         assert row["shedder_ids"] == [1]
         assert row["shared_room_exposure_count"] >= 1
         assert row["droplet_exposure_count"] >= 1
-        # Change detector: the POLYMOD contact rate yields one infection.
-        assert row["infection_count"] == 1
+        # Positive control, replacing the retired infection_count == 1 golden:
+        # a hand-realistic single-epoch dose no longer reaches the default
+        # dose-response threshold, so the route-alive check uses the same
+        # fixture at a larger reservoir, where the composed route does infect.
+        # Change detector for the direct route through the donor's hand
+        # reservoir; if this ever reports 0, the route died.
+        control_shedder = _agent(1, berthing, infected=True)
+        control_shedder.hand_load_by_pathogen = {
+            "_default": (10.0 ** HAND_LOAD_LOG10_GEC) * 1e4,
+        }
+        control_target = _agent(2, berthing)
+        control = TransmissionCore(
+            rng=np.random.default_rng(0),
+            zone_volumes={berthing: 200.0, medbay: 45.0},
+            zone_types={berthing: "Room", medbay: "Medical"},
+        )
+        control.initialize_zones([berthing, medbay])
+        control_matrix, _ = control.execute_transmission(
+            epoch=1,
+            agents=[control_shedder, control_target],
+            zone_pathogen_mass={berthing: 0.0, medbay: 0.0},
+        )
+        control_row = _by_zone(control_matrix.zone_contact_summary)[berthing]
+        assert control_row["infection_count"] >= 1
 
         as_dict = matrix.to_dict()
         assert "zone_contact_summary" in as_dict

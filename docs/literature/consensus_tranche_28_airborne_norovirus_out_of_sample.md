@@ -90,8 +90,10 @@ with the balcony ventilation factor **0.5**:
    comparison is a **bounding** check on a coarser volume, not a like-for-like
    validation. Recorded as Grade **B**, analogous setting.
 4. **The 3-hour association is reproduced structurally, not numerically.** The
-   drain in `TransmissionCore.drain_emesis_aerosol` puts the whole event mass
-   into the zone in the epoch of the event, and the shipped legacy clock is one
+   emitting zone is dosed in the epoch of the event by
+   `TransmissionCore._pathway_emesis_aerosol` (the drain in
+   `drain_emesis_aerosol` feeds the zone reservoir for HVAC-downstream
+   transport one epoch later), and the shipped legacy clock is one
    epoch = 24 h, so the model cannot resolve a 3-hour window at all. The
    odds-ratio result is therefore evidence for the *mode*, and the window
    itself is **not representable** on the shipped clock. That is a clock-grain

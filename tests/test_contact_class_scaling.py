@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import (
+    HAND_LOAD_LOG10_GEC,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -24,6 +25,11 @@ from engines.transmission_core import (
 )
 
 LOUNGE = "Lounge"
+
+# The symptomatic-peak hand target get_pathogen_hand_target returns
+# (10**3.86 GEC); the composed direct route records as a source only a
+# donor whose hands carried virus, so fixture shedders hold this load.
+HAND_LOAD = 10.0 ** HAND_LOAD_LOG10_GEC
 
 
 def _agent(aid: int, role: str, infected: bool = False) -> KorkinAgent:
@@ -37,6 +43,7 @@ def _agent(aid: int, role: str, infected: bool = False) -> KorkinAgent:
         a.infection_status = InfectionStatus.INFECTED
         a.illness_status = IllnessStatus.SYMPTOMATIC
         a.time_infected = 1
+        a.hand_load_by_pathogen = {"_default": HAND_LOAD}
     a.current_location = LOUNGE
     return a
 
@@ -79,6 +86,8 @@ def _rows(core: TransmissionCore, agents: list[KorkinAgent], epochs: int) -> lis
             if a.agent_id not in shedders:
                 a.infection_status = InfectionStatus.SUSCEPTIBLE
                 a.illness_status = IllnessStatus.NOT_ILL
+            else:
+                a.hand_load_by_pathogen["_default"] = HAND_LOAD
     return rows
 
 
@@ -148,7 +157,9 @@ class TestClassDirectedScaling:
         assert under > uniform
 
     def test_the_uniform_draw_is_the_class_share(self) -> None:
-        rows = _rows(_core(0.0), _room(40, 10), epochs=120)
+        # ~62 picks over 120 epochs leaves the estimator noisier than the
+        # 0.05 band; 400 epochs tightens it without touching the band.
+        rows = _rows(_core(0.0), _room(40, 10), epochs=400)
         assert _crew_fraction(rows, 0) == pytest.approx(10 / 49, abs=0.05)
 
     def test_every_class_present_can_still_be_met(self) -> None:

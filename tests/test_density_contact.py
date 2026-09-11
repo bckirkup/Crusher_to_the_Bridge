@@ -13,6 +13,8 @@ from engines.infection_dynamics_bridge import (
 )
 from engines.transmission_core import AVG_R_POOL, TransmissionCore
 
+PATHOGEN = "test_pathogen"
+
 
 def _agent(
     aid: int,
@@ -439,44 +441,61 @@ class TestHeterogeneousZoneDose:
 
 
 class TestPerPartnerContact:
-    """Distinct partner sampling changes variance without changing scale."""
+    """Distinct partner sampling draws on each donor's finite hand reservoir."""
 
-    def test_mean_dose_matches_density_average(self) -> None:
+    @staticmethod
+    def _carrying_shedders(
+        zone: str, count: int, hand_load: float = 1.0e6,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Donors with a freshly charged hand reservoir.
+
+        The composed route debits the reservoir on every call, so each draw
+        needs donors whose hands were not spent by a previous draw.
+        """
+        shedders = []
+        for index in range(count):
+            donor = _agent(index + 1, zone, infected=True)
+            donor.hand_load_by_pathogen[PATHOGEN] = hand_load
+            shedders.append((donor, float(index + 1)))
+        return shedders
+
+    def test_dose_grows_with_the_contact_count(self) -> None:
+        # Retired: "mean per-partner dose equals the density-mode emission
+        # average" restated dose ∝ whole-body emission -- the defect the
+        # composed route repaired. What this file still owns is the sampling
+        # plumbing: more sampled partners move more off the donors' hands.
         zone = "Lounge"
-        shedders = [
-            (_agent(1, zone, infected=True), 1.0),
-            (_agent(2, zone, infected=True), 2.0),
-            (_agent(3, zone, infected=True), 3.0),
-            (_agent(4, zone, infected=True), 4.0),
-        ]
         target = _agent(5, zone)
         partner = _core(contact_mode="per_partner_contact", seed=13)
-        density = _core(contact_mode="density_dependent", seed=13)
-        draws = [
-            partner._direct_contact_dose(
-                target, shedders, 10.0, 100, 4, False,
-            )
-            for _ in range(12000)
-        ]
-        expected = density._direct_contact_dose(
-            target, shedders, 10.0, 100, 4, False,
-        )
-        assert sum(draws) / len(draws) == pytest.approx(expected, rel=0.03)
+        means = []
+        for r0_draw in (1, 4, 16):
+            draws = [
+                partner._direct_contact_dose(
+                    target, self._carrying_shedders(zone, 4),
+                    10.0, 100, r0_draw, False, PATHOGEN, 0,
+                )
+                for _ in range(12000)
+            ]
+            means.append(sum(draws) / len(draws))
+        assert all(np.isfinite(mean) and mean > 0.0 for mean in means)
+        assert means == sorted(means)
+        assert means[2] > 2.0 * means[0]
 
     def test_single_shedder_creates_contact_heterogeneity(self) -> None:
         zone = "Lounge"
-        shedders = [(_agent(1, zone, infected=True), 4.0)]
         target = _agent(2, zone)
         partner = _core(contact_mode="per_partner_contact", seed=22)
         density = _core(contact_mode="density_dependent", seed=22)
+        density_shedders = [(_agent(1, zone, infected=True), 4.0)]
         partner_doses = [
             partner._direct_contact_dose(
-                target, shedders, 4.0, 100, 1, False,
+                target, self._carrying_shedders(zone, 1),
+                4.0, 100, 1, False, PATHOGEN, 0,
             )
             for _ in range(6000)
         ]
         density_dose = density._direct_contact_dose(
-            target, shedders, 4.0, 100, 1, False,
+            target, density_shedders, 4.0, 100, 1, False, PATHOGEN, 0,
         )
         partner_variance = np.var(partner_doses)
         assert sum(dose > 0 for dose in partner_doses) < len(partner_doses) * 0.03
@@ -487,18 +506,16 @@ class TestPerPartnerContact:
         target = _agent(999, zone)
 
         def _mean_per_contact(n_occupants: int, copies: int) -> float:
-            shedders = [
-                (_agent(i, zone, infected=True), float(i % 4 + 1))
-                for i in range(copies)
-            ]
             core = _core(contact_mode="per_partner_contact", seed=n_occupants)
-            draws = [
-                core._direct_contact_dose(
-                    target, shedders, sum(v for _, v in shedders),
-                    n_occupants, 1, False,
+            draws = []
+            for _ in range(50000):
+                shedders = self._carrying_shedders(zone, copies)
+                draws.append(
+                    core._direct_contact_dose(
+                        target, shedders, sum(v for _, v in shedders),
+                        n_occupants, 1, False, PATHOGEN, 0,
+                    )
                 )
-                for _ in range(50000)
-            ]
             return sum(draws) / len(draws)
 
         lower_occupancy = _mean_per_contact(20, 4)
@@ -510,11 +527,11 @@ class TestPerPartnerContact:
         target = _agent(1, zone)
         core = _core(contact_mode="per_partner_contact", seed=3)
         assert core._direct_contact_dose(
-            target, [(_agent(2, zone, infected=True), 1.0)],
-            1.0, 10, 0, False,
+            target, self._carrying_shedders(zone, 1),
+            1.0, 10, 0, False, PATHOGEN, 0,
         ) == 0.0
         assert core._direct_contact_dose(
-            target, [], 0.0, 10, 2, False,
+            target, [], 0.0, 10, 2, False, PATHOGEN, 0,
         ) == 0.0
         assert core._sample_contact_partners(
             [(_agent(2, zone, infected=True), 1.0)], 1, 4,
