@@ -1070,6 +1070,72 @@ boarding population), and both ends sit one to three orders below the ordinary
 asymptomatic adult channel at 2.5–4%. No chronic-shedder boarding point
 prevalence is licensed; the importation channel is mostly immunocompetent.
 
+**Withdrawn (2026-09-05): the reading that any structural arm since `BERTH-01`
+was measured against the anchors at all.** Every one of those campaigns swept
+the `expedition_sensitivity` box, and that box contains
+`environmental_faecal_release_log10_g_per_epoch` — the void dose normaliser —
+on a *linear* interval [4, 24]. The quantity enters as an exponent:
+emission is `10^(curve[idx] − adj)`
+(`engines/infection_dynamics_bridge.py`, `shedding_amount`), the shipped
+faecal curve peaks near 11 log10, so the interval sweeps released material over
+**twenty orders of magnitude**, from 10⁷ down to 10⁻¹³ of a curve unit. A
+Grade D axis twenty logs wide is not a sensitivity range; it is the whole
+model, switched on and off.
+
+Where the switch sits, measured (scratch diagnostic, expedition_cruise_450,
+168 epochs, `norwalk_gi`, every other factor at its box midpoint, two seeds per
+point — acquired-aboard infections per voyage, separated from boarding imports
+by `boarding_state`):
+
+| `adj` | acquired/voyage | imported/voyage | pax AR | crew AR | posted |
+|---:|---:|---:|---:|---:|---:|
+| 4 | 150.5 | 9.0 | 0.424 | 0.190 | 1.00 |
+| 5 | 113.5 | 9.5 | 0.342 | 0.112 | 1.00 |
+| 6 | 17.5 | 10.5 | 0.081 | 0.019 | 0.50 |
+| 7 | 1.0 | 10.5 | 0.030 | 0.015 | 0.00 |
+| 8–12 | 0.0 | 10.5 | 0.027 | 0.015 | 0.00 |
+
+The transition is complete inside the bottom three units of a twenty-unit
+interval. Above `adj ≈ 7` — 85% of the swept box — the continuous faecal chain
+delivers no transmissible dose at all, and a voyage's infections *are* its
+boarding imports. At the midpoint over twelve seeds, 12 voyages produced 2
+acquired infections between them, none posted, and their dose was fomite from
+emesis deposition: the emesis channel draws an absolute load
+(`EMESIS_TOTAL_SHED_GEC_RANGE`) that the normaliser never touches, so the two
+shedding channels are on incommensurate scales and only one of them is swept.
+
+Three consequences, none of which is a new measurement:
+
+1. **The posting rate the campaigns report is the fraction of the box below the
+   switch.** A uniform design over [4, 24] puts roughly 15% of its points under
+   `adj ≈ 7`, those points post on essentially every voyage, and the rest post
+   almost never — against the 13.5–18.6% postings reported across the φ,
+   `CONTACT-ARCH-01` and `CONTACT-ARCH-02` arms. The model has not been
+   producing 10× too many outbreaks; it has been producing a near-certain
+   outbreak in one corner and a dead ship everywhere else, and the campaign
+   reported the mixture.
+2. **A5 has been measuring boarding prevalence, not transmission.** In the
+   import-only regime the passenger:crew infection ratio is 0.0269/0.0149 =
+   1.81, which is the ratio of the two boarding-prevalence intervals and
+   nothing else; the explosive corner gives 2.2. The 2.02–2.37 that nine arms
+   reproduced is that mixture, and no partner-topology or contact-count change
+   could have moved it, because in 85% of the box no contact transmits.
+3. **Every null since `BERTH-01` is uninterpretable as a mechanism result.**
+   Cabin, crew mess, sitting, table, class exponent, activity-derived contacts
+   and dwell saturation were each averaged over a box in which most points
+   have no transmission to reallocate. The mechanisms are not refuted; they
+   were not tested.
+
+Nothing is adopted or refitted here, and the interval is not narrowed: the
+refit that would license a value is the one the whole ledger is waiting on.
+What this entry withdraws is the *interpretation* of the campaign readouts, and
+what it adds is a precondition — no mechanism arm on this box can be read
+against an anchor until the dose scale is resolved, or until the design
+conditions on it (stratify the readout by `adj`, or sweep the mechanism at a
+declared scale rather than marginalising over twenty logs of it). The
+diagnostics behind this entry are scratch, not repository functionality, and
+are recorded here rather than committed.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
@@ -1492,6 +1558,18 @@ double-count by exactly the amount emesis already supplies.
 ## 4. Outstanding
 
 Roughly in dependency order.
+
+00. **The dose scale governs the box, and every mechanism arm is downstream of
+   it.** `environmental_faecal_release_log10_g_per_epoch` is swept linearly
+   over [4, 24] as an exponent, the switch between a runaway epidemic and no
+   onboard transmission at all sits at `adj ≈ 6–7`, and §1's entry records the
+   measurement. Until the refit resolves the scale, a campaign on this box
+   measures which side of the switch its design points fell on. Two ways
+   forward that adopt nothing: **stratify** every readout by `adj` so the
+   mechanism is read within a regime instead of marginalised across the
+   switch, and **declare** the emesis channel's absolute load and the
+   continuous channel's normaliser on one scale, since only the second is
+   currently swept. Neither is implemented.
 
 0. **`SYMP-EFF-01`: the missing term now exists as a rate, and the shared
    quantity is narrowed rather than separated.** Norovirus boards at
