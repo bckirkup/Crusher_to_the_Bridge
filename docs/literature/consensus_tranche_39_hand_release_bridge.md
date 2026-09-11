@@ -146,14 +146,21 @@ anchor would mean discarding the only independent evidence retrieved.
 | Row | State | Basis |
 |---|---|---|
 | Gravimetric faecal mass on a hand | **∅ null** | Three phrasings across this tranche and tranche 26; the literature measures organisms per hand, never mass |
-| Stool titre and hand load in the same subjects | **∅ null** | Tranche 26, unchanged |
+| Stool titre and hand load in the same subjects | ~~**∅ null**~~ → **retrieved, partial** | **Overturned by [tranche 40](consensus_tranche_40_hand_event_amplitude.md) §2**: Liu 2013's Table 3, read from the PMC full text, pairs each subject's *maximum* stool titre (7.4–8.3 log10/g) with that subject's *mean positive* hand load. The pairing is max-versus-mean rather than simultaneous, so it bounds rather than measures — but it is not absent, and this row was a retrieval failure, not a null |
 | crAssphage or other marker per hand, normalised | **∅ null** | Tranche 38 — the marker is a water literature |
 | Total culturable organisms per gram of human faeces (Oie's denominator) | **`?nr`** | Two phrasings returned E. coli-specific and 16S data only |
 | Mattioli 2015 ES&T indicator→mass conversion factor | **`?nr`** | Headline result read from a citing paper; the paper's own Methods not retrieved |
 | Norovirus genome copies per hand in a naturally infected GII host | **∅ null** | Tranche 26, unchanged; Liu's GI.1 challenge subjects remain the only measurement |
 
+Note on (i): tranche 40 found the full text of the paper this tranche read
+only in abstract, and it answers part of (i) — see the row above, and §2 of
+that tranche for the consequence, which is that the within-study pairing puts
+the bridge at `−3.5 … −4.4 log10 g/hand`, at the **top** of the envelope this
+tranche derived rather than below it.
+
 What would close it, in order of strength: (i) a hand-rinse study reporting
-norovirus genome copies per hand *and* stool titre in the same subjects;
+norovirus genome copies per hand *and* stool titre in the same subjects,
+*simultaneously*;
 (ii) a gravimetric or dye-tracer study of faecal residue transferred to the
 hand at defecation; (iii) Oie's per-gram denominator, which would turn the one
 event-level numerator into a usable event-level bridge. None of the three was

@@ -113,15 +113,21 @@ Three nulls worth stating as nulls rather than as gaps in the reading:
    closest naturally-exposed design and reports detection frequency, not
    concentration. So the hand route has **one** measured absolute level, and it
    is GI.1.
-2. **No study measures stool titre and hand load in the same subjects.** That
-   pairing is the measurement that would license the −7.14 bridge (or replace
-   it), and it is what would make the peak adoptable independently of the hand
-   route. Its absence is structural: hand studies dose or enrol for hand
-   sampling, faecal time-course studies quantify stool.
+2. ~~**No study measures stool titre and hand load in the same subjects.**~~
+   **Withdrawn — this was a retrieval failure, not a null.**
+   [Tranche 40](consensus_tranche_40_hand_event_amplitude.md) §2 opened Liu
+   2013's full text at PMC3837815, and its Table 3 carries both quantities per
+   subject: *maximum* stool titre 7.4–8.3 log10/g beside that subject's *mean
+   positive* hand load. The pairing is max-versus-mean rather than
+   simultaneous, so it bounds the bridge instead of measuring it — at
+   `−3.5 … −4.4 log10 g/hand`, above the shipped `−7.14` — and a simultaneous
+   pairing remains unfound. What this row was reasoning from was the abstract:
+   the paper was never opened here.
 3. **No stool peak in a cruise population.** Grade A remains unreachable for
    the peak from the demand side as well as the supply side.
 
-All three stand. [Tranche 39](consensus_tranche_39_hand_release_bridge.md)
+Nulls 1 and 3 stand; null 2 is withdrawn above.
+[Tranche 39](consensus_tranche_39_hand_release_bridge.md)
 re-asked null 1 and null 2 from the mass side and adds a third: no study
 weighs faecal material on a hand. What it does return is an *indicator*
 envelope — faecal-indicator counts per hand over indicator counts per gram of
