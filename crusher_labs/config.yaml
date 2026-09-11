@@ -268,6 +268,34 @@ agent_behavior:
 # within-zone exposure factor.
 transmission:
   contact_mode: "per_partner_contact"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose" | "per_partner_contact"
+  # CONTACT-ARCH-01, switched on. Eight per-activity rates in distinct partners
+  # per hour, from the sourced intervals in docs/contact_architecture_spec.md
+  # section 4 (tranche 37; Pung 2022 Nat Commun 13:1956 is the only cruise
+  # sensor record). The interval LOW corner, because section 8a's pre-registered
+  # check declares a per-role daily total outside 5-40 a declaration error and
+  # only the low corner sits inside the band -- it landed on Mossong's 13.4
+  # reference for passengers without having been aimed at it. Two departures
+  # from the low corner, neither chosen against a model output: `cabin` and
+  # `corridor` have no per-hour measurement at all (interval 0-0.5, Grade C),
+  # and their low endpoint of 0 would ship the cabin-mate and hallway pathways
+  # as implemented-but-inert mechanisms, so both take the interval midpoint;
+  # `other` is declared 0, which section 4 permits, because the
+  # CONTACT-ARCH-01b resolver repair drained that bucket. No `saturation_hours`
+  # is declared: no tau is measured for any setting, and declaring one here
+  # would be choosing an unmeasured constant, so the run keeps the tau -> inf
+  # constant-rate arithmetic. Role splits are 1 by construction, so any
+  # crew:passenger difference in the readout is the schedule's.
+  activity_contacts:
+    enabled: true
+    rates_per_hour:
+      cabin: 0.25
+      corridor: 0.25
+      work_service: 2.9
+      work_other: 0.5
+      dining_table: 2.0
+      dining_venue: 2.0
+      leisure: 1.0
+      other: 0.0
   density_dependent:
     reference_occupancy: 50           # occupancy at which contacts = base_contacts
     base_contacts: 1.33               # mean contacts at reference_occupancy

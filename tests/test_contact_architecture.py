@@ -842,3 +842,30 @@ class TestTheSaturationArmOfTheGate:
         assert jd["parameters"]["activity_saturation_hours"] == "off"
         cmd = jd["containerProperties"]["command"]
         assert cmd[cmd.index("--activity-saturation-hours") + 1] == "Ref::activity_saturation_hours"
+
+
+class TestTheShippedDeclaration:
+    """The shipped config.yaml carries CONTACT-ARCH-01 on."""
+
+    def test_the_shipped_block_reaches_the_engine(self) -> None:
+        from pathlib import Path
+
+        import yaml
+
+        cfg = yaml.safe_load(
+            Path("crusher_labs/config.yaml").read_text()
+        )
+        core = TransmissionCore(
+            cfg=cfg,
+            rng=np.random.default_rng(1),
+        )
+        rates = (cfg["transmission"]["activity_contacts"]
+                 ["rates_per_hour"])
+        assert set(rates) == set(CONTACT_ACTIVITIES)
+        assert core.activity_contacts is not None
+        assert set(core.activity_contacts) == set(CONTACT_ACTIVITIES)
+        for activity, rate in rates.items():
+            assert core.activity_contacts[activity] == {
+                role: pytest.approx(float(rate))
+                for role in ("passenger", "crew")
+            }
