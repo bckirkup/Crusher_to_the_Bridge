@@ -3306,8 +3306,8 @@ class TransmissionCore:
         n_occupants: int,
         r0_draw: int,
         cabin_confinement: bool,
-        pathogen_id: str = "_default",
-        epoch: int = 0,
+        pathogen_id: str,
+        epoch: int,
     ) -> float:
         if self.contact_mode == "per_partner_contact":
             sampled, _ = self._sample_contact_partners(
