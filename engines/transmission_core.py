@@ -50,6 +50,7 @@ from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+    HAND_CARRIAGE_PROPENSITY_BETA,
     SURFACE_DEPOSITION_FRACTION,
     IllnessStatus,
     InfectionStatus,
@@ -4203,6 +4204,24 @@ class TransmissionCore:
         agent.hand_inactivation_rate_by_pathogen[pathogen_id] = max(rate, 0.0)
         return agent.hand_inactivation_rate_by_pathogen[pathogen_id]
 
+    def _hand_carriage_propensity(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """This host's probability that a defecation contaminates its hand.
+
+        A per-host-per-infection beta-binomial draw (Liu 2013 Table 3): some
+        infected hosts never carry at all, which a per-event common rate
+        cannot express.
+        """
+        existing = agent.hand_carriage_propensity_by_pathogen.get(pathogen_id)
+        if existing is not None:
+            return existing
+        propensity = float(self.rng.beta(*HAND_CARRIAGE_PROPENSITY_BETA))
+        agent.hand_carriage_propensity_by_pathogen[pathogen_id] = propensity
+        return propensity
+
     def _hand_hygiene_efficacy(self, profile: dict | None) -> float:
         configured = (profile or {}).get(
             "hand_hygiene_efficacy_log10_reduction",
@@ -4244,6 +4263,14 @@ class TransmissionCore:
                 target + (current - target) * survival
             )
             return
+        # Thin the defecation rate by this host's carriage propensity here and
+        # not in _stool_event_rate_per_day: the accessor reports a physical
+        # quantity the profile declares (defecation frequency), while carriage
+        # is a separate mechanism conditioned on defecation. Bernoulli
+        # thinning of a Poisson rate is distributionally identical to gating
+        # each event, and doing it before both uses keeps the stationary-load
+        # initialisation consistent with the event stream.
+        events_per_day *= self._hand_carriage_propensity(agent, pathogen_id)
         if pathogen_id not in agent.hand_load_by_pathogen:
             current = self._stationary_hand_load(
                 target, rate, events_per_day,
