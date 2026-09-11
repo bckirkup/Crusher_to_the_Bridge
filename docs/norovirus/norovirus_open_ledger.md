@@ -2348,6 +2348,63 @@ Roughly in dependency order.
     None was found. `HAND_LOAD_LOG10_GEC`, `HAND_LOAD_REFERENCE_PEAK_LOG10`,
     `environmental_faecal_release_log10_g_per_epoch`, the dose-response rows
     and `POSTING_THRESHOLD` are all unchanged by this item.
+24. **The hand load is intermittent, its reference pair is cross-population,
+    and the defecation trigger has the wrong sign — three corrections from one
+    full text, none of them adopted.**
+    [Tranche 40](../literature/consensus_tranche_40_hand_event_amplitude.md)
+    opened Liu 2013 (`10.1128/AEM.02576-13`) at PMC3837815 after three
+    Consensus phrasings returned the abstract only. Items 22–23 and the
+    tranche 26/39 rows are corrected as follows; **no constant moves**.
+    (a) **Item 23(a) is partly withdrawn, and tranche 26's null 2 with it.**
+    "No study measures stool titre and hand load in the same subjects" was a
+    **retrieval failure, not a null**. Liu's Table 3 pairs each subject's
+    *maximum* stool titre — **8.3, 8.1, 7.4, 7.5, 7.4, 8.2 log10/g** — with
+    that subject's *mean positive* hand load. Max-versus-mean and not
+    simultaneous, so it bounds rather than measures.
+    (b) **The shipped pair is cross-population.** The engine reads Liu's
+    3.86 against a curve peak of 11.0 taken from a different population.
+    Against Liu's own subjects the same arithmetic gives
+    **−3.5 … −4.4 log10 g/hand**, 2.7–3.6 logs above the shipped `−7.14` and
+    at the **top** of item 23(b)'s independent indicator envelope. Two
+    independent routes now bracket the bridge from above. Neither is adopted,
+    and neither licenses raising the load on its own — see (c), which acts the
+    other way.
+    (c) **3.86 is a mean over a quarter.** Only **18/71 (25.4%)** of rinses
+    from symptomatic, stool-positive hosts were positive at a limit of
+    **2.15 log10 GEC per rinse**; **two of six** infected subjects never had a
+    positive hand; per-subject positivity ran 0% to 54.5%, per-subject means
+    3.30–4.45. `_replenish_hand`'s **non-event mode — which holds every
+    shedding host at the ceiling every epoch — is refuted** for this pathogen
+    in this setting, independently of any magnitude.
+    (d) **The event mode's trigger has the wrong sign.** Liu measured the
+    contrast the engine asserts: rinses taken **immediately after bathroom
+    use** were *lower* and *less often positive* (**11/89 = 12.4%**, mean
+    **2.30 log10**) than rinses at routine vital-sign checks (**6/16 =
+    37.5%**, mean **3.32 log10**), **P < 0.05** on both. The engine returns
+    the hand to the ceiling *at* a stool event. Why the field reverses is
+    `?nr` — the paper records sample context, not behaviour.
+    (e) **What the dispersion evidence licenses.** Ram 2011 (serial rinses,
+    same mothers hours apart): mean absolute difference **3.5 log10, SD 1.4**,
+    and **no correlation** between random and critical-time counts
+    (R = 0.13). Pickering 2011: activity-conditioned geometric-mean increments
+    from **50 to 6,310 CFU per two hands**, bathing negative. Oie: SD ≈ 2× the
+    mean. Together these support **intermittency plus lognormal-scale
+    dispersion with measured suppression terms**; a **fitted power-law or
+    Pareto tail index is `?nr-term`** — no retrieved source reports one, and
+    adopting one would be a declaration.
+    (f) **Rare-release mode.** Chalmers 2021 puts the probability that one
+    bather contaminates a pool at **1 in 10³ to worse than 1 in 10⁴** per
+    person-visit; Gerba 2000 estimates **0.14 g** of faecal material per
+    bather from indicator wash-off; Petterson 2020's **0.06 / 0.6 / 6 g**
+    triangular is another model's declared reference distribution and is
+    **not** evidence. Wrong setting for all three.
+    (g) **Nothing changed.** `HAND_LOAD_LOG10_GEC`,
+    `HAND_LOAD_REFERENCE_PEAK_LOG10`, `stool_events_per_day`,
+    `environmental_faecal_release_log10_g_per_epoch`, the dose-response rows
+    and `POSTING_THRESHOLD` are untouched. Corrections (b) and (c) act in
+    opposite directions on the time-averaged hand load and must be resolved
+    together; (d) is a structural result and may not be retimed by what moves
+    A9.
 
 ## 5. Held fixed by assumption
 
