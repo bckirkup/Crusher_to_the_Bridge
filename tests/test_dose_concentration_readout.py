@@ -129,15 +129,23 @@ def test_patchiness_cost_is_neutral_in_the_linear_limit():
 
 
 def test_patchiness_cost_penalises_a_saturating_allocation():
-    """The same total delivered to one host infects fewer than spread over many."""
+    """The same total delivered to one host infects fewer than spread over many.
+
+    Both streams carry the same total over the same number of draws; only a
+    host-epoch that received nothing is not a draw, so the concentrated arm
+    keeps a negligible residual on the other 99 rather than a zero.
+    """
     total = 100.0
     n = 100
-    concentrated = patchiness_cost([total] + [0.0] * (n - 1))
+    residual = 1e-9
+    concentrated = patchiness_cost(
+        [total - (n - 1) * residual] + [residual] * (n - 1),
+    )
     spread = patchiness_cost([total / n] * n)
 
     assert concentrated["realised_establishments"] < 1.001
     assert spread["realised_establishments"] > 50.0
-    assert concentrated["realised_over_flat"] < spread["realised_over_flat"]
+    assert concentrated["realised_over_flat"] < 0.05
     assert spread["realised_over_flat"] == pytest.approx(1.0, abs=1e-9)
 
 
