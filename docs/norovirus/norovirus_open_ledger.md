@@ -1571,6 +1571,28 @@ Roughly in dependency order.
    continuous channel's normaliser on one scale, since only the second is
    currently swept. Neither is implemented.
 
+   **What the release term should be instead, sourced but not adopted.**
+   [Tranche 38](../literature/consensus_tranche_38_environmental_release.md)
+   assembles the factors that would replace the scalar: titre (existing curve)
+   × stool mass per event (Rose 2015, **128 g/cap/day over 1.20
+   defecations/day**, Grade A, and the review states its data are highly
+   skewed) × deposition fraction per 100 cm² per flush (Goforth 2023 and Sassi
+   2018 seeded MS2, **10^−3.7 to 10^−8.8** on seat surfaces, Grade B-minus
+   surrogate) × event rate (tranche 32). Composed, that envelope is **about
+   five orders of magnitude wide against the box's twenty**, and it
+   **straddles** the `adj ≈ 6–7` switch rather than sitting on one side of it.
+   The third mode — the **background deposition onto ordinary surfaces** — is
+   a **literature null**: crAssphage is quantified only in water
+   (copies/100 mL), and every built-environment chair study is 16S relative
+   abundance, including the classroom-chair source-contribution work (Meadow
+   2014, gut-associated indicator taxa on chair seats, no absolute load). The
+   one quantified built-environment result is a **turnover timescale** — a
+   desk's community recovers within **2–5 days** of a ~50% removal (Kwan
+   2018) — not a level. **Nothing is adopted and [4, 24] is not narrowed**:
+   the surrogate deposition fraction is PFU on a 100 cm² swab, the model's
+   pool has its own declared area, and that denominator must be reconciled
+   before any of this becomes a parameter.
+
 0. **`SYMP-EFF-01`: the missing term now exists as a rate, and the shared
    quantity is narrowed rather than separated.** Norovirus boards at
    a prevalence of **asymptomatic faecal RNA carriage** (Grade B on its own
