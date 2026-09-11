@@ -2002,7 +2002,7 @@ Roughly in dependency order.
     out; nothing is retuned here.**
 
 19. **`CONTACT-ARCH-02`: a visit's contacts saturate with dwell, when a run
-    declares so; nothing runs under it yet.** Item 17 (d) is implemented, off
+    declares so; the matched reprise is item 20.** Item 17 (d) is implemented, off
     unless declared, and reads `contact_architecture_spec.md` §3a. The engine
     counts, per agent, the consecutive epochs it has been placed by the same
     token in the same room (`KorkinAgent.dwell_epochs`; any change of token,
@@ -2021,6 +2021,50 @@ Roughly in dependency order.
     the upper-corner declaration error it recorded is now *readable* under a
     declared `tau` sweep, which is the matched reprise item 18 already
     requires. No rate, `tau` or kernel adopted.
+
+20. **The matched reprise under the resolver repair and dwell saturation:
+    saturation returns the upper corners to the control, the ordering of item
+    17 reproduces, no arm nears an anchor, and no `tau` or rate is adopted.**
+    Nine expedition arms on image `bounded-design-v20` (job definition rev 20,
+    built from the item 18 tree), each 256 Sobol' points × 6 seeds over the
+    13-factor `expedition_sensitivity` box (design seed 37, seed base 500),
+    1,536 voyages per arm, 16/16 shards, no failed child: the uniform control,
+    the tranche-37 lows / midpoints / highs unsaturated, and a declared `tau`
+    sweep on the two upper corners (midpoint × {1, 2} h; high × {0.5, 1, 2} h;
+    the same `tau` on all eight activities). Full tables in
+    `contact_architecture_spec.md` §9–9a. Finite-sample over that design only.
+    (a) **The item 18 repair moved the control within error**: against the
+    item 17 (v19) control on the same points and seeds, Δ pax +0.05 pp (se
+    0.08), Δ crew −0.00 pp (se 0.05), 36 off / 35 on, p = 1.0, 804/1,536
+    bit-identical — half the voyages changed and the aggregate did not, so the
+    item 18 reprise requirement for the `FOOD-*`, `SURF-KO-01` and
+    `CONTACT-SCALE-01` readouts is discharged for the expedition control
+    aggregate and remains open for each of those arms individually.
+    (b) **Unsaturated, item 17's ordering reproduces**: pax 6.26 → 6.54 →
+    7.83 → 8.57%, crew 2.65 → 2.95 → 3.81 → 4.25%; A5 2.37 → 2.02, away from
+    4.3; postings 14.3% → 18.6% against 0.6–1.6%. The low corner is now a small
+    positive on both roles (+0.28 / +0.31 pp, se 0.09 / 0.08) rather than a
+    null, attributable to the repair moving waiting diners from `other` into
+    `leisure`. (c) **Saturation lowers every upper corner, monotonically in
+    `tau`**: high → τ = 0.5 / 1 / 2 h is −2.75 / −2.04 / −1.31 pp pax and
+    −1.57 / −1.09 / −0.67 pp crew, all p < 10⁻⁴; midpoint → τ = 1 / 2 h is
+    −1.84 / −1.26 pp pax and −1.00 / −0.72 pp crew. At τ ≤ 1 h both corners
+    sit within ~0.5 pp of the uniform control on both roles. (d) **§6 checks
+    after the repair**: crew:passenger 0.61–0.65 on every arm (was 1.1–1.5
+    inverted in item 17), on Pung's side of unity; unsaturated high (63 / 41
+    per day) and the midpoint's passengers (42) remain declaration errors
+    outside the 5–40 band, the low corner (21 / 13) and every saturated arm
+    (15–35 / 10–23) lie inside it; passenger dining share 48–61% saturated
+    against 34–40% unsaturated and Pung's 71%. (e) **Reported, not tuned**: a
+    single `tau` saturates a ten-hour `work_service` shift like a one-hour
+    meal (0.7–2.2 on-duty contacts/day under the sweep), which is the wrong
+    shape for a role whose partners turn over; the map allows `work_service`
+    its own `tau` or none, and no arm here declared one. That is an open
+    declaration question, not a magnitude. **Consequence for the record: A5
+    lies in 2.02–2.37 and postings in 13.8–18.6% across all nine arms; no
+    activity rate, `tau` or kernel is adopted, and no arm was chosen or read
+    for its distance from Pung's 20/10, A5, VSP or a posting rate.** Every dose
+    figure remains void pending refit.
 
 ## 5. Held fixed by assumption
 
