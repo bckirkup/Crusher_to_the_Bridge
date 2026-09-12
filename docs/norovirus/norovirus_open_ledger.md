@@ -2964,6 +2964,47 @@ Roughly in dependency order.
     seeds, and no result of that measurement may be read back into the
     shipped defaults.
 
+34. **`recovery_day` is a point value: nobody is ever ill at day 3.1 and
+    everybody is ill at day 2.9 — the defect is the dispersion, not the
+    level.** A `norwalk_gi` illness lasts exactly 3 days, so the boarding
+    cohort can contain no symptomatic-at-boarding host and VSP's 3-day crew
+    pre-boarding window (item measured in the 2018 manual, §4.1.1.2) has
+    nobody to catch.
+    (a) **The dispersed arm is implemented, default-off, and unmeasured.**
+    `illness_duration` on `norwalk_gi` carries the Harris 2019 Fig 4C
+    survival table (community cohort, ≥5 years; median 2, mean 2.57,
+    87% resolved by day 4 — [tranche
+    43](../literature/consensus_tranche_43_illness_duration_harris_2019.md)),
+    Grade B, origin F4·dig. `draw: empirical_survival` draws one integer-day
+    duration per infection and stamps `inf["recovery_day"]` at first
+    progression — before the onset-time pharmaceutical override in the same
+    `advance_infections` call — so treatment shortens the drawn value, not
+    the profile constant. `draw: point` (the shipped default) stamps nothing
+    and consumes no RNG; a fixed-seed run over the shipped profile is
+    bit-identical to the pre-arm model, pinned by the change-detector in
+    `tests/test_illness_duration.py`.
+    (b) **The point value stays the default.** Its Atmar challenge-illness
+    basis (1–2 days in 16 challenged adults) is a different population and
+    exposure from Harris's community cohort; the register row says so. Which
+    arm is right is a campaign measurement, not a sourcing verdict.
+    (c) **Edison `norovirus_gii4` repair.** It shipped a 15-entry authored
+    shedding curve but no `shedding_duration_days`, so shedding fell back to
+    `recovery_day` = 3 and 12 of the 15 authored curve days were
+    unreachable. `shedding_duration_days: 15` is the extent of its own
+    authored curve — an internal-consistency repair, not a new literature
+    claim and not transferred from the GI.1 evidence.
+    (d) **Open item — the `resolving` symptom phase keeps the point.**
+    `engines/transmission_core.py`'s emetic-phase bounds fall back to the
+    *profile* `recovery_day` when `dpi_max` is null, so under
+    `empirical_survival` a host drawn 7 days of illness still loses its
+    `resolving`-phase features at day 3. Making that read the infection
+    record would change today's pharmaceutical-treatment behaviour and break
+    default inertness, so it is deliberately not done; the `acute` vomiting
+    phase carries an explicit `dpi_max: 2` and is unaffected.
+    (e) **Nothing shipped moved.** The arm is unmeasured until a campaign
+    runs the matched-seed pair; the symptomatic-boarder state and the VSP
+    pre-boarding screen are downstream work that depends on this arm.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
