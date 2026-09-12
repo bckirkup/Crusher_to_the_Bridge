@@ -85,7 +85,11 @@ def test_core_sources_have_no_toplevel_analysis_imports(rel: str) -> None:
     assert path.is_file(), f"missing core source {rel}"
     for name in _top_level_import_names(path):
         for prefix in _FORBIDDEN_PREFIXES:
-            assert name != prefix and not name.startswith(prefix + "."), (
+            assert name != prefix, (
+                f"{rel} top-level import {name!r} pulls offline package "
+                f"{prefix!r}; move it inside the function that needs it"
+            )
+            assert not name.startswith(prefix + "."), (
                 f"{rel} top-level import {name!r} pulls offline package "
                 f"{prefix!r}; move it inside the function that needs it"
             )

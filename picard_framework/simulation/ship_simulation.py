@@ -12,10 +12,7 @@ import numpy as np
 
 if TYPE_CHECKING:
     from picard_framework.analysis.sentinel.line_list import SentinelLedger
-    from picard_framework.analysis.sentinel.wastewater_ops import (
-        WastewaterOpsConfig,
-        WastewaterOpsSampler,
-    )
+    from picard_framework.analysis.sentinel.wastewater_ops import WastewaterOpsSampler
 
 from crusher_labs import build_modalities
 from crusher_labs.modalities.clinical_strain_typing import (
