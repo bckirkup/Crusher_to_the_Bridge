@@ -2952,7 +2952,10 @@ Roughly in dependency order.
     `detectable_duration_days` (28, Atmar 2008) and counts hosts past the
     authored shedding window as `cleared` — RNA-positive in the measurement,
     representable in the engine only as non-shedding, a boundary rather than
-    a clearance claim. Both defaults (`screening_prevalence`,
+    a clearance claim. `cleared` is counted in `composition` but excluded
+    from `drawn_by_role`, which counts infectious introductions only, so the
+    per-import yield denominator is not deflated by the boundary mass. Both
+    defaults (`screening_prevalence`,
     `engine_window`) are today's behaviour bit-for-bit: a fixed-seed boarding
     draw with neither key set reproduces main's cohort, composition and
     per-host infection age exactly, and that inertness is pinned by a labelled

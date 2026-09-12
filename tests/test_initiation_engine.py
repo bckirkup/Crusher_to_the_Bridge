@@ -1383,8 +1383,12 @@ class TestStationaryAgeDraw:
         drawn = sum(report.drawn_by_role.values())
         infected = len(_infected_ids(engine))
         assert report.composition[STATE_CLEARED] > 0
-        assert sum(report.composition.values()) == drawn
-        assert infected == drawn - report.composition[STATE_CLEARED]
+        # drawn_by_role counts infectious introductions; composition counts
+        # the whole drawn RNA-positive cohort, cleared included.
+        assert drawn == sum(report.composition.values()) - (
+            report.composition[STATE_CLEARED]
+        )
+        assert infected == drawn
 
     def test_an_unknown_age_draw_is_an_error(self) -> None:
         cfg = _cfg()
@@ -1393,6 +1397,19 @@ class TestStationaryAgeDraw:
             ValueError, match="engine_window.*stationary_detectable",
         ):
             resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
+    def test_a_renewal_rate_in_party_mode_is_an_error(self) -> None:
+        block = _party_block()
+        block["rate_mode"] = "renewal"
+        block["renewal"] = {
+            "case_incidence_per_1000_py": {"passenger": 39.0, "crew": 39.0},
+            "detectable_duration_days": 28,
+        }
+        with pytest.raises(ValueError, match="party mode"):
+            resolve_initiation_plan(
+                {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
+                {PATHOGEN: _profile()},
+            )
 
     def test_stationary_without_a_detectable_duration_is_an_error(self) -> None:
         cfg = _cfg()

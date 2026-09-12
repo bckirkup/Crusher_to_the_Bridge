@@ -157,7 +157,13 @@ class InitiationPlan:
 
 @dataclass(frozen=True)
 class BoardingReport:
-    """What one pathogen's boarding draw actually produced."""
+    """What one pathogen's boarding draw actually produced.
+
+    ``drawn_by_role`` counts infectious introductions only: a ``cleared``
+    host is part of the drawn RNA-positive cohort and is counted in
+    ``composition``, but holds no infection record and cannot infect anyone,
+    so it is not an introduction and stays out of ``drawn_by_role``.
+    """
 
     pathogen_id: str
     drawn_by_role: dict[str, int]
@@ -416,15 +422,15 @@ def _resolve_boarding_spec(
         else None
     )
     if party is not None:
-        passenger, crew = 0.0, 0.0
-        detectable_days = None
-    elif rate_mode == RATE_MODE_RENEWAL:
-        if _resolve_mode(block, location) == BOARDING_MODE_PARTY:
+        if rate_mode == RATE_MODE_RENEWAL:
             raise ValueError(
                 f"{location}.rate_mode = {rate_mode!r} is an import-rate "
                 "mechanism and cannot be combined with party mode, "
                 "which sets its own cluster size",
             )
+        passenger, crew = 0.0, 0.0
+        detectable_days = None
+    elif rate_mode == RATE_MODE_RENEWAL:
         passenger, crew, detectable_days = _resolve_renewal(
             block, location, never,
         )
@@ -481,12 +487,6 @@ def _merge_block(base: Any, override: Any) -> Any:
     merged = dict(base)
     for key, value in override.items():
         merged[key] = _merge_block(base.get(key), value)
-    if (
-        isinstance(override, dict)
-        and override.get("rate_mode") == RATE_MODE_RENEWAL
-        and "prevalence" not in override
-    ):
-        merged.pop("prevalence", None)
     return merged
 
 
@@ -521,6 +521,15 @@ def boarding_blocks(
         if pathogen_id == "enabled":
             continue
         merged = _merge_block(blocks.get(str(pathogen_id), {}), block or {})
+        if (
+            isinstance(block, dict)
+            and block.get("rate_mode") == RATE_MODE_RENEWAL
+            and "prevalence" not in block
+        ):
+            # A profile ships its screening prevalence unconditionally, so a
+            # config arm selecting renewal withdraws it here; a config that
+            # states both still fails the two-mechanisms check downstream.
+            merged.pop("prevalence", None)
         blocks[str(pathogen_id)] = merged
     return blocks
 
@@ -729,9 +738,7 @@ def _state_window(
     """
     shedding_onset = max(0.0, incubation_days - presymptomatic_days)
     low = shedding_onset
-    if state == STATE_INCUBATING:
-        low, high = 0.0, shedding_onset
-    elif state == STATE_PRESYMPTOMATIC:
+    if state == STATE_PRESYMPTOMATIC:
         high = incubation_days
     elif state == STATE_NEVER_SYMPTOMATIC:
         high = incubation_days + duration_days
@@ -746,8 +753,12 @@ def _state_window(
         high = incubation_days + duration_days
         if age_draw == AGE_DRAW_STATIONARY_DETECTABLE:
             high = max(high, detectable_duration_days or 0.0)
-    else:
+    elif state == STATE_INCUBATING:
         low, high = 0.0, shedding_onset
+    else:
+        # STATE_CLEARED is an outcome of the age draw, never an input to a
+        # window; any other unrecognised state has no authored window either.
+        return None
     if high <= low:
         return None
     return low, high
@@ -921,7 +932,8 @@ def _draw_party_cohort(
         state = _board_one_host(spec, agent, profile, clock, rng)
         if state is None:
             continue
-        drawn_by_role[party.role] += 1
+        if state != STATE_CLEARED:
+            drawn_by_role[party.role] += 1
         composition[state] += 1
     return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
 
@@ -940,7 +952,10 @@ def draw_boarding_cohort(
     measurement is a per-person probability, and the two roles carry rates
     that differ by about a factor of four, so they are drawn against their own
     populations. In party mode the draw is the all-or-nothing cluster of
-    ``_draw_party_cohort``.
+    ``_draw_party_cohort``. ``drawn_by_role`` counts infectious
+    introductions; a host drawn into the ``cleared`` boundary state is part
+    of the drawn RNA-positive cohort (``composition``) but is not an
+    introduction.
     """
     if spec.party is not None:
         return _draw_party_cohort(spec, agents, profile, clock, rng)
@@ -967,7 +982,8 @@ def draw_boarding_cohort(
             state = _board_one_host(spec, agent, profile, clock, rng)
             if state is None:
                 continue
-            drawn_by_role[role] += 1
+            if state != STATE_CLEARED:
+                drawn_by_role[role] += 1
             composition[state] += 1
     return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
 

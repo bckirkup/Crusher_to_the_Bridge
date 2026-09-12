@@ -48,11 +48,15 @@ _INIT_TAG = re.compile(r"(?:^|_)init(\d+)(?:_|$)", re.IGNORECASE)
 
 
 def drawn_boarding_introductions(initiation: Any) -> int | None:
-    """Introductions a boarding run actually drew, from its initiation manifest.
+    """Infectious introductions a boarding run drew, from its initiation manifest.
 
     A boarding run has no configured index-case count: the cohort is drawn from
     role prevalence, so ``k`` is the realised draw the manifest records, not a
-    setting to be read back off the run spec.
+    setting to be read back off the run spec. ``drawn_by_role`` counts only
+    hosts that hold an infection record; the manifest's ``composition`` is the
+    full drawn RNA-positive cohort and may additionally count ``cleared``
+    hosts, which carry no infection and are excluded here on purpose — a
+    cleared host cannot produce a secondary.
     """
     if not isinstance(initiation, dict):
         return None

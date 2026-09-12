@@ -165,7 +165,9 @@ moved and neither arm has been measured.
   not harmonised). A host whose age lands past `incubation +
   shedding_duration` boards as `cleared`: counted in
   `BoardingReport.composition`, never passed to `infect_with_pathogen`, inert
-  to transmission. The `_select_prevalent` length-bias weight is unchanged
+  to transmission, and excluded from `drawn_by_role` so the realised
+  introduction count stays a count of infectious hosts. The
+  `_select_prevalent` length-bias weight is unchanged
   (it is strictly detectable duration under the stationary model; changing
   it was scoped out).
 - **Defaults.** `rate_mode` omitted → `screening_prevalence`; `age_draw`
