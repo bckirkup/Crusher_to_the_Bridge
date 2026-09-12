@@ -2823,15 +2823,23 @@ Roughly in dependency order.
     initiation side. The direction was declared before the run; the magnitude
     was not. This is item 22(d)'s posting floor re-measured on the repaired
     chain, 10–20× higher than it was there.
-    (b) **The imported cohort alone overshoots A8, before any transmission.**
-    A 3.25% passenger boarding prevalence on a 7-day voyage is 464 imported
-    infections per 100,000 passenger travel-days against A8's 17.8 *reported*
-    cases; at the model's own ascertainment on these voyages (≈0.21) the
-    imports alone give ~97, still 5.5× A8. Mean reported passenger incidence
-    per 100,000 passenger travel-days runs 407 (classic 7 d) and 530 (classic
-    12 d) under boarding, against the fiat arm's 20 and 35 — which is A8's
-    17.8 and 35.0 almost exactly. No transmission-side change subtracts an
-    import.
+    (b) **The imported infection load dwarfs A8's reported count; the
+    *reported-case* overshoot originally claimed here is RETRACTED (item
+    33).** A 3.25% passenger boarding prevalence on a 7-day voyage is 464
+    imported infections per 100,000 passenger travel-days against A8's 17.8
+    *reported* cases — a real load contrast, but it mixes an infection
+    numerator with a reported-case denominator. The original version of this
+    item applied the model's overall ascertainment (≈0.21) to the imported
+    cohort and concluded the imports alone give ~97 reported cases per
+    100,000, 5.5× A8; that used the wrong reportability for imports — only
+    the presymptomatic sliver (2.84% of imports) is ever reportable, so the
+    imports alone deliver ≈7 per 100,000, *below* A8. The boarding arm's
+    measured incidence is secondary transmission from unreportable shedders,
+    not directly-imported reported cases (item 33). Mean reported passenger
+    incidence per 100,000 passenger travel-days runs 407 (classic 7 d) and
+    530 (classic 12 d) under boarding, against the fiat arm's 20 and 35 —
+    which is A8's 17.8 and 35.0 almost exactly. No transmission-side change
+    subtracts an import.
     (c) **Boarding does repair the over-dispersion it was run to test.** The
     fiat arm's establishment lottery (70% of 7-day voyages at the index case
     alone, the mean carried in a ~1.5% tail) is gone: zero-secondary voyages
@@ -2872,6 +2880,67 @@ Roughly in dependency order.
     (g) **Nothing adopted.** No prevalence, state-split, release or route
     constant moved; every dose figure stays withdrawn; the archived fiat
     campaigns are untouched.
+33. **Convalescent imports are unreportable, and the boarding prevalence fails
+    a renewal-identity check — two claims of item 32 are RETRACTED.** Checked
+    at tranche 42
+    ([`../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md`](../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md));
+    the retractions are applied in place in
+    `docs/norovirus/introduction_mechanism_ab.md` §3/§6 and in item 32(b)
+    above.
+    (a) **The retraction.** Item 32(b) applied the model's overall
+    ascertainment (≈0.21) to the imported cohort and claimed the imports
+    alone deliver ~97 reported cases per 100,000 passenger travel-days, 5.5×
+    A8; and `introduction_mechanism_ab.md` §6 claimed 71% of RNA-positive
+    boarders get a presenting course "with full shedding and full
+    reportability". The reportability half is wrong:
+    `_write_presentation_history` gives a convalescent import
+    `IllnessStatus.RECOVERED` with `presented=True`,
+    `telemetry_buffer/agent_axes.py` maps a recovered infection to
+    `asymptomatic` presentation, and `update_ever_reported_ids`
+    (`orchestrator_init.py`) intersects syndromic positives with the current
+    symptomatic roster — a convalescent import can never become a reported
+    case. Only the presymptomatic sliver, (1 − 0.29) × 0.04 = **2.84% of
+    imports**, is ever reportable. At that rate the 8.18 mean passenger
+    imports on a 450-berth 7-day voyage give ≈0.23 reported cases over
+    3,150 passenger travel-days ≈ **7 per 100,000 — below A8's 17.8, not
+    5.5× above it.** The boarding arm's measured overshoot is therefore
+    secondary transmission from invisible shedders, not imported reported
+    cases. Not retracted: the 464-imported-infections-per-100,000 load, the
+    two-order-of-magnitude bracketing of A9, the dispersion repair, and the
+    per-import secondary yield of item 32(d).
+    (b) **The boarding age draw sits on the symptomatic peak, and the engine's
+    window is shorter than the detectable window.** `_state_window`
+    (`engines/initiation.py`) draws a convalescent import's age uniformly
+    over 3–15 days since infection — 1.8–13.8 days post onset at the 1.2-day
+    incubation median — spanning the symptomatic curve's own peak, so the
+    engine's mean per-import shedding is **1.77×10¹⁰** where the same
+    composition drawn stationary over Atmar's 28-day detectable window gives
+    **8.77×10⁹** — a **2.02×** overstatement, 81% of a fully symptomatic
+    index case's mean. And Atmar 2008 puts RNA detectability at a median 28
+    days against `shedding_duration_days` 15, so only ~54% of a stationary
+    RNA-positive cohort is in any state the engine can represent.
+    (c) **The renewal identity fails: prevalence ≠ incidence × duration.**
+    Adult community incidence (O'Brien 2016 Table 1; Tam 2011, IID2 — both UK
+    community cohorts, so no cruise, VSP, MIDRS or A-anchor content enters
+    the check) times Atmar's 28-day detectable duration, converted to
+    infections under the engine's own two `never_symptomatic` regimes, gives
+    **0.30%/0.42%** (adult-challenge, ≥65/15–64 y) and **0.58%/0.82%**
+    (community-cohort); the full corner set (13/28/56 d × both regimes × both
+    bands) spans **0.14%–1.64%**. The adopted passenger interval **[2.5%,
+    4.0%]** lies above every corner — 4–10× central, 1.5× the most favourable
+    — and the crew interval [0.7%, 3.0%] straddles it. Three separately
+    sourced quantities are mutually inconsistent; at most two can be right.
+    The three admissible resolutions (screening-series selection, uncounted
+    asymptomatic infections in case-incidence, chronic shedders inflating
+    detectable over infectious duration) are recorded in tranche 42 §4 and
+    none is chosen.
+    (d) **Nothing moved.** No prevalence, duration, state-split or any other
+    constant changed; the A9-direction coincidence of every correction is
+    recorded as a coincidence, not confirmation. **Open:** whether the
+    boarding block should take a renewal-derived import rate (incidence ×
+    model-representable duration) in place of the screening prevalence, and
+    whether "convalescent" is the right state for an RNA-positive
+    asymptomatic sample at all given (b).
 
 ## 5. Held fixed by assumption
 

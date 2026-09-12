@@ -62,10 +62,25 @@ The overshoot is visible without any transmission at all. A 3.25% passenger
 boarding prevalence on a 7-day voyage is 3,250 infected boarders per 100,000
 passengers, i.e. **464 imported infections per 100,000 passenger travel-days**,
 against A8's observed **17.8 reported cases** per 100,000 passenger travel-days
-in the 6–7 day band. At the model's own ascertainment on these voyages
-(reported/infected ≈ 0.21) the imports alone still deliver ~97 per 100,000 —
-5.5× A8 — before a single secondary case. No transmission-side change can
-subtract that.
+in the 6–7 day band.
+
+> **Retraction.** The next sentence as first written applied the model's
+> overall ascertainment (reported/infected ≈ 0.21) to the imported cohort and
+> concluded imports alone deliver ~97 reported cases per 100,000 passenger
+> travel-days, 5.5× A8. That used the wrong reportability for imports:
+> `_write_presentation_history` stamps a convalescent import
+> `IllnessStatus.RECOVERED` / `presented=True`, `agent_axes` maps a recovered
+> infection to `asymptomatic` presentation, and `update_ever_reported_ids`
+> intersects syndromic positives with the *current* symptomatic roster — a
+> convalescent import can never become a reported case. Only the
+> presymptomatic sliver, (1 − 0.29) × 0.04 = **2.84% of imports**, is ever
+> reportable. At that rate the 8.18 mean passenger imports on a 450-berth
+> 7-day voyage give ≈0.23 reported cases over 3,150 passenger travel-days ≈
+> **7 per 100,000 — below A8's 17.8, not 5.5× above it.** The boarding arm's
+> measured 112 per 100,000 is therefore secondary transmission from invisible
+> shedders, not directly-imported reported cases. Corrected by ledger §4 item
+> 33; the check behind the correction is
+> [`../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md`](../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md).
 
 Mean reported passenger incidence per 100,000 passenger travel-days, model
 against A8 (17.8 at 6–7 d, 35.0 at 11–14 d):
@@ -137,7 +152,21 @@ its own denominator** (Kobayashi 2021 / Qi 2018 / Jeong 2021; outbreak-populatio
 positivity excluded as circular — ledger §1). The engine composes them with
 `never_symptomatic_fraction` = 0.29, which is adult-challenge **infections**, so
 71% of the RNA-positive boarders are given a presenting course (convalescent, or
-presymptomatic) with full shedding and full reportability.
+presymptomatic).
+
+> **Retraction.** That sentence as first written continued "with full shedding
+> and full reportability". The reportability half is false and is retracted:
+> a convalescent import carries `IllnessStatus.RECOVERED` with
+> `presented=True`, a recovered infection maps to `asymptomatic`
+> presentation in `telemetry_buffer/agent_axes.py`, and
+> `update_ever_reported_ids` (`orchestrator_init.py`) intersects syndromic
+> positives with the **current** symptomatic roster — so a convalescent
+> import can never become a reported case. Only the presymptomatic sliver,
+> (1 − 0.29) × 0.04 = **2.84% of imports**, is ever reportable. Full
+> shedding is **not** retracted: convalescent imports do shed, on the
+> symptomatic curve, per tranche 42 finding B. Corrected by ledger §4 item
+> 33; see
+> [`../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md`](../literature/consensus_tranche_42_boarding_prevalence_renewal_check.md).
 
 That composition is the part this campaign puts in question, and it is a
 provenance question — what population and case definition the prevalence
