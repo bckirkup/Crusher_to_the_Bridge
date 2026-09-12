@@ -357,6 +357,7 @@ Tier 1 alone: ~15 hours (300 × 3 min).
 | `c1_single_dose_hours_v1_manifest.json` | Hourly-only single-dose C1 VSP refit |
 | `c1_reported_case_refit_v1_manifest.json` | Corrected-model reported-case C1 refit |
 | `tier_iterators.py` | `t1`–`t16` and calibration (`c1`–`c6`, `a2`, `b1`, `b2`) cartesian generators; `dispatch_standard_or_calibration` |
-| `campaign_runner.py` | Spec generator + Picard executor (sharding + S3 upload); `sr*` / `vd*` families stay here |
+| `campaign_runner.py` | Spec generator façade (Picard entrypoint); `sr*` / `vd*` families stay here; re-exports execution symbols |
+| `campaign_execution.py` | Resume / S3 / sharding / CLI and Picard run loop (`main` lives here; `campaign_runner.main` delegates) |
 | `README.md` | This file |
 | [`deploy/aws/`](../../../deploy/aws/README.md) | Dockerfile is at repo root; ECR + AWS Batch array-job deployment using IAM **role assumption** (short-lived creds) — bootstrap user → `picard-deploy-role`; containers use Batch execution/job roles |

@@ -917,11 +917,11 @@ def test_subprocess_timeout_writes_stderr(
             return ("", "")
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.subprocess.Popen",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.subprocess.Popen",
         lambda *_a, **_k: _FakeProc(),
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.time.monotonic",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.time.monotonic",
         lambda: 1_000_000.0,
     )
     monkeypatch.setattr(
@@ -1056,7 +1056,7 @@ def test_resume_downloads_s3_completed_log(
             return f"s3://fake/{name}"
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.S3Uploader",
         FakeUploader,
     )
     # dry-run still triggers resume download before generation completes.
@@ -1346,15 +1346,15 @@ def test_smoke_s3_upload_failure_still_succeeds(
         return True
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.S3Uploader",
         FailingUploader,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation_subprocess",
         fake_run,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation",
         fake_run,
     )
     rc = main([
@@ -1423,15 +1423,15 @@ def test_resume_skips_when_s3_manifest_contains_run(
         return True
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.S3Uploader",
         ExistingZipUploader,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation_subprocess",
         fake_run,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation",
         fake_run,
     )
 
@@ -1506,15 +1506,15 @@ def test_periodic_shard_bundle_upload_and_resume_append(
         return True
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.S3Uploader",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.S3Uploader",
         MemoryUploader,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation",
         fake_run,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation_subprocess",
         fake_run,
     )
 
@@ -1633,11 +1633,11 @@ def test_local_resume_preserves_manifest_entries_without_s3(
         return True
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation",
         fake_run,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation_subprocess",
         fake_run,
     )
     args = [
@@ -1690,11 +1690,11 @@ def test_shard_accumulation_isolated_by_shard_index(
         return True
 
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation",
         fake_run,
     )
     monkeypatch.setattr(
-        "picard_framework.runs.mega_cruise_campaign.campaign_runner.run_simulation_subprocess",
+        "picard_framework.runs.mega_cruise_campaign.campaign_execution.run_simulation_subprocess",
         fake_run,
     )
     common = [
