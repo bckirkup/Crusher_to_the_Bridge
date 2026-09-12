@@ -15,7 +15,7 @@ from picard_framework.analysis._io import (
 )
 from simulation_utils.paths import validated_open
 
-VSP_SWEEP = (0.01, 0.03, 0.05, None)  # None = off
+VSP_SWEEP = (0.01, 0.03, 0.05, None)  # None disables the VSP threshold
 DOSE_PROBABILITY_WINDOW_KEY = "p_dose_in_10.4_10.8"
 
 

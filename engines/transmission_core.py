@@ -1037,7 +1037,7 @@ def _parse_contact_rate(activity: str, raw: Any) -> dict[str, float]:
             )
         items = {str(r): raw[r] for r in CONTACT_RATE_ROLES}
     else:
-        items = {r: raw for r in CONTACT_RATE_ROLES}
+        items = dict.fromkeys(CONTACT_RATE_ROLES, raw)
     low, high = CONTACT_RATE_PER_HOUR_BOUNDS
     out: dict[str, float] = {}
     for role, value in items.items():

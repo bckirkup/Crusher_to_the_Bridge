@@ -77,6 +77,10 @@ SWEPT_KINDS: frozenset[str] = frozenset({SOURCED_INTERVAL, DECLARED_AXIS})
 # The config key the NPI interface (#9) reads.
 _NPI_KEY = "non_pharmaceutical_interventions"
 
+# Dotted config paths that appear as both lever name and destination key.
+FILTER_EFFICIENCY_PATH = "hvac.filter_efficiency"
+IMMUNE_FRACTION_PATH = "ship_graph.immune_fraction"
+
 
 class Span(NamedTuple):
     """A closed interval a lever is swept over.  Never collapsed to a point."""
@@ -238,8 +242,8 @@ def _hygiene_arm_levers(
 
 
 _FILTER_PRE = Lever(
-    name="hvac.filter_efficiency",
-    path="hvac.filter_efficiency",
+    name=FILTER_EFFICIENCY_PATH,
+    path=FILTER_EFFICIENCY_PATH,
     kind=SOURCED_INTERVAL, span=Span(0.0, 0.30), value=None,
     source=HSP, grade="C", origin="Tr",
     note=(
@@ -252,8 +256,8 @@ _FILTER_PRE = Lever(
     ),
 )
 _FILTER_POST = Lever(
-    name="hvac.filter_efficiency",
-    path="hvac.filter_efficiency",
+    name=FILTER_EFFICIENCY_PATH,
+    path=FILTER_EFFICIENCY_PATH,
     kind=SOURCED_INTERVAL, span=Span(0.90, 0.99), value=None,
     source=HSP, grade="C", origin="Tr",
     note=(
@@ -280,8 +284,8 @@ _ACH = Lever(
 )
 
 _IMMUNE_PRE = Lever(
-    name="ship_graph.immune_fraction",
-    path="ship_graph.immune_fraction",
+    name=IMMUNE_FRACTION_PATH,
+    path=IMMUNE_FRACTION_PATH,
     kind=INHERITED_POINT, span=None, value=0.2,
     source=KORKIN, grade="C", origin="Tr",
     note=(
@@ -292,8 +296,8 @@ _IMMUNE_PRE = Lever(
     ),
 )
 _IMMUNE_POST = Lever(
-    name="ship_graph.immune_fraction",
-    path="ship_graph.immune_fraction",
+    name=IMMUNE_FRACTION_PATH,
+    path=IMMUNE_FRACTION_PATH,
     kind=DECLARED_AXIS, span=Span(0.0, 0.2), value=None,
     source=IMMUNITY_DEBT, grade="C", origin="R",
     note=(
@@ -581,10 +585,10 @@ def main() -> None:
     corners = {
         "no NPI effect, immunity unchanged": dict.fromkeys(
             swept_lever_names("post"), 0.0,
-        ) | {"ship_graph.immune_fraction": 1.0},
+        ) | {IMMUNE_FRACTION_PATH: 1.0},
         "maximum NPI effect, immunity lost": dict.fromkeys(
             swept_lever_names("post"), 1.0,
-        ) | {"ship_graph.immune_fraction": 0.0},
+        ) | {IMMUNE_FRACTION_PATH: 0.0},
     }
     for label, coordinates in corners.items():
         patch = era_config_patch("post", coordinates)

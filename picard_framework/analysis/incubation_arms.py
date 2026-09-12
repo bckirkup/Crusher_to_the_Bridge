@@ -68,6 +68,9 @@ ARM_DISTRIBUTION = "distribution"
 ARM_FIXED = "fixed_onset"
 ARMS = (ARM_DISTRIBUTION, ARM_FIXED)
 
+ITINERARY_FILENAME = "itinerary.json"
+OBSERVATIONS_FILENAME = "observations.json"
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST_PATH = os.path.join(
     "picard_framework",
@@ -447,16 +450,16 @@ def _voyage_entry(record: Mapping[str, Any]) -> dict[str, Any]:
         "fleet_config": str(params["fleet_config"]),
         "R_onboard": float(params["R_onboard"]),
         "port_hazards": dict(params["port_hazards"]),
-        "itinerary": os.path.join("voyages", run_id, "itinerary.json"),
-        "observations": os.path.join("voyages", run_id, "observations.json"),
+        "itinerary": os.path.join("voyages", run_id, ITINERARY_FILENAME),
+        "observations": os.path.join("voyages", run_id, OBSERVATIONS_FILENAME),
     }
 
 
 def write_voyage_record(arm_dir: str, record: Mapping[str, Any]) -> None:
     """Persist one voyage in the layout ``cells_from_out`` expects."""
     dest = os.path.join(arm_dir, "voyages", str(record["run_id"]))
-    write_json(os.path.join(dest, "itinerary.json"), record["itinerary"])
-    write_json(os.path.join(dest, "observations.json"), record["observations"])
+    write_json(os.path.join(dest, ITINERARY_FILENAME), record["itinerary"])
+    write_json(os.path.join(dest, OBSERVATIONS_FILENAME), record["observations"])
     write_json(os.path.join(dest, "meta.json"), record["params"])
 
 
@@ -514,13 +517,13 @@ def _voyage_or_cached(
 ) -> dict[str, Any]:
     run_id = voyage_run_id(arm, variant, seed)
     dest = os.path.join(arm_dir, "voyages", run_id)
-    obs_path = os.path.join(dest, "observations.json")
+    obs_path = os.path.join(dest, OBSERVATIONS_FILENAME)
     if skip_existing and os.path.isfile(obs_path):
         print(f"[{arm}] reuse {run_id}", flush=True)
         return {
             "run_id": run_id,
             "params": read_json(os.path.join(dest, "meta.json")),
-            "itinerary": read_json(os.path.join(dest, "itinerary.json")),
+            "itinerary": read_json(os.path.join(dest, ITINERARY_FILENAME)),
             "observations": read_json(obs_path),
         }
     print(f"[{arm}] simulate {run_id}", flush=True)
