@@ -269,6 +269,26 @@ class TestRenderAndMain:
         assert "| sentinel | -4.0 | 10.0 | 2 | 1 |" in markdown
         assert "P(post)" in markdown
 
+    def test_render_markdown_carries_platform_per_row(self) -> None:
+        report = build_report(
+            [
+                _row(pax_ar=0.05, crew_ar=0.0, platform="hull_a"),
+                _row(pax_ar=0.05, crew_ar=0.0, platform="hull_b"),
+            ],
+            era="pre",
+        )
+        markdown = render_markdown(report)
+        assert markdown.splitlines()[0] == (
+            "# Posting frequency and posting-conditional attack rate"
+        )
+        assert "| platform | surveillance | release | days |" in markdown
+        rows = [l for l in markdown.splitlines() if l.startswith("| hull_")]
+        assert len(rows) == 2
+        by_platform = {r.split("|")[1].strip(): r for r in rows}
+        assert set(by_platform) == {"hull_a", "hull_b"}
+        for platform, row in by_platform.items():
+            assert row.startswith(f"| {platform} |")
+
     def test_main_writes_report_and_markdown(self, tmp_path: Path) -> None:
         _write_zip(
             tmp_path, "runs.zip",
