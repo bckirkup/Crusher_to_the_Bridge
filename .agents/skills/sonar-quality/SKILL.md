@@ -13,7 +13,7 @@ quality fixes separate from Sentinel analysis and campaign implementation work.
 ## Active Quality Rules
 
 - Keep the CI lint scope blocking for Ruff `E`, `F`, `W`, and `I`.
-- Keep `C901` enabled with the measured repository ceiling of 117. New
+- Keep `C901` enabled with the measured repository ceiling of 56. New
   functions must stay at or below cognitive complexity 15 (Sonar new-code
   S3776). The local Ruff hook uses the repository ceiling; that ceiling only
   ever ratchets downward after a measured max below the current value is
@@ -83,12 +83,15 @@ fleet column / wastewater builders. Official open `S3776` is 87 after
 those extractions scanned. Next named follow-ups (local ranking, not
 official Sonar):
 
-- `picard_framework/analysis/stan/posterior_summaries.py` `summarize_fit`
+- `engines/infection_dynamics_bridge.py` `step` (deferred: higher-risk dynamics path)
+
+Closed on the dedicated complexity-backlog pass (extract helpers only; behavior
+locks via existing suites + `tests/test_complexity_backlog_seams.py`):
+
+- `picard_framework/analysis/stan/posterior_summaries.py` `summarize_fit` / `summarize_outbreak_fit`
 - `crusher_labs/diagnostic_cascade.py` `evaluate_epoch`
-- `engines/infection_dynamics_bridge.py` `step`
 - `tools/sanity_checker.py` `_check_logical_contradictions`
 - `picard_framework/analysis/figures.py` `write_standard_figures`
-- `summarize_outbreak_fit`
 
 Keep that work under the owning package and out of Sentinel analysis
 changes. The boundary aliases are removed and the `S1845` blockers are

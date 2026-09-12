@@ -299,6 +299,180 @@ class DiagnosticCascadeEngine:
 
         return False
 
+    def _record_entry_tier(self, result: CascadeEpochResult, aid: int, tier: int) -> None:
+        if tier == 0:
+            result.new_tier0_agents.append(aid)
+        elif tier == 1:
+            result.new_tier1_agents.append(aid)
+
+    def _enter_sick_calls(
+        self,
+        result: CascadeEpochResult,
+        sick_call_ids: list[int],
+        epoch: int,
+        sick_tier: int,
+    ) -> None:
+        for aid in sick_call_ids:
+            if self.enter_tier(aid, sick_tier, epoch, reason="sick_call"):
+                self._record_entry_tier(result, aid, sick_tier)
+
+    def _enter_wearable_alerts(
+        self,
+        result: CascadeEpochResult,
+        wearable_red_ids: list[int],
+        epoch: int,
+        sick_tier: int,
+        wearable_tier: int,
+    ) -> None:
+        for aid in wearable_red_ids:
+            state = self.agent_states.get(aid)
+            if state is not None and state.current_tier >= sick_tier:
+                continue
+            if self.enter_tier(aid, wearable_tier, epoch, reason="wearable_alert"):
+                self._record_entry_tier(result, aid, wearable_tier)
+
+    def _resolve_pending_tats(
+        self,
+        result: CascadeEpochResult,
+        epoch: int,
+        agent_map: dict[int, dict[str, Any]],
+    ) -> None:
+        for state in self.agent_states.values():
+            if state.pending_tier is None or state.pending_available_epoch is None:
+                continue
+            if epoch < state.pending_available_epoch:
+                continue
+            pending_results = state.tier_results.get(state.pending_tier, {})
+            tier = self.get_tier(state.pending_tier)
+            if tier is None:
+                continue
+            agent = agent_map.get(state.agent_id, {})
+            positive = self._determine_test_outcome(agent, pending_results, tier)
+            if not positive:
+                state.pending_tier = None
+                state.pending_available_epoch = None
+                continue
+            next_tier_id = state.pending_tier + 1
+            if next_tier_id <= self.max_tier:
+                self._advance_agent(state, next_tier_id, epoch, pending_results)
+                result.tier_advancements.append({
+                    "agent_id": state.agent_id,
+                    "from_tier": state.pending_tier,
+                    "to_tier": next_tier_id,
+                    "epoch": epoch,
+                    "reason": "pending_tat_resolved",
+                })
+            else:
+                state.confirmed = True
+                state.pending_tier = None
+                state.pending_available_epoch = None
+
+    def _apply_positive_actions(
+        self,
+        result: CascadeEpochResult,
+        state: Any,
+        current_tier: Any,
+        positive: bool,
+        monitored: set[int],
+    ) -> None:
+        if current_tier.confinement_on_positive and positive:
+            result.confinements_ordered.append(state.agent_id)
+        for action in current_tier.actions_on_positive:
+            if action != "offer_wearable" or state.wearable_offered:
+                continue
+            if state.agent_id in monitored:
+                continue
+            state.wearable_offered = True
+            result.wearable_offers.append(state.agent_id)
+
+    def _maybe_advance_agent(
+        self,
+        result: CascadeEpochResult,
+        state: Any,
+        current_tier: Any,
+        epoch: int,
+        positive: bool,
+    ) -> bool:
+        next_tier_id = state.current_tier + 1
+        if next_tier_id <= self.max_tier:
+            next_tier_actions = [
+                a for a in current_tier.actions_on_positive
+                if a.startswith("advance_to_tier_")
+            ]
+            should_advance = positive and (
+                bool(next_tier_actions) or not current_tier.tests
+            )
+            if not should_advance:
+                return False
+            self._advance_agent(state, next_tier_id, epoch)
+            result.tier_advancements.append({
+                "agent_id": state.agent_id,
+                "from_tier": state.current_tier - 1,
+                "to_tier": next_tier_id,
+                "epoch": epoch,
+                "reason": "intra_epoch",
+            })
+            return True
+        if positive:
+            state.confirmed = True
+        return False
+
+    def _process_agent_at_tier(
+        self,
+        result: CascadeEpochResult,
+        state: Any,
+        epoch: int,
+        agent_map: dict[int, dict[str, Any]],
+        test_runner: _CascadeTestRunner | None,
+        monitored: set[int],
+    ) -> bool:
+        if state.confirmed or state.pending_tier is not None:
+            return False
+        current_tier = self.get_tier(state.current_tier)
+        if current_tier is None:
+            return False
+        agent = agent_map.get(state.agent_id, {})
+        if current_tier.tests and test_runner is not None:
+            if state.current_tier not in state.tier_results:
+                test_results = test_runner.run_tier_tests(
+                    state.agent_id, agent, current_tier,
+                )
+                state.tier_results[state.current_tier] = test_results
+                ordered_keys = list(test_results.keys()) or list(current_tier.tests)
+                result.tests_ordered.setdefault(state.agent_id, []).extend(
+                    ordered_keys,
+                )
+                if current_tier.tat_epochs > 0:
+                    state.pending_tier = state.current_tier
+                    state.pending_available_epoch = epoch + current_tier.tat_epochs
+                    return False
+        tier_results = state.tier_results.get(state.current_tier, {})
+        positive = self._determine_test_outcome(agent, tier_results, current_tier)
+        if not positive and current_tier.tests:
+            return False
+        self._apply_positive_actions(result, state, current_tier, positive, monitored)
+        return self._maybe_advance_agent(result, state, current_tier, epoch, positive)
+
+    def _run_intra_epoch_advances(
+        self,
+        result: CascadeEpochResult,
+        epoch: int,
+        agent_map: dict[int, dict[str, Any]],
+        test_runner: _CascadeTestRunner | None,
+        monitored: set[int],
+    ) -> None:
+        changed = True
+        iterations = 0
+        max_iterations = self.max_tier + 2
+        while changed and iterations < max_iterations:
+            changed = False
+            iterations += 1
+            for state in self.agent_states.values():
+                if self._process_agent_at_tier(
+                    result, state, epoch, agent_map, test_runner, monitored,
+                ):
+                    changed = True
+
     def evaluate_epoch(
         self,
         epoch: int,
@@ -323,119 +497,14 @@ class DiagnosticCascadeEngine:
         sick_tier = self.entry_config.sick_call_tier
         wearable_tier = self.entry_config.wearable_alert_tier
 
-        for aid in sick_call_ids:
-            if self.enter_tier(aid, sick_tier, epoch, reason="sick_call"):
-                if sick_tier == 0:
-                    result.new_tier0_agents.append(aid)
-                elif sick_tier == 1:
-                    result.new_tier1_agents.append(aid)
-
-        for aid in wearable_red_ids:
-            state = self.agent_states.get(aid)
-            if state is not None and state.current_tier >= sick_tier:
-                continue
-            if self.enter_tier(aid, wearable_tier, epoch, reason="wearable_alert"):
-                if wearable_tier == 0:
-                    result.new_tier0_agents.append(aid)
-                elif wearable_tier == 1:
-                    result.new_tier1_agents.append(aid)
-
-        for state in self.agent_states.values():
-            if state.pending_tier is not None and state.pending_available_epoch is not None:
-                if epoch >= state.pending_available_epoch:
-                    pending_results = state.tier_results.get(state.pending_tier, {})
-                    tier = self.get_tier(state.pending_tier)
-                    if tier is not None:
-                        agent = agent_map.get(state.agent_id, {})
-                        positive = self._determine_test_outcome(agent, pending_results, tier)
-                        if positive:
-                            next_tier_id = state.pending_tier + 1
-                            if next_tier_id <= self.max_tier:
-                                self._advance_agent(state, next_tier_id, epoch, pending_results)
-                                result.tier_advancements.append({
-                                    "agent_id": state.agent_id,
-                                    "from_tier": state.pending_tier,
-                                    "to_tier": next_tier_id,
-                                    "epoch": epoch,
-                                    "reason": "pending_tat_resolved",
-                                })
-                            else:
-                                state.confirmed = True
-                                state.pending_tier = None
-                                state.pending_available_epoch = None
-                        else:
-                            state.pending_tier = None
-                            state.pending_available_epoch = None
-
-        changed = True
-        iterations = 0
-        max_iterations = self.max_tier + 2
-        while changed and iterations < max_iterations:
-            changed = False
-            iterations += 1
-
-            for state in self.agent_states.values():
-                if state.confirmed or state.pending_tier is not None:
-                    continue
-
-                current_tier = self.get_tier(state.current_tier)
-                if current_tier is None:
-                    continue
-
-                agent = agent_map.get(state.agent_id, {})
-
-                if current_tier.tests and test_runner is not None:
-                    if state.current_tier not in state.tier_results:
-                        test_results = test_runner.run_tier_tests(
-                            state.agent_id, agent, current_tier,
-                        )
-                        state.tier_results[state.current_tier] = test_results
-                        ordered_keys = list(test_results.keys()) or list(current_tier.tests)
-                        result.tests_ordered.setdefault(state.agent_id, []).extend(
-                            ordered_keys,
-                        )
-
-                        if current_tier.tat_epochs > 0:
-                            state.pending_tier = state.current_tier
-                            state.pending_available_epoch = epoch + current_tier.tat_epochs
-                            continue
-
-                tier_results = state.tier_results.get(state.current_tier, {})
-                positive = self._determine_test_outcome(agent, tier_results, current_tier)
-
-                if not positive and current_tier.tests:
-                    continue
-
-                if current_tier.confinement_on_positive and positive:
-                    result.confinements_ordered.append(state.agent_id)
-
-                for action in current_tier.actions_on_positive:
-                    if action == "offer_wearable" and not state.wearable_offered:
-                        if state.agent_id not in monitored:
-                            state.wearable_offered = True
-                            result.wearable_offers.append(state.agent_id)
-
-                next_tier_id = state.current_tier + 1
-                if next_tier_id <= self.max_tier:
-                    next_tier_actions = [
-                        a for a in current_tier.actions_on_positive
-                        if a.startswith("advance_to_tier_")
-                    ]
-                    should_advance = positive and (
-                        bool(next_tier_actions) or not current_tier.tests
-                    )
-                    if should_advance:
-                        self._advance_agent(state, next_tier_id, epoch)
-                        result.tier_advancements.append({
-                            "agent_id": state.agent_id,
-                            "from_tier": state.current_tier - 1,
-                            "to_tier": next_tier_id,
-                            "epoch": epoch,
-                            "reason": "intra_epoch",
-                        })
-                        changed = True
-                elif positive:
-                    state.confirmed = True
+        self._enter_sick_calls(result, sick_call_ids, epoch, sick_tier)
+        self._enter_wearable_alerts(
+            result, wearable_red_ids, epoch, sick_tier, wearable_tier,
+        )
+        self._resolve_pending_tats(result, epoch, agent_map)
+        self._run_intra_epoch_advances(
+            result, epoch, agent_map, test_runner, monitored,
+        )
 
         result.fleet_sops_unlocked = self._evaluate_fleet_rules(agents)
         result.agent_states = {

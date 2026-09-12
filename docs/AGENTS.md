@@ -104,7 +104,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `presidio-fleet-run` | `presidio_runner.py`, fleet configs |
 | `stackelberg-utility-export` | Social config, utility bundles, action import |
 | `testing-picard-presidio` | Before PRs on framework code |
-| `sonar-quality` | Before source/workflow edits; complexity-backlog splits (C901 117, new-code 15) |
+| `sonar-quality` | Before source/workflow edits; complexity-backlog splits (C901 56, new-code 15) |
 | `model-parameter-provenance` | Before changing any epidemiological constant, rate, fraction or kernel; sourcing, evidence grades, no-tuning rules, moved goldens |
 | `configuring-stackelberg-social` | Adding/editing diffusion, class interactions, profiles |
 | `operational-impact-behavioral-policies` | OIS weights, action kinds, ThresholdBeliefPolicy |
