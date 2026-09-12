@@ -30,6 +30,10 @@ from typing import Any
 
 import numpy as np
 
+from engines.illness_duration import (
+    DRAW_EMPIRICAL_SURVIVAL,
+    IllnessDurationModel,
+)
 from engines.incubation import (
     IncubationHost,
     IncubationModel,
@@ -65,6 +69,7 @@ __all__ = [
     "draw_symptom_severity",
     "ever_presented",
     "host_age_band",
+    "illness_duration_days",
     "incubation_days",
     "onset_day",
     "presentation_probability",
@@ -130,6 +135,37 @@ def incubation_days(
             rng=rng,
         )
     inf["incubation_days"] = drawn
+    return drawn
+
+
+def illness_duration_days(
+    inf: dict[str, Any],
+    profile: dict[str, Any],
+    rng: np.random.Generator,
+) -> float | None:
+    """This infection's illness duration, drawn once and then remembered.
+
+    Drawn at the first progression step rather than at infection creation, for
+    the same reason ``incubation_days`` draws lazily: every entry point —
+    seeding, transmission, environmental acquisition, boarding — reaches the
+    record through ``advance_infections`` with the run's RNG, and the stamp
+    lands before the onset-time pharmaceutical override reads ``recovery_day``
+    in the same call, so treatment shortens the host's drawn duration rather
+    than the profile constant.
+
+    Returns ``None`` without touching the record or the RNG when the profile
+    declares no ``empirical_survival`` draw: an absent block or
+    ``draw: "point"`` is exactly the pre-distribution behaviour, including
+    zero stream consumption.
+    """
+    stored = inf.get("recovery_day")
+    if stored is not None:
+        return float(stored)
+    model = IllnessDurationModel.from_mapping(profile.get("illness_duration"))
+    if model is None or model.draw != DRAW_EMPIRICAL_SURVIVAL:
+        return None
+    drawn = float(model.sample_days(rng))
+    inf["recovery_day"] = drawn
     return drawn
 
 
@@ -388,6 +424,10 @@ def advance_infections(
         # The counter is in epochs; every threshold below is in days.
         epochs_infected = inf["time_infected"] or 0
         days_infected = clock.days_elapsed(epochs_infected)
+        # Stamp the drawn illness duration before anything below can read it:
+        # draw_symptom_onset applies treatment, which shortens this host's
+        # value, and clearance_days reads the record ahead of the profile.
+        illness_duration_days(inf, prof, rng)
         onset = onset_day(agent, pid, inf, prof, rng)
         if (
             inf["illness"] == IllnessStatus.NOT_ILL
