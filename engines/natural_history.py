@@ -26,12 +26,14 @@ sites this module was extracted from.
 from __future__ import annotations
 
 import math
+from collections.abc import Mapping
 from typing import Any
 
 import numpy as np
 
 from engines.illness_duration import (
     DRAW_EMPIRICAL_SURVIVAL,
+    DRAW_POINT,
     IllnessDurationModel,
 )
 from engines.incubation import (
@@ -156,15 +158,21 @@ def illness_duration_days(
     Returns ``None`` without touching the record or the RNG when the profile
     declares no ``empirical_survival`` draw: an absent block or
     ``draw: "point"`` is exactly the pre-distribution behaviour, including
-    zero stream consumption.
+    zero stream consumption. The ``draw`` key is read straight off the block
+    before the model is built, so the shipped default does no table parsing
+    per infection per epoch — a malformed table under ``point`` is rejected
+    at data-validation time (schema, ``sanity_checker``, ``from_mapping``
+    itself), which is where data defects belong.
     """
     stored = inf.get("recovery_day")
     if stored is not None:
         return float(stored)
-    model = IllnessDurationModel.from_mapping(profile.get("illness_duration"))
-    if model is None or model.draw != DRAW_EMPIRICAL_SURVIVAL:
+    block = profile.get("illness_duration")
+    if not isinstance(block, Mapping) or (
+        str(block.get("draw", DRAW_POINT)) != DRAW_EMPIRICAL_SURVIVAL
+    ):
         return None
-    drawn = float(model.sample_days(rng))
+    drawn = float(IllnessDurationModel.from_mapping(block).sample_days(rng))
     inf["recovery_day"] = drawn
     return drawn
 

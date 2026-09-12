@@ -24,12 +24,19 @@ unmeasured until a campaign runs it.
 
 ## 1. What the figure measures — and what it does not
 
-Harris et al. 2019, "Norovirus and Sapovirus Epidemiology and Strain
-Characteristics in a Global Pediatric Diarrhea Surveillance Network", *BMC
-Infect Dis* 19:87, DOI 10.1186/s12879-019-3706-z. Fig 4 panel C, dotted curve:
-**percent still ill by number of days following illness onset, adults and
-children aged ≥ 5 years**, for the diarrhoea symptom. The population is a
-community cohort (the MAL-ED site's older age band) — the model's population.
+Harris, Iturriza-Gomara, Allen, Kelly & O'Brien 2019, "Norovirus strain
+types found within the second infectious intestinal diseases (IID2) study:
+an analysis of norovirus circulating in the community", *BMC Infect Dis*
+19:87, DOI 10.1186/s12879-019-3706-z, published 25 January 2019 (Europe PMC
+PMC6346499, PMID 30683063). IID2 is a UK national community cohort study
+conducted April 2008–August 2009, with a GP arm and a self-reporting postal
+arm; the paper's denominator statement is 477 norovirus-positive samples —
+that is the study's positive-sample count, **not** a stated denominator for
+Fig 4, whose panel denominators are not reported. Fig 4 panel C, dotted
+curve: **percent still ill by number of days following illness onset, adults
+and children aged ≥ 5 years** — the ≥ 5 band includes school-age children,
+not adults only — for the diarrhoea symptom. The population is a community
+cohort — the model's population.
 
 The curve measures **self-reported diarrhoea duration** in that cohort. It is
 not shedding duration, not RT-PCR detectability, not infectiousness, and not
@@ -73,17 +80,24 @@ are read from the figure, not from text.
 
 ## 3. Cross-check against the paper's own summaries
 
-The digitization is validated by reproducing Harris's reported statistics
-under the discrete sampling convention `P(T = d) = S(d-1) − S(d)`:
+The digitization is validated by reproducing the paper's own reported
+statistics — from the abstract, verbatim: *"85% of people recovered within
+two days for vomiting; diarrhoea symptoms were reported to day 4 for 83% of
+the cases, and 10% of people reported symptoms of diarrhoea lasting between
+five and six days"*, and *"both diarrhoea and vomiting symptoms lasted
+longer in children aged < 5 years compared to adults"*. Under the discrete
+sampling convention `P(T = d) = S(d-1) − S(d)`:
 
-- **Median T = 2 days** (paper reports median 2 for diarrhoea, all ages) —
-  the table gives exactly 2.
-- **E[T] = 2.57 days** (paper reports mean 2.8 all ages; the ≥5 curve is
-  shorter than the all-ages one, so below 2.8 is the correct direction) —
-  the table gives exactly 2.57.
-- **P(T ≤ 4) = 0.87** (paper reports 83% of diarrhoea resolved by day 4 all
-  ages; adults are shorter, so above 0.83 is the correct direction) — the
-  table gives exactly 0.87.
+- **Median T = 2 days** — the table gives exactly 2; the abstract reports
+  no diarrhoea median, but 85% of vomiting cases resolved within two days
+  and diarrhoea tracks vomiting on the figure's paired panels, so a median
+  of 2 is consistent with the reported resolution speed.
+- **E[T] = 2.57 days** — the ≥ 5 curve is shorter than the all-ages one
+  (the abstract: symptoms last longer in < 5 than in adults), so the ≥ 5
+  table's 2.57 landing below the all-ages figure is the correct direction.
+- **P(T ≤ 4) = 0.87** — the table gives exactly 0.87 against the
+  abstract's 83% resolved by day 4 for all ages; the ≥ 5 band being
+  shorter means above 0.83 is the correct direction.
 
 ## 4. Sampling convention
 

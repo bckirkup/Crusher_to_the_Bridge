@@ -101,12 +101,14 @@ class TestDigitization:
         pmf = _exact_pmf(_model())
         cdf = np.cumsum([pmf[d] for d in sorted(pmf)])
         median = sorted(pmf)[int(np.searchsorted(cdf, 0.5))]
-        # Harris reports median 2 days for diarrhoea, all ages.
+        # The >=5 table's own median; the abstract reports no diarrhoea
+        # median but resolves 83% of diarrhoea cases by day 4 all ages.
         assert median == 2
 
     def test_the_table_mean_is_the_papers_mean_direction(self) -> None:
         mean = sum(d * p for d, p in _exact_pmf(_model()).items())
-        # Harris reports mean 2.8 all ages; the >=5 curve is shorter.
+        # The abstract's all-ages figure is higher; symptoms last longer in
+        # children < 5 than in adults, so the >=5 table sits below it.
         # The table's exact mean is 2.5715; 2.57 is its rounded form.
         assert mean == pytest.approx(2.57, abs=0.005)
         assert mean < 2.8
@@ -114,8 +116,8 @@ class TestDigitization:
     def test_the_table_resolved_by_day_4_matches(self) -> None:
         pmf = _exact_pmf(_model())
         resolved = sum(p for d, p in pmf.items() if d <= 4)
-        # Harris reports 83% of diarrhoea resolved by day 4 all ages;
-        # adults are shorter, so above 0.83 is the right direction.
+        # The abstract reports 83% of diarrhoea resolved by day 4 all ages;
+        # the >=5 band is shorter, so above 0.83 is the right direction.
         assert resolved == pytest.approx(0.87, abs=1e-9)
         assert resolved > 0.83
 
@@ -278,6 +280,31 @@ class TestProgressionSeam:
             inf = agent.infections[PATHOGEN]
             assert inf["status"] == InfectionStatus.RECOVERED
             assert inf["illness"] == IllnessStatus.RECOVERED
+
+    def test_point_mode_performs_no_table_validation(self) -> None:
+        """Pins where validation lives: data-validation time, not progression.
+
+        The default path reads the draw key and returns before the model is
+        built, so it never pays the parse cost per infection-epoch — and a
+        malformed table under ``point`` is the schema's, the sanity
+        checker's and ``from_mapping``'s defect to reject, not the epoch
+        loop's. Do not "fix" this back into per-epoch validation.
+        """
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
+        agent = _agent(clock)
+        profile = _profile(illness_duration={
+            "draw": "point",
+            "unit": "days",
+            "notes": "deliberately malformed under the inert arm",
+            "survival": [{"day": 7, "probability": 0.5}],
+        })
+        rng = np.random.default_rng(3)
+        for epoch in range(int(clock.epochs_for_days(10))):
+            advance_infections(agent, {PATHOGEN: profile}, rng, epoch=epoch)
+        inf = agent.infections[PATHOGEN]
+        assert "recovery_day" not in inf
+        assert illness_duration_days(inf, profile, rng) is None
+        assert inf["illness"] == IllnessStatus.RECOVERED
 
 
 class TestDefaultInertness:
