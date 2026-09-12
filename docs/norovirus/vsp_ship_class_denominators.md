@@ -46,6 +46,8 @@ Hulls map to tonnage through the published space-ratio span
 declared **passenger** complement therefore becomes a tonnage *interval*, and
 every band the interval meets is returned:
 
+This interval mapping replaced an earlier one that picked a single representative ship per hull against its passenger-plus-crew total, which put the classic and spirit hulls one band too high; the ledger's B3 (#29) passage records that repair.
+
 | hull | passengers | GRT interval | bands admitted |
 |---|---:|---|---|
 | expedition_cruise_450 | 300 | 12,516-17,143 | <=30,000 |

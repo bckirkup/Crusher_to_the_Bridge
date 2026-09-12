@@ -1268,12 +1268,16 @@ passenger counts (`pax_total`), so the A4 class bins inherited this offset.
 `nominal_complement` as a passengers/crew split, `HULL_PASSENGER_CAPACITY`
 reads the passenger half, and `BAND_EDGES` are geometric means of those
 passenger complements (636 / 1,684 / 3,240). The A4 targets merged in #360 are
-superseded by the recut table above. Still unrepaired: the hull-to-GRT
-mapping behind A8/A9 picked representative ships for the classic and spirit
-hulls against the same total-agent figures, so their GRT band is one band too
-high pending two re-sourced representative ships. The class-denominator record
-and the decision not to build a hull for the unmapped 120,001-140,000 band are
-in `vsp_ship_class_denominators.md`. A8's passenger and crew denominators instead
+superseded by the recut table above. Also repaired: the hull-to-GRT
+mapping behind A8/A9 no longer picks a representative ship per hull. It
+converts each hull's declared passenger
+complement to a tonnage interval through the published space-ratio span and
+returns every band that interval meets, so the classic and spirit hulls are no
+longer one band too high, and a hull whose interval straddles a band edge is
+scored against both bands rather than against whichever band a chosen ship fell
+in. The class-denominator record and the decision not to build a hull for the
+unmapped 120,001-140,000 band are in `vsp_ship_class_denominators.md`. A8's
+passenger and crew denominators instead
 come from the role-derived complements emitted in each run summary and do
 not use `HULL_CAPACITY`, so A8/A9 are unaffected.
 
