@@ -51,6 +51,7 @@ _HARDENED_MODULES = (
     "picard_framework/analysis/sentinel/run_sentinel.py",
     "picard_framework/analysis/sentinel_recovery_postprocess.py",
     "deploy/aws/sentinel_nuts_entrypoint.py",
+    "telemetry_buffer/observation_model/adj_stratified_readout.py",
 )
 
 # Path.write_text / read_text / unlink / open are also sinks for S2083/S8707

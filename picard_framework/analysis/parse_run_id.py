@@ -36,7 +36,7 @@ _NORO_TOKEN = "noro"
 
 def parse_run_tags(run_id: str) -> dict[str, str | None]:
     """Extract common campaign sweep tags from a run_id string."""
-    tags: dict[str, str | None] = {name: None for name, _ in _TAG_PATTERNS}
+    tags: dict[str, str | None] = dict.fromkeys(name for name, _ in _TAG_PATTERNS)
     for name, pat in _TAG_PATTERNS:
         m = pat.search(run_id)
         if m:

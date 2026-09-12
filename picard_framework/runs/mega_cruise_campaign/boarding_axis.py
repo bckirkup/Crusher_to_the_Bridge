@@ -813,9 +813,12 @@ def recorded_factors(
         return {}
     swept = {k: v for k, v in factors.items() if k in _COORDINATE_FACTORS}
     named = factors.get(FACTOR_SWEPT_PATHOGEN)
-    target = str(named) if named is not None else (
-        next(iter(active)) if len(active) == 1 else None
-    )
+    if named is not None:
+        target = str(named)
+    elif len(active) == 1:
+        target = next(iter(active))
+    else:
+        target = None
     if target is None:
         return swept
     recorded: dict[str, Any] = {**profile_coords(target), **swept}

@@ -1746,9 +1746,9 @@ class KorkinShipEngine:
         self._meal_seatings_by_zone: dict[str, int] = {
             str(e["name"]): int(e["meal_seatings"]) for e in self._dining_catalog
         }
-        self._diners_dealt_by_zone: dict[str, int] = {
-            name: 0 for name in self._meal_seatings_by_zone
-        }
+        self._diners_dealt_by_zone: dict[str, int] = dict.fromkeys(
+            self._meal_seatings_by_zone, 0,
+        )
         self._crew_dining_catalog = self._dining_catalog_for(CREW_DINING_SERVICE_TYPES)
         self._passenger_dining_catalog = self._dining_catalog_for(
             PASSENGER_DINING_SERVICE_TYPES,

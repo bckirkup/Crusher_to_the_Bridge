@@ -924,10 +924,10 @@ def _run_jobs(
     if workers <= 1:
         for payload in jobs:
             keep(job(payload))
-        return results
-    with ProcessPoolExecutor(max_workers=workers) as pool:
-        for record in pool.map(job, jobs):
-            keep(record)
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            for record in pool.map(job, jobs):
+                keep(record)
     return results
 
 
@@ -948,7 +948,7 @@ def selected_indices(
     """
     if not only:
         return list(range(len(units_grid)))
-    chosen = sorted(set(int(index) for index in only))
+    chosen = sorted({int(index) for index in only})
     outside = [index for index in chosen if not 0 <= index < len(units_grid)]
     if outside:
         raise ValueError(
@@ -1151,7 +1151,7 @@ def pooled_row_points(
         points.append(
             score_point(
                 rows,
-                blocks[sorted(blocks)[0]]["units"],
+                blocks[min(blocks)]["units"],
                 point_index=index,
                 design=design,
                 factors=factors,

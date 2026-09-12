@@ -190,18 +190,21 @@ def score_cell(
             "decision": decision(mass),
         }
     decisions = {channels[channel]["decision"] for channel in CHANNELS}
+    if CONTINUE in decisions:
+        cell_decision = CONTINUE
+    elif decisions == {STOP_ABOVE}:
+        cell_decision = STOP_ABOVE
+    elif decisions == {STOP_BELOW}:
+        cell_decision = STOP_BELOW
+    else:
+        cell_decision = CONTINUE
     return {
         "band": list(band),
         "eligible_runs": n,
         "seeds": [int(row["seed"]) for row in rows],
         "channels": channels,
         # Continue if any channel is undecided; a stop needs both settled.
-        "decision": (
-            CONTINUE if CONTINUE in decisions
-            else STOP_ABOVE if decisions == {STOP_ABOVE}
-            else STOP_BELOW if decisions == {STOP_BELOW}
-            else CONTINUE
-        ),
+        "decision": cell_decision,
     }
 
 
@@ -230,7 +233,8 @@ def next_stage(cells: dict[str, dict[int, dict[str, Any]]]) -> dict[str, Any]:
 def readout(paths: Sequence[Path]) -> dict[str, Any]:
     pooled = pool_cells(paths)
     cells: dict[str, dict[int, dict[str, Any]]] = defaultdict(dict)
-    bands = {hull: hull_posting_band(hull) for hull, _ in pooled}
+    hulls = {key[0] for key in pooled}
+    bands = {hull: hull_posting_band(hull) for hull in hulls}
     for (hull, index), rows in pooled.items():
         cells[hull][index] = score_cell(rows, bands[hull])
     return {

@@ -36,11 +36,20 @@ Finite-sample over the submitted designs. Nothing is selected or adopted by it.
 from __future__ import annotations
 
 import argparse
-import glob
 import json
 import statistics as st
 from math import comb
+from pathlib import Path
 
+from simulation_utils.paths import (
+    resolve_child_path,
+    resolve_repo_path,
+    safe_listdir,
+    validate_path_component,
+    validated_open,
+)
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 BASE = "telemetry_buffer/observation_model"
 POSTING_THRESHOLD = 0.03
 ADJ = "environmental_faecal_release_log10_g_per_epoch"
@@ -72,12 +81,36 @@ CAMPAIGNS = {
 }
 
 
+def _stage_jsonl_paths(stage: str, root: str = BASE) -> list[str]:
+    """Resolve campaign JSONL files under a contained stage directory."""
+    safe_root = resolve_repo_path(str(REPO_ROOT), root)
+    safe_stage = validate_path_component(stage, label="stage")
+    stage_dir = resolve_child_path(safe_root, safe_stage)
+    paths: list[str] = []
+    for point_name in safe_listdir(stage_dir, allowed_roots=(safe_root,)):
+        try:
+            point_dir = resolve_child_path(stage_dir, point_name)
+        except ValueError:
+            continue
+        for filename in safe_listdir(point_dir, allowed_roots=(safe_root,)):
+            if not filename.endswith(".jsonl"):
+                continue
+            try:
+                paths.append(resolve_child_path(point_dir, filename))
+            except ValueError:
+                continue
+    return sorted(paths)
+
+
 def load(stage: str, root: str = BASE):
     """Per-voyage rows keyed by point and seed, plus each point's factors."""
     rows: dict[str, dict] = {}
     factors: dict[int, dict] = {}
-    for path in sorted(glob.glob(f"{root}/{stage}/*/*.jsonl")):
-        with open(path) as handle:
+    safe_root = resolve_repo_path(str(REPO_ROOT), root)
+    for path in _stage_jsonl_paths(stage, root):
+        with validated_open(
+            path, allowed_roots=(safe_root,), encoding="utf-8",
+        ) as handle:
             for line in handle:
                 record = json.loads(line)
                 if "runs" not in record:
