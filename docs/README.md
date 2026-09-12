@@ -133,6 +133,7 @@ longer justifications.
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |
+| [norovirus/introduction_mechanism_ab.md](norovirus/introduction_mechanism_ab.md) | Implemented — the boarding-prevalence vs fiat-index-case A/B: posting frequency, reported incidence against A8, per-import secondary yield, and the prevalence-denominator unit question |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs
