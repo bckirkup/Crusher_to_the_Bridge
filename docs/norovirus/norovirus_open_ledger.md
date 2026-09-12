@@ -2941,6 +2941,28 @@ Roughly in dependency order.
     model-representable duration) in place of the screening prevalence, and
     whether "convalescent" is the right state for an RNA-positive
     asymptomatic sample at all given (b).
+    (e) **Both repairs are now implemented, default-off, and unmeasured.** A2
+    is `initiation.boarding.<pathogen>.rate_mode: renewal`, which carries
+    `case_incidence_per_1000_py` per role plus a detectable duration and
+    derives the per-person prevalence in code under the identity prevalence =
+    infection incidence × mean detectable duration (case incidence divided
+    by `1 − never_symptomatic_fraction`); at O'Brien's 39.0, 0.29 and 28 days
+    it derives **0.42%**. B2 is `age_draw: stationary_detectable`, which draws
+    the infection age stationarily over the profile's new
+    `detectable_duration_days` (28, Atmar 2008) and counts hosts past the
+    authored shedding window as `cleared` — RNA-positive in the measurement,
+    representable in the engine only as non-shedding, a boundary rather than
+    a clearance claim. `cleared` is counted in `composition` but excluded
+    from `drawn_by_role`, which counts infectious introductions only, so the
+    per-import yield denominator is not deflated by the boundary mass. Both
+    defaults (`screening_prevalence`,
+    `engine_window`) are today's behaviour bit-for-bit: a fixed-seed boarding
+    draw with neither key set reproduces main's cohort, composition and
+    per-host infection age exactly, and that inertness is pinned by a labelled
+    change-detector in `tests/test_initiation_engine.py`. Nothing shipped
+    moved; the arms are unmeasured until a campaign runs them at matched
+    seeds, and no result of that measurement may be read back into the
+    shipped defaults.
 
 ## 5. Held fixed by assumption
 

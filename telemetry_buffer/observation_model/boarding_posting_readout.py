@@ -115,7 +115,12 @@ def _pairs(path: Path) -> Iterable[tuple[dict[str, Any], dict[str, Any] | None]]
 
 
 def _drawn(profile: dict[str, Any] | None) -> dict[str, Any]:
-    """The realised boarding cohort, or an empty record when fiat-seeded."""
+    """The realised infectious boarding cohort, or empty when fiat-seeded.
+
+    ``drawn_by_role`` counts infectious introductions; the full drawn
+    RNA-positive cohort — including any ``cleared`` hosts, which carry no
+    infection record — lives in ``composition``.
+    """
     initiation = (profile or {}).get("initiation") or {}
     boarding = initiation.get("boarding") or {}
     drawn = {"passenger": 0, "crew": 0, "composition": {}, "mode": None}
