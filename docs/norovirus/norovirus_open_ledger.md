@@ -2805,6 +2805,74 @@ Roughly in dependency order.
     (e) **Nothing adopted.** Every dose figure stays withdrawn; the
     measurements above are measurements of the model.
 
+32. **The introduction mechanism is the binding term, and the two available
+    mechanisms bracket A9 by two orders of magnitude.** Measured at
+    `c8ad791` on `boarding_posting_v1` (8,550 voyages, Batch
+    `8041311d-fb54-4735-a1df-d10fdb9f3a06`, image
+    `boarding-posting-v1-02e0052`, 256/256 children, 0 failed simulations)
+    against the matched fiat-index arms `expedition_posting_v2` and
+    `hull_posting_v1`. One coordinate varied: boarding prevalence (the shipped
+    `norwalk_gi` block) against the campaign `fiat_index_case` override. Same
+    hulls, lengths, release rung 4.0, `syndromic_comp65`, 1,000 voyages a cell.
+    Full record: `docs/norovirus/introduction_mechanism_ab.md`.
+    (a) **Boarding raises posting 11–116×.** Passenger-or-crew postings per
+    1,000: expedition 9 → 108 (7 d) and 54 → 304 (12 d); classic 10 → 555 and
+    75 → 944; spirit 6 → 695 and 64 → 992, against A9's fleet-pooled
+    4.187–5.583. On classic and spirit at 12 days posting is near-universal
+    again — the ceiling the composition repairs removed, re-entering from the
+    initiation side. The direction was declared before the run; the magnitude
+    was not. This is item 22(d)'s posting floor re-measured on the repaired
+    chain, 10–20× higher than it was there.
+    (b) **The imported cohort alone overshoots A8, before any transmission.**
+    A 3.25% passenger boarding prevalence on a 7-day voyage is 464 imported
+    infections per 100,000 passenger travel-days against A8's 17.8 *reported*
+    cases; at the model's own ascertainment on these voyages (≈0.21) the
+    imports alone give ~97, still 5.5× A8. Mean reported passenger incidence
+    per 100,000 passenger travel-days runs 407 (classic 7 d) and 530 (classic
+    12 d) under boarding, against the fiat arm's 20 and 35 — which is A8's
+    17.8 and 35.0 almost exactly. No transmission-side change subtracts an
+    import.
+    (c) **Boarding does repair the over-dispersion it was run to test.** The
+    fiat arm's establishment lottery (70% of 7-day voyages at the index case
+    alone, the mean carried in a ~1.5% tail) is gone: zero-secondary voyages
+    are 15.6% on expedition and ~0% on classic and spirit, and the largest 10%
+    of voyages hold 12.3–33.9% of secondary infections rather than nearly all
+    of them. The distributional defect is genuinely fixed, at a level the
+    incidence anchor rejects. Both halves are results.
+    (d) **What the fiat arm was masking is per-introduction yield, not level.**
+    Mean secondary infections per import: classic 7.77 → 4.45 at 7 days and
+    25.96 → 6.92 at 12 days going from one fiat seed to ~43 imports, i.e. the
+    yield is density-dependent and falls as imports compete for the same
+    susceptibles. For a ~2.5–3.25% import prevalence to post ~0.5% of voyages
+    the yield would have to sit well below 1; one seed times a yield of 8 is
+    still one small epidemic, which is why the single-index arm never exposed
+    it. These are ratios of cell means, not per-voyage reproduction numbers,
+    and `r_effective_at_peak` stays a peak-epoch diagnostic.
+    (e) **The open question is a unit question.** The prevalence intervals are
+    Grade B on asymptomatic faecal RNA carriage on its own denominator (§1),
+    and the engine composes them with `never_symptomatic_fraction` = 0.29,
+    which is adult-challenge *infections* — so 71% of RNA-positive boarders
+    get a presenting, reportable course. Whether a challenge-measured state
+    split may be applied to a carriage-defined prevalence is a provenance
+    question, and the two admissible readings point opposite ways (if the
+    carriage figure *is* the never-symptomatic stratum, total infection
+    prevalence is higher still). Neither number may be moved toward A9. The
+    axis that actually controls the presenting fraction was not swept: the
+    campaign swept `presymptomatic_share_of_presenting` (0.02–0.08, posting
+    nearly flat in it) and never swept the 0.29 adult-challenge regime against
+    the 0.635 community-cohort regime (71% → 36.5% presenting).
+    (f) **A8's crew column is a control against surveillance intensity scaling
+    with voyage length.** Observed crew case rates are flat to declining with
+    length (22.1 → 17.4 per 100,000 crew travel-days, 6–7 d → 11–14 d) while
+    passenger rates rise (17.8 → 35.0). If longer voyages were simply watched
+    harder, crew would rise too. What this does not exclude is passenger-side
+    *reporting propensity* varying with itinerary. Separately, the model's own
+    crew incidence rises 3.3× with length where the data is flat: our crew are
+    getting a passenger-shaped epidemic, which is its own open departure.
+    (g) **Nothing adopted.** No prevalence, state-split, release or route
+    constant moved; every dose figure stays withdrawn; the archived fiat
+    campaigns are untouched.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
