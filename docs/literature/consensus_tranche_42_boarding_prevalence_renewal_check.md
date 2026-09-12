@@ -75,7 +75,7 @@ the shipped split (0.29 / 0.04):
 - for scale, the mean shedding of a full-course symptomatic host over its 15
   days is 2.18×10¹⁰, so **each import is 81% as infectious on average as a
   fully symptomatic index case** while being invisible to surveillance
-  (finding C of ledger item 33).
+  (ledger item 33(a)).
 
 Derivation, reproduced before writing the figures above:
 
