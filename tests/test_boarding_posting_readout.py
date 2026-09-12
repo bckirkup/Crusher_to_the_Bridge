@@ -10,14 +10,20 @@ golden numbers.
 
 from __future__ import annotations
 
+import argparse
 import json
 import zipfile
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from telemetry_buffer.observation_model.boarding_posting_readout import (
+    _parse_arm,
     build_report,
     collect_rows,
+    main,
+    render_markdown,
 )
 
 PAX = 1000
@@ -183,3 +189,77 @@ def test_rates_and_shares_stay_in_bounds(tmp_path: Path) -> None:
         share = spread[f"top_{fraction}pct_share"]
         assert share is None or 0.0 <= share <= 1.0
     assert spread["median"] <= spread["p90"] <= spread["p99"] <= spread["max"]
+
+
+class TestRenderAndMain:
+    """End-to-end: zips in, JSON report and markdown table out."""
+
+    def test_render_markdown_emits_one_row_per_cell(
+        self, tmp_path: Path,
+    ) -> None:
+        """Each cell becomes one table row under the report's own columns."""
+        runs = [
+            (_summary("quiet0", 3), _profile(3, 0)),
+            (_summary("quiet1", 5), _profile(5, 0)),
+        ]
+        _archive(tmp_path / "shard-0.zip", runs)
+        report = build_report(collect_rows(tmp_path, "boarding"), "pre")
+        markdown = render_markdown(report)
+        assert markdown.splitlines()[0] == (
+            "# Introduction mechanism, posting frequency and "
+            "between-voyage spread"
+        )
+        assert "| arm | platform | surv |" in markdown
+        assert "median pax AR" in markdown
+        rows = [
+            line for line in markdown.splitlines()
+            if line.startswith("| boarding |")
+        ]
+        assert len(rows) == 1
+        assert "| classic_cruise_1900 |" in rows[0]
+        # No voyage posted, so the posting-conditional median is n/a.
+        assert "n/a" in rows[0]
+
+    def test_main_writes_report_and_markdown(self, tmp_path: Path) -> None:
+        """--arm name=root drives collection, writes JSON and markdown."""
+        _archive(
+            tmp_path / "shard-0.zip",
+            [
+                (_summary("r0", 40, reported_pax=35), _profile(6, 1)),
+                (_summary("r1", 3), _profile(3, 0)),
+            ],
+        )
+        out = Path("telemetry_buffer/_test_boarding_readout.json")
+        md = Path("telemetry_buffer/_test_boarding_readout.md")
+        try:
+            assert main([
+                f"--arm=boarding={tmp_path}",
+                "--out", str(out), "--markdown", str(md),
+            ]) == 0
+            report = json.loads(
+                (Path.cwd() / out).read_text(encoding="utf-8"),
+            )
+            assert report["n_cells"] == 1
+            assert report["cells"][0]["arm"] == "boarding"
+            assert report["cells"][0]["n_voyages"] == 2
+            text = (Path.cwd() / md).read_text(encoding="utf-8")
+            assert "median pax AR" in text
+        finally:
+            (Path.cwd() / out).unlink(missing_ok=True)
+            (Path.cwd() / md).unlink(missing_ok=True)
+
+    def test_main_errors_on_empty_results_root(self, tmp_path: Path) -> None:
+        """An arm root with no run summaries is a CLI error, not a report."""
+        with pytest.raises(SystemExit):
+            main([
+                f"--arm=boarding={tmp_path}",
+                "--out", "telemetry_buffer/_never.json",
+            ])
+
+    def test_parse_arm_requires_a_name_equals_path(self) -> None:
+        """`name=path` parses; anything else is an argument-type error."""
+        name, path = _parse_arm("fiat=results/here")
+        assert name == "fiat"
+        assert path == Path("results/here")
+        with pytest.raises(argparse.ArgumentTypeError):
+            _parse_arm("no_separator_here")
