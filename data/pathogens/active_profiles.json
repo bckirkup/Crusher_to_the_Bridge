@@ -129,6 +129,8 @@
       },
       "recovery_day": 3,
       "shedding_duration_days": 15,
+      "detectable_duration_days": 28,
+      "detectable_duration_notes": "Atmar et al. 2008, Emerg Infect Dis 14(10), DOI 10.3201/eid1410.080117: 16 experimentally challenged adults, GI.1, faecal RT-PCR detectability median 28 days (range 13-56) measured from inoculation. Grade A for duration-of-RT-PCR-detectability, origin R. This is the window the asymptomatic RNA positivity boarding prevalence was measured over; it is deliberately longer than the authored 15-day shedding curve, so stationary_detectable boarding draws can land in the representability boundary state 'cleared'.",
       "chronic_shedder_fraction": 0.228,
       "chronic_shedding_duration_days": {
         "median": 218,

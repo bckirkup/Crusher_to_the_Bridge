@@ -776,6 +776,11 @@
           "minimum": 0,
           "description": "Infectious/shedding period in days from symptom onset, after which the infection clears. This is NOT the illness duration: recovery_day remains the illness duration from onset, and shedding continues past it whenever this field is larger. Absent means the shedding period equals recovery_day. The endpoint is the one the arm's shedding_curve_log10 is measured on: an infectivity curve bounds a viable-shedding period, an RNA-concentration curve (sars_cov2_resp) bounds a detectability period, which is the longer of the two."
         },
+        "detectable_duration_days": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Duration over which the host remains positive in the assay the boarding prevalence was measured on. This is NOT the model-representable shedding window: norwalk_gi measures faecal RT-PCR detectability, which outlasts the authored shedding curve, so a boarding age drawn stationarily over it can land beyond any shedding state and is then a cleared representability boundary. Atmar 2008 (16 challenged adults, GI.1) gives median 28 days, range 13-56, from inoculation."
+        },
         "chronic_shedder_fraction": {
           "type": "number",
           "minimum": 0,
@@ -881,6 +886,16 @@
           "properties": {
             "mode": {"type": "string", "enum": ["prevalence", "party"]},
             "enabled": {"type": "boolean"},
+            "rate_mode": {
+              "type": "string",
+              "enum": ["screening_prevalence", "renewal"],
+              "description": "How the per-person boarding probability is supplied. 'screening_prevalence' (default) reads prevalence.passenger/.crew directly. 'renewal' derives it in code from renewal.case_incidence_per_1000_py and renewal.detectable_duration_days under the identity prevalence = infection incidence x mean detectable duration; a renewal block may not carry prevalence."
+            },
+            "age_draw": {
+              "type": "string",
+              "enum": ["engine_window", "stationary_detectable"],
+              "description": "How a boarding host's days-since-infection is drawn within its state. 'engine_window' (default) is the authored state window. 'stationary_detectable' widens the never_symptomatic and convalescent high edges to max(incubation + shedding duration, detectable_duration_days) and marks hosts beyond the shedding window as cleared (RNA-positive but non-shedding, a representability boundary)."
+            },
             "prevalence": {
               "type": "object",
               "additionalProperties": false,
@@ -888,6 +903,23 @@
               "properties": {
                 "passenger": {"type": "number", "minimum": 0, "maximum": 1},
                 "crew": {"type": "number", "minimum": 0, "maximum": 1}
+              }
+            },
+            "renewal": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["case_incidence_per_1000_py", "detectable_duration_days"],
+              "properties": {
+                "case_incidence_per_1000_py": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["passenger", "crew"],
+                  "properties": {
+                    "passenger": {"type": "number", "minimum": 0},
+                    "crew": {"type": "number", "minimum": 0}
+                  }
+                },
+                "detectable_duration_days": {"type": "number", "minimum": 0}
               }
             },
             "party": {

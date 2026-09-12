@@ -50,6 +50,12 @@ _ROLES = (ROLE_PASSENGER, ROLE_CREW)
 STATE_NEVER_SYMPTOMATIC = "never_symptomatic"
 STATE_PRESYMPTOMATIC = "presymptomatic"
 STATE_CONVALESCENT = "convalescent"
+# A host drawn from the RNA-positive prevalence whose age lands beyond the
+# model-representable shedding window. It remains positive in the measurement
+# that supplied prevalence, but sits outside the authored curve, so the engine
+# can represent it only as non-shedding. This is a representability boundary,
+# not an epidemiological clearance claim.
+STATE_CLEARED = "cleared"
 # Party mode only: infected at the common exposure, not yet shedding. A
 # prevalent sample never contains it (a prevalence is of hosts shedding), and a
 # party that has already had a case in it does not board, so it replaces the
@@ -57,7 +63,7 @@ STATE_CONVALESCENT = "convalescent"
 STATE_INCUBATING = "incubating"
 _STATES = (
     STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
-    STATE_INCUBATING,
+    STATE_CLEARED, STATE_INCUBATING,
 )
 
 # The two boarding draw modes. Which one a pathogen uses is a claim about the
@@ -66,6 +72,14 @@ _STATES = (
 BOARDING_MODE_PREVALENCE = "prevalence"
 BOARDING_MODE_PARTY = "party"
 _BOARDING_MODES = (BOARDING_MODE_PREVALENCE, BOARDING_MODE_PARTY)
+
+AGE_DRAW_ENGINE_WINDOW = "engine_window"
+AGE_DRAW_STATIONARY_DETECTABLE = "stationary_detectable"
+_AGE_DRAW_MODES = (AGE_DRAW_ENGINE_WINDOW, AGE_DRAW_STATIONARY_DETECTABLE)
+
+RATE_MODE_SCREENING_PREVALENCE = "screening_prevalence"
+RATE_MODE_RENEWAL = "renewal"
+_RATE_MODES = (RATE_MODE_SCREENING_PREVALENCE, RATE_MODE_RENEWAL)
 
 MODE_LEGACY = "legacy"
 MODE_NONE = "none"
@@ -105,6 +119,9 @@ class BoardingSpec:
     crew_prevalence: float
     never_symptomatic_fraction: float
     presymptomatic_share_of_presenting: float
+    age_draw: str = AGE_DRAW_ENGINE_WINDOW
+    rate_mode: str = RATE_MODE_SCREENING_PREVALENCE
+    detectable_duration_days: float | None = None
     party: BoardingParty | None = None
     epoch: int = 0
 
@@ -280,6 +297,76 @@ def _resolve_prevalence(
     )
 
 
+def _resolve_rate_mode(block: dict[str, Any], location: str) -> str:
+    """Select screening prevalence or the incidence-duration renewal identity."""
+    rate_mode = str(block.get("rate_mode") or RATE_MODE_SCREENING_PREVALENCE)
+    if rate_mode not in _RATE_MODES:
+        raise ValueError(
+            f"{location}.rate_mode = {rate_mode!r} is not one of "
+            f"{list(_RATE_MODES)}",
+        )
+    return rate_mode
+
+
+def _resolve_age_draw(block: dict[str, Any], location: str) -> str:
+    """Select today's authored window or a stationary detectable window."""
+    age_draw = str(block.get("age_draw") or AGE_DRAW_ENGINE_WINDOW)
+    if age_draw not in _AGE_DRAW_MODES:
+        raise ValueError(
+            f"{location}.age_draw = {age_draw!r} is not one of "
+            f"{list(_AGE_DRAW_MODES)}",
+        )
+    return age_draw
+
+
+def _resolve_renewal(
+    block: dict[str, Any], location: str, never: float,
+) -> tuple[float, float, float]:
+    """Derive role prevalences from community incidence and detectability."""
+    if block.get("prevalence") is not None:
+        raise ValueError(
+            f"{location} is in renewal mode and also carries a prevalence: "
+            "two mechanisms for one rate make the resulting count "
+            "attributable to neither",
+        )
+    renewal = block.get("renewal") or {}
+    incidence = renewal.get("case_incidence_per_1000_py") or {}
+    missing = [role for role in _ROLES if incidence.get(role) is None]
+    if missing:
+        raise ValueError(
+            f"{location}.renewal.case_incidence_per_1000_py is missing "
+            f"{', '.join(missing)}",
+        )
+    detectable = renewal.get("detectable_duration_days")
+    if detectable is None:
+        raise ValueError(
+            f"{location}.renewal.detectable_duration_days is unset: renewal "
+            "requires a mean detectable duration in days",
+        )
+    detectable_days = float(detectable)
+    if detectable_days < 0.0:
+        raise ValueError(
+            f"{location}.renewal.detectable_duration_days = {detectable_days} "
+            "is negative",
+        )
+    presenting = 1.0 - never
+    if presenting <= 0.0:
+        raise ValueError(
+            f"{location}.state_split.never_symptomatic_fraction = {never} "
+            "leaves no presenting fraction for renewal incidence",
+        )
+    derived = tuple(
+        _fraction(
+            (float(incidence[role]) / 1000.0) / presenting
+            * (detectable_days / 365.25),
+            f"{location}.derived_prevalence.{role}",
+            "renewal-derived prevalence must remain in [0, 1]",
+        )
+        for role in _ROLES
+    )
+    return derived[0], derived[1], detectable_days
+
+
 def _resolve_epoch(
     block: dict[str, Any], profile: dict[str, Any], location: str,
 ) -> int:
@@ -314,31 +401,62 @@ def _resolve_boarding_spec(
     profile = _known_pathogen(pathogen_id, location, pathogen_profiles)
     _refuse_legacy_index_case(pathogen_id, location, profile, "is enabled")
     split = block.get("state_split") or {}
+    never = _fraction(
+        split.get("never_symptomatic_fraction"),
+        f"{location}.state_split.never_symptomatic_fraction",
+        "no value for it is licensed in "
+        "docs/parameter_provenance_register.md, so enabling boarding "
+        "requires setting it explicitly rather than defaulting it",
+    )
+    rate_mode = _resolve_rate_mode(block, location)
+    age_draw = _resolve_age_draw(block, location)
     party = (
         _resolve_party(block, location)
         if _resolve_mode(block, location) == BOARDING_MODE_PARTY
         else None
     )
-    passenger, crew = (
-        (0.0, 0.0) if party is not None
-        else _resolve_prevalence(block, location)
-    )
+    if party is not None:
+        passenger, crew = 0.0, 0.0
+        detectable_days = None
+    elif rate_mode == RATE_MODE_RENEWAL:
+        if _resolve_mode(block, location) == BOARDING_MODE_PARTY:
+            raise ValueError(
+                f"{location}.rate_mode = {rate_mode!r} is an import-rate "
+                "mechanism and cannot be combined with party mode, "
+                "which sets its own cluster size",
+            )
+        passenger, crew, detectable_days = _resolve_renewal(
+            block, location, never,
+        )
+    else:
+        passenger, crew = _resolve_prevalence(block, location)
+        detectable_days = None
+    if (
+        detectable_days is None
+        and age_draw == AGE_DRAW_STATIONARY_DETECTABLE
+    ):
+        detectable = profile.get("detectable_duration_days")
+        if detectable is None:
+            raise ValueError(
+                f"{location} asks for stationary_detectable ages while the "
+                f"{pathogen_id} profile carries no "
+                "detectable_duration_days: a stationary draw needs the "
+                "measurement window it is stationary over",
+            )
+        detectable_days = float(detectable)
     return BoardingSpec(
         pathogen_id=pathogen_id,
         passenger_prevalence=passenger,
         crew_prevalence=crew,
-        never_symptomatic_fraction=_fraction(
-            split.get("never_symptomatic_fraction"),
-            f"{location}.state_split.never_symptomatic_fraction",
-            "no value for it is licensed in "
-            "docs/parameter_provenance_register.md, so enabling boarding "
-            "requires setting it explicitly rather than defaulting it",
-        ),
+        never_symptomatic_fraction=never,
         presymptomatic_share_of_presenting=_fraction(
             split.get("presymptomatic_share_of_presenting"),
             f"{location}.state_split.presymptomatic_share_of_presenting",
             "it is a share of the imported hosts that do present",
         ),
+        age_draw=age_draw,
+        rate_mode=rate_mode,
+        detectable_duration_days=detectable_days,
         party=party,
         epoch=_resolve_epoch(block, profile, location),
     )
@@ -363,6 +481,12 @@ def _merge_block(base: Any, override: Any) -> Any:
     merged = dict(base)
     for key, value in override.items():
         merged[key] = _merge_block(base.get(key), value)
+    if (
+        isinstance(override, dict)
+        and override.get("rate_mode") == RATE_MODE_RENEWAL
+        and "prevalence" not in override
+    ):
+        merged.pop("prevalence", None)
     return merged
 
 
@@ -539,7 +663,11 @@ def _select_prevalent(
     own already-assigned duration. That is the prevalent-sample construction
     itself rather than an approximation to it, and it introduces no
     distribution and reinterprets no fraction: the weights are host properties
-    the run already had.
+    the run already had. Under the stationary age model the strict length-bias
+    weight would be detectable duration, not shedding duration; the two
+    coincide only for chronic hosts. Keeping the existing shedding weight is
+    deliberate: changing it here would conflate who boards with how long they
+    shed, and is out of scope.
     """
     size = min(count, len(pool))
     weights = np.asarray(
@@ -583,6 +711,8 @@ def _state_window(
     presymptomatic_days: float,
     recovery_day: float,
     duration_days: float,
+    age_draw: str = AGE_DRAW_ENGINE_WINDOW,
+    detectable_duration_days: float | None = None,
 ) -> tuple[float, float] | None:
     """The days-since-infection window this state occupies for this host.
 
@@ -605,9 +735,19 @@ def _state_window(
         high = incubation_days
     elif state == STATE_NEVER_SYMPTOMATIC:
         high = incubation_days + duration_days
-    else:
+        if age_draw == AGE_DRAW_STATIONARY_DETECTABLE:
+            # Atmar's detectable duration runs from infection while
+            # shedding_duration_days is indexed from incubation by the
+            # engine's curve; keep that origin mismatch visible rather than
+            # silently harmonising the two clocks.
+            high = max(high, detectable_duration_days or 0.0)
+    elif state == STATE_CONVALESCENT:
         low = incubation_days + recovery_day
         high = incubation_days + duration_days
+        if age_draw == AGE_DRAW_STATIONARY_DETECTABLE:
+            high = max(high, detectable_duration_days or 0.0)
+    else:
+        low, high = 0.0, shedding_onset
     if high <= low:
         return None
     return low, high
@@ -689,19 +829,33 @@ def _board_one_host(
     presymptomatic_days = float(
         profile.get("presymptomatic_shedding_days", 0.0) or 0.0,
     )
+    detectable_duration_days = spec.detectable_duration_days
+    if detectable_duration_days is None:
+        # The profile field is optional, like recovery_day: absent means the
+        # authored shedding window is also the detectable window, which makes
+        # stationary_detectable a no-op and preserves engine_window exactly.
+        detectable_duration_days = float(
+            profile.get("detectable_duration_days", duration_days),
+        )
     window: tuple[float, float] | None = None
     state = STATE_NEVER_SYMPTOMATIC
     for _ in range(_STATE_MAX_DRAWS):
         state = _draw_state(spec, rng)
         window = _state_window(
             state, incubation_days, presymptomatic_days,
-            recovery_day, duration_days,
+            recovery_day, duration_days, spec.age_draw,
+            detectable_duration_days,
         )
         if window is not None:
             break
     if window is None:
         return None
     age_days = float(rng.uniform(window[0], window[1]))
+    if (
+        spec.age_draw == AGE_DRAW_STATIONARY_DETECTABLE
+        and age_days > incubation_days + duration_days
+    ):
+        return STATE_CLEARED
     agent.infect_with_pathogen(
         pathogen_id, 0.0, 0,
         time_infected=int(round(clock.epochs_for_days(age_days))),

@@ -18,7 +18,8 @@ that this check exposed. It **moves no constant and adopts none.**
 Each number below names the paper section it was read from.
 
 **Status:** Evidence assembled, arithmetic reproduced below and checkable —
-findings A/B/C stand as stated; the adoption question at the end is open.
+findings A/B/C stand as stated; both repairs are now implemented as
+selectable, default-off modes (§6) and unmeasured.
 
 ---
 
@@ -142,3 +143,32 @@ Unresolved: whether the boarding block should take a renewal-derived import
 rate (incidence × model-representable duration) in place of a screening
 prevalence, and whether "convalescent" is the right state for an RNA-positive
 asymptomatic sample at all given finding B.
+
+## 6. What was implemented
+
+Both repairs now exist as selectable, default-off modes; nothing shipped
+moved and neither arm has been measured.
+
+- **A2, `rate_mode: renewal`.** The boarding block carries
+  `renewal.case_incidence_per_1000_py` per role and
+  `renewal.detectable_duration_days`, and `engines/initiation.py` derives the
+  per-person prevalence under the finding-C identity — case incidence
+  divided by `1 − never_symptomatic_fraction` to recover infections, times
+  duration/365.25. At 39.0 / 0.29 / 28 it derives **0.004208 ≈ 0.42%**. A
+  block carrying both `renewal` and `prevalence` is a load error.
+- **B2, `age_draw: stationary_detectable`.** The infection-age draw keeps
+  `_draw_state` first, then widens only the `never_symptomatic` and
+  `convalescent` high edges to `max(incubation + shedding duration,
+  detectable_duration_days)` — detectable duration is read from the profile
+  (`norwalk_gi` now ships 28, Atmar 2008; origin mismatch between
+  from-infection and from-incubation indexing is recorded at the definition,
+  not harmonised). A host whose age lands past `incubation +
+  shedding_duration` boards as `cleared`: counted in
+  `BoardingReport.composition`, never passed to `infect_with_pathogen`, inert
+  to transmission. The `_select_prevalent` length-bias weight is unchanged
+  (it is strictly detectable duration under the stationary model; changing
+  it was scoped out).
+- **Defaults.** `rate_mode` omitted → `screening_prevalence`; `age_draw`
+  omitted → `engine_window`; both reproduce the pre-change draw bit-for-bit,
+  pinned by a labelled change-detector test. The open question of §5 is
+  thereby made measurable rather than decided.

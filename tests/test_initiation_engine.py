@@ -25,6 +25,7 @@ from engines.initiation import (
     MODE_BOARDING_AND_SEEDS,
     MODE_LEGACY,
     MODE_SEEDS,
+    STATE_CLEARED,
     STATE_CONVALESCENT,
     STATE_INCUBATING,
     STATE_NEVER_SYMPTOMATIC,
@@ -760,7 +761,7 @@ class TestManifest:
         assert set(drawn) == {"passenger", "crew"}
         assert set(manifest["boarding"][PATHOGEN]["composition"]) == {
             STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
-            STATE_INCUBATING,
+            STATE_CLEARED, STATE_INCUBATING,
         }
         assert manifest["boarding_mode"] == {PATHOGEN: "prevalence"}
         assert manifest["party"] == {}
@@ -1167,3 +1168,236 @@ class TestProfileCarriedBlocks:
                 }}},
                 profiles,
             )
+
+
+# ── A2/B2: selectable renewal rate and stationary age draw ───────────────
+
+# CHANGE DETECTOR, not a correctness check. Captured from main before the
+# A2/B2 modes existed, at passenger=crew=0.2, never=0.29, pre=0.04, seed 123
+# (agent_id, boarding_state, time_infected). If this moves, something in the
+# default path moved; it failing means "something moved", not "the repairs
+# are wrong".
+_DEFAULT_DRAW_GOLDEN = [
+    (0, "never_symptomatic", 49), (2, "presymptomatic", 2),
+    (3, "never_symptomatic", 24), (6, "convalescent", 29),
+    (14, "convalescent", 16), (23, "convalescent", 30),
+    (33, "never_symptomatic", 24), (34, "convalescent", 59),
+    (35, "convalescent", 40), (36, "convalescent", 46),
+    (42, "presymptomatic", 4), (43, "never_symptomatic", 11),
+    (44, "convalescent", 44), (46, "convalescent", 23),
+    (47, "convalescent", 20), (48, "presymptomatic", 2),
+    (54, "never_symptomatic", 49), (55, "convalescent", 61),
+    (59, "convalescent", 27), (65, "never_symptomatic", 22),
+    (91, "convalescent", 61), (94, "never_symptomatic", 25),
+    (96, "convalescent", 38), (99, "convalescent", 61),
+    (102, "convalescent", 52), (103, "convalescent", 37),
+    (105, "convalescent", 51), (116, "convalescent", 23),
+    (125, "convalescent", 55), (145, "convalescent", 45),
+    (146, "never_symptomatic", 33), (148, "convalescent", 31),
+    (152, "never_symptomatic", 13), (159, "never_symptomatic", 4),
+    (162, "convalescent", 37), (163, "convalescent", 41),
+    (164, "convalescent", 20), (172, "convalescent", 49),
+    (173, "convalescent", 41), (177, "convalescent", 19),
+    (183, "convalescent", 30), (184, "never_symptomatic", 31),
+    (185, "convalescent", 27), (208, "convalescent", 38),
+    (214, "convalescent", 37), (221, "convalescent", 31),
+    (224, "convalescent", 17), (226, "convalescent", 35),
+    (239, "never_symptomatic", 10), (241, "presymptomatic", 4),
+    (245, "never_symptomatic", 6), (254, "convalescent", 37),
+    (255, "convalescent", 34), (261, "never_symptomatic", 55),
+    (265, "convalescent", 57), (269, "never_symptomatic", 28),
+    (275, "never_symptomatic", 15), (278, "convalescent", 31),
+    (280, "never_symptomatic", 50), (296, "convalescent", 34),
+]
+
+
+def _stationary_spec(detectable: float, **kwargs: Any) -> BoardingSpec:
+    return BoardingSpec(
+        pathogen_id=PATHOGEN,
+        passenger_prevalence=kwargs.get("passenger", 0.5),
+        crew_prevalence=kwargs.get("crew", 0.5),
+        never_symptomatic_fraction=kwargs.get("never", 0.29),
+        presymptomatic_share_of_presenting=kwargs.get("pre_share", 0.04),
+        age_draw="stationary_detectable",
+        detectable_duration_days=detectable,
+    )
+
+
+def _renewal_cfg(
+    passenger_rate: float = 39.0, crew_rate: float = 39.0,
+    detectable: float = 28, **kwargs: Any,
+) -> dict[str, Any]:
+    cfg = _cfg(**kwargs)
+    block = cfg["initiation"]["boarding"][PATHOGEN]
+    block.pop("prevalence")
+    block["rate_mode"] = "renewal"
+    block["renewal"] = {
+        "case_incidence_per_1000_py": {
+            "passenger": passenger_rate, "crew": crew_rate,
+        },
+        "detectable_duration_days": detectable,
+    }
+    return cfg
+
+
+def _ages(engine: _FakeEngine) -> list[float]:
+    return [
+        agent.infections[PATHOGEN]["time_infected"] / engine.clock.epochs_per_day
+        for agent in engine.agents if PATHOGEN in agent.infections
+    ]
+
+
+class TestDefaultInertness:
+    def test_an_unset_pair_reproduces_main_bit_for_bit(self) -> None:
+        """Inertness guard: no rate_mode / age_draw keys, fixed seed."""
+        profiles = {PATHOGEN: _profile(detectable_duration_days=28)}
+        plan = resolve_initiation_plan(
+            _cfg(passenger=0.2, crew=0.2, never=0.29, pre=0.04), profiles,
+        )
+        (spec,) = plan.boarding
+        assert spec.age_draw == "engine_window"
+        assert spec.rate_mode == "screening_prevalence"
+        engine = _FakeEngine()
+        report = draw_boarding_cohort(
+            spec, engine.agents, profiles[PATHOGEN], engine.clock,
+            np.random.default_rng(123),
+        )
+        assert report.drawn_by_role == {"passenger": 43, "crew": 17}
+        assert report.composition == {
+            "never_symptomatic": 17, "presymptomatic": 4,
+            "convalescent": 39, "cleared": 0, "incubating": 0,
+        }
+        records = [
+            (a.agent_id, a.infections[PATHOGEN]["boarding_state"],
+             a.infections[PATHOGEN]["time_infected"])
+            for a in engine.agents if PATHOGEN in a.infections
+        ]
+        assert records == _DEFAULT_DRAW_GOLDEN
+
+
+class TestRenewalRateMode:
+    def test_three_incidences_give_ordered_derived_prevalences(self) -> None:
+        prevalences = []
+        for rate in (10.0, 39.0, 200.0):
+            plan = resolve_initiation_plan(
+                _renewal_cfg(passenger_rate=rate, crew_rate=rate, never=0.29),
+                {PATHOGEN: _profile()},
+            )
+            prevalences.append(plan.boarding[0].passenger_prevalence)
+        assert prevalences[0] < prevalences[1] < prevalences[2]
+        assert prevalences[2] > 3.0 * prevalences[1]
+
+    def test_the_derived_rate_change_detector(self) -> None:
+        # CHANGE DETECTOR: O'Brien 15-64 y incidence 39.0, never=0.29,
+        # detectable 28 -> 0.004208 by the renewal identity.
+        plan = resolve_initiation_plan(
+            _renewal_cfg(never=0.29), {PATHOGEN: _profile()},
+        )
+        assert plan.boarding[0].passenger_prevalence == pytest.approx(
+            0.004208, rel=1e-3,
+        )
+        assert plan.boarding[0].crew_prevalence == pytest.approx(
+            0.004208, rel=1e-3,
+        )
+
+    def test_derived_prevalences_stay_in_unit_interval(self) -> None:
+        for rate in (0.0, 39.0, 1000.0):
+            plan = resolve_initiation_plan(
+                _renewal_cfg(passenger_rate=rate, crew_rate=rate),
+                {PATHOGEN: _profile()},
+            )
+            spec = plan.boarding[0]
+            assert 0.0 <= spec.passenger_prevalence <= 1.0
+            assert 0.0 <= spec.crew_prevalence <= 1.0
+
+    def test_a_prevalence_alongside_renewal_is_an_error(self) -> None:
+        cfg = _renewal_cfg()
+        cfg["initiation"]["boarding"][PATHOGEN]["prevalence"] = {
+            "passenger": 0.01, "crew": 0.01,
+        }
+        with pytest.raises(ValueError, match="attributable to neither"):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
+    def test_a_missing_role_incidence_is_an_error(self) -> None:
+        cfg = _renewal_cfg()
+        cfg["initiation"]["boarding"][PATHOGEN]["renewal"][
+            "case_incidence_per_1000_py"
+        ].pop("crew")
+        with pytest.raises(ValueError, match="case_incidence_per_1000_py"):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
+    def test_an_unknown_rate_mode_is_an_error(self) -> None:
+        cfg = _cfg()
+        cfg["initiation"]["boarding"][PATHOGEN]["rate_mode"] = "empirical"
+        with pytest.raises(
+            ValueError, match="screening_prevalence.*renewal|renewal",
+        ):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
+    def test_an_unbounded_derived_prevalence_is_an_error(self) -> None:
+        with pytest.raises(ValueError, match=r"\[0, 1\]"):
+            resolve_initiation_plan(
+                _renewal_cfg(passenger_rate=1e9, crew_rate=1e9),
+                {PATHOGEN: _profile()},
+            )
+
+
+class TestStationaryAgeDraw:
+    def test_three_detectable_durations_give_an_ordered_cleared_fraction(
+        self,
+    ) -> None:
+        fractions = []
+        for detectable in (18.0, 28.0, 56.0):
+            spec = _stationary_spec(detectable)
+            cleared = drawn = 0
+            for seed in range(20):
+                _, _, report = _draw(
+                    spec, seed, detectable_duration_days=detectable,
+                )
+                cleared += report.composition[STATE_CLEARED]
+                drawn += sum(report.composition.values())
+            fractions.append(cleared / drawn)
+        assert fractions[0] < fractions[1] < fractions[2]
+        assert fractions[1] > 0.30
+        assert fractions[0] > 0.0
+
+    def test_stationary_ages_are_younger_among_represented_hosts(self) -> None:
+        """The detectable tail is unrepresentable, so represented hosts are
+        the younger half of the stationary draw."""
+        stationary = _stationary_spec(28.0)
+        means = {}
+        for label, spec in (("engine", _spec(passenger=0.5, crew=0.5)),
+                            ("stationary", stationary)):
+            ages: list[float] = []
+            for seed in range(20):
+                engine, _, _ = _draw(spec, seed, detectable_duration_days=28)
+                ages.extend(_ages(engine))
+            means[label] = float(np.mean(ages))
+        assert means["stationary"] < means["engine"]
+
+    def test_a_cleared_host_holds_no_infection_record(self) -> None:
+        spec = _stationary_spec(56.0)
+        engine, _, report = _draw(
+            spec, 3, detectable_duration_days=56.0,
+        )
+        drawn = sum(report.drawn_by_role.values())
+        infected = len(_infected_ids(engine))
+        assert report.composition[STATE_CLEARED] > 0
+        assert sum(report.composition.values()) == drawn
+        assert infected == drawn - report.composition[STATE_CLEARED]
+
+    def test_an_unknown_age_draw_is_an_error(self) -> None:
+        cfg = _cfg()
+        cfg["initiation"]["boarding"][PATHOGEN]["age_draw"] = "free"
+        with pytest.raises(
+            ValueError, match="engine_window.*stationary_detectable",
+        ):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
+    def test_stationary_without_a_detectable_duration_is_an_error(self) -> None:
+        cfg = _cfg()
+        cfg["initiation"]["boarding"][PATHOGEN][
+            "age_draw"
+        ] = "stationary_detectable"
+        with pytest.raises(ValueError, match="detectable_duration_days"):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
