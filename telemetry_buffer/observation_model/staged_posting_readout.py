@@ -191,20 +191,20 @@ def score_cell(
         }
     decisions = {channels[channel]["decision"] for channel in CHANNELS}
     if CONTINUE in decisions:
-        decision = CONTINUE
+        cell_decision = CONTINUE
     elif decisions == {STOP_ABOVE}:
-        decision = STOP_ABOVE
+        cell_decision = STOP_ABOVE
     elif decisions == {STOP_BELOW}:
-        decision = STOP_BELOW
+        cell_decision = STOP_BELOW
     else:
-        decision = CONTINUE
+        cell_decision = CONTINUE
     return {
         "band": list(band),
         "eligible_runs": n,
         "seeds": [int(row["seed"]) for row in rows],
         "channels": channels,
         # Continue if any channel is undecided; a stop needs both settled.
-        "decision": decision,
+        "decision": cell_decision,
     }
 
 
