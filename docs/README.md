@@ -132,6 +132,7 @@ longer justifications.
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
+| [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs
