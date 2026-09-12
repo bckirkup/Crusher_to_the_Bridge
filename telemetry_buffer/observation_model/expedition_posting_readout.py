@@ -1,4 +1,4 @@
-"""How often an expedition voyage posts, and the attack rate when it does.
+"""How often a voyage posts, and the attack rate when it does.
 
 Two quantities, per design cell, over the run zips of a campaign:
 
@@ -277,6 +277,7 @@ def _cell_row(cell: dict[str, Any]) -> str:
         f"{_fmt(ci[0])}-{_fmt(ci[1])}" if ci else "n/a"
     )
     return (
+        f"| {cell['platform_id']} "
         f"| {cell['surveillance']} "
         f"| {_fmt(cell['environmental_faecal_release_log10_g_per_epoch'], 1)} "
         f"| {_fmt(cell['voyage_days'], 1)} "
@@ -293,7 +294,7 @@ def _cell_row(cell: dict[str, Any]) -> str:
 def render_markdown(report: dict[str, Any]) -> str:
     """A table of posting frequency and posting-conditional passenger AR."""
     lines = [
-        "# Expedition posting frequency and posting-conditional attack rate",
+        "# Posting frequency and posting-conditional attack rate",
         "",
         f"Posting rule: reported cases >= {report['posting_threshold']:.0%} of "
         "passengers or of crew. Attack rate is the reported passenger attack "
@@ -301,9 +302,9 @@ def render_markdown(report: dict[str, Any]) -> str:
         "`environmental_faecal_release_log10_g_per_epoch` and cells are never "
         "pooled across it.",
         "",
-        "| surveillance | release | days | voyages | posted | P(post) "
+        "| platform | surveillance | release | days | voyages | posted | P(post) "
         "| P(post) 95% CI | n posted | median pax AR | IQR |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     lines.extend(_cell_row(cell) for cell in report["cells"])
     lines.extend([
