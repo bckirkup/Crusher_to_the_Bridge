@@ -15,6 +15,7 @@ curve), not a statement that the survival function is discontinuous.
 
 from __future__ import annotations
 
+import math
 from bisect import bisect_left
 from collections.abc import Mapping
 from dataclasses import dataclass
@@ -72,12 +73,12 @@ def _validate_survival_table(
         points.append((day, float(probability)))
     days = [day for day, _ in points]
     probs = [prob for _, prob in points]
-    if days[0] != 0 or probs[0] != 1.0:
+    if days[0] != 0 or not math.isclose(probs[0], 1.0, rel_tol=0.0, abs_tol=0.0):
         raise ValueError(
             f"{where}.survival must start at day 0 with probability 1.0: "
             f"got ({days[0]}, {probs[0]})",
         )
-    if probs[-1] != 0.0:
+    if not math.isclose(probs[-1], 0.0, rel_tol=0.0, abs_tol=0.0):
         raise ValueError(
             f"{where}.survival must end at probability 0.0: "
             f"got {probs[-1]}",
