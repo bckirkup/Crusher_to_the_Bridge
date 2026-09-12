@@ -6,9 +6,13 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from picard_framework.analysis.sentinel.line_list import SentinelLedger
+    from picard_framework.analysis.sentinel.wastewater_ops import WastewaterOpsSampler
 
 from crusher_labs import build_modalities
 from crusher_labs.modalities.clinical_strain_typing import (
@@ -112,12 +116,6 @@ from orchestrator_types import (
     STATUS_RANK,
     STATUS_SUSPECTED,
     SimulationState,
-)
-from picard_framework.analysis.sentinel.line_list import SentinelLedger
-from picard_framework.analysis.sentinel.wastewater_ops import (
-    WastewaterOpsConfig,
-    WastewaterOpsSampler,
-    assign_collection_points,
 )
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
@@ -517,6 +515,7 @@ class ShipSimulation:
         if paths is None or not paths.sentinel_line_list:
             return
         from picard_framework.analysis.sentinel.export_line_list import port_id_lookup
+        from picard_framework.analysis.sentinel.line_list import SentinelLedger
 
         voyage = (voyage_cfg or {}).get("voyage") or {}
         self.sentinel_ledger = SentinelLedger(
@@ -532,6 +531,12 @@ class ShipSimulation:
         """
         if self.sentinel_ledger is None:
             return
+        from picard_framework.analysis.sentinel.wastewater_ops import (
+            WastewaterOpsConfig,
+            WastewaterOpsSampler,
+            assign_collection_points,
+        )
+
         config = WastewaterOpsConfig.from_mapping(self.cfg.get("wastewater_surveillance"))
         if not config.enabled:
             return
