@@ -22,7 +22,7 @@ chosen to make VSP, Park, or the passenger/crew ratio come out right.
 dose figure in the repository is void pending a refit** — check the ledger
 before quoting one.
 
-Crusher's local Ruff pre-commit hook uses the repository `C901` ceiling of 117.
+Crusher's local Ruff pre-commit hook uses the repository `C901` ceiling of 56.
 Sonar's new-code gate holds new functions to cognitive complexity 15. Dedicated
 complexity-backlog splits are allowed as their own change; do not mix them into
 Sentinel analysis. The last documented official `S3776` count was 87, taken from

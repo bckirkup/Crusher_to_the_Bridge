@@ -1142,6 +1142,259 @@ def _check_zone_geometry(
             )
 
 
+def _check_pathogen_routes(p: Any, report: Report) -> None:
+    for route in p.transmission_routes:
+        if route not in _VALID_TRANSMISSION_ROUTES:
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "LOGIC_ROUTE",
+                f"{p.pathogen_id} has unknown transmission route "
+                f"'{route}'. Valid routes: {_VALID_TRANSMISSION_ROUTES}",
+            )
+
+
+def _check_pathogen_route_efficiencies(p: Any, report: Report) -> None:
+    # Route efficiencies are independent per-route dose multipliers,
+    # unbounded above; there is deliberately no sum rule. Non-negativity
+    # is enforced by the field validator on both key spellings.
+    if p.route_efficiency_multipliers:
+        field = "route_efficiency_multipliers"
+        efficiencies = p.route_efficiency_multipliers
+    else:
+        field = "transmission_route_weights"
+        efficiencies = p.transmission_route_weights or {}
+    if not efficiencies:
+        return
+    allowed = {
+        "direct_contact", "droplet", "hvac_airborne",
+        "emesis_aerosol", "fomite", "food_contamination",
+        "environmental_source",
+    }
+    unknown = set(efficiencies) - allowed
+    if unknown:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "LOGIC_ROUTE",
+            f"{p.pathogen_id} {field} has "
+            f"unknown keys {sorted(unknown)}",
+        )
+
+
+def _check_pathogen_shedding_curve(p: Any, report: Report) -> None:
+    if not p.shedding_curve_log10:
+        return
+    curve_len = len(p.shedding_curve_log10)
+    if curve_len < 2:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "LOGIC_SHED",
+            f"{p.pathogen_id} shedding_curve_log10 has only "
+            f"{curve_len} entries (expected >= 2 for a time-series).",
+        )
+    for i, val in enumerate(p.shedding_curve_log10):
+        if val < 0:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.shedding_curve_log10[{i}] = {val} "
+                f"is negative (log10 shedding rate cannot be negative "
+                f"in this model).",
+            )
+
+
+def _check_pathogen_timing_bounds(p: Any, report: Report) -> None:
+    if p.recovery_day < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.recovery_day = {p.recovery_day} is negative.",
+        )
+
+    # The shedding duration is the infectious period from onset, and a
+    # host cannot stop being infectious before it stops being ill.
+    if p.shedding_duration_days is not None:
+        if p.shedding_duration_days < 0:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.shedding_duration_days = "
+                f"{p.shedding_duration_days} is negative.",
+            )
+        elif p.shedding_duration_days < p.recovery_day:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.shedding_duration_days = "
+                f"{p.shedding_duration_days} is shorter than "
+                f"recovery_day = {p.recovery_day}: shedding cannot "
+                f"end before illness does.",
+            )
+
+    if p.introduction_epoch < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.introduction_epoch = {p.introduction_epoch} "
+            f"is negative.",
+        )
+
+    if p.initial_time_infected < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.initial_time_infected = "
+            f"{p.initial_time_infected} is negative.",
+        )
+    curve_len = len(p.shedding_curve_log10)
+    if curve_len and p.initial_time_infected >= curve_len:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "LOGIC",
+            f"{p.pathogen_id}.initial_time_infected = "
+            f"{p.initial_time_infected} is beyond shedding_curve_log10 "
+            f"length ({curve_len}); shedding will clamp to final day.",
+        )
+
+
+def _check_pathogen_food_contamination(p: Any, report: Report) -> None:
+    fc = p.food_contamination
+    if not fc.get("enabled", False):
+        return
+    gr = fc.get("growth_rate_per_epoch", 0.0)
+    dr = fc.get("decay_rate_per_epoch", 0.0)
+    if gr < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.food_contamination."
+            f"growth_rate_per_epoch = {gr} is negative.",
+        )
+    if dr < 0 or dr > 1:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.food_contamination."
+            f"decay_rate_per_epoch = {dr} outside [0, 1].",
+        )
+    if "food" not in p.transmission_routes:
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "LOGIC_ROUTE",
+            f"{p.pathogen_id} has food_contamination enabled "
+            f"but 'food' not in transmission_routes.",
+        )
+
+
+def _check_pathogen_environmental_contamination(p: Any, report: Report) -> None:
+    ecc = p.environmental_contamination
+    if not ecc.get("enabled", False):
+        return
+    bl = ecc.get("baseline_environmental_load", 0.0)
+    cr = ecc.get("colonization_rate_per_epoch", 0.0)
+    if bl < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.environmental_contamination."
+            f"baseline_environmental_load = {bl} is negative.",
+        )
+    if cr < 0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "MATH_BOUND",
+            f"{p.pathogen_id}.environmental_contamination."
+            f"colonization_rate_per_epoch = {cr} is negative.",
+        )
+
+
+def _check_protocol_material_refs(
+    protocols: ProtocolsConfig,
+    resource_costs: ResourceCosts,
+    report: Report,
+) -> None:
+    known_materials = set(resource_costs.material_inventory.keys())
+    for proto in protocols.protocols:
+        for cost_block_name in ("costs_per_epoch", "activation_costs"):
+            cost_block = getattr(proto, cost_block_name)
+            for mat_name in cost_block.materials:
+                if mat_name not in known_materials:
+                    report.warn(
+                        _PROTOCOLS_JSON,
+                        "LOGIC_MATERIAL",
+                        f"{proto.protocol_id}.{cost_block_name} references "
+                        f"material '{mat_name}' not found in "
+                        f"resource_costs.json material_inventory: "
+                        f"{known_materials}",
+                    )
+
+
+def _check_protocol_exempt_classes(
+    protocols: ProtocolsConfig,
+    report: Report,
+) -> None:
+    for proto in protocols.protocols:
+        ec = proto.modifiers.get("exempt_classes", [])
+        if ec and not isinstance(ec, list):
+            report.error(
+                _PROTOCOLS_JSON,
+                "SCHEMA",
+                f"{proto.protocol_id}.modifiers.exempt_classes must be "
+                f"a list of agent class IDs, got {type(ec).__name__}",
+            )
+        elif ec:
+            has_confinement = (
+                proto.modifiers.get("confine_symptomatic_to_quarters", False)
+                or proto.modifiers.get("confine_all_to_quarters", False)
+            )
+            if not has_confinement:
+                report.warn(
+                    _PROTOCOLS_JSON,
+                    "LOGIC_EXEMPT",
+                    f"{proto.protocol_id} has exempt_classes but no "
+                    f"confinement modifier (confine_symptomatic_to_quarters "
+                    f"or confine_all_to_quarters).",
+                )
+
+
+def _check_per_test_material_refs(
+    resource_costs: ResourceCosts,
+    report: Report,
+) -> None:
+    known_materials = set(resource_costs.material_inventory.keys())
+    per_test = resource_costs.per_test_costs
+    for test_type, cost_data in per_test.items():
+        if isinstance(cost_data, dict):
+            for mat_name in cost_data.get("materials", {}):
+                if mat_name not in known_materials:
+                    report.warn(
+                        _RESOURCE_COSTS_JSON,
+                        "LOGIC_MATERIAL",
+                        f"per_test_costs.{test_type} references "
+                        f"material '{mat_name}' not found in "
+                        f"material_inventory: {known_materials}",
+                    )
+
+
+def _check_ois_weights(resource_costs: ResourceCosts, report: Report) -> None:
+    ois = resource_costs.operational_impact_weights
+    if ois is None:
+        return
+    for field_name in (
+        "per_passenger_quarantined",
+        "per_essential_crew_quarantined",
+        "per_passenger_isolated",
+        "per_closed_galley_zone",
+        "per_fleet_ppe_active",
+    ):
+        val = getattr(ois, field_name, 0.0)
+        if val < 0:
+            report.error(
+                _RESOURCE_COSTS_JSON,
+                "BOUNDS_OIS",
+                f"operational_impact_weights.{field_name} = {val} must be non-negative",
+            )
+
+
 def _check_logical_contradictions(
     protocols: ProtocolsConfig | None,
     resource_costs: ResourceCosts | None,
@@ -1154,237 +1407,25 @@ def _check_logical_contradictions(
     # as limits.  No warnings are emitted for costs exceeding starting
     # allocations — the ledger is a spend tracker, not a constraint.
 
-    # Validate pathogen transmission route names
     if pathogens:
         for p in pathogens.pathogens:
-            for route in p.transmission_routes:
-                if route not in _VALID_TRANSMISSION_ROUTES:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "LOGIC_ROUTE",
-                        f"{p.pathogen_id} has unknown transmission route "
-                        f"'{route}'. Valid routes: {_VALID_TRANSMISSION_ROUTES}",
-                    )
+            _check_pathogen_routes(p, report)
+            _check_pathogen_route_efficiencies(p, report)
+            _check_pathogen_shedding_curve(p, report)
+            _check_pathogen_timing_bounds(p, report)
+            _check_pathogen_food_contamination(p, report)
+            _check_pathogen_environmental_contamination(p, report)
 
-            # Route efficiencies are independent per-route dose multipliers,
-            # unbounded above; there is deliberately no sum rule. Non-negativity
-            # is enforced by the field validator on both key spellings.
-            if p.route_efficiency_multipliers:
-                field = "route_efficiency_multipliers"
-                efficiencies = p.route_efficiency_multipliers
-            else:
-                field = "transmission_route_weights"
-                efficiencies = p.transmission_route_weights or {}
-            if efficiencies:
-                allowed = {
-                    "direct_contact", "droplet", "hvac_airborne",
-                    "emesis_aerosol", "fomite", "food_contamination",
-                    "environmental_source",
-                }
-                unknown = set(efficiencies) - allowed
-                if unknown:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "LOGIC_ROUTE",
-                        f"{p.pathogen_id} {field} has "
-                        f"unknown keys {sorted(unknown)}",
-                    )
-
-            # Check that shedding curves have reasonable lengths
-            if p.shedding_curve_log10:
-                curve_len = len(p.shedding_curve_log10)
-                if curve_len < 2:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "LOGIC_SHED",
-                        f"{p.pathogen_id} shedding_curve_log10 has only "
-                        f"{curve_len} entries (expected >= 2 for a time-series).",
-                    )
-                for i, val in enumerate(p.shedding_curve_log10):
-                    if val < 0:
-                        report.error(
-                            _ACTIVE_PROFILES_JSON,
-                            "MATH_BOUND",
-                            f"{p.pathogen_id}.shedding_curve_log10[{i}] = {val} "
-                            f"is negative (log10 shedding rate cannot be negative "
-                            f"in this model).",
-                        )
-
-            # Verify recovery_day is non-negative
-            if p.recovery_day < 0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.recovery_day = {p.recovery_day} is negative.",
-                )
-
-            # The shedding duration is the infectious period from onset, and a
-            # host cannot stop being infectious before it stops being ill.
-            if p.shedding_duration_days is not None:
-                if p.shedding_duration_days < 0:
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.shedding_duration_days = "
-                        f"{p.shedding_duration_days} is negative.",
-                    )
-                elif p.shedding_duration_days < p.recovery_day:
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.shedding_duration_days = "
-                        f"{p.shedding_duration_days} is shorter than "
-                        f"recovery_day = {p.recovery_day}: shedding cannot "
-                        f"end before illness does.",
-                    )
-
-            # Verify introduction_epoch is non-negative
-            if p.introduction_epoch < 0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.introduction_epoch = {p.introduction_epoch} "
-                    f"is negative.",
-                )
-
-            if p.initial_time_infected < 0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.initial_time_infected = "
-                    f"{p.initial_time_infected} is negative.",
-                )
-            curve_len = len(p.shedding_curve_log10)
-            if curve_len and p.initial_time_infected >= curve_len:
-                report.warn(
-                    _ACTIVE_PROFILES_JSON,
-                    "LOGIC",
-                    f"{p.pathogen_id}.initial_time_infected = "
-                    f"{p.initial_time_infected} is beyond shedding_curve_log10 "
-                    f"length ({curve_len}); shedding will clamp to final day.",
-                )
-
-            # Validate food_contamination config
-            fc = p.food_contamination
-            if fc.get("enabled", False):
-                gr = fc.get("growth_rate_per_epoch", 0.0)
-                dr = fc.get("decay_rate_per_epoch", 0.0)
-                if gr < 0:
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.food_contamination."
-                        f"growth_rate_per_epoch = {gr} is negative.",
-                    )
-                if dr < 0 or dr > 1:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.food_contamination."
-                        f"decay_rate_per_epoch = {dr} outside [0, 1].",
-                    )
-                if "food" not in p.transmission_routes:
-                    report.warn(
-                        _ACTIVE_PROFILES_JSON,
-                        "LOGIC_ROUTE",
-                        f"{p.pathogen_id} has food_contamination enabled "
-                        f"but 'food' not in transmission_routes.",
-                    )
-
-            # Validate environmental_contamination config
-            ecc = p.environmental_contamination
-            if ecc.get("enabled", False):
-                bl = ecc.get("baseline_environmental_load", 0.0)
-                cr = ecc.get("colonization_rate_per_epoch", 0.0)
-                if bl < 0:
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.environmental_contamination."
-                        f"baseline_environmental_load = {bl} is negative.",
-                    )
-                if cr < 0:
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.environmental_contamination."
-                        f"colonization_rate_per_epoch = {cr} is negative.",
-                    )
-
-    # Material references in protocol costs
     if protocols and resource_costs:
-        known_materials = set(resource_costs.material_inventory.keys())
-        for proto in protocols.protocols:
-            for cost_block_name in ("costs_per_epoch", "activation_costs"):
-                cost_block = getattr(proto, cost_block_name)
-                for mat_name in cost_block.materials:
-                    if mat_name not in known_materials:
-                        report.warn(
-                            _PROTOCOLS_JSON,
-                            "LOGIC_MATERIAL",
-                            f"{proto.protocol_id}.{cost_block_name} references "
-                            f"material '{mat_name}' not found in "
-                            f"resource_costs.json material_inventory: "
-                            f"{known_materials}",
-                        )
+        _check_protocol_material_refs(protocols, resource_costs, report)
 
-    # Validate exempt_classes references in protocols
     if protocols:
-        for proto in protocols.protocols:
-            ec = proto.modifiers.get("exempt_classes", [])
-            if ec and not isinstance(ec, list):
-                report.error(
-                    _PROTOCOLS_JSON,
-                    "SCHEMA",
-                    f"{proto.protocol_id}.modifiers.exempt_classes must be "
-                    f"a list of agent class IDs, got {type(ec).__name__}",
-                )
-            elif ec:
-                has_confinement = (
-                    proto.modifiers.get("confine_symptomatic_to_quarters", False)
-                    or proto.modifiers.get("confine_all_to_quarters", False)
-                )
-                if not has_confinement:
-                    report.warn(
-                        _PROTOCOLS_JSON,
-                        "LOGIC_EXEMPT",
-                        f"{proto.protocol_id} has exempt_classes but no "
-                        f"confinement modifier (confine_symptomatic_to_quarters "
-                        f"or confine_all_to_quarters).",
-                    )
+        _check_protocol_exempt_classes(protocols, report)
 
-    # Material references in per_test_costs
     if resource_costs:
-        known_materials = set(resource_costs.material_inventory.keys())
-        per_test = resource_costs.per_test_costs
-        for test_type, cost_data in per_test.items():
-            if isinstance(cost_data, dict):
-                for mat_name in cost_data.get("materials", {}):
-                    if mat_name not in known_materials:
-                        report.warn(
-                            _RESOURCE_COSTS_JSON,
-                            "LOGIC_MATERIAL",
-                            f"per_test_costs.{test_type} references "
-                            f"material '{mat_name}' not found in "
-                            f"material_inventory: {known_materials}",
-                        )
+        _check_per_test_material_refs(resource_costs, report)
+        _check_ois_weights(resource_costs, report)
 
-        ois = resource_costs.operational_impact_weights
-        if ois is not None:
-            for field_name in (
-                "per_passenger_quarantined",
-                "per_essential_crew_quarantined",
-                "per_passenger_isolated",
-                "per_closed_galley_zone",
-                "per_fleet_ppe_active",
-            ):
-                val = getattr(ois, field_name, 0.0)
-                if val < 0:
-                    report.error(
-                        _RESOURCE_COSTS_JSON,
-                        "BOUNDS_OIS",
-                        f"operational_impact_weights.{field_name} = {val} must be non-negative",
-                    )
 
 
 # ── File loading + pydantic parse ────────────────────────────────────────

@@ -78,7 +78,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.mccabe]
-max-complexity = 117
+max-complexity = 56
 
 [tool.ruff.lint.per-file-ignores]
 "tests/*" = ["E402"]      # sys.path manipulation before imports
