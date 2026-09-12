@@ -98,6 +98,11 @@ DEFAULT_NEVER_SYMPTOMATIC_REGIME = "adult_challenge"
 # default regime, named as a midpoint rather than as a licensed value.
 DEFAULT_NEVER_SYMPTOMATIC_FRACTION = 0.29
 
+# Screening stool-RNA positivity intervals (asymptomatic carriage, tranche
+# 10). Their renewal-identity consistency against adult community incidence
+# and Atmar's 28-day detectable duration is open — the corner set spans
+# 0.14–1.64% — see docs/literature/
+# consensus_tranche_42_boarding_prevalence_renewal_check.md.
 PASSENGER_PREVALENCE_INTERVAL = (0.025, 0.040)
 CREW_PREVALENCE_INTERVAL = (0.007, 0.030)
 DEFAULT_PASSENGER_PREVALENCE = 0.0325

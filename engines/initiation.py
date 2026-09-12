@@ -587,7 +587,15 @@ def _state_window(
     """The days-since-infection window this state occupies for this host.
 
     ``None`` when the window is empty — a convalescent host needs a shedding
-    duration that outlasts its illness — and the caller then redraws the state.
+    duration that outlasts its illness — and the caller then redraws the
+    state.
+
+    The convalescent window runs ``recovery_day`` to ``shedding_duration_days``
+    and so spans the symptomatic curve's own peak; and in a stationary
+    prevalent sample days-since-infection is uniform over the *detectable*
+    duration (Atmar 2008: 28 days), not over the model-representable shedding
+    duration. Both caveats are quantified in docs/literature/
+    consensus_tranche_42_boarding_prevalence_renewal_check.md, finding B.
     """
     shedding_onset = max(0.0, incubation_days - presymptomatic_days)
     low = shedding_onset
