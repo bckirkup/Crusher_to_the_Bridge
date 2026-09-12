@@ -44,6 +44,9 @@ VOYAGE_LENGTH_8_10 = "8-10"
 VOYAGE_LENGTH_11_14 = "11-14"
 VOYAGE_LENGTH_15_21 = "15-21"
 
+# The class-denominator record, including the Jenkins "Mega" versus project
+# ``mega_cruise_5000`` label collision and the decision not to build a hull for
+# the 120,001-140,000 band, is ``docs/norovirus/vsp_ship_class_denominators.md``.
 MIDRS_VOYAGE_COUNTS_BY_GRT_BAND: dict[str, int] = {
     GRT_BAND_LE_30000: 1_500,
     GRT_BAND_30001_60000: 4_510,
@@ -234,7 +237,9 @@ HULL_TO_GRT_BANDS: dict[str, tuple[str, ...]] = {
 }
 
 # Bands no hull can occupy.  Their observed rates are transcribed above and
-# nothing is scored against them.
+# nothing is scored against them. The class-denominator record, including the
+# decision not to build a hull for 120,001-140,000, is documented in
+# ``docs/norovirus/vsp_ship_class_denominators.md``.
 UNMAPPED_GRT_BANDS: tuple[str, ...] = tuple(
     band
     for band in GRT_BAND_LIMITS

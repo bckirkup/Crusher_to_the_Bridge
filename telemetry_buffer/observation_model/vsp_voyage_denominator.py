@@ -4,6 +4,10 @@ The posting series in ``vsp_outbreak_series.csv`` is a numerator only: it
 counts voyages CDC *posted*, and says nothing about how many voyages sailed.
 Any rate built on it needs a count of qualifying voyages from outside the
 repository, and this module is the only place that count is allowed to enter.
+The Jenkins GRT-band voyage-report counts are represented in
+``midrs_incidence_targets.MIDRS_VOYAGE_COUNTS_BY_GRT_BAND``; their class mapping
+and the related decisions are recorded in
+``docs/norovirus/vsp_ship_class_denominators.md``.
 
 Two published counts exist, they are in different units, and neither covers
 the series:

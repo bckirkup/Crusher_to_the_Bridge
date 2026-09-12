@@ -1226,7 +1226,9 @@ unconditional incidence observation at all.** The model-side channels are in
 `telemetry_buffer/observation_model/score_anchors.py`; their MIDRS constants,
 interval targets and fixed hull-to-GRT mapping are in
 `telemetry_buffer/observation_model/midrs_incidence_targets.py`, sourced from
-`telemetry_buffer/observation_model/midrs_observed_targets.md`. A8 aggregates
+`telemetry_buffer/observation_model/midrs_observed_targets.md`. The class
+denominators, Jenkins/project “Mega” label collision, and unmapped-band
+decision are recorded in `vsp_ship_class_denominators.md`. A8 aggregates
 reported cases and travel-days over every run, including non-take-off runs. A9
 applies the VSP 3% passenger-or-crew rule to eligible voyages and reports
 ineligible runs separately. A truth-only arm emits an explicit no-reporting
@@ -1269,7 +1271,9 @@ passenger complements (636 / 1,684 / 3,240). The A4 targets merged in #360 are
 superseded by the recut table above. Still unrepaired: the hull-to-GRT
 mapping behind A8/A9 picked representative ships for the classic and spirit
 hulls against the same total-agent figures, so their GRT band is one band too
-high pending two re-sourced representative ships. A8's passenger and crew denominators instead
+high pending two re-sourced representative ships. The class-denominator record
+and the decision not to build a hull for the unmapped 120,001-140,000 band are
+in `vsp_ship_class_denominators.md`. A8's passenger and crew denominators instead
 come from the role-derived complements emitted in each run summary and do
 not use `HULL_CAPACITY`, so A8/A9 are unaffected.
 

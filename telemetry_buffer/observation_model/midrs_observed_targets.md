@@ -23,6 +23,10 @@ not footnotes -- each one changes what an honest target is.
 
 ## Table 1 -- voyage reports by characteristic (the A9 denominators)
 
+The class-denominator record, including the Jenkins/project “Mega” label
+collision and the unmapped-band decision, is in
+`docs/norovirus/vsp_ship_class_denominators.md`.
+
 "No. voyage reports (unduplicated) 37,258 (100)"; "No. ships (unduplicated)
 252 (100)". The three report types sum exactly to 37,258 (18,040 24-hour +
 18,606 4-hour + 612 special), so a voyage contributes exactly one row and
