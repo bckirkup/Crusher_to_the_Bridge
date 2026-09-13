@@ -1558,17 +1558,23 @@ class KorkinAgent:
     def has_chronic_disease(self) -> bool:
         return len(self.chronic_disease_ids) > 0
 
+    def _symptom_onset_epochs(self, inf: dict[str, Any]) -> int | None:
+        """Epochs elapsed since the stamped onset, or ``None`` if unknown."""
+        time_infected = inf.get("time_infected")
+        onset_time = inf.get("onset_time_infected")
+        if time_infected is None or onset_time is None:
+            return None
+        return max(0, int(time_infected) - int(onset_time))
+
     def _symptom_days(self, inf: dict[str, Any]) -> int | None:
         """Return 1-based symptom days, or ``None`` when onset is unknown.
 
         This differs from the 0-based ``days_post_infection`` value, so the
         fields must not be compared as an ordering invariant.
         """
-        time_infected = inf.get("time_infected")
-        onset_time = inf.get("onset_time_infected")
-        if time_infected is None or onset_time is None:
+        elapsed = self._symptom_onset_epochs(inf)
+        if elapsed is None:
             return None
-        elapsed = max(0, int(time_infected) - int(onset_time))
         return self.clock.day_index(elapsed) + 1
 
     def to_schema_dict(self) -> dict[str, Any]:
@@ -1613,6 +1619,7 @@ class KorkinAgent:
                     else self.clock.day_index(inf["time_infected"])
                 ),
                 "days_since_symptom_onset": self._symptom_days(inf),
+                "epochs_since_symptom_onset": self._symptom_onset_epochs(inf),
                 "symptom_severity": inf.get("symptom_severity", ""),
             }
 
