@@ -1026,7 +1026,7 @@ def _board_one_symptomatic_host(
     profile: dict[str, Any],
     clock: Any,
     rng: np.random.Generator,
-) -> str | None:
+) -> str:
     """Give one host an in-flight illness; returns ``symptomatic`` or ``cleared``.
 
     The backward-recurrence construction a prevalent symptomatic sample
@@ -1143,8 +1143,6 @@ def _draw_symptomatic_role(
         state = _board_one_symptomatic_host(
             spec, agent, profile, clock, rng,
         )
-        if state is None:
-            continue
         if state != STATE_CLEARED:
             drawn_by_role[role] += 1
         composition[state] += 1

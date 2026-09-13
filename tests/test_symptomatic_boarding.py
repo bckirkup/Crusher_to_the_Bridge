@@ -466,6 +466,12 @@ class TestRefusals:
         with pytest.raises(ValueError, match="unknown keys"):
             _resolve({"enabled": True, "notes": "x", "typo": 1})
 
+    def test_a_non_mapping_stream_is_refused(self) -> None:
+        cfg = _cfg({"enabled": True, "notes": "x"})
+        cfg["initiation"]["boarding"][PATHOGEN]["symptomatic_stream"] = "on"
+        with pytest.raises(ValueError, match="must be a mapping"):
+            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+
     def test_a_disabled_stream_reads_no_further_keys(self) -> None:
         spec = _resolve({"enabled": False, "notes": "x"})
         assert spec.symptomatic_stream is False

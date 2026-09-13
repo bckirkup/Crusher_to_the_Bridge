@@ -1,16 +1,32 @@
 """test_sanity_checker.py – sanity checker vs orchestrator config paths."""
 from __future__ import annotations
-import os, sys
+
+import os
+import sys
+
 import pytest
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 from tools.sanity_checker import (
-    PathogenProfile, Report, paths_from_run_config, run_checks,
-    _check_config_yaml, _check_agent_classes, _check_gender_distribution,
-    _check_wearable_monitoring, _check_modality_params, _check_hvac_params,
-    _check_emod_progression, _check_escalation_params, _check_fred_behavior,
-    _check_multi_pathogen_params, _check_microflora_params,
+    PathogenProfile,
+    PathogensFile,
+    Report,
+    _check_agent_classes,
+    _check_config_yaml,
     _check_emesis_airborne_exclusion,
+    _check_emod_progression,
+    _check_escalation_params,
+    _check_fred_behavior,
+    _check_gender_distribution,
+    _check_hvac_params,
+    _check_microflora_params,
+    _check_modality_params,
+    _check_multi_pathogen_params,
+    _check_symptomatic_stream,
+    _check_wearable_monitoring,
+    paths_from_run_config,
+    run_checks,
 )
 
 
@@ -470,3 +486,152 @@ def test_new_pathogen_profile_fields_reject_invalid_values(
 
 def test_emesis_total_shed_validator_accepts_missing_value() -> None:
     assert PathogenProfile.emesis_total_shed_ordered(None) is None
+
+
+# ── symptomatic-stream cross-field check ─────────────────────────────────
+
+def _stream_profile(**boarding: object) -> PathogensFile:
+    return PathogensFile(
+        pathogens=[_minimal_pathogen_profile(boarding=dict(boarding))],
+    )
+
+
+def _stream_errors(pathogens: PathogensFile | None) -> list[str]:
+    report = Report()
+    _check_symptomatic_stream(pathogens, report)
+    return [f.message for f in report.errors]
+
+
+def test_symptomatic_stream_check_ignores_absent_and_disabled() -> None:
+    assert _stream_errors(None) == []
+    assert _stream_errors(PathogensFile(
+        pathogens=[_minimal_pathogen_profile()],
+    )) == []
+    disabled = _stream_profile(
+        symptomatic_stream={"enabled": False, "notes": "x"},
+    )
+    assert _stream_errors(disabled) == []
+
+
+def test_symptomatic_stream_check_requires_renewal_mode() -> None:
+    msgs = _stream_errors(_stream_profile(
+        rate_mode="screening_prevalence",
+        symptomatic_stream={"enabled": True, "notes": "x"},
+    ))
+    assert len(msgs) == 1
+    assert "rate_mode" in msgs[0]
+
+
+def test_symptomatic_stream_check_requires_renewal_inputs() -> None:
+    msgs = _stream_errors(_stream_profile(
+        rate_mode="renewal",
+        renewal={"case_incidence_per_1000_py": {"passenger": 39.0}},
+        symptomatic_stream={"enabled": True, "notes": "x"},
+    ))
+    assert any("case_incidence_per_1000_py" in m and "crew" in m
+               for m in msgs)
+    assert any("detectable_duration_days" in m for m in msgs)
+
+
+def test_symptomatic_stream_check_flags_a_negative_partition() -> None:
+    # A mean illness longer than the detectable window empties p_asym.
+    msgs = _stream_errors(_stream_profile(
+        rate_mode="renewal",
+        renewal={
+            "case_incidence_per_1000_py": {"passenger": 39.0, "crew": 39.0},
+            "detectable_duration_days": 2,
+        },
+        state_split={"never_symptomatic_fraction": 0.29},
+        symptomatic_stream={"enabled": True, "notes": "x"},
+    ))
+    assert any("partition goes negative" in m for m in msgs)
+
+
+def test_symptomatic_stream_check_accepts_the_shipped_inputs() -> None:
+    msgs = _stream_errors(_stream_profile(
+        rate_mode="renewal",
+        renewal={
+            "case_incidence_per_1000_py": {"passenger": 39.0, "crew": 27.7},
+            "detectable_duration_days": 28,
+        },
+        state_split={"never_symptomatic_fraction": 0.29},
+        symptomatic_stream={"enabled": True, "notes": "x"},
+    ))
+    assert msgs == []
+
+
+def test_symptomatic_stream_check_uses_the_empirical_mean() -> None:
+    profile = _minimal_pathogen_profile(
+        boarding={
+            "rate_mode": "renewal",
+            "renewal": {
+                "case_incidence_per_1000_py": {
+                    "passenger": 39.0, "crew": 39.0,
+                },
+                "detectable_duration_days": 28,
+            },
+            "symptomatic_stream": {"enabled": True, "notes": "x"},
+        },
+        illness_duration={
+            "draw": "empirical_survival",
+            "unit": "days",
+            "survival": [
+                {"day": 0, "probability": 1.0},
+                {"day": 3, "probability": 0.0},
+            ],
+        },
+    )
+    assert _stream_errors(PathogensFile(pathogens=[profile])) == []
+
+
+def test_symptomatic_stream_check_defers_a_malformed_illness_block() -> None:
+    # A malformed survival table is reported by the illness-duration check;
+    # here it is skipped, not double-reported.
+    profile = _minimal_pathogen_profile(
+        boarding={
+            "rate_mode": "renewal",
+            "renewal": {
+                "case_incidence_per_1000_py": {
+                    "passenger": 39.0, "crew": 39.0,
+                },
+                "detectable_duration_days": 28,
+            },
+            "symptomatic_stream": {"enabled": True, "notes": "x"},
+        },
+        illness_duration={
+            "draw": "empirical_survival",
+            "unit": "days",
+            "survival": [
+                {"day": 0, "probability": 0.9},
+                {"day": 3, "probability": 0.0},
+            ],
+        },
+    )
+    assert _stream_errors(PathogensFile(pathogens=[profile])) == []
+
+
+def test_run_checks_reports_a_bad_symptomatic_stream() -> None:
+    import json
+    pathogen_file = os.path.join(
+        REPO_ROOT, "telemetry_buffer", "bad_symptomatic_stream_test.json",
+    )
+    with open(pathogen_file, "w", encoding="utf-8") as fh:
+        json.dump({"pathogens": [{
+            "pathogen_id": "bad",
+            "name": "Bad",
+            "boarding": {
+                "rate_mode": "screening_prevalence",
+                "prevalence": {"passenger": 0.03, "crew": 0.02},
+                "symptomatic_stream": {"enabled": True, "notes": "x"},
+            },
+        }]}, fh)
+    try:
+        report = run_checks(
+            os.path.join(REPO_ROOT, "data", "config"),
+            os.path.join(REPO_ROOT, "data", "platforms", "destroyer_baseline"),
+            pathogen_file=pathogen_file,
+        )
+    finally:
+        os.unlink(pathogen_file)
+    assert not report.passed
+    assert any(f.rule == "SYMPTOMATIC_STREAM" for f in report.errors)
