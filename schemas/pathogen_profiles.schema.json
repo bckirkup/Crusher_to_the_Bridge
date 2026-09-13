@@ -314,6 +314,45 @@
       },
       "additionalProperties": false
     },
+    "IllnessDuration": {
+      "type": "object",
+      "description": "Illness duration as a distribution rather than the point value recovery_day. draw 'point' (default) stamps nothing and is bit-identical to the pre-distribution behaviour; 'empirical_survival' draws an integer day count by inverting the survival table (T = smallest integer day with S(T) <= u). survival is an authored day-indexed survival function; shape constraints it must satisfy (start day 0 at S=1.0, strictly increasing integer days, monotone non-increasing S, terminal S=0.0, max day <= shedding_duration_days) are enforced by IllnessDurationModel.from_mapping and tools/sanity_checker.py, not by this schema.",
+      "required": ["draw", "notes"],
+      "properties": {
+        "draw": {
+          "type": "string",
+          "enum": ["point", "empirical_survival"],
+          "description": "point stamps no per-infection recovery_day (today's behaviour); empirical_survival draws one integer-day duration per infection."
+        },
+        "unit": {
+          "type": "string",
+          "enum": ["days"],
+          "description": "Physical unit of the day axis. Days only; the block exists for natural-history day durations."
+        },
+        "survival": {
+          "type": "array",
+          "minItems": 2,
+          "description": "Survival function rows: S(d) = probability illness is still present d days after onset. Integer days, [0,1] probabilities.",
+          "items": {
+            "type": "object",
+            "required": ["day", "probability"],
+            "properties": {
+              "day": {"type": "integer", "minimum": 0},
+              "probability": {"type": "number", "minimum": 0, "maximum": 1}
+            },
+            "additionalProperties": false
+          }
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Provenance for the table: citation, figure read, population, evidence grade, origin."
+        }
+      },
+      "if": {"properties": {"draw": {"const": "empirical_survival"}}},
+      "then": {"required": ["survival"]},
+      "additionalProperties": false
+    },
     "Incubation": {
       "type": "object",
       "description": "Incubation period as a distribution, conditioned on inoculum and host biology. Absent → the fixed symptom_onset_day path. Cross-field constraints JSON Schema cannot express (max_days > min_days, min_days below the median) are enforced by IncubationModel and reported by tools/sanity_checker.py.",
@@ -771,6 +810,7 @@
         "severity_model": {"$ref": "#/$defs/SeverityModel"},
         "observation_model": {"$ref": "#/$defs/ObservationModel"},
         "recovery_day": {"type": "integer", "minimum": 0},
+        "illness_duration": {"$ref": "#/$defs/IllnessDuration"},
         "shedding_duration_days": {
           "type": "number",
           "minimum": 0,

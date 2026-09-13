@@ -47,6 +47,7 @@ from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
     AssayConfigError,
     SequencingAssay,
 )
+from engines.illness_duration import IllnessDurationModel  # noqa: E402
 from engines.incubation import IncubationModel  # noqa: E402
 from engines.strain_state import (  # noqa: E402
     StrainConfigError,
@@ -508,6 +509,7 @@ class PathogenProfile(BaseModel):
     initial_time_infected: int = 0
     shedding_profile: dict[str, Any] = {}
     incubation: dict[str, Any] = {}
+    illness_duration: dict[str, Any] | None = None
     symptom_onset_day: float | None = None
     strain_evolution: dict[str, Any] = {}
     sequencing_assay: dict[str, Any] = {}
@@ -894,6 +896,48 @@ def _check_incubation_models(
             continue
         if model is not None:
             _check_incubation_shape(p, model, report)
+
+
+def _check_illness_duration_models(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Validate optional illness_duration distributions.
+
+    Parsing is delegated to ``IllnessDurationModel.from_mapping`` so the
+    checker and the progression seam cannot disagree about what a valid
+    block is. The one cross-field rule lives here: the table's last day must
+    not exceed ``shedding_duration_days``, because clearance takes
+    ``max(shedding, illness)`` and a longer illness would silently extend
+    the infection.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        if not p.illness_duration:
+            continue
+        try:
+            model = IllnessDurationModel.from_mapping(p.illness_duration)
+        except ValueError as exc:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "ILLNESS_DURATION",
+                f"{p.pathogen_id}.illness_duration invalid: {exc}",
+            )
+            continue
+        if model is None or not model.survival:
+            continue
+        last_day = model.survival[-1][0]
+        shedding = p.shedding_duration_days
+        if shedding is not None and last_day > shedding:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "ILLNESS_DURATION",
+                f"{p.pathogen_id}.illness_duration reaches day {last_day}, "
+                f"past shedding_duration_days = {shedding}: an illness "
+                f"longer than the shedding window would extend the "
+                f"infection silently (clearance takes the max of the two).",
+            )
 
 
 def _check_incubation_shape(
@@ -2661,6 +2705,15 @@ def run_checks(
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}Incubation distributions valid{_RESET}")
+
+    print(f"  {_CYAN}Running illness-duration checks...{_RESET}")
+    pre = len(report.findings)
+    _check_illness_duration_models(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Illness-duration blocks valid{_RESET}")
 
     print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
     pre = len(report.findings)

@@ -128,6 +128,24 @@
         }
       },
       "recovery_day": 3,
+      "illness_duration": {
+        "draw": "point",
+        "unit": "days",
+        "survival": [
+          {"day": 0, "probability": 1.0},
+          {"day": 1, "probability": 0.63},
+          {"day": 2, "probability": 0.355},
+          {"day": 3, "probability": 0.22},
+          {"day": 4, "probability": 0.13},
+          {"day": 5, "probability": 0.079},
+          {"day": 6, "probability": 0.057},
+          {"day": 7, "probability": 0.03},
+          {"day": 8, "probability": 0.023},
+          {"day": 9, "probability": 0.019},
+          {"day": 13, "probability": 0.0}
+        ],
+        "notes": "Harris, Iturriza-Gomara, Allen, Kelly & O'Brien 2019, 'Norovirus strain types found within the second infectious intestinal diseases (IID2) study: an analysis of norovirus circulating in the community', BMC Infect Dis 19:87, DOI 10.1186/s12879-019-3706-z (IID2: UK national community cohort, April 2008 - August 2009), Fig 4 panel C (diarrhoea, dotted curve): percent still ill by number of days following illness onset, adults and children aged >= 5 years — the model's population. S(d) is P(illness still present at d days after onset); days 10-12 are not digitizable (the legend overlies the curve) and are interpolated linearly between d=9 and d=13, where both curves sit at zero. Digitization calibration: source image media.springernature.com full/springer-static/image/art:10.1186/s12879-019-3706-z/MediaObjects/12879_2019_3706_Fig4_HTML.png (1945x1373 grayscale), panel C axis rows 334 px (0%) and 307.5 px (10%) giving 2.65 px per percentage point, x-axis label centroids giving day 0 at col 97.5 and 141.2 px per day, curve read as the topmost dark pixel per day column with the 10% reference line and axis masked; read error about +/-1 percentage point. The table's own statistics reproduce the paper's reported figures in direction and where the >=5 band is the right comparison, exactly: median T = 2 days, E[T] = 2.57 days, P(T <= 4) = 0.87 against the abstract's 83% resolved by day 4 all ages. Grade B (direct measurement of illness duration in a community cohort of the right age band, not in a cruise setting), origin F4·dig. This replaces a value previously carried from Atmar's challenge illness (1-2 days), a different population and exposure. draw 'point' is the default: the arm is inert until a campaign selects empirical_survival."
+      },
       "shedding_duration_days": 15,
       "detectable_duration_days": 28,
       "detectable_duration_notes": "Atmar et al. 2008, Emerg Infect Dis 14(10), DOI 10.3201/eid1410.080117: 16 experimentally challenged adults, GI.1, faecal RT-PCR detectability median 28 days (range 13-56) measured from inoculation. Grade A for duration-of-RT-PCR-detectability, origin R. This is the window the asymptomatic RNA positivity boarding prevalence was measured over; it is deliberately longer than the authored 15-day shedding curve, so stationary_detectable boarding draws can land in the representability boundary state 'cleared'.",

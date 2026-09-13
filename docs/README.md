@@ -135,6 +135,7 @@ longer justifications.
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |
 | [norovirus/introduction_mechanism_ab.md](norovirus/introduction_mechanism_ab.md) | Implemented — the boarding-prevalence vs fiat-index-case A/B: posting frequency, reported incidence against A8, per-import secondary yield, and the prevalence-denominator unit question |
 | [literature/consensus_tranche_42_boarding_prevalence_renewal_check.md](literature/consensus_tranche_42_boarding_prevalence_renewal_check.md) | Evidence assembled — boarding-prevalence renewal-identity check; retracts the imported-reported-case and import-reportability claims of the A/B record |
+| [literature/consensus_tranche_43_illness_duration_harris_2019.md](literature/consensus_tranche_43_illness_duration_harris_2019.md) | Implemented, default-off — Harris 2019 Fig 4C illness-duration survival table; the `illness_duration` dispersed arm on `norwalk_gi` |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs
