@@ -3106,6 +3106,45 @@ Roughly in dependency order.
     campaign runs it. Campaign coordinates: `preboarding_crew_points`,
     `preboarding_passenger_points`, `preboarding_crew_reportable_values` in
     `boarding_axis.py` (run-id tags `pbc…`/`pbp…`/`rep1`/`rep0`).
+    **Superseded by item 38 for defaults:** the reference crew clause is now
+    the default under renewal mode.
+
+38. **The realism chain is the default — defaults flipped for the boarding
+    mechanism, nothing deleted, every historical arm explicitly selectable.**
+    `engines/initiation.py` now infers `rate_mode` from which mechanism block
+    is present (`renewal` → renewal, `prevalence` → screening; both is a load
+    error), resolves unstated `age_draw` to `stationary_detectable` when a
+    detectable duration exists (the error tells the caller to supply
+    `detectable_duration_days` or state `age_draw: engine_window`), enables
+    the symptomatic stream under renewal unless stated off, resolves an
+    unstated `preboarding_assessment` to the item-37 reference crew clause
+    under renewal (and stays `None` under screening, so that arm remains
+    bit-identical), and `engines/illness_duration.py` resolves an unstated
+    `draw` to `empirical_survival` when a survival table is present. The
+    `norwalk_gi` profile now ships the renewal block (O'Brien 2016 39.0
+    cases/1000 py, Atmar 2008 28-day detectable window) with the full chain
+    on; the historical screening prevalences (0.0325/0.0185) are kept in the
+    notes as the explicit comparator. Edison `norovirus_gii4` has a
+    detectable duration but no illness-duration table, so it is pinned
+    explicitly to the historical arm (`rate_mode: screening_prevalence`,
+    `age_draw: engine_window`) rather than flipped. The campaign mechanism
+    ladder is `boarding_mechanism_rungs` (`shipped` / `renewal_stationary` /
+    `symptomatic` / `reportable` / `default`, tag `rung-<name>`), and
+    `realism_ladder_v1_manifest.json` (script
+    `scripts/build_realism_ladder_v1_manifest.py`, 26,800 runs) is the paired
+    measurement: the `shipped` rung reproduces `boarding_posting_v1`'s
+    mechanism, so every earlier posting/attack-rate measurement recorded in
+    this ledger maps to that rung and **no measurement here was produced
+    under the new defaults**. Moved goldens were re-pointed to the explicit
+    historical configuration rather than deleted (each carries an
+    `ATTRIBUTED MOVE` comment naming the flip). One interaction to record:
+    a tier that sweeps `boarding_prevalence_points` without declaring a rung
+    now writes the full `shipped` mechanism baseline into its initiation
+    override — necessary because the profile's own arm is renewal and the
+    two mechanism blocks cannot coexist — which preserves those tiers'
+    historical semantics exactly and leaves their run ids unchanged;
+    `sentinel_recovery.onboard_seeding` stamps its prevalence factors itself
+    for the same reason.
 
 ## 5. Held fixed by assumption
 

@@ -32,6 +32,7 @@
       ],
       "surveillance_strategies": ["syndromic"],
       "epochs": 168,
+      "boarding_mechanism_rungs": ["shipped"],
       "parameter_vectors": [
         {
           "id": "ridge_1",

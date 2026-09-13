@@ -181,15 +181,15 @@ class BoardingSpec:
     crew_prevalence: float
     never_symptomatic_fraction: float
     presymptomatic_share_of_presenting: float
-    age_draw: str = AGE_DRAW_ENGINE_WINDOW
-    rate_mode: str = RATE_MODE_SCREENING_PREVALENCE
+    age_draw: str = AGE_DRAW_STATIONARY_DETECTABLE
+    rate_mode: str = RATE_MODE_RENEWAL
     detectable_duration_days: float | None = None
     party: BoardingParty | None = None
     epoch: int = 0
     # Symptomatic-stream arm (renewal only): ``passenger_prevalence`` and
     # ``crew_prevalence`` then carry the asymptomatic share p_asym, and these
     # carry the symptomatic share p_sym of the same total prevalence.
-    symptomatic_stream: bool = False
+    symptomatic_stream: bool = True
     symptomatic_passenger_prevalence: float = 0.0
     symptomatic_crew_prevalence: float = 0.0
     mean_illness_duration_days: float | None = None
@@ -383,8 +383,22 @@ def _resolve_prevalence(
 
 
 def _resolve_rate_mode(block: dict[str, Any], location: str) -> str:
-    """Select screening prevalence or the incidence-duration renewal identity."""
-    rate_mode = str(block.get("rate_mode") or RATE_MODE_SCREENING_PREVALENCE)
+    """Select screening prevalence or the incidence-duration renewal identity.
+
+    Unstated, the mode is inferred from which input block the profile
+    carries — ``renewal`` selects renewal, ``prevalence`` selects
+    screening. An explicit ``rate_mode`` wins and must match the block
+    present: the downstream resolvers reject a renewal selection over a
+    prevalence block and vice versa.
+    """
+    stated = block.get("rate_mode")
+    if stated is None:
+        rate_mode = (
+            RATE_MODE_RENEWAL if block.get("renewal") is not None
+            else RATE_MODE_SCREENING_PREVALENCE
+        )
+    else:
+        rate_mode = str(stated)
     if rate_mode not in _RATE_MODES:
         raise ValueError(
             f"{location}.rate_mode = {rate_mode!r} is not one of "
@@ -393,9 +407,20 @@ def _resolve_rate_mode(block: dict[str, Any], location: str) -> str:
     return rate_mode
 
 
-def _resolve_age_draw(block: dict[str, Any], location: str) -> str:
-    """Select today's authored window or a stationary detectable window."""
-    age_draw = str(block.get("age_draw") or AGE_DRAW_ENGINE_WINDOW)
+def _resolve_age_draw(
+    block: dict[str, Any], location: str, detectable_known: bool,
+) -> str:
+    """Select today's authored window or a stationary detectable window.
+
+    Unstated, the stationary draw over the detectable window is the
+    default where the profile carries the window it is stationary over;
+    a profile with no detectable duration anywhere stays on the
+    historical ``engine_window``, which is also selectable explicitly.
+    """
+    age_draw = str(block.get("age_draw") or (
+        AGE_DRAW_STATIONARY_DETECTABLE if detectable_known
+        else AGE_DRAW_ENGINE_WINDOW
+    ))
     if age_draw not in _AGE_DRAW_MODES:
         raise ValueError(
             f"{location}.age_draw = {age_draw!r} is not one of "
@@ -501,7 +526,7 @@ def _resolve_symptomatic_stream(
     """
     raw = block.get("symptomatic_stream")
     if raw is None:
-        return False, 0.0, 0.0, None
+        raw = {}
     if not isinstance(raw, dict):
         raise ValueError(
             f"{location}.symptomatic_stream must be a mapping, got "
@@ -512,7 +537,7 @@ def _resolve_symptomatic_stream(
         raise ValueError(
             f"{location}.symptomatic_stream has unknown keys: {unknown}",
         )
-    if not raw.get("enabled", False):
+    if not raw.get("enabled", rate_mode == RATE_MODE_RENEWAL):
         return False, 0.0, 0.0, None
     if party is not None:
         raise ValueError(
@@ -560,6 +585,15 @@ _PREBOARDING_DEFAULT_LOOKBACK_DAYS = 3.0
 # the manual actually writes, so the reference block declares at full
 # compliance and reports; the passenger side is industry practice VSP is
 # silent on, so its block defaults to the no-screen corner.
+# The arm a renewal-mode block gets when ``preboarding_assessment`` is
+# unstated: the sourced crew clause, declared and reportable, no denial.
+# Everything else is the role defaults (crew compliance 1.0, null
+# halflife; passenger disabled at the no-screen corner).
+_PREBOARDING_REFERENCE_BLOCK: dict[str, Any] = {
+    "lookback_days": _PREBOARDING_DEFAULT_LOOKBACK_DAYS,
+    "crew": {"enabled": True},
+    "passenger": {"enabled": False},
+}
 _PREBOARDING_ROLE_DEFAULTS: dict[str, dict[str, Any]] = {
     ROLE_CREW: {
         "declaration_compliance": 1.0,
@@ -633,18 +667,25 @@ def _resolve_preboarding_role(
 
 
 def _resolve_preboarding(
-    block: dict[str, Any], location: str,
+    block: dict[str, Any], location: str, rate_mode: str,
 ) -> PreboardingAssessment | None:
     """The ``preboarding_assessment`` block, or ``None`` when unstated.
 
-    Absent means the arm never runs and no draw is consumed; a block whose
-    roles are both ``enabled: false`` resolves but also draws nothing. The
+    Under renewal mode an unstated block resolves to the reference arm —
+    the sourced crew clause at full compliance, no denial — because a
+    renewal cohort carries the symptomatic stream the clause reads.
+    Under screening prevalence an unstated block stays ``None``: that arm
+    has no symptomatic stream to assess and remains bit-identical to the
+    historical draw. An explicit block always wins; a block whose roles
+    are both ``enabled: false`` resolves but also draws nothing. The
     declaration form is c * 2 ** (-a / h) in days since onset ``a``; the
     derivation of record is ``docs/norovirus/preboarding_assessment.md``.
     """
     raw = block.get("preboarding_assessment")
     if raw is None:
-        return None
+        if rate_mode != RATE_MODE_RENEWAL:
+            return None
+        raw = _PREBOARDING_REFERENCE_BLOCK
     assessment_location = f"{location}.preboarding_assessment"
     if not isinstance(raw, dict):
         raise ValueError(
@@ -718,7 +759,6 @@ def _resolve_boarding_spec(
         "requires setting it explicitly rather than defaulting it",
     )
     rate_mode = _resolve_rate_mode(block, location)
-    age_draw = _resolve_age_draw(block, location)
     party = (
         _resolve_party(block, location)
         if _resolve_mode(block, location) == BOARDING_MODE_PARTY
@@ -740,6 +780,13 @@ def _resolve_boarding_spec(
     else:
         passenger, crew = _resolve_prevalence(block, location)
         detectable_days = None
+    age_draw = _resolve_age_draw(
+        block, location,
+        detectable_known=(
+            detectable_days is not None
+            or profile.get("detectable_duration_days") is not None
+        ),
+    )
     if (
         detectable_days is None
         and age_draw == AGE_DRAW_STATIONARY_DETECTABLE
@@ -750,7 +797,8 @@ def _resolve_boarding_spec(
                 f"{location} asks for stationary_detectable ages while the "
                 f"{pathogen_id} profile carries no "
                 "detectable_duration_days: a stationary draw needs the "
-                "measurement window it is stationary over",
+                "measurement window it is stationary over; supply it or "
+                f"state age_draw: {AGE_DRAW_ENGINE_WINDOW!r} explicitly",
             )
         detectable_days = float(detectable)
     (
@@ -786,7 +834,7 @@ def _resolve_boarding_spec(
         symptomatic_passenger_prevalence=symptomatic_passenger,
         symptomatic_crew_prevalence=symptomatic_crew,
         mean_illness_duration_days=mean_illness_days,
-        preboarding=_resolve_preboarding(block, location),
+        preboarding=_resolve_preboarding(block, location, rate_mode),
     )
 
 
@@ -843,15 +891,25 @@ def boarding_blocks(
         if pathogen_id == "enabled":
             continue
         merged = _merge_block(blocks.get(str(pathogen_id), {}), block or {})
-        if (
-            isinstance(block, dict)
-            and block.get("rate_mode") == RATE_MODE_RENEWAL
-            and "prevalence" not in block
-        ):
-            # A profile ships its screening prevalence unconditionally, so a
-            # config arm selecting renewal withdraws it here; a config that
-            # states both still fails the two-mechanisms check downstream.
-            merged.pop("prevalence", None)
+        if isinstance(block, dict):
+            stated = block.get("rate_mode")
+            if (
+                stated == RATE_MODE_RENEWAL
+                and "prevalence" not in block
+            ):
+                # A profile ships its screening prevalence unconditionally,
+                # so a config arm selecting renewal withdraws it here; a
+                # config that states both still fails the two-mechanisms
+                # check downstream.
+                merged.pop("prevalence", None)
+            elif (
+                stated == RATE_MODE_SCREENING_PREVALENCE
+                and "renewal" not in block
+            ):
+                # Symmetric direction: a profile on the renewal arm keeps
+                # its renewal block, which a config arm selecting screening
+                # prevalence withdraws the same way.
+                merged.pop("renewal", None)
         blocks[str(pathogen_id)] = merged
     return blocks
 

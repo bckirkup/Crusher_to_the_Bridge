@@ -96,6 +96,8 @@
       "initial_infected": null,
       "boarding": {
         "mode": "prevalence",
+        "rate_mode": "screening_prevalence",
+        "age_draw": "engine_window",
         "prevalence": {
           "passenger": 0.0325,
           "crew": 0.0185

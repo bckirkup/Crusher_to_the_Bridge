@@ -1232,6 +1232,14 @@ def _renewal_cfg(
     block = cfg["initiation"]["boarding"][PATHOGEN]
     block.pop("prevalence")
     block["rate_mode"] = "renewal"
+    # ATTRIBUTED MOVE (realism-default flip): an unstated symptomatic
+    # stream / preboarding block under renewal now resolves enabled, so
+    # the renewal-only fixtures state both arms off explicitly.
+    block["symptomatic_stream"] = {"enabled": False}
+    block["preboarding_assessment"] = {
+        "crew": {"enabled": False},
+        "passenger": {"enabled": False},
+    }
     block["renewal"] = {
         "case_incidence_per_1000_py": {
             "passenger": passenger_rate, "crew": crew_rate,
@@ -1250,11 +1258,19 @@ def _ages(engine: _FakeEngine) -> list[float]:
 
 class TestDefaultInertness:
     def test_an_unset_pair_reproduces_main_bit_for_bit(self) -> None:
-        """Inertness guard: no rate_mode / age_draw keys, fixed seed."""
+        """Inertness guard: the explicit historical pair, fixed seed.
+
+        ATTRIBUTED MOVE (realism-default flip): unstated ``age_draw``
+        with a detectable duration is now ``stationary_detectable``, so
+        the historical arm is stated explicitly.``rate_mode`` is
+        inferred from the prevalence block either way.
+        """
         profiles = {PATHOGEN: _profile(detectable_duration_days=28)}
-        plan = resolve_initiation_plan(
-            _cfg(passenger=0.2, crew=0.2, never=0.29, pre=0.04), profiles,
+        cfg = _cfg(passenger=0.2, crew=0.2, never=0.29, pre=0.04)
+        cfg["initiation"]["boarding"][PATHOGEN]["age_draw"] = (
+            "engine_window"
         )
+        plan = resolve_initiation_plan(cfg, profiles)
         (spec,) = plan.boarding
         assert spec.age_draw == "engine_window"
         assert spec.rate_mode == "screening_prevalence"

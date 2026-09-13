@@ -1,7 +1,9 @@
 # The symptomatic boarding stream: partitioning the renewal-derived import rate
 
-Status: derivation of record for the `boarding.symptomatic_stream` arm. Default
-off; the arm is inert until a run selects it. No constant here is chosen against
+Status: derivation of record for the `boarding.symptomatic_stream` arm. Now the
+**default** under renewal mode: an unstated block resolves enabled (the chain
+flip of the realism-default PR), while `enabled: false` still selects the
+comparator arm bit-for-bit. No constant here is chosen against
 A4, A8, A9, VSP, MIDRS or Park — the two inputs were sourced for other purposes
 and the stream's rate is an identity over them.
 

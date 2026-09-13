@@ -149,6 +149,17 @@ def _cfg(
     block.update(overrides)
     if symptomatic_stream is not None:
         block["symptomatic_stream"] = symptomatic_stream
+    else:
+        # ATTRIBUTED MOVE (realism-default flip): an unstated stream under
+        # renewal is now ON. These fixtures mean "off", so they state it.
+        block["symptomatic_stream"] = {"enabled": False}
+    if "preboarding_assessment" not in block:
+        # Same flip: an unstated preboarding block under renewal resolves
+        # to the reference crew clause; these fixtures mean "off".
+        block["preboarding_assessment"] = {
+            "crew": {"enabled": False},
+            "passenger": {"enabled": False},
+        }
     return {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}}
 
 
@@ -494,7 +505,9 @@ class TestDefaultInertness:
     _INERTNESS_RNG_NEXT = 0.8120945066557737
 
     def _run(self) -> tuple[str, float]:
-        spec = _resolve(None)
+        # ATTRIBUTED MOVE (realism-default flip): the historical arm also
+        # needs age_draw stated — unstated now means stationary.
+        spec = _resolve(None, age_draw="engine_window")
         rng = np.random.default_rng(123)
         agents = [_agent(i) for i in range(200)] + [
             _agent(200 + i, "crew") for i in range(100)

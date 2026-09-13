@@ -50,8 +50,15 @@ def test_shipped_config_boards_every_loaded_profile_with_a_block() -> None:
     assert boarding_axis.boarding_pathogen_ids() >= owned
     assert UNOWNED not in boarding_axis.boarding_pathogen_ids()
     (spec,) = [s for s in plan.boarding if s.pathogen_id == "norwalk_gi"]
-    assert spec.passenger_prevalence == pytest.approx(0.0325)
-    assert spec.crew_prevalence == pytest.approx(0.0185)
+    # ATTRIBUTED MOVE (realism-default flip): norwalk_gi ships renewal
+    # mode now, so the asymptomatic-total prevalence is derived rather
+    # than the historical screening midpoint. ``shipped`` rung pins the
+    # comparator values.
+    assert spec.rate_mode == "renewal"
+    assert spec.passenger_prevalence == pytest.approx(
+        0.003936316684501258)
+    assert spec.crew_prevalence == pytest.approx(
+        0.003936316684501258)
     assert spec.never_symptomatic_fraction == pytest.approx(0.29)
     assert spec.presymptomatic_share_of_presenting == pytest.approx(0.04)
 
@@ -98,12 +105,13 @@ def test_unswept_owned_pathogen_boards_at_register_midpoints() -> None:
     assert axis.boarding
     (point,) = axis.points
     assert axis.tags(point) == []
+    # ATTRIBUTED MOVE (realism-default flip): prevalence factors are
+    # stamped only when the tier sweeps them — a default stamp would
+    # restate norwalk's midpoints onto every other pathogen's block.
     assert axis.factors(point) == {
         "boarding_pathogen": "norwalk_gi",
         "never_symptomatic_fraction": pytest.approx(0.29),
         "presymptomatic_share_of_presenting": pytest.approx(0.04),
-        "boarding_passenger_prevalence": pytest.approx(0.0325),
-        "boarding_crew_prevalence": pytest.approx(0.0185),
     }
     assert axis.pathogen_overrides({}, point) == {}
 
@@ -177,7 +185,9 @@ def test_swept_coordinates_reach_only_the_studied_pathogen() -> None:
     assert "influenza_a" in block
     for pid, coords in block.items():
         if pid != "enabled":
-            assert coords["state_split"]["never_symptomatic_fraction"] == 0.36
+            assert coords["state_split"][
+                "never_symptomatic_fraction"
+            ] == pytest.approx(0.36)
 
 
 def test_party_axis_moves_the_party_block_and_the_run_id() -> None:
@@ -218,11 +228,16 @@ def test_override_is_withdrawn_when_the_run_loads_no_owned_pathogen() -> None:
         "active_profiles", none_owned,
     ) == {"initiation": None}
     assert boarding_axis.recorded_factors("active_profiles", none_owned) == {}
+    # ATTRIBUTED MOVE (realism-default flip): norwalk_gi's profile is
+    # the renewal arm now, so the profile-supplied coordinates are the
+    # mechanism chain's rather than the screening midpoints.
     assert boarding_axis.recorded_factors("active_profiles", NORO_ONLY) == {
         "never_symptomatic_fraction": pytest.approx(0.29),
         "presymptomatic_share_of_presenting": pytest.approx(0.04),
-        "boarding_passenger_prevalence": pytest.approx(0.0325),
-        "boarding_crew_prevalence": pytest.approx(0.0185),
+        "boarding_rate_mode": "renewal",
+        "symptomatic_stream": True,
+        "boarding_age_draw": "stationary_detectable",
+        "illness_duration_draw": "empirical_survival",
     }
 
 
@@ -347,3 +362,86 @@ def test_analysis_reads_k_from_the_realised_boarding_draw() -> None:
     assert resolve_initial_infected(
         parameters={"n_init": 3}, run_id="x_init3_s1", initiation={},
     ) == 3
+
+
+def test_default_rung_resolves_identically_to_reportable() -> None:
+    """CHANGE DETECTOR: ``default`` must stay the new default arm.
+
+    The ``default`` rung writes nothing, so it resolves whatever the
+    profile states; the ``reportable`` rung writes the full explicit
+    reference arm. For norwalk_gi they must produce the same
+    BoardingSpec — if they diverge, the profile's default chain and the
+    labeled rung have drifted apart and this test catches it.
+    """
+    from picard_framework.pathogen_overrides import apply_pathogen_overrides
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        merge_cfg,
+    )
+
+    cfg = load_config()
+    profiles = load_pathogen_profiles(cfg)
+
+    def spec_for(rung: str):
+        axis = IndexCaseAxis.for_tier(
+            {"boarding_mechanism_rungs": [rung]}, "norwalk_gi",
+        )
+        (point,) = axis.points
+        factors = axis.factors(point)
+        run_cfg = merge_cfg(
+            cfg,
+            boarding_axis.initiation_override("active_profiles", None, factors),
+        )
+        run_profiles = apply_pathogen_overrides(
+            profiles, axis.pathogen_overrides({}, point),
+        )
+        (spec,) = [
+            s for s in resolve_initiation_plan(run_cfg, run_profiles).boarding
+            if s.pathogen_id == "norwalk_gi"
+        ]
+        return spec
+
+    default_spec = spec_for("default")
+    reportable_spec = spec_for("reportable")
+    assert default_spec == reportable_spec
+    # And it really is the realism chain, not a stale historical spec.
+    assert default_spec.rate_mode == "renewal"
+    assert default_spec.age_draw == "stationary_detectable"
+    assert default_spec.symptomatic_stream is True
+    assert default_spec.preboarding is not None
+    assert default_spec.preboarding.crew.enabled is True
+
+
+def test_rung_blocks_match_the_shipped_profile_constants() -> None:
+    """CHANGE DETECTOR: the rung literals must not drift from the profile.
+
+    The rungs repeat sourced constants so each run is self-describing; the
+    profile is the record, the rung the duplicate. If a profile edit moves
+    one side only, this fails rather than letting the ladder drift.
+    """
+    profiles = load_pathogen_profiles(load_config())
+    boarding = profiles["norwalk_gi"]["boarding"]
+    assert boarding_axis._RENEWAL_BLOCK == boarding["renewal"]
+    assert boarding_axis._SHIPPED_PREVALENCE == {
+        "passenger": 0.0325, "crew": 0.0185,
+    }
+    # And those comparator numbers are the ones the profile's notes name.
+    notes = boarding["symptomatic_stream"].get("notes", "")
+    assert "0.0325" in notes
+    assert "0.0185" in notes
+
+
+def test_reportable_rung_preboarding_matches_the_engine_reference() -> None:
+    """CHANGE DETECTOR: the rung's clause must equal the engine's default.
+
+    ``default`` resolving equal to ``reportable`` already catches drift on
+    either side; this makes the reference point explicit — a change to the
+    engine's ``_PREBOARDING_REFERENCE_BLOCK`` or the rung block must move
+    the resolved spec, not silently desynchronise the two declarations.
+    """
+    from engines.initiation import _PREBOARDING_REFERENCE_BLOCK
+
+    rung = boarding_axis.MECHANISM_RUNGS["reportable"]["preboarding_assessment"]
+    ref = _PREBOARDING_REFERENCE_BLOCK
+    assert rung["lookback_days"] == ref["lookback_days"]
+    assert rung["crew"]["enabled"] == ref["crew"]["enabled"]
+    assert rung["passenger"]["enabled"] == ref["passenger"]["enabled"]
