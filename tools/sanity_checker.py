@@ -1025,6 +1025,78 @@ def _check_symptomatic_stream(
                 )
 
 
+def _check_preboarding_assessment(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Cross-field check for boarding.preboarding_assessment.
+
+    The arm is the VSP 4.1.1.2 three-day assessment (see
+    docs/norovirus/preboarding_assessment.md): the reportable clause is
+    crew-only, its coordinates are bounded operational sweeps, and an
+    enabled role needs a boarding draw that can produce an onset-aged host —
+    party mode cannot, since incubating replaces convalescent there.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        boarding = p.boarding or {}
+        assessment = boarding.get("preboarding_assessment") or {}
+        location = f"{p.pathogen_id}.boarding.preboarding_assessment"
+        lookback = assessment.get("lookback_days")
+        if lookback is not None and float(lookback) < 0.0:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "PREBOARDING_ASSESSMENT",
+                f"{location}.lookback_days = {lookback} is negative; the "
+                "window counts days of onset back from boarding",
+            )
+        for role in ("passenger", "crew"):
+            sub = assessment.get(role) or {}
+            role_location = f"{location}.{role}"
+            compliance = sub.get("declaration_compliance")
+            if compliance is not None and not 0.0 <= float(compliance) <= 1.0:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location}.declaration_compliance = {compliance} "
+                    "is outside [0, 1]",
+                )
+            halflife = sub.get("recall_halflife_days")
+            if halflife is not None and float(halflife) <= 0.0:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location}.recall_halflife_days = {halflife} "
+                    "must be positive; null states perfect recall",
+                )
+            denial = sub.get("denial_probability")
+            if denial is not None and not 0.0 <= float(denial) <= 1.0:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location}.denial_probability = {denial} is "
+                    "outside [0, 1]",
+                )
+            if role == "passenger" and sub.get("reportable"):
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location}.reportable is true: the VSP 4.1.1.2 "
+                    "three-day reportable AGE clause is crew-only, so a "
+                    "passenger reportable case is not licensed",
+                )
+            if sub.get("enabled") and boarding.get("mode") == "party":
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location} is enabled on a party-mode boarding "
+                    "block: a party boards its members incubating and no "
+                    "member carries an onset age, so no host can ever be "
+                    "eligible for the screen",
+                )
+
+
 def _check_incubation_shape(
     profile: PathogenProfile,
     model: IncubationModel,
@@ -2803,6 +2875,7 @@ def run_checks(
     print(f"  {_CYAN}Running symptomatic-stream checks...{_RESET}")
     pre = len(report.findings)
     _check_symptomatic_stream(pathogens, report)
+    _check_preboarding_assessment(pathogens, report)
     added = len(report.findings) - pre
     if added:
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")

@@ -972,6 +972,40 @@
                 "notes": {"type": "string", "minLength": 1}
               }
             },
+            "preboarding_assessment": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["lookback_days", "crew", "passenger", "notes"],
+              "description": "The VSP 2018 Operations Manual 4.1.1.2 pre-boarding symptom assessment (manual p. 31; docs/norovirus/preboarding_assessment.md): a boarder whose symptom onset is within lookback_days is eligible for the declaration screen, a declared crew case is a reportable AGE case at epoch 0 (crew-only; passenger reportable is a load error), and a declared host of either role is denied boarding at denial_probability. declaration_compliance, recall_halflife_days and denial_probability are operational sweep coordinates, not measurements; 0 is the no-screen corner and null halflife is perfect recall. Default off.",
+              "properties": {
+                "lookback_days": {"type": "number", "minimum": 0},
+                "crew": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["enabled", "declaration_compliance", "recall_halflife_days", "reportable", "denial_probability"],
+                  "properties": {
+                    "enabled": {"type": "boolean"},
+                    "declaration_compliance": {"type": "number", "minimum": 0, "maximum": 1},
+                    "recall_halflife_days": {"type": ["number", "null"], "exclusiveMinimum": 0},
+                    "reportable": {"type": "boolean"},
+                    "denial_probability": {"type": "number", "minimum": 0, "maximum": 1}
+                  }
+                },
+                "passenger": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["enabled", "declaration_compliance", "recall_halflife_days", "reportable", "denial_probability"],
+                  "properties": {
+                    "enabled": {"type": "boolean"},
+                    "declaration_compliance": {"type": "number", "minimum": 0, "maximum": 1},
+                    "recall_halflife_days": {"type": ["number", "null"], "exclusiveMinimum": 0},
+                    "reportable": {"type": "boolean"},
+                    "denial_probability": {"type": "number", "minimum": 0, "maximum": 1}
+                  }
+                },
+                "notes": {"type": "string", "minLength": 1}
+              }
+            },
             "party": {
               "type": "object",
               "additionalProperties": false,

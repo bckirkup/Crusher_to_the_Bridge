@@ -240,6 +240,7 @@ def step_mid_cruise_introductions(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
     rng: np.random.Generator,
+    state: Any | None = None,
 ) -> None:
     """Introduce new pathogens at their scheduled introduction_epoch.
 
@@ -254,9 +255,17 @@ def step_mid_cruise_introductions(
     owned: frozenset[str] = frozenset()
     if plan is not None and not plan.legacy:
         apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
-        record_boarding_reports(
-            engine, draw_port_call(plan, engine, epoch, pathogen_profiles),
-        )
+        reports = draw_port_call(plan, engine, epoch, pathogen_profiles)
+        record_boarding_reports(engine, reports)
+        if state is not None:
+            # A pathogen boarding at a later port call can still declare a
+            # crew reportable case; it joins the live set the sailing-port
+            # construction seeded.
+            from orchestrator_init import preboarding_reportable_ids
+
+            state.ever_reported_ids.update(
+                preboarding_reportable_ids(engine),
+            )
         owned = initiation_owned_pathogens(plan)
     for pid, prof in pathogen_profiles.items():
         if pid in owned:

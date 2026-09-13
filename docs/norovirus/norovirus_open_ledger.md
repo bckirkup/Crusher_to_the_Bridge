@@ -3077,6 +3077,36 @@ Roughly in dependency order.
     has the same first-seen stamp, but its schema pins `onset_epoch`
     `minimum: 1`, so the fix belongs to a Sentinel change, not this one.
 
+37. **The VSP §4.1.1.2 pre-boarding assessment exists, default-off and
+    unmeasured — reportability and denial of boarding are separately
+    switchable.** The arm the item-35 stream made structurally possible is
+    implemented as `initiation.boarding.<pathogen>.preboarding_assessment`
+    (`engines/initiation.py`; derivation of record
+    [`preboarding_assessment.md`](preboarding_assessment.md)). A boarded host
+    whose stamped `days_since_onset_at_boarding` falls inside
+    `lookback_days` = 3 — the sourced crew clause, manual p. 31 / PDF p. 60 —
+    is eligible; one declaration draw at `c·2^(−a/h)` decides whether it
+    declares, and two consequences hang off that one event: a declared *crew*
+    case is a reportable AGE case at epoch 0 (`ever_reported_ids`, the
+    ladder item 33(a) proved cannot see it — this is the repair of that
+    structural blindness for the pre-boarding window only), and a declared
+    host of either role is denied boarding at `denial_probability`, leaving
+    the drawn cohort entirely (`screened_out`, never a `composition` state).
+    `c`, `h`, `denial` are operational sweep coordinates with no licensed
+    point; `c = 0`/`denial = 0` is the no-screen corner and `h = null` is
+    perfect recall. The passenger side is VSP-silent — the manual's only
+    questionnaire is the §4.1.2.2.1 72-hour instrument on already-identified
+    cases — and follows Neri 2008's screening recommendation as industry
+    practice; passenger `reportable` is a load error because the case
+    definition is crew-only. In party mode no host carries an onset age
+    (incubating replaces convalescent), so the screen is a documented no-op.
+    Default-off and rng-neutral: the inertness fingerprint in
+    `tests/test_preboarding_assessment.py` is the pre-arm draw of merged
+    `main`, and nothing shipped moved; the arm is unmeasured until a
+    campaign runs it. Campaign coordinates: `preboarding_crew_points`,
+    `preboarding_passenger_points`, `preboarding_crew_reportable_values` in
+    `boarding_axis.py` (run-id tags `pbc…`/`pbp…`/`rep1`/`rep0`).
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

@@ -150,6 +150,31 @@ FACTOR_SWEPT_PATHOGEN = "boarding_pathogen"
 # exclusive, and the one the run recorded is the one the engine must use.
 FACTOR_FIAT_COUNT = "n_init"
 
+# The VSP 4.1.1.2 pre-boarding assessment's sweep coordinates
+# (docs/norovirus/preboarding_assessment.md). A point is a mapping
+# ``{"compliance": c, "recall_halflife_days": h | null,
+# "denial_probability": d}`` per role; the crew clause's reportable arm is
+# swept separately, as a list of bools, so a campaign can measure the
+# declaration screen and the reportability consequence apart. None of these
+# is a measurement: they are operational coordinates with no licensed point,
+# and the unswept default is the profile's own (disabled) block.
+PREBOARDING_CREW_KEY = "preboarding_crew_points"
+PREBOARDING_PASSENGER_KEY = "preboarding_passenger_points"
+PREBOARDING_REPORTABLE_KEY = "preboarding_crew_reportable_values"
+FACTOR_PREBOARDING_CREW_COMPLIANCE = "preboarding_crew_declaration_compliance"
+FACTOR_PREBOARDING_CREW_HALFLIFE = "preboarding_crew_recall_halflife_days"
+FACTOR_PREBOARDING_CREW_DENIAL = "preboarding_crew_denial_probability"
+FACTOR_PREBOARDING_CREW_REPORTABLE = "preboarding_crew_reportable"
+FACTOR_PREBOARDING_PASSENGER_COMPLIANCE = (
+    "preboarding_passenger_declaration_compliance"
+)
+FACTOR_PREBOARDING_PASSENGER_HALFLIFE = (
+    "preboarding_passenger_recall_halflife_days"
+)
+FACTOR_PREBOARDING_PASSENGER_DENIAL = "preboarding_passenger_denial_probability"
+
+_PreboardingPoint = tuple[float, float | None, float]
+
 
 def owns(pathogen_id: str) -> bool:
     """Whether initiation owns this pathogen, so boarding is its mechanism."""
@@ -194,6 +219,90 @@ def party_tag(probability: float, size: int | None) -> str:
     """Run-id fragment naming the swept party coordinates."""
     suffix = "" if size is None else f"n{int(size)}"
     return f"pty{_permille_tag(probability)}{suffix}"
+
+
+def preboarding_tag(prefix: str, point: _PreboardingPoint) -> str:
+    """Run-id fragment naming a swept pre-boarding point.
+
+    ``pbc``/``pbp`` for crew/passenger, then the compliance and denial as
+    permille and the recall halflife in days, ``inf`` for perfect recall.
+    """
+    compliance, halflife, denial = point
+    halflife_tag = (
+        "inf" if halflife is None else _fraction_tag(halflife)
+    )
+    return (
+        f"{prefix}{_permille_tag(compliance)}h{halflife_tag}"
+        f"d{_permille_tag(denial)}"
+    )
+
+
+def preboarding_reportable_tag(value: bool) -> str:
+    """Run-id fragment naming the crew clause's reportable arm."""
+    return f"rep{int(bool(value))}"
+
+
+def _preboarding_point(raw: Any) -> _PreboardingPoint:
+    """One pre-boarding point: compliance, recall halflife, denial."""
+    if not isinstance(raw, Mapping):
+        raise ValueError(
+            f"a preboarding point must be a mapping, got {raw!r}",
+        )
+    halflife = raw.get("recall_halflife_days")
+    return (
+        float(raw["compliance"]),
+        None if halflife is None else float(halflife),
+        float(raw.get("denial_probability", 0.0)),
+    )
+
+
+def preboarding_points(
+    tier: Mapping[str, Any], key: str, prefix: str,
+) -> list[_PreboardingPoint | None]:
+    """The tier's pre-boarding sweep for one role; ``[None]`` when unswept."""
+    if key not in tier:
+        return [None]
+    points = [_preboarding_point(raw) for raw in tier[key]]
+    if not points:
+        raise ValueError(f"tier {key} is empty")
+    tags = [preboarding_tag(prefix, point) for point in points]
+    if len(set(tags)) != len(tags):
+        raise ValueError(
+            f"tier {key} = {points!r} collapses to run-id tags {tags!r}: "
+            "two points on the sweep would share a run id",
+        )
+    return points
+
+
+def preboarding_crew_reportable_values(
+    tier: Mapping[str, Any],
+) -> list[bool | None]:
+    """The tier's reportable-arm sweep; ``[None]`` — profile's own — unswept."""
+    if PREBOARDING_REPORTABLE_KEY not in tier:
+        return [None]
+    values = [bool(v) for v in tier[PREBOARDING_REPORTABLE_KEY]]
+    if not values:
+        raise ValueError(f"tier {PREBOARDING_REPORTABLE_KEY} is empty")
+    tags = [preboarding_reportable_tag(v) for v in values]
+    if len(set(tags)) != len(tags):
+        raise ValueError(
+            f"tier {PREBOARDING_REPORTABLE_KEY} = {values!r} collapses to "
+            f"run-id tags {tags!r}: two points on the sweep would share a "
+            "run id",
+        )
+    return values
+
+
+def sweeps_preboarding(tier: Mapping[str, Any]) -> bool:
+    """Whether the tier declares any pre-boarding axis, so ids must name it."""
+    return any(
+        key in tier
+        for key in (
+            PREBOARDING_CREW_KEY,
+            PREBOARDING_PASSENGER_KEY,
+            PREBOARDING_REPORTABLE_KEY,
+        )
+    )
 
 
 def _party_point(raw: Any) -> tuple[float, int | None]:
@@ -355,6 +464,9 @@ def run_id_tags(
     passenger_prevalence: float,
     crew_prevalence: float,
     party: tuple[float, int | None] | None = None,
+    preboarding_crew: _PreboardingPoint | None = None,
+    preboarding_passenger: _PreboardingPoint | None = None,
+    preboarding_crew_reportable: bool | None = None,
 ) -> list[str]:
     """Run-id fragments for the boarding coordinates this tier actually sweeps.
 
@@ -373,7 +485,32 @@ def run_id_tags(
         tags.append(prevalence_tag(passenger_prevalence, crew_prevalence))
     if sweeps_party(tier) and party is not None and not prevalence_mode:
         tags.append(party_tag(*party))
+    if preboarding_crew is not None and PREBOARDING_CREW_KEY in tier:
+        tags.append(preboarding_tag("pbc", preboarding_crew))
+    if preboarding_passenger is not None and PREBOARDING_PASSENGER_KEY in tier:
+        tags.append(preboarding_tag("pbp", preboarding_passenger))
+    if (
+        preboarding_crew_reportable is not None
+        and PREBOARDING_REPORTABLE_KEY in tier
+    ):
+        tags.append(preboarding_reportable_tag(preboarding_crew_reportable))
     return tags
+
+
+def _preboarding_factors(
+    point: _PreboardingPoint,
+    compliance: str,
+    halflife: str,
+    denial: str,
+) -> dict[str, Any]:
+    """One role's swept pre-boarding point as factor labels."""
+    factors: dict[str, Any] = {
+        compliance: float(point[0]),
+        denial: float(point[2]),
+    }
+    if point[1] is not None:
+        factors[halflife] = float(point[1])
+    return factors
 
 
 def point_factors(
@@ -383,9 +520,17 @@ def point_factors(
     passenger_prevalence: float = DEFAULT_PASSENGER_PREVALENCE,
     crew_prevalence: float = DEFAULT_CREW_PREVALENCE,
     party: tuple[float, int | None] | None = None,
-) -> dict[str, float]:
-    """Factor labels for one boarding grid point, for ``yield_run``."""
-    factors: dict[str, float] = {
+    preboarding_crew: _PreboardingPoint | None = None,
+    preboarding_passenger: _PreboardingPoint | None = None,
+    preboarding_crew_reportable: bool | None = None,
+) -> dict[str, Any]:
+    """Factor labels for one boarding grid point, for ``yield_run``.
+
+    The pre-boarding coordinates are stamped only when the tier swept them:
+    an unswept arm leaves the profile's own (disabled) block, and recording
+    it would be stamping a number the draw never read.
+    """
+    factors: dict[str, Any] = {
         FACTOR_NEVER_SYMPTOMATIC: float(never_symptomatic_fraction),
         FACTOR_PRESYMPTOMATIC: float(presymptomatic_share),
         FACTOR_PASSENGER_PREVALENCE: float(passenger_prevalence),
@@ -395,6 +540,24 @@ def point_factors(
         factors[FACTOR_PARTY_PROBABILITY] = float(party[0])
         if party[1] is not None:
             factors[FACTOR_PARTY_SIZE] = int(party[1])
+    if preboarding_crew is not None:
+        factors.update(_preboarding_factors(
+            preboarding_crew,
+            FACTOR_PREBOARDING_CREW_COMPLIANCE,
+            FACTOR_PREBOARDING_CREW_HALFLIFE,
+            FACTOR_PREBOARDING_CREW_DENIAL,
+        ))
+    if preboarding_passenger is not None:
+        factors.update(_preboarding_factors(
+            preboarding_passenger,
+            FACTOR_PREBOARDING_PASSENGER_COMPLIANCE,
+            FACTOR_PREBOARDING_PASSENGER_HALFLIFE,
+            FACTOR_PREBOARDING_PASSENGER_DENIAL,
+        ))
+    if preboarding_crew_reportable is not None:
+        factors[FACTOR_PREBOARDING_CREW_REPORTABLE] = bool(
+            preboarding_crew_reportable,
+        )
     return factors
 
 
@@ -407,6 +570,9 @@ class BoardingPoint:
     passenger_prevalence: float
     crew_prevalence: float
     party: tuple[float, int | None] | None = None
+    preboarding_crew: _PreboardingPoint | None = None
+    preboarding_passenger: _PreboardingPoint | None = None
+    preboarding_crew_reportable: bool | None = None
 
 
 def boarding_points(
@@ -424,13 +590,36 @@ def boarding_points(
         else ((DEFAULT_PASSENGER_PREVALENCE, DEFAULT_CREW_PREVALENCE),)
     )
     parties = party_points(tier) if mode != MODE_PREVALENCE else [None]
+    # The declaration screen reads an onset age, which only the prevalence
+    # draw stamps: a party boards incubating, so crossing it against a
+    # pre-boarding grid would multiply runs by a coordinate nothing reads.
+    preboarding_crew = (
+        preboarding_points(tier, PREBOARDING_CREW_KEY, "pbc")
+        if mode == MODE_PREVALENCE else [None]
+    )
+    preboarding_passenger = (
+        preboarding_points(tier, PREBOARDING_PASSENGER_KEY, "pbp")
+        if mode == MODE_PREVALENCE else [None]
+    )
+    reportable = (
+        preboarding_crew_reportable_values(tier)
+        if mode == MODE_PREVALENCE else [None]
+    )
     return tuple(
-        BoardingPoint(nsf, psp, passenger, crew, party)
-        for nsf, psp, (passenger, crew), party in product(
+        BoardingPoint(
+            nsf, psp, passenger, crew, party,
+            preboarding_crew=pbc,
+            preboarding_passenger=pbp,
+            preboarding_crew_reportable=rep,
+        )
+        for nsf, psp, (passenger, crew), party, pbc, pbp, rep in product(
             never_symptomatic_values(tier),
             presymptomatic_values(tier),
             prevalence,
             parties,
+            preboarding_crew,
+            preboarding_passenger,
+            reportable,
         )
     )
 
@@ -484,6 +673,9 @@ class IndexCaseAxis:
                 passenger_prevalence=point.passenger_prevalence,
                 crew_prevalence=point.crew_prevalence,
                 party=point.party,
+                preboarding_crew=point.preboarding_crew,
+                preboarding_passenger=point.preboarding_passenger,
+                preboarding_crew_reportable=point.preboarding_crew_reportable,
             )
         return [] if point is None else [f"init{int(point)}"]
 
@@ -499,6 +691,9 @@ class IndexCaseAxis:
                     passenger_prevalence=point.passenger_prevalence,
                     crew_prevalence=point.crew_prevalence,
                     party=party,
+                    preboarding_crew=point.preboarding_crew,
+                    preboarding_passenger=point.preboarding_passenger,
+                    preboarding_crew_reportable=point.preboarding_crew_reportable,
                 ),
             }
             return _drop_inapplicable(self.pathogen_id, factors)
@@ -700,6 +895,13 @@ _COORDINATE_FACTORS = frozenset({
     FACTOR_CREW_PREVALENCE,
     FACTOR_PARTY_PROBABILITY,
     FACTOR_PARTY_SIZE,
+    FACTOR_PREBOARDING_CREW_COMPLIANCE,
+    FACTOR_PREBOARDING_CREW_HALFLIFE,
+    FACTOR_PREBOARDING_CREW_DENIAL,
+    FACTOR_PREBOARDING_CREW_REPORTABLE,
+    FACTOR_PREBOARDING_PASSENGER_COMPLIANCE,
+    FACTOR_PREBOARDING_PASSENGER_HALFLIFE,
+    FACTOR_PREBOARDING_PASSENGER_DENIAL,
 })
 
 
@@ -721,6 +923,61 @@ def tier_party_factors(tier: Mapping[str, Any]) -> dict[str, Any]:
     if size is not None:
         factors[FACTOR_PARTY_SIZE] = int(size)
     return factors
+
+
+def _preboarding_role_block(
+    factors: Mapping[str, Any],
+    compliance: str,
+    halflife: str,
+    denial: str,
+) -> dict[str, Any]:
+    """One role's swept pre-boarding coordinates, enabled, as a config block.
+
+    Only the swept keys are written: the profile's own block (which ships the
+    sourced ``lookback_days`` and the disabled defaults) supplies the rest
+    through the usual config-over-profile merge.
+    """
+    block: dict[str, Any] = {}
+    if compliance in factors or denial in factors:
+        block["enabled"] = True
+        block["declaration_compliance"] = float(
+            factors.get(compliance, 0.0),
+        )
+        block["recall_halflife_days"] = (
+            None if halflife not in factors else float(factors[halflife])
+        )
+        block["denial_probability"] = float(factors.get(denial, 0.0))
+    return block
+
+
+def _preboarding_swept(factors: Mapping[str, Any]) -> dict[str, Any] | None:
+    """The swept ``preboarding_assessment`` block, or ``None`` when unswept."""
+    crew = _preboarding_role_block(
+        factors,
+        FACTOR_PREBOARDING_CREW_COMPLIANCE,
+        FACTOR_PREBOARDING_CREW_HALFLIFE,
+        FACTOR_PREBOARDING_CREW_DENIAL,
+    )
+    if FACTOR_PREBOARDING_CREW_REPORTABLE in factors:
+        # The reportable arm is switchable apart from the declaration grid:
+        # sweeping it alone still enables the crew clause at its shipped
+        # compliance.
+        crew["enabled"] = True
+        crew["reportable"] = bool(factors[FACTOR_PREBOARDING_CREW_REPORTABLE])
+    passenger = _preboarding_role_block(
+        factors,
+        FACTOR_PREBOARDING_PASSENGER_COMPLIANCE,
+        FACTOR_PREBOARDING_PASSENGER_HALFLIFE,
+        FACTOR_PREBOARDING_PASSENGER_DENIAL,
+    )
+    if not crew and not passenger:
+        return None
+    block: dict[str, Any] = {}
+    if crew:
+        block["crew"] = crew
+    if passenger:
+        block["passenger"] = passenger
+    return block
 
 
 def _swept_block(
@@ -755,6 +1012,9 @@ def _swept_block(
         }
         if prevalence:
             block["prevalence"] = prevalence
+        assessment = _preboarding_swept(factors)
+        if assessment is not None:
+            block["preboarding_assessment"] = assessment
         return block
     party = _party_from_factors(factors)
     if party is not None:
