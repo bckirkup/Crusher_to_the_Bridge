@@ -3005,6 +3005,54 @@ Roughly in dependency order.
     runs the matched-seed pair; the symptomatic-boarder state and the VSP
     pre-boarding screen are downstream work that depends on this arm.
 
+35. **The symptomatic boarding stream exists, default-off and unmeasured —
+    VSP's three-day window finally has someone to catch.** The boarding
+    cohort previously had no state in which a host is ill at embarkation:
+    every drawn state was pre-onset, never-presenting, or past its illness,
+    so VSP §4.1.1.2's crew pre-boarding window (item 34) was structurally
+    empty. The arm is specified in
+    [`symptomatic_boarding_stream.md`](symptomatic_boarding_stream.md) and
+    registers as a **derived** row, not a new measurement.
+    (a) **A partition, not an addition.** Under `rate_mode: renewal`,
+    `symptomatic_stream.enabled` splits each role's import prevalence into
+    p_sym = (I/1000)·(E[T]/365.25) — case incidence × mean illness
+    duration, the never-symptomatic correction cancelling — and
+    p_asym = p_total − p_sym, which is what the asymptomatic draw keeps.
+    The total drawn cohort cannot grow. At the sourced inputs (O'Brien's
+    39.0, Harris's 2.5715, Atmar's 28) p_sym is 0.02746%, the symptomatic
+    share of the RNA-positive cohort 6.52%, and expected symptomatic
+    passengers per voyage 0.12/0.52/0.82 (expedition/classic/spirit).
+    (b) **Refusals.** `screening_prevalence` cannot be partitioned (a
+    measured asymptomatic-carriage series has no illness-day decomposition)
+    and party mode sets its own cluster size — both raise at plan
+    resolution, as does a partition going negative (E[T] > detectable).
+    (c) **Where a symptomatic boarder sits.** The illness length is drawn
+    length-biased (P(T=d) ∝ d·P(T=d)) under `empirical_survival`, the
+    elapsed time a ~ U(0, T) uniform: P[a ≤ 3] = 0.772. The record is
+    stamped `recovery_day = T`, `onset_time_infected`, `SYMPTOMATIC`,
+    `presented`, severity at day int(a), symptom axes, and an emesis
+    schedule with every event at or before `a` dropped — those episodes
+    happened ashore, and the per-episode load is not rescaled because the
+    total is a per-subject cumulative shed partitioned over the whole
+    illness. Under `point` the stream exists but carries no dispersion
+    (T = 3 for every host).
+    (d) **Inertness.** `enabled: false` (shipped) consumes no RNG and takes
+    no new branch; a fixed-seed renewal draw is fingerprinted in
+    `tests/test_symptomatic_boarding.py`. One existing golden moved by
+    attribution: `composition` now reports the `symptomatic` state key
+    (zero under the default), so the two key-set assertions in
+    `tests/test_initiation_engine.py` name it; the drawn counts in them are
+    unchanged.
+    (e) **Open items the arm does not settle.** Pre-boarding treatment is
+    unmodelled (`apply_treatment_at_onset` is not applied — the drawn
+    duration is untreated, in the direction of slightly long); the
+    `resolving`-phase `dpi_max` profile fallback stands from item 34(d);
+    and the VSP three-day crew assessment itself — onset up to three days
+    before boarding counted in the reportable numerator, declaration
+    compliance — is the following change, measured against this stream
+    rather than assumed by it. Nothing shipped moved; the arm is unmeasured
+    until a campaign runs it.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

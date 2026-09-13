@@ -204,6 +204,10 @@
         "state_split": {
           "never_symptomatic_fraction": 0.29,
           "presymptomatic_share_of_presenting": 0.04
+        },
+        "symptomatic_stream": {
+          "enabled": false,
+          "notes": "Derivation of record: docs/norovirus/symptomatic_boarding_stream.md. A partition of the renewal import rate (requires rate_mode 'renewal'), not an addition: p_sym = case incidence x mean illness duration = (I/1000) x (E[T]/365.25) and p_asym = p_total - p_sym. Inputs are sourced rows, not tuned: I = 39.0 cases/1000 py ages 15-64, O'Brien et al. 2016 J Infect Dis DOI 10.1093/infdis/jiv411 Table 1 (Grade B, origin T1); E[T] = 2.5715 days from this profile's own illness_duration table, Harris et al. 2019 IID2 DOI 10.1186/s12879-019-3706-z Fig 4C (Grade B, origin F4·dig). Derived values under the dispersed arm: p_sym = 0.02746%, p_asym = 0.3936% of p_total 0.4211%, symptomatic share of the RNA-positive cohort 6.52%; under draw 'point' (E[T] = 3) p_sym = 0.03203%. Default-off and inert until a run selects it."
         }
       },
       "initial_time_infected": 0,

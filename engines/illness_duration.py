@@ -178,3 +178,32 @@ class IllnessDurationModel:
             if self.survival_at(day) <= u:
                 return day
         return last_day
+
+    def _pmf(self) -> dict[int, float]:
+        """The discrete pmf P(T = d) = S(d-1) - S(d) over the table's days."""
+        last_day = self.survival[-1][0]
+        return {
+            day: self.survival_at(day - 1) - self.survival_at(day)
+            for day in range(1, last_day + 1)
+        }
+
+    def mean_days(self) -> float:
+        """E[T] = Σ d·P(T=d), the exact mean of the authored table."""
+        return float(
+            sum(day * mass for day, mass in self._pmf().items()),
+        )
+
+    def sample_length_biased_days(self, rng: np.random.Generator) -> int:
+        """Draw T from the length-biased pmf P(T = d) ∝ d·P(T = d).
+
+        This is step one of the renewal backward-recurrence construction a
+        prevalent symptomatic sample needs: a host caught mid-illness sits in
+        a long illness with probability proportional to its length. Step two —
+        the elapsed time a ~ U(0, T) — is the caller's draw.
+        """
+        pmf = self._pmf()
+        days = sorted(pmf)
+        weights = np.asarray(
+            [day * pmf[day] for day in days], dtype=float,
+        )
+        return int(rng.choice(days, p=weights / weights.sum()))

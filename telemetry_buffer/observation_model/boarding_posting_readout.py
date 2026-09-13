@@ -254,7 +254,10 @@ def _imports(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """The realised boarding cohort, averaged over the cell's voyages."""
     if not rows:
         return {}
-    states = ("never_symptomatic", "presymptomatic", "convalescent", "incubating")
+    states = (
+        "never_symptomatic", "presymptomatic", "convalescent", "incubating",
+        "symptomatic",
+    )
     record: dict[str, Any] = {
         "mean_imported_passenger": statistics.fmean(
             [row["imported_passenger"] for row in rows],
