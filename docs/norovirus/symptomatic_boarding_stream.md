@@ -152,4 +152,8 @@ episodes and the ashore share of it was not deposited onboard.
   onset up to three days *before* boarding counted in the reportable numerator —
   and the three-day crew assessment with its declaration compliance are the
   following change, and both are measured against this stream rather than
-  assumed by it.
+  assumed by it. Onset back-dating has landed alongside this stream: the
+  syndromic modality now reads `epochs_since_symptom_onset` from the infection
+  record instead of stamping onset at first observation, so a host ill at
+  embarkation carries its true (possibly negative-epoch) onset into the
+  detection-delay gate and the onset-observation record.

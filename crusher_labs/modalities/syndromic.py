@@ -24,6 +24,7 @@ Syndromic surveillance – models sick-call reporting with:
 
 from __future__ import annotations
 
+import math
 from collections.abc import Iterable
 from typing import Any
 
@@ -44,6 +45,18 @@ def _symptomatic_infection(agent: dict[str, Any]) -> dict[str, Any]:
         ),
         {},
     )
+
+
+def _observed_onset_epoch(
+    agent: dict[str, Any], epoch: int,
+) -> int:
+    """The host's true onset epoch, back-dated from its symptomatic
+    infection record; falls back to ``epoch`` when the record carries
+    no onset age."""
+    elapsed = _symptomatic_infection(agent).get("epochs_since_symptom_onset")
+    if elapsed is None:
+        return int(epoch)
+    return int(epoch) - int(elapsed)
 
 
 # Spawn keys for the molecular rung's and the campaign roster's own streams.
@@ -195,6 +208,7 @@ class SyndromicSurveillance:
         self,
         aid: int,
         epoch: int,
+        onset_epoch: int,
         overrides: dict[int, str],
         beliefs: dict[int, dict[str, float]],
         chronic_mods: dict[int, dict[str, float]],
@@ -203,7 +217,7 @@ class SyndromicSurveillance:
         true_positive_ids: list[int],
     ) -> None:
         if aid not in self._symptom_onset_epoch:
-            self._symptom_onset_epoch[aid] = int(epoch)
+            self._symptom_onset_epoch[aid] = int(onset_epoch)
         override = overrides.get(aid, "")
         if override == "hide_symptoms":
             return
@@ -310,7 +324,9 @@ class SyndromicSurveillance:
             _, _, compliance = resolve_agent_axes(agent)
             presenting = agent_has_symptomatic_presentation(agent)
             if presenting and aid not in self._presentation_onset_epoch:
-                self._presentation_onset_epoch[aid] = int(epoch)
+                self._presentation_onset_epoch[aid] = _observed_onset_epoch(
+                    agent, epoch,
+                )
             is_symptomatic = presenting or compliance == COMPLIANCE_NON_COMPLIANT
 
             if is_isolated:
@@ -321,7 +337,8 @@ class SyndromicSurveillance:
                     agent, outbreak_recognized=outbreak_recognized,
                 )
                 self._process_symptomatic_agent(
-                    aid, epoch, overrides, beliefs, chronic_mods,
+                    aid, epoch, _observed_onset_epoch(agent, epoch),
+                    overrides, beliefs, chronic_mods,
                     severity_hazards,
                     sick_call_ids, true_positive_ids,
                 )
@@ -713,7 +730,9 @@ class SyndromicSurveillance:
             "agent_id": aid,
             "pathogen_id": pathogen_id,
             "onset_epoch": int(onset_epoch),
-            "onset_day": self.clock.day_index(int(onset_epoch)),
+            # A pre-boarding onset is negative; day_index clamps to 0, so
+            # the floor of elapsed days is taken here directly.
+            "onset_day": int(math.floor(self.clock.days_elapsed(int(onset_epoch)))),
             "recorded_epoch": int(epoch),
             "confirmed_epoch": int(self._lab_confirmed[key]),
             "symptom_severity": severity,

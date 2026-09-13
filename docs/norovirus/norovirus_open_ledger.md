@@ -3053,6 +3053,30 @@ Roughly in dependency order.
     rather than assumed by it. Nothing shipped moved; the arm is unmeasured
     until a campaign runs it.
 
+36. **Onset back-dating landed — the syndromic modality no longer stamps
+    onset at first observation.** `syndromic.py` stamped
+    `_symptom_onset_epoch` (the `detection_delay` gate and detection
+    telemetry) and `_presentation_onset_epoch` (the onset-observation
+    record's `onset_epoch`/`onset_day`) as the first epoch it *saw* a host
+    symptomatic. For a host already ill before first observation — the
+    item-35 symptomatic boarder, a fiat index case seeded past onset, a
+    host isolated at onset and seen at release — the stamp was wrong: the
+    detection delay restarted and the recorded onset date was the
+    observation date. The repair is bookkeeping, not a parameter:
+    `to_schema_dict` now exports `epochs_since_symptom_onset`
+    (`time_infected − onset_time_infected`, the quantity `_symptom_days`
+    already computed — the two share one helper so they cannot disagree),
+    and both stamp sites read it. `_onset_observation`'s `onset_day` now
+    floors `days_elapsed` instead of `day_index`, which clamped to 0, so a
+    pre-boarding onset records a negative day; `symptom_onset_epoch` in
+    detection and episode telemetry can likewise go negative — intended.
+    At the campaigns' shipped `detection_delay_hours: 0` the repair moves
+    no sick-call decision; what it moves are the recorded onset dates and
+    any arm carrying a nonzero delay. **Open item:** the Sentinel line
+    list (`picard_framework/analysis/sentinel/line_list.py` ~line 166)
+    has the same first-seen stamp, but its schema pins `onset_epoch`
+    `minimum: 1`, so the fix belongs to a Sentinel change, not this one.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
