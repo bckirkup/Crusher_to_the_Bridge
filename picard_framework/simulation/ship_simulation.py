@@ -39,6 +39,7 @@ from engines.crew_duty_exclusion import (
 from engines.crew_duty_exclusion import (
     build_tracker as build_crew_duty_exclusion_tracker,
 )
+from engines.initiation import preboarding_reportable_ids
 from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
@@ -475,6 +476,10 @@ class ShipSimulation:
             chronic_assignments=self.chronic_assignments,
             chronic_behavioral_mods=self.chronic_behavioral_mods,
             voyage_config=voyage_cfg,
+            # VSP 4.1.1.2 reportable AGE cases at boarding never pass the
+            # sick-call ladder; the initiation draw records them, and the
+            # state starts out already holding them.
+            ever_reported_ids=preboarding_reportable_ids(self.engine),
         )
         self.state = sim_state
         self.crew_exclusion = build_crew_duty_exclusion_tracker(
@@ -824,6 +829,7 @@ class ShipSimulation:
         step_fred_compliance(epoch, state, syndromic, agents=fred_agents)
         step_mid_cruise_introductions(
             epoch, self.engine, self.pathogen_profiles, self.rng,
+            state=state,
         )
 
         from engines.voyage_itinerary import resolve_epoch_state

@@ -57,6 +57,7 @@ from engines.initiation import (
     draw_port_call,
     initiation_configured,
     initiation_owned_pathogens,
+    record_boarding_reports,
     resolve_initiation_plan,
 )
 from engines.non_pharmaceutical_interventions import (
@@ -1824,6 +1825,7 @@ def _run_initiation(
     Specs boarding at a later port call keep the same stream, which the epoch
     loop reads from ``engine.boarding_rng``.
     """
+    engine.preboarding_reportable_ids = set()
     reports: list[BoardingReport] = []
     if plan.boarding:
         engine.boarding_rng = _boarding_rng(rng, cfg)
@@ -1832,6 +1834,9 @@ def _run_initiation(
             boarded = sum(report.drawn_by_role.values())
             print(f"  Boarded {report.pathogen_id} -> {boarded} hosts")
     engine.initiation_manifest = build_initiation_manifest(plan, reports, [])
+    # The single code path that stamps the epoch-0 reportable ids onto the
+    # engine; it also re-folds the same boarding entries into the manifest.
+    record_boarding_reports(engine, reports)
     for record in apply_explicit_seeds(
         plan, engine, 0, rng, pathogen_profiles,
     ):

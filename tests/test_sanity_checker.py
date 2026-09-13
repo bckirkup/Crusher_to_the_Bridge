@@ -23,6 +23,7 @@ from tools.sanity_checker import (
     _check_microflora_params,
     _check_modality_params,
     _check_multi_pathogen_params,
+    _check_preboarding_assessment,
     _check_symptomatic_stream,
     _check_wearable_monitoring,
     paths_from_run_config,
@@ -528,8 +529,10 @@ def test_symptomatic_stream_check_requires_renewal_inputs() -> None:
         renewal={"case_incidence_per_1000_py": {"passenger": 39.0}},
         symptomatic_stream={"enabled": True, "notes": "x"},
     ))
-    assert any("case_incidence_per_1000_py" in m and "crew" in m
-               for m in msgs)
+    assert any(
+        "case_incidence_per_1000_py" in m
+        for m in msgs if "crew" in m
+    )
     assert any("detectable_duration_days" in m for m in msgs)
 
 
@@ -635,3 +638,107 @@ def test_run_checks_reports_a_bad_symptomatic_stream() -> None:
         os.unlink(pathogen_file)
     assert not report.passed
     assert any(f.rule == "SYMPTOMATIC_STREAM" for f in report.errors)
+
+
+# ── preboarding-assessment cross-field check ─────────────────────────────
+
+def _preboarding_errors(pathogens: PathogensFile | None) -> list[str]:
+    report = Report()
+    _check_preboarding_assessment(pathogens, report)
+    return [f.message for f in report.errors]
+
+
+def test_preboarding_check_ignores_absent_and_disabled() -> None:
+    assert _preboarding_errors(None) == []
+    assert _preboarding_errors(PathogensFile(
+        pathogens=[_minimal_pathogen_profile()],
+    )) == []
+    disabled = _stream_profile(
+        preboarding_assessment={
+            "lookback_days": 3,
+            "crew": {"enabled": False},
+            "passenger": {"enabled": False},
+            "notes": "x",
+        },
+    )
+    assert _preboarding_errors(disabled) == []
+
+
+def test_preboarding_check_refuses_a_passenger_reportable() -> None:
+    msgs = _preboarding_errors(_stream_profile(
+        preboarding_assessment={
+            "lookback_days": 3,
+            "passenger": {"enabled": True, "reportable": True},
+            "notes": "x",
+        },
+    ))
+    assert len(msgs) == 1
+    assert "crew-only" in msgs[0]
+
+
+@pytest.mark.parametrize(
+    ("key", "value"),
+    [
+        ("declaration_compliance", 1.5),
+        ("declaration_compliance", -0.1),
+        ("recall_halflife_days", 0),
+        ("recall_halflife_days", -2.0),
+        ("denial_probability", 1.5),
+        ("denial_probability", -0.1),
+    ],
+)
+def test_preboarding_check_bounds_role_coordinates(
+    key: str, value: object,
+) -> None:
+    msgs = _preboarding_errors(_stream_profile(
+        preboarding_assessment={
+            "lookback_days": 3,
+            "crew": {"enabled": True, key: value},
+            "notes": "x",
+        },
+    ))
+    assert len(msgs) == 1
+
+
+def test_preboarding_check_refuses_a_negative_lookback() -> None:
+    msgs = _preboarding_errors(_stream_profile(
+        preboarding_assessment={
+            "lookback_days": -1,
+            "notes": "x",
+        },
+    ))
+    assert len(msgs) == 1
+    assert "negative" in msgs[0]
+
+
+def test_preboarding_check_refuses_enabled_on_party_mode() -> None:
+    msgs = _preboarding_errors(_stream_profile(
+        mode="party",
+        party={"probability": 0.01, "size": 3},
+        preboarding_assessment={
+            "lookback_days": 3,
+            "crew": {"enabled": True},
+            "notes": "x",
+        },
+    ))
+    assert any("party" in m for m in msgs if "eligible" in m)
+
+
+def test_preboarding_check_accepts_the_shipped_shape() -> None:
+    msgs = _preboarding_errors(_stream_profile(
+        mode="prevalence",
+        prevalence={"passenger": 0.03, "crew": 0.02},
+        preboarding_assessment={
+            "lookback_days": 3,
+            "crew": {
+                "enabled": True,
+                "declaration_compliance": 1.0,
+                "recall_halflife_days": None,
+                "reportable": True,
+                "denial_probability": 0.0,
+            },
+            "passenger": {"enabled": False},
+            "notes": "x",
+        },
+    ))
+    assert msgs == []

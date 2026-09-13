@@ -79,6 +79,11 @@ _STATES = (
     STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
     STATE_CLEARED, STATE_INCUBATING, STATE_SYMPTOMATIC,
 )
+# A declared host the pre-boarding assessment turns back: it never boards,
+# holds no infection record, and is counted in the report's own
+# ``screened_out`` tally rather than in ``composition`` (it was never part of
+# the cohort the prevalence measurement describes) or ``drawn_by_role``.
+STATE_SCREENED_OUT = "screened_out"
 
 # The two boarding draw modes. Which one a pathogen uses is a claim about the
 # embarkation population, not a tuning choice: a prevalence needs a measured
@@ -125,6 +130,49 @@ class BoardingParty:
 
 
 @dataclass(frozen=True)
+class PreboardingRoleSpec:
+    """One role's pre-boarding assessment coordinates.
+
+    ``declaration_compliance`` is the probability an eligible host declares
+    a current symptom at all; ``recall_halflife_days`` lets that probability
+    decay in days since onset, ``None`` being perfect recall;
+    ``denial_probability`` is the chance a declared host is denied boarding.
+    All three are operational sweep coordinates, not measurements: no point
+    is licensed, and the corners (``compliance`` 0, ``denial_probability`` 0)
+    are the no-screen boundary.
+    """
+
+    enabled: bool
+    declaration_compliance: float
+    recall_halflife_days: float | None
+    reportable: bool
+    denial_probability: float
+
+
+@dataclass(frozen=True)
+class PreboardingAssessment:
+    """The VSP 4.1.1.2 pre-boarding symptom assessment for one pathogen.
+
+    A boarder whose symptom onset falls inside ``lookback_days`` of
+    embarkation is eligible for the declaration screen; a host with no onset
+    yet is not, because the clause is onset-indexed. A declared crew case is
+    a reportable AGE case at epoch 0 when ``reportable`` holds; a declared
+    host of either role is denied boarding at ``denial_probability``. The
+    reportable clause is crew-only: the manual's three-day reportable case
+    definition covers crew, so a passenger ``reportable`` is a load error at
+    resolution.
+    """
+
+    lookback_days: float
+    crew: PreboardingRoleSpec
+    passenger: PreboardingRoleSpec
+
+    def for_role(self, role: str) -> PreboardingRoleSpec:
+        """The role's own block."""
+        return self.crew if role == ROLE_CREW else self.passenger
+
+
+@dataclass(frozen=True)
 class BoardingSpec:
     """One pathogen's boarding channel, as configured."""
 
@@ -145,6 +193,9 @@ class BoardingSpec:
     symptomatic_passenger_prevalence: float = 0.0
     symptomatic_crew_prevalence: float = 0.0
     mean_illness_duration_days: float | None = None
+    # The VSP 4.1.1.2 three-day pre-boarding assessment; ``None`` when the
+    # block is absent, which consumes exactly the draws the pre-arm code did.
+    preboarding: PreboardingAssessment | None = None
 
     @property
     def mode(self) -> str:
@@ -189,6 +240,13 @@ class BoardingReport:
     pathogen_id: str
     drawn_by_role: dict[str, int]
     composition: dict[str, int]
+    # The pre-boarding assessment's manifest payload (per-role eligible,
+    # declared, screened_out, preboarding_reportable plus the effective
+    # coordinates) when the arm ran, and the ids the crew clause makes
+    # reportable at epoch 0. ``screened_out`` stays off ``composition``:
+    # a denied host was never aboard.
+    preboarding: dict[str, Any] | None = None
+    preboarding_reportable_ids: tuple[int, ...] = ()
 
 
 # ── Configuration resolution ─────────────────────────────────────────────
@@ -488,6 +546,136 @@ def _resolve_symptomatic_stream(
     return True, sym[ROLE_PASSENGER], sym[ROLE_CREW], mean_days
 
 
+_PREBOARDING_KEYS = frozenset({
+    "lookback_days", "crew", "passenger", "notes",
+})
+_PREBOARDING_ROLE_KEYS = frozenset({
+    "enabled", "declaration_compliance", "recall_halflife_days",
+    "reportable", "denial_probability",
+})
+# The sourced coordinate: VSP 2018 Operations Manual 4.1.1.2 (manual p. 31 /
+# PDF p. 60) indexes the reportable window to three days before boarding.
+_PREBOARDING_DEFAULT_LOOKBACK_DAYS = 3.0
+# Role defaults when a key is unstated: the crew declaration is the clause
+# the manual actually writes, so the reference block declares at full
+# compliance and reports; the passenger side is industry practice VSP is
+# silent on, so its block defaults to the no-screen corner.
+_PREBOARDING_ROLE_DEFAULTS: dict[str, dict[str, Any]] = {
+    ROLE_CREW: {
+        "declaration_compliance": 1.0,
+        "reportable": True,
+    },
+    ROLE_PASSENGER: {
+        "declaration_compliance": 0.0,
+        "reportable": False,
+    },
+}
+
+
+def _resolve_preboarding_role(
+    raw: Any, role: str, location: str,
+) -> PreboardingRoleSpec:
+    """One role's ``preboarding_assessment`` sub-block, defaults applied."""
+    role_location = f"{location}.{role}"
+    defaults = _PREBOARDING_ROLE_DEFAULTS[role]
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"{role_location} must be a mapping, got {type(raw).__name__}",
+        )
+    unknown = sorted(set(raw) - _PREBOARDING_ROLE_KEYS)
+    if unknown:
+        raise ValueError(
+            f"{role_location} has unknown keys: {unknown}; the admissible "
+            f"keys are {sorted(_PREBOARDING_ROLE_KEYS)}",
+        )
+    compliance = _fraction(
+        raw.get(
+            "declaration_compliance", defaults["declaration_compliance"],
+        ),
+        f"{role_location}.declaration_compliance",
+        "it is the probability an eligible host declares; there is no "
+        "licensed point, and 0 is the admissible no-screen corner",
+    )
+    halflife = raw.get("recall_halflife_days")
+    if halflife is not None:
+        halflife = float(halflife)
+        if halflife <= 0.0:
+            raise ValueError(
+                f"{role_location}.recall_halflife_days = {halflife!r} must "
+                "be positive; null states perfect recall, a non-positive "
+                "halflife is no decay model",
+            )
+    reportable = bool(
+        raw.get("reportable", defaults["reportable"]),
+    )
+    if reportable and role == ROLE_PASSENGER:
+        raise ValueError(
+            f"{role_location}.reportable = true names a reportable case the "
+            "case definition does not license: the VSP 4.1.1.2 three-day "
+            "reportable AGE clause is crew-only",
+        )
+    denial = _fraction(
+        raw.get("denial_probability", 0.0),
+        f"{role_location}.denial_probability",
+        "it is the probability a declared host is denied boarding; VSP is "
+        "silent on denial, so 0 is the admissible corner and any positive "
+        "value is a stated industry-practice arm",
+    )
+    return PreboardingRoleSpec(
+        enabled=bool(raw.get("enabled", False)),
+        declaration_compliance=compliance,
+        recall_halflife_days=halflife,
+        reportable=reportable,
+        denial_probability=denial,
+    )
+
+
+def _resolve_preboarding(
+    block: dict[str, Any], location: str,
+) -> PreboardingAssessment | None:
+    """The ``preboarding_assessment`` block, or ``None`` when unstated.
+
+    Absent means the arm never runs and no draw is consumed; a block whose
+    roles are both ``enabled: false`` resolves but also draws nothing. The
+    declaration form is c * 2 ** (-a / h) in days since onset ``a``; the
+    derivation of record is ``docs/norovirus/preboarding_assessment.md``.
+    """
+    raw = block.get("preboarding_assessment")
+    if raw is None:
+        return None
+    assessment_location = f"{location}.preboarding_assessment"
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"{assessment_location} must be a mapping, got "
+            f"{type(raw).__name__}",
+        )
+    unknown = sorted(set(raw) - _PREBOARDING_KEYS)
+    if unknown:
+        raise ValueError(
+            f"{assessment_location} has unknown keys: {unknown}; the "
+            f"admissible keys are {sorted(_PREBOARDING_KEYS)}",
+        )
+    lookback = float(
+        raw.get("lookback_days", _PREBOARDING_DEFAULT_LOOKBACK_DAYS),
+    )
+    if lookback < 0.0:
+        raise ValueError(
+            f"{assessment_location}.lookback_days = {lookback!r} is "
+            "negative; the window counts days of onset back from boarding",
+        )
+    return PreboardingAssessment(
+        lookback_days=lookback,
+        crew=_resolve_preboarding_role(
+            raw.get(ROLE_CREW), ROLE_CREW, assessment_location,
+        ),
+        passenger=_resolve_preboarding_role(
+            raw.get(ROLE_PASSENGER), ROLE_PASSENGER, assessment_location,
+        ),
+    )
+
+
 def _resolve_epoch(
     block: dict[str, Any], profile: dict[str, Any], location: str,
 ) -> int:
@@ -598,6 +786,7 @@ def _resolve_boarding_spec(
         symptomatic_passenger_prevalence=symptomatic_passenger,
         symptomatic_crew_prevalence=symptomatic_crew,
         mean_illness_duration_days=mean_illness_days,
+        preboarding=_resolve_preboarding(block, location),
     )
 
 
@@ -950,12 +1139,95 @@ def _write_presentation_history(
     inf["symptom_severity_peak"] = inf["symptom_severity"]
 
 
+@dataclass
+class _PreboardingTallies:
+    """What one cohort's declaration screen saw, per role."""
+
+    eligible: dict[str, int]
+    declared: dict[str, int]
+    screened_out: dict[str, int]
+    reportable: dict[str, set[int]]
+
+    @classmethod
+    def empty(cls) -> _PreboardingTallies:
+        """Zeroed tallies over both roles."""
+        return cls(
+            eligible=dict.fromkeys(_ROLES, 0),
+            declared=dict.fromkeys(_ROLES, 0),
+            screened_out=dict.fromkeys(_ROLES, 0),
+            reportable={role: set() for role in _ROLES},
+        )
+
+    def payload(self, assessment: PreboardingAssessment) -> dict[str, Any]:
+        """The manifest's ``preboarding_assessment`` sub-dict."""
+        return {
+            "lookback_days": assessment.lookback_days,
+            **{
+                role: {
+                    "enabled": spec.enabled,
+                    "declaration_compliance": spec.declaration_compliance,
+                    "recall_halflife_days": spec.recall_halflife_days,
+                    "reportable": spec.reportable,
+                    "denial_probability": spec.denial_probability,
+                    "eligible": self.eligible[role],
+                    "declared": self.declared[role],
+                    "screened_out": self.screened_out[role],
+                    "preboarding_reportable": len(self.reportable[role]),
+                }
+                for role, spec in (
+                    (ROLE_PASSENGER, assessment.passenger),
+                    (ROLE_CREW, assessment.crew),
+                )
+            },
+        }
+
+
+def _assess_boarder(
+    assessment: PreboardingAssessment,
+    tallies: _PreboardingTallies,
+    agent: Any,
+    role: str,
+    onset_age_days: float,
+    rng: np.random.Generator,
+) -> bool:
+    """Whether one onset-aged boarder is admitted past the declaration screen.
+
+    Returns ``False`` for the denied host — which is why the caller invokes
+    this before the infection record is written, so a denied host never
+    boards and can never be reportable: the denial draw lands first and the
+    reportable id is recorded only for a host that sails.
+    """
+    spec = assessment.for_role(role)
+    if (
+        not spec.enabled
+        or onset_age_days < 0.0
+        or onset_age_days > assessment.lookback_days
+    ):
+        return True
+    tallies.eligible[role] += 1
+    halflife = spec.recall_halflife_days
+    declare_p = spec.declaration_compliance * (
+        1.0 if halflife is None else 2.0 ** (-onset_age_days / halflife)
+    )
+    if rng.random() >= declare_p:
+        return True
+    tallies.declared[role] += 1
+    if rng.random() < spec.denial_probability:
+        tallies.screened_out[role] += 1
+        return False
+    if spec.reportable:
+        tallies.reportable[role].add(agent.agent_id)
+    return True
+
+
 def _board_one_host(
     spec: BoardingSpec,
     agent: Any,
     profile: dict[str, Any],
     clock: Any,
     rng: np.random.Generator,
+    role: str = ROLE_PASSENGER,
+    tallies: _PreboardingTallies | None = None,
 ) -> str | None:
     """Give one host a boarding infection; returns its state, or ``None``.
 
@@ -1000,6 +1272,16 @@ def _board_one_host(
         and age_days > incubation_days + duration_days
     ):
         return STATE_CLEARED
+    if (
+        spec.preboarding is not None
+        and tallies is not None
+        and state == STATE_CONVALESCENT
+        and not _assess_boarder(
+            spec.preboarding, tallies, agent, role,
+            age_days - incubation_days, rng,
+        )
+    ):
+        return STATE_SCREENED_OUT
     agent.infect_with_pathogen(
         pathogen_id, 0.0, 0,
         time_infected=int(round(clock.epochs_for_days(age_days))),
@@ -1026,6 +1308,8 @@ def _board_one_symptomatic_host(
     profile: dict[str, Any],
     clock: Any,
     rng: np.random.Generator,
+    role: str = ROLE_PASSENGER,
+    tallies: _PreboardingTallies | None = None,
 ) -> str:
     """Give one host an in-flight illness; returns ``symptomatic`` or ``cleared``.
 
@@ -1059,6 +1343,14 @@ def _board_one_symptomatic_host(
         # Beyond the authored shedding window: the same representability
         # boundary the stationary age draw uses.
         return STATE_CLEARED
+    if (
+        spec.preboarding is not None
+        and tallies is not None
+        and not _assess_boarder(
+            spec.preboarding, tallies, agent, role, elapsed_days, rng,
+        )
+    ):
+        return STATE_SCREENED_OUT
     agent.infect_with_pathogen(
         pathogen_id, 0.0, 0,
         time_infected=int(
@@ -1116,6 +1408,7 @@ def _draw_symptomatic_role(
     role: str,
     drawn_by_role: dict[str, int],
     composition: dict[str, int],
+    tallies: _PreboardingTallies | None = None,
 ) -> None:
     """The ill-at-embarkation share of one role's renewal prevalence.
 
@@ -1141,8 +1434,10 @@ def _draw_symptomatic_role(
     chosen = rng.choice(pool, size=min(count, len(pool)), replace=False)
     for agent in chosen:
         state = _board_one_symptomatic_host(
-            spec, agent, profile, clock, rng,
+            spec, agent, profile, clock, rng, role, tallies,
         )
+        if state == STATE_SCREENED_OUT:
+            continue
         if state != STATE_CLEARED:
             drawn_by_role[role] += 1
         composition[state] += 1
@@ -1187,6 +1482,12 @@ def _draw_party_cohort(
     party = spec.party
     drawn_by_role = dict.fromkeys(_ROLES, 0)
     composition = dict.fromkeys(_STATES, 0)
+    # A party boards its members incubating, never convalescent, so no party
+    # host carries an onset age and the declaration screen is a no-op here —
+    # it is skipped rather than refused, per the arm's design note.
+    tallies = (
+        _PreboardingTallies.empty() if spec.preboarding is not None else None
+    )
     if party is None or rng.random() >= party.probability:
         return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
     pool = [
@@ -1194,7 +1495,9 @@ def _draw_party_cohort(
         if _eligible(agent, spec.pathogen_id, party.role)
     ]
     for agent in _select_party(pool, party.size, rng):
-        state = _board_one_host(spec, agent, profile, clock, rng)
+        state = _board_one_host(
+            spec, agent, profile, clock, rng, party.role, tallies,
+        )
         if state is None:
             continue
         if state != STATE_CLEARED:
@@ -1226,6 +1529,9 @@ def draw_boarding_cohort(
         return _draw_party_cohort(spec, agents, profile, clock, rng)
     drawn_by_role = dict.fromkeys(_ROLES, 0)
     composition = dict.fromkeys(_STATES, 0)
+    tallies = (
+        _PreboardingTallies.empty() if spec.preboarding is not None else None
+    )
     prevalence_by_role = {
         ROLE_PASSENGER: spec.passenger_prevalence,
         ROLE_CREW: spec.crew_prevalence,
@@ -1237,7 +1543,7 @@ def draw_boarding_cohort(
             # twice.
             _draw_symptomatic_role(
                 spec, agents, profile, clock, rng,
-                role, drawn_by_role, composition,
+                role, drawn_by_role, composition, tallies,
             )
         pool = [
             agent for agent in agents
@@ -1252,13 +1558,23 @@ def draw_boarding_cohort(
             pool, count, spec.pathogen_id, profile, rng,
         )
         for agent in chosen:
-            state = _board_one_host(spec, agent, profile, clock, rng)
-            if state is None:
+            state = _board_one_host(
+                spec, agent, profile, clock, rng, role, tallies,
+            )
+            if state is None or state == STATE_SCREENED_OUT:
                 continue
             if state != STATE_CLEARED:
                 drawn_by_role[role] += 1
             composition[state] += 1
-    return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
+    if spec.preboarding is None or tallies is None:
+        return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
+    return BoardingReport(
+        spec.pathogen_id, drawn_by_role, composition,
+        preboarding=tallies.payload(spec.preboarding),
+        preboarding_reportable_ids=tuple(sorted(
+            tallies.reportable[ROLE_PASSENGER] | tallies.reportable[ROLE_CREW],
+        )),
+    )
 
 
 # ── Explicit seeds ───────────────────────────────────────────────────────
@@ -1403,17 +1719,38 @@ def draw_port_call(
     ]
 
 
+def preboarding_reportable_ids(engine: Any) -> set[int]:
+    """The agent ids the pre-boarding assessment made reportable at boarding.
+
+    VSP 4.1.1.2 reportable AGE cases cannot pass through the sick-call
+    ladder: ``update_ever_reported_ids`` intersects reports with the
+    currently symptomatic roster, and a host whose illness already resolved
+    ashore is not on it. The initiation draw records them on the engine and
+    callers union them into the live ``ever_reported_ids`` — at state
+    construction for the sailing port, and at each later port call in
+    ``step_mid_cruise_introductions``. Empty when the arm is off.
+    """
+    return set(getattr(engine, "preboarding_reportable_ids", ()) or ())
+
+
 def record_boarding_reports(engine: Any, reports: list[BoardingReport]) -> None:
     """Fold a port call's draws into the manifest already written."""
     manifest = getattr(engine, "initiation_manifest", None)
     if not reports or not isinstance(manifest, dict):
         return
+    ids = getattr(engine, "preboarding_reportable_ids", None)
+    if ids is None:
+        ids = engine.preboarding_reportable_ids = set()
     boarding = manifest.setdefault("boarding", {})
     for report in reports:
-        boarding[report.pathogen_id] = {
+        entry = {
             "drawn_by_role": dict(report.drawn_by_role),
             "composition": dict(report.composition),
         }
+        if report.preboarding is not None:
+            entry["preboarding_assessment"] = report.preboarding
+        boarding[report.pathogen_id] = entry
+        ids.update(report.preboarding_reportable_ids)
 
 
 def initiation_owned_pathogens(plan: InitiationPlan) -> frozenset[str]:
@@ -1453,6 +1790,10 @@ def build_initiation_manifest(
             report.pathogen_id: {
                 "drawn_by_role": dict(report.drawn_by_role),
                 "composition": dict(report.composition),
+                **(
+                    {"preboarding_assessment": report.preboarding}
+                    if report.preboarding is not None else {}
+                ),
             }
             for report in reports
         },
