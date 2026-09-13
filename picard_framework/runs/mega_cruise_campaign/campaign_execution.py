@@ -28,6 +28,17 @@ from engines.initiation import LEGACY_MANIFEST  # noqa: E402
 
 # Late-bound access to generation + shared mutable campaign state.
 from picard_framework.runs.mega_cruise_campaign import campaign_runner as _cr  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign.informative_ordering import (  # noqa: E402
+    ORDER_CHOICES,
+    ORDER_MANIFEST,
+    order_runs,
+)
+from picard_framework.runs.mega_cruise_campaign.stop_rule import (  # noqa: E402
+    CONTINUE,
+    StopRule,
+    StopRuleSpecError,
+    parse_stop_rule,
+)
 from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     confine_to_base,
@@ -1086,6 +1097,26 @@ def _campaign_parser() -> argparse.ArgumentParser:
         help="Per-run subprocess timeout in seconds (default 3600; "
         "~30 min 7000-agent runs need headroom beyond the old 600s cap).",
     )
+    parser.add_argument(
+        "--order",
+        choices=ORDER_CHOICES,
+        default=ORDER_MANIFEST,
+        help="Global run order applied to the flattened run list BEFORE the "
+        "shard partition: 'manifest' (tier/cartesian order, default) or "
+        "'informative' (every design point once before any replicate, "
+        "coarse-to-fine across the grid). Shard-independent by construction.",
+    )
+    parser.add_argument(
+        "--stop-rule",
+        default=None,
+        metavar="EVENT:LOW:HIGH:MIN_N",
+        help="Pre-declared in-loop stopping rule on this shard's completed runs: "
+        "a Beta-Binomial (Jeffreys) posterior on the frequency of EVENT "
+        "(a derived metric, e.g. outbreak_occurred or attack_rate>=0.3) "
+        "against the expected band [LOW, HIGH]; the shard stops cleanly once "
+        ">= 0.95 posterior mass lies on one side of the band after MIN_N "
+        "scored runs. Default off.",
+    )
     return parser
 
 
@@ -1151,9 +1182,12 @@ def _campaign_gate(
     done: set[str],
     retry_only: set[str] | None,
     bundle: ShardBundle | None = None,
+    stop_rule: StopRule | None = None,
 ) -> str:
     if shard_count is not None and global_index % shard_count != shard_index:
         return "ignore"
+    if stop_rule is not None and stop_rule.triggered:
+        return "stop"
     if args.limit is not None and executed >= args.limit:
         return "stop"
     if run_id in done:
@@ -1174,6 +1208,55 @@ def _record_run_ok(bundle: ShardBundle, run_id: str) -> None:
     print(" OK")
 
 
+def _stop_rule_artifact_name(shard_index: int, shard_count: int | None) -> str:
+    return f"{_shard_suffix(shard_index, shard_count)}.stop_rule.json"
+
+
+def _observe_stop_rule(
+    stop_rule: StopRule | None,
+    bundle: ShardBundle,
+    run_id: str,
+) -> None:
+    """Feed the just-recorded run's derived block to the rule and report a trip."""
+    if stop_rule is None:
+        return
+    entry = bundle.entries.get(_cr._safe_run_id(run_id)) or {}
+    stop_rule.observe(run_id, entry.get("derived") or {})
+    verdict = stop_rule.decision()
+    if verdict == CONTINUE:
+        return
+    mass = stop_rule.mass()
+    print(
+        f"\n  STOP RULE {stop_rule.render_spec()} fired: {verdict} "
+        f"({stop_rule.k}/{stop_rule.n} events; P(below)={mass['below']:.3f} "
+        f"P(above)={mass['above']:.3f}). Orderly shutdown: flushing bundle.",
+    )
+
+
+def _publish_stop_rule_verdict(
+    stop_rule: StopRule | None,
+    uploader: Any,
+    shard_index: int,
+    shard_count: int | None,
+) -> None:
+    """Write the rule's state next to the shard bundle and mirror it to S3."""
+    if stop_rule is None:
+        return
+    name = _stop_rule_artifact_name(shard_index, shard_count)
+    path = _cr._output_artifact(name)
+    with validated_open(
+        path, "w", allowed_roots=_cr._allowed_roots(), encoding="utf-8",
+    ) as fh:
+        json.dump(stop_rule.verdict(), fh, indent=2)
+        fh.write("\n")
+    if uploader is None:
+        return
+    try:
+        uploader.upload_file(Path(path), name)
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ({name} upload failed: {exc})")
+
+
 def _perform_campaign_run(
     *,
     run_id: str,
@@ -1192,6 +1275,7 @@ def _perform_campaign_run(
     uploader: Any,
     bundle: ShardBundle,
     t0: float,
+    stop_rule: StopRule | None = None,
 ) -> bool:
     if args.retry_failed:
         _cr.clear_failed_artifacts(run_id)
@@ -1226,6 +1310,7 @@ def _perform_campaign_run(
         return False
     _cr.mark_completed(run_id)
     _record_run_ok(bundle, run_id)
+    _observe_stop_rule(stop_rule, bundle, run_id)
     if (
         uploader is not None
         and args.s3_log_every > 0
@@ -1248,6 +1333,7 @@ def _execute_assigned_runs(
     uploader: Any,
     bundle: ShardBundle,
     t0: float,
+    stop_rule: StopRule | None = None,
 ) -> int:
     total = succeeded = failed = skipped = executed = 0
     for global_index, (_tier_id, run_id, spec) in enumerate(all_runs):
@@ -1261,6 +1347,7 @@ def _execute_assigned_runs(
             done=done,
             retry_only=retry_only,
             bundle=bundle,
+            stop_rule=stop_rule,
         )
         if gate == "ignore":
             continue
@@ -1292,6 +1379,7 @@ def _execute_assigned_runs(
             uploader=uploader,
             bundle=bundle,
             t0=t0,
+            stop_rule=stop_rule,
         )
         executed += 1
         if ok:
@@ -1301,9 +1389,15 @@ def _execute_assigned_runs(
     if uploader is not None:
         _upload_completed_log(uploader, shard_index, shard_count)
     bundle.flush(uploader)
+    _publish_stop_rule_verdict(stop_rule, uploader, shard_index, shard_count)
     elapsed = time.time() - t0
     print(f"\n{'=' * 60}")
     print(f"  Campaign: {total} listed, {succeeded} ok, {failed} err, {skipped} skip")
+    if stop_rule is not None:
+        print(
+            f"  Stop rule {stop_rule.render_spec()}: {stop_rule.decision()} "
+            f"({stop_rule.k}/{stop_rule.n} events)",
+        )
     print(f"  Time: {elapsed / 3600:.2f}h ({elapsed / max(executed, 1):.1f}s/run)")
     print(f"  Output: {_cr.OUTPUT_ROOT}")
     print(f"{'=' * 60}")
@@ -1333,14 +1427,36 @@ def _print_dry_run(
     shard_count: int | None,
     shard_index: int,
     shard_total: int,
+    order: str = ORDER_MANIFEST,
 ) -> int:
     print(f"\n{'=' * 60}")
     print(f"  DRY RUN — {len(all_runs)} runs total across {len(tiers)} tier(s)")
+    if order != ORDER_MANIFEST:
+        print(f"  DRY RUN — global order: {order}")
     if shard_count is not None:
         print(f"  DRY RUN — {shard_total} runs would run on shard {shard_index}")
     print(f"  Output: {_cr.OUTPUT_ROOT}")
     print(f"{'=' * 60}")
     return 0
+
+
+def _resolve_stop_rule(
+    args: argparse.Namespace,
+    bundle: ShardBundle,
+) -> StopRule | None:
+    """Parse ``--stop-rule`` and seed it with this shard's already-completed runs."""
+    if args.stop_rule is None:
+        return None
+    try:
+        rule = parse_stop_rule(args.stop_rule)
+    except StopRuleSpecError as exc:
+        raise SystemExit(str(exc)) from exc
+    rule.observe_entries(bundle.entries)
+    print(
+        f"  Stop rule {rule.render_spec()} armed "
+        f"({rule.n} prior scored runs, {rule.k} events)",
+    )
+    return rule
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -1380,7 +1496,9 @@ def main(argv: list[str] | None = None) -> int:
         manifest, args.tier, include_deferred=args.include_deferred,
     )
     _print_deferred_tiers(manifest, tiers, args)
-    all_runs = _collect_all_runs(manifest, tiers, args)
+    all_runs = order_runs(_collect_all_runs(manifest, tiers, args), args.order)
+    if args.order != ORDER_MANIFEST:
+        print(f"\n  Global run order: {args.order} (shard-independent)")
     shard_total = sum(
         1 for gi in range(len(all_runs))
         if shard_count is None or gi % shard_count == shard_index
@@ -1391,7 +1509,10 @@ def main(argv: list[str] | None = None) -> int:
             f"{shard_total} of {len(all_runs)} runs assigned to this shard",
         )
     if args.dry_run:
-        return _print_dry_run(all_runs, tiers, shard_count, shard_index, shard_total)
+        return _print_dry_run(
+            all_runs, tiers, shard_count, shard_index, shard_total, order=args.order,
+        )
+    stop_rule = _resolve_stop_rule(args, bundle)
     return _execute_assigned_runs(
         all_runs=all_runs,
         args=args,
@@ -1403,6 +1524,7 @@ def main(argv: list[str] | None = None) -> int:
         uploader=uploader,
         bundle=bundle,
         t0=time.time(),
+        stop_rule=stop_rule,
     )
 
 
