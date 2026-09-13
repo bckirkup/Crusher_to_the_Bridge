@@ -66,7 +66,10 @@ _COMPARATORS: dict[str, Callable[[float, float], bool]] = {
     "<": lambda v, t: v < t,
     "==": lambda v, t: v == t,
 }
-_EVENT_RE = re.compile(r"^(?P<metric>[A-Za-z_][A-Za-z0-9_]*)(?:(?P<op>>=|<=|==|>|<)(?P<threshold>[^:]+))?$")
+_EVENT_RE = re.compile(
+    r"^(?P<metric>[A-Za-z_]\w*)(?:(?P<op>>=|<=|==|>|<)(?P<threshold>[^:]+))?$",
+    re.ASCII,
+)
 
 
 class StopRuleSpecError(ValueError):

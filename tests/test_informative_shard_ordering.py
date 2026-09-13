@@ -191,7 +191,8 @@ def test_stop_rule_fires_below_on_absent_events() -> None:
     for i in range(15):
         rule.observe(f"r{i}", {"attack_rate": 0.05})
     assert rule.decision() == STOP_BELOW
-    assert rule.k == 0 and rule.n == 15
+    assert rule.k == 0
+    assert rule.n == 15
 
 
 def test_stop_rule_stays_quiet_inside_band() -> None:
@@ -221,7 +222,8 @@ def test_stop_rule_skips_unscorable_runs() -> None:
     assert rule.observe("b", {"attack_rate": None}) is None
     assert rule.observe("c", {"attack_rate": "n/a"}) is None
     assert rule.observe("d", {"attack_rate": 0.5}) is True
-    assert rule.n == 1 and rule.unscored == 3
+    assert rule.n == 1
+    assert rule.unscored == 3
     assert rule.decision() == CONTINUE
 
 
@@ -230,7 +232,8 @@ def test_stop_rule_verdict_round_trips_spec() -> None:
     rule.observe_entries({"x": {"derived": {"peak_epoch": 12}}, "y": {"derived": {}}})
     verdict = rule.verdict()
     assert verdict["spec"] == "peak_epoch<40:0.1:0.3:7"
-    assert verdict["scored_runs"] == 1 and verdict["events"] == 1
+    assert verdict["scored_runs"] == 1
+    assert verdict["events"] == 1
     assert verdict["unscored_runs"] == 1
     assert verdict["decision"] == CONTINUE
     assert parse_stop_rule(verdict["spec"]).render_spec() == verdict["spec"]
@@ -322,7 +325,8 @@ def test_stop_rule_triggers_orderly_resumable_shutdown(
         assert all(f"{run_id}/summary.json" in zf.namelist() for run_id in calls)
     verdict = json.loads(storage["shard-1.stop_rule.json"])
     assert verdict["decision"] == STOP_ABOVE
-    assert verdict["scored_runs"] == 5 and verdict["events"] == 5
+    assert verdict["scored_runs"] == 5
+    assert verdict["events"] == 5
     assert verdict["posterior"]["above"] >= STOP_MASS
     assert verdict["scored_run_ids"] == calls
     completed = (out / "completed_runs.txt").read_text(encoding="utf-8").split()
