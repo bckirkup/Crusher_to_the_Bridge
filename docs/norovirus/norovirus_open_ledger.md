@@ -3137,7 +3137,14 @@ Roughly in dependency order.
     this ledger maps to that rung and **no measurement here was produced
     under the new defaults**. Moved goldens were re-pointed to the explicit
     historical configuration rather than deleted (each carries an
-    `ATTRIBUTED MOVE` comment naming the flip).
+    `ATTRIBUTED MOVE` comment naming the flip). One interaction to record:
+    a tier that sweeps `boarding_prevalence_points` without declaring a rung
+    now writes the full `shipped` mechanism baseline into its initiation
+    override — necessary because the profile's own arm is renewal and the
+    two mechanism blocks cannot coexist — which preserves those tiers'
+    historical semantics exactly and leaves their run ids unchanged;
+    `sentinel_recovery.onboard_seeding` stamps its prevalence factors itself
+    for the same reason.
 
 ## 5. Held fixed by assumption
 

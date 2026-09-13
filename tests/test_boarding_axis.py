@@ -185,7 +185,9 @@ def test_swept_coordinates_reach_only_the_studied_pathogen() -> None:
     assert "influenza_a" in block
     for pid, coords in block.items():
         if pid != "enabled":
-            assert coords["state_split"]["never_symptomatic_fraction"] == 0.36
+            assert coords["state_split"][
+                "never_symptomatic_fraction"
+            ] == pytest.approx(0.36)
 
 
 def test_party_axis_moves_the_party_block_and_the_run_id() -> None:
@@ -407,3 +409,39 @@ def test_default_rung_resolves_identically_to_reportable() -> None:
     assert default_spec.symptomatic_stream is True
     assert default_spec.preboarding is not None
     assert default_spec.preboarding.crew.enabled is True
+
+
+def test_rung_blocks_match_the_shipped_profile_constants() -> None:
+    """CHANGE DETECTOR: the rung literals must not drift from the profile.
+
+    The rungs repeat sourced constants so each run is self-describing; the
+    profile is the record, the rung the duplicate. If a profile edit moves
+    one side only, this fails rather than letting the ladder drift.
+    """
+    profiles = load_pathogen_profiles(load_config())
+    boarding = profiles["norwalk_gi"]["boarding"]
+    assert boarding_axis._RENEWAL_BLOCK == boarding["renewal"]
+    assert boarding_axis._SHIPPED_PREVALENCE == {
+        "passenger": 0.0325, "crew": 0.0185,
+    }
+    # And those comparator numbers are the ones the profile's notes name.
+    notes = boarding["symptomatic_stream"].get("notes", "")
+    assert "0.0325" in notes
+    assert "0.0185" in notes
+
+
+def test_reportable_rung_preboarding_matches_the_engine_reference() -> None:
+    """CHANGE DETECTOR: the rung's clause must equal the engine's default.
+
+    ``default`` resolving equal to ``reportable`` already catches drift on
+    either side; this makes the reference point explicit — a change to the
+    engine's ``_PREBOARDING_REFERENCE_BLOCK`` or the rung block must move
+    the resolved spec, not silently desynchronise the two declarations.
+    """
+    from engines.initiation import _PREBOARDING_REFERENCE_BLOCK
+
+    rung = boarding_axis.MECHANISM_RUNGS["reportable"]["preboarding_assessment"]
+    ref = _PREBOARDING_REFERENCE_BLOCK
+    assert rung["lookback_days"] == ref["lookback_days"]
+    assert rung["crew"]["enabled"] == ref["crew"]["enabled"]
+    assert rung["passenger"]["enabled"] == ref["passenger"]["enabled"]
