@@ -1498,7 +1498,7 @@ def _draw_party_cohort(
         state = _board_one_host(
             spec, agent, profile, clock, rng, party.role, tallies,
         )
-        if state is None or state == STATE_SCREENED_OUT:
+        if state is None:
             continue
         if state != STATE_CLEARED:
             drawn_by_role[party.role] += 1

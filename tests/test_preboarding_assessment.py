@@ -24,6 +24,7 @@ from engines.initiation import (
     _PreboardingTallies,
     draw_boarding_cohort,
     preboarding_reportable_ids,
+    record_boarding_reports,
     resolve_initiation_plan,
 )
 from engines.sim_clock import HOURS, SimClock
@@ -608,3 +609,200 @@ class TestDefaultInertness:
         assert rng_next == pytest.approx(
             self._INERTNESS_RNG_NEXT, abs=1e-15,
         )
+
+
+class TestSymptomaticDenial:
+    """A declared symptomatic-stream host denied boarding holds no record."""
+
+    def test_a_denied_symptomatic_crew_host_leaves_the_cohort(self) -> None:
+        spec = BoardingSpec(
+            pathogen_id=PATHOGEN,
+            passenger_prevalence=0.0,
+            crew_prevalence=0.0,
+            never_symptomatic_fraction=0.20,
+            presymptomatic_share_of_presenting=0.04,
+            rate_mode="renewal",
+            symptomatic_stream=True,
+            symptomatic_passenger_prevalence=0.0,
+            symptomatic_crew_prevalence=1.0,
+            mean_illness_duration_days=3.0,
+            preboarding=PreboardingAssessment(
+                lookback_days=30.0,
+                crew=_role_spec(reportable=True, denial_probability=1.0),
+                passenger=_role_spec(enabled=False),
+            ),
+        )
+        agents = [_agent(600 + i, "crew") for i in range(20)]
+        report = draw_boarding_cohort(
+            spec, agents, _profile(), _clock(), np.random.default_rng(67),
+        )
+        arm = report.preboarding["crew"]
+        assert arm["eligible"] == 20
+        assert arm["declared"] == 20
+        assert arm["screened_out"] == 20
+        assert report.drawn_by_role["crew"] == 0
+        assert not any(PATHOGEN in a.infections for a in agents)
+        assert report.preboarding_reportable_ids == ()
+
+
+class TestReportFolding:
+    """record_boarding_reports is the single stamping path for the ids."""
+
+    def test_it_stamps_ids_and_the_manifest_entry(self) -> None:
+        engine = _FakeEngine()
+        engine.initiation_manifest = {"mode": "boarding"}
+        report = draw_boarding_cohort(
+            _resolve(_assessment(
+                passenger=_role(declaration_compliance=0.0),
+            )),
+            engine.agents, _profile(), _clock(), np.random.default_rng(71),
+        )
+        record_boarding_reports(engine, [report])
+        entry = engine.initiation_manifest["boarding"][PATHOGEN]
+        assert entry["preboarding_assessment"]["crew"]["preboarding_reportable"] > 0
+        assert engine.preboarding_reportable_ids == set(
+            report.preboarding_reportable_ids,
+        )
+        assert engine.preboarding_reportable_ids
+
+
+class TestRoleBlockValidation:
+    def test_a_non_mapping_role_block_is_refused(self) -> None:
+        with pytest.raises(ValueError, match="must be a mapping"):
+            _resolve(_assessment(crew="yes"))
+
+
+class TestCampaignAxis:
+    """The sweep coordinates: tier keys, tags, factors, the written block."""
+
+    _NORO_ONLY = {"remove": [
+        "sapovirus", "campylobacter_jejuni", "influenza_a", "sars_cov2_resp",
+    ]}
+
+    def _axis(self, tier: dict[str, Any]) -> Any:
+        from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
+            IndexCaseAxis,
+        )
+        return IndexCaseAxis.for_tier(tier, PATHOGEN)
+
+    def test_unswept_leaves_no_trace(self) -> None:
+        from picard_framework.runs.mega_cruise_campaign import boarding_axis
+        axis = self._axis({})
+        (point,) = axis.points
+        assert axis.tags(point) == []
+        assert not any("preboarding" in k for k in axis.factors(point))
+        block = boarding_axis.initiation_override(
+            "active_profiles", self._NORO_ONLY, axis.factors(point),
+        )["initiation"]["boarding"]
+        assert "preboarding_assessment" not in block["norwalk_gi"]
+
+    def test_the_swept_tier_tags_factors_and_block(self) -> None:
+        from picard_framework.runs.mega_cruise_campaign import boarding_axis
+        tier = {
+            "preboarding_crew_points": [
+                {"compliance": 1.0, "recall_halflife_days": None,
+                 "denial_probability": 0.5},
+            ],
+            "preboarding_passenger_points": [
+                {"compliance": 0.3, "recall_halflife_days": 2.0,
+                 "denial_probability": 0.0},
+            ],
+            "preboarding_crew_reportable_values": [True],
+        }
+        axis = self._axis(tier)
+        point = axis.points[0]
+        # CHANGE DETECTOR: the run-id tag shape is the contract the campaign
+        # post-process reads.
+        assert axis.tags(point) == [
+            "pbc1000hinfd500", "pbp300h200d0", "rep1",
+        ]
+        factors = axis.factors(point)
+        assert factors["preboarding_crew_declaration_compliance"] == pytest.approx(1.0)
+        assert factors["preboarding_crew_denial_probability"] == pytest.approx(0.5)
+        assert factors["preboarding_passenger_recall_halflife_days"] == pytest.approx(2.0)
+        assert factors["preboarding_crew_reportable"] is True
+        block = boarding_axis.initiation_override(
+            "active_profiles", self._NORO_ONLY, factors,
+        )["initiation"]["boarding"]["norwalk_gi"]
+        assessment = block["preboarding_assessment"]
+        assert assessment["crew"] == {
+            "enabled": True,
+            "declaration_compliance": 1.0,
+            "recall_halflife_days": None,
+            "denial_probability": 0.5,
+            "reportable": True,
+        }
+        assert assessment["passenger"]["declaration_compliance"] == pytest.approx(0.3)
+        recorded = boarding_axis.recorded_factors(
+            "active_profiles", self._NORO_ONLY, factors,
+        )
+        assert recorded["preboarding_crew_reportable"] is True
+
+    def test_reportable_alone_enables_the_crew_clause(self) -> None:
+        from picard_framework.runs.mega_cruise_campaign import boarding_axis
+        axis = self._axis({"preboarding_crew_reportable_values": [True, False]})
+        assert [axis.tags(p) for p in axis.points] == [["rep1"], ["rep0"]]
+        block = boarding_axis.initiation_override(
+            "active_profiles", self._NORO_ONLY, axis.factors(axis.points[0]),
+        )["initiation"]["boarding"]["norwalk_gi"]
+        assert block["preboarding_assessment"]["crew"] == {
+            "enabled": True, "reportable": True,
+        }
+
+    def test_party_mode_pathogens_do_not_take_the_axis(self) -> None:
+        axis = self._axis({
+            "preboarding_crew_points": [
+                {"compliance": 1.0, "recall_halflife_days": None,
+                 "denial_probability": 0.5},
+            ],
+        })
+        # norwalk_gi is prevalence-mode here; the party-mode pathogens of the
+        # edison bundle are not crossed against the screen.
+        for point in axis.points:
+            assert point.preboarding_crew is not None
+
+    def test_point_validation(self) -> None:
+        from picard_framework.runs.mega_cruise_campaign import boarding_axis
+        with pytest.raises(ValueError, match="must be a mapping"):
+            boarding_axis.preboarding_points(
+                {"preboarding_crew_points": [0.5]},
+                "preboarding_crew_points", "pbc",
+            )
+        with pytest.raises(ValueError, match="empty"):
+            boarding_axis.preboarding_points(
+                {"preboarding_crew_points": []},
+                "preboarding_crew_points", "pbc",
+            )
+        with pytest.raises(ValueError, match="collapses"):
+            boarding_axis.preboarding_points(
+                {"preboarding_crew_points": [
+                    {"compliance": 1.0, "denial_probability": 0.0},
+                    {"compliance": 1.0, "denial_probability": 0.0},
+                ]},
+                "preboarding_crew_points", "pbc",
+            )
+        with pytest.raises(ValueError, match="empty"):
+            boarding_axis.preboarding_crew_reportable_values(
+                {"preboarding_crew_reportable_values": []},
+            )
+        with pytest.raises(ValueError, match="collapses"):
+            boarding_axis.preboarding_crew_reportable_values(
+                {"preboarding_crew_reportable_values": [True, True]},
+            )
+        assert boarding_axis.preboarding_points(
+            {}, "preboarding_crew_points", "pbc",
+        ) == [None]
+        assert boarding_axis.preboarding_crew_reportable_values({}) == [None]
+        assert not boarding_axis.sweeps_preboarding({})
+        assert boarding_axis.sweeps_preboarding(
+            {"preboarding_passenger_points": []},
+        )
+
+
+class TestAbsentRoleBlocks:
+    def test_a_block_without_role_keys_disables_both(self) -> None:
+        spec = _resolve(_assessment(
+            crew=None, passenger=None,
+        ))
+        assert spec.preboarding.crew.enabled is False
+        assert spec.preboarding.passenger.enabled is False
