@@ -23,14 +23,12 @@ from engines.initiation import (
     _assess_boarder,
     _PreboardingTallies,
     draw_boarding_cohort,
+    preboarding_reportable_ids,
     resolve_initiation_plan,
 )
 from engines.sim_clock import HOURS, SimClock
 from orchestrator_epoch import step_mid_cruise_introductions
-from orchestrator_init import (
-    init_multi_pathogen,
-    preboarding_reportable_ids,
-)
+from orchestrator_init import init_multi_pathogen
 from orchestrator_types import SimulationState
 
 PATHOGEN = "norwalk_gi"

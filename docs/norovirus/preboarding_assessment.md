@@ -83,6 +83,12 @@ field on the report, never a `composition` bucket.
 ## Inertness
 
 A block absent or with both roles `enabled: false` consumes exactly the
-draws the pre-arm code consumed: eligibility reads a stamp that already
-existed, and no rng call is reached before `enabled` is checked. The
-fingerprint test captures the pre-arm draw of merged `main`.
+draws the pre-arm code consumed: a disabled role is skipped before
+eligibility is tested, so no rng call is ever reached. The fingerprint
+test captures the pre-arm draw of merged `main`.
+
+When a role *is* enabled the declaration/denial draws share
+`boarding_rng`, so on-vs-off matched-seed runs are not host-paired — a
+denial draw shifts every subsequent host's stream position. The campaign
+readout therefore compares distributions across matched seeds, never
+which hosts were drawn.

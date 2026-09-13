@@ -37,6 +37,7 @@ from engines.initiation import (
     apply_explicit_seeds,
     draw_port_call,
     initiation_owned_pathogens,
+    preboarding_reportable_ids,
     record_boarding_reports,
 )
 from engines.natural_history import advance_infections, project_legacy_illness
@@ -261,8 +262,6 @@ def step_mid_cruise_introductions(
             # A pathogen boarding at a later port call can still declare a
             # crew reportable case; it joins the live set the sailing-port
             # construction seeded.
-            from orchestrator_init import preboarding_reportable_ids
-
             state.ever_reported_ids.update(
                 preboarding_reportable_ids(engine),
             )

@@ -1719,6 +1719,20 @@ def draw_port_call(
     ]
 
 
+def preboarding_reportable_ids(engine: Any) -> set[int]:
+    """The agent ids the pre-boarding assessment made reportable at boarding.
+
+    VSP 4.1.1.2 reportable AGE cases cannot pass through the sick-call
+    ladder: ``update_ever_reported_ids`` intersects reports with the
+    currently symptomatic roster, and a host whose illness already resolved
+    ashore is not on it. The initiation draw records them on the engine and
+    callers union them into the live ``ever_reported_ids`` — at state
+    construction for the sailing port, and at each later port call in
+    ``step_mid_cruise_introductions``. Empty when the arm is off.
+    """
+    return set(getattr(engine, "preboarding_reportable_ids", ()) or ())
+
+
 def record_boarding_reports(engine: Any, reports: list[BoardingReport]) -> None:
     """Fold a port call's draws into the manifest already written."""
     manifest = getattr(engine, "initiation_manifest", None)

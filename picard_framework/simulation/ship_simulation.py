@@ -39,6 +39,7 @@ from engines.crew_duty_exclusion import (
 from engines.crew_duty_exclusion import (
     build_tracker as build_crew_duty_exclusion_tracker,
 )
+from engines.initiation import preboarding_reportable_ids
 from engines.py_contam_bridge import (
     build_transport_engine,
     load_air_flow_paths,
@@ -104,7 +105,6 @@ from orchestrator_init import (
     load_isolation_unit_capacity,
     load_pathogen_profiles,
     pathogen_profiles_are_respiratory,
-    preboarding_reportable_ids,
     update_cumulative_confirmed_cases,
     update_ever_infected_ids,
     update_ever_reported_ids,

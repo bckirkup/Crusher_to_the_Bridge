@@ -57,6 +57,7 @@ from engines.initiation import (
     draw_port_call,
     initiation_configured,
     initiation_owned_pathogens,
+    record_boarding_reports,
     resolve_initiation_plan,
 )
 from engines.non_pharmaceutical_interventions import (
@@ -818,20 +819,6 @@ def update_ever_infected_ids(
         infection_state, _, _ = resolve_agent_axes(agent)
         if infection_state in (INFECTION_INFECTED, INFECTION_RECOVERED):
             ever_infected_ids.add(int(agent["agent_id"]))
-
-
-def preboarding_reportable_ids(engine: KorkinShipEngine) -> set[int]:
-    """The agent ids the pre-boarding assessment made reportable at boarding.
-
-    VSP 4.1.1.2 reportable AGE cases cannot pass through the sick-call
-    ladder: ``update_ever_reported_ids`` intersects reports with the
-    currently symptomatic roster, and a host whose illness already resolved
-    ashore is not on it. The initiation draw records them on the engine and
-    callers union them into the live ``ever_reported_ids`` — at state
-    construction for the sailing port, and at each later port call in
-    ``step_mid_cruise_introductions``. Empty when the arm is off.
-    """
-    return set(getattr(engine, "preboarding_reportable_ids", ()) or ())
 
 
 def update_ever_reported_ids(
@@ -1845,11 +1832,11 @@ def _run_initiation(
         reports = draw_port_call(plan, engine, 0, pathogen_profiles)
         for report in reports:
             boarded = sum(report.drawn_by_role.values())
-            engine.preboarding_reportable_ids.update(
-                report.preboarding_reportable_ids,
-            )
             print(f"  Boarded {report.pathogen_id} -> {boarded} hosts")
     engine.initiation_manifest = build_initiation_manifest(plan, reports, [])
+    # The single code path that stamps the epoch-0 reportable ids onto the
+    # engine; it also re-folds the same boarding entries into the manifest.
+    record_boarding_reports(engine, reports)
     for record in apply_explicit_seeds(
         plan, engine, 0, rng, pathogen_profiles,
     ):
