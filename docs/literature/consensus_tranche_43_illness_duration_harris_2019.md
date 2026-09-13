@@ -16,9 +16,10 @@ cohort sourced here.
 survival *curve*, and the paper reports it as a figure. Source image:
 `https://media.springernature.com/full/springer-static/image/art%3A10.1186%2Fs12879-019-3706-z/MediaObjects/12879_2019_3706_Fig4_HTML.png`.
 
-**Status:** Implemented as a default-off selectable arm; the digitization is
-cross-checked against the paper's own summary statistics (§3) and the arm is
-unmeasured until a campaign runs it.
+**Status:** Implemented and now the **default** draw wherever a survival
+table is present (unstated `draw` → `empirical_survival`; `point` remains
+selectable). The digitization is cross-checked against the paper's own
+summary statistics (§3); the arm is unmeasured until a campaign runs it.
 
 ---
 

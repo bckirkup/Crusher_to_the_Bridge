@@ -68,7 +68,12 @@ def _profile(pathogen_id: str = PATHOGEN, **overrides: object) -> dict:
     profile = next(
         p for p in data["pathogens"] if p["pathogen_id"] == pathogen_id
     )
-    return {**copy.deepcopy(profile), **overrides}
+    merged = {**copy.deepcopy(profile), **overrides}
+    # ATTRIBUTED MOVE (realism-default flip): the profile now ships the
+    # empirical illness-duration table as its default draw; these tests
+    # pin recovery to recovery_day, so the table comes off.
+    merged.pop("illness_duration", None)
+    return merged
 
 
 def _config(pathogen_id: str = PATHOGEN, **overrides: object) -> StrainEvolutionConfig:

@@ -18,8 +18,11 @@ that this check exposed. It **moves no constant and adopts none.**
 Each number below names the paper section it was read from.
 
 **Status:** Evidence assembled, arithmetic reproduced below and checkable —
-findings A/B/C stand as stated; both repairs are now implemented as
-selectable, default-off modes (§6) and unmeasured.
+findings A/B/C stand as stated. Both repairs are implemented and are now the
+**default** mechanism for `norwalk_gi` (the realism-default flip); the
+historical arm is still selectable as the `shipped` mechanism rung. Neither
+arm has been measured under a dedicated campaign yet — `realism_ladder_v1`
+is the paired measurement.
 
 ---
 
@@ -146,8 +149,9 @@ asymptomatic sample at all given finding B.
 
 ## 6. What was implemented
 
-Both repairs now exist as selectable, default-off modes; nothing shipped
-moved and neither arm has been measured.
+Both repairs exist as selectable modes; they are now the default mechanism
+for `norwalk_gi` (explicit configuration reproduces the shipped arm exactly)
+and neither arm has yet been measured under matched campaign conditions.
 
 - **A2, `rate_mode: renewal`.** The boarding block carries
   `renewal.case_incidence_per_1000_py` per role and

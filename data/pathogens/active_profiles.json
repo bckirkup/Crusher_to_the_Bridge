@@ -129,7 +129,7 @@
       },
       "recovery_day": 3,
       "illness_duration": {
-        "draw": "point",
+        "draw": "empirical_survival",
         "unit": "days",
         "survival": [
           {"day": 0, "probability": 1.0},
@@ -144,7 +144,7 @@
           {"day": 9, "probability": 0.019},
           {"day": 13, "probability": 0.0}
         ],
-        "notes": "Harris, Iturriza-Gomara, Allen, Kelly & O'Brien 2019, 'Norovirus strain types found within the second infectious intestinal diseases (IID2) study: an analysis of norovirus circulating in the community', BMC Infect Dis 19:87, DOI 10.1186/s12879-019-3706-z (IID2: UK national community cohort, April 2008 - August 2009), Fig 4 panel C (diarrhoea, dotted curve): percent still ill by number of days following illness onset, adults and children aged >= 5 years — the model's population. S(d) is P(illness still present at d days after onset); days 10-12 are not digitizable (the legend overlies the curve) and are interpolated linearly between d=9 and d=13, where both curves sit at zero. Digitization calibration: source image media.springernature.com full/springer-static/image/art:10.1186/s12879-019-3706-z/MediaObjects/12879_2019_3706_Fig4_HTML.png (1945x1373 grayscale), panel C axis rows 334 px (0%) and 307.5 px (10%) giving 2.65 px per percentage point, x-axis label centroids giving day 0 at col 97.5 and 141.2 px per day, curve read as the topmost dark pixel per day column with the 10% reference line and axis masked; read error about +/-1 percentage point. The table's own statistics reproduce the paper's reported figures in direction and where the >=5 band is the right comparison, exactly: median T = 2 days, E[T] = 2.57 days, P(T <= 4) = 0.87 against the abstract's 83% resolved by day 4 all ages. Grade B (direct measurement of illness duration in a community cohort of the right age band, not in a cruise setting), origin F4·dig. This replaces a value previously carried from Atmar's challenge illness (1-2 days), a different population and exposure. draw 'point' is the default: the arm is inert until a campaign selects empirical_survival."
+        "notes": "Harris, Iturriza-Gomara, Allen, Kelly & O'Brien 2019, 'Norovirus strain types found within the second infectious intestinal diseases (IID2) study: an analysis of norovirus circulating in the community', BMC Infect Dis 19:87, DOI 10.1186/s12879-019-3706-z (IID2: UK national community cohort, April 2008 - August 2009), Fig 4 panel C (diarrhoea, dotted curve): percent still ill by number of days following illness onset, adults and children aged >= 5 years — the model's population. S(d) is P(illness still present at d days after onset); days 10-12 are not digitizable (the legend overlies the curve) and are interpolated linearly between d=9 and d=13, where both curves sit at zero. Digitization calibration: source image media.springernature.com full/springer-static/image/art:10.1186/s12879-019-3706-z/MediaObjects/12879_2019_3706_Fig4_HTML.png (1945x1373 grayscale), panel C axis rows 334 px (0%) and 307.5 px (10%) giving 2.65 px per percentage point, x-axis label centroids giving day 0 at col 97.5 and 141.2 px per day, curve read as the topmost dark pixel per day column with the 10% reference line and axis masked; read error about +/-1 percentage point. The table's own statistics reproduce the paper's reported figures in direction and where the >=5 band is the right comparison, exactly: median T = 2 days, E[T] = 2.57 days, P(T <= 4) = 0.87 against the abstract's 83% resolved by day 4 all ages. Grade B (direct measurement of illness duration in a community cohort of the right age band, not in a cruise setting), origin F4·dig. This replaces a value previously carried from Atmar's challenge illness (1-2 days), a different population and exposure. draw 'empirical_survival' is the default under this profile's renewal arm; the historical comparator states draw 'point' explicitly."
       },
       "shedding_duration_days": 15,
       "detectable_duration_days": 28,
@@ -197,22 +197,27 @@
       "initial_infected": null,
       "boarding": {
         "mode": "prevalence",
-        "prevalence": {
-          "passenger": 0.0325,
-          "crew": 0.0185
+        "rate_mode": "renewal",
+        "age_draw": "stationary_detectable",
+        "renewal": {
+          "case_incidence_per_1000_py": {
+            "passenger": 39.0,
+            "crew": 39.0
+          },
+          "detectable_duration_days": 28
         },
         "state_split": {
           "never_symptomatic_fraction": 0.29,
           "presymptomatic_share_of_presenting": 0.04
         },
         "symptomatic_stream": {
-          "enabled": false,
-          "notes": "Derivation of record: docs/norovirus/symptomatic_boarding_stream.md. A partition of the renewal import rate (requires rate_mode 'renewal'), not an addition: p_sym = case incidence x mean illness duration = (I/1000) x (E[T]/365.25) and p_asym = p_total - p_sym. Inputs are sourced rows, not tuned: I = 39.0 cases/1000 py ages 15-64, O'Brien et al. 2016 J Infect Dis DOI 10.1093/infdis/jiv411 Table 1 (Grade B, origin T1); E[T] = 2.5715 days from this profile's own illness_duration table, Harris et al. 2019 IID2 DOI 10.1186/s12879-019-3706-z Fig 4C (Grade B, origin F4·dig). Derived values under the dispersed arm: p_sym = 0.02746%, p_asym = 0.3936% of p_total 0.4211%, symptomatic share of the RNA-positive cohort 6.52%; under draw 'point' (E[T] = 3) p_sym = 0.03203%. Default-off and inert until a run selects it."
+          "enabled": true,
+          "notes": "Derivation of record: docs/norovirus/symptomatic_boarding_stream.md. A partition of the renewal import rate (requires rate_mode 'renewal'), not an addition: p_sym = case incidence x mean illness duration = (I/1000) x (E[T]/365.25) and p_asym = p_total - p_sym. Inputs are sourced rows, not tuned: I = 39.0 cases/1000 py ages 15-64, O'Brien et al. 2016 J Infect Dis DOI 10.1093/infdis/jiv411 Table 1 (Grade B, origin T1); E[T] = 2.5715 days from this profile's own illness_duration table, Harris et al. 2019 IID2 DOI 10.1186/s12879-019-3706-z Fig 4C (Grade B, origin F4·dig). Derived values under the dispersed arm: p_sym = 0.02746%, p_asym = 0.3936% of p_total 0.4211%, symptomatic share of the RNA-positive cohort 6.52%; under draw 'point' (E[T] = 3) p_sym = 0.03203%. Enabled by default under this profile's renewal arm; the historical comparator is rate_mode 'screening_prevalence' with prevalence passenger 0.0325 / crew 0.0185 (Grade B intervals, tranche 10 / tranche 42), age_draw 'engine_window', this stream disabled, and illness_duration.draw 'point'."
         },
         "preboarding_assessment": {
           "lookback_days": 3,
           "crew": {
-            "enabled": false,
+            "enabled": true,
             "declaration_compliance": 1.0,
             "recall_halflife_days": null,
             "reportable": true,
@@ -225,7 +230,7 @@
             "reportable": false,
             "denial_probability": 0.0
           },
-          "notes": "Derivation of record: docs/norovirus/preboarding_assessment.md. The VSP 2018 Operations Manual 4.1.1.2 three-day pre-boarding assessment (manual p. 31 / PDF p. 60): a boarded host whose symptom onset is within lookback_days is eligible; a declared crew case is a reportable AGE case at epoch 0 and enters ever_reported_ids directly, since the sick-call ladder only sees the currently symptomatic. lookback_days = 3 is the sourced crew clause. declaration_compliance, recall_halflife_days and denial_probability are operational sweep coordinates with no licensed point: 0 is the no-screen corner, null halflife is perfect recall, and denial of boarding is industry practice VSP never states. The passenger side is VSP-silent (the manual's only questionnaire is the 4.1.2.2.1 72-hour instrument for already-identified cases); it follows Neri et al. 2008's recommendation of embarking-passenger screening, declared as practice not regulation, and passenger reportable is a load error. Default-off and rng-neutral: a role with enabled false is skipped before eligibility is tested, so the arm consumes no draw the pre-arm code did not make. When a role is enabled the declaration/denial draws share boarding_rng, so on-vs-off matched-seed runs are not host-paired — a denial draw shifts every subsequent host's stream position; the campaign readout must compare distributions, not hosts."
+          "notes": "Derivation of record: docs/norovirus/preboarding_assessment.md. The VSP 2018 Operations Manual 4.1.1.2 three-day pre-boarding assessment (manual p. 31 / PDF p. 60): a boarded host whose symptom onset is within lookback_days is eligible; a declared crew case is a reportable AGE case at epoch 0 and enters ever_reported_ids directly, since the sick-call ladder only sees the currently symptomatic. lookback_days = 3 is the sourced crew clause. declaration_compliance, recall_halflife_days and denial_probability are operational sweep coordinates with no licensed point: 0 is the no-screen corner, null halflife is perfect recall, and denial of boarding is industry practice VSP never states. The passenger side is VSP-silent (the manual's only questionnaire is the 4.1.2.2.1 72-hour instrument for already-identified cases); it follows Neri et al. 2008's recommendation of embarking-passenger screening, declared as practice not regulation, and passenger reportable is a load error. The crew clause is on by default under the renewal arm; the historical comparator disables both roles explicitly. When a role is enabled the declaration/denial draws share boarding_rng, so on-vs-off matched-seed runs are not host-paired — a denial draw shifts every subsequent host's stream position; the campaign readout must compare distributions, not hosts."
         }
       },
       "initial_time_infected": 0,

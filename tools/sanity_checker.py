@@ -957,16 +957,33 @@ def _check_symptomatic_stream(
         return
     for p in pathogens.pathogens:
         boarding = p.boarding or {}
-        stream = boarding.get("symptomatic_stream") or {}
-        if not stream.get("enabled"):
-            continue
+        stream = boarding.get("symptomatic_stream")
+        # Unstated rate_mode follows the input block present; unstated
+        # enabled under renewal is the realism chain's default.
+        rate_mode = boarding.get("rate_mode") or (
+            "renewal" if boarding.get("renewal") else "screening_prevalence"
+        )
         location = f"{p.pathogen_id}.boarding.symptomatic_stream"
-        if boarding.get("rate_mode") != "renewal":
+        if isinstance(stream, dict) and stream.get("enabled") is False and (
+            rate_mode == "renewal"
+        ):
+            report.warn(
+                _ACTIVE_PROFILES_JSON,
+                "SYMPTOMATIC_STREAM",
+                f"{location} is explicitly disabled under rate_mode "
+                "'renewal': a legitimate historical-comparator arm, noted "
+                "so the pairing is deliberate and not a stale key",
+            )
+        if not isinstance(stream, dict):
+            stream = {}
+        if not stream.get("enabled", rate_mode == "renewal"):
+            continue
+        if rate_mode != "renewal":
             report.error(
                 _ACTIVE_PROFILES_JSON,
                 "SYMPTOMATIC_STREAM",
                 f"{location} is enabled while boarding.rate_mode is "
-                f"{boarding.get('rate_mode')!r}: the symptomatic stream is "
+                f"{rate_mode!r}: the symptomatic stream is "
                 "a partition of the renewal identity and requires "
                 "rate_mode 'renewal'",
             )
@@ -1077,6 +1094,20 @@ def _check_preboarding_assessment(
                     "PREBOARDING_ASSESSMENT",
                     f"{role_location}.denial_probability = {denial} is "
                     "outside [0, 1]",
+                )
+            rate_mode = boarding.get("rate_mode") or (
+                "renewal" if boarding.get("renewal")
+                else "screening_prevalence"
+            )
+            if role == "crew" and sub.get("enabled") is False and (
+                rate_mode == "renewal"
+            ):
+                report.warn(
+                    _ACTIVE_PROFILES_JSON,
+                    "PREBOARDING_ASSESSMENT",
+                    f"{role_location} is explicitly disabled under rate_mode "
+                    "'renewal': a legitimate historical-comparator arm, "
+                    "noted so the pairing is deliberate and not a stale key",
                 )
             if role == "passenger" and sub.get("reportable"):
                 report.error(

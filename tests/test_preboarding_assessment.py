@@ -146,6 +146,10 @@ def _cfg(
     }
     if overrides.get("rate_mode") != "renewal":
         block["prevalence"] = {"passenger": passenger, "crew": crew}
+    elif "symptomatic_stream" not in overrides:
+        # ATTRIBUTED MOVE (realism-default flip): an unstated stream under
+        # renewal is now ON. These fixtures mean "off", so they state it.
+        block["symptomatic_stream"] = {"enabled": False}
     block.update(overrides)
     if preboarding is not None:
         block["preboarding_assessment"] = preboarding
@@ -314,7 +318,21 @@ class TestResolution:
     """The block validates like the rest of the boarding block."""
 
     def test_absent_block_is_inert(self) -> None:
+        # Under screening prevalence an unstated block is still the
+        # historical None; under renewal it resolves to the reference
+        # crew clause (the realism-default flip).
         assert _resolve(None).preboarding is None
+        spec = _resolve(None, rate_mode="renewal", renewal={
+            "case_incidence_per_1000_py": {
+                "passenger": 39.0, "crew": 39.0,
+            },
+            "detectable_duration_days": 28.0,
+        })
+        assert spec.preboarding is not None
+        assert spec.preboarding.lookback_days == pytest.approx(3.0)
+        assert spec.preboarding.crew.enabled is True
+        assert spec.preboarding.crew.reportable is True
+        assert spec.preboarding.passenger.enabled is False
 
     def test_shipped_shape_resolves(self) -> None:
         spec = _resolve(_assessment())
@@ -591,14 +609,25 @@ class TestDefaultInertness:
         ).hexdigest()
         return fingerprint, rng.random()
 
-    def test_the_absent_block_is_the_pre_arm_draw(self) -> None:
+    # At the reference arm's sourced lookback of 3 days no crew host in
+    # this fixture is eligible (a convalescent boarder's onset age is at
+    # least recovery_day = 3), so the reference arm draws nothing and the
+    # fingerprint coincides with the pre-arm one — verified, not assumed.
+    _NEW_DEFAULT_FINGERPRINT = _INERTNESS_FINGERPRINT
+
+    def test_the_absent_block_is_the_new_default_draw(self) -> None:
+        # CHANGE DETECTOR: under the realism-default flip an absent block
+        # under renewal resolves to the reference crew clause, so this
+        # fingerprint is the new default draw — the stream is off here
+        # (_cfg states it) so the change isolates the assessment arm.
         fingerprint, rng_next = self._run(None)
-        assert fingerprint == self._INERTNESS_FINGERPRINT
+        assert fingerprint == self._NEW_DEFAULT_FINGERPRINT
         assert rng_next == pytest.approx(
             self._INERTNESS_RNG_NEXT, abs=1e-15,
         )
 
     def test_the_disabled_block_is_the_pre_arm_draw(self) -> None:
+        # The explicit comparator arm: still bit-for-bit the pre-flip draw.
         fingerprint, rng_next = self._run({
             "lookback_days": 3,
             "crew": {"enabled": False},

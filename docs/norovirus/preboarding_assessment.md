@@ -1,11 +1,14 @@
 # Pre-boarding assessment — the VSP §4.1.1.2 declaration screen
 
-**Status: Implemented, default-off.** The arm lives in `engines/initiation.py`
+**Status: Implemented — the reference crew clause is the default under
+renewal mode** (unstated block → lookback 3, crew enabled at c=1, h=null,
+reportable, denial 0; under screening-prevalence an unstated block stays off).
+The arm lives in `engines/initiation.py`
 (`preboarding_assessment` inside each pathogen's `boarding` block), is swept
 by `boarding_axis.py` (`preboarding_crew_points`, `preboarding_passenger_points`,
 `preboarding_crew_reportable_values`), and consumes no draw when off — the
 inertness fingerprint in `tests/test_preboarding_assessment.py` is the pre-arm
-draw of current `main`.
+draw of `main` reproduced by stating every arm explicitly off.
 
 ## The clause
 

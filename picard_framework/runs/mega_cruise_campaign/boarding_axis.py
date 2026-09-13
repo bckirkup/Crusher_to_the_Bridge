@@ -173,6 +173,87 @@ FACTOR_PREBOARDING_PASSENGER_HALFLIFE = (
 )
 FACTOR_PREBOARDING_PASSENGER_DENIAL = "preboarding_passenger_denial_probability"
 
+# The mechanism ladder: one named rung per level of the introduction
+# realism chain, so a tier can step the whole chain at once. Each rung
+# writes the FULL explicit override set — the run is self-describing
+# regardless of what the profile's defaults are — except ``default``,
+# which writes nothing and resolves to whatever the profile ships.
+MECHANISM_RUNG_KEY = "boarding_mechanism_rungs"
+FACTOR_MECHANISM_RUNG = "boarding_mechanism_rung"
+FACTOR_RATE_MODE = "boarding_rate_mode"
+FACTOR_AGE_DRAW = "boarding_age_draw"
+FACTOR_ILLNESS_DRAW = "illness_duration_draw"
+FACTOR_SYM_STREAM = "symptomatic_stream"
+
+# The shipped comparators, stated as values because a rung must reproduce
+# them exactly wherever it lands: the tranche-10 Grade B screening
+# midpoints, and the renewal row's O'Brien 2016 T1 incidence with Atmar's
+# 28-day detectable window.
+_SHIPPED_PREVALENCE = {
+    "passenger": DEFAULT_PASSENGER_PREVALENCE,
+    "crew": DEFAULT_CREW_PREVALENCE,
+}
+_RENEWAL_BLOCK = {
+    "case_incidence_per_1000_py": {"passenger": 39.0, "crew": 39.0},
+    "detectable_duration_days": 28,
+}
+_PREBOARDING_OFF = {
+    "crew": {"enabled": False},
+    "passenger": {"enabled": False},
+}
+_PREBOARDING_REFERENCE = {
+    "crew": {
+        "enabled": True,
+        "declaration_compliance": 1.0,
+        "recall_halflife_days": None,
+        "reportable": True,
+        "denial_probability": 0.0,
+    },
+    "passenger": {"enabled": False},
+}
+
+MECHANISM_RUNGS: dict[str, dict[str, Any] | None] = {
+    "shipped": {
+        "rate_mode": "screening_prevalence",
+        "prevalence": dict(_SHIPPED_PREVALENCE),
+        "age_draw": "engine_window",
+        "illness_duration_draw": "point",
+        "symptomatic_stream": {"enabled": False},
+        "preboarding_assessment": {
+            "crew": {"enabled": False},
+            "passenger": {"enabled": False},
+        },
+    },
+    "renewal_stationary": {
+        "rate_mode": "renewal",
+        "renewal": dict(_RENEWAL_BLOCK),
+        "age_draw": "stationary_detectable",
+        "illness_duration_draw": "empirical_survival",
+        "symptomatic_stream": {"enabled": False},
+        "preboarding_assessment": dict(_PREBOARDING_OFF),
+    },
+    "symptomatic": {
+        "rate_mode": "renewal",
+        "renewal": dict(_RENEWAL_BLOCK),
+        "age_draw": "stationary_detectable",
+        "illness_duration_draw": "empirical_survival",
+        "symptomatic_stream": {"enabled": True},
+        "preboarding_assessment": dict(_PREBOARDING_OFF),
+    },
+    "reportable": {
+        "rate_mode": "renewal",
+        "renewal": dict(_RENEWAL_BLOCK),
+        "age_draw": "stationary_detectable",
+        "illness_duration_draw": "empirical_survival",
+        "symptomatic_stream": {"enabled": True},
+        "preboarding_assessment": {
+            "lookback_days": 3,
+            **dict(_PREBOARDING_REFERENCE),
+        },
+    },
+    "default": None,
+}
+
 _PreboardingPoint = tuple[float, float | None, float]
 
 
@@ -291,6 +372,36 @@ def preboarding_crew_reportable_values(
             "run id",
         )
     return values
+
+
+def mechanism_rungs(tier: Mapping[str, Any]) -> list[str | None]:
+    """The tier's mechanism-ladder sweep; ``[None]`` — profile defaults — unswept.
+
+    Rung names are unique by construction, so no run-id collision check is
+    needed beyond membership in :data:`MECHANISM_RUNGS`.
+    """
+    if MECHANISM_RUNG_KEY not in tier:
+        return [None]
+    rungs = [str(rung) for rung in tier[MECHANISM_RUNG_KEY]]
+    if not rungs:
+        raise ValueError(f"tier {MECHANISM_RUNG_KEY} is empty")
+    unknown = [rung for rung in rungs if rung not in MECHANISM_RUNGS]
+    if unknown:
+        raise ValueError(
+            f"tier {MECHANISM_RUNG_KEY} = {unknown!r} names no rung in the "
+            f"ladder; choose from {sorted(MECHANISM_RUNGS)}",
+        )
+    return rungs
+
+
+def sweeps_mechanism_rungs(tier: Mapping[str, Any]) -> bool:
+    """Whether the tier declares the mechanism ladder, so ids must name it."""
+    return MECHANISM_RUNG_KEY in tier
+
+
+def mechanism_rung_tag(rung: str) -> str:
+    """Run-id fragment naming the mechanism rung."""
+    return f"rung-{rung}"
 
 
 def sweeps_preboarding(tier: Mapping[str, Any]) -> bool:
@@ -467,12 +578,17 @@ def run_id_tags(
     preboarding_crew: _PreboardingPoint | None = None,
     preboarding_passenger: _PreboardingPoint | None = None,
     preboarding_crew_reportable: bool | None = None,
+    mechanism_rung: str | None = None,
 ) -> list[str]:
     """Run-id fragments for the boarding coordinates this tier actually sweeps.
 
     Unswept coordinates are not named, as with every other campaign axis: they
     are stamped into ``campaign_parameters`` instead.
     """
+    if mechanism_rung is not None and MECHANISM_RUNG_KEY in tier:
+        rung_tags = [mechanism_rung_tag(mechanism_rung)]
+    else:
+        rung_tags = []
     if not owns(pathogen_id):
         return []
     tags: list[str] = []
@@ -494,7 +610,7 @@ def run_id_tags(
         and PREBOARDING_REPORTABLE_KEY in tier
     ):
         tags.append(preboarding_reportable_tag(preboarding_crew_reportable))
-    return tags
+    return rung_tags + tags
 
 
 def _preboarding_factors(
@@ -523,6 +639,8 @@ def point_factors(
     preboarding_crew: _PreboardingPoint | None = None,
     preboarding_passenger: _PreboardingPoint | None = None,
     preboarding_crew_reportable: bool | None = None,
+    mechanism_rung: str | None = None,
+    prevalence_swept: bool = False,
 ) -> dict[str, Any]:
     """Factor labels for one boarding grid point, for ``yield_run``.
 
@@ -533,9 +651,10 @@ def point_factors(
     factors: dict[str, Any] = {
         FACTOR_NEVER_SYMPTOMATIC: float(never_symptomatic_fraction),
         FACTOR_PRESYMPTOMATIC: float(presymptomatic_share),
-        FACTOR_PASSENGER_PREVALENCE: float(passenger_prevalence),
-        FACTOR_CREW_PREVALENCE: float(crew_prevalence),
     }
+    if prevalence_swept:
+        factors[FACTOR_PASSENGER_PREVALENCE] = float(passenger_prevalence)
+        factors[FACTOR_CREW_PREVALENCE] = float(crew_prevalence)
     if party is not None:
         factors[FACTOR_PARTY_PROBABILITY] = float(party[0])
         if party[1] is not None:
@@ -558,6 +677,25 @@ def point_factors(
         factors[FACTOR_PREBOARDING_CREW_REPORTABLE] = bool(
             preboarding_crew_reportable,
         )
+    if mechanism_rung is not None:
+        rung = MECHANISM_RUNGS[mechanism_rung]
+        factors[FACTOR_MECHANISM_RUNG] = mechanism_rung
+        # ``default`` writes nothing downstream, but the run still records
+        # the reference coordinates the profile resolves to.
+        effective = rung or MECHANISM_RUNGS["reportable"]
+        factors[FACTOR_RATE_MODE] = effective["rate_mode"]
+        factors[FACTOR_AGE_DRAW] = effective["age_draw"]
+        factors[FACTOR_ILLNESS_DRAW] = effective["illness_duration_draw"]
+        factors[FACTOR_SYM_STREAM] = bool(
+            effective["symptomatic_stream"]["enabled"],
+        )
+        prevalence = effective.get("prevalence") or {}
+        for factor, key in (
+            (FACTOR_PASSENGER_PREVALENCE, "passenger"),
+            (FACTOR_CREW_PREVALENCE, "crew"),
+        ):
+            if key in prevalence:
+                factors[factor] = prevalence[key]
     return factors
 
 
@@ -573,6 +711,7 @@ class BoardingPoint:
     preboarding_crew: _PreboardingPoint | None = None
     preboarding_passenger: _PreboardingPoint | None = None
     preboarding_crew_reportable: bool | None = None
+    mechanism_rung: str | None = None
 
 
 def boarding_points(
@@ -605,14 +744,18 @@ def boarding_points(
         preboarding_crew_reportable_values(tier)
         if mode == MODE_PREVALENCE else [None]
     )
+    # A rung rewrites the whole introduction mechanism, which only the
+    # prevalence draw owns; a party-mode pathogen is not crossed against it.
+    rungs = mechanism_rungs(tier) if mode == MODE_PREVALENCE else [None]
     return tuple(
         BoardingPoint(
             nsf, psp, passenger, crew, party,
             preboarding_crew=pbc,
             preboarding_passenger=pbp,
             preboarding_crew_reportable=rep,
+            mechanism_rung=rung,
         )
-        for nsf, psp, (passenger, crew), party, pbc, pbp, rep in product(
+        for nsf, psp, (passenger, crew), party, pbc, pbp, rep, rung in product(
             never_symptomatic_values(tier),
             presymptomatic_values(tier),
             prevalence,
@@ -620,6 +763,7 @@ def boarding_points(
             preboarding_crew,
             preboarding_passenger,
             reportable,
+            rungs,
         )
     )
 
@@ -676,6 +820,7 @@ class IndexCaseAxis:
                 preboarding_crew=point.preboarding_crew,
                 preboarding_passenger=point.preboarding_passenger,
                 preboarding_crew_reportable=point.preboarding_crew_reportable,
+                mechanism_rung=point.mechanism_rung,
             )
         return [] if point is None else [f"init{int(point)}"]
 
@@ -694,6 +839,8 @@ class IndexCaseAxis:
                     preboarding_crew=point.preboarding_crew,
                     preboarding_passenger=point.preboarding_passenger,
                     preboarding_crew_reportable=point.preboarding_crew_reportable,
+                    mechanism_rung=point.mechanism_rung,
+                    prevalence_swept=sweeps_prevalence(self.tier),
                 ),
             }
             return _drop_inapplicable(self.pathogen_id, factors)
@@ -714,6 +861,13 @@ class IndexCaseAxis:
         fields = {k: v for k, v in patch.items() if v is not None}
         if not self.boarding and point is not None:
             fields["initial_infected"] = int(point)
+        rung = getattr(point, "mechanism_rung", None)
+        if self.boarding and rung is not None and rung != "default":
+            # The rung's illness-duration mode rides the profile patch — it
+            # is a per-pathogen field, not an initiation coordinate.
+            fields["illness_duration"] = {
+                "draw": MECHANISM_RUNGS[rung]["illness_duration_draw"],
+            }
         path_over = dict(base or {})
         if fields:
             path_over[self.pathogen_id] = {
@@ -787,6 +941,31 @@ def _profile_size(pathogen_id: str) -> int | None:
     return None if party is None else party[1]
 
 
+def profile_rate_mode(pathogen_id: str) -> str:
+    """A pathogen's own boarding rate mode, inferred the way the engine does."""
+    block = shipped_boarding_blocks().get(str(pathogen_id), {})
+    if block.get("rate_mode") is not None:
+        return str(block["rate_mode"])
+    return "renewal" if block.get("renewal") else "screening_prevalence"
+
+
+def _effective_rate_mode(
+    pathogen_id: str, factors: Mapping[str, Any],
+) -> str:
+    """The mode the run resolves to: the rung's, else the profile's own.
+
+    A swept prevalence point selects the screening arm: the axis's
+    prevalence intervals are screening stool-RNA measurements, so a tier
+    that sweeps them is on the shipped mechanism by construction.
+    """
+    rung = factors.get(FACTOR_MECHANISM_RUNG)
+    if rung is not None and rung != "default":
+        return str(MECHANISM_RUNGS[str(rung)]["rate_mode"])
+    if FACTOR_PASSENGER_PREVALENCE in factors:
+        return "screening_prevalence"
+    return profile_rate_mode(pathogen_id)
+
+
 def _drop_inapplicable(
     pathogen_id: str, factors: dict[str, Any],
 ) -> dict[str, Any]:
@@ -802,7 +981,17 @@ def _drop_inapplicable(
         if boarding_mode(pathogen_id) == MODE_PREVALENCE
         else (FACTOR_PASSENGER_PREVALENCE, FACTOR_CREW_PREVALENCE)
     )
-    return {k: v for k, v in factors.items() if k not in unused}
+    cleaned = {k: v for k, v in factors.items() if k not in unused}
+    if (
+        boarding_mode(pathogen_id) == MODE_PREVALENCE
+        and _effective_rate_mode(pathogen_id, factors) != "screening_prevalence"
+    ):
+        # Under a renewal arm the screening prevalences are coordinates the
+        # draw never read — same reason a party factor is dropped under
+        # prevalence mode.
+        cleaned.pop(FACTOR_PASSENGER_PREVALENCE, None)
+        cleaned.pop(FACTOR_CREW_PREVALENCE, None)
+    return cleaned
 
 
 def _coordinates(factors: Mapping[str, Any]) -> dict[str, float]:
@@ -867,6 +1056,18 @@ def swept_pathogens(
     )
 
 
+@lru_cache(maxsize=None)
+def _shipped_profile(pathogen_id: str) -> dict[str, Any]:
+    """The whole shipped profile, for coordinates living outside boarding."""
+    for name in sorted(os.listdir(BUNDLE_DIR)):
+        if not name.endswith(".json"):
+            continue
+        profiles = load_pathogen_bundle(os.path.join(BUNDLE_DIR, name))
+        if str(pathogen_id) in profiles:
+            return dict(profiles[str(pathogen_id)])
+    return {}
+
+
 def profile_coords(pathogen_id: str) -> dict[str, Any]:
     """The coordinates a pathogen's own profile block states, as factors."""
     block = shipped_boarding_blocks().get(str(pathogen_id), {})
@@ -881,11 +1082,33 @@ def profile_coords(pathogen_id: str) -> dict[str, Any]:
         (FACTOR_PARTY_PROBABILITY, party, "probability"),
         (FACTOR_PARTY_SIZE, party, "size"),
     )
-    return {
+    coords = {
         factor: source[key]
         for factor, source, key in sources
         if key in source
     }
+    # The mechanism chain's effective settings, so a run on the profile's
+    # own arm still records which arm it was. Unstated keys resolve the
+    # way the engine's resolver does.
+    coords[FACTOR_RATE_MODE] = profile_rate_mode(pathogen_id)
+    stream = block.get("symptomatic_stream") or {}
+    coords[FACTOR_SYM_STREAM] = bool(
+        stream.get("enabled", coords[FACTOR_RATE_MODE] == "renewal"),
+    )
+    profile = _shipped_profile(pathogen_id)
+    detectable = (
+        (block.get("renewal") or {}).get("detectable_duration_days")
+        or profile.get("detectable_duration_days")
+    )
+    coords[FACTOR_AGE_DRAW] = block.get("age_draw") or (
+        "stationary_detectable" if detectable is not None
+        else "engine_window"
+    )
+    illness = profile.get("illness_duration") or {}
+    coords[FACTOR_ILLNESS_DRAW] = illness.get("draw") or (
+        "empirical_survival" if illness.get("survival") else "point"
+    )
+    return coords
 
 
 _COORDINATE_FACTORS = frozenset({
@@ -902,6 +1125,11 @@ _COORDINATE_FACTORS = frozenset({
     FACTOR_PREBOARDING_PASSENGER_COMPLIANCE,
     FACTOR_PREBOARDING_PASSENGER_HALFLIFE,
     FACTOR_PREBOARDING_PASSENGER_DENIAL,
+    FACTOR_MECHANISM_RUNG,
+    FACTOR_RATE_MODE,
+    FACTOR_AGE_DRAW,
+    FACTOR_ILLNESS_DRAW,
+    FACTOR_SYM_STREAM,
 })
 
 
@@ -980,6 +1208,28 @@ def _preboarding_swept(factors: Mapping[str, Any]) -> dict[str, Any] | None:
     return block
 
 
+def _rung_block(rung_name: str) -> dict[str, Any]:
+    """The rung's full explicit boarding block; ``{}`` for ``default``."""
+    rung = MECHANISM_RUNGS[rung_name]
+    if rung is None:
+        return {}
+    assessment = {
+        key: (dict(value) if isinstance(value, Mapping) else value)
+        for key, value in rung["preboarding_assessment"].items()
+    }
+    block: dict[str, Any] = {
+        "rate_mode": rung["rate_mode"],
+        "age_draw": rung["age_draw"],
+        "symptomatic_stream": dict(rung["symptomatic_stream"]),
+        "preboarding_assessment": assessment,
+    }
+    if "prevalence" in rung:
+        block["prevalence"] = dict(rung["prevalence"])
+    if "renewal" in rung:
+        block["renewal"] = dict(rung["renewal"])
+    return block
+
+
 def _swept_block(
     pathogen_id: str, factors: Mapping[str, Any],
 ) -> dict[str, Any]:
@@ -990,7 +1240,12 @@ def _swept_block(
     interval would silently restate campylobacter's — and the incidence would
     then be attributable to the campaign rather than to the profile.
     """
-    block: dict[str, Any] = {}
+    # A rung writes the whole mechanism baseline first; the tier's other
+    # swept coordinates then override on top of it.
+    rung_name = factors.get(FACTOR_MECHANISM_RUNG)
+    block: dict[str, Any] = (
+        _rung_block(str(rung_name)) if rung_name is not None else {}
+    )
     split = {
         key: float(factors[factor])
         for factor, key in (
@@ -1011,10 +1266,22 @@ def _swept_block(
             if factor in factors
         }
         if prevalence:
+            if (
+                _effective_rate_mode(pathogen_id, factors)
+                != "screening_prevalence"
+                and rung_name is None
+            ):
+                # A prevalence sweep landing on a renewal-mode profile is
+                # the shipped-comparator arm: write the full historical
+                # baseline so the run is self-describing, then the point.
+                block = {**_rung_block("shipped"), **block}
             block["prevalence"] = prevalence
         assessment = _preboarding_swept(factors)
         if assessment is not None:
-            block["preboarding_assessment"] = assessment
+            block["preboarding_assessment"] = {
+                **(block.get("preboarding_assessment") or {}),
+                **assessment,
+            }
         return block
     party = _party_from_factors(factors)
     if party is not None:

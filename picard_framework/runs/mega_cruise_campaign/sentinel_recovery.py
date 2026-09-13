@@ -16,6 +16,8 @@ from pathlib import Path
 from typing import Any
 
 from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
+    FACTOR_CREW_PREVALENCE,
+    FACTOR_PASSENGER_PREVALENCE,
     IndexCaseAxis,
 )
 
@@ -110,7 +112,13 @@ def onboard_seeding(
         return OnboardSeeding({"initial_infected": n_init}, {"n_init": n_init})
     if clean:
         point = replace(point, passenger_prevalence=0.0, crew_prevalence=0.0)
-    return OnboardSeeding({}, axis.factors(point))
+    # This arm effectively sweeps the prevalence coordinate (to its tier
+    # point or to zero for a clean embarkation), so the factors must state
+    # it — unswept prevalence factors are no longer stamped by the axis.
+    factors = axis.factors(point)
+    factors[FACTOR_PASSENGER_PREVALENCE] = float(point.passenger_prevalence)
+    factors[FACTOR_CREW_PREVALENCE] = float(point.crew_prevalence)
+    return OnboardSeeding({}, factors)
 
 
 def itinerary_days(manifest: dict[str, Any], variant: str) -> list[dict[str, Any]]:

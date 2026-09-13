@@ -57,7 +57,12 @@ def _norwalk_profile(**overrides: object) -> dict:
     profile = next(
         p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN
     )
-    return {**copy.deepcopy(profile), **overrides}
+    merged = {**copy.deepcopy(profile), **overrides}
+    # ATTRIBUTED MOVE (realism-default flip): the profile now ships the
+    # empirical illness-duration table as its default draw; these tests
+    # pin recovery to recovery_day, so the table comes off.
+    merged.pop("illness_duration", None)
+    return merged
 
 
 def _agent(aid: int = 1, *, immune: bool = False) -> KorkinAgent:

@@ -147,12 +147,18 @@ class IllnessDurationModel:
             return None
         cfg = dict(block)
         _reject_unknown_keys("illness_duration", cfg)
-        draw = str(cfg.get("draw", DRAW_POINT))
         unit = str(cfg.get("unit", ILLNESS_DURATION_UNIT_DAYS))
         table = cfg.get("survival")
         points: tuple[tuple[int, float], ...] = ()
         if table is not None:
             points = _validate_survival_table("illness_duration", table)
+        # An unstated draw follows the block's contents: a profile that
+        # ships a measured survival table draws from it, and a profile
+        # without one keeps the point. ``draw: point`` remains selectable
+        # explicitly (the historical arm).
+        draw = str(cfg.get("draw") or (
+            DRAW_EMPIRICAL_SURVIVAL if points else DRAW_POINT
+        ))
         return cls(draw=draw, unit=unit, survival=points)
 
     def survival_at(self, day: int) -> float:
