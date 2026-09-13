@@ -962,6 +962,16 @@
                 "detectable_duration_days": {"type": "number", "minimum": 0}
               }
             },
+            "symptomatic_stream": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["enabled", "notes"],
+              "description": "Partition the renewal-derived import rate into ill-at-embarkation and not-ill streams (docs/norovirus/symptomatic_boarding_stream.md). Requires rate_mode 'renewal': p_sym = case incidence x mean illness duration, and p_asym = p_total - p_sym is what the asymptomatic draw uses. Default off.",
+              "properties": {
+                "enabled": {"type": "boolean"},
+                "notes": {"type": "string", "minLength": 1}
+              }
+            },
             "party": {
               "type": "object",
               "additionalProperties": false,

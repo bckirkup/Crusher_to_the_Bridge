@@ -30,6 +30,7 @@ from engines.initiation import (
     STATE_INCUBATING,
     STATE_NEVER_SYMPTOMATIC,
     STATE_PRESYMPTOMATIC,
+    STATE_SYMPTOMATIC,
     BoardingParty,
     BoardingSpec,
     build_initiation_manifest,
@@ -761,7 +762,7 @@ class TestManifest:
         assert set(drawn) == {"passenger", "crew"}
         assert set(manifest["boarding"][PATHOGEN]["composition"]) == {
             STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
-            STATE_CLEARED, STATE_INCUBATING,
+            STATE_CLEARED, STATE_INCUBATING, STATE_SYMPTOMATIC,
         }
         assert manifest["boarding_mode"] == {PATHOGEN: "prevalence"}
         assert manifest["party"] == {}
@@ -1263,9 +1264,12 @@ class TestDefaultInertness:
             np.random.default_rng(123),
         )
         assert report.drawn_by_role == {"passenger": 43, "crew": 17}
+        # The symptomatic key is new with the symptomatic-stream arm; it
+        # carries zero here — the drawn counts themselves are unchanged.
         assert report.composition == {
             "never_symptomatic": 17, "presymptomatic": 4,
             "convalescent": 39, "cleared": 0, "incubating": 0,
+            "symptomatic": 0,
         }
         records = [
             (a.agent_id, a.infections[PATHOGEN]["boarding_state"],

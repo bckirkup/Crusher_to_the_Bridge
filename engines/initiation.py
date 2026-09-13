@@ -31,12 +31,21 @@ from typing import Any
 
 import numpy as np
 
+from engines.illness_duration import (
+    DRAW_EMPIRICAL_SURVIVAL,
+    IllnessDurationModel,
+)
 from engines.infection_dynamics_bridge import IllnessStatus, InfectionStatus
 from engines.natural_history import (
     DEFAULT_RECOVERY_DAY,
     draw_symptom_severity,
     host_age_band,
     incubation_days,
+    severity_on_day,
+)
+from engines.transmission_core import (
+    draw_emesis_schedule,
+    draw_symptom_axes,
 )
 
 # Attempts allowed for the state draw before a host is left uninfected, used
@@ -61,9 +70,14 @@ STATE_CLEARED = "cleared"
 # party that has already had a case in it does not board, so it replaces the
 # convalescent state there.
 STATE_INCUBATING = "incubating"
+# Ill at embarkation: a host caught inside its illness by the renewal
+# partition, drawn by the symptomatic stream rather than the state split.
+# Unlike ``cleared`` it holds an infection record and counts as an
+# infectious introduction in ``drawn_by_role``.
+STATE_SYMPTOMATIC = "symptomatic"
 _STATES = (
     STATE_NEVER_SYMPTOMATIC, STATE_PRESYMPTOMATIC, STATE_CONVALESCENT,
-    STATE_CLEARED, STATE_INCUBATING,
+    STATE_CLEARED, STATE_INCUBATING, STATE_SYMPTOMATIC,
 )
 
 # The two boarding draw modes. Which one a pathogen uses is a claim about the
@@ -124,6 +138,13 @@ class BoardingSpec:
     detectable_duration_days: float | None = None
     party: BoardingParty | None = None
     epoch: int = 0
+    # Symptomatic-stream arm (renewal only): ``passenger_prevalence`` and
+    # ``crew_prevalence`` then carry the asymptomatic share p_asym, and these
+    # carry the symptomatic share p_sym of the same total prevalence.
+    symptomatic_stream: bool = False
+    symptomatic_passenger_prevalence: float = 0.0
+    symptomatic_crew_prevalence: float = 0.0
+    mean_illness_duration_days: float | None = None
 
     @property
     def mode(self) -> str:
@@ -335,14 +356,8 @@ def _resolve_renewal(
             "two mechanisms for one rate make the resulting count "
             "attributable to neither",
         )
+    incidence = _renewal_incidence(block, location)
     renewal = block.get("renewal") or {}
-    incidence = renewal.get("case_incidence_per_1000_py") or {}
-    missing = [role for role in _ROLES if incidence.get(role) is None]
-    if missing:
-        raise ValueError(
-            f"{location}.renewal.case_incidence_per_1000_py is missing "
-            f"{', '.join(missing)}",
-        )
     detectable = renewal.get("detectable_duration_days")
     if detectable is None:
         raise ValueError(
@@ -371,6 +386,106 @@ def _resolve_renewal(
         for role in _ROLES
     )
     return derived[0], derived[1], detectable_days
+
+
+def _renewal_incidence(
+    block: dict[str, Any], location: str,
+) -> dict[str, float]:
+    """The per-role case-incidence rates a renewal block declares."""
+    renewal = block.get("renewal") or {}
+    incidence = renewal.get("case_incidence_per_1000_py") or {}
+    missing = [role for role in _ROLES if incidence.get(role) is None]
+    if missing:
+        raise ValueError(
+            f"{location}.renewal.case_incidence_per_1000_py is missing "
+            f"{', '.join(missing)}",
+        )
+    return {role: float(incidence[role]) for role in _ROLES}
+
+
+_SYMPTOMATIC_STREAM_KEYS = frozenset({"enabled", "notes"})
+
+
+def _mean_illness_duration_days(profile: dict[str, Any]) -> float:
+    """E[T] for the symptomatic-stream partition, from the profile.
+
+    Under ``illness_duration.draw: empirical_survival`` the mean of the
+    authored survival table; under ``point`` or an absent block the point
+    ``recovery_day``. It is a population quantity, so the per-host chronic
+    recovery adjustment does not enter it.
+    """
+    model = IllnessDurationModel.from_mapping(
+        profile.get("illness_duration"),
+    )
+    if model is not None and model.draw == DRAW_EMPIRICAL_SURVIVAL:
+        return model.mean_days()
+    return float(profile.get("recovery_day", DEFAULT_RECOVERY_DAY))
+
+
+def _resolve_symptomatic_stream(
+    block: dict[str, Any],
+    location: str,
+    profile: dict[str, Any],
+    rate_mode: str,
+    party: BoardingParty | None,
+    passenger_total: float,
+    crew_total: float,
+) -> tuple[bool, float, float, float | None]:
+    """Partition each role's renewal prevalence into ill and not-ill shares.
+
+    The identity is the derivation of record in
+    ``docs/norovirus/symptomatic_boarding_stream.md``: of the D detectable
+    days an infection contributes, the ill ones number T for a presenting
+    host, so p_sym = (I/1000)·(E[T]/365.25) — case incidence times illness
+    duration, the never-symptomatic correction cancelling — and
+    p_asym = p_total − p_sym. The two streams draw the same total the
+    renewal arm already draws; this is a partition, not an addition.
+    """
+    raw = block.get("symptomatic_stream")
+    if raw is None:
+        return False, 0.0, 0.0, None
+    if not isinstance(raw, dict):
+        raise ValueError(
+            f"{location}.symptomatic_stream must be a mapping, got "
+            f"{type(raw).__name__}",
+        )
+    unknown = sorted(set(raw) - _SYMPTOMATIC_STREAM_KEYS)
+    if unknown:
+        raise ValueError(
+            f"{location}.symptomatic_stream has unknown keys: {unknown}",
+        )
+    if not raw.get("enabled", False):
+        return False, 0.0, 0.0, None
+    if party is not None:
+        raise ValueError(
+            f"{location}.symptomatic_stream cannot be combined with party "
+            "mode: a party sets its own cluster size and its incubating "
+            "state replaces convalescent, so there is no illness-day "
+            "partition to draw it from",
+        )
+    if rate_mode != RATE_MODE_RENEWAL:
+        raise ValueError(
+            f"{location}.symptomatic_stream requires rate_mode "
+            f"{RATE_MODE_RENEWAL!r}: the screening_prevalence series is a "
+            "measured asymptomatic-carriage rate with no illness-day "
+            "decomposition, so no partition of it exists and a second "
+            "stream on top of it would double-count",
+        )
+    incidence = _renewal_incidence(block, location)
+    mean_days = _mean_illness_duration_days(profile)
+    sym = {
+        role: (incidence[role] / 1000.0) * (mean_days / 365.25)
+        for role in _ROLES
+    }
+    totals = {ROLE_PASSENGER: passenger_total, ROLE_CREW: crew_total}
+    if any(totals[role] - sym[role] < 0.0 for role in _ROLES):
+        raise ValueError(
+            f"{location}.symptomatic_stream derives p_sym = "
+            f"{sym[ROLE_PASSENGER]} passenger / {sym[ROLE_CREW]} crew above "
+            "the renewal totals: a mean illness duration longer than the "
+            "detectable duration makes the partition invalid",
+        )
+    return True, sym[ROLE_PASSENGER], sym[ROLE_CREW], mean_days
 
 
 def _resolve_epoch(
@@ -450,6 +565,20 @@ def _resolve_boarding_spec(
                 "measurement window it is stationary over",
             )
         detectable_days = float(detectable)
+    (
+        symptomatic_stream,
+        symptomatic_passenger,
+        symptomatic_crew,
+        mean_illness_days,
+    ) = _resolve_symptomatic_stream(
+        block, location, profile, rate_mode, party, passenger, crew,
+    )
+    if symptomatic_stream:
+        # The streams are a partition of one total: the symptomatic share is
+        # drawn by its own draw and the asymptomatic draw keeps the rest, so
+        # enabling the stream cannot grow the cohort.
+        passenger -= symptomatic_passenger
+        crew -= symptomatic_crew
     return BoardingSpec(
         pathogen_id=pathogen_id,
         passenger_prevalence=passenger,
@@ -465,6 +594,10 @@ def _resolve_boarding_spec(
         detectable_duration_days=detectable_days,
         party=party,
         epoch=_resolve_epoch(block, profile, location),
+        symptomatic_stream=symptomatic_stream,
+        symptomatic_passenger_prevalence=symptomatic_passenger,
+        symptomatic_crew_prevalence=symptomatic_crew,
+        mean_illness_duration_days=mean_illness_days,
     )
 
 
@@ -880,7 +1013,141 @@ def _board_one_host(
         inf, state, incubation_days, clock, profile, rng,
         host_age_band(agent),
     )
+    if state == STATE_CONVALESCENT:
+        # The observable the pre-boarding assessment screens on; only a
+        # post-onset boarder has one.
+        inf["days_since_onset_at_boarding"] = age_days - incubation_days
     return state
+
+
+def _board_one_symptomatic_host(
+    spec: BoardingSpec,
+    agent: Any,
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+) -> str | None:
+    """Give one host an in-flight illness; returns ``symptomatic`` or ``cleared``.
+
+    The backward-recurrence construction a prevalent symptomatic sample
+    needs: draw the illness length length-biased (a host caught mid-illness
+    sits preferentially in a long illness), then its elapsed time
+    ``a ~ U(0, T)``. The record is stamped so the ordinary progression seam
+    ends the illness ``T - a`` days into the voyage: ``recovery_day`` carries
+    the drawn duration, ``onset_time_infected`` places onset ``a`` days
+    before boarding, and ``days_since_onset_at_boarding`` is the observable
+    the pre-boarding assessment reads.
+    """
+    pathogen_id = spec.pathogen_id
+    duration_days = _host_duration(agent, pathogen_id, profile)
+    incubation_days = _draw_incubation_days(agent, pathogen_id, profile, rng)
+    model = IllnessDurationModel.from_mapping(
+        profile.get("illness_duration"),
+    )
+    if model is not None and model.draw == DRAW_EMPIRICAL_SURVIVAL:
+        drawn = model.sample_length_biased_days(rng)
+    else:
+        drawn = int(profile.get("recovery_day", DEFAULT_RECOVERY_DAY))
+    # The record carries the drawn duration; the chronic extension is applied
+    # once by clearance_days at read time, exactly as for the lazy draw, so
+    # the window the elapsed time is sampled over is the extended course.
+    illness_days = float(
+        agent.get_chronic_recovery_day(pathogen_id, drawn),
+    )
+    elapsed_days = float(rng.uniform(0.0, illness_days))
+    if elapsed_days >= duration_days:
+        # Beyond the authored shedding window: the same representability
+        # boundary the stationary age draw uses.
+        return STATE_CLEARED
+    agent.infect_with_pathogen(
+        pathogen_id, 0.0, 0,
+        time_infected=int(
+            round(clock.epochs_for_days(incubation_days + elapsed_days)),
+        ),
+        rng=rng, profile=profile,
+    )
+    inf = agent.infections[pathogen_id]
+    inf["incubation_days"] = incubation_days
+    inf["boarding_state"] = STATE_SYMPTOMATIC
+    inf["shedding_duration_days"] = duration_days
+    inf["recovery_day"] = drawn
+    inf["onset_time_infected"] = int(
+        round(clock.epochs_for_days(incubation_days)),
+    )
+    inf["illness"] = IllnessStatus.SYMPTOMATIC
+    inf["presented"] = True
+    inf["will_present"] = True
+    inf["days_since_onset_at_boarding"] = elapsed_days
+    peak = draw_symptom_severity(profile, rng, host_age_band(agent))
+    inf["symptom_severity_peak"] = peak
+    # Already elapsed_days into the course: the observer sees day int(a),
+    # not day 0 and not the peak.
+    inf["symptom_severity"] = severity_on_day(profile, peak, int(elapsed_days))
+    # A symptomatic boarder never passes through draw_symptom_onset, so its
+    # axes and emesis schedule are drawn here — without this it could never
+    # vomit, and vomiting is the dominant route.
+    draw_symptom_axes(inf, profile, rng)
+    draw_emesis_schedule(agent, pathogen_id, profile, rng)
+    schedules = getattr(
+        agent, "emesis_episode_schedule_by_pathogen", None,
+    )
+    if schedules is not None and pathogen_id in schedules:
+        # Events at or before the elapsed age happened ashore. The per-
+        # episode load is not rescaled: it is a per-subject cumulative shed
+        # partitioned over the whole illness, and the ashore share was never
+        # deposited onboard. Without the drop, _emit_emesis fires every
+        # past-due event the first time it looks.
+        schedules[pathogen_id] = [
+            age for age in schedules[pathogen_id] if age > elapsed_days
+        ]
+    if agent.illness_status == IllnessStatus.NOT_ILL:
+        agent.illness_status = IllnessStatus.SYMPTOMATIC
+    # apply_treatment_at_onset is deliberately not called: whatever care the
+    # host sought ashore is unmodelled, so its drawn duration is untreated.
+    return STATE_SYMPTOMATIC
+
+
+def _draw_symptomatic_role(
+    spec: BoardingSpec,
+    agents: list[Any],
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+    role: str,
+    drawn_by_role: dict[str, int],
+    composition: dict[str, int],
+) -> None:
+    """The ill-at-embarkation share of one role's renewal prevalence.
+
+    The Binomial fixes how many; who boards is uniform over the eligible
+    pool, because the length bias a prevalent sample needs is already
+    carried by the illness-length draw — applying the shedding-duration
+    weight ``_select_prevalent`` uses would apply it twice.
+    """
+    pool = [
+        agent for agent in agents
+        if _eligible(agent, spec.pathogen_id, role)
+    ]
+    if not pool:
+        return
+    prevalence = (
+        spec.symptomatic_passenger_prevalence
+        if role == ROLE_PASSENGER
+        else spec.symptomatic_crew_prevalence
+    )
+    count = int(rng.binomial(len(pool), prevalence))
+    if count <= 0:
+        return
+    chosen = rng.choice(pool, size=min(count, len(pool)), replace=False)
+    for agent in chosen:
+        state = _board_one_symptomatic_host(
+            spec, agent, profile, clock, rng,
+        )
+        if state is None:
+            continue
+        if state != STATE_CLEARED:
+            drawn_by_role[role] += 1
+        composition[state] += 1
 
 
 def _party_rank(seed: Any, agent: Any) -> int:
@@ -966,6 +1233,14 @@ def draw_boarding_cohort(
         ROLE_CREW: spec.crew_prevalence,
     }
     for role in _ROLES:
+        if spec.symptomatic_stream:
+            # The symptomatic stream draws first; the eligible pool is then
+            # rebuilt, so a host now carrying the illness cannot be drawn
+            # twice.
+            _draw_symptomatic_role(
+                spec, agents, profile, clock, rng,
+                role, drawn_by_role, composition,
+            )
         pool = [
             agent for agent in agents
             if _eligible(agent, spec.pathogen_id, role)

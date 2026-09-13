@@ -510,6 +510,7 @@ class PathogenProfile(BaseModel):
     shedding_profile: dict[str, Any] = {}
     incubation: dict[str, Any] = {}
     illness_duration: dict[str, Any] | None = None
+    boarding: dict[str, Any] | None = None
     symptom_onset_day: float | None = None
     strain_evolution: dict[str, Any] = {}
     sequencing_assay: dict[str, Any] = {}
@@ -938,6 +939,90 @@ def _check_illness_duration_models(
                 f"longer than the shedding window would extend the "
                 f"infection silently (clearance takes the max of the two).",
             )
+
+
+def _check_symptomatic_stream(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Cross-field check for boarding.symptomatic_stream.
+
+    The stream is a partition of the renewal identity (see
+    docs/norovirus/symptomatic_boarding_stream.md), so a profile enabling it
+    must select ``rate_mode: "renewal"`` and carry the renewal inputs; and
+    the partition itself must not go negative — a mean illness duration
+    longer than the detectable duration leaves p_asym below zero.
+    """
+    if pathogens is None:
+        return
+    for p in pathogens.pathogens:
+        boarding = p.boarding or {}
+        stream = boarding.get("symptomatic_stream") or {}
+        if not stream.get("enabled"):
+            continue
+        location = f"{p.pathogen_id}.boarding.symptomatic_stream"
+        if boarding.get("rate_mode") != "renewal":
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "SYMPTOMATIC_STREAM",
+                f"{location} is enabled while boarding.rate_mode is "
+                f"{boarding.get('rate_mode')!r}: the symptomatic stream is "
+                "a partition of the renewal identity and requires "
+                "rate_mode 'renewal'",
+            )
+            continue
+        renewal = boarding.get("renewal") or {}
+        incidence = renewal.get("case_incidence_per_1000_py") or {}
+        missing = [
+            role for role in ("passenger", "crew")
+            if incidence.get(role) is None
+        ]
+        if missing:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "SYMPTOMATIC_STREAM",
+                f"{location} is enabled but renewal."
+                "case_incidence_per_1000_py is missing "
+                f"{', '.join(missing)}",
+            )
+        detectable = renewal.get("detectable_duration_days")
+        if detectable is None:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "SYMPTOMATIC_STREAM",
+                f"{location} is enabled but renewal.detectable_duration_days "
+                "is unset",
+            )
+        if missing or detectable is None:
+            continue
+        illness = p.illness_duration or {}
+        mean_days = p.recovery_day
+        if illness.get("draw") == "empirical_survival":
+            try:
+                model = IllnessDurationModel.from_mapping(illness)
+            except ValueError:
+                # The illness-duration check reports the malformed block.
+                continue
+            if model is not None:
+                mean_days = model.mean_days()
+        never = (
+            (boarding.get("state_split") or {})
+            .get("never_symptomatic_fraction")
+        )
+        for role, rate in incidence.items():
+            p_sym = (float(rate) / 1000.0) * (float(mean_days) / 365.25)
+            p_total = (
+                (float(rate) / 1000.0) / (1.0 - float(never or 0.0))
+                * (float(detectable) / 365.25)
+            )
+            if p_sym > p_total:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "SYMPTOMATIC_STREAM",
+                    f"{location} partition goes negative for {role}: "
+                    f"p_sym {p_sym:.6f} > p_total {p_total:.6f} (mean "
+                    f"illness {mean_days} d vs detectable {detectable} d)",
+                )
 
 
 def _check_incubation_shape(
@@ -2714,6 +2799,15 @@ def run_checks(
         print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}Illness-duration blocks valid{_RESET}")
+
+    print(f"  {_CYAN}Running symptomatic-stream checks...{_RESET}")
+    pre = len(report.findings)
+    _check_symptomatic_stream(pathogens, report)
+    added = len(report.findings) - pre
+    if added:
+        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}Symptomatic-stream blocks valid{_RESET}")
 
     print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
     pre = len(report.findings)
