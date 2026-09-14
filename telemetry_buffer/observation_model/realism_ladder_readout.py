@@ -47,6 +47,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from engines.transmission_core import DEFAULT_ROUTE_EFFICIENCY
 from simulation_utils.paths import resolve_repo_path, validated_open
 from telemetry_buffer.observation_model.boarding_posting_readout import (
     BOARDING_KEYS,
@@ -120,6 +121,7 @@ ARCHITECTURE_KEYS = (
 
 TALLY_KEYS = ("eligible", "declared", "screened_out", "preboarding_reportable")
 ROLES = ("passenger", "crew")
+ROUTE_KEYS = (*DEFAULT_ROUTE_EFFICIENCY, "unknown")
 
 
 def _boarding_entry(profile: dict[str, Any] | None) -> dict[str, Any]:
@@ -160,6 +162,9 @@ def _row(summary: dict[str, Any], profile: dict[str, Any] | None) -> dict[str, A
     """One voyage, flattened to the coordinates and the outcomes."""
     params = summary["parameters"]
     derived = summary["derived"]
+    route_summary = summary.get("summary") or {}
+    route_counts = route_summary.get("infections_by_dominant_route") or {}
+    route_shares = route_summary.get("infection_dose_share_by_route") or {}
     entry = _boarding_entry(profile)
     counts = _counts(derived)
     imported = sum(entry["drawn"].values())
@@ -183,6 +188,9 @@ def _row(summary: dict[str, Any], profile: dict[str, Any] | None) -> dict[str, A
     }
     row.update(counts)
     row.update(_tallies(entry["assessment"]))
+    for route in ROUTE_KEYS:
+        row[f"route_dom_{route}"] = int(route_counts.get(route, 0))
+        row[f"route_share_{route}"] = float(route_shares.get(route, 0.0))
     for state in COMPOSITION_STATES:
         row[f"composition_{state}"] = int((entry["composition"] or {}).get(state, 0))
     row["boarding_mechanism_rung"] = params.get(
@@ -254,6 +262,27 @@ def _imports(rows: list[dict[str, Any]]) -> dict[str, Any]:
     return record
 
 
+def _route_attribution(rows: list[dict[str, Any]]) -> dict[str, dict[str, float]]:
+    """Per-route means and dominant-attribution fractions for one cell."""
+    means = {
+        route: {
+            "mean_dominant_count": statistics.fmean(
+                float(row.get(f"route_dom_{route}", 0)) for row in rows
+            ) if rows else 0.0,
+            "mean_dose_share": statistics.fmean(
+                float(row.get(f"route_share_{route}", 0.0)) for row in rows
+            ) if rows else 0.0,
+        }
+        for route in ROUTE_KEYS
+    }
+    total = sum(item["mean_dominant_count"] for item in means.values())
+    for item in means.values():
+        item["fraction_dominant"] = (
+            item["mean_dominant_count"] / total if total > 0.0 else 0.0
+        )
+    return means
+
+
 def _screen(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """The assessment's tallies: per-voyage means and rare-event counts.
 
@@ -297,6 +326,7 @@ def summarise_cell(rows: list[dict[str, Any]]) -> dict[str, Any]:
             1000.0 * len(posted) / trials if trials else None
         ),
         "imports": _imports(rows),
+        "secondary_route_attribution": _route_attribution(rows),
         "preboarding_assessment": _screen(rows),
         "secondary_infection_spread": _dispersion(
             [row["secondary_infections"] for row in rows],
@@ -376,7 +406,24 @@ def _screen_cell(cell: dict[str, Any], role: str, key: str) -> str:
     return f"{_fmt(block['mean_per_voyage'], 3)}/{block['voyages_with_any']}"
 
 
-def _table_row(cell: dict[str, Any]) -> str:
+def _route_columns(report: dict[str, Any]) -> list[str]:
+    """Routes with a nonzero dominant attribution anywhere in the report."""
+    active = []
+    for route in ROUTE_KEYS:
+        if any(
+            cell["secondary_route_attribution"][route]["fraction_dominant"] > 0.0
+            for cell in report["cells"]
+        ):
+            active.append(route)
+    return active
+
+
+def _route_cell(cell: dict[str, Any], route: str) -> str:
+    fraction = cell["secondary_route_attribution"][route]["fraction_dominant"]
+    return f"{100.0 * fraction:.1f}%"
+
+
+def _table_row(cell: dict[str, Any], routes: list[str]) -> str:
     spread = cell["secondary_infection_spread"]
     conditional = cell["conditional_on_posting"][
         "reported_case_attack_rate_passenger"
@@ -403,12 +450,17 @@ def _table_row(cell: dict[str, Any]) -> str:
         f"| {_screen_cell(cell, 'crew', 'screened_out')} "
         f"| {_fmt(spread.get('mean'), 1)} "
         f"| {_fmt(spread.get('fraction_zero'))} "
-        f"| {_fmt(conditional['median'], 4)} |"
+        f"| {_fmt(conditional['median'], 4)} "
+        + " ".join(f"| {_route_cell(cell, route)}" for route in routes)
+        + (" |" if routes else "|")
     )
 
 
 def render_markdown(report: dict[str, Any]) -> str:
     """One row per rung and screen point."""
+    routes = _route_columns(report)
+    route_headers = " ".join(f"| {route} dominant %" for route in routes)
+    route_separators = " ".join("---|" for _ in routes)
     lines = [
         "# The introduction realism ladder: what each rung does to posting",
         "",
@@ -420,16 +472,18 @@ def render_markdown(report: dict[str, Any]) -> str:
         "distinguish a rare event from a structural zero. `crew c/h/d` is "
         "the declaration compliance, recall half-life in days and denial "
         "probability the cell was run at; `n/a` means the tier did not "
-        "sweep that coordinate.",
+        "sweep that coordinate. Route columns are the percentage of all "
+        "dominant-attributed infections in the cell; all-zero routes are "
+        "omitted.",
         "",
         "| rung | platform | days | prev pax/crew | crew c/h/d | voyages "
         "| post/1,000 | crew-only | imports | sympt | cleared | eligible "
         "| declared | reportable | denied | mean secondary | zero "
-        "| median pax AR |",
+        "| median pax AR " + route_headers + (" |" if routes else "|"),
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
-        "---|---|",
+        "---|---|" + route_separators,
     ]
-    lines.extend(_table_row(cell) for cell in report["cells"])
+    lines.extend(_table_row(cell, routes) for cell in report["cells"])
     lines.extend([
         "",
         "Observed comparators, reported and not fitted: A4 reported passenger "

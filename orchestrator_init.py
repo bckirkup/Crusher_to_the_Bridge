@@ -821,6 +821,26 @@ def update_ever_infected_ids(
             ever_infected_ids.add(int(agent["agent_id"]))
 
 
+def update_route_attribution(
+    events: list[Any],
+    dominant_counts: dict[str, int],
+    dose_shares: dict[str, float],
+) -> None:
+    """Accumulate established-infection route attribution in place."""
+    for event in events:
+        ledger = event.acquired_particles_by_route or {}
+        total = sum(ledger.values())
+        if total > 0.0:
+            dominant = max(ledger, key=ledger.get)
+            dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
+            for route, dose in ledger.items():
+                dose_shares[route] = dose_shares.get(route, 0.0) + dose / total
+            continue
+        fallback = event.pathway or "unknown"
+        dominant_counts[fallback] = dominant_counts.get(fallback, 0) + 1
+        dose_shares[fallback] = dose_shares.get(fallback, 0.0) + 1.0
+
+
 def update_ever_reported_ids(
     agents: list[dict[str, Any]],
     syn_result: dict[str, Any],
