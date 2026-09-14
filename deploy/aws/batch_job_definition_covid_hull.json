@@ -3,7 +3,7 @@
   "type": "container",
   "platformCapabilities": ["EC2"],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:covid-first-look-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-first-look-v1",
     "command": [
       "deploy/aws/covid_hull_entrypoint.py",
       "--phase", "Ref::phase",
@@ -24,7 +24,7 @@
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/aws/batch/picard-boundary-analysis",
+        "awslogs-group": "/aws/batch/picard-campaign",
         "awslogs-region": "<REGION>",
         "awslogs-stream-prefix": "covid-hull"
       }
