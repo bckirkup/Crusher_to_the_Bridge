@@ -1240,13 +1240,26 @@ class _PreboardingTallies:
         }
 
 
+def _screen_rng(rng: np.random.Generator) -> np.random.Generator:
+    """An independent stream for the declaration/denial screen draws.
+
+    A screen that draws from the shared boarding stream would rebase every
+    downstream stochastic decision, so a declaration-compliance sweep would
+    move the whole voyage rather than the screen. ``SeedSequence.spawn`` is
+    deterministic and consumes nothing from the parent — the same convention
+    the engine uses for its sibling streams — so the boarding generator
+    consumes exactly the same draws as when the screen is disabled.
+    """
+    return np.random.default_rng(rng.bit_generator.seed_seq.spawn(1)[0])
+
+
 def _assess_boarder(
     assessment: PreboardingAssessment,
     tallies: _PreboardingTallies,
     agent: Any,
     role: str,
     onset_age_days: float,
-    rng: np.random.Generator,
+    screen_rng: np.random.Generator,
 ) -> bool:
     """Whether one onset-aged boarder is admitted past the declaration screen.
 
@@ -1267,10 +1280,10 @@ def _assess_boarder(
     declare_p = spec.declaration_compliance * (
         1.0 if halflife is None else 2.0 ** (-onset_age_days / halflife)
     )
-    if rng.random() >= declare_p:
+    if screen_rng.random() >= declare_p:
         return True
     tallies.declared[role] += 1
-    if rng.random() < spec.denial_probability:
+    if screen_rng.random() < spec.denial_probability:
         tallies.screened_out[role] += 1
         return False
     if spec.reportable:
@@ -1286,6 +1299,7 @@ def _board_one_host(
     rng: np.random.Generator,
     role: str = ROLE_PASSENGER,
     tallies: _PreboardingTallies | None = None,
+    screen_rng: np.random.Generator | None = None,
 ) -> str | None:
     """Give one host a boarding infection; returns its state, or ``None``.
 
@@ -1336,7 +1350,8 @@ def _board_one_host(
         and state == STATE_CONVALESCENT
         and not _assess_boarder(
             spec.preboarding, tallies, agent, role,
-            age_days - incubation_days, rng,
+            age_days - incubation_days,
+            _screen_rng(rng) if screen_rng is None else screen_rng,
         )
     ):
         return STATE_SCREENED_OUT
@@ -1368,6 +1383,7 @@ def _board_one_symptomatic_host(
     rng: np.random.Generator,
     role: str = ROLE_PASSENGER,
     tallies: _PreboardingTallies | None = None,
+    screen_rng: np.random.Generator | None = None,
 ) -> str:
     """Give one host an in-flight illness; returns ``symptomatic`` or ``cleared``.
 
@@ -1405,7 +1421,8 @@ def _board_one_symptomatic_host(
         spec.preboarding is not None
         and tallies is not None
         and not _assess_boarder(
-            spec.preboarding, tallies, agent, role, elapsed_days, rng,
+            spec.preboarding, tallies, agent, role, elapsed_days,
+            _screen_rng(rng) if screen_rng is None else screen_rng,
         )
     ):
         return STATE_SCREENED_OUT
@@ -1467,6 +1484,7 @@ def _draw_symptomatic_role(
     drawn_by_role: dict[str, int],
     composition: dict[str, int],
     tallies: _PreboardingTallies | None = None,
+    screen_rng: np.random.Generator | None = None,
 ) -> None:
     """The ill-at-embarkation share of one role's renewal prevalence.
 
@@ -1492,7 +1510,7 @@ def _draw_symptomatic_role(
     chosen = rng.choice(pool, size=min(count, len(pool)), replace=False)
     for agent in chosen:
         state = _board_one_symptomatic_host(
-            spec, agent, profile, clock, rng, role, tallies,
+            spec, agent, profile, clock, rng, role, tallies, screen_rng,
         )
         if state == STATE_SCREENED_OUT:
             continue
@@ -1546,6 +1564,7 @@ def _draw_party_cohort(
     tallies = (
         _PreboardingTallies.empty() if spec.preboarding is not None else None
     )
+    screen_rng = _screen_rng(rng) if tallies is not None else None
     if party is None or rng.random() >= party.probability:
         return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
     pool = [
@@ -1554,7 +1573,7 @@ def _draw_party_cohort(
     ]
     for agent in _select_party(pool, party.size, rng):
         state = _board_one_host(
-            spec, agent, profile, clock, rng, party.role, tallies,
+            spec, agent, profile, clock, rng, party.role, tallies, screen_rng,
         )
         if state is None:
             continue
@@ -1590,6 +1609,10 @@ def draw_boarding_cohort(
     tallies = (
         _PreboardingTallies.empty() if spec.preboarding is not None else None
     )
+    # One screen stream per cohort draw, spawned off the shared boarding
+    # generator: declaration and denial draws land here, not in the stream
+    # the state/age draws share, so the boarding draw is unchanged.
+    screen_rng = _screen_rng(rng) if tallies is not None else None
     prevalence_by_role = {
         ROLE_PASSENGER: spec.passenger_prevalence,
         ROLE_CREW: spec.crew_prevalence,
@@ -1601,7 +1624,7 @@ def draw_boarding_cohort(
             # twice.
             _draw_symptomatic_role(
                 spec, agents, profile, clock, rng,
-                role, drawn_by_role, composition, tallies,
+                role, drawn_by_role, composition, tallies, screen_rng,
             )
         pool = [
             agent for agent in agents
@@ -1617,7 +1640,7 @@ def draw_boarding_cohort(
         )
         for agent in chosen:
             state = _board_one_host(
-                spec, agent, profile, clock, rng, role, tallies,
+                spec, agent, profile, clock, rng, role, tallies, screen_rng,
             )
             if state is None or state == STATE_SCREENED_OUT:
                 continue

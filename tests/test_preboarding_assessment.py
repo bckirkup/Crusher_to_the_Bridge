@@ -835,3 +835,113 @@ class TestAbsentRoleBlocks:
         ))
         assert spec.preboarding.crew.enabled is False
         assert spec.preboarding.passenger.enabled is False
+
+
+class TestScreenStreamIsolation:
+    """The declaration/denial draws ride a dedicated stream.
+
+    Before the split they drew from the shared boarding stream, so a screen
+    with c>0 rebased every downstream draw even at d=0 — the campaign's
+    identical-import pairing diagnostic caught it. These tests pin the
+    isolation: the shared generator's consumption is unchanged by the
+    screen, which is why a compliance sweep compares distributions rather
+    than reseeded voyages.
+    """
+
+    def _spec(self, compliance: float, denial: float) -> BoardingSpec:
+        # The symptomatic stream on, every crew host symptomatic at
+        # boarding, lookback 30 so every one is eligible.
+        return BoardingSpec(
+            pathogen_id=PATHOGEN,
+            passenger_prevalence=0.0,
+            crew_prevalence=0.0,
+            never_symptomatic_fraction=0.20,
+            presymptomatic_share_of_presenting=0.04,
+            rate_mode="renewal",
+            symptomatic_stream=True,
+            symptomatic_passenger_prevalence=0.0,
+            symptomatic_crew_prevalence=1.0,
+            mean_illness_duration_days=3.0,
+            preboarding=PreboardingAssessment(
+                lookback_days=30.0,
+                crew=_role_spec(
+                    reportable=True, declaration_compliance=compliance,
+                    denial_probability=denial,
+                ),
+                passenger=_role_spec(enabled=False),
+            ),
+        )
+
+    def _draw(
+        self, compliance: float, denial: float, seed: int = 67,
+    ) -> tuple[Any, str]:
+        agents = [_agent(600 + i, "crew") for i in range(20)]
+        report = draw_boarding_cohort(
+            self._spec(compliance, denial), agents, _profile(),
+            _clock(), np.random.default_rng(seed),
+        )
+        records = sorted(
+            (
+                agent.agent_id,
+                agent.infections[PATHOGEN]["boarding_state"],
+                agent.infections[PATHOGEN]["time_infected"],
+                agent.infections[PATHOGEN]["incubation_days"],
+            )
+            for agent in agents
+            if PATHOGEN in agent.infections
+        )
+        payload = json.dumps(
+            {
+                "records": records,
+                "drawn": report.drawn_by_role,
+                "composition": report.composition,
+            },
+            sort_keys=True, default=str,
+        )
+        return report, payload
+
+    def test_compliance_alone_does_not_rebase_the_boarding_draw(self) -> None:
+        # c=0 vs c=1 at d=0 screens nobody out, so the only difference the
+        # arm may show is the tallies — composition and the infection
+        # records are byte-identical because the boarding stream never fed
+        # the screen.
+        report_off, payload_off = self._draw(0.0, 0.0)
+        report_on, payload_on = self._draw(1.0, 0.0)
+        arm = report_on.preboarding["crew"]
+        assert arm["eligible"] == 20
+        assert arm["declared"] == 20
+        assert arm["screened_out"] == 0
+        assert payload_on == payload_off
+
+    def test_denial_orders_screened_out_and_boarded_crew(self) -> None:
+        # At c=1 every eligible crew host declares; sweeping d then moves
+        # them monotonically into screened_out and out of the boarded
+        # cohort. All 20 hosts are eligible on this fixture, so the
+        # ordering is a single-seed fact, not a seed search.
+        screened = []
+        boarded = []
+        for denial in (0.0, 0.5, 1.0):
+            report, _ = self._draw(1.0, denial)
+            arm = report.preboarding["crew"]
+            assert arm["eligible"] == 20
+            assert arm["declared"] == 20
+            screened.append(arm["screened_out"])
+            boarded.append(report.drawn_by_role["crew"])
+        assert screened == sorted(screened)
+        assert boarded == sorted(boarded, reverse=True)
+        assert screened[0] == 0 < screened[-1] == 20
+        assert boarded[0] == 20 > boarded[-1] == 0
+
+    def test_the_screen_reproduces_seed_for_seed(self) -> None:
+        a, _ = self._draw(0.5, 0.5, seed=71)
+        b, _ = self._draw(0.5, 0.5, seed=71)
+        assert a.preboarding == b.preboarding
+        assert a.preboarding_reportable_ids == b.preboarding_reportable_ids
+        # A different seed draws a different screen stream; the ids it
+        # makes reportable need not coincide.
+        c, _ = self._draw(0.5, 0.5, seed=73)
+        assert (
+            c.preboarding["crew"]["screened_out"]
+            != a.preboarding["crew"]["screened_out"]
+            or c.preboarding_reportable_ids != a.preboarding_reportable_ids
+        )
