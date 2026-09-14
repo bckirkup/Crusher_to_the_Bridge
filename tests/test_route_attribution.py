@@ -1,6 +1,7 @@
 """Route-attribution telemetry is exhaustive and numerically inert."""
 from __future__ import annotations
 
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -9,7 +10,7 @@ from orchestrator_init import update_route_attribution
 from picard_framework import PicardRunSpec, ShipSimulation
 from picard_framework.simulation import ship_simulation as ship_simulation_module
 
-REPO_ROOT = "/home/ubuntu/repos/Crusher-to-the-Bridge"
+REPO_ROOT = str(Path(__file__).resolve().parents[1])
 
 
 def _event(ledger: dict[str, float], pathway: str | None = None) -> SimpleNamespace:
