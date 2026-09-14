@@ -47,6 +47,26 @@ def _lockdown_tag(lockdown_ar: Any) -> tuple[float | None, str]:
     return lockdown_val, tag
 
 
+def _calibration_phi_values(tier: dict[str, Any]) -> list[float | None]:
+    """Contact-class-exponent sweep; ``[None]`` leaves the shipped value."""
+    if "contact_class_exponents" in tier:
+        return [float(phi) for phi in tier["contact_class_exponents"]]
+    return [None]
+
+
+def _phi_tag(phi: float) -> str:
+    """Compact run-id fragment (0.5 -> phi050, -0.2 -> phi-020)."""
+    value = int(round(float(phi) * 100))
+    return f"phi-{abs(value):03d}" if value < 0 else f"phi{value:03d}"
+
+
+def _phi_override(phi: float | None) -> dict[str, Any] | None:
+    """``contact_class_exponent`` alone; it applies under the shipped mode."""
+    if phi is None:
+        return None
+    return {"transmission": {"contact_class_exponent": float(phi)}}
+
+
 def _calibration_rid(
     ctx: Any,
     *,
@@ -56,6 +76,8 @@ def _calibration_rid(
     index_tags: list[str],
     alpha: Any,
     cmode: Any,
+    phi: Any,
+    n_agents: int | None,
     sweep_epochs: bool,
     n_epochs: int,
     imm_tag: str,
@@ -70,6 +92,10 @@ def _calibration_rid(
         parts.append(ctx.alpha_tag(alpha))
     if cmode is not None:
         parts.append(ctx.contact_mode_tag(cmode))
+    if phi is not None:
+        parts.append(_phi_tag(phi))
+    if n_agents is not None:
+        parts.append(f"n{n_agents}")
     if sweep_epochs:
         parts.append(f"ep{int(n_epochs)}")
     if imm_tag:
@@ -544,18 +570,30 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
     epoch_list, sweep_epochs = _calibration_epochs(ctx)
     hvac = {"hvac": ctx.tier["hvac"]} if ctx.tier.get("hvac") else None
     index_axis = ctx.calibration_index_axis(ctx.tier, pathogen_id)
-    for plat, dose, point, alpha, cmode, imm_frac, n_epochs, sname, seed in product(
+    phis = _calibration_phi_values(ctx.tier)
+    # An occupancy tier's cells share every other coordinate, so the
+    # complement it runs at must enter the run id or cells collide.
+    rid_carries_n = "num_agents" in ctx.tier
+    default_agents = int(ctx.manifest.get("default_num_agents", 7000))
+    for plat, dose, point, alpha, cmode, phi, imm_frac, n_epochs, sname, seed in product(
         platforms,
         ctx.calibration_dose_values(ctx.tier),
         index_axis.points,
         ctx.density_exponent_values(ctx.tier),
         ctx.contact_mode_values(ctx.tier),
+        phis,
         ctx.tier.get("pre_immunity_fractions", [None]),
         epoch_list,
         strategies,
         ctx.tier["seeds"],
     ):
         imm_over, imm_tag = ctx.immunity_override(imm_frac)
+        n_agents = ctx.platform_num_agents(
+            plat,
+            num_agents_override=ctx.num_agents_override,
+            tier=ctx.tier,
+            default_agents=default_agents,
+        )
         yield ctx.yield_run(
             _calibration_rid(
                 ctx,
@@ -565,6 +603,8 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
                 index_tags=index_axis.tags(point),
                 alpha=alpha,
                 cmode=cmode,
+                phi=phi,
+                n_agents=n_agents if rid_carries_n else None,
                 sweep_epochs=sweep_epochs,
                 n_epochs=n_epochs,
                 imm_tag=imm_tag,
@@ -579,17 +619,14 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
             ),
             config_overrides=ctx.merge_cfg(
                 ctx.surv_cfgs.get(sname),
+                ctx.tier.get("config_overrides"),
                 imm_over,
                 ctx.density_contact_override(alpha, contact_mode=cmode),
+                _phi_override(phi),
                 hvac,
             ),
             seed=seed,
-            num_agents=ctx.platform_num_agents(
-                plat,
-                num_agents_override=ctx.num_agents_override,
-                tier=ctx.tier,
-                default_agents=int(ctx.manifest.get("default_num_agents", 7000)),
-            ),
+            num_agents=n_agents,
             pathogen=pathogen,
             platform_id=plat,
             epochs=int(n_epochs),
@@ -598,6 +635,7 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
             immunity=imm_frac,
             density_exponent=alpha,
             contact_mode=cmode,
+            contact_class_exponent=phi,
             **index_axis.factors(point),
         )
 

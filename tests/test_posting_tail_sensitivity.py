@@ -238,6 +238,50 @@ class TestBuildReport:
         assert pair["differences"][MARGIN_KEY]["variance_reduction"] > 1.0
 
 
+class TestArchitectureCoordinates:
+    """Complement and kernel sweep coordinates the pairing must respect."""
+
+    def test_occupancy_is_its_own_coordinate(self) -> None:
+        n = MIN_PAIRED_SEEDS + 10
+        rows = (
+            _cell_rows(_margins(n, 1), num_agents=478)
+            + _cell_rows(_margins(n, 2), num_agents=955)
+        )
+        report = build_report(rows)
+        assert report["n_cells"] == 2
+        assert [pair["coordinate"] for pair in report["pairs"]] == [
+            "num_agents",
+        ]
+
+    def test_occupancy_plus_kernel_refuses_to_pair(self) -> None:
+        n = MIN_PAIRED_SEEDS + 10
+        rows = (
+            _cell_rows(
+                _margins(n, 1), num_agents=478, contact_class_exponent=0.0,
+            )
+            + _cell_rows(
+                _margins(n, 2), num_agents=955, contact_class_exponent=0.5,
+            )
+        )
+        report = build_report(rows)
+        assert report["n_cells"] == 2
+        assert report["pairs"] == []
+
+    def test_kernel_exponent_is_its_own_coordinate(self) -> None:
+        n = MIN_PAIRED_SEEDS + 10
+        rows = (
+            _cell_rows(_margins(n, 1), contact_class_exponent=0.0)
+            + _cell_rows(_margins(n, 2), contact_class_exponent=0.5)
+            + _cell_rows(_margins(n, 3), contact_class_exponent=1.0)
+        )
+        report = build_report(rows)
+        assert report["n_cells"] == 3
+        assert {
+            pair["coordinate"] for pair in report["pairs"]
+        } == {"contact_class_exponent"}
+        assert len(report["pairs"]) == 3
+
+
 class TestMcnemar:
     def _posted_rows(self, flags: list[bool]) -> list[dict[str, Any]]:
         return [{"posted": flag} for flag in flags]

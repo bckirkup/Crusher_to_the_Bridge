@@ -94,8 +94,6 @@ Cells differing in exactly one coordinate, matched seed by seed. `identical impo
 | coordinate | platform | days | seeds | identical imports | margin shift | shift CI | var reduction | gained/lost | observed | predicted | exact p |
 |---|---|---|---|---|---|---|---|---|---|---|---|
 | num_epochs | classic_cruise_1900 | 7.0 | 1000 | 1.000 | 0.01058 | 0.00951-0.01183 | 2.0 | 174/1 | 0.1730 | 0.0249 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.036 | -0.00271 | -0.00354--0.00201 | 1.0 | 7/47 | -0.0400 | -0.0028 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.109 | 0.00020 | -0.00068-0.00104 | 1.0 | 50/45 | 0.0050 | 0.0005 | 0.682 |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 7.0 | 200 | 0.985 | -0.00000 | -0.00005-0.00003 | 3328.5 | 0/0 | 0.0000 | -0.0000 | n/a |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 7.0 | 200 | 0.965 | 0.00023 | -0.00003-0.00070 | 37.3 | 1/1 | 0.0000 | 0.0007 | 1.000 |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 7.0 | 200 | 0.935 | 0.00025 | -0.00033-0.00102 | 13.1 | 2/3 | -0.0050 | 0.0008 | 1.000 |
@@ -178,13 +176,7 @@ Cells differing in exactly one coordinate, matched seed by seed. `identical impo
 | num_epochs | classic_cruise_1900 | 7.0 | 200 | 1.000 | 0.00866 | 0.00583-0.01128 | 2.2 | 27/0 | 0.1350 | 0.0130 | 0.000 |
 | boarding_mechanism_rung | classic_cruise_1900 | 7.0 | 1000 | 0.936 | -0.00029 | -0.00061-0.00001 | 8.1 | 5/7 | -0.0020 | -0.0006 | 0.774 |
 | num_epochs | classic_cruise_1900 | 7.0 | 1000 | 1.000 | 0.00999 | 0.00880-0.01110 | 2.0 | 164/0 | 0.1640 | 0.0180 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.035 | -0.00223 | -0.00289--0.00162 | 1.1 | 4/38 | -0.0340 | -0.0023 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.099 | 0.00009 | -0.00070-0.00087 | 1.1 | 35/37 | -0.0020 | 0.0001 | 0.906 |
 | num_epochs | classic_cruise_1900 | 7.0 | 1000 | 1.000 | 0.01002 | 0.00896-0.01110 | 1.9 | 164/0 | 0.1640 | 0.0185 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.034 | -0.00225 | -0.00286--0.00165 | 1.1 | 2/38 | -0.0360 | -0.0023 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.105 | 0.00039 | -0.00036-0.00123 | 1.2 | 39/34 | 0.0050 | 0.0006 | 0.640 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.036 | -0.01185 | -0.01330--0.01042 | 1.1 | 20/207 | -0.1870 | -0.0213 | 0.000 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.109 | 0.00161 | -0.00049-0.00340 | 1.0 | 188/164 | 0.0240 | 0.0052 | 0.220 |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 12.0 | 200 | 0.985 | 0.00010 | -0.00042-0.00065 | 85.9 | 1/1 | 0.0000 | 0.0001 | 1.000 |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 12.0 | 200 | 0.965 | 0.00040 | -0.00028-0.00110 | 48.7 | 2/1 | 0.0050 | 0.0004 | 1.000 |
 | preboarding_crew_declaration_compliance | classic_cruise_1900 | 12.0 | 200 | 0.935 | 0.00057 | -0.00081-0.00200 | 10.7 | 4/2 | 0.0100 | 0.0004 | 0.688 |
@@ -244,21 +236,11 @@ Cells differing in exactly one coordinate, matched seed by seed. `identical impo
 | preboarding_passenger_declaration_compliance | classic_cruise_1900 | 12.0 | 200 | 0.880 | -0.00029 | -0.00164-0.00108 | 10.4 | 4/3 | 0.0050 | -0.0003 | 1.000 |
 | preboarding_passenger_declaration_compliance | classic_cruise_1900 | 12.0 | 200 | 0.910 | 0.00044 | -0.00082-0.00181 | 12.9 | 5/2 | 0.0150 | 0.0004 | 0.453 |
 | boarding_mechanism_rung | classic_cruise_1900 | 12.0 | 1000 | 0.936 | -0.00026 | -0.00083-0.00021 | 16.0 | 10/12 | -0.0020 | -0.0005 | 0.832 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.035 | -0.01074 | -0.01251--0.00919 | 1.1 | 17/196 | -0.1790 | -0.0199 | 0.000 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.099 | 0.00379 | 0.00191-0.00569 | 1.2 | 192/127 | 0.0650 | 0.0108 | 0.000 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.034 | -0.01070 | -0.01238--0.00911 | 1.0 | 20/198 | -0.1780 | -0.0193 | 0.000 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.105 | 0.00356 | 0.00177-0.00546 | 1.2 | 178/123 | 0.0550 | 0.0103 | 0.002 |
 | num_epochs | expedition_cruise_450 | 7.0 | 1000 | 1.000 | 0.00144 | 0.00101-0.00196 | 2.4 | 27/1 | 0.0260 | 0.0007 | 0.000 |
-| platform_id | expedition_cruise_450 | 7.0 | 1000 | 0.003 | 0.00291 | 0.00229-0.00361 | 1.1 | 51/6 | 0.0450 | 0.0052 | 0.000 |
 | boarding_mechanism_rung | expedition_cruise_450 | 7.0 | 1000 | 0.987 | -0.00032 | -0.00052--0.00014 | 4.5 | 0/4 | -0.0040 | -0.0000 | 0.125 |
 | num_epochs | expedition_cruise_450 | 7.0 | 1000 | 1.000 | 0.00148 | 0.00109-0.00196 | 2.4 | 20/1 | 0.0190 | 0.0016 | 0.000 |
-| platform_id | expedition_cruise_450 | 7.0 | 1000 | 0.005 | 0.00232 | 0.00169-0.00306 | 1.0 | 39/7 | 0.0320 | 0.0016 | 0.000 |
 | num_epochs | expedition_cruise_450 | 7.0 | 1000 | 1.000 | 0.00157 | 0.00117-0.00206 | 2.0 | 23/1 | 0.0220 | 0.0015 | 0.000 |
-| platform_id | expedition_cruise_450 | 7.0 | 1000 | 0.004 | 0.00264 | 0.00194-0.00337 | 1.0 | 44/3 | 0.0410 | 0.0018 | 0.000 |
-| platform_id | expedition_cruise_450 | 12.0 | 1000 | 0.003 | 0.01346 | 0.01190-0.01504 | 1.0 | 235/24 | 0.2110 | 0.0289 | 0.000 |
 | boarding_mechanism_rung | expedition_cruise_450 | 12.0 | 1000 | 0.987 | -0.00023 | -0.00053-0.00006 | 8.0 | 5/6 | -0.0010 | -0.0004 | 1.000 |
-| platform_id | expedition_cruise_450 | 12.0 | 1000 | 0.005 | 0.01452 | 0.01294-0.01625 | 1.0 | 262/18 | 0.2440 | 0.0436 | 0.000 |
-| platform_id | expedition_cruise_450 | 12.0 | 1000 | 0.004 | 0.01426 | 0.01259-0.01606 | 1.0 | 250/17 | 0.2330 | 0.0414 | 0.000 |
 | num_epochs | spirit_cruise_3000 | 7.0 | 1000 | 1.000 | 0.01199 | 0.01095-0.01315 | 2.1 | 192/0 | 0.1920 | 0.0414 | 0.000 |
 | boarding_mechanism_rung | spirit_cruise_3000 | 7.0 | 1000 | 0.880 | 0.00001 | -0.00023-0.00030 | 10.6 | 7/2 | 0.0050 | 0.0000 | 0.180 |
 | num_epochs | spirit_cruise_3000 | 7.0 | 1000 | 1.000 | 0.01368 | 0.01257-0.01492 | 1.8 | 232/1 | 0.2310 | 0.0356 | 0.000 |
@@ -272,13 +254,9 @@ Cells differing in exactly one coordinate, matched seed by seed. `identical impo
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 7.0 | 150 | 0.873 | 0.00002 | -0.00232-0.00261 | 5.9 | 6/11 | -0.0333 | 0.0001 | 0.332 |
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 7.0 | 150 | 0.620 | 0.00267 | -0.00098-0.00631 | 2.4 | 27/18 | 0.0600 | 0.0231 | 0.233 |
 | num_epochs | classic_cruise_1900 | 7.0 | 150 | 1.000 | 0.03957 | 0.03630-0.04268 | 3.2 | 69/0 | 0.4600 | 0.1715 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 150 | 0.000 | -0.01955 | -0.02386--0.01464 | 1.0 | 11/62 | -0.3400 | -0.1629 | 0.000 |
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 7.0 | 150 | 0.673 | 0.00265 | -0.00061-0.00606 | 2.9 | 25/11 | 0.0933 | 0.0230 | 0.029 |
 | num_epochs | classic_cruise_1900 | 7.0 | 1150 | 1.000 | 0.03806 | 0.03705-0.03913 | 3.0 | 449/1 | 0.3896 | 0.1870 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1150 | 0.000 | -0.02501 | -0.02683--0.02339 | 1.0 | 49/563 | -0.4470 | -0.1609 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 1000 | 0.002 | 0.00491 | 0.00319-0.00648 | 1.3 | 258/137 | 0.1210 | 0.0503 | 0.000 |
 | num_epochs | classic_cruise_1900 | 7.0 | 150 | 1.000 | 0.03867 | 0.03550-0.04213 | 2.6 | 62/0 | 0.4133 | 0.2320 | 0.000 |
-| platform_id | classic_cruise_1900 | 7.0 | 150 | 0.000 | -0.02130 | -0.02549--0.01667 | 1.1 | 6/66 | -0.4000 | -0.1633 | 0.000 |
 | boarding_crew_prevalence | classic_cruise_1900 | 7.0 | 150 | 0.000 | 0.00797 | 0.00430-0.01146 | 2.0 | 33/14 | 0.1267 | 0.0744 | 0.008 |
 | num_epochs | classic_cruise_1900 | 7.0 | 150 | 1.000 | 0.03816 | 0.03532-0.04116 | 3.1 | 58/1 | 0.3800 | 0.1781 | 0.000 |
 | num_epochs | classic_cruise_1900 | 7.0 | 150 | 1.000 | 0.03440 | 0.03116-0.03766 | 3.1 | 41/0 | 0.2733 | 0.2064 | 0.000 |
@@ -288,13 +266,9 @@ Cells differing in exactly one coordinate, matched seed by seed. `identical impo
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 12.0 | 150 | 0.873 | -0.00103 | -0.00379-0.00204 | 4.4 | 4/7 | -0.0200 | -0.0017 | 0.549 |
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 12.0 | 150 | 0.620 | 0.00177 | -0.00293-0.00654 | 1.5 | 12/10 | 0.0133 | 0.0030 | 0.832 |
 | presymptomatic_share_of_presenting | classic_cruise_1900 | 12.0 | 150 | 0.673 | 0.00280 | -0.00159-0.00671 | 2.0 | 10/5 | 0.0333 | 0.0075 | 0.302 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.000 | -0.05197 | -0.05373--0.04995 | 1.1 | 17/664 | -0.6470 | -0.2989 | 0.000 |
-| platform_id | classic_cruise_1900 | 12.0 | 1000 | 0.002 | 0.00477 | 0.00320-0.00628 | 1.2 | 48/7 | 0.0410 | 0.0055 | 0.000 |
 | boarding_crew_prevalence | classic_cruise_1900 | 12.0 | 150 | 0.000 | 0.00420 | 0.00034-0.00801 | 1.7 | 6/3 | 0.0200 | 0.0056 | 0.508 |
 | presymptomatic_share_of_presenting | expedition_cruise_450 | 7.0 | 150 | 0.960 | 0.00096 | 0.00007-0.00224 | 9.6 | 2/1 | 0.0067 | 0.0086 | 1.000 |
 | presymptomatic_share_of_presenting | expedition_cruise_450 | 7.0 | 150 | 0.827 | 0.00092 | -0.00076-0.00248 | 4.7 | 4/4 | 0.0000 | 0.0068 | 1.000 |
 | presymptomatic_share_of_presenting | expedition_cruise_450 | 7.0 | 150 | 0.867 | -0.00003 | -0.00125-0.00120 | 8.9 | 2/3 | -0.0067 | -0.0003 | 1.000 |
 | num_epochs | expedition_cruise_450 | 7.0 | 1000 | 1.000 | 0.01198 | 0.01073-0.01312 | 2.5 | 213/14 | 0.1990 | 0.0839 | 0.000 |
-| platform_id | expedition_cruise_450 | 7.0 | 1000 | 0.000 | 0.03088 | 0.02920-0.03246 | 1.0 | 617/27 | 0.5900 | 0.2609 | 0.000 |
-| platform_id | expedition_cruise_450 | 12.0 | 1000 | 0.000 | 0.05675 | 0.05503-0.05843 | 1.1 | 689/1 | 0.6880 | 0.2894 | 0.000 |
 | num_epochs | spirit_cruise_3000 | 7.0 | 1000 | 1.000 | 0.03785 | 0.03683-0.03898 | 2.6 | 298/1 | 0.2970 | 0.2479 | 0.000 |

@@ -69,6 +69,7 @@ from telemetry_buffer.observation_model.expedition_posting_readout import (
     jeffreys_interval,
 )
 from telemetry_buffer.observation_model.realism_ladder_readout import (
+    ARCHITECTURE_KEYS,
     MECHANISM_KEYS,
     SCREEN_KEYS,
     collect_rows,
@@ -88,7 +89,10 @@ FAMILY_KEYS = (
     "dose_adjustment",
     "num_epochs",
 )
-COORD_KEYS = FAMILY_KEYS + MECHANISM_KEYS + SCREEN_KEYS + BOARDING_KEYS
+COORD_KEYS = (
+    FAMILY_KEYS + MECHANISM_KEYS + SCREEN_KEYS + BOARDING_KEYS
+    + ARCHITECTURE_KEYS
+)
 
 # The anchor's exceedance probability. It fixes how much of the sample
 # the tail fit sees: 0.15 keeps the anchor far enough below 3% that the

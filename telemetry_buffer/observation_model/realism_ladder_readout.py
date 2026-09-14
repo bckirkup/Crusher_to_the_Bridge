@@ -108,6 +108,16 @@ COMPOSITION_STATES = (
     "screened_out",
 )
 
+# The complement and contact-kernel coordinates the hull-compounding
+# campaign moves. ``num_agents`` is recorded on every run; the kernel
+# coordinates are absent in the older archives and read as None there.
+ARCHITECTURE_KEYS = (
+    "num_agents",
+    "contact_class_exponent",
+    "density_exponent",
+    "contact_mode",
+)
+
 TALLY_KEYS = ("eligible", "declared", "screened_out", "preboarding_reportable")
 ROLES = ("passenger", "crew")
 
@@ -178,7 +188,9 @@ def _row(summary: dict[str, Any], profile: dict[str, Any] | None) -> dict[str, A
     row["boarding_mechanism_rung"] = params.get(
         "boarding_mechanism_rung", DEFAULT_RUNG,
     )
-    for key in MECHANISM_KEYS[1:] + SCREEN_KEYS + BOARDING_KEYS:
+    for key in (
+        MECHANISM_KEYS[1:] + SCREEN_KEYS + BOARDING_KEYS + ARCHITECTURE_KEYS
+    ):
         row[key] = params.get(key)
     for key in LEVEL_KEYS:
         row[key] = float(derived[key])
@@ -216,6 +228,9 @@ def _cell_key(row: dict[str, Any]) -> tuple[Any, ...]:
         # state split; pooling them would average two mechanisms' cells
         # into one row and hide the corner that produced a posting rate.
         *(row[key] for key in BOARDING_KEYS),
+        # Complement and kernel: constant inside every archived cell, the
+        # coordinates the hull-compounding cells differ in.
+        *(row[key] for key in ARCHITECTURE_KEYS),
     )
 
 
@@ -311,7 +326,10 @@ def _cell_header(key: tuple[Any, ...]) -> dict[str, Any]:
         "voyage_days": epochs / 24.0,  # clock-exempt: epochs->days
     }
     header.update(
-        dict(zip(MECHANISM_KEYS + SCREEN_KEYS + BOARDING_KEYS, key[5:])),
+        dict(zip(
+            MECHANISM_KEYS + SCREEN_KEYS + BOARDING_KEYS + ARCHITECTURE_KEYS,
+            key[5:],
+        )),
     )
     return header
 
