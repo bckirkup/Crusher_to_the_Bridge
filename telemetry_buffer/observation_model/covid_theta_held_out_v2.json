@@ -1,0 +1,341 @@
+{
+  "coverage": {
+    "expected": 550,
+    "missing": [],
+    "present": 550
+  },
+  "design_id": "covid_first_look_v1",
+  "partial": false,
+  "scenario_id": "greg_mortimer_2020",
+  "scored": {
+    "campaign_positives": {
+      "mean": 5.16,
+      "median": 0.0,
+      "n": 50,
+      "q05": 0.0,
+      "q95": 20.64999999999999
+    },
+    "placement": {
+      "anchor_id": "covid.H3",
+      "frequency_above_iqr": 0.26,
+      "n_defined": 50,
+      "n_undefined": 0,
+      "quantity": "share of seeds placing the hull above the cross-ship IQR",
+      "target": 0.015
+    },
+    "probability_no_positives": 0.52,
+    "scores": [
+      {
+        "anchor_id": "covid.H1",
+        "observed": {
+          "mean": 0.03563749686457752,
+          "median": 0.0,
+          "n": 50,
+          "q05": 0.0,
+          "q95": 0.14919195078719627
+        },
+        "quantity": "campaign positive share",
+        "target": 0.5899,
+        "verdicts": {
+          "hit": 0,
+          "miss": 50,
+          "undefined": 0
+        }
+      },
+      {
+        "anchor_id": "covid.H2",
+        "observed": {
+          "mean": 0.7873217468805703,
+          "median": 1.0,
+          "n": 24,
+          "q05": 0.0,
+          "q95": 1.0
+        },
+        "quantity": "asymptomatic share among positives",
+        "target": 0.8125,
+        "verdicts": {
+          "hit": 0,
+          "miss": 24,
+          "undefined": 26
+        }
+      }
+    ],
+    "seeds": [
+      20200315,
+      20200316,
+      20200317,
+      20200318,
+      20200319,
+      20200320,
+      20200321,
+      20200322,
+      20200323,
+      20200324,
+      20200325,
+      20200326,
+      20200327,
+      20200328,
+      20200329,
+      20200330,
+      20200331,
+      20200332,
+      20200333,
+      20200334,
+      20200335,
+      20200336,
+      20200337,
+      20200338,
+      20200339,
+      20200340,
+      20200341,
+      20200342,
+      20200343,
+      20200344,
+      20200345,
+      20200346,
+      20200347,
+      20200348,
+      20200349,
+      20200350,
+      20200351,
+      20200352,
+      20200353,
+      20200354,
+      20200355,
+      20200356,
+      20200357,
+      20200358,
+      20200359,
+      20200360,
+      20200361,
+      20200362,
+      20200363,
+      20200364
+    ],
+    "takeoff_probability": 0.26,
+    "theta": 31622.776601683792
+  },
+  "sensitivity": [
+    {
+      "campaign_positives": {
+        "mean": 1.06,
+        "median": 0.0,
+        "n": 50,
+        "q05": 0.0,
+        "q95": 6.099999999999994
+      },
+      "placement": {
+        "anchor_id": "covid.H3",
+        "frequency_above_iqr": 0.12,
+        "n_defined": 50,
+        "n_undefined": 0,
+        "quantity": "share of seeds placing the hull above the cross-ship IQR",
+        "target": 0.015
+      },
+      "probability_no_positives": 0.6,
+      "scores": [
+        {
+          "anchor_id": "covid.H1",
+          "observed": {
+            "mean": 0.007163895827198928,
+            "median": 0.0,
+            "n": 50,
+            "q05": 0.0,
+            "q95": 0.0436486422219051
+          },
+          "quantity": "campaign positive share",
+          "target": 0.5899,
+          "verdicts": {
+            "hit": 0,
+            "miss": 50,
+            "undefined": 0
+          }
+        },
+        {
+          "anchor_id": "covid.H2",
+          "observed": {
+            "mean": 0.69375,
+            "median": 1.0,
+            "n": 20,
+            "q05": 0.0,
+            "q95": 1.0
+          },
+          "quantity": "asymptomatic share among positives",
+          "target": 0.8125,
+          "verdicts": {
+            "hit": 1,
+            "miss": 19,
+            "undefined": 30
+          }
+        }
+      ],
+      "seeds": [
+        20200315,
+        20200316,
+        20200317,
+        20200318,
+        20200319,
+        20200320,
+        20200321,
+        20200322,
+        20200323,
+        20200324,
+        20200325,
+        20200326,
+        20200327,
+        20200328,
+        20200329,
+        20200330,
+        20200331,
+        20200332,
+        20200333,
+        20200334,
+        20200335,
+        20200336,
+        20200337,
+        20200338,
+        20200339,
+        20200340,
+        20200341,
+        20200342,
+        20200343,
+        20200344,
+        20200345,
+        20200346,
+        20200347,
+        20200348,
+        20200349,
+        20200350,
+        20200351,
+        20200352,
+        20200353,
+        20200354,
+        20200355,
+        20200356,
+        20200357,
+        20200358,
+        20200359,
+        20200360,
+        20200361,
+        20200362,
+        20200363,
+        20200364
+      ],
+      "takeoff_probability": 0.16,
+      "theta": 10000.0
+    },
+    {
+      "campaign_positives": {
+        "mean": 6.32,
+        "median": 1.0,
+        "n": 50,
+        "q05": 0.0,
+        "q95": 28.099999999999994
+      },
+      "placement": {
+        "anchor_id": "covid.H3",
+        "frequency_above_iqr": 0.32,
+        "n_defined": 50,
+        "n_undefined": 0,
+        "quantity": "share of seeds placing the hull above the cross-ship IQR",
+        "target": 0.015
+      },
+      "probability_no_positives": 0.48,
+      "scores": [
+        {
+          "anchor_id": "covid.H1",
+          "observed": {
+            "mean": 0.04523819488635757,
+            "median": 0.005718954248366014,
+            "n": 50,
+            "q05": 0.0,
+            "q95": 0.20520833333333324
+          },
+          "quantity": "campaign positive share",
+          "target": 0.5899,
+          "verdicts": {
+            "hit": 0,
+            "miss": 50,
+            "undefined": 0
+          }
+        },
+        {
+          "anchor_id": "covid.H2",
+          "observed": {
+            "mean": 0.7784123284123284,
+            "median": 1.0,
+            "n": 26,
+            "q05": 0.0,
+            "q95": 1.0
+          },
+          "quantity": "asymptomatic share among positives",
+          "target": 0.8125,
+          "verdicts": {
+            "hit": 1,
+            "miss": 25,
+            "undefined": 24
+          }
+        }
+      ],
+      "seeds": [
+        20200315,
+        20200316,
+        20200317,
+        20200318,
+        20200319,
+        20200320,
+        20200321,
+        20200322,
+        20200323,
+        20200324,
+        20200325,
+        20200326,
+        20200327,
+        20200328,
+        20200329,
+        20200330,
+        20200331,
+        20200332,
+        20200333,
+        20200334,
+        20200335,
+        20200336,
+        20200337,
+        20200338,
+        20200339,
+        20200340,
+        20200341,
+        20200342,
+        20200343,
+        20200344,
+        20200345,
+        20200346,
+        20200347,
+        20200348,
+        20200349,
+        20200350,
+        20200351,
+        20200352,
+        20200353,
+        20200354,
+        20200355,
+        20200356,
+        20200357,
+        20200358,
+        20200359,
+        20200360,
+        20200361,
+        20200362,
+        20200363,
+        20200364
+      ],
+      "takeoff_probability": 0.28,
+      "theta": 100000.0
+    }
+  ],
+  "split_preserved": true,
+  "theta": 31622.776601683792,
+  "unscorable": [
+    "covid.H4"
+  ]
+}
