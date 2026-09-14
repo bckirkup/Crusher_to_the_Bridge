@@ -3146,6 +3146,39 @@ Roughly in dependency order.
     `sentinel_recovery.onboard_seeding` stamps its prevalence factors itself
     for the same reason.
 
+39. **Route attribution is measured, and it withdraws the kernel's
+    characterisation.** `hull_compounding_route_v1` (Batch
+    `dd30e656-5aeb-48bc-a052-75964ebe6677`, 1,800/1,800 runs, 0 failed) re-ran
+    `hull_compounding_v1` Arm B — fixed classic/spirit architecture at 0.25 /
+    0.5 / 1.0 of declared complement, same 300 matched seeds per cell — with
+    the route instrument of #530. Per `acquired_particles_by_route` dominant
+    attribution of established infections: **droplet carries 84.8–99.2% of
+    every cell and all of the headcount scaling** (secondaries per import
+    scale as N^1.96 classic, N^1.70–1.75 spirit where the denominator is
+    populated), fomite carries the balance (0.8–15.2%, same exponent),
+    `direct_contact` establishes **3 infections in 1,800 voyages**, and
+    `hvac_airborne`, `emesis_aerosol`, `food_contamination`,
+    `environmental_source` and `unknown` are exactly zero in all six cells.
+    **This withdraws the prior characterisation that the shipped kernel is
+    frequency-dependent by construction**, and withdraws the Arm B inference
+    that its surplus sat in the surface/fomite/emesis/environmental routes:
+    per-partner frequency dependence holds only for the direct route, which
+    is measured inert. The carrier is `_pathway_droplet`'s in-room aerosol
+    pool — `Σ(emission × DROPLET_AEROSOL_FRACTION) / V_zone`, `V_zone` fixed —
+    so the dose every occupant receives scales with N and the scaling is
+    density-dependent in fact. (c) `DROPLET_AEROSOL_FRACTION = 0.05`
+    ("fraction of shedding emitted to air") has **no register row** and is
+    the same ∅-null continuous-emission definition the register already
+    deleted from the norovirus airborne route in favour of
+    `emesis_conditioned` + Tung-Thompson's `[7.2e-7, 2.67e-4]` — an open
+    item, flagged, **not repaired here**; no value is proposed or adopted.
+    Full account:
+    `docs/norovirus/route_attribution_headcount_scaling.md`; artifacts
+    `telemetry_buffer/observation_model/hull_compounding_route_v1*.json` and
+    `docs/norovirus/hull_compounding_route_v1*.md`. Away from declared
+    complement these cells remain a mechanism probe — no posting, attack-rate
+    or anchor claim may be read off them.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

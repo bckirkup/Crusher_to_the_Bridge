@@ -1,0 +1,422 @@
+{
+ "cells": {
+  "classic_cruise_1900|1910": {
+   "mean_imports": 4.366666666666666,
+   "n_voyages": 300,
+   "num_agents": 1910.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.00011559357299734135,
+     "dominant_per_1000_agents": 0.0017452006980802793,
+     "dominant_per_import": 0.0007633587786259543,
+     "mean_dominant_per_voyage": 0.0033333333333333335
+    },
+    "droplet": {
+     "dominant_fraction": 0.8476476707895041,
+     "dominant_per_1000_agents": 12.797556719022687,
+     "dominant_per_import": 5.597709923664122,
+     "mean_dominant_per_voyage": 24.44333333333333
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.15223673563749857,
+     "dominant_per_1000_agents": 2.298429319371728,
+     "dominant_per_import": 1.0053435114503817,
+     "mean_dominant_per_voyage": 4.39
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  },
+  "classic_cruise_1900|478": {
+   "mean_imports": 1.0766666666666667,
+   "n_voyages": 300,
+   "num_agents": 478.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "droplet": {
+     "dominant_fraction": 0.9917355371900827,
+     "dominant_per_1000_agents": 0.8368200836820083,
+     "dominant_per_import": 0.3715170278637771,
+     "mean_dominant_per_voyage": 0.4
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.008264462809917356,
+     "dominant_per_1000_agents": 0.00697350069735007,
+     "dominant_per_import": 0.0030959752321981426,
+     "mean_dominant_per_voyage": 0.0033333333333333335
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  },
+  "classic_cruise_1900|955": {
+   "mean_imports": 2.15,
+   "n_voyages": 300,
+   "num_agents": 955.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "droplet": {
+     "dominant_fraction": 0.9135169762972454,
+     "dominant_per_1000_agents": 4.977312390924956,
+     "dominant_per_import": 2.2108527131782947,
+     "mean_dominant_per_voyage": 4.753333333333333
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.08648302370275464,
+     "dominant_per_1000_agents": 0.4712041884816754,
+     "dominant_per_import": 0.20930232558139536,
+     "mean_dominant_per_voyage": 0.45
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  },
+  "spirit_cruise_3000|1500": {
+   "mean_imports": 3.493333333333333,
+   "n_voyages": 300,
+   "num_agents": 1500.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "droplet": {
+     "dominant_fraction": 0.8913043478260869,
+     "dominant_per_1000_agents": 4.008888888888889,
+     "dominant_per_import": 1.721374045801527,
+     "mean_dominant_per_voyage": 6.013333333333334
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.10869565217391304,
+     "dominant_per_1000_agents": 0.4888888888888888,
+     "dominant_per_import": 0.2099236641221374,
+     "mean_dominant_per_voyage": 0.7333333333333333
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  },
+  "spirit_cruise_3000|3000": {
+   "mean_imports": 7.036666666666667,
+   "n_voyages": 300,
+   "num_agents": 3000.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.00011899803653239721,
+     "dominant_per_1000_agents": 0.0022222222222222222,
+     "dominant_per_import": 0.0009474182851729038,
+     "mean_dominant_per_voyage": 0.006666666666666667
+    },
+    "droplet": {
+     "dominant_fraction": 0.8782055096090915,
+     "dominant_per_1000_agents": 16.4,
+     "dominant_per_import": 6.99194694457603,
+     "mean_dominant_per_voyage": 49.2
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.12167549235437615,
+     "dominant_per_1000_agents": 2.272222222222222,
+     "dominant_per_import": 0.9687351965892941,
+     "mean_dominant_per_voyage": 6.816666666666666
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  },
+  "spirit_cruise_3000|750": {
+   "mean_imports": 1.7466666666666666,
+   "n_voyages": 300,
+   "num_agents": 750.0,
+   "routes": {
+    "direct_contact": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "droplet": {
+     "dominant_fraction": 0.8857868020304569,
+     "dominant_per_1000_agents": 1.551111111111111,
+     "dominant_per_import": 0.6660305343511451,
+     "mean_dominant_per_voyage": 1.1633333333333333
+    },
+    "emesis_aerosol": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "environmental_source": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "fomite": {
+     "dominant_fraction": 0.11421319796954314,
+     "dominant_per_1000_agents": 0.2,
+     "dominant_per_import": 0.08587786259541985,
+     "mean_dominant_per_voyage": 0.15
+    },
+    "food_contamination": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "hvac_airborne": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    },
+    "unknown": {
+     "dominant_fraction": 0.0,
+     "dominant_per_1000_agents": 0.0,
+     "dominant_per_import": 0.0,
+     "mean_dominant_per_voyage": 0.0
+    }
+   }
+  }
+ },
+ "paired_full_over_quarter": {
+  "classic_cruise_1900": {
+   "direct_contact": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "droplet": {
+    "mean_paired_seed_ratio": 15.001573902288188,
+    "n_seeds_with_quarter_events": 35,
+    "ratio_of_means_full_over_quarter": 61.10833333333333
+   },
+   "emesis_aerosol": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "environmental_source": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "fomite": {
+    "mean_paired_seed_ratio": 5.0,
+    "n_seeds_with_quarter_events": 1,
+    "ratio_of_means_full_over_quarter": 1316.9999999999998
+   },
+   "food_contamination": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "hvac_airborne": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "n_shared_seeds": 300,
+   "unknown": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   }
+  },
+  "spirit_cruise_3000": {
+   "direct_contact": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "droplet": {
+    "mean_paired_seed_ratio": 41.968235536473244,
+    "n_seeds_with_quarter_events": 61,
+    "ratio_of_means_full_over_quarter": 42.29226361031519
+   },
+   "emesis_aerosol": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "environmental_source": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "fomite": {
+    "mean_paired_seed_ratio": 17.714285714285715,
+    "n_seeds_with_quarter_events": 14,
+    "ratio_of_means_full_over_quarter": 45.44444444444444
+   },
+   "food_contamination": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "hvac_airborne": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   },
+   "n_shared_seeds": 300,
+   "unknown": {
+    "mean_paired_seed_ratio": null,
+    "n_seeds_with_quarter_events": 0,
+    "ratio_of_means_full_over_quarter": null
+   }
+  }
+ }
+}
