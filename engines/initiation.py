@@ -1250,10 +1250,7 @@ def _screen_rng(rng: np.random.Generator) -> np.random.Generator:
     the engine uses for its sibling streams — so the boarding generator
     consumes exactly the same draws as when the screen is disabled.
     """
-    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
-    if seed_seq is not None:
-        return np.random.default_rng(seed_seq.spawn(1)[0])
-    return np.random.default_rng(rng)
+    return np.random.default_rng(rng.bit_generator.seed_seq.spawn(1)[0])
 
 
 def _assess_boarder(
