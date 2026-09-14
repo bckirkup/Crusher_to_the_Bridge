@@ -1,0 +1,19 @@
+# COVID first-look hull worker — the campaign image with a different entry.
+#
+# The replicated Theta fit needs the simulation and nothing else: no CmdStan,
+# so it does not pay the analysis image's build. It layers the array-cell
+# worker onto the campaign image, which already carries every module and data
+# file a hull run reads.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.covid_hull -t picard-covid-hull .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/covid_hull_entrypoint.py ./deploy/aws/covid_hull_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
