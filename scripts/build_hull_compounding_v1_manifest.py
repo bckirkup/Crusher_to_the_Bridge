@@ -26,6 +26,7 @@ pair seed-for-seed with the realism ladder.
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -33,13 +34,11 @@ from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
-MANIFEST_PATH = (
-    REPO_ROOT
-    / "picard_framework"
-    / "runs"
-    / "mega_cruise_campaign"
-    / "hull_compounding_v1_manifest.json"
+MANIFEST_DIR = (
+    REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 )
+MANIFEST_PATH = MANIFEST_DIR / "hull_compounding_v1_manifest.json"
+ARM_B_MANIFEST_PATH = MANIFEST_DIR / "hull_compounding_route_v1_manifest.json"
 
 from picard_framework.runs.mega_cruise_campaign.boarding_axis import (  # noqa: E402
     IndexCaseAxis,
@@ -127,8 +126,8 @@ def _base_tier(platform: str, epochs: int, description: str) -> dict[str, Any]:
     }
 
 
-def build() -> dict[str, Any]:
-    """The whole manifest."""
+def build(*, arm_b_only: bool = False) -> dict[str, Any]:
+    """Build the full grid or its route-attribution Arm B rerun."""
     tiers: dict[str, Any] = {}
     for hull_key, platform in HULLS.items():
         for length_key, epochs in LENGTHS.items():
@@ -154,9 +153,19 @@ def build() -> dict[str, Any]:
         }
         tier["seeds"] = PROBE_SEEDS
         tiers[f"rl_{hull_key}_density_7d"] = tier
+    if arm_b_only:
+        tiers = {
+            tier_id: tier for tier_id, tier in tiers.items()
+            if "_occ" in tier_id
+        }
+    campaign = "hull_compounding_route_v1" if arm_b_only else "hull_compounding_v1"
+    description = (
+        "Arm B-only route attribution rerun: " + ARM_B_DESCRIPTION
+        if arm_b_only else CAMPAIGN_DESCRIPTION
+    )
     return {
-        "campaign": "hull_compounding_v1",
-        "description": CAMPAIGN_DESCRIPTION,
+        "campaign": campaign,
+        "description": description,
         "platform": "classic_cruise_1900",
         "default_epochs": EPOCHS_7D,
         "default_num_agents": declared_total("classic_cruise_1900"),
@@ -203,9 +212,16 @@ def _tier_run_count(tier: dict[str, Any]) -> int:
 
 
 def main() -> None:
-    """Write the manifest and print the per-tier run counts."""
-    manifest = build()
-    MANIFEST_PATH.write_text(
+    """Write the selected manifest and print the per-tier run counts."""
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--arm-b-only", action="store_true",
+        help="write the 1,800-run route-attribution Arm B manifest",
+    )
+    args = parser.parse_args()
+    manifest = build(arm_b_only=args.arm_b_only)
+    output_path = ARM_B_MANIFEST_PATH if args.arm_b_only else MANIFEST_PATH
+    output_path.write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8",
     )
     total = 0
@@ -214,7 +230,7 @@ def main() -> None:
         total += count
         print(f"{tier_id}: {count}")
     print(f"TOTAL: {total} runs")
-    print(f"wrote {MANIFEST_PATH.relative_to(REPO_ROOT)}")
+    print(f"wrote {output_path.relative_to(REPO_ROOT)}")
 
 
 if __name__ == "__main__":
