@@ -41,6 +41,9 @@
      "q3": 0.0516
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -61,6 +64,7 @@
    "n_posted_passenger_channel": 27,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.047,
@@ -255,6 +259,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -275,6 +282,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -469,6 +477,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -489,6 +500,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -683,6 +695,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -703,6 +718,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -897,6 +913,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -917,6 +936,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -1111,6 +1131,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -1131,6 +1154,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -1325,6 +1349,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -1345,6 +1372,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -1539,6 +1567,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -1559,6 +1590,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -1753,6 +1785,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -1773,6 +1808,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -1967,6 +2003,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -1987,6 +2026,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -2181,6 +2221,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -2201,6 +2244,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -2395,6 +2439,9 @@
      "q3": 0.046725
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -2415,6 +2462,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.07,
@@ -2609,6 +2657,9 @@
      "q3": 0.0471
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -2629,6 +2680,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.065,
@@ -2823,6 +2875,9 @@
      "q3": 0.046525000000000004
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -2843,6 +2898,7 @@
    "n_posted_passenger_channel": 9,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.07,
@@ -3037,6 +3093,9 @@
      "q3": 0.04635
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -3057,6 +3116,7 @@
    "n_posted_passenger_channel": 11,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -3251,6 +3311,9 @@
      "q3": 0.0471
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -3271,6 +3334,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.065,
@@ -3465,6 +3529,9 @@
      "q3": 0.046725
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -3485,6 +3552,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.07,
@@ -3679,6 +3747,9 @@
      "q3": 0.046525000000000004
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -3699,6 +3770,7 @@
    "n_posted_passenger_channel": 9,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.07,
@@ -3893,6 +3965,9 @@
      "q3": 0.0448
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -3913,6 +3988,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.085,
@@ -4107,6 +4183,9 @@
      "q3": 0.045950000000000005
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -4127,6 +4206,7 @@
    "n_posted_passenger_channel": 10,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.075,
@@ -4321,6 +4401,9 @@
      "q3": 0.046525000000000004
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -4341,6 +4424,7 @@
    "n_posted_passenger_channel": 8,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.05,
@@ -4535,6 +4619,9 @@
      "q3": 0.046525000000000004
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -4555,6 +4642,7 @@
    "n_posted_passenger_channel": 8,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.05,
@@ -4749,6 +4837,9 @@
      "q3": 0.045950000000000005
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -4769,6 +4860,7 @@
    "n_posted_passenger_channel": 8,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.055,
@@ -4963,6 +5055,9 @@
      "q3": 0.0486
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -4983,6 +5078,7 @@
    "n_posted_passenger_channel": 25,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.041,
@@ -5177,6 +5273,9 @@
      "q3": 0.051199999999999996
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -5197,6 +5296,7 @@
    "n_posted_passenger_channel": 25,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.039,
@@ -5391,6 +5491,9 @@
      "q3": 0.0598
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -5411,6 +5514,7 @@
    "n_posted_passenger_channel": 143,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.22,
@@ -5605,6 +5709,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -5625,6 +5732,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -5819,6 +5927,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -5839,6 +5950,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -6033,6 +6145,9 @@
      "q3": 0.06725
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -6053,6 +6168,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.2,
@@ -6247,6 +6363,9 @@
      "q3": 0.06725
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -6267,6 +6386,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.2,
@@ -6461,6 +6581,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -6481,6 +6604,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -6675,6 +6799,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -6695,6 +6822,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -6889,6 +7017,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -6909,6 +7040,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -7103,6 +7235,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -7123,6 +7258,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -7317,6 +7453,9 @@
      "q3": 0.06970000000000001
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -7337,6 +7476,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.2,
@@ -7531,6 +7671,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -7551,6 +7694,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -7745,6 +7889,9 @@
      "q3": 0.0699
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -7765,6 +7912,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -7959,6 +8107,9 @@
      "q3": 0.0701
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -7979,6 +8130,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.19,
@@ -8173,6 +8325,9 @@
      "q3": 0.0703
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -8193,6 +8348,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.205,
@@ -8387,6 +8543,9 @@
      "q3": 0.068
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -8407,6 +8566,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -8601,6 +8761,9 @@
      "q3": 0.0699
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -8621,6 +8784,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.195,
@@ -8815,6 +8979,9 @@
      "q3": 0.06970000000000001
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -8835,6 +9002,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.2,
@@ -9029,6 +9197,9 @@
      "q3": 0.0703
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -9049,6 +9220,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.205,
@@ -9243,6 +9415,9 @@
      "q3": 0.0654
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -9263,6 +9438,7 @@
    "n_posted_passenger_channel": 31,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.215,
@@ -9457,6 +9633,9 @@
      "q3": 0.06725
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -9477,6 +9656,7 @@
    "n_posted_passenger_channel": 30,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.2,
@@ -9671,6 +9851,9 @@
      "q3": 0.0703
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -9691,6 +9874,7 @@
    "n_posted_passenger_channel": 29,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.185,
@@ -9885,6 +10069,9 @@
      "q3": 0.0699
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -9905,6 +10092,7 @@
    "n_posted_passenger_channel": 27,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.175,
@@ -10099,6 +10287,9 @@
      "q3": 0.06875
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -10119,6 +10310,7 @@
    "n_posted_passenger_channel": 27,
    "n_voyages": 200,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.19,
@@ -10313,6 +10505,9 @@
      "q3": 0.0643
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -10333,6 +10528,7 @@
    "n_posted_passenger_channel": 149,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.205,
@@ -10527,6 +10723,9 @@
      "q3": 0.06315
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -10547,6 +10746,7 @@
    "n_posted_passenger_channel": 146,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.203,
@@ -10741,6 +10941,9 @@
      "q3": 0.0332
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -10761,6 +10964,7 @@
    "n_posted_passenger_channel": 3,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.007,
@@ -10955,6 +11159,9 @@
      "q3": 0.0427
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -10975,6 +11182,7 @@
    "n_posted_passenger_channel": 3,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.007,
@@ -11169,6 +11377,9 @@
      "q3": 0.058550000000000005
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -11189,6 +11400,7 @@
    "n_posted_passenger_channel": 3,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.003,
@@ -11383,6 +11595,9 @@
      "q3": 0.0475
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -11403,6 +11618,7 @@
    "n_posted_passenger_channel": 22,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 288,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.033,
@@ -11597,6 +11813,9 @@
      "q3": 0.046700000000000005
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -11617,6 +11836,7 @@
    "n_posted_passenger_channel": 16,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 288,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.026,
@@ -11811,6 +12031,9 @@
      "q3": 0.0475
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -11831,6 +12054,7 @@
    "n_posted_passenger_channel": 17,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 288,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.025,
@@ -12025,6 +12249,9 @@
      "q3": 0.031
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -12045,6 +12272,7 @@
    "n_posted_passenger_channel": 15,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 168,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.052,
@@ -12239,6 +12467,9 @@
      "q3": 0.051199999999999996
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -12259,6 +12490,7 @@
    "n_posted_passenger_channel": 25,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 168,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.039,
@@ -12453,6 +12685,9 @@
      "q3": 0.051
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -12473,6 +12708,7 @@
    "n_posted_passenger_channel": 27,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 168,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.044,
@@ -12667,6 +12903,9 @@
      "q3": 0.0576
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -12687,6 +12926,7 @@
    "n_posted_passenger_channel": 152,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 288,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.244,
@@ -12881,6 +13121,9 @@
      "q3": 0.057975
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -12901,6 +13144,7 @@
    "n_posted_passenger_channel": 180,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 288,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.27,
@@ -13095,6 +13339,9 @@
      "q3": 0.059375
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": "empirical_survival",
    "imports": {
@@ -13115,6 +13362,7 @@
    "n_posted_passenger_channel": 177,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 288,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.258,
@@ -13309,6 +13557,9 @@
      "q3": 0.056425
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -13329,6 +13580,7 @@
    "n_posted_passenger_channel": 48,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.38666666666666666,
@@ -13523,6 +13775,9 @@
      "q3": 0.05495
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -13543,6 +13798,7 @@
    "n_posted_passenger_channel": 49,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.5266666666666666,
@@ -13737,6 +13993,9 @@
      "q3": 0.0561
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -13757,6 +14016,7 @@
    "n_posted_passenger_channel": 58,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.46,
@@ -13951,6 +14211,9 @@
      "q3": 0.0575
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -13971,6 +14234,7 @@
    "n_posted_passenger_channel": 494,
    "n_voyages": 1150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.5547826086956522,
@@ -14165,6 +14429,9 @@
      "q3": 0.0561
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -14185,6 +14452,7 @@
    "n_posted_passenger_channel": 62,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.52,
@@ -14379,6 +14647,9 @@
      "q3": 0.0613
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -14399,6 +14670,7 @@
    "n_posted_passenger_channel": 78,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.5666666666666667,
@@ -14593,6 +14865,9 @@
      "q3": 0.059
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -14613,6 +14888,7 @@
    "n_posted_passenger_channel": 78,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 168,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.6933333333333334,
@@ -14807,6 +15083,9 @@
      "q3": 0.083375
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -14827,6 +15106,7 @@
    "n_posted_passenger_channel": 109,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.7733333333333333,
@@ -15021,6 +15301,9 @@
      "q3": 0.07640000000000001
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -15041,6 +15324,7 @@
    "n_posted_passenger_channel": 121,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.9066666666666666,
@@ -15235,6 +15519,9 @@
      "q3": 0.0845
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -15255,6 +15542,7 @@
    "n_posted_passenger_channel": 128,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.92,
@@ -15449,6 +15737,9 @@
      "q3": 0.0859
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -15469,6 +15760,7 @@
    "n_posted_passenger_channel": 997,
    "n_voyages": 1150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.9443478260869566,
@@ -15663,6 +15955,9 @@
      "q3": 0.0859
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -15683,6 +15978,7 @@
    "n_posted_passenger_channel": 128,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.9333333333333333,
@@ -15877,6 +16173,9 @@
      "q3": 0.0882
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -15897,6 +16196,7 @@
    "n_posted_passenger_channel": 137,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.9466666666666667,
@@ -16091,6 +16391,9 @@
      "q3": 0.0859
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -16111,6 +16414,7 @@
    "n_posted_passenger_channel": 136,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 1910,
    "num_epochs": 288,
    "platform_id": "classic_cruise_1900",
    "posting_frequency": 0.9666666666666667,
@@ -16305,6 +16609,9 @@
      "q3": 0.051425
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -16325,6 +16632,7 @@
    "n_posted_passenger_channel": 15,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.12,
@@ -16519,6 +16827,9 @@
      "q3": 0.0506
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -16539,6 +16850,7 @@
    "n_posted_passenger_channel": 85,
    "n_voyages": 1150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.10782608695652174,
@@ -16733,6 +17045,9 @@
      "q3": 0.0538
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -16753,6 +17068,7 @@
    "n_posted_passenger_channel": 15,
    "n_voyages": 150,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 168,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.12,
@@ -16947,6 +17263,9 @@
      "q3": 0.0633
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -16967,6 +17286,7 @@
    "n_posted_passenger_channel": 246,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 450,
    "num_epochs": 288,
    "platform_id": "expedition_cruise_450",
    "posting_frequency": 0.304,
@@ -17161,6 +17481,9 @@
      "q3": 0.0567
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -17181,6 +17504,7 @@
    "n_posted_passenger_channel": 555,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 168,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.695,
@@ -17375,6 +17699,9 @@
      "q3": 0.0871
     }
    },
+   "contact_class_exponent": null,
+   "contact_mode": null,
+   "density_exponent": null,
    "environmental_faecal_release_log10_g_per_epoch": 4.0,
    "illness_duration_draw": null,
    "imports": {
@@ -17395,6 +17722,7 @@
    "n_posted_passenger_channel": 955,
    "n_voyages": 1000,
    "never_symptomatic_fraction": 0.29,
+   "num_agents": 3000,
    "num_epochs": 288,
    "platform_id": "spirit_cruise_3000",
    "posting_frequency": 0.992,
