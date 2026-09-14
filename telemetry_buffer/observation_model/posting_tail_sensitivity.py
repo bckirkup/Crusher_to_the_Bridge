@@ -61,6 +61,7 @@ from typing import Any
 import numpy as np
 from scipy.stats import binomtest
 
+from simulation_utils.numeric import is_zero
 from simulation_utils.paths import resolve_repo_path, validated_open
 from telemetry_buffer.observation_model.boarding_posting_readout import (
     BOARDING_KEYS,
@@ -359,7 +360,9 @@ def _paired_diff(
         "variance_reduction": (
             unpaired_var / paired_var if paired_var > 0.0 else None
         ),
-        "n_identical": int(sum(1 for value in diffs if value == 0.0)),
+        "n_identical": int(
+            sum(1 for value in diffs if is_zero(float(value), abs_tol=1e-12))
+        ),
     }
 
 

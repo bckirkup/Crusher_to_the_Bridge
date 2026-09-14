@@ -21,6 +21,7 @@ from telemetry_buffer.observation_model.posting_tail_sensitivity import (
     _gpd_exceedance,
     _gpd_pwm,
     _mcnemar,
+    _paired_diff,
     _tail_probability,
     build_report,
     render_markdown,
@@ -280,6 +281,24 @@ class TestArchitectureCoordinates:
             pair["coordinate"] for pair in report["pairs"]
         } == {"contact_class_exponent"}
         assert len(report["pairs"]) == 3
+
+
+class TestPairedDiff:
+    """n_identical uses a tolerance, not exact float equality."""
+
+    def test_near_zero_diffs_count_as_identical(self) -> None:
+        left = [{"imported": 4.0 + 1e-15} for _ in range(MIN_PAIRED_SEEDS)]
+        right = [{"imported": 4.0} for _ in range(MIN_PAIRED_SEEDS)]
+        out = _paired_diff(left, right, "imported")
+        assert out["n_identical"] == MIN_PAIRED_SEEDS
+        assert out["mean_difference"] == pytest.approx(0.0, abs=1e-12)
+
+    def test_material_diffs_are_not_identical(self) -> None:
+        left = [{"imported": 4.0} for _ in range(MIN_PAIRED_SEEDS)]
+        right = [{"imported": 5.0} for _ in range(MIN_PAIRED_SEEDS)]
+        out = _paired_diff(left, right, "imported")
+        assert out["n_identical"] == 0
+        assert out["mean_difference"] == pytest.approx(1.0)
 
 
 class TestMcnemar:
