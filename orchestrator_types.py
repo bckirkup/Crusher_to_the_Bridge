@@ -116,6 +116,8 @@ class SimulationState:
     ever_ill_ids: set[int] = field(default_factory=set)
     ever_reported_ids: set[int] = field(default_factory=set)
     ever_reported_noise_ids: set[int] = field(default_factory=set)
+    infections_by_dominant_route: dict[str, int] = field(default_factory=dict)
+    infection_dose_share_by_route: dict[str, float] = field(default_factory=dict)
     vsp_reported_case_fraction: float = 0.0
     # Pending escalation: {"to": status, "epoch_triggered": int} or None
     escalation_pending: dict[str, Any] | None = None

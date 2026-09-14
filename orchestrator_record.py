@@ -164,6 +164,13 @@ def _summary_counts(
         "cumulative_ever_infected": len(state.ever_infected_ids),
         "cumulative_ever_infected_passenger": infected_counts["passenger"],
         "cumulative_ever_infected_crew": infected_counts["crew"],
+        "infections_by_dominant_route": dict(
+            sorted(state.infections_by_dominant_route.items()),
+        ),
+        "infection_dose_share_by_route": {
+            key: round(value, 4)
+            for key, value in sorted(state.infection_dose_share_by_route.items())
+        },
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],

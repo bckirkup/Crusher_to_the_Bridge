@@ -108,6 +108,7 @@ from orchestrator_init import (
     update_cumulative_confirmed_cases,
     update_ever_infected_ids,
     update_ever_reported_ids,
+    update_route_attribution,
 )
 from orchestrator_record import finalize_simulation, record_epoch
 from orchestrator_types import (
@@ -879,7 +880,7 @@ class ShipSimulation:
             work.epoch,
             self.tx_core,
         )
-        work.tracing_matrix, _tx_events = self.tx_core.execute_transmission(
+        work.tracing_matrix, tx_events = self.tx_core.execute_transmission(
             epoch=work.epoch,
             agents=self.engine.agents,
             zone_pathogen_mass=self.engine.zone_pathogen_mass,
@@ -888,6 +889,11 @@ class ShipSimulation:
                 self.engine.multi_pathogen_mass if self.pathogen_profiles else None
             ),
             quarantined_ids=set(state.quarantined_ids),
+        )
+        update_route_attribution(
+            tx_events,
+            state.infections_by_dominant_route,
+            state.infection_dose_share_by_route,
         )
         if self.contam_engine is not None:
             self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
