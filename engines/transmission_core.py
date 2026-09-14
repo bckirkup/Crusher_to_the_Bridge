@@ -82,8 +82,25 @@ from engines.strain_state import (
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
-# Fraction of total shedding that becomes immediate room-level aerosol
+# Continuous share of shedding that becomes immediate room-level aerosol for a
+# continuous-emission arm. UNSOURCED: as a fraction of continuous shedding this
+# quantity has no commensurable numerator and denominator (shedding is copies/g
+# of stool or vomitus, airborne virus copies/m3 of room air, never measured in
+# the same subjects) — the same null the register records for the reservoir
+# path's airborne_emission_fraction. An emesis_conditioned arm receives no
+# continuous droplet emission at all (see _droplet_emission_fraction); this
+# constant now governs only continuous arms, whose own declared
+# airborne_emission_fraction the droplet route still does not read — a separate
+# open item, deliberately left measurable rather than folded in here.
 DROPLET_AEROSOL_FRACTION = 0.05
+
+# How the droplet route resolves a shedder's continuous emission fraction.
+# "profile_conditioned" (default): emesis_conditioned arms emit zero continuous
+# droplet aerosol, continuous arms keep DROPLET_AEROSOL_FRACTION. "shipped_uniform":
+# the pre-change behaviour, DROPLET_AEROSOL_FRACTION for every arm regardless of
+# mode — retained as a selectable baseline so the deletion is measured, not inherited.
+DROPLET_EMISSION_MODES = frozenset({"profile_conditioned", "shipped_uniform"})
+DEFAULT_DROPLET_EMISSION_MODE = "profile_conditioned"
 
 # ICRP-style adult daily inhaled air volume, converted through SimClock.
 BREATHING_RATE_M3_PER_DAY = 14.4
@@ -922,6 +939,13 @@ def _parse_contact_mode(tx: dict[str, Any]) -> str:
     return mode
 
 
+def _parse_droplet_emission_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("droplet_emission_mode", DEFAULT_DROPLET_EMISSION_MODE))
+    if mode not in DROPLET_EMISSION_MODES:
+        return DEFAULT_DROPLET_EMISSION_MODE
+    return mode
+
+
 def _parse_dining_party_share(tx: dict[str, Any]) -> float:
     raw = tx.get("dining_party_contact_share", DEFAULT_DINING_PARTY_CONTACT_SHARE)
     share = float(raw)
@@ -1397,6 +1421,7 @@ class TransmissionCore:
 
         tx = (cfg or {}).get("transmission", {}) or {}
         self.contact_mode = _parse_contact_mode(tx)
+        self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
         self.surface_cleaning_enabled = bool(cleaning_cfg["enabled"])
@@ -2719,6 +2744,27 @@ class TransmissionCore:
             return self.confinement_isolation_factor
         return 1.0
 
+    def _droplet_emission_fraction(self, profile: dict | None) -> float:
+        """Continuous share of a shedder's emission entering the room droplet pool.
+
+        An ``emesis_conditioned`` arm emits to air only per vomiting event — the
+        record supports no continuous respiratory emission for norovirus
+        (tranche 36 §4), and the profile schema forbids
+        ``airborne_emission_fraction`` on such a profile for exactly that
+        reason. Its continuous droplet share is therefore zero, the same gate
+        ``_airborne_emission_fraction`` already applies to the reservoir path.
+        Continuous arms keep ``DROPLET_AEROSOL_FRACTION`` unchanged here;
+        whether they should instead read their own declared
+        ``airborne_emission_fraction`` is a separate open item. The
+        ``shipped_uniform`` mode restores the pre-change uniform fraction for
+        every arm so the deletion is measured against a matched baseline.
+        """
+        if self.droplet_emission_mode == "shipped_uniform":
+            return DROPLET_AEROSOL_FRACTION
+        if (profile or {}).get("airborne_emission_mode") == "emesis_conditioned":
+            return 0.0
+        return DROPLET_AEROSOL_FRACTION
+
     def _cabin_mate_droplet_addback(
         self,
         target: KorkinAgent,
@@ -2726,6 +2772,7 @@ class TransmissionCore:
         volume: float,
         vent_factor: float,
         target_factor: float,
+        emission_fraction: float,
     ) -> float:
         """Restore withheld emission for cabin mates sharing the cabin."""
         addback = 0.0
@@ -2733,7 +2780,7 @@ class TransmissionCore:
             if shedder.agent_id not in target.cabin_mate_ids:
                 continue
             unattenuated = (
-                shedding * DROPLET_AEROSOL_FRACTION
+                shedding * emission_fraction
                 / max(volume, 1.0)
                 * self.inhaled_air_volume_m3_per_epoch
                 * self.droplet_scalar
@@ -2805,8 +2852,10 @@ class TransmissionCore:
         ``emesis_conditioned`` arm has none: the record supports norovirus in
         air only from a vomiting episode (tranche 36 §5), so enhancing that
         arm's continuous droplet term would amplify a route the literature does
-        not license at any magnitude. Such an arm keeps the far field it has
-        today; its emesis-aerosol near field is a separate item.
+        not license at any magnitude. Such an arm now has no continuous far
+        field either — ``_droplet_emission_fraction`` gives it a zero emission
+        share — so this gate is the second of two independent refusals rather
+        than the only one. Its emesis-aerosol near field is a separate item.
         """
         if not self.near_field_air.active:
             return False
@@ -2822,6 +2871,7 @@ class TransmissionCore:
         volume: float,
         vent_factor: float,
         target_factor: float,
+        emission_fraction: float,
     ) -> float:
         """AERO-NEAR-01: the short-range term of the two-compartment air route.
 
@@ -2848,7 +2898,7 @@ class TransmissionCore:
             dose += (
                 near.retained_fraction
                 * weight
-                * emitted * DROPLET_AEROSOL_FRACTION
+                * emitted * emission_fraction
                 * gain
                 * self.inhaled_air_volume_m3_per_epoch
                 * self.droplet_scalar
@@ -3939,6 +3989,7 @@ class TransmissionCore:
     ) -> None:
         """Immediate aerosol exposure from shedders in the same room."""
         near_field_on = self._near_field_admits(profile)
+        emission_fraction = self._droplet_emission_fraction(profile)
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             susceptible = self._get_susceptible(occupants, pathogen_id)
@@ -3950,7 +4001,7 @@ class TransmissionCore:
                 for shedder, sv in shedders
             ]
             total_aerosol = sum(
-                emitted * DROPLET_AEROSOL_FRACTION
+                emitted * emission_fraction
                 for _, emitted in emitted_shedders
             )
 
@@ -3980,12 +4031,13 @@ class TransmissionCore:
                 dose *= target_factor
                 dose += self._cabin_mate_droplet_addback(
                     target, shedders, volume, vent_factor, target_factor,
+                    emission_fraction,
                 )
                 near_dose = 0.0
                 if near_field_on:
                     near_dose = self._near_field_droplet_dose(
                         zone_name, target, emitted_shedders, volume,
-                        vent_factor, target_factor,
+                        vent_factor, target_factor, emission_fraction,
                     )
                 dose += near_dose
                 dose = self._accumulate(

@@ -3179,6 +3179,35 @@ Roughly in dependency order.
     complement these cells remain a mechanism probe — no posting, attack-rate
     or anchor claim may be read off them.
 
+40. **The droplet route's continuous emission share is deleted on the norovirus
+    arm, and that voids item 39's route shares.** Item 39 flagged
+    `DROPLET_AEROSOL_FRACTION = 0.05` and repaired nothing. The repair is a
+    deletion, not a re-valuation: an `emesis_conditioned` profile has no
+    continuous emission to air (tranche 36 §4), the profile schema forbids the
+    field for that reason, and `_pathway_droplet` was applying it hardcoded
+    past the profile. `TransmissionCore._droplet_emission_fraction` now
+    resolves the share per profile — zero for an `emesis_conditioned` arm
+    across all three droplet call sites (room pool, cabin-mate addback, near
+    field) — and `transmission.droplet_emission_mode` selects
+    `profile_conditioned` (default) or `shipped_uniform`, the pre-change
+    uniform arm, kept selectable so the deletion is measured on matched seeds
+    rather than inherited. **No replacement value is proposed or adopted, and
+    none may be chosen against an anchor.** Consequence, stated before it was
+    measured: droplet carried 84.8–99.2% of establishments, so **~85–99% of
+    them are expected to disappear and posting to collapse well below A9** —
+    that is the result, not a reason to keep the constant. Accordingly **every
+    route share, per-import yield and headcount exponent in item 39 was
+    measured under the deleted definition** and is now historical: it
+    describes the pre-deletion engine and may not be quoted as current
+    behaviour. The matched `hull_compounding_route_v1` Arm B rerun is the
+    measurement, and it has **not yet been taken** — until it lands, no route
+    share or posting rate in this ledger describes the default engine. Two
+    things the deletion leaves open, both deliberately separate changes: the
+    droplet route still ignores a continuous arm's declared
+    `airborne_emission_fraction` (a 15× move on COVID), and toilet-flush
+    aerosolisation — the diarrhoea-conditioned air source norovirus needs and
+    this model has no structure for — is unbuilt.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

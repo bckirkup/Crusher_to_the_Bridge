@@ -39,6 +39,24 @@ from engines.transmission_core import (  # noqa: E402
 )
 
 VARIANT_CFG = {"variant_surveillance": {"enabled": True}}
+
+# These fixtures load the real norwalk_gi profile, whose emesis_conditioned
+# mode gives the droplet route a zero continuous emission share, and droplet is
+# the only route that transmits in them. They select the pre-change uniform arm
+# explicitly: what they measure is strain attribution, not the emission
+# definition. ATTRIBUTED MOVE: the droplet-emission deletion.
+SHIPPED_DROPLET = {"transmission": {"droplet_emission_mode": "shipped_uniform"}}
+
+
+def _with_shipped_droplet(cfg: dict | None) -> dict:
+    """Merge the shipped droplet arm into ``cfg`` without clobbering it."""
+    merged = copy.deepcopy(cfg) if cfg else {}
+    tx = dict(merged.get("transmission") or {})
+    tx.update(SHIPPED_DROPLET["transmission"])
+    merged["transmission"] = tx
+    return merged
+
+
 ZONES = ["Cabin_A", "MainDining_L"]
 
 
@@ -84,7 +102,7 @@ def _core(
         zone_volumes=dict.fromkeys(ZONES, 60.0),
         pathogen_profiles={"norwalk_gi": profile or _norwalk_profile()},
         zone_types={"Cabin_A": "Cabin_Corridor", "MainDining_L": "Dining"},
-        cfg=cfg,
+        cfg=_with_shipped_droplet(cfg),
     )
     core.initialize_zones(ZONES)
     return core

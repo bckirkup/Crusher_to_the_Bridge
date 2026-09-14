@@ -88,6 +88,10 @@ def _core(
         pathogen_profiles={PATHOGEN: profile},
         zone_types={ZONE: "Room", DOWNSTREAM: "Room"},
         clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        # Hold droplet on the pre-change uniform arm so the emesis switch
+        # (presence of airborne_emission_mode) no longer also moves the
+        # droplet share — the invariants below isolate the emesis route.
+        cfg={"transmission": {"droplet_emission_mode": "shipped_uniform"}},
     )
     core.initialize_zones([ZONE, DOWNSTREAM])
     return core

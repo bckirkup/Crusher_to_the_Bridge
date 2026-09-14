@@ -94,7 +94,10 @@ arithmetic, in two places:
 1. Emission split. `SURFACE_DEPOSITION_FRACTION = 1e-4` and
    `FOOD_DEPOSITION_FRACTION_OF_EMISSION = 1e-4` (then spelled
    `FOOD_DEPOSITION_FRACTION_PER_EPOCH`) against
-   `DROPLET_AEROSOL_FRACTION = 0.05` — a 500× handicap at the source. The
+   `DROPLET_AEROSOL_FRACTION = 0.05` — a 500× handicap at the source. (This
+   fraction is now resolved per profile: **0 on an `emesis_conditioned` arm**
+   under the default `droplet_emission_mode: profile_conditioned`, 0.05 only on
+   continuous arms and the selectable `shipped_uniform` baseline.) The
    surface constant's comment cites a Java particle *survival duration*
    (86 400 steps), which is not a deposition fraction; the constant appears to
    be mislabelled rather than sourced.

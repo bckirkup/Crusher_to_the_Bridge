@@ -33,6 +33,7 @@ from engines.strain_state import (  # noqa: E402
     StrainRegistry,
 )
 from engines.transmission_core import TransmissionCore  # noqa: E402
+from tests.test_strain_dose_ledger import _with_shipped_droplet  # noqa: E402
 
 PATHOGEN = "norwalk_gi"
 VARIANT_CFG = {"variant_surveillance": {"enabled": True}}
@@ -79,7 +80,7 @@ def _core(*, cfg: dict | None = VARIANT_CFG, seed: int = 5) -> TransmissionCore:
         zone_volumes=dict.fromkeys(ZONES, 60.0),
         pathogen_profiles={PATHOGEN: _norwalk_profile()},
         zone_types={"Cabin_A": "Cabin_Corridor", "MainDining_L": "Dining"},
-        cfg=cfg,
+        cfg=_with_shipped_droplet(cfg),
     )
     core.initialize_zones(ZONES)
     return core

@@ -37,6 +37,11 @@ In `crusher_labs/config.yaml`:
 ```yaml
 transmission:
   contact_mode: "per_partner_contact"  # "per_partner_contact" | "density_dependent" | "heterogeneous_zone_dose" | "legacy"
+  droplet_emission_mode: "profile_conditioned"  # "profile_conditioned" | "shipped_uniform"
+  # profile_conditioned (default): an emesis_conditioned arm emits zero
+  #   continuous droplet aerosol; continuous arms keep DROPLET_AEROSOL_FRACTION.
+  # shipped_uniform: pre-change behaviour, DROPLET_AEROSOL_FRACTION on every
+  #   arm — selectable so the deletion is measured, not inherited.
   # Legacy: fixed AVG_R_POOL draws (Korkin default, frequency-dependent)
   # density_dependent: effective contacts scale with zone occupancy
 
@@ -193,6 +198,9 @@ Runs: 4 platforms × 3 dose_adj × 5 α × 2 immunity × 2 surveillance × 15 se
 
 - Default contact_mode is **per_partner_contact** (new model); set
   `contact_mode: legacy` to restore fixed AVG_R_POOL draws
+- Default droplet_emission_mode is **profile_conditioned**; set
+  `droplet_emission_mode: shipped_uniform` to restore the pre-deletion
+  uniform `DROPLET_AEROSOL_FRACTION` on every arm
 - The density_dependent config block is optional; missing keys fall back to defaults
 - Campaign manifests can override contact_mode / exponent per-tier via config_overrides
 

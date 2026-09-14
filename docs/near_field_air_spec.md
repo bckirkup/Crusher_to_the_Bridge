@@ -15,8 +15,12 @@
 ## 1. The defect
 
 `TransmissionCore._pathway_droplet` is the only short-range inhalation route.
-Per zone and epoch it sums `DROPLET_AEROSOL_FRACTION` (0.05) of every shedder's
-emission into one pool, divides by the zone's declared `volume_m3`, and gives
+Per zone and epoch it sums the shedder's emission × a per-profile continuous
+emission share into one pool — `DROPLET_AEROSOL_FRACTION` (0.05) on a
+continuous arm, **0 on an `emesis_conditioned` arm** under the default
+`droplet_emission_mode: profile_conditioned` since the droplet-emission
+deletion; `shipped_uniform` restores 0.05 for every arm — divides by the
+zone's declared `volume_m3`, and gives
 every susceptible in the room `concentration × inhaled_air_volume × vent_factor`
 (`engines/transmission_core.py`, `_pathway_droplet`). The dose is identical for
 every occupant and carries no notion of distance, seat, or table. The HVAC
@@ -205,6 +209,9 @@ anchor.
   the service-model question, not yet filed as its own item).
 - Per-venue exhaust/recirculation in Contam; the far field stays as declared.
 - Any change to `DROPLET_AEROSOL_FRACTION` or the arms' emission fractions.
+  (Postscript: the droplet-emission deletion later voided this carve-out for
+  the emesis-conditioned arm — the fraction is now per-profile, not a change
+  to the constant.)
 
 ## 8. Tests the change must carry
 
@@ -243,8 +250,8 @@ transmission:
 ```
 
 For a susceptible `t` and a shedder `s` in the same zone and epoch, with `m`
-the aerosol mass `s` already emits into this zone's pool
-(`emission × DROPLET_AEROSOL_FRACTION`, unchanged), the near field adds
+the aerosol mass `s` already emits into this zone's pool (`emission` × the
+per-profile droplet emission share — see §1), the near field adds
 
 ```text
 near(t) = Σ_s  κ · w(t,s) · m_s · (1/V_unit(t) − 1/V_zone) · inhaled × droplet_scalar × vent × confinement
@@ -267,8 +274,12 @@ with the same three multipliers the far-field term already carries, and
 Four things worth reading twice, because they differ from a naïve reading of
 §4:
 
-1. **The far field is untouched, and that is the conservation statement.** The
-   zone pool keeps the *whole* emitted mass, as in the nested Nicas–Jones form
+1. **The far field is untouched by this change, and that is the conservation
+   statement.** "Untouched" is scoped to near-field on/off; the later
+   droplet-emission deletion zeroes the same far field for an
+   `emesis_conditioned` arm independently of this spec — such an arm now has
+   neither near nor far continuous field. The zone pool keeps the *whole*
+   emitted mass, as in the nested Nicas–Jones form
    where the near field sits inside the far field and drains into it; the near
    field is the *difference* of the two concentrations, so no emission is
    created, the drift route reads the same pool as before, and the room-summed
@@ -281,8 +292,10 @@ Four things worth reading twice, because they differ from a naïve reading of
    refuses `airborne_emission_mode: emesis_conditioned`, because §6 question 4
    returned no support for *continuous* norovirus respiratory emission; the
    arm's licensed airborne pathway is the emesis pool, whose near field is a
-   separate item (§7). So a norovirus campaign over κ is a **null by
-   construction**: this change is measurable on the `sars_cov2_resp` arm, and
+   separate item (§7). Since the droplet-emission deletion the gate is the
+   *second* of two independent refusals — `_droplet_emission_fraction` already
+   gives that arm a zero continuous share. So a norovirus campaign over κ is a
+   **null by construction**: this change is measurable on the `sars_cov2_resp` arm, and
    Marks 2000's by-table gradient remains its out-of-sample check.
 4. **Both magnitudes are swept, neither is chosen.** κ and ρ are design fields
    of the bounded gate (`Design`, `build_run_spec`, `--near-field-*` on the gate

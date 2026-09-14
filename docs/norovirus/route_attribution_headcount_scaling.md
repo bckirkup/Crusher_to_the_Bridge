@@ -1,6 +1,13 @@
 # Which route carries the headcount scaling
 
-**Status: measurement of record for `hull_compounding_route_v1`.** 1,800 runs,
+**Status: measurement of record for `hull_compounding_route_v1` — taken under
+the pre-deletion engine.** `DROPLET_AEROSOL_FRACTION` has since been **deleted
+on the emesis-conditioned arm** (`droplet_emission_mode: profile_conditioned`
+is the default; `shipped_uniform` reproduces what this campaign measured), so
+every route share and exponent below describes the *deleted* definition, not
+current behaviour. See ledger item 40.
+
+1,800 runs,
 Arm B only, same architecture, same 300 matched seeds per cell, occupancy
 0.25 / 0.5 / 1.0 of declared complement, 7 days, baseline configuration.
 AWS Batch `dd30e656-5aeb-48bc-a052-75964ebe6677`, 128/128 shards succeeded,
@@ -47,17 +54,17 @@ droplet holds ~88% of the level.
 
 ## The mechanism, read from the code rather than inferred
 
-`TransmissionCore._pathway_droplet` sums `DROPLET_AEROSOL_FRACTION` (0.05) of
-every shedder's emission in a zone into one pool, divides by the zone's
-declared `volume_m3`, and gives every susceptible occupant
-`concentration × inhaled_air_volume × vent_factor`:
+Under the engine this campaign measured, `TransmissionCore._pathway_droplet`
+summed `DROPLET_AEROSOL_FRACTION` (0.05) of every shedder's emission in a zone
+into one pool, divided by the zone's declared `volume_m3`, and gave every
+susceptible occupant `concentration × inhaled_air_volume × vent_factor`:
 
 ```text
-dose(target) = ( Σ_shedders emission_s × 0.05 ) / V_zone × inhaled × vent × confinement
+dose(target) = ( Σ_shedders emission_s × 0.05 ) / V_zone × inhaled × vent × confinement   [pre-deletion definition]
 ```
 
 `V_zone` is a property of the architecture and is **fixed** across the
-occupancy probe. So shedders per zone scale with N, the per-susceptible dose
+occupancy probe — and under the deleted definition the 0.05 fed it. So shedders per zone scale with N, the per-susceptible dose
 scales with N, and the number of susceptibles receiving it scales with N —
 droplet infections go as N², and because imports also scale with N, total
 secondaries go as N³. That is what the table measures (N^2.70–2.97 total,
@@ -81,10 +88,10 @@ reading holds, but the carrier is the in-room aerosol pool, not the surfaces
 ## What that makes of the constant
 
 `DROPLET_AEROSOL_FRACTION = 0.05`, "fraction of total shedding that becomes
-immediate room-level aerosol", is a module constant in
-`engines/transmission_core.py` with **no row in
-[parameter_provenance_register.md](../parameter_provenance_register.md)** and no
-entry in the freedom audit's unsourced list. It is now measured to carry
+immediate room-level aerosol", was a module constant in
+`engines/transmission_core.py` applied to every arm. It now has a row in
+[parameter_provenance_register.md](../parameter_provenance_register.md) §3.1
+and has been **deleted on this arm** — zeroed per profile, not lowered. It is now measured to carry
 85–99% of all established infections and the entire headcount scaling.
 
 The register has already ruled on this exact quantity, for the airborne route:
@@ -103,7 +110,9 @@ per emesis event over Tung-Thompson 2015's measured
 same null definition, at 0.05, applied **continuously, every epoch, to every
 shedder** — 2 to 5 orders of magnitude above the only air-emission fraction in
 the repository that a study measures, and unconditional where the measured one
-is conditioned on an event.
+is conditioned on an event. The remedy the register took for the droplet arm
+is the definitional one: the share is now resolved per profile and is zero for
+`emesis_conditioned`.
 
 So the composition is inverted against the evidence: the route with a sourced
 emission definition (`emesis_aerosol`) establishes **zero** infections, and the
@@ -115,7 +124,9 @@ reservoir routes that were built are not reaching a dose that establishes.
 
 ## What must not be concluded
 
-Lowering 0.05 would lower posting, and **that is not a reason to lower it**.
+Lowering 0.05 would lower posting, and **that is not a reason to lower it** —
+nor was it: the change that landed is the deletion, `shipped_uniform` kept
+selectable so it is measured on matched seeds rather than inherited.
 The admissible move is the definitional one the register already took for the
 airborne route: either give the droplet route a commensurable, measured
 emission definition (event-conditioned, as the evidence is), or declare the
