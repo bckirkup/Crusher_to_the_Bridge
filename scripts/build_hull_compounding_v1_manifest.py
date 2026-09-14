@@ -41,7 +41,10 @@ MANIFEST_PATH = (
     / "hull_compounding_v1_manifest.json"
 )
 
-from simulation_utils.platform_complement import declared_total
+from picard_framework.runs.mega_cruise_campaign.boarding_axis import (  # noqa: E402
+    IndexCaseAxis,
+)
+from simulation_utils.platform_complement import declared_total  # noqa: E402
 
 SHIPPED_DOSE = 4.0
 SURVEILLANCE = ["syndromic_comp65"]
@@ -187,9 +190,6 @@ def build() -> dict[str, Any]:
 
 def _tier_run_count(tier: dict[str, Any]) -> int:
     """Runs a tier yields over every swept axis it declares."""
-    from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
-        IndexCaseAxis,
-    )
     axis = IndexCaseAxis.for_tier(tier, "norwalk_gi")
     return (
         len(axis.points)
