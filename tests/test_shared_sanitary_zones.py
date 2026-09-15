@@ -412,8 +412,8 @@ def test_stool_event_records_the_resolved_venue() -> None:
 def _exposure_core(
     n_susceptible: int,
     pool_mass: float = 500.0,
-) -> TransmissionCore:
-    """Core with a contaminated head and seeded visit/stool records."""
+) -> tuple[TransmissionCore, dict[str, list[KorkinAgent]]]:
+    """Core with a contaminated head, plus its zone occupancy map."""
     core = _make_core(seed=7)
     shedder = _agent(1, "TheaterLng")
     shedder.hand_load_by_pathogen["_default"] = 100.0
