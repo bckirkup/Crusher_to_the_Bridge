@@ -1,0 +1,31 @@
+{
+  "design_id": "covid_first_look_v3",
+  "description": "Rerun of covid_first_look_v2 on the declared scenario: the COVID hull spec now opts sars_cov2_resp out of the ship-wide boarding channel (HullScenario._initiation_block), so a cell boards the declared index case only. v1 and v2 cells also boarded a prevalence-drawn cohort (profile 1% passengers, 0.6% crew at epoch 6, about 34 hosts on Diamond Princess) that the scenario never declared. Same grid, same matched seeds, same objective; v2 and v3 cells are paired by (Theta, seed).",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "grid": {
+    "low": 10000.0,
+    "high": 1000000000.0,
+    "count": 11,
+    "note": "Half-decade points from 1e4 to 1e9; the single-seed fit's grid with the midpoints added."
+  },
+  "phases": {
+    "fit": {
+      "scenario_id": "diamond_princess_2020",
+      "split_role": "training",
+      "seed_base": 20200205,
+      "seeds": 20,
+      "note": "Matched seeds: every candidate sees the same 20 seeds, so candidate differences are paired."
+    },
+    "held_out": {
+      "scenario_id": "greg_mortimer_2020",
+      "split_role": "held_out",
+      "seed_base": 20200315,
+      "seeds": 50,
+      "note": "Scored at the fitted Theta and reported at its half-decade neighbours as sensitivity; the rest of the grid is stored, not scored."
+    }
+  },
+  "takeoff_recorded_onsets": 10,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 20200205,
+  "supersedes": "covid_first_look_v2"
+}

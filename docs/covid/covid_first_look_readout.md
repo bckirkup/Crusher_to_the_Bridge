@@ -9,6 +9,19 @@
 > #537 + shared sanitary zones #538; PR #539): 770/770, zero failures, outputs
 > `covid_theta_fit_v3.json` / `covid_theta_held_out_v3.json`; see the v2
 > section at the end. Theta and the misfit pattern are unchanged.
+> **Withdrawn 2026-09-14 pending rerun.** Every v1, v2 and
+> `covid_boarding_screen_v1` cell boarded an undeclared cohort: the ship-wide
+> boarding channel (`initiation.boarding.enabled`, default on since 09-11) read
+> the `sars_cov2_resp` profile's screening prevalence (1% passengers, 0.6% crew,
+> epoch 6) and boarded about 34 hosts on Diamond Princess on top of the one
+> declared index case (probe: 25 passengers + 9 crew; 17 never-symptomatic, 15
+> convalescent, 2 presymptomatic). Takeoff probability 1.0 at every Theta, the
+> early-onset excess, the asymptomatic share, and the 1b result that neither
+> infection age nor 1-vs-3 imports moved anything all sit partly on that cohort.
+> The hull spec now opts the arm out (`HullScenario._initiation_block`); the
+> change-detector cell moved from (53, 15, 217, 74, 39) to (1, 1, 217, 3, 2),
+> attributed to that one change. Reruns: `covid_first_look_v3` and
+> `covid_boarding_screen_v2`; until they land, no number below is current.
 
 This replaces the single-seed fit of 2026-09-05 (`covid_theta_fit.json`) as the
 current statement of how the COVID arm fits. It is a first look: it tells us
