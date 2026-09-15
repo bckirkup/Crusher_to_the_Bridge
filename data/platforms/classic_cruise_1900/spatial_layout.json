@@ -279,7 +279,7 @@
     {
       "id": "Bridge",
       "type": "Free",
-      "traffic": "medium",
+      "traffic": "low",
       "volume_m3": 240.0,
       "deck": "10_Bridge",
       "max_occupancy": 10,
@@ -971,7 +971,7 @@
     {
       "id": "HD_10B_M",
       "type": "Sanitary",
-      "traffic": "medium",
+      "traffic": "low",
       "volume_m3": 6.21,
       "floor_area_m2": 2.7,
       "ceiling_height_m": 2.3,

@@ -224,7 +224,7 @@ def _expedition_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "Medical room (~4 beds). Deck 4.",
         ),
         PublicZoneRecipe(
-            "Bridge", "Free", "medium", 180.0, "8_Bridge", 8,
+            "Bridge", "Free", "low", 180.0, "8_Bridge", 8,
             {"x": 150, "y": 10},
             "Navigating bridge and chartroom. Deck 8.",
         ),
@@ -549,7 +549,7 @@ def _classic_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "Isolation room (~2 beds). Deck 2.",
         ),
         PublicZoneRecipe(
-            "Bridge", "Free", "medium", 240.0, "10_Bridge", 10,
+            "Bridge", "Free", "low", 240.0, "10_Bridge", 10,
             {"x": 150, "y": 8},
             "Navigating bridge and chartroom. Deck 10.",
         ),
@@ -908,7 +908,7 @@ def _spirit_public_zones() -> tuple[PublicZoneRecipe, ...]:
             {"x": 110, "y": 82}, "Isolation ward (~4 beds). Deck 2.",
         ),
         PublicZoneRecipe(
-            "Bridge", "Free", "medium", 300.0, "13_Bridge", 12,
+            "Bridge", "Free", "low", 300.0, "13_Bridge", 12,
             {"x": 150, "y": 6},
             "Navigating bridge and chartroom. Deck 13.",
         ),
