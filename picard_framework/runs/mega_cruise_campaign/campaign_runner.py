@@ -1036,6 +1036,12 @@ _HVAC_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("oa_fraction", "outdoor_air_fraction"),
     ("natural_decay_rate", "decay_rate"),
 )
+# Structural transmission coordinates a tier declares through
+# ``config_overrides`` rather than as a tier factor; recorded so the archive
+# names the arm it ran under instead of leaving that to be inferred.
+_TRANSMISSION_PARAM_MAP: tuple[tuple[str, str], ...] = (
+    ("sanitary_visit_mode", "sanitary_visit_mode"),
+)
 _WEAR_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("deployment_profile", "wearables"),
     ("detection_sensitivity_scale", "wearable_sensitivity"),
@@ -1103,6 +1109,11 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
     )
     ship = cfg.get("ship_graph") or {}
     _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
+    transmission = cfg.get("transmission") or {}
+    _copy_present(
+        params, transmission, _TRANSMISSION_PARAM_MAP,
+        skip_if_present=frozenset(dest for _, dest in _TRANSMISSION_PARAM_MAP),
+    )
     fred = cfg.get("fred_behavior") or {}
     _copy_present(
         params,
@@ -1237,6 +1248,7 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     )
     _copy_present(params, cfg.get("hvac") or {}, _HVAC_PARAM_MAP)
     _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
+    _copy_present(params, cfg.get("transmission") or {}, _TRANSMISSION_PARAM_MAP)
     _copy_present(
         params,
         cfg.get("fred_behavior") or {},
