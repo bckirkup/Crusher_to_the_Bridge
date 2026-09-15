@@ -1,0 +1,14 @@
+{
+  "design_id": "covid_boarding_screen_v1",
+  "description": "Phase 1b of the COVID first look: the boarding axis as a declared screen on the training hull. Infection age of the index case at embarkation and the number of introductions are DECLARED assumptions in the scenario (age 0, one import); this grid reports how the pre-quarantine onset count and the first recorded onset respond to them, at the fitted Theta (covid_first_look_v2: 3.16e4) and its half-decade neighbours, on matched seeds. The declared cell is in the grid so every contrast is paired. Run with shared heads visited (transmission.sanitary_visit_mode dwell_weighted), which the replicated fit did not; the execution witness is recorded per cell.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [10000.0, 31622.776601683792, 100000.0],
+  "infection_age_days": [0.0, 3.0, 6.0],
+  "imports": [1, 3],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "takeoff_recorded_onsets": 10,
+  "note": "3 Theta x 3 ages x 2 import counts x 10 seeds = 180 cells. Seeds are the first ten of covid_first_look_v2's fit seeds, but the v2 cells are not a paired baseline for this screen because the visit mode differs; the age-0/one-import column is."
+}

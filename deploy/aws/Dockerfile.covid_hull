@@ -13,6 +13,7 @@ FROM ${BASE_IMAGE}
 
 USER root
 COPY --chown=campaign:campaign deploy/aws/covid_hull_entrypoint.py ./deploy/aws/covid_hull_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/covid_boarding_screen_entrypoint.py ./deploy/aws/covid_boarding_screen_entrypoint.py
 USER campaign
 
 # The job definition supplies the worker script as argv[0].
