@@ -1,6 +1,8 @@
 """Route-attribution telemetry is exhaustive and numerically inert."""
 from __future__ import annotations
 
+import json
+import zipfile
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -225,3 +227,36 @@ class TestReadoutRouteAttribution:
         assert len(body_rows) == 2
         assert any(row.startswith("| deleted | 478") for row in body_rows)
         assert any(row.startswith("| shipped | 1910") for row in body_rows)
+
+    def test_main_threads_the_title_through_to_the_markdown(
+        self, tmp_path: Path,
+    ) -> None:
+        """``--arm``/``--out``/``--markdown``/``--title`` drive the report."""
+        with zipfile.ZipFile(tmp_path / "shard-0.zip", "w") as archive:
+            archive.writestr(
+                "fixture_arm/summary.json",
+                json.dumps(
+                    _summary_fixture(1, {"fomite": 2}, {"fomite": 2.0}),
+                ),
+            )
+        out = Path("telemetry_buffer/_test_ladder_readout.json")
+        md = Path("telemetry_buffer/_test_ladder_readout.md")
+        title = "The droplet deletion: matched arms"
+        try:
+            assert realism_ladder_readout.main([
+                f"--arm=deleted={tmp_path}",
+                "--out", str(out),
+                "--markdown", str(md),
+                "--title", title,
+            ]) == 0
+            report = json.loads(
+                (Path.cwd() / out).read_text(encoding="utf-8"),
+            )
+            assert report["n_cells"] == 1
+            assert report["cells"][0]["arm"] == "deleted"
+            text = (Path.cwd() / md).read_text(encoding="utf-8")
+            assert text.splitlines()[0] == f"# {title}"
+            assert "| deleted |" in text
+        finally:
+            (Path.cwd() / out).unlink(missing_ok=True)
+            (Path.cwd() / md).unlink(missing_ok=True)
