@@ -172,6 +172,21 @@ The weights are normalized to sum to 1.0 and multiply the dose from each
 pathway. This does NOT change the total dose magnitude (controlled by 
 dose_adjustment) — it changes the RELATIVE contribution of each route.
 
+### Operator note: droplet emission mode (added later)
+
+`transmission.droplet_emission_mode` resolves the droplet route's continuous
+share of shedding entering room air, alongside `contact_mode` (see
+`docs/density_contact_spec.md`):
+
+- `profile_conditioned` (default): an `emesis_conditioned` arm emits **zero**
+  continuous droplet aerosol — the profile schema forbids
+  `airborne_emission_fraction` on such an arm because the quantity has no
+  commensurable numerator and denominator; continuous arms keep
+  `DROPLET_AEROSOL_FRACTION`.
+- `shipped_uniform`: the pre-change arm — `DROPLET_AEROSOL_FRACTION` on every
+  arm regardless of mode — retained as an explicitly selectable baseline so
+  the deletion is measured on matched seeds, not inherited.
+
 ---
 
 ## 3. Environmental Source Model for Legionella and C. difficile

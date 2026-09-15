@@ -65,12 +65,20 @@ def _near_block(
     return {"near_field_air": block}
 
 
-def _core(kappa: float | None, rho: float = 0.0, **geometry) -> TransmissionCore:
+def _core(
+    kappa: float | None,
+    rho: float = 0.0,
+    droplet_emission_mode: str | None = None,
+    **geometry,
+) -> TransmissionCore:
+    tx = _near_block(kappa, rho, **geometry)
+    if droplet_emission_mode is not None:
+        tx = {**tx, "droplet_emission_mode": droplet_emission_mode}
     core = TransmissionCore(
         rng=np.random.default_rng(7),
         zone_volumes={CABIN: CABIN_VOLUME, DINING: DINING_VOLUME},
         zone_types={CABIN: "Cabin_Corridor", DINING: "Dining"},
-        cfg={"transmission": _near_block(kappa, rho, **geometry)},
+        cfg={"transmission": tx},
     )
     core.initialize_zones([CABIN, DINING])
     return core
@@ -319,12 +327,12 @@ class TestPathogenGate:
         assert core._near_field_admits({})
         assert core._near_field_admits(None)
 
-    def test_an_emesis_conditioned_arm_keeps_its_far_field(self, core: TransmissionCore) -> None:
+    def test_an_emesis_conditioned_arm_takes_no_near_field(self, core: TransmissionCore) -> None:
         assert not core._near_field_admits({"airborne_emission_mode": "emesis_conditioned"})
 
     def test_the_gate_reaches_the_route(self) -> None:
-        def rows(profile: dict) -> list[dict]:
-            core = _core(0.5)
+        def rows(profile: dict, mode: str | None = None) -> list[dict]:
+            core = _core(0.5, droplet_emission_mode=mode)
             agents = _cabin_scene()
             matrix = ContactTracingMatrix(epoch=1)
             core._pathway_droplet(
@@ -333,11 +341,44 @@ class TestPathogenGate:
             )
             return matrix.droplet_exposures
 
-        gated = rows({"airborne_emission_mode": "emesis_conditioned"})
-        open_ = rows({"airborne_emission_mode": "continuous_fraction"})
+        emesis = {"airborne_emission_mode": "emesis_conditioned"}
+        continuous = {"airborne_emission_mode": "continuous_fraction"}
+        gated = rows(emesis)
+        open_ = rows(continuous)
+        # An emesis-conditioned arm has no continuous emission to place in
+        # either compartment: the near field is gated off and the far field is
+        # unfed, so the whole continuous droplet term is zero.
         assert _near(gated, 2) == pytest.approx(0.0)
+        assert _dose(gated, 2) == pytest.approx(0.0)
         assert _near(open_, 2) > 0.0
-        assert _dose(gated, 2) == pytest.approx(_dose(open_, 2) - _near(open_, 2), abs=1e-4)
+        assert _dose(open_, 2) > 0.0
+
+    def test_the_shipped_baseline_restores_the_far_field(self) -> None:
+        """shipped_uniform recovers the pre-change reading, for the matched arm."""
+        def rows(profile: dict, mode: str | None = None) -> list[dict]:
+            core = _core(0.5, droplet_emission_mode=mode)
+            agents = _cabin_scene()
+            matrix = ContactTracingMatrix(epoch=1)
+            core._pathway_droplet(
+                1, {CABIN: agents}, {}, matrix, [], {},
+                pathogen_id="_default", profile=profile,
+            )
+            return matrix.droplet_exposures
+
+        emesis = {"airborne_emission_mode": "emesis_conditioned"}
+        continuous = {"airborne_emission_mode": "continuous_fraction"}
+        open_ = rows(continuous)
+        shipped = rows(emesis, mode="shipped_uniform")
+        # Under the baseline the emesis arm keeps the far field the uniform
+        # fraction fed it; only the near field stays gated.
+        assert _near(shipped, 2) == pytest.approx(0.0)
+        assert _dose(shipped, 2) == pytest.approx(
+            _dose(open_, 2) - _near(open_, 2), abs=1e-4,
+        )
+        # A continuous arm reads the same under either mode.
+        assert _dose(rows(continuous, mode="shipped_uniform"), 2) == pytest.approx(
+            _dose(open_, 2), abs=1e-9,
+        )
 
 
 class TestNearFieldIsADesignArm:
