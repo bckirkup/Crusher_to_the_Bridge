@@ -171,6 +171,12 @@ def _summary_counts(
             key: round(value, 4)
             for key, value in sorted(state.infection_dose_share_by_route.items())
         },
+        # Emitted unconditionally: all-zero under sanitary_visit_mode "none"
+        # is the witness that the baseline arm ran the same code path.
+        "sanitary_activity": {
+            key: round(value, 6)
+            for key, value in sorted(state.sanitary_activity.items())
+        },
         "cumulative_ever_ill": len(state.ever_ill_ids),
         "cumulative_ever_ill_passenger": ill_counts["passenger"],
         "cumulative_ever_ill_crew": ill_counts["crew"],

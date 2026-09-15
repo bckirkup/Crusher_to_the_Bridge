@@ -510,6 +510,7 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             ),
             "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
             "ever_ill_rate_crew": s.get("ever_ill_rate_crew", 0.0),
+            "sanitary_activity": dict(s.get("sanitary_activity") or {}),
             "trigger_status": rec.get(
                 "trigger_status",
                 rec.get("reactive_protocols", {}).get("trigger_status", "none"),
