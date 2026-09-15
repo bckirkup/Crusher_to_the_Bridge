@@ -328,6 +328,21 @@ class ShipSimulation:
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
         )
+        # Served zone -> sex-keyed head block, from each head's declared
+        # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
+        # block (e.g. the bridge head) serves as "any".
+        sanitary_zone_map: dict[str, dict[str, str]] = {}
+        for z in platform_layout.get("zones", []):
+            if z.get("type") != "Sanitary":
+                continue
+            sex = "any"
+            for seg in reversed(str(z["id"]).split("_")):
+                token = seg.rstrip("0123456789")
+                if token in ("M", "F"):
+                    sex = "male" if token == "M" else "female"
+                    break
+            for served in z.get("serves", []):
+                sanitary_zone_map.setdefault(served, {})[sex] = z["id"]
         self.tx_core = TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
@@ -335,6 +350,7 @@ class ShipSimulation:
             zone_types=zone_types,
             zone_ventilation=zone_ventilation,
             zone_floor_areas=zone_floor_areas,
+            sanitary_zone_map=sanitary_zone_map,
             confinement_isolation_factor=float(
                 platform_layout.get(
                     "confinement_isolation_factor",

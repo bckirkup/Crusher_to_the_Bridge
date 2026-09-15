@@ -199,6 +199,10 @@ SURFACE_CONTACTS_PER_HOUR = {
     "galley": 545.4,
     # Crew eating; diner rate applies to the eater, not the server.
     "crew_mess": 42.8,
+    # No restroom touch-rate measurement exists; the shared public-surface
+    # rate (Ackerley 2023/2025, above) is the declared stand-in.
+    # Grade C (declared, borrowed class rate). Origin: n/a.
+    "sanitary": 21.0,
 }
 # Same restaurant, same study, same hour: staff touch shared surfaces 12.7x
 # more than diners do. Touch rate is a property of the activity, not the room,
@@ -323,6 +327,37 @@ EMESIS_DEPOSITION_AREA_M2 = 7.8
 # produced. The correct repair is per-cabin volumes in the platform layout —
 # its own change, recorded in the open ledger item 31.
 EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0
+
+# Public head geometry. Floor area is a declared assumption: a 0.9 x 1.5 m
+# water-closet stall footprint doubled to carry the handwashing and
+# circulation share. Nobody has measured ship head floor area.
+# Grade C (declared). Origin: Tr (VSP/IPC fixture dimensions).
+SANITARY_FLOOR_AREA_M2_PER_WC = 2.7
+# Accommodation deckhead height; MLC 2006 Standard A3.1.6 sets a 2.03 m
+# headroom floor and 2.3 m is ship-typical.
+# Grade C (declared, above a regulatory floor). Origin: Tr (MLC A3.1.6).
+SANITARY_CEILING_HEIGHT_M = 2.3
+# Public toilet room exhaust per water closet, intermittent operation:
+# 70 cfm = 118.9 m3/h. Interval: 50-70 cfm (continuous vs intermittent);
+# the higher rate is taken because a cruise head has periods of heavy use,
+# which is the condition the table names for it.
+# ASHRAE 62.1 Table 6-5. Grade B (land-side public toilet). Origin: T6-5.
+SANITARY_EXHAUST_M3H_PER_WC = 118.9
+# Bathroom dwell time, mean, no queuing; 502 users of male, female and
+# accessible bathrooms at a North American airport. Female facilities ran
+# 22% longer. Shape: point (no range reported).
+# Gwynne et al. 2019, J Building Engineering. Grade B (public transport hub).
+# Origin: Ab.
+SANITARY_DWELL_SECONDS = 155.0
+SANITARY_DWELL_FEMALE_MULTIPLIER = 1.22
+# Voiding frequency, healthy adult males, 3-day voiding diary, n=935:
+# median 6 voids daily and 0.5 nightly. Defecation is not added here -- the
+# existing sourced stool_events_per_day draw is rerouted to the same
+# resolution rather than duplicated.
+# Chung et al. 2009, J Urol. Grade B (healthy adults, not shipboard).
+# Origin: R.
+SANITARY_VOIDS_PER_DAY = 6.0
+SANITARY_VOIDS_PER_NIGHT = 0.5
 
 
 VOMITING_AXIS = "vomiting"
@@ -955,6 +990,17 @@ def _parse_droplet_emission_mode(tx: dict[str, Any]) -> str:
     return mode
 
 
+SANITARY_VISIT_MODES = ("none", "dwell_weighted")
+DEFAULT_SANITARY_VISIT_MODE = "none"
+
+
+def _parse_sanitary_visit_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("sanitary_visit_mode", DEFAULT_SANITARY_VISIT_MODE))
+    if mode not in SANITARY_VISIT_MODES:
+        return DEFAULT_SANITARY_VISIT_MODE
+    return mode
+
+
 def _parse_dining_party_share(tx: dict[str, Any]) -> float:
     raw = tx.get("dining_party_contact_share", DEFAULT_DINING_PARTY_CONTACT_SHARE)
     share = float(raw)
@@ -1363,6 +1409,7 @@ class TransmissionCore:
         zone_types: dict[str, str] | None = None,
         zone_ventilation: dict[str, str] | None = None,
         zone_floor_areas: dict[str, float] | None = None,
+        sanitary_zone_map: dict[str, dict[str, str]] | None = None,
         confinement_isolation_factor: float = DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
         corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
         cfg: dict[str, Any] | None = None,
@@ -1433,6 +1480,27 @@ class TransmissionCore:
         tx = (cfg or {}).get("transmission", {}) or {}
         self.contact_mode = _parse_contact_mode(tx)
         self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
+        self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
+        # Served zone id -> {"male"/"female"/"any": head zone id}, from the
+        # layout's per-head ``serves`` lists.
+        self.sanitary_zone_map = sanitary_zone_map or {}
+        # The visit draw gets its own stream (``sanitary_visits``), spawned
+        # the same way the initiation screen stream is, so the arm pairs
+        # exactly on matched seeds and ``none`` stays bit-identical.
+        self._sanitary_visits_rng = (
+            np.random.default_rng(self.rng.bit_generator.seed_seq.spawn(1)[0])
+            if self.sanitary_visit_mode != "none"
+            else None
+        )
+        self._sanitary_epoch = -1
+        self._sanitary_visits: dict[int, list[str]] = {}
+        self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
+        self.sanitary_telemetry: dict[str, float] = {
+            "visits": 0,
+            "person_seconds": 0.0,
+            "stool_visits": 0,
+            "unresolved": 0,
+        }
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
         self.surface_cleaning_enabled = bool(cleaning_cfg["enabled"])
@@ -4341,6 +4409,7 @@ class TransmissionCore:
         agent: KorkinAgent,
         pathogen_id: str,
         profile: dict | None,
+        zone_name: str | None = None,
     ) -> None:
         """Relax one host's hand load over one epoch.
 
@@ -4379,6 +4448,19 @@ class TransmissionCore:
         decayed = current * survival
         if self._stool_event_occurs(events_per_day):
             decayed = max(decayed, target)
+            # The event's location resolves through the same structural rule
+            # as every other sanitary visit (home -> own fittings, otherwise
+            # the serving head); the hand effect above is unchanged. Under
+            # visit mode that venue joins this epoch's exposure records.
+            if (
+                self.sanitary_visit_mode != "none"
+                and zone_name is not None
+            ):
+                venue = self._sanitary_venue(zone_name, agent)
+                if venue is not None:
+                    self._sanitary_stool_venues.setdefault(
+                        pathogen_id, {},
+                    )[agent.agent_id] = venue
         agent.hand_load_by_pathogen[pathogen_id] = decayed
 
     def _stationary_hand_load(
@@ -4939,6 +5021,226 @@ class TransmissionCore:
             * FOMITE_TRANSFER_FRACTION,
         )
 
+    # ── Sanitary visits ─────────────────────────────────────────────
+
+    def _sanitary_venue(
+        self,
+        zone_name: str,
+        agent: KorkinAgent,
+    ) -> str | None:
+        """Where this host's sanitary visit this epoch happens.
+
+        Structural, not a parameter: at home it is the host's own cabin
+        fittings (the existing stateroom compartment, or the room itself on
+        hulls without cabin compartments); anywhere else it is the head
+        block serving the host's current zone, matched on the host's sex.
+        ``None`` when no head serves the zone.
+        """
+        if zone_name == agent.home_zone:
+            if self.zone_types.get(zone_name) == "Cabin_Corridor":
+                return self._cabin_compartment_key(zone_name, agent)
+            return zone_name
+        options = self.sanitary_zone_map.get(zone_name)
+        if not options:
+            return None
+        return (
+            options.get(agent.gender)
+            or options.get("any")
+            or next(iter(options.values()), None)
+        )
+
+    def _sanitary_occupancy_key(self, zone_name: str, agent: KorkinAgent) -> str:
+        """The venue key the agent's whole-epoch occupancy already covers."""
+        if self.zone_types.get(zone_name) == "Cabin_Corridor":
+            return self._cabin_compartment_key(zone_name, agent)
+        return zone_name
+
+    def _draw_sanitary_visits(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+    ) -> dict[int, list[str]]:
+        """Poisson sanitary visits per agent for this epoch, by venue.
+
+        Drawn once per epoch from the dedicated ``sanitary_visits`` stream:
+        the Chung voiding rate while awake, the nightly rate while the
+        schedule token is ``Sleep``. A host whose current zone is its home
+        resolves to its own cabin fittings, which its whole-epoch occupancy
+        already covers -- those visits count in telemetry but add no fomite
+        exposure. Returns agent_id -> venue ids (one entry per visit).
+        """
+        if self._sanitary_epoch == epoch:
+            return self._sanitary_visits
+        self._sanitary_epoch = epoch
+        self._sanitary_visits = {}
+        self._sanitary_stool_venues.clear()
+        rng = self._sanitary_visits_rng
+        for zone_name, occupants in zone_occupants.items():
+            if self._is_cabin_compartment(zone_name):
+                continue
+            for agent in occupants:
+                rate = (
+                    SANITARY_VOIDS_PER_NIGHT
+                    if str(getattr(agent, "current_activity", "")) == "Sleep"
+                    else SANITARY_VOIDS_PER_DAY
+                )
+                n = int(rng.poisson(rate * self.clock.day_fraction_per_epoch))
+                if n <= 0:
+                    continue
+                venue = self._sanitary_venue(zone_name, agent)
+                if venue is None:
+                    self.sanitary_telemetry["unresolved"] += n
+                    continue
+                if venue == self._sanitary_occupancy_key(zone_name, agent):
+                    # Own cabin fittings while home: occupancy already
+                    # deposits and picks up there for the whole epoch.
+                    self.sanitary_telemetry["visits"] += n
+                    dwell = SANITARY_DWELL_SECONDS * (
+                        SANITARY_DWELL_FEMALE_MULTIPLIER
+                        if agent.gender == "female" else 1.0
+                    )
+                    self.sanitary_telemetry["person_seconds"] += n * dwell
+                    continue
+                self._sanitary_visits.setdefault(
+                    agent.agent_id, [],
+                ).extend([venue] * n)
+                self.sanitary_telemetry["visits"] += n
+                dwell = SANITARY_DWELL_SECONDS * (
+                    SANITARY_DWELL_FEMALE_MULTIPLIER
+                    if agent.gender == "female" else 1.0
+                )
+                self.sanitary_telemetry["person_seconds"] += n * dwell
+        return self._sanitary_visits
+
+    def _sanitary_fomite_exposure(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        profile: dict | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Fomite deposit and pickup at visit venues, dwell-weighted.
+
+        Each visit is a fraction of the epoch -- dwell seconds over epoch
+        seconds -- so every contact count and requested mass is scaled by
+        that share. Stool events rerouted through ``_replenish_hand`` land
+        in the same venue list as drawn visits, not in a parallel draw.
+        """
+        agents = {
+            a.agent_id: a for occ in zone_occupants.values() for a in occ
+        }
+        records: dict[tuple[int, str], int] = {}
+        for aid, venues in self._draw_sanitary_visits(epoch, zone_occupants).items():
+            for venue in venues:
+                records[(aid, venue)] = records.get((aid, venue), 0) + 1
+        for aid, venue in self._sanitary_stool_venues.get(pathogen_id, {}).items():
+            records[(aid, venue)] = records.get((aid, venue), 0) + 1
+            self.sanitary_telemetry["stool_visits"] += 1
+        if not records:
+            return
+        epoch_seconds = self.clock.hours_per_epoch * 3600.0
+
+        def share_of(agent: KorkinAgent, n: int) -> float:
+            dwell = SANITARY_DWELL_SECONDS * (
+                SANITARY_DWELL_FEMALE_MULTIPLIER
+                if agent.gender == "female" else 1.0
+            )
+            return min(1.0, n * dwell / epoch_seconds)
+
+        # Deposit from shedding visitors.
+        deposits_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
+        for (aid, venue), n in records.items():
+            agent = agents.get(aid)
+            if agent is None or self._cabin_confinement_active(agent):
+                continue
+            if not self._get_shedders([agent], pathogen_id, profile):
+                continue
+            share = share_of(agent, n)
+            hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+            transfer_efficiency = min(
+                1.0,
+                max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
+            ) * self._hand_to_surface_drying(profile)
+            requested = (
+                self._fomite_surface_contacts(venue, agent, epoch)
+                * share
+                * used_fraction
+                * transfer_efficiency
+                * hand
+            )
+            deposit = min(hand, max(0.0, requested))
+            agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            deposits_by_venue.setdefault(venue, []).append((agent, deposit))
+            self._deposit_surface_mass(pathogen_id, venue, deposit)
+        for venue, deposits in deposits_by_venue.items():
+            self._deposit_reservoir_strains(
+                SURFACE_RESERVOIR, pathogen_id, venue, deposits,
+            )
+
+        # Pickup by susceptible visitors, grouped per venue pool.
+        requests_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
+        for (aid, venue), n in records.items():
+            agent = agents.get(aid)
+            if agent is None or agent not in self._get_susceptible(
+                [agent], pathogen_id,
+            ):
+                continue
+            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+            surface_mass = (
+                path_pools.get(venue, 0.0)
+                if path_pools is not None
+                else self.surface_pools.get(venue, 0.0)
+            )
+            if surface_mass <= 0.0:
+                continue
+            request = (
+                self._fomite_pickup_request(agent, venue, surface_mass, epoch)
+                * share_of(agent, n)
+            )
+            if request > 0.0:
+                requests_by_venue.setdefault(venue, []).append(
+                    (agent, request),
+                )
+        for venue, requests in requests_by_venue.items():
+            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+            surface_mass = (
+                path_pools.get(venue, 0.0)
+                if path_pools is not None
+                else self.surface_pools.get(venue, 0.0)
+            )
+            scale = self._delivery_scale(
+                sum(m for _, m in requests), surface_mass,
+            )
+            surface_attribution = attribution(
+                ledger,
+                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, venue),
+            )
+            delivered_total = 0.0
+            for agent, requested in requests:
+                delivered = requested * scale
+                if delivered <= 0.0:
+                    continue
+                hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+                agent.hand_load_by_pathogen[pathogen_id] = hand + delivered
+                dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
+                agent.hand_load_by_pathogen[pathogen_id] = (
+                    hand + delivered - dose
+                )
+                self._record_fomite_pickup(
+                    agent, venue, surface_mass, delivered, dose,
+                    set(), [], agent_doses, matrix, agent_pathway_doses,
+                    pathogen_id, surface_attribution,
+                )
+                delivered_total += delivered
+            self._consume_surface_mass(
+                pathogen_id, venue, delivered_total, surface_mass,
+            )
+
     def _pathway_fomite(
         self,
         epoch: int,
@@ -4968,12 +5270,17 @@ class TransmissionCore:
             )
             return
         pickup_units = dict(zone_occupants)
+        # Sanitary visit draws happen before any _replenish_hand call so the
+        # stool venues they record this epoch are not cleared by the epoch
+        # rollover inside _draw_sanitary_visits.
+        if self.sanitary_visit_mode != "none":
+            self._draw_sanitary_visits(epoch, pickup_units)
         zone_occupants = self._cabin_compartments(zone_occupants)
         pickup_units.update(zone_occupants)
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         for zone_name, occupants in zone_occupants.items():
             for agent in occupants:
-                self._replenish_hand(agent, pathogen_id, profile)
+                self._replenish_hand(agent, pathogen_id, profile, zone_name)
                 self._deposit_emesis(
                     agent, pathogen_id, zone_name, epoch, profile or {},
                 )
@@ -5066,6 +5373,15 @@ class TransmissionCore:
                 pathogen_id, zone_name, delivered_total, surface_mass,
             )
 
+        # c) Sanitary visits: dwell-weighted fomite contact at head venues.
+        # Runs off the original (unsplit) occupancy; under the default
+        # ``none`` mode the whole block is a no-op.
+        if self.sanitary_visit_mode != "none":
+            self._sanitary_fomite_exposure(
+                epoch, pickup_units, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, profile, ledger,
+            )
+
         for occupants in zone_occupants.values():
             for agent in occupants:
                 self._apply_hand_hygiene(agent, pathogen_id, profile)
@@ -5113,7 +5429,7 @@ class TransmissionCore:
             occupants = zone_occupants.get(zone_name, [])
             if owns_hands:
                 for agent in occupants:
-                    self._replenish_hand(agent, pathogen_id, profile)
+                    self._replenish_hand(agent, pathogen_id, profile, zone_name)
 
             deposits = self._food_deposits(
                 zone_name, occupants, pathogen_id, profile, fc, epoch,
