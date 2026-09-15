@@ -125,15 +125,30 @@ def test_contamx_report_kept_links_use_flow_m3h() -> None:
     spatial, _airflow, path_map = _load_destroyer()
     known = {z["id"] for z in spatial["zones"]}
     flows = {int(e["path_nr"]): 0.0 for e in path_map}
-    # Non-zero real Bridge→MedBay passageway (path 7) + reverse-signed fan.
-    flows[7] = 15.0
-    flows[22] = -10.0  # Bridge→Engine_Room in path_map; negative → reverse
+    # Non-zero real Bridge→MedBay passageway + reverse-signed fan. The
+    # path_nr values renumber whenever the zone list changes (heads under
+    # shared_sanitary_zones moved them 7->10 and 22->25), so resolve them
+    # from the endpoint zones rather than pinning the index.
+    passageway = next(
+        e for e in path_map
+        if e["from_zone"] == "Bridge" and e["to_zone"] == "MedBay"
+        and e["kind"] == "passageway"
+    )
+    shaft = next(
+        e for e in path_map
+        if e["from_zone"] == "Bridge" and e["to_zone"] == "Engine_Room"
+    )
+    flows[int(passageway["path_nr"])] = 15.0
+    flows[int(shaft["path_nr"])] = -10.0  # negative → reverse
     cx = contamx_flow_report(path_map, flows, known)
     assert cx["n_kept_real_paths"] == 2
     assert all("flow_m3h" in link for link in cx["kept_links"])
     assert cx["zone_degree"]["Bridge"]["out_edges"] >= 1
-    # Negative Flow0 on path 22: Engine_Room → Bridge
-    rev = next(l for l in cx["kept_links"] if l["path_nr"] == 22)
+    # Negative Flow0 on the shaft: Engine_Room → Bridge
+    rev = next(
+        l for l in cx["kept_links"]
+        if l["path_nr"] == int(shaft["path_nr"])
+    )
     assert rev["from_zone"] == "Engine_Room"
     assert rev["to_zone"] == "Bridge"
     assert rev["flow_m3h"] == pytest.approx(10.0)
