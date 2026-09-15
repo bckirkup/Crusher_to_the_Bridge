@@ -55,8 +55,10 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # CI, the Batch worker image, and covid_first_look_v1 cell
     # held_out_greg_mortimer_2020_theta1e6p00_seed20200333.json
     (3, 11): (96, 52, 106, 36, 36),
-    # Local CPython 3.12 venv (compensated float sum)
-    (3, 12): (85, 51, 102, 30, 30),
+    # Local CPython 3.12 venv (compensated float sum); repinned from
+    # (85, 51, 102, 30, 30) when the expedition_cruise_450 Bridge zone
+    # (shared_sanitary_zones) shifted the work-zone assignment draws.
+    (3, 12): (82, 46, 113, 25, 24),
 }
 
 

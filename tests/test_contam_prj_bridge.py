@@ -224,9 +224,18 @@ class TestPrjRoundTrip:
         spatial, airflow = _destroyer_layout()
         prj = contam_prj_bridge.export_prj_interchange(spatial, airflow)
         r_spatial, _ = contam_prj_bridge.import_prj(prj)
+        declared = {
+            z["id"] for z in spatial["zones"] if "floor_area_m2" in z
+        }
+        # Declared geometry round-trips; the head blocks are the only zones
+        # on this hull that declare it (shared_sanitary_zones).
+        assert declared == {"HD_MAIN_M", "HD_MAIN_F", "HD_UPPER_M"}
         for z in r_spatial["zones"]:
-            assert "floor_area_m2" not in z
-            assert "ceiling_height_m" not in z
+            if z["id"] in declared:
+                assert "floor_area_m2" in z
+            else:
+                assert "floor_area_m2" not in z
+                assert "ceiling_height_m" not in z
 
     def test_exported_prj_has_contamw34_signature(self) -> None:
         spatial, airflow = _destroyer_layout()
