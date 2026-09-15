@@ -180,6 +180,48 @@
     "top_1pct_share": 0.11849241717621861,
     "variance_to_mean": 128.85957753825957
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
    "unconditional": {
@@ -397,6 +439,48 @@
     "top_10pct_share": 0.6470072992700729,
     "top_1pct_share": 0.0908029197080292,
     "variance_to_mean": 144.0492700729927
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -616,6 +700,48 @@
     "top_1pct_share": 0.09077641564506714,
     "variance_to_mean": 143.9878108581436
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -834,6 +960,48 @@
     "top_1pct_share": 0.0908029197080292,
     "variance_to_mean": 144.04226277372263
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -1051,6 +1219,48 @@
     "top_10pct_share": 0.6470072992700729,
     "top_1pct_share": 0.0908029197080292,
     "variance_to_mean": 144.04226277372263
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -1270,6 +1480,48 @@
     "top_1pct_share": 0.09145713865607999,
     "variance_to_mean": 144.49095647698866
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -1487,6 +1739,48 @@
     "top_10pct_share": 0.6468184471687098,
     "top_1pct_share": 0.09077641564506714,
     "variance_to_mean": 143.9878108581436
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -1706,6 +2000,48 @@
     "top_1pct_share": 0.09143025135969425,
     "variance_to_mean": 144.4331846244304
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -1923,6 +2259,48 @@
     "top_10pct_share": 0.6514772894311334,
     "top_1pct_share": 0.09143025135969425,
     "variance_to_mean": 144.4331846244304
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -2142,6 +2520,48 @@
     "top_1pct_share": 0.09004053271569196,
     "variance_to_mean": 144.41454545454548
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -2359,6 +2779,48 @@
     "top_10pct_share": 0.6514772894311334,
     "top_1pct_share": 0.09143025135969425,
     "variance_to_mean": 144.4331846244304
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -2578,6 +3040,48 @@
     "top_1pct_share": 0.0910155106818847,
     "variance_to_mean": 145.72318115305822
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -2795,6 +3299,48 @@
     "top_10pct_share": 0.6646314221891289,
     "top_1pct_share": 0.09262844378257633,
     "variance_to_mean": 147.5009493670886
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -3014,6 +3560,48 @@
     "top_1pct_share": 0.09246820065742462,
     "variance_to_mean": 147.01600042875518
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -3231,6 +3819,48 @@
     "top_10pct_share": 0.6514772894311334,
     "top_1pct_share": 0.09143025135969425,
     "variance_to_mean": 144.4331846244304
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -3450,6 +4080,48 @@
     "top_1pct_share": 0.09197101877864852,
     "variance_to_mean": 146.2620368179802
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -3667,6 +4339,48 @@
     "top_10pct_share": 0.6518529241459178,
     "top_1pct_share": 0.09004053271569196,
     "variance_to_mean": 146.07349160393747
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -3886,6 +4600,48 @@
     "top_1pct_share": 0.09143583945732052,
     "variance_to_mean": 148.80004522329
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -4103,6 +4859,48 @@
     "top_10pct_share": 0.6294068270844991,
     "top_1pct_share": 0.08701734750979295,
     "variance_to_mean": 139.1771796306659
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -4322,6 +5120,48 @@
     "top_1pct_share": 0.09097557408219979,
     "variance_to_mean": 140.431205938277
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -4539,6 +5379,48 @@
     "top_10pct_share": 0.6801125703564728,
     "top_1pct_share": 0.10115697310819262,
     "variance_to_mean": 145.23888680425264
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -4758,6 +5640,48 @@
     "top_1pct_share": 0.10610036077402427,
     "variance_to_mean": 148.89635618235488
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -4975,6 +5899,48 @@
     "top_10pct_share": 0.6930868167202572,
     "top_1pct_share": 0.1040192926045016,
     "variance_to_mean": 148.39967845659163
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -5194,6 +6160,48 @@
     "top_1pct_share": 0.12428866577259053,
     "variance_to_mean": 121.73170752836276
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -5411,6 +6419,48 @@
     "top_10pct_share": 0.6416393812803433,
     "top_1pct_share": 0.13025478905573745,
     "variance_to_mean": 122.55131380076021
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -5630,6 +6680,48 @@
     "top_1pct_share": 0.055372127318047165,
     "variance_to_mean": 182.24171468281418
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
    "unconditional": {
@@ -5847,6 +6939,48 @@
     "top_10pct_share": 0.4779116465863454,
     "top_1pct_share": 0.05819889728405146,
     "variance_to_mean": 192.84429889047715
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -6066,6 +7200,48 @@
     "top_1pct_share": 0.057828880622252284,
     "variance_to_mean": 191.27885525870815
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -6284,6 +7460,48 @@
     "top_1pct_share": 0.057118043957512195,
     "variance_to_mean": 190.4423939474915
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -6501,6 +7719,48 @@
     "top_10pct_share": 0.46903600774934867,
     "top_1pct_share": 0.057118043957512195,
     "variance_to_mean": 190.4423939474915
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -6720,6 +7980,48 @@
     "top_1pct_share": 0.05812767693249031,
     "variance_to_mean": 186.41550037392074
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -6937,6 +8239,48 @@
     "top_10pct_share": 0.47487318227933717,
     "top_1pct_share": 0.057828880622252284,
     "variance_to_mean": 191.27885525870815
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -7156,6 +8500,48 @@
     "top_1pct_share": 0.057852358075647876,
     "variance_to_mean": 185.44047601326207
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -7373,6 +8759,48 @@
     "top_10pct_share": 0.4670140063603762,
     "top_1pct_share": 0.057852358075647876,
     "variance_to_mean": 185.44047601326207
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -7592,6 +9020,48 @@
     "top_1pct_share": 0.054754849137931036,
     "variance_to_mean": 183.12449353448275
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -7809,6 +9279,48 @@
     "top_10pct_share": 0.4670140063603762,
     "top_1pct_share": 0.057852358075647876,
     "variance_to_mean": 185.44047601326207
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -8028,6 +9540,48 @@
     "top_1pct_share": 0.057661181548421904,
     "variance_to_mean": 186.6285459940653
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -8245,6 +9799,48 @@
     "top_10pct_share": 0.47704344245418984,
     "top_1pct_share": 0.05867819641754169,
     "variance_to_mean": 189.15673563928348
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -8464,6 +10060,48 @@
     "top_1pct_share": 0.05735677518550705,
     "variance_to_mean": 186.6825720302159
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -8681,6 +10319,48 @@
     "top_10pct_share": 0.4670140063603762,
     "top_1pct_share": 0.057852358075647876,
     "variance_to_mean": 185.44047601326207
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -8900,6 +10580,48 @@
     "top_1pct_share": 0.05775856245355671,
     "variance_to_mean": 186.30121968519893
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -9117,6 +10839,48 @@
     "top_10pct_share": 0.46128511896760316,
     "top_1pct_share": 0.054644441457185104,
     "variance_to_mean": 185.1811789218981
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -9336,6 +11100,48 @@
     "top_1pct_share": 0.054230665588790083,
     "variance_to_mean": 183.37997305308542
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -9553,6 +11359,48 @@
     "top_10pct_share": 0.45042531473290237,
     "top_1pct_share": 0.05028921401837359,
     "variance_to_mean": 176.20577577407283
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -9772,6 +11620,48 @@
     "top_1pct_share": 0.05269913713185481,
     "variance_to_mean": 180.1459284746488
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -9989,6 +11879,48 @@
     "top_10pct_share": 0.45503865455038656,
     "top_1pct_share": 0.056218635562186356,
     "variance_to_mean": 175.03793706767937
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -10208,6 +12140,48 @@
     "top_1pct_share": 0.05856801563744299,
     "variance_to_mean": 179.69160609570696
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -10425,6 +12399,48 @@
     "top_10pct_share": 0.4967105263157895,
     "top_1pct_share": 0.06018241626794258,
     "variance_to_mean": 183.88510167464116
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -10644,6 +12660,48 @@
     "top_1pct_share": 0.056246783918934964,
     "variance_to_mean": 177.43649402963413
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -10861,6 +12919,48 @@
     "top_10pct_share": 0.4485087976931087,
     "top_1pct_share": 0.05609697487517689,
     "variance_to_mean": 173.80980380743864
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -11080,6 +13180,48 @@
     "top_1pct_share": 0.2877813504823151,
     "variance_to_mean": 28.165082529474812
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
    "unconditional": {
@@ -11297,6 +13439,48 @@
     "top_10pct_share": 0.9472049689440993,
     "top_1pct_share": 0.3027950310559006,
     "variance_to_mean": 29.975867494824016
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -11516,6 +13700,48 @@
     "top_1pct_share": 0.3108695652173913,
     "variance_to_mean": 29.587173913043475
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -11733,6 +13959,48 @@
     "top_10pct_share": 0.9634753735473159,
     "top_1pct_share": 0.2340896513558384,
     "variance_to_mean": 47.50166131710017
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
@@ -11952,6 +14220,48 @@
     "top_1pct_share": 0.2345346960731576,
     "variance_to_mean": 47.209380311995695
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -12169,6 +14479,48 @@
     "top_10pct_share": 0.9645969498910676,
     "top_1pct_share": 0.2374727668845316,
     "variance_to_mean": 47.83943790849673
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -12388,6 +14740,48 @@
     "top_1pct_share": 0.09220032840722496,
     "variance_to_mean": 157.01957307060755
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
    "unconditional": {
@@ -12605,6 +14999,48 @@
     "top_10pct_share": 0.5323643933844789,
     "top_1pct_share": 0.09655345233046764,
     "variance_to_mean": 157.1915477851883
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -12824,6 +15260,48 @@
     "top_1pct_share": 0.09550021170945763,
     "variance_to_mean": 162.76477608837908
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -13041,6 +15519,48 @@
     "top_10pct_share": 0.3896056162017128,
     "top_1pct_share": 0.046399823574815306,
     "variance_to_mean": 240.9292444959018
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": false,
@@ -13260,6 +15780,48 @@
     "top_1pct_share": 0.04075627301915577,
     "variance_to_mean": 226.44039390921913
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
    "unconditional": {
@@ -13477,6 +16039,48 @@
     "top_10pct_share": 0.3540732980230099,
     "top_1pct_share": 0.041066035478467815,
     "variance_to_mean": 231.9993362111894
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": true,
@@ -13696,6 +16300,48 @@
     "top_1pct_share": 0.032178781120568024,
     "variance_to_mean": 63.323171149849045
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -13913,6 +16559,48 @@
     "top_10pct_share": 0.19205609165492066,
     "top_1pct_share": 0.02826267664172901,
     "variance_to_mean": 51.32774079294517
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -14132,6 +16820,48 @@
     "top_1pct_share": 0.029943289224952742,
     "variance_to_mean": 52.2583490863264
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -14349,6 +17079,48 @@
     "top_10pct_share": 0.17845656259034404,
     "top_1pct_share": 0.021818083261058108,
     "variance_to_mean": 45.399336419171156
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -14568,6 +17340,48 @@
     "top_1pct_share": 0.02853669003003862,
     "variance_to_mean": 55.93987603108759
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -14785,6 +17599,48 @@
     "top_10pct_share": 0.17369433847608115,
     "top_1pct_share": 0.02714290537118936,
     "variance_to_mean": 47.7196378695295
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -15004,6 +17860,48 @@
     "top_1pct_share": 0.02363480706903932,
     "variance_to_mean": 36.74572738946983
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -15221,6 +18119,48 @@
     "top_10pct_share": 0.1513431706394249,
     "top_1pct_share": 0.02181864043385042,
     "variance_to_mean": 45.320759238239376
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -15440,6 +18380,48 @@
     "top_1pct_share": 0.020288066820112475,
     "variance_to_mean": 28.82487419816656
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -15657,6 +18639,48 @@
     "top_10pct_share": 0.13653351236432806,
     "top_1pct_share": 0.020051471410988026,
     "variance_to_mean": 24.267237327962405
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -15876,6 +18900,48 @@
     "top_1pct_share": 0.015200603843697381,
     "variance_to_mean": 17.81200265570054
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -16093,6 +19159,48 @@
     "top_10pct_share": 0.13449962801812565,
     "top_1pct_share": 0.019230335685461144,
     "variance_to_mean": 22.367172562015767
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -16312,6 +19420,48 @@
     "top_1pct_share": 0.019463042462797786,
     "variance_to_mean": 18.13592262235766
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -16529,6 +19679,48 @@
     "top_10pct_share": 0.134483205809882,
     "top_1pct_share": 0.019387887433536505,
     "variance_to_mean": 15.34515540569749
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -16748,6 +19940,48 @@
     "top_1pct_share": 0.062111801242236024,
     "variance_to_mean": 20.78085921325052
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -16965,6 +20199,48 @@
     "top_10pct_share": 0.33880012697069095,
     "top_1pct_share": 0.048989524917998094,
     "variance_to_mean": 19.562314362869355
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -17184,6 +20460,48 @@
     "top_1pct_share": 0.06259780907668232,
     "variance_to_mean": 22.31602503912363
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -17401,6 +20719,48 @@
     "top_10pct_share": 0.2970875221762271,
     "top_1pct_share": 0.038919278533412184,
     "variance_to_mean": 26.571808988764044
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
@@ -17620,6 +20980,48 @@
     "top_1pct_share": 0.016948768943948263,
     "variance_to_mean": 47.68022097901703
    },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
+   },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,
    "unconditional": {
@@ -17837,6 +21239,48 @@
     "top_10pct_share": 0.12324235876237004,
     "top_1pct_share": 0.013376080420894401,
     "variance_to_mean": 12.72070778529375
+   },
+   "secondary_route_attribution": {
+    "direct_contact": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "droplet": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "emesis_aerosol": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "environmental_source": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "fomite": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "food_contamination": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "hvac_airborne": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    },
+    "unknown": {
+     "fraction_dominant": 0.0,
+     "mean_dominant_count": 0.0,
+     "mean_dose_share": 0.0
+    }
    },
    "surveillance": "syndromic_comp65",
    "symptomatic_stream": null,

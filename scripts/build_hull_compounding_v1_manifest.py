@@ -51,6 +51,28 @@ EPOCHS_7D = 168
 EPOCHS_12D = 288
 RUNG = "reportable"
 
+# The two arms of the droplet-emission deletion contrast. Run on the same
+# PROBE_SEEDS, they pair voyage-for-voyage, so the difference between them is
+# the emission definition and nothing else.
+DROPLET_ARM_TAGS = {
+    "profile_conditioned": "deleted",
+    "shipped_uniform": "shipped",
+}
+DROPLET_ARM_DESCRIPTIONS = {
+    "profile_conditioned": (
+        "Droplet arm: profile_conditioned — the emesis_conditioned norovirus "
+        "profile emits NO continuous droplet aerosol, the engine default "
+        "since the droplet-emission deletion. This is the arm under test."
+    ),
+    "shipped_uniform": (
+        "Droplet arm: shipped_uniform — the pre-deletion uniform "
+        "DROPLET_AEROSOL_FRACTION on every profile, which is what "
+        "hull_compounding_route_v1 measured (droplet 84.8-99.2% of "
+        "establishments). The matched baseline, re-run on the current engine "
+        "so the contrast carries no cross-version confound."
+    ),
+}
+
 PHI_POINTS = [0.0, 0.5, 1.0]
 OCCUPANCY_FRACTIONS = (0.25, 0.5, 1.0)
 ALPHA_POINTS = [0.0, 0.5, 1.0]
@@ -126,8 +148,19 @@ def _base_tier(platform: str, epochs: int, description: str) -> dict[str, Any]:
     }
 
 
-def build(*, arm_b_only: bool = False) -> dict[str, Any]:
-    """Build the full grid or its route-attribution Arm B rerun."""
+def build(
+    *,
+    arm_b_only: bool = False,
+    droplet_emission_mode: str | None = None,
+) -> dict[str, Any]:
+    """Build the full grid or its route-attribution Arm B rerun.
+
+    ``droplet_emission_mode`` stamps ``transmission.droplet_emission_mode``
+    on every Arm B tier. Both arms of the droplet-deletion contrast declare
+    it explicitly rather than one inheriting the engine default, so the
+    archive records which emission definition produced it and a later change
+    of default cannot silently re-label these runs.
+    """
     tiers: dict[str, Any] = {}
     for hull_key, platform in HULLS.items():
         for length_key, epochs in LENGTHS.items():
@@ -140,6 +173,12 @@ def build(*, arm_b_only: bool = False) -> dict[str, Any]:
             tier = _base_tier(platform, EPOCHS_7D, ARM_B_DESCRIPTION)
             tier["num_agents"] = int(round(fraction * declared_total(platform)))
             tier["seeds"] = PROBE_SEEDS
+            if droplet_emission_mode is not None:
+                tier["config_overrides"] = {
+                    "transmission": {
+                        "droplet_emission_mode": droplet_emission_mode,
+                    },
+                }
             tiers[f"rl_{hull_key}_occ{int(fraction * 100)}_7d"] = tier
     for hull_key, platform in HULLS.items():
         tier = _base_tier(platform, EPOCHS_7D, ARM_C_DESCRIPTION)
@@ -163,6 +202,11 @@ def build(*, arm_b_only: bool = False) -> dict[str, Any]:
         "Arm B-only route attribution rerun: " + ARM_B_DESCRIPTION
         if arm_b_only else CAMPAIGN_DESCRIPTION
     )
+    if droplet_emission_mode is not None:
+        campaign = f"{campaign}_{DROPLET_ARM_TAGS[droplet_emission_mode]}"
+        description = (
+            f"{description} {DROPLET_ARM_DESCRIPTIONS[droplet_emission_mode]}"
+        )
     return {
         "campaign": campaign,
         "description": description,
@@ -218,9 +262,27 @@ def main() -> None:
         "--arm-b-only", action="store_true",
         help="write the 1,800-run route-attribution Arm B manifest",
     )
+    parser.add_argument(
+        "--droplet-emission-mode",
+        choices=sorted(DROPLET_ARM_TAGS),
+        default=None,
+        help=(
+            "stamp transmission.droplet_emission_mode on the Arm B tiers "
+            "and write that arm's own manifest; both arms of the "
+            "droplet-deletion contrast declare it explicitly"
+        ),
+    )
     args = parser.parse_args()
-    manifest = build(arm_b_only=args.arm_b_only)
+    manifest = build(
+        arm_b_only=args.arm_b_only,
+        droplet_emission_mode=args.droplet_emission_mode,
+    )
     output_path = ARM_B_MANIFEST_PATH if args.arm_b_only else MANIFEST_PATH
+    if args.droplet_emission_mode is not None:
+        tag = DROPLET_ARM_TAGS[args.droplet_emission_mode]
+        output_path = output_path.with_name(
+            output_path.name.replace("_manifest.json", f"_{tag}_manifest.json"),
+        )
     output_path.write_text(
         json.dumps(manifest, indent=2) + "\n", encoding="utf-8",
     )

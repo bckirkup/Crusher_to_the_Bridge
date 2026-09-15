@@ -3200,13 +3200,58 @@ Roughly in dependency order.
     measured under the deleted definition** and is now historical: it
     describes the pre-deletion engine and may not be quoted as current
     behaviour. The matched `hull_compounding_route_v1` Arm B rerun is the
-    measurement, and it has **not yet been taken** — until it lands, no route
-    share or posting rate in this ledger describes the default engine. Two
+    measurement, and it has now been taken — see item 41, which supersedes
+    item 39 as the description of default behaviour. Two
     things the deletion leaves open, both deliberately separate changes: the
     droplet route still ignores a continuous arm's declared
     `airborne_emission_fraction` (a 15× move on COVID), and toilet-flush
     aerosolisation — the diarrhoea-conditioned air source norovirus needs and
-    this model has no structure for — is unbuilt.
+    this model has no structure for — is unbuilt. **The prediction recorded
+    above — "posting collapses well below A9" — is corrected by item 41: the
+    collapse happened, the A9 comparison did not hold.**
+
+41. **The deletion is measured, and it is a 31–49× collapse whose headcount
+    exponent survives.** `droplet_deletion_route_v1` re-ran item 39's Arm B
+    twice on one image (`droplet-emission-deletion-76c0c51`, job definition
+    `picard-campaign:40`), the arms differing only in
+    `transmission.droplet_emission_mode`: `profile_conditioned` (deleted,
+    default) against `shipped_uniform` (the pre-deletion uniform fraction).
+    Same architecture, same 300 seeds per cell, 7 days, separate output roots
+    because the arms generate identical run ids by construction. Batch
+    `7ff847c0-72a0-4633-af29-c9b210a3ed57` and
+    `a928d39c-5a3b-45da-8729-9d4994fadddb`, 128/128 shards each, 0 failed,
+    3,600/3,600 runs. **Nothing was fitted and no replacement fraction was
+    proposed.** (a) Secondaries per import at full complement fall 6.601 →
+    0.134 (classic, 49×) and 7.954 → 0.257 (spirit, 31×); zero-secondary
+    voyages rise from 21–35% to 91–99%. (b) **Droplet is exactly zero in all
+    six deleted cells** — the wiring check across all three call sites — and
+    fomite carries 75–100% of the residual; `emesis_aerosol` posts its first
+    nonzero establishment in any campaign (one infection, spirit full), so the
+    event-conditioned route is alive and very small; `hvac_airborne`,
+    `food_contamination`, `environmental_source` and `unknown` remain zero
+    everywhere. (c) **The headcount exponent survives the deletion** (classic
+    N^2.07 → N^1.72, spirit N^1.70 → N^1.69, the classic deleted cells
+    non-monotonic and the top 1% of voyages carrying 63–100% of each deleted
+    cell's secondaries): the N-scaling was never a property of the constant but
+    of any route whose per-person dose is N-independent, and fomite inherits it
+    off a 30–50× lower base. The large-hull problem's **magnitude** is removed,
+    not its mechanism. (d) Posting falls to 0/300 in five cells and 2/300 in
+    spirit full. **The item-40 prediction of "well below A9" is withdrawn**:
+    0/300 has a 95% Jeffreys interval of [0, 8.3]/1,000, which contains both
+    A9's fleet-pooled 4.19–5.58 and the 6–7 day band's 0.33, so at 300 voyages
+    per cell the arm is **not resolvable either side of A9** — the defensible
+    claim is that a 110–140× overshoot at full complement is gone. (e) What is
+    now too low is outbreak **size**: median reported passenger attack rate
+    over the two surviving postings is 0.0153 against A4's 0.053–0.055, and the
+    worst voyage in 300 falls from 0.0561 to 0.0067 (classic full), so the arm
+    has lost the upper tail a VSP-scale voyage lives in. **Deletion alone
+    validates nothing**; it converts an over-producer into an under-producer and
+    leaves the flush route, the continuous-arm `airborne_emission_fraction`
+    inconsistency and the food-contamination zero as the open questions. Full
+    account: `docs/norovirus/droplet_deletion_route_v1.md`; artifacts
+    `telemetry_buffer/observation_model/droplet_deletion_route_v1.json` and
+    `docs/norovirus/droplet_deletion_route_v1_readout.md`. Away from declared
+    complement these cells remain a mechanism probe.
 
 ## 5. Held fixed by assumption
 
