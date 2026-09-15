@@ -134,7 +134,6 @@ def _pathway(
     agent_doses: dict[int, float] = {}
     core._pathway_flush_aerosol(
         zone_occupants, agent_doses, matrix, {}, PATHOGEN,
-        profile=core.pathogen_profiles[PATHOGEN],
     )
     return matrix, agent_doses
 
@@ -546,7 +545,7 @@ def test_flush_witness_positive_and_consistent_when_on() -> None:
     agent_doses: dict[int, float] = {}
     core._pathway_flush_aerosol(
         {THEATER: [visitor], HEAD: []}, agent_doses, matrix, {},
-        PATHOGEN, profile=core.pathogen_profiles[PATHOGEN],
+        PATHOGEN,
     )
     tel = core.sanitary_telemetry
     assert tel["flush_recipients"] > 0
