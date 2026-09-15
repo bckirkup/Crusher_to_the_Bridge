@@ -205,6 +205,18 @@ per-copy risk separately.
    the published schedule (3,063 tests) and whether asymptomatic infections are
    being tested at all — the 0.96 asymptomatic share says they are being
    *produced*, so the shortfall is in who gets swabbed.
+   **Observation-process finding (post-campaign, one cell).** At Theta_fit,
+   seed 20200205, CPython 3.12, 102 of 111 pre-6-February onsets were
+   confirmed by a passive sick-call swab taken before 5 February — a test the
+   ship did not have. The passive channel also skips a host for the campaign
+   roster, so symptomatic cases were drained out of the campaign log. The
+   scenario record now declares `molecular_ascertainment.start_day` (Diamond
+   Princess day 14 = 3 February; Greg Mortimer day 20, the screen) and no
+   specimen precedes it. On the change-detector cell (Greg Mortimer, 1e6,
+   seed 20200333) this moved onsets 96→68, pre-split onsets 52→14, campaign
+   specimens 106→217, positives 36→104 and the asymptomatic share of
+   positives 1.00→0.57 (CPython 3.11). The 20-seed grid has **not** been
+   rerun under the gate; the numbers above in this readout are pre-gate.
 4. **Phase 3 (cross-ship import rate by embarkation date)** only after 1–3;
    the H3 result says the small-hull centre of the distribution is roughly
    where the model already puts it, so the secular-shift question is about the
