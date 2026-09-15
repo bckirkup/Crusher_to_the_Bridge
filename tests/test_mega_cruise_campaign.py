@@ -623,6 +623,22 @@ def test_parameters_from_spec_fallback_without_campaign_block() -> None:
     assert params["num_agents"] == 50
     assert params["filter_efficiency"] == pytest.approx(0.9)
     assert params["history_retention"] == "full"
+    assert "sanitary_visit_mode" not in params
+
+
+@pytest.mark.parametrize("mode", ["none", "dwell_weighted"])
+def test_declared_sanitary_visit_mode_is_recorded_in_parameters(mode: str) -> None:
+    """Both arms name themselves in the archive; neither inherits a default."""
+    spec = make_picard_spec(
+        "san_probe", platform="expedition_cruise_450", bundle="active_profiles",
+        pathogen_overrides=None,
+        config_overrides={"transmission": {"sanitary_visit_mode": mode}},
+        seed=1, epochs=2, num_agents=20,
+    )
+    assert spec["campaign_parameters"]["sanitary_visit_mode"] == mode
+    assert parameters_from_spec(
+        {k: v for k, v in spec.items() if k != "campaign_parameters"},
+    )["sanitary_visit_mode"] == mode
 
 
 def _sample_history() -> list[dict]:

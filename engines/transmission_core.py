@@ -1508,6 +1508,12 @@ class TransmissionCore:
             "person_seconds": 0.0,
             "stool_visits": 0,
             "unresolved": 0,
+            # Bookkeeping only: dose handed to the fomite dose ledger at a
+            # sanitary venue (copies of the credited hand-to-mouth dose), and
+            # susceptible pickup *events* there -- events, not distinct
+            # agents, so a repeat visitor counts once per pickup.
+            "dose_delivered": 0.0,
+            "recipients": 0,
         }
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
@@ -5248,6 +5254,8 @@ class TransmissionCore:
                     set(), [], agent_doses, matrix, agent_pathway_doses,
                     pathogen_id, surface_attribution,
                 )
+                self.sanitary_telemetry["dose_delivered"] += dose
+                self.sanitary_telemetry["recipients"] += 1
                 delivered_total += delivered
             self._consume_surface_mass(
                 pathogen_id, venue, delivered_total, surface_mass,

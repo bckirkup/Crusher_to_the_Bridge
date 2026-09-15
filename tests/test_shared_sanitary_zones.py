@@ -14,6 +14,7 @@ from __future__ import annotations
 import json
 import sys
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
@@ -28,6 +29,8 @@ from derive_sanitary_provisioning import (  # noqa: E402
 )
 from engines.infection_dynamics_bridge import KorkinAgent  # noqa: E402
 from engines.sim_clock import HOURS, SimClock  # noqa: E402
+from orchestrator_record import _summary_counts  # noqa: E402
+from orchestrator_types import SimulationState  # noqa: E402
 from engines.transmission_core import (  # noqa: E402
     ContactTracingMatrix,
     SANITARY_CEILING_HEIGHT_M,
@@ -398,3 +401,125 @@ def test_stool_event_records_the_resolved_venue() -> None:
         zone_name="TheaterLng",
     )
     assert core._sanitary_stool_venues["_default"][1] == "HD_5T_M"
+
+
+# ── Execution witness (sanitary_structure_v1) ─────────────────────────
+# The campaign arm must carry evidence that the visit mechanism actually
+# executed; these counters are that witness. Bookkeeping only -- the
+# dose ledger, rng draws and ordering are untouched.
+
+
+def _exposure_core(
+    n_susceptible: int,
+    pool_mass: float = 500.0,
+) -> tuple[TransmissionCore, dict[str, list[KorkinAgent]]]:
+    """Core with a contaminated head, plus its zone occupancy map."""
+    core = _make_core(seed=7)
+    shedder = _agent(1, "TheaterLng")
+    shedder.hand_load_by_pathogen["_default"] = 100.0
+    susc = [_agent(10 + i, "TheaterLng") for i in range(n_susceptible)]
+    core._get_shedders = lambda occ, pid, prof: [(shedder, 5.0)]
+    core._get_susceptible = lambda occ, pid: susc
+    core._sanitary_epoch = 0
+    core._sanitary_visits = {
+        1: ["HD_5T_M"],
+        **{a.agent_id: ["HD_5T_M"] for a in susc},
+    }
+    core.surface_pools["HD_5T_M"] = pool_mass
+    occ = {"TheaterLng": [shedder, *susc]}
+    return core, occ
+
+
+def _run_exposure(core: TransmissionCore, occ: dict, epoch: int) -> dict:
+    matrix = ContactTracingMatrix(epoch=epoch)
+    agent_doses: dict[int, float] = {}
+    core._sanitary_epoch = epoch
+    core._sanitary_fomite_exposure(
+        epoch, occ, agent_doses, matrix, {}, "_default", None, None,
+    )
+    return agent_doses
+
+
+def test_witness_counters_zero_under_none_positive_under_visits() -> None:
+    """The none arm's counters stay at zero; a pickup epoch moves them."""
+    inert = _make_core(mode="none")
+    for key in ("dose_delivered", "recipients"):
+        assert inert.sanitary_telemetry[key] == 0
+
+    core, occ = _exposure_core(1)
+    agent_doses = _run_exposure(core, occ, 0)
+    assert core.sanitary_telemetry["recipients"] == 1
+    assert core.sanitary_telemetry["dose_delivered"] > 0.0
+    assert agent_doses.get(10, 0.0) > 0.0
+
+
+def test_witness_dose_rises_with_more_recipients() -> None:
+    """Graded sensitivity: more susceptible pickups -> more delivered dose.
+
+    Per-agent pickup doses carry a small stochastic factor, so the axis is
+    wide (1 vs 8 recipients), not a golden ratio.
+    """
+    core_one, occ_one = _exposure_core(1)
+    _run_exposure(core_one, occ_one, 0)
+    core_many, occ_many = _exposure_core(8)
+    _run_exposure(core_many, occ_many, 0)
+
+    assert core_many.sanitary_telemetry["recipients"] == 8
+    assert (
+        core_many.sanitary_telemetry["dose_delivered"]
+        > core_one.sanitary_telemetry["dose_delivered"]
+    )
+
+
+def test_epoch_summary_exports_sanitary_activity_on_both_arms() -> None:
+    """summary['sanitary_activity'] mirrors the core totals, zeros included."""
+    expected_keys = {
+        "visits", "person_seconds", "stool_visits",
+        "unresolved", "dose_delivered", "recipients",
+    }
+    for mode in ("none", "dwell_weighted"):
+        core = _make_core(mode=mode, seed=7)
+        if mode == "dwell_weighted":
+            core.surface_pools["HD_5T_M"] = 500.0
+            core._sanitary_visits = {10: ["HD_5T_M"]}
+            _run_exposure(
+                core,
+                {"TheaterLng": [_agent(10, "TheaterLng")]},
+                0,
+            )
+            assert core.sanitary_telemetry["recipients"] > 0
+        state = SimulationState()
+        # The ship-simulation seam copies the cumulative dict, not deltas.
+        state.sanitary_activity = dict(core.sanitary_telemetry)
+        summary = _summary_counts(
+            [], SimpleNamespace(agents=[]), state,
+            {"sick_call_count": 0},
+        )
+        activity = summary["sanitary_activity"]
+        assert expected_keys <= set(activity)
+        assert activity == {
+            key: round(core.sanitary_telemetry[key], 6)
+            for key in sorted(core.sanitary_telemetry)
+        }
+        if mode == "none":
+            assert all(v == 0 for v in activity.values())
+
+
+def test_witness_counters_are_cumulative_and_copied_not_added() -> None:
+    """A second epoch's export reports the running total once, not twice."""
+    core, occ = _exposure_core(1)
+    state = SimulationState()
+    seen = []
+    for epoch in (0, 1):
+        # Re-seed the epoch's visit record and pool so epoch 1 picks up too.
+        core._sanitary_visits = {10: ["HD_5T_M"]}
+        core.surface_pools["HD_5T_M"] = 500.0
+        _run_exposure(core, occ, epoch)
+        # Same copy seam ShipSimulation._step_execute_transmission uses.
+        state.sanitary_activity = dict(core.sanitary_telemetry)
+        seen.append(dict(state.sanitary_activity))
+    for key in ("dose_delivered", "recipients"):
+        assert seen[1][key] >= seen[0][key]
+    # Copy, not accumulation: epoch 1's export equals the core's totals,
+    # not the sum of two epochs' exports.
+    assert seen[1]["recipients"] == core.sanitary_telemetry["recipients"]

@@ -916,6 +916,9 @@ class ShipSimulation:
             state.infections_by_dominant_route,
             state.infection_dose_share_by_route,
         )
+        # Cumulative totals, not deltas: copy the core's running counters so a
+        # multi-epoch run reports the same totals the core holds.
+        state.sanitary_activity = dict(self.tx_core.sanitary_telemetry)
         if self.contam_engine is not None:
             self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
                 self.engine.zone_pathogen_mass,
