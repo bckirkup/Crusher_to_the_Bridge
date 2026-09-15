@@ -440,6 +440,12 @@ def step_infection_progression(
             for zone_name, mass in confinement_core.drain_emesis_aerosol(pid).items():
                 if zone_name in masses:
                     masses[zone_name] += mass
+            # Sanitary HVAC is exhaust-only, so a head venue normally has
+            # nothing downstream to transport to; the drain exists for
+            # parity and for cabin-corridor venues that share a branch.
+            for zone_name, mass in confinement_core.drain_flush_aerosol(pid).items():
+                if zone_name in masses:
+                    masses[zone_name] += mass
         engine.set_pathogen_zone_mass(pid, masses)
 
 
