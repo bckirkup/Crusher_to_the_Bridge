@@ -224,14 +224,11 @@ HIGH_TOUCH_AREA_M2 = {
     "public": 6.0,
     "galley": 10.0,
     "crew_mess": 4.0,
-    # Sanitary heads use the same declared-geometry basis as the head floor
-    # area -- taps, flush buttons and stall latches scale with fixture count,
-    # which the head's floor_area_m2 already carries. The per-water-closet
-    # value below is the fallback for a zone that declares no floor_area_m2;
-    # _fomite_surface_area reads the zone's own declared floor area first.
-    # Same Grade C declared-assumption class as the rest of this table.
-    # Origin: n/a (declared geometry, shared basis with the layout).
-    "sanitary": 2.7,
+    # Fallback for a sanitary zone that declares no floor_area_m2 to scale
+    # SANITARY_HIGH_TOUCH_AREA_M2_PER_WC from: a whole-zone single-fixture
+    # head, i.e. one water closet's hardware. Same Grade C
+    # declared-assumption class as the rest of this table. Origin: n/a.
+    "sanitary": 0.5,
 }
 
 # Fraction of high-touch objects actually cleaned in a daily housekeeping
@@ -330,9 +327,20 @@ EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0
 
 # Public head geometry. Floor area is a declared assumption: a 0.9 x 1.5 m
 # water-closet stall footprint doubled to carry the handwashing and
-# circulation share. Nobody has measured ship head floor area.
+# circulation share. Nobody has measured ship head floor area. It is deck
+# plan only -- fomite transfer runs on SANITARY_HIGH_TOUCH_AREA_M2_PER_WC,
+# not on this footprint.
 # Grade C (declared). Origin: Tr (VSP/IPC fixture dimensions).
 SANITARY_FLOOR_AREA_M2_PER_WC = 2.7
+# High-touch hardware per water closet: tap set, flush actuator, stall latch
+# and door hardware. This is the same declared-assumption class as the rest
+# of HIGH_TOUCH_AREA_M2 -- a hardware area, NOT a footprint: a head's
+# floor_area_m2 is its deck plan and touching it transfers nothing. Sized so
+# a single-fixture head sits below a stateroom's 1.5 m2 (whose high-touch set
+# includes its own toilet and fittings) and a ten-fixture block sits just
+# under a public space's 6.0 m2.
+# Grade C (declared). Origin: n/a.
+SANITARY_HIGH_TOUCH_AREA_M2_PER_WC = 0.5
 # Accommodation deckhead height; MLC 2006 Standard A3.1.6 sets a 2.03 m
 # headroom floor and 2.3 m is ship-typical.
 # Grade C (declared, above a regulatory floor). Origin: Tr (MLC A3.1.6).
@@ -4267,12 +4275,16 @@ class TransmissionCore:
     def _fomite_surface_area(self, zone_name: str) -> float:
         zone_class = self._fomite_zone_class(zone_name)
         if zone_class == "sanitary":
-            # The head's declared floor area IS its touchable-surface basis
-            # (see HIGH_TOUCH_AREA_M2["sanitary"]); a zone that declares it
-            # uses it directly rather than the per-water-closet fallback.
+            # Touchable surface is hardware, not footprint: water closets
+            # back-computed from the declared floor area scale the per-WC
+            # hardware constant. floor at 1 -- a head with fixtures never
+            # presents less than a single fixture's hardware.
             declared = self.zone_floor_areas.get(zone_name)
             if declared is not None:
-                return float(declared)
+                water_closets = max(
+                    1, round(float(declared) / SANITARY_FLOOR_AREA_M2_PER_WC),
+                )
+                return SANITARY_HIGH_TOUCH_AREA_M2_PER_WC * water_closets
         return HIGH_TOUCH_AREA_M2[zone_class]
 
     def _fomite_surface_contacts(

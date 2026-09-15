@@ -258,6 +258,25 @@ def test_home_visits_are_own_fittings_telemetry_only() -> None:
     assert core.sanitary_telemetry["visits"] > 0
 
 
+def test_head_fomite_area_is_fixture_hardware_not_footprint() -> None:
+    """Touchable surface scales with water closets, not floor area."""
+    core = _make_core(seed=7)
+    # 27 m2 = 10 WC -> 5.0 m2; 54 m2 = 20 WC -> 10.0 m2; a single-fixture
+    # head (2.7 m2) -> 0.5 m2, below a stateroom's 1.5 m2.
+    core.zone_floor_areas["HD_1W_M"] = SANITARY_FLOOR_AREA_M2_PER_WC
+    core.zone_types["HD_1W_M"] = "Sanitary"
+    assert core._fomite_surface_area("HD_5T_M") == pytest.approx(5.0)
+    assert core._fomite_surface_area("HD_5T_M2") == pytest.approx(10.0)
+    assert core._fomite_surface_area("HD_1W_M") == pytest.approx(0.5)
+    # No declared floor area -> the single-fixture whole-zone fallback.
+    core.zone_floor_areas.pop("HD_5T_M")
+    assert core._fomite_surface_area("HD_5T_M") == pytest.approx(0.5)
+    # The deck-plan footprint never enters the transfer area: doubling
+    # floor area per fixture does not double the touchable surface.
+    core.zone_floor_areas["HD_1W_M"] = 2 * SANITARY_FLOOR_AREA_M2_PER_WC
+    assert core._fomite_surface_area("HD_1W_M") == pytest.approx(1.0)
+
+
 def test_head_fomite_dose_scales_inversely_with_surface_area() -> None:
     """Same contaminated mass in a bigger head -> lower delivered dose."""
     def delivered(area: float) -> float:
