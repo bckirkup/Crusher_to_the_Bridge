@@ -103,7 +103,7 @@ def _model(**overrides: object) -> IncubationModel:
 
 
 def _draws(model: IncubationModel, *, host: HostIncubationState = NEUTRAL_HOST,
-           dose: float = REFERENCE_DOSE, seed: int = 11) -> np.ndarray:
+           dose: float | None = REFERENCE_DOSE, seed: int = 11) -> np.ndarray:
     rng = np.random.default_rng(seed)
     return np.array([
         model.sample_days(dose=dose, host=host, rng=rng)
@@ -274,6 +274,20 @@ class TestDoseConditioning:
         model = _model(dose_log10_shortening=0.1)
         assert model.dose_factor(0.0) > 1.0
 
+    def test_no_inoculum_on_record_draws_at_the_reference(self) -> None:
+        """A declared index case has no dose; it is a typical host, not the
+        lightest exposure the floor can express."""
+        model = _model(dose_log10_shortening=0.5)
+        at_reference = model.conditional_median(REFERENCE_DOSE, NEUTRAL_HOST)
+        assert model.conditional_median(None, NEUTRAL_HOST) == pytest.approx(
+            at_reference,
+        )
+        assert model.conditional_median(0.0, NEUTRAL_HOST) > at_reference
+        unstated = float(np.median(_draws(model, dose=None)))
+        literal_zero = float(np.median(_draws(model, dose=0.0)))
+        assert unstated == pytest.approx(at_reference, rel=0.05)
+        assert literal_zero > 1.5 * unstated
+
 
 # ── Host conditioning ───────────────────────────────────────────────────
 
@@ -406,6 +420,30 @@ class TestProgressionSeam:
             again = incubation_days(agent, PATHOGEN, agent.infections[PATHOGEN],
                                      profile, rng)
             assert again == first
+
+    def test_a_seed_with_no_recorded_dose_incubates_like_a_typical_host(
+        self,
+    ) -> None:
+        """An explicit seed carries ``acquired_particles`` 0.0; its period
+        must come from the profile's median, not from the dose floor."""
+        profile = _profile(RESPIRATORY)
+        model = IncubationModel.from_mapping(profile["incubation"])
+        assert model is not None
+        n50 = 10 ** model.dose_reference_log10
+        rng = np.random.default_rng(23)
+        by_dose: dict[float, list[float]] = {0.0: [], n50: []}
+        for dose, periods in by_dose.items():
+            for aid in range(400):
+                agent = _agent(aid)
+                agent.infect_with_pathogen(RESPIRATORY, dose, 0)
+                periods.append(incubation_days(
+                    agent, RESPIRATORY, agent.infections[RESPIRATORY],
+                    profile, rng,
+                ))
+        unstated = float(np.median(by_dose[0.0]))
+        typical = float(np.median(by_dose[n50]))
+        assert unstated == pytest.approx(typical, rel=0.15)
+        assert unstated == pytest.approx(model.median_days, rel=0.15)
 
     def test_hosts_of_one_pathogen_no_longer_share_an_onset_day(self) -> None:
         profile = _profile(RESPIRATORY)

@@ -210,7 +210,7 @@ def theta_profile_overrides(
         )
     ]
     peak = max(symptomatic)
-    return {
+    overrides: dict[str, Any] = {
         "shedding_curve_log10": [round(v - peak, 6) for v in symptomatic],
         "asymptomatic_shedding_log10": [
             round(v - peak, 6) for v in asymptomatic
@@ -218,6 +218,17 @@ def theta_profile_overrides(
         "dose_adjustment": 0.0,
         "dose_response": {"model": "exponential", "k": theta},
     }
+    if "incubation" in profile:
+        # The shipped reference is the profile's own beta-Poisson N50, in the
+        # units its own dose-response reads. With the exponential model
+        # installed above, the N50 the hosts are actually infected around is
+        # ln 2 / Theta; the incubation term is re-referenced there so a
+        # typical infection keeps the profile's median rather than sitting
+        # ten decades below a reference that no longer describes this arm.
+        overrides["incubation"] = {
+            "dose_reference_log10": math.log10(math.log(2.0) / theta),
+        }
+    return overrides
 
 
 def implied_per_copy_risk(theta: float) -> tuple[float, float]:
