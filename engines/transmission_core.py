@@ -220,6 +220,14 @@ HIGH_TOUCH_AREA_M2 = {
     "public": 6.0,
     "galley": 10.0,
     "crew_mess": 4.0,
+    # Sanitary heads use the same declared-geometry basis as the head floor
+    # area -- taps, flush buttons and stall latches scale with fixture count,
+    # which the head's floor_area_m2 already carries. The per-water-closet
+    # value below is the fallback for a zone that declares no floor_area_m2;
+    # _fomite_surface_area reads the zone's own declared floor area first.
+    # Same Grade C declared-assumption class as the rest of this table.
+    # Origin: n/a (declared geometry, shared basis with the layout).
+    "sanitary": 2.7,
 }
 
 # Fraction of high-touch objects actually cleaned in a daily housekeeping
@@ -617,6 +625,7 @@ DEFAULT_HETEROGENEOUS_SIGMA_BY_ZONE_TYPE: dict[str, float] = {
     "Room": 0.5,
     "Medical": 0.5,
     "Engineering": 0.5,
+    "Sanitary": 0.75,        # shared public space, same band as Free
 }
 DEFAULT_HETEROGENEOUS_SIGMA_SERVICE = 1.0  # Galley / service (high)
 DEFAULT_HETEROGENEOUS_SIGMA_DEFAULT = 0.75
@@ -1353,6 +1362,7 @@ class TransmissionCore:
         pathogen_profiles: dict[str, dict] | None = None,
         zone_types: dict[str, str] | None = None,
         zone_ventilation: dict[str, str] | None = None,
+        zone_floor_areas: dict[str, float] | None = None,
         confinement_isolation_factor: float = DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
         corridor_direct_contact_factor: float = DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
         cfg: dict[str, Any] | None = None,
@@ -1381,6 +1391,7 @@ class TransmissionCore:
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
         self.zone_ventilation = zone_ventilation or {}
+        self.zone_floor_areas = zone_floor_areas or {}
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -4167,6 +4178,8 @@ class TransmissionCore:
             return "cabin"
         if zone_type == "Dining":
             return "dining"
+        if zone_type == "Sanitary":
+            return "sanitary"
         return "public"
 
     def _routine_cleaning_schedule(self, zone_name: str) -> tuple[float, float]:
@@ -4184,7 +4197,15 @@ class TransmissionCore:
         )
 
     def _fomite_surface_area(self, zone_name: str) -> float:
-        return HIGH_TOUCH_AREA_M2[self._fomite_zone_class(zone_name)]
+        zone_class = self._fomite_zone_class(zone_name)
+        if zone_class == "sanitary":
+            # The head's declared floor area IS its touchable-surface basis
+            # (see HIGH_TOUCH_AREA_M2["sanitary"]); a zone that declares it
+            # uses it directly rather than the per-water-closet fallback.
+            declared = self.zone_floor_areas.get(zone_name)
+            if declared is not None:
+                return float(declared)
+        return HIGH_TOUCH_AREA_M2[zone_class]
 
     def _fomite_surface_contacts(
         self,

@@ -305,12 +305,16 @@ class ShipSimulation:
         }
         zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
         zone_ventilation: dict[str, str] = {}
+        zone_floor_areas: dict[str, float] = {}
         food_zone_multipliers: dict[str, float] = {}
         for z in platform_layout.get("zones", []):
             zid = z["id"]
             vent = z.get("cabin_ventilation_type")
             if vent:
                 zone_ventilation[zid] = vent
+            floor_area = z.get("floor_area_m2")
+            if floor_area is not None:
+                zone_floor_areas[zid] = float(floor_area)
             if z.get("type") == "Dining":
                 mult = z.get("food_contamination_multiplier")
                 if mult is None:
@@ -330,6 +334,7 @@ class ShipSimulation:
             pathogen_profiles=self.pathogen_profiles,
             zone_types=zone_types,
             zone_ventilation=zone_ventilation,
+            zone_floor_areas=zone_floor_areas,
             confinement_isolation_factor=float(
                 platform_layout.get(
                     "confinement_isolation_factor",

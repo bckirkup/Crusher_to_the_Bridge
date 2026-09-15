@@ -62,7 +62,7 @@
         },
         "type": {
           "type": "string",
-          "enum": ["Free", "Dining", "Room", "Medical", "Engineering", "Cabin_Corridor"]
+          "enum": ["Free", "Dining", "Room", "Medical", "Engineering", "Cabin_Corridor", "Sanitary"]
         },
         "traffic": {
           "type": "string",
@@ -109,6 +109,11 @@
           "type": "integer",
           "minimum": 1,
           "description": "Nominal max occupants for the zone (simulation / display)"
+        },
+        "serves": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Zone ids this block serves (e.g. a Sanitary head block's served deck cluster). Declared rather than derived so visit resolution does not recompute the provisioning mapping."
         },
         "dining_service_type": {
           "type": "string",

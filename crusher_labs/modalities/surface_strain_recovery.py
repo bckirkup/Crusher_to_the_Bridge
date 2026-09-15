@@ -35,6 +35,7 @@ SURFACE_TYPE_RECOVERY_ORDER: tuple[str, ...] = (
     "Room",
     "Engineering",
     "Dining",
+    "Sanitary",
     "Medical",
 )
 DEFAULT_RECOVERY_BY_SURFACE_TYPE: Mapping[str, float] = MappingProxyType({
@@ -43,6 +44,9 @@ DEFAULT_RECOVERY_BY_SURFACE_TYPE: Mapping[str, float] = MappingProxyType({
     "Room": 0.50,
     "Engineering": 0.60,
     "Dining": 0.75,
+    # Hard-surface, frequently cleaned shared fixture room: banded with
+    # Dining rather than with Free open space. Declared, Grade C.
+    "Sanitary": 0.75,
     "Medical": 0.85,
 })
 DEFAULT_SURFACE_RECOVERY = 0.25
