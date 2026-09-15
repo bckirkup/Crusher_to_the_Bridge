@@ -119,9 +119,16 @@ def main() -> int:
         required=True,
         help="s3://bucket/campaign/covid_first_look_v1/",
     )
+    parser.add_argument(
+        "--design",
+        default=None,
+        help="Design JSON, relative to the repository root (default: v1)",
+    )
     args = parser.parse_args()
 
-    design = load_design()
+    design = load_design(
+        str(_REPO_ROOT / args.design) if args.design else None,
+    )
     cells = child_cells(enumerate_cells(design), args.phase, _array_index(), args.stride)
     bucket, prefix = _s3_uri(args.s3_prefix)
     if prefix:
