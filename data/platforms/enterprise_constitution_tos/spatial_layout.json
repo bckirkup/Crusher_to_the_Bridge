@@ -234,19 +234,6 @@
       "description": "Crew mess."
     },
     {
-      "id": "HeadsMain",
-      "type": "Free",
-      "traffic": "medium",
-      "volume_m3": 90,
-      "deck": "saucer_5",
-      "max_occupancy": 20,
-      "display": {
-        "x": 110,
-        "y": 36
-      },
-      "description": "Public heads near living ring."
-    },
-    {
       "id": "StoresDry",
       "type": "Free",
       "traffic": "low",
@@ -632,6 +619,388 @@
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 1,
       "description": "Officer stateroom corridor, saucer deck 6 Aft. Mostly single occupancy, ventilation=interior_hvac."
+    },
+    {
+      "id": "HD_NECK_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "neck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "NeckHub"
+      ],
+      "display": {
+        "x": 60.0,
+        "y": 51.0
+      },
+      "description": "Public head (male, 1 water closet) serving NeckHub."
+    },
+    {
+      "id": "HD_NECK_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "neck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "NeckHub"
+      ],
+      "display": {
+        "x": 60.0,
+        "y": 51.0
+      },
+      "description": "Public head (female, 1 water closet) serving NeckHub."
+    },
+    {
+      "id": "HD_1S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_1",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Bridge",
+        "BriefRoom"
+      ],
+      "display": {
+        "x": 192.5,
+        "y": 5.0
+      },
+      "description": "Public head (male, 2 water closets) serving Bridge, BriefRoom."
+    },
+    {
+      "id": "HD_1S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_1",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge",
+        "BriefRoom"
+      ],
+      "display": {
+        "x": 192.5,
+        "y": 5.0
+      },
+      "description": "Public head (female, 1 water closet) serving Bridge, BriefRoom."
+    },
+    {
+      "id": "HD_2S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_2",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Comms",
+        "Library"
+      ],
+      "display": {
+        "x": 180.0,
+        "y": 13.0
+      },
+      "description": "Public head (male, 2 water closets) serving Comms, Library."
+    },
+    {
+      "id": "HD_2S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_2",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Comms",
+        "Library"
+      ],
+      "display": {
+        "x": 180.0,
+        "y": 13.0
+      },
+      "description": "Public head (female, 2 water closets) serving Comms, Library."
+    },
+    {
+      "id": "HD_3S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_3",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Sickbay"
+      ],
+      "display": {
+        "x": 150.0,
+        "y": 20.0
+      },
+      "description": "Public head (male, 1 water closet) serving Sickbay."
+    },
+    {
+      "id": "HD_3S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_3",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Sickbay"
+      ],
+      "display": {
+        "x": 150.0,
+        "y": 20.0
+      },
+      "description": "Public head (female, 1 water closet) serving Sickbay."
+    },
+    {
+      "id": "HD_4S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_4",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Science1",
+        "Science2",
+        "Transprt1"
+      ],
+      "display": {
+        "x": 141.66666666666666,
+        "y": 28.0
+      },
+      "description": "Public head (male, 3 water closets) serving Science1, Science2, Transprt1."
+    },
+    {
+      "id": "HD_4S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_4",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Science1",
+        "Science2",
+        "Transprt1"
+      ],
+      "display": {
+        "x": 141.66666666666666,
+        "y": 28.0
+      },
+      "description": "Public head (female, 3 water closets) serving Science1, Science2, Transprt1."
+    },
+    {
+      "id": "HD_5S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_5",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Transprt2",
+        "Security"
+      ],
+      "display": {
+        "x": 135.0,
+        "y": 35.0
+      },
+      "description": "Public head (male, 2 water closets) serving Transprt2, Security."
+    },
+    {
+      "id": "HD_5S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_5",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Transprt2",
+        "Security"
+      ],
+      "display": {
+        "x": 135.0,
+        "y": 35.0
+      },
+      "description": "Public head (female, 2 water closets) serving Transprt2, Security."
+    },
+    {
+      "id": "HD_6S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_6",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "RecDeck",
+        "Gym",
+        "Galley",
+        "Mess_Hall"
+      ],
+      "display": {
+        "x": 96.25,
+        "y": 19.0
+      },
+      "description": "Public head (male, 4 water closets) serving RecDeck, Gym, Galley, Mess_Hall."
+    },
+    {
+      "id": "HD_6S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_6",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "RecDeck",
+        "Gym",
+        "Galley",
+        "Mess_Hall"
+      ],
+      "display": {
+        "x": 96.25,
+        "y": 19.0
+      },
+      "description": "Public head (female, 3 water closets) serving RecDeck, Gym, Galley, Mess_Hall."
+    },
+    {
+      "id": "HD_7S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_7",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "StoresDry",
+        "StoresCold"
+      ],
+      "display": {
+        "x": 77.5,
+        "y": 41.0
+      },
+      "description": "Public head (male, 2 water closets) serving StoresDry, StoresCold."
+    },
+    {
+      "id": "HD_7S_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "saucer_7",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "StoresDry",
+        "StoresCold"
+      ],
+      "display": {
+        "x": 77.5,
+        "y": 41.0
+      },
+      "description": "Public head (female, 2 water closets) serving StoresDry, StoresCold."
+    },
+    {
+      "id": "HD_1SE_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "secondary_1",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "EngMain",
+        "WarpCore"
+      ],
+      "display": {
+        "x": 40.0,
+        "y": 59.5
+      },
+      "description": "Public head (male, 2 water closets) serving EngMain, WarpCore."
+    },
+    {
+      "id": "HD_2SE_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "secondary_2",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "EPSDist",
+        "Jefferies"
+      ],
+      "display": {
+        "x": 52.5,
+        "y": 67.0
+      },
+      "description": "Public head (male, 2 water closets) serving EPSDist, Jefferies."
+    },
+    {
+      "id": "HD_2SE_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "secondary_2",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "EPSDist",
+        "Jefferies"
+      ],
+      "display": {
+        "x": 52.5,
+        "y": 67.0
+      },
+      "description": "Public head (female, 1 water closet) serving EPSDist, Jefferies."
     }
   ]
 }

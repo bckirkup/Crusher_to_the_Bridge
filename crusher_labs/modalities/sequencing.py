@@ -73,6 +73,9 @@ ZONE_TYPE_MODIFIERS: dict[str, dict[str, float]] = {
     "Dining":  {"Bacteria": 1.3, "Archaea": 0.7, "Fungi": 1.6, "Virus": 1.0},
     "Room":    {"Bacteria": 1.1, "Archaea": 0.9, "Fungi": 1.0, "Virus": 1.2},
     "Free":    {"Bacteria": 1.0, "Archaea": 1.0, "Fungi": 0.8, "Virus": 0.9},
+    # Fixture-dense wet room: bacterial load banded with Dining, enteric
+    # virus elevated. Declared, Grade C.
+    "Sanitary": {"Bacteria": 1.3, "Archaea": 0.8, "Fungi": 0.9, "Virus": 1.2},
 }
 
 # Ecological drift profiles

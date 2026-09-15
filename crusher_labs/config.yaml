@@ -268,6 +268,10 @@ agent_behavior:
 # within-zone exposure factor.
 transmission:
   contact_mode: "per_partner_contact"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose" | "per_partner_contact"
+  # Shared-head visit mechanism: "none" (default, bit-identical) or
+  # "dwell_weighted" (Poisson visits resolved to the serving head, exposure
+  # scaled by dwell share of the epoch, own `sanitary_visits` rng stream).
+  sanitary_visit_mode: "none"
   # CONTACT-ARCH-01, switched on. Eight per-activity rates in distinct partners
   # per hour, from the sourced intervals in docs/contact_architecture_spec.md
   # section 4 (tranche 37; Pung 2022 Nat Commun 13:1956 is the only cruise

@@ -44,7 +44,7 @@
         "x": 100,
         "y": 6
       },
-      "description": "Officer staterooms. 2-person rooms, ~7.3 m³ per person. Includes CO/XO at-sea cabins."
+      "description": "Officer staterooms. 2-person rooms, ~7.3 m\u00b3 per person. Includes CO/XO at-sea cabins."
     },
     {
       "id": "CPO_Berthing",
@@ -70,7 +70,7 @@
         "x": 85,
         "y": 6
       },
-      "description": "Forward enlisted berthing. 3-high racks. ~4.0 m³ per person — significantly better than Navy destroyers."
+      "description": "Forward enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person \u2014 significantly better than Navy destroyers."
     },
     {
       "id": "Enlisted_Berthing_Aft",
@@ -83,7 +83,7 @@
         "x": 50,
         "y": 6
       },
-      "description": "Aft enlisted berthing. 3-high racks. ~4.0 m³ per person. Adjacent to aviation berthing."
+      "description": "Aft enlisted berthing. 3-high racks. ~4.0 m\u00b3 per person. Adjacent to aviation berthing."
     },
     {
       "id": "Aviation_Det_Berthing",
@@ -240,6 +240,189 @@
         "y": 8
       },
       "description": "Main deck central passageway. Primary fore-aft transit route."
+    },
+    {
+      "id": "HD_01L_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Wardroom"
+      ],
+      "display": {
+        "x": 98.0,
+        "y": 8.0
+      },
+      "description": "Public head (male, 1 water closet) serving Wardroom."
+    },
+    {
+      "id": "HD_01L_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Wardroom"
+      ],
+      "display": {
+        "x": 98.0,
+        "y": 8.0
+      },
+      "description": "Public head (female, 1 water closet) serving Wardroom."
+    },
+    {
+      "id": "HD_02L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "02_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CIC"
+      ],
+      "display": {
+        "x": 108.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 1 water closet) serving CIC."
+    },
+    {
+      "id": "HD_04L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "04_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
+    },
+    {
+      "id": "HD_LOWERDE_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "lower_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 65.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_MAINDEC_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "main_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "Crew_Mess",
+        "Galley",
+        "Sickbay",
+        "Helicopter_Hangar",
+        "Boarding_Team_Staging",
+        "Armory",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 62.57142857142857,
+        "y": 6.571428571428571
+      },
+      "description": "Public head (male, 7 water closets) serving Crew_Mess, Galley, Sickbay, Helicopter_Hangar, +3 more."
+    },
+    {
+      "id": "HD_MAINDEC_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "main_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Crew_Mess",
+        "Galley",
+        "Sickbay",
+        "Helicopter_Hangar",
+        "Boarding_Team_Staging",
+        "Armory",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 62.57142857142857,
+        "y": 6.571428571428571
+      },
+      "description": "Public head (female, 6 water closets) serving Crew_Mess, Galley, Sickbay, Helicopter_Hangar, +3 more."
+    },
+    {
+      "id": "HD_WEATHER_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "weather_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Boat_Deck"
+      ],
+      "display": {
+        "x": 55.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 1 water closet) serving Boat_Deck."
+    },
+    {
+      "id": "HD_WEATHER_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "weather_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Boat_Deck"
+      ],
+      "display": {
+        "x": 55.0,
+        "y": 4.0
+      },
+      "description": "Public head (female, 1 water closet) serving Boat_Deck."
     }
   ],
   "graywater_zones": [

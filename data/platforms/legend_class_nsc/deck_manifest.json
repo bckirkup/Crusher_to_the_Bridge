@@ -5,7 +5,7 @@
   "representative_of": "Legend-class National Security Cutter (WMSL-750). 127.4m LOA, 16.5m beam. ~148 crew + aviation det. Modern HVAC with CBRN collective protection system. Helicopter and stern-launch boat capability.",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 18",
+    "zone count: 27",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -27,7 +27,16 @@
     "Boarding_Team_Staging",
     "Armory",
     "Boat_Deck",
-    "Passageway_Main"
+    "Passageway_Main",
+    "HD_01L_M",
+    "HD_01L_F",
+    "HD_02L_M",
+    "HD_04L_M",
+    "HD_LOWERDE_M",
+    "HD_MAINDEC_M",
+    "HD_MAINDEC_F",
+    "HD_WEATHER_M",
+    "HD_WEATHER_F"
   ],
   "decks": [
     "01_level",

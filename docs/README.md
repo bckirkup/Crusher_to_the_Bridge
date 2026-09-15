@@ -99,6 +99,7 @@ python3 presidio_runner.py \
 | [preboarding_wearable_decision_model_spec.md](preboarding_wearable_decision_model_spec.md) | Phase 1 implemented (`picard_framework/analysis/boundary/`); ship-sim handoff deferred |
 | [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md) | Implemented — cabin-level spatial resolution |
 | [ENTERPRISE_CABIN_REVISION.md](ENTERPRISE_CABIN_REVISION.md) | Implemented — Constitution + Galaxy rebuilt to cruise-class |
+| [shared_sanitary_zones.md](shared_sanitary_zones.md) | Implemented — `Sanitary` head zones on all 12 platforms with exhaust-only one-way air wiring; `transmission.sanitary_visit_mode` (`none` default / `dwell_weighted`); flush emission is a separate change |
 | [MATHEMATICAL_FIDELITY_AUDIT.md](MATHEMATICAL_FIDELITY_AUDIT.md) | Living audit — records what is *not* implemented (stratified SEIQR, crew schedule) |
 
 ## Contam / HVAC

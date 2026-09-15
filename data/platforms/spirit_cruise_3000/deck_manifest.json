@@ -1,11 +1,11 @@
 {
   "platform_id": "spirit_cruise_3000",
-  "ship_class_label": "Spirit Cruise 3000",
+  "ship_class_label": "Spirit cruise (cabin-corridor)",
   "footprint_tier": "representative",
   "representative_of": "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA × 36m beam, ~86,000 GT. Cabin-corridor resolution (48 pax + 9",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 86",
+    "zone count: 115",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -39,6 +39,7 @@
     "Engine_Room",
     "MedCenter",
     "IsolWard",
+    "Bridge",
     "PC_D4_P_F",
     "PC_D4_P_M",
     "PC_D4_P_A",
@@ -95,7 +96,35 @@
     "CC_D2_A",
     "CC_D3_F",
     "CC_D3_M",
-    "CC_D3_A"
+    "CC_D3_A",
+    "HD_0E_M",
+    "HD_10L_M",
+    "HD_10L_F_1",
+    "HD_10L_F_2",
+    "HD_11S_M",
+    "HD_11S_F",
+    "HD_12S_M",
+    "HD_12S_F",
+    "HD_13B_M",
+    "HD_1C_M",
+    "HD_1C_F",
+    "HD_2C_M",
+    "HD_2C_F",
+    "HD_3C_M",
+    "HD_3C_F",
+    "HD_4M_M_1",
+    "HD_4M_M_2",
+    "HD_4M_F_1",
+    "HD_4M_F_2",
+    "HD_5L_M",
+    "HD_5L_F_1",
+    "HD_5L_F_2",
+    "HD_6C_M",
+    "HD_6C_F",
+    "HD_7C_M",
+    "HD_7C_F",
+    "HD_9C_M",
+    "HD_9C_F"
   ],
   "decks": [
     "0_Engine",
@@ -104,6 +133,7 @@
     "11_Cabins",
     "11_Spa",
     "12_Sports",
+    "13_Bridge",
     "1_Crew",
     "2_Crew",
     "3_Crew",
@@ -131,6 +161,11 @@
     "elevation": "graphics/elevation.jpg"
   },
   "background_plate": "architectural_plan",
+  "reference_photo": {
+    "license": "Original work (AI-generated notional schematic)",
+    "credit": "Crusher-to-the-Bridge — notional spirit-cruise architectural plates (plan + elevation)",
+    "local_file": "reference_photo.jpg"
+  },
   "architectural_graphics": {
     "schema_version": "1.0",
     "description": "Architectural underlays for LCARS tactical map.",

@@ -1,10 +1,6 @@
 {
   "platform": "mega_cruise_5000",
   "description": "Mega cruise ship (~5,000 passengers, ~2,000 crew), Oasis-class scale. Cabin-corridor resolution: 81 passenger corridor sections (~67 pax each) and 12 crew corridor sections (~170 crew each) replace legacy well-mixed berthing blocks. See docs/PLATFORM_CABIN_REVISION.md; legacy topology archived as messy_cruise_500.",
-  "nominal_complement": {
-    "passengers": 5000,
-    "crew": 2000
-  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 362,
@@ -12,6 +8,13 @@
   },
   "confinement_isolation_factor": 0.05,
   "corridor_direct_contact_factor": 0.15,
+  "graywater_zones": [
+    "Engine_Room_Aft"
+  ],
+  "nominal_complement": {
+    "passengers": 5000,
+    "crew": 2000
+  },
   "zones": [
     {
       "id": "Bridge",
@@ -529,8 +532,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_P_M",
@@ -544,8 +547,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_P_A",
@@ -559,8 +562,8 @@
         "y": 50.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_S_F",
@@ -574,8 +577,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_S_M",
@@ -589,8 +592,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_S_A",
@@ -604,8 +607,8 @@
         "y": 53.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 6 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D6_C_F",
@@ -619,8 +622,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D6_C_M",
@@ -634,8 +637,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D6_C_A",
@@ -649,8 +652,8 @@
         "y": 51.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 6 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 6 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D7_P_F",
@@ -664,8 +667,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_P_M",
@@ -679,8 +682,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_P_A",
@@ -694,8 +697,8 @@
         "y": 45.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_S_F",
@@ -709,8 +712,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_S_M",
@@ -724,8 +727,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_S_A",
@@ -739,8 +742,8 @@
         "y": 48.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 7 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D7_C_F",
@@ -754,8 +757,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D7_C_M",
@@ -769,8 +772,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D7_C_A",
@@ -784,8 +787,8 @@
         "y": 47.0
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 7 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 7 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D8_P_F",
@@ -799,8 +802,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_P_M",
@@ -814,8 +817,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_P_A",
@@ -829,8 +832,8 @@
         "y": 41.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_S_F",
@@ -844,8 +847,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_S_M",
@@ -859,8 +862,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_S_A",
@@ -874,8 +877,8 @@
         "y": 44.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D8_C_F",
@@ -889,8 +892,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Central Fwd. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D8_C_M",
@@ -904,8 +907,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Central Mid. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D8_C_A",
@@ -919,8 +922,8 @@
         "y": 42.5
       },
       "cabin_ventilation_type": "atrium_view",
-      "description": "Passenger cabin corridor, Deck 8 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 8 Central Aft. ~10 cabins, ~67 pax, ventilation=atrium_view."
     },
     {
       "id": "PC_D9_P_F",
@@ -934,8 +937,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_P_M",
@@ -949,8 +952,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_P_A",
@@ -964,8 +967,8 @@
         "y": 36.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_S_F",
@@ -979,8 +982,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_S_M",
@@ -994,8 +997,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_S_A",
@@ -1009,8 +1012,8 @@
         "y": 39.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D9_C_F",
@@ -1024,8 +1027,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D9_C_M",
@@ -1039,8 +1042,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D9_C_A",
@@ -1054,8 +1057,8 @@
         "y": 38.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 9 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 9 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D10_P_F",
@@ -1069,8 +1072,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_P_M",
@@ -1084,8 +1087,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_P_A",
@@ -1099,8 +1102,8 @@
         "y": 32.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_S_F",
@@ -1114,8 +1117,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_S_M",
@@ -1129,8 +1132,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_S_A",
@@ -1144,8 +1147,8 @@
         "y": 35.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D10_C_F",
@@ -1159,8 +1162,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D10_C_M",
@@ -1174,8 +1177,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D10_C_A",
@@ -1189,8 +1192,8 @@
         "y": 33.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 10 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 10 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D11_P_F",
@@ -1204,8 +1207,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_P_M",
@@ -1219,8 +1222,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_P_A",
@@ -1234,8 +1237,8 @@
         "y": 27.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_S_F",
@@ -1249,8 +1252,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_S_M",
@@ -1264,8 +1267,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_S_A",
@@ -1279,8 +1282,8 @@
         "y": 30.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D11_C_F",
@@ -1294,8 +1297,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D11_C_M",
@@ -1309,8 +1312,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D11_C_A",
@@ -1324,8 +1327,8 @@
         "y": 29.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 11 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 11 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D12_P_F",
@@ -1339,8 +1342,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_P_M",
@@ -1354,8 +1357,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_P_A",
@@ -1369,8 +1372,8 @@
         "y": 23.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_S_F",
@@ -1384,8 +1387,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_S_M",
@@ -1399,8 +1402,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_S_A",
@@ -1414,8 +1417,8 @@
         "y": 26.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D12_C_F",
@@ -1429,8 +1432,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D12_C_M",
@@ -1444,8 +1447,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D12_C_A",
@@ -1459,8 +1462,8 @@
         "y": 24.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 12 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 12 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D13_P_F",
@@ -1474,8 +1477,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_P_M",
@@ -1489,8 +1492,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_P_A",
@@ -1504,8 +1507,8 @@
         "y": 18.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_S_F",
@@ -1519,8 +1522,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_S_M",
@@ -1534,8 +1537,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_S_A",
@@ -1549,8 +1552,8 @@
         "y": 21.5
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 13 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D13_C_F",
@@ -1564,8 +1567,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D13_C_M",
@@ -1579,8 +1582,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D13_C_A",
@@ -1594,8 +1597,8 @@
         "y": 20.0
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 13 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 13 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D14_P_F",
@@ -1609,8 +1612,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Port Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_P_M",
@@ -1624,8 +1627,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Port Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_P_A",
@@ -1639,8 +1642,8 @@
         "y": 14.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Port Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_S_F",
@@ -1654,8 +1657,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Stbd Fwd. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_S_M",
@@ -1669,8 +1672,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Stbd Mid. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_S_A",
@@ -1684,8 +1687,8 @@
         "y": 17.0
       },
       "cabin_ventilation_type": "balcony_partial",
-      "description": "Passenger cabin corridor, Deck 14 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Stbd Aft. ~10 cabins, ~67 pax, ventilation=balcony_partial."
     },
     {
       "id": "PC_D14_C_F",
@@ -1699,8 +1702,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Central Fwd. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D14_C_M",
@@ -1714,8 +1717,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Central Mid. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "PC_D14_C_A",
@@ -1729,8 +1732,8 @@
         "y": 15.5
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Passenger cabin corridor, Deck 14 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Passenger cabin corridor, Deck 14 Central Aft. ~10 cabins, ~67 pax, ventilation=interior_hvac."
     },
     {
       "id": "CC_D1_F",
@@ -1744,8 +1747,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Fwd. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 1 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D1_M",
@@ -1759,8 +1762,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Mid. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 1 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D1_A",
@@ -1774,8 +1777,8 @@
         "y": 88
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 1 Aft. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 1 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D2_F",
@@ -1789,8 +1792,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Fwd. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 2 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D2_M",
@@ -1804,8 +1807,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Mid. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 2 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D2_A",
@@ -1819,8 +1822,8 @@
         "y": 82
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 2 Aft. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 2 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D3_F",
@@ -1834,8 +1837,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Fwd. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 3 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D3_M",
@@ -1849,8 +1852,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Mid. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 3 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D3_A",
@@ -1864,8 +1867,8 @@
         "y": 76
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 3 Aft. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 3 Aft. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D4_F",
@@ -1879,8 +1882,8 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Fwd. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 4 Fwd. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D4_M",
@@ -1894,8 +1897,8 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Mid. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 4 Mid. ~35 shared cabins, higher density, interior HVAC."
     },
     {
       "id": "CC_D4_A",
@@ -1909,11 +1912,1243 @@
         "y": 70
       },
       "cabin_ventilation_type": "interior_hvac",
-      "description": "Crew cabin corridor, Deck 4 Aft. ~35 shared cabins, higher density, interior HVAC.",
-      "cabin_size": 2
+      "cabin_size": 2,
+      "description": "Crew cabin corridor, Deck 4 Aft. ~35 shared cabins, higher density, interior HVAC."
+    },
+    {
+      "id": "HD_0E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room_Aft"
+      ],
+      "display": {
+        "x": 65.0,
+        "y": 92.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room_Aft."
+    },
+    {
+      "id": "HD_0T_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Technical",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "WasteTreat"
+      ],
+      "display": {
+        "x": 250.0,
+        "y": 92.0
+      },
+      "description": "Public head (male, 1 water closet) serving WasteTreat."
+    },
+    {
+      "id": "HD_0T_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Technical",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "WasteTreat"
+      ],
+      "display": {
+        "x": 250.0,
+        "y": 92.0
+      },
+      "description": "Public head (female, 1 water closet) serving WasteTreat."
+    },
+    {
+      "id": "HD_14S_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Spa",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "SpaFitness"
+      ],
+      "display": {
+        "x": 310.0,
+        "y": 21.0
+      },
+      "description": "Public head (male, 2 water closets) serving SpaFitness."
+    },
+    {
+      "id": "HD_14S_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Spa",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "SpaFitness"
+      ],
+      "display": {
+        "x": 310.0,
+        "y": 21.0
+      },
+      "description": "Public head (female, 4 water closets) serving SpaFitness."
+    },
+    {
+      "id": "HD_14Y_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Youth",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Kids_Club",
+        "Teen_Zone"
+      ],
+      "display": {
+        "x": 222.5,
+        "y": 21.0
+      },
+      "description": "Public head (male, 8 water closets) serving Kids_Club, Teen_Zone."
+    },
+    {
+      "id": "HD_14Y_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "14_Youth",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Kids_Club",
+        "Teen_Zone"
+      ],
+      "display": {
+        "x": 222.5,
+        "y": 21.0
+      },
+      "description": "Public head (female, 8 water closets) serving Kids_Club, Teen_Zone."
+    },
+    {
+      "id": "HD_15P_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (male, 9 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15P_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (male, 9 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15P_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15P_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15P_F_3",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15P_F_4",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Pool",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Pool_Deck",
+        "Sports_Court",
+        "Waterpark",
+        "Pool_Bar_Grill"
+      ],
+      "display": {
+        "x": 146.25,
+        "y": 14.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Pool_Deck, Sports_Court, Waterpark, Pool_Bar_Grill."
+    },
+    {
+      "id": "HD_15S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "BuffetGal_U"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 12.0
+      },
+      "description": "Public head (male, 3 water closets) serving BuffetGal_U."
+    },
+    {
+      "id": "HD_15S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "15_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "BuffetGal_U"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 12.0
+      },
+      "description": "Public head (female, 2 water closets) serving BuffetGal_U."
+    },
+    {
+      "id": "HD_16B_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Bridge",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 340.0,
+        "y": 1.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
+    },
+    {
+      "id": "HD_16BU_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Buffet",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Windjammer"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 6 water closets) serving Windjammer."
+    },
+    {
+      "id": "HD_16BU_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Buffet",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Windjammer"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 6 water closets) serving Windjammer."
+    },
+    {
+      "id": "HD_16BU_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Buffet",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Windjammer"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 4.0
+      },
+      "description": "Public head (female, 6 water closets) serving Windjammer."
+    },
+    {
+      "id": "HD_16BU_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Buffet",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Windjammer"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 4.0
+      },
+      "description": "Public head (female, 6 water closets) serving Windjammer."
+    },
+    {
+      "id": "HD_16S_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Solarium",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Solarium"
+      ],
+      "display": {
+        "x": 300.0,
+        "y": 8.0
+      },
+      "description": "Public head (male, 4 water closets) serving Solarium."
+    },
+    {
+      "id": "HD_16S_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "16_Solarium",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "Solarium"
+      ],
+      "display": {
+        "x": 300.0,
+        "y": 8.0
+      },
+      "description": "Public head (female, 7 water closets) serving Solarium."
+    },
+    {
+      "id": "HD_1E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "EngControl"
+      ],
+      "display": {
+        "x": 105.0,
+        "y": 86.0
+      },
+      "description": "Public head (male, 1 water closet) serving EngControl."
+    },
+    {
+      "id": "HD_1S_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry_Main"
+      ],
+      "display": {
+        "x": 190.0,
+        "y": 86.0
+      },
+      "description": "Public head (male, 2 water closets) serving Laundry_Main."
+    },
+    {
+      "id": "HD_1S_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry_Main"
+      ],
+      "display": {
+        "x": 190.0,
+        "y": 86.0
+      },
+      "description": "Public head (female, 2 water closets) serving Laundry_Main."
+    },
+    {
+      "id": "HD_1ST_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Stores",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Central_Stores"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 86.0
+      },
+      "description": "Public head (male, 1 water closet) serving Central_Stores."
+    },
+    {
+      "id": "HD_1ST_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Stores",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Central_Stores"
+      ],
+      "display": {
+        "x": 120.0,
+        "y": 86.0
+      },
+      "description": "Public head (female, 1 water closet) serving Central_Stores."
+    },
+    {
+      "id": "HD_2C_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "Crew_Mess_Main"
+      ],
+      "display": {
+        "x": 130.0,
+        "y": 78.0
+      },
+      "description": "Public head (male, 5 water closets) serving Crew_Mess_Main."
+    },
+    {
+      "id": "HD_2C_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "Crew_Mess_Main"
+      ],
+      "display": {
+        "x": 130.0,
+        "y": 78.0
+      },
+      "description": "Public head (female, 5 water closets) serving Crew_Mess_Main."
+    },
+    {
+      "id": "HD_2M_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Medical",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Medical_Center"
+      ],
+      "display": {
+        "x": 310.0,
+        "y": 78.0
+      },
+      "description": "Public head (male, 2 water closets) serving Medical_Center."
+    },
+    {
+      "id": "HD_2M_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Medical",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Medical_Center"
+      ],
+      "display": {
+        "x": 310.0,
+        "y": 78.0
+      },
+      "description": "Public head (female, 2 water closets) serving Medical_Center."
+    },
+    {
+      "id": "HD_3C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CrewMess_Fwd"
+      ],
+      "display": {
+        "x": 260.0,
+        "y": 70.0
+      },
+      "description": "Public head (male, 3 water closets) serving CrewMess_Fwd."
+    },
+    {
+      "id": "HD_3C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CrewMess_Fwd"
+      ],
+      "display": {
+        "x": 260.0,
+        "y": 70.0
+      },
+      "description": "Public head (female, 3 water closets) serving CrewMess_Fwd."
+    },
+    {
+      "id": "HD_3D_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Dining",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "MainDining_L"
+      ],
+      "display": {
+        "x": 85.0,
+        "y": 66.0
+      },
+      "description": "Public head (male, 10 water closets) serving MainDining_L."
+    },
+    {
+      "id": "HD_3D_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Dining",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "MainDining_L"
+      ],
+      "display": {
+        "x": 85.0,
+        "y": 66.0
+      },
+      "description": "Public head (female, 10 water closets) serving MainDining_L."
+    },
+    {
+      "id": "HD_3E_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Entertainment",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Ice_Rink_Studio"
+      ],
+      "display": {
+        "x": 200.0,
+        "y": 68.0
+      },
+      "description": "Public head (male, 6 water closets) serving Ice_Rink_Studio."
+    },
+    {
+      "id": "HD_3E_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Entertainment",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Ice_Rink_Studio"
+      ],
+      "display": {
+        "x": 200.0,
+        "y": 68.0
+      },
+      "description": "Public head (female, 6 water closets) serving Ice_Rink_Studio."
+    },
+    {
+      "id": "HD_3E_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Entertainment",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Ice_Rink_Studio"
+      ],
+      "display": {
+        "x": 200.0,
+        "y": 68.0
+      },
+      "description": "Public head (female, 6 water closets) serving Ice_Rink_Studio."
+    },
+    {
+      "id": "HD_3S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Main_Galley_Aft"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 74.0
+      },
+      "description": "Public head (male, 4 water closets) serving Main_Galley_Aft."
+    },
+    {
+      "id": "HD_3S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Main_Galley_Aft"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 74.0
+      },
+      "description": "Public head (female, 3 water closets) serving Main_Galley_Aft."
+    },
+    {
+      "id": "HD_4D_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Dining",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "MainDining_U"
+      ],
+      "display": {
+        "x": 85.0,
+        "y": 58.0
+      },
+      "description": "Public head (male, 8 water closets) serving MainDining_U."
+    },
+    {
+      "id": "HD_4D_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Dining",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "MainDining_U"
+      ],
+      "display": {
+        "x": 85.0,
+        "y": 58.0
+      },
+      "description": "Public head (female, 8 water closets) serving MainDining_U."
+    },
+    {
+      "id": "HD_4E_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Entertainment",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Casino",
+        "ComedyClub"
+      ],
+      "display": {
+        "x": 197.5,
+        "y": 59.0
+      },
+      "description": "Public head (male, 6 water closets) serving Casino, ComedyClub."
+    },
+    {
+      "id": "HD_4E_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Entertainment",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "Casino",
+        "ComedyClub"
+      ],
+      "display": {
+        "x": 197.5,
+        "y": 59.0
+      },
+      "description": "Public head (female, 9 water closets) serving Casino, ComedyClub."
+    },
+    {
+      "id": "HD_4T_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Theater",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Theater"
+      ],
+      "display": {
+        "x": 315.0,
+        "y": 56.0
+      },
+      "description": "Public head (male, 8 water closets) serving Main_Theater."
+    },
+    {
+      "id": "HD_4T_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Theater",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Theater"
+      ],
+      "display": {
+        "x": 315.0,
+        "y": 56.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Theater."
+    },
+    {
+      "id": "HD_4T_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Theater",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Main_Theater"
+      ],
+      "display": {
+        "x": 315.0,
+        "y": 56.0
+      },
+      "description": "Public head (female, 8 water closets) serving Main_Theater."
+    },
+    {
+      "id": "HD_5P_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Royal_Promenade",
+        "ShopRetail",
+        "CafeBakery"
+      ],
+      "display": {
+        "x": 226.66666666666666,
+        "y": 51.0
+      },
+      "description": "Public head (male, 8 water closets) serving Royal_Promenade, ShopRetail, CafeBakery."
+    },
+    {
+      "id": "HD_5P_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Royal_Promenade",
+        "ShopRetail",
+        "CafeBakery"
+      ],
+      "display": {
+        "x": 226.66666666666666,
+        "y": 51.0
+      },
+      "description": "Public head (male, 8 water closets) serving Royal_Promenade, ShopRetail, CafeBakery."
+    },
+    {
+      "id": "HD_5P_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "Royal_Promenade",
+        "ShopRetail",
+        "CafeBakery"
+      ],
+      "display": {
+        "x": 226.66666666666666,
+        "y": 51.0
+      },
+      "description": "Public head (female, 10 water closets) serving Royal_Promenade, ShopRetail, CafeBakery."
+    },
+    {
+      "id": "HD_5P_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "Royal_Promenade",
+        "ShopRetail",
+        "CafeBakery"
+      ],
+      "display": {
+        "x": 226.66666666666666,
+        "y": 51.0
+      },
+      "description": "Public head (female, 10 water closets) serving Royal_Promenade, ShopRetail, CafeBakery."
+    },
+    {
+      "id": "HD_5P_F_3",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Promenade",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "Royal_Promenade",
+        "ShopRetail",
+        "CafeBakery"
+      ],
+      "display": {
+        "x": 226.66666666666666,
+        "y": 51.0
+      },
+      "description": "Public head (female, 10 water closets) serving Royal_Promenade, ShopRetail, CafeBakery."
+    },
+    {
+      "id": "HD_6A_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Aqua",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Aqua_Theater"
+      ],
+      "display": {
+        "x": 45.0,
+        "y": 46.0
+      },
+      "description": "Public head (male, 8 water closets) serving Aqua_Theater."
+    },
+    {
+      "id": "HD_6A_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Aqua",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Aqua_Theater"
+      ],
+      "display": {
+        "x": 45.0,
+        "y": 46.0
+      },
+      "description": "Public head (female, 8 water closets) serving Aqua_Theater."
+    },
+    {
+      "id": "HD_6A_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Aqua",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Aqua_Theater"
+      ],
+      "display": {
+        "x": 45.0,
+        "y": 46.0
+      },
+      "description": "Public head (female, 8 water closets) serving Aqua_Theater."
+    },
+    {
+      "id": "HD_6P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "LibraryCard",
+        "SpecRest_B"
+      ],
+      "display": {
+        "x": 242.5,
+        "y": 46.0
+      },
+      "description": "Public head (male, 4 water closets) serving LibraryCard, SpecRest_B."
+    },
+    {
+      "id": "HD_6P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Public",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "LibraryCard",
+        "SpecRest_B"
+      ],
+      "display": {
+        "x": 242.5,
+        "y": 46.0
+      },
+      "description": "Public head (female, 4 water closets) serving LibraryCard, SpecRest_B."
+    },
+    {
+      "id": "HD_6S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "SpecGalley"
+      ],
+      "display": {
+        "x": 175.0,
+        "y": 46.0
+      },
+      "description": "Public head (male, 2 water closets) serving SpecGalley."
+    },
+    {
+      "id": "HD_6S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Service",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "SpecGalley"
+      ],
+      "display": {
+        "x": 175.0,
+        "y": 46.0
+      },
+      "description": "Public head (female, 2 water closets) serving SpecGalley."
+    },
+    {
+      "id": "HD_8C_M_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "8_CentralPark",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "CentralPark",
+        "SpecRest_A"
+      ],
+      "display": {
+        "x": 160.0,
+        "y": 38.0
+      },
+      "description": "Public head (male, 6 water closets) serving CentralPark, SpecRest_A."
+    },
+    {
+      "id": "HD_8C_M_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "8_CentralPark",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "CentralPark",
+        "SpecRest_A"
+      ],
+      "display": {
+        "x": 160.0,
+        "y": 38.0
+      },
+      "description": "Public head (male, 6 water closets) serving CentralPark, SpecRest_A."
+    },
+    {
+      "id": "HD_8C_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "8_CentralPark",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "CentralPark",
+        "SpecRest_A"
+      ],
+      "display": {
+        "x": 160.0,
+        "y": 38.0
+      },
+      "description": "Public head (female, 9 water closets) serving CentralPark, SpecRest_A."
+    },
+    {
+      "id": "HD_8C_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "8_CentralPark",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "CentralPark",
+        "SpecRest_A"
+      ],
+      "display": {
+        "x": 160.0,
+        "y": 38.0
+      },
+      "description": "Public head (female, 9 water closets) serving CentralPark, SpecRest_A."
     }
-  ],
-  "graywater_zones": [
-    "Engine_Room_Aft"
   ]
 }

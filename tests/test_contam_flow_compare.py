@@ -36,11 +36,13 @@ def _load_destroyer() -> tuple[dict, dict, list]:
 def test_native_destroyer_has_star_hvac_links() -> None:
     spatial, airflow, _ = _load_destroyer()
     native = native_links_report(spatial, airflow)
-    # 12 HVAC star (6 rooms × ret+sup) + 11 cross-zone + 12 adjacency = 35
-    assert native["n_paths"] == 35
+    # 12 HVAC star (6 rooms × ret+sup) + 18 cross-zone + 12 adjacency = 42;
+    # cross_zone was 11 before the three head blocks (shared_sanitary_zones),
+    # whose Sanitary_Makeup links expand to 7 room-level paths.
+    assert native["n_paths"] == 42
     assert native["by_path_type"]["hvac_return"] == 6
     assert native["by_path_type"]["hvac_supply"] == 6
-    assert native["by_path_type"]["cross_zone"] == 11
+    assert native["by_path_type"]["cross_zone"] == 18
     # Bridge now has single-room AHS return as well as adjacency/cross-zone
     assert native["zone_degree"]["Bridge"]["out_edges"] >= 4
     assert native["zone_degree"]["Bridge"]["out_m3h"] > 0
@@ -97,7 +99,8 @@ def test_build_report_offline_without_sim() -> None:
         path_flows_m3h=None,
         inject_zones=["Bridge"],
     )
-    assert report["native"]["n_paths"] == 35
+    # 42 since the three head blocks landed (shared_sanitary_zones)
+    assert report["native"]["n_paths"] == 42
     assert report["contamx"]["sim_flows_loaded"] is False
     assert report["connectivity_gap"][0]["zone"] == "Bridge"
     assert any("SIM flows not loaded" in h for h in report["hypotheses"])
@@ -122,15 +125,30 @@ def test_contamx_report_kept_links_use_flow_m3h() -> None:
     spatial, _airflow, path_map = _load_destroyer()
     known = {z["id"] for z in spatial["zones"]}
     flows = {int(e["path_nr"]): 0.0 for e in path_map}
-    # Non-zero real Bridge→MedBay passageway (path 7) + reverse-signed fan.
-    flows[7] = 15.0
-    flows[22] = -10.0  # Bridge→Engine_Room in path_map; negative → reverse
+    # Non-zero real Bridge→MedBay passageway + reverse-signed fan. The
+    # path_nr values renumber whenever the zone list changes (heads under
+    # shared_sanitary_zones moved them 7->10 and 22->25), so resolve them
+    # from the endpoint zones rather than pinning the index.
+    passageway = next(
+        e for e in path_map
+        if e["from_zone"] == "Bridge" and e["to_zone"] == "MedBay"
+        and e["kind"] == "passageway"
+    )
+    shaft = next(
+        e for e in path_map
+        if e["from_zone"] == "Bridge" and e["to_zone"] == "Engine_Room"
+    )
+    flows[int(passageway["path_nr"])] = 15.0
+    flows[int(shaft["path_nr"])] = -10.0  # negative → reverse
     cx = contamx_flow_report(path_map, flows, known)
     assert cx["n_kept_real_paths"] == 2
     assert all("flow_m3h" in link for link in cx["kept_links"])
     assert cx["zone_degree"]["Bridge"]["out_edges"] >= 1
-    # Negative Flow0 on path 22: Engine_Room → Bridge
-    rev = next(l for l in cx["kept_links"] if l["path_nr"] == 22)
+    # Negative Flow0 on the shaft: Engine_Room → Bridge
+    rev = next(
+        l for l in cx["kept_links"]
+        if l["path_nr"] == int(shaft["path_nr"])
+    )
     assert rev["from_zone"] == "Engine_Room"
     assert rev["to_zone"] == "Bridge"
     assert rev["flow_m3h"] == pytest.approx(10.0)

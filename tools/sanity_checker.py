@@ -142,6 +142,15 @@ class ZoneDisplay(BaseModel):
     y: float
 
 
+# Zone type vocabulary, kept identical to
+# schemas/spatial_layout.schema.json $defs.Zone.type.enum so the checker and
+# the schema cannot drift.
+ZONE_TYPES = frozenset({
+    "Free", "Dining", "Room", "Medical", "Engineering", "Cabin_Corridor",
+    "Sanitary",
+})
+
+
 class SpatialZone(BaseModel):
     id: str
     type: str
@@ -154,6 +163,16 @@ class SpatialZone(BaseModel):
     display: ZoneDisplay
     description: str | None = None
     base_ach: float | None = None
+    serves: list[str] | None = None
+
+    @field_validator("type")
+    @classmethod
+    def type_in_vocabulary(cls, v: str) -> str:
+        if v not in ZONE_TYPES:
+            raise ValueError(
+                f"zone type {v!r} not in the schema enum {sorted(ZONE_TYPES)}",
+            )
+        return v
 
     @field_validator("volume_m3")
     @classmethod
@@ -1282,6 +1301,16 @@ def _check_graph_integrity(
             "GRAPH_REF",
             "graywater_zones must list downstream wastewater collection zone(s)",
         )
+
+    for zone in layout.zones:
+        for served in zone.serves or []:
+            if served not in valid_zones:
+                report.error(
+                    _SPATIAL_LAYOUT_JSON,
+                    "GRAPH_REF",
+                    f"zone '{zone.id}' serves '{served}' not found in "
+                    f"spatial_layout zones",
+                )
 
     if airflow:
         # Check HVAC zone room references

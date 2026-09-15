@@ -100,9 +100,10 @@ def test_destroyer_hobbyist_export_section_counts() -> None:
     assert re.search(r"\bnone 0 0 0 0 -1 0\b", text)
     assert " T: " not in text
     assert re.search(r"\bT:", text) is None
-    # Destroyer with room×room cross-zone expansion: 44 Contam paths
-    # (6 envelope + 6 adjacency + 11 cross + 9 AHS system + 12 terminals)
-    assert len(path_map) == 44
+    # Destroyer with room×room cross-zone expansion: 69 Contam paths, up
+    # from 44 when the three head blocks (shared_sanitary_zones) added
+    # their exhaust AHS systems and makeup links.
+    assert len(path_map) == 69
 
 
 def test_destroyer_hobbyist_typed_orifices_and_temps() -> None:

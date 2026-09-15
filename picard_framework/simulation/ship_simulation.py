@@ -305,12 +305,16 @@ class ShipSimulation:
         }
         zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
         zone_ventilation: dict[str, str] = {}
+        zone_floor_areas: dict[str, float] = {}
         food_zone_multipliers: dict[str, float] = {}
         for z in platform_layout.get("zones", []):
             zid = z["id"]
             vent = z.get("cabin_ventilation_type")
             if vent:
                 zone_ventilation[zid] = vent
+            floor_area = z.get("floor_area_m2")
+            if floor_area is not None:
+                zone_floor_areas[zid] = float(floor_area)
             if z.get("type") == "Dining":
                 mult = z.get("food_contamination_multiplier")
                 if mult is None:
@@ -324,12 +328,29 @@ class ShipSimulation:
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
         )
+        # Served zone -> sex-keyed head block, from each head's declared
+        # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
+        # block (e.g. the bridge head) serves as "any".
+        sanitary_zone_map: dict[str, dict[str, str]] = {}
+        for z in platform_layout.get("zones", []):
+            if z.get("type") != "Sanitary":
+                continue
+            sex = "any"
+            for seg in reversed(str(z["id"]).split("_")):
+                token = seg.rstrip("0123456789")
+                if token in ("M", "F"):
+                    sex = "male" if token == "M" else "female"
+                    break
+            for served in z.get("serves", []):
+                sanitary_zone_map.setdefault(served, {})[sex] = z["id"]
         self.tx_core = TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
             pathogen_profiles=self.pathogen_profiles,
             zone_types=zone_types,
             zone_ventilation=zone_ventilation,
+            zone_floor_areas=zone_floor_areas,
+            sanitary_zone_map=sanitary_zone_map,
             confinement_isolation_factor=float(
                 platform_layout.get(
                     "confinement_isolation_factor",
