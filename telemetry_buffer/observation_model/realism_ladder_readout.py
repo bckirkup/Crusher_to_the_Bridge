@@ -430,6 +430,8 @@ def _table_row(cell: dict[str, Any], routes: list[str]) -> str:
     ]
     imports = cell["imports"]
     return (
+        f"| {cell['arm']} "
+        f"| {cell['num_agents']} "
         f"| {cell['boarding_mechanism_rung']} "
         f"| {cell['platform_id']} "
         f"| {_fmt(cell['voyage_days'], 1)} "
@@ -456,13 +458,21 @@ def _table_row(cell: dict[str, Any], routes: list[str]) -> str:
     )
 
 
-def render_markdown(report: dict[str, Any]) -> str:
+DEFAULT_TITLE = (
+    "The introduction realism ladder: what each rung does to posting"
+)
+
+
+def render_markdown(
+    report: dict[str, Any],
+    title: str = DEFAULT_TITLE,
+) -> str:
     """One row per rung and screen point."""
     routes = _route_columns(report)
     route_headers = " ".join(f"| {route} dominant %" for route in routes)
     route_separators = " ".join("---|" for _ in routes)
     lines = [
-        "# The introduction realism ladder: what each rung does to posting",
+        f"# {title}",
         "",
         f"Posting rule: reported cases >= {report['posting_threshold']:.0%} of "
         "passengers or of crew. `secondary` infections are infections net of "
@@ -476,12 +486,13 @@ def render_markdown(report: dict[str, Any]) -> str:
         "dominant-attributed infections in the cell; all-zero routes are "
         "omitted.",
         "",
-        "| rung | platform | days | prev pax/crew | crew c/h/d | voyages "
+        "| arm | agents | rung | platform | days | prev pax/crew "
+        "| crew c/h/d | voyages "
         "| post/1,000 | crew-only | imports | sympt | cleared | eligible "
         "| declared | reportable | denied | mean secondary | zero "
         "| median pax AR " + route_headers + (" |" if routes else "|"),
         "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|"
-        "---|---|" + route_separators,
+        "---|---|---|---|" + route_separators,
     ]
     lines.extend(_table_row(cell, routes) for cell in report["cells"])
     lines.extend([
@@ -519,6 +530,8 @@ def main(argv: list[str] | None = None) -> int:
                         help="name=results_root, repeatable")
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--markdown", type=Path)
+    parser.add_argument("--title", default=DEFAULT_TITLE,
+                        help="markdown H1 for the campaign's readout")
     parser.add_argument("--vsp-era", default="pre", choices=("pre", "post"))
     args = parser.parse_args(argv)
 
@@ -530,7 +543,7 @@ def main(argv: list[str] | None = None) -> int:
         rows.extend(found)
     report = build_report(rows, args.vsp_era)
     _write(args.out, json.dumps(report, indent=1, sort_keys=True) + "\n")
-    markdown = render_markdown(report)
+    markdown = render_markdown(report, title=args.title)
     if args.markdown:
         _write(args.markdown, markdown)
     print(markdown)

@@ -182,7 +182,7 @@ class TestReadoutRouteAttribution:
         markdown = realism_ladder_readout.render_markdown(report)
 
         header = next(
-            line for line in markdown.splitlines() if line.startswith("| rung")
+            line for line in markdown.splitlines() if line.startswith("| arm")
         )
         assert "fomite dominant %" in header
         assert "unknown dominant %" in header
@@ -193,3 +193,35 @@ class TestReadoutRouteAttribution:
         )
         zero_markdown = realism_ladder_readout.render_markdown(zero_report)
         assert "dominant %" not in zero_markdown
+
+    def test_rows_are_identified_by_arm_complement_and_title(self) -> None:
+        """Two cells differing only in arm and num_agents render as two
+        distinguishable rows — the committed droplet readout's defect."""
+        rows = []
+        for arm, agents in (("deleted", 478), ("shipped", 1910)):
+            record = _summary_fixture(1, {"fomite": 2}, {"fomite": 2.0})
+            record["parameters"]["num_agents"] = agents
+            record["run_id"] = f"fixture_{arm}"
+            row = realism_ladder_readout._row(record, None)
+            row["arm"] = arm
+            rows.append(row)
+        report = realism_ladder_readout.build_report(rows, era="pre")
+        title = (
+            "The droplet deletion: matched profile_conditioned and "
+            "shipped_uniform arms"
+        )
+        markdown = realism_ladder_readout.render_markdown(report, title=title)
+
+        assert markdown.splitlines()[0] == f"# {title}"
+        header = next(
+            line for line in markdown.splitlines()
+            if line.startswith("| arm")
+        )
+        assert header.startswith("| arm | agents | rung |")
+        body_rows = [
+            line for line in markdown.splitlines()
+            if line.startswith("| deleted") or line.startswith("| shipped")
+        ]
+        assert len(body_rows) == 2
+        assert any(row.startswith("| deleted | 478") for row in body_rows)
+        assert any(row.startswith("| shipped | 1910") for row in body_rows)
