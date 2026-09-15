@@ -3,12 +3,13 @@
   "type": "container",
   "platformCapabilities": ["EC2"],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-first-look-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-first-look-v2",
     "command": [
       "deploy/aws/covid_hull_entrypoint.py",
       "--phase", "Ref::phase",
       "--stride", "Ref::stride",
-      "--s3-prefix", "Ref::s3_prefix"
+      "--s3-prefix", "Ref::s3_prefix",
+      "--design", "Ref::design"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
@@ -33,7 +34,8 @@
   "parameters": {
     "phase": "fit",
     "stride": "1",
-    "s3_prefix": "s3://<BUCKET>/campaign/covid_first_look_v1/"
+    "s3_prefix": "s3://<BUCKET>/campaign/covid_first_look_v2/",
+    "design": "picard_framework/runs/covid_first_look_v2_design.json"
   },
   "retryStrategy": {
     "attempts": 10,
