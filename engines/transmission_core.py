@@ -367,6 +367,26 @@ SANITARY_DWELL_FEMALE_MULTIPLIER = 1.22
 SANITARY_VOIDS_PER_DAY = 6.0
 SANITARY_VOIDS_PER_NIGHT = 0.5
 
+# Mean stool mass per defecation event, adults. Rose et al. 2015
+# (Crit Rev Environ Sci Technol), via the exposure arithmetic in
+# Boles et al. 2021. It multiplies the profile's own shedding curve
+# (copies/g), so a flush inherits the profile's titre, host multiplier
+# and strain multiplier rather than a second, incommensurable titre.
+# Grade B. Origin: Sec.
+FLUSH_STOOL_MASS_G = 107.0
+# Aerosolised fraction of the bowl load per flush. The two primary
+# measurements disagree by four to five decades because they measure
+# different fractions: Johnson et al. 2013 (flushometer, fluorescent-
+# microsphere surrogate, settled droplets excluded -> droplet nuclei
+# only) gives ~1e-9 to 8e-8; Boles et al. 2021 (murine norovirus
+# surrogate, RT-ddPCR, 0.15 m above the rim) back-calculates to ~1e-4
+# to 1e-3. Neither refutes the other, and cruise-ship vacuum systems
+# have no virus measurement at all, so no point value is adopted: the
+# frozen span is swept (docs/norovirus/flush_aerosolisation_v1.md).
+# Grade C. Origin: T2-3 (Johnson) / Sec (Boles back-calculation).
+FLUSH_AEROSOL_FRACTION_BOUNDS = (1e-9, 1e-3)
+DEFAULT_FLUSH_AEROSOL_FRACTION = 0.0  # off
+
 
 VOMITING_AXIS = "vomiting"
 DIARRHOEA_AXIS = "diarrhoea"
@@ -586,6 +606,7 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
     "droplet": 1.0,
     "hvac_airborne": 1.0,
     "emesis_aerosol": 1.0,
+    "flush_aerosol": 1.0,
     "fomite": 1.0,
     "food_contamination": 1.0,
     "environmental_source": 1.0,
@@ -599,6 +620,7 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "droplet": "droplet",
     "hvac_airborne": "hvac_airborne",
     "emesis_aerosol": "emesis_aerosol",
+    "flush_aerosol": "flush_aerosol",
     "fomite": "fomite",
     "food": "food_contamination",
     "environmental": "environmental_source",
@@ -728,6 +750,9 @@ class ContactTracingMatrix:
     # Pathway 3b: Emesis aerosol — inhalation dose in the zone an emesis
     # event happened in, in the epoch it happened
     emesis_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 3c: Flush aerosol — inhalation dose at the venue a
+    # toilet-flush event aerosolised into, in the epoch it happened
+    flush_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 5: Food contamination — ingestion dose from contaminated
     # food in Dining-type zones
     food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -746,6 +771,7 @@ class ContactTracingMatrix:
             "droplet_exposures": self.droplet_exposures,
             "hvac_downstream_exposures": self.hvac_downstream_exposures,
             "emesis_aerosol_exposures": self.emesis_aerosol_exposures,
+            "flush_aerosol_exposures": self.flush_aerosol_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
             "food_contamination_exposures": self.food_contamination_exposures,
             "environmental_exposures": self.environmental_exposures,
@@ -1007,6 +1033,35 @@ def _parse_sanitary_visit_mode(tx: dict[str, Any]) -> str:
     if mode not in SANITARY_VISIT_MODES:
         return DEFAULT_SANITARY_VISIT_MODE
     return mode
+
+
+def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
+    """Read the toilet-flush aerosol fraction (FLUSH-AERO-01).
+
+    Absent or ``0.0`` is off and takes the pre-change code path, so a run
+    is bit-identical to the pre-change tree. Any other value must lie in
+    ``FLUSH_AEROSOL_FRACTION_BOUNDS`` -- a refusal band spanning both
+    primary measurements end to end, not a prior.
+    """
+    raw = tx.get("flush_aerosol_fraction", DEFAULT_FLUSH_AEROSOL_FRACTION)
+    frac = float(raw)
+    low, high = FLUSH_AEROSOL_FRACTION_BOUNDS
+    if (
+        not math.isfinite(frac)
+        or frac < 0.0
+        or 0.0 < frac < low
+        or frac > high
+    ):
+        raise ValueError(
+            "transmission.flush_aerosol_fraction must be 0 (off) or finite "
+            f"in [{low}, {high}], got {raw!r}",
+        )
+    return frac
+
+
+def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
+    """Whether a flush at a host's own fittings emits (corner sweep)."""
+    return bool(tx.get("flush_cabin_emission", True))
 
 
 def _parse_dining_party_share(tx: dict[str, Any]) -> float:
@@ -1503,6 +1558,16 @@ class TransmissionCore:
         self._sanitary_epoch = -1
         self._sanitary_visits: dict[int, list[str]] = {}
         self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
+        self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
+        self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
+        # Two-channel emission, same structure as the emesis route:
+        # ``pending`` drains into the zone airborne reservoir once at the
+        # epoch boundary; ``emitted`` carries this epoch's in-room dose
+        # and is popped whole by ``_pathway_flush_aerosol``.
+        self.flush_aerosol_pending_by_pathogen: dict[str, dict[str, float]] = {}
+        self._flush_aerosol_emitted_by_pathogen: dict[
+            str, dict[str, list[tuple[KorkinAgent, float]]]
+        ] = {}
         self.sanitary_telemetry: dict[str, float] = {
             "visits": 0,
             "person_seconds": 0.0,
@@ -1514,6 +1579,15 @@ class TransmissionCore:
             # agents, so a repeat visitor counts once per pickup.
             "dose_delivered": 0.0,
             "recipients": 0,
+            # Flush-emission witness, bookkeeping only: emission events,
+            # aerosolised copies emitted, susceptible pickup *events*
+            # dosed (events, not distinct agents), and the credited dose
+            # sum. All zero under the default-off fraction, so an all-zero
+            # witness distinguishes "flush off" from "witness missing".
+            "flush_events": 0,
+            "flush_aerosol_emitted": 0.0,
+            "flush_recipients": 0,
+            "flush_dose_delivered": 0.0,
         }
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
@@ -3326,6 +3400,14 @@ class TransmissionCore:
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
+            # Same argument shape as the emesis pathway: the flush route's
+            # emitted accumulator was filled by _replenish_hand inside
+            # _pathway_fomite and is popped here, once.
+            self._pathway_flush_aerosol(
+                zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id,
+                ledger=ledger,
+            )
 
         fc = profile.get("food_contamination", {})
         if fc.get("enabled", False):
@@ -4466,20 +4548,54 @@ class TransmissionCore:
         decayed = current * survival
         if self._stool_event_occurs(events_per_day):
             decayed = max(decayed, target)
-            # The event's location resolves through the same structural rule
-            # as every other sanitary visit (home -> own fittings, otherwise
-            # the serving head); the hand effect above is unchanged. Under
-            # visit mode that venue joins this epoch's exposure records.
-            if (
-                self.sanitary_visit_mode != "none"
-                and zone_name is not None
-            ):
-                venue = self._sanitary_venue(zone_name, agent)
-                if venue is not None:
-                    self._sanitary_stool_venues.setdefault(
-                        pathogen_id, {},
-                    )[agent.agent_id] = venue
+            self._route_stool_event_venue(
+                agent, pathogen_id, profile, zone_name,
+            )
         agent.hand_load_by_pathogen[pathogen_id] = decayed
+
+    def _route_stool_event_venue(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+        zone_name: str | None,
+    ) -> None:
+        """Route one defecation event's venue to its two consumers.
+
+        The event's location resolves through the same structural rule as
+        every other sanitary visit (home -> own fittings, otherwise the
+        serving head). The venue is resolved at every event regardless of
+        which consumer is on -- ``_sanitary_venue`` is deterministic and
+        consumes no RNG -- and the consumers gate independently: visit
+        mode gates the fomite reroute, the flush route gates on its own
+        fraction.
+        """
+        venue = (
+            self._sanitary_venue(zone_name, agent)
+            if zone_name is not None
+            else None
+        )
+        if self.sanitary_visit_mode != "none" and venue is not None:
+            self._sanitary_stool_venues.setdefault(
+                pathogen_id, {},
+            )[agent.agent_id] = venue
+        if self.flush_aerosol_fraction <= 0.0:
+            return
+        # ``zone_name`` here is the already-compartmented cabin key, which
+        # ``_sanitary_venue`` cannot match to a corridor-named ``home_zone``;
+        # the compartment IS the own-fittings venue that home resolves to.
+        flush_venue = venue
+        if (
+            flush_venue is None
+            and zone_name is not None
+            and self._is_cabin_compartment(zone_name)
+        ):
+            flush_venue = zone_name
+        if flush_venue is not None and (
+            self.zone_types.get(flush_venue) == "Sanitary"
+            or self.flush_cabin_emission
+        ):
+            self._emit_flush(agent, pathogen_id, profile, flush_venue)
 
     def _stationary_hand_load(
         self,
@@ -4746,6 +4862,70 @@ class TransmissionCore:
         """
         return self.emesis_aerosol_pending_by_pathogen.pop(pathogen_id, {})
 
+    def _emit_flush(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+        venue: str,
+    ) -> float:
+        """Aerosolised copies one defecation event's flush puts into a venue.
+
+        The bowl deposit is the stool itself -- ``FLUSH_STOOL_MASS_G`` at
+        the host's current shedding-curve titre -- NOT the continuous
+        environmental release, so the ``environmental_release_log10_per_day``
+        offset ``get_pathogen_shedding`` applies is deliberately absent
+        (the two are different physical masses by six orders of magnitude).
+        Host and strain multipliers apply as in the shedding path.
+
+        One flush is emitted per event-epoch even when more than one event
+        fell in it (``_stool_event_occurs`` is a >=1 draw): at 5.63
+        events/day and 1-h epochs the expected count is 0.23 and P(>=2) is
+        ~3%, so this is an undercount of multi-event epochs, recorded here
+        rather than claimed to model them. Consumes no RNG.
+
+        Confinement is not gated, matching ``_emit_emesis``: the emesis
+        path emits regardless of confinement (confinement attenuates only
+        continuous shedding, via ``confinement_emission_factor``), so a
+        flush in a confined cabin emits the same way.
+        """
+        titre_log10 = agent.get_pathogen_stool_titre_log10(
+            pathogen_id, profile or {},
+        )
+        if titre_log10 is None:
+            return 0.0
+        inf = agent.infections.get(pathogen_id) or {}
+        aerosol_load = (
+            math.pow(10.0, titre_log10)
+            * float(inf.get("shedding_multiplier", 1.0))
+            * float(inf.get("strain_shedding_multiplier", 1.0))
+            * FLUSH_STOOL_MASS_G
+            * self.flush_aerosol_fraction
+        )
+        if aerosol_load <= 0.0:
+            return 0.0
+        pending = self.flush_aerosol_pending_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        pending[venue] = pending.get(venue, 0.0) + aerosol_load
+        emitted = self._flush_aerosol_emitted_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        emitted.setdefault(venue, []).append((agent, aerosol_load))
+        self.sanitary_telemetry["flush_events"] += 1
+        self.sanitary_telemetry["flush_aerosol_emitted"] += aerosol_load
+        return aerosol_load
+
+    def drain_flush_aerosol(self, pathogen_id: str) -> dict[str, float]:
+        """Per-zone airborne mass from this epoch's flush events, once.
+
+        Same drain-once contract as ``drain_emesis_aerosol``. Sanitary
+        HVAC is exhaust-only, so a head venue normally has nothing
+        downstream to transport to; the drain exists for parity and for
+        cabin-corridor venues that share a branch with cabins.
+        """
+        return self.flush_aerosol_pending_by_pathogen.pop(pathogen_id, {})
+
     def _pathway_emesis_aerosol(
         self,
         zone_occupants: dict[str, list[KorkinAgent]],
@@ -4835,6 +5015,238 @@ class TransmissionCore:
                     "airborne_mass": round(mass, 4),
                     "concentration_per_m3": round(concentration, 6),
                 })
+
+    def _sanitary_exhaust_ach(self, _venue: str) -> float:
+        """Air changes per hour of a sanitary venue, from the provisioning
+        derivation: the per-fixture code exhaust over one fixture's floor
+        footprint at deckhead height, so it is independent of block size
+        (118.9 / (2.7 x 2.3) = 19.2). A method so a future per-block value
+        can override it. Johnson 2013's experimental water closet ran at
+        ~18 ACH, so the measured setting and the modelled head are
+        ventilation-comparable without anything arranged to make them so.
+        """
+        return SANITARY_EXHAUST_M3H_PER_WC / (
+            SANITARY_FLOOR_AREA_M2_PER_WC * SANITARY_CEILING_HEIGHT_M
+        )
+
+    def _sanitary_visit_share(self, agent: KorkinAgent, n_visits: int) -> float:
+        """Fraction of this epoch ``agent`` spends in a venue it visits
+        ``n_visits`` times -- the same dwell share the fomite path uses.
+        """
+        dwell = SANITARY_DWELL_SECONDS * (
+            SANITARY_DWELL_FEMALE_MULTIPLIER
+            if agent.gender == "female" else 1.0
+        )
+        epoch_seconds = self.clock.hours_per_epoch * 3600.0
+        return min(1.0, n_visits * dwell / epoch_seconds)
+
+    def _pathway_flush_aerosol(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None = None,
+    ) -> None:
+        """Inhalation dose at the venue a flush event aerosolised into.
+
+        Filled by ``_emit_flush`` inside ``_replenish_hand`` (which runs in
+        ``_pathway_fomite``) and popped whole here: a venue's mass doses
+        exactly once. The same mass still stands in
+        ``flush_aerosol_pending_by_pathogen`` for the epoch-boundary drain
+        into the zone reservoir -- transport of one mass, not two
+        emissions, exactly as the emesis route accounts it.
+
+        Two venue kinds deliberately differ:
+
+        * A ``Sanitary`` venue is visited, not occupied: a visitor arrives
+          at a uniformly random time in the epoch and stays ~155 s, so it
+          meets the time-averaged concentration of a ventilating pool,
+          ``C0 * f_vent``, and inhales for its dwell share only. ``f_vent
+          = (1 - exp(-x))/x`` at x = ACH * T is the mean of e^(-ACH*t)
+          over a uniform arrival; at 19.2 ACH and a 1-h epoch it is
+          0.052, a ~19x reduction against a naive mass/V that would
+          silently treat a code-ventilated head as a sealed box.
+        * A cabin venue (own fittings -- a compartment key or a
+          non-Sanitary home zone) inherits the emesis treatment: the
+          whole-epoch occupants inhale mass/V for the full epoch. No
+          cabin bathroom volume exists anywhere in the platform data
+          (open ledger item 31), so this is one air volume where reality
+          has two and the bias is downward -- recorded, not corrected.
+        """
+        emitted = self._flush_aerosol_emitted_by_pathogen.pop(
+            pathogen_id, {},
+        )
+        if not emitted:
+            return
+        agents = {
+            a.agent_id: a
+            for occ in zone_occupants.values()
+            for a in occ
+        }
+        visits_at_venue = self._flush_visits_at_venue(pathogen_id)
+        units = self._cabin_compartments(zone_occupants)
+        for venue, entries in emitted.items():
+            mass = sum(load for _, load in entries)
+            if mass <= 0.0:
+                continue
+            source_attribution = attribution(
+                ledger, self._shedder_mix(entries, pathogen_id),
+            )
+            source_ids = [agent.agent_id for agent, _ in entries]
+            if self.zone_types.get(venue) == "Sanitary":
+                self._dose_flush_sanitary(
+                    venue, mass, source_ids, source_attribution, agents,
+                    visits_at_venue.get(venue, {}), pathogen_id,
+                    agent_doses, agent_pathway_doses, matrix,
+                )
+            else:
+                self._dose_flush_cabin(
+                    venue, mass, source_ids, source_attribution, units,
+                    pathogen_id, agent_doses, agent_pathway_doses, matrix,
+                )
+
+    def _flush_visits_at_venue(
+        self, pathogen_id: str,
+    ) -> dict[str, dict[int, int]]:
+        """Visitor counts per venue from the per-epoch caches.
+
+        Drawn visits plus stool events, the set _sanitary_fomite_exposure
+        calls its records. Empty when the visit mode is off -- a sanitary
+        flush then emits into a room no one enters and doses nobody.
+        """
+        visits_at_venue: dict[str, dict[int, int]] = {}
+        for aid, venues in self._sanitary_visits.items():
+            for venue in venues:
+                counts = visits_at_venue.setdefault(venue, {})
+                counts[aid] = counts.get(aid, 0) + 1
+        for aid, venue in self._sanitary_stool_venues.get(
+            pathogen_id, {},
+        ).items():
+            counts = visits_at_venue.setdefault(venue, {})
+            counts[aid] = counts.get(aid, 0) + 1
+        return visits_at_venue
+
+    def _dose_flush_sanitary(
+        self,
+        venue: str,
+        mass: float,
+        source_ids: list[int],
+        source_attribution: DoseAttribution | None,
+        agents: dict[int, KorkinAgent],
+        venue_visits: dict[int, int],
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Dwell-weighted inhalation dose to a head's epoch visitors.
+
+        The visitor meets the time-averaged concentration of a ventilating
+        pool, ``C0 * f_vent``, and inhales for its dwell share only.
+        """
+        volume = max(self.zone_volumes.get(venue, 0.0), 1.0)
+        concentration = mass / volume
+        x = self._sanitary_exhaust_ach(venue) * self.clock.hours_per_epoch
+        f_vent = (1.0 - math.exp(-x)) / x
+        target_shares = [
+            (agent, self._sanitary_visit_share(agent, n))
+            for aid, n in venue_visits.items()
+            if (agent := agents.get(aid)) is not None
+        ]
+        susceptible = {
+            t.agent_id
+            for t in self._get_susceptible(
+                [a for a, _ in target_shares], pathogen_id,
+            )
+        }
+        for target, share in target_shares:
+            if target.agent_id not in susceptible or share <= 0.0:
+                continue
+            dose = self._accumulate(
+                target.agent_id, "flush_aerosol",
+                concentration
+                * f_vent
+                * self.inhaled_air_volume_m3_per_epoch
+                * share,
+                agent_doses, agent_pathway_doses, source_attribution,
+            )
+            self._record_flush_exposure(
+                matrix, target, venue, source_ids, pathogen_id,
+                dose, mass, concentration, "sanitary",
+            )
+
+    def _dose_flush_cabin(
+        self,
+        venue: str,
+        mass: float,
+        source_ids: list[int],
+        source_attribution: DoseAttribution | None,
+        units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Whole-epoch inhalation dose to a cabin venue's occupants.
+
+        The emesis treatment unchanged: ``mass / volume`` with the
+        compartment fallback volume and the parent's ventilation factor,
+        no ``f_vent`` -- the bias is downward, recorded, not corrected.
+        """
+        susceptible = self._get_susceptible(
+            units.get(venue, []), pathogen_id,
+        )
+        if not susceptible:
+            return
+        volume = max(
+            self.zone_volumes.get(venue, EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3),
+            1.0,
+        )
+        concentration = mass / volume
+        ventilation = self._aerosol_ventilation_factor(
+            self.compartment_parent(venue),
+        )
+        for target in susceptible:
+            dose = self._accumulate(
+                target.agent_id, "flush_aerosol",
+                concentration
+                * self.inhaled_air_volume_m3_per_epoch
+                * ventilation,
+                agent_doses, agent_pathway_doses, source_attribution,
+            )
+            self._record_flush_exposure(
+                matrix, target, venue, source_ids, pathogen_id,
+                dose, mass, concentration, "cabin",
+            )
+
+    def _record_flush_exposure(
+        self,
+        matrix: ContactTracingMatrix,
+        target: KorkinAgent,
+        venue: str,
+        source_ids: list[int],
+        pathogen_id: str,
+        dose: float,
+        mass: float,
+        concentration: float,
+        venue_kind: str,
+    ) -> None:
+        matrix.flush_aerosol_exposures.append({
+            "target_id": target.agent_id,
+            "target_zone": venue,
+            "source_zone": venue,
+            "source_agent_ids": source_ids,
+            "pathogen_id": pathogen_id,
+            "dose": round(dose, 4),
+            "airborne_mass": round(mass, 4),
+            "concentration_per_m3": round(concentration, 6),
+            "venue_kind": venue_kind,
+        })
+        if dose > 0.0:
+            self.sanitary_telemetry["flush_recipients"] += 1
+            self.sanitary_telemetry["flush_dose_delivered"] += dose
 
     def _deposit_emesis(
         self,
@@ -5160,14 +5572,7 @@ class TransmissionCore:
             self.sanitary_telemetry["stool_visits"] += 1
         if not records:
             return
-        epoch_seconds = self.clock.hours_per_epoch * 3600.0
-
-        def share_of(agent: KorkinAgent, n: int) -> float:
-            dwell = SANITARY_DWELL_SECONDS * (
-                SANITARY_DWELL_FEMALE_MULTIPLIER
-                if agent.gender == "female" else 1.0
-            )
-            return min(1.0, n * dwell / epoch_seconds)
+        share_of = self._sanitary_visit_share
 
         # Deposit from shedding visitors.
         deposits_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}

@@ -1280,14 +1280,27 @@ class KorkinAgent:
             infection_epoch=int(inf["infection_epoch"]),
         )}
 
-    def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
-        """Shedding value for a specific pathogen based on its profile."""
+    def _shedding_curve_point(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> tuple[dict[str, Any], list[float], int] | None:
+        """(infection record, curve, clamped day index) for a shedding host.
+
+        The shared resolution ``get_pathogen_shedding``,
+        ``get_pathogen_hand_target`` and ``get_pathogen_stool_titre_log10``
+        all need: the active infection, the symptomatic/asymptomatic
+        curve selection, the onset-anchored shedding age, and the
+        presymptomatic gate. ``None`` whenever the host is not shedding at
+        a curve-resolvable age (no infection, not INFECTED, negative
+        duration, or earlier than the presymptomatic window).
+        """
         inf = self.infections.get(pathogen_id)
         if inf is None or inf["status"] != InfectionStatus.INFECTED:
-            return 0.0
-        epochs_infected = inf["time_infected"]
+            return None
+        epochs_infected = inf.get("time_infected")
         if epochs_infected is None or epochs_infected < 0:
-            return 0.0
+            return None
         is_symp = ever_presented(inf)
         curve = profile.get(
             "shedding_curve_log10",
@@ -1295,6 +1308,25 @@ class KorkinAgent:
         )
         if not is_symp:
             curve = profile.get("asymptomatic_shedding_log10", curve)
+        days_since_onset, curve_index = self._shedding_age(
+            epochs_infected, inf, profile, self.clock,
+        )
+        if days_since_onset < -float(
+            profile.get("presymptomatic_shedding_days", 0.0),
+        ):
+            return None
+        idx = min(max(curve_index, 0), len(curve) - 1)
+        return inf, curve, idx
+
+    def get_pathogen_shedding(self, pathogen_id: str, profile: dict) -> float:
+        """Shedding value for a specific pathogen based on its profile."""
+        point = self._shedding_curve_point(pathogen_id, profile)
+        if point is None:
+            # A pre-gate host cannot be emitting residents either: each
+            # resident's curve is acquisition-anchored, so it is younger
+            # than the host's and is gated inside ``_resident_emissions``.
+            return 0.0
+        inf, curve, idx = point
         adj = environmental_release_log10_per_day(profile)
         host_mult = inf.get("shedding_multiplier", 1.0)
         residents = self.resident_strains(pathogen_id)
@@ -1309,17 +1341,32 @@ class KorkinAgent:
         # Host factor (per-agent log-normal draw) and strain factor (heritable)
         # compose multiplicatively and are kept apart so a high shedder stays
         # attributable to the host or to the lineage, not to both at once.
-        days_since_onset, curve_index = self._shedding_age(
-            epochs_infected, inf, profile, self.clock,
-        )
-        if days_since_onset < -float(profile.get("presymptomatic_shedding_days", 0.0)):
-            return 0.0
-        idx = min(max(curve_index, 0), len(curve) - 1)
         return self.clock.amount_per_epoch(
             math.pow(10, curve[idx] - adj)
             * host_mult
             * inf.get("strain_shedding_multiplier", 1.0),
         )
+
+    def get_pathogen_stool_titre_log10(
+        self,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> float | None:
+        """Current shedding titre in log10 copies/g, or ``None``.
+
+        The flush route's emission needs the titre of the stool itself:
+        ``get_pathogen_shedding`` divides the curve by
+        ``environmental_release_log10_per_day`` (the grams smeared to the
+        environment per epoch), which is a different physical mass from
+        the ~107 g bowl deposit and must NOT be applied here. Host and
+        strain multipliers are left to the caller, as in the flush
+        formula.
+        """
+        point = self._shedding_curve_point(pathogen_id, profile)
+        if point is None:
+            return None
+        _inf, curve, idx = point
+        return float(curve[idx])
 
     def get_pathogen_hand_target(
         self,
@@ -1327,27 +1374,10 @@ class KorkinAgent:
         profile: dict[str, Any],
     ) -> float:
         """Return the measured stool-linked target load for one hand."""
-        inf = self.infections.get(pathogen_id)
-        if inf is None or inf["status"] != InfectionStatus.INFECTED:
+        point = self._shedding_curve_point(pathogen_id, profile)
+        if point is None:
             return 0.0
-        epochs_infected = inf.get("time_infected")
-        if epochs_infected is None or epochs_infected < 0:
-            return 0.0
-        symptomatic = ever_presented(inf)
-        curve = profile.get(
-            "shedding_curve_log10",
-            SYMPTOMATIC_SHEDDING if symptomatic else ASYMPTOMATIC_SHEDDING,
-        )
-        if not symptomatic:
-            curve = profile.get("asymptomatic_shedding_log10", curve)
-        days_since_onset, curve_index = self._shedding_age(
-            epochs_infected, inf, profile, self.clock,
-        )
-        if days_since_onset < -float(
-            profile.get("presymptomatic_shedding_days", 0.0),
-        ):
-            return 0.0
-        idx = min(max(curve_index, 0), len(curve) - 1)
+        inf, curve, idx = point
         return (
             math.pow(10.0, HAND_LOAD_LOG10_GEC)
             * math.pow(10.0, curve[idx] - HAND_LOAD_REFERENCE_PEAK_LOG10)
