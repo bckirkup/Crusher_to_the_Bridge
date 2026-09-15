@@ -379,6 +379,19 @@ def build_fit_run_spec(
     return raw
 
 
+def run_fit_spec(raw: dict[str, Any], *, repo_root: str = REPO_ROOT) -> Any:
+    """Run a fit run-spec mapping to the end and return the finished simulation."""
+    from picard_framework.simulation.ship_simulation import ShipSimulation
+
+    spec = PicardRunSpec.from_picard_dict(repo_root, raw)
+    with contextlib.redirect_stdout(io.StringIO()):
+        sim = ShipSimulation(spec, display=False)
+        sim.initialize()
+        for _ in range(sim.num_epochs):
+            sim.step()
+    return sim
+
+
 def simulate_hull(
     scenario_id: str,
     theta: float,
@@ -390,18 +403,11 @@ def simulate_hull(
     turn_day: int = 16,
 ) -> HullObservables:
     """Run one hull at one candidate Theta and read its observation logs."""
-    from picard_framework.simulation.ship_simulation import ShipSimulation
-
     raw = build_fit_run_spec(
         scenario_id, theta, seed,
         num_epochs=num_epochs, repo_root=repo_root,
     )
-    spec = PicardRunSpec.from_picard_dict(repo_root, raw)
-    with contextlib.redirect_stdout(io.StringIO()):
-        sim = ShipSimulation(spec, display=False)
-        sim.initialize()
-        for _ in range(sim.num_epochs):
-            sim.step()
+    sim = run_fit_spec(raw, repo_root=repo_root)
     return observables_from_modality(
         sim.modalities["syndromic"],
         scenario_id=scenario_id,

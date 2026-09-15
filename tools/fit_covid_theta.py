@@ -23,6 +23,10 @@ The replicated version of the same two phases runs on AWS Batch
 ``merge`` fixes Theta from the training cells first and only then reads the
 held-out cells at that Theta, so the order the single-seed commands impose is
 the order the merge takes internally.
+
+The boarding-axis screen (Phase 1b, deploy/aws/submit_covid_boarding_screen.sh)
+pools with ``screen``; it is a surface over declared assumptions, not a fit,
+and writes no Theta.
 """
 
 from __future__ import annotations
@@ -35,6 +39,7 @@ import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from picard_framework import covid_boarding_screen  # noqa: E402
 from picard_framework.covid_first_look import (  # noqa: E402
     load_design,
     merge_fit,
@@ -152,6 +157,37 @@ def _merge(args: argparse.Namespace) -> int:
     return 0
 
 
+def _screen(args: argparse.Namespace) -> int:
+    design = covid_boarding_screen.load_design(args.design)
+    payloads = _load_cells(args.cells)
+    print(f"{len(payloads)} cells read from {args.cells}", flush=True)
+    surface = covid_boarding_screen.merge_screen(
+        design, payloads, allow_partial=args.allow_partial,
+    )
+    _write(surface, args.out)
+    witness = surface["sanitary_witness"]
+    print(
+        f"sanitary visits {witness['declared_mode']}: executed in "
+        f"{witness['cells_with_visits']}/{witness['cells']} cells"
+        f"{'' if witness['consistent'] else ' -- INCONSISTENT WITH DECLARED MODE'}",
+        flush=True,
+    )
+    for entry in surface["surface"]:
+        early = entry["onsets_before_split_day"]
+        total = entry["recorded_onsets"]
+        first = entry["first_onset_day"]
+        first_text = "n/a" if first is None else f"{first['median']:.0f}"
+        print(
+            f"  theta={entry['theta']:.4g} age={entry['infection_age_days']:g}d "
+            f"imports={entry['imports']}: early median={early['median']:.0f} "
+            f"total median={total['median']:.0f} "
+            f"first onset median={first_text} "
+            f"P(takeoff)={entry['takeoff_probability']:.2f}",
+            flush=True,
+        )
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -187,6 +223,18 @@ def main(argv: list[str] | None = None) -> int:
         default="telemetry_buffer/observation_model/covid_theta_held_out_v2.json",
     )
     merge_parser.set_defaults(func=_merge)
+
+    screen_parser = sub.add_parser(
+        "screen", help="pool the boarding-axis screen cells into a surface",
+    )
+    screen_parser.add_argument("--cells", required=True, help="directory of cell JSON files")
+    screen_parser.add_argument("--design", default=None)
+    screen_parser.add_argument("--allow-partial", action="store_true")
+    screen_parser.add_argument(
+        "--out",
+        default="telemetry_buffer/observation_model/covid_boarding_screen_v1.json",
+    )
+    screen_parser.set_defaults(func=_screen)
 
     args = parser.parse_args(argv)
     return int(args.func(args))
