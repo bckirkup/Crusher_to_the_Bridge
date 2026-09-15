@@ -52,11 +52,16 @@ PINNED_FIELDS = (
 
 # (onsets, onsets before split day, specimens, positives, asymptomatic positives)
 GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
-    # CI, the Batch worker image, and covid_first_look_v1 cell
-    # held_out_greg_mortimer_2020_theta1e6p00_seed20200333.json
-    (3, 11): (96, 52, 106, 36, 36),
-    # Local CPython 3.12 venv (compensated float sum)
-    (3, 12): (85, 51, 102, 30, 30),
+    # CI and the Batch worker image (picard-campaign, CPython 3.11). The
+    # covid_first_look_v1 cell held_out_greg_mortimer_2020_theta1e6p00_
+    # seed20200333.json read (96, 52, 106, 36, 36) before the molecular
+    # ascertainment gate (scenario field molecular_ascertainment.start_day);
+    # with the passive swab channel closed until the day-20 screen, the
+    # onset curve is ascertained only through the campaign and the campaign
+    # reaches the symptomatic hosts the passive channel used to take first.
+    (3, 11): (68, 20, 217, 104, 59),
+    # Local CPython 3.12 venv (compensated float sum); was (85, 51, 102, 30, 30)
+    (3, 12): (58, 14, 217, 93, 52),
 }
 
 

@@ -277,6 +277,9 @@ def build_modalities(
             clock=run_clock,
             rng=rng,
             testing_campaigns=testing_campaigns_from_config(syn_cfg),
+            molecular_ascertainment_start_day=syn_cfg.get(
+                "molecular_ascertainment_start_day",
+            ),
         ),
         "clinical_rdt": ClinicalRDT(
             base_sensitivity=rdt_cfg.get("base_sensitivity", 0.95),

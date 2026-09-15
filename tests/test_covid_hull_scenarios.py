@@ -57,6 +57,7 @@ def _scenario(
         ("crew_general", "crew", 40),
     ),
     campaign_start_day: int = 2,
+    molecular_start_day: int | None = None,
     scheduled: tuple[dict[str, Any], ...] = (),
 ) -> HullScenario:
     return HullScenario(
@@ -75,6 +76,7 @@ def _scenario(
         ),
         campaign_id="unit_campaign",
         campaign_start_day=campaign_start_day,
+        molecular_start_day=molecular_start_day,
         scheduled_protocols=scheduled,
     )
 
@@ -312,6 +314,43 @@ class TestCampaignAlignment:
     def test_a_campaign_starting_after_the_event_is_refused(self):
         with pytest.raises(ValueError, match="campaign starts on day"):
             _scenario(duration_days=5, campaign_start_day=5)
+
+
+class TestMolecularAscertainment:
+    """The first day a specimen can be taken is the record's, not the run's."""
+
+    def test_shipped_hulls_date_the_arrival_of_the_test(self, scenarios):
+        assert scenarios[DIAMOND].molecular_start_day == 14
+        assert scenarios[MORTIMER].molecular_start_day == 20
+
+    def test_the_test_never_arrives_after_the_campaign_that_uses_it(
+        self, scenarios,
+    ):
+        for scenario in scenarios.scenarios.values():
+            assert scenario.molecular_start_day <= scenario.campaign_start_day
+
+    def test_start_day_reaches_the_syndromic_config(self, scenarios):
+        block = scenarios[DIAMOND].config_overrides()["syndromic"]
+        assert block["molecular_ascertainment_start_day"] == 14
+
+    def test_an_undeclared_start_day_emits_no_key(self):
+        block = _scenario().config_overrides()["syndromic"]
+        assert "molecular_ascertainment_start_day" not in block
+        assert _scenario().molecular_start_day is None
+
+    @pytest.mark.parametrize("start_day", [0, 1, 2])
+    def test_a_start_day_up_to_the_campaign_day_is_accepted(self, start_day):
+        scenario = _scenario(campaign_start_day=2, molecular_start_day=start_day)
+        assert scenario.molecular_start_day == start_day
+
+    def test_a_campaign_before_the_test_exists_is_refused(self):
+        with pytest.raises(ValueError, match="cannot swab before"):
+            _scenario(campaign_start_day=2, molecular_start_day=3)
+
+    def test_every_shipped_start_day_is_sourced(self, raw_records):
+        for record in raw_records["scenarios"]:
+            fields = {entry["field"] for entry in record["provenance"]}
+            assert "molecular_ascertainment.start_day" in fields
 
 
 class TestSharedBiology:

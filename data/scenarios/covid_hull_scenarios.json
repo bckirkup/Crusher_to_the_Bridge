@@ -65,6 +65,10 @@
         "start_day": 16,
         "calendar": "5–20 February 2020"
       },
+      "molecular_ascertainment": {
+        "start_day": 14,
+        "calendar": "3 February 2020, the first day specimens were collected on board"
+      },
       "provenance": [
         {
           "field": "population.total / passengers / crew",
@@ -91,6 +95,13 @@
           "value": "simulated day 16 = 5 February 2020, the campaign record's first dated day",
           "source": "data/observation/covid_testing_campaigns.json (Mizumoto 2020, Yamahata 2020, NIID Field Briefing)",
           "grade": "A"
+        },
+        {
+          "field": "molecular_ascertainment.start_day",
+          "value": "simulated day 14 = 3 February 2020; no SARS-CoV-2 specimen is taken on board before it",
+          "source": "NIID Field Briefing, 19 February 2020 (quarantine officers boarded on 3 February and collected specimens from symptomatic persons and their close contacts on 3–4 February; the first 31 results were reported on 5 February); Mizumoto 2020, Table 1 (no reported tests before 5 February)",
+          "grade": "A",
+          "note": "Before this day the ship had no RT-PCR: a host who fell ill in January enters the recorded-onset curve only if a specimen taken from 3 February onward tests positive. Without the gate the passive sick-call swab channel runs from embarkation and ascertains January onsets through a test that did not exist, which is the observation artifact behind the pre-6-February onset excess in covid_first_look_v1 (docs/covid/covid_first_look_readout.md)."
         },
         {
           "field": "role_classes[].age_band_weights",
@@ -175,6 +186,10 @@
         "start_day": 20,
         "calendar": "voyage day 20, the single ship-wide test event"
       },
+      "molecular_ascertainment": {
+        "start_day": 20,
+        "calendar": "voyage day 20; the ship carried no RT-PCR before the shore-supplied screen"
+      },
       "provenance": [
         {
           "field": "population.total / passengers / crew",
@@ -201,6 +216,13 @@
           "value": "voyage day 20",
           "source": "Ing 2020; Keeley 2020 ('128 (59.0%) of those on board tested positive … on day 20, when everyone was screened with an RT-PCR-based test')",
           "grade": "A"
+        },
+        {
+          "field": "molecular_ascertainment.start_day",
+          "value": "voyage day 20, the same day as the ship-wide screen",
+          "source": "Ing 2020, Thorax 75:693 (febrile passengers were isolated on clinical grounds from day 8; RT-PCR testing was first available on day 20 when the whole complement was screened)",
+          "grade": "A",
+          "note": "Fevers before day 20 were managed without a molecular test, so no specimen precedes the screen."
         },
         {
           "field": "age composition",

@@ -143,6 +143,15 @@
             "calendar": {"type": "string"}
           }
         },
+        "molecular_ascertainment": {
+          "type": "object",
+          "required": ["start_day"],
+          "additionalProperties": false,
+          "properties": {
+            "start_day": {"type": "integer", "minimum": 0},
+            "calendar": {"type": "string"}
+          }
+        },
         "provenance": {
           "type": "array",
           "minItems": 1,

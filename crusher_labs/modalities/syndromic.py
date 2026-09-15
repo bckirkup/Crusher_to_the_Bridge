@@ -123,8 +123,17 @@ class SyndromicSurveillance:
         clock: SimClock | None = None,
         rng: np.random.Generator | None = None,
         testing_campaigns: Iterable[TestingCampaign] | None = None,
+        molecular_ascertainment_start_day: int | None = None,
     ) -> None:
         self.sick_call_probability = sick_call_probability
+        # First simulated day any specimen can be taken. ``None`` leaves the
+        # swab channel open from embarkation; a hull whose record says the
+        # test arrived on a dated day declares it, and no specimen precedes it.
+        self.molecular_ascertainment_start_day = (
+            int(molecular_ascertainment_start_day)
+            if molecular_ascertainment_start_day is not None
+            else None
+        )
         self.sick_call_severity_mode = sick_call_severity_mode
         self.symptom_severity_profiles = dict(symptom_severity_profiles or {})
         self.clock = clock or SimClock()
@@ -428,7 +437,11 @@ class SyndromicSurveillance:
         confirmed: dict[str, list[int]] = {}
         campaign_rosters: dict[str, list[int]] = {}
         campaign_confirmed: dict[str, list[int]] = {}
-        for pathogen_id, model in self._molecular_models().items():
+        models = (
+            self._molecular_models() if self.molecular_test_available(epoch)
+            else {}
+        )
+        for pathogen_id, model in models.items():
             roster = self._campaign_roster(agents, epoch, pathogen_id)
             drawn, positive = self._sample_pathogen(
                 agents, epoch, presenting, pathogen_id, model,
@@ -462,6 +475,13 @@ class SyndromicSurveillance:
             "campaign_specimens_by_pathogen": campaign_rosters,
             "campaign_confirmed_by_pathogen": campaign_confirmed,
         }
+
+    def molecular_test_available(self, epoch: int) -> bool:
+        """Whether a specimen taken this epoch has a test to go to."""
+        start = self.molecular_ascertainment_start_day
+        if start is None:
+            return True
+        return self.clock.day_index(int(epoch)) >= start
 
     def _sample_pathogen(
         self,
