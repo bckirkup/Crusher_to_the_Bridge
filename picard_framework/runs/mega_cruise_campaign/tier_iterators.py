@@ -642,7 +642,7 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
 
 _STANDARD_ITERS = {f"t{i}": globals()[f"_iter_t{i}_runs"] for i in range(1, 17)}
 _CALIBRATION_SHORTS = frozenset(
-    {"c1", "c2", "c3", "c4", "c5", "c6", "a2", "b1", "b2", "rl"},
+    {"c1", "c2", "c3", "c4", "c5", "c6", "a2", "b1", "b2", "rl", "san"},
 )
 
 
