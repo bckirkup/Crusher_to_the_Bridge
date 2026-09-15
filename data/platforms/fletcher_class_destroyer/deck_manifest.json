@@ -5,7 +5,7 @@
   "representative_of": "WWII Fletcher-class destroyer (DD-445 class). 114.7m LOA, 12.0m beam, ~329 crew. Forced-draft ventilation, no HVAC filtration. Hot-bunking in enlisted berthing.",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 20",
+    "zone count: 33",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -29,7 +29,20 @@
     "Torpedo_Mount_Midships",
     "Gun_Mount_51",
     "Radio_Room",
-    "Passageway_Main"
+    "Passageway_Main",
+    "HD_01L_M",
+    "HD_01L_F",
+    "HD_02L_M",
+    "HD_02L_F",
+    "HD_03L_M",
+    "HD_HOLD_M",
+    "HD_HOLD_F",
+    "HD_LOWERDE_M",
+    "HD_LOWERDE_F",
+    "HD_MAINDEC_M",
+    "HD_MAINDEC_F",
+    "HD_SECONDD_M",
+    "HD_SECONDD_F"
   ],
   "decks": [
     "01_level",

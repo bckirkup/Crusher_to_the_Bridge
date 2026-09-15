@@ -57,7 +57,7 @@
         "x": 70,
         "y": 4
       },
-      "description": "Forward enlisted berthing. Stacked canvas racks 3-high, 18-inch spacing. Hot-bunking for ~120 men. Extremely cramped: ~1.5 m³ per person."
+      "description": "Forward enlisted berthing. Stacked canvas racks 3-high, 18-inch spacing. Hot-bunking for ~120 men. Extremely cramped: ~1.5 m\u00b3 per person."
     },
     {
       "id": "Enlisted_Berthing_Aft",
@@ -83,7 +83,7 @@
         "x": 55,
         "y": 8
       },
-      "description": "Chief Petty Officers quarters. Slightly less cramped than enlisted berthing. ~2.5 m³ per person."
+      "description": "Chief Petty Officers quarters. Slightly less cramped than enlisted berthing. ~2.5 m\u00b3 per person."
     },
     {
       "id": "Wardroom",
@@ -135,7 +135,7 @@
         "x": 55,
         "y": 6
       },
-      "description": "Forward boiler room. Babcock & Wilcox 600psi boiler #1 and #2. Extreme heat (~60°C ambient). Forced-draft ventilation via uptakes."
+      "description": "Forward boiler room. Babcock & Wilcox 600psi boiler #1 and #2. Extreme heat (~60\u00b0C ambient). Forced-draft ventilation via uptakes."
     },
     {
       "id": "Boiler_Room_2",
@@ -266,6 +266,271 @@
         "y": 6
       },
       "description": "Main deck central passageway. Primary fore-aft transit route. Extremely narrow (~0.9m wide)."
+    },
+    {
+      "id": "HD_01L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Gun_Mount_51"
+      ],
+      "display": {
+        "x": 108.0,
+        "y": 2.0
+      },
+      "description": "Public head (male, 1 water closet) serving Gun_Mount_51."
+    },
+    {
+      "id": "HD_01L_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Gun_Mount_51"
+      ],
+      "display": {
+        "x": 108.0,
+        "y": 2.0
+      },
+      "description": "Public head (female, 1 water closet) serving Gun_Mount_51."
+    },
+    {
+      "id": "HD_02L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "02_level",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "CIC",
+        "Radio_Room"
+      ],
+      "display": {
+        "x": 97.5,
+        "y": 3.0
+      },
+      "description": "Public head (male, 2 water closets) serving CIC, Radio_Room."
+    },
+    {
+      "id": "HD_02L_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "02_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CIC",
+        "Radio_Room"
+      ],
+      "display": {
+        "x": 97.5,
+        "y": 3.0
+      },
+      "description": "Public head (female, 1 water closet) serving CIC, Radio_Room."
+    },
+    {
+      "id": "HD_03L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "03_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 105.0,
+        "y": 2.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
+    },
+    {
+      "id": "HD_HOLD_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "hold",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Magazine_Fwd",
+        "Magazine_Aft"
+      ],
+      "display": {
+        "x": 55.0,
+        "y": -1.0
+      },
+      "description": "Public head (male, 2 water closets) serving Magazine_Fwd, Magazine_Aft."
+    },
+    {
+      "id": "HD_HOLD_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "hold",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Magazine_Fwd",
+        "Magazine_Aft"
+      ],
+      "display": {
+        "x": 55.0,
+        "y": -1.0
+      },
+      "description": "Public head (female, 2 water closets) serving Magazine_Fwd, Magazine_Aft."
+    },
+    {
+      "id": "HD_LOWERDE_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "lower_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft"
+      ],
+      "display": {
+        "x": 36.25,
+        "y": 2.0
+      },
+      "description": "Public head (male, 4 water closets) serving Boiler_Room_1, Boiler_Room_2, Engine_Room_Fwd, Engine_Room_Aft."
+    },
+    {
+      "id": "HD_LOWERDE_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "lower_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Boiler_Room_1",
+        "Boiler_Room_2",
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft"
+      ],
+      "display": {
+        "x": 36.25,
+        "y": 2.0
+      },
+      "description": "Public head (female, 2 water closets) serving Boiler_Room_1, Boiler_Room_2, Engine_Room_Fwd, Engine_Room_Aft."
+    },
+    {
+      "id": "HD_MAINDEC_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "main_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "Wardroom",
+        "Galley",
+        "Sickbay",
+        "Torpedo_Mount_Midships",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 65.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 5 water closets) serving Wardroom, Galley, Sickbay, Torpedo_Mount_Midships, +1 more."
+    },
+    {
+      "id": "HD_MAINDEC_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "main_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Wardroom",
+        "Galley",
+        "Sickbay",
+        "Torpedo_Mount_Midships",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 65.0,
+        "y": 4.0
+      },
+      "description": "Public head (female, 4 water closets) serving Wardroom, Galley, Sickbay, Torpedo_Mount_Midships, +1 more."
+    },
+    {
+      "id": "HD_SECONDD_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "second_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Mess_Deck"
+      ],
+      "display": {
+        "x": 50.0,
+        "y": 2.0
+      },
+      "description": "Public head (male, 1 water closet) serving Mess_Deck."
+    },
+    {
+      "id": "HD_SECONDD_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "second_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Mess_Deck"
+      ],
+      "display": {
+        "x": 50.0,
+        "y": 2.0
+      },
+      "description": "Public head (female, 1 water closet) serving Mess_Deck."
     }
   ],
   "graywater_zones": [

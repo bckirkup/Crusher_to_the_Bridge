@@ -26,6 +26,10 @@ from cruise_platform_recipes import (  # noqa: E402
     crew_zone_id,
     pax_zone_id,
 )
+from derive_sanitary_provisioning import (  # noqa: E402
+    sanitary_airflow_augment,
+    sanitary_zone_dicts,
+)
 
 
 def _pax_display(
@@ -70,6 +74,10 @@ def _build_grid_corridors(
                         deck=deck, side=side, section=section, vent=vent,
                     ),
                 })
+                if corr.cabin_size_by_class:
+                    zones[-1]["cabin_size_by_class"] = dict(
+                        corr.cabin_size_by_class,
+                    )
     return zones
 
 
@@ -96,6 +104,8 @@ def _build_linear_corridors(
                     deck=deck, side="", section=section, vent=vent,
                 ).replace("  ", " "),
             })
+            if corr.cabin_size_by_class:
+                zones[-1]["cabin_size_by_class"] = dict(corr.cabin_size_by_class)
     return zones
 
 
@@ -119,7 +129,7 @@ def _public_zone_dicts(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
     for z in recipe.public_zones:
         assert len(z.id) <= 15, f"Contam zone id too long: {z.id!r}"
-        out.append({
+        entry: dict[str, Any] = {
             "id": z.id,
             "type": z.type,
             "traffic": z.traffic,
@@ -128,7 +138,14 @@ def _public_zone_dicts(recipe: CruisePlatformRecipe) -> list[dict[str, Any]]:
             "max_occupancy": z.max_occupancy,
             "display": dict(z.display),
             "description": z.description,
-        })
+        }
+        if z.dining_service_type is not None:
+            entry["dining_service_type"] = z.dining_service_type
+        if z.food_contamination_multiplier is not None:
+            entry["food_contamination_multiplier"] = z.food_contamination_multiplier
+        if z.meal_seatings is not None:
+            entry["meal_seatings"] = z.meal_seatings
+        out.append(entry)
     return out
 
 
@@ -142,9 +159,10 @@ def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
         + _build_crew_corridors(recipe)
         + extra
     )
+    zones += sanitary_zone_dicts(zones)
     for z in zones:
         assert len(z["id"]) <= 15, f"Contam zone id too long: {z['id']!r}"
-    return {
+    out: dict[str, Any] = {
         "platform": recipe.platform_id,
         "description": recipe.description,
         "isolation_unit_capacity": recipe.isolation_unit_capacity,
@@ -157,6 +175,9 @@ def build_spatial_layout(recipe: CruisePlatformRecipe) -> dict[str, Any]:
         "graywater_zones": list(recipe.graywater_zones),
         "zones": zones,
     }
+    if recipe.nominal_complement:
+        out["nominal_complement"] = dict(recipe.nominal_complement)
+    return out
 
 
 def _pax_corridor_ids(corr: CorridorRecipe) -> list[str]:
@@ -294,6 +315,16 @@ def build_air_flow_paths(
                 "is_hvac_ducted": True,
                 "path": f"Cabin_Relief_D{deck}",
             })
+
+    # Sanitary head blocks: one exhaust-only HVAC group each plus a single
+    # one-way makeup link from the served space's branch, added before the
+    # endpoint filter so the head groups register as valid endpoints.
+    head_augmented = sanitary_airflow_augment(
+        build_spatial_layout(recipe)["zones"],
+        {"hvac_zones": hvac, "cross_zone_links": cross},
+    )
+    hvac = head_augmented["hvac_zones"]
+    cross = head_augmented["cross_zone_links"]
 
     hvac_ids = {hz["id"] for hz in hvac}
     valid_endpoints = zone_ids | hvac_ids

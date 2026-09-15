@@ -5,7 +5,7 @@
   "representative_of": "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). Holland America Veendam / Celebrity Century archetype: ~238m LOA × 32m beam, ~57,000 GT. Cabin-corridor resolution (36 pax + 6 crew corrid",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 61",
+    "zone count: 77",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -70,7 +70,23 @@
     "CC_D2_F",
     "CC_D2_A",
     "CC_D3_F",
-    "CC_D3_A"
+    "CC_D3_A",
+    "HD_0E_M",
+    "HD_1C_M",
+    "HD_1C_F",
+    "HD_2C_M",
+    "HD_2C_F",
+    "HD_4M_M",
+    "HD_4M_F_1",
+    "HD_4M_F_2",
+    "HD_5L_M",
+    "HD_5L_F",
+    "HD_7C_M",
+    "HD_7C_F",
+    "HD_8C_M",
+    "HD_8C_F",
+    "HD_9L_M",
+    "HD_9L_F"
   ],
   "decks": [
     "0_Engine",

@@ -44,7 +44,7 @@
         "x": 155,
         "y": 10
       },
-      "description": "Ship's company officer staterooms. 2-person rooms, ~8 m³ per person."
+      "description": "Ship's company officer staterooms. 2-person rooms, ~8 m\u00b3 per person."
     },
     {
       "id": "Ship_CPO_Quarters",
@@ -70,7 +70,7 @@
         "x": 140,
         "y": 10
       },
-      "description": "Ship's company enlisted berthing. 3-high bunks with personal storage. ~2.4 m³ per person."
+      "description": "Ship's company enlisted berthing. 3-high bunks with personal storage. ~2.4 m\u00b3 per person."
     },
     {
       "id": "Troop_Berthing_Fwd",
@@ -83,7 +83,7 @@
         "x": 120,
         "y": 10
       },
-      "description": "Forward Marine berthing. 3-high racks, extremely dense. ~2.9 m³ per person. Shared heads (latrines)."
+      "description": "Forward Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person. Shared heads (latrines)."
     },
     {
       "id": "Troop_Berthing_Mid",
@@ -96,7 +96,7 @@
         "x": 100,
         "y": 10
       },
-      "description": "Midships Marine berthing. 3-high racks, extremely dense. ~2.9 m³ per person."
+      "description": "Midships Marine berthing. 3-high racks, extremely dense. ~2.9 m\u00b3 per person."
     },
     {
       "id": "Troop_Berthing_Aft",
@@ -109,7 +109,7 @@
         "x": 80,
         "y": 10
       },
-      "description": "Aft Marine berthing. 3-high racks, extremely dense. Closest to well deck — first to embark."
+      "description": "Aft Marine berthing. 3-high racks, extremely dense. Closest to well deck \u2014 first to embark."
     },
     {
       "id": "Crew_Mess",
@@ -187,7 +187,7 @@
         "x": 90,
         "y": 16
       },
-      "description": "Vehicle storage deck. 2,322 m² for AAVs, LAVs, HMMWVs. Connected to well deck via ramp. Marine staging area before embarkation."
+      "description": "Vehicle storage deck. 2,322 m\u00b2 for AAVs, LAVs, HMMWVs. Connected to well deck via ramp. Marine staging area before embarkation."
     },
     {
       "id": "Well_Deck",
@@ -200,7 +200,7 @@
         "x": 50,
         "y": 16
       },
-      "description": "Well deck (64m × 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
+      "description": "Well deck (64m \u00d7 15m). Floodable for LCAC operations. Two LCAC or one LCU capacity. Partially open to sea when flooded."
     },
     {
       "id": "Flight_Deck",
@@ -292,6 +292,156 @@
         "y": 6
       },
       "description": "Main fore-aft passageway on 2nd deck. Primary transit corridor for 1,160 personnel."
+    },
+    {
+      "id": "HD_01L_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Wardroom",
+        "Hangar",
+        "Marine_Planning"
+      ],
+      "display": {
+        "x": 108.33333333333333,
+        "y": 15.333333333333332
+      },
+      "description": "Public head (male, 3 water closets) serving Wardroom, Hangar, Marine_Planning."
+    },
+    {
+      "id": "HD_01L_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "01_level",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Wardroom",
+        "Hangar",
+        "Marine_Planning"
+      ],
+      "display": {
+        "x": 108.33333333333333,
+        "y": 15.333333333333332
+      },
+      "description": "Public head (female, 3 water closets) serving Wardroom, Hangar, Marine_Planning."
+    },
+    {
+      "id": "HD_03L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "03_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CIC"
+      ],
+      "display": {
+        "x": 160.0,
+        "y": 12.0
+      },
+      "description": "Public head (male, 1 water closet) serving CIC."
+    },
+    {
+      "id": "HD_07L_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "07_level",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 175.0,
+        "y": 12.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
+    },
+    {
+      "id": "HD_1S_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "1st_platform",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Engine_Room_Fwd",
+        "Engine_Room_Aft"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 2.0
+      },
+      "description": "Public head (male, 2 water closets) serving Engine_Room_Fwd, Engine_Room_Aft."
+    },
+    {
+      "id": "HD_2N_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "2nd_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "Crew_Mess",
+        "Troop_Mess",
+        "Galley",
+        "Medical_Ward",
+        "Vehicle_Deck",
+        "Troop_Recreation",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 13.142857142857142
+      },
+      "description": "Public head (male, 8 water closets) serving Crew_Mess, Troop_Mess, Galley, Medical_Ward, +3 more."
+    },
+    {
+      "id": "HD_2N_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "2nd_deck",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "Crew_Mess",
+        "Troop_Mess",
+        "Galley",
+        "Medical_Ward",
+        "Vehicle_Deck",
+        "Troop_Recreation",
+        "Passageway_Main"
+      ],
+      "display": {
+        "x": 115.0,
+        "y": 13.142857142857142
+      },
+      "description": "Public head (female, 7 water closets) serving Crew_Mess, Troop_Mess, Galley, Medical_Ward, +3 more."
     }
   ],
   "graywater_zones": [

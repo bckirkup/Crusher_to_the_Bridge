@@ -113,6 +113,76 @@
       "filter_efficiency": 0.0,
       "filter_type": "none",
       "description": "Machinery room ventilation. Independent from habitability HVAC. High ACH for gas turbine combustion air and heat removal."
+    },
+    {
+      "id": "AHU_HD_01L_M",
+      "rooms": [
+        "HD_01L_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_01L_M, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_01L_F",
+      "rooms": [
+        "HD_01L_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_01L_F, 3 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_03L_M",
+      "rooms": [
+        "HD_03L_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_03L_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_07L_M",
+      "rooms": [
+        "HD_07L_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_07L_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_1S_M",
+      "rooms": [
+        "HD_1S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2N_M",
+      "rooms": [
+        "HD_2N_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2N_M, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2N_F",
+      "rooms": [
+        "HD_2N_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2N_F, 7 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -203,6 +273,62 @@
       "path": "machinery_access_trunk",
       "is_hvac_ducted": false,
       "description": "Passive airflow to machinery spaces through access trunks. Minimal exchange due to pressure differential."
+    },
+    {
+      "from": "HVAC_Aviation",
+      "to": "AHU_HD_01L_M",
+      "flow_rate_m3h": 356.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_01L_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Aviation",
+      "to": "AHU_HD_01L_F",
+      "flow_rate_m3h": 356.8,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_01L_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Superstructure",
+      "to": "AHU_HD_03L_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_03L_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Superstructure",
+      "to": "AHU_HD_07L_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_07L_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Machinery",
+      "to": "AHU_HD_1S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Crew_Habitable",
+      "to": "AHU_HD_2N_M",
+      "flow_rate_m3h": 951.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2N_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Crew_Habitable",
+      "to": "AHU_HD_2N_F",
+      "flow_rate_m3h": 832.5,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2N_F; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [

@@ -1,10 +1,6 @@
 {
   "platform": "expedition_cruise_450",
   "description": "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). Silver Cloud / Le Bor\u00e9al / Viking Star class archetype: ~160m LOA \u00d7 21m beam, ~17,000 GT. Cabin-corridor resolution (12 pax + 4 crew corridors). Supersedes expedition_cruise_300. CDC Small/Medium AGE target 9.06/100K TD (calibration deferred).",
-  "nominal_complement": {
-    "passengers": 300,
-    "crew": 150
-  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 160.0,
@@ -499,6 +495,260 @@
       "cabin_size_by_class": {
         "crew_galley": 3
       }
+    },
+    {
+      "id": "HD_2C_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "CrewMess",
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 52.5,
+        "y": 81.0
+      },
+      "description": "Public head (male, 2 water closets) serving CrewMess, Engine_Room."
+    },
+    {
+      "id": "HD_2C_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "CrewMess",
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 52.5,
+        "y": 81.0
+      },
+      "description": "Public head (female, 1 water closet) serving CrewMess, Engine_Room."
+    },
+    {
+      "id": "HD_3C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 66.0
+      },
+      "description": "Public head (male, 2 water closets) serving Laundry, Stores."
+    },
+    {
+      "id": "HD_3C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 110.0,
+        "y": 66.0
+      },
+      "description": "Public head (female, 2 water closets) serving Laundry, Stores."
+    },
+    {
+      "id": "HD_4V_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Voyager",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "MainGalley",
+        "Reception",
+        "MedBay"
+      ],
+      "display": {
+        "x": 66.66666666666667,
+        "y": 51.0
+      },
+      "description": "Public head (male, 3 water closets) serving MainGalley, Reception, MedBay."
+    },
+    {
+      "id": "HD_4V_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Voyager",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "MainGalley",
+        "Reception",
+        "MedBay"
+      ],
+      "display": {
+        "x": 66.66666666666667,
+        "y": 51.0
+      },
+      "description": "Public head (female, 3 water closets) serving MainGalley, Reception, MedBay."
+    },
+    {
+      "id": "HD_5P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Panorama",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "MainDining",
+        "TheaterLng",
+        "Casino",
+        "Library"
+      ],
+      "display": {
+        "x": 86.25,
+        "y": 36.0
+      },
+      "description": "Public head (male, 5 water closets) serving MainDining, TheaterLng, Casino, Library."
+    },
+    {
+      "id": "HD_5P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Panorama",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "MainDining",
+        "TheaterLng",
+        "Casino",
+        "Library"
+      ],
+      "display": {
+        "x": 86.25,
+        "y": 36.0
+      },
+      "description": "Public head (female, 6 water closets) serving MainDining, TheaterLng, Casino, Library."
+    },
+    {
+      "id": "HD_6E_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Explorer",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Gym",
+        "Spa",
+        "ExpedLounge"
+      ],
+      "display": {
+        "x": 98.33333333333333,
+        "y": 21.0
+      },
+      "description": "Public head (male, 3 water closets) serving Gym, Spa, ExpedLounge."
+    },
+    {
+      "id": "HD_6E_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Explorer",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Gym",
+        "Spa",
+        "ExpedLounge"
+      ],
+      "display": {
+        "x": 98.33333333333333,
+        "y": 21.0
+      },
+      "description": "Public head (female, 3 water closets) serving Gym, Spa, ExpedLounge."
+    },
+    {
+      "id": "HD_7S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CasualDining",
+        "PoolDeck",
+        "ObsLounge"
+      ],
+      "display": {
+        "x": 63.333333333333336,
+        "y": 6.0
+      },
+      "description": "Public head (male, 3 water closets) serving CasualDining, PoolDeck, ObsLounge."
+    },
+    {
+      "id": "HD_7S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "CasualDining",
+        "PoolDeck",
+        "ObsLounge"
+      ],
+      "display": {
+        "x": 63.333333333333336,
+        "y": 6.0
+      },
+      "description": "Public head (female, 4 water closets) serving CasualDining, PoolDeck, ObsLounge."
     }
-  ]
+  ],
+  "nominal_complement": {
+    "passengers": 300,
+    "crew": 150
+  }
 }

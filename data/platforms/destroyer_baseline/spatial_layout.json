@@ -78,6 +78,67 @@
         "y": 3
       },
       "description": "Crew and passenger sleeping quarters"
+    },
+    {
+      "id": "HD_MAIN_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "main",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "MedBay",
+        "Mess_Hall",
+        "Galley"
+      ],
+      "display": {
+        "x": 60.0,
+        "y": 4.333333333333334
+      },
+      "description": "Public head (male, 3 water closets) serving MedBay, Mess_Hall, Galley."
+    },
+    {
+      "id": "HD_MAIN_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "main",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "MedBay",
+        "Mess_Hall",
+        "Galley"
+      ],
+      "display": {
+        "x": 60.0,
+        "y": 4.333333333333334
+      },
+      "description": "Public head (female, 2 water closets) serving MedBay, Mess_Hall, Galley."
+    },
+    {
+      "id": "HD_UPPER_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "upper",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 100.0,
+        "y": 8.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
     }
   ],
   "graywater_zones": [

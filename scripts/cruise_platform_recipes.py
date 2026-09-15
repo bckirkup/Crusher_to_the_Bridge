@@ -44,6 +44,8 @@ class CorridorRecipe:
     ventilation: VentFn
     description_template: str
     id_prefix: str = "PC"  # PC/CC cruise; EC/OC/FC starship
+    # Per-agent-class berth override (BERTH-01); emitted verbatim when set.
+    cabin_size_by_class: dict[str, int] | None = None
 
 
 @dataclass(frozen=True)
@@ -56,6 +58,10 @@ class PublicZoneRecipe:
     max_occupancy: int
     display: dict[str, float]
     description: str
+    # Dining venue fields (SEAT-01/02); emitted only when set.
+    dining_service_type: str | None = None
+    food_contamination_multiplier: float | None = None
+    meal_seatings: int | None = None
 
 
 @dataclass(frozen=True)
@@ -82,6 +88,10 @@ class CruisePlatformRecipe:
     # AHU_Pax_D* / AHU_Crew* ids listed in auto_* below.
     public_hvac: tuple[HvacGroupRecipe, ...]
     exterior_zones: tuple[str, ...] = ()
+    # Berth declaration (nominal_complement). The VSP rule scores passenger
+    # and crew denominators separately, so hulls that sail scored voyages
+    # declare both; None emits no key (Enterprise hulls carry none).
+    nominal_complement: dict[str, int] | None = None
     # Optional additional cabin-corridor banks (e.g. Galaxy family suites).
     extra_corridors: tuple[CorridorRecipe, ...] = ()
     auto_pax_ahu: bool = True
@@ -125,21 +135,28 @@ def _expedition_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "MainDining", "Dining", "high", 1050.0, "5_Panorama", 300,
             {"x": 40, "y": 40},
             "Main dining room with assigned seating. Deck 5. ~300 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "CasualDining", "Dining", "high", 525.0, "7_Sun", 150,
             {"x": 70, "y": 10},
             "Casual dining (table service / MDR). Deck 7. ~150 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "CrewMess", "Dining", "high", 210.0, "2_Crew", 60,
             {"x": 55, "y": 82},
             "Crew mess. Deck 2. ~60 seats.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=3,
         ),
         PublicZoneRecipe(
             "MainGalley", "Dining", "high", 525.0, "4_Voyager", 40,
             {"x": 35, "y": 55},
             "Main galley (crew-only service). Deck 4.",
+            dining_service_type="galley", food_contamination_multiplier=0.5,
         ),
         PublicZoneRecipe(
             "PoolDeck", "Free", "high", 1050.0, "7_Sun", 120,
@@ -276,6 +293,7 @@ def _expedition_adjacency() -> tuple[dict[str, str], ...]:
 
 EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
     platform_id="expedition_cruise_450",
+    nominal_complement={"passengers": 300, "crew": 150},
     description=(
         "Small/medium expedition cruise (~300 passengers + ~150 crew = 450). "
         "Silver Cloud / Le Boréal / Viking Star class archetype: ~160m LOA × 21m beam, "
@@ -309,7 +327,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
         sections=("Fwd", "Aft"),
         max_occupancy=40,
         volume_m3=450.0,
-        cabin_size=3,
+        cabin_size=2,
         traffic="medium",
         deck_label="{deck}_Crew",
         ventilation=lambda d, s, sec: "interior_hvac",
@@ -318,6 +336,7 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
             "~20 crew, interior HVAC."
         ),
         id_prefix="CC",
+        cabin_size_by_class={"crew_galley": 3},
     ),
     public_zones=_expedition_public_zones(),
     exterior_zones=("PoolDeck",),
@@ -420,31 +439,42 @@ def _classic_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "MainDining_L", "Dining", "high", 1400.0, "4_Main", 400,
             {"x": 50, "y": 55},
             "Main dining room lower level. Deck 4. ~400 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "MainDining_U", "Dining", "high", 1400.0, "5_Lounge", 400,
             {"x": 50, "y": 42},
             "Main dining room upper level. Deck 5. ~400 seats.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "LidoBuffet", "Dining", "high", 1225.0, "9_Lido", 350,
             {"x": 80, "y": 12},
             "Open Lido buffet. Deck 9. ~350 seats.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "Specialty", "Dining", "medium", 280.0, "5_Lounge", 80,
             {"x": 110, "y": 42},
             "Specialty restaurant. Deck 5. ~80 seats.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "CrewMess", "Dining", "high", 700.0, "1_Crew", 200,
             {"x": 60, "y": 92},
             "Crew mess. Deck 1. ~200 seats.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
         ),
         PublicZoneRecipe(
             "MainGalley", "Dining", "high", 900.0, "4_Main", 60,
             {"x": 30, "y": 55},
             "Main galley (crew-only). Deck 4.",
+            dining_service_type="galley", food_contamination_multiplier=0.5,
         ),
         PublicZoneRecipe(
             "PoolDeck", "Free", "high", 2100.0, "9_Lido", 400,
@@ -588,6 +618,7 @@ def _classic_adjacency() -> tuple[dict[str, str], ...]:
 
 CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
     platform_id="classic_cruise_1900",
+    nominal_complement={"passengers": 1350, "crew": 560},
     description=(
         "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). "
         "Holland America Veendam / Celebrity Century archetype: ~238m LOA × 32m beam, "
@@ -630,6 +661,9 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
             "~95 crew, interior HVAC."
         ),
         id_prefix="CC",
+        cabin_size_by_class={
+            "crew_galley": 4, "crew_engineering": 2, "crew_medical": 2,
+        },
     ),
     public_zones=_classic_public_zones(),
     exterior_zones=("PoolDeck",),
@@ -728,42 +762,61 @@ def _spirit_public_zones() -> tuple[PublicZoneRecipe, ...]:
         PublicZoneRecipe(
             "MainDining_L", "Dining", "high", 1600.0, "4_Main", 500,
             {"x": 55, "y": 58}, "Main dining lower. Deck 4.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "MainDining_U", "Dining", "high", 1600.0, "5_Lounge", 500,
             {"x": 55, "y": 48}, "Main dining upper. Deck 5.",
+            dining_service_type="mdr", food_contamination_multiplier=1.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "LidoBuffet", "Dining", "high", 1400.0, "10_Lido", 400,
             {"x": 90, "y": 14}, "Lido buffet. Deck 10.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "PizzaGrill", "Dining", "high", 420.0, "10_Lido", 120,
             {"x": 120, "y": 14}, "Pizzeria / grill quick-service. Deck 10.",
+            dining_service_type="buffet", food_contamination_multiplier=3.0,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "SpecialtyA", "Dining", "medium", 350.0, "5_Lounge", 80,
             {"x": 120, "y": 48}, "Specialty steakhouse. Deck 5.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "SpecialtyB", "Dining", "medium", 350.0, "5_Lounge", 80,
             {"x": 140, "y": 48}, "Specialty Italian. Deck 5.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "SpecialtyC", "Dining", "medium", 350.0, "11_Spa", 80,
             {"x": 40, "y": 8}, "Specialty Asian. Deck 11.",
+            dining_service_type="specialty", food_contamination_multiplier=0.5,
+            meal_seatings=2,
         ),
         PublicZoneRecipe(
             "CrewMessMain", "Dining", "high", 900.0, "1_Crew", 250,
             {"x": 70, "y": 95}, "Crew mess main. Deck 1.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
         ),
         PublicZoneRecipe(
             "CrewMessOff", "Dining", "medium", 280.0, "2_Crew", 60,
             {"x": 70, "y": 82}, "Officers mess. Deck 2.",
+            dining_service_type="crew_mess", food_contamination_multiplier=1.0,
+            meal_seatings=4,
         ),
         PublicZoneRecipe(
             "MainGalley", "Dining", "high", 1100.0, "4_Main", 80,
             {"x": 30, "y": 58}, "Main galley. Deck 4.",
+            dining_service_type="galley", food_contamination_multiplier=0.5,
         ),
         PublicZoneRecipe(
             "MainPool", "Free", "high", 2400.0, "10_Lido", 500,
@@ -934,6 +987,7 @@ def _spirit_adjacency() -> tuple[dict[str, str], ...]:
 
 SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
     platform_id="spirit_cruise_3000",
+    nominal_complement={"passengers": 2100, "crew": 900},
     description=(
         "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). "
         "Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA × 36m beam, "
@@ -977,6 +1031,7 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
             "~100 crew, interior HVAC."
         ),
         id_prefix="CC",
+        cabin_size_by_class={"crew_engineering": 2, "crew_medical": 2},
     ),
     public_zones=_spirit_public_zones(),
     exterior_zones=("MainPool", "AftPool", "SportsDeck"),

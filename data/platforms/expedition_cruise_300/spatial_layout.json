@@ -331,6 +331,239 @@
         "y": 82
       },
       "description": "Main engine room spanning Decks 1-2. ~300 m\u00b2 footprint \u00d7 8.4m effective height."
+    },
+    {
+      "id": "HD_2E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 60.0,
+        "y": 78.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_3M_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Marina",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Galley",
+        "Crew_Mess",
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 81.25,
+        "y": 64.0
+      },
+      "description": "Public head (male, 4 water closets) serving Galley, Crew_Mess, Laundry, Stores."
+    },
+    {
+      "id": "HD_3M_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "3_Marina",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Galley",
+        "Crew_Mess",
+        "Laundry",
+        "Stores"
+      ],
+      "display": {
+        "x": 81.25,
+        "y": 64.0
+      },
+      "description": "Public head (female, 4 water closets) serving Galley, Crew_Mess, Laundry, Stores."
+    },
+    {
+      "id": "HD_4V_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Voyager",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "MedBay",
+        "Reception_Lobby"
+      ],
+      "display": {
+        "x": 75.0,
+        "y": 51.0
+      },
+      "description": "Public head (male, 2 water closets) serving MedBay, Reception_Lobby."
+    },
+    {
+      "id": "HD_4V_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Voyager",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "MedBay",
+        "Reception_Lobby"
+      ],
+      "display": {
+        "x": 75.0,
+        "y": 51.0
+      },
+      "description": "Public head (female, 2 water closets) serving MedBay, Reception_Lobby."
+    },
+    {
+      "id": "HD_5P_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 31.05,
+      "floor_area_m2": 13.5,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Panorama",
+      "base_ach": 19.2,
+      "max_occupancy": 5,
+      "serves": [
+        "Main_Dining_Room",
+        "Theater_Lounge",
+        "Casino",
+        "Library"
+      ],
+      "display": {
+        "x": 81.25,
+        "y": 36.0
+      },
+      "description": "Public head (male, 5 water closets) serving Main_Dining_Room, Theater_Lounge, Casino, Library."
+    },
+    {
+      "id": "HD_5P_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 37.26,
+      "floor_area_m2": 16.2,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Panorama",
+      "base_ach": 19.2,
+      "max_occupancy": 6,
+      "serves": [
+        "Main_Dining_Room",
+        "Theater_Lounge",
+        "Casino",
+        "Library"
+      ],
+      "display": {
+        "x": 81.25,
+        "y": 36.0
+      },
+      "description": "Public head (female, 6 water closets) serving Main_Dining_Room, Theater_Lounge, Casino, Library."
+    },
+    {
+      "id": "HD_6E_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Explorer",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Gym",
+        "Spa",
+        "Buffet_Lido",
+        "Expedition_Lounge"
+      ],
+      "display": {
+        "x": 90.0,
+        "y": 21.0
+      },
+      "description": "Public head (male, 4 water closets) serving Gym, Spa, Buffet_Lido, Expedition_Lounge."
+    },
+    {
+      "id": "HD_6E_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 24.84,
+      "floor_area_m2": 10.8,
+      "ceiling_height_m": 2.3,
+      "deck": "6_Explorer",
+      "base_ach": 19.2,
+      "max_occupancy": 4,
+      "serves": [
+        "Gym",
+        "Spa",
+        "Buffet_Lido",
+        "Expedition_Lounge"
+      ],
+      "display": {
+        "x": 90.0,
+        "y": 21.0
+      },
+      "description": "Public head (female, 4 water closets) serving Gym, Spa, Buffet_Lido, Expedition_Lounge."
+    },
+    {
+      "id": "HD_7S_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Bridge",
+        "Pool_Deck",
+        "Observation_Lounge"
+      ],
+      "display": {
+        "x": 90.0,
+        "y": 6.0
+      },
+      "description": "Public head (male, 3 water closets) serving Bridge, Pool_Deck, Observation_Lounge."
+    },
+    {
+      "id": "HD_7S_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Sun",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "Bridge",
+        "Pool_Deck",
+        "Observation_Lounge"
+      ],
+      "display": {
+        "x": 90.0,
+        "y": 6.0
+      },
+      "description": "Public head (female, 3 water closets) serving Bridge, Pool_Deck, Observation_Lounge."
     }
   ],
   "graywater_zones": [

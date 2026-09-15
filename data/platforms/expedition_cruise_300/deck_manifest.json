@@ -1,11 +1,11 @@
 {
   "platform_id": "expedition_cruise_300",
-  "ship_class_label": "Expedition cruise (representative)",
+  "ship_class_label": "Expedition cruise — legacy well-mixed berthing",
   "footprint_tier": "representative",
-  "representative_of": "Small expedition cruise ship (~300 passengers, ~150 crew). Based on Silver Cloud / Le Boréal class vessels: ~157m LOA × 21m beam, 7 passenger decks, ~17,000 GT. Volumes estimated from published deck p",
+  "representative_of": "LEGACY platform (archived Aug 2026). Small expedition cruise with well-mixed Room berthing blocks (~50 pax per cabin block) and a single Crew_Quarters zone. Retained for regression and comparison only",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 25",
+    "zone count: 36",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -34,7 +34,18 @@
     "Laundry",
     "Crew_Quarters",
     "Stores",
-    "Engine_Room"
+    "Engine_Room",
+    "HD_2E_M",
+    "HD_3M_M",
+    "HD_3M_F",
+    "HD_4V_M",
+    "HD_4V_F",
+    "HD_5P_M",
+    "HD_5P_F",
+    "HD_6E_M",
+    "HD_6E_F",
+    "HD_7S_M",
+    "HD_7S_F"
   ],
   "decks": [
     "2_Engine",
@@ -61,7 +72,7 @@
     "wikimedia_title": "File:Cruise ship side view.png",
     "source_page": null,
     "license": "CC BY-SA 3.0",
-    "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic)",
+    "credit": "Marcusroos / Wikimedia Commons — cruise ship side elevation (schematic); LEGACY platform superseded by expedition_cruise_450",
     "local_file": "reference_photo.jpg"
   }
 }

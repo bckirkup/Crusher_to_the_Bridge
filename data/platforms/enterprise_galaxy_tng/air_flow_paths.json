@@ -15,7 +15,7 @@
         "EC_D7_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 7 cabin fan-coil branch."
+      "description": "Deck 7 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_EC_D8",
@@ -28,7 +28,7 @@
         "EC_D8_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 8 cabin fan-coil branch."
+      "description": "Deck 8 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_EC_D9",
@@ -41,7 +41,7 @@
         "EC_D9_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 9 cabin fan-coil branch."
+      "description": "Deck 9 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_EC_D10",
@@ -54,7 +54,7 @@
         "EC_D10_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 10 cabin fan-coil branch."
+      "description": "Deck 10 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_EC_D11",
@@ -67,7 +67,7 @@
         "EC_D11_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 11 cabin fan-coil branch."
+      "description": "Deck 11 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_EC_D12",
@@ -80,7 +80,7 @@
         "EC_D12_S_A"
       ],
       "ach": 7.0,
-      "description": "Deck 12 cabin fan-coil branch."
+      "description": "Deck 12 passenger cabin fan-coil branch."
     },
     {
       "id": "AHU_FC_D23",
@@ -170,7 +170,6 @@
       "rooms": [
         "Galley",
         "Mess_Hall",
-        "HeadsMain",
         "StoresDry",
         "StoresCold",
         "Armory"
@@ -213,6 +212,376 @@
       ],
       "ach": 7.0,
       "description": "Officer corridors."
+    },
+    {
+      "id": "AHU_HD_1D_M",
+      "rooms": [
+        "HD_1D_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1D_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2D_M",
+      "rooms": [
+        "HD_2D_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2D_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2D_F",
+      "rooms": [
+        "HD_2D_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2D_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_3D_M",
+      "rooms": [
+        "HD_3D_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_3D_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_3D_F",
+      "rooms": [
+        "HD_3D_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_3D_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_4D_M",
+      "rooms": [
+        "HD_4D_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_4D_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_4D_F",
+      "rooms": [
+        "HD_4D_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_4D_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_NECK_M",
+      "rooms": [
+        "HD_NECK_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_NECK_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_NECK_F",
+      "rooms": [
+        "HD_NECK_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_NECK_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_1S_M",
+      "rooms": [
+        "HD_1S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_1S_F",
+      "rooms": [
+        "HD_1S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_1S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_10S_M",
+      "rooms": [
+        "HD_10S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_10S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_10S_F",
+      "rooms": [
+        "HD_10S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_10S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_11S_M",
+      "rooms": [
+        "HD_11S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_11S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_11S_F",
+      "rooms": [
+        "HD_11S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_11S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_12S_M",
+      "rooms": [
+        "HD_12S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_12S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_12S_F",
+      "rooms": [
+        "HD_12S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_12S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_13S_M",
+      "rooms": [
+        "HD_13S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_13S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_13S_F",
+      "rooms": [
+        "HD_13S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_13S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14S_M",
+      "rooms": [
+        "HD_14S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_14S_F",
+      "rooms": [
+        "HD_14S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_14S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_M",
+      "rooms": [
+        "HD_15S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_15S_F",
+      "rooms": [
+        "HD_15S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_15S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_16S_M",
+      "rooms": [
+        "HD_16S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_16S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_16S_F",
+      "rooms": [
+        "HD_16S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_16S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_17S_M",
+      "rooms": [
+        "HD_17S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_17S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_17S_F",
+      "rooms": [
+        "HD_17S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_17S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2S_M",
+      "rooms": [
+        "HD_2S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_2S_F",
+      "rooms": [
+        "HD_2S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_2S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6S_M",
+      "rooms": [
+        "HD_6S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_6S_F",
+      "rooms": [
+        "HD_6S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_6S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7S_M",
+      "rooms": [
+        "HD_7S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7S_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_7S_F",
+      "rooms": [
+        "HD_7S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_7S_F, 1 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_8S_M",
+      "rooms": [
+        "HD_8S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_8S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_8S_F",
+      "rooms": [
+        "HD_8S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_8S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_9S_M",
+      "rooms": [
+        "HD_9S_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_9S_M, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_9S_F",
+      "rooms": [
+        "HD_9S_F"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_9S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -327,6 +696,302 @@
       "flow_rate_m3h": 500.0,
       "is_hvac_ducted": true,
       "path": "Cabin_Relief_D12"
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_HD_1D_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1D_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_HD_2D_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2D_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_HD_2D_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2D_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_HD_3D_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_3D_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Engineering",
+      "to": "AHU_HD_3D_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_3D_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Flight",
+      "to": "AHU_HD_4D_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_4D_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Flight",
+      "to": "AHU_HD_4D_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_4D_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_NECK_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_NECK_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_NECK_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_NECK_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Command",
+      "to": "AHU_HD_1S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Command",
+      "to": "AHU_HD_1S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_1S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_10S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_10S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_10S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_10S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_11S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_11S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_11S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_11S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_HD_12S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_12S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Medical",
+      "to": "AHU_HD_12S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_12S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_13S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_13S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_13S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_13S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_14S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_14S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_14S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_15S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_15S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_15S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_16S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_16S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_16S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_16S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_17S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_17S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_17S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_17S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Command",
+      "to": "AHU_HD_2S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Command",
+      "to": "AHU_HD_2S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_2S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_6S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_6S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_6S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_7S_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Ops",
+      "to": "AHU_HD_7S_F",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_7S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_8S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_8S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Service",
+      "to": "AHU_HD_8S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_8S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_9S_M",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_9S_M; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public",
+      "to": "AHU_HD_9S_F",
+      "flow_rate_m3h": 237.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_9S_F; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [
@@ -399,11 +1064,6 @@
       "from": "Galley",
       "to": "Mess_Hall",
       "type": "service_hatch"
-    },
-    {
-      "from": "Mess_Hall",
-      "to": "HeadsMain",
-      "type": "pocket_door"
     },
     {
       "from": "StoresDry",

@@ -1,10 +1,6 @@
 {
   "platform": "classic_cruise_1900",
   "description": "Large classic cruise (~1,350 passengers + ~560 crew = 1,910). Holland America Veendam / Celebrity Century archetype: ~238m LOA \u00d7 32m beam, ~57,000 GT. Cabin-corridor resolution (36 pax + 6 crew corridors). Key venues: Lido buffet, promenade, multi-deck atrium, kids club, isolation room. CDC Large AGE target 21.4/100K TD (calibration deferred).",
-  "nominal_complement": {
-    "passengers": 1350,
-    "crew": 560
-  },
   "isolation_unit_capacity": 0,
   "deck_dimensions": {
     "length_m": 238.0,
@@ -939,6 +935,337 @@
         "crew_engineering": 2,
         "crew_medical": 2
       }
+    },
+    {
+      "id": "HD_0E_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "0_Engine",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Engine_Room"
+      ],
+      "display": {
+        "x": 70.0,
+        "y": 101.0
+      },
+      "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_1C_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CrewMess",
+        "Laundry"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 88.0
+      },
+      "description": "Public head (male, 3 water closets) serving CrewMess, Laundry."
+    },
+    {
+      "id": "HD_1C_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 18.63,
+      "floor_area_m2": 8.1,
+      "ceiling_height_m": 2.3,
+      "deck": "1_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 3,
+      "serves": [
+        "CrewMess",
+        "Laundry"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 88.0
+      },
+      "description": "Public head (female, 3 water closets) serving CrewMess, Laundry."
+    },
+    {
+      "id": "HD_2C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "MedCenter"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 76.0
+      },
+      "description": "Public head (male, 1 water closet) serving MedCenter."
+    },
+    {
+      "id": "HD_2C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "2_Crew",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "MedCenter"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 76.0
+      },
+      "description": "Public head (female, 1 water closet) serving MedCenter."
+    },
+    {
+      "id": "HD_4M_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Main",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "MainDining_L",
+        "MainGalley",
+        "MainTheater",
+        "Reception"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 49.75
+      },
+      "description": "Public head (male, 10 water closets) serving MainDining_L, MainGalley, MainTheater, Reception."
+    },
+    {
+      "id": "HD_4M_F_1",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Main",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "MainDining_L",
+        "MainGalley",
+        "MainTheater",
+        "Reception"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 49.75
+      },
+      "description": "Public head (female, 7 water closets) serving MainDining_L, MainGalley, MainTheater, Reception."
+    },
+    {
+      "id": "HD_4M_F_2",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "4_Main",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "MainDining_L",
+        "MainGalley",
+        "MainTheater",
+        "Reception"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 49.75
+      },
+      "description": "Public head (female, 7 water closets) serving MainDining_L, MainGalley, MainTheater, Reception."
+    },
+    {
+      "id": "HD_5L_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 49.68,
+      "floor_area_m2": 21.6,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Lounge",
+      "base_ach": 19.2,
+      "max_occupancy": 8,
+      "serves": [
+        "MainDining_U",
+        "Specialty",
+        "Promenade",
+        "Casino",
+        "PhotoShops"
+      ],
+      "display": {
+        "x": 108.0,
+        "y": 38.0
+      },
+      "description": "Public head (male, 8 water closets) serving MainDining_U, Specialty, Promenade, Casino, +1 more."
+    },
+    {
+      "id": "HD_5L_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 62.1,
+      "floor_area_m2": 27.0,
+      "ceiling_height_m": 2.3,
+      "deck": "5_Lounge",
+      "base_ach": 19.2,
+      "max_occupancy": 10,
+      "serves": [
+        "MainDining_U",
+        "Specialty",
+        "Promenade",
+        "Casino",
+        "PhotoShops"
+      ],
+      "display": {
+        "x": 108.0,
+        "y": 38.0
+      },
+      "description": "Public head (female, 10 water closets) serving MainDining_U, Specialty, Promenade, Casino, +1 more."
+    },
+    {
+      "id": "HD_7C_M",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Cabins",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Library"
+      ],
+      "display": {
+        "x": 40.0,
+        "y": 24.0
+      },
+      "description": "Public head (male, 1 water closet) serving Library."
+    },
+    {
+      "id": "HD_7C_F",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "7_Cabins",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Library"
+      ],
+      "display": {
+        "x": 40.0,
+        "y": 24.0
+      },
+      "description": "Public head (female, 1 water closet) serving Library."
+    },
+    {
+      "id": "HD_8C_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 12.42,
+      "floor_area_m2": 5.4,
+      "ceiling_height_m": 2.3,
+      "deck": "8_Cabins",
+      "base_ach": 19.2,
+      "max_occupancy": 2,
+      "serves": [
+        "KidsClub"
+      ],
+      "display": {
+        "x": 40.0,
+        "y": 16.0
+      },
+      "description": "Public head (male, 2 water closets) serving KidsClub."
+    },
+    {
+      "id": "HD_8C_F",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "8_Cabins",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "KidsClub"
+      ],
+      "display": {
+        "x": 40.0,
+        "y": 16.0
+      },
+      "description": "Public head (female, 1 water closet) serving KidsClub."
+    },
+    {
+      "id": "HD_9L_M",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 43.47,
+      "floor_area_m2": 18.9,
+      "ceiling_height_m": 2.3,
+      "deck": "9_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 7,
+      "serves": [
+        "LidoBuffet",
+        "PoolDeck",
+        "SpaFit"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 8.0
+      },
+      "description": "Public head (male, 7 water closets) serving LidoBuffet, PoolDeck, SpaFit."
+    },
+    {
+      "id": "HD_9L_F",
+      "type": "Sanitary",
+      "traffic": "high",
+      "volume_m3": 55.89,
+      "floor_area_m2": 24.3,
+      "ceiling_height_m": 2.3,
+      "deck": "9_Lido",
+      "base_ach": 19.2,
+      "max_occupancy": 9,
+      "serves": [
+        "LidoBuffet",
+        "PoolDeck",
+        "SpaFit"
+      ],
+      "display": {
+        "x": 80.0,
+        "y": 8.0
+      },
+      "description": "Public head (female, 9 water closets) serving LidoBuffet, PoolDeck, SpaFit."
     }
-  ]
+  ],
+  "nominal_complement": {
+    "passengers": 1350,
+    "crew": 560
+  }
 }
