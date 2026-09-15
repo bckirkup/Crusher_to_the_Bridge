@@ -20,8 +20,12 @@
 > infection age nor 1-vs-3 imports moved anything all sit partly on that cohort.
 > The hull spec now opts the arm out (`HullScenario._initiation_block`); the
 > change-detector cell moved from (53, 15, 217, 74, 39) to (1, 1, 217, 3, 2),
-> attributed to that one change. Reruns: `covid_first_look_v3` and
-> `covid_boarding_screen_v2`; until they land, no number below is current.
+> attributed to that one change. **Reruns landed 2026-09-15** as
+> `covid_first_look_v3` (770/770) and `covid_boarding_screen_v2` (180/180),
+> zero failures, on `main` = `4de87ba` (#543): see the two sections at the
+> end. Everything between here and those sections describes the model *with*
+> the undeclared cohort and is kept as the record of what was measured; it is
+> not the current statement of the fit.
 
 This replaces the single-seed fit of 2026-09-05 (`covid_theta_fit.json`) as the
 current statement of how the COVID arm fits. It is a first look: it tells us
@@ -319,6 +323,267 @@ short of 128; the hull still goes extinct in half the seeds.
 - The asymptomatic-share misfit is a campaign-roster question (who gets
   swabbed by whom first), not an ascertainment-start question.
 
+## covid_first_look_v3: the declared index case, and nothing else
+
+Same grid, same 20 + 50 matched seeds, same objective and loss as v1/v2; the
+only change is that the hull spec now opts `sars_cov2_resp` out of the
+ship-wide boarding channel (#543), so each Diamond Princess cell starts from
+one index case instead of one index case plus a prevalence-drawn cohort of
+about 34. Image `picard-campaign:covid-first-look-v3` from `4de87ba` (CPython
+3.11.16); 770/770 cells, zero Batch failures. Outputs:
+`telemetry_buffer/observation_model/covid_theta_fit_v4.json` and
+`covid_theta_held_out_v4.json`. Cells pair with v1 and v2 by (Theta, seed).
+
+### Phase 1, Diamond Princess (20 seeds)
+
+Medians are no longer the useful summary: the surface is bimodal. Recorded
+onsets per seed, sorted, at each Theta:
+
+| Theta | recorded onsets, 20 seeds sorted | P(takeoff, ≥10) | loss (mean) | wins |
+|---|---|---|---|---|
+| 1e4 | 0 ×12, 1 ×6, 4, 37 | 0.05 | 106.1 | 0.00 |
+| 3.16e4 | 0 ×12, 1 ×6, 11, 91 | 0.10 | 104.9 | 0.00 |
+| 1e5 | 0 ×12, 1 ×6, 47, 185 | 0.10 | 102.4 | 0.00 |
+| 3.16e5 | 0 ×8, 1 ×9, 2, 153, 261 | 0.10 | 95.0 | 0.00 |
+| 1e6 | 0 ×9, 1 ×6, 2, 4, 5, 309, 381 | 0.10 | 91.5 | 0.00 |
+| 3.16e6 | 0 ×7, 1 ×6, 2, 5, 11, 18, 30, 321, 403 | 0.25 | 79.1 | 0.00 |
+| 1e7 | 0 ×5, 1 ×7, 2 ×3, 13, 16, 23, 387, 597 | 0.25 | 75.0 | 0.00 |
+| 1e8 | 0 ×4, 1 ×5, 2, 3, 3, 4, 4, 6, 20, 23, 37, 448, 724 | 0.25 | 59.8 | 0.01 |
+| 1e9 | 0 ×3, 1 ×4, 2 ×4, 6, 8, 8, 21, 22, 51, 161, 628, 979 | 0.30 | 52.0 | 0.94 |
+| *observed* | *197 (34 before 6 Feb)* | | | |
+
+**Theta = 1e9, boundary-pinned** (0.94 of paired-bootstrap resamples; 3.16e8
+the rest). This is not a fit either, and for the opposite reason to v1/v2:
+the mean loss is dominated by the 14–18 seeds that never get past a handful
+of onsets (loss ≈ 100 each against ≈ 3 for a seed that takes off), so
+selection is chasing takeoff probability up the grid, and takeoff probability
+saturates near 0.25–0.30 from 3e6 upward. Five decades of Theta move
+P(takeoff) from 0.05 to 0.30.
+
+**Takeoff is decided by the seed, not by Theta.** Two seeds (20200205 and
+20200221) take off at every Theta from 1e4 up; seven seeds never exceed 3
+onsets even at 1e9. Per-seed shedding multipliers of the index case
+(`shedding_variance_log10` 1.2) do not explain it: the two seeds that always
+take off drew 57.8 and 2.2, while 20200219 (54.2), 20200214 (28.8) and
+20200223 (21.1) never do. Whatever separates them is set at initialisation
+and is insensitive to the transmission scale across five decades — which
+points at the index case's contact opportunity (cabin, schedule, isolation on
+presentation) rather than at emission or per-copy risk. This is the open
+question the campaign leaves; it has not been traced.
+
+**Conditional on taking off, the trajectory is now too slow, not too fast.**
+Among seeds with ≥10 onsets at 1e5–1e6 (n = 2 each): median onsets before
+6 Feb 2–7 vs 34 observed, totals 116–345 vs 197, campaign positives 146–536
+vs 634, asymptomatic share 0.89–0.95 vs 0.50. At 3e6–1e9 the taking-off
+group (n = 5–6) is a mixture of two large outbreaks (600–980 onsets) and
+three or four late clusters of 11–52. The ~120 early onsets of v1/v2 were
+the undeclared cohort; with one index the model cannot produce 34 onsets in
+the first 17 days from any Theta in the grid.
+
+**The asymptomatic share (0.89–0.97 where defined) did not move.** The
+cohort was not its cause; the campaign-roster drain described under v2
+stands.
+
+### Phase 2, Greg Mortimer at Theta = 1e9 (50 seeds; 3.16e8 in parentheses)
+
+| | v2 at 3.16e4 | v3 at 1e9 (3.16e8) | observed |
+|---|---|---|---|
+| P(no positives) | 0.48 | 0.20 (0.24) | — |
+| P(takeoff, ≥10 onsets) | 0.20 | 0.04 (0.04) | — |
+| campaign positives, median / q95 | 1 / 34 | 3 / 16 (2.5 / 16) | 128 |
+| H1 positive share | miss 50/50 | miss 50/50 (median 0.014) | 0.59 |
+| H2 asymptomatic share among positives | hit 3, miss 23 of 26 defined | hit 7, miss 33 of 40 defined (median 1.00) | 0.81 |
+| H3 share above cross-ship IQR | 0.28 | 0.48 | 0.015 |
+
+At the selected Theta the held-out hull almost never takes off and its
+median positive count is 3 of 217 against 128 observed; the H3 figure rises
+because a 1e9 scale makes small clusters common on a small hull, not because
+the outbreak is reproduced. Across the whole held-out grid P(takeoff) never
+exceeds 0.04 and the q95 of positives never exceeds 18 — Greg Mortimer, with
+its one declared import, does not produce its outbreak at any Theta.
+
+### What v3 says
+
+- v1 and v2 were fits to the wrong initial condition. Their Theta (3.16e4),
+  the "three misfits a single scale cannot absorb", and P(takeoff) = 1.0
+  were properties of a ~35-import experiment. They should not be quoted.
+- With the declared single index case, the composite Theta is not the lever
+  for takeoff at all; it moves the size of an outbreak that has already
+  started (37 → 979 onsets across the grid on the seeds that ignite) and
+  barely moves whether one starts.
+- The record's one identified import is therefore too few for this hull, or
+  a within-ship mechanism removes the index case's early contacts, or both.
+  The boarding screen below separates the first from the second as far as
+  10 seeds allow.
+
+## covid_boarding_screen_v2: index infection age × imports × Theta
+
+Declared axes, not fitted: infection age at boarding {0, 3, 6} d × imports
+{1, 3} × Theta {1e4, 3.16e4, 1e5} × 10 matched Diamond Princess seeds
+(20200205..14, the first ten of the fit set), shared heads visited
+(`dwell_weighted`). 180/180 cells, zero failures, image
+`picard-campaign:covid-boarding-screen-v2` from `4de87ba`. Output
+`telemetry_buffer/observation_model/covid_boarding_screen_v2.json`. The
+sanitary witness is consistent in all 180 cells (declared mode
+`dwell_weighted`, visits recorded in every cell). `covid_boarding_screen_v1`
+(same grid, undeclared cohort present) is superseded and was never written
+up: its surface was flat because every axis was a perturbation on ~35
+imports.
+
+| Theta | age (d) | imports | P(takeoff) | onsets before 6 Feb, median / q95 | recorded onsets, median / q95 | first onset day, median | positives, median | asym. share, median |
+|---|---|---|---|---|---|---|---|---|
+| 1e4 | 0 | 1 | 0.10 | 0 / 1 | 0 / 19 | 17 | 0 | 0.00 |
+| 1e4 | 0 | 3 | 0.30 | 2 / 2 | 3 / 39 | 14 | 3 | 0.67 |
+| 1e4 | 3 | 1 | 0.00 | 0 / 1 | 0 / 1 | 11 | 0 | 0.00 |
+| 1e4 | 3 | 3 | 0.10 | 0 / 4 | 2 / 14 | 14.5 | 1 | 0.25 |
+| 1e4 | 6 | 1 | 0.00 | 0 / 1 | 0 / 6 | 14 | 0 | 0.67 |
+| 1e4 | 6 | 3 | 0.20 | 1 / 12 | 2 / 206 | 13 | 1 | 0.25 |
+| 3.16e4 | 0 | 1 | 0.10 | 0 / 1 | 0 / 54 | 17 | 0 | 0.00 |
+| 3.16e4 | 0 | 3 | 0.30 | 2 / 2 | 8 / 106 | 14 | 8 | 0.64 |
+| 3.16e4 | 3 | 1 | 0.00 | 0 / 1 | 0 / 4 | 14 | 0 | 0.25 |
+| 3.16e4 | 3 | 3 | 0.20 | 0 / 3 | 3 / 34 | 11.5 | 2 | 0.66 |
+| 3.16e4 | 6 | 1 | 0.10 | 0 / 1 | 0 / 9 | 14 | 0 | 0.65 |
+| 3.16e4 | 6 | 3 | 0.40 | 2 / 15 | 4 / 258 | 13 | 6 | 0.44 |
+| 1e5 | 0 | 1 | 0.10 | 0 / 1 | 0 / 93 | 17 | 1 | 0.00 |
+| 1e5 | 0 | 3 | 0.50 | 1 / 5 | 9 / 172 | 14 | 11 | 0.82 |
+| 1e5 | 3 | 1 | 0.00 | 0 / 1 | 0 / 4 | 14 | 0 | 0.50 |
+| 1e5 | 3 | 3 | 0.50 | 2 / 6 | 9 / 75 | 11 | 6 | 0.68 |
+| 1e5 | 6 | 1 | 0.20 | 0 / 1 | 1 / 16 | 20.5 | 1 | 0.78 |
+| 1e5 | 6 | 3 | 0.60 | 2 / 19 | 13 / 310 | 11 | 16 | 0.52 |
+| *observed* | | | | *34* | *197* | *—* | *634* | *0.50* |
+
+First onset day, positives and asymptomatic share are medians over the seeds
+where they are defined (a seed with no onsets has no first onset), so they
+rest on 1–6 seeds per cell and are indicative only.
+
+**Imports is the axis that moves.** Going from one import to three lifts
+P(takeoff) from 0.0–0.2 to 0.1–0.6 at every Theta and every age, and lifts
+the q95 of recorded onsets by one to two orders of magnitude. That is what a
+per-import ignition probability of order 0.1–0.2 predicts, and it is
+consistent with the fit grid above where P(takeoff) with one import sat at
+0.05–0.10 in this Theta range.
+
+**Infection age moves the first onset, weakly.** With three imports, first
+recorded onset shifts from day 14 (age 0) to day 11–13 (age 3–6); with one
+import the cell is mostly extinct and the median is noise. Age alone does not
+rescue takeoff: age 3 or 6 with one import is 0.0–0.2 at every Theta. The
+contrast is in the direction the mechanism predicts (an older index is
+nearer its infectious peak at boarding), and it was invisible in screen v1.
+
+**Nothing in the grid reaches the record.** The best cell (1e5, age 6,
+three imports) has median 2 onsets before 6 Feb and 13 total against 34 and
+197, with a q95 that overshoots (19 / 310). Ten seeds at these takeoff
+probabilities leave 1–6 taking-off runs per cell; the screen shows the shape
+of the surface, not its values.
+
+### What the corrected screen says
+
+- The number of imports, not the transmission scale and not the index case's
+  age, is the first-order unknown for whether this hull's outbreak starts.
+  That is the boarding baseline-shift question from the original plan, now
+  posed as a measurable declared axis rather than hidden in a profile
+  default.
+- The next campaign, if approved, is a declared import-count sweep
+  ({1, 3, 5, 10, 20}) at a few Theta values with 20 seeds, reporting
+  P(takeoff), onsets before 6 Feb and totals — a report of how many imports
+  the hull needs, not a fit of that number. Its result feeds Phase 3 directly.
+- Separately, the seed-determined, Theta-insensitive takeoff in the fit grid
+  wants a one-cell trace of the index case (contacts in its first infectious
+  week; whether presentation isolates it) before any import count is
+  declared, since a mechanism that removes the index case's contacts would
+  masquerade as a need for more imports.
+
+## Index-case trace (local, 2026-09-16): why takeoff is seed-locked
+
+One cell per seed, Theta = 1e6, CPython 3.12, the corrected scenario,
+`execute_transmission` wrapped to record the index case's location, the
+dose it put on its co-occupants each epoch, its symptom / isolation state,
+and every transmission event. Seeds 20200205 and 20200221 (the two that
+ignite at every Theta) and 20200206 / 20200207 (extinct at every Theta),
+plus two counterfactuals with the index's incubation pinned.
+
+**The index case's incubation is drawn at a dose of zero, and the model
+reads zero as the lightest possible inoculum.** An explicit seed carries
+`acquired_particles = 0.0` (`engines/initiation.py:_apply_one_seed`, and
+the boarding path draws against a scratch record with the same value). The
+incubation model (`engines/incubation.py:dose_factor`) floors that at 1e-9
+particles, 12.4 log10 below the profile's reference dose (10^3.43), and
+lengthens the median by the capped maximum factor 2.5: median 5.8 d becomes
+14.5 d, lognormal GSD 1.57, clamped at 21 d. Shedding starts 2 d before onset
+(`presymptomatic_shedding_days`), so the declared index case sheds nothing
+for a median 12.5 days of a 23-day voyage. The twenty fit seeds' index
+draws:
+
+| incubation (d) | seeds | onsets at 1e6 / 1e9 |
+|---|---|---|
+| 5.1, 5.8, 7.5, 8.0 | 20200221, 15, 20, 17 | 309 / 979, 0 / 21, 4 / 161, 0 / 0 |
+| 10.5, 12.4, 12.5 | 20200205, 06, 23 | 381 / 628, 1 / 8, 2 / 22 |
+| 14.6 – 17.5 | 20200210, 13, 11, 16, 08 | 5 / 51, 0 / 8, 1 / 2, 1 / 2, 0 / 1 |
+| 20.9 – 21.0 (clamp) | seven seeds | 0–1 / 0–6 |
+
+Seven of twenty index cases hit the 21-day clamp and cannot present before
+the voyage ends; only four draw under 8 d. Incubation plus the per-host
+shedding multiplier (57.8 on 20200205, 0.00 on 20200217) orders the seeds.
+Pinning 20200206's incubation at 4.96 d (its draw / 2.5) with its 0.27
+multiplier still gave no transmission in 14 d; pinning 20200207 at 8.4 d
+gave two.
+
+**Every secondary case gets the same 2.5× penalty**, because acquisition
+doses under the composite Theta are ~1e-7 in the units the incubation term
+reads as particles (first transmission events in both igniting seeds carried
+0.9e-7 – 3.6e-7). The generation interval is therefore ~13 d rather than
+~5 d: seed 20200221 reached 1000 infections by voyage end but only 309 of
+them had an onset to record. This is the "too slow conditional on
+takeoff" finding above, and it is a units mismatch between Theta-scaled
+doses and `incubation.dose_reference_log10`, not biology. The profile note
+on `dose_reference_log10` chose the profile's own N50 (2670) precisely so
+that "a near-ID50 host presents at the literature median"; on the composite
+arm that premise fails, because Theta scales the dose in the infection
+probability and not in the incubation term, so hosts are infected ten
+decades below the N50 the incubation term is referenced to.
+
+**Presentation isolates the index within one epoch, and the isolation
+leaks inside the cabin block.** On 20200205 the index turned symptomatic at
+epoch 251 and was confined at 252; all 37 of its transmissions came later
+(epochs 312–361) inside its home zone `PC_D6_S_A`, a 38-occupant cabin
+block that confinement does not leave. 20200207 (pinned) was the same
+pattern with two events. 20200221 turned symptomatic at epoch 122 and was
+**never** confined in 552 epochs; it kept its Aqua_Theater / dining rotation
+and seeded 1000 infections. Why it escaped confinement was not traced
+(inference: the bimodal compliance draw; it is consistent with a refuser).
+
+**The index case's contacts are not the problem.** Both traced index cases
+had 30–550 co-occupants every epoch from epoch 0 (cabin block, promenade,
+main dining). Nothing strands the index case; it simply does not shed
+until late, and when it does the shedding is 3–5 log10 for the two
+presymptomatic days, which delivered no infections in any trace.
+
+Implications, in order:
+
+- The seed-locked takeoff is an initialisation defect, not evidence about
+  imports. A declared import with no stated dose should draw its incubation
+  at the reference dose (factor 1.0), not at the floor; until it does, the
+  import-count sweep proposed above would be counting how many 14.5-day
+  incubations it takes to get one short one.
+- The same zero-dose draw sits under every norovirus explicit seed and every
+  boarding-drawn host: `norwalk_gi` has `dose_log10_shortening 0.12` and
+  reference 10^4.23, so its seeds and boarders take 1.2 d × 2.5 = 3.0 d
+  median incubation against a 6 d clamp. Whether norovirus *transmitted*
+  doses also sit below the reference depends on that arm's dose units and
+  was not checked here.
+- The 2.5× penalty on Theta-scaled secondary doses means the COVID arm's
+  incubation term is currently reading a composite scale as an inoculum.
+  Either the incubation dose term is disabled on the composite-Theta arm, or
+  the acquired dose is converted to the units the reference is in, before
+  any Theta or import count is interpreted.
+- The infection-age result in the screen (age 6 d moving first onset by
+  ~3 d) is what subtracting 6 d from a 14.5-d median predicts; it is not
+  evidence about the record's index case.
+
+Trace scripts and JSON are session artifacts, not in the tree; the mechanism
+is checkable from the two functions named above and one 2-epoch run
+(`incubation_days` appears on the index record after the first step).
+
 ## Reproduction
 
 ```bash
@@ -335,3 +600,16 @@ job definition `picard-covid-hull:1`, image
 `picard-campaign:covid-first-look-v1`, queue `picard-campaign-queue`. Fit cells
 took roughly one hour each on the shared Spot fleet; the whole campaign ran in
 under three hours wall-clock.
+
+v3 / screen v2 (2026-09-15): fit `cd4e7b89-fc19-46a5-a9aa-63b29efc6919`
+(220 children), held-out `242fccaa-f1d4-4b6e-8cb7-c435b65c6f5d` (11 children),
+boarding screen `433d085c-646b-40b9-962b-89533b21f332` (180 children); job
+definitions `picard-covid-hull:3` and `picard-covid-boarding-screen:2`; S3
+prefixes `campaign/covid_first_look_v3/` and `campaign/covid_boarding_screen_v2/`.
+
+```bash
+python3 tools/fit_covid_theta.py merge --cells <v3 cells> \
+  --design picard_framework/runs/covid_first_look_v3_design.json
+python3 tools/fit_covid_theta.py screen --cells <screen v2 cells> \
+  --design picard_framework/runs/covid_boarding_screen_v2_design.json
+```

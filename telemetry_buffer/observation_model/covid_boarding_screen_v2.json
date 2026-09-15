@@ -1,0 +1,1568 @@
+{
+  "coverage": {
+    "expected": 180,
+    "found": 180,
+    "partial": false
+  },
+  "design": {
+    "design_id": "covid_boarding_screen_v2",
+    "imports": [
+      1,
+      3
+    ],
+    "infection_age_days": [
+      0.0,
+      3.0,
+      6.0
+    ],
+    "sanitary_visit_mode": "dwell_weighted",
+    "scenario_id": "diamond_princess_2020",
+    "seed_base": 20200205,
+    "seeds": 10,
+    "takeoff_recorded_onsets": 10,
+    "thetas": [
+      10000.0,
+      31622.776601683792,
+      100000.0
+    ]
+  },
+  "note": "A screen, not a fit. Cells are paired by seed against the declared scenario (infection_age_days 0, imports 1) at the same Theta. No entry here may be used to move the scenario.",
+  "sanitary_witness": {
+    "cells": 180,
+    "cells_with_visits": 180,
+    "consistent": true,
+    "declared_mode": "dwell_weighted"
+  },
+  "surface": [
+    {
+      "asymptomatic_share": {
+        "mean": 0.2073170731707317,
+        "median": 0.0,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 0.7048780487804874
+      },
+      "campaign_positives": {
+        "mean": 4.4,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 22.999999999999957
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "recorded_onsets": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "seeds_with_more_early_onsets": 0
+      },
+      "early_onset_share": {
+        "mean": 0.5,
+        "median": 0.5,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 16.5,
+        "median": 17.0,
+        "n": 4,
+        "q05": 12.45,
+        "q95": 19.85
+      },
+      "imports": 1,
+      "infection_age_days": 0.0,
+      "is_baseline": true,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 3.7,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 19.149999999999963
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.1,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.518312757201646,
+        "median": 0.6666666666666666,
+        "n": 9,
+        "q05": 0.0,
+        "q95": 0.9333333333333333
+      },
+      "campaign_positives": {
+        "mean": 13.3,
+        "median": 3.0,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 45.89999999999998
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 1.0,
+          "median": 1.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 2.0
+        },
+        "recorded_onsets": {
+          "mean": 7.8,
+          "median": 2.0,
+          "n": 10,
+          "q05": 0.45,
+          "q95": 32.44999999999998
+        },
+        "seeds_with_more_early_onsets": 7
+      },
+      "early_onset_share": {
+        "mean": 0.3813131313131313,
+        "median": 0.29545454545454547,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 14.3,
+        "median": 14.0,
+        "n": 10,
+        "q05": 9.45,
+        "q95": 20.0
+      },
+      "imports": 3,
+      "infection_age_days": 0.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 1.2,
+        "median": 1.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 2.0
+      },
+      "recorded_onsets": {
+        "mean": 11.5,
+        "median": 3.0,
+        "n": 10,
+        "q05": 1.0,
+        "q95": 38.74999999999999
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.3,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.0,
+        "median": 0.0,
+        "n": 3,
+        "q05": 0.0,
+        "q95": 0.0
+      },
+      "campaign_positives": {
+        "mean": 0.3,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 0.5499999999999989
+        },
+        "recorded_onsets": {
+          "mean": -3.4,
+          "median": 0.0,
+          "n": 10,
+          "q05": -19.15,
+          "q95": 1.0
+        },
+        "seeds_with_more_early_onsets": 1
+      },
+      "early_onset_share": {
+        "mean": 0.6666666666666666,
+        "median": 1.0,
+        "n": 3,
+        "q05": 0.1,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 12.333333333333334,
+        "median": 11.0,
+        "n": 3,
+        "q05": 9.2,
+        "q95": 16.4
+      },
+      "imports": 1,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 0.3,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.0,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.2916666666666667,
+        "median": 0.25,
+        "n": 6,
+        "q05": 0.0,
+        "q95": 0.6458333333333333
+      },
+      "campaign_positives": {
+        "mean": 3.3,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 13.099999999999998
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.8,
+          "median": 0.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 3.649999999999997
+        },
+        "recorded_onsets": {
+          "mean": 0.1,
+          "median": 1.0,
+          "n": 10,
+          "q05": -17.5,
+          "q95": 13.599999999999987
+        },
+        "seeds_with_more_early_onsets": 4
+      },
+      "early_onset_share": {
+        "mean": 0.42351973684210525,
+        "median": 0.19407894736842105,
+        "n": 8,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 14.5,
+        "median": 14.5,
+        "n": 8,
+        "q05": 7.05,
+        "q95": 22.299999999999997
+      },
+      "imports": 3,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 1.0,
+        "median": 0.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 3.649999999999997
+      },
+      "recorded_onsets": {
+        "mean": 3.8,
+        "median": 1.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 14.049999999999988
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.1,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.4646464646464647,
+        "median": 0.6666666666666666,
+        "n": 3,
+        "q05": 0.06666666666666667,
+        "q95": 0.7212121212121212
+      },
+      "campaign_positives": {
+        "mean": 1.5,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 7.3999999999999915
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.1,
+          "median": 0.0,
+          "n": 10,
+          "q05": -1.0,
+          "q95": 1.0
+        },
+        "recorded_onsets": {
+          "mean": -2.5,
+          "median": 0.0,
+          "n": 10,
+          "q05": -16.95,
+          "q95": 4.299999999999994
+        },
+        "seeds_with_more_early_onsets": 3
+      },
+      "early_onset_share": {
+        "mean": 0.46428571428571425,
+        "median": 0.25,
+        "n": 3,
+        "q05": 0.15357142857142855,
+        "q95": 0.9249999999999999
+      },
+      "first_onset_day": {
+        "mean": 14.333333333333334,
+        "median": 14.0,
+        "n": 3,
+        "q05": 14.0,
+        "q95": 14.9
+      },
+      "imports": 1,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.3,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 1.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 5.649999999999997
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.0,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.3572951171635382,
+        "median": 0.25,
+        "n": 8,
+        "q05": 0.0,
+        "q95": 0.8522328548644338
+      },
+      "campaign_positives": {
+        "mean": 32.3,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 158.39999999999998
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 2.7,
+          "median": 1.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 11.349999999999982
+        },
+        "recorded_onsets": {
+          "mean": 37.5,
+          "median": 1.0,
+          "n": 10,
+          "q05": -17.049999999999997,
+          "q95": 205.89999999999986
+        },
+        "seeds_with_more_early_onsets": 7
+      },
+      "early_onset_share": {
+        "mean": 0.6193721602643536,
+        "median": 0.6666666666666666,
+        "n": 9,
+        "q05": 0.029739776951672865,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 12.88888888888889,
+        "median": 13.0,
+        "n": 9,
+        "q05": 7.2,
+        "q95": 17.2
+      },
+      "imports": 3,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 2.9,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 11.89999999999998
+      },
+      "recorded_onsets": {
+        "mean": 41.2,
+        "median": 2.0,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 206.44999999999985
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.2,
+      "theta": 10000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.23333333333333334,
+        "median": 0.0,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 0.793333333333333
+      },
+      "campaign_positives": {
+        "mean": 9.3,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 49.9499999999999
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "recorded_onsets": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "seeds_with_more_early_onsets": 0
+      },
+      "early_onset_share": {
+        "mean": 0.5,
+        "median": 0.5,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 16.5,
+        "median": 17.0,
+        "n": 4,
+        "q05": 12.45,
+        "q95": 19.85
+      },
+      "imports": 1,
+      "infection_age_days": 0.0,
+      "is_baseline": true,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 10.1,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 54.349999999999895
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.1,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.5248050560550561,
+        "median": 0.6363636363636364,
+        "n": 9,
+        "q05": 0.0,
+        "q95": 0.9070741758241758
+      },
+      "campaign_positives": {
+        "mean": 42.0,
+        "median": 8.5,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 164.14999999999986
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 1.1,
+          "median": 1.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 2.0
+        },
+        "recorded_onsets": {
+          "mean": 17.7,
+          "median": 4.5,
+          "n": 10,
+          "q05": -9.35,
+          "q95": 87.3999999999999
+        },
+        "seeds_with_more_early_onsets": 8
+      },
+      "early_onset_share": {
+        "mean": 0.2750514091721441,
+        "median": 0.15064102564102563,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 0.8499999999999996
+      },
+      "first_onset_day": {
+        "mean": 13.9,
+        "median": 14.0,
+        "n": 10,
+        "q05": 9.45,
+        "q95": 18.65
+      },
+      "imports": 3,
+      "infection_age_days": 0.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 1.3,
+        "median": 1.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 2.0
+      },
+      "recorded_onsets": {
+        "mean": 27.8,
+        "median": 8.0,
+        "n": 10,
+        "q05": 1.0,
+        "q95": 106.29999999999995
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.3,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.33333333333333337,
+        "median": 0.25,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 0.7833333333333332
+      },
+      "campaign_positives": {
+        "mean": 1.0,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 4.199999999999996
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 0.5499999999999989
+        },
+        "recorded_onsets": {
+          "mean": -9.1,
+          "median": 0.0,
+          "n": 10,
+          "q05": -50.5,
+          "q95": 1.0
+        },
+        "seeds_with_more_early_onsets": 1
+      },
+      "early_onset_share": {
+        "mean": 0.5,
+        "median": 0.5,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 14.25,
+        "median": 14.0,
+        "n": 4,
+        "q05": 9.3,
+        "q95": 19.549999999999997
+      },
+      "imports": 1,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 1.0,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 4.299999999999994
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.0,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.6202551834130781,
+        "median": 0.6552631578947368,
+        "n": 8,
+        "q05": 0.11666666666666667,
+        "q95": 1.0
+      },
+      "campaign_positives": {
+        "mean": 6.3,
+        "median": 2.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 25.849999999999973
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.8,
+          "median": 0.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 3.099999999999998
+        },
+        "recorded_onsets": {
+          "mean": -2.0,
+          "median": 2.0,
+          "n": 10,
+          "q05": -52.15,
+          "q95": 33.44999999999996
+        },
+        "seeds_with_more_early_onsets": 4
+      },
+      "early_onset_share": {
+        "mean": 0.23816930618401205,
+        "median": 0.07767722473604827,
+        "n": 8,
+        "q05": 0.0,
+        "q95": 0.8249999999999997
+      },
+      "first_onset_day": {
+        "mean": 13.75,
+        "median": 11.5,
+        "n": 8,
+        "q05": 7.75,
+        "q95": 21.299999999999997
+      },
+      "imports": 3,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 1.0,
+        "median": 0.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 3.099999999999998
+      },
+      "recorded_onsets": {
+        "mean": 8.1,
+        "median": 3.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 33.89999999999996
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.2,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.43790849673202614,
+        "median": 0.6470588235294118,
+        "n": 3,
+        "q05": 0.06470588235294118,
+        "q95": 0.6647058823529411
+      },
+      "campaign_positives": {
+        "mean": 2.4,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 12.049999999999988
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.1,
+          "median": 0.0,
+          "n": 10,
+          "q05": -1.0,
+          "q95": 1.0
+        },
+        "recorded_onsets": {
+          "mean": -8.3,
+          "median": 0.0,
+          "n": 10,
+          "q05": -50.5,
+          "q95": 5.94999999999999
+        },
+        "seeds_with_more_early_onsets": 3
+      },
+      "early_onset_share": {
+        "mean": 0.4142857142857143,
+        "median": 0.14285714285714285,
+        "n": 3,
+        "q05": 0.10428571428571429,
+        "q95": 0.9142857142857141
+      },
+      "first_onset_day": {
+        "mean": 14.333333333333334,
+        "median": 14.0,
+        "n": 3,
+        "q05": 14.0,
+        "q95": 14.9
+      },
+      "imports": 1,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.3,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 1.8,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 8.649999999999997
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.1,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.47955456002331,
+        "median": 0.43939393939393934,
+        "n": 8,
+        "q05": 0.0,
+        "q95": 0.9032167832167832
+      },
+      "campaign_positives": {
+        "mean": 59.1,
+        "median": 6.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 255.79999999999987
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 3.7,
+          "median": 2.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 14.649999999999975
+        },
+        "recorded_onsets": {
+          "mean": 47.8,
+          "median": 2.5,
+          "n": 10,
+          "q05": -47.85,
+          "q95": 257.2499999999999
+        },
+        "seeds_with_more_early_onsets": 8
+      },
+      "early_onset_share": {
+        "mean": 0.440605890768965,
+        "median": 0.3333333333333333,
+        "n": 9,
+        "q05": 0.014186991869918699,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 11.666666666666666,
+        "median": 13.0,
+        "n": 9,
+        "q05": 6.8,
+        "q95": 15.2
+      },
+      "imports": 3,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 3.9,
+        "median": 2.0,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 15.199999999999974
+      },
+      "recorded_onsets": {
+        "mean": 57.9,
+        "median": 4.5,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 257.7999999999999
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.4,
+      "theta": 31622.776601683792
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.418196328810854,
+        "median": 0.0,
+        "n": 7,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "campaign_positives": {
+        "mean": 18.5,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 98.8999999999998
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "recorded_onsets": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 0.0
+        },
+        "seeds_with_more_early_onsets": 0
+      },
+      "early_onset_share": {
+        "mean": 0.4,
+        "median": 0.0,
+        "n": 5,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 17.8,
+        "median": 17.0,
+        "n": 5,
+        "q05": 12.6,
+        "q95": 24.0
+      },
+      "imports": 1,
+      "infection_age_days": 0.0,
+      "is_baseline": true,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 17.2,
+        "median": 0.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 92.84999999999982
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.1,
+      "theta": 100000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.718393532959934,
+        "median": 0.8181818181818182,
+        "n": 9,
+        "q05": 0.38181818181818183,
+        "q95": 0.9652173913043478
+      },
+      "campaign_positives": {
+        "mean": 50.0,
+        "median": 11.0,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 182.24999999999994
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 1.5,
+          "median": 1.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 5.299999999999994
+        },
+        "recorded_onsets": {
+          "mean": 24.2,
+          "median": 5.0,
+          "n": 10,
+          "q05": -18.7,
+          "q95": 129.19999999999982
+        },
+        "seeds_with_more_early_onsets": 7
+      },
+      "early_onset_share": {
+        "mean": 0.26228289295196144,
+        "median": 0.09706959706959706,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 13.2,
+        "median": 14.0,
+        "n": 10,
+        "q05": 7.9,
+        "q95": 18.65
+      },
+      "imports": 3,
+      "infection_age_days": 0.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 1.7,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 5.299999999999994
+      },
+      "recorded_onsets": {
+        "mean": 41.4,
+        "median": 9.0,
+        "n": 10,
+        "q05": 1.0,
+        "q95": 171.94999999999993
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.5,
+      "theta": 100000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.45,
+        "median": 0.5,
+        "n": 5,
+        "q05": 0.0,
+        "q95": 0.95
+      },
+      "campaign_positives": {
+        "mean": 1.3,
+        "median": 0.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 5.299999999999994
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 0.5499999999999989
+        },
+        "recorded_onsets": {
+          "mean": -16.2,
+          "median": 0.0,
+          "n": 10,
+          "q05": -89.0,
+          "q95": 0.5499999999999989
+        },
+        "seeds_with_more_early_onsets": 1
+      },
+      "early_onset_share": {
+        "mean": 0.5,
+        "median": 0.5,
+        "n": 4,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "first_onset_day": {
+        "mean": 14.0,
+        "median": 14.0,
+        "n": 4,
+        "q05": 9.3,
+        "q95": 18.7
+      },
+      "imports": 1,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 1.0,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 4.299999999999994
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.0,
+      "theta": 100000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.6922043848205768,
+        "median": 0.6818181818181819,
+        "n": 8,
+        "q05": 0.45357142857142857,
+        "q95": 0.956551724137931
+      },
+      "campaign_positives": {
+        "mean": 22.1,
+        "median": 5.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 90.09999999999987
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 1.8,
+          "median": 1.0,
+          "n": 10,
+          "q05": -0.55,
+          "q95": 6.299999999999994
+        },
+        "recorded_onsets": {
+          "mean": 1.3,
+          "median": 4.5,
+          "n": 10,
+          "q05": -86.8,
+          "q95": 75.24999999999989
+        },
+        "seeds_with_more_early_onsets": 7
+      },
+      "early_onset_share": {
+        "mean": 0.17445650733052306,
+        "median": 0.125,
+        "n": 9,
+        "q05": 0.0,
+        "q95": 0.49999999999999983
+      },
+      "first_onset_day": {
+        "mean": 14.11111111111111,
+        "median": 11.0,
+        "n": 9,
+        "q05": 8.0,
+        "q95": 25.399999999999995
+      },
+      "imports": 3,
+      "infection_age_days": 3.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 2.0,
+        "median": 1.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 6.299999999999994
+      },
+      "recorded_onsets": {
+        "mean": 18.5,
+        "median": 9.0,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 75.24999999999989
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.5,
+      "theta": 100000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.5167310167310167,
+        "median": 0.7837837837837838,
+        "n": 7,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "campaign_positives": {
+        "mean": 5.4,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 25.74999999999997
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 0.0,
+          "median": 0.0,
+          "n": 10,
+          "q05": -1.0,
+          "q95": 1.0
+        },
+        "recorded_onsets": {
+          "mean": -13.7,
+          "median": 0.0,
+          "n": 10,
+          "q05": -84.05,
+          "q95": 8.699999999999985
+        },
+        "seeds_with_more_early_onsets": 2
+      },
+      "early_onset_share": {
+        "mean": 0.17777777777777778,
+        "median": 0.0,
+        "n": 6,
+        "q05": 0.0,
+        "q95": 0.7666666666666666
+      },
+      "first_onset_day": {
+        "mean": 20.666666666666668,
+        "median": 20.5,
+        "n": 6,
+        "q05": 14.0,
+        "q95": 27.75
+      },
+      "imports": 1,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 0.2,
+        "median": 0.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 1.0
+      },
+      "recorded_onsets": {
+        "mean": 3.5,
+        "median": 1.0,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 15.549999999999999
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.2,
+      "theta": 100000.0
+    },
+    {
+      "asymptomatic_share": {
+        "mean": 0.559879131273373,
+        "median": 0.52,
+        "n": 9,
+        "q05": 0.0,
+        "q95": 0.9738562091503268
+      },
+      "campaign_positives": {
+        "mean": 66.7,
+        "median": 15.5,
+        "n": 10,
+        "q05": 0.45,
+        "q95": 292.95
+      },
+      "delta_vs_baseline": {
+        "n": 10,
+        "onsets_before_split_day": {
+          "mean": 5.1,
+          "median": 1.5,
+          "n": 10,
+          "q05": 0.0,
+          "q95": 18.799999999999983
+        },
+        "recorded_onsets": {
+          "mean": 49.8,
+          "median": 6.0,
+          "n": 10,
+          "q05": -83.6,
+          "q95": 309.09999999999974
+        },
+        "seeds_with_more_early_onsets": 7
+      },
+      "early_onset_share": {
+        "mean": 0.3567250778816199,
+        "median": 0.325,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 0.8499999999999996
+      },
+      "first_onset_day": {
+        "mean": 10.8,
+        "median": 11.0,
+        "n": 10,
+        "q05": 3.25,
+        "q95": 17.549999999999997
+      },
+      "imports": 3,
+      "infection_age_days": 6.0,
+      "is_baseline": false,
+      "onsets_before_split_day": {
+        "mean": 5.3,
+        "median": 1.5,
+        "n": 10,
+        "q05": 0.0,
+        "q95": 19.34999999999998
+      },
+      "recorded_onsets": {
+        "mean": 67.0,
+        "median": 13.0,
+        "n": 10,
+        "q05": 1.45,
+        "q95": 309.64999999999975
+      },
+      "sanitary_witness": {
+        "cells": 10,
+        "cells_with_visits": 10,
+        "consistent": true,
+        "declared_mode": "dwell_weighted"
+      },
+      "seeds": [
+        20200205,
+        20200206,
+        20200207,
+        20200208,
+        20200209,
+        20200210,
+        20200211,
+        20200212,
+        20200213,
+        20200214
+      ],
+      "takeoff_probability": 0.6,
+      "theta": 100000.0
+    }
+  ]
+}
