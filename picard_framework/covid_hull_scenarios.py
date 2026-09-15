@@ -67,6 +67,7 @@ class HullScenario:
     role_classes: tuple[RoleClass, ...]
     campaign_id: str
     campaign_start_day: int
+    molecular_start_day: int | None = None
     scheduled_protocols: tuple[Mapping[str, Any], ...] = ()
     explicit_seeds: tuple[Mapping[str, Any], ...] = ()
     agent_profile_bundle: str | None = None
@@ -95,6 +96,16 @@ class HullScenario:
             raise ValueError(
                 f"{self.scenario_id}: campaign starts on day "
                 f"{self.campaign_start_day} of a {self.duration_days}-day event",
+            )
+        if (
+            self.molecular_start_day is not None
+            and self.molecular_start_day > self.campaign_start_day
+        ):
+            raise ValueError(
+                f"{self.scenario_id}: molecular ascertainment starts on day "
+                f"{self.molecular_start_day} but the testing campaign on day "
+                f"{self.campaign_start_day}; a campaign cannot swab before "
+                "the ship has a test",
             )
 
     @property
@@ -164,18 +175,34 @@ class HullScenario:
                     for entry in self.scheduled_protocols
                 ],
             },
-            "syndromic": {
-                "testing_campaigns": {
-                    "campaign_file": _CAMPAIGN_FILE_REL,
-                    "campaigns": [
-                        {
-                            "campaign_id": self.campaign_id,
-                            "start_day": self.campaign_start_day,
-                        },
-                    ],
-                },
+            "syndromic": self._syndromic_block(),
+        }
+
+    def _syndromic_block(self) -> dict[str, Any]:
+        """The observation process the hull's record supports.
+
+        The campaign is the record's test volumes and ladder; the molecular
+        start day is the first day any specimen could be taken on board, and
+        it gates the passive sick-call swab channel as well as the campaign.
+        A scenario that declares none leaves the modality's default, a swab
+        channel open from embarkation.
+        """
+        block: dict[str, Any] = {
+            "testing_campaigns": {
+                "campaign_file": _CAMPAIGN_FILE_REL,
+                "campaigns": [
+                    {
+                        "campaign_id": self.campaign_id,
+                        "start_day": self.campaign_start_day,
+                    },
+                ],
             },
         }
+        if self.molecular_start_day is not None:
+            block["molecular_ascertainment_start_day"] = int(
+                self.molecular_start_day,
+            )
+        return block
 
     def pathogen_overrides(self) -> dict[str, Any]:
         """Isolate the hull's one pathogen and hand initiation the index case.
@@ -301,6 +328,7 @@ def _role_classes(raw: Sequence[Mapping[str, Any]]) -> tuple[RoleClass, ...]:
 def _scenario_from_dict(raw: Mapping[str, Any]) -> HullScenario:
     clock = raw.get("clock") or {}
     campaign = raw.get("testing_campaign") or {}
+    molecular = raw.get("molecular_ascertainment") or {}
     population = raw.get("population") or {}
     initiation = raw.get("initiation") or {}
     return HullScenario(
@@ -316,6 +344,9 @@ def _scenario_from_dict(raw: Mapping[str, Any]) -> HullScenario:
         role_classes=_role_classes(raw.get("role_classes") or ()),
         campaign_id=str(campaign["campaign_id"]),
         campaign_start_day=int(campaign.get("start_day", 0)),
+        molecular_start_day=(
+            int(molecular["start_day"]) if "start_day" in molecular else None
+        ),
         scheduled_protocols=tuple(
             dict(entry) for entry in raw.get("scheduled_protocols") or ()
         ),

@@ -26,6 +26,7 @@ from engines.natural_history import (
     host_age_band,
     severity_probabilities,
 )
+from engines.sim_clock import SimClock
 from orchestrator_init import _validate_symptom_severity_profiles
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
@@ -361,3 +362,78 @@ class TestLoaderRefusals:
         }
         with pytest.raises(ValueError, match="sum to 1.0"):
             _validate_symptom_severity_profiles(profiles)
+
+
+def _presenting_population(agents: int) -> list[dict[str, Any]]:
+    return [
+        {
+            "agent_id": aid,
+            "pathogen_infections": {
+                PATHOGEN: {
+                    "status": "INFECTED",
+                    "illness": "SYMPTOMATIC",
+                    "symptom_severity": "mild",
+                    "time_infected": 0,
+                },
+            },
+        }
+        for aid in range(agents)
+    ]
+
+
+class TestMolecularAscertainmentStartDay:
+    """No specimen precedes the day the ship first has a test.
+
+    Diamond Princess had no RT-PCR before 3 February; a swab channel open
+    from embarkation ascertains January onsets through a test that did not
+    exist, so the start day gates every specimen, passive or campaign.
+    """
+
+    def _specimens_by_day(self, start_day: int | None) -> list[int]:
+        profile = _specimen_profile(scalar=1.0)
+        surveillance = SyndromicSurveillance(
+            symptom_severity_profiles=profile,
+            rng=np.random.default_rng(3),
+            clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+            molecular_ascertainment_start_day=start_day,
+        )
+        counts = []
+        for day in range(6):
+            population = _presenting_population(50)
+            for agent in population:
+                agent["agent_id"] += 1000 * day
+            result = surveillance.collect_specimens(
+                population, day * 24, [a["agent_id"] for a in population],
+            )
+            counts.append(result["lab_sampled_count"])
+        return counts
+
+    def test_no_specimen_is_taken_before_the_start_day(self) -> None:
+        counts = self._specimens_by_day(start_day=3)
+
+        assert counts[:3] == [0, 0, 0]
+        assert all(count == 50 for count in counts[3:])
+
+    @pytest.mark.parametrize("start_day", [0, 2, 5])
+    def test_later_start_days_withhold_more_of_the_record(
+        self, start_day: int,
+    ) -> None:
+        counts = self._specimens_by_day(start_day=start_day)
+
+        assert sum(counts[:start_day]) == 0
+        assert sum(counts) == 50 * (6 - start_day)
+
+    def test_an_undeclared_start_day_leaves_the_channel_open(self) -> None:
+        counts = self._specimens_by_day(start_day=None)
+
+        assert counts == [50] * 6
+
+    def test_availability_reads_the_clock_not_the_epoch(self) -> None:
+        surveillance = SyndromicSurveillance(
+            symptom_severity_profiles=_specimen_profile(scalar=1.0),
+            clock=SimClock(epoch_duration_hours=6.0, mode="hours"),
+            molecular_ascertainment_start_day=2,
+        )
+
+        assert not surveillance.molecular_test_available(7)
+        assert surveillance.molecular_test_available(8)

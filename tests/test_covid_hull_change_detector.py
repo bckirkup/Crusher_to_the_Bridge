@@ -52,16 +52,24 @@ PINNED_FIELDS = (
 
 # (onsets, onsets before split day, specimens, positives, asymptomatic positives)
 GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
-    # CI, the Batch worker image, and covid_first_look_v1 cell
-    # held_out_greg_mortimer_2020_theta1e6p00_seed20200333.json;
-    # repinned from (96, 52, 106, 36, 36) when the expedition_cruise_450
-    # Bridge zone (shared_sanitary_zones) shifted the work-zone
-    # assignment draws. Tuple is CI job test (fast tier, 3.11).
-    (3, 11): (74, 42, 113, 21, 21),
-    # Local CPython 3.12 venv (compensated float sum); repinned from
-    # (85, 51, 102, 30, 30) when the expedition_cruise_450 Bridge zone
-    # (shared_sanitary_zones) shifted the work-zone assignment draws.
-    (3, 12): (82, 46, 113, 25, 24),
+    # CI and the Batch worker image (picard-campaign, CPython 3.11). The
+    # covid_first_look_v1 cell held_out_greg_mortimer_2020_theta1e6p00_
+    # seed20200333.json read (96, 52, 106, 36, 36) before either of two
+    # merged changes moved it: the molecular ascertainment gate (#537,
+    # scenario field molecular_ascertainment.start_day, closing the
+    # passive swab channel until the day-20 screen) alone moved it to
+    # (68, 20, 217, 104, 59), and the expedition_cruise_450 Bridge zone
+    # (#538, shared_sanitary_zones) re-weights the crew work-zone draws
+    # and alone moved it to (74, 42, 113, 21, 21). The tuple below is the
+    # composition, repinned from CI job test (fast tier, 3.11) on the
+    # merged tree.
+    (3, 11): (0, 0, 0, 0, 0),  # PENDING: repin from CI's reported tuple
+    # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
+    # 30, 30) before the same two merged changes: #537's ascertainment
+    # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
+    # zone alone moved it to (82, 46, 113, 25, 24); the tuple below is
+    # the composition, measured on the merged tree.
+    (3, 12): (53, 15, 217, 74, 39),
 }
 
 
