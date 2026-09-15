@@ -29,12 +29,14 @@ from derive_sanitary_provisioning import (  # noqa: E402
 from engines.infection_dynamics_bridge import KorkinAgent  # noqa: E402
 from engines.sim_clock import HOURS, SimClock  # noqa: E402
 from engines.transmission_core import (  # noqa: E402
+    ContactTracingMatrix,
     SANITARY_CEILING_HEIGHT_M,
     SANITARY_DWELL_SECONDS,
     SANITARY_EXHAUST_M3H_PER_WC,
     SANITARY_FLOOR_AREA_M2_PER_WC,
     SANITARY_VOIDS_PER_DAY,
     TransmissionCore,
+    _parse_sanitary_visit_mode,
 )
 
 PLATFORMS_DIR = REPO_ROOT / "data" / "platforms"
@@ -328,3 +330,71 @@ def test_unserved_zone_visits_are_unresolved() -> None:
         core._draw_sanitary_visits(e, {"TheaterLng": [visitor]})
     assert core._sanitary_visits.get(1) is None
     assert core.sanitary_telemetry["unresolved"] > 0
+
+
+def test_sanitary_visit_mode_refuses_unknown() -> None:
+    """A mode outside the enum falls back to the inert default."""
+    assert _parse_sanitary_visit_mode(
+        {"sanitary_visit_mode": "bogus"},
+    ) == "none"
+
+
+def test_sanitary_venue_home_noncabin_resolves_to_room() -> None:
+    """At home on a hull without cabin compartments the venue is the room."""
+    core = _make_core(seed=1)
+    core.zone_types["Berthing"] = "Room"
+    home = _agent(9, "Berthing")
+    home.home_zone = "Berthing"
+    assert core._sanitary_venue("Berthing", home) == "Berthing"
+
+
+def test_sanitary_fomite_exposure_deposits_and_picks_up() -> None:
+    """End-to-end venue exposure: shedder deposits, susceptible picks up."""
+    core = _make_core(seed=7)
+    shedder = _agent(1, "TheaterLng")
+    shedder.hand_load_by_pathogen["_default"] = 100.0
+    susceptible = _agent(2, "TheaterLng")
+    # The shedder/susceptible classifications are covered elsewhere; this
+    # test is about the venue deposit/pickup phase.
+    core._get_shedders = lambda occ, pid, prof: [(shedder, 5.0)]
+    core._get_susceptible = lambda occ, pid: [susceptible]
+    # A cabin-compartment occupancy key is skipped outright -- its visits
+    # resolve to fittings whole-epoch occupancy already covers.
+    occ = {
+        "TheaterLng": [shedder, susceptible],
+        "PC_D5_P_F::cabin1": [_agent(3, "PC_D5_P_F")],
+    }
+    # Seed the epoch's visit and stool-venue records directly; the phase
+    # consumes them exactly as _draw_sanitary_visits/_replenish_hand write
+    # them.
+    core._sanitary_epoch = 0
+    core._sanitary_visits = {1: ["HD_5T_M"], 2: ["HD_5T_M"]}
+    core._sanitary_stool_venues = {"_default": {1: "HD_5T_M"}}
+    core.surface_pools["HD_5T_M"] = 500.0
+    matrix = ContactTracingMatrix(epoch=0)
+    agent_doses: dict[int, float] = {}
+    core._sanitary_fomite_exposure(
+        0, occ, agent_doses, matrix, {}, "_default", None, None,
+    )
+    # The shedder's hand fell into the venue; the susceptible's rose, was
+    # credited a dose, and the pool paid for what was delivered.
+    assert shedder.hand_load_by_pathogen["_default"] < 100.0
+    assert susceptible.hand_load_by_pathogen["_default"] > 0.0
+    assert agent_doses.get(2, 0.0) > 0.0
+    assert matrix.fomite_trailing_exposures
+    assert 0.0 < core.surface_pools["HD_5T_M"]
+    assert core.sanitary_telemetry["stool_visits"] == 1
+
+
+def test_stool_event_records_the_resolved_venue() -> None:
+    """The rerouted stool draw writes the same venue list as a visit."""
+    core = _make_core(seed=4)
+    agent = _agent(1, "TheaterLng")
+    agent.hand_load_by_pathogen["_default"] = 10.0
+    core._stool_event_occurs = lambda rate: True
+    core._replenish_hand(
+        agent, "_default",
+        {"stool_events_per_day": {"baseline": 1.0}},
+        zone_name="TheaterLng",
+    )
+    assert core._sanitary_stool_venues["_default"][1] == "HD_5T_M"
