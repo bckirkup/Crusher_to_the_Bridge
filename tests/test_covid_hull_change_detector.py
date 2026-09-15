@@ -70,17 +70,30 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # left the ship-wide boarding channel open for sars_cov2_resp, so every
     # cell boarded a prevalence-drawn cohort (profile 1% passengers, 0.6%
     # crew, epoch 6) on top of the declared index case; the opt-out in
-    # HullScenario._initiation_block removes that cohort and alone moves
-    # the cell to the tuple below (campaign image, CPython 3.11.16).
-    (3, 11): (1, 1, 217, 3, 2),
+    # HullScenario._initiation_block removes that cohort and alone moved
+    # the cell to (1, 1, 217, 3, 2) (campaign image, CPython 3.11.16).
+    # Two incubation changes then moved it, each measured alone on this
+    # cell: an infection with no inoculum on record (the declared index
+    # case) is drawn at the reference dose instead of the literal-zero
+    # floor (natural_history.incubation_days; median 5.8 d, not 14.5 d),
+    # which alone gives (3, 1, 217, 2, 1); and the composite-Theta arm
+    # re-references the incubation dose term to the N50 of the exponential
+    # model it installs, ln 2 / Theta (covid_theta_fit.theta_profile_
+    # overrides), so secondary cases are no longer all drawn at the
+    # ceiling either, which on top gives the tuple below. Both
+    # interpreters agree on this cell now: it is a near-extinct run with
+    # few Bernoulli draws for the two float-sum paths to disagree on.
+    (3, 11): (5, 0, 217, 6, 4),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
     # zone alone moved it to (82, 46, 113, 25, 24); the tuple below is
     # the composition, measured on the merged tree, and read (53, 15, 217,
-    # 74, 39) with the boarding cohort; the same opt-out alone moves it to
-    # the tuple below.
-    (3, 12): (1, 1, 217, 3, 2),
+    # 74, 39) with the boarding cohort; the same opt-out alone moved it to
+    # (1, 1, 217, 3, 2). The two incubation changes above then moved it
+    # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
+    # and to the tuple below (with the Theta-arm re-reference).
+    (3, 12): (5, 0, 217, 6, 4),
 }
 
 

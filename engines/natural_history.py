@@ -120,8 +120,10 @@ def incubation_days(
 
     Drawn at the first progression step rather than at infection so every entry
     point — seeding, transmission, environmental acquisition — gets a draw, and
-    conditioned on the inoculum actually acquired. A pathogen with no
-    ``incubation`` block keeps its fixed onset day.
+    conditioned on the inoculum actually acquired. An infection with no
+    inoculum on record (a declared index case, a boarding host) is drawn at
+    the reference dose. A pathogen with no ``incubation`` block keeps its
+    fixed onset day.
     """
     stored = inf.get("incubation_days")
     if stored is not None:
@@ -130,8 +132,9 @@ def incubation_days(
     if model is None:
         drawn = float(profile.get("symptom_onset_day", ONSET_DAY))
     else:
+        acquired = float(inf["acquired_particles"])
         drawn = model.sample_days(
-            dose=float(inf["acquired_particles"]),
+            dose=acquired if acquired > 0.0 else None,
             host=host_incubation_state(agent, pathogen_id),
             rng=rng,
         )

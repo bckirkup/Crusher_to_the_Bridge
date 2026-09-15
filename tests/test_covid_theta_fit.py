@@ -21,6 +21,7 @@ from typing import Any
 
 import pytest
 
+from engines.incubation import MAX_DOSE_FACTOR, IncubationModel
 from picard_framework.covid_fit_targets import (
     HELD_OUT,
     TRAINING,
@@ -31,6 +32,7 @@ from picard_framework.covid_theta_fit import (
     DECLARED_ASSUMPTIONS,
     EMISSION_BRACKET_COPIES_PER_EPOCH,
     FIT_CONTRACT,
+    PATHOGEN_ID,
     PER_COPY_RISK,
     HullObservables,
     ThetaObjective,
@@ -43,6 +45,7 @@ from picard_framework.covid_theta_fit import (
     score_held_out,
     theta_profile_overrides,
 )
+from picard_framework.pathogen_overrides import apply_pathogen_overrides
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 DIAMOND = "diamond_princess_2020"
@@ -170,6 +173,32 @@ def test_the_shedding_curve_keeps_its_shape_and_its_measured_offset(profile):
     ] == pytest.approx([
         round(a - b, 6) for a, b in zip(source_asym, source, strict=True)
     ])
+
+
+@pytest.mark.parametrize("theta", [1e4, 1e6, 1e9])
+def test_the_incubation_term_is_referenced_to_the_installed_n50(profile, theta):
+    """The shipped reference is the profile's beta-Poisson N50; with the
+    exponential model Theta installs, the N50 is ln 2 / Theta. A host
+    infected at that dose must keep the profile's median, and only the
+    reference moves — the shape of the dose term is untouched."""
+    resolved = apply_pathogen_overrides(
+        {PATHOGEN_ID: profile},
+        {PATHOGEN_ID: theta_profile_overrides(profile, theta)},
+    )[PATHOGEN_ID]
+    model = IncubationModel.from_mapping(resolved["incubation"])
+    shipped = IncubationModel.from_mapping(profile["incubation"])
+    assert model is not None and shipped is not None
+    n50 = math.log(2.0) / theta
+    assert model.dose_factor(n50) == pytest.approx(1.0)
+    assert model.dose_factor(n50 * 100) < 1.0 < model.dose_factor(n50 / 100)
+    assert model.dose_log10_shortening == shipped.dose_log10_shortening
+    assert model.dose_floor == shipped.dose_floor
+    assert model.median_days == shipped.median_days
+    # Under the shipped reference the same infecting dose sat at or near the
+    # ceiling: a typical infection was drawn as the lightest exposure the
+    # term can express.
+    assert shipped.dose_factor(n50) > 2.0
+    assert shipped.dose_factor(n50) <= MAX_DOSE_FACTOR
 
 
 @pytest.mark.parametrize("theta", [0.0, -1.0, float("nan"), float("inf")])

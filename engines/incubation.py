@@ -225,20 +225,34 @@ class IncubationModel:
         """
         if self.dose_log10_shortening <= 0.0:
             return 1.0
-        exponent = math.log10(max(float(dose), _DOSE_FLOOR))
+        numeric = float(dose)
+        # Only a non-positive dose needs the guard; a genuinely tiny inoculum
+        # is compared against the reference on its own value, since a profile
+        # may be referenced well below one copy.
+        exponent = math.log10(numeric if numeric > 0.0 else _DOSE_FLOOR)
         excess = exponent - self.dose_reference_log10
         factor = 1.0 - self.dose_log10_shortening * excess
         return min(max(factor, self.dose_floor), MAX_DOSE_FACTOR)
 
-    def conditional_median(self, dose: float, host: HostIncubationState) -> float:
-        """Median incubation for this exposure in this host, before the draw."""
-        median = self.median_days * self.dose_factor(dose)
+    def conditional_median(
+        self,
+        dose: float | None,
+        host: HostIncubationState,
+    ) -> float:
+        """Median incubation for this exposure in this host, before the draw.
+
+        ``dose=None`` is an infection with no inoculum on record (a declared
+        index case, a boarding host): it sits at the reference, the profile's
+        own median, rather than at the floor a literal zero would reach.
+        """
+        factor = 1.0 if dose is None else self.dose_factor(dose)
+        median = self.median_days * factor
         return median * self.host_factors.multiplier(host)
 
     def sample_days(
         self,
         *,
-        dose: float,
+        dose: float | None,
         host: HostIncubationState,
         rng: np.random.Generator,
     ) -> float:
