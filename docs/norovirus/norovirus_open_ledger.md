@@ -3253,6 +3253,48 @@ Roughly in dependency order.
     `docs/norovirus/droplet_deletion_route_v1_readout.md`. Away from declared
     complement these cells remain a mechanism probe.
 
+42. **Shared heads execute and are epidemiologically inert without a flush
+    term: the structure-only arm is a null at 500 matched seeds per cell.**
+    `sanitary_structure_v1` ran the twelve-hull sanitary structure (shared
+    `Sanitary` blocks, exhaust-only HVAC, dwell-weighted visits) as two arms on
+    one image (`sanitary-structure-v1-ea5a49a`, job definition
+    `picard-campaign:41`), differing only in `transmission.sanitary_visit_mode`:
+    `none` against `dwell_weighted`. Expedition, classic and spirit at declared
+    complement, 7 and 12 days, 500 seeds per cell, 3,000 runs per arm, Batch
+    `6e88aebf-e92b-4e81-a5d2-c492738ce1f6` and
+    `774559a0-9809-464e-b9d6-f9ee8fd364b5`, 256/256 shards each, 0 failed,
+    6,000/6,000 runs; no flush aerosolisation exists in either arm. Every
+    archive records its mode explicitly. **Nothing was fitted.** (a) **The
+    mechanism ran**: the execution witness is present in all 6,000 runs, all
+    zero in the `none` arm, and in the visits arm 3.98 shared-head visits per
+    person-day (Chung's 6 + 0.5 nightly over the schedule), a shedder stool
+    event landing on a shared head in 57–100% of voyages (51–1,945 such events
+    per voyage), and a susceptible picking dose up off a head in 29–96% of
+    voyages — 300–20,700 pickup events per voyage. (b) **The dose is
+    sub-infectious by four to five orders**: ingested dose per pickup event is
+    0.004–0.14 model particles against the profile's own N50 of 16,871, and the
+    whole ship's sanitary ingestion sums to 38–970 particles per voyage. The
+    head is contaminated only by the hand-borne share of a shedder's Liu
+    ceiling, thinned by dwell over epoch (155 s / 3,600 s) and the surface
+    contact fraction; the stool itself never touches a fixture in this model,
+    because `_replenish_hand` recontaminates the hand and nothing else. (c)
+    **Paired contrast is a null in every cell**: identical imports 1.000 (the
+    dedicated visit stream does not leak), Δ secondaries per import between
+    −0.075 and +0.015 with every CI straddling zero, Δ posting margin
+    |≤ 0.00012|, McNemar 0/0 discordant postings in five cells and 0/1 in
+    classic 12 d, posting 0–2 per 1,000 both arms, fomite dominant share
+    98.7–100% both arms. So **the heads are not the missing structure by
+    themselves**; they are the venue the flush term needs. The finding
+    constrains the later flush change: whatever it emits must reach a
+    susceptible at ≥ 10⁴ times the current per-pickup ingestion to matter,
+    which on the proposal's bowl-load arithmetic sits within Boles'
+    near-field range and at or above the top of Johnson's droplet-nuclei
+    range — an inference from that arithmetic, and the reason the sweep spans
+    both; it is the next measurement, not a value to adopt. Artifacts
+    `telemetry_buffer/observation_model/sanitary_structure_v1.json` and
+    `docs/norovirus/sanitary_structure_v1_readout.md`. Item 41's conditional
+    attack-rate and posting description of default behaviour stands.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
