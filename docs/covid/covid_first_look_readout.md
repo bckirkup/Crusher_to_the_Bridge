@@ -5,6 +5,10 @@
 > failures. Outputs: `telemetry_buffer/observation_model/covid_theta_fit_v2.json`
 > and `covid_theta_held_out_v2.json`. Merge command:
 > `python3 tools/fit_covid_theta.py merge --cells <synced cells dir>`.
+> **Rerun 2026-09-15** as `covid_first_look_v2` at `main` = `35207bc` (gate
+> #537 + shared sanitary zones #538; PR #539): 770/770, zero failures, outputs
+> `covid_theta_fit_v3.json` / `covid_theta_held_out_v3.json`; see the v2
+> section at the end. Theta and the misfit pattern are unchanged.
 
 This replaces the single-seed fit of 2026-09-05 (`covid_theta_fit.json`) as the
 current statement of how the COVID arm fits. It is a first look: it tells us
@@ -215,12 +219,92 @@ per-copy risk separately.
    specimen precedes it. On the change-detector cell (Greg Mortimer, 1e6,
    seed 20200333) this moved onsets 96→68, pre-split onsets 52→14, campaign
    specimens 106→217, positives 36→104 and the asymptomatic share of
-   positives 1.00→0.57 (CPython 3.11). The 20-seed grid has **not** been
-   rerun under the gate; the numbers above in this readout are pre-gate.
+   positives 1.00→0.57 (CPython 3.11). The 20-seed grid was rerun under
+   the gate as `covid_first_look_v2`; see the section below. The numbers
+   above in this readout are the pre-gate v1 numbers.
 4. **Phase 3 (cross-ship import rate by embarkation date)** only after 1–3;
    the H3 result says the small-hull centre of the distribution is roughly
    where the model already puts it, so the secular-shift question is about the
    tail, and the tail is what items 2 and 3 are about.
+
+## covid_first_look_v2: the same design on the corrected model
+
+Same grid, same 20 + 50 matched seeds, same objective, same loss; the model
+underneath now has the molecular-ascertainment gate (#537, no specimen before
+Diamond Princess day 14 / Greg Mortimer day 20) and the shared sanitary-zone
+ship model (#538). Image `picard-campaign:covid-first-look-v2` from `35207bc`
+(CPython 3.11.16); 770/770 cells, zero Batch failures. Outputs:
+`telemetry_buffer/observation_model/covid_theta_fit_v3.json` and
+`covid_theta_held_out_v3.json`. Cells pair with v1 by (Theta, seed).
+
+### Phase 1, Diamond Princess (medians over 20 seeds)
+
+| Theta | recorded onsets | onsets before 6 Feb | campaign positives | specimens | asymptomatic share | loss (mean) | P(takeoff) | wins |
+|---|---|---|---|---|---|---|---|---|
+| 1e4 | 174 | 47 | 107 | 2532 | 0.95 | 8.97 | 0.90 | 0.00 |
+| **3.16e4** | **435** | **119** | **303** | **2362** | **0.96** | **3.83** | **1.00** | **0.70** |
+| 1e5 | 908 | 191 | 581 | 2051 | 0.96 | 4.38 | 1.00 | 0.30 |
+| 3.16e5 | 1341 | 292 | 801 | 1758 | 0.96 | 6.61 | 1.00 | 0.00 |
+| 1e6 | 1785 | 428 | 839 | 1453 | 0.96 | 8.98 | 1.00 | 0.00 |
+| 3.16e6 | 1941 | 580 | 743 | 1238 | 0.96 | 9.62 | 1.00 | 0.00 |
+| 1e7 .. 1e9 | 2041 .. 2093 | 667 .. 1067 | 639 .. 383 | 1098 .. 753 | 0.95 .. 0.93 | 9.9 .. 9.2 | 1.00 | 0.00 |
+| *observed* | *197* | *34* | *634* | *3063* | *0.50* | | | |
+
+**Theta is unchanged: 3.16e4** (0.70 of paired-bootstrap resamples; 1e5 the
+other 0.30; not boundary-pinned). Paired per-seed at 3.16e4, v2 minus v1:
+recorded onsets median −12 (9 of 20 seeds up), onsets before 6 Feb median −6
+(8 up), campaign specimens **+140 (18 of 20 up)**, campaign positives −17
+(9 up). Only the specimen count moved as a body; everything else is within
+seed noise. The mean loss is worse (3.27 → 3.83) because the 95th-percentile
+seed got worse (6.8 → 13.4); the median loss is flat (2.15 → 2.20).
+
+**The early-trajectory excess did not move.** This contradicts the
+one-cell diagnosis above, and the reason is in how onsets are recorded:
+`onset_observation_curve` bins a confirmed host by *onset day*, whenever the
+confirmation happens. Closing the passive swab channel until 3 February
+delays confirmation of a January onset but does not remove it — the host
+keeps presenting at sick call and is swabbed once the ship has a test. That
+is the right behaviour (the published 34 is also a retrospective by-onset-date
+count), so the v1 diagnostic showed *which channel* confirmed those onsets,
+not that they were spurious. The ~120 vs 34 gap is transmission-side (or
+boarding-side), not an ascertainment artifact. Item 2 (the boarding axis)
+stands as the next lever.
+
+**The asymptomatic share on Diamond Princess did not move either** (0.96 at
+every Theta). The gate opens the passive channel on day 14, one day before
+the campaign starts, so symptomatic hosts are still swabbed passively first
+and still leave the campaign pool. The drain the v1 readout inferred is real
+but the gate does not close it on this hull; only a later-starting passive
+channel or a campaign that does not skip already-sampled hosts would.
+
+### Phase 2, Greg Mortimer at Theta = 3.16e4 (50 seeds)
+
+| | v1 | v2 | observed |
+|---|---|---|---|
+| P(no positives) | 0.52 | 0.48 | — |
+| P(takeoff, ≥10 onsets) | 0.26 | 0.20 | — |
+| campaign positives, median / q95 | 0 / 19 | 1 / 34 | 128 |
+| H1 positive share | miss 50/50 | miss 50/50 (median 0.005) | 0.59 |
+| H2 asymptomatic share among positives | miss 24/24 defined (median 1.00) | **hit 3, miss 23** of 26 defined (median 0.49) | 0.81 |
+| H3 share above cross-ship IQR | 0.26 | 0.28 | 0.015 |
+
+On the held-out hull the gate does what it was meant to: with no passive
+swab before the day-20 screen, the campaign is the only observer and it sees
+the symptomatic hosts, so the asymptomatic share falls from 1.00 to a
+spread centred on 0.49 (still below the observed 0.81, in the other
+direction now). Positives roughly double but remain an order of magnitude
+short of 128; the hull still goes extinct in half the seeds.
+
+### What v2 says
+
+- The two model corrections did not change the fit or its shape; Theta is
+  a compromise between the onset anchors and the positive anchors exactly
+  as in v1.
+- The early-trajectory excess survives the observation-process fix and is
+  now the cleanest evidence that the *boarding* assumptions (index infection
+  age, number of imports) are where the model is too fast.
+- The asymptomatic-share misfit is a campaign-roster question (who gets
+  swabbed by whom first), not an ascertainment-start question.
 
 ## Reproduction
 
