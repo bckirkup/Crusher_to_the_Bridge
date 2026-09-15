@@ -63,7 +63,7 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # and alone moved it to (74, 42, 113, 21, 21). The tuple below is the
     # composition, repinned from CI job test (fast tier, 3.11) on the
     # merged tree.
-    (3, 11): (0, 0, 0, 0, 0),  # PENDING: repin from CI's reported tuple
+    (3, 11): (47, 14, 217, 70, 37),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
