@@ -5,7 +5,9 @@ the pre-deletion engine.** `DROPLET_AEROSOL_FRACTION` has since been **deleted
 on the emesis-conditioned arm** (`droplet_emission_mode: profile_conditioned`
 is the default; `shipped_uniform` reproduces what this campaign measured), so
 every route share and exponent below describes the *deleted* definition, not
-current behaviour. See ledger item 40.
+current behaviour. The matched measurement of the deletion is
+[droplet_deletion_route_v1.md](droplet_deletion_route_v1.md), which supersedes
+this document as the account of the default engine. See ledger items 40 and 41.
 
 1,800 runs,
 Arm B only, same architecture, same 300 matched seeds per cell, occupancy
