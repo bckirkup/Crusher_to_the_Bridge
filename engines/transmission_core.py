@@ -367,6 +367,26 @@ SANITARY_DWELL_FEMALE_MULTIPLIER = 1.22
 SANITARY_VOIDS_PER_DAY = 6.0
 SANITARY_VOIDS_PER_NIGHT = 0.5
 
+# Mean stool mass per defecation event, adults. Rose et al. 2015
+# (Crit Rev Environ Sci Technol), via the exposure arithmetic in
+# Boles et al. 2021. It multiplies the profile's own shedding curve
+# (copies/g), so a flush inherits the profile's titre, host multiplier
+# and strain multiplier rather than a second, incommensurable titre.
+# Grade B. Origin: Sec.
+FLUSH_STOOL_MASS_G = 107.0
+# Aerosolised fraction of the bowl load per flush. The two primary
+# measurements disagree by four to five decades because they measure
+# different fractions: Johnson et al. 2013 (flushometer, fluorescent-
+# microsphere surrogate, settled droplets excluded -> droplet nuclei
+# only) gives ~1e-9 to 8e-8; Boles et al. 2021 (murine norovirus
+# surrogate, RT-ddPCR, 0.15 m above the rim) back-calculates to ~1e-4
+# to 1e-3. Neither refutes the other, and cruise-ship vacuum systems
+# have no virus measurement at all, so no point value is adopted: the
+# frozen span is swept (docs/norovirus/flush_aerosolisation_v1.md).
+# Grade C. Origin: T2-3 (Johnson) / Sec (Boles back-calculation).
+FLUSH_AEROSOL_FRACTION_BOUNDS = (1e-9, 1e-3)
+DEFAULT_FLUSH_AEROSOL_FRACTION = 0.0  # off
+
 
 VOMITING_AXIS = "vomiting"
 DIARRHOEA_AXIS = "diarrhoea"
@@ -586,6 +606,7 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
     "droplet": 1.0,
     "hvac_airborne": 1.0,
     "emesis_aerosol": 1.0,
+    "flush_aerosol": 1.0,
     "fomite": 1.0,
     "food_contamination": 1.0,
     "environmental_source": 1.0,
@@ -599,6 +620,7 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "droplet": "droplet",
     "hvac_airborne": "hvac_airborne",
     "emesis_aerosol": "emesis_aerosol",
+    "flush_aerosol": "flush_aerosol",
     "fomite": "fomite",
     "food": "food_contamination",
     "environmental": "environmental_source",
@@ -728,6 +750,9 @@ class ContactTracingMatrix:
     # Pathway 3b: Emesis aerosol — inhalation dose in the zone an emesis
     # event happened in, in the epoch it happened
     emesis_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 3c: Flush aerosol — inhalation dose at the venue a
+    # toilet-flush event aerosolised into, in the epoch it happened
+    flush_aerosol_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 5: Food contamination — ingestion dose from contaminated
     # food in Dining-type zones
     food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -746,6 +771,7 @@ class ContactTracingMatrix:
             "droplet_exposures": self.droplet_exposures,
             "hvac_downstream_exposures": self.hvac_downstream_exposures,
             "emesis_aerosol_exposures": self.emesis_aerosol_exposures,
+            "flush_aerosol_exposures": self.flush_aerosol_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
             "food_contamination_exposures": self.food_contamination_exposures,
             "environmental_exposures": self.environmental_exposures,
@@ -1007,6 +1033,32 @@ def _parse_sanitary_visit_mode(tx: dict[str, Any]) -> str:
     if mode not in SANITARY_VISIT_MODES:
         return DEFAULT_SANITARY_VISIT_MODE
     return mode
+
+
+def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
+    """Read the toilet-flush aerosol fraction (FLUSH-AERO-01).
+
+    Absent or ``0.0`` is off and takes the pre-change code path, so a run
+    is bit-identical to the pre-change tree. Any other value must lie in
+    ``FLUSH_AEROSOL_FRACTION_BOUNDS`` -- a refusal band spanning both
+    primary measurements end to end, not a prior.
+    """
+    raw = tx.get("flush_aerosol_fraction", DEFAULT_FLUSH_AEROSOL_FRACTION)
+    frac = float(raw)
+    low, high = FLUSH_AEROSOL_FRACTION_BOUNDS
+    if frac == 0.0:
+        return 0.0
+    if not math.isfinite(frac) or not low <= frac <= high:
+        raise ValueError(
+            "transmission.flush_aerosol_fraction must be 0 (off) or finite "
+            f"in [{low}, {high}], got {raw!r}",
+        )
+    return frac
+
+
+def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
+    """Whether a flush at a host's own fittings emits (corner sweep)."""
+    return bool(tx.get("flush_cabin_emission", True))
 
 
 def _parse_dining_party_share(tx: dict[str, Any]) -> float:
