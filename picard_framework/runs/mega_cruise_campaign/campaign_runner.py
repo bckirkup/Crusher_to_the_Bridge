@@ -1041,6 +1041,8 @@ _HVAC_PARAM_MAP: tuple[tuple[str, str], ...] = (
 # names the arm it ran under instead of leaving that to be inferred.
 _TRANSMISSION_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("sanitary_visit_mode", "sanitary_visit_mode"),
+    ("flush_aerosol_fraction", "flush_aerosol_fraction"),
+    ("flush_cabin_emission", "flush_cabin_emission"),
 )
 _WEAR_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("deployment_profile", "wearables"),
