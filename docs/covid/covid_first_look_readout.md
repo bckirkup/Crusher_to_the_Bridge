@@ -106,27 +106,71 @@ Per-Theta medians over 20 seeds (Diamond Princess, 32 days):
 
 The recorded single-seed fit found Theta = 1e6 with 289 onsets at seed
 20200205. The same cell at `654c0a4` produces **1,795 onsets** on the Batch
-worker and **1,718 onsets** rerun locally (1,104 s wall). Between `b38e5ba`
-and `654c0a4` the engine's initiation, boarding and RNG-stream code moved for
-the norovirus thread (`c823ea4`, `e98c68f`, `4d059c5`, `ef4c8d9`, `29ba558`,
-`d44e01e`, among others). The most likely reading — not yet bisected — is
-that the COVID arm inherited those changes with no COVID-side check, and its
-effective transmission scale shifted by more than a decade.
-`covid_theta_fit.json` is therefore a record of a previous engine, not a
-result to compare against; this readout supersedes it.
+worker and **1,718 onsets** rerun locally. The first reading of that gap —
+that shared norovirus-side engine changes had shifted the COVID arm's
+effective scale by more than a decade, and that some unseeded entropy made the
+cell host-dependent — was checked after the campaign (2026-09-14) and **both
+halves were wrong**. What the controlled reruns show:
 
-The 1,795 vs 1,718 gap at an identical Theta, seed and commit is a second,
-smaller finding: a fixed-seed hull run is **not bit-reproducible across
-hosts**. Something in the run consumes entropy outside the seeded stream
-(hash ordering, thread count, or an unseeded RNG). It does not affect the
-campaign conclusions — all of them rest on 20–50 seed distributions — but it
-must be found before a change-detector cell can be pinned to an exact value.
+**The 289-onset artifact is not reproducible from its own commit.** Checking
+out `b38e5ba` (the commit that wrote `covid_theta_fit.json`) and rerunning the
+identical cell gives **2,098 onsets** under CPython 3.11 and **2,159** under
+3.12, with the same `uv.lock` (numpy 2.5.0, scipy 1.18.1). The artifact's
+grid is also internally odd: at every one of its six Theta values it reports
+0–5 onsets before 6 February against 100–880 campaign positives, a pattern no
+rerun at any commit produces. Whatever produced that file — an uncommitted
+tree, a different data directory, a mis-recorded run — is not in the
+repository history. `covid_theta_fit.json` is not evidence about a previous
+engine; it is a record of unknown provenance, and this readout supersedes it.
 
-These are the first two items for the ledger: **the COVID arm needs a
-change-detector cell** — one Diamond Princess run at a fixed Theta and seed,
-in the fast test tier or a nightly, so an engine change that moves the
-respiratory arm is seen when it lands rather than at the next campaign — and
-the cell has to be host-reproducible first.
+**The cell moved between `b38e5ba` and `654c0a4` by ~15%, not a decade — and
+one seed cannot say which commit moved it.** Same cell, same interpreter
+(3.11): 2,098 → 1,795 recorded onsets; by day 17 (a 408-epoch truncation)
+707 → 502. A first-parent bisection of the truncated cell over the 86 merges
+in between read 707 (`9fafcc9`, #443), 604 (`3fff70c`, #486), 569
+(`461be35`, #496), 502 (`bd634e2`, #507), 502 (`654c0a4`, #529): a graded
+drift with no single step. That is the expected shape once the interpreter
+result below is understood — a last-bit change anywhere in a dose re-rolls
+every later Bernoulli draw, and that alone moves this cell by 5–13% (1,718 vs
+1,795; 85 vs 96 on Greg Mortimer). Any commit that touches a float on the
+transmission path re-rolls the trajectory, so a single-seed bisection cannot
+separate "the engine's scale changed" from "the same engine took a different
+path". Attributing a move to a commit needs the 20-seed distribution, i.e. a
+Diamond Princess Theta-grid cell rerun at the candidate commit, which is a
+Batch job rather than a local probe. The bisection was stopped there.
+
+**1,795 vs 1,718 is the interpreter, not an entropy leak.** The Batch image
+runs CPython 3.11; the local venv runs 3.12. Each interpreter is
+bit-reproducible on its own (repeated runs, and a 3.11 venv on the local host
+matching the Batch worker exactly); swapping numpy 2.5.0 ↔ 2.4.6 and scipy
+1.18.1 ↔ 1.17.1 changes nothing. CPython 3.12 switched builtin `sum()` on
+floats to compensated (Neumaier) summation, and the route-dose, shedding and
+aerosol totals in `engines/transmission_core.py` (near lines 3120, 3128, 3830,
+3952, 4972) go through `sum()`; a last-bit change in a dose moves the next
+Bernoulli draw, and the two trajectories diverge from there. Same seed, same
+code, two deterministic paths. The Greg Mortimer cell at Theta = 1e6, seed
+20200333 reads 96/52/106/36/36 (onsets, pre-split, specimens, positives,
+asymptomatic) on 3.11 and 85/51/102/30/30 on 3.12.
+
+**The change-detector cell now exists:**
+`tests/test_covid_hull_change_detector.py` pins that Greg Mortimer cell in the
+fast tier, keyed by interpreter minor version (CI runs both 3.11 and 3.12),
+alongside bounds and same-seed reproducibility checks. It is labelled a
+change detector, not a correctness check: a move must be attributed to a part
+of the diff before the pin is updated. Greg Mortimer rather than Diamond
+Princess because it is the held-out hull (pinning it leaks nothing into the
+fit) and costs ~25 s rather than ~18 min.
+
+**On the norovirus parallel.** Nothing here shows that the COVID
+early-trajectory excess (122 vs 34 onsets before 6 February) shares a
+mechanism with the norovirus ignition/posting floor, whose documented cause is
+the hand-route normaliser — a route the COVID arm does not use. The two share
+a symptom (the model ignites and runs too readily). The 289 → 1,795
+comparison, which looked like the strongest sign of a shared lever, does not
+survive; what remains is the direct evidence — the early trajectory is 2–4x
+too fast at every Theta, across 20 seeds — and that points at the boarding
+axis (Phase 1b) and the observation process, not at inherited norovirus
+changes.
 
 ## What this first look does and does not say
 
@@ -150,7 +194,7 @@ per-copy risk separately.
 
 ## Next steps, in the order the evidence suggests
 
-1. **Engine change-detector for the COVID arm** (above). Cheap; do it first.
+1. **Engine change-detector for the COVID arm** — done (above).
 2. **Phase 1b, the declared boarding axis.** Index infection age at boarding
    and 1 vs 3 imports, screened at the fitted Theta and its neighbours, scored
    on onsets-before-6-Feb vs total. The early-trajectory excess is the
