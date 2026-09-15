@@ -10,10 +10,14 @@ this cell by ~5–13% without changing the engine's scale, so a failure here
 says "attribute the move", not "the scale changed" (see
 docs/covid/covid_first_look_readout.md).
 
-The cell is the cheapest one on the grid that takes off: Greg Mortimer (the
-held-out hull, so pinning it leaks nothing into the fit), Theta = 1e6, seed
-20200333, ~15 s. It was measured on AWS Batch and reproduced bit-for-bit in the
-campaign image and in a local CPython 3.11 environment.
+The cell is the cheapest one on the grid: Greg Mortimer (the held-out hull, so
+pinning it leaks nothing into the fit), Theta = 1e6, seed 20200333, ~15 s. It
+was measured on AWS Batch and reproduced bit-for-bit in the campaign image and
+in a local CPython 3.11 environment. Under the declared scenario (one index
+case, no boarding cohort) this cell does not take off: a one-import Greg
+Mortimer run at Theta 1e6 goes extinct in most seeds (0-8 onsets over seeds
+20200333-20200348 on both interpreters), so the bound below is that the index
+case was ascertained at all, not that an outbreak followed.
 
 CHANGE DETECTOR, not a correctness check. The pinned values are not
 independently derived; they only pin current behaviour. If a deliberate change
@@ -62,14 +66,21 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (#538, shared_sanitary_zones) re-weights the crew work-zone draws
     # and alone moved it to (74, 42, 113, 21, 21). The tuple below is the
     # composition, repinned from CI job test (fast tier, 3.11) on the
-    # merged tree.
-    (3, 11): (47, 14, 217, 70, 37),
+    # merged tree. It read (47, 14, 217, 70, 37) while the COVID hull spec
+    # left the ship-wide boarding channel open for sars_cov2_resp, so every
+    # cell boarded a prevalence-drawn cohort (profile 1% passengers, 0.6%
+    # crew, epoch 6) on top of the declared index case; the opt-out in
+    # HullScenario._initiation_block removes that cohort and alone moves
+    # the cell to the tuple below (campaign image, CPython 3.11.16).
+    (3, 11): (1, 1, 217, 3, 2),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
     # zone alone moved it to (82, 46, 113, 25, 24); the tuple below is
-    # the composition, measured on the merged tree.
-    (3, 12): (53, 15, 217, 74, 39),
+    # the composition, measured on the merged tree, and read (53, 15, 217,
+    # 74, 39) with the boarding cohort; the same opt-out alone moves it to
+    # the tuple below.
+    (3, 12): (1, 1, 217, 3, 2),
 }
 
 
@@ -83,8 +94,8 @@ def _pinned(obs: HullObservables) -> tuple[int, ...]:
     return tuple(int(d[k]) for k in PINNED_FIELDS)
 
 
-def test_the_cell_took_off_and_stays_in_bounds(cell):
-    assert cell.recorded_onsets >= 10  # the campaign's takeoff threshold
+def test_the_cell_recorded_its_index_case_and_stays_in_bounds(cell):
+    assert cell.recorded_onsets >= 1
     assert 0 <= cell.onsets_before_split_day <= cell.recorded_onsets
     assert (
         cell.onsets_before_split_day + cell.onsets_on_or_after_split_day

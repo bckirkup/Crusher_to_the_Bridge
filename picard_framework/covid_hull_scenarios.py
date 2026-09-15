@@ -164,7 +164,7 @@ class HullScenario:
                 },
                 "agent_classes": self._agent_classes(),
             },
-            "initiation": {"explicit_seeds": [dict(s) for s in self.explicit_seeds]},
+            "initiation": self._initiation_block(),
             "scenario_schedule": {
                 "protocols": [
                     {
@@ -176,6 +176,20 @@ class HullScenario:
                 ],
             },
             "syndromic": self._syndromic_block(),
+        }
+
+    def _initiation_block(self) -> dict[str, Any]:
+        """The scenario's explicit seeds, and nothing else boarding this arm.
+
+        The ship-wide boarding channel is on by default and the pathogen
+        profile ships a community screening prevalence, so without the
+        opt-out a replayed hull would board a prevalence-drawn cohort on
+        top of the declared index case. A replay declares its introductions;
+        the profile's prevalence is a fleet default, not this voyage's record.
+        """
+        return {
+            "explicit_seeds": [dict(s) for s in self.explicit_seeds],
+            "boarding": {self.pathogen_id: {"enabled": False}},
         }
 
     def _syndromic_block(self) -> dict[str, Any]:

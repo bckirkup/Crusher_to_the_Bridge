@@ -17,6 +17,7 @@ from typing import Any
 
 import pytest
 
+from engines.initiation import resolve_initiation_plan
 from engines.scenario_schedule import (
     ScenarioSchedule,
     ScheduledProtocol,
@@ -29,6 +30,7 @@ from picard_framework.covid_hull_scenarios import (
     load_hull_scenarios,
     scenario_data_path,
 )
+from picard_framework.covid_theta_fit import load_covid_profile
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PATHOGEN = "sars_cov2_resp"
@@ -369,6 +371,22 @@ class TestSharedBiology:
             assert overrides[PATHOGEN]["initial_infected"] is None
             seeds = scenario.config_overrides()["initiation"]["explicit_seeds"]
             assert [seed["pathogen"] for seed in seeds] == [PATHOGEN]
+
+    def test_the_declared_seeds_are_the_only_introductions(self, scenarios):
+        """The profile's boarding prevalence must not board a second cohort."""
+        profiles = {PATHOGEN: {**load_covid_profile(), "initial_infected": None}}
+        assert profiles[PATHOGEN]["boarding"]["prevalence"]
+        for scenario in scenarios.scenarios.values():
+            initiation = scenario.config_overrides()["initiation"]
+            assert initiation["boarding"] == {PATHOGEN: {"enabled": False}}
+            plan = resolve_initiation_plan(
+                {"initiation": {**initiation, "boarding": {
+                    "enabled": True, **initiation["boarding"],
+                }}},
+                profiles,
+            )
+            assert plan.boarding == ()
+            assert [seed.pathogen_id for seed in plan.seeds] == [PATHOGEN]
 
     def test_ground_truth_is_off_unless_a_caller_asks_for_it(self, scenarios):
         spec = scenarios[DIAMOND].to_run_spec_dict()
