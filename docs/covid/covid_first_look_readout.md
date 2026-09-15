@@ -493,6 +493,97 @@ of the surface, not its values.
   declared, since a mechanism that removes the index case's contacts would
   masquerade as a need for more imports.
 
+## Index-case trace (local, 2026-09-16): why takeoff is seed-locked
+
+One cell per seed, Theta = 1e6, CPython 3.12, the corrected scenario,
+`execute_transmission` wrapped to record the index case's location, the
+dose it put on its co-occupants each epoch, its symptom / isolation state,
+and every transmission event. Seeds 20200205 and 20200221 (the two that
+ignite at every Theta) and 20200206 / 20200207 (extinct at every Theta),
+plus two counterfactuals with the index's incubation pinned.
+
+**The index case's incubation is drawn at a dose of zero, and the model
+reads zero as the lightest possible inoculum.** An explicit seed carries
+`acquired_particles = 0.0` (`engines/initiation.py:_apply_one_seed`, and
+the boarding path draws against a scratch record with the same value). The
+incubation model (`engines/incubation.py:dose_factor`) floors that at 1e-9
+particles, 12.4 log10 below the profile's reference dose (10^3.43), and
+lengthens the median by the capped maximum factor 2.5: median 5.8 d becomes
+14.5 d, lognormal GSD 1.57, clamped at 21 d. Shedding starts 2 d before onset
+(`presymptomatic_shedding_days`), so the declared index case sheds nothing
+for a median 12.5 days of a 23-day voyage. The twenty fit seeds' index
+draws:
+
+| incubation (d) | seeds | onsets at 1e6 / 1e9 |
+|---|---|---|
+| 5.1, 5.8, 7.5, 8.0 | 20200221, 15, 20, 17 | 309 / 979, 0 / 21, 4 / 161, 0 / 0 |
+| 10.5, 12.4, 12.5 | 20200205, 06, 23 | 381 / 628, 1 / 8, 2 / 22 |
+| 14.6 – 17.5 | 20200210, 13, 11, 16, 08 | 5 / 51, 0 / 8, 1 / 2, 1 / 2, 0 / 1 |
+| 20.9 – 21.0 (clamp) | seven seeds | 0–1 / 0–6 |
+
+Seven of twenty index cases hit the 21-day clamp and cannot present before
+the voyage ends; only four draw under 8 d. Incubation plus the per-host
+shedding multiplier (57.8 on 20200205, 0.00 on 20200217) orders the seeds.
+Pinning 20200206's incubation at 4.96 d (its draw / 2.5) with its 0.27
+multiplier still gave no transmission in 14 d; pinning 20200207 at 8.4 d
+gave two.
+
+**Every secondary case gets the same 2.5× penalty**, because acquisition
+doses under the composite Theta are ~1e-7 in the units the incubation term
+reads as particles (first transmission events in both igniting seeds carried
+0.9e-7 – 3.6e-7). The generation interval is therefore ~13 d rather than
+~5 d: seed 20200221 reached 1000 infections by voyage end but only 309 of
+them had an onset to record. This is the "too slow conditional on
+takeoff" finding above, and it is a units mismatch between Theta-scaled
+doses and `incubation.dose_reference_log10`, not biology. The profile note
+on `dose_reference_log10` chose the profile's own N50 (2670) precisely so
+that "a near-ID50 host presents at the literature median"; on the composite
+arm that premise fails, because Theta scales the dose in the infection
+probability and not in the incubation term, so hosts are infected ten
+decades below the N50 the incubation term is referenced to.
+
+**Presentation isolates the index within one epoch, and the isolation
+leaks inside the cabin block.** On 20200205 the index turned symptomatic at
+epoch 251 and was confined at 252; all 37 of its transmissions came later
+(epochs 312–361) inside its home zone `PC_D6_S_A`, a 38-occupant cabin
+block that confinement does not leave. 20200207 (pinned) was the same
+pattern with two events. 20200221 turned symptomatic at epoch 122 and was
+**never** confined in 552 epochs; it kept its Aqua_Theater / dining rotation
+and seeded 1000 infections. Why it escaped confinement was not traced
+(inference: the bimodal compliance draw; it is consistent with a refuser).
+
+**The index case's contacts are not the problem.** Both traced index cases
+had 30–550 co-occupants every epoch from epoch 0 (cabin block, promenade,
+main dining). Nothing strands the index case; it simply does not shed
+until late, and when it does the shedding is 3–5 log10 for the two
+presymptomatic days, which delivered no infections in any trace.
+
+Implications, in order:
+
+- The seed-locked takeoff is an initialisation defect, not evidence about
+  imports. A declared import with no stated dose should draw its incubation
+  at the reference dose (factor 1.0), not at the floor; until it does, the
+  import-count sweep proposed above would be counting how many 14.5-day
+  incubations it takes to get one short one.
+- The same zero-dose draw sits under every norovirus explicit seed and every
+  boarding-drawn host: `norwalk_gi` has `dose_log10_shortening 0.12` and
+  reference 10^4.23, so its seeds and boarders take 1.2 d × 2.5 = 3.0 d
+  median incubation against a 6 d clamp. Whether norovirus *transmitted*
+  doses also sit below the reference depends on that arm's dose units and
+  was not checked here.
+- The 2.5× penalty on Theta-scaled secondary doses means the COVID arm's
+  incubation term is currently reading a composite scale as an inoculum.
+  Either the incubation dose term is disabled on the composite-Theta arm, or
+  the acquired dose is converted to the units the reference is in, before
+  any Theta or import count is interpreted.
+- The infection-age result in the screen (age 6 d moving first onset by
+  ~3 d) is what subtracting 6 d from a 14.5-d median predicts; it is not
+  evidence about the record's index case.
+
+Trace scripts and JSON are session artifacts, not in the tree; the mechanism
+is checkable from the two functions named above and one 2-epoch run
+(`incubation_days` appears on the index record after the first step).
+
 ## Reproduction
 
 ```bash
