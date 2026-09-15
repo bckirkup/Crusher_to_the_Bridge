@@ -5,7 +5,7 @@
   "representative_of": "Extra-large Spirit-class cruise (~2,100 passengers + ~900 crew = 3,000). Carnival Spirit / HAL Vista / Princess Grand archetype: ~290m LOA × 36m beam, ~86,000 GT. Cabin-corridor resolution (48 pax + 9",
   "provenance": [
     "spatial_layout.json description and deck_dimensions",
-    "zone count: 113",
+    "zone count: 115",
     "per-deck non-overlapping compartment packing"
   ],
   "disclaimer": "Footprints are class-representative for simulation zones, not a surveyed deck plan of one vessel.",
@@ -39,6 +39,7 @@
     "Engine_Room",
     "MedCenter",
     "IsolWard",
+    "Bridge",
     "PC_D4_P_F",
     "PC_D4_P_M",
     "PC_D4_P_A",
@@ -104,6 +105,7 @@
     "HD_11S_F",
     "HD_12S_M",
     "HD_12S_F",
+    "HD_13B_M",
     "HD_1C_M",
     "HD_1C_F",
     "HD_2C_M",
@@ -131,6 +133,7 @@
     "11_Cabins",
     "11_Spa",
     "12_Sports",
+    "13_Bridge",
     "1_Crew",
     "2_Crew",
     "3_Crew",

@@ -45,7 +45,8 @@
         "Casino",
         "Library",
         "Reception",
-        "ExpedLounge"
+        "ExpedLounge",
+        "Bridge"
       ],
       "ach": 8.0,
       "description": "Forward/mid public venues."
@@ -218,6 +219,16 @@
       "oa_fraction": 1.0,
       "hvac_duty": 0.0,
       "description": "Exhaust-only sanitary branch (HD_7S_F, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_8B_M",
+      "rooms": [
+        "HD_8B_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_8B_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -344,6 +355,14 @@
       "is_hvac_ducted": false,
       "path": "Sanitary_Makeup",
       "description": "Transfer air into HD_7S_F; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_8B_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_8B_M; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [
@@ -351,6 +370,11 @@
       "from": "ObsLounge",
       "to": "PoolDeck",
       "type": "open_deck"
+    },
+    {
+      "from": "Bridge",
+      "to": "ObsLounge",
+      "type": "passageway"
     },
     {
       "from": "CasualDining",

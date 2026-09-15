@@ -223,12 +223,18 @@ def _expedition_public_zones() -> tuple[PublicZoneRecipe, ...]:
             {"x": 95, "y": 55},
             "Medical room (~4 beds). Deck 4.",
         ),
+        PublicZoneRecipe(
+            "Bridge", "Free", "medium", 180.0, "8_Bridge", 8,
+            {"x": 150, "y": 10},
+            "Navigating bridge and chartroom. Deck 8.",
+        ),
     )
 
 
 def _expedition_adjacency() -> tuple[dict[str, str], ...]:
     links: list[dict[str, str]] = [
         {"from": "ObsLounge", "to": "PoolDeck", "type": "open_deck"},
+        {"from": "Bridge", "to": "ObsLounge", "type": "passageway"},
         {"from": "CasualDining", "to": "PoolDeck", "type": "doorway"},
         {"from": "Gym", "to": "Spa", "type": "doorway"},
         {"from": "Spa", "to": "ExpedLounge", "type": "passageway"},
@@ -343,7 +349,8 @@ EXPEDITION_CRUISE_450 = CruisePlatformRecipe(
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
-            ("ObsLounge", "TheaterLng", "Casino", "Library", "Reception", "ExpedLounge"),
+            ("ObsLounge", "TheaterLng", "Casino", "Library", "Reception", "ExpedLounge",
+             "Bridge"),
             8.0,
             "Forward/mid public venues.",
         ),
@@ -541,6 +548,11 @@ def _classic_public_zones() -> tuple[PublicZoneRecipe, ...]:
             {"x": 95, "y": 80},
             "Isolation room (~2 beds). Deck 2.",
         ),
+        PublicZoneRecipe(
+            "Bridge", "Free", "medium", 240.0, "10_Bridge", 10,
+            {"x": 150, "y": 8},
+            "Navigating bridge and chartroom. Deck 10.",
+        ),
     )
 
 
@@ -550,6 +562,7 @@ def _classic_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "MainDining_L", "to": "MainGalley", "type": "service_hatch"},
         {"from": "MainDining_U", "to": "Specialty", "type": "passageway"},
         {"from": "MainTheater", "to": "Reception", "type": "passageway"},
+        {"from": "Bridge", "to": "MainTheater", "type": "passageway"},
         {"from": "Reception", "to": "Promenade", "type": "multi_deck_void"},
         {"from": "Promenade", "to": "Casino", "type": "open_front"},
         {"from": "Promenade", "to": "PhotoShops", "type": "open_front"},
@@ -670,7 +683,7 @@ CLASSIC_CRUISE_1900 = CruisePlatformRecipe(
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
-            ("MainTheater", "Casino"),
+            ("MainTheater", "Casino", "Bridge"),
             8.0,
             "Forward public venues.",
         ),
@@ -894,6 +907,11 @@ def _spirit_public_zones() -> tuple[PublicZoneRecipe, ...]:
             "IsolWard", "Medical", "low", 140.0, "2_Crew", 4,
             {"x": 110, "y": 82}, "Isolation ward (~4 beds). Deck 2.",
         ),
+        PublicZoneRecipe(
+            "Bridge", "Free", "medium", 300.0, "13_Bridge", 12,
+            {"x": 150, "y": 6},
+            "Navigating bridge and chartroom. Deck 13.",
+        ),
     )
 
 
@@ -907,6 +925,7 @@ def _spirit_adjacency() -> tuple[dict[str, str], ...]:
         {"from": "Promenade", "to": "Casino", "type": "open_front"},
         {"from": "Promenade", "to": "PhotoShops", "type": "open_front"},
         {"from": "MainTheater", "to": "Reception", "type": "passageway"},
+        {"from": "Bridge", "to": "MainTheater", "type": "passageway"},
         {"from": "LidoBuffet", "to": "MainPool", "type": "doorway"},
         {"from": "LidoBuffet", "to": "PizzaGrill", "type": "passageway"},
         {"from": "MainPool", "to": "AftPool", "type": "open_deck"},
@@ -1038,7 +1057,7 @@ SPIRIT_CRUISE_3000 = CruisePlatformRecipe(
     public_hvac=(
         HvacGroupRecipe(
             "AHU_Public_Fwd",
-            ("MainTheater", "Casino", "Nightclub"),
+            ("MainTheater", "Casino", "Nightclub", "Bridge"),
             8.0,
             "Forward / entertainment.",
         ),

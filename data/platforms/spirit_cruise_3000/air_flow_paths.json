@@ -113,7 +113,8 @@
       "rooms": [
         "MainTheater",
         "Casino",
-        "Nightclub"
+        "Nightclub",
+        "Bridge"
       ],
       "ach": 8.0,
       "description": "Forward / entertainment."
@@ -285,6 +286,16 @@
       "oa_fraction": 1.0,
       "hvac_duty": 0.0,
       "description": "Exhaust-only sanitary branch (HD_12S_F, 2 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_13B_M",
+      "rooms": [
+        "HD_13B_M"
+      ],
+      "ach": 19.2,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_13B_M, 1 WC); makeup air enters from the served space's branch and leaves overboard."
     },
     {
       "id": "AHU_HD_1C_M",
@@ -683,6 +694,14 @@
       "description": "Transfer air into HD_12S_F; the head exhausts overboard, never back to the served space."
     },
     {
+      "from": "AHU_Public_Fwd",
+      "to": "AHU_HD_13B_M",
+      "flow_rate_m3h": 118.9,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_13B_M; the head exhausts overboard, never back to the served space."
+    },
+    {
       "from": "AHU_Dining",
       "to": "AHU_HD_1C_M",
       "flow_rate_m3h": 356.8,
@@ -874,6 +893,11 @@
     {
       "from": "MainTheater",
       "to": "Reception",
+      "type": "passageway"
+    },
+    {
+      "from": "Bridge",
+      "to": "MainTheater",
       "type": "passageway"
     },
     {

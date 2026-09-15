@@ -32,9 +32,9 @@ def test_spirit_3000_corridor_topology() -> None:
     crew = [z for z in corridors if z["id"].startswith("CC_")]
     assert len(pax) == 48
     assert len(crew) == 9
-    # +27 shared sanitary (head) zones added by the shared-sanitary change;
-    # previously 86.
-    assert len(zones) == 113
+    # Previously 86: +27 shared sanitary (head) zones from the sanitary
+    # change, then +1 Bridge zone and +1 bridge head.
+    assert len(zones) == 115
     vents = {z["cabin_ventilation_type"] for z in corridors}
     assert vents == {"balcony_partial", "interior_hvac", "atrium_view"}
     assert all(len(z["id"]) <= 15 for z in zones)
@@ -89,9 +89,9 @@ def test_classic_1900_corridor_topology() -> None:
     crew = [z for z in corridors if z["id"].startswith("CC_")]
     assert len(pax) == 36
     assert len(crew) == 6
-    # +16 shared sanitary (head) zones added by the shared-sanitary change;
-    # previously 61.
-    assert len(zones) == 77
+    # Previously 61: +16 shared sanitary (head) zones from the sanitary
+    # change, then +1 Bridge zone and +1 bridge head.
+    assert len(zones) == 79
     vents = {z["cabin_ventilation_type"] for z in corridors}
     assert vents == {"balcony_partial", "interior_hvac", "atrium_view"}
     assert all(len(z["id"]) <= 15 for z in zones)
@@ -144,9 +144,9 @@ def test_expedition_450_corridor_topology() -> None:
     crew = [z for z in corridors if z["id"].startswith("CC_")]
     assert len(pax) == 12
     assert len(crew) == 4
-    # +12 shared sanitary (head) zones added by the shared-sanitary change;
-    # previously 33.
-    assert len(zones) == 45
+    # Previously 33: +12 shared sanitary (head) zones from the sanitary
+    # change, then +1 Bridge zone and +1 bridge head.
+    assert len(zones) == 47
     vents = {z["cabin_ventilation_type"] for z in corridors}
     assert "balcony_partial" in vents
     assert "interior_hvac" in vents

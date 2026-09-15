@@ -277,6 +277,19 @@
       "description": "Isolation room (~2 beds). Deck 2."
     },
     {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 240.0,
+      "deck": "10_Bridge",
+      "max_occupancy": 10,
+      "display": {
+        "x": 150,
+        "y": 8
+      },
+      "description": "Navigating bridge and chartroom. Deck 10."
+    },
+    {
       "id": "PC_D4_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
@@ -954,6 +967,25 @@
         "y": 101.0
       },
       "description": "Public head (male, 1 water closet) serving Engine_Room."
+    },
+    {
+      "id": "HD_10B_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "10_Bridge",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 150.0,
+        "y": 4.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
     },
     {
       "id": "HD_1C_M",

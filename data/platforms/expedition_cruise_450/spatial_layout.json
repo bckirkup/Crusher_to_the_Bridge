@@ -245,6 +245,19 @@
       "description": "Medical room (~4 beds). Deck 4."
     },
     {
+      "id": "Bridge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 180.0,
+      "deck": "8_Bridge",
+      "max_occupancy": 8,
+      "display": {
+        "x": 150,
+        "y": 10
+      },
+      "description": "Navigating bridge and chartroom. Deck 8."
+    },
+    {
       "id": "PC_D4_P_F",
       "type": "Cabin_Corridor",
       "traffic": "low",
@@ -745,6 +758,25 @@
         "y": 6.0
       },
       "description": "Public head (female, 4 water closets) serving CasualDining, PoolDeck, ObsLounge."
+    },
+    {
+      "id": "HD_8B_M",
+      "type": "Sanitary",
+      "traffic": "medium",
+      "volume_m3": 6.21,
+      "floor_area_m2": 2.7,
+      "ceiling_height_m": 2.3,
+      "deck": "8_Bridge",
+      "base_ach": 19.2,
+      "max_occupancy": 1,
+      "serves": [
+        "Bridge"
+      ],
+      "display": {
+        "x": 150.0,
+        "y": 6.0
+      },
+      "description": "Public head (male, 1 water closet) serving Bridge."
     }
   ],
   "nominal_complement": {
