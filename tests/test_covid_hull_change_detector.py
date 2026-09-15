@@ -53,8 +53,11 @@ PINNED_FIELDS = (
 # (onsets, onsets before split day, specimens, positives, asymptomatic positives)
 GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # CI, the Batch worker image, and covid_first_look_v1 cell
-    # held_out_greg_mortimer_2020_theta1e6p00_seed20200333.json
-    (3, 11): (96, 52, 106, 36, 36),
+    # held_out_greg_mortimer_2020_theta1e6p00_seed20200333.json;
+    # repinned from (96, 52, 106, 36, 36) when the expedition_cruise_450
+    # Bridge zone (shared_sanitary_zones) shifted the work-zone
+    # assignment draws. Tuple is CI job test (fast tier, 3.11).
+    (3, 11): (74, 42, 113, 21, 21),
     # Local CPython 3.12 venv (compensated float sum); repinned from
     # (85, 51, 102, 30, 30) when the expedition_cruise_450 Bridge zone
     # (shared_sanitary_zones) shifted the work-zone assignment draws.
