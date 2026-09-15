@@ -1,0 +1,3979 @@
+{
+ "cells": [
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 2.02,
+      "mean_convalescent": 2.718,
+      "mean_imported_crew": 1.39,
+      "mean_imported_passenger": 3.144,
+      "mean_imported_total": 4.534,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.24,
+      "mean_presymptomatic": 0.166,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.41
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.83,
+      "max": 5,
+      "mean": 0.204,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 2,
+      "top_10pct_share": 0.6568627450980392,
+      "top_1pct_share": 0.1568627450980392,
+      "variance_to_mean": 1.3254117647058825
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.03970004411116013,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.944,
+      "max": 19,
+      "mean": 0.18,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 4,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.6555555555555556,
+      "variance_to_mean": 9.375555555555556
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0004324
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.00027899999999999995
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.18,
+       "mean_dose_share": 0.1792792
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 3.3999999999999996e-06
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0082,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0007
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0157,
+       "median": 0.0022,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0015,
+       "q3": 0.003
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.007,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0037,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 2.02,
+      "mean_convalescent": 2.718,
+      "mean_imported_crew": 1.39,
+      "mean_imported_passenger": 3.144,
+      "mean_imported_total": 4.534,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.24,
+      "mean_presymptomatic": 0.166,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.41
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.828,
+      "max": 7,
+      "mean": 0.22,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 3,
+      "top_10pct_share": 0.6727272727272727,
+      "top_1pct_share": 0.18181818181818182,
+      "variance_to_mean": 1.5981818181818184
+     },
+     "sanitary": {
+      "mean_dose_delivered": 170.101766468,
+      "mean_person_seconds": 9161393.25259663,
+      "mean_recipients": 5901.822,
+      "mean_stool_visits": 572.796,
+      "mean_unresolved": 0.0,
+      "mean_visits": 53249.146,
+      "n_voyages": 500,
+      "total_dose_delivered": 85050.883234,
+      "total_person_seconds": 4580696626.298315,
+      "total_recipients": 2950911.0,
+      "total_stool_visits": 286398.0,
+      "total_unresolved": 0.0,
+      "total_visits": 26624573.0,
+      "visits_per_person_day": 3.9827334330590873,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.773880896543564,
+        0.8425425809697209
+       ],
+       "count": 405,
+       "fraction": 0.81
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.9473346497253808,
+        0.979301048947279
+       ],
+       "count": 483,
+       "fraction": 0.966
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.05513895015438906,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.948,
+      "max": 41,
+      "mean": 0.25,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 8,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.68,
+      "variance_to_mean": 18.254
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0008866
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.000222
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.248,
+       "mean_dose_share": 0.2473218
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 1.3399999999999999e-05
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.009,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0007
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0314,
+       "median": 0.0022,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0015,
+       "q3": 0.003
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.007,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0052,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": 5.7999999999999995e-06,
+      "mean_difference_ci95": [
+       -1.661e-05,
+       2.8224999999999978e-05
+      ],
+      "n_identical": 491,
+      "variance_reduction": 18.039344601919037
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": 2.0000000000000052e-07,
+      "mean_difference_ci95": [
+       -1.3599999999999999e-05,
+       1.4e-05
+      ],
+      "n_identical": 496,
+      "variance_reduction": 38.876765536130186
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": 1.2e-05,
+      "mean_difference_ci95": [
+       -9.005e-06,
+       3.560999999999998e-05
+      ],
+      "n_identical": 492,
+      "variance_reduction": 5.709015508169481
+     },
+     "route_dom_fomite": {
+      "mean_difference": 0.068,
+      "mean_difference_ci95": [
+       -0.08604999999999999,
+       0.2880999999999999
+      ],
+      "n_identical": 469,
+      "variance_reduction": 1.5055480399751793
+     },
+     "sanitary_recipients": {
+      "mean_difference": 5901.822,
+      "mean_difference_ci95": [
+       5486.52255,
+       6317.409049999999
+      ],
+      "n_identical": 95,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": 0.07,
+      "mean_difference_ci95": [
+       -0.08405,
+       0.292
+      ],
+      "n_identical": 470,
+      "variance_reduction": 1.5066158926032152
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": null,
+     "n_gained": 0,
+     "n_lost": 0,
+     "n_pairs": 500,
+     "n_posted_left": 0,
+     "n_posted_right": 0,
+     "observed_difference": 0.0
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": 0.015438906043228937
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 1910,
+   "num_epochs": 168,
+   "platform_id": "classic_cruise_1900",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 7.0
+  },
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0396,
+       "median": 0.0396,
+       "min": 0.0396,
+       "n": 1,
+       "q1": 0.0396,
+       "q3": 0.0396
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0628,
+       "median": 0.0628,
+       "min": 0.0628,
+       "n": 1,
+       "q1": 0.0628,
+       "q3": 0.0628
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0035,
+       "median": 0.0035,
+       "min": 0.0035,
+       "n": 1,
+       "q1": 0.0035,
+       "q3": 0.0035
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0366,
+       "median": 0.0366,
+       "min": 0.0366,
+       "n": 1,
+       "q1": 0.0366,
+       "q3": 0.0366
+      }
+     },
+     "imports": {
+      "mean_cleared": 2.02,
+      "mean_convalescent": 2.718,
+      "mean_imported_crew": 1.39,
+      "mean_imported_passenger": 3.144,
+      "mean_imported_total": 4.534,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.24,
+      "mean_presymptomatic": 0.166,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.41
+     },
+     "n_posted": 1,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 1,
+     "n_voyages": 500,
+     "posting_frequency": 0.002,
+     "posting_frequency_ci95": [
+      0.00021587997577295862,
+      0.009309481685507251
+     ],
+     "posting_frequency_per_1000": 2.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.832,
+      "max": 49,
+      "mean": 0.374,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 3,
+      "top_10pct_share": 0.8181818181818182,
+      "top_1pct_share": 0.5294117647058824,
+      "variance_to_mean": 18.091240641711227
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.10939567710630789,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.948,
+      "max": 86,
+      "mean": 0.496,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 4,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.8790322580645161,
+      "variance_to_mean": 54.61690322580645
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0009144000000000001
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.001295
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.496,
+       "mean_dose_share": 0.493577
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.00021079999999999997
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0396,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0007
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0628,
+       "median": 0.0022,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0015,
+       "q3": 0.003
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0035,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0366,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 2.02,
+      "mean_convalescent": 2.718,
+      "mean_imported_crew": 1.39,
+      "mean_imported_passenger": 3.144,
+      "mean_imported_total": 4.534,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.24,
+      "mean_presymptomatic": 0.166,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.41
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.112,
+       "total": 56,
+       "voyages_with_any": 55,
+       "voyages_with_any_ci95": [
+        0.0848344649388079,
+        0.13966346055452525
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.826,
+      "max": 6,
+      "mean": 0.22,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 2,
+      "top_10pct_share": 0.6636363636363637,
+      "top_1pct_share": 0.15454545454545454,
+      "variance_to_mean": 1.4345454545454546
+     },
+     "sanitary": {
+      "mean_dose_delivered": 45.405241604,
+      "mean_person_seconds": 15706681.612789802,
+      "mean_recipients": 12318.364,
+      "mean_stool_visits": 1109.96,
+      "mean_unresolved": 0.0,
+      "mean_visits": 91291.242,
+      "n_voyages": 500,
+      "total_dose_delivered": 22702.620801999998,
+      "total_person_seconds": 7853340806.394901,
+      "total_recipients": 6159182.0,
+      "total_stool_visits": 554980.0,
+      "total_unresolved": 0.0,
+      "total_visits": 45645621.0,
+      "visits_per_person_day": 3.9830384816753925,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.8145614567327569,
+        0.8774240839420739
+       ],
+       "count": 424,
+       "fraction": 0.848
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.9571983462720723,
+        0.9853498305939032
+       ],
+       "count": 487,
+       "fraction": 0.974
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.03440670489633877,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.948,
+      "max": 17,
+      "mean": 0.156,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 5,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.5769230769230769,
+      "variance_to_mean": 7.3311794871794875
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.012987012987012988,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0024108000000000003
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.000121
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 0.987012987012987,
+       "mean_dominant_count": 0.152,
+       "mean_dose_share": 0.151887
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 1e-06
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0082,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0007
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0172,
+       "median": 0.0022,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0015,
+       "q3": 0.003
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0035,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0045,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": -0.000121,
+      "mean_difference_ci95": [
+       -0.00028623499999999997,
+       2.0449999999999597e-06
+      ],
+      "n_identical": 488,
+      "variance_reduction": 1.3783761363744529
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": -1.72e-05,
+      "mean_difference_ci95": [
+       -4.1599999999999995e-05,
+       7.0099999999999905e-06
+      ],
+      "n_identical": 490,
+      "variance_reduction": 10.387441229637782
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": -0.0001154,
+      "mean_difference_ci95": [
+       -0.00027866999999999996,
+       7.434999999999966e-06
+      ],
+      "n_identical": 491,
+      "variance_reduction": 1.217823641789742
+     },
+     "route_dom_fomite": {
+      "mean_difference": -0.344,
+      "mean_difference_ci95": [
+       -0.8042,
+       0.010199999999999819
+      ],
+      "n_identical": 469,
+      "variance_reduction": 1.2030718585248639
+     },
+     "sanitary_recipients": {
+      "mean_difference": 12318.364,
+      "mean_difference_ci95": [
+       11550.40495,
+       13085.93545
+      ],
+      "n_identical": 76,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": -0.34,
+      "mean_difference_ci95": [
+       -0.80005,
+       0.016049999999999953
+      ],
+      "n_identical": 469,
+      "variance_reduction": 1.2030495474766068
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": 1.0,
+     "n_gained": 0,
+     "n_lost": 1,
+     "n_pairs": 500,
+     "n_posted_left": 1,
+     "n_posted_right": 0,
+     "observed_difference": -0.002
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": -0.07498897220996911
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 1910,
+   "num_epochs": 288,
+   "platform_id": "classic_cruise_1900",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 12.0
+  },
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 0.526,
+      "mean_convalescent": 0.644,
+      "mean_imported_crew": 0.332,
+      "mean_imported_passenger": 0.744,
+      "mean_imported_total": 1.076,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 0.29,
+      "mean_presymptomatic": 0.046,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.096
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.966,
+      "max": 2,
+      "mean": 0.038,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.3684210526315789,
+      "variance_to_mean": 1.1725263157894736
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.055762081784386616,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.982,
+      "max": 19,
+      "mean": 0.06,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.8666666666666667,
+      "variance_to_mean": 12.606666666666667
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 8e-06
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0001032
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.06,
+       "mean_dose_share": 0.059852199999999994
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 8.000000000000001e-07
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0316,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0696,
+       "median": 0.0032,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0032
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0075,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0063,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 0.526,
+      "mean_convalescent": 0.644,
+      "mean_imported_crew": 0.332,
+      "mean_imported_passenger": 0.744,
+      "mean_imported_total": 1.076,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 0.29,
+      "mean_presymptomatic": 0.046,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.096
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.968,
+      "max": 6,
+      "mean": 0.044,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.5,
+      "variance_to_mean": 2.410545454545455
+     },
+     "sanitary": {
+      "mean_dose_delivered": 44.842361998,
+      "mean_person_seconds": 2159968.5674,
+      "mean_recipients": 312.3,
+      "mean_stool_visits": 50.506,
+      "mean_unresolved": 0.0,
+      "mean_visits": 12544.504,
+      "n_voyages": 500,
+      "total_dose_delivered": 22421.180999,
+      "total_person_seconds": 1079984283.7,
+      "total_recipients": 156150.0,
+      "total_stool_visits": 25253.0,
+      "total_unresolved": 0.0,
+      "total_visits": 6272252.0,
+      "visits_per_person_day": 3.982382222222222,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.25152333710763297,
+        0.33089984240231596
+       ],
+       "count": 145,
+       "fraction": 0.29
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.5303329583744005,
+        0.61681309767634
+       ],
+       "count": 287,
+       "fraction": 0.574
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.048327137546468404,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.988,
+      "max": 20,
+      "mean": 0.052,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.9615384615384616,
+      "variance_to_mean": 15.640307692307694
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 8.000000000000001e-07
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 5.2000000000000004e-05
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.052,
+       "mean_dose_share": 0.0519456
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 1.6000000000000001e-06
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.038,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0728,
+       "median": 0.0032,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0032
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0075,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.019,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": 1.0399999999999999e-05,
+      "mean_difference_ci95": [
+       -3.8599999999999996e-05,
+       7.165999999999993e-05
+      ],
+      "n_identical": 495,
+      "variance_reduction": 13.632172103883033
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": -1.4999999999999999e-05,
+      "mean_difference_ci95": [
+       -5.9999999999999995e-05,
+       0.0
+      ],
+      "n_identical": 499,
+      "variance_reduction": 39.39679358717434
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": 1.9e-05,
+      "mean_difference_ci95": [
+       -1.9359999999999994e-05,
+       8.240499999999998e-05
+      ],
+      "n_identical": 496,
+      "variance_reduction": 3.961107441764693
+     },
+     "route_dom_fomite": {
+      "mean_difference": -0.008,
+      "mean_difference_ci95": [
+       -0.026049999999999997,
+       0.006
+      ],
+      "n_identical": 492,
+      "variance_reduction": 49.151302605210425
+     },
+     "sanitary_recipients": {
+      "mean_difference": 312.3,
+      "mean_difference_ci95": [
+       258.6549,
+       368.88514999999984
+      ],
+      "n_identical": 355,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": -0.008,
+      "mean_difference_ci95": [
+       -0.026049999999999997,
+       0.006
+      ],
+      "n_identical": 492,
+      "variance_reduction": 49.151302605210425
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": null,
+     "n_gained": 0,
+     "n_lost": 0,
+     "n_pairs": 500,
+     "n_posted_left": 0,
+     "n_posted_right": 0,
+     "observed_difference": 0.0
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": -0.007434944237918212
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 450,
+   "num_epochs": 168,
+   "platform_id": "expedition_cruise_450",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 7.0
+  },
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 0.526,
+      "mean_convalescent": 0.644,
+      "mean_imported_crew": 0.332,
+      "mean_imported_passenger": 0.744,
+      "mean_imported_total": 1.076,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 0.29,
+      "mean_presymptomatic": 0.046,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.096
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.958,
+      "max": 8,
+      "mean": 0.058,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.4482758620689655,
+      "variance_to_mean": 2.942
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.055762081784386616,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.982,
+      "max": 19,
+      "mean": 0.06,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.8666666666666667,
+      "variance_to_mean": 12.606666666666667
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 7e-06
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0001066
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.06,
+       "mean_dose_share": 0.0598498
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 8.000000000000001e-07
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0316,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0696,
+       "median": 0.0032,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0032
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0149,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0253,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 0.526,
+      "mean_convalescent": 0.644,
+      "mean_imported_crew": 0.332,
+      "mean_imported_passenger": 0.744,
+      "mean_imported_total": 1.076,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 0.29,
+      "mean_presymptomatic": 0.046,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.096
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.03,
+       "total": 15,
+       "voyages_with_any": 15,
+       "voyages_with_any_ci95": [
+        0.017640463865729445,
+        0.04776791682721319
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.956,
+      "max": 6,
+      "mean": 0.056,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.39285714285714285,
+      "variance_to_mean": 2.0868571428571427
+     },
+     "sanitary": {
+      "mean_dose_delivered": 37.898999026,
+      "mean_person_seconds": 3703337.971200998,
+      "mean_recipients": 665.586,
+      "mean_stool_visits": 98.048,
+      "mean_unresolved": 0.0,
+      "mean_visits": 21509.148,
+      "n_voyages": 500,
+      "total_dose_delivered": 18949.499513,
+      "total_person_seconds": 1851668985.600499,
+      "total_recipients": 332793.0,
+      "total_stool_visits": 49024.0,
+      "total_unresolved": 0.0,
+      "total_visits": 10754574.0,
+      "visits_per_person_day": 3.9831755555555555,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.2975665004537419,
+        0.3803028776270004
+       ],
+       "count": 169,
+       "fraction": 0.338
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.5565837383162036,
+        0.6422622917467331
+       ],
+       "count": 300,
+       "fraction": 0.6
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.04460966542750929,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.988,
+      "max": 18,
+      "mean": 0.048,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 1,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.9583333333333334,
+      "variance_to_mean": 13.785333333333332
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 3.68e-05
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 1.0,
+       "mean_dominant_count": 0.048,
+       "mean_dose_share": 0.0479616
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0443,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0665,
+       "median": 0.0032,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0032
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0149,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.019,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": -1.48e-05,
+      "mean_difference_ci95": [
+       -5.1000000000000006e-05,
+       1.0654999999999951e-05
+      ],
+      "n_identical": 497,
+      "variance_reduction": 51.713825462798674
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": -1.4999999999999999e-05,
+      "mean_difference_ci95": [
+       -4.4999999999999996e-05,
+       0.0
+      ],
+      "n_identical": 499,
+      "variance_reduction": 39.604871253618334
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": -6.2e-06,
+      "mean_difference_ci95": [
+       -3.76e-05,
+       1.9200000000000003e-05
+      ],
+      "n_identical": 498,
+      "variance_reduction": 28.98783589436991
+     },
+     "route_dom_fomite": {
+      "mean_difference": -0.012,
+      "mean_difference_ci95": [
+       -0.032,
+       0.002
+      ],
+      "n_identical": 492,
+      "variance_reduction": 44.515821195379196
+     },
+     "sanitary_recipients": {
+      "mean_difference": 665.586,
+      "mean_difference_ci95": [
+       562.8381,
+       784.7697499999999
+      ],
+      "n_identical": 331,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": -0.012,
+      "mean_difference_ci95": [
+       -0.032,
+       0.002
+      ],
+      "n_identical": 492,
+      "variance_reduction": 44.515821195379196
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": null,
+     "n_gained": 0,
+     "n_lost": 0,
+     "n_pairs": 500,
+     "n_posted_left": 0,
+     "n_posted_right": 0,
+     "observed_difference": 0.0
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": -0.011152416356877325
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 450,
+   "num_epochs": 288,
+   "platform_id": "expedition_cruise_450",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 12.0
+  },
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 3.12,
+      "mean_convalescent": 4.216,
+      "mean_imported_crew": 2.084,
+      "mean_imported_passenger": 4.924,
+      "mean_imported_total": 7.008,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.822,
+      "mean_presymptomatic": 0.274,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.696
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.75,
+      "max": 32,
+      "mean": 0.412,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 4,
+      "top_10pct_share": 0.6359223300970874,
+      "top_1pct_share": 0.2961165048543689,
+      "variance_to_mean": 7.160815533980583
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.14440639269406394,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.896,
+      "max": 116,
+      "mean": 1.012,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 31,
+      "top_10pct_share": 0.9960474308300395,
+      "top_1pct_share": 0.6225296442687747,
+      "variance_to_mean": 52.67969960474308
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.001976284584980237,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0014976
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.001976284584980237,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0032906000000000003
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 0.9960474308300395,
+       "mean_dominant_count": 1.008,
+       "mean_dose_share": 1.0071618
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 8.200000000000001e-06
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0229,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.051,
+       "median": 0.0024,
+       "min": 0.0005,
+       "n": 500,
+       "q1": 0.0014,
+       "q3": 0.0029
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0067,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0152,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.000125
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 3.12,
+      "mean_convalescent": 4.216,
+      "mean_imported_crew": 2.084,
+      "mean_imported_passenger": 4.924,
+      "mean_imported_total": 7.008,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.822,
+      "mean_presymptomatic": 0.274,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.696
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.744,
+      "max": 41,
+      "mean": 0.472,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 8,
+      "top_10pct_share": 0.6694915254237288,
+      "top_1pct_share": 0.3389830508474576,
+      "variance_to_mean": 9.350033898305085
+     },
+     "sanitary": {
+      "mean_dose_delivered": 588.162596278,
+      "mean_person_seconds": 14396104.011991017,
+      "mean_recipients": 10003.246,
+      "mean_stool_visits": 998.64,
+      "mean_unresolved": 0.0,
+      "mean_visits": 83668.138,
+      "n_voyages": 500,
+      "total_dose_delivered": 294081.298139,
+      "total_person_seconds": 7198052005.995508,
+      "total_recipients": 5001623.0,
+      "total_stool_visits": 499320.0,
+      "total_unresolved": 0.0,
+      "total_visits": 41834069.0,
+      "visits_per_person_day": 3.984197047619048,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.9259020216017353,
+        0.9649359993486029
+       ],
+       "count": 474,
+       "fraction": 0.948
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.9906905183144927,
+        0.999784120024227
+       ],
+       "count": 499,
+       "fraction": 0.998
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.11757990867579908,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.914,
+      "max": 93,
+      "mean": 0.824,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 30,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.6310679611650486,
+      "variance_to_mean": 45.32648543689321
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0024271844660194177,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0030833999999999996
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0017458
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 0.9975728155339806,
+       "mean_dominant_count": 0.822,
+       "mean_dose_share": 0.8191423999999999
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 2.6e-05
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0233,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0448,
+       "median": 0.0024,
+       "min": 0.0005,
+       "n": 500,
+       "q1": 0.0014,
+       "q3": 0.0029
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0156,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0195,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": 4.319999999999999e-05,
+      "mean_difference_ci95": [
+       3.3950000000000022e-06,
+       8.6605e-05
+      ],
+      "n_identical": 476,
+      "variance_reduction": 10.413265287420367
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": 2.2199999999999998e-05,
+      "mean_difference_ci95": [
+       -8.8e-06,
+       6.225499999999994e-05
+      ],
+      "n_identical": 488,
+      "variance_reduction": 6.972810608321401
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": 2.86e-05,
+      "mean_difference_ci95": [
+       5.59e-06,
+       5.7004999999999994e-05
+      ],
+      "n_identical": 483,
+      "variance_reduction": 19.140191255820056
+     },
+     "route_dom_fomite": {
+      "mean_difference": -0.186,
+      "mean_difference_ci95": [
+       -0.474,
+       0.07009999999999991
+      ],
+      "n_identical": 449,
+      "variance_reduction": 8.938298342471553
+     },
+     "sanitary_recipients": {
+      "mean_difference": 10003.246,
+      "mean_difference_ci95": [
+       9382.46845,
+       10611.768399999999
+      ],
+      "n_identical": 26,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": -0.188,
+      "mean_difference_ci95": [
+       -0.47605,
+       0.07
+      ],
+      "n_identical": 449,
+      "variance_reduction": 8.891236499495527
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": null,
+     "n_gained": 0,
+     "n_lost": 0,
+     "n_pairs": 500,
+     "n_posted_left": 0,
+     "n_posted_right": 0,
+     "observed_difference": 0.0
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": -0.02682648401826486
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 3000,
+   "num_epochs": 168,
+   "platform_id": "spirit_cruise_3000",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 7.0
+  },
+  {
+   "arms": {
+    "baseline": {
+     "arm": "baseline",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 3.12,
+      "mean_convalescent": 4.216,
+      "mean_imported_crew": 2.084,
+      "mean_imported_passenger": 4.924,
+      "mean_imported_total": 7.008,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.822,
+      "mean_presymptomatic": 0.274,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.696
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.738,
+      "max": 27,
+      "mean": 0.458,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 9,
+      "top_10pct_share": 0.6462882096069869,
+      "top_1pct_share": 0.31877729257641924,
+      "variance_to_mean": 6.183921397379913
+     },
+     "sanitary": {
+      "mean_dose_delivered": 0.0,
+      "mean_person_seconds": 0.0,
+      "mean_recipients": 0.0,
+      "mean_stool_visits": 0.0,
+      "mean_unresolved": 0.0,
+      "mean_visits": 0.0,
+      "n_voyages": 500,
+      "total_dose_delivered": 0.0,
+      "total_person_seconds": 0.0,
+      "total_recipients": 0.0,
+      "total_stool_visits": 0.0,
+      "total_unresolved": 0.0,
+      "total_visits": 0.0,
+      "visits_per_person_day": 0.0,
+      "voyages_with_recipients": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ],
+       "count": 0,
+       "fraction": 0.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "none",
+     "secondaries_per_import": 0.1555365296803653,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.888,
+      "max": 125,
+      "mean": 1.09,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 35,
+      "top_10pct_share": 0.9889908256880734,
+      "top_1pct_share": 0.563302752293578,
+      "variance_to_mean": 50.63660550458715
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.009174311926605503,
+       "mean_dominant_count": 0.01,
+       "mean_dose_share": 0.0073364
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0018348623853211008,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0048866000000000005
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 0.9889908256880734,
+       "mean_dominant_count": 1.078,
+       "mean_dose_share": 1.0777066
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 2.12e-05
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0214,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0552,
+       "median": 0.0024,
+       "min": 0.0005,
+       "n": 500,
+       "q1": 0.0014,
+       "q3": 0.003
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0056,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0129,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      }
+     }
+    },
+    "visits": {
+     "arm": "visits",
+     "conditional_on_posting": {
+      "ever_ill_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "infection_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_crew": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": null,
+       "median": null,
+       "min": null,
+       "n": 0,
+       "q1": null,
+       "q3": null
+      }
+     },
+     "imports": {
+      "mean_cleared": 3.12,
+      "mean_convalescent": 4.216,
+      "mean_imported_crew": 2.084,
+      "mean_imported_passenger": 4.924,
+      "mean_imported_total": 7.008,
+      "mean_incubating": 0.0,
+      "mean_never_symptomatic": 1.822,
+      "mean_presymptomatic": 0.274,
+      "mean_screened_out": 0.0,
+      "mean_symptomatic": 0.696
+     },
+     "n_posted": 0,
+     "n_posted_crew_channel": 0,
+     "n_posted_crew_only": 0,
+     "n_posted_passenger_channel": 0,
+     "n_voyages": 500,
+     "posting_frequency": 0.0,
+     "posting_frequency_ci95": [
+      9.815777236487957e-07,
+      0.0050087878001096745
+     ],
+     "posting_frequency_per_1000": 0.0,
+     "preboarding_assessment": {
+      "crew_declared": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_eligible": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_preboarding_reportable": {
+       "mean_per_voyage": 0.194,
+       "total": 97,
+       "voyages_with_any": 91,
+       "voyages_with_any_ci95": [
+        0.15006613391787413,
+        0.21760261029731123
+       ]
+      },
+      "crew_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "n_voyages": 500,
+      "passenger_declared": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_eligible": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_preboarding_reportable": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      },
+      "passenger_screened_out": {
+       "mean_per_voyage": 0.0,
+       "total": 0,
+       "voyages_with_any": 0,
+       "voyages_with_any_ci95": [
+        9.815777236487957e-07,
+        0.0050087878001096745
+       ]
+      }
+     },
+     "reported_passenger_case_spread": {
+      "fraction_zero": 0.73,
+      "max": 36,
+      "mean": 0.496,
+      "median": 0.0,
+      "n": 500,
+      "p90": 1,
+      "p99": 8,
+      "top_10pct_share": 0.657258064516129,
+      "top_1pct_share": 0.3467741935483871,
+      "variance_to_mean": 8.495935483870968
+     },
+     "sanitary": {
+      "mean_dose_delivered": 970.43330042,
+      "mean_person_seconds": 24672423.08361401,
+      "mean_recipients": 20709.488,
+      "mean_stool_visits": 1945.402,
+      "mean_unresolved": 0.0,
+      "mean_visits": 143391.836,
+      "n_voyages": 500,
+      "total_dose_delivered": 485216.65021,
+      "total_person_seconds": 12336211541.807005,
+      "total_recipients": 10354744.0,
+      "total_stool_visits": 972701.0,
+      "total_unresolved": 0.0,
+      "total_visits": 71695918.0,
+      "visits_per_person_day": 3.9831065555555556,
+      "voyages_with_recipients": {
+       "ci95": [
+        0.9400936284480618,
+        0.9746089688737695
+       ],
+       "count": 480,
+       "fraction": 0.96
+      },
+      "voyages_with_stool_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "voyages_with_visits": {
+       "ci95": [
+        0.9949912121998903,
+        0.9999990184222763
+       ],
+       "count": 500,
+       "fraction": 1.0
+      },
+      "witness_present_fraction": 1.0
+     },
+     "sanitary_visit_mode": "dwell_weighted",
+     "secondaries_per_import": 0.15896118721461186,
+     "secondary_infection_spread": {
+      "fraction_zero": 0.904,
+      "max": 140,
+      "mean": 1.114,
+      "median": 0.0,
+      "n": 500,
+      "p90": 0,
+      "p99": 41,
+      "top_10pct_share": 1.0,
+      "top_1pct_share": 0.5978456014362658,
+      "variance_to_mean": 56.733396768402145
+     },
+     "secondary_route_attribution": {
+      "direct_contact": {
+       "fraction_dominant": 0.0035906642728904844,
+       "mean_dominant_count": 0.004,
+       "mean_dose_share": 0.0058092
+      },
+      "droplet": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "emesis_aerosol": {
+       "fraction_dominant": 0.0017953321364452422,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.003713
+      },
+      "environmental_source": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "fomite": {
+       "fraction_dominant": 0.992818671454219,
+       "mean_dominant_count": 1.106,
+       "mean_dose_share": 1.1033712
+      },
+      "food_contamination": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      },
+      "hvac_airborne": {
+       "fraction_dominant": 0.0017953321364452422,
+       "mean_dominant_count": 0.002,
+       "mean_dose_share": 0.0010953999999999998
+      },
+      "unknown": {
+       "fraction_dominant": 0.0,
+       "mean_dominant_count": 0.0,
+       "mean_dose_share": 0.0
+      }
+     },
+     "unconditional": {
+      "ever_ill_attack_rate_passenger": {
+       "max": 0.0257,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      },
+      "infection_attack_rate_passenger": {
+       "max": 0.0395,
+       "median": 0.0024,
+       "min": 0.0005,
+       "n": 500,
+       "q1": 0.0014,
+       "q3": 0.0029
+      },
+      "reported_case_attack_rate_crew": {
+       "max": 0.0289,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0
+      },
+      "reported_case_attack_rate_passenger": {
+       "max": 0.0171,
+       "median": 0.0,
+       "min": 0.0,
+       "n": 500,
+       "q1": 0.0,
+       "q3": 0.0005
+      }
+     }
+    }
+   },
+   "boarding_mechanism_rung": "reportable",
+   "contrast": {
+    "differences": {
+     "imported": {
+      "mean_difference": 0.0,
+      "mean_difference_ci95": [
+       0.0,
+       0.0
+      ],
+      "n_identical": 500,
+      "variance_reduction": null
+     },
+     "posting_margin": {
+      "mean_difference": 6.42e-05,
+      "mean_difference_ci95": [
+       -1.803e-05,
+       0.00016936999999999988
+      ],
+      "n_identical": 465,
+      "variance_reduction": 3.310440421040875
+     },
+     "reported_case_attack_rate_crew": {
+      "mean_difference": 7.359999999999999e-05,
+      "mean_difference_ci95": [
+       -2.8405e-05,
+       0.00020724999999999991
+      ],
+      "n_identical": 478,
+      "variance_reduction": 1.6384549175522969
+     },
+     "reported_case_attack_rate_passenger": {
+      "mean_difference": 1.8e-05,
+      "mean_difference_ci95": [
+       -1.3809999999999998e-05,
+       4.98e-05
+      ],
+      "n_identical": 472,
+      "variance_reduction": 9.437314155444307
+     },
+     "route_dom_fomite": {
+      "mean_difference": 0.028,
+      "mean_difference_ci95": [
+       -0.5391,
+       0.5101999999999999
+      ],
+      "n_identical": 443,
+      "variance_reduction": 2.796428594631179
+     },
+     "sanitary_recipients": {
+      "mean_difference": 20709.488,
+      "mean_difference_ci95": [
+       19606.86345,
+       21820.70265
+      ],
+      "n_identical": 20,
+      "variance_reduction": 1.0
+     },
+     "secondary_infections": {
+      "mean_difference": 0.024,
+      "mean_difference_ci95": [
+       -0.5452,
+       0.5100999999999999
+      ],
+      "n_identical": 441,
+      "variance_reduction": 2.784751811483757
+     }
+    },
+    "identical_import_fraction": 1.0,
+    "left_arm": "baseline",
+    "n_shared_seeds": 500,
+    "posting": {
+     "exact_p_value": null,
+     "n_gained": 0,
+     "n_lost": 0,
+     "n_pairs": 500,
+     "n_posted_left": 0,
+     "n_posted_right": 0,
+     "observed_difference": 0.0
+    },
+    "right_arm": "visits",
+    "secondaries_per_import_difference": 0.0034246575342465613
+   },
+   "dose_adjustment": 4.0,
+   "num_agents": 3000,
+   "num_epochs": 288,
+   "platform_id": "spirit_cruise_3000",
+   "surveillance": "syndromic_comp65",
+   "voyage_days": 12.0
+  }
+ ],
+ "n_cells": 6,
+ "n_runs": 6000,
+ "observed_comparators": {
+  "A4_reported_passenger_ar_over_postings_by_hull": {
+   "classic_cruise_1900": {
+    "median": 0.05518945634266886,
+    "n": 95.0,
+    "q1": 0.04148771722542215,
+    "q3": 0.07820870359866389
+   },
+   "expedition_cruise_450": {
+    "median": 0.0532258064516129,
+    "n": 21.0,
+    "q1": 0.04,
+    "q3": 0.1044776119402985
+   },
+   "mega_cruise_5000": {
+    "median": 0.060037301484954994,
+    "n": 16.0,
+    "q1": 0.03547007602769624,
+    "q3": 0.07489444602199992
+   },
+   "spirit_cruise_3000": {
+    "median": 0.05260409128190283,
+    "n": 130.0,
+    "q1": 0.041835460931410134,
+    "q3": 0.07239561073520678
+   }
+  },
+  "A9_posting_probability_per_1000_voyages": {
+   "fleet": {
+    "definitions": {
+     "investigated": "MMWR investigated passenger outbreaks",
+     "posted": "project VSP posted series"
+    },
+    "denominator": {
+     "source": "Jenkins 2021 (MMWR SS 70(6)), Table 1",
+     "unit": "unduplicated voyage reports, pooled 2006-2019",
+     "voyages": 37258,
+     "window": [
+      2006,
+      2019
+     ]
+    },
+    "interval": [
+     4.1870202372644805,
+     5.582693649685973
+    ],
+    "investigated": 4.1870202372644805,
+    "posted": 5.582693649685973
+   },
+   "passenger_by_voyage_length": {
+    "11-14": 18.32208293153327,
+    "15-21": 28.50356294536817,
+    "3-5": 0.5082776648271856,
+    "6-7": 0.331619963521804,
+    "8-10": 2.4511806520140533
+   },
+   "per_hull": {
+    "classic_cruise_1900": {
+     "reason": "per-hull outbreak numerator unpublished",
+     "target": null
+    },
+    "expedition_cruise_450": {
+     "reason": "per-hull outbreak numerator unpublished",
+     "target": null
+    },
+    "mega_cruise_5000": {
+     "reason": "per-hull outbreak numerator unpublished",
+     "target": null
+    },
+    "spirit_cruise_3000": {
+     "reason": "per-hull outbreak numerator unpublished",
+     "target": null
+    }
+   },
+   "per_length": {
+    "11-14": 18.32208293153327,
+    "15-21": 28.50356294536817,
+    "3-5": 0.5082776648271856,
+    "6-7": 0.331619963521804,
+    "8-10": 2.4511806520140533
+   }
+  },
+  "note": "Reported for contrast only. No value in this campaign was selected to move any of them."
+ },
+ "posting_threshold": 0.03
+}
