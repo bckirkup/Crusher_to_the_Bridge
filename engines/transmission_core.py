@@ -1576,6 +1576,15 @@ class TransmissionCore:
             # agents, so a repeat visitor counts once per pickup.
             "dose_delivered": 0.0,
             "recipients": 0,
+            # Flush-emission witness, bookkeeping only: emission events,
+            # aerosolised copies emitted, susceptible pickup *events*
+            # dosed (events, not distinct agents), and the credited dose
+            # sum. All zero under the default-off fraction, so an all-zero
+            # witness distinguishes "flush off" from "witness missing".
+            "flush_events": 0,
+            "flush_aerosol_emitted": 0.0,
+            "flush_recipients": 0,
+            "flush_dose_delivered": 0.0,
         }
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
