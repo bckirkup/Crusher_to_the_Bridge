@@ -1,13 +1,17 @@
 """Adaptive-density refinement of the COVID imports x Theta sweep.
 
 Stage 1 of the sweep is an ordinary boarding screen (a product grid over
-import count and Theta on matched seeds, ``covid_boarding_screen``). Stage 2
-does not run the grid again at finer pitch: it reads the stage-1 surface and
-inserts a geometric midpoint only between neighbouring grid cells where the
-response moves fast, or where it crosses the observed Diamond Princess
-counts. The refined points are written as a second screen design with an
-explicit ``points`` list, so the Batch worker, merge and pairing are the
-stage-1 code paths unchanged.
+import count and Theta on matched seeds, ``covid_boarding_screen``). Later
+stages do not run the grid again at finer pitch: each reads the union of
+every surface run so far and inserts a geometric midpoint only between
+neighbouring cells where the response moves fast, or where it crosses the
+observed Diamond Princess counts. Neighbours are taken along each row and
+column *as populated*, so a stage-2 midpoint becomes a stage-3 neighbour and
+the pitch closes only where earlier stages found the response moving. The
+refined points are written as a screen design with an explicit ``points``
+list, so the Batch worker, merge and pairing are the stage-1 code paths
+unchanged. Tolerances are declared per stage and are expected to tighten as
+the pitch closes; the refined design records them.
 
 Responses read off each cell, all on the same matched seeds:
 
@@ -25,6 +29,7 @@ counts only decide *where* to look, never which cell is preferred.
 from __future__ import annotations
 
 import math
+from collections.abc import Sequence
 from dataclasses import dataclass
 from typing import Any
 
@@ -81,12 +86,21 @@ def _conditional_median(entry: dict[str, Any], field: str) -> float | None:
 def responses_from_surface(
     surface: dict[str, Any], *, infection_age_days: float = 0.0,
 ) -> dict[tuple[float, int], CellResponse]:
-    """Index the stage-1 surface by (Theta, imports) at one infection age."""
+    """Index one merged surface by (Theta, imports) at one infection age."""
+    return responses_from_surfaces([surface], infection_age_days=infection_age_days)
+
+
+def responses_from_surfaces(
+    surfaces: Sequence[dict[str, Any]], *, infection_age_days: float = 0.0,
+) -> dict[tuple[float, int], CellResponse]:
+    """Union of every stage's cells; a (Theta, imports) may appear only once."""
     out: dict[tuple[float, int], CellResponse] = {}
-    for entry in surface["surface"]:
+    for entry in (e for s in surfaces for e in s["surface"]):
         if float(entry["infection_age_days"]) != infection_age_days:
             continue
         key = (float(entry["theta"]), int(entry["imports"]))
+        if key in out:
+            raise ValueError(f"cell {key} appears in more than one surface")
         out[key] = CellResponse(
             theta=key[0],
             imports=key[1],
@@ -145,17 +159,26 @@ def _midpoint(a: CellResponse, b: CellResponse) -> tuple[float, int] | None:
 def _neighbour_pairs(
     responses: dict[tuple[float, int], CellResponse],
 ) -> list[tuple[CellResponse, CellResponse, str]]:
-    thetas = sorted({k[0] for k in responses})
-    imports = sorted({k[1] for k in responses})
+    """Adjacent cells along each populated row (imports) and column (Theta).
+
+    Adjacency is taken within the row or column as it is actually populated,
+    so after refinement a midpoint pairs with the cells on either side of it
+    rather than leaving a gap in a global lattice.
+    """
+    rows: dict[float, list[int]] = {}
+    cols: dict[int, list[float]] = {}
+    for theta, n in responses:
+        rows.setdefault(theta, []).append(n)
+        cols.setdefault(n, []).append(theta)
     pairs: list[tuple[CellResponse, CellResponse, str]] = []
-    for theta in thetas:
-        for lo, hi in zip(imports, imports[1:]):
-            if (theta, lo) in responses and (theta, hi) in responses:
-                pairs.append((responses[(theta, lo)], responses[(theta, hi)], "imports"))
-    for n in imports:
-        for lo, hi in zip(thetas, thetas[1:]):
-            if (lo, n) in responses and (hi, n) in responses:
-                pairs.append((responses[(lo, n)], responses[(hi, n)], "theta"))
+    for theta, ns in sorted(rows.items()):
+        ns.sort()
+        for lo, hi in zip(ns, ns[1:]):
+            pairs.append((responses[(theta, lo)], responses[(theta, hi)], "imports"))
+    for n, ts in sorted(cols.items()):
+        ts.sort()
+        for lo, hi in zip(ts, ts[1:]):
+            pairs.append((responses[(lo, n)], responses[(hi, n)], "theta"))
     return pairs
 
 
@@ -195,16 +218,25 @@ def refine_points(
 
 def refined_design(
     parent: dict[str, Any],
-    surface: dict[str, Any],
+    surface: dict[str, Any] | Sequence[dict[str, Any]],
     *,
     design_id: str,
     rule: RefinementRule,
     infection_age_days: float = 0.0,
+    stage: int = 2,
 ) -> dict[str, Any]:
-    """Stage-2 screen design: the parent's axes, an explicit point list."""
-    responses = responses_from_surface(surface, infection_age_days=infection_age_days)
+    """Next-stage screen design: the root grid's axes, an explicit point list.
+
+    ``parent`` is the stage-1 (root) design whose axes, seeds and takeoff
+    threshold every stage shares; ``surface`` is every merged surface run so
+    far (stage 1 alone for stage 2; stages 1 and 2 for stage 3, ...).
+    """
+    surfaces = [surface] if isinstance(surface, dict) else list(surface)
+    responses = responses_from_surfaces(surfaces, infection_age_days=infection_age_days)
     if not responses:
-        raise ValueError("the stage-1 surface has no cells at the requested infection age")
+        raise ValueError("no surface cells at the requested infection age")
+    if stage < 2:
+        raise ValueError("refinement stages start at 2")
     chosen = refine_points(responses, rule)
     design = {
         k: parent[k] for k in (
@@ -217,15 +249,18 @@ def refined_design(
         "parent_design": str(parent["design_id"]),
         "points": [[c["theta"], infection_age_days, c["imports"]] for c in chosen],
         "refinement": {
+            "stage": stage,
             "rule": rule.as_dict(),
-            "stage1_cells_read": len(responses),
+            "surfaces_read": [str(s["design"]["design_id"]) for s in surfaces],
+            "cells_read": len(responses),
             "chosen": chosen,
         },
         "note": (
-            "Stage 2 of the adaptive-density import sweep: geometric midpoints "
-            "inserted only where the stage-1 response moved faster than the "
-            "declared tolerances or crossed the observed counts. Same matched "
-            "seeds as the parent; pair by (Theta, imports, seed)."
+            f"Stage {stage} of the adaptive-density import sweep: geometric "
+            "midpoints inserted only where the response over every earlier "
+            "stage moved faster than the declared tolerances or crossed the "
+            "observed counts. Same matched seeds as the root grid; pair by "
+            "(Theta, imports, seed)."
         ),
     })
     return design

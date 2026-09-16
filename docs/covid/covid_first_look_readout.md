@@ -731,11 +731,12 @@ Campaign positives are 300 against 3,520 infected, and 74% crew (observed
 coincide with peak incidence, so positives are presymptomatic at swab (64%
 record an onset later) — and will move with the leak before any roster change.
 
-## covid_import_sweep_v1: adaptive-density imports × Theta (design, not yet run)
+## covid_import_sweep_v1: adaptive-density imports × Theta, three stages (design, not yet run)
 
 The next campaign measures how declared import count trades against Theta on
 the corrected model, with **adaptive sampling density**: a coarse product grid
-first, then midpoints inserted only where the response moves fastest.
+first, then two refinement stages that insert midpoints only where the
+response moves fastest, each at closer resolution than the last.
 
 **Stage 1** (`picard_framework/runs/covid_import_sweep_v1_design.json`): Theta
 ∈ {3.16e6, 1e7, 3.16e7, 1e8, 3.16e8} × imports ∈ {1, 2, 3, 5, 8, 13, 20} ×
@@ -755,8 +756,21 @@ by their largest normalised change; the top 12 geometric midpoints
 (`sqrt(Theta_a Theta_b)`, `round(sqrt(n_a n_b))`, skipping midpoints that
 collapse onto an endpoint) become an explicit point list — the same design
 schema with `points` set — run on the same 20 seeds (≤240 cells). The refined
-design records the rule, every candidate's scores and the pair it sits
-between, so the choice of where to look is declared before the cells run.
+design records the stage, the rule, every candidate's scores and the pair it
+sits between, so the choice of where to look is declared before the cells run.
+
+**Stage 3** (`refine --stage 3 --surface <stage1> <stage2>`): the same rule
+over the **union** of the stage-1 and stage-2 surfaces, with tolerances
+tightened to `|ΔP(takeoff)| > 0.15` and a **1.5×** conditional-median change
+(`--stage` sets these defaults: 0.25·0.6^(k−2) and 1+0.5^(k−2); either can be
+overridden). Neighbours are taken along each Theta row and imports column *as
+populated*, so a stage-2 midpoint pairs with the stage-1 cells on either side
+of it and the pitch closes only where stage 2 still found the response moving.
+On the imports axis integer midpoints saturate (a pair `(n, n+1)` has no
+midpoint and is skipped), so stage 3 mostly closes the Theta pitch to a
+quarter-decade or finer around the crossings. Another ≤240 cells at budget 12.
+The stage-3 design records both surfaces it read; a cell present in two
+surfaces is refused rather than silently averaged.
 
 What the sweep reads: P(takeoff), early and total onsets and campaign
 positives conditional on takeoff, first onset day, and positive composition,

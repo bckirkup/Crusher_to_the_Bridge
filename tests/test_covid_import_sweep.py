@@ -202,3 +202,59 @@ def test_merge_reports_conditional_on_takeoff_medians(stage1):
 def test_rule_rejects_degenerate_tolerances(kwargs):
     with pytest.raises(ValueError):
         RefinementRule(**kwargs)
+
+
+def test_stage3_pairs_a_stage2_midpoint_with_both_of_its_stage1_neighbours(stage1):
+    # Stage 1: imports 1 and 20 at one Theta, flat elsewhere; stage 2 put a
+    # midpoint at imports 4 (sqrt(1*20) ~ 4). Stage 3 must see (1,4) and
+    # (4,20) as neighbours, not (1,20), even though 4 is absent from other
+    # Theta rows.
+    stage1_surface = _surface([
+        _entry(1e7, 1, 0.0, None, None), _entry(1e7, 20, 1.0, 40.0, 400.0),
+        _entry(1e8, 1, 1.0, 30.0, 300.0), _entry(1e8, 20, 1.0, 40.0, 400.0),
+    ])
+    stage2_surface = _surface(
+        [_entry(1e7, 4, 0.1, 5.0, 50.0)], design_id="covid_import_sweep_v1r",
+    )
+    rule = RefinementRule(takeoff_tolerance=0.15, log_ratio_tolerance=math.log(1.5))
+    design = refined_design(
+        stage1.as_dict(), [stage1_surface, stage2_surface],
+        design_id="covid_import_sweep_v1rr", rule=rule, stage=3,
+    )
+    assert design["refinement"]["stage"] == 3
+    assert design["refinement"]["surfaces_read"] == [
+        "covid_import_sweep_v1", "covid_import_sweep_v1r",
+    ]
+    assert design["refinement"]["cells_read"] == 5
+    chosen = {(c["theta"], c["imports"]) for c in design["refinement"]["chosen"]}
+    # (4,20) moves 0.1 -> 1.0 and 5 -> 40: midpoint round(sqrt(80)) = 9.
+    assert (1e7, 9) in chosen
+    # (1,4) moves 0.0 -> 0.1 with undefined medians on one side: below tolerance.
+    assert (1e7, 2) not in chosen
+    # the stale stage-1 pair (1,20) is no longer adjacent.
+    assert (1e7, 4) not in chosen
+    assert all(len(p) == 3 for p in design["points"])
+
+
+def test_duplicate_cells_across_surfaces_are_refused(stage1):
+    surface = _surface([_entry(1e7, 1, 0.0, None, None), _entry(1e7, 20, 1.0, 40.0, 400.0)])
+    with pytest.raises(ValueError, match="more than one surface"):
+        refined_design(
+            stage1.as_dict(), [surface, surface],
+            design_id="x", rule=RefinementRule(), stage=3,
+        )
+
+
+def test_refinement_stage_must_be_at_least_two(stage1):
+    surface = _surface([_entry(1e7, 1, 0.0, None, None), _entry(1e7, 20, 1.0, 40.0, 400.0)])
+    with pytest.raises(ValueError, match="start at 2"):
+        refined_design(stage1.as_dict(), surface, design_id="x", rule=RefinementRule(), stage=1)
+
+
+@pytest.mark.parametrize("stage, takeoff, ratio", [(2, 0.25, 2.0), (3, 0.15, 1.5), (4, 0.09, 1.25)])
+def test_refine_cli_tolerances_tighten_per_stage(stage, takeoff, ratio):
+    from tools.fit_covid_theta import _stage_tolerances
+
+    got = _stage_tolerances(stage, None, None)
+    assert got == pytest.approx((takeoff, ratio))
+    assert _stage_tolerances(stage, 0.5, 3.0) == (0.5, 3.0)

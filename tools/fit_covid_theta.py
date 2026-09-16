@@ -189,22 +189,43 @@ def _screen(args: argparse.Namespace) -> int:
     return 0
 
 
+def _stage_tolerances(stage: int, takeoff: float | None, ratio: float | None) -> tuple[float, float]:
+    """Per-stage defaults that tighten as the pitch closes: stage 2 (0.25, 2x), stage 3 (0.15, 1.5x), ..."""
+    step = stage - 2
+    if takeoff is None:
+        takeoff = 0.25 * (0.6 ** step)
+    if ratio is None:
+        ratio = 1.0 + 1.0 * (0.5 ** step)
+    return takeoff, ratio
+
+
 def _refine(args: argparse.Namespace) -> int:
     parent = covid_boarding_screen.load_design(args.design)
-    with open(args.surface, encoding="utf-8") as handle:
-        surface = json.load(handle)
-    if surface["design"]["design_id"] != parent.design_id:
+    surfaces = []
+    for path in args.surface:
+        with open(path, encoding="utf-8") as handle:
+            surfaces.append(json.load(handle))
+    if surfaces[0]["design"]["design_id"] != parent.design_id:
         raise SystemExit(
-            f"surface is from {surface['design']['design_id']}, "
-            f"design is {parent.design_id}",
+            f"first surface is from {surfaces[0]['design']['design_id']}, "
+            f"root design is {parent.design_id}",
         )
+    takeoff, ratio = _stage_tolerances(
+        args.stage, args.takeoff_tolerance, args.ratio_tolerance,
+    )
     rule = covid_import_sweep.RefinementRule(
-        takeoff_tolerance=args.takeoff_tolerance,
-        log_ratio_tolerance=math.log(args.ratio_tolerance),
+        takeoff_tolerance=takeoff,
+        log_ratio_tolerance=math.log(ratio),
         budget=args.budget,
     )
     design = covid_import_sweep.refined_design(
-        parent.as_dict(), surface, design_id=args.design_id, rule=rule,
+        parent.as_dict(), surfaces, design_id=args.design_id, rule=rule,
+        stage=args.stage,
+    )
+    print(
+        f"stage {args.stage}: takeoff tolerance {takeoff:.3g}, "
+        f"ratio tolerance {ratio:.3g}x, {len(surfaces)} surface(s) read",
+        flush=True,
     )
     _write(design, args.out)
     for point in design["refinement"]["chosen"]:
@@ -271,14 +292,24 @@ def main(argv: list[str] | None = None) -> int:
         "refine",
         help="write the stage-2 point-list design from a stage-1 screen surface",
     )
-    refine_parser.add_argument("--design", required=True, help="stage-1 design JSON")
-    refine_parser.add_argument("--surface", required=True, help="stage-1 merged surface")
-    refine_parser.add_argument("--design-id", required=True)
-    refine_parser.add_argument("--budget", type=int, default=12)
-    refine_parser.add_argument("--takeoff-tolerance", type=float, default=0.25)
+    refine_parser.add_argument("--design", required=True, help="stage-1 (root) design JSON")
     refine_parser.add_argument(
-        "--ratio-tolerance", type=float, default=2.0,
-        help="fold change in a conditional onset median that triggers refinement",
+        "--surface", required=True, nargs="+",
+        help="every merged surface run so far, stage 1 first",
+    )
+    refine_parser.add_argument("--design-id", required=True)
+    refine_parser.add_argument(
+        "--stage", type=int, default=2,
+        help="stage being designed (2, 3, ...); sets the default tolerances",
+    )
+    refine_parser.add_argument("--budget", type=int, default=12)
+    refine_parser.add_argument(
+        "--takeoff-tolerance", type=float, default=None,
+        help="P(takeoff) change that triggers refinement (default per stage)",
+    )
+    refine_parser.add_argument(
+        "--ratio-tolerance", type=float, default=None,
+        help="fold change in a conditional onset median that triggers refinement (default per stage)",
     )
     refine_parser.add_argument("--out", required=True)
     refine_parser.set_defaults(func=_refine)
