@@ -26,6 +26,12 @@
 > end. Everything between here and those sections describes the model *with*
 > the undeclared cohort and is kept as the record of what was measured; it is
 > not the current statement of the fit.
+> **v3 superseded 2026-09-16** by `covid_first_look_v4` (770/770, zero
+> failures, `main` = `24e1d58`, #547 in): the declared index case and every
+> secondary case incubated under a literal-zero / units-mismatched dose term,
+> which made v3's takeoff seed-locked and pinned Theta to 1e9. On the corrected
+> model **Theta = 3.16e7, interior**, P(takeoff) 0.95 at Theta_fit; the v4
+> section at the end is the current statement of the fit.
 
 This replaces the single-seed fit of 2026-09-05 (`covid_theta_fit.json`) as the
 current statement of how the COVID arm fits. It is a first look: it tells us
@@ -584,6 +590,112 @@ Trace scripts and JSON are session artifacts, not in the tree; the mechanism
 is checkable from the two functions named above and one 2-epoch run
 (`incubation_days` appears on the index record after the first step).
 
+The two changes recommended above landed as #547: a host with no inoculum on
+record draws its incubation at the reference (factor 1.0), and the
+composite-Theta arm re-references its incubation dose term to the N50 it
+installs (ln 2 / Theta) rather than disabling it, so Theta stays the one
+fitted dimension.
+
+## covid_first_look_v4: the v3 grid on the corrected incubation model
+
+Same grid, same 20 + 50 matched seeds, same objective as v3; the only
+change is #547. Image `picard-campaign:covid-first-look-v4` from `24e1d58`
+(CPython 3.11); 770/770 cells, zero Batch failures. Outputs:
+`telemetry_buffer/observation_model/covid_theta_fit_v5.json` and
+`covid_theta_held_out_v5.json`. Cells pair with v3 by (Theta, seed).
+
+### Phase 1, Diamond Princess (20 seeds)
+
+| Theta | recorded onsets, 20 seeds sorted | P(takeoff, ≥10) | v3 P | loss (mean) | wins |
+|---|---|---|---|---|---|
+| 1e4 | 0 ×11, 1 ×4, 2 ×2, 3 ×3 | 0.00 | 0.05 | 106.1 | 0.00 |
+| 3.16e4 | 0 ×12, 1 ×2, 3, 8, 22 ×2, 131, 240 | 0.20 | 0.10 | 90.8 | 0.00 |
+| 1e5 | 0 ×7, 1–8 ×8, 10, 17, 34, 143, 331 | 0.25 | 0.10 | 74.2 | 0.00 |
+| 3.16e5 | 0 ×4, 1–3 ×8, 13–88 ×6, 242, 672 | 0.40 | 0.10 | 62.2 | 0.00 |
+| 1e6 | 0 ×2, 1, 2, 4, 8, 11–258 ×11, 699, 763, 1384 | 0.70 | 0.10 | 30.8 | 0.00 |
+| 3.16e6 | 0, 2, 5, 9, 12–233 ×13, 647, 791, 1718 | 0.80 | 0.25 | 20.0 | 0.00 |
+| 1e7 | 0, 5, 27–570 ×14, 880, 938, 1024, 1961 | 0.90 | 0.25 | 12.0 | 0.26 |
+| **3.16e7** | 0, 36–402 ×13, 685, 915, 1071, 1359, 1674, 2058 | 0.95 | 0.25 | **10.1** | **0.50** |
+| 1e8 | 0, 82–999 ×13, 1116–2145 ×6 | 0.95 | 0.25 | 10.4 | 0.21 |
+| 3.16e8 | 0, 366–1027 ×11, 1134–1710 ×8 | 0.95 | 0.25 | 11.2 | 0.03 |
+| 1e9 | 0, 320–1245 ×10, 1352–2018 ×9 | 0.95 | 0.30 | 12.6 | 0.00 |
+| *observed* | *197 (34 before 6 Feb)* | | | | |
+
+**Theta = 3.16e7, and it is no longer boundary-pinned** (0.50 of
+paired-bootstrap resamples; 1e7 0.26, 1e8 0.22, 3.16e8 0.03, 1e9 0.00). The
+loss curve has an interior minimum for the first time in the campaign
+series: below 1e7 the loss is takeoff-limited, above 1e8 it is
+overshoot-limited (median totals 700–1245 vs 197).
+
+**Takeoff is now decided by Theta, not by the seed.** Paired by seed,
+no seed that ignited in v3 fails to ignite in v4 at any Theta from 3.16e4
+up, and 11–14 of the 15–18 v3-extinct seeds ignite from 1e6 up. One seed
+(20200217) never ignites at any Theta: 0 recorded onsets even at 1e9 with
+2,696 campaign specimens, so its index case did not transmit at all
+(inference: an index case isolated before its shedding window — not traced).
+P(takeoff) rises 0.00 → 0.95 across the grid where v3 moved 0.05 → 0.30.
+The seed-locked pattern of v3 was the 14.5-day median incubation of the
+declared index case, as the trace predicted.
+
+**Conditional on takeoff at the selected Theta, the early trajectory is
+still slow and the total is too large.** At 3.16e7 (n = 19): median onsets
+before 6 Feb 13 vs 34, median total 381 vs 197, campaign positives 311 vs
+634, asymptomatic share of positives 0.90 vs 0.50. The early/total tension
+is now the visible misfit: Theta values that give ~34 early onsets (1e9,
+median 27) give 1,245 total; those that give ~200 total (3.16e6–1e7) give
+4–5 early. A single composite scale does not set both the early speed and
+the plateau. The asymptomatic share (0.89–0.91 across 1e6–1e9) did not
+move with either incubation change; the campaign-roster drain described
+under v2 remains the candidate.
+
+### Phase 2, Greg Mortimer at Theta = 3.16e7 (50 seeds; 1e7 / 1e8 in parentheses)
+
+| | v3 at 1e9 | v4 at 3.16e7 (1e7 / 1e8) | observed |
+|---|---|---|---|
+| P(no positives) | 0.20 | 0.06 (0.10 / 0.06) | — |
+| P(takeoff, ≥10 onsets) | 0.04 | 0.64 (0.54 / 0.76) | — |
+| campaign positives, median / q95 | 3 / 16 | 17.5 / 118 (12 / 94; 35.5 / 142) | 128 |
+| H1 positive share | miss 50/50 | hit 6, miss 44 (median 0.08) | 0.59 |
+| H2 asymptomatic share among positives | hit 7, miss 33 of 40 | hit 1, miss 46 of 47 (median 0.33) | 0.81 |
+| H3 share above cross-ship IQR | 0.48 | 0.76 | 0.015 |
+
+The held-out hull now takes off in most seeds and its positive count is a
+distribution that reaches the observed 128 at its q95 rather than never;
+across the held-out grid P(takeoff) rises 0.04 → 0.80 and the positive
+share median reaches 0.52 only at 1e9. H1 is met only at the top of the
+grid and H2 has flipped side: v3's Greg Mortimer positives were almost all
+asymptomatic (median 1.00), v4's are one-third asymptomatic against 0.81
+observed. Greg Mortimer's positives are therefore under-produced at
+Theta_fit by roughly 7× at the median, and their composition now misses
+in the opposite direction to Diamond Princess (0.33 vs 0.81 observed here;
+0.90 vs 0.50 observed there) — the observation-process split between the
+two hulls, not Theta, is where that lives.
+
+### What v4 says
+
+- v3's boundary-pinned Theta and seed-locked takeoff were the incubation
+  defect. They should not be quoted; the v4 selection (3.16e7, interior)
+  supersedes them.
+- With one declared index case the corrected model *does* produce a
+  Diamond Princess-sized outbreak in 19 of 20 seeds at Theta_fit. The
+  "needs more imports" reading of v3 and the boarding screen is much
+  weaker than it was: an import-count sweep would now measure how imports
+  trade against Theta in the early trajectory, not whether the hull
+  ignites at all.
+- The remaining Diamond Princess misfit is shape, not scale: early onsets
+  13 vs 34 while the total overshoots 2×. Candidates, in the order the
+  evidence suggests: (a) the import axis (several early imports raise the
+  early count without raising the plateau the way Theta does — the 1b
+  screen's direction, now to be re-read on the corrected model),
+  (b) the quarantine's effect on the plateau (the observed 197 onsets are
+  under a 5 Feb cabin quarantine; whether the model's confinement leaks
+  as much as the trace showed in cabin blocks is the total-side lever),
+  (c) the campaign-roster drain for the asymptomatic share.
+- The held-out result improved from "never" to "under-produced by ~7× at
+  the median, with the observed value inside the distribution". That is
+  the first held-out statement in this series that is a quantitative
+  miss rather than a categorical one.
+
 ## Reproduction
 
 ```bash
@@ -612,4 +724,16 @@ python3 tools/fit_covid_theta.py merge --cells <v3 cells> \
   --design picard_framework/runs/covid_first_look_v3_design.json
 python3 tools/fit_covid_theta.py screen --cells <screen v2 cells> \
   --design picard_framework/runs/covid_boarding_screen_v2_design.json
+```
+
+v4 (2026-09-16): fit `b5dd61d4-baa4-444f-ab44-c72642801040` (220 children),
+held-out `a01111a4-192a-4a53-a7a3-c8fceae7215a` (11 children); job definition
+`picard-covid-hull:4`, image `picard-campaign:covid-first-look-v4`, S3 prefix
+`campaign/covid_first_look_v4/`.
+
+```bash
+python3 tools/fit_covid_theta.py merge --cells <v4 cells> \
+  --design picard_framework/runs/covid_first_look_v4_design.json \
+  --fit-out telemetry_buffer/observation_model/covid_theta_fit_v5.json \
+  --held-out-out telemetry_buffer/observation_model/covid_theta_held_out_v5.json
 ```
