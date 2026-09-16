@@ -1,0 +1,30 @@
+{
+  "design_id": "covid_import_sweep_v1",
+  "description": "Stage 1 (coarse grid) of the adaptive-density import sweep on the corrected model (#543 declared seeding, #547 incubation). Import count x Theta on the 20 matched covid_first_look_v4 fit seeds, index case infected at embarkation. Stage 2 (covid_import_sweep_v1r) is generated from this surface by tools/fit_covid_theta.py refine and inserts geometric midpoints only where P(takeoff) or the conditional onset medians move faster than the declared tolerances or cross the observed counts.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    3162277.6601683795,
+    10000000.0,
+    31622776.601683792,
+    100000000.0,
+    316227766.01683795
+  ],
+  "infection_age_days": [
+    0.0
+  ],
+  "imports": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    13,
+    20
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "note": "5 Theta x 7 import counts x 20 seeds = 700 cells; roughly log-spaced imports. Theta brackets the v4 interior selection (3.16e7) by a decade each side. A screen, not a fit: imports is a declared axis and nothing here moves the scenario."
+}

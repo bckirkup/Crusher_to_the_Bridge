@@ -65,6 +65,8 @@ class BoardingScreenDesign:
     seed_base: int
     seeds: int
     takeoff_recorded_onsets: int
+    points: tuple[tuple[float, float, int], ...] = ()
+    parent_design: str | None = None
 
     def __post_init__(self) -> None:
         if self.sanitary_visit_mode not in SANITARY_VISIT_MODES:
@@ -80,6 +82,26 @@ class BoardingScreenDesign:
             raise ValueError("imports must be at least 1")
         if any(not math.isfinite(t) or t <= 0 for t in self.thetas):
             raise ValueError("thetas must be finite and positive")
+        for theta, age, imports in self.points:
+            if not math.isfinite(theta) or theta <= 0 or age < 0 or imports < 1:
+                raise ValueError(f"malformed refinement point {(theta, age, imports)}")
+        if len(set(self.points)) != len(self.points):
+            raise ValueError("refinement points must be distinct")
+
+    @property
+    def is_refinement(self) -> bool:
+        """An explicit point list (stage 2) rather than a product grid."""
+        return bool(self.points)
+
+    @property
+    def axis_points(self) -> tuple[tuple[float, float, int], ...]:
+        """Every (Theta, age, imports) the design evaluates, in order."""
+        if self.is_refinement:
+            return self.points
+        return tuple(
+            (float(t), float(a), int(n))
+            for t, a, n in product(self.thetas, self.infection_age_days, self.imports)
+        )
 
     @property
     def seed_values(self) -> tuple[int, ...]:
@@ -101,6 +123,8 @@ class BoardingScreenDesign:
             "seed_base": self.seed_base,
             "seeds": self.seeds,
             "takeoff_recorded_onsets": self.takeoff_recorded_onsets,
+            "points": [list(p) for p in self.points],
+            "parent_design": self.parent_design,
         }
 
 
@@ -128,8 +152,14 @@ def load_design(
         seed_base=int(raw["seed_base"]),
         seeds=int(raw["seeds"]),
         takeoff_recorded_onsets=int(raw["takeoff_recorded_onsets"]),
+        points=tuple(
+            (float(t), float(a), int(n)) for t, a, n in raw.get("points", [])
+        ),
+        parent_design=raw.get("parent_design"),
     )
     load_hull_scenarios().assert_fit_target(design.scenario_id)
+    if design.is_refinement:
+        return design
     if design.baseline[0] not in design.infection_age_days or (
         design.baseline[1] not in design.imports
     ):
@@ -179,11 +209,14 @@ class ScreenCell:
 
 
 def enumerate_cells(design: BoardingScreenDesign) -> tuple[ScreenCell, ...]:
-    """Every cell in a fixed order: Theta, then age, then imports, then seed."""
+    """Every cell in a fixed order: Theta, then age, then imports, then seed.
+
+    A refinement design enumerates its explicit point list in the order the
+    refinement ranked them, each over the same matched seeds.
+    """
     cells: list[ScreenCell] = []
-    for theta, age, imports, seed in product(
-        design.thetas, design.infection_age_days, design.imports,
-        design.seed_values,
+    for (theta, age, imports), seed in product(
+        design.axis_points, design.seed_values,
     ):
         cells.append(ScreenCell(
             index=len(cells),
@@ -362,6 +395,10 @@ def _cell_summary(
         o.onsets_before_split_day / o.recorded_onsets
         for o in obs.values() if o.recorded_onsets > 0
     ]
+    taken_off = [
+        o for o in obs.values()
+        if o.recorded_onsets >= design.takeoff_recorded_onsets
+    ]
     return {
         "seeds": sorted(obs),
         "recorded_onsets": _summary([o.recorded_onsets for o in obs.values()]),
@@ -378,6 +415,16 @@ def _cell_summary(
             o.recorded_onsets >= design.takeoff_recorded_onsets
             for o in obs.values()
         ])),
+        "conditional_on_takeoff": {
+            "n": len(taken_off),
+            "recorded_onsets": _summary([o.recorded_onsets for o in taken_off]),
+            "onsets_before_split_day": _summary(
+                [o.onsets_before_split_day for o in taken_off],
+            ),
+            "campaign_positives": _summary(
+                [o.campaign_positives for o in taken_off],
+            ),
+        },
         "sanitary_witness": _witness(by_seed.values(), design.sanitary_visit_mode),
     }
 
@@ -422,21 +469,20 @@ def merge_screen(
             "summarise an incomplete screen",
         )
     surface = []
-    for theta in design.thetas:
+    for theta, age, imports in design.axis_points:
         base = grouped.get((theta, *design.baseline), {})
-        for age, imports in product(design.infection_age_days, design.imports):
-            by_seed = grouped.get((theta, age, imports), {})
-            if not by_seed:
-                continue
-            entry = {
-                "theta": theta,
-                "infection_age_days": age,
-                "imports": imports,
-                "is_baseline": (age, imports) == design.baseline,
-                **_cell_summary(design, by_seed),
-                "delta_vs_baseline": _paired_deltas(base, by_seed),
-            }
-            surface.append(entry)
+        by_seed = grouped.get((theta, age, imports), {})
+        if not by_seed:
+            continue
+        entry = {
+            "theta": theta,
+            "infection_age_days": age,
+            "imports": imports,
+            "is_baseline": (age, imports) == design.baseline,
+            **_cell_summary(design, by_seed),
+            "delta_vs_baseline": _paired_deltas(base, by_seed),
+        }
+        surface.append(entry)
     return {
         "design": design.as_dict(),
         "coverage": {"expected": expected, "found": found, "partial": found < expected},

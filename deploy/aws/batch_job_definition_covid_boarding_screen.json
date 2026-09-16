@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-boarding-screen-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-import-sweep-v1",
     "command": [
       "deploy/aws/covid_boarding_screen_entrypoint.py",
       "--stride",
