@@ -988,6 +988,102 @@ retracted: every campaign in this document ran the default `zone_pool`, and the
 mode ships off. Whether the early/total shape misfit survives the refit — the
 question the sweep left open — is what v5 measures.
 
+## covid_first_look_v5: refit with cabin compartments on, and a paired pooled control (Batch, 2026-09-17)
+
+v5 refits Theta with `transmission.cabin_air_mode: cabin_compartment` — the
+question AERO-CABIN-01 left open, now on the full 20-seed distribution rather
+than the single paired cell. The grid runs half-decades **1e7 → 1e12** (11
+points), the 20 matched Diamond Princess seeds and 50 Greg Mortimer held-out
+seeds; 770 cells, zero Batch failures. A paired control, **v5c**, runs the same
+seeds on the old `zone_pool` air at 1e7 / 3.16e7 / 1e8 (210 cells), so the
+air-architecture effect is separable from the observation-process change (#555)
+that both v5 and v4 differ in. Designs
+[`../../picard_framework/runs/covid_first_look_v5_design.json`](../../picard_framework/runs/covid_first_look_v5_design.json)
+and `..._v5c_design.json`; every landed cell records its `cabin_air_mode`.
+
+### The compartment refit does not produce a fit — it makes the tension worse
+
+Diamond Princess fit medians over 20 seeds (`recorded_onsets`, onsets before
+day 17, campaign specimens, campaign positives, asymptomatic share of
+positives); observed anchors are **197 onsets, 34 before 6 Feb, 634 positives**:
+
+| Theta | onsets | before d17 | specimens | positives | asymp | P(takeoff) | mean loss | median loss |
+|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1e7 | 1 | 1 | 2663 | 1 | 0.00 | 0.30 | 79.1 | 103.0 |
+| 3.16e7 | 1 | 1 | 2662 | 1 | 0.00 | 0.25 | 79.3 | 103.0 |
+| 1e8 | 2.5 | 1 | 2658 | 2 | 0.89 | 0.45 | 56.7 | 80.2 |
+| 3.16e8 | 173 | 1.5 | 2470 | 186 | 0.90 | 0.65 | 41.9 | 7.4 |
+| 1e9 | 709 | 2 | 1959 | 374 | 0.89 | 0.75 | 29.5 | 7.2 |
+| 3.16e9 | 1272 | 13.5 | 1208 | 379 | 0.90 | 0.90 | 16.6 | 8.9 |
+| 1e10 | 1685 | 176.5 | 731 | 355 | 0.89 | 0.90 | 15.7 | 9.3 |
+| 3.16e10 | 2010 | 867.5 | 482 | 332 | 0.88 | 1.00 | 9.0 | 9.3 |
+| 1e11 | 2440 | 1864.5 | 357 | 252 | 0.88 | 1.00 | 9.2 | 9.0 |
+| **3.16e11** | **2458** | **2089.5** | **349** | **245** | 0.90 | 1.00 | **8.98** | 8.9 |
+| 1e12 | 2499 | 2209 | 381 | 202.5 | 0.87 | 1.00 | 9.3 | 9.3 |
+
+The objective (covid.T1 total + on/after-split onsets, covid.T3 positives)
+selects **Theta = 3.16e11**, bootstrap frequency 0.37, not boundary-pinned. But
+that selection is an artefact of ranking on the **mean** across a highly
+variable extinction: at low Theta most seeds go extinct (a 0-onset seed costs
+~35 in log-residual), inflating the mean, while the high-Theta plateau ignites
+every seed to a *uniformly* mediocre loss (~9, q05–q95 8.2–10.2). It is
+reliably wrong, so it wins on the mean.
+
+**What the selected Theta actually produces is the whole ship, before
+quarantine.** 2,458 onsets on a ~3,700-host hull, **2,089 of them before day 17
+against 34 observed** — the outbreak burns out before the 5 Feb confinement it
+was supposed to test. To ignite reliably from one index case with each
+stateroom its own air unit, Theta has to reach ~3e11, at which point the implied
+per-copy risk is ~1e11, decades outside the grade-B emission bracket
+(4,200–5.8e7 copies/epoch). No point on five decades both ignites and matches
+the trajectory. The objective does not score the before-split count, so it is
+blind to that early overshoot; the channel table is not.
+
+Held-out Greg Mortimer at the selected Theta does land its positive count for
+the first time — median 123 against 128 observed, P(takeoff) 0.98, covid.H1 35
+hit / 15 miss — but by the same runaway: 51.5 of 63.5 recorded onsets fall
+before day 17, and the asymptomatic share collapses to 0.03 against 0.81
+observed (covid.H2 0/50, covid.H3 above the IQR in 0.98 of seeds). A count
+matched by burning the hull early is not the hull's trajectory, so it is
+reported, not claimed.
+
+### The pooled control refits cleanly to the old value
+
+v5c, same seeds and observation process, pooled air:
+
+| Theta | onsets | before d17 | positives | asymp | P(takeoff) | mean loss | median loss |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1e7 | 288.5 | 5 | 253 | 0.90 | 0.90 | 12.0 | 2.2 |
+| **3.16e7** | **365** | **12.5** | **310** | 0.90 | 0.95 | 10.1 | **2.7** |
+| 1e8 | 688.5 | 14.5 | 451.5 | 0.91 | 0.95 | 10.4 | 5.1 |
+
+v5c selects **3.16e7 — the v4 value — with a median loss of 2.7**, three times
+better per typical seed than the compartment plateau's 8.9, and a plausible
+outbreak (365 onsets, 310 positives) rather than a whole-ship burn. Its mean
+loss (10.1) reads worse than v5's (9.0) only because one extinct seed inflates
+it; the median is the honest per-seed comparison. Held-out Greg Mortimer at
+3.16e7 reproduces v4 (positives 17.5 vs 128 at q95, asymptomatic 0.33 vs 0.81),
+confirming the control is the v4 regime with the air held fixed.
+
+### What v5 says
+
+**A hard per-stateroom partition over-isolates, exactly as the single pool
+over-mixed.** The pooled block was not merely *a* quarantine leak to close: it
+was the model's dominant between-cabin transport, and with it removed the HVAC
+route that was expected to carry the between-cabin path is too weak to sustain
+the outbreak from one index case. Neither extreme is the Diamond Princess: the
+900–1,200 m³ block pool over-mixes (the total-side overshoot during quarantine,
+Phase-sweep result), and the sealed stateroom cannot ignite without a
+physically indefensible Theta. The real between-cabin path is corridor/HVAC
+coupling stronger than the current HVAC route and weaker than a shared pool —
+that coupling, not the confinement factor or the import count, is now the
+open lever. The early-vs-total shape misfit the sweep flagged is unchanged by
+either air model: even v5c's plausible cell has 12 early onsets against 34 and
+365 total against 197.
+
+**Nothing above is retracted.** v1–v4 and the sweep ran the pooled default,
+which v5c refits to the same 3.16e7; the compartment mode remains default-off.
+
 ## Reproduction
 
 ```bash
@@ -1037,6 +1133,15 @@ python3 tools/fit_covid_theta.py refine --stage 2 \
   --surface <s1.json> --design-id covid_import_sweep_v1r \
   --out picard_framework/runs/covid_import_sweep_v1r_design.json
 ```
+
+v5 / v5c (2026-09-17): v5 fit `9b8d1ce7-e318-4987-853c-3c4d0c59f03f`
+(220 children), v5 held-out `36cb4ee0-9440-4b8c-add8-211efc39a9ff` (11 children,
+stride 50), v5c fit `94904a4c-2e85-42b2-b2a9-cfd5c3442123` (60 children), v5c
+held-out `41dc98d9-f1cb-4a94-a2fb-bdae39a98b04` (3 children, stride 50); job
+definition `picard-covid-hull:5`, image `picard-campaign:covid-first-look-v5`
+built from `c6a3996` (PR #557 branch, needed for the `cabin_air_mode` seam and
+the two design files); S3 prefixes `campaign/covid_first_look_v5/` and
+`campaign/covid_first_look_v5c/`.
 
 ```bash
 python3 tools/fit_covid_theta.py merge --cells <v4 cells> \
