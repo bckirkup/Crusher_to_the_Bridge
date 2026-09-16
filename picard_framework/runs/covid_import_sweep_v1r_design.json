@@ -1,0 +1,359 @@
+{
+  "design_id": "covid_import_sweep_v1r",
+  "imports": [
+    1,
+    2,
+    3,
+    5,
+    8,
+    13,
+    20
+  ],
+  "infection_age_days": [
+    0.0
+  ],
+  "note": "Stage 2 of the adaptive-density import sweep: geometric midpoints inserted only where the response over every earlier stage moved faster than the declared tolerances or crossed the observed counts. Same matched seeds as the root grid; pair by (Theta, imports, seed).",
+  "parent_design": "covid_import_sweep_v1",
+  "points": [
+    [
+      3162277.6601683795,
+      0.0,
+      10
+    ],
+    [
+      31622776.60168379,
+      0.0,
+      10
+    ],
+    [
+      56234132.51903491,
+      0.0,
+      3
+    ],
+    [
+      100000000.0,
+      0.0,
+      10
+    ],
+    [
+      10000000.0,
+      0.0,
+      10
+    ],
+    [
+      31622776.60168379,
+      0.0,
+      4
+    ],
+    [
+      10000000.0,
+      0.0,
+      4
+    ],
+    [
+      5623413.251903491,
+      0.0,
+      2
+    ],
+    [
+      5623413.251903491,
+      0.0,
+      1
+    ],
+    [
+      316227766.01683795,
+      0.0,
+      10
+    ],
+    [
+      3162277.6601683795,
+      0.0,
+      4
+    ],
+    [
+      5623413.251903491,
+      0.0,
+      3
+    ]
+  ],
+  "refinement": {
+    "cells_read": 35,
+    "chosen": [
+      {
+        "axis": "imports",
+        "between": [
+          [
+            3162277.6601683795,
+            8
+          ],
+          [
+            3162277.6601683795,
+            13
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.3883084604915918,
+        "imports": 10,
+        "score": 2.002905731175411,
+        "takeoff_change": 0.0,
+        "theta": 3162277.6601683795,
+        "total_log_change": 0.5288238598886066
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            31622776.60168379,
+            8
+          ],
+          [
+            31622776.60168379,
+            13
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.165751591505738,
+        "imports": 10,
+        "score": 1.6818240399737447,
+        "takeoff_change": 0.0,
+        "theta": 31622776.60168379,
+        "total_log_change": 0.17498850942716263
+      },
+      {
+        "axis": "theta",
+        "between": [
+          [
+            31622776.60168379,
+            3
+          ],
+          [
+            100000000.0,
+            3
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.161047759608902,
+        "imports": 3,
+        "score": 1.6750378450230041,
+        "takeoff_change": 0.0,
+        "theta": 56234132.51903491,
+        "total_log_change": 0.18954734517920532
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            100000000.0,
+            8
+          ],
+          [
+            100000000.0,
+            13
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.1348523736832536,
+        "imports": 10,
+        "score": 1.6372458916538988,
+        "takeoff_change": 0.0,
+        "theta": 100000000.0,
+        "total_log_change": 0.1959231857652748
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            10000000.0,
+            8
+          ],
+          [
+            10000000.0,
+            13
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.0763701399343892,
+        "imports": 10,
+        "score": 1.552873863044303,
+        "takeoff_change": 0.0,
+        "theta": 10000000.0,
+        "total_log_change": 0.14233454172812898
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            31622776.60168379,
+            3
+          ],
+          [
+            31622776.60168379,
+            5
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 1.0468766142689203,
+        "imports": 4,
+        "score": 1.5103236998283995,
+        "takeoff_change": 0.0,
+        "theta": 31622776.60168379,
+        "total_log_change": 0.13723074105053357
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            10000000.0,
+            3
+          ],
+          [
+            10000000.0,
+            5
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 0.9021060968821991,
+        "imports": 4,
+        "score": 1.3014639923276474,
+        "takeoff_change": 0.0,
+        "theta": 10000000.0,
+        "total_log_change": 0.288965495087842
+      },
+      {
+        "axis": "theta",
+        "between": [
+          [
+            3162277.6601683795,
+            2
+          ],
+          [
+            10000000.0,
+            2
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 0.5260930958967793,
+        "imports": 2,
+        "score": 1.2320814775048818,
+        "takeoff_change": 0.0,
+        "theta": 5623413.251903491,
+        "total_log_change": 0.8540138023526405
+      },
+      {
+        "axis": "theta",
+        "between": [
+          [
+            3162277.6601683795,
+            1
+          ],
+          [
+            10000000.0,
+            1
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": true,
+        "early_log_change": 0.4353180712578455,
+        "imports": 1,
+        "score": 1.2318867095352461,
+        "takeoff_change": 0.09999999999999998,
+        "theta": 5623413.251903491,
+        "total_log_change": 0.8538787994836241
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            316227766.01683795,
+            8
+          ],
+          [
+            316227766.01683795,
+            13
+          ]
+        ],
+        "crosses_observed_early": false,
+        "crosses_observed_total": false,
+        "early_log_change": 0.7293598700547524,
+        "imports": 10,
+        "score": 1.05224386755141,
+        "takeoff_change": 0.0,
+        "theta": 316227766.01683795,
+        "total_log_change": 0.13235809670205612
+      },
+      {
+        "axis": "imports",
+        "between": [
+          [
+            3162277.6601683795,
+            3
+          ],
+          [
+            3162277.6601683795,
+            5
+          ]
+        ],
+        "crosses_observed_early": true,
+        "crosses_observed_total": false,
+        "early_log_change": 0.552565229938756,
+        "imports": 4,
+        "score": 1.0,
+        "takeoff_change": 0.0,
+        "theta": 3162277.6601683795,
+        "total_log_change": 0.28851784349917775
+      },
+      {
+        "axis": "theta",
+        "between": [
+          [
+            3162277.6601683795,
+            3
+          ],
+          [
+            10000000.0,
+            3
+          ]
+        ],
+        "crosses_observed_early": true,
+        "crosses_observed_total": false,
+        "early_log_change": 0.1518060128680041,
+        "imports": 3,
+        "score": 1.0,
+        "takeoff_change": 0.0,
+        "theta": 5623413.251903491,
+        "total_log_change": 0.38177533698576044
+      }
+    ],
+    "rule": {
+      "budget": 12,
+      "log_ratio_tolerance": 0.6931471805599453,
+      "observed_early": 34,
+      "observed_total": 197,
+      "takeoff_tolerance": 0.25
+    },
+    "stage": 2,
+    "surfaces_read": [
+      "covid_import_sweep_v1"
+    ]
+  },
+  "sanitary_visit_mode": "dwell_weighted",
+  "scenario_id": "diamond_princess_2020",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "thetas": [
+    3162277.6601683795,
+    10000000.0,
+    31622776.60168379,
+    100000000.0,
+    316227766.01683795
+  ]
+}
