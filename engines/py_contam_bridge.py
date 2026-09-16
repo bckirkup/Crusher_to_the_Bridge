@@ -15,16 +15,15 @@ from ``py-contam/python/contam_output.py``:
 - **Airflow nodes**: Zone pressure P [Pa], temperature T [K],
   air density D [kg/m³].
 - **Contaminant transport**: Analytical well-mixed zone ODE per epoch
-  (CONTAM-style; unconditionally stable at 1-hour steps)::
+  (CONTAM-style linear operator)::
 
-  dM_i/dt = S_i - k_i · M_i
-  M_i(t+Δt) = M_i · e^{-kΔt} + (S_i/k_i) · (1 - e^{-kΔt})
+  dM/dt = A · M
+  M(t+Δt) = expm(A · Δt) · M(t)
 
   where:
     M_i   = pathogen mass in zone i [copies]
     C_j   = M_j / V_j  concentration in source zone j [copies/m³]
-    S_i   = Σ_j Q_ji·C_j·(1-η)   inflow source rate [copies/h]
-    k_i   = Σ_j Q_ij / V_i + λ   removal rate [1/h]
+    A     = declared flow, volume and filter operator, with λ on its diagonal
     η     = HVAC filter efficiency (0 = no filter, 0.999 = HEPA)
     λ     = natural decay rate (settling + viral inactivation) [1/h]
 
@@ -36,9 +35,10 @@ previously used in ``infection_dynamics_bridge.py``.
 from __future__ import annotations
 
 import json
-import math
 import os
 from typing import Any
+
+import numpy as np
 
 from engines.sim_clock import SimClock
 from simulation_utils.paths import resolve_repo_path, validated_open
@@ -62,6 +62,33 @@ PATH_TYPE_HVAC_SUPPLY = "hvac_supply"
 # this value: a configuration must state its own η rather than inherit one, so
 # an omitted key raises instead of silently landing here.
 UNSOURCED_LEGACY_FILTER_EFFICIENCY = 0.50
+
+PATHOGEN_POOL_TRANSPORT_MODES = ("none", "airflow")
+DEFAULT_PATHOGEN_POOL_TRANSPORT = "airflow"
+
+
+def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
+    """Read the declared transport mode for per-pathogen airborne pools."""
+    mode = str(hvac_cfg.get(
+        "pathogen_pool_transport", DEFAULT_PATHOGEN_POOL_TRANSPORT,
+    ))
+    if mode not in PATHOGEN_POOL_TRANSPORT_MODES:
+        raise ValueError(
+            "hvac.pathogen_pool_transport must be one of "
+            f"{PATHOGEN_POOL_TRANSPORT_MODES}, got {mode!r}",
+        )
+    return mode
+
+
+def _matrix_exponential(operator: np.ndarray) -> np.ndarray:
+    """Require SciPy for exact transport; never fall back to approximation."""
+    try:
+        from scipy.linalg import expm
+    except ImportError as exc:
+        raise RuntimeError(
+            "scipy.linalg.expm is required for CONTAM transport",
+        ) from exc
+    return expm(operator)
 
 
 def require_filter_efficiency(hvac_cfg: dict[str, Any]) -> float:
@@ -187,8 +214,8 @@ class ContamAirflowPath:
 class ContamTransportEngine:
     """CONTAM-style multi-zone aerosol mass transport engine.
 
-    Implements the NIST CONTAM contaminant transport equation via the
-    analytical well-mixed zone ODE per epoch (unconditionally stable).
+    Implements the NIST CONTAM contaminant transport equation via an exact
+    linear-operator solution of the well-mixed zone ODE per epoch.
     The engine:
 
     1. Reads the airflow network from ``air_flow_paths.json``
@@ -197,8 +224,8 @@ class ContamTransportEngine:
        - HVAC star recirculation through virtual AHU plenums (filter η)
        - Cross-zone airflow through ladder wells, ventilation shafts
        - Passive adjacency exchange through passageways and hatches
-    4. Solves ``M(t+Δt) = M e^{-kΔt} + (S/k)(1 − e^{-kΔt})`` with
-       ``k = ΣQ_out/V + λ`` (decay folded into the exponent)
+    4. Builds the decay-free linear operator by probing the existing
+       path-rate code, then applies its matrix exponential at each epoch.
 
     Parameters
     ----------
@@ -231,9 +258,15 @@ class ContamTransportEngine:
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
         self.airflow_paths: list[ContamAirflowPath] = []
+        self._real_zone_ids: tuple[str, ...] = ()
+        self._decay_free_operator: np.ndarray | None = None
+        self._propagator_cache: dict[tuple[float, float], np.ndarray] = {}
 
         self._build_zone_nodes(spatial_layout)
         self._build_airflow_paths(air_flow_paths)
+        self._real_zone_ids = tuple(
+            sorted(zid for zid in self.zone_nodes if not is_plenum_zone(zid))
+        )
 
     def _build_zone_nodes(self, layout: dict[str, Any]) -> None:
         """Create zone nodes from spatial layout.
@@ -497,82 +530,118 @@ class ContamTransportEngine:
                     arriving *= (1.0 - self.filter_efficiency)
                 source_rate[dst] += arriving
 
-    def transport_step(
+    def _probe_path_rates(
         self,
-        zone_pathogen_mass: dict[str, float],
-    ) -> dict[str, float]:
-        """Execute one epoch of CONTAM-style aerosol mass transport.
-
-        Solves the well-mixed zone ODE analytically with epoch-start
-        concentrations frozen for inter-zone sources (semi-implicit)::
-
-            dM_i/dt = S_i − k_i · M_i
-            M_i(t+Δt) = M_i e^{-kΔt} + (S_i/k_i)(1 − e^{-kΔt})
-
-        where ``S_i`` aggregates filtered inflows [copies/h] and
-        ``k_i = Σ Q_out/V_i + λ`` [1/h]. HVAC return/supply stars are
-        folded into these rates via plenum mixing (not Euler path deltas).
-
-        Parameters
-        ----------
-        zone_pathogen_mass : dict
-            Current pathogen mass per zone {zone_id: mass}.
-
-        Returns
-        -------
-        dict
-            Updated pathogen mass per real zone after transport and decay.
-            Virtual ``_plenum_*`` keys are never returned.
-        """
-        dt = self.clock.hours_per_epoch
-
-        real_input = {
-            zid: mass
-            for zid, mass in zone_pathogen_mass.items()
-            if not is_plenum_zone(zid)
-        }
-        working = dict(real_input)
-        for zid in self.zone_nodes:
-            if is_plenum_zone(zid):
-                working[zid] = 0.0
-            else:
-                working.setdefault(zid, 0.0)
-
+        source_zone: str,
+    ) -> tuple[dict[str, float], dict[str, float]]:
+        """Probe the existing rate code with unit mass in one real zone."""
+        working = {zid: 0.0 for zid in self.zone_nodes}
+        working[source_zone] = 1.0
         concentrations: dict[str, float] = {}
         for zone_id, mass in working.items():
             node = self.zone_nodes.get(zone_id)
-            if node is not None:
-                concentrations[zone_id] = node.concentration(mass)
-            else:
-                concentrations[zone_id] = 0.0
+            concentrations[zone_id] = (
+                node.concentration(mass) if node is not None else 0.0
+            )
 
-        source_rate: dict[str, float] = {
-            zid: 0.0 for zid in working if not is_plenum_zone(zid)
-        }
-        outflow_rate: dict[str, float] = dict.fromkeys(source_rate, 0.0)
-
+        source_rate = {zid: 0.0 for zid in self._real_zone_ids}
+        outflow_rate = dict.fromkeys(self._real_zone_ids, 0.0)
         for path in self.airflow_paths:
             if path.path_type in (PATH_TYPE_HVAC_RETURN, PATH_TYPE_HVAC_SUPPLY):
                 continue
             self._accumulate_path_rates(
                 path, concentrations, source_rate, outflow_rate,
             )
-
         self._accumulate_ahs_star_rates(
             concentrations, source_rate, outflow_rate,
         )
+        source_rate[source_zone] -= outflow_rate[source_zone]
+        return source_rate, outflow_rate
 
-        result: dict[str, float] = {}
-        for zone_id, current_mass in real_input.items():
-            s = source_rate.get(zone_id, 0.0)
-            k = outflow_rate.get(zone_id, 0.0) + self.natural_decay_rate
-            if k > 0.0:
-                exp_term = math.exp(-k * dt)
-                new_mass = current_mass * exp_term + (s / k) * (1.0 - exp_term)
-            else:
-                new_mass = current_mass + s * dt
-            result[zone_id] = max(0.0, new_mass)
+    def _build_decay_free_operator(self) -> np.ndarray:
+        """Build dM/dt = A₀M by probing each real-zone basis vector."""
+        operator = np.zeros(
+            (len(self._real_zone_ids), len(self._real_zone_ids)),
+            dtype=float,
+        )
+        for column, source_zone in enumerate(self._real_zone_ids):
+            source_rate, _ = self._probe_path_rates(source_zone)
+            for row, destination_zone in enumerate(self._real_zone_ids):
+                operator[row, column] = source_rate[destination_zone]
+        return operator
 
+    def _get_propagator(
+        self,
+        natural_decay_rate: float,
+        dt: float,
+    ) -> np.ndarray:
+        """Return and cache the epoch propagator for a decay rate and step."""
+        if self._decay_free_operator is None:
+            self._decay_free_operator = self._build_decay_free_operator()
+        key = (natural_decay_rate, dt)
+        propagator = self._propagator_cache.get(key)
+        if propagator is None:
+            operator = self._decay_free_operator.copy()
+            operator[np.diag_indices_from(operator)] -= natural_decay_rate
+            propagator = _matrix_exponential(operator * dt)
+            self._propagator_cache[key] = propagator
+        return propagator
+
+    def transport_step(
+        self,
+        zone_pathogen_mass: dict[str, float],
+        *,
+        natural_decay_rate: float | None = None,
+    ) -> dict[str, float]:
+        """Execute one epoch of exact linear CONTAM mass transport.
+
+        The declared flow network is linear and time-invariant, so its
+        decay-free operator is probed once from the existing path-rate code
+        and each epoch applies ``expm((A₀ − λI) · Δt)``. This avoids the
+        measured source-freeze asymmetry of the former semi-implicit scheme:
+        on the real ship, 1000 units in Bridge (k=7/h, Δt=1 h) created about
+        3.4× total mass on the first epoch because the donor's exponential
+        sink was paired with epoch-start receiver sources.
+
+        Parameters
+        ----------
+        zone_pathogen_mass : dict
+            Current pathogen mass per zone {zone_id: mass}.
+        natural_decay_rate : float, optional
+            Override the engine decay rate for this transport step. Per-
+            pathogen pools are already aged by their declared airborne
+            half-life, so transporting them must not apply generic decay
+            a second time.
+
+        Returns
+        -------
+        dict
+            Updated pathogen mass per real zone after transport and decay.
+            Virtual ``_plenum_*`` keys are never returned; a zone the airflow
+            network does not model passes through untouched rather than
+            losing its mass to a silent sink.
+        """
+        dt = self.clock.hours_per_epoch
+        decay_rate = (
+            self.natural_decay_rate
+            if natural_decay_rate is None
+            else natural_decay_rate
+        )
+        input_vector = np.array(
+            [
+                zone_pathogen_mass.get(zone_id, 0.0)
+                for zone_id in self._real_zone_ids
+            ],
+            dtype=float,
+        )
+        output_vector = self._get_propagator(decay_rate, dt) @ input_vector
+        result = {
+            zone_id: max(0.0, float(mass))
+            for zone_id, mass in zip(self._real_zone_ids, output_vector)
+        }
+        for zone_id, mass in zone_pathogen_mass.items():
+            if zone_id not in result and not is_plenum_zone(zone_id):
+                result[zone_id] = mass
         return result
 
     def get_transport_summary(

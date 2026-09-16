@@ -78,7 +78,7 @@ def _core(
         rng=np.random.default_rng(7),
         zone_volumes={CABIN: CABIN_VOLUME, DINING: DINING_VOLUME},
         zone_types={CABIN: "Cabin_Corridor", DINING: "Dining"},
-        cfg={"transmission": tx},
+        cfg={"transmission": {**tx, "cabin_air_mode": "zone_pool"}},
     )
     core.initialize_zones([CABIN, DINING])
     return core

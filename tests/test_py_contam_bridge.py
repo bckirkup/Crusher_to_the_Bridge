@@ -18,6 +18,7 @@ import os
 import sys
 
 import pytest
+import yaml
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
@@ -28,9 +29,9 @@ from engines.py_contam_bridge import (
     ContamAirflowPath,
     ContamTransportEngine,
     ContamZoneNode,
+    build_transport_engine,
     is_plenum_zone,
 )
-
 
 # ── Helpers ──────────────────────────────────────────────────────────────
 
@@ -101,6 +102,36 @@ class TestContamZoneNode:
 # ── Mass conservation tests ─────────────────────────────────────────────
 
 class TestMassConservation:
+    @pytest.mark.parametrize("flow", [50.0, 500.0])
+    def test_decay_override_conserves_unfiltered_mass(self, flow: float) -> None:
+        engine = _engine_with_single_path(
+            flow=flow, filter_eff=0.0, decay=0.10, is_ducted=False,
+        )
+        initial = {"A": 1000.0, "B": 0.0}
+        result = engine.transport_step(initial, natural_decay_rate=0.0)
+        assert sum(result.values()) <= sum(initial.values()) * (1 + 1e-12)
+        assert sum(result.values()) == pytest.approx(
+            sum(initial.values()), rel=1e-12,
+        )
+
+        decay_only = _engine_with_single_path(
+            flow=0.0, filter_eff=0.0, decay=0.10, is_ducted=False,
+        )
+        decayed = decay_only.transport_step(initial)
+        assert sum(decayed.values()) < sum(initial.values())
+
+    def test_destination_mass_grades_with_passive_flow(self) -> None:
+        destination_masses = [
+            _engine_with_single_path(
+                flow=flow, filter_eff=0.0, decay=0.0, is_ducted=False,
+            ).transport_step(
+                {"A": 1000.0, "B": 0.0}, natural_decay_rate=0.0,
+            )["B"]
+            for flow in (10.0, 50.0, 100.0)
+        ]
+        assert destination_masses == sorted(destination_masses)
+        assert destination_masses[0] < destination_masses[-1]
+
     def test_total_mass_decreases_with_filter(self) -> None:
         """HVAC-ducted path with filter removes mass from the system."""
         engine = _engine_with_single_path(
@@ -111,16 +142,31 @@ class TestMassConservation:
         total_after = result["A"] + result["B"]
         assert total_after < 1000.0, "Filter should remove mass"
 
+    def test_real_ship_transport_does_not_create_mass(self) -> None:
+        """Filtered real-ship paths can remove mass but never create it."""
+        with open(
+            os.path.join(REPO_ROOT, "crusher_labs", "config.yaml"),
+            encoding="utf-8",
+        ) as handle:
+            config = yaml.safe_load(handle)
+        engine = build_transport_engine(REPO_ROOT, config)
+        mass = {"Bridge": 1000.0}
+        previous_total = 1000.0
+        for _ in range(5):
+            mass = engine.transport_step(mass, natural_decay_rate=0.0)
+            current_total = sum(mass.values())
+            assert current_total <= previous_total * (1.0 + 1e-9)
+            previous_total = current_total
+
     def test_unfiltered_transfer_moves_mass_to_destination(self) -> None:
-        """Semi-implicit analytical step moves mass A→B without going negative."""
+        """Exact linear step moves mass A→B without going negative."""
         engine = _engine_with_single_path(
             flow=50.0, filter_eff=0.0, decay=0.0, is_ducted=False,
         )
         initial = {"A": 1000.0, "B": 0.0}
         result = engine.transport_step(initial)
-        # k_A = 50/100 = 0.5; M_A = 1000*exp(-0.5); S_B = 50*(1000/100)=500
         assert result["A"] == pytest.approx(1000.0 * math.exp(-0.5))
-        assert result["B"] == pytest.approx(500.0)
+        assert result["B"] == pytest.approx(1000.0 * (1.0 - math.exp(-0.5)))
         assert result["A"] >= 0.0
         assert result["B"] >= 0.0
 
@@ -231,7 +277,7 @@ class TestEdgeCases:
     def test_empty_mass_dict(self) -> None:
         engine = _engine_with_single_path()
         result = engine.transport_step({})
-        assert result == {}
+        assert result == {"A": 0.0, "B": 0.0}
 
     def test_zero_flow(self) -> None:
         engine = _engine_with_single_path(flow=0.0, decay=0.0)
@@ -260,7 +306,8 @@ class TestEdgeCases:
         engine = _engine_with_single_path(flow=10.0, decay=0.0)
         initial = {"A": 100.0, "B": 0.0, "NONEXISTENT": 50.0}
         result = engine.transport_step(initial)
-        assert "NONEXISTENT" in result
+        assert result["NONEXISTENT"] == 50.0
+        assert set(result) == {"A", "B", "NONEXISTENT"}
 
 
 # ── Adjacency / cross-zone path construction ────────────────────────────
@@ -327,7 +374,7 @@ class TestPathConstruction:
 
 class TestHvacStarTopology:
     def test_single_room_ahu_analytical_oa_and_filter(self) -> None:
-        """N=1 star: k = Q_ret/V + λ; S = Q_sup·C·(1−η) with C_mix = C."""
+        """N=1 star applies the exact linear source/removal operator."""
         layout = {"zones": [{"id": "A", "volume_m3": 100.0}]}
         airflow = {
             "oa_fraction": 0.2,
@@ -340,13 +387,9 @@ class TestHvacStarTopology:
         engine = ContamTransportEngine(
             layout, airflow, filter_efficiency=eta, natural_decay_rate=0.0,
         )
-        # Q_ret = 100, Q_sup = 80; C = 10; k = 1.0; S = 80*10*0.5 = 400
-        # M = 1000*e^{-1} + 400*(1-e^{-1})
-        m0 = 1000.0
-        k = 1.0
-        s = 400.0
-        expected = m0 * math.exp(-k) + (s / k) * (1.0 - math.exp(-k))
-        result = engine.transport_step({"A": m0})
+        # Q_ret = 100, Q_sup = 80, and η = 0.5, so dM/dt = -0.6M.
+        expected = 1000.0 * math.exp(-0.6)
+        result = engine.transport_step({"A": 1000.0})
         assert result["A"] == pytest.approx(expected)
         assert "_plenum_hz" not in result
 

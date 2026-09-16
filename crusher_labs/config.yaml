@@ -267,6 +267,10 @@ agent_behavior:
 # heterogeneous_zone_dose: density mean + optional mean-1 lognormal
 # within-zone exposure factor.
 transmission:
+  # cabin_compartment is the default: short-range inhalation is resolved per
+  # stateroom. zone_pool is the labelled pre-change baseline for paired
+  # measurement.
+  cabin_air_mode: "cabin_compartment"
   contact_mode: "per_partner_contact"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose" | "per_partner_contact"
   # Shared-head visit mechanism: "none" (default, bit-identical) or
   # "dwell_weighted" (Poisson visits resolved to the serving head, exposure
@@ -329,6 +333,13 @@ transmission:
 
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:
+  # airflow moves each per-pathogen pool through the declared airflow network
+  # (ducts, passive paths, AHU stars, filter efficiency), with λ set to 0
+  # because the pool's own half-life already ages it.
+  # none ages pools in place and transports only the legacy aggregate: the
+  # labelled pre-change baseline for paired measurement. Ships on by default
+  # and is measured before any run declares it, as cabin_air_mode was.
+  pathogen_pool_transport: "airflow"
   filter_efficiency: 0.50           # η – HVAC filter removal efficiency.
                                     # UNSOURCED, and it is a filter class the
                                     # sourced record does not contain: the

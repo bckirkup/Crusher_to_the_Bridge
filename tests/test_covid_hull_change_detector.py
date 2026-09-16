@@ -10,14 +10,12 @@ this cell by ~5–13% without changing the engine's scale, so a failure here
 says "attribute the move", not "the scale changed" (see
 docs/covid/covid_first_look_readout.md).
 
-The cell is the cheapest one on the grid: Greg Mortimer (the held-out hull, so
-pinning it leaks nothing into the fit), Theta = 1e6, seed 20200333, ~15 s. It
-was measured on AWS Batch and reproduced bit-for-bit in the campaign image and
-in a local CPython 3.11 environment. Under the declared scenario (one index
-case, no boarding cohort) this cell does not take off: a one-import Greg
-Mortimer run at Theta 1e6 goes extinct in most seeds (0-8 onsets over seeds
-20200333-20200348 on both interpreters), so the bound below is that the index
-case was ascertained at all, not that an outbreak followed.
+The cell is Greg Mortimer (the held-out hull, so pinning it leaks nothing into
+the fit), Theta = 1e10, seed 20200333. The old Theta = 1e6 cell belonged to
+the pooled-air model and became all-zero under either default flip, so the
+detector moved to the lowest live, unsaturated point on the new defaults.
+At Theta = 1e6 the prior pooled-air tuple was (6, 0, 217, 6, 3); changing
+either default alone drove that cell to (0, 0, 217, 0, 0).
 
 CHANGE DETECTOR, not a correctness check. The pinned values are not
 independently derived; they only pin current behaviour. If a deliberate change
@@ -43,7 +41,7 @@ import pytest
 from picard_framework.covid_theta_fit import HullObservables, simulate_hull
 
 HULL = "greg_mortimer_2020"
-THETA = 1e6
+THETA = 1e10
 SEED = 20200333
 
 PINNED_FIELDS = (
@@ -91,13 +89,13 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # coupling restored: the old tuple returns). The declared
     # retest-after-negative policy shipped in the same change is inert
     # here because greg_mortimer_2020 does not declare it.
-    # AERO-CABIN-01 (transmission.cabin_air_mode) leaves this tuple alone
-    # because the cell runs the default zone_pool: measured on CPython 3.12
-    # on the merged tree, zone_pool reads the tuple below and the same cell
-    # under cabin_compartment reads (0, 0, 217, 0, 0) — the index
-    # case no longer doses its whole cabin block. That reading is recorded
-    # in docs/covid/covid_first_look_readout.md, not pinned here.
-    (3, 11): (6, 0, 217, 6, 3),
+    # At the old Theta=1e6, each default flip independently moved the prior
+    # (6, 0, 217, 6, 3) reading to (0, 0, 217, 0, 0). The detector moved to
+    # Theta=1e10 because 1e6 belonged to the pooled-air model.
+    # The exact linear-operator transport repair moves the live cell from
+    # (149, 62, 217, 166, 30) to (144, 64, 217, 157, 30) on CPython 3.11;
+    # the old value returns with the pre-repair frozen-source scheme.
+    (3, 11): (144, 64, 217, 157, 30),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -107,9 +105,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (1, 1, 217, 3, 2). The two incubation changes above then moved it
     # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
-    # presentation-only sick call above moved it to the tuple below; the
-    # two interpreters still agree.
-    (3, 12): (6, 0, 217, 6, 3),
+    # The new-default Theta=1e10 reading is live but unsaturated on both
+    # interpreters.
+    (3, 12): (128, 51, 217, 149, 34),
 }
 
 

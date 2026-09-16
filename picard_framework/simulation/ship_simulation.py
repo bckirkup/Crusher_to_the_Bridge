@@ -41,8 +41,10 @@ from engines.crew_duty_exclusion import (
 )
 from engines.initiation import preboarding_reportable_ids
 from engines.py_contam_bridge import (
+    DEFAULT_PATHOGEN_POOL_TRANSPORT,
     build_transport_engine,
     load_air_flow_paths,
+    parse_pathogen_pool_transport,
 )
 from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
@@ -259,6 +261,7 @@ class ShipSimulation:
         self.world: WorldState | None = None
         self.engine = None
         self.contam_engine = None
+        self.pathogen_pool_transport = DEFAULT_PATHOGEN_POOL_TRANSPORT
         self.tx_core = None
         self.crew_exclusion: CrewDutyExclusionTracker | None = None
         self.obs = None
@@ -398,6 +401,9 @@ class ShipSimulation:
         self.clock = SimClock.for_run(cfg, voyage_cfg)
         self.scenario_schedule = resolve_scenario_schedule(cfg)
         self.pathogen_profiles = load_pathogen_profiles(cfg)
+        self.pathogen_pool_transport = parse_pathogen_pool_transport(
+            cfg.get("hvac", {}),
+        )
         self.modalities = build_modalities(
             cfg,
             self.rng,
@@ -920,14 +926,27 @@ class ShipSimulation:
         # Cumulative totals, not deltas: copy the core's running counters so a
         # multi-epoch run reports the same totals the core holds.
         state.sanitary_activity = dict(self.tx_core.sanitary_telemetry)
-        if self.contam_engine is not None:
-            self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
-                self.engine.zone_pathogen_mass,
-            )
+        self._transport_airborne_pools()
         if self.pathogen_profiles and self.enable_dual_signal:
             work.zone_microflora_shifts = compute_zone_microflora_shifts(
                 self.engine.agents, self.pathogen_profiles, work.cfg,
             )
+
+    def _transport_airborne_pools(self) -> None:
+        """Move aggregate or per-pathogen airborne pools through CONTAM."""
+        if self.contam_engine is None:
+            return
+        if self.pathogen_pool_transport == "airflow" and self.pathogen_profiles:
+            for pathogen_id in self.pathogen_profiles:
+                masses = self.contam_engine.transport_step(
+                    self.engine.get_pathogen_zone_mass(pathogen_id),
+                    natural_decay_rate=0.0,
+                )
+                self.engine.set_pathogen_zone_mass(pathogen_id, masses)
+            return
+        self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
+            self.engine.zone_pathogen_mass,
+        )
 
     def _step_export_truth(self, work: _EpochWork) -> None:
         assert self.engine is not None

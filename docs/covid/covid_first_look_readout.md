@@ -988,6 +988,70 @@ retracted: every campaign in this document ran the default `zone_pool`, and the
 mode ships off. Whether the early/total shape misfit survives the refit — the
 question the sweep left open — is what v5 measures.
 
+## Per-pathogen HVAC pool transport repair and the two default flips
+
+The pre-repair CONTAM step transported only the legacy aggregate airborne
+array. The aggregate is recomputed from the per-pathogen pools on the next
+`set_pathogen_zone_mass` call, so the transported aggregate was discarded and
+no profiled pathogen's airborne mass crossed a zone boundary. Within-zone
+airborne dosing was unaffected. The repair transports each per-pathogen pool
+through the declared airflow network with the engine decay rate set to zero,
+because each pool is already aged by its own declared airborne half-life.
+
+The first repair implementation exposed a second defect in the old transport
+integrator: it drained each donor exponentially while crediting receivers from
+the donor's epoch-start concentration. With 1000 units in `Bridge`, this
+created 3.4× total mass on the first ship-scale epoch (the prior totals were
+3364.5, 3178.0, 3101.9, 3071.4, and 3059.3). The repair now probes the
+declared path-rate code once to build the linear operator and applies its
+exact matrix exponential per epoch. The old frozen-source transport is not a
+valid baseline; every transported figure below from before this numerical
+repair is superseded.
+
+The shipped defaults also changed to
+`hvac.pathogen_pool_transport: airflow` and
+`transmission.cabin_air_mode: cabin_compartment`. The labelled pre-change
+baselines remain available for paired measurement. The change-detector
+attribution table is:
+
+| pool transport | cabin air | pinned tuple |
+|---|---|---|
+| `none` | `zone_pool` | `(114, 29, 217, 128, 40)` |
+| `none` | `cabin_compartment` | `(132, 55, 217, 140, 36)` |
+| `airflow` | `zone_pool` | `(112, 32, 217, 123, 51)` |
+| `airflow` | `cabin_compartment` | `(128, 51, 217, 149, 34)` |
+
+The old change-detector cell at Θ=1e6 belonged to the pooled-air model and
+became all-zero under either single default flip. After the exact transport
+repair, the new-default Θ table was `(0, 0, 217, 0, 0)` at 1e6,
+`(0, 0, 217, 0, 0)` at 1e8, `(128, 51, 217, 149, 34)` at 1e10,
+`(101, 71, 217, 140, 9)` at 1e11, and `(62, 61, 217, 119, 1)` at 1e12.
+The detector therefore remains at the lowest live, unsaturated point, Θ=1e10,
+which reads `(128, 51, 217, 149, 34)` on the local CPython 3.12 run and is
+pinned for both supported interpreter minors. The prior detector value
+`(149, 62, 217, 166, 30)` was from the frozen-source scheme;
+the moved golden is therefore attributed to the numerical repair rather than
+a default flip.
+
+The corrected full-voyage traces at Θ=3.16e7, seed 20200216 were:
+
+| cabin air | onsets | hvac_airborne infections | hvac dose | witness: mass zones without a shedder |
+|---|---:|---:|---:|---:|
+| `zone_pool` | 2001 | 796 | 0 | 65 |
+| `cabin_compartment` | 2 | 0 | 0 | 188 |
+
+The earlier trace values (zone_pool: 2258 onsets and 1729 HVAC infections;
+cabin_compartment: 3 onsets and 13 HVAC infections; witnesses 68 and 139)
+were produced by the mass-creating frozen-source integrator and are
+superseded. Corrected artifacts are
+[`/home/ubuntu/phase0/pool_transport_logs/zone_pool_new.log`](file:///home/ubuntu/phase0/pool_transport_logs/zone_pool_new.log)
+and
+[`/home/ubuntu/phase0/pool_transport_logs/cabin_compartment_new.log`](file:///home/ubuntu/phase0/pool_transport_logs/cabin_compartment_new.log).
+
+Θ=3.16e7 belongs to the pooled model, so a refit under the new defaults is
+required before any v5 or v4 number is carried forward. Earlier campaigns are
+not retracted; they are labelled pooled-air, no-between-zone-transport runs.
+
 ## covid_first_look_v5: refit with cabin compartments on, and a paired pooled control (Batch, 2026-09-17)
 
 v5 refits Theta with `transmission.cabin_air_mode: cabin_compartment` — the

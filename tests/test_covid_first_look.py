@@ -49,6 +49,7 @@ def _stub(
     seed: int,
     *,
     cabin_air_mode: str | None = None,
+    pathogen_pool_transport: str | None = None,
 ) -> HullObservables:
     """Onsets peak at TRUE_THETA; every third seed is an extinction."""
     distance = abs(math.log10(theta) - math.log10(TRUE_THETA))
@@ -119,12 +120,12 @@ def test_a_cell_payload_round_trips_its_observables(design, cells):
 
 
 @pytest.mark.parametrize("version", [1, 2, 3, 4])
-def test_legacy_designs_default_to_zone_pool_and_keep_their_cells(version):
+def test_legacy_designs_keep_their_cells_with_current_defaults(version):
     design = load_design(
         REPO_ROOT / "picard_framework" / "runs"
         / f"covid_first_look_v{version}_design.json",
     )
-    assert design.cabin_air_mode == "zone_pool"
+    assert design.cabin_air_mode == "cabin_compartment"
     assert len(enumerate_cells(design)) == 11 * (20 + 50)
     assert enumerate_cells(design)[0].key.startswith("fit_")
 
@@ -159,8 +160,12 @@ def test_an_invalid_cabin_air_mode_in_a_design_is_refused(design):
 def test_run_cell_records_and_passes_the_design_cabin_air_mode(design, cells):
     seen: dict[str, object] = {}
 
-    def runner(scenario_id, theta, seed, *, cabin_air_mode):
+    def runner(
+        scenario_id, theta, seed, *,
+        cabin_air_mode, pathogen_pool_transport,
+    ):
         seen["mode"] = cabin_air_mode
+        seen["pool_transport"] = pathogen_pool_transport
         return _stub(scenario_id, theta, seed)
 
     compartment_design = replace(design, cabin_air_mode="cabin_compartment")

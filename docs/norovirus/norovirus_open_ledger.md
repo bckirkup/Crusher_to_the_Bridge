@@ -3467,6 +3467,35 @@ Roughly in dependency order.
     `docs/norovirus/flush_sweep_v1_stage2_readout.md` and
     `docs/norovirus/flush_sweep_v1_stage2_findings.md`.
 
+46. **`AERO-CABIN-03`: per-pathogen airborne pool transport was absent before
+    the airflow repair, and the two air-model defaults are now changed.** On
+    every prior run, for every profiled pathogen, the CONTAM engine transported
+    only the legacy aggregate airborne array. That aggregate is recomputed from
+    the per-pathogen pools on the next update and the transported result is
+    therefore discarded; no per-pathogen aerosol mass crossed a zone boundary.
+    Within-zone airborne dosing is unaffected. Any norovirus conclusion
+    resting on the HVAC/drift route, on ventilation, or on filter efficiency is
+    withdrawn pending refit, as is any result assuming the pooled cabin block.
+    This is the transport half of `AERO-CABIN-01` (item 44), which separately
+    records the cabin-air partition. The labelled pre-change modes remain
+    available for paired measurement; the shipped defaults are now
+    `hvac.pathogen_pool_transport: airflow` and
+    `transmission.cabin_air_mode: cabin_compartment`.
+    The initial airflow repair also exposed a numerical defect in the former
+    transport step: it drained each donor exponentially but credited receivers
+    from the donor's epoch-start concentration. With 1000 units in `Bridge`,
+    the old ship-scale totals were 3364.5, 3178.0, 3101.9, 3071.4, and 3059.3
+    over five epochs (about 3.4× creation on the first step). The repair now
+    solves the declared linear transport operator exactly by matrix
+    exponential, with no fallback to the frozen-source scheme. Every
+    pre-repair transported figure, including the prior full-voyage traces,
+    is superseded: at Θ=3.16e7, seed 20200216, the old `zone_pool` trace
+    reported 2258 onsets, 1729 HVAC infections, and witness 68, while the old
+    `cabin_compartment` trace reported 3 onsets, 13 HVAC infections, and
+    witness 139. The corrected traces are 2001/796/65 and 2/0/188,
+    respectively. Refit remains required before any HVAC, ventilation, filter,
+    or pooled-cabin conclusion is used.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
