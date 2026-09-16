@@ -187,7 +187,8 @@ def test_the_incubation_term_is_referenced_to_the_installed_n50(profile, theta):
     )[PATHOGEN_ID]
     model = IncubationModel.from_mapping(resolved["incubation"])
     shipped = IncubationModel.from_mapping(profile["incubation"])
-    assert model is not None and shipped is not None
+    assert model is not None
+    assert shipped is not None
     n50 = math.log(2.0) / theta
     assert model.dose_factor(n50) == pytest.approx(1.0)
     assert model.dose_factor(n50 * 100) < 1.0 < model.dose_factor(n50 / 100)
@@ -216,6 +217,26 @@ def test_the_run_spec_carries_the_declared_assumptions():
     assert raw["run"]["history_retention"] == "compact"
     dose = raw["pathogen_overrides"]["sars_cov2_resp"]["dose_response"]
     assert dose == {"model": "exponential", "k": 1e8}
+
+
+def test_the_run_spec_omits_cabin_air_override_by_default():
+    raw = build_fit_run_spec(DIAMOND, 1e8, 7, num_epochs=24)
+    assert "transmission" not in raw["config_overrides"]
+
+
+@pytest.mark.parametrize("mode", ["zone_pool", "cabin_compartment"])
+def test_the_run_spec_declares_only_the_requested_cabin_air_mode(mode):
+    raw = build_fit_run_spec(
+        DIAMOND, 1e8, 7, num_epochs=24, cabin_air_mode=mode,
+    )
+    assert raw["config_overrides"]["transmission"] == {"cabin_air_mode": mode}
+
+
+def test_an_unknown_cabin_air_mode_is_refused():
+    with pytest.raises(ValueError, match="cabin_air_mode"):
+        build_fit_run_spec(
+            DIAMOND, 1e8, 7, num_epochs=24, cabin_air_mode="invalid",
+        )
 
 
 # ── the grid ──────────────────────────────────────────────────────────────
