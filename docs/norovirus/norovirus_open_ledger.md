@@ -1902,6 +1902,9 @@ Roughly in dependency order.
    crew rates" was a guess for 3- vs 2-berth cabins under corridor mixing and
    is withdrawn as a prediction: the direction is to be measured on AWS, not
    assumed. The corridor factors (0.15 direct, 0.25 zone) remain undeclared.
+   **The air half of this item is now implemented too — `AERO-CABIN-01`, item
+   44** (off by default; a null on this arm's outcomes, and ~20× on doses under
+   the `shipped_uniform` baseline).
 9. **Aerosol portal efficiency.** #352 computes and records the emesis aerosol
    load but does not route it into the airborne reservoir. The direction is
    settled (norovirus establishes enterically; inhalation is delivery-to-gut via
@@ -2029,6 +2032,17 @@ Roughly in dependency order.
     [`../near_field_air_spec.md`](../near_field_air_spec.md).
     Off by default and bit-identical when off; sourcing precedes any value; no
     constant here is chosen against a scored quantity.
+
+    **The cabin half now has a second, independent implementation that needs no
+    sourced volume — `AERO-CABIN-01`, item 44.** It makes the stateroom the
+    *primary* inhalation unit by partitioning the block's declared volume by
+    berths, where this item's near field leaves the block pooled and adds a
+    mate-only bonus over it against an unmeasured effective volume (the ∅ null
+    below). The two compose: with `cabin_air_mode: cabin_compartment` the
+    difference-of-concentrations term is taken against the stateroom's
+    partitioned volume, so it vanishes unless the declared
+    `cabin_berth_volume_m3` is smaller still. The table half of this item remains
+    open and untouched.
 
     **Sourced, [tranche 36](../literature/consensus_tranche_36_near_field_air.md)**
     (Consensus exhausted for the period; retrieved by the approved open-full-text
@@ -3329,6 +3343,52 @@ Roughly in dependency order.
     `telemetry_buffer/observation_model/flush_sweep_v1_s1.json`,
     `docs/norovirus/flush_sweep_v1_stage1_readout.md` and
     `docs/norovirus/flush_sweep_v1_stage1_findings.md`.
+
+44. **`AERO-CABIN-01`: the air half of item 8 is now implemented, off by
+    default, and it is a measured null on the norovirus arm's *outcomes* while
+    **not** a null on the `shipped_uniform` baseline's doses.** The inhalation
+    route may now run on staterooms rather than on the whole `Cabin_Corridor`
+    pool — `transmission.cabin_air_mode`, `zone_pool` (default, and an absent
+    key) versus `cabin_compartment`, spec
+    `docs/cabin_air_compartment_spec.md`. **No constant is added, moved or
+    fitted**: a stateroom's dilution volume is its berth share of the block
+    volume the hull already declares, from the berthing plan read off the roster
+    at initialisation, so the partition sums to the declared block volume
+    exactly and no cabin volume is invented — which is also how it stays clear
+    of the ∅ null item 16 records against the near-field effective volume.
+    Emitted mass is still credited to the parent ship zone, so the drift route
+    and the aerosol reservoir read the same air at the same magnitude.
+    (a) **Outcomes are invariant on this arm.** Measured, not assumed
+    (`expedition_cruise_450`, 450 agents, seed 42, 48 epochs, `norwalk_gi`
+    alone, both droplet modes; runner
+    `/home/ubuntu/phase0/norovirus_cabin_air_invariance.py`): under
+    `profile_conditioned` **and** under `shipped_uniform`, `zone_pool` and
+    `cabin_compartment` agree exactly on total infections, postings, attack
+    rates, per-agent infection records and acquired-particle route totals
+    (1 infection, 0 postings, empty route totals in this cell). The droplet path
+    consumes no RNG, so nothing downstream is re-rolled by the split.
+    (b) **Under the default mode the route is a null by construction, not by
+    luck**: an `emesis_conditioned` profile has continuous droplet emission
+    share 0 (item 40), so every dose this route computes on the norovirus arm is
+    zero and only the *granularity* of the exposure record changes — 35 pooled
+    droplet-exposure records become 1 stateroom record, each now carrying an
+    `air_unit` key. (c) **Under `shipped_uniform` the doses do move, by ~20× in
+    the cell measured** (recorded concentration 0.575 → 11.8 particles m⁻³,
+    exposure dose 0.345 → 7.07), because that baseline restores a nonzero
+    emission share on this arm and the stateroom is ~20× smaller than its block.
+    Outcomes did not move here only because the cell has a single infection and
+    no onward chain; **any `shipped_uniform` measurement — item 41's matched
+    deletion baseline included — is therefore not transferable across this
+    mode**, and must record which `cabin_air_mode` it ran under. Nothing in
+    items 40–43 was measured with the mode on, so no result recorded above is
+    invalidated. (d) **The hallway loses its airborne residual under the mode**:
+    two non-mates in a cabin corridor share no air at all, where before they
+    shared all of it. The corridor encounter survives as direct contact and as a
+    fomite pool exactly as `BERTH-01` filed it, so the mode is a *lower* bound on
+    cabin-corridor airborne transmission; a corridor-air residual is a separate
+    change. The measurable arm is `sars_cov2_resp`, where the leak this repairs
+    was measured (92% of post-confinement droplet dose arriving through shared
+    block air) — a COVID readout, not a norovirus one.
 
 ## 5. Held fixed by assumption
 

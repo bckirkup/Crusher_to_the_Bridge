@@ -83,6 +83,13 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # ceiling either, which on top gives the tuple below. Both
     # interpreters agree on this cell now: it is a near-extinct run with
     # few Bernoulli draws for the two float-sum paths to disagree on.
+    # AERO-CABIN-01 (transmission.cabin_air_mode) leaves this tuple alone
+    # because the cell runs the default zone_pool: measured on CPython
+    # 3.12, zone_pool reads the tuple below and the same cell under
+    # cabin_compartment reads (0, 0, 217, 0, 0) — the index case no longer
+    # doses its whole cabin block, so this near-extinct run goes extinct.
+    # That reading is recorded in docs/covid/covid_first_look_readout.md,
+    # not pinned here: an all-zero cell detects nothing.
     (3, 11): (5, 0, 217, 6, 4),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment

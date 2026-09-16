@@ -899,6 +899,52 @@ license "Diamond Princess had N imports": with the leak in place the total-side
 constraint that picks ~2 imports is itself suspect. The ordering implied is
 leak first, roster second, imports last.
 
+## AERO-CABIN-01: the leak closed, measured on one paired cell (local, 2026-09-16)
+
+The repair is a declared mode, `transmission.cabin_air_mode`: `zone_pool`
+(default, and what every campaign above ran) against `cabin_compartment`, which
+runs the far-field inhalation pool per stateroom inside a `Cabin_Corridor`
+block, dividing the block's declared volume by berths. Spec and its bounds:
+[`../cabin_air_compartment_spec.md`](../cabin_air_compartment_spec.md);
+norovirus ledger item 44. **No constant is added or fitted** — the stateroom
+volume is a partition of the volume the hull already declares, and emitted mass
+is still credited to the parent zone so the drift route and the aerosol
+reservoir are unchanged.
+
+**Paired full-voyage cell** (Diamond Princess, Theta_fit = 3.16e7, seed
+20200216, 768 epochs, CPython 3.12, one declared index case, heads visited;
+`/home/ubuntu/phase0/leak_mode.py`, artifacts `leak_pool.json` and
+`leak_comp.json`). The two runs differ only in the mode:
+
+| | `zone_pool` | `cabin_compartment` |
+|---|---|---|
+| ever infected | 3,568 | **2** |
+| transmission events | 3,588 | 1 |
+| recorded onsets | 401 | 0 |
+| campaign specimens / positives | 2,231 / 308 | 2,640 / 0 |
+| passive specimens / positives | 1,480 / 187 | 1,071 / 0 |
+| events in `Cabin_Corridor` | 2,358 | 1 |
+| post-day-16 events (confined pax / crew) | 3,544 (2,088 / 1,043) | 0 |
+
+So the block pool was not *a* leak, it was the epidemic: with the index case
+dosing only its own stateroom, the outbreak does not reach a second
+generation at the Theta fitted against the pooled block, and the 838 Dining and
+392 Free events in the pooled run are downstream of cabin-block seeding rather
+than an independent path. The change-detector cell moves the same way (Greg
+Mortimer, Theta 1e6, seed 20200333, CPython 3.12): `(5, 0, 217, 6, 4)` under
+`zone_pool` to `(0, 0, 217, 0, 0)` under `cabin_compartment`, which is why that
+reading is recorded here and not pinned — an all-zero cell detects nothing.
+
+**What this does and does not say.** It is one seed on one hull, and it is a
+*mechanism* measurement, not a fit: it says the confined-passenger dose the
+trace attributed 92% to shared block air disappears when the air is
+partitioned, and therefore that **Theta_fit = 3.16e7 belongs to the pooled
+block and cannot be carried over** — the v5 fit has to refit Theta with the
+mode on, and should expect a substantially higher value. Nothing above is
+retracted: every campaign in this document ran the default `zone_pool`, and the
+mode ships off. Whether the early/total shape misfit survives the refit — the
+question the sweep left open — is what v5 measures.
+
 ## Reproduction
 
 ```bash

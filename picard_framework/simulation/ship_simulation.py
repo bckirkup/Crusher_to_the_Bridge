@@ -453,6 +453,7 @@ class ShipSimulation:
         platform_layout = load_platform_layout(self.repo_root, cfg) or {}
         self._init_transmission_core(ship, airflow_data, platform_layout)
         if self.tx_core is not None:
+            self.tx_core.register_cabin_berths(self.engine.agents)
             self.tx_core.register_seeded_founders(self.engine.agents)
 
         self.obs = init_observation_engine(
