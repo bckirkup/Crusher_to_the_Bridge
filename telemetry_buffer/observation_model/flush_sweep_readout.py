@@ -52,21 +52,21 @@ nothing: no decade acquires standing from its distance to an anchor.
 
 from __future__ import annotations
 
-import argparse
 import json
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path, validated_open
 from telemetry_buffer.observation_model.boarding_posting_readout import _pairs
 from telemetry_buffer.observation_model.midrs_incidence_targets import a9_targets
 from telemetry_buffer.observation_model.posting_tail_sensitivity import (
     MARGIN_KEY,
-    MIN_PAIRED_SEEDS,
-    _by_seed,
     _mcnemar,
     _paired_diff,
+)
+from telemetry_buffer.observation_model.readout_common import (
+    paired_rows,
+    run_readout_cli,
 )
 from telemetry_buffer.observation_model.realism_ladder_readout import (
     summarise_cell,
@@ -206,24 +206,19 @@ def _contrast(
     right_rows: list[dict[str, Any]],
 ) -> dict[str, Any] | None:
     """``right - left`` on shared seeds; None when the pairing is invalid."""
-    left_by_seed = _by_seed(left_rows)
-    right_by_seed = _by_seed(right_rows)
-    if left_by_seed is None or right_by_seed is None:
+    paired = paired_rows(left_rows, right_rows)
+    if paired is None:
         return None
-    shared = sorted(set(left_by_seed) & set(right_by_seed))
-    if len(shared) < MIN_PAIRED_SEEDS:
-        return None
-    left = [left_by_seed[seed] for seed in shared]
-    right = [right_by_seed[seed] for seed in shared]
+    left, right, n_shared = paired
     differences = {key: _paired_diff(left, right, key) for key in DIFF_KEYS}
     left_yield = _per_import_yield(left)
     right_yield = _per_import_yield(right)
     return {
         "left_arm": left[0]["arm"],
         "right_arm": right[0]["arm"],
-        "n_shared_seeds": len(shared),
+        "n_shared_seeds": n_shared,
         "identical_import_fraction": (
-            differences["imported"]["n_identical"] / len(shared)
+            differences["imported"]["n_identical"] / n_shared
         ),
         "secondaries_per_import_difference": (
             None
@@ -432,44 +427,15 @@ def render_markdown(
     return "\n".join(lines) + "\n"
 
 
-def _write(path: Path, text: str) -> None:
-    resolved = Path(resolve_repo_path(str(REPO_ROOT), str(path)))
-    with validated_open(
-        str(resolved), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        handle.write(text)
-
-
-def _parse_arm(value: str) -> tuple[str, Path]:
-    if "=" not in value:
-        raise argparse.ArgumentTypeError("expected name=path")
-    name, _, path = value.partition("=")
-    return name, Path(path)
-
-
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--arm", action="append", required=True, type=_parse_arm,
-                        help="name=results_root, repeatable")
-    parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--markdown", type=Path)
-    parser.add_argument("--title", default=DEFAULT_TITLE)
-    parser.add_argument("--vsp-era", default="pre", choices=("pre", "post"))
-    args = parser.parse_args(argv)
-
-    rows: list[dict[str, Any]] = []
-    for name, root in args.arm:
-        found = collect_rows(root, name)
-        if not found:
-            parser.error(f"no run summaries found under {root}")
-        rows.extend(found)
-    report = build_report(rows, args.vsp_era)
-    _write(args.out, json.dumps(report, indent=1, sort_keys=True) + "\n")
-    markdown = render_markdown(report, title=args.title)
-    if args.markdown:
-        _write(args.markdown, markdown)
-    print(markdown)
-    return 0
+    return run_readout_cli(
+        collect_rows=collect_rows,
+        build_report=build_report,
+        render_markdown=render_markdown,
+        description=__doc__,
+        default_title=DEFAULT_TITLE,
+        argv=argv,
+    )
 
 
 if __name__ == "__main__":

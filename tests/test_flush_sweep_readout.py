@@ -10,7 +10,9 @@ dose-per-exposure and the paired secondaries contrast.
 
 from __future__ import annotations
 
+import json
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -23,8 +25,11 @@ from telemetry_buffer.observation_model.flush_sweep_readout import (  # noqa: E4
     FLUSH_KEYS,
     _sorted_arms,
     build_report,
+    collect_rows,
     declared_fraction,
     flush_witness,
+    main,
+    render_markdown,
 )
 from telemetry_buffer.observation_model.posting_tail_sensitivity import (  # noqa: E402
     MARGIN_KEY,
@@ -273,3 +278,202 @@ def test_rising_flush_dose_rises_dose_per_exposure_and_contrast() -> None:
         if prev_diff is not None:
             assert diff > prev_diff
         prev_diff = diff
+
+
+# ── Archive collection ───────────────────────────────────────────────
+
+
+def _summary(
+    seed: int,
+    *,
+    fraction: float,
+    secondaries: int = 0,
+    witness: bool = True,
+) -> dict:
+    block: dict = {
+        "infections_by_dominant_route": {"flush_aerosol": secondaries},
+        "infection_dose_share_by_route": {},
+    }
+    if witness:
+        block["sanitary_activity"] = {
+            "visits": 10.0,
+            "person_seconds": 1000.0,
+            "stool_visits": 1.0,
+            "unresolved": 0.0,
+            "recipients": 0.0,
+            "dose_delivered": 0.0,
+            "flush_events": 1.0,
+            "flush_aerosol_emitted": 1e6,
+            "flush_recipients": 2.0,
+            "flush_dose_delivered": 10.0,
+        }
+    return {
+        "run_id": f"fl_{fraction}_{seed}",
+        "parameters": {
+            "tier_id": "fl_cls_7d",
+            "platform_id": CELL["platform_id"],
+            "surveillance": CELL["surveillance"],
+            "dose_adjustment": CELL["dose_adjustment"],
+            "num_epochs": CELL["num_epochs"],
+            "num_agents": CELL["num_agents"],
+            "seed": seed,
+            "boarding_mechanism_rung": CELL["boarding_mechanism_rung"],
+            "sanitary_visit_mode": "dwell_weighted",
+            "flush_aerosol_fraction": fraction,
+        },
+        "derived": {
+            "reported_case_attack_rate_passenger": 0.0,
+            "reported_case_attack_rate_crew": 0.0,
+            "infection_attack_rate_passenger": (1 + secondaries) / 1600,
+            "infection_attack_rate_crew": 0.0,
+            "ever_ill_attack_rate_passenger": 0.01,
+            "passenger_complement": 1600,
+            "crew_complement": 310,
+        },
+        "summary": block,
+    }
+
+
+def _profile() -> dict:
+    return {
+        "initiation": {
+            "mode": "boarding",
+            "boarding": {
+                "norwalk_gi": {
+                    "drawn_by_role": {"passenger": 1, "crew": 0},
+                    "composition": {"never_symptomatic": 1},
+                },
+            },
+        },
+    }
+
+
+def _archive(
+    root: Path, name: str, summaries: list[tuple[dict, dict]],
+) -> Path:
+    root.mkdir(parents=True, exist_ok=True)
+    path = root / f"{name}.zip"
+    with zipfile.ZipFile(path, "w") as archive:
+        for summary, profile in summaries:
+            prefix = f"{summary['run_id']}/"
+            archive.writestr(f"{prefix}summary.json", json.dumps(summary))
+            archive.writestr(
+                f"{prefix}resolved_pathogen_profiles.json",
+                json.dumps(profile),
+            )
+    return path
+
+
+def test_collect_rows_flattens_zips_and_deduplicates(tmp_path: Path) -> None:
+    pairs = [(_summary(seed, fraction=1e-7), _profile()) for seed in range(3)]
+    _archive(tmp_path, "shard_a", pairs)
+    first = tmp_path / "shard_a.zip"
+    (tmp_path / "shard_b.zip").write_bytes(first.read_bytes())
+    rows = collect_rows(tmp_path, "1e-7")
+    assert len(rows) == 3
+    assert {row["arm"] for row in rows} == {"1e-7"}
+    assert declared_fraction(rows) == pytest.approx(1e-7)
+    assert all(row["flush_witness_present"] for row in rows)
+
+
+def test_collect_rows_marks_a_missing_sanitary_block(tmp_path: Path) -> None:
+    _archive(
+        tmp_path, "arm",
+        [(_summary(0, fraction=1e-7, witness=False), _profile())],
+    )
+    (row,) = collect_rows(tmp_path, "1e-7")
+    assert row["flush_witness_present"] is False
+    assert row["flush_events"] is None
+
+
+# ── Empty and unpaired edges ─────────────────────────────────────────
+
+
+def test_flush_witness_of_no_rows_is_empty() -> None:
+    assert flush_witness([]) == {}
+
+
+def test_contrast_is_none_below_the_paired_floor() -> None:
+    rows = _arm_rows("off", 0.0, 20) + _arm_rows("1e-7", 1e-7, 20)
+    cell = build_report(rows, "pre")["cells"][0]
+    assert cell["contrasts"] == {"1e-7": None}
+
+
+def test_contrast_is_none_when_seeds_do_not_pair() -> None:
+    off = _arm_rows("off", 0.0, 10)
+    live = _arm_rows("1e-7", 1e-7, 10)
+    live.append(live[0])
+    cell = build_report(off + live, "pre")["cells"][0]
+    assert cell["contrasts"]["1e-7"] is None
+
+
+# ── Rendering and the CLI ────────────────────────────────────────────
+
+
+def test_render_markdown_covers_arms_contrasts_and_unpaired() -> None:
+    n = MIN_PAIRED_SEEDS
+    rows = (
+        _arm_rows("off", 0.0, n)
+        + _arm_rows("1e-7", 1e-7, n, secondary_infections=2,
+                    flush_events=3, flush_recipients=4)
+        + _arm_rows("3e-9", 3e-9, n - 20, seeds=range(200, 200 + n - 20))
+    )
+    report = build_report(rows, "pre")
+    markdown = render_markdown(report, title="Flush sweep stage 1")
+    assert "| off |" in markdown
+    assert "| 1e-7 |" in markdown
+    assert "unpaired" in markdown
+    assert "A4" in markdown
+
+
+def test_build_report_post_era_uses_post_targets() -> None:
+    n = MIN_PAIRED_SEEDS
+    rows = _arm_rows("off", 0.0, n) + _arm_rows("1e-7", 1e-7, n)
+    pre = build_report(rows, "pre")["observed_comparators"]
+    post = build_report(rows, "post")["observed_comparators"]
+    assert post["A9_posting_probability_per_1000_voyages"] is None
+    assert pre["A9_posting_probability_per_1000_voyages"]["fleet"]
+
+
+def test_main_writes_report_and_markdown(tmp_path: Path) -> None:
+    n = MIN_PAIRED_SEEDS
+    for arm, fraction in (("off", 0.0), ("1e-7", 1e-7)):
+        pairs = [
+            (_summary(8000 + seed, fraction=fraction), _profile())
+            for seed in range(n)
+        ]
+        _archive(tmp_path / arm, arm, pairs)
+    out_dir = REPO_ROOT / "telemetry_buffer" / "_flush_cli_test"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    out_path = out_dir / "report.json"
+    md_path = out_dir / "report.md"
+    try:
+        assert main([
+            "--arm", f"off={tmp_path / 'off'}",
+            "--arm", f"1e-7={tmp_path / '1e-7'}",
+            "--out", str(out_path),
+            "--markdown", str(md_path),
+            "--title", "test",
+        ]) == 0
+        report = json.loads(out_path.read_text())
+        assert report["n_cells"] == 1
+        assert report["baseline_arm"] == "off"
+        assert md_path.read_text().startswith("# test")
+    finally:
+        out_path.unlink(missing_ok=True)
+        md_path.unlink(missing_ok=True)
+        out_dir.rmdir()
+
+
+def test_main_refuses_an_empty_arm_root(tmp_path: Path) -> None:
+    out_dir = REPO_ROOT / "telemetry_buffer" / "_flush_cli_test"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        with pytest.raises(SystemExit):
+            main([
+                "--arm", f"missing={tmp_path}",
+                "--out", str(out_dir / "report.json"),
+            ])
+    finally:
+        (out_dir / "report.json").unlink(missing_ok=True)
+        out_dir.rmdir()
