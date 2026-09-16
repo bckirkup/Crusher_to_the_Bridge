@@ -93,9 +93,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (6, 0, 217, 6, 3) reading to (0, 0, 217, 0, 0). The detector moved to
     # Theta=1e10 because 1e6 belonged to the pooled-air model.
     # The exact linear-operator transport repair moves the live cell from
-    # (149, 62, 217, 166, 30) to (128, 51, 217, 149, 34); the old value
-    # returns with the pre-repair frozen-source transport scheme.
-    (3, 11): (128, 51, 217, 149, 34),
+    # (149, 62, 217, 166, 30) to (144, 64, 217, 157, 30) on CPython 3.11;
+    # the old value returns with the pre-repair frozen-source scheme.
+    (3, 11): (144, 64, 217, 157, 30),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
