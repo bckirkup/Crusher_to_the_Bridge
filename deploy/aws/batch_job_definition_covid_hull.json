@@ -3,7 +3,7 @@
   "type": "container",
   "platformCapabilities": ["EC2"],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-first-look-v2",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:covid-first-look-v4",
     "command": [
       "deploy/aws/covid_hull_entrypoint.py",
       "--phase", "Ref::phase",

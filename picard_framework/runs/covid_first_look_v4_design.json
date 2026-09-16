@@ -1,0 +1,31 @@
+{
+  "design_id": "covid_first_look_v4",
+  "description": "Rerun of covid_first_look_v3 after two incubation corrections (#547): an infection with no inoculum on record (the declared index case) is drawn at the reference dose instead of the literal-zero floor (SARS-CoV-2 median 5.8 d, not 14.5 d), and the composite-Theta arm re-references its incubation dose term to the N50 of the exponential dose-response it installs (ln 2 / Theta), so secondary cases are no longer all drawn at the 2.5x ceiling. v3 cells carried both defects: takeoff was decided by the index case's incubation draw and the generation interval conditional on takeoff was ~13 d. Same grid, same matched seeds, same objective; v3 and v4 cells are paired by (Theta, seed).",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "grid": {
+    "low": 10000.0,
+    "high": 1000000000.0,
+    "count": 11,
+    "note": "Half-decade points from 1e4 to 1e9; the single-seed fit's grid with the midpoints added."
+  },
+  "phases": {
+    "fit": {
+      "scenario_id": "diamond_princess_2020",
+      "split_role": "training",
+      "seed_base": 20200205,
+      "seeds": 20,
+      "note": "Matched seeds: every candidate sees the same 20 seeds, so candidate differences are paired."
+    },
+    "held_out": {
+      "scenario_id": "greg_mortimer_2020",
+      "split_role": "held_out",
+      "seed_base": 20200315,
+      "seeds": 50,
+      "note": "Scored at the fitted Theta and reported at its half-decade neighbours as sensitivity; the rest of the grid is stored, not scored."
+    }
+  },
+  "takeoff_recorded_onsets": 10,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 20200205,
+  "supersedes": "covid_first_look_v3"
+}
