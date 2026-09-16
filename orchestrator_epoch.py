@@ -377,6 +377,23 @@ def _airborne_emission_fraction(profile: dict[str, Any]) -> float:
     return UNSOURCED_AIRBORNE_EMISSION_FRACTION
 
 
+def _credit_event_aerosol(
+    masses: dict[str, float],
+    confinement_core: TransmissionCore,
+    drained: dict[str, float],
+) -> None:
+    """Credit drained event-aerosol mass to its ship zone.
+
+    Flush and emesis events emitted in a stateroom are keyed by cabin
+    compartment, which never appears in the zone-mass map; the parent ship
+    zone receives the mass instead.
+    """
+    for zone_name, mass in drained.items():
+        target = confinement_core.compartment_parent(zone_name)
+        if target in masses:
+            masses[target] += mass
+
+
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -437,15 +454,12 @@ def step_infection_progression(
                     )
                     masses[loc] += sv * dep_frac * emission_factor
         if confinement_core is not None:
-            for zone_name, mass in confinement_core.drain_emesis_aerosol(pid).items():
-                if zone_name in masses:
-                    masses[zone_name] += mass
             # Sanitary HVAC is exhaust-only, so a head venue normally has
-            # nothing downstream to transport to; the drain exists for
-            # parity and for cabin-corridor venues that share a branch.
-            for zone_name, mass in confinement_core.drain_flush_aerosol(pid).items():
-                if zone_name in masses:
-                    masses[zone_name] += mass
+            # nothing downstream to transport to; the drains exist for
+            # parity and for cabin-compartment venues, whose mass is credited
+            # to the parent corridor block sharing the cabin HVAC branch.
+            _credit_event_aerosol(masses, confinement_core, confinement_core.drain_emesis_aerosol(pid))
+            _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
         engine.set_pathogen_zone_mass(pid, masses)
 
 

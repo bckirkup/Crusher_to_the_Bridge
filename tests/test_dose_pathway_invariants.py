@@ -18,6 +18,7 @@ from engines.infection_dynamics_bridge import (
 )
 from engines.sim_clock import SimClock
 from engines.transmission_core import (
+    CABIN_COMPARTMENT_SEPARATOR,
     FOOD_INGESTION_FRACTION_PER_DAY,
     ContactTracingMatrix,
     TransmissionCore,
@@ -672,3 +673,65 @@ def test_environmental_delivery_is_the_same_day_on_every_clock_grid() -> None:
 
     assert delivered(1.0) == pytest.approx(delivered(24.0), abs=1e-9)
     assert delivered(6.0) == pytest.approx(delivered(24.0), abs=1e-9)
+
+
+def _cabin_drain_engine() -> tuple[KorkinShipEngine, TransmissionCore]:
+    """One zone, no shedders, a confinement core on a Cabin_Corridor zone."""
+    engine = _aging_engine(shedder=False)
+    core = TransmissionCore(
+        rng=np.random.default_rng(19),
+        zone_volumes={ZONE: 50.0},
+        zone_types={ZONE: "Cabin_Corridor"},
+        clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+    )
+    core.initialize_zones([ZONE])
+    return engine, core
+
+
+def _drain_with_pending(
+    flush_pending: dict[str, float],
+    emesis_pending: dict[str, float],
+) -> dict[str, float]:
+    """One epoch with pending event mass; returns the zone-mass map."""
+    engine, core = _cabin_drain_engine()
+    core.flush_aerosol_pending_by_pathogen[PATHOGEN] = dict(flush_pending)
+    core.emesis_aerosol_pending_by_pathogen[PATHOGEN] = dict(emesis_pending)
+    profile = {
+        **AGING_PROFILE,
+        "airborne_emission_mode": "emesis_conditioned",
+    }
+    step_infection_progression(
+        engine,
+        {PATHOGEN: profile},
+        epoch=0,
+        confinement_core=core,
+    )
+    assert core.flush_aerosol_pending_by_pathogen == {}
+    assert core.emesis_aerosol_pending_by_pathogen == {}
+    return engine.get_pathogen_zone_mass(PATHOGEN)
+
+
+def test_cabin_compartment_event_mass_is_credited_to_its_parent_zone() -> None:
+    """Cabin-keyed flush and emesis mass lands on the corridor block."""
+    compartment = f"{ZONE}{CABIN_COMPARTMENT_SEPARATOR}7"
+    masses = _drain_with_pending({compartment: 3.0}, {compartment: 2.0})
+
+    assert masses[ZONE] == pytest.approx(5.0)
+    assert set(masses) == {ZONE}
+
+
+def test_event_mass_in_an_undeclared_zone_is_still_dropped() -> None:
+    masses = _drain_with_pending({"Not_A_Zone": 3.0}, {"Not_A_Zone": 2.0})
+
+    assert masses[ZONE] == pytest.approx(0.0)
+    assert set(masses) == {ZONE}
+
+
+def test_credited_event_mass_scales_with_pending_mass() -> None:
+    """Double the pending compartment mass, double the credited pool."""
+    compartment = f"{ZONE}{CABIN_COMPARTMENT_SEPARATOR}7"
+    single = _drain_with_pending({compartment: 3.0}, {})[ZONE]
+    double = _drain_with_pending({compartment: 6.0}, {})[ZONE]
+
+    assert double == pytest.approx(2.0 * single)
+    assert single > 0.0
