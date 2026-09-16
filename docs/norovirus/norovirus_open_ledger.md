@@ -3336,7 +3336,7 @@ Roughly in dependency order.
     a null in all six cells** and **1e-7's Δ secondaries excludes zero in
     all six**, so the resolvability crossing lies strictly inside
     (1e-9, 1e-7) and stage 2 places its half-decade arms there at the full
-    200 seeds. The flat 8-arm grid declared in the design's first §8 is
+    200 seeds. **Stage 2 is measured — item 46.** The flat 8-arm grid declared in the design's first §8 is
     superseded by this staged design — the declaration is unchanged:
     [1e-9, 1e-3] spans both measurements end to end, and staging only
     decides where compute is spent inside it. Artifacts
@@ -3427,7 +3427,45 @@ Roughly in dependency order.
     were produced under the pre-partition engine and cannot be re-read as
     stage-2 baselines; `1e-7` re-runs as the measured upper bracket of the
     crossing under the corrected dilution. Arm selection unchanged; nothing
-    chosen on distance to any anchor.
+    chosen on distance to any anchor. **Stage 2 is measured — item 46.**
+
+46. **Flush sweep stage 2 is measured (6,000 runs, 0 failed, AERO-CABIN-02
+    engine): the resolvability crossing is hull/length-dependent — classic
+    resolves at `3e-9`, spirit 7 d and expedition 7 d at `1e-8`, spirit 12 d
+    and expedition 12 d at `3e-8` — every cell resolves by `3e-8`.** Stage 2
+    ran the five arms `off`, `3e-9`, `1e-8`, `3e-8`, `1e-7` at the full 200
+    paired seeds (8000–8199) on the same six hull/length cells, with `off`
+    and `1e-7` re-run under the berth-share partition rather than re-read
+    from the stage-1 archives (item 45) — image `flush-sweep-v1-s2-6cfe1fd`,
+    job definition `picard-campaign:44`. The crossing: classic is already
+    resolved at `3e-9`, so it lies in **(1e-9, 3e-9]** — the bottom of
+    Johnson's own measured droplet-nuclei range; spirit is (3e-9, 1e-8] at
+    7 d and (1e-8, 3e-8] at 12 d; expedition (3e-9, 1e-8] at 7 d and (1e-8,
+    3e-8] at 12 d. At `1e-7` secondaries per import rise **×52–97 on
+    classic, ×7.6–10.4 on spirit, ×4.4–4.9 on expedition** — the multiplier
+    is hull-ordered by the baseline, not by the dose. **The frozen span
+    [1e-9, 1e-3] is not narrowed; no arm was selected on any anchor; no
+    stage 3 is declared.** (a) **Pairing holds on the boarding cohort but
+    not on the whole trajectory**: imports identical in 1.000 of pairs in
+    all 24 contrasts, and on paired seeds where neither arm established a
+    secondary and the route emitted, 659 of 698 `3e-9`→`1e-8` pairs show
+    the exactly-linear mass ratio; the remaining no-secondary pairs diverge
+    (mass ratio 0.4–31×, and 23 of the 966 no-secondary pairs differ in
+    flush-event count) because once a flush exposure exists the
+    dose-response roll on its recipients consumes the shared rng stream —
+    downstream noise, not a leak in the flush code. Means are unbiased;
+    pair-level exactness is not available past the first exposure.
+    (b) **Open defect — the cabin-venue drift path never receives
+    flush/emesis mass**: the epoch-boundary drain in `orchestrator_epoch`
+    credits `drain_flush_aerosol()` only for keys present in the zone-mass
+    map (`if zone_name in masses`), and stateroom compartment keys are
+    absent from it, so cabin-venue event mass never reaches the HVAC
+    reservoir — only sanitary-venue mass does, and sanitary HVAC is
+    exhaust-only. The in-room dose measured here is unaffected; the fix is
+    a separate measured change. Artifacts
+    `telemetry_buffer/observation_model/flush_sweep_v1_s2.json`,
+    `docs/norovirus/flush_sweep_v1_stage2_readout.md` and
+    `docs/norovirus/flush_sweep_v1_stage2_findings.md`.
 
 ## 5. Held fixed by assumption
 

@@ -131,4 +131,5 @@ about the evidence and not about the ships.
 > stage-1 `off` and 1e-7 arms is superseded: stage 2 executes as **five
 > arms** — `off`, `1e-7`, `3e-9`, `1e-8`, `3e-8`, ~6,000 runs — carrying
 > its own baselines under the corrected dilution (see
-> `flush_aerosolisation_v1.md` §8).
+> `flush_aerosolisation_v1.md` §8). Stage 2 is measured — see
+> `flush_sweep_v1_stage2_findings.md` (ledger item 46).

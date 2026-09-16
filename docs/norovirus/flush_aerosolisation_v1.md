@@ -273,6 +273,10 @@ stage-1 measurement and its interpretation are ledger item 43 and
 `docs/norovirus/flush_sweep_v1_stage1_findings.md`; the archive
 comparability boundary is ledger item 45.
 
+**Stage 2 is measured** — `docs/norovirus/flush_sweep_v1_stage2_findings.md`
+(generated tables `flush_sweep_v1_stage2_readout.md`): the crossing is
+hull/length-dependent, every cell resolved by `3e-8`; ledger item 46.
+
 **What the sweep may conclude.** Which decades of `f_aero` produce a resolvable
 change in secondaries per import, in VSP-style posting frequency, and in
 attack rate conditional on posting; and hence whether the sourced span contains
