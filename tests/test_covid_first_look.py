@@ -29,7 +29,7 @@ from picard_framework.covid_first_look import (
     observables_from_payload,
     run_cell,
 )
-from picard_framework.covid_theta_fit import HullObservables
+from picard_framework.covid_theta_fit import HullObservables, build_fit_run_spec
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 TRUE_THETA = 1e6
@@ -115,6 +115,7 @@ def test_a_cell_payload_round_trips_its_observables(design, cells):
     payload = run_cell(design, cell, runner=_stub)
     assert payload["design_id"] == design.design_id
     assert payload["cabin_air_mode"] == design.cabin_air_mode
+    assert payload["pathogen_pool_transport"] == design.pathogen_pool_transport
     assert payload["cell"]["key"] == cell.key
     assert observables_from_payload(payload) == _stub(cell.scenario_id, cell.theta, cell.seed)
 
@@ -152,6 +153,49 @@ def test_v5c_design_uses_zone_pool_and_declares_210_cells():
     assert len(enumerate_cells(design)) == 60 + 150
 
 
+@pytest.mark.parametrize(
+    ("filename", "expected_transport"),
+    [
+        ("covid_first_look_v6_design.json", "airflow"),
+        ("covid_first_look_v6c_design.json", "none"),
+    ],
+)
+def test_v6_designs_use_repaired_pool_transport_and_declare_770_cells(
+    filename: str,
+    expected_transport: str,
+):
+    design = load_design(REPO_ROOT / "picard_framework" / "runs" / filename)
+    assert design.cabin_air_mode == "cabin_compartment"
+    assert design.pathogen_pool_transport == expected_transport
+    assert len(enumerate_cells(design)) == 11 * (20 + 50)
+
+
+@pytest.mark.parametrize(
+    ("filename", "expected_transport"),
+    [
+        ("covid_first_look_v6_design.json", "airflow"),
+        ("covid_first_look_v6c_design.json", "none"),
+    ],
+)
+def test_v6_cell_run_spec_carries_both_air_subsystem_modes(
+    filename: str,
+    expected_transport: str,
+):
+    design = load_design(REPO_ROOT / "picard_framework" / "runs" / filename)
+    cell = enumerate_cells(design)[0]
+    raw = build_fit_run_spec(
+        cell.scenario_id,
+        cell.theta,
+        cell.seed,
+        num_epochs=24,
+        cabin_air_mode=design.cabin_air_mode,
+        pathogen_pool_transport=design.pathogen_pool_transport,
+    )
+    overrides = raw["config_overrides"]
+    assert overrides["hvac"]["pathogen_pool_transport"] == expected_transport
+    assert overrides["transmission"]["cabin_air_mode"] == "cabin_compartment"
+
+
 def test_an_invalid_cabin_air_mode_in_a_design_is_refused(design):
     with pytest.raises(ValueError, match="cabin_air_mode"):
         replace(design, cabin_air_mode="invalid")
@@ -172,6 +216,8 @@ def test_run_cell_records_and_passes_the_design_cabin_air_mode(design, cells):
     payload = run_cell(compartment_design, cells[0], runner=runner)
     assert seen["mode"] == "cabin_compartment"
     assert payload["cabin_air_mode"] == "cabin_compartment"
+    assert seen["pool_transport"] == design.pathogen_pool_transport
+    assert payload["pathogen_pool_transport"] == design.pathogen_pool_transport
 
 
 def test_the_merge_recovers_the_stub_scale(design, payloads):

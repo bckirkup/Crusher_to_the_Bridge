@@ -1,0 +1,33 @@
+{
+  "design_id": "covid_first_look_v6c",
+  "description": "Paired control for covid_first_look_v6: identical grid, seeds and cabin compartments, with per-pathogen pool transport held at the labelled pre-change baseline (hvac.pathogen_pool_transport: none), so no airborne mass crosses a zone boundary for SARS-CoV-2. v6 differs from v5 in two things at once - the pools now ride the airflow network, and the transport step no longer creates mass - and this arm isolates the first: v6 minus v6c at the same (Theta, seed) is the contribution of between-zone ducted air to the Diamond Princess outbreak on the repaired transport numerics. Full grid rather than three points because the v6 selection is not known in advance; the arm attributes a difference and does not select a value.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "cabin_air_mode": "cabin_compartment",
+  "pathogen_pool_transport": "none",
+  "grid": {
+    "low": 10000000.0,
+    "high": 1000000000000.0,
+    "count": 11,
+    "note": "Half-decade points from 1e7 to 1e12, identical to v6 and v5."
+  },
+  "phases": {
+    "fit": {
+      "scenario_id": "diamond_princess_2020",
+      "split_role": "training",
+      "seed_base": 20200205,
+      "seeds": 20,
+      "note": "The 20 matched v4/v5/v6 seeds."
+    },
+    "held_out": {
+      "scenario_id": "greg_mortimer_2020",
+      "split_role": "held_out",
+      "seed_base": 20200315,
+      "seeds": 50,
+      "note": "Stored for the same pairing against v6 on the held-out hull (seconds a cell); not scored."
+    }
+  },
+  "takeoff_recorded_onsets": 10,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 20200205,
+  "supersedes": null
+}
