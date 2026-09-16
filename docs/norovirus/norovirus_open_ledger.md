@@ -3390,6 +3390,38 @@ Roughly in dependency order.
     was measured (92% of post-confinement droplet dose arriving through shared
     block air) — a COVID readout, not a norovirus one.
 
+45. **`AERO-CABIN-02`: the flush route's cabin dosing now reads the berth-share
+    partition; the emesis path still dilutes into the invented 100 m³
+    compartment fallback — an open item, deliberately deferred.** Item 44 gave
+    cabin compartments a declared volume (`_air_unit_volume`: the block's
+    `V_block × berths / Σ berths` share, no new volume introduced), but the
+    flush cabin branch kept looking the compartment key up in `zone_volumes`,
+    which never contains it, so every cabin flush dose ran at
+    `EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3` = 100 m³ — the "well-mixed pool
+    standing in for a concentrated event" archetype. Flush now reads the same
+    partition the air route does. **Measured dilution change vs the 100 m³
+    fallback** (dose rises by 100 / partition), computed on a real roster
+    (seed 8000, declared complement) rather than declared occupancy, since
+    `Σ berths` is what `register_cabin_berths` actually records: passenger
+    2-berth staterooms — classic_cruise_1900 `800 × 2/Σ`, roster Σ mean
+    37.2 (range 25–50 across 38 `PC_` blocks) ≈ 43.0 m³ → **×2.32**;
+    spirit_cruise_3000 `900 × 2/Σ`, Σ mean 43.8 (32–56 over 52 blocks) ≈
+    41.1 m³ → **×2.43**; expedition_cruise_450 `600 × 2/Σ`, Σ mean 26.3
+    (20–34 over 12 blocks) ≈ 45.6 m³ → **×2.19**. Crew blocks swing wider
+    because the roster fills them unevenly: expedition's `CC_` blocks run
+    Σ 15–58 → 2-berth **×1.67–6.44**; spirit's run Σ 44–345 → 3-berth
+    **×1.96–15.3**; classic's run Σ 39–242 → 3-berth **×1.86–11.5**
+    (2-berth departments **×2.79–17.3**, 4-berth galley **×1.39–8.64**).
+    **Every flush archive produced before this change — the
+    stage-1 sweep of item 43 included — ran at the 100 m³ fallback and is
+    not comparable to anything run after it**; stage 2's arms were declared
+    under the fallback and now run under the partition. **The emesis
+    aerosol path (`_pathway_emesis_aerosol`) still resolves the compartment
+    through `zone_volumes` and therefore still dilutes into the same
+    invented 100 m³** — the identical defect, left in place because emesis
+    is on by default: removing it moves every existing arm, so it is a
+    separate measured change, not a ride-along here.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

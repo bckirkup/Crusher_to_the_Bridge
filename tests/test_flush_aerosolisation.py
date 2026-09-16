@@ -429,13 +429,14 @@ def test_cabin_venue_doses_compartment_occupants_whole_epoch() -> None:
     row = _flush_dose_rows(matrix)[0]
     assert row["venue_kind"] == "cabin"
     # Emesis treatment: no f_vent, whole-epoch inhaled volume, the
-    # compartment-volume fallback (no cabin bathroom volume exists).
+    # compartment's air-unit volume. No berthing plan is registered here,
+    # so the unit falls back to the declared block volume (AERO-CABIN-02).
     expected = (
-        mass / 100.0 * core.inhaled_air_volume_m3_per_epoch
+        mass / 800.0 * core.inhaled_air_volume_m3_per_epoch
     )
     assert agent_doses[2] == pytest.approx(expected, rel=1e-6)
     # The shedder itself is not susceptible and takes no dose.
-    assert agent_doses.get(1, 0.0) == 0.0
+    assert agent_doses.get(1, 0.0) == pytest.approx(0.0)
 
 
 def test_cabin_flush_dose_scales_linearly_with_fraction() -> None:
@@ -455,6 +456,93 @@ def test_cabin_flush_dose_scales_linearly_with_fraction() -> None:
         doses.append(agent_doses[2])
     assert doses[1] == pytest.approx(doses[0] * 1e3, rel=1e-9)
     assert doses[2] == pytest.approx(doses[0] * 1e6, rel=1e-9)
+
+
+def test_cabin_dose_scales_with_berth_share_of_block() -> None:
+    """A 4-berth stateroom's air share is twice a 2-berth's in the same
+    block, so equal emitted mass doses its occupants at exactly half."""
+    core = _core(1e-6, seed=11)
+    shedder = _shedder(core, aid=9, location=CABIN_ZONE)
+    two = [_agent(1, CABIN_ZONE), _agent(2, CABIN_ZONE)]
+    four = [_agent(i, CABIN_ZONE) for i in (3, 4, 5, 6)]
+    for agent in two:
+        agent.cabin_mate_ids = frozenset({1, 2} - {agent.agent_id})
+    for agent in four:
+        agent.cabin_mate_ids = frozenset({3, 4, 5, 6} - {agent.agent_id})
+    core.register_cabin_berths(two + four)
+    mass = 1e6
+    core._flush_aerosol_emitted_by_pathogen[PATHOGEN] = {
+        f"{CABIN_ZONE}::cabin1": [(shedder, mass)],
+        f"{CABIN_ZONE}::cabin3": [(shedder, mass)],
+    }
+    matrix, agent_doses = _pathway(
+        core, {CABIN_ZONE: two + four + [shedder]},
+    )
+    # V_2berth = 800 x 2/6, V_4berth = 800 x 4/6 -> dose2 = 2 x dose4.
+    assert agent_doses[1] == pytest.approx(2.0 * agent_doses[3], rel=1e-9)
+    # And it is the berth share, not the retired 100 m3 fallback.
+    expected = (
+        mass / (800.0 * 2 / 6) * core.inhaled_air_volume_m3_per_epoch
+    )
+    assert agent_doses[1] == pytest.approx(expected, rel=1e-9)
+
+
+def test_cabin_dose_scales_inversely_with_block_volume() -> None:
+    doses = []
+    for volume in (800.0, 1600.0):
+        core = _core(1e-6, seed=11)
+        core.zone_volumes[CABIN_ZONE] = volume
+        shedder = _shedder(core, aid=1, location=CABIN_ZONE)
+        shedder.cabin_mate_ids = frozenset({2})
+        mate = _agent(2, CABIN_ZONE)
+        mate.cabin_mate_ids = frozenset({1})
+        core.register_cabin_berths([shedder, mate])
+        core._flush_aerosol_emitted_by_pathogen[PATHOGEN] = {
+            f"{CABIN_ZONE}::cabin1": [(shedder, 1e6)],
+        }
+        _, agent_doses = _pathway(core, {CABIN_ZONE: [shedder, mate]})
+        doses.append(agent_doses[2])
+    assert doses[0] == pytest.approx(2.0 * doses[1], rel=1e-9)
+
+
+def test_unregistered_berthing_plan_falls_back_to_block_volume() -> None:
+    """No registered berthing plan dilutes into the parent block, the
+    pre-AERO-CABIN-01 treatment — not the retired 100 m3 number."""
+    core = _core(1e-6, seed=11)
+    shedder = _shedder(core, aid=1, location=CABIN_ZONE)
+    shedder.cabin_mate_ids = frozenset({2})
+    mate = _agent(2, CABIN_ZONE)
+    mate.cabin_mate_ids = frozenset({1})
+    core._flush_aerosol_emitted_by_pathogen[PATHOGEN] = {
+        COMPARTMENT: [(shedder, 1e6)],
+    }
+    _, agent_doses = _pathway(core, {CABIN_ZONE: [shedder, mate]})
+    expected = 1e6 / 800.0 * core.inhaled_air_volume_m3_per_epoch
+    assert agent_doses[2] == pytest.approx(expected, rel=1e-9)
+
+
+def test_sanitary_dose_ignores_the_berthing_plan() -> None:
+    """The Sanitary branch does not read cabin berths: registering a plan
+    leaves a head's flush dose bit-identical."""
+    doses = []
+    for register in (False, True):
+        core = _core(1e-6, seed=7)
+        shedder = _shedder(core)
+        _force_stool_event(core, shedder, THEATER)
+        visitor = _agent(2, THEATER)
+        core._sanitary_epoch = 0
+        core._sanitary_visits = {2: [HEAD]}
+        if register:
+            mate = _agent(3, CABIN_ZONE)
+            mate.cabin_mate_ids = frozenset({2})
+            visitor.cabin_mate_ids = frozenset({3})
+            core.register_cabin_berths([visitor, mate])
+        _, agent_doses = _pathway(
+            core, {THEATER: [visitor], HEAD: []},
+        )
+        doses.append(agent_doses[2])
+    assert doses[0] > 0.0
+    assert doses[0] == pytest.approx(doses[1], rel=0.0)
 
 
 def test_delivered_dose_scales_with_fraction_end_to_end() -> None:
