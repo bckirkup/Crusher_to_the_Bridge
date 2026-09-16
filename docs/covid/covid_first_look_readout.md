@@ -899,6 +899,42 @@ license "Diamond Princess had N imports": with the leak in place the total-side
 constraint that picks ~2 imports is itself suspect. The ordering implied is
 leak first, roster second, imports last.
 
+## Observation-process correction (2026-09-17): sick call reads presentation; declared retest-after-negative
+
+Two of the three drains above are closed in the observation process, ahead of
+the cabin-air architecture change and before any v5 campaign.
+
+**Sick call reads presentation only.** The syndromic roster treated a host with
+`compliance_status = non_compliant` as symptomatic, a carry-over from the old
+combined status in which `non_compliant` implied illness. Under general
+confinement, ~30% of hosts refuse, so ~800 healthy refusers drew a passive
+specimen on days 16-17 and were retired from the campaign roster for the
+voyage. The roster now enters a host on symptomatic presentation alone;
+compliance remains what the confinement logic reads (`agent_requires_confinement`
+is unchanged).
+
+**Declared retest-after-negative.** The campaign roster was without replacement
+across days for every host; a host swabbed negative (or swabbed while below the
+day-of-infection sensitivity curve) was never reached again. Diamond Princess
+now declares `molecular_ascertainment.retest_negatives_on_indication: true`
+(Grade C: the published 3,063 specimens include repeat tests of quarantined
+negatives, and symptomatic/contact indications arose again during quarantine;
+the per-host repeat assignment is not published). Under the policy a host with
+a negative on record may be swabbed again on a *later* day when there is an
+indication — it presents to sick call, or the campaign's
+`symptomatic_or_contact` tier reaches it. Population sweep tiers do not return
+to a swabbed host, a confirmed host is never swabbed again, one host never
+yields two specimens on one day, and the daily capacities are the published
+counts unchanged. Greg Mortimer does not declare it (one day, one rung), so the
+default is the old behaviour.
+
+**Change detector** (Greg Mortimer, Θ=1e6, seed 20200333): (5, 0, 217, 6, 4) →
+(6, 0, 217, 6, 3) on both CPython 3.11 and 3.12. The move is the
+presentation-only sick call alone (restoring the coupling returns the old
+tuple); the retest policy is inert on this hull. The Diamond Princess effect
+(campaign positives, asymptomatic share, crew share) is measured on the v5
+campaign, not locally.
+
 ## Reproduction
 
 ```bash

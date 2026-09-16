@@ -41,6 +41,12 @@ RULE_REMAINING_PASSENGERS = "remaining_passengers"
 RULE_CREW = "crew"
 RULE_EVERYONE = "everyone"
 
+#: Tiers a host with an earlier negative specimen may re-enter: the record's
+#: step 1 is an indication (symptoms, or a confirmed cabin mate), and an
+#: indication arising after a negative is a new reason to swab. The
+#: population tiers are a sweep, and a sweep does not return to a host.
+INDICATION_RULES = frozenset({RULE_SYMPTOMATIC_OR_CONTACT})
+
 RULES = (
     RULE_SYMPTOMATIC_OR_CONTACT,
     RULE_PASSENGERS_IN_AGE_BANDS,
@@ -307,6 +313,7 @@ class TestingCampaign:
         *,
         confirmed_ids: Iterable[int] = (),
         already_sampled: Iterable[int] = (),
+        retest_on_indication: Iterable[int] = (),
         rng: np.random.Generator,
     ) -> list[int]:
         """Hosts this campaign takes a specimen from on *day_index*.
@@ -321,24 +328,27 @@ class TestingCampaign:
         groups were reached in which order and says nothing about who inside
         a group went first, so imposing an order there would be an invented
         number. Hosts already swabbed for this pathogen are skipped, so the
-        roster is without replacement across days.
+        roster is without replacement across days - except the hosts in
+        ``retest_on_indication`` (an earlier specimen came back negative),
+        which an indication tier may reach again and a sweep tier may not.
         """
         day = self.day_for(day_index)
         if day is None or day.capacity <= 0:
             return []
         confirmed = {int(aid) for aid in confirmed_ids}
         taken = {int(aid) for aid in already_sampled}
+        retestable = {int(aid) for aid in retest_on_indication}
         roster: list[int] = []
         remaining = day.capacity
         for tier_id in day.tiers:
             if remaining <= 0:
                 break
+            tier = self.tiers[tier_id]
+            reopened = retestable if tier.rule in INDICATION_RULES else frozenset()
             members = [
                 aid
-                for aid in self._tier_members(
-                    self.tiers[tier_id], agents, confirmed,
-                )
-                if aid not in taken
+                for aid in self._tier_members(tier, agents, confirmed)
+                if aid not in taken or aid in reopened
             ]
             if not members:
                 continue
