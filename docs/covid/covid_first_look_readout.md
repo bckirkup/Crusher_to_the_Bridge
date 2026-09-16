@@ -731,7 +731,7 @@ Campaign positives are 300 against 3,520 infected, and 74% crew (observed
 coincide with peak incidence, so positives are presymptomatic at swab (64%
 record an onset later) — and will move with the leak before any roster change.
 
-## covid_import_sweep_v1: adaptive-density imports × Theta, three stages (design, not yet run)
+## covid_import_sweep_v1: adaptive-density imports × Theta, three stages (stage 1 submitted 2026-09-16; stages 2-3 not yet run)
 
 The next campaign measures how declared import count trades against Theta on
 the corrected model, with **adaptive sampling density**: a coarse product grid
@@ -812,6 +812,21 @@ v4 (2026-09-16): fit `b5dd61d4-baa4-444f-ab44-c72642801040` (220 children),
 held-out `a01111a4-192a-4a53-a7a3-c8fceae7215a` (11 children); job definition
 `picard-covid-hull:4`, image `picard-campaign:covid-first-look-v4`, S3 prefix
 `campaign/covid_first_look_v4/`.
+
+Import sweep stage 1 (2026-09-16): array `54663e13-28e6-4957-ade7-fda67c5df76b`
+(700 children, stride 1); job definition `picard-covid-boarding-screen:3`,
+image `picard-campaign:covid-import-sweep-v1` built from `296fc82` (PR #551
+branch, needed for the `points` / conditional-on-takeoff merge); S3 prefix
+`campaign/covid_import_sweep_v1/`.
+
+```bash
+python3 tools/fit_covid_theta.py screen --cells <sweep v1 cells> \
+  --design picard_framework/runs/covid_import_sweep_v1_design.json --out <s1.json>
+python3 tools/fit_covid_theta.py refine --stage 2 \
+  --design picard_framework/runs/covid_import_sweep_v1_design.json \
+  --surface <s1.json> --design-id covid_import_sweep_v1r \
+  --out picard_framework/runs/covid_import_sweep_v1r_design.json
+```
 
 ```bash
 python3 tools/fit_covid_theta.py merge --cells <v4 cells> \
