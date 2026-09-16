@@ -3443,6 +3443,20 @@ Roughly in dependency order.
     available for paired measurement; the shipped defaults are now
     `hvac.pathogen_pool_transport: airflow` and
     `transmission.cabin_air_mode: cabin_compartment`.
+    The initial airflow repair also exposed a numerical defect in the former
+    transport step: it drained each donor exponentially but credited receivers
+    from the donor's epoch-start concentration. With 1000 units in `Bridge`,
+    the old ship-scale totals were 3364.5, 3178.0, 3101.9, 3071.4, and 3059.3
+    over five epochs (about 3.4× creation on the first step). The repair now
+    solves the declared linear transport operator exactly by matrix
+    exponential, with no fallback to the frozen-source scheme. Every
+    pre-repair transported figure, including the prior full-voyage traces,
+    is superseded: at Θ=3.16e7, seed 20200216, the old `zone_pool` trace
+    reported 2258 onsets, 1729 HVAC infections, and witness 68, while the old
+    `cabin_compartment` trace reported 3 onsets, 13 HVAC infections, and
+    witness 139. The corrected traces are 2001/796/65 and 2/0/188,
+    respectively. Refit remains required before any HVAC, ventilation, filter,
+    or pooled-cabin conclusion is used.
 
 ## 5. Held fixed by assumption
 

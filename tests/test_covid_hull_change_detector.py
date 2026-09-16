@@ -92,7 +92,10 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # At the old Theta=1e6, each default flip independently moved the prior
     # (6, 0, 217, 6, 3) reading to (0, 0, 217, 0, 0). The detector moved to
     # Theta=1e10 because 1e6 belonged to the pooled-air model.
-    (3, 11): (149, 62, 217, 166, 30),
+    # The exact linear-operator transport repair moves the live cell from
+    # (149, 62, 217, 166, 30) to (128, 51, 217, 149, 34); the old value
+    # returns with the pre-repair frozen-source transport scheme.
+    (3, 11): (128, 51, 217, 149, 34),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -104,7 +107,7 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
     # The new-default Theta=1e10 reading is live but unsaturated on both
     # interpreters.
-    (3, 12): (149, 62, 217, 166, 30),
+    (3, 12): (128, 51, 217, 149, 34),
 }
 
 
