@@ -83,7 +83,15 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # ceiling either, which on top gives the tuple below. Both
     # interpreters agree on this cell now: it is a near-extinct run with
     # few Bernoulli draws for the two float-sum paths to disagree on.
-    (3, 11): (5, 0, 217, 6, 4),
+    # That read (5, 0, 217, 6, 4). The sick-call roster then stopped
+    # reading a quarantine refuser as a symptomatic host (syndromic
+    # query_ground_truth: presentation only), so a healthy refuser no
+    # longer draws a passive specimen that retires it from the campaign;
+    # that alone moves the cell to the tuple below (measured with the
+    # coupling restored: the old tuple returns). The declared
+    # retest-after-negative policy shipped in the same change is inert
+    # here because greg_mortimer_2020 does not declare it.
+    (3, 11): (6, 0, 217, 6, 3),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -92,8 +100,10 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # 74, 39) with the boarding cohort; the same opt-out alone moved it to
     # (1, 1, 217, 3, 2). The two incubation changes above then moved it
     # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
-    # and to the tuple below (with the Theta-arm re-reference).
-    (3, 12): (5, 0, 217, 6, 4),
+    # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
+    # presentation-only sick call above moved it to the tuple below; the
+    # two interpreters still agree.
+    (3, 12): (6, 0, 217, 6, 3),
 }
 
 

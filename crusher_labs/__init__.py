@@ -280,6 +280,9 @@ def build_modalities(
             molecular_ascertainment_start_day=syn_cfg.get(
                 "molecular_ascertainment_start_day",
             ),
+            retest_negatives_on_indication=syn_cfg.get(
+                "retest_negatives_on_indication", False,
+            ),
         ),
         "clinical_rdt": ClinicalRDT(
             base_sensitivity=rdt_cfg.get("base_sensitivity", 0.95),

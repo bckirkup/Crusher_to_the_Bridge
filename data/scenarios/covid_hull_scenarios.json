@@ -67,7 +67,8 @@
       },
       "molecular_ascertainment": {
         "start_day": 14,
-        "calendar": "3 February 2020, the first day specimens were collected on board"
+        "calendar": "3 February 2020, the first day specimens were collected on board",
+        "retest_negatives_on_indication": true
       },
       "provenance": [
         {
@@ -123,6 +124,13 @@
           "source": "∅",
           "grade": "declared",
           "note": "The repository has no Diamond Princess deck plan. mega_cruise_5000 is the smallest platform whose nominal complement (5000 passengers, 2000 crew) holds 3711 people, so the hull geometry, cabin pairing and HVAC topology are that platform's and not Diamond Princess's. Declared as a scenario axis, not fitted."
+        },
+        {
+          "field": "molecular_ascertainment.retest_negatives_on_indication",
+          "value": "true - a host whose specimen was negative may be swabbed again on a later day when there is an indication: it presents to sick call, or the campaign's step-1 tier (symptomatic person or cabin mate of a confirmed case) reaches it. A confirmed host is never re-swabbed, and no host yields two specimens on one day. The population sweep tiers do not return to a host.",
+          "source": "Mizumoto 2020, Eurosurveillance 25(10):2000180, Table 1 (3,063 tests reported among 3,711 people on board, a count that includes repeat specimens); Yamahata & Shibata 2020, JMIR Public Health Surveill 6(2):e18821, Results (testing was extended step by step and symptomatic people and contacts of confirmed cases were tested as they arose, throughout the quarantine)",
+          "grade": "C",
+          "note": "Grade C because the published record gives test volumes, not a per-host testing history: that repeat specimens exist is measured, which hosts got them is not. What is declared here is the eligibility rule, not a repeat count - the campaign's day capacities are unchanged, so this cannot raise the specimen total. Without it a negative specimen retires a host from the record for the rest of the voyage, which is the roster drain measured in docs/covid/covid_first_look_readout.md (1,758 hosts swabbed negative and infected later, 1,279 swabbed while infected but below the day-of-infection sensitivity curve, never retested)."
         }
       ],
       "refusals": [

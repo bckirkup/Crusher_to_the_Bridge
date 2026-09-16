@@ -149,7 +149,8 @@
           "additionalProperties": false,
           "properties": {
             "start_day": {"type": "integer", "minimum": 0},
-            "calendar": {"type": "string"}
+            "calendar": {"type": "string"},
+            "retest_negatives_on_indication": {"type": "boolean"}
           }
         },
         "provenance": {
