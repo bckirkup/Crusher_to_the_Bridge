@@ -31,6 +31,7 @@ from typing import Any
 
 import numpy as np
 
+from engines.transmission_core import CABIN_AIR_MODES, DEFAULT_CABIN_AIR_MODE
 from picard_framework.covid_fit_targets import FitTargets, load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
 from picard_framework.covid_theta_fit import (
@@ -88,6 +89,14 @@ class FirstLookDesign:
     takeoff_recorded_onsets: int
     bootstrap_resamples: int
     bootstrap_seed: int
+    cabin_air_mode: str = DEFAULT_CABIN_AIR_MODE
+
+    def __post_init__(self) -> None:
+        if self.cabin_air_mode not in CABIN_AIR_MODES:
+            raise ValueError(
+                "cabin_air_mode must be one of "
+                f"{CABIN_AIR_MODES}, got {self.cabin_air_mode!r}",
+            )
 
     def phase(self, name: str) -> PhaseDesign:
         if name == FIT_PHASE:
@@ -105,6 +114,7 @@ class FirstLookDesign:
             "takeoff_recorded_onsets": self.takeoff_recorded_onsets,
             "bootstrap_resamples": self.bootstrap_resamples,
             "bootstrap_seed": self.bootstrap_seed,
+            "cabin_air_mode": self.cabin_air_mode,
         }
 
 
@@ -162,6 +172,7 @@ def load_design(
         takeoff_recorded_onsets=int(raw["takeoff_recorded_onsets"]),
         bootstrap_resamples=int(raw["bootstrap_resamples"]),
         bootstrap_seed=int(raw["bootstrap_seed"]),
+        cabin_air_mode=str(raw.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE)),
     )
     _assert_roles(design)
     return design
@@ -222,9 +233,13 @@ def run_cell(
     time from the training anchors, so a worker never needs the targets and
     a held-out cell never has a loss attached to it.
     """
-    obs = runner(cell.scenario_id, cell.theta, cell.seed)
+    obs = runner(
+        cell.scenario_id, cell.theta, cell.seed,
+        cabin_air_mode=design.cabin_air_mode,
+    )
     return {
         "design_id": design.design_id,
+        "cabin_air_mode": design.cabin_air_mode,
         "cell": cell.as_dict(),
         "observables": obs.as_dict(),
     }

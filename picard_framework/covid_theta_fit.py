@@ -41,6 +41,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
+from engines.transmission_core import CABIN_AIR_MODES
 from picard_framework.covid_fit_targets import FitTarget, FitTargets, load_fit_targets
 from picard_framework.covid_hull_scenarios import (
     REPO_ROOT,
@@ -369,6 +370,7 @@ def build_fit_run_spec(
     *,
     num_epochs: int | None = None,
     repo_root: str = REPO_ROOT,
+    cabin_air_mode: str | None = None,
 ) -> dict[str, Any]:
     """The run spec one candidate is evaluated on, assumptions included."""
     raw = build_run_spec_dict(
@@ -383,6 +385,13 @@ def build_fit_run_spec(
     overrides["wearable_monitoring"] = {"enabled": False}
     overrides["diagnostic_cascade"] = {"enabled": False}
     overrides.setdefault("ship_graph", {})["immune_fraction"] = 0.0
+    if cabin_air_mode is not None:
+        if cabin_air_mode not in CABIN_AIR_MODES:
+            raise ValueError(
+                "cabin_air_mode must be one of "
+                f"{CABIN_AIR_MODES}, got {cabin_air_mode!r}",
+            )
+        overrides.setdefault("transmission", {})["cabin_air_mode"] = cabin_air_mode
     profile = load_covid_profile(repo_root)
     raw.setdefault("pathogen_overrides", {}).setdefault(
         PATHOGEN_ID, {},
@@ -412,11 +421,13 @@ def simulate_hull(
     repo_root: str = REPO_ROOT,
     split_day: int = 17,
     turn_day: int = 16,
+    cabin_air_mode: str | None = None,
 ) -> HullObservables:
     """Run one hull at one candidate Theta and read its observation logs."""
     raw = build_fit_run_spec(
         scenario_id, theta, seed,
         num_epochs=num_epochs, repo_root=repo_root,
+        cabin_air_mode=cabin_air_mode,
     )
     sim = run_fit_spec(raw, repo_root=repo_root)
     return observables_from_modality(
@@ -429,7 +440,7 @@ def simulate_hull(
     )
 
 
-HullRunner = Callable[[str, float, int], HullObservables]
+HullRunner = Callable[..., HullObservables]
 
 
 # ── the objective ─────────────────────────────────────────────────────────

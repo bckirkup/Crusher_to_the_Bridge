@@ -43,7 +43,13 @@ def _load_entrypoint():
     return module
 
 
-def _stub(scenario_id: str, theta: float, seed: int) -> HullObservables:
+def _stub(
+    scenario_id: str,
+    theta: float,
+    seed: int,
+    *,
+    cabin_air_mode: str | None = None,
+) -> HullObservables:
     """Onsets peak at TRUE_THETA; every third seed is an extinction."""
     distance = abs(math.log10(theta) - math.log10(TRUE_THETA))
     onsets = 0 if seed % 3 == 0 else int(round(300 * math.exp(-distance)))
@@ -107,8 +113,60 @@ def test_a_cell_payload_round_trips_its_observables(design, cells):
     cell = cells[0]
     payload = run_cell(design, cell, runner=_stub)
     assert payload["design_id"] == design.design_id
+    assert payload["cabin_air_mode"] == design.cabin_air_mode
     assert payload["cell"]["key"] == cell.key
     assert observables_from_payload(payload) == _stub(cell.scenario_id, cell.theta, cell.seed)
+
+
+@pytest.mark.parametrize("version", [1, 2, 3, 4])
+def test_legacy_designs_default_to_zone_pool_and_keep_their_cells(version):
+    design = load_design(
+        REPO_ROOT / "picard_framework" / "runs"
+        / f"covid_first_look_v{version}_design.json",
+    )
+    assert design.cabin_air_mode == "zone_pool"
+    assert len(enumerate_cells(design)) == 11 * (20 + 50)
+    assert enumerate_cells(design)[0].key.startswith("fit_")
+
+
+def test_v5_design_uses_cabin_compartments_and_declares_770_cells():
+    design = load_design(
+        REPO_ROOT / "picard_framework" / "runs" / "covid_first_look_v5_design.json",
+    )
+    assert design.cabin_air_mode == "cabin_compartment"
+    assert design.grid == pytest.approx(
+        [1e7, 3.162277660168379e7, 1e8, 3.162277660168379e8,
+         1e9, 3.162277660168379e9, 1e10, 3.162277660168379e10,
+         1e11, 3.162277660168379e11, 1e12],
+    )
+    assert len(enumerate_cells(design)) == 220 + 550
+
+
+def test_v5c_design_uses_zone_pool_and_declares_210_cells():
+    design = load_design(
+        REPO_ROOT / "picard_framework" / "runs" / "covid_first_look_v5c_design.json",
+    )
+    assert design.cabin_air_mode == "zone_pool"
+    assert design.grid == pytest.approx([1e7, 3.162277660168379e7, 1e8])
+    assert len(enumerate_cells(design)) == 60 + 150
+
+
+def test_an_invalid_cabin_air_mode_in_a_design_is_refused(design):
+    with pytest.raises(ValueError, match="cabin_air_mode"):
+        replace(design, cabin_air_mode="invalid")
+
+
+def test_run_cell_records_and_passes_the_design_cabin_air_mode(design, cells):
+    seen: dict[str, object] = {}
+
+    def runner(scenario_id, theta, seed, *, cabin_air_mode):
+        seen["mode"] = cabin_air_mode
+        return _stub(scenario_id, theta, seed)
+
+    compartment_design = replace(design, cabin_air_mode="cabin_compartment")
+    payload = run_cell(compartment_design, cells[0], runner=runner)
+    assert seen["mode"] == "cabin_compartment"
+    assert payload["cabin_air_mode"] == "cabin_compartment"
 
 
 def test_the_merge_recovers_the_stub_scale(design, payloads):

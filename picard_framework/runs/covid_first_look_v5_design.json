@@ -1,0 +1,32 @@
+{
+  "design_id": "covid_first_look_v5",
+  "description": "Refit of Theta on the corrected ship and observation model: the airborne far field runs per cabin compartment (AERO-CABIN-01, transmission.cabin_air_mode: cabin_compartment) and sick call reads presentation only with a declared retest-after-negative policy (#555). Theta_fit = 3.16e7 belongs to the pooled cabin block and cannot be carried over: on a paired local cell the same seed at that Theta went from 3,568 ever infected under zone_pool to 2 under cabin_compartment, because a confined shedder no longer doses ~35 people through one 900-1,200 m3 pool. The grid therefore starts at the v4 selection's decade and extends five decades above it. v4 cells pair with v5 by (Theta, seed) at the overlapping Theta points, but the two differ in two changes at once (air and observation), which is what covid_first_look_v5c isolates.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "cabin_air_mode": "cabin_compartment",
+  "grid": {
+    "low": 10000000.0,
+    "high": 1000000000000.0,
+    "count": 11,
+    "note": "Half-decade points from 1e7 to 1e12. The lower end brackets the v4 interior selection (3.16e7, the second point) so the pooled fit stays visible on the surface; the upper end is where the compartment arm is expected to sit and is a boundary that must be reported if the selection lands on it."
+  },
+  "phases": {
+    "fit": {
+      "scenario_id": "diamond_princess_2020",
+      "split_role": "training",
+      "seed_base": 20200205,
+      "seeds": 20,
+      "note": "The 20 matched v4 seeds, unchanged, so every v4-v5 contrast is paired by (Theta, seed) where the grids overlap."
+    },
+    "held_out": {
+      "scenario_id": "greg_mortimer_2020",
+      "split_role": "held_out",
+      "seed_base": 20200315,
+      "seeds": 50,
+      "note": "Scored at the fitted Theta and reported at its half-decade neighbours as sensitivity; the rest of the grid is stored, not scored. greg_mortimer_2020 does not declare retest-after-negative, so its observation process is the pre-#555 one and the compartment mode is the only change on this hull."
+    }
+  },
+  "takeoff_recorded_onsets": 10,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 20200205,
+  "supersedes": "covid_first_look_v4"
+}
