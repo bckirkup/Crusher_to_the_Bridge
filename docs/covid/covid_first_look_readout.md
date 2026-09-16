@@ -899,6 +899,42 @@ license "Diamond Princess had N imports": with the leak in place the total-side
 constraint that picks ~2 imports is itself suspect. The ordering implied is
 leak first, roster second, imports last.
 
+## Observation-process correction (2026-09-17): sick call reads presentation; declared retest-after-negative
+
+Two of the three drains above are closed in the observation process, ahead of
+the cabin-air architecture change and before any v5 campaign.
+
+**Sick call reads presentation only.** The syndromic roster treated a host with
+`compliance_status = non_compliant` as symptomatic, a carry-over from the old
+combined status in which `non_compliant` implied illness. Under general
+confinement, ~30% of hosts refuse, so ~800 healthy refusers drew a passive
+specimen on days 16-17 and were retired from the campaign roster for the
+voyage. The roster now enters a host on symptomatic presentation alone;
+compliance remains what the confinement logic reads (`agent_requires_confinement`
+is unchanged).
+
+**Declared retest-after-negative.** The campaign roster was without replacement
+across days for every host; a host swabbed negative (or swabbed while below the
+day-of-infection sensitivity curve) was never reached again. Diamond Princess
+now declares `molecular_ascertainment.retest_negatives_on_indication: true`
+(Grade C: the published 3,063 specimens include repeat tests of quarantined
+negatives, and symptomatic/contact indications arose again during quarantine;
+the per-host repeat assignment is not published). Under the policy a host with
+a negative on record may be swabbed again on a *later* day when there is an
+indication — it presents to sick call, or the campaign's
+`symptomatic_or_contact` tier reaches it. Population sweep tiers do not return
+to a swabbed host, a confirmed host is never swabbed again, one host never
+yields two specimens on one day, and the daily capacities are the published
+counts unchanged. Greg Mortimer does not declare it (one day, one rung), so the
+default is the old behaviour.
+
+**Change detector** (Greg Mortimer, Θ=1e6, seed 20200333): (5, 0, 217, 6, 4) →
+(6, 0, 217, 6, 3) on both CPython 3.11 and 3.12. The move is the
+presentation-only sick call alone (restoring the coupling returns the old
+tuple); the retest policy is inert on this hull. The Diamond Princess effect
+(campaign positives, asymptomatic share, crew share) is measured on the v5
+campaign, not locally.
+
 ## AERO-CABIN-01: the leak closed, measured on one paired cell (local, 2026-09-16)
 
 The repair is a declared mode, `transmission.cabin_air_mode`: `zone_pool`
@@ -914,7 +950,11 @@ reservoir are unchanged.
 **Paired full-voyage cell** (Diamond Princess, Theta_fit = 3.16e7, seed
 20200216, 768 epochs, CPython 3.12, one declared index case, heads visited;
 `/home/ubuntu/phase0/leak_mode.py`, artifacts `leak_pool.json` and
-`leak_comp.json`). The two runs differ only in the mode:
+`leak_comp.json`). The two runs differ only in the mode. Both were traced on
+the tree *before* the observation-process correction above, so the two specimen
+rows are pre-correction counts; the transmission rows do not depend on the
+observation channel and the change-detector readings below are on the merged
+tree:
 
 | | `zone_pool` | `cabin_compartment` |
 |---|---|---|
@@ -930,10 +970,13 @@ So the block pool was not *a* leak, it was the epidemic: with the index case
 dosing only its own stateroom, the outbreak does not reach a second
 generation at the Theta fitted against the pooled block, and the 838 Dining and
 392 Free events in the pooled run are downstream of cabin-block seeding rather
-than an independent path. The change-detector cell moves the same way (Greg
-Mortimer, Theta 1e6, seed 20200333, CPython 3.12): `(5, 0, 217, 6, 4)` under
-`zone_pool` to `(0, 0, 217, 0, 0)` under `cabin_compartment`, which is why that
-reading is recorded here and not pinned — an all-zero cell detects nothing.
+than an independent path. The change-detector cell moves the same way on the
+merged tree (Greg Mortimer, Theta 1e6, seed 20200333, CPython 3.12):
+`(6, 0, 217, 6, 3)` under `zone_pool` — the pinned golden, unchanged, because
+the mode ships off — to `(0, 0, 217, 0, 0)` under `cabin_compartment`, which is
+why that reading is recorded here and not pinned: an all-zero cell detects
+nothing. That hull partitions 16 blocks into 114 staterooms over 223 berths, at
+a median 60 m³ per berth (15-100).
 
 **What this does and does not say.** It is one seed on one hull, and it is a
 *mechanism* measurement, not a fit: it says the confined-passenger dose the

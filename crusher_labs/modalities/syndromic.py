@@ -124,8 +124,17 @@ class SyndromicSurveillance:
         rng: np.random.Generator | None = None,
         testing_campaigns: Iterable[TestingCampaign] | None = None,
         molecular_ascertainment_start_day: int | None = None,
+        retest_negatives_on_indication: bool = False,
     ) -> None:
         self.sick_call_probability = sick_call_probability
+        # Whether a host whose specimen came back negative may be swabbed
+        # again on a later day when there is an indication to: it presents
+        # to sick call, or a campaign indication tier reaches it. A record
+        # that counts repeat tests declares this; off, one specimen per host
+        # per pathogen is the ceiling for the voyage.
+        self.retest_negatives_on_indication = bool(
+            retest_negatives_on_indication,
+        )
         # First simulated day any specimen can be taken. ``None`` leaves the
         # swab channel open from embarkation; a hull whose record says the
         # test arrived on a dated day declares it, and no specimen precedes it.
@@ -316,10 +325,8 @@ class SyndromicSurveillance:
         crew_screening_ids: list[int] = []
 
         from telemetry_buffer.agent_axes import (
-            COMPLIANCE_NON_COMPLIANT,
             agent_has_symptomatic_presentation,
             agent_is_isolated,
-            resolve_agent_axes,
         )
 
         overrides = behavioral_overrides or {}
@@ -330,18 +337,15 @@ class SyndromicSurveillance:
         for agent in agents:
             aid = agent["agent_id"]
             is_isolated = agent_is_isolated(agent)
-            _, _, compliance = resolve_agent_axes(agent)
             presenting = agent_has_symptomatic_presentation(agent)
             if presenting and aid not in self._presentation_onset_epoch:
                 self._presentation_onset_epoch[aid] = _observed_onset_epoch(
                     agent, epoch,
                 )
-            is_symptomatic = presenting or compliance == COMPLIANCE_NON_COMPLIANT
-
             if is_isolated:
                 continue
 
-            if is_symptomatic:
+            if presenting:
                 severity_hazards[aid] = self._severity_hazard(
                     agent, outbreak_recognized=outbreak_recognized,
                 )
@@ -498,7 +502,10 @@ class SyndromicSurveillance:
         scheduled = forced or set()
         for agent in agents:
             aid = int(agent["agent_id"])
-            if (pathogen_id, aid) in self._lab_sampled:
+            if self._specimen_barred(
+                pathogen_id, aid, epoch,
+                indicated=aid in presenting or aid in scheduled,
+            ):
                 continue
             infection = (agent.get("pathogen_infections") or {}).get(
                 pathogen_id, {},
@@ -515,6 +522,44 @@ class SyndromicSurveillance:
                 self._lab_confirmed[(pathogen_id, aid)] = int(epoch)
                 positive.append(aid)
         return drawn, positive
+
+    def _specimen_barred(
+        self,
+        pathogen_id: str,
+        aid: int,
+        epoch: int,
+        *,
+        indicated: bool,
+    ) -> bool:
+        """Whether an earlier specimen rules this host out today.
+
+        A confirmed host is never swabbed again. A host with a negative on
+        record is barred unless the run declares indicated retesting, the
+        host is indicated today, and the earlier specimen was taken on an
+        earlier simulated day - a case swabbed on day two is still one case
+        on day three, so the same day never yields two.
+        """
+        key = (pathogen_id, aid)
+        if key in self._lab_confirmed:
+            return True
+        sampled_epoch = self._lab_sampled.get(key)
+        if sampled_epoch is None:
+            return False
+        if not (self.retest_negatives_on_indication and indicated):
+            return True
+        return self.clock.day_index(int(epoch)) <= self.clock.day_index(
+            int(sampled_epoch),
+        )
+
+    def _retestable_negatives(self, pathogen_id: str, epoch: int) -> set[int]:
+        """Hosts a campaign indication tier may reach again this day."""
+        if not self.retest_negatives_on_indication:
+            return set()
+        return {
+            aid for (pid, aid) in self._lab_sampled
+            if pid == pathogen_id
+            and not self._specimen_barred(pid, aid, epoch, indicated=True)
+        }
 
     def _specimen_probability(
         self,
@@ -689,6 +734,7 @@ class SyndromicSurveillance:
             agents, day_index,
             confirmed_ids=confirmed,
             already_sampled=sampled,
+            retest_on_indication=self._retestable_negatives(pathogen_id, epoch),
             rng=self._campaign_rng,
         )
 

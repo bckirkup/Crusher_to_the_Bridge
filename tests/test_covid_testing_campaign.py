@@ -654,6 +654,174 @@ class TestSymptomOnsetChannel:
         assert result["onset_observation_count"] == 0
 
 
+# ── who is eligible to be swabbed again ───────────────────────────────────
+
+
+class TestSickCallReadsPresentationOnly:
+    """Refusing quarantine is not a symptom.
+
+    A host who will not stay in its cabin is a behavioural state the
+    confinement logic reads; it gives the ship's doctor nothing to see, so it
+    must not enter the sick-call roster or draw a specimen through it.
+    """
+
+    @staticmethod
+    def _roster(compliance: str, *, symptomatic: bool) -> dict[str, Any]:
+        profile = _profile()
+        observation = profile[PATHOGEN]["observation_model"]
+        observation["reporting_probability_by_severity_pre_recognition"] = [
+            0.0, 0.0, 1.0, 1.0, 1.0,
+        ]
+        surveillance = SyndromicSurveillance(
+            sick_call_probability=1.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles=profile,
+            clock=SimClock(epoch_duration_hours=6.0, mode="hours"),
+            rng=np.random.default_rng(7),
+        )
+        agents = []
+        for aid in range(40):
+            agent = _agent(aid, infected=symptomatic, symptomatic=symptomatic)
+            agent["compliance_status"] = compliance
+            agents.append(agent)
+        return surveillance.query_ground_truth({"agents": agents, "epoch": 0})
+
+    def test_a_healthy_refuser_reports_no_sick_call(self) -> None:
+        result = self._roster("non_compliant", symptomatic=False)
+
+        assert result["sick_call_agents"] == []
+        assert result["true_positive_ids"] == []
+
+    def test_a_presenting_host_still_reports(self) -> None:
+        result = self._roster("compliant", symptomatic=True)
+
+        assert len(result["sick_call_agents"]) >= 10
+        assert set(result["true_positive_ids"]) == set(
+            result["sick_call_agents"],
+        )
+
+    def test_refusal_does_not_change_a_presenting_host(self) -> None:
+        compliant = self._roster("compliant", symptomatic=True)
+        refuser = self._roster("non_compliant", symptomatic=True)
+
+        assert len(refuser["sick_call_agents"]) == len(
+            compliant["sick_call_agents"],
+        )
+
+    def test_refusal_still_requires_confinement(self) -> None:
+        """The state survives; only the syndromic reading of it is gone."""
+        from telemetry_buffer.agent_axes import agent_requires_confinement
+
+        agent = _agent(1)
+        agent["compliance_status"] = "non_compliant"
+
+        assert agent_requires_confinement(agent)
+
+
+class TestRetestAfterANegative:
+    @staticmethod
+    def _reached(campaign: TestingCampaign, *, retest: bool) -> list[int]:
+        """Distinct hosts the campaign reaches per day over four days."""
+        surveillance = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles=_profile([0.0]),
+            clock=SimClock(epoch_duration_hours=6.0, mode="hours"),
+            rng=np.random.default_rng(11),
+            testing_campaigns=[campaign],
+            retest_negatives_on_indication=retest,
+        )
+        ship = _ship(20, 0, infected=20, symptomatic=20)
+        return [
+            len(surveillance.query_ground_truth(
+                {"agents": ship, "epoch": 4 * day},
+            )["campaign_specimens_by_pathogen"].get(PATHOGEN, []))
+            for day in range(4)
+        ]
+
+    def test_without_the_policy_the_indication_tier_runs_dry(self) -> None:
+        """20 hosts, four days of 10: the second day exhausts them."""
+        counts = self._reached(
+            _campaign([10, 10, 10, 10], tiers=("symptomatic",)), retest=False,
+        )
+
+        assert counts == [10, 10, 0, 0]
+
+    def test_with_the_policy_an_indication_reaches_a_host_again(self) -> None:
+        counts = self._reached(
+            _campaign([10, 10, 10, 10], tiers=("symptomatic",)), retest=True,
+        )
+
+        assert counts == [10, 10, 10, 10]
+
+    def test_the_policy_never_raises_a_day_above_its_capacity(self) -> None:
+        capacities = [3, 7, 11]
+        counts = self._reached(
+            _campaign([*capacities, 5], tiers=("symptomatic",)), retest=True,
+        )
+
+        assert counts[: len(capacities)] == capacities
+
+    def test_a_sweep_tier_does_not_return_to_a_swabbed_host(self) -> None:
+        """Only an indication reopens a host; the population sweep does not."""
+        counts = self._reached(
+            _campaign([10, 10, 10, 10], tiers=("rest",)), retest=True,
+        )
+
+        assert counts == [10, 10, 0, 0]
+
+    def test_a_confirmed_host_is_never_swabbed_again(self) -> None:
+        surveillance = SyndromicSurveillance(
+            sick_call_probability=0.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles=_profile([1.0]),
+            clock=SimClock(epoch_duration_hours=6.0, mode="hours"),
+            rng=np.random.default_rng(3),
+            testing_campaigns=[_campaign([10, 10], tiers=("symptomatic",))],
+            retest_negatives_on_indication=True,
+        )
+        ship = _ship(10, 0, infected=10, symptomatic=10)
+        first = surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        second = surveillance.query_ground_truth({"agents": ship, "epoch": 4})
+
+        assert len(first["campaign_confirmed_by_pathogen"][PATHOGEN]) == 10
+        assert second["campaign_specimens_by_pathogen"].get(PATHOGEN, []) == []
+
+    def test_one_host_never_yields_two_specimens_on_one_day(self) -> None:
+        """A sick call and a campaign rung on the same day are one specimen."""
+        surveillance = SyndromicSurveillance(
+            sick_call_probability=1.0,
+            background_noise_rate=0.0,
+            symptom_severity_profiles=_profile([0.0]),
+            clock=SimClock(epoch_duration_hours=6.0, mode="hours"),
+            rng=np.random.default_rng(5),
+            testing_campaigns=[_campaign([10], tiers=("symptomatic",))],
+            retest_negatives_on_indication=True,
+        )
+        ship = _ship(10, 0, infected=10, symptomatic=10)
+        sampled = [
+            surveillance.query_ground_truth(
+                {"agents": ship, "epoch": epoch},
+            )["lab_sampled_by_pathogen"].get(PATHOGEN, [])
+            for epoch in range(4)
+        ]
+        taken = [aid for epoch_ids in sampled for aid in epoch_ids]
+
+        assert len(taken) == len(set(taken))
+
+    def test_the_policy_is_off_unless_the_scenario_declares_it(self) -> None:
+        from crusher_labs import build_modalities
+
+        default = build_modalities({}, rng=np.random.default_rng(1))
+        declared = build_modalities(
+            {"syndromic": {"retest_negatives_on_indication": True}},
+            rng=np.random.default_rng(1),
+        )
+
+        assert not default["syndromic"].retest_negatives_on_indication
+        assert declared["syndromic"].retest_negatives_on_indication
+
+
 # ── the shipped records ───────────────────────────────────────────────────
 
 

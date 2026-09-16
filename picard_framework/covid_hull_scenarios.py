@@ -68,6 +68,7 @@ class HullScenario:
     campaign_id: str
     campaign_start_day: int
     molecular_start_day: int | None = None
+    retest_negatives_on_indication: bool = False
     scheduled_protocols: tuple[Mapping[str, Any], ...] = ()
     explicit_seeds: tuple[Mapping[str, Any], ...] = ()
     agent_profile_bundle: str | None = None
@@ -200,6 +201,10 @@ class HullScenario:
         it gates the passive sick-call swab channel as well as the campaign.
         A scenario that declares none leaves the modality's default, a swab
         channel open from embarkation.
+
+        A hull whose record shows hosts swabbed more than once declares
+        indicated retesting; without it a negative specimen retires a host
+        from the record for the rest of the voyage.
         """
         block: dict[str, Any] = {
             "testing_campaigns": {
@@ -216,6 +221,8 @@ class HullScenario:
             block["molecular_ascertainment_start_day"] = int(
                 self.molecular_start_day,
             )
+        if self.retest_negatives_on_indication:
+            block["retest_negatives_on_indication"] = True
         return block
 
     def pathogen_overrides(self) -> dict[str, Any]:
@@ -360,6 +367,9 @@ def _scenario_from_dict(raw: Mapping[str, Any]) -> HullScenario:
         campaign_start_day=int(campaign.get("start_day", 0)),
         molecular_start_day=(
             int(molecular["start_day"]) if "start_day" in molecular else None
+        ),
+        retest_negatives_on_indication=bool(
+            molecular.get("retest_negatives_on_indication", False),
         ),
         scheduled_protocols=tuple(
             dict(entry) for entry in raw.get("scheduled_protocols") or ()
