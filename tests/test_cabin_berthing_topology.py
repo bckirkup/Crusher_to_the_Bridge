@@ -69,6 +69,7 @@ def _core(seed: int = 7) -> TransmissionCore:
         rng=np.random.default_rng(seed),
         zone_volumes={CORRIDOR: 1200.0},
         zone_types={CORRIDOR: "Cabin_Corridor"},
+        cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
     )
     core.initialize_zones([CORRIDOR])
     return core

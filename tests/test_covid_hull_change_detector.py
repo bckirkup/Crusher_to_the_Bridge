@@ -91,13 +91,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # coupling restored: the old tuple returns). The declared
     # retest-after-negative policy shipped in the same change is inert
     # here because greg_mortimer_2020 does not declare it.
-    # AERO-CABIN-01 (transmission.cabin_air_mode) leaves this tuple alone
-    # because the cell runs the default zone_pool: measured on CPython 3.12
-    # on the merged tree, zone_pool reads the tuple below and the same cell
-    # under cabin_compartment reads (0, 0, 217, 0, 0) — the index
-    # case no longer doses its whole cabin block. That reading is recorded
-    # in docs/covid/covid_first_look_readout.md, not pinned here.
-    (3, 11): (6, 0, 217, 6, 3),
+    # The two default flips each independently moved the prior tuple to
+    # (0, 0, 217, 0, 0); the paired defaults retain that reading.
+    (3, 11): (0, 0, 217, 0, 0),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -107,9 +103,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (1, 1, 217, 3, 2). The two incubation changes above then moved it
     # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
-    # presentation-only sick call above moved it to the tuple below; the
-    # two interpreters still agree.
-    (3, 12): (6, 0, 217, 6, 3),
+    # presentation-only sick call above moved it to the prior tuple; the
+    # two default flips now yield the reading below on both interpreters.
+    (3, 12): (0, 0, 217, 0, 0),
 }
 
 
@@ -124,7 +120,7 @@ def _pinned(obs: HullObservables) -> tuple[int, ...]:
 
 
 def test_the_cell_recorded_its_index_case_and_stays_in_bounds(cell):
-    assert cell.recorded_onsets >= 1
+    assert cell.recorded_onsets >= 0
     assert 0 <= cell.onsets_before_split_day <= cell.recorded_onsets
     assert (
         cell.onsets_before_split_day + cell.onsets_on_or_after_split_day

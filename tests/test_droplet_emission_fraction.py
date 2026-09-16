@@ -62,7 +62,7 @@ def _core(
         rng=np.random.default_rng(42),
         zone_volumes={ZONE: VOLUME},
         zone_types={ZONE: "Cabin_Corridor"},
-        cfg={"transmission": tx},
+        cfg={"transmission": {**tx, "cabin_air_mode": "zone_pool"}},
         pathogen_profiles={"_default": profile} if profile is not None else None,
     )
     core.initialize_zones([ZONE])

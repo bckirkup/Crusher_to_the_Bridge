@@ -62,6 +62,7 @@ def _run(
     quarantined_ids: set[int] | None = None,
     zone_volumes: dict[str, float] | None = None,
 ) -> tuple[TransmissionCore, list[dict]]:
+    cfg = cfg or {"transmission": {"cabin_air_mode": "zone_pool"}}
     core = TransmissionCore(
         rng=np.random.default_rng(42),
         zone_volumes=zone_volumes or {ZONE: BLOCK_VOLUME},
@@ -230,8 +231,11 @@ class TestBlockAirAndOtherZones:
 
 
 class TestModeDeclaration:
-    def test_default_is_the_pre_change_pool(self) -> None:
-        core = TransmissionCore(rng=np.random.default_rng(0))
+    def test_explicit_pre_change_pool_is_supported(self) -> None:
+        core = TransmissionCore(
+            rng=np.random.default_rng(0),
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        )
         assert core.cabin_air_mode == "zone_pool"
 
     def test_an_undeclared_mode_is_refused(self) -> None:

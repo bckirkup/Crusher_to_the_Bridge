@@ -41,6 +41,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
+from engines.py_contam_bridge import PATHOGEN_POOL_TRANSPORT_MODES
 from engines.transmission_core import CABIN_AIR_MODES
 from picard_framework.covid_fit_targets import FitTarget, FitTargets, load_fit_targets
 from picard_framework.covid_hull_scenarios import (
@@ -371,6 +372,7 @@ def build_fit_run_spec(
     num_epochs: int | None = None,
     repo_root: str = REPO_ROOT,
     cabin_air_mode: str | None = None,
+    pathogen_pool_transport: str | None = None,
 ) -> dict[str, Any]:
     """The run spec one candidate is evaluated on, assumptions included."""
     raw = build_run_spec_dict(
@@ -392,6 +394,16 @@ def build_fit_run_spec(
                 f"{CABIN_AIR_MODES}, got {cabin_air_mode!r}",
             )
         overrides.setdefault("transmission", {})["cabin_air_mode"] = cabin_air_mode
+    if pathogen_pool_transport is not None:
+        if pathogen_pool_transport not in PATHOGEN_POOL_TRANSPORT_MODES:
+            raise ValueError(
+                "pathogen_pool_transport must be one of "
+                f"{PATHOGEN_POOL_TRANSPORT_MODES}, got "
+                f"{pathogen_pool_transport!r}",
+            )
+        overrides.setdefault("hvac", {})["pathogen_pool_transport"] = (
+            pathogen_pool_transport
+        )
     profile = load_covid_profile(repo_root)
     raw.setdefault("pathogen_overrides", {}).setdefault(
         PATHOGEN_ID, {},
@@ -422,12 +434,14 @@ def simulate_hull(
     split_day: int = 17,
     turn_day: int = 16,
     cabin_air_mode: str | None = None,
+    pathogen_pool_transport: str | None = None,
 ) -> HullObservables:
     """Run one hull at one candidate Theta and read its observation logs."""
     raw = build_fit_run_spec(
         scenario_id, theta, seed,
         num_epochs=num_epochs, repo_root=repo_root,
         cabin_air_mode=cabin_air_mode,
+        pathogen_pool_transport=pathogen_pool_transport,
     )
     sim = run_fit_spec(raw, repo_root=repo_root)
     return observables_from_modality(

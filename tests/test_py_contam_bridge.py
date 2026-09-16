@@ -31,7 +31,6 @@ from engines.py_contam_bridge import (
     is_plenum_zone,
 )
 
-
 # ── Helpers ──────────────────────────────────────────────────────────────
 
 def _two_zone_layout() -> dict:
@@ -101,6 +100,34 @@ class TestContamZoneNode:
 # ── Mass conservation tests ─────────────────────────────────────────────
 
 class TestMassConservation:
+    def test_decay_override_conserves_unfiltered_mass(self) -> None:
+        engine = _engine_with_single_path(
+            flow=50.0, filter_eff=0.0, decay=0.10, is_ducted=False,
+        )
+        initial = {"A": 1000.0, "B": 0.0}
+        result = engine.transport_step(initial, natural_decay_rate=0.0)
+        assert sum(result.values()) == pytest.approx(
+            sum(initial.values()), rel=1e-9,
+        )
+
+        decay_only = _engine_with_single_path(
+            flow=0.0, filter_eff=0.0, decay=0.10, is_ducted=False,
+        )
+        decayed = decay_only.transport_step(initial)
+        assert sum(decayed.values()) < sum(initial.values())
+
+    def test_destination_mass_grades_with_passive_flow(self) -> None:
+        destination_masses = [
+            _engine_with_single_path(
+                flow=flow, filter_eff=0.0, decay=0.0, is_ducted=False,
+            ).transport_step(
+                {"A": 1000.0, "B": 0.0}, natural_decay_rate=0.0,
+            )["B"]
+            for flow in (10.0, 50.0, 100.0)
+        ]
+        assert destination_masses == sorted(destination_masses)
+        assert destination_masses[0] < destination_masses[-1]
+
     def test_total_mass_decreases_with_filter(self) -> None:
         """HVAC-ducted path with filter removes mass from the system."""
         engine = _engine_with_single_path(

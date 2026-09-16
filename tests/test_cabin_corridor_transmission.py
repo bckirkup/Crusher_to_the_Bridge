@@ -44,6 +44,7 @@ def _droplet_doses(
         rng=np.random.default_rng(42),
         zone_volumes={zone: volume},
         clock=clock,
+        cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
     )
     core.initialize_zones([zone])
     matrix, _ = core.execute_transmission(
@@ -71,6 +72,7 @@ class TestCabinCorridorTransmission:
             rng=np.random.default_rng(42),
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         core.initialize_zones([zone])
         matrix, _ = core.execute_transmission(
@@ -143,6 +145,7 @@ class TestCabinCorridorTransmission:
                 zone_volumes={zone: 1200.0},
                 zone_types={zone: "Cabin_Corridor"},
                 confinement_isolation_factor=factor,
+                cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
             )
             core.initialize_zones([zone])
             matrix, _ = core.execute_transmission(
@@ -191,7 +194,10 @@ class TestCabinCorridorTransmission:
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
             corridor_direct_contact_factor=0.15,
-            cfg={"transmission": {"contact_mode": "density_dependent"}},
+            cfg={"transmission": {
+                "contact_mode": "density_dependent",
+                "cabin_air_mode": "zone_pool",
+            }},
         )
         core.initialize_zones([zone])
         free_dose = 0.0
@@ -229,7 +235,10 @@ class TestCabinCorridorTransmission:
             zone_types={zone: "Room"},
             confinement_isolation_factor=0.05,
             # Legacy AVG_R_POOL always draws ≥1; density Poisson can be 0 at n=2.
-            cfg={"transmission": {"contact_mode": "legacy"}},
+            cfg={"transmission": {
+                "contact_mode": "legacy",
+                "cabin_air_mode": "zone_pool",
+            }},
         )
         core.initialize_zones([zone])
         dose = 0.0
@@ -254,6 +263,7 @@ class TestCabinCorridorTransmission:
             rng=np.random.default_rng(0),
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         core.initialize_zones([zone])
         core.surface_pools[zone] = 1000.0
@@ -276,12 +286,14 @@ class TestCabinCorridorTransmission:
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
             zone_ventilation={zone: "interior_hvac"},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         core_balcony = TransmissionCore(
             rng=np.random.default_rng(7),
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
             zone_ventilation={zone: "balcony_partial"},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         for c in (core_interior, core_balcony):
             c.initialize_zones([zone])
@@ -305,12 +317,14 @@ class TestCabinCorridorTransmission:
             zone_volumes=volumes,
             zone_types=types,
             confinement_isolation_factor=0.05,
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         core_confined = TransmissionCore(
             rng=np.random.default_rng(11),
             zone_volumes=volumes,
             zone_types=types,
             confinement_isolation_factor=0.05,
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
         )
         for c in (core_free, core_confined):
             c.initialize_zones(list(volumes))

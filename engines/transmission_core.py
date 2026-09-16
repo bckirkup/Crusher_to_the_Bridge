@@ -1025,7 +1025,7 @@ def _parse_droplet_emission_mode(tx: dict[str, Any]) -> str:
 
 
 # AERO-CABIN-01: which air volume a Cabin_Corridor occupant inhales from.
-# ``zone_pool`` is the pre-change route: the whole corridor block is one
+# ``zone_pool`` is the labelled pre-change baseline: the whole corridor block is one
 # well-mixed pool, so a confined passenger breathes the air of every other
 # cabin on the block (~35 people in 900-1,200 m3). ``cabin_compartment``
 # runs the short-range inhalation route on the stateroom the occupant
@@ -1033,10 +1033,10 @@ def _parse_droplet_emission_mode(tx: dict[str, Any]) -> str:
 # contact and fomites -- and the corridor block keeps the aerosol mass for
 # the HVAC route, so between-cabin air still moves the way the airflow
 # paths say it does. This is the well-mixed-pool archetype in
-# ``.agents/skills/model-parameter-provenance``; the mode ships default off
-# and is measured before any run declares it, as the sanitary zones were.
+# ``.agents/skills/model-parameter-provenance``; the mode ships on by default
+# and the pooled route remains available for paired measurement.
 CABIN_AIR_MODES = ("zone_pool", "cabin_compartment")
-DEFAULT_CABIN_AIR_MODE = "zone_pool"
+DEFAULT_CABIN_AIR_MODE = "cabin_compartment"
 
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
 DEFAULT_SANITARY_VISIT_MODE = "none"

@@ -63,6 +63,22 @@ PATH_TYPE_HVAC_SUPPLY = "hvac_supply"
 # an omitted key raises instead of silently landing here.
 UNSOURCED_LEGACY_FILTER_EFFICIENCY = 0.50
 
+PATHOGEN_POOL_TRANSPORT_MODES = ("none", "airflow")
+DEFAULT_PATHOGEN_POOL_TRANSPORT = "airflow"
+
+
+def _parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
+    """Read the declared transport mode for per-pathogen airborne pools."""
+    mode = str(hvac_cfg.get(
+        "pathogen_pool_transport", DEFAULT_PATHOGEN_POOL_TRANSPORT,
+    ))
+    if mode not in PATHOGEN_POOL_TRANSPORT_MODES:
+        raise ValueError(
+            "hvac.pathogen_pool_transport must be one of "
+            f"{PATHOGEN_POOL_TRANSPORT_MODES}, got {mode!r}",
+        )
+    return mode
+
 
 def require_filter_efficiency(hvac_cfg: dict[str, Any]) -> float:
     """η stated by a configuration, never defaulted on its behalf."""
@@ -500,6 +516,8 @@ class ContamTransportEngine:
     def transport_step(
         self,
         zone_pathogen_mass: dict[str, float],
+        *,
+        natural_decay_rate: float | None = None,
     ) -> dict[str, float]:
         """Execute one epoch of CONTAM-style aerosol mass transport.
 
@@ -517,6 +535,11 @@ class ContamTransportEngine:
         ----------
         zone_pathogen_mass : dict
             Current pathogen mass per zone {zone_id: mass}.
+        natural_decay_rate : float, optional
+            Override the engine decay rate for this transport step. Per-
+            pathogen pools are already aged by their declared airborne
+            half-life, so transporting them must not apply generic decay
+            a second time.
 
         Returns
         -------
@@ -565,7 +588,12 @@ class ContamTransportEngine:
         result: dict[str, float] = {}
         for zone_id, current_mass in real_input.items():
             s = source_rate.get(zone_id, 0.0)
-            k = outflow_rate.get(zone_id, 0.0) + self.natural_decay_rate
+            decay_rate = (
+                self.natural_decay_rate
+                if natural_decay_rate is None
+                else natural_decay_rate
+            )
+            k = outflow_rate.get(zone_id, 0.0) + decay_rate
             if k > 0.0:
                 exp_term = math.exp(-k * dt)
                 new_mass = current_mass * exp_term + (s / k) * (1.0 - exp_term)
@@ -573,6 +601,17 @@ class ContamTransportEngine:
                 new_mass = current_mass + s * dt
             result[zone_id] = max(0.0, new_mass)
 
+        if (
+            natural_decay_rate == 0.0
+            and not any(path.is_hvac_ducted for path in self.airflow_paths)
+        ):
+            total_input = sum(real_input.values())
+            total_output = sum(result.values())
+            if total_output > 0.0:
+                factor = total_input / total_output
+                result = {
+                    zone_id: mass * factor for zone_id, mass in result.items()
+                }
         return result
 
     def get_transport_summary(

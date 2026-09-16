@@ -239,6 +239,28 @@ def test_an_unknown_cabin_air_mode_is_refused():
         )
 
 
+def test_the_run_spec_omits_pathogen_pool_override_by_default():
+    raw = build_fit_run_spec(DIAMOND, 1e8, 7, num_epochs=24)
+    assert "hvac" not in raw["config_overrides"]
+
+
+def test_the_run_spec_declares_only_the_requested_pathogen_pool_mode():
+    raw = build_fit_run_spec(
+        DIAMOND, 1e8, 7, num_epochs=24, pathogen_pool_transport="airflow",
+    )
+    assert raw["config_overrides"]["hvac"] == {
+        "pathogen_pool_transport": "airflow",
+    }
+
+
+def test_an_unknown_pathogen_pool_transport_mode_is_refused():
+    with pytest.raises(ValueError, match="pathogen_pool_transport"):
+        build_fit_run_spec(
+            DIAMOND, 1e8, 7, num_epochs=24,
+            pathogen_pool_transport="invalid",
+        )
+
+
 # ── the grid ──────────────────────────────────────────────────────────────
 
 def test_the_grid_is_log_spaced_and_spans_its_bounds():

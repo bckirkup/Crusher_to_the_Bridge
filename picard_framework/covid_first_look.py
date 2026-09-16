@@ -31,6 +31,10 @@ from typing import Any
 
 import numpy as np
 
+from engines.py_contam_bridge import (
+    DEFAULT_PATHOGEN_POOL_TRANSPORT,
+    PATHOGEN_POOL_TRANSPORT_MODES,
+)
 from engines.transmission_core import CABIN_AIR_MODES, DEFAULT_CABIN_AIR_MODE
 from picard_framework.covid_fit_targets import FitTargets, load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
@@ -90,12 +94,19 @@ class FirstLookDesign:
     bootstrap_resamples: int
     bootstrap_seed: int
     cabin_air_mode: str = DEFAULT_CABIN_AIR_MODE
+    pathogen_pool_transport: str = DEFAULT_PATHOGEN_POOL_TRANSPORT
 
     def __post_init__(self) -> None:
         if self.cabin_air_mode not in CABIN_AIR_MODES:
             raise ValueError(
                 "cabin_air_mode must be one of "
                 f"{CABIN_AIR_MODES}, got {self.cabin_air_mode!r}",
+            )
+        if self.pathogen_pool_transport not in PATHOGEN_POOL_TRANSPORT_MODES:
+            raise ValueError(
+                "pathogen_pool_transport must be one of "
+                f"{PATHOGEN_POOL_TRANSPORT_MODES}, got "
+                f"{self.pathogen_pool_transport!r}",
             )
 
     def phase(self, name: str) -> PhaseDesign:
@@ -115,6 +126,7 @@ class FirstLookDesign:
             "bootstrap_resamples": self.bootstrap_resamples,
             "bootstrap_seed": self.bootstrap_seed,
             "cabin_air_mode": self.cabin_air_mode,
+            "pathogen_pool_transport": self.pathogen_pool_transport,
         }
 
 
@@ -173,6 +185,9 @@ def load_design(
         bootstrap_resamples=int(raw["bootstrap_resamples"]),
         bootstrap_seed=int(raw["bootstrap_seed"]),
         cabin_air_mode=str(raw.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE)),
+        pathogen_pool_transport=str(raw.get(
+            "pathogen_pool_transport", DEFAULT_PATHOGEN_POOL_TRANSPORT,
+        )),
     )
     _assert_roles(design)
     return design
@@ -236,10 +251,12 @@ def run_cell(
     obs = runner(
         cell.scenario_id, cell.theta, cell.seed,
         cabin_air_mode=design.cabin_air_mode,
+        pathogen_pool_transport=design.pathogen_pool_transport,
     )
     return {
         "design_id": design.design_id,
         "cabin_air_mode": design.cabin_air_mode,
+        "pathogen_pool_transport": design.pathogen_pool_transport,
         "cell": cell.as_dict(),
         "observables": obs.as_dict(),
     }
