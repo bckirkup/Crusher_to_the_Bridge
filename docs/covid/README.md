@@ -15,7 +15,7 @@ dose-response α/β are not, and the emission magnitude is dimensionally wrong.
 | Doc | Status | Role |
 |-----|--------|------|
 | [covid_parameter_provenance_audit.md](covid_parameter_provenance_audit.md) | Audit (2026-09-01) | Provenance class of every profile scalar; why the emission scale is not identifiable apart from β; which quantities are scored and must not be fitted |
-| [covid_first_look_readout.md](covid_first_look_readout.md) | Findings (2026-09-14/15) | Replicated Theta grid on Diamond Princess (20 seeds), Greg Mortimer held-out scoring (50 seeds) and the boarding-axis screen (age x imports x Theta) on AWS Batch; the undeclared-cohort defect and the corrected v3 / screen v2 surfaces |
+| [covid_first_look_readout.md](covid_first_look_readout.md) | Findings (2026-09-14/16) | Replicated Theta grid on Diamond Princess (20 seeds), Greg Mortimer held-out scoring (50 seeds) and the boarding-axis screen (age x imports x Theta) on AWS Batch; the undeclared-cohort defect, the corrected v3 / screen v2 surfaces, and the v4 rerun on the corrected incubation model (Theta 3.16e7, interior) |
 | [covid_arm_status.md](covid_arm_status.md) | Findings (2026-09-01) | What the `sars_cov2_resp` campaign arm actually does, and the four reasons it is not yet scoreable |
 | [../proposals/covid_trajectory_fit_spec.md](../proposals/covid_trajectory_fit_spec.md) | Proposal — split and one-composite fit implemented (`picard_framework/covid_theta_fit.py`, `covid_first_look.py`); calendar/import axes not | The fixed train/test split: Diamond Princess trains, Greg Mortimer and the Willebrand cross-ship distribution are held out |
 
