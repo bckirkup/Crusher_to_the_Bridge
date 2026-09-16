@@ -3,8 +3,8 @@
 # Spot array.
 #
 # The design is fixed in picard_framework/runs/<DESIGN>_design.json (DESIGN
-# defaults to covid_first_look_v2; set DESIGN=covid_first_look_v1 for the
-# original); this script only chooses which phase runs and how many cells
+# defaults to covid_first_look_v2; set DESIGN to a landed v1-v6/v6c design
+# as needed); this script only chooses which phase runs and how many cells
 # each array child owns. Array size = ceil(phase cells / stride). Every cell uploads its
 # own object, so a reclaimed child resumes and the merge
 # (tools/fit_covid_theta.py merge) pools cells rather than children.

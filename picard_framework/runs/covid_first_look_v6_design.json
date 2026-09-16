@@ -1,0 +1,33 @@
+{
+  "design_id": "covid_first_look_v6",
+  "description": "Refit of Theta on the repaired airborne subsystem shipped by AERO-CABIN-03 (#561): the airborne far field runs per stateroom (transmission.cabin_air_mode: cabin_compartment), every pathogen's own airborne pool is transported through the declared airflow network (hvac.pathogen_pool_transport: airflow), and the CONTAM transport step is the exact linear-operator solution (the former semi-implicit step created ~3.4x mass per ship-scale epoch). v5 ran cabin compartments with NO between-zone air for any pathogen and with the mass-creating transport step, so its Theta cannot be carried over any more than v4's pooled 3.16e7 can. Same grid and seeds as v5 so v4, v5, v5c and v6 pair by (Theta, seed) at every overlapping point. Not a mechanism choice: the realistic subsystem is on because it is the realistic subsystem; the fit is a readout of what is still missing.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "cabin_air_mode": "cabin_compartment",
+  "pathogen_pool_transport": "airflow",
+  "grid": {
+    "low": 10000000.0,
+    "high": 1000000000000.0,
+    "count": 11,
+    "note": "Half-decade points from 1e7 to 1e12, identical to v5. The lower end keeps the v4 pooled selection (3.16e7) on the surface; the upper end is where v5's compartment arm ignited reliably (3.16e11) and burned the ship before quarantine. A selection on either boundary is a boundary and must be reported as one."
+  },
+  "phases": {
+    "fit": {
+      "scenario_id": "diamond_princess_2020",
+      "split_role": "training",
+      "seed_base": 20200205,
+      "seeds": 20,
+      "note": "The 20 matched v4/v5 seeds, unchanged."
+    },
+    "held_out": {
+      "scenario_id": "greg_mortimer_2020",
+      "split_role": "held_out",
+      "seed_base": 20200315,
+      "seeds": 50,
+      "note": "Scored at the fitted Theta and reported at its half-decade neighbours as sensitivity; the rest of the grid is stored, not scored. greg_mortimer_2020 does not declare retest-after-negative, so the air repair is the only change on this hull relative to v4."
+    }
+  },
+  "takeoff_recorded_onsets": 10,
+  "bootstrap_resamples": 2000,
+  "bootstrap_seed": 20200205,
+  "supersedes": "covid_first_look_v5"
+}

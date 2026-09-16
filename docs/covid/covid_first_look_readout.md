@@ -1148,6 +1148,34 @@ either air model: even v5c's plausible cell has 12 early onsets against 34 and
 **Nothing above is retracted.** v1–v4 and the sweep ran the pooled default,
 which v5c refits to the same 3.16e7; the compartment mode remains default-off.
 
+## covid_first_look_v6: refit on the repaired airborne subsystem (designed, submitted)
+
+v6 supersedes v5 on the repaired airborne subsystem: per-pathogen pools now
+move through the declared airflow network, and the CONTAM step uses the exact
+linear-operator numerics rather than the former mass-creating frozen-source
+scheme. Both realistic defaults are on —
+`transmission.cabin_air_mode: cabin_compartment` and
+`hvac.pathogen_pool_transport: airflow`. Theta cannot be carried from v4's
+pooled-air model or v5's compartment model with absent between-zone pool
+transport and pre-repair transport numerics.
+
+The paired **v6c** control is identical except
+`hvac.pathogen_pool_transport: none`; it isolates the contribution of
+between-zone airborne transport on the repaired numerics while keeping the
+compartment cabin model fixed. Both designs use the 1e7 → 1e12 half-decade
+grid, 20 Diamond Princess seeds, and 50 Greg Mortimer seeds: 770 cells each.
+The estimated cost is approximately **$14 total**, matching v5 + v5c.
+
+Submission record (2026-09-16): v6 fit `eb63971c-d11b-4708-91f4-7398cb8e5b37`
+(220 children), v6 held-out `c37da34c-ada5-4e77-94b3-457b4ab38b78` (11
+children, stride 50), v6c fit `ea116129-dbbd-43d9-8e88-19c1898cc28e` (220
+children), v6c held-out `6294e670-30b5-40a0-bd31-7c24b4f6cdd1` (11 children,
+stride 50); job definition `picard-covid-hull:6`, image
+`picard-campaign:covid-first-look-v6` built from `24f0e6c` (this PR's branch,
+merged `main` with #561 plus the two design files); S3 prefixes
+`campaign/covid_first_look_v6/` and `campaign/covid_first_look_v6c/`. v4 and
+v5 outputs untouched.
+
 ## Reproduction
 
 ```bash
