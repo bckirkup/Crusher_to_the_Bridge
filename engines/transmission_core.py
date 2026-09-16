@@ -1024,8 +1024,32 @@ def _parse_droplet_emission_mode(tx: dict[str, Any]) -> str:
     return mode
 
 
+# AERO-CABIN-01: which air volume a Cabin_Corridor occupant inhales from.
+# ``zone_pool`` is the pre-change route: the whole corridor block is one
+# well-mixed pool, so a confined passenger breathes the air of every other
+# cabin on the block (~35 people in 900-1,200 m3). ``cabin_compartment``
+# runs the short-range inhalation route on the stateroom the occupant
+# actually shares -- the same compartments BERTH-01 already gives direct
+# contact and fomites -- and the corridor block keeps the aerosol mass for
+# the HVAC route, so between-cabin air still moves the way the airflow
+# paths say it does. This is the well-mixed-pool archetype in
+# ``.agents/skills/model-parameter-provenance``; the mode ships default off
+# and is measured before any run declares it, as the sanitary zones were.
+CABIN_AIR_MODES = ("zone_pool", "cabin_compartment")
+DEFAULT_CABIN_AIR_MODE = "zone_pool"
+
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
 DEFAULT_SANITARY_VISIT_MODE = "none"
+
+
+def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE))
+    if mode not in CABIN_AIR_MODES:
+        raise ValueError(
+            "transmission.cabin_air_mode must be one of "
+            f"{CABIN_AIR_MODES}, got {mode!r}",
+        )
+    return mode
 
 
 def _parse_sanitary_visit_mode(tx: dict[str, Any]) -> str:
@@ -1543,6 +1567,13 @@ class TransmissionCore:
         tx = (cfg or {}).get("transmission", {}) or {}
         self.contact_mode = _parse_contact_mode(tx)
         self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
+        self.cabin_air_mode = _parse_cabin_air_mode(tx)
+        # Berths per stateroom and per corridor block, from the cabin roster,
+        # so a compartment's share of the block volume is a fixed property of
+        # the berthing plan rather than of who happens to be aboard the zone
+        # this epoch. Empty until ``register_cabin_berths`` is called.
+        self._cabin_berths: dict[str, int] = {}
+        self._block_berths: dict[str, int] = {}
         self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
         # layout's per-head ``serves`` lists.
@@ -1836,6 +1867,26 @@ class TransmissionCore:
             pathogen_id, founder.strain_id, Phenotype.of(founder),
         )
         return founder.strain_id
+
+    def register_cabin_berths(self, agents: Iterable[KorkinAgent]) -> None:
+        """Record the berthing plan: berths per stateroom and per block.
+
+        Read once from the roster, after cabin mates are assigned, so a
+        stateroom's share of its block's air volume is the same on an epoch
+        when half the block is at dinner as on an epoch when nobody is.
+        """
+        self._cabin_berths = {}
+        self._block_berths = {}
+        for agent in agents:
+            zone = agent.home_zone
+            if self.zone_types.get(zone) != "Cabin_Corridor":
+                continue
+            key = self._cabin_compartment_key(zone, agent)
+            if key in self._cabin_berths:
+                continue
+            berths = len(set(agent.cabin_mate_ids) | {agent.agent_id})
+            self._cabin_berths[key] = berths
+            self._block_berths[zone] = self._block_berths.get(zone, 0) + berths
 
     def register_seeded_founders(self, agents: Iterable[KorkinAgent]) -> None:
         """Assign founder strains to infections present before transmission.
@@ -2845,6 +2896,39 @@ class TransmissionCore:
                 key = self._cabin_compartment_key(zone_name, agent)
                 out.setdefault(key, []).append(agent)
         return out
+
+    def _cabin_air_units(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+    ) -> dict[str, list[KorkinAgent]]:
+        """Air compartments the short-range route runs on this epoch.
+
+        Identity under ``zone_pool``. Under ``cabin_compartment`` each
+        Cabin_Corridor's occupants are split into their staterooms, exactly
+        as the direct-contact and fomite routes already split them.
+        """
+        if self.cabin_air_mode != "cabin_compartment":
+            return zone_occupants
+        return self._cabin_compartments(zone_occupants)
+
+    def _air_unit_volume(self, unit_name: str) -> float:
+        """Volume a unit's aerosol is diluted into.
+
+        A stateroom takes its berth share of the block it sits in: the
+        partition conserves the block's declared volume, so no new volume is
+        introduced and none is invented for a cabin nobody measured. A block
+        whose berthing plan was never registered falls back to its own volume,
+        which is the pre-change dilution.
+        """
+        if not self._is_cabin_compartment(unit_name):
+            return self.zone_volumes.get(unit_name, 100.0)
+        parent = self.compartment_parent(unit_name)
+        block_volume = self.zone_volumes.get(parent, 100.0)
+        berths = self._cabin_berths.get(unit_name, 0)
+        block_berths = self._block_berths.get(parent, 0)
+        if berths <= 0 or block_berths <= 0:
+            return block_volume
+        return block_volume * berths / block_berths
 
     def zone_surface_keys(self, zone_name: str) -> list[str]:
         """A zone's own surface key plus every cabin compartment within it."""
@@ -4162,79 +4246,116 @@ class TransmissionCore:
         profile: dict | None = None,
         ledger: StrainDoseLedger | None = None,
     ) -> None:
-        """Immediate aerosol exposure from shedders in the same room."""
+        """Immediate aerosol exposure from shedders sharing the same air.
+
+        The unit of air is the zone, except under ``cabin_air_mode:
+        cabin_compartment``, where a Cabin_Corridor's occupants breathe the
+        stateroom they share. Emitted mass is always credited to the ship
+        zone, so the drift route downstream reads the same air it read
+        before whichever unit inhaled it.
+        """
         near_field_on = self._near_field_admits(profile)
         emission_fraction = self._droplet_emission_fraction(profile)
-        for zone_name, occupants in zone_occupants.items():
+        for unit_name, occupants in self._cabin_air_units(zone_occupants).items():
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             susceptible = self._get_susceptible(occupants, pathogen_id)
             if not shedders or not susceptible:
                 continue
-
-            emitted_shedders = [
-                (shedder, sv * self.confinement_emission_factor(shedder))
-                for shedder, sv in shedders
-            ]
-            total_aerosol = sum(
-                emitted * emission_fraction
-                for _, emitted in emitted_shedders
+            self._droplet_unit_doses(
+                unit_name, shedders, susceptible,
+                agent_doses, matrix, agent_pathway_doses,
+                pathogen_id, ledger,
+                near_field_on=near_field_on,
+                emission_fraction=emission_fraction,
             )
 
-            self.aerosol_pools[zone_name] = (
-                self.aerosol_pools.get(zone_name, 0.0) + total_aerosol
+    def _droplet_unit_doses(
+        self,
+        unit_name: str,
+        shedders: list[tuple[KorkinAgent, float]],
+        susceptible: list[KorkinAgent],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+        *,
+        near_field_on: bool,
+        emission_fraction: float,
+    ) -> None:
+        """One air unit's shedders dosing its own susceptibles."""
+        zone_name = self.compartment_parent(unit_name)
+        emitted_shedders = [
+            (shedder, sv * self.confinement_emission_factor(shedder))
+            for shedder, sv in shedders
+        ]
+        total_aerosol = sum(
+            emitted * emission_fraction
+            for _, emitted in emitted_shedders
+        )
+
+        self.aerosol_pools[zone_name] = (
+            self.aerosol_pools.get(zone_name, 0.0) + total_aerosol
+        )
+        self.aerosol_pools_by_pathogen.setdefault(
+            pathogen_id, {},
+        )[zone_name] = (
+            self.aerosol_pools_by_pathogen.get(pathogen_id, {}).get(
+                zone_name, 0.0,
             )
-            self.aerosol_pools_by_pathogen.setdefault(
-                pathogen_id, {},
-            )[zone_name] = (
-                self.aerosol_pools_by_pathogen.get(pathogen_id, {}).get(
-                    zone_name, 0.0,
+            + total_aerosol
+        )
+
+        in_compartment = self._is_cabin_compartment(unit_name)
+        volume = self._air_unit_volume(unit_name)
+        concentration = total_aerosol / max(volume, 1.0)
+        shedder_ids = [s.agent_id for s, _ in shedders]
+        vent_factor = self._aerosol_ventilation_factor(zone_name)
+        mix = self._shedder_mix(emitted_shedders, pathogen_id)
+
+        for target in susceptible:
+            dose = concentration * self.inhaled_air_volume_m3_per_epoch
+            dose *= self.droplet_scalar
+            dose *= vent_factor
+            target_factor = self._confinement_factor(target)
+            dose *= target_factor
+            dose += self._cabin_mate_droplet_addback(
+                target, shedders, volume, vent_factor, target_factor,
+                emission_fraction,
+            )
+            near_dose = 0.0
+            if near_field_on:
+                # Difference-of-concentrations form: against the unit's own
+                # volume, so it vanishes once the unit is the stateroom.
+                near_dose = self._near_field_droplet_dose(
+                    zone_name, target, emitted_shedders, volume,
+                    vent_factor, target_factor, emission_fraction,
                 )
-                + total_aerosol
+            dose += near_dose
+            dose = self._accumulate(
+                target.agent_id, "droplet", dose,
+                agent_doses, agent_pathway_doses,
+                attribution(ledger, mix),
             )
 
-            volume = self.zone_volumes.get(zone_name, 100.0)
-            concentration = total_aerosol / max(volume, 1.0)
-            shedder_ids = [s.agent_id for s, _ in shedders]
-            vent_factor = self._aerosol_ventilation_factor(zone_name)
-            mix = self._shedder_mix(emitted_shedders, pathogen_id)
-
-            for target in susceptible:
-                dose = concentration * self.inhaled_air_volume_m3_per_epoch
-                dose *= self.droplet_scalar
-                dose *= vent_factor
-                target_factor = self._confinement_factor(target)
-                dose *= target_factor
-                dose += self._cabin_mate_droplet_addback(
-                    target, shedders, volume, vent_factor, target_factor,
-                    emission_fraction,
-                )
-                near_dose = 0.0
-                if near_field_on:
-                    near_dose = self._near_field_droplet_dose(
-                        zone_name, target, emitted_shedders, volume,
-                        vent_factor, target_factor, emission_fraction,
-                    )
-                dose += near_dose
-                dose = self._accumulate(
-                    target.agent_id, "droplet", dose,
-                    agent_doses, agent_pathway_doses,
-                    attribution(ledger, mix),
-                )
-
-                exposure: dict[str, Any] = {
-                    "target_id": target.agent_id,
-                    "zone": zone_name,
-                    "source_ids": shedder_ids,
-                    "pathogen_id": pathogen_id,
-                    "dose": round(dose, 4),
-                    "aerosol_mass": round(total_aerosol, 4),
-                    "concentration_per_m3": round(concentration, 6),
-                }
-                if near_dose > 0.0:
-                    # Written only when the near field is on, so the payload of
-                    # a run without it is the pre-change payload.
-                    exposure["near_field_dose"] = round(near_dose, 4)
-                matrix.droplet_exposures.append(exposure)
+            exposure: dict[str, Any] = {
+                "target_id": target.agent_id,
+                "zone": zone_name,
+                "source_ids": shedder_ids,
+                "pathogen_id": pathogen_id,
+                "dose": round(dose, 4),
+                "aerosol_mass": round(total_aerosol, 4),
+                "concentration_per_m3": round(concentration, 6),
+            }
+            if in_compartment:
+                # Written only under the compartment mode, so a zone-pool
+                # run's payload is the pre-change payload.
+                exposure["air_unit"] = unit_name
+            if near_dose > 0.0:
+                # Written only when the near field is on, so the payload of
+                # a run without it is the pre-change payload.
+                exposure["near_field_dose"] = round(near_dose, 4)
+            matrix.droplet_exposures.append(exposure)
 
     # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────────
 

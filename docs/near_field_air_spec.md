@@ -38,7 +38,15 @@ consequences follow from the hulls' own declarations
 | dining table of 6 at ~1 m | expiratory near field | 1,050 m³ (`MainDining`) |
 
 `BERTH-01` made the cabin the direct-contact unit and gave it its own fomite
-pool; it did **not** give it its own air. `_cabin_mate_droplet_addback` only
+pool; it did **not** give it its own air. (The cabin half of that gap is now
+addressed separately and complementarily by `AERO-CABIN-01`
+[`cabin_air_compartment_spec.md`](cabin_air_compartment_spec.md), which makes
+the stateroom the *primary* inhalation unit inside a `Cabin_Corridor` by
+partitioning the declared block volume — where this spec's near field leaves the
+block pooled and adds a mate-only bonus over it. Both are off by default and
+compose: with `cabin_air_mode: cabin_compartment` the near-field difference term
+is taken against the stateroom's partitioned volume, so it vanishes unless the
+declared `cabin_berth_volume_m3` is smaller still.) `_cabin_mate_droplet_addback` only
 restores the confinement attenuation between cabin mates, and does so at the
 corridor volume. `DINE-PARTY-01` made the table the direct-contact pool at a
 meal; the table's air is still the room's. Both repairs therefore left the
