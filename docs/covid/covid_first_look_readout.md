@@ -731,7 +731,7 @@ Campaign positives are 300 against 3,520 infected, and 74% crew (observed
 coincide with peak incidence, so positives are presymptomatic at swab (64%
 record an onset later) — and will move with the leak before any roster change.
 
-## covid_import_sweep_v1: adaptive-density imports × Theta, three stages (stage 1 submitted 2026-09-16; stages 2-3 not yet run)
+## covid_import_sweep_v1: adaptive-density imports × Theta, three stages (all three run 2026-09-16/17)
 
 The next campaign measures how declared import count trades against Theta on
 the corrected model, with **adaptive sampling density**: a coarse product grid
@@ -777,6 +777,127 @@ positives conditional on takeoff, first onset day, and positive composition,
 all per (Theta, imports) and paired by seed. It declares imports; it does not
 fit them, and the quarantine-leak finding above bounds how much of any total-
 side mismatch may be attributed to the import axis.
+
+### Result: 1,180 cells, zero Batch failures, and no point on the surface is the record
+
+Stage 1 700 cells, stage 2 240, stage 3 240; 59 distinct (Theta, imports)
+points, no point evaluated twice, heads visited in 1,180/1,180 cells. Every
+figure below is a median over the 20 matched seeds **conditional on takeoff**
+(a cell counts as taking off at 10 or more recorded onsets); `P(takeoff)` is
+over all 20.
+
+Stage 2 chose eight midpoints on the imports axis and four on Theta (imports 4
+and 10 across the Theta rows, Theta 5.62e6 and 5.62e7 at low imports); stage 3,
+with tolerances at 0.15 and 1.5x, split six and six — imports 11 and 16, and
+quarter-decade Theta steps (7.5e6, 1.78e7, 4.22e7, 1.78e8). Both refinement
+stages therefore closed the pitch around the *early-onset* crossing rather than
+the takeoff boundary, which by v4 was already saturated: `P(takeoff)` is 0.80
+or higher at every point on this surface, including one import.
+
+| Theta | imports | stage | P(takeoff) | early | total | early/total | positives | asym share | crew share |
+|---|---|---|---|---|---|---|---|---|---|
+| 3.16e+06 | 1 | 1 | 0.80 | 4 | 118 | 0.038 | 137 | 0.88 | 0.01 |
+| 3.16e+06 | 2 | 1 | 0.95 | 12 | 211 | 0.057 | 220 | 0.90 | 0.01 |
+| 3.16e+06 | 3 | 1 | 1.00 | 30 | 597 | 0.049 | 360 | 0.90 | 0.03 |
+| 3.16e+06 | 4 | 2 | 1.00 | 28 | 504 | 0.055 | 332 | 0.90 | 0.04 |
+| 3.16e+06 | 5 | 1 | 1.00 | 52 | 797 | 0.065 | 411 | 0.89 | 0.06 |
+| 3.16e+06 | 8 | 1 | 1.00 | 61 | 880 | 0.069 | 400 | 0.90 | 0.08 |
+| 3.16e+06 | 10 | 2 | 1.00 | 74 | 1058 | 0.070 | 438 | 0.89 | 0.07 |
+| 3.16e+06 | 11 | 3 | 1.00 | 133 | 1230 | 0.108 | 443 | 0.89 | 0.08 |
+| 3.16e+06 | 13 | 1 | 1.00 | 248 | 1494 | 0.166 | 438 | 0.89 | 0.12 |
+| 3.16e+06 | 16 | 3 | 1.00 | 397 | 1689 | 0.235 | 443 | 0.89 | 0.13 |
+| 3.16e+06 | 20 | 1 | 1.00 | 488 | 1756 | 0.278 | 423 | 0.90 | 0.15 |
+| 5.62e+06 | 1 | 2 | 0.95 | 5 | 173 | 0.029 | 200 | 0.89 | 0.01 |
+| 5.62e+06 | 2 | 2 | 1.00 | 14 | 261 | 0.052 | 202 | 0.87 | 0.01 |
+| 5.62e+06 | 3 | 2 | 1.00 | 42 | 855 | 0.049 | 410 | 0.91 | 0.05 |
+| 5.62e+06 | 4 | 3 | 1.00 | 42 | 847 | 0.049 | 426 | 0.90 | 0.06 |
+| 7.5e+06 | 2 | 3 | 1.00 | 16 | 394 | 0.042 | 284 | 0.89 | 0.03 |
+| 1e+07 | 1 | 1 | 0.90 | 8 | 278 | 0.027 | 260 | 0.90 | 0.01 |
+| 1e+07 | 2 | 1 | 0.95 | 21 | 497 | 0.042 | 378 | 0.91 | 0.04 |
+| 1e+07 | 3 | 1 | 1.00 | 34 | 875 | 0.039 | 430 | 0.90 | 0.05 |
+| 1e+07 | 4 | 2 | 1.00 | 50 | 969 | 0.052 | 456 | 0.90 | 0.05 |
+| 1e+07 | 5 | 1 | 1.00 | 86 | 1168 | 0.074 | 456 | 0.90 | 0.08 |
+| 1e+07 | 8 | 1 | 1.00 | 98 | 1392 | 0.070 | 470 | 0.91 | 0.10 |
+| 1e+07 | 10 | 2 | 1.00 | 134 | 1398 | 0.096 | 452 | 0.90 | 0.10 |
+| 1e+07 | 11 | 3 | 1.00 | 255 | 1538 | 0.166 | 463 | 0.90 | 0.13 |
+| 1e+07 | 13 | 1 | 1.00 | 288 | 1604 | 0.179 | 430 | 0.89 | 0.16 |
+| 1e+07 | 20 | 1 | 1.00 | 515 | 1856 | 0.277 | 404 | 0.89 | 0.17 |
+| 1.78e+07 | 5 | 3 | 1.00 | 100 | 1390 | 0.072 | 426 | 0.89 | 0.09 |
+| 1.78e+07 | 13 | 3 | 1.00 | 419 | 1744 | 0.240 | 428 | 0.89 | 0.18 |
+| 3.16e+07 | 1 | 1 | 0.95 | 7 | 368 | 0.019 | 302 | 0.91 | 0.03 |
+| 3.16e+07 | 2 | 1 | 1.00 | 28 | 794 | 0.035 | 466 | 0.89 | 0.05 |
+| 3.16e+07 | 3 | 1 | 1.00 | 58 | 1298 | 0.045 | 452 | 0.90 | 0.09 |
+| 3.16e+07 | 4 | 2 | 1.00 | 52 | 1126 | 0.047 | 491 | 0.90 | 0.07 |
+| 3.16e+07 | 5 | 1 | 1.00 | 168 | 1488 | 0.113 | 452 | 0.90 | 0.12 |
+| 3.16e+07 | 8 | 1 | 1.00 | 179 | 1573 | 0.114 | 462 | 0.89 | 0.15 |
+| 3.16e+07 | 10 | 2 | 1.00 | 204 | 1606 | 0.127 | 460 | 0.89 | 0.15 |
+| 3.16e+07 | 11 | 3 | 1.00 | 348 | 1724 | 0.202 | 448 | 0.89 | 0.16 |
+| 3.16e+07 | 13 | 1 | 1.00 | 576 | 1874 | 0.308 | 397 | 0.89 | 0.20 |
+| 3.16e+07 | 20 | 1 | 1.00 | 808 | 2020 | 0.400 | 366 | 0.90 | 0.21 |
+| 4.22e+07 | 3 | 3 | 1.00 | 68 | 1250 | 0.054 | 464 | 0.90 | 0.09 |
+| 5.62e+07 | 3 | 2 | 1.00 | 136 | 1428 | 0.096 | 454 | 0.90 | 0.11 |
+| 1e+08 | 1 | 1 | 0.95 | 13 | 557 | 0.023 | 371 | 0.90 | 0.02 |
+| 1e+08 | 2 | 1 | 1.00 | 40 | 1192 | 0.033 | 466 | 0.90 | 0.06 |
+| 1e+08 | 3 | 1 | 1.00 | 189 | 1568 | 0.120 | 431 | 0.90 | 0.16 |
+| 1e+08 | 5 | 1 | 1.00 | 268 | 1648 | 0.163 | 422 | 0.89 | 0.17 |
+| 1e+08 | 8 | 1 | 1.00 | 279 | 1678 | 0.166 | 410 | 0.89 | 0.19 |
+| 1e+08 | 10 | 2 | 1.00 | 266 | 1714 | 0.155 | 410 | 0.90 | 0.19 |
+| 1e+08 | 11 | 3 | 1.00 | 514 | 1874 | 0.275 | 396 | 0.89 | 0.20 |
+| 1e+08 | 13 | 1 | 1.00 | 870 | 2042 | 0.426 | 350 | 0.89 | 0.22 |
+| 1e+08 | 20 | 1 | 1.00 | 1174 | 2189 | 0.537 | 322 | 0.89 | 0.23 |
+| 1.78e+08 | 2 | 3 | 1.00 | 49 | 1277 | 0.038 | 477 | 0.89 | 0.08 |
+| 3.16e+08 | 1 | 1 | 0.95 | 16 | 974 | 0.016 | 459 | 0.88 | 0.06 |
+| 3.16e+08 | 2 | 1 | 1.00 | 75 | 1440 | 0.052 | 452 | 0.89 | 0.15 |
+| 3.16e+08 | 3 | 1 | 1.00 | 294 | 1732 | 0.170 | 415 | 0.89 | 0.22 |
+| 3.16e+08 | 5 | 1 | 1.00 | 279 | 1738 | 0.160 | 394 | 0.89 | 0.21 |
+| 3.16e+08 | 8 | 1 | 1.00 | 460 | 1864 | 0.247 | 380 | 0.89 | 0.23 |
+| 3.16e+08 | 10 | 2 | 1.00 | 482 | 1878 | 0.257 | 392 | 0.88 | 0.23 |
+| 3.16e+08 | 11 | 3 | 1.00 | 760 | 2022 | 0.376 | 354 | 0.88 | 0.24 |
+| 3.16e+08 | 13 | 1 | 1.00 | 955 | 2128 | 0.449 | 350 | 0.89 | 0.24 |
+| 3.16e+08 | 20 | 1 | 1.00 | 1486 | 2309 | 0.644 | 291 | 0.89 | 0.25 |
+| **observed** | — | — | — | **34** | **197** | **0.173** | **634** | **0.50** | **~0.20** |
+
+**Takeoff no longer discriminates.** Five decades of Theta and imports 1-20
+all ignite (0.80-1.00). Whatever the sweep measures, it is not the ignition
+problem v3 had.
+
+**The early and total anchors cannot be satisfied together.** Interpolating
+each Theta row to where the early median crosses the observed 34:
+
+| Theta | imports at the early crossing | total median there | observed total |
+|---|---|---|---|
+| 3.16e6 | 4.3 | 582 | 197 |
+| 5.62e6 | 2.7 | 688 | 197 |
+| 1e7 | 3.0 | 861 | 197 |
+| 3.16e7 | 2.2 | 900 | 197 |
+| 1e8 | 1.8 | 1,060 | 197 |
+| 3.16e8 | 1.3 | 1,116 | 197 |
+
+Matching the early count overshoots the voyage total by 3-6x on every row;
+matching the total (3.16e6 with 2 imports: early 12, total 211) undershoots the
+early count by ~3x. The reason is the **shape**: the model's early share of the
+voyage total is 0.02-0.06 through the whole low-import region against an
+observed 34/197 = 0.173, and it only reaches 0.17 at 11-20 imports, where the
+total is 1,500-2,300 (the hull saturates near 2,300). Imports front-load the
+epidemic, but they cannot front-load it without also finishing it.
+
+**That missing suppression is the quarantine leak**, measured in the trace
+above: the epidemic keeps running inside the 5 Feb confinement through the
+shared cabin-block air pool (peak ~540 infections/day on day 25) instead of
+being cut off by it. The sweep therefore brackets the import axis rather than
+fitting it: the record's total is only reachable with ~2 imports, and at ~2
+imports nothing on the Theta axis produces the observed early trajectory.
+
+**Two invariants across all 59 points**, neither moved by imports or Theta:
+the campaign asymptomatic share sits at 0.88-0.91 against 0.50 observed, and
+campaign positives never exceed ~490 against 634 observed (they *fall* at high
+Theta as hosts are drained off the roster). Both are roster/observation-process
+properties, consistent with the drain trace, and neither is an import effect.
+
+**What the sweep does not say.** It does not fit imports, and it does not
+license "Diamond Princess had N imports": with the leak in place the total-side
+constraint that picks ~2 imports is itself suspect. The ordering implied is
+leak first, roster second, imports last.
 
 ## Reproduction
 
