@@ -42,9 +42,9 @@ from engines.crew_duty_exclusion import (
 from engines.initiation import preboarding_reportable_ids
 from engines.py_contam_bridge import (
     DEFAULT_PATHOGEN_POOL_TRANSPORT,
-    _parse_pathogen_pool_transport,
     build_transport_engine,
     load_air_flow_paths,
+    parse_pathogen_pool_transport,
 )
 from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
@@ -401,7 +401,7 @@ class ShipSimulation:
         self.clock = SimClock.for_run(cfg, voyage_cfg)
         self.scenario_schedule = resolve_scenario_schedule(cfg)
         self.pathogen_profiles = load_pathogen_profiles(cfg)
-        self.pathogen_pool_transport = _parse_pathogen_pool_transport(
+        self.pathogen_pool_transport = parse_pathogen_pool_transport(
             cfg.get("hvac", {}),
         )
         self.modalities = build_modalities(

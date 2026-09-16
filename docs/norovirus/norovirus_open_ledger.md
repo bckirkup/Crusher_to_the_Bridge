@@ -3429,6 +3429,21 @@ Roughly in dependency order.
     crossing under the corrected dilution. Arm selection unchanged; nothing
     chosen on distance to any anchor.
 
+46. **`AERO-CABIN-03`: per-pathogen airborne pool transport was absent before
+    the airflow repair, and the two air-model defaults are now changed.** On
+    every prior run, for every profiled pathogen, the CONTAM engine transported
+    only the legacy aggregate airborne array. That aggregate is recomputed from
+    the per-pathogen pools on the next update and the transported result is
+    therefore discarded; no per-pathogen aerosol mass crossed a zone boundary.
+    Within-zone airborne dosing is unaffected. Any norovirus conclusion
+    resting on the HVAC/drift route, on ventilation, or on filter efficiency is
+    withdrawn pending refit, as is any result assuming the pooled cabin block.
+    This is the transport half of `AERO-CABIN-01` (item 44), which separately
+    records the cabin-air partition. The labelled pre-change modes remain
+    available for paired measurement; the shipped defaults are now
+    `hvac.pathogen_pool_transport: airflow` and
+    `transmission.cabin_air_mode: cabin_compartment`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

@@ -7,7 +7,7 @@ from dataclasses import replace
 
 import pytest
 
-from engines.py_contam_bridge import _parse_pathogen_pool_transport
+from engines.py_contam_bridge import parse_pathogen_pool_transport
 from picard_framework import PicardRunSpec, ShipSimulation
 from picard_framework.covid_first_look import enumerate_cells, load_design, run_cell
 from picard_framework.covid_theta_fit import HullObservables, build_fit_run_spec
@@ -43,12 +43,12 @@ def _stub_runner(
 
 
 def test_pathogen_pool_transport_mode_parsing() -> None:
-    assert _parse_pathogen_pool_transport({}) == "airflow"
-    assert _parse_pathogen_pool_transport(
+    assert parse_pathogen_pool_transport({}) == "airflow"
+    assert parse_pathogen_pool_transport(
         {"pathogen_pool_transport": "airflow"},
     ) == "airflow"
     with pytest.raises(ValueError, match="pathogen_pool_transport"):
-        _parse_pathogen_pool_transport({"pathogen_pool_transport": "foo"})
+        parse_pathogen_pool_transport({"pathogen_pool_transport": "foo"})
 
 
 def _initialized_sim(mode: str) -> ShipSimulation:

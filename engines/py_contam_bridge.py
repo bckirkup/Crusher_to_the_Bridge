@@ -67,7 +67,7 @@ PATHOGEN_POOL_TRANSPORT_MODES = ("none", "airflow")
 DEFAULT_PATHOGEN_POOL_TRANSPORT = "airflow"
 
 
-def _parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
+def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
     """Read the declared transport mode for per-pathogen airborne pools."""
     mode = str(hvac_cfg.get(
         "pathogen_pool_transport", DEFAULT_PATHOGEN_POOL_TRANSPORT,
@@ -601,17 +601,6 @@ class ContamTransportEngine:
                 new_mass = current_mass + s * dt
             result[zone_id] = max(0.0, new_mass)
 
-        if (
-            natural_decay_rate == 0.0
-            and not any(path.is_hvac_ducted for path in self.airflow_paths)
-        ):
-            total_input = sum(real_input.values())
-            total_output = sum(result.values())
-            if total_output > 0.0:
-                factor = total_input / total_output
-                result = {
-                    zone_id: mass * factor for zone_id, mass in result.items()
-                }
         return result
 
     def get_transport_summary(

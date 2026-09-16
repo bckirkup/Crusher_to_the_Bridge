@@ -988,6 +988,48 @@ retracted: every campaign in this document ran the default `zone_pool`, and the
 mode ships off. Whether the early/total shape misfit survives the refit — the
 question the sweep left open — is what v5 measures.
 
+## Per-pathogen HVAC pool transport repair and the two default flips
+
+The pre-repair CONTAM step transported only the legacy aggregate airborne
+array. The aggregate is recomputed from the per-pathogen pools on the next
+`set_pathogen_zone_mass` call, so the transported aggregate was discarded and
+no profiled pathogen's airborne mass crossed a zone boundary. Within-zone
+airborne dosing was unaffected. The repair transports each per-pathogen pool
+through the declared airflow network with the engine decay rate set to zero,
+because each pool is already aged by its own declared airborne half-life.
+
+The shipped defaults also changed to
+`hvac.pathogen_pool_transport: airflow` and
+`transmission.cabin_air_mode: cabin_compartment`. The labelled pre-change
+baselines remain available for paired measurement. The change-detector
+attribution table is:
+
+| pool transport | cabin air | pinned tuple |
+|---|---|---|
+| `none` | `zone_pool` | `(6, 0, 217, 6, 3)` |
+| `none` | `cabin_compartment` | `(0, 0, 217, 0, 0)` |
+| `airflow` | `zone_pool` | `(0, 0, 217, 0, 0)` |
+| `airflow` | `cabin_compartment` | `(0, 0, 217, 0, 0)` |
+
+The old change-detector cell at Θ=1e6 belonged to the pooled-air model and
+became all-zero under either single default flip. The detector therefore moved
+to the lowest live, unsaturated new-default point, Θ=1e10, which reads
+`(149, 62, 217, 166, 30)` on the local CPython 3.12 run and is pinned for both
+supported interpreter minors.
+
+The full-voyage traces at Θ=3.16e7, seed 20200216 were:
+
+| cabin air | onsets | hvac_airborne infections | witness: mass zones without a shedder |
+|---|---:|---:|---:|
+| `zone_pool` | 2258 | 1729 | 68 |
+| `cabin_compartment` | 3 | 13 | 139 |
+
+Artifacts: [`/home/ubuntu/phase0/pool_transport_logs/zone_pool.log`](file:///home/ubuntu/phase0/pool_transport_logs/zone_pool.log) and [`/home/ubuntu/phase0/pool_transport_logs/cabin_compartment.log`](file:///home/ubuntu/phase0/pool_transport_logs/cabin_compartment.log).
+
+Θ=3.16e7 belongs to the pooled model, so a refit under the new defaults is
+required before any v5 or v4 number is carried forward. Earlier campaigns are
+not retracted; they are labelled pooled-air, no-between-zone-transport runs.
+
 ## covid_first_look_v5: refit with cabin compartments on, and a paired pooled control (Batch, 2026-09-17)
 
 v5 refits Theta with `transmission.cabin_air_mode: cabin_compartment` — the

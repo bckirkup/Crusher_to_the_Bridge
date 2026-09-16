@@ -10,14 +10,12 @@ this cell by ~5–13% without changing the engine's scale, so a failure here
 says "attribute the move", not "the scale changed" (see
 docs/covid/covid_first_look_readout.md).
 
-The cell is the cheapest one on the grid: Greg Mortimer (the held-out hull, so
-pinning it leaks nothing into the fit), Theta = 1e6, seed 20200333, ~15 s. It
-was measured on AWS Batch and reproduced bit-for-bit in the campaign image and
-in a local CPython 3.11 environment. Under the declared scenario (one index
-case, no boarding cohort) this cell does not take off: a one-import Greg
-Mortimer run at Theta 1e6 goes extinct in most seeds (0-8 onsets over seeds
-20200333-20200348 on both interpreters), so the bound below is that the index
-case was ascertained at all, not that an outbreak followed.
+The cell is Greg Mortimer (the held-out hull, so pinning it leaks nothing into
+the fit), Theta = 1e10, seed 20200333. The old Theta = 1e6 cell belonged to
+the pooled-air model and became all-zero under either default flip, so the
+detector moved to the lowest live, unsaturated point on the new defaults.
+At Theta = 1e6 the prior pooled-air tuple was (6, 0, 217, 6, 3); changing
+either default alone drove that cell to (0, 0, 217, 0, 0).
 
 CHANGE DETECTOR, not a correctness check. The pinned values are not
 independently derived; they only pin current behaviour. If a deliberate change
@@ -43,7 +41,7 @@ import pytest
 from picard_framework.covid_theta_fit import HullObservables, simulate_hull
 
 HULL = "greg_mortimer_2020"
-THETA = 1e6
+THETA = 1e10
 SEED = 20200333
 
 PINNED_FIELDS = (
@@ -91,9 +89,10 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # coupling restored: the old tuple returns). The declared
     # retest-after-negative policy shipped in the same change is inert
     # here because greg_mortimer_2020 does not declare it.
-    # The two default flips each independently moved the prior tuple to
-    # (0, 0, 217, 0, 0); the paired defaults retain that reading.
-    (3, 11): (0, 0, 217, 0, 0),
+    # At the old Theta=1e6, each default flip independently moved the prior
+    # (6, 0, 217, 6, 3) reading to (0, 0, 217, 0, 0). The detector moved to
+    # Theta=1e10 because 1e6 belonged to the pooled-air model.
+    (3, 11): (149, 62, 217, 166, 30),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -103,9 +102,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (1, 1, 217, 3, 2). The two incubation changes above then moved it
     # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
-    # presentation-only sick call above moved it to the prior tuple; the
-    # two default flips now yield the reading below on both interpreters.
-    (3, 12): (0, 0, 217, 0, 0),
+    # The new-default Theta=1e10 reading is live but unsaturated on both
+    # interpreters.
+    (3, 12): (149, 62, 217, 166, 30),
 }
 
 
@@ -120,7 +119,7 @@ def _pinned(obs: HullObservables) -> tuple[int, ...]:
 
 
 def test_the_cell_recorded_its_index_case_and_stays_in_bounds(cell):
-    assert cell.recorded_onsets >= 0
+    assert cell.recorded_onsets >= 1
     assert 0 <= cell.onsets_before_split_day <= cell.recorded_onsets
     assert (
         cell.onsets_before_split_day + cell.onsets_on_or_after_split_day
