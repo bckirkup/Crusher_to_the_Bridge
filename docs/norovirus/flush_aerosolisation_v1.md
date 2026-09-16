@@ -252,15 +252,26 @@ four orders finer than an unpaired comparison.
   resolvable — not across the whole grid, which would quadruple a campaign to
   answer a question conditional on the first result.
 
-**Stage 2, executed as declared.** Stage 1 measured Δ secondaries straddling
-zero in all six cells at 1e-9 and excluding zero in all six at 1e-7, so the
-resolvability crossing lies strictly inside (1e-9, 1e-7); stage 2 places
-three arms — `3e-9`, `1e-8`, `3e-8` — at half-decade resolution inside that
-interval at the full 200 seeds (`flush_sweep_v1_{3e-9,1e-8,3e-8}_s2`,
-1,200 runs each, 3,600 total). No arm was selected on distance to A4, A9,
-VSP, or MIDRS, and the frozen [1e-9, 1e-3] span is unnarrowed — nothing has
-been adopted. The stage-1 measurement and its interpretation are ledger item
-43 and `docs/norovirus/flush_sweep_v1_stage1_findings.md`.
+**Stage 2, executed as declared — five arms under the corrected cabin
+dilution.** Stage 1 measured Δ secondaries straddling zero in all six cells
+at 1e-9 and excluding zero in all six at 1e-7, so the resolvability crossing
+lies strictly inside (1e-9, 1e-7); stage 2 places its arms at half-decade
+resolution inside that interval at the full 200 seeds. As executed it is
+**five arms, ~6,000 runs**: `3e-9`, `1e-8`, `3e-8` plus fresh `off` and
+`1e-7` baselines (`flush_sweep_v1_{off,1e-7,3e-9,1e-8,3e-8}_s2`, 1,200 runs
+each). The baselines exist because AERO-CABIN-02 replaced the cabin flush
+dose's invented 100 m³ dilution with the berth-share partition: the stage-1
+`off` and `1e-7` archives were produced under a different engine and are not
+a valid comparison for anything run now, so stage 2 carries its own. That
+re-run is the cost of the fix, not a design change — `1e-7` is retained as
+the arm stage 1 measured to exclude zero in all six cells, i.e. the upper
+bracket of the crossing under the corrected dilution. Stage-2 arm selection
+is unchanged and still keyed to the measured stage-1 contrast: no arm was
+selected on distance to A4, A9, VSP, MIDRS, or any attack-rate anchor, and
+the frozen [1e-9, 1e-3] span is unnarrowed — nothing has been adopted. The
+stage-1 measurement and its interpretation are ledger item 43 and
+`docs/norovirus/flush_sweep_v1_stage1_findings.md`; the archive
+comparability boundary is ledger item 45.
 
 **What the sweep may conclude.** Which decades of `f_aero` produce a resolvable
 change in secondaries per import, in VSP-style posting frequency, and in
