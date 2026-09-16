@@ -3294,6 +3294,41 @@ Roughly in dependency order.
     `telemetry_buffer/observation_model/sanitary_structure_v1.json` and
     `docs/norovirus/sanitary_structure_v1_readout.md`. Item 41's conditional
     attack-rate and posting description of default behaviour stands.
+    **The sweep has now been taken as a staged design — item 43.**
+
+43. **Flush aerosolisation is implemented, swept, and its resolvability
+    crossing sits strictly inside (1e-9, 1e-7); the staged design's own
+    saturation prediction is falsified at the outcome level.** The route
+    emits `10^titre x 107 g x f_aero` per defecation event into a sanitary
+    or cabin venue (`FLUSH-AERO-01`, default-off, refusals outside the
+    frozen [1e-9, 1e-3] span sourced to Johnson 2013 and Boles 2021;
+    `docs/norovirus/flush_aerosolisation_v1.md`). `flush_sweep_v1` stage 1
+    ran four arms on one image (`flush-sweep-v1-s1-0e23c6c`, job definition
+    `picard-campaign:43`) — `off` (the item-42 visits configuration exactly)
+    against 1e-9, 1e-7, 1e-5 — on the first 100 seeds of the matched block
+    (8000–8099), 6 cells, 600 runs per arm, 2,400 total, Batch
+    `dfe1f626`, `a2d141cc`, `97a2b304`, `a46d80e9`, 256/256 shards each,
+    0 failed; every archive records `parameters.flush_aerosol_fraction`
+    and pairing is verified run-for-run. **Nothing was fitted and no
+    fraction is adopted; the frozen span is unnarrowed.** (a) **Emission is
+    confirmed exactly linear in `f_aero` and within ~2× of the closed-form
+    per-visit prediction** — the mechanism executes as specified: witness
+    all-zero in `off`, nonzero in the live arms. (b) **The stage-1
+    saturation prediction is falsified at the outcome level**: per-exposure
+    infection probability does saturate at 1e-5, but the voyage does not —
+    3–11× more secondaries from 1e-7 to 1e-5, carried by more exposures and
+    onward chains (each infection is itself a shedder who flushes), so the
+    analytic knee bounds a single exposure, not the epidemic. (c) **1e-9 is
+    a null in all six cells** and **1e-7's Δ secondaries excludes zero in
+    all six**, so the resolvability crossing lies strictly inside
+    (1e-9, 1e-7) and stage 2 places its half-decade arms there at the full
+    200 seeds. The flat 8-arm grid declared in the design's first §8 is
+    superseded by this staged design — the declaration is unchanged:
+    [1e-9, 1e-3] spans both measurements end to end, and staging only
+    decides where compute is spent inside it. Artifacts
+    `telemetry_buffer/observation_model/flush_sweep_v1_s1.json`,
+    `docs/norovirus/flush_sweep_v1_stage1_readout.md` and
+    `docs/norovirus/flush_sweep_v1_stage1_findings.md`.
 
 ## 5. Held fixed by assumption
 
