@@ -563,3 +563,77 @@ def test_emit_updates_events_and_emitted_mass() -> None:
     _force_stool_event(core, shedder, THEATER)
     assert core.sanitary_telemetry["flush_events"] == 1
     assert core.sanitary_telemetry["flush_aerosol_emitted"] > 0.0
+
+
+# ── Manifest builder: staged-sweep plumbing ──────────────────────────
+
+import importlib.util  # noqa: E402
+
+
+def _builder():
+    spec = importlib.util.spec_from_file_location(
+        "build_flush_sweep_v1_manifest",
+        REPO_ROOT / "scripts" / "build_flush_sweep_v1_manifest.py",
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def test_seeds_is_a_prefix_of_the_matched_block() -> None:
+    mod = _builder()
+    full = mod.build(arm="1e-7", cabin_emission=True, seeds=200)
+    staged = mod.build(arm="1e-7", cabin_emission=True, seeds=100)
+    for tier_id in full["tiers"]:
+        full_seeds = full["tiers"][tier_id]["seeds"]
+        stage_seeds = staged["tiers"][tier_id]["seeds"]
+        assert stage_seeds == full_seeds[:100]
+        assert stage_seeds == mod.MATCHED_SEEDS[:100]
+        # Same block, run-for-run: no resample, no offset.
+        assert stage_seeds[0] == full_seeds[0]
+
+
+def test_seeds_refuses_out_of_range() -> None:
+    mod = _builder()
+    for bad in (0, -1, len(mod.MATCHED_SEEDS) + 1):
+        with pytest.raises(ValueError, match="--seeds"):
+            mod.build(arm="1e-7", cabin_emission=True, seeds=bad)
+
+
+def test_stage_tag_refusal_and_nocab_composition() -> None:
+    mod = _builder()
+    for bad in ("S1", "s-1", "stage 1", "", "s.1"):
+        with pytest.raises(ValueError, match="--stage-tag"):
+            mod.build(
+                arm="1e-7", cabin_emission=True, stage_tag=bad,
+            )
+    tag = mod._arm_tag("1e-7", False, "s1")
+    assert tag == "1e-7_s1_nocab"
+
+
+def test_stage_tag_propagates_to_campaign_and_filename() -> None:
+    mod = _builder()
+    manifest = mod.build(
+        arm="1e-7", cabin_emission=True, seeds=100, stage_tag="s1",
+    )
+    assert manifest["campaign"] == "flush_sweep_v1_1e-7_s1"
+    assert mod._arm_tag("1e-7", True, "s1") == "1e-7_s1"
+    # Untagged arm at the same fraction is a different label.
+    plain = mod.build(arm="1e-7", cabin_emission=True)
+    assert plain["campaign"] != manifest["campaign"]
+
+
+def test_half_decade_spellings_parse_inside_the_band() -> None:
+    mod = _builder()
+    new_arms = {"3e-9", "3e-8", "3e-7", "3e-6", "3e-5", "3e-4"}
+    assert new_arms <= set(mod.FRACTION_ARMS)
+    for spelling in new_arms:
+        parsed = _parse_flush_aerosol_fraction(
+            {"flush_aerosol_fraction": float(spelling)},
+        )
+        # The spelling round-trips: tag string -> float -> archived value.
+        assert parsed == float(spelling)
+        manifest = mod.build(arm=spelling, cabin_emission=True)
+        tx = manifest["tiers"]["fl_cls_7d"]["config_overrides"]["transmission"]
+        assert tx["flush_aerosol_fraction"] == float(spelling)
+        assert float(manifest["campaign"].split("_")[-1]) == float(spelling)

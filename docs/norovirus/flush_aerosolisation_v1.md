@@ -211,15 +211,39 @@ Matched seeds, one image, arms differing only in the swept field — the
 instrument from #527 and items 41–42, which resolves a paired difference two to
 four orders finer than an unpaired comparison.
 
-- **Primary grid.** `flush_aerosol_fraction` ∈ {off, 1e-9, 1e-8, 1e-7, 1e-6,
-  1e-5, 1e-4, 1e-3} — 8 arms, the off arm being the item-42 visits
-  configuration exactly, so the whole sweep pairs against a measured baseline.
+- **Staged design, replacing the flat 8-arm grid.** The analytic per-visit
+  dose (§3, §4) is exactly linear in `f_aero`, so the response is computable
+  before the campaign runs: with the shipped GII.4 curve, the real head
+  volumes (6.21 / 18.63 / 62.1 m³), `f_vent` 0.052, 0.6 m³/epoch breathing
+  and a 155 s dwell share, one visit after one peak-shedder flush gives dose
+  0.77 at 1e-9, 77 at 1e-7 and ≥7.7×10³ at 1e-5 in a median head — under
+  beta-Poisson that is P/visit ≈ 0.3% → 12.6% → ≥46%. **Everything at 1e-5
+  and above is saturated**; the interesting crossing is a band
+  (~4×10⁻¹⁰…4×10⁻⁶) that moves with titre and head size. Sampling the
+  saturated plateau at four decades would spend most of the campaign
+  measuring identical outcomes.
+- **Stage 1 — bracket.** `flush_aerosol_fraction` ∈ {off, 1e-9, 1e-7, 1e-5},
+  each on the **first 100 seeds** of the matched block (`--seeds 100
+  --stage-tag s1`) → 4 arms × 6 cells × 100 seeds = **2,400 runs**. The off
+  arm is the item-42 visits configuration exactly. The seed set is a prefix,
+  never a resample, so stage 1 pairs run-for-run with stage 2 and with the
+  item-42 archive; the `_s1` arm tag makes a 100-seed stage-1 arm impossible
+  to mistake for a 200-seed stage-2 arm at the same fraction.
+- **Stage 2 — locate the crossing.** Half-decade arms either side of the
+  crossing stage 1 measures, at the full 200 seeds, chosen from the
+  dose-response shape — explicitly **not** from distance to A9, A4, or any
+  VSP anchor. The builder already accepts the half-decade spellings
+  (`3e-9` … `3e-4`) so stage 2 needs no code change.
+- **The declaration is unchanged.** The frozen span [1e-9, 1e-3] is not
+  being narrowed by evidence we haven't collected — the band still spans
+  Johnson 2013 to Boles 2021 end to end; the staging only decides where
+  compute is spent inside it.
 - **Cells.** expedition_450, classic_1900, spirit_3000 at declared complement,
   7 and 12 days: the same six cells as items 41 and 42, so the contrast is
   against measured numbers rather than re-derived ones.
-- **Seeds.** 200 matched per cell per arm → **9,600 runs**. `sanitary_visit_mode
-  = dwell_weighted` throughout (§5), `droplet_emission_mode =
-  profile_conditioned` (the post-deletion default), no other change.
+- `sanitary_visit_mode = dwell_weighted` throughout (§5),
+  `droplet_emission_mode = profile_conditioned` (the post-deletion
+  default), no other change.
 - **Corner sweeps, only where the primary grid says they matter.**
   `SANITARY_HIGH_TOUCH_AREA_M2_PER_WC` at 0.25 and 1.0 m²/WC, and the cabin
   emitter disabled, both run at the lowest decade whose paired contrast is

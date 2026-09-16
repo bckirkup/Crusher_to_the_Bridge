@@ -7,8 +7,15 @@ aerosolised fraction disagree by four to five decades because they
 measure different fractions -- Johnson 2013 counts droplet nuclei only
 (~1e-9 to 8e-8), Boles 2021 captures near-field larger droplets (~1e-4
 to 1e-3) -- and cruise-ship vacuum systems have no virus measurement at
-all. No point value is adopted: the frozen span [1e-9, 1e-3] is swept,
-eight arms of ``transmission.flush_aerosol_fraction`` plus ``off``.
+all. No point value is adopted: the frozen span [1e-9, 1e-3] is swept
+as a staged design (doc section 8): stage 1 brackets the analytically
+predicted crossing with ``off``, 1e-9, 1e-7, 1e-5 on a 100-seed prefix,
+and stage 2 places half-decade arms around the measured crossing at
+the full 200 seeds. ``--seeds`` takes a PREFIX of the matched block,
+never a resample, so every stage pairs run-for-run with every other
+and with the item-42 archive; ``--stage-tag`` stamps the stage into
+the arm tag so a 100-seed stage-1 arm can never be mistaken for a
+200-seed stage-2 arm at the same fraction.
 
 The ``off`` arm is the item-42 ``dwell_weighted`` visits configuration
 exactly: ``sanitary_visit_mode = dwell_weighted`` in EVERY arm including
@@ -31,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 from typing import Any
@@ -56,7 +64,16 @@ EPOCHS_7D = 168
 EPOCHS_12D = 288
 RUNG = "reportable"
 
-FRACTION_ARMS = ("off", "1e-9", "1e-8", "1e-7", "1e-6", "1e-5", "1e-4", "1e-3")
+FRACTION_ARMS = (
+    "off",
+    "1e-9", "3e-9",
+    "1e-8", "3e-8",
+    "1e-7", "3e-7",
+    "1e-6", "3e-6",
+    "1e-5", "3e-5",
+    "1e-4", "3e-4",
+    "1e-3",
+)
 # Same arm spellings the campaign uses for its S3 prefixes.
 ARM_TAGS = {f: (f if f != "off" else "off") for f in FRACTION_ARMS}
 
@@ -120,6 +137,7 @@ def _base_tier(
     epochs: int,
     fraction: float,
     cabin_emission: bool,
+    seeds: list[int],
 ) -> dict[str, Any]:
     return {
         "description": TIER_DESCRIPTION,
@@ -130,7 +148,7 @@ def _base_tier(
         "epoch_durations": [epochs],
         "boarding_mechanism_rungs": [RUNG],
         "num_agents": declared_total(platform),
-        "seeds": MATCHED_SEEDS,
+        "seeds": seeds,
         "config_overrides": {
             "transmission": {
                 "sanitary_visit_mode": "dwell_weighted",
@@ -141,17 +159,55 @@ def _base_tier(
     }
 
 
-def build(*, arm: str, cabin_emission: bool) -> dict[str, Any]:
+def _arm_tag(arm: str, cabin_emission: bool, stage_tag: str | None) -> str:
+    """Filename/campaign tag; stage and cabin-emitter suffixes compose."""
+    tag = arm
+    if stage_tag is not None:
+        tag = f"{tag}_{stage_tag}"
+    if not cabin_emission:
+        tag = f"{tag}_nocab"
+    return tag
+
+
+def _checked_seeds(n: int) -> list[int]:
+    """First N of the matched block -- a prefix, never a resample."""
+    if not 1 <= n <= len(MATCHED_SEEDS):
+        raise ValueError(
+            f"--seeds must be in [1, {len(MATCHED_SEEDS)}], got {n!r}"
+        )
+    return MATCHED_SEEDS[:n]
+
+
+def _checked_stage_tag(tag: str | None) -> str | None:
+    """Stage tags are lowercase alphanumeric, e.g. ``s1``/``s2``."""
+    if tag is None:
+        return None
+    if not re.fullmatch(r"[a-z0-9]+", tag):
+        raise ValueError(
+            f"--stage-tag must match [a-z0-9]+, got {tag!r}"
+        )
+    return tag
+
+
+def build(
+    *,
+    arm: str,
+    cabin_emission: bool,
+    seeds: int = len(MATCHED_SEEDS),
+    stage_tag: str | None = None,
+) -> dict[str, Any]:
     """Build one arm of the sweep, its coordinates stamped on every tier."""
     fraction = 0.0 if arm == "off" else float(arm)
+    seed_block = _checked_seeds(seeds)
+    stage_tag = _checked_stage_tag(stage_tag)
     tiers: dict[str, Any] = {}
     for hull_key, platform in HULLS.items():
         for length_key, epochs in LENGTHS.items():
             tier_id = f"fl_{hull_key}_{length_key}"
             tiers[tier_id] = _base_tier(
-                platform, epochs, fraction, cabin_emission,
+                platform, epochs, fraction, cabin_emission, seed_block,
             )
-    tag = arm if cabin_emission else f"{arm}_nocab"
+    tag = _arm_tag(arm, cabin_emission, stage_tag)
     description_key = (
         "nocab" if not cabin_emission else ("off" if arm == "off" else "swept")
     )
@@ -226,15 +282,33 @@ def main() -> None:
         action="store_false",
         help="corner sweep: disable cabin-venue emission",
     )
+    parser.add_argument(
+        "--seeds",
+        type=int,
+        default=len(MATCHED_SEEDS),
+        help=(
+            "take the first N seeds of the matched 8000-8199 block "
+            "(a prefix, never a resample); default all 200"
+        ),
+    )
+    parser.add_argument(
+        "--stage-tag",
+        default=None,
+        help=(
+            "optional stage stamp [a-z0-9]+ appended to the arm tag, e.g. "
+            "s1 -> flush_sweep_v1_1e-7_s1; keeps a 100-seed stage-1 arm "
+            "distinct from a 200-seed stage-2 arm at the same fraction"
+        ),
+    )
     args = parser.parse_args()
     manifest = build(
         arm=args.flush_aerosol_fraction,
         cabin_emission=args.flush_cabin_emission,
+        seeds=args.seeds,
+        stage_tag=args.stage_tag,
     )
-    tag = (
-        args.flush_aerosol_fraction
-        if args.flush_cabin_emission
-        else f"{args.flush_aerosol_fraction}_nocab"
+    tag = _arm_tag(
+        args.flush_aerosol_fraction, args.flush_cabin_emission, args.stage_tag,
     )
     output_path = MANIFEST_PATH.with_name(
         MANIFEST_PATH.name.replace("_manifest.json", f"_{tag}_manifest.json"),
