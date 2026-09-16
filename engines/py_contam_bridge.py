@@ -617,7 +617,9 @@ class ContamTransportEngine:
         -------
         dict
             Updated pathogen mass per real zone after transport and decay.
-            Virtual ``_plenum_*`` keys are never returned.
+            Virtual ``_plenum_*`` keys are never returned; a zone the airflow
+            network does not model passes through untouched rather than
+            losing its mass to a silent sink.
         """
         dt = self.clock.hours_per_epoch
         decay_rate = (
@@ -633,10 +635,14 @@ class ContamTransportEngine:
             dtype=float,
         )
         output_vector = self._get_propagator(decay_rate, dt) @ input_vector
-        return {
+        result = {
             zone_id: max(0.0, float(mass))
             for zone_id, mass in zip(self._real_zone_ids, output_vector)
         }
+        for zone_id, mass in zone_pathogen_mass.items():
+            if zone_id not in result and not is_plenum_zone(zone_id):
+                result[zone_id] = mass
+        return result
 
     def get_transport_summary(
         self,

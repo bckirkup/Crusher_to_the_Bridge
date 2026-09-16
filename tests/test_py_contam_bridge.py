@@ -306,8 +306,8 @@ class TestEdgeCases:
         engine = _engine_with_single_path(flow=10.0, decay=0.0)
         initial = {"A": 100.0, "B": 0.0, "NONEXISTENT": 50.0}
         result = engine.transport_step(initial)
-        assert "NONEXISTENT" not in result
-        assert set(result) == {"A", "B"}
+        assert result["NONEXISTENT"] == 50.0
+        assert set(result) == {"A", "B", "NONEXISTENT"}
 
 
 # ── Adjacency / cross-zone path construction ────────────────────────────
