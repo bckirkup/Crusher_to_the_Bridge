@@ -711,6 +711,22 @@ def test_stage_tag_propagates_to_campaign_and_filename() -> None:
     assert plain["campaign"] != manifest["campaign"]
 
 
+def test_built_arms_pin_the_air_model_and_share_one_seed_block() -> None:
+    mod = _builder()
+    arms = ["off", "3e-9", "1e-8", "3e-8", "1e-7"]
+    seed_blocks = set()
+    for arm in arms:
+        manifest = mod.build(arm=arm, cabin_emission=True, stage_tag="s2r")
+        for tier in manifest["tiers"].values():
+            overrides = tier["config_overrides"]
+            assert overrides["transmission"]["cabin_air_mode"] == (
+                "cabin_compartment"
+            )
+            assert overrides["hvac"]["pathogen_pool_transport"] == "airflow"
+            seed_blocks.add(tuple(tier["seeds"]))
+    assert len(seed_blocks) == 1
+
+
 def test_half_decade_spellings_parse_inside_the_band() -> None:
     mod = _builder()
     new_arms = {"3e-9", "3e-8", "3e-7", "3e-6", "3e-5", "3e-4"}

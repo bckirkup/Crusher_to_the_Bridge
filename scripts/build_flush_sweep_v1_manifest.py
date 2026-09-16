@@ -154,6 +154,13 @@ def _base_tier(
                 "sanitary_visit_mode": "dwell_weighted",
                 "flush_aerosol_fraction": fraction,
                 "flush_cabin_emission": cabin_emission,
+                "cabin_air_mode": "cabin_compartment",
+            },
+            # Both air-model settings are the shipped defaults; the manifest
+            # pins them so a rerun records the engine it measured, whatever
+            # the defaults do next.
+            "hvac": {
+                "pathogen_pool_transport": "airflow",
             },
         },
     }
