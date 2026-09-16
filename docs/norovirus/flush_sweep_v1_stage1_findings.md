@@ -121,3 +121,14 @@ forbidden from answering "which arm best matches A9/A4/MIDRS". If the
 crossing turns out to sit below 3e-9, the finding is that the route is
 resolvable at Johnson's own measured bottom decade, which is a statement
 about the evidence and not about the ships.
+
+> **Note — engine supersession (AERO-CABIN-02, ledger item 45).** This
+> document stands as the measurement of the **pre-AERO-CABIN-02** engine:
+> every archive it describes ran with the cabin flush route diluting into
+> the retired 100 m³ compartment fallback. Its absolute cabin-route doses
+> are therefore **not comparable** to stage 2's, which runs under the
+> berth-share partition. The §5 declaration that stage 2 "re-reads" the
+> stage-1 `off` and 1e-7 arms is superseded: stage 2 executes as **five
+> arms** — `off`, `1e-7`, `3e-9`, `1e-8`, `3e-8`, ~6,000 runs — carrying
+> its own baselines under the corrected dilution (see
+> `flush_aerosolisation_v1.md` §8).

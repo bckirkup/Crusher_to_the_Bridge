@@ -3420,7 +3420,14 @@ Roughly in dependency order.
     through `zone_volumes` and therefore still dilutes into the same
     invented 100 m³** — the identical defect, left in place because emesis
     is on by default: removing it moves every existing arm, so it is a
-    separate measured change, not a ride-along here.
+    separate measured change, not a ride-along here. **Consequence for the
+    sweep**: stage 2 grew from three arms to **five / ~6,000 runs** — the
+    declared `3e-9`, `1e-8`, `3e-8` plus fresh `off` and `1e-7` baselines at
+    the same 200 paired seeds — because the stage-1 `off`/`1e-7` archives
+    were produced under the pre-partition engine and cannot be re-read as
+    stage-2 baselines; `1e-7` re-runs as the measured upper bracket of the
+    crossing under the corrected dilution. Arm selection unchanged; nothing
+    chosen on distance to any anchor.
 
 ## 5. Held fixed by assumption
 
