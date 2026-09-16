@@ -33,13 +33,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 import time
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from picard_framework import covid_boarding_screen  # noqa: E402
+from picard_framework import covid_boarding_screen, covid_import_sweep  # noqa: E402
 from picard_framework.covid_first_look import (  # noqa: E402
     load_design,
     merge_fit,
@@ -188,6 +189,36 @@ def _screen(args: argparse.Namespace) -> int:
     return 0
 
 
+def _refine(args: argparse.Namespace) -> int:
+    parent = covid_boarding_screen.load_design(args.design)
+    with open(args.surface, encoding="utf-8") as handle:
+        surface = json.load(handle)
+    if surface["design"]["design_id"] != parent.design_id:
+        raise SystemExit(
+            f"surface is from {surface['design']['design_id']}, "
+            f"design is {parent.design_id}",
+        )
+    rule = covid_import_sweep.RefinementRule(
+        takeoff_tolerance=args.takeoff_tolerance,
+        log_ratio_tolerance=math.log(args.ratio_tolerance),
+        budget=args.budget,
+    )
+    design = covid_import_sweep.refined_design(
+        parent.as_dict(), surface, design_id=args.design_id, rule=rule,
+    )
+    _write(design, args.out)
+    for point in design["refinement"]["chosen"]:
+        print(
+            f"  theta={point['theta']:.4g} imports={point['imports']} "
+            f"({point['axis']} midpoint, score {point['score']:.2f}"
+            f"{', crosses early' if point['crosses_observed_early'] else ''}"
+            f"{', crosses total' if point['crosses_observed_total'] else ''})",
+            flush=True,
+        )
+    print(f"{len(design['points'])} refinement points -> {args.out}", flush=True)
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
@@ -235,6 +266,22 @@ def main(argv: list[str] | None = None) -> int:
         default="telemetry_buffer/observation_model/covid_boarding_screen_v1.json",
     )
     screen_parser.set_defaults(func=_screen)
+
+    refine_parser = sub.add_parser(
+        "refine",
+        help="write the stage-2 point-list design from a stage-1 screen surface",
+    )
+    refine_parser.add_argument("--design", required=True, help="stage-1 design JSON")
+    refine_parser.add_argument("--surface", required=True, help="stage-1 merged surface")
+    refine_parser.add_argument("--design-id", required=True)
+    refine_parser.add_argument("--budget", type=int, default=12)
+    refine_parser.add_argument("--takeoff-tolerance", type=float, default=0.25)
+    refine_parser.add_argument(
+        "--ratio-tolerance", type=float, default=2.0,
+        help="fold change in a conditional onset median that triggers refinement",
+    )
+    refine_parser.add_argument("--out", required=True)
+    refine_parser.set_defaults(func=_refine)
 
     args = parser.parse_args(argv)
     return int(args.func(args))

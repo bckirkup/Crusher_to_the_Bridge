@@ -696,6 +696,74 @@ two hulls, not Theta, is where that lives.
   the first held-out statement in this series that is a quantitative
   miss rather than a categorical one.
 
+## Quarantine-leak and roster-drain trace (local, 2026-09-16)
+
+Two full-voyage Diamond Princess cells at Theta_fit = 3.16e7 (v4 seeds
+20200215 and 20200216, CPython 3.12) with the transmission core's dose
+accumulation and the syndromic specimen ledger instrumented. Aggregate only:
+`TransmissionEvent.source_agent_id` is `None` on every droplet/HVAC event, so
+transmitter-specific chains cannot be read from the current event structure.
+
+**Leak.** Pathways are 95% droplet, 5% HVAC, zero direct contact, so
+`contact_mode` (`density_dependent` or otherwise) is inert on this arm. After
+the day-16 (5 Feb) confinement, seed 16 infects 2,039 confined passengers
+inside `Cabin_Corridor` zones, 1,043 crew (exempt, working Dining/Free/crew
+corridors) and 413 unconfined passengers; infections/day peak at ~540 on
+day 25, i.e. the epidemic runs inside the quarantine, opposite to the record.
+Decomposing the droplet dose each confined passenger accumulated before
+infection: **92% shared far-field cabin-block air, 8% cabin-mate add-back,
+0% near-field** (near-field is off in the fit spec). The block is a single
+900-1,200 m³ pool holding ~35 confined passengers 24 h/day; the 0.05×0.05
+confinement factor on emission and inhalation does not beat a median 144
+dosed epochs against several 1e9-copy shedders. The shared corridor pool, not
+cabin-mate contact, is the leak; it is a ship-model architecture finding and
+is *not* interpreted as an import effect in the sweep below.
+
+**Drain.** (1) ~800 passengers receive a passive sick-call swab on days 16-17
+with ~45 hosts infected: confinement → ~30% refuse → exported as
+`compliance_status = non_compliant` → syndromic treats non-compliant as
+symptomatic → sick-call hazard → PCR. All are then excluded from the campaign
+roster for the rest of the voyage. (2) One specimen per host, ever: 1,758
+hosts swabbed negative and infected later were never retested; 1,279 swabbed
+while infected but below the day-of-infection sensitivity curve, likewise.
+Campaign positives are 300 against 3,520 infected, and 74% crew (observed
+~20%). The 0.90 asymptomatic share is mostly *timing* — campaign days 24-29
+coincide with peak incidence, so positives are presymptomatic at swab (64%
+record an onset later) — and will move with the leak before any roster change.
+
+## covid_import_sweep_v1: adaptive-density imports × Theta (design, not yet run)
+
+The next campaign measures how declared import count trades against Theta on
+the corrected model, with **adaptive sampling density**: a coarse product grid
+first, then midpoints inserted only where the response moves fastest.
+
+**Stage 1** (`picard_framework/runs/covid_import_sweep_v1_design.json`): Theta
+∈ {3.16e6, 1e7, 3.16e7, 1e8, 3.16e8} × imports ∈ {1, 2, 3, 5, 8, 13, 20} ×
+the 20 matched v4 fit seeds, index case infected at embarkation, heads
+visited (`dwell_weighted`). 700 cells, ~30 min each, roughly $10 on Spot.
+Same worker, merge and pairing as the boarding screen (`screen` subcommand),
+plus per-cell `conditional_on_takeoff` medians.
+
+**Stage 2** (`tools/fit_covid_theta.py refine`, `picard_framework/covid_import_sweep.py`):
+for every pair of neighbouring stage-1 cells along either axis, compute
+`P(takeoff)` change, and the log change of the conditional medians of onsets
+before 6 Feb and total recorded onsets. A pair is a candidate when
+`|ΔP(takeoff)| > 0.25`, a conditional median changes more than 2×, or a
+conditional median **crosses the observed count** (34 early / 197 total —
+used to locate the crossing, never to prefer a cell). Candidates are ranked
+by their largest normalised change; the top 12 geometric midpoints
+(`sqrt(Theta_a Theta_b)`, `round(sqrt(n_a n_b))`, skipping midpoints that
+collapse onto an endpoint) become an explicit point list — the same design
+schema with `points` set — run on the same 20 seeds (≤240 cells). The refined
+design records the rule, every candidate's scores and the pair it sits
+between, so the choice of where to look is declared before the cells run.
+
+What the sweep reads: P(takeoff), early and total onsets and campaign
+positives conditional on takeoff, first onset day, and positive composition,
+all per (Theta, imports) and paired by seed. It declares imports; it does not
+fit them, and the quarantine-leak finding above bounds how much of any total-
+side mismatch may be attributed to the import axis.
+
 ## Reproduction
 
 ```bash
