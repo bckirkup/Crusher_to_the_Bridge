@@ -5317,7 +5317,7 @@ class TransmissionCore:
     ) -> None:
         """Whole-epoch inhalation dose to a cabin venue's occupants.
 
-        The emesis treatment unchanged: ``mass / volume`` with the
+        The emesis treatment, at the stateroom's volume: ``mass / volume`` with the
         compartment's berth share of its declared block volume and the
         parent's ventilation factor, no ``f_vent`` -- the bias is downward,
         recorded, not corrected.
