@@ -111,11 +111,13 @@ The existing structural rule, unchanged and with no tunable "fraction away from
 cabin": at home the venue is the host's own cabin fittings, otherwise the head
 block serving its current zone, matched on sex. Both emit.
 
-The **cabin** emitter inherits ledger item 31: no platform declares a cabin
-bathroom volume, so the compartment volume falls back to 100 m³ and dilutes a
-flush ~40× against a real ~2.5 m³ bathroom. That biases the cabin arm's dose
-**down** and is recorded, not corrected — inventing a 2 m³ bathroom now would
-be an unsourced volume choice that happens to raise the dose.
+The **cabin** emitter dilutes into the stateroom's air-unit volume — the
+compartment's berth share of its declared block (`V_block × berths / Σ
+berths`, the AERO-CABIN-01 partition), not the retired 100 m³ fallback it
+shipped with. The remaining downward bias is that a stateroom is not a
+bathroom: no platform declares a lavatory micro-zone, so ~14–48 m³ stands in
+for a real ~2.5 m³ one. Recorded, not corrected — inventing a 2 m³ bathroom
+now would be an unsourced volume choice that happens to raise the dose.
 
 The **shared-head** emitter is the load-bearing one, and is the reason this
 change follows #538 rather than preceding it: a public head concentrates many

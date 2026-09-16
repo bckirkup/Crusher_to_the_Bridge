@@ -5089,7 +5089,12 @@ class TransmissionCore:
         # occupants are looked up in the compartmented map a cabin corridor
         # produces; a cabin compartment has no measured volume, so the
         # lookup falls back to EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3, which
-        # biases the dose down — recorded in ledger item 31.
+        # biases the dose down — recorded in ledger item 31. The flush
+        # route's cabin dosing does take the berth-share partition
+        # (_dose_flush_cabin via _air_unit_volume); emesis stays on the
+        # fallback deliberately — it is on by default, so removing its
+        # invented volume moves every existing arm and must be its own
+        # measured change.
         units = self._cabin_compartments(zone_occupants)
         for zone_name, entries in emitted.items():
             mass = sum(load for _, load in entries)
@@ -5313,18 +5318,16 @@ class TransmissionCore:
         """Whole-epoch inhalation dose to a cabin venue's occupants.
 
         The emesis treatment unchanged: ``mass / volume`` with the
-        compartment fallback volume and the parent's ventilation factor,
-        no ``f_vent`` -- the bias is downward, recorded, not corrected.
+        compartment's berth share of its declared block volume and the
+        parent's ventilation factor, no ``f_vent`` -- the bias is downward,
+        recorded, not corrected.
         """
         susceptible = self._get_susceptible(
             units.get(venue, []), pathogen_id,
         )
         if not susceptible:
             return
-        volume = max(
-            self.zone_volumes.get(venue, EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3),
-            1.0,
-        )
+        volume = max(self._air_unit_volume(venue), 1.0)
         concentration = mass / volume
         ventilation = self._aerosol_ventilation_factor(
             self.compartment_parent(venue),
