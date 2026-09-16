@@ -3462,12 +3462,14 @@ Roughly in dependency order.
     absent from it, so cabin-venue event mass never reaches the HVAC
     reservoir — only sanitary-venue mass does, and sanitary HVAC is
     exhaust-only. The in-room dose measured here is unaffected; the fix is
-    a separate measured change. Artifacts
+    a separate measured change — **repaired in item 48; the stage-2
+    archive is superseded by items 47 and 48 and is re-run on the repaired
+    engine as its own measurement.** Artifacts
     `telemetry_buffer/observation_model/flush_sweep_v1_s2.json`,
     `docs/norovirus/flush_sweep_v1_stage2_readout.md` and
     `docs/norovirus/flush_sweep_v1_stage2_findings.md`.
 
-46. **`AERO-CABIN-03`: per-pathogen airborne pool transport was absent before
+47. **`AERO-CABIN-03`: per-pathogen airborne pool transport was absent before
     the airflow repair, and the two air-model defaults are now changed.** On
     every prior run, for every profiled pathogen, the CONTAM engine transported
     only the legacy aggregate airborne array. That aggregate is recomputed from
@@ -3494,7 +3496,35 @@ Roughly in dependency order.
     `cabin_compartment` trace reported 3 onsets, 13 HVAC infections, and
     witness 139. The corrected traces are 2001/796/65 and 2/0/188,
     respectively. Refit remains required before any HVAC, ventilation, filter,
-    or pooled-cabin conclusion is used.
+    or pooled-cabin conclusion is used. **Consequence for the flush sweep**:
+    stage 2 (item 46) ran under the pre-repair engine, on which the
+    norovirus per-pathogen pool — the only pool `_pathway_hvac_airborne`
+    doses from — never crossed a zone boundary, so its drift route was dead
+    in every arm including `off`. The `cabin_air_mode` flip is a null for
+    norovirus (zero continuous emission share on the `emesis_conditioned`
+    profile); the transport repair is not. Stage 2 stands as a measurement
+    of the dead-drift engine only.
+
+48. **Item 46(b) repaired: cabin-venue flush and emesis mass now reaches the
+    zone pool.** The epoch drain in `orchestrator_epoch` resolves each
+    drained key through `TransmissionCore.compartment_parent()` before
+    crediting, so a stateroom event's aerosol mass is credited to its
+    parent corridor block (the zone that shares the cabin HVAC branch)
+    instead of being dropped because its compartment key is absent from
+    the zone-mass map. Keys that resolve to no declared zone are still
+    dropped. No constant is added; the in-room dose paths are untouched.
+    Under item 47's live transport this is the difference between
+    stateroom events feeding the corridor/HVAC branch and vanishing — so it
+    lands before the stage-2 re-run rather than after it, to avoid a third
+    pass. A paired-seed probe (classic 7 d, seed 8000, `1e-7`) showed no
+    divergence because no flush exposure established a secondary on that
+    seed; the mechanism is covered by unit tests on the credited mass. The
+    stage-2 arms (`off`, `3e-9`, `1e-8`, `3e-8`, `1e-7`; seeds 8000–8199)
+    are re-run as declared on an image pinned to this tip, with
+    `cabin_air_mode` and `hvac.pathogen_pool_transport` set explicitly in
+    the manifests rather than inherited from moving defaults, and read
+    against the item-46 archive as an engine-change contrast on paired
+    seeds. Nothing selected on any anchor; the span is not narrowed.
 
 ## 5. Held fixed by assumption
 

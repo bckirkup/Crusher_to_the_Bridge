@@ -1,6 +1,10 @@
 # Stage 2 of the flush sweep: the crossing is hull-dependent and sits below the stage-1 bracket on the large hulls
 
-Status: measured. Companion to the generated tables in
+Status: measured; **superseded as a measurement of the current engine** —
+it ran before the per-pathogen pool transport repair (ledger item 47, under
+which the norovirus drift route was dead in every arm) and before the
+cabin-venue drain repair (item 48). It stands as the pre-repair reference the
+re-run is read against on paired seeds. Companion to the generated tables in
 [`flush_sweep_v1_stage2_readout.md`](flush_sweep_v1_stage2_readout.md)
 (`telemetry_buffer/observation_model/flush_sweep_v1_s2.json`); design and
 declared uncertainty in
