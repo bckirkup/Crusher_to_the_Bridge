@@ -1336,8 +1336,10 @@ the before column is the merged-`main` baseline):
 | distinct infected hosts | 3,449 | 2,769 |
 | `droplet` events | 2,068 | 2,360 |
 | `hvac_airborne` events | 1,384 | 411 |
-| day 15 incidence | 376 | 32 |
+| `hvac_airborne` events in confined cabin hosts | 1,101 | 336 |
+| day 15 incidence | 376 | 376 |
 | days 16–18 incidence | 18 / 13 / 18 | 16 / 11 / 21 |
+| days 20–22 incidence | 297 / 350 / 543 | 222 / 334 / 454 |
 
 The cell still burns to near-total penetration, so this change corrects an
 inflated route magnitude; it does not make the outbreak partially penetrating,

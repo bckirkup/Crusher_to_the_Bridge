@@ -4455,11 +4455,11 @@ class TransmissionCore:
         zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
         hvac_downstream_zones: dict[str, list[str]],
     ) -> dict[str, list[str]]:
-        upstream: dict[str, list[str]] = {}
-        for source_zone in sorted(zone_shedders):
+        upstream: dict[str, set[str]] = {}
+        for source_zone in zone_shedders:
             for target_zone in hvac_downstream_zones.get(source_zone, []):
                 if target_zone != source_zone:
-                    upstream.setdefault(target_zone, []).append(source_zone)
+                    upstream.setdefault(target_zone, set()).add(source_zone)
         return {
             target_zone: sorted(source_zones)
             for target_zone, source_zones in upstream.items()
