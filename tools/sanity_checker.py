@@ -54,6 +54,7 @@ from engines.strain_state import (  # noqa: E402
     StrainEvolutionConfig,
 )
 from engines.transmission_core import HIGH_TOUCH_AREA_M2  # noqa: E402
+from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 
 
@@ -84,11 +85,11 @@ _CYAN = "\033[96m"
 _BOLD = "\033[1m"
 _RESET = "\033[0m"
 
-_PROTOCOLS_JSON = "protocols.json"
-_ACTIVE_PROFILES_JSON = "active_profiles.json"
-_SPATIAL_LAYOUT_JSON = "spatial_layout.json"
-_AIR_FLOW_PATHS_JSON = "air_flow_paths.json"
-_RESOURCE_COSTS_JSON = "resource_costs.json"
+_PROTOCOLS_JSON = os.path.basename(asset_defaults.PROTOCOLS_CONFIG)
+_ACTIVE_PROFILES_JSON = os.path.basename(asset_defaults.DEFAULT_PATHOGEN_PROFILES)
+_SPATIAL_LAYOUT_JSON = asset_defaults.SPATIAL_LAYOUT_FILENAME
+_AIR_FLOW_PATHS_JSON = asset_defaults.AIR_FLOW_PATHS_FILENAME
+_RESOURCE_COSTS_JSON = os.path.basename(asset_defaults.RESOURCE_COSTS_CONFIG)
 _CONFIG_YAML = "config.yaml"
 
 # Sourced interval for immunosuppression prevalence in adults: Harpaz 2016
@@ -2045,8 +2046,7 @@ def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
     config_path = tat_cfg.get("config_path")
     if not config_path:
         return
-    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    full = config_path if os.path.isabs(config_path) else os.path.join(_root, config_path)
+    full = config_path if os.path.isabs(config_path) else os.path.join(_REPO_ROOT, config_path)
     if not os.path.isfile(full):
         report.error(
             _CONFIG_YAML, "TAT",
@@ -2109,8 +2109,7 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
                 )
     params_path = lr.get("params_path")
     if params_path:
-        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        full = params_path if os.path.isabs(params_path) else os.path.join(_root, params_path)
+        full = params_path if os.path.isabs(params_path) else os.path.join(_REPO_ROOT, params_path)
         if not os.path.isfile(full):
             report.error(
                 _CONFIG_YAML, "LONG_READ",
@@ -2687,8 +2686,7 @@ def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
                      "chronic_disease.enabled but no config_path specified")
         return
 
-    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    full_path = os.path.join(repo_root, config_path)
+    full_path = os.path.join(_REPO_ROOT, config_path)
     if not os.path.isfile(full_path):
         report.error(_CONFIG_YAML, "FILE",
                       f"chronic_disease.config_path '{config_path}' not found")
@@ -2797,12 +2795,12 @@ def paths_from_run_config(repo_root: str, config_yaml: str | None = None) -> dic
     from crusher_labs import load_config
     cfg = load_config(config_yaml)
     layout_rel = cfg.get("ship_graph", {}).get(
-        "spatial_layout", "data/platforms/mega_cruise_5000/spatial_layout.json")
+        "spatial_layout", asset_defaults.DEFAULT_SPATIAL_LAYOUT)
     platform_dir = os.path.dirname(os.path.join(repo_root, layout_rel))
     profiles_rel = cfg.get("multi_pathogen", {}).get(
-        "profiles_path", "data/pathogens/active_profiles.json")
+        "profiles_path", asset_defaults.DEFAULT_PATHOGEN_PROFILES)
     return {
-        "config_dir": os.path.join(repo_root, "data", "config"),
+        "config_dir": os.path.join(repo_root, asset_defaults.CONFIG_DIR),
         "platform_dir": platform_dir,
         "pathogen_file": os.path.join(repo_root, profiles_rel),
         "cfg": cfg,
@@ -3016,13 +3014,13 @@ def main() -> None:
     )
     parser.add_argument(
         "--config-dir",
-        default=os.path.join(_REPO_ROOT, "data", "config"),
-        help="Path to config directory (default: data/config/)",
+        default=os.path.join(_REPO_ROOT, asset_defaults.CONFIG_DIR),
+        help=f"Path to config directory (default: {asset_defaults.CONFIG_DIR}/)",
     )
     parser.add_argument(
         "--platform-dir",
-        default=os.path.join(_REPO_ROOT, "data", "platforms", "mega_cruise_5000"),
-        help="Path to platform directory (default: data/platforms/mega_cruise_5000/)",
+        default=os.path.join(_REPO_ROOT, asset_defaults.platform_dir_rel()),
+        help=f"Path to platform directory (default: {asset_defaults.platform_dir_rel()}/)",
     )
     parser.add_argument(
         "--from-config",
@@ -3035,7 +3033,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--pathogen-dir",
-        default=os.path.join(_REPO_ROOT, "data", "pathogens"),
+        default=os.path.join(_REPO_ROOT, asset_defaults.PATHOGENS_DIR),
         help="Directory for active_profiles.json when --pathogen-file omitted",
     )
     parser.add_argument(

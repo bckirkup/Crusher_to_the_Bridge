@@ -40,6 +40,7 @@ from typing import Any
 import numpy as np
 
 from engines.sim_clock import SimClock
+from simulation_utils import asset_defaults
 from simulation_utils.paths import load_validated_json, resolve_repo_path
 
 # ── Constants ────────────────────────────────────────────────────────────
@@ -692,8 +693,7 @@ def load_air_flow_paths(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     """Load air_flow_paths.json from the configured path."""
     graph_cfg = cfg.get("ship_graph", {})
     rel_path = graph_cfg.get(
-        "air_flow_paths",
-        "data/platforms/destroyer_baseline/air_flow_paths.json",
+        "air_flow_paths", asset_defaults.DEFAULT_AIR_FLOW_PATHS,
     )
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
@@ -705,8 +705,7 @@ def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     """Load spatial_layout.json from the configured path."""
     graph_cfg = cfg.get("ship_graph", {})
     rel_path = graph_cfg.get(
-        "spatial_layout",
-        "data/platforms/destroyer_baseline/spatial_layout.json",
+        "spatial_layout", asset_defaults.DEFAULT_SPATIAL_LAYOUT,
     )
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):

@@ -32,6 +32,7 @@ from orchestrator_types import (
     ProtocolContext,
     SimulationState,
 )
+from simulation_utils import asset_defaults
 from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
 from telemetry_buffer.agent_axes import (
     INFECTION_IMMUNE,
@@ -447,7 +448,7 @@ def finalize_simulation(
 
     logging_config_path = resolve_repo_path(
         REPO_ROOT,
-        logging_profile_path or "data/config/logging_profile.json",
+        logging_profile_path or asset_defaults.LOGGING_PROFILE_CONFIG,
     )
     _, _, logging_config = load_logging_profile(logging_config_path)
 

@@ -77,7 +77,6 @@ import json
 import math
 import os
 import statistics
-import sys
 import tempfile
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
@@ -86,30 +85,28 @@ from typing import Literal
 
 import numpy as np
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from engines.transmission_core import (  # noqa: E402
+from engines.transmission_core import (
     CONTACT_ACTIVITIES,
     EMESIS_TOTAL_SHED_GEC_RANGE,
 )
-from orchestrator_init import SCENARIO_VECTORS  # noqa: E402
-from picard_framework.catalog.registry import CatalogRegistry  # noqa: E402
-from picard_framework.pathogen_overrides import (  # noqa: E402
+from orchestrator_init import SCENARIO_VECTORS
+from picard_framework.catalog.registry import CatalogRegistry
+from picard_framework.pathogen_overrides import (
     load_pathogen_bundle,
 )
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
+from picard_framework.run_spec import PicardRunSpec
+from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
     compute_derived_metrics,
     extract_timeseries,
 )
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
-from simulation_utils.platform_complement import (  # noqa: E402
+from picard_framework.simulation.ship_simulation import ShipSimulation
+from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.platform_complement import (
     declared_total,
     require_declared_total,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # The class the observed VSP record is mostly made of -- 66% of the postings
 # in `vsp_outbreak_series.csv` carry 600-2,200 passengers -- and a third of the

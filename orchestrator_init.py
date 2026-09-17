@@ -90,6 +90,7 @@ from orchestrator_types import (
     ObservationEngine,
     ProtocolContext,
 )
+from simulation_utils import asset_defaults
 from simulation_utils.paths import load_validated_json, resolve_repo_path
 from telemetry_buffer.agent_axes import (
     INFECTION_INFECTED,
@@ -1207,7 +1208,7 @@ def load_pathogen_profiles(
         _validate_route_parameterisation(profiles)
         return _normalize_profile_units(profiles)
 
-    profiles_path = mp_cfg.get("profiles_path", "data/pathogens/active_profiles.json")
+    profiles_path = mp_cfg.get("profiles_path", asset_defaults.DEFAULT_PATHOGEN_PROFILES)
     full_path = resolve_repo_path(REPO_ROOT, profiles_path)
     if not os.path.isfile(full_path):
         return {}
@@ -2006,7 +2007,7 @@ def init_observation_engine(
         ClinicalMultiplexPanel,
     )
 
-    obs_cfg_path = resolve_repo_path(REPO_ROOT, "data/config/logging_profile.json")
+    obs_cfg_path = resolve_repo_path(REPO_ROOT, asset_defaults.LOGGING_PROFILE_CONFIG)
     fidelity_name, _fidelity, logging_config = load_logging_profile(obs_cfg_path)
     lab_notebook_enabled = logging_config.get("lab_notebook", {}).get("enabled", True)
 
@@ -2085,13 +2086,13 @@ def init_observation_engine(
     from crusher_labs.observation_core import LongReadVerificationSequencing
 
     tat_cfg = cfg.get("instrument_turnaround", {})
-    tat_path = tat_cfg.get("config_path", "data/config/instrument_turnaround.json")
+    tat_path = tat_cfg.get("config_path", asset_defaults.INSTRUMENT_TURNAROUND_CONFIG)
     lr_profile_turnaround: dict[str, Any] | None = None
     long_read_inst: LongReadVerificationSequencing | None = None
     if is_long_read_enabled(cfg):
         lr_cfg = long_read_config(cfg)
         params_path = lr_cfg.get(
-            "params_path", "data/config/long_read_sequencing_params.json",
+            "params_path", asset_defaults.LONG_READ_SEQUENCING_PARAMS_CONFIG,
         )
         profile = lr_cfg.get("default_profile", "flongle_rapid")
         modality = LongReadNanoporeSequencing.from_params_path(
@@ -2156,11 +2157,11 @@ def init_protocol_engine(
     """Initialise the reactive protocol engine and cost ledger."""
     protocols_cfg_path = resolve_repo_path(
         REPO_ROOT,
-        protocols_path or "data/config/protocols.json",
+        protocols_path or asset_defaults.PROTOCOLS_CONFIG,
     )
     resource_cfg_path = resolve_repo_path(
         REPO_ROOT,
-        resource_costs_path or "data/config/resource_costs.json",
+        resource_costs_path or asset_defaults.RESOURCE_COSTS_CONFIG,
     )
     _ = logging_profile_path  # reserved for future logging-profile overrides
 
@@ -2209,7 +2210,7 @@ def init_wearable_monitors(
     Returns ``(None, None)`` when wearable monitoring is disabled or absent.
     """
     rng = np.random.default_rng(seed)
-    root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    root = repo_root or REPO_ROOT
     monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=root)
     if monitor is None:
         return None, None

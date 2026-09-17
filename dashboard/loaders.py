@@ -30,6 +30,11 @@ from simulation_utils.paths import (
     validate_path_component,
     validated_open,
 )
+from telemetry_buffer.fields import (
+    RECORD_AGENTS,
+    RECORD_CONTACT_TRACING,
+    record_spaces,
+)
 
 SPATIAL_LAYOUT_SCHEMA = "spatial_layout.schema.json"
 PICARD_RUN_SPEC_SCHEMA = "picard_run_spec.schema.json"
@@ -171,7 +176,7 @@ def resolve_platform_id(
     if override:
         return override, "manual"
     if history:
-        spaces = history[-1].get("spaces", {})
+        spaces = record_spaces(history[-1])
         pid, method = fingerprint_platform(set(spaces.keys()))
         if pid:
             return pid, method
@@ -307,9 +312,9 @@ def detect_retention_mode(history: list[dict[str, Any]]) -> str:
     if not history:
         return "empty"
     sample = history[min(len(history) // 2, len(history) - 1)]
-    if sample.get("agents"):
+    if sample.get(RECORD_AGENTS):
         return "full"
-    if sample.get("contact_tracing"):
+    if sample.get(RECORD_CONTACT_TRACING):
         return "full"
     return "compact"
 

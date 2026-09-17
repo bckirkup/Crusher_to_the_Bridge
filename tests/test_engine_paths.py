@@ -8,7 +8,12 @@ import sys
 import pytest
 
 import engines.engine_paths as engine_paths
-from engines.engine_paths import get_engine_path, register_engine_paths
+from engines.engine_paths import (
+    engine_import_paths,
+    get_engine_path,
+    register_engine_paths,
+    registered_engine_paths,
+)
 
 
 class TestUnknownAndLookup:
@@ -25,7 +30,7 @@ class TestUnknownAndLookup:
 
 
 class TestRegisterIdempotent:
-    def test_tmp_py_path_prepended_once(
+    def test_tmp_py_path_appended_once(
         self, tmp_path, monkeypatch: pytest.MonkeyPatch
     ) -> None:
         repo = tmp_path / "fake-engine"
@@ -49,7 +54,8 @@ class TestRegisterIdempotent:
         before = list(sys.path)
         status1 = register_engine_paths(engines=["fake-engine"])
         assert status1["fake-engine"] is True
-        assert sys.path[0] == abs_py
+        assert sys.path[-1] == abs_py
+        assert sys.path[: len(before)] == before
         count_after_first = sys.path.count(abs_py)
         assert count_after_first == 1
 
@@ -57,6 +63,51 @@ class TestRegisterIdempotent:
         assert status2["fake-engine"] is True
         assert sys.path.count(abs_py) == 1
         assert len(sys.path) == len(before) + 1
+
+    def test_engine_import_paths_is_pure(
+        self, tmp_path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        py_dir = tmp_path / "fake-engine" / "python"
+        py_dir.mkdir(parents=True)
+        abs_py = str(py_dir.resolve())
+        monkeypatch.setitem(
+            engine_paths.ENGINE_REGISTRY,
+            "fake-engine",
+            {
+                "repo_dir": str(py_dir.parent.resolve()),
+                "py_paths": [abs_py],
+                "language": "Python",
+                "role": "unit-test stub",
+            },
+        )
+        before = list(sys.path)
+        status, paths = engine_import_paths(engines=["fake-engine"])
+        assert status == {"fake-engine": True}
+        assert paths == [abs_py]
+        assert sys.path == before
+
+    def test_scoped_registration_restores_sys_path(
+        self, tmp_path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        py_dir = tmp_path / "fake-engine" / "python"
+        py_dir.mkdir(parents=True)
+        abs_py = str(py_dir.resolve())
+        monkeypatch.setitem(
+            engine_paths.ENGINE_REGISTRY,
+            "fake-engine",
+            {
+                "repo_dir": str(py_dir.parent.resolve()),
+                "py_paths": [abs_py],
+                "language": "Python",
+                "role": "unit-test stub",
+            },
+        )
+        monkeypatch.setattr(sys, "path", [p for p in sys.path if p != abs_py])
+        before = list(sys.path)
+        with registered_engine_paths(engines=["fake-engine"]) as status:
+            assert status == {"fake-engine": True}
+            assert abs_py in sys.path
+        assert sys.path == before
 
 
 class TestFredEmptyPyPaths:

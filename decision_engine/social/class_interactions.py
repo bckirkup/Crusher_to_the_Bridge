@@ -6,9 +6,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import load_validated_json
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from simulation_utils.paths import REPO_ROOT, load_validated_json
 
 
 @dataclass

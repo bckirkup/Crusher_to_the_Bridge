@@ -15,9 +15,9 @@ import os
 import sys
 from typing import Any
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, REPO)
-sys.path.insert(0, os.path.join(REPO, "scripts"))
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, _BOOTSTRAP_ROOT)
+sys.path.insert(0, os.path.join(_BOOTSTRAP_ROOT, "scripts"))
 
 from deck_footprint_builder import (  # noqa: E402
     build_manifest,
@@ -32,11 +32,14 @@ from deck_photo_plate import (  # noqa: E402
 )
 
 from simulation_utils.paths import (  # noqa: E402
+    REPO_ROOT,
     prepare_output_directory,
     resolve_child_path,
     validate_path_component,
     validated_open,
 )
+
+REPO = REPO_ROOT
 
 PLATFORMS = [
     "destroyer_baseline",
