@@ -3679,6 +3679,23 @@ Roughly in dependency order.
     `docs/norovirus/flush_sweep_v1_stage2e_readout.md`,
     `docs/norovirus/flush_sweep_v1_stage2e_findings.md`.
 
+55. **`AERO-CABIN-05`: HVAC-downstream standing mass was dosed once per
+    upstream shedding zone, inflating the route.** `_pathway_hvac_airborne`
+    previously passed the whole transported target-zone mass to the dose helper
+    once for every upstream zone that hosted a shedder. The correction now
+    inhales each positive-mass target zone once per epoch; upstream zones remain
+    the gate and attribution fallback, and records carry the sorted
+    `source_zones` list. The measured COVID multiplicity was mean 5.2 passes
+    per dosed room-hour, maximum 82, and 2.474× a single pass over the first
+    20 days of the Diamond Princess burning cell. The fixed probe reports
+    `delivered_over_one_pass = 1.0`.
+
+    Norovirus rode the same HVAC-downstream route, including emesis-aerosol
+    mass credited from a stateroom to its parent block pool. Any norovirus
+    HVAC-route dose figure produced before this correction is therefore an
+    inflation and is withdrawn. Its magnitude is unmeasured; no norovirus
+    route share, dose, or anchor conclusion is restored by this correction.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
