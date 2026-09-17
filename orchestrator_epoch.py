@@ -678,6 +678,7 @@ def run_observation_sampling(
     pathogen_profiles: dict[str, dict[str, Any]],
     cfg: dict[str, Any],
     strain_registry: StrainRegistry | None = None,
+    tx_core: TransmissionCore | None = None,
 ) -> tuple[
     dict[str, dict[str, Any]],
     dict[str, dict[str, Any]],
@@ -733,9 +734,51 @@ def run_observation_sampling(
         swab_targets = zone_names
     elif rank >= STATUS_RANK[STATUS_ALERT]:
         swab_targets = high_traffic
-    swab_results = obs.surface_swab.swab_zones(
-        zone_surface, fred_compliance, target_zones=swab_targets,
+    # observation.surface_swab_source: "airborne_fraction" (default, legacy
+    # synthetic 0.4 of the airborne pool) or "surface_pool_density" (the real
+    # deposited pool as a per-cm² density — the repaired channel).
+    swab_source = cfg.get("observation", {}).get(
+        "surface_swab_source", "airborne_fraction"
     )
+    if swab_source == "surface_pool_density" and tx_core is not None:
+        surface_copies_by_pid = {
+            pid: tx_core.get_pathogen_surface_mass(pid)
+            for pid in pathogen_profiles
+        }
+        zone_surface_copies = {
+            zname: sum(
+                masses.get(zname, 0.0)
+                for masses in surface_copies_by_pid.values()
+            )
+            for zname in zone_names
+        }
+        zone_high_touch = {
+            zname: tx_core.zone_high_touch_area_cm2(zname)
+            for zname in zone_names
+        }
+        # Declared mapping: a sanitary-class zone's touchable surface is
+        # toilet-seat hardware; everything else is non-porous hard surface
+        # (docs/norovirus/environmental_observation_v1.md §2).
+        surface_classes = {
+            zname: (
+                "toilet_seat"
+                if tx_core.zone_types.get(zname) == "Sanitary"
+                else "nonporous_hard"
+            )
+            for zname in zone_names
+        }
+        swab_results = obs.surface_swab.swab_surface_zones(
+            zone_surface_copies,
+            zone_high_touch,
+            fred_compliance,
+            target_zones=swab_targets,
+            surface_classes=surface_classes,
+            copies_by_pathogen=surface_copies_by_pid,
+        )
+    else:
+        swab_results = obs.surface_swab.swab_zones(
+            zone_surface, fred_compliance, target_zones=swab_targets,
+        )
 
     ww_microflora: dict[str, dict[str, float]] = {}
     for zname, mf_data in zone_microflora_shifts.items():

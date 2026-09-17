@@ -415,6 +415,11 @@ escalation:
 # confinement are controlled separately.
 observation:
   enabled: true
+  # surface_swab_source: "airborne_fraction" (default; legacy synthetic
+  # surface_fraction of the airborne zone pool — bit-identical to pre-change
+  # behaviour) or "surface_pool_density" (repaired: the real deposited
+  # surface pool as a per-cm² density, with a per-swab copy LOD).
+  # surface_swab_source: "airborne_fraction"
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:
