@@ -586,9 +586,111 @@ def _uninformative_base_result(
     return result
 
 
+class PerAgentAssay:
+    """Shared steps of the per-agent clinical instruments.
+
+    Every instrument that runs against a single agent resolves which pathogen
+    it is being asked about, whether its configured panel covers that
+    pathogen, draws a uniform, pushes the specimen through the instrument's
+    cross-contamination state, and assembles a result carrying the agent axes.
+    Subclasses supply ``name``, ``rng`` and (except for bedside impression)
+    ``instrument_params`` and ``qc``.
+    """
+
+    name: str
+    rng: np.random.Generator
+    instrument_params: dict[str, Any] | None
+    qc: InstrumentQC
+
+    @staticmethod
+    def _active_ids(pathogen_infections: dict[str, Any] | None) -> list[str]:
+        from crusher_labs.clinical_instrument_params import active_pathogen_ids
+
+        return active_pathogen_ids(
+            {"pathogen_infections": pathogen_infections or {}},
+        )
+
+    def _primary_pathogen_id(
+        self,
+        pathogen_id: str | None,
+        pathogen_infections: dict[str, Any] | None,
+    ) -> str | None:
+        if pathogen_id is not None:
+            return pathogen_id
+        ids = self._active_ids(pathogen_infections)
+        return ids[0] if ids else None
+
+    def _resolve_coverage(self, pathogen_id: str | None) -> tuple[Any | None, bool]:
+        """Resolved instrument params for ``pathogen_id``, and its coverage.
+
+        ``(None, True)`` when the instrument is unparameterised or no pathogen
+        is named: the instrument's own defaults then apply.
+        """
+        from crusher_labs.clinical_instrument_params import resolve_instrument_params
+
+        if self.instrument_params is None or not pathogen_id:
+            return None, True
+        resolved = resolve_instrument_params(
+            self.instrument_params, self.name, pathogen_id,
+        )
+        return resolved, resolved.covers_pathogen
+
+    def _uninformative(
+        self,
+        agent_id: int,
+        location: str,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
+        *,
+        pathogen_id: str | None = None,
+        panel_id: str | None = None,
+    ) -> dict[str, Any]:
+        return _uninformative_base_result(
+            self.name, agent_id, location,
+            infection_state, symptom_presentation, compliance_status,
+            pathogen_id=pathogen_id,
+            panel_id=panel_id,
+        )
+
+    def _draw(self, uniform_draw: float | None) -> float:
+        return self.rng.random() if uniform_draw is None else uniform_draw
+
+    def _base_result(
+        self,
+        agent_id: int,
+        location: str,
+        infection_state: str,
+        symptom_presentation: str,
+        compliance_status: str,
+    ) -> dict[str, Any]:
+        return {
+            "instrument": self.name,
+            "agent_id": agent_id,
+            "location": location,
+            **agent_axes_dict(
+                infection_state, symptom_presentation, compliance_status,
+            ),
+        }
+
+    def _with_qc_control(self, result: dict[str, Any]) -> dict[str, Any]:
+        if self.qc.should_run_control():
+            result["qc_control"] = self.qc.run_negative_control()
+        return result
+
+    @staticmethod
+    def _shedding_scaled_sensitivity(
+        sensitivity: float,
+        shedding_rate: float,
+    ) -> float:
+        if shedding_rate <= 0:
+            return 0.0
+        return sensitivity * min(1.0, shedding_rate / (shedding_rate + 1000.0))
+
+
 # ── Instrument 4: Clinical Rapid Diagnostic Test (Lateral Flow) ──────────
 
-class ClinicalRapidDiagnostic:
+class ClinicalRapidDiagnostic(PerAgentAssay):
     """Individual patient lateral-flow antigen test.
 
     High speed, lower sensitivity, binary output.
@@ -627,76 +729,71 @@ class ClinicalRapidDiagnostic:
         pathogen_infections: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Run a rapid antigen test on a single agent."""
-        from crusher_labs.clinical_instrument_params import (
-            active_pathogen_ids,
-            rdt_phase_sensitivity,
-            resolve_instrument_params,
-        )
-
-        if pathogen_id is None and pathogen_infections:
-            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
-            pathogen_id = ids[0] if ids else None
-
-        sens = self.sensitivity
-        spec = self.specificity
-        covers = True
-        if self.instrument_params is not None and pathogen_id:
-            resolved = resolve_instrument_params(
-                self.instrument_params, self.name, pathogen_id,
-            )
-            covers = resolved.covers_pathogen
-            if covers:
-                sens = rdt_phase_sensitivity(resolved, shedding_rate)
-                spec = resolved.specificity or spec
-        elif self.instrument_params is not None and is_infected and not pathogen_id:
-            covers = True
+        pathogen_id = self._primary_pathogen_id(pathogen_id, pathogen_infections)
+        resolved, covers = self._resolve_coverage(pathogen_id)
 
         if is_infected and pathogen_id and not covers:
-            return _uninformative_base_result(
-                self.name, agent_id, location,
+            return self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=pathogen_id,
             )
 
-        if shedding_rate > 0:
-            eff_sens = sens * min(1.0, shedding_rate / (shedding_rate + 1000.0))
-        else:
-            eff_sens = 0.0
+        sens, spec = self._assay_operating_point(resolved, covers, shedding_rate)
+        eff_sens = self._shedding_scaled_sensitivity(sens, shedding_rate)
 
         _, carryover = self.qc.process_sample(shedding_rate * 0.001)
 
-        draw = self.rng.random() if uniform_draw is None else uniform_draw
-        if is_infected:
-            positive = draw < eff_sens
-        else:
-            positive = draw > spec
+        draw = self._draw(uniform_draw)
+        positive = draw < eff_sens if is_infected else draw > spec
 
+        result: dict[str, Any] = {
+            **self._base_result(
+                agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+            ),
+            "positive": positive,
+            "informative": True,
+            "pathogen_id": pathogen_id,
+            "effective_sensitivity": round(eff_sens, 4),
+            "shedding_rate": round(shedding_rate, 2),
+            **self._lateral_flow_lines(positive, shedding_rate),
+            "cross_contamination_carryover": carryover,
+        }
+
+        return self._with_qc_control(result)
+
+    def _assay_operating_point(
+        self,
+        resolved: Any | None,
+        covers: bool,
+        shedding_rate: float,
+    ) -> tuple[float, float]:
+        """Phase-dependent sensitivity and specificity for this specimen."""
+        from crusher_labs.clinical_instrument_params import rdt_phase_sensitivity
+
+        if resolved is None or not covers:
+            return self.sensitivity, self.specificity
+        return (
+            rdt_phase_sensitivity(resolved, shedding_rate),
+            resolved.specificity or self.specificity,
+        )
+
+    def _lateral_flow_lines(
+        self,
+        positive: bool,
+        shedding_rate: float,
+    ) -> dict[str, float]:
         control_line = round(float(self.rng.normal(0.85, 0.05)), 3)
         test_line = 0.0
         if positive:
             test_line = round(float(self.rng.normal(0.6, 0.15)), 3)
         elif shedding_rate > 0:
             test_line = round(float(self.rng.normal(0.05, 0.02)), 3)
-
-        result: dict[str, Any] = {
-            "instrument": self.name,
-            "agent_id": agent_id,
-            "location": location,
-            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
-            "positive": positive,
-            "informative": True,
-            "pathogen_id": pathogen_id,
-            "effective_sensitivity": round(eff_sens, 4),
-            "shedding_rate": round(shedding_rate, 2),
+        return {
             "control_line_intensity": control_line,
             "test_line_intensity": round(max(0, test_line), 3),
-            "cross_contamination_carryover": carryover,
         }
-
-        if self.qc.should_run_control():
-            result["qc_control"] = self.qc.run_negative_control()
-
-        return result
 
     def test_sick_call_agents(
         self,
@@ -724,7 +821,7 @@ class ClinicalRapidDiagnostic:
 
 # ── Instrument 4b: Clinical Multiplex PCR Panel ─────────────────────────
 
-class ClinicalMultiplexPanel:
+class ClinicalMultiplexPanel(PerAgentAssay):
     """Syndrome-selected multiplex PCR panel (GI / RP / pneumonia)."""
 
     name = "clinical_multiplex_panel"
@@ -755,99 +852,129 @@ class ClinicalMultiplexPanel:
         observed_syndromes: list[str] | None = None,
         panel_id: str | None = None,
     ) -> dict[str, Any]:
-        from crusher_labs.clinical_instrument_params import (
-            active_pathogen_ids,
-            panels_for_syndromes,
-            resolve_panel_params,
-        )
+        from crusher_labs.clinical_instrument_params import panels_for_syndromes
 
         syndromes = list(observed_syndromes or [])
         panel_ids = [panel_id] if panel_id else panels_for_syndromes(
             self.instrument_params, syndromes,
         )
-        active = active_pathogen_ids({"pathogen_infections": pathogen_infections or {}})
+        active = self._active_ids(pathogen_infections)
 
         if not panel_ids:
-            return _uninformative_base_result(
-                self.name, agent_id, location,
+            return self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=active[0] if active else None,
             )
 
         _, carryover = self.qc.process_sample(shedding_rate * 0.001)
-        draw = self.rng.random() if uniform_draw is None else uniform_draw
+        draw = self._draw(uniform_draw)
 
+        target_results, screened = self._screen_panels(
+            panel_ids, active, shedding_rate, draw,
+        )
+        adjudicated = self._adjudicate_coverage(active, target_results, screened)
+
+        result: dict[str, Any] = {
+            **self._base_result(
+                agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+            ),
+            "positive": adjudicated["positive"],
+            "informative": adjudicated["informative"],
+            "panel_ids": panel_ids,
+            "target_results": target_results,
+            "identified_pathogen": adjudicated["identified_pathogen"],
+            "uncovered_active_pathogens": adjudicated["uncovered_active_pathogens"],
+            "shedding_rate": round(shedding_rate, 2),
+            "cross_contamination_carryover": carryover,
+        }
+        return self._with_qc_control(result)
+
+    def _panel_targets(self, panel_ids: list[str]) -> Any:
+        """Yield ``(panel_id, target_pathogen_id, resolved)`` per panel target."""
+        from crusher_labs.clinical_instrument_params import resolve_panel_params
+
+        for pid_panel in panel_ids:
+            panel_cfg = (self.instrument_params.get("panels") or {}).get(pid_panel) or {}
+            for target_pid in panel_cfg.get("pathogens") or {}:
+                resolved = resolve_panel_params(
+                    self.instrument_params, pid_panel, target_pid,
+                )
+                if resolved is not None:
+                    yield pid_panel, target_pid, resolved
+
+    def _screen_panels(
+        self,
+        panel_ids: list[str],
+        active: list[str],
+        shedding_rate: float,
+        draw: float,
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Call every resolvable target on the ordered panels."""
         target_results: dict[str, Any] = {}
         identified: str | None = None
         any_informative = False
         overall_positive = False
 
-        for pid_panel in panel_ids:
-            panel_cfg = (self.instrument_params.get("panels") or {}).get(pid_panel) or {}
-            panel_pathogens = panel_cfg.get("pathogens") or {}
-            for target_pid in panel_pathogens:
-                resolved = resolve_panel_params(
-                    self.instrument_params, pid_panel, target_pid,
-                )
-                if resolved is None:
-                    continue
-                any_informative = True
-                infected_with_target = target_pid in active
-                if shedding_rate > 0 and infected_with_target:
-                    eff_sens = resolved.sensitivity * min(
-                        1.0, shedding_rate / (shedding_rate + 1000.0),
-                    )
-                else:
-                    eff_sens = 0.0
-                if infected_with_target:
-                    hit = draw < eff_sens
-                else:
-                    hit = draw > resolved.specificity
-                target_results[target_pid] = {
-                    "panel_id": pid_panel,
-                    "positive": hit,
-                    "effective_sensitivity": round(eff_sens, 4),
-                }
-                if hit:
-                    overall_positive = True
-                    if infected_with_target and identified is None:
-                        identified = target_pid
+        for pid_panel, target_pid, resolved in self._panel_targets(panel_ids):
+            any_informative = True
+            infected_with_target = target_pid in active
+            eff_sens = (
+                self._shedding_scaled_sensitivity(resolved.sensitivity, shedding_rate)
+                if infected_with_target
+                else 0.0
+            )
+            hit = (
+                draw < eff_sens if infected_with_target
+                else draw > resolved.specificity
+            )
+            target_results[target_pid] = {
+                "panel_id": pid_panel,
+                "positive": hit,
+                "effective_sensitivity": round(eff_sens, 4),
+            }
+            if hit:
+                overall_positive = True
+                if infected_with_target and identified is None:
+                    identified = target_pid
 
-        # Active pathogens not on any ordered panel → uninformative for them
-        covered = set(target_results)
-        uncovered_active = [p for p in active if p not in covered]
-        informative = any_informative and (
-            not active or any(p in covered for p in active)
-        )
-        # If agent is infected only with off-panel pathogens, entire result is
-        # uninformative even though on-panel targets are negative.
-        if active and not any(p in covered for p in active):
-            informative = False
-            overall_positive = False
-            identified = None
-
-        result: dict[str, Any] = {
-            "instrument": self.name,
-            "agent_id": agent_id,
-            "location": location,
-            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
-            "positive": overall_positive if informative else False,
-            "informative": informative,
-            "panel_ids": panel_ids,
-            "target_results": target_results,
-            "identified_pathogen": identified if informative and overall_positive else None,
-            "uncovered_active_pathogens": uncovered_active,
-            "shedding_rate": round(shedding_rate, 2),
-            "cross_contamination_carryover": carryover,
+        screened = {
+            "any_informative": any_informative,
+            "overall_positive": overall_positive,
+            "identified": identified,
         }
-        if self.qc.should_run_control():
-            result["qc_control"] = self.qc.run_negative_control()
-        return result
+        return target_results, screened
+
+    @staticmethod
+    def _adjudicate_coverage(
+        active: list[str],
+        target_results: dict[str, Any],
+        screened: dict[str, Any],
+    ) -> dict[str, Any]:
+        """Decide what the ordered panels can say about the agent.
+
+        An agent infected only with off-panel pathogens gets an uninformative
+        result even though every on-panel target came back negative.
+        """
+        covered = set(target_results)
+        on_panel = any(p in covered for p in active)
+        informative = screened["any_informative"] and (not active or on_panel)
+        if active and not on_panel:
+            informative = False
+        positive = screened["overall_positive"] and informative
+        identified = screened["identified"] if informative and positive else None
+        return {
+            "informative": informative,
+            "positive": positive,
+            "identified_pathogen": identified,
+            "uncovered_active_pathogens": [p for p in active if p not in covered],
+        }
 
 
 # ── Instrument 4c: Clinical Impression (bedside, no lab) ────────────────
 
-class ClinicalImpression:
+class ClinicalImpression(PerAgentAssay):
     """Time-dependent bedside clinical suspicion (not laboratory confirmation)."""
 
     name = "clinical_impression"
@@ -877,68 +1004,37 @@ class ClinicalImpression:
         outbreak_aware: bool = False,
         candidate_pathogens: list[str] | None = None,
     ) -> dict[str, Any]:
-        from crusher_labs.clinical_instrument_params import (
-            active_pathogen_ids,
-            impression_sensitivity_for_day,
-            resolve_instrument_params,
-        )
-
-        active = active_pathogen_ids({"pathogen_infections": pathogen_infections or {}})
-        candidates = list(candidate_pathogens or [])
-        if not candidates and pathogen_id:
-            candidates = [pathogen_id]
-        if not candidates:
-            # Fall back to active pathogens with impression coverage
-            for pid in active:
-                resolved = resolve_instrument_params(
-                    self.instrument_params, self.name, pid,
-                )
-                if resolved.covers_pathogen:
-                    candidates.append(pid)
+        active = self._active_ids(pathogen_infections)
+        candidates = self._candidate_pathogens(candidate_pathogens, pathogen_id, active)
 
         if not candidates:
-            return _uninformative_base_result(
-                self.name, agent_id, location,
+            return self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=active[0] if active else None,
             )
 
-        draw = self.rng.random() if uniform_draw is None else uniform_draw
-        suspected: str | None = None
-        informative = False
-        for pid in candidates:
-            resolved = resolve_instrument_params(
-                self.instrument_params, self.name, pid,
-            )
-            if not resolved.covers_pathogen:
-                continue
-            informative = True
-            sens = impression_sensitivity_for_day(
-                resolved,
-                days_since_symptom_onset,
-                outbreak_aware=outbreak_aware,
-            )
-            spec = resolved.specificity
-            infected_with = pid in active
-            if infected_with:
-                hit = draw < sens
-            else:
-                hit = draw > spec
-            if hit and suspected is None:
-                suspected = pid
+        draw = self._draw(uniform_draw)
+        suspected, informative = self._suspect_pathogen(
+            candidates,
+            active,
+            draw,
+            days_since_symptom_onset=days_since_symptom_onset,
+            outbreak_aware=outbreak_aware,
+        )
 
         if not informative:
-            return _uninformative_base_result(
-                self.name, agent_id, location,
+            return self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=active[0] if active else None,
             )
 
         return {
-            "instrument": self.name,
-            "agent_id": agent_id,
-            "location": location,
-            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+            **self._base_result(
+                agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+            ),
             "positive": suspected is not None,
             "informative": True,
             "suspected_pathogen": suspected,
@@ -948,10 +1044,55 @@ class ClinicalImpression:
             "shedding_rate": round(shedding_rate, 2),
         }
 
+    def _candidate_pathogens(
+        self,
+        candidate_pathogens: list[str] | None,
+        pathogen_id: str | None,
+        active: list[str],
+    ) -> list[str]:
+        candidates = list(candidate_pathogens or [])
+        if candidates:
+            return candidates
+        if pathogen_id:
+            return [pathogen_id]
+        # Fall back to active pathogens with impression coverage
+        return [pid for pid in active if self._resolve_coverage(pid)[1]]
+
+    def _suspect_pathogen(
+        self,
+        candidates: list[str],
+        active: list[str],
+        draw: float,
+        *,
+        days_since_symptom_onset: int,
+        outbreak_aware: bool,
+    ) -> tuple[str | None, bool]:
+        """First candidate the bedside impression flags, and whether any is covered."""
+        from crusher_labs.clinical_instrument_params import (
+            impression_sensitivity_for_day,
+        )
+
+        suspected: str | None = None
+        informative = False
+        for pid in candidates:
+            resolved, covers = self._resolve_coverage(pid)
+            if resolved is None or not covers:
+                continue
+            informative = True
+            sens = impression_sensitivity_for_day(
+                resolved,
+                days_since_symptom_onset,
+                outbreak_aware=outbreak_aware,
+            )
+            hit = draw < sens if pid in active else draw > resolved.specificity
+            if hit and suspected is None:
+                suspected = pid
+        return suspected, informative
+
 
 # ── Instrument 5: Clinical qPCR (Patient Viral Load) ────────────────────
 
-class ClinicalQPCR:
+class ClinicalQPCR(PerAgentAssay):
     """High-sensitivity patient viral load qPCR.
 
     Returns exact Ct values for individual patient specimens.
@@ -993,65 +1134,39 @@ class ClinicalQPCR:
         is_infected: bool | None = None,
     ) -> dict[str, Any]:
         """Run clinical qPCR on a patient specimen."""
-        from crusher_labs.clinical_instrument_params import (
-            active_pathogen_ids,
-            resolve_instrument_params,
-        )
-
-        if pathogen_id is None and pathogen_infections:
-            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
-            pathogen_id = ids[0] if ids else None
+        pathogen_id = self._primary_pathogen_id(pathogen_id, pathogen_infections)
         if is_infected is None:
             is_infected = bool(pathogen_id) or shedding_rate > 0
 
-        detect_sens = RDT_SENSITIVITY
-        covers = True
-        if self.instrument_params is not None and pathogen_id:
-            resolved = resolve_instrument_params(
-                self.instrument_params, self.name, pathogen_id,
-            )
-            covers = resolved.covers_pathogen
-            if covers:
-                detect_sens = resolved.sensitivity or detect_sens
-
+        resolved, covers = self._resolve_coverage(pathogen_id)
         if is_infected and pathogen_id and not covers:
-            return _uninformative_base_result(
-                self.name, agent_id, location,
+            return self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=pathogen_id,
             )
 
-        specimen_mass = shedding_rate * self.extraction_efficiency
-        if uniform_draw is None:
-            noise_mult = self.rng.lognormal(0, 0.04)
-        else:
-            from crusher_labs.clinical_correlation import _normal_ppf
+        detect_sens = RDT_SENSITIVITY
+        if resolved is not None and covers:
+            detect_sens = resolved.sensitivity or detect_sens
 
-            noise_mult = math.exp(_normal_ppf(uniform_draw) * 0.04)
-        specimen_mass *= noise_mult
-
+        specimen_mass = self._extract_specimen(shedding_rate, uniform_draw)
         effective_mass, carryover = self.qc.process_sample(specimen_mass)
 
         ct = self._compute_ct(effective_mass)
-        if uniform_draw is None:
-            detected = ct is not None and ct <= self.lod_ct
-        elif shedding_rate > 0:
-            eff_detect = detect_sens * min(
-                1.0, shedding_rate / (shedding_rate + 1000.0),
-            )
-            detected = uniform_draw < eff_detect
-        else:
-            detected = False
+        detected = self._detected(
+            ct, shedding_rate, uniform_draw, detect_sens,
+        )
 
         viral_load_copies_ml = round(effective_mass * 100, 2) if effective_mass > 0 else 0.0
 
         raw_amplification = self._simulate_amplification_curve(effective_mass)
 
         result: dict[str, Any] = {
-            "instrument": self.name,
-            "agent_id": agent_id,
-            "location": location,
-            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+            **self._base_result(
+                agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+            ),
             "ct_value": ct,
             "detected": detected,
             "positive": detected,
@@ -1064,10 +1179,37 @@ class ClinicalQPCR:
             "background_fluorescence": round(float(self.rng.normal(160, 18)), 1),
         }
 
-        if self.qc.should_run_control():
-            result["qc_control"] = self.qc.run_negative_control()
+        return self._with_qc_control(result)
 
-        return result
+    def _extract_specimen(
+        self,
+        shedding_rate: float,
+        uniform_draw: float | None,
+    ) -> float:
+        """Specimen mass after extraction efficiency and extraction noise."""
+        if uniform_draw is None:
+            noise_mult = self.rng.lognormal(0, 0.04)
+        else:
+            from crusher_labs.clinical_correlation import _normal_ppf
+
+            noise_mult = math.exp(_normal_ppf(uniform_draw) * 0.04)
+        return shedding_rate * self.extraction_efficiency * noise_mult
+
+    def _detected(
+        self,
+        ct: float | None,
+        shedding_rate: float,
+        uniform_draw: float | None,
+        detect_sens: float,
+    ) -> bool:
+        """Ct against the LoD, or the correlated draw against sensitivity."""
+        if uniform_draw is None:
+            return ct is not None and ct <= self.lod_ct
+        if shedding_rate <= 0:
+            return False
+        return uniform_draw < self._shedding_scaled_sensitivity(
+            detect_sens, shedding_rate,
+        )
 
     def test_sick_call_agents(
         self,
@@ -1142,7 +1284,7 @@ ABNORMAL_MARKERS: dict[str, list[str]] = {
 }
 
 
-class ClinicalMicrobiology:
+class ClinicalMicrobiology(PerAgentAssay):
     """Clinical culture/staining for host flora shifts and secondary infections.
 
     Performs basic Gram stain and culture to detect:
@@ -1250,31 +1392,15 @@ class ClinicalMicrobiology:
         is_infected: bool | None = None,
     ) -> dict[str, Any]:
         """Run clinical microbiology on a patient specimen."""
-        from crusher_labs.clinical_instrument_params import (
-            active_pathogen_ids,
-            resolve_instrument_params,
-        )
-
         pathogen_infections = pathogen_infections or {}
-        if pathogen_id is None:
-            ids = active_pathogen_ids({"pathogen_infections": pathogen_infections})
-            pathogen_id = ids[0] if ids else None
+        pathogen_id = self._primary_pathogen_id(pathogen_id, pathogen_infections)
         if is_infected is None:
             is_infected = pathogen_id is not None
 
-        culture_sens = self.culture_sensitivity
-        covers = True
-        if self.instrument_params is not None and pathogen_id:
-            resolved = resolve_instrument_params(
-                self.instrument_params, self.name, pathogen_id,
-            )
-            covers = resolved.covers_pathogen
-            if covers:
-                culture_sens = resolved.sensitivity or culture_sens
-
+        resolved, covers = self._resolve_coverage(pathogen_id)
         if is_infected and pathogen_id and not covers:
-            result = _uninformative_base_result(
-                self.name, agent_id, location,
+            result = self._uninformative(
+                agent_id, location,
                 infection_state, symptom_presentation, compliance_status,
                 pathogen_id=pathogen_id,
             )
@@ -1282,6 +1408,10 @@ class ClinicalMicrobiology:
             result["flora_shift_detected"] = False
             result["secondary_infection_detected"] = False
             return result
+
+        culture_sens = self.culture_sensitivity
+        if resolved is not None and covers:
+            culture_sens = resolved.sensitivity or culture_sens
 
         _, carryover = self.qc.process_sample(microflora_disruption * 10)
 
@@ -1299,10 +1429,10 @@ class ClinicalMicrobiology:
         )
 
         result: dict[str, Any] = {
-            "instrument": self.name,
-            "agent_id": agent_id,
-            "location": location,
-            **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
+            **self._base_result(
+                agent_id, location,
+                infection_state, symptom_presentation, compliance_status,
+            ),
             "disruption_site": disruption_site,
             "microflora_disruption_level": round(microflora_disruption, 4),
             "gram_stain_result": gram_stain,
@@ -1315,10 +1445,7 @@ class ClinicalMicrobiology:
             "cross_contamination_carryover": carryover,
         }
 
-        if self.qc.should_run_control():
-            result["qc_control"] = self.qc.run_negative_control()
-
-        return result
+        return self._with_qc_control(result)
 
     def test_sick_call_agents(
         self,
