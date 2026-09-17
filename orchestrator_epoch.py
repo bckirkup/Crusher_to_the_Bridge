@@ -63,9 +63,20 @@ from orchestrator_types import (
 from telemetry_buffer.agent_axes import (
     INFECTION_RECOVERED,
     INFECTION_SUSCEPTIBLE,
+    PRESENTATION_SEVERE,
+    PRESENTATION_SYMPTOMATIC,
     agent_has_symptomatic_presentation,
     agent_is_infected,
     agent_requires_confinement,
+    resolve_agent_axes,
+)
+from telemetry_buffer.fields import (
+    AGENT_CABIN_MATE_IDS,
+    AGENT_CLASS,
+    AGENT_SHEDDING_RATE,
+    AGENT_SYMPTOM_PRESENTATION,
+    agent_id,
+    zone_pathogen_mass,
 )
 
 
@@ -207,7 +218,7 @@ def step_fred_compliance(
 ) -> None:
     """Re-check reluctant/defiant agents for delayed quarantine compliance."""
     agent_by_id = {
-        int(a["agent_id"]): a for a in (agents or [])
+        agent_id(a): a for a in (agents or [])
     }
     for aid in tuple(state.quarantine_refusers):
         epochs_since = epoch - state.quarantine_order_epoch.get(aid, epoch)
@@ -476,15 +487,11 @@ def apply_chronic_severity_escalation(
     multiplier determines the probability of escalation:
     ``P(severe) = clamp(severity_mult - 1.0, 0, 1)``.
     """
-    from telemetry_buffer.agent_axes import (
-        PRESENTATION_SEVERE,
-        PRESENTATION_SYMPTOMATIC,
-    )
     for agent_dict in agents:
-        pres = agent_dict.get("symptom_presentation", "")
+        pres = agent_dict.get(AGENT_SYMPTOM_PRESENTATION, "")
         if pres != PRESENTATION_SYMPTOMATIC:
             continue
-        aid = agent_dict["agent_id"]
+        aid = agent_id(agent_dict)
         korkin_agent = None
         if aid < len(engine.agents):
             korkin_agent = engine.agents[aid]
@@ -500,7 +507,7 @@ def apply_chronic_severity_escalation(
             clock = SimClock()
         escalation_prob = clock.probability_per_epoch(escalation_prob)
         if escalation_prob > 0 and rng.random() < escalation_prob:
-            agent_dict["symptom_presentation"] = PRESENTATION_SEVERE
+            agent_dict[AGENT_SYMPTOM_PRESENTATION] = PRESENTATION_SEVERE
 
 
 # ── Observation sampling ─────────────────────────────────────────────────
@@ -712,7 +719,7 @@ def run_observation_sampling(
     zone_airborne: dict[str, float] = {}
     zone_surface: dict[str, float] = {}
     for zname, zdata in spaces.items():
-        total_mass = zdata.get("pathogen_mass", 0.0)
+        total_mass = zone_pathogen_mass(zdata)
         zone_airborne[zname] = total_mass * airborne_frac
         zone_surface[zname] = total_mass * surface_frac
 
@@ -754,7 +761,7 @@ def run_observation_sampling(
 
     sick_call_agents = [
         a for a in agents
-        if a["agent_id"] in syn_result.get("sick_call_agents", [])
+        if agent_id(a) in syn_result.get("sick_call_agents", [])
     ]
     clin_rdt_results, clin_qpcr_results, clin_microbio_results = (
         _run_clinical_panel(obs, sick_call_agents)
@@ -875,26 +882,26 @@ def confine_agents(
     contact_ids: set[int] = set()
     if include_cabin_contacts:
         for agent in agents:
-            aid = int(agent["agent_id"])
+            aid = agent_id(agent)
             if aid in _confirmed or agent_requires_confinement(agent):
-                mates = agent.get("cabin_mate_ids") or ()
+                mates = agent.get(AGENT_CABIN_MATE_IDS) or ()
                 contact_ids.update(int(m) for m in mates)
 
     for agent in agents:
-        aid = agent["agent_id"]
-        if agent.get("agent_class", "") in _exempt:
+        aid = agent_id(agent)
+        if agent.get(AGENT_CLASS, "") in _exempt:
             continue
         is_symptomatic = agent_requires_confinement(agent)
-        is_shedding = include_shedding and agent.get("shedding_rate", 0.0) > 0.0
-        is_confirmed = int(aid) in _confirmed
-        is_contact = int(aid) in contact_ids
+        is_shedding = include_shedding and agent.get(AGENT_SHEDDING_RATE, 0.0) > 0.0
+        is_confirmed = aid in _confirmed
+        is_contact = aid in contact_ids
         if not (is_symptomatic or is_shedding or is_confirmed or is_contact):
             continue
         try_admit_to_quarantine(
             epoch, aid, state, syndromic,
             action_ok="immediate_compliance",
             action_refuse="refused_quarantine",
-            agent_class=agent.get("agent_class"),
+            agent_class=agent.get(AGENT_CLASS),
             is_symptomatic=is_symptomatic,
         )
 
@@ -912,14 +919,14 @@ def confine_all_agents(
     """
     _exempt = exempt_classes or set()
     for agent in agents:
-        aid = agent["agent_id"]
-        if agent.get("agent_class", "") in _exempt:
+        aid = agent_id(agent)
+        if agent.get(AGENT_CLASS, "") in _exempt:
             continue
         try_admit_to_quarantine(
             epoch, aid, state, syndromic,
             action_ok="general_confinement",
             action_refuse="refused_general_confinement",
-            agent_class=agent.get("agent_class"),
+            agent_class=agent.get(AGENT_CLASS),
             is_symptomatic=agent_requires_confinement(agent),
         )
 
@@ -950,14 +957,14 @@ def step_crew_duty_exclusion(
     # ``agent_requires_confinement`` would also catch a quarantine refuser,
     # who is not a case.
     still_symptomatic = {
-        int(agent["agent_id"])
+        agent_id(agent)
         for agent in agents
         if agent_has_symptomatic_presentation(agent)
     }
     tracker.note_symptoms(epoch, still_symptomatic & tracker.excluded_ids)
 
     for agent in agents:
-        aid = int(agent["agent_id"])
+        aid = agent_id(agent)
         if aid not in tracker.crew_ids or aid in tracker.excluded_ids:
             continue
         if aid not in still_symptomatic or aid not in state.ever_reported_ids:
@@ -1433,7 +1440,7 @@ def _agent_matches_filter(
     role_group = counter_filter.get("role_group")
     classes = counter_filter.get("classes")
 
-    agent_class = agent.get("agent_class", "")
+    agent_class = agent.get(AGENT_CLASS, "")
     if role_group and not agent_class.startswith(role_group):
         return False
     if classes and agent_class not in classes:
@@ -1470,7 +1477,7 @@ def _counter_metric_value(
         if pop == 0 or not ever_reported_ids:
             return 0.0
         return sum(
-            int(a["agent_id"]) in ever_reported_ids for a in group
+            agent_id(a) in ever_reported_ids for a in group
         ) / pop
     if metric == "infected_count":
         return float(sum(1 for a in group if agent_is_infected(a)))
@@ -1482,17 +1489,12 @@ def _counter_metric_value(
     if metric == "recovered_count":
         return float(sum(
             1 for a in group
-            if a.get("infection_state") == INFECTION_RECOVERED
-            or a.get("symptom_status") == "recovered"
+            if resolve_agent_axes(a)[0] == INFECTION_RECOVERED
         ))
     if metric == "susceptible_count":
         return float(sum(
             1 for a in group
-            if a.get("infection_state") == INFECTION_SUSCEPTIBLE
-            or (
-                "infection_state" not in a
-                and a.get("symptom_status") == "asymptomatic"
-            )
+            if resolve_agent_axes(a)[0] == INFECTION_SUSCEPTIBLE
         ))
     return 0.0
 

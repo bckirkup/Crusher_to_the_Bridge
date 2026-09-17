@@ -13,6 +13,13 @@ from __future__ import annotations
 
 from typing import Any
 
+from telemetry_buffer.fields import (
+    AGENT_COMPLIANCE_STATUS,
+    AGENT_INFECTION_STATE,
+    AGENT_LEGACY_SYMPTOM_STATUS,
+    AGENT_SYMPTOM_PRESENTATION,
+)
+
 # ── Infection state (SIR / immune) ───────────────────────────────────────
 
 INFECTION_SUSCEPTIBLE = "susceptible"
@@ -95,13 +102,13 @@ def axes_from_legacy_symptom_status(legacy: str) -> tuple[str, str, str]:
 
 def resolve_agent_axes(raw: dict[str, Any]) -> tuple[str, str, str]:
     """Return (infection_state, symptom_presentation, compliance_status)."""
-    if "infection_state" in raw:
+    if AGENT_INFECTION_STATE in raw:
         return (
-            str(raw["infection_state"]),
-            str(raw.get("symptom_presentation", PRESENTATION_ASYMPTOMATIC)),
-            str(raw.get("compliance_status", COMPLIANCE_COMPLIANT)),
+            str(raw[AGENT_INFECTION_STATE]),
+            str(raw.get(AGENT_SYMPTOM_PRESENTATION, PRESENTATION_ASYMPTOMATIC)),
+            str(raw.get(AGENT_COMPLIANCE_STATUS, COMPLIANCE_COMPLIANT)),
         )
-    legacy = str(raw.get("symptom_status", "asymptomatic"))
+    legacy = str(raw.get(AGENT_LEGACY_SYMPTOM_STATUS, "asymptomatic"))
     return axes_from_legacy_symptom_status(legacy)
 
 
@@ -111,9 +118,9 @@ def agent_axes_dict(
     compliance_status: str,
 ) -> dict[str, str]:
     return {
-        "infection_state": infection_state,
-        "symptom_presentation": symptom_presentation,
-        "compliance_status": compliance_status,
+        AGENT_INFECTION_STATE: infection_state,
+        AGENT_SYMPTOM_PRESENTATION: symptom_presentation,
+        AGENT_COMPLIANCE_STATUS: compliance_status,
     }
 
 
@@ -142,13 +149,13 @@ def agent_is_isolated(agent: dict[str, Any]) -> bool:
 
 def clinical_axes_for_notebook(data: dict[str, Any]) -> dict[str, str]:
     """Extract orthogonal axes for lab-notebook clinical records."""
-    if "infection_state" in data:
+    if AGENT_INFECTION_STATE in data:
         return agent_axes_dict(
-            str(data["infection_state"]),
-            str(data.get("symptom_presentation", PRESENTATION_ASYMPTOMATIC)),
-            str(data.get("compliance_status", COMPLIANCE_COMPLIANT)),
+            str(data[AGENT_INFECTION_STATE]),
+            str(data.get(AGENT_SYMPTOM_PRESENTATION, PRESENTATION_ASYMPTOMATIC)),
+            str(data.get(AGENT_COMPLIANCE_STATUS, COMPLIANCE_COMPLIANT)),
         )
-    legacy = data.get("symptom_status")
+    legacy = data.get(AGENT_LEGACY_SYMPTOM_STATUS)
     if legacy is not None:
         inf, pres, comp = axes_from_legacy_symptom_status(str(legacy))
         return agent_axes_dict(inf, pres, comp)
