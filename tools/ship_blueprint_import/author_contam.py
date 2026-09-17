@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from simulation_utils.paths import (
+    REPO_ROOT,
     prepare_output_directory,
     resolve_child_path,
     validated_open,
@@ -21,10 +22,6 @@ from tools.contam_hobbyist import load_hobbyist_pack, resolve_orifice_type
 from tools.contam_prj_bridge import export_platform_to_prj
 from tools.contamw34_prj import path_map_from_prj, simplify_contamw34
 from tools.ship_blueprint_import.models import ContamHints, OpeningHint, ShipDigest
-
-_REPO_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-)
 
 HANDOFF_MD = "CONTAM_HANDOFF.md"
 OPENINGS_DRAFT = "openings_draft.json"
@@ -398,7 +395,7 @@ def validate_prj_offline(prj_path: str, *, allowed_roots: tuple[str, ...]) -> di
 def try_contamx_smoke(platform_id: str) -> dict[str, Any] | None:
     """Best-effort ContamX availability probe; None if binary/missing."""
     # ContamX is optional local install under third_party/contamx
-    cand = os.path.join(_REPO_ROOT, "third_party", "contamx")
+    cand = os.path.join(REPO_ROOT, "third_party", "contamx")
     if not os.path.isdir(cand):
         return None
     bin_names = [n for n in os.listdir(cand) if "contam" in n.lower()]

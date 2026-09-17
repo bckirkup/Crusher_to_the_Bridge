@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import os
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from simulation_utils.paths import REPO_ROOT
+
 PLATFORMS_DIR = os.path.join(REPO_ROOT, "data", "platforms")
 CONFIG_YAML = os.path.join(REPO_ROOT, "crusher_labs", "config.yaml")
 PATHOGEN_PATH = os.path.join(REPO_ROOT, "data", "pathogens", "active_profiles.json")

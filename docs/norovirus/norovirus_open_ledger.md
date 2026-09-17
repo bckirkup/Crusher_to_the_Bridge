@@ -3605,6 +3605,25 @@ Roughly in dependency order.
     measurement of the current engine**; a re-measurement is declared
     separately. Nothing is fitted and no anchor was consulted.
 
+51. **Flush sweep stage `s2e` declared: the same five arms re-run on the
+    emesis-berth-share engine, read against `s2r` on paired seeds.**
+    Manifests `flush_sweep_v1_{off,3e-9,1e-8,3e-8,1e-7}_s2e_manifest.json`
+    — five arms, 1,200 runs each (6,000), the same matched seed block
+    8000–8199, the same six hull/length cells, `sanitary_visit_mode:
+    dwell_weighted`, `flush_cabin_emission: true`, and the air model
+    pinned (`transmission.cabin_air_mode: cabin_compartment`,
+    `hvac.pathogen_pool_transport: airflow`). Field-identical to the `s2r`
+    manifests apart from campaign name/description; the only difference is
+    the engine — merged main `585ad89`, which carries the item-50 repair —
+    so `s2e` vs `s2r` on the same seeds is the measured engine-change
+    contrast for the emesis berth-share partition (item 49 measured the
+    cabin-drain repair the same way). No arm is selected, nothing is
+    chosen on distance to any anchor, and the `[1e-9, 1e-3]` span is
+    untouched. Submitted on image `flush-sweep-v1-s2e-34febdc`
+    (`sha256:1bcba429c715b769454cba9d41a69b4a4520cdf115037f2236cfec33c68b2dac`),
+    job definition `picard-campaign:46`, S3 prefixes
+    `campaign/flush_sweep_v1_<arm>_s2e/`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

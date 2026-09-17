@@ -149,6 +149,47 @@ def _polygons_to_zones(
 
 # ── Line layers → HVAC / adjacency edges ────────────────────────────────
 
+def _connected_zone_ids(
+    single_line: LineString,
+    poly_gdf: gpd.GeoDataFrame,
+    zone_ids: list[str],
+) -> list[str]:
+    """Ordered, de-duplicated zone ids whose polygons the line intersects."""
+    connected: list[str] = []
+    for poly_idx, poly_row in poly_gdf.iterrows():
+        poly_geom = poly_row.geometry
+        if poly_geom is None or poly_geom.is_empty:
+            continue
+        if not single_line.intersects(poly_geom):
+            continue
+        pid = zone_ids[poly_idx] if poly_idx < len(zone_ids) else f"Zone_{poly_idx}"
+        if pid not in connected:
+            connected.append(pid)
+    return connected
+
+
+def _edge_attributes(
+    line_row: Any,
+    flow_col: str | None,
+    ducted_col: str | None,
+) -> tuple[float, bool]:
+    """Flow rate and ducted flag for the edges traced from one line row."""
+    flow_rate = _DEFAULT_FLOW_RATE
+    if flow_col and flow_col in line_row.index:
+        try:
+            flow_rate = float(line_row[flow_col])
+        except (ValueError, TypeError):
+            # Retain the calibrated default for malformed flow data.
+            pass
+
+    is_ducted = False
+    if ducted_col and ducted_col in line_row.index:
+        val = line_row[ducted_col]
+        is_ducted = bool(val) if not isinstance(val, str) else val.lower() in ("true", "yes", "1")
+
+    return flow_rate, is_ducted
+
+
 def _lines_to_edges(
     line_gdf: gpd.GeoDataFrame,
     poly_gdf: gpd.GeoDataFrame,
@@ -176,49 +217,24 @@ def _lines_to_edges(
             continue
 
         lines = [line_geom] if isinstance(line_geom, LineString) else list(line_geom.geoms)
+        flow_rate, is_ducted = _edge_attributes(line_row, flow_col, ducted_col)
 
         for single_line in lines:
-            connected: list[str] = []
-            for poly_idx, poly_row in poly_gdf.iterrows():
-                poly_geom = poly_row.geometry
-                if poly_geom is None or poly_geom.is_empty:
+            connected = _connected_zone_ids(single_line, poly_gdf, zone_ids)
+
+            for from_z, to_z in zip(connected, connected[1:]):
+                if G.has_edge(from_z, to_z):
                     continue
-                if single_line.intersects(poly_geom):
-                    pid = zone_ids[poly_idx] if poly_idx < len(zone_ids) else f"Zone_{poly_idx}"
-                    if pid not in connected:
-                        connected.append(pid)
-
-            if len(connected) >= 2:
-                for i in range(len(connected) - 1):
-                    from_z = connected[i]
-                    to_z = connected[i + 1]
-
-                    flow_rate = _DEFAULT_FLOW_RATE
-                    if flow_col and flow_col in line_row.index:
-                        try:
-                            flow_rate = float(line_row[flow_col])
-                        except (ValueError, TypeError):
-                            # Retain the calibrated default for malformed flow data.
-                            pass
-
-                    is_ducted = False
-                    if ducted_col and ducted_col in line_row.index:
-                        val = line_row[ducted_col]
-                        is_ducted = bool(val) if not isinstance(val, str) else val.lower() in ("true", "yes", "1")
-
-                    edge_key = (from_z, to_z)
-                    if not G.has_edge(*edge_key):
-                        G.add_edge(
-                            from_z, to_z,
-                            flow_rate_m3h=flow_rate,
-                            is_hvac_ducted=is_ducted,
-                        )
-                        adj_type = "hvac_duct" if is_ducted else "passageway"
-                        adjacency.append({
-                            "from": from_z,
-                            "to": to_z,
-                            "type": adj_type,
-                        })
+                G.add_edge(
+                    from_z, to_z,
+                    flow_rate_m3h=flow_rate,
+                    is_hvac_ducted=is_ducted,
+                )
+                adjacency.append({
+                    "from": from_z,
+                    "to": to_z,
+                    "type": "hvac_duct" if is_ducted else "passageway",
+                })
 
     cross_zone_links: list[dict[str, Any]] = []
     for u, v, data in G.edges(data=True):

@@ -4,8 +4,12 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
-REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from simulation_utils.paths import REPO_ROOT as REPO  # noqa: E402
+
 DATA = os.path.join(REPO, "data")
 
 

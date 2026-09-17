@@ -66,6 +66,7 @@ from telemetry_buffer.agent_axes import (
     agent_has_symptomatic_presentation,
     agent_is_infected,
     agent_requires_confinement,
+    resolve_agent_axes,
 )
 
 
@@ -1482,17 +1483,12 @@ def _counter_metric_value(
     if metric == "recovered_count":
         return float(sum(
             1 for a in group
-            if a.get("infection_state") == INFECTION_RECOVERED
-            or a.get("symptom_status") == "recovered"
+            if resolve_agent_axes(a)[0] == INFECTION_RECOVERED
         ))
     if metric == "susceptible_count":
         return float(sum(
             1 for a in group
-            if a.get("infection_state") == INFECTION_SUSCEPTIBLE
-            or (
-                "infection_state" not in a
-                and a.get("symptom_status") == "asymptomatic"
-            )
+            if resolve_agent_axes(a)[0] == INFECTION_SUSCEPTIBLE
         ))
     return 0.0
 

@@ -2046,8 +2046,7 @@ def _check_instrument_turnaround(cfg: dict[str, Any], report: Report) -> None:
     config_path = tat_cfg.get("config_path")
     if not config_path:
         return
-    _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    full = config_path if os.path.isabs(config_path) else os.path.join(_root, config_path)
+    full = config_path if os.path.isabs(config_path) else os.path.join(_REPO_ROOT, config_path)
     if not os.path.isfile(full):
         report.error(
             _CONFIG_YAML, "TAT",
@@ -2110,8 +2109,7 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
                 )
     params_path = lr.get("params_path")
     if params_path:
-        _root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        full = params_path if os.path.isabs(params_path) else os.path.join(_root, params_path)
+        full = params_path if os.path.isabs(params_path) else os.path.join(_REPO_ROOT, params_path)
         if not os.path.isfile(full):
             report.error(
                 _CONFIG_YAML, "LONG_READ",
@@ -2688,8 +2686,7 @@ def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
                      "chronic_disease.enabled but no config_path specified")
         return
 
-    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    full_path = os.path.join(repo_root, config_path)
+    full_path = os.path.join(_REPO_ROOT, config_path)
     if not os.path.isfile(full_path):
         report.error(_CONFIG_YAML, "FILE",
                       f"chronic_disease.config_path '{config_path}' not found")
