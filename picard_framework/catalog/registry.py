@@ -9,6 +9,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any
 
+from simulation_utils import asset_defaults
 from simulation_utils.paths import validated_open
 
 
@@ -39,15 +40,15 @@ class CatalogRegistry:
         return reg
 
     def _scan_platforms(self) -> None:
-        platforms_dir = os.path.join(self.repo_root, "data", "platforms")
+        platforms_dir = os.path.join(self.repo_root, asset_defaults.PLATFORMS_DIR)
         if not os.path.isdir(platforms_dir):
             return
         for name in sorted(os.listdir(platforms_dir)):
             pdir = os.path.join(platforms_dir, name)
             if not os.path.isdir(pdir):
                 continue
-            layout = os.path.join(pdir, "spatial_layout.json")
-            airflow = os.path.join(pdir, "air_flow_paths.json")
+            layout = os.path.join(pdir, asset_defaults.SPATIAL_LAYOUT_FILENAME)
+            airflow = os.path.join(pdir, asset_defaults.AIR_FLOW_PATHS_FILENAME)
             if os.path.isfile(layout) and os.path.isfile(airflow):
                 self.platforms[name] = PlatformEntry(
                     platform_id=name,
@@ -56,7 +57,7 @@ class CatalogRegistry:
                 )
 
     def _scan_pathogens(self) -> None:
-        pathogens_dir = os.path.join(self.repo_root, "data", "pathogens")
+        pathogens_dir = os.path.join(self.repo_root, asset_defaults.PATHOGENS_DIR)
         if not os.path.isdir(pathogens_dir):
             return
         for fname in sorted(os.listdir(pathogens_dir)):
@@ -65,10 +66,15 @@ class CatalogRegistry:
                 self.pathogen_bundles[bundle_id] = os.path.join(pathogens_dir, fname)
 
     def _set_defaults(self) -> None:
-        config_dir = os.path.join(self.repo_root, "data", "config")
-        self.protocol_bundle = os.path.join(config_dir, "protocols.json")
-        self.resource_costs = os.path.join(config_dir, "resource_costs.json")
-        self.logging_profile = os.path.join(config_dir, "logging_profile.json")
+        self.protocol_bundle = os.path.join(self.repo_root, asset_defaults.PROTOCOLS_CONFIG)
+        self.resource_costs = os.path.join(self.repo_root, asset_defaults.RESOURCE_COSTS_CONFIG)
+        self.logging_profile = os.path.join(self.repo_root, asset_defaults.LOGGING_PROFILE_CONFIG)
+
+    def default_platform(self) -> PlatformEntry:
+        return self.resolve_platform(asset_defaults.DEFAULT_PLATFORM_ID)
+
+    def default_pathogen_bundle(self) -> str:
+        return self.resolve_pathogen_bundle(asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID)
 
     def resolve_platform(self, platform_id: str) -> PlatformEntry:
         if platform_id not in self.platforms:
