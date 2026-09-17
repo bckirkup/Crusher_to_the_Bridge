@@ -36,7 +36,7 @@ echo Repo: %CD%
 echo Python: %PY%
 echo.
 
-"%PY%" picard_framework\runs\mega_cruise_campaign\campaign_runner.py %*
+"%PY%" -m picard_framework.runs.mega_cruise_campaign.campaign_runner %*
 set "EC=%ERRORLEVEL%"
 if not "%EC%"=="0" (
   echo.

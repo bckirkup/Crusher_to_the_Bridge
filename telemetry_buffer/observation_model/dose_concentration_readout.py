@@ -44,17 +44,16 @@ from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT))
-
-from engines.transmission_core import TransmissionCore  # noqa: E402
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-from simulation_utils.paths import (  # noqa: E402
+from engines.transmission_core import TransmissionCore
+from picard_framework.run_spec import PicardRunSpec
+from picard_framework.simulation.ship_simulation import ShipSimulation
+from simulation_utils.paths import (
     resolve_child_path,
     resolve_repo_path,
     validated_open,
 )
+
+ROOT = Path(__file__).resolve().parents[2]
 
 TOP_SHARES = (0.001, 0.01, 0.1)
 
