@@ -23,15 +23,16 @@ import os
 import sys
 from typing import Any
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 from engines.contamx_runner import ContamXUnavailable, find_contamx  # noqa: E402
 from picard_framework.catalog.registry import CatalogRegistry  # noqa: E402
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
+    REPO_ROOT,
     prepare_output_directory,
     resolve_repo_path,
     validate_path_component,

@@ -34,10 +34,12 @@ from engines.infection_dynamics_bridge import (
     KorkinAgent,
 )
 from simulation_utils.numeric import default_simulation_rng, float_ne
-from simulation_utils.paths import resolve_repo_path, validate_path_component, validated_open
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+from simulation_utils.paths import (
+    REPO_ROOT,
+    resolve_repo_path,
+    validate_path_component,
+    validated_open,
+)
 
 # ── Channel baseline defaults ────────────────────────────────────────────
 
@@ -951,7 +953,7 @@ def build_wearable_monitor_from_config(
     if not wm_cfg.get("enabled", True):
         return None
 
-    root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    root = repo_root or REPO_ROOT
     wm_cfg = load_wearable_deployment_profile(wm_cfg, root)
     devices: dict[str, WearableDevice] = {}
     for dev_cfg in wm_cfg.get("devices", []):

@@ -61,7 +61,6 @@ AGENT_ID: Final = "agent_id"
 AGENT_INFECTION_STATE: Final = "infection_state"
 AGENT_SYMPTOM_PRESENTATION: Final = "symptom_presentation"
 AGENT_COMPLIANCE_STATUS: Final = "compliance_status"
-AGENT_LEGACY_SYMPTOM_STATUS: Final = "symptom_status"
 AGENT_LOCATION: Final = "location"
 AGENT_SHEDDING_RATE: Final = "shedding_rate"
 AGENT_DAY_OF_INFECTION: Final = "day_of_infection"
@@ -190,7 +189,6 @@ class AgentState(TypedDict, total=False):
     infection_state: str
     symptom_presentation: str
     compliance_status: str
-    symptom_status: str
     location: str
     shedding_rate: float
     day_of_infection: int

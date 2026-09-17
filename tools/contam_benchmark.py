@@ -30,14 +30,15 @@ import os
 import sys
 from typing import Any
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if REPO_ROOT not in sys.path:
-    sys.path.insert(0, REPO_ROOT)
+_BOOTSTRAP_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _BOOTSTRAP_ROOT not in sys.path:
+    sys.path.insert(0, _BOOTSTRAP_ROOT)
 
 from engines.contamx_runner import ContamXUnavailable  # noqa: E402
 from engines.contamx_transport import build_contamx_engine  # noqa: E402
 from engines.py_contam_bridge import ContamTransportEngine  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
+    REPO_ROOT,
     resolve_repo_path,
     validated_open,
 )

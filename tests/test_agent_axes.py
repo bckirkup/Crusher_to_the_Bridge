@@ -15,30 +15,33 @@ from telemetry_buffer.agent_axes import (
     COMPLIANCE_NON_COMPLIANT,
     INFECTION_INFECTED,
     INFECTION_SUSCEPTIBLE,
+    PRESENTATION_ASYMPTOMATIC,
     PRESENTATION_SYMPTOMATIC,
     agent_axes_dict,
     agent_is_infected,
     agent_requires_confinement,
-    axes_from_legacy_symptom_status,
+    clinical_axes_for_notebook,
     resolve_agent_axes,
 )
 
 
-class TestLegacyMapping:
-    def test_symptomatic_infected(self) -> None:
-        assert axes_from_legacy_symptom_status("symptomatic") == (
-            INFECTION_INFECTED,
-            PRESENTATION_SYMPTOMATIC,
+class TestResolveAgentAxes:
+    def test_missing_axes_default_to_susceptible(self) -> None:
+        assert resolve_agent_axes({"agent_id": 1}) == (
+            INFECTION_SUSCEPTIBLE,
+            PRESENTATION_ASYMPTOMATIC,
             "compliant",
         )
 
-    def test_isolated_preserves_infection(self) -> None:
-        inf, _pres, comp = axes_from_legacy_symptom_status("isolated")
-        assert inf == INFECTION_INFECTED
-        assert comp == COMPLIANCE_ISOLATED
+    def test_legacy_symptom_status_is_ignored(self) -> None:
+        agent = {"agent_id": 1, "symptom_status": "symptomatic"}
+        assert not agent_is_infected(agent)
+        assert clinical_axes_for_notebook(agent) == agent_axes_dict(
+            INFECTION_SUSCEPTIBLE,
+            PRESENTATION_ASYMPTOMATIC,
+            "compliant",
+        )
 
-
-class TestResolveAgentAxes:
     def test_orthogonal_fields_preferred(self) -> None:
         agent = {
             "agent_id": 1,

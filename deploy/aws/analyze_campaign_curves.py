@@ -64,68 +64,97 @@ def _zip_groups(names: list[str]) -> dict[str, dict[str, str]]:
     return groups
 
 
+def _read_timeseries(zf: zipfile.ZipFile, name: str | None) -> list[Any] | None:
+    """Return the parsed timeseries list, or None when absent/malformed."""
+    if not name:
+        return None
+    try:
+        ts = json.loads(zf.read(name).decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return None
+    return ts if isinstance(ts, list) else None
+
+
+def _read_summary(zf: zipfile.ZipFile, name: str | None) -> dict[str, Any]:
+    """Return the parsed summary mapping; empty when absent/malformed."""
+    if not name:
+        return {}
+    try:
+        summary = json.loads(zf.read(name).decode("utf-8"))
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return {}
+    return summary if isinstance(summary, dict) else {}
+
+
+def _row_from_point(
+    point: dict[str, Any],
+    *,
+    run_id: str,
+    tags: dict[str, str | None],
+    derived: dict[str, Any],
+) -> dict[str, Any]:
+    """Build one long-form epoch row from a timeseries point."""
+    row: dict[str, Any] = {
+        "run_id": run_id,
+        "epoch": point.get("epoch"),
+        "susceptible": point.get("susceptible"),
+        "infected": point.get("infected"),
+        "symptomatic": point.get("symptomatic"),
+        "recovered": point.get("recovered"),
+        "immune": point.get("immune"),
+        "quarantined": point.get("quarantined"),
+        "isolated": point.get("isolated"),
+        "new_infections": point.get("new_infections"),
+        "total_pathogen_mass": point.get("total_pathogen_mass"),
+        "n_zones_contaminated": point.get("n_zones_contaminated"),
+        "max_concentration": point.get("max_concentration"),
+        "cumulative_cost_usd": point.get("cumulative_cost_usd"),
+        "cumulative_ois": point.get("cumulative_ois"),
+        "trigger_status": point.get("trigger_status"),
+        "attack_rate": derived.get("attack_rate"),
+        "peak_prevalence": derived.get("peak_prevalence"),
+        "peak_epoch": derived.get("peak_epoch"),
+        "detection_epoch": derived.get("detection_epoch"),
+        "r_effective_at_peak": derived.get("r_effective_at_peak"),
+    }
+    row.update(tags)
+    return row
+
+
+def _iter_zip_curve_rows(
+    zip_path: Path,
+    emitted_run_ids: set[str],
+) -> Iterator[dict[str, Any]]:
+    """Yield long-form epoch rows for every run in one shard zip."""
+    with zipfile.ZipFile(zip_path) as zf:
+        for prefix, group in _zip_groups(zf.namelist()).items():
+            ts = _read_timeseries(zf, group.get("timeseries.json"))
+            if ts is None:
+                continue
+            summary = _read_summary(zf, group.get("summary.json"))
+            fallback = Path(prefix).name if prefix != "." else zip_path.stem
+            run_id = str(summary.get("run_id") or fallback)
+            if run_id in emitted_run_ids:
+                continue
+            emitted_run_ids.add(run_id)
+            derived = summary.get("derived") or {}
+            tags = parse_run_tags(run_id)
+            for point in ts:
+                if isinstance(point, dict):
+                    yield _row_from_point(
+                        point,
+                        run_id=run_id,
+                        tags=tags,
+                        derived=derived,
+                    )
+
+
 def iter_curve_rows(results_dir: Path) -> Iterator[dict[str, Any]]:
     """Yield long-form epoch rows for every run in each shard zip."""
     emitted_run_ids: set[str] = set()
     for zip_path in sorted(results_dir.rglob("*.zip")):
         try:
-            with zipfile.ZipFile(zip_path) as zf:
-                for prefix, group in _zip_groups(zf.namelist()).items():
-                    ts_name = group.get("timeseries.json")
-                    if not ts_name:
-                        continue
-                    try:
-                        ts = json.loads(zf.read(ts_name).decode("utf-8"))
-                    except (json.JSONDecodeError, UnicodeDecodeError):
-                        continue
-                    if not isinstance(ts, list):
-                        continue
-
-                    summary: dict[str, Any] = {}
-                    sum_name = group.get("summary.json")
-                    if sum_name:
-                        try:
-                            summary = json.loads(
-                                zf.read(sum_name).decode("utf-8"),
-                            )
-                        except (json.JSONDecodeError, UnicodeDecodeError):
-                            summary = {}
-
-                    fallback = Path(prefix).name if prefix != "." else zip_path.stem
-                    run_id = str(summary.get("run_id") or fallback)
-                    if run_id in emitted_run_ids:
-                        continue
-                    emitted_run_ids.add(run_id)
-                    derived = summary.get("derived") or {}
-                    tags = parse_run_tags(run_id)
-                    for point in ts:
-                        if not isinstance(point, dict):
-                            continue
-                        row: dict[str, Any] = {
-                            "run_id": run_id,
-                            "epoch": point.get("epoch"),
-                            "susceptible": point.get("susceptible"),
-                            "infected": point.get("infected"),
-                            "symptomatic": point.get("symptomatic"),
-                            "recovered": point.get("recovered"),
-                            "immune": point.get("immune"),
-                            "quarantined": point.get("quarantined"),
-                            "isolated": point.get("isolated"),
-                            "new_infections": point.get("new_infections"),
-                            "total_pathogen_mass": point.get("total_pathogen_mass"),
-                            "n_zones_contaminated": point.get("n_zones_contaminated"),
-                            "max_concentration": point.get("max_concentration"),
-                            "cumulative_cost_usd": point.get("cumulative_cost_usd"),
-                            "cumulative_ois": point.get("cumulative_ois"),
-                            "trigger_status": point.get("trigger_status"),
-                            "attack_rate": derived.get("attack_rate"),
-                            "peak_prevalence": derived.get("peak_prevalence"),
-                            "peak_epoch": derived.get("peak_epoch"),
-                            "detection_epoch": derived.get("detection_epoch"),
-                            "r_effective_at_peak": derived.get("r_effective_at_peak"),
-                        }
-                        row.update(tags)
-                        yield row
+            yield from _iter_zip_curve_rows(zip_path, emitted_run_ids)
         except zipfile.BadZipFile:
             print(f"  WARN: {zip_path.name} is not a valid zip; skipping", file=sys.stderr)
 

@@ -20,9 +20,8 @@ import os
 from dataclasses import dataclass
 from typing import Any
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import REPO_ROOT, validated_open
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGETS_REL = os.path.join("data", "observation", "covid_fit_targets.json")
 TRAINING = "training"
 HELD_OUT = "held_out"

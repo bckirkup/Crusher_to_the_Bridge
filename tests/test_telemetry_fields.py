@@ -68,7 +68,12 @@ class TestPublicView:
             fields.RECORD_SUMMARY: {fields.SUMMARY_INFECTED: 3},
             fields.RECORD_SPACES: {"mess": {fields.ZONE_PATHOGEN_MASS: 1.5}},
             fields.RECORD_AGENTS: [
-                {fields.AGENT_ID: 1, fields.AGENT_LEGACY_SYMPTOM_STATUS: "isolated"},
+                {
+                    fields.AGENT_ID: 1,
+                    fields.AGENT_INFECTION_STATE: INFECTION_INFECTED,
+                    fields.AGENT_SYMPTOM_PRESENTATION: PRESENTATION_SYMPTOMATIC,
+                    fields.AGENT_COMPLIANCE_STATUS: COMPLIANCE_ISOLATED,
+                },
             ],
             fields.RECORD_REACTIVE_PROTOCOLS: {
                 fields.PROTOCOLS_STOPLIGHTS: {"sanitation": "amber"},
@@ -102,7 +107,7 @@ class TestPublicView:
         ) == pytest.approx(1.5)
         assert fields.zone_pathogen_mass({}) == pytest.approx(0.0)
 
-    def test_legacy_agent_resolves_through_axes(self) -> None:
+    def test_public_agent_resolves_through_axes(self) -> None:
         agent = fields.public_view(self._record())[fields.PUBLIC_AGENTS][0]
         assert resolve_agent_axes(agent) == (
             INFECTION_INFECTED,

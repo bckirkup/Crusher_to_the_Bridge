@@ -21,38 +21,62 @@ from orchestrator_epoch import (
     step_counter_thresholds,
 )
 from orchestrator_init import build_engine
-from orchestrator_types import (
-    SYMPTOM_ASYMPTOMATIC,
-    SYMPTOM_ASYMPTOMATIC_SHEDDING,
-    SYMPTOM_SYMPTOMATIC,
-    SimulationState,
+from orchestrator_types import SimulationState
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_COMPLIANT,
+    INFECTION_INFECTED,
+    INFECTION_SUSCEPTIBLE,
+    PRESENTATION_ASYMPTOMATIC,
+    PRESENTATION_SYMPTOMATIC,
+    agent_axes_dict,
 )
-from telemetry_buffer.agent_axes import agent_axes_dict, axes_from_legacy_symptom_status
 
 
 def _agent(
     agent_id: int,
-    symptom_status: str,
+    infection: str,
+    presentation: str,
     agent_class: str = "passenger_general",
 ) -> dict[str, Any]:
-    infection, presentation, compliance = axes_from_legacy_symptom_status(
-        symptom_status,
-    )
     return {
         "agent_id": agent_id,
-        **agent_axes_dict(infection, presentation, compliance),
+        **agent_axes_dict(infection, presentation, COMPLIANCE_COMPLIANT),
         "agent_class": agent_class,
         "shedding_rate": 0.0,
     }
 
 
+def _susceptible(
+    agent_id: int, agent_class: str = "passenger_general",
+) -> dict[str, Any]:
+    return _agent(
+        agent_id, INFECTION_SUSCEPTIBLE, PRESENTATION_ASYMPTOMATIC, agent_class,
+    )
+
+
+def _symptomatic(
+    agent_id: int, agent_class: str = "passenger_general",
+) -> dict[str, Any]:
+    return _agent(
+        agent_id, INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC, agent_class,
+    )
+
+
+def _asymptomatic_shedding(
+    agent_id: int, agent_class: str = "passenger_general",
+) -> dict[str, Any]:
+    return _agent(
+        agent_id, INFECTION_INFECTED, PRESENTATION_ASYMPTOMATIC, agent_class,
+    )
+
+
 class TestComputeInfectionCounters:
     def test_attack_rate_by_role_group(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC, "crew_general"),
-            _agent(1, SYMPTOM_ASYMPTOMATIC, "crew_general"),
-            _agent(2, SYMPTOM_SYMPTOMATIC, "passenger_general"),
-            _agent(3, SYMPTOM_ASYMPTOMATIC, "passenger_general"),
+            _symptomatic(0, "crew_general"),
+            _susceptible(1, "crew_general"),
+            _symptomatic(2, "passenger_general"),
+            _susceptible(3, "passenger_general"),
         ]
         defs = [
             {
@@ -67,8 +91,8 @@ class TestComputeInfectionCounters:
 
     def test_threshold_exceeded(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_SYMPTOMATIC),
+            _symptomatic(0),
+            _symptomatic(1),
         ]
         defs = [
             {
@@ -83,8 +107,8 @@ class TestComputeInfectionCounters:
 
     def test_attack_rate_alias_matches_symptomatic_prevalence(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_ASYMPTOMATIC),
+            _symptomatic(0),
+            _susceptible(1),
         ]
         defs = [
             {"counter_id": "legacy", "metric": "attack_rate"},
@@ -96,8 +120,8 @@ class TestComputeInfectionCounters:
 
     def test_threshold_not_exceeded(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_ASYMPTOMATIC),
+            _symptomatic(0),
+            _susceptible(1),
         ]
         defs = [
             {
@@ -112,8 +136,8 @@ class TestComputeInfectionCounters:
 
     def test_infected_count_metric(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_ASYMPTOMATIC_SHEDDING),
-            _agent(1, SYMPTOM_ASYMPTOMATIC),
+            _asymptomatic_shedding(0),
+            _susceptible(1),
         ]
         defs = [{"counter_id": "n_infected", "metric": "infected_count", "filter": {}}]
         results = compute_infection_counters(agents, defs)
@@ -121,8 +145,8 @@ class TestComputeInfectionCounters:
 
     def test_class_filter(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC, "crew_medical"),
-            _agent(1, SYMPTOM_SYMPTOMATIC, "passenger_general"),
+            _symptomatic(0, "crew_medical"),
+            _symptomatic(1, "passenger_general"),
         ]
         defs = [
             {
@@ -137,10 +161,10 @@ class TestComputeInfectionCounters:
 
     def test_reported_case_rate_uses_unique_ids_and_handles_empty_groups(self) -> None:
         agents = [
-            _agent(0, SYMPTOM_ASYMPTOMATIC, "passenger_general"),
-            _agent(1, SYMPTOM_ASYMPTOMATIC, "passenger_general"),
-            _agent(2, SYMPTOM_ASYMPTOMATIC, "crew_general"),
-            _agent(3, SYMPTOM_ASYMPTOMATIC, "crew_general"),
+            _susceptible(0, "passenger_general"),
+            _susceptible(1, "passenger_general"),
+            _susceptible(2, "crew_general"),
+            _susceptible(3, "crew_general"),
         ]
         defs = [
             {
@@ -178,7 +202,7 @@ class TestComputeInfectionCounters:
             "filter": {"classes": ["missing_class"]},
         }]
         results = compute_infection_counters(
-            [_agent(0, SYMPTOM_ASYMPTOMATIC)],
+            [_susceptible(0)],
             defs,
             ever_reported_ids={0},
         )
@@ -190,8 +214,8 @@ class TestExemptClassesConfinement:
     def test_exempt_class_skipped(self) -> None:
         state = SimulationState()
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC, "crew_medical"),
-            _agent(1, SYMPTOM_SYMPTOMATIC, "passenger_general"),
+            _symptomatic(0, "crew_medical"),
+            _symptomatic(1, "passenger_general"),
         ]
         syndromic = MagicMock()
         syndromic.check_quarantine_compliance.return_value = True
@@ -208,8 +232,8 @@ class TestCounterConfinementEnabled:
     def test_step_counter_thresholds_confines_when_exceeded(self) -> None:
         state = SimulationState()
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_SYMPTOMATIC),
+            _symptomatic(0),
+            _symptomatic(1),
         ]
         defs = [{
             "counter_id": "all_attack_rate",
@@ -230,8 +254,8 @@ class TestCounterConfinementEnabled:
         """Config sensitivity: confinement_enabled=False skips confine actions."""
         state = SimulationState()
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_SYMPTOMATIC),
+            _symptomatic(0),
+            _symptomatic(1),
         ]
         defs = [{
             "counter_id": "all_attack_rate",
@@ -254,8 +278,8 @@ class TestCounterConfinementEnabled:
     def test_reported_case_threshold_replaces_prevalence_trigger(self) -> None:
         state = SimulationState()
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC, "passenger_general"),
-            _agent(1, SYMPTOM_SYMPTOMATIC, "passenger_general"),
+            _symptomatic(0, "passenger_general"),
+            _symptomatic(1, "passenger_general"),
         ]
         defs = [{
             "counter_id": "passenger_reported_case_rate",
@@ -287,8 +311,8 @@ class TestCounterConfinementEnabled:
     def test_counter_confinement_reports_only_newly_confined_agents(self) -> None:
         state = SimulationState(quarantined_ids={0})
         agents = [
-            _agent(0, SYMPTOM_SYMPTOMATIC),
-            _agent(1, SYMPTOM_SYMPTOMATIC),
+            _symptomatic(0),
+            _symptomatic(1),
         ]
         defs = [{
             "counter_id": "passenger_reported_case_rate",

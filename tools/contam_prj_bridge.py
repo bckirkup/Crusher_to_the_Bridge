@@ -307,55 +307,33 @@ def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
         platform = stripped.split()[0]
         break
 
+    section_parsers = {
+        "!------ levels": lambda rows: _parse_interchange_levels(rows, levels),
+        "!------ zones": lambda rows: zones.extend(
+            _parse_zone_row(row, levels) for row in rows
+        ),
+        "!------ flow paths": lambda rows: adjacency.extend(
+            _parse_interchange_flow_paths(rows)
+        ),
+        "!------ air-handling systems": lambda rows: hvac_zones.extend(
+            _parse_interchange_ahs(rows)
+        ),
+        "!------ inter-system links": lambda rows: cross_zone_links.extend(
+            _parse_interchange_links(rows)
+        ),
+    }
+
     i = 0
     while i < len(lines):
         header = lines[i].strip()
         i += 1
         if not header.startswith("!------"):
             continue
-
-        if header.startswith("!------ levels"):
-            rows, i = _iter_records(lines, i + 1)
-            for row in rows:
-                if len(row) >= 4:
-                    levels[int(row[0])] = row[3]
-        elif header.startswith("!------ zones"):
-            rows, i = _iter_records(lines, i + 1)
-            for row in rows:
-                zones.append(_parse_zone_row(row, levels))
-        elif header.startswith("!------ flow paths"):
-            rows, i = _iter_records(lines, i + 1)
-            for row in rows:
-                if len(row) >= 4:
-                    adjacency.append(
-                        {"from": row[1], "to": row[2], "type": row[3]}
-                    )
-        elif header.startswith("!------ air-handling systems"):
-            rows, i = _iter_records(lines, i + 1)
-            for row in rows:
-                if len(row) >= 3:
-                    rooms_tok = row[3] if len(row) >= 4 else _NONE_TOKEN
-                    rooms = [] if rooms_tok == _NONE_TOKEN else rooms_tok.split(",")
-                    hvac_zones.append(
-                        {
-                            "id": row[1],
-                            "rooms": rooms,
-                            "ach": _clean_float(float(row[2])),
-                        }
-                    )
-        elif header.startswith("!------ inter-system links"):
-            rows, i = _iter_records(lines, i + 1)
-            for row in rows:
-                if len(row) >= 5:
-                    link: dict[str, Any] = {
-                        "from": row[1],
-                        "to": row[2],
-                        "flow_rate_m3h": _clean_float(float(row[3])),
-                        "is_hvac_ducted": row[4] == "1",
-                    }
-                    if len(row) >= 6 and row[5] != _NONE_TOKEN:
-                        link["path"] = row[5]
-                    cross_zone_links.append(link)
+        for prefix, parse in section_parsers.items():
+            if header.startswith(prefix):
+                rows, i = _iter_records(lines, i + 1)
+                parse(rows)
+                break
 
     spatial_layout: dict[str, Any] = {
         "platform": platform,
@@ -374,6 +352,54 @@ def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
         "adjacency": adjacency,
     }
     return spatial_layout, air_flow_paths
+
+
+def _parse_interchange_levels(rows: list[list[str]], levels: dict[int, str]) -> None:
+    for row in rows:
+        if len(row) >= 4:
+            levels[int(row[0])] = row[3]
+
+
+def _parse_interchange_flow_paths(rows: list[list[str]]) -> list[dict[str, str]]:
+    return [
+        {"from": row[1], "to": row[2], "type": row[3]}
+        for row in rows
+        if len(row) >= 4
+    ]
+
+
+def _parse_interchange_ahs(rows: list[list[str]]) -> list[dict[str, Any]]:
+    hvac_zones: list[dict[str, Any]] = []
+    for row in rows:
+        if len(row) < 3:
+            continue
+        rooms_tok = row[3] if len(row) >= 4 else _NONE_TOKEN
+        rooms = [] if rooms_tok == _NONE_TOKEN else rooms_tok.split(",")
+        hvac_zones.append(
+            {
+                "id": row[1],
+                "rooms": rooms,
+                "ach": _clean_float(float(row[2])),
+            }
+        )
+    return hvac_zones
+
+
+def _parse_interchange_links(rows: list[list[str]]) -> list[dict[str, Any]]:
+    links: list[dict[str, Any]] = []
+    for row in rows:
+        if len(row) < 5:
+            continue
+        link: dict[str, Any] = {
+            "from": row[1],
+            "to": row[2],
+            "flow_rate_m3h": _clean_float(float(row[3])),
+            "is_hvac_ducted": row[4] == "1",
+        }
+        if len(row) >= 6 and row[5] != _NONE_TOKEN:
+            link["path"] = row[5]
+        links.append(link)
+    return links
 
 
 def _parse_zone_row(row: list[str], levels: dict[int, str]) -> dict[str, Any]:
