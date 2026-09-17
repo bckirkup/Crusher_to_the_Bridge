@@ -722,6 +722,9 @@ def run_simulation(
         if isinstance(spec.get("campaign_parameters"), dict):
             spec["campaign_parameters"] = dict(spec["campaign_parameters"])
             spec["campaign_parameters"]["history_retention"] = "full"
+            spec["campaign_parameters"].setdefault(
+                "engine_git_sha", _cr.engine_git_sha(),
+            )
     else:
         # Campaign default: compact in-RAM history (summary / spaces / cost only).
         spec["run"].setdefault("history_retention", "compact")

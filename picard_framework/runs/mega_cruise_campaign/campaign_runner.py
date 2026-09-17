@@ -19,7 +19,9 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import shutil
+import subprocess
 from functools import lru_cache
 from itertools import product
 from pathlib import Path
@@ -999,7 +1001,10 @@ def make_picard_spec(
     if cfg:
         spec["config_overrides"] = cfg
     if parameters:
-        spec["campaign_parameters"] = dict(parameters)
+        params = dict(parameters)
+        # An explicit block wins; the stamp only fills the gap.
+        params.setdefault("engine_git_sha", engine_git_sha())
+        spec["campaign_parameters"] = params
     elif parameters is None:
         # Always attach a minimal parameters block for bookkeeping.
         campaign_parameters = {
@@ -1010,6 +1015,7 @@ def make_picard_spec(
             "num_epochs": int(epochs),
             "num_agents": int(num_agents),
             "history_retention": retention,
+            "engine_git_sha": engine_git_sha(),
         }
         _fill_override_params(campaign_parameters, cfg)
         spec["campaign_parameters"] = campaign_parameters
@@ -1096,6 +1102,41 @@ def _record_reporting_hazard(params: dict[str, Any]) -> None:
         f"{LEGACY_CONFIG_RELPATH} declares no syndromic sick-call hazard "
         "under sick_call_probability_per_day or sick_call_probability",
     )
+
+
+@lru_cache(maxsize=1)
+def engine_git_sha() -> str:
+    """Source revision an archived run was produced by.
+
+    The campaign image stamps ``ENGINE_GIT_SHA`` at build time (Dockerfile
+    ``ARG``); a local run resolves ``git rev-parse HEAD`` in the repo root,
+    suffixed ``-dirty`` when the working tree carries uncommitted changes.
+    Any failure — no git binary, not a repository, a timeout — resolves to
+    ``"unknown"`` rather than raising: provenance must never break a run.
+    Cached so it is resolved once per process, not once per run.
+    """
+    env = os.environ.get("ENGINE_GIT_SHA", "").strip()
+    if env and env != "unknown":
+        return env
+    try:
+        sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+            timeout=10, check=True,
+        ).stdout.strip()
+    except Exception:
+        return "unknown"
+    if not re.fullmatch(r"[0-9a-f]{40}", sha):
+        return "unknown"
+    try:
+        dirty = subprocess.run(
+            ["git", "status", "--porcelain"],
+            cwd=REPO_ROOT, capture_output=True, text=True,
+            timeout=10, check=True,
+        ).stdout.strip()
+    except Exception:
+        dirty = ""
+    return sha + ("-dirty" if dirty else "")
 
 
 def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> None:
@@ -1210,6 +1251,7 @@ def _campaign_parameters(
         "num_epochs": int(epochs),
         "num_agents": int(num_agents),
         "history_retention": history_retention,
+        "engine_git_sha": engine_git_sha(),
     }
     if pathogen is not None:
         params["pathogen"] = pathogen
@@ -1228,7 +1270,9 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     """
     attached = spec.get("campaign_parameters")
     if isinstance(attached, dict) and attached:
-        return dict(attached)
+        out = dict(attached)
+        out.setdefault("engine_git_sha", engine_git_sha())
+        return out
 
     catalog = spec.get("catalog") or {}
     run = spec.get("run") or {}
@@ -1242,6 +1286,7 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
         "num_epochs": run.get("num_epochs"),
         "num_agents": ship.get("num_agents"),
         "history_retention": run.get("history_retention", "full"),
+        "engine_git_sha": engine_git_sha(),
     }
     _copy_present(
         params, cfg, (("natural_history_clock", "natural_history_clock"),),
