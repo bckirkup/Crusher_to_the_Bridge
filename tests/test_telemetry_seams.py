@@ -27,12 +27,13 @@ from orchestrator_types import (
     COMPLIANCE_NON_COMPLIANT,
     INFECTION_SUSCEPTIBLE,
     INFECTION_INFECTED,
+    PRESENTATION_ASYMPTOMATIC,
     PRESENTATION_SYMPTOMATIC,
-    SYMPTOM_ASYMPTOMATIC,
-    SYMPTOM_SYMPTOMATIC,
+    COMPLIANCE_COMPLIANT,
     LOCATION_ISOLATED,
     SimulationState,
 )
+from telemetry_buffer.agent_axes import agent_axes_dict
 from orchestrator_init import (
     engine_payload_to_schema,
     build_engine,
@@ -52,6 +53,13 @@ from engines.infection_dynamics_bridge import (
     IllnessStatus,
 )
 from crusher_labs import load_config
+
+_SUSCEPTIBLE_AXES = agent_axes_dict(
+    INFECTION_SUSCEPTIBLE, PRESENTATION_ASYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
+_SYMPTOMATIC_AXES = agent_axes_dict(
+    INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
 
 
 # ── VSP sync tests ───────────────────────────────────────────────────────
@@ -150,7 +158,7 @@ class TestEnginePayloadBoundary:
     def test_shedding_rate_always_float(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+                {"agent_id": 0, **_SUSCEPTIBLE_AXES,
                  "shedding_rate": 5, "location": "Bridge"},
             ],
             "spaces": {"Bridge": {"pathogen_mass": 10}},
@@ -162,7 +170,7 @@ class TestEnginePayloadBoundary:
     def test_shedding_rate_zero_for_isolated(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC,
+                {"agent_id": 1, **_SYMPTOMATIC_AXES,
                  "shedding_rate": 999.0, "location": "MedBay"},
             ],
             "spaces": {},
@@ -196,7 +204,7 @@ class TestEnginePayloadBoundary:
     def test_non_compliant_preserves_shedding(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 3, "symptom_status": SYMPTOM_SYMPTOMATIC,
+                {"agent_id": 3, **_SYMPTOMATIC_AXES,
                  "shedding_rate": 42.5, "location": "Galley"},
             ],
             "spaces": {},
@@ -209,7 +217,7 @@ class TestEnginePayloadBoundary:
     def test_microflora_disruption_field_preserved(self) -> None:
         payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+                {"agent_id": 0, **_SUSCEPTIBLE_AXES,
                  "microflora_disruption": 0.75},
             ],
             "spaces": {},

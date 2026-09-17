@@ -17,6 +17,7 @@ import pytest
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
+from telemetry_buffer.agent_axes import INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC
 from telemetry_buffer.schema import (
     SCHEMA_VERSION,
     make_agent,
@@ -73,7 +74,9 @@ class TestIOHelpers:
         path = os.path.join(REPO_ROOT, "telemetry_buffer", "test_gt_roundtrip.json")
         payload = make_ground_truth(
             epoch=0,
-            agents=[make_agent(0, symptom_status="symptomatic", shedding_rate=50.0)],
+            agents=[make_agent(
+                0, INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC, shedding_rate=50.0,
+            )],
             spaces={"Galley": make_space(pathogen_mass=100.0)},
         )
         try:

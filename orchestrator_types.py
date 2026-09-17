@@ -67,14 +67,6 @@ from telemetry_buffer.agent_axes import (  # noqa: E402,F401
     PRESENTATION_SYMPTOMATIC_LEVELS,
 )
 
-# Deprecated aliases — legacy combined ``symptom_status`` string values
-SYMPTOM_ASYMPTOMATIC = PRESENTATION_ASYMPTOMATIC
-SYMPTOM_SYMPTOMATIC = PRESENTATION_SYMPTOMATIC
-SYMPTOM_ISOLATED = COMPLIANCE_ISOLATED
-SYMPTOM_QUARANTINED = COMPLIANCE_QUARANTINED
-SYMPTOM_NON_COMPLIANT = COMPLIANCE_NON_COMPLIANT
-SYMPTOM_ASYMPTOMATIC_SHEDDING = "asymptomatic_shedding"
-
 # ── Synthetic locations for confined agents ──────────────────────────────
 LOCATION_ISOLATED = "Isolated_In_Quarters"
 LOCATION_QUARANTINED = "Quarantined_In_Quarters"

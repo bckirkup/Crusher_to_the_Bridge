@@ -518,9 +518,8 @@ Each agent in `simulation_history.json` carries three independent fields
 | `symptom_presentation` | asymptomatic, mild, symptomatic, severe | Clinical presentation |
 | `compliance_status` | compliant, non_compliant, isolated, quarantined | FRED confinement |
 
-The legacy `symptom_status` field is still emitted for backward compatibility
-but is deprecated. Counters, syndromic logic, and confinement SOPs resolve
-axes via `resolve_agent_axes()`.
+These three axes are the only agent status representation. Counters,
+syndromic logic, and confinement SOPs resolve axes via `resolve_agent_axes()`.
 
 ## Cost Accounting
 
