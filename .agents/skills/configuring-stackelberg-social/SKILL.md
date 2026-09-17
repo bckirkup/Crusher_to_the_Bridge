@@ -29,6 +29,15 @@ Reference in `picard_framework/runs/destroyer_baseline_default.json`:
 }
 ```
 
+## Resolution against `crusher_labs/config.yaml`
+
+`decision_engine/config_resolution.py` is the only place the runtime reads
+these settings from. Precedence is per key: the spec `social` block overrides
+a legacy `social` block key by key (nested mappings merge), and the legacy
+`wearable_monitoring`, `multi_pathogen` and `decision_engine` blocks can be
+overridden key by key from a same-named block nested under the spec `social`.
+`DecisionRuntime.resolved_config.sources` reports which source won each block.
+
 ## Parameter bounds (Law 3)
 
 `information_diffusion_default.json`:

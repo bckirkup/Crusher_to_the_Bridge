@@ -53,21 +53,8 @@ def make_agent(
     location: str | None = None,
     agent_class: str | None = None,
     gender: str | None = None,
-    *,
-    symptom_status: str | None = None,
 ) -> dict[str, Any]:
-    """Return a single agent state dictionary with orthogonal status axes.
-
-    ``symptom_status`` is accepted only for backward-compatible call sites
-    and is not written to the output dict.
-    """
-    if symptom_status is not None:
-        from telemetry_buffer.agent_axes import axes_from_legacy_symptom_status
-
-        infection_state, symptom_presentation, compliance_status = (
-            axes_from_legacy_symptom_status(symptom_status)
-        )
-
+    """Return a single agent state dictionary with orthogonal status axes."""
     d: dict[str, Any] = {
         "agent_id": agent_id,
         **agent_axes_dict(infection_state, symptom_presentation, compliance_status),

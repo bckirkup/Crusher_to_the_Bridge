@@ -15,6 +15,10 @@ from decision_engine.agent_profile import (
     default_bundle_path,
     load_agent_profile_bundle,
 )
+from decision_engine.config_resolution import (
+    ResolvedDecisionConfig,
+    resolve_decision_config,
+)
 from decision_engine.context import EpochDecisionContext
 from decision_engine.information.diffusion import InformationDiffusionEngine
 from decision_engine.intelligence import default_timeline_path, load_global_health_timeline
@@ -30,6 +34,7 @@ from simulation_utils.paths import resolve_repo_path, validated_open
 class DecisionRuntime:
     repo_root: str
     social_config: dict[str, Any] = field(default_factory=dict)
+    resolved_config: ResolvedDecisionConfig = field(default_factory=ResolvedDecisionConfig)
     profiles: dict[int, AgentProfile] = field(default_factory=dict)
     contact_graph: ContactGraphBuilder = field(default_factory=ContactGraphBuilder)
     lived_store: AgentLivedExperienceStore = field(default_factory=AgentLivedExperienceStore)
@@ -46,21 +51,14 @@ class DecisionRuntime:
     decision_detail_telemetry: bool = False
 
     @staticmethod
-    def _resolve_social_config(run_spec: Any) -> dict[str, Any]:
-        social = getattr(run_spec, "social_config", None) or {}
-        if not social and hasattr(run_spec, "legacy_cfg"):
-            social = run_spec.legacy_cfg.get("social", {})
-        return social
-
-    @staticmethod
     def _load_agent_profiles(
         run_spec: Any,
         engine: Any,
         profile_path: str,
+        resolved: ResolvedDecisionConfig,
     ) -> dict[int, AgentProfile]:
         bundle = load_agent_profile_bundle(profile_path)
-        wm = run_spec.legacy_cfg.get("wearable_monitoring", {})
-        raw_map = wm.get("class_device_map", {})
+        raw_map = resolved.wearable_monitoring.get("class_device_map", {})
         device_map: dict[str, str] = {}
         if isinstance(raw_map, dict):
             device_map = raw_map
@@ -70,8 +68,9 @@ class DecisionRuntime:
                     device_map[str(entry.get("agent_class", ""))] = str(
                         entry.get("device_id", ""),
                     )
-        mp = run_spec.legacy_cfg.get("multi_pathogen", {})
-        imm_frac = float(mp.get("immunocompromised_fraction", 0.0))
+        imm_frac = float(
+            resolved.multi_pathogen.get("immunocompromised_fraction", 0.0),
+        )
         return build_profiles_for_agents(
             engine.agents, bundle, np.random.default_rng(run_spec.random_seed),
             class_device_map=device_map,
@@ -97,13 +96,14 @@ class DecisionRuntime:
     @classmethod
     def from_run_spec(cls, run_spec: Any, engine: Any, proto_ctx: Any) -> DecisionRuntime:
         repo = run_spec.repo_root
-        social = cls._resolve_social_config(run_spec)
-        rt = cls(repo_root=repo, social_config=social)
+        resolved = resolve_decision_config(run_spec)
+        social = resolved.social
+        rt = cls(repo_root=repo, social_config=social, resolved_config=resolved)
 
         profile_path = cls._required_input(
             repo, social.get("agent_profile_bundle"), default_bundle_path,
         )
-        rt.profiles = cls._load_agent_profiles(run_spec, engine, profile_path)
+        rt.profiles = cls._load_agent_profiles(run_spec, engine, profile_path, resolved)
 
         ci_path = cls._required_input(
             repo, social.get("class_interactions"), ClassInteractionMatrix.default_path,
@@ -145,9 +145,7 @@ class DecisionRuntime:
 
         export_dir = social.get("export_utility_dir")
         import_dir = social.get("import_actions_dir")
-        cmd_pol, med_pol, pop_pol = build_policies_from_config(
-            run_spec.legacy_cfg if hasattr(run_spec, "legacy_cfg") else {},
-        )
+        cmd_pol, med_pol, pop_pol = build_policies_from_config(resolved.policy_config())
         rt.stackelberg = StackelbergRound(
             command_policy=cmd_pol,
             medical_policy=med_pol,

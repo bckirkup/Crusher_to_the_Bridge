@@ -198,8 +198,7 @@ surveillance:
 ### Orthogonal Agent State Axes
 
 Ground-truth and per-epoch telemetry use three independent fields per agent
-(`telemetry_buffer/agent_axes.py`), replacing the legacy combined
-`symptom_status` string:
+(`telemetry_buffer/agent_axes.py`):
 
 | Field | Role |
 |-------|------|
@@ -208,8 +207,9 @@ Ground-truth and per-epoch telemetry use three independent fields per agent
 | `compliance_status` | FRED confinement: compliant, non_compliant, isolated, quarantined |
 
 Infection counters, syndromic sick-call logic, and confinement SOPs call
-`resolve_agent_axes()`. Downstream tools should prefer the three-axis fields;
-`symptom_status` remains in JSON output for backward compatibility only.
+`resolve_agent_axes()`. The three-axis fields are the only agent status
+representation; an agent dict with no axes resolves to susceptible /
+asymptomatic / compliant.
 
 ---
 
@@ -1518,7 +1518,7 @@ During execution, a single-line progress bar shows:
 `infection_counters`, `wearable_monitoring`, `contact_tracing.transmission_events`.
 
 **Per-agent telemetry** uses `infection_state`, `symptom_presentation`, and
-`compliance_status` (legacy `symptom_status` is deprecated).
+`compliance_status`.
 
 **Cost accounting** per epoch includes `materials_consumed`,
 `by_category.surveillance` / `by_category.intervention`, and remaining

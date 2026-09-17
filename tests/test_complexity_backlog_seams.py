@@ -14,11 +14,17 @@ from types import SimpleNamespace
 import pytest
 
 from crusher_labs.diagnostic_cascade import DiagnosticCascadeEngine
+from engines.infection_dynamics_bridge import (
+    IllnessStatus,
+    InfectionStatus,
+    KorkinShipEngine,
+)
+from engines.voyage_itinerary import LOCATION_ASHORE
 from picard_framework.analysis import figures as figures_mod
 from tests.test_diagnostic_cascade import (
-    _StubTestRunner,
     _default_tiers,
     _make_agent,
+    _StubTestRunner,
 )
 from tools.sanity_checker import (
     Report,
@@ -26,7 +32,6 @@ from tools.sanity_checker import (
     _check_pathogen_shedding_curve,
     _check_pathogen_timing_bounds,
 )
-
 
 # --- figures helpers ---------------------------------------------------------
 
@@ -213,3 +218,79 @@ def test_ois_weights_non_negative_bounds() -> None:
     ok = Report()
     _check_ois_weights(costs, ok)
     assert not any(f.rule == "BOUNDS_OIS" for f in ok.errors)
+
+
+# --- KorkinShipEngine native transmission helpers ----------------------------
+
+
+def _native_engine_in_one_zone(
+    initial_infected: int, *, seed: int = 3, zone_index: int = 0,
+) -> tuple[KorkinShipEngine, str]:
+    """Engine on the legacy path with every agent co-located and shedders past onset."""
+    eng = KorkinShipEngine(
+        num_passengers=200, num_crew=50, initial_infected=initial_infected, seed=seed,
+    )
+    for agent in eng.agents:
+        if agent.is_infected:
+            agent.time_infected = (agent.time_infected or 0) + 48
+    zone = eng._all_zone_names[zone_index]
+    for agent in eng.agents:
+        agent.current_location = zone
+    return eng, zone
+
+
+def _count(eng: KorkinShipEngine, status: InfectionStatus) -> int:
+    return sum(a.infection_status == status for a in eng.agents)
+
+
+def test_native_transmission_grades_with_shedder_count() -> None:
+    new_infections = []
+    for n in (0, 2, 10, 40):
+        eng, _ = _native_engine_in_one_zone(n)
+        before = _count(eng, InfectionStatus.SUSCEPTIBLE)
+        eng._native_transmission(LOCATION_ASHORE)
+        new_infections.append(before - _count(eng, InfectionStatus.SUSCEPTIBLE))
+
+    assert new_infections[0] == 0
+    assert new_infections == sorted(new_infections)
+    assert new_infections[-1] - new_infections[1] >= 10
+
+
+def test_native_transmission_new_infections_are_fresh_and_dosed() -> None:
+    eng, _ = _native_engine_in_one_zone(10)
+    seeded = {a.agent_id for a in eng.agents if a.is_infected}
+    immune_before = _count(eng, InfectionStatus.IMMUNE)
+    eng._native_transmission(LOCATION_ASHORE)
+
+    fresh = [a for a in eng.agents if a.is_infected and a.agent_id not in seeded]
+    assert fresh
+    for agent in fresh:
+        assert agent.time_infected == 0
+        assert agent.illness_status == IllnessStatus.NOT_ILL
+        assert math.isfinite(agent.acquired_particles)
+        assert agent.acquired_particles > 0
+    assert _count(eng, InfectionStatus.IMMUNE) == immune_before
+
+
+def test_native_transmission_skips_quarantine_and_ashore() -> None:
+    for excluded in ("Isolated_In_Quarters", LOCATION_ASHORE):
+        eng, _ = _native_engine_in_one_zone(10)
+        for agent in eng.agents:
+            agent.current_location = excluded
+        before = _count(eng, InfectionStatus.SUSCEPTIBLE)
+        eng._native_transmission(LOCATION_ASHORE)
+        assert _count(eng, InfectionStatus.SUSCEPTIBLE) == before
+
+
+def test_native_transmission_in_zone_needs_both_shedders_and_susceptible() -> None:
+    eng, _ = _native_engine_in_one_zone(10)
+    shedders = [a for a in eng.agents if a.current_shedding > 0]
+    susceptible = [a for a in eng.agents if a.infection_status == InfectionStatus.SUSCEPTIBLE]
+    assert shedders and susceptible
+
+    eng._native_transmission_in_zone(shedders)
+    eng._native_transmission_in_zone(susceptible)
+    assert all(a.infection_status == InfectionStatus.SUSCEPTIBLE for a in susceptible)
+
+    eng._native_transmission_in_zone(shedders + susceptible)
+    assert any(a.is_infected for a in susceptible)
