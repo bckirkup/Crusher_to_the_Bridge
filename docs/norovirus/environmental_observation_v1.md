@@ -166,7 +166,11 @@ declared: the assay is not routed through the `InstrumentTurnaroundQueue`
 (no declared TAT entry); no decay is applied over the holding time; the
 graywater sequencing grid is untouched; and the emesis capture reaches only
 the `non_touchable` cleanup share — the touchable footprint still feeds the
-fomite pool only. Unresolved cross-check, deliberately not reconciled:
+fomite pool only. One correction to the table above: `rate × residence` is
+the continuous-CSTR limit, while the implemented discrete update (inflow,
+then drain at `epoch_hours / residence`) settles at `rate × (residence −
+one epoch's hours)` — on the hourly clock at 62 h residence, a ~1.6%
+difference. Unresolved cross-check, deliberately not reconciled:
 EPA's 8.4 gal/person/day average embeds far more than the mechanistic
 0.3 gal × ~6 voids ≈ 1.8 gal that `FLUSH_VOLUME_L` implies.
 

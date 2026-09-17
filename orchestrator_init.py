@@ -31,6 +31,7 @@ from crusher_labs.observation_core import (
     ClinicalRapidDiagnostic,
     ContinuousAirSniffer,
     TargetedSurfaceSwab,
+    WastewaterHoldingTankAssay,
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import (
@@ -2047,8 +2048,6 @@ def init_observation_engine(
         cfg.get("observation", {}).get("wastewater_assay_mode", "none")
         == "holding_tank"
     ):
-        from crusher_labs.observation_core import WastewaterHoldingTankAssay
-
         wastewater_assay = WastewaterHoldingTankAssay(
             cross_contamination_rate=xcontam_rate,
             control_intensity=ctrl_intensity,

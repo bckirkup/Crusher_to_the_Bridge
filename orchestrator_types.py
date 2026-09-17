@@ -23,6 +23,7 @@ from crusher_labs.observation_core import (
     ContinuousAirSniffer,
     LongReadVerificationSequencing,
     TargetedSurfaceSwab,
+    WastewaterHoldingTankAssay,
     WastewaterSequencingGrid,
 )
 from crusher_labs.protocol_engine import ProtocolEngine
@@ -144,7 +145,7 @@ class ObservationEngine:
     clin_impression: Any = None  # ClinicalImpression
     turnaround: Any = None  # InstrumentTurnaroundQueue
     long_read: LongReadVerificationSequencing | None = None
-    wastewater_assay: Any = None  # WastewaterHoldingTankAssay
+    wastewater_assay: WastewaterHoldingTankAssay | None = None
     clinical_instrument_params: dict | None = None
     pathogen_profiles: dict | None = None
     outbreak_aware: bool = False
