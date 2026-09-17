@@ -9,6 +9,7 @@ import os
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from crusher_labs import load_config
 from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
@@ -135,11 +136,6 @@ class PicardRunSpec:
         num_epochs: int | None = None,
         catalog: CatalogRegistry | None = None,
     ) -> PicardRunSpec:
-        sys_path_insert = repo_root
-        if sys_path_insert not in __import__("sys").path:
-            __import__("sys").path.insert(0, sys_path_insert)
-        from crusher_labs import load_config
-
         if config_yaml is None:
             config_yaml = os.path.join(repo_root, _CRUSHER_CONFIG_REL)
         cfg = load_config(config_yaml)

@@ -20,27 +20,23 @@ from pathlib import Path
 from typing import Any, Iterator
 from urllib.parse import urlparse
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from engines.initiation import LEGACY_MANIFEST  # noqa: E402
+from engines.initiation import LEGACY_MANIFEST
 
 # Late-bound access to generation + shared mutable campaign state.
-from picard_framework.runs.mega_cruise_campaign import campaign_runner as _cr  # noqa: E402
-from picard_framework.runs.mega_cruise_campaign.informative_ordering import (  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign import campaign_runner as _cr
+from picard_framework.runs.mega_cruise_campaign.informative_ordering import (
     ORDER_CHOICES,
     ORDER_MANIFEST,
     order_runs,
 )
-from picard_framework.runs.mega_cruise_campaign.stop_rule import (  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign.stop_rule import (
     CONTINUE,
     StopRule,
     StopRuleSpecError,
     parse_stop_rule,
 )
-from simulation_utils.epidemic_labels import epidemic_took_off  # noqa: E402
-from simulation_utils.paths import (  # noqa: E402
+from simulation_utils.epidemic_labels import epidemic_took_off
+from simulation_utils.paths import (
     confine_to_base,
     prepare_output_directory,
     resolve_child_path,
@@ -897,7 +893,8 @@ def run_simulation_subprocess(
 
     cmd = [
         sys.executable,
-        str(_cr.CAMPAIGN_DIR / "campaign_runner.py"),
+        "-m",
+        "picard_framework.runs.mega_cruise_campaign.campaign_runner",
         "--single", spec_path, _cr._output_root_str(),
         "--accumulation-suffix", accumulation_suffix,
     ]

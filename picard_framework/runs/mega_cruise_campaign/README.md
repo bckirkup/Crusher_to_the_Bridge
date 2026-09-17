@@ -54,14 +54,14 @@ fine `dose_adjustments` × FUT2 `pre_immunity_fractions` at a pinned
 
 ```bash
 MANIFEST=picard_framework/runs/mega_cruise_campaign/calibration_manifest_v1.json
-RUNNER=picard_framework/runs/mega_cruise_campaign/campaign_runner.py
+RUNNER=picard_framework.runs.mega_cruise_campaign.campaign_runner
 
 # Wave 1 (skips deferred c2)
-python3 "$RUNNER" --manifest "$MANIFEST" --dry-run
-python3 "$RUNNER" --manifest "$MANIFEST" --tier c1 --limit 1 --epochs 6 --num-agents 50
+python3 -m "$RUNNER" --manifest "$MANIFEST" --dry-run
+python3 -m "$RUNNER" --manifest "$MANIFEST" --tier c1 --limit 1 --epochs 6 --num-agents 50
 
 # After C1 analysis: edit c2 with dose_adjustment, then
-python3 "$RUNNER" --manifest "$MANIFEST" --tier c2 --dry-run
+python3 -m "$RUNNER" --manifest "$MANIFEST" --tier c2 --dry-run
 ```
 
 Use a distinct S3 prefix for Batch (e.g. `s3://…/campaign/calibration_v1/`).
@@ -131,7 +131,7 @@ enumerates 560 runs, for 2,240 runs with `--tier all`:
 
 ```bash
 MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_single_dose_hours_v1_manifest.json
-python3 "$RUNNER" --manifest "$MANIFEST" \
+python3 -m "$RUNNER" --manifest "$MANIFEST" \
   --tier all --natural-history-clock hours --dry-run
 ```
 
@@ -150,7 +150,7 @@ all four hulls. Each hull enumerates 720 runs, for 2,880 runs with
 
 ```bash
 MANIFEST=picard_framework/runs/mega_cruise_campaign/c1_reported_case_refit_v1_manifest.json
-python3 "$RUNNER" --manifest "$MANIFEST" \
+python3 -m "$RUNNER" --manifest "$MANIFEST" \
   --tier all --natural-history-clock hours --dry-run
 ```
 
@@ -207,19 +207,19 @@ From the **repo root**:
 
 ```bash
 # Dry run (count without executing)
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --dry-run
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --dry-run
 
 # Fast local smoke (destroyer, 2 epochs, 20 agents, 1 run)
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --smoke
 
 # One tier
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --tier t1
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --tier t1
 
 # Resume after interruption
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --resume --tier t2
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --resume --tier t2
 
 # Limit / override for testing
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner \
   --tier t1 --limit 3 --epochs 6 --num-agents 100
 ```
 
@@ -326,12 +326,12 @@ aws s3 sync s3://$BUCKET/$PREFIX/_resume/ ./_resume/ && cat ./_resume/completed_
 
 ```bash
 # Shard 3 of 200, uploading to S3, resumable:
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner \
   --shard-count 200 --shard-index 3 \
   --s3-prefix s3://my-bucket/campaign/ --resume
 
 # Count how many runs a shard would execute:
-python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner \
   --dry-run --shard-count 200 --shard-index 3
 ```
 

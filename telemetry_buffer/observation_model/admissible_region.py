@@ -59,7 +59,6 @@ import argparse
 import json
 import math
 import os
-import sys
 import tempfile
 from collections.abc import Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor
@@ -70,36 +69,34 @@ from typing import Any
 
 from scipy.stats import qmc
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
+from picard_framework.run_spec import PicardRunSpec
+from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
     compute_derived_metrics,
     extract_timeseries,
 )
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
-from simulation_utils.platform_complement import (  # noqa: E402
+from picard_framework.simulation.ship_simulation import ShipSimulation
+from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.platform_complement import (
     declared_total,
     require_declared_total,
 )
-from telemetry_buffer.observation_model import score_anchors  # noqa: E402
-from telemetry_buffer.observation_model.bounded_screen import (  # noqa: E402
+from telemetry_buffer.observation_model import score_anchors
+from telemetry_buffer.observation_model.bounded_screen import (
     CONTACT_ACTIVITIES,
     DEFAULT_PLATFORM,
     FACTOR_SETS,
     Factor,
     build_run_spec,
 )
-from telemetry_buffer.observation_model.midrs_incidence_targets import (  # noqa: E402
+from telemetry_buffer.observation_model.midrs_incidence_targets import (
     a8_targets,
     a9_targets,
 )
-from telemetry_buffer.observation_model.vsp_class_era_scoring import (  # noqa: E402
+from telemetry_buffer.observation_model.vsp_class_era_scoring import (
     vsp_attack_rate_targets,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # The anchors a point must satisfy simultaneously. A3 is not here: it is a
 # construction band (#23) and has no verdict to satisfy.

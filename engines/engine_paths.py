@@ -2,10 +2,11 @@
 engines.engine_paths
 ~~~~~~~~~~~~~~~~~~~~~
 
-Path registry and sys.path integration for the five sibling simulation
-repositories.  Calling :func:`register_engine_paths` adds the relevant
-directories to ``sys.path`` so that Python-based engines can be imported
-directly from the master ``crusher_to_the_bridge`` workspace.
+Path registry for the five sibling simulation repositories.  Importing this
+module has no side effects.  :func:`engine_import_paths` reports which of the
+registered Python directories exist on disk; an entrypoint that wants them on
+``sys.path`` opts in explicitly with :func:`register_engine_paths` (appends,
+never prepends) or the scoped :func:`registered_engine_paths` context manager.
 
 Layout assumption::
 
@@ -25,6 +26,8 @@ from __future__ import annotations
 
 import os
 import sys
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 
 # ── Resolve workspace root (parent of this repo) ────────────────────────
@@ -90,27 +93,31 @@ def get_engine_path(engine_name: str) -> str:
     return ENGINE_REGISTRY[engine_name]["repo_dir"]
 
 
-def register_engine_paths(
+def engine_import_paths(
     engines: list[str] | None = None,
     verbose: bool = False,
-) -> dict[str, bool]:
-    """Add Python-importable paths from sibling repos to ``sys.path``.
+) -> tuple[dict[str, bool], list[str]]:
+    """Report sibling-repo presence and the Python directories they expose.
+
+    Pure query: nothing is mutated.
 
     Parameters
     ----------
     engines:
-        Engine names to register.  ``None`` (default) registers all.
+        Engine names to inspect.  ``None`` (default) inspects all.
     verbose:
-        If ``True``, print each path as it is added.
+        If ``True``, print each engine's status.
 
     Returns
     -------
-    dict
-        Mapping of engine name → bool indicating whether the repo
-        directory exists on disk.
+    tuple
+        ``(status, paths)`` where ``status`` maps engine name → bool (repo
+        directory exists on disk) and ``paths`` lists, in registry order,
+        the existing Python-importable directories of the present engines.
     """
     targets = engines if engines is not None else list(ENGINE_REGISTRY.keys())
     status: dict[str, bool] = {}
+    paths: list[str] = []
 
     for name in targets:
         entry = ENGINE_REGISTRY.get(name)
@@ -127,12 +134,45 @@ def register_engine_paths(
             continue
 
         for py_path in entry["py_paths"]:
-            if os.path.isdir(py_path) and py_path not in sys.path:
-                sys.path.insert(0, py_path)
+            if os.path.isdir(py_path) and py_path not in paths:
+                paths.append(py_path)
                 if verbose:
-                    print(f"  [{name}] added    {py_path}")
+                    print(f"  [{name}] python   {py_path}")
 
         if verbose and not entry["py_paths"]:
             print(f"  [{name}] present  {entry['repo_dir']}  (no Python paths)")
 
+    return status, paths
+
+
+def register_engine_paths(
+    engines: list[str] | None = None,
+    verbose: bool = False,
+) -> dict[str, bool]:
+    """Append sibling-repo Python directories to ``sys.path``.
+
+    Explicit opt-in for an entrypoint; call it once from a CLI ``main``,
+    not from a library module.  Paths are appended so first-party and
+    standard-library modules are never shadowed, and a path already on
+    ``sys.path`` is left where it is.
+
+    Returns the engine presence mapping from :func:`engine_import_paths`.
+    """
+    status, paths = engine_import_paths(engines, verbose=verbose)
+    for py_path in paths:
+        if py_path not in sys.path:
+            sys.path.append(py_path)
     return status
+
+
+@contextmanager
+def registered_engine_paths(
+    engines: list[str] | None = None,
+    verbose: bool = False,
+) -> Iterator[dict[str, bool]]:
+    """Scoped :func:`register_engine_paths`: ``sys.path`` is restored on exit."""
+    saved = list(sys.path)
+    try:
+        yield register_engine_paths(engines, verbose=verbose)
+    finally:
+        sys.path[:] = saved
