@@ -144,6 +144,7 @@ class ObservationEngine:
     clin_impression: Any = None  # ClinicalImpression
     turnaround: Any = None  # InstrumentTurnaroundQueue
     long_read: LongReadVerificationSequencing | None = None
+    wastewater_assay: Any = None  # WastewaterHoldingTankAssay
     clinical_instrument_params: dict | None = None
     pathogen_profiles: dict | None = None
     outbreak_aware: bool = False

@@ -473,6 +473,20 @@ def step_infection_progression(
             _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
         engine.set_pathogen_zone_mass(pid, masses)
 
+    # The blackwater tank discharges at the same epoch boundary as the
+    # aerosol drains: this epoch's credited mass is in the tank, so the
+    # assay (which runs in run_observation_sampling) reads the
+    # post-discharge concentration.
+    tank = (
+        confinement_core.blackwater_tank
+        if confinement_core is not None
+        else None
+    )
+    if tank is not None:
+        if tank.complement == 0:
+            tank.complement = len(engine.agents)
+        tank.advance_epoch(clock.hours_per_epoch, clock.day_fraction_per_epoch)
+
 
 # ── Chronic disease severity escalation ──────────────────────────────────
 
@@ -688,16 +702,18 @@ def run_observation_sampling(
     dict[int, dict[str, Any]],
     dict[str, dict[str, Any]],
     int,
+    dict[str, Any] | None,
 ]:
     """Run all six observation instruments for a single epoch.
 
     Returns (air_results, swab_results, ww_results,
              clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-             long_read_results, long_read_ordered_count).
+             long_read_results, long_read_ordered_count,
+             wastewater_holding_tank_result).
     Delivered results respect instrument turnaround; stoplights use delivered only.
     """
     if not cfg.get("observation", {}).get("enabled", True):
-        return ({}, {}, {}, {}, {}, {}, {}, 0)
+        return ({}, {}, {}, {}, {}, {}, {}, 0, None)
 
     from crusher_labs.instrument_turnaround import (
         merge_released_into_observation,
@@ -809,6 +825,22 @@ def run_observation_sampling(
         wastewater_zones=ww_target_zones,
     )
 
+    # The holding-tank assay is a different instrument on a different
+    # stream (the blackwater tank, post-discharge); it is not submitted to
+    # the turnaround queue in v1 — it has no declared TAT entry.
+    wastewater_ht_result: dict[str, Any] | None = None
+    if (
+        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        == "holding_tank"
+        and obs.wastewater_assay is not None
+        and tx_core is not None
+        and tx_core.blackwater_tank is not None
+    ):
+        tank = tx_core.blackwater_tank
+        wastewater_ht_result = obs.wastewater_assay.assay(
+            tank.volume_l, dict(tank.copies_by_pathogen),
+        )
+
     sick_call_agents = [
         a for a in agents
         if agent_id(a) in syn_result.get("sick_call_agents", [])
@@ -860,6 +892,7 @@ def run_observation_sampling(
         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         long_read_results,
         long_read_ordered_count,
+        wastewater_ht_result,
     )
 
 

@@ -3714,6 +3714,28 @@ Roughly in dependency order.
     routes it, and the `swab()` legacy path keeps its invented
     `surface_fraction` input for the unchanged default arm. Nothing was
     selected on VSP, A9, MIDRS, or Park outcomes.
+
+57. **A blackwater holding tank and a copies/L assay now exist,
+    default-off.** `transmission.blackwater_plumbing` builds the CSTR
+    (`engines/wastewater_plumbing.py`, EPA 842-R-07-005 nominals: 31.8
+    L/person/day and 62 h residence, Grade B ranges swept) and routes the
+    two streams that were dropped: the bowl deposit's non-aerosolised
+    share for every resolved defecation event — including at
+    `flush_aerosol_fraction = 0`, where the stool still goes down the
+    toilet — and each emesis event's `non_touchable` cleanup share at the
+    declared Grade D capture fraction of 1.0. `WastewaterHoldingTankAssay`
+    (behind `observation.wastewater_assay_mode: holding_tank`, default
+    `none`) applies the composite raw-wastewater LOD — Alex-Sanders 2023's
+    eluate LOD/LOQ (Grade A for the assay step) folded back through four
+    declared Grade C workflow factors, each a swept axis; the composite
+    (~5.5e3 copies/L GII) is an inference, not a reading — and below-LOD
+    samples are censored, never zeroed. v1 limitations, declared: no
+    turnaround-queue entry (the assay reads immediately), no decay over
+    the holding time, graywater sequencing untouched, capture only of
+    `non_touchable`. The change is additive and default-off: no dose,
+    rate, or RNG draw is touched, so no existing measurement is
+    invalidated — the tank reads mass that was previously dropped.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

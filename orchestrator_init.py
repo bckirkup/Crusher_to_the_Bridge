@@ -2042,6 +2042,18 @@ def init_observation_engine(
         control_intensity=ctrl_intensity,
         rng=np.random.default_rng(seed),
     )
+    wastewater_assay = None
+    if (
+        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        == "holding_tank"
+    ):
+        from crusher_labs.observation_core import WastewaterHoldingTankAssay
+
+        wastewater_assay = WastewaterHoldingTankAssay(
+            cross_contamination_rate=xcontam_rate,
+            control_intensity=ctrl_intensity,
+            rng=np.random.default_rng(seed),
+        )
     clin_rdt = ClinicalRapidDiagnostic(
         cross_contamination_rate=xcontam_rate,
         control_intensity=ctrl_intensity,
@@ -2138,6 +2150,7 @@ def init_observation_engine(
         lab_notebook_enabled=lab_notebook_enabled,
         turnaround=turnaround,
         long_read=long_read_inst,
+        wastewater_assay=wastewater_assay,
         clinical_instrument_params=clin_params,
         pathogen_profiles=pathogen_profiles,
         outbreak_aware=bool(cfg.get("clinical_instruments", {}).get("outbreak_aware", False)),

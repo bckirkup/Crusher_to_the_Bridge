@@ -79,6 +79,12 @@ from engines.strain_state import (
     StrainRegistry,
     StrainState,
 )
+from engines.wastewater_plumbing import (
+    BLACKWATER_L_PER_PERSON_DAY,
+    BLACKWATER_RESIDENCE_HOURS,
+    EMESIS_DRAIN_CAPTURE_FRACTION,
+    BlackwaterHoldingTank,
+)
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
@@ -1079,6 +1085,33 @@ def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
     return bool(tx.get("flush_cabin_emission", True))
 
 
+def _parse_blackwater_plumbing(tx: dict[str, Any]) -> BlackwaterHoldingTank | None:
+    """Build the ship's blackwater holding tank, or ``None`` when off.
+
+    ``transmission.blackwater_plumbing`` defaults to ``false``; ``true``
+    takes the EPA 842-R-07-005 nominals, a dict overrides any of the three
+    ctor kwargs. The tank consumes no RNG, so the off path stays
+    bit-identical.
+    """
+    raw = tx.get("blackwater_plumbing", False)
+    if raw is True:
+        return BlackwaterHoldingTank()
+    if isinstance(raw, dict):
+        return BlackwaterHoldingTank(
+            l_per_person_day=raw.get(
+                "l_per_person_day", BLACKWATER_L_PER_PERSON_DAY,
+            ),
+            residence_hours=raw.get(
+                "residence_hours", BLACKWATER_RESIDENCE_HOURS,
+            ),
+            emesis_drain_capture_fraction=raw.get(
+                "emesis_drain_capture_fraction",
+                EMESIS_DRAIN_CAPTURE_FRACTION,
+            ),
+        )
+    return None
+
+
 def _parse_dining_party_share(tx: dict[str, Any]) -> float:
     raw = tx.get("dining_party_contact_share", DEFAULT_DINING_PARTY_CONTACT_SHARE)
     share = float(raw)
@@ -1582,6 +1615,10 @@ class TransmissionCore:
         self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
         self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
         self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
+        # The blackwater tank reads mass that is otherwise dropped (the
+        # non-aerosolised bowl share and emesis ``non_touchable``) and
+        # consumes no RNG, so the off path is bit-identical.
+        self.blackwater_tank = _parse_blackwater_plumbing(tx)
         # Two-channel emission, same structure as the emesis route:
         # ``pending`` drains into the zone airborne reservoir once at the
         # epoch boundary; ``emitted`` carries this epoch's in-room dose
@@ -4782,8 +4819,6 @@ class TransmissionCore:
             self._sanitary_stool_venues.setdefault(
                 pathogen_id, {},
             )[agent.agent_id] = venue
-        if self.flush_aerosol_fraction <= 0.0:
-            return
         # ``zone_name`` here is the already-compartmented cabin key, which
         # ``_sanitary_venue`` cannot match to a corridor-named ``home_zone``;
         # the compartment IS the own-fittings venue that home resolves to.
@@ -4794,7 +4829,21 @@ class TransmissionCore:
             and self._is_cabin_compartment(zone_name)
         ):
             flush_venue = zone_name
-        if flush_venue is not None and (
+        if flush_venue is None:
+            return
+        # Stool goes down the toilet whether or not it aerosolises: the
+        # bowl deposit's non-aerosolised share always reaches the tank.
+        if self.blackwater_tank is not None:
+            bowl_copies = self._stool_bowl_copies(agent, pathogen_id, profile)
+            if bowl_copies is not None:
+                self.blackwater_tank.add_copies(
+                    pathogen_id,
+                    bowl_copies * (1.0 - self.flush_aerosol_fraction),
+                    "stool",
+                )
+        if self.flush_aerosol_fraction <= 0.0:
+            return
+        if (
             self.zone_types.get(flush_venue) == "Sanitary"
             or self.flush_cabin_emission
         ):
@@ -5052,6 +5101,16 @@ class TransmissionCore:
                 "non_touchable": surface_load - pool_gain,
                 "touchable_fraction": touchable_fraction,
             })
+            if self.blackwater_tank is not None:
+                # The deposited share outside the high-touch footprint is
+                # cleaned up into the sewage stream at the declared
+                # capture fraction; ``pool_gain`` is untouched.
+                self.blackwater_tank.add_copies(
+                    pathogen_id,
+                    (surface_load - pool_gain)
+                    * self.blackwater_tank.emesis_drain_capture_fraction,
+                    "emesis",
+                )
             pool_gain_total += pool_gain
         return pool_gain_total
 
@@ -5092,19 +5151,10 @@ class TransmissionCore:
         continuous shedding, via ``confinement_emission_factor``), so a
         flush in a confined cabin emits the same way.
         """
-        titre_log10 = agent.get_pathogen_stool_titre_log10(
-            pathogen_id, profile or {},
-        )
-        if titre_log10 is None:
+        bowl_copies = self._stool_bowl_copies(agent, pathogen_id, profile)
+        if bowl_copies is None:
             return 0.0
-        inf = agent.infections.get(pathogen_id) or {}
-        aerosol_load = (
-            math.pow(10.0, titre_log10)
-            * float(inf.get("shedding_multiplier", 1.0))
-            * float(inf.get("strain_shedding_multiplier", 1.0))
-            * FLUSH_STOOL_MASS_G
-            * self.flush_aerosol_fraction
-        )
+        aerosol_load = bowl_copies * self.flush_aerosol_fraction
         if aerosol_load <= 0.0:
             return 0.0
         pending = self.flush_aerosol_pending_by_pathogen.setdefault(
@@ -5118,6 +5168,32 @@ class TransmissionCore:
         self.sanitary_telemetry["flush_events"] += 1
         self.sanitary_telemetry["flush_aerosol_emitted"] += aerosol_load
         return aerosol_load
+
+    def _stool_bowl_copies(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> float | None:
+        """Copies one defecation event deposits in the bowl.
+
+        The bowl deposit is the stool itself -- ``FLUSH_STOOL_MASS_G`` at
+        the host's current shedding-curve titre with host and strain
+        multipliers -- shared by the flush aerosol channel and the
+        blackwater tank so their two shares sum to the deposit.
+        """
+        titre_log10 = agent.get_pathogen_stool_titre_log10(
+            pathogen_id, profile or {},
+        )
+        if titre_log10 is None:
+            return None
+        inf = agent.infections.get(pathogen_id) or {}
+        return (
+            math.pow(10.0, titre_log10)
+            * float(inf.get("shedding_multiplier", 1.0))
+            * float(inf.get("strain_shedding_multiplier", 1.0))
+            * FLUSH_STOOL_MASS_G
+        )
 
     def drain_flush_aerosol(self, pathogen_id: str) -> dict[str, float]:
         """Per-zone airborne mass from this epoch's flush events, once.
