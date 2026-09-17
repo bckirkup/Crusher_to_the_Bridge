@@ -7,19 +7,39 @@ from typing import Any, Iterator
 from dashboard.loaders import PlatformBundle
 from dashboard.paths import ALL_DECKS_LABEL
 from scripts.blueprint_shapes import blueprint_compartment
-from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
+from telemetry_buffer.agent_axes import (
+    agent_has_symptomatic_presentation,
+    resolve_agent_axes,
+)
+from telemetry_buffer.fields import (
+    AGENT_CLASS,
+    AGENT_ID,
+    AGENT_INFECTION_STATE,
+    AGENT_LOCATION,
+    AGENT_SYMPTOM_PRESENTATION,
+    OBSERVATION_SURFACE_MASS,
+    OBSERVATION_SURFACE_SWAB,
+    RECORD_OBSERVATION_ENGINE,
+    agent_id,
+    agent_location,
+    record_agents,
+    record_block,
+    record_spaces,
+    zone_pathogen_mass,
+)
 
 
 def zone_metric(record: dict[str, Any], zone_id: str, color_mode: str) -> float:
-    spaces = record.get("spaces", {})
-    obs = record.get("observation_engine", {})
+    spaces = record_spaces(record)
+    obs = record_block(record, RECORD_OBSERVATION_ENGINE)
     if color_mode == "Airborne Aerosol Mass":
-        return float(spaces.get(zone_id, {}).get("pathogen_mass", 0.0))
+        return zone_pathogen_mass(spaces.get(zone_id, {}))
     if color_mode == "Surface Fomite Contamination":
-        return float(obs.get("surface_swab", {}).get(zone_id, {}).get("surface_mass", 0.0))
+        swab = record_block(obs, OBSERVATION_SURFACE_SWAB)
+        return float(swab.get(zone_id, {}).get(OBSERVATION_SURFACE_MASS, 0.0))
     count = 0
-    for agent in record.get("agents", []):
-        if agent.get("location") == zone_id and agent_has_symptomatic_presentation(agent):
+    for agent in record_agents(record):
+        if agent.get(AGENT_LOCATION) == zone_id and agent_has_symptomatic_presentation(agent):
             count += 1
     return float(count)
 
@@ -142,8 +162,8 @@ def compute_agent_positions(
     """Zone-centroid positions with jitter for agents on the selected deck."""
     zone_counts: dict[str, int] = defaultdict(int)
     positions: list[dict[str, Any]] = []
-    for agent in record.get("agents", []):
-        loc = agent.get("location", "")
+    for agent in record_agents(record):
+        loc = agent.get(AGENT_LOCATION, "")
         zinfo = bundle.zone_coords.get(loc)
         if not zinfo:
             continue
@@ -152,15 +172,17 @@ def compute_agent_positions(
             continue
         idx = zone_counts[loc]
         zone_counts[loc] += 1
-        jx, jy = _jitter_for_agent(int(agent["agent_id"]), idx)
+        aid = agent_id(agent)
+        jx, jy = _jitter_for_agent(aid, idx)
+        infection_state, presentation, _compliance = resolve_agent_axes(agent)
         positions.append({
-            "agent_id": int(agent["agent_id"]),
+            AGENT_ID: aid,
             "x": float(zinfo["x"]) + jx,
             "y": float(zinfo["y"]) + jy,
-            "location": loc,
-            "infection_state": agent.get("infection_state", ""),
-            "symptom_presentation": agent.get("symptom_presentation", ""),
-            "agent_class": agent.get("agent_class", ""),
+            AGENT_LOCATION: loc,
+            AGENT_INFECTION_STATE: infection_state,
+            AGENT_SYMPTOM_PRESENTATION: presentation,
+            AGENT_CLASS: agent.get(AGENT_CLASS, ""),
         })
     return positions
 
@@ -177,10 +199,10 @@ def compute_agent_trail(
     trail: list[tuple[float, float]] = []
     start = max(0, end_epoch - max_points + 1)
     for rec in history[start : end_epoch + 1]:
-        for agent in rec.get("agents", []):
-            if int(agent["agent_id"]) != agent_id:
+        for agent in record_agents(rec):
+            if int(agent[AGENT_ID]) != agent_id:
                 continue
-            loc = agent.get("location", "")
+            loc = agent_location(agent)
             zinfo = bundle.zone_coords.get(loc)
             if zinfo:
                 trail.append((float(zinfo["x"]), float(zinfo["y"])))

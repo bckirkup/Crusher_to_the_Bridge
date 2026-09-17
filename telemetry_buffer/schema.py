@@ -22,6 +22,18 @@ from telemetry_buffer.agent_axes import (
     PRESENTATION_ASYMPTOMATIC,
     agent_axes_dict,
 )
+from telemetry_buffer.fields import (
+    AGENT_CLASS,
+    AGENT_GENDER,
+    AGENT_ID,
+    AGENT_LOCATION,
+    AGENT_SHEDDING_RATE,
+    RECORD_AGENTS,
+    RECORD_EPOCH,
+    RECORD_SPACES,
+    ZONE_MICROBIOME_ID,
+    ZONE_PATHOGEN_MASS,
+)
 
 # ---------------------------------------------------------------------------
 # Schema helpers
@@ -56,16 +68,16 @@ def make_agent(
 ) -> dict[str, Any]:
     """Return a single agent state dictionary with orthogonal status axes."""
     d: dict[str, Any] = {
-        "agent_id": agent_id,
+        AGENT_ID: agent_id,
         **agent_axes_dict(infection_state, symptom_presentation, compliance_status),
-        "shedding_rate": shedding_rate,
+        AGENT_SHEDDING_RATE: shedding_rate,
     }
     if location is not None:
-        d["location"] = location
+        d[AGENT_LOCATION] = location
     if agent_class is not None:
-        d["agent_class"] = agent_class
+        d[AGENT_CLASS] = agent_class
     if gender is not None:
-        d["gender"] = gender
+        d[AGENT_GENDER] = gender
     return d
 
 
@@ -75,8 +87,8 @@ def make_space(
 ) -> dict[str, Any]:
     """Return a single space/zone state dictionary."""
     return {
-        "pathogen_mass": pathogen_mass,
-        "microbiome_id": microbiome_id,
+        ZONE_PATHOGEN_MASS: pathogen_mass,
+        ZONE_MICROBIOME_ID: microbiome_id,
     }
 
 
@@ -104,9 +116,9 @@ def make_ground_truth(
     """
     return {
         "schema_version": SCHEMA_VERSION,
-        "epoch": epoch,
-        "agents": agents,
-        "spaces": spaces,
+        RECORD_EPOCH: epoch,
+        RECORD_AGENTS: agents,
+        RECORD_SPACES: spaces,
     }
 
 
