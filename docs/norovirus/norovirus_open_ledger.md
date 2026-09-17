@@ -3696,7 +3696,7 @@ Roughly in dependency order.
     inflation and is withdrawn. Its magnitude is unmeasured; no norovirus
     route share, dose, or anchor conclusion is restored by this correction.
 
-55. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
+56. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
     cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,
     continuous shedding in an agent's own cabin block and event aerosol drained
     from that stateroom remain in a stateroom-keyed pool. The declared airflow
