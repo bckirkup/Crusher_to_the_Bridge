@@ -129,16 +129,21 @@ jobs:
         run: pytest tests/test_json_schema_validation.py -v --tb=short
 
   test:
-    # The fast tier only: `-m 'not slow'` deselects the posterior-recovery fits,
-    # which were ~35 of the 47 minutes this job took. `nightly.yml` runs the
-    # whole suite. Both interpreters stay here because they run in parallel, so
-    # the second one costs no wall clock on the gate.
-    name: test (fast tier, ${{ matrix.python-version }})
+    # The fast tier only: `-m 'not slow'` deselects the posterior-recovery fits;
+    # `nightly.yml` runs the whole suite. The tier is split by test module into
+    # `shard-count` jobs per interpreter (tests/conftest.py, --ci-shard-*), and
+    # each job runs its modules across the runner's cores with xdist. Every
+    # shard writes its own coverage data file; `coverage-report` combines them
+    # into the single coverage.xml Sonar reads, so the split costs no coverage.
+    name: test (fast tier, ${{ matrix.python-version }}, shard ${{ matrix.shard-index }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
+        shard-count: [4]
+        shard-index: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -153,12 +158,55 @@ jobs:
         run: |
           uv sync --locked --all-extras --no-install-project --no-build
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
-      - name: Run the fast test tier with coverage (closes #89)
+      - name: Run this shard of the fast test tier with coverage (closes #89)
+        env:
+          SHARD_COUNT: ${{ matrix.shard-count }}
+          SHARD_INDEX: ${{ matrix.shard-index }}
+          COVERAGE_FILE: .coverage.shard-${{ matrix.shard-index }}
         run: |
           pytest tests/ -m 'not slow' -v --tb=short \
-            --cov --cov-report=term-missing --cov-report=xml
-      - name: Upload coverage
+            -n auto --dist loadfile \
+            --ci-shard-count "$SHARD_COUNT" --ci-shard-index "$SHARD_INDEX" \
+            --cov --cov-report=
+      - name: Upload coverage data
         if: matrix.python-version == '3.12'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: coverage-data-${{ matrix.shard-index }}
+          path: .coverage.shard-*
+          include-hidden-files: true
+          if-no-files-found: error
+
+  coverage-report:
+    name: Combine coverage
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+        with:
+          version: "0.7.9"
+          python-version: "3.12"
+          enable-cache: true
+      - name: Install dependencies
+        run: |
+          uv sync --locked --all-extras --no-install-project --no-build
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
+      - name: Download every shard's coverage data
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          pattern: coverage-data-*
+          merge-multiple: true
+      - name: Combine shards into one report
+        run: |
+          ls -la .coverage.shard-*
+          coverage combine --keep .coverage.shard-*
+          coverage xml
+          coverage report --show-missing --skip-covered
+      - name: Upload coverage
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: coverage
@@ -384,7 +432,7 @@ jobs:
     name: SonarQube Cloud
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    needs: test
+    needs: coverage-report
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4

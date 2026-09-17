@@ -9,9 +9,11 @@ initialization, observation engine, and protocol engine setup.
 
 from __future__ import annotations
 
+import copy
 import os
 import warnings
 from collections import defaultdict
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -255,8 +257,17 @@ def assign_dining_parties(
                 agent.dining_table_index = i // size
 
 
-def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
-    """Load the raw platform spatial_layout.json document."""
+@lru_cache(maxsize=8)
+def _validated_platform_layout(full_path: str, mtime_ns: int, size: int) -> dict[str, Any]:
+    return load_validated_json(full_path, "spatial_layout.schema.json", allowed_roots=(REPO_ROOT,))
+
+
+def _shared_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
+    """Return the validated platform layout, shared across callers (do not mutate).
+
+    The cache key includes the file's mtime and size, so an edited layout is
+    re-read and re-validated while the per-epoch readers skip the schema walk.
+    """
     graph_cfg = cfg.get("ship_graph", {})
     layout_path = graph_cfg.get("spatial_layout")
     if not layout_path:
@@ -264,7 +275,14 @@ def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
     full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
         return None
-    return load_validated_json(full_path, "spatial_layout.schema.json", allowed_roots=(REPO_ROOT,))
+    stat = os.stat(full_path)
+    return _validated_platform_layout(full_path, stat.st_mtime_ns, stat.st_size)
+
+
+def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
+    """Load the raw platform spatial_layout.json document."""
+    layout = _shared_platform_layout_doc(cfg)
+    return None if layout is None else copy.deepcopy(layout)
 
 
 def resolve_graywater_zones(
@@ -283,7 +301,7 @@ def resolve_graywater_zones(
     if explicit:
         return list(explicit)
 
-    layout = load_platform_layout_doc(cfg)
+    layout = _shared_platform_layout_doc(cfg)
     if layout:
         platform_zones = layout.get("graywater_zones")
         if platform_zones:
@@ -294,7 +312,7 @@ def resolve_graywater_zones(
 
 def load_isolation_unit_capacity(cfg: dict[str, Any], default: int = 0) -> int:
     """Read isolation_unit_capacity from the platform spatial layout."""
-    layout = load_platform_layout_doc(cfg)
+    layout = _shared_platform_layout_doc(cfg)
     if layout is None:
         return default
     return int(layout.get("isolation_unit_capacity", default))

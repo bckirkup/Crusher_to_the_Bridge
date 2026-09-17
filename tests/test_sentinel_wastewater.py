@@ -543,8 +543,24 @@ def test_deeper_libraries_do_not_buy_unbounded_confidence() -> None:
 
 # --- posteriors ----------------------------------------------------------
 #
-# Three fits, cached, because each is a few tens of seconds: the aligned fleet,
-# the same fleet with unaligned reads, and the clinical-only baseline.
+# Three fits, cached, because each is a few minutes: the aligned fleet, the
+# same fleet with unaligned reads, and the clinical-only baseline. They are the
+# posterior-recovery claims, so they carry the nightly ``slow`` marker; the
+# short fit below keeps the read arm of the walker on the PR tier.
+
+
+def test_a_short_fit_with_reads_reports_every_wastewater_quantity() -> None:
+    """The read arm is wired end to end: data in, slope, loglik and conc out, finite."""
+    data, meta, _ = fleet_with_reads()
+    posterior = fleet_reference_posterior(data, draws=20, warmup=60, seed=5)
+    for key in ("ww_slope", "ww_logit_base", "ww_conc", "loglik_wastewater"):
+        values = np.asarray(posterior[key], dtype=float)
+        assert values.shape == (20,), key
+        assert np.all(np.isfinite(values)), key
+    assert np.all(np.asarray(posterior["ww_conc"], dtype=float) > 0.0)
+    assert float(np.mean(posterior["loglik_wastewater"])) < 0.0
+    assert WASTEWATER_CHANNEL in channel_loglik(posterior)
+    assert wastewater_summary(posterior, meta)["fitted"] is True
 
 
 @pytest.fixture(scope="module")
@@ -571,6 +587,7 @@ def clinical_only_fit() -> tuple[dict[str, Any], dict[str, list[float]]]:
     return meta, fleet_reference_posterior(data, draws=DRAWS, warmup=WARMUP)
 
 
+@pytest.mark.slow
 def test_the_posterior_recovers_the_shedding_signal(
     aligned_fit: tuple[dict[str, Any], dict[str, Any], dict[str, list[float]]],
 ) -> None:
@@ -586,6 +603,7 @@ def test_the_posterior_recovers_the_shedding_signal(
     assert np.all(np.isfinite(np.asarray(posterior["ww_conc"], dtype=float)))
 
 
+@pytest.mark.slow
 def test_unaligned_reads_report_a_weaker_elasticity(
     aligned_fit: tuple[dict[str, Any], dict[str, Any], dict[str, list[float]]],
     scrambled_fit: dict[str, list[float]],
@@ -597,6 +615,7 @@ def test_unaligned_reads_report_a_weaker_elasticity(
     assert null < tracked, f"unaligned reads gave slope {null:.2f} vs {tracked:.2f}"
 
 
+@pytest.mark.slow
 def test_the_channel_does_not_move_the_port_hazards(
     aligned_fit: tuple[dict[str, Any], dict[str, Any], dict[str, list[float]]],
     clinical_only_fit: tuple[dict[str, Any], dict[str, list[float]]],

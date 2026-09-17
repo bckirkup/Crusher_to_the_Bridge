@@ -24,13 +24,18 @@ annotated as guarded.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 import re
+from collections import OrderedDict
 from functools import lru_cache
 from typing import Any, BinaryIO, TextIO
 
 import jsonschema
+from jsonschema.exceptions import best_match
+from jsonschema.protocols import Validator
+from jsonschema.validators import validator_for
 
 _PATH_COMPONENT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
@@ -250,6 +255,20 @@ def load_schema(schema_name: str) -> dict[str, Any]:
         return json.load(fh)
 
 
+@lru_cache(maxsize=None)
+def _schema_validator(schema_name: str) -> Validator:
+    """Return a validator for ``schemas/<schema_name>``, metaschema-checked once per process.
+
+    ``jsonschema.validate`` re-runs the metaschema check on every call, and
+    for the draft-2020-12 schemas in this repository that check dominates the
+    cost of validating the instance itself.
+    """
+    schema = load_schema(schema_name)
+    cls = validator_for(schema)
+    cls.check_schema(schema)
+    return cls(schema)
+
+
 def _describe_violation(schema_name: str, source: str, error: jsonschema.ValidationError) -> str:
     location = "/".join(str(part) for part in error.absolute_path) or "<root>"
     return f"{source} violates schemas/{schema_name} at {location}: {error.message}"
@@ -267,12 +286,22 @@ def validate_json_document(
     the schema, and the offending location so callers that already treat
     ``ValueError`` as "unusable input" keep their existing fallbacks.
     """
-    schema = load_schema(schema_name)
-    try:
-        jsonschema.validate(instance=document, schema=schema)
-    except jsonschema.ValidationError as exc:
-        raise SchemaValidationError(_describe_violation(schema_name, source, exc)) from exc
+    error = best_match(_schema_validator(schema_name).iter_errors(document))
+    if error is not None:
+        raise SchemaValidationError(_describe_violation(schema_name, source, error)) from error
     return document
+
+
+_VALIDATED_TEXT_CACHE_SIZE = 256
+# (schema_name, sha256 of the file text) for documents that already passed validation.
+_validated_texts: OrderedDict[tuple[str, str], None] = OrderedDict()
+
+
+def _remember_validated_text(key: tuple[str, str]) -> None:
+    _validated_texts[key] = None
+    _validated_texts.move_to_end(key)
+    while len(_validated_texts) > _VALIDATED_TEXT_CACHE_SIZE:
+        _validated_texts.popitem(last=False)
 
 
 def load_validated_json(
@@ -287,7 +316,18 @@ def load_validated_json(
     (platform layouts, pathogen bundles, run specs, protocol/cost/logging
     configs, ...) should use, so the contracts in ``schemas/`` are enforced on
     the path the simulation actually runs rather than only offline.
+
+    Every call re-reads and re-parses the file, so callers always get a fresh
+    document; only the schema walk is skipped when the exact same bytes have
+    already been validated against the same schema in this process.
     """
     with validated_open(path, "r", allowed_roots=allowed_roots, encoding="utf-8") as fh:
-        document = json.load(fh)
-    return validate_json_document(document, schema_name, source=path)
+        text = fh.read()
+    document = json.loads(text)
+    key = (schema_name, hashlib.sha256(text.encode("utf-8")).hexdigest())
+    if key in _validated_texts:
+        _validated_texts.move_to_end(key)
+        return document
+    validate_json_document(document, schema_name, source=path)
+    _remember_validated_text(key)
+    return document
