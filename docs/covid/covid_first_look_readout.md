@@ -1381,12 +1381,12 @@ The 12-cell Θ probe after this change records onsets per cell below:
 
 | seed | Θ = 3.16e7 | Θ = 1e9 |
 |---:|---:|---:|
-| 20200205 | pending | pending |
-| 20200206 | pending | pending |
-| 20200207 | pending | pending |
-| 20200208 | pending | pending |
-| 20200209 | pending | pending |
-| 20200210 | pending | pending |
+| 20200205 | 3 | 3,943 |
+| 20200206 | 2,759 | 3,854 |
+| 20200207 | 2,011 | 3,148 |
+| 20200208 | 1 | 3,249 |
+| 20200209 | 4 | 48 |
+| 20200210 | 2,009 | 347 |
 
 ## Reproduction
 
