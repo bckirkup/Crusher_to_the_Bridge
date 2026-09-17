@@ -4433,6 +4433,7 @@ class TransmissionCore:
             dose = concentration * self.inhaled_air_volume_m3_per_epoch
             dose *= self.hvac_airborne_scalar
             dose *= self._aerosol_ventilation_factor(target_zone)
+            dose *= self._confinement_factor(target)
             dose = self._accumulate(
                 target.agent_id, "hvac_airborne", dose,
                 agent_doses, agent_pathway_doses, source_attribution,
