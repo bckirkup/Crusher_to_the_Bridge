@@ -2,6 +2,7 @@
 """Pack compartment footprints per deck so plan polygons do not overlap."""
 from __future__ import annotations
 
+import itertools
 import math
 import re
 from typing import Any
@@ -116,6 +117,49 @@ def _preferred_centers(
     return placed
 
 
+def _separate_pair(
+    a: dict[str, Any],
+    b: dict[str, Any],
+    length_m: float,
+    beam_m: float,
+) -> bool:
+    """Shrink and push apart one overlapping pair; True when a center moved."""
+    ax0, ax1 = a["cx"] - a["w"] / 2, a["cx"] + a["w"] / 2
+    ay0, ay1 = a["cy"] - a["h"] / 2, a["cy"] + a["h"] / 2
+    bx0, bx1 = b["cx"] - b["w"] / 2, b["cx"] + b["w"] / 2
+    by0, by1 = b["cy"] - b["h"] / 2, b["cy"] + b["h"] / 2
+    if _overlap_area((ax0, ax1, ay0, ay1), (bx0, bx1, by0, by1)) <= 1e-3:
+        return False
+
+    # Shrink slightly, then push apart along the stronger separation axis.
+    shrink = 0.96
+    a["w"] = max(3.0, a["w"] * shrink)
+    a["h"] = max(2.5, a["h"] * shrink)
+    b["w"] = max(3.0, b["w"] * shrink)
+    b["h"] = max(2.5, b["h"] * shrink)
+    dx = b["cx"] - a["cx"]
+    dy = b["cy"] - a["cy"]
+    if abs(dx) < 1e-6 and abs(dy) < 1e-6:
+        dx = 0.5
+
+    moved = False
+    if abs(dx) * a["h"] >= abs(dy) * a["w"]:
+        push = (a["w"] + b["w"]) * 0.5 - abs(dx) + 0.4
+        axis, sign = "cx", (1.0 if dx >= 0 else -1.0)
+    else:
+        push = (a["h"] + b["h"]) * 0.5 - abs(dy) + 0.4
+        axis, sign = "cy", (1.0 if dy >= 0 else -1.0)
+    if push > 0:
+        a[axis] -= sign * push * 0.5
+        b[axis] += sign * push * 0.5
+        moved = True
+
+    for it in (a, b):
+        it["cx"] = min(max(it["cx"], it["w"] / 2 + 1.0), length_m - it["w"] / 2 - 1.0)
+        it["cy"] = min(max(it["cy"], it["h"] / 2 + 1.0), beam_m - it["h"] / 2 - 1.0)
+    return moved
+
+
 def pack_deck_compartments(
     zones: list[dict[str, Any]],
     length_m: float,
@@ -159,43 +203,9 @@ def pack_deck_compartments(
 
     for _ in range(max_iters):
         moved = False
-        for i in range(len(items)):
-            for j in range(i + 1, len(items)):
-                a, b = items[i], items[j]
-                ax0, ax1 = a["cx"] - a["w"] / 2, a["cx"] + a["w"] / 2
-                ay0, ay1 = a["cy"] - a["h"] / 2, a["cy"] + a["h"] / 2
-                bx0, bx1 = b["cx"] - b["w"] / 2, b["cx"] + b["w"] / 2
-                by0, by1 = b["cy"] - b["h"] / 2, b["cy"] + b["h"] / 2
-                ov = _overlap_area((ax0, ax1, ay0, ay1), (bx0, bx1, by0, by1))
-                if ov <= 1e-3:
-                    continue
-                # Shrink slightly, then push apart along the stronger separation axis.
-                shrink = 0.96
-                a["w"] = max(3.0, a["w"] * shrink)
-                a["h"] = max(2.5, a["h"] * shrink)
-                b["w"] = max(3.0, b["w"] * shrink)
-                b["h"] = max(2.5, b["h"] * shrink)
-                dx = b["cx"] - a["cx"]
-                dy = b["cy"] - a["cy"]
-                if abs(dx) < 1e-6 and abs(dy) < 1e-6:
-                    dx = 0.5
-                if abs(dx) * a["h"] >= abs(dy) * a["w"]:
-                    push = (a["w"] + b["w"]) * 0.5 - abs(dx) + 0.4
-                    if push > 0:
-                        sign = 1.0 if dx >= 0 else -1.0
-                        a["cx"] -= sign * push * 0.5
-                        b["cx"] += sign * push * 0.5
-                        moved = True
-                else:
-                    push = (a["h"] + b["h"]) * 0.5 - abs(dy) + 0.4
-                    if push > 0:
-                        sign = 1.0 if dy >= 0 else -1.0
-                        a["cy"] -= sign * push * 0.5
-                        b["cy"] += sign * push * 0.5
-                        moved = True
-                for it in (a, b):
-                    it["cx"] = min(max(it["cx"], it["w"] / 2 + 1.0), length_m - it["w"] / 2 - 1.0)
-                    it["cy"] = min(max(it["cy"], it["h"] / 2 + 1.0), beam_m - it["h"] / 2 - 1.0)
+        for i, j in itertools.combinations(range(len(items)), 2):
+            if _separate_pair(items[i], items[j], length_m, beam_m):
+                moved = True
         if not moved:
             break
 
