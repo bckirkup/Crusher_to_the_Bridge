@@ -3656,7 +3656,30 @@ Roughly in dependency order.
     norovirus airborne, ventilation, filter, and confinement conclusions remain
     withdrawn pending a re-measurement on the repaired engine.
 
-54. **`AERO-CABIN-05`: HVAC-downstream standing mass was dosed once per
+54. **Stage `s2e` is measured — the item-50 emesis berth-share repair is a
+    null at 200 paired seeds.** 6,000 runs (five arms
+    `off`/`3e-9`/`1e-8`/`3e-8`/`1e-7`, 1,200 each, seeds 8000–8199, six
+    hull/length cells), 0 non-Spot failures, image
+    `flush-sweep-v1-s2e-34febdc`, job definition `picard-campaign:46`,
+    engine merged main `585ad89`. Paired `s2e` vs `s2r` on identical
+    seeds: imports identical 1.000 in all 30 cell × arm contrasts;
+    secondaries/import within noise everywhere; `emesis_aerosol`
+    dominant-route share ≈0 in both stages. Instrumented local runs show
+    why the ×2.2–2.4 cabin concentration moved nothing: the per-exposure
+    cabin emesis dose sits several decades below N50 = 16,871 at the
+    emitted-mass scale, so doubling it changes no infection outcome. **The
+    `s2r` interpretation stands as the measurement of record on the
+    current engine** (crossing bounded above by `3e-9`; `hvac_airborne`
+    dominant in 26–68% of establishments; posting 85–110/1,000 on the
+    12-day large hulls). Item 50's separate re-measurement requirement is
+    met by this item; item 51's declaration is now measured. No arm is
+    selected, `[1e-9, 1e-3]` untouched, no stage 3. The `s2e` archive
+    carries no `engine_git_sha` (item 52 — the image predates it).
+    Artifacts `telemetry_buffer/observation_model/flush_sweep_v1_s2e.json`,
+    `docs/norovirus/flush_sweep_v1_stage2e_readout.md`,
+    `docs/norovirus/flush_sweep_v1_stage2e_findings.md`.
+
+55. **`AERO-CABIN-05`: HVAC-downstream standing mass was dosed once per
     upstream shedding zone, inflating the route.** `_pathway_hvac_airborne`
     previously passed the whole transported target-zone mass to the dose helper
     once for every upstream zone that hosted a shedder. The correction now
