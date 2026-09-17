@@ -305,41 +305,111 @@ class TestCabinCorridorTransmission:
         )
         assert m_bal.droplet_exposures[0]["dose"] < m_int.droplet_exposures[0]["dose"]
 
-    def test_quarantined_agent_hvac_dose_not_reduced_by_confinement(self) -> None:
+    @pytest.mark.parametrize(
+        "cabin_air_mode",
+        ("zone_pool", "cabin_compartment"),
+    )
+    def test_quarantined_agent_hvac_dose_is_reduced_by_confinement(
+        self,
+        cabin_air_mode: str,
+    ) -> None:
         source = "PC_D6_P_F"
         target_zone = "PC_D6_P_M"
         volumes = {source: 1200.0, target_zone: 1200.0}
         types = {source: "Cabin_Corridor", target_zone: "Cabin_Corridor"}
         downstream = {source: [target_zone]}
         mass = {target_zone: 5000.0}
-        core_free = TransmissionCore(
+        core = TransmissionCore(
             rng=np.random.default_rng(11),
             zone_volumes=volumes,
             zone_types=types,
             confinement_isolation_factor=0.05,
-            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+            cfg={"transmission": {"cabin_air_mode": cabin_air_mode}},
         )
-        core_confined = TransmissionCore(
+        core.initialize_zones(list(volumes))
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[
+                _agent(1, source, infected=True),
+                _agent(2, target_zone),
+                _agent(3, target_zone),
+            ],
+            zone_pathogen_mass=mass,
+            hvac_downstream_zones=downstream,
+            quarantined_ids={3},
+        )
+        doses = {
+            exposure["target_id"]: exposure["dose"]
+            for exposure in matrix.hvac_downstream_exposures
+        }
+        free_dose = doses[2]
+        confined_dose = doses[3]
+        assert confined_dose == pytest.approx(free_dose * 0.05, abs=5e-5)
+
+    @pytest.mark.parametrize("cabin_air_mode", ("zone_pool", "cabin_compartment"))
+    def test_quarantined_hvac_target_outside_cabin_zone_is_unaffected(
+        self,
+        cabin_air_mode: str,
+    ) -> None:
+        source = "PC_D6_P_F"
+        target_zone = "MainDining_L"
+        volumes = {source: 1200.0, target_zone: 1200.0}
+        types = {source: "Cabin_Corridor", target_zone: "Dining"}
+        downstream = {source: [target_zone]}
+        mass = {target_zone: 5000.0}
+        core = TransmissionCore(
             rng=np.random.default_rng(11),
             zone_volumes=volumes,
             zone_types=types,
             confinement_isolation_factor=0.05,
-            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+            cfg={"transmission": {"cabin_air_mode": cabin_air_mode}},
         )
-        for c in (core_free, core_confined):
-            c.initialize_zones(list(volumes))
-        m_free, _ = core_free.execute_transmission(
+        core.initialize_zones(list(volumes))
+        matrix, _ = core.execute_transmission(
             epoch=1,
-            agents=[_agent(1, source, infected=True), _agent(2, target_zone)],
+            agents=[
+                _agent(1, source, infected=True),
+                _agent(2, target_zone),
+                _agent(3, target_zone),
+            ],
             zone_pathogen_mass=mass,
             hvac_downstream_zones=downstream,
-            quarantined_ids=set(),
+            quarantined_ids={3},
         )
-        m_conf, _ = core_confined.execute_transmission(
-            epoch=1,
-            agents=[_agent(1, source, infected=True), _agent(2, target_zone)],
-            zone_pathogen_mass=mass,
-            hvac_downstream_zones=downstream,
-            quarantined_ids={2},
-        )
-        assert m_free.hvac_downstream_exposures[0]["dose"] == m_conf.hvac_downstream_exposures[0]["dose"]
+        doses = {
+            exposure["target_id"]: exposure["dose"]
+            for exposure in matrix.hvac_downstream_exposures
+        }
+        assert doses[3] == pytest.approx(doses[2])
+
+    def test_hvac_confinement_dose_is_finite_nonnegative_and_monotonic(
+        self,
+    ) -> None:
+        source = "PC_D6_P_F"
+        target_zone = "PC_D6_P_M"
+        volumes = {source: 1200.0, target_zone: 1200.0}
+        doses = []
+        for confinement_factor in (0.0, 0.05, 0.5, 1.0):
+            core = TransmissionCore(
+                rng=np.random.default_rng(11),
+                zone_volumes=volumes,
+                zone_types={
+                    source: "Cabin_Corridor",
+                    target_zone: "Cabin_Corridor",
+                },
+                confinement_isolation_factor=confinement_factor,
+                cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+            )
+            core.initialize_zones(list(volumes))
+            matrix, _ = core.execute_transmission(
+                epoch=1,
+                agents=[_agent(1, source, infected=True), _agent(2, target_zone)],
+                zone_pathogen_mass={target_zone: 5000.0},
+                hvac_downstream_zones={source: [target_zone]},
+                quarantined_ids={2},
+            )
+            dose = matrix.hvac_downstream_exposures[0]["dose"]
+            assert np.isfinite(dose)
+            assert dose >= 0.0
+            doses.append(dose)
+        assert doses == sorted(doses)

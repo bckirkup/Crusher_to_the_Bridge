@@ -3605,6 +3605,26 @@ Roughly in dependency order.
     measurement of the current engine**; a re-measurement is declared
     separately. Nothing is fitted and no anchor was consulted.
 
+51. **`AERO-CABIN-04`: cabin confinement now attenuates HVAC-downstream
+    inhalation for confined cabin targets.** `_apply_hvac_downstream_doses`
+    now applies the existing target-side `_confinement_factor` alongside the
+    HVAC scalar and aerosol ventilation factor. This closes the same
+    confinement asymmetry identified on the COVID arm: emission into a cabin
+    block already carries `confinement_emission_factor`, and the droplet route
+    already attenuates a confined target, but the HVAC-downstream route
+    previously dosed every susceptible occupant at full inhalation rate. The
+    gate remains `Cabin_Corridor`-only, and the change is independent of
+    `transmission.cabin_air_mode`; no constant is added or moved.
+
+    The norovirus-relevant path is real but its magnitude is unmeasured.
+    Norovirus has no continuous airborne emission, but emesis-aerosol mass is
+    credited from a stateroom compartment to its parent block pool by
+    `_credit_event_aerosol` and can therefore reach the `hvac_airborne` route.
+    Before this repair, that mass was inhaled by confined cabin hosts at full
+    rate. This is a live path of unmeasured magnitude, not a null. Existing
+    norovirus airborne, ventilation, filter, and confinement conclusions remain
+    withdrawn pending a re-measurement on the repaired engine.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

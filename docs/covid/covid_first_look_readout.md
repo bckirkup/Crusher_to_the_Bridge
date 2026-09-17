@@ -1019,18 +1019,22 @@ attribution table is:
 | `none` | `zone_pool` | `(114, 29, 217, 128, 40)` |
 | `none` | `cabin_compartment` | `(132, 55, 217, 140, 36)` |
 | `airflow` | `zone_pool` | `(112, 32, 217, 123, 51)` |
-| `airflow` | `cabin_compartment` | `(128, 51, 217, 149, 34)` |
+| `airflow` | `cabin_compartment` | `(118, 48, 217, 139, 30)` |
 
 The old change-detector cell at Θ=1e6 belonged to the pooled-air model and
 became all-zero under either single default flip. After the exact transport
 repair, the new-default Θ table was `(0, 0, 217, 0, 0)` at 1e6,
-`(0, 0, 217, 0, 0)` at 1e8, `(128, 51, 217, 149, 34)` at 1e10,
+`(0, 0, 217, 0, 0)` at 1e8, `(118, 48, 217, 139, 30)` at 1e10,
 `(101, 71, 217, 140, 9)` at 1e11, and `(62, 61, 217, 119, 1)` at 1e12.
 The detector therefore remains at the lowest live, unsaturated point, Θ=1e10,
-which reads `(128, 51, 217, 149, 34)` on the local CPython 3.12 run and is
-pinned for both supported interpreter minors. The prior detector value
-`(149, 62, 217, 166, 30)` was from the frozen-source scheme;
-the moved golden is therefore attributed to the numerical repair rather than
+which reads `(140, 64, 217, 155, 36)` on CPython 3.11 and
+`(118, 48, 217, 139, 30)` on CPython 3.12. These moved goldens are attributed
+to the HVAC confinement repair: the downstream airborne route now applies the
+existing cabin target attenuation factor. The prior detector values
+were `(144, 64, 217, 157, 30)` on CPython 3.11 and
+`(128, 51, 217, 149, 34)` on CPython 3.12. The earlier
+`(149, 62, 217, 166, 30)` reading was from the frozen-source scheme; the
+moved goldens are therefore attributed to the confinement repair rather than
 a default flip.
 
 The corrected full-voyage traces at Θ=3.16e7, seed 20200216 were:
@@ -1259,6 +1263,41 @@ the sweep ran the pooled block with dead transport; v5 ran compartments with
 dead transport and the mass-creating step. v6 is the first surface on the
 repaired subsystem, and it supersedes v5 as the current COVID calibration
 statement.
+
+## AERO-CABIN-04: HVAC confinement asymmetry diagnosed and repaired
+
+The HVAC-downstream route had applied cabin confinement asymmetrically. Emission
+into a cabin block's airborne pool already carried
+`confinement_emission_factor(agent)`, and the droplet route already applied the
+target-side `_confinement_factor(target)`. `_apply_hvac_downstream_doses`,
+however, divided standing mass by the full block volume and dosed every
+susceptible occupant at the full inhalation rate, applying neither the target
+factor nor cabin compartments. The repair applies the existing
+`_confinement_factor(target)` before dose accumulation. It introduces no
+constant, remains gated by `Cabin_Corridor`, and applies in both
+`zone_pool` and `cabin_compartment` modes. The emesis-aerosol route is unchanged:
+it already doses the emitting stateroom compartment, where confinement does not
+reduce exposure.
+
+The accompanying mechanism probe diagnosed four facts. First, at the v6
+Theta, the burn cell's confined Cabin_Corridor infections were dominated by the
+HVAC route: 1,591 of 1,792 arrived through `hvac_airborne`. This is the
+asymmetry the change addresses. Second, the exponential Theta arm gives every
+host the same dose-response susceptibility, Theta itself; unlike the
+beta-Poisson arm it does not draw a per-host frailty. The measured stream had
+one distinct susceptibility value across all 3,711 hosts. Third, dose was
+extremely concentrated: the top 1% of `(epoch, zone)` cells held 99.6% of all
+dose and were shared by approximately 138 hosts, while only 0.1–0.4% of
+host-epochs had `sD >= 1` and those host-epochs carried 18–56% of all
+establishment. Fourth, both burning cells infected 3,711 of 3,711 hosts, so
+burn is total penetration; the Theta=`1e9` cell also recorded 795 repeat
+infection events.
+
+The second through fourth findings remain open items that this change does not
+address: the exponential-arm susceptibility degeneracy, concentrated
+cell/host dose coincidence, and repeat infection events. The confinement repair
+changes the target-side HVAC dose only; it is not a fit, a new calibration
+constant, or a claim that these open items are resolved.
 
 ## Reproduction
 
