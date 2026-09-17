@@ -711,13 +711,14 @@ def _drain_with_pending(
     return engine.get_pathogen_zone_mass(PATHOGEN)
 
 
-def test_cabin_compartment_event_mass_is_credited_to_its_parent_zone() -> None:
-    """Cabin-keyed flush and emesis mass lands on the corridor block."""
+def test_cabin_compartment_event_mass_stays_in_its_stateroom_pool() -> None:
+    """Cabin-keyed flush and emesis mass stays on the stateroom key."""
     compartment = f"{ZONE}{CABIN_COMPARTMENT_SEPARATOR}7"
     masses = _drain_with_pending({compartment: 3.0}, {compartment: 2.0})
 
-    assert masses[ZONE] == pytest.approx(5.0)
-    assert set(masses) == {ZONE}
+    assert masses[compartment] == pytest.approx(5.0)
+    assert masses[ZONE] == pytest.approx(0.0)
+    assert set(masses) == {ZONE, compartment}
 
 
 def test_event_mass_in_an_undeclared_zone_is_still_dropped() -> None:
@@ -727,11 +728,18 @@ def test_event_mass_in_an_undeclared_zone_is_still_dropped() -> None:
     assert set(masses) == {ZONE}
 
 
+def test_event_mass_in_an_undeclared_compartment_is_still_dropped() -> None:
+    compartment = f"Not_A_Zone{CABIN_COMPARTMENT_SEPARATOR}7"
+    masses = _drain_with_pending({compartment: 3.0}, {compartment: 2.0})
+
+    assert set(masses) == {ZONE}
+
+
 def test_credited_event_mass_scales_with_pending_mass() -> None:
-    """Double the pending compartment mass, double the credited pool."""
+    """Double the pending compartment mass, double the stateroom pool."""
     compartment = f"{ZONE}{CABIN_COMPARTMENT_SEPARATOR}7"
-    single = _drain_with_pending({compartment: 3.0}, {})[ZONE]
-    double = _drain_with_pending({compartment: 6.0}, {})[ZONE]
+    single = _drain_with_pending({compartment: 3.0}, {})[compartment]
+    double = _drain_with_pending({compartment: 6.0}, {})[compartment]
 
     assert double == pytest.approx(2.0 * single)
     assert single > 0.0

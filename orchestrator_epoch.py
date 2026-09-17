@@ -395,13 +395,18 @@ def _credit_event_aerosol(
 ) -> None:
     """Credit drained event-aerosol mass to the active airborne pool."""
     for zone_name, mass in drained.items():
-        target = zone_name
-        if confinement_core.cabin_air_mode != "cabin_compartment":
-            target = confinement_core.compartment_parent(zone_name)
-            if target in masses:
-                masses[target] += mass
+        parent = confinement_core.compartment_parent(zone_name)
+        if parent not in masses:
             continue
-        masses.setdefault(target, 0.0)
+        is_compartment = confinement_core._is_cabin_compartment(zone_name)
+        target = (
+            zone_name
+            if confinement_core.cabin_air_mode == "cabin_compartment"
+            and is_compartment
+            else parent
+        )
+        if is_compartment:
+            masses.setdefault(target, 0.0)
         masses[target] += mass
 
 

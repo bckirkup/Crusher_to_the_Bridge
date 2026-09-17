@@ -2875,7 +2875,7 @@ class TransmissionCore:
             self.cabin_air_mode != "cabin_compartment"
             or self.zone_types.get(zone_name) != "Cabin_Corridor"
             or self._is_cabin_compartment(zone_name)
-            or zone_name != getattr(agent, "home_zone", None)
+            or zone_name != agent.home_zone
         ):
             return zone_name
         return self._cabin_compartment_key(zone_name, agent)
