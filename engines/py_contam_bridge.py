@@ -261,6 +261,7 @@ class ContamTransportEngine:
         self._real_zone_ids: tuple[str, ...] = ()
         self._decay_free_operator: np.ndarray | None = None
         self._propagator_cache: dict[tuple[float, float], np.ndarray] = {}
+        self._outflow_rate_cache: dict[str, float] = {}
 
         self._build_zone_nodes(spatial_layout)
         self._build_airflow_paths(air_flow_paths)
@@ -557,6 +558,24 @@ class ContamTransportEngine:
         )
         source_rate[source_zone] -= outflow_rate[source_zone]
         return source_rate, outflow_rate
+
+    def zone_specific_outflow_rate(self, zone_id: str) -> float:
+        """Gross specific outflow rate k [1/h] leaving one real zone.
+
+        The same rate the transport operator already carries on its diagonal,
+        read from the declared paths rather than restated, so a caller that
+        partitions a zone's air holds it for exactly the step the operator
+        used.
+        """
+        cached = self._outflow_rate_cache.get(zone_id)
+        if cached is not None:
+            return cached
+        if zone_id not in self._real_zone_ids:
+            rate = 0.0
+        else:
+            rate = float(self._probe_path_rates(zone_id)[1].get(zone_id, 0.0))
+        self._outflow_rate_cache[zone_id] = rate
+        return rate
 
     def _build_decay_free_operator(self) -> np.ndarray:
         """Build dM/dt = A₀M by probing each real-zone basis vector."""

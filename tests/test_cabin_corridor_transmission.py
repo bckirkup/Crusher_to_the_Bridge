@@ -10,6 +10,7 @@ from engines.infection_dynamics_bridge import (
     KorkinAgent,
 )
 from engines.sim_clock import SimClock
+from engines.stateroom_air import partition_block_air
 from engines.transmission_core import TransmissionCore
 
 
@@ -56,6 +57,154 @@ def _droplet_doses(
 
 
 class TestCabinCorridorTransmission:
+    def test_partition_conserves_transport_mass(self) -> None:
+        pre = {
+            "B::cabin::1": 17.0,
+            "B::cabin::2": 29.0,
+            "B::cabin::3": 43.0,
+            "B": 0.0,
+        }
+        post = {"B": 88.0, "Public": 12.0}
+        shares = {
+            "B": {
+                "B::cabin::1": 0.25,
+                "B::cabin::2": 0.25,
+                "B::cabin::3": 0.5,
+            },
+        }
+        result = partition_block_air(pre, post, shares, {"B": 0.2}, 1.0)
+        assert sum(result.values()) == pytest.approx(sum(post.values()), rel=1e-12)
+
+    def test_stateroom_retention_and_share(self) -> None:
+        pre = {
+            "B::cabin::1": 100.0,
+            "B::cabin::2": 0.0,
+            "B::cabin::3": 0.0,
+        }
+        shares = {
+            "B": {
+                "B::cabin::1": 0.25,
+                "B::cabin::2": 0.25,
+                "B::cabin::3": 0.5,
+            },
+        }
+        k = 0.2
+        result = partition_block_air(
+            pre, {"B": 100.0}, shares, {"B": k}, 1.0,
+        )
+        retained = np.exp(-k)
+        assert result["B::cabin::1"] >= 100.0 * retained
+        assert result["B::cabin::2"] / result["B::cabin::3"] == pytest.approx(0.5)
+
+    @pytest.mark.parametrize("cabin_air_mode, expected_compartment", [
+        ("cabin_compartment", True),
+        ("zone_pool", False),
+    ])
+    def test_airborne_deposit_key(
+        self,
+        cabin_air_mode: str,
+        expected_compartment: bool,
+    ) -> None:
+        block = "PC_D6_P_M"
+        public = "MainDining_L"
+        agent = _agent(1, block)
+        core = TransmissionCore(
+            rng=np.random.default_rng(12),
+            zone_volumes={block: 1200.0, public: 100.0},
+            zone_types={block: "Cabin_Corridor", public: "Dining"},
+            cfg={"transmission": {"cabin_air_mode": cabin_air_mode}},
+        )
+        key = core.airborne_deposit_key(agent, block)
+        assert (key != block) == expected_compartment
+        assert core.airborne_deposit_key(agent, public) == public
+
+    def test_cabin_compartment_hvac_targets_other_stateroom(self) -> None:
+        block = "PC_D6_P_M"
+        shedder = _agent(1, block, infected=True)
+        target = _agent(2, block)
+        shedder.cabin_mate_ids = frozenset()
+        target.cabin_mate_ids = frozenset()
+        core = TransmissionCore(
+            rng=np.random.default_rng(13),
+            zone_volumes={block: 1200.0},
+            zone_types={block: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "cabin_compartment"}},
+        )
+        core.initialize_zones([block])
+        core.register_cabin_berths([shedder, target])
+        shedder.cabin_mate_ids = frozenset()
+        target.cabin_mate_ids = frozenset()
+        shedder.current_location = block
+        target.current_location = block
+        shed_key = core._cabin_compartment_key(block, shedder)
+        target_key = core._cabin_compartment_key(block, target)
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={shed_key: 0.0, target_key: 5000.0},
+            hvac_downstream_zones={block: [block]},
+        )
+        assert len(matrix.hvac_downstream_exposures) == 1
+        exposure = matrix.hvac_downstream_exposures[0]
+        assert exposure["target_id"] == target.agent_id
+        assert exposure["air_unit"] == target_key
+
+    def test_cabin_compartment_hvac_is_graded_in_stateroom_mass(self) -> None:
+        block = "PC_D6_P_M"
+        shedder = _agent(1, block, infected=True)
+        target = _agent(2, block)
+        core = TransmissionCore(
+            rng=np.random.default_rng(14),
+            zone_volumes={block: 1200.0},
+            zone_types={block: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "cabin_compartment"}},
+        )
+        core.initialize_zones([block])
+        core.register_cabin_berths([shedder, target])
+        shed_key = core._cabin_compartment_key(block, shedder)
+        target_key = core._cabin_compartment_key(block, target)
+        doses: list[float] = []
+        for mass in (0.0, 1000.0, 5000.0, 20000.0):
+            matrix, _ = core.execute_transmission(
+                epoch=1,
+                agents=[shedder, target],
+                zone_pathogen_mass={shed_key: 0.0, target_key: mass},
+                hvac_downstream_zones={block: [block]},
+            )
+            exposures = matrix.hvac_downstream_exposures
+            assert len(exposures) == (1 if mass > 0.0 else 0)
+            if exposures:
+                dose = exposures[0]["dose"]
+                assert np.isfinite(dose)
+                assert dose >= 0.0
+                doses.append(dose)
+        assert doses[0] < doses[1] < doses[2]
+
+    def test_cabin_compartment_hvac_excludes_shedder_stateroom(self) -> None:
+        block = "PC_D6_P_M"
+        shedder = _agent(1, block, infected=True)
+        target = _agent(2, block)
+        core = TransmissionCore(
+            rng=np.random.default_rng(15),
+            zone_volumes={block: 1200.0},
+            zone_types={block: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "cabin_compartment"}},
+        )
+        core.initialize_zones([block])
+        core.register_cabin_berths([shedder, target])
+        shed_key = core._cabin_compartment_key(block, shedder)
+        target_key = core._cabin_compartment_key(block, target)
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={shed_key: 5000.0, target_key: 5000.0},
+            hvac_downstream_zones={block: [block]},
+        )
+        assert [
+            exposure["air_unit"]
+            for exposure in matrix.hvac_downstream_exposures
+        ] == [target_key]
+
     @staticmethod
     def _droplet_case(
         *,

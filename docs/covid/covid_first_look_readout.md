@@ -1345,6 +1345,49 @@ The cell still burns to near-total penetration, so this change corrects an
 inflated route magnitude; it does not make the outbreak partially penetrating,
 and none of the open items recorded under `AERO-CABIN-04` is resolved by it.
 
+## AERO-CABIN-06: per-stateroom airborne pools
+
+Under `cabin_air_mode: cabin_compartment`, the per-pathogen airborne pool now
+keeps a key for each registered stateroom. Continuous shedding in an agent's
+own cabin block and event aerosol drained from that stateroom enter its
+stateroom key. The declared airflow network still transports the parent block
+as one node; after transport, the block mass is partitioned by each stateroom's
+berth share, retaining the stateroom's own pre-transport mass according to the
+block's gross specific outflow. The HVAC route then doses each target
+stateroom's standing mass once, excludes the stateroom hosting the shedder in
+parity with the existing own-zone short-range route, and records the stateroom
+as `air_unit`. `zone_pool` remains byte-identical.
+
+The own-stateroom exclusion is deliberate parity rather than a new
+attenuation: occupants sharing the shedder's stateroom are dosed by the
+short-range route, while other staterooms in the block can receive the
+standing-mass HVAC exposure.
+
+Burning-cell measurement (seed 20200206, Θ = 3.16e7, full voyage; baseline is
+the HEAD of AERO-CABIN-05 and the after run is this change) is recorded here:
+
+| | AERO-CABIN-05 | AERO-CABIN-06 |
+|---|---:|---:|
+| total infection events | 2,771 | 2,759 |
+| distinct infected hosts | 2,769 | 2,732 |
+| `hvac_airborne` events, all | 411 | 141 |
+| `hvac_airborne` events, confined cabin hosts | 336 | 32 |
+| final attack | 74.62% | 73.62% |
+
+Daily onset counts for days 14–24 (before → after):
+`268 / 376 / 16 / 11 / 21 / 58 / 222 / 334 / 454 / 415 / 247`
+→ `427 / 25 / 76 / 216 / 94 / 313 / 158 / 153 / 240 / 163 / 96`.
+The 12-cell Θ probe after this change records onsets per cell below:
+
+| seed | Θ = 3.16e7 | Θ = 1e9 |
+|---:|---:|---:|
+| 20200205 | pending | pending |
+| 20200206 | pending | pending |
+| 20200207 | pending | pending |
+| 20200208 | pending | pending |
+| 20200209 | pending | pending |
+| 20200210 | pending | pending |
+
 ## Reproduction
 
 ```bash

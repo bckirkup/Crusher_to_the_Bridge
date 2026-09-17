@@ -3673,6 +3673,23 @@ Roughly in dependency order.
     inflation and is withdrawn. Its magnitude is unmeasured; no norovirus
     route share, dose, or anchor conclusion is restored by this correction.
 
+55. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
+    cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,
+    continuous shedding in an agent's own cabin block and event aerosol drained
+    from that stateroom remain in a stateroom-keyed pool. The declared airflow
+    network still transports the parent block, then partitions the transported
+    mass by declared berth share and the block's gross specific outflow. The
+    HVAC route inhales each target stateroom's standing mass once and excludes
+    the stateroom hosting the shedder, preserving the existing own-stateroom
+    short-range route parity. `zone_pool` is unchanged.
+
+    Norovirus has no continuous airborne emission, but emesis aerosol now
+    remains in the emitting stateroom until the block transport and partition
+    step. Any prior norovirus cabin-compartment HVAC dose figure that treated
+    emesis mass as a well-mixed block pool was inflated by that block
+    representation and is withdrawn. The magnitude of the correction for
+    norovirus is unmeasured; no route share or anchor conclusion is restored.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

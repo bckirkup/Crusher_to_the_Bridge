@@ -51,6 +51,7 @@ from engines.py_contam_bridge import (
 )
 from engines.scenario_schedule import ScenarioSchedule, resolve_scenario_schedule
 from engines.sim_clock import SimClock
+from engines.stateroom_air import partition_block_air
 from engines.transmission_core import (
     DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
@@ -938,10 +939,34 @@ class ShipSimulation:
             return
         if self.pathogen_pool_transport == "airflow" and self.pathogen_profiles:
             for pathogen_id in self.pathogen_profiles:
+                pre = self.engine.get_pathogen_zone_mass(pathogen_id)
+                block_in = dict(pre)
+                shares_by_block = (
+                    self.tx_core.stateroom_air_shares_by_block()
+                    if self.tx_core is not None
+                    else {}
+                )
+                for key, mass in pre.items():
+                    if self.tx_core is None or not self.tx_core._is_cabin_compartment(key):
+                        continue
+                    block = self.tx_core.compartment_parent(key)
+                    block_in[block] = block_in.get(block, 0.0) + mass
+                    block_in.pop(key, None)
                 masses = self.contam_engine.transport_step(
-                    self.engine.get_pathogen_zone_mass(pathogen_id),
+                    block_in,
                     natural_decay_rate=0.0,
                 )
+                if shares_by_block and self.tx_core is not None:
+                    masses = partition_block_air(
+                        pre,
+                        masses,
+                        shares_by_block,
+                        {
+                            block: self.contam_engine.zone_specific_outflow_rate(block)
+                            for block in shares_by_block
+                        },
+                        self.clock.hours_per_epoch,
+                    )
                 self.engine.set_pathogen_zone_mass(pathogen_id, masses)
             return
         self.engine.zone_pathogen_mass = self.contam_engine.transport_step(

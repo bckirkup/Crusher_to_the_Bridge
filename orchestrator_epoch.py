@@ -393,16 +393,16 @@ def _credit_event_aerosol(
     confinement_core: TransmissionCore,
     drained: dict[str, float],
 ) -> None:
-    """Credit drained event-aerosol mass to its ship zone.
-
-    Flush and emesis events emitted in a stateroom are keyed by cabin
-    compartment, which never appears in the zone-mass map; the parent ship
-    zone receives the mass instead.
-    """
+    """Credit drained event-aerosol mass to the active airborne pool."""
     for zone_name, mass in drained.items():
-        target = confinement_core.compartment_parent(zone_name)
-        if target in masses:
-            masses[target] += mass
+        target = zone_name
+        if confinement_core.cabin_air_mode != "cabin_compartment":
+            target = confinement_core.compartment_parent(zone_name)
+            if target in masses:
+                masses[target] += mass
+            continue
+        masses.setdefault(target, 0.0)
+        masses[target] += mass
 
 
 def step_infection_progression(
@@ -463,12 +463,18 @@ def step_infection_progression(
                         if confinement_core is not None
                         else 1.0
                     )
-                    masses[loc] += sv * dep_frac * emission_factor
+                    target = (
+                        confinement_core.airborne_deposit_key(agent, loc)
+                        if confinement_core is not None
+                        else loc
+                    )
+                    masses.setdefault(target, 0.0)
+                    masses[target] += sv * dep_frac * emission_factor
         if confinement_core is not None:
             # Sanitary HVAC is exhaust-only, so a head venue normally has
             # nothing downstream to transport to; the drains exist for
             # parity and for cabin-compartment venues, whose mass is credited
-            # to the parent corridor block sharing the cabin HVAC branch.
+            # to the emitting stateroom pool.
             _credit_event_aerosol(masses, confinement_core, confinement_core.drain_emesis_aerosol(pid))
             _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
         engine.set_pathogen_zone_mass(pid, masses)

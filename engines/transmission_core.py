@@ -2865,6 +2865,43 @@ class TransmissionCore:
         self.zone_types.setdefault(key, "Cabin_Corridor")
         return key
 
+    def airborne_deposit_key(self, agent: KorkinAgent, zone_name: str) -> str:
+        """The airborne pool a host's continuous emission enters.
+
+        Its own stateroom under ``cabin_compartment`` while it is in its own
+        cabin block, and the ship zone everywhere else.
+        """
+        if (
+            self.cabin_air_mode != "cabin_compartment"
+            or self.zone_types.get(zone_name) != "Cabin_Corridor"
+            or self._is_cabin_compartment(zone_name)
+            or zone_name != getattr(agent, "home_zone", None)
+        ):
+            return zone_name
+        return self._cabin_compartment_key(zone_name, agent)
+
+    def stateroom_air_shares(self, block: str) -> dict[str, float]:
+        """Berth share of a cabin block's air held by each of its staterooms."""
+        block_berths = self._block_berths.get(block, 0)
+        if block_berths <= 0:
+            return {}
+        prefix = block + CABIN_COMPARTMENT_SEPARATOR
+        return {
+            key: berths / block_berths
+            for key, berths in sorted(self._cabin_berths.items())
+            if key.startswith(prefix) and berths > 0
+        }
+
+    def stateroom_air_shares_by_block(self) -> dict[str, dict[str, float]]:
+        """Every registered cabin block's stateroom shares (empty under zone_pool)."""
+        if self.cabin_air_mode != "cabin_compartment":
+            return {}
+        shares = {
+            block: self.stateroom_air_shares(block)
+            for block in sorted(self._block_berths)
+        }
+        return {block: s for block, s in shares.items() if s}
+
     def _cabin_compartments(
         self,
         zone_occupants: dict[str, list[KorkinAgent]],
@@ -2898,7 +2935,7 @@ class TransmissionCore:
         Cabin_Corridor's occupants are split into their staterooms, exactly
         as the direct-contact and fomite routes already split them.
         """
-        if self.cabin_air_mode != "cabin_compartment":
+        if self.cabin_air_mode != "cabin_compartment" or not self._cabin_berths:
             return zone_occupants
         return self._cabin_compartments(zone_occupants)
 
@@ -4300,9 +4337,8 @@ class TransmissionCore:
 
         The unit of air is the zone, except under ``cabin_air_mode:
         cabin_compartment``, where a Cabin_Corridor's occupants breathe the
-        stateroom they share. Emitted mass is always credited to the ship
-        zone, so the drift route downstream reads the same air it read
-        before whichever unit inhaled it.
+        stateroom they share. The drift route reads the transported pools
+        after the short-range route has credited each emitting unit.
         """
         near_field_on = self._near_field_admits(profile)
         emission_fraction = self._droplet_emission_fraction(profile)
@@ -4415,17 +4451,18 @@ class TransmissionCore:
         source_zones: list[str],
         shedder_ids: list[int],
         mass_in_target: float,
-        zone_occupants: dict[str, list[KorkinAgent]],
+        occupants: list[KorkinAgent],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         pathogen_id: str,
         source_attribution: DoseAttribution | None = None,
+        air_unit: str | None = None,
     ) -> None:
-        volume = self.zone_volumes.get(target_zone, 100.0)
+        unit_name = air_unit or target_zone
+        volume = self._air_unit_volume(unit_name)
         concentration = mass_in_target / max(volume, 1.0)
-        target_occupants = zone_occupants.get(target_zone, [])
-        susceptible = self._get_susceptible(target_occupants, pathogen_id)
+        susceptible = self._get_susceptible(occupants, pathogen_id)
         if not susceptible:
             return
 
@@ -4439,7 +4476,7 @@ class TransmissionCore:
                 agent_doses, agent_pathway_doses, source_attribution,
             )
 
-            matrix.hvac_downstream_exposures.append({
+            exposure: dict[str, Any] = {
                 "target_id": target.agent_id,
                 "target_zone": target_zone,
                 "source_zones": sorted(source_zones),
@@ -4448,7 +4485,12 @@ class TransmissionCore:
                 "dose": round(dose, 4),
                 "airborne_mass": round(mass_in_target, 4),
                 "concentration_per_m3": round(concentration, 6),
-            })
+            }
+            if unit_name != target_zone:
+                # Written only under the compartment mode, so a zone-pool
+                # run's payload is the pre-change payload.
+                exposure["air_unit"] = unit_name
+            matrix.hvac_downstream_exposures.append(exposure)
 
     @staticmethod
     def _hvac_upstream_sources(
@@ -4457,13 +4499,96 @@ class TransmissionCore:
     ) -> dict[str, list[str]]:
         upstream: dict[str, set[str]] = {}
         for source_zone in zone_shedders:
-            for target_zone in hvac_downstream_zones.get(source_zone, []):
-                if target_zone != source_zone:
-                    upstream.setdefault(target_zone, set()).add(source_zone)
+            route_source = source_zone.split(
+                CABIN_COMPARTMENT_SEPARATOR, 1,
+            )[0]
+            for target_zone in hvac_downstream_zones.get(route_source, []):
+                if target_zone != route_source:
+                    upstream.setdefault(target_zone, set()).add(route_source)
         return {
             target_zone: sorted(source_zones)
             for target_zone, source_zones in upstream.items()
         }
+
+    def _is_cabin_block(self, zone_name: str) -> bool:
+        return (
+            self.zone_types.get(zone_name) == "Cabin_Corridor"
+            and not self._is_cabin_compartment(zone_name)
+        )
+
+    def _cabin_block_air_units(
+        self,
+        block: str,
+        upstream: dict[str, list[str]],
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+        units: dict[str, list[KorkinAgent]],
+        zone_pathogen_mass: dict[str, float],
+    ) -> list[tuple[str, str, list[str]]]:
+        """One cabin block's stateroom targets, their block and their sources."""
+        if not self.stateroom_air_shares(block):
+            sources = set(upstream.get(block, []))
+            if any(
+                self.compartment_parent(unit) == block
+                for unit in zone_shedders
+            ):
+                sources.add(block)
+            return [(block, block, sorted(sources))]
+        shedding_units = {
+            unit for unit in zone_shedders
+            if self.compartment_parent(unit) == block
+        }
+        sources = set(upstream.get(block, []))
+        if shedding_units:
+            sources.add(block)
+        if not sources:
+            return []
+        prefix = block + CABIN_COMPARTMENT_SEPARATOR
+        return [
+            (unit, block, sorted(sources))
+            for unit in sorted(
+                key for key in zone_pathogen_mass if key.startswith(prefix)
+            )
+            if unit not in shedding_units and units.get(unit)
+        ]
+
+    def _hvac_air_units(
+        self,
+        upstream: dict[str, list[str]],
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+        units: dict[str, list[KorkinAgent]],
+        zone_pathogen_mass: dict[str, float],
+    ) -> list[tuple[str, str, list[str]]]:
+        """The (air unit, ship zone, source zones) triples dosed this epoch."""
+        if self.cabin_air_mode != "cabin_compartment":
+            return [(zone, zone, upstream[zone]) for zone in sorted(upstream)]
+        blocks = set(upstream) | {
+            zone for zone in zone_shedders if self._is_cabin_block(zone)
+        }
+        blocks.update(
+            self.compartment_parent(zone)
+            for zone in zone_shedders
+            if self._is_cabin_compartment(zone)
+        )
+        jobs: list[tuple[str, str, list[str]]] = []
+        for zone in sorted(blocks):
+            if not self._is_cabin_block(zone):
+                jobs.append((zone, zone, upstream[zone]))
+                continue
+            jobs.extend(self._cabin_block_air_units(
+                zone, upstream, zone_shedders, units, zone_pathogen_mass,
+            ))
+        return jobs
+
+    def _airborne_composition_sources(
+        self,
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+    ) -> dict[str, list[tuple[KorkinAgent, float]]]:
+        if self.cabin_air_mode != "cabin_compartment":
+            return zone_shedders
+        grouped: dict[str, list[tuple[KorkinAgent, float]]] = {}
+        for unit, shedders in zone_shedders.items():
+            grouped.setdefault(self.compartment_parent(unit), []).extend(shedders)
+        return grouped
 
     def _pathway_hvac_airborne(
         self,
@@ -4484,9 +4609,15 @@ class TransmissionCore:
         pool is transported, so upstream sources are already integrated into
         that mass; upstream shedders only gate the route and provide an
         attribution fallback when the reservoir has no composition.
+
+        Under ``cabin_air_mode: cabin_compartment`` the unit that inhales
+        inside a cabin block is the stateroom, which holds its own share of
+        the block's air; a stateroom hosting a shedder is left to the
+        short-range route, as an upstream zone's own occupants already are.
         """
+        units = self._cabin_air_units(zone_occupants)
         zone_shedders: dict[str, list[tuple[KorkinAgent, float]]] = {}
-        for zone_name, occupants in zone_occupants.items():
+        for zone_name, occupants in units.items():
             shedders = self._get_shedders(occupants, pathogen_id, None)
             if shedders:
                 zone_shedders[zone_name] = shedders
@@ -4494,17 +4625,23 @@ class TransmissionCore:
         upstream = self._hvac_upstream_sources(
             zone_shedders, hvac_downstream_zones,
         )
-        for target_zone in sorted(upstream):
-            mass_in_target = zone_pathogen_mass.get(target_zone, 0.0)
+        for air_unit, target_zone, source_zones in self._hvac_air_units(
+            upstream, zone_shedders, units, zone_pathogen_mass,
+        ):
+            mass_in_target = zone_pathogen_mass.get(air_unit, 0.0)
             if mass_in_target <= 0:
                 continue
 
-            source_zones = upstream[target_zone]
-            shedders = [
-                shedder
-                for source_zone in source_zones
-                for shedder in zone_shedders[source_zone]
-            ]
+            shedders = []
+            for source_zone in source_zones:
+                if source_zone in zone_shedders:
+                    shedders.extend(
+                        zone_shedders[source_zone]
+                    )
+                elif self._is_cabin_block(source_zone):
+                    for unit, unit_shedders in zone_shedders.items():
+                        if self.compartment_parent(unit) == source_zone:
+                            shedders.extend(unit_shedders)
             mix = self._reservoir_mix(
                 AIRBORNE_RESERVOIR, pathogen_id, target_zone,
             ) or self._shedder_mix(shedders, pathogen_id)
@@ -4512,12 +4649,16 @@ class TransmissionCore:
                 target_zone, source_zones,
                 [s.agent_id for s, _ in shedders],
                 mass_in_target,
-                zone_occupants, agent_doses, matrix,
+                units.get(air_unit, []), agent_doses, matrix,
                 agent_pathway_doses, pathogen_id,
                 attribution(ledger, mix),
+                air_unit=air_unit,
             )
 
-        self._airborne_composition(pathogen_id, zone_shedders)
+        self._airborne_composition(
+            pathogen_id,
+            self._airborne_composition_sources(zone_shedders),
+        )
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
 
