@@ -11,24 +11,75 @@ from dashboard.retention import render_retention_banner
 from dashboard.session_state import get_selected_agent_id, set_selected_agent
 from dashboard.theme import LCARS_GOLD, LCARS_PURPLE, LCARS_RED, apply_lcars_layout
 from dashboard.units import axis, time_x_values
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_COMPLIANT,
+    COMPLIANCE_ISOLATED,
+    COMPLIANCE_NON_COMPLIANT,
+    COMPLIANCE_QUARANTINED,
+    INFECTION_IMMUNE,
+    INFECTION_INFECTED,
+    INFECTION_RECOVERED,
+    INFECTION_SUSCEPTIBLE,
+    PRESENTATION_ASYMPTOMATIC,
+    PRESENTATION_MILD,
+    PRESENTATION_SEVERE,
+    PRESENTATION_SYMPTOMATIC,
+    resolve_agent_axes,
+)
+from telemetry_buffer.fields import (
+    AGENT_CABIN_MATE_IDS,
+    AGENT_CLASS,
+    AGENT_GENDER,
+    AGENT_ID,
+    AGENT_PATHOGEN_INFECTIONS,
+    RECORD_VOYAGE_EPOCH,
+    VOYAGE_DAY,
+    VOYAGE_PORT,
+    agent_location,
+    record_agents,
+    record_block,
+    record_epoch,
+)
+
+_INFECTION_ORDINAL = {
+    INFECTION_SUSCEPTIBLE: 0,
+    INFECTION_INFECTED: 1,
+    INFECTION_RECOVERED: 2,
+    INFECTION_IMMUNE: 3,
+}
+_PRESENTATION_ORDINAL = {
+    PRESENTATION_ASYMPTOMATIC: 0,
+    PRESENTATION_MILD: 1,
+    PRESENTATION_SYMPTOMATIC: 2,
+    PRESENTATION_SEVERE: 3,
+}
+_COMPLIANCE_ORDINAL = {
+    COMPLIANCE_COMPLIANT: 0,
+    COMPLIANCE_NON_COMPLIANT: 1,
+    COMPLIANCE_ISOLATED: 2,
+    COMPLIANCE_QUARANTINED: 3,
+}
+
+
+def _find_agent(rec: dict[str, Any], agent_id: int) -> dict[str, Any] | None:
+    return next(
+        (a for a in record_agents(rec) if int(a[AGENT_ID]) == agent_id), None,
+    )
 
 
 def _agent_ids(history: list[dict[str, Any]]) -> list[int]:
     ids: set[int] = set()
     for rec in history:
-        for ag in rec.get("agents", []):
-            ids.add(int(ag["agent_id"]))
+        for ag in record_agents(rec):
+            ids.add(int(ag[AGENT_ID]))
     return sorted(ids)
 
 
 def _agent_record_at(history: list[dict[str, Any]], agent_id: int, epoch: int) -> dict[str, Any] | None:
-    rec = next((r for r in history if r["epoch"] == epoch), None)
+    rec = next((r for r in history if record_epoch(r) == epoch), None)
     if not rec:
         return None
-    for ag in rec.get("agents", []):
-        if int(ag["agent_id"]) == agent_id:
-            return ag
-    return None
+    return _find_agent(rec, agent_id)
 
 
 def _build_agent_timeline(history: list[dict[str, Any]], agent_id: int) -> go.Figure | None:
@@ -36,20 +87,18 @@ def _build_agent_timeline(history: list[dict[str, Any]], agent_id: int) -> go.Fi
     infection_y: list[int] = []
     symptom_y: list[int] = []
     compliance_y: list[int] = []
-    state_map = {"susceptible": 0, "infected": 1, "recovered": 2, "immune": 3}
-    symptom_map = {"asymptomatic": 0, "mild": 1, "symptomatic": 2, "severe": 3}
-    compliance_map = {"compliant": 0, "non_compliant": 1, "isolated": 2, "quarantined": 3}
 
     for rec in history:
-        ag = next((a for a in rec.get("agents", []) if int(a["agent_id"]) == agent_id), None)
+        ag = _find_agent(rec, agent_id)
         if not ag:
             infection_y.append(0)
             symptom_y.append(0)
             compliance_y.append(0)
             continue
-        infection_y.append(state_map.get(ag.get("infection_state", "susceptible"), 0))
-        symptom_y.append(symptom_map.get(ag.get("symptom_presentation", "asymptomatic"), 0))
-        compliance_y.append(compliance_map.get(ag.get("compliance_status", "compliant"), 0))
+        infection, presentation, compliance = resolve_agent_axes(ag)
+        infection_y.append(_INFECTION_ORDINAL.get(infection, 0))
+        symptom_y.append(_PRESENTATION_ORDINAL.get(presentation, 0))
+        compliance_y.append(_COMPLIANCE_ORDINAL.get(compliance, 0))
 
     if not any(infection_y):
         return None
@@ -82,13 +131,14 @@ def _build_agent_timeline(history: list[dict[str, Any]], agent_id: int) -> go.Fi
 def _location_track(history: list[dict[str, Any]], agent_id: int) -> pd.DataFrame:
     rows = []
     for rec in history:
-        ag = next((a for a in rec.get("agents", []) if int(a["agent_id"]) == agent_id), None)
+        ag = _find_agent(rec, agent_id)
         if ag:
+            voyage = record_block(rec, RECORD_VOYAGE_EPOCH)
             rows.append({
-                "epoch": rec["epoch"],
-                "location": ag.get("location", ""),
-                "voyage_day": rec.get("voyage_epoch", {}).get("voyage_day"),
-                "port": rec.get("voyage_epoch", {}).get("port", ""),
+                "epoch": record_epoch(rec),
+                "location": agent_location(ag),
+                "voyage_day": voyage.get(VOYAGE_DAY),
+                "port": voyage.get(VOYAGE_PORT, ""),
             })
     return pd.DataFrame(rows)
 
@@ -181,13 +231,13 @@ def render_agent_explorer(
     )
     set_selected_agent(int(agent_id))
 
-    ag0 = _agent_record_at(history, int(agent_id), history[0]["epoch"])
+    ag0 = _agent_record_at(history, int(agent_id), record_epoch(history[0]))
     if ag0:
         c1, c2, c3, c4 = st.columns(4)
-        c1.metric("Class", ag0.get("agent_class", "—"))
-        c2.metric("Gender", ag0.get("gender", "—"))
-        c3.metric("Cabin mates", ", ".join(map(str, ag0.get("cabin_mate_ids", []))) or "—")
-        path_inf = ag0.get("pathogen_infections") or {}
+        c1.metric("Class", ag0.get(AGENT_CLASS, "—"))
+        c2.metric("Gender", ag0.get(AGENT_GENDER, "—"))
+        c3.metric("Cabin mates", ", ".join(map(str, ag0.get(AGENT_CABIN_MATE_IDS, []))) or "—")
+        path_inf = ag0.get(AGENT_PATHOGEN_INFECTIONS) or {}
         c4.metric("Pathogens tracked", len(path_inf) if path_inf else 0)
 
     fig = _build_agent_timeline(history, int(agent_id))

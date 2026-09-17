@@ -43,6 +43,48 @@ from simulation_utils.paths import (
     validate_path_component,
     validated_open,
 )
+from telemetry_buffer.fields import (  # noqa: E402
+    COST_OPERATIONAL_IMPACT_CUMULATIVE,
+    COST_TOTAL_FINANCIAL_USD,
+    COUNTER_EXCEEDED,
+    COUNTER_NEWLY_CONFINED,
+    COUNTER_PASSENGER_REPORTED_CASE_RATE,
+    COUNTER_VALUE,
+    RECORD_COST_ACCOUNTING,
+    RECORD_INFECTION_COUNTERS,
+    RECORD_SUMMARY,
+    SUMMARY_CREW_COMPLEMENT,
+    SUMMARY_CUMULATIVE_EVER_ILL,
+    SUMMARY_CUMULATIVE_EVER_ILL_CREW,
+    SUMMARY_CUMULATIVE_EVER_ILL_PASSENGER,
+    SUMMARY_CUMULATIVE_EVER_INFECTED,
+    SUMMARY_CUMULATIVE_EVER_INFECTED_CREW,
+    SUMMARY_CUMULATIVE_EVER_INFECTED_PASSENGER,
+    SUMMARY_CUMULATIVE_REPORTED_CASES,
+    SUMMARY_CUMULATIVE_REPORTED_CASES_CREW,
+    SUMMARY_CUMULATIVE_REPORTED_CASES_PASSENGER,
+    SUMMARY_CUMULATIVE_REPORTED_NOISE_CASES,
+    SUMMARY_EVER_ILL_RATE_CREW,
+    SUMMARY_EVER_ILL_RATE_PASSENGER,
+    SUMMARY_IMMUNE,
+    SUMMARY_INFECTED,
+    SUMMARY_INFECTION_ATTACK_RATE_CREW,
+    SUMMARY_INFECTION_ATTACK_RATE_PASSENGER,
+    SUMMARY_ISOLATED,
+    SUMMARY_PASSENGER_COMPLEMENT,
+    SUMMARY_QUARANTINED,
+    SUMMARY_RECOVERED,
+    SUMMARY_REPORTED_CASE_RATE_CREW,
+    SUMMARY_REPORTED_CASE_RATE_PASSENGER,
+    SUMMARY_SANITARY_ACTIVITY,
+    SUMMARY_SUSCEPTIBLE,
+    SUMMARY_SYMPTOMATIC,
+    ZONE_CONCENTRATION_PER_M3,
+    record_block,
+    record_spaces,
+    record_trigger_status,
+    zone_pathogen_mass,
+)
 
 
 def parse_s3_prefix(s3_prefix: str) -> tuple[str, str]:
@@ -419,15 +461,16 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
     series: list[dict[str, Any]] = []
     prev_ever_infected = 0
     for epoch_idx, rec in enumerate(history):
-        s = rec.get("summary", {})
-        cost = rec.get("cost_accounting", {})
-        spaces = rec.get("spaces", {})
-        reported_case_counter = rec.get(
-            "infection_counters", {},
-        ).get("passenger_reported_case_rate", {})
+        s = record_block(rec, RECORD_SUMMARY)
+        cost = record_block(rec, RECORD_COST_ACCOUNTING)
+        spaces = record_spaces(rec)
+        reported_case_counter = record_block(
+            record_block(rec, RECORD_INFECTION_COUNTERS),
+            COUNTER_PASSENGER_REPORTED_CASE_RATE,
+        )
 
-        infected = int(s.get("infected", 0) or 0)
-        recovered = int(s.get("recovered", 0) or 0)
+        infected = int(s.get(SUMMARY_INFECTED, 0) or 0)
+        recovered = int(s.get(SUMMARY_RECOVERED, 0) or 0)
         ever_infected = infected + recovered
         new_infections = max(0, ever_infected - prev_ever_infected)
         prev_ever_infected = ever_infected
@@ -437,11 +480,8 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
         max_conc_zone = ""
         total_mass = 0.0
         for zname, zdata in spaces.items():
-            conc = zdata.get("concentration_per_m3", 0.0)
-            mass = zdata.get("pathogen_mass", 0.0)
-            if isinstance(mass, dict):
-                mass = sum(mass.values())
-            total_mass += mass
+            conc = zdata.get(ZONE_CONCENTRATION_PER_M3, 0.0)
+            total_mass += zone_pathogen_mass(zdata)
             if conc > 1.0:
                 n_contaminated += 1
             if conc > max_conc:
@@ -450,67 +490,64 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
         series.append({
             "epoch": epoch_idx,
-            "susceptible": s.get("susceptible", 0),
-            "infected": s.get("infected", 0),
-            "symptomatic": s.get("symptomatic", 0),
-            "recovered": s.get("recovered", 0),
-            "immune": s.get("immune", 0),
-            "quarantined": s.get("quarantined", 0),
-            "isolated": s.get("isolated", 0),
+            "susceptible": s.get(SUMMARY_SUSCEPTIBLE, 0),
+            "infected": s.get(SUMMARY_INFECTED, 0),
+            "symptomatic": s.get(SUMMARY_SYMPTOMATIC, 0),
+            "recovered": s.get(SUMMARY_RECOVERED, 0),
+            "immune": s.get(SUMMARY_IMMUNE, 0),
+            "quarantined": s.get(SUMMARY_QUARANTINED, 0),
+            "isolated": s.get(SUMMARY_ISOLATED, 0),
             "new_infections": new_infections,
             "total_pathogen_mass": round(total_mass, 2),
             "n_zones_contaminated": n_contaminated,
             "max_concentration": round(max_conc, 4),
             "max_conc_zone": max_conc_zone,
-            "cumulative_cost_usd": cost.get("total_financial_usd", 0),
-            "cumulative_ois": cost.get("operational_impact_cumulative", 0),
-            "cumulative_reported_cases": s.get("cumulative_reported_cases", 0),
+            "cumulative_cost_usd": cost.get(COST_TOTAL_FINANCIAL_USD, 0),
+            "cumulative_ois": cost.get(COST_OPERATIONAL_IMPACT_CUMULATIVE, 0),
+            "cumulative_reported_cases": s.get(SUMMARY_CUMULATIVE_REPORTED_CASES, 0),
             "cumulative_reported_cases_passenger": s.get(
-                "cumulative_reported_cases_passenger", 0,
+                SUMMARY_CUMULATIVE_REPORTED_CASES_PASSENGER, 0,
             ),
             "cumulative_reported_cases_crew": s.get(
-                "cumulative_reported_cases_crew", 0,
+                SUMMARY_CUMULATIVE_REPORTED_CASES_CREW, 0,
             ),
             "cumulative_reported_noise_cases": s.get(
-                "cumulative_reported_noise_cases", 0,
+                SUMMARY_CUMULATIVE_REPORTED_NOISE_CASES, 0,
             ),
-            "cumulative_ever_ill": s.get("cumulative_ever_ill", 0),
+            "cumulative_ever_ill": s.get(SUMMARY_CUMULATIVE_EVER_ILL, 0),
             "cumulative_ever_ill_passenger": s.get(
-                "cumulative_ever_ill_passenger", 0,
+                SUMMARY_CUMULATIVE_EVER_ILL_PASSENGER, 0,
             ),
-            "cumulative_ever_ill_crew": s.get("cumulative_ever_ill_crew", 0),
-            "cumulative_ever_infected": s.get("cumulative_ever_infected", 0),
+            "cumulative_ever_ill_crew": s.get(SUMMARY_CUMULATIVE_EVER_ILL_CREW, 0),
+            "cumulative_ever_infected": s.get(SUMMARY_CUMULATIVE_EVER_INFECTED, 0),
             "cumulative_ever_infected_passenger": s.get(
-                "cumulative_ever_infected_passenger", 0,
+                SUMMARY_CUMULATIVE_EVER_INFECTED_PASSENGER, 0,
             ),
             "cumulative_ever_infected_crew": s.get(
-                "cumulative_ever_infected_crew", 0,
+                SUMMARY_CUMULATIVE_EVER_INFECTED_CREW, 0,
             ),
-            "passenger_complement": s.get("passenger_complement"),
-            "crew_complement": s.get("crew_complement"),
+            "passenger_complement": s.get(SUMMARY_PASSENGER_COMPLEMENT),
+            "crew_complement": s.get(SUMMARY_CREW_COMPLEMENT),
             "infection_attack_rate_passenger": s.get(
-                "infection_attack_rate_passenger", 0.0,
+                SUMMARY_INFECTION_ATTACK_RATE_PASSENGER, 0.0,
             ),
             "infection_attack_rate_crew": s.get(
-                "infection_attack_rate_crew", 0.0,
+                SUMMARY_INFECTION_ATTACK_RATE_CREW, 0.0,
             ),
             "reported_case_rate_passenger": reported_case_counter.get(
-                "value", s.get("reported_case_rate_passenger", 0.0),
+                COUNTER_VALUE, s.get(SUMMARY_REPORTED_CASE_RATE_PASSENGER, 0.0),
             ),
-            "reported_case_rate_crew": s.get("reported_case_rate_crew", 0.0),
+            "reported_case_rate_crew": s.get(SUMMARY_REPORTED_CASE_RATE_CREW, 0.0),
             "passenger_reported_case_rate_newly_confined": reported_case_counter.get(
-                "newly_confined", 0,
+                COUNTER_NEWLY_CONFINED, 0,
             ),
             "passenger_reported_case_rate_exceeded": bool(
-                reported_case_counter.get("exceeded", False),
+                reported_case_counter.get(COUNTER_EXCEEDED, False),
             ),
-            "ever_ill_rate_passenger": s.get("ever_ill_rate_passenger", 0.0),
-            "ever_ill_rate_crew": s.get("ever_ill_rate_crew", 0.0),
-            "sanitary_activity": dict(s.get("sanitary_activity") or {}),
-            "trigger_status": rec.get(
-                "trigger_status",
-                rec.get("reactive_protocols", {}).get("trigger_status", "none"),
-            ),
+            "ever_ill_rate_passenger": s.get(SUMMARY_EVER_ILL_RATE_PASSENGER, 0.0),
+            "ever_ill_rate_crew": s.get(SUMMARY_EVER_ILL_RATE_CREW, 0.0),
+            "sanitary_activity": dict(s.get(SUMMARY_SANITARY_ACTIVITY) or {}),
+            "trigger_status": record_trigger_status(rec, "none"),
         })
     return series
 

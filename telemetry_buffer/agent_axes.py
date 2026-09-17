@@ -15,6 +15,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from telemetry_buffer.fields import (
+    AGENT_COMPLIANCE_STATUS,
+    AGENT_INFECTION_STATE,
+    AGENT_SYMPTOM_PRESENTATION,
+)
+
 # ── Infection state (SIR / immune) ───────────────────────────────────────
 
 INFECTION_SUSCEPTIBLE = "susceptible"
@@ -50,9 +56,9 @@ def resolve_agent_axes(raw: dict[str, Any]) -> tuple[str, str, str]:
     Missing axes default to a susceptible, asymptomatic, compliant agent.
     """
     return (
-        str(raw.get("infection_state", INFECTION_SUSCEPTIBLE)),
-        str(raw.get("symptom_presentation", PRESENTATION_ASYMPTOMATIC)),
-        str(raw.get("compliance_status", COMPLIANCE_COMPLIANT)),
+        str(raw.get(AGENT_INFECTION_STATE, INFECTION_SUSCEPTIBLE)),
+        str(raw.get(AGENT_SYMPTOM_PRESENTATION, PRESENTATION_ASYMPTOMATIC)),
+        str(raw.get(AGENT_COMPLIANCE_STATUS, COMPLIANCE_COMPLIANT)),
     )
 
 
@@ -62,9 +68,9 @@ def agent_axes_dict(
     compliance_status: str,
 ) -> dict[str, str]:
     return {
-        "infection_state": infection_state,
-        "symptom_presentation": symptom_presentation,
-        "compliance_status": compliance_status,
+        AGENT_INFECTION_STATE: infection_state,
+        AGENT_SYMPTOM_PRESENTATION: symptom_presentation,
+        AGENT_COMPLIANCE_STATUS: compliance_status,
     }
 
 

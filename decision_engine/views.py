@@ -5,6 +5,26 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any
 
+from telemetry_buffer.agent_axes import resolve_agent_axes
+from telemetry_buffer.fields import (
+    AGENT_CLASS,
+    AGENT_COMPLIANCE_STATUS,
+    AGENT_ID,
+    AGENT_INFECTION_STATE,
+    AGENT_LOCATION,
+    AGENT_ROLE,
+    AGENT_SYMPTOM_PRESENTATION,
+    COST_OPERATIONAL_IMPACT_CUMULATIVE,
+    COST_OPERATIONAL_IMPACT_EPOCH,
+    PUBLIC_AGENTS,
+    PUBLIC_COST_ACCOUNTING,
+    PUBLIC_EPOCH,
+    PUBLIC_OBSERVATION_ENGINE,
+    PUBLIC_STOPLIGHTS,
+    PUBLIC_SUMMARY,
+    PUBLIC_TRIGGER_STATUS,
+)
+
 
 @dataclass
 class ObservationView:
@@ -32,14 +52,15 @@ class ObservationModel:
         except ValueError:
             return {}
         for ag in agents:
-            if ag.get("agent_id") == aid:
+            if ag.get(AGENT_ID) == aid:
+                infection_state, presentation, compliance = resolve_agent_axes(ag)
                 local = {
-                    "location": ag.get("location"),
-                    "infection_state": ag.get("infection_state"),
-                    "symptom_presentation": ag.get("symptom_presentation"),
-                    "compliance_status": ag.get("compliance_status"),
-                    "role": ag.get("role"),
-                    "agent_class": ag.get("agent_class"),
+                    AGENT_LOCATION: ag.get(AGENT_LOCATION),
+                    AGENT_INFECTION_STATE: infection_state,
+                    AGENT_SYMPTOM_PRESENTATION: presentation,
+                    AGENT_COMPLIANCE_STATUS: compliance,
+                    AGENT_ROLE: ag.get(AGENT_ROLE),
+                    AGENT_CLASS: ag.get(AGENT_CLASS),
                 }
                 inf = agent_info_map.get(str(aid), {})
                 if isinstance(inf, dict) and inf:
@@ -53,10 +74,10 @@ class ObservationModel:
         actor_id: str,
         role: str,
     ) -> ObservationView:
-        epoch = int(public_snapshot.get("epoch", 0))
-        agents = public_snapshot.get("agents", [])
-        summary = public_snapshot.get("summary", {})
-        stoplights = public_snapshot.get("stoplights", {})
+        epoch = int(public_snapshot.get(PUBLIC_EPOCH, 0))
+        agents = public_snapshot.get(PUBLIC_AGENTS, [])
+        summary = public_snapshot.get(PUBLIC_SUMMARY, {})
+        stoplights = public_snapshot.get(PUBLIC_STOPLIGHTS, {})
 
         local: dict[str, Any] = {}
         raw_info = public_snapshot.get("information_state", {})
@@ -69,19 +90,19 @@ class ObservationModel:
             local = ObservationModel._agent_local_view(agents, actor_id, agent_info_map)
         elif role == "medical_officer":
             local = {
-                "observation_engine": public_snapshot.get("observation_engine", {}),
-                "trigger_status": public_snapshot.get("trigger_status"),
+                "observation_engine": public_snapshot.get(PUBLIC_OBSERVATION_ENGINE, {}),
+                "trigger_status": public_snapshot.get(PUBLIC_TRIGGER_STATUS),
                 "high_traffic_zones": public_snapshot.get("high_traffic_zones", []),
             }
         elif role == "commanding_officer":
-            cost = public_snapshot.get("cost_accounting", {})
+            cost = public_snapshot.get(PUBLIC_COST_ACCOUNTING, {})
             local = {
                 "cost_accounting": cost,
-                "trigger_status": public_snapshot.get("trigger_status"),
+                "trigger_status": public_snapshot.get(PUBLIC_TRIGGER_STATUS),
                 "operational_impact_cumulative": cost.get(
-                    "operational_impact_cumulative", 0.0,
+                    COST_OPERATIONAL_IMPACT_CUMULATIVE, 0.0,
                 ),
-                "operational_impact_epoch": cost.get("operational_impact_epoch", 0.0),
+                "operational_impact_epoch": cost.get(COST_OPERATIONAL_IMPACT_EPOCH, 0.0),
                 "stoplight_eligible_sop_ids": public_snapshot.get(
                     "stoplight_eligible_sop_ids", [],
                 ),

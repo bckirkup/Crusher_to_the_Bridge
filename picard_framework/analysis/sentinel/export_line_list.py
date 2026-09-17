@@ -21,6 +21,21 @@ from picard_framework.analysis.sentinel.itinerary import (
     slugify_port,
 )
 from picard_framework.analysis.sentinel.line_list import SentinelLedger
+from telemetry_buffer.fields import (
+    CASCADE_NEW_TIER0_AGENTS,
+    CASCADE_NEW_TIER1_AGENTS,
+    RECORD_AGENTS,
+    RECORD_DIAGNOSTIC_CASCADE,
+    RECORD_VOYAGE_EPOCH,
+    RECORD_WEARABLE_MONITORING,
+    VOYAGE_PORT,
+    WEARABLE_STAFF_VISIBLE_AGENTS,
+    agent_id,
+    agent_location,
+    record_agents,
+    record_block,
+    record_epoch,
+)
 
 
 def port_id_lookup(voyage_config: Mapping[str, Any] | None) -> dict[str, str]:
@@ -36,20 +51,18 @@ def port_id_lookup(voyage_config: Mapping[str, Any] | None) -> dict[str, str]:
 
 def _detections_from_record(record: Mapping[str, Any]) -> dict[str, list[int]]:
     detections: dict[str, list[int]] = {}
-    cascade = record.get("diagnostic_cascade") or {}
-    if isinstance(cascade, Mapping):
-        tiers = [
-            int(a)
-            for key in ("new_tier0_agents", "new_tier1_agents")
-            for a in cascade.get(key) or []
-        ]
-        if tiers:
-            detections["cascade"] = tiers
-    wearable = record.get("wearable_monitoring") or {}
-    if isinstance(wearable, Mapping):
-        visible = [int(a) for a in wearable.get("staff_visible_agents") or []]
-        if visible:
-            detections["wearable"] = visible
+    cascade = record_block(record, RECORD_DIAGNOSTIC_CASCADE)
+    tiers = [
+        int(a)
+        for key in (CASCADE_NEW_TIER0_AGENTS, CASCADE_NEW_TIER1_AGENTS)
+        for a in cascade.get(key) or []
+    ]
+    if tiers:
+        detections["cascade"] = tiers
+    wearable = record_block(record, RECORD_WEARABLE_MONITORING)
+    visible = [int(a) for a in wearable.get(WEARABLE_STAFF_VISIBLE_AGENTS) or []]
+    if visible:
+        detections["wearable"] = visible
     return detections
 
 
@@ -67,19 +80,17 @@ def ledger_from_history(
     lookup = dict(port_ids or {})
     ledger = SentinelLedger(epoch_duration_hours=epoch_duration_hours)
     for record in history:
-        agents = record.get("agents") or []
-        if not isinstance(agents, list):
+        if not isinstance(record.get(RECORD_AGENTS) or [], list):
             continue
-        voyage = record.get("voyage_epoch") or {}
-        port_name = str(voyage.get("port") or "") if isinstance(voyage, Mapping) else ""
+        agents = record_agents(record)
+        voyage = record_block(record, RECORD_VOYAGE_EPOCH)
+        port_name = str(voyage.get(VOYAGE_PORT) or "")
         port_id = lookup.get(port_name, slugify_port(port_name) if port_name else "")
         ashore = [
-            int(a["agent_id"])
-            for a in agents
-            if str(a.get("location") or "") == LOCATION_ASHORE
+            agent_id(a) for a in agents if agent_location(a) == LOCATION_ASHORE
         ]
         ledger.observe_epoch(
-            int(record.get("epoch", 0)),
+            record_epoch(record),
             agents,
             port_id=port_id,
             ashore_ids=ashore,
