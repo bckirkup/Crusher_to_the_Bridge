@@ -2212,7 +2212,7 @@ def init_wearable_monitors(
     Returns ``(None, None)`` when wearable monitoring is disabled or absent.
     """
     rng = np.random.default_rng(seed)
-    root = repo_root or os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    root = repo_root or REPO_ROOT
     monitor = build_wearable_monitor_from_config(cfg, rng, repo_root=root)
     if monitor is None:
         return None, None

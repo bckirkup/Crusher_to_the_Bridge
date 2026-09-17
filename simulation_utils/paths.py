@@ -30,6 +30,30 @@ from typing import BinaryIO, TextIO
 
 _PATH_COMPONENT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
+_REPO_ROOT_MARKERS = ("pyproject.toml", ".git")
+
+
+def repo_root() -> str:
+    """Return the absolute path of the repository root.
+
+    The root is the nearest ancestor of this module that carries a repository
+    marker (``pyproject.toml`` or ``.git``); if no marker is found the
+    package's parent directory is used. Modules should call this instead of
+    counting ``os.path.dirname`` levels from their own ``__file__``.
+    """
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    current = package_dir
+    while True:
+        if any(os.path.exists(os.path.join(current, m)) for m in _REPO_ROOT_MARKERS):
+            return current
+        parent = os.path.dirname(current)
+        if parent == current:
+            return os.path.dirname(package_dir)
+        current = parent
+
+
+REPO_ROOT = repo_root()
+
 
 def _real(path: str) -> str:
     return os.path.realpath(path)
