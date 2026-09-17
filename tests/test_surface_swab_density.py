@@ -21,7 +21,10 @@ from crusher_labs.observation_core import (
     SWAB_RECOVERY_EFFICIENCY_BOUNDS,
     TargetedSurfaceSwab,
 )
-from engines.transmission_core import TransmissionCore
+from engines.transmission_core import (
+    CABIN_COMPARTMENT_SEPARATOR,
+    TransmissionCore,
+)
 
 ZONE = "Galley_M"
 AREA_CM2 = 6.0 * 1.0e4  # HIGH_TOUCH_AREA_M2 order: a public space
@@ -196,19 +199,25 @@ def _obs_mock() -> MagicMock:
 
 
 def _core_with_pool() -> TransmissionCore:
-    zone_types = {"Galley_M": "Dining", "Head_1": "Sanitary"}
+    cabin = f"Corridor_A{CABIN_COMPARTMENT_SEPARATOR}1"
+    zone_types = {
+        "Galley_M": "Dining",
+        "Head_1": "Sanitary",
+        "Corridor_A": "Cabin_Corridor",
+    }
     core = TransmissionCore(
         rng=np.random.default_rng(9),
-        zone_volumes={"Galley_M": 80.0, "Head_1": 3.0},
+        zone_volumes={"Galley_M": 80.0, "Head_1": 3.0, "Corridor_A": 60.0},
         pathogen_profiles={"norwalk_gi": {}},
         zone_types=zone_types,
-        zone_floor_areas={"Galley_M": 40.0, "Head_1": 8.0},
+        zone_floor_areas={"Galley_M": 40.0, "Head_1": 8.0, "Corridor_A": 30.0},
     )
-    core.initialize_zones(["Galley_M", "Head_1"])
+    core.initialize_zones(["Galley_M", "Head_1", "Corridor_A"])
     core.surface_pools["Galley_M"] = 5.0e4
     core.surface_pools["Head_1"] = 2.0e4
+    core.surface_pools[cabin] = 7.0e3
     core.surface_pools_by_pathogen["norwalk_gi"] = {
-        "Galley_M": 5.0e4, "Head_1": 2.0e4,
+        "Galley_M": 5.0e4, "Head_1": 2.0e4, cabin: 7.0e3,
     }
     return core
 
@@ -225,8 +234,10 @@ class TestOrchestratorSourceWiring:
             obs=obs,
             agents=[],
             spaces={"Galley_M": {"pathogen_mass": 1.0}},
-            zone_names=["Galley_M", "Head_1"],
-            zone_volumes={"Galley_M": 80.0, "Head_1": 3.0},
+            zone_names=["Galley_M", "Head_1", "Corridor_A"],
+            zone_volumes={
+                "Galley_M": 80.0, "Head_1": 3.0, "Corridor_A": 60.0,
+            },
             zone_microflora_shifts={},
             trigger_status="LOCKDOWN",
             high_traffic=["Galley_M", "Head_1"],
@@ -274,3 +285,22 @@ class TestOrchestratorSourceWiring:
         classes = args.kwargs["surface_classes"]
         assert classes["Head_1"] == "toilet_seat"
         assert classes["Galley_M"] == "nonporous_hard"
+
+    def test_compartment_deposit_pools_into_the_corridor_block(self) -> None:
+        obs = _obs_mock()
+        self._run(
+            {
+                "observation": {
+                    "enabled": True,
+                    "surface_swab_source": "surface_pool_density",
+                },
+            },
+            obs,
+        )
+        args = obs.surface_swab.swab_surface_zones.call_args
+        zone_copies = args.args[0]
+        # The cabin-compartment deposit (7.0e3) rolls up into its parent
+        # block's total — a stateroom emesis event is swabbable.
+        assert zone_copies["Corridor_A"] == pytest.approx(7.0e3)
+        by_pid = args.kwargs["copies_by_pathogen"]
+        assert by_pid["norwalk_gi"]["Corridor_A"] == pytest.approx(7.0e3)

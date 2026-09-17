@@ -741,8 +741,15 @@ def run_observation_sampling(
         "surface_swab_source", "airborne_fraction"
     )
     if swab_source == "surface_pool_density" and tx_core is not None:
+        # zone_surface_mass pools every cabin compartment under its
+        # corridor block, so a stateroom emesis deposit is swabbable;
+        # the compartments' hardware is part of the block's touchable
+        # field, so zone_high_touch_area_cm2 is still the denominator.
         surface_copies_by_pid = {
-            pid: tx_core.get_pathogen_surface_mass(pid)
+            pid: {
+                zname: tx_core.zone_surface_mass(zname, pid)
+                for zname in zone_names
+            }
             for pid in pathogen_profiles
         }
         zone_surface_copies = {
