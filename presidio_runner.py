@@ -18,6 +18,19 @@ from picard_framework import PicardRunSpec, ShipSimulation
 from picard_framework.run_spec import TelemetryPaths
 from presidio.run_spec import PresidioRunSpec
 from simulation_utils.paths import prepare_output_directory, resolve_child_path, resolve_repo_path, validated_open
+from telemetry_buffer.fields import (
+    COST_OPERATIONAL_IMPACT_CUMULATIVE,
+    COST_TOTAL_FINANCIAL_USD,
+    PUBLIC_EPOCH,
+    RECORD_COST_ACCOUNTING,
+    RECORD_SUMMARY,
+    SUMMARY_INFECTED,
+    SUMMARY_RECOVERED,
+    SUMMARY_SYMPTOMATIC,
+    PublicSnapshot,
+    public_view,
+    record_block,
+)
 
 
 def _compute_rewards(
@@ -44,13 +57,16 @@ def _compute_rewards(
     if not history:
         return {"fleet": 0.0}
     last = history[-1]
-    summary = last.get("summary", {})
-    cost = last.get("cost_accounting", {})
+    summary = record_block(last, RECORD_SUMMARY)
+    cost = record_block(last, RECORD_COST_ACCOUNTING)
 
-    biodefense = -float(summary.get("infected", 0)) - float(summary.get("symptomatic", 0))
-    budget_penalty = -0.001 * float(cost.get("total_financial_usd", 0.0))
-    recovery_bonus = float(summary.get("recovered", 0))
-    ois_penalty = -float(cost.get("operational_impact_cumulative", 0.0))
+    biodefense = (
+        -float(summary.get(SUMMARY_INFECTED, 0))
+        - float(summary.get(SUMMARY_SYMPTOMATIC, 0))
+    )
+    budget_penalty = -0.001 * float(cost.get(COST_TOTAL_FINANCIAL_USD, 0.0))
+    recovery_bonus = float(summary.get(SUMMARY_RECOVERED, 0))
+    ois_penalty = -float(cost.get(COST_OPERATIONAL_IMPACT_CUMULATIVE, 0.0))
 
     w_bio = float(incentives.get("biodefense_weight", 1.0))
     w_cost = float(incentives.get("budget_weight", 0.1))
@@ -139,18 +155,9 @@ def run(fleet_spec: PresidioRunSpec, *, display: bool = False) -> None:
         sim.initialize()
 
         for _ in range(picard_spec.num_epochs):
-            public: dict = {"epoch": sim.epoch + 1}
+            public: PublicSnapshot = {PUBLIC_EPOCH: sim.epoch + 1}
             if sim.state and sim.state.simulation_history:
-                last = sim.state.simulation_history[-1]
-                public = {
-                    "epoch": sim.epoch + 1,
-                    "agents": last.get("agents", []),
-                    "summary": last.get("summary", {}),
-                    "stoplights": last.get("reactive_protocols", {}).get("stoplights", {}),
-                    "trigger_status": last.get("trigger_status"),
-                    "cost_accounting": last.get("cost_accounting", {}),
-                    "observation_engine": last.get("observation_engine", {}),
-                }
+                public = public_view(sim.state.simulation_history[-1], sim.epoch + 1)
             envelope = decision_round.solve(sim.epoch + 1, public, experience)
             sim.step(envelope)
 

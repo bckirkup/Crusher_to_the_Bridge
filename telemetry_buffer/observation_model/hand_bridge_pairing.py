@@ -34,23 +34,17 @@ from __future__ import annotations
 
 import math
 import statistics
-import sys
-from pathlib import Path
 
 from scipy.special import betainc
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-
-from engines.infection_dynamics_bridge import (  # noqa: E402
+from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     HAND_LOAD_LOG10_GEC,
     HAND_LOAD_REFERENCE_PEAK_LOG10,
     SYMPTOMATIC_SHEDDING,
 )
-from engines.transmission_core import (  # noqa: E402
+from engines.transmission_core import (
     HAND_TO_MOUTH_NORMAL,
     MOUTH_CONTACT_FRACTION_RANGE,
 )

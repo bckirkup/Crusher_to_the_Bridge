@@ -202,7 +202,12 @@ assumed-role credentials.
 From the repo root (the `Dockerfile` lives there):
 
 ```bash
-docker build -t picard-campaign .
+# Stamp the engine revision into the image (every archived run records it
+# in campaign_parameters.engine_git_sha). Warn if the tree is dirty first —
+# a dirty build stamps the committed SHA only.
+test -z "$(git status --porcelain)" || echo "WARNING: dirty working tree"
+docker build --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+    -t picard-campaign .
 
 # Validate locally with the built-in fast smoke path:
 docker run --rm picard-campaign --smoke
@@ -601,7 +606,8 @@ python picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
 **Phase 1 Spot** (rebuild image after manifest changes):
 
 ```powershell
-docker build -t picard-campaign .
+docker build --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+    -t picard-campaign .
 # ECR login/tag/push as in §3
 # Re-register batch_job_definition.json if ACTIVE rev pins a stale tag (not :latest)
 .\deploy\aws\submit_boundary_surface.ps1 -ShardCount 200

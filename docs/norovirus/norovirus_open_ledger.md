@@ -3624,7 +3624,19 @@ Roughly in dependency order.
     job definition `picard-campaign:46`, S3 prefixes
     `campaign/flush_sweep_v1_<arm>_s2e/`.
 
-52. **`AERO-CABIN-04`: cabin confinement now attenuates HVAC-downstream
+52. **Archived runs now record their engine revision:
+    `campaign_parameters.engine_git_sha`.** Every summary's parameters
+    block carries the source revision it was produced by — stamped from
+    `ENGINE_GIT_SHA` (set by `--build-arg` at image build and recorded as
+    the OCI `org.opencontainers.image.revision` label), falling back to
+    `git rev-parse HEAD` locally with a `-dirty` suffix, never raising.
+    **Every archive produced before this change — stage 1, s2, s2r, s2e —
+    carries no engine revision, so this ledger remains the only record of
+    which engine produced it.** No measurement is invalidated: the stamp
+    is metadata only — it writes one string into the bookkeeping
+    parameters dict and nothing in the dose, rate, or RNG path reads it.
+
+53. **`AERO-CABIN-04`: cabin confinement now attenuates HVAC-downstream
     inhalation for confined cabin targets.** `_apply_hvac_downstream_doses`
     now applies the existing target-side `_confinement_factor` alongside the
     HVAC scalar and aerosol ventilation factor. This closes the same

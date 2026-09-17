@@ -20,15 +20,12 @@ Usage: PYTHONPATH=. python3 telemetry_buffer/observation_model/contact_arch_read
 
 from __future__ import annotations
 
-import sys
 from collections import defaultdict
 from pathlib import Path
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
+from picard_framework import PicardRunSpec, ShipSimulation
 
-from picard_framework import PicardRunSpec, ShipSimulation  # noqa: E402
+REPO_ROOT = Path(__file__).resolve().parents[2]
 
 DINING_ACTIVITIES = ("dining_table", "dining_venue")
 

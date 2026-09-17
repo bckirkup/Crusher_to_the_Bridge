@@ -3177,35 +3177,53 @@ class TransmissionCore:
             z for z in zone_names
             if self.zone_types.get(z, "") == "Dining"
         ]
-        # Initialize per-pathogen pools
         for pid, profile in self.pathogen_profiles.items():
-            self.surface_pools_by_pathogen.setdefault(pid, {})
-            self.surface_pools_cleanable_by_pathogen.setdefault(pid, {})
-            self.aerosol_pools_by_pathogen.setdefault(pid, {})
-            self._prev_zone_shedders_by_pathogen.setdefault(pid, {})
-            for z in zone_names:
-                self.surface_pools_by_pathogen[pid].setdefault(z, 0.0)
-                self.surface_pools_cleanable_by_pathogen[pid].setdefault(z, 0.0)
-                self.aerosol_pools_by_pathogen[pid].setdefault(z, 0.0)
-                self._prev_zone_shedders_by_pathogen[pid].setdefault(z, [])
-            # Initialize food contamination pools for Dining zones
-            fc = profile.get("food_contamination", {})
-            if fc.get("enabled", False):
-                food_zones = fc.get("food_zones", dining_zones)
-                self.food_pools.setdefault(pid, {})
-                for fz in food_zones:
-                    self.food_pools[pid].setdefault(fz, 0.0)
-            # Initialize environmental contamination load
-            ec = profile.get("environmental_contamination", {})
-            if ec.get("enabled", False):
-                baseline = float(ec.get("baseline_environmental_load", 0.0))
-                self.environmental_load[pid] = baseline
-                source_zones = ec.get("source_zones")
-                if source_zones:
-                    self.env_contamination.setdefault(pid, {})
-                    for z in zone_names:
-                        if self._zone_matches(z, source_zones):
-                            self.env_contamination[pid].setdefault(z, baseline)
+            self._initialize_pathogen_zone_pools(pid, zone_names)
+            self._initialize_food_pools(pid, profile, dining_zones)
+            self._initialize_environmental_load(pid, profile, zone_names)
+
+    def _initialize_pathogen_zone_pools(
+        self, pid: str, zone_names: list[str],
+    ) -> None:
+        """Zero one pathogen's surface, cleanable-surface and aerosol pools."""
+        self.surface_pools_by_pathogen.setdefault(pid, {})
+        self.surface_pools_cleanable_by_pathogen.setdefault(pid, {})
+        self.aerosol_pools_by_pathogen.setdefault(pid, {})
+        self._prev_zone_shedders_by_pathogen.setdefault(pid, {})
+        for z in zone_names:
+            self.surface_pools_by_pathogen[pid].setdefault(z, 0.0)
+            self.surface_pools_cleanable_by_pathogen[pid].setdefault(z, 0.0)
+            self.aerosol_pools_by_pathogen[pid].setdefault(z, 0.0)
+            self._prev_zone_shedders_by_pathogen[pid].setdefault(z, [])
+
+    def _initialize_food_pools(
+        self, pid: str, profile: dict, dining_zones: list[str],
+    ) -> None:
+        """Food contamination pools for Dining zones (profile-gated)."""
+        fc = profile.get("food_contamination", {})
+        if not fc.get("enabled", False):
+            return
+        food_zones = fc.get("food_zones", dining_zones)
+        self.food_pools.setdefault(pid, {})
+        for fz in food_zones:
+            self.food_pools[pid].setdefault(fz, 0.0)
+
+    def _initialize_environmental_load(
+        self, pid: str, profile: dict, zone_names: list[str],
+    ) -> None:
+        """Baseline environmental load and source-zone seeding (profile-gated)."""
+        ec = profile.get("environmental_contamination", {})
+        if not ec.get("enabled", False):
+            return
+        baseline = float(ec.get("baseline_environmental_load", 0.0))
+        self.environmental_load[pid] = baseline
+        source_zones = ec.get("source_zones")
+        if not source_zones:
+            return
+        self.env_contamination.setdefault(pid, {})
+        for z in zone_names:
+            if self._zone_matches(z, source_zones):
+                self.env_contamination[pid].setdefault(z, baseline)
 
     def execute_transmission(
         self,
@@ -3283,82 +3301,11 @@ class TransmissionCore:
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
             for pathogen_id in active_pathogens:
-                resident = agent.is_infected_with(pathogen_id)
-                if resident and not self._superinfection_open(pathogen_id):
-                    continue
-                p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
-                if p_dose <= 0:
-                    continue
-                protection = self._challenge_protection(agent, pathogen_id, epoch)
-                if protection >= 1.0:
-                    continue
-
-                effective_dose = p_dose * (1.0 - protection)
-                if resident:
-                    effective_dose *= self._superinfection_susceptibility(pathogen_id)
-                if effective_dose <= 0.0:
-                    continue
-
-                cumulative_dose = (
-                    agent.cumulative_exposure.get(pathogen_id, 0.0)
-                    + effective_dose
+                self._resolve_pathogen_challenge(
+                    epoch, agent, pathogen_id,
+                    agent_pathogen_doses, agent_pathway_doses,
+                    matrix, events,
                 )
-                route_doses = self._effective_route_doses(
-                    agent.agent_id,
-                    pathogen_id,
-                    effective_dose,
-                )
-                agent.cumulative_exposure[pathogen_id] = cumulative_dose
-                route_ledger = agent.cumulative_exposure_by_route.setdefault(
-                    pathogen_id, {},
-                )
-                for route, route_dose in route_doses.items():
-                    route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
-                inf_prob = self._dose_response_hazard(
-                    agent, pathogen_id, effective_dose,
-                )
-
-                if self.rng.random() < inf_prob:
-                    parent_strain_id, source_agent_id = self._draw_source(
-                        agent.agent_id, pathogen_id,
-                    )
-                    acquired_strain_id = self._inherit_strain(parent_strain_id)
-                    if not self._establish(
-                        agent, pathogen_id, acquired_strain_id, cumulative_dose, epoch,
-                        resident=resident,
-                        acquired_particles_by_route=dict(route_ledger),
-                    ):
-                        continue
-                    agent.cumulative_exposure[pathogen_id] = 0.0
-                    agent.cumulative_exposure_by_route.pop(pathogen_id, None)
-
-                    pw_doses = agent_pathway_doses.get(agent.agent_id, {})
-                    dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
-                    route_ledger = dict(route_ledger)
-                    event = TransmissionEvent(
-                        epoch=epoch,
-                        pathway=dominant,
-                        source_agent_id=source_agent_id,
-                        target_agent_id=agent.agent_id,
-                        zone=agent.current_location,
-                        dose=p_dose,
-                        source_strain_id=parent_strain_id or None,
-                        acquired_particles_by_route=route_ledger,
-                    )
-                    events.append(event)
-                    matrix.transmission_events.append({
-                        "target_id": agent.agent_id,
-                        "zone": agent.current_location,
-                        "pathogen_id": pathogen_id,
-                        "dominant_pathway": dominant,
-                        "total_dose": round(p_dose, 4),
-                        "superinfection": resident,
-                        "pathway_breakdown": {
-                            k: round(v, 4)
-                            for k, v in pw_doses.items()
-                            if pathogen_id in k or pathogen_id == "_default"
-                        },
-                    })
 
         # ── Per-zone contact summary (occupancy map used for doses) ──
         matrix.zone_contact_summary = self._build_zone_contact_summary(
@@ -3371,6 +3318,118 @@ class TransmissionCore:
         self.collect_extinct_strains(agents)
 
         return matrix, events
+
+    def _resolve_pathogen_challenge(
+        self,
+        epoch: int,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        agent_pathogen_doses: dict[int, dict[str, float]],
+        agent_pathway_doses: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        events: list[TransmissionEvent],
+    ) -> None:
+        """Dose-response draw for one agent against one pathogen this epoch.
+
+        Books the effective dose into the agent's cumulative and per-route
+        exposure ledgers, then draws infection; on establishment the ledgers
+        are cleared and the event is recorded on ``matrix`` and ``events``.
+        """
+        resident = agent.is_infected_with(pathogen_id)
+        if resident and not self._superinfection_open(pathogen_id):
+            return
+        p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
+        if p_dose <= 0:
+            return
+        protection = self._challenge_protection(agent, pathogen_id, epoch)
+        if protection >= 1.0:
+            return
+
+        effective_dose = p_dose * (1.0 - protection)
+        if resident:
+            effective_dose *= self._superinfection_susceptibility(pathogen_id)
+        if effective_dose <= 0.0:
+            return
+
+        cumulative_dose = (
+            agent.cumulative_exposure.get(pathogen_id, 0.0)
+            + effective_dose
+        )
+        route_doses = self._effective_route_doses(
+            agent.agent_id,
+            pathogen_id,
+            effective_dose,
+        )
+        agent.cumulative_exposure[pathogen_id] = cumulative_dose
+        route_ledger = agent.cumulative_exposure_by_route.setdefault(
+            pathogen_id, {},
+        )
+        for route, route_dose in route_doses.items():
+            route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
+        inf_prob = self._dose_response_hazard(
+            agent, pathogen_id, effective_dose,
+        )
+
+        if self.rng.random() >= inf_prob:
+            return
+        parent_strain_id, source_agent_id = self._draw_source(
+            agent.agent_id, pathogen_id,
+        )
+        acquired_strain_id = self._inherit_strain(parent_strain_id)
+        if not self._establish(
+            agent, pathogen_id, acquired_strain_id, cumulative_dose, epoch,
+            resident=resident,
+            acquired_particles_by_route=dict(route_ledger),
+        ):
+            return
+        agent.cumulative_exposure[pathogen_id] = 0.0
+        agent.cumulative_exposure_by_route.pop(pathogen_id, None)
+        self._record_transmission_event(
+            epoch, agent, pathogen_id, p_dose, resident,
+            parent_strain_id, source_agent_id, dict(route_ledger),
+            agent_pathway_doses.get(agent.agent_id, {}),
+            matrix, events,
+        )
+
+    @staticmethod
+    def _record_transmission_event(
+        epoch: int,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        p_dose: float,
+        resident: bool,
+        parent_strain_id: str,
+        source_agent_id: int | None,
+        route_ledger: dict[str, float],
+        pw_doses: dict[str, float],
+        matrix: ContactTracingMatrix,
+        events: list[TransmissionEvent],
+    ) -> None:
+        """Append one established infection to ``events`` and ``matrix``."""
+        dominant = max(pw_doses, key=pw_doses.get) if pw_doses else "unknown"
+        events.append(TransmissionEvent(
+            epoch=epoch,
+            pathway=dominant,
+            source_agent_id=source_agent_id,
+            target_agent_id=agent.agent_id,
+            zone=agent.current_location,
+            dose=p_dose,
+            source_strain_id=parent_strain_id or None,
+            acquired_particles_by_route=route_ledger,
+        ))
+        matrix.transmission_events.append({
+            "target_id": agent.agent_id,
+            "zone": agent.current_location,
+            "pathogen_id": pathogen_id,
+            "dominant_pathway": dominant,
+            "total_dose": round(p_dose, 4),
+            "superinfection": resident,
+            "pathway_breakdown": {
+                k: round(v, 4)
+                for k, v in pw_doses.items()
+                if pathogen_id in k or pathogen_id == "_default"
+            },
+        })
 
     def _merge_pathogen_doses(
         self,
@@ -5610,43 +5669,48 @@ class TransmissionCore:
         self._sanitary_epoch = epoch
         self._sanitary_visits = {}
         self._sanitary_stool_venues.clear()
-        rng = self._sanitary_visits_rng
         for zone_name, occupants in zone_occupants.items():
             if self._is_cabin_compartment(zone_name):
                 continue
             for agent in occupants:
-                rate = (
-                    SANITARY_VOIDS_PER_NIGHT
-                    if str(getattr(agent, "current_activity", "")) == "Sleep"
-                    else SANITARY_VOIDS_PER_DAY
-                )
-                n = int(rng.poisson(rate * self.clock.day_fraction_per_epoch))
-                if n <= 0:
-                    continue
-                venue = self._sanitary_venue(zone_name, agent)
-                if venue is None:
-                    self.sanitary_telemetry["unresolved"] += n
-                    continue
-                if venue == self._sanitary_occupancy_key(zone_name, agent):
-                    # Own cabin fittings while home: occupancy already
-                    # deposits and picks up there for the whole epoch.
-                    self.sanitary_telemetry["visits"] += n
-                    dwell = SANITARY_DWELL_SECONDS * (
-                        SANITARY_DWELL_FEMALE_MULTIPLIER
-                        if agent.gender == "female" else 1.0
-                    )
-                    self.sanitary_telemetry["person_seconds"] += n * dwell
-                    continue
-                self._sanitary_visits.setdefault(
-                    agent.agent_id, [],
-                ).extend([venue] * n)
-                self.sanitary_telemetry["visits"] += n
-                dwell = SANITARY_DWELL_SECONDS * (
-                    SANITARY_DWELL_FEMALE_MULTIPLIER
-                    if agent.gender == "female" else 1.0
-                )
-                self.sanitary_telemetry["person_seconds"] += n * dwell
+                self._draw_agent_sanitary_visits(zone_name, agent)
         return self._sanitary_visits
+
+    def _draw_agent_sanitary_visits(
+        self, zone_name: str, agent: KorkinAgent,
+    ) -> None:
+        """One host's Poisson visit count this epoch, booked by venue."""
+        rate = (
+            SANITARY_VOIDS_PER_NIGHT
+            if str(getattr(agent, "current_activity", "")) == "Sleep"
+            else SANITARY_VOIDS_PER_DAY
+        )
+        n = int(self._sanitary_visits_rng.poisson(
+            rate * self.clock.day_fraction_per_epoch,
+        ))
+        if n <= 0:
+            return
+        venue = self._sanitary_venue(zone_name, agent)
+        if venue is None:
+            self.sanitary_telemetry["unresolved"] += n
+            return
+        if venue != self._sanitary_occupancy_key(zone_name, agent):
+            self._sanitary_visits.setdefault(
+                agent.agent_id, [],
+            ).extend([venue] * n)
+        # Own cabin fittings while home: occupancy already deposits and
+        # picks up there for the whole epoch, so only telemetry is booked.
+        self.sanitary_telemetry["visits"] += n
+        self.sanitary_telemetry["person_seconds"] += (
+            n * self._sanitary_dwell_seconds(agent)
+        )
+
+    @staticmethod
+    def _sanitary_dwell_seconds(agent: KorkinAgent) -> float:
+        return SANITARY_DWELL_SECONDS * (
+            SANITARY_DWELL_FEMALE_MULTIPLIER
+            if agent.gender == "female" else 1.0
+        )
 
     def _sanitary_fomite_exposure(
         self,

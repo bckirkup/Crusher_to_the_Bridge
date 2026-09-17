@@ -35,12 +35,36 @@ from dashboard.theme import (
     apply_lcars_layout,
 )
 from dashboard.units import axis
+from telemetry_buffer.agent_axes import (
+    INFECTION_IMMUNE,
+    INFECTION_INFECTED,
+    INFECTION_RECOVERED,
+    INFECTION_SUSCEPTIBLE,
+)
+from telemetry_buffer.fields import (
+    AGENT_CLASS,
+    AGENT_COMPLIANCE_STATUS,
+    AGENT_GENDER,
+    AGENT_ID,
+    AGENT_INFECTION_STATE,
+    AGENT_LOCATION,
+    AGENT_SHEDDING_RATE,
+    AGENT_SYMPTOM_PRESENTATION,
+    PROTOCOLS_ACTIVE,
+    RECORD_AGENTS,
+    RECORD_REACTIVE_PROTOCOLS,
+    RECORD_TRIGGER_STATUS,
+    record_agents,
+    record_block,
+    record_spaces,
+    record_stoplights,
+)
 
 _AGENT_COLORS = {
-    "susceptible": "#4a90d9",
-    "infected": "#e05050",
-    "recovered": "#50a050",
-    "immune": "#808080",
+    INFECTION_SUSCEPTIBLE: "#4a90d9",
+    INFECTION_INFECTED: "#e05050",
+    INFECTION_RECOVERED: "#50a050",
+    INFECTION_IMMUNE: "#808080",
 }
 
 _CLASS_COLOR_PALETTE = [
@@ -51,18 +75,18 @@ _CLASS_COLOR_PALETTE = [
 
 def _colors_for_agents(positions: list[dict[str, Any]], color_by: str) -> list[str]:
     """Map agent markers to colors for infection state or agent class."""
-    if color_by == "agent_class":
-        classes = sorted({str(p.get("agent_class", "") or "unknown") for p in positions})
+    if color_by == AGENT_CLASS:
+        classes = sorted({str(p.get(AGENT_CLASS, "") or "unknown") for p in positions})
         class_colors = {
             cls: _CLASS_COLOR_PALETTE[i % len(_CLASS_COLOR_PALETTE)]
             for i, cls in enumerate(classes)
         }
         return [
-            class_colors.get(str(p.get("agent_class", "") or "unknown"), "#333333")
+            class_colors.get(str(p.get(AGENT_CLASS, "") or "unknown"), "#333333")
             for p in positions
         ]
     return [
-        _AGENT_COLORS.get(p.get("infection_state", ""), "#333333")
+        _AGENT_COLORS.get(p.get(AGENT_INFECTION_STATE, ""), "#333333")
         for p in positions
     ]
 
@@ -99,18 +123,20 @@ def _add_agent_layer(
                 ))
     if not show_agents or not positions:
         return
-    color_key = color_by if color_by in ("infection_state", "agent_class") else "infection_state"
+    color_key = (
+        color_by if color_by in (AGENT_INFECTION_STATE, AGENT_CLASS) else AGENT_INFECTION_STATE
+    )
     colors = _colors_for_agents(positions, color_key)
     sel = get_selected_agent_id()
-    sizes = [10 if p["agent_id"] == sel else 5 for p in positions]
+    sizes = [10 if p[AGENT_ID] == sel else 5 for p in positions]
     fig.add_trace(go.Scatter(
         x=[p["x"] for p in positions],
         y=[p["y"] for p in positions],
         mode="markers",
         marker={"color": colors, "size": sizes, "line": {"width": 1, "color": _INK}},
         text=[
-            f"Agent {p['agent_id']}<br>{p['location']}<br>"
-            f"{p['infection_state']} / {p.get('agent_class', '')}"
+            f"Agent {p[AGENT_ID]}<br>{p[AGENT_LOCATION]}<br>"
+            f"{p[AGENT_INFECTION_STATE]} / {p.get(AGENT_CLASS, '')}"
             for p in positions
         ],
         hoverinfo="text",
@@ -553,17 +579,17 @@ def render_tactical_grid(
     with c2:
         deck_filter = _render_deck_filter(decks, key_suffix=key_suffix)
 
-    has_agents = retention_mode == "full" and bool(history[0].get("agents"))
+    has_agents = retention_mode == "full" and bool(history[0].get(RECORD_AGENTS))
     show_agents = False
     show_trails = False
-    agent_color_by = "infection_state"
+    agent_color_by = AGENT_INFECTION_STATE
     hvac_exposure = False
     if has_agents:
         show_agents = st.checkbox("Show agents on plan", value=False, key=f"show_agents{key_suffix}")
         show_trails = st.checkbox("Show selected agent trail", value=False, key=f"show_trails{key_suffix}")
         agent_color_by = st.selectbox(
             "Agent color by",
-            ["infection_state", "agent_class"],
+            [AGENT_INFECTION_STATE, AGENT_CLASS],
             key=f"agent_color{key_suffix}",
         )
         hvac_exposure = st.checkbox("Highlight HVAC exposures", value=False, key=f"hvac_exp{key_suffix}")
@@ -571,14 +597,14 @@ def render_tactical_grid(
         render_retention_banner(retention_mode, feature="Agent movement layer")
 
     record = history[epoch_idx]
-    st.markdown(_lcars_alert_banner(record["trigger_status"]), unsafe_allow_html=True)
+    st.markdown(_lcars_alert_banner(record[RECORD_TRIGGER_STATUS]), unsafe_allow_html=True)
 
     sel_zone = get_selected_zone_id()
     if sel_zone:
         st.caption(f"Selected zone: **{sel_zone}**")
         zone_pick = st.selectbox(
             "Filter by zone",
-            ["(all)"] + sorted(record.get("spaces", {}).keys()),
+            ["(all)"] + sorted(record_spaces(record).keys()),
             index=0,
             key=f"zone_filter{key_suffix}",
         )
@@ -634,11 +660,11 @@ def render_tactical_grid(
             if deck_obj is not None:
                 st.pydeck_chart(deck_obj, use_container_width=True, height=520)
 
-    stoplights = record.get("reactive_protocols", {}).get("stoplights", {})
+    stoplights = record_stoplights(record)
     if stoplights:
         _render_stoplight_panel(stoplights)
 
-    active_sops = record.get("reactive_protocols", {}).get("active_protocols", [])
+    active_sops = record_block(record, RECORD_REACTIVE_PROTOCOLS).get(PROTOCOLS_ACTIVE, [])
     if active_sops:
         names = [p.get("name", p.get("protocol_id", "?")) for p in active_sops]
         st.markdown(
@@ -647,16 +673,16 @@ def render_tactical_grid(
         )
 
     with st.expander(f"Crew Disposition — Epoch {epoch_idx}", expanded=False):
-        agents = record.get("agents", [])
+        agents = record_agents(record)
         if agents:
             import pandas as pd
-            df = pd.DataFrame(agents).sort_values("agent_id")
+            df = pd.DataFrame(agents).sort_values(AGENT_ID)
             if sel_zone:
-                df = df[df["location"] == sel_zone]
+                df = df[df[AGENT_LOCATION] == sel_zone]
             preferred = [
-                "agent_id", "agent_class", "location",
-                "infection_state", "symptom_presentation", "compliance_status",
-                "shedding_rate", "gender",
+                AGENT_ID, AGENT_CLASS, AGENT_LOCATION,
+                AGENT_INFECTION_STATE, AGENT_SYMPTOM_PRESENTATION, AGENT_COMPLIANCE_STATUS,
+                AGENT_SHEDDING_RATE, AGENT_GENDER,
             ]
             cols = [c for c in preferred if c in df.columns]
             extra = [c for c in df.columns if c not in cols]

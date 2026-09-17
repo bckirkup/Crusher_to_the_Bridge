@@ -10,11 +10,17 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
+# Source revision stamped into every archived run's campaign_parameters;
+# pass --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) at build time.
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+
 ENV PYTHONPATH=/app \
     PYTHONUTF8=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     UV_NO_CACHE=1 \
     UV_PYTHON_DOWNLOADS=never \
+    ENGINE_GIT_SHA=${ENGINE_GIT_SHA} \
     PATH=/app/.venv/bin:$PATH
 
 COPY --from=ghcr.io/astral-sh/uv:0.7.9 /uv /bin/uv
@@ -46,4 +52,4 @@ COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 RUN useradd --create-home --uid 10001 campaign && chown -R campaign:campaign /app
 USER campaign
 
-ENTRYPOINT ["python3", "picard_framework/runs/mega_cruise_campaign/campaign_runner.py"]
+ENTRYPOINT ["python3", "-m", "picard_framework.runs.mega_cruise_campaign.campaign_runner"]

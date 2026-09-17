@@ -33,6 +33,20 @@ from telemetry_buffer.agent_axes import (
     agent_is_infected,
     resolve_agent_axes,
 )
+from telemetry_buffer.fields import (
+    AGENT_CLASS,
+    RECORD_INFECTION_COUNTERS,
+    RECORD_SUMMARY,
+    RECORD_TRIGGER_STATUS,
+    SUMMARY_INFECTED,
+    SUMMARY_ISOLATED,
+    SUMMARY_QUARANTINED,
+    SUMMARY_RECOVERED,
+    SUMMARY_SUSCEPTIBLE,
+    SUMMARY_SYMPTOMATIC,
+    record_agents,
+    record_block,
+)
 
 PLOT_MODE_LINES_MARKERS = "lines+markers"
 
@@ -247,10 +261,10 @@ def render_bridge_status(
         return
 
     last = history[-1]
-    summary = last["summary"]
+    summary = last[RECORD_SUMMARY]
 
-    _render_bridge_ship_status(summary, last["trigger_status"])
-    _render_bridge_biosensor_telemetry(history, last.get("infection_counters", {}))
+    _render_bridge_ship_status(summary, last[RECORD_TRIGGER_STATUS])
+    _render_bridge_biosensor_telemetry(history, record_block(last, RECORD_INFECTION_COUNTERS))
     _render_class_breakdown(last)
 
     # ── Contagion Progression ─────────────────────────────────────
@@ -386,7 +400,7 @@ def aggregate_class_stats(agents: list[dict[str, Any]]) -> dict[str, dict[str, i
     """Infection distribution by agent class using orthogonal telemetry axes."""
     class_stats: dict[str, dict[str, int]] = {}
     for agent in agents:
-        cls = agent.get("agent_class", "unknown")
+        cls = agent.get(AGENT_CLASS, "unknown")
         if cls not in class_stats:
             class_stats[cls] = {
                 "total": 0, "infected": 0, "symptomatic": 0,
@@ -407,7 +421,7 @@ def aggregate_class_stats(agents: list[dict[str, Any]]) -> dict[str, dict[str, i
 
 def _render_class_breakdown(last: dict[str, Any]) -> None:
     """Agent class breakdown showing infection distribution across classes."""
-    agents = last.get("agents", [])
+    agents = record_agents(last)
     if not agents:
         return
 
@@ -819,12 +833,12 @@ def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
     isolated: list[int] = []
     recovered: list[int] = []
     for record in history:
-        s = record["summary"]
-        susceptible.append(s.get("susceptible", 0))
-        infected.append(s.get("infected", 0) + s.get("symptomatic", 0))
-        quarantined.append(s.get("quarantined", 0))
-        isolated.append(s.get("isolated", 0))
-        recovered.append(s.get("recovered", 0))
+        s = record[RECORD_SUMMARY]
+        susceptible.append(s.get(SUMMARY_SUSCEPTIBLE, 0))
+        infected.append(s.get(SUMMARY_INFECTED, 0) + s.get(SUMMARY_SYMPTOMATIC, 0))
+        quarantined.append(s.get(SUMMARY_QUARANTINED, 0))
+        isolated.append(s.get(SUMMARY_ISOLATED, 0))
+        recovered.append(s.get(SUMMARY_RECOVERED, 0))
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
