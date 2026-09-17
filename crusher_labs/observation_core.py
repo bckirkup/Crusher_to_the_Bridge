@@ -47,6 +47,18 @@ SWAB_NOMINAL_EFF = 0.35
 SWAB_GOOD_TECHNIQUE_VARIANCE = 0.05
 SWAB_POOR_TECHNIQUE_VARIANCE = 0.20
 SWAB_AREA_CM2 = 100.0
+# Park et al. 2015 macrofoam 2.3% at 645 cm² .. Lee et al. 2018
+# cotton/polyester-PBS >80% on plastic and stainless steel — Grade A
+# interval, swept (docs/norovirus/environmental_observation_v1.md §2).
+SWAB_RECOVERY_EFFICIENCY_BOUNDS = (0.023, 0.80)
+# Park et al. 2015 per-swabbed-surface detection limits, RNA copies —
+# Grade A for the two measured surfaces, B as shipboard analogue
+# (docs/norovirus/environmental_observation_v1.md §2).
+SWAB_LOD_COPIES_BY_SURFACE = {
+    "nonporous_hard": 10.0 ** 3.5,
+    "toilet_seat": 10.0 ** 4.0,
+}
+DEFAULT_SWAB_SURFACE_CLASS = "nonporous_hard"
 
 DEFAULT_WW_READ_DEPTH = 50_000
 DEFAULT_WW_DIRICHLET_CONCENTRATION = 100.0
@@ -356,6 +368,123 @@ class TargetedSurfaceSwab:
         for zone_name in targets:
             mass = zone_surface_masses.get(zone_name, 0.0)
             results[zone_name] = self.swab(zone_name, mass, compliance_scalar)
+        return results
+
+    def swab_surface(
+        self,
+        zone_name: str,
+        surface_copies: float,
+        high_touch_area_cm2: float,
+        surface_class: str = DEFAULT_SWAB_SURFACE_CLASS,
+        compliance_scalar: float = 0.85,
+        copies_by_pathogen: dict[str, float] | None = None,
+    ) -> dict[str, Any]:
+        """Swab a zone's deposited surface pool as a per-area density.
+
+        The density denominator is the same high-touch field the fomite
+        dose route divides by, so the swab measures the same physical
+        field a host picks up from. Park 2015's per-swab copy LOD applies
+        to recovered copies; a below-LOD reading keeps its quantitative
+        value and is flagged, never zeroed.
+        """
+        if compliance_scalar >= 0.8:
+            variance = self.good_variance
+            technique = "careful"
+        else:
+            variance = self.poor_variance
+            technique = "rushed"
+
+        actual_efficiency = self.rng.normal(self.nominal_efficiency, variance)
+        lo, hi = SWAB_RECOVERY_EFFICIENCY_BOUNDS
+        actual_efficiency = float(np.clip(actual_efficiency, lo, hi))
+
+        copies = float(surface_copies) if math.isfinite(surface_copies) else 0.0
+        area = (
+            float(high_touch_area_cm2)
+            if math.isfinite(high_touch_area_cm2) and high_touch_area_cm2 > 0.0
+            else 0.0
+        )
+        density = copies / area if area > 0.0 else 0.0
+        sampled = density * self.swab_area_cm2
+
+        raw_recovered = sampled * actual_efficiency
+        raw_recovered *= self.rng.lognormal(0, 0.03)
+
+        recovered_copies, carryover = self.qc.process_sample(raw_recovered)
+
+        ct = self._compute_ct(recovered_copies)
+        lod_copies = SWAB_LOD_COPIES_BY_SURFACE.get(
+            surface_class, SWAB_LOD_COPIES_BY_SURFACE[DEFAULT_SWAB_SURFACE_CLASS],
+        )
+        detected = (
+            recovered_copies >= lod_copies
+            and ct is not None
+            and ct <= self.lod_ct
+        )
+        censored = recovered_copies > 0.0 and not detected
+
+        raw_amplification = self._simulate_amplification_curve(recovered_copies)
+
+        result: dict[str, Any] = {
+            "instrument": self.name,
+            "zone": zone_name,
+            "surface_class": surface_class,
+            "surface_copies_total": round(copies, 4),
+            "surface_mass": round(copies, 4),
+            "high_touch_area_cm2": round(area, 4),
+            "surface_density_copies_per_cm2": round(density, 6),
+            "swab_area_cm2": self.swab_area_cm2,
+            "sampled_copies": round(sampled, 4),
+            "compliance_scalar": round(compliance_scalar, 3),
+            "technique_quality": technique,
+            "actual_collection_efficiency": round(actual_efficiency, 4),
+            "recovered_copies": round(recovered_copies, 4),
+            "recovered_mass": round(recovered_copies, 4),
+            "lod_copies_per_swab": lod_copies,
+            "ct_value": ct,
+            "detected": detected,
+            "censored_below_lod": censored,
+            "copies_by_pathogen": dict(copies_by_pathogen or {}),
+            "cross_contamination_carryover": carryover,
+            "raw_amplification_curve": raw_amplification,
+            "background_fluorescence": round(float(self.rng.normal(140, 18)), 1),
+        }
+
+        if self.qc.should_run_control():
+            result["qc_control"] = self.qc.run_negative_control()
+
+        return result
+
+    def swab_surface_zones(
+        self,
+        zone_surface_copies: dict[str, float],
+        zone_high_touch_areas: dict[str, float],
+        compliance_scalar: float = 0.85,
+        target_zones: list[str] | None = None,
+        surface_classes: dict[str, str] | None = None,
+        copies_by_pathogen: dict[str, dict[str, float]] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        targets = (
+            target_zones if target_zones else list(zone_surface_copies.keys())
+        )
+        results: dict[str, dict[str, Any]] = {}
+        for zone_name in targets:
+            results[zone_name] = self.swab_surface(
+                zone_name,
+                zone_surface_copies.get(zone_name, 0.0),
+                zone_high_touch_areas.get(zone_name, 0.0),
+                surface_class=(surface_classes or {}).get(
+                    zone_name, DEFAULT_SWAB_SURFACE_CLASS,
+                ),
+                compliance_scalar=compliance_scalar,
+                copies_by_pathogen=(
+                    None if copies_by_pathogen is None
+                    else {
+                        pid: masses.get(zone_name, 0.0)
+                        for pid, masses in copies_by_pathogen.items()
+                    }
+                ),
+            )
         return results
 
     def _compute_ct(self, mass: float) -> float | None:

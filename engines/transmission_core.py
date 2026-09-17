@@ -2930,6 +2930,18 @@ class TransmissionCore:
             keys.update(k for k in pools if k.startswith(prefix))
         return sorted(keys)
 
+    def get_pathogen_surface_mass(self, pathogen_id: str) -> dict[str, float]:
+        """Per-zone deposited surface mass for one pathogen, as a copy."""
+        return dict(self.surface_pools_by_pathogen.get(pathogen_id, {}))
+
+    def zone_high_touch_area_cm2(self, zone_name: str) -> float:
+        """A zone's touchable surface area in cm².
+
+        The same denominator ``_fomite_pickup_request`` divides by, so the
+        density a swab measures is the density a host picks up from.
+        """
+        return self._fomite_surface_area(zone_name) * 1.0e4
+
     def zone_surface_mass(self, zone_name: str, pathogen_id: str | None = None) -> float:
         """Surface mass on a zone plus every cabin compartment within it."""
         pools = (

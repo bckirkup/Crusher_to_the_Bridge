@@ -3696,6 +3696,24 @@ Roughly in dependency order.
     inflation and is withdrawn. Its magnitude is unmeasured; no norovirus
     route share, dose, or anchor conclusion is restored by this correction.
 
+56. **The surface swab is rewired to the real surface pool, default-off.**
+    `observation.surface_swab_source` gains `surface_pool_density`: the swab
+    reads `surface_pools_by_pathogen` (the pool the fomite route doses
+    from), reports a per-cm² density over the same high-touch area the
+    pickup request divides by, and applies Park 2015's per-swab copy LOD
+    (`SWAB_LOD_COPIES_BY_SURFACE`, `SWAB_RECOVERY_EFFICIENCY_BOUNDS`;
+    derivation `docs/norovirus/environmental_observation_v1.md` §2). The
+    default stays `airborne_fraction`, so the decision layer reads the
+    legacy synthetic 0.4-of-airborne figure and no golden moves; the
+    repaired path ships unmeasured and awaits a matched arm — no archive
+    to date carries it. Explicitly **not done** here and owed by the
+    following change: the deposited share outside the high-touch
+    footprint (`non_touchable` in `_emit_emesis`, `transmission_core.py`)
+    is still written to the deposition record and dropped — the majority
+    of a vomiting event's mass — until the wastewater/holding-tank repair
+    routes it, and the `swab()` legacy path keeps its invented
+    `surface_fraction` input for the unchanged default arm. Nothing was
+    selected on VSP, A9, MIDRS, or Park outcomes.
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

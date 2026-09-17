@@ -1135,6 +1135,7 @@ class ShipSimulation:
             strain_registry=(
                 None if self.tx_core is None else self.tx_core.strain_registry
             ),
+            tx_core=self.tx_core,
         )
         self._attach_surface_strain_recovery(work)
 
