@@ -4424,7 +4424,7 @@ class TransmissionCore:
     def _apply_hvac_downstream_doses(
         self,
         target_zone: str,
-        source_zone: str,
+        source_zones: list[str],
         shedder_ids: list[int],
         mass_in_target: float,
         zone_occupants: dict[str, list[KorkinAgent]],
@@ -4454,13 +4454,28 @@ class TransmissionCore:
             matrix.hvac_downstream_exposures.append({
                 "target_id": target.agent_id,
                 "target_zone": target_zone,
-                "source_zone": source_zone,
-                "source_agent_ids": shedder_ids,
+                "source_zones": sorted(source_zones),
+                "source_agent_ids": sorted(shedder_ids),
                 "pathogen_id": pathogen_id,
                 "dose": round(dose, 4),
                 "airborne_mass": round(mass_in_target, 4),
                 "concentration_per_m3": round(concentration, 6),
             })
+
+    @staticmethod
+    def _hvac_upstream_sources(
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+        hvac_downstream_zones: dict[str, list[str]],
+    ) -> dict[str, list[str]]:
+        upstream: dict[str, set[str]] = {}
+        for source_zone in zone_shedders:
+            for target_zone in hvac_downstream_zones.get(source_zone, []):
+                if target_zone != source_zone:
+                    upstream.setdefault(target_zone, set()).add(source_zone)
+        return {
+            target_zone: sorted(source_zones)
+            for target_zone, source_zones in upstream.items()
+        }
 
     def _pathway_hvac_airborne(
         self,
@@ -4477,10 +4492,10 @@ class TransmissionCore:
     ) -> None:
         """Exposure from airborne pathogen drifted via HVAC from upstream zones.
 
-        The dose is taken from the mass standing in the *target* zone, which is
-        older than this epoch's shedding, so it is attributed to that zone's
-        aerosol composition; the upstream shedders are the fallback for air whose
-        history the composition does not yet cover.
+        The standing mass in each target zone is inhaled once per epoch. The
+        pool is transported, so upstream sources are already integrated into
+        that mass; upstream shedders only gate the route and provide an
+        attribution fallback when the reservoir has no composition.
         """
         zone_shedders: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for zone_name, occupants in zone_occupants.items():
@@ -4488,27 +4503,31 @@ class TransmissionCore:
             if shedders:
                 zone_shedders[zone_name] = shedders
 
-        # For each downstream zone receiving HVAC air from a shedding zone
-        for source_zone, shedders in zone_shedders.items():
-            downstream = hvac_downstream_zones.get(source_zone, [])
-            for target_zone in downstream:
-                if target_zone == source_zone:
-                    continue
+        upstream = self._hvac_upstream_sources(
+            zone_shedders, hvac_downstream_zones,
+        )
+        for target_zone in sorted(upstream):
+            mass_in_target = zone_pathogen_mass.get(target_zone, 0.0)
+            if mass_in_target <= 0:
+                continue
 
-                mass_in_target = zone_pathogen_mass.get(target_zone, 0.0)
-                if mass_in_target <= 0:
-                    continue
-
-                mix = self._reservoir_mix(
-                    AIRBORNE_RESERVOIR, pathogen_id, target_zone,
-                ) or self._shedder_mix(shedders, pathogen_id)
-                self._apply_hvac_downstream_doses(
-                    target_zone, source_zone, [s.agent_id for s, _ in shedders],
-                    mass_in_target,
-                    zone_occupants, agent_doses, matrix,
-                    agent_pathway_doses, pathogen_id,
-                    attribution(ledger, mix),
-                )
+            source_zones = upstream[target_zone]
+            shedders = [
+                shedder
+                for source_zone in source_zones
+                for shedder in zone_shedders[source_zone]
+            ]
+            mix = self._reservoir_mix(
+                AIRBORNE_RESERVOIR, pathogen_id, target_zone,
+            ) or self._shedder_mix(shedders, pathogen_id)
+            self._apply_hvac_downstream_doses(
+                target_zone, source_zones,
+                [s.agent_id for s, _ in shedders],
+                mass_in_target,
+                zone_occupants, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id,
+                attribution(ledger, mix),
+            )
 
         self._airborne_composition(pathogen_id, zone_shedders)
 

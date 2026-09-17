@@ -99,7 +99,13 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # The exact linear-operator transport repair moves the live cell from
     # (149, 62, 217, 166, 30) to (144, 64, 217, 157, 30) on CPython 3.11;
     # the old value returns with the pre-repair frozen-source scheme.
-    (3, 11): (140, 64, 217, 155, 36),
+    # `AERO-CABIN-05` inverts the HVAC-downstream loop so a target zone's
+    # standing mass is inhaled once per epoch instead of once per upstream
+    # zone hosting a shedder, so the dose is no longer multiplied by the
+    # count of those zones: (140, 64, 217, 155, 36) to
+    # (129, 53, 217, 140, 41) on CPython 3.11, and
+    # (118, 48, 217, 139, 30) to (112, 48, 217, 125, 29) on 3.12.
+    (3, 11): (129, 53, 217, 140, 41),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -111,7 +117,7 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
     # The new-default Theta=1e10 reading is live but unsaturated on both
     # interpreters.
-    (3, 12): (118, 48, 217, 139, 30),
+    (3, 12): (112, 48, 217, 125, 29),
 }
 
 
