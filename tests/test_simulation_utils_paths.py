@@ -244,3 +244,43 @@ def test_load_validated_json_still_refuses_paths_outside_the_allowed_roots(tmp_p
 def test_unknown_schema_names_are_rejected_before_any_file_is_read() -> None:
     with pytest.raises(ValueError):
         validate_json_document({}, "../pyproject.toml")
+
+
+def test_reloading_the_same_bytes_returns_a_fresh_document_without_a_second_schema_walk(
+    tmp_path, monkeypatch,
+) -> None:
+    from simulation_utils import paths as paths_module
+
+    path = tmp_path / "protocols.json"
+    path.write_text(json.dumps({"protocols": []}), encoding="utf-8")
+    calls: list[str] = []
+    real_validate = paths_module.validate_json_document
+
+    def counting_validate(document, schema_name, *, source="<document>"):
+        calls.append(source)
+        return real_validate(document, schema_name, source=source)
+
+    monkeypatch.setattr(paths_module, "validate_json_document", counting_validate)
+    paths_module._validated_texts.clear()
+    first = load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+    second = load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+    assert first == second == {"protocols": []}
+    assert first is not second
+    assert len(calls) == 1
+
+
+def test_an_edited_file_is_validated_again_and_a_violation_is_still_reported(tmp_path) -> None:
+    path = tmp_path / "protocols.json"
+    path.write_text(json.dumps({"protocols": []}), encoding="utf-8")
+    load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+    path.write_text(json.dumps({"protocols": "not-a-list"}), encoding="utf-8")
+    with pytest.raises(SchemaValidationError):
+        load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+
+
+def test_the_same_bytes_under_a_different_schema_are_validated_on_their_own(tmp_path) -> None:
+    path = tmp_path / "doc.json"
+    path.write_text(json.dumps({"protocols": []}), encoding="utf-8")
+    load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+    with pytest.raises(SchemaValidationError):
+        load_validated_json(str(path), "class_interactions.schema.json", allowed_roots=(str(tmp_path),))

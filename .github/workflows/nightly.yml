@@ -1,8 +1,11 @@
 name: Nightly
 
 # The tier that PR CI no longer runs. `ci.yml` runs `pytest -m 'not slow'`; this
-# runs the whole suite, slow tests included. Measured cost of the slow tier:
-# ~35 min, nearly all of it in tests/test_sentinel_fleet_validation.py.
+# runs the whole suite, slow tests included. The slow tier is dominated by the
+# posterior-recovery fits in tests/test_sentinel_fleet_validation.py and
+# tests/test_sentinel_wastewater.py, which are independent of each other, so the
+# suite is split by module across jobs (tests/conftest.py, --ci-shard-*) and
+# each job spreads its tests over the runner's cores with xdist.
 on:
   schedule:
     # 05:40 UTC — offset from the hour to reduce shared-runner contention.
@@ -25,13 +28,15 @@ concurrency:
 
 jobs:
   full-suite:
-    name: full suite (${{ matrix.python-version }})
+    name: full suite (${{ matrix.python-version }}, shard ${{ matrix.shard-index }})
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12"]
+        shard-count: [2]
+        shard-index: [0, 1]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
@@ -46,12 +51,19 @@ jobs:
         run: |
           uv sync --locked --all-extras --no-install-project --no-build
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
-      - name: Run the full test suite
+      - name: Run this shard of the full test suite
         env:
           PYTEST_SELECTION: ${{ inputs.pytest_selection }}
+          SHARD_COUNT: ${{ matrix.shard-count }}
+          SHARD_INDEX: ${{ matrix.shard-index }}
         run: |
           if [ -n "$PYTEST_SELECTION" ]; then
-            pytest tests/ -m "$PYTEST_SELECTION" -v --tb=short
+            set -- -m "$PYTEST_SELECTION"
           else
-            pytest tests/ -v --tb=short
+            set --
           fi
+          # A narrow -m selection can leave a shard with nothing to run; pytest
+          # reports that as exit 5, which is not a failure here.
+          pytest tests/ "$@" -v --tb=short -n auto --dist load \
+            --ci-shard-count "$SHARD_COUNT" --ci-shard-index "$SHARD_INDEX" \
+            || { status=$?; [ "$status" -eq 5 ] || exit "$status"; }

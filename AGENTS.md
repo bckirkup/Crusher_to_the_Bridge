@@ -47,12 +47,15 @@ python3 presidio_runner.py \
 ```
 
 `-m 'not slow'` is the fast tier that `.github/workflows/ci.yml` runs on every
-push (about 4.5 min locally). The `slow` marker covers the posterior-recovery
-fits — all of `tests/test_sentinel_fleet_validation.py` plus a few reference-walker
-and campaign cases — measured at 35 of the suite's 41 min;
-`.github/workflows/nightly.yml` runs the whole suite on cron and on demand. Run
-`python3 -m pytest tests/ -v --tb=short` locally before changing anything under
-`picard_framework/analysis/stan/`.
+push, split by test module across four jobs per interpreter
+(`--ci-shard-count`/`--ci-shard-index`, defined in `tests/conftest.py`) with
+`pytest -n auto` inside each; add `-n auto` locally to use every core. The
+`slow` marker covers the posterior-recovery fits — all of
+`tests/test_sentinel_fleet_validation.py`, the three long wastewater fits in
+`tests/test_sentinel_wastewater.py`, plus a few reference-walker and campaign
+cases; `.github/workflows/nightly.yml` runs the whole suite on cron and on
+demand, sharded the same way. Run `python3 -m pytest tests/ -v --tb=short`
+locally before changing anything under `picard_framework/analysis/stan/`.
 
 Docker campaign smoke is optional when Docker is unavailable:
 
