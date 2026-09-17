@@ -11,13 +11,15 @@ shore pathogen introduction — needs the second, narrower
 from __future__ import annotations
 
 import copy
-import json
 import os
 import warnings
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from engines.sim_clock import HOURS, SimClock
+from simulation_utils.paths import load_validated_json
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DAY_TYPES = frozenset({"sea_day", "port_day", "embarkation", "disembarkation"})
 
@@ -153,10 +155,7 @@ def load_voyage_config(path: str | None) -> dict[str, Any]:
     """Load voyage config JSON, or return empty identity config if missing."""
     if not path or not os.path.isfile(path):
         return copy.deepcopy(EMPTY_VOYAGE_CONFIG)
-    with open(path, encoding="utf-8") as fh:
-        raw = json.load(fh)
-    if not isinstance(raw, dict):
-        raise ValueError(f"voyage_config must be an object: {path}")
+    raw = load_validated_json(path, "voyage_config.schema.json", allowed_roots=(REPO_ROOT,))
     return normalize_voyage_config(raw)
 
 

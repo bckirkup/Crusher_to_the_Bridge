@@ -2,13 +2,12 @@
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any
 
 from decision_engine.information.reputation import ReputationTracker
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -50,8 +49,7 @@ class InformationDiffusionEngine:
 
     @classmethod
     def from_config_path(cls, path: str) -> InformationDiffusionEngine:
-        with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-            cfg = json.load(fh)
+        cfg = load_validated_json(path, "information_diffusion.schema.json", allowed_roots=(REPO_ROOT,))
         eng = cls(config=cfg)
         eng.reputation.apply_config(cfg)
         return eng

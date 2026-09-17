@@ -17,7 +17,6 @@ its training set.
 
 from __future__ import annotations
 
-import json
 import os
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
@@ -25,7 +24,7 @@ from typing import Any
 
 from engines.sim_clock import SimClock
 from picard_framework.pathogen_overrides import isolate_arm_overrides
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCENARIO_DATA_REL = os.path.join("data", "scenarios", "covid_hull_scenarios.json")
@@ -390,10 +389,9 @@ def load_hull_scenarios(
 ) -> HullScenarioSet:
     """Load the hull scenario records and check them against their own split."""
     resolved = path or scenario_data_path(repo_root)
-    with validated_open(
-        resolved, allowed_roots=(repo_root,), encoding="utf-8",
-    ) as fh:
-        raw = json.load(fh)
+    raw = load_validated_json(
+        resolved, "covid_hull_scenarios.schema.json", allowed_roots=(repo_root,),
+    )
     scenarios = {
         str(entry["scenario_id"]): _scenario_from_dict(entry)
         for entry in raw.get("scenarios") or ()

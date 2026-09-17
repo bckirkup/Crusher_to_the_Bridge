@@ -4,7 +4,6 @@ PicardRunSpec — immutable resolved configuration for one ship cruise.
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Literal
@@ -14,7 +13,7 @@ from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
     load_pathogen_bundle,
 )
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -194,8 +193,9 @@ class PicardRunSpec:
     def from_picard_json(cls, repo_root: str, spec_path: str) -> PicardRunSpec:
         root = repo_root or REPO_ROOT
         spec_dir = os.path.dirname(os.path.abspath(spec_path))
-        with validated_open(spec_path, allowed_roots=(root, spec_dir), encoding="utf-8") as fh:
-            raw = json.load(fh)
+        raw = load_validated_json(
+            spec_path, "picard_run_spec.schema.json", allowed_roots=(root, spec_dir),
+        )
         return cls.from_picard_dict(repo_root, raw)
 
     @classmethod

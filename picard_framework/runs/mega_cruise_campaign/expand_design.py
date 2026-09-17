@@ -24,7 +24,11 @@ import os
 import sys
 from typing import Any
 
-from simulation_utils.paths import prepare_output_directory, validated_open
+from simulation_utils.paths import (
+    load_validated_json,
+    prepare_output_directory,
+    validated_open,
+)
 
 CAMPAIGN_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(CAMPAIGN_DIR)))
@@ -44,6 +48,13 @@ def load_json(path: str) -> dict[str, Any]:
         path, encoding="utf-8", allowed_roots=(REPO_ROOT,),
     ) as handle:
         return dict(json.load(handle))
+
+
+def load_design(path: str) -> dict[str, Any]:
+    """Read a campaign design spec and check it against its schema."""
+    return dict(load_validated_json(
+        path, "sentinel_recovery_design.schema.json", allowed_roots=(REPO_ROOT,),
+    ))
 
 
 def _require(mapping: dict[str, Any], key: str, label: str) -> Any:
@@ -447,7 +458,7 @@ def build_manifest(design: dict[str, Any]) -> dict[str, Any]:
 
 def manifest_from_design_file(design_path: str) -> dict[str, Any]:
     """Load a design file and expand it, recording the source file name."""
-    design = load_json(design_path)
+    design = load_design(design_path)
     design["design_file"] = os.path.basename(design_path)
     return build_manifest(design)
 

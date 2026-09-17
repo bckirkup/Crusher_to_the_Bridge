@@ -2,15 +2,19 @@
 
 from __future__ import annotations
 
+import json
 import os
 
 import pytest
 
 from simulation_utils.paths import (
+    SchemaValidationError,
     is_path_under_base,
+    load_validated_json,
     prepare_output_directory,
     resolve_child_path,
     resolve_repo_path,
+    validate_json_document,
     validate_path_component,
 )
 
@@ -207,3 +211,36 @@ def test_prepare_output_directory_returns_the_path_it_checked(tmp_path) -> None:
     created = prepare_output_directory(str(root / "link" / "out"), allowed_roots=(str(root),))
     assert created == os.path.realpath(root / "real" / "out")
     assert os.path.isdir(created)
+
+
+def test_load_validated_json_returns_a_document_that_meets_its_schema(tmp_path) -> None:
+    path = tmp_path / "protocols.json"
+    path.write_text(json.dumps({"protocols": []}), encoding="utf-8")
+    loaded = load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+    assert loaded == {"protocols": []}
+
+
+def test_load_validated_json_names_the_file_schema_and_location_on_violation(tmp_path) -> None:
+    path = tmp_path / "protocols.json"
+    path.write_text(json.dumps({"protocols": "not-a-list"}), encoding="utf-8")
+    with pytest.raises(SchemaValidationError, match=r"protocols\.json violates schemas/protocols\.schema\.json at protocols"):
+        load_validated_json(str(path), "protocols.schema.json", allowed_roots=(str(tmp_path),))
+
+
+def test_schema_violation_is_a_value_error_so_existing_fallbacks_still_catch_it() -> None:
+    with pytest.raises(ValueError):
+        validate_json_document({"protocols": 3}, "protocols.schema.json")
+
+
+def test_load_validated_json_still_refuses_paths_outside_the_allowed_roots(tmp_path) -> None:
+    outside = tmp_path / "outside.json"
+    outside.write_text("{}", encoding="utf-8")
+    inside = tmp_path / "inside"
+    inside.mkdir()
+    with pytest.raises(ValueError):
+        load_validated_json(str(outside), "protocols.schema.json", allowed_roots=(str(inside),))
+
+
+def test_unknown_schema_names_are_rejected_before_any_file_is_read() -> None:
+    with pytest.raises(ValueError):
+        validate_json_document({}, "../pyproject.toml")

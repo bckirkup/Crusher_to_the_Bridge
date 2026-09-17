@@ -434,6 +434,7 @@ name = "crusher-to-the-bridge"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "jsonschema" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "pydantic" },
@@ -481,6 +482,7 @@ requires-dist = [
     { name = "check-jsonschema", marker = "extra == 'dev'", specifier = ">=0.28" },
     { name = "cmdstanpy", marker = "extra == 'analysis'", specifier = ">=1.2" },
     { name = "geopandas", marker = "extra == 'gis'", specifier = ">=0.14" },
+    { name = "jsonschema", specifier = ">=4.17" },
     { name = "matplotlib", marker = "extra == 'analysis'", specifier = ">=3.8" },
     { name = "networkx", marker = "extra == 'gis'", specifier = ">=3.0" },
     { name = "numpy", specifier = ">=1.24" },

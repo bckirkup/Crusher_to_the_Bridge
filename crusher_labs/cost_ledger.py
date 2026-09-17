@@ -20,16 +20,16 @@ itemizing total expenditures split by *Surveillance Cost* vs *Intervention Cost*
 
 from __future__ import annotations
 
-import json
 import os
 import warnings
 from dataclasses import dataclass
 from math import isclose, isfinite
 from typing import Any, Mapping
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RESOURCE_COSTS_SCHEMA = "resource_costs.schema.json"
 
 
 # ── Ledger entry categories ──────────────────────────────────────────────
@@ -630,8 +630,7 @@ def compute_operational_impact(
 
 def build_ledger_from_config(config_path: str) -> CostLedger:
     """Construct a CostLedger from ``resource_costs.json``."""
-    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        cfg = json.load(fh)
+    cfg = load_validated_json(config_path, RESOURCE_COSTS_SCHEMA, allowed_roots=(REPO_ROOT,))
 
     budgets = cfg.get("budgets", {})
     starting_usd = budgets.get("financial_usd", {}).get("starting_balance", 50_000.0)
@@ -657,8 +656,7 @@ def build_ledger_from_config(config_path: str) -> CostLedger:
 
 def load_resource_costs(config_path: str) -> dict[str, Any]:
     """Load the raw resource costs config."""
-    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        config = json.load(fh)
+    config = load_validated_json(config_path, RESOURCE_COSTS_SCHEMA, allowed_roots=(REPO_ROOT,))
     if "baseline_surveillance_costs_per_epoch" in config:
         warnings.warn(
             "baseline_surveillance_costs_per_epoch is deprecated; "

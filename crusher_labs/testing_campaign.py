@@ -25,7 +25,7 @@ symptoms), and no count here is fitted.
 
 from __future__ import annotations
 
-import json
+import os
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -33,7 +33,10 @@ from typing import Any
 
 import numpy as np
 
+from simulation_utils.paths import load_validated_json, resolve_repo_path
 from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 RULE_SYMPTOMATIC_OR_CONTACT = "symptomatic_or_cabin_contact"
 RULE_PASSENGERS_IN_AGE_BANDS = "passengers_in_age_bands"
@@ -57,6 +60,14 @@ RULES = (
 
 #: Repository default location of the replicated campaigns.
 CAMPAIGN_DATA_PATH = "data/observation/covid_testing_campaigns.json"
+
+
+def _load_campaign_payload(path: str | Path) -> dict[str, Any]:
+    """Read a campaign data file confined to the repository and schema-checked."""
+    resolved = resolve_repo_path(REPO_ROOT, str(path))
+    return load_validated_json(
+        resolved, "testing_campaigns.schema.json", allowed_roots=(REPO_ROOT,),
+    )
 
 
 @dataclass(frozen=True)
@@ -244,8 +255,7 @@ class TestingCampaign:
         start_day: int = 0,
     ) -> "TestingCampaign":
         """Load one named campaign from a campaign data file."""
-        with open(path, encoding="utf-8") as handle:
-            payload = json.load(handle)
+        payload = _load_campaign_payload(path)
         for entry in payload.get("campaigns") or []:
             if str(entry.get("campaign_id")) == str(campaign_id):
                 return cls.from_dict(entry, start_day=start_day)
@@ -372,8 +382,7 @@ def load_campaigns(
     ``start_days`` aligns each campaign's first recorded day with a simulated
     day index. A campaign with no entry starts on simulated day 0.
     """
-    with open(path, encoding="utf-8") as handle:
-        payload = json.load(handle)
+    payload = _load_campaign_payload(path)
     wanted = None if campaign_ids is None else {str(cid) for cid in campaign_ids}
     offsets = dict(start_days or {})
     campaigns: dict[str, TestingCampaign] = {}

@@ -4,12 +4,11 @@ Load and resolve JSON clinical instrument / panel / impression parameters.
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import load_validated_json, resolve_repo_path
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DEFAULT_CONFIG_REL = "data/config/clinical_instrument_params.json"
@@ -39,8 +38,9 @@ def load_clinical_instrument_params(
     root = repo_root or REPO_ROOT
     rel = path or DEFAULT_CONFIG_REL
     config_path = resolve_repo_path(root, rel)
-    with validated_open(config_path, "r", allowed_roots=(root,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(
+        config_path, "clinical_instrument_params.schema.json", allowed_roots=(root,),
+    )
 
 
 def clinical_instruments_config_path(cfg: dict[str, Any] | None) -> str:

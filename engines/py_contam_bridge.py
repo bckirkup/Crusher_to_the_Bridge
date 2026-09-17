@@ -34,14 +34,13 @@ previously used in ``infection_dynamics_bridge.py``.
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
 import numpy as np
 
 from engines.sim_clock import SimClock
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import load_validated_json, resolve_repo_path
 
 # ── Constants ────────────────────────────────────────────────────────────
 
@@ -699,8 +698,7 @@ def load_air_flow_paths(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
-    with validated_open(full_path, "r", allowed_roots=(repo_root,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(full_path, "air_flow_paths.schema.json", allowed_roots=(repo_root,))
 
 
 def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
@@ -713,8 +711,7 @@ def load_spatial_layout(repo_root: str, cfg: dict[str, Any]) -> dict[str, Any]:
     full_path = resolve_repo_path(repo_root, rel_path)
     if not os.path.isfile(full_path):
         return {}
-    with validated_open(full_path, "r", allowed_roots=(repo_root,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(full_path, "spatial_layout.schema.json", allowed_roots=(repo_root,))
 
 
 def _build_native_engine(

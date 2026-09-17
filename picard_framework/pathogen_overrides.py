@@ -10,12 +10,11 @@ re-read from disk during simulation.
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
 from picard_framework.catalog.registry import CatalogRegistry
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -35,8 +34,7 @@ def deep_merge_dict(base: dict[str, Any], patch: dict[str, Any]) -> dict[str, An
 
 def load_pathogen_bundle(path: str) -> dict[str, dict[str, Any]]:
     """Load a pathogen bundle JSON file into ``pathogen_id -> profile``."""
-    with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        data = json.load(fh)
+    data = load_validated_json(path, "pathogen_profiles.schema.json", allowed_roots=(REPO_ROOT,))
     profiles: dict[str, dict[str, Any]] = {}
     for entry in data.get("pathogens", []):
         pid = entry.get("pathogen_id")

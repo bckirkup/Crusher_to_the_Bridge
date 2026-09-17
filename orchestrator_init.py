@@ -9,7 +9,6 @@ initialization, observation engine, and protocol engine setup.
 
 from __future__ import annotations
 
-import json
 import os
 import warnings
 from collections import defaultdict
@@ -91,7 +90,7 @@ from orchestrator_types import (
     ObservationEngine,
     ProtocolContext,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import load_validated_json, resolve_repo_path
 from telemetry_buffer.agent_axes import (
     INFECTION_INFECTED,
     INFECTION_RECOVERED,
@@ -264,8 +263,7 @@ def load_platform_layout_doc(cfg: dict[str, Any]) -> dict[str, Any] | None:
     full_path = resolve_repo_path(REPO_ROOT, layout_path)
     if not os.path.isfile(full_path):
         return None
-    with validated_open(full_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(full_path, "spatial_layout.schema.json", allowed_roots=(REPO_ROOT,))
 
 
 def resolve_graywater_zones(
@@ -1213,8 +1211,7 @@ def load_pathogen_profiles(
     full_path = resolve_repo_path(REPO_ROOT, profiles_path)
     if not os.path.isfile(full_path):
         return {}
-    with validated_open(full_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        data = json.load(fh)
+    data = load_validated_json(full_path, "pathogen_profiles.schema.json", allowed_roots=(REPO_ROOT,))
     profiles: dict[str, dict[str, Any]] = {}
     for p in data.get("pathogens", []):
         pid = p.get("pathogen_id", "unknown")

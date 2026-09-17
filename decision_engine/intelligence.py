@@ -2,18 +2,16 @@
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def load_global_health_timeline(path: str) -> dict[str, Any]:
-    with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(path, "global_health_briefing.schema.json", allowed_roots=(REPO_ROOT,))
 
 
 def briefing_for_epoch(timeline: dict[str, Any], epoch: int) -> dict[str, Any]:

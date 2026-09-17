@@ -1,7 +1,6 @@
 """Main Streamlit LCARS command deck."""
 from __future__ import annotations
 
-import json
 import os
 
 import streamlit as st
@@ -45,22 +44,23 @@ from dashboard.theme import (
 )
 from dashboard.time_control import render_time_control
 from dashboard.transmission_viz import render_transmission_explorer
+from simulation_utils.paths import load_validated_json
 
 
 @st.cache_data
 def _load_pathogen_profiles() -> dict:
     if not os.path.isfile(PATHOGEN_PATH):
         return {}
-    with open(PATHOGEN_PATH, encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(
+        PATHOGEN_PATH, "pathogen_profiles.schema.json", allowed_roots=(REPO_ROOT,),
+    )
 
 
 @st.cache_data
 def _load_protocols() -> dict:
     if not os.path.isfile(PROTOCOLS_PATH):
         return {}
-    with open(PROTOCOLS_PATH, encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(PROTOCOLS_PATH, "protocols.schema.json", allowed_roots=(REPO_ROOT,))
 
 
 def _detection_label(method: str) -> str:
