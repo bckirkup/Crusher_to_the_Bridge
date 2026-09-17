@@ -32,8 +32,6 @@ from orchestrator_types import (
     COMPLIANCE_COMPLIANT,
     COMPLIANCE_ISOLATED,
     COMPLIANCE_NON_COMPLIANT,
-    SYMPTOM_ASYMPTOMATIC,
-    SYMPTOM_SYMPTOMATIC,
     LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
     DEFAULT_SURFACE_FRACTION,
@@ -57,6 +55,7 @@ from orchestrator_epoch import (
     try_admit_to_quarantine as _try_admit_to_quarantine,
 )
 from crusher_labs import load_config
+from telemetry_buffer.agent_axes import agent_axes_dict
 from telemetry_buffer.schema import make_agent
 from engines.wearable_monitor import (
     WearableDevice,
@@ -72,6 +71,13 @@ from engines.wearable_monitor import (
 )
 from crusher_labs.modalities.wearable import WearableDataStream
 from engines.infection_dynamics_bridge import KorkinShipEngine
+
+_SUSCEPTIBLE_AXES = agent_axes_dict(
+    INFECTION_SUSCEPTIBLE, PRESENTATION_ASYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
+_SYMPTOMATIC_AXES = agent_axes_dict(
+    INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
 
 
 # ── SimulationState tests ────────────────────────────────────────────────
@@ -385,8 +391,8 @@ class TestCheckEscalation:
     def test_lockdown_confinement_scope(self) -> None:
         state = SimulationState()
         agents = [
-            {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
-            {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+            {"agent_id": 0, **_SUSCEPTIBLE_AXES},
+            {"agent_id": 1, **_SYMPTOMATIC_AXES},
         ]
         mock = MagicMock()
         mock.check_quarantine_compliance.return_value = True
@@ -421,7 +427,7 @@ class TestEnginePayloadToSchema:
     def test_normal_agent(self) -> None:
         engine_payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+                {"agent_id": 0, **_SUSCEPTIBLE_AXES,
                  "shedding_rate": 0.0, "location": "Bridge"},
             ],
             "spaces": {
@@ -478,7 +484,7 @@ class TestEnginePayloadToSchema:
     def test_pathogen_metadata_preserved(self) -> None:
         engine_payload = {
             "agents": [
-                {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+                {"agent_id": 0, **_SUSCEPTIBLE_AXES,
                  "pathogen_infections": {"norovirus": {}},
                  "susceptibility_multiplier": {"norovirus": 1.0},
                  "microflora_disruption": 0.5},
@@ -514,7 +520,7 @@ class TestStepQuarantineConfinement:
 
     def test_protocol_driven_confinement(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC, "shedding_rate": 50.0}]
+        agents = [{"agent_id": 0, **_SYMPTOMATIC_AXES, "shedding_rate": 50.0}]
         merged = {"confine_symptomatic_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
 
@@ -523,7 +529,7 @@ class TestStepQuarantineConfinement:
 
     def test_legacy_confirmed_fallback(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC, "shedding_rate": 50.0}]
+        agents = [{"agent_id": 1, **_SYMPTOMATIC_AXES, "shedding_rate": 50.0}]
         merged = {}
         syndromic = self._make_syndromic_mock(compliance=True)
 
@@ -532,7 +538,7 @@ class TestStepQuarantineConfinement:
 
     def test_no_confinement_at_baseline(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 2, "symptom_status": SYMPTOM_SYMPTOMATIC}]
+        agents = [{"agent_id": 2, **_SYMPTOMATIC_AXES}]
         merged = {}
         syndromic = self._make_syndromic_mock(compliance=True)
 
@@ -541,7 +547,7 @@ class TestStepQuarantineConfinement:
 
     def test_refusal_tracked(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 7, "symptom_status": SYMPTOM_SYMPTOMATIC}]
+        agents = [{"agent_id": 7, **_SYMPTOMATIC_AXES}]
         merged = {"confine_symptomatic_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=False)
 
@@ -552,7 +558,7 @@ class TestStepQuarantineConfinement:
     def test_already_isolated_skipped(self) -> None:
         state = SimulationState()
         state.isolated_ids.add(0)
-        agents = [{"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC}]
+        agents = [{"agent_id": 0, **_SYMPTOMATIC_AXES}]
         merged = {"confine_symptomatic_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
 
@@ -562,7 +568,7 @@ class TestStepQuarantineConfinement:
     def test_already_quarantined_skipped(self) -> None:
         state = SimulationState()
         state.quarantined_ids.add(0)
-        agents = [{"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC}]
+        agents = [{"agent_id": 0, **_SYMPTOMATIC_AXES}]
         merged = {"confine_symptomatic_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
 
@@ -581,8 +587,8 @@ class TestSOP009GeneralConfinement:
     def test_confine_all_confines_asymptomatic_agents(self) -> None:
         state = SimulationState()
         agents = [
-            {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
-            {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+            {"agent_id": 0, **_SUSCEPTIBLE_AXES},
+            {"agent_id": 1, **_SYMPTOMATIC_AXES},
         ]
         merged = {"confine_all_to_quarters": True}
         syndromic = self._make_syndromic_mock(compliance=True)
@@ -593,7 +599,7 @@ class TestSOP009GeneralConfinement:
     def test_confine_all_takes_priority_over_symptomatic_only(self) -> None:
         state = SimulationState()
         agents = [
-            {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+            {"agent_id": 0, **_SUSCEPTIBLE_AXES},
         ]
         merged = {
             "confine_all_to_quarters": True,
@@ -607,8 +613,8 @@ class TestSOP009GeneralConfinement:
         state = SimulationState()
         state.isolated_ids.add(0)
         agents = [
-            {"agent_id": 0, "symptom_status": SYMPTOM_SYMPTOMATIC},
-            {"agent_id": 1, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+            {"agent_id": 0, **_SYMPTOMATIC_AXES},
+            {"agent_id": 1, **_SUSCEPTIBLE_AXES},
         ]
         syndromic = self._make_syndromic_mock(compliance=True)
         _confine_all_agents(5, agents, state, syndromic)
@@ -618,7 +624,7 @@ class TestSOP009GeneralConfinement:
 
     def test_confine_all_refusal_tracked(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 4, "symptom_status": SYMPTOM_ASYMPTOMATIC}]
+        agents = [{"agent_id": 4, **_SUSCEPTIBLE_AXES}]
         syndromic = self._make_syndromic_mock(compliance=False)
         _confine_all_agents(5, agents, state, syndromic)
         assert 4 in state.quarantine_refusers
@@ -723,7 +729,7 @@ class TestZoneClosures:
 class TestEdgeCaseBoundaries:
     def test_zero_shedding_agent_not_confined_by_shedding(self) -> None:
         state = SimulationState()
-        agents = [{"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC, "shedding_rate": 0.0}]
+        agents = [{"agent_id": 0, **_SUSCEPTIBLE_AXES, "shedding_rate": 0.0}]
         merged = {}
         syndromic = MagicMock()
         syndromic.check_quarantine_compliance.return_value = True
@@ -744,7 +750,7 @@ class TestEdgeCaseBoundaries:
         state = SimulationState()
         state.isolated_ids = {0, 1, 2}
         agents = [
-            {"agent_id": i, "symptom_status": SYMPTOM_SYMPTOMATIC}
+            {"agent_id": i, **_SYMPTOMATIC_AXES}
             for i in range(3)
         ]
         syndromic = MagicMock()
