@@ -1,5 +1,7 @@
 # COVID first look: replicated Theta on Diamond Princess, scored on Greg Mortimer
 
+> **Status:** Living — current COVID mechanism readout
+
 > **Status:** Findings (2026-09-14). Campaign `covid_first_look_v1`, run on AWS
 > Batch at `main` = `654c0a4` (PR #529). 770 of 770 cells completed, zero
 > failures. Outputs: `telemetry_buffer/observation_model/covid_theta_fit_v2.json`
@@ -1298,6 +1300,50 @@ address: the exponential-arm susceptibility degeneracy, concentrated
 cell/host dose coincidence, and repeat infection events. The confinement repair
 changes the target-side HVAC dose only; it is not a fit, a new calibration
 constant, or a claim that these open items are resolved.
+
+## AERO-CABIN-05: the HVAC route dosed a room once per upstream shedding zone
+
+`_pathway_hvac_airborne` looped over shedding source zones and, for each of
+their declared downstream zones, called `_apply_hvac_downstream_doses` with the
+*whole* standing mass of the target zone. A room with `k` upstream zones that
+happened to host a shedder in that epoch therefore accumulated `k` times the
+dose its own standing air implies, and wrote `k` exposure records per occupant.
+Since the per-pathogen pool is itself transported (`AERO-CABIN-03`), the mass
+standing in a target zone already integrates every upstream source, so the
+repeated passes were double counting, not a mechanism.
+
+**Measured multiplicity before the fix** (Diamond Princess, seed 20200206,
+Θ = 3.16e7, first 20 days, `/home/ubuntu/phase0/hvac_multiplicity_probe.py`):
+mean 5.2 passes per dosed room-hour, maximum 82, and total delivered HVAC dose
+**2.474×** a single pass.
+
+**The fix** inverts the loop: each target zone with positive standing mass is
+inhaled exactly once per epoch, from its own mass. The upstream shedding zones
+are kept as the route gate and as the attribution fallback — the shedder set
+for a target is the union over its upstream zones, and the exposure record
+carries `source_zones` (the sorted list) in place of the former single
+`source_zone`. The dose formula, the confinement factor from `AERO-CABIN-04`,
+the aerosol ventilation factor, `hvac_airborne_scalar` and `cabin_air_mode`
+handling are untouched. No constant is added or moved.
+
+After the fix the same probe reads mean multiplicity 1.0 and
+`delivered_over_one_pass` = **1.0**.
+
+**Burning cell, before and after** (seed 20200206, Θ = 3.16e7, full voyage;
+the before column is the merged-`main` baseline):
+
+| | merged `main` | AERO-CABIN-05 |
+|---|---:|---:|
+| total infection events | 3,452 | 2,771 |
+| distinct infected hosts | 3,449 | 2,769 |
+| `droplet` events | 2,068 | 2,360 |
+| `hvac_airborne` events | 1,384 | 411 |
+| day 15 incidence | 376 | 32 |
+| days 16–18 incidence | 18 / 13 / 18 | 16 / 11 / 21 |
+
+The cell still burns to near-total penetration, so this change corrects an
+inflated route magnitude; it does not make the outbreak partially penetrating,
+and none of the open items recorded under `AERO-CABIN-04` is resolved by it.
 
 ## Reproduction
 

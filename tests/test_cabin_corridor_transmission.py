@@ -413,3 +413,136 @@ class TestCabinCorridorTransmission:
             assert dose >= 0.0
             doses.append(dose)
         assert doses == sorted(doses)
+
+    @staticmethod
+    def _hvac_multiplicity_case(upstream_count: int) -> tuple[float, int]:
+        """One epoch of HVAC dosing with ``upstream_count`` shedding sources."""
+        target_zone = "PC_D6_P_M"
+        source_zones = [f"PC_D6_P_F_{index}" for index in range(upstream_count)]
+        volumes = {zone: 1200.0 for zone in [*source_zones, target_zone]}
+        core = TransmissionCore(
+            rng=np.random.default_rng(11),
+            zone_volumes=volumes,
+            zone_types={zone: "Cabin_Corridor" for zone in volumes},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        )
+        core.initialize_zones(list(volumes))
+        sources = [
+            _agent(index + 1, zone, infected=True)
+            for index, zone in enumerate(source_zones)
+        ]
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[*sources, _agent(100, target_zone)],
+            zone_pathogen_mass={target_zone: 5000.0},
+            hvac_downstream_zones={
+                zone: [target_zone] for zone in source_zones
+            },
+        )
+        exposures = matrix.hvac_downstream_exposures
+        total = sum(exposure["dose"] for exposure in exposures)
+        return total, len(exposures)
+
+    @pytest.mark.parametrize("upstream_count", (1, 2, 4))
+    def test_hvac_dose_is_invariant_to_upstream_source_multiplicity(
+        self,
+        upstream_count: int,
+    ) -> None:
+        one_dose, one_records = self._hvac_multiplicity_case(1)
+        dose, records = self._hvac_multiplicity_case(upstream_count)
+
+        assert records == 1
+        assert one_records == 1
+        assert dose == pytest.approx(one_dose)
+
+    def test_hvac_dose_sensitivity_to_standing_mass(self) -> None:
+        source_zones = ["PC_D6_P_F_0", "PC_D6_P_F_1"]
+        target_zone = "PC_D6_P_M"
+        volumes = {zone: 1200.0 for zone in [*source_zones, target_zone]}
+        doses = []
+        for mass in (0.0, 1000.0, 5000.0, 20000.0):
+            core = TransmissionCore(
+                rng=np.random.default_rng(11),
+                zone_volumes=volumes,
+                zone_types={zone: "Cabin_Corridor" for zone in volumes},
+                cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+            )
+            core.initialize_zones(list(volumes))
+            sources = [
+                _agent(index + 1, zone, infected=True)
+                for index, zone in enumerate(source_zones)
+            ]
+            matrix, _ = core.execute_transmission(
+                epoch=1,
+                agents=[*sources, _agent(100, target_zone)],
+                zone_pathogen_mass={target_zone: mass},
+                hvac_downstream_zones={
+                    zone: [target_zone] for zone in source_zones
+                },
+            )
+            assert len(matrix.hvac_downstream_exposures) == (mass > 0.0)
+            doses.append(
+                matrix.hvac_downstream_exposures[0]["dose"]
+                if matrix.hvac_downstream_exposures
+                else 0.0
+            )
+        assert doses[0] == 0.0
+        assert doses[1] < doses[2] < doses[3]
+        assert all(np.isfinite(dose) and dose >= 0.0 for dose in doses)
+
+    def test_hvac_gate_requires_shedders_and_downstream_edge(self) -> None:
+        source = "PC_D6_P_F"
+        target_zone = "PC_D6_P_M"
+        volumes = {source: 1200.0, target_zone: 1200.0}
+        core = TransmissionCore(
+            rng=np.random.default_rng(11),
+            zone_volumes=volumes,
+            zone_types={zone: "Cabin_Corridor" for zone in volumes},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        )
+        core.initialize_zones(list(volumes))
+        target = _agent(2, target_zone)
+        no_shedder, _ = core.execute_transmission(
+            epoch=1,
+            agents=[target],
+            zone_pathogen_mass={target_zone: 5000.0},
+            hvac_downstream_zones={source: [target_zone]},
+        )
+        assert no_shedder.hvac_downstream_exposures == []
+
+        shedder = _agent(1, source, infected=True)
+        no_edge, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={target_zone: 5000.0},
+            hvac_downstream_zones={source: []},
+        )
+        assert no_edge.hvac_downstream_exposures == []
+
+    def test_hvac_exposure_attributes_all_upstream_sources(self) -> None:
+        source_zones = ["PC_D6_P_F_1", "PC_D6_P_F_0"]
+        target_zone = "PC_D6_P_M"
+        volumes = {zone: 1200.0 for zone in [*source_zones, target_zone]}
+        core = TransmissionCore(
+            rng=np.random.default_rng(11),
+            zone_volumes=volumes,
+            zone_types={zone: "Cabin_Corridor" for zone in volumes},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        )
+        core.initialize_zones(list(volumes))
+        sources = [
+            _agent(20, source_zones[0], infected=True),
+            _agent(10, source_zones[1], infected=True),
+        ]
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[*sources, _agent(100, target_zone)],
+            zone_pathogen_mass={target_zone: 5000.0},
+            hvac_downstream_zones={
+                source_zones[0]: [target_zone],
+                source_zones[1]: [target_zone],
+            },
+        )
+        exposure = matrix.hvac_downstream_exposures[0]
+        assert exposure["source_zones"] == sorted(source_zones)
+        assert exposure["source_agent_ids"] == [10, 20]
