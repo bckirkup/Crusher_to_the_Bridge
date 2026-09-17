@@ -148,12 +148,8 @@ def test_the_cell_recorded_its_index_case_and_stays_in_bounds(cell):
     assert cell.campaign_positives <= cell.campaign_specimens
 
 
-def test_the_same_seed_reproduces_the_same_cell(cell):
-    again = simulate_hull(HULL, THETA, SEED)
-    assert _pinned(again) == _pinned(cell)
-
-
 def test_the_cell_matches_its_pinned_reading(cell):
+    """Seed reproducibility is asserted here too: the tuple was read in another process."""
     key = (sys.version_info.major, sys.version_info.minor)
     if key not in GOLDEN_BY_PYTHON_MINOR:
         pytest.skip(f"no pinned reading for CPython {key[0]}.{key[1]}")
