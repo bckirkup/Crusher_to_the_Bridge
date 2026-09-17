@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import shutil
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
@@ -18,12 +19,16 @@ from typing import Any  # noqa: E402
 from picard_framework.pathogen_overrides import (  # noqa: E402
     load_pathogen_bundle,
 )
+from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
+    campaign_runner as _cr,
+)
 from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa: E402
     ShardBundle,
     _campaign_parser,
     _ensure_clock_arm,
     clear_failed_artifacts,
     compute_derived_metrics,
+    engine_git_sha,
     extract_timeseries,
     failed_runs,
     generate_tier_runs,
@@ -639,6 +644,101 @@ def test_declared_sanitary_visit_mode_is_recorded_in_parameters(mode: str) -> No
     assert parameters_from_spec(
         {k: v for k, v in spec.items() if k != "campaign_parameters"},
     )["sanitary_visit_mode"] == mode
+
+
+def _spec_for_sha(parameters: dict[str, Any] | None = None) -> dict[str, Any]:
+    return make_picard_spec(
+        "sha_probe",
+        platform="destroyer_baseline",
+        bundle="active_profiles",
+        pathogen_overrides=None,
+        config_overrides=None,
+        seed=1,
+        epochs=2,
+        num_agents=20,
+        parameters=parameters,
+    )
+
+
+def test_engine_git_sha_prefers_the_stamped_env_var(monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_GIT_SHA", "sha-under-test")
+    _cr.engine_git_sha.cache_clear()
+    try:
+        assert engine_git_sha() == "sha-under-test"
+    finally:
+        _cr.engine_git_sha.cache_clear()
+
+
+def test_engine_git_sha_treats_unknown_env_as_unstamped(monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_GIT_SHA", "unknown")
+    _cr.engine_git_sha.cache_clear()
+    try:
+        resolved = engine_git_sha()
+    finally:
+        _cr.engine_git_sha.cache_clear()
+    # Falls through to the git lookup rather than reporting "unknown" by
+    # reading the env default back.
+    assert resolved != "unknown"
+
+
+def test_engine_git_sha_falls_back_to_git_rev_parse(monkeypatch) -> None:
+    monkeypatch.delenv("ENGINE_GIT_SHA", raising=False)
+    _cr.engine_git_sha.cache_clear()
+    try:
+        resolved = engine_git_sha()
+    finally:
+        _cr.engine_git_sha.cache_clear()
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=_cr.REPO_ROOT,
+        capture_output=True, text=True, check=True,
+    ).stdout.strip()
+    assert resolved == head or resolved == head + "-dirty"
+
+
+def test_engine_git_sha_never_raises_without_git(monkeypatch) -> None:
+    monkeypatch.delenv("ENGINE_GIT_SHA", raising=False)
+
+    def _boom(*_a: Any, **_k: Any) -> Any:
+        raise FileNotFoundError("git missing")
+
+    monkeypatch.setattr(_cr.subprocess, "run", _boom)
+    _cr.engine_git_sha.cache_clear()
+    try:
+        assert engine_git_sha() == "unknown"
+    finally:
+        _cr.engine_git_sha.cache_clear()
+
+
+def test_campaign_parameters_record_the_engine_sha(monkeypatch) -> None:
+    monkeypatch.setenv("ENGINE_GIT_SHA", "sha-under-test")
+    _cr.engine_git_sha.cache_clear()
+    try:
+        minimal = _spec_for_sha()
+        explicit = _spec_for_sha(parameters={"custom": 1})
+        supplied = _spec_for_sha(
+            parameters={"engine_git_sha": "caller-supplied"},
+        )
+        assert minimal["campaign_parameters"]["engine_git_sha"] == (
+            "sha-under-test"
+        )
+        assert explicit["campaign_parameters"]["engine_git_sha"] == (
+            "sha-under-test"
+        )
+        # An explicitly supplied revision is never overwritten.
+        assert supplied["campaign_parameters"]["engine_git_sha"] == (
+            "caller-supplied"
+        )
+        # The stamp survives into the archived summary's parameters block
+        # through both parameters_from_spec branches.
+        assert parameters_from_spec(minimal)["engine_git_sha"] == (
+            "sha-under-test"
+        )
+        derived = parameters_from_spec(
+            {k: v for k, v in minimal.items() if k != "campaign_parameters"},
+        )
+        assert derived["engine_git_sha"] == "sha-under-test"
+    finally:
+        _cr.engine_git_sha.cache_clear()
 
 
 def _sample_history() -> list[dict]:
