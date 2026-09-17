@@ -711,12 +711,15 @@ def test_stage_tag_propagates_to_campaign_and_filename() -> None:
     assert plain["campaign"] != manifest["campaign"]
 
 
-def test_built_arms_pin_the_air_model_and_share_one_seed_block() -> None:
+@pytest.mark.parametrize("stage_tag", ["s2r", "s2e"])
+def test_built_arms_pin_the_air_model_and_share_one_seed_block(
+    stage_tag: str,
+) -> None:
     mod = _builder()
     arms = ["off", "3e-9", "1e-8", "3e-8", "1e-7"]
     seed_blocks = set()
     for arm in arms:
-        manifest = mod.build(arm=arm, cabin_emission=True, stage_tag="s2r")
+        manifest = mod.build(arm=arm, cabin_emission=True, stage_tag=stage_tag)
         for tier in manifest["tiers"].values():
             overrides = tier["config_overrides"]
             assert overrides["transmission"]["cabin_air_mode"] == (
