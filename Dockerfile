@@ -46,4 +46,4 @@ COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
 RUN useradd --create-home --uid 10001 campaign && chown -R campaign:campaign /app
 USER campaign
 
-ENTRYPOINT ["python3", "picard_framework/runs/mega_cruise_campaign/campaign_runner.py"]
+ENTRYPOINT ["python3", "-m", "picard_framework.runs.mega_cruise_campaign.campaign_runner"]

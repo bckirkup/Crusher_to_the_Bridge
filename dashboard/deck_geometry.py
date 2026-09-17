@@ -1,13 +1,12 @@
 """Ship-local deck geometry and contamination metrics (meters, not lat/lon)."""
 from __future__ import annotations
 
-import os
-import sys
 from collections import defaultdict
 from typing import Any, Iterator
 
 from dashboard.loaders import PlatformBundle
 from dashboard.paths import ALL_DECKS_LABEL
+from scripts.blueprint_shapes import blueprint_compartment
 from telemetry_buffer.agent_axes import (
     agent_has_symptomatic_presentation,
     resolve_agent_axes,
@@ -28,11 +27,6 @@ from telemetry_buffer.fields import (
     record_spaces,
     zone_pathogen_mass,
 )
-
-_SCRIPTS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "scripts")
-if _SCRIPTS not in sys.path:
-    sys.path.insert(0, _SCRIPTS)
-from blueprint_shapes import blueprint_compartment  # noqa: E402
 
 
 def zone_metric(record: dict[str, Any], zone_id: str, color_mode: str) -> float:

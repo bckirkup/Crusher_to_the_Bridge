@@ -5,10 +5,10 @@ campaign_runner.py — Spec generation for mega-cruise campaign runs
 ``campaign_execution.py``; ``main`` and related symbols are re-exported.
 
 Usage (from repo root):
-    python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --dry-run
-    python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --tier t1
-    python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --resume
-    python3 picard_framework/runs/mega_cruise_campaign/campaign_runner.py --smoke
+    python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --dry-run
+    python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --tier t1
+    python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --resume
+    python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --smoke
 
 Windows:
     run_campaign.bat --tier t1
@@ -20,46 +20,44 @@ import argparse
 import json
 import os
 import shutil
-import sys
 from functools import lru_cache
 from itertools import product
 from pathlib import Path
 from types import MappingProxyType, SimpleNamespace
 from typing import Any, Iterator, Mapping, Sequence
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(REPO_ROOT))
+import yaml
 
-import yaml  # noqa: E402
-
-from picard_framework.analysis.sentinel.wastewater_assays import (  # noqa: E402
+from picard_framework.analysis.sentinel.wastewater_assays import (
     DEFAULT_ASSAY_MODE,
 )
-from picard_framework.pathogen_overrides import (  # noqa: E402
+from picard_framework.pathogen_overrides import (
     isolate_arm_overrides,
 )
-from picard_framework.runs.mega_cruise_campaign import (  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign import (
     boarding_axis,
     sentinel_recovery,
     variant_campaign,
 )
-from picard_framework.runs.mega_cruise_campaign.boarding_axis import (  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign.boarding_axis import (
     IndexCaseAxis,
 )
-from picard_framework.runs.mega_cruise_campaign.tier_iterators import (  # noqa: E402
+from picard_framework.runs.mega_cruise_campaign.tier_iterators import (
     dispatch_standard_or_calibration,
 )
-from simulation_utils.paths import (  # noqa: E402
+from simulation_utils.paths import (
     is_path_under_base,
     prepare_output_directory,
     resolve_child_path,
     validate_path_component,
     validated_open,
 )
-from simulation_utils.platform_complement import (  # noqa: E402
+from simulation_utils.platform_complement import (
     declared_total,
     declaring_platforms,
 )
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
