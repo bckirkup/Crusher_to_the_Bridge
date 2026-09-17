@@ -38,7 +38,12 @@ from crusher_labs.stoplight import (
     stoplight_from_disruption,
     stoplight_from_rdt,
 )
-from simulation_utils.paths import prepare_output_directory, resolve_repo_path, validated_open
+from simulation_utils.paths import (
+    load_validated_json,
+    prepare_output_directory,
+    resolve_repo_path,
+    validated_open,
+)
 from telemetry_buffer.agent_axes import clinical_axes_for_notebook
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -89,8 +94,7 @@ def load_logging_profile(
             "log_qc_validation": True,
         }), {}
 
-    with validated_open(cfg_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        config = json.load(fh)
+    config = load_validated_json(cfg_path, "logging_profile.schema.json", allowed_roots=(REPO_ROOT,))
 
     fidelity_name = config.get("logging_fidelity", FIDELITY_HIGH)
     levels = config.get("fidelity_levels", {})

@@ -23,6 +23,7 @@ from dashboard.paths import (
     SPATIAL_LAYOUT_JSON,
 )
 from simulation_utils.paths import (
+    load_validated_json,
     resolve_child_path,
     resolve_repo_path,
     safe_listdir,
@@ -34,6 +35,9 @@ from telemetry_buffer.fields import (
     RECORD_CONTACT_TRACING,
     record_spaces,
 )
+
+SPATIAL_LAYOUT_SCHEMA = "spatial_layout.schema.json"
+PICARD_RUN_SPEC_SCHEMA = "picard_run_spec.schema.json"
 
 
 @dataclass
@@ -60,10 +64,17 @@ def list_platform_ids() -> list[str]:
     return ids
 
 
-def _load_json(path: str) -> dict[str, Any]:
+def _load_json(path: str, schema_name: str | None = None) -> dict[str, Any]:
+    """Read a repository JSON asset, or ``{}`` when the file is absent.
+
+    Assets with a contract under ``schemas/`` pass ``schema_name`` so drifted
+    files fail loudly instead of rendering as empty defaults.
+    """
     if not os.path.isfile(path):
         return {}
-    with open(path, encoding="utf-8") as fh:
+    if schema_name is not None:
+        return load_validated_json(path, schema_name, allowed_roots=(REPO_ROOT,))
+    with validated_open(path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         return json.load(fh)
 
 
@@ -105,7 +116,7 @@ def _platform_from_config() -> str | None:
 def _platform_from_picard_spec(spec_path: str) -> str | None:
     if not os.path.isfile(spec_path):
         return None
-    data = _load_json(spec_path)
+    data = _load_json(spec_path, PICARD_RUN_SPEC_SCHEMA)
     pid = (data.get("catalog") or {}).get("platform_id")
     return str(pid) if pid else None
 
@@ -115,7 +126,9 @@ def _zone_ids_for_platform(pid: str) -> set[str]:
     manifest = _load_json(mpath)
     zone_ids = set(manifest.get("zone_ids") or [])
     if not zone_ids:
-        layout = _load_json(os.path.join(platform_dir(pid), SPATIAL_LAYOUT_JSON))
+        layout = _load_json(
+            os.path.join(platform_dir(pid), SPATIAL_LAYOUT_JSON), SPATIAL_LAYOUT_SCHEMA,
+        )
         zone_ids = {z["id"] for z in layout.get("zones", [])}
     return zone_ids
 
@@ -199,8 +212,8 @@ def _blueprint_bg_path(plan_path: str | None, bg_path: str) -> str | None:
 
 def load_platform_bundle(platform_id: str) -> PlatformBundle:
     pdir = platform_dir(platform_id)
-    layout = _load_json(os.path.join(pdir, SPATIAL_LAYOUT_JSON))
-    airflow = _load_json(os.path.join(pdir, "air_flow_paths.json"))
+    layout = _load_json(os.path.join(pdir, SPATIAL_LAYOUT_JSON), SPATIAL_LAYOUT_SCHEMA)
+    airflow = _load_json(os.path.join(pdir, "air_flow_paths.json"), "air_flow_paths.schema.json")
     manifest = _load_json(os.path.join(pdir, "deck_manifest.json"))
     if not manifest:
         manifest = {
@@ -268,11 +281,10 @@ def parse_fleet_output_root(fleet_config_path: str) -> str:
     except ValueError:
         return ""
     try:
-        with validated_open(
-            fleet_config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as fh:
-            raw = json.load(fh)
-    except (OSError, ValueError, json.JSONDecodeError):
+        raw = load_validated_json(
+            fleet_config_path, "presidio_fleet_config.schema.json", allowed_roots=(REPO_ROOT,),
+        )
+    except (OSError, ValueError):
         return ""
     output_root = (raw.get("run") or {}).get("output_root", "")
     if not output_root:
@@ -310,7 +322,7 @@ def detect_retention_mode(history: list[dict[str, Any]]) -> str:
 def load_voyage_config(platform_id: str) -> dict[str, Any]:
     """Load platform voyage_config.json if present."""
     path = os.path.join(platform_dir(platform_id), "voyage_config.json")
-    return _load_json(path)
+    return _load_json(path, "voyage_config.schema.json")
 
 
 def extract_run_metadata(

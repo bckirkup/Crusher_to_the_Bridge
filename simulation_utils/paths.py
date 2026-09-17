@@ -24,9 +24,13 @@ annotated as guarded.
 
 from __future__ import annotations
 
+import json
 import os
 import re
-from typing import BinaryIO, TextIO
+from functools import lru_cache
+from typing import Any, BinaryIO, TextIO
+
+import jsonschema
 
 _PATH_COMPONENT_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 
@@ -53,6 +57,12 @@ def repo_root() -> str:
 
 
 REPO_ROOT = repo_root()
+
+SCHEMA_DIR = os.path.join(REPO_ROOT, "schemas")
+
+
+class SchemaValidationError(ValueError):
+    """A JSON document violates the repository schema it is loaded under."""
 
 
 def _real(path: str) -> str:
@@ -230,3 +240,54 @@ def validated_open(
         newline=newline,
         allowed_roots=allowed_roots,
     )
+
+
+@lru_cache(maxsize=None)
+def load_schema(schema_name: str) -> dict[str, Any]:
+    """Return the parsed ``schemas/<schema_name>`` document, cached per process."""
+    schema_path = resolve_child_path(SCHEMA_DIR, schema_name)
+    with validated_open(schema_path, "r", allowed_roots=(SCHEMA_DIR,), encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def _describe_violation(schema_name: str, source: str, error: jsonschema.ValidationError) -> str:
+    location = "/".join(str(part) for part in error.absolute_path) or "<root>"
+    return f"{source} violates schemas/{schema_name} at {location}: {error.message}"
+
+
+def validate_json_document(
+    document: Any,
+    schema_name: str,
+    *,
+    source: str = "<document>",
+) -> Any:
+    """Validate *document* against ``schemas/<schema_name>`` and return it.
+
+    Raises :class:`SchemaValidationError` (a ``ValueError``) naming the source,
+    the schema, and the offending location so callers that already treat
+    ``ValueError`` as "unusable input" keep their existing fallbacks.
+    """
+    schema = load_schema(schema_name)
+    try:
+        jsonschema.validate(instance=document, schema=schema)
+    except jsonschema.ValidationError as exc:
+        raise SchemaValidationError(_describe_violation(schema_name, source, exc)) from exc
+    return document
+
+
+def load_validated_json(
+    path: str,
+    schema_name: str,
+    *,
+    allowed_roots: tuple[str, ...],
+) -> Any:
+    """Open *path* under *allowed_roots*, parse it, and validate it against a schema.
+
+    This is the one loader every runtime consumer of a schema-backed asset
+    (platform layouts, pathogen bundles, run specs, protocol/cost/logging
+    configs, ...) should use, so the contracts in ``schemas/`` are enforced on
+    the path the simulation actually runs rather than only offline.
+    """
+    with validated_open(path, "r", allowed_roots=allowed_roots, encoding="utf-8") as fh:
+        document = json.load(fh)
+    return validate_json_document(document, schema_name, source=path)

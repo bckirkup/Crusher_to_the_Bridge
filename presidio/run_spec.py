@@ -4,11 +4,10 @@ PresidioRunSpec — fleet-level immutable configuration for multi-cruise runs.
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import load_validated_json, resolve_repo_path
 
 
 @dataclass
@@ -32,8 +31,9 @@ class PresidioRunSpec:
     @classmethod
     def from_fleet_json(cls, repo_root: str, fleet_config_path: str) -> PresidioRunSpec:
         fleet_config_path = resolve_repo_path(repo_root, fleet_config_path)
-        with validated_open(fleet_config_path, allowed_roots=(repo_root,), encoding="utf-8") as fh:
-            raw = json.load(fh)
+        raw = load_validated_json(
+            fleet_config_path, "presidio_fleet_config.schema.json", allowed_roots=(repo_root,),
+        )
         fleet = raw.get("fleet", {})
         catalog = raw.get("catalog", {})
         run = raw.get("run", {})

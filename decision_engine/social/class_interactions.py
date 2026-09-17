@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any
 
-from simulation_utils.paths import REPO_ROOT, validated_open
+from simulation_utils.paths import REPO_ROOT, load_validated_json
 
 
 @dataclass
@@ -16,8 +15,7 @@ class ClassInteractionMatrix:
 
     @classmethod
     def from_json(cls, path: str) -> ClassInteractionMatrix:
-        with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-            data = json.load(fh)
+        data = load_validated_json(path, "class_interactions.schema.json", allowed_roots=(REPO_ROOT,))
         return cls(pairs=data.get("pairs", []))
 
     @classmethod

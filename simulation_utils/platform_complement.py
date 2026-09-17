@@ -20,10 +20,9 @@ inferred from the id.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 PLATFORMS = REPO_ROOT / "data" / "platforms"
@@ -54,13 +53,10 @@ def _declared_block(platform_id: str) -> dict[str, int] | None:
             f"{platform_id} has no spatial_layout.json under {PLATFORMS}: a "
             "run cannot walk a hull the repository does not carry",
         )
-    with validated_open(
-        str(layout),
-        "r",
-        allowed_roots=(str(PLATFORMS),),
-        encoding="utf-8",
-    ) as handle:
-        complement = json.load(handle).get("nominal_complement")
+    document = load_validated_json(
+        str(layout), "spatial_layout.schema.json", allowed_roots=(str(PLATFORMS),),
+    )
+    complement = document.get("nominal_complement")
     return complement if isinstance(complement, dict) else None
 
 

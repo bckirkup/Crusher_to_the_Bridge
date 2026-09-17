@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-import json
 import os
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
 import numpy as np
 
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -51,8 +50,7 @@ class AgentProfile:
 
 
 def load_agent_profile_bundle(path: str) -> dict[str, Any]:
-    with validated_open(path, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        return json.load(fh)
+    return load_validated_json(path, "agent_profile.schema.json", allowed_roots=(REPO_ROOT,))
 
 
 def _build_device_map(

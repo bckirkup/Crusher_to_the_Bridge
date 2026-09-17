@@ -14,7 +14,6 @@ of the configured fidelity tier.
 
 from __future__ import annotations
 
-import json
 import os
 from typing import Any
 
@@ -32,7 +31,7 @@ from crusher_labs.stoplight import (
     stoplight_from_wearable_fleet_rates,
 )
 from engines.sim_clock import SimClock, config_epochs_for_hours
-from simulation_utils.paths import validated_open
+from simulation_utils.paths import load_validated_json
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -587,6 +586,5 @@ def load_protocols(
     clock: SimClock | None = None,
 ) -> list[StandingProtocol]:
     """Load standing protocols from ``protocols.json``."""
-    with validated_open(config_path, "r", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-        cfg = json.load(fh)
+    cfg = load_validated_json(config_path, "protocols.schema.json", allowed_roots=(REPO_ROOT,))
     return [StandingProtocol(p, clock=clock) for p in cfg.get("protocols", [])]
