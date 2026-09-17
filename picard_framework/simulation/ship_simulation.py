@@ -939,15 +939,13 @@ class ShipSimulation:
             return
         if self.pathogen_pool_transport == "airflow" and self.pathogen_profiles:
             tx_core = self.tx_core
-            if tx_core is None:
-                self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
-                    self.engine.zone_pathogen_mass,
-                )
-                return
             for pathogen_id in self.pathogen_profiles:
                 pre = self.engine.get_pathogen_zone_mass(pathogen_id)
-                block_in = fold_stateroom_mass(pre, tx_core.compartment_parent)
-                shares_by_block = tx_core.stateroom_air_shares_by_block()
+                block_in = pre
+                shares_by_block: dict[str, dict[str, float]] = {}
+                if tx_core is not None:
+                    block_in = fold_stateroom_mass(pre, tx_core.compartment_parent)
+                    shares_by_block = tx_core.stateroom_air_shares_by_block()
                 masses = self.contam_engine.transport_step(
                     block_in,
                     natural_decay_rate=0.0,
