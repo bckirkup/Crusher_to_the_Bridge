@@ -735,3 +735,109 @@ def test_credited_event_mass_scales_with_pending_mass() -> None:
 
     assert double == pytest.approx(2.0 * single)
     assert single > 0.0
+
+
+def _deck_agent(agent_id: int, deck: str, mates: set[int]) -> KorkinAgent:
+    agent = _agent(agent_id)
+    agent.home_zone = deck
+    agent.current_location = deck
+    agent.cabin_mate_ids = frozenset(mates - {agent_id})
+    return agent
+
+
+def _emesis_cabin_concentration(
+    *,
+    block_volume: float,
+    cabins: list[list[int]],
+    mass: float,
+) -> float:
+    """``concentration_per_m3`` recorded for one cabin-venue emesis event.
+
+    ``cabins`` holds one berth list per stateroom in the block; the dose is
+    emitted under the first cabin's compartment key and measured there.
+    """
+    deck = "Cabin_Deck"
+    core = TransmissionCore(
+        rng=np.random.default_rng(19),
+        zone_volumes={deck: block_volume},
+        pathogen_profiles={PATHOGEN: _profile()},
+        zone_types={deck: "Cabin_Corridor"},
+        clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+    )
+    core.initialize_zones([deck])
+    occupants = [
+        _deck_agent(agent_id, deck, set(cabin))
+        for cabin in cabins
+        for agent_id in cabin
+    ]
+    core.register_cabin_berths(occupants)
+    compartment = f"{deck}{CABIN_COMPARTMENT_SEPARATOR}{cabins[0][0]}"
+    shedder = _agent(99, infected=True)
+    core._emesis_aerosol_emitted_by_pathogen[PATHOGEN] = {
+        compartment: [(shedder, mass)],
+    }
+    matrix = ContactTracingMatrix(epoch=0)
+    profile = {**_profile(), "airborne_emission_mode": "emesis_conditioned"}
+    core._pathway_emesis_aerosol(
+        {deck: occupants},
+        {},
+        matrix,
+        None,
+        pathogen_id=PATHOGEN,
+        profile=profile,
+    )
+    rows = list(matrix.emesis_aerosol_exposures)
+    assert rows
+    assert {row["target_zone"] for row in rows} == {compartment}
+    concentrations = {row["concentration_per_m3"] for row in rows}
+    assert len(concentrations) == 1
+    assert core._air_unit_volume(compartment) == pytest.approx(
+        block_volume * len(cabins[0]) / sum(len(c) for c in cabins)
+    )
+    return concentrations.pop()
+
+
+def test_emesis_cabin_dose_uses_berth_share_volume() -> None:
+    """A compartment event dilutes into its berth share, not 100 m3."""
+    concentration = _emesis_cabin_concentration(
+        block_volume=80.0, cabins=[[1, 2], [3, 4]], mass=1e6,
+    )
+    assert concentration == pytest.approx(1e6 / 40.0, rel=1e-9)
+    assert concentration != pytest.approx(1e6 / 100.0, rel=1e-9)
+
+
+def test_emesis_public_zone_dose_unchanged_by_partition() -> None:
+    """A plain zone key still dilutes into the declared zone volume."""
+    core = _core(clock=SimClock(epoch_duration_hours=1.0, mode="hours"))
+    shedder = _agent(1, infected=True)
+    core._emesis_aerosol_emitted_by_pathogen[PATHOGEN] = {
+        ZONE: [(shedder, 1e6)],
+    }
+    target = _agent(2)
+    matrix = ContactTracingMatrix(epoch=0)
+    profile = {**_profile(), "airborne_emission_mode": "emesis_conditioned"}
+    core._pathway_emesis_aerosol(
+        {ZONE: [target]},
+        {},
+        matrix,
+        None,
+        pathogen_id=PATHOGEN,
+        profile=profile,
+    )
+    rows = list(matrix.emesis_aerosol_exposures)
+    assert len(rows) == 1
+    assert rows[0]["concentration_per_m3"] == pytest.approx(
+        1e6 / 50.0, rel=1e-9,
+    )
+
+
+def test_emesis_cabin_concentration_doubles_when_block_berths_double() -> None:
+    """A second registered cabin halves the first's share of the same
+    block volume, so the same emitted mass concentrates twice."""
+    single = _emesis_cabin_concentration(
+        block_volume=80.0, cabins=[[1, 2]], mass=1e6,
+    )
+    doubled = _emesis_cabin_concentration(
+        block_volume=80.0, cabins=[[1, 2], [3, 4]], mass=1e6,
+    )
+    assert doubled == pytest.approx(single * 2.0, rel=1e-9)

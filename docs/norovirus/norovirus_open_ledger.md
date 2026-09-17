@@ -3428,6 +3428,7 @@ Roughly in dependency order.
     stage-2 baselines; `1e-7` re-runs as the measured upper bracket of the
     crossing under the corrected dilution. Arm selection unchanged; nothing
     chosen on distance to any anchor. **Stage 2 is measured — item 46.**
+    **Closed — item 50.**
 
 46. **Flush sweep stage 2 is measured (6,000 runs, 0 failed, AERO-CABIN-02
     engine): the resolvability crossing is hull/length-dependent — classic
@@ -3584,6 +3585,25 @@ Roughly in dependency order.
     `telemetry_buffer/observation_model/flush_sweep_v1_s2r.json`,
     `docs/norovirus/flush_sweep_v1_stage2r_readout.md`,
     `docs/norovirus/flush_sweep_v1_stage2r_findings.md`.
+
+50. **Item 45 closed: the emesis-aerosol cabin dose takes the berth-share
+    partition.** `_pathway_emesis_aerosol` now resolves the emission key's
+    volume through `_air_unit_volume` — the same `V_block × berths / Σberths`
+    partition `_dose_flush_cabin` has used since item 45 — and the invented
+    constant `EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0` is deleted; no
+    new constant is introduced and no volume is invented for a cabin nobody
+    measured. Public-zone emesis is numerically unchanged: for a
+    non-compartment key `_air_unit_volume` returns `zone_volumes.get(name,
+    100.0)`, the identical fallback the deleted constant supplied. For a
+    `zone::cabinN` key the in-room concentration rises by 100/partition —
+    the same factors item 45 measured for the flush route: ≈×2.32 classic,
+    ×2.43 spirit, ×2.19 expedition on passenger two-berth staterooms, wider
+    on crew blocks (expedition two-berth ×1.67–6.44, spirit three-berth
+    ×1.96–15.3, classic three-berth ×1.86–11.5). **Every archive produced
+    with emesis on — which is every norovirus arm to date, including
+    `s2r`/item 49 — predates this repair and is superseded as a
+    measurement of the current engine**; a re-measurement is declared
+    separately. Nothing is fitted and no anchor was consulted.
 
 ## 5. Held fixed by assumption
 
