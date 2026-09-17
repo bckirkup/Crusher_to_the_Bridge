@@ -1176,6 +1176,90 @@ merged `main` with #561 plus the two design files); S3 prefixes
 `campaign/covid_first_look_v6/` and `campaign/covid_first_look_v6c/`. v4 and
 v5 outputs untouched.
 
+### Result: the transport repair does not change the answer
+
+1,540 cells, zero Batch failures. Diamond Princess fit medians over the 20
+seeds; observed anchors are **197 onsets, 34 before 6 Feb, 634 positives**:
+
+| Theta | onsets | before d17 | positives | asymp | P(takeoff) | mean loss | median loss |
+|---:|---:|---:|---:|---:|---:|---:|---:|
+| 1e7 | 1.5 | 1 | 2 | 0.25 | 0.25 | 73.1 | 91.6 |
+| 3.16e7 | 2 | 1 | 2 | 0.00 | 0.30 | 65.9 | 83.6 |
+| 1e8 | 136.5 | 1 | 113 | 0.88 | 0.65 | 43.4 | 11.5 |
+| 3.16e8 | 63.5 | 1 | 61 | 0.89 | 0.55 | 45.6 | 18.8 |
+| 1e9 | 1355.5 | 3 | 518 | 0.90 | 0.85 | 17.7 | 9.7 |
+| 3.16e9 | 1579 | 3 | 460.5 | 0.89 | 0.80 | 26.1 | 10.8 |
+| 1e10 | 1980.5 | 171 | 395 | 0.88 | 0.90 | 18.1 | 10.5 |
+| 3.16e10 | 2078 | 612 | 394.5 | 0.89 | 1.00 | 9.6 | 10.0 |
+| 1e11 | 2395.5 | 1691.5 | 289.5 | 0.89 | 1.00 | 9.4 | 9.0 |
+| **3.16e11** | **2429.5** | **2056.5** | **259** | 0.90 | 1.00 | **9.2** | 8.7 |
+| 1e12 | 2508.5 | 2182 | 225 | 0.88 | 1.00 | 9.6 | 9.2 |
+
+**This is v5's surface within seed noise.** The objective selects the same
+**3.16e11** (bootstrap 0.686, not boundary-pinned) and the selected cell is the
+same whole-ship burn: 2,429 onsets with **2,056 before day 17 against 34
+observed**, i.e. the outbreak is over before the 5 Feb confinement it was meant
+to test. v5 read 2,458 / 2,089 at the same point. The implied per-copy risk
+interval at the selection is **5.5e3 – 7.5e7** against the grade-B emission
+bracket (4,200–5.8e7 copies/epoch) — a per-copy risk far above 1, which is not
+a value a risk can take. No point on five decades both ignites from one index
+case and matches the trajectory.
+
+### v6c: the ducted between-cabin route is worth nothing
+
+The control removes only between-zone pool transport, on the same repaired
+numerics and the same compartments:
+
+| Theta | v6 mean loss | v6c mean loss | v6 onsets | v6c onsets |
+|---:|---:|---:|---:|---:|
+| 1e9 | 17.7 | 30.5 | 1355.5 | 1077 |
+| 3.16e10 | 9.6 | 9.5 | 2078 | 2080 |
+| **3.16e11** | **9.2** | **9.1** | 2429.5 | 2437 |
+| 1e12 | 9.6 | 9.3 | 2508.5 | 2509 |
+
+v6c selects the same **3.16e11** with mean loss 9.05 against v6's 9.22 — a
+difference smaller than the seed spread — and the same 2,437 onsets, 2,080 of
+them before day 17. **So the repaired, mass-conserving, genuinely-live duct
+network contributes no material share of the Diamond Princess outbreak**, which
+is the full-campaign form of the single-cell result in `AERO-CABIN-03` (mass
+reaches 188 zones that never hosted a shedder, and infects nobody there). The
+mid-grid differences (1e9, 3.16e9) are extinction-mix noise on 20 seeds, not a
+transport signal: they change sign between neighbouring points.
+
+Held-out Greg Mortimer at the selected Theta repeats v5: campaign positives
+median **125 against 128 observed** (covid.H1 39 hit / 11 miss), P(takeoff)
+1.00, but 52.5 of 62 onsets fall before day 17 and the asymptomatic share is
+**0.03 against 0.81** (covid.H2 0/50; covid.H3 above the cross-ship IQR in every
+seed). A matched count produced by burning the hull early is reported, not
+claimed.
+
+### What v6 says
+
+**The airborne subsystem is now mechanistically defensible and the fit is
+still absent — so what is missing is a route, not a number.** Three candidate
+mechanisms have now been repaired or excluded on the air side: the pooled
+cabin block (over-mixing, `AERO-CABIN-01`), absent per-pathogen transport, and
+a transport integrator that created mass. With all three corrected, one index
+case cannot sustain the outbreak at any physically admissible Theta, and the
+declared duct network carries a negligible share. Ducted air between
+staterooms is therefore not the Diamond Princess route in this model, and no
+further Theta grid on this subsystem will find it.
+
+**The open lever is the non-airborne between-cabin path**, in the order the
+evidence ranks it: crew service entering staterooms (meal and linen delivery
+during confinement — the model's crew are exempt and working, and crew were
+74% of campaign positives in the leak/drain trace), corridor transit and
+shared sanitary fixtures, and fomite/surface coupling across the cabin
+boundary. Each is a declared mechanism that the current spec either omits or
+routes through the cabin partition that now blocks it. This is a mechanism
+audit, not a fit.
+
+**Nothing above is retracted, and nothing earlier is rehabilitated.** v1–v4 and
+the sweep ran the pooled block with dead transport; v5 ran compartments with
+dead transport and the mass-creating step. v6 is the first surface on the
+repaired subsystem, and it supersedes v5 as the current COVID calibration
+statement.
+
 ## Reproduction
 
 ```bash

@@ -3504,6 +3504,17 @@ Roughly in dependency order.
     norovirus (zero continuous emission share on the `emesis_conditioned`
     profile); the transport repair is not. Stage 2 stands as a measurement
     of the dead-drift engine only.
+    **Size of the repaired route, measured on COVID
+    (`covid_first_look_v6` / `v6c`, 1,540 Batch cells):** with the pools live
+    and the transport exact, a paired control that removes only between-zone
+    pool transport selects the same Theta (3.16e11) with mean loss 9.05
+    against 9.22 and the same voyage total (2437 vs 2430 onsets). The
+    declared duct network therefore carries no material share of the SARS-CoV-2
+    outbreak on `mega_cruise_5000` — the route is now correct and small. This
+    bounds what a norovirus ventilation or filter-efficiency conclusion may
+    attribute to it, but it does not substitute for the norovirus refit: the
+    withdrawal above stands, and no norovirus dose, route share, or anchor
+    result is restored by it.
 
 48. **Item 46(b) repaired: cabin-venue flush and emesis mass now reaches the
     zone pool.** The epoch drain in `orchestrator_epoch` resolves each
