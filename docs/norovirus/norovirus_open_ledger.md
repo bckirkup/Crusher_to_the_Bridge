@@ -3619,8 +3619,10 @@ Roughly in dependency order.
     contrast for the emesis berth-share partition (item 49 measured the
     cabin-drain repair the same way). No arm is selected, nothing is
     chosen on distance to any anchor, and the `[1e-9, 1e-3]` span is
-    untouched. Campaign image tag and job-definition revision to be
-    recorded here at submission.
+    untouched. Submitted on image `flush-sweep-v1-s2e-34febdc`
+    (`sha256:1bcba429c715b769454cba9d41a69b4a4520cdf115037f2236cfec33c68b2dac`),
+    job definition `picard-campaign:46`, S3 prefixes
+    `campaign/flush_sweep_v1_<arm>_s2e/`.
 
 ## 5. Held fixed by assumption
 
