@@ -3536,6 +3536,54 @@ Roughly in dependency order.
     the manifests rather than inherited from moving defaults, and read
     against the item-46 archive as an engine-change contrast on paired
     seeds. Nothing selected on any anchor; the span is not narrowed.
+    **Measured — item 49.**
+
+49. **The stage-2 re-run (`s2r`) on the repaired engine moves the crossing to
+    or below `3e-9`, so the bracket built to contain it no longer bounds it
+    from below.** 6,000 runs (five arms `off`/`3e-9`/`1e-8`/`3e-8`/`1e-7`,
+    1,200 each, seeds 8000–8199, six hull/length cells), 0 non-Spot failures,
+    image `flush-sweep-v1-s2r-3b75403`, job definition `picard-campaign:45`,
+    with `transmission.cabin_air_mode: cabin_compartment` and
+    `hvac.pathogen_pool_transport: airflow` pinned in the manifests rather
+    than inherited. Imports identical in 1.000 of pairs in all 24 contrasts.
+    (a) **Crossing**: the paired Δ secondaries excludes zero already at
+    `3e-9` in five of six cells — classic 7 d +0.94 [0.20, 2.01], classic 12 d
+    +0.53 [0.20, 0.98], spirit 7 d +1.38 [0.54, 2.51], spirit 12 d +3.96
+    [1.57, 6.98], expedition 12 d +0.15 [0.03, 0.37]; only expedition 7 d
+    still first resolves at `1e-8`. The crossing is therefore **bounded above
+    by `3e-9` and unbounded below by anything measured on this engine**: the
+    `(1e-9, 3e-9]` interval of item 46 rested on stage 1's `1e-9` null, taken
+    on the pre-repair engine, which is withdrawn with it. Arms at and below
+    `1e-9` would be required to locate it; none is declared.
+    (b) **Where the increase went**: multipliers on secondaries per import at
+    `1e-7` rise from ×52→×197 and ×97→×520 (classic 7 d / 12 d), ×7.6→×22 and
+    ×10.4→×63 (spirit), ×4.4→×7.8 and ×4.9→×13.9 (expedition), and
+    `hvac_airborne` is dominant in **26–68%** of established infections where
+    it was previously inert (`flush_aerosol` 12–38%). The in-room dose per
+    exposure is unchanged; the added infections are the same emitted mass
+    reaching susceptibles elsewhere on the HVAC branch — item 48's credit
+    carried by item 47's transport. Flush events per voyage also rise with the
+    arm (classic 12 d 14.3→42.7, spirit 12 d 33.5→72.8 at `1e-7`): newly
+    infected hosts flush too, the same trajectory compounding that falsified
+    the stage-1 saturation argument, now through a live drift path.
+    (c) **The `off` baseline moved too** (secondaries/import classic 12 d
+    0.009→0.013, expedition 12 d 0.137→0.083, spirit 7 d 0.161→0.120), because
+    the emesis path shares the repaired drain and transport. **No s2 figure may
+    be quoted against an s2r figure as though only the flush term changed.**
+    (d) **Posting overshoots at the top of the bracket**: per 1,000 voyages at
+    `1e-7`, classic 15.0 / 85.0 and spirit 5.0 / 110.0 (7 d / 12 d),
+    expedition 5.0 / 10.0, against 0 in every `off` arm; McNemar exact
+    p = 1.5e-5 (classic 12 d) and 4.8e-7 (spirit 12 d), no discordant pairs in
+    the losing direction. A9's observed 0.33 per 1,000 now sits **inside** the
+    swept span — under-powered at its floor, over-powered near `1e-7` — for
+    the first time. **This selects nothing**: `[1e-9, 1e-3]` is not narrowed,
+    no arm gains standing from its distance to A9, the Johnson/Boles and
+    vacuum-versus-gravity disagreements are untouched by this campaign, and
+    the posting comparator may itself reflect VSP reporting and investigation
+    selection rather than population truth. Artifacts
+    `telemetry_buffer/observation_model/flush_sweep_v1_s2r.json`,
+    `docs/norovirus/flush_sweep_v1_stage2r_readout.md`,
+    `docs/norovirus/flush_sweep_v1_stage2r_findings.md`.
 
 ## 5. Held fixed by assumption
 
