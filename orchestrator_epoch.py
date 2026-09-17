@@ -484,6 +484,20 @@ def step_infection_progression(
             _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
         engine.set_pathogen_zone_mass(pid, masses)
 
+    # The blackwater tank discharges at the same epoch boundary as the
+    # aerosol drains: this epoch's credited mass is in the tank, so the
+    # assay (which runs in run_observation_sampling) reads the
+    # post-discharge concentration.
+    tank = (
+        confinement_core.blackwater_tank
+        if confinement_core is not None
+        else None
+    )
+    if tank is not None:
+        if tank.complement == 0:
+            tank.complement = len(engine.agents)
+        tank.advance_epoch(clock.hours_per_epoch, clock.day_fraction_per_epoch)
+
 
 # ── Chronic disease severity escalation ──────────────────────────────────
 
@@ -689,6 +703,7 @@ def run_observation_sampling(
     pathogen_profiles: dict[str, dict[str, Any]],
     cfg: dict[str, Any],
     strain_registry: StrainRegistry | None = None,
+    tx_core: TransmissionCore | None = None,
 ) -> tuple[
     dict[str, dict[str, Any]],
     dict[str, dict[str, Any]],
@@ -698,16 +713,18 @@ def run_observation_sampling(
     dict[int, dict[str, Any]],
     dict[str, dict[str, Any]],
     int,
+    dict[str, Any] | None,
 ]:
     """Run all six observation instruments for a single epoch.
 
     Returns (air_results, swab_results, ww_results,
              clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-             long_read_results, long_read_ordered_count).
+             long_read_results, long_read_ordered_count,
+             wastewater_holding_tank_result).
     Delivered results respect instrument turnaround; stoplights use delivered only.
     """
     if not cfg.get("observation", {}).get("enabled", True):
-        return ({}, {}, {}, {}, {}, {}, {}, 0)
+        return ({}, {}, {}, {}, {}, {}, {}, 0, None)
 
     from crusher_labs.instrument_turnaround import (
         merge_released_into_observation,
@@ -744,9 +761,58 @@ def run_observation_sampling(
         swab_targets = zone_names
     elif rank >= STATUS_RANK[STATUS_ALERT]:
         swab_targets = high_traffic
-    swab_results = obs.surface_swab.swab_zones(
-        zone_surface, fred_compliance, target_zones=swab_targets,
+    # observation.surface_swab_source: "airborne_fraction" (default, legacy
+    # synthetic 0.4 of the airborne pool) or "surface_pool_density" (the real
+    # deposited pool as a per-cm² density — the repaired channel).
+    swab_source = cfg.get("observation", {}).get(
+        "surface_swab_source", "airborne_fraction"
     )
+    if swab_source == "surface_pool_density" and tx_core is not None:
+        # zone_surface_mass pools every cabin compartment under its
+        # corridor block, so a stateroom emesis deposit is swabbable;
+        # the compartments' hardware is part of the block's touchable
+        # field, so zone_high_touch_area_cm2 is still the denominator.
+        surface_copies_by_pid = {
+            pid: {
+                zname: tx_core.zone_surface_mass(zname, pid)
+                for zname in zone_names
+            }
+            for pid in pathogen_profiles
+        }
+        zone_surface_copies = {
+            zname: sum(
+                masses.get(zname, 0.0)
+                for masses in surface_copies_by_pid.values()
+            )
+            for zname in zone_names
+        }
+        zone_high_touch = {
+            zname: tx_core.zone_high_touch_area_cm2(zname)
+            for zname in zone_names
+        }
+        # Declared mapping: a sanitary-class zone's touchable surface is
+        # toilet-seat hardware; everything else is non-porous hard surface
+        # (docs/norovirus/environmental_observation_v1.md §2).
+        surface_classes = {
+            zname: (
+                "toilet_seat"
+                if tx_core.zone_types.get(zname) == "Sanitary"
+                else "nonporous_hard"
+            )
+            for zname in zone_names
+        }
+        swab_results = obs.surface_swab.swab_surface_zones(
+            zone_surface_copies,
+            zone_high_touch,
+            fred_compliance,
+            target_zones=swab_targets,
+            surface_classes=surface_classes,
+            copies_by_pathogen=surface_copies_by_pid,
+        )
+    else:
+        swab_results = obs.surface_swab.swab_zones(
+            zone_surface, fred_compliance, target_zones=swab_targets,
+        )
 
     ww_microflora: dict[str, dict[str, float]] = {}
     for zname, mf_data in zone_microflora_shifts.items():
@@ -769,6 +835,22 @@ def run_observation_sampling(
         pathogen_mass_by_id=ww_per_pathogen,
         wastewater_zones=ww_target_zones,
     )
+
+    # The holding-tank assay is a different instrument on a different
+    # stream (the blackwater tank, post-discharge); it is not submitted to
+    # the turnaround queue in v1 — it has no declared TAT entry.
+    wastewater_ht_result: dict[str, Any] | None = None
+    if (
+        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        == "holding_tank"
+        and obs.wastewater_assay is not None
+        and tx_core is not None
+        and tx_core.blackwater_tank is not None
+    ):
+        tank = tx_core.blackwater_tank
+        wastewater_ht_result = obs.wastewater_assay.assay(
+            tank.volume_l, dict(tank.copies_by_pathogen),
+        )
 
     sick_call_agents = [
         a for a in agents
@@ -821,6 +903,7 @@ def run_observation_sampling(
         clin_rdt_results, clin_qpcr_results, clin_microbio_results,
         long_read_results,
         long_read_ordered_count,
+        wastewater_ht_result,
     )
 
 

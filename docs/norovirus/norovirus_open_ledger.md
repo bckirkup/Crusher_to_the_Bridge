@@ -3696,7 +3696,47 @@ Roughly in dependency order.
     inflation and is withdrawn. Its magnitude is unmeasured; no norovirus
     route share, dose, or anchor conclusion is restored by this correction.
 
-56. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
+56. **The surface swab is rewired to the real surface pool, default-off.**
+    `observation.surface_swab_source` gains `surface_pool_density`: the swab
+    reads `surface_pools_by_pathogen` (the pool the fomite route doses
+    from), reports a per-cm² density over the same high-touch area the
+    pickup request divides by, and applies Park 2015's per-swab copy LOD
+    (`SWAB_LOD_COPIES_BY_SURFACE`, `SWAB_RECOVERY_EFFICIENCY_BOUNDS`;
+    derivation `docs/norovirus/environmental_observation_v1.md` §2). The
+    default stays `airborne_fraction`, so the decision layer reads the
+    legacy synthetic 0.4-of-airborne figure and no golden moves; the
+    repaired path ships unmeasured and awaits a matched arm — no archive
+    to date carries it. Explicitly **not done** here and owed by the
+    following change: the deposited share outside the high-touch
+    footprint (`non_touchable` in `_emit_emesis`, `transmission_core.py`)
+    is still written to the deposition record and dropped — the majority
+    of a vomiting event's mass — until the wastewater/holding-tank repair
+    routes it, and the `swab()` legacy path keeps its invented
+    `surface_fraction` input for the unchanged default arm. Nothing was
+    selected on VSP, A9, MIDRS, or Park outcomes.
+
+57. **A blackwater holding tank and a copies/L assay now exist,
+    default-off.** `transmission.blackwater_plumbing` builds the CSTR
+    (`engines/wastewater_plumbing.py`, EPA 842-R-07-005 nominals: 31.8
+    L/person/day and 62 h residence, Grade B ranges swept) and routes the
+    two streams that were dropped: the bowl deposit's non-aerosolised
+    share for every resolved defecation event — including at
+    `flush_aerosol_fraction = 0`, where the stool still goes down the
+    toilet — and each emesis event's `non_touchable` cleanup share at the
+    declared Grade D capture fraction of 1.0. `WastewaterHoldingTankAssay`
+    (behind `observation.wastewater_assay_mode: holding_tank`, default
+    `none`) applies the composite raw-wastewater LOD — Alex-Sanders 2023's
+    eluate LOD/LOQ (Grade A for the assay step) folded back through four
+    declared Grade C workflow factors, each a swept axis; the composite
+    (~5.5e3 copies/L GII) is an inference, not a reading — and below-LOD
+    samples are censored, never zeroed. v1 limitations, declared: no
+    turnaround-queue entry (the assay reads immediately), no decay over
+    the holding time, graywater sequencing untouched, capture only of
+    `non_touchable`. The change is additive and default-off: no dose,
+    rate, or RNG draw is touched, so no existing measurement is
+    invalidated — the tank reads mass that was previously dropped.
+
+58. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
     cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,
     continuous shedding in an agent's own cabin block and event aerosol drained
     from that stateroom remain in a stateroom-keyed pool. The declared airflow

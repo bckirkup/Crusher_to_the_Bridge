@@ -1161,7 +1161,7 @@ class TestObservationEnabledGate:
 
         engine = MagicMock()
         obs = MagicMock()
-        air, swab, ww, rdt, qpcr, micro, lr, lr_count = run_observation_sampling(
+        air, swab, ww, rdt, qpcr, micro, lr, lr_count, ww_ht = run_observation_sampling(
             epoch=1,
             obs=obs,
             agents=[],

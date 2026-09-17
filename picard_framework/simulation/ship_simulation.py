@@ -205,6 +205,7 @@ class _EpochWork:
     clin_microbio_results: Any = None
     long_read_results: Any = None
     long_read_ordered_count: int = 0
+    wastewater_ht_result: Any = None
     prev_status: str = ""
     stoplights: dict[str, Any] = field(default_factory=dict)
     active_mods: Any = None
@@ -1146,6 +1147,7 @@ class ShipSimulation:
             work.air_results, work.swab_results, work.ww_results,
             work.clin_rdt_results, work.clin_qpcr_results, work.clin_microbio_results,
             work.long_read_results, work.long_read_ordered_count,
+            work.wastewater_ht_result,
         ) = run_observation_sampling(
             work.epoch, self.obs, work.agents, work.spaces, self.zone_names,
             self.zone_volumes, work.zone_microflora_shifts,
@@ -1154,6 +1156,7 @@ class ShipSimulation:
             strain_registry=(
                 None if self.tx_core is None else self.tx_core.strain_registry
             ),
+            tx_core=self.tx_core,
         )
         self._attach_surface_strain_recovery(work)
 
@@ -1489,6 +1492,7 @@ class ShipSimulation:
             wearable_result=work.wearable_result,
             infection_counters=work.counter_results,
             long_read_results=work.long_read_results,
+            wastewater_ht_result=work.wastewater_ht_result,
             cascade_result=work.cascade_result,
             history_retention=self.run_spec.history_retention,
             final_epoch=(work.epoch + 1 >= self.num_epochs),

@@ -226,6 +226,7 @@ def record_epoch(  # NOSONAR
     wearable_result: dict[str, Any] | None = None,
     infection_counters: dict[str, dict[str, Any]] | None = None,
     long_read_results: dict[str, dict[str, Any]] | None = None,
+    wastewater_ht_result: dict[str, Any] | None = None,
     cascade_result: dict[str, Any] | None = None,
     history_retention: str = "full",
     final_epoch: bool = False,
@@ -376,6 +377,10 @@ def record_epoch(  # NOSONAR
         "long_read_verification": long_read_results or {},
         "logging_fidelity": obs.fidelity_name,
     }
+    if wastewater_ht_result is not None:
+        epoch_record["observation_engine"][
+            "wastewater_holding_tank"
+        ] = wastewater_ht_result
     if final_epoch:
         epoch_record["observation_engine"]["syndromic"][
             "episode_detection_telemetry"

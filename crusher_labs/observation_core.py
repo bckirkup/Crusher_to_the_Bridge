@@ -47,6 +47,18 @@ SWAB_NOMINAL_EFF = 0.35
 SWAB_GOOD_TECHNIQUE_VARIANCE = 0.05
 SWAB_POOR_TECHNIQUE_VARIANCE = 0.20
 SWAB_AREA_CM2 = 100.0
+# Park et al. 2015 macrofoam 2.3% at 645 cm² .. Lee et al. 2018
+# cotton/polyester-PBS >80% on plastic and stainless steel — Grade A
+# interval, swept (docs/norovirus/environmental_observation_v1.md §2).
+SWAB_RECOVERY_EFFICIENCY_BOUNDS = (0.023, 0.80)
+# Park et al. 2015 per-swabbed-surface detection limits, RNA copies —
+# Grade A for the two measured surfaces, B as shipboard analogue
+# (docs/norovirus/environmental_observation_v1.md §2).
+SWAB_LOD_COPIES_BY_SURFACE = {
+    "nonporous_hard": 10.0 ** 3.5,
+    "toilet_seat": 10.0 ** 4.0,
+}
+DEFAULT_SWAB_SURFACE_CLASS = "nonporous_hard"
 
 DEFAULT_WW_READ_DEPTH = 50_000
 DEFAULT_WW_DIRICHLET_CONCENTRATION = 100.0
@@ -358,6 +370,123 @@ class TargetedSurfaceSwab:
             results[zone_name] = self.swab(zone_name, mass, compliance_scalar)
         return results
 
+    def swab_surface(
+        self,
+        zone_name: str,
+        surface_copies: float,
+        high_touch_area_cm2: float,
+        surface_class: str = DEFAULT_SWAB_SURFACE_CLASS,
+        compliance_scalar: float = 0.85,
+        copies_by_pathogen: dict[str, float] | None = None,
+    ) -> dict[str, Any]:
+        """Swab a zone's deposited surface pool as a per-area density.
+
+        The density denominator is the same high-touch field the fomite
+        dose route divides by, so the swab measures the same physical
+        field a host picks up from. Park 2015's per-swab copy LOD applies
+        to recovered copies; a below-LOD reading keeps its quantitative
+        value and is flagged, never zeroed.
+        """
+        if compliance_scalar >= 0.8:
+            variance = self.good_variance
+            technique = "careful"
+        else:
+            variance = self.poor_variance
+            technique = "rushed"
+
+        actual_efficiency = self.rng.normal(self.nominal_efficiency, variance)
+        lo, hi = SWAB_RECOVERY_EFFICIENCY_BOUNDS
+        actual_efficiency = float(np.clip(actual_efficiency, lo, hi))
+
+        copies = float(surface_copies) if math.isfinite(surface_copies) else 0.0
+        area = (
+            float(high_touch_area_cm2)
+            if math.isfinite(high_touch_area_cm2) and high_touch_area_cm2 > 0.0
+            else 0.0
+        )
+        density = copies / area if area > 0.0 else 0.0
+        sampled = density * self.swab_area_cm2
+
+        raw_recovered = sampled * actual_efficiency
+        raw_recovered *= self.rng.lognormal(0, 0.03)
+
+        recovered_copies, carryover = self.qc.process_sample(raw_recovered)
+
+        ct = self._compute_ct(recovered_copies)
+        lod_copies = SWAB_LOD_COPIES_BY_SURFACE.get(
+            surface_class, SWAB_LOD_COPIES_BY_SURFACE[DEFAULT_SWAB_SURFACE_CLASS],
+        )
+        detected = (
+            recovered_copies >= lod_copies
+            and ct is not None
+            and ct <= self.lod_ct
+        )
+        censored = recovered_copies > 0.0 and not detected
+
+        raw_amplification = self._simulate_amplification_curve(recovered_copies)
+
+        result: dict[str, Any] = {
+            "instrument": self.name,
+            "zone": zone_name,
+            "surface_class": surface_class,
+            "surface_copies_total": round(copies, 4),
+            "surface_mass": round(copies, 4),
+            "high_touch_area_cm2": round(area, 4),
+            "surface_density_copies_per_cm2": round(density, 6),
+            "swab_area_cm2": self.swab_area_cm2,
+            "sampled_copies": round(sampled, 4),
+            "compliance_scalar": round(compliance_scalar, 3),
+            "technique_quality": technique,
+            "actual_collection_efficiency": round(actual_efficiency, 4),
+            "recovered_copies": round(recovered_copies, 4),
+            "recovered_mass": round(recovered_copies, 4),
+            "lod_copies_per_swab": lod_copies,
+            "ct_value": ct,
+            "detected": detected,
+            "censored_below_lod": censored,
+            "copies_by_pathogen": dict(copies_by_pathogen or {}),
+            "cross_contamination_carryover": carryover,
+            "raw_amplification_curve": raw_amplification,
+            "background_fluorescence": round(float(self.rng.normal(140, 18)), 1),
+        }
+
+        if self.qc.should_run_control():
+            result["qc_control"] = self.qc.run_negative_control()
+
+        return result
+
+    def swab_surface_zones(
+        self,
+        zone_surface_copies: dict[str, float],
+        zone_high_touch_areas: dict[str, float],
+        compliance_scalar: float = 0.85,
+        target_zones: list[str] | None = None,
+        surface_classes: dict[str, str] | None = None,
+        copies_by_pathogen: dict[str, dict[str, float]] | None = None,
+    ) -> dict[str, dict[str, Any]]:
+        targets = (
+            target_zones if target_zones else list(zone_surface_copies.keys())
+        )
+        results: dict[str, dict[str, Any]] = {}
+        for zone_name in targets:
+            results[zone_name] = self.swab_surface(
+                zone_name,
+                zone_surface_copies.get(zone_name, 0.0),
+                zone_high_touch_areas.get(zone_name, 0.0),
+                surface_class=(surface_classes or {}).get(
+                    zone_name, DEFAULT_SWAB_SURFACE_CLASS,
+                ),
+                compliance_scalar=compliance_scalar,
+                copies_by_pathogen=(
+                    None if copies_by_pathogen is None
+                    else {
+                        pid: masses.get(zone_name, 0.0)
+                        for pid, masses in copies_by_pathogen.items()
+                    }
+                ),
+            )
+        return results
+
     def _compute_ct(self, mass: float) -> float | None:
         if mass <= 0:
             return None
@@ -379,6 +508,162 @@ class TargetedSurfaceSwab:
                 val = self.rng.normal(4000, 45)
             curve.append(round(float(max(0, val)), 1))
         return curve
+
+
+# Alex-Sanders et al. 2023, doi:10.1016/j.jviromet.2023.114804 — duplex
+# RT-qPCR LOD/LOQ on the nucleic-acid eluate, genome copies per uL. Grade A
+# for the assay step (docs/norovirus/environmental_observation_v1.md §3).
+WW_ASSAY_LOD_COPIES_PER_UL = {"GI": 0.519, "GII": 1.369}
+WW_ASSAY_LOQ_COPIES_PER_UL = {"GI": 3.837, "GII": 11.68}
+WW_DEFAULT_GENOGROUP = "GII"
+# Workflow factors of the composite raw-wastewater LOD. Each is Grade C
+# declared and each is a swept axis; the composite is an inference, not a
+# reading (same doc section).
+WW_SAMPLE_VOLUME_L = 0.1
+WW_ELUATE_VOLUME_UL = 100.0
+WW_CONCENTRATION_RECOVERY = 0.25
+WW_CONCENTRATION_RECOVERY_RANGE = (0.004, 0.657)
+WW_TEMPLATE_VOLUME_UL = 5.0
+# Same paper: wastewater-derived extracts inhibited up to ~32%. Recorded at
+# the constant, NOT applied as a hidden multiplier.
+WW_INHIBITION_MAX_FRACTION = 0.32
+
+
+class WastewaterHoldingTankAssay:
+    """Copies/L qPCR assay on the ship's blackwater holding tank.
+
+    The composite raw-wastewater LOD folds the eluate LOD back through the
+    declared workflow factors::
+
+        lod_copies_per_l = lod_copies_per_ul * eluate_volume_ul
+                           / (sample_volume_l * concentration_recovery)
+
+    so GII nominal = 1.369 * 100 / (0.1 * 0.25) = 5476 copies/L. Below-LOD
+    samples keep their quantitative concentration and are flagged
+    ``censored_below_lod`` — never written back as a physical zero.
+    """
+
+    name = "wastewater_qpcr"
+
+    def __init__(
+        self,
+        sample_volume_l: float = WW_SAMPLE_VOLUME_L,
+        eluate_volume_ul: float = WW_ELUATE_VOLUME_UL,
+        concentration_recovery: float = WW_CONCENTRATION_RECOVERY,
+        template_volume_ul: float = WW_TEMPLATE_VOLUME_UL,
+        genogroup: str = WW_DEFAULT_GENOGROUP,
+        ct_slope: float = DEFAULT_CT_SLOPE,
+        ct_intercept: float = DEFAULT_CT_INTERCEPT,
+        cross_contamination_rate: float = DEFAULT_CROSS_CONTAMINATION_RATE,
+        control_intensity: str = DEFAULT_CONTROL_RUN_INTENSITY,
+        rng: np.random.Generator | None = None,
+    ) -> None:
+        self.sample_volume_l = sample_volume_l
+        self.eluate_volume_ul = eluate_volume_ul
+        self.concentration_recovery = concentration_recovery
+        self.template_volume_ul = template_volume_ul
+        self.genogroup = genogroup
+        self.ct_slope = ct_slope
+        self.ct_intercept = ct_intercept
+        self.rng = rng if rng is not None else default_simulation_rng()
+        self.qc = InstrumentQC(cross_contamination_rate, control_intensity, self.rng)
+
+    def lod_copies_per_l(self) -> float:
+        """Composite raw-wastewater detection limit for the genogroup."""
+        lod_ul = WW_ASSAY_LOD_COPIES_PER_UL.get(
+            self.genogroup, WW_ASSAY_LOD_COPIES_PER_UL[WW_DEFAULT_GENOGROUP],
+        )
+        return lod_ul * self.eluate_volume_ul / (
+            self.sample_volume_l * self.concentration_recovery
+        )
+
+    def loq_copies_per_l(self) -> float:
+        """Composite raw-wastewater quantification limit for the genogroup."""
+        loq_ul = WW_ASSAY_LOQ_COPIES_PER_UL.get(
+            self.genogroup, WW_ASSAY_LOQ_COPIES_PER_UL[WW_DEFAULT_GENOGROUP],
+        )
+        return loq_ul * self.eluate_volume_ul / (
+            self.sample_volume_l * self.concentration_recovery
+        )
+
+    def assay(
+        self,
+        tank_volume_l: float,
+        copies_by_pathogen: dict[str, float],
+    ) -> dict[str, Any]:
+        """Assay the post-discharge holding tank. Consumes one noise draw."""
+        volume_l = (
+            tank_volume_l
+            if math.isfinite(tank_volume_l) and tank_volume_l > 0.0
+            else 0.0
+        )
+        total_copies = sum(
+            v for v in copies_by_pathogen.values() if math.isfinite(v) and v > 0.0
+        )
+        concentration = (
+            total_copies / volume_l if volume_l > 0.0 else 0.0
+        )
+        sampled_copies = concentration * self.sample_volume_l
+        raw_recovered = (
+            sampled_copies
+            * self.concentration_recovery
+            * self.rng.lognormal(0.0, 0.03)
+        )
+        recovered_copies, carryover = self.qc.process_sample(raw_recovered)
+        eluate_copies_per_ul = recovered_copies / self.eluate_volume_ul
+        copies_per_reaction = eluate_copies_per_ul * self.template_volume_ul
+
+        lod_per_l = self.lod_copies_per_l()
+        loq_per_l = self.loq_copies_per_l()
+        lod_ul = WW_ASSAY_LOD_COPIES_PER_UL.get(
+            self.genogroup, WW_ASSAY_LOD_COPIES_PER_UL[WW_DEFAULT_GENOGROUP],
+        )
+        loq_ul = WW_ASSAY_LOQ_COPIES_PER_UL.get(
+            self.genogroup, WW_ASSAY_LOQ_COPIES_PER_UL[WW_DEFAULT_GENOGROUP],
+        )
+        detected = eluate_copies_per_ul >= lod_ul
+        quantifiable = eluate_copies_per_ul >= loq_ul
+
+        result: dict[str, Any] = {
+            "instrument": self.name,
+            "stream": "blackwater_raw_influent",
+            "genogroup": self.genogroup,
+            "tank_volume_l": round(volume_l, 4),
+            "tank_copies_total": round(total_copies, 4),
+            "concentration_copies_per_l": round(concentration, 4),
+            "log10_copies_per_l": (
+                round(math.log10(concentration), 4)
+                if concentration > 0.0 else None
+            ),
+            "sample_volume_l": self.sample_volume_l,
+            "sampled_copies": round(sampled_copies, 4),
+            "concentration_recovery": self.concentration_recovery,
+            "recovered_copies": round(recovered_copies, 4),
+            "eluate_volume_ul": self.eluate_volume_ul,
+            "eluate_copies_per_ul": round(eluate_copies_per_ul, 6),
+            "template_volume_ul": self.template_volume_ul,
+            "copies_per_reaction": round(copies_per_reaction, 4),
+            "ct_value": self._compute_ct(copies_per_reaction),
+            "lod_copies_per_l": round(lod_per_l, 4),
+            "loq_copies_per_l": round(loq_per_l, 4),
+            "detected": detected,
+            "quantifiable": quantifiable,
+            "censored_below_lod": concentration > 0.0 and not detected,
+            "concentration_copies_per_l_by_pathogen": {
+                pid: round(v / volume_l, 4)
+                for pid, v in copies_by_pathogen.items()
+                if math.isfinite(v) and v > 0.0 and volume_l > 0.0
+            },
+            "cross_contamination_carryover": carryover,
+        }
+        if self.qc.should_run_control():
+            result["qc_control"] = self.qc.run_negative_control()
+        return result
+
+    def _compute_ct(self, mass: float) -> float | None:
+        if mass <= 0:
+            return None
+        return round(self.ct_slope * math.log10(mass) + self.ct_intercept, 2)
 
 
 # ── Instrument 3: Wastewater Sequencing Grid ─────────────────────────────
