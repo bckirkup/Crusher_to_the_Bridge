@@ -31,4 +31,4 @@ echo "Repo: $ROOT"
 echo "Python: $PY"
 echo ""
 
-exec "$PY" picard_framework/runs/mega_cruise_campaign/campaign_runner.py "$@"
+exec "$PY" -m picard_framework.runs.mega_cruise_campaign.campaign_runner "$@"
