@@ -42,6 +42,21 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
     generate_tier_runs,
     load_manifest,
 )
+from telemetry_buffer.agent_axes import (
+    COMPLIANCE_COMPLIANT,
+    INFECTION_INFECTED,
+    INFECTION_SUSCEPTIBLE,
+    PRESENTATION_ASYMPTOMATIC,
+    PRESENTATION_SYMPTOMATIC,
+    agent_axes_dict,
+)
+
+_SUSCEPTIBLE_AXES = agent_axes_dict(
+    INFECTION_SUSCEPTIBLE, PRESENTATION_ASYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
+_SYMPTOMATIC_AXES = agent_axes_dict(
+    INFECTION_INFECTED, PRESENTATION_SYMPTOMATIC, COMPLIANCE_COMPLIANT,
+)
 
 
 def test_respiratory_mode_detection() -> None:
@@ -341,16 +356,12 @@ def test_confinement_scope_alert_symptomatic_only() -> None:
     from unittest.mock import MagicMock
 
     from orchestrator_epoch import step_quarantine_confinement
-    from orchestrator_types import (
-        SYMPTOM_ASYMPTOMATIC,
-        SYMPTOM_SYMPTOMATIC,
-        SimulationState,
-    )
+    from orchestrator_types import SimulationState
 
     state = SimulationState()
     agents = [
-        {"agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC},
-        {"agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC},
+        {"agent_id": 0, **_SUSCEPTIBLE_AXES},
+        {"agent_id": 1, **_SYMPTOMATIC_AXES},
     ]
     mock = MagicMock()
     mock.check_quarantine_compliance.return_value = True
@@ -363,24 +374,20 @@ def test_confinement_scope_confirmed_includes_cabin_contacts() -> None:
     from unittest.mock import MagicMock
 
     from orchestrator_epoch import step_quarantine_confinement
-    from orchestrator_types import (
-        SYMPTOM_ASYMPTOMATIC,
-        SYMPTOM_SYMPTOMATIC,
-        SimulationState,
-    )
+    from orchestrator_types import SimulationState
 
     state = SimulationState()
     state.cumulative_confirmed_case_ids.add(1)
     agents = [
         {
-            "agent_id": 0, "symptom_status": SYMPTOM_ASYMPTOMATIC,
+            "agent_id": 0, **_SUSCEPTIBLE_AXES,
             "cabin_mate_ids": [1],
         },
         {
-            "agent_id": 1, "symptom_status": SYMPTOM_SYMPTOMATIC,
+            "agent_id": 1, **_SYMPTOMATIC_AXES,
             "cabin_mate_ids": [0],
         },
-        {"agent_id": 2, "symptom_status": SYMPTOM_ASYMPTOMATIC},
+        {"agent_id": 2, **_SUSCEPTIBLE_AXES},
     ]
     mock = MagicMock()
     mock.check_quarantine_compliance.return_value = True

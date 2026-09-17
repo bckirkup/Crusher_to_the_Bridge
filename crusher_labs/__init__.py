@@ -55,7 +55,7 @@ from crusher_labs.testing_campaign import (
     load_campaigns,
 )
 from engines.sim_clock import SimClock, config_epochs_for_hours
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import REPO_ROOT, resolve_repo_path, validated_open
 
 _CONFIG_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.yaml")
 
@@ -124,9 +124,8 @@ def _warn_legacy_config_units(
 
 def load_config(path: str = _CONFIG_PATH) -> dict[str, Any]:
     """Load and return the Crusher Labs YAML configuration."""
-    repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    resolved = resolve_repo_path(repo_root, path)
-    with validated_open(resolved, allowed_roots=(repo_root,), encoding="utf-8") as fh:
+    resolved = resolve_repo_path(REPO_ROOT, path)
+    with validated_open(resolved, allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         config = yaml.safe_load(fh)
     _warn_legacy_config_units(config)
     return config

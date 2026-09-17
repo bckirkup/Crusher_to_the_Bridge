@@ -14,9 +14,7 @@ from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
     load_pathogen_bundle,
 )
-from simulation_utils.paths import validated_open
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from simulation_utils.paths import REPO_ROOT, validated_open
 
 _CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
 

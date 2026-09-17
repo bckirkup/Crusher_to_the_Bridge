@@ -9,7 +9,6 @@ of signed benefit.
 from __future__ import annotations
 
 import json
-import os
 from dataclasses import dataclass
 from math import isfinite
 from types import MappingProxyType
@@ -23,9 +22,8 @@ from crusher_labs.cost_ledger import (
     CostLedger,
 )
 from picard_framework.analysis.shore.counterfactual import CounterfactualResult
-from simulation_utils.paths import resolve_repo_path, validated_open
+from simulation_utils.paths import REPO_ROOT, resolve_repo_path, validated_open
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 COMMUNITIES = ("afloat", "shore")
 
 

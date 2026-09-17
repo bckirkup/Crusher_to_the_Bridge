@@ -2306,37 +2306,7 @@ class KorkinShipEngine:
         # this step is skipped — the orchestrator calls TransmissionCore
         # which handles all four pathways (direct, droplet, HVAC, fomite).
         if not self._external_transmission:
-            zone_occupants: dict[str, list[KorkinAgent]] = {z: [] for z in self._all_zone_names}
-            zone_occupants["Isolated_In_Quarters"] = []
-            zone_occupants[LOCATION_ASHORE] = []
-            for agent in self.agents:
-                loc = agent.current_location
-                if loc in zone_occupants:
-                    zone_occupants[loc].append(agent)
-
-            for zone_name, occupants in zone_occupants.items():
-                if zone_name in ("Isolated_In_Quarters", LOCATION_ASHORE):
-                    continue
-
-                shedders = [a for a in occupants if a.is_infected and a.current_shedding > 0]
-                susceptible = [a for a in occupants
-                               if a.infection_status == InfectionStatus.SUSCEPTIBLE]
-
-                if not shedders or not susceptible:
-                    continue
-
-                total_shedding = sum(s.current_shedding for s in shedders)
-
-                avg_r_pool = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
-                for target in susceptible:
-                    r0_draw = int(self.rng.choice(avg_r_pool))
-                    contact_shedding = total_shedding / max(len(occupants), 1) * r0_draw
-                    inf_prob = infection_probability(contact_shedding)
-                    if self.rng.random() < inf_prob:
-                        target.infection_status = InfectionStatus.INFECTED
-                        target.illness_status = IllnessStatus.NOT_ILL
-                        target.time_infected = 0
-                        target.acquired_particles = contact_shedding
+            self._native_transmission(LOCATION_ASHORE)
 
         # 3-4. Illness progression and recovery, both on the day scale
         self._advance_illness_and_recovery()
@@ -2366,6 +2336,47 @@ class KorkinShipEngine:
 
         # 7. Export payload
         return self._export_payload()
+
+    def _native_transmission(self, ashore_location: str) -> None:
+        """Legacy monolithic transmission used when TransmissionCore is off.
+
+        Groups agents by current zone and runs the per-zone contact draw for
+        every zone except quarantine and ashore.
+        """
+        zone_occupants: dict[str, list[KorkinAgent]] = {z: [] for z in self._all_zone_names}
+        zone_occupants["Isolated_In_Quarters"] = []
+        zone_occupants[ashore_location] = []
+        for agent in self.agents:
+            loc = agent.current_location
+            if loc in zone_occupants:
+                zone_occupants[loc].append(agent)
+
+        for zone_name, occupants in zone_occupants.items():
+            if zone_name in ("Isolated_In_Quarters", ashore_location):
+                continue
+            self._native_transmission_in_zone(occupants)
+
+    def _native_transmission_in_zone(self, occupants: list[KorkinAgent]) -> None:
+        """Draw native-path infections among one zone's occupants."""
+        shedders = [a for a in occupants if a.is_infected and a.current_shedding > 0]
+        susceptible = [a for a in occupants
+                       if a.infection_status == InfectionStatus.SUSCEPTIBLE]
+
+        if not shedders or not susceptible:
+            return
+
+        total_shedding = sum(s.current_shedding for s in shedders)
+
+        avg_r_pool = [1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2]
+        for target in susceptible:
+            r0_draw = int(self.rng.choice(avg_r_pool))
+            contact_shedding = total_shedding / max(len(occupants), 1) * r0_draw
+            inf_prob = infection_probability(contact_shedding)
+            if self.rng.random() < inf_prob:
+                target.infection_status = InfectionStatus.INFECTED
+                target.illness_status = IllnessStatus.NOT_ILL
+                target.time_infected = 0
+                target.acquired_particles = contact_shedding
 
     def _check_vsp_trigger(self) -> None:
         """Apply the VSP trigger and quarantine symptomatic agents.

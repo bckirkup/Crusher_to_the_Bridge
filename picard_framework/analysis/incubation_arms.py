@@ -62,7 +62,7 @@ from picard_framework.pathogen_overrides import (
     load_pathogen_bundle,
 )
 from picard_framework.runs.mega_cruise_campaign import boarding_axis, sentinel_recovery
-from simulation_utils.paths import validate_path_component, validated_open
+from simulation_utils.paths import REPO_ROOT, validate_path_component, validated_open
 
 ARM_DISTRIBUTION = "distribution"
 ARM_FIXED = "fixed_onset"
@@ -71,7 +71,6 @@ ARMS = (ARM_DISTRIBUTION, ARM_FIXED)
 ITINERARY_FILENAME = "itinerary.json"
 OBSERVATIONS_FILENAME = "observations.json"
 
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 MANIFEST_PATH = os.path.join(
     "picard_framework",
     "runs",

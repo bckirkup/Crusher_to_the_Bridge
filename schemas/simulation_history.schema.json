@@ -206,10 +206,6 @@
         "location": {"type": "string"},
         "shedding_rate": {"type": "number"},
         "day_of_infection": {"type": "integer"},
-        "symptom_status": {
-          "type": "string",
-          "description": "Deprecated; use infection_state, symptom_presentation, compliance_status."
-        },
         "infection_pathway": {"type": "string"},
         "agent_class": {
           "type": "string",

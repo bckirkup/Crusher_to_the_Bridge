@@ -40,12 +40,10 @@ from picard_framework.analysis.sentinel.incubation import (
     lognormal_delay,
 )
 from picard_framework.pathogen_overrides import load_pathogen_bundle
+from simulation_utils.paths import REPO_ROOT as _REPO_ROOT
 
 HOURS_PER_DAY = 24.0
 
-_REPO_ROOT = os.path.dirname(
-    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-)
 
 #: The bundle the shipped simulator runs on, and so the source of truth the
 #: catalog is checked against.
