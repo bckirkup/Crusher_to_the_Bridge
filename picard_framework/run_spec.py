@@ -14,6 +14,7 @@ from picard_framework.pathogen_overrides import (
     apply_pathogen_overrides,
     load_pathogen_bundle,
 )
+from simulation_utils import asset_defaults
 from simulation_utils.paths import validated_open
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,18 +148,16 @@ class PicardRunSpec:
 
         ship_graph = cfg.get("ship_graph", {})
         layout_rel = ship_graph.get(
-            "spatial_layout",
-            "data/platforms/destroyer_baseline/spatial_layout.json",
+            "spatial_layout", asset_defaults.DEFAULT_SPATIAL_LAYOUT,
         )
         airflow_rel = ship_graph.get(
-            "air_flow_paths",
-            "data/platforms/destroyer_baseline/air_flow_paths.json",
+            "air_flow_paths", asset_defaults.DEFAULT_AIR_FLOW_PATHS,
         )
         profiles_rel = cfg.get("multi_pathogen", {}).get(
-            "profiles_path", "data/pathogens/active_profiles.json",
+            "profiles_path", asset_defaults.DEFAULT_PATHOGEN_PROFILES,
         )
 
-        platform_id = "destroyer_baseline"
+        platform_id = asset_defaults.DEFAULT_PLATFORM_ID
         for pid, entry in reg.platforms.items():
             if os.path.normpath(entry.spatial_layout) == os.path.normpath(
                 os.path.join(repo_root, layout_rel),

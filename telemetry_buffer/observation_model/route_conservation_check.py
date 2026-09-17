@@ -40,11 +40,12 @@ from engines.transmission_core import (  # noqa: E402
     HAND_TO_MOUTH_NORMAL,
     MOUTH_CONTACT_FRACTION_RANGE,
 )
+from simulation_utils import asset_defaults  # noqa: E402
 
 # Norovirus `route_efficiency_multipliers["direct_contact"]`, the route's sole
 # surviving owner after the C5 retirement of `contact_transfer_fraction`
 # (tranche 12 §10). Read from the profile rather than hard-coded by the caller.
-PROFILE_PATH = "data/pathogens/active_profiles.json"
+PROFILE_PATH = asset_defaults.DEFAULT_PATHOGEN_PROFILES
 HOURS_PER_DAY = 24.0
 
 # Donor-hand -> recipient-hand transfer, for the composed arm only. These are
