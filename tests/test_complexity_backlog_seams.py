@@ -19,6 +19,12 @@ from engines.infection_dynamics_bridge import (
     InfectionStatus,
     KorkinShipEngine,
 )
+from engines.transmission_core import (
+    SANITARY_DWELL_FEMALE_MULTIPLIER,
+    SANITARY_DWELL_SECONDS,
+    ContactTracingMatrix,
+    TransmissionCore,
+)
 from engines.voyage_itinerary import LOCATION_ASHORE
 from picard_framework.analysis import figures as figures_mod
 from tests.test_diagnostic_cascade import (
@@ -26,6 +32,8 @@ from tests.test_diagnostic_cascade import (
     _make_agent,
     _StubTestRunner,
 )
+from tests.test_shared_sanitary_zones import _agent as _sanitary_agent
+from tests.test_shared_sanitary_zones import _make_core as _make_sanitary_core
 from tools.sanity_checker import (
     Report,
     _check_ois_weights,
@@ -294,3 +302,103 @@ def test_native_transmission_in_zone_needs_both_shedders_and_susceptible() -> No
 
     eng._native_transmission_in_zone(shedders + susceptible)
     assert any(a.is_infected for a in susceptible)
+
+
+# --- transmission_core pool-init helpers -------------------------------------
+
+
+def test_initialize_food_pools_gated_and_zone_selective() -> None:
+    core = _make_sanitary_core()
+    core._initialize_food_pools("p", {"food_contamination": {"enabled": False}}, ["D1"])
+    assert "p" not in core.food_pools
+
+    core._initialize_food_pools("p", {"food_contamination": {"enabled": True}}, ["D1", "D2"])
+    assert core.food_pools["p"] == {"D1": 0.0, "D2": 0.0}
+
+    core._initialize_food_pools(
+        "q", {"food_contamination": {"enabled": True, "food_zones": ["Galley"]}}, ["D1"],
+    )
+    assert core.food_pools["q"] == {"Galley": 0.0}
+
+
+@pytest.mark.parametrize("baseline", [0.5, 2.0])
+def test_initialize_environmental_load_seeds_matching_zones(baseline: float) -> None:
+    core = _make_sanitary_core()
+    zones = ["HD_5T_M", "HD_5T_F", "TheaterLng"]
+    core._initialize_environmental_load("p", {"environmental_contamination": {"enabled": False}}, zones)
+    assert "p" not in core.environmental_load
+
+    profile = {"environmental_contamination": {
+        "enabled": True, "baseline_environmental_load": baseline,
+    }}
+    core._initialize_environmental_load("p", profile, zones)
+    assert core.environmental_load["p"] == pytest.approx(baseline)
+    assert "p" not in core.env_contamination
+
+    profile["environmental_contamination"]["source_zones"] = ["HD_5T_*"]
+    core._initialize_environmental_load("p", profile, zones)
+    assert set(core.env_contamination["p"]) == {"HD_5T_M", "HD_5T_F"}
+    assert all(v == pytest.approx(baseline) for v in core.env_contamination["p"].values())
+
+
+# --- transmission_core dose-response event seam -----------------------------
+
+
+def test_record_transmission_event_dominant_and_breakdown_filter() -> None:
+    matrix = ContactTracingMatrix(epoch=3)
+    events: list = []
+    agent = _sanitary_agent(7, "TheaterLng")
+    pw = {"noro:fomite": 0.2, "noro:droplet": 0.7, "flu:droplet": 5.0}
+    TransmissionCore._record_transmission_event(
+        3, agent, "noro", 0.9, False, "", None, {"droplet": 0.9}, pw, matrix, events,
+    )
+    assert len(events) == 1 and len(matrix.transmission_events) == 1
+    assert events[0].pathway == "flu:droplet"
+    assert events[0].source_strain_id is None
+    rec = matrix.transmission_events[0]
+    assert set(rec["pathway_breakdown"]) == {"noro:fomite", "noro:droplet"}
+    assert rec["total_dose"] == pytest.approx(0.9)
+
+    TransmissionCore._record_transmission_event(
+        3, agent, "noro", 0.1, True, "s1", 2, {}, {}, matrix, events,
+    )
+    assert events[1].pathway == "unknown"
+    assert events[1].source_strain_id == "s1"
+    assert matrix.transmission_events[1]["superinfection"] is True
+
+
+# --- transmission_core sanitary-visit seam ----------------------------------
+
+
+def test_sanitary_dwell_seconds_by_gender() -> None:
+    male = TransmissionCore._sanitary_dwell_seconds(_sanitary_agent(1, "TheaterLng", "male"))
+    female = TransmissionCore._sanitary_dwell_seconds(_sanitary_agent(2, "TheaterLng", "female"))
+    assert male == pytest.approx(SANITARY_DWELL_SECONDS)
+    assert female == pytest.approx(SANITARY_DWELL_SECONDS * SANITARY_DWELL_FEMALE_MULTIPLIER)
+    assert female > male
+
+
+def test_draw_agent_sanitary_visits_home_books_telemetry_only() -> None:
+    core = _make_sanitary_core(seed=3)
+    core._sanitary_visits = {}
+    home = _sanitary_agent(1, "PC_D5_P_F")
+    for _ in range(50):
+        core._draw_agent_sanitary_visits("PC_D5_P_F", home)
+    assert core._sanitary_visits == {}
+    assert core.sanitary_telemetry["visits"] > 0
+    assert core.sanitary_telemetry["person_seconds"] == pytest.approx(
+        core.sanitary_telemetry["visits"] * SANITARY_DWELL_SECONDS,
+    )
+
+    away = _sanitary_agent(2, "TheaterLng")
+    for _ in range(50):
+        core._draw_agent_sanitary_visits("TheaterLng", away)
+    assert set(core._sanitary_visits.get(2, [])) == {"HD_5T_M"}
+    assert len(core._sanitary_visits[2]) > 0
+
+    unserved = _sanitary_agent(3, "Casino")
+    before = core.sanitary_telemetry["unresolved"]
+    for _ in range(50):
+        core._draw_agent_sanitary_visits("Casino", unserved)
+    assert core.sanitary_telemetry["unresolved"] > before
+    assert 3 not in core._sanitary_visits
