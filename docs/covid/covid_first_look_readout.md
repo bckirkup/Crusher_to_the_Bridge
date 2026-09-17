@@ -1,7 +1,5 @@
 # COVID first look: replicated Theta on Diamond Princess, scored on Greg Mortimer
 
-> **Status:** Living — current COVID mechanism readout
-
 > **Status:** Findings (2026-09-14). Campaign `covid_first_look_v1`, run on AWS
 > Batch at `main` = `654c0a4` (PR #529). 770 of 770 cells completed, zero
 > failures. Outputs: `telemetry_buffer/observation_model/covid_theta_fit_v2.json`
