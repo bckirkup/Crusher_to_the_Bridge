@@ -315,15 +315,6 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # Forward/lateral deposition footprint from Booth 2014 and Booth & Frost 2019;
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
-# Volume a source-zone emesis dose is diluted into when the emitting key is
-# absent from ``zone_volumes`` — the case for every cabin compartment
-# (``zone::cabinN``), since no platform data carries a per-cabin room volume.
-# The value is the engine's standing zone-volume default, not a measurement:
-# a cabin is smaller than 100 m3, so the fallback biases the source-zone dose
-# DOWN, opposite to the upward bias the un-corrected ventilation lookup
-# produced. The correct repair is per-cabin volumes in the platform layout —
-# its own change, recorded in the open ledger item 31.
-EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3 = 100.0
 
 # Public head geometry. Floor area is a declared assumption: a 0.9 x 1.5 m
 # water-closet stall footprint doubled to carry the handwashing and
@@ -5087,14 +5078,9 @@ class TransmissionCore:
             return
         # Emission is keyed by the compartment the event happened in, so the
         # occupants are looked up in the compartmented map a cabin corridor
-        # produces; a cabin compartment has no measured volume, so the
-        # lookup falls back to EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3, which
-        # biases the dose down — recorded in ledger item 31. The flush
-        # route's cabin dosing does take the berth-share partition
-        # (_dose_flush_cabin via _air_unit_volume); emesis stays on the
-        # fallback deliberately — it is on by default, so removing its
-        # invented volume moves every existing arm and must be its own
-        # measured change.
+        # produces; a compartment takes its berth share of the declared block
+        # volume (_air_unit_volume), and ventilation resolves through the
+        # parent zone below.
         units = self._cabin_compartments(zone_occupants)
         for zone_name, entries in emitted.items():
             mass = sum(load for _, load in entries)
@@ -5105,12 +5091,7 @@ class TransmissionCore:
             )
             if not susceptible:
                 continue
-            volume = max(
-                self.zone_volumes.get(
-                    zone_name, EMESIS_COMPARTMENT_VOLUME_FALLBACK_M3,
-                ),
-                1.0,
-            )
+            volume = max(self._air_unit_volume(zone_name), 1.0)
             concentration = mass / volume
             # A cabin compartment sits on its parent corridor's HVAC branch,
             # so ventilation resolves through the parent zone key.
