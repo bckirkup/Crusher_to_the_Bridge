@@ -1,0 +1,103 @@
+{
+  "design_id": "covid_theta_screen_v7",
+  "description": "First Theta screen on the repaired arm: beta-Poisson host frailty preserved under Theta (DOSE-FRAIL-01, #603) and the Diamond Princess index case with its real geometry (INDEX-GEOM-01, #605: boarded 20 Jan already symptomatic, disembarked Hong Kong 25 Jan = day 5). v6 and every earlier fit are superseded on both counts: v6 replaced the per-host Beta(0.18, 58) draw with an exponential k, making all 3,711 hosts identically susceptible on the one arm the grid is scored on, and it scored a curve containing a host the record excludes after day 5. The Theta grid and seed base are v6's so the two designs pair by (Theta, seed) on the age-0 row. The screen carries a second axis the record forces and v6 could not: the index case's infection age at boarding, which is one day plus an unobserved incubation period and is therefore screened, never chosen. Runs on the covid_boarding_screen pipeline (deploy/aws/covid_boarding_screen_entrypoint.py) with imports fixed at 1.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "covid_first_look_v6",
+  "prerequisites": [
+    "DOSE-FRAIL-01 (#603): Theta scales the per-host beta-Poisson frailty draw; mean host susceptibility = Theta.",
+    "INDEX-GEOM-01 (#605): declared per-agent departure; the diamond_princess_2020 index seed carries departure_day 5.0."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    10000000.0,
+    31622776.601683795,
+    100000000.0,
+    316227766.01683795,
+    1000000000.0,
+    3162277660.1683793,
+    10000000000.0,
+    31622776601.683792,
+    100000000000.0,
+    316227766016.83795,
+    1000000000000.0
+  ],
+  "thetas_note": "Half-decade points from 1e7 to 1e12, identical to v5 and v6. Under DOSE-FRAIL-01 the same grid point is not the same arm (Theta is now the mean of a per-host draw, not a shared k), so the pairing is for attribution, never for carrying a value forward. A selection on either boundary is a boundary and must be reported as one.",
+  "infection_age_days": [0.0, 3.0, 5.0, 7.0, 9.0, 11.0, 13.0],
+  "infection_age_note": "Yamagishi 2020 (Grade A, Results prose) dates the index case's cough to 19 January = day -1 against the scenario's day_zero of 20 January, so its infection age at boarding is one day plus that host's incubation period. The profile's incubation is lognormal median 5.8 d, GSD 1.57, 95% interval 2.3-14.6 d (Wei 2021), so the plausible infection age at boarding is about 3 to 16 days; the axis brackets it in two-day steps. 0.0 is retained only because it is the declared scenario's value and the pipeline pairs every contrast against it; it is known to be wrong by about six days. No value on this axis may be selected by which one reproduces covid.T1 or covid.T3 — see admissibility.index_geometry, a filter read off the seeded host, not off an anchor.",
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 40,
+  "seeds_note": "40 seeds rather than v6's 20 because the arm is expected to be near-critical: at a Theta that reproduces the fleet, most voyages fizzle and a minority burn, so a cell's informative quantity is a distribution and its tail, not a point. The first 20 seeds of the age-0 row pair with v6's fit phase.",
+  "cells": 3080,
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "Fields the v7 worker adds to the boarding-screen payload so the admissibility block below can be evaluated at merge time without a second run. All are read from the run, none from the targets file.",
+    "index_onset_day": "Voyage day of the seeded index host's symptom onset (negative if before boarding, null if the host never became symptomatic within the run). Read from the host's infection record, not from the recorded-onset channel, because a pre-boarding onset is by construction not a ship observation.",
+    "index_shedding_at_day0": "Whether the seeded host's shedding curve is above zero at epoch 0.",
+    "index_departed_epoch": "The epoch the seeded host left the ship, echoed from the run for audit.",
+    "infections_total": "Truth-channel count of hosts ever infected, index excluded.",
+    "aboard_total": "Hosts aboard at epoch 0.",
+    "attack_rate": "infections_total / aboard_total.",
+    "vsp_reported_case_fraction_max": "Maximum over epochs of the engine's reported passenger case fraction, for the cross-pathogen readout against the 3% VSP threshold; recorded, not thresholded, in the worker."
+  },
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "Pre-declared so that a cell is admitted or refused by criteria fixed before any of this design's results exist. Bimodality is NOT a failure criterion and its absence is not a success criterion: covid.H3 records a median voyage attack rate of 0.2% with Diamond Princess at 712 cases, so the real fleet IS near-critical, and a Theta that makes every voyage burn is as wrong as one that makes none burn. The question is whether one Theta puts typical voyages at the fleet median while leaving the Diamond Princess trajectory in the tail.",
+    "index_geometry": {
+      "criterion": "index_onset_day <= 0 and index_shedding_at_day0 true in at least 80% of a cell's seeds.",
+      "reads": "the seeded host's own onset and shedding record",
+      "note": "A geometry filter, not an anchor: it asks whether the simulated index matches the record's statement that it boarded already symptomatic on 20 January. Cells failing it are reported and excluded from selection."
+    },
+    "covid_T1": {
+      "criterion": "The cell's 10th-to-90th percentile interval of recorded_onsets across seeds contains 197, AND |before_share - 0.173| <= 0.10 for the cell's median before_share, where before_share = onsets_before_split_day / recorded_onsets and 0.173 = 34/197 (onsets before day 17, 6 February).",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "An interval criterion rather than a distance because a near-critical arm's across-seed spread is the quantity, not noise around a point."
+    },
+    "covid_T3": {
+      "criterion": "The cell's 10th-to-90th percentile interval of campaign_positives contains 634, with the cell's median campaign_specimens within 15% of 3,063.",
+      "target_source": "covid.T3, data/observation/covid_fit_targets.json",
+      "note": "The specimen-count condition guards against a cell matching the positive count by testing a different number of people than the published schedule."
+    },
+    "covid_T2_diagnostic": {
+      "criterion": "Reported, never used in selection: direction of the passenger and crew onset turn in the 7 days after day 16.",
+      "target_source": "covid.T2"
+    },
+    "covid_T4_diagnostic": {
+      "criterion": "Reported, never used in selection: asymptomatic share among positives, target 0.5047.",
+      "target_source": "covid.T4"
+    },
+    "burn_tail": {
+      "criterion": "Reported per cell, not thresholded: P(attack_rate >= 0.10), P(attack_rate <= 0.01), and attack_rate quantiles at 0.1, 0.25, 0.5, 0.75, 0.9. The real Diamond Princess attack was 712/3711 = 0.19 under an intervention schedule the scenario reproduces; a cell whose attack-rate 10th-90th interval excludes 0.19 entirely is reported as such."
+    },
+    "selection": "The admissible set is every cell passing index_geometry, covid_T1 and covid_T3. If it is empty, the readout reports the nearest cells on each criterion and states that no admissible Theta exists on this arm; no criterion is loosened after the fact. If it is non-empty, stage 2 (fleet shape, below) is run on the admissible Thetas plus their half-decade neighbours."
+  },
+  "stage_2_fleet_shape": {
+    "status": "designed, not submitted until stage 1 closes; its Theta list is stage 1's output",
+    "scenario_id": "diamond_princess_2020",
+    "voyage_days": 7,
+    "seed_base": 20201001,
+    "voyages": 200,
+    "introduction": "one host at boarding with infection age drawn from the profile's incubation distribution (not declared), no shore-directed mass testing campaign, standard response",
+    "criterion": "Across the 200 voyages: median recorded attack rate within [0.0005, 0.008], interquartile range overlapping [0.0003, 0.015], mean not above 0.06.",
+    "target_source": "covid.H3 (median 0.002, IQR 0.0003-0.015, mean 0.037; 79 ships, 104 voyages)",
+    "note": "An approximation and declared as one: the model has one hull, not 79, so what is compared is the SHAPE of the across-voyage distribution, never a ship-specific value. The comparison numerator is RECORDED cases, not the truth channel, because H3's real numerators are ascertained cases on ships that largely had no testing. H3 is held out: this stage may refuse a Theta stage 1 admitted, but may never pick among Thetas stage 1 admitted."
+  },
+  "stage_3_held_out": {
+    "status": "designed, not submitted until stages 1 and 2 close",
+    "scenario_id": "greg_mortimer_2020",
+    "seed_base": 20200315,
+    "seeds": 50,
+    "note": "Scored once at the selected Theta and reported at its half-decade neighbours as sensitivity, exactly as v6's held_out phase. A miss here is a result to record, not a reason to reopen the grid."
+  },
+  "cross_pathogen_readout": {
+    "note": "Recorded for comparison with the norovirus arm running the same hull: per cell, the fraction of runs whose vsp_reported_case_fraction_max reaches 0.03 and the attack-rate quantiles conditioned on reaching it. Same ship, different observable; neither arm constrains the other's Theta.",
+    "quantities": ["vsp_threshold_crossing_fraction", "attack_rate_quantiles", "attack_rate_quantiles_given_vsp_crossing"]
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v7",
+    "stage_1_cells": 3080,
+    "stride": 1,
+    "expected_cell_minutes": 30
+  }
+}

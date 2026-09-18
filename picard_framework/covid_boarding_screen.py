@@ -31,6 +31,8 @@ from typing import Any
 
 import numpy as np
 
+from engines.infection_dynamics_bridge import ever_presented
+from picard_framework.covid_fit_targets import load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
 from picard_framework.covid_theta_fit import (
     PATHOGEN_ID,
@@ -257,6 +259,73 @@ def apply_boarding_axis(
     return raw
 
 
+def _index_host(engine: Any) -> Any | None:
+    """The agent the explicit-seed channel infected at boarding."""
+    seeded = set(getattr(engine, "explicit_seed_agent_ids", ()) or ())
+    return next(
+        (a for a in engine.agents if a.agent_id in seeded),
+        None,
+    )
+
+
+def _index_geometry(
+    engine: Any,
+    cell: ScreenCell,
+    profile: dict[str, Any],
+) -> dict[str, Any]:
+    """The seeded index host's own geometry, read off its infection record.
+
+    The stamped ``onset_time_infected`` records when progression *noticed*
+    the onset, so a host that boarded past incubation is not back-dated;
+    the true onset is the drawn ``incubation_days`` against the declared
+    boarding age, which is the record this screen means.
+    """
+    agent = _index_host(engine)
+    if agent is None:
+        return {
+            "index_onset_day": None,
+            "index_shedding_at_day0": None,
+            "index_departed_epoch": None,
+        }
+    inf = agent.infections.get(PATHOGEN_ID, {})
+    incubation = inf.get("incubation_days")
+    onset_day: float | None = None
+    if incubation is not None and ever_presented(inf):
+        onset_day = (
+            engine.clock.days_elapsed(int(inf.get("infection_epoch", 0)))
+            + float(incubation)
+            - cell.infection_age_days
+        )
+    shedding_day0 = False
+    if incubation is not None:
+        presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
+        # The same gate _shedding_curve_point applies, evaluated at the
+        # boarding age: in-window means the host emits at epoch 0.
+        shedding_day0 = (
+            cell.infection_age_days - float(incubation) >= -presymptomatic
+        )
+    return {
+        "index_onset_day": onset_day,
+        "index_shedding_at_day0": shedding_day0,
+        "index_departed_epoch": agent.departure_epoch,
+    }
+
+
+def _truth_counts(engine: Any) -> dict[str, Any]:
+    """Ever-infected host count excluding the seeded hosts, and the aboard."""
+    seeded = set(getattr(engine, "explicit_seed_agent_ids", ()) or ())
+    infected = sum(
+        1 for a in engine.agents
+        if PATHOGEN_ID in a.infections and a.agent_id not in seeded
+    )
+    aboard = len(engine.agents)
+    return {
+        "infections_total": infected,
+        "aboard_total": aboard,
+        "attack_rate": (infected / aboard) if aboard else None,
+    }
+
+
 def _first_onset_day(curve: dict[int, dict[str, int]]) -> int | None:
     days = [
         int(day) for day, roles in curve.items()
@@ -303,6 +372,13 @@ def simulate_screen_cell(
         "sanitary_activity": {
             k: float(v) for k, v in dict(sim.tx_core.sanitary_telemetry).items()
         },
+        **_index_geometry(
+            sim.engine, cell, sim.pathogen_profiles[PATHOGEN_ID],
+        ),
+        **_truth_counts(sim.engine),
+        "vsp_reported_case_fraction_max": float(
+            getattr(sim.engine, "vsp_reported_case_fraction_max", 0.0),
+        ),
     }
 
 
@@ -378,9 +454,118 @@ def _witness(payloads: Iterable[dict[str, Any]], mode: str) -> dict[str, Any]:
     }
 
 
+def _attack_quantiles(
+    rates: Sequence[float],
+) -> dict[str, float | None]:
+    if not rates:
+        return {
+            f"q{int(q * 100):02d}": None
+            for q in (0.10, 0.25, 0.50, 0.75, 0.90)
+        }
+    return {
+        f"q{int(q * 100):02d}": _quantile(rates, q)
+        for q in (0.10, 0.25, 0.50, 0.75, 0.90)
+    }
+
+
+def _admissibility(
+    by_seed: dict[int, dict[str, Any]],
+    obs: dict[int, HullObservables],
+    targets: Any,
+) -> dict[str, Any]:
+    """The v7 pre-declared criteria, evaluated per the design's own text.
+
+    Index geometry and VSP fields are ``None`` on payloads written before
+    the fields existed rather than reading a missing field as a failure.
+    """
+    has_geometry = any("index_onset_day" in p for p in by_seed.values())
+    geometry_pass = [
+        (p.get("index_onset_day") is not None
+         and float(p["index_onset_day"]) <= 0.0
+         and bool(p.get("index_shedding_at_day0")))
+        for p in by_seed.values()
+    ] if has_geometry else None
+    pass_fraction = (
+        float(np.mean(geometry_pass)) if geometry_pass else (0.0 if has_geometry else None)
+    )
+    onsets = [o.recorded_onsets for o in obs.values()]
+    before_share = [
+        o.onsets_before_split_day / o.recorded_onsets
+        for o in obs.values() if o.recorded_onsets > 0
+    ]
+    positives = [o.campaign_positives for o in obs.values()]
+    specimens = [o.campaign_specimens for o in obs.values()]
+    t1 = targets.assert_fittable("covid.T1").values
+    t3 = targets.assert_fittable("covid.T3").values
+    t1_onsets = float(t1["recorded_onsets"])
+    t1_before_share = float(t1["onsets_before_day"]) / t1_onsets
+    t3_positives = float(t3["cumulative_positives"])
+    t3_tests = float(t3["cumulative_tests"])
+    before_median = _quantile(before_share, 0.5) if before_share else None
+    specimens_median = _quantile(specimens, 0.5) if specimens else None
+    t1_ok = bool(
+        _quantile(onsets, 0.10) <= t1_onsets <= _quantile(onsets, 0.90)
+        and before_median is not None
+        and abs(before_median - t1_before_share) <= 0.10
+    )
+    t3_ok = bool(
+        _quantile(positives, 0.10) <= t3_positives <= _quantile(positives, 0.90)
+        and specimens_median is not None
+        and abs(specimens_median / t3_tests - 1.0) <= 0.15
+    )
+    vsp_maxima = [
+        float(p["vsp_reported_case_fraction_max"])
+        for p in by_seed.values()
+        if p.get("vsp_reported_case_fraction_max") is not None
+    ]
+    crossing_ids = [
+        seed for seed, p in by_seed.items()
+        if p.get("vsp_reported_case_fraction_max") is not None
+        and float(p["vsp_reported_case_fraction_max"]) >= 0.03
+    ]
+    rates = [
+        float(p["attack_rate"])
+        for p in by_seed.values()
+        if p.get("attack_rate") is not None
+    ]
+    crossing_rates = [
+        float(by_seed[s]["attack_rate"]) for s in crossing_ids
+        if by_seed[s].get("attack_rate") is not None
+    ]
+    return {
+        "index_geometry_pass_fraction": pass_fraction,
+        "index_geometry_ok": (
+            None if pass_fraction is None else bool(pass_fraction >= 0.80)
+        ),
+        "recorded_onsets_p10": _quantile(onsets, 0.10),
+        "recorded_onsets_p90": _quantile(onsets, 0.90),
+        "before_share_median": before_median,
+        "campaign_positives_p10": _quantile(positives, 0.10),
+        "campaign_positives_p90": _quantile(positives, 0.90),
+        "campaign_specimens_median": specimens_median,
+        "t1_ok": t1_ok,
+        "t3_ok": t3_ok,
+        "attack_rate_quantiles": _attack_quantiles(rates),
+        "p_attack_ge_0p10": (
+            float(np.mean([r >= 0.10 for r in rates])) if rates else None
+        ),
+        "p_attack_le_0p01": (
+            float(np.mean([r <= 0.01 for r in rates])) if rates else None
+        ),
+        "vsp_threshold_crossing_fraction": (
+            float(np.mean([m >= 0.03 for m in vsp_maxima]))
+            if vsp_maxima else None
+        ),
+        "attack_rate_quantiles_given_vsp_crossing": (
+            _attack_quantiles(crossing_rates) if crossing_rates else None
+        ),
+    }
+
+
 def _cell_summary(
     design: BoardingScreenDesign,
     by_seed: dict[int, dict[str, Any]],
+    targets: Any | None = None,
 ) -> dict[str, Any]:
     obs = {seed: _observables(p) for seed, p in by_seed.items()}
     firsts = [
@@ -426,6 +611,9 @@ def _cell_summary(
             ),
         },
         "sanitary_witness": _witness(by_seed.values(), design.sanitary_visit_mode),
+        **(_admissibility(
+            by_seed, obs, targets or load_fit_targets(),
+        )),
     }
 
 
@@ -457,6 +645,7 @@ def merge_screen(
     payloads: dict[str, dict[str, Any]],
     *,
     allow_partial: bool = False,
+    targets: Any | None = None,
 ) -> dict[str, Any]:
     """Pool finished cells into the boarding surface."""
     cells = enumerate_cells(design)
@@ -468,6 +657,7 @@ def merge_screen(
             f"{found} of {expected} cells present; pass allow_partial to "
             "summarise an incomplete screen",
         )
+    resolved_targets = targets or load_fit_targets()
     surface = []
     for theta, age, imports in design.axis_points:
         base = grouped.get((theta, *design.baseline), {})
@@ -479,7 +669,7 @@ def merge_screen(
             "infection_age_days": age,
             "imports": imports,
             "is_baseline": (age, imports) == design.baseline,
-            **_cell_summary(design, by_seed),
+            **_cell_summary(design, by_seed, resolved_targets),
             "delta_vs_baseline": _paired_deltas(base, by_seed),
         }
         surface.append(entry)

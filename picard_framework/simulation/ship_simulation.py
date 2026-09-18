@@ -58,6 +58,7 @@ from engines.transmission_core import (
     TransmissionCore,
     build_hvac_downstream_map,
 )
+from engines.voyage_itinerary import agent_is_departed
 from orchestrator_chronic import (
     assign_chronic_diseases,
     get_chronic_behavioral_modifiers,
@@ -609,9 +610,9 @@ class ShipSimulation:
     def _observe_wastewater(self, epoch: int) -> None:
         """Mix this epoch's shedder prevalence into the holding tanks.
 
-        Agents ashore are excluded: they are not using the ship's plumbing, so
-        counting them would dilute the very port-call epochs the channel is
-        supposed to inform.
+        Agents ashore or departed are excluded: they are not using the ship's
+        plumbing, so counting them would dilute the very port-call epochs the
+        channel is supposed to inform.
         """
         sampler = self.wastewater_sampler
         if sampler is None or self.engine is None:
@@ -624,7 +625,7 @@ class ShipSimulation:
         shedders: dict[str, float] = {}
         composition: dict[str, dict[str, float]] = {}
         for agent in self.engine.agents:
-            if agent.ashore:
+            if agent.ashore or agent_is_departed(agent):
                 continue
             point = self._wastewater_routing.get(agent.home_zone, fallback)
             aboard[point] = aboard.get(point, 0.0) + 1.0
@@ -893,6 +894,10 @@ class ShipSimulation:
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
         self.engine.vsp_reported_case_fraction = state.vsp_reported_case_fraction
+        self.engine.vsp_reported_case_fraction_max = max(
+            self.engine.vsp_reported_case_fraction_max,
+            state.vsp_reported_case_fraction,
+        )
         self.engine.step()
         self._note_shore_introductions(
             step_shore_introductions(

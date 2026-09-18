@@ -76,6 +76,7 @@ from engines.py_contam_bridge import (
     ContamTransportEngine,
 )
 from engines.sim_clock import SimClock, config_epochs_for_hours
+from engines.voyage_itinerary import agent_is_departed
 from engines.wearable_monitor import (
     WearableMonitor,
     build_wearable_monitor_from_config,
@@ -858,6 +859,7 @@ def update_ever_reported_ids(
         int(agent["agent_id"])
         for agent in agents
         if agent_has_symptomatic_presentation(agent)
+        and not agent_is_departed(agent)
     }
     ever_reported_ids.update(
         symptomatic_ids.intersection(
@@ -871,11 +873,12 @@ def _compute_group_rates(
     agents: list[dict[str, Any]],
     id_set: set[int],
 ) -> dict[str, float]:
-    if not agents:
+    aboard = [a for a in agents if not agent_is_departed(a)]
+    if not aboard:
         return {"overall": 0.0, "passenger": 0.0, "crew": 0.0, "max_group": 0.0}
 
     groups: dict[str, list[int]] = {"passenger": [], "crew": []}
-    for agent in agents:
+    for agent in aboard:
         groups[_role_group_for_agent(agent)].append(int(agent["agent_id"]))
 
     def _rate(ids: list[int]) -> float:
@@ -884,7 +887,7 @@ def _compute_group_rates(
     passenger = _rate(groups["passenger"])
     crew = _rate(groups["crew"])
     return {
-        "overall": len(id_set) / len(agents),
+        "overall": len(id_set) / len(aboard),
         "passenger": passenger,
         "crew": crew,
         "max_group": max(passenger, crew),

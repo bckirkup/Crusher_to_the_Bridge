@@ -59,6 +59,15 @@ age 0 on day 0 and keeps him aboard. There is no per-agent permanent
 disembarkation in the engine. Every fit above scores a curve that includes a
 host the record excludes.
 
+**INDEX-GEOM-01 supersedes every Θ-arm figure measured with the index case
+aboard for the whole voyage.** Declared per-agent departure now exists
+(`docs/ledger/INDEX-GEOM-01.md`) and the seed disembarks on day 5 as the
+record states, so every Θ-arm figure of record — which scores a curve that
+includes a host the record excludes — is superseded pending remeasurement.
+The infection-age component of the geometry is NOT resolved: the seed still
+arrives at declared age 0, and the infection-age × Θ screen remains open in
+§3.
+
 ## 2. Last measurement of record
 
 `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
@@ -97,5 +106,13 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   the realised infecting dose is unresolved.
 - **795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
   pool; lifecycle not yet traced.
-- **Index-case geometry.** Declared per-agent departure, then a resolved
-  infection-age × Θ screen (≥20 seeds), before any v7 refit.
+- **Index-case geometry.** Declared per-agent departure shipped
+  (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020.
+  Remaining: a resolved infection-age × Θ screen (≥20 seeds), before any
+  v7 refit.
+- **`covid_theta_screen_v7` is declared, not yet run.** The pre-registered
+  Θ × infection-age screen on the repaired arm (host frailty restored,
+  index departing day 5) lives at
+  `picard_framework/runs/covid_theta_screen_v7_design.json`: 11 half-decade
+  Thetas × 7 ages × 40 seeds = 3,080 cells with pre-declared admissibility
+  (index geometry, covid.T1, covid.T3) and no result exists yet.
