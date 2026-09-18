@@ -74,10 +74,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   remains is the well-mixed venue far field clearing threshold for a roomful
   of identically susceptible hosts. No constant is to be moved to produce a
   19% attack rate.
-- **Crew-mess seating structure.** Crew dine as a workplace and likely retain
-  department table-mates (Pung 2023); the model deals crew-mess tables
-  independently each meal. Open null, unsourced for ships
-  (`docs/ledger/AERO-NEAR-02.md`).
+- **Crew-mess seating structure.** Crew-mess tables are now dealt within
+  department (DINE-CREW-01), while the venue far-field pool is unchanged.
+  AERO-NEAR-02 figures are pending remeasurement
+  (`docs/ledger/DINE-CREW-01.md`).
 - **Windjammer 100× pool-mass jump at 1 → 2 shedders** (QUAR-ORDER-01 trace):
   the trajectory did not recur under AERO-NEAR-02; mechanism untraced.
 - **Identical host susceptibility on the Θ arm.** The exponential dose-response
