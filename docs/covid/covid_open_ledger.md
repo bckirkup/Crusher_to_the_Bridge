@@ -18,8 +18,10 @@ for the COVID arm.
 ## 1. Currently withdrawn
 
 **AERO-NEAR-02 invalidates prior near-field-sensitive COVID figures.** The
-QUAR-ORDER-01 burning and intermediate-cell figures are void pending
-remeasurement with the near-field two-box default and per-meal buffet tables.
+QUAR-ORDER-01 burning and intermediate-cell figures are superseded by the
+AERO-NEAR-02 measurement (§2). The two diagnostic cells are not paired with
+their QUAR-ORDER-01 runs: per-meal table dealing consumes RNG, so the same seed
+follows a different trajectory.
 
 **Every fitted Θ is void pending a refit on the repaired airborne subsystem.**
 The fits of record (`covid_first_look_v1`–`v6`, the 1b boarding screen, and the
@@ -49,7 +51,15 @@ host the record excludes.
 
 ## 2. Last measurement of record
 
-Local burning cell, seed `20200206`, Θ = 3.16e7, full voyage, after
+`AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
+`20200206`, Θ = 3.16e7 — 2 infections (extinction); seed `20200210`, Θ = 1e9 —
+1,390 infections (37.5%), 952 of them in the two crew messes after 5 Feb, 303
+in confined passengers, Windjammer 0. One crew-mess epoch (242 occupants, 2
+shedders) infected 140 hosts at one identical far-field dose: the roomful-at-once
+behaviour is now the well-mixed far field on identical hosts, not the near
+field or the dining topology.
+
+Prior to that — local burning cell, seed `20200206`, Θ = 3.16e7, full voyage, after
 `AERO-CABIN-06` (#591): 2,759 infection events, 2,732 distinct hosts infected,
 final attack 73.6%; HVAC-route infections in confined cabin hosts 32 (was 1,591
 before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
@@ -58,10 +68,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **Missing intermediate attack rates.** With the airborne leaks closed, ~2,700
-  infections still pass through confinement on non-air routes (direct contact,
-  fomite, crew service). Route trace of confined hosts' remaining dose is the
-  next diagnostic; no constant is to be moved to produce a 19% attack rate.
+- **Missing intermediate attack rates.** The route trace (QUAR-ORDER-01,
+  AERO-NEAR-02) placed the burn in public dining, not in a leak through
+  confinement. With enforced quarantine and dining tables in place, what
+  remains is the well-mixed venue far field clearing threshold for a roomful
+  of identically susceptible hosts. No constant is to be moved to produce a
+  19% attack rate.
+- **Crew-mess seating structure.** Crew dine as a workplace and likely retain
+  department table-mates (Pung 2023); the model deals crew-mess tables
+  independently each meal. Open null, unsourced for ships
+  (`docs/ledger/AERO-NEAR-02.md`).
+- **Windjammer 100× pool-mass jump at 1 → 2 shedders** (QUAR-ORDER-01 trace):
+  the trajectory did not recur under AERO-NEAR-02; mechanism untraced.
 - **Identical host susceptibility on the Θ arm.** The exponential dose-response
   branch returns Θ itself rather than a per-host frailty draw (one distinct
   value across 3,711 hosts). Whether frailty belongs on this arm is a provenance
