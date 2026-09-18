@@ -134,7 +134,12 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # -> (81, 42, 217, 88, 11).
     # AERO-NEAR-02: default β near-field dose plus per-meal buffet/mess table
     # dealing moves this local CPython 3.12 reading to (51, 8, 217, 51, 32).
-    (3, 12): (51, 8, 217, 51, 32),
+    # DINE-CREW-01 deals crew-mess tables within department (work zone), which
+    # reorders the per-meal RNG draws and changes the near-field table-mates of
+    # every crew diner; the cell follows a different Bernoulli path:
+    # (51, 8, 217, 51, 32) -> (14, 3, 217, 18, 10) on CPython 3.12. The 3.11
+    # reading is taken from the CI job on this branch.
+    (3, 12): (14, 3, 217, 18, 10),
 }
 
 
