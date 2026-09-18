@@ -685,26 +685,33 @@
           "minimum": 0,
           "description": "Hand-hygiene event rate; defaults to zero because no event model is currently fitted."
         },
-        "emesis_total_shed_gec_range": {
+        "emesis_titre_gec_per_ml_range": {
           "type": "array",
           "items": {"type": "number", "exclusiveMinimum": 0},
           "minItems": 2,
           "maxItems": 2,
-          "description": "Optional [low, high] log-uniform bounds on the per-subject cumulative emesis shed in genome copies, drawn once per symptomatic illness and partitioned equally across the drawn episodes. This is the quantity the emesis literature identifies; the withdrawn emesis_titre_gec_per_ml key is not honoured, because titre and volume are not independent of this total."
+          "description": "Optional [low, high] log-uniform bounds on the host emesis titre in genome copies per millilitre, drawn once per symptomatic illness with at least EMESIS_DETECTABLE_MIN_EPISODES events and multiplied by each episode's drawn volume to make its load (Kirby et al. 2016: cumulative shed is titre x volume summed over positive samples)."
+        },
+        "emesis_censored_titre_gec_per_ml_range": {
+          "type": "array",
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Optional [low, high] log-uniform bounds on the emesis titre of a censored illness (fewer than EMESIS_DETECTABLE_MIN_EPISODES events) -- below the assay LOD, bounded below by the lowest measured emesis titre, never zero."
         },
         "emesis_volume_ml_range": {
           "type": "array",
           "items": {"type": "number", "exclusiveMinimum": 0},
           "minItems": 2,
           "maxItems": 2,
-          "description": "Optional [low, high] log-uniform emesis volume bounds in millilitres. Physical deposit volume only; it does not multiply a titre to make the emitted load."
+          "description": "Optional [low, high] log-uniform emesis volume bounds in millilitres, drawn per episode and multiplied by the host titre to make the emitted load."
         },
         "emesis_episodes_range": {
           "type": "array",
           "items": {"type": "integer", "minimum": 1},
           "minItems": 2,
           "maxItems": 2,
-          "description": "Optional inclusive [low, high] discrete-uniform episode count bounds."
+          "description": "Optional inclusive [low, high] episode count bounds; the count is drawn from a truncated geometric solved to reproduce the measured single-episode fraction, not a discrete uniform."
         },
         "emesis_aerosol_fraction_range": {
           "type": "array",

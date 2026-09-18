@@ -31,7 +31,9 @@ from scripts.release_axis_role_retest import (
 )
 
 PROFILE = {
-    "emesis_total_shed_gec_range": [1e5, 1e8],
+    "emesis_titre_gec_per_ml_range": [1.6e5, 8.0e5],
+    "emesis_censored_titre_gec_per_ml_range": [5.0e3, 1.5e4],
+    "emesis_volume_ml_range": [50.0, 800.0],
     "emesis_episodes_range": [1, 7],
     "emesis_aerosol_fraction_range": [7.2e-7, 2.67e-4],
 }
@@ -80,10 +82,10 @@ class TestEpisodeAerosolMass:
     def test_endpoints_are_ordered_and_wide(self) -> None:
         low, high = episode_aerosol_mass_gec(PROFILE)
         assert 0.0 < low < high
-        # 3 logs of shed total, 0.85 log of episode count, 2.6 logs of
-        # fraction: the span is the reason a single measured concentration
-        # cannot discriminate inside it.
-        assert math.log10(high / low) > 6.0
+        # ~4.2 logs of titre span (censored floor to detectable ceiling),
+        # ~1.2 logs of volume, 2.6 logs of fraction: the span is the reason a
+        # single measured concentration cannot discriminate inside it.
+        assert math.log10(high / low) > 5.0
 
     def test_scales_linearly_with_the_fraction(self) -> None:
         doubled = dict(PROFILE, emesis_aerosol_fraction_range=[1.44e-6, 5.34e-4])
@@ -92,11 +94,13 @@ class TestEpisodeAerosolMass:
         assert low == pytest.approx(2.0 * base_low)
         assert high == pytest.approx(2.0 * base_high)
 
-    def test_episode_count_only_partitions_the_total(self) -> None:
+    def test_episode_count_does_not_move_the_per_episode_span(self) -> None:
+        # The episode load is per-episode volume x per-illness host titre; the
+        # count gates detectability, not the per-episode endpoints.
         single = dict(PROFILE, emesis_episodes_range=[1, 1])
         base_low, base_high = episode_aerosol_mass_gec(PROFILE)
         low, high = episode_aerosol_mass_gec(single)
-        assert low == pytest.approx(7.0 * base_low)
+        assert low == pytest.approx(base_low)
         assert high == pytest.approx(base_high)
 
     def test_missing_keys_fall_back_to_engine_constants(self) -> None:

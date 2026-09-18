@@ -40,6 +40,7 @@ import fnmatch
 import math
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, replace
+from functools import lru_cache
 from typing import Any
 
 import numpy as np
@@ -280,40 +281,50 @@ OUTBREAK_DISINFECTION_LOG10_REDUCTION = (
 # applied to Carling's 37% baseline gives 0.58. Inferred across settings, and
 # it must be swept rather than asserted. Grade C.
 OUTBREAK_CLEANING_COVERAGE = 0.58
-# Per-subject cumulative emesis shed, drawn log-uniform once per symptomatic
-# illness. Kirby et al. 2016, PLoS ONE, Table 3, per-subject cumulative shed in
-# vomitus: GII.2 Snow Mountain mean 1.8e7 GEC (SEM 1.8e7), GI.1 2.3e8, with the
-# per-subject values spanning roughly 1e5-1e8. Grade B: surrogate genotype, as
-# no GII.4 emesis measurement exists (docs/literature/consensus_tranche_4.md
-# section 3).
-#
-# This is the quantity the paper identifies, and it replaces the former
-# volume x titre product. Titre and volume are not independent of the total:
-# the measured GII.2 sample-mean titre (1.6e5 GEC/mL) times the measured mean
-# total volume (845 mL) is 1.35e8, 7.5x the same paper's measured per-subject
-# cumulative 1.8e7, because the titre mean is taken over positive samples on a
-# heavy right tail. Adopting titre and volume as independent inputs therefore
-# overstates emission by an order of magnitude while looking like provenance.
-#
-# The endpoints are set by this arithmetic check, not by tuning: the arithmetic
-# mean of a log-uniform on [1e5, 1e8] is (1e8 - 1e5) / ln(1e3) = 1.45e7, within
-# 1.25x of Kirby's measured GII.2 per-subject mean of 1.8e7. The interval
-# reproduces the measured mean rather than being fitted to any anchor.
-EMESIS_TOTAL_SHED_GEC_RANGE = (1e5, 1e8)
-# Emesis titre is deliberately absent: no profile key resolves to one, and the
-# emesis record carries titre as a derived diagnostic, episode_load /
-# volume_ml. The withdrawn figure is recorded in
-# docs/norovirus/norovirus_open_ledger.md.
-# Vomitus volume from Tung-Thompson et al. 2015 and Booth & Frost 2019;
-# measured range, evidence grade B. Still drawn per episode, but it no longer
-# multiplies a titre to make the emitted load: with the per-subject total
-# identified, volume is only the physical volume of the deposit, carried on the
-# record for the deposition geometry and for any concentration-based check.
+# Per-sample emesis titre is the identified quantity: Kirby et al. 2016's
+# cumulative shed is titre x volume summed over positive samples, and Table 3
+# reports per-subject positives-only sample means. Titre is a host property,
+# drawn log-uniform once per illness; volume is drawn per episode. The
+# interval spans the two strains the paper's own Results decline to
+# distinguish (GII.2 Snow Mountain 1.6e5 vs All GI 8.0e5 GEC/mL, p = 0.36),
+# declared as genotype uncertainty -- no GII.4 emesis measurement exists. The
+# 2-subject GII.1 Hawaii pilot (5.0e3) is excluded from this span exactly as
+# the paper excludes it from every genogroup comparison.
+# Kirby et al. 2016, PLoS ONE 11(4):e0143759, Table 3. Grade B (surrogate
+# genotype). Origin: T3.
+EMESIS_TITRE_GEC_PER_ML_RANGE = (1.6e5, 8.0e5)
+# A host below the detectable-episode threshold is not virus-free -- it is a
+# censored interval. Upper bound: Ge et al. 2023's stated challenge-study
+# assay LOD, 1.5e4 GEC/g by immunomagnetic-capture RT-PCR
+# (doi:10.3201/eid2907.230117), with Kirby's 1 g = 1 mL proxy. Lower bound:
+# the lowest emesis titre the literature measures at all, the Hawaii pilot's
+# 5.0e3 GEC/mL. Grade C declared inference bounded by two measured numbers.
+# The Hawaii pilot is excluded from the detectable span above because the
+# paper excludes it from genogroup comparisons; it anchors this floor because
+# "lowest titre ever measured" is a different claim than "genogroup-typical
+# titre", and the two are consistent.
+EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE = (5.0e3, 1.5e4)
+# Detectable-illness threshold read directly off Kirby et al. 2016 Fig 1: of
+# the subjects who vomited once (7) or twice (2), every one was
+# virus-negative; every subject with 3+ events was positive. Grade B.
+# Origin: F1.
+EMESIS_DETECTABLE_MIN_EPISODES = 3
+# Fraction of subjects vomiting exactly once, measured 32% (Kirby et al. 2016
+# Table 2 / Results, "32% of subjects only vomiting once"). The episode count
+# is drawn from a truncated geometric on EMESIS_EPISODES_RANGE solved to
+# reproduce this fraction, so there is no free shape knob. Grade B. Origin: T2.
+EMESIS_SINGLE_EPISODE_FRACTION = 0.32
+# Vomitus volume per episode from Tung-Thompson et al. 2015 and Booth & Frost
+# 2019; measured range, evidence grade B. Drawn log-uniform per episode at
+# emission time and multiplied by the host's per-illness titre to make the
+# episode load -- Kirby's own arithmetic (titre x volume summed over positive
+# samples).
 EMESIS_VOLUME_ML_RANGE = (50.0, 800.0)
 # Emesis events per subject, 1-7 with mode 1 (Kirby et al. 2016, Tables 2-3);
-# measured count, evidence grade B. With the per-illness total identified, the
-# episode count only partitions and times that same total -- it no longer
-# scales emission -- which is why correcting the former (1, 3) is safe.
+# measured count, evidence grade B. The count is drawn from a truncated
+# geometric solved against EMESIS_SINGLE_EPISODE_FRACTION -- see
+# emesis_episode_weights -- not a discrete uniform (which would put 14.3% at
+# one event against the measured 32%).
 EMESIS_EPISODES_RANGE = (1, 7)
 # Aerosol fraction from Tung-Thompson et al. 2015 surrogate measurements;
 # evidence grade B.
@@ -439,18 +450,51 @@ def draw_symptom_axes(
     }
 
 
+@lru_cache(maxsize=None)
+def emesis_episode_weights(low: int, high: int) -> tuple[float, ...]:
+    """Truncated-geometric episode-count weights on ``low..high``.
+
+    The distribution is P(K=k) proportional to q^(k-1), with q solved by
+    bisection from the measured single-episode share
+    ``EMESIS_SINGLE_EPISODE_FRACTION`` -- on 1..7, (1-q)/(1-q^7) = 0.32 gives
+    q ~= 0.708 and E[K] ~= 2.75. The measured input is the fraction; q is
+    derived from it, so there is no free shape knob. Deterministic, consumes
+    no RNG.
+    """
+    n = int(high) - int(low) + 1
+    target = EMESIS_SINGLE_EPISODE_FRACTION
+    lo, hi = 0.0, 1.0
+    for _ in range(200):
+        q = 0.5 * (lo + hi)
+        single = (1.0 - q) / (1.0 - q**n) if q < 1.0 else 1.0 / n
+        if single > target:
+            lo = q
+        else:
+            hi = q
+    q = 0.5 * (lo + hi)
+    weights = [q**k for k in range(n)]
+    total = sum(weights)
+    return tuple(w / total for w in weights)
+
+
 def draw_emesis_schedule(
     agent: Any,
     pathogen_id: str,
     profile: dict[str, Any],
     rng: np.random.Generator,
 ) -> None:
-    """Draw onset-relative emesis times and the illness total, once.
+    """Draw onset-relative emesis times and the host titre, once per illness.
 
-    The per-subject cumulative shed is the identified quantity, so it is drawn
-    once here and partitioned equally over the episodes drawn with it; nothing
-    is drawn per episode at emission time. A host whose drawn symptom axes
-    exclude vomiting draws no schedule at all.
+    Kirby et al. 2016's arithmetic is cumulative shed = titre x volume summed
+    over positive samples: titre is a host property drawn once here, and the
+    per-episode volume drawn at emission time multiplies it, so cumulative
+    shed rises with episode count as Fig 1 measures instead of falling as
+    1/K. Episode count comes from the truncated geometric solved to reproduce
+    the measured 32% single-episode share; a host with fewer than
+    EMESIS_DETECTABLE_MIN_EPISODES events is below the assay LOD -- a
+    censored interval, not a zero -- and draws its titre from the censored
+    range. A host whose drawn symptom axes exclude vomiting draws no
+    schedule at all.
     """
     if not hasattr(agent, "emesis_episode_schedule_by_pathogen"):
         return
@@ -458,7 +502,8 @@ def draw_emesis_schedule(
         agent.infections.get(pathogen_id) or {}, VOMITING_AXIS,
     ):
         agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
-        agent.emesis_episode_load_by_pathogen[pathogen_id] = 0.0
+        agent.emesis_titre_gec_per_ml_by_pathogen[pathogen_id] = 0.0
+        agent.emesis_censored_below_lod_by_pathogen[pathogen_id] = False
         return
     phases = profile.get("clinical_presentation", {}).get("phases", [])
     emetic_phases = [
@@ -466,7 +511,8 @@ def draw_emesis_schedule(
     ]
     if not emetic_phases:
         agent.emesis_episode_schedule_by_pathogen[pathogen_id] = []
-        agent.emesis_episode_load_by_pathogen[pathogen_id] = 0.0
+        agent.emesis_titre_gec_per_ml_by_pathogen[pathogen_id] = 0.0
+        agent.emesis_censored_below_lod_by_pathogen[pathogen_id] = False
         return
     bounds = [
         (
@@ -480,20 +526,28 @@ def draw_emesis_schedule(
     window_start = min(start for start, _ in bounds)
     window_end = max(end for _, end in bounds)
     low, high = profile.get("emesis_episodes_range", EMESIS_EPISODES_RANGE)
-    count = int(rng.integers(int(low), int(high) + 1))
+    count = int(low) + int(rng.choice(
+        len(emesis_episode_weights(int(low), int(high))),
+        p=emesis_episode_weights(int(low), int(high)),
+    ))
     schedule = rng.uniform(window_start, window_end, count)
     agent.emesis_episode_schedule_by_pathogen[pathogen_id] = sorted(
         float(age) for age in schedule
     )
-    total_low, total_high = profile.get(
-        "emesis_total_shed_gec_range", EMESIS_TOTAL_SHED_GEC_RANGE,
+    censored = count < EMESIS_DETECTABLE_MIN_EPISODES
+    if censored:
+        titre_key = "emesis_censored_titre_gec_per_ml_range"
+        titre_default = EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE
+    else:
+        titre_key = "emesis_titre_gec_per_ml_range"
+        titre_default = EMESIS_TITRE_GEC_PER_ML_RANGE
+    titre_low, titre_high = profile.get(titre_key, titre_default)
+    agent.emesis_titre_gec_per_ml_by_pathogen[pathogen_id] = math.exp(
+        rng.uniform(
+            math.log(float(titre_low)), math.log(float(titre_high)),
+        ),
     )
-    total_shed = math.exp(rng.uniform(
-        math.log(float(total_low)), math.log(float(total_high)),
-    ))
-    agent.emesis_episode_load_by_pathogen[pathogen_id] = (
-        total_shed / max(1, count)
-    )
+    agent.emesis_censored_below_lod_by_pathogen[pathogen_id] = censored
 
 
 # Deprecated names retained for import compatibility. The measured hand
@@ -4962,30 +5016,30 @@ class TransmissionCore:
         """Arithmetic mean of a log-uniform variate on [low, high]."""
         return (high - low) / math.log(high / low)
 
-    def _emesis_episode_load(
+    def _emesis_host_titre(
         self,
         agent: KorkinAgent,
         pathogen_id: str,
         profile: dict,
-        scheduled_episodes: int,
     ) -> float:
-        """Copies expelled in one episode of this illness.
+        """This host's per-illness emesis titre in GEC/mL.
 
-        The identified quantity is the per-subject cumulative shed, drawn once
-        per illness in :func:`draw_emesis_schedule` and partitioned equally over
-        the episodes drawn with it. A harness that writes a schedule directly
-        never made that draw, so it falls back to the interval's arithmetic mean
-        split over the scheduled episodes; the fallback consumes no RNG.
+        The identified quantity is the per-sample titre, drawn once per
+        illness in :func:`draw_emesis_schedule` (censored illnesses draw from
+        the below-LOD interval); each episode multiplies it by that event's
+        drawn volume. A harness that writes a schedule directly never made
+        that draw, so it falls back to the log-uniform mean of the detectable
+        interval; the fallback consumes no RNG.
         """
         stored = getattr(
-            agent, "emesis_episode_load_by_pathogen", {},
+            agent, "emesis_titre_gec_per_ml_by_pathogen", {},
         ).get(pathogen_id)
         if stored is not None:
             return float(stored)
         low, high = self._emesis_range(
-            profile, "emesis_total_shed_gec_range", EMESIS_TOTAL_SHED_GEC_RANGE,
+            profile, "emesis_titre_gec_per_ml_range", EMESIS_TITRE_GEC_PER_ML_RANGE,
         )
-        return self._log_uniform_mean(low, high) / max(1, scheduled_episodes)
+        return self._log_uniform_mean(low, high)
 
     @staticmethod
     def _symptomatic_phase(
@@ -5057,8 +5111,9 @@ class TransmissionCore:
             "emesis_aerosol_fraction_range",
             EMESIS_AEROSOL_FRACTION_RANGE,
         )
-        episode_load = self._emesis_episode_load(
-            agent, pathogen_id, profile, len(schedule),
+        host_titre = self._emesis_host_titre(agent, pathogen_id, profile)
+        censored = agent.emesis_censored_below_lod_by_pathogen.get(
+            pathogen_id, False,
         )
         area = float(profile.get(
             "emesis_deposition_area_m2", EMESIS_DEPOSITION_AREA_M2,
@@ -5077,6 +5132,7 @@ class TransmissionCore:
             aerosol_fraction = math.exp(self.rng.uniform(
                 math.log(aerosol_low), math.log(aerosol_high),
             ))
+            episode_load = volume * host_titre
             surface_load = episode_load * (1.0 - aerosol_fraction)
             aerosol_load = episode_load * aerosol_fraction
             pending = self.emesis_aerosol_pending_by_pathogen.setdefault(
@@ -5092,8 +5148,11 @@ class TransmissionCore:
                 "epoch": int(epoch),
                 "zone": zone_name,
                 "volume_ml": volume,
-                # Derived diagnostic, never an input.
-                "titre_gec_per_ml": episode_load / volume,
+                # The input, drawn once per illness -- not a derived
+                # diagnostic. Below-LOD illnesses carry the censored flag
+                # rather than a zero titre.
+                "titre_gec_per_ml": host_titre,
+                "censored_below_lod": bool(censored),
                 "episode_load": episode_load,
                 "surface_load": surface_load,
                 "aerosol_load": aerosol_load,
