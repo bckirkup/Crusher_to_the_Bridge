@@ -333,6 +333,18 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
 
+# Deck-to-deck height, used only to convert a zone's declared air volume into
+# a deck area. 2.8 m is the deck height assumed throughout a statistical
+# preliminary-design study of 21 parent cruise ships (Bruce, "Cruise Ship
+# Preliminary Design: The Influence of Design Features on Profitability",
+# Univ. of New Orleans thesis 1914, 2014 — staterooms and machinery spaces
+# alike). Design practice for this ship type, not a measurement of any zone
+# in this model: Grade C. Origin: Sec.
+# Multi-deck public rooms (theatres, atria) are one zone here, so their floor
+# area is understated and their touchable share correspondingly overstated --
+# the error is in the conservative direction.
+PASSENGER_DECK_HEIGHT_M = 2.8
+
 # Public head geometry. Floor area is a declared assumption: a 0.9 x 1.5 m
 # water-closet stall footprint doubled to carry the handwashing and
 # circulation share. Nobody has measured ship head floor area. It is deck
@@ -1547,6 +1559,26 @@ def _parse_routine_by_zone_class(
     return by_zone_class
 
 
+@dataclass
+class EmesisPatch:
+    """The localised patch of soiled high-touch surface one emesis episode leaves.
+
+    Filed against the unit key (zone or cabin compartment) the episode
+    happened in, so the mass stays inside the bolus footprint instead of
+    joining the zone-wide surface pool. ``occupant_share`` is the fraction
+    of the unit's occupants the footprint can reach
+    (``footprint_area / floor_area``, in (0, 1]); ``high_touch_area_m2`` is
+    the footprint's share of the unit's high-touch inventory, so the patch's
+    areal density equals the zone-wide share's density by construction --
+    the extent of exposure shrinks, the per-touch dose does not.
+    """
+
+    mass: float               # GEC on soiled high-touch surface
+    high_touch_area_m2: float  # footprint_share * high_touch_area, > 0
+    occupant_share: float      # footprint_area / floor_area, in (0, 1]
+    epoch: int                 # deposition epoch, for diagnostics
+
+
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
 
@@ -1738,6 +1770,13 @@ class TransmissionCore:
         self.surface_pools: dict[str, float] = {}  # aggregate (legacy)
         self.surface_pools_by_pathogen: dict[str, dict[str, float]] = {}
         self.surface_pools_cleanable_by_pathogen: dict[str, dict[str, float]] = {}
+        # Localised emesis patches per unit key per pathogen: the touchable
+        # share of an emesis bolus stays in its footprint rather than
+        # joining the zone-wide pool. Continuous hand deposition still uses
+        # ``surface_pools_by_pathogen``.
+        self.emesis_patch_pools_by_pathogen: dict[
+            str, dict[str, list[EmesisPatch]],
+        ] = {}
         self._routine_cleaning_accumulators: dict[str, float] = {}
         self._routine_cleaning_event_counts: dict[str, int] = {}
         self._surface_last_deposition_epoch: dict[str, int] = {}
@@ -2342,6 +2381,26 @@ class TransmissionCore:
                         SURFACE_RESERVOIR, pathogen_id, zone_name,
                     ),
                 )
+        # Emesis patches sit on high-touch surface, so a routine pass sees
+        # them as cleanable at the zone's routine coverage.
+        for pathogen_id, patches_by_unit in (
+            self.emesis_patch_pools_by_pathogen.items()
+        ):
+            coverage = self._routine_cleaning_schedule(zone_name)[0]
+            retention = 1.0 - coverage * (1.0 - multiplier)
+            patches = patches_by_unit.get(zone_name)
+            if not patches:
+                continue
+            kept = [
+                p for p in patches
+                if self._scale_emesis_patch(p, retention) > 0.0
+            ]
+            patches_by_unit[zone_name] = kept
+
+    def _scale_emesis_patch(self, patch: EmesisPatch, factor: float) -> float:
+        """Scale one patch's mass by a decay/cleaning retention; drop at ~0."""
+        patch.mass = max(0.0, patch.mass * self._bounded_fraction(factor))
+        return patch.mass
 
     def _step_routine_surface_cleaning(self) -> None:
         """Advance daily housekeeping accumulators and fire discrete passes."""
@@ -2350,6 +2409,8 @@ class TransmissionCore:
         zones = set(self._routine_cleaning_accumulators)
         zones.update(self.surface_pools)
         for pools in self.surface_pools_by_pathogen.values():
+            zones.update(pools)
+        for pools in self.emesis_patch_pools_by_pathogen.values():
             zones.update(pools)
         for zone_name in zones:
             events_per_day = self._routine_cleaning_schedule(zone_name)[1]
@@ -2380,6 +2441,12 @@ class TransmissionCore:
             for pools in self.surface_pools_by_pathogen.values()
             for zone_name in pools
         }
+        patch_zones = {
+            zone_name
+            for pools in self.emesis_patch_pools_by_pathogen.values()
+            for zone_name in pools
+        }
+        zone_names.update(patch_zones)
         disinfection_factors = {
             zone_name: self._nested_disinfection_factors(
                 self._routine_cleaning_schedule(zone_name)[0],
@@ -2414,6 +2481,17 @@ class TransmissionCore:
                             SURFACE_RESERVOIR, pathogen_id, zone_name,
                         ),
                     )
+        for _pid, patches_by_unit in (
+            self.emesis_patch_pools_by_pathogen.items()
+        ):
+            for zone_name, patches in patches_by_unit.items():
+                if zone_name not in disinfection_factors or not patches:
+                    continue
+                cleanable_factor, _missed = disinfection_factors[zone_name]
+                patches_by_unit[zone_name] = [
+                    p for p in patches
+                    if self._scale_emesis_patch(p, cleanable_factor) > 0.0
+                ]
 
     @classmethod
     def _nested_disinfection_factors(
@@ -3056,6 +3134,8 @@ class TransmissionCore:
         keys.update(k for k in self.surface_pools if k.startswith(prefix))
         for pools in self.surface_pools_by_pathogen.values():
             keys.update(k for k in pools if k.startswith(prefix))
+        for pools in self.emesis_patch_pools_by_pathogen.values():
+            keys.update(k for k in pools if k.startswith(prefix))
         return sorted(keys)
 
     def get_pathogen_surface_mass(self, pathogen_id: str) -> dict[str, float]:
@@ -3071,12 +3151,26 @@ class TransmissionCore:
         return self._fomite_surface_area(zone_name) * 1.0e4
 
     def zone_surface_mass(self, zone_name: str, pathogen_id: str | None = None) -> float:
-        """Surface mass on a zone plus every cabin compartment within it."""
+        """Surface mass on a zone plus every cabin compartment within it.
+
+        Includes live emesis patch mass so the mass stays visible to the
+        surface-swab observer and to mass accounting; the patch's mass is
+        spread over the zone's high-touch area in the swab density, which
+        under-reads a targeted swab of the patch itself (EMESIS-FOOTPRINT-01).
+        """
         pools = (
             self.surface_pools if pathogen_id is None
             else self.surface_pools_by_pathogen.get(pathogen_id, {})
         )
-        return sum(pools.get(key, 0.0) for key in self.zone_surface_keys(zone_name))
+        total = sum(
+            pools.get(key, 0.0) for key in self.zone_surface_keys(zone_name)
+        )
+        patch_pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id, {})
+        for key in self.zone_surface_keys(zone_name):
+            total += sum(
+                patch.mass for patch in patch_pools.get(key, ())
+            )
+        return total
 
     def zone_surface_lineage_masses(
         self,
@@ -4810,6 +4904,28 @@ class TransmissionCore:
                 return SANITARY_HIGH_TOUCH_AREA_M2_PER_WC * water_closets
         return HIGH_TOUCH_AREA_M2[zone_class]
 
+    def _zone_floor_area_m2(self, unit_name: str) -> float:
+        """Declared deck area, else the unit's air volume over a deck height.
+
+        Sanitary zones declare ``floor_area_m2`` on the layout. Everything
+        else derives a floor area from ``_air_unit_volume`` -- which already
+        resolves a cabin compartment to its berth share of the block, so a
+        stateroom gets a per-stateroom floor area with no new partition --
+        over ``PASSENGER_DECK_HEIGHT_M``. A unit with no positive area
+        resolves to ``EMESIS_DEPOSITION_AREA_M2`` so the caller degrades to
+        the bolus footprint rather than dividing by zero.
+        """
+        declared = self.zone_floor_areas.get(unit_name)
+        if declared is not None and float(declared) > 0.0:
+            return float(declared)
+        volume = self._air_unit_volume(unit_name)
+        if not math.isfinite(volume) or volume <= 0.0:
+            return EMESIS_DEPOSITION_AREA_M2
+        area = volume / PASSENGER_DECK_HEIGHT_M
+        if not math.isfinite(area) or area <= 0.0:
+            return EMESIS_DEPOSITION_AREA_M2
+        return area
+
     def _fomite_surface_contacts(
         self,
         zone_name: str,
@@ -4858,6 +4974,29 @@ class TransmissionCore:
         epoch: int,
     ) -> float:
         """Mass one target transfers from surface to hands."""
+        return self._fomite_pickup_request_for_area(
+            target,
+            zone_name,
+            surface_mass,
+            self._fomite_surface_area(zone_name),
+            epoch,
+        )
+
+    def _fomite_pickup_request_for_area(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        surface_mass: float,
+        surface_area_m2: float,
+        epoch: int,
+    ) -> float:
+        """Mass one target transfers to hands from a mass spread over an area.
+
+        Shared by the zone-wide pool (``_fomite_pickup_request``, area =
+        the unit's high-touch inventory) and the localised emesis patch
+        (area = the patch's share of that inventory), so the transfer chain
+        is identical in both and only the areal denominator differs.
+        """
         if self._cabin_confinement_active(target):
             return 0.0
         hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
@@ -4866,10 +5005,9 @@ class TransmissionCore:
             1.0,
             max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
         )
-        area = self._fomite_surface_area(zone_name)
         request = (
             self._fomite_surface_contacts(zone_name, target, epoch)
-            * (used_fraction * hand_area / area)
+            * (used_fraction * hand_area / surface_area_m2)
             * transfer_efficiency
             * surface_mass
         )
@@ -5259,9 +5397,16 @@ class TransmissionCore:
         area = float(profile.get(
             "emesis_deposition_area_m2", EMESIS_DEPOSITION_AREA_M2,
         ))
+        # The touchable share of a bolus is the high-touch areal fraction of
+        # the room it lands in: the footprint, not the bolus area, bounds
+        # the denominator, so a room smaller than the footprint keeps the
+        # pre-change value (the bolus overflows the space).
+        floor_area_m2 = self._zone_floor_area_m2(zone_name)
+        high_touch_area_m2 = self._fomite_surface_area(zone_name)
         touchable_fraction = min(
-            1.0, self._fomite_surface_area(zone_name) / area,
+            1.0, high_touch_area_m2 / max(floor_area_m2, area),
         )
+        footprint_share = min(1.0, area / floor_area_m2)
         records = agent.emesis_deposition_records_by_pathogen.setdefault(
             pathogen_id, [],
         )
@@ -5301,6 +5446,19 @@ class TransmissionCore:
                 "non_touchable": surface_load - pool_gain,
                 "touchable_fraction": touchable_fraction,
             })
+            if pool_gain > 0.0:
+                patch_pools = self.emesis_patch_pools_by_pathogen.setdefault(
+                    pathogen_id, {},
+                )
+                patch_pools.setdefault(zone_name, []).append(EmesisPatch(
+                    mass=pool_gain,
+                    high_touch_area_m2=(
+                        footprint_share * high_touch_area_m2
+                    ),
+                    occupant_share=footprint_share,
+                    epoch=int(epoch),
+                ))
+                self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
             if self.blackwater_tank is not None:
                 # The deposited share outside the high-touch footprint is
                 # cleaned up into the sewage stream at the declared
@@ -5733,7 +5891,9 @@ class TransmissionCore:
         )
         if pool_gain <= 0.0:
             return 0.0
-        self._deposit_surface_mass(pathogen_id, zone_name, pool_gain)
+        # The touchable mass was filed as an EmesisPatch inside
+        # _emit_emesis -- localised to the bolus footprint, not the
+        # zone-wide pool. Only the strain attribution records it here.
         self._deposit_reservoir_strains(
             SURFACE_RESERVOIR, pathogen_id, zone_name, [(agent, pool_gain)],
         )
@@ -5743,6 +5903,140 @@ class TransmissionCore:
             )
             self._surface_last_deposition_epoch[key] = int(epoch)
         return pool_gain
+
+    def _deliver_fomite_requests(
+        self,
+        requests: list[tuple[KorkinAgent, float]],
+        zone_name: str,
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> float:
+        """Scale simultaneous requests to the mass and deliver to hands.
+
+        Each dose is computed from the same start-of-epoch mass; the whole
+        set is scaled together when demand exceeds supply. Returns the
+        delivered total so the caller decrements the pool or patch it drew
+        against.
+        """
+        scale = self._delivery_scale(
+            sum(mass for _, mass in requests), surface_mass,
+        )
+        delivered_total = 0.0
+        for target, requested in requests:
+            delivered = requested * scale
+            if delivered <= 0.0:
+                continue
+            hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            target.hand_load_by_pathogen[pathogen_id] = hand + delivered
+            dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
+            target.hand_load_by_pathogen[pathogen_id] = (
+                hand + delivered - dose
+            )
+            self._record_fomite_pickup(
+                target, zone_name, surface_mass, delivered, dose,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
+            delivered_total += delivered
+        return delivered_total
+
+    def _emesis_patch_pickup(
+        self,
+        epoch: int,
+        pickup_units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Expose only the occupants an emesis patch's footprint reaches.
+
+        A unit with no patches draws no RNG here, so a voyage without emesis
+        episodes is bit-identical to the pre-patch stream.
+        """
+        patches_by_unit = self.emesis_patch_pools_by_pathogen.get(pathogen_id)
+        if not patches_by_unit:
+            return
+        for unit_name, occupants in pickup_units.items():
+            patches = patches_by_unit.get(unit_name)
+            if not patches:
+                continue
+            susceptible = self._get_susceptible(occupants, pathogen_id)
+            if not susceptible:
+                continue
+            prev_occupant_ids = self._prev_zone_occupants.get(unit_name, set())
+            prev_shedders = self._prev_zone_shedders.get(unit_name, [])
+            surface_attribution = attribution(
+                ledger,
+                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, unit_name),
+            )
+            kept: list[EmesisPatch] = []
+            for patch in patches:
+                delivered = self._emesis_patch_pickup_one(
+                    patch, susceptible, unit_name, epoch,
+                    prev_occupant_ids, prev_shedders,
+                    agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                    surface_attribution,
+                )
+                patch.mass = max(0.0, patch.mass - delivered)
+                if patch.mass > 0.0:
+                    kept.append(patch)
+            patches_by_unit[unit_name] = kept
+
+    def _emesis_patch_pickup_one(
+        self,
+        patch: EmesisPatch,
+        susceptible: list[KorkinAgent],
+        unit_name: str,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> float:
+        """Deliver one patch to the occupants its footprint covers."""
+        exposed = [
+            target for target in susceptible
+            if self.rng.random() < patch.occupant_share
+        ]
+        if not exposed:
+            return 0.0
+        requests = [
+            (
+                target,
+                self._fomite_pickup_request_for_area(
+                    target, unit_name, patch.mass,
+                    patch.high_touch_area_m2, epoch,
+                ),
+            )
+            for target in exposed
+        ]
+        delivered = self._deliver_fomite_requests(
+            requests, unit_name, patch.mass, epoch,
+            prev_occupant_ids, prev_shedders,
+            agent_doses, matrix, agent_pathway_doses, pathogen_id,
+            surface_attribution,
+        )
+        if delivered > 0.0 and delivered < patch.mass:
+            self._reservoir.decay(
+                (patch.mass - delivered) / patch.mass,
+                ReservoirComposition.key(
+                    SURFACE_RESERVOIR, pathogen_id, unit_name,
+                ),
+            )
+        return delivered
 
     def _hand_to_mouth_dose(
         self,
@@ -6250,30 +6544,23 @@ class TransmissionCore:
                 )
                 for target in susceptible
             ]
-            scale = self._delivery_scale(
-                sum(mass for _, mass in requests), surface_mass,
+            delivered_total = self._deliver_fomite_requests(
+                requests, zone_name, surface_mass, epoch,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
             )
-            delivered_total = 0.0
-            for target, requested in requests:
-                delivered = requested * scale
-                if delivered <= 0.0:
-                    continue
-                hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
-                target.hand_load_by_pathogen[pathogen_id] = hand + delivered
-                dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
-                target.hand_load_by_pathogen[pathogen_id] = (
-                    hand + delivered - dose
-                )
-                self._record_fomite_pickup(
-                    target, zone_name, surface_mass, delivered, dose,
-                    prev_occupant_ids, prev_shedders,
-                    agent_doses, matrix, agent_pathway_doses, pathogen_id,
-                    surface_attribution,
-                )
-                delivered_total += delivered
             self._consume_surface_mass(
                 pathogen_id, zone_name, delivered_total, surface_mass,
             )
+
+        # b2) Emesis patches: the same transfer chain as the zone pool, but
+        # only the occupants the bolus footprint can reach are exposed --
+        # the patch's areal density is unchanged, its extent is not.
+        self._emesis_patch_pickup(
+            epoch, pickup_units, pathogen_id, agent_doses, matrix,
+            agent_pathway_doses, ledger,
+        )
 
         # c) Sanitary visits: dwell-weighted fomite contact at head venues.
         # Runs off the original (unsplit) occupancy; under the default
@@ -6815,6 +7102,23 @@ class TransmissionCore:
             )
             for zone_name in pools:
                 self._scale_surface_mass(pathogen_id, zone_name, survival)
+        # Emesis patches see the same one-epoch survival as the zone pool --
+        # same surface, same decay -- then drop anything that fell to ~0.
+        for pathogen_id, patches_by_unit in (
+            self.emesis_patch_pools_by_pathogen.items()
+        ):
+            survival = self._surface_survival(
+                self.pathogen_profiles.get(pathogen_id),
+            )
+            for zone_name, patches in list(patches_by_unit.items()):
+                kept = [
+                    p for p in patches
+                    if self._scale_emesis_patch(p, survival) > 0.0
+                ]
+                if kept:
+                    patches_by_unit[zone_name] = kept
+                else:
+                    del patches_by_unit[zone_name]
         tracked_zones = {
             zone_name
             for pools in self.surface_pools_by_pathogen.values()

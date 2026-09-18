@@ -16,6 +16,24 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`EMESIS-FOOTPRINT-01` (ledger entry): every campaign reading that rests on
+emesis deposition — including the FLUSH-S4 `off`-arm posting rates (5 per
+1,000 classic, 20 per 1,000 spirit at `7f689b9`) and every earlier stage's
+fomite-route attributions — was measured while the whole touchable share of
+a bolus joined the zone-wide surface pool at a fraction independent of room
+size.** The replayed explosive `fl_spr_12d` voyage (seed 8105, 621
+infections) shows the mechanism exactly: one subclinical passenger's single
+emesis event at epoch 16 put 1.35e8 GEC onto MainTheater's shared pool and
+infected 100 of 562 co-occupants in one epoch. The repair localises that
+mass to the bolus footprint — exposed set = `footprint_area / floor_area`
+of the zone's occupants — and makes the touchable share the high-touch
+areal fraction of the room. So those posting readings and the explosive
+tail they rested on are historical, not current. Item 26(d)–(f)'s
+"one scalar per zone per pathogen" limitation is now partly addressed
+**for emesis deposition only** — continuous hand deposition is still
+zone-wide. The paired-seed re-measurement on the repaired engine is pending
+in this entry.
+
 **Every crew attack rate and crew-channel posting measured before
 `FOOD-ROLE-01` was measured with the whole crew as food handlers at every
 meal.** The transmission core's food-handler test was `role == crew and zone in
