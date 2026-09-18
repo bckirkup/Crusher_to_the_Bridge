@@ -70,10 +70,11 @@ docker run --rm picard-campaign --smoke
   a numeric expectation, attribute the move to a specific part of your diff
   before updating it; an unattributed baseline move is a possible defect.
 - Do not fit a physical constant to an anchor the model is scored against.
-- Update `docs/norovirus/norovirus_open_ledger.md` in the same change as anything that
-  invalidates a measurement recorded there; new entries are one file each under
-  `docs/norovirus/ledger/<ID>.md` (see its README), and must not append numbered
-  items.
+- Update the relevant open ledger (`docs/norovirus/norovirus_open_ledger.md` or
+  `docs/covid/covid_open_ledger.md`) in the same change as anything that
+  invalidates a measurement recorded there; new defect/measurement entries are
+  one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and
+  Commit SHA.
 - Preserve the locked `uv sync` installation (`--locked --no-build`, wheels only
   from `uv.lock`) and both CI workflows. Regenerate `uv.lock` only with
   `uv lock` after changing `pyproject.toml`.

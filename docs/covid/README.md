@@ -14,6 +14,7 @@ dose-response α/β are not, and the emission magnitude is dimensionally wrong.
 
 | Doc | Status | Role |
 |-----|--------|------|
+| [covid_open_ledger.md](covid_open_ledger.md) | Living | Current withdrawals and measurement status for the COVID arm |
 | [covid_parameter_provenance_audit.md](covid_parameter_provenance_audit.md) | Audit (2026-09-01) | Provenance class of every profile scalar; why the emission scale is not identifiable apart from β; which quantities are scored and must not be fitted |
 | [covid_first_look_readout.md](covid_first_look_readout.md) | Findings (2026-09-14/16) | Replicated Theta grid on Diamond Princess (20 seeds), Greg Mortimer held-out scoring (50 seeds) and the boarding-axis screen (age x imports x Theta) on AWS Batch; the undeclared-cohort defect, the corrected v3 / screen v2 surfaces, and the v4 rerun on the corrected incubation model (Theta 3.16e7, interior); the quarantine-leak / roster-drain trace and the adaptive-density imports × Theta sweep design (`covid_import_sweep_v1`, not yet run) |
 | [covid_arm_status.md](covid_arm_status.md) | Findings (2026-09-01) | What the `sars_cov2_resp` campaign arm actually does, and the four reasons it is not yet scoreable |

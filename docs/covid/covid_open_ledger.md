@@ -1,0 +1,64 @@
+# SARS-CoV-2 fit: open ledger
+
+> **Status:** Living. Head commit of record: `4d016c5` (fill with the
+> `main` SHA this file was authored against). If that is not the current head,
+> treat every number here as unverified.
+
+What is currently withdrawn on the `sars_cov2_resp` arm, what the last
+measurement of record is, and what is outstanding. The permanent defect record
+for shared mechanics is `docs/ledger/` (entries tagged `sars_cov2_resp` or
+`all`) together with the frozen numbered history in
+`docs/norovirus/norovirus_open_ledger.md`; readouts live in `docs/covid/`.
+
+Read this before quoting any Θ, attack-rate, onset-curve or route-share figure
+for the COVID arm.
+
+---
+
+## 1. Currently withdrawn
+
+**Every fitted Θ is void pending a refit on the repaired airborne subsystem.**
+The fits of record (`covid_first_look_v1`–`v6`, the 1b boarding screen, and the
+three-stage imports × Θ sweep) were all measured before at least one of:
+
+- `AERO-CABIN-04` (#583): HVAC-downstream inhalation ignored cabin confinement.
+- `AERO-CABIN-05` (#588): each room's standing air was inhaled once per upstream
+  shedding zone (measured mean 5.2×, up to 82×) instead of once per epoch.
+- `AERO-CABIN-06` (#591): the airborne reservoir was keyed on the whole cabin
+  block, so a confined shedder's aerosol reached every stateroom on the block.
+
+`v6` (#565) additionally carried `AERO-CABIN-03` (#561) and the two realistic
+air defaults, but not 04–06. Its selected Θ = 3.16e11 and every earlier
+Θ (3.16e7 on pooled air, v4/v5) belong to the air model they were measured on
+and are not carried forward.
+
+**The declared index case is wrong by about six days and never disembarks.**
+The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
+at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
+age 0 on day 0 and keeps him aboard. There is no per-agent permanent
+disembarkation in the engine. Every fit above scores a curve that includes a
+host the record excludes.
+
+## 2. Last measurement of record
+
+Local burning cell, seed `20200206`, Θ = 3.16e7, full voyage, after
+`AERO-CABIN-06` (#591): 2,759 infection events, 2,732 distinct hosts infected,
+final attack 73.6%; HVAC-route infections in confined cabin hosts 32 (was 1,591
+before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
+2,009 — still extinction-or-burn; at Θ = 1e9 two intermediate cells appear
+(48 and 347). Change-detector cell: CPython 3.12 `(105, 51, 217, 118, 20)`.
+
+## 3. Outstanding
+
+- **Missing intermediate attack rates.** With the airborne leaks closed, ~2,700
+  infections still pass through confinement on non-air routes (direct contact,
+  fomite, crew service). Route trace of confined hosts' remaining dose is the
+  next diagnostic; no constant is to be moved to produce a 19% attack rate.
+- **Identical host susceptibility on the Θ arm.** The exponential dose-response
+  branch returns Θ itself rather than a per-host frailty draw (one distinct
+  value across 3,711 hosts). Whether frailty belongs on this arm is a provenance
+  decision, not a fit choice.
+- **795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
+  pool; lifecycle not yet traced.
+- **Index-case geometry.** Declared per-agent departure, then a resolved
+  infection-age × Θ screen (≥20 seeds), before any v7 refit.
