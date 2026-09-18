@@ -3242,7 +3242,8 @@ class TransmissionCore:
             return None
         diners = [
             agent for agent in occupants
-            if self._scheduled_activity(agent, epoch).startswith("Meal")
+            if self._scheduled_activity(agent, epoch).split(":", 1)[0]
+            not in {"Work", "Sleep"}
             and not self._on_service_duty(agent, zone_name, epoch)
         ]
         ordered = seated_diners_in_booking_order(diners)

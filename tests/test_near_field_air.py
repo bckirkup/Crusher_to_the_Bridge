@@ -246,6 +246,16 @@ class TestMealTables:
         for left, right in ((0, 1), (2, 3), (4, 5)):
             assert dealt[left][0] == dealt[right][0]
 
+    def test_free_buffet_occupants_are_dealt_but_work_is_not(self) -> None:
+        core = self._buffet_core()
+        free = _agent(20, BUFFET)
+        free.schedule = ["Free"] * 24
+        worker = _agent(21, BUFFET, role="crew")
+        worker.work_zone = BUFFET
+        worker.schedule = ["Work"] * 24
+        core._deal_meal_tables(BUFFET, [free, worker], 1)
+        assert set(core._meal_tables[(BUFFET, 1)]) == {free.agent_id}
+
     def test_same_seed_repeats_and_next_epoch_redeals(self) -> None:
         first = self._buffet_core(seed=31)
         second = self._buffet_core(seed=31)
