@@ -164,5 +164,5 @@ longer justifications.
 | Agent/CI commands | `AGENTS.md` + matching `.agents/skills/` |
 | JSON contracts | `schemas/README.md` + schema files |
 | ContamX / HVAC physics | `CONTAM_INTEROP.md` and [`exterior_zone_ahu_audit.md`](exterior_zone_ahu_audit.md) |
-| An epidemiological constant | The constant's provenance comment, the relevant open ledger (`norovirus/norovirus_open_ledger.md` or `covid/covid_open_ledger.md`) if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items. |
+| An epidemiological constant | The constant's provenance comment, the relevant open ledger (`norovirus/norovirus_open_ledger.md` or `covid/covid_open_ledger.md`) if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items. |
 | A document's implementation state | Its status header — and move the file if the filing rule above now puts it elsewhere |
