@@ -1,6 +1,6 @@
 # AERO-NEAR-02
 **Date:** 2026-09-18
-**Commit:** 627b2a3
+**Commit:** 9c1ed81
 **Pathogens:** all
 **Status:** open
 
