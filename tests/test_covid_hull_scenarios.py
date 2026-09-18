@@ -435,7 +435,8 @@ class TestProvenanceAndRefusals:
                 "scheduled_protocols[SOP-017].modifiers.confinement_enforced"
             ]
             assert scheduled["protocol_id"] == "SOP-017"
-            assert entry["value"].startswith("true — passengers confined")
+            assert entry["value"].startswith("true — ")
+            assert "not an opt-in" in entry["value"]
             assert entry["grade"] in {"A", "B"}
 
     def test_held_out_outcomes_are_recorded_as_observations_not_config(
