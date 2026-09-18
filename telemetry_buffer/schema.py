@@ -127,10 +127,17 @@ def make_ground_truth(
 # ---------------------------------------------------------------------------
 
 def write_ground_truth(payload: dict[str, Any], path: str = GROUND_TRUTH_PATH) -> None:
-    """Serialise *payload* to the ground-truth JSON file."""
+    """Serialise *payload* to the ground-truth JSON file.
+
+    Writes a per-process temp file and renames it into place: the default
+    path is shared by every ShipSimulation in the checkout, so under
+    parallel test workers a direct write can be read mid-serialisation.
+    """
     safe_path = _validated_ground_truth_path(path)
-    with open(safe_path, "w", encoding="utf-8") as fh:
+    tmp_path = f"{safe_path}.tmp-{os.getpid()}"
+    with open(tmp_path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2)
+    os.replace(tmp_path, safe_path)
 
 
 def read_ground_truth(path: str = GROUND_TRUTH_PATH) -> dict[str, Any]:
