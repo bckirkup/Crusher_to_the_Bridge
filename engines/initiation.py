@@ -1459,11 +1459,10 @@ def _board_one_symptomatic_host(
         agent, "emesis_episode_schedule_by_pathogen", None,
     )
     if schedules is not None and pathogen_id in schedules:
-        # Events at or before the elapsed age happened ashore. The per-
-        # episode load is not rescaled: it is a per-subject cumulative shed
-        # partitioned over the whole illness, and the ashore share was never
-        # deposited onboard. Without the drop, _emit_emesis fires every
-        # past-due event the first time it looks.
+        # Events at or before the elapsed age happened ashore. The host
+        # titre is not rescaled: it is a per-illness property, and the ashore
+        # episodes' mass was never deposited onboard. Without the drop,
+        # _emit_emesis fires every past-due event the first time it looks.
         schedules[pathogen_id] = [
             age for age in schedules[pathogen_id] if age > elapsed_days
         ]

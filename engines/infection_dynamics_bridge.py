@@ -658,7 +658,8 @@ class KorkinAgent:
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
-        "emesis_episode_load_by_pathogen",
+        "emesis_titre_gec_per_ml_by_pathogen",
+        "emesis_censored_below_lod_by_pathogen",
         "emesis_deposition_records_by_pathogen",
         "microflora_disruption_status",
         # Chronic disease extensions
@@ -754,9 +755,11 @@ class KorkinAgent:
         self.hand_carriage_propensity_by_pathogen: dict[str, float] = {}
         # Elapsed days since onset, drawn once for each symptomatic illness.
         self.emesis_episode_schedule_by_pathogen: dict[str, list[float]] = {}
-        # Per-episode share of the illness's cumulative emesis shed, drawn with
-        # the schedule so nothing is drawn per episode.
-        self.emesis_episode_load_by_pathogen: dict[str, float] = {}
+        # Per-illness emesis titre (GEC/mL) drawn once with the schedule, and
+        # whether the illness sits below the assay LOD -- a censored interval,
+        # not a zero.
+        self.emesis_titre_gec_per_ml_by_pathogen: dict[str, float] = {}
+        self.emesis_censored_below_lod_by_pathogen: dict[str, bool] = {}
         self.emesis_deposition_records_by_pathogen: dict[
             str, list[dict[str, Any]]
         ] = {}
@@ -1032,7 +1035,8 @@ class KorkinAgent:
         if time_infected < 0:
             raise ValueError(f"time_infected must be non-negative, got {time_infected}")
         self.emesis_episode_schedule_by_pathogen.pop(pathogen_id, None)
-        self.emesis_episode_load_by_pathogen.pop(pathogen_id, None)
+        self.emesis_titre_gec_per_ml_by_pathogen.pop(pathogen_id, None)
+        self.emesis_censored_below_lod_by_pathogen.pop(pathogen_id, None)
         self.emesis_deposition_records_by_pathogen.pop(pathogen_id, None)
         self.hand_carriage_propensity_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (

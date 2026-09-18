@@ -95,7 +95,7 @@ def _agent(*, presented: bool, clock: SimClock | None = None) -> KorkinAgent:
             ONSET_DAYS * agent.clock.epochs_per_day,
         )
         agent.emesis_episode_schedule_by_pathogen[PATHOGEN] = [0.5]
-        agent.emesis_episode_load_by_pathogen[PATHOGEN] = 1e6
+        agent.emesis_titre_gec_per_ml_by_pathogen[PATHOGEN] = 1e6
     return agent
 
 
@@ -424,12 +424,12 @@ class TestEmesisStaysIllnessLinked:
         assert infection["illness"] == IllnessStatus.RECOVERED
         assert infection["status"] == InfectionStatus.INFECTED
         assert PATHOGEN not in agent.emesis_episode_schedule_by_pathogen
-        assert PATHOGEN not in agent.emesis_episode_load_by_pathogen
+        assert PATHOGEN not in agent.emesis_titre_gec_per_ml_by_pathogen
         assert PATHOGEN not in agent.emesis_deposition_records_by_pathogen
 
         core = self._core(profile, clock)
         agent.emesis_episode_schedule_by_pathogen[PATHOGEN] = [0.5]
-        agent.emesis_episode_load_by_pathogen[PATHOGEN] = 1e6
+        agent.emesis_titre_gec_per_ml_by_pathogen[PATHOGEN] = 1e6
         core._deposit_emesis(agent, PATHOGEN, ZONE, epochs, profile)
 
         assert not agent.emesis_deposition_records_by_pathogen.get(PATHOGEN)
