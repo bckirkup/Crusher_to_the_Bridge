@@ -76,21 +76,21 @@ class TestRouteAttribution:
             "smoke_pathogen_overrides_2epoch.json"
         )
         spec = PicardRunSpec.from_picard_json(REPO_ROOT, spec_path)
-        spec.num_epochs = 48
-        # The emesis source term (#emesis_source_term) repositioned the shared
-        # RNG stream (truncated-geometric episode count + per-illness titre
-        # draw): under the shipped seed 42 the seeded host's single episode
-        # falls past the run horizon and the fixture produced zero secondary
-        # transmission events. Seed 51 restores exactly one fomite event
-        # (cumulative_ever_infected 4), the same shape main produced at 42.
-        spec.random_seed = 51
-        first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(48)
+        # The emesis source term repositioned the shared RNG stream
+        # (truncated-geometric episode count + per-illness titre draw):
+        # at the shipped seed the seeded host's only scheduled episode now
+        # falls past the old 48-epoch horizon, so the run produced zero
+        # secondary transmission events. The horizon is extended to 72,
+        # the first length at which the fixture again establishes at least
+        # one transmission event.
+        spec.num_epochs = 72
+        first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,
             "update_route_attribution",
             lambda events, dominant, shares: None,
         )
-        second = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(48)
+        second = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         first_summary = first.history[-1]["summary"]
         second_summary = second.history[-1]["summary"]
 

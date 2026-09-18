@@ -323,7 +323,7 @@ EMESIS_VOLUME_ML_RANGE = (50.0, 800.0)
 # Emesis events per subject, 1-7 with mode 1 (Kirby et al. 2016, Tables 2-3);
 # measured count, evidence grade B. The count is drawn from a truncated
 # geometric solved against EMESIS_SINGLE_EPISODE_FRACTION -- see
-# _emesis_episode_weights -- not a discrete uniform (which would put 14.3% at
+# emesis_episode_weights -- not a discrete uniform (which would put 14.3% at
 # one event against the measured 32%).
 EMESIS_EPISODES_RANGE = (1, 7)
 # Aerosol fraction from Tung-Thompson et al. 2015 surrogate measurements;
@@ -5112,9 +5112,9 @@ class TransmissionCore:
             EMESIS_AEROSOL_FRACTION_RANGE,
         )
         host_titre = self._emesis_host_titre(agent, pathogen_id, profile)
-        censored = getattr(
-            agent, "emesis_censored_below_lod_by_pathogen", {},
-        ).get(pathogen_id, False)
+        censored = agent.emesis_censored_below_lod_by_pathogen.get(
+            pathogen_id, False,
+        )
         area = float(profile.get(
             "emesis_deposition_area_m2", EMESIS_DEPOSITION_AREA_M2,
         ))

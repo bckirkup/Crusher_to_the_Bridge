@@ -162,32 +162,43 @@ class TestFigOneDirection:
         assert means[-1] > means[0] * 2.0
 
 
+_KIRBY_SIMULATION: tuple[float, float] | None = None
+
+
+def _kirby_simulation(illnesses: int = 1500) -> tuple[float, float]:
+    """One simulated sample shared by both SEM-bracket assertions."""
+    global _KIRBY_SIMULATION
+    if _KIRBY_SIMULATION is not None:
+        return _KIRBY_SIMULATION
+    rng = np.random.default_rng(97)
+    profile = _profile()
+    totals: list[float] = []
+    volume_totals: list[float] = []
+    for i in range(illnesses):
+        # Fresh core seed per subject so the per-episode volume draws
+        # are independent across the sample.
+        core = _core(seed=3000 + i)
+        agent, _, _ = _drawn_illness(rng, profile)
+        records = _emit_all(core, agent, profile)
+        totals.append(sum(r["episode_load"] for r in records))
+        volume_totals.append(sum(r["volume_ml"] for r in records))
+    _KIRBY_SIMULATION = (
+        float(np.mean(totals)), float(np.mean(volume_totals)),
+    )
+    return _KIRBY_SIMULATION
+
+
 class TestKirbyMeasuredMeans:
     """The generated distribution lands inside Kirby's own SEM brackets."""
 
-    def _simulate(self, illnesses: int = 1500) -> tuple[float, float]:
-        rng = np.random.default_rng(97)
-        profile = _profile()
-        totals: list[float] = []
-        volume_totals: list[float] = []
-        for i in range(illnesses):
-            # Fresh core seed per subject so the per-episode volume draws
-            # are independent across the sample.
-            core = _core(seed=3000 + i)
-            agent, _, _ = _drawn_illness(rng, profile)
-            records = _emit_all(core, agent, profile)
-            totals.append(sum(r["episode_load"] for r in records))
-            volume_totals.append(sum(r["volume_ml"] for r in records))
-        return float(np.mean(totals)), float(np.mean(volume_totals))
-
     def test_per_subject_cumulative_shed_within_two_sem(self) -> None:
-        mean_total, _ = self._simulate()
+        mean_total, _ = _kirby_simulation()
         # Overall 1.8e8 +/- 7.8e7 and All GI 2.3e8 +/- 1.0e8, 2 SEM each.
         assert 2.4e7 <= mean_total <= 3.4e8
         assert 3.0e7 <= mean_total <= 4.3e8
 
     def test_per_subject_total_volume_within_two_sem(self) -> None:
-        _, mean_volume = self._simulate()
+        _, mean_volume = _kirby_simulation()
         # All GI 658.7 +/- 111.9 mL and GII.2 845.0 +/- 226.7 mL, 2 SEM each.
         assert 434.9 <= mean_volume <= 882.5
         assert 391.6 <= mean_volume <= 1298.4
