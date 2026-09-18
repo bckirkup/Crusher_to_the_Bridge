@@ -112,3 +112,27 @@ of the contrast and not by distance to a comparator:
 
 The two arms straddling the measured crossing are then re-run at the full 200
 paired seeds.
+
+## Submission provenance
+
+Submitted 2026-09-18 from branch tip `65d9fb2`, which is merged main `71a5aae`
+plus these manifests and this entry.
+
+Image `picard-campaign:flush-sweep-v1-s3-65d9fb2`, digest
+`sha256:d6490ea6bf4f542729019b8aef137c7e911d5e5ffbef93bd98fe4951a9fbfa6f`,
+built with `ENGINE_GIT_SHA=65d9fb2821c4d389eb92d3470d61f0ab06b84b3a` — verified
+present in the image environment and in the OCI `image.revision` label, so
+every archived run stamps its own engine. Job definition
+`picard-campaign:47`, queue `picard-campaign-queue`, compute environment
+`picard-campaign-spot` (EC2 Spot), log group `/aws/batch/picard-campaign`.
+
+| Arm | Batch job ID | Array size | S3 prefix |
+|---|---|---:|---|
+| `off_s3` | `5a4f71da-d985-477b-9fc2-ea19c1b2b3f9` | 600 | `campaign/flush_sweep_v1_off_s3/` |
+| `1e-9_s3` | `1281ae35-704c-405a-a90b-1ee6ced5fe81` | 600 | `campaign/flush_sweep_v1_1e-9_s3/` |
+| `1e-7_s3` | `48bca2c4-6786-4fbe-8a77-d118d72ee87f` | 600 | `campaign/flush_sweep_v1_1e-7_s3/` |
+| `1e-5_s3` | `415f8807-8653-46f6-9dfb-5cd8c7c96b6f` | 600 | `campaign/flush_sweep_v1_1e-5_s3/` |
+
+Bucket `crusherbucket-994254241749-us-east-1-an`. One prefix per arm, never a
+shared prefix: an arm may not be inferable from a directory name alone
+(the item-42 lesson).
