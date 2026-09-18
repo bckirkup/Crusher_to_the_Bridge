@@ -299,6 +299,18 @@ def test_contamx_engine_matches_native_interface():
     assert set(summary["zone_concentrations"]) == {"A", "B"}
 
 
+def test_contamx_engine_exposes_zone_specific_outflow_rate():
+    engine = ContamXTransportEngine.from_flow_field(
+        _TWO_ZONE_LAYOUT,
+        path_map=[("A", "B", False)],
+        path_flows_m3h={1: 100.0},
+    )
+    first = engine.zone_specific_outflow_rate("A")
+    second = engine.zone_specific_outflow_rate("A")
+    assert first == pytest.approx(1.0)
+    assert second == first
+
+
 def test_path_map_from_airflow_includes_adjacency_and_more():
     spatial = {
         "platform": "t",

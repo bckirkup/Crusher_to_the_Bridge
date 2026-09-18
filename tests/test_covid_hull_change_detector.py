@@ -105,7 +105,11 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # count of those zones: (140, 64, 217, 155, 36) to
     # (129, 53, 217, 140, 41) on CPython 3.11, and
     # (118, 48, 217, 139, 30) to (112, 48, 217, 125, 29) on 3.12.
-    (3, 11): (129, 53, 217, 140, 41),
+    # AERO-CABIN-06 moves the live COVID cell because per-stateroom pools
+    # partition cabin airborne mass and exclude a shedder's own stateroom
+    # from the HVAC target set: (129, 53, 217, 140, 41) to
+    # (101, 42, 217, 120, 27) on CPython 3.11.
+    (3, 11): (101, 42, 217, 120, 27),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -117,7 +121,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
     # The new-default Theta=1e10 reading is live but unsaturated on both
     # interpreters.
-    (3, 12): (112, 48, 217, 125, 29),
+    # AERO-CABIN-06 makes the same attributed move on CPython 3.12:
+    # (112, 48, 217, 125, 29) to (105, 51, 217, 118, 20).
+    (3, 12): (105, 51, 217, 118, 20),
 }
 
 
