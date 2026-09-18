@@ -2,7 +2,17 @@
 **Date:** 2026-09-17
 **Commit:** 588582c
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
+**Measured at:** `7f689b9` — 6,000 of 6,000 runs, 0 failures. Result in
+[`flush_sweep_v1_stage4_findings.md`](../norovirus/flush_sweep_v1_stage4_findings.md),
+tables in
+[`flush_sweep_v1_stage4_readout.md`](../norovirus/flush_sweep_v1_stage4_readout.md).
+The six cells give six different crossing brackets spanning ~3 decades,
+ordered by baseline chain yield; no arm in `[3e-9, 3e-7]` is null on every cell
+or resolves on every cell, `off_s4` reproduced `off_s3` on all 600 shared
+voyages, and the `off` mean itself moved sharply between stages because the
+voyage distribution is heavy-tailed and 100 seeds missed the tail. Nothing
+adopted; `[1e-9, 1e-3]` unchanged.
 
 The fine arms the `FLUSH-S3` re-bracket's predeclared rule selects, at the full
 200 paired seeds. `FLUSH-S3` measured `1e-9` as a null in all six hull/length
