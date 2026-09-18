@@ -11,10 +11,8 @@ Closes #83.
 from __future__ import annotations
 
 import json
-import os
-import sys
-from pathlib import Path
 from copy import deepcopy
+from pathlib import Path
 
 import pytest
 
