@@ -144,7 +144,11 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # every crew diner; the cell follows a different Bernoulli path:
     # (51, 8, 217, 51, 32) -> (14, 3, 217, 18, 10) on CPython 3.12. The 3.11
     # reading is taken from the CI job on this branch.
-    (3, 12): (14, 3, 217, 18, 10),
+    # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility shape
+    # while scaling its mean to Θ, changing the COVID cell from
+    # (14, 3, 217, 18, 10) -> (1, 1, 217, 4, 0) on CPython 3.12. The 3.11
+    # reading is not yet measured locally and remains the prior CI pin.
+    (3, 12): (1, 1, 217, 4, 0),
 }
 
 

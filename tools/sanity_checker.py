@@ -309,6 +309,7 @@ class DoseResponse(BaseModel):
     model: str = "beta_poisson"
     alpha: float | None = None
     beta: float | None = None
+    susceptibility_scale: float | None = None
     k: float | None = None
 
     @model_validator(mode="after")
@@ -322,6 +323,16 @@ class DoseResponse(BaseModel):
                 raise ValueError(f"alpha must be positive, got {self.alpha}")
             if self.beta <= 0:
                 raise ValueError(f"beta must be positive, got {self.beta}")
+            if (
+                self.susceptibility_scale is not None
+                and (
+                    not math.isfinite(self.susceptibility_scale)
+                    or self.susceptibility_scale <= 0
+                )
+            ):
+                raise ValueError(
+                    "susceptibility_scale must be finite and positive",
+                )
         elif self.model == "exponential":
             if self.k is None:
                 raise ValueError("exponential model requires 'k' parameter")

@@ -9,12 +9,11 @@ bracket, the per-copy factor stays null, and what is fitted is their product::
 
     Theta = respiratory emission scale x per-copy risk
 
-Theta enters the simulation through the one place that product can be
-represented without splitting it: the shedding curves are reduced to their
-measured *shape* (peak normalised to unity, the measured asymptomatic offset
-preserved) and Theta becomes the exponential dose-response coefficient, so the
-hazard is ``1 - exp(-Theta x shape-weighted dose)``. There is no second knob to
-compensate with, which is the point.
+Theta enters the simulation as the scale on the per-host susceptibility draw.
+The shedding curves are reduced to their measured *shape* (peak normalised to
+unity, the measured asymptomatic offset preserved), while the arm inherits the
+profile's beta-Poisson heterogeneity shape ``alpha``; that shape is not fitted
+here. There is no second knob to compensate with, which is the point.
 
 What the fit is allowed to look at is enforced elsewhere:
 :mod:`picard_framework.covid_fit_targets` will not hand a held-out anchor to an
@@ -212,21 +211,25 @@ def theta_profile_overrides(
         )
     ]
     peak = max(symptomatic)
+    dose_response = profile["dose_response"]
+    alpha = float(dose_response["alpha"])
+    beta = float(dose_response["beta"])
     overrides: dict[str, Any] = {
         "shedding_curve_log10": [round(v - peak, 6) for v in symptomatic],
         "asymptomatic_shedding_log10": [
             round(v - peak, 6) for v in asymptomatic
         ],
         "dose_adjustment": 0.0,
-        "dose_response": {"model": "exponential", "k": theta},
+        "dose_response": {
+            "model": "beta_poisson",
+            "alpha": alpha,
+            "beta": beta,
+            "susceptibility_scale": theta * (alpha + beta) / alpha,
+        },
     }
     if "incubation" in profile:
-        # The shipped reference is the profile's own beta-Poisson N50, in the
-        # units its own dose-response reads. With the exponential model
-        # installed above, the N50 the hosts are actually infected around is
-        # ln 2 / Theta; the incubation term is re-referenced there so a
-        # typical infection keeps the profile's median rather than sitting
-        # ten decades below a reference that no longer describes this arm.
+        # The reference is the mean host's susceptibility: ln 2 / Theta.
+        # Re-reference there so a typical infection keeps the profile's median.
         overrides["incubation"] = {
             "dose_reference_log10": math.log10(math.log(2.0) / theta),
         }

@@ -2733,9 +2733,23 @@ class TransmissionCore:
         dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
         if dr.get("model", "beta_poisson") == "exponential":
             return 1.0 - math.exp(-dr.get("k", 0.01) * dose)
+        scale = self._beta_poisson_susceptibility_scale(pathogen_id, dr)
         return 1.0 - math.pow(
-            1.0 + dose / dr.get("beta", BETA), -dr.get("alpha", ALPHA),
+            1.0 + scale * dose / dr.get("beta", BETA), -dr.get("alpha", ALPHA),
         )
+
+    def _beta_poisson_susceptibility_scale(
+        self,
+        pathogen_id: str,
+        dose_response: dict,
+    ) -> float:
+        """Return the declared scale for a beta-Poisson host draw."""
+        scale = float(dose_response.get("susceptibility_scale", 1.0))
+        if not math.isfinite(scale) or scale <= 0.0:
+            raise ValueError(
+                f"{pathogen_id}: susceptibility_scale must be finite and > 0",
+            )
+        return scale
 
     def _dose_response_susceptibility(
         self,
@@ -2750,8 +2764,11 @@ class TransmissionCore:
         if dr.get("model", "beta_poisson") == "exponential":
             susceptibility = float(dr.get("k", 0.01))
         else:
-            susceptibility = float(
+            draw = float(
                 self.rng.beta(dr.get("alpha", ALPHA), dr.get("beta", BETA)),
+            )
+            susceptibility = (
+                draw * self._beta_poisson_susceptibility_scale(pathogen_id, dr)
             )
         agent.dose_response_susceptibility[pathogen_id] = susceptibility
         return susceptibility

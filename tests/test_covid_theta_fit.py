@@ -152,8 +152,27 @@ def test_theta_is_the_only_scale_the_overrides_move(profile):
     assert low["shedding_curve_log10"] == high["shedding_curve_log10"]
     assert low["dose_adjustment"] == pytest.approx(0.0)
     assert high["dose_adjustment"] == pytest.approx(0.0)
-    assert low["dose_response"]["k"] < high["dose_response"]["k"]
-    assert low["dose_response"]["model"] == "exponential"
+    assert low["dose_response"]["model"] == "beta_poisson"
+    assert low["dose_response"]["alpha"] == profile["dose_response"]["alpha"]
+    assert high["dose_response"]["alpha"] == profile["dose_response"]["alpha"]
+    assert (
+        low["dose_response"]["susceptibility_scale"]
+        < high["dose_response"]["susceptibility_scale"]
+    )
+
+
+def test_theta_override_preserves_profile_heterogeneity_shape(profile):
+    overrides = theta_profile_overrides(profile, 3.16e7)
+    response = profile["dose_response"]
+    assert overrides["dose_response"]["model"] != "exponential"
+    assert overrides["dose_response"]["alpha"] == response["alpha"]
+    assert overrides["dose_response"]["beta"] == response["beta"]
+    expected = 3.16e7 * (
+        response["alpha"] + response["beta"]
+    ) / response["alpha"]
+    assert overrides["dose_response"]["susceptibility_scale"] == pytest.approx(
+        expected,
+    )
 
 
 def test_the_shedding_curve_keeps_its_shape_and_its_measured_offset(profile):
@@ -177,10 +196,7 @@ def test_the_shedding_curve_keeps_its_shape_and_its_measured_offset(profile):
 
 @pytest.mark.parametrize("theta", [1e4, 1e6, 1e9])
 def test_the_incubation_term_is_referenced_to_the_installed_n50(profile, theta):
-    """The shipped reference is the profile's beta-Poisson N50; with the
-    exponential model Theta installs, the N50 is ln 2 / Theta. A host
-    infected at that dose must keep the profile's median, and only the
-    reference moves — the shape of the dose term is untouched."""
+    """The reference uses the mean host susceptibility, ln 2 / Theta."""
     resolved = apply_pathogen_overrides(
         {PATHOGEN_ID: profile},
         {PATHOGEN_ID: theta_profile_overrides(profile, theta)},
@@ -208,7 +224,7 @@ def test_a_non_positive_or_non_finite_theta_is_refused(profile, theta):
         theta_profile_overrides(profile, theta)
 
 
-def test_the_run_spec_carries_the_declared_assumptions():
+def test_the_run_spec_carries_the_declared_assumptions(profile):
     raw = build_fit_run_spec(DIAMOND, 1e8, 7, num_epochs=24)
     overrides = raw["config_overrides"]
     assert overrides["wearable_monitoring"]["enabled"] is False
@@ -216,7 +232,15 @@ def test_the_run_spec_carries_the_declared_assumptions():
     assert overrides["ship_graph"]["immune_fraction"] == pytest.approx(0.0)
     assert raw["run"]["history_retention"] == "compact"
     dose = raw["pathogen_overrides"]["sars_cov2_resp"]["dose_response"]
-    assert dose == {"model": "exponential", "k": 1e8}
+    assert dose["model"] == "beta_poisson"
+    assert dose["alpha"] == profile["dose_response"]["alpha"]
+    assert dose["beta"] == profile["dose_response"]["beta"]
+    assert dose["susceptibility_scale"] == pytest.approx(
+        1e8 * (
+            profile["dose_response"]["alpha"]
+            + profile["dose_response"]["beta"]
+        ) / profile["dose_response"]["alpha"],
+    )
 
 
 def test_the_run_spec_omits_cabin_air_override_by_default():

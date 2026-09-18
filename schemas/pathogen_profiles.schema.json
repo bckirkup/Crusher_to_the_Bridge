@@ -789,6 +789,11 @@
             "model": {"type": "string", "enum": ["beta_poisson", "exponential"]},
             "alpha": {"type": "number", "exclusiveMinimum": 0},
             "beta": {"type": "number", "exclusiveMinimum": 0},
+            "susceptibility_scale": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "Positive scale applied to each beta-Poisson host susceptibility draw; defaults to 1.0."
+            },
             "k": {"type": "number", "exclusiveMinimum": 0, "description": "Rate parameter for exponential model"}
           },
           "if": {"properties": {"model": {"const": "beta_poisson"}}},
