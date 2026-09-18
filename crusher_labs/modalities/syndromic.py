@@ -32,6 +32,7 @@ import numpy as np
 
 from crusher_labs.testing_campaign import TestingCampaign
 from engines.sim_clock import SimClock
+from engines.voyage_itinerary import agent_is_departed
 from simulation_utils.numeric import default_simulation_rng
 
 
@@ -317,8 +318,6 @@ class SyndromicSurveillance:
         """
         agents = json_data.get("agents", [])
         epoch = json_data.get("epoch", 0)
-
-        from engines.voyage_itinerary import agent_is_departed
 
         # The ship's record ends at the gangway: a departed host cannot
         # present to sick call, be screened, be swabbed, or enter the

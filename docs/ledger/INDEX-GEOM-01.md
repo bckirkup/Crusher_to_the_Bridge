@@ -83,11 +83,21 @@ so no CI cell touched the hull Θ is actually fitted on. The new
 cell — Θ = 1e10, seed 20200333, the same five pinned fields — and its first
 reading, taken with the index case departing on day 5, is
 `(3522, 2934, 1706, 252, 73)` on CPython 3.12; the 3.11 entry is pending a
-CI reading. The file's comment block states that the cell is a change
+CI reading. The DP cell is marked `slow` — a full Diamond Princess replay
+is ~20 minutes, a signal needed per PR at most, so it lands on the nightly
+tier while the Greg Mortimer cell keeps a fast-tier reading on every push. The file's comment block states that the cell is a change
 detector and not an anchor comparison — it is not the Diamond Princess
 observables of `data/observation/covid_fit_targets.json`, covid.T1/T3 are
 real scored anchors on the same scenario, and nothing in the file may be
 quoted as a result.
+
+A reading caveat on the group-rate denominator: `update_ever_reported_ids`
+accumulates and `_compute_group_rates` now divides by the aboard-only
+denominator, so a host who reported sick and *then* departed stays in the
+numerator while leaving the denominator. That is the intended reading — the
+ship's record keeps what it recorded — but it means the group rate is a
+cumulative-reports-over-current-aboard ratio, not a prevalence, and it can
+only be read as such.
 
 No Θ is claimed by this entry. `infection_age_days` is left at its declared
 value: Yamagishi 2020 places cough onset at day −1, so the boarding-age

@@ -183,12 +183,22 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # with the declared index case departing on day 5 (departure_day 5.0,
         # Yamagishi 2020). The CPython 3.11 entry is pending a CI reading, as the
         # Greg Mortimer 3.11 reads above were.
+        # This cell is marked `slow`: a full Diamond Princess replay is ~20
+        # minutes, so it lands on the nightly tier while the Greg Mortimer
+        # cell keeps a fast-tier reading on every push.
         (3, 12): (3522, 2934, 1706, 252, 73),
     },
 }
 
 
-@pytest.fixture(scope="module", params=HULLS, ids=HULLS)
+@pytest.fixture(
+    scope="module",
+    params=[
+        "greg_mortimer_2020",
+        pytest.param("diamond_princess_2020", marks=pytest.mark.slow),
+    ],
+    ids=HULLS,
+)
 def cell(request) -> tuple[str, HullObservables]:
     return request.param, simulate_hull(request.param, THETA, SEED)
 

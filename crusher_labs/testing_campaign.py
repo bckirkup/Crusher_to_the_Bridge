@@ -33,6 +33,7 @@ from typing import Any
 
 import numpy as np
 
+from engines.voyage_itinerary import agent_is_departed
 from simulation_utils.paths import load_validated_json, resolve_repo_path
 from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
 
@@ -290,7 +291,7 @@ class TestingCampaign:
     ) -> list[int]:
         members: list[int] = []
         for agent in agents:
-            if agent.get("location") == "Departed":
+            if agent_is_departed(agent):
                 # A host who left the ship is not swabbable.
                 continue
             if self._matches(tier, agent, confirmed_ids):

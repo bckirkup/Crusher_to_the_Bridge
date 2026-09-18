@@ -350,8 +350,8 @@ def step_shore_introductions(
         if not getattr(agent, "ashore", False):
             continue
         if agent_is_departed(agent):
-            # A departed host keeps the ashore flag placement left on it;
-            # it is not a shore-excursion draw target.
+            # A departed passenger can still be marked ashore by the
+            # port-call draw; it is not a shore-excursion draw target.
             continue
         if (
             agent.immune
