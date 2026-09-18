@@ -1174,6 +1174,36 @@ uncertainty. Readout
 `docs/norovirus/flush_sweep_v1_stage3_readout.md`, interpretation
 `docs/norovirus/flush_sweep_v1_stage3_findings.md`.
 
+**`FLUSH-S4` is measured at `7f689b9` (same engine tree as `FLUSH-S3`), 6,000
+of 6,000 runs, and the crossing is not one number in any sense: the six cells
+give six brackets spanning about three decades** — `fl_spr_7d` `(1e-9, 3e-9]`,
+`fl_spr_12d` `(3e-9, 1e-8]`, `fl_cls_12d` `(1e-8, 3e-8]`, `fl_cls_7d`
+`(3e-8, 1e-7]`, `fl_exp_12d` `(1e-8, 3e-7]` (unresolved inside it),
+`fl_exp_7d` `(3e-7, 1e-5]`. Ordered by baseline chain yield and *inversely* to
+dose per exposure, for the third campaign running. **No arm in `[3e-9, 3e-7]`
+is null on every cell, and none resolves on every cell**, so no window can be
+selected by asking which arm looks right everywhere.
+
+Two further results carry beyond the flush sweep. `off_s4` reproduces `off_s3`
+voyage-for-voyage on all 600 shared voyages (final ever-infected, epoch-0
+count, posting, both witness fields; zero flush events in both), which is what
+the re-run bought. But **the `off` mean moved sharply anyway, because the
+voyage distribution is heavy-tailed and `FLUSH-S3`'s 100 seeds missed the
+tail**: seeds 8100–8199 contain voyages of 372/475/621 infections where
+8000–8099 contain nothing above 68, and the `off` mean rises 7.89 → 21.84 on
+`fl_spr_7d`. Every earlier stage's interval widths are therefore optimistic,
+and no cross-stage mean comparison is admissible off the shared seeds.
+Consequently **posting at `off` is 5 per 1,000 (classic) and 20 per 1,000
+(spirit) against A9's 0.33, with the flush route disabled** — the posting
+surplus is a baseline-engine property that no `f_aero` can fix, expedition
+remains the quietest cell (0 per 1,000 until `3e-7`), and the median reported
+attack rate among posted voyages (0.036–0.116) shows no trend in `f_aero` at
+all while posting frequency moves ×2–7: the route changes how often a voyage
+becomes reportable, not how severe a reportable voyage is. All of that is
+contrast; nothing is selected, and the `[1e-9, 1e-3]` band stays frozen.
+Readout `docs/norovirus/flush_sweep_v1_stage4_readout.md`, interpretation
+`docs/norovirus/flush_sweep_v1_stage4_findings.md`.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
