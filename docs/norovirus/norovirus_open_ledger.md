@@ -1136,6 +1136,25 @@ declared scale rather than marginalising over twenty logs of it). The
 diagnostics behind this entry are scratch, not repository functionality, and
 are recorded here rather than committed.
 
+**Every flush-sweep result — stages 1, 2, `s2r` and `s2e`, items 42, 49 and 51
+— is withdrawn as a current-engine measurement.** All four were taken at engine
+`585ad89` or earlier. Four changes have landed since which move the routes those
+arms dosed through, and they do not push one way: the HVAC multiplicity fix
+(`924351c`) and upstream-source deduplication (`ff767a9`) remove a dose
+duplication of approximately `N`-fold for a target fed by *N* shedding upstream
+zones, PR #583 multiplies the downstream dose by `confinement_isolation_factor
+= 0.05` for confined targets, PR #591 makes stateroom airborne pools
+per-stateroom, and PR #595 raises the emesis source term by one to one and a
+half decades. Because `s2r` found HVAC drift to be the dominant norovirus route,
+the first two changes move every flush arm including `off`, and the last moves
+the `off` baseline independently of any flush term. The hull-ordered crossing
+recorded in item 49 — at or below `3e-9` in five of six cells — and the 85–110
+per 1,000 posting at `1e-7` on the 12-day large hulls are therefore historical,
+not current, and neither may be quoted as a result or paired against a new arm.
+The archives remain valid as measurements *of their own engines*; nothing about
+them is retracted as a reading. Superseded by `FLUSH-S3`, which declares the
+replacement re-bracket. The frozen `[1e-9, 1e-3]` refusal band is unchanged.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
