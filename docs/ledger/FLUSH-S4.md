@@ -3,7 +3,9 @@
 **Commit:** 588582c
 **Pathogens:** norwalk_gi
 **Status:** measured
-**Measured at:** `7f689b9` — 6,000 of 6,000 runs, 0 failures. Result in
+**Measured at:** 7f689b99e50fbc08eec55b5a8037b121935ab32f
+
+6,000 of 6,000 runs, 0 failures. Result in
 [`flush_sweep_v1_stage4_findings.md`](../norovirus/flush_sweep_v1_stage4_findings.md),
 tables in
 [`flush_sweep_v1_stage4_readout.md`](../norovirus/flush_sweep_v1_stage4_readout.md).
