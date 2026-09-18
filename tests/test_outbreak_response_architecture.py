@@ -352,6 +352,93 @@ def test_refuse_quarantine_forces_defiant_forever() -> None:
     assert syn._compliance_class[11] == "defiant"
 
 
+def test_enforced_confinement_overrides_defiant_without_fred_draw() -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import confine_all_agents
+    from orchestrator_types import SimulationState
+
+    state = SimulationState()
+    state.agent_behavioral_overrides[4] = "refuse_quarantine"
+    syndromic = MagicMock()
+    syndromic._compliance_class = {4: "defiant"}
+    agents = [{"agent_id": 4, "agent_class": "passenger_general"}]
+
+    confine_all_agents(3, agents, state, syndromic, enforced=True)
+
+    assert 4 in state.quarantined_ids
+    assert 4 not in state.quarantine_refusers
+    assert state.compliance_class_by_agent[4] == "defiant"
+    assert state.compliance_log[-1]["action"] == "enforced_confinement"
+    syndromic.check_quarantine_compliance.assert_not_called()
+
+
+def test_voluntary_confinement_keeps_defiant_refuser_behavior() -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import confine_all_agents
+    from orchestrator_types import SimulationState
+
+    state = SimulationState()
+    state.agent_behavioral_overrides[4] = "refuse_quarantine"
+    syndromic = MagicMock()
+    syndromic.check_quarantine_compliance.return_value = False
+    syndromic._compliance_class = {4: "defiant"}
+    agents = [{"agent_id": 4, "agent_class": "passenger_general"}]
+
+    confine_all_agents(3, agents, state, syndromic, enforced=False)
+
+    assert 4 not in state.quarantined_ids
+    assert 4 in state.quarantine_refusers
+    assert state.compliance_log[-1]["action"] == "refused_general_confinement"
+    syndromic.check_quarantine_compliance.assert_called_once()
+
+
+def test_enforced_confinement_skips_exempt_class() -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import confine_all_agents
+    from orchestrator_types import SimulationState
+
+    state = SimulationState()
+    syndromic = MagicMock()
+    agents = [{"agent_id": 4, "agent_class": "crew_general"}]
+
+    confine_all_agents(
+        3, agents, state, syndromic,
+        {"crew_general"}, enforced=True,
+    )
+
+    assert 4 not in state.quarantined_ids
+    assert not state.compliance_log
+    syndromic.check_quarantine_compliance.assert_not_called()
+
+
+@pytest.mark.parametrize("mods, admitted", [
+    ({"confine_all_to_quarters": True, "confinement_enforced": True}, True),
+    ({"confine_all_to_quarters": True}, False),
+])
+def test_scheduled_confinement_modifier_selects_enforcement(
+    mods: dict[str, bool], admitted: bool,
+) -> None:
+    from unittest.mock import MagicMock
+
+    from orchestrator_epoch import step_quarantine_confinement
+    from orchestrator_types import SimulationState
+
+    state = SimulationState()
+    syndromic = MagicMock()
+    syndromic.check_quarantine_compliance.return_value = False
+    agents = [{"agent_id": 4, "agent_class": "passenger_general"}]
+
+    step_quarantine_confinement(
+        3, agents, mods, STATUS_CONFIRMED, state, syndromic,
+    )
+
+    assert (4 in state.quarantined_ids) is admitted
+    assert (4 in state.quarantine_refusers) is not admitted
+
+
 def test_confinement_scope_alert_symptomatic_only() -> None:
     from unittest.mock import MagicMock
 

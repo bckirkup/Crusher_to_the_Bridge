@@ -421,6 +421,24 @@ class TestProvenanceAndRefusals:
         for scenario in scenarios.scenarios.values():
             assert scenario.refusals
 
+    def test_scheduled_quarantine_declares_authority_enforcement(self, raw_records):
+        for record in raw_records["scenarios"]:
+            scheduled = next(
+                entry for entry in record["scheduled_protocols"]
+                if entry["protocol_id"] == "SOP-017"
+            )
+            provenance = {
+                entry["field"]: entry
+                for entry in record["provenance"]
+            }
+            entry = provenance[
+                "scheduled_protocols[SOP-017].modifiers.confinement_enforced"
+            ]
+            assert scheduled["protocol_id"] == "SOP-017"
+            assert entry["value"].startswith("true — ")
+            assert "not an opt-in" in entry["value"]
+            assert entry["grade"] in {"A", "B"}
+
     def test_held_out_outcomes_are_recorded_as_observations_not_config(
         self, raw_records,
     ):

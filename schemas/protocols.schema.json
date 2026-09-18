@@ -56,6 +56,10 @@
               "type": "boolean",
               "description": "When true, ALL agents are confined to quarters (general lockdown)."
             },
+            "confinement_enforced": {
+              "type": "boolean",
+              "description": "When true with confine_all_to_quarters, the confinement is an authority order carried out by officers: every non-exempt agent is admitted without the FRED voluntary-compliance draw (compliant/reluctant/defiant do not apply). False/absent keeps the voluntary draw."
+            },
             "vsp_isolation_threshold_fraction": {
               "type": "number",
               "minimum": 0,

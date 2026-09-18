@@ -11,8 +11,7 @@ Closes #83.
 from __future__ import annotations
 
 import json
-import os
-import sys
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -179,3 +178,23 @@ def test_json_validates_against_schema(schema_name: str, data_path: str) -> None
         data = json.load(f)
 
     jsonschema.validate(instance=data, schema=schema)
+
+
+@pytest.mark.skipif(jsonschema is None, reason="jsonschema not installed")
+def test_confinement_enforced_is_boolean_modifier() -> None:
+    schema = json.loads(
+        (REPO_ROOT / "schemas" / "protocols.schema.json").read_text(),
+    )
+    data = json.loads(
+        (REPO_ROOT / "data" / "config" / "protocols.json").read_text(),
+    )
+    sop017 = next(p for p in data["protocols"] if p["protocol_id"] == "SOP-017")
+    assert sop017["modifiers"]["confinement_enforced"] is True
+
+    invalid = deepcopy(data)
+    invalid_sop = next(
+        p for p in invalid["protocols"] if p["protocol_id"] == "SOP-017"
+    )
+    invalid_sop["modifiers"]["confinement_enforced"] = "true"
+    with pytest.raises(jsonschema.ValidationError):
+        jsonschema.validate(instance=invalid, schema=schema)
