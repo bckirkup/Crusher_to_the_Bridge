@@ -209,6 +209,16 @@ five mechanism errors for a year.
 
 ## 8. The sweep, declared before it runs
 
+> **Superseded as a plan of record by [`FLUSH-S3`](../ledger/FLUSH-S3.md).** The
+> three-stage structure below and every arm it ran (stages 1, 2, `s2r`, `s2e`)
+> were measured at engine `585ad89` or earlier, on an engine whose HVAC
+> downstream dose was duplicated once per upstream source and whose emesis
+> source term was over a decade low. `FLUSH-S3` collapses the stages into one
+> current-engine re-bracket at the same arms as stage 1. The design, the
+> uncertainty in §1–§7 and the frozen [1e-9, 1e-3] band are unchanged; what is
+> superseded is the staging and the saturation claim in the first bullet, which
+> stage 1 falsified at the voyage level (item 42).
+
 Matched seeds, one image, arms differing only in the swept field — the
 instrument from #527 and items 41–42, which resolves a paired difference two to
 four orders finer than an unpaired comparison.
