@@ -72,10 +72,15 @@ writing this change.
   not only its location, is expected to move: frailty spreads the threshold that
   previously fired for a whole room at once.
 - **Change-detector cell.** The COVID hull cell moves
-  `(14, 3, 217, 18, 10) → (1, 1, 217, 4, 0)` on CPython 3.12, attributed to the
-  restored per-host draw (the cell's hosts are no longer identically
-  susceptible). The CPython 3.11 reading is not measured locally and remains the
-  prior CI pin.
+  `(14, 3, 217, 18, 10) → (1, 1, 217, 4, 0)` on CPython 3.12 and
+  `(14, 5, 217, 19, 7) → (1, 1, 217, 4, 0)` on CPython 3.11 (read from CI job
+  105760985675, fast tier 3.11 shard 3, on this branch), attributed to the
+  restored per-host draw: the cell's hosts are no longer identically
+  susceptible, and a concave marginal response over a right-skewed frailty
+  distribution yields fewer infections than the same mean applied to
+  identical hosts. The two interpreters now agree on the reading, which is
+  itself evidence the move is interpreter-independent rather than RNG-stream
+  divergence.
 
 ## Not settled by this entry
 

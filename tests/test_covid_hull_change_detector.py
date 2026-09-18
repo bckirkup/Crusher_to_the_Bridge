@@ -120,7 +120,11 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # every crew diner; the CI cell follows a different Bernoulli path:
     # (64, 8, 217, 67, 36) -> (14, 5, 217, 19, 7), read from the CI job (fast
     # tier, 3.11) on this branch.
-    (3, 11): (14, 5, 217, 19, 7),
+    # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility draw
+    # while scaling its mean to Theta: (14, 5, 217, 19, 7) ->
+    # (1, 1, 217, 4, 0) on CPython 3.11, read from CI job 105760985675
+    # (fast tier, 3.11, shard 3) on this branch.
+    (3, 11): (1, 1, 217, 4, 0),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -144,10 +148,15 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # every crew diner; the cell follows a different Bernoulli path:
     # (51, 8, 217, 51, 32) -> (14, 3, 217, 18, 10) on CPython 3.12. The 3.11
     # reading is taken from the CI job on this branch.
-    # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility shape
-    # while scaling its mean to Θ, changing the COVID cell from
-    # (14, 3, 217, 18, 10) -> (1, 1, 217, 4, 0) on CPython 3.12. The 3.11
-    # reading is not yet measured locally and remains the prior CI pin.
+    # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility draw
+    # while scaling its mean to Theta, moving the cell
+    # (14, 3, 217, 18, 10) -> (1, 1, 217, 4, 0) on CPython 3.12 and
+    # (14, 5, 217, 19, 7) -> (1, 1, 217, 4, 0) on CPython 3.11 (read from CI
+    # job 105760985675 on this branch). The interpreters now agree because
+    # the move is not RNG-stream divergence: the cell's hosts are no longer
+    # identically susceptible, and a concave marginal response over a
+    # right-skewed frailty distribution yields fewer infections than the
+    # same mean applied to identical hosts.
     (3, 12): (1, 1, 217, 4, 0),
 }
 
