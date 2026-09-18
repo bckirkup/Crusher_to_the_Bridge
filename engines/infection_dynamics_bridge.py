@@ -325,6 +325,12 @@ PASSENGER_DINING_SERVICE_TYPES = frozenset({"mdr", "buffet", "specialty"})
 # tables across successive short sittings. Documentary evidence, Grade C.
 SEATED_PARTY_DINING_SERVICE_TYPES = frozenset({"mdr", "specialty"})
 
+# Carnival "Table Sizes" 2–10 is the only published table geometry, Grade C,
+# so buffet and mess tables reuse DEFAULT_DINING_TABLE_SIZE. The deal per meal
+# is the documentary "take a tray to whatever seat is free", with the booking
+# kept together as it arrives together.
+PER_MEAL_TABLE_DINING_SERVICE_TYPES = frozenset({"buffet", "crew_mess"})
+
 # Diners per table where a seated venue declares no ``dining_table_size``.
 # The published cruise range is 2–10 with round tables at 6–10 (Carnival,
 # "Table Sizes"); nothing publishes the distribution over that range, so this
@@ -348,6 +354,25 @@ def resolve_dining_service_type(zone: dict[str, Any]) -> str:
     if "spec" in name:
         return "specialty"
     return "mdr"
+
+
+def seated_diners_in_booking_order(
+    diners: list[KorkinAgent],
+) -> list[KorkinAgent]:
+    """Return diners with each cabin's occupants kept contiguous."""
+    by_id = {a.agent_id: a for a in diners}
+    ordered: list[KorkinAgent] = []
+    seen: set[int] = set()
+    for agent in sorted(diners, key=lambda a: a.agent_id):
+        if agent.agent_id in seen:
+            continue
+        booking = [agent.agent_id, *sorted(agent.cabin_mate_ids)]
+        for member_id in booking:
+            member = by_id.get(member_id)
+            if member is not None and member_id not in seen:
+                seen.add(member_id)
+                ordered.append(member)
+    return ordered
 
 
 # Passenger leisure access. No zone record on any platform carries an access

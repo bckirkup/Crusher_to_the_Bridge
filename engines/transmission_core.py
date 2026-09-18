@@ -51,11 +51,15 @@ from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+    DEFAULT_DINING_TABLE_SIZE,
     HAND_CARRIAGE_PROPENSITY_BETA,
+    PER_MEAL_TABLE_DINING_SERVICE_TYPES,
     SURFACE_DEPOSITION_FRACTION,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
+    resolve_dining_service_type,
+    seated_diners_in_booking_order,
 )
 from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
@@ -869,27 +873,27 @@ CABIN_COMPARTMENT_SEPARATOR = "::cabin"
 # the model made before parties existed (bit-identical), not a fitted value.
 DEFAULT_DINING_PARTY_CONTACT_SHARE = 1.0
 
-# AERO-NEAR-01: the near-field air compartment over the co-located unit (the
-# cabin in a Cabin_Corridor, the table party in a seated Dining venue). The
-# short-range inhalation route is a two-compartment form (Nicas & Jones 2009):
-# the far field is the zone's well-mixed pool exactly as before, and a share
-# ``retained_fraction`` (kappa) of each unit-affiliated shedder's aerosol is
-# breathed at the unit's own volume before it reaches the room. kappa = 0 is
-# the pre-change route, same code path, bit-identical. The near-field volume
-# and exchange rate are measured nowhere for a table or a bedroom (literature
-# tranche 36, docs/literature/consensus_tranche_36_near_field_air.md, all four
-# questions), so kappa ships as a declared swept axis on [0, 1] with no
-# default level, and the unit volume is declared geometry: a per-berth and a
-# per-seat volume the run must state when it turns the near field on.
-# ``neighbour_table_ratio`` (rho) is the second ring of the dining record:
-# the exposure at a neighbouring table relative to the index table, which is
-# the quantity Li et al. 2021 Table 3 tabulates (CFD exposure 0.76-1.04 in the
-# same air stream, 0.40-0.47 downstream, 0.04-0.23 remote; Grade B, analogous
-# setting, an ordering envelope and not a dose). rho on [0, 1] keeps the
-# ordering same table >= neighbour table >= far table for every admissible
-# value. Nothing here may be chosen against A5, A9 or a posting rate.
-DEFAULT_NEAR_FIELD_RETAINED_FRACTION = 0.0
-DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO = 0.0
+# AERO-NEAR-02: the identifiable near-field quantity is interzonal airflow
+# beta, not retained_fraction times an inverse unit volume. Keil C. et al.
+# 2017, J Occup Environ Hyg, DOI 10.1080/15459624.2017.1334903 (Abstract +
+# Results) measured 3.4 m3/min = 204 m3/h (geometric mean; GSD 2.3; 95% CI
+# of GM 2.8-4.2; range 0.4-19 m3/min over 74 measurements in 12 rooms; NF box
+# 0.32 m3, 0.60 m high over a 0.60 x 0.90 m table; beta approximately half
+# free-surface-area times random air speed; beta uncorrelated with room ACH).
+# Grade B, analogous workspace setting, Origin: Ab + R. The sweep is 0.4-19
+# m3/min (24-1,140 m3/h), same source and grade. The neighbour-table ratio rho
+# defaults to 0.43, midpoint of 0.40-0.47, the CFD exposure at two tables in
+# the same HVAC zone downstream of the index table (index = 1): Li Y. et al.
+# 2021, Build Environ, Table 3. Grade B, analogous setting, Origin: T3.
+DEFAULT_NEAR_FIELD_MODE = "two_box"
+# Shipped beta is Keil 2017's geometric-mean interzonal airflow: 3.4 m3/min
+# (204 m3/h), measured across 74 analogous workspace rooms (Abstract + Results).
+# Grade B, Origin: Ab + R. Sweep: 24-1,140 m3/h, same source and grade.
+DEFAULT_NEAR_FIELD_INTERZONAL_AIRFLOW_M3_PER_HOUR = 204.0
+# Li 2021 Build Environ Table 3 reports 0.40-0.47 at neighbouring tables in
+# the same HVAC zone; the shipped midpoint is a Grade B analogous-setting
+# declaration, Origin: T3, and is not fitted to a campaign anchor.
+DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO = 0.43
 
 # Hand → food transfer efficiency per bare-hand contact with communal or
 # served food. Span of the measured means across food matrices and studies:
@@ -1179,16 +1183,17 @@ def _parse_dining_party_share(tx: dict[str, Any]) -> float:
 
 @dataclass(frozen=True)
 class NearFieldAir:
-    """Declared near-field air compartment (AERO-NEAR-01); off at kappa 0."""
+    """Declared near-field air compartment (AERO-NEAR-02)."""
 
-    retained_fraction: float = DEFAULT_NEAR_FIELD_RETAINED_FRACTION
+    mode: str = DEFAULT_NEAR_FIELD_MODE
+    interzonal_airflow_m3_per_hour: float = (
+        DEFAULT_NEAR_FIELD_INTERZONAL_AIRFLOW_M3_PER_HOUR
+    )
     neighbour_table_ratio: float = DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO
-    cabin_berth_volume_m3: float | None = None
-    table_seat_volume_m3: float | None = None
 
     @property
     def active(self) -> bool:
-        return self.retained_fraction > 0.0
+        return self.mode == "two_box"
 
 
 def _near_field_unit_fraction(block: dict[str, Any], key: str, default: float) -> float:
@@ -1201,46 +1206,43 @@ def _near_field_unit_fraction(block: dict[str, Any], key: str, default: float) -
     return value
 
 
-def _near_field_volume(block: dict[str, Any], key: str, required: bool) -> float | None:
-    raw = block.get(key)
-    if raw is None:
-        if required:
-            raise ValueError(
-                f"transmission.near_field_air.{key} must be declared when "
-                "retained_fraction is above 0: the near-field volume is "
-                "declared geometry, not a default",
-            )
-        return None
-    value = float(raw)
-    if not math.isfinite(value) or value <= 0.0:
-        raise ValueError(
-            f"transmission.near_field_air.{key} must be finite and positive, got {raw!r}",
-        )
-    return value
-
-
 def _parse_near_field_air(tx: dict[str, Any]) -> NearFieldAir:
-    """Read the near-field air declaration (AERO-NEAR-01).
-
-    Absent, or ``retained_fraction`` 0, is the pre-change well-mixed route and
-    takes the same code path. A run that turns the near field on must declare
-    both unit volumes; there is no measured default to fall back on.
-    """
+    """Read the AERO-NEAR-02 two-box declaration."""
     block = tx.get("near_field_air") or {}
     if not isinstance(block, dict):
         raise ValueError("transmission.near_field_air must be a mapping")
-    kappa = _near_field_unit_fraction(
-        block, "retained_fraction", DEFAULT_NEAR_FIELD_RETAINED_FRACTION,
+    retired = {
+        "retained_fraction",
+        "cabin_berth_volume_m3",
+        "table_seat_volume_m3",
+    } & block.keys()
+    if retired:
+        raise ValueError(
+            "transmission.near_field_air uses retired key(s) "
+            f"{sorted(retired)}; use interzonal_airflow_m3_per_hour",
+        )
+    mode = str(block.get("mode", DEFAULT_NEAR_FIELD_MODE))
+    if mode not in {"two_box", "off"}:
+        raise ValueError(
+            "transmission.near_field_air.mode must be 'two_box' or 'off'",
+        )
+    beta_raw = block.get(
+        "interzonal_airflow_m3_per_hour",
+        DEFAULT_NEAR_FIELD_INTERZONAL_AIRFLOW_M3_PER_HOUR,
     )
+    beta = float(beta_raw)
+    if not math.isfinite(beta) or beta <= 0.0:
+        raise ValueError(
+            "transmission.near_field_air.interzonal_airflow_m3_per_hour "
+            f"must be finite and positive, got {beta_raw!r}",
+        )
     rho = _near_field_unit_fraction(
         block, "neighbour_table_ratio", DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO,
     )
-    required = kappa > 0.0
     return NearFieldAir(
-        retained_fraction=kappa,
+        mode=mode,
+        interzonal_airflow_m3_per_hour=beta,
         neighbour_table_ratio=rho,
-        cabin_berth_volume_m3=_near_field_volume(block, "cabin_berth_volume_m3", required),
-        table_seat_volume_m3=_near_field_volume(block, "table_seat_volume_m3", required),
     )
 
 
@@ -1638,6 +1640,13 @@ class TransmissionCore:
         self.near_field_air = _parse_near_field_air(
             (cfg or {}).get("transmission", {}) or {},
         )
+        self.near_field_flushed_volume_m3_per_epoch = (
+            self.near_field_air.interzonal_airflow_m3_per_hour
+            * self.clock.hours_per_epoch
+        )
+        self._meal_tables: dict[
+            tuple[str, int], dict[int, tuple[int, frozenset[int]]]
+        ] = {}
         self._quarantined_ids: set[int] = set()
         # Voyage layer contact scale (1.0 when effects disabled)
         self.voyage_contact_multiplier: float = 1.0
@@ -3180,51 +3189,124 @@ class TransmissionCore:
         zone_name: str,
         target: KorkinAgent,
         shedder: KorkinAgent,
-    ) -> tuple[float, float] | None:
-        """Weight and effective volume of the near field target shares with shedder.
-
-        Three units, in the order the record resolves them: the stateroom a pair
-        of cabin mates share at night, the table a seated party shares at a meal,
-        and the neighbouring table as the second ring, weighted by the declared
-        ``neighbour_table_ratio``. Anyone else in the room is far field only.
-        """
+        epoch: int,
+    ) -> float | None:
+        """Return the near-field weight for a co-located shedding partner."""
         near = self.near_field_air
         if shedder.agent_id == target.agent_id:
             return None
         if shedder.agent_id in target.cabin_mate_ids:
             if self.zone_types.get(zone_name) != "Cabin_Corridor":
                 return None
-            berth = near.cabin_berth_volume_m3
-            if berth is None:
-                return None
-            return 1.0, berth * (len(target.cabin_mate_ids) + 1)
-        if zone_name != target.dining_zone or not target.dining_party_ids:
+            return 1.0
+        table = self._table_party(zone_name, target, epoch)
+        if table is None or self._table_party(zone_name, shedder, epoch) is None:
             return None
-        seat = near.table_seat_volume_m3
-        if seat is None:
-            return None
-        table_volume = seat * (len(target.dining_party_ids) + 1)
-        if shedder.agent_id in target.dining_party_ids:
-            return 1.0, table_volume
-        if self._adjacent_table(target, shedder):
-            return near.neighbour_table_ratio, table_volume
+        if shedder.agent_id in table[0]:
+            return 1.0
+        if self._adjacent_table(target, shedder, epoch):
+            return near.neighbour_table_ratio
         return None
 
-    def _adjacent_table(self, target: KorkinAgent, shedder: KorkinAgent) -> bool:
+    def _table_party(
+        self,
+        zone_name: str,
+        target: KorkinAgent,
+        epoch: int,
+    ) -> tuple[frozenset[int], int] | None:
+        """Return a target's fixed or per-meal table in this venue."""
+        if (
+            zone_name == target.dining_zone
+            and target.dining_party_ids
+        ):
+            return target.dining_party_ids, target.dining_table_index
+        dealt = self._meal_tables.get((zone_name, epoch), {})
+        entry = dealt.get(target.agent_id)
+        if entry is None:
+            return None
+        table_index, party_ids = entry
+        return party_ids, table_index
+
+    def _deal_meal_tables(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        epoch: int,
+    ) -> None:
+        """Deal buffet and crew-mess diners into random per-meal tables."""
+        if (
+            not self.near_field_air.active
+            or resolve_dining_service_type({"name": zone_name})
+            not in PER_MEAL_TABLE_DINING_SERVICE_TYPES
+        ):
+            return None
+        diners = [
+            agent for agent in occupants
+            if self._scheduled_activity(agent, epoch).startswith("Meal")
+            and not self._on_service_duty(agent, zone_name, epoch)
+        ]
+        ordered = seated_diners_in_booking_order(diners)
+        by_id = {agent.agent_id: agent for agent in diners}
+        groups: list[list[KorkinAgent]] = []
+        seen: set[int] = set()
+        for agent in ordered:
+            if agent.agent_id in seen:
+                continue
+            group = [
+                by_id[member_id]
+                for member_id in (agent.agent_id, *sorted(agent.cabin_mate_ids))
+                if member_id in by_id and member_id not in seen
+            ]
+            seen.update(member.agent_id for member in group)
+            groups.append(group)
+        self.rng.shuffle(groups)
+        dealt: dict[int, tuple[int, frozenset[int]]] = {}
+        tables: list[list[KorkinAgent]] = []
+        table: list[KorkinAgent] = []
+        for group in groups:
+            if table and len(table) + len(group) > DEFAULT_DINING_TABLE_SIZE:
+                tables.append(table)
+                table = []
+            table.extend(group)
+        if table:
+            tables.append(table)
+        for table_index, table in enumerate(tables):
+            table_ids = frozenset(agent.agent_id for agent in table)
+            for agent in table:
+                dealt[agent.agent_id] = (
+                    table_index,
+                    table_ids - {agent.agent_id},
+                )
+        self._meal_tables[(zone_name, epoch)] = dealt
+        cutoff = epoch - 1
+        self._meal_tables = {
+            key: value for key, value in self._meal_tables.items()
+            if key[1] >= cutoff
+        }
+
+    def _adjacent_table(
+        self,
+        target: KorkinAgent,
+        shedder: KorkinAgent,
+        epoch: int,
+    ) -> bool:
         """Whether the two are seated at neighbouring tables in one sitting.
 
         Declared topology, not a distance kernel: tables are dealt in
         consecutive slices of a sitting, so consecutive indices are the pair the
         dining record calls adjacent, and no third ring exists.
         """
-        index = target.dining_table_index
-        other = shedder.dining_table_index
+        target_table = self._table_party(target.current_location, target, epoch)
+        shedder_table = self._table_party(shedder.current_location, shedder, epoch)
+        if target_table is None or shedder_table is None:
+            return False
+        index = target_table[1]
+        other = shedder_table[1]
         return (
             index >= 0
             and other >= 0
             and abs(index - other) == 1
-            and shedder.dining_zone == target.dining_zone
-            and shedder.meal_seating == target.meal_seating
+            and shedder.current_location == target.current_location
         )
 
     def _near_field_admits(self, profile: dict | None) -> bool:
@@ -3251,40 +3333,31 @@ class TransmissionCore:
         target: KorkinAgent,
         emitted_shedders: list[tuple[KorkinAgent, float]],
         volume: float,
-        vent_factor: float,
         target_factor: float,
         emission_fraction: float,
+        epoch: int,
     ) -> float:
-        """AERO-NEAR-01: the short-range term of the two-compartment air route.
-
-        No emission is created. A share ``retained_fraction`` of the aerosol a
-        near-field partner already emitted into this zone's pool is breathed at
-        the unit's own volume instead of the room's, so the term is the
-        difference of the two concentrations and vanishes when the unit is no
-        smaller than the room. The far-field term above is untouched, and the
-        zone pool the drift route reads keeps the whole emitted mass.
-        """
+        """AERO-NEAR-02 two-box excess concentration over the far field."""
         near = self.near_field_air
         if not near.active:
             return 0.0
-        room_concentration_per_unit_mass = 1.0 / max(volume, 1.0)
+        gain = (
+            1.0 / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
+            - 1.0 / max(volume, 1.0)
+        )
+        if gain <= 0.0:
+            return 0.0
         dose = 0.0
         for shedder, emitted in emitted_shedders:
-            unit = self._near_field_unit(zone_name, target, shedder)
-            if unit is None:
-                continue
-            weight, unit_volume = unit
-            gain = 1.0 / unit_volume - room_concentration_per_unit_mass
-            if weight <= 0.0 or gain <= 0.0:
+            weight = self._near_field_unit(zone_name, target, shedder, epoch)
+            if weight is None or weight <= 0.0:
                 continue
             dose += (
-                near.retained_fraction
-                * weight
+                weight
                 * emitted * emission_fraction
                 * gain
                 * self.inhaled_air_volume_m3_per_epoch
                 * self.droplet_scalar
-                * vent_factor
                 * target_factor
             )
         return dose
@@ -3413,6 +3486,9 @@ class TransmissionCore:
             if getattr(agent, "ashore", False):
                 continue
             zone_occupants.setdefault(loc, []).append(agent)
+        for zone_name, occupants in zone_occupants.items():
+            if self.zone_types.get(zone_name) == "Dining":
+                self._deal_meal_tables(zone_name, occupants, epoch)
 
         # Per-agent accumulated dose across all pathways (aggregate)
         agent_doses: dict[int, float] = {}
@@ -3968,6 +4044,7 @@ class TransmissionCore:
         present_ids: frozenset[int],
         r0_draw: int,
         zone_name: str,
+        epoch: int,
     ) -> tuple[list[tuple[KorkinAgent, float]], int] | None:
         """Partners for a diner seated with its table party, or None.
 
@@ -3979,9 +4056,10 @@ class TransmissionCore:
         share is 0. Each of the two pools then divides its own share between
         the classes sitting in it, under ``contact_class_exponent``.
         """
-        party = target.dining_party_ids
+        table = self._table_party(zone_name, target, epoch)
+        party = table[0] if table is not None else frozenset()
         share = self.dining_party_contact_share
-        if not party or share <= 0.0 or zone_name != target.dining_zone:
+        if not party or share <= 0.0:
             return None
         n_occupants = max(len(occupants), 1)
         n_party = 1 + len(party & present_ids)
@@ -4129,7 +4207,7 @@ class TransmissionCore:
         # A meal is a meal wherever it is taken, and a Dining zone is a meal
         # for whoever is in it off `Work` and off `Sleep`.
         if token == "Meal" or self.zone_types.get(zone_name) == "Dining":
-            if target.dining_party_ids and zone_name == target.dining_zone:
+            if self._table_party(zone_name, target, epoch) is not None:
                 return "dining_table"
             return "dining_venue"
         if token == "Free":
@@ -4355,7 +4433,7 @@ class TransmissionCore:
             if use_partner:
                 seated = self._seated_partner_sample(
                     target, shedders, occupants, present_ids, r0_draw,
-                    zone_name,
+                    zone_name, epoch,
                 )
                 sampled_shedders, n_contacts = (
                     seated if seated is not None
@@ -4451,7 +4529,7 @@ class TransmissionCore:
             if not shedders or not susceptible:
                 continue
             self._droplet_unit_doses(
-                unit_name, shedders, susceptible,
+                _epoch, unit_name, shedders, susceptible,
                 agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, ledger,
                 near_field_on=near_field_on,
@@ -4460,6 +4538,7 @@ class TransmissionCore:
 
     def _droplet_unit_doses(
         self,
+        epoch: int,
         unit_name: str,
         shedders: list[tuple[KorkinAgent, float]],
         susceptible: list[KorkinAgent],
@@ -4518,7 +4597,7 @@ class TransmissionCore:
                 # volume, so it vanishes once the unit is the stateroom.
                 near_dose = self._near_field_droplet_dose(
                     zone_name, target, emitted_shedders, volume,
-                    vent_factor, target_factor, emission_fraction,
+                    target_factor, emission_fraction, epoch,
                 )
             dose += near_dose
             dose = self._accumulate(
@@ -4540,6 +4619,9 @@ class TransmissionCore:
                 # Written only under the compartment mode, so a zone-pool
                 # run's payload is the pre-change payload.
                 exposure["air_unit"] = unit_name
+            table = self._table_party(zone_name, target, epoch)
+            if near_field_on and table is not None:
+                exposure["meal_table_index"] = table[1]
             if near_dose > 0.0:
                 # Written only when the near field is on, so the payload of
                 # a run without it is the pre-change payload.

@@ -28,7 +28,6 @@ from engines.transmission_core import (
 from engines.voyage_itinerary import LOCATION_ASHORE
 from orchestrator_init import load_spatial_layout
 
-
 LOUNGE = "Lounge"
 DINING = "MainDining"
 CORRIDOR = "PC_D6"
@@ -590,16 +589,24 @@ class TestTheActivityArmOfTheGate:
         )
 
     def test_the_control_arm_is_the_pre_change_spec(self) -> None:
-        assert "transmission" not in self._spec(None)["config_overrides"]
-        assert "transmission" not in self._spec("")["config_overrides"]
+        control = self._spec(None)["config_overrides"]
+        assert control["transmission"]["near_field_air"] == {
+            "mode": "two_box",
+            "interzonal_airflow_m3_per_hour": 204.0,
+            "neighbour_table_ratio": 0.43,
+        }
+        assert self._spec("")["config_overrides"] == control
         assert self._design(None).run_kwargs()["activity_contacts"] is None
 
     def test_the_arm_writes_a_complete_enabled_declaration_and_nothing_else(self) -> None:
-        control = self._spec(None)
+        control = self._spec(None)["config_overrides"]
         arm = self._spec(ARM)
         overrides = dict(arm["config_overrides"])
         tx = overrides.pop("transmission")
-        assert overrides == control["config_overrides"]
+        assert tx["near_field_air"] == control["transmission"]["near_field_air"]
+        control_without_transmission = dict(control)
+        control_without_transmission.pop("transmission")
+        assert overrides == control_without_transmission
         assert tx["contact_mode"] == "per_partner_contact"
         assert tx["activity_contacts"]["enabled"] is True
         rates = tx["activity_contacts"]["rates_per_hour"]

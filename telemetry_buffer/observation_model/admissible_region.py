@@ -179,13 +179,11 @@ class Design:
     # arm of a sweep. 0.0 is the pre-change kernel and the matched control;
     # a design carries it so arms differ in this field alone.
     contact_class_exponent: float = 0.0
-    # AERO-NEAR-01: the near-field air arm. kappa 0.0 is the well-mixed route
-    # and the matched control; above 0 the two volumes are declared geometry
-    # the arm must carry, because no measurement of either exists (tranche 36).
-    near_field_retained_fraction: float = 0.0
-    near_field_neighbour_table_ratio: float = 0.0
-    near_field_cabin_berth_volume_m3: float | None = None
-    near_field_table_seat_volume_m3: float | None = None
+    # AERO-NEAR-02: beta is the measured two-box exchange, and "off" is the
+    # labelled pre-change baseline.
+    near_field_mode: str = "two_box"
+    near_field_interzonal_airflow_m3_per_hour: float = 204.0
+    near_field_neighbour_table_ratio: float = 0.43
     # CONTACT-ARCH-01: the activity-derived contact arm, one declared rate per
     # activity as (activity, contacts/hour) pairs. ``None`` is the uniform
     # 13.4-a-day draw and the matched control. A rate is a scalar across roles
@@ -226,15 +224,12 @@ class Design:
             "crew_duty_exclusion": self.crew_duty_exclusion,
             "service_surface_knockout": self.service_surface_knockout,
             "contact_class_exponent": self.contact_class_exponent,
-            "near_field_retained_fraction": self.near_field_retained_fraction,
+            "near_field_mode": self.near_field_mode,
+            "near_field_interzonal_airflow_m3_per_hour": (
+                self.near_field_interzonal_airflow_m3_per_hour
+            ),
             "near_field_neighbour_table_ratio": (
                 self.near_field_neighbour_table_ratio
-            ),
-            "near_field_cabin_berth_volume_m3": (
-                self.near_field_cabin_berth_volume_m3
-            ),
-            "near_field_table_seat_volume_m3": (
-                self.near_field_table_seat_volume_m3
             ),
             "activity_contacts": (
                 None if self.activity_contacts is None
@@ -1364,43 +1359,20 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         ),
     )
     parser.add_argument(
-        "--near-field-retained-fraction",
-        type=float,
-        default=0.0,
-        help=(
-            "AERO-NEAR-01: kappa, the share of a near-field partner's aerosol "
-            "breathed at the shared unit's volume rather than the room's. "
-            "0 (default) is the well-mixed route and the matched control; "
-            "above 0 both near-field volumes must be declared"
-        ),
+        "--near-field-mode", choices=("two_box", "off"), default="two_box",
+    )
+    parser.add_argument(
+        "--near-field-interzonal-airflow-m3-per-hour",
+        type=float, default=204.0,
     )
     parser.add_argument(
         "--near-field-neighbour-table-ratio",
         type=float,
-        default=0.0,
+        default=0.43,
         help=(
             "AERO-NEAR-01: rho, the near-field exposure at a neighbouring "
             "table relative to the diner's own table; keeps the ordering "
             "same table >= neighbour >= far for any value in [0, 1]"
-        ),
-    )
-    parser.add_argument(
-        "--near-field-cabin-berth-volume-m3",
-        type=float,
-        default=None,
-        help=(
-            "AERO-NEAR-01: declared near-field air volume per berth in a "
-            "stateroom. No measurement of this quantity exists (tranche 36), "
-            "so a run that turns the near field on must state it"
-        ),
-    )
-    parser.add_argument(
-        "--near-field-table-seat-volume-m3",
-        type=float,
-        default=None,
-        help=(
-            "AERO-NEAR-01: declared near-field air volume per seat at a "
-            "dining table, stated for the same reason as the berth volume"
         ),
     )
     parser.add_argument(
@@ -1505,10 +1477,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         crew_duty_exclusion=args.crew_duty_exclusion,
         service_surface_knockout=args.service_surface_knockout,
         contact_class_exponent=args.contact_class_exponent,
-        near_field_retained_fraction=args.near_field_retained_fraction,
+        near_field_mode=args.near_field_mode,
+        near_field_interzonal_airflow_m3_per_hour=(
+            args.near_field_interzonal_airflow_m3_per_hour
+        ),
         near_field_neighbour_table_ratio=args.near_field_neighbour_table_ratio,
-        near_field_cabin_berth_volume_m3=args.near_field_cabin_berth_volume_m3,
-        near_field_table_seat_volume_m3=args.near_field_table_seat_volume_m3,
         activity_contacts=activity_contacts,
         activity_saturation_hours=parse_activity_saturation(
             args.activity_saturation_hours, activity_contacts,

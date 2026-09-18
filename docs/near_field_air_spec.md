@@ -1,8 +1,8 @@
-# AERO-NEAR-01: a near-field air compartment over the seating unit and the cabin
+# AERO-NEAR-02: a near-field air compartment over the seating unit and the cabin
 
-> **Status:** **Implemented, off by default** — `transmission.near_field_air`
-> in `engines/transmission_core.py`, with `retained_fraction` 0 (and an absent
-> block) taking the pre-change well-mixed code path. §§1–7 below are the
+> **Status:** **Implemented, on by default (two_box)** — `transmission.near_field_air`
+> in `engines/transmission_core.py`; `mode: off` is the labelled pre-change
+> well-mixed baseline. §§1–7 below are the
 > requirement as sourced; **§10 records what landed and how it differs from
 > the requirement**. No constant is adopted and no value is fitted: the §6
 > sourcing tranche ([tranche 36](literature/consensus_tranche_36_near_field_air.md))
@@ -43,8 +43,10 @@ addressed separately and complementarily by `AERO-CABIN-01`
 [`cabin_air_compartment_spec.md`](cabin_air_compartment_spec.md), which makes
 the stateroom the *primary* inhalation unit inside a `Cabin_Corridor` by
 partitioning the declared block volume — where this spec's near field leaves the
-block pooled and adds a mate-only bonus over it. Both are off by default and
-compose: with `cabin_air_mode: cabin_compartment` the near-field difference term
+block pooled and adds a mate-only bonus over it. The cabin-air compartment is
+the labelled default for cabin geometry and the near-field two-box route is
+on by default; they compose: with `cabin_air_mode: cabin_compartment` the
+near-field difference term
 is taken against the stateroom's partitioned volume, so it vanishes unless the
 declared `cabin_berth_volume_m3` is smaller still.) `_cabin_mate_droplet_addback` only
 restores the confinement attenuation between cabin mates, and does so at the
@@ -236,10 +238,10 @@ anchor.
 ## 9. Sequence
 
 After the `DINE-PARTY-01` matched reprise is recorded (Batch `14dfa232`). The
-sourcing tranche (§6) precedes implementation; implementation ships off by
+sourcing tranche (§6) precedes implementation; implementation ships on by
 default. What the implementation then changed about this sequence: because the
 continuous near field admits only continuously emitting arms (§10), a norovirus
-κ sweep is a null by construction, so the measurement is a `sars_cov2_resp`
+β sweep is a null by construction, so the measurement is a `sars_cov2_resp`
 campaign and the restaurant pattern is its out-of-sample structural check.
 Norovirus reaches this route only through the emesis pool item of §7.
 
@@ -251,10 +253,9 @@ Norovirus reaches this route only through the emesis pool item of §7.
 ```yaml
 transmission:
   near_field_air:
-    retained_fraction: 0.0      # κ, the swept axis; 0 = the well-mixed route
-    neighbour_table_ratio: 0.0  # ρ, the second dining ring
-    cabin_berth_volume_m3: null # declared geometry, required when κ > 0
-    table_seat_volume_m3: null  #   ditto; there is no measured default
+    mode: two_box
+    interzonal_airflow_m3_per_hour: 204.0  # β, Keil 2017 GM
+    neighbour_table_ratio: 0.43            # ρ, Li 2021 T3 midpoint
 ```
 
 For a susceptible `t` and a shedder `s` in the same zone and epoch, with `m`
@@ -262,15 +263,15 @@ the aerosol mass `s` already emits into this zone's pool (`emission` × the
 per-profile droplet emission share — see §1), the near field adds
 
 ```text
-near(t) = Σ_s  κ · w(t,s) · m_s · (1/V_unit(t) − 1/V_zone) · inhaled × droplet_scalar × vent × confinement
+gain = 1/(β · T) − 1/max(V_zone, 1)
+near(t) = Σ_s w(t,s) · m_s · gain · inhaled × droplet_scalar × confinement
 ```
 
-with the same three multipliers the far-field term already carries, and
+with the room ventilation factor deliberately absent (Keil found β
+uncorrelated with room ACH), and
 
-- `V_unit` = `cabin_berth_volume_m3 × berths` in a `Cabin_Corridor` for a cabin
-  mate; `table_seat_volume_m3 × seats` in the target's dining zone for a seated
-  party; nothing anywhere else, so a corridor neighbour, a buffet queue and a
-  crew-mess diner stay far field only;
+- `β·T` is the flushed near-field volume for the epoch; a cabin mate in a
+  `Cabin_Corridor` or a table party gets weight 1;
 - `w = 1` at the same table or in the same cabin, `w = ρ` at a neighbouring
   table, `0` beyond — the two rings of §5 and no third;
 - **adjacency is declared, not a distance kernel.** `assign_dining_parties`
@@ -302,12 +303,39 @@ Four things worth reading twice, because they differ from a naïve reading of
    arm's licensed airborne pathway is the emesis pool, whose near field is a
    separate item (§7). Since the droplet-emission deletion the gate is the
    *second* of two independent refusals — `_droplet_emission_fraction` already
-   gives that arm a zero continuous share. So a norovirus campaign over κ is a
+   gives that arm a zero continuous share. So a norovirus campaign over β is a
    **null by construction**: this change is measurable on the `sars_cov2_resp` arm, and
    Marks 2000's by-table gradient remains its out-of-sample check.
-4. **Both magnitudes are swept, neither is chosen.** κ and ρ are design fields
+4. **Both magnitudes are swept, neither is chosen.** β and ρ are design fields
    of the bounded gate (`Design`, `build_run_spec`, `--near-field-*` on the gate
-   CLI and the Batch entrypoint), and a κ = 0 arm writes no `transmission`
-   override at all, so the control arm is the shipped model. Turning the near
-   field on without declaring both unit volumes is a load error rather than a
-   defaulted geometry.
+   CLI and the Batch entrypoint), and `mode: off` is the labelled control arm.
+
+## 11. AERO-NEAR-02: β reparametrisation and per-meal tables
+
+The near/far exchange is now declared by the identifiable interzonal airflow
+β, not by the retired `retained_fraction` multiplied by an assumed unit
+volume:
+
+| quantity | shipped value | source | grade |
+|---|---:|---|---|
+| β default | **3.4 m³/min = 204 m³/h** (geometric mean; GSD 2.3; 95% CI of GM 2.8–4.2; range 0.4–19 m³/min over 74 measurements in 12 rooms; NF box 0.32 m³, 0.60 m high over a 0.60×0.90 m table; β ≈ ½·free-surface-area × random air speed; β uncorrelated with room ACH) | Keil C. et al. 2017, J Occup Environ Hyg, DOI 10.1080/15459624.2017.1334903 (Abstract + Results) | B |
+| β sweep range | 0.4–19 m³/min (24–1,140 m³/h) | Keil et al. 2017 | B |
+| neighbour-table ratio ρ default | **0.43**, midpoint of 0.40–0.47 | Li Y. et al. 2021, Build Environ, Table 3 | B |
+| background indoor air speed | arithmetic mean ≈0.3 m/s; 85% below 0.3; +0.05 m/s modal around a person → 0.3–0.4 m/s | Baldwin & Maynard 1998, DOI 10.1093/annhyg/42.5.303 | B |
+| near-field extent | ≈ within 1 m of the breathing zone; airborne-fraction dose decays 1/L to 0.76 m and 1/L² over 0.76–1.75 m | LeBlanc 2017, DOI 10.1016/j.ijheh.2017.10.016; Cortellessa 2021, DOI 10.1016/j.scitotenv.2021.148749 | B |
+
+For a source emission `G` over an epoch of `T` hours, the excess
+near-field concentration is `G/(β·T)` and the flushed near-field volume is
+`β·T`. The near-field term does not apply the room ventilation factor and does
+not add to or remove mass from either aerosol pool.
+
+Buffet and crew-mess diners receive a random table deal for each meal epoch,
+with cabin bookings kept together, tables of the default size, and on-duty
+service staff excluded. Fixed MDR and specialty seating remains unchanged.
+Carnival “Table Sizes” 2–10 is the only published table geometry, Grade C, so
+buffet and mess tables reuse `DEFAULT_DINING_TABLE_SIZE`. The deal is the
+documentary “take a tray to whatever seat is free”; serving-line queue exposure
+and cruise-dining-table β remain declared omissions.
+
+Section 10's `retained_fraction`, `cabin_berth_volume_m3`, and
+`table_seat_volume_m3` parameters are retired and rejected rather than aliased.

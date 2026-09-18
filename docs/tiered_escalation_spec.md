@@ -187,6 +187,13 @@ influenza ABM parameterizations), compliance is best modeled as a
 The `compliance` parameter (0.0 to 1.0) sets the fraction in the Compliant 
 class. The remainder splits between Reluctant and Defiant.
 
+An authority-issued whole-passenger quarantine may declare
+`confinement_enforced: true` alongside `confine_all_to_quarters`. This is the
+officer-carried-out SOP path: every non-exempt agent is admitted without the
+FRED voluntary draw, so Compliant/Reluctant/Defiant classes do not determine
+admission. When absent or false, the voluntary compliance mixture above is
+unchanged.
+
 #### Agent class modifiers
 
 Different agent classes (crew vs. passenger) may have different baseline 

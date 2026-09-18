@@ -17,6 +17,10 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**AERO-NEAR-02 invalidates prior near-field-sensitive COVID figures.** The
+QUAR-ORDER-01 burning and intermediate-cell figures are void pending
+remeasurement with the near-field two-box default and per-meal buffet tables.
+
 **Every fitted Θ is void pending a refit on the repaired airborne subsystem.**
 The fits of record (`covid_first_look_v1`–`v6`, the 1b boarding screen, and the
 three-stage imports × Θ sweep) were all measured before at least one of:

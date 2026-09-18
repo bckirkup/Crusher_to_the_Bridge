@@ -195,20 +195,15 @@ def _region_argv(
     # CONTACT-SCALE-01: phi is a number, not a switch, and 0 is the matched
     # control; it is passed through as given so the report records the arm.
     argv += ["--contact-class-exponent", args.contact_class_exponent]
-    # AERO-NEAR-01: kappa and the declared geometry travel the same way. kappa
-    # 0 is the matched control, and the two volumes are only sent when the arm
-    # states them, so an off arm's command line is the pre-change one.
-    argv += ["--near-field-retained-fraction", args.near_field_retained_fraction]
+    argv += ["--near-field-mode", args.near_field_mode]
+    argv += [
+        "--near-field-interzonal-airflow-m3-per-hour",
+        args.near_field_interzonal_airflow_m3_per_hour,
+    ]
     argv += [
         "--near-field-neighbour-table-ratio",
         args.near_field_neighbour_table_ratio,
     ]
-    for flag, value in (
-        ("--near-field-cabin-berth-volume-m3", args.near_field_cabin_berth_volume_m3),
-        ("--near-field-table-seat-volume-m3", args.near_field_table_seat_volume_m3),
-    ):
-        if value:
-            argv += [flag, value]
     # CONTACT-ARCH-01: the activity arm is one 'activity=rate,...' string,
     # sent only when the arm states it, so the control arm's command line is
     # the pre-change one and the gate parses the declaration itself. A Batch
@@ -246,11 +241,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     # A string, like the other arm parameters: Batch parameters arrive as
     # text and the gate parses the float itself.
     parser.add_argument("--contact-class-exponent", default="0")
-    # Numbers, like phi, and empty for a volume the arm does not declare.
-    parser.add_argument("--near-field-retained-fraction", default="0")
-    parser.add_argument("--near-field-neighbour-table-ratio", default="0")
-    parser.add_argument("--near-field-cabin-berth-volume-m3", default="")
-    parser.add_argument("--near-field-table-seat-volume-m3", default="")
+    parser.add_argument("--near-field-mode", default="two_box", choices=("two_box", "off"))
+    parser.add_argument("--near-field-interzonal-airflow-m3-per-hour", default="204")
+    parser.add_argument("--near-field-neighbour-table-ratio", default="0.43")
     # 'off' for the control; 'activity=rate,...' for an activity arm.
     parser.add_argument("--activity-contacts", default="off")
     parser.add_argument("--activity-saturation-hours", default="off")
