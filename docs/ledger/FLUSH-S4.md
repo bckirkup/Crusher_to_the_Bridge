@@ -40,6 +40,31 @@ and `hvac.pathogen_pool_transport: airflow`, so the measurement records the
 engine state it was taken under rather than inheriting whatever the defaults do
 next.
 
+## Submission provenance
+
+Image `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:flush-sweep-v1-s4-7f689b9`,
+digest `sha256:5c0b6607197b63ba6fdc5d3870dafdb2d94bd1aaaefffb2ac1d1152eb14e2c83`,
+built with `ENGINE_GIT_SHA=7f689b99e50fbc08eec55b5a8037b121935ab32f` (this
+branch: merged main `588582c` plus these manifests — the engine tree is
+identical to `FLUSH-S3`'s `65d9fb2`, which is docs and one readout script
+behind, so the stamp differs while the engine does not). Job definition
+`picard-campaign:48`, queue `picard-campaign-queue` on `picard-campaign-spot`
+(EC2 Spot), 256 array children per arm, log group
+`/aws/batch/picard-campaign`.
+
+| Arm | S3 prefix | Batch job |
+|---|---|---|
+| `off_s4` | `campaign/flush_sweep_v1_off_s4/` | `43c0a225-4918-439a-ac37-b4d7bca97de9` |
+| `3e-9_s4` | `campaign/flush_sweep_v1_3e-9_s4/` | `2a775c19-85a0-49a2-96c2-a1f1416fefa8` |
+| `1e-8_s4` | `campaign/flush_sweep_v1_1e-8_s4/` | `fce7be28-1728-4153-94d1-4ab1632b0298` |
+| `3e-8_s4` | `campaign/flush_sweep_v1_3e-8_s4/` | `772f4b1e-e853-41af-bf6c-ed9c427e0f34` |
+| `3e-7_s4` | `campaign/flush_sweep_v1_3e-7_s4/` | `454d66c7-3420-463b-ae79-79dfa5bfbef2` |
+
+Bucket `crusherbucket-994254241749-us-east-1-an`, one prefix per arm so no arm
+can be read from another's archive. Each arm's archived
+`flush_aerosol_fraction` is checked against its prefix at readout, not assumed
+from the directory name.
+
 ## Why `off` is re-run and not re-read
 
 Main has not moved the engine since `FLUSH-S3` (`65d9fb2…` → `588582c` is docs
