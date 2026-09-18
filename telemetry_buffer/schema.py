@@ -43,12 +43,21 @@ SCHEMA_VERSION = "0.3.0"
 
 BUFFER_DIR = os.path.dirname(os.path.abspath(__file__))
 REPO_ROOT = os.path.dirname(BUFFER_DIR)
-GROUND_TRUTH_PATH = os.path.join(BUFFER_DIR, "ground_truth.json")
+TELEMETRY_DIR_ENV = "CTTB_TELEMETRY_DIR"
+
+
+def telemetry_dir(repo_root: str = REPO_ROOT) -> str:
+    """Directory holding the default telemetry artifacts; CTTB_TELEMETRY_DIR overrides it."""
+    override = os.environ.get(TELEMETRY_DIR_ENV)
+    return os.path.realpath(override) if override else os.path.join(repo_root, "telemetry_buffer")
+
+
+GROUND_TRUTH_PATH = os.path.join(telemetry_dir(), "ground_truth.json")
 
 
 def _validated_ground_truth_path(path: str) -> str:
     resolved = os.path.realpath(path)
-    allowed_roots = (BUFFER_DIR, REPO_ROOT)
+    allowed_roots = (BUFFER_DIR, REPO_ROOT, telemetry_dir())
     if not any(is_path_under_base(root, resolved) for root in allowed_roots):
         raise ValueError(
             f"Ground-truth path must stay under repository or telemetry_buffer: {path!r}",

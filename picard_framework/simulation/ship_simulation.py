@@ -1560,6 +1560,7 @@ class ShipSimulation:
             num_agents=len(self.engine.agents) if self.engine else 0,
             num_epochs=self.num_epochs,
             history_path=history_path,
+            lab_notebook_path=paths.lab_notebook if paths else None,
             logging_profile_path=logging_path,
             display=show,
         )
