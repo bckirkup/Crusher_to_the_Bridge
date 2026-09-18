@@ -39,12 +39,14 @@ from crusher_labs.stoplight import (
     stoplight_from_rdt,
 )
 from simulation_utils.paths import (
+    is_path_under_base,
     load_validated_json,
     prepare_output_directory,
     resolve_repo_path,
     validated_open,
 )
 from telemetry_buffer.agent_axes import clinical_axes_for_notebook
+from telemetry_buffer.schema import telemetry_dir
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -726,12 +728,18 @@ class ArtificialLabNotebook:
             notebook["PROTOCOL_SUMMARY"] = protocol_summary
 
         repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-        output_path = resolve_repo_path(repo_root, output_path)
+        resolved_path = os.path.realpath(
+            output_path if os.path.isabs(output_path) else os.path.join(repo_root, output_path),
+        )
+        allowed_roots = (repo_root, telemetry_dir())
+        if not any(is_path_under_base(root, resolved_path) for root in allowed_roots):
+            raise ValueError(f"Lab notebook path escapes allowed roots: {output_path!r}")
+        output_path = resolved_path
         prepare_output_directory(
             os.path.dirname(output_path),
-            allowed_roots=(repo_root,),
+            allowed_roots=allowed_roots,
         )
-        with validated_open(output_path, "w", allowed_roots=(repo_root,), encoding="utf-8") as fh:
+        with validated_open(output_path, "w", allowed_roots=allowed_roots, encoding="utf-8") as fh:
             json.dump(notebook, fh, indent=2, default=str)
 
         return os.path.abspath(output_path)
