@@ -27,7 +27,8 @@ near-field extent context are recorded in `docs/near_field_air_spec.md` §11.
 Serving-line queue exposure and cruise-dining-table β remain open omissions.
 
 The COVID change detector moved from `(81, 42, 217, 88, 11)` to
-`(51, 8, 217, 51, 32)` on local CPython 3.12. This is attributed to the
-default β near-field dose and the additional RNG consumption from per-meal
-buffet/crew-mess table dealing. The CPython 3.11 tuple remains pending its CI
-measurement.
+`(64, 8, 217, 67, 36)` on CPython 3.11 and to
+`(51, 8, 217, 51, 32)` on local CPython 3.12. These moves are attributed to
+the default β near-field dose and the additional RNG consumption from
+per-meal buffet/crew-mess table dealing. The CPython 3.11 reading was read
+from the CI job (fast tier, 3.11) on this branch.

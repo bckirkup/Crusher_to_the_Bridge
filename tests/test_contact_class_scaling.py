@@ -228,6 +228,7 @@ class TestPhiIsADesignArm:
             factor_set="expedition_sensitivity",
             platform="expedition_cruise_450",
             contact_class_exponent=phi,
+            near_field_mode="off",
         )
         units = [0.5] * len(design.factors)
         return build_run_spec(
@@ -236,15 +237,25 @@ class TestPhiIsADesignArm:
         )
 
     def test_the_control_arm_is_the_pre_change_spec(self) -> None:
-        assert "transmission" not in self._spec(0.0)["config_overrides"]
+        assert self._spec(0.0)["config_overrides"]["transmission"] == {
+            "near_field_air": {
+                "mode": "off",
+                "interzonal_airflow_m3_per_hour": 204.0,
+                "neighbour_table_ratio": 0.43,
+            },
+        }
 
     @pytest.mark.parametrize("phi", [-1.0, 0.5, 2.0])
     def test_a_swept_arm_writes_phi_and_only_phi(self, phi: float) -> None:
         control = self._spec(0.0)
         arm = self._spec(phi)
         overrides = dict(arm["config_overrides"])
-        assert overrides.pop("transmission") == {"contact_class_exponent": phi}
-        assert overrides == control["config_overrides"]
+        transmission = dict(overrides.pop("transmission"))
+        assert transmission.pop("contact_class_exponent") == phi
+        assert transmission == control["config_overrides"]["transmission"]
+        control_overrides = dict(control["config_overrides"])
+        control_overrides.pop("transmission")
+        assert overrides == control_overrides
         assert {k: v for k, v in arm.items() if k != "config_overrides"} == {
             k: v for k, v in control.items() if k != "config_overrides"
         }

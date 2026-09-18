@@ -45,7 +45,12 @@ def _droplet_doses(
         rng=np.random.default_rng(42),
         zone_volumes={zone: volume},
         clock=clock,
-        cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        cfg={
+            "transmission": {
+                "cabin_air_mode": "zone_pool",
+                "near_field_air": {"mode": "off"},
+            },
+        },
     )
     core.initialize_zones([zone])
     matrix, _ = core.execute_transmission(
@@ -221,7 +226,12 @@ class TestCabinCorridorTransmission:
             rng=np.random.default_rng(42),
             zone_volumes={zone: 1200.0},
             zone_types={zone: "Cabin_Corridor"},
-            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+            cfg={
+                "transmission": {
+                    "cabin_air_mode": "zone_pool",
+                    "near_field_air": {"mode": "off"},
+                },
+            },
         )
         core.initialize_zones([zone])
         matrix, _ = core.execute_transmission(

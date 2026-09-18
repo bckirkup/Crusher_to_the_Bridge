@@ -3353,13 +3353,19 @@ class TransmissionCore:
             weight = self._near_field_unit(zone_name, target, shedder, epoch)
             if weight is None or weight <= 0.0:
                 continue
+            pair_factor = target_factor
+            if shedder.agent_id in target.cabin_mate_ids:
+                shedder_factor = self.confinement_emission_factor(shedder)
+                if shedder_factor > 0.0:
+                    emitted /= shedder_factor
+                pair_factor = 1.0
             dose += (
                 weight
                 * emitted * emission_fraction
                 * gain
                 * self.inhaled_air_volume_m3_per_epoch
                 * self.droplet_scalar
-                * target_factor
+                * pair_factor
             )
         return dose
 
