@@ -131,6 +131,7 @@ longer justifications.
 | [parameter_provenance_register.md](parameter_provenance_register.md) | Register, authoritative — every quantity in all three arms with its provenance class and adoption state. Read it before changing any epidemiological constant, and update it in the same change |
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
 | [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
+| [covid/covid_open_ledger.md](covid/covid_open_ledger.md) | Living — current withdrawals and measurement status for the COVID arm |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
@@ -163,5 +164,5 @@ longer justifications.
 | Agent/CI commands | `AGENTS.md` + matching `.agents/skills/` |
 | JSON contracts | `schemas/README.md` + schema files |
 | ContamX / HVAC physics | `CONTAM_INTEROP.md` and [`exterior_zone_ahu_audit.md`](exterior_zone_ahu_audit.md) |
-| An epidemiological constant | The constant's provenance comment, `norovirus/norovirus_open_ledger.md` if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `norovirus/ledger/<ID>.md` (see its README); do not append numbered items. |
+| An epidemiological constant | The constant's provenance comment, the relevant open ledger (`norovirus/norovirus_open_ledger.md` or `covid/covid_open_ledger.md`) if it invalidates a recorded measurement, and `norovirus/norovirus_model_history.md` if it is a defect. New ledger entries are one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and Commit SHA; do not append numbered items. |
 | A document's implementation state | Its status header — and move the file if the filing rule above now puts it elsewhere |

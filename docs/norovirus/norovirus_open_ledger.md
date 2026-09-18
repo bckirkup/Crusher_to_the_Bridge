@@ -1567,8 +1567,8 @@ double-count by exactly the amount emesis already supplies.
 
 Roughly in dependency order.
 
-Items numbered here are frozen at 57 because they are cross-referenced by
-number. Every entry after that is a file in `docs/norovirus/ledger/`, keyed by
+Items numbered here are frozen at 58 because they are cross-referenced by
+number. Every entry after that is a file in `docs/ledger/`, keyed by
 its stable ID; pull requests must not append numbered items.
 
 00. **The dose scale governs the box, and every mechanism arm is downstream of
@@ -3951,5 +3951,5 @@ failure mode this file exists to prevent is a future session reading a stale
 dose figure from a doc and building on it in good faith — so a ledger that is
 quietly out of date is worse than no ledger. Date-stamp every measurement with
 the commit it was taken at. New entries belong in
-`docs/norovirus/ledger/<ID>.md`, not as appended numbered items, because
+`docs/ledger/<ID>.md`, not as appended numbered items, because
 concurrent pull requests collide on the running number.
