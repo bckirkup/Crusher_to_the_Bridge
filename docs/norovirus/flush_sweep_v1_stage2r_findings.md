@@ -1,5 +1,13 @@
 # The repaired transport engine moves the flush crossing below the bracket that was built to contain it
 
+> **Superseded as a measurement of current behaviour by
+> [`flush_sweep_v1_stage3_findings.md`](flush_sweep_v1_stage3_findings.md)**
+> (`FLUSH-S3`, measured at `65d9fb2`). This document remains a valid reading of
+> engine `585ad89`; the crossing it locates at or below `3e-9`, and the 85–110
+> per 1,000 posting at `1e-7`, are historical. The HVAC multiplicity fix,
+> confinement, per-stateroom pools and the emesis source-term repair have moved
+> the crossing up about two decades since.
+
 Status: measured. Companion to the generated tables in
 [`flush_sweep_v1_stage2r_readout.md`](flush_sweep_v1_stage2r_readout.md)
 (`telemetry_buffer/observation_model/flush_sweep_v1_s2r.json`); design and

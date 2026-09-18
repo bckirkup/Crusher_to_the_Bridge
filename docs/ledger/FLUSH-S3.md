@@ -2,7 +2,8 @@
 **Date:** 2026-09-17
 **Commit:** 71a5aae
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
+**Measured at:** 65d9fb2821c4d389eb92d3470d61f0ab06b84b3a
 
 The `s2r` and `s2e` flush archives are superseded. Both were taken at engine
 `585ad89`; four changes have landed since that move the routes those arms dosed
@@ -136,3 +137,37 @@ every archived run stamps its own engine. Job definition
 Bucket `crusherbucket-994254241749-us-east-1-an`. One prefix per arm, never a
 shared prefix: an arm may not be inferable from a directory name alone
 (the item-42 lesson).
+
+## Result
+
+2,400 of 2,400 runs completed, 0 non-Spot failures. Every archived run stamps
+`parameters.engine_git_sha = 65d9fb2821c4d389eb92d3470d61f0ab06b84b3a`, and
+every arm's archived `flush_aerosol_fraction` was read back from the archive
+and matches its prefix — the one failure mode that would have produced a
+plausible-looking wrong answer.
+
+Paired Δ in ever-infected per voyage against `off` on the shared seed, 100
+seeds per cell:
+
+| cell | `1e-9` | `1e-7` | `1e-5` |
+|---|---|---|---|
+| `fl_exp_7d` | null | null | resolves |
+| `fl_exp_12d` | null | null | resolves |
+| `fl_cls_7d` | null | resolves | resolves |
+| `fl_cls_12d` | null | resolves | resolves |
+| `fl_spr_7d` | null | resolves | resolves |
+| `fl_spr_12d` | null | resolves | resolves |
+
+The crossing is inside `(1e-9, 1e-7]` on the large hulls, about two decades
+above where `s2r` put it. `1e-5` is not saturated. Numbers in
+`docs/norovirus/flush_sweep_v1_stage3_readout.md`; interpretation, route
+shares and caveats in `docs/norovirus/flush_sweep_v1_stage3_findings.md`.
+
+## Follow-up selected by the predeclared rule
+
+`1e-9` null → no arms below it. `1e-7` resolves and the response still rises
+materially to `1e-5` → fine arms inside `(1e-9, 1e-7)`: **`3e-9`, `1e-8`,
+`3e-8`**, with `off` re-run rather than re-read, and the full 200 paired seeds
+on the two arms that straddle the crossing. Placed by the shape of the
+contrast above; no arm is placed by distance to A9, VSP, MIDRS or Park, and
+the frozen `[1e-9, 1e-3]` band is unchanged.
