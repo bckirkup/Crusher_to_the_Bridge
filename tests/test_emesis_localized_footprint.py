@@ -14,8 +14,10 @@ import pytest
 
 from engines.infection_dynamics_bridge import IllnessStatus, KorkinAgent
 from engines.sim_clock import HOURS, SimClock
+from engines.strain_dose_ledger import ReservoirComposition
 from engines.transmission_core import (
     EMESIS_DEPOSITION_AREA_M2,
+    SURFACE_RESERVOIR,
     ContactTracingMatrix,
     EmesisPatch,
     TransmissionCore,
@@ -255,6 +257,36 @@ def test_patch_pickup_bounds_dose_and_hand_load() -> None:
         load = agent.hand_load_by_pathogen.get(PATHOGEN, 0.0)
         assert np.isfinite(load)
         assert load >= 0.0
+
+
+def test_patch_pickup_scales_composition_by_unit_total() -> None:
+    """A nearly-consumed patch must not zero the unit's composition bucket.
+
+    The bucket keyed by (surface, pathogen, unit) holds the zone pool's
+    deposits as well as the patch's, so consumption scales it by the
+    delivered share of the unit's total surface mass, not of the patch.
+    """
+    core = _core()
+    pool_mass, patch_mass = 400.0, 5.0
+    core.surface_pools_by_pathogen[PATHOGEN][ZONE] = pool_mass
+    key = ReservoirComposition.key(SURFACE_RESERVOIR, PATHOGEN, ZONE)
+    core._reservoir.deposit(key, ("strainA", 1), pool_mass + patch_mass)
+    before = sum(core._reservoir.contributors(key).values())
+    patch = EmesisPatch(
+        mass=patch_mass,
+        high_touch_area_m2=0.03,
+        occupant_share=1.0,
+        epoch=0,
+    )
+    occupants = _run_patch_pickup(core, patch, 50)
+    assert occupants  # sanity: the patch actually delivered
+    delivered = patch_mass - patch.mass
+    assert delivered > 0.0
+    total = pool_mass + patch_mass
+    after = sum(core._reservoir.contributors(key).values())
+    assert after == pytest.approx(before * (total - delivered) / total)
+    # and the zone pool's share of the bucket is preserved, not wiped out
+    assert after > 0.9 * before
 
 
 def test_zero_emesis_draws_no_rng() -> None:

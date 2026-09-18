@@ -1,7 +1,7 @@
 # EMESIS-FOOTPRINT-01
 **Date:** 2026-10-26
 **Commit:** ee16ca0882cdc924302b8f06e211c9f305b1f71f
-**Pathogens:** norovirus
+**Pathogens:** norwalk_gi
 **Status:** open
 
 The touchable share of an emesis bolus was computed as
@@ -49,6 +49,13 @@ mechanically on the FLUSH-S4 `off` arm replay:
   are bit-identical to before.
 
 No emesis source term, dose-response, or transfer constant changed.
+
+Review follow-up on the same branch: patch consumption scales the unit's
+strain-composition bucket by the delivered share of the unit's *total*
+surface mass (zone pool plus patches), not of the patch alone — the bucket
+holds both, so scaling by patch mass would wipe pool composition. And
+`zone_surface_mass(zone)` with no pathogen argument sums patches across
+all pathogens, matching the per-pathogen view.
 
 ## Consequences for recorded numbers
 

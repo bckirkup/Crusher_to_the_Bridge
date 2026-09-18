@@ -3165,11 +3165,17 @@ class TransmissionCore:
         total = sum(
             pools.get(key, 0.0) for key in self.zone_surface_keys(zone_name)
         )
-        patch_pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id, {})
-        for key in self.zone_surface_keys(zone_name):
-            total += sum(
-                patch.mass for patch in patch_pools.get(key, ())
-            )
+        patch_pools = (
+            self.emesis_patch_pools_by_pathogen.values()
+            if pathogen_id is None
+            else (self.emesis_patch_pools_by_pathogen.get(pathogen_id, {}),)
+        )
+        zone_keys = self.zone_surface_keys(zone_name)
+        for pools in patch_pools:
+            for key in zone_keys:
+                total += sum(
+                    patch.mass for patch in pools.get(key, ())
+                )
         return total
 
     def zone_surface_lineage_masses(
@@ -6023,15 +6029,19 @@ class TransmissionCore:
             )
             for target in exposed
         ]
+        total = self.zone_surface_mass(unit_name, pathogen_id)
         delivered = self._deliver_fomite_requests(
             requests, unit_name, patch.mass, epoch,
             prev_occupant_ids, prev_shedders,
             agent_doses, matrix, agent_pathway_doses, pathogen_id,
             surface_attribution,
         )
-        if delivered > 0.0 and delivered < patch.mass:
+        if delivered > 0.0 and total > 0.0:
+            # The unit's composition bucket holds the zone pool's deposits as
+            # well as this patch's, so it is scaled by the delivered share of
+            # the unit's total surface mass, not of the patch alone.
             self._reservoir.decay(
-                (patch.mass - delivered) / patch.mass,
+                max(0.0, (total - delivered) / total),
                 ReservoirComposition.key(
                     SURFACE_RESERVOIR, pathogen_id, unit_name,
                 ),
