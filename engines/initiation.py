@@ -1723,8 +1723,14 @@ def _apply_one_seed(
             # A stated index case presents by construction rather than by
             # ``illness_probability`` at a fabricated acquisition dose.
             agent.infections[seed.pathogen_id]["will_present"] = True
+    seeded_ids = [int(a.agent_id) for a in chosen]
+    recorded = getattr(engine, "explicit_seed_agent_ids", None)
+    if recorded is None:
+        recorded = engine.explicit_seed_agent_ids = []
+    recorded.extend(seeded_ids)
     return {
         "pathogen": seed.pathogen_id,
+        "agent_ids": seeded_ids,
         "epoch": epoch,
         "role": seed.role,
         "requested": seed.count,

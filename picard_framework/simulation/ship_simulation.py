@@ -894,6 +894,10 @@ class ShipSimulation:
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
         self.engine.vsp_reported_case_fraction = state.vsp_reported_case_fraction
+        self.engine.vsp_reported_case_fraction_max = max(
+            self.engine.vsp_reported_case_fraction_max,
+            state.vsp_reported_case_fraction,
+        )
         self.engine.step()
         self._note_shore_introductions(
             step_shore_introductions(

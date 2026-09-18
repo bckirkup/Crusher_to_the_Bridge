@@ -110,3 +110,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020.
   Remaining: a resolved infection-age × Θ screen (≥20 seeds), before any
   v7 refit.
+- **`covid_theta_screen_v7` is declared, not yet run.** The pre-registered
+  Θ × infection-age screen on the repaired arm (host frailty restored,
+  index departing day 5) lives at
+  `picard_framework/runs/covid_theta_screen_v7_design.json`: 11 half-decade
+  Thetas × 7 ages × 40 seeds = 3,080 cells with pre-declared admissibility
+  (index geometry, covid.T1, covid.T3) and no result exists yet.

@@ -194,3 +194,116 @@ def test_array_children_cover_every_cell_once(design):
         entry.child_cells(cells, 180, 1)
     with pytest.raises(SystemExit):
         entry.child_cells(cells, 0, 0)
+
+
+# ── v7 admissibility readout ──────────────────────────────────────────────
+
+V7_DESIGN_REL = REPO_ROOT / "picard_framework" / "runs" / "covid_theta_screen_v7_design.json"
+
+
+def test_v7_design_loads_and_enumerates_the_declared_screen():
+    design = load_design(str(V7_DESIGN_REL))
+    assert design.design_id == "covid_theta_screen_v7"
+    assert design.scenario_id == "diamond_princess_2020"
+    assert design.sanitary_visit_mode == "dwell_weighted"
+    assert not design.is_refinement
+    assert design.baseline == (0.0, 1)
+    cells = enumerate_cells(design)
+    assert len(cells) == 3080
+    assert {c.imports for c in cells} == {1}
+    assert len({c.key for c in cells}) == 3080
+
+
+def _v7_stub(cell: ScreenCell, onsets: int, *, boards_symptomatic: bool) -> dict:
+    """A payload centred near ``onsets`` whose T1 interval contains it."""
+    seed_jitter = (cell.seed % 3) - 1  # -1, 0, +1
+    recorded = onsets + 5 * seed_jitter
+    before = round(recorded * (34 / 197))
+    obs = HullObservables(
+        scenario_id=cell.scenario_id, theta=cell.theta, seed=cell.seed,
+        recorded_onsets=recorded,
+        onsets_before_split_day=before,
+        onsets_on_or_after_split_day=recorded - before,
+        passenger_onsets_before=1, passenger_onsets_after=1,
+        crew_onsets_before=1, crew_onsets_after=1,
+        campaign_specimens=3063 + 10 * seed_jitter,
+        campaign_positives=634 + 5 * seed_jitter,
+        campaign_asymptomatic_positives=320,
+    )
+    return {
+        "design_id": "x",
+        "cell": cell.as_dict(),
+        "observables": obs.as_dict(),
+        "onset_curve": {},
+        "first_onset_day": None,
+        "sanitary_activity": {"visits": 100.0},
+        "index_onset_day": -2.5 if boards_symptomatic else 1.5,
+        "index_shedding_at_day0": boards_symptomatic,
+        "index_departed_epoch": 120,
+        "infections_total": int(recorded),
+        "aboard_total": 3711,
+        "attack_rate": recorded / 3711,
+        "vsp_reported_case_fraction_max": 0.04 if seed_jitter > 0 else 0.01,
+    }
+
+
+def test_merge_evaluates_the_v7_admissibility_criteria():
+    """Graded: only the cell centred on the T1 reading passes; geometry flips
+    on the sign of the seeded host's own onset day."""
+    design = BoardingScreenDesign(
+        design_id="v7_probe", scenario_id="diamond_princess_2020",
+        thetas=(1e10,), infection_age_days=(0.0, 5.0, 9.0), imports=(1,),
+        sanitary_visit_mode="dwell_weighted", seed_base=20200205,
+        seeds=10, takeoff_recorded_onsets=10,
+    )
+    centre = {0.0: 100, 5.0: 197, 9.0: 400}
+    payloads = {
+        c.key: _v7_stub(
+            c, centre[c.infection_age_days],
+            boards_symptomatic=(c.infection_age_days == 5.0),
+        )
+        for c in enumerate_cells(design)
+    }
+    surface = merge_screen(design, payloads)
+    by_age = {e["infection_age_days"]: e for e in surface["surface"]}
+    assert [by_age[a]["t1_ok"] for a in (0.0, 5.0, 9.0)] == [False, True, False]
+    assert [by_age[a]["t3_ok"] for a in (0.0, 5.0, 9.0)] == [True, True, True]
+    assert [by_age[a]["index_geometry_ok"] for a in (0.0, 5.0, 9.0)] == [
+        False, True, False,
+    ]
+    assert by_age[5.0]["index_geometry_pass_fraction"] == 1.0
+    assert by_age[0.0]["index_geometry_pass_fraction"] == 0.0
+    crossing = by_age[5.0]["vsp_threshold_crossing_fraction"]
+    assert 0.0 < crossing < 1.0
+    assert by_age[5.0]["attack_rate_quantiles"]["q50"] > 0.0
+    assert (
+        by_age[5.0]["attack_rate_quantiles_given_vsp_crossing"]["q50"]
+        > by_age[5.0]["attack_rate_quantiles"]["q10"]
+    )
+
+
+def test_geometry_fields_are_none_on_pre_v7_payloads(design):
+    """v1-shaped payloads carry no index fields; absence reads as None,
+    not as a failed criterion."""
+    cells = enumerate_cells(design)
+    payloads = {c.key: _stub_payload(c) for c in cells}
+    for entry in merge_screen(design, payloads)["surface"]:
+        assert entry["index_geometry_ok"] is None
+        assert entry["index_geometry_pass_fraction"] is None
+
+
+def test_a_real_cell_reports_the_index_geometry(design):
+    """Age 9: onset lands before boarding and the host emits at epoch 0;
+    age 0: onset cannot precede boarding (or never arrives in-window)."""
+    cell_at = lambda age: ScreenCell(  # noqa: E731
+        index=0, scenario_id="greg_mortimer_2020", theta=1e10,
+        infection_age_days=age, imports=1, seed=20200205,
+    )
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+    aged = simulate_screen_cell(design, cell_at(9.0), num_epochs=48)
+    assert aged["index_onset_day"] is not None
+    assert aged["index_onset_day"] < 0.0
+    assert aged["index_shedding_at_day0"] is True
+    fresh = simulate_screen_cell(design, cell_at(0.0), num_epochs=48)
+    assert fresh["index_shedding_at_day0"] is False
+    assert fresh["index_onset_day"] is None or fresh["index_onset_day"] >= 0.0
