@@ -1155,6 +1155,25 @@ The archives remain valid as measurements *of their own engines*; nothing about
 them is retracted as a reading. Superseded by `FLUSH-S3`, which declares the
 replacement re-bracket. The frozen `[1e-9, 1e-3]` refusal band is unchanged.
 
+**The `FLUSH-S3` re-bracket is measured at `65d9fb2`, and the crossing moved up
+about two decades.** `1e-9` is a null in all six hull/length cells on 100
+paired seeds; `1e-7` resolves on the four large-hull cells and is null on both
+expedition cells; `1e-5` resolves everywhere and is not saturated
+(ever-infected still rises ×10–25 from `1e-7`). So the crossing sits strictly
+inside `(1e-9, 1e-7]` rather than at or below `3e-9`, and the reason is
+visible in the route shares: `hvac_airborne` is **0.0% of dominant-route
+attributions in every `off` cell**, where `s2r` had it dominant in 26–68% —
+the multiplicity fix plus the ×0.05 confinement removed drift as a baseline
+contributor rather than trimming it, which outweighed the emesis increase
+pushing the other way. Posting is 0 per 1,000 in every `off` cell and in every
+expedition cell up to and including `1e-7`, and reaches 60–80 per 1,000 at
+`1e-7` on the large 12-day hulls against
+A9's 0.33; reported as contrast only — nothing is selected, the `[1e-9, 1e-3]`
+band is not narrowed, and `flush_aerosol_fraction` remains a declared
+uncertainty. Readout
+`docs/norovirus/flush_sweep_v1_stage3_readout.md`, interpretation
+`docs/norovirus/flush_sweep_v1_stage3_findings.md`.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
