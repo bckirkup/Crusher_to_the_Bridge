@@ -52,6 +52,7 @@ from engines.infection_dynamics_bridge import (
     BETA,
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     DEFAULT_DINING_TABLE_SIZE,
+    DEPARTMENT_TABLE_DINING_SERVICE_TYPES,
     HAND_CARRIAGE_PROPENSITY_BETA,
     PER_MEAL_TABLE_DINING_SERVICE_TYPES,
     SURFACE_DEPOSITION_FRACTION,
@@ -3233,7 +3234,16 @@ class TransmissionCore:
         occupants: list[KorkinAgent],
         epoch: int,
     ) -> None:
-        """Deal buffet and crew-mess diners into random per-meal tables."""
+        """Deal buffet and crew-mess diners into random per-meal tables.
+
+        Crew-mess diners are dealt within department (work zone): crew eat
+        with the team they work with (Pung et al. 2022, Nat Commun, DOI
+        10.1038/s41467-022-29522-y — crew contacts cluster by department,
+        10 unique close contacts/day IQR 6–18 vs 20 for passengers; Grade B:
+        measured under COVID-era work bubbles). Buffet diners are dealt across
+        the sitting (Read 2008: casual contacts random-mixing-like). No
+        numeric constant; the venue far-field pool is unchanged.
+        """
         if (
             not self.near_field_air.active
             or resolve_dining_service_type({"name": zone_name})
@@ -3260,7 +3270,7 @@ class TransmissionCore:
             ]
             seen.update(member.agent_id for member in group)
             groups.append(group)
-        self.rng.shuffle(groups)
+        groups = self._ordered_meal_groups(zone_name, groups)
         dealt: dict[int, tuple[int, frozenset[int]]] = {}
         tables: list[list[KorkinAgent]] = []
         table: list[KorkinAgent] = []
@@ -3284,6 +3294,29 @@ class TransmissionCore:
             key: value for key, value in self._meal_tables.items()
             if key[1] >= cutoff
         }
+
+    def _ordered_meal_groups(
+        self,
+        zone_name: str,
+        groups: list[list[KorkinAgent]],
+    ) -> list[list[KorkinAgent]]:
+        """Order booking groups for the venue's declared seating structure."""
+        service_type = resolve_dining_service_type({"name": zone_name})
+        if service_type not in DEPARTMENT_TABLE_DINING_SERVICE_TYPES:
+            self.rng.shuffle(groups)
+            return groups
+        by_department: dict[str, list[list[KorkinAgent]]] = {}
+        for group in groups:
+            department = group[0].work_zone
+            by_department.setdefault(department, []).append(group)
+        departments = sorted(by_department)
+        self.rng.shuffle(departments)
+        ordered: list[list[KorkinAgent]] = []
+        for department in departments:
+            department_groups = by_department[department]
+            self.rng.shuffle(department_groups)
+            ordered.extend(department_groups)
+        return ordered
 
     def _adjacent_table(
         self,

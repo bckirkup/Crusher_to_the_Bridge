@@ -222,6 +222,9 @@ class TestMealTables:
     def _buffet_core(self, seed: int = 17) -> TransmissionCore:
         return _core(zone=BUFFET, volume=5000.0, seed=seed)
 
+    def _crew_core(self, seed: int = 17) -> TransmissionCore:
+        return _core(zone="CrewMess", volume=5000.0, seed=seed)
+
     def _diners(self) -> list[KorkinAgent]:
         agents = [_agent(aid, BUFFET) for aid in range(20)]
         for left, right in ((0, 1), (2, 3), (4, 5)):
@@ -232,6 +235,39 @@ class TestMealTables:
             agents[aid].work_zone = BUFFET
             agents[aid].schedule = ["Work"] * 24
         return agents
+
+    def _department_diners(self, venue: str) -> list[KorkinAgent]:
+        agents = []
+        for department in range(4):
+            for offset in range(12):
+                agent = _agent(
+                    department * 12 + offset,
+                    venue,
+                    role="crew",
+                )
+                agent.work_zone = f"Department-{department}"
+                agent.schedule = ["Meal:Dinner"] * 24
+                agents.append(agent)
+        return agents
+
+    @staticmethod
+    def _table_departments(
+        core: TransmissionCore,
+        venue: str,
+        agents: list[KorkinAgent],
+        epoch: int,
+    ) -> list[set[str]]:
+        core._deal_meal_tables(venue, agents, epoch)
+        by_id = {agent.agent_id: agent for agent in agents}
+        tables: dict[int, set[str]] = {}
+        for agent_id, (table_index, party_ids) in core._meal_tables[(venue, epoch)].items():
+            tables.setdefault(table_index, set()).add(
+                by_id[agent_id].work_zone,
+            )
+            tables[table_index].update(
+                by_id[party_id].work_zone for party_id in party_ids
+            )
+        return list(tables.values())
 
     def test_per_meal_deal_keeps_bookings_and_excludes_staff(self) -> None:
         core = self._buffet_core()
@@ -255,6 +291,54 @@ class TestMealTables:
         worker.schedule = ["Work"] * 24
         core._deal_meal_tables(BUFFET, [free, worker], 1)
         assert set(core._meal_tables[(BUFFET, 1)]) == {free.agent_id}
+
+    def test_crew_mess_tables_are_dealt_within_department(self) -> None:
+        core = self._crew_core()
+        agents = self._department_diners("CrewMess")
+        tables = self._table_departments(core, "CrewMess", agents, 1)
+        assert sum(len(departments) > 1 for departments in tables) <= 3
+
+    def test_buffet_tables_still_mix_departments(self) -> None:
+        core = self._buffet_core()
+        agents = self._department_diners(BUFFET)
+        tables = self._table_departments(core, BUFFET, agents, 1)
+        assert any(len(departments) > 1 for departments in tables)
+
+    def test_department_dealing_repeats_table_mates_more_than_a_room_deal(self) -> None:
+        crew = self._department_diners("CrewMess")
+        buffet = self._department_diners(BUFFET)
+        crew_core = self._crew_core(seed=23)
+        buffet_core = self._buffet_core(seed=23)
+        crew_mates: set[int] = set()
+        buffet_mates: set[int] = set()
+        for epoch in range(1, 21):
+            crew_core._deal_meal_tables("CrewMess", crew, epoch)
+            buffet_core._deal_meal_tables(BUFFET, buffet, epoch)
+            crew_mates.update(
+                crew_core._meal_tables[("CrewMess", epoch)][0][1]
+            )
+            buffet_mates.update(
+                buffet_core._meal_tables[(BUFFET, epoch)][0][1]
+            )
+        assert len(crew_mates) < len(buffet_mates)
+
+    def test_department_deal_keeps_cabin_groups_together(self) -> None:
+        core = self._crew_core()
+        agents = self._department_diners("CrewMess")
+        agents[0].cabin_mate_ids = frozenset({1})
+        agents[1].cabin_mate_ids = frozenset({0})
+        core._deal_meal_tables("CrewMess", agents, 1)
+        dealt = core._meal_tables[("CrewMess", 1)]
+        assert dealt[agents[0].agent_id][0] == dealt[agents[1].agent_id][0]
+
+    def test_department_deal_is_deterministic(self) -> None:
+        first = self._crew_core(seed=31)
+        second = self._crew_core(seed=31)
+        first_agents = self._department_diners("CrewMess")
+        second_agents = self._department_diners("CrewMess")
+        first._deal_meal_tables("CrewMess", first_agents, 1)
+        second._deal_meal_tables("CrewMess", second_agents, 1)
+        assert first._meal_tables[("CrewMess", 1)] == second._meal_tables[("CrewMess", 1)]
 
     def test_same_seed_repeats_and_next_epoch_redeals(self) -> None:
         first = self._buffet_core(seed=31)

@@ -330,6 +330,7 @@ SEATED_PARTY_DINING_SERVICE_TYPES = frozenset({"mdr", "specialty"})
 # is the documentary "take a tray to whatever seat is free", with the booking
 # kept together as it arrives together.
 PER_MEAL_TABLE_DINING_SERVICE_TYPES = frozenset({"buffet", "crew_mess"})
+DEPARTMENT_TABLE_DINING_SERVICE_TYPES = frozenset({"crew_mess"})
 
 # Diners per table where a seated venue declares no ``dining_table_size``.
 # The published cruise range is 2–10 with round tables at 6–10 (Carnival,
