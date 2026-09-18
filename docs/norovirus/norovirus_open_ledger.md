@@ -1174,6 +1174,16 @@ uncertainty. Readout
 `docs/norovirus/flush_sweep_v1_stage3_readout.md`, interpretation
 `docs/norovirus/flush_sweep_v1_stage3_findings.md`.
 
+**`FLUSH-S4` declares the fine arms and is open.** `off` / `3e-9` / `1e-8` /
+`3e-8` at the full 200 paired seeds inside `(1e-9, 1e-7)`, plus `3e-7` to
+bracket the expedition crossing — which `FLUSH-S3` placed in `(1e-7, 1e-5)`,
+above every arm the single-crossing rule names — from below. 6,000 runs, same
+matched seed block, both air-model settings pinned. `off` is re-run rather than
+re-read so the fine arms pair on all 200 seeds and so `off_s4` can be required
+to reproduce `off_s3` on the 100 shared seeds. Declaration
+`docs/ledger/FLUSH-S4.md`; no result yet, and the `[1e-9, 1e-3]` band stays
+frozen.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
