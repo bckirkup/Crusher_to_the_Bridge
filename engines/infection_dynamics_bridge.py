@@ -1770,6 +1770,12 @@ class KorkinShipEngine:
         self._gender_distribution = gender_distribution or DEFAULT_GENDER_DISTRIBUTION
         self.vsp_threshold_fraction: float = VSP_THRESHOLD_FRACTION
         self.vsp_reported_case_fraction: float = 0.0
+        # Running maximum over the voyage, kept next to the live value so a
+        # screen can read the crossing without replaying telemetry.
+        self.vsp_reported_case_fraction_max: float = 0.0
+        # Agent ids the explicit-seed channel actually infected, in apply
+        # order, so a run can name the host the scenario calls its index.
+        self.explicit_seed_agent_ids: list[int] = []
         behavior = dict(DEFAULT_AGENT_BEHAVIOR)
         if agent_behavior:
             behavior.update({
