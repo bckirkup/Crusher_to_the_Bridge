@@ -567,6 +567,7 @@
       },
       "modifiers": {
         "confine_all_to_quarters": true,
+        "confinement_enforced": true,
         "exempt_classes": [
           "crew_general",
           "crew_medical",

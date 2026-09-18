@@ -92,6 +92,13 @@
           "note": "Passengers confined to cabins; crew continued essential service duties throughout, which is what SOP-017 encodes by exempting every crew class."
         },
         {
+          "field": "scheduled_protocols[SOP-017].modifiers.confinement_enforced",
+          "value": "true — passengers confined to cabins under the Japanese MHLW quarantine order from 5 Feb 2020, quarantine officers aboard; not an opt-in",
+          "source": "Yamagishi 2020, Eurosurveillance, DOI 10.2807/1560-7917.es.2020.25.23.2000272; NIID Field Briefing: Diamond Princess COVID-19 Cases (Feb 2020)",
+          "grade": "A",
+          "note": "Declared omission: passengers in windowless cabins were allowed ~1 h/day supervised deck time, masked and distanced; not modelled. Voluntary FRED classes still govern reactive SOPs."
+        },
+        {
           "field": "testing_campaign.start_day",
           "value": "simulated day 16 = 5 February 2020, the campaign record's first dated day",
           "source": "data/observation/covid_testing_campaigns.json (Mizumoto 2020, Yamahata 2020, NIID Field Briefing)",
@@ -218,6 +225,13 @@
           "source": "Keeley 2020 ('At day 8, the first member developed symptoms. Despite immediate imposition of cabin isolation of all passengers and strict personal protective equipment use by crew…'); Ing 2020",
           "grade": "A",
           "note": "Cabin isolation of all passengers, crew still working — the same asymmetry as the training hull, so both hulls use SOP-017."
+        },
+        {
+          "field": "scheduled_protocols[SOP-017].modifiers.confinement_enforced",
+          "value": "true — passengers confined to cabins under the Japanese MHLW quarantine order from 5 Feb 2020, quarantine officers aboard; not an opt-in",
+          "source": "Ing 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215091",
+          "grade": "B",
+          "note": "Declared omission: passengers in windowless cabins were allowed ~1 h/day supervised deck time, masked and distanced; not modelled. Voluntary FRED classes still govern reactive SOPs."
         },
         {
           "field": "testing_campaign.start_day",

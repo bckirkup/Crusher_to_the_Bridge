@@ -32,6 +32,14 @@ air defaults, but not 04–06. Its selected Θ = 3.16e11 and every earlier
 Θ (3.16e7 on pooled air, v4/v5) belong to the air model they were measured on
 and are not carried forward.
 
+Every prior Θ figure and the v6 readout were also measured with the voluntary
+FRED draw applied to scheduled SOP-017, so they are void pending remeasurement
+under the authority-enforced quarantine declaration.
+
+Every prior Θ figure and the v6 readout were also measured with the voluntary
+FRED draw applied to scheduled SOP-017, so they are void pending remeasurement
+under the authority-enforced quarantine declaration.
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection

@@ -930,11 +930,18 @@ def step_quarantine_confinement(
     exempt_classes: set[str] = set(merged_mods.get("exempt_classes", []))
 
     # SOP-009 / LOCKDOWN: full-ship lockdown — confine every agent
-    if (
-        merged_mods.get("confine_all_to_quarters", False)
-        or trigger_status == STATUS_LOCKDOWN
-    ):
-        confine_all_agents(epoch, agents, state, syndromic, exempt_classes)
+    if merged_mods.get("confine_all_to_quarters", False):
+        confine_all_agents(
+            epoch, agents, state, syndromic, exempt_classes,
+            enforced=bool(merged_mods.get("confinement_enforced", False)),
+        )
+        return
+
+    if trigger_status == STATUS_LOCKDOWN:
+        confine_all_agents(
+            epoch, agents, state, syndromic, exempt_classes,
+            enforced=False,
+        )
         return
 
     # SOP-008/010 or ALERT+: symptomatic confinement
@@ -1000,21 +1007,50 @@ def confine_agents(
         )
 
 
+def _admit_enforced(
+    epoch: int,
+    aid: int,
+    state: SimulationState,
+    syndromic: Any,
+) -> bool:
+    """Admit one agent under an authority-enforced confinement order."""
+    if aid in _all_confined(state):
+        return False
+    cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+    if cls is not None:
+        state.compliance_class_by_agent[aid] = cls
+    state.quarantine_refusers.discard(aid)
+    state.quarantine_order_epoch.pop(aid, None)
+    state.quarantined_ids.add(aid)
+    state.compliance_log.append({
+        "epoch": epoch, "agent_id": aid,
+        "action": "enforced_confinement",
+        "compliance_class": cls,
+    })
+    return True
+
+
 def confine_all_agents(
     epoch: int,
     agents: list[dict[str, Any]],
     state: SimulationState,
     syndromic: Any,
     exempt_classes: set[str] | None = None,
+    *,
+    enforced: bool = False,
 ) -> None:
-    """SOP-009: confine ALL agents to quarters (quarantine lockdown).
+    """Confine ALL non-exempt agents to quarters.
 
-    Agents whose ``agent_class`` is in *exempt_classes* are skipped.
+    Agents whose ``agent_class`` is in *exempt_classes* are skipped. Enforced
+    orders bypass the voluntary FRED compliance draw.
     """
     _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent_id(agent)
         if agent.get(AGENT_CLASS, "") in _exempt:
+            continue
+        if enforced:
+            _admit_enforced(epoch, aid, state, syndromic)
             continue
         try_admit_to_quarantine(
             epoch, aid, state, syndromic,

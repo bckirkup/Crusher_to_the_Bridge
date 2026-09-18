@@ -67,6 +67,9 @@ stoplight + escalation gate eligibility (forced SOPs bypass SOP delay).
 
 ## System 3 — Bimodal compliance
 
+Scheduled authority-enforced confinement is distinct from voluntary FRED
+compliance for reactive orders.
+
 ```yaml
 fred_behavior:
   quarantine_compliance: 0.85     # fraction Compliant

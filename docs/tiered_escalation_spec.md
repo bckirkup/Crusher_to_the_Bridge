@@ -154,6 +154,12 @@ decision_latency.lockdown_delay_hours: [24, 48, 72, 168]
 
 ## System 3: Compliance (Behavioral Layer)
 
+Scheduled authority orders may declare `confinement_enforced` alongside
+`confine_all_to_quarters`; this represents officers carrying out the order and
+admits every non-exempt agent without the voluntary FRED draw. Reactive
+confinement, including LOCKDOWN and SOP-009, remains voluntary unless a
+separate protocol declaration explicitly says otherwise.
+
 ### What it is
 Whether individual agents follow quarantine/isolation orders. This is 
 human behavior, determined by psychology, sociology, and circumstance — 
