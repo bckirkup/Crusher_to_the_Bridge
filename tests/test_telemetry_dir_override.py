@@ -4,7 +4,11 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from types import SimpleNamespace
 
+import pytest
+
+import orchestrator_record
 from crusher_labs.lab_notebook import ArtificialLabNotebook
 from picard_framework.run_spec import TelemetryPaths
 from telemetry_buffer import (
@@ -59,3 +63,62 @@ def test_telemetry_dir_defaults_to_repository(monkeypatch) -> None:
     assert paths.lab_notebook == str(
         REPO_ROOT / "telemetry_buffer" / "artificial_lab_notebook.json",
     )
+
+
+def test_finalize_simulation_routes_all_notebook_paths(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("CTTB_TELEMETRY_DIR", str(tmp_path))
+    state = SimpleNamespace(simulation_history=[], escalation_log=[])
+    engine = SimpleNamespace(get_summary=lambda: {})
+    cost_ledger = SimpleNamespace(generate_financial_audit=lambda: {})
+    protocol_engine = SimpleNamespace(generate_protocol_summary=lambda: {})
+    proto_ctx = SimpleNamespace(
+        cost_ledger=cost_ledger,
+        protocol_engine=protocol_engine,
+    )
+
+    def run_finalize(
+        notebook_path: str | None,
+        logging_config: dict,
+    ) -> None:
+        monkeypatch.setattr(
+            orchestrator_record,
+            "load_logging_profile",
+            lambda _path: ({}, {}, logging_config),
+        )
+        orchestrator_record.finalize_simulation(
+            state=state,
+            engine=engine,
+            obs=SimpleNamespace(
+                lab_notebook_enabled=True,
+                notebook=ArtificialLabNotebook(),
+            ),
+            proto_ctx=proto_ctx,
+            pathogen_profiles={},
+            zone_names=[],
+            num_agents=0,
+            num_epochs=0,
+            lab_notebook_path=notebook_path,
+            display=False,
+        )
+
+    run_finalize(None, {})
+    assert (tmp_path / "artificial_lab_notebook.json").exists()
+
+    explicit_path = tmp_path / "explicit.json"
+    run_finalize(str(explicit_path), {})
+    assert explicit_path.exists()
+
+    configured_path = tmp_path / "configured.json"
+    run_finalize(None, {"lab_notebook": {"output_path": str(configured_path)}})
+    assert configured_path.exists()
+
+
+def test_telemetry_output_rejects_paths_outside_allowed_roots() -> None:
+    with pytest.raises(ValueError, match="escapes allowed roots"):
+        orchestrator_record._resolve_telemetry_output(
+            "/tmp/outside-telemetry.json",
+            allowed_roots=(str(REPO_ROOT),),
+        )
