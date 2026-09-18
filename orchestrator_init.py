@@ -49,6 +49,7 @@ from engines.infection_dynamics_bridge import (
     KorkinAgent,
     KorkinShipEngine,
     resolve_dining_service_type,
+    seated_diners_in_booking_order,
 )
 from engines.initiation import (
     LEGACY_MANIFEST,
@@ -185,25 +186,6 @@ def assign_cabin_mates(
                 agent.cabin_mate_ids = frozenset(cabin_ids - {agent.agent_id})
 
 
-def _seated_diners_in_booking_order(
-    diners: list[KorkinAgent],
-) -> list[KorkinAgent]:
-    """Diners of one sitting, each cabin's occupants kept contiguous."""
-    by_id = {a.agent_id: a for a in diners}
-    ordered: list[KorkinAgent] = []
-    seen: set[int] = set()
-    for agent in sorted(diners, key=lambda a: a.agent_id):
-        if agent.agent_id in seen:
-            continue
-        booking = [agent.agent_id, *sorted(agent.cabin_mate_ids)]
-        for member_id in booking:
-            member = by_id.get(member_id)
-            if member is not None and member_id not in seen:
-                seen.add(member_id)
-                ordered.append(member)
-    return ordered
-
-
 def _table_size_by_zone(zones: list[dict[str, Any]]) -> dict[str, int]:
     """Table size of each table-service Dining zone, by zone name."""
     sizes: dict[str, int] = {}
@@ -249,7 +231,7 @@ def assign_dining_parties(
 
     for (zone_name, _seating), diners in sittings.items():
         size = table_size_by_zone[zone_name]
-        ordered = _seated_diners_in_booking_order(diners)
+        ordered = seated_diners_in_booking_order(diners)
         for i in range(0, len(ordered), size):
             table = ordered[i : i + size]
             table_ids = {a.agent_id for a in table}

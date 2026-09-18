@@ -70,6 +70,10 @@ stoplight + escalation gate eligibility (forced SOPs bypass SOP delay).
 Scheduled authority-enforced confinement is distinct from voluntary FRED
 compliance for reactive orders.
 
+An SOP declaring `confinement_enforced: true` with `confine_all_to_quarters`
+admits every non-exempt agent directly; voluntary FRED classes still govern
+reactive orders.
+
 ```yaml
 fred_behavior:
   quarantine_compliance: 0.85     # fraction Compliant

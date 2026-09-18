@@ -111,7 +111,11 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # (101, 42, 217, 120, 27) on CPython 3.11.
     # QUAR-ORDER-01 makes the same move on CPython 3.11:
     # (101, 42, 217, 120, 27) -> (81, 42, 217, 88, 11).
-    (3, 11): (81, 42, 217, 88, 11),
+    # AERO-NEAR-02 then enables the two-box near field by default and deals
+    # buffet/crew-mess tables per meal, moving the 3.11 reading to
+    # (64, 8, 217, 67, 36). This value was read from the CI job (fast tier,
+    # 3.11) on this branch.
+    (3, 11): (64, 8, 217, 67, 36),
     # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
     # 30, 30) before the same two merged changes: #537's ascertainment
     # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -128,7 +132,9 @@ GOLDEN_BY_PYTHON_MINOR: dict[tuple[int, int], tuple[int, ...]] = {
     # QUAR-ORDER-01: scheduled SOP-017 now admits every non-exempt passenger
     # instead of applying the voluntary FRED draw: (105, 51, 217, 118, 20)
     # -> (81, 42, 217, 88, 11).
-    (3, 12): (81, 42, 217, 88, 11),
+    # AERO-NEAR-02: default β near-field dose plus per-meal buffet/mess table
+    # dealing moves this local CPython 3.12 reading to (51, 8, 217, 51, 32).
+    (3, 12): (51, 8, 217, 51, 32),
 }
 
 

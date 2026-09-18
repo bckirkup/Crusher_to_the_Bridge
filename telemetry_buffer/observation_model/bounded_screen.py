@@ -560,10 +560,9 @@ def build_run_spec(
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
     contact_class_exponent: float = 0.0,
-    near_field_retained_fraction: float = 0.0,
-    near_field_neighbour_table_ratio: float = 0.0,
-    near_field_cabin_berth_volume_m3: float | None = None,
-    near_field_table_seat_volume_m3: float | None = None,
+    near_field_mode: str = "two_box",
+    near_field_interzonal_airflow_m3_per_hour: float = 204.0,
+    near_field_neighbour_table_ratio: float = 0.43,
     activity_contacts: Mapping[str, float] | None = None,
     activity_saturation_hours: Mapping[str, float] | None = None,
 ) -> dict[str, object]:
@@ -596,8 +595,8 @@ def build_run_spec(
         config_overrides["service_surface_knockout"] = {"enabled": True}
     if contact_class_exponent:
         # CONTACT-SCALE-01: phi is a declared arm of a sweep, never a level.
-        # Zero writes nothing, so the phi=0 arm is the pre-change spec and
-        # the matched control; the block joins any transmission overrides a
+        # The near-field block is always explicit, so the phi=0 arm remains
+        # the matched control; this block joins any transmission overrides a
         # run factor already wrote rather than replacing them.
         _merge_run_overrides(
             config_overrides,
@@ -605,21 +604,16 @@ def build_run_spec(
                 "contact_class_exponent": float(contact_class_exponent),
             }},
         )
-    if near_field_retained_fraction:
-        # AERO-NEAR-01: kappa is an arm, and the two volumes are the geometry
-        # the arm declares. kappa 0 writes nothing, so that arm is the
-        # pre-change well-mixed spec and the matched control.
-        _merge_run_overrides(
-            config_overrides,
-            {"transmission": {"near_field_air": {
-                "retained_fraction": float(near_field_retained_fraction),
-                "neighbour_table_ratio": float(
-                    near_field_neighbour_table_ratio,
-                ),
-                "cabin_berth_volume_m3": near_field_cabin_berth_volume_m3,
-                "table_seat_volume_m3": near_field_table_seat_volume_m3,
-            }}},
-        )
+    _merge_run_overrides(
+        config_overrides,
+        {"transmission": {"near_field_air": {
+            "mode": near_field_mode,
+            "interzonal_airflow_m3_per_hour": (
+                float(near_field_interzonal_airflow_m3_per_hour)
+            ),
+            "neighbour_table_ratio": float(near_field_neighbour_table_ratio),
+        }}},
+    )
     if activity_contacts:
         # CONTACT-ARCH-01: the activity arm. Absent, the run draws Mossong's
         # uniform 13.4 a day and is the paired control, so the control arm's
@@ -687,10 +681,9 @@ def run_point(
     crew_duty_exclusion: bool = False,
     service_surface_knockout: bool = False,
     contact_class_exponent: float = 0.0,
-    near_field_retained_fraction: float = 0.0,
-    near_field_neighbour_table_ratio: float = 0.0,
-    near_field_cabin_berth_volume_m3: float | None = None,
-    near_field_table_seat_volume_m3: float | None = None,
+    near_field_mode: str = "two_box",
+    near_field_interzonal_airflow_m3_per_hour: float = 204.0,
+    near_field_neighbour_table_ratio: float = 0.43,
     activity_contacts: Mapping[str, float] | None = None,
     activity_saturation_hours: Mapping[str, float] | None = None,
 ) -> dict[str, float]:
@@ -709,10 +702,11 @@ def run_point(
         crew_duty_exclusion=crew_duty_exclusion,
         service_surface_knockout=service_surface_knockout,
         contact_class_exponent=contact_class_exponent,
-        near_field_retained_fraction=near_field_retained_fraction,
+        near_field_mode=near_field_mode,
+        near_field_interzonal_airflow_m3_per_hour=(
+            near_field_interzonal_airflow_m3_per_hour
+        ),
         near_field_neighbour_table_ratio=near_field_neighbour_table_ratio,
-        near_field_cabin_berth_volume_m3=near_field_cabin_berth_volume_m3,
-        near_field_table_seat_volume_m3=near_field_table_seat_volume_m3,
         activity_contacts=activity_contacts,
         activity_saturation_hours=activity_saturation_hours,
     )

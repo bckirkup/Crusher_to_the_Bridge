@@ -1,20 +1,18 @@
-# Tranche 36 — the near field is a two-ring seating structure and a shared bedroom, both bounded by measurement; its effective volume is measured nowhere
+# Tranche 36 — the near field is a two-ring seating structure and a shared bedroom, bounded by measurement
 
 **Register rows fed / supersession.** Runs §6 of
 [`../near_field_air_spec.md`](../near_field_air_spec.md)
 (`AERO-NEAR-01`) and feeds the open ledger's §4 item 16. It **supersedes
-nothing** and **withdraws no measurement**. It moves no constant, and it adopts
-none: the near-field structure it licenses is topology, and the one magnitude
-the structure needs — the near-field effective volume, or equivalently the
-near/far exchange rate — is **∅ null on search** and must ship as declared
-geometry with a swept exchange axis.
+nothing** and **withdraws no measurement**. It moved no constant in its
+original tranche: the near-field structure it licensed was topology, while
+the near/far exchange rate was then **∅ null on search**.
 
 **Status:** Evidence assembled and interpreted. Nothing implemented in this
 tranche; `CONTACT-SCALE-01` is unblocked by it, not decided by it.
-`AERO-NEAR-01` has since landed on the structure licensed here, off by default
-and with no magnitude adopted — the two rings became `retained_fraction` and
-`neighbour_table_ratio` as swept axes over declared geometry, and question 4's
-null kept `norwalk_gi` out of the continuous near field
+`AERO-NEAR-01` landed on the structure licensed here. `AERO-NEAR-02` replaces
+its non-identifiable `retained_fraction`/unit-volume pair with the measured
+Keil β declaration and keeps `neighbour_table_ratio` as a declared axis;
+question 4's null kept `norwalk_gi` out of the continuous near field
 ([`../near_field_air_spec.md`](../near_field_air_spec.md) §10).
 
 **Source discipline.** The Consensus MCP account is **exhausted for the
@@ -272,6 +270,50 @@ A5, A9, posting frequency, an attack-rate band, or a COVID trajectory anchor.
 | cabin as an air compartment | **yes** | B ×4 convergent (2.99 / ×4.5 / RR 3.0 / aOR 3.27) | ×3 as an aerosol multiplier — three routes already share the cabin |
 | norovirus near field = the vomiting host's table or cabin | **yes** | B, Alsved 2020 R; Marks 2000 R/F | continuous respiratory norovirus emission (∅) |
 | Marks 2000's 91/71/56/50/40/25% by table | **yes, as the post-repair check** | R/F | fitting any near-field term to reproduce it |
-| near-field effective volume / exchange rate | **no** | **∅ null on search** | any point value; ships as declared geometry + swept axis |
+| near-field effective volume / exchange rate | **yes, as β** | B, Keil 2017 Ab + R | a cruise-dining-table β; ships as the declared 24–1,140 m³/h sweep |
 | influenza bedroom-sharing magnitude | **no** | **∅ null on search** | inheriting the SARS-CoV-2 aOR as an influenza value |
 | toilet-flush and diarrhoea aerosol channels | **no** | review lists both unresolved | adding either channel |
+
+## 7. Occupational-hygiene retrieval (2026-09-17)
+
+The previously open near-field exchange-rate null is closed by an analogous
+occupational-hygiene measurement. Keil C. et al. 2017, *Journal of
+Occupational and Environmental Hygiene*, DOI
+10.1080/15459624.2017.1334903 (Consensus:
+https://consensus.app/papers/details/b760d84b7f985f37af419e436bdd68e8/)
+measured interzonal airflow β at **3.4 m³/min = 204 m³/h** (geometric mean,
+GSD 2.3, 95% CI of GM 2.8–4.2; range 0.4–19 m³/min over 74 measurements in
+12 rooms; a 0.32 m³ near-field box 0.60 m high over a 0.60 × 0.90 m table).
+The paper reports β approximately as one half of free-surface area times
+random air speed and finds it uncorrelated with room ACH. This is Grade B,
+measured in an analogous workspace setting, Origin: Abstract + Results. The
+declared sweep is 0.4–19 m³/min (24–1,140 m³/h); no cruise-dining-table β was
+found.
+
+The two-zone structure is supported by Abattan et al. 2021
+(https://consensus.app/papers/details/4586cfee421d5738a51108ab93e30dfc/),
+Nicas 2023
+(https://consensus.app/papers/details/5ecbb31a62a6565aba2958e574ec57d2/),
+and Jones 2011 dust two-zone measurements (DOI 10.1080/15459624.2011.598762;
+https://consensus.app/papers/details/e040dc6b7e235fb5a6a9e6b065c93704/).
+Near-field size and air speed materially affect the result, so the near field
+remains much smaller than the far field. LeBlanc 2017
+(https://consensus.app/papers/details/c8133fd45c7b5974a7d6bef57f69a3b2/)
+supports an extent of approximately 1 m from the breathing zone. Cortellessa
+2021 (https://consensus.app/papers/details/1b7ab2aac3ec5b28adc1496108d4e038/)
+reports airborne-fraction decay as 1/L to 0.76 m and 1/L² over 0.76–1.75 m.
+Baldwin & Maynard 1998 (DOI 10.1093/annhyg/42.5.303;
+https://consensus.app/papers/details/8d594bef32675ef8a2e999e0bf8b8003/)
+reports indoor air speed around 0.3 m/s, with 85% below 0.3 m/s and a
+person-local modal increment of 0.05 m/s. Fierce et al. 2021, QuaRAD, DOI
+10.1111/ina.12900
+(https://consensus.app/papers/details/759e3ade178e50d082aab2dadb80cabb/)
+provides an upper envelope in which near-field extent can exceed 2 m through
+expiration velocity.
+
+Li et al. 2021, *Building and Environment*, Table 3 remains the analogous CFD
+ordering envelope: same table 1.00, neighbouring tables 0.40–0.47 (same HVAC
+zone downstream of the index table), and remote tables 0.04–0.23. The shipped
+ρ = 0.43 is that interval's midpoint, Grade B, Origin: T3. The remaining
+nulls are cruise-dining-table β and buffet serving-line queue exposure; both
+are declared omissions.

@@ -21,7 +21,12 @@ from engines.transmission_core import TransmissionCore
 
 ZONE = "PC_D6_P_F"
 BLOCK_VOLUME = 1200.0
-COMPARTMENT_MODE = {"transmission": {"cabin_air_mode": "cabin_compartment"}}
+COMPARTMENT_MODE = {
+    "transmission": {
+        "cabin_air_mode": "cabin_compartment",
+        "near_field_air": {"mode": "off"},
+    },
+}
 
 
 def _agent(aid: int, infected: bool = False, mates: set[int] = frozenset()) -> KorkinAgent:
@@ -62,7 +67,12 @@ def _run(
     quarantined_ids: set[int] | None = None,
     zone_volumes: dict[str, float] | None = None,
 ) -> tuple[TransmissionCore, list[dict]]:
-    cfg = cfg or {"transmission": {"cabin_air_mode": "zone_pool"}}
+    cfg = cfg or {
+        "transmission": {
+            "cabin_air_mode": "zone_pool",
+            "near_field_air": {"mode": "off"},
+        },
+    }
     core = TransmissionCore(
         rng=np.random.default_rng(42),
         zone_volumes=zone_volumes or {ZONE: BLOCK_VOLUME},
