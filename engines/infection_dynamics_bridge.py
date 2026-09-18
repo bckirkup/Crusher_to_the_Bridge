@@ -700,7 +700,7 @@ class KorkinAgent:
         # incoming dose, by route, and which measures reached it
         "dose_reduction_multipliers", "npi_measures",
         "shedding_multiplier", "cabin_mate_ids", "ashore", "meal_seating",
-        "dining_party_ids", "dining_table_index",
+        "dining_party_ids", "dining_table_index", "departure_epoch",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
@@ -830,6 +830,9 @@ class KorkinAgent:
         self.dining_table_index: int = -1
         # Voyage layer: passenger ashore during port/disembark windows
         self.ashore: bool = False
+        # Epoch the host leaves the ship for the rest of the run; ``None``
+        # means aboard for the whole run
+        self.departure_epoch: int | None = None
 
         # {pathogen_id: genotype} the agent's pre-existing immunity was raised
         # against; empty unless variant surveillance is on
@@ -861,6 +864,14 @@ class KorkinAgent:
     @property
     def is_recovered(self) -> bool:
         return self.infection_status == InfectionStatus.RECOVERED
+
+    def has_departed(self, epoch: int) -> bool:
+        """Whether the host has left the ship for the rest of the run.
+
+        ``departure_epoch`` is the first epoch the host is no longer aboard;
+        ``None`` means the host never departs.
+        """
+        return self.departure_epoch is not None and epoch >= self.departure_epoch
 
     @property
     def current_shedding(self) -> float:
@@ -2269,6 +2280,7 @@ class KorkinShipEngine:
 
         from engines.voyage_itinerary import (
             LOCATION_ASHORE,
+            LOCATION_DEPARTED,
             apply_ashore_and_embarkation,
             apply_embarkation_surge_locations,
         )
@@ -2300,6 +2312,9 @@ class KorkinShipEngine:
         }
         for agent in self.agents:
             agent.current_activity = agent.scheduled_token(hour)
+            if agent.has_departed(self.epoch):
+                agent.current_location = LOCATION_DEPARTED
+                continue
             if getattr(agent, "ashore", False):
                 agent.current_location = LOCATION_ASHORE
                 continue
@@ -2424,8 +2439,12 @@ class KorkinShipEngine:
                 self.vsp_reported_case_fraction >= self.vsp_threshold_fraction
             )
         else:
-            total_pop = len(self.agents)
-            total_ill = sum(1 for a in self.agents if a.is_symptomatic)
+            total_pop = sum(1 for a in self.agents if not a.has_departed(self.epoch))
+            total_ill = sum(
+                1
+                for a in self.agents
+                if a.is_symptomatic and not a.has_departed(self.epoch)
+            )
             vsp_threshold = int(self.vsp_threshold_fraction * total_pop)
             threshold_reached = total_ill >= vsp_threshold
         if self.vsp_isolation and threshold_reached and not self.vsp_triggered:

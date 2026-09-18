@@ -44,6 +44,7 @@ from engines.natural_history import advance_infections, project_legacy_illness
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.strain_state import StrainRegistry
 from engines.transmission_core import TransmissionCore
+from engines.voyage_itinerary import agent_is_departed
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
@@ -347,6 +348,10 @@ def step_shore_introductions(
     introduced: list[dict[str, Any]] = []
     for agent in engine.agents:
         if not getattr(agent, "ashore", False):
+            continue
+        if agent_is_departed(agent):
+            # A departed host keeps the ashore flag placement left on it;
+            # it is not a shore-excursion draw target.
             continue
         if (
             agent.immune

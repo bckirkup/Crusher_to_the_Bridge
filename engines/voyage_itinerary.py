@@ -13,6 +13,7 @@ from __future__ import annotations
 import copy
 import os
 import warnings
+from collections.abc import Mapping
 from dataclasses import asdict, dataclass, field
 from typing import Any
 
@@ -394,6 +395,26 @@ def epoch_state_as_dict(state: EpochState) -> dict[str, Any]:
 
 LOCATION_ASHORE = "Ashore"
 
+# A declared departure is not an excursion: ``ashore`` marks a host who left
+# for a port call and returns, ``Departed`` marks one who left for the rest
+# of the run. Keeping them distinct sentinels is deliberate — reports that
+# read ``current_location`` must not conflate the two.
+LOCATION_DEPARTED = "Departed"
+
+
+def agent_is_departed(agent: Any) -> bool:
+    """Whether this host has left the ship for the rest of the run.
+
+    Works on a ``KorkinAgent`` (``current_location`` attribute) and on the
+    telemetry-schema dict the same agent exports (``location`` key), which is
+    what the lab modalities and ledger denominators consume. Placement marks
+    the location each epoch, so the sentinel is the single check both shapes
+    need.
+    """
+    if isinstance(agent, Mapping):
+        return agent.get("location") == LOCATION_DEPARTED
+    return getattr(agent, "current_location", None) == LOCATION_DEPARTED
+
 
 def _surge_dining_zone(dining_catalog: list[dict[str, Any]]) -> str | None:
     """Prefer buffet venues; fall back to MDR/casual for expedition."""
@@ -528,6 +549,7 @@ def apply_embarkation_surge_locations(
         a for a in agents
         if getattr(a, "role", "") == "passenger"
         and not getattr(a, "ashore", False)
+        and not agent_is_departed(a)
     ]
     n = int(round(len(passengers) * frac))
     if n <= 0 or not passengers:

@@ -3538,9 +3538,9 @@ class TransmissionCore:
         zone_occupants: dict[str, list[KorkinAgent]] = {}
         for agent in agents:
             loc = agent.current_location
-            if loc in ("Isolated_In_Quarters", "Ashore"):
+            if loc in ("Isolated_In_Quarters", "Ashore", "Departed"):
                 continue
-            if getattr(agent, "ashore", False):
+            if getattr(agent, "ashore", False) or agent.has_departed(epoch):
                 continue
             zone_occupants.setdefault(loc, []).append(agent)
         for zone_name, occupants in zone_occupants.items():
@@ -3573,6 +3573,11 @@ class TransmissionCore:
 
         # ── Apply combined dose-response per pathogen ───────────────
         for agent in agents:
+            if agent.has_departed(epoch):
+                # A host who left the ship cannot acquire aboard; dropping it
+                # from the loop entirely keeps a zero-dose challenge from
+                # quietly becoming a reachable defect later.
+                continue
             for pathogen_id in active_pathogens:
                 self._resolve_pathogen_challenge(
                     epoch, agent, pathogen_id,

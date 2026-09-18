@@ -26,6 +26,7 @@ for what each configured coordinate means.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Any
 
@@ -216,6 +217,7 @@ class ExplicitSeed:
     infection_age_days: float
     dose: float | None
     strain_id: str | None
+    departure_day: float | None = None
 
 
 @dataclass(frozen=True)
@@ -964,6 +966,16 @@ def _resolve_seed(
             f"{location}.infection_age_days = {age_days} is negative: an "
             "infection age is measured forward from acquisition",
         )
+    departure_day = raw.get("departure_day")
+    if departure_day is not None:
+        departure_day = float(departure_day)
+        if not math.isfinite(departure_day) or departure_day < 0.0:
+            raise ValueError(
+                f"{location}.departure_day = {departure_day} is not a "
+                "finite non-negative day: a host that departs does so on a "
+                "declared voyage day, and a host that never does leaves the "
+                "key unset",
+            )
     dose = raw.get("dose")
     strain = raw.get("strain")
     return ExplicitSeed(
@@ -974,6 +986,7 @@ def _resolve_seed(
         infection_age_days=age_days,
         dose=None if dose is None else float(dose),
         strain_id=None if strain is None else str(strain),
+        departure_day=departure_day,
     )
 
 
@@ -1683,10 +1696,24 @@ def _apply_one_seed(
     time_infected = int(
         round(engine.clock.epochs_for_days(seed.infection_age_days)),
     )
+    departure_epoch: int | None = None
+    if seed.departure_day is not None:
+        departure_epoch = int(
+            round(engine.clock.epochs_for_days(seed.departure_day)),
+        )
+        if departure_epoch < seed.epoch:
+            raise ValueError(
+                f"initiation seed for {seed.pathogen_id} declares "
+                f"departure_day {seed.departure_day} (epoch "
+                f"{departure_epoch}) earlier than the seed's own epoch "
+                f"{seed.epoch}: a host cannot leave the ship before it "
+                "boards",
+            )
     chosen = (
         rng.choice(pool, size=count, replace=False) if count > 0 else []
     )
     for agent in chosen:
+        agent.departure_epoch = departure_epoch
         agent.infect_with_pathogen(
             seed.pathogen_id, dose, epoch,
             time_infected=time_infected, rng=rng, profile=profile,
@@ -1705,6 +1732,7 @@ def _apply_one_seed(
         "dose": dose,
         "infection_age_days": seed.infection_age_days,
         "strain": seed.strain_id,
+        "departure_day": seed.departure_day,
     }
 
 

@@ -290,6 +290,9 @@ class TestingCampaign:
     ) -> list[int]:
         members: list[int] = []
         for agent in agents:
+            if agent.get("location") == "Departed":
+                # A host who left the ship is not swabbable.
+                continue
             if self._matches(tier, agent, confirmed_ids):
                 members.append(int(agent["agent_id"]))
         return members

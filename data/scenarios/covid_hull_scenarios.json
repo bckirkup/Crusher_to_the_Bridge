@@ -48,7 +48,8 @@
             "count": 1,
             "role": "passenger",
             "epoch": 0,
-            "infection_age_days": 0.0
+            "infection_age_days": 0.0,
+            "departure_day": 5.0
           }
         ]
       },
@@ -123,7 +124,14 @@
           "value": "0.0 — DECLARED ASSUMPTION, not sourced",
           "source": "∅",
           "grade": "declared",
-          "note": "One infected passenger is placed at embarkation because the introduction happened before day 0 and no retrieved source gives the index case's infection age at boarding. The consequence is recorded rather than removed: with the profile's incubation median of 5.8 days, simulated onsets begin later than the recorded 22 January onset. Choosing an infection age that reproduces 22 January would be tuning the scenario to a scored anchor, so it is refused and left as a declared axis for the #36 screen."
+          "note": "One infected passenger is placed at embarkation because the introduction happened before day 0 and no retrieved source gives the index case's infection age at boarding. Yamagishi 2020 dates the index's cough onset to 19 January = day −1, so the index boarded already symptomatic and its infection age at boarding is one day plus an incubation period; that incubation uncertainty is exactly why infection age is a screened axis in the Θ campaign rather than a pinned constant. Choosing an infection age that reproduces 22 January would be tuning the scenario to a scored anchor, so it is refused and left as a declared axis for the #36 screen."
+        },
+        {
+          "field": "initiation.explicit_seeds[0].departure_day",
+          "value": "5.0 = 25 January 2020, the index case's permanent disembarkation at Hong Kong",
+          "source": "Yamagishi 2020, Eurosurveillance 25(23):2000272, DOI 10.2807/1560-7917.es.2020.25.23.2000272",
+          "grade": "A",
+          "note": "Results prose: the case 'disembarked the ship in Hong Kong on 25 January'; boarding was 20 January = day 0. Declared omission: the case's 22 January Kagoshima shore excursion (leaving and returning mid-voyage) is not modelled — departure is permanent once declared, and the excursion falls on the aboard side of it anyway."
         },
         {
           "field": "platform_id",

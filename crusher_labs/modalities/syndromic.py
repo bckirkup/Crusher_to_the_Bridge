@@ -318,6 +318,14 @@ class SyndromicSurveillance:
         agents = json_data.get("agents", [])
         epoch = json_data.get("epoch", 0)
 
+        from engines.voyage_itinerary import agent_is_departed
+
+        # The ship's record ends at the gangway: a departed host cannot
+        # present to sick call, be screened, be swabbed, or enter the
+        # recorded-onset curve from off-ship. Onsets and specimens the
+        # record already holds stay held.
+        agents = [a for a in agents if not agent_is_departed(a)]
+
         sick_call_ids: list[int] = []
         true_positive_ids: list[int] = []
         noise_ids: list[int] = []

@@ -113,7 +113,8 @@
                   "count": {"type": "integer", "minimum": 1},
                   "role": {"type": ["string", "null"], "enum": ["passenger", "crew", null]},
                   "epoch": {"type": "integer", "minimum": 0},
-                  "infection_age_days": {"type": "number", "minimum": 0}
+                  "infection_age_days": {"type": "number", "minimum": 0},
+                  "departure_day": {"type": "number", "minimum": 0}
                 }
               }
             }
