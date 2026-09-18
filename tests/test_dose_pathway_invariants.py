@@ -23,6 +23,10 @@ from engines.transmission_core import (
     ContactTracingMatrix,
     TransmissionCore,
 )
+from picard_framework.covid_theta_fit import (
+    load_covid_profile,
+    theta_profile_overrides,
+)
 from orchestrator_epoch import _airborne_emission_fraction, step_infection_progression
 
 ZONE = "Test_Zone"
@@ -549,6 +553,63 @@ def _beta_poisson_core(alpha: float, beta: float) -> TransmissionCore:
         "beta": beta,
     }
     return core
+
+
+def test_default_beta_poisson_draws_are_bit_identical() -> None:
+    core = _beta_poisson_core(0.18, 58.0)
+    expected_rng = np.random.default_rng(19)
+    expected = expected_rng.beta(0.18, 58.0, size=32)
+    observed = np.array([
+        core._dose_response_susceptibility(_agent(index), PATHOGEN)
+        for index in range(32)
+    ])
+    assert np.array_equal(observed, expected)
+
+
+def test_theta_arm_restores_per_host_susceptibility_heterogeneity() -> None:
+    profile = load_covid_profile()
+    core = _core()
+    core.pathogen_profiles[PATHOGEN]["dose_response"] = (
+        theta_profile_overrides(profile, 3.16e7)["dose_response"]
+    )
+    values = [
+        core._dose_response_susceptibility(_agent(index), PATHOGEN)
+        for index in range(2000)
+    ]
+    assert len(set(values)) > 1900
+    assert np.mean(values) == pytest.approx(3.16e7, rel=0.05)
+
+
+def test_beta_poisson_susceptibility_persists_per_agent() -> None:
+    core = _beta_poisson_core(0.18, 58.0)
+    first = _agent(1)
+    second = _agent(2)
+    first_value = core._dose_response_susceptibility(first, PATHOGEN)
+    assert core._dose_response_susceptibility(first, PATHOGEN) == first_value
+    assert core._dose_response_susceptibility(second, PATHOGEN) != first_value
+
+
+def test_beta_poisson_hazard_increases_with_susceptibility_scale() -> None:
+    values = []
+    for scale in (0.5, 1.0, 2.0):
+        core = _beta_poisson_core(0.18, 58.0)
+        core.pathogen_profiles[PATHOGEN]["dose_response"][
+            "susceptibility_scale"
+        ] = scale
+        agent = _agent(1)
+        agent.dose_response_susceptibility[PATHOGEN] = 0.2 * scale
+        values.append(core._dose_response_hazard(agent, PATHOGEN, 10.0))
+    assert values[0] < values[1] < values[2]
+
+
+@pytest.mark.parametrize("scale", [0.0, -1.0, float("nan"), float("inf")])
+def test_beta_poisson_rejects_invalid_susceptibility_scale(scale: float) -> None:
+    core = _beta_poisson_core(0.18, 58.0)
+    core.pathogen_profiles[PATHOGEN]["dose_response"][
+        "susceptibility_scale"
+    ] = scale
+    with pytest.raises(ValueError, match=PATHOGEN):
+        core._dose_response(PATHOGEN, 1.0)
 
 
 @pytest.mark.parametrize("scale", [10.0, 100.0, 1000.0])

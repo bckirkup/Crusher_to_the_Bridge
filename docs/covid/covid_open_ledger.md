@@ -23,6 +23,16 @@ AERO-NEAR-02 measurement (§2). The two diagnostic cells are not paired with
 their QUAR-ORDER-01 runs: per-meal table dealing consumes RNG, so the same seed
 follows a different trajectory.
 
+**DOSE-FRAIL-01 invalidates every Θ-arm figure measured on identical hosts.**
+The Θ arm previously installed an exponential dose-response, which gave every
+host the same susceptibility; it now scales the profile's own per-host
+`Beta(0.18, 58)` draw so that the arm's mean susceptibility is Θ
+(`docs/ledger/DOSE-FRAIL-01.md`). The AERO-NEAR-02 crew-mess trace below, and
+every Θ-arm figure of record, were measured with identical hosts and are
+superseded on this arm pending remeasurement. A rescaling will not recover
+them: frailty spreads a threshold that previously fired for a whole room at
+once.
+
 **Every fitted Θ is void pending a refit on the repaired airborne subsystem.**
 The fits of record (`covid_first_look_v1`–`v6`, the 1b boarding screen, and the
 three-stage imports × Θ sweep) were all measured before at least one of:
@@ -72,18 +82,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   AERO-NEAR-02) placed the burn in public dining, not in a leak through
   confinement. With enforced quarantine and dining tables in place, what
   remains is the well-mixed venue far field clearing threshold for a roomful
-  of identically susceptible hosts. No constant is to be moved to produce a
-  19% attack rate.
+  of hosts whose susceptibilities now differ (DOSE-FRAIL-01). No constant is to
+  be moved to produce a 19% attack rate.
 - **Crew-mess seating structure.** Crew-mess tables are now dealt within
   department (DINE-CREW-01), while the venue far-field pool is unchanged.
   AERO-NEAR-02 figures are pending remeasurement
   (`docs/ledger/DINE-CREW-01.md`).
 - **Windjammer 100× pool-mass jump at 1 → 2 shedders** (QUAR-ORDER-01 trace):
   the trajectory did not recur under AERO-NEAR-02; mechanism untraced.
-- **Identical host susceptibility on the Θ arm.** The exponential dose-response
-  branch returns Θ itself rather than a per-host frailty draw (one distinct
-  value across 3,711 hosts). Whether frailty belongs on this arm is a provenance
-  decision, not a fit choice.
+- **Incubation dose reference on the Θ arm.** Host frailty is restored
+  (DOSE-FRAIL-01), but `dose_reference_log10` is referenced to the mean host,
+  `ln 2 / Θ`. `Beta(0.18, 58)` is strongly right-skewed, so the median host sits
+  well below the mean; whether the reference belongs at the mean, the median, or
+  the realised infecting dose is unresolved.
 - **795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
   pool; lifecycle not yet traced.
 - **Index-case geometry.** Declared per-agent departure, then a resolved
