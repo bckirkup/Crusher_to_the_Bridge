@@ -228,10 +228,10 @@
         },
         {
           "field": "scheduled_protocols[SOP-017].modifiers.confinement_enforced",
-          "value": "true — passengers confined to cabins under the Japanese MHLW quarantine order from 5 Feb 2020, quarantine officers aboard; not an opt-in",
-          "source": "Ing 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215091",
+          "value": "true — the ship's own command imposed cabin isolation of all passengers from voyage day 8 and held it to disembarkation; not an opt-in",
+          "source": "Keeley 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215337 ('immediate imposition of cabin isolation of all passengers'); Ing 2020, Thorax, DOI 10.1136/thoraxjnl-2020-215091",
           "grade": "B",
-          "note": "Declared omission: passengers in windowless cabins were allowed ~1 h/day supervised deck time, masked and distanced; not modelled. Voluntary FRED classes still govern reactive SOPs."
+          "note": "The papers report the order, not a compliance measurement, so the enforced arm is the declaration that matches the record. Voluntary FRED classes still govern reactive SOPs."
         },
         {
           "field": "testing_campaign.start_day",
