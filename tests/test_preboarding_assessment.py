@@ -114,7 +114,8 @@ def _profile(**overrides: Any) -> dict[str, Any]:
             ],
         },
         "emesis_episodes_range": [2, 4],
-        "emesis_total_shed_gec_range": [1e6, 1e6],
+        "emesis_titre_gec_per_ml_range": [1e5, 1e5],
+        "emesis_censored_titre_gec_per_ml_range": [1e4, 1e4],
     }
     profile.update(overrides)
     return profile

@@ -16,6 +16,7 @@ from picard_framework.pathogen_overrides import (
 )
 from simulation_utils import asset_defaults
 from simulation_utils.paths import REPO_ROOT, load_validated_json
+from telemetry_buffer.schema import telemetry_dir
 
 _CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
 
@@ -73,14 +74,14 @@ class TelemetryPaths:
             object.__setattr__(
                 self,
                 "ground_truth",
-                os.path.join(self.repo_root, "telemetry_buffer", "ground_truth.json"),
+                os.path.join(telemetry_dir(self.repo_root), "ground_truth.json"),
             )
         if not self.simulation_history:
             object.__setattr__(
                 self,
                 "simulation_history",
                 os.path.join(
-                    self.repo_root, "telemetry_buffer", "simulation_history.json",
+                    telemetry_dir(self.repo_root), "simulation_history.json",
                 ),
             )
         if not self.lab_notebook:
@@ -88,9 +89,7 @@ class TelemetryPaths:
                 self,
                 "lab_notebook",
                 os.path.join(
-                    self.repo_root,
-                    "telemetry_buffer",
-                    "artificial_lab_notebook.json",
+                    telemetry_dir(self.repo_root), "artificial_lab_notebook.json",
                 ),
             )
 

@@ -201,6 +201,15 @@ immunomagnetic-capture RT-PCR, 4.0e7 GEC/g qRT-PCR), so a "negative" emesis
 sample is a censored interval, not a zero — the same censoring the two observers
 need.
 
+**Implementation state**: shipped — `draw_emesis_schedule` draws the episode
+count from a truncated geometric solved to the measured 32% single-episode
+share, draws the host titre log-uniform once per illness
+(`emesis_titre_gec_per_ml_range` detectable / `emesis_censored_titre_gec_per_ml_range`
+below-LOD arm for K < `EMESIS_DETECTABLE_MIN_EPISODES` = 3), and
+`_emit_emesis` multiplies each episode's drawn volume by that titre. The
+derivation and validation checks live in `emesis_source_term_v1.md`; the
+retired `emesis_total_shed_gec_range` is recorded in the ledger (item 13).
+
 `EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)` is **verified and
 unchanged**: Tung-Thompson et al. 2015 Table 2 is a percent column and the
 shipped range is that percent converted. Two definitional qualifications are
@@ -219,4 +228,7 @@ behind `transmission.blackwater_plumbing` (default `false`) and
 `observation.wastewater_assay_mode` (default `none`): they read mass that was
 dropped on the floor and remove nothing from any existing pool, so no dose and
 no golden moves — which is also why a null in the infection outcome would say
-nothing about whether they are right.
+nothing about whether they are right. The emesis source term is **not
+default-off**: it is a correction to a term every symptomatic illness already
+emits, so it moves the emesis-derived expectations and the RNG streams on
+every arm — the moved quantities are recorded in ledger item 13.

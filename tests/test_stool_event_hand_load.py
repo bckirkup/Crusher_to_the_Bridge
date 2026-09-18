@@ -155,7 +155,7 @@ def test_a_non_vomiting_host_draws_no_emesis_schedule() -> None:
             agent, PATHOGEN, profile, np.random.default_rng(3),
         )
         schedule = agent.emesis_episode_schedule_by_pathogen[PATHOGEN]
-        load = agent.emesis_episode_load_by_pathogen[PATHOGEN]
+        load = agent.emesis_titre_gec_per_ml_by_pathogen[PATHOGEN]
         assert bool(schedule) is vomits
         assert (load > 0.0) is vomits
 

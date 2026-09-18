@@ -435,11 +435,11 @@ def test_new_pathogen_profile_fields_accept_valid_values() -> None:
     profile = _minimal_pathogen_profile(
         surface_decay_log10_per_day=0.25,
         hand_to_surface_drying_multiplier=0.5,
-        emesis_total_shed_gec_range=[1e5, 1e8],
+        emesis_titre_gec_per_ml_range=[1e5, 1e8],
     )
     assert profile.surface_decay_log10_per_day == pytest.approx(0.25)
     assert profile.hand_to_surface_drying_multiplier == pytest.approx(0.5)
-    assert profile.emesis_total_shed_gec_range == [1e5, 1e8]
+    assert profile.emesis_titre_gec_per_ml_range == [1e5, 1e8]
 
 
 def test_airborne_emission_mode_accepts_supported_values() -> None:
@@ -472,9 +472,9 @@ def test_emesis_airborne_exclusion_checks_raw_profile_keys() -> None:
         ("surface_decay_log10_per_day", -0.01),
         ("hand_to_surface_drying_multiplier", -0.01),
         ("hand_to_surface_drying_multiplier", 1.01),
-        ("emesis_total_shed_gec_range", []),
-        ("emesis_total_shed_gec_range", [0.0, 1.0]),
-        ("emesis_total_shed_gec_range", [2.0, 1.0]),
+        ("emesis_titre_gec_per_ml_range", []),
+        ("emesis_titre_gec_per_ml_range", [0.0, 1.0]),
+        ("emesis_titre_gec_per_ml_range", [2.0, 1.0]),
         ("airborne_emission_mode", "unsupported"),
     ],
 )
@@ -485,8 +485,8 @@ def test_new_pathogen_profile_fields_reject_invalid_values(
         _minimal_pathogen_profile(**{field: value})
 
 
-def test_emesis_total_shed_validator_accepts_missing_value() -> None:
-    assert PathogenProfile.emesis_total_shed_ordered(None) is None
+def test_emesis_titre_validator_accepts_missing_value() -> None:
+    assert PathogenProfile.emesis_titre_ordered(None, None) is None
 
 
 # ── symptomatic-stream cross-field check ─────────────────────────────────

@@ -506,7 +506,8 @@ class PathogenProfile(BaseModel):
     airborne_emission_fraction: float | None = None
     surface_decay_log10_per_day: float | None = None
     hand_to_surface_drying_multiplier: float | None = None
-    emesis_total_shed_gec_range: list[float] | None = None
+    emesis_titre_gec_per_ml_range: list[float] | None = None
+    emesis_censored_titre_gec_per_ml_range: list[float] | None = None
     base_susceptibility: float = 1.0
     microflora_disruption: dict[str, Any] = {}
     food_contamination: dict[str, Any] = {}
@@ -669,25 +670,28 @@ class PathogenProfile(BaseModel):
             )
         return v
 
-    @field_validator("emesis_total_shed_gec_range")
+    @field_validator(
+        "emesis_titre_gec_per_ml_range",
+        "emesis_censored_titre_gec_per_ml_range",
+    )
     @classmethod
-    def emesis_total_shed_ordered(
-        cls, v: list[float] | None,
+    def emesis_titre_ordered(
+        cls, v: list[float] | None, info: ValidationInfo,
     ) -> list[float] | None:
         if v is None:
             return v
         if len(v) != 2:
             raise ValueError(
-                f"emesis_total_shed_gec_range must be [low, high], got {v}"
+                f"{info.field_name} must be [low, high], got {v}"
             )
         low, high = v
         if low <= 0:
             raise ValueError(
-                f"emesis_total_shed_gec_range low must be > 0, got {low}"
+                f"{info.field_name} low must be > 0, got {low}"
             )
         if low >= high:
             raise ValueError(
-                f"emesis_total_shed_gec_range low must be < high, got {v}"
+                f"{info.field_name} low must be < high, got {v}"
             )
         return v
 

@@ -25,10 +25,12 @@ from typing import Any
 
 import pytest
 
+from telemetry_buffer.schema import telemetry_dir
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
-HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
+HISTORY_PATH = os.path.join(telemetry_dir(REPO_ROOT), "simulation_history.json")
 GOLDEN_EPOCHS = 24
 GOLDEN_SEED = 42
 GOLDEN_LAST = GOLDEN_EPOCHS - 1

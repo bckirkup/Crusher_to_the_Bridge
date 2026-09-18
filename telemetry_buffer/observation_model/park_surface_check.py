@@ -206,18 +206,30 @@ def concentration_per_swab(pool: float, zone_class: str) -> float:
 def mean_episode_load() -> float:
     """Expected genome copies expelled in one vomiting episode.
 
-    The identified quantity is the per-subject cumulative shed, drawn
-    log-uniform once per illness and partitioned equally over the drawn
-    episodes, so the expectation is E[total] * E[1/n]: the log-uniform mean
-    (hi - lo) / ln(hi / lo) times the mean reciprocal of the discrete-uniform
-    episode count. It is no longer volume x titre, which double-counted a
-    heavy-tailed titre mean against the measured total.
+    The episode load is volume x host titre: volume is drawn per episode,
+    titre once per illness from the detectable interval when the illness has
+    at least EMESIS_DETECTABLE_MIN_EPISODES events and from the censored
+    interval otherwise. The expectation is therefore E[volume] times
+    P(detectable) * E[titre | detectable] + P(censored) * E[titre |
+    censored], with the detectable share read off the truncated-geometric
+    episode weights.
     """
-    low, high = tc.EMESIS_TOTAL_SHED_GEC_RANGE
-    mean_total = (high - low) / math.log(high / low)
-    episode_low, episode_high = tc.EMESIS_EPISODES_RANGE
-    counts = range(int(episode_low), int(episode_high) + 1)
-    return mean_total * sum(1.0 / n for n in counts) / len(counts)
+    vol_low, vol_high = tc.EMESIS_VOLUME_ML_RANGE
+    mean_volume = (vol_high - vol_low) / math.log(vol_high / vol_low)
+    weights = tc.emesis_episode_weights(*tc.EMESIS_EPISODES_RANGE)
+    p_detectable = sum(
+        weights[k - 1]
+        for k in range(1, len(weights) + 1)
+        if k >= tc.EMESIS_DETECTABLE_MIN_EPISODES
+    )
+    det_low, det_high = tc.EMESIS_TITRE_GEC_PER_ML_RANGE
+    mean_detectable = (det_high - det_low) / math.log(det_high / det_low)
+    cen_low, cen_high = tc.EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE
+    mean_censored = (cen_high - cen_low) / math.log(cen_high / cen_low)
+    return mean_volume * (
+        p_detectable * mean_detectable
+        + (1.0 - p_detectable) * mean_censored
+    )
 
 
 def emesis_pool_gain_per_episode(zone_class: str) -> float:

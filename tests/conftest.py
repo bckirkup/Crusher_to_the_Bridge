@@ -26,6 +26,11 @@ def pytest_addoption(parser: pytest.Parser) -> None:
 def pytest_configure(config: pytest.Config) -> None:
     """Register custom markers so pytest doesn't warn about them."""
     config.addinivalue_line("markers", "timeout: mark test with a timeout (seconds)")
+    worker = os.environ.get("PYTEST_XDIST_WORKER")
+    if worker and not os.environ.get("CTTB_TELEMETRY_DIR"):
+        worker_dir = os.path.join(REPO_ROOT, "telemetry_buffer", ".xdist", worker)
+        os.makedirs(worker_dir, exist_ok=True)
+        os.environ["CTTB_TELEMETRY_DIR"] = worker_dir
     count = config.getoption("--ci-shard-count")
     index = config.getoption("--ci-shard-index")
     if count < 1 or not 0 <= index < count:

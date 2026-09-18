@@ -49,7 +49,7 @@ def test_unit_cube_corners_map_to_the_declared_interval_endpoints() -> None:
 def test_log_scaled_factor_midpoint_is_geometric_not_arithmetic() -> None:
     units = [0.5] * len(NOROVIRUS_FACTORS)
     values = gate.factor_values(NOROVIRUS_FACTORS, units)
-    emesis = next(f for f in NOROVIRUS_FACTORS if f.name == "emesis_total_shed_gec")
+    emesis = next(f for f in NOROVIRUS_FACTORS if f.name == "emesis_titre_gec_per_ml")
     assert values[emesis.name] == pytest.approx((emesis.low * emesis.high) ** 0.5)
 
 

@@ -14,6 +14,7 @@ from telemetry_buffer.schema import (
     make_ground_truth,
     make_space,
     read_ground_truth,
+    telemetry_dir,
     write_ground_truth,
 )
 
@@ -29,5 +30,6 @@ __all__ = [
     "make_ground_truth",
     "make_space",
     "read_ground_truth",
+    "telemetry_dir",
     "write_ground_truth",
 ]

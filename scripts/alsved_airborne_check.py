@@ -58,8 +58,10 @@ if str(REPO_ROOT) not in sys.path:
 from engines.transmission_core import (  # noqa: E402
     BALCONY_AEROSOL_REDUCTION,
     EMESIS_AEROSOL_FRACTION_RANGE,
+    EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE,
     EMESIS_EPISODES_RANGE,
-    EMESIS_TOTAL_SHED_GEC_RANGE,
+    EMESIS_TITRE_GEC_PER_ML_RANGE,
+    EMESIS_VOLUME_ML_RANGE,
 )
 from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 
@@ -92,26 +94,32 @@ def profile_interval(
 def episode_aerosol_mass_gec(profile: dict[str, object]) -> tuple[float, float]:
     """Aerosolised copies from one episode, at the interval endpoints.
 
-    The engine draws the per-subject cumulative shed once per illness and
-    splits it equally over the episodes drawn with it, so the smallest
-    per-episode load is the interval floor over the largest episode count and
-    the largest is the interval ceiling over one episode. Both endpoints then
-    take the aerosol fraction at the matching end, which makes this a span of
-    the mechanism rather than a distribution: no draw is simulated and no
-    endpoint is preferred.
+    The engine multiplies a per-episode volume draw by the per-illness host
+    titre, so the smallest per-episode load is the censored titre floor times
+    the volume floor and the largest is the detectable titre ceiling times
+    the volume ceiling. Both endpoints then take the aerosol fraction at the
+    matching end, which makes this a span of the mechanism rather than a
+    distribution: no draw is simulated and no endpoint is preferred.
     """
-    shed_low, shed_high = profile_interval(
-        profile, "emesis_total_shed_gec_range", EMESIS_TOTAL_SHED_GEC_RANGE,
+    titre_low, _ = profile_interval(
+        profile,
+        "emesis_censored_titre_gec_per_ml_range",
+        EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE,
     )
-    episodes_low, episodes_high = profile_interval(
-        profile, "emesis_episodes_range", EMESIS_EPISODES_RANGE,
+    _, titre_high = profile_interval(
+        profile,
+        "emesis_titre_gec_per_ml_range",
+        EMESIS_TITRE_GEC_PER_ML_RANGE,
+    )
+    volume_low, volume_high = profile_interval(
+        profile, "emesis_volume_ml_range", EMESIS_VOLUME_ML_RANGE,
     )
     fraction_low, fraction_high = profile_interval(
         profile, "emesis_aerosol_fraction_range", EMESIS_AEROSOL_FRACTION_RANGE,
     )
     return (
-        (shed_low / episodes_high) * fraction_low,
-        (shed_high / max(episodes_low, 1.0)) * fraction_high,
+        volume_low * titre_low * fraction_low,
+        volume_high * titre_high * fraction_high,
     )
 
 
@@ -239,11 +247,23 @@ def main(argv: Sequence[str] | None = None) -> int:
             "grade": "B",
         },
         "model_inputs": {
-            "emesis_total_shed_gec_range": list(
+            "emesis_titre_gec_per_ml_range": list(
                 profile_interval(
                     profile,
-                    "emesis_total_shed_gec_range",
-                    EMESIS_TOTAL_SHED_GEC_RANGE,
+                    "emesis_titre_gec_per_ml_range",
+                    EMESIS_TITRE_GEC_PER_ML_RANGE,
+                ),
+            ),
+            "emesis_censored_titre_gec_per_ml_range": list(
+                profile_interval(
+                    profile,
+                    "emesis_censored_titre_gec_per_ml_range",
+                    EMESIS_CENSORED_TITRE_GEC_PER_ML_RANGE,
+                ),
+            ),
+            "emesis_volume_ml_range": list(
+                profile_interval(
+                    profile, "emesis_volume_ml_range", EMESIS_VOLUME_ML_RANGE,
                 ),
             ),
             "emesis_episodes_range": list(

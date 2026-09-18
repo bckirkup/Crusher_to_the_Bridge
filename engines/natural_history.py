@@ -418,7 +418,8 @@ def clearance_days(
 def _clear_emesis_records(agent: Any, pid: str) -> None:
     """Drop the emesis records an ended illness leaves behind."""
     agent.emesis_episode_schedule_by_pathogen.pop(pid, None)
-    agent.emesis_episode_load_by_pathogen.pop(pid, None)
+    agent.emesis_titre_gec_per_ml_by_pathogen.pop(pid, None)
+    agent.emesis_censored_below_lod_by_pathogen.pop(pid, None)
     agent.emesis_deposition_records_by_pathogen.pop(pid, None)
 
 

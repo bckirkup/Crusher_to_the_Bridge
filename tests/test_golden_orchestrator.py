@@ -23,8 +23,10 @@ import sys
 
 import pytest
 
+from telemetry_buffer.schema import telemetry_dir
+
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
+HISTORY_PATH = os.path.join(telemetry_dir(REPO_ROOT), "simulation_history.json")
 
 COMPARTMENTS = ("susceptible", "infected", "recovered", "immune")
 LAST_EPOCH = 23
