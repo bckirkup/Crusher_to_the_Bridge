@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import math
-
 import numpy as np
 import pytest
 
@@ -11,9 +9,9 @@ from engines.infection_dynamics_bridge import IllnessStatus, KorkinAgent
 from engines.natural_history import advance_infections
 from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
-    EMESIS_TOTAL_SHED_GEC_RANGE,
     ContactTracingMatrix,
     TransmissionCore,
+    draw_emesis_schedule,
 )
 
 PATHOGEN = "norwalk_gi"
@@ -127,17 +125,42 @@ def test_emesis_aerosol_is_drained_once_within_declared_range() -> None:
     assert core.drain_emesis_aerosol(PATHOGEN) == {}
 
 
-def test_expected_emitted_load_matches_ge_cross_check() -> None:
-    """Modelled per-illness shed against Ge et al. 2023's measured totals.
+def test_generated_cumulative_shed_matches_kirby_measured_mean() -> None:
+    """Simulated per-subject cumulative shed against Kirby's measured means.
 
-    The bracket is Ge's measured per-subject cumulative shed across its dose
-    groups. The engine draws the per-illness total log-uniform, so its
-    expectation is (high - low) / ln(high / low), and the comparison is
-    like-for-like per subject with no withdrawn intermediate in between.
+    Kirby et al. 2016 Results: overall 1.8e8 +/- 7.8e7 GEC (Norwalk and Snow
+    Mountain) and All GI 2.3e8 +/- 1.0e8. The per-subject total is an output
+    now -- illness titre x summed episode volumes -- so the check simulates
+    many illnesses through ``draw_emesis_schedule`` plus emission and asserts
+    the generated mean lands within 2 SEM of both measured means, rather than
+    asserting a drawn interval's mean.
     """
-    low, high = EMESIS_TOTAL_SHED_GEC_RANGE
-    expected_total = (high - low) / math.log(high / low)
-    assert 6.4e5 <= expected_total <= 3.0e7
+    rng = np.random.default_rng(97)
+    profile = _profile()
+    totals: list[float] = []
+    for i in range(1500):
+        # Fresh core seed per subject: the volume draws are per-episode and
+        # a shared seed would freeze the whole sample onto one sequence.
+        core = _core(seed=2000 + i)
+        agent = _agent()
+        agent.clock = core.clock
+        agent.infections[PATHOGEN]["symptom_axes"] = {
+            "vomiting": True, "diarrhoea": True,
+        }
+        draw_emesis_schedule(agent, PATHOGEN, profile, rng)
+        for epoch in range(round(3.0 * core.clock.epochs_per_day) + 1):
+            agent.infections[PATHOGEN]["time_infected"] = epoch
+            core._deposit_emesis(agent, PATHOGEN, ZONE, epoch, profile)
+        totals.append(sum(
+            record["episode_load"]
+            for record in agent.emesis_deposition_records_by_pathogen.get(
+                PATHOGEN, [],
+            )
+        ))
+    mean_total = float(np.mean(totals))
+    # 2 SEM brackets: overall 1.8e8 +/- 2*7.8e7, All GI 2.3e8 +/- 2*1.0e8.
+    assert 2.4e7 <= mean_total <= 3.4e8
+    assert 3.0e7 <= mean_total <= 4.3e8
 
 
 @pytest.mark.parametrize(

@@ -315,10 +315,15 @@ class TestDefaultInertness:
     existed. If a deliberate change moves it, update it and say why.
     """
 
+    # Moved by the emesis-source-term repair: draw_emesis_schedule's
+    # truncated-geometric count draw and per-illness titre draw reposition
+    # the shared RNG stream, so downstream draws (and the trajectory rows
+    # they feed) change. The arm's own invariant -- no stamp, no extra draw
+    # -- is unaffected.
     _INERTNESS_FINGERPRINT = (
-        "07865c737bd4f03a69abd5be49b2aa25fbe23ef94a4f95db5f4014bcff519bf7"
+        "6db842e264407f2c756e11dbf9f8c8142e5affd67ad997d7cca6bfc51414bb95"
     )
-    _INERTNESS_RNG_NEXT = 0.5168044128381893
+    _INERTNESS_RNG_NEXT = 0.39807554513852694
 
     def _run(
         self, illness_duration: dict[str, Any] | None,

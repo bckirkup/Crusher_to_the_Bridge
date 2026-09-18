@@ -87,7 +87,7 @@ import numpy as np
 
 from engines.transmission_core import (
     CONTACT_ACTIVITIES,
-    EMESIS_TOTAL_SHED_GEC_RANGE,
+    EMESIS_TITRE_GEC_PER_ML_RANGE,
 )
 from orchestrator_init import SCENARIO_VECTORS
 from picard_framework.catalog.registry import CatalogRegistry
@@ -175,18 +175,18 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
     # a direction-free quantity. The field is now refused at load and the route
     # keeps one owner, whose own value is untraced and therefore not a sourced
     # interval either -- so no replacement factor is asserted here.
-    # emesis_total_shed_gec: upper end of the per-subject cumulative emesis
-    # shed interval. Kirby et al. 2016 Table 3 -- low end is the GII.2 mean plus
-    # one SEM (1.8e7 + 1.8e7 = 3.6e7), high end the largest per-subject
-    # cumulative mean the paper measures (GI.1, 3.1e8). Grade B: surrogate
-    # genotype. This factor replaces the retired titre and volume factors: the
-    # per-subject total is the quantity Kirby identifies, and titre x volume as
-    # independent inputs overstates it 7.5x.
+    # emesis_titre_gec_per_ml: upper end of the host emesis titre interval,
+    # drawn once per detectable illness and multiplied by each episode's
+    # volume. Kirby et al. 2016 Table 3 positives-only sample means: the
+    # interval spans the two strains the paper's Results decline to
+    # distinguish (GII.2 1.6e5, All GI 8.0e5). Grade B: surrogate genotype --
+    # no GII.4 emesis measurement exists. The per-subject cumulative shed is
+    # no longer an input; it is a validated output of titre x volume.
     Factor(
-        "emesis_total_shed_gec",
-        ("emesis_total_shed_gec_range", 1),
-        3.6e7,
-        3.1e8,
+        "emesis_titre_gec_per_ml",
+        ("emesis_titre_gec_per_ml_range", 1),
+        1.6e5,
+        8.0e5,
         "log10",
         "B",
     ),
@@ -319,7 +319,7 @@ NOROVIRUS_FACTORS: tuple[Factor, ...] = (
 # indexed factor moves one end of a pair; the other end must keep the value
 # the engine would otherwise use, not zero.
 INDEXED_PATH_DEFAULTS: dict[str, tuple[float, ...]] = {
-    "emesis_total_shed_gec_range": tuple(EMESIS_TOTAL_SHED_GEC_RANGE),
+    "emesis_titre_gec_per_ml_range": tuple(EMESIS_TITRE_GEC_PER_ML_RANGE),
 }
 
 # The three-arm expedition sensitivity (SURF-KO-01 / boarding / IMMUNE-ROLE-01).

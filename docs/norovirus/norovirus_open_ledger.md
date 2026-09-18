@@ -1954,7 +1954,29 @@ Roughly in dependency order.
     cumulative shed, drawn log-uniform once per illness, with titre retired as
     an input and the episode count corrected to 1–7. Three inputs collapse to
     one, so the item is closed as a degrees-of-freedom reduction rather than as
-    a re-valued titre.
+    a re-valued titre. **Reopened and re-repaired** (slice 3 of the
+    environmental-observability work,
+    [`norovirus/emesis_source_term_v1.md`](emesis_source_term_v1.md)): the Wave
+    2 `EMESIS_TOTAL_SHED_GEC_RANGE` = (1e5, 1e8) is **retired entirely**, not
+    kept as a fallback — it sat below the paper's own measured per-subject
+    means (overall 1.8e8, All GI 2.3e8, study 2 3.1e8), its equal partition
+    made per-episode load fall as 1/K and thereby *inverted* Fig 1's measured
+    count/cumulative relation, and its uniform 1–7 count put 14.3% singles
+    against the measured 32%. The replacement is Kirby's own arithmetic: a
+    per-illness host titre (detectable `[1.6e5, 8.0e5]` Grade B spanning the
+    two strains the Results decline to distinguish; censored `[5.0e3, 1.5e4]`
+    Grade C bounded by the lowest measured emesis titre and Ge 2023's stated
+    challenge-study LOD) multiplied by each episode's drawn volume, with the
+    episode count on a truncated geometric solved to reproduce the measured
+    32% single-episode share (q ≈ 0.708, E[K] ≈ 2.75) and a below-LOD
+    censored arm for K < 3 read off Fig 1. The generated per-subject
+    cumulative lands at ≈ 2.0e8 against the measured 1.8e8 ± 7.8e7 and total
+    volume ≈ 730 mL against 658.7 ± 111.9 — validated outputs within one SEM,
+    not fitted inputs. **Invalidated by this change:** every emesis-derived
+    numeric expectation and every RNG-dependent emesis measurement taken
+    under the retired interval — the total-shed draw is gone, a titre draw
+    and a different count distribution moved the streams. **No value here was
+    selected against VSP, A9, MIDRS, Park or any attack-rate comparator.**
 14. **Resolved: the infectious period was incorrectly tied to illness duration,
     and two thirds of the authored shedding curve was never emitted.** Measured,
     not argued:
