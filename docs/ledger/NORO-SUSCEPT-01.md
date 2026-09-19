@@ -2,7 +2,8 @@
 **Date:** 2026-09-19
 **Commit:** 56edddf
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** closed
+**Closed by:** `NORO-SUSCEPT-02` (measured at 9f4cd79)
 
 Analysis only. **No constant is changed by this entry and none is recommended
 for change.** Every figure below is either read from a definition site, derived
@@ -268,3 +269,23 @@ abilities.vomiting` is 0.72 and `severity_model` puts 75% of infections in a
 Only if (1)–(3) come back clean is there a case that the expectation itself is
 wrong, and at that point the admissible move is α within [0.072, 0.161] with β
 held fixed, as a swept axis — not a refit, and never chosen against VSP.
+
+## Resolution
+
+`NORO-SUSCEPT-02` measured (1)–(4) on paired seeds 8105/8106, classic hull, 288
+epochs, and closes this entry. Measured there: 106 and 48 hosts hold 90% of the
+credited dose; zero hosts and zero GEC are credited to a host that is never
+challenged; the challenge reads the same per-epoch dose the accumulator
+credited, and Σ credited dose reconciles with Σ evaluated hazard exactly over
+the same host set; the emesis pathway fires end-to-end to a patch pickup that
+delivers mass to a host's hands.
+
+The §1 recovered figures were never reproduced and carry no `Measured at` SHA.
+The measured credited dose at the same seam, same hull, same epoch count is
+0.101 GEC (seed 8105) against the recovered 394,281 GEC — five to six orders of
+magnitude apart, the size of the fomite transfer chain below hand load.
+**`raw_fomite_in_sum` = 394,281 GEC, `raw_fomite_in_max` = 49,572 GEC and
+`naive_hazard_sum` = 0.197 are void as credited-dose and hazard figures and
+must not be quoted; see `NORO-SUSCEPT-02` §d.** Nothing in §2–§4 of this entry
+is indicted: the dose-response pair, the frailty draw and the arithmetic are
+unchanged and were reproduced by the measurement.
