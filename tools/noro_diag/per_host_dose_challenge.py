@@ -48,10 +48,10 @@ labelled as such.
 Inputs
 ------
 ``--platform`` (default ``classic_cruise_1900``) at its declared complement,
-``--epochs``, ``--seed`` (repeat for paired seeds), shipped
-``data/pathogens/active_profiles.json`` bundle. Without ``--alpha`` no pathogen
-or run override is written: an arm of this diagnostic differs from a shipped
-run only by the wrappers, which are read-only. With ``--alpha`` (rejected
+``--epochs``, ``--seed`` (repeat for paired seeds), the shipped ``--bundle``
+pathogen bundle (both the run and the readout arithmetic). Without ``--alpha``
+no pathogen or run override is written: an arm of this diagnostic differs from
+a shipped run only by the wrappers, which are read-only. With ``--alpha`` (rejected
 outside the frozen NORO-SUSCEPT-03 interval [0.072, 0.161]) the run carries
 exactly one override, a ``pathogen_overrides`` patch on
 ``norwalk_gi.dose_response`` that sets ``alpha`` to the requested value and
@@ -99,14 +99,16 @@ if str(REPO_ROOT) not in sys.path:
 from engines import initiation as initiation_module  # noqa: E402
 from engines import natural_history as natural_history_module  # noqa: E402
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
+from picard_framework.run_spec import CRUSHER_CONFIG_REL, PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
     validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 
 # Frailties for hosts the engine never challenged are not in the run: the
 # engine draws one lazily at the first hazard evaluation. A counterfactual
@@ -668,7 +670,7 @@ def build_spec(
             "write_ground_truth": False,
             "history_retention": "compact",
         },
-        "legacy_yaml": "crusher_labs/config.yaml",
+        "legacy_yaml": CRUSHER_CONFIG_REL,
         "actors": [],
         "incentives": {},
         "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
@@ -873,14 +875,7 @@ def run_seed(
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     num_agents = declared_total(platform)
-    profiles = json.loads(
-        (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
-    )["pathogens"]
-    profile = next(
-        p for p in profiles if p.get("pathogen_id") == pathogen_id
-    )
-    alpha = float(profile["dose_response"]["alpha"])
-    beta = float(profile["dose_response"]["beta"])
+    alpha, beta = load_dose_response(pathogen_id, bundle)
     spec_dict = build_spec(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=num_agents,
@@ -969,7 +964,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument(
         "--platform", type=_identifier, default="classic_cruise_1900")
     parser.add_argument(
-        "--bundle", type=_identifier, default="active_profiles")
+        "--bundle", type=_identifier,
+        default=asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID)
     parser.add_argument(
         "--pathogen-id", type=_identifier, default="norwalk_gi")
     parser.add_argument("--epochs", type=int, default=288)
