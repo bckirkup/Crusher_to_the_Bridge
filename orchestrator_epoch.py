@@ -1157,19 +1157,6 @@ def _release_cleared_crew(
         })
 
 
-def apply_outbreak_surface_disinfection(
-    tx_core: TransmissionCore | None,
-    log10_reduction: float,
-) -> None:
-    """Apply SOP-triggered outbreak-response surface disinfection."""
-    if tx_core is None:
-        return
-    tx_core.disinfect_surfaces(
-        log10_reduction,
-        tx_core.outbreak_cleaning_coverage,
-    )
-
-
 def apply_zone_closures(
     engine: KorkinShipEngine,
     closed_zones: list[str],

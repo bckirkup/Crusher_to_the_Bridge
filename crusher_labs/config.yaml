@@ -336,6 +336,23 @@ transmission:
     outbreak_response:
       coverage: 0.58
       log10_reduction: 4.29
+      # Public-area pass rate: VSP 2018 §9.1.1.1.1 "Continuous Disinfection
+      # (41)" requires, at >=2% AGE, continuous cleaning/disinfection of
+      # hand-contact surfaces in all public areas while passengers/crew
+      # circulate, along an uninterrupted deck/venue/area route. VSP gives
+      # no circuit time, so this hourly circuit is a declared assumption
+      # (Grade C, Origin: Tr) and deliberately preserves the pre-repair
+      # public-area behaviour at 1-hour epochs: this change is the defect
+      # fix and nothing else.
+      # https://www.cdc.gov/vessel-sanitation/media/files/vsp_operations_manual_2018-508.pdf §9.1.1.1
+      events_per_day: 24.0
+      by_zone_class:
+        cabin:
+          # VSP 2018 §9.1.1.1.2 "Cabin Cleaning (41)": cabins housing
+          # passengers or crew with AGE "must be cleaned and disinfected
+          # daily while the occupants are ill." Regulator's own
+          # prescription for this setting. Grade A, Origin: Tr. Same manual.
+          events_per_day: 1.0
 
 # ── HVAC / CONTAM Transport ────────────────────────────────────
 hvac:
