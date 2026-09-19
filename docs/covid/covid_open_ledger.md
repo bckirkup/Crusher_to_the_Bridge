@@ -107,12 +107,29 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 - **795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
   pool; lifecycle not yet traced.
 - **Index-case geometry.** Declared per-agent departure shipped
-  (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020.
-  Remaining: a resolved infection-age × Θ screen (≥20 seeds), before any
-  v7 refit.
-- **`covid_theta_screen_v7` is declared, not yet run.** The pre-registered
-  Θ × infection-age screen on the repaired arm (host frailty restored,
-  index departing day 5) lives at
-  `picard_framework/runs/covid_theta_screen_v7_design.json`: 11 half-decade
-  Thetas × 7 ages × 40 seeds = 3,080 cells with pre-declared admissibility
-  (index geometry, covid.T1, covid.T3) and no result exists yet.
+  (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020. The
+  resolved infection-age × Θ screen has now run (THETA-V7-01, below) and
+  exposed the remaining half: the seed channel still cannot declare the
+  index's *observed onset date*, only an infection age.
+- **`covid_theta_screen_v7` ran; the admissible region is empty.** The
+  pre-registered Θ × infection-age screen on the repaired arm (host frailty
+  restored, index departing day 5;
+  `picard_framework/runs/covid_theta_screen_v7_design.json`, 11 half-decade
+  Thetas × 7 ages × 40 seeds) completed 3,080/3,080 cells with zero failures at
+  `main` = `e32272d`. **No Θ is admissible**: zero of 77 cells satisfy index
+  geometry, covid.T1 and covid.T3 jointly, and none satisfy geometry and T1
+  together at any Θ (`docs/ledger/THETA-V7-01.md`,
+  `docs/covid/covid_theta_screen_v7_readout.md`). Outstanding from it:
+  - the explicit-seed channel cannot declare the index's observed onset date, so
+    the record's own infection age (≈5–6 d) passes the geometry gate in only 45%
+    of seeds — the gate mixes the host's free incubation draw with the recorded
+    onset, and no threshold change fixes that;
+  - the asymptomatic share caps at 0.43 median anywhere on the surface and falls
+    with Θ, against covid.T4 0.50 and held-out covid.H2 0.81 — it is emergent
+    from delivered dose rather than a natural-history parameter;
+  - covid.T3 is non-discriminating on this hull (specimens saturate at
+    ~1,600–3,063 across five decades of Θ) and must not carry selection weight
+    in a successor design;
+  - Θ 1e8–1e9 at index ages 0–5 d is the nearest region — it reproduces
+    DP-sized takeoffs and the covid.H3 fleet shape, and fails geometry alone.
+  Stages 2–3 of the design are gated on a non-empty shortlist and were not run.
