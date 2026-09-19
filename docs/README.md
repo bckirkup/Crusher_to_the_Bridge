@@ -132,7 +132,8 @@ longer justifications.
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
 | [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
 | [covid/covid_open_ledger.md](covid/covid_open_ledger.md) | Living — current withdrawals and measurement status for the COVID arm |
-| [covid/covid_theta_handoff_2026_09_19.md](covid/covid_theta_handoff_2026_09_19.md) | Handoff record (2026-09-19) — where the Θ calibration stands: the four repairs that landed, what the empty v7 admissible region does and does not mean, the declared-but-unrun `covid_theta_screen_v8`, and where its artifacts live. Reports no new numbers |
+| [covid/covid_theta_handoff_2026_09_19.md](covid/covid_theta_handoff_2026_09_19.md) | Handoff record (2026-09-19) — where the Θ calibration stands: the four repairs that landed, what the empty v7 admissible region does and does not mean, the never-run `covid_theta_screen_v8`, and `covid_theta_screen_v9` from declaration to result (§9–10). Numbers live in the ledger entries it cites |
+| [covid/covid_theta_screen_v9_readout.md](covid/covid_theta_screen_v9_readout.md) | Findings (2026-09-19) — the 600-cell recentring screen: invariant holds, infection-age axis inert under a declared onset, sole `covid.T1` pass (Θ 1e9) is an interval-span with zero mass near 197, Θ sets takeoff probability not outbreak size; stage 1b withdrawn, criterion decision open |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |

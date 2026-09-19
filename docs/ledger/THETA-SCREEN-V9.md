@@ -2,9 +2,10 @@
 **Date:** 2026-09-19
 **Commit:** b113517
 **Pathogens:** sars_cov2_resp
-**Status:** open
+**Status:** measured
+**Measured at:** 0fb186b
 
-## Declared, not yet run
+## Declared (before any cell ran)
 
 `covid_theta_screen_v9`
 (`picard_framework/runs/covid_theta_screen_v9_design.json`) is the stage-1
@@ -65,5 +66,51 @@ is reported alongside it so a pass can be read as mass-near-197 or as
 interval-spanning-197, and any tightening must be declared in the stage-1b design
 before its cells run, with this measurement as the stated reason.
 
-No result exists yet. The surface will be merged into this entry, with the
-per-seed distributions beside the T1 intervals, when the array completes.
+## Result (measured at `main` = `0fb186b`, 2026-09-19)
+
+Run on AWS Batch as array `913e36b9-bad2-4f65-a1c6-9ea450bb395e`
+(`picard-covid-boarding-screen:7`, image digest `sha256:85936b12…`, 600/600
+SUCCEEDED, 0 failed, 51 min; cells at
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v9/cells/`).
+Full reading: `docs/covid/covid_theta_screen_v9_readout.md`; surface with
+per-seed vectors: `docs/covid/covid_theta_screen_v9_surface.csv`. Criterion
+unchanged from the declaration above.
+
+1. **Invariant holds in all 600 cells** (`index_onset_day == -1.0`,
+   `index_shedding_at_day0` true, departure epoch 120). No seeding defect.
+2. **The infection-age axis is inert.** All 200 (Θ, seed) triples are
+   byte-identical across 3.3 / 6.8 / 12.8 d outside the `cell` block. Cause,
+   read in `engines/initiation.py::_apply_one_seed`: with `onset_day` declared
+   the incubation is set to `age + onset_day − seed_day` and the history is
+   stamped from `elapsed_since_onset` = 1.0 d, so `time_infected` and the
+   incubation shift together and the age cancels. The scenario's own
+   provenance note already said the age "no longer states an independent
+   fact". v9 is therefore a 10-Θ × 20-seed locator (200 distinct cells); the
+   age axis of v8 (never run) and v9 is void, and the "three ages" framing in
+   this entry's declaration is withdrawn.
+3. **`covid.T1` admissible set = {Θ = 1e9}, interior, vacuous.** Per-seed
+   `recorded_onsets` at 1e9: `0 0 0 1 1 1 1 2 969 982 1034 1474 2330 3103 3103
+   3187 3277 3318 3368 3379` — p10 = 0, p90 = 3,323 contain 197 by spanning
+   it; median `before_share` 0.21 is within 0.10 of 0.173.
+   `onset_mass_near_target` at 1e9 = **0.00**; the surface maximum is 0.10
+   (Θ 1e5, seeds at 277 and 356). No Θ has more than two of 20 seeds within
+   [98.5, 394]. This is the failure mode THETA-SCREEN-V8 pre-registered, now
+   measured on the surface it was declared for.
+4. **Θ moves the takeoff probability, not the outbreak size.** P(attack >
+   0.10): 0 at Θ ≤ 1e3; 0.10 / 0.15 / 0.10 / 0.20 at 1e4–1e7; 0.35 at 1e8;
+   0.60 at 1e9; 0.85 at 1e10. Conditional on takeoff the median recorded
+   onsets is 1,582–3,391 from 1e6 upward against 197 observed. The 1e1 floor is
+   inert as predicted, so the sweep brackets Θ space: there is no near-critical
+   band in [1e1, 1e10] where a typical single-import declared-geometry voyage
+   yields ~200 onsets.
+5. Diagnostics: `covid.T3` fails at every Θ (specimens saturate ~3,030–3,060
+   for Θ ≤ 1e9); VSP crossing fraction tracks takeoff probability.
+
+**Stage 1b as pre-committed above (half-decade, 40-seed, six-age refinement of
+"the band") should not be run**: two of its axes are now known to be wrong
+(no band; age inert). The one open decision, recorded in the readout §6 and
+owed to Benjamin before any further cell runs, is whether the calibration
+target is (a) the DP trajectory under `covid.T1` — in which case import
+geometry, not Θ, is the next axis — or (b) single-voyage takeoff probability
+against `covid.H3` with onsets scored conditional on takeoff, declared in a
+`covid_theta_screen_v10` design with this entry as the stated reason.

@@ -3,7 +3,7 @@
 > **Status:** Handoff record (2026-09-19), authored against `main` after #609
 > merged; amended at `main` = `46cff41` with §7 (the v8 probe result) and §8 (the
 > merged, unsubmitted v9 screen and the state of its preflight gate) — read §8
-> before acting on §4; §9 records the v9 preflight and the running array. It states where the Theta calibration stands, what is declared but
+> before acting on §4; §9 records the v9 preflight and submission, §10 its result and why stage 1b is withdrawn. It states where the Theta calibration stands, what is declared but
 > not yet run, and what must not be reopened. It reports no new numbers: every
 > figure it refers to is quoted from the ledger entry or readout that measured
 > it, with that entry's own `Measured at` SHA. Nothing here is a fit.
@@ -288,3 +288,26 @@ submit time so that nothing about the running job lives only in a conversation:
 
 Merge command when complete:
 `python3 tools/fit_covid_theta.py screen --design picard_framework/runs/covid_theta_screen_v9_design.json --cells <synced cells dir> --out <surface json>`.
+
+## 10. v9 complete — read `docs/covid/covid_theta_screen_v9_readout.md`
+
+Array `913e36b9-bad2-4f65-a1c6-9ea450bb395e` finished 600/600 SUCCEEDED, 0
+failed, 51 min. Merged surface committed as
+`docs/covid/covid_theta_screen_v9_surface.csv`; result recorded in
+`docs/ledger/THETA-SCREEN-V9.md` (`Measured at: 0fb186b`) and
+`covid_open_ledger.md`. Two facts change the plan in §8:
+
+- **The infection-age axis is inert on this scenario.** All 200 (Θ, seed)
+  triples are byte-identical across 3.3 / 6.8 / 12.8 d: with `onset_day`
+  declared, `_apply_one_seed` pins the index's phase at epoch 0 and the age
+  cancels. Do not sweep infection age against `diamond_princess_2020` again
+  while `onset_day` is declared; the v8 age axis is void with it.
+- **No near-critical band exists in [1e1, 1e10].** Θ moves the takeoff
+  probability (0 → 0.85), not the outbreak size; the sole `covid.T1` pass
+  (Θ 1e9, interior) is an interval-span with zero seeds near 197.
+
+**Stage 1b as declared in §8 is withdrawn.** The next campaign is gated on a
+criterion decision — readout §6, options (a) import geometry under T1 vs
+(b) takeoff probability against `covid.H3` — that must be made and written into
+a `covid_theta_screen_v10` design file before any cell runs. This session
+retires here at the stage boundary.

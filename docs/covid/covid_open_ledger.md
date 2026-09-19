@@ -168,6 +168,27 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   hit from the v7 bimodal pass
   (`picard_framework/runs/covid_theta_screen_v9_design.json`,
   `docs/ledger/THETA-SCREEN-V9.md`).
+- **`covid_theta_screen_v9` ran (600/600 at `main` = `0fb186b`); the
+  infection-age axis is inert and the one covid.T1 pass is vacuous.**
+  Measured (`docs/ledger/THETA-SCREEN-V9.md`,
+  `docs/covid/covid_theta_screen_v9_readout.md`): (i) every (Θ, seed) payload is
+  byte-identical across the three declared ages — with `onset_day` declared,
+  `_apply_one_seed` sets incubation = age + onset_day − seed_day and stamps the
+  history from `elapsed_since_onset`, so the age cancels exactly. **Every
+  infection-age contrast on `diamond_princess_2020` under a declared
+  `onset_day` is void**, including the age axes of v8 (never run) and v9; v9 is
+  a 10-Θ × 20-seed locator. (ii) Under covid.T1 verbatim the admissible set is
+  {Θ = 1e9}, interior, but it passes by its p10–p90 interval spanning 197 from
+  8 extinct seeds to 12 burning seeds; `onset_mass_near_target` = 0.00 there
+  and ≤ 0.10 everywhere. (iii) Θ sets the takeoff probability (0 at ≤ 1e3 →
+  0.85 at 1e10), not the outbreak size (conditional-on-takeoff median onsets
+  1,582–3,391 from 1e6 up); there is no near-critical band in [1e1, 1e10] for
+  one declared import. **Θ = 1e9 may not be quoted as a fit or a selected
+  value.** The pre-committed stage 1b (half-decade, 40-seed, six-age
+  refinement) is withdrawn as a plan; the open decision is the criterion
+  (trajectory under T1 with import geometry as the next axis, vs takeoff
+  probability against covid.H3 with onsets scored conditional on takeoff),
+  to be declared in a v10 design file before any cell runs.
 - **covid.T1 as declared is satisfiable without mass near the target.** All
   eleven T1-passing cells on the v7 surface passed by spanning 197 between an
   extinction floor (`recorded_onsets_p10` = 0) and a burn ceiling (p90 316 to
