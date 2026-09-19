@@ -18,9 +18,7 @@ from dataclasses import asdict, dataclass, field
 from typing import Any
 
 from engines.sim_clock import HOURS, SimClock
-from simulation_utils.paths import load_validated_json
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+from simulation_utils.paths import REPO_ROOT, load_validated_json
 
 DAY_TYPES = frozenset({"sea_day", "port_day", "embarkation", "disembarkation"})
 

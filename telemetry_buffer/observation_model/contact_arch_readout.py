@@ -21,11 +21,9 @@ Usage: PYTHONPATH=. python3 telemetry_buffer/observation_model/contact_arch_read
 from __future__ import annotations
 
 from collections import defaultdict
-from pathlib import Path
 
 from picard_framework import PicardRunSpec, ShipSimulation
-
-REPO_ROOT = Path(__file__).resolve().parents[2]
+from simulation_utils.paths import REPO_ROOT
 
 DINING_ACTIVITIES = ("dining_table", "dining_venue")
 
@@ -59,7 +57,7 @@ def _accumulate_epoch(core, agents: list, totals: dict, by_activity: dict,
 
 def main() -> None:
     spec = PicardRunSpec.from_legacy_yaml(
-        repo_root=str(REPO_ROOT), num_epochs=24 * 7,  # clock-exempt: hours in a day for the 7-day readout window
+        repo_root=REPO_ROOT, num_epochs=24 * 7,  # clock-exempt: hours in a day for the 7-day readout window
     )
     sim = ShipSimulation(spec, display=False)
     core = None

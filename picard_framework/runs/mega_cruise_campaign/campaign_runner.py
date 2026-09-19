@@ -48,6 +48,9 @@ from picard_framework.runs.mega_cruise_campaign.tier_iterators import (
     dispatch_standard_or_calibration,
 )
 from simulation_utils.paths import (
+    REPO_ROOT as _REPO_ROOT_STR,
+)
+from simulation_utils.paths import (
     is_path_under_base,
     prepare_output_directory,
     resolve_child_path,
@@ -59,7 +62,7 @@ from simulation_utils.platform_complement import (
     declaring_platforms,
 )
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+REPO_ROOT = Path(_REPO_ROOT_STR)
 
 CAMPAIGN_DIR = Path(__file__).resolve().parent
 MANIFEST_PATH = CAMPAIGN_DIR / "campaign_manifest.json"
@@ -70,8 +73,6 @@ DEFAULT_NATURAL_HISTORY_CLOCK = "hours"
 OUTPUT_ROOT = REPO_ROOT / "telemetry_buffer" / "mega_cruise_campaign"
 COMPLETED_LOG = OUTPUT_ROOT / COMPLETED_RUNS_FILENAME
 FAILED_LOG = OUTPUT_ROOT / FAILED_RUNS_FILENAME
-
-_REPO_ROOT_STR = str(REPO_ROOT)
 
 
 def set_output_root(path: Path | str) -> Path:

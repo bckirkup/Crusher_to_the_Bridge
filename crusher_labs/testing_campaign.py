@@ -25,7 +25,6 @@ symptoms), and no count here is fitted.
 
 from __future__ import annotations
 
-import os
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
@@ -34,10 +33,8 @@ from typing import Any
 import numpy as np
 
 from engines.voyage_itinerary import agent_is_departed
-from simulation_utils.paths import load_validated_json, resolve_repo_path
+from simulation_utils.paths import REPO_ROOT, load_validated_json, resolve_repo_path
 from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
-
-REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 RULE_SYMPTOMATIC_OR_CONTACT = "symptomatic_or_cabin_contact"
 RULE_PASSENGERS_IN_AGE_BANDS = "passengers_in_age_bands"

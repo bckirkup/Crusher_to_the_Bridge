@@ -35,9 +35,10 @@ from engines.transmission_core import (
     HAND_TO_MOUTH_NORMAL,
     MOUTH_CONTACT_FRACTION_RANGE,
 )
-from simulation_utils import asset_defaults  # noqa: E402
+from simulation_utils import asset_defaults
+from simulation_utils.paths import REPO_ROOT as _REPO_ROOT_STR
 
-REPO_ROOT = Path(__file__).resolve().parents[2]
+REPO_ROOT = Path(_REPO_ROOT_STR)
 
 # Norovirus `route_efficiency_multipliers["direct_contact"]`, the route's sole
 # surviving owner after the C5 retirement of `contact_transfer_fraction`
