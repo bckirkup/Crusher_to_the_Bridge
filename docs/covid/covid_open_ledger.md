@@ -149,8 +149,21 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   selection criterion verbatim from v7, and covid.T3 demoted to a diagnostic on
   v7's own saturation evidence
   (`picard_framework/runs/covid_theta_screen_v8_design.json`,
-  `docs/ledger/THETA-SCREEN-V8.md`). It is declared-and-tested but not
-  smoke-confirmed end-to-end: the first action is to confirm
-  `index_onset_day == -1.0` on one real cell, before the array submits. Session
-  state of play, including what may not be reopened:
+  `docs/ledger/THETA-SCREEN-V8.md`). Three probe cells at `main` = `4721b5b`
+  confirm the invariant end-to-end (`index_onset_day == -1.0`,
+  `index_shedding_at_day0` true, departure at epoch 120 in all three), **and say
+  the grid is mis-centred**: every probe burns the ship (2,843–3,099 recorded
+  onsets of 3,711 against covid.T1's 197) including the Θ 1e7 floor, consistent
+  with v7's 40-seed cells wherever its index was in fact symptomatic aboard
+  (median attack 0.709 at Θ 1e7, age 11 d). The v8 array should therefore **not**
+  be submitted as declared; an admissible Θ, if one exists, lies below 1e7, where
+  no screen has been, and the successor should declare a coarse wide downward
+  recentring screen first with covid.T1 and the geometry invariant verbatim.
+- **covid.T1 as declared is satisfiable without mass near the target.** All
+  eleven T1-passing cells on the v7 surface passed by spanning 197 between an
+  extinction floor (`recorded_onsets_p10` = 0) and a burn ceiling (p90 316 to
+  3,405), with attack q50 = 0.0000 in seven of them. No criterion is rewritten on
+  that basis here: readouts must report the per-seed distribution beside the
+  interval, and any tightening must be declared in a design file before its cells
+  run. Session state of play, including what may not be reopened:
   `docs/covid/covid_theta_handoff_2026_09_19.md`.
