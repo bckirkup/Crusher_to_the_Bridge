@@ -9,7 +9,10 @@ from telemetry_buffer.fields import (
 )
 from telemetry_buffer.schema import (
     GROUND_TRUTH_PATH,
+    LAB_NOTEBOOK_FILENAME,
     SCHEMA_VERSION,
+    default_ground_truth_path,
+    default_lab_notebook_path,
     make_agent,
     make_ground_truth,
     make_space,
@@ -20,7 +23,10 @@ from telemetry_buffer.schema import (
 
 __all__ = [
     "GROUND_TRUTH_PATH",
+    "LAB_NOTEBOOK_FILENAME",
     "SCHEMA_VERSION",
+    "default_ground_truth_path",
+    "default_lab_notebook_path",
     "AgentState",
     "EpochRecord",
     "PublicSnapshot",
