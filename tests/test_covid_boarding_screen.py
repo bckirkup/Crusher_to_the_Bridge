@@ -105,7 +105,11 @@ def test_design_rejects_malformed_axes(design, field, value):
 def test_apply_boarding_axis_edits_only_the_declared_seed_and_visit_mode():
     raw = build_fit_run_spec("diamond_princess_2020", 1e5, 20200205)
     before = raw["config_overrides"]["initiation"]["explicit_seeds"][0]
-    assert (before["count"], before["infection_age_days"]) == (1, 0.0)
+    # infection_age_days moved 0.0 → 6.8 under SEED-ONSET-01: with the
+    # declared onset_day (-1.0) it only fixes the implied incubation at the
+    # profile median 5.8 d; it is no longer an independent assumption.
+    assert (before["count"], before["infection_age_days"]) == (1, 6.8)
+    assert before["onset_day"] == -1.0
     out = apply_boarding_axis(
         raw, infection_age_days=6.0, imports=3, sanitary_visit_mode="dwell_weighted",
     )
@@ -113,6 +117,9 @@ def test_apply_boarding_axis_edits_only_the_declared_seed_and_visit_mode():
     assert (seed["count"], seed["infection_age_days"]) == (3, 6.0)
     assert seed["pathogen"] == before["pathogen"]
     assert seed["epoch"] == before["epoch"]
+    # The axis moves infection_age_days only; a declared onset_day is the
+    # record's and is carried through untouched.
+    assert seed["onset_day"] == -1.0
     assert out["config_overrides"]["transmission"]["sanitary_visit_mode"] == "dwell_weighted"
     assert out is raw
     untouched = build_fit_run_spec("diamond_princess_2020", 1e5, 20200205)
@@ -307,3 +314,81 @@ def test_a_real_cell_reports_the_index_geometry(design):
     fresh = simulate_screen_cell(design, cell_at(0.0), num_epochs=48)
     assert fresh["index_shedding_at_day0"] is False
     assert fresh["index_onset_day"] is None or fresh["index_onset_day"] >= 0.0
+
+
+@pytest.mark.parametrize("age", [2.0, 4.0, 6.8, 9.0])
+def test_declared_onset_day_returns_the_declared_day(age):
+    """SEED-ONSET-01: _index_geometry must return onset_day exactly.
+
+    With onset stamped rather than drawn, ``days_elapsed(infection_epoch)
+    + incubation_days - infection_age_days`` collapses to the declared day
+    identically — a geometry the free incubation draw could only hit by
+    chance.
+    """
+    import numpy as np
+
+    from engines.infection_dynamics_bridge import KorkinAgent
+    from engines.initiation import (
+        apply_explicit_seeds,
+        resolve_initiation_plan,
+    )
+    from engines.sim_clock import SimClock
+    from picard_framework.covid_boarding_screen import (
+        PATHOGEN_ID,
+        _index_geometry,
+    )
+
+    onset = -1.0
+    clock = SimClock(epoch_duration_hours=6.0, mode="hours")
+    profile = {
+        "shedding_curve_log10": [7.0] * 40,
+        "asymptomatic_shedding_log10": [7.0] * 40,
+        "symptom_onset_day": 0.0,
+        "recovery_day": 1000.0,
+        "shedding_duration_days": 30.0,
+        "dose_response": {"model": "exponential", "k": 0.05},
+    }
+
+    class _Engine:
+        def __init__(self, sim_clock) -> None:
+            self.clock = sim_clock
+            self.initiation_manifest = {}
+
+    engine = _Engine(clock)
+    engine.agents = [
+        KorkinAgent(
+            agent_id=i, role="passenger", immune=False, home_zone="Z",
+            dining_zone="Z", work_zone="Z", free_zone="Z",
+            schedule=["Free"] * 4,
+        )
+        for i in range(10)
+    ]
+    for a in engine.agents:
+        a.clock = clock
+        a.current_location = "Z"
+    plan = resolve_initiation_plan(
+        {
+            "initiation": {
+                "explicit_seeds": [
+                    {
+                        "pathogen": PATHOGEN_ID,
+                        "count": 1,
+                        "epoch": 0,
+                        "infection_age_days": age,
+                        "onset_day": onset,
+                    },
+                ],
+            },
+        },
+        {PATHOGEN_ID: profile},
+    )
+    apply_explicit_seeds(
+        plan, engine, 0, np.random.default_rng(3), {PATHOGEN_ID: profile},
+    )
+    cell = ScreenCell(
+        index=0, scenario_id="diamond_princess_2020", theta=1e9,
+        infection_age_days=age, imports=1, seed=1,
+    )
+    geometry = _index_geometry(engine, cell, profile)
+    assert geometry["index_onset_day"] == pytest.approx(onset)
+    assert geometry["index_shedding_at_day0"] is True

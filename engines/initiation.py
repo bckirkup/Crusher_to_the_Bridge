@@ -218,6 +218,7 @@ class ExplicitSeed:
     dose: float | None
     strain_id: str | None
     departure_day: float | None = None
+    onset_day: float | None = None
 
 
 @dataclass(frozen=True)
@@ -976,6 +977,15 @@ def _resolve_seed(
                 "declared voyage day, and a host that never does leaves the "
                 "key unset",
             )
+    onset_day = raw.get("onset_day")
+    if onset_day is not None:
+        onset_day = float(onset_day)
+        if not math.isfinite(onset_day):
+            raise ValueError(
+                f"{location}.onset_day = {onset_day} is not finite: a "
+                "declared onset is a voyage day and may be signed (onset "
+                "before the seed's own epoch), never nan or infinite",
+            )
     dose = raw.get("dose")
     strain = raw.get("strain")
     return ExplicitSeed(
@@ -987,6 +997,7 @@ def _resolve_seed(
         dose=None if dose is None else float(dose),
         strain_id=None if strain is None else str(strain),
         departure_day=departure_day,
+        onset_day=onset_day,
     )
 
 
@@ -1446,11 +1457,48 @@ def _board_one_symptomatic_host(
         ),
         rng=rng, profile=profile,
     )
+    _stamp_symptomatic_history(
+        agent, pathogen_id, profile, clock, rng,
+        incubation_days=incubation_days,
+        duration_days=duration_days,
+        recovery_day=drawn,
+        elapsed_days=elapsed_days,
+        boarding_state=STATE_SYMPTOMATIC,
+    )
+    return STATE_SYMPTOMATIC
+
+
+def _stamp_symptomatic_history(
+    agent: Any,
+    pathogen_id: str,
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+    *,
+    incubation_days: float,
+    duration_days: float,
+    recovery_day: float,
+    elapsed_days: float,
+    boarding_state: str | None,
+) -> None:
+    """Stamp a host already ``elapsed_days`` into a symptomatic course.
+
+    Shared by the boarding channel's prevalent symptomatic draw and a seed
+    declaring an observed onset day (``ExplicitSeed.onset_day``): both need
+    the same record shape — onset back-dated to ``incubation_days`` into the
+    infection, severity read at the elapsed day rather than the peak, and
+    the symptom axes and emesis schedule drawn here because a host that
+    boards past onset never passes through ``draw_symptom_onset``.
+    ``boarding_state`` is ``None`` for the seed path: a declared index is
+    not a drawn boarder, so the boarding channel's marker stays off its
+    record.
+    """
     inf = agent.infections[pathogen_id]
     inf["incubation_days"] = incubation_days
-    inf["boarding_state"] = STATE_SYMPTOMATIC
+    if boarding_state is not None:
+        inf["boarding_state"] = boarding_state
     inf["shedding_duration_days"] = duration_days
-    inf["recovery_day"] = drawn
+    inf["recovery_day"] = recovery_day
     inf["onset_time_infected"] = int(
         round(clock.epochs_for_days(incubation_days)),
     )
@@ -1463,7 +1511,7 @@ def _board_one_symptomatic_host(
     # Already elapsed_days into the course: the observer sees day int(a),
     # not day 0 and not the peak.
     inf["symptom_severity"] = severity_on_day(profile, peak, int(elapsed_days))
-    # A symptomatic boarder never passes through draw_symptom_onset, so its
+    # A symptomatic arrival never passes through draw_symptom_onset, so its
     # axes and emesis schedule are drawn here — without this it could never
     # vomit, and vomiting is the dominant route.
     draw_symptom_axes(inf, profile, rng)
@@ -1483,7 +1531,6 @@ def _board_one_symptomatic_host(
         agent.illness_status = IllnessStatus.SYMPTOMATIC
     # apply_treatment_at_onset is deliberately not called: whatever care the
     # host sought ashore is unmodelled, so its drawn duration is untreated.
-    return STATE_SYMPTOMATIC
 
 
 def _draw_symptomatic_role(
@@ -1688,6 +1735,7 @@ def _apply_one_seed(
     epoch: int,
     rng: np.random.Generator,
     profile: dict[str, Any],
+    location: str,
 ) -> dict[str, Any]:
     """Introduce one seed's hosts and return what it actually did."""
     pool = _seed_pool(seed, engine)
@@ -1696,6 +1744,24 @@ def _apply_one_seed(
     time_infected = int(
         round(engine.clock.epochs_for_days(seed.infection_age_days)),
     )
+    onset_incubation: float | None = None
+    elapsed_since_onset: float | None = None
+    if seed.onset_day is not None:
+        # The record states the onset's voyage day; the implied incubation
+        # is a consequence of it, not a draw from the profile.
+        seed_day = float(engine.clock.days_elapsed(epoch))
+        onset_incubation = (
+            seed.infection_age_days + seed.onset_day - seed_day
+        )
+        if onset_incubation <= 0.0:
+            raise ValueError(
+                f"{location}.onset_day = {seed.onset_day} with "
+                f"infection_age_days {seed.infection_age_days} at seed day "
+                f"{seed_day}: an onset cannot precede acquisition — "
+                f"infection_age_days + onset_day - {seed_day} must be "
+                "positive",
+            )
+        elapsed_since_onset = seed_day - seed.onset_day
     departure_epoch: int | None = None
     if seed.departure_day is not None:
         departure_epoch = int(
@@ -1723,6 +1789,35 @@ def _apply_one_seed(
             # A stated index case presents by construction rather than by
             # ``illness_probability`` at a fabricated acquisition dose.
             agent.infections[seed.pathogen_id]["will_present"] = True
+        if seed.onset_day is not None:
+            inf = agent.infections[seed.pathogen_id]
+            inf["incubation_days"] = onset_incubation
+            inf["will_present"] = True
+            if elapsed_since_onset > 0.0:
+                duration_days = _host_duration(
+                    agent, seed.pathogen_id, profile,
+                )
+                if elapsed_since_onset >= duration_days:
+                    raise ValueError(
+                        f"{location}.onset_day = {seed.onset_day} leaves "
+                        f"the seeded host {elapsed_since_onset} days past "
+                        "onset at its epoch, already past the authored "
+                        f"shedding window of {duration_days} days: a "
+                        "declared index cannot arrive cleared",
+                    )
+                _stamp_symptomatic_history(
+                    agent, seed.pathogen_id, profile, engine.clock, rng,
+                    incubation_days=onset_incubation,
+                    duration_days=duration_days,
+                    # The record carries the unextended duration: the
+                    # chronic extension is applied once by clearance_days
+                    # at read time, exactly as for the lazy draw.
+                    recovery_day=float(
+                        profile.get("recovery_day", DEFAULT_RECOVERY_DAY),
+                    ),
+                    elapsed_days=elapsed_since_onset,
+                    boarding_state=None,
+                )
     seeded_ids = [int(a.agent_id) for a in chosen]
     recorded = getattr(engine, "explicit_seed_agent_ids", None)
     if recorded is None:
@@ -1739,6 +1834,7 @@ def _apply_one_seed(
         "infection_age_days": seed.infection_age_days,
         "strain": seed.strain_id,
         "departure_day": seed.departure_day,
+        "onset_day": seed.onset_day,
     }
 
 
@@ -1762,6 +1858,7 @@ def apply_explicit_seeds(
     records = [
         _apply_one_seed(
             seed, engine, epoch, rng, resolved.get(seed.pathogen_id, {}),
+            f"initiation.explicit_seeds[{index}]",
         )
         for index, seed in enumerate(plan.seeds)
         if seed.epoch == epoch
