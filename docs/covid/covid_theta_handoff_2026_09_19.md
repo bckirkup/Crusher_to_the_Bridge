@@ -1,7 +1,9 @@
 # COVID Theta calibration: state of play at 2026-09-19 handoff
 
 > **Status:** Handoff record (2026-09-19), authored against `main` after #609
-> merged. It states where the Theta calibration stands, what is declared but
+> merged; amended at `main` = `46cff41` with §7 (the v8 probe result) and §8 (the
+> merged, unsubmitted v9 screen and the state of its preflight gate) — read §8
+> before acting on §4. It states where the Theta calibration stands, what is declared but
 > not yet run, and what must not be reopened. It reports no new numbers: every
 > figure it refers to is quoted from the ledger entry or readout that measured
 > it, with that entry's own `Measured at` SHA. Nothing here is a fit.
@@ -98,15 +100,16 @@ held-out `covid.H3` fleet shape, which may refuse a Theta but may never pick
 among admitted ones) and 3 (the held-out Greg Mortimer hull) are declared in the
 same file and gated on a non-empty stage-1 shortlist.
 
-**Next actions, in order — revised by §7, read it first.** (1) Declare the
-downward recentring screen: the probes say the v8 grid's floor is already in
-saturation, so `covid_theta_screen_v8` should not be submitted as declared.
-(2) Build a campaign image from a `main` containing the successor design — the
-design must be *inside* the image — and submit per
-`.agents/skills/aws-batch-campaign/SKILL.md` with `DESIGN=<successor>`.
+**Next actions, in order — revised by §7 and §8, read both first.** The
+successor screen is declared and merged; step (1) is done, and the session
+stopped deliberately before submitting anything, so **no array is running and
+nothing is orphaned in AWS**. (1) ~~Declare the downward recentring screen~~ —
+done: `covid_theta_screen_v9` (§8), which supersedes v8. v8 was never submitted
+and must not be. (2) Run the `.agents/skills/campaign-preflight/SKILL.md` gate
+for v9 and submit the 600-cell array — see §8 for the exact state of that gate.
 (3) Merge with `tools/fit_covid_theta.py screen` and write the readout as a
 ledger entry before interpreting anything, reporting the per-seed onset
-distribution next to the T1 interval (§7).
+distribution and `onset_mass_near_target` next to the T1 interval (§7, §8).
 
 ## 5. Where the artifacts live
 
@@ -117,8 +120,9 @@ Durable, and all a successor needs:
   the surface itself is committed at
   `docs/covid/covid_theta_screen_v7_surface.csv` with its readout.
 - ECR image `picard-campaign:theta-screen-v7-7ff6dd0`, job definition
-  `picard-covid-boarding-screen:6`, queue `picard-campaign-queue`. The v8
-  submission needs a new image tag off a `main` containing the v8 design.
+  `picard-covid-boarding-screen:6`, queue `picard-campaign-queue`. The v9
+  submission needs a new image tag off a `main` containing the v9 design (§8);
+  no v8 or v9 image was ever built, and no v8 or v9 cell has ever run on AWS.
 
 Nothing in a home directory or `/tmp` on this session's box is required: local
 synced copies of the v7 results are reproducible from the S3 prefix, the probe
@@ -192,3 +196,60 @@ Run from the repository root with `PYTHONPATH=.`, one shell per cell, at
 (1e7, 3.3), (1e10, 15.6) and (316227766.01683795, 6.8). Redirect each to a file:
 the first attempt was lost with a session restart because the results only ever
 existed in shell buffers.
+
+## 8. `covid_theta_screen_v9`: declared, merged, not submitted
+
+The successor screen landed at `main` = `46cff41` (#615) and is the live design:
+`picard_framework/runs/covid_theta_screen_v9_design.json`, entry
+`docs/ledger/THETA-SCREEN-V9.md`. Ten decade Theta from **1e1** to 1e10 × three
+index infection ages (3.3 / 6.8 / 12.8 d) × 20 matched seeds at base 20200205 =
+**600 cells** on `diamond_princess_2020`, authored as a refinement of
+`covid_theta_screen_v8`. `covid.T1` and the index-geometry invariant carry over
+verbatim; `covid.T3` stays a diagnostic; the reason the range moved down six
+decades is §7, measured and recorded before the design was written. **v8 is
+superseded and must never be submitted**; v9 supersedes it in the same Theta
+ceiling so the two surfaces remain readable against each other at 1e7–1e10.
+
+#615 also added the discriminator the readout needs, reported and never selected
+on: `onset_mass_near_target` (share of a cell's seeds whose `recorded_onsets`
+falls within a factor of two of `covid.T1`'s 197, bounds computed from the target),
+with `recorded_onsets_per_seed` aligned to the existing `seeds` key. It exists
+because every v7 T1 pass was an interval spanning 197, not mass near it (§7); a
+bimodal cell now reports mass 0.0 while `t1_ok` is still true, which is the point.
+Any tightening of T1 itself must be declared in the stage-1b design before its
+cells run.
+
+**Where the preflight gate stands.** Rule A is satisfied: every criterion,
+invariant and diagnostic was frozen in the design file before any v9 cell existed,
+and `main` now contains it. Nothing else in
+`.agents/skills/campaign-preflight/SKILL.md` has been done — steps 1–6 are all
+outstanding, and no image was built, no job definition registered, no canary or
+array submitted. The successor runs that gate from the top:
+
+- the design must be **inside** the image, so build from a `main` containing
+  `46cff41` and tag it for v9 (v7's image `picard-campaign:theta-screen-v7-7ff6dd0`
+  does not contain the v9 design);
+- submit against a **pinned job-definition revision and `sha256:` digest**, never
+  a bare tag — `picard-covid-boarding-screen:6` and the v7 digest are the last
+  known-good pair and are recorded in §5, but the v9 image is a new digest;
+- `DESIGN=covid_theta_screen_v9`, `STRIDE=1`, via
+  `deploy/aws/submit_covid_boarding_screen.sh`, whose array size is computed from
+  `enumerate_cells` and must print **600**;
+- one canary child inspected before the array: confirm `index_onset_day == -1.0`
+  and `index_shedding_at_day0` true (the §7 invariant), the swept Theta read back
+  from the cell's own output rather than the submitted spec, and a non-degenerate
+  run;
+- then the array, with the ETA announced at submit time (~30 min per cell,
+  ~9 min observed per cell on a Spot worker in the §7 probes).
+
+**What the floor is for.** The 1e1 end is *expected to be inert*. An inert floor
+is the evidence that the sweep brackets the near-critical band instead of sitting
+above it — the mistake v8 would have made. If the admissible set lands on either
+boundary, report it as a boundary and extend the sweep in that direction; never
+select on a boundary. If the admissible set is empty, report the located band and
+the nearest cells and say so: no criterion may be loosened after the surface
+exists (§6).
+
+Stage 1b, if stage 1 admits anything: half-decade steps spanning the admitted
+band plus one half decade beyond each edge, 40 seeds, the six v8 incubation points
+restored, declared in its own design file before its cells run.
