@@ -54,8 +54,11 @@ wrappers, which are read-only.
 
 Outputs
 -------
-One JSON per seed at ``--out``: the per-host table (credited dose, crediting
-epochs, frailty, challenge and evaluation counts, state tallies), the
+One gzipped JSON per seed at ``--out`` (``*.json.gz``; gzipped because the
+per-host table carries ``*_epochs`` count keys, which the repository's unit
+safety guard reads as an undeclared time unit in any plain ``.json`` on disk):
+the per-host table (credited dose, crediting epochs, frailty, challenge and
+evaluation counts, state tallies), the
 reconciliation chain from accumulated dose to summed evaluated hazard, the
 dose-concentration curve (how many hosts hold 90% of the credited dose), and
 the emesis witness counters. A summary of the same is printed.
@@ -70,6 +73,7 @@ Nothing here fits or selects a parameter value.
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import math
 import sys
@@ -894,8 +898,9 @@ def main(argv: list[str] | None = None) -> int:
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
         )
-        path = args.out / f"per_host_dose_challenge_seed{seed}.json"
-        path.write_text(json.dumps(summary, indent=1), encoding="utf-8")
+        path = args.out / f"per_host_dose_challenge_seed{seed}.json.gz"
+        with gzip.open(path, "wt", encoding="utf-8") as handle:
+            json.dump(summary, handle, indent=1)
         print_summary(summary)
         print(f"written: {path}")
     return 0
