@@ -109,8 +109,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 - **Index-case geometry.** Declared per-agent departure shipped
   (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020. The
   resolved infection-age × Θ screen has now run (THETA-V7-01, below) and
-  exposed the remaining half: the seed channel still cannot declare the
-  index's *observed onset date*, only an infection age.
+  exposed the remaining half, which SEED-ONSET-01 then closed: the seed
+  channel can now declare the index's *observed onset date* (onset day
+  −1, grade A), making the implied incubation a consequence of the record
+  rather than a free draw.
 - **`covid_theta_screen_v7` ran; the admissible region is empty.** The
   pre-registered Θ × infection-age screen on the repaired arm (host frailty
   restored, index departing day 5;
@@ -119,18 +121,24 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `main` = `e32272d`. **No Θ is admissible**: zero of 77 cells satisfy index
   geometry, covid.T1 and covid.T3 jointly, and none satisfy geometry and T1
   together at any Θ (`docs/ledger/THETA-V7-01.md`,
-  `docs/covid/covid_theta_screen_v7_readout.md`). Outstanding from it:
-  - the explicit-seed channel cannot declare the index's observed onset date, so
-    the record's own infection age (≈5–6 d) passes the geometry gate in only 45%
-    of seeds — the gate mixes the host's free incubation draw with the recorded
-    onset, and no threshold change fixes that;
+  `docs/covid/covid_theta_screen_v7_readout.md`). Outstanding from it
+  (geometry rows superseded by SEED-ONSET-01, which makes the onset day
+  declared rather than drawn — every `index_geometry_pass_fraction` on the
+  v7 surface is an artifact of the free incubation draw and is void, so the
+  empty admissible region is not a statement about Θ):
+  - ~~the explicit-seed channel cannot declare the index's observed onset
+    date~~ — fixed by SEED-ONSET-01: `ExplicitSeed.onset_day` stamps the
+    declared onset and the symptomatic history directly;
   - the asymptomatic share caps at 0.43 median anywhere on the surface and falls
     with Θ, against covid.T4 0.50 and held-out covid.H2 0.81 — it is emergent
     from delivered dose rather than a natural-history parameter;
   - covid.T3 is non-discriminating on this hull (specimens saturate at
     ~1,600–3,063 across five decades of Θ) and must not carry selection weight
     in a successor design;
-  - Θ 3.16e7–3.16e9 at index ages 0–5 d is the nearest region — eleven cells
-    passing covid.T1 (four of them covid.T3), reproducing DP-sized takeoffs
-    and the covid.H3 fleet shape, failing geometry alone.
+  - Θ 3.16e7–3.16e9 at index ages 0–5 d remains the nearest region as a
+    fleet-shape observation — eleven cells passing covid.T1 (four of them
+    covid.T3), reproducing DP-sized takeoffs and the covid.H3 fleet shape —
+    but its geometry pass fractions are void with the others; under a
+    declared onset the gate is satisfied by construction at the record's
+    geometry.
   Stages 2–3 of the design are gated on a non-empty shortlist and were not run.

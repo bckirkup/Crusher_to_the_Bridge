@@ -48,8 +48,9 @@
             "count": 1,
             "role": "passenger",
             "epoch": 0,
-            "infection_age_days": 0.0,
-            "departure_day": 5.0
+            "infection_age_days": 6.8,
+            "departure_day": 5.0,
+            "onset_day": -1.0
           }
         ]
       },
@@ -120,11 +121,18 @@
           "note": "Coarsened onto the repository's age-band vocabulary and decomposed by role; the derivation and its declared assumptions are in the bundle."
         },
         {
+          "field": "initiation.explicit_seeds[0].onset_day",
+          "value": "-1.0 = 19 January 2020, the index case's cough onset; boarding was 20 January = day 0",
+          "source": "Yamagishi 2020, Eurosurveillance 25(23):2000272, DOI 10.2807/1560-7917.es.2020.25.23.2000272",
+          "grade": "A",
+          "note": "SEED-ONSET-01: the record dates the onset, so the channel declares it and the implied incubation (infection_age_days + onset_day = 5.8 d) is a consequence of the record rather than a free draw."
+        },
+        {
           "field": "initiation.explicit_seeds[0].infection_age_days",
-          "value": "0.0 — DECLARED ASSUMPTION, not sourced",
+          "value": "6.8 — DECLARED, not sourced",
           "source": "∅",
           "grade": "declared",
-          "note": "One infected passenger is placed at embarkation because the introduction happened before day 0 and no retrieved source gives the index case's infection age at boarding. Yamagishi 2020 dates the index's cough onset to 19 January = day −1, so the index boarded already symptomatic and its infection age at boarding is one day plus an incubation period; that incubation uncertainty is exactly why infection age is a screened axis in the Θ campaign rather than a pinned constant. Choosing an infection age that reproduces 22 January would be tuning the scenario to a scored anchor, so it is refused and left as a declared axis for the #36 screen."
+          "note": "With onset_day declared, the infection age no longer states an independent fact: it only fixes the implied incubation A + O = 5.8 d, which is exactly the sars_cov2_resp profile's own authored incubation median (incubation.median_days = 5.8, Wei et al. 2021 via docs/ctb_incubation_spec.md). It was chosen from the profile's natural-history distribution, not from any scored anchor — in particular not to reproduce the 22 January first secondary onset — and it remains a swept axis in the Θ campaign."
         },
         {
           "field": "initiation.explicit_seeds[0].departure_day",
