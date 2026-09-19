@@ -3905,6 +3905,26 @@ internally consistent voyage; what is lost is the α-axis *shape*, not the
 magnitude. Any future α or β arm is unreadable until the entry's declared
 child-stream fix lands as its own labelled paired change.
 
+**`NORO-DOSE-01`: the dose shortfall on `classic_cruise_1900` is geometrical
+attenuation in a one-hop fomite chain, not a blocked mechanism.** Working the
+transmission-blocker cascade in its declared order on the `NORO-SUSCEPT-02`
+instrumented voyages (seeds 8105/8106, 288 epochs, shipped profile, engine
+`f55e93f`): Σ evaluated hazard 3.81e-4 gives P(0 secondaries) = 0.9996, so zero
+is an ordinary draw and there is no Bernoulli blocker. Fomite carries 93.5% of
+accumulated dose; the chain loses 2.17 log10 at surface→hand pickup and 1.93
+log10 at hand→mouth ingestion (jointly principal), 4.1 log10 in total. The
+carrier-dead-end archetype is present and measured: `_sanitary_fomite_exposure`,
+`_food_deposits` and `_direct_contact_unit` all gate hand-mediated source terms
+on `_get_shedders()`, so a non-shedding host holding picked-up hand load can
+never re-deposit or transfer it. Fomite is therefore a one-hop chain with no
+re-contamination amplification, which is why one host can hold most of a
+voyage's credited dose. No host-side blocker exists: protection 0.0, no dose
+credited while infected or immune, engine and recomputed hazard agree to 1e-11
+relative. This **restores nothing and withdraws nothing** recorded here; no
+constant was changed and the forced-challenge step was not reached. The
+archetype finding is measured at two seeds and is a mechanism statement, not a
+sized effect — the truncated mass is unquantified.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
