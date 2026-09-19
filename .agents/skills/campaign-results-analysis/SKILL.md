@@ -135,6 +135,14 @@ AWS_PROFILE=picard python3 deploy/aws/classify_batch_failures.py \
 Separates Spot reclaim vs OOM (exit 137) vs timeout vs other so you can decide
 whether to escalate Fargate memory or just re-submit Spot.
 
+## Definition of done
+
+Aggregation is not the end of the campaign: the campaign is not finished until
+the canonical readout section is written into `docs/` and the interpretation
+plus the next decision have been sent to the user — a clean 770/770-cell
+campaign was lost to exactly this gap
+(`.agents/skills/session-handoff-ledger/SKILL.md`).
+
 ## Related
 
 - Spec: `docs/stan_analysis_tool_spec.md`
