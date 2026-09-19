@@ -76,6 +76,7 @@ import argparse
 import gzip
 import json
 import math
+import re
 import sys
 import tempfile
 from collections import defaultdict
@@ -868,11 +869,20 @@ def print_summary(summary: dict[str, Any]) -> None:
     print(f"fomite witness: {summary['fomite_witness']}")
 
 
+def _identifier(value: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
+        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
+    return value
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--platform", default="classic_cruise_1900")
-    parser.add_argument("--bundle", default="active_profiles")
-    parser.add_argument("--pathogen-id", default="norwalk_gi")
+    parser.add_argument(
+        "--platform", type=_identifier, default="classic_cruise_1900")
+    parser.add_argument(
+        "--bundle", type=_identifier, default="active_profiles")
+    parser.add_argument(
+        "--pathogen-id", type=_identifier, default="norwalk_gi")
     parser.add_argument("--epochs", type=int, default=288)
     parser.add_argument(
         "--seeds", type=int, nargs="+", default=[8105, 8106],
