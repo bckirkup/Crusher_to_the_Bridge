@@ -1,0 +1,54 @@
+{
+  "design_id": "covid_fleet_placement_v1",
+  "parent_design": "covid_theta_screen_v9",
+  "description": "The covid.H3 fleet check, declared as what the anchor actually supports: a PLACEMENT test of the two simulated hulls in the 104-voyage cross-ship attack-rate distribution, not a fit to that distribution. covid.H3's own note in data/observation/covid_fit_targets.json declares the limit - 'Scored as a placement question, not a fitted distribution: where do the two simulated hulls fall in it ... whether the model would also reproduce the 0.2% median needs the other 102 voyages' geometries, which this repository does not have.' That limit is honoured here rather than worked around: nothing in this design claims the model reproduces fleet outbreak frequency, and the takeoff probability measured in THETA-SCREEN-V9 may NOT be read as the fleet's outbreak rate, because a takeoff probability at fixed Theta on one hull with one declared import is not a draw from a fleet of 104 voyages with unknown imports, durations and geometries.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "THETA-SCREEN-V9: the Diamond Princess side of this comparison already exists (10 decades x 20 seeds). No DP cells are re-run.",
+    "DOSE-FRAIL-01, INDEX-GEOM-01, SEED-ONSET-01, QUAR-ORDER-01: as for covid_quarantine_attribution_v1.",
+    "covid.H1 / covid.H2 are the Greg Mortimer held-out anchors and are NOT selected on here; this design reports them beside the placement."
+  ],
+  "scenario_id": "greg_mortimer_2020",
+  "scenario_note": "Only the held-out hull is run; platform expedition_cruise_450, 223 aboard (128 passengers, 95 crew), 28 days, SOP-017 confinement from voyage day 8 to day 27, single ship-wide test event on day 20. Greg Mortimer is the informative one for this question: its observed outcome is 128 positives of 217 tested on the single ship-wide test day (covid.H1, share 0.59) on 223 aboard, i.e. a hull whose real attack rate is in the same order as this model's 'burn' mode. If the model's saturating behaviour is wrong everywhere, Greg Mortimer is where that shows; if the model is right about high-attack voyages and wrong only about arrested ones, Greg Mortimer is where THAT shows. Diamond Princess alone cannot distinguish those.",
+  "thetas": [100000.0, 10000000.0, 1000000000.0],
+  "thetas_note": "Three decades spanning the v9 behavioural regimes on DP: 1e5 (rare takeoff, the only decade with seeds near the DP magnitude), 1e7 (low takeoff probability, burn when it takes off), 1e9 (takeoff-rich, the sole covid.T1 interval pass). No Theta is selected here; the point is whether ANY single Theta places both hulls correctly at once, which is the question v9 could not ask with one hull.",
+  "infection_age_days": [0.0],
+  "infection_age_note": "The scenario's declared value, held fixed, and NOT an axis. Checked before this design was written: greg_mortimer_2020 declares explicit_seeds[0].infection_age_days = 0.0 and NO onset_day, so unlike diamond_princess_2020 the age here is live - the incubation is drawn rather than stamped, and varying it would open exactly the lottery the v7 age axis ran into. This design refuses that and varies only Theta. A deliberate Greg Mortimer boarding-state screen would be its own design, with the drawn-incubation variance budgeted for in its seed count.",
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "cells": 60,
+  "cells_note": "3 Theta x 20 seeds on one hull. Small by design: this is a placement check against an anchor that can only support a placement.",
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "v9's fields verbatim, plus the two Greg Mortimer campaign channels.",
+    "single_test_day_positives": "Positives on the scenario's declared ship-wide test day, the covid.H1 channel.",
+    "single_test_day_tested": "Specimens on that day, so the share is computed the same way the anchor is (128/217, not positives/aboard).",
+    "single_test_day_asymptomatic_share": "Asymptomatic share among those positives, the covid.H2 channel.",
+    "attack_rate": "Truth-channel infections / aboard, for the covid.H3 placement."
+  },
+  "placement_criterion": {
+    "declared_before_running": true,
+    "statement": "For each Theta, and for each hull, classify the cell's attack-rate distribution against the covid.H3 fleet distribution (median 0.002, IQR [0.0003, 0.015], mean 0.037, with Diamond Princess 712 cases and Ruby Princess 907 as the named right-tail outliers). A hull is PLACED IN THE TAIL at that Theta if the median over its 20 seeds exceeds the H3 IQR upper bound of 0.015. The placement test is PASSED at a Theta only if BOTH hulls are placed in the tail at that same Theta, using the existing v9 Diamond Princess cells for the DP side.",
+    "reported_beside_it_never_selected_on": [
+      "The observed values the hulls should land near if the model had the right magnitude: Diamond Princess 712/3711 = 0.192; Greg Mortimer 128/217 = 0.59 positive share on the test day. Distance from these is REPORTED, and is the number that matters scientifically, but it is not the placement criterion and may not be turned into one after the cells run.",
+      "covid.H1 and covid.H2 as measured, with their channels computed the anchor's way.",
+      "The per-seed attack-rate vector for both hulls, so bimodality is visible rather than summarised."
+    ],
+    "what_a_pass_would_and_would_not_mean": "A pass means only that the model puts both known right-tail voyages in the right tail. It does NOT mean the model reproduces the fleet's outbreak frequency or its 0.2% median, and the readout must say so in those words. Because both simulated hulls are drawn from the right tail of H3, a model that burns EVERY voyage also passes this test - so a pass is necessary and not sufficient, and it must be reported together with the conditional-on-takeoff attack rates that show whether the tail placement was achieved at the right magnitude or by saturation."
+  },
+  "open_question_this_design_does_not_close": {
+    "statement": "Whether the model reproduces the fleet's outbreak FREQUENCY - the thing a bimodal extinction/burn surface superficially looks like it should explain - cannot be answered from these cells or from v9's takeoff probabilities.",
+    "what_it_would_take": "The other 102 voyages' geometries (hull, complement, duration, imports), which this repository does not have. Acquiring or synthesising them is a separate piece of work with its own provenance burden: a synthesised fleet would be a modelling choice scored against a real distribution, which is precisely the kind of circularity the fit spec forbids. If that work is ever undertaken, it must be declared as its own design with the synthesis rules fixed in advance.",
+    "interim_honest_statement": "Until then, the correct claim is: the model is bimodal, the real fleet is right-skewed with a 0.2% median, and these two facts have not been compared. They are not evidence for each other."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md. The image must be built from a main containing this design file.",
+    "stage_1_cells": 60,
+    "stride": 1,
+    "expected_cell_minutes": 10,
+    "expected_cell_minutes_note": "Greg Mortimer is 223 hosts against Diamond Princess's 3,711, so cells are far cheaper than v9's.",
+    "gate": ".agents/skills/campaign-preflight: local smoke proving the greg_mortimer_2020 scenario loads with the declared geometry and that the single-test-day channel reads back, --dry-run count = 60, job-definition revision and image digest pinned, one canary child read out and reported before the array is submitted."
+  }
+}
