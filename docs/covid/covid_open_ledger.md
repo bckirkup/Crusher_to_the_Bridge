@@ -130,6 +130,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   - covid.T3 is non-discriminating on this hull (specimens saturate at
     ~1,600–3,063 across five decades of Θ) and must not carry selection weight
     in a successor design;
-  - Θ 1e8–1e9 at index ages 0–5 d is the nearest region — it reproduces
-    DP-sized takeoffs and the covid.H3 fleet shape, and fails geometry alone.
+  - Θ 3.16e7–3.16e9 at index ages 0–5 d is the nearest region — eleven cells
+    passing covid.T1 (three of them covid.T3), reproducing DP-sized takeoffs
+    and the covid.H3 fleet shape, failing geometry alone.
   Stages 2–3 of the design are gated on a non-empty shortlist and were not run.
