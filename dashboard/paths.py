@@ -4,6 +4,11 @@ from __future__ import annotations
 import os
 
 from simulation_utils.paths import REPO_ROOT
+from telemetry_buffer.schema import (
+    LAB_NOTEBOOK_FILENAME,
+    SIMULATION_HISTORY_FILENAME,
+    TELEMETRY_BUFFER_DIRNAME,
+)
 
 PLATFORMS_DIR = os.path.join(REPO_ROOT, "data", "platforms")
 CONFIG_YAML = os.path.join(REPO_ROOT, "crusher_labs", "config.yaml")
@@ -18,8 +23,8 @@ DEFAULT_PICARD_SPEC = os.path.join(
     REPO_ROOT, "picard_framework", "runs", "destroyer_baseline_default.json",
 )
 
-HISTORY_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "simulation_history.json")
-NOTEBOOK_PATH = os.path.join(REPO_ROOT, "telemetry_buffer", "artificial_lab_notebook.json")
+HISTORY_PATH = os.path.join(REPO_ROOT, TELEMETRY_BUFFER_DIRNAME, SIMULATION_HISTORY_FILENAME)
+NOTEBOOK_PATH = os.path.join(REPO_ROOT, TELEMETRY_BUFFER_DIRNAME, LAB_NOTEBOOK_FILENAME)
 
 SPATIAL_LAYOUT_JSON = "spatial_layout.json"
 ALL_DECKS_LABEL = "All Decks"

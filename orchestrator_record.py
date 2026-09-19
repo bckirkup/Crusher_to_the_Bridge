@@ -47,11 +47,16 @@ from telemetry_buffer.agent_axes import (
     agent_is_isolated,
     resolve_agent_axes,
 )
-from telemetry_buffer.schema import telemetry_dir
+from telemetry_buffer.schema import (
+    default_lab_notebook_path,
+    default_simulation_history_path,
+    resolve_telemetry_path,
+    telemetry_dir,
+)
 
 
 def _resolve_telemetry_output(path: str, *, allowed_roots: tuple[str, ...]) -> str:
-    resolved = os.path.realpath(path if os.path.isabs(path) else os.path.join(REPO_ROOT, path))
+    resolved = resolve_telemetry_path(path, REPO_ROOT)
     if not any(is_path_under_base(root, resolved) for root in allowed_roots):
         raise ValueError(f"Telemetry output path escapes allowed roots: {path!r}")
     return resolved
@@ -452,7 +457,7 @@ def finalize_simulation(
     """Save simulation history, lab notebook, and print executive summary."""
     output_roots = (REPO_ROOT, telemetry_dir())
     if history_path is None:
-        history_path = os.path.join(telemetry_dir(), "simulation_history.json")
+        history_path = default_simulation_history_path()
     else:
         history_path = _resolve_telemetry_output(history_path, allowed_roots=output_roots)
     prepare_output_directory(
@@ -482,18 +487,12 @@ def finalize_simulation(
                 lab_notebook_path, allowed_roots=output_roots,
             )
         else:
-            nb_output = logging_config.get("lab_notebook", {}).get(
-                "output_path", "telemetry_buffer/artificial_lab_notebook.json",
+            nb_output = logging_config.get("lab_notebook", {}).get("output_path")
+            nb_path = (
+                _resolve_telemetry_output(nb_output, allowed_roots=output_roots)
+                if nb_output
+                else default_lab_notebook_path()
             )
-            default_notebook = os.path.join(
-                "telemetry_buffer", "artificial_lab_notebook.json",
-            )
-            if os.path.normpath(nb_output) == default_notebook:
-                nb_path = os.path.join(telemetry_dir(), "artificial_lab_notebook.json")
-            else:
-                nb_path = _resolve_telemetry_output(
-                    nb_output, allowed_roots=output_roots,
-                )
         financial_audit = proto_ctx.cost_ledger.generate_financial_audit()
         protocol_summary = proto_ctx.protocol_engine.generate_protocol_summary()
         obs.notebook.serialize(

@@ -122,3 +122,45 @@ def test_telemetry_output_rejects_paths_outside_allowed_roots() -> None:
             "/tmp/outside-telemetry.json",
             allowed_roots=(str(REPO_ROOT),),
         )
+
+
+def test_ground_truth_default_path_follows_env_set_after_import(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    monkeypatch.setenv("CTTB_TELEMETRY_DIR", str(tmp_path))
+    payload = make_ground_truth(epoch=3, agents=[make_agent(1)], spaces={})
+
+    write_ground_truth(payload)
+
+    assert (tmp_path / "ground_truth.json").exists()
+    assert read_ground_truth() == payload
+
+
+@pytest.mark.parametrize(
+    "configured, expected_name",
+    [
+        ("telemetry_buffer/artificial_lab_notebook.json", "artificial_lab_notebook.json"),
+        ("telemetry_buffer/notebook.json", "notebook.json"),
+        ("./telemetry_buffer/nested/../renamed.json", "renamed.json"),
+    ],
+)
+def test_telemetry_buffer_relative_outputs_follow_override(
+    monkeypatch,
+    tmp_path: Path,
+    configured: str,
+    expected_name: str,
+) -> None:
+    monkeypatch.setenv("CTTB_TELEMETRY_DIR", str(tmp_path))
+    resolved = orchestrator_record._resolve_telemetry_output(
+        configured, allowed_roots=(str(REPO_ROOT), telemetry_dir()),
+    )
+    assert resolved == os.path.join(os.path.realpath(tmp_path), expected_name)
+
+
+def test_non_telemetry_relative_output_stays_under_repo(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("CTTB_TELEMETRY_DIR", str(tmp_path))
+    resolved = orchestrator_record._resolve_telemetry_output(
+        "picard_framework/runs/out.json", allowed_roots=(str(REPO_ROOT), telemetry_dir()),
+    )
+    assert resolved == str(REPO_ROOT / "picard_framework" / "runs" / "out.json")
