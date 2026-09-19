@@ -22,3 +22,4 @@ need to know *why* something is the way it is.
 | [SOP_CASCADE_RECONFIG.md](SOP_CASCADE_RECONFIG.md) | Design note, "may be partially landed". Prefer `data/config/diagnostic_cascade*.json` and `protocols.json` as the source of truth |
 | [CTB HVAC Star Topology Fix.md](CTB%20HVAC%20Star%20Topology%20Fix.md) | Implemented (merged) — native + ContamX AHS use AHU star topology. Living guidance: [`../CONTAM_INTEROP.md`](../CONTAM_INTEROP.md) |
 | [CTB PRJ Config Fixes v2 (PRJ-primary).md](<CTB PRJ Config Fixes v2 (PRJ-primary).md>) | Implemented (merged) — PRJ-primary Contam config fixes |
+| [devin_session_retrospective_2026_09.md](devin_session_retrospective_2026_09.md) | Historical — operating lessons from the three crashed September 2026 Devin sessions; recovered norovirus numbers are in [`../ledger/NORO-DIAG-RECOVER-01.md`](../ledger/NORO-DIAG-RECOVER-01.md) |
