@@ -128,7 +128,7 @@
             "required": ["protocol_id", "start_day"],
             "additionalProperties": false,
             "properties": {
-              "protocol_id": {"type": "string", "pattern": "^SOP-[0-9]{3}$"},
+              "protocol_id": {"type": "string", "pattern": "^SOP-[0-9]{3}(-[A-Z]+)?$"},
               "start_day": {"type": "integer", "minimum": 0},
               "end_day": {"type": ["integer", "null"], "minimum": 0},
               "calendar": {"type": "string"}
