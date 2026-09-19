@@ -2,7 +2,7 @@
 **Date:** 2026-09-19
 **Commit:** 46cff41
 **Pathogens:** norwalk_gi
-**Status:** open — design frozen, cells not yet run
+**Status:** open
 
 Swept-α axis on the classic hull: is the *expectation* wrong? `NORO-SUSCEPT-02`
 closed the chain and the host set — credited dose and evaluated hazard are
