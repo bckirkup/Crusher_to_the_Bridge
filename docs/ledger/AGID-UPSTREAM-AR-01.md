@@ -1,7 +1,7 @@
 # AGID-UPSTREAM-AR-01
 **Date:** 2026-09-19
 **Commit:** e53a73c
-**Pathogens:** sars_cov_2_respiratory, norovirus_gii4
+**Pathogens:** sars_cov2_resp, norwalk_gi
 **Status:** measured
 **Measured at:** e53a73c
 
