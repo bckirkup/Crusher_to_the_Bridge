@@ -3,7 +3,7 @@
 > **Status:** Handoff record (2026-09-19), authored against `main` after #609
 > merged; amended at `main` = `46cff41` with §7 (the v8 probe result) and §8 (the
 > merged, unsubmitted v9 screen and the state of its preflight gate) — read §8
-> before acting on §4. It states where the Theta calibration stands, what is declared but
+> before acting on §4; §9 records the v9 preflight and the running array. It states where the Theta calibration stands, what is declared but
 > not yet run, and what must not be reopened. It reports no new numbers: every
 > figure it refers to is quoted from the ledger entry or readout that measured
 > it, with that entry's own `Measured at` SHA. Nothing here is a fit.
@@ -253,3 +253,38 @@ exists (§6).
 Stage 1b, if stage 1 admits anything: half-decade steps spanning the admitted
 band plus one half decade beyond each edge, 40 seeds, the six v8 incubation points
 restored, declared in its own design file before its cells run.
+
+## 9. v9 submitted (2026-09-19, `main` = `0fb186b`)
+
+The preflight gate was run from the top and the array is out. Recorded here at
+submit time so that nothing about the running job lives only in a conversation:
+
+- **Smoke (step 1):** one v9 cell (index 0, Θ 1e1, age 3.3 d) run locally for 48
+  epochs through `run_cell`; `theta` and `infection_age_days` read back from the
+  payload's `cell` block, `index_onset_day == -1.0`, `index_shedding_at_day0`
+  true, `index_departed_epoch == 120`, `observables.recorded_onsets` present.
+  Focused tests (`-k "covid_boarding_screen or theta_screen"`): 32 passed.
+- **Count (step 2):** `enumerate_cells` on the design → **600**; the submit
+  script printed `array size : 600`.
+- **Image and job definition (step 3):** root `Dockerfile` (which does not copy
+  `deploy/aws/`) layered with `deploy/aws/Dockerfile.covid_hull`, as for v7;
+  `ENGINE_GIT_SHA` = `0fb186b`. ECR `picard-campaign:theta-screen-v9-0fb186b`,
+  digest `sha256:85936b12231738770db3bed90e0e3bdcf626c840e617efcc783c3b3a0ad22aa0`,
+  confirmed to contain the v9 design. Job definition
+  `picard-covid-boarding-screen:7`, image pinned to that digest, 1 vCPU / 2048 MB.
+- **Prefix (step 4):** `s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v9/`
+  (`cells/<key>.json`, one per cell); empty before the canary.
+- **Canary (step 5):** cell 420 (Θ 1e8, age 3.3 d, seed 20200205) as a single
+  non-array job, `1b2e8e89-ea19-4eca-81dc-11bd67003246`, SUCCEEDED in ~19 min.
+  Batch strips `AWS_BATCH_*` environment overrides, so the index was set inside a
+  `python3 -c` command override (first attempt `cc510936-…` failed on
+  `AWS_BATCH_JOB_ARRAY_INDEX is required`). Payload: Θ 1e8 read back, invariant
+  holds exactly, attack 0.891, 3,072 recorded onsets — non-degenerate and
+  consistent with the §7 probes above 1e7.
+- **Array (step 6):** parent job **`913e36b9-bad2-4f65-a1c6-9ea450bb395e`**,
+  `picard-theta-screen-v9-0fb186b`, 600 children, stride 1, queue
+  `picard-campaign-queue`, compute environment `picard-abm-campaign-spot`
+  (Spot, max 256 vCPU). ETA at submit: ~3 waves × ~19 min ≈ 1–1.5 h.
+
+Merge command when complete:
+`python3 tools/fit_covid_theta.py screen --design picard_framework/runs/covid_theta_screen_v9_design.json --cells <synced cells dir> --out <surface json>`.
