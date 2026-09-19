@@ -455,19 +455,19 @@ class TestDefaultOff:
             pathogen_profiles={},
         )
         # Default mode: instrument exists but the mode is none -> no call.
-        *_, ww_ht = run_observation_sampling(
+        ww_ht = run_observation_sampling(
             cfg={"observation": {"enabled": True}}, **common,
-        )
+        ).wastewater_ht
         assert ww_ht is None
         obs.wastewater_assay.assay.assert_not_called()
         # holding_tank mode with tx_core=None degrades to no record.
-        *_, ww_ht = run_observation_sampling(
+        ww_ht = run_observation_sampling(
             cfg={
                 "observation": {
                     "enabled": True, "wastewater_assay_mode": "holding_tank",
                 },
             },
             **common,
-        )
+        ).wastewater_ht
         assert ww_ht is None
         obs.wastewater_assay.assay.assert_not_called()

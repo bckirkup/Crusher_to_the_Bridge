@@ -1170,7 +1170,7 @@ class TestObservationEnabledGate:
 
         engine = MagicMock()
         obs = MagicMock()
-        air, swab, ww, rdt, qpcr, micro, lr, lr_count, ww_ht = run_observation_sampling(
+        results = run_observation_sampling(
             epoch=1,
             obs=obs,
             agents=[],
@@ -1185,14 +1185,15 @@ class TestObservationEnabledGate:
             pathogen_profiles={},
             cfg={"observation": {"enabled": False}},
         )
-        assert air == {}
-        assert swab == {}
-        assert ww == {}
-        assert rdt == {}
-        assert qpcr == {}
-        assert micro == {}
-        assert lr == {}
-        assert lr_count == 0
+        assert results.air == {}
+        assert results.swab == {}
+        assert results.ww == {}
+        assert results.clin_rdt == {}
+        assert results.clin_qpcr == {}
+        assert results.clin_microbio == {}
+        assert results.long_read == {}
+        assert results.long_read_ordered_count == 0
+        assert results.wastewater_ht is None
         obs.air_sniffer.sample_all_zones.assert_not_called()
 
     def test_enabled_sensitivity_invokes_air_sniffer(self) -> None:
@@ -1229,13 +1230,13 @@ class TestObservationEnabledGate:
             pathogen_profiles={},
         )
         obs_on = _make_obs()
-        air_on, *_ = run_observation_sampling(
+        air_on = run_observation_sampling(
             obs=obs_on, cfg={"observation": {"enabled": True}}, **common,
-        )
+        ).air
         obs_off = _make_obs()
-        air_off, *_ = run_observation_sampling(
+        air_off = run_observation_sampling(
             obs=obs_off, cfg={"observation": {"enabled": False}}, **common,
-        )
+        ).air
         assert air_on != air_off
         assert "Bridge" in air_on
         assert air_off == {}

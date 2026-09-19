@@ -151,6 +151,22 @@ class ObservationEngine:
     outbreak_aware: bool = False
 
 
+@dataclass
+class ObservationResults:
+    """Delivered instrument results for one epoch (turnaround already applied)."""
+
+    air: dict[str, dict[str, Any]] = field(default_factory=dict)
+    swab: dict[str, dict[str, Any]] = field(default_factory=dict)
+    ww: dict[str, dict[str, Any]] = field(default_factory=dict)
+    clin_rdt: dict[int, dict[str, Any]] = field(default_factory=dict)
+    clin_qpcr: dict[int, dict[str, Any]] = field(default_factory=dict)
+    clin_microbio: dict[int, dict[str, Any]] = field(default_factory=dict)
+    long_read: dict[str, dict[str, Any]] = field(default_factory=dict)
+    long_read_ordered_count: int = 0
+    wastewater_ht: dict[str, Any] | None = None
+    cascade: dict[str, Any] | None = None
+
+
 # ── Protocol engine bundle ───────────────────────────────────────────────
 
 @dataclass

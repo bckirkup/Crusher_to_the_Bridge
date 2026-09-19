@@ -58,6 +58,7 @@ from orchestrator_types import (
     STATUS_RANK,
     STATUS_SUSPECTED,
     ObservationEngine,
+    ObservationResults,
     ProtocolContext,
     SimulationState,
 )
@@ -709,27 +710,13 @@ def run_observation_sampling(
     cfg: dict[str, Any],
     strain_registry: StrainRegistry | None = None,
     tx_core: TransmissionCore | None = None,
-) -> tuple[
-    dict[str, dict[str, Any]],
-    dict[str, dict[str, Any]],
-    dict[str, dict[str, Any]],
-    dict[int, dict[str, Any]],
-    dict[int, dict[str, Any]],
-    dict[int, dict[str, Any]],
-    dict[str, dict[str, Any]],
-    int,
-    dict[str, Any] | None,
-]:
+) -> ObservationResults:
     """Run all six observation instruments for a single epoch.
 
-    Returns (air_results, swab_results, ww_results,
-             clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-             long_read_results, long_read_ordered_count,
-             wastewater_holding_tank_result).
     Delivered results respect instrument turnaround; stoplights use delivered only.
     """
     if not cfg.get("observation", {}).get("enabled", True):
-        return ({}, {}, {}, {}, {}, {}, {}, 0, None)
+        return ObservationResults()
 
     from crusher_labs.instrument_turnaround import (
         merge_released_into_observation,
@@ -903,12 +890,16 @@ def run_observation_sampling(
         if long_read_results:
             obs.notebook.log_long_read_verification(epoch, long_read_results)
 
-    return (
-        air_results, swab_results, ww_results,
-        clin_rdt_results, clin_qpcr_results, clin_microbio_results,
-        long_read_results,
-        long_read_ordered_count,
-        wastewater_ht_result,
+    return ObservationResults(
+        air=air_results,
+        swab=swab_results,
+        ww=ww_results,
+        clin_rdt=clin_rdt_results,
+        clin_qpcr=clin_qpcr_results,
+        clin_microbio=clin_microbio_results,
+        long_read=long_read_results,
+        long_read_ordered_count=long_read_ordered_count,
+        wastewater_ht=wastewater_ht_result,
     )
 
 
