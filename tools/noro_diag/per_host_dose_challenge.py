@@ -96,6 +96,11 @@ from engines import natural_history as natural_history_module  # noqa: E402
 from engines import transmission_core as tc  # noqa: E402
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    resolve_child_path,
+    validated_open,
+)
 from simulation_utils.platform_complement import declared_total  # noqa: E402
 
 # Frailties for hosts the engine never challenged are not in the run: the
@@ -827,11 +832,17 @@ def run_seed(
     # the summary: a full 1,910 x 288 row dump is not needed to show what one
     # heavily dosed host's epochs looked like.
     top_ids = set(range(top_hosts))
-    with tempfile.TemporaryDirectory() as tmp:
-        spec_path = Path(tmp) / "run_spec.json"
-        spec_path.write_text(json.dumps(spec_dict), encoding="utf-8")
+    # The spec path lives under the repository root, not /tmp, because
+    # validated_open refuses publicly writable targets; the directory is
+    # still a fresh private TemporaryDirectory.
+    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+        spec_path = resolve_child_path(tmp, "run_spec.json")
+        with validated_open(
+            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(spec_dict))
         picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), str(spec_path),
+            str(REPO_ROOT), spec_path,
         )
         with instrumented(rec, top_ids):
             result = ShipSimulation(picard_spec, display=False).run()
@@ -898,7 +909,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    args.out.mkdir(parents=True, exist_ok=True)
+    out_dir = Path(
+        prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
+    )
     for seed in args.seeds:
         summary = run_seed(
             seed=seed,
@@ -908,7 +921,9 @@ def main(argv: list[str] | None = None) -> int:
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
         )
-        path = args.out / f"per_host_dose_challenge_seed{seed}.json.gz"
+        path = resolve_child_path(
+            str(out_dir), f"per_host_dose_challenge_seed{seed}.json.gz",
+        )
         with gzip.open(path, "wt", encoding="utf-8") as handle:
             json.dump(summary, handle, indent=1)
         print_summary(summary)
