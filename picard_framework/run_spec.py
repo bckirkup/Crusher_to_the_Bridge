@@ -18,7 +18,7 @@ from simulation_utils import asset_defaults
 from simulation_utils.paths import REPO_ROOT, load_validated_json
 from telemetry_buffer.schema import telemetry_dir
 
-_CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
+CRUSHER_CONFIG_REL = os.path.join("crusher_labs", "config.yaml")
 
 HistoryRetention = Literal["full", "compact"]
 _VALID_HISTORY_RETENTION = frozenset({"full", "compact"})
@@ -134,7 +134,7 @@ class PicardRunSpec:
         catalog: CatalogRegistry | None = None,
     ) -> PicardRunSpec:
         if config_yaml is None:
-            config_yaml = os.path.join(repo_root, _CRUSHER_CONFIG_REL)
+            config_yaml = os.path.join(repo_root, CRUSHER_CONFIG_REL)
         cfg = load_config(config_yaml)
         reg = catalog or CatalogRegistry.from_repo(repo_root)
 
@@ -220,10 +220,10 @@ class PicardRunSpec:
                 else os.path.join(repo_root, legacy_yaml)
             )
             legacy_cfg = load_config(yaml_path)
-        elif os.path.isfile(os.path.join(repo_root, _CRUSHER_CONFIG_REL)):
+        elif os.path.isfile(os.path.join(repo_root, CRUSHER_CONFIG_REL)):
             from crusher_labs import load_config
             legacy_cfg = load_config(
-                os.path.join(repo_root, _CRUSHER_CONFIG_REL),
+                os.path.join(repo_root, CRUSHER_CONFIG_REL),
             )
             ship_graph = legacy_cfg.setdefault("ship_graph", {})
             ship_graph["spatial_layout"] = os.path.relpath(

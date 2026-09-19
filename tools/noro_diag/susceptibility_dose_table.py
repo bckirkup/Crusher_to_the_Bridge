@@ -21,8 +21,8 @@ bility``) and applies ``1 - exp(-s * D)`` (``_dose_response_hazard``), so the
 
 Inputs
 ------
-Read from ``data/pathogens/active_profiles.json`` (no overrides, no RNG state
-from a run): ``dose_response.alpha`` and ``dose_response.beta`` for the
+Read from the ``--bundle`` pathogen bundle (no overrides, no RNG state from a
+run): ``dose_response.alpha`` and ``dose_response.beta`` for the
 ``--pathogen`` profile id. Optional ``--total-dose`` and ``--hazard-sum``
 enable check 3; ``--hosts`` sets the complement used for the per-host mean.
 
@@ -56,27 +56,23 @@ parameter value: it reports what the shipped pair implies.
 from __future__ import annotations
 
 import argparse
-import json
 import math
+import sys
 from pathlib import Path
 
 import numpy as np
 from scipy.stats import beta as beta_dist
 
-PROFILES = Path(__file__).resolve().parents[2] / "data/pathogens/active_profiles.json"
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from simulation_utils import asset_defaults  # noqa: E402
+from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
+
 QUANTILES = (0.01, 0.05, 0.10, 0.25, 0.50, 0.75, 0.90, 0.95, 0.99, 0.999)
 HOST_COUNTS = (1, 2, 5, 10, 50, 200, 1910)
 REPLICATES = 20_000
-
-
-def load_dose_response(pathogen_id: str) -> tuple[float, float]:
-    """Return the shipped ``(alpha, beta)`` for one pathogen profile."""
-    profiles = json.loads(PROFILES.read_text())["pathogens"]
-    for profile in profiles:
-        if profile.get("pathogen_id") == pathogen_id:
-            dose_response = profile["dose_response"]
-            return float(dose_response["alpha"]), float(dose_response["beta"])
-    raise SystemExit(f"no profile with pathogen_id {pathogen_id!r}")
 
 
 def quantile_table(alpha: float, beta: float) -> None:
@@ -130,6 +126,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--pathogen", default="norwalk_gi")
     parser.add_argument(
+        "--bundle", default=asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID)
+    parser.add_argument(
         "--doses",
         default="206,1500,15000,17211,49572",
         help="comma-separated doses in GEC for the population table",
@@ -139,7 +137,7 @@ def main() -> None:
     parser.add_argument("--hosts", type=int, default=1910)
     args = parser.parse_args()
 
-    alpha, beta = load_dose_response(args.pathogen)
+    alpha, beta = load_dose_response(args.pathogen, args.bundle)
     quantile_table(alpha, beta)
     population_table(alpha, beta, [float(d) for d in args.doses.split(",")])
     if args.total_dose is not None and args.hazard_sum is not None:
