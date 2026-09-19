@@ -98,17 +98,15 @@ held-out `covid.H3` fleet shape, which may refuse a Theta but may never pick
 among admitted ones) and 3 (the held-out Greg Mortimer hull) are declared in the
 same file and gated on a non-empty stage-1 shortlist.
 
-**Next actions, in order.** (1) Confirm on one real cell that
-`index_onset_day == -1.0` and `index_shedding_at_day0` is true — three local
-probe cells (Theta 1e7/age 3.3, 1e10/age 15.6, 3.16e8/age 6.8, one seed each
-through `simulate_screen_cell`) were launched at this handoff and had not
-returned; they are cheap to rerun and the design is not smoke-confirmed
-end-to-end until one has. (2) Build a new campaign image from a `main` that
-contains the v8 design file — the design must be *inside* the image — and
-submit the 1,680-cell array per `.agents/skills/aws-batch-campaign/SKILL.md`
-with `DESIGN=covid_theta_screen_v8`. (3) Merge with
-`tools/fit_covid_theta.py screen` and write the readout as a ledger entry before
-interpreting anything.
+**Next actions, in order — revised by §7, read it first.** (1) Declare the
+downward recentring screen: the probes say the v8 grid's floor is already in
+saturation, so `covid_theta_screen_v8` should not be submitted as declared.
+(2) Build a campaign image from a `main` containing the successor design — the
+design must be *inside* the image — and submit per
+`.agents/skills/aws-batch-campaign/SKILL.md` with `DESIGN=<successor>`.
+(3) Merge with `tools/fit_covid_theta.py screen` and write the readout as a
+ledger entry before interpreting anything, reporting the per-seed onset
+distribution next to the T1 interval (§7).
 
 ## 5. Where the artifacts live
 
@@ -123,9 +121,9 @@ Durable, and all a successor needs:
   submission needs a new image tag off a `main` containing the v8 design.
 
 Nothing in a home directory or `/tmp` on this session's box is required: local
-synced copies of the v7 results and the throwaway probe driver are reproducible
-from the S3 prefix and from the commands in §4 respectively, and no result,
-design, criterion or measurement exists only there.
+synced copies of the v7 results are reproducible from the S3 prefix, the probe
+driver is reproduced verbatim in §7, and no result, design, criterion or
+measurement exists only there.
 
 ## 6. Do not reopen
 
@@ -138,3 +136,59 @@ design, criterion or measurement exists only there.
   (`.agents/skills/model-parameter-provenance/SKILL.md`).
 - The index infection age is the record's unobserved coordinate: it is screened
   and reported, never chosen by which value reproduces an anchor.
+
+## 7. The v8 smoke probes, and why the array did not go out
+
+The three probe cells were rerun at `main` = `4721b5b` and all three completed.
+Full results and their reading are in `docs/ledger/THETA-SCREEN-V8.md`; in short:
+
+- **The invariant holds exactly** — `index_onset_day == -1.0`,
+  `index_shedding_at_day0` true, `index_departed_epoch` 120 (day 5) in every
+  cell. SEED-ONSET-01 does what it declares, and the defect that emptied v7
+  cannot recur.
+- **Every cell burns the ship** — 2,843–3,099 recorded onsets of 3,711 against
+  `covid.T1`'s 197, *including* the Theta 1e7 floor of the grid. One seed drives
+  all three, but v7's 40-seed cells agree wherever its index happened to be
+  symptomatic aboard (median attack 0.709 at Theta 1e7, age 11 d). So the quiet
+  region of the v7 surface was quiet because the index usually never became
+  infectious aboard — not because Theta was small.
+- **Therefore the v8 grid is mis-centred**, floor above the near-critical band
+  rather than below it, and an admissible Theta (if any) lies below 1e7 where no
+  screen has been. Submitting 1,680 cells as declared would buy saturation. The
+  successor should declare a coarse wide downward screen first, with `covid.T1`
+  and the invariant verbatim.
+- **`covid.T1` as declared is weaker than it looks**: all eleven v7 T1-passing
+  cells passed by spanning 197 between an extinction floor (p10 = 0) and a burn
+  ceiling, not by putting mass near 197. Report the per-seed distribution beside
+  the interval from now on; tighten the criterion only in a design file, before
+  cells run.
+
+Probe payloads are at `/home/ubuntu/campaign_results/v8_probe_{low,high,mid}.json`
+on the session box, which a successor should not rely on — the numbers that
+matter are in the ledger entry, and the driver is reproduced here so the cells
+can be rerun anywhere (~67 min each locally three-up, ~9 min on a Spot worker):
+
+```python
+import json, sys, time
+from picard_framework.covid_boarding_screen import (
+    ScreenCell, load_design, simulate_screen_cell,
+)
+th, age = float(sys.argv[1]), float(sys.argv[2])
+d = load_design('picard_framework/runs/covid_theta_screen_v8_design.json')
+cell = ScreenCell(index=0, scenario_id='diamond_princess_2020', theta=th,
+                  infection_age_days=age, imports=1, seed=20200205)
+t0 = time.time()
+p = simulate_screen_cell(d, cell)
+out = {k: p[k] for k in ('index_onset_day', 'index_shedding_at_day0',
+                         'index_departed_epoch', 'attack_rate',
+                         'infections_total', 'aboard_total',
+                         'vsp_reported_case_fraction_max')}
+out['recorded_onsets'] = p['observables']['recorded_onsets']
+out['minutes'] = round((time.time() - t0) / 60, 1)
+print(json.dumps(out))
+```
+
+Run from the repository root with `PYTHONPATH=.`, one shell per cell, at
+(1e7, 3.3), (1e10, 15.6) and (316227766.01683795, 6.8). Redirect each to a file:
+the first attempt was lost with a session restart because the results only ever
+existed in shell buffers.
