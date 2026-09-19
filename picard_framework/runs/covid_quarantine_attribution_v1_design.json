@@ -52,10 +52,24 @@
       "role": "counterfactual: both structural channels removed",
       "overrides": {"scheduled_protocol_id": "SOP-017-ALLHANDS", "pathogen_pool_transport": "none"},
       "note": "Declared because channel contributions are not additive in a saturating epidemic: A0 - A1 - A2 does not measure the interaction. If A4 still burns, neither channel is the load-bearing one and the residual is cabin-mate and within-compartment contact, which is the next thing to instrument."
+    },
+    {
+      "arm_id": "A5_all_shared_air_off",
+      "role": "counterfactual: every shared-air dose term removed, leaving contact and fomite",
+      "overrides": {
+        "pathogen_pool_transport": "none",
+        "near_field_air_mode": "off",
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.0,
+          "hvac_airborne": 0.0
+        }
+      },
+      "note": "The upstream-shaped arm, declared on the evidence in ledger AGID-UPSTREAM-AR-01. The published AGID engine (bckirkup/infection-dynamics 8d159f4) has no active environmental route at all: particle creation in Agent.java:455-461 and ViralParticle.java's infection block are both commented out, exposure is a 0.1524 m proximity query capped at 1-2 targets per shedder per 20 minutes, and the infection decision is the deterministic threshold infProb > 0.5 on the SOURCE's shedding. Its attack rate is therefore a contact-opportunity count that pathogen quantity cannot move, which is why it can sit at 18.6% with no arrest layer. This port instead sums per-agent dose across contact, cabin/near-field air, HVAC pool and fomite into one exponential hazard draw, so occupants of one air volume receive a near-uniform dose and cross the hazard together. A5 removes exactly the terms that make the dose shared: droplet and hvac_airborne efficiency to zero, the near field off, the pool untransported. It is NOT a proposed configuration and may never score an anchor - the airborne routes are declared for SARS-CoV-2 in data/pathogens/active_profiles.json and removing them is physically false. It exists to test one thing: whether an intermediate attack rate is reachable in this engine at all once the shared-air terms are gone. If A5 is the only arm that produces one, the bimodality measured in THETA-SCREEN-V9 is a property of the air model rather than of Theta or of the response layer.",
+      "override_wiring_note": "profile_route_efficiency_multipliers is a pathogen-PROFILE field (route_efficiency_multipliers on the sars_cov_2_respiratory entry, keys per PATHWAY_EFFICIENCY_KEYS in engines/transmission_core.py:706-715), not a top-level transmission override. The worker must apply it as a profile override and the smoke must prove the droplet and hvac_airborne dose accumulators read zero in the payload, because a silently ignored profile key would present as 'the air routes do not matter'."
     }
   ],
-  "cells": 200,
-  "cells_note": "2 Theta x 5 arms x 20 seeds. The age and import axes are single-valued.",
+  "cells": 240,
+  "cells_note": "2 Theta x 6 arms x 20 seeds. The age and import axes are single-valued.",
   "takeoff_recorded_onsets": 10,
   "cell_payload_additions": {
     "note": "v9's fields are retained verbatim so the two surfaces read the same way. The additions below exist because the v9 payload cannot answer where a post-quarantine infection happened, which is the whole question here.",
@@ -80,13 +94,14 @@
     "It cannot produce a fitted Theta, and no Theta on this surface may be quoted as one.",
     "It cannot score covid.T1 or covid.T3: the counterfactual arms are not the declared scenario, and A0 alone adds nothing to v9.",
     "It cannot tell us whether the model's confinement is quantitatively right, only which channel dominates while confinement is in force. Whether a confined DP passenger really received that dose is a parameter-provenance question about the cabin compartment and the mess near field, and belongs to .agents/skills/model-parameter-provenance.",
-    "It says nothing about the fleet distribution; covid.H3 placement is a separate design (covid_fleet_placement_v1)."
+    "It says nothing about the fleet distribution; covid.H3 placement is a separate design (covid_fleet_placement_v1).",
+    "It cannot inherit the upstream AGID attack-rate fit as validation of anything here. Per ledger AGID-UPSTREAM-AR-01, upstream's 18.6% Diamond Princess run carries no arrest layer while DP's observed 19.2% is a post-quarantine outcome, and upstream's own Isolation arm on the same parameterisation lands at 4% - so the historically correct configuration undershoots DP five-fold there. A5 reproduces the SHAPE of the upstream dose construction, not its parameters, and a match in A5 would be a statement about this engine's air model, not a replication of that paper."
   ],
   "execution": {
     "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_quarantine_attribution_v1. The image must be built from a main that contains this design file: the design is read inside the container.",
-    "stage_1_cells": 200,
+    "stage_1_cells": 240,
     "stride": 1,
     "expected_cell_minutes": 30,
-    "gate": ".agents/skills/campaign-preflight: local smoke proving each arm's override reaches the engine and changes the run (an arm whose override does not alter the payload is a wiring defect, not a null result), --dry-run count = 200, explicit job-definition revision and image digest, one canary child read out and reported before the array is submitted."
+    "gate": ".agents/skills/campaign-preflight: local smoke proving each arm's override reaches the engine and changes the run (an arm whose override does not alter the payload is a wiring defect, not a null result), --dry-run count = 240, explicit job-definition revision and image digest, one canary child read out and reported before the array is submitted."
   }
 }

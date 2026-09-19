@@ -354,3 +354,33 @@ Do not re-derive: the v9 surface
 (`docs/covid/covid_theta_screen_v9_surface.csv`) is the settled input for both
 designs' Diamond Princess side, and no DP cells need re-running for the
 placement test.
+
+## 12. The predecessor comparison, and the arm it added
+
+Ledger `AGID-UPSTREAM-AR-01` settles a question that had been carried as an
+assumption: whether the upstream Korkin-lab model fit the Diamond Princess
+attack rate. It did report one (18.6% against 19%, RMSE 23.73 on the daily
+series, PNAS 10.1073/pnas.2422574123), but with no arrest layer against an
+observation that had one, and its own Isolation arm on the same parameterisation
+lands at 4%. Reading the published source (`bckirkup/infection-dynamics`
+`8d159f4`) shows why the two engines cannot fail the same way: upstream has no
+active environmental route at all, caps infection at one to two 15-cm proximity
+targets per shedder per 20 minutes, and decides infection by a deterministic
+`infProb > 0.5` on the source's own shedding — an attack rate that is a
+contact-opportunity count, insensitive to pathogen quantity above threshold and
+with no analogue of Θ. This port sums shared-air dose per agent into one
+exponential hazard, which is the construction that produces the v9 bimodality.
+
+That comparison added arm `A5_all_shared_air_off` to
+`covid_quarantine_attribution_v1` (now 240 cells, six arms): droplet and
+`hvac_airborne` route efficiency zeroed, near field off, pool untransported —
+the upstream-shaped configuration, physically false and barred from scoring any
+anchor. It is the decisive arm. If an intermediate attack rate is reachable only
+there, the missing intermediate band is a property of this engine's air model,
+and neither Θ nor the response layer is the thing to change next.
+
+The successor's wiring list in §11 therefore grows one item: the A5 override is
+a pathogen-*profile* field (`route_efficiency_multipliers` on
+`sars_cov_2_respiratory`), not a top-level transmission override, and the smoke
+must prove the droplet and `hvac_airborne` accumulators read zero — a silently
+ignored profile key would present as "the air routes do not matter".

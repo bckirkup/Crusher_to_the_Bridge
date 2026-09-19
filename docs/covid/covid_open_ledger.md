@@ -68,6 +68,22 @@ The infection-age component of the geometry is NOT resolved: the seed still
 arrives at declared age 0, and the infection-age × Θ screen remains open in
 §3.
 
+**The upstream AGID attack-rate fit may not be quoted as validation of this
+port's arrest layer or dose scale.** Ledger `AGID-UPSTREAM-AR-01` settles the
+provenance question: the upstream paper (PNAS 10.1073/pnas.2422574123) does
+report a Diamond Princess fit — 18.6% against the observed 19%, RMSE 23.73 on
+the daily series — but that run carries no arrest layer, while DP's 19.2% is a
+post-quarantine outcome, and upstream's own Isolation arm on the same
+parameterisation lands at 4%. The published engine
+(`bckirkup/infection-dynamics` `8d159f4`) also has no active environmental
+route, caps transmission at one to two proximity targets per shedder per 20
+minutes, and decides infection by a deterministic `P > 0.5` threshold on the
+source's shedding, so its attack rate is a contact-opportunity count that
+pathogen quantity cannot move. Neither its fit nor its calibration transfers to
+a summed-dose engine with shared-air routes. The same applies to the VSP-shadow
+monograph (`docs/reports/05_vsp.tex`), whose attack-rate band is post-response
+norovirus at `dose_adjustment` 10.6, not a COVID fit.
+
 ## 2. Last measurement of record
 
 `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
