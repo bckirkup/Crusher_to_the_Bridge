@@ -32,7 +32,7 @@ from typing import Any
 import numpy as np
 
 from engines.infection_dynamics_bridge import ever_presented
-from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS
+from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS, TransmissionCore
 from picard_framework.covid_fit_targets import load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
 from picard_framework.covid_theta_fit import (
@@ -448,7 +448,7 @@ class QuarantineAttributionLedger:
             self._seen_targets.add(target)
             self.events.append({
                 "epoch": int(ev.epoch),
-                "zone": ev.zone,
+                "zone": TransmissionCore.compartment_parent(ev.zone),
                 "pathway": ev.pathway,
                 "target_agent_id": int(target),
                 "confined": target in quarantined,
@@ -545,9 +545,7 @@ def _quarantine_window(raw: dict[str, Any]) -> tuple[dict[str, Any], int, int | 
         .get("protocols", [])
     )
     for entry in protocols:
-        # The scheduled quarantine is whatever SOP-017 (or the arm's swap)
-        # declared; take the entry in that slot by window, not by name, so a
-        # renamed ALLHANDS entry reads identically.
+        # SOP-017 or an arm's renamed copy of it (same window).
         if entry.get("protocol_id", "").startswith(QUARANTINE_PROTOCOL_ID):
             end = entry.get("end_day")
             return (
