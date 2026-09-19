@@ -221,6 +221,114 @@ def test_v7_design_loads_and_enumerates_the_declared_screen():
     assert len({c.key for c in cells}) == 3080
 
 
+V8_DESIGN_REL = REPO_ROOT / "picard_framework" / "runs" / "covid_theta_screen_v8_design.json"
+
+
+def test_v8_design_is_the_declared_refinement_screen():
+    """v8 re-screens the v7 near-critical corner under a declared onset.
+
+    The design is a point-list refinement because the paired baseline
+    (infection age 0, one import) became a contradiction under
+    SEED-ONSET-01 — onset day -1.0 at age 0 implies a negative incubation.
+    """
+    import json
+
+    design = load_design(str(V8_DESIGN_REL))
+    assert design.design_id == "covid_theta_screen_v8"
+    assert design.scenario_id == "diamond_princess_2020"
+    assert design.is_refinement
+    assert design.parent_design == "covid_theta_screen_v7"
+    cells = enumerate_cells(design)
+    assert len(cells) == 1680
+    assert len({c.key for c in cells}) == 1680
+    assert design.thetas == (
+        1e7, 31622776.60168379, 1e8, 316227766.01683795,
+        1e9, 3162277660.1683793, 1e10,
+    )
+    assert design.infection_age_days == (3.3, 4.8, 6.8, 9.8, 12.8, 15.6)
+    raw = json.loads(V8_DESIGN_REL.read_text(encoding="utf-8"))
+    assert raw["admissibility"]["declared_before_running"] is True
+
+
+def test_v8_axis_cannot_reintroduce_the_baseline_contradiction():
+    """Every declared point's implied incubation is positive and inside
+    the profile's shedding window, and age 0 is off the axis: under the
+    declared onset_day = -1.0 the v7 root-grid baseline would be a
+    load-time refusal, so a future axis edit fails loudly instead of
+    silently screening a nonsense cell."""
+    import json
+
+    from engines.initiation import apply_explicit_seeds, resolve_initiation_plan
+
+    raw = json.loads(V8_DESIGN_REL.read_text(encoding="utf-8"))
+    ages = raw["infection_age_days"]
+    assert 0.0 not in ages
+
+    onset_day = -1.0  # the scenario's declared index onset (SEED-ONSET-01)
+    profile = json.loads(
+        (REPO_ROOT / "data" / "pathogens" / "active_profiles.json").read_text(
+            encoding="utf-8",
+        ),
+    )
+    sars = next(
+        p for p in profile["pathogens"] if p["pathogen_id"] == "sars_cov2_resp"
+    )
+    shedding_window = float(
+        sars.get("shedding_duration_days", sars["recovery_day"])
+    )
+    for age in ages:
+        incubation = age + onset_day
+        assert 0.0 < incubation < shedding_window, (
+            f"age {age} implies incubation {incubation} d, outside "
+            f"(0, {shedding_window})"
+        )
+
+    # And the refused cell itself: the root-grid baseline (age 0) with the
+    # declared onset is a contradiction, so applying it raises rather than
+    # screening a host whose onset precedes its acquisition.
+    import numpy as np
+
+    from engines.infection_dynamics_bridge import KorkinAgent
+    from engines.sim_clock import SimClock
+
+    clock = SimClock(epoch_duration_hours=6.0, mode="hours")
+    agent = KorkinAgent(
+        agent_id=0, role="passenger", immune=False, home_zone="Z",
+        dining_zone="Z", work_zone="Z", free_zone="Z",
+        schedule=["Free"] * 4,
+    )
+    agent.clock = clock
+    agent.current_location = "Z"
+
+    class _Engine:
+        def __init__(self) -> None:
+            self.clock = clock
+            self.agents = [agent]
+            self.initiation_manifest = {}
+
+    plan = resolve_initiation_plan(
+        {
+            "initiation": {
+                "explicit_seeds": [
+                    {
+                        "pathogen": "sars_cov2_resp",
+                        "count": 1,
+                        "epoch": 0,
+                        "infection_age_days": 0.0,
+                        "onset_day": onset_day,
+                    },
+                ],
+            },
+        },
+        {"sars_cov2_resp": sars},
+    )
+    with pytest.raises(ValueError, match="onset"):
+        apply_explicit_seeds(
+            plan, _Engine(), 0, np.random.default_rng(0),
+            {"sars_cov2_resp": sars},
+        )
+
+
 def _v7_stub(cell: ScreenCell, onsets: int, *, boards_symptomatic: bool) -> dict:
     """A payload centred near ``onsets`` whose T1 interval contains it."""
     seed_jitter = (cell.seed % 3) - 1  # -1, 0, +1
