@@ -3876,6 +3876,35 @@ its stable ID; pull requests must not append numbered items.
     representation and is withdrawn. The magnitude of the correction for
     norovirus is unmeasured; no route share or anchor conclusion is restored.
 
+**`NORO-SUSCEPT-03`: the sourced α interval is excluded as the explanation for
+the absent onboard secondary transmission — the suspect is the dose reaching
+hosts.** α was swept over `[0.072, 0.161]` at β = 32.81, seeds 8105/8106,
+`classic_cruise_1900`, 288 epochs, as a declared axis on a diagnostic run;
+`data/pathogens/active_profiles.json` was not touched and no α is adopted.
+Zero secondaries in all 14 voyages, attack rate 0.0 everywhere, and the maximum
+summed evaluated hazard anywhere in the sweep is 1.186e-2 — 8.4× below the
+Marginal floor the entry froze before the cells ran. Mean host susceptibility
+moves only 2.2× end to end across the interval (measured), against
+`NORO-SUSCEPT-01` §4a's 7.0× on population N50; the shortfall is orders of
+magnitude, so the dose-response expectation is not what is wrong. This
+**restores nothing and withdraws nothing** recorded here: it is a capability
+bound on the interval, and it is measured on an engine still carrying every
+correction listed in §1, so the absent secondaries themselves remain
+attributable to those pending re-measurements as much as to dose delivery.
+
+**`RNG-FRAILTY-STREAM-01`: a dose-response arm cannot be seed-paired.** Host
+frailty is drawn from the run's one shared generator, and NumPy's rejection-
+based `Generator.beta` consumes a parameter-dependent number of words, so
+moving `dose_response.alpha` or `beta` re-phases every later draw in the run.
+In `NORO-SUSCEPT-03` this moved the emesis schedule and every fomite counter at
+a fixed seed, and spread total credited dose — which α cannot touch — over nine
+orders of magnitude. No figure recorded in this file is withdrawn by it (no
+earlier norovirus measurement varied α or β at fixed seed), and the
+`NORO-SUSCEPT-03` bound above survives it because each cell remains an
+internally consistent voyage; what is lost is the α-axis *shape*, not the
+magnitude. Any future α or β arm is unreadable until the entry's declared
+child-stream fix lands as its own labelled paired change.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

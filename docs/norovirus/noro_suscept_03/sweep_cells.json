@@ -1,0 +1,1905 @@
+{
+ "cells": [
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.072,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 261265,
+     "influenza_a": 201141,
+     "sars_cov2_resp": 444588
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 286.5736094760187,
+     "influenza_a": 147951.0413425978,
+     "sars_cov2_resp": 22164.07743983125
+    },
+    "pathway_calls": {
+     "direct_contact": 38684,
+     "droplet": 15993,
+     "fomite": 4863,
+     "emesis_aerosol": 1,
+     "hvac_airborne": 201724
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.5896738677051179,
+     "droplet": 0.0,
+     "fomite": 267.23916308514555,
+     "emesis_aerosol": 16.564330579761126,
+     "hvac_airborne": 2.180441943416703
+    },
+    "sum_credited_raw_gec": 97.05148745617245,
+    "sum_credited_scaled_gec": 19.99108872991377,
+    "sum_dose_read_at_challenge_gec": 19.99108872991377,
+    "sum_effective_dose_evaluated_gec": 19.99108872991377,
+    "sum_evaluated_hazard": 0.0003044105649609569
+   },
+   "joint": {
+    "hosts_credited_any_dose": 1435,
+    "hosts_with_evaluated_challenge": 1435,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 204617,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 39254,
+    "crediting_epochs_challenge_evaluated": 204617,
+    "challenge_exit_reasons": {
+     "evaluated": 204617,
+     "no_dose_this_epoch": 344503,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 1435,
+    "total_credited": 19.99108872991377,
+    "max_host": 19.27511700776831,
+    "max_host_share": 0.9641854562391035,
+    "hosts_for_50pct": 1,
+    "hosts_for_90pct": 1,
+    "hosts_for_95pct": 1,
+    "hosts_for_99pct": 2
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 1435,
+    "naive_hazard_engine_frailty_hosts": 0.00030441012423718865,
+    "naive_hazard_all_credited_hosts": 0.00030441012423718865
+   },
+   "frailty_drawn": {
+    "n": 1435,
+    "min": 1.8556822303947502e-57,
+    "p25": 5.967660368174502e-11,
+    "median": 8.404301279469655e-07,
+    "p75": 0.0003462819734604613,
+    "max": 0.10415123791182007,
+    "mean": 0.0025466368601171777
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 1.0,
+    "patch_mass_gec": 8515243.026809178,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 3.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0,
+    "emitting_hosts": 1.0,
+    "sweeps_with_filed_patch": 262.0,
+    "sweeps_with_matching_unit": 262.0,
+    "matched_unit_occupants": 524.0,
+    "matched_unit_susceptible": 262.0,
+    "patch_pickup_calls": 262.0,
+    "patch_pickup_dose_gec": 18734.7551535348,
+    "patch_pickups": 2.0
+   },
+   "emesis_unit_names": {
+    "filed_units": [
+     "CC_D1_F::cabin1581"
+    ],
+    "pickup_units": [
+     "CC_D1_A",
+     "CC_D1_A::cabin1338",
+     "CC_D1_A::cabin1357",
+     "CC_D1_A::cabin1398",
+     "CC_D1_A::cabin1412",
+     "CC_D1_A::cabin1429",
+     "CC_D1_A::cabin1443",
+     "CC_D1_A::cabin1470",
+     "CC_D1_A::cabin1492",
+     "CC_D1_A::cabin1538"
+    ],
+    "matched_units": [
+     "CC_D1_F::cabin1581"
+    ]
+   },
+   "fomite_witness": {
+    "max_hand_load_gec": 3935.0341761787904,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 36.0,
+    "surface_mass_deposited_gec": 838.1463866538328,
+    "hand_to_mouth_calls": 5066.0,
+    "hand_load_seen_gec": 25045.600553598975,
+    "hand_to_mouth_dose_gec": 279.03269801429104,
+    "deliver_calls": 1752.0,
+    "surface_mass_offered_gec": 137189210.1098967,
+    "mass_requested_gec": 18830.904321560774,
+    "mass_delivered_to_hands_gec": 18830.835092710324
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.072,
+    "alpha_resolved": 0.072,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.072
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.072,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 43016,
+     "influenza_a": 337845,
+     "sars_cov2_resp": 614880
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.014401572794145405,
+     "influenza_a": 101603.75018152819,
+     "sars_cov2_resp": 101432.53572805019
+    },
+    "pathway_calls": {
+     "direct_contact": 21638,
+     "droplet": 10155,
+     "fomite": 7859,
+     "food": 3364
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.001885507747473533,
+     "droplet": 0.0,
+     "fomite": 0.012333744486431666,
+     "food": 0.000182320560240294
+    },
+    "sum_credited_raw_gec": 0.004396515169593307,
+    "sum_credited_scaled_gec": 0.004159752416960925,
+    "sum_dose_read_at_challenge_gec": 0.004159752416960925,
+    "sum_effective_dose_evaluated_gec": 0.004159752416960925,
+    "sum_evaluated_hazard": 1.4291812709836477e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 438,
+    "hosts_with_evaluated_challenge": 438,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 10113,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 1436,
+    "crediting_epochs_challenge_evaluated": 10113,
+    "challenge_exit_reasons": {
+     "evaluated": 10113,
+     "no_dose_this_epoch": 539457,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 438,
+    "total_credited": 0.004159752416960925,
+    "max_host": 0.0004409283833761111,
+    "max_host_share": 0.10599870837943984,
+    "hosts_for_50pct": 11,
+    "hosts_for_90pct": 74,
+    "hosts_for_95pct": 106,
+    "hosts_for_99pct": 174
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 438,
+    "naive_hazard_engine_frailty_hosts": 1.4291808739424109e-05,
+    "naive_hazard_all_credited_hosts": 1.4291808739424109e-05
+   },
+   "frailty_drawn": {
+    "n": 438,
+    "min": 1.0448787857010606e-41,
+    "p25": 1.6777339883639038e-10,
+    "median": 1.0809379028903199e-06,
+    "p75": 0.00031011507736901237,
+    "max": 0.07940963366020906,
+    "mean": 0.0025765830799311497
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 9.0,
+    "surface_mass_deposited_gec": 2.1338217220553735,
+    "hand_to_mouth_calls": 7912.0,
+    "hand_load_seen_gec": 1.4183537748171418,
+    "hand_to_mouth_dose_gec": 0.01426558140932652,
+    "deliver_calls": 639.0,
+    "surface_mass_offered_gec": 4.056808962937268,
+    "mass_requested_gec": 1.2056381644712117,
+    "mass_delivered_to_hands_gec": 1.1908449028090966
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.072,
+    "alpha_resolved": 0.072,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.072
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.0898,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 56841,
+     "influenza_a": 201733,
+     "sars_cov2_resp": 439263
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 1.026070632227261e-07,
+     "influenza_a": 182543.17333809746,
+     "sars_cov2_resp": 57639.33431706739
+    },
+    "pathway_calls": {
+     "direct_contact": 40602,
+     "droplet": 13350,
+     "fomite": 2889
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 1.0260706322181936e-07,
+     "droplet": 0.0,
+     "fomite": 9.067270573676582e-19
+    },
+    "sum_credited_raw_gec": 3.5912472127908793e-08,
+    "sum_credited_scaled_gec": 7.113193072927985e-08,
+    "sum_dose_read_at_challenge_gec": 7.113193072927985e-08,
+    "sum_effective_dose_evaluated_gec": 7.113193072927985e-08,
+    "sum_evaluated_hazard": 9.122231424231324e-15
+   },
+   "joint": {
+    "hosts_credited_any_dose": 206,
+    "hosts_with_evaluated_challenge": 206,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 2587,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 447,
+    "crediting_epochs_challenge_evaluated": 2587,
+    "challenge_exit_reasons": {
+     "evaluated": 2587,
+     "no_dose_this_epoch": 546533,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 206,
+    "total_credited": 7.113193072927985e-08,
+    "max_host": 6.700912975425463e-08,
+    "max_host_share": 0.942040080555157,
+    "hosts_for_50pct": 1,
+    "hosts_for_90pct": 1,
+    "hosts_for_95pct": 2,
+    "hosts_for_99pct": 2
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 206,
+    "naive_hazard_engine_frailty_hosts": 9.122231424231307e-15,
+    "naive_hazard_all_credited_hosts": 9.122231424231307e-15
+   },
+   "frailty_drawn": {
+    "n": 206,
+    "min": 2.8385549704195637e-23,
+    "p25": 1.8068135138170072e-08,
+    "median": 8.254249533494065e-06,
+    "p75": 0.0006564187946461186,
+    "max": 0.06516011671940168,
+    "mean": 0.0031456480980079494
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 1.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 256.6540447671868,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 28.0,
+    "surface_mass_deposited_gec": 2.529452814004399e-16,
+    "hand_to_mouth_calls": 2974.0,
+    "hand_load_seen_gec": 0.017031885921827604,
+    "hand_to_mouth_dose_gec": 1.2372865392129174e-05,
+    "deliver_calls": 1542.0,
+    "surface_mass_offered_gec": 5.387840697688066e-15,
+    "mass_requested_gec": 4.760250949914372e-17,
+    "mass_delivered_to_hands_gec": 4.760250949914372e-17
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.0898,
+    "alpha_resolved": 0.0898,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.0898
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.0898,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 38039,
+     "influenza_a": 290072,
+     "sars_cov2_resp": 627138
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.0093842536277743,
+     "influenza_a": 135986.23028971365,
+     "sars_cov2_resp": 93682.75419927234
+    },
+    "pathway_calls": {
+     "direct_contact": 21073,
+     "droplet": 9947,
+     "fomite": 7019
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 2.1212512155319215e-05,
+     "droplet": 0.0,
+     "fomite": 0.00936304111561898
+    },
+    "sum_credited_raw_gec": 0.0028163367139400755,
+    "sum_credited_scaled_gec": 0.00260060798900496,
+    "sum_dose_read_at_challenge_gec": 0.00260060798900496,
+    "sum_effective_dose_evaluated_gec": 0.00260060798900496,
+    "sum_evaluated_hazard": 1.038141848519234e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 182,
+    "hosts_with_evaluated_challenge": 182,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 6177,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 933,
+    "crediting_epochs_challenge_evaluated": 6177,
+    "challenge_exit_reasons": {
+     "evaluated": 6177,
+     "no_dose_this_epoch": 543393,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 182,
+    "total_credited": 0.00260060798900496,
+    "max_host": 0.0002663742925465688,
+    "max_host_share": 0.10242769908912279,
+    "hosts_for_50pct": 13,
+    "hosts_for_90pct": 50,
+    "hosts_for_95pct": 67,
+    "hosts_for_99pct": 97
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 182,
+    "naive_hazard_engine_frailty_hosts": 1.038141523201108e-05,
+    "naive_hazard_all_credited_hosts": 1.038141523201108e-05
+   },
+   "frailty_drawn": {
+    "n": 182,
+    "min": 3.86307537915709e-26,
+    "p25": 6.402901656339554e-08,
+    "median": 9.787633141253306e-06,
+    "p75": 0.0008801978735807111,
+    "max": 0.07384856169917037,
+    "mean": 0.002908426428453031
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 5.0,
+    "surface_mass_deposited_gec": 1.9700446245459393,
+    "hand_to_mouth_calls": 7097.0,
+    "hand_load_seen_gec": 1.1399449113378493,
+    "hand_to_mouth_dose_gec": 0.009790446174172502,
+    "deliver_calls": 636.0,
+    "surface_mass_offered_gec": 3.8855618452421496,
+    "mass_requested_gec": 1.0257039647394546,
+    "mass_delivered_to_hands_gec": 1.0257039647394548
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.0898,
+    "alpha_resolved": 0.0898,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.0898
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1076,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 290200,
+     "influenza_a": 203458,
+     "sars_cov2_resp": 413511
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 957.1031663708669,
+     "influenza_a": 179839.40750436962,
+     "sars_cov2_resp": 57540.5926020986
+    },
+    "pathway_calls": {
+     "direct_contact": 39818,
+     "droplet": 11589,
+     "fomite": 3194,
+     "hvac_airborne": 235598,
+     "emesis_aerosol": 1
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.004609378279172993,
+     "droplet": 0.0,
+     "fomite": 889.3373647202507,
+     "hvac_airborne": 66.79704653456972,
+     "emesis_aerosol": 0.9641457377961623
+    },
+    "sum_credited_raw_gec": 271.10682076299776,
+    "sum_credited_scaled_gec": 56.6204532788515,
+    "sum_dose_read_at_challenge_gec": 56.6204532788515,
+    "sum_effective_dose_evaluated_gec": 56.6204532788515,
+    "sum_evaluated_hazard": 0.011855582945443388
+   },
+   "joint": {
+    "hosts_credited_any_dose": 1355,
+    "hosts_with_evaluated_challenge": 1355,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 238056,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 46197,
+    "crediting_epochs_challenge_evaluated": 238056,
+    "challenge_exit_reasons": {
+     "evaluated": 238056,
+     "no_dose_this_epoch": 311064,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 1355,
+    "total_credited": 56.6204532788515,
+    "max_host": 53.55309632960758,
+    "max_host_share": 0.945825990934099,
+    "hosts_for_50pct": 1,
+    "hosts_for_90pct": 1,
+    "hosts_for_95pct": 14,
+    "hosts_for_99pct": 213
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 1355,
+    "naive_hazard_engine_frailty_hosts": 0.011855264173368935,
+    "naive_hazard_all_credited_hosts": 0.011855264173368935
+   },
+   "frailty_drawn": {
+    "n": 1355,
+    "min": 3.4651566726586917e-43,
+    "p25": 3.15527900980231e-08,
+    "median": 3.210432381425193e-05,
+    "p75": 0.0012567498396993861,
+    "max": 0.0960570611140659,
+    "mean": 0.003066148587975095
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 2.0,
+    "patch_mass_gec": 25265214.571441982,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 6.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0,
+    "emitting_hosts": 2.0,
+    "sweeps_with_filed_patch": 265.0,
+    "sweeps_with_matching_unit": 265.0,
+    "matched_unit_occupants": 528.0,
+    "matched_unit_susceptible": 263.0,
+    "patch_pickup_calls": 518.0,
+    "patch_pickup_dose_gec": 106931.19575153514,
+    "patch_pickups": 2.0
+   },
+   "emesis_unit_names": {
+    "filed_units": [
+     "CC_D1_F::cabin1581"
+    ],
+    "pickup_units": [
+     "Bridge",
+     "CC_D1_A",
+     "CC_D1_A::cabin1815",
+     "CC_D1_A::cabin1819",
+     "CC_D1_A::cabin1823",
+     "CC_D1_A::cabin1827",
+     "CC_D1_A::cabin1831",
+     "CC_D1_A::cabin1835",
+     "CC_D1_A::cabin1839",
+     "CC_D1_A::cabin1843"
+    ],
+    "matched_units": [
+     "CC_D1_F::cabin1581"
+    ]
+   },
+   "fomite_witness": {
+    "max_hand_load_gec": 30835.3826933099,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 29.0,
+    "surface_mass_deposited_gec": 811.6113521591302,
+    "hand_to_mouth_calls": 3298.0,
+    "hand_load_seen_gec": 111217.14678167111,
+    "hand_to_mouth_dose_gec": 889.4297609245891,
+    "deliver_calls": 1896.0,
+    "surface_mass_offered_gec": 87301778.6751783,
+    "mass_requested_gec": 106931.19575153514,
+    "mass_delivered_to_hands_gec": 106931.19575153514
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1076,
+    "alpha_resolved": 0.1076,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1076
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1076,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 39414,
+     "influenza_a": 332169,
+     "sars_cov2_resp": 644457
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.009683109276507156,
+     "influenza_a": 153494.2279704646,
+     "sars_cov2_resp": 103216.2647441535
+    },
+    "pathway_calls": {
+     "direct_contact": 21244,
+     "droplet": 10275,
+     "fomite": 7895
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 3.116666898636155e-05,
+     "droplet": 0.0,
+     "fomite": 0.009651942607520793
+    },
+    "sum_credited_raw_gec": 0.002906491116401473,
+    "sum_credited_scaled_gec": 0.002712989107227093,
+    "sum_dose_read_at_challenge_gec": 0.002712989107227093,
+    "sum_effective_dose_evaluated_gec": 0.002712989107227093,
+    "sum_evaluated_hazard": 1.1410250213867831e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 187,
+    "hosts_with_evaluated_challenge": 187,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 6928,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 725,
+    "crediting_epochs_challenge_evaluated": 6928,
+    "challenge_exit_reasons": {
+     "evaluated": 6928,
+     "no_dose_this_epoch": 542642,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 187,
+    "total_credited": 0.002712989107227093,
+    "max_host": 0.00043486460040231356,
+    "max_host_share": 0.16028984386405531,
+    "hosts_for_50pct": 10,
+    "hosts_for_90pct": 48,
+    "hosts_for_95pct": 65,
+    "hosts_for_99pct": 96
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 187,
+    "naive_hazard_engine_frailty_hosts": 1.1410244777878618e-05,
+    "naive_hazard_all_credited_hosts": 1.1410244777878618e-05
+   },
+   "frailty_drawn": {
+    "n": 187,
+    "min": 1.295302752427919e-28,
+    "p25": 2.461176785318255e-07,
+    "median": 3.606758961723595e-05,
+    "p75": 0.0021970676785704785,
+    "max": 0.05248076616959757,
+    "mean": 0.0034956386189650477
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 5.0,
+    "surface_mass_deposited_gec": 1.9700446245459393,
+    "hand_to_mouth_calls": 7993.0,
+    "hand_load_seen_gec": 1.3001441774291405,
+    "hand_to_mouth_dose_gec": 0.010275519700306391,
+    "deliver_calls": 605.0,
+    "surface_mass_offered_gec": 3.867077498034677,
+    "mass_requested_gec": 1.055984927290883,
+    "mass_delivered_to_hands_gec": 1.0559849028365036
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1076,
+    "alpha_resolved": 0.1076,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1076
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.111,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 304929,
+     "influenza_a": 185678,
+     "sars_cov2_resp": 430799
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.40936097221910256,
+     "influenza_a": 177512.87047117137,
+     "sars_cov2_resp": 75912.09010478863
+    },
+    "pathway_calls": {
+     "direct_contact": 39380,
+     "droplet": 11804,
+     "fomite": 7220,
+     "hvac_airborne": 244506,
+     "food": 2019
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.021759836078995832,
+     "droplet": 0.0,
+     "fomite": 0.38258801055248254,
+     "hvac_airborne": 0.002854895687540401,
+     "food": 0.0021582299001011184
+    },
+    "sum_credited_raw_gec": 0.1229667365577909,
+    "sum_credited_scaled_gec": 0.10095231571100434,
+    "sum_dose_read_at_challenge_gec": 0.10095231571100434,
+    "sum_effective_dose_evaluated_gec": 0.10095231571100434,
+    "sum_evaluated_hazard": 0.00038090943729360077
+   },
+   "joint": {
+    "hosts_credited_any_dose": 1441,
+    "hosts_with_evaluated_challenge": 1441,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 251824,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 48457,
+    "crediting_epochs_challenge_evaluated": 251824,
+    "challenge_exit_reasons": {
+     "evaluated": 251824,
+     "no_dose_this_epoch": 297296,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 1441,
+    "total_credited": 0.10095231571100434,
+    "max_host": 0.009518357604940374,
+    "max_host_share": 0.09428567871774755,
+    "hosts_for_50pct": 21,
+    "hosts_for_90pct": 106,
+    "hosts_for_95pct": 139,
+    "hosts_for_99pct": 194
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 1441,
+    "naive_hazard_engine_frailty_hosts": 0.0003809085885110489,
+    "naive_hazard_all_credited_hosts": 0.0003809085885110489
+   },
+   "frailty_drawn": {
+    "n": 1441,
+    "min": 4.568827874216804e-27,
+    "p25": 1.1429961664894149e-07,
+    "median": 6.84926669033864e-05,
+    "p75": 0.002157687905572597,
+    "max": 0.117564574229397,
+    "mean": 0.003844324961038649
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 1.0,
+    "patch_mass_gec": 1961773.8050119258,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 3.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0,
+    "emitting_hosts": 1.0,
+    "sweeps_with_filed_patch": 274.0,
+    "sweeps_with_matching_unit": 274.0,
+    "matched_unit_occupants": 537.0,
+    "matched_unit_susceptible": 263.0,
+    "patch_pickup_calls": 263.0,
+    "patch_pickup_dose_gec": 2.6101715872250137,
+    "patch_pickups": 2.0
+   },
+   "emesis_unit_names": {
+    "filed_units": [
+     "CC_D1_F::cabin1581"
+    ],
+    "pickup_units": [
+     "Bridge",
+     "CC_D1_F",
+     "CC_D1_F::cabin1581",
+     "CC_D2_A",
+     "CC_D2_A::cabin1381",
+     "CC_D2_F",
+     "CC_D2_F::cabin1766",
+     "Casino",
+     "CrewMess",
+     "Engine_Room"
+    ],
+    "matched_units": [
+     "CC_D1_F::cabin1581"
+    ]
+   },
+   "fomite_witness": {
+    "max_hand_load_gec": 139244.8703703371,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 40.0,
+    "surface_mass_deposited_gec": 220.31809897088854,
+    "hand_to_mouth_calls": 7417.0,
+    "hand_load_seen_gec": 58.9068582939354,
+    "hand_to_mouth_dose_gec": 0.6918799040545637,
+    "deliver_calls": 1917.0,
+    "surface_mass_offered_gec": 5170.378106515924,
+    "mass_requested_gec": 35.132341702912264,
+    "mass_delivered_to_hands_gec": 33.02924460140752
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.111,
+    "alpha_resolved": 0.111,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.111
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.111,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 39414,
+     "influenza_a": 332169,
+     "sars_cov2_resp": 644457
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.009683109276507156,
+     "influenza_a": 153494.2279704646,
+     "sars_cov2_resp": 103216.2647441535
+    },
+    "pathway_calls": {
+     "direct_contact": 21244,
+     "droplet": 10275,
+     "fomite": 7895
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 3.116666898636155e-05,
+     "droplet": 0.0,
+     "fomite": 0.009651942607520793
+    },
+    "sum_credited_raw_gec": 0.002906491116401473,
+    "sum_credited_scaled_gec": 0.002712989107227093,
+    "sum_dose_read_at_challenge_gec": 0.002712989107227093,
+    "sum_effective_dose_evaluated_gec": 0.002712989107227093,
+    "sum_evaluated_hazard": 1.1870996645479683e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 187,
+    "hosts_with_evaluated_challenge": 187,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 6928,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 725,
+    "crediting_epochs_challenge_evaluated": 6928,
+    "challenge_exit_reasons": {
+     "evaluated": 6928,
+     "no_dose_this_epoch": 542642,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 187,
+    "total_credited": 0.002712989107227093,
+    "max_host": 0.00043486460040231356,
+    "max_host_share": 0.16028984386405531,
+    "hosts_for_50pct": 10,
+    "hosts_for_90pct": 48,
+    "hosts_for_95pct": 65,
+    "hosts_for_99pct": 96
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 187,
+    "naive_hazard_engine_frailty_hosts": 1.1870990857351872e-05,
+    "naive_hazard_all_credited_hosts": 1.1870990857351872e-05
+   },
+   "frailty_drawn": {
+    "n": 187,
+    "min": 8.384867201942267e-28,
+    "p25": 3.507733753475934e-07,
+    "median": 4.401514506161345e-05,
+    "p75": 0.0023869274199650884,
+    "max": 0.05390330838240467,
+    "mean": 0.0036330663433109837
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 5.0,
+    "surface_mass_deposited_gec": 1.9700446245459393,
+    "hand_to_mouth_calls": 7993.0,
+    "hand_load_seen_gec": 1.3001441774291405,
+    "hand_to_mouth_dose_gec": 0.010275519700306391,
+    "deliver_calls": 605.0,
+    "surface_mass_offered_gec": 3.867077498034677,
+    "mass_requested_gec": 1.055984927290883,
+    "mass_delivered_to_hands_gec": 1.0559849028365036
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.111,
+    "alpha_resolved": 0.111,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.111
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1254,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 272751,
+     "influenza_a": 190967,
+     "sars_cov2_resp": 400966
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 6.847707864010231,
+     "influenza_a": 212704.4171774374,
+     "sars_cov2_resp": 57589.905573255615
+    },
+    "pathway_calls": {
+     "direct_contact": 37570,
+     "droplet": 14681,
+     "fomite": 8847,
+     "hvac_airborne": 209194,
+     "food": 2459
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.03878124746682306,
+     "droplet": 0.0,
+     "fomite": 6.772716088692714,
+     "hvac_airborne": 0.03612399604003561,
+     "food": 8.653181084512566e-05
+    },
+    "sum_credited_raw_gec": 2.047211769385369,
+    "sum_credited_scaled_gec": 1.7874396933850196,
+    "sum_dose_read_at_challenge_gec": 1.7874396933850196,
+    "sum_effective_dose_evaluated_gec": 1.7874396933850196,
+    "sum_evaluated_hazard": 0.0071525461306622936
+   },
+   "joint": {
+    "hosts_credited_any_dose": 1424,
+    "hosts_with_evaluated_challenge": 1424,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 216542,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 41357,
+    "crediting_epochs_challenge_evaluated": 216542,
+    "challenge_exit_reasons": {
+     "evaluated": 216542,
+     "no_dose_this_epoch": 332578,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 1424,
+    "total_credited": 1.7874396933850196,
+    "max_host": 0.10619512716000276,
+    "max_host_share": 0.05941186578378621,
+    "hosts_for_50pct": 18,
+    "hosts_for_90pct": 75,
+    "hosts_for_95pct": 98,
+    "hosts_for_99pct": 134
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 1424,
+    "naive_hazard_engine_frailty_hosts": 0.007151761501650858,
+    "naive_hazard_all_credited_hosts": 0.007151761501650858
+   },
+   "frailty_drawn": {
+    "n": 1424,
+    "min": 2.368060060154052e-27,
+    "p25": 4.282864883835466e-07,
+    "median": 8.64672824587529e-05,
+    "p75": 0.0024076457438493917,
+    "max": 0.15011635796602082,
+    "mean": 0.004092899195245715
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 1.0,
+    "patch_mass_gec": 188609.46818017386,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 2.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0,
+    "emitting_hosts": 1.0,
+    "sweeps_with_filed_patch": 265.0,
+    "sweeps_with_matching_unit": 265.0,
+    "matched_unit_occupants": 528.0,
+    "matched_unit_susceptible": 263.0,
+    "patch_pickup_calls": 263.0,
+    "patch_pickup_dose_gec": 0.0
+   },
+   "emesis_unit_names": {
+    "filed_units": [
+     "CC_D1_F::cabin1581"
+    ],
+    "pickup_units": [
+     "Bridge",
+     "CC_D1_A",
+     "CC_D1_A::cabin1815",
+     "CC_D1_A::cabin1819",
+     "CC_D1_A::cabin1823",
+     "CC_D1_A::cabin1827",
+     "CC_D1_A::cabin1831",
+     "CC_D1_A::cabin1835",
+     "CC_D1_A::cabin1839",
+     "CC_D1_A::cabin1843"
+    ],
+    "matched_units": [
+     "CC_D1_F::cabin1581"
+    ]
+   },
+   "fomite_witness": {
+    "max_hand_load_gec": 811.6113521591302,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 39.0,
+    "surface_mass_deposited_gec": 737.5075139651922,
+    "hand_to_mouth_calls": 9013.0,
+    "hand_load_seen_gec": 778.5872877496025,
+    "hand_to_mouth_dose_gec": 6.8153391792714775,
+    "deliver_calls": 1889.0,
+    "surface_mass_offered_gec": 3173.841782831034,
+    "mass_requested_gec": 550.6047935169082,
+    "mass_delivered_to_hands_gec": 550.5364341335214
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1254,
+    "alpha_resolved": 0.1254,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1254
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1254,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 38084,
+     "influenza_a": 293003,
+     "sars_cov2_resp": 581574
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.009650723599664748,
+     "influenza_a": 238695.12584734595,
+     "sars_cov2_resp": 108348.03106840268
+    },
+    "pathway_calls": {
+     "direct_contact": 21315,
+     "droplet": 9851,
+     "fomite": 6918
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 2.2377448029934046e-07,
+     "droplet": 0.0,
+     "fomite": 0.009650499825184448
+    },
+    "sum_credited_raw_gec": 0.0028952282686234574,
+    "sum_credited_scaled_gec": 0.0026974581521597646,
+    "sum_dose_read_at_challenge_gec": 0.0026974581521597646,
+    "sum_effective_dose_evaluated_gec": 0.0026974581521597646,
+    "sum_evaluated_hazard": 1.2701642605296927e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 179,
+    "hosts_with_evaluated_challenge": 179,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 6080,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 972,
+    "crediting_epochs_challenge_evaluated": 6080,
+    "challenge_exit_reasons": {
+     "evaluated": 6080,
+     "no_dose_this_epoch": 543490,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 179,
+    "total_credited": 0.0026974581521597646,
+    "max_host": 0.0004348644560919744,
+    "max_host_share": 0.16121267933064798,
+    "hosts_for_50pct": 10,
+    "hosts_for_90pct": 48,
+    "hosts_for_95pct": 65,
+    "hosts_for_99pct": 95
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 179,
+    "naive_hazard_engine_frailty_hosts": 1.2701635295523527e-05,
+    "naive_hazard_all_credited_hosts": 1.2701635295523527e-05
+   },
+   "frailty_drawn": {
+    "n": 179,
+    "min": 7.433869573407106e-25,
+    "p25": 3.467648222980502e-06,
+    "median": 0.00014386571949387249,
+    "p75": 0.0034304567482545583,
+    "max": 0.05051879115016066,
+    "mean": 0.0039185304939972606
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 5.0,
+    "surface_mass_deposited_gec": 1.9700446245459393,
+    "hand_to_mouth_calls": 6972.0,
+    "hand_load_seen_gec": 1.1520883613849238,
+    "hand_to_mouth_dose_gec": 0.009680336422557572,
+    "deliver_calls": 648.0,
+    "surface_mass_offered_gec": 3.867081902225134,
+    "mass_requested_gec": 1.0559866340404878,
+    "mass_delivered_to_hands_gec": 1.055986634040488
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1254,
+    "alpha_resolved": 0.1254,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1254
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1432,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 67042,
+     "influenza_a": 199245,
+     "sars_cov2_resp": 431372
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.1428805091281932,
+     "influenza_a": 124003.77210464014,
+     "sars_cov2_resp": 57570.28727833921
+    },
+    "pathway_calls": {
+     "direct_contact": 40952,
+     "droplet": 16270,
+     "fomite": 8244,
+     "food": 1576
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.07868924127896282,
+     "droplet": 0.0,
+     "fomite": 0.06396330365410574,
+     "food": 0.00022796419512585023
+    },
+    "sum_credited_raw_gec": 0.04677581838289393,
+    "sum_credited_scaled_gec": 0.0305331716241475,
+    "sum_dose_read_at_challenge_gec": 0.0305331716241475,
+    "sum_effective_dose_evaluated_gec": 0.0305331716241475,
+    "sum_evaluated_hazard": 3.267102060560473e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 402,
+    "hosts_with_evaluated_challenge": 402,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 8196,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 1310,
+    "crediting_epochs_challenge_evaluated": 8196,
+    "challenge_exit_reasons": {
+     "evaluated": 8196,
+     "no_dose_this_epoch": 540924,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 402,
+    "total_credited": 0.0305331716241475,
+    "max_host": 0.006970401138695055,
+    "max_host_share": 0.22828945595623729,
+    "hosts_for_50pct": 3,
+    "hosts_for_90pct": 32,
+    "hosts_for_95pct": 52,
+    "hosts_for_99pct": 92
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 402,
+    "naive_hazard_engine_frailty_hosts": 3.26709851283248e-05,
+    "naive_hazard_all_credited_hosts": 3.26709851283248e-05
+   },
+   "frailty_drawn": {
+    "n": 402,
+    "min": 7.498421329775119e-16,
+    "p25": 1.6210225809763511e-06,
+    "median": 0.0001662964459047281,
+    "p75": 0.002145734461018722,
+    "max": 0.0936267209600848,
+    "mean": 0.004780974523917653
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 1.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 139244.8703703371,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 56.0,
+    "surface_mass_deposited_gec": 205.59113164065212,
+    "hand_to_mouth_calls": 8352.0,
+    "hand_load_seen_gec": 95.15543187898247,
+    "hand_to_mouth_dose_gec": 1.1576643217773457,
+    "deliver_calls": 1582.0,
+    "surface_mass_offered_gec": 5860.236152995426,
+    "mass_requested_gec": 4.063838950784344,
+    "mass_delivered_to_hands_gec": 3.779080016782161
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1432,
+    "alpha_resolved": 0.1432,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1432
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.1432,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 29899,
+     "influenza_a": 324976,
+     "sars_cov2_resp": 600957
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.04124195090394157,
+     "influenza_a": 84982.68593998022,
+     "sars_cov2_resp": 125445.88654213178
+    },
+    "pathway_calls": {
+     "direct_contact": 19967,
+     "droplet": 9409,
+     "fomite": 523
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 3.502368728188058e-07,
+     "droplet": 0.0,
+     "fomite": 0.04124160066706876
+    },
+    "sum_credited_raw_gec": 0.012372602783026116,
+    "sum_credited_scaled_gec": 0.012172842919050386,
+    "sum_dose_read_at_challenge_gec": 0.012172842919050386,
+    "sum_effective_dose_evaluated_gec": 0.012172842919050386,
+    "sum_evaluated_hazard": 8.235867581086697e-06
+   },
+   "joint": {
+    "hosts_credited_any_dose": 169,
+    "hosts_with_evaluated_challenge": 169,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 477,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 47,
+    "crediting_epochs_challenge_evaluated": 477,
+    "challenge_exit_reasons": {
+     "evaluated": 477,
+     "no_dose_this_epoch": 549093,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 169,
+    "total_credited": 0.012172842919050386,
+    "max_host": 0.009528884726773648,
+    "max_host_share": 0.7827986272509138,
+    "hosts_for_50pct": 1,
+    "hosts_for_90pct": 13,
+    "hosts_for_95pct": 29,
+    "hosts_for_99pct": 68
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 169,
+    "naive_hazard_engine_frailty_hosts": 8.235866431202976e-06,
+    "naive_hazard_all_credited_hosts": 8.235866431202976e-06
+   },
+   "frailty_drawn": {
+    "n": 169,
+    "min": 4.961322466561452e-22,
+    "p25": 1.1365240606434748e-05,
+    "median": 0.00026827405183882174,
+    "p75": 0.00417885592979516,
+    "max": 0.07694948272546086,
+    "mean": 0.005100575224670143
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 52.19452390820107,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 7.0,
+    "surface_mass_deposited_gec": 35.1614664181894,
+    "hand_to_mouth_calls": 550.0,
+    "hand_load_seen_gec": 4.2774407420705,
+    "hand_to_mouth_dose_gec": 0.04125750447770601,
+    "deliver_calls": 437.0,
+    "surface_mass_offered_gec": 287.67945428850334,
+    "mass_requested_gec": 3.6434486758325626,
+    "mass_delivered_to_hands_gec": 3.643138655066581
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.1432,
+    "alpha_resolved": 0.1432,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.1432
+  },
+  {
+   "seed": 8105,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.161,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 65423,
+     "influenza_a": 199850,
+     "sars_cov2_resp": 429643
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.09958957744631208,
+     "influenza_a": 173927.64969735654,
+     "sars_cov2_resp": 57516.55048447809
+    },
+    "pathway_calls": {
+     "direct_contact": 40899,
+     "droplet": 16152,
+     "fomite": 7911,
+     "food": 461
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 0.024859978846003356,
+     "droplet": 0.0,
+     "fomite": 0.07472261997324692,
+     "food": 6.978627062254223e-06
+    },
+    "sum_credited_raw_gec": 0.031119174313487822,
+    "sum_credited_scaled_gec": 0.02977593804919198,
+    "sum_dose_read_at_challenge_gec": 0.02977593804919198,
+    "sum_effective_dose_evaluated_gec": 0.02977593804919198,
+    "sum_evaluated_hazard": 8.582387623023874e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 359,
+    "hosts_with_evaluated_challenge": 359,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 7002,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 991,
+    "crediting_epochs_challenge_evaluated": 7002,
+    "challenge_exit_reasons": {
+     "evaluated": 7002,
+     "no_dose_this_epoch": 542118,
+     "resident_superinfection_closed": 960
+    }
+   },
+   "concentration": {
+    "hosts_credited": 359,
+    "total_credited": 0.02977593804919198,
+    "max_host": 0.005183876069175561,
+    "max_host_share": 0.17409614637871113,
+    "hosts_for_50pct": 7,
+    "hosts_for_90pct": 34,
+    "hosts_for_95pct": 47,
+    "hosts_for_99pct": 80
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 359,
+    "naive_hazard_engine_frailty_hosts": 8.582382445011688e-05,
+    "naive_hazard_all_credited_hosts": 8.582382445011688e-05
+   },
+   "frailty_drawn": {
+    "n": 359,
+    "min": 1.5733419606106113e-16,
+    "p25": 4.6295917769229605e-06,
+    "median": 0.00022581844273560143,
+    "p75": 0.003222919146248431,
+    "max": 0.09922194653921278,
+    "mean": 0.005139678894407087
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 5,
+    "ever_infected": 5,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550056.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0,
+    "schedule_draws": 1.0,
+    "scheduled_episodes": 1.0,
+    "hosts_with_schedule": 1.0,
+    "phase_eligible": 24.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 256.6540447671868,
+    "hand_target_positive_calls": 960.0,
+    "max_hand_target_gec": 139244.8703703371,
+    "surface_deposit_calls": 51.0,
+    "surface_mass_deposited_gec": 182.04159474586902,
+    "hand_to_mouth_calls": 7928.0,
+    "hand_load_seen_gec": 7.1697898257305255,
+    "hand_to_mouth_dose_gec": 0.09962975075490532,
+    "deliver_calls": 1560.0,
+    "surface_mass_offered_gec": 5074.333362533213,
+    "mass_requested_gec": 4.669701415679946,
+    "mass_delivered_to_hands_gec": 4.385433507643949
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.161,
+    "alpha_resolved": 0.161,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.161
+  },
+  {
+   "seed": 8106,
+   "epochs": 288,
+   "dose_response": {
+    "alpha": 0.161,
+    "beta": 32.81
+   },
+   "reconciliation": {
+    "accumulate_calls": {
+     "norwalk_gi": 40113,
+     "influenza_a": 296862,
+     "sars_cov2_resp": 591217
+    },
+    "accumulate_dose_gec": {
+     "norwalk_gi": 0.009409877594079094,
+     "influenza_a": 126001.77795886717,
+     "sars_cov2_resp": 134223.31188405317
+    },
+    "pathway_calls": {
+     "direct_contact": 20320,
+     "droplet": 11823,
+     "fomite": 7586,
+     "food": 384
+    },
+    "pathway_dose_gec": {
+     "direct_contact": 3.366826328032792e-05,
+     "droplet": 0.0,
+     "fomite": 0.009375769819234582,
+     "food": 4.395115642409933e-07
+    },
+    "sum_credited_raw_gec": 0.0028246027402313665,
+    "sum_credited_scaled_gec": 0.0026468819446142347,
+    "sum_dose_read_at_challenge_gec": 0.0026468819446142347,
+    "sum_effective_dose_evaluated_gec": 0.0026468819446142347,
+    "sum_evaluated_hazard": 1.0176286329478852e-05
+   },
+   "joint": {
+    "hosts_credited_any_dose": 191,
+    "hosts_with_evaluated_challenge": 191,
+    "hosts_credited_but_never_evaluated": 0,
+    "dose_to_never_evaluated_hosts_gec": 0,
+    "crediting_epochs_total": 6675,
+    "crediting_epochs_host_infected": 0,
+    "crediting_epochs_host_immune": 0,
+    "crediting_epochs_host_secretor_negative": 812,
+    "crediting_epochs_challenge_evaluated": 6675,
+    "challenge_exit_reasons": {
+     "evaluated": 6675,
+     "no_dose_this_epoch": 542895,
+     "resident_superinfection_closed": 510
+    }
+   },
+   "concentration": {
+    "hosts_credited": 191,
+    "total_credited": 0.0026468819446142347,
+    "max_host": 0.0003968401774225235,
+    "max_host_share": 0.14992741864819373,
+    "hosts_for_50pct": 11,
+    "hosts_for_90pct": 51,
+    "hosts_for_95pct": 69,
+    "hosts_for_99pct": 106
+   },
+   "naive_hazard": {
+    "hosts_with_engine_frailty": 191,
+    "naive_hazard_engine_frailty_hosts": 1.0176285612843264e-05,
+    "naive_hazard_all_credited_hosts": 1.0176285612843264e-05
+   },
+   "frailty_drawn": {
+    "n": 191,
+    "min": 2.453404682515026e-20,
+    "p25": 1.8966948472486743e-05,
+    "median": 0.00031154354174260716,
+    "p75": 0.0067638186014925845,
+    "max": 0.11938460208655967,
+    "mean": 0.006189084175529983
+   },
+   "transmission": {
+    "secondaries": 0,
+    "imports": 2,
+    "ever_infected": 2,
+    "acquisitions": [],
+    "attack_rate": 0.0
+   },
+   "emesis_witness": {
+    "phase_blocked": 550080.0,
+    "emit_calls": 550080.0,
+    "emesis_events": 0.0,
+    "patch_mass_gec": 0.0,
+    "patch_pickup_sweeps": 288.0
+   },
+   "emesis_unit_names": {},
+   "fomite_witness": {
+    "max_hand_load_gec": 1.9700446245459393,
+    "hand_target_positive_calls": 510.0,
+    "max_hand_target_gec": 165.05357693802864,
+    "surface_deposit_calls": 12.0,
+    "surface_mass_deposited_gec": 2.246601785781516,
+    "hand_to_mouth_calls": 7591.0,
+    "hand_load_seen_gec": 1.2307051677006806,
+    "hand_to_mouth_dose_gec": 0.009871035583899292,
+    "deliver_calls": 684.0,
+    "surface_mass_offered_gec": 11.77117218266721,
+    "mass_requested_gec": 1.0195697399514736,
+    "mass_delivered_to_hands_gec": 1.0195697399514736
+   },
+   "dose_response_resolved": {
+    "alpha_requested": 0.161,
+    "alpha_resolved": 0.161,
+    "beta_resolved": 32.81,
+    "source": "override"
+   },
+   "platform": "classic_cruise_1900",
+   "num_agents": 1910,
+   "run_history": {
+    "pathogen_id": "norwalk_gi",
+    "epochs_recorded": 288,
+    "final_epoch_fields": {
+     "total_infected": null,
+     "ever_infected": null,
+     "active_infections": null,
+     "cumulative_infections": null,
+     "new_infections": null
+    }
+   },
+   "alpha": 0.161
+  }
+ ],
+ "reconciliation": {
+  "rtol": 1e-09,
+  "worst_relative_difference": 0.0,
+  "verdict": "PASS"
+ },
+ "rng_alignment_identical": false
+}

@@ -2,7 +2,8 @@
 **Date:** 2026-09-19
 **Commit:** 46cff41
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
+**Measured at:** f5f9ff3
 
 Swept-α axis on the classic hull: is the *expectation* wrong? `NORO-SUSCEPT-02`
 closed the chain and the host set — credited dose and evaluated hazard are
@@ -163,5 +164,145 @@ No engine file, no configuration value and no other constant is touched.
 
 ## Measured result
 
-*(This section is written after the sweep, with `Measured at: <SHA>`. It is
-empty at the commit that freezes the design above.)*
+**Measured at `f5f9ff3`** — the instrument commit the 14 cells ran on; the two
+later commits on the branch (`5c2e896`, and this one) touch documentation only,
+and `f5f9ff3`'s tree is the one merged as `707ab14` (PR #618). Per-cell dumps
+are left on disk uncommitted under `docs/norovirus/noro_suscept_03/raw/`; every
+summary field except the per-host table is committed in
+`docs/norovirus/noro_suscept_03/sweep_cells.json` and re-read by
+`tools/noro_diag/alpha_sweep_readout.py`, which aggregates and never re-derives.
+
+All 14 cells completed at 288 epochs. No run died and no cell dropped its
+override: the resolved α equals the requested α in every cell and β resolves to
+32.81 everywhere. The §3 proof passed before the sweep (at 96 epochs rather
+than 48, taking the escalation §3.2 allows because the high-α arm drew 185 < 200
+frailties at 48: n = 1442 / 1329, median ratio 268.8× against the 10× floor,
+KS p = 3.25e-56).
+
+### a. The frozen hard gate held; the frozen §4 invariance did not
+
+**Reconciliation: PASS at every cell, worst relative difference 0.000e+00** —
+credited-scaled, dose-read-at-challenge and effective-dose-evaluated agree
+exactly in all 14 runs, as they did in -02. The chain -02 closed is still
+closed at every α. No harness defect there.
+
+**RNG-stream alignment: FAILED.** §4 predicted that α moves the *value* of each
+`rng.beta` draw and not the number of draws, so the emesis and fomite witnesses
+would be identical across α at a fixed seed. They are not. At seed 8105 the
+emesis witness moves with α in every counter it has — `scheduled_episodes`
+reads 3 / 1 / 6 / 3 / 2 / 1 / 1 across the grid and `emesis_events` 1 / 0 / 2 /
+1 / 1 / 0 / 0 — and at both seeds all ten fomite counters move
+(`deliver_calls`, `mass_requested_gec`, `mass_delivered_to_hands_gec`,
+`max_hand_load_gec`, `hand_load_seen_gec`, `hand_to_mouth_calls`,
+`hand_to_mouth_dose_gec`, `surface_deposit_calls`,
+`surface_mass_offered_gec`, `surface_mass_deposited_gec`). The credited dose
+itself — a quantity α cannot touch, because α scales frailty and not dose —
+spans 7.11e-8 to 56.620 GEC across the seven α cells at seed 8105, nine orders
+of magnitude. The voyages diverge completely.
+
+**The mechanism, measured rather than inferred.** The frailty draw at
+`transmission_core.py:2983` is taken from `self.rng`, the run's one shared
+generator, which is read at 47 sites in that module — the emesis and fomite
+paths among them. NumPy's `Generator.beta` is rejection-based, so the number of
+64-bit words it consumes depends on its parameters: 2,000 draws at β = 32.81
+consume 8,248 words at α = 0.072 and 8,401 at α = 0.161, monotonically across
+this grid (measured directly off the PCG64 counter, seed 12345). Changing α
+therefore re-phases every subsequent draw in the run. The frailty count per
+cell is itself downstream of that divergence (182 to 1,441 draws). This is the
+`stochastic-attribution` RNG-stream disruption case, and §4 says it is reported,
+not interpreted: **the shape of the response across the α axis is not readable
+from this design.** It is filed as its own defect entry,
+`RNG-FRAILTY-STREAM-01`, with the declaration-shaped fix.
+
+### b. The cells
+
+| α | seed | α resolved | secondaries | ever_infected | imports | attack rate | Σ evaluated hazard | credited-scaled GEC | frailty median | frailty mean | hosts for 90% |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 0.0720 | 8105 | 0.072 | 0 | 5 | 5 | 0.0 | 3.044e-4 | 19.991 | 8.40e-7 | 2.547e-3 | 1 |
+| 0.0720 | 8106 | 0.072 | 0 | 2 | 2 | 0.0 | 1.429e-5 | 0.00416 | 1.08e-6 | 2.577e-3 | 74 |
+| 0.0898 | 8105 | 0.0898 | 0 | 5 | 5 | 0.0 | 9.12e-15 | 7.11e-8 | 8.25e-6 | 3.146e-3 | 1 |
+| 0.0898 | 8106 | 0.0898 | 0 | 2 | 2 | 0.0 | 1.038e-5 | 0.00260 | 9.79e-6 | 2.908e-3 | 50 |
+| 0.1076 | 8105 | 0.1076 | 0 | 5 | 5 | 0.0 | **1.186e-2** | 56.620 | 3.21e-5 | 3.066e-3 | 1 |
+| 0.1076 | 8106 | 0.1076 | 0 | 2 | 2 | 0.0 | 1.141e-5 | 0.00271 | 3.61e-5 | 3.496e-3 | 48 |
+| 0.1110 | 8105 | 0.111 | 0 | 5 | 5 | 0.0 | 3.809e-4 | 0.10095 | 6.85e-5 | 3.844e-3 | 106 |
+| 0.1110 | 8106 | 0.111 | 0 | 2 | 2 | 0.0 | 1.187e-5 | 0.00271 | 4.40e-5 | 3.633e-3 | 48 |
+| 0.1254 | 8105 | 0.1254 | 0 | 5 | 5 | 0.0 | 7.15e-3 | 1.787 | 8.65e-5 | 4.093e-3 | 75 |
+| 0.1254 | 8106 | 0.1254 | 0 | 2 | 2 | 0.0 | 1.270e-5 | 0.00270 | 1.44e-4 | 3.919e-3 | 48 |
+| 0.1432 | 8105 | 0.1432 | 0 | 5 | 5 | 0.0 | 3.27e-5 | 0.0305 | 1.66e-4 | 4.781e-3 | 32 |
+| 0.1432 | 8106 | 0.1432 | 0 | 2 | 2 | 0.0 | 8.24e-6 | 0.0122 | 2.68e-4 | 5.101e-3 | 13 |
+| 0.1610 | 8105 | 0.161 | 0 | 5 | 5 | 0.0 | 8.58e-5 | 0.0298 | 2.26e-4 | 5.140e-3 | 34 |
+| 0.1610 | 8106 | 0.161 | 0 | 2 | 2 | 0.0 | 1.018e-5 | 0.00265 | 3.12e-4 | 6.189e-3 | 51 |
+
+The α = 0.1110 / seed 8105 reference cell reproduces `NORO-SUSCEPT-02` exactly
+(0.10095 GEC credited, Σ hazard 3.809e-4, 106 hosts for 90% of dose), which is
+the evidence that the instrument's α path is additive: with the shipped α the
+cell is the -02 arm.
+
+What is *not* confounded by §a is the frailty distribution itself, because it is
+the direct image of the override rather than a downstream consequence of stream
+phase. It behaves as the design predicted: the drawn mean rises from 2.547e-3
+at α = 0.072 to 5.140e-3 (6.189e-3 at the paired seed) at α = 0.161, against
+the `α/(α+β)` prediction of 2.190e-3 → 4.883e-3, monotone and a factor of
+**≈ 2.2 across the whole admissible interval**.
+
+### c. The decision
+
+**No α in `[0.072, 0.161]` produced secondary transmission on the classic hull
+at 288 epochs.** Secondaries are 0 in all 14 voyages; every infection in every
+cell is an import (5 at seed 8105, 2 at seed 8106); the attack rate is 0.0
+across the interval, so there is no attack-rate behaviour across the interval to
+report. On the primary statistic the maximum over all 14 runs is
+**Σ hazard = 1.186e-2**, which is **8.4× below the 0.1 floor of the Marginal
+band** and roughly two orders below the Capable band. That is the **Excluded**
+verdict of §2.
+
+The §a confound weakens *how* that verdict is supported but does not overturn
+it, and the distinction matters:
+
+- Each cell is still a legitimate voyage of the model at its own α — the
+  override resolves correctly and the run is internally consistent, including
+  its reconciliation. What the re-phasing costs is the *pairing*: the two seeds
+  do not pair across α, so the sweep is 14 independent realisations, effectively
+  one per α, not 7 paired contrasts.
+- Read that way the sweep is *stronger* than the paired design on the magnitude
+  question and silent on the shape question. The 14 realisations happen to span
+  a dose range the design never asked for — credited dose from 7.11e-8 to
+  56.620 GEC, 560× the -02 arm at the top — and the largest Σ hazard anywhere in
+  that range is 1.186e-2. A voyage delivering 560× the -02 credited dose, at an
+  α inside the interval, still expects 0.012 secondary infections.
+- The interval cannot close that gap, and this is the one α statement §a does
+  not touch: mean host susceptibility moves 2.2× from end to end (measured
+  above), and `NORO-SUSCEPT-01` §4a puts the same move at 7.0× on population
+  N50. Two orders of magnitude are missing and the admissible axis is worth
+  less than one.
+
+**So the expectation is not wrong in the way α could make it wrong.** The
+sourced interval `[0.072, 0.161]` is not the explanation for the absent onboard
+secondary transmission, and the suspect moves back to **the dose reaching
+hosts** — not the dose-response. The credited dose spread in §b is the place to
+look: at seed 8105 the total credited dose over a whole 288-epoch voyage is
+under 0.11 GEC in the -02 realisation and the concentration column shows a
+single host holding 90% of it in four of the seven cells. Whether that is the
+emesis patch localisation, the fomite pickup terms, or the crediting seam is
+exactly the `transmission-blocker-cascade` question, and it is not answered
+here.
+
+No α is recommended for adoption. No constant moved in this session:
+`data/pathogens/active_profiles.json` is untouched, α entered only as a
+per-cell `pathogen_overrides` patch on a diagnostic run, and nothing was chosen
+against VSP, Park or the passenger/crew ratio.
+
+### d. The two -02 §e observations were not sized
+
+§5 said this sweep would not size them, for the reason that the 14 runs are 7
+repeats of 2 emesis draws. §a makes the position worse rather than better: the
+emesis stream is not even repeatable across α at a fixed seed, so the 14 cells
+are 14 unpaired draws of it. For the record only: at seed 8105
+`scheduled_episodes = 3` with `emesis_events = 1` in the reference cell, the
+filed and matched unit is `CC_D1_F::cabin1581` and pickups land in ten `CC_D1_A`
+cabins; at seed 8106 there is no emesis at all (`scheduled_episodes = None`,
+`emesis_events = 0`, identical across α). **Neither observation is sized by this
+entry**, and neither licenses a constant change. Sizing them needs replicate
+seeds at fixed α, which is a different campaign — and one that `RNG-FRAILTY-
+STREAM-01` does not block, because it does not vary α.
+
