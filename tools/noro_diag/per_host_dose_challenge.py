@@ -15,7 +15,8 @@ and the hazard the engine actually evaluated.
 
 Method
 ------
-The engine is not modified and no configuration value is overridden. Every
+The engine is not modified and, unless ``--alpha`` is given, no configuration
+value is overridden. Every
 observation is taken by wrapping bound methods on ``TransmissionCore`` (and the
 module-level ``draw_emesis_schedule``) for the duration of one run:
 
@@ -48,9 +49,13 @@ Inputs
 ------
 ``--platform`` (default ``classic_cruise_1900``) at its declared complement,
 ``--epochs``, ``--seed`` (repeat for paired seeds), the shipped ``--bundle``
-pathogen bundle (both the run and the readout arithmetic). No pathogen or run
-override is written: an arm of this diagnostic differs from a shipped run only
-by the wrappers, which are read-only.
+pathogen bundle (both the run and the readout arithmetic). Without ``--alpha``
+no pathogen or run override is written: an arm of this diagnostic differs from
+a shipped run only by the wrappers, which are read-only. With ``--alpha`` (rejected
+outside the frozen NORO-SUSCEPT-03 interval [0.072, 0.161]) the run carries
+exactly one override, a ``pathogen_overrides`` patch on
+``norwalk_gi.dose_response`` that sets ``alpha`` to the requested value and
+pins ``beta`` at the profile value; everything else is unchanged.
 
 Outputs
 -------
@@ -163,6 +168,11 @@ class Recorder:
         default_factory=lambda: defaultdict(float),
     )
     emesis_units: dict[str, list[str]] = field(default_factory=dict)
+    # Challenge-acquired infections: one row per susceptible->infected
+    # transition seen across ``_resolve_pathogen_challenge``.
+    acquisitions: list[dict[str, Any]] = field(default_factory=list)
+    acquired_ids: set[int] = field(default_factory=set)
+    import_ids: set[int] = field(default_factory=set)
     # Slot the hazard wrapper writes and the challenge wrapper reads, so that
     # "a challenge was evaluated this epoch" is a witnessed fact rather than a
     # re-derivation of the engine's early returns.
@@ -360,6 +370,19 @@ def _wrap_challenge(core_cls: type, rec: Recorder, top_ids: set[int]) -> Any:
         record.reasons[reason] += 1
         if state["p_dose"] > 0.0 and evaluated:
             record.credited_epochs_challenge_evaluated += 1
+        now_infected = bool(agent.is_infected_with(pathogen_id))
+        if not state["resident"] and now_infected:
+            rec.acquisitions.append({
+                "agent_id": int(agent.agent_id),
+                "epoch": int(epoch),
+                "dose_read": state["p_dose"],
+                "effective_dose": witness[2] if evaluated else None,
+                "frailty": witness[3] if evaluated else None,
+                "hazard": witness[4] if evaluated else None,
+            })
+            rec.acquired_ids.add(int(agent.agent_id))
+        if state["resident"] and agent.agent_id not in rec.acquired_ids:
+            rec.import_ids.add(int(agent.agent_id))
         if agent.agent_id in top_ids and state["p_dose"] > 0.0:
             rec.top_host_rows.append({
                 "agent_id": int(agent.agent_id),
@@ -621,8 +644,22 @@ def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
 
 def build_spec(
     *, seed: int, platform: str, bundle: str, epochs: int, num_agents: int,
+    pathogen_id: str, alpha: float | None, beta: float,
 ) -> dict[str, Any]:
-    """The shipped run, at one seed: no pathogen or run override."""
+    """The shipped run, at one seed.
+
+    With ``alpha=None`` no pathogen or run override is written (byte-identical
+    to the NORO-SUSCEPT-02 spec). With an alpha, exactly one override is
+    written: a ``pathogen_overrides`` patch on the pathogen's ``dose_response``
+    carrying the requested alpha and beta pinned explicitly.
+    """
+    overrides: dict[str, Any] = {}
+    if alpha is not None:
+        overrides = {
+            pathogen_id: {
+                "dose_response": {"alpha": float(alpha), "beta": float(beta)},
+            },
+        }
     return {
         "schema_version": "1.0.0",
         "description": "noro_diag per_host_dose_challenge",
@@ -637,7 +674,7 @@ def build_spec(
         "actors": [],
         "incentives": {},
         "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
-        "pathogen_overrides": {},
+        "pathogen_overrides": overrides,
     }
 
 
@@ -744,6 +781,25 @@ def summarise(
         ),
         "challenge_exit_reasons": dict(reasons),
     }
+    drawn = [r.frailty for r in records if r.frailty is not None]
+    if drawn:
+        frailty_drawn = {
+            "n": len(drawn),
+            "min": float(np.min(drawn)),
+            "p25": float(np.percentile(drawn, 25)),
+            "median": float(np.median(drawn)),
+            "p75": float(np.percentile(drawn, 75)),
+            "max": float(np.max(drawn)),
+            "mean": float(np.mean(drawn)),
+        }
+    else:
+        frailty_drawn = {"n": 0}
+    transmission = {
+        "secondaries": len(rec.acquired_ids),
+        "imports": len(rec.import_ids),
+        "ever_infected": len(rec.acquired_ids) + len(rec.import_ids),
+        "acquisitions": rec.acquisitions,
+    }
     return {
         "seed": seed,
         "epochs": epochs,
@@ -752,6 +808,8 @@ def summarise(
         "joint": joint,
         "concentration": concentration_curve(credited),
         "naive_hazard": _naive_hazard(records, generator, alpha, beta),
+        "frailty_drawn": frailty_drawn,
+        "transmission": transmission,
         "emesis_witness": dict(rec.emesis),
         "emesis_unit_names": dict(rec.emesis_units),
         "fomite_witness": dict(rec.fomite),
@@ -813,14 +871,18 @@ def run_seed(
     epochs: int,
     pathogen_id: str,
     top_hosts: int,
+    alpha_override: float | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     num_agents = declared_total(platform)
+    alpha, beta = load_dose_response(pathogen_id, bundle)
     spec_dict = build_spec(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=num_agents,
+        pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
     )
-    alpha, beta = load_dose_response(pathogen_id, bundle)
+    if alpha_override is not None:
+        alpha = float(alpha_override)
     rec = Recorder(pathogen_id=pathogen_id)
     # The per-epoch witness rows are kept only for the hosts the first pass
     # cannot know yet, so the set is seeded by agent id order and pruned in
@@ -839,9 +901,25 @@ def run_seed(
         picard_spec = PicardRunSpec.from_picard_json(
             str(REPO_ROOT), spec_path,
         )
+        resolved = picard_spec.pathogen_profiles[pathogen_id]["dose_response"]
+        alpha_resolved = float(resolved["alpha"])
+        if abs(alpha_resolved - alpha) > 1e-12:
+            raise RuntimeError(
+                f"dose-response override dropped: requested alpha={alpha}, "
+                f"resolved alpha={alpha_resolved}",
+            )
         with instrumented(rec, top_ids):
             result = ShipSimulation(picard_spec, display=False).run()
     summary = summarise(rec, alpha, beta, seed, epochs)
+    summary["dose_response_resolved"] = {
+        "alpha_requested": alpha,
+        "alpha_resolved": alpha_resolved,
+        "beta_resolved": float(resolved["beta"]),
+        "source": "override" if alpha_override is not None else "active_profile",
+    }
+    summary["transmission"]["attack_rate"] = (
+        len(rec.acquired_ids) / num_agents
+    )
     summary["platform"] = platform
     summary["num_agents"] = num_agents
     summary["run_history"] = infection_tally(result, pathogen_id)
@@ -899,8 +977,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--top-hosts", type=int, default=8,
         help="agent ids 0..N-1 get a per-epoch witness row dump",
     )
+    parser.add_argument(
+        "--alpha", type=float, default=None,
+        help="dose-response alpha override for NORO-SUSCEPT-03; must lie in "
+             "the frozen interval [0.072, 0.161]",
+    )
     parser.add_argument("--out", type=Path, required=True)
-    return parser.parse_args(argv)
+    args = parser.parse_args(argv)
+    if args.alpha is not None and not 0.072 <= args.alpha <= 0.161:
+        parser.error(
+            f"--alpha {args.alpha} is outside the frozen interval "
+            "[0.072, 0.161]",
+        )
+    return args
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -916,10 +1005,15 @@ def main(argv: list[str] | None = None) -> int:
             epochs=args.epochs,
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
+            alpha_override=args.alpha,
         )
-        path = resolve_child_path(
-            str(out_dir), f"per_host_dose_challenge_seed{seed}.json.gz",
-        )
+        if args.alpha is None:
+            filename = f"per_host_dose_challenge_seed{seed}.json.gz"
+        else:
+            filename = (
+                f"per_host_dose_challenge_a{args.alpha:.4f}_seed{seed}.json.gz"
+            )
+        path = resolve_child_path(str(out_dir), filename)
         with gzip.open(path, "wt", encoding="utf-8") as handle:
             json.dump(summary, handle, indent=1)
         print_summary(summary)
