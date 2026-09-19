@@ -142,3 +142,15 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
     declared onset the gate is satisfied by construction at the record's
     geometry.
   Stages 2–3 of the design are gated on a non-empty shortlist and were not run.
+- **`covid_theta_screen_v8` is declared and not yet run.** The successor screen
+  re-screens the Θ 3.16e7–3.16e9 corner (seven half-decade Θ from 1e7 to 1e10 ×
+  six index infection ages × 40 matched seeds = 1,680 cells) with the index
+  geometry true by construction under SEED-ONSET-01, `covid.T1` as the sole
+  selection criterion verbatim from v7, and covid.T3 demoted to a diagnostic on
+  v7's own saturation evidence
+  (`picard_framework/runs/covid_theta_screen_v8_design.json`,
+  `docs/ledger/THETA-SCREEN-V8.md`). It is declared-and-tested but not
+  smoke-confirmed end-to-end: the first action is to confirm
+  `index_onset_day == -1.0` on one real cell, before the array submits. Session
+  state of play, including what may not be reopened:
+  `docs/covid/covid_theta_handoff_2026_09_19.md`.
