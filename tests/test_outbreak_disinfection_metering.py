@@ -32,7 +32,11 @@ def _core(
     clock: SimClock,
     cabin_events: float = 1.0,
     public_events: float = 24.0,
+    cabin_coverage: float | None = None,
 ) -> TransmissionCore:
+    cabin_override: dict[str, float] = {"events_per_day": cabin_events}
+    if cabin_coverage is not None:
+        cabin_override["coverage"] = cabin_coverage
     return TransmissionCore(
         rng=np.random.default_rng(11),
         pathogen_profiles={PATHOGEN: {}},
@@ -52,7 +56,7 @@ def _core(
                         "log10_reduction": REDUCTION,
                         "events_per_day": public_events,
                         "by_zone_class": {
-                            "cabin": {"events_per_day": cabin_events},
+                            "cabin": cabin_override,
                         },
                     },
                 },
@@ -179,6 +183,25 @@ class TestGradedSensitivity:
         assert survivors[0] > survivors[1] > survivors[2]
         span = (survivors[0] - survivors[2]) / survivors[0]
         assert span > 0.2, f"cabin pass rate looks dead: span={span:.3f}"
+
+    def test_cabin_coverage_override_reaches_metered_passes(self) -> None:
+        """A per-zone-class coverage override must reach the metered pass.
+
+        Cabin coverage below the routine coverage kills the routine->outbreak
+        nesting, so every metered pass leaves strictly more patch mass than
+        the default 0.58 coverage. A live difference asserts the override
+        actually reached `_outbreak_cleaning_event`, not just the parser.
+        """
+        survivors: dict[float, float] = {}
+        for coverage in (0.20, OUTBREAK_CLEANING_COVERAGE):
+            core = _core(
+                clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+                cabin_coverage=coverage,
+            )
+            _seed_masses(core)
+            _run_sop_hours(core, 24.0)
+            survivors[coverage] = _patch(core).mass
+        assert survivors[0.20] > survivors[OUTBREAK_CLEANING_COVERAGE]
 
 
 class TestBounds:

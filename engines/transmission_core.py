@@ -2581,9 +2581,10 @@ class TransmissionCore:
     def _outbreak_cleaning_event(self, zone_name: str) -> None:
         """Apply one metered outbreak pass to a single zone."""
         reduction = max(0.0, float(self._outbreak_disinfection_in_force or 0.0))
+        coverage = self._outbreak_cleaning_schedule(zone_name)[0]
         self._disinfect_zone(
             zone_name,
-            self.outbreak_cleaning_coverage,
+            coverage,
             10.0 ** -reduction,
         )
 
@@ -2610,7 +2611,9 @@ class TransmissionCore:
                 float(log10_reduction),
                 self.outbreak_cleaning_coverage,
             )
-            self._outbreak_disinfection_in_force = float(log10_reduction)
+        # An escalation mid-outbreak updates the reduction metered passes
+        # use; only the inactive->active edge fires an immediate pass.
+        self._outbreak_disinfection_in_force = float(log10_reduction)
         zones = set(self._outbreak_cleaning_accumulators)
         for pools in self.surface_pools_by_pathogen.values():
             zones.update(pools)
