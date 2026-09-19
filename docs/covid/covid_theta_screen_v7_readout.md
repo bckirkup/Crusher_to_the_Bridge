@@ -38,8 +38,8 @@ a matter of resolution.
 ## Why the two criteria cannot be met at once
 
 The index-geometry pass fraction is a function of index infection age *only* —
-0.0, 0.075, 0.45, 0.675, 0.775, 0.90, and 0.90 to 0.93 at ages 0 to 13 — and is
-flat in Theta to within seed noise. It has to be: the gate asks whether the
+0.0, 0.075, 0.45, 0.675, 0.775, 0.90, and 0.90 to 0.925 at ages 0 to 13 — and
+is flat in Theta to within seed noise. It has to be: the gate asks whether the
 seeded host has already had onset by day 0, which is decided by the host's own
 incubation draw against its boarding infection age, not by how infectious the
 ship is. The declared 80% threshold is therefore reachable only at ages 11 to
@@ -57,13 +57,13 @@ Diamond-Princess-sized trajectories do exist on this surface, at Theta 1e8 to
 1e9 and index ages 0 to 5 d: conditional-on-takeoff median recorded onsets 108
 (Theta 1e8, age 0, 6 takeoffs of 40), 400 (1e8, age 3), 939 (1e8, age 5),
 1,105 (3.16e8, age 0), 1,142 (3.16e8, age 3), 1,676 (1e9, age 0). Eleven cells
-in this corner — Theta 3.16e7 to 3.16e9, ages 0 to 5 d — pass T1, three of them
+in this corner — Theta 3.16e7 to 3.16e9, ages 0 to 5 d — pass T1, four of them
 passing T3 as well; the smallest-takeoff cell (1e8, age 0) is not among them,
 its recorded-onset interval sitting below 197 rather than around it. They also
 carry the fleet shape the held-out `covid.H3` record wants — across the
-T1-passing cells `p(attack <= 0.01)` runs 0.375 to 0.80 at a takeoff probability
-of 0.20 to 0.65, i.e. most voyages extinguishing and a minority burning. They
-fail only the index-geometry gate.
+T1-passing cells `p(attack <= 0.01)` runs 0.125 to 0.825 at a takeoff
+probability of 0.175 to 0.85, i.e. most voyages extinguishing and a minority
+burning. They fail only the index-geometry gate.
 
 So the empty region is not "Theta is wrong everywhere". It is: the band where
 the outbreak is the right size is the band where the seeded index is *not*
@@ -89,14 +89,14 @@ onset date, so it cannot seed the host the record describes.
 ## Two misses Theta cannot close
 
 **Asymptomatic share.** Across all 77 cells the median asymptomatic share never
-exceeds 0.43 (mean 0.40), against `covid.T4`'s 320/634 = 0.50 on Diamond
-Princess and `covid.H2`'s 104/128 = 0.81 on Greg Mortimer. It is monotone
-*downward* in Theta — at index age 11 d the median is 0.412 at Theta 1e7, 0.249
-at 1e9, 0.084 at 1e10 and 0.002 at 1e12 — because in this model the
-asymptomatic fraction is an emergent consequence of delivered dose rather than
-a natural-history parameter. Raising Theta to reach the observed outbreak sizes
-therefore *moves away* from the observed asymptomatic share. No Theta
-reconciles the two.
+exceeds 0.43 (0.425 at its highest; the cell medians average 0.22), against
+`covid.T4`'s 320/634 = 0.50 on Diamond Princess and `covid.H2`'s 104/128 = 0.81
+on Greg Mortimer. It is monotone *downward* in Theta — at index age 11 d the
+median is 0.412 at Theta 1e7, 0.249 at 1e9, 0.084 at 1e10 and 0.002 at 1e12 —
+because in this model the asymptomatic fraction is an emergent consequence of
+delivered dose rather than a natural-history parameter. Raising Theta to reach
+the observed outbreak sizes therefore *moves away* from the observed
+asymptomatic share. No Theta reconciles the two.
 
 **T3 does not discriminate.** Median campaign specimens run 1,598 to 3,063 and
 conditional-on-takeoff median campaign positives 66 to 872 across five decades

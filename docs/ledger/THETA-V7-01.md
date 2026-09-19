@@ -21,17 +21,18 @@ claimed. Full readout with the per-cell table:
 
 The two selection criteria are in structural tension along the index-age axis.
 The geometry pass fraction depends on index infection age alone (0.0, 0.075,
-0.45, 0.675, 0.775, 0.90, 0.90 to 0.93 at ages 0 to 13 d), flat in Theta to
-seed noise, so the declared 80% threshold is reachable only at ages 11 to 13 d — where
-every Theta on the grid burns (conditional-on-takeoff median 2,404 to 3,354
-recorded onsets of 3,711 hosts, attack median given a VSP crossing 0.70 to 0.98,
-pre-day-17 onset share 0.30 to 0.99 against the record's 34/197 = 0.17).
+0.45, 0.675, 0.775, 0.90, 0.90 to 0.925 at ages 0 to 13 d), flat in Theta to
+seed noise, so the declared 80% threshold is reachable only at ages 11 to 13 d
+— where every Theta on the grid burns (conditional-on-takeoff median 2,404 to
+3,354 recorded onsets of 3,711 hosts, attack median given a VSP crossing 0.70
+to 0.98, pre-day-17 onset share 0.30 to 0.99 against the record's
+34/197 = 0.17).
 Diamond-Princess-sized trajectories *do* occur, at Theta 1e8 to 1e9 and ages 0
 to 5 d (conditional-on-takeoff median recorded onsets 108, 400, 939, 1,105,
 1,142, 1,676), together with the fleet shape `covid.H3` wants. Eleven cells
-there — Theta 3.16e7 to 3.16e9, ages 0 to 5 d — pass `covid.T1`, three of them
-pass `covid.T3` as well, they run `p(attack <= 0.01)` 0.375 to 0.80 at takeoff
-probability 0.20 to 0.65, and they fail geometry alone.
+there — Theta 3.16e7 to 3.16e9, ages 0 to 5 d — pass `covid.T1`, four of them
+pass `covid.T3` as well, they run `p(attack <= 0.01)` 0.125 to 0.825 at takeoff
+probability 0.175 to 0.85, and they fail geometry alone.
 
 ## Defect exposed: the seed channel cannot declare an observed onset
 
@@ -48,18 +49,19 @@ seed channel has no way to declare the index's observed onset date.
 ## Two misses Theta cannot close
 
 - **Asymptomatic share.** Median asymptomatic share never exceeds 0.43
-  (mean 0.40) in any of the 77 cells, against `covid.T4` 320/634 = 0.50 and
-  held-out `covid.H2` 104/128 = 0.81. It is monotone *downward* in Theta (at
-  index age 11 d: 0.412 at 1e7, 0.249 at 1e9, 0.084 at 1e10, 0.002 at 1e12):
-  the asymptomatic fraction is emergent from delivered dose rather than a
-  natural-history parameter, so raising Theta towards the observed outbreak
-  sizes moves away from the observed asymptomatic share.
+  (0.425 at its highest; cell medians average 0.22) in any of the 77 cells,
+  against `covid.T4` 320/634 = 0.50 and held-out `covid.H2` 104/128 = 0.81. It
+  is monotone *downward* in Theta (at index age 11 d: 0.412 at 1e7, 0.249 at
+  1e9, 0.084 at 1e10, 0.002 at 1e12): the asymptomatic fraction is emergent
+  from delivered dose rather than a natural-history parameter, so raising Theta
+  towards the observed outbreak sizes moves away from the observed asymptomatic
+  share.
 - **`covid.T3` does not discriminate.** Median campaign specimens 1,598 to
   3,063 and conditional-on-takeoff median positives 66 to 872 across five
   decades of Theta: the testing campaign saturates against its own capacity
-  before the epidemic does. T3 is passed in sixteen scattered cells — Theta 1e9
+  before the epidemic does. T3 is passed in sixteen scattered cells: Theta 1e9
   (ages 0 to 9), 3.16e9 (ages 3, 5), 1e11 and 3.16e11 (ages 9 to 13), 1e12
-  (ages 5 to 9) — whose attack rates differ threefold. It is a capacity test on
+  (ages 5 to 9), whose attack rates differ threefold. It is a capacity test on
   this hull and should not carry selection weight in a successor design.
 
 ## Not done here
