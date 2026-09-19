@@ -311,3 +311,76 @@ criterion decision — readout §6, options (a) import geometry under T1 vs
 (b) takeoff probability against `covid.H3` — that must be made and written into
 a `covid_theta_screen_v10` design file before any cell runs. This session
 retires here at the stage boundary.
+
+## 11. What replaced stage 1b, and what the successor must build first
+
+The criterion decision in §10 was taken: neither option as originally framed.
+Measured after §10 was written, and the reason for the change:
+
+- The DP onset **timing** is close at Θ 1e9 (median peak day 19.5, 79% of
+  onsets on or after day 17, against DP's ~day 18–20 and 83%); only the
+  magnitude is wrong (median 3,103 recorded onsets against 197).
+- SOP-017 is **not** inert while that happens. `diamond_princess_2020` declares
+  it on days 16–30 with `confinement_enforced: true`, and QUAR-ORDER-01 (#600)
+  measured 2,666 passengers confined with zero unconfined post-quarantine
+  passenger infections.
+
+So the epidemic runs *through* an enforced quarantine, and the open question is
+which channel carries it — not what Θ is. Two designs are declared and merged
+(#629), neither run:
+
+- `picard_framework/runs/covid_quarantine_attribution_v1_design.json` — 2 Θ ×
+  5 arms × 20 matched seeds on Diamond Princess, with the attribution criterion
+  and the RNG-pairing caveat frozen in the file.
+- `picard_framework/runs/covid_fleet_placement_v1_design.json` — the covid.H3
+  check as a placement test on Greg Mortimer (60 cells), with its
+  necessary-but-not-sufficient limit stated in the criterion.
+
+**Neither design is wired to a worker.** Before either can be submitted the
+successor must build, and validate against `.agents/skills/campaign-preflight`:
+
+1. an **arm axis** in `picard_framework/covid_boarding_screen.py` (the design
+   axis is currently `(Θ, age, imports)` only), carrying per-arm run-spec
+   overrides; `cabin_air_mode` and `pathogen_pool_transport` already exist on
+   `build_fit_run_spec`, `near_field_air.mode` does not;
+2. `SOP-017-ALLHANDS` in `data/config/protocols.json` — SOP-017 with
+   `exempt_classes: []`, labelled a diagnostic counterfactual that may never
+   score an anchor, because the record says DP crew kept working;
+3. the new payload fields (before/during/after-quarantine splits by role, zone
+   class and route, plus the `quarantine_witness`);
+4. the Greg Mortimer single-test-day channel for covid.H1/H2.
+
+Do not re-derive: the v9 surface
+(`docs/covid/covid_theta_screen_v9_surface.csv`) is the settled input for both
+designs' Diamond Princess side, and no DP cells need re-running for the
+placement test.
+
+## 12. The predecessor comparison, and the arm it added
+
+Ledger `AGID-UPSTREAM-AR-01` settles a question that had been carried as an
+assumption: whether the upstream Korkin-lab model fit the Diamond Princess
+attack rate. It did report one (18.6% against 19%, RMSE 23.73 on the daily
+series, PNAS 10.1073/pnas.2422574123), but with no arrest layer against an
+observation that had one, and its own Isolation arm on the same parameterisation
+lands at 4%. Reading the published source (`bckirkup/infection-dynamics`
+`8d159f4`) shows why the two engines cannot fail the same way: upstream has no
+active environmental route at all, caps infection at one to two 15-cm proximity
+targets per shedder per 20 minutes, and decides infection by a deterministic
+`infProb > 0.5` on the source's own shedding — an attack rate that is a
+contact-opportunity count, insensitive to pathogen quantity above threshold and
+with no analogue of Θ. This port sums shared-air dose per agent into one
+exponential hazard, which is the construction that produces the v9 bimodality.
+
+That comparison added arm `A5_all_shared_air_off` to
+`covid_quarantine_attribution_v1` (now 240 cells, six arms): droplet and
+`hvac_airborne` route efficiency zeroed, near field off, pool untransported —
+the upstream-shaped configuration, physically false and barred from scoring any
+anchor. It is the decisive arm. If an intermediate attack rate is reachable only
+there, the missing intermediate band is a property of this engine's air model,
+and neither Θ nor the response layer is the thing to change next.
+
+The successor's wiring list in §11 therefore grows one item: the A5 override is
+a pathogen-*profile* field (`route_efficiency_multipliers` on
+`sars_cov_2_respiratory`), not a top-level transmission override, and the smoke
+must prove the droplet and `hvac_airborne` accumulators read zero — a silently
+ignored profile key would present as "the air routes do not matter".
