@@ -1,0 +1,279 @@
+{
+  "design_id": "covid_theta_screen_v9",
+  "parent_design": "covid_theta_screen_v8",
+  "description": "Stage 1 recentring screen: a coarse, wide, DOWNWARD sweep of Theta to locate the near-critical band under the record's index geometry. v8 was declared over Theta 1e7 to 1e10 on the strength of v7's T1-passing corner, and was never submitted: its three smoke-probe cells (THETA-SCREEN-V8, #613) confirmed the declared-onset invariant but burned the ship at every cell INCLUDING the 1e7 floor (2,843 to 3,099 recorded onsets of 3,711 against covid.T1's 197), and v7's own 40-seed cells agree wherever its index was in fact symptomatic aboard (median attack 0.709 at Theta 1e7, age 11 d, rising monotonically to 0.98 at 1e12). The quiet region of the v7 surface was quiet because the index usually never became infectious before disembarking at day 5, not because Theta was small. So the band that can reproduce Diamond Princess at 712/3,711 = 0.19 and the covid.H3 fleet median at 0.002 lies BELOW 1e7, where no screen has been. This screen goes there: ten decade steps from 1e1 to 1e10 at three index incubations, 20 seeds, 600 cells. It is a locator, not a fit -- a half-decade refinement of whatever band it finds is stage 1b, declared after this surface exists and before its own cells run.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "covid_theta_screen_v8 stage 1 (never submitted)",
+  "prerequisites": [
+    "DOSE-FRAIL-01 (#603): Theta scales the per-host beta-Poisson frailty draw; mean host susceptibility = Theta.",
+    "INDEX-GEOM-01 (#605): declared per-agent departure; the diamond_princess_2020 index seed carries departure_day 5.0.",
+    "SEED-ONSET-01 (#609): ExplicitSeed.onset_day; the diamond_princess_2020 index seed carries onset_day -1.0 and boards symptomatic by construction.",
+    "THETA-SCREEN-V8 (#610, #613): the declared-onset invariant is confirmed end-to-end on real cells (index_onset_day == -1.0, index_shedding_at_day0 true, index_departed_epoch 120), and the v8 grid was measured to sit in saturation. v8 was never submitted."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    10.0,
+    100.0,
+    1000.0,
+    10000.0,
+    100000.0,
+    1000000.0,
+    10000000.0,
+    100000000.0,
+    1000000000.0,
+    10000000000.0
+  ],
+  "thetas_note": "Ten decade steps, 1e1 to 1e10. Decades rather than v7/v8's half decades because the purpose is to bracket a band whose location is unknown to within several decades, and 600 cells buys that; resolution comes afterwards. The ceiling is v8's ceiling, so this surface contains the whole region v7 and v8 declared and the probes measured, and the two can be read against each other at 1e7, 1e8, 1e9 and 1e10 on the shared lattice. The floor is 1e1 and is expected to be inert: an inert floor is the evidence that the sweep contains the band rather than sitting above it, which is exactly the failure v8 would have made. If the admissible set sits on either boundary it is a boundary and must be reported as one, and the sweep extended in that direction rather than selected on.",
+  "infection_age_days": [
+    3.3,
+    6.8,
+    12.8
+  ],
+  "infection_age_note": "Three points, not v8's six: with onset_day declared this axis is the index host's incubation period (implied incubation = infection_age_days + onset_day = infection_age_days - 1.0 d), so 3.3, 6.8 and 12.8 d place it at 2.3, 5.8 and 11.8 d -- the sars_cov2_resp profile's authored incubation distribution (lognormal, median 5.8 d, GSD 1.57, 95% interval 2.3 to 14.6 d; Wei 2021 via docs/ctb_incubation_spec.md) at its median and near both 95% endpoints. Three points span the axis's effect while the Theta range is being located; the interior points return at stage 1b. No value on this axis may be selected by which one reproduces covid.T1 -- it is the record's unobserved coordinate, screened and reported, never chosen.",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "20 matched seeds, v7's base. Half of v8's count because this is a locator over ten decades and the quantity being read is which decades produce a near-critical arm at all; 40 seeds return at stage 1b where the across-seed distribution is the thing being judged. Same base, so a v9 cell pairs with the v7/v8 cell at the same (Theta, seed) where the lattices meet.",
+  "points": [
+    [
+      10.0,
+      3.3,
+      1
+    ],
+    [
+      10.0,
+      6.8,
+      1
+    ],
+    [
+      10.0,
+      12.8,
+      1
+    ],
+    [
+      100.0,
+      3.3,
+      1
+    ],
+    [
+      100.0,
+      6.8,
+      1
+    ],
+    [
+      100.0,
+      12.8,
+      1
+    ],
+    [
+      1000.0,
+      3.3,
+      1
+    ],
+    [
+      1000.0,
+      6.8,
+      1
+    ],
+    [
+      1000.0,
+      12.8,
+      1
+    ],
+    [
+      10000.0,
+      3.3,
+      1
+    ],
+    [
+      10000.0,
+      6.8,
+      1
+    ],
+    [
+      10000.0,
+      12.8,
+      1
+    ],
+    [
+      100000.0,
+      3.3,
+      1
+    ],
+    [
+      100000.0,
+      6.8,
+      1
+    ],
+    [
+      100000.0,
+      12.8,
+      1
+    ],
+    [
+      1000000.0,
+      3.3,
+      1
+    ],
+    [
+      1000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000.0,
+      12.8,
+      1
+    ],
+    [
+      10000000.0,
+      3.3,
+      1
+    ],
+    [
+      10000000.0,
+      6.8,
+      1
+    ],
+    [
+      10000000.0,
+      12.8,
+      1
+    ],
+    [
+      100000000.0,
+      3.3,
+      1
+    ],
+    [
+      100000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000.0,
+      12.8,
+      1
+    ],
+    [
+      1000000000.0,
+      3.3,
+      1
+    ],
+    [
+      1000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000.0,
+      12.8,
+      1
+    ],
+    [
+      10000000000.0,
+      3.3,
+      1
+    ],
+    [
+      10000000000.0,
+      6.8,
+      1
+    ],
+    [
+      10000000000.0,
+      12.8,
+      1
+    ]
+  ],
+  "cells": 600,
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "Unchanged from v7: the same worker fields, so the two surfaces are read the same way.",
+    "index_onset_day": "Voyage day of the seeded index host's symptom onset. Under a declared onset this must equal -1.0 in every cell; a cell where it does not is a defect in the seeding path, not a failed criterion.",
+    "index_shedding_at_day0": "Whether the seeded host's shedding curve is above zero at epoch 0. True by construction here: the host is one day past onset at boarding.",
+    "index_departed_epoch": "The epoch the seeded host left the ship, echoed from the run for audit.",
+    "infections_total": "Truth-channel count of hosts ever infected, index excluded.",
+    "aboard_total": "Hosts aboard at epoch 0.",
+    "attack_rate": "infections_total / aboard_total.",
+    "vsp_reported_case_fraction_max": "Maximum over epochs of the engine's reported passenger case fraction, for the cross-pathogen readout against the 3% VSP threshold; recorded, not thresholded, in the worker."
+  },
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "Pre-declared before any v9 cell exists. covid.T1 and the index-geometry invariant are carried over verbatim from v8, thresholds included; nothing is loosened, and widening the Theta range downward is not a loosening -- it screens Theta space the earlier grids never visited, for a reason measured and recorded before this design was written (THETA-SCREEN-V8). Bimodality is NOT a failure criterion and its absence is not a success criterion: covid.H3 records a median voyage attack rate of 0.2% with Diamond Princess at 712 cases, so the real fleet IS near-critical. The question is whether one Theta puts typical voyages at the fleet median while leaving the Diamond Princess trajectory in the tail.",
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT, not a selection filter: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds.",
+      "reads": "the seeded host's own onset and shedding record",
+      "note": "Under SEED-ONSET-01 the onset day is stamped from the record rather than drawn, so any deviation is a seeding-path defect and invalidates the cell rather than excluding it from selection. The v7 criterion (80% of seeds) is retired: it was a threshold on a lottery the model should never have been running."
+    },
+    "covid_T1": {
+      "criterion": "The cell's 10th-to-90th percentile interval of recorded_onsets across seeds contains 197, AND |before_share - 0.173| <= 0.10 for the cell's median before_share, where before_share = onsets_before_split_day / recorded_onsets and 0.173 = 34/197 (onsets before day 17, 6 February).",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Verbatim from v7 and v8, thresholds included. This is the selection criterion. It is known to be weak in one specific way, measured off the v7 surface and recorded in THETA-SCREEN-V8 before this design was written: all eleven v7 T1-passing cells passed by their 10th-to-90th interval SPANNING 197 from an extinction floor (recorded_onsets p10 = 0) to a burn ceiling (p90 316 to 3,405), with attack q50 = 0.0000 in seven of them. The criterion is deliberately NOT rewritten here -- rewriting a criterion because a surface disappointed is the thing that must never happen -- but onset_mass_near_target below is reported alongside it so a pass can be read as mass-near-197 or as interval-spanning-197. A stage-1b design may tighten T1 using that diagnostic, declared before its own cells run."
+    },
+    "covid_T3_diagnostic": {
+      "criterion": "Reported, never used in selection: the cell's campaign_positives interval against 634 and median campaign_specimens against 3,063.",
+      "target_source": "covid.T3, data/observation/covid_fit_targets.json",
+      "note": "Demoted on v7's evidence, before any v8 cell ran: median campaign specimens ran 1,598 to 3,063 and conditional-on-takeoff median positives 66 to 872 across five decades of Theta, and T3 was passed in sixteen scattered cells whose attack rates differ by a factor of three. On this hull the testing campaign saturates against its own day capacities well before the epidemic does, so T3 measures assay capacity, not transmission."
+    },
+    "covid_T2_diagnostic": {
+      "criterion": "Reported, never used in selection: direction of the passenger and crew onset turn in the 7 days after day 16.",
+      "target_source": "covid.T2"
+    },
+    "covid_T4_diagnostic": {
+      "criterion": "Reported, never used in selection: asymptomatic share among positives, target 0.5047.",
+      "target_source": "covid.T4",
+      "note": "v7 measured this share capping at 0.43 anywhere on the surface and falling as Theta rises, because in this model it is emergent from delivered dose rather than a natural-history parameter. It cannot be met by a choice of Theta and is recorded here so the mismatch is tracked rather than silently reselected against."
+    },
+    "fleet_shape_indicator": {
+      "criterion": "Reported per cell, not thresholded at stage 1: P(attack_rate <= 0.01), the takeoff fraction (seeds reaching takeoff_recorded_onsets), P(attack_rate >= 0.10), and attack_rate quantiles at 0.1, 0.25, 0.5, 0.75, 0.9. The held-out covid.H3 shape (most voyages extinguishing, a minority burning) is what stage 2 tests; at stage 1 these are the indicator that a T1-passing cell is near-critical rather than deterministic."
+    },
+    "burn_tail": {
+      "criterion": "Reported per cell, not thresholded. The real Diamond Princess attack was 712/3711 = 0.19 under an intervention schedule the scenario reproduces; a cell whose attack-rate 10th-90th interval excludes 0.19 entirely is reported as such."
+    },
+    "selection": "The admissible set is every cell passing covid_T1 whose index-geometry invariant holds. If it is empty, the readout reports the nearest cells, the located band, and states that no admissible Theta exists on this arm; no criterion is loosened after the fact. If it is non-empty, stage 1b refines the band at half-decade steps with 40 seeds and the interior incubation points restored, and only then do stage 2 (fleet shape) and stage 3 (held-out hull) run on its output.",
+    "onset_mass_near_target_diagnostic": {
+      "criterion": "Reported, never used in selection at stage 1: the fraction of a cell's seeds whose recorded_onsets lies within a factor of two of the observed 197 (that is, in [98, 394] inclusive), and the full per-seed recorded_onsets vector so the distribution can be read rather than summarised.",
+      "note": "New in v9 and diagnostic by declaration. It exists because a T1 pass driven by an interval spanning 197 and a T1 pass driven by seeds landing near 197 are different evidential objects, and v7 could not tell them apart. Recorded, not thresholded: no cell is admitted or excluded on this quantity at stage 1."
+    }
+  },
+  "stage_2_fleet_shape": {
+    "status": "designed, not submitted until stage 1 closes; its Theta list is stage 1's output",
+    "scenario_id": "diamond_princess_2020",
+    "voyage_days": 7,
+    "seed_base": 20201001,
+    "voyages": 200,
+    "introduction": "one host at boarding with infection age drawn from the profile's incubation distribution and NO declared onset -- a typical voyage's introduction is not a dated case report, so onset_day is left unset here and the incubation is drawn, exactly as the channel does without SEED-ONSET-01",
+    "criterion": "Across the 200 voyages: median recorded attack rate within [0.0005, 0.008], interquartile range overlapping [0.0003, 0.015], mean not above 0.06.",
+    "target_source": "covid.H3 (median 0.002, IQR 0.0003-0.015, mean 0.037; 79 ships, 104 voyages)",
+    "note": "Unchanged from v7. An approximation and declared as one: the model has one hull, not 79, so what is compared is the SHAPE of the across-voyage distribution, never a ship-specific value. The comparison numerator is RECORDED cases, not the truth channel. H3 is held out: this stage may refuse a Theta stage 1 admitted, but may never pick among Thetas stage 1 admitted."
+  },
+  "stage_3_held_out": {
+    "status": "designed, not submitted until stages 1 and 2 close",
+    "scenario_id": "greg_mortimer_2020",
+    "seed_base": 20200315,
+    "seeds": 50,
+    "note": "Scored once at the selected Theta and reported at its half-decade neighbours as sensitivity. The Greg Mortimer seed declares no onset day -- no retrieved source dates that index's onset -- so its incubation is drawn, and its geometry is not an invariant there. A miss here is a result to record, not a reason to reopen the grid."
+  },
+  "cross_pathogen_readout": {
+    "note": "Recorded for comparison with the norovirus arm running the same hull: per cell, the fraction of runs whose vsp_reported_case_fraction_max reaches 0.03 and the attack-rate quantiles conditioned on reaching it. Same ship, different observable; neither arm constrains the other's Theta.",
+    "quantities": [
+      "vsp_threshold_crossing_fraction",
+      "attack_rate_quantiles",
+      "attack_rate_quantiles_given_vsp_crossing"
+    ]
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v9. The image must be built from a main that contains this design file: the design is read inside the container.",
+    "stage_1_cells": 600,
+    "stride": 1,
+    "expected_cell_minutes": 30
+  },
+  "stage_1b_refinement": {
+    "status": "designed in outline, declared in its own file once this surface exists; its Theta list is this screen's output",
+    "note": "Half-decade steps spanning the admitted band plus one half decade beyond each edge, 40 seeds, the six v8 incubation points restored. It refines resolution and seed count only: covid.T1 and the geometry invariant carry over verbatim again, and any tightening of T1 on v9's onset_mass_near_target evidence is declared there, before its cells run."
+  }
+}

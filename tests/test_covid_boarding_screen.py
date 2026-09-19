@@ -500,3 +500,107 @@ def test_declared_onset_day_returns_the_declared_day(age):
     geometry = _index_geometry(engine, cell, profile)
     assert geometry["index_onset_day"] == pytest.approx(onset)
     assert geometry["index_shedding_at_day0"] is True
+
+
+# ── v9 onset-mass diagnostic ──────────────────────────────────────────────
+
+V9_DESIGN_REL = REPO_ROOT / "picard_framework" / "runs" / "covid_theta_screen_v9_design.json"
+
+
+def _per_seed_stub(cell: ScreenCell, by_seed_onsets: dict[int, int]) -> dict:
+    """A payload whose recorded_onsets are stated per seed, not jittered."""
+    recorded = int(by_seed_onsets[cell.seed])
+    before = round(recorded * (34 / 197))
+    obs = HullObservables(
+        scenario_id=cell.scenario_id, theta=cell.theta, seed=cell.seed,
+        recorded_onsets=recorded,
+        onsets_before_split_day=before,
+        onsets_on_or_after_split_day=recorded - before,
+        passenger_onsets_before=1, passenger_onsets_after=1,
+        crew_onsets_before=1, crew_onsets_after=1,
+        campaign_specimens=3063,
+        campaign_positives=634,
+        campaign_asymptomatic_positives=320,
+    )
+    return {
+        "design_id": "x",
+        "cell": cell.as_dict(),
+        "observables": obs.as_dict(),
+        "onset_curve": {},
+        "first_onset_day": None,
+        "sanitary_activity": {"visits": 100.0},
+        "index_onset_day": -1.0,
+        "index_shedding_at_day0": True,
+        "index_departed_epoch": 120,
+        "infections_total": recorded,
+        "aboard_total": 3711,
+        "attack_rate": recorded / 3711,
+        "vsp_reported_case_fraction_max": 0.04,
+    }
+
+
+def _single_cell_surface(by_seed_onsets: dict[int, int]) -> dict:
+    design = BoardingScreenDesign(
+        design_id="v9_probe", scenario_id="diamond_princess_2020",
+        thetas=(1e9,), infection_age_days=(6.8,), imports=(1,),
+        sanitary_visit_mode="dwell_weighted", seed_base=20200205,
+        seeds=len(by_seed_onsets), takeoff_recorded_onsets=10,
+    )
+    payloads = {
+        c.key: _per_seed_stub(c, by_seed_onsets)
+        for c in enumerate_cells(design)
+    }
+    surface = merge_screen(design, payloads)
+    assert len(surface["surface"]) == 1
+    return surface["surface"][0]
+
+
+def test_onset_mass_is_one_when_every_seed_lands_on_target():
+    seeds = {20200205 + i: 180 + 7 * i for i in range(10)}
+    entry = _single_cell_surface(seeds)
+    assert entry["onset_mass_near_target"] == 1.0
+    assert entry["recorded_onsets_per_seed"] == [
+        seeds[s] for s in sorted(seeds)
+    ]
+    assert entry["seeds"] == sorted(seeds)
+    assert entry["onset_mass_near_target_bounds"] == [98.5, 394.0]
+
+
+def test_onset_mass_is_zero_on_the_bimodal_cell_that_passes_t1():
+    """The v7 failure mode: the T1 interval covers 197 because half the
+    seeds die and half burn — the diagnostic must separate the two."""
+    seeds = {
+        **{20200205 + i: 2 + i for i in range(5)},
+        **{20200205 + 5 + i: 2950 + 10 * i for i in range(5)},
+    }
+    entry = _single_cell_surface(seeds)
+    assert entry["onset_mass_near_target"] == 0.0
+    assert entry["t1_ok"] is True  # p10<=197<=p90 and before-share in range
+    assert entry["recorded_onsets_per_seed"] == [
+        seeds[s] for s in sorted(seeds)
+    ]
+
+
+def test_onset_mass_is_graded_between_the_extremes():
+    seeds = {
+        **{20200205 + i: 150 + i for i in range(6)},   # inside [98.5, 394]
+        **{20200205 + 6 + i: 900 + i for i in range(4)},
+    }
+    entry = _single_cell_surface(seeds)
+    assert 0.0 < entry["onset_mass_near_target"] < 1.0
+    assert entry["onset_mass_near_target"] == 0.6
+
+
+def test_v9_design_is_the_declared_recentring_screen():
+    design = load_design(str(V9_DESIGN_REL))
+    assert design.design_id == "covid_theta_screen_v9"
+    assert design.scenario_id == "diamond_princess_2020"
+    assert design.is_refinement
+    assert design.parent_design == "covid_theta_screen_v8"
+    cells = enumerate_cells(design)
+    assert len(cells) == 600
+    assert len({c.key for c in cells}) == 600
+    assert min(design.thetas) == 1e1
+    assert max(design.thetas) == 1e10
+    assert design.infection_age_days == (3.3, 6.8, 12.8)
+    assert design.seeds == 20

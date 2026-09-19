@@ -498,6 +498,15 @@ def _admissibility(
     t1 = targets.assert_fittable("covid.T1").values
     t3 = targets.assert_fittable("covid.T3").values
     t1_onsets = float(t1["recorded_onsets"])
+    onsets_per_seed = [o.recorded_onsets for o in (obs[s] for s in sorted(obs))]
+    onset_mass_bounds = [0.5 * t1_onsets, 2.0 * t1_onsets]
+    onset_mass = (
+        float(np.mean([
+            onset_mass_bounds[0] <= x <= onset_mass_bounds[1]
+            for x in onsets_per_seed
+        ]))
+        if onsets_per_seed else None
+    )
     t1_before_share = float(t1["onsets_before_day"]) / t1_onsets
     t3_positives = float(t3["cumulative_positives"])
     t3_tests = float(t3["cumulative_tests"])
@@ -552,6 +561,12 @@ def _admissibility(
         "p_attack_le_0p01": (
             float(np.mean([r <= 0.01 for r in rates])) if rates else None
         ),
+        # Diagnostic only, v9's near-critical discriminator: the share of
+        # seeds whose recorded_onsets lands inside [0.5x, 2x] the covid.T1
+        # target. Never enters t1_ok / t3_ok / index_geometry_ok.
+        "recorded_onsets_per_seed": onsets_per_seed,
+        "onset_mass_near_target": onset_mass,
+        "onset_mass_near_target_bounds": onset_mass_bounds,
         "vsp_threshold_crossing_fraction": (
             float(np.mean([m >= 0.03 for m in vsp_maxima]))
             if vsp_maxima else None
