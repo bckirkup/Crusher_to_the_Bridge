@@ -5,6 +5,7 @@ Steppable ship simulation extracted from orchestrator.py.
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
@@ -214,6 +215,7 @@ class _EpochWork:
     merged_mods: Any = None
     counter_results: Any = None
     epoch_record: dict[str, Any] = field(default_factory=dict)
+    tx_events: list[Any] = field(default_factory=list)
 
 
 def _merge_applied(current: dict[str, Any], extra: dict[str, Any]) -> dict[str, Any]:
@@ -295,6 +297,10 @@ class ShipSimulation:
         self.surface_recovery_config: SurfaceRecoveryConfig | None = None
         self.surface_recovery_rng: np.random.Generator | None = None
         self.scenario_schedule = ScenarioSchedule()
+        # Read-only per-epoch seam: fired at the end of every step with the
+        # epoch's scratch pad so attribution screens can accumulate the
+        # detail that history_retention compact drops.
+        self.epoch_observer: Callable[[ShipSimulation, _EpochWork], None] | None = None
 
 
     @property
@@ -808,6 +814,8 @@ class ShipSimulation:
         self._step_command(work)
         self._step_protocols(work)
         self._step_record(work)
+        if self.epoch_observer is not None:
+            self.epoch_observer(self, work)
         return StepResult(
             epoch=work.epoch,
             trigger_status=work.state.trigger_status,
@@ -916,7 +924,7 @@ class ShipSimulation:
             work.epoch,
             self.tx_core,
         )
-        work.tracing_matrix, tx_events = self.tx_core.execute_transmission(
+        tracing, tx_events = self.tx_core.execute_transmission(
             epoch=work.epoch,
             agents=self.engine.agents,
             zone_pathogen_mass=self.engine.zone_pathogen_mass,
@@ -926,6 +934,8 @@ class ShipSimulation:
             ),
             quarantined_ids=set(state.quarantined_ids),
         )
+        work.tracing_matrix = tracing
+        work.tx_events = tx_events
         update_route_attribution(
             tx_events,
             state.infections_by_dominant_route,
