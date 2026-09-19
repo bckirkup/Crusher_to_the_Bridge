@@ -67,7 +67,6 @@ from orchestrator_chronic import (
 )
 from orchestrator_epoch import (
     apply_chronic_severity_escalation,
-    apply_outbreak_surface_disinfection,
     apply_zone_closures,
     build_cascade_context,
     compute_infection_counters,
@@ -1368,17 +1367,19 @@ class ShipSimulation:
         work.merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(
             work.active_mods,
         )
+        if self.tx_core is not None:
+            # Armed or cleared every epoch, merged or not -- the meter must
+            # see the falling edge to release the in-force reduction.
+            self.tx_core.set_outbreak_disinfection(
+                work.merged_mods.get("surface_disinfection_log10_reduction")
+                if work.merged_mods else None
+            )
         if not work.merged_mods:
             return
         apply_hvac_modifiers(self.contam_engine, work.merged_mods)
         apply_transmission_modifiers(self.tx_core, work.merged_mods)
         if "close_zones" in work.merged_mods:
             apply_zone_closures(self.engine, work.merged_mods["close_zones"])
-        if "surface_disinfection_log10_reduction" in work.merged_mods:
-            apply_outbreak_surface_disinfection(
-                self.tx_core,
-                work.merged_mods["surface_disinfection_log10_reduction"],
-            )
 
     def _attach_strain_census(self, work: _EpochWork) -> None:
         """Record this epoch's lineage census, once per tracked pathogen.

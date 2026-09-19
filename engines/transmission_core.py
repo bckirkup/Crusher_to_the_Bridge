@@ -286,6 +286,26 @@ OUTBREAK_DISINFECTION_LOG10_REDUCTION = (
 # applied to Carling's 37% baseline gives 0.58. Inferred across settings, and
 # it must be swept rather than asserted. Grade C.
 OUTBREAK_CLEANING_COVERAGE = 0.58
+
+# Outbreak-response disinfection passes per day on public-area hand-contact
+# surfaces. VSP 2018 Operations Manual §9.1.1.1.1 "Continuous Disinfection
+# (41)" requires, at >=2% AGE, cleaning/disinfecting the hand-contact
+# surfaces of all public areas "on a continuous basis while passengers
+# and/or crew are circulating", "without interruption along a logical
+# route by deck, venue, and area". VSP specifies no circuit time, so the
+# per-surface revisit rate is NOT sourced: this is a declared assumption of
+# an hourly circuit, and it is deliberately the value that preserves the
+# pre-repair public-area behaviour at 1-hour epochs, so the metering change
+# is the defect fix and nothing else. Grade C. Origin: Tr.
+# https://www.cdc.gov/vessel-sanitation/media/files/vsp_operations_manual_2018-508.pdf §9.1.1.1
+OUTBREAK_CLEANING_EVENTS_PER_DAY = 24.0
+
+# Outbreak-response cabin passes per day. VSP 2018 Operations Manual
+# §9.1.1.1.2 "Cabin Cleaning (41)": "Cabins that house passengers or crew
+# with AGE must be cleaned and disinfected daily while the occupants are
+# ill." The regulator's own prescription for this setting. Grade A.
+# Origin: Tr. Same manual, §9.1.1.1.
+OUTBREAK_CABIN_CLEANING_EVENTS_PER_DAY = 1.0
 # Per-sample emesis titre is the identified quantity: Kirby et al. 2016's
 # cumulative shed is titre x volume summed over positive samples, and Table 3
 # reports per-subject positives-only sample means. Titre is a host property,
@@ -1469,23 +1489,43 @@ def _parse_surface_cleaning_cfg(
     routine_coverage, routine_events, routine_log10_reduction = (
         _parse_routine_cleaning_scalars(routine)
     )
+    outbreak_coverage = float(
+        outbreak.get("coverage", OUTBREAK_CLEANING_COVERAGE),
+    )
+    if not 0.0 <= outbreak_coverage <= 1.0:
+        raise ValueError(
+            "surface_cleaning.outbreak_response.coverage must be in [0,1]",
+        )
+    outbreak_events = float(
+        outbreak.get("events_per_day", OUTBREAK_CLEANING_EVENTS_PER_DAY),
+    )
+    if outbreak_events < 0.0:
+        raise ValueError(
+            "surface_cleaning.outbreak_response.events_per_day must be >= 0",
+        )
     return {
         "enabled": bool(cleaning.get("enabled", True)),
         "routine_coverage": routine_coverage,
         "routine_log10_reduction": routine_log10_reduction,
         "routine_events_per_day": routine_events,
-        "routine_by_zone_class": _parse_routine_by_zone_class(
+        "routine_by_zone_class": _parse_cleaning_by_zone_class(
             routine.get("by_zone_class", {}),
             routine_coverage,
             routine_events,
+            "routine",
         ),
-        "outbreak_coverage": float(
-            outbreak.get("coverage", OUTBREAK_CLEANING_COVERAGE),
-        ),
+        "outbreak_coverage": outbreak_coverage,
         "outbreak_log10_reduction": float(
             outbreak.get(
                 "log10_reduction", OUTBREAK_DISINFECTION_LOG10_REDUCTION,
             ),
+        ),
+        "outbreak_events_per_day": outbreak_events,
+        "outbreak_by_zone_class": _parse_cleaning_by_zone_class(
+            outbreak.get("by_zone_class", {}),
+            outbreak_coverage,
+            outbreak_events,
+            "outbreak_response",
         ),
     }
 
@@ -1516,16 +1556,19 @@ def _parse_routine_cleaning_scalars(
     return routine_coverage, routine_events, routine_log10_reduction
 
 
-def _parse_routine_by_zone_class(
+def _parse_cleaning_by_zone_class(
     raw: Any,
-    routine_coverage: float,
-    routine_events: float,
+    default_coverage: float,
+    default_events: float,
+    block: str,
 ) -> dict[str, dict[str, float]]:
-    """Parse optional per-zone routine-cleaning overrides."""
+    """Parse optional per-zone cleaning overrides for one config block."""
     if raw is None:
         raw = {}
     if not isinstance(raw, Mapping):
-        raise ValueError("surface_cleaning.routine.by_zone_class must be a mapping")
+        raise ValueError(
+            f"surface_cleaning.{block}.by_zone_class must be a mapping",
+        )
     by_zone_class: dict[str, dict[str, float]] = {}
     for zone_class, values in raw.items():
         if zone_class not in HIGH_TOUCH_AREA_M2:
@@ -1534,7 +1577,7 @@ def _parse_routine_by_zone_class(
             )
         if not isinstance(values, Mapping):
             raise ValueError(
-                f"surface_cleaning.routine.by_zone_class.{zone_class} "
+                f"surface_cleaning.{block}.by_zone_class.{zone_class} "
                 "must be a mapping",
             )
         unknown_fields = set(values) - {"coverage", "events_per_day"}
@@ -1543,16 +1586,16 @@ def _parse_routine_by_zone_class(
                 f"unknown fields in surface-cleaning zone class "
                 f"{zone_class}: {sorted(unknown_fields)}",
             )
-        coverage = float(values.get("coverage", routine_coverage))
-        events = float(values.get("events_per_day", routine_events))
+        coverage = float(values.get("coverage", default_coverage))
+        events = float(values.get("events_per_day", default_events))
         if not 0.0 <= coverage <= 1.0:
             raise ValueError(
-                f"surface_cleaning.routine.by_zone_class.{zone_class}."
+                f"surface_cleaning.{block}.by_zone_class.{zone_class}."
                 "coverage must be in [0,1]",
             )
         if events < 0.0:
             raise ValueError(
-                f"surface_cleaning.routine.by_zone_class.{zone_class}."
+                f"surface_cleaning.{block}.by_zone_class.{zone_class}."
                 "events_per_day must be >= 0",
             )
         by_zone_class[zone_class] = {
@@ -1763,6 +1806,12 @@ class TransmissionCore:
         self.outbreak_cleaning_log10_reduction = float(
             cleaning_cfg["outbreak_log10_reduction"],
         )
+        self.outbreak_cleaning_events_per_day = float(
+            cleaning_cfg["outbreak_events_per_day"],
+        )
+        self.outbreak_cleaning_by_zone_class: dict[str, dict[str, float]] = (
+            cleaning_cfg["outbreak_by_zone_class"]
+        )
         # Dining-type zones or Galley IDs: crew contact multiplier applies here
         self._service_zones: set[str] = {
             z
@@ -1789,6 +1838,13 @@ class TransmissionCore:
         ] = {}
         self._routine_cleaning_accumulators: dict[str, float] = {}
         self._routine_cleaning_event_counts: dict[str, int] = {}
+        # Outbreak-response pass meter, same discrete-event contract as the
+        # routine accumulators: a pass is a housekeeping event, not an epoch
+        # action. ``_outbreak_disinfection_in_force`` is the SOP's log10
+        # reduction while active, None while cleared.
+        self._outbreak_cleaning_accumulators: dict[str, float] = {}
+        self._outbreak_cleaning_event_counts: dict[str, int] = {}
+        self._outbreak_disinfection_in_force: float | None = None
         self._surface_last_deposition_epoch: dict[str, int] = {}
 
         # Persistent state: airborne aerosol pools per zone per pathogen
@@ -2457,51 +2513,129 @@ class TransmissionCore:
             for zone_name in pools
         }
         zone_names.update(patch_zones)
-        disinfection_factors = {
-            zone_name: self._nested_disinfection_factors(
-                self._routine_cleaning_schedule(zone_name)[0],
-                coverage,
-                kill_multiplier,
-            )
-            for zone_name in zone_names
-        }
+        for zone_name in zone_names:
+            self._disinfect_zone(zone_name, coverage, kill_multiplier)
+
+    def _disinfect_zone(
+        self,
+        zone_name: str,
+        coverage: float,
+        kill_multiplier: float,
+    ) -> None:
+        """Apply one outbreak pass to a single zone's surface compartments."""
+        cleanable_factor, missed_factor = self._nested_disinfection_factors(
+            self._routine_cleaning_schedule(zone_name)[0],
+            coverage,
+            kill_multiplier,
+        )
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
-            for zone_name, value in pools.items():
-                total = max(0.0, float(value))
-                if total <= 0.0:
-                    continue
-                cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-                    pathogen_id, {},
+            value = pools.get(zone_name)
+            total = max(0.0, float(value)) if value is not None else 0.0
+            if total <= 0.0:
+                continue
+            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            old_cleanable = min(
+                total, max(0.0, float(cleanable.get(zone_name, 0.0))),
+            )
+            old_missed = total - old_cleanable
+            retention = (
+                old_cleanable * cleanable_factor
+                + old_missed * missed_factor
+            ) / total
+            self._scale_surface_mass(pathogen_id, zone_name, retention)
+            cleanable[zone_name] = old_cleanable * cleanable_factor
+            if self.strain_registry is not None:
+                self._reservoir.decay(
+                    retention,
+                    ReservoirComposition.key(
+                        SURFACE_RESERVOIR, pathogen_id, zone_name,
+                    ),
                 )
-                old_cleanable = min(
-                    total, max(0.0, float(cleanable.get(zone_name, 0.0))),
-                )
-                old_missed = total - old_cleanable
-                cleanable_factor, missed_factor = disinfection_factors[zone_name]
-                retention = (
-                    old_cleanable * cleanable_factor
-                    + old_missed * missed_factor
-                ) / total
-                self._scale_surface_mass(pathogen_id, zone_name, retention)
-                cleanable[zone_name] = old_cleanable * cleanable_factor
-                if self.strain_registry is not None:
-                    self._reservoir.decay(
-                        retention,
-                        ReservoirComposition.key(
-                            SURFACE_RESERVOIR, pathogen_id, zone_name,
-                        ),
-                    )
         for _pid, patches_by_unit in (
             self.emesis_patch_pools_by_pathogen.items()
         ):
-            for zone_name, patches in patches_by_unit.items():
-                if zone_name not in disinfection_factors or not patches:
-                    continue
-                cleanable_factor, _missed = disinfection_factors[zone_name]
-                patches_by_unit[zone_name] = [
-                    p for p in patches
-                    if self._scale_emesis_patch(p, cleanable_factor) > 0.0
-                ]
+            patches = patches_by_unit.get(zone_name)
+            if not patches:
+                continue
+            patches_by_unit[zone_name] = [
+                p for p in patches
+                if self._scale_emesis_patch(p, cleanable_factor) > 0.0
+            ]
+
+    def _outbreak_cleaning_schedule(self, zone_name: str) -> tuple[float, float]:
+        """Return outbreak coverage and passes-per-day for a zone."""
+        zone_class = self._fomite_zone_class(zone_name)
+        schedule = self.outbreak_cleaning_by_zone_class.get(zone_class)
+        if schedule is None:
+            return (
+                self._bounded_fraction(self.outbreak_cleaning_coverage),
+                self.outbreak_cleaning_events_per_day,
+            )
+        return (
+            self._bounded_fraction(schedule["coverage"]),
+            schedule["events_per_day"],
+        )
+
+    def _outbreak_cleaning_event(self, zone_name: str) -> None:
+        """Apply one metered outbreak pass to a single zone."""
+        reduction = max(0.0, float(self._outbreak_disinfection_in_force or 0.0))
+        self._disinfect_zone(
+            zone_name,
+            self.outbreak_cleaning_coverage,
+            10.0 ** -reduction,
+        )
+
+    def set_outbreak_disinfection(self, log10_reduction: float | None) -> None:
+        """Arm or clear the outbreak-response pass meter for this epoch.
+
+        Called every epoch with the SOP's log10 reduction while a
+        disinfection modifier is in force, and with ``None`` once it is not.
+        A rising edge fires one immediate ship-wide round -- an outbreak
+        declaration does trigger an immediate pass, and one pass per
+        activation edge is epoch-length independent. While armed, per-zone
+        accumulators advance by ``events_per_day(zone_class) *
+        clock.day_fraction_per_epoch`` and fire whole passes, the same
+        discrete-event contract as routine housekeeping; the epoch is not
+        the pass's unit.
+        """
+        if log10_reduction is None:
+            if self._outbreak_disinfection_in_force is not None:
+                self._outbreak_disinfection_in_force = None
+                self._outbreak_cleaning_accumulators.clear()
+            return
+        if self._outbreak_disinfection_in_force is None:
+            self.disinfect_surfaces(
+                float(log10_reduction),
+                self.outbreak_cleaning_coverage,
+            )
+            self._outbreak_disinfection_in_force = float(log10_reduction)
+        zones = set(self._outbreak_cleaning_accumulators)
+        for pools in self.surface_pools_by_pathogen.values():
+            zones.update(pools)
+        for pools in self.emesis_patch_pools_by_pathogen.values():
+            zones.update(pools)
+        for zone_name in zones:
+            events_per_day = self._outbreak_cleaning_schedule(zone_name)[1]
+            increment = (
+                max(0.0, events_per_day)
+                * self.clock.day_fraction_per_epoch
+            )
+            if increment <= 0.0:
+                continue
+            self._outbreak_cleaning_accumulators.setdefault(zone_name, 0.0)
+            accumulator = (
+                self._outbreak_cleaning_accumulators[zone_name] + increment
+            )
+            while accumulator + 1e-12 >= 1.0:
+                self._outbreak_cleaning_event(zone_name)
+                self._outbreak_cleaning_event_counts[zone_name] = (
+                    self._outbreak_cleaning_event_counts.get(zone_name, 0) + 1
+                )
+                accumulator -= 1.0
+            accumulator = max(0.0, accumulator)
+            self._outbreak_cleaning_accumulators[zone_name] = accumulator
 
     @classmethod
     def _nested_disinfection_factors(
@@ -3542,6 +3676,8 @@ class TransmissionCore:
             self._prev_zone_shedders.setdefault(z, [])
             self._routine_cleaning_accumulators.setdefault(z, 0.0)
             self._routine_cleaning_event_counts.setdefault(z, 0)
+            self._outbreak_cleaning_accumulators.setdefault(z, 0.0)
+            self._outbreak_cleaning_event_counts.setdefault(z, 0)
         # Identify Dining-type zones for food contamination
         dining_zones = [
             z for z in zone_names
@@ -5604,6 +5740,7 @@ class TransmissionCore:
                     epoch=int(epoch),
                 ))
                 self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
+                self._outbreak_cleaning_accumulators.setdefault(zone_name, 0.0)
             if self.blackwater_tank is not None:
                 # The deposited share outside the high-touch footprint is
                 # cleaned up into the sewage stream at the declared

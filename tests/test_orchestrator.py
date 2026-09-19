@@ -648,19 +648,28 @@ class TestSOP010Modifiers:
             zone_volumes={"Bridge": 100.0},
             pathogen_profiles={"norwalk_gi": {}},
             zone_types={"Bridge": "Work"},
+            # Zero metered passes: these tests exercise the activation-edge
+            # pass only, matching the old per-epoch call they replace.
+            cfg={
+                "transmission": {
+                    "surface_cleaning": {
+                        "outbreak_response": {"events_per_day": 0.0},
+                    },
+                },
+            },
         )
         core.initialize_zones(["Bridge"])
         core._deposit_surface_mass("norwalk_gi", "Bridge", 100.0)
         return core
 
     def test_surface_disinfection_reduces_mass(self) -> None:
-        from orchestrator_epoch import apply_outbreak_surface_disinfection
         cfg = load_config()
         from orchestrator_init import build_engine
         engine = build_engine(cfg, seed=42)
         engine.zone_pathogen_mass["Bridge"] = 100.0
         core = self._disinfection_core()
-        apply_outbreak_surface_disinfection(core, 4.29)
+        core.set_outbreak_disinfection(4.29)
+        core.set_outbreak_disinfection(None)
         # 0.37 is reduced by 4.29 log10; 0.63 loses only 1/3, so
         # 0.63 * (1 - 1/3) = 0.42 retention.
         assert core.surface_pools["Bridge"] == pytest.approx(42.0, rel=1e-3)
@@ -670,18 +679,18 @@ class TestSOP010Modifiers:
         assert engine.zone_pathogen_mass["Bridge"] == pytest.approx(100.0)
 
     def test_surface_disinfection_negative_reduction_clamped(self) -> None:
-        from orchestrator_epoch import apply_outbreak_surface_disinfection
         core = self._disinfection_core()
-        apply_outbreak_surface_disinfection(core, -1.0)
+        core.set_outbreak_disinfection(-1.0)
+        core.set_outbreak_disinfection(None)
         assert core.surface_pools["Bridge"] == pytest.approx(100.0)
         assert core.surface_pools_by_pathogen["norwalk_gi"][
             "Bridge"
         ] == pytest.approx(100.0)
 
     def test_surface_disinfection_high_reduction_preserves_missed_floor(self) -> None:
-        from orchestrator_epoch import apply_outbreak_surface_disinfection
         core = self._disinfection_core()
-        apply_outbreak_surface_disinfection(core, 50.0)
+        core.set_outbreak_disinfection(50.0)
+        core.set_outbreak_disinfection(None)
         assert core.surface_pools_cleanable_by_pathogen["norwalk_gi"][
             "Bridge"
         ] == pytest.approx(0.0, abs=1e-10)

@@ -16,6 +16,17 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`CLEAN-OUTBREAK-01` (ledger entry): every voyage measured while an
+outbreak SOP could fire ran under ~100 log10/day of surface removal —
+the SOP-triggered disinfection pass fired once *per epoch* rather than on
+the clock.** This includes the post-`EMESIS-FOOTPRINT-01` baselines
+themselves: zero onboard secondaries in 12/12 `fl_cls_12d` and 12/12
+`fl_exp_12d` seeds of `flush_sweep_v1_off_s4` (run zips under
+`telemetry_buffer/noro_diag_2026_09_18/`). Those readings are withdrawn
+pending re-measurement on the metered repair; the reported absence of
+secondary transmission cannot be attributed to any upstream blocker until
+then. No dose figure measured under the per-epoch pass is current.
+
 **`EMESIS-FOOTPRINT-01` (ledger entry): every campaign reading that rests on
 emesis deposition — including the FLUSH-S4 `off`-arm posting rates (5 per
 1,000 classic, 20 per 1,000 spirit at `7f689b9`) and every earlier stage's
