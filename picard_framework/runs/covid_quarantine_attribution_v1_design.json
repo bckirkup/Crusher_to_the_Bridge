@@ -1,0 +1,92 @@
+{
+  "design_id": "covid_quarantine_attribution_v1",
+  "parent_design": "covid_theta_screen_v9",
+  "description": "Paired-seed attribution of the attack rate that accrues DURING the Diamond Princess cabin quarantine. THETA-SCREEN-V9 measured that the v9 takeoff seeds reproduce the DP onset TIMING (Theta 1e9: median peak day 19.5, 79% of onsets on or after day 17, against DP's ~day 18-20 and 83%) while overshooting the magnitude by ~15x (median 3,103 recorded onsets against 197). SOP-017 is not inert while that happens: it is declared confinement_enforced and QUAR-ORDER-01 measured all 2,666 passengers confined with zero unconfined post-quarantine passenger infections. The question this design answers is therefore NOT what Theta is, and NOT whether the quarantine fires, but which transmission channel carries the epidemic through an enforced confinement. It is an attribution screen. Nothing here is fitted and no arm is a candidate scenario: the declared DP replay is arm A0, and every other arm is a labelled counterfactual that exists only to be differenced against it.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": null,
+  "withdraws": "The stage_1b_refinement block of covid_theta_screen_v9 (half-decade, 40-seed, six-age refinement). Two of its three axes are void: the infection-age axis is inert under a declared onset_day (THETA-SCREEN-V9), and there is no near-critical Theta band to refine.",
+  "prerequisites": [
+    "DOSE-FRAIL-01 (#603): Theta scales the per-host beta-Poisson frailty draw.",
+    "INDEX-GEOM-01 (#605): declared per-agent departure; the index seed departs day 5.",
+    "SEED-ONSET-01 (#609): ExplicitSeed.onset_day; the index seed boards symptomatic with onset_day -1.0.",
+    "QUAR-ORDER-01 (#600): SOP-017 declares confinement_enforced; every non-exempt agent is admitted under the declaration rather than the voluntary FRED draw. Measured: 2,666 passengers confined, 0 unconfined post-quarantine passenger infections.",
+    "THETA-SCREEN-V9: the measured surface this design is a response to. Theta axis exhausted over [1e1, 1e10]; age axis inert; covid.T1 pass at 1e9 vacuous."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [100000.0, 1000000000.0],
+  "thetas_note": "Two decades, both carried from the v9 surface and chosen for what they contain, not for where a fit might be. 1e9 is the takeoff-rich decade (12 of 20 seeds take off; median peak day 19.5; the sole covid.T1 interval pass). 1e5 is the only decade on the v9 surface with ANY seed near the observed magnitude (2 of 20 seeds within a factor of two of 197; one seed, 20200211, reached attack rate 0.2005 = 744/3711 against DP's 0.1919). Running both means the attribution is measured where the model burns AND where it occasionally does not, so a channel's contribution cannot be an artefact of saturation.",
+  "infection_age_days": [3.3],
+  "infection_age_note": "Single value, and it is NOT an axis. Under the scenario's declared onset_day = -1.0 the infection age cancels exactly in engines/initiation.py::_apply_one_seed (incubation = age + onset_day - seed_day, history stamped from elapsed_since_onset = 1.0 d), measured in THETA-SCREEN-V9 as 200 of 200 (Theta, seed) triples byte-identical across 3.3 / 6.8 / 12.8 d. The value is retained only so this design's cells are readable against v9's on the same lattice.",
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The SAME 20 seeds as v9 at the same base, so arm A0 is a re-measurement of v9 cells that must reproduce them exactly and is used as the execution witness for that.",
+  "arms": [
+    {
+      "arm_id": "A0_declared",
+      "role": "baseline, and the only arm that is the declared Diamond Princess replay",
+      "overrides": {},
+      "note": "Shipped defaults: transmission.cabin_air_mode = cabin_compartment, transmission.near_field_air.mode = two_box, hvac.pathogen_pool_transport = airflow, SOP-017 with its declared crew exemptions. Must reproduce the corresponding v9 cells byte-for-byte outside the cell block; a mismatch invalidates the run rather than becoming a finding."
+    },
+    {
+      "arm_id": "A1_crew_confined",
+      "role": "counterfactual: removes the crew channel",
+      "overrides": {"scheduled_protocol_id": "SOP-017-ALLHANDS"},
+      "note": "SOP-017-ALLHANDS is SOP-017 with exempt_classes = [] and the same day 16-30 window, declared in data/config/protocols.json as a diagnostic counterfactual and marked as such. It is historically FALSE - Diamond Princess crew kept working essential service throughout, which is exactly what SOP-017 encodes - and it may never be used to score any anchor. It exists to measure how much of the post-day-16 attack rate requires unconfined crew."
+    },
+    {
+      "arm_id": "A2_pool_transport_off",
+      "role": "counterfactual: removes cross-zone airborne transport",
+      "overrides": {"pathogen_pool_transport": "none"},
+      "note": "The labelled pre-AERO-CABIN-03 baseline: no pathogen's airborne pool crosses a zone. Measures how much of the confined-passenger infection accrual arrives through the airflow network rather than within the cabin compartment."
+    },
+    {
+      "arm_id": "A3_near_field_off",
+      "role": "counterfactual: removes the near-field / per-meal table channel",
+      "overrides": {"near_field_air_mode": "off"},
+      "note": "The labelled baseline arm of near_field_air. AERO-NEAR-02 measured 952 of 1,390 infections in the two crew messes after 5 February in one Theta 1e9 trace; that trace was on identical hosts and is superseded by DOSE-FRAIL-01, so this arm re-measures the mess channel on the frailty-scaled arm with paired seeds instead of quoting it."
+    },
+    {
+      "arm_id": "A4_crew_confined_and_pool_off",
+      "role": "counterfactual: both structural channels removed",
+      "overrides": {"scheduled_protocol_id": "SOP-017-ALLHANDS", "pathogen_pool_transport": "none"},
+      "note": "Declared because channel contributions are not additive in a saturating epidemic: A0 - A1 - A2 does not measure the interaction. If A4 still burns, neither channel is the load-bearing one and the residual is cabin-mate and within-compartment contact, which is the next thing to instrument."
+    }
+  ],
+  "cells": 200,
+  "cells_note": "2 Theta x 5 arms x 20 seeds. The age and import axes are single-valued.",
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "v9's fields are retained verbatim so the two surfaces read the same way. The additions below exist because the v9 payload cannot answer where a post-quarantine infection happened, which is the whole question here.",
+    "arm_id": "The arm this cell was run under, echoed for audit.",
+    "infections_before_quarantine": "Truth-channel infections with infection epoch < day 16.",
+    "infections_during_quarantine": "Truth-channel infections with infection epoch in [day 16, day 30], the declared SOP-017 window.",
+    "infections_after_quarantine": "Truth-channel infections with infection epoch > day 30.",
+    "during_quarantine_by_role": "The during-quarantine count split passenger / crew.",
+    "during_quarantine_by_zone_class": "The during-quarantine count by the infection zone's class (cabin / crew mess / galley / corridor / other), so the mess channel and the cabin channel are separable without re-running.",
+    "during_quarantine_by_route": "The during-quarantine count by transmission route (direct contact / droplet / airborne / fomite), from the engine's own route attribution.",
+    "confined_passenger_infections_during_quarantine": "During-quarantine infections among passengers recorded as confined at the infection epoch. Under QUAR-ORDER-01 the unconfined count is expected to be ~0; this is the count that is NOT explained by a confinement failure.",
+    "quarantine_witness": "Per-cell record that SOP-017 (or SOP-017-ALLHANDS) actually activated: activation epoch, the count of agents confined, and the exempt-class list in force. A cell whose witness shows no activation is a defect and invalidates the cell rather than becoming a low-transmission finding."
+  },
+  "attribution_criterion": {
+    "declared_before_running": true,
+    "statement": "For each Theta, the attributed contribution of a channel is the shift between arm A0 and the arm that removes it, measured on the 20 matched seeds as (i) the median of infections_during_quarantine over ALL seeds, and (ii) the median of infections_during_quarantine over seeds that took off in BOTH arms. A channel is called load-bearing at that Theta if the conditional-on-takeoff median falls by at least 50% relative to A0 AND the all-seed median falls, and is called non-load-bearing if the conditional median moves by less than 20%. Anything between 20% and 50% is reported as indeterminate and gets no verdict.",
+    "why_not_per_seed": "A config override changes the number and order of RNG draws, so an arm's seed s is not the same trajectory as A0's seed s even though it is the same seed. Paired seeds here control the host frailty draws and the initial conditions, not the stream alignment (.agents/skills/stochastic-attribution). Per-seed differences therefore may NOT be quoted as the effect of a channel; only the distributional shift over the 20 seeds may be. This is declared now so it cannot be relaxed after seeing a large per-seed difference.",
+    "takeoff_definition": "recorded_onsets >= 10, carried from the takeoff_recorded_onsets field, identical to v9's usage.",
+    "null_result_is_a_result": "If no arm moves the conditional median by 50%, the finding is that no single removed channel carries the epidemic through confinement, and the readout says so. No further arm may be added to this design after cells have run; a follow-on arm goes in its own design file."
+  },
+  "what_this_cannot_settle": [
+    "It cannot produce a fitted Theta, and no Theta on this surface may be quoted as one.",
+    "It cannot score covid.T1 or covid.T3: the counterfactual arms are not the declared scenario, and A0 alone adds nothing to v9.",
+    "It cannot tell us whether the model's confinement is quantitatively right, only which channel dominates while confinement is in force. Whether a confined DP passenger really received that dose is a parameter-provenance question about the cabin compartment and the mess near field, and belongs to .agents/skills/model-parameter-provenance.",
+    "It says nothing about the fleet distribution; covid.H3 placement is a separate design (covid_fleet_placement_v1)."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_quarantine_attribution_v1. The image must be built from a main that contains this design file: the design is read inside the container.",
+    "stage_1_cells": 200,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "gate": ".agents/skills/campaign-preflight: local smoke proving each arm's override reaches the engine and changes the run (an arm whose override does not alter the payload is a wiring defect, not a null result), --dry-run count = 200, explicit job-definition revision and image digest, one canary child read out and reported before the array is submitted."
+  }
+}
