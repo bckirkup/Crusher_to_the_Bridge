@@ -183,7 +183,8 @@ def _screen(args: argparse.Namespace) -> int:
             f"imports={entry['imports']}: early median={early['median']:.0f} "
             f"total median={total['median']:.0f} "
             f"first onset median={first_text} "
-            f"P(takeoff)={entry['takeoff_probability']:.2f}",
+            f"P(takeoff)={entry['takeoff_probability']:.2f} "
+            f"mass@T1={entry.get('onset_mass_near_target')}",
             flush=True,
         )
     return 0

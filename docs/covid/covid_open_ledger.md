@@ -159,6 +159,15 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   be submitted as declared; an admissible Θ, if one exists, lies below 1e7, where
   no screen has been, and the successor should declare a coarse wide downward
   recentring screen first with covid.T1 and the geometry invariant verbatim.
+- **`covid_theta_screen_v9` is declared and supersedes v8, which was never
+  submitted.** The successor re-centres on the quiet region v8's probes missed:
+  ten decade Θ from 1e1 to 1e10 × three index infection ages (3.3 / 6.8 /
+  12.8 d) × 20 matched seeds = 600 cells, with covid.T1 and the geometry
+  invariant verbatim plus a reported-only `onset_mass_near_target` diagnostic
+  (share of seeds inside [0.5×, 2×] the T1 onsets target) that separates a real
+  hit from the v7 bimodal pass
+  (`picard_framework/runs/covid_theta_screen_v9_design.json`,
+  `docs/ledger/THETA-SCREEN-V9.md`).
 - **covid.T1 as declared is satisfiable without mass near the target.** All
   eleven T1-passing cells on the v7 surface passed by spanning 197 between an
   extinction floor (`recorded_onsets_p10` = 0) and a burn ceiling (p90 316 to
