@@ -229,7 +229,7 @@ class TestOrchestratorSourceWiring:
         core = _core_with_pool()
         engine = MagicMock()
         engine.get_pathogen_zone_mass.return_value = {}
-        _, swab, *_ = run_observation_sampling(
+        swab = run_observation_sampling(
             epoch=1,
             obs=obs,
             agents=[],
@@ -246,7 +246,7 @@ class TestOrchestratorSourceWiring:
             pathogen_profiles={"norwalk_gi": {}},
             cfg=cfg,
             tx_core=core,
-        )
+        ).swab
         return core, swab
 
     def test_default_mode_uses_airborne_fraction(self) -> None:

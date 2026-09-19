@@ -29,6 +29,7 @@ from orchestrator_init import (
 from orchestrator_types import (
     REPO_ROOT,
     ObservationEngine,
+    ObservationResults,
     ProtocolContext,
     SimulationState,
 )
@@ -208,7 +209,138 @@ def _summary_counts(
     return summary
 
 
-def record_epoch(  # NOSONAR
+def _observation_engine_record(
+    results: ObservationResults,
+    syn_result: dict[str, Any],
+    obs: ObservationEngine,
+    final_epoch: bool,
+) -> dict[str, Any]:
+    syndromic: dict[str, Any] = {
+        "sick_call_agents": syn_result.get("sick_call_agents", []),
+        "true_positive_ids": syn_result.get("true_positive_ids", []),
+        "first_detection_events": syn_result.get(
+            "first_detection_events", [],
+        ),
+        "campaign_specimens_by_pathogen": syn_result.get(
+            "campaign_specimens_by_pathogen", {},
+        ),
+        "campaign_confirmed_by_pathogen": syn_result.get(
+            "campaign_confirmed_by_pathogen", {},
+        ),
+        "onset_observations": syn_result.get("onset_observations", []),
+    }
+    record: dict[str, Any] = {
+        "syndromic": syndromic,
+        "air_sniffer": results.air,
+        "surface_swab": results.swab,
+        "wastewater_sequencing": results.ww,
+        "clinical_rdt": results.clin_rdt,
+        "clinical_qpcr": results.clin_qpcr,
+        "clinical_microbiology": results.clin_microbio,
+        "long_read_verification": results.long_read or {},
+        "logging_fidelity": obs.fidelity_name,
+    }
+    if results.wastewater_ht is not None:
+        record["wastewater_holding_tank"] = results.wastewater_ht
+    if final_epoch:
+        syndromic["episode_detection_telemetry"] = syn_result.get(
+            "episode_detection_telemetry", [],
+        )
+    return record
+
+
+def _wearable_monitoring_record(wearable_result: dict[str, Any]) -> dict[str, Any]:
+    fleet = wearable_result.get("fleet_summary", {})
+    return {
+        "total_monitored": fleet.get("total_monitored", 0),
+        "total_staff_visible": fleet.get("total_staff_visible", 0),
+        "fever_count": fleet.get("fever_count", 0),
+        "fever_rate": fleet.get("fever_rate", 0.0),
+        "anomaly_count": fleet.get("anomaly_count", 0),
+        "anomaly_rate": fleet.get("anomaly_rate", 0.0),
+        "channel_anomaly_counts": fleet.get("channel_anomaly_counts", {}),
+        "staff_visible_agents": wearable_result.get("staff_visible_agents", []),
+        "wearer_only_agents": wearable_result.get("wearer_only_agents", []),
+        "visibility_breakdown": fleet.get("visibility_breakdown", {}),
+        "device_deployment_counts": fleet.get("device_deployment_counts", {}),
+    }
+
+
+def _agent_record(a: dict[str, Any], pathogen_profiles: dict[str, dict[str, Any]]) -> dict[str, Any]:
+    infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
+    agent_record: dict[str, Any] = {
+        "agent_id": a["agent_id"],
+        "infection_state": infection_state,
+        "symptom_presentation": symptom_presentation,
+        "compliance_status": compliance_status,
+        "shedding_rate": a.get("shedding_rate", 0.0),
+        "location": a.get("location", "unknown"),
+        "agent_class": a.get("agent_class", "unknown"),
+        "gender": a.get("gender", "unknown"),
+    }
+    if pathogen_profiles:
+        agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
+        agent_record["susceptibility_multiplier"] = a.get("susceptibility_multiplier", {})
+        agent_record["microflora_disruption"] = a.get("microflora_disruption", 0.0)
+    if "chronic_disease_ids" in a:
+        agent_record["chronic_disease_ids"] = a["chronic_disease_ids"]
+    return agent_record
+
+
+def _microflora_shift_records(
+    zone_names: list[str],
+    zone_microflora_shifts: dict[str, dict[str, float]],
+) -> dict[str, dict[str, Any]]:
+    out: dict[str, dict[str, Any]] = {}
+    for zname in zone_names:
+        mf_shift = zone_microflora_shifts.get(zname, {})
+        if mf_shift:
+            out[zname] = {
+                "disruption_types": list(mf_shift.keys()),
+                "magnitudes": {k: round(v, 4) for k, v in mf_shift.items()},
+                "total_magnitude": round(sum(mf_shift.values()), 4),
+            }
+    return out
+
+
+def _microflora_sequencing_record(seq_result: dict[str, Any]) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for zname, zr in seq_result.get("zone_results", {}).items():
+        mf_data = zr.get("microflora_disruption", {})
+        if mf_data.get("total_disruption_magnitude", 0) > 0:
+            out[zname] = mf_data
+    return out
+
+
+def _apply_pcr_result(crusher_ops: dict[str, Any], pcr_result: dict[str, Any]) -> None:
+    zone_results = pcr_result.get("zone_results", {})
+    crusher_ops["surface_wipe_zones"] = list(zone_results.keys())
+    for zname, zdata in zone_results.items():
+        crusher_ops["pcr_results"][zname] = {
+            "ct_value": zdata.get("ct_value"),
+            "detected": zdata.get("detected", False),
+        }
+
+
+def _hvac_record(cfg: dict[str, Any], contam_engine: ContamTransportEngine | None) -> dict[str, Any]:
+    return {
+        "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
+        "filter_efficiency": (
+            contam_engine.filter_efficiency if contam_engine else 0.0
+        ),
+        "transport_active": contam_engine is not None,
+    }
+
+
+def _active_protocol_records(active_mods: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [
+        {"protocol_id": m["protocol_id"], "name": m["name"],
+         "newly_activated": m["newly_activated"]}
+        for m in active_mods
+    ]
+
+
+def record_epoch(
     epoch: int,
     trigger_status: str,
     agents: list[dict[str, Any]],
@@ -230,22 +362,16 @@ def record_epoch(  # NOSONAR
     stoplights: dict[str, dict[str, str]],
     epoch_cost: dict[str, Any],
     cfg: dict[str, Any],
-    air_results: dict[str, dict[str, Any]],
-    swab_results: dict[str, dict[str, Any]],
-    ww_results: dict[str, dict[str, Any]],
-    clin_rdt_results: dict[int, dict[str, Any]],
-    clin_qpcr_results: dict[int, dict[str, Any]],
-    clin_microbio_results: dict[int, dict[str, Any]],
+    observations: ObservationResults,
     wearable_result: dict[str, Any] | None = None,
     infection_counters: dict[str, dict[str, Any]] | None = None,
-    long_read_results: dict[str, dict[str, Any]] | None = None,
-    wastewater_ht_result: dict[str, Any] | None = None,
-    cascade_result: dict[str, Any] | None = None,
     history_retention: str = "full",
     final_epoch: bool = False,
 ) -> dict[str, Any]:
     """Build an epoch record for simulation_history.
 
+    ``observations`` carries every instrument result for the epoch (the
+    ``run_observation_sampling`` output plus the diagnostic cascade).
     ``history_retention="compact"`` keeps only scalars needed for campaign
     timeseries / summary (no per-agent, contact-tracing, or raw assay blobs).
     """
@@ -261,6 +387,7 @@ def record_epoch(  # NOSONAR
     space_map = _space_entries(
         spaces, contam_engine, pathogen_profiles, compact=compact,
     )
+    multi_pathogen_summary = _multi_pathogen_summary(engine, pathogen_profiles)
 
     if compact:
         return {
@@ -268,162 +395,55 @@ def record_epoch(  # NOSONAR
             "trigger_status": trigger_status,
             "summary": summary,
             "spaces": space_map,
-            "multi_pathogen": _multi_pathogen_summary(engine, pathogen_profiles),
+            "multi_pathogen": multi_pathogen_summary,
             "infection_counters": infection_counters or {},
-            "hvac": {
-                "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
-                "filter_efficiency": (
-                    contam_engine.filter_efficiency if contam_engine else 0.0
-                ),
-                "transport_active": contam_engine is not None,
-            },
+            "hvac": _hvac_record(cfg, contam_engine),
             "reactive_protocols": {
-                "active_protocols": [
-                    {"protocol_id": m["protocol_id"], "name": m["name"],
-                     "newly_activated": m["newly_activated"]}
-                    for m in active_mods
-                ],
+                "active_protocols": _active_protocol_records(active_mods),
                 "stoplights": stoplights,
                 "trigger_status": trigger_status,
             },
             "cost_accounting": epoch_cost,
         }
 
-    multi_pathogen_summary = _multi_pathogen_summary(engine, pathogen_profiles)
-
+    crusher_ops: dict[str, Any] = {
+        "surface_wipe_zones": [],
+        "pcr_results": {},
+        "rdt_positive_count": sum(1 for r in rdt_result["results"] if r["positive"]),
+        "rdt_tested_count": rdt_result["tested_count"],
+    }
     epoch_record: dict[str, Any] = {
         "epoch": epoch,
         "trigger_status": trigger_status,
-        "agents": [],
+        "agents": [_agent_record(a, pathogen_profiles) for a in agents],
         "spaces": space_map,
         "summary": summary,
         "multi_pathogen": multi_pathogen_summary,
-        "microflora_shifts": {},
-        "hvac": {
-            "filter_type": cfg.get("hvac", {}).get("filter_type", "none"),
-            "filter_efficiency": (
-                contam_engine.filter_efficiency if contam_engine else 0.0
-            ),
-            "transport_active": contam_engine is not None,
-        },
+        "microflora_shifts": _microflora_shift_records(zone_names, zone_microflora_shifts),
+        "hvac": _hvac_record(cfg, contam_engine),
         "contact_tracing": tracing_matrix.to_dict(),
-        "crusher_ops": {
-            "surface_wipe_zones": [],
-            "pcr_results": {},
-            "rdt_positive_count": sum(1 for r in rdt_result["results"] if r["positive"]),
-            "rdt_tested_count": rdt_result["tested_count"],
-        },
+        "crusher_ops": crusher_ops,
         "infection_counters": infection_counters or {},
     }
 
-    for a in agents:
-        infection_state, symptom_presentation, compliance_status = resolve_agent_axes(a)
-
-        agent_record: dict[str, Any] = {
-            "agent_id": a["agent_id"],
-            "infection_state": infection_state,
-            "symptom_presentation": symptom_presentation,
-            "compliance_status": compliance_status,
-            "shedding_rate": a.get("shedding_rate", 0.0),
-            "location": a.get("location", "unknown"),
-            "agent_class": a.get("agent_class", "unknown"),
-            "gender": a.get("gender", "unknown"),
-        }
-        if pathogen_profiles:
-            agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
-            agent_record["susceptibility_multiplier"] = a.get("susceptibility_multiplier", {})
-            agent_record["microflora_disruption"] = a.get("microflora_disruption", 0.0)
-        if "chronic_disease_ids" in a:
-            agent_record["chronic_disease_ids"] = a["chronic_disease_ids"]
-        epoch_record["agents"].append(agent_record)
-
-    for zname in zone_names:
-        mf_shift = zone_microflora_shifts.get(zname, {})
-        if mf_shift:
-            epoch_record["microflora_shifts"][zname] = {
-                "disruption_types": list(mf_shift.keys()),
-                "magnitudes": {k: round(v, 4) for k, v in mf_shift.items()},
-                "total_magnitude": round(sum(mf_shift.values()), 4),
-            }
-
     if seq_result is not None:
-        epoch_record["microflora_sequencing"] = {}
-        for zname, zr in seq_result.get("zone_results", {}).items():
-            mf_data = zr.get("microflora_disruption", {})
-            if mf_data.get("total_disruption_magnitude", 0) > 0:
-                epoch_record["microflora_sequencing"][zname] = mf_data
-
+        epoch_record["microflora_sequencing"] = _microflora_sequencing_record(seq_result)
     if pcr_result is not None:
-        epoch_record["crusher_ops"]["surface_wipe_zones"] = list(
-            pcr_result.get("zone_results", {}).keys()
-        )
-        for zname, zdata in pcr_result.get("zone_results", {}).items():
-            epoch_record["crusher_ops"]["pcr_results"][zname] = {
-                "ct_value": zdata.get("ct_value"),
-                "detected": zdata.get("detected", False),
-            }
+        _apply_pcr_result(crusher_ops, pcr_result)
 
-    epoch_record["crusher_ops"]["isolated_agents"] = sorted(state.isolated_ids)
-    epoch_record["crusher_ops"]["quarantined_agents"] = sorted(state.quarantined_ids)
+    crusher_ops["isolated_agents"] = sorted(state.isolated_ids)
+    crusher_ops["quarantined_agents"] = sorted(state.quarantined_ids)
 
-    epoch_record["observation_engine"] = {
-        "syndromic": {
-            "sick_call_agents": syn_result.get("sick_call_agents", []),
-            "true_positive_ids": syn_result.get("true_positive_ids", []),
-            "first_detection_events": syn_result.get(
-                "first_detection_events", [],
-            ),
-            "campaign_specimens_by_pathogen": syn_result.get(
-                "campaign_specimens_by_pathogen", {},
-            ),
-            "campaign_confirmed_by_pathogen": syn_result.get(
-                "campaign_confirmed_by_pathogen", {},
-            ),
-            "onset_observations": syn_result.get("onset_observations", []),
-        },
-        "air_sniffer": air_results,
-        "surface_swab": swab_results,
-        "wastewater_sequencing": ww_results,
-        "clinical_rdt": clin_rdt_results,
-        "clinical_qpcr": clin_qpcr_results,
-        "clinical_microbiology": clin_microbio_results,
-        "long_read_verification": long_read_results or {},
-        "logging_fidelity": obs.fidelity_name,
-    }
-    if wastewater_ht_result is not None:
-        epoch_record["observation_engine"][
-            "wastewater_holding_tank"
-        ] = wastewater_ht_result
-    if final_epoch:
-        epoch_record["observation_engine"]["syndromic"][
-            "episode_detection_telemetry"
-        ] = syn_result.get("episode_detection_telemetry", [])
-
+    epoch_record["observation_engine"] = _observation_engine_record(
+        observations, syn_result, obs, final_epoch,
+    )
     if wearable_result is not None:
-        fleet = wearable_result.get("fleet_summary", {})
-        epoch_record["wearable_monitoring"] = {
-            "total_monitored": fleet.get("total_monitored", 0),
-            "total_staff_visible": fleet.get("total_staff_visible", 0),
-            "fever_count": fleet.get("fever_count", 0),
-            "fever_rate": fleet.get("fever_rate", 0.0),
-            "anomaly_count": fleet.get("anomaly_count", 0),
-            "anomaly_rate": fleet.get("anomaly_rate", 0.0),
-            "channel_anomaly_counts": fleet.get("channel_anomaly_counts", {}),
-            "staff_visible_agents": wearable_result.get("staff_visible_agents", []),
-            "wearer_only_agents": wearable_result.get("wearer_only_agents", []),
-            "visibility_breakdown": fleet.get("visibility_breakdown", {}),
-            "device_deployment_counts": fleet.get("device_deployment_counts", {}),
-        }
-
-    if cascade_result is not None:
-        epoch_record["diagnostic_cascade"] = cascade_result
+        epoch_record["wearable_monitoring"] = _wearable_monitoring_record(wearable_result)
+    if observations.cascade is not None:
+        epoch_record["diagnostic_cascade"] = observations.cascade
 
     epoch_record["reactive_protocols"] = {
-        "active_protocols": [
-            {"protocol_id": m["protocol_id"], "name": m["name"],
-             "newly_activated": m["newly_activated"]}
-            for m in active_mods
-        ],
+        "active_protocols": _active_protocol_records(active_mods),
         "merged_modifiers": merged_mods,
         "stoplights": stoplights,
     }

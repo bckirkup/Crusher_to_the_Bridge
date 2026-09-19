@@ -5,7 +5,7 @@ Steppable ship simulation extracted from orchestrator.py.
 from __future__ import annotations
 
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -120,6 +120,7 @@ from orchestrator_types import (
     STATUS_CONFIRMED,
     STATUS_RANK,
     STATUS_SUSPECTED,
+    ObservationResults,
     SimulationState,
 )
 from picard_framework.run_spec import PicardRunSpec
@@ -197,6 +198,7 @@ class _EpochWork:
     rdt_result: Any = None
     pcr_result: Any = None
     seq_result: Any = None
+    observations: ObservationResults = field(default_factory=ObservationResults)
     air_results: Any = None
     swab_results: Any = None
     ww_results: Any = None
@@ -1147,12 +1149,7 @@ class ShipSimulation:
 
     def _step_labs(self, work: _EpochWork) -> None:
         self._query_pcr_seq(work)
-        (
-            work.air_results, work.swab_results, work.ww_results,
-            work.clin_rdt_results, work.clin_qpcr_results, work.clin_microbio_results,
-            work.long_read_results, work.long_read_ordered_count,
-            work.wastewater_ht_result,
-        ) = run_observation_sampling(
+        work.observations = run_observation_sampling(
             work.epoch, self.obs, work.agents, work.spaces, self.zone_names,
             self.zone_volumes, work.zone_microflora_shifts,
             work.state.trigger_status, self.high_traffic, work.syn_result,
@@ -1162,6 +1159,16 @@ class ShipSimulation:
             ),
             tx_core=self.tx_core,
         )
+        results = work.observations
+        work.air_results = results.air
+        work.swab_results = results.swab
+        work.ww_results = results.ww
+        work.clin_rdt_results = results.clin_rdt
+        work.clin_qpcr_results = results.clin_qpcr
+        work.clin_microbio_results = results.clin_microbio
+        work.long_read_results = results.long_read
+        work.long_read_ordered_count = results.long_read_ordered_count
+        work.wastewater_ht_result = results.wastewater_ht
         self._attach_surface_strain_recovery(work)
 
     def _recover_zone_surface_strains(
@@ -1489,17 +1496,9 @@ class ShipSimulation:
             stoplights=work.stoplights,
             epoch_cost=self.proto_ctx.cost_ledger.get_epoch_summary(work.epoch),
             cfg=work.cfg,
-            air_results=work.air_results,
-            swab_results=work.swab_results,
-            ww_results=work.ww_results,
-            clin_rdt_results=work.clin_rdt_results,
-            clin_qpcr_results=work.clin_qpcr_results,
-            clin_microbio_results=work.clin_microbio_results,
+            observations=replace(work.observations, cascade=work.cascade_result),
             wearable_result=work.wearable_result,
             infection_counters=work.counter_results,
-            long_read_results=work.long_read_results,
-            wastewater_ht_result=work.wastewater_ht_result,
-            cascade_result=work.cascade_result,
             history_retention=self.run_spec.history_retention,
             final_epoch=(work.epoch + 1 >= self.num_epochs),
         )

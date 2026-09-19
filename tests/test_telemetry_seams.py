@@ -21,6 +21,7 @@ REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, REPO_ROOT)
 
 from orchestrator_types import (
+    ObservationResults,
     STATUS_BASELINE,
     STATUS_SUSPECTED,
     STATUS_CONFIRMED,
@@ -254,12 +255,7 @@ class TestRecordEpochBoundary:
             "stoplights": {},
             "epoch_cost": {},
             "cfg": {},
-            "air_results": {},
-            "swab_results": {},
-            "ww_results": {},
-            "clin_rdt_results": {},
-            "clin_qpcr_results": {},
-            "clin_microbio_results": {},
+            "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="agents must be list"):
             record_epoch(**kwargs)
@@ -287,12 +283,7 @@ class TestRecordEpochBoundary:
             "stoplights": {},
             "epoch_cost": {},
             "cfg": {},
-            "air_results": {},
-            "swab_results": {},
-            "ww_results": {},
-            "clin_rdt_results": {},
-            "clin_qpcr_results": {},
-            "clin_microbio_results": {},
+            "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="spaces must be dict"):
             record_epoch(**kwargs)
@@ -320,12 +311,7 @@ class TestRecordEpochBoundary:
             "stoplights": "not_a_dict",
             "epoch_cost": {},
             "cfg": {},
-            "air_results": {},
-            "swab_results": {},
-            "ww_results": {},
-            "clin_rdt_results": {},
-            "clin_qpcr_results": {},
-            "clin_microbio_results": {},
+            "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="stoplights must be dict"):
             record_epoch(**kwargs)
@@ -366,12 +352,7 @@ class TestRecordEpochBoundary:
             "stoplights": {"air": {"Bridge": "GREEN"}},
             "epoch_cost": {"total_financial_usd": 0.0},
             "cfg": {},
-            "air_results": {"Bridge": {"ct": 40}},
-            "swab_results": {},
-            "ww_results": {},
-            "clin_rdt_results": {},
-            "clin_qpcr_results": {},
-            "clin_microbio_results": {},
+            "observations": ObservationResults(air={"Bridge": {"ct": 40}}),
             "history_retention": "compact",
         }
         rec = record_epoch(**kwargs)
