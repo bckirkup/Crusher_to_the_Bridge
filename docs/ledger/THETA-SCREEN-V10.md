@@ -2,7 +2,7 @@
 **Date:** 2026-09-20
 **Commit:** 1da4211
 **Pathogens:** sars_cov2_resp
-**Status:** open
+**Status:** declared
 
 ## Declared (before any cell ran)
 

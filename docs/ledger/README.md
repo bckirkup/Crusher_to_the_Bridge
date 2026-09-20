@@ -12,8 +12,12 @@ Every entry begins with this header:
 **Date:** YYYY-MM-DD
 **Commit:** <7–40 hex SHA of main the entry was authored against, or #NNN PR number>
 **Pathogens:** all | comma-separated pathogen profile ids
-**Status:** open|measured|closed
+**Status:** declared|open|measured|closed
 ```
+
+`declared` is a campaign design frozen before any of its cells ran — the
+campaign-preflight declaration. It carries no numbers and nothing in it may be
+quoted as a result; it moves to `measured` when its canary is read out.
 
 An entry that reports numbers must also include `**Measured at:** <SHA>`.
 Pathogen profile IDs are the `pathogen_id` values in

@@ -15,7 +15,7 @@ SHA_RE = re.compile(r"^(?:#\d+|[0-9a-f]{7,40})$")
 HEADER_RE = re.compile(r"^\*\*(Date|Commit|Pathogens|Status|Measured at):\*\*\s*(.+)$")
 NUMBERED_ITEM_RE = re.compile(r"^(\d+)\. \*\*")
 FROZEN_LAST_ITEM = 58
-VALID_STATUSES = {"open", "measured", "closed"}
+VALID_STATUSES = {"declared", "open", "measured", "closed"}
 
 
 def _profile_ids() -> set[str]:
