@@ -1259,6 +1259,36 @@ infections at epochs 5, 6 and 31, far short of the 15-day clearance. Any future
 paired contrast on this hull must be re-baselined at or after `d62f10d`, with
 both arms on the same side of the repair.
 
+**`NORO-DOSE-BLOCK-01` (ledger entry): `NORO-DOSE-01`'s route and transfer
+figures are replaced by block distributions, and its "low-tail pair" successor
+reading is itself withdrawn.** Measured at post-repair `5870c74` over seeds
+8000–8019 plus 8105/8106 on `classic_cruise_1900`, 22/22 admissible, this is
+the current-`main` baseline for the hull. (i) 8105 sits at the **60th**
+percentile of the block on both credited dose and Σ hazard, so
+`NORO-EMESIS-SIZE-01`'s statement that the pair is a low-tail pair is
+**withdrawn**: the pair is an ordinary voyage and the block is skewed —
+credited scaled dose median 0.0584 GEC, mean 1,491 GEC, max 1.806e4 GEC.
+(ii) Fomite dominance stands as a hull property — 97.7% dose-weighted — but
+the 93.5% point figure is **restated as a distribution**: per-voyage median
+0.891, IQR 0.666–0.970, with four bottom-quartile voyages direct-contact
+dominated. (iii) Hand→mouth **confirms** at median 1.960 log10 against the
+pair's 1.93, whole block inside one log10. (iv) Surface→hand does **not**:
+block median 0.840 log10 against the pair's 2.17, range 2.7 log10 wide, and
+the pre-repair block gives the same 0.925 median, so this is the pair's
+atypicality, not the repair's. **The fomite chain on this hull loses ~2.8
+log10, not `NORO-DOSE-01`'s 4.1.** α and β were untouched and
+`NORO-SUSCEPT-03`'s exclusion is unaffected — 1.3 log10 does not close a
+shortfall of orders of magnitude. Repair stability, unpaired: block Σ hazard
+2.9450 here against 3.0046 at `e83aa06` (−2.0%), same three secondaries in the
+same two seeds, as `NORO-REINFECT-IMPACT-01` predicted. One criterion is
+retired rather than met: the 1e-9 three-sum reconciliation gate now **fails**
+in 9 of 22 cells (worst 8.400e-3) because `REINFECT-01` skips dose evaluation
+for fully protected hosts, so `sum_effective_dose_evaluated_gec` falls short of
+credited by 1.045e-7 of the block while `sum_dose_read_at_challenge_gec` still
+matches credited exactly and no cell is ever long. Successor studies should
+gate on the exact read-equals-credited identity plus a bound on the
+credited-minus-evaluated gap, and treat a *negative* gap as the defect.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
