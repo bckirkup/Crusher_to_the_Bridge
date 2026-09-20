@@ -86,6 +86,8 @@ def _agent_row(
         "infection_epoch": infection_epoch,
         "infection_day": int(sim.clock.day_index(infection_epoch)),
         "time_infected": inf.get("time_infected"),
+        "episode": inf.get("episode"),
+        "first_infection_epoch": inf.get("first_infection_epoch"),
         "incubation_days": inf.get("incubation_days"),
         "illness": str(inf.get("illness")),
         "symptom_severity": inf.get("symptom_severity"),
@@ -165,6 +167,9 @@ def _summarise(sim, rows, start: int, end: int | None) -> dict[str, Any]:
             )
         },
         "ledger_epoch_before_infection_epoch": len(overwritten),
+        "episode_ge_2": sum(
+            1 for r in rows if (r["episode"] or 1) >= 2
+        ),
         "truth_windows": {
             "before": truth.get("before", 0),
             "during": truth.get("during", 0),

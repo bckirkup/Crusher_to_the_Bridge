@@ -1,9 +1,9 @@
 # REINFECT-01
 **Date:** 2026-09-20
-**Commit:** 861a0b9
+**Commit:** 7f105a7
 **Pathogens:** all
-**Status:** open
-**Measured at:** 861a0b9
+**Status:** closed
+**Measured at:** 7f105a7
 
 ## Defect
 
@@ -63,18 +63,45 @@ truth-channel during-quarantine count at Θ 1e5 and 32% at Θ 1e9.
   late infection is a second episode that keeps its first onset date
   (inference from the probe; the record has onsets to day 30).
 
-## Fix (not made)
+## Fix
 
-Two candidate shapes, to be chosen with a provenance review, not here:
-(a) write an `ImmuneRecord` on clearance without a strain registry, using the
-profile's `immune_waning` block (`refractory_days` 90 for `sars_cov2_resp` is
-already declared) so a cleared host is refractory for the voyage; (b) keep
-the first record and append episodes rather than overwrite, so the truth
-channel can count first infections irrespective of (a). (a) changes
-trajectories; (b) changes only the payload. Paired measurement is the
-canary cell (A0, Θ 1e5 and 1e9, seed `20200205`) inside the campaign image.
+Both candidate shapes landed at `7f105a7`, plus two companions:
 
-## Open decision
+- (a) `engines/natural_history.py` `record_unlabeled_clearance_immunity`
+  writes one genotype-blind `ImmuneRecord` (genotype `""`, origin
+  `IMMUNITY_FROM_INFECTION`) at the pathogen-level RECOVERED transition when
+  `record_cleared_immunity` wrote no lineage record.
+  `engines/transmission_core.py` `_init_strain_tracking` now parses
+  `strain_evolution` (including `immune_waning`) for every profile
+  regardless of registry, and `_challenge_protection` takes
+  `max(legacy, _unlabeled_resolution_protection)` — the declared
+  `immune_waning.protection_at` window (`refractory_days` 90,
+  `refractory_protection` 1.0 for `sars_cov2_resp`) applies per-epoch as a
+  hazard multiplier, so a cleared host is refractory for the voyage.
+- (b) `engines/infection_dynamics_bridge.py` `infect_with_pathogen` keeps
+  `first_infection_epoch`, `episode` and `episode_epochs` across
+  overwrites, so the truth channel can count first infections.
+- `crusher_labs/modalities/syndromic.py` re-dates `_presentation_onset_epoch`
+  and `_onset_observations` when a presenting infection's `infection_epoch`
+  postdates the stored onset (second episodes get their own onset date).
 
-Whether the next COVID session fixes REINFECT-01 before any further campaign.
-See `docs/ledger/QUAR-ATTR-V1.md`.
+Paired in-image canary (`994254241749.dkr.ecr.us-east-1.amazonaws.com/
+picard-campaign@sha256:17d74c5dcecdcb9aafa80643dda973088d3d98581db9252
+5174888dd16364341`, job-def `picard-covid-boarding-screen:9`, A0, seed
+`20200205`, cells under
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/reinfect01_canary/
+7f105a7/`; jobs `f56507e0-1122-4d99-86ac-2fe68a5eee2d` Θ 1e5,
+`b99cd613-356e-4ac0-a133-a84aa041fcb0` Θ 1e9):
+
+| cell | total | AR | before/during/after | vs `861a0b9` during |
+|------|-------|-----|--------------------|--------------------|
+| Θ 1e5 | 950 | 0.2560 | 745 / 198 / 7 | 455 → 198 |
+| Θ 1e9 | 3458 | 0.9318 | 3414 / 43 / 1 | 973 → 43 |
+
+At Θ 1e9 the during-quarantine count collapses from 973 (overwritten
+reinfection records) to 43 fresh infections, matching the probe's estimate
+that only ~4% of during-window truth infections were first episodes. Local
+probe re-run on the same cell (`reinfect01_probe_1e9.json`, host
+trajectory): `episode >= 2` count 0, zero negative onset lags, zero
+ledger-event epochs preceding `infection_epoch` — the overwrite path is
+closed at every layer the probe measures.

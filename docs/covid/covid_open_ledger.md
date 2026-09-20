@@ -18,17 +18,22 @@ for the COVID arm.
 ## 1. Currently withdrawn
 
 **REINFECT-01 voids every `infections_before/during/after_quarantine`
-figure as a count of hosts infected in the window.** A cleared host acquires
-no immunity without a strain registry and its second infection overwrites the
-record, so the truth channel dates the latest episode
-(`docs/ledger/REINFECT-01.md`, measured at `861a0b9`): 32% of the Θ 1e9
-`A0` during-quarantine count and 96% in the saturated seed `20200205` are
-reinfections; 37.6% of infected hosts in the probe cell were infected twice.
-`infections_total`, `attack_rate` and `recorded_onsets` count distinct hosts
-and first onsets and stand in count, but high-Θ attack rates carry re-shedding
-by an unmeasured amount. The "outbreak continues through enforced quarantine"
-reading at truth-channel scale (handoff §12, v9 readout §6) is superseded by
-`docs/covid/covid_quarantine_attribution_v1_readout.md` §4–6.
+figure measured at or before `861a0b9` as a count of hosts infected in the
+window.** A cleared host acquired no immunity without a strain registry and
+its second infection overwrote the record, so the truth channel dated the
+latest episode (`docs/ledger/REINFECT-01.md`, measured at `861a0b9`): 32% of
+the Θ 1e9 `A0` during-quarantine count and 96% in the saturated seed
+`20200205` were reinfections; 37.6% of infected hosts in the probe cell were
+infected twice. **Fixed at `7f105a7`** (unlabeled clearance immunity +
+refractory protection without a registry, episode bookkeeping, syndromic
+onset re-dating); the paired in-image canary moved `A0` seed `20200205`
+during-quarantine counts 455 → 198 (Θ 1e5) and 973 → 43 (Θ 1e9), so all
+`861a0b9` during-quarantine figures — including every arm count in the
+`covid_quarantine_attribution_v1` campaign — are superseded as first-infection
+windows. `infections_total`, `attack_rate` and `recorded_onsets` counted
+distinct hosts and stand in count. The "outbreak continues through enforced
+quarantine" reading at truth-channel scale (handoff §12, v9 readout §6) is
+superseded by `docs/covid/covid_quarantine_attribution_v1_readout.md` §4–6.
 
 **QUAR-EXEMPT-01 moves every post-`1a25c24` confinement-sensitive figure.**
 `exempt_classes` is now scoped to the protocol that declares it
