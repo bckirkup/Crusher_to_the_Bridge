@@ -21,7 +21,7 @@
       "properties": {
         "protocol_id": {
           "type": "string",
-          "pattern": "^SOP-\\d{3,4}$",
+          "pattern": "^SOP-\\d{3,4}(-[A-Z]+)?$",
           "description": "Unique protocol identifier (e.g. 'SOP-001')"
         },
         "name": {"type": "string"},

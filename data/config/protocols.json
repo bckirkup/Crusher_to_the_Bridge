@@ -577,6 +577,22 @@
       },
       "category": "intervention",
       "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-ALLHANDS",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine of All Hands (historically false)",
+      "description": "DIAGNOSTIC COUNTERFACTUAL, historically FALSE: Diamond Princess crew kept working essential service throughout the quarantine, and that passenger/crew asymmetry is exactly what SOP-017 encodes. This protocol exists only as arm A1/A4 of covid_quarantine_attribution_v1, to be differenced against SOP-017 so the crew channel's contribution during confinement can be measured. It may never be used to score covid.T1, covid.T3, covid.H3 or any other anchor. Like SOP-017 its trigger is unreachable (no instrument reports 'scenario_calendar') and it activates only when a scenario schedule names it — see engines/scenario_schedule.py.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": []
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }

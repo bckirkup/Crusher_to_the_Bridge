@@ -3,7 +3,7 @@
 > **Status:** Handoff record (2026-09-19), authored against `main` after #609
 > merged; amended at `main` = `46cff41` with §7 (the v8 probe result) and §8 (the
 > merged, unsubmitted v9 screen and the state of its preflight gate) — read §8
-> before acting on §4; §9 records the v9 preflight and submission, §10 its result and why stage 1b is withdrawn. It states where the Theta calibration stands, what is declared but
+> before acting on §4; §9 records the v9 preflight and submission, §10 its result and why stage 1b is withdrawn, §13 the wired attribution worker (nothing submitted). It states where the Theta calibration stands, what is declared but
 > not yet run, and what must not be reopened. It reports no new numbers: every
 > figure it refers to is quoted from the ledger entry or readout that measured
 > it, with that entry's own `Measured at` SHA. Nothing here is a fit.
@@ -384,3 +384,33 @@ a pathogen-*profile* field (`route_efficiency_multipliers` on
 `sars_cov_2_respiratory`), not a top-level transmission override, and the smoke
 must prove the droplet and `hvac_airborne` accumulators read zero — a silently
 ignored profile key would present as "the air routes do not matter".
+
+## 13. The attribution worker is wired; nothing has been submitted
+
+`covid_quarantine_attribution_v1` now runs on the boarding-screen worker: the
+design's six arms enumerate to 240 cells
+(`DESIGN=covid_quarantine_attribution_v1 deploy/aws/submit_covid_boarding_screen.sh --dry-run`;
+v9 still counts 600, the default v1 180), every arm override is read back out
+of the run spec and changes the payload against `A0` in one local cell per arm
+(theta 1e5, seed `20200205`), and the `A5` cell reads exactly zero droplet and
+`hvac_airborne` dose. The per-arm witness numbers are in the wiring PR body.
+
+Two things the successor must know. First, the arms required an engine fix,
+ledger `QUAR-EXEMPT-01`: `exempt_classes` was unioned across active protocols,
+so `SOP-017-ALLHANDS` inherited `SOP-011`'s crew exemptions and `A1`/`A4` were
+identical to `A0`/`A2`; exemptions are now scoped to the protocol that declares
+them, symptomatic orders included. The v9 cell at HEAD is therefore a different
+trajectory from the committed v9 surface (1,110 → 1,171 infections at theta
+1e5, seed `20200205`, attributed in the ledger entry); THETA-SCREEN-V9 stays
+valid at `0fb186b` and is not re-run. Second, the committed v9 cells reproduce
+byte-for-byte only inside the campaign image (`python:3.11-slim`, numpy 2.4.6);
+the same commit on a CPython 3.12 / numpy 2.5.0 host follows a different
+trajectory. Compare local runs with local runs, and S3 cells with in-image
+runs.
+
+The preflight gate (`.agents/skills/campaign-preflight`) still requires,
+before any array: the ECR image built from the merged commit and pinned by
+digest, an explicit job-definition revision, the manifest in S3, and one canary
+child inspected. None of that has happened. No image was pushed, no job
+definition registered, no canary or array submitted in this session. The open
+decision is whether to run the 240-cell array.
