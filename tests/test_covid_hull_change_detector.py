@@ -129,9 +129,10 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (1, 1, 217, 4, 0) on CPython 3.11, read from CI job 105760985675
         # (fast tier, 3.11, shard 3) on this branch.
         # REINFECT-01 (refractory window after clearance, episode-keeping
-        # records) was read only on 3.12 (below); the 3.11 entry is pending a
-        # CI reading.
-        (3, 11): (1, 1, 217, 4, 0),
+        # records) moves one campaign positive on 3.11 the same as on 3.12:
+        # (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0), read from CI job
+        # 106118699889 (fast tier, 3.11, shard 3) on this branch.
+        (3, 11): (1, 1, 217, 5, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
