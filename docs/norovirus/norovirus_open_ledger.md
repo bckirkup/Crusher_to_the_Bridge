@@ -3925,6 +3925,61 @@ constant was changed and the forced-challenge step was not reached. The
 archetype finding is measured at two seeds and is a mechanism statement, not a
 sized effect — the truncated mass is unquantified.
 
+**`NORO-EMESIS-CANARY-01`: `expedition_cruise_450` cannot carry an emesis
+measurement, and its fomite chain does not reconcile.** At engine `204ba42`,
+`classic_cruise_1900` replays `NORO-DOSE-01` exactly (seed 8105: 0.100952
+credited GEC, Σ hazard 3.80909e-4, 1 emesis event, patch mass 1961773.805 GEC,
+pickup dose 2.6101716 GEC, 2 pickups; seed 8106: Σ hazard 1.1871e-5), so no
+drift is present on the reference hull across the 25 commits since `f55e93f`.
+On `expedition_cruise_450` at 450 agents and 168 epochs, four seeds
+(8105, 8106, 8000, 8001) all report `phase_eligible = 0` — every emit call is
+phase-blocked, no emesis schedule is ever drawn, and the mechanism never fires;
+two of the four have no `norwalk_gi` dose path at all. The two non-void seeds
+are underflow-scale (8.1e-221 and 2.1e-32 credited GEC) and internally
+inconsistent: seed 8001 deposits 25.943 GEC to surfaces but offers 3.28e-28 GEC
+at pickup, against 220.3 deposited / 5170.4 offered on classic, with an ordinary
+`max_hand_target_gec` of 12.97 alongside a 1.7e-29 hand load. This **restores
+nothing**; it **withdraws prospectively** any expedition-hull emesis or fomite
+dose reading taken at 168 epochs until the declared
+`NORO-EXP-FOMITE-RECONCILE-01` attributes the deposit-versus-offer gap. The
+two-hull emesis design is therefore NO-GO and the sizing study is classic-only;
+`docs/norovirus/NORO-EMESIS-SIZE-prompt.md` is removed with this entry. No
+constant, profile, or engine path was changed. Dumps:
+`docs/norovirus/noro_emesis_canary_01/`.
+
+**`NORO-EXP-FOMITE-RECONCILE-01`: the expedition fomite chain conserves; the
+canary's gap is a dead-end zone, disinfection, and a hand reservoir that
+underflows.** Measured at `c004a15` with the new read-only instrument
+`tools/noro_diag/fomite_mass_balance.py`, which closes the surface-mass book per
+zone and per call site. All three cells are **CONSERVED** — deposits equal
+witnessed removals plus residual to 3.4e-16 relative on the voyage total and
+7.9e-16 on the worst zone — so no mass is lost between deposit and offer on
+either hull. On expedition seed 8001 all 25.943 GEC of deposits land in one
+zone, `CC_D2_A::cabin380`, offered to nobody in 168 epochs (the shedding host is
+its only occupant and pickup needs a susceptible), and leave through SOP
+disinfection (67.9%), surface decay (29.0%) and routine cleaning (0.001%), with
+3.1% residual at disembarkation. On seed 8106 the pool *is* offered and
+delivered; the 1e-218 magnitude comes from `_stationary_hand_load` returning
+1.622e-217 GEC against a 13.323 GEC hand target, because the hand inactivation
+rate (1.0025/h) is three to four orders above the defecation rate (0.01094/day)
+and the backward-recurrence exponent underflows — 156 of 156 target-positive
+calls underflowed and no stool event fired in 323 draws. The same spike-and-crash
+hand behaviour is present on the classic control (867 of 960 target-positive
+calls underflowed, 9 at target, max load 139,244.870 GEC), so it is a hand-model
+property, not an expedition defect. `phase_eligible = 0` is hull size: both
+expedition voyages carried one `norwalk_gi` host and it was never symptomatic,
+against 24 eligible calls from 1 symptomatic host of 5 infected on classic.
+This entry therefore **lifts** `NORO-EMESIS-CANARY-01`'s prospective withdrawal
+of expedition-hull emesis and fomite readings — they are correct readings of a
+hull that cannot carry the measurement — and the two-hull NO-GO stands on hull
+size rather than on a suspected defect. Also measured, outside the declared
+criteria and **not** attributed: on classic, mass delivered to hands (33.029
+GEC) exceeds the pool debit for those deliveries (30.419 GEC) by 7.9%, because
+`_consume_surface_mass` debits by ratio rather than absolute; filed as
+`NORO-SURFACE-CONSUME-01`. The hand initialisation is filed as
+`NORO-HAND-STATIONARY-01`. No constant, profile, or engine path was changed.
+Dumps: `docs/norovirus/noro_exp_fomite_reconcile_01/`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
