@@ -17,6 +17,15 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**QUAR-EXEMPT-01 moves every post-`1a25c24` confinement-sensitive figure.**
+`exempt_classes` is now scoped to the protocol that declares it
+(`docs/ledger/QUAR-EXEMPT-01.md`); symptomatic crew are confined by
+`SOP-008`/`010`/`016` while `SOP-011` is active, where the old union never
+confined them. THETA-SCREEN-V9 figures stay valid at their own `Measured at`
+SHA `0fb186b` and are not re-run; the same cells at HEAD are a different
+trajectory. S3 cells reproduce only inside the campaign image
+(`python:3.11-slim`, numpy 2.4.6), not on a CPython 3.12 / numpy 2.5.0 host.
+
 **AERO-NEAR-02 invalidates prior near-field-sensitive COVID figures.** The
 QUAR-ORDER-01 burning and intermediate-cell figures are superseded by the
 AERO-NEAR-02 measurement (§2). The two diagnostic cells are not paired with
