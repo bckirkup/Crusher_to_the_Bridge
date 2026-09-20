@@ -204,7 +204,7 @@ def _wrap_surface_mass(core_cls: type, rec: Recorder) -> dict[str, Any]:
             ),
         )
         removed = before - after
-        if removed == 0.0:
+        if removed <= 0.0:
             return
         site = _caller_name()
         rec.zone(zone_name).removed[site] += removed
