@@ -74,6 +74,39 @@ def _window_bucket(day: int, start: int, end: int | None) -> str:
     return "after"
 
 
+def _agent_row(
+    sim, agent, inf, onset_obs, pres_epoch, ev,
+) -> dict[str, Any]:
+    """One agent's truth stamp, syndromic stamps and ledger event joined."""
+    infection_epoch = int(inf.get("infection_epoch", 0))
+    aid = int(agent.agent_id)
+    return {
+        "agent_id": aid,
+        "role": getattr(agent, "role", None),
+        "infection_epoch": infection_epoch,
+        "infection_day": int(sim.clock.day_index(infection_epoch)),
+        "time_infected": inf.get("time_infected"),
+        "incubation_days": inf.get("incubation_days"),
+        "illness": str(inf.get("illness")),
+        "symptom_severity": inf.get("symptom_severity"),
+        "onset_time_infected": inf.get("onset_time_infected"),
+        "presentation_onset_epoch": (
+            None if pres_epoch is None else int(pres_epoch)
+        ),
+        "onset_day": (
+            None if onset_obs is None else int(onset_obs["onset_day"])
+        ),
+        "recorded": onset_obs is not None,
+        "ledger_event_epoch": (
+            None if ev is None else int(ev["epoch"])
+        ),
+        "ledger_event_day": (
+            None if ev is None else int(sim.clock.day_index(ev["epoch"]))
+        ),
+        "ledger_pathway": None if ev is None else ev["pathway"],
+    }
+
+
 def _per_agent_rows(sim, ledger) -> list[dict[str, Any]]:
     """One row per non-seeded COVID-infected agent, all three clocks joined."""
     seeded = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
@@ -83,42 +116,17 @@ def _per_agent_rows(sim, ledger) -> list[dict[str, Any]]:
     events_by_target: dict[int, dict] = {}
     for ev in ledger.events:
         events_by_target.setdefault(int(ev["target_agent_id"]), ev)
-    rows: list[dict[str, Any]] = []
-    for agent in sim.engine.agents:
-        aid = int(agent.agent_id)
-        if aid in seeded or PATHOGEN_ID not in agent.infections:
-            continue
-        inf = agent.infections[PATHOGEN_ID]
-        infection_epoch = int(inf.get("infection_epoch", 0))
-        onset_obs = observations.get((PATHOGEN_ID, aid))
-        pres_epoch = presentation.get(aid)
-        ev = events_by_target.get(aid)
-        rows.append({
-            "agent_id": aid,
-            "role": getattr(agent, "role", None),
-            "infection_epoch": infection_epoch,
-            "infection_day": int(sim.clock.day_index(infection_epoch)),
-            "time_infected": inf.get("time_infected"),
-            "incubation_days": inf.get("incubation_days"),
-            "illness": str(inf.get("illness")),
-            "symptom_severity": inf.get("symptom_severity"),
-            "onset_time_infected": inf.get("onset_time_infected"),
-            "presentation_onset_epoch": (
-                None if pres_epoch is None else int(pres_epoch)
-            ),
-            "onset_day": (
-                None if onset_obs is None else int(onset_obs["onset_day"])
-            ),
-            "recorded": onset_obs is not None,
-            "ledger_event_epoch": (
-                None if ev is None else int(ev["epoch"])
-            ),
-            "ledger_event_day": (
-                None if ev is None else int(sim.clock.day_index(ev["epoch"]))
-            ),
-            "ledger_pathway": None if ev is None else ev["pathway"],
-        })
-    return rows
+    return [
+        _agent_row(
+            sim, agent, agent.infections[PATHOGEN_ID],
+            observations.get((PATHOGEN_ID, int(agent.agent_id))),
+            presentation.get(int(agent.agent_id)),
+            events_by_target.get(int(agent.agent_id)),
+        )
+        for agent in sim.engine.agents
+        if int(agent.agent_id) not in seeded
+        and PATHOGEN_ID in agent.infections
+    ]
 
 
 def _summarise(sim, rows, start: int, end: int | None) -> dict[str, Any]:
@@ -199,9 +207,14 @@ def main(argv: list[str] | None = None) -> int:
     })
     print(json.dumps(summary, indent=2, sort_keys=True))
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as fh:
+        out_dir = os.path.dirname(os.path.realpath(__file__))
+        repo_root = os.path.realpath(os.path.join(out_dir, ".."))
+        path = os.path.realpath(args.out)
+        if os.path.commonpath([repo_root, path]) != repo_root:
+            raise SystemExit(f"--out {args.out!r} escapes the repository root")
+        with open(path, "w", encoding="utf-8") as fh:
             json.dump({"summary": summary, "agents": rows}, fh, indent=1)
-        print(f"per-agent dump: {args.out}")
+        print(f"per-agent dump: {path}")
     return 0
 
 
