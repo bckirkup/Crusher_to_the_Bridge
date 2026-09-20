@@ -1,0 +1,413 @@
+{
+ "cells_loaded": 22,
+ "magnitude": {
+  "block_sum_evaluated_hazard": 2.9450354535525776,
+  "credited_scaled_gec": {
+   "max": 18055.67990945673,
+   "median": 0.05837091047830022,
+   "min": 9.56372670309132e-07,
+   "n": 20,
+   "p25": 0.004087876419996827,
+   "p75": 328.0901705713977
+  },
+  "hosts_for_90pct": {
+   "max": 218.0,
+   "median": 7.0,
+   "min": 1.0,
+   "n": 20,
+   "p25": 1.0,
+   "p75": 89.5
+  },
+  "imports_total": 87,
+  "secondaries_total": 3,
+  "sum_evaluated_hazard": {
+   "max": 1.6908797451593711,
+   "median": 0.0001339473654609059,
+   "min": 2.133507437961593e-12,
+   "n": 20,
+   "p25": 5.261353110464342e-06,
+   "p75": 0.0037533628526701312
+  }
+ },
+ "pair_position": {
+  "block_seeds_loaded": 20,
+  "pair": [
+   {
+    "credited_scaled_gec": 0.084441594414279,
+    "dose_percentile_in_block": 60.0,
+    "hazard_percentile_in_block": 60.0,
+    "seed": 8105,
+    "sum_evaluated_hazard": 0.0003104066645696331
+   },
+   {
+    "credited_scaled_gec": 0.0026349140913720184,
+    "dose_percentile_in_block": 25.0,
+    "hazard_percentile_in_block": 35.0,
+    "seed": 8106,
+    "sum_evaluated_hazard": 1.0796294019603455e-05
+   }
+  ],
+  "pair_is_low_tail": false,
+  "percentile_threshold": 25.0
+ },
+ "raw_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_dose_block_01/classic_cruise_1900",
+ "reconciliation": {
+  "rtol": 1e-09,
+  "verdict": "FAIL",
+  "worst_relative_difference": 0.008400409611248476
+ },
+ "route_attribution": {
+  "cells_above_floor": [
+   {
+    "direct_contact": 0.00014207278040181983,
+    "droplet": 0.0,
+    "emesis_aerosol": 0.0009877307508212793,
+    "fomite": 0.9958202299658906,
+    "food": 0.0030473222638742643,
+    "hvac_airborne": 2.6442390121589357e-06,
+    "pathway_total_gec": 1435.4886157647104,
+    "seed": 8000
+   },
+   {
+    "direct_contact": 0.010420802889153575,
+    "droplet": 0.0,
+    "fomite": 0.9895791971108465,
+    "pathway_total_gec": 0.45654348002977696,
+    "seed": 8001
+   },
+   {
+    "direct_contact": 0.04217728466066117,
+    "droplet": 0.0,
+    "emesis_aerosol": 0.010020088626645576,
+    "fomite": 0.9471899137856401,
+    "food": 1.4460783217455065e-29,
+    "hvac_airborne": 0.000612712927053213,
+    "pathway_total_gec": 30371.84479464527,
+    "seed": 8002
+   },
+   {
+    "direct_contact": 0.09006866596493508,
+    "droplet": 0.0,
+    "fomite": 0.9095194099658602,
+    "food": 0.00041192406920460454,
+    "pathway_total_gec": 0.004204140475457385,
+    "seed": 8003
+   },
+   {
+    "direct_contact": 0.03510054967175384,
+    "droplet": 0.0,
+    "fomite": 0.96326346086627,
+    "food": 0.001635989461976061,
+    "pathway_total_gec": 0.08077453161832955,
+    "seed": 8004
+   },
+   {
+    "direct_contact": 0.03346625444690194,
+    "droplet": 0.0,
+    "fomite": 0.9497924810654814,
+    "food": 0.01674126448761662,
+    "pathway_total_gec": 0.20302860113052318,
+    "seed": 8005
+   },
+   {
+    "direct_contact": 0.2063752086484287,
+    "droplet": 0.0,
+    "emesis_aerosol": 3.837943316824887e-05,
+    "fomite": 0.7929381796042699,
+    "food": 0.0006482027144742253,
+    "hvac_airborne": 2.959965888818961e-08,
+    "pathway_total_gec": 1082.384815577914,
+    "seed": 8006
+   },
+   {
+    "direct_contact": 0.9941095735707932,
+    "droplet": 0.0,
+    "fomite": 0.005532816194472362,
+    "food": 0.0003576102347344271,
+    "pathway_total_gec": 0.02420350997415049,
+    "seed": 8007
+   },
+   {
+    "direct_contact": 0.0032559843112375457,
+    "droplet": 0.0,
+    "fomite": 0.9967440156887624,
+    "pathway_total_gec": 0.01765627675913403,
+    "seed": 8008
+   },
+   {
+    "direct_contact": 0.000829294735447476,
+    "droplet": 0.0,
+    "emesis_aerosol": 0.0002874177585398881,
+    "fomite": 0.9988181834441089,
+    "food": 2.444882665508178e-05,
+    "hvac_airborne": 4.065523524869463e-05,
+    "pathway_total_gec": 1085.7365516963428,
+    "seed": 8009
+   },
+   {
+    "direct_contact": 1.0,
+    "droplet": 0.0,
+    "fomite": 3.904128012405809e-30,
+    "pathway_total_gec": 0.0654309353827016,
+    "seed": 8010
+   },
+   {
+    "direct_contact": 0.33899328229116377,
+    "droplet": 0.0,
+    "fomite": 0.6607647875288005,
+    "food": 0.00024193018003578195,
+    "pathway_total_gec": 0.002302069600113296,
+    "seed": 8011
+   },
+   {
+    "direct_contact": 0.09415127163639618,
+    "droplet": 0.0,
+    "fomite": 0.9052809382871406,
+    "food": 0.0005677900764631345,
+    "pathway_total_gec": 0.5440693286255325,
+    "seed": 8012
+   },
+   {
+    "direct_contact": 0.19081434400128341,
+    "droplet": 0.0,
+    "fomite": 0.7764099547244802,
+    "food": 0.03277570127423648,
+    "pathway_total_gec": 0.2455197630242499,
+    "seed": 8013
+   },
+   {
+    "direct_contact": 0.3327142920176174,
+    "droplet": 0.0,
+    "fomite": 0.6672857079823826,
+    "pathway_total_gec": 0.23328217037464144,
+    "seed": 8014
+   },
+   {
+    "direct_contact": 1.0,
+    "droplet": 0.0,
+    "fomite": 2.0536043657041683e-39,
+    "pathway_total_gec": 2.7328599434246652e-06,
+    "seed": 8015
+   },
+   {
+    "direct_contact": 0.0019889258612577803,
+    "droplet": 0.0,
+    "emesis_aerosol": 0.11621222261828652,
+    "fomite": 0.8762574354977557,
+    "food": 0.00014126457751945448,
+    "hvac_airborne": 0.005400151445180554,
+    "pathway_total_gec": 2878.7864422218313,
+    "seed": 8016
+   },
+   {
+    "direct_contact": 1.0,
+    "droplet": 0.0,
+    "fomite": 3.365975105594746e-79,
+    "pathway_total_gec": 9.702630753923212e-05,
+    "seed": 8017
+   },
+   {
+    "direct_contact": 6.424106090227456e-08,
+    "droplet": 0.0,
+    "emesis_aerosol": 0.00015961602817721716,
+    "fomite": 0.9997840827070584,
+    "food": 2.6598805829706704e-13,
+    "hvac_airborne": 5.623702343743382e-05,
+    "pathway_total_gec": 60166.16598534908,
+    "seed": 8018
+   },
+   {
+    "direct_contact": 0.1439095252046532,
+    "droplet": 0.0,
+    "fomite": 0.8527817985923702,
+    "food": 0.003308676202976642,
+    "pathway_total_gec": 0.0791968878075467,
+    "seed": 8019
+   }
+  ],
+  "cells_below_floor": [],
+  "dose01_pair_fomite_share": 0.935,
+  "fomite_share_confirmed_as_hull_property": false,
+  "share_distribution": {
+   "direct_contact": {
+    "max": 1.0,
+    "median": 0.09210996880066563,
+    "min": 6.424106090227456e-08,
+    "n": 20,
+    "p25": 0.008629598244674568,
+    "p75": 0.33428403958600394
+   },
+   "droplet": {
+    "max": 0.0,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 20,
+    "p25": 0.0,
+    "p75": 0.0
+   },
+   "emesis_aerosol": {
+    "max": 0.11621222261828652,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 20,
+    "p25": 0.0,
+    "p75": 6.868858192049095e-05
+   },
+   "fomite": {
+    "max": 0.9997840827070584,
+    "median": 0.8907691868924481,
+    "min": 3.365975105594746e-79,
+    "n": 20,
+    "p25": 0.6656554778689872,
+    "p75": 0.9698423949274142
+   },
+   "food": {
+    "max": 0.03277570127423648,
+    "median": 0.00019159737877761821,
+    "min": 0.0,
+    "n": 20,
+    "p25": 0.0,
+    "p75": 0.0008951494013496842
+   },
+   "hvac_airborne": {
+    "max": 0.005400151445180554,
+    "median": 0.0,
+    "min": 0.0,
+    "n": 20,
+    "p25": 0.0,
+    "p75": 6.832594972058761e-07
+   }
+  },
+  "share_floor_gec": 1e-06
+ },
+ "study_admissible": true,
+ "transfer_terms": {
+  "cells": [
+   {
+    "hand_to_mouth_log10": 2.204026847319347,
+    "seed": 8000,
+    "surface_to_hand_log10": 7.051009700825623e-07
+   },
+   {
+    "hand_to_mouth_log10": 1.9752419328366668,
+    "seed": 8001,
+    "surface_to_hand_log10": 0.18117850956882403
+   },
+   {
+    "hand_to_mouth_log10": 1.89604639492105,
+    "seed": 8002,
+    "surface_to_hand_log10": 2.6733705625519404
+   },
+   {
+    "hand_to_mouth_log10": 2.027969349360268,
+    "seed": 8003,
+    "surface_to_hand_log10": 0.11929431983059262
+   },
+   {
+    "hand_to_mouth_log10": 1.943887497266162,
+    "seed": 8004,
+    "surface_to_hand_log10": 0.21930771052059786
+   },
+   {
+    "hand_to_mouth_log10": 1.9275385959695546,
+    "seed": 8005,
+    "surface_to_hand_log10": 0.9636296992856455
+   },
+   {
+    "hand_to_mouth_log10": 2.030739265999873,
+    "seed": 8006,
+    "surface_to_hand_log10": 1.167970230282452
+   },
+   {
+    "hand_to_mouth_log10": 1.5951754675438878,
+    "seed": 8007,
+    "surface_to_hand_log10": 1.1682982570419163
+   },
+   {
+    "hand_to_mouth_log10": 2.0661508531424704,
+    "seed": 8008,
+    "surface_to_hand_log10": 0.5623020614537921
+   },
+   {
+    "hand_to_mouth_log10": 1.856615353967705,
+    "seed": 8009,
+    "surface_to_hand_log10": 1.661293584717628
+   },
+   {
+    "hand_to_mouth_log10": 2.0972391339010126,
+    "seed": 8010,
+    "surface_to_hand_log10": 1.8406159606230785
+   },
+   {
+    "hand_to_mouth_log10": 1.9960725781846578,
+    "seed": 8011,
+    "surface_to_hand_log10": 0.3316624168578372
+   },
+   {
+    "hand_to_mouth_log10": 1.9437548547616068,
+    "seed": 8012,
+    "surface_to_hand_log10": 0.7092924510789974
+   },
+   {
+    "hand_to_mouth_log10": 1.8981029898961057,
+    "seed": 8013,
+    "surface_to_hand_log10": 0.28626627777298663
+   },
+   {
+    "hand_to_mouth_log10": 2.078343061105491,
+    "seed": 8014,
+    "surface_to_hand_log10": 0.7158952009483603
+   },
+   {
+    "hand_to_mouth_log10": 2.5763011935414366,
+    "seed": 8015,
+    "surface_to_hand_log10": 2.1311425948906173
+   },
+   {
+    "hand_to_mouth_log10": 1.8792967909961193,
+    "seed": 8016,
+    "surface_to_hand_log10": 1.7882393068700138
+   },
+   {
+    "hand_to_mouth_log10": 1.8325213516416674,
+    "seed": 8017,
+    "surface_to_hand_log10": 1.7616998517821383
+   },
+   {
+    "hand_to_mouth_log10": 2.12989839590111,
+    "seed": 8018,
+    "surface_to_hand_log10": 1.3234154281671733
+   },
+   {
+    "hand_to_mouth_log10": 1.9255110727701712,
+    "seed": 8019,
+    "surface_to_hand_log10": 0.6211800493367531
+   }
+  ],
+  "hand_to_mouth_log10": {
+   "confirmed": true,
+   "distribution": {
+    "max": 2.5763011935414366,
+    "median": 1.9595647150514144,
+    "min": 1.5951754675438878,
+    "n": 20,
+    "p25": 1.8975888411523416,
+    "p75": 2.0691989051332254
+   },
+   "dose01_pair_value": 1.93
+  },
+  "surface_to_hand_log10": {
+   "confirmed": false,
+   "distribution": {
+    "max": 2.6733705625519404,
+    "median": 0.8397624501170029,
+    "min": 7.051009700825623e-07,
+    "n": 20,
+    "p25": 0.3203133820866245,
+    "p75": 1.6863951514837556
+   },
+   "dose01_pair_value": 2.17
+  }
+ },
+ "void_seeds": []
+}
