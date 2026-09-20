@@ -173,6 +173,19 @@ def _summarise(sim, rows, start: int, end: int | None) -> dict[str, Any]:
     }
 
 
+def _write_dump(out_arg: str, summary: dict, rows: list[dict]) -> str:
+    """Write the per-agent dump at the repo root; bare filenames only."""
+    if os.path.basename(out_arg) != out_arg:
+        raise SystemExit(f"--out {out_arg!r} must be a bare filename")
+    repo_root = os.path.realpath(
+        os.path.join(os.path.dirname(__file__), ".."),
+    )
+    path = os.path.join(repo_root, out_arg)
+    with open(path, "w", encoding="utf-8") as fh:
+        json.dump({"summary": summary, "agents": rows}, fh, indent=1)
+    return path
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--theta", type=float, default=1e9)
@@ -185,7 +198,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--design", default=DESIGN_REL)
     parser.add_argument(
         "--out", default=None,
-        help="optional path for the per-agent JSON dump",
+        help="optional bare filename for the per-agent JSON dump "
+        "(written at the repository root)",
     )
     args = parser.parse_args(argv)
 
@@ -207,14 +221,7 @@ def main(argv: list[str] | None = None) -> int:
     })
     print(json.dumps(summary, indent=2, sort_keys=True))
     if args.out:
-        out_dir = os.path.dirname(os.path.realpath(__file__))
-        repo_root = os.path.realpath(os.path.join(out_dir, ".."))
-        path = os.path.realpath(args.out)
-        if os.path.commonpath([repo_root, path]) != repo_root:
-            raise SystemExit(f"--out {args.out!r} escapes the repository root")
-        with open(path, "w", encoding="utf-8") as fh:
-            json.dump({"summary": summary, "agents": rows}, fh, indent=1)
-        print(f"per-agent dump: {path}")
+        print(f"per-agent dump: {_write_dump(args.out, summary, rows)}")
     return 0
 
 
