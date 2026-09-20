@@ -426,3 +426,12 @@ channels exposed REINFECT-01 (`docs/ledger/REINFECT-01.md`): the
 counts second episodes of recovered hosts. §12's "continues through enforced
 quarantine" reading is superseded at the truth-channel scale; the
 first-infection reading is in the readout §5.
+
+## 15. Postscript (2026-09-20, second): the post-REINFECT-01 rerun
+
+The same 240-cell design ran again at `main` = `d62f10d`
+(`docs/ledger/QUAR-ATTR-V2.md`,
+`docs/covid/covid_quarantine_attribution_v2_readout.md`). With the REINFECT-01
+fix in, the truth channel counts first infections and the frozen criterion
+calls crew confinement and pool transport load-bearing at Θ 1e9; §14's "no
+load-bearing channel" verdict is superseded.

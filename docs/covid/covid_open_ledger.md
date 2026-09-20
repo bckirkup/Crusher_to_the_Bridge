@@ -113,16 +113,19 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`QUAR-ATTR-V1`, measured at `861a0b9` (`docs/ledger/QUAR-ATTR-V1.md`,
-`docs/covid/covid_quarantine_attribution_v1_readout.md`): 240/240 cells of
-`covid_quarantine_attribution_v1` (six arms × Θ {1e5, 1e9} × 20 seeds). On
-the frozen criterion no single channel is load-bearing (Θ 1e9, 8–12
-overlapping seeds: crew confined −21%, pool transport off −16%, near-field off
-+3%, both −23%); removing all shared air collapses takeoff (0/20, 1/20).
-Whole-voyage attack rate is arm-invariant once a seed takes off (0.83–0.91 at
-1e9; 2,060 of 3,711 infected before day 16). Post-hoc on first infections only
-(event ledger), crew exemption and pool transport each carry most of what
-enters the confined population (−65% to −85%), near-field none. No Θ is
+`QUAR-ATTR-V2`, measured at `d62f10d` (`docs/ledger/QUAR-ATTR-V2.md`,
+`docs/covid/covid_quarantine_attribution_v2_readout.md`): the same 240 cells
+re-run post-REINFECT-01. On the now-valid frozen criterion at Θ 1e9, crew
+confinement (−74%, n = 12) and pool-transport removal (−66%, n = 8) are each
+load-bearing, near-field air is not (+19%, n = 8); the combined arm (−50%,
+n = 7) also suppresses takeoff 12 → 8. Nothing decidable at Θ 1e5 (3/20
+takeoff). `infections_during_quarantine == ledger_events_during` in 240/240
+cells. The v1 reading (`861a0b9`, `docs/ledger/QUAR-ATTR-V1.md`) that no
+channel is load-bearing is superseded — its measure counted second
+episodes; its post-hoc ledger shifts are confirmed. Removing all shared air
+still collapses takeoff (0/20, 1/20). Conditional-on-takeoff attack rate is
+0.79–0.90 across A0–A4 at 1e9 (A1 0.824 vs A0 0.865; A2/A4 move the all-seed
+AR by suppressing takeoff, not the taken-off voyage). No Θ is
 fitted; A1–A5 score no anchor.
 
 Before that — `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
