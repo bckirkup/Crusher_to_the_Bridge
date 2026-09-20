@@ -17,6 +17,19 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**REINFECT-01 voids every `infections_before/during/after_quarantine`
+figure as a count of hosts infected in the window.** A cleared host acquires
+no immunity without a strain registry and its second infection overwrites the
+record, so the truth channel dates the latest episode
+(`docs/ledger/REINFECT-01.md`, measured at `861a0b9`): 32% of the Θ 1e9
+`A0` during-quarantine count and 96% in the saturated seed `20200205` are
+reinfections; 37.6% of infected hosts in the probe cell were infected twice.
+`infections_total`, `attack_rate` and `recorded_onsets` count distinct hosts
+and first onsets and stand in count, but high-Θ attack rates carry re-shedding
+by an unmeasured amount. The "outbreak continues through enforced quarantine"
+reading at truth-channel scale (handoff §12, v9 readout §6) is superseded by
+`docs/covid/covid_quarantine_attribution_v1_readout.md` §4–6.
+
 **QUAR-EXEMPT-01 moves every post-`1a25c24` confinement-sensitive figure.**
 `exempt_classes` is now scoped to the protocol that declares it
 (`docs/ledger/QUAR-EXEMPT-01.md`); symptomatic crew are confined by
@@ -95,7 +108,19 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
+`QUAR-ATTR-V1`, measured at `861a0b9` (`docs/ledger/QUAR-ATTR-V1.md`,
+`docs/covid/covid_quarantine_attribution_v1_readout.md`): 240/240 cells of
+`covid_quarantine_attribution_v1` (six arms × Θ {1e5, 1e9} × 20 seeds). On
+the frozen criterion no single channel is load-bearing (Θ 1e9, 8–12
+overlapping seeds: crew confined −21%, pool transport off −16%, near-field off
++3%, both −23%); removing all shared air collapses takeoff (0/20, 1/20).
+Whole-voyage attack rate is arm-invariant once a seed takes off (0.83–0.91 at
+1e9; 2,060 of 3,711 infected before day 16). Post-hoc on first infections only
+(event ledger), crew exemption and pool transport each carry most of what
+enters the confined population (−65% to −85%), near-field none. No Θ is
+fitted; A1–A5 score no anchor.
+
+Before that — `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
 `20200206`, Θ = 3.16e7 — 2 infections (extinction); seed `20200210`, Θ = 1e9 —
 1,390 infections (37.5%), 952 of them in the two crew messes after 5 Feb, 303
 in confined passengers, Windjammer 0. One crew-mess epoch (242 occupants, 2
@@ -129,8 +154,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `ln 2 / Θ`. `Beta(0.18, 58)` is strongly right-skewed, so the median host sits
   well below the mean; whether the reference belongs at the mean, the median, or
   the realised infecting dose is unresolved.
-- **795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
-  pool; lifecycle not yet traced.
+- ~~**795 repeat infection events at Θ = 1e9.** Hosts re-enter the susceptible
+  pool; lifecycle not yet traced.~~ Traced: REINFECT-01 (§1). The open
+  decision is whether to fix it before any further COVID campaign
+  (`docs/ledger/QUAR-ATTR-V1.md`).
 - **Index-case geometry.** Declared per-agent departure shipped
   (INDEX-GEOM-01): the index disembarks on day 5 per Yamagishi 2020. The
   resolved infection-age × Θ screen has now run (THETA-V7-01, below) and
