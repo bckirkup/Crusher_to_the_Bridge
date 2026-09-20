@@ -1,7 +1,7 @@
 # REINFECT-01
 **Date:** 2026-09-20
 **Commit:** 861a0b9
-**Pathogens:** all (exposed on `sars_cov2_resp`; any profile whose hosts clear before the voyage ends)
+**Pathogens:** all
 **Status:** open
 **Measured at:** 861a0b9
 
@@ -9,6 +9,8 @@
 
 A host whose infection clears acquires no immunity unless a strain registry
 is configured, and a second infection overwrites the record of the first.
+Exposed on `sars_cov2_resp`; applies to any profile whose hosts clear before
+the voyage ends.
 
 - `engines/natural_history.py` `advance_infection`: when the last resident
   lineage clears (`days_infected >= shedding_clearance_day`, day 15 for
