@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import math
 import os
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from itertools import product
 from typing import Any
@@ -32,12 +32,14 @@ from typing import Any
 import numpy as np
 
 from engines.infection_dynamics_bridge import ever_presented
+from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS, TransmissionCore
 from picard_framework.covid_fit_targets import load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
 from picard_framework.covid_theta_fit import (
     PATHOGEN_ID,
     HullObservables,
     build_fit_run_spec,
+    load_covid_profile,
     observables_from_modality,
     run_fit_spec,
 )
@@ -47,6 +49,18 @@ DESIGN_REL = os.path.join(
     "picard_framework", "runs", "covid_boarding_screen_v1_design.json",
 )
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
+# Attribution-design arm axes (covid_quarantine_attribution_v1). Every key a
+# declared arm may override; anything else refuses at design load rather than
+# drifting into a silently-ignored counterfactual.
+ARM_OVERRIDE_KEYS = frozenset({
+    "scheduled_protocol_id",
+    "pathogen_pool_transport",
+    "near_field_air_mode",
+    "profile_route_efficiency_multipliers",
+})
+QUARANTINE_PROTOCOL_ID = "SOP-017"
+NEAR_FIELD_AIR_MODES = ("two_box", "off")
+ZONE_CLASSES = ("cabin", "corridor", "crew_mess", "galley", "other")
 INTERVAL = (0.05, 0.95)
 SPLIT_DAY = 17
 TURN_DAY = 16
@@ -67,6 +81,31 @@ INDEX_GEOMETRY_PASS_FRACTION_MIN = 0.80
 
 # ── design ────────────────────────────────────────────────────────────────
 
+def _validate_arms(arms: tuple[Mapping[str, Any], ...]) -> None:
+    """The arm-axis validation the design performs at load."""
+    arm_ids = [a.get("arm_id") for a in arms]
+    for arm_id in arm_ids:
+        if not isinstance(arm_id, str) or not arm_id:
+            raise ValueError("every arm needs a non-empty string arm_id")
+    if len(set(arm_ids)) != len(arm_ids):
+        raise ValueError("arm_ids must be distinct")
+    if arms:
+        baseline_overrides = arms[0].get("overrides") or {}
+        if baseline_overrides:
+            raise ValueError(
+                "the first arm is the declared baseline and must carry "
+                "empty overrides",
+            )
+        for arm in arms:
+            unknown = set(arm.get("overrides") or {}) - ARM_OVERRIDE_KEYS
+            if unknown:
+                raise ValueError(
+                    f"arm {arm.get('arm_id')!r} declares unknown override "
+                    f"keys {sorted(unknown)}; allowed: "
+                    f"{sorted(ARM_OVERRIDE_KEYS)}",
+                )
+
+
 @dataclass(frozen=True)
 class BoardingScreenDesign:
     """The screen as declared before any cell ran."""
@@ -82,6 +121,7 @@ class BoardingScreenDesign:
     takeoff_recorded_onsets: int
     points: tuple[tuple[float, float, int], ...] = ()
     parent_design: str | None = None
+    arms: tuple[Mapping[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
         if self.sanitary_visit_mode not in SANITARY_VISIT_MODES:
@@ -102,6 +142,22 @@ class BoardingScreenDesign:
                 raise ValueError(f"malformed refinement point {(theta, age, imports)}")
         if len(set(self.points)) != len(self.points):
             raise ValueError("refinement points must be distinct")
+        _validate_arms(self.arms)
+
+    @property
+    def arm_ids(self) -> tuple[str, ...]:
+        return tuple(str(a["arm_id"]) for a in self.arms)
+
+    @property
+    def baseline_arm_id(self) -> str | None:
+        return self.arm_ids[0] if self.arms else None
+
+    def arm_overrides(self, arm_id: str) -> Mapping[str, Any]:
+        """The override block one arm declares, KeyError on an unknown id."""
+        for arm in self.arms:
+            if arm.get("arm_id") == arm_id:
+                return arm.get("overrides") or {}
+        raise KeyError(f"unknown arm_id {arm_id!r}")
 
     @property
     def is_refinement(self) -> bool:
@@ -140,6 +196,7 @@ class BoardingScreenDesign:
             "takeoff_recorded_onsets": self.takeoff_recorded_onsets,
             "points": [list(p) for p in self.points],
             "parent_design": self.parent_design,
+            "arms": [dict(a) for a in self.arms],
         }
 
 
@@ -171,9 +228,14 @@ def load_design(
             (float(t), float(a), int(n)) for t, a, n in raw.get("points", [])
         ),
         parent_design=raw.get("parent_design"),
+        arms=tuple(dict(a) for a in raw.get("arms", [])),
     )
     load_hull_scenarios().assert_fit_target(design.scenario_id)
     if design.is_refinement:
+        return design
+    if design.arms:
+        # An arm design pairs cells by arm, not by the boarding axis: its
+        # axes do not have to include the declared scenario's cell.
         return design
     if design.baseline[0] not in design.infection_age_days or (
         design.baseline[1] not in design.imports
@@ -197,6 +259,7 @@ class ScreenCell:
     infection_age_days: float
     imports: int
     seed: int
+    arm_id: str | None = None
 
     @property
     def axis(self) -> tuple[float, int]:
@@ -206,10 +269,13 @@ class ScreenCell:
     def key(self) -> str:
         exponent = f"{math.log10(self.theta):.2f}".replace(".", "p")
         age = f"{self.infection_age_days:g}".replace(".", "p")
-        return (
+        stem = (
             f"screen_{self.scenario_id}_theta1e{exponent}_age{age}d"
-            f"_imports{self.imports}_seed{self.seed}.json"
+            f"_imports{self.imports}_seed{self.seed}"
         )
+        if self.arm_id is not None:
+            stem += f"_arm{self.arm_id}"
+        return f"{stem}.json"
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -219,6 +285,7 @@ class ScreenCell:
             "infection_age_days": self.infection_age_days,
             "imports": self.imports,
             "seed": self.seed,
+            "arm_id": self.arm_id,
             "key": self.key,
         }
 
@@ -230,8 +297,10 @@ def enumerate_cells(design: BoardingScreenDesign) -> tuple[ScreenCell, ...]:
     refinement ranked them, each over the same matched seeds.
     """
     cells: list[ScreenCell] = []
-    for (theta, age, imports), seed in product(
-        design.axis_points, design.seed_values,
+    # Axis point, then arm, then seed: one arm's seeds stay contiguous.
+    arm_ids = design.arm_ids or (None,)
+    for (theta, age, imports), arm_id, seed in product(
+        design.axis_points, arm_ids, design.seed_values,
     ):
         cells.append(ScreenCell(
             index=len(cells),
@@ -240,6 +309,7 @@ def enumerate_cells(design: BoardingScreenDesign) -> tuple[ScreenCell, ...]:
             infection_age_days=float(age),
             imports=int(imports),
             seed=int(seed),
+            arm_id=arm_id,
         ))
     return tuple(cells)
 
@@ -270,6 +340,150 @@ def apply_boarding_axis(
         sanitary_visit_mode
     )
     return raw
+
+
+def _swap_scheduled_protocol(raw: dict[str, Any], protocol_id: str) -> None:
+    """Rename the scheduled SOP-017 entry to the arm's protocol, in place."""
+    protocols = (
+        raw.get("config_overrides", {})
+        .get("scenario_schedule", {})
+        .get("protocols", [])
+    )
+    found = False
+    for entry in protocols:
+        if entry.get("protocol_id") == QUARANTINE_PROTOCOL_ID:
+            entry["protocol_id"] = str(protocol_id)
+            found = True
+    if not found:
+        raise ValueError(
+            f"the run spec's scenario_schedule schedules no "
+            f"{QUARANTINE_PROTOCOL_ID} entry to rename",
+        )
+
+
+def _apply_route_efficiencies(
+    raw: dict[str, Any],
+    arm_values: Mapping[str, Any],
+    profile: dict[str, Any],
+) -> None:
+    """Merge the arm's route multipliers onto the shipped profile mapping."""
+    shipped = profile["route_efficiency_multipliers"]
+    unknown = set(arm_values) - set(shipped)
+    if unknown:
+        raise ValueError(
+            f"route_efficiency_multipliers keys {sorted(unknown)} are not in "
+            f"the shipped profile {sorted(shipped)}",
+        )
+    for key, value in arm_values.items():
+        if not math.isfinite(float(value)) or float(value) < 0.0:
+            raise ValueError(
+                f"route_efficiency_multipliers[{key!r}] must be finite and "
+                f">= 0, got {value!r}",
+            )
+    merged = {**shipped, **{k: float(v) for k, v in arm_values.items()}}
+    raw.setdefault("pathogen_overrides", {}).setdefault(
+        PATHOGEN_ID, {},
+    )["route_efficiency_multipliers"] = merged
+
+
+def apply_arm_overrides(
+    raw: dict[str, Any],
+    overrides: Mapping[str, Any],
+    *,
+    profile: dict[str, Any],
+) -> dict[str, Any]:
+    """Apply one arm's override block to a built run spec, in place.
+
+    ``pathogen_pool_transport`` is not handled here: it is a build-time
+    argument to ``build_fit_run_spec``. Every other declared key lands in the
+    spec where the engine reads it; an undeclared key raises rather than
+    being silently ignored.
+    """
+    for key in overrides:
+        if key not in ARM_OVERRIDE_KEYS:
+            raise ValueError(
+                f"unknown arm override key {key!r}; allowed: "
+                f"{sorted(ARM_OVERRIDE_KEYS)}",
+            )
+    if "scheduled_protocol_id" in overrides:
+        _swap_scheduled_protocol(raw, str(overrides["scheduled_protocol_id"]))
+    if "near_field_air_mode" in overrides:
+        mode = str(overrides["near_field_air_mode"])
+        if mode not in NEAR_FIELD_AIR_MODES:
+            raise ValueError(
+                f"near_field_air_mode must be one of {NEAR_FIELD_AIR_MODES}, "
+                f"got {mode!r}",
+            )
+        raw["config_overrides"].setdefault("transmission", {}).setdefault(
+            "near_field_air", {},
+        )["mode"] = mode
+    if "profile_route_efficiency_multipliers" in overrides:
+        _apply_route_efficiencies(
+            raw, overrides["profile_route_efficiency_multipliers"], profile,
+        )
+    return raw
+
+
+class QuarantineAttributionLedger:
+    """Per-epoch accumulator a screen cell attaches as the epoch observer.
+
+    Reads the epoch's transmission events and the confinement in force while
+    they fired — detail that ``history_retention = "compact"`` drops — into
+    the smallest structure the payload needs. The observer only reads.
+    """
+
+    def __init__(self) -> None:
+        self.events: list[dict[str, Any]] = []
+        self._seen_targets: set[int] = set()
+        self.activation_epoch: int | None = None
+        self.exempt_classes: list[str] | None = None
+        self.confined_at_activation: int | None = None
+        self.protocol_ids: list[str] | None = None
+
+    @property
+    def activated(self) -> bool:
+        return self.activation_epoch is not None
+
+    @staticmethod
+    def _event_pathway(ev: Any) -> str:
+        """The dominant acquired-dose route, else the stripped pathway key."""
+        ledger = ev.acquired_particles_by_route or {}
+        if sum(ledger.values()) > 0.0:
+            return max(ledger, key=ledger.get)
+        pathway = str(ev.pathway or "")
+        return pathway.split(":", 1)[0] or "unknown"
+
+    def observe(self, sim: Any, work: Any) -> None:
+        seeded = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
+        quarantined = set(getattr(sim.engine, "quarantined_ids", None) or ())
+        for ev in work.tx_events:
+            target = ev.target_agent_id
+            if target in self._seen_targets or target in seeded:
+                continue
+            self._seen_targets.add(target)
+            self.events.append({
+                "epoch": int(ev.epoch),
+                "zone": TransmissionCore.compartment_parent(ev.zone),
+                "pathway": self._event_pathway(ev),
+                "target_agent_id": int(target),
+                "confined": target in quarantined,
+            })
+        whole_body = [
+            e for e in (work.active_mods or [])
+            if e.get("modifiers", {}).get("confine_all_to_quarters")
+        ]
+        if self.activation_epoch is None and whole_body:
+            self.activation_epoch = work.epoch
+            exempt = [
+                set(e.get("modifiers", {}).get("exempt_classes", []))
+                for e in whole_body
+            ]
+            # An agent is exempt only if every whole-body order exempts it.
+            self.exempt_classes = sorted(set.intersection(*exempt))
+            self.confined_at_activation = len(work.state.quarantined_ids)
+            self.protocol_ids = sorted(
+                e.get("protocol_id") for e in whole_body
+            )
 
 
 def _index_host(engine: Any) -> Any | None:
@@ -347,17 +561,164 @@ def _first_onset_day(curve: dict[int, dict[str, int]]) -> int | None:
     return min(days) if days else None
 
 
-def simulate_screen_cell(
+def _quarantine_window(raw: dict[str, Any]) -> tuple[dict[str, Any], int, int | None]:
+    """The scheduled quarantine entry and its inclusive day window."""
+    protocols = (
+        raw.get("config_overrides", {})
+        .get("scenario_schedule", {})
+        .get("protocols", [])
+    )
+    for entry in protocols:
+        # SOP-017 or an arm's renamed copy of it (same window).
+        if entry.get("protocol_id", "").startswith(QUARANTINE_PROTOCOL_ID):
+            end = entry.get("end_day")
+            return (
+                entry,
+                int(entry["start_day"]),
+                None if end is None else int(end),
+            )
+    raise ValueError(
+        "the run spec schedules no quarantine entry for the payload window",
+    )
+
+
+def _zone_class_lookup(sim: Any) -> dict[str, str]:
+    """Zone id -> dining service type, from the platform's spatial layout."""
+    from engines.infection_dynamics_bridge import resolve_dining_service_type
+    from engines.py_contam_bridge import load_spatial_layout
+
+    layout = load_spatial_layout(sim.repo_root, sim.cfg)
+    return {
+        str(z.get("id")): resolve_dining_service_type(z)
+        for z in layout.get("zones", [])
+        if z.get("type") == "Dining"
+    }
+
+
+def _truth_window_counts(sim: Any, start: int, end: int | None) -> dict[str, int]:
+    """Ever-infected non-seeded hosts by infection day vs the window."""
+    seeded = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
+    counts = {"before": 0, "during": 0, "after": 0}
+    for agent in sim.engine.agents:
+        if agent.agent_id in seeded or PATHOGEN_ID not in agent.infections:
+            continue
+        day = sim.clock.day_index(int(agent.infections[PATHOGEN_ID]["infection_epoch"]))
+        if day < start:
+            counts["before"] += 1
+        elif end is None or day <= end:
+            counts["during"] += 1
+        else:
+            counts["after"] += 1
+    return counts
+
+
+def _during_zone_class(
+    sim: Any,
+    dining_types: Mapping[str, str],
+    agents_by_id: Mapping[int, Any],
+    ev: Mapping[str, Any],
+) -> str:
+    zone = ev["zone"]
+    ztype = sim.zone_types.get(zone)
+    if ztype == "Cabin_Corridor":
+        target = agents_by_id.get(ev["target_agent_id"])
+        if target is not None and zone == getattr(target, "home_zone", None):
+            return "cabin"
+        return "corridor"
+    if ztype == "Dining":
+        stype = dining_types.get(zone, "")
+        if stype in ("crew_mess", "galley"):
+            return stype
+        return "other"
+    return "other"
+
+
+def _tally_during_events(
+    sim: Any,
+    ledger_events: list[dict[str, Any]],
+    agents_by_id: dict[int, Any],
+    dining_types: Mapping[str, str],
+    start: int,
+    end: int | None,
+) -> tuple[dict[str, int], dict[str, int], dict[str, int], int]:
+    """Split the during-window ledger events by role, zone class and route."""
+    by_role = {"passenger": 0, "crew": 0}
+    by_zone = dict.fromkeys(ZONE_CLASSES, 0)
+    by_route = {**dict.fromkeys(PATHWAY_EFFICIENCY_KEYS, 0), "unknown": 0}
+    confined_passengers = 0
+    for ev in ledger_events:
+        day = sim.clock.day_index(int(ev["epoch"]))
+        if day < start or (end is not None and day > end):
+            continue
+        agent = agents_by_id.get(ev["target_agent_id"])
+        role = getattr(agent, "role", None)
+        if role in by_role:
+            by_role[role] += 1
+        by_zone[_during_zone_class(sim, dining_types, agents_by_id, ev)] += 1
+        by_route[ev["pathway"] if ev["pathway"] in by_route else "unknown"] += 1
+        if role == "passenger" and ev["confined"]:
+            confined_passengers += 1
+    return by_role, by_zone, by_route, confined_passengers
+
+
+def _attribution_block(
+    sim: Any,
+    ledger: QuarantineAttributionLedger,
+    raw: dict[str, Any],
+) -> dict[str, Any]:
+    """The cell_payload_additions fields of the attribution design."""
+    schedule_entry, start, end = _quarantine_window(raw)
+    window_counts = _truth_window_counts(sim, start, end)
+    activated = ledger.activated
+    agents_by_id = {a.agent_id: a for a in sim.engine.agents}
+    dining_types = _zone_class_lookup(sim)
+
+    by_role, by_zone, by_route, confined_passengers = _tally_during_events(
+        sim, ledger.events, agents_by_id, dining_types, start, end,
+    )
+
+    witness = {
+        "protocol_id": schedule_entry["protocol_id"],
+        "protocol_ids": ledger.protocol_ids,
+        "window_days": [start, end],
+        "activated": activated,
+        "activation_epoch": ledger.activation_epoch,
+        "confined_at_activation": ledger.confined_at_activation,
+        "exempt_classes": ledger.exempt_classes,
+        "invalid_reason": None if activated else "quarantine_never_activated",
+    }
+    return {
+        "infections_before_quarantine": window_counts["before"],
+        "infections_during_quarantine": (
+            window_counts["during"] if activated else None
+        ),
+        "infections_after_quarantine": window_counts["after"],
+        "during_quarantine_by_role": by_role if activated else None,
+        "during_quarantine_by_zone_class": by_zone if activated else None,
+        "during_quarantine_by_route": by_route if activated else None,
+        "confined_passenger_infections_during_quarantine": (
+            confined_passengers if activated else None
+        ),
+        "quarantine_witness": witness,
+    }
+
+
+def prepare_cell_run_spec(
     design: BoardingScreenDesign,
     cell: ScreenCell,
     *,
     num_epochs: int | None = None,
     repo_root: str = REPO_ROOT,
 ) -> dict[str, Any]:
-    """Run one cell and return its observables, onset curve and witness."""
+    """Build the run spec one cell executes, arm overrides included."""
+    arm_overrides = (
+        design.arm_overrides(cell.arm_id)
+        if design.arms and cell.arm_id is not None else {}
+    )
     raw = build_fit_run_spec(
         cell.scenario_id, cell.theta, cell.seed,
         num_epochs=num_epochs, repo_root=repo_root,
+        pathogen_pool_transport=arm_overrides.get("pathogen_pool_transport"),
     )
     apply_boarding_axis(
         raw,
@@ -365,7 +726,20 @@ def simulate_screen_cell(
         imports=cell.imports,
         sanitary_visit_mode=design.sanitary_visit_mode,
     )
-    sim = run_fit_spec(raw, repo_root=repo_root)
+    apply_arm_overrides(
+        raw, arm_overrides, profile=load_covid_profile(repo_root),
+    )
+    return raw
+
+
+def cell_payload(
+    design: BoardingScreenDesign,
+    cell: ScreenCell,
+    sim: Any,
+    ledger: QuarantineAttributionLedger,
+    raw: dict[str, Any],
+) -> dict[str, Any]:
+    """Read one finished simulation into the cell's payload."""
     syndromic = sim.modalities["syndromic"]
     obs = observables_from_modality(
         syndromic,
@@ -376,7 +750,7 @@ def simulate_screen_cell(
         turn_day=TURN_DAY,
     )
     curve = syndromic.onset_observation_curve(PATHOGEN_ID)
-    return {
+    payload = {
         "observables": obs.as_dict(),
         "onset_curve": {
             str(day): dict(roles) for day, roles in sorted(curve.items())
@@ -393,6 +767,28 @@ def simulate_screen_cell(
             getattr(sim.engine, "vsp_reported_case_fraction_max", 0.0),
         ),
     }
+    if design.arms:
+        payload.update({
+            "arm_id": cell.arm_id,
+            **_attribution_block(sim, ledger, raw),
+        })
+    return payload
+
+
+def simulate_screen_cell(
+    design: BoardingScreenDesign,
+    cell: ScreenCell,
+    *,
+    num_epochs: int | None = None,
+    repo_root: str = REPO_ROOT,
+) -> dict[str, Any]:
+    """Run one cell and return its observables, onset curve and witness."""
+    raw = prepare_cell_run_spec(
+        design, cell, num_epochs=num_epochs, repo_root=repo_root,
+    )
+    ledger = QuarantineAttributionLedger()
+    sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=ledger.observe)
+    return cell_payload(design, cell, sim, ledger, raw)
 
 
 ScreenRunner = Any
@@ -442,14 +838,17 @@ def _observables(payload: dict[str, Any]) -> HullObservables:
 def _group(
     cells: Iterable[ScreenCell],
     payloads: dict[str, dict[str, Any]],
-) -> dict[tuple[float, float, int], dict[int, dict[str, Any]]]:
-    grouped: dict[tuple[float, float, int], dict[int, dict[str, Any]]] = {}
+) -> dict[tuple[float, float, int, str | None], dict[int, dict[str, Any]]]:
+    grouped: dict[
+        tuple[float, float, int, str | None], dict[int, dict[str, Any]],
+    ] = {}
     for cell in cells:
         payload = payloads.get(cell.key)
         if payload is None:
             continue
         grouped.setdefault(
-            (cell.theta, cell.infection_age_days, cell.imports), {},
+            (cell.theta, cell.infection_age_days, cell.imports, cell.arm_id),
+            {},
         )[cell.seed] = payload
     return grouped
 
@@ -752,19 +1151,29 @@ def merge_screen(
     resolved_targets = targets or load_fit_targets()
     surface = []
     for theta, age, imports in design.axis_points:
-        base = grouped.get((theta, *design.baseline), {})
-        by_seed = grouped.get((theta, age, imports), {})
-        if not by_seed:
-            continue
-        entry = {
-            "theta": theta,
-            "infection_age_days": age,
-            "imports": imports,
-            "is_baseline": (age, imports) == design.baseline,
-            **_cell_summary(design, by_seed, resolved_targets),
-            "delta_vs_baseline": _paired_deltas(base, by_seed),
-        }
-        surface.append(entry)
+        for arm_id in design.arm_ids or (None,):
+            if design.arms:
+                # Arm designs pair on the first arm at the same axis point.
+                base = grouped.get(
+                    (theta, age, imports, design.baseline_arm_id), {},
+                )
+                is_baseline = arm_id == design.baseline_arm_id
+            else:
+                base = grouped.get((theta, *design.baseline, None), {})
+                is_baseline = (age, imports) == design.baseline
+            by_seed = grouped.get((theta, age, imports, arm_id), {})
+            if not by_seed:
+                continue
+            entry = {
+                "theta": theta,
+                "infection_age_days": age,
+                "imports": imports,
+                "arm_id": arm_id,
+                "is_baseline": is_baseline,
+                **_cell_summary(design, by_seed, resolved_targets),
+                "delta_vs_baseline": _paired_deltas(base, by_seed),
+            }
+            surface.append(entry)
     return {
         "design": design.as_dict(),
         "coverage": {"expected": expected, "found": found, "partial": found < expected},

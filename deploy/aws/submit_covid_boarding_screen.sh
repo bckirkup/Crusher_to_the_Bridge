@@ -8,8 +8,22 @@
 # its own object; pool with `tools/fit_covid_theta.py screen`.
 set -euo pipefail
 
-USAGE="usage: submit_covid_boarding_screen.sh <bucket> [region] [queue] [job-definition]"
-BUCKET="${1:?$USAGE}"
+USAGE="usage: submit_covid_boarding_screen.sh <bucket> [region] [queue] [job-definition] [--dry-run]"
+DRY_RUN=0
+ARGS=()
+for arg in "$@"; do
+  if [ "$arg" = "--dry-run" ]; then
+    DRY_RUN=1
+  else
+    ARGS+=("$arg")
+  fi
+done
+set -- "${ARGS[@]}"
+if [ "$DRY_RUN" -eq 1 ] && [ $# -eq 0 ]; then
+  BUCKET="dry-run"
+else
+  BUCKET="${1:?$USAGE}"
+fi
 AWS_REGION="${2:-us-east-1}"
 JOB_QUEUE="${3:-picard-campaign-queue}"
 JOB_DEFINITION="${4:-picard-covid-boarding-screen}"
@@ -45,6 +59,11 @@ if [ "$ARRAY_SIZE" -eq 1 ]; then
   echo "  (single child: submitted without array properties)"
 else
   ARRAY_ARGS=(--array-properties "size=$ARRAY_SIZE")
+fi
+
+if [ "$DRY_RUN" -eq 1 ]; then
+  echo "  (dry run: nothing submitted)"
+  exit 0
 fi
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
