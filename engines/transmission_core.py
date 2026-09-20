@@ -1901,11 +1901,10 @@ class TransmissionCore:
             StrainRegistry() if enabled else None
         )
         self.strain_configs: dict[str, StrainEvolutionConfig] = {}
-        if self.strain_registry is not None:
-            for pid, profile in self.pathogen_profiles.items():
-                config = self._strain_config_for_profile(pid, profile)
-                if config is not None:
-                    self.strain_configs[pid] = config
+        for pid, profile in self.pathogen_profiles.items():
+            config = self._strain_config_for_profile(pid, profile)
+            if config is not None:
+                self.strain_configs[pid] = config
         self.mutation_operator: MutationOperator | None = (
             MutationOperator(self.strain_registry, self.strain_configs)
             if self.strain_registry is not None
@@ -2903,6 +2902,36 @@ class TransmissionCore:
             priors.setdefault(embarked, None)
         return tuple(priors)
 
+    def _unlabeled_resolution_protection(
+        self, agent: KorkinAgent, pathogen_id: str, epoch: int,
+    ) -> float:
+        """Genotype-blind protection from every resolved infection-origin
+        exposure of this host to this pathogen.
+
+        The refractory window is non-specific by construction, so a record
+        with an empty genotype — written when no strain registry tracked the
+        cleared lineage — protects exactly as a named one does. This is the
+        only immunity channel that exists when ``variant_surveillance`` is off;
+        with a registry it mirrors what ``_nonspecific_protection`` already
+        contributes through the genotyped records.
+        """
+        config = self.strain_configs.get(pathogen_id)
+        if config is None:
+            return 0.0
+        return max(
+            (
+                config.immune_waning.protection_at(
+                    0.0,
+                    self.clock.days_elapsed(max(0, epoch - record.epoch)),
+                    0.0,
+                )
+                for record in agent.immune_history
+                if record.pathogen_id == pathogen_id
+                and record.origin == IMMUNITY_FROM_INFECTION
+            ),
+            default=0.0,
+        )
+
     def _challenge_protection(
         self, agent: KorkinAgent, pathogen_id: str, epoch: int = 0,
     ) -> float:
@@ -2918,6 +2947,10 @@ class TransmissionCore:
         """
         config = self.strain_configs.get(pathogen_id)
         legacy = 1.0 if agent.immune else 0.0
+        legacy = max(
+            legacy,
+            self._unlabeled_resolution_protection(agent, pathogen_id, epoch),
+        )
         if self.strain_registry is None or config is None or not config.cross_immunity:
             return legacy
         priors = self._prior_exposures(agent, pathogen_id, epoch)

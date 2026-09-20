@@ -1081,6 +1081,7 @@ class KorkinAgent:
             if rng is not None
             else 1.0
         )
+        prior = self.infections.get(pathogen_id)
         self.infections[pathogen_id] = {
             "status": InfectionStatus.INFECTED,
             "illness": IllnessStatus.NOT_ILL,
@@ -1088,6 +1089,15 @@ class KorkinAgent:
             "acquired_particles": dose,
             "acquired_particles_by_route": dict(acquired_particles_by_route or {}),
             "infection_epoch": epoch,
+            "first_infection_epoch": (
+                prior.get("first_infection_epoch", prior["infection_epoch"])
+                if prior else epoch
+            ),
+            "episode": prior.get("episode", 1) + 1 if prior else 1,
+            "episode_epochs": (
+                [*prior.get("episode_epochs", [prior["infection_epoch"]]), epoch]
+                if prior else [epoch]
+            ),
             "shedding_multiplier": shedding_mult,
         }
         # A chronic shedder carries its own infectious period, so the record

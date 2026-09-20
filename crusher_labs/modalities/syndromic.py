@@ -345,7 +345,7 @@ class SyndromicSurveillance:
             aid = agent["agent_id"]
             is_isolated = agent_is_isolated(agent)
             presenting = agent_has_symptomatic_presentation(agent)
-            if presenting and aid not in self._presentation_onset_epoch:
+            if presenting and self._onset_is_stale(aid, agent):
                 self._presentation_onset_epoch[aid] = _observed_onset_epoch(
                     agent, epoch,
                 )
@@ -760,6 +760,21 @@ class SyndromicSurveillance:
     # laboratory-confirmed and presenting a syndrome-eligible severity;
     # the day recorded is the day it first presented.
 
+    def _onset_is_stale(self, aid: int, agent: dict[str, Any]) -> bool:
+        """True when the stored onset predates the presenting infection.
+
+        A cleared-and-reinfected host presents a second episode whose
+        infection postdates the stored onset epoch; keeping the first date
+        would report the onset before the exposure that caused it.
+        """
+        stored = self._presentation_onset_epoch.get(aid)
+        if stored is None:
+            return True
+        infection_epoch = _symptomatic_infection(agent).get("infection_epoch")
+        if infection_epoch is None:
+            return False
+        return int(infection_epoch) > int(stored)
+
     def _record_onset_observations(
         self,
         agents: list[dict[str, Any]],
@@ -792,7 +807,10 @@ class SyndromicSurveillance:
         epoch: int,
     ) -> dict[str, Any] | None:
         key = (pathogen_id, aid)
-        if key in self._onset_observations or key not in self._lab_confirmed:
+        if key not in self._lab_confirmed:
+            return None
+        existing = self._onset_observations.get(key)
+        if existing is not None and int(existing["onset_epoch"]) >= int(onset_epoch):
             return None
         if infection.get("illness") != "SYMPTOMATIC":
             return None
