@@ -193,8 +193,23 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # Greg Mortimer 3.11 reads above were.
         # This cell is marked `slow`: a full Diamond Princess replay is ~20
         # minutes, so it lands on the nightly tier while the Greg Mortimer
-        # cell keeps a fast-tier reading on every push.
-        (3, 12): (3522, 2934, 1706, 252, 73),
+        # cell keeps a fast-tier reading on every push. That first reading was
+        # (3522, 2934, 1706, 252, 73); the 3.12 nightly at a44d4c4 (#632) was
+        # the last to pass at it. Two merges then moved the cell, read locally
+        # on CPython 3.12 (numpy 2.5.0) at each merge commit:
+        #   QUAR-EXEMPT-01 (#633, 861a0b9): confinement now applies each
+        #   order's own exempt_classes, changing whom the SOP-017 scenario
+        #   quarantine confines on this hull,
+        #   (3522, 2934, 1706, 252, 73) -> (3464, 2982, 1847, 232, 68);
+        #   REINFECT-01 (#636, d62f10d): cleared hosts get the declared 90-day
+        #   refractory window and episode-keeping records, so the late-replay
+        #   reinfections the old engine counted no longer occur,
+        #   (3464, 2982, 1847, 232, 68) -> (3418, 2942, 1894, 209, 68).
+        # The pin is the post-REINFECT-01 reading; #637/#638 touch no engine
+        # code. The local CPython 3.11 reading at the same commit is
+        # (3399, 2963, 1987, 195, 64) (numpy 2.4.6) and stays unpinned
+        # pending a CI reading, as the 3.11 entries above were.
+        (3, 12): (3418, 2942, 1894, 209, 68),
     },
 }
 
