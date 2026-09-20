@@ -433,10 +433,20 @@ class QuarantineAttributionLedger:
         self.activation_epoch: int | None = None
         self.exempt_classes: list[str] | None = None
         self.confined_at_activation: int | None = None
+        self.protocol_ids: list[str] | None = None
 
     @property
     def activated(self) -> bool:
         return self.activation_epoch is not None
+
+    @staticmethod
+    def _event_pathway(ev: Any) -> str:
+        """The dominant acquired-dose route, else the stripped pathway key."""
+        ledger = ev.acquired_particles_by_route or {}
+        if sum(ledger.values()) > 0.0:
+            return max(ledger, key=ledger.get)
+        pathway = str(ev.pathway or "")
+        return pathway.split(":", 1)[0] or "unknown"
 
     def observe(self, sim: Any, work: Any) -> None:
         seeded = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
@@ -449,17 +459,26 @@ class QuarantineAttributionLedger:
             self.events.append({
                 "epoch": int(ev.epoch),
                 "zone": TransmissionCore.compartment_parent(ev.zone),
-                "pathway": ev.pathway,
+                "pathway": self._event_pathway(ev),
                 "target_agent_id": int(target),
                 "confined": target in quarantined,
             })
-        mods = work.merged_mods
-        if self.activation_epoch is None and mods and mods.get(
-            "confine_all_to_quarters",
-        ):
+        whole_body = [
+            e for e in (work.active_mods or [])
+            if e.get("modifiers", {}).get("confine_all_to_quarters")
+        ]
+        if self.activation_epoch is None and whole_body:
             self.activation_epoch = work.epoch
-            self.exempt_classes = sorted(mods.get("exempt_classes", []))
+            exempt = [
+                set(e.get("modifiers", {}).get("exempt_classes", []))
+                for e in whole_body
+            ]
+            # An agent is exempt only if every whole-body order exempts it.
+            self.exempt_classes = sorted(set.intersection(*exempt))
             self.confined_at_activation = len(work.state.quarantined_ids)
+            self.protocol_ids = sorted(
+                e.get("protocol_id") for e in whole_body
+            )
 
 
 def _index_host(engine: Any) -> Any | None:
@@ -645,6 +664,7 @@ def _attribution_block(
 
     witness = {
         "protocol_id": schedule_entry["protocol_id"],
+        "protocol_ids": ledger.protocol_ids,
         "window_days": [start, end],
         "activated": activated,
         "activation_epoch": ledger.activation_epoch,

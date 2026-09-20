@@ -298,11 +298,22 @@ def _ev(epoch, zone, pathway, target, particles=None):
     )
 
 
-def _work(epoch, tx_events=(), merged_mods=None, quarantined=()):
+def _work(epoch, tx_events=(), active_mods=None, quarantined=()):
     return SimpleNamespace(
-        epoch=epoch, tx_events=list(tx_events), merged_mods=merged_mods,
+        epoch=epoch, tx_events=list(tx_events), active_mods=active_mods,
         state=SimpleNamespace(quarantined_ids=set(quarantined)),
     )
+
+
+def _confine_order(protocol_id="SOP-017", exempt=()):
+    return {
+        "protocol_id": protocol_id,
+        "modifiers": {
+            "confine_all_to_quarters": True,
+            "confinement_enforced": True,
+            "exempt_classes": list(exempt),
+        },
+    }
 
 
 def _attribution_for(sim, ledger, raw):
@@ -338,8 +349,7 @@ def test_window_day_boundaries(infection_epoch, bucket):
     ]
     sim = _Sim(agents)
     ledger = QuarantineAttributionLedger()
-    ledger.observe(sim, _work(epoch=0, merged_mods={
-        "confine_all_to_quarters": True, "exempt_classes": []}))
+    ledger.observe(sim, _work(epoch=0, active_mods=[_confine_order()]))
     raw = _raw_spec()
     out = _attribution_for(sim, ledger, raw)
     for name in ("before", "during", "after"):
@@ -366,7 +376,7 @@ def test_window_counts_sum_to_total_and_dedupe():
         _ev(20 * 24, "PC_1", "droplet", 1),
         _ev(20 * 24, "PC_2", "fomite", 1),
         _ev(20 * 24, "PC_9", "droplet", 9),   # unknown target: recorded
-    ], merged_mods={"confine_all_to_quarters": True}))
+    ], active_mods=[_confine_order()]))
     sim.engine.quarantined_ids = {1, 2}
     ledger.observe(sim, _work(epoch=25 * 24, tx_events=[
         _ev(25 * 24, "Crew_Mess_Main", "direct_contact", 2),
@@ -408,7 +418,7 @@ def test_during_splits_and_confined_count():
         _ev(22 * 24, "Main_Galley_Aft", "food", 3),       # galley
         _ev(23 * 24, "PC_Corridor", "hvac_airborne", 4),  # corridor
         _ev(24 * 24, "Void", "teleport", 1),              # dedupe: already
-    ], merged_mods={"confine_all_to_quarters": True}, quarantined={1, 4}))
+    ], active_mods=[_confine_order()], quarantined={1, 4}))
     raw = _raw_spec()
     out = _attribution_for(sim, ledger, raw)
     assert out["during_quarantine_by_role"] == {"passenger": 2, "crew": 2}
@@ -454,6 +464,35 @@ def test_never_activated_is_an_invalid_marker_not_zeros():
     assert out["infections_after_quarantine"] == 0
 
 
+def test_ledger_pathway_uses_dominant_dose_then_stripped_key():
+    sim = _Sim([_Agent(1, "passenger", "PC_1")])
+    ledger = QuarantineAttributionLedger()
+    ledger.observe(sim, _work(epoch=1, tx_events=[
+        _ev(1, "Z", "droplet:sars_cov2_resp", 1,
+            particles={"droplet": 0.5, "hvac_airborne": 0.9}),
+        _ev(1, "Z", "fomite:sars_cov2_resp", 2),
+        _ev(1, "Z", "", 3),
+    ]))
+    assert ledger.events[0]["pathway"] == "hvac_airborne"
+    assert ledger.events[1]["pathway"] == "fomite"
+    assert ledger.events[2]["pathway"] == "unknown"
+
+
+def test_witness_reports_intersection_and_protocol_ids():
+    sim = _Sim([], quarantined=(1, 2, 3))
+    ledger = QuarantineAttributionLedger()
+    ledger.observe(sim, _work(epoch=16 * 24, active_mods=[
+        _confine_order("SOP-017", exempt=["a", "b"]),
+        _confine_order("SOP-017-ALLHANDS", exempt=["b"]),
+    ], quarantined={1, 2, 3}))
+    assert ledger.exempt_classes == ["b"]
+    assert ledger.protocol_ids == ["SOP-017", "SOP-017-ALLHANDS"]
+    out = _attribution_for(sim, ledger, _raw_spec())
+    assert out["quarantine_witness"]["exempt_classes"] == ["b"]
+    assert out["quarantine_witness"]["protocol_ids"] == [
+        "SOP-017", "SOP-017-ALLHANDS"]
+
+
 def test_witness_reads_confinement_in_force_during_transmission():
     # The record step's new admissions only reach the engine next epoch, so a
     # target admitted this epoch is still unconfined in the event record.
@@ -463,7 +502,7 @@ def test_witness_reads_confinement_in_force_during_transmission():
     sim.engine.quarantined_ids = set()
     ledger.observe(sim, _work(
         epoch=16 * 24, tx_events=[_ev(16 * 24, "PC_7", "droplet", 7)],
-        merged_mods={"confine_all_to_quarters": True},
+        active_mods=[_confine_order()],
         quarantined={7},  # admitted this epoch's record step
     ))
     assert ledger.events[0]["confined"] is False
