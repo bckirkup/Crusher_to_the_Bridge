@@ -223,13 +223,15 @@ class TestRecordingImmunity:
         ]
         assert agent.immune_history[-1].epoch == 9
 
-    def test_untracked_infection_records_nothing(self) -> None:
-        """Flag off: the recovery seam is the legacy one, history stays empty."""
+    def test_untracked_infection_records_unlabeled_memory(self) -> None:
+        """Flag off: clearance still leaves one genotype-blind record (REINFECT-01)."""
         agent = _agent()
         agent.infect_with_pathogen(PATHOGEN, 1e4, 0)
         _resolve(agent, None)
         assert agent.infections[PATHOGEN]["status"] == InfectionStatus.RECOVERED
-        assert agent.immune_history == []
+        assert len(agent.immune_history) == 1
+        assert agent.immune_history[0].pathogen_id == PATHOGEN
+        assert agent.immune_history[0].genotype == ""
 
     def test_history_grows_only_with_resolved_exposures(self) -> None:
         """Repeated progression of one infection does not append per epoch."""
