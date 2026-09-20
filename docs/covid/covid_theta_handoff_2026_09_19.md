@@ -414,3 +414,15 @@ digest, an explicit job-definition revision, the manifest in S3, and one canary
 child inspected. None of that has happened. No image was pushed, no job
 definition registered, no canary or array submitted in this session. The open
 decision is whether to run the 240-cell array.
+
+## 14. Postscript (2026-09-20): the array ran
+
+The 240-cell array was submitted and completed at `main` = `861a0b9`
+(`docs/ledger/QUAR-ATTR-V1.md`,
+`docs/covid/covid_quarantine_attribution_v1_readout.md`). The frozen
+criterion returns no load-bearing channel, and reconciling the payload's
+channels exposed REINFECT-01 (`docs/ledger/REINFECT-01.md`): the
+`infections_during_quarantine` measure this document's §12 reasoned from
+counts second episodes of recovered hosts. §12's "continues through enforced
+quarantine" reading is superseded at the truth-channel scale; the
+first-infection reading is in the readout §5.
