@@ -905,6 +905,23 @@ def run_observation_sampling(
 
 # ── Quarantine confinement ───────────────────────────────────────────────
 
+def _confinement_orders(
+    merged_mods: dict[str, Any],
+    active_mods: list[dict[str, Any]] | None,
+) -> list[tuple[str | None, dict[str, Any]]]:
+    """The (protocol_id, modifiers) pairs an epoch's confinement comes from.
+
+    With per-protocol ``active_mods`` each order carries its own
+    ``exempt_classes``; without them (legacy callers) the merged modifiers
+    stand in as one anonymous order, preserving the union behaviour.
+    """
+    if active_mods is not None:
+        return [
+            (e.get("protocol_id"), e["modifiers"]) for e in active_mods
+        ]
+    return [(None, merged_mods)]
+
+
 def step_quarantine_confinement(
     epoch: int,
     agents: list[dict[str, Any]],
@@ -912,47 +929,78 @@ def step_quarantine_confinement(
     trigger_status: str,
     state: SimulationState,
     syndromic: Any,
+    active_mods: list[dict[str, Any]] | None = None,
 ) -> None:
-    """Apply quarantine confinement from escalation level and/or SOP modifiers.
+    """Apply quarantine confinement from escalation level and/or SOP orders.
+
+    Exemptions never cross protocol boundaries: an agent is confined when
+    ANY active order confines it under THAT order's own ``exempt_classes``.
+    The escalation-status path has no owning protocol and keeps the merged
+    exemption set.
 
     Escalation-level scope (outbreak response architecture):
     - ALERT: symptomatic individuals
     - SUSPECTED: symptomatic + clinically confirmed cases
     - CONFIRMED: symptomatic + confirmed + cabin-mate contacts
     - LOCKDOWN: all non-exempt agents
-
-    SOP modifiers still apply and may widen scope (e.g. ``confine_all_to_quarters``).
     """
-    exempt_classes: set[str] = set(merged_mods.get("exempt_classes", []))
+    orders = _confinement_orders(merged_mods, active_mods)
+    merged_exempt: set[str] = set(merged_mods.get("exempt_classes", []))
 
-    # SOP-009 / LOCKDOWN: full-ship lockdown — confine every agent
-    if merged_mods.get("confine_all_to_quarters", False):
-        confine_all_agents(
-            epoch, agents, state, syndromic, exempt_classes,
-            enforced=bool(merged_mods.get("confinement_enforced", False)),
+    # Whole-body orders supersede symptomatic confinement; enforced orders
+    # run first so an agent covered by both is admitted under enforcement.
+    whole_body = [
+        mods for _pid, mods in orders
+        if mods.get("confine_all_to_quarters", False)
+    ]
+    if whole_body:
+        whole_body.sort(
+            key=lambda m: not m.get("confinement_enforced", False),
         )
+        for mods in whole_body:
+            confine_all_agents(
+                epoch, agents, state, syndromic,
+                set(mods.get("exempt_classes", [])),
+                enforced=bool(mods.get("confinement_enforced", False)),
+            )
         return
 
     if trigger_status == STATUS_LOCKDOWN:
         confine_all_agents(
-            epoch, agents, state, syndromic, exempt_classes,
+            epoch, agents, state, syndromic, merged_exempt,
             enforced=False,
         )
         return
 
-    # SOP-008/010 or ALERT+: symptomatic confinement
-    if (
-        merged_mods.get("confine_symptomatic_to_quarters", False)
-        or STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[STATUS_ALERT]
-    ):
-        include_confirmed = STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[
-            STATUS_SUSPECTED
-        ]
-        include_contacts = trigger_status == STATUS_CONFIRMED
+    # Symptomatic confinement: once per symptomatic order with that order's
+    # exemptions, plus once for the status-driven path (ALERT+), which has
+    # no owning protocol and keeps the merged set.
+    status_driven = STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[STATUS_ALERT]
+    symptomatic_orders = [
+        mods for _pid, mods in orders
+        if mods.get("confine_symptomatic_to_quarters", False)
+    ]
+    if not symptomatic_orders and not status_driven:
+        return
+    include_confirmed = STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[
+        STATUS_SUSPECTED
+    ]
+    include_contacts = trigger_status == STATUS_CONFIRMED
+    for mods in symptomatic_orders:
         confine_agents(
             epoch, agents, state, syndromic,
             include_shedding=False,
-            exempt_classes=exempt_classes,
+            exempt_classes=set(mods.get("exempt_classes", [])),
+            confirmed_ids=(
+                state.cumulative_confirmed_case_ids if include_confirmed else None
+            ),
+            include_cabin_contacts=include_contacts,
+        )
+    if status_driven:
+        confine_agents(
+            epoch, agents, state, syndromic,
+            include_shedding=False,
+            exempt_classes=merged_exempt,
             confirmed_ids=(
                 state.cumulative_confirmed_case_ids if include_confirmed else None
             ),
