@@ -128,7 +128,11 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # while scaling its mean to Theta: (14, 5, 217, 19, 7) ->
         # (1, 1, 217, 4, 0) on CPython 3.11, read from CI job 105760985675
         # (fast tier, 3.11, shard 3) on this branch.
-        (3, 11): (1, 1, 217, 4, 0),
+        # REINFECT-01 gives a cleared host the declared refractory window and
+        # keeps first-episode records, which changes the trajectory and moves
+        # one campaign positive: (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0)
+        # on CPython 3.11, read locally on this branch.
+        (3, 11): (1, 1, 217, 5, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
