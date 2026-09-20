@@ -409,5 +409,77 @@
    "dose01_pair_value": 2.17
   }
  },
+ "unevaluated_dose": {
+  "any_negative_gap": false,
+  "block_credited_scaled_gec": 29826.262900411843,
+  "block_evaluated_gec": 29826.25978326745,
+  "block_unevaluated_fraction": 1.0451005551680793e-07,
+  "block_unevaluated_gec": 0.0031171443915809505,
+  "cells_with_gap": [
+   {
+    "credited_scaled_gec": 630.9296740449245,
+    "evaluated_gec": 630.9296674370597,
+    "seed": 8000,
+    "unevaluated_fraction": 1.0473219155246468e-08,
+    "unevaluated_gec": 6.607864747820713e-06
+   },
+   {
+    "credited_scaled_gec": 9383.858498483813,
+    "evaluated_gec": 9383.85634062028,
+    "seed": 8002,
+    "unevaluated_fraction": 2.2995482440757748e-07,
+    "unevaluated_gec": 0.0021578635332843987
+   },
+   {
+    "credited_scaled_gec": 0.052101717212946284,
+    "evaluated_gec": 0.05210130714883885,
+    "seed": 8005,
+    "unevaluated_fraction": 7.870452825152667e-06,
+    "unevaluated_gec": 4.100641074339384e-07
+   },
+   {
+    "credited_scaled_gec": 0.001740639469521504,
+    "evaluated_gec": 0.0017297344914970283,
+    "seed": 8007,
+    "unevaluated_fraction": 0.006264926318988581,
+    "unevaluated_gec": 1.0904978024475591e-05
+   },
+   {
+    "credited_scaled_gec": 325.56169868366106,
+    "evaluated_gec": 325.56092890661034,
+    "seed": 8009,
+    "unevaluated_fraction": 2.364458269609433e-06,
+    "unevaluated_gec": 0.0007697770507206769
+   },
+   {
+    "credited_scaled_gec": 0.0006381781630545698,
+    "evaluated_gec": 0.00063817380107513,
+    "seed": 8011,
+    "unevaluated_fraction": 6.83504966542313e-06,
+    "unevaluated_gec": 4.3619794398664855e-09
+   },
+   {
+    "credited_scaled_gec": 0.07396486891975951,
+    "evaluated_gec": 0.0739648689196534,
+    "seed": 8014,
+    "unevaluated_fraction": 1.4345941137766616e-12,
+    "unevaluated_gec": 1.0610956557854934e-13
+   },
+   {
+    "credited_scaled_gec": 0.020305380155521767,
+    "evaluated_gec": 0.020134806644903268,
+    "seed": 8019,
+    "unevaluated_fraction": 0.008400409611248476,
+    "unevaluated_gec": 0.00017057351061849912
+   },
+   {
+    "credited_scaled_gec": 0.084441594414279,
+    "evaluated_gec": 0.08444059138985507,
+    "seed": 8105,
+    "unevaluated_fraction": 1.1878321707187345e-05,
+    "unevaluated_gec": 1.0030244239206398e-06
+   }
+  ]
+ },
  "void_seeds": []
 }

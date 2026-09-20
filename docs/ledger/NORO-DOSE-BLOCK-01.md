@@ -127,11 +127,45 @@ proceed into any of them.
 
 ## Readout
 
-Measured at `5870c74`, 22/22 cells admissible, 0 void, reconciliation gate
-worst relative difference 0.000e+00 (PASS). Cells in
+Measured at `5870c74`, 22/22 cells admissible, 0 void. Cells in
 `docs/norovirus/noro_dose_block_01/classic_cruise_1900/`; aggregation by
 `tools/noro_diag/dose_block_readout.py` into
 `docs/norovirus/noro_dose_block_01/dose_block_cells.json`.
+
+### 0. Reconciliation gate — FAILED at the declared 1e-9, cause identified
+
+The gate frozen above **fails**: 9 of 22 cells exceed 1e-9 relative, worst
+8.400e-3 (seed 8019). It is reported here before any distribution is quoted,
+as the criterion requires.
+
+The failure is one-sided and localised to one of the three sums.
+`sum_dose_read_at_challenge_gec` equals `sum_credited_scaled_gec` **exactly**
+in all 22 cells, so nothing is lost in the chain up to the challenge;
+`sum_effective_dose_evaluated_gec` is the sum that is short, and it is short
+in every failing cell and never long (`any_negative_gap` false). That is the
+signature of `REINFECT-01`, not of a conservation defect: the challenge
+resolver returns at `protection >= 1.0` before the dose is evaluated, so a
+fully protected host's credited dose is read and then never evaluated. The
+pre-repair `e83aa06` block reconciles at exactly 0.000e+00 in all 20 cells,
+which dates the change to the repair.
+
+| | value |
+| --- | --- |
+| cells over 1e-9 | 9 of 22 (8000, 8002, 8005, 8007, 8009, 8011, 8014, 8019, 8105) |
+| worst per-cell fraction | 8.400e-3 (8019) |
+| block credited scaled | 29,826.2629 GEC |
+| block evaluated | 29,826.2598 GEC |
+| block unevaluated | 3.117e-3 GEC, **1.045e-7** of credited |
+
+**Reading: the gate's 1e-9 threshold is the wrong gate on post-repair `main`,
+not a defect it caught.** A threshold written for an engine in which every
+credited dose was evaluated cannot survive an engine that deliberately skips
+evaluation for immune hosts. The quantity that matters — how much dose the
+skip removes — is 1.0e-7 of the block, four orders below the smallest effect
+this study reports, so no distribution below is affected. A successor study
+should declare the gate as `sum_dose_read_at_challenge == sum_credited` exact,
+plus a bound on the credited-minus-evaluated gap, and should treat a
+*negative* gap (evaluated exceeding credited) as the real defect signature.
 
 ### 4. Pair position — criterion FAILED, "low-tail pair" withdrawn
 
@@ -262,6 +296,13 @@ Two consequences worth acting on, in this order:
    2.7-log10 range across seeds, against hand→mouth's 1.0, points at the same
    hand reservoir `NORO-EXP-FOMITE-RECONCILE-01` found spiking and crashing, so
    `NORO-HAND-STATIONARY-01` is the mechanism study behind it.
+
+3. **Retire the 1e-9 three-sum reconciliation gate.** It now fails on a
+   correct engine (§0) and would fail in every successor study that reuses it.
+   Replace it with the exact read-equals-credited identity plus a bound on the
+   credited-minus-evaluated gap, and keep a negative gap as the defect
+   signature. This is a one-line criterion change in the next ledger entry, not
+   a study.
 
 Not started here, and none should start automatically: `NORO-TRANSFER-PRODUCT-01`,
 `NORO-HAND-STATIONARY-01`, `NORO-EMESIS-SHARE-01`, `NORO-PATCH-SATURATION-01`,

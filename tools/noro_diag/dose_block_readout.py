@@ -26,11 +26,8 @@ is not a finding.
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import math
-import re
-import statistics
 import sys
 from pathlib import Path
 from typing import Any
@@ -43,11 +40,18 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.noro_diag.cell_readout import (  # noqa: E402
+    dig,
+    gate_report,
+    load_cells,
+    number,
+    partition,
+    print_block,
+)
+from tools.noro_diag.cell_readout import (  # noqa: E402
+    spread as _spread_base,
+)
 
-CELL_RE = re.compile(r"per_host_dose_challenge_seed(?P<seed>\d+)\.json\.gz")
-PATHOGEN_ID = "norwalk_gi"
-RECONCILIATION_RTOL = 1e-9
-MAX_VOID_CELLS = 4
 # Below this credited total a pathway share is arithmetic on a vanishing
 # number, so the cell is reported apart from the attribution distribution.
 SHARE_FLOOR_GEC = 1e-6
@@ -64,83 +68,8 @@ TRANSFER_TOLERANCE_LOG10 = 0.5
 PAIR_LOW_TAIL_PERCENTILE = 25.0
 
 
-def _dig(summary: dict[str, Any], dotted: str) -> Any:
-    value: Any = summary
-    for key in dotted.split("."):
-        value = value.get(key) if isinstance(value, dict) else None
-    return value
-
-
-def _number(summary: dict[str, Any], dotted: str) -> float:
-    value = _dig(summary, dotted)
-    return float(value) if value is not None else 0.0
-
-
-def accumulate_calls(summary: dict[str, Any]) -> int:
-    """The pathogen's own accumulate-call count, from the per-pathogen map."""
-    calls = _dig(summary, "reconciliation.accumulate_calls")
-    if isinstance(calls, dict):
-        return int(calls.get(PATHOGEN_ID, 0) or 0)
-    return int(calls or 0)
-
-
-def load_cells(raw_dir: Path) -> list[dict[str, Any]]:
-    """Load every per-seed dump in the directory, ordered by seed."""
-    cells = []
-    for path in sorted(raw_dir.glob("per_host_dose_challenge_seed*.json.gz")):
-        if CELL_RE.fullmatch(path.name) is None:
-            continue
-        with gzip.open(path, "rt", encoding="utf-8") as handle:
-            cells.append(json.load(handle))
-    return sorted(cells, key=lambda s: s["seed"])
-
-
-def partition(cells: list[dict[str, Any]]) -> tuple[list, list]:
-    """Split the cells into admissible and void, by the declared rule."""
-    admissible, void = [], []
-    for summary in cells:
-        (void if accumulate_calls(summary) <= 0 else admissible).append(summary)
-    return admissible, void
-
-
-def reconciliation_gate(cells: list[dict[str, Any]]) -> tuple[float, bool]:
-    """The frozen gate: the three dose sums agree to <= 1e-9 relative."""
-    worst = 0.0
-    for summary in cells:
-        chain = summary["reconciliation"]
-        credited = float(chain["sum_credited_scaled_gec"])
-        for key in (
-            "sum_dose_read_at_challenge_gec",
-            "sum_effective_dose_evaluated_gec",
-        ):
-            diff = abs(float(chain[key]) - credited)
-            worst = max(worst, diff / credited if credited else math.inf)
-    return worst, worst <= RECONCILIATION_RTOL
-
-
 def _spread(values: list[float]) -> dict[str, float]:
-    if not values:
-        return {"n": 0}
-    ordered = sorted(values)
-    return {
-        "n": len(ordered),
-        "min": ordered[0],
-        "p25": _percentile_value(ordered, 25.0),
-        "median": statistics.median(ordered),
-        "p75": _percentile_value(ordered, 75.0),
-        "max": ordered[-1],
-    }
-
-
-def _percentile_value(ordered: list[float], pct: float) -> float:
-    """Linear-interpolated percentile of an already sorted list."""
-    if len(ordered) == 1:
-        return ordered[0]
-    position = (pct / 100.0) * (len(ordered) - 1)
-    lower = math.floor(position)
-    upper = math.ceil(position)
-    weight = position - lower
-    return ordered[lower] * (1.0 - weight) + ordered[upper] * weight
+    return _spread_base(values, quartiles=True)
 
 
 def _percentile_of(ordered: list[float], value: float) -> float:
@@ -152,7 +81,7 @@ def _percentile_of(ordered: list[float], value: float) -> float:
 
 
 def _pathway_shares(summary: dict[str, Any]) -> dict[str, float]:
-    doses = _dig(summary, "reconciliation.pathway_dose_gec") or {}
+    doses = dig(summary, "reconciliation.pathway_dose_gec") or {}
     total = sum(float(v) for v in doses.values())
     if total <= 0.0:
         return {}
@@ -166,7 +95,7 @@ def route_attribution(cells: list[dict[str, Any]]) -> dict[str, Any]:
         shares = _pathway_shares(summary)
         total = sum(
             float(v)
-            for v in (_dig(summary, "reconciliation.pathway_dose_gec") or {}
+            for v in (dig(summary, "reconciliation.pathway_dose_gec") or {}
                       ).values()
         )
         row = {"seed": summary["seed"], "pathway_total_gec": total, **shares}
@@ -241,22 +170,63 @@ def transfer_terms(cells: list[dict[str, Any]]) -> dict[str, Any]:
 def magnitude(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 3: credited dose and how few hosts hold most of it."""
     credited = [
-        _number(s, "reconciliation.sum_credited_scaled_gec") for s in cells
+        number(s, "reconciliation.sum_credited_scaled_gec") for s in cells
     ]
     hazards = [
-        _number(s, "reconciliation.sum_evaluated_hazard") for s in cells
+        number(s, "reconciliation.sum_evaluated_hazard") for s in cells
     ]
-    hosts_90 = [_number(s, "concentration.hosts_for_90pct") for s in cells]
+    hosts_90 = [number(s, "concentration.hosts_for_90pct") for s in cells]
     return {
         "credited_scaled_gec": _spread(credited),
         "sum_evaluated_hazard": _spread(hazards),
         "block_sum_evaluated_hazard": sum(hazards),
         "hosts_for_90pct": _spread(hosts_90),
         "secondaries_total": sum(
-            int(_number(s, "transmission.secondaries")) for s in cells
+            int(number(s, "transmission.secondaries")) for s in cells
         ),
         "imports_total": sum(
-            int(_number(s, "transmission.imports")) for s in cells
+            int(number(s, "transmission.imports")) for s in cells
+        ),
+    }
+
+
+def unevaluated_dose(cells: list[dict[str, Any]]) -> dict[str, Any]:
+    """Credited dose that no challenge ever evaluated, per cell and summed.
+
+    Post-``REINFECT-01`` a fully protected host's challenge returns before the
+    dose is evaluated, so the credited and evaluated sums part company. The
+    gap is reported rather than tolerated: it is the size of the skip.
+    """
+    rows = []
+    credited_total = evaluated_total = 0.0
+    for summary in cells:
+        credited = number(summary, "reconciliation.sum_credited_scaled_gec")
+        evaluated = number(
+            summary, "reconciliation.sum_effective_dose_evaluated_gec",
+        )
+        credited_total += credited
+        evaluated_total += evaluated
+        if credited > evaluated:
+            rows.append({
+                "seed": summary["seed"],
+                "credited_scaled_gec": credited,
+                "evaluated_gec": evaluated,
+                "unevaluated_gec": credited - evaluated,
+                "unevaluated_fraction": (credited - evaluated) / credited,
+            })
+    gap = credited_total - evaluated_total
+    return {
+        "cells_with_gap": rows,
+        "block_credited_scaled_gec": credited_total,
+        "block_evaluated_gec": evaluated_total,
+        "block_unevaluated_gec": gap,
+        "block_unevaluated_fraction": (
+            gap / credited_total if credited_total else 0.0
+        ),
+        "any_negative_gap": any(
+            number(s, "reconciliation.sum_effective_dose_evaluated_gec")
+            > number(s, "reconciliation.sum_credited_scaled_gec")
+            for s in cells
         ),
     }
 
@@ -266,15 +236,15 @@ def pair_position(cells: list[dict[str, Any]]) -> dict[str, Any]:
     block = [s for s in cells if s["seed"] in BLOCK_SEEDS]
     pair = [s for s in cells if s["seed"] in PAIR_SEEDS]
     dose_ordered = sorted(
-        _number(s, "reconciliation.sum_credited_scaled_gec") for s in block
+        number(s, "reconciliation.sum_credited_scaled_gec") for s in block
     )
     hazard_ordered = sorted(
-        _number(s, "reconciliation.sum_evaluated_hazard") for s in block
+        number(s, "reconciliation.sum_evaluated_hazard") for s in block
     )
     rows = []
     for summary in pair:
-        dose = _number(summary, "reconciliation.sum_credited_scaled_gec")
-        hazard = _number(summary, "reconciliation.sum_evaluated_hazard")
+        dose = number(summary, "reconciliation.sum_credited_scaled_gec")
+        hazard = number(summary, "reconciliation.sum_evaluated_hazard")
         rows.append({
             "seed": summary["seed"],
             "credited_scaled_gec": dose,
@@ -297,11 +267,6 @@ def pair_position(cells: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _print_block(title: str, payload: dict[str, Any]) -> None:
-    print(f"\n{title}:")
-    print(json.dumps(payload, indent=1, sort_keys=True, default=str))
-
-
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -322,33 +287,19 @@ def main(argv: list[str] | None = None) -> int:
     cells = load_cells(args.raw_dir)
     admissible, void = partition(cells)
     block = [s for s in admissible if s["seed"] in BLOCK_SEEDS]
-    worst, gate_ok = reconciliation_gate(admissible)
-    study_go = len(void) <= MAX_VOID_CELLS
-    print(f"loaded {len(cells)} cells from {args.raw_dir}")
-    print(f"admissible {len(admissible)}, void {len(void)} "
-          f"(void seeds: {[s['seed'] for s in void]})")
-    print(f"study admissibility: {'GO' if study_go else 'NO-GO'}")
-    print(f"reconciliation gate (rtol {RECONCILIATION_RTOL:g}): "
-          f"worst {worst:.3e} -> {'PASS' if gate_ok else 'FAIL'}")
-    payload = {
-        "raw_dir": str(args.raw_dir),
-        "cells_loaded": len(cells),
-        "void_seeds": [s["seed"] for s in void],
-        "study_admissible": study_go,
-        "reconciliation": {
-            "rtol": RECONCILIATION_RTOL,
-            "worst_relative_difference": worst,
-            "verdict": "PASS" if gate_ok else "FAIL",
-        },
+    payload, gates_ok = gate_report(cells, admissible, void, args.raw_dir)
+    payload.update({
         "route_attribution": route_attribution(block),
         "transfer_terms": transfer_terms(block),
         "magnitude": magnitude(block),
         "pair_position": pair_position(admissible),
-    }
+        "unevaluated_dose": unevaluated_dose(admissible),
+    })
     for key in (
         "route_attribution", "transfer_terms", "magnitude", "pair_position",
+        "unevaluated_dose",
     ):
-        _print_block(key, payload[key])
+        print_block(key, payload[key])
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
@@ -356,7 +307,7 @@ def main(argv: list[str] | None = None) -> int:
     with open(path, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, indent=1, sort_keys=True, default=str)
     print(f"\nwritten: {path}")
-    return 0 if gate_ok and study_go else 1
+    return 0 if gates_ok else 1
 
 
 if __name__ == "__main__":

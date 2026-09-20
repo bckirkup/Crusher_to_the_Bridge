@@ -1280,7 +1280,14 @@ log10, not `NORO-DOSE-01`'s 4.1.** α and β were untouched and
 `NORO-SUSCEPT-03`'s exclusion is unaffected — 1.3 log10 does not close a
 shortfall of orders of magnitude. Repair stability, unpaired: block Σ hazard
 2.9450 here against 3.0046 at `e83aa06` (−2.0%), same three secondaries in the
-same two seeds, as `NORO-REINFECT-IMPACT-01` predicted.
+same two seeds, as `NORO-REINFECT-IMPACT-01` predicted. One criterion is
+retired rather than met: the 1e-9 three-sum reconciliation gate now **fails**
+in 9 of 22 cells (worst 8.400e-3) because `REINFECT-01` skips dose evaluation
+for fully protected hosts, so `sum_effective_dose_evaluated_gec` falls short of
+credited by 1.045e-7 of the block while `sum_dose_read_at_challenge_gec` still
+matches credited exactly and no cell is ever long. Successor studies should
+gate on the exact read-equals-credited identity plus a bound on the
+credited-minus-evaluated gap, and treat a *negative* gap as the defect.
 
 ## 2. Anchors
 
