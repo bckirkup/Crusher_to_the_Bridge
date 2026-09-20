@@ -133,8 +133,9 @@ def test_arm_free_design_enumerates_with_none():
     ids=["unknown_key", "duplicate_id", "empty_id", "nonempty_baseline"],
 )
 def test_arm_validation_raises(design, mutate):
+    arms = tuple(mutate(list(design.arms)))
     with pytest.raises(ValueError):
-        replace(design, arms=tuple(mutate(list(design.arms))))
+        replace(design, arms=arms)
 
 
 # ── overrides reaching the run spec ───────────────────────────────────────
@@ -167,10 +168,11 @@ def test_scheduled_protocol_swap_preserves_the_window():
 def test_protocol_swap_raises_without_the_scheduled_entry():
     raw = _raw_spec()
     raw["config_overrides"]["scenario_schedule"]["protocols"] = []
+    profile = load_covid_profile()
     with pytest.raises(ValueError):
         apply_arm_overrides(
             raw, {"scheduled_protocol_id": "SOP-017-ALLHANDS"},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
@@ -186,10 +188,12 @@ def test_near_field_mode_writes_the_transmission_block():
 
 
 def test_near_field_mode_rejects_unknown_modes():
+    raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError):
         apply_arm_overrides(
-            _raw_spec(), {"near_field_air_mode": "one_box"},
-            profile=load_covid_profile(),
+            raw, {"near_field_air_mode": "one_box"},
+            profile=profile,
         )
 
 
@@ -220,19 +224,21 @@ def test_route_multipliers_merge_onto_the_shipped_mapping():
     ids=["unknown_route", "negative_value"],
 )
 def test_route_multipliers_reject_bad_input(arm_values):
+    raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError):
         apply_arm_overrides(
-            _raw_spec(),
+            raw,
             {"profile_route_efficiency_multipliers": arm_values},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
 def test_unknown_override_key_raises():
+    raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError):
-        apply_arm_overrides(
-            _raw_spec(), {"bogus": 1}, profile=load_covid_profile(),
-        )
+        apply_arm_overrides(raw, {"bogus": 1}, profile=profile)
 
 
 def test_pool_transport_threads_through_prepare(design):

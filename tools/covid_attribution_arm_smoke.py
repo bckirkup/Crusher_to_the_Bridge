@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 
@@ -105,8 +106,13 @@ def _run_arm(design, cell, *, num_epochs: int, repo_root: str, out_dir: str):
     ledger = QuarantineAttributionLedger()
     sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=ledger.observe)
     payload = cell_payload(design, cell, sim, ledger, raw)
+    path = os.path.realpath(os.path.join(out_dir, cell.key))
+    if os.path.commonpath([out_dir, path]) != out_dir:
+        raise ValueError(
+            f"cell key {cell.key!r} escapes --out-dir {out_dir!r}",
+        )
     os.makedirs(out_dir, exist_ok=True)
-    with open(os.path.join(out_dir, cell.key), "w", encoding="utf-8") as fh:
+    with open(path, "w", encoding="utf-8") as fh:
         json.dump(payload, fh, indent=2, sort_keys=True)
 
     state = sim.state
@@ -144,7 +150,8 @@ def _v9_witness(a0_payload: dict, *, theta: float, seed: int,
     v9 = load_design(V9_DESIGN_REL, repo_root=repo_root)
     cell = next(
         c for c in enumerate_cells(v9)
-        if c.theta == theta and c.infection_age_days == 3.3
+        if math.isclose(c.theta, theta, rel_tol=1e-12)
+        and math.isclose(c.infection_age_days, 3.3, rel_tol=1e-12)
         and c.imports == 1 and c.seed == seed
     )
     v9_payload = simulate_screen_cell(
@@ -187,7 +194,8 @@ def main() -> int:
     wanted = set(args.arms) if args.arms else set(design.arm_ids)
     cells = [
         c for c in enumerate_cells(design)
-        if c.theta == args.theta and c.seed == args.seed
+        if math.isclose(c.theta, args.theta, rel_tol=1e-12)
+        and c.seed == args.seed
         and c.arm_id in wanted
     ]
     if not cells:
@@ -197,7 +205,8 @@ def main() -> int:
     for cell in cells:
         payload = _run_arm(
             design, cell, num_epochs=args.num_epochs,
-            repo_root=args.repo_root, out_dir=args.out_dir,
+            repo_root=args.repo_root,
+            out_dir=os.path.realpath(args.out_dir),
         )
         if cell.arm_id == design.baseline_arm_id:
             a0_payload = payload

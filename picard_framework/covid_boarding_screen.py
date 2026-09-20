@@ -81,6 +81,31 @@ INDEX_GEOMETRY_PASS_FRACTION_MIN = 0.80
 
 # ── design ────────────────────────────────────────────────────────────────
 
+def _validate_arms(arms: tuple[Mapping[str, Any], ...]) -> None:
+    """The arm-axis validation the design performs at load."""
+    arm_ids = [a.get("arm_id") for a in arms]
+    for arm_id in arm_ids:
+        if not isinstance(arm_id, str) or not arm_id:
+            raise ValueError("every arm needs a non-empty string arm_id")
+    if len(set(arm_ids)) != len(arm_ids):
+        raise ValueError("arm_ids must be distinct")
+    if arms:
+        baseline_overrides = arms[0].get("overrides") or {}
+        if baseline_overrides:
+            raise ValueError(
+                "the first arm is the declared baseline and must carry "
+                "empty overrides",
+            )
+        for arm in arms:
+            unknown = set(arm.get("overrides") or {}) - ARM_OVERRIDE_KEYS
+            if unknown:
+                raise ValueError(
+                    f"arm {arm.get('arm_id')!r} declares unknown override "
+                    f"keys {sorted(unknown)}; allowed: "
+                    f"{sorted(ARM_OVERRIDE_KEYS)}",
+                )
+
+
 @dataclass(frozen=True)
 class BoardingScreenDesign:
     """The screen as declared before any cell ran."""
@@ -117,27 +142,7 @@ class BoardingScreenDesign:
                 raise ValueError(f"malformed refinement point {(theta, age, imports)}")
         if len(set(self.points)) != len(self.points):
             raise ValueError("refinement points must be distinct")
-        arm_ids = [a.get("arm_id") for a in self.arms]
-        for arm_id in arm_ids:
-            if not isinstance(arm_id, str) or not arm_id:
-                raise ValueError("every arm needs a non-empty string arm_id")
-        if len(set(arm_ids)) != len(arm_ids):
-            raise ValueError("arm_ids must be distinct")
-        if self.arms:
-            baseline_overrides = self.arms[0].get("overrides") or {}
-            if baseline_overrides:
-                raise ValueError(
-                    "the first arm is the declared baseline and must carry "
-                    "empty overrides",
-                )
-            for arm in self.arms:
-                unknown = set(arm.get("overrides") or {}) - ARM_OVERRIDE_KEYS
-                if unknown:
-                    raise ValueError(
-                        f"arm {arm.get('arm_id')!r} declares unknown override "
-                        f"keys {sorted(unknown)}; allowed: "
-                        f"{sorted(ARM_OVERRIDE_KEYS)}",
-                    )
+        _validate_arms(self.arms)
 
     @property
     def arm_ids(self) -> tuple[str, ...]:
@@ -628,6 +633,34 @@ def _during_zone_class(
     return "other"
 
 
+def _tally_during_events(
+    sim: Any,
+    ledger_events: list[dict[str, Any]],
+    agents_by_id: dict[int, Any],
+    dining_types: Mapping[str, str],
+    start: int,
+    end: int | None,
+) -> tuple[dict[str, int], dict[str, int], dict[str, int], int]:
+    """Split the during-window ledger events by role, zone class and route."""
+    by_role = {"passenger": 0, "crew": 0}
+    by_zone = dict.fromkeys(ZONE_CLASSES, 0)
+    by_route = {**dict.fromkeys(PATHWAY_EFFICIENCY_KEYS, 0), "unknown": 0}
+    confined_passengers = 0
+    for ev in ledger_events:
+        day = sim.clock.day_index(int(ev["epoch"]))
+        if day < start or (end is not None and day > end):
+            continue
+        agent = agents_by_id.get(ev["target_agent_id"])
+        role = getattr(agent, "role", None)
+        if role in by_role:
+            by_role[role] += 1
+        by_zone[_during_zone_class(sim, dining_types, agents_by_id, ev)] += 1
+        by_route[ev["pathway"] if ev["pathway"] in by_route else "unknown"] += 1
+        if role == "passenger" and ev["confined"]:
+            confined_passengers += 1
+    return by_role, by_zone, by_route, confined_passengers
+
+
 def _attribution_block(
     sim: Any,
     ledger: QuarantineAttributionLedger,
@@ -640,27 +673,9 @@ def _attribution_block(
     agents_by_id = {a.agent_id: a for a in sim.engine.agents}
     dining_types = _zone_class_lookup(sim)
 
-    def _in_window(ev: Mapping[str, Any]) -> bool:
-        day = sim.clock.day_index(int(ev["epoch"]))
-        return day >= start and (end is None or day <= end)
-
-    during_events = [ev for ev in ledger.events if _in_window(ev)]
-    by_role = {"passenger": 0, "crew": 0}
-    by_zone = {c: 0 for c in ZONE_CLASSES}
-    by_route = {
-        **{k: 0 for k in PATHWAY_EFFICIENCY_KEYS},
-        "unknown": 0,
-    }
-    confined_passengers = 0
-    for ev in during_events:
-        agent = agents_by_id.get(ev["target_agent_id"])
-        role = getattr(agent, "role", None)
-        if role in by_role:
-            by_role[role] += 1
-        by_zone[_during_zone_class(sim, dining_types, agents_by_id, ev)] += 1
-        by_route[ev["pathway"] if ev["pathway"] in by_route else "unknown"] += 1
-        if role == "passenger" and ev["confined"]:
-            confined_passengers += 1
+    by_role, by_zone, by_route, confined_passengers = _tally_during_events(
+        sim, ledger.events, agents_by_id, dining_types, start, end,
+    )
 
     witness = {
         "protocol_id": schedule_entry["protocol_id"],
