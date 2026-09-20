@@ -1246,6 +1246,19 @@ host blocker and 2.17/1.93 log10 fomite terms are mechanism statements and are
 **not** withdrawn; its dose totals and `NORO-SUSCEPT-03`'s 1.186e-2 maximum
 hazard are. The α exclusion itself is unaffected — no arm here varied α or β.
 
+**`NORO-REINFECT-IMPACT-01` (ledger entry): `NORO-EMESIS-SIZE-01`'s per-seed
+numbers are pinned to pre-repair `main` at `e83aa06` and are no longer
+bit-reproducible on current `main`.** `REINFECT-01` (merged at `d62f10d`) gives
+`norwalk_gi` full 56-day refractory protection after an aboard clearance even
+with no strain registry, and `_resolve_pathogen_challenge` returns at
+`protection >= 1.0` before `self.rng.random()`, so the blocked challenges are
+draws the engine no longer consumes and the stream shifts in 10 of the 20
+seeds. Nothing is withdrawn on content: the hazard so blocked is 1.2527e-5 of
+the block's 3.0046 (4.2e-6), and all three observed secondaries are naive first
+infections at epochs 5, 6 and 31, far short of the 15-day clearance. Any future
+paired contrast on this hull must be re-baselined at or after `d62f10d`, with
+both arms on the same side of the repair.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
@@ -4025,6 +4038,23 @@ epoch, since the delivery scale caps the set at patch mass with no per-host
 ceiling — filed as `NORO-PATCH-SATURATION-01`; the missing per-pathway split
 for patch pickups is filed as `NORO-EMESIS-SHARE-01`. No constant, profile, or
 engine path was changed. Dumps: `docs/norovirus/noro_emesis_size_01/`.
+
+**`NORO-REINFECT-IMPACT-01`: the reinfection repair is live for norovirus but
+changes no norovirus conclusion; it does break bit-comparability with the
+`NORO-EMESIS-SIZE-01` block.** Read from the committed `e83aa06` dumps, no new
+cell. `REINFECT-01` at `d62f10d` populates `strain_configs` for every profile
+that declares one and adds `_unlabeled_resolution_protection`, and `norwalk_gi`
+declares `refractory_days = 56.0` with `refractory_protection = 1.0`, so a host
+that clears aboard is now fully protected for the rest of a 288-epoch voyage.
+In the block, 90 hosts were ever resident (87 imports, 3 secondaries), 46 had
+non-resident challenge epochs and 22 carried dose during them, summing
+**1.2527e-5** of the block's **3.0046** evaluated hazard — the repair removes
+4.2e-6 of the expected secondaries, six orders below the effect the study
+reports. No secondary was a reinfection. The consequence that does bite is
+stream-level, recorded in §1. The repair remains material to voyages longer
+than the 15-day `shedding_duration_days`, to multi-voyage immune history, and
+to any arm that shortens shedding duration inside its screened [12, 30] band;
+none is opened. No constant, profile, or engine path was changed.
 
 ## 5. Held fixed by assumption
 
