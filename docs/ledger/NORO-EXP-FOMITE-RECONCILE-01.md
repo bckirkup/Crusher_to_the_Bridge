@@ -2,7 +2,8 @@
 **Date:** 2026-09-19
 **Commit:** d5f3130
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
+**Measured at:** c004a15
 
 `NORO-EMESIS-CANARY-01` left `expedition_cruise_450` with two unexplained
 witnesses at main `204ba42`, and declared this entry to explain them. On
@@ -51,6 +52,15 @@ of one run and only reads:
   call site, so per-epoch survival decay, `_consume_surface_mass`, and routine
   or SOP surface cleaning are separated rather than summed.
 * `_replenish_hand` — per host hand target and hand load.
+* `_hand_carriage_propensity`, `_stationary_hand_load` and
+  `_stool_event_occurs` — the hand reservoir's own initialisation: the per-host
+  beta carriage propensity, the load a host first seen mid-illness starts at,
+  and whether a defecation event ever refills it. These three were added after
+  the classic control cell had already run, because the first expedition cell
+  showed an ordinary hand *target* against an underflow *load* and the term had
+  to be named; the two expedition cells were then re-run with the full witness
+  set, and the classic dump carries the hand target/load witness but not these
+  three fields.
 * `_emesis_phase` and the clinical phase of every host infected with
   `norwalk_gi`, per epoch, so "no host is ever eligible" is measured against
   the phase histogram rather than inferred from a zero counter.
@@ -128,3 +138,130 @@ reopened; `NORO-SUSCEPT-02`'s chain, `NORO-SUSCEPT-03`'s bound, and
 `NORO-DOSE-01`'s cascade are settled inputs. Whether the expedition hull can
 ever carry an emesis measurement is a design question for a later entry, not
 this one.
+
+## Measured
+
+Three cells, `tools/noro_diag/fomite_mass_balance.py`, dumps committed under
+`docs/norovirus/noro_exp_fomite_reconcile_01/`.
+
+**Conservation: CONSERVED in all three cells.** The surface-mass book closes to
+3.4e-16 relative on the voyage total and 7.9e-16 on the worst zone, against a
+declared tolerance of 1e-9 and 1e-6. There is no leak, and the canary's
+"25.943 deposited versus 3.278e-28 offered" is therefore not a conservation
+failure. Every gram deposited is accounted for by a witnessed removal or by
+the end-of-voyage residual:
+
+| Term | classic 8105 | expedition 8001 | expedition 8106 |
+| --- | --- | --- | --- |
+| deposited (GEC) | 220.318 | 25.943 | 5.952e-218 |
+| `_disinfect_zone` | 111.391 (50.6%) | 17.626 (67.9%) | 3.366e-219 (5.7%) |
+| `_update_surface_pools` decay | 52.406 (23.8%) | 7.522 (29.0%) | 2.493e-218 (41.9%) |
+| `_consume_surface_mass` (picked up) | 30.419 (13.8%) | 5.145e-30 (2e-31) | 1.618e-218 (27.2%) |
+| `_routine_cleaning_event` | 26.055 (11.8%) | 3.588e-4 (0.001%) | 1.471e-218 (24.7%) |
+| residual at disembarkation | 0.047 (0.02%) | 0.794 (3.1%) | 3.212e-220 (0.5%) |
+| balance error, relative | 3.4e-16 | 1.5e-16 | 1.8e-16 |
+
+**Attribution, seed 8001: the deposit reached a zone that was never offered to
+anyone, and disinfection took it.** All 25.943 GEC of the voyage's deposits
+landed in a single zone, `CC_D2_A::cabin380`, which `_deliver_fomite_requests`
+was never called on — zero offers in 168 epochs — because the cabin's only
+occupant was the shedding host itself and a pickup needs a susceptible
+occupant. The declared H1 clause on coverage is met at its limit (100% of
+deposited mass in never-offered zones, criterion 90%), but H1's second clause
+fails: those grams were not delivered anywhere else either. H2's first clause
+is met (disinfection plus decay remove 96.9%, criterion 90%) and its second
+fails narrowly (3.1% residual against a 1% criterion). The honest reading is
+that neither hypothesis as declared is the whole answer and the measurement is
+compound: **deposit into a single-occupant confined cabin, no susceptible ever
+offered it, removal dominated by SOP disinfection (67.9%) and surface decay
+(29.0%)**. This is reported as measured rather than folded into whichever
+hypothesis it came closest to.
+
+**Attribution, seed 8106: H3, the underflow is upstream in the hand load.**
+Here the pool *was* offered (74 delivery calls on the depositing zone) and
+delivered, so nothing is lost between deposit and offer; the whole chain simply
+runs at 1e-218. The instrument caught the term: `_stationary_hand_load`
+returned an initial hand load of 1.622e-217 GEC for a host whose hand *target*
+was 13.323 GEC, from an inactivation rate of 1.0025 per hour against a
+defecation rate of 0.01094 events per day. The initialisation is the backward
+recurrence time of the event process decayed at the hand inactivation rate, and
+with a ~1 h e-folding time against a ~91-day expected recurrence the exponent
+underflows. No stool event fired in 323 draws over the voyage, so the load was
+never refilled: 156 of 156 target-positive calls underflowed.
+
+Seed 8001 shows the same mechanism with an unremarkable draw. Its host's
+carriage propensity was 0.248 (the voyage drew 0.0005, 0.0048, 0.072, 0.098,
+0.248, 0.265), its initial load 6.103e-28 GEC against a 12.971 GEC target, from
+a 1.116 per hour inactivation rate and a 2.4-day backward recurrence. Three
+stool events fired in 968 draws, and the hand sat at its target in exactly 2 of
+168 target-positive calls. **Hand load is a spike-and-crash process: at the
+ceiling in the epoch of a defecation event and ~27 log10 below it a day later.**
+The classic control has the same shape — 867 of 960 target-positive calls
+underflowed, 9 at target, max load 139,244.870 GEC — so this is a hand-model
+property, not an expedition defect. What differs is that 1,910 agents supply a
+host whose spikes land in shared zones, and 450 agents with one import do not.
+
+**Eligibility: import scarcity, not a defect.** Both expedition voyages carried
+exactly one `norwalk_gi` host, and that host was never symptomatic: all 168
+`_emesis_phase` calls on it returned at the `infected_but_no_symptomatic_phase`
+condition, so no call ever reached the `vomiting`-feature test. The classic
+control reached `eligible` 24 times, from 1 symptomatic host of 5 infected,
+phase `acute`. At the control's 1 symptomatic host per 5 infected, an
+expedition voyage with ≤1 import expects ≤0.2 symptomatic hosts, so
+`phase_eligible = 0` is the ordinary outcome of hull size. No expedition host
+was recorded symptomatic while `_emesis_phase` refused it, which was the
+declared defect condition.
+
+**Incidental measurement, not in the declared criteria.** On the classic
+control, mass delivered to hands (33.029 GEC over 1,917 delivery calls) exceeds
+the mass debited from the pools for those deliveries (30.419 GEC) by 2.610 GEC,
+7.9% of delivered and 1.2% of deposit. `_consume_surface_mass` debits the pool
+by the *ratio* `(previous - delivered) / previous` applied to the pool's
+current mass, so a pool that changed between the read and the debit loses a
+different absolute amount than the hands gained. Both expedition cells match
+exactly (ratio and absolute coincide when one delivery empties one zone), so
+this is a classic-hull-visible, sub-decade effect. It does not change any
+conclusion here and it is not attributed; it is filed below.
+
+## Conclusion
+
+The expedition fomite chain is **not broken**. Its books conserve to machine
+precision, and both canary signatures are explained by measured terms:
+
+1. The deposit/offer gap is a *dead-end zone* plus *disinfection*, not a lost
+   mass — the single infected host deposits into its own confined cabin, which
+   has no susceptible occupant to offer it to, and SOP disinfection removes two
+   thirds of it.
+2. The 1e-218 magnitudes are the hand reservoir's stationary initialisation
+   underflowing when the hand inactivation rate (~1 per hour) is three to four
+   orders above the defecation rate (~0.01–0.25 per day). The same underflow is
+   present on the classic hull and is invisible there only because some host
+   eventually spikes.
+3. `phase_eligible = 0` is hull size: one import per voyage and a control
+   symptomatic rate of 1 in 5.
+
+`NORO-EMESIS-CANARY-01`'s prospective withdrawal of the expedition emesis and
+fomite readings can be lifted: those numbers are correct readings of a hull
+that structurally cannot carry the measurement, and the NO-GO on the two-hull
+emesis design stands for that reason rather than for a suspected defect.
+
+## Recommendation
+
+Run `NORO-EMESIS-SIZE-01` on `classic_cruise_1900` only, 20 paired seeds, α and
+β untouched. Expedition is not a defective arm to repair; it is a hull with too
+few imports to size a rare host-level mechanism, and adding it to a sizing
+campaign buys void cells at 4 min each.
+
+Two entries are filed, neither started:
+
+* `NORO-HAND-STATIONARY-01` — whether the spike-and-crash hand reservoir is the
+  intended reading of Liu 2013, given that the stationary initialisation
+  underflows to denormal values and that the hand is at its measured ceiling in
+  ~1% of shedding epochs. This is a provenance question before it is a code
+  question, and it is upstream of every fomite dose in the model.
+* `NORO-SURFACE-CONSUME-01` — the 7.9% ratio-versus-absolute mismatch between
+  mass delivered to hands and mass debited from the pool in
+  `_consume_surface_mass`.
+
+Still inherited and unstarted from `NORO-DOSE-01`:
+`NORO-CARRIER-REDEPOSIT-01` and `NORO-TRANSFER-PRODUCT-01`.

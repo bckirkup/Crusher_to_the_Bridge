@@ -3947,6 +3947,39 @@ two-hull emesis design is therefore NO-GO and the sizing study is classic-only;
 constant, profile, or engine path was changed. Dumps:
 `docs/norovirus/noro_emesis_canary_01/`.
 
+**`NORO-EXP-FOMITE-RECONCILE-01`: the expedition fomite chain conserves; the
+canary's gap is a dead-end zone, disinfection, and a hand reservoir that
+underflows.** Measured at `c004a15` with the new read-only instrument
+`tools/noro_diag/fomite_mass_balance.py`, which closes the surface-mass book per
+zone and per call site. All three cells are **CONSERVED** — deposits equal
+witnessed removals plus residual to 3.4e-16 relative on the voyage total and
+7.9e-16 on the worst zone — so no mass is lost between deposit and offer on
+either hull. On expedition seed 8001 all 25.943 GEC of deposits land in one
+zone, `CC_D2_A::cabin380`, offered to nobody in 168 epochs (the shedding host is
+its only occupant and pickup needs a susceptible), and leave through SOP
+disinfection (67.9%), surface decay (29.0%) and routine cleaning (0.001%), with
+3.1% residual at disembarkation. On seed 8106 the pool *is* offered and
+delivered; the 1e-218 magnitude comes from `_stationary_hand_load` returning
+1.622e-217 GEC against a 13.323 GEC hand target, because the hand inactivation
+rate (1.0025/h) is three to four orders above the defecation rate (0.01094/day)
+and the backward-recurrence exponent underflows — 156 of 156 target-positive
+calls underflowed and no stool event fired in 323 draws. The same spike-and-crash
+hand behaviour is present on the classic control (867 of 960 target-positive
+calls underflowed, 9 at target, max load 139,244.870 GEC), so it is a hand-model
+property, not an expedition defect. `phase_eligible = 0` is hull size: both
+expedition voyages carried one `norwalk_gi` host and it was never symptomatic,
+against 24 eligible calls from 1 symptomatic host of 5 infected on classic.
+This entry therefore **lifts** `NORO-EMESIS-CANARY-01`'s prospective withdrawal
+of expedition-hull emesis and fomite readings — they are correct readings of a
+hull that cannot carry the measurement — and the two-hull NO-GO stands on hull
+size rather than on a suspected defect. Also measured, outside the declared
+criteria and **not** attributed: on classic, mass delivered to hands (33.029
+GEC) exceeds the pool debit for those deliveries (30.419 GEC) by 7.9%, because
+`_consume_surface_mass` debits by ratio rather than absolute; filed as
+`NORO-SURFACE-CONSUME-01`. The hand initialisation is filed as
+`NORO-HAND-STATIONARY-01`. No constant, profile, or engine path was changed.
+Dumps: `docs/norovirus/noro_exp_fomite_reconcile_01/`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
