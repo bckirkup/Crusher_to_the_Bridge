@@ -76,6 +76,7 @@ __all__ = [
     "presentation_probability",
     "project_legacy_illness",
     "record_cleared_immunity",
+    "record_unlabeled_clearance_immunity",
     "severity_on_day",
     "severity_probabilities",
 ]
@@ -107,6 +108,30 @@ def record_cleared_immunity(
             epoch=epoch,
             immune_escape=strain.immune_escape,
         ))
+
+
+def record_unlabeled_clearance_immunity(
+    agent: Any,
+    pathogen_id: str,
+    epoch: int,
+) -> None:
+    """Write the memory of a resolved exposure no lineage tracked.
+
+    When variant surveillance is off, ``advance_resident_strains`` has no
+    lineages to clear and ``record_cleared_immunity`` writes nothing, so a
+    resolved infection leaves the host as susceptible as a naive one. The
+    genotype-blind record — empty ``genotype`` and ``strain_id``, escape 0 —
+    carries exactly the non-specific part of immunity (the refractory window)
+    that a cleared infection confers, and is the only record a no-registry run
+    can write.
+    """
+    agent.record_immunity(ImmuneRecord(
+        pathogen_id=pathogen_id,
+        genotype="",
+        strain_id="",
+        epoch=epoch,
+        immune_escape=0.0,
+    ))
 
 
 def incubation_days(
@@ -482,6 +507,8 @@ def advance_infections(
         )
         record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
         if days_infected >= shedding_clearance_day and residents_left == 0:
+            if not cleared:
+                record_unlabeled_clearance_immunity(agent, pid, epoch)
             # The hand load has to survive convalescent shedding, so it is
             # dropped with the infection rather than with the illness.
             inf["status"] = InfectionStatus.RECOVERED
