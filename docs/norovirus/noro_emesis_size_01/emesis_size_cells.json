@@ -1,0 +1,326 @@
+{
+ "association": {
+  "labelled": "associational across seeds, not a paired contrast: seeds differ in every draw, not only in whether a host vomited",
+  "with": {
+   "credited_scaled_gec": {
+    "max": 18055.687948619692,
+    "mean": 5768.190576247703,
+    "median": 862.5607879018065,
+    "min": 328.332679997898,
+    "n": 6
+   },
+   "n": 6,
+   "seeds": [
+    8000,
+    8002,
+    8006,
+    8009,
+    8016,
+    8018
+   ],
+   "sum_evaluated_hazard": {
+    "max": 1.691333033393452,
+    "mean": 0.49231527750018156,
+    "median": 0.07136095530675866,
+    "min": 0.005239701134369496,
+    "n": 6
+   }
+  },
+  "without": {
+   "credited_scaled_gec": {
+    "max": 12.461171919231488,
+    "mean": 0.9617724204770878,
+    "median": 0.01043117354010744,
+    "min": 4.418051985208429e-45,
+    "n": 14
+   },
+   "n": 14,
+   "seeds": [
+    8001,
+    8003,
+    8004,
+    8005,
+    8007,
+    8008,
+    8010,
+    8011,
+    8012,
+    8013,
+    8014,
+    8015,
+    8017,
+    8019
+   ],
+   "sum_evaluated_hazard": {
+    "max": 0.04806106781050393,
+    "mean": 0.0036243233002490834,
+    "median": 1.900706022752462e-05,
+    "min": 9.051012010690534e-51,
+    "n": 14
+   }
+  }
+ },
+ "cells_loaded": 20,
+ "consequence": {
+  "cells_over_likely": 2,
+  "cells_over_plausible": 3,
+  "imports_total": 87,
+  "likely_threshold": 0.693,
+  "max_p_at_least_one": 0.8157262828234905,
+  "plausible_threshold": 0.105,
+  "secondaries_total": 3,
+  "sum_evaluated_hazard": {
+   "max": 1.691333033393452,
+   "mean": 0.15023160956022882,
+   "median": 0.00011807134265347867,
+   "min": 9.051012010690534e-51,
+   "n": 20
+  }
+ },
+ "incidence": {
+  "events_per_voyage_distribution": {
+   "0": 14,
+   "1": 3,
+   "2": 1,
+   "4": 1,
+   "6": 1
+  },
+  "events_when_present": {
+   "max": 6.0,
+   "mean": 2.5,
+   "median": 1.5,
+   "min": 1.0,
+   "n": 6
+  },
+  "fraction_with_event": 0.3,
+  "sizeable": true,
+  "voyages": 20,
+  "voyages_with_event": 6
+ },
+ "raw_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_emesis_size_01/classic_cruise_1900",
+ "reconciliation": {
+  "rtol": 1e-09,
+  "verdict": "PASS",
+  "worst_relative_difference": 0.0
+ },
+ "share": {
+  "caveat": "pickup dose is measured at delivery and credited dose after route efficiency and susceptibility scaling; the ratio is an upper bound on the emesis share, not an equality",
+  "cells": [
+   {
+    "credited_scaled_gec": 631.0013489593848,
+    "patch_pickup_dose_gec": 218616.86165991396,
+    "seed": 8000,
+    "upper_bound_share": 346.46021283543325
+   },
+   {
+    "credited_scaled_gec": 0.14474179985108143,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8001,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 14139.59399983433,
+    "patch_pickup_dose_gec": 3703516.1182517633,
+    "seed": 8002,
+    "upper_bound_share": 261.92520933027896
+   },
+   {
+    "credited_scaled_gec": 0.0004844959073491834,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8003,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 3.1321940486775136e-06,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8004,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.0392733190358422,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8005,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 360.4072532306823,
+    "patch_pickup_dose_gec": 65872.52481925364,
+    "seed": 8006,
+    "upper_bound_share": 182.77247260917713
+   },
+   {
+    "credited_scaled_gec": 0.0006108917818380305,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8007,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.009579012490062041,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8008,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 328.332679997898,
+    "patch_pickup_dose_gec": 63547.1872226308,
+    "seed": 8009,
+    "upper_bound_share": 193.54511778430836
+   },
+   {
+    "credited_scaled_gec": 6.861936818348639e-05,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8010,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.0024137411086976577,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8011,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.6970731096789979,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8012,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.022282975735452615,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8013,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 0.07582753570603495,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8014,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 4.418051985208429e-45,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8015,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 1094.1202268442282,
+    "patch_pickup_dose_gec": 189210.5338299755,
+    "seed": 8016,
+    "upper_bound_share": 172.93395112136403
+   },
+   {
+    "credited_scaled_gec": 12.461171919231488,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8017,
+    "upper_bound_share": 0.0
+   },
+   {
+    "credited_scaled_gec": 18055.687948619692,
+    "patch_pickup_dose_gec": 4261354.43376406,
+    "seed": 8018,
+    "upper_bound_share": 236.01174576623256
+   },
+   {
+    "credited_scaled_gec": 0.01128333459015284,
+    "patch_pickup_dose_gec": 0.0,
+    "seed": 8019,
+    "upper_bound_share": 0.0
+   }
+  ],
+  "upper_bound_share": {
+   "max": 346.46021283543325,
+   "mean": 232.27478490779905,
+   "median": 214.77843177527046,
+   "min": 172.93395112136403,
+   "n": 6
+  }
+ },
+ "size": {
+  "cells": [
+   {
+    "events": 1,
+    "log10_loss": -0.0,
+    "patch_mass_gec": 218616.86165991396,
+    "patch_pickup_dose_gec": 218616.86165991396,
+    "pickup_over_mass": 1.0,
+    "pickups": 1,
+    "seed": 8000
+   },
+   {
+    "events": 6,
+    "log10_loss": 1.4083974295147454,
+    "patch_mass_gec": 94844394.57425678,
+    "patch_pickup_dose_gec": 3703516.1182517633,
+    "pickup_over_mass": 0.03904833949203144,
+    "pickups": 404,
+    "seed": 8002
+   },
+   {
+    "events": 1,
+    "log10_loss": 0.6165406727463075,
+    "patch_mass_gec": 272423.75983747037,
+    "patch_pickup_dose_gec": 65872.52481925364,
+    "pickup_over_mass": 0.24180168740991453,
+    "pickups": 41,
+    "seed": 8006
+   },
+   {
+    "events": 2,
+    "log10_loss": 1.2705481599638837,
+    "patch_mass_gec": 1184798.4904599022,
+    "patch_pickup_dose_gec": 63547.1872226308,
+    "pickup_over_mass": 0.053635439050875006,
+    "pickups": 109,
+    "seed": 8009
+   },
+   {
+    "events": 1,
+    "log10_loss": 1.796536179145487,
+    "patch_mass_gec": 11843538.881851621,
+    "patch_pickup_dose_gec": 189210.5338299755,
+    "pickup_over_mass": 0.01597584435847221,
+    "pickups": 1,
+    "seed": 8016
+   },
+   {
+    "events": 4,
+    "log10_loss": 1.0565105134580315,
+    "patch_mass_gec": 48535350.6017143,
+    "patch_pickup_dose_gec": 4261354.43376406,
+    "pickup_over_mass": 0.0877989832345735,
+    "pickups": 7,
+    "seed": 8018
+   }
+  ],
+  "log10_loss": {
+   "max": 1.796536179145487,
+   "mean": 1.024755492471409,
+   "median": 1.1635293367109576,
+   "min": -0.0,
+   "n": 6
+  },
+  "patch_mass_gec": {
+   "max": 94844394.57425678,
+   "mean": 26149853.861629996,
+   "median": 6514168.686155762,
+   "min": 218616.86165991396,
+   "n": 6
+  },
+  "patch_pickup_dose_gec": {
+   "max": 4261354.43376406,
+   "mean": 1417019.6099245995,
+   "median": 203913.69774494471,
+   "min": 63547.1872226308,
+   "n": 6
+  },
+  "pickup_over_mass": {
+   "max": 1.0,
+   "mean": 0.2397100489243111,
+   "median": 0.07071721114272425,
+   "min": 0.01597584435847221,
+   "n": 6
+  }
+ },
+ "study_admissible": true,
+ "void_seeds": []
+}

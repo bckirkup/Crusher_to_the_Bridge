@@ -62,8 +62,8 @@ COLUMNS = (
     ("patch_pickup_dose_gec", "emesis_witness.patch_pickup_dose_gec"),
     ("credited_scaled_gec", "reconciliation.sum_credited_scaled_gec"),
     ("sum_evaluated_hazard", "reconciliation.sum_evaluated_hazard"),
-    ("accumulate_calls", "reconciliation.accumulate_calls"),
 )
+PATHOGEN_ID = "norwalk_gi"
 
 
 def _dig(summary: dict[str, Any], dotted: str) -> Any:
@@ -76,6 +76,14 @@ def _dig(summary: dict[str, Any], dotted: str) -> Any:
 def _number(summary: dict[str, Any], dotted: str) -> float:
     value = _dig(summary, dotted)
     return float(value) if value is not None else 0.0
+
+
+def accumulate_calls(summary: dict[str, Any]) -> int:
+    """The pathogen's own accumulate-call count, from the per-pathogen map."""
+    calls = _dig(summary, "reconciliation.accumulate_calls")
+    if isinstance(calls, dict):
+        return int(calls.get(PATHOGEN_ID, 0) or 0)
+    return int(calls or 0)
 
 
 def load_cells(raw_dir: Path) -> list[dict[str, Any]]:
@@ -94,18 +102,21 @@ def partition(cells: list[dict[str, Any]]) -> tuple[list, list]:
     """Split the cells into admissible and void, by the declared rule."""
     admissible, void = [], []
     for summary in cells:
-        calls = _number(summary, "reconciliation.accumulate_calls")
+        calls = accumulate_calls(summary)
         (void if calls <= 0 else admissible).append(summary)
     return admissible, void
 
 
 def markdown_table(cells: list[dict[str, Any]]) -> str:
-    header = "| " + " | ".join(name for name, _ in COLUMNS) + " |"
-    rule = "|" + "---|" * len(COLUMNS)
+    header = (
+        "| " + " | ".join(name for name, _ in COLUMNS)
+        + " | accumulate_calls |"
+    )
+    rule = "|" + "---|" * (len(COLUMNS) + 1)
     rows = [
         "| " + " | ".join(
             _format(_dig(summary, dotted)) for _, dotted in COLUMNS
-        ) + " |"
+        ) + f" | {accumulate_calls(summary)} |"
         for summary in cells
     ]
     return "\n".join([header, rule, *rows])

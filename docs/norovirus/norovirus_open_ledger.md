@@ -1233,6 +1233,19 @@ contrast; nothing is selected, and the `[1e-9, 1e-3]` band stays frozen.
 Readout `docs/norovirus/flush_sweep_v1_stage4_readout.md`, interpretation
 `docs/norovirus/flush_sweep_v1_stage4_findings.md`.
 
+**`NORO-EMESIS-SIZE-01` (ledger entry): every norovirus dose magnitude or
+hazard bound quoted from the 8105/8106 pair alone is withdrawn as a statement
+about `classic_cruise_1900`.** Measured at `e83aa06` over seeds 8000–8019 on
+that hull, credited scaled dose spans 4.42e-45 to 1.81e4 GEC and per-voyage Σ
+evaluated hazard spans 9.05e-51 to 1.691, against the pair's 0.101/0.0027 GEC
+and 3.81e-4. The block produces 3 secondaries against a summed hazard of
+3.0046, so the voyage distribution here is heavy-tailed in the same way
+`FLUSH-S4` found for the 8100-block, and the pair sits two or more decades
+below the tail. `NORO-DOSE-01`'s route attribution, carrier dead end, absent
+host blocker and 2.17/1.93 log10 fomite terms are mechanism statements and are
+**not** withdrawn; its dose totals and `NORO-SUSCEPT-03`'s 1.186e-2 maximum
+hazard are. The α exclusion itself is unaffected — no arm here varied α or β.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
@@ -3979,6 +3992,39 @@ GEC) exceeds the pool debit for those deliveries (30.419 GEC) by 7.9%, because
 `NORO-SURFACE-CONSUME-01`. The hand initialisation is filed as
 `NORO-HAND-STATIONARY-01`. No constant, profile, or engine path was changed.
 Dumps: `docs/norovirus/noro_exp_fomite_reconcile_01/`.
+
+**`NORO-EMESIS-SIZE-01`: secondary transmission is not absent on
+`classic_cruise_1900`; the 8105/8106 pair is a low-tail pair.** Measured at
+`e83aa06`, 20 seeds 8000–8019, 1,910 agents, 288 epochs, shipped bundle, no
+override, with `tools/noro_diag/per_host_dose_challenge.py` unmodified. All 20
+cells are admissible and the three dose sums agree exactly (worst relative
+difference 0.0e0 against the declared 1e-9). Summed evaluated hazard over the
+block is **3.0046** and the block produces **3 secondaries** — expectation 3.00,
+observed 3 — in seeds 8016 (2) and 8018 (1), both emesis-bearing: agent 228 at
+dose 747.373 GEC (hazard 0.9426), agent 630 at 5.538e-4 GEC (hazard 6.438e-5),
+agent 900 at 15,639.182 GEC (hazard 0.8395). Per-voyage Σ hazard spans 9.05e-51
+to **1.691** (median 1.18e-4), and credited scaled dose spans 4.42e-45 to
+1.81e4 GEC. `NORO-SUSCEPT-03`'s "maximum Σ hazard anywhere is 1.186e-2" and
+`NORO-DOSE-01`'s 0.101 GEC classic voyage are therefore **properties of the
+8105/8106 pair, not of the hull**: both entries' *mechanism* findings stand
+(route attribution, the carrier dead end, no host-side blocker, the 2.17 and
+1.93 log10 fomite terms), but their dose magnitudes and the hazard bound are
+**withdrawn as hull-level statements** pending re-measurement over a seed
+block. Nothing here varies α or β, so the `NORO-SUSCEPT-03` exclusion of the
+sourced α interval as an *explanation* is untouched. Emesis sizing: the
+mechanism fires in **6 of 20 voyages**, 1–6 events each; patch mass 2.19e5 to
+9.48e7 GEC (median 6.51e6); mass delivered from patches to hands 6.35e4 to
+4.26e6 GEC (median 2.04e5), a **median 1.16 log10 loss** bolus→hands (range
+−0.0 to 1.80). Delivered patch mass exceeds credited dose by 173–346×, i.e.
+2.24–2.54 log10 of downstream hand→mouth and route-efficiency attenuation,
+consistent with `NORO-DOSE-01`. The event-bearing voyages hold the whole upper
+tail (median credited 862.561 GEC against 1.043e-2 GEC without), reported as
+**associational across seeds**, not a paired contrast. Seed 8000 is a
+saturation case — one susceptible removed an entire 218,617 GEC bolus in one
+epoch, since the delivery scale caps the set at patch mass with no per-host
+ceiling — filed as `NORO-PATCH-SATURATION-01`; the missing per-pathway split
+for patch pickups is filed as `NORO-EMESIS-SHARE-01`. No constant, profile, or
+engine path was changed. Dumps: `docs/norovirus/noro_emesis_size_01/`.
 
 ## 5. Held fixed by assumption
 
