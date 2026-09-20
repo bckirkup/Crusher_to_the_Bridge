@@ -3925,6 +3925,28 @@ constant was changed and the forced-challenge step was not reached. The
 archetype finding is measured at two seeds and is a mechanism statement, not a
 sized effect — the truncated mass is unquantified.
 
+**`NORO-EMESIS-CANARY-01`: `expedition_cruise_450` cannot carry an emesis
+measurement, and its fomite chain does not reconcile.** At engine `204ba42`,
+`classic_cruise_1900` replays `NORO-DOSE-01` exactly (seed 8105: 0.100952
+credited GEC, Σ hazard 3.80909e-4, 1 emesis event, patch mass 1961773.805 GEC,
+pickup dose 2.6101716 GEC, 2 pickups; seed 8106: Σ hazard 1.1871e-5), so no
+drift is present on the reference hull across the 25 commits since `f55e93f`.
+On `expedition_cruise_450` at 450 agents and 168 epochs, four seeds
+(8105, 8106, 8000, 8001) all report `phase_eligible = 0` — every emit call is
+phase-blocked, no emesis schedule is ever drawn, and the mechanism never fires;
+two of the four have no `norwalk_gi` dose path at all. The two non-void seeds
+are underflow-scale (8.1e-221 and 2.1e-32 credited GEC) and internally
+inconsistent: seed 8001 deposits 25.943 GEC to surfaces but offers 3.28e-28 GEC
+at pickup, against 220.3 deposited / 5170.4 offered on classic, with an ordinary
+`max_hand_target_gec` of 12.97 alongside a 1.7e-29 hand load. This **restores
+nothing**; it **withdraws prospectively** any expedition-hull emesis or fomite
+dose reading taken at 168 epochs until the declared
+`NORO-EXP-FOMITE-RECONCILE-01` attributes the deposit-versus-offer gap. The
+two-hull emesis design is therefore NO-GO and the sizing study is classic-only;
+`docs/norovirus/NORO-EMESIS-SIZE-prompt.md` is removed with this entry. No
+constant, profile, or engine path was changed. Dumps:
+`docs/norovirus/noro_emesis_canary_01/`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
