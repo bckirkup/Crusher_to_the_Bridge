@@ -126,7 +126,8 @@ episodes; its post-hoc ledger shifts are confirmed. Removing all shared air
 still collapses takeoff (0/20, 1/20). Conditional-on-takeoff attack rate is
 0.79–0.90 across A0–A4 at 1e9 (A1 0.824 vs A0 0.865; A2/A4 move the all-seed
 AR by suppressing takeoff, not the taken-off voyage). No Θ is
-fitted; A1–A5 score no anchor.
+fitted; A1–A5 score no anchor. Successor prompt for the Θ re-screen:
+`docs/covid/covid_theta_handoff_2026_09_19.md` §16.
 
 Before that — `AERO-NEAR-02`, measured at `7d8b0d2` (`docs/ledger/AERO-NEAR-02.md`): seed
 `20200206`, Θ = 3.16e7 — 2 infections (extinction); seed `20200210`, Θ = 1e9 —

@@ -435,3 +435,64 @@ The same 240-cell design ran again at `main` = `d62f10d`
 fix in, the truth channel counts first infections and the frozen criterion
 calls crew confinement and pool transport load-bearing at Θ 1e9; §14's "no
 load-bearing channel" verdict is superseded.
+
+## 16. Postscript (2026-09-20, third): the session retires here; successor prompt for the Θ re-screen
+
+Decision taken by the user after QUAR-ATTR-V2: before acting on the attribution, re-measure the Θ surface on the repaired engine, because every Θ-conditioned conclusion upstream (v7, v9, the change-detector pins, the "no near-critical band" finding) was measured with post-clearance reinfection active. This session has closed two campaign stages and merged three PRs, so per the bounded-session rule it retires here rather than opening the next stage; the successor starts from this prompt.
+
+```
+Settled inputs (do not re-derive):
+- Engine: main at or after d62f10d (REINFECT-01 merged, #636). Cleared hosts now
+  carry the declared 90-day refractory window; no second episode is possible on
+  a <=35-day voyage. Do not touch immune_waning constants.
+- QUAR-ATTR-V2 (docs/ledger/QUAR-ATTR-V2.md, d62f10d): at Θ 1e9 crew exemption
+  (-74%) and cross-zone pool transport (-66%) are load-bearing for
+  during-quarantine infection; near-field is not; whole-voyage AR at A0 is
+  0.310 (median over 12/20 takeoff seeds). Do not re-run attribution.
+- THETA-SCREEN-V9 (0fb186b, pre-fix): the infection-age axis is inert while
+  onset_day is declared (200 byte-identical triples) — drop it; Θ moved takeoff
+  probability, not size; sole covid.T1 pass at Θ 1e9 was an interval-span.
+- Canary cell of record: A0 seed 20200205 at d62f10d — Θ 1e5: 950 / 0.2560 /
+  745-198-7; Θ 1e9: 3458 / 0.9318 / 3414-43-1 (docs/covid/covid_quarantine_attribution_v2_readout.md §1).
+- Slow-tier change detector: tests/test_covid_hull_change_detector.py
+  diamond_princess_2020 pin (3522, 2934, 1706, 252, 73) predates REINFECT-01
+  and will fail on nightly; its repin is part of this deliverable, attributed
+  to REINFECT-01 with the CI/nightly job id, in the same style as the
+  greg_mortimer repins in that file.
+
+Deliverable (exactly one): covid_theta_screen_v10 — the v9 design with the
+age axis removed (10 decade Θ 1e1..1e10 × 20 seeds = 200 cells, same seeds,
+same frozen v9 admissibility block, same payload), run on AWS Batch at the
+pinned main SHA, with: design file merged before any cell runs; readout
+docs/covid/covid_theta_screen_v10_readout.md with v9-vs-v10 side by side per Θ
+(takeoff fraction, conditional AR quantiles, covid.T1/T4 verdicts,
+vsp_threshold_crossing_fraction); surface CSV; ledger THETA-SCREEN-V10;
+open-ledger update marking which v9 verdicts are superseded; the DP
+change-detector repin.
+
+Non-goals: no Θ fit, no constant changes, no attribution arms, no fleet
+placement test, no SOP design work, no reopening of §6 items.
+
+Validation gate before PR: campaign-preflight skill in full (local smoke of
+the runner showing the arm/age override path is gone or inert, --dry-run = 200
+matching the design, image built at the pinned SHA and job-def registered by
+digest, fresh S3 prefix under campaign/covid_theta_screen_v10/<SHA>/, manifest
+present), plus tests/test_ledger_entries.py and pre-commit on changed files.
+
+Campaign gate: canary = Θ 1e9, all 20 seeds (one Θ, 20 cells) — read takeoff
+fraction and conditional AR against v9's Θ 1e9 row (takeoff 0.85, median
+recorded onsets 3,103) and against the A0 seed-20200205 cell of record above
+(must match exactly at the shared seed). Stop and report; the user decides
+whether the remaining 180 cells run.
+
+Report immediately if: the shared-seed canary cell does not reproduce the
+d62f10d record; any Θ shows takeoff where v9 showed none (or vice versa)
+outside a 2/20 seed band; any cell reports episode >= 2 (should be impossible);
+child failure rate > 5%.
+
+Stop when: v10 readout + surface + THETA-SCREEN-V10 ledger + open-ledger
+update + DP detector repin are merged, and the single next decision (act on
+the attribution — model a crew-confinement SOP variant — vs. re-open the
+pre-quarantine magnitude question at the now-valid Θ) is written in a §17
+postscript here.
+```
