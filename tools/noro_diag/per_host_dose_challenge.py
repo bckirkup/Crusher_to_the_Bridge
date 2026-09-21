@@ -644,7 +644,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         bucket["sum_surface_mass_gec"] += float(surface_mass)
         bucket["sum_contacts"] += float(contacts)
         bucket["sum_surface_area_m2"] += float(surface_area_m2)
-        if request == 0.0 and self._cabin_confinement_active(target):
+        if self._cabin_confinement_active(target):
             bucket["calls_confined"] += 1
         elif surface_mass <= 0.0:
             bucket["calls_zero_mass"] += 1
