@@ -60,6 +60,9 @@ No engine constant is changed to close a gap with literature.
 
 ## Instrument
 
+The declaration above was frozen at `a9b4f1f`, before any cell ran; the
+instrument merged at `bd462c5` and the cells were measured there.
+
 `tools/noro_diag/per_host_dose_challenge.py` is extended (this change) with a
 `transfer_product_witness` summary block: a wrapper on
 `_fomite_pickup_request_for_area` that calls the original exactly once,
