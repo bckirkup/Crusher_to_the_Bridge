@@ -1,9 +1,9 @@
 # NORO-TRANSFER-PRODUCT-01
 **Date:** 2026-09-21
-**Commit:** a9b4f1f (declared), `bd462c5` (instrument merged)
-**Measured at:** `bd462c5`
+**Commit:** bd462c5
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** bd462c5
 
 `NORO-DOSE-BLOCK-01` (measured at `5870c74`) reported whole-voyage "transfer
 terms": a surface->hand loss of
