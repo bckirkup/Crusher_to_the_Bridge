@@ -63,8 +63,8 @@ from tools.noro_diag.cell_readout import (  # noqa: E402
     print_block,
 )
 
-BLOCK_SEEDS = tuple(range(8000, 8020))
-PAIR_SEEDS = (8105, 8106)
+BLOCK_SEEDS = [*range(8000, 8020)]
+PAIR_SEEDS = [8105, 8106]
 
 # The existing witness keys that must reproduce exactly against the 5870c74
 # cells for the extended instrument to be RNG-neutral.
@@ -365,8 +365,8 @@ def main(argv: list[str] | None = None) -> int:
         "surface_to_hand": surface_to_hand(admissible),
         "hand_to_mouth": hand_to_mouth(admissible),
         "bookkeeping_contrast": bookkeeping_contrast(admissible),
-        "block_seeds": list(BLOCK_SEEDS),
-        "pair_seeds": list(PAIR_SEEDS),
+        "block_seeds": BLOCK_SEEDS,
+        "pair_seeds": PAIR_SEEDS,
     })
     for key in (
         "rng_neutrality", "surface_to_hand", "hand_to_mouth",
