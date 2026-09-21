@@ -360,11 +360,17 @@ def _core_with_scale(
     scale: float | None,
     *,
     seed: int = 7,
+    by_class: dict[str, float] | None = None,
 ) -> TransmissionCore:
     """A core spanning every zone class, with the sweep axis declared."""
     cfg: dict[str, object] = {}
+    tx: dict[str, object] = {}
     if scale is not None:
-        cfg = {"transmission": {"high_touch_area_scale": scale}}
+        tx["high_touch_area_scale"] = scale
+    if by_class is not None:
+        tx["high_touch_area_scale_by_zone_class"] = by_class
+    if tx:
+        cfg = {"transmission": tx}
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes=dict.fromkeys(_SCALE_ZONES, 50.0),
@@ -446,3 +452,79 @@ def test_pickup_request_is_monotone_in_inverse_scale(scale: float) -> None:
 def test_scale_refusal_band_rejects_bad_arms(scale: float) -> None:
     with pytest.raises(ValueError, match="high_touch_area_scale"):
         _core_with_scale(scale)
+
+
+def test_class_map_absent_and_empty_are_bit_identical() -> None:
+    absent = _core_with_scale(None)
+    empty = _core_with_scale(None, by_class={})
+    for zone in _SCALE_ZONES:
+        assert absent._fomite_surface_area(zone) == pytest.approx(
+            empty._fomite_surface_area(zone), rel=0.0, abs=0.0,
+        )
+
+
+def test_class_map_scales_only_its_own_class() -> None:
+    base = _core_with_scale(None)
+    swept = _core_with_scale(
+        None, by_class={"cabin": 0.5, "dining": 3.5},
+    )
+    for zone in _SCALE_ZONES:
+        zone_class = base._fomite_zone_class(zone)
+        expected = base._fomite_surface_area(zone)
+        if zone_class in ("cabin", "dining"):
+            expected *= 0.5 if zone_class == "cabin" else 3.5
+        assert swept._fomite_surface_area(zone) == pytest.approx(
+            expected, rel=0.0, abs=0.0,
+        )
+
+
+def test_class_map_composes_with_the_global_scalar() -> None:
+    base = _core_with_scale(1.0)
+    swept = _core_with_scale(2.0, by_class={"public": 0.5})
+    for zone in _SCALE_ZONES:
+        expected = base._fomite_surface_area(zone) * 2.0
+        if base._fomite_zone_class(zone) == "public":
+            expected *= 0.5
+        assert swept._fomite_surface_area(zone) == pytest.approx(
+            expected, rel=0.0, abs=0.0,
+        )
+
+
+def test_class_map_scales_the_sanitary_per_wc_branch() -> None:
+    # Head_A declares 2 WC floor areas: 0.5 * 2 * class scale.
+    swept = _core_with_scale(None, by_class={"sanitary": 3.0})
+    assert swept._fomite_surface_area("Head_A") == pytest.approx(3.0)
+
+
+def test_swab_denominator_reflects_the_composed_scale() -> None:
+    base = _core_with_scale(1.0)
+    swept = _core_with_scale(2.0, by_class={"galley": 0.25})
+    for zone in _SCALE_ZONES:
+        expected = base.zone_high_touch_area_cm2(zone) * 2.0
+        if base._fomite_zone_class(zone) == "galley":
+            expected *= 0.25
+        assert swept.zone_high_touch_area_cm2(zone) == pytest.approx(
+            expected, rel=1e-15,
+        )
+
+
+def test_class_map_rejects_unknown_zone_class() -> None:
+    with pytest.raises(ValueError, match="unknown zone class"):
+        _core_with_scale(None, by_class={"not_a_class": 1.0})
+
+
+def test_class_map_rejects_non_mapping() -> None:
+    with pytest.raises(ValueError, match="must be a mapping"):
+        _core_with_scale(None, by_class=4)  # type: ignore[arg-type]
+
+
+@pytest.mark.parametrize(
+    "value",
+    [0.0, -1.0, float("nan"), float("inf"), 0.001, 1000.0, "half"],
+)
+def test_class_map_refusal_band_rejects_bad_arms(value: object) -> None:
+    with pytest.raises(ValueError, match="high_touch_area_scale"):
+        _core_with_scale(
+            None,
+            by_class={"cabin": value},  # type: ignore[dict-item]
+        )

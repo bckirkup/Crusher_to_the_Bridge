@@ -448,6 +448,10 @@ DEFAULT_FLUSH_AEROSOL_FRACTION = 0.0  # off
 # floor) bound it from below, and measured total room object-surface
 # inventories bound it from above (Manuja 2019: 22 rooms, S/V 3.2 +/- 1.2
 # m-1 with contents; Hodgson 2005: 33 rooms).
+# The map form (``high_touch_area_scale_by_zone_class``) is the same axis
+# per zone class and adopts nothing either: it exists because the declared
+# table is per-zone-class while the enumerated inventories scale with items
+# and occupants, so the two differ by a class-dependent factor.
 # Grade C (declared assumption axis). Origin: sweep (NORO-HIGH-TOUCH-AREA-01).
 DEFAULT_HIGH_TOUCH_AREA_SCALE = 1.0  # shipped declaration; absent = 1.0
 # Guard against a typo'd sweep arm, not a physical claim: two decades on
@@ -1194,6 +1198,21 @@ def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
     return frac
 
 
+def _coerce_high_touch_area_scale(raw: Any, key: str) -> float:
+    """Validate one arm of the area sweep axis against the refusal band."""
+    try:
+        scale = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{key} must be numeric, got {raw!r}") from exc
+    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
+    if not math.isfinite(scale) or scale <= 0.0 or scale < low or scale > high:
+        raise ValueError(
+            f"{key} is a sweep-arm guard, not a "
+            f"physical bound: must be finite in [{low}, {high}], got {raw!r}",
+        )
+    return scale
+
+
 def _parse_high_touch_area_scale(tx: dict[str, Any]) -> float:
     """Read the high-touch-area sweep axis (NORO-HIGH-TOUCH-AREA-01).
 
@@ -1201,15 +1220,44 @@ def _parse_high_touch_area_scale(tx: dict[str, Any]) -> float:
     pre-change tree: the multiply is exact and no draw is taken. The band
     is a guard against a typo'd sweep arm, not a physical claim.
     """
-    raw = tx.get("high_touch_area_scale", DEFAULT_HIGH_TOUCH_AREA_SCALE)
-    scale = float(raw)
-    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
-    if not math.isfinite(scale) or scale <= 0.0 or scale < low or scale > high:
+    return _coerce_high_touch_area_scale(
+        tx.get("high_touch_area_scale", DEFAULT_HIGH_TOUCH_AREA_SCALE),
+        "transmission.high_touch_area_scale",
+    )
+
+
+def _parse_high_touch_area_scale_by_zone_class(
+    tx: dict[str, Any],
+) -> dict[str, float]:
+    """Read per-zone-class multipliers on the same sweep axis.
+
+    Absent or empty is the shipped declaration and bit-identical to today:
+    a class absent from the map takes ``1.0``. The axis exists because the
+    declared table is per-zone-class while the enumerated inventories scale
+    with items and occupants, so the two differ by a class-dependent
+    factor; it is a sweep arm, not a sourced value.
+    """
+    raw = tx.get("high_touch_area_scale_by_zone_class", {})
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, Mapping):
         raise ValueError(
-            "transmission.high_touch_area_scale is a sweep-arm guard, not a "
-            f"physical bound: must be finite in [{low}, {high}], got {raw!r}",
+            "transmission.high_touch_area_scale_by_zone_class must be a "
+            "mapping from zone class to multiplier",
         )
-    return scale
+    scales: dict[str, float] = {}
+    for zone_class, value in raw.items():
+        if zone_class not in HIGH_TOUCH_AREA_M2:
+            raise ValueError(
+                "transmission.high_touch_area_scale_by_zone_class: unknown "
+                f"zone class {zone_class!r}; allowed "
+                f"{sorted(HIGH_TOUCH_AREA_M2)}",
+            )
+        scales[zone_class] = _coerce_high_touch_area_scale(
+            value,
+            f"transmission.high_touch_area_scale_by_zone_class.{zone_class}",
+        )
+    return scales
 
 
 def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
@@ -1796,6 +1844,9 @@ class TransmissionCore:
         self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
         self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
         self.high_touch_area_scale = _parse_high_touch_area_scale(tx)
+        self.high_touch_area_scale_by_zone_class = (
+            _parse_high_touch_area_scale_by_zone_class(tx)
+        )
         # The blackwater tank reads mass that is otherwise dropped (the
         # non-aerosolised bowl share and emesis ``non_touchable``) and
         # consumes no RNG, so the off path is bit-identical.
@@ -5268,9 +5319,19 @@ class TransmissionCore:
                 return (
                     SANITARY_HIGH_TOUCH_AREA_M2_PER_WC
                     * water_closets
-                    * self.high_touch_area_scale
+                    * self._high_touch_area_effective_scale(zone_class)
                 )
-        return HIGH_TOUCH_AREA_M2[zone_class] * self.high_touch_area_scale
+        return (
+            HIGH_TOUCH_AREA_M2[zone_class]
+            * self._high_touch_area_effective_scale(zone_class)
+        )
+
+    def _high_touch_area_effective_scale(self, zone_class: str) -> float:
+        """Global sweep axis composed with the per-class multiplier."""
+        return (
+            self.high_touch_area_scale
+            * self.high_touch_area_scale_by_zone_class.get(zone_class, 1.0)
+        )
 
     def _zone_floor_area_m2(self, unit_name: str) -> float:
         """Declared deck area, else the unit's air volume over a deck height.
