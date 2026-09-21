@@ -116,7 +116,9 @@ def test_pickup_is_monotonic_in_shared_surface_touch_frequency(
 def test_zero_hand_load_delivers_zero_mouth_dose() -> None:
     core = _core()
     target = _agent()
-    assert core._hand_to_mouth_dose(target, 0, 0.0) == 0.0
+    assert core._hand_to_mouth_dose(target, 0, 0.0) == pytest.approx(
+        0.0, abs=0.0,
+    )
 
 
 def test_eating_context_increases_mouth_contact_dose(
@@ -334,3 +336,113 @@ def test_fomite_delivery_is_per_capita_invariant_to_occupancy() -> None:
         results.append(sum(doses.values()) / count)
     assert results[0] == pytest.approx(results[1])
     assert results[1] == pytest.approx(results[2])
+
+
+# ── transmission.high_touch_area_scale (NORO-HIGH-TOUCH-AREA-01) ──────────
+#
+# The sweep axis multiplies ``_fomite_surface_area``'s single choke point, so
+# the pickup denominator, the emesis ``touchable_fraction``, the EmesisPatch
+# area and the swab-density denominator all move together. Absent or ``1.0``
+# must be bit-identical to the shipped declaration -- the multiply is exact
+# and the parser draws nothing.
+
+_SCALE_ZONES = {
+    "Cabin_A": "Cabin_Corridor",
+    "Diner_A": "Dining",
+    "Lounge_A": "Free",
+    "Galley_M": "Free",
+    "CrewMess_A": "Free",
+    "Head_A": "Sanitary",
+}
+
+
+def _core_with_scale(
+    scale: float | None,
+    *,
+    seed: int = 7,
+) -> TransmissionCore:
+    """A core spanning every zone class, with the sweep axis declared."""
+    cfg: dict[str, object] = {}
+    if scale is not None:
+        cfg = {"transmission": {"high_touch_area_scale": scale}}
+    core = TransmissionCore(
+        rng=np.random.default_rng(seed),
+        zone_volumes=dict.fromkeys(_SCALE_ZONES, 50.0),
+        pathogen_profiles={PATHOGEN: _profile()},
+        zone_types=dict(_SCALE_ZONES),
+        zone_floor_areas={
+            "Head_A": 2 * transmission_core.SANITARY_FLOOR_AREA_M2_PER_WC,
+        },
+        clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        cfg=cfg,
+    )
+    core.initialize_zones(list(_SCALE_ZONES))
+    return core
+
+
+def test_scale_default_and_one_are_bit_identical() -> None:
+    absent = _core_with_scale(None)
+    declared = _core_with_scale(1.0)
+    for zone in _SCALE_ZONES:
+        assert absent._fomite_surface_area(zone) == pytest.approx(
+            declared._fomite_surface_area(zone), rel=0.0, abs=0.0,
+        )
+
+
+@pytest.mark.parametrize("scale", [0.25, 0.5, 1.0, 2.0, 4.0])
+def test_surface_area_is_exactly_proportional(scale: float) -> None:
+    base = _core_with_scale(1.0)
+    swept = _core_with_scale(scale)
+    for zone in _SCALE_ZONES:
+        assert swept._fomite_surface_area(zone) == pytest.approx(
+            base._fomite_surface_area(zone) * scale,
+            rel=1e-15,
+        )
+
+
+def test_sanitary_branch_scales_through_the_per_wc_path() -> None:
+    # Head_A declares 2 WC floor areas, so the per-WC constant branch
+    # applies: area = 0.5 * 2 * scale.
+    swept = _core_with_scale(3.0)
+    assert swept._fomite_surface_area("Head_A") == pytest.approx(3.0)
+
+
+def test_swab_denominator_scales_with_the_area() -> None:
+    base = _core_with_scale(1.0)
+    swept = _core_with_scale(2.0)
+    for zone in _SCALE_ZONES:
+        assert swept.zone_high_touch_area_cm2(zone) == pytest.approx(
+            base.zone_high_touch_area_cm2(zone) * 2.0,
+            rel=1e-15,
+        )
+
+
+@pytest.mark.parametrize("scale", [0.25, 0.5, 2.0, 4.0])
+def test_pickup_request_is_monotone_in_inverse_scale(scale: float) -> None:
+    # Same seed, and the scale parser draws nothing, so both cores make the
+    # same draws: the uncapped request is exactly 1/scale of the declared
+    # arm's request. A tiny pool keeps ``min(surface_mass, ...)`` from
+    # binding.
+    surface_mass = 1e-30
+    base = _core_with_scale(1.0, seed=13)
+    swept = _core_with_scale(scale, seed=13)
+    target = _agent()
+    base_request = base._fomite_pickup_request_for_area(
+        target, "Lounge_A", surface_mass,
+        base._fomite_surface_area("Lounge_A"), 0,
+    )
+    swept_request = swept._fomite_pickup_request_for_area(
+        target, "Lounge_A", surface_mass,
+        swept._fomite_surface_area("Lounge_A"), 0,
+    )
+    assert base_request < surface_mass
+    assert swept_request < surface_mass
+    assert swept_request == pytest.approx(base_request / scale, rel=1e-12)
+
+
+@pytest.mark.parametrize(
+    "scale", [0.0, -1.0, float("nan"), float("inf"), 0.001, 1000.0],
+)
+def test_scale_refusal_band_rejects_bad_arms(scale: float) -> None:
+    with pytest.raises(ValueError, match="high_touch_area_scale"):
+        _core_with_scale(scale)

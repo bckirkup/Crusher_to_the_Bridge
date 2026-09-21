@@ -1932,6 +1932,28 @@ def _check_config_yaml(
     _check_instrument_turnaround(cfg, report)
     _check_variant_surveillance(cfg, report)
     _check_surface_cleaning(cfg, report)
+    _check_high_touch_area_scale(cfg, report)
+
+
+def _check_high_touch_area_scale(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the optional high-touch-area sweep axis; absent is valid."""
+    tx = cfg.get("transmission", {})
+    if not isinstance(tx, dict) or "high_touch_area_scale" not in tx:
+        return
+    scale = tx["high_touch_area_scale"]
+    low, high = 0.01, 100.0
+    if (
+        not isinstance(scale, (int, float))
+        or not math.isfinite(scale)
+        or scale <= 0
+        or scale < low
+        or scale > high
+    ):
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"transmission.high_touch_area_scale = {scale!r} must be finite "
+            f"in [{low}, {high}] (a sweep-arm guard, not a physical bound)",
+        )
 
 
 def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:

@@ -432,6 +432,29 @@ FLUSH_STOOL_MASS_G = 107.0
 FLUSH_AEROSOL_FRACTION_BOUNDS = (1e-9, 1e-3)
 DEFAULT_FLUSH_AEROSOL_FRACTION = 0.0  # off
 
+# Sweep axis over the declared HIGH_TOUCH_AREA_M2 / per-WC sanitary hardware
+# assumption, multiplied onto ``_fomite_surface_area``'s single choke point so
+# the pickup denominator, the emesis ``touchable_fraction``, the EmesisPatch
+# area and the surface-swab density denominator all move together: the sweep
+# asks "what if the hull has s times the high-touch hardware we declared".
+# This is not a sourced constant -- 1.0 is the shipped declaration and the
+# axis adopts nothing. The axis exists because the high-touch area per room
+# has never been measured directly, while the *enumerated item count* per
+# room (Huslage 2010: 5 objects; Murphy 2011: 7 predefined HTOs; Heo 2023:
+# 38 items; Carling 2009: 8,344 objects over 273 ship restrooms; Lei 2017:
+# 422 surfaces in a 21-row 737 economy cabin) and the *per-fomite swabbed
+# area* distribution (Zambrana 2023: 26% of 275 datasets <50 cm2, 23%
+# 50-100 cm2, 12% >100 cm2; Gerba 2025: 10 cm2 flush handle to 385-500 cm2
+# floor) bound it from below, and measured total room object-surface
+# inventories bound it from above (Manuja 2019: 22 rooms, S/V 3.2 +/- 1.2
+# m-1 with contents; Hodgson 2005: 33 rooms).
+# Grade C (declared assumption axis). Origin: sweep (NORO-HIGH-TOUCH-AREA-01).
+DEFAULT_HIGH_TOUCH_AREA_SCALE = 1.0  # shipped declaration; absent = 1.0
+# Guard against a typo'd sweep arm, not a physical claim: two decades on
+# either side of the declaration comfortably covers any defensible hardware
+# inventory and refuses nonsense without pretending to know the bound.
+HIGH_TOUCH_AREA_SCALE_BOUNDS = (0.01, 100.0)
+
 
 VOMITING_AXIS = "vomiting"
 DIARRHOEA_AXIS = "diarrhoea"
@@ -1171,6 +1194,24 @@ def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
     return frac
 
 
+def _parse_high_touch_area_scale(tx: dict[str, Any]) -> float:
+    """Read the high-touch-area sweep axis (NORO-HIGH-TOUCH-AREA-01).
+
+    Absent or ``1.0`` is the shipped declaration and bit-identical to the
+    pre-change tree: the multiply is exact and no draw is taken. The band
+    is a guard against a typo'd sweep arm, not a physical claim.
+    """
+    raw = tx.get("high_touch_area_scale", DEFAULT_HIGH_TOUCH_AREA_SCALE)
+    scale = float(raw)
+    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
+    if not math.isfinite(scale) or scale <= 0.0 or scale < low or scale > high:
+        raise ValueError(
+            "transmission.high_touch_area_scale is a sweep-arm guard, not a "
+            f"physical bound: must be finite in [{low}, {high}], got {raw!r}",
+        )
+    return scale
+
+
 def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
     """Whether a flush at a host's own fittings emits (corner sweep)."""
     return bool(tx.get("flush_cabin_emission", True))
@@ -1754,6 +1795,7 @@ class TransmissionCore:
         self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
         self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
         self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
+        self.high_touch_area_scale = _parse_high_touch_area_scale(tx)
         # The blackwater tank reads mass that is otherwise dropped (the
         # non-aerosolised bowl share and emesis ``non_touchable``) and
         # consumes no RNG, so the off path is bit-identical.
@@ -5223,8 +5265,12 @@ class TransmissionCore:
                 water_closets = max(
                     1, round(float(declared) / SANITARY_FLOOR_AREA_M2_PER_WC),
                 )
-                return SANITARY_HIGH_TOUCH_AREA_M2_PER_WC * water_closets
-        return HIGH_TOUCH_AREA_M2[zone_class]
+                return (
+                    SANITARY_HIGH_TOUCH_AREA_M2_PER_WC
+                    * water_closets
+                    * self.high_touch_area_scale
+                )
+        return HIGH_TOUCH_AREA_M2[zone_class] * self.high_touch_area_scale
 
     def _zone_floor_area_m2(self, unit_name: str) -> float:
         """Declared deck area, else the unit's air volume over a deck height.
