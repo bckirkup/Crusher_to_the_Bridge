@@ -162,6 +162,8 @@ longer justifications.
 | [norovirus/environmental_observation_v1.md](norovirus/environmental_observation_v1.md) | Implemented — the environmental-observability derivation: surface density + Park 2015 per-swab LOD (shipped behind `observation.surface_swab_source`, default `airborne_fraction`), blackwater holding tank + copies/L assay (shipped behind `transmission.blackwater_plumbing` and `observation.wastewater_assay_mode`, both default-off), emesis source-term replacement (shipped; see [norovirus/emesis_source_term_v1.md](norovirus/emesis_source_term_v1.md)); ledger items 56–57 and 13 |
 | [literature/consensus_tranche_42_boarding_prevalence_renewal_check.md](literature/consensus_tranche_42_boarding_prevalence_renewal_check.md) | Evidence assembled — boarding-prevalence renewal-identity check; both repairs are now the default mechanism for `norwalk_gi` (historical arm selectable as the `shipped` rung) |
 | [literature/consensus_tranche_43_illness_duration_harris_2019.md](literature/consensus_tranche_43_illness_duration_harris_2019.md) | Implemented, default-on where a survival table exists — Harris 2019 Fig 4C illness-duration survival table; the `illness_duration` dispersed arm on `norwalk_gi` |
+| [literature/consensus_tranche_44_transfer_product.md](literature/consensus_tranche_44_transfer_product.md) | Living — per-touch transfer chain vs literature; feeds NORO-TRANSFER-PRODUCT-01 |
+| [literature/consensus_tranche_45_high_touch_area.md](literature/consensus_tranche_45_high_touch_area.md) | Living — literature record for ledger NORO-HIGH-TOUCH-AREA-01; adopts nothing |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs

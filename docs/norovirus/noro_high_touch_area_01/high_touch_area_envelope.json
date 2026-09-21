@@ -1,0 +1,293 @@
+{
+  "ceiling_basis": {
+    "central": 3.2,
+    "high": 4.4,
+    "low": 2.0,
+    "src": "Manuja 2019 3.2 +/- 1.2 m^-1 with contents; Hodgson 2005 bedroom 2.3-4.7"
+  },
+  "classes": {
+    "cabin": {
+      "broad_m2": 1.9187999999999998,
+      "ceiling_total_surface_m2": 128.0,
+      "count_anchor": "Heo 2023 38-item list; Park 2015 cabin swab sites",
+      "hardware_m2": 0.1738,
+      "representative_occupancy": 2.0,
+      "representative_volume_m3": 40.0,
+      "scale_to_broad": 1.2792,
+      "scale_to_hardware": 0.11586666666666667,
+      "shipped_inside_envelope": true,
+      "shipped_m2": 1.5,
+      "shipped_over_ceiling": 0.01171875,
+      "unit": "one stateroom compartment (2 berths)",
+      "zones": [
+        "PC_D4_P_F",
+        "PC_D4_P_M",
+        "PC_D4_P_A",
+        "PC_D4_S_F",
+        "PC_D4_S_M",
+        "PC_D4_S_A",
+        "PC_D5_P_F",
+        "PC_D5_P_M",
+        "PC_D5_P_A",
+        "PC_D5_S_F",
+        "PC_D5_S_M",
+        "PC_D5_S_A",
+        "PC_D6_P_F",
+        "PC_D6_P_M",
+        "PC_D6_P_A",
+        "PC_D6_S_F",
+        "PC_D6_S_M",
+        "PC_D6_S_A",
+        "PC_D7_P_F",
+        "PC_D7_P_M",
+        "PC_D7_P_A",
+        "PC_D7_S_F",
+        "PC_D7_S_M",
+        "PC_D7_S_A",
+        "PC_D8_P_F",
+        "PC_D8_P_M",
+        "PC_D8_P_A",
+        "PC_D8_S_F",
+        "PC_D8_S_M",
+        "PC_D8_S_A",
+        "PC_D9_P_F",
+        "PC_D9_P_M",
+        "PC_D9_P_A",
+        "PC_D9_S_F",
+        "PC_D9_S_M",
+        "PC_D9_S_A",
+        "CC_D1_F",
+        "CC_D1_A",
+        "CC_D2_F",
+        "CC_D2_A",
+        "CC_D3_F",
+        "CC_D3_A"
+      ]
+    },
+    "crew_mess": {
+      "broad_m2": 58.1198,
+      "ceiling_total_surface_m2": 2240.0,
+      "count_anchor": "as dining; crew service pattern",
+      "hardware_m2": 4.1198,
+      "representative_occupancy": 200.0,
+      "representative_volume_m3": 700.0,
+      "scale_to_broad": 14.52995,
+      "scale_to_hardware": 1.02995,
+      "shipped_inside_envelope": false,
+      "shipped_m2": 4.0,
+      "shipped_over_ceiling": 0.0017857142857142857,
+      "unit": "one crew mess zone",
+      "zones": [
+        "CrewMess"
+      ]
+    },
+    "dining": {
+      "broad_m2": 105.99461138211383,
+      "ceiling_total_surface_m2": 4087.5447154471544,
+      "count_anchor": "Jin 2022 restaurant touch classes; Lei 2017 per-seat scale",
+      "hardware_m2": 7.455586991869918,
+      "representative_occupancy": 364.9593495934959,
+      "representative_volume_m3": 1277.3577235772357,
+      "scale_to_broad": 13.249326422764229,
+      "scale_to_hardware": 0.9319483739837398,
+      "shipped_inside_envelope": true,
+      "shipped_m2": 8.0,
+      "shipped_over_ceiling": 0.001957165133819177,
+      "unit": "one dining zone",
+      "zones": [
+        "MainDining_L",
+        "MainDining_U",
+        "LidoBuffet",
+        "Specialty"
+      ]
+    },
+    "galley": {
+      "broad_m2": 19.3142,
+      "ceiling_total_surface_m2": 2880.0,
+      "count_anchor": "fixed equipment, not occupancy",
+      "hardware_m2": 0.5042,
+      "representative_occupancy": 60.0,
+      "representative_volume_m3": 900.0,
+      "scale_to_broad": 1.93142,
+      "scale_to_hardware": 0.05042,
+      "shipped_inside_envelope": true,
+      "shipped_m2": 10.0,
+      "shipped_over_ceiling": 0.003472222222222222,
+      "unit": "one galley zone",
+      "zones": [
+        "MainGalley"
+      ]
+    },
+    "public": {
+      "broad_m2": 69.90475312641595,
+      "ceiling_total_surface_m2": 7534.919800634345,
+      "count_anchor": "Lei 2017 3.3 touchable surfaces per seat; Ackerley 2025 lobby",
+      "hardware_m2": 3.3712914136837338,
+      "representative_occupancy": 443.5564114182148,
+      "representative_volume_m3": 2354.6624376982327,
+      "scale_to_broad": 11.650792187735993,
+      "scale_to_hardware": 0.5618819022806223,
+      "shipped_inside_envelope": true,
+      "shipped_m2": 6.0,
+      "shipped_over_ceiling": 0.0007962924833645709,
+      "unit": "one public zone",
+      "zones": [
+        "PoolDeck",
+        "Promenade",
+        "MainTheater",
+        "Casino",
+        "Library",
+        "SpaFit",
+        "KidsClub",
+        "PhotoShops",
+        "Reception",
+        "Laundry",
+        "Engine_Room",
+        "MedCenter",
+        "IsolRoom",
+        "Bridge"
+      ]
+    },
+    "sanitary": {
+      "broad_m2": 0.45809999999999995,
+      "ceiling_total_surface_m2": 85.33270588235294,
+      "count_anchor": "Carling 2009 30.6 objects per shipboard public restroom",
+      "hardware_m2": 0.1446,
+      "representative_occupancy": 1.0,
+      "representative_volume_m3": 26.666470588235292,
+      "scale_to_broad": 0.9161999999999999,
+      "scale_to_hardware": 0.2892,
+      "shipped_inside_envelope": false,
+      "shipped_m2": 0.5,
+      "shipped_over_ceiling": 0.0058594180839565,
+      "unit": "one water closet",
+      "zones": [
+        "HD_0E_M",
+        "HD_10B_M",
+        "HD_1C_M",
+        "HD_1C_F",
+        "HD_2C_M",
+        "HD_2C_F",
+        "HD_4M_M",
+        "HD_4M_F_1",
+        "HD_4M_F_2",
+        "HD_5L_M",
+        "HD_5L_F",
+        "HD_7C_M",
+        "HD_7C_F",
+        "HD_8C_M",
+        "HD_8C_F",
+        "HD_9L_M",
+        "HD_9L_F"
+      ]
+    }
+  },
+  "declared_item_area_share": 0.7058823529411765,
+  "item_areas_m2": {
+    "bed_and_linen_touched": {
+      "area_m2": 0.3,
+      "note": "headboard, rail, top sheet edge",
+      "src": "declared"
+    },
+    "button_or_dispenser": {
+      "area_m2": 0.005,
+      "note": "actuator + bezel ~50 cm2",
+      "src": "declared"
+    },
+    "chair_touched": {
+      "area_m2": 0.15,
+      "note": "seat pan + back + arms",
+      "src": "declared"
+    },
+    "door_lever": {
+      "area_m2": 0.0016,
+      "note": "Weir 2016 aluminium fomite 15.8 cm2",
+      "src": "qmra"
+    },
+    "flush_actuator": {
+      "area_m2": 0.001,
+      "note": "Gerba 2025 flush handle 10 cm2",
+      "src": "measured"
+    },
+    "grab_rail_m": {
+      "area_m2": 0.1,
+      "note": "0.1 m2 of rail per linear metre",
+      "src": "declared"
+    },
+    "light_switch": {
+      "area_m2": 0.002,
+      "note": "switch plate ~20 cm2",
+      "src": "declared"
+    },
+    "remote_or_phone": {
+      "area_m2": 0.01,
+      "note": "handset/remote ~100 cm2",
+      "src": "declared"
+    },
+    "small_panel": {
+      "area_m2": 0.0059,
+      "note": "Weir 2016 plastic laminate 593 cm2",
+      "src": "qmra"
+    },
+    "stall_latch": {
+      "area_m2": 0.002,
+      "note": "latch + edge ~20 cm2",
+      "src": "declared"
+    },
+    "table_top_per_seat": {
+      "area_m2": 0.12,
+      "note": "place setting footprint",
+      "src": "declared"
+    },
+    "tableware_per_seat": {
+      "area_m2": 0.02,
+      "note": "glass + cutlery + menu ~200 cm2",
+      "src": "declared"
+    },
+    "tap_set": {
+      "area_m2": 0.01,
+      "note": "two handles + spout ~100 cm2",
+      "src": "declared"
+    },
+    "toilet_seat": {
+      "area_m2": 0.07,
+      "note": "Park 2015 toilet seat surface 700 cm2",
+      "src": "measured"
+    },
+    "utensil": {
+      "area_m2": 0.005,
+      "note": "serving tong / handle ~50 cm2",
+      "src": "declared"
+    },
+    "wardrobe_front": {
+      "area_m2": 0.1,
+      "note": "door fronts and pulls",
+      "src": "declared"
+    },
+    "work_plane": {
+      "area_m2": 1.045,
+      "note": "Weir 2016 wood laminate 11.25 ft2",
+      "src": "qmra"
+    }
+  },
+  "platform": "classic_cruise_1900",
+  "sweep_arms": {
+    "broad": {
+      "cabin": 1.279,
+      "crew_mess": 14.53,
+      "dining": 13.249,
+      "galley": 1.931,
+      "public": 11.651,
+      "sanitary": 0.916
+    },
+    "hardware": {
+      "cabin": 0.116,
+      "crew_mess": 1.03,
+      "dining": 0.932,
+      "galley": 0.05,
+      "public": 0.562,
+      "sanitary": 0.289
+    }
+  },
+  "what_this_is": "A derived envelope for the fomite areal denominator, not a measurement and not an adopted constant. Item counts are enumerated from published high-touch inventories; item areas are measured, QMRA-declared or declared here, per ITEM_AREA_M2."
+}

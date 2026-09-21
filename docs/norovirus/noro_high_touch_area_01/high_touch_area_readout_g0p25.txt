@@ -1,0 +1,18 @@
+== g0p25 (scale 0.25) over 20 cells ==
+criterion 2a, per touch:
+  cabin      area x0.250000 (exp 0.25), log10 f_touch shift +0.605±0.017 (exp +0.602), pool n=21199/22677  -> conforms
+  crew_mess  area x0.250000 (exp 0.25), log10 f_touch shift +0.576±0.021 (exp +0.602), pool n=1514/2502  -> conforms
+  dining     area x0.250000 (exp 0.25), log10 f_touch shift +0.578±0.011 (exp +0.602), pool n=7705/7820  -> conforms
+  galley     area x0.250000 (exp 0.25), log10 f_touch shift +0.426±0.052 (exp +0.602), pool n=226/640  -> departs
+  public     area x0.250000 (exp 0.25), log10 f_touch shift +0.604±0.004 (exp +0.602), pool n=31148/118650  -> conforms
+  patch pickups, arm: cabin n=2338 A=0.298 m2, galley n=2 A=0.0607 m2
+  patch pickups, base: cabin n=1226 A=0.814 m2, galley n=2 A=0.243 m2
+criterion 2b, whole voyage: median(arm x scale)/median(base) = 7.735  -> departs
+criterion 3, arm: capped 154/64132 = 2.40e-03, requested/offered 0.082  -> linear regime
+    per class (pool): cabin 0/21199, crew_mess 40/1514, dining 91/7705, galley 19/226, public 0/31148
+criterion 3, base: capped 8/153517 = 5.21e-05, requested/offered 0.007  -> linear regime
+    per class (pool): cabin 0/22677, crew_mess 6/2502, dining 0/7820, galley 0/640, public 0/118650
+criterion 4, arm: 4 secondaries over 20 seeds -> not resolvable at n=20
+criterion 4, base: 3 secondaries over 20 seeds -> not resolvable at n=20
+
+written: /home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_high_touch_area_01/high_touch_area_readout_g0p25.json

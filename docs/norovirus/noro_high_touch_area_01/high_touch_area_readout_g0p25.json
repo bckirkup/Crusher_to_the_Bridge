@@ -1,0 +1,548 @@
+{
+ "arm_tag": "g0p25",
+ "cells": 20,
+ "patch_pickups_arm": {
+  "cabin": {
+   "calls": 2338.0,
+   "mean_area_per_call_m2": 0.2981067792985455
+  },
+  "galley": {
+   "calls": 2.0,
+   "mean_area_per_call_m2": 0.06066666666666666
+  }
+ },
+ "patch_pickups_base": {
+  "cabin": {
+   "calls": 1226.0,
+   "mean_area_per_call_m2": 0.8136390905383335
+  },
+  "galley": {
+   "calls": 2.0,
+   "mean_area_per_call_m2": 0.24266666666666664
+  }
+ },
+ "per_touch_scaling": {
+  "cabin": {
+   "area_ratio": 0.25,
+   "area_ratio_expected": 0.25,
+   "calls_arm": 21199.0,
+   "calls_base": 22677.0,
+   "calls_clean_arm": 3142.0,
+   "calls_clean_base": 3139.0,
+   "log10_f_touch_shift": 0.6053965716218328,
+   "log10_f_touch_shift_expected": 0.6020599913279624,
+   "log10_f_touch_shift_se": 0.016929504810641822,
+   "mean_area_per_call_m2_arm": 0.375,
+   "mean_area_per_call_m2_base": 1.5,
+   "mean_log10_f_touch_arm": -2.8059334185640927,
+   "mean_log10_f_touch_base": -3.4113299901859255,
+   "verdict": "conforms"
+  },
+  "crew_mess": {
+   "area_ratio": 0.25,
+   "area_ratio_expected": 0.25,
+   "calls_arm": 1514.0,
+   "calls_base": 2502.0,
+   "calls_clean_arm": 1474.0,
+   "calls_clean_base": 2496.0,
+   "log10_f_touch_shift": 0.5759368855441163,
+   "log10_f_touch_shift_expected": 0.6020599913279624,
+   "log10_f_touch_shift_se": 0.021415692172435958,
+   "mean_area_per_call_m2_arm": 1.0,
+   "mean_area_per_call_m2_base": 4.0,
+   "mean_log10_f_touch_arm": -3.2324190614487827,
+   "mean_log10_f_touch_base": -3.808355946992899,
+   "verdict": "conforms"
+  },
+  "dining": {
+   "area_ratio": 0.25,
+   "area_ratio_expected": 0.25,
+   "calls_arm": 7705.0,
+   "calls_base": 7820.0,
+   "calls_clean_arm": 7614.0,
+   "calls_clean_base": 7820.0,
+   "log10_f_touch_shift": 0.5778998424786876,
+   "log10_f_touch_shift_expected": 0.6020599913279624,
+   "log10_f_touch_shift_se": 0.010725779960781723,
+   "mean_area_per_call_m2_arm": 2.0,
+   "mean_area_per_call_m2_base": 8.0,
+   "mean_log10_f_touch_arm": -3.544808059809337,
+   "mean_log10_f_touch_base": -4.122707902288025,
+   "verdict": "conforms"
+  },
+  "galley": {
+   "area_ratio": 0.25,
+   "area_ratio_expected": 0.25,
+   "calls_arm": 226.0,
+   "calls_base": 640.0,
+   "calls_clean_arm": 207.0,
+   "calls_clean_base": 640.0,
+   "log10_f_touch_shift": 0.4258520376071364,
+   "log10_f_touch_shift_expected": 0.6020599913279624,
+   "log10_f_touch_shift_se": 0.051620579670383575,
+   "mean_area_per_call_m2_arm": 2.5,
+   "mean_area_per_call_m2_base": 10.0,
+   "mean_log10_f_touch_arm": -3.7861701975967326,
+   "mean_log10_f_touch_base": -4.212022235203869,
+   "verdict": "departs"
+  },
+  "public": {
+   "area_ratio": 0.25,
+   "area_ratio_expected": 0.25,
+   "calls_arm": 31148.0,
+   "calls_base": 118650.0,
+   "calls_clean_arm": 31148.0,
+   "calls_clean_base": 118650.0,
+   "log10_f_touch_shift": 0.6039430555818175,
+   "log10_f_touch_shift_expected": 0.6020599913279624,
+   "log10_f_touch_shift_se": 0.004228888542506473,
+   "mean_area_per_call_m2_arm": 1.5,
+   "mean_area_per_call_m2_base": 6.0,
+   "mean_log10_f_touch_arm": -3.400923750393816,
+   "mean_log10_f_touch_base": -4.004866805975634,
+   "verdict": "conforms"
+  }
+ },
+ "saturation_arm": {
+  "calls_capped": 154.0,
+  "capped_share": 0.002401297324268696,
+  "capped_share_ceiling": 0.01,
+  "per_seed": [
+   {
+    "requested_over_offered": 1.9999985856191755,
+    "seed": 8000
+   },
+   {
+    "requested_over_offered": 0.10041789870536831,
+    "seed": 8001
+   },
+   {
+    "requested_over_offered": 0.08525402937343275,
+    "seed": 8002
+   },
+   {
+    "requested_over_offered": 2.438133448875037,
+    "seed": 8003
+   },
+   {
+    "requested_over_offered": 6.636246274118607,
+    "seed": 8004
+   },
+   {
+    "requested_over_offered": 1.0498119770609033,
+    "seed": 8005
+   },
+   {
+    "requested_over_offered": 0.6152465664749572,
+    "seed": 8006
+   },
+   {
+    "requested_over_offered": 7.299238069515808e-09,
+    "seed": 8007
+   },
+   {
+    "requested_over_offered": 0.17971593297099556,
+    "seed": 8008
+   },
+   {
+    "requested_over_offered": 0.13432519047793717,
+    "seed": 8009
+   },
+   {
+    "requested_over_offered": 3.1641911401508387,
+    "seed": 8010
+   },
+   {
+    "requested_over_offered": 2.883722869660833,
+    "seed": 8011
+   },
+   {
+    "requested_over_offered": 0.2729577653621336,
+    "seed": 8012
+   },
+   {
+    "requested_over_offered": 2.5940805728014635,
+    "seed": 8013
+   },
+   {
+    "requested_over_offered": 2.527905937723516,
+    "seed": 8014
+   },
+   {
+    "requested_over_offered": 8.142622219101884,
+    "seed": 8015
+   },
+   {
+    "requested_over_offered": 0.07355918829719343,
+    "seed": 8016
+   },
+   {
+    "requested_over_offered": 0.06537525646759106,
+    "seed": 8017
+   },
+   {
+    "requested_over_offered": 0.16681890718064782,
+    "seed": 8018
+   },
+   {
+    "requested_over_offered": 1.34214021283572,
+    "seed": 8019
+   }
+  ],
+  "per_zone_class_pool": {
+   "cabin": {
+    "calls": 21199.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   },
+   "crew_mess": {
+    "calls": 1514.0,
+    "calls_capped": 40.0,
+    "capped_share": 0.026420079260237782
+   },
+   "dining": {
+    "calls": 7705.0,
+    "calls_capped": 91.0,
+    "capped_share": 0.0118105126541207
+   },
+   "galley": {
+    "calls": 226.0,
+    "calls_capped": 19.0,
+    "capped_share": 0.084070796460177
+   },
+   "public": {
+    "calls": 31148.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   }
+  },
+  "sum_requested_over_sum_offered": 0.08184207189524796,
+  "surface_pickup_calls": 64132.0,
+  "verdict": "linear regime"
+ },
+ "saturation_base": {
+  "calls_capped": 8.0,
+  "capped_share": 5.211149253828566e-05,
+  "capped_share_ceiling": 0.01,
+  "per_seed": [
+   {
+    "requested_over_offered": 2.1293848239441937,
+    "seed": 8000
+   },
+   {
+    "requested_over_offered": 0.658903008385018,
+    "seed": 8001
+   },
+   {
+    "requested_over_offered": 0.002121433572506171,
+    "seed": 8002
+   },
+   {
+    "requested_over_offered": 1.010890108322161,
+    "seed": 8003
+   },
+   {
+    "requested_over_offered": 1.0804989991059728,
+    "seed": 8004
+   },
+   {
+    "requested_over_offered": 0.1205164210965573,
+    "seed": 8005
+   },
+   {
+    "requested_over_offered": 0.06811052649183955,
+    "seed": 8006
+   },
+   {
+    "requested_over_offered": 0.07897179023661884,
+    "seed": 8007
+   },
+   {
+    "requested_over_offered": 0.2739668009192616,
+    "seed": 8008
+   },
+   {
+    "requested_over_offered": 0.022040590844596464,
+    "seed": 8009
+   },
+   {
+    "requested_over_offered": 0.014433911541133122,
+    "seed": 8010
+   },
+   {
+    "requested_over_offered": 0.502307498342147,
+    "seed": 8011
+   },
+   {
+    "requested_over_offered": 0.19546243475277914,
+    "seed": 8012
+   },
+   {
+    "requested_over_offered": 0.5172895703779091,
+    "seed": 8013
+   },
+   {
+    "requested_over_offered": 0.2200199320261838,
+    "seed": 8014
+   },
+   {
+    "requested_over_offered": 0.007393624752398273,
+    "seed": 8015
+   },
+   {
+    "requested_over_offered": 0.016565138577209544,
+    "seed": 8016
+   },
+   {
+    "requested_over_offered": 0.01731012277594912,
+    "seed": 8017
+   },
+   {
+    "requested_over_offered": 0.047488078264979625,
+    "seed": 8018
+   },
+   {
+    "requested_over_offered": 0.2454516194116292,
+    "seed": 8019
+   }
+  ],
+  "per_zone_class_pool": {
+   "cabin": {
+    "calls": 22677.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   },
+   "crew_mess": {
+    "calls": 2502.0,
+    "calls_capped": 6.0,
+    "capped_share": 0.002398081534772182
+   },
+   "dining": {
+    "calls": 7820.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   },
+   "galley": {
+    "calls": 640.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   },
+   "public": {
+    "calls": 118650.0,
+    "calls_capped": 0.0,
+    "capped_share": 0.0
+   }
+  },
+  "sum_requested_over_sum_offered": 0.007438111141019916,
+  "surface_pickup_calls": 153517.0,
+  "verdict": "linear regime"
+ },
+ "scale": 0.25,
+ "secondaries_arm": {
+  "per_seed": {
+   "8000": 0,
+   "8001": 0,
+   "8002": 0,
+   "8003": 0,
+   "8004": 0,
+   "8005": 0,
+   "8006": 0,
+   "8007": 0,
+   "8008": 1,
+   "8009": 0,
+   "8010": 0,
+   "8011": 0,
+   "8012": 0,
+   "8013": 0,
+   "8014": 0,
+   "8015": 0,
+   "8016": 2,
+   "8017": 0,
+   "8018": 1,
+   "8019": 0
+  },
+  "resolvable_at": 20,
+  "secondaries_total": 4,
+  "seeds": 20,
+  "verdict": "not resolvable at n=20"
+ },
+ "secondaries_base": {
+  "per_seed": {
+   "8000": 0,
+   "8001": 0,
+   "8002": 0,
+   "8003": 0,
+   "8004": 0,
+   "8005": 0,
+   "8006": 0,
+   "8007": 0,
+   "8008": 0,
+   "8009": 0,
+   "8010": 0,
+   "8011": 0,
+   "8012": 0,
+   "8013": 0,
+   "8014": 0,
+   "8015": 0,
+   "8016": 2,
+   "8017": 0,
+   "8018": 1,
+   "8019": 0
+  },
+  "resolvable_at": 20,
+  "secondaries_total": 3,
+  "seeds": 20,
+  "verdict": "not resolvable at n=20"
+ },
+ "whole_voyage_scaling": {
+  "median_arm_times_scale_over_base": 7.734680816260875,
+  "median_hand_to_mouth_dose_gec_arm": 13.27267144288349,
+  "median_hand_to_mouth_dose_gec_base": 0.42899868004184205,
+  "paired": [
+   {
+    "arm_over_base": 0.23075130050032608,
+    "dose_arm": 330.12477460165456,
+    "dose_base": 1430.6518484873634,
+    "seed": 8000
+   },
+   {
+    "arm_over_base": 0.000912137801457207,
+    "dose_arm": 0.000416430566143983,
+    "dose_base": 0.45654348002977696,
+    "seed": 8001
+   },
+   {
+    "arm_over_base": 2.8550538554784826,
+    "dose_arm": 89448.82420290772,
+    "dose_base": 31329.995415416382,
+    "seed": 8002
+   },
+   {
+    "arm_over_base": 1755.3386630488085,
+    "dose_arm": 17.817385367938023,
+    "dose_base": 0.010150397608739162,
+    "seed": 8003
+   },
+   {
+    "arm_over_base": 1.3042572358770705,
+    "dose_arm": 0.10517877795551117,
+    "dose_base": 0.08064266393337804,
+    "seed": 8004
+   },
+   {
+    "arm_over_base": 0.27867824529763313,
+    "dose_arm": 0.0560032287847196,
+    "dose_base": 0.20096017442950093,
+    "seed": 8005
+   },
+   {
+    "arm_over_base": 0.918819026025283,
+    "dose_arm": 1199.1478162179326,
+    "dose_base": 1305.0968495997772,
+    "seed": 8006
+   },
+   {
+    "arm_over_base": 1.0303655813998105,
+    "dose_arm": 0.5911436466917492,
+    "dose_base": 0.5737222373913605,
+    "seed": 8007
+   },
+   {
+    "arm_over_base": 736939.6922750243,
+    "dose_arm": 15757.430121892248,
+    "dose_base": 0.021382251881761325,
+    "seed": 8008
+   },
+   {
+    "arm_over_base": 0.00801286026591028,
+    "dose_arm": 8.727957517828958,
+    "dose_base": 1089.24369428492,
+    "seed": 8009
+   },
+   {
+    "arm_over_base": 43.144902532799925,
+    "dose_arm": 56.49544764816185,
+    "dose_base": 1.3094350509938568,
+    "seed": 8010
+   },
+   {
+    "arm_over_base": 2.604320810505766,
+    "dose_arm": 0.007882055831515678,
+    "dose_base": 0.0030265302952384586,
+    "seed": 8011
+   },
+   {
+    "arm_over_base": 235.34699801544494,
+    "dose_arm": 136.42804569050034,
+    "dose_base": 0.5796889139905115,
+    "seed": 8012
+   },
+   {
+    "arm_over_base": 978.7646715663763,
+    "dose_arm": 234.30430688462033,
+    "dose_base": 0.239387785124742,
+    "seed": 8013
+   },
+   {
+    "arm_over_base": 2.866844469639994,
+    "dose_arm": 1.1509058358480613,
+    "dose_base": 0.4014538800539072,
+    "seed": 8014
+   },
+   {
+    "arm_over_base": 126.85311145885859,
+    "dose_arm": 0.006940273475894469,
+    "dose_base": 5.471110165197139e-05,
+    "seed": 8015
+   },
+   {
+    "arm_over_base": 2.037758319593756,
+    "dose_arm": 5164.972661254247,
+    "dose_base": 2534.634559746971,
+    "seed": 8016
+   },
+   {
+    "arm_over_base": 5.920417978936545,
+    "dose_arm": 0.020768107863480368,
+    "dose_base": 0.0035078786560963117,
+    "seed": 8017
+   },
+   {
+    "arm_over_base": 1.924159276011247,
+    "dose_arm": 115744.31017935292,
+    "dose_base": 60153.185665216406,
+    "seed": 8018
+   },
+   {
+    "arm_over_base": 3.87992266085723,
+    "dose_arm": 0.30798087675179714,
+    "dose_base": 0.07937809685200062,
+    "seed": 8019
+   }
+  ],
+  "seeds": [
+   8000,
+   8001,
+   8002,
+   8003,
+   8004,
+   8005,
+   8006,
+   8007,
+   8008,
+   8009,
+   8010,
+   8011,
+   8012,
+   8013,
+   8014,
+   8015,
+   8016,
+   8017,
+   8018,
+   8019
+  ],
+  "tolerance": 0.1,
+  "verdict": "departs"
+ }
+}

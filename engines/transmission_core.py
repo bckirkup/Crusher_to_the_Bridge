@@ -224,9 +224,12 @@ SURFACE_CONTACTS_PER_HOUR = {
 CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR = 545.4
 # Denominator of the fomite pickup model: the pool's mass enters a pickup only
 # as the areal density mass/area, so these are what converts a zone's pool into
-# a surface concentration. Total high-touch surface area per room in m2 has
-# never been measured by anybody (register null class ∅lit), so every entry is
-# a declared assumption and the class is a permanent Grade C liability.
+# a surface concentration. No retrieved source reports the summed high-touch
+# area of any room (register null ∅nr; ∅lit for cruise zone classes), although
+# item sets, per-item areas and total room surface are each measured -- see
+# docs/literature/consensus_tranche_45_high_touch_area.md, which derives a
+# Grade C envelope from them. Every entry here is a declared assumption;
+# nothing from that envelope is adopted.
 # No source: declared assumption. Grade C. Origin: n/a.
 # The density is uniform over the zone: a pool gain deposited by one event is
 # available at the same concentration to every touch anywhere in the zone.
@@ -431,6 +434,33 @@ FLUSH_STOOL_MASS_G = 107.0
 # Grade C. Origin: T2-3 (Johnson) / Sec (Boles back-calculation).
 FLUSH_AEROSOL_FRACTION_BOUNDS = (1e-9, 1e-3)
 DEFAULT_FLUSH_AEROSOL_FRACTION = 0.0  # off
+
+# Sweep axis over the declared HIGH_TOUCH_AREA_M2 / per-WC sanitary hardware
+# assumption, multiplied onto ``_fomite_surface_area``'s single choke point so
+# the pickup denominator, the emesis ``touchable_fraction``, the EmesisPatch
+# area and the surface-swab density denominator all move together: the sweep
+# asks "what if the hull has s times the high-touch hardware we declared".
+# This is not a sourced constant -- 1.0 is the shipped declaration and the
+# axis adopts nothing. The axis exists because the high-touch area per room
+# has never been measured directly, while the *enumerated item count* per
+# room (Huslage 2010: 5 objects; Murphy 2011: 7 predefined HTOs; Heo 2023:
+# 38 items; Carling 2009: 8,344 objects over 273 ship restrooms; Lei 2017:
+# 422 surfaces in a 21-row 737 economy cabin) and the *per-fomite swabbed
+# area* distribution (Zambrana 2023: 26% of 275 datasets <50 cm2, 23%
+# 50-100 cm2, 12% >100 cm2; Gerba 2025: 10 cm2 flush handle to 385-500 cm2
+# floor) bound it from below, and measured total room object-surface
+# inventories bound it from above (Manuja 2019: 22 rooms, S/V 3.2 +/- 1.2
+# m-1 with contents; Hodgson 2005: 33 rooms).
+# The map form (``high_touch_area_scale_by_zone_class``) is the same axis
+# per zone class and adopts nothing either: it exists because the declared
+# table is per-zone-class while the enumerated inventories scale with items
+# and occupants, so the two differ by a class-dependent factor.
+# Grade C (declared assumption axis). Origin: sweep (NORO-HIGH-TOUCH-AREA-01).
+DEFAULT_HIGH_TOUCH_AREA_SCALE = 1.0  # shipped declaration; absent = 1.0
+# Guard against a typo'd sweep arm, not a physical claim: two decades on
+# either side of the declaration comfortably covers any defensible hardware
+# inventory and refuses nonsense without pretending to know the bound.
+HIGH_TOUCH_AREA_SCALE_BOUNDS = (0.01, 100.0)
 
 
 VOMITING_AXIS = "vomiting"
@@ -1171,6 +1201,68 @@ def _parse_flush_aerosol_fraction(tx: dict[str, Any]) -> float:
     return frac
 
 
+def _coerce_high_touch_area_scale(raw: Any, key: str) -> float:
+    """Validate one arm of the area sweep axis against the refusal band."""
+    try:
+        scale = float(raw)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(f"{key} must be numeric, got {raw!r}") from exc
+    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
+    if not math.isfinite(scale) or scale <= 0.0 or scale < low or scale > high:
+        raise ValueError(
+            f"{key} is a sweep-arm guard, not a "
+            f"physical bound: must be finite in [{low}, {high}], got {raw!r}",
+        )
+    return scale
+
+
+def _parse_high_touch_area_scale(tx: dict[str, Any]) -> float:
+    """Read the high-touch-area sweep axis (NORO-HIGH-TOUCH-AREA-01).
+
+    Absent or ``1.0`` is the shipped declaration and bit-identical to the
+    pre-change tree: the multiply is exact and no draw is taken. The band
+    is a guard against a typo'd sweep arm, not a physical claim.
+    """
+    return _coerce_high_touch_area_scale(
+        tx.get("high_touch_area_scale", DEFAULT_HIGH_TOUCH_AREA_SCALE),
+        "transmission.high_touch_area_scale",
+    )
+
+
+def _parse_high_touch_area_scale_by_zone_class(
+    tx: dict[str, Any],
+) -> dict[str, float]:
+    """Read per-zone-class multipliers on the same sweep axis.
+
+    Absent or empty is the shipped declaration and bit-identical to today:
+    a class absent from the map takes ``1.0``. The axis exists because the
+    declared table is per-zone-class while the enumerated inventories scale
+    with items and occupants, so the two differ by a class-dependent
+    factor; it is a sweep arm, not a sourced value.
+    """
+    raw = tx.get("high_touch_area_scale_by_zone_class", {})
+    if raw is None:
+        raw = {}
+    if not isinstance(raw, Mapping):
+        raise ValueError(
+            "transmission.high_touch_area_scale_by_zone_class must be a "
+            "mapping from zone class to multiplier",
+        )
+    scales: dict[str, float] = {}
+    for zone_class, value in raw.items():
+        if zone_class not in HIGH_TOUCH_AREA_M2:
+            raise ValueError(
+                "transmission.high_touch_area_scale_by_zone_class: unknown "
+                f"zone class {zone_class!r}; allowed "
+                f"{sorted(HIGH_TOUCH_AREA_M2)}",
+            )
+        scales[zone_class] = _coerce_high_touch_area_scale(
+            value,
+            f"transmission.high_touch_area_scale_by_zone_class.{zone_class}",
+        )
+    return scales
+
+
 def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
     """Whether a flush at a host's own fittings emits (corner sweep)."""
     return bool(tx.get("flush_cabin_emission", True))
@@ -1754,6 +1846,10 @@ class TransmissionCore:
         self._sanitary_stool_venues: dict[str, dict[int, str]] = {}
         self.flush_aerosol_fraction = _parse_flush_aerosol_fraction(tx)
         self.flush_cabin_emission = _parse_flush_cabin_emission(tx)
+        self.high_touch_area_scale = _parse_high_touch_area_scale(tx)
+        self.high_touch_area_scale_by_zone_class = (
+            _parse_high_touch_area_scale_by_zone_class(tx)
+        )
         # The blackwater tank reads mass that is otherwise dropped (the
         # non-aerosolised bowl share and emesis ``non_touchable``) and
         # consumes no RNG, so the off path is bit-identical.
@@ -5223,8 +5319,22 @@ class TransmissionCore:
                 water_closets = max(
                     1, round(float(declared) / SANITARY_FLOOR_AREA_M2_PER_WC),
                 )
-                return SANITARY_HIGH_TOUCH_AREA_M2_PER_WC * water_closets
-        return HIGH_TOUCH_AREA_M2[zone_class]
+                return (
+                    SANITARY_HIGH_TOUCH_AREA_M2_PER_WC
+                    * water_closets
+                    * self._high_touch_area_effective_scale(zone_class)
+                )
+        return (
+            HIGH_TOUCH_AREA_M2[zone_class]
+            * self._high_touch_area_effective_scale(zone_class)
+        )
+
+    def _high_touch_area_effective_scale(self, zone_class: str) -> float:
+        """Global sweep axis composed with the per-class multiplier."""
+        return (
+            self.high_touch_area_scale
+            * self.high_touch_area_scale_by_zone_class.get(zone_class, 1.0)
+        )
 
     def _zone_floor_area_m2(self, unit_name: str) -> float:
         """Declared deck area, else the unit's air volume over a deck height.

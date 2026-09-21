@@ -842,13 +842,18 @@ def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
 def build_spec(
     *, seed: int, platform: str, bundle: str, epochs: int, num_agents: int,
     pathogen_id: str, alpha: float | None, beta: float,
+    high_touch_area_scale: float | None = None,
+    high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed.
 
-    With ``alpha=None`` no pathogen or run override is written (byte-identical
-    to the NORO-SUSCEPT-02 spec). With an alpha, exactly one override is
-    written: a ``pathogen_overrides`` patch on the pathogen's ``dose_response``
-    carrying the requested alpha and beta pinned explicitly.
+    With ``alpha=None`` and no area-sweep arguments no pathogen or run
+    override is written (byte-identical to the NORO-SUSCEPT-02 spec). With
+    an alpha, exactly one override is written: a ``pathogen_overrides``
+    patch on the pathogen's ``dose_response`` carrying the requested alpha
+    and beta pinned explicitly. Each area-sweep argument, when given, adds
+    its key under ``config_overrides.transmission`` -- the only block the
+    sweep touches -- and nothing else.
     """
     overrides: dict[str, Any] = {}
     if alpha is not None:
@@ -857,6 +862,18 @@ def build_spec(
                 "dose_response": {"alpha": float(alpha), "beta": float(beta)},
             },
         }
+    tx_overrides: dict[str, Any] = {}
+    if high_touch_area_scale is not None:
+        tx_overrides["high_touch_area_scale"] = float(high_touch_area_scale)
+    if high_touch_area_scale_by_zone_class is not None:
+        tx_overrides["high_touch_area_scale_by_zone_class"] = dict(
+            high_touch_area_scale_by_zone_class,
+        )
+    config_overrides: dict[str, Any] = {
+        "ship_graph": {"num_agents": int(num_agents)},
+    }
+    if tx_overrides:
+        config_overrides["transmission"] = tx_overrides
     return {
         "schema_version": "1.0.0",
         "description": "noro_diag per_host_dose_challenge",
@@ -870,7 +887,7 @@ def build_spec(
         "legacy_yaml": CRUSHER_CONFIG_REL,
         "actors": [],
         "incentives": {},
-        "config_overrides": {"ship_graph": {"num_agents": int(num_agents)}},
+        "config_overrides": config_overrides,
         "pathogen_overrides": overrides,
     }
 
@@ -1118,6 +1135,9 @@ def run_seed(
     pathogen_id: str,
     top_hosts: int,
     alpha_override: float | None = None,
+    high_touch_area_scale: float | None = None,
+    high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
+    arm_tag: str | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     num_agents = declared_total(platform)
@@ -1126,6 +1146,8 @@ def run_seed(
         seed=seed, platform=platform, bundle=bundle,
         epochs=epochs, num_agents=num_agents,
         pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
+        high_touch_area_scale=high_touch_area_scale,
+        high_touch_area_scale_by_zone_class=high_touch_area_scale_by_zone_class,
     )
     if alpha_override is not None:
         alpha = float(alpha_override)
@@ -1169,6 +1191,16 @@ def run_seed(
     summary["platform"] = platform
     summary["num_agents"] = num_agents
     summary["run_history"] = infection_tally(result, pathogen_id)
+    if (
+        arm_tag is not None
+        or high_touch_area_scale is not None
+        or high_touch_area_scale_by_zone_class is not None
+    ):
+        summary["arm_tag"] = arm_tag
+        summary["high_touch_area_scale"] = high_touch_area_scale
+        summary["high_touch_area_scale_by_zone_class"] = (
+            high_touch_area_scale_by_zone_class
+        )
     return summary
 
 
@@ -1205,6 +1237,15 @@ def _identifier(value: str) -> str:
     return value
 
 
+def _json_object(value: str) -> dict[str, Any]:
+    parsed = json.loads(value)
+    if not isinstance(parsed, dict):
+        raise argparse.ArgumentTypeError(
+            f"expected a JSON object, got {value!r}",
+        )
+    return parsed
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1229,6 +1270,21 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "the frozen interval [0.072, 0.161]",
     )
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--high-touch-area-scale", type=float, default=None,
+        help="NORO-HIGH-TOUCH-AREA-01 sweep arm: global multiplier on the "
+             "fomite areal denominator; the engine parser refuses bad arms",
+    )
+    parser.add_argument(
+        "--high-touch-area-scale-by-zone-class", type=_json_object,
+        default=None,
+        help='JSON object of per-zone-class multipliers, e.g. '
+             '\'{"cabin": 0.11, "dining": 3.5}\'',
+    )
+    parser.add_argument(
+        "--arm-tag", type=_identifier, default=None,
+        help="arm label stamped into the output filename and summary",
+    )
     args = parser.parse_args(argv)
     if args.alpha is not None and not 0.072 <= args.alpha <= 0.161:
         parser.error(
@@ -1252,8 +1308,17 @@ def main(argv: list[str] | None = None) -> int:
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
             alpha_override=args.alpha,
+            high_touch_area_scale=args.high_touch_area_scale,
+            high_touch_area_scale_by_zone_class=(
+                args.high_touch_area_scale_by_zone_class
+            ),
+            arm_tag=args.arm_tag,
         )
-        if args.alpha is None:
+        if args.arm_tag is not None:
+            filename = (
+                f"per_host_dose_challenge_{args.arm_tag}_seed{seed}.json.gz"
+            )
+        elif args.alpha is None:
             filename = f"per_host_dose_challenge_seed{seed}.json.gz"
         else:
             filename = (

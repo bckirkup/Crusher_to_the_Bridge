@@ -53,7 +53,10 @@ from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
 )
-from engines.transmission_core import HIGH_TOUCH_AREA_M2  # noqa: E402
+from engines.transmission_core import (  # noqa: E402
+    HIGH_TOUCH_AREA_M2,
+    HIGH_TOUCH_AREA_SCALE_BOUNDS,
+)
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 
@@ -1932,6 +1935,59 @@ def _check_config_yaml(
     _check_instrument_turnaround(cfg, report)
     _check_variant_surveillance(cfg, report)
     _check_surface_cleaning(cfg, report)
+    _check_high_touch_area_scale(cfg, report)
+
+
+def _check_high_touch_area_scale(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the optional high-touch-area sweep axis; absent is valid."""
+    tx = cfg.get("transmission", {})
+    if not isinstance(tx, dict):
+        return
+    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
+
+    def _in_band(value: Any) -> bool:
+        return (
+            isinstance(value, (int, float))
+            and math.isfinite(value)
+            and low <= value <= high
+        )
+
+    if "high_touch_area_scale" in tx:
+        scale = tx["high_touch_area_scale"]
+        if not _in_band(scale):
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                f"transmission.high_touch_area_scale = {scale!r} must be "
+                f"finite in [{low}, {high}] (a sweep-arm guard, not a "
+                "physical bound)",
+            )
+    if "high_touch_area_scale_by_zone_class" not in tx:
+        return
+    by_class = tx["high_touch_area_scale_by_zone_class"]
+    if by_class is None:
+        by_class = {}
+    if not isinstance(by_class, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "transmission.high_touch_area_scale_by_zone_class must be a "
+            "mapping from zone class to multiplier",
+        )
+        return
+    for zone_class, value in by_class.items():
+        if zone_class not in HIGH_TOUCH_AREA_M2:
+            report.error(
+                _CONFIG_YAML, "CONFIG",
+                "transmission.high_touch_area_scale_by_zone_class: unknown "
+                f"zone class {zone_class!r}",
+            )
+            continue
+        if not _in_band(value):
+            report.error(
+                _CONFIG_YAML, "MATH_BOUND",
+                "transmission.high_touch_area_scale_by_zone_class."
+                f"{zone_class} = {value!r} must be finite in [{low}, {high}] "
+                "(a sweep-arm guard, not a physical bound)",
+            )
 
 
 def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
