@@ -44,6 +44,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from simulation_utils.paths import (  # noqa: E402
+    confine_to_base,
     prepare_output_directory,
     resolve_child_path,
 )
@@ -355,8 +356,13 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     result = readout(args.arm_dir, args.arm_tag, args.scale)
     out_dir = prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),))
-    path = resolve_child_path(str(out_dir), f"high_touch_area_readout_{args.arm_tag}.json")
-    Path(path).write_text(json.dumps(result, indent=1, sort_keys=True, default=str) + "\n")
+    filename = resolve_child_path(
+        str(out_dir), f"high_touch_area_readout_{args.arm_tag}.json",
+    )
+    # confine_to_base canonicalises and prefix-checks the CLI-derived target
+    # at the sink itself (S8707): the write cannot leave args.out.
+    path = Path(confine_to_base(str(out_dir), filename))
+    path.write_text(json.dumps(result, indent=1, sort_keys=True, default=str) + "\n")
     _print(result)
     print(f"\nwritten: {path}")
     return 0

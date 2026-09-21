@@ -222,4 +222,47 @@ def test_envelope_item_area_sources_are_the_three_labels():
 
 
 def test_envelope_build_is_deterministic():
-    assert htae.build_envelope() == htae.build_envelope()
+    first = htae.build_envelope()
+    second = htae.build_envelope()
+    assert first == second
+
+
+def _check(cfg: dict) -> list:
+    from tools.sanity_checker import Report, _check_high_touch_area_scale
+
+    report = Report()
+    _check_high_touch_area_scale(cfg, report)
+    return report.errors
+
+
+def test_sanity_check_map_absent_and_valid_are_quiet():
+    assert not _check({"transmission": {}})
+    assert not _check(
+        {
+            "transmission": {
+                "high_touch_area_scale": 2.0,
+                "high_touch_area_scale_by_zone_class": {"cabin": 0.11},
+            },
+        },
+    )
+
+
+@pytest.mark.parametrize(
+    "by_class",
+    [
+        4,
+        {"not_a_class": 1.0},
+        {"cabin": 0.0},
+        {"cabin": 0.001},
+        {"cabin": 1000.0},
+        {"cabin": "half"},
+    ],
+)
+def test_sanity_check_map_reports_bad_shapes_and_arms(by_class):
+    errors = _check(
+        {"transmission": {"high_touch_area_scale_by_zone_class": by_class}},
+    )
+    assert errors
+    assert all(
+        "high_touch_area_scale_by_zone_class" in e.message for e in errors
+    )
