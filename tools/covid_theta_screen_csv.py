@@ -12,15 +12,29 @@ The surface CSV carries the same columns as
 (Θ, age, seed) present in ``--cells``: this run's ``infections_total``,
 ``attack_rate`` and ``recorded_onsets`` beside the parent's at the same seed,
 or blanks where the parent has no such cell. Reporting only; nothing here
-selects or fits.
+selects or fits. Every path must lie under the repository root or the
+process working directory.
 """
 from __future__ import annotations
 
 import argparse
 import csv
 import json
-from pathlib import Path
+import os
+import sys
 from typing import Any
+
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if REPO_ROOT not in sys.path:
+    sys.path.insert(0, REPO_ROOT)
+
+from simulation_utils.paths import safe_listdir, validated_open  # noqa: E402
+
+
+def _allowed_roots() -> tuple[str, str]:
+    """Paths must resolve under the repository or the process working directory."""
+    return (REPO_ROOT, os.getcwd())
+
 
 SURFACE_COLUMNS = (
     "theta",
@@ -76,20 +90,26 @@ def _surface_row(entry: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def write_surface_csv(surface: dict[str, Any], out: Path) -> int:
+def write_surface_csv(surface: dict[str, Any], out: str) -> int:
     rows = [_surface_row(e) for e in surface.get("surface", [])]
     rows.sort(key=lambda r: (float(r["theta"]), float(r["infection_age_days"])))
-    with out.open("w", newline="") as handle:
+    with validated_open(out, "w", allowed_roots=_allowed_roots(), newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=SURFACE_COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
     return len(rows)
 
 
-def _load_cells(cells_dir: Path) -> dict[tuple[float, float, int], dict[str, Any]]:
+def _load_cells(cells_dir: str) -> dict[tuple[float, float, int], dict[str, Any]]:
     out: dict[tuple[float, float, int], dict[str, Any]] = {}
-    for path in sorted(cells_dir.glob("*.json")):
-        payload = json.loads(path.read_text())
+    roots = _allowed_roots()
+    for name in safe_listdir(cells_dir, allowed_roots=roots):
+        if not name.endswith(".json"):
+            continue
+        with validated_open(
+            os.path.join(cells_dir, name), "r", allowed_roots=roots, encoding="utf-8",
+        ) as handle:
+            payload = json.load(handle)
         cell = payload.get("cell") or {}
         key = (
             float(cell["theta"]),
@@ -127,7 +147,7 @@ PAIR_COLUMNS = (
 )
 
 
-def write_pairs_csv(cells_dir: Path, parent_dir: Path | None, out: Path) -> int:
+def write_pairs_csv(cells_dir: str, parent_dir: str | None, out: str) -> int:
     cells = _load_cells(cells_dir)
     parent = _load_cells(parent_dir) if parent_dir else {}
     rows = []
@@ -149,7 +169,7 @@ def write_pairs_csv(cells_dir: Path, parent_dir: Path | None, out: Path) -> int:
             "parent_attack_rate": p_rate,
             "parent_recorded_onsets": p_onsets,
         })
-    with out.open("w", newline="") as handle:
+    with validated_open(out, "w", allowed_roots=_allowed_roots(), newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=PAIR_COLUMNS)
         writer.writeheader()
         writer.writerows(rows)
@@ -165,17 +185,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--pairs-out", default=None, help="paired-seed CSV path")
     args = parser.parse_args(argv)
 
-    surface = json.loads(Path(args.surface).read_text())
-    n_rows = write_surface_csv(surface, Path(args.out))
+    with validated_open(
+        args.surface, "r", allowed_roots=_allowed_roots(), encoding="utf-8",
+    ) as handle:
+        surface = json.load(handle)
+    n_rows = write_surface_csv(surface, args.out)
     print(f"wrote {n_rows} surface rows to {args.out}")
     if args.pairs_out:
         if not args.cells:
             parser.error("--pairs-out requires --cells")
-        n_pairs = write_pairs_csv(
-            Path(args.cells),
-            Path(args.parent_cells) if args.parent_cells else None,
-            Path(args.pairs_out),
-        )
+        n_pairs = write_pairs_csv(args.cells, args.parent_cells, args.pairs_out)
         print(f"wrote {n_pairs} paired rows to {args.pairs_out}")
     return 0
 
