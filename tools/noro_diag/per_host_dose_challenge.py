@@ -38,6 +38,15 @@ module-level ``draw_emesis_schedule``) for the duration of one run:
   chain's own reconciliation: surface mass offered, mass requested, mass
   delivered to hands, and dose ingested, so a dose that collapses between the
   surface pool and the accumulator is localised to a term rather than inferred.
+* ``_fomite_pickup_request_for_area`` -- the per-touch surface->hand factor
+  (ledger NORO-TRANSFER-PRODUCT-01): for every clean pickup call the witness
+  records ``f_touch = (request / surface_mass) / contacts`` bucketed by
+  source (zone pool vs emesis patch) and zone class, so the per-touch chain
+  -- the layer literature transfer efficiencies are commensurable with -- is
+  measured rather than inferred from whole-voyage bookkeeping ratios. The
+  hand->mouth wrapper likewise records ``dose / hand_load`` per contact,
+  split eating/non-eating, and the deliver wrapper records how often demand
+  exceeded the pool (the ``_delivery_scale`` saturation path).
 
 Wrappers only read. ``_challenge_protection`` and ``is_infected_with`` consume
 no RNG, so calling them from a wrapper cannot perturb the stream; nothing here
@@ -116,6 +125,74 @@ from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 # separately from anything the run measured.
 COUNTERFACTUAL_SEED = 20260919
 
+# Fixed bin spec for the per-touch transfer-factor histograms
+# (``transfer_product_witness``). The edges are emitted in the summary so a
+# readout never has to reconstruct them.
+F_TOUCH_LOG_MIN = -12.0
+F_TOUCH_LOG_MAX = 1.0
+F_TOUCH_LOG_BIN = 0.25
+F_TOUCH_BINS = round((F_TOUCH_LOG_MAX - F_TOUCH_LOG_MIN) / F_TOUCH_LOG_BIN)
+
+
+def _log10_hist_index(value: float) -> int:
+    """Bin index of a log10 ratio, clipped into the first/last bin."""
+    index = int((value - F_TOUCH_LOG_MIN) / F_TOUCH_LOG_BIN)
+    return min(F_TOUCH_BINS - 1, max(0, index))
+
+
+def _touch_bucket() -> dict[str, Any]:
+    """Accumulators for one (source, zone_class) surface->hand bucket."""
+    return {
+        "calls": 0,
+        "calls_clean": 0,
+        "calls_capped": 0,
+        "calls_confined": 0,
+        "calls_zero_mass": 0,
+        "sum_request_gec": 0.0,
+        "sum_surface_mass_gec": 0.0,
+        "sum_contacts": 0.0,
+        "sum_surface_area_m2": 0.0,
+        "sum_log10_f_touch": 0.0,
+        "sum_sq_log10_f_touch": 0.0,
+        "min_log10_f_touch": math.inf,
+        "max_log10_f_touch": -math.inf,
+        "hist_log10_f_touch": [0] * F_TOUCH_BINS,
+        "hist_underflow": 0,
+        "hist_overflow": 0,
+    }
+
+
+def _mouth_bucket() -> dict[str, Any]:
+    """Accumulators for one hand->mouth ``dose / hand_load`` bucket."""
+    return {
+        "calls": 0,
+        "calls_capped": 0,
+        "sum_log10_ratio": 0.0,
+        "sum_sq_log10_ratio": 0.0,
+        "min_log10_ratio": math.inf,
+        "max_log10_ratio": -math.inf,
+        "hist_log10_ratio": [0] * F_TOUCH_BINS,
+        "hist_underflow": 0,
+        "hist_overflow": 0,
+    }
+
+
+def _hist_add(bucket: dict[str, Any], hist_key: str, value: float) -> None:
+    """File one log10 value into a bucket's fixed-bin histogram."""
+    if value < F_TOUCH_LOG_MIN:
+        bucket["hist_underflow"] += 1
+    elif value >= F_TOUCH_LOG_MAX:
+        bucket["hist_overflow"] += 1
+    bucket[hist_key][_log10_hist_index(value)] += 1
+
+
+def f_touch_bin_edges() -> list[float]:
+    """The emitted histogram bin edges, explicit so readouts never guess."""
+    return [
+        F_TOUCH_LOG_MIN + index * F_TOUCH_LOG_BIN
+        for index in range(F_TOUCH_BINS + 1)
+    ]
+
 
 @dataclass
 class HostRecord:
@@ -178,6 +255,23 @@ class Recorder:
     # re-derivation of the engine's early returns.
     hazard_witness: tuple[int, str, float, float, float] | None = None
     top_host_rows: list[dict[str, Any]] = field(default_factory=list)
+    # Per-touch transfer witness (ledger NORO-TRANSFER-PRODUCT-01). Depth
+    # counter, not a bool, so a nested call can never leave the flag set:
+    # nonzero while ``_emesis_patch_pickup_one``'s original is on the stack,
+    # which is how a ``_fomite_pickup_request_for_area`` call knows it was
+    # made for a localised patch rather than the zone-wide pool.
+    patch_depth: int = 0
+    surface_touch: dict[str, dict[str, dict[str, Any]]] = field(
+        default_factory=lambda: defaultdict(
+            lambda: defaultdict(_touch_bucket),
+        ),
+    )
+    mouth_touch: dict[str, dict[str, Any]] = field(
+        default_factory=lambda: defaultdict(_mouth_bucket),
+    )
+    delivery_scale: dict[str, float] = field(
+        default_factory=lambda: defaultdict(float),
+    )
 
     def host(self, agent_id: int) -> HostRecord:
         """Return (creating if needed) one host's record."""
@@ -412,6 +506,13 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         "_hand_to_mouth_dose": core_cls._hand_to_mouth_dose,
         "_deposit_surface_mass": core_cls._deposit_surface_mass,
         "_replenish_hand": core_cls._replenish_hand,
+        "_fomite_pickup_request_for_area": (
+            core_cls._fomite_pickup_request_for_area
+        ),
+        # RNG-free helpers, re-called from the witness below; kept in
+        # ``originals`` so the restore loop covers them uniformly even though
+        # nothing replaces them.
+        "_fomite_surface_contacts": core_cls._fomite_surface_contacts,
     }
 
     def replenish_hand(
@@ -459,12 +560,22 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             self, requests, zone_name, surface_mass, *args, **kwargs,
         )
         if rec.current_pathogen == rec.pathogen_id:
+            requested = float(sum(mass for _, mass in requests))
             rec.fomite["deliver_calls"] += 1
             rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
-            rec.fomite["mass_requested_gec"] += float(
-                sum(mass for _, mass in requests),
-            )
+            rec.fomite["mass_requested_gec"] += requested
             rec.fomite["mass_delivered_to_hands_gec"] += float(delivered)
+            scale_witness = rec.delivery_scale
+            scale_witness["deliver_calls"] += 1
+            scale_witness["sum_requested_gec"] += requested
+            scale_witness["sum_offered_gec"] += float(surface_mass)
+            if requested > float(surface_mass) > 0.0:
+                scale_witness["scaled_calls"] += 1
+                log10_scale = math.log10(float(surface_mass) / requested)
+                scale_witness["sum_log10_scale"] += log10_scale
+                scale_witness["min_log10_scale"] = min(
+                    scale_witness["min_log10_scale"], log10_scale,
+                )
         return delivered
 
     def hand_to_mouth(
@@ -475,12 +586,94 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             rec.fomite["hand_to_mouth_calls"] += 1
             rec.fomite["hand_load_seen_gec"] += float(hand_load)
             rec.fomite["hand_to_mouth_dose_gec"] += float(dose)
+            if float(hand_load) > 0.0:
+                # ``_fomite_is_eating`` only reads the schedule -- no draw --
+                # so the eating/non-eating split is free.
+                meal = (
+                    "eating"
+                    if self._fomite_is_eating(target, epoch)
+                    else "non_eating"
+                )
+                bucket = rec.mouth_touch[meal]
+                ratio = float(dose) / float(hand_load)
+                bucket["calls"] += 1
+                if dose >= hand_load:
+                    bucket["calls_capped"] += 1
+                if ratio > 0.0:
+                    log10_ratio = math.log10(ratio)
+                    bucket["sum_log10_ratio"] += log10_ratio
+                    bucket["sum_sq_log10_ratio"] += log10_ratio**2
+                    bucket["min_log10_ratio"] = min(
+                        bucket["min_log10_ratio"], log10_ratio,
+                    )
+                    bucket["max_log10_ratio"] = max(
+                        bucket["max_log10_ratio"], log10_ratio,
+                    )
+                    _hist_add(bucket, "hist_log10_ratio", log10_ratio)
+                else:
+                    bucket["hist_underflow"] += 1
         return dose
+
+    def pickup_request_for_area(
+        self: Any,
+        target: Any,
+        zone_name: str,
+        surface_mass: float,
+        surface_area_m2: float,
+        epoch: int,
+    ) -> float:
+        """Witness the per-touch surface->hand factor without a draw.
+
+        The original is called exactly once and both re-read helpers
+        (``_fomite_surface_contacts``, ``_fomite_zone_class``) draw nothing,
+        so this wrapper cannot perturb the RNG stream.
+        """
+        request = originals["_fomite_pickup_request_for_area"](
+            self, target, zone_name, surface_mass, surface_area_m2, epoch,
+        )
+        if rec.current_pathogen != rec.pathogen_id:
+            return request
+        source = "patch" if rec.patch_depth > 0 else "pool"
+        zone_class = self._fomite_zone_class(zone_name)
+        contacts = originals["_fomite_surface_contacts"](
+            self, zone_name, target, epoch,
+        )
+        bucket = rec.surface_touch[source][zone_class]
+        bucket["calls"] += 1
+        bucket["sum_request_gec"] += float(request)
+        bucket["sum_surface_mass_gec"] += float(surface_mass)
+        bucket["sum_contacts"] += float(contacts)
+        bucket["sum_surface_area_m2"] += float(surface_area_m2)
+        if self._cabin_confinement_active(target):
+            bucket["calls_confined"] += 1
+        elif surface_mass <= 0.0:
+            bucket["calls_zero_mass"] += 1
+        elif request >= surface_mass:
+            # min(surface_mass, ...) bound bit: f_touch is right-censored.
+            bucket["calls_capped"] += 1
+        elif contacts > 0.0:
+            bucket["calls_clean"] += 1
+            f_touch = (float(request) / float(surface_mass)) / float(contacts)
+            if f_touch > 0.0:
+                log10_f = math.log10(f_touch)
+                bucket["sum_log10_f_touch"] += log10_f
+                bucket["sum_sq_log10_f_touch"] += log10_f**2
+                bucket["min_log10_f_touch"] = min(
+                    bucket["min_log10_f_touch"], log10_f,
+                )
+                bucket["max_log10_f_touch"] = max(
+                    bucket["max_log10_f_touch"], log10_f,
+                )
+                _hist_add(bucket, "hist_log10_f_touch", log10_f)
+            else:
+                bucket["hist_underflow"] += 1
+        return request
 
     core_cls._deliver_fomite_requests = deliver
     core_cls._hand_to_mouth_dose = hand_to_mouth
     core_cls._deposit_surface_mass = deposit
     core_cls._replenish_hand = replenish_hand
+    core_cls._fomite_pickup_request_for_area = pickup_request_for_area
     return originals
 
 
@@ -581,9 +774,13 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
         )
 
     def patch_pickup_one(self: Any, patch: Any, *args: Any, **kwargs: Any) -> float:
-        delivered = originals["_emesis_patch_pickup_one"](
-            self, patch, *args, **kwargs,
-        )
+        rec.patch_depth += 1
+        try:
+            delivered = originals["_emesis_patch_pickup_one"](
+                self, patch, *args, **kwargs,
+            )
+        finally:
+            rec.patch_depth -= 1
         rec.emesis["patch_pickup_calls"] += 1
         rec.emesis["patch_pickup_dose_gec"] += float(delivered)
         if delivered > 0.0:
@@ -729,6 +926,53 @@ def _naive_hazard(
     }
 
 
+def _finalise_bucket(bucket: dict[str, Any], prefix: str) -> dict[str, Any]:
+    """Materialise one accumulator bucket for JSON, inf sentinels to None."""
+    out = dict(bucket)
+    for key in (f"min_{prefix}", f"max_{prefix}"):
+        if not math.isfinite(out[key]):
+            out[key] = None
+    return out
+
+
+def _transfer_product_summary(rec: Recorder) -> dict[str, Any]:
+    """The per-touch transfer factors, split at the layers literature reads.
+
+    ``surface_to_hand`` is bucketed by source (``pool`` zone-wide vs
+    ``patch`` emesis footprint) and zone class; ``hand_to_mouth`` by whether
+    the contact happened while the agent was eating. Only ``clean`` surface
+    calls contribute to ``f_touch`` statistics -- capped, confined and
+    zero-mass calls are counted but are not transfer-efficiency samples.
+    """
+    return {
+        "hist_bin_edges": f_touch_bin_edges(),
+        "hist_bin_width": F_TOUCH_LOG_BIN,
+        "surface_to_hand": {
+            source: {
+                zone_class: _finalise_bucket(bucket, "log10_f_touch")
+                for zone_class, bucket in sorted(zones.items())
+            }
+            for source, zones in sorted(rec.surface_touch.items())
+        },
+        "hand_to_mouth": {
+            meal: _finalise_bucket(bucket, "log10_ratio")
+            for meal, bucket in sorted(rec.mouth_touch.items())
+        },
+    }
+
+
+def _delivery_scale_summary(rec: Recorder) -> dict[str, Any]:
+    """How often demand exceeded the pool, and by how much it was scaled."""
+    witness = dict(rec.delivery_scale)
+    if not math.isfinite(witness.get("min_log10_scale", math.inf)):
+        witness["min_log10_scale"] = None
+    scaled = witness.get("scaled_calls", 0)
+    witness["geometric_mean_scale"] = (
+        10.0 ** (witness["sum_log10_scale"] / scaled) if scaled else None
+    )
+    return witness
+
+
 def summarise(
     rec: Recorder, alpha: float, beta: float, seed: int, epochs: int,
 ) -> dict[str, Any]:
@@ -813,6 +1057,8 @@ def summarise(
         "emesis_witness": dict(rec.emesis),
         "emesis_unit_names": dict(rec.emesis_units),
         "fomite_witness": dict(rec.fomite),
+        "transfer_product_witness": _transfer_product_summary(rec),
+        "delivery_scale_witness": _delivery_scale_summary(rec),
         "hosts": [
             {
                 "agent_id": agent_id,
