@@ -3,7 +3,9 @@
 **Commit:** 28441bd
 **Pathogens:** norwalk_gi
 **Status:** measured
-**Measured at:** 25eaa17 (canary arm `g0.25` only; eight arms not run)
+**Measured at:** 25eaa17
+
+Measured on the canary arm `g0.25` only; eight arms not run.
 
 `NORO-TRANSFER-PRODUCT-01` (measured at `bd462c5`) found the hull's per-touch
 fomite chain defensible against the literature that measures it — surface→hand
