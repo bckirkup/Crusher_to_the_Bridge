@@ -146,6 +146,24 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **The import x Theta axis is closed as negative, and the confinement leak is
+  the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
+  1,180 cells) already swept imports 1-20: matching the early onset count
+  overshoots the voyage total by 3-6x on every Theta row, and imports > 1 is not
+  licensed by the record (Sekizuka 2020, single introduction before quarantine).
+  The audit adds the anchor this arm never carried — DP's effective reproduction
+  number **0.1 (SD 0.2) after** quarantine against 3.8 (SD 0.9) before (Azimi
+  2021, grade B) — so the target is a sourced decay, not arrest. It also records
+  that `hvac.filter_efficiency` = 0.50 is unsourced and its era-correct value
+  (0.30) *increases* during-quarantine transport by 1.4x, and that
+  `confinement_isolation_factor` 0.05, `corridor_direct_contact_factor` 0.15 and
+  `NON_MATE_CONFINEMENT_CONTACT_FACTOR` 0.01 are unlabelled literals that govern
+  the whole during-quarantine regime. `#645` adds the graded
+  `hvac.outdoor_air_fraction_override` (absent by default) so the recirculation
+  channel QUAR-ATTR-V2 measured at -66% can be evaluated between "as shipped"
+  and "off"; the paired-seed bracket itself is **not run**
+  (`docs/ledger/COVID-VENT-AUDIT-01.md`,
+  `docs/covid/covid_dp_ventilation_sourcing.md`).
 - **Missing intermediate attack rates.** The route trace (QUAR-ORDER-01,
   AERO-NEAR-02) placed the burn in public dining, not in a leak through
   confinement. With enforced quarantine and dining tables in place, what
