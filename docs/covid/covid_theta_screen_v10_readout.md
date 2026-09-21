@@ -1,9 +1,11 @@
-# COVID Theta screen v10 — canary readout: the Θ 1e9 row is seed-for-seed stable across QUAR-EXEMPT-01 + REINFECT-01
+# COVID Theta screen v10 — readout: the v9 Θ surface is seed-for-seed stable across QUAR-EXEMPT-01 + REINFECT-01
 
-> **Status:** Canary findings (2026-09-21). Campaign `covid_theta_screen_v10`,
+> **Status:** Findings (2026-09-21), full surface. Campaign `covid_theta_screen_v10`,
 > declared in `picard_framework/runs/covid_theta_screen_v10_design.json` (#639,
-> `docs/ledger/THETA-SCREEN-V10.md`). **Only the pre-committed canary has run:
-> Θ 1e9 × 20 seeds (enumeration indices 160–179), 20 of 200 cells.** Run on
+> `docs/ledger/THETA-SCREEN-V10.md`). **All 200 cells have run**: the
+> pre-committed canary (Θ 1e9 × 20 seeds, indices 160–179, §1–§5) first,
+> then the remaining 180 after the user's decision (§6). §1–§5 are the canary
+> readout as written before the rest ran and are left as they were. Run on
 > AWS Batch at `main` = `a9b4f1f` (engine identical to `d62f10d`: the only
 > diff is the v10 design file), image `picard-campaign:theta-v10-a9b4f1f`
 > (`sha256:325dde73ac57039dee318f451700fd1886fa3c35d60f880d060ea93146b4d3b1`,
@@ -22,7 +24,12 @@
 > --parent-cells <v9 Θ 1e9 age 3.3 cells> --pairs-out
 > docs/covid/covid_theta_screen_v10_canary_pairs.csv`.
 > No Theta is claimed here; nothing below may be quoted as a fit. The
-> remaining 180 cells (Θ 1e1–1e8, 1e10) have **not** run.
+> remaining 180 cells ran as arrays `a83a2b5b-1b73-475c-8857-71ef9d0cbeae`
+> (size 160, offsets 0–159) and `dfe080e6-b83b-42d9-9177-1c3991e99f85` (size
+> 20, offsets 180–199) on the same job definition, digest and prefix; the
+> full-surface artefacts are `docs/covid/covid_theta_screen_v10_surface.csv`
+> and `docs/covid/covid_theta_screen_v10_pairs.csv` (merge without
+> `--allow-partial`, v9 parents from `campaign/covid_theta_screen_v9/cells/`).
 
 Every figure below is measured at `a9b4f1f` inside the campaign image, seeds
 `20200205 + k`, k = 0..19, `diamond_princess_2020`, one declared import,
@@ -149,3 +156,54 @@ The design file stops here. Options:
 The readout's own reading: the canary gives no reason to expect surprises and
 the cost is one hour; the case for running the rest is completeness of the
 record, not an open question at Θ 1e9.
+
+## 6. The full surface, v9 vs v10 (200 of 200 cells)
+
+The user chose to run the rest. 180/180 children SUCCEEDED (0/200 failures
+over the campaign); S3 holds exactly one payload per (Θ, seed). Every cell:
+`index_onset_day` −1.0, `index_shedding_at_day0` true, `invalid_reason`
+null; `index_geometry_ok` true on all ten rows.
+
+| Θ | takeoff v9 → v10 | median recorded onsets | attack q90 | T1/T3 | `infections_total` identical to v9 |
+|---|---|---|---|---|---|
+| 1e1 | 0.00 → 0.00 | 0 → 0 | 0.000 → 0.000 | F/F → F/F | 20/20 |
+| 1e2 | 0.00 → 0.00 | 0 → 0 | 0.000 → 0.000 | F/F → F/F | 20/20 |
+| 1e3 | 0.00 → 0.00 | 0 → 0 | 0.000 → 0.000 | F/F → F/F | 20/20 |
+| 1e4 | 0.10 → 0.10 | 0 → 0 | 0.001 → 0.001 | F/F → F/F | 20/20 |
+| 1e5 | 0.15 → 0.15 | 0 → 0 | 0.115 → 0.115 | F/F → F/F | 17/20 |
+| 1e6 | 0.10 → 0.10 | 0 → 0 | 0.047 → 0.046 | F/F → F/F | 18/20 |
+| 1e7 | 0.20 → 0.20 | 1 → 1 | 0.327 → 0.322 | F/F → F/F | 16/20 |
+| 1e8 | 0.35 → 0.35 | 1.5 → 1.5 | 0.804 → 0.822 | F/F → F/F | 13/20 |
+| 1e9 | 0.60 → 0.60 | 1008 → 1004 | 0.924 → 0.923 | T/F → T/T | 8/20 |
+| 1e10 | 0.90 → 0.90 | 3381.5 → 3354 | 0.957 → 0.955 | F/F → F/F | 2/20 |
+
+**Measured.** Takeoff fraction is identical at every decade and **no seed of
+200 changes takeoff class** (the declared band was 2/20 per row).
+`onset_mass_near_target` is identical to v9 on every row (0.05 at 1e4 and
+1e8, 0.10 at 1e5, 0 elsewhere): still no decade puts more than two seeds
+near 197 onsets. `covid.T1` passes only at Θ 1e9 in both versions; `covid.T3`
+fails everywhere except the Θ 1e9 flip of §2. `infections_total` is
+byte-identical to v9 on 154/200 cells: all 80 at Θ ≤ 1e4, and every extinct
+seed at every Θ but one (Θ 1e8, seed 20200224, 48 → 46 hosts). Among takeoff
+seeds the two largest paired moves are Θ 1e5 seed 20200205, 1110 → 950 —
+which is the QUAR-ATTR-V2 `A0_declared` Θ 1e5 cell of record (950 / 0.2560)
+reproduced exactly — and Θ 1e7 seed 20200214, 457 → 621; every other
+takeoff seed is within 7% of its v9 total, and row medians at 1e9 and 1e10
+move ≤ 1%.
+
+**Inferred.** QUAR-EXEMPT-01 and REINFECT-01 do not move the screen surface.
+The v9 structural readings — extinction-or-burn at every decade, Θ moving the
+probability of takeoff rather than the size of the burn, no near-critical band
+for one declared import — hold on the repaired engine and are now measured
+there, not carried from `0fb186b`. The v10 CSV supersedes the v9 CSV as the
+surface of record; the v9 rows are confirmed, not withdrawn.
+
+**Hypothesis (unchanged, now the blocker).** Θ is not the parameter that
+produces onset mass near 197. The criterion question — T1 trajectory with
+import geometry as the next axis, versus takeoff probability against covid.H3
+with onsets conditional on takeoff — is what stands between this surface and a
+calibration, and it must be declared in a design file before any cell runs.
+
+**Not read here.** The screen payload carries no quarantine-window or episode
+fields, so the 3414–43–1 split and "no episode ≥ 2" are not asserted from
+these 200 cells; they rest on QUAR-ATTR-V2 and REINFECT-01's own tests.

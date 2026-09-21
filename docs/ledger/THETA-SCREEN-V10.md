@@ -5,7 +5,8 @@
 **Status:** measured
 **Measured at:** a9b4f1f
 
-Canary only: Θ 1e9 × 20 seeds, 20 of 200 cells (see Result).
+Fully measured: 200 of 200 cells (canary Θ 1e9 first, then the remaining 180;
+see Result).
 
 ## Declared (before any cell ran)
 
@@ -123,13 +124,47 @@ and the comparison uses the CSV row. Conditional median recorded onsets
 `infections_total` moves by at most 69 hosts (≤ 2.1%) on any takeoff seed and
 is identical on all eight extinct seeds.
 
-One Θ is not a surface: nothing here may be quoted as a Θ value, and the nine
-unrun rows (Θ 1e1–1e8, 1e10) keep v9's `0fb186b` readings as their only
-measurement. Whether the remaining 180 cells run is the open decision in
-`docs/covid/covid_theta_handoff_2026_09_21.md`.
-
 The entrypoint gained `--index-offset` in the same change: Batch overwrites a
 user-supplied `AWS_BATCH_JOB_ARRAY_INDEX`, so this canary had to be launched
-through a `runpy` wrapper that added the 160/161 offset. The flag removes the
-wrapper for the next sub-block run; it is in the tree, not in the image that
-ran.
+through a `runpy` wrapper that added the 160/161 offset. The flag is in the
+tree, not in the image that ran; the remaining sub-blocks below were launched
+through the same wrapper against the same pinned digest.
+
+## Result — full surface (200 of 200)
+
+The user chose to run the rest. Arrays `a83a2b5b-1b73-475c-8857-71ef9d0cbeae`
+(size 160, offsets 0–159) and `dfe080e6-b83b-42d9-9177-1c3991e99f85` (size
+20, offsets 180–199), same job definition `:12`, image digest, queue and
+prefix. **Both arrays SUCCEEDED, 180/180 children; child failure rate over
+the campaign 0/200.** S3 holds exactly 200 cell payloads, one per (Θ, seed);
+`fit_covid_theta.py screen` merged them against the design without
+`--allow-partial`. Full readout `docs/covid/covid_theta_screen_v10_readout.md`,
+surface `docs/covid/covid_theta_screen_v10_surface.csv` (ten rows), all 200
+seeds paired to their v9 cells in `docs/covid/covid_theta_screen_v10_pairs.csv`
+(v9 parents synced from `campaign/covid_theta_screen_v9/cells/`, age 3.3 d).
+
+Gate outcome, per Θ against v9 (`0fb186b`): takeoff fraction identical at
+every decade (0, 0, 0, 0.10, 0.15, 0.10, 0.20, 0.35, 0.60, 0.90); **zero
+takeoff-class flips in 200 paired seeds** (band was 2/20 per row);
+`index_onset_day` −1.0, `index_shedding_at_day0` true and no `invalid_reason`
+in 200/200; `index_geometry_ok` true on every row; `covid.T1` true only at
+Θ 1e9 in both versions; `covid.T3` false at every row except the Θ 1e9 flip
+already recorded above; `onset_mass_near_target` identical to v9 at every
+decade (0.05 at 1e4 and 1e8, 0.10 at 1e5, 0 elsewhere). `infections_total`
+is byte-identical to v9 on 154/200 cells (20/20 at Θ ≤ 1e4, falling to 2/20
+at 1e10 where every seed burns); every non-identical cell is a takeoff seed
+except one (Θ 1e8, seed 20200224: 48 → 46 hosts). The two largest paired
+moves are Θ 1e5 seed 20200205 (1110 → 950, the QUAR-ATTR-V2 A0 record at
+that Θ, reproduced exactly) and Θ 1e7 seed 20200214 (457 → 621); all others
+are within 7% of the v9 total. Row medians move ≤ 1% at 1e9 and 1e10
+(1008 → 1004, 3381.5 → 3354 recorded onsets).
+
+Verdict: QUAR-EXEMPT-01 + REINFECT-01 leave the v9 Θ surface structurally
+unchanged — extinction-or-burn at every decade, Θ moving takeoff probability
+rather than size, no near-critical band at one declared import. Every v9 row
+is now **confirmed on the repaired engine at `a9b4f1f`**; the v10 CSV
+supersedes the v9 CSV as the surface of record. Still no Θ is fitted or
+selected: `covid.T1` passing at 1e9 is the same interval-span artefact the v9
+readout named. The screen payload still carries no quarantine-window or
+episode fields, so the "no episode ≥ 2" check remains unread by this campaign
+and rests on REINFECT-01's own tests.

@@ -258,21 +258,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   interval, and any tightening must be declared in a design file before its cells
   run. Session state of play, including what may not be reopened:
   `docs/covid/covid_theta_handoff_2026_09_19.md`.
-- **`covid_theta_screen_v10` has run its canary only — Θ 1e9 × 20 seeds, 20 of
-  200 cells — and the v9 Θ 1e9 row survives the repaired engine unchanged.**
-  Measured at `main` = `a9b4f1f` on AWS Batch (`docs/ledger/THETA-SCREEN-V10.md`,
-  `docs/covid/covid_theta_screen_v10_readout.md`): 20/20 children succeeded, the
+- **`covid_theta_screen_v10` is fully measured — 200 of 200 cells — and the
+  whole v9 Θ surface survives the repaired engine unchanged.** Measured at
+  `main` = `a9b4f1f` on AWS Batch (`docs/ledger/THETA-SCREEN-V10.md`,
+  `docs/covid/covid_theta_screen_v10_readout.md` §6): 200/200 children
+  succeeded; takeoff fraction identical to v9 at every decade (0 at ≤ 1e3,
+  0.10 / 0.15 / 0.10 / 0.20 / 0.35 / 0.60 / 0.90 at 1e4–1e10); **no seed of
+  200 changes takeoff class**; `onset_mass_near_target` identical on every
+  row; `infections_total` byte-identical to v9 on 154/200 cells including
+  every extinct seed but one; `covid.T1` passes only at 1e9 in both. **Every
+  v9 row is confirmed on the repaired engine, and the v10 surface CSV
+  (`docs/covid/covid_theta_screen_v10_surface.csv`) supersedes the v9 CSV as
+  the surface of record.** The v9 structural readings above —
+  extinction-or-burn at every decade, Θ moving takeoff probability rather
+  than size, no near-critical band — now stand at `a9b4f1f`, not `0fb186b`.
+  The canary detail follows. Canary (Θ 1e9 × 20 seeds): the
   shared seed 20200205 reproduces the QUAR-ATTR-V2 `A0_declared` record exactly
   (3458 / 0.9318), takeoff is 0.60 on the same twelve seeds as v9 with
   `infections_total` moving ≤ 2.1% on any takeoff seed and identically zero on
   the eight extinct ones, and the conditional median attack rate is 0.865 in
   both. So QUAR-EXEMPT-01 and REINFECT-01 together do **not** move this row:
   consistent with the reinfection inflation having lived in the
-  quarantine-window counts, which the screen payload never carried. **The other
-  nine v9 rows (Θ 1e1–1e8, 1e10) have not been re-measured; they remain at
-  `0fb186b` on the pre-repair engine, and the v9 structural readings above are
-  neither confirmed nor withdrawn.** Θ 1e9 still may not be quoted as a fit. The
-  `covid.T3` verdict on this row flips fail → pass on the same bimodal
-  interval-span mechanism as covid.T1 and changes nothing. Open decision
-  (whether the remaining 180 cells run):
-  `docs/covid/covid_theta_handoff_2026_09_21.md`.
+  quarantine-window counts, which the screen payload never carried. Θ 1e9
+  still may not be quoted as a fit. The `covid.T3` verdict on this row flips
+  fail → pass on the same bimodal interval-span mechanism as covid.T1 and
+  changes nothing. The screen payload has no episode or quarantine-window
+  fields, so this campaign does not re-read those gates. Next decision (the
+  criterion declaration): `docs/covid/covid_theta_handoff_2026_09_21.md` §8.
