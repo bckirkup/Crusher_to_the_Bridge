@@ -2,7 +2,10 @@
 **Date:** 2026-09-20
 **Commit:** 1da4211
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** a9b4f1f
+
+Canary only: Θ 1e9 × 20 seeds, 20 of 200 cells (see Result).
 
 ## Declared (before any cell ran)
 
@@ -87,7 +90,46 @@ design file, before its cells run.
   reading. The slow tier passes locally at the new 3.12 pin (2 passed,
   35 min).
 
-## Result
+## Result — canary only
 
-Not run. Nothing here may be quoted as a Θ result until the canary has been read
-out and this entry carries `**Measured at:**`.
+The pre-committed canary ran on AWS Batch at `main` = `a9b4f1f` (engine
+identical to `d62f10d`; the only diff is this design file), image
+`picard-campaign:theta-v10-a9b4f1f`
+(`sha256:325dde73ac57039dee318f451700fd1886fa3c35d60f880d060ea93146b4d3b1`,
+the campaign base layered with `deploy/aws/Dockerfile.covid_hull` so the
+screen entrypoint is present), job definition
+`picard-covid-boarding-screen:12`, queue `picard-campaign-queue`, prefix
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v10/a9b4f1f/`.
+Child `6555b89d-f44f-420e-b607-41ebd239c1b9` ran index 160 (shared seed), then
+array `cf4865ef-2a4b-48ef-bf31-6830d062fd0c` (size 19) ran indices 161–179.
+**20 of 20 cells SUCCEEDED; 180 of 200 cells have not run.** Full readout:
+`docs/covid/covid_theta_screen_v10_readout.md`, with
+`docs/covid/covid_theta_screen_v10_canary_surface.csv` (the one Θ 1e9 row) and
+`docs/covid/covid_theta_screen_v10_canary_pairs.csv` (all 20 seeds paired to
+their v9 cells).
+
+Gate outcome: `index_onset_day` −1.0 and `index_shedding_at_day0` true in
+20/20; no `invalid_reason`; child failure rate 0/20; the shared seed
+(20200205) reproduces the QUAR-ATTR-V2 `A0_declared` record exactly at
+`infections_total` 3458 / `attack_rate` 0.9318, matching an in-image local
+run of the same cell. The screen payload carries no quarantine-window or
+episode fields, so the 3414–43–1 split and the "no episode ≥ 2" check are not
+readable from these cells and are not asserted here. Takeoff at Θ 1e9 is
+0.60 (12/20) against v9's 0.60 at the same seeds — **no seed changes takeoff
+class**, well inside the declared 2/20 band. The gate text above quotes v9's
+Θ 1e9 takeoff as 0.85; the v9 surface CSV gives 0.60 at 1e9 and 0.85 at 1e10,
+and the comparison uses the CSV row. Conditional median recorded onsets
+3,103 → 2,991.5; conditional median attack rate 0.865 → 0.865;
+`infections_total` moves by at most 69 hosts (≤ 2.1%) on any takeoff seed and
+is identical on all eight extinct seeds.
+
+One Θ is not a surface: nothing here may be quoted as a Θ value, and the nine
+unrun rows (Θ 1e1–1e8, 1e10) keep v9's `0fb186b` readings as their only
+measurement. Whether the remaining 180 cells run is the open decision in
+`docs/covid/covid_theta_handoff_2026_09_21.md`.
+
+The entrypoint gained `--index-offset` in the same change: Batch overwrites a
+user-supplied `AWS_BATCH_JOB_ARRAY_INDEX`, so this canary had to be launched
+through a `runpy` wrapper that added the 160/161 offset. The flag removes the
+wrapper for the next sub-block run; it is in the tree, not in the image that
+ran.

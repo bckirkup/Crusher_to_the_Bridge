@@ -258,3 +258,21 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   interval, and any tightening must be declared in a design file before its cells
   run. Session state of play, including what may not be reopened:
   `docs/covid/covid_theta_handoff_2026_09_19.md`.
+- **`covid_theta_screen_v10` has run its canary only — Θ 1e9 × 20 seeds, 20 of
+  200 cells — and the v9 Θ 1e9 row survives the repaired engine unchanged.**
+  Measured at `main` = `a9b4f1f` on AWS Batch (`docs/ledger/THETA-SCREEN-V10.md`,
+  `docs/covid/covid_theta_screen_v10_readout.md`): 20/20 children succeeded, the
+  shared seed 20200205 reproduces the QUAR-ATTR-V2 `A0_declared` record exactly
+  (3458 / 0.9318), takeoff is 0.60 on the same twelve seeds as v9 with
+  `infections_total` moving ≤ 2.1% on any takeoff seed and identically zero on
+  the eight extinct ones, and the conditional median attack rate is 0.865 in
+  both. So QUAR-EXEMPT-01 and REINFECT-01 together do **not** move this row:
+  consistent with the reinfection inflation having lived in the
+  quarantine-window counts, which the screen payload never carried. **The other
+  nine v9 rows (Θ 1e1–1e8, 1e10) have not been re-measured; they remain at
+  `0fb186b` on the pre-repair engine, and the v9 structural readings above are
+  neither confirmed nor withdrawn.** Θ 1e9 still may not be quoted as a fit. The
+  `covid.T3` verdict on this row flips fail → pass on the same bimodal
+  interval-span mechanism as covid.T1 and changes nothing. Open decision
+  (whether the remaining 180 cells run):
+  `docs/covid/covid_theta_handoff_2026_09_21.md`.
