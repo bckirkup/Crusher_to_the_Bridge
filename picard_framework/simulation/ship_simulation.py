@@ -45,6 +45,7 @@ from engines.py_contam_bridge import (
     DEFAULT_PATHOGEN_POOL_TRANSPORT,
     build_transport_engine,
     load_air_flow_paths,
+    parse_outdoor_air_fraction_override,
     parse_pathogen_pool_transport,
 )
 from engines.py_contam_bridge import (
@@ -268,6 +269,7 @@ class ShipSimulation:
         self.engine = None
         self.contam_engine = None
         self.pathogen_pool_transport = DEFAULT_PATHOGEN_POOL_TRANSPORT
+        self.outdoor_air_fraction_override: float | None = None
         self.tx_core = None
         self.crew_exclusion: CrewDutyExclusionTracker | None = None
         self.obs = None
@@ -414,6 +416,9 @@ class ShipSimulation:
         self.pathogen_pool_transport = parse_pathogen_pool_transport(
             cfg.get("hvac", {}),
         )
+        self.outdoor_air_fraction_override = parse_outdoor_air_fraction_override(
+            cfg.get("hvac", {}),
+        )
         self.modalities = build_modalities(
             cfg,
             self.rng,
@@ -430,7 +435,10 @@ class ShipSimulation:
         assign_dining_parties(self.engine.agents, ship["zones"])
 
         self.contam_engine = build_transport_engine(
-            self.repo_root, cfg, clock=self.clock,
+            self.repo_root,
+            cfg,
+            clock=self.clock,
+            outdoor_air_fraction_override=self.outdoor_air_fraction_override,
         )
         if self.contam_engine is not None:
             self.engine.enable_external_transport()

@@ -34,6 +34,7 @@ previously used in ``infection_dynamics_bridge.py``.
 
 from __future__ import annotations
 
+import math
 import os
 from typing import Any
 
@@ -78,6 +79,32 @@ def parse_pathogen_pool_transport(hvac_cfg: dict[str, Any]) -> str:
             f"{PATHOGEN_POOL_TRANSPORT_MODES}, got {mode!r}",
         )
     return mode
+
+
+def parse_outdoor_air_fraction_override(hvac_cfg: dict[str, Any]) -> float | None:
+    """Read the declared override of every HVAC zone's ``oa_fraction``.
+
+    Absent or ``None`` leaves each zone's declared value in place. Set, it
+    replaces the ``oa_fraction`` of every HVAC zone at operator-build time:
+    ``1.0`` is fully outdoor air so no recirculated mass returns through the
+    plenum, ``0.0`` is full recirculation. It touches nothing else — not
+    ``hvac_duty``, ``ach``, cross-zone links, or passive adjacency.
+    """
+    raw = hvac_cfg.get("outdoor_air_fraction_override")
+    if raw is None:
+        return None
+    if not isinstance(raw, (int, float)) or isinstance(raw, bool):
+        raise ValueError(
+            f"hvac.outdoor_air_fraction_override = {raw!r} is not a number: "
+            "it must be finite and in [0, 1]",
+        )
+    value = float(raw)
+    if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(
+            f"hvac.outdoor_air_fraction_override = {raw!r} must be finite "
+            "and in [0, 1]",
+        )
+    return value
 
 
 def _matrix_exponential(operator: np.ndarray) -> np.ndarray:
@@ -250,10 +277,12 @@ class ContamTransportEngine:
         air_flow_paths: dict[str, Any],
         filter_efficiency: float = UNSOURCED_LEGACY_FILTER_EFFICIENCY,
         natural_decay_rate: float = 0.10,
+        outdoor_air_fraction_override: float | None = None,
         clock: SimClock | None = None,
     ) -> None:
         self.filter_efficiency = filter_efficiency
         self.natural_decay_rate = natural_decay_rate
+        self.outdoor_air_fraction_override = outdoor_air_fraction_override
         self.clock = clock or SimClock.from_config({})
 
         self.zone_nodes: dict[str, ContamZoneNode] = {}
@@ -354,7 +383,11 @@ class ContamTransportEngine:
         total_volume = sum(self.zone_nodes[r].volume_m3 for r in rooms)
         if total_volume <= 0:
             return
-        oa = float(hvac_zone.get("oa_fraction", default_oa))
+        oa = (
+            self.outdoor_air_fraction_override
+            if self.outdoor_air_fraction_override is not None
+            else float(hvac_zone.get("oa_fraction", default_oa))
+        )
         duty = float(hvac_zone.get("hvac_duty", default_duty))
         oa = min(max(oa, 0.0), 1.0)
         duty = max(duty, 0.0)
@@ -737,12 +770,14 @@ def _build_native_engine(
     airflow: dict[str, Any],
     hvac_cfg: dict[str, Any],
     clock: SimClock | None = None,
+    outdoor_air_fraction_override: float | None = None,
 ) -> ContamTransportEngine:
     return ContamTransportEngine(
         spatial_layout=spatial,
         air_flow_paths=airflow,
         filter_efficiency=require_filter_efficiency(hvac_cfg),
         natural_decay_rate=hvac_cfg.get("natural_decay_rate", 0.10),
+        outdoor_air_fraction_override=outdoor_air_fraction_override,
         clock=clock,
     )
 
@@ -752,6 +787,7 @@ def build_transport_engine(
     cfg: dict[str, Any],
     *,
     clock: SimClock | None = None,
+    outdoor_air_fraction_override: float | None = None,
 ) -> ContamTransportEngine | None:
     """Build a CONTAM transport engine from config and layout files.
 
@@ -793,4 +829,10 @@ def build_transport_engine(
                 )
             # "auto" falls back silently.
 
-    return _build_native_engine(spatial, airflow, hvac_cfg, clock=clock)
+    return _build_native_engine(
+        spatial,
+        airflow,
+        hvac_cfg,
+        clock=clock,
+        outdoor_air_fraction_override=outdoor_air_fraction_override,
+    )

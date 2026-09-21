@@ -363,6 +363,16 @@ hvac:
   # labelled pre-change baseline for paired measurement. Ships on by default
   # and is measured before any run declares it, as cabin_air_mode was.
   pathogen_pool_transport: "airflow"
+  # outdoor_air_fraction_override: null (absent) — every HVAC zone keeps its
+  # own declared oa_fraction from air_flow_paths.json. Set to a float in
+  # [0, 1] to replace every zone's oa_fraction at operator-build time: 1.0 is
+  # fully outdoor air (no recirculated mass returns through the AHU plenum),
+  # 0.0 is full recirculation. Nothing else moves: hvac_duty, ach, cross-zone
+  # links and passive adjacency keep their declared values. This is an
+  # override of platform-declared geometry, not a sourced physical constant:
+  # mega_cruise_5000 declares oa_fraction: 0.2, while the Diamond Princess
+  # design-practice figure is ~0.3 (Kosako and Shiiyama 2008 via Almilaji and
+  # Thomas 2020, grade C, secondary) — docs/covid/covid_dp_ventilation_sourcing.md
   filter_efficiency: 0.50           # η – HVAC filter removal efficiency.
                                     # UNSOURCED, and it is a filter class the
                                     # sourced record does not contain: the
