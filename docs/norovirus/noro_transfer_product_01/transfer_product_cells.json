@@ -190,28 +190,32 @@
   "eating": {
    "calls": 10700,
    "calls_capped": 0,
+   "calls_zero_ratio": 383,
    "capped_share": 0.0,
    "ratio_per_epoch": {
-    "geometric_mean": 0.02389889873187101,
+    "geometric_mean": 0.020805497045516794,
     "max": 0.1473422992367142,
-    "mean_log10": -1.621622111005455,
+    "mean_log10": -1.6818219044061615,
     "min": 1.679885870622677e-05,
-    "n": 10700,
-    "sd_log10": 0.48446104686733826
-   }
+    "n": 10317,
+    "sd_log10": 0.3770544809181021
+   },
+   "zero_ratio_share": 0.035794392523364485
   },
   "non_eating": {
    "calls": 139845,
    "calls_capped": 0,
+   "calls_zero_ratio": 17747,
    "capped_share": 0.0,
    "ratio_per_epoch": {
-    "geometric_mean": 0.015043187703743828,
+    "geometric_mean": 0.008173637893560046,
     "max": 0.089999631822028,
-    "mean_log10": -1.8226601254826935,
+    "mean_log10": -2.087584606202618,
     "min": 1.895540681897119e-08,
-    "n": 139845,
-    "sd_log10": 0.8122264816929337
-   }
+    "n": 122098,
+    "sd_log10": 0.45005445143619327
+   },
+   "zero_ratio_share": 0.12690478744324074
   },
   "note": "dose/hand_load is contacts * used_fraction * efficiency per epoch; contacts is an RNG draw the instrument may not re-take, so the per-contact efficiency is unresolved from this witness"
  },
@@ -365,6 +369,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 0.0007468129468579951,
     "max": 0.01079406617768727,
@@ -392,6 +397,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "n": 0
    }
@@ -410,6 +416,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 0.00038701988496372773,
     "max": 0.008480008382511266,
@@ -437,6 +444,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 0.000155240483045635,
     "max": 0.0032122380107017243,
@@ -464,6 +472,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 7.530182919757265e-05,
     "max": 0.0016637242734342977,
@@ -491,6 +500,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 6.137305823065017e-05,
     "max": 0.0012522035693327328,
@@ -518,6 +528,7 @@
      "calls_zero_mass": 0.0
     }
    },
+   "clean_calls_with_zero_f_touch": 0,
    "f_touch_per_contact": {
     "geometric_mean": 9.870127865902685e-05,
     "max": 0.00222307734648458,

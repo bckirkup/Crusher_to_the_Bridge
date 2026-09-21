@@ -167,8 +167,16 @@ def _merge_buckets(buckets: list[dict[str, Any]], prefix: str) -> dict[str, Any]
     return out
 
 
-def _log_stats(bucket: dict[str, Any], prefix: str, n: int) -> dict[str, Any]:
-    """Geometric mean and log10 sd of a pooled log-accumulator bucket."""
+def _log_stats(bucket: dict[str, Any], prefix: str) -> dict[str, Any]:
+    """Geometric mean and log10 sd of a pooled log-accumulator bucket.
+
+    The divisor is the number of samples that actually entered the log sums,
+    read off the histogram the instrument files every logged sample into. A
+    zero ratio has no logarithm and is counted but not summed, so dividing by
+    the call count instead would pull the mean toward zero by exactly the
+    zero-ratio share.
+    """
+    n = sum(bucket.get(f"hist_{prefix}", []))
     if n <= 0:
         return {"n": 0}
     mean_log = bucket[f"sum_{prefix}"] / n
@@ -240,13 +248,15 @@ def surface_to_hand(cells: list[dict[str, Any]]) -> dict[str, Any]:
 def _surface_cell(buckets: list[dict[str, Any]]) -> dict[str, Any]:
     """One pooled (source, zone class) row: f_touch and implied efficiency."""
     merged = _merge_buckets(buckets, "log10_f_touch")
-    clean = merged.get("calls_clean", 0)
-    stats = _log_stats(merged, "log10_f_touch", clean)
+    stats = _log_stats(merged, "log10_f_touch")
     row: dict[str, Any] = {
         "f_touch_per_contact": stats,
         "censoring": _censoring(merged),
+        "clean_calls_with_zero_f_touch": (
+            merged.get("calls_clean", 0) - stats["n"]
+        ),
     }
-    if not clean:
+    if not stats["n"]:
         return row
     mean_area = merged["sum_surface_area_m2"] / merged["calls"]
     implied = (
@@ -281,9 +291,14 @@ def hand_to_mouth(cells: list[dict[str, Any]]) -> dict[str, Any]:
     for meal, buckets in sorted(grouped.items()):
         merged = _merge_buckets(buckets, "log10_ratio")
         calls = merged.get("calls", 0)
+        stats = _log_stats(merged, "log10_ratio")
         out[meal] = {
-            "ratio_per_epoch": _log_stats(merged, "log10_ratio", calls),
+            "ratio_per_epoch": stats,
             "calls": calls,
+            "calls_zero_ratio": calls - stats["n"],
+            "zero_ratio_share": (
+                (calls - stats["n"]) / calls if calls else 0.0
+            ),
             "calls_capped": merged.get("calls_capped", 0),
             "capped_share": (
                 merged.get("calls_capped", 0) / calls if calls else 0.0
