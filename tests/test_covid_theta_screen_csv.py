@@ -140,14 +140,14 @@ class TestPairsCsv:
 
 class TestPathContainment:
     def test_output_outside_the_allowed_roots_is_refused(self, tmp_path) -> None:
+        surface = _surface(1e9, onsets=[1], takeoff=0.5)
         with pytest.raises(ValueError):
-            mod.write_surface_csv(
-                _surface(1e9, onsets=[1], takeoff=0.5), "/etc/surface.csv",
-            )
+            mod.write_surface_csv(surface, "/etc/surface.csv")
 
     def test_traversal_in_a_cells_directory_is_refused(self, tmp_path) -> None:
+        out = str(tmp_path / "pairs.csv")
         with pytest.raises(ValueError):
-            mod.write_pairs_csv("../../etc", None, str(tmp_path / "pairs.csv"))
+            mod.write_pairs_csv("../../etc", None, out)
 
 
 class TestCli:
