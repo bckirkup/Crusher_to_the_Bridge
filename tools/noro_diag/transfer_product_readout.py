@@ -293,7 +293,7 @@ def hand_to_mouth(cells: list[dict[str, Any]]) -> dict[str, Any]:
         calls = merged.get("calls", 0)
         stats = _log_stats(merged, "log10_ratio")
         out[meal] = {
-            "ratio_per_epoch": stats,
+            "dose_hand_load_ratio": stats,
             "calls": calls,
             "calls_zero_ratio": calls - stats["n"],
             "zero_ratio_share": (

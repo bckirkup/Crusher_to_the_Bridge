@@ -192,7 +192,7 @@
    "calls_capped": 0,
    "calls_zero_ratio": 383,
    "capped_share": 0.0,
-   "ratio_per_epoch": {
+   "dose_hand_load_ratio": {
     "geometric_mean": 0.020805497045516794,
     "max": 0.1473422992367142,
     "mean_log10": -1.6818219044061615,
@@ -207,7 +207,7 @@
    "calls_capped": 0,
    "calls_zero_ratio": 17747,
    "capped_share": 0.0,
-   "ratio_per_epoch": {
+   "dose_hand_load_ratio": {
     "geometric_mean": 0.008173637893560046,
     "max": 0.089999631822028,
     "mean_log10": -2.087584606202618,
