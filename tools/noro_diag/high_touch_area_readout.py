@@ -33,6 +33,7 @@ import argparse
 import gzip
 import json
 import math
+import re
 import statistics
 import sys
 from pathlib import Path
@@ -339,10 +340,16 @@ def _print(r: dict[str, Any]) -> None:
         print(f"criterion 4, {label}: {s['secondaries_total']} secondaries over {s['seeds']} seeds -> {s['verdict']}")
 
 
+def _identifier(value: str) -> str:
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
+        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
+    return value
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--arm-dir", type=Path, required=True)
-    parser.add_argument("--arm-tag", required=True)
+    parser.add_argument("--arm-tag", type=_identifier, required=True)
     parser.add_argument("--scale", type=float, required=True)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)
