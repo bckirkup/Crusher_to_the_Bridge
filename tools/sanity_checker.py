@@ -53,7 +53,10 @@ from engines.strain_state import (  # noqa: E402
     StrainConfigError,
     StrainEvolutionConfig,
 )
-from engines.transmission_core import HIGH_TOUCH_AREA_M2  # noqa: E402
+from engines.transmission_core import (  # noqa: E402
+    HIGH_TOUCH_AREA_M2,
+    HIGH_TOUCH_AREA_SCALE_BOUNDS,
+)
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 
@@ -1940,7 +1943,7 @@ def _check_high_touch_area_scale(cfg: dict[str, Any], report: Report) -> None:
     tx = cfg.get("transmission", {})
     if not isinstance(tx, dict):
         return
-    low, high = 0.01, 100.0
+    low, high = HIGH_TOUCH_AREA_SCALE_BOUNDS
 
     def _in_band(value: Any) -> bool:
         return (

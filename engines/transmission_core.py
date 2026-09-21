@@ -224,9 +224,12 @@ SURFACE_CONTACTS_PER_HOUR = {
 CREW_SERVICE_SURFACE_CONTACTS_PER_HOUR = 545.4
 # Denominator of the fomite pickup model: the pool's mass enters a pickup only
 # as the areal density mass/area, so these are what converts a zone's pool into
-# a surface concentration. Total high-touch surface area per room in m2 has
-# never been measured by anybody (register null class ∅lit), so every entry is
-# a declared assumption and the class is a permanent Grade C liability.
+# a surface concentration. No retrieved source reports the summed high-touch
+# area of any room (register null ∅nr; ∅lit for cruise zone classes), although
+# item sets, per-item areas and total room surface are each measured -- see
+# docs/literature/consensus_tranche_45_high_touch_area.md, which derives a
+# Grade C envelope from them. Every entry here is a declared assumption;
+# nothing from that envelope is adopted.
 # No source: declared assumption. Grade C. Origin: n/a.
 # The density is uniform over the zone: a pool gain deposited by one event is
 # available at the same concentration to every touch anywhere in the zone.
