@@ -1,0 +1,547 @@
+{
+ "block_seeds": [
+  8000,
+  8001,
+  8002,
+  8003,
+  8004,
+  8005,
+  8006,
+  8007,
+  8008,
+  8009,
+  8010,
+  8011,
+  8012,
+  8013,
+  8014,
+  8015,
+  8016,
+  8017,
+  8018,
+  8019
+ ],
+ "bookkeeping_contrast": {
+  "cells": [
+   {
+    "geometric_mean_scale": 0.36301335025506115,
+    "requested_over_offered": 2.1293848239441937,
+    "scaled_call_share": 0.009950248756218905,
+    "seed": 8000,
+    "whole_voyage_loss_log10": 7.051009700825623e-07
+   },
+   {
+    "geometric_mean_scale": 0.20122893782244664,
+    "requested_over_offered": 0.658903008385018,
+    "scaled_call_share": 0.0007782101167315176,
+    "seed": 8001,
+    "whole_voyage_loss_log10": 0.18117850956882403
+   },
+   {
+    "geometric_mean_scale": 0.35724801391134736,
+    "requested_over_offered": 0.002121433572506171,
+    "scaled_call_share": 0.002352941176470588,
+    "seed": 8002,
+    "whole_voyage_loss_log10": 2.6733705625519404
+   },
+   {
+    "geometric_mean_scale": 0.6223029161199296,
+    "requested_over_offered": 1.010890108322161,
+    "scaled_call_share": 0.034759358288770054,
+    "seed": 8003,
+    "whole_voyage_loss_log10": 0.11929431983059262
+   },
+   {
+    "geometric_mean_scale": 0.6076610649624162,
+    "requested_over_offered": 1.0804989991059728,
+    "scaled_call_share": 0.008746355685131196,
+    "seed": 8004,
+    "whole_voyage_loss_log10": 0.21930771052059786
+   },
+   {
+    "geometric_mean_scale": 0.46893564556102285,
+    "requested_over_offered": 0.1205164210965573,
+    "scaled_call_share": 0.004744958481613286,
+    "seed": 8005,
+    "whole_voyage_loss_log10": 0.9636296992856455
+   },
+   {
+    "geometric_mean_scale": 0.677664759795974,
+    "requested_over_offered": 0.06811052649183955,
+    "scaled_call_share": 0.010166358595194085,
+    "seed": 8006,
+    "whole_voyage_loss_log10": 1.167970230282452
+   },
+   {
+    "geometric_mean_scale": 0.5328126309729843,
+    "requested_over_offered": 0.07897179023661884,
+    "scaled_call_share": 0.008997429305912597,
+    "seed": 8007,
+    "whole_voyage_loss_log10": 1.1682982570419163
+   },
+   {
+    "geometric_mean_scale": 0.1511369568206363,
+    "requested_over_offered": 0.2739668009192616,
+    "scaled_call_share": 0.006263048016701462,
+    "seed": 8008,
+    "whole_voyage_loss_log10": 0.5623020614537921
+   },
+   {
+    "geometric_mean_scale": 0.553727814766057,
+    "requested_over_offered": 0.022040590844596464,
+    "scaled_call_share": 0.0037313432835820895,
+    "seed": 8009,
+    "whole_voyage_loss_log10": 1.661293584717628
+   },
+   {
+    "geometric_mean_scale": null,
+    "requested_over_offered": 0.014433911541133122,
+    "scaled_call_share": 0.0,
+    "seed": 8010,
+    "whole_voyage_loss_log10": 1.8406159606230785
+   },
+   {
+    "geometric_mean_scale": 0.6408944389319934,
+    "requested_over_offered": 0.502307498342147,
+    "scaled_call_share": 0.046153846153846156,
+    "seed": 8011,
+    "whole_voyage_loss_log10": 0.3316624168578372
+   },
+   {
+    "geometric_mean_scale": 0.5449851892693771,
+    "requested_over_offered": 0.19546243475277914,
+    "scaled_call_share": 0.01177336276674025,
+    "seed": 8012,
+    "whole_voyage_loss_log10": 0.7092924510789974
+   },
+   {
+    "geometric_mean_scale": 0.9345975701060363,
+    "requested_over_offered": 0.5172895703779091,
+    "scaled_call_share": 0.003003003003003003,
+    "seed": 8013,
+    "whole_voyage_loss_log10": 0.28626627777298663
+   },
+   {
+    "geometric_mean_scale": 0.5808661142314295,
+    "requested_over_offered": 0.2200199320261838,
+    "scaled_call_share": 0.009324009324009324,
+    "seed": 8014,
+    "whole_voyage_loss_log10": 0.7158952009483603
+   },
+   {
+    "geometric_mean_scale": null,
+    "requested_over_offered": 0.007393624752398273,
+    "scaled_call_share": 0.0,
+    "seed": 8015,
+    "whole_voyage_loss_log10": 2.1311425948906173
+   },
+   {
+    "geometric_mean_scale": 0.5593362878541996,
+    "requested_over_offered": 0.016565138577209544,
+    "scaled_call_share": 0.005518763796909493,
+    "seed": 8016,
+    "whole_voyage_loss_log10": 1.7882393068700138
+   },
+   {
+    "geometric_mean_scale": null,
+    "requested_over_offered": 0.01731012277594912,
+    "scaled_call_share": 0.0,
+    "seed": 8017,
+    "whole_voyage_loss_log10": 1.7616998517821383
+   },
+   {
+    "geometric_mean_scale": 0.6408730538601195,
+    "requested_over_offered": 0.047488078264979625,
+    "scaled_call_share": 0.011400651465798045,
+    "seed": 8018,
+    "whole_voyage_loss_log10": 1.3234154281671733
+   },
+   {
+    "geometric_mean_scale": 0.49469108358855174,
+    "requested_over_offered": 0.2454516194116292,
+    "scaled_call_share": 0.0005494505494505495,
+    "seed": 8019,
+    "whole_voyage_loss_log10": 0.6211800493367531
+   },
+   {
+    "geometric_mean_scale": 0.6213372643347642,
+    "requested_over_offered": 0.005738088053995742,
+    "scaled_call_share": 0.006928406466512702,
+    "seed": 8105,
+    "whole_voyage_loss_log10": 2.2710215218567185
+   },
+   {
+    "geometric_mean_scale": null,
+    "requested_over_offered": 0.26256416571532953,
+    "scaled_call_share": 0.0,
+    "seed": 8106,
+    "whole_voyage_loss_log10": 0.5807645459313338
+   }
+  ],
+  "cells_demand_exceeded_pool": [
+   8000,
+   8003,
+   8004
+  ],
+  "note": "offered sums a persisting pool once per epoch it survives, so this ratio is a mass-epoch bookkeeping quantity truncated by conservation, not a transfer efficiency"
+ },
+ "cells_loaded": 22,
+ "hand_to_mouth": {
+  "eating": {
+   "calls": 10700,
+   "calls_capped": 0,
+   "calls_zero_ratio": 383,
+   "capped_share": 0.0,
+   "dose_hand_load_ratio": {
+    "geometric_mean": 0.020805497045516794,
+    "max": 0.1473422992367142,
+    "mean_log10": -1.6818219044061615,
+    "min": 1.679885870622677e-05,
+    "n": 10317,
+    "sd_log10": 0.3770544809181021
+   },
+   "zero_ratio_share": 0.035794392523364485
+  },
+  "non_eating": {
+   "calls": 139845,
+   "calls_capped": 0,
+   "calls_zero_ratio": 17747,
+   "capped_share": 0.0,
+   "dose_hand_load_ratio": {
+    "geometric_mean": 0.008173637893560046,
+    "max": 0.089999631822028,
+    "mean_log10": -2.087584606202618,
+    "min": 1.895540681897119e-08,
+    "n": 122098,
+    "sd_log10": 0.45005445143619327
+   },
+   "zero_ratio_share": 0.12690478744324074
+  },
+  "note": "dose/hand_load is contacts * used_fraction * efficiency per epoch; contacts is an RNG draw the instrument may not re-take, so the per-contact efficiency is unresolved from this witness"
+ },
+ "pair_seeds": [
+  8105,
+  8106
+ ],
+ "raw_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_transfer_product_01/classic_cruise_1900",
+ "reconciliation": {
+  "rtol": 1e-09,
+  "verdict": "FAIL",
+  "worst_relative_difference": 0.008400409611248476
+ },
+ "rng_neutrality": {
+  "baseline_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_dose_block_01/classic_cruise_1900",
+  "cells_compared": [
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8000
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8001
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8002
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8003
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8004
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8005
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8006
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8007
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8008
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8009
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8010
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8011
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8012
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8013
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8014
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8015
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8016
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8017
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8018
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8019
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8105
+   },
+   {
+    "exact": true,
+    "keys_compared": 7,
+    "seed": 8106
+   }
+  ],
+  "cells_void_if_failed": false,
+  "mismatches": [],
+  "seeds_absent_from_baseline": [],
+  "verdict": "PASS"
+ },
+ "study_admissible": true,
+ "surface_to_hand": {
+  "geometry_divisor": {
+   "geomean_hand_area_m2": 0.04893099610469624,
+   "geomean_used_fraction": 0.10305333630060813,
+   "note": "implied_efficiency divides the areal geometry back out of f_touch using the geometric means of the two uniform draws and the mean witnessed surface area; it is an inference, not a measurement of the efficiency draw"
+  },
+  "patch/cabin": {
+   "censoring": {
+    "calls": 1412,
+    "calls_capped": 0,
+    "calls_clean": 30,
+    "calls_confined": 1382,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0,
+     "calls_clean": 0.021246458923512748,
+     "calls_confined": 0.9787535410764873,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 0.0007468129468579951,
+    "max": 0.01079406617768727,
+    "mean_log10": -3.126788161665318,
+    "min": 1.6510151445669058e-05,
+    "n": 30,
+    "sd_log10": 0.6667708466692355
+   },
+   "implied_efficiency_geomean": 0.12654225731235483,
+   "mean_surface_area_m2": 0.8544169440509889,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  },
+  "patch/galley": {
+   "censoring": {
+    "calls": 2,
+    "calls_capped": 2,
+    "calls_clean": 0,
+    "calls_confined": 0,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 1.0,
+     "calls_clean": 0.0,
+     "calls_confined": 0.0,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "n": 0
+   }
+  },
+  "pool/cabin": {
+   "censoring": {
+    "calls": 24840,
+    "calls_capped": 0,
+    "calls_clean": 3365,
+    "calls_confined": 21475,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0,
+     "calls_clean": 0.13546698872785828,
+     "calls_confined": 0.8645330112721417,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 0.00038701988496372773,
+    "max": 0.008480008382511266,
+    "mean_log10": -3.4122667204897184,
+    "min": 1.0274784558469595e-06,
+    "n": 3365,
+    "sd_log10": 0.674141553972773
+   },
+   "implied_efficiency_geomean": 0.11512732800669462,
+   "mean_surface_area_m2": 1.5,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  },
+  "pool/crew_mess": {
+   "censoring": {
+    "calls": 2609,
+    "calls_capped": 6,
+    "calls_clean": 2603,
+    "calls_confined": 0,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0022997316979685703,
+     "calls_clean": 0.9977002683020314,
+     "calls_confined": 0.0,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 0.000155240483045635,
+    "max": 0.0032122380107017243,
+    "mean_log10": -3.8089950145810345,
+    "min": 7.714086349677014e-07,
+    "n": 2603,
+    "sd_log10": 0.6513970003189135
+   },
+   "implied_efficiency_geomean": 0.12314558988401038,
+   "mean_surface_area_m2": 4.0,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  },
+  "pool/dining": {
+   "censoring": {
+    "calls": 8474,
+    "calls_capped": 0,
+    "calls_clean": 8474,
+    "calls_confined": 0,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0,
+     "calls_clean": 1.0,
+     "calls_confined": 0.0,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 7.530182919757265e-05,
+    "max": 0.0016637242734342977,
+    "mean_log10": -4.123194473988366,
+    "min": 9.590600073244536e-08,
+    "n": 8474,
+    "sd_log10": 0.6681366990776842
+   },
+   "implied_efficiency_geomean": 0.1194673965701863,
+   "mean_surface_area_m2": 8.0,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  },
+  "pool/galley": {
+   "censoring": {
+    "calls": 640,
+    "calls_capped": 0,
+    "calls_clean": 640,
+    "calls_confined": 0,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0,
+     "calls_clean": 1.0,
+     "calls_confined": 0.0,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 6.137305823065017e-05,
+    "max": 0.0012522035693327328,
+    "mean_log10": -4.212022235203869,
+    "min": 9.484525266661153e-08,
+    "n": 640,
+    "sd_log10": 0.6832066986218865
+   },
+   "implied_efficiency_geomean": 0.12171151027302285,
+   "mean_surface_area_m2": 10.0,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  },
+  "pool/public": {
+   "censoring": {
+    "calls": 132046,
+    "calls_capped": 0,
+    "calls_clean": 132046,
+    "calls_confined": 0,
+    "calls_zero_mass": 0,
+    "shares": {
+     "calls_capped": 0.0,
+     "calls_clean": 1.0,
+     "calls_confined": 0.0,
+     "calls_zero_mass": 0.0
+    }
+   },
+   "clean_calls_with_zero_f_touch": 0,
+   "f_touch_per_contact": {
+    "geometric_mean": 9.870127865902685e-05,
+    "max": 0.00222307734648458,
+    "mean_log10": -4.005677221079476,
+    "min": 5.723903073687281e-08,
+    "n": 132046,
+    "sd_log10": 0.6637464828955669
+   },
+   "implied_efficiency_geomean": 0.11744321079443175,
+   "mean_surface_area_m2": 6.0,
+   "vs_analogue_envelope": "inside",
+   "vs_norovirus_band": "inside"
+  }
+ },
+ "void_seeds": []
+}
