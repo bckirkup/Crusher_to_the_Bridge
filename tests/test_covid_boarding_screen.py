@@ -197,8 +197,14 @@ def test_array_children_cover_every_cell_once(design):
         seen.extend(c.index for c in entry.child_cells(cells, index, 7))
     assert seen == list(range(180))
     assert [c.index for c in entry.child_cells(cells, 5, 1)] == [5]
+    offset_block = [c.index for i in range(20) for c in entry.child_cells(cells, i, 1, 160)]
+    assert offset_block == list(range(160, 180))
     with pytest.raises(SystemExit):
         entry.child_cells(cells, 180, 1)
+    with pytest.raises(SystemExit):
+        entry.child_cells(cells, 20, 1, 160)
+    with pytest.raises(SystemExit):
+        entry.child_cells(cells, 0, 1, -1)
     with pytest.raises(SystemExit):
         entry.child_cells(cells, 0, 0)
 

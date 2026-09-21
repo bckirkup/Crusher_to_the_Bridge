@@ -38,11 +38,18 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
 
 
 def child_cells(
-    cells: tuple[ScreenCell, ...], index: int, stride: int,
+    cells: tuple[ScreenCell, ...], index: int, stride: int, offset: int = 0,
 ) -> list[ScreenCell]:
-    """The block of cells that array child ``index`` owns."""
+    """The block of cells that array child ``index`` owns.
+
+    ``offset`` shifts the child's index so a sub-block of the enumeration
+    (a canary at one Θ) can run as its own small array.
+    """
     if stride < 1:
         raise SystemExit("--stride must be at least 1")
+    if offset < 0:
+        raise SystemExit("--index-offset must be non-negative")
+    index += offset
     start = index * stride
     if index < 0 or start >= len(cells):
         children = -(-len(cells) // stride)
@@ -53,6 +60,12 @@ def child_cells(
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stride", type=int, default=1, help="Cells per array child")
+    parser.add_argument(
+        "--index-offset",
+        type=int,
+        default=0,
+        help="Added to AWS_BATCH_JOB_ARRAY_INDEX before resolving the child's block",
+    )
     parser.add_argument(
         "--s3-prefix",
         required=True,
@@ -68,7 +81,9 @@ def main() -> int:
     design = load_design(
         str(_REPO_ROOT / args.design) if args.design else None,
     )
-    cells = child_cells(enumerate_cells(design), _array_index(), args.stride)
+    cells = child_cells(
+        enumerate_cells(design), _array_index(), args.stride, args.index_offset,
+    )
     bucket, prefix = _s3_uri(args.s3_prefix)
     if prefix:
         prefix += "/"
