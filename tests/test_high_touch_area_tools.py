@@ -17,6 +17,27 @@ from tools.noro_diag import high_touch_area_readout as htar
 _LF_SIGMA = 0.1
 
 
+def _pool_row(
+    calls: float = 100.0,
+    area: float = 1.5,
+    lf: float = -4.0,
+    clean: float = 100.0,
+    capped: float = 0.0,
+    confined: float = 0.0,
+    zero_mass: float = 0.0,
+) -> dict:
+    return {
+        "calls": calls,
+        "calls_clean": clean,
+        "calls_capped": capped,
+        "calls_confined": confined,
+        "calls_zero_mass": zero_mass,
+        "sum_surface_area_m2": calls * area,
+        "sum_log10_f_touch": clean * lf,
+        "sum_sq_log10_f_touch": clean * (lf * lf + _LF_SIGMA**2),
+    }
+
+
 def _cell(
     seed: int,
     *,
@@ -25,23 +46,23 @@ def _cell(
     calls: float = 100.0,
     clean: float = 100.0,
     capped: float = 0.0,
+    confined: float = 0.0,
+    zero_mass: float = 0.0,
     dose: float = 1.0,
     req: float = 1.0,
     off: float = 1.0,
     secondaries: int = 0,
+    extra_classes: dict | None = None,
 ) -> dict:
-    row = {
-        "calls": calls,
-        "calls_clean": clean,
-        "calls_capped": capped,
-        "sum_surface_area_m2": calls * area,
-        "sum_log10_f_touch": clean * lf,
-        "sum_sq_log10_f_touch": clean * (lf * lf + _LF_SIGMA**2),
+    rows = {
+        "cabin": _pool_row(calls, area, lf, clean, capped, confined, zero_mass),
     }
+    for zone_class, kwargs in (extra_classes or {}).items():
+        rows[zone_class] = _pool_row(**kwargs)
     return {
         "seed": seed,
         "transfer_product_witness": {
-            "surface_to_hand": {"pool": {"cabin": row}, "patch": {}},
+            "surface_to_hand": {"pool": rows, "patch": {}},
         },
         "fomite_witness": {"hand_to_mouth_dose_gec": dose},
         "delivery_scale_witness": {
@@ -64,7 +85,9 @@ def _run(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
     *,
-    scale: float,
+    scale: float | None = None,
+    scale_by_zone_class: dict | None = None,
+    predicted_direction: str = "up",
     base_cells: list[dict],
     arm_cells: list[dict],
     tag: str = "htaT",
@@ -76,7 +99,12 @@ def _run(
     for cell in arm_cells:
         _write(arm_dir, tag, cell)
     monkeypatch.setattr(htar, "BASELINE_DIR", base_dir)
-    return htar.readout(arm_dir, tag, scale)
+    return htar.readout(
+        arm_dir, tag,
+        scale=scale,
+        scale_by_zone_class=scale_by_zone_class,
+        predicted_direction=predicted_direction,
+    )
 
 
 _BASE_LF = -4.0
@@ -115,6 +143,78 @@ def test_per_touch_departs_when_area_ratio_wrong(monkeypatch, tmp_path):
     assert row["verdict"] == "departs"
 
 
+def _two_class_paired(cabin_mult: float, dining_mult: float):
+    """Two zone classes each scaling at its own multiplier."""
+    seeds = [9001, 9002]
+    base = [
+        _cell(
+            s, area=1.5, lf=_BASE_LF,
+            extra_classes={"dining": {"area": 2.0, "lf": _BASE_LF}},
+        )
+        for s in seeds
+    ]
+    arm = [
+        _cell(
+            s, area=1.5 * cabin_mult, lf=_BASE_LF - math.log10(cabin_mult),
+            extra_classes={
+                "dining": {
+                    "area": 2.0 * dining_mult,
+                    "lf": _BASE_LF - math.log10(dining_mult),
+                },
+            },
+        )
+        for s in seeds
+    ]
+    return base, arm
+
+
+def test_per_class_scaling_conforms_at_each_multiplier(monkeypatch, tmp_path):
+    base, arm = _two_class_paired(0.5, 2.0)
+    rows = _run(
+        monkeypatch, tmp_path,
+        scale_by_zone_class={"cabin": 0.5, "dining": 2.0},
+        base_cells=base, arm_cells=arm,
+    )["per_touch_scaling"]
+    assert rows["cabin"]["verdict"] == "conforms"
+    assert rows["dining"]["verdict"] == "conforms"
+    assert rows["cabin"]["area_ratio_expected"] == pytest.approx(0.5)
+    assert rows["dining"]["area_ratio_expected"] == pytest.approx(2.0)
+
+
+def test_per_class_scaling_departs_on_wrong_multiplier(monkeypatch, tmp_path):
+    base, arm = _two_class_paired(0.5, 2.0)
+    rows = _run(
+        monkeypatch, tmp_path,
+        scale_by_zone_class={"cabin": 0.5, "dining": 3.0},
+        base_cells=base, arm_cells=arm,
+    )["per_touch_scaling"]
+    assert rows["cabin"]["verdict"] == "conforms"
+    assert rows["dining"]["verdict"] == "departs"
+
+
+def test_unlisted_zone_class_rides_at_unit_multiplier(monkeypatch, tmp_path):
+    seeds = [9001, 9002]
+    base = [_cell(s, area=1.5, lf=_BASE_LF) for s in seeds]
+    arm = [_cell(s, area=1.5, lf=_BASE_LF) for s in seeds]
+    row = _run(
+        monkeypatch, tmp_path, scale_by_zone_class={"dining": 4.0},
+        base_cells=base, arm_cells=arm,
+    )["per_touch_scaling"]["cabin"]
+    assert row["verdict"] == "conforms"
+    assert row["scale_c"] == pytest.approx(1.0)
+
+
+def test_censored_class_still_reports_raw_matches(monkeypatch, tmp_path):
+    base, arm = _paired(capped=2.0)  # 2 % of 100 calls > 1 % ceiling
+    row = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["per_touch_scaling"]["cabin"]
+    assert row["verdict"] == "censored"
+    assert row["area_ratio_matches"] is True
+    assert row["log10_shift_within_3se"] is True
+
+
 @pytest.mark.parametrize(
     ("capped", "verdict"),
     [(5.0, "out of linear regime"), (0.5, "linear regime")],
@@ -133,6 +233,45 @@ def test_saturation_verdicts_and_per_class_rows(
     )
 
 
+def test_saturation_reports_censored_shares_and_regime(monkeypatch, tmp_path):
+    base, arm = _paired(capped=25.0, confined=10.0, zero_mass=3.0)
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["saturation_arm"]
+    cabin = result["per_zone_class_pool"]["cabin"]
+    assert cabin["regime"] == "measures the cap"
+    assert cabin["confined_share"] == pytest.approx(0.10, rel=1e-12)
+    assert cabin["zero_mass_share"] == pytest.approx(0.03, rel=1e-12)
+    assert result["classes_measuring_the_cap"] == ["cabin"]
+
+
+@pytest.mark.parametrize(
+    ("capped", "regime"),
+    [(0.5, "linear"), (10.0, "capped regime"), (25.0, "measures the cap")],
+)
+def test_saturation_regime_grades_with_capped_share(
+    monkeypatch, tmp_path, capped, regime,
+):
+    base, arm = _paired(capped=capped)
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["saturation_arm"]["per_zone_class_pool"]["cabin"]
+    assert result["regime"] == regime
+
+
+def test_classes_measuring_the_cap_empty_in_linear_regime(
+    monkeypatch, tmp_path,
+):
+    base, arm = _paired(capped=0.5)
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["saturation_arm"]
+    assert result["classes_measuring_the_cap"] == []
+
+
 @pytest.mark.parametrize(
     ("secondaries", "fragment"),
     [(3, "not resolvable at"), (25, "changed")],
@@ -148,22 +287,101 @@ def test_secondaries_resolvability_floor(
     assert fragment in result["verdict"]
 
 
-@pytest.mark.parametrize(
-    ("arm_dose", "verdict"),
-    [(4.2, "conforms"), (8.0, "departs")],
-)
-def test_whole_voyage_median_within_and_outside_tolerance(
-    monkeypatch, tmp_path, arm_dose, verdict,
+def _dose_pairs(
+    n: int,
+    up_count: int,
+    *,
+    dose_up: float = 10.0,
+    dose_down: float = 0.1,
+    zero_seed: int | None = None,
 ):
-    base, arm = _paired(dose=arm_dose)
+    """n paired seeds: first up_count arm doses above base, rest below."""
+    seeds = list(range(9001, 9001 + n))
+    base = [_cell(s, area=1.5, lf=_BASE_LF, dose=1.0) for s in seeds]
+    arm = []
+    for i, s in enumerate(seeds):
+        if s == zero_seed:
+            dose = 0.0
+        else:
+            dose = dose_up if i < up_count else dose_down
+        arm.append(
+            _cell(s, area=1.5 * _SCALE, lf=_BASE_LF + _SHIFT, dose=dose)
+        )
+    return base, arm
+
+
+@pytest.mark.parametrize(
+    ("up_count", "predicted", "verdict"),
+    [
+        (18, "up", "shifted"),
+        (10, "up", "not resolvable at n=20"),
+        (2, "up", "shifted against prediction"),
+        (18, "down", "shifted against prediction"),
+        (2, "down", "shifted"),
+    ],
+)
+def test_paired_dose_distribution_sign_verdicts(
+    monkeypatch, tmp_path, up_count, predicted, verdict,
+):
+    base, arm = _dose_pairs(20, up_count)
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE, predicted_direction=predicted,
+        base_cells=base, arm_cells=arm,
+    )["paired_dose_distribution"]
+    assert result["verdict"] == verdict
+    assert result["n"] == 20
+    assert result["k_matching_predicted_sign"] == (
+        up_count if predicted == "up" else 20 - up_count
+    )
+
+
+def test_paired_dose_distribution_magnitude_is_unscaled(monkeypatch, tmp_path):
+    base, arm = _dose_pairs(20, 18)
     result = _run(
         monkeypatch, tmp_path, scale=_SCALE,
         base_cells=base, arm_cells=arm,
-    )["whole_voyage_scaling"]
-    assert result["verdict"] == verdict
-    assert result["median_arm_times_scale_over_base"] == pytest.approx(
-        arm_dose * _SCALE, rel=1e-12,
+    )["paired_dose_distribution"]
+    assert result["median_r"] == pytest.approx(
+        math.log10(10.0), rel=1e-12,
     )
+    assert result["min_r"] == pytest.approx(math.log10(0.1), rel=1e-12)
+    assert result["max_r"] == pytest.approx(math.log10(10.0), rel=1e-12)
+
+
+def test_zero_dose_pair_is_undefined_not_counted(monkeypatch, tmp_path):
+    base, arm = _dose_pairs(20, 18, zero_seed=9005)
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["paired_dose_distribution"]
+    assert result["pairs_undefined"] == 1
+    assert result["n"] == 19
+    zero_row = next(p for p in result["paired"] if p["seed"] == 9005)
+    assert zero_row["r_s"] is None
+
+
+def test_k_threshold_alpha05_at_n20_is_15():
+    assert htar._k_threshold_alpha05(20) == 15
+
+
+def test_one_sided_tail_straddles_alpha_at_threshold():
+    assert htar._binomial_one_sided_tail(20, 15) <= 0.025
+    assert htar._binomial_one_sided_tail(20, 14) > 0.025
+
+
+def test_paired_dose_all_undefined_is_not_resolvable(monkeypatch, tmp_path):
+    seeds = [9001, 9002]
+    base = [_cell(s, area=1.5, lf=_BASE_LF, dose=0.0) for s in seeds]
+    arm = [
+        _cell(s, area=1.5 * _SCALE, lf=_BASE_LF + _SHIFT, dose=2.0)
+        for s in seeds
+    ]
+    result = _run(
+        monkeypatch, tmp_path, scale=_SCALE,
+        base_cells=base, arm_cells=arm,
+    )["paired_dose_distribution"]
+    assert result["verdict"] == "undefined: no defined pairs"
+    assert result["n"] == 0
 
 
 def test_missing_baseline_seed_exits(monkeypatch, tmp_path):
@@ -189,6 +407,7 @@ def test_main_writes_named_readout_json(monkeypatch, tmp_path):
                 "--arm-dir", str(tmp_path / "arm"),
                 "--arm-tag", "htaT",
                 "--scale", "0.25",
+                "--predicted-direction", "up",
                 "--out", str(out_dir),
             ],
         )
@@ -196,6 +415,37 @@ def test_main_writes_named_readout_json(monkeypatch, tmp_path):
         written = out_dir / "high_touch_area_readout_htaT.json"
         assert written.is_file()
         assert json.loads(written.read_text())["arm_tag"] == "htaT"
+    finally:
+        import shutil
+
+        shutil.rmtree(out_dir)
+
+
+def test_main_per_class_path_writes_class_map(monkeypatch, tmp_path):
+    base, arm = _two_class_paired(0.5, 2.0)
+    _run(
+        monkeypatch, tmp_path,
+        scale_by_zone_class={"cabin": 0.5, "dining": 2.0},
+        base_cells=base, arm_cells=arm,
+    )
+    out_dir = Path(tempfile.mkdtemp(dir=REPO_ROOT))
+    try:
+        rc = htar.main(
+            [
+                "--arm-dir", str(tmp_path / "arm"),
+                "--arm-tag", "htaT",
+                "--scale-by-zone-class", '{"cabin": 0.5, "dining": 2.0}',
+                "--predicted-direction", "down",
+                "--out", str(out_dir),
+            ],
+        )
+        assert rc == 0
+        written = json.loads(
+            (out_dir / "high_touch_area_readout_htaT.json").read_text()
+        )
+        assert "scale" not in written
+        assert written["scale_by_zone_class"] == {"cabin": 0.5, "dining": 2.0}
+        assert written["predicted_direction"] == "down"
     finally:
         import shutil
 
