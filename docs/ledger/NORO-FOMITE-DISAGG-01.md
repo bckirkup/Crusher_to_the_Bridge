@@ -1,6 +1,6 @@
 # NORO-FOMITE-DISAGG-01
 **Date:** 2026-09-22
-**Commit:** (PR1 head; filled at merge)
+**Commit:** 6594c6e
 **Pathogens:** norwalk_gi
 **Status:** declared
 
