@@ -638,9 +638,9 @@ def test_v11_design_is_the_declared_generic_fleet_screen(v11):
     cells = enumerate_cells(v11)
     assert len(cells) == 1600
     # Theta-outer, seed-inner: the canary row is 1e8 at indices 800..999.
-    assert cells[800].theta == 1e8
+    assert cells[800].theta == pytest.approx(1e8)
     assert cells[800].seed == 20201001
-    assert cells[999].theta == 1e8
+    assert cells[999].theta == pytest.approx(1e8)
     assert cells[999].seed == 20201200
 
 
@@ -664,6 +664,20 @@ def test_generic_spec_drops_the_declared_onset_and_departure(v11):
     assert raw["run"]["num_epochs"] == 168
     assert raw["config_overrides"]["num_epochs"] == 168
     assert raw["config_overrides"]["voyage"]["total_epochs"] == 168
+
+
+def test_generic_spec_opens_the_swab_channel_from_embarkation(v11, design):
+    generic = prepare_cell_run_spec(v11, enumerate_cells(v11)[800])
+    assert (
+        "molecular_ascertainment_start_day"
+        not in generic["config_overrides"]["syndromic"]
+    )
+    declared = prepare_cell_run_spec(design, enumerate_cells(design)[160])
+    assert (
+        declared["config_overrides"]["syndromic"][
+            "molecular_ascertainment_start_day"
+        ] == pytest.approx(14)
+    )
 
 
 def test_generic_age_is_drawn_paired_across_theta(v11):
@@ -749,7 +763,7 @@ def test_fleet_shape_passes_inside_the_h3_window():
     assert entry["fleet_shape_ok"] is True
     assert 0.0005 <= shape["median"] <= 0.008
     assert shape["mean"] <= 0.06
-    assert entry["p_recorded_ge_0p015"] == 0.0
+    assert entry["p_recorded_ge_0p015"] == pytest.approx(0.0)
 
 
 def test_fleet_shape_fails_on_an_extinct_or_burning_row():

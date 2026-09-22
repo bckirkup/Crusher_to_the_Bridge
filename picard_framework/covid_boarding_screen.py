@@ -414,7 +414,11 @@ def apply_boarding_axis(
     ``departure_day`` are dropped — a typical voyage's introduction is not a
     dated case report — and its infection age is a draw from the pathogen's
     incubation distribution, so the engine's lazy incubation channel applies
-    and the index stays aboard for the whole voyage.
+    and the index stays aboard for the whole voyage. The scenario's
+    molecular-ascertainment start day is a Diamond Princess historical —
+    onboard testing began mid-voyage there — while a generic voyage swabs
+    sick-call presenters from embarkation, so the start-day gate is dropped
+    and the recorded channel works for the whole voyage.
     """
     overrides = raw.setdefault("config_overrides", {})
     seeds = overrides.get("initiation", {}).get("explicit_seeds", [])
@@ -428,6 +432,9 @@ def apply_boarding_axis(
         seeds[0].pop("departure_day", None)
         seeds[0]["infection_age_days"] = _draw_introduction_age(
             incubation_profile, age_stream,
+        )
+        overrides.get("syndromic", {}).pop(
+            "molecular_ascertainment_start_day", None,
         )
     elif voyage_mode == VOYAGE_MODE_DECLARED:
         seeds[0]["infection_age_days"] = float(infection_age_days)
