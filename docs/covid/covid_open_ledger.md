@@ -303,25 +303,27 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   changes nothing. The screen payload has no episode or quarantine-window
   fields, so this campaign does not re-read those gates. Next decision (the
   criterion declaration): `docs/covid/covid_theta_handoff_2026_09_21.md` §8.
-- **`covid_theta_screen_v11` is declared and not yet run: the criterion
-  decision is resolved in favour of takeoff probability against covid.H3
-  with onsets scored conditional on takeoff**
-  (`picard_framework/runs/covid_theta_screen_v11_design.json`,
+- **`covid_theta_screen_v11` stage 1 has run: empty admissible set on the
+  decade lattice; the covid.H3 window is bracketed between Θ 1e10 and
+  1e11** (`7660392`, array `33482fcc-7954-4566-928d-7052d62b83ee`,
+  1,600/1,600 cells; readout
+  `docs/covid/covid_theta_screen_v11_readout.md`, ledger
   `docs/ledger/THETA-SCREEN-V11.md`). Unconditional covid.T1 is measured
   vacuous (interval-span at 1e9, `onset_mass_near_target` 0.00), so the
-  v10 `stage_2_fleet_shape` block is promoted to stage-1 selector on
-  generic 7-day voyages (8 decade Θ, 1e4–1e11, × 200 voyages, seed base
-  20201001 = 1,600 cells) and the declared replay is scored only among
-  takeoff seeds on the v7–v10 T1 form (q05–q95 of `recorded_onsets`
-  contains 197 AND median `before_share` within 0.10 of 0.173, ≥ 5
-  takeoff seeds else "insufficient takeoff mass"). **covid.H3 leaves the
-  held-out set for this screen** — it is the selection anchor; covid.H1/H2
-  on `greg_mortimer_2020` remain held out (gated stage 3). The rejected
-  alternative (T1 + import-geometry axis) is recorded in the design file:
-  imports > 1 measured negative (COVID-FIT-01) and unlicensed (Sekizuka
-  2020). The admissible set is the joint pass and may be empty — the
-  expected result localises the deficit to conditional outbreak size, not
-  takeoff. Worker support outstanding: a `voyage_mode` branch in
-  `apply_boarding_axis` (drop the seed's declared onset/departure, drawn
-  incubation age, 168 epochs) before any cell exists; then the two-part
-  canary declared in the design file.
+  v10 `stage_2_fleet_shape` block is the stage-1 selector on generic 7-day
+  voyages (8 decade Θ, 1e4–1e11, × 200 voyages, seed base 20201001);
+  P(takeoff) climbs 0.00 → 0.575 and the recorded-attack median jumps
+  0.0003 → 0.0158 across the last decade, straddling the H3 window
+  [0.0005, 0.008] without a lattice point inside it — nearest cells 1e10
+  (median misses floor 1.85×) and 1e11 (median/mean overshoot). Per the
+  design, stage 2 does not run and the conditional read is quoted from v10
+  (1,582–3,391 vs 197); generic takeoffs independently give DP-order
+  recorded mass (median 175 at 1e10) in a 7-day voyage. **covid.H3 stays
+  out of the held-out set for this screen**; covid.H1/H2 on
+  `greg_mortimer_2020` remain held out (gated stage 3). In-flight
+  user-approved amendment (#655): generic mode drops the DP's
+  `molecular_ascertainment.start_day` — the day-14 historical testing
+  start — so the recorded channel is live on generic voyages; the declared
+  replay keeps it. Open decision: a half-decade interior refinement
+  ({1.8e10, 3.2e10, 5.6e10}) to learn whether any admissible Θ exists
+  inside the located band, before stage 2 can ever enumerate.
