@@ -1,0 +1,99 @@
+{
+  "design_id": "covid_theta_screen_v11",
+  "parent_design": "covid_theta_screen_v10",
+  "description": "Stage 1 criterion screen: the admissibility criterion for a COVID Theta fit, chosen as recorded in docs/ledger/THETA-SCREEN-V11.md and docs/covid/covid_theta_handoff_2026_09_21.md section 8. THETA-SCREEN-V9 (0fb186b) and its re-measurement THETA-SCREEN-V10 (a9b4f1f) established that Theta moves the probability that one declared import takes off (0 at <= 1e3 -> 0.90 at 1e10), not the size of a taken-off voyage (conditional-on-takeoff median onsets 1,582-3,391 from 1e6 up, against covid.T1's 197), and that covid.T1 as declared is satisfiable by an interval that spans 197 between extinct and burning seeds (onset_mass_near_target 0.00 at the sole pass). A selector Theta cannot move is vacuous. This design therefore inverts the v10 stage ordering: the fleet-shape test that v10 reserved as a held-out refusal check becomes the stage-1 selector, scored as takeoff probability against covid.H3 on generic voyages, and the declared Diamond Princess replay is scored only on seeds that took off -- the record's voyage is a taken-off voyage, and scoring extinct seeds against it is the category error that made T1 vacuous. The admissible set is Thetas satisfying BOTH clauses; if it is empty the readout reports the nearest cells and the located band and states that no admissible Theta exists on this arm. No Theta on this design may be quoted as a fit. The rejected alternative (T1 trajectory with import geometry as the swept axis) is recorded under rejected_alternatives.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "covid_theta_screen_v10 as the selector question: v10 remains the declared-replay surface of record (a9b4f1f) and its decade rows are quoted, not re-run, at every lattice Theta (the default engine path is unchanged since a9b4f1f: the only engine diffs since are the default-absent hvac.outdoor_air_fraction_override (#645) and the RNG-neutral norovirus high-touch sweep axes (#646-#648))",
+  "prerequisites": [
+    "SEED-ONSET-01 (#609) and INDEX-GEOM-01 (#605): the diamond_princess_2020 explicit seed carries onset_day -1.0 and departure_day 5.0; the declared-replay cells inherit them verbatim from v10.",
+    "THETA-SCREEN-V9 (0fb186b) and THETA-SCREEN-V10 (a9b4f1f): takeoff fraction identical at every decade, zero takeoff-class flips in 200 paired seeds; Theta moves takeoff probability, not conditional size; the sole covid.T1 pass at 1e9 is an interval-span with onset_mass_near_target 0.00.",
+    "QUAR-ATTR-V2 (d62f10d): canary cell of record, arm A0_declared, seed 20200205 -- Theta 1e9: infections_total 3458, attack_rate 0.9318. The stage-2 replay cell at (1e9, 20200205) must reproduce this inside the campaign image.",
+    "The v10 stage_2_fleet_shape block (never submitted) is promoted to stage 1 here: its voyage shape, seed base, voyage count and criterion text are carried verbatim; what changes is only its role (selector instead of post-hoc refuser) and its Theta list (a fixed decade lattice instead of a stage-1 shortlist).",
+    "covid.H3's role change is declared in admissibility.h3_role_change below: it leaves the held-out set for this screen because the only training-side selector is measured vacuous. covid.H1/H2 (greg_mortimer_2020) remain held out and are the stage-3 check."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "generic",
+  "voyage_mode_note": "Stage 1 cells are generic voyages, not the declared replay: the explicit seed's onset_day and departure_day are dropped, its infection age is drawn from the profile's incubation distribution (a typical voyage's introduction is not a dated case report -- verbatim from the v10 stage-2 block), the voyage runs 7 days (168 epochs on the hourly clock), and no intervention fires because every declared mechanism starts after the voyage ends (SOP-017 day 16, testing campaign day 16, molecular ascertainment day 14). Carried: imports count 1 and sanitary_visit_mode dwell_weighted. Requires worker support next session: a voyage_mode branch in apply_boarding_axis and num_epochs 168 via build_fit_run_spec; until then the flat lattice below enumerates the cell keys and nothing else runs.",
+  "thetas": [
+    10000.0,
+    100000.0,
+    1000000.0,
+    10000000.0,
+    100000000.0,
+    1000000000.0,
+    10000000000.0,
+    100000000000.0
+  ],
+  "thetas_note": "Decade lattice 1e4-1e11. The declared replay's takeoff transition sat at 1e4-1e10 on the v10 surface; a generic introduction is expected to be weaker (drawn incubation, no symptomatic-at-boarding guarantee) but the index also stays aboard all 7 days rather than leaving at day 5, so the transition could sit either side of the declared curve. The lattice brackets both directions: 1e4 is the declared replay's first nonzero-takeoff decade and 1e11 is one decade above its top. If the admissible set sits on either boundary it is a boundary and is reported as one, never selected on -- the v10 thetas_note convention.",
+  "infection_age_days": [
+    0.0
+  ],
+  "infection_age_note": "Placeholder required by the cell enumeration grammar, NOT an axis: under voyage_mode generic the import's infection age is drawn per voyage from the profile's incubation distribution and the 0.0 in the cell key (age0d) carries no meaning. Declared so a reader of the S3 prefix is not misled into reading a seeded age.",
+  "imports": [
+    1
+  ],
+  "imports_note": "One import per voyage, verbatim from the v10 stage-2 block and licensed by the record (Sekizuka 2020, single introduction before quarantine). The number/timing-of-imports axis is the rejected alternative below, not an axis of this screen.",
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20201001,
+  "seeds": 200,
+  "seeds_note": "200 voyages per Theta, verbatim from the v10 stage-2 fleet-shape block (seed base 20201001, a different stream from the replay's 20200205). The Binomial standard error on a 0.25 tail share at 200 voyages is about 3%.",
+  "takeoff_recorded_onsets": 10,
+  "cells": 1600,
+  "cells_note": "8 Theta x 1 placeholder age x 1 import x 200 seeds = 1,600 stage-1 cells, each a 168-epoch generic voyage (~7 min vs the replay's ~30). Stage-2 replay cells are enumerated at readout time from the stage-1 admissible set and are NOT in this count.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any v11 cell exists. The criterion decision is the one posed in docs/covid/covid_theta_handoff_2026_09_21.md section 8 and docs/covid/covid_open_ledger.md section 3 (v9 bullet), resolved here in favour of takeoff probability against covid.H3 with the onset curve scored conditional on takeoff. Bimodality is not a failure criterion and its absence is not a success criterion -- verbatim from v10: covid.H3 records a median voyage attack rate of 0.2% with Diamond Princess at 712 cases, so the real fleet IS near-critical.",
+    "fleet_shape_selector": {
+      "criterion": "STAGE-1 SELECTOR, verbatim from the v10 stage_2_fleet_shape block: across the 200 generic voyages at each Theta, the median recorded attack rate lies within [0.0005, 0.008], the interquartile range overlaps [0.0003, 0.015], and the mean is not above 0.06.",
+      "target_source": "covid.H3 (median 0.002, IQR 0.0003-0.015, mean 0.037; 79 ships, 104 voyages, Willebrand 2022), data/observation/covid_fit_targets.json",
+      "numerator": "recorded_onsets / aboard_total per voyage -- the RECORDED channel, not the truth channel, verbatim from the v10 stage-2 note. Median [0.0005, 0.008] is a median of 2-30 recorded onsets on a 3,711-host hull.",
+      "note": "An approximation, declared: the model has one hull and one voyage length, not 79 hulls and a voyage mixture, so what is compared is the SHAPE of the across-voyage distribution. Reported beside it but never thresholded: P(attack >= 0.015) -- the fleet's upper-quartile share is ~0.25 by construction of its IQR -- P(attack >= 0.10), P(attack <= 0.01), and attack-rate quantiles at 0.1/0.25/0.5/0.75/0.9."
+    },
+    "conditional_trajectory_clause": {
+      "criterion": "STAGE-2 CLAUSE, scored only at stage-1-admissible Thetas and only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10) of the declared replay: the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February). The clause is scored only when a cell has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "This is the v7/v8/v9/v10 covid.T1 criterion restricted to the takeoff class: the same interval-and-share form, evaluated on the seeds whose outcome class matches the record (the real voyage took off). A pass is now a statement about taken-off voyages straddling 197, not about an interval spanning from extinction to burn. Reported beside it, never thresholded: the conditional analogue of onset_mass_near_target -- the fraction of TAKEOFF seeds whose recorded_onsets lies in [98.5, 394] -- so a conditional pass can be read as mass-near-197 or interval-spanning-197, and the full per-seed recorded_onsets vector."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT on stage-2 replay cells, verbatim from v10: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of seeds; a deviation is a seeding-path defect that invalidates the cell. On stage-1 generic-voyage cells the declared invariant is the converse: the run spec's explicit seed carries NO onset_day and NO departure_day, the drawn incubation and the 168-epoch duration are read back from the run spec, and any cell where onset_day or departure_day appears is a defect in the voyage_mode path.",
+      "reads": "the seeded host's own onset/departure record (replay) and the cell's run_spec.json (fleet)"
+    },
+    "h3_role_change": {
+      "declared": "covid.H3 leaves the held-out set for this screen: it is the stage-1 selection anchor. Declared rather than silently reused because the split in data/observation/covid_fit_targets.json tags it held_out; the reason is that the only training-side selector, unconditional covid.T1, is measured vacuous on this arm (THETA-SCREEN-V9 at 0fb186b, confirmed at a9b4f1f), and the fleet distribution is the only anchor that exists for voyage-level takeoff. What remains held out and never selected on: covid.H1 and covid.H2 on greg_mortimer_2020 (stage 3), covid.T2's direction check, covid.T3, covid.T4, the VSP-crossing and burn-tail diagnostics."
+    },
+    "selection": "The admissible set is every Theta passing the fleet_shape_selector whose declared-replay cells pass the conditional_trajectory_clause. If the set is empty the readout reports the nearest cells on each clause, the located takeoff band, and states that no admissible Theta exists on this arm; no criterion is loosened after the fact. If the fleet stage admits no Theta the replay stage does not run at all, and the conditional read at the decade lattice is quoted from the v10 surface instead. Pre-declared expectation from the v10 surface: the H3-admissible band, if any, sits near the takeoff transition (~1e7-1e8 on the declared geometry, higher on generic voyages) and the conditional clause fails there -- conditional medians 1,582-3,391 against 197 measured at a9b4f1f -- so the expected result is an empty admissible set that localises the deficit to conditional outbreak size (the during-quarantine arrest gap of COVID-VENT-AUDIT-01), not to takeoff. A measured empty set is the result this screen is for."
+  },
+  "diagnostics": {
+    "covid_T2": "Reported on replay cells, never selected on: direction of the passenger and crew onset turn in the 7 days after day 16.",
+    "covid_T3": "Reported, never used in selection: campaign positives interval against 634 and median specimens against 3,063. Demoted since v7 on saturation evidence; on this hull the campaign saturates against its own day capacities.",
+    "covid_T4": "Reported, never used in selection: asymptomatic share among positives, target 0.5047. Emergent from delivered dose, not a natural-history parameter; it cannot be met by a choice of Theta.",
+    "fleet_shape_indicator": "On replay cells, verbatim from v10: P(attack <= 0.01), takeoff fraction, P(attack >= 0.10), attack-rate quantiles -- reported so the replay's own distribution can be read against the fleet block's, declaring the conditioning-set difference (a dated symptomatic index is a stronger introduction than a drawn one).",
+    "burn_tail": "Reported on replay cells, verbatim from v10: whether the attack-rate q05-q95 interval excludes 0.19 entirely.",
+    "cross_pathogen": "vsp_reported_case_fraction_max and vsp_threshold_crossing_fraction carried in the payload and reported, verbatim from v10's cross_pathogen_readout block."
+  },
+  "rejected_alternatives": {
+    "t1_trajectory_with_import_geometry_axis": "REJECTED as this screen's criterion. (a) It keeps unconditional covid.T1 as the selector -- the measured-vacuous criterion whose sole pass was an interval-span with onset_mass_near_target 0.00 (THETA-SCREEN-V9, confirmed V10). (b) The import-count axis is already measured negative: covid_import_sweep_v1 / COVID-FIT-01 (a686114, 1,180 cells) swept imports 1-20 and matching the early onset count overshot the voyage total 3-6x on every Theta row; the open ledger records the imports x Theta axis closed as negative. The engine has been repaired since, but the direction is structural -- more imports raise takeoff AND onset mass, and the model already overshoots conditional mass by ~10x. (c) imports > 1 is not licensed by the record: Sekizuka 2020 supports a single introduction before quarantine, so a fitted import count declares the record wrong -- a model-versus-record finding to report, not a calibration axis. (d) Independently timed imports are additionally not expressible in the screen machinery (the imports axis sets count on the single declared seed; distinct timings are distinct seed records the record does not contain)."
+  },
+  "stage_2_declared_replay": {
+    "status": "gated on a non-empty stage-1 admissible set; enumerated at readout time",
+    "cell_shape": "Verbatim from covid_theta_screen_v10: onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 3.3 carried for cell-key compatibility, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+    "theta_points": "Every Theta in the stage-1 admissible set, plus the nearest failing lattice point on each side of it as boundary flanks. At decade-lattice Thetas (1e4-1e10) the v10 cells at a9b4f1f are QUOTED, not re-run -- the default engine path is unchanged since -- so new replay cells run only at off-lattice admissible or flank points (half-decade offsets inside the lattice are permitted for this purpose). If stage 1 admits no Theta, no replay cells run.",
+    "note": "The conditional_trajectory_clause is scored on these cells. The v10 decade rows already give the conditional read at lattice resolution and are reported beside whatever this stage produces."
+  },
+  "stage_3_held_out": {
+    "status": "designed, not submitted until stages 1 and 2 close",
+    "scenario_id": "greg_mortimer_2020",
+    "seed_base": 20200315,
+    "seeds": 50,
+    "note": "Verbatim from v10: scored once at the selected Theta and reported at its half-decade neighbours as sensitivity. The Greg Mortimer seed declares no onset day, so its incubation is drawn and its geometry is not an invariant there. covid.H1/H2 remain held out and are the check this screen never selected on. A miss here is a result to record, not a reason to reopen the grid."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v11. The image must be built from a main that contains this design file AND the voyage_mode worker path: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_1_cells": 1600,
+    "stride": 1,
+    "expected_cell_minutes": 7,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v11/<sha>/cells/",
+    "canary": "Two parts, both read before the array: (a) stage-1 Theta 1e8, all 200 generic voyages -- the run spec of every cell carries NO onset_day and NO departure_day on its explicit seed, num_epochs 168, the payload contract is unchanged (run_spec/summary/timeseries fields the merge reads), and the row is not degenerate (some takeoffs and some extinctions, attack-rate spread nonzero; a row that is all-extinct or all-burn at 1e8 is itself a reportable surprise); (b) one declared-replay cell at (Theta 1e9, seed 20200205) reproducing the QUAR-ATTR-V2/v10 record exactly (infections_total 3458, attack_rate 0.9318). Stop and report; the user decides whether the remaining cells run.",
+    "report_immediately_if": "the admissible set touches the 1e4 or 1e11 lattice boundary; the fleet takeoff transition sits entirely above the grid (zero takeoff at 1e11); any replay cell at a shared (Theta, seed) flips takeoff class against v10 outside a 2/20 seed band; the child failure rate exceeds 5%; or any stage-1 cell's run spec carries a declared onset_day or departure_day."
+  }
+}
