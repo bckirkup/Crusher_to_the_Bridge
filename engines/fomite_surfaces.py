@@ -506,12 +506,21 @@ class PerSurfaceFomiteState:
         pathogen_id: str,
         delivered_by_class: dict[str, float],
     ) -> None:
-        """Remove delivered mass class by class."""
+        """Remove delivered mass class by class.
+
+        The cleanable compartment sheds the same fraction the pooled
+        ``_scale_surface_mass`` applies (``cleanable * remaining/old``),
+        so delivery is a uniform removal across both compartments.
+        """
         for item_class, delivered in delivered_by_class.items():
             key = (unit_key, pathogen_id, item_class)
-            self.mass[key] = max(0.0, self.mass.get(key, 0.0) - delivered)
+            old_mass = self.mass.get(key, 0.0)
+            new_mass = max(0.0, old_mass - delivered)
+            self.mass[key] = new_mass
             self.cleanable[key] = min(
-                self.mass[key], self.cleanable.get(key, 0.0),
+                new_mass,
+                self.cleanable.get(key, 0.0)
+                * (new_mass / old_mass if old_mass > 0.0 else 0.0),
             )
 
     def routine_clean(
