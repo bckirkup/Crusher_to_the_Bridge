@@ -164,6 +164,7 @@ longer justifications.
 | [literature/consensus_tranche_43_illness_duration_harris_2019.md](literature/consensus_tranche_43_illness_duration_harris_2019.md) | Implemented, default-on where a survival table exists — Harris 2019 Fig 4C illness-duration survival table; the `illness_duration` dispersed arm on `norwalk_gi` |
 | [literature/consensus_tranche_44_transfer_product.md](literature/consensus_tranche_44_transfer_product.md) | Living — per-touch transfer chain vs literature; feeds NORO-TRANSFER-PRODUCT-01 |
 | [literature/consensus_tranche_45_high_touch_area.md](literature/consensus_tranche_45_high_touch_area.md) | Living — literature record for ledger NORO-HIGH-TOUCH-AREA-01; adopts nothing |
+| [literature/consensus_tranche_46_touch_behaviour.md](literature/consensus_tranche_46_touch_behaviour.md) | Living — which surfaces observation counts as touched (multi-user vs single-user), the evidence behind ledger NORO-HIGH-TOUCH-DEFINITION-01; adopts nothing |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs

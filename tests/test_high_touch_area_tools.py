@@ -204,14 +204,34 @@ def test_main_writes_named_readout_json(monkeypatch, tmp_path):
 
 def test_envelope_rows_are_ordered_positive_and_finite():
     for zone_class, row in htae.build_envelope()["classes"].items():
-        for key in ("hardware_m2", "broad_m2", "ceiling_total_surface_m2"):
+        for key in (
+            "hardware_m2",
+            "broad_m2",
+            "shared_m2",
+            "ceiling_total_surface_m2",
+        ):
             assert math.isfinite(row[key]), (zone_class, key, row[key])
             assert row[key] > 0.0, (zone_class, key, row[key])
         assert row["hardware_m2"] <= row["broad_m2"], zone_class
         assert row["broad_m2"] <= row["ceiling_total_surface_m2"], zone_class
+        assert row["shared_m2"] <= row["ceiling_total_surface_m2"], zone_class
         assert row["scale_to_hardware"] == pytest.approx(
             row["hardware_m2"] / row["shipped_m2"], rel=1e-9,
         )
+        assert row["scale_to_shared"] == pytest.approx(
+            row["shared_m2"] / row["shipped_m2"], rel=1e-9,
+        )
+
+
+@pytest.mark.parametrize("zone_class", ["dining", "crew_mess", "public"])
+def test_envelope_shared_reading_is_occupancy_coupled(zone_class):
+    row = htae.build_envelope()["classes"][zone_class]
+    assert row["shared_m2_per_occupant"] is not None
+    assert math.isfinite(row["shared_m2_per_occupant"])
+    assert row["shared_m2_per_occupant"] > 0.0
+    assert row["shared_m2_per_occupant"] == pytest.approx(
+        row["shared_m2"] / row["representative_occupancy"], rel=1e-9,
+    )
 
 
 def test_envelope_item_area_sources_are_the_three_labels():
