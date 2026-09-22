@@ -2,10 +2,12 @@
 **Date:** 2026-09-22
 **Commit:** 6c9a564
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 06b3239
 
-A campaign design frozen before any of its cells ran. Nothing in this entry is
-a result. Every dose figure it will eventually report is a ratio against a
+A campaign design frozen before any of its cells ran (§§1–6 are the frozen
+design, unaltered since). **Measured for the `hardware` canary only** (§7);
+`shared` and `broad` have not run. Every dose figure here is a ratio against a
 withdrawn baseline (`../norovirus/norovirus_open_ledger.md` §1) and is
 relative/derived, never a dose result.
 
@@ -188,7 +190,141 @@ is a later, separate session. Out of scope and noted only: the post-era A4
 anchor hole for two of four hulls and the `SURFACE_CONTACTS_PER_HOUR["cabin"]`
 (Yuan 2024) numerator sourcing defect, both recorded in the handoff §4.
 
-## 7. Canary readout
+## 7. Canary readout — `hardware` (measured)
 
-Not yet run. This section is filled when the `hardware` canary is read out
-and the status moves to `measured`.
+**Measured at `06b3239`**, seeds 8000–8019 (20 paired cells, 0 lost), 288
+epochs, `classic_cruise_1900`, `norwalk_gi`, 1,910 agents, run locally in
+3 h 01 min against the unaltered `shipped` baseline of
+`NORO-TRANSFER-PRODUCT-01`. Cells:
+`../norovirus/noro_high_touch_sweep_01/classic_cruise_1900/per_host_dose_challenge_hardware_seed<N>.json.gz`.
+Readout: `../norovirus/noro_high_touch_sweep_01/high_touch_area_readout_hardware.json`
+and `.txt`, produced by `tools/noro_diag/high_touch_area_readout.py
+--scale-by-zone-class <§3 hardware row> --predicted-direction up`.
+
+### 7.1 Criterion 1 — neutrality gate: **passed**, both halves
+
+Seed 9000 / 24 epochs. With the knob absent the challenge output is
+byte-identical on re-run and the summary carries no `high_touch_area_scale*`
+key, so the default path is untouched. With the `hardware` map set, every
+zone class with pool pickups shows its mean `sum_surface_area_m2 / calls` at
+exactly its multiplier times the baseline's: cabin 1.500 → 0.1738 (×0.115867),
+dining 8.000 → 7.4556 (×0.931948), public 6.000 → 3.3713 (×0.561882), all to
+`rel_tol 1e-9`. `crew_mess` had no pool calls in the 24-epoch unscaled leg, so
+it was cross-checked against the 20 pooled baseline cells (4.000 m²/call) and
+matches at 4.1198 = 4.000 × 1.02995 exactly. The per-class override therefore
+reaches `_fomite_surface_area` per class, and the sweep is not voided.
+
+### 7.2 Criterion 2a — per-touch scaling, per class
+
+| zone class | area ratio (expected) | log10 `f_touch` shift ± SE (expected) | capped share | pool calls arm/base | verdict |
+|---|---|---|---:|---|---|
+| cabin | 0.115867 (0.115867) | +0.917 ± 0.019 (+0.936) | 3.39e-03 | 11,490 / 22,677 | `conforms` |
+| crew_mess | 1.029950 (1.029950) | −0.018 ± 0.020 (−0.013) | 4.35e-03 | 1,838 / 2,502 | `conforms` |
+| dining | 0.931948 (0.931948) | +0.028 ± 0.010 (+0.031) | 0.00e+00 | 11,988 / 7,820 | `conforms` |
+| public | 0.561882 (0.561882) | +0.250 ± 0.003 (+0.250) | 0.00e+00 | 62,938 / 118,650 | `conforms` |
+| galley | 0.050420 (0.050420) | +0.822 ± 0.051 (+1.297) | **3.63e-01** | 226 / 640 | **`censored`** (area_match=True, shift_match=False) |
+
+`sanitary` had no pool pickups in either arm at this cell, so it is not
+scored; its multiplier is exercised but unobserved here. **In every class that
+is not saturated the per-touch chain scales exactly as `1/A`** — the fourth
+independent confirmation of `NORO-TRANSFER-PRODUCT-01`, now per class rather
+than under a single global factor.
+
+Galley is the one departure and it is a *censoring* artefact, not a mechanism
+failure: `f_touch` is logged only on uncapped calls, so at ×0.05042 the
+surviving 144 of 226 draws are the low tail and the pooled shift is pulled
+short of `−log10(0.05042)`. The area ratio is still exact. This is the galley
+mechanism the `g0.25` canary predicted, arriving at the endpoint where §5
+said it would bite first.
+
+### 7.3 Criterion 2b — paired per-seed dose distribution: **not resolvable at n = 20**
+
+Predicted direction **up** (§3). All 20 pairs defined, 0 undefined (no seed
+had a zero dose on either side).
+
+| statistic | value |
+|---|---|
+| `k` matching predicted sign `up` | **8 / 20** |
+| threshold for `shifted` at α = 0.05 | `k ≥ 15` (or `k ≤ 5` against) |
+| exact two-sided binomial p | **0.5034** |
+| median `r_s` (decades, unscored) | −0.205 |
+| IQR `r_s` | [−0.560, +1.012] |
+| min, max `r_s` | −1.577, +5.301 |
+| `legacy_median_ratio_unscaled` (retired, no verdict) | 18.81 |
+
+**Verdict: `not resolvable at n = 20` — design-limited, not a null.** The
+smallest admissible area endpoint, which raises per-touch dose by a
+calls-weighted +0.34 decades and does so exactly (§7.2), does not produce a
+resolvable directional shift in whole-voyage fomite dose: the signs split
+8 up / 12 down, and the per-seed spread (−1.58 to +5.30 decades, IQR 1.6
+decades wide) swamps the predicted move. Seed 8008 alone moves +5.30 decades
+and seed 8001 −1.58. This is `NORO-HIGH-TOUCH-AREA-01`'s finding reproduced
+under the rescored statistic and at a per-class endpoint rather than a global
+factor: **the per-touch relation is exact and the whole-voyage relation is
+not a scale law at all.** The magnitude figures above are reported and not
+scored, per §4.3; all are ratios against a withdrawn baseline.
+
+### 7.4 Criterion 3 — saturation, and the headline
+
+> **HEADLINE: for `galley` this arm measures the conservation cap, not the
+> transfer chain.** Galley pool pickups are capped on 82 of 226 calls
+> (**36.3 %**), far above the 20 % line frozen in §4.3(b).
+
+Arm pooled: 134 / 89,606 capped = 1.50e-03, `Σ requested / Σ offered` 0.027 →
+`linear regime` overall. Baseline pooled: 8 / 153,517 = 5.21e-05, 0.007 →
+`linear regime`.
+
+| zone class | arm capped / calls | arm share | regime | confined share | zero-mass share | base capped / calls |
+|---|---|---:|---|---:|---:|---|
+| cabin | 39 / 11,490 | 3.39e-03 | linear | 0.828 | 0.000 | 0 / 22,677 |
+| crew_mess | 8 / 1,838 | 4.35e-03 | linear | 0.000 | 0.000 | 6 / 2,502 |
+| dining | 0 / 11,988 | 0.00e+00 | linear | 0.000 | 0.000 | 0 / 7,820 |
+| public | 0 / 62,938 | 0.00e+00 | linear | 0.000 | 0.000 | 0 / 118,650 |
+| galley | 82 / 226 | **3.63e-01** | **measures the cap** | 0.000 | 0.000 | 0 / 640 |
+
+What this does and does not invalidate. Galley carries 226 of 89,606 arm pool
+pickups (0.25 %), so the arm's §7.3 dose distribution is not a galley result
+and is not withdrawn; but **no galley per-touch or per-class dose number from
+this arm is quotable as a transfer-chain result**, and any later arm that
+shrinks galley further measures the cap harder, not the chain. Cabin's 0.828
+confined share is the cabin-compartment localisation, not saturation — it is
+reported because §4.6 requires the censored shares beside every ratio.
+
+### 7.5 Criterion 4 — epidemiological endpoint: **not resolvable at n = 20**
+
+Arm 3 secondaries over 20 seeds; baseline 3 over the same 20 seeds. The §4.5
+floor for *changed* is ≥ 20. Identical counts here, and even a difference
+would not have been called: this design cannot resolve the endpoint, and no
+smaller difference is an effect in either direction.
+
+### 7.6 What is measured, inferred, and hypothesis
+
+- **Measured** (at `06b3239`, seeds 8000–8019): criterion 1 both halves;
+  per-class `1/A` per-touch scaling in cabin, crew_mess, dining, public;
+  galley censored at 36.3 % capped; `k = 8/20`, p = 0.5034 on the paired dose
+  signs; secondaries 3 vs 3.
+- **Inferred:** the galley shift shortfall is censoring rather than a
+  mechanism departure (its area ratio is exact and only uncapped calls are
+  logged). The whole-voyage dose distribution is dominated by touch-history
+  divergence rather than by the areal denominator.
+- **Hypothesis, not measured:** that `shared` and `broad` — whose predicted
+  direction is *down* and which move most classes by ×12–14 rather than
+  ×0.05–1 — would also be unresolvable. The endpoint measured here is the one
+  with the smaller predicted move (+0.34 decades vs ≈ −0.9), so this canary
+  does **not** settle the other two arms.
+- **Not contradicted:** nothing in this canary bears on the `∅nr` / `∅lit`
+  null on summed high-touch area; no literature was retrieved.
+
+### 7.7 Open decision (Benjamin's)
+
+Whether `shared` and `broad` run. They are frozen and ready (§§2–4); if they
+run they run on AWS Batch, not the local VM. The case for running them is
+that their predicted move is ≈ 2.6× larger than the canary's and in the
+opposite direction, so the canary does not answer them. The case against is
+that criterion 2b is design-limited at n = 20 for a per-seed spread of ~7
+decades, so two more 20-seed arms would most likely return
+`not resolvable at n = 20` again; resolving the coordinate at all plausibly
+needs either many more seeds per arm or the per-surface disaggregation
+(`../proposals/fomite_surface_disaggregation_spec.md`), which is a separate
+session. **No arm beyond this canary was run in this session, and nothing is
+adopted.**
