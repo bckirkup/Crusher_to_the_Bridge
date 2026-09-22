@@ -638,8 +638,10 @@ def test_v11_design_is_the_declared_generic_fleet_screen(v11):
     cells = enumerate_cells(v11)
     assert len(cells) == 1600
     # Theta-outer, seed-inner: the canary row is 1e8 at indices 800..999.
-    assert cells[800].theta == 1e8 and cells[800].seed == 20201001
-    assert cells[999].theta == 1e8 and cells[999].seed == 20201200
+    assert cells[800].theta == 1e8
+    assert cells[800].seed == 20201001
+    assert cells[999].theta == 1e8
+    assert cells[999].seed == 20201200
 
 
 def test_design_rejects_an_unknown_voyage_mode(design):
