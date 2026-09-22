@@ -10,7 +10,7 @@ per-item areas (literature where an item was measured, declared geometry where
 it was not), evaluated against the actual ``classic_cruise_1900`` zones, with
 the measured total object-surface inventories as the ceiling.
 
-Three quantities per zone class, all *derived*, none adopted:
+Four quantities per zone class, all *derived*, none adopted:
 
 * ``hardware`` -- the narrow reading of "high touch": hand-contact hardware
   only (handles, switches, taps, flush actuators, seats, rails, remotes,
@@ -19,6 +19,14 @@ Three quantities per zone class, all *derived*, none adopted:
 * ``broad`` -- hardware plus the touched planes of furniture (table tops,
   chair seats and backs, desks, counters), i.e. what an observational
   high-touch study would mark as touched at least once.
+* ``shared`` -- the single operational definition of
+  NORO-HIGH-TOUCH-DEFINITION-01: the touched extent of surfaces that more
+  than one of the zone's occupants touches over an occupancy cycle, i.e.
+  the same shared/public-surface set whose touch rates
+  ``SURFACE_CONTACTS_PER_HOUR`` already counts (Jin 2022 classes T+R,
+  excluding PP/PT; Ackerley 2025 lobby fomites; Carling 2009 shipboard
+  restroom objects; Zhang 2018/2021 public-vs-private touch network).
+  Derived, Grade C, and adopted nowhere.
 * ``ceiling`` -- total object-plus-material surface area of the room from the
   two measured indoor inventories, via the surface-to-volume ratio applied to
   the zone's declared air volume. An area above this is impossible; it is a
@@ -136,6 +144,18 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
             "bed_and_linen_touched": 2,
             "wardrobe_front": 1,
         },
+        "shared_fixed": {
+            "door_lever": 3,
+            "light_switch": 4,
+            "tap_set": 1,
+            "flush_actuator": 1,
+            "toilet_seat": 1,
+            "remote_or_phone": 2,
+            "button_or_dispenser": 2,
+            "grab_rail_m": 0.5,
+            "wardrobe_front": 1,
+            "work_plane": 1,
+        },
     },
     "sanitary": {
         "unit": "one water closet",
@@ -151,6 +171,16 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
             "grab_rail_m": 0.5,
         },
         "broad_extra_fixed": {"work_plane": 0.3},
+        "shared_fixed": {
+            "flush_actuator": 1,
+            "toilet_seat": 1,
+            "stall_latch": 1,
+            "door_lever": 1,
+            "tap_set": 1,
+            "button_or_dispenser": 2,
+            "grab_rail_m": 0.5,
+            "work_plane": 0.3,
+        },
     },
     "dining": {
         "unit": "one dining zone",
@@ -163,6 +193,13 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
         },
         "hardware_per_occupant": {"tableware_per_seat": 1},
         "broad_extra_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
+        "shared_fixed": {
+            "door_lever": 4,
+            "button_or_dispenser": 6,
+            "utensil": 20,
+            "tap_set": 2,
+        },
+        "shared_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
     },
     "crew_mess": {
         "unit": "one crew mess zone",
@@ -175,6 +212,13 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
         },
         "hardware_per_occupant": {"tableware_per_seat": 1},
         "broad_extra_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
+        "shared_fixed": {
+            "door_lever": 3,
+            "button_or_dispenser": 4,
+            "utensil": 15,
+            "tap_set": 2,
+        },
+        "shared_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
     },
     "public": {
         "unit": "one public zone",
@@ -186,6 +230,12 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
         },
         "hardware_per_occupant": {"small_panel": 0.5},
         "broad_extra_per_occupant": {"chair_touched": 1},
+        "shared_fixed": {
+            "door_lever": 8,
+            "button_or_dispenser": 10,
+            "grab_rail_m": 20,
+        },
+        "shared_per_occupant": {"chair_touched": 1, "small_panel": 0.5},
     },
     "galley": {
         "unit": "one galley zone",
@@ -197,6 +247,13 @@ ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
             "button_or_dispenser": 25,
         },
         "broad_extra_fixed": {"work_plane": 18},
+        "shared_fixed": {
+            "door_lever": 12,
+            "utensil": 60,
+            "tap_set": 6,
+            "button_or_dispenser": 25,
+            "work_plane": 18,
+        },
     },
 }
 
@@ -292,6 +349,9 @@ def _envelope_for_class(
     broad += _sum_items(spec.get("broad_extra_fixed", {}))
     broad += occupancy * _sum_items(spec.get("broad_extra_per_occupant", {}))
 
+    shared = _sum_items(spec.get("shared_fixed", {}))
+    shared += occupancy * _sum_items(spec.get("shared_per_occupant", {}))
+
     shipped = (
         SANITARY_HIGH_TOUCH_AREA_M2_PER_WC
         if zone_class == "sanitary"
@@ -306,9 +366,13 @@ def _envelope_for_class(
         "shipped_m2": shipped,
         "hardware_m2": hardware,
         "broad_m2": broad,
+        "shared_m2": shared,
         "ceiling_total_surface_m2": ceiling,
         "scale_to_hardware": hardware / shipped,
         "scale_to_broad": broad / shipped,
+        "scale_to_shared": shared / shipped,
+        "shared_m2_per_occupant": shared / occupancy if occupancy > 0 else None,
+        "shipped_m2_per_occupant": shipped / occupancy if occupancy > 0 else None,
         "shipped_over_ceiling": shipped / ceiling if ceiling > 0.0 else None,
         "shipped_inside_envelope": hardware <= shipped <= broad,
         "zones": [z["id"] for z in zones],
@@ -345,6 +409,9 @@ def build_envelope(layout_path: Path = LAYOUT) -> dict[str, Any]:
                 k: round(v["scale_to_hardware"], 3) for k, v in classes.items()
             },
             "broad": {k: round(v["scale_to_broad"], 3) for k, v in classes.items()},
+            "shared": {
+                k: round(v["scale_to_shared"], 3) for k, v in classes.items()
+            },
         },
     }
 
@@ -352,15 +419,18 @@ def build_envelope(layout_path: Path = LAYOUT) -> dict[str, Any]:
 def _markdown(envelope: dict[str, Any]) -> str:
     lines = [
         "| zone class | unit | rep. occ. | shipped A (m2) | hardware (m2) | "
-        "broad (m2) | ceiling (m2) | x to hardware | x to broad |",
-        "|---|---|---:|---:|---:|---:|---:|---:|---:|",
+        "broad (m2) | shared (m2) | ceiling (m2) | x to hardware | x to broad | "
+        "x to shared |",
+        "|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for name, row in envelope["classes"].items():
         lines.append(
             f"| {name} | {row['unit']} | {row['representative_occupancy']:.0f} | "
             f"{row['shipped_m2']:.2f} | {row['hardware_m2']:.2f} | "
-            f"{row['broad_m2']:.2f} | {row['ceiling_total_surface_m2']:.0f} | "
-            f"{row['scale_to_hardware']:.2f} | {row['scale_to_broad']:.2f} |",
+            f"{row['broad_m2']:.2f} | {row['shared_m2']:.2f} | "
+            f"{row['ceiling_total_surface_m2']:.0f} | "
+            f"{row['scale_to_hardware']:.2f} | {row['scale_to_broad']:.2f} | "
+            f"{row['scale_to_shared']:.2f} |",
         )
     return "\n".join(lines)
 
