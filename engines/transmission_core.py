@@ -47,6 +47,11 @@ import numpy as np
 
 from crusher_labs.clinical_presentation import resolve_phase
 from engines.crew_duty_exclusion import is_food_employee
+from engines.fomite_surfaces import (
+    PerSurfaceFomiteState,
+    UnitInventory,
+    parse_per_surface_config,
+)
 from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
@@ -1850,6 +1855,18 @@ class TransmissionCore:
         self.high_touch_area_scale_by_zone_class = (
             _parse_high_touch_area_scale_by_zone_class(tx)
         )
+        # NORO-FOMITE-DISAGG-01: absent or ``pooled`` leaves every surface
+        # hook inert (``self._per_surface is None`` guards), so the shipped
+        # path is bit-identical to the pre-change tree.
+        self.per_surface_config = parse_per_surface_config(tx)
+        self._per_surface = (
+            PerSurfaceFomiteState(self.per_surface_config)
+            if self.per_surface_config is not None
+            else None
+        )
+        self.fomite_representation = (
+            "per_surface" if self._per_surface is not None else "pooled"
+        )
         # The blackwater tank reads mass that is otherwise dropped (the
         # non-aerosolised bowl share and emesis ``non_touchable``) and
         # consumes no RNG, so the off path is bit-identical.
@@ -2486,6 +2503,15 @@ class TransmissionCore:
         )
         cleanable[zone_name] = cleanable.get(zone_name, 0.0) + mass * coverage
         self._routine_cleaning_accumulators.setdefault(zone_name, 0.0)
+        if self._per_surface is not None:
+            self._per_surface.deposit(
+                zone_name,
+                pathogen_id,
+                mass,
+                self._per_surface_inventory(
+                    zone_name, self._fomite_surface_area_pooled(zone_name),
+                ),
+            )
 
     def _scale_surface_mass(
         self,
@@ -2516,32 +2542,39 @@ class TransmissionCore:
             remaining,
             max(0.0, float(cleanable.get(zone_name, 0.0))) * factor,
         )
+        if self._per_surface is not None:
+            self._per_surface.scale(zone_name, pathogen_id, factor)
 
     def _routine_cleaning_event(self, zone_name: str) -> None:
         """Apply one routine pass to the cleanable compartment in a zone."""
         multiplier = 10.0 ** -max(
             0.0, float(self.routine_cleaning_log10_reduction),
         )
-        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
-            total = max(0.0, float(pools.get(zone_name, 0.0)))
-            if total <= 0.0:
-                continue
-            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-                pathogen_id, {},
-            )
-            old_cleanable = min(
-                total, max(0.0, float(cleanable.get(zone_name, 0.0))),
-            )
-            retention = 1.0 - (old_cleanable / total) * (1.0 - multiplier)
-            self._scale_surface_mass(pathogen_id, zone_name, retention)
-            cleanable[zone_name] = old_cleanable * multiplier
-            if self.strain_registry is not None:
-                self._reservoir.decay(
-                    retention,
-                    ReservoirComposition.key(
-                        SURFACE_RESERVOIR, pathogen_id, zone_name,
-                    ),
+        if self._per_surface is not None:
+            self._routine_cleaning_event_by_class(zone_name, multiplier)
+        else:
+            for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+                total = max(0.0, float(pools.get(zone_name, 0.0)))
+                if total <= 0.0:
+                    continue
+                cleanable = (
+                    self.surface_pools_cleanable_by_pathogen.setdefault(
+                        pathogen_id, {},
+                    )
                 )
+                old_cleanable = min(
+                    total, max(0.0, float(cleanable.get(zone_name, 0.0))),
+                )
+                retention = 1.0 - (old_cleanable / total) * (1.0 - multiplier)
+                self._scale_surface_mass(pathogen_id, zone_name, retention)
+                cleanable[zone_name] = old_cleanable * multiplier
+                if self.strain_registry is not None:
+                    self._reservoir.decay(
+                        retention,
+                        ReservoirComposition.key(
+                            SURFACE_RESERVOIR, pathogen_id, zone_name,
+                        ),
+                    )
         # Emesis patches sit on high-touch surface, so a routine pass sees
         # them as cleanable at the zone's routine coverage.
         for pathogen_id, patches_by_unit in (
@@ -2557,6 +2590,47 @@ class TransmissionCore:
                 if self._scale_emesis_patch(p, retention) > 0.0
             ]
             patches_by_unit[zone_name] = kept
+
+    def _routine_cleaning_event_by_class(
+        self,
+        zone_name: str,
+        multiplier: float,
+    ) -> None:
+        """Routine pass over the per-item-class sub-pools (per-surface arm).
+
+        The class retentions roll up to one zone retention applied to the
+        pooled compartments, so the unit cleans exactly the mass the pooled
+        path would clean at its effective coverage. ``_scale_surface_mass``
+        is deliberately not called -- it would re-scale the classes.
+        """
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            total = max(0.0, float(pools.get(zone_name, 0.0)))
+            if total <= 0.0:
+                continue
+            retention = self._per_surface.routine_clean(
+                zone_name, pathogen_id, multiplier,
+            )
+            new_total = self._per_surface.total(zone_name, pathogen_id)
+            pools[zone_name] = new_total
+            self.surface_pools[zone_name] = max(
+                0.0,
+                float(self.surface_pools.get(zone_name, 0.0))
+                - total
+                + new_total,
+            )
+            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            cleanable[zone_name] = self._per_surface.cleanable_total(
+                zone_name, pathogen_id,
+            )
+            if self.strain_registry is not None:
+                self._reservoir.decay(
+                    retention,
+                    ReservoirComposition.key(
+                        SURFACE_RESERVOIR, pathogen_id, zone_name,
+                    ),
+                )
 
     def _scale_emesis_patch(self, patch: EmesisPatch, factor: float) -> float:
         """Scale one patch's mass by a decay/cleaning retention; drop at ~0."""
@@ -5308,6 +5382,35 @@ class TransmissionCore:
         )
 
     def _fomite_surface_area(self, zone_name: str) -> float:
+        pooled = self._fomite_surface_area_pooled(zone_name)
+        if self._per_surface is None:
+            return pooled
+        return self._per_surface_inventory(zone_name, pooled).total_area_m2
+
+    def _per_surface_inventory(
+        self,
+        zone_name: str,
+        pooled_area_m2: float,
+    ) -> UnitInventory:
+        """Register (idempotently) and return the unit's item inventory."""
+        zone_class = self._fomite_zone_class(zone_name)
+        water_closets = 1
+        if zone_class == "sanitary":
+            declared = self.zone_floor_areas.get(zone_name)
+            if declared is not None:
+                water_closets = max(
+                    1,
+                    round(float(declared) / SANITARY_FLOOR_AREA_M2_PER_WC),
+                )
+        return self._per_surface.register_unit(
+            zone_name,
+            zone_class,
+            pooled_area_m2,
+            water_closets,
+            self._routine_cleaning_schedule(zone_name)[0],
+        )
+
+    def _fomite_surface_area_pooled(self, zone_name: str) -> float:
         zone_class = self._fomite_zone_class(zone_name)
         if zone_class == "sanitary":
             # Touchable surface is hardware, not footprint: water closets
@@ -5398,6 +5501,16 @@ class TransmissionCore:
             * self.clock.hours_per_epoch,
         )
 
+    def _draw_surface_to_hand(self) -> tuple[float, float, float]:
+        """The three surface->hand draws, in the pooled order."""
+        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
+        used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+        transfer_efficiency = min(
+            1.0,
+            max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
+        )
+        return hand_area, used_fraction, transfer_efficiency
+
     def _fomite_pickup_request(
         self,
         target: KorkinAgent,
@@ -5431,11 +5544,8 @@ class TransmissionCore:
         """
         if self._cabin_confinement_active(target):
             return 0.0
-        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
-        used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
-        transfer_efficiency = min(
-            1.0,
-            max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
+        hand_area, used_fraction, transfer_efficiency = (
+            self._draw_surface_to_hand()
         )
         request = (
             self._fomite_surface_contacts(zone_name, target, epoch)
@@ -5444,6 +5554,32 @@ class TransmissionCore:
             * surface_mass
         )
         return min(surface_mass, max(0.0, request))
+
+    def _fomite_pickup_requests_by_class(
+        self,
+        target: KorkinAgent,
+        zone_name: str,
+        epoch: int,
+        pathogen_id: str,
+    ) -> dict[str, float] | None:
+        """One target's per-item-class pickup requests (per-surface arm).
+
+        ``None`` for a cabin-confined target -- no draws, exactly as the
+        pooled request's 0.0 -- so the two arms take identical draws.
+        """
+        if self._cabin_confinement_active(target):
+            return None
+        hand_area, used_fraction, transfer_efficiency = (
+            self._draw_surface_to_hand()
+        )
+        contacts = self._fomite_surface_contacts(zone_name, target, epoch)
+        inv = self._per_surface_inventory(
+            zone_name, self._fomite_surface_area_pooled(zone_name),
+        )
+        return self._per_surface.pickup_requests(
+            inv, zone_name, pathogen_id, contacts,
+            used_fraction, hand_area, transfer_efficiency,
+        )
 
     @staticmethod
     def _hand_to_surface_drying(profile: dict | None) -> float:
@@ -6366,20 +6502,125 @@ class TransmissionCore:
             delivered = requested * scale
             if delivered <= 0.0:
                 continue
-            hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
-            target.hand_load_by_pathogen[pathogen_id] = hand + delivered
-            dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
-            target.hand_load_by_pathogen[pathogen_id] = (
-                hand + delivered - dose
-            )
-            self._record_fomite_pickup(
-                target, zone_name, surface_mass, delivered, dose,
+            self._deliver_one_pickup(
+                target, delivered, zone_name, surface_mass, epoch,
                 prev_occupant_ids, prev_shedders,
                 agent_doses, matrix, agent_pathway_doses, pathogen_id,
                 surface_attribution,
             )
             delivered_total += delivered
         return delivered_total
+
+    def _deliver_one_pickup(
+        self,
+        target: KorkinAgent,
+        delivered: float,
+        zone_name: str,
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> float:
+        """Hand one target its delivered mass and ingest the hand->mouth dose.
+
+        Returns the ingested dose so callers with per-event telemetry can
+        book it; the pooled caller ignores it.
+        """
+        hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        target.hand_load_by_pathogen[pathogen_id] = hand + delivered
+        dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
+        target.hand_load_by_pathogen[pathogen_id] = (
+            hand + delivered - dose
+        )
+        self._record_fomite_pickup(
+            target, zone_name, surface_mass, delivered, dose,
+            prev_occupant_ids, prev_shedders,
+            agent_doses, matrix, agent_pathway_doses, pathogen_id,
+            surface_attribution,
+        )
+        return dose
+
+    def _deliver_fomite_requests_by_class(
+        self,
+        requests: list[tuple[KorkinAgent, dict[str, float]]],
+        zone_name: str,
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> dict[str, float]:
+        """Scale per-class requests to each class pool and deliver to hands.
+
+        Demand exceeding one class's mass scales down only that class --
+        the per-class analogue of the pooled ``_delivery_scale``. Returns
+        the delivered mass per item class.
+        """
+        classes = {c for _, req in requests for c in req}
+        scales = {
+            c: self._delivery_scale(
+                sum(req.get(c, 0.0) for _, req in requests),
+                self._per_surface.mass.get((zone_name, pathogen_id, c), 0.0),
+            )
+            for c in classes
+        }
+        delivered_by_class = {c: 0.0 for c in classes}
+        for target, request in requests:
+            delivered = sum(request.get(c, 0.0) * scales[c] for c in classes)
+            if delivered <= 0.0:
+                continue
+            self._deliver_one_pickup(
+                target, delivered, zone_name, surface_mass, epoch,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
+            for c in classes:
+                delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        return delivered_by_class
+
+    def _consume_surface_mass_by_class(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        delivered_by_class: dict[str, float],
+        previous_mass: float,
+    ) -> None:
+        """Per-class analogue of ``_consume_surface_mass``."""
+        if previous_mass <= 0.0 or not any(
+            delivered > 0.0 for delivered in delivered_by_class.values()
+        ):
+            return
+        self._per_surface.consume(zone_name, pathogen_id, delivered_by_class)
+        remaining = self._per_surface.total(zone_name, pathogen_id)
+        pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
+        tracked = max(0.0, float(pools.get(zone_name, 0.0)))
+        pools[zone_name] = remaining
+        self.surface_pools[zone_name] = max(
+            0.0,
+            float(self.surface_pools.get(zone_name, 0.0))
+            - tracked
+            + remaining,
+        )
+        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        cleanable[zone_name] = self._per_surface.cleanable_total(
+            zone_name, pathogen_id,
+        )
+        self._reservoir.decay(
+            remaining / previous_mass,
+            ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        )
 
     def _emesis_patch_pickup(
         self,
@@ -6561,6 +6802,43 @@ class TransmissionCore:
         self._reservoir.decay(
             remaining / previous_mass,
             ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        )
+
+    def _fomite_pickup_by_class(
+        self,
+        zone_name: str,
+        susceptible: list[KorkinAgent],
+        surface_mass: float,
+        epoch: int,
+        prev_occupant_ids: set[int],
+        prev_shedders: list[int],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: DoseAttribution | None,
+    ) -> None:
+        """Per-item-class request/deliver/consume for one zone (per-surface arm).
+
+        Confined targets contribute no request -- the pooled arm includes
+        them at request 0.0 and the delivery loop skips them, so draw order
+        is unchanged.
+        """
+        requests = []
+        for target in susceptible:
+            request = self._fomite_pickup_requests_by_class(
+                target, zone_name, epoch, pathogen_id,
+            )
+            if request is not None:
+                requests.append((target, request))
+        delivered_by_class = self._deliver_fomite_requests_by_class(
+            requests, zone_name, surface_mass, epoch,
+            prev_occupant_ids, prev_shedders,
+            agent_doses, matrix, agent_pathway_doses, pathogen_id,
+            surface_attribution,
+        )
+        self._consume_surface_mass_by_class(
+            pathogen_id, zone_name, delivered_by_class, surface_mass,
         )
 
     def _pathway_fomite_legacy_default(
@@ -6814,6 +7092,39 @@ class TransmissionCore:
             )
 
         # Pickup by susceptible visitors, grouped per venue pool.
+        if self._per_surface is not None:
+            class_requests: dict[str, list[tuple[KorkinAgent, dict[str, float]]]] = {}
+            for (aid, venue), n in records.items():
+                agent = agents.get(aid)
+                if agent is None or agent not in self._get_susceptible(
+                    [agent], pathogen_id,
+                ):
+                    continue
+                path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+                surface_mass = (
+                    path_pools.get(venue, 0.0)
+                    if path_pools is not None
+                    else self.surface_pools.get(venue, 0.0)
+                )
+                if surface_mass <= 0.0:
+                    continue
+                request = self._fomite_pickup_requests_by_class(
+                    agent, venue, epoch, pathogen_id,
+                )
+                if request is None:
+                    continue
+                share = share_of(agent, n)
+                scaled = {c: value * share for c, value in request.items()}
+                if any(value > 0.0 for value in scaled.values()):
+                    class_requests.setdefault(venue, []).append(
+                        (agent, scaled),
+                    )
+            for venue, requests in class_requests.items():
+                self._deliver_sanitary_requests_by_class(
+                    requests, venue, epoch, agent_doses, matrix,
+                    agent_pathway_doses, pathogen_id, ledger,
+                )
+            return
         requests_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for (aid, venue), n in records.items():
             agent = agents.get(aid)
@@ -6873,6 +7184,58 @@ class TransmissionCore:
             self._consume_surface_mass(
                 pathogen_id, venue, delivered_total, surface_mass,
             )
+
+    def _deliver_sanitary_requests_by_class(
+        self,
+        requests: list[tuple[KorkinAgent, dict[str, float]]],
+        venue: str,
+        epoch: int,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Per-class delivery at one sanitary venue (per-surface arm).
+
+        Same shape as the pooled venue loop: per-class ``_delivery_scale``
+        against each class's mass, then hand->mouth dose and telemetry.
+        """
+        path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        surface_mass = (
+            path_pools.get(venue, 0.0)
+            if path_pools is not None
+            else self.surface_pools.get(venue, 0.0)
+        )
+        classes = {c for _, req in requests for c in req}
+        scales = {
+            c: self._delivery_scale(
+                sum(req.get(c, 0.0) for _, req in requests),
+                self._per_surface.mass.get((venue, pathogen_id, c), 0.0),
+            )
+            for c in classes
+        }
+        surface_attribution = attribution(
+            ledger,
+            self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, venue),
+        )
+        delivered_by_class = {c: 0.0 for c in classes}
+        for agent, request in requests:
+            delivered = sum(request.get(c, 0.0) * scales[c] for c in classes)
+            if delivered <= 0.0:
+                continue
+            dose = self._deliver_one_pickup(
+                agent, delivered, venue, surface_mass, epoch,
+                set(), [], agent_doses, matrix, agent_pathway_doses,
+                pathogen_id, surface_attribution,
+            )
+            self.sanitary_telemetry["dose_delivered"] += dose
+            self.sanitary_telemetry["recipients"] += 1
+            for c in classes:
+                delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        self._consume_surface_mass_by_class(
+            pathogen_id, venue, delivered_by_class, surface_mass,
+        )
 
     def _pathway_fomite(
         self,
@@ -6972,6 +7335,15 @@ class TransmissionCore:
                 self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
             )
 
+            if self._per_surface is not None:
+                self._fomite_pickup_by_class(
+                    zone_name, susceptible, surface_mass, epoch,
+                    prev_occupant_ids, prev_shedders,
+                    agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                    surface_attribution,
+                )
+                continue
+
             requests = [
                 (
                     target,
@@ -7011,6 +7383,37 @@ class TransmissionCore:
         for occupants in zone_occupants.values():
             for agent in occupants:
                 self._apply_hand_hygiene(agent, pathogen_id, profile)
+
+    def zone_item_class_state(
+        self,
+        zone_name: str,
+        pathogen_id: str,
+    ) -> dict[str, dict[str, float]]:
+        """Read-only per-item-class surface state for a unit.
+
+        Empty under the pooled representation; otherwise each class reports
+        its mass, enumerated area, item count, areal density and touch
+        share, for the readout tool and tests.
+        """
+        if self._per_surface is None:
+            return {}
+        inv = self._per_surface.inventory(zone_name)
+        if inv is None:
+            return {}
+        density = self._per_surface.class_density_per_m2(
+            zone_name, pathogen_id,
+        )
+        state: dict[str, dict[str, float]] = {}
+        for item_class, count in inv.counts.items():
+            key = (zone_name, pathogen_id, item_class)
+            state[item_class] = {
+                "mass": self._per_surface.mass.get(key, 0.0),
+                "area_m2": count * inv.area_each_m2[item_class],
+                "count": count,
+                "density_per_m2": density.get(item_class, 0.0),
+                "touch_share": inv.touch_share[item_class],
+            }
+        return state
 
     # ── Pathway 5: Food Contamination ────────────────────────────────
 

@@ -35,7 +35,9 @@ Four quantities per zone class, all *derived*, none adopted:
 The output is an envelope and the per-zone-class multiplier that maps the
 shipped table onto each end of it. Those multipliers are the sweep arms of
 ``docs/ledger/NORO-HIGH-TOUCH-AREA-01.md``. **No constant is changed by this
-script and nothing here is adopted into the engine.**
+script.** The item tables themselves now live in ``engines/fomite_surfaces``
+(NORO-FOMITE-DISAGG-01) and are re-imported here, so the engine's
+default-off per-surface arm and this envelope read one enumeration.
 
 Sources, each recorded at the item or count it supports:
 
@@ -83,6 +85,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from engines.fomite_surfaces import (  # noqa: E402
+    ITEM_AREA_M2,
+    ZONE_ITEM_SETS,
+)
 from engines.transmission_core import (  # noqa: E402
     HIGH_TOUCH_AREA_M2,
     SANITARY_HIGH_TOUCH_AREA_M2_PER_WC,
@@ -95,167 +101,6 @@ from simulation_utils.paths import (  # noqa: E402
 LAYOUT = (
     REPO_ROOT / "data" / "platforms" / "classic_cruise_1900" / "spatial_layout.json"
 )
-
-# --- item areas in m2 -------------------------------------------------------
-# (area_m2, src, note). ``measured``/``qmra`` items are read off the paper
-# named in the note; ``declared`` items are this repository's geometry for an
-# object no retrieved source dimensions.
-ITEM_AREA_M2: dict[str, tuple[float, str, str]] = {
-    "toilet_seat": (0.0700, "measured", "Park 2015 toilet seat surface 700 cm2"),
-    "flush_actuator": (0.0010, "measured", "Gerba 2025 flush handle 10 cm2"),
-    "door_lever": (0.0016, "qmra", "Weir 2016 aluminium fomite 15.8 cm2"),
-    "small_panel": (0.0059, "qmra", "Weir 2016 plastic laminate 593 cm2"),
-    "work_plane": (1.0450, "qmra", "Weir 2016 wood laminate 11.25 ft2"),
-    "light_switch": (0.0020, "declared", "switch plate ~20 cm2"),
-    "tap_set": (0.0100, "declared", "two handles + spout ~100 cm2"),
-    "stall_latch": (0.0020, "declared", "latch + edge ~20 cm2"),
-    "remote_or_phone": (0.0100, "declared", "handset/remote ~100 cm2"),
-    "button_or_dispenser": (0.0050, "declared", "actuator + bezel ~50 cm2"),
-    "grab_rail_m": (0.1000, "declared", "0.1 m2 of rail per linear metre"),
-    "utensil": (0.0050, "declared", "serving tong / handle ~50 cm2"),
-    "tableware_per_seat": (0.0200, "declared", "glass + cutlery + menu ~200 cm2"),
-    "table_top_per_seat": (0.1200, "declared", "place setting footprint"),
-    "chair_touched": (0.1500, "declared", "seat pan + back + arms"),
-    "bed_and_linen_touched": (0.3000, "declared", "headboard, rail, top sheet edge"),
-    "wardrobe_front": (0.1000, "declared", "door fronts and pulls"),
-}
-
-# --- item sets --------------------------------------------------------------
-# ``fixed`` items are per zone unit; ``per_occupant`` items scale with the
-# zone's declared max_occupancy (a 400-seat dining room has 400 place
-# settings). ``hardware`` and ``broad`` differ only in which items count.
-ZONE_ITEM_SETS: dict[str, dict[str, Any]] = {
-    "cabin": {
-        "unit": "one stateroom compartment (2 berths)",
-        "occupants": 2,
-        "count_anchor": "Heo 2023 38-item list; Park 2015 cabin swab sites",
-        "hardware_fixed": {
-            "door_lever": 3,
-            "light_switch": 4,
-            "tap_set": 1,
-            "flush_actuator": 1,
-            "toilet_seat": 1,
-            "remote_or_phone": 2,
-            "button_or_dispenser": 2,
-            "grab_rail_m": 0.5,
-        },
-        "broad_extra_fixed": {
-            "work_plane": 1,
-            "bed_and_linen_touched": 2,
-            "wardrobe_front": 1,
-        },
-        "shared_fixed": {
-            "door_lever": 3,
-            "light_switch": 4,
-            "tap_set": 1,
-            "flush_actuator": 1,
-            "toilet_seat": 1,
-            "remote_or_phone": 2,
-            "button_or_dispenser": 2,
-            "grab_rail_m": 0.5,
-            "wardrobe_front": 1,
-            "work_plane": 1,
-        },
-    },
-    "sanitary": {
-        "unit": "one water closet",
-        "occupants": 1,
-        "count_anchor": "Carling 2009 30.6 objects per shipboard public restroom",
-        "hardware_fixed": {
-            "flush_actuator": 1,
-            "toilet_seat": 1,
-            "stall_latch": 1,
-            "door_lever": 1,
-            "tap_set": 1,
-            "button_or_dispenser": 2,
-            "grab_rail_m": 0.5,
-        },
-        "broad_extra_fixed": {"work_plane": 0.3},
-        "shared_fixed": {
-            "flush_actuator": 1,
-            "toilet_seat": 1,
-            "stall_latch": 1,
-            "door_lever": 1,
-            "tap_set": 1,
-            "button_or_dispenser": 2,
-            "grab_rail_m": 0.5,
-            "work_plane": 0.3,
-        },
-    },
-    "dining": {
-        "unit": "one dining zone",
-        "count_anchor": "Jin 2022 restaurant touch classes; Lei 2017 per-seat scale",
-        "hardware_fixed": {
-            "door_lever": 4,
-            "button_or_dispenser": 6,
-            "utensil": 20,
-            "tap_set": 2,
-        },
-        "hardware_per_occupant": {"tableware_per_seat": 1},
-        "broad_extra_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
-        "shared_fixed": {
-            "door_lever": 4,
-            "button_or_dispenser": 6,
-            "utensil": 20,
-            "tap_set": 2,
-        },
-        "shared_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
-    },
-    "crew_mess": {
-        "unit": "one crew mess zone",
-        "count_anchor": "as dining; crew service pattern",
-        "hardware_fixed": {
-            "door_lever": 3,
-            "button_or_dispenser": 4,
-            "utensil": 15,
-            "tap_set": 2,
-        },
-        "hardware_per_occupant": {"tableware_per_seat": 1},
-        "broad_extra_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
-        "shared_fixed": {
-            "door_lever": 3,
-            "button_or_dispenser": 4,
-            "utensil": 15,
-            "tap_set": 2,
-        },
-        "shared_per_occupant": {"table_top_per_seat": 1, "chair_touched": 1},
-    },
-    "public": {
-        "unit": "one public zone",
-        "count_anchor": "Lei 2017 3.3 touchable surfaces per seat; Ackerley 2025 lobby",
-        "hardware_fixed": {
-            "door_lever": 8,
-            "button_or_dispenser": 10,
-            "grab_rail_m": 20,
-        },
-        "hardware_per_occupant": {"small_panel": 0.5},
-        "broad_extra_per_occupant": {"chair_touched": 1},
-        "shared_fixed": {
-            "door_lever": 8,
-            "button_or_dispenser": 10,
-            "grab_rail_m": 20,
-        },
-        "shared_per_occupant": {"chair_touched": 1, "small_panel": 0.5},
-    },
-    "galley": {
-        "unit": "one galley zone",
-        "count_anchor": "fixed equipment, not occupancy",
-        "hardware_fixed": {
-            "door_lever": 12,
-            "utensil": 60,
-            "tap_set": 6,
-            "button_or_dispenser": 25,
-        },
-        "broad_extra_fixed": {"work_plane": 18},
-        "shared_fixed": {
-            "door_lever": 12,
-            "utensil": 60,
-            "tap_set": 6,
-            "button_or_dispenser": 25,
-            "work_plane": 18,
-        },
-    },
-}
 
 # Measured total object+material surface per unit air volume (the ceiling).
 CEILING_S_OVER_V_M2_PER_M3 = {
