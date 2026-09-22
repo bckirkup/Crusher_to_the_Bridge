@@ -1,0 +1,20 @@
+== hardware (scale_by_zone_class {'cabin': 0.11586666666666667, 'sanitary': 0.2892, 'dining': 0.9319483739837398, 'crew_mess': 1.02995, 'public': 0.5618819022806223, 'galley': 0.05042}) over 20 cells ==
+HEADLINE: arm measures the conservation cap, not the chain: galley
+criterion 2a, per touch:
+  cabin      area x0.115867 (exp 0.11586666666666667), log10 f_touch shift +0.917±0.019 (exp +0.936), capped 3.39e-03, pool n=11490/22677  -> conforms
+  crew_mess  area x1.029950 (exp 1.02995), log10 f_touch shift -0.018±0.020 (exp -0.013), capped 4.35e-03, pool n=1838/2502  -> conforms
+  dining     area x0.931948 (exp 0.9319483739837398), log10 f_touch shift +0.028±0.010 (exp +0.031), capped 0.00e+00, pool n=11988/7820  -> conforms
+  galley     area x0.050420 (exp 0.05042), log10 f_touch shift +0.822±0.051 (exp +1.297), capped 3.63e-01, pool n=226/640  -> censored [area_match=True, shift_match=False]
+  public     area x0.561882 (exp 0.5618819022806223), log10 f_touch shift +0.250±0.003 (exp +0.250), capped 0.00e+00, pool n=62938/118650  -> conforms
+  patch pickups, arm: cabin n=1124 A=0.118 m2, galley n=2 A=0.0122 m2
+  patch pickups, base: cabin n=1226 A=0.814 m2, galley n=2 A=0.243 m2
+criterion 2b, paired dose: n=20 defined (0 undefined), k=8 matching 'up', median r=-0.205 IQR [-0.560, +1.012] [-1.577, +5.301], binomial p=0.5034  -> not resolvable at n=20
+    legacy median ratio (unscaled, no verdict): 18.81
+criterion 3, arm: capped 134/89606 = 1.50e-03, requested/offered 0.027  -> linear regime
+    per class (pool): cabin 39/11490 linear, crew_mess 8/1838 linear, dining 0/11988 linear, galley 82/226 measures the cap, public 0/62938 linear
+criterion 3, base: capped 8/153517 = 5.21e-05, requested/offered 0.007  -> linear regime
+    per class (pool): cabin 0/22677 linear, crew_mess 6/2502 linear, dining 0/7820 linear, galley 0/640 linear, public 0/118650 linear
+criterion 4, arm: 3 secondaries over 20 seeds -> not resolvable at n=20
+criterion 4, base: 3 secondaries over 20 seeds -> not resolvable at n=20
+
+written: /home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_high_touch_sweep_01/high_touch_area_readout_hardware.json
