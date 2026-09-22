@@ -2,7 +2,7 @@
 **Date:** 2026-09-22
 **Commit:** 7660392
 **Pathogens:** sars_cov2_resp
-**Status:** stage 1 measured — admissible set empty on the decade lattice
+**Status:** measured
 
 Declared at `32d1842`; stage 1 measured at `7660392`. Section "Declared"
 records the criteria as frozen before any cell ran; section "Result"
