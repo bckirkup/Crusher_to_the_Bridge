@@ -303,3 +303,25 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   changes nothing. The screen payload has no episode or quarantine-window
   fields, so this campaign does not re-read those gates. Next decision (the
   criterion declaration): `docs/covid/covid_theta_handoff_2026_09_21.md` §8.
+- **`covid_theta_screen_v11` is declared and not yet run: the criterion
+  decision is resolved in favour of takeoff probability against covid.H3
+  with onsets scored conditional on takeoff**
+  (`picard_framework/runs/covid_theta_screen_v11_design.json`,
+  `docs/ledger/THETA-SCREEN-V11.md`). Unconditional covid.T1 is measured
+  vacuous (interval-span at 1e9, `onset_mass_near_target` 0.00), so the
+  v10 `stage_2_fleet_shape` block is promoted to stage-1 selector on
+  generic 7-day voyages (8 decade Θ, 1e4–1e11, × 200 voyages, seed base
+  20201001 = 1,600 cells) and the declared replay is scored only among
+  takeoff seeds on the v7–v10 T1 form (q05–q95 of `recorded_onsets`
+  contains 197 AND median `before_share` within 0.10 of 0.173, ≥ 5
+  takeoff seeds else "insufficient takeoff mass"). **covid.H3 leaves the
+  held-out set for this screen** — it is the selection anchor; covid.H1/H2
+  on `greg_mortimer_2020` remain held out (gated stage 3). The rejected
+  alternative (T1 + import-geometry axis) is recorded in the design file:
+  imports > 1 measured negative (COVID-FIT-01) and unlicensed (Sekizuka
+  2020). The admissible set is the joint pass and may be empty — the
+  expected result localises the deficit to conditional outbreak size, not
+  takeoff. Worker support outstanding: a `voyage_mode` branch in
+  `apply_boarding_axis` (drop the seed's declared onset/departure, drawn
+  incubation age, 168 epochs) before any cell exists; then the two-part
+  canary declared in the design file.
