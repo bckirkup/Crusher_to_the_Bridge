@@ -47,6 +47,9 @@ from crusher_labs.modalities.clinical_strain_typing import (  # noqa: E402
     AssayConfigError,
     SequencingAssay,
 )
+from engines.fomite_surfaces import (  # noqa: E402
+    parse_per_surface_config,
+)
 from engines.illness_duration import IllnessDurationModel  # noqa: E402
 from engines.incubation import IncubationModel  # noqa: E402
 from engines.strain_state import (  # noqa: E402
@@ -1936,6 +1939,18 @@ def _check_config_yaml(
     _check_variant_surveillance(cfg, report)
     _check_surface_cleaning(cfg, report)
     _check_high_touch_area_scale(cfg, report)
+    _check_fomite_representation(cfg, report)
+
+
+def _check_fomite_representation(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the fomite representation selector and its arm keys."""
+    tx = cfg.get("transmission", {})
+    if not isinstance(tx, dict):
+        return
+    try:
+        parse_per_surface_config(tx)
+    except ValueError as exc:
+        report.error(_CONFIG_YAML, "CONFIG", str(exc))
 
 
 def _check_high_touch_area_scale(cfg: dict[str, Any], report: Report) -> None:
