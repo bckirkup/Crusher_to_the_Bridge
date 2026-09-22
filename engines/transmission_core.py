@@ -6586,6 +6586,14 @@ class TransmissionCore:
             )
             for c in classes:
                 delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        # A class whose demand exceeds its supply is emptied exactly: the
+        # consumption total is the class mass itself, matching the pooled
+        # path where a capped pool subtracts its whole previous mass.
+        for c in classes:
+            if scales[c] < 1.0:
+                delivered_by_class[c] = self._per_surface.mass.get(
+                    (zone_name, pathogen_id, c), 0.0,
+                )
         return delivered_by_class
 
     def _consume_surface_mass_by_class(
@@ -7233,6 +7241,13 @@ class TransmissionCore:
             self.sanitary_telemetry["recipients"] += 1
             for c in classes:
                 delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        # A class whose demand exceeds its supply is emptied exactly, as
+        # in _deliver_fomite_requests_by_class.
+        for c in classes:
+            if scales[c] < 1.0:
+                delivered_by_class[c] = self._per_surface.mass.get(
+                    (venue, pathogen_id, c), 0.0,
+                )
         self._consume_surface_mass_by_class(
             pathogen_id, venue, delivered_by_class, surface_mass,
         )
