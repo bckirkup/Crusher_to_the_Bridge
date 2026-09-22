@@ -13,7 +13,9 @@
       "--s3-prefix",
       "Ref::s3_prefix",
       "--design",
-      "Ref::design"
+      "Ref::design",
+      "--index-offset",
+      "Ref::index_offset"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
@@ -52,7 +54,8 @@
   "parameters": {
     "stride": "1",
     "s3_prefix": "s3://<BUCKET>/campaign/covid_boarding_screen_v1/",
-    "design": "picard_framework/runs/covid_boarding_screen_v1_design.json"
+    "design": "picard_framework/runs/covid_boarding_screen_v1_design.json",
+    "index_offset": "0"
   },
   "retryStrategy": {
     "attempts": 10,

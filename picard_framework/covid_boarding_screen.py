@@ -31,7 +31,9 @@ from typing import Any
 
 import numpy as np
 
+from engines.incubation import HostIncubationState, IncubationModel
 from engines.infection_dynamics_bridge import ever_presented
+from engines.sim_clock import SimClock
 from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS, TransmissionCore
 from picard_framework.covid_fit_targets import load_fit_targets
 from picard_framework.covid_hull_scenarios import REPO_ROOT, load_hull_scenarios
@@ -49,6 +51,21 @@ DESIGN_REL = os.path.join(
     "picard_framework", "runs", "covid_boarding_screen_v1_design.json",
 )
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
+# A screen's voyage shape: the declared replay carries the record's onset
+# and departure on its explicit seed; a generic voyage drops both, draws the
+# import's infection age from the profile's incubation distribution, and
+# runs a fixed-length cruise with no dated interventions.
+VOYAGE_MODE_DECLARED = "declared"
+VOYAGE_MODE_GENERIC = "generic"
+VOYAGE_MODES = (VOYAGE_MODE_DECLARED, VOYAGE_MODE_GENERIC)
+GENERIC_VOYAGE_DAYS = 7.0
+# covid.H3's recorded attack-rate window (Willebrand 2022, 104 voyages on 79
+# ships): the stage-1 selector of covid_theta_screen_v11. The numerator is
+# the RECORDED channel — recorded_onsets / aboard_total per voyage — not the
+# truth channel the attack-rate block pools.
+FLEET_MEDIAN_WINDOW = (0.0005, 0.008)
+FLEET_IQR_WINDOW = (0.0003, 0.015)
+FLEET_MEAN_MAX = 0.06
 # Attribution-design arm axes (covid_quarantine_attribution_v1). Every key a
 # declared arm may override; anything else refuses at design load rather than
 # drifting into a silently-ignored counterfactual.
@@ -122,8 +139,14 @@ class BoardingScreenDesign:
     points: tuple[tuple[float, float, int], ...] = ()
     parent_design: str | None = None
     arms: tuple[Mapping[str, Any], ...] = ()
+    voyage_mode: str = VOYAGE_MODE_DECLARED
 
     def __post_init__(self) -> None:
+        if self.voyage_mode not in VOYAGE_MODES:
+            raise ValueError(
+                f"voyage_mode must be one of {VOYAGE_MODES}, "
+                f"got {self.voyage_mode!r}",
+            )
         if self.sanitary_visit_mode not in SANITARY_VISIT_MODES:
             raise ValueError(
                 f"sanitary_visit_mode must be one of {SANITARY_VISIT_MODES}, "
@@ -197,6 +220,7 @@ class BoardingScreenDesign:
             "points": [list(p) for p in self.points],
             "parent_design": self.parent_design,
             "arms": [dict(a) for a in self.arms],
+            "voyage_mode": self.voyage_mode,
         }
 
 
@@ -229,6 +253,7 @@ def load_design(
         ),
         parent_design=raw.get("parent_design"),
         arms=tuple(dict(a) for a in raw.get("arms", [])),
+        voyage_mode=str(raw.get("voyage_mode", VOYAGE_MODE_DECLARED)),
     )
     load_hull_scenarios().assert_fit_target(design.scenario_id)
     if design.is_refinement:
@@ -314,12 +339,69 @@ def enumerate_cells(design: BoardingScreenDesign) -> tuple[ScreenCell, ...]:
     return tuple(cells)
 
 
+def _generic_age_stream(seed: int) -> np.random.Generator:
+    """The stream a generic voyage's introduction age is drawn on.
+
+    Keyed on the cell seed and a fixed port tag so the same seed draws the
+    same introduction at every Theta — the screen's pairing — on a stream
+    disjoint from the simulation's own ``default_rng(seed)``, which the
+    engine consumes.
+    """
+    digest = sum(
+        (index + 1) * ord(ch)
+        for index, ch in enumerate("generic_voyage_age")
+    )
+    return np.random.default_rng([int(seed), digest])
+
+
+def _draw_introduction_age(
+    incubation_profile: Mapping[str, Any] | None,
+    rng: np.random.Generator | None,
+) -> float:
+    """One generic-voyage introduction's infection age at boarding.
+
+    Drawn from the pathogen's incubation distribution: a typical voyage's
+    index is not a dated case report, so its time-since-infection at
+    boarding is the range of times an onset takes to appear, at the
+    reference dose a declared index sits at and a neutral host.
+    """
+    model = IncubationModel.from_mapping(
+        dict(incubation_profile or {}).get("incubation"),
+    )
+    if model is None:
+        raise ValueError(
+            "voyage_mode 'generic' draws the import's infection age from "
+            "the pathogen's incubation distribution; the profile declares "
+            "none",
+        )
+    if rng is None:
+        raise ValueError(
+            "voyage_mode 'generic' needs the per-seed introduction-age stream",
+        )
+    return float(model.sample_days(
+        dose=None, host=HostIncubationState(), rng=rng,
+    ))
+
+
+def _generic_voyage_epochs(scenario_id: str, repo_root: str) -> int:
+    """A generic voyage's length on the scenario's own clock."""
+    scenario = load_hull_scenarios(repo_root=repo_root)[scenario_id]
+    clock = SimClock(
+        epoch_duration_hours=float(scenario.epoch_duration_hours),
+        mode=scenario.clock_mode,
+    )
+    return int(round(clock.epochs_for_days(GENERIC_VOYAGE_DAYS)))
+
+
 def apply_boarding_axis(
     raw: dict[str, Any],
     *,
     infection_age_days: float,
     imports: int,
     sanitary_visit_mode: str,
+    voyage_mode: str = VOYAGE_MODE_DECLARED,
+    incubation_profile: Mapping[str, Any] | None = None,
+    age_stream: np.random.Generator | None = None,
 ) -> dict[str, Any]:
     """Move the scenario's explicit seed along the axis, in place.
 
@@ -327,6 +409,12 @@ def apply_boarding_axis(
     the screen changes only its ``count`` and ``infection_age_days`` and the
     transmission block's sanitary visit mode. Everything else in the run
     spec is what the fit ran.
+
+    Under ``voyage_mode 'generic'`` the seed's declared ``onset_day`` and
+    ``departure_day`` are dropped — a typical voyage's introduction is not a
+    dated case report — and its infection age is a draw from the pathogen's
+    incubation distribution, so the engine's lazy incubation channel applies
+    and the index stays aboard for the whole voyage.
     """
     overrides = raw.setdefault("config_overrides", {})
     seeds = overrides.get("initiation", {}).get("explicit_seeds", [])
@@ -335,7 +423,18 @@ def apply_boarding_axis(
             f"the boarding screen expects one explicit seed, found {len(seeds)}",
         )
     seeds[0]["count"] = int(imports)
-    seeds[0]["infection_age_days"] = float(infection_age_days)
+    if voyage_mode == VOYAGE_MODE_GENERIC:
+        seeds[0].pop("onset_day", None)
+        seeds[0].pop("departure_day", None)
+        seeds[0]["infection_age_days"] = _draw_introduction_age(
+            incubation_profile, age_stream,
+        )
+    elif voyage_mode == VOYAGE_MODE_DECLARED:
+        seeds[0]["infection_age_days"] = float(infection_age_days)
+    else:
+        raise ValueError(
+            f"voyage_mode must be one of {VOYAGE_MODES}, got {voyage_mode!r}",
+        )
     overrides.setdefault("transmission", {})["sanitary_visit_mode"] = (
         sanitary_visit_mode
     )
@@ -499,14 +598,22 @@ def _index_geometry(
     engine: Any,
     cell: ScreenCell,
     profile: dict[str, Any],
+    *,
+    infection_age_days: float | None = None,
 ) -> dict[str, Any]:
     """The seeded index host's own geometry, read off its infection record.
 
     The stamped ``onset_time_infected`` records when progression *noticed*
     the onset, so a host that boarded past incubation is not back-dated;
-    the true onset is the drawn ``incubation_days`` against the declared
-    boarding age, which is the record this screen means.
+    the true onset is the drawn ``incubation_days`` against the boarding
+    age, which is the record this screen means. ``infection_age_days`` is
+    the age the host was actually seeded with — the cell axis under the
+    declared mode, the drawn introduction age under a generic voyage.
     """
+    age = (
+        float(cell.infection_age_days) if infection_age_days is None
+        else float(infection_age_days)
+    )
     agent = _index_host(engine)
     if agent is None:
         return {
@@ -521,16 +628,14 @@ def _index_geometry(
         onset_day = (
             engine.clock.days_elapsed(int(inf.get("infection_epoch", 0)))
             + float(incubation)
-            - cell.infection_age_days
+            - age
         )
     shedding_day0 = False
     if incubation is not None:
         presymptomatic = float(profile.get("presymptomatic_shedding_days", 0.0))
         # The same gate _shedding_curve_point applies, evaluated at the
         # boarding age: in-window means the host emits at epoch 0.
-        shedding_day0 = (
-            cell.infection_age_days - float(incubation) >= -presymptomatic
-        )
+        shedding_day0 = age - float(incubation) >= -presymptomatic
     return {
         KEY_INDEX_ONSET_DAY: onset_day,
         KEY_INDEX_SHEDDING_AT_DAY0: shedding_day0,
@@ -710,26 +815,55 @@ def prepare_cell_run_spec(
     num_epochs: int | None = None,
     repo_root: str = REPO_ROOT,
 ) -> dict[str, Any]:
-    """Build the run spec one cell executes, arm overrides included."""
+    """Build the run spec one cell executes, arm overrides included.
+
+    A generic-voyage design runs the fixed cruise length on the scenario's
+    clock unless ``num_epochs`` is given (a smoke); a declared design keeps
+    the scenario's full recorded event.
+    """
     arm_overrides = (
         design.arm_overrides(cell.arm_id)
         if design.arms and cell.arm_id is not None else {}
     )
+    if num_epochs is None and design.voyage_mode == VOYAGE_MODE_GENERIC:
+        num_epochs = _generic_voyage_epochs(cell.scenario_id, repo_root)
     raw = build_fit_run_spec(
         cell.scenario_id, cell.theta, cell.seed,
         num_epochs=num_epochs, repo_root=repo_root,
         pathogen_pool_transport=arm_overrides.get("pathogen_pool_transport"),
     )
+    profile = load_covid_profile(repo_root)
     apply_boarding_axis(
         raw,
         infection_age_days=cell.infection_age_days,
         imports=cell.imports,
         sanitary_visit_mode=design.sanitary_visit_mode,
+        voyage_mode=design.voyage_mode,
+        incubation_profile=profile,
+        age_stream=(
+            _generic_age_stream(cell.seed)
+            if design.voyage_mode == VOYAGE_MODE_GENERIC else None
+        ),
     )
-    apply_arm_overrides(
-        raw, arm_overrides, profile=load_covid_profile(repo_root),
-    )
+    apply_arm_overrides(raw, arm_overrides, profile=profile)
     return raw
+
+
+def _index_infection_age(raw: dict[str, Any], cell: ScreenCell) -> float:
+    """The age the index host was seeded with, read back off the run spec.
+
+    Identical to the cell axis under the declared mode; under a generic
+    voyage it is the drawn introduction age stamped on the explicit seed —
+    the index-geometry fields need the value the host boarded with, not the
+    placeholder the cell key carries.
+    """
+    seeds = (
+        raw.get("config_overrides", {})
+        .get("initiation", {}).get("explicit_seeds", [])
+    )
+    if len(seeds) == 1 and seeds[0].get("infection_age_days") is not None:
+        return float(seeds[0]["infection_age_days"])
+    return float(cell.infection_age_days)
 
 
 def cell_payload(
@@ -761,6 +895,7 @@ def cell_payload(
         },
         **_index_geometry(
             sim.engine, cell, sim.pathogen_profiles[PATHOGEN_ID],
+            infection_age_days=_index_infection_age(raw, cell),
         ),
         **_truth_counts(sim.engine),
         KEY_VSP_MAX: float(
@@ -1027,6 +1162,59 @@ def _onset_mass_diagnostic(
     }
 
 
+def _fleet_shape(
+    by_seed: dict[int, dict[str, Any]],
+    obs: dict[int, HullObservables],
+) -> dict[str, Any]:
+    """The across-voyage recorded attack-rate shape, scored against covid.H3.
+
+    The numerator is the RECORDED channel — ``recorded_onsets`` over the
+    aboard total — verbatim from the v10 stage-2 block, not the truth
+    channel ``attack_rate`` pools. ``fleet_shape_ok`` is the v11 stage-1
+    selector verbatim: the median in [0.0005, 0.008], the IQR overlapping
+    [0.0003, 0.015], the mean not above 0.06. Emitted on every design as a
+    diagnostic; only a generic-voyage screen selects on it.
+    """
+    rates = [
+        o.recorded_onsets / float(by_seed[seed][KEY_ABOARD_TOTAL])
+        for seed, o in obs.items()
+        if by_seed[seed].get(KEY_ABOARD_TOTAL)
+    ]
+    if not rates:
+        return {
+            "recorded_attack_rate": None,
+            "recorded_attack_rate_quantiles": _attack_quantiles(()),
+            "p_recorded_ge_0p015": None,
+            "p_recorded_ge_0p10": None,
+            "p_recorded_le_0p01": None,
+            "fleet_shape_ok": None,
+        }
+    median = _quantile(rates, 0.5)
+    q25 = _quantile(rates, 0.25)
+    q75 = _quantile(rates, 0.75)
+    mean = float(np.mean(rates))
+    iqr_overlaps = not (
+        q75 < FLEET_IQR_WINDOW[0] or q25 > FLEET_IQR_WINDOW[1]
+    )
+    return {
+        "recorded_attack_rate": {
+            "median": median,
+            "mean": mean,
+            "q25": q25,
+            "q75": q75,
+        },
+        "recorded_attack_rate_quantiles": _attack_quantiles(rates),
+        "p_recorded_ge_0p015": float(np.mean([r >= 0.015 for r in rates])),
+        "p_recorded_ge_0p10": float(np.mean([r >= 0.10 for r in rates])),
+        "p_recorded_le_0p01": float(np.mean([r <= 0.01 for r in rates])),
+        "fleet_shape_ok": bool(
+            FLEET_MEDIAN_WINDOW[0] <= median <= FLEET_MEDIAN_WINDOW[1]
+            and iqr_overlaps
+            and mean <= FLEET_MEAN_MAX
+        ),
+    }
+
+
 def _admissibility(
     by_seed: dict[int, dict[str, Any]],
     obs: dict[int, HullObservables],
@@ -1050,6 +1238,7 @@ def _admissibility(
         **_attack_rate_stats(by_seed),
         **_onset_mass_diagnostic(obs, t1),
         **_vsp_crossing_stats(by_seed),
+        **_fleet_shape(by_seed, obs),
     }
 
 

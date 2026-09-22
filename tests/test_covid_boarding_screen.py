@@ -20,6 +20,7 @@ from picard_framework.covid_boarding_screen import (
     enumerate_cells,
     load_design,
     merge_screen,
+    prepare_cell_run_spec,
 )
 from picard_framework.covid_theta_fit import HullObservables, build_fit_run_spec
 
@@ -610,3 +611,166 @@ def test_v9_design_is_the_declared_recentring_screen():
     assert max(design.thetas) == 1e10
     assert design.infection_age_days == (3.3, 6.8, 12.8)
     assert design.seeds == 20
+
+
+# ── v11 generic-voyage mode ───────────────────────────────────────────────
+
+V11_DESIGN_REL = (
+    REPO_ROOT / "picard_framework" / "runs"
+    / "covid_theta_screen_v11_design.json"
+)
+
+
+@pytest.fixture(scope="module")
+def v11() -> BoardingScreenDesign:
+    return load_design(str(V11_DESIGN_REL))
+
+
+def test_v11_design_is_the_declared_generic_fleet_screen(v11):
+    assert v11.design_id == "covid_theta_screen_v11"
+    assert v11.scenario_id == "diamond_princess_2020"
+    assert v11.voyage_mode == "generic"
+    assert v11.thetas == (1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10, 1e11)
+    assert v11.infection_age_days == (0.0,)
+    assert v11.imports == (1,)
+    assert v11.seeds == 200
+    assert v11.seed_base == 20201001
+    cells = enumerate_cells(v11)
+    assert len(cells) == 1600
+    # Theta-outer, seed-inner: the canary row is 1e8 at indices 800..999.
+    assert cells[800].theta == 1e8 and cells[800].seed == 20201001
+    assert cells[999].theta == 1e8 and cells[999].seed == 20201200
+
+
+def test_design_rejects_an_unknown_voyage_mode(design):
+    with pytest.raises(ValueError):
+        replace(design, voyage_mode="chartered")
+
+
+def _generic_seed(raw: dict) -> dict:
+    return raw["config_overrides"]["initiation"]["explicit_seeds"][0]
+
+
+def test_generic_spec_drops_the_declared_onset_and_departure(v11):
+    cell = enumerate_cells(v11)[800]
+    raw = prepare_cell_run_spec(v11, cell)
+    seed = _generic_seed(raw)
+    assert "onset_day" not in seed
+    assert "departure_day" not in seed
+    assert seed["count"] == 1
+    # The 168-epoch generic voyage is stamped in all three places.
+    assert raw["run"]["num_epochs"] == 168
+    assert raw["config_overrides"]["num_epochs"] == 168
+    assert raw["config_overrides"]["voyage"]["total_epochs"] == 168
+
+
+def test_generic_age_is_drawn_paired_across_theta(v11):
+    cells = [c for c in enumerate_cells(v11) if c.seed == 20201001]
+    assert len(cells) == 8
+    ages = {
+        _generic_seed(prepare_cell_run_spec(v11, c))["infection_age_days"]
+        for c in cells
+    }
+    assert len(ages) == 1
+    assert 0.5 <= ages.pop() <= 21.0
+
+
+def test_generic_ages_vary_across_seeds_inside_the_window(v11):
+    ages = [
+        _generic_seed(prepare_cell_run_spec(v11, c))["infection_age_days"]
+        for c in enumerate_cells(v11)[800:820]
+    ]
+    assert len(set(ages)) == len(ages)
+    assert all(0.5 <= a <= 21.0 for a in ages)
+
+
+def test_generic_spec_respects_an_explicit_num_epochs(v11):
+    raw = prepare_cell_run_spec(
+        v11, enumerate_cells(v11)[800], num_epochs=48,
+    )
+    assert raw["run"]["num_epochs"] == 48
+
+
+def test_generic_mode_without_an_incubation_profile_refuses(v11):
+    import numpy as np
+
+    raw = build_fit_run_spec("diamond_princess_2020", 1e8, 20201001)
+    with pytest.raises(ValueError):
+        apply_boarding_axis(
+            raw, infection_age_days=0.0, imports=1,
+            sanitary_visit_mode="dwell_weighted",
+            voyage_mode="generic", incubation_profile={},
+            age_stream=np.random.default_rng(0),
+        )
+    with pytest.raises(ValueError):
+        apply_boarding_axis(
+            raw, infection_age_days=0.0, imports=1,
+            sanitary_visit_mode="dwell_weighted",
+            voyage_mode="generic",
+            incubation_profile={"incubation": {"median_days": 5.8}},
+            age_stream=None,
+        )
+
+
+def test_a_real_generic_cell_runs_and_reports_geometry():
+    """A generic voyage on the small hull: the drawn age reaches the index
+    geometry fields and the index never departs."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = BoardingScreenDesign(
+        design_id="generic_probe", scenario_id="greg_mortimer_2020",
+        thetas=(1e9,), infection_age_days=(0.0,), imports=(1,),
+        sanitary_visit_mode="dwell_weighted", seed_base=20200315,
+        seeds=1, takeoff_recorded_onsets=10,
+        voyage_mode="generic",
+    )
+    cell = enumerate_cells(design)[0]
+    spec = prepare_cell_run_spec(design, cell, num_epochs=48)
+    drawn = _generic_seed(spec)["infection_age_days"]
+    assert 0.5 <= drawn <= 21.0
+    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    assert payload["index_departed_epoch"] is None
+    assert set(payload) >= {
+        "observables", "onset_curve", "first_onset_day",
+        "index_onset_day", "index_shedding_at_day0",
+        "infections_total", "aboard_total", "attack_rate",
+    }
+
+
+# ── v11 fleet-shape selector ──────────────────────────────────────────────
+
+def test_fleet_shape_passes_inside_the_h3_window():
+    # ~9 recorded onsets on a 3,711-host hull ≈ 0.0024 attack rate.
+    seeds = {20200205 + i: 7 + (i % 5) for i in range(20)}
+    entry = _single_cell_surface(seeds)
+    shape = entry["recorded_attack_rate"]
+    assert entry["fleet_shape_ok"] is True
+    assert 0.0005 <= shape["median"] <= 0.008
+    assert shape["mean"] <= 0.06
+    assert entry["p_recorded_ge_0p015"] == 0.0
+
+
+def test_fleet_shape_fails_on_an_extinct_or_burning_row():
+    # Half extinct, half burning: median and mean both leave the window.
+    seeds = {
+        **{20200205 + i: 0 for i in range(10)},
+        **{20200205 + 10 + i: 2500 + 10 * i for i in range(10)},
+    }
+    entry = _single_cell_surface(seeds)
+    assert entry["fleet_shape_ok"] is False
+    assert entry["recorded_attack_rate"]["median"] > 0.008
+    assert entry["recorded_attack_rate"]["mean"] > 0.06
+    assert entry["p_recorded_ge_0p10"] == pytest.approx(0.5)
+
+
+def test_fleet_shape_fails_on_mean_with_a_single_outlier():
+    # 19 quiet voyages pin the median inside the window; one burner drags
+    # the mean above 0.06 — the selector is three clauses, not one.
+    seeds = {
+        **{20200205 + i: 9 for i in range(19)},
+        20200205 + 19: 8000,
+    }
+    entry = _single_cell_surface(seeds)
+    assert 0.0005 <= entry["recorded_attack_rate"]["median"] <= 0.008
+    assert entry["recorded_attack_rate"]["mean"] > 0.06
+    assert entry["fleet_shape_ok"] is False
