@@ -1289,6 +1289,22 @@ matches credited exactly and no cell is ever long. Successor studies should
 gate on the exact read-equals-credited identity plus a bound on the
 credited-minus-evaluated gap, and treat a *negative* gap as the defect.
 
+**The #37 feasibility-gate verdict is pre-refit and is not a current result.**
+`telemetry_buffer/observation_model/admissible_region_37_v2.json` carries the box
+factor `emesis_total_shed_gec`, which no longer exists in `engines/`: the emesis
+source term is now a drawn host titre `emesis_titre_gec_per_ml` times per-episode
+volume, with no fallback (`emesis_source_term_v1.md`, item 13), and the boarding
+prevalence replacement moved passenger attack rate by an order of magnitude after
+that gate ran. The artifact records no commit SHA, so the engine it was measured
+on cannot be established from the file. Both §2 subsections below — "empty, and
+two of six anchors never became evidence" and "still empty, and now nothing is
+design-limited" — therefore describe a model that is no longer run, and neither
+may be cited as evidence that the current model cannot satisfy its anchors. The
+*necessary-condition* logic they support is unaffected: an anchor with an empty
+satisfiable subregion still empties the joint. What is withdrawn is every
+specific per-anchor "cannot hit target X" measured on the old structure. See
+`high_touch_area_handoff_2026_09_22.md` §7.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
