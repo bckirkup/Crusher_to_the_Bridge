@@ -33,14 +33,17 @@ DESIGN="${DESIGN:-covid_boarding_screen_v1}"
 DESIGN_REL="picard_framework/runs/${DESIGN}_design.json"
 S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/${DESIGN}/}"
 JOB_NAME="${JOB_NAME:-picard-covid-screen-$(date +%Y%m%d-%H%M%S)}"
+INDEX_OFFSET="${INDEX_OFFSET:-0}"
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ARRAY_SIZE="$(cd "$HERE/../.." && python3 -c "
+if [ -z "${ARRAY_SIZE:-}" ]; then
+  ARRAY_SIZE="$(cd "$HERE/../.." && python3 -c "
 from picard_framework.covid_boarding_screen import enumerate_cells, load_design
 design = load_design('$DESIGN_REL')
 assert design.design_id == '$DESIGN', design.design_id
 print(-(-len(enumerate_cells(design)) // $STRIDE))
 ")"
+fi
 
 echo "Submitting COVID boarding-screen array:"
 echo "  name       : $JOB_NAME"
@@ -50,9 +53,10 @@ echo "  array size : $ARRAY_SIZE"
 echo "  queue      : $JOB_QUEUE"
 echo "  job def    : $JOB_DEFINITION"
 echo "  s3 prefix  : $S3_PREFIX"
+echo "  index off. : $INDEX_OFFSET"
 
-PARAMETERS=$(printf '{"stride":"%s","s3_prefix":"%s","design":"%s"}' \
-  "$STRIDE" "$S3_PREFIX" "$DESIGN_REL")
+PARAMETERS=$(printf '{"stride":"%s","s3_prefix":"%s","design":"%s","index_offset":"%s"}' \
+  "$STRIDE" "$S3_PREFIX" "$DESIGN_REL" "$INDEX_OFFSET")
 
 if [ "$ARRAY_SIZE" -eq 1 ]; then
   ARRAY_ARGS=()
