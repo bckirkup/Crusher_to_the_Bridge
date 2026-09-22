@@ -15,8 +15,12 @@
       "representative_volume_m3": 40.0,
       "scale_to_broad": 1.2792,
       "scale_to_hardware": 0.11586666666666667,
+      "scale_to_shared": 0.8792,
+      "shared_m2": 1.3188,
+      "shared_m2_per_occupant": 0.6594,
       "shipped_inside_envelope": true,
       "shipped_m2": 1.5,
+      "shipped_m2_per_occupant": 0.75,
       "shipped_over_ceiling": 0.01171875,
       "unit": "one stateroom compartment (2 berths)",
       "zones": [
@@ -73,8 +77,12 @@
       "representative_volume_m3": 700.0,
       "scale_to_broad": 14.52995,
       "scale_to_hardware": 1.02995,
+      "scale_to_shared": 13.52995,
+      "shared_m2": 54.1198,
+      "shared_m2_per_occupant": 0.270599,
       "shipped_inside_envelope": false,
       "shipped_m2": 4.0,
+      "shipped_m2_per_occupant": 0.02,
       "shipped_over_ceiling": 0.0017857142857142857,
       "unit": "one crew mess zone",
       "zones": [
@@ -90,8 +98,12 @@
       "representative_volume_m3": 1277.3577235772357,
       "scale_to_broad": 13.249326422764229,
       "scale_to_hardware": 0.9319483739837398,
+      "scale_to_shared": 12.33692804878049,
+      "shared_m2": 98.69542439024391,
+      "shared_m2_per_occupant": 0.2704285408777011,
       "shipped_inside_envelope": true,
       "shipped_m2": 8.0,
+      "shipped_m2_per_occupant": 0.021920249498774785,
       "shipped_over_ceiling": 0.001957165133819177,
       "unit": "one dining zone",
       "zones": [
@@ -110,8 +122,12 @@
       "representative_volume_m3": 900.0,
       "scale_to_broad": 1.93142,
       "scale_to_hardware": 0.05042,
+      "scale_to_shared": 1.93142,
+      "shared_m2": 19.3142,
+      "shared_m2_per_occupant": 0.3219033333333333,
       "shipped_inside_envelope": true,
       "shipped_m2": 10.0,
+      "shipped_m2_per_occupant": 0.16666666666666666,
       "shipped_over_ceiling": 0.003472222222222222,
       "unit": "one galley zone",
       "zones": [
@@ -127,8 +143,12 @@
       "representative_volume_m3": 2354.6624376982327,
       "scale_to_broad": 11.650792187735993,
       "scale_to_hardware": 0.5618819022806223,
+      "scale_to_shared": 11.650792187735993,
+      "shared_m2": 69.90475312641595,
+      "shared_m2_per_occupant": 0.1576005922288542,
       "shipped_inside_envelope": true,
       "shipped_m2": 6.0,
+      "shipped_m2_per_occupant": 0.013527028007138413,
       "shipped_over_ceiling": 0.0007962924833645709,
       "unit": "one public zone",
       "zones": [
@@ -157,8 +177,12 @@
       "representative_volume_m3": 26.666470588235292,
       "scale_to_broad": 0.9161999999999999,
       "scale_to_hardware": 0.2892,
+      "scale_to_shared": 0.9161999999999999,
+      "shared_m2": 0.45809999999999995,
+      "shared_m2_per_occupant": 0.45809999999999995,
       "shipped_inside_envelope": false,
       "shipped_m2": 0.5,
+      "shipped_m2_per_occupant": 0.5,
       "shipped_over_ceiling": 0.0058594180839565,
       "unit": "one water closet",
       "zones": [
@@ -287,6 +311,14 @@
       "galley": 0.05,
       "public": 0.562,
       "sanitary": 0.289
+    },
+    "shared": {
+      "cabin": 0.879,
+      "crew_mess": 13.53,
+      "dining": 12.337,
+      "galley": 1.931,
+      "public": 11.651,
+      "sanitary": 0.916
     }
   },
   "what_this_is": "A derived envelope for the fomite areal denominator, not a measurement and not an adopted constant. Item counts are enumerated from published high-touch inventories; item areas are measured, QMRA-declared or declared here, per ITEM_AREA_M2."
