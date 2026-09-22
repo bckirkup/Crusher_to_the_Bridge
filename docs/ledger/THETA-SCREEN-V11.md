@@ -1,6 +1,6 @@
 # THETA-SCREEN-V11
 **Date:** 2026-09-22
-**Commit:** 32d1842 (design); 7660392 (stage-1 run)
+**Commit:** 7660392
 **Pathogens:** sars_cov2_resp
 **Status:** stage 1 measured — admissible set empty on the decade lattice
 
