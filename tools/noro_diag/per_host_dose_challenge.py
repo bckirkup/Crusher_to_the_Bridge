@@ -93,6 +93,7 @@ import math
 import re
 import sys
 import tempfile
+import time
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -272,6 +273,10 @@ class Recorder:
     delivery_scale: dict[str, float] = field(
         default_factory=lambda: defaultdict(float),
     )
+    # The fomite-representation arm the engine actually ran, captured off
+    # the TransmissionCore by the deposit wrapper so a dropped override is
+    # a witnessed fact rather than an assumption.
+    fomite_representation_seen: str | None = None
 
     def host(self, agent_id: int) -> HostRecord:
         """Return (creating if needed) one host's record."""
@@ -503,6 +508,9 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
     """Wrap the fomite transfer chain's mass and dose terms."""
     originals = {
         "_deliver_fomite_requests": core_cls._deliver_fomite_requests,
+        "_deliver_fomite_requests_by_class": (
+            core_cls._deliver_fomite_requests_by_class
+        ),
         "_hand_to_mouth_dose": core_cls._hand_to_mouth_dose,
         "_deposit_surface_mass": core_cls._deposit_surface_mass,
         "_replenish_hand": core_cls._replenish_hand,
@@ -541,6 +549,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
     ) -> None:
+        rec.fomite_representation_seen = self.fomite_representation
         if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
             rec.fomite["surface_deposit_calls"] += 1
             rec.fomite["surface_mass_deposited_gec"] += float(mass)
@@ -565,6 +574,47 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
             rec.fomite["mass_requested_gec"] += requested
             rec.fomite["mass_delivered_to_hands_gec"] += float(delivered)
+            scale_witness = rec.delivery_scale
+            scale_witness["deliver_calls"] += 1
+            scale_witness["sum_requested_gec"] += requested
+            scale_witness["sum_offered_gec"] += float(surface_mass)
+            if requested > float(surface_mass) > 0.0:
+                scale_witness["scaled_calls"] += 1
+                log10_scale = math.log10(float(surface_mass) / requested)
+                scale_witness["sum_log10_scale"] += log10_scale
+                scale_witness["min_log10_scale"] = min(
+                    scale_witness["min_log10_scale"], log10_scale,
+                )
+        return delivered
+
+    def deliver_by_class(
+        self: Any,
+        requests: list[tuple[Any, dict[str, float]]],
+        zone_name: str,
+        surface_mass: float,
+        *args: Any,
+        **kwargs: Any,
+    ) -> dict[str, float]:
+        """Per-class analogue of ``deliver`` feeding the same counters.
+
+        ``requests`` carries ``{item_class: mass}`` per target; the pooled
+        aggregates are reconstructed exactly: requested is the sum over
+        classes and targets, offered is ``surface_mass`` (the zone total),
+        and delivered is the sum over the returned per-class dict.
+        """
+        delivered = originals["_deliver_fomite_requests_by_class"](
+            self, requests, zone_name, surface_mass, *args, **kwargs,
+        )
+        if rec.current_pathogen == rec.pathogen_id:
+            requested = float(
+                sum(m for _, req in requests for m in req.values())
+            )
+            rec.fomite["deliver_calls"] += 1
+            rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
+            rec.fomite["mass_requested_gec"] += requested
+            rec.fomite["mass_delivered_to_hands_gec"] += float(
+                sum(delivered.values())
+            )
             scale_witness = rec.delivery_scale
             scale_witness["deliver_calls"] += 1
             scale_witness["sum_requested_gec"] += requested
@@ -670,6 +720,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         return request
 
     core_cls._deliver_fomite_requests = deliver
+    core_cls._deliver_fomite_requests_by_class = deliver_by_class
     core_cls._hand_to_mouth_dose = hand_to_mouth
     core_cls._deposit_surface_mass = deposit
     core_cls._replenish_hand = replenish_hand
@@ -844,6 +895,7 @@ def build_spec(
     pathogen_id: str, alpha: float | None, beta: float,
     high_touch_area_scale: float | None = None,
     high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
+    fomite_representation: str | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed.
 
@@ -869,6 +921,8 @@ def build_spec(
         tx_overrides["high_touch_area_scale_by_zone_class"] = dict(
             high_touch_area_scale_by_zone_class,
         )
+    if fomite_representation is not None:
+        tx_overrides["fomite_representation"] = str(fomite_representation)
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
@@ -1137,9 +1191,11 @@ def run_seed(
     alpha_override: float | None = None,
     high_touch_area_scale: float | None = None,
     high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
+    fomite_representation: str | None = None,
     arm_tag: str | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
+    started_total = time.perf_counter()
     num_agents = declared_total(platform)
     alpha, beta = load_dose_response(pathogen_id, bundle)
     spec_dict = build_spec(
@@ -1148,6 +1204,7 @@ def run_seed(
         pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
         high_touch_area_scale=high_touch_area_scale,
         high_touch_area_scale_by_zone_class=high_touch_area_scale_by_zone_class,
+        fomite_representation=fomite_representation,
     )
     if alpha_override is not None:
         alpha = float(alpha_override)
@@ -1177,7 +1234,17 @@ def run_seed(
                 f"resolved alpha={alpha_resolved}",
             )
         with instrumented(rec, top_ids):
+            started_run = time.perf_counter()
             result = ShipSimulation(picard_spec, display=False).run()
+            wall_clock_run = time.perf_counter() - started_run
+    if fomite_representation is not None and (
+        rec.fomite_representation_seen != fomite_representation
+    ):
+        raise RuntimeError(
+            "fomite_representation override dropped: requested "
+            f"fomite_representation={fomite_representation}, resolved "
+            f"{rec.fomite_representation_seen}",
+        )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["dose_response_resolved"] = {
         "alpha_requested": alpha,
@@ -1195,12 +1262,19 @@ def run_seed(
         arm_tag is not None
         or high_touch_area_scale is not None
         or high_touch_area_scale_by_zone_class is not None
+        or fomite_representation is not None
     ):
         summary["arm_tag"] = arm_tag
         summary["high_touch_area_scale"] = high_touch_area_scale
         summary["high_touch_area_scale_by_zone_class"] = (
             high_touch_area_scale_by_zone_class
         )
+        summary["fomite_representation"] = fomite_representation
+    summary["fomite_representation_resolved"] = (
+        rec.fomite_representation_seen
+    )
+    summary["wall_clock_seconds_run"] = wall_clock_run
+    summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
     return summary
 
 
@@ -1282,6 +1356,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              '\'{"cabin": 0.11, "dining": 3.5}\'',
     )
     parser.add_argument(
+        "--fomite-representation",
+        choices=("pooled", "per_surface"), default=None,
+        help="NORO-FOMITE-DISAGG-01 arm: pooled (default-path identity) or "
+             "per_surface (per-item-class fomite accounting); the run "
+             "aborts if the engine resolves a different representation",
+    )
+    parser.add_argument(
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
@@ -1312,6 +1393,7 @@ def main(argv: list[str] | None = None) -> int:
             high_touch_area_scale_by_zone_class=(
                 args.high_touch_area_scale_by_zone_class
             ),
+            fomite_representation=args.fomite_representation,
             arm_tag=args.arm_tag,
         )
         if args.arm_tag is not None:
