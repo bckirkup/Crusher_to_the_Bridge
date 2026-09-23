@@ -1,10 +1,12 @@
 # THETA-SCREEN-V11
 **Date:** 2026-09-22
-**Commit:** 32d1842
+**Commit:** 7660392
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
 
-Declared only; no cell has run.
+Declared at `32d1842`; stage 1 measured at `7660392`. Section "Declared"
+records the criteria as frozen before any cell ran; section "Result"
+records the measurement.
 
 ## Declared (before any cell runs)
 
@@ -69,13 +71,15 @@ voyage total 3–6× on every Θ row) and unlicensed by the record (Sekizuka
 2020, single introduction); independently timed imports are not expressible
 in the screen machinery.
 
-**Worker support not yet present.** `apply_boarding_axis` mutates only seed
-count, infection age and sanitary-visit mode; the generic-voyage mode
-(drop onset/departure, drawn age, 168 epochs) and the stage-2 enumeration
-need a `voyage_mode` branch before any cell runs. This declaration commits
-the criterion only; the next session implements the worker path, runs the
-two-part canary (stage-1 Θ 1e8 × 200 generic voyages + the (1e9, 20200205)
-replay reproduction cell at 3458 / 0.9318), stops and reports.
+**Worker support.** The `voyage_mode` branch landed in #653 (`21c344d`):
+generic mode drops the seed's declared onset/departure, draws the
+introduction age from the incubation profile, and runs 168 epochs; #655
+(`7660392`) additionally drops the DP's `molecular_ascertainment.start_day`
+in generic mode so the recorded channel is live (see Result). Both parts of
+the declared canary passed: (a) the stage-1 Θ 1e8 row's spec carries no
+declared geometry, 168 epochs, no ascertainment key, unchanged contract,
+non-degenerate; (b) the (1e9, 20200205) replay reproduces 3458 / 0.9318
+exactly.
 
 ## Validation gate (local, this PR)
 
@@ -87,5 +91,31 @@ replay reproduction cell at 3458 / 0.9318), stops and reports.
 
 ## Result
 
-Not run. Stage 1 is 1,600 generic-voyage cells behind a worker change and a
-canary; the canary is declared in the design file's `execution.canary` block.
+**Stage 1 ran; the admissible set is empty on the decade lattice.**
+`7660392`, image `theta-v11-7660392`, job def `picard-covid-boarding-screen:14`,
+array `33482fcc-7954-4566-928d-7052d62b83ee`: 1,600/1,600 SUCCEEDED, zero
+failures. P(takeoff) climbs 0.00 (1e4) → 0.575 (1e11, still rising); the
+recorded-attack median stays 0 through 1e9, then 0.0003 at 1e10 → 0.0158 at
+1e11 — the H3 median window [0.0005, 0.008] is bracketed between the last
+two decades, never landed on. Nearest cells: 1e10 (median misses the floor
+1.85×; IQR and mean pass) and 1e11 (median overshoots 2×, mean overshoots
+1.24×). The located band is interior to the lattice — any admissible Θ
+lives inside (1e10, ~7e10) — but the takeoff transition is unresolved at
+the top edge, reported as boundary-adjacent. Per the design, stage 2 does
+not run; the conditional read is quoted from v10 (1,582–3,391 vs 197).
+Generic takeoffs already give DP-order recorded mass (median 175 at 1e10)
+in a 7-day voyage. Full readout:
+`docs/covid/covid_theta_screen_v11_readout.md`; surface:
+`telemetry_buffer/observation_model/covid_theta_screen_v11.json` +
+`docs/covid/covid_theta_screen_v11_surface.csv`.
+
+One in-flight amendment (user-approved, this same campaign): the canary
+found the DP scenario's `molecular_ascertainment.start_day: 14` kills the
+recorded channel inside any 7-day generic voyage; #655 drops it in generic
+mode only, so `recorded_onsets` measures forward-looking ascertainment
+(swabbing from embarkation). Declared replay unaffected — canary (b)
+reproduced 3458 / 0.9318 exactly.
+
+Open decision: whether an interior half-decade stage-1 refinement
+({1.8e10, 3.2e10, 5.6e10} × 200 seeds) locates an admissible Θ inside
+(1e10, 1e11) — recommended as the next session in the readout §6.
