@@ -1,0 +1,96 @@
+{
+  "design_id": "covid_theta_screen_v11_refine",
+  "parent_design": "covid_theta_screen_v11",
+  "description": "Stage-1 lattice refinement of covid_theta_screen_v11 inside the located band. The v11 decade-lattice stage-1 readout (7660392, 1,600/1,600 cells) measured an empty admissible set with the covid.H3 median window [0.0005, 0.008] bracketed between Theta 1e10 (recorded median 0.00027 -- a 1.85x floor miss while IQR and mean pass) and 1e11 (0.0158, overshoot; mean 0.075 > 0.06): docs/covid/covid_theta_screen_v11_readout.md. Any admissible Theta lives strictly inside (1e10, 1e11). This design re-runs the IDENTICAL stage-1 cell shape on an eighth-decade interior lattice to learn whether an admissible Theta exists there at all: a pass keeps the located band and enumerates stage-2 replay cells per v11's stage_2.theta_points clause; a uniform fail measures the empty set at sub-decade resolution. Nothing else changes -- same worker, same seed base, same frozen fleet_shape_selector criterion, verbatim. No criterion is loosened and no Theta on this design may be quoted as a fit.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it refines covid_theta_screen_v11's stage-1 lattice inside the measured bracket. The v11 decade rows remain the stage-1 surface of record at their points (7660392) and are quoted, not re-run -- the 1e10 and 1e11 flank rows are not in this design's theta list and their v11 numbers stand.",
+  "prerequisites": [
+    "covid_theta_screen_v11 stage 1 measured (7660392): empty admissible set on the decade lattice; nearest cells 1e10 (median floor miss only) and 1e11 (median + mean overshoot); P(takeoff) still climbing at the top edge (0.575); generic takeoffs already give DP-order recorded mass (median 175 at 1e10).",
+    "The v11 voyage_mode worker path and the #655 ascertainment amendment are on main at 7660392 and unchanged since: generic mode drops the seed's declared onset/departure, draws infection age from the incubation profile, runs 168 epochs, and carries no molecular_ascertainment_start_day.",
+    "v11 admissibility.fleet_shape_selector is the frozen criterion, carried verbatim; the conditional_trajectory_clause and stage-2 enumeration rules of v11 apply unchanged to whatever admissible set this lattice produces.",
+    "covid.H3's role change from v11 stands: it is the stage-1 selection anchor, out of the held-out set; covid.H1/H2 (greg_mortimer_2020) remain held out for the gated stage 3."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "generic",
+  "voyage_mode_note": "Verbatim from v11 (as amended by #655): the explicit seed's onset_day and departure_day are dropped, infection age drawn from the profile's incubation distribution, 168 epochs, no intervention fires, and molecular_ascertainment_start_day is dropped so the recorded channel reads symptomatic onsets that would be confirmed on a forward-looking voyage. Carried: imports count 1 and sanitary_visit_mode dwell_weighted.",
+  "thetas": [
+    13300000000.0,
+    17800000000.0,
+    23700000000.0,
+    31600000000.0,
+    42200000000.0,
+    56200000000.0,
+    75000000000.0
+  ],
+  "thetas_note": "Eighth-decade interior lattice inside the located band (1e10, 1e11): 10^10.125 through 10^10.875 in 0.125-decade steps, rounded to three significant figures. Rationale for the spacing: the recorded-median slope measured across the bracketing decade is ~1.77 decades of median per decade of Theta (0.00027 -> 0.0158), so the median-in-window region is ~0.68 decades wide and eighth-decade spacing lands ~5 points inside it before the mean clause (crossing ~0.06 near 10^10.75) can narrow it. The decade flanks 1e10 and 1e11 are quoted from v11, not re-run. If the admissible set is one point wide it is reported as a fragile single-point pass, not selected on alone; if it touches 1.33e10 or 7.5e10 that is the band running to a flank, reported as such.",
+  "infection_age_days": [
+    0.0
+  ],
+  "infection_age_note": "Placeholder required by the cell enumeration grammar, NOT an axis: under voyage_mode generic the import's infection age is drawn per voyage from the profile's incubation distribution and the 0.0 in the cell key (age0d) carries no meaning. Verbatim from v11.",
+  "imports": [
+    1
+  ],
+  "imports_note": "One import per voyage, verbatim from v11 (and from the v10 stage-2 block it promoted): licensed by the record (Sekizuka 2020, single introduction before quarantine).",
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20201001,
+  "seeds": 200,
+  "seeds_note": "200 voyages per Theta, same base as v11 stage 1 so each refinement row shares the v11 decade rows' per-seed voyage streams (paired by seed across Theta). The Binomial standard error on a 0.25 tail share at 200 voyages is about 3%.",
+  "takeoff_recorded_onsets": 10,
+  "cells": 1400,
+  "cells_note": "7 Theta x 1 placeholder age x 1 import x 200 seeds = 1,400 cells, each a 168-epoch generic voyage (~7 min). Tighter grid bought with more runs rather than a further session, per the user's direction; the seeds axis is unchanged (200 is already adequate for the median/IQR statistics -- the extra runs go to Theta resolution).",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any refinement cell exists, verbatim from v11: the fleet-shape selector is the stage-1 selector and the conditional clause the stage-2 clause. Bimodality is not a failure criterion and its absence is not a success criterion; covid.H3 records a median voyage attack rate of 0.2% with Diamond Princess at 712 cases, so the real fleet IS near-critical.",
+    "fleet_shape_selector": {
+      "criterion": "STAGE-1 SELECTOR, verbatim from v11 (itself verbatim from the v10 stage_2_fleet_shape block): across the 200 generic voyages at each Theta, the median recorded attack rate lies within [0.0005, 0.008], the interquartile range overlaps [0.0003, 0.015], and the mean is not above 0.06.",
+      "target_source": "covid.H3 (median 0.002, IQR 0.0003-0.015, mean 0.037; 79 ships, 104 voyages, Willebrand 2022), data/observation/covid_fit_targets.json",
+      "numerator": "recorded_onsets / aboard_total per voyage -- the RECORDED channel, not the truth channel, verbatim from v11. Median [0.0005, 0.008] is a median of 2-30 recorded onsets on a 3,711-host hull.",
+      "note": "Same declared approximation as v11: one hull and one voyage length stand in for 79 hulls and a voyage mixture, so what is compared is the SHAPE of the across-voyage distribution. Reported beside it but never thresholded: P(attack >= 0.015), P(attack >= 0.10), P(attack <= 0.01), and attack-rate quantiles at 0.1/0.25/0.5/0.75/0.9."
+    },
+    "conditional_trajectory_clause": {
+      "criterion": "STAGE-2 CLAUSE, verbatim from v11, scored only at stage-1-admissible Thetas and only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10) of the declared replay: the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173. Scored only when a cell has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Unchanged from v11. Reported beside it, never thresholded: the fraction of takeoff seeds whose recorded_onsets lies in [98.5, 394], and the full per-seed recorded_onsets vector."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT, verbatim from v11: on stage-1 generic-voyage cells the run spec's explicit seed carries NO onset_day and NO departure_day, the drawn incubation and the 168-epoch duration are read back from the run spec, and any cell where onset_day or departure_day appears is a defect in the voyage_mode path. Replay cells keep the declared invariant (index_onset_day == -1.0, shedding at day 0, 100% of seeds).",
+      "reads": "the cell's run_spec.json (fleet) and the seeded host's onset/departure record (replay)"
+    },
+    "h3_role_change": {
+      "declared": "Unchanged from v11: covid.H3 is the stage-1 selection anchor, out of the held-out set. What remains held out and never selected on: covid.H1 and covid.H2 on greg_mortimer_2020 (stage 3), covid.T2's direction check, covid.T3, covid.T4, the VSP-crossing and burn-tail diagnostics."
+    },
+    "selection": "The admissible set is every Theta passing the fleet_shape_selector whose declared-replay cells pass the conditional_trajectory_clause, as in v11. This design refines only the stage-1 lattice; stage-2 enumeration follows v11's stage_2_declared_replay.theta_points verbatim (admissible set plus nearest failing lattice point on each side as boundary flanks; off-lattice admissible or flank points run new replay cells). If this lattice admits no Theta the readout reports the nearest cells, states that no admissible Theta exists inside the located band at eighth-decade resolution, and closes the arm's stage-1 question at that resolution; no criterion is loosened after the fact."
+  },
+  "diagnostics": {
+    "fleet_shape_indicator": "Reported beside the verdict, never thresholded: P(attack <= 0.01), takeoff fraction, P(attack >= 0.015), P(attack >= 0.10), attack-rate quantiles, and the per-seed recorded_onsets vectors -- the latter paired by seed against the v11 1e10/1e11 rows so the bracket can be read as the same voyages re-priced.",
+    "conditional_on_takeoff": "The takeoff-seed recorded_onsets distribution per row, reported beside the stage-1 verdict -- v11 measured it rising through DP order (median 175 at 1e10) inside this band, which is the free read on how the conditional clause would fare here.",
+    "index_geometry": "index_geometry_pass_fraction reported as the drawn-incubation boarding witness (0.52 at v11); it feeds no gate.",
+    "cross_pathogen": "vsp_reported_case_fraction_max and vsp_threshold_crossing_fraction carried in the payload and reported, verbatim from v11."
+  },
+  "rejected_alternatives": {
+    "more_seeds_instead_of_grid": "REJECTED: the user's direction was tighter at the cost of more runs. 200 seeds already carry a ~3% Binomial SE on a 0.25 tail share; the binding uncertainty is WHERE the median crosses the H3 window, which only Theta resolution buys. The extra runs go to grid density.",
+    "wider_bracket": "REJECTED: the v11 flanks are the measured bracket. 1e10 misses the median floor and 1e11 overshoots median and mean; points outside [1e10, 1e11] fail the median clause farther than the flanks do and add no information."
+  },
+  "stage_2_declared_replay": {
+    "status": "gated on a non-empty stage-1 admissible set; enumerated per v11's stage_2_declared_replay.theta_points (admissible set + nearest failing lattice point on each side as boundary flanks; half-decade offsets inside the lattice are permitted, and this refinement's eighth-decade points are themselves eligible Thetas)",
+    "cell_shape": "Verbatim from covid_theta_screen_v10: onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 3.3 carried for cell-key compatibility, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+    "theta_points": "Every Theta in the admissible set of the union of this lattice and the v11 decade rows, plus the nearest failing lattice point on each side of it as boundary flanks. If the union admits no Theta, no replay cells run and the arm's stage-1 question is closed at eighth-decade resolution.",
+    "note": "Unchanged from v11; the v10 decade rows already give the conditional read at lattice resolution."
+  },
+  "stage_3_held_out": {
+    "status": "designed, not submitted until stages 1 and 2 close",
+    "scenario_id": "greg_mortimer_2020",
+    "seed_base": 20200315,
+    "seeds": 50,
+    "note": "Verbatim from v11: scored once at the selected Theta and reported at its half-decade neighbours as sensitivity. covid.H1/H2 remain held out and are the check this screen never selected on."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v11_refine. The image must be built from a main that contains this design file: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_1_cells": 1400,
+    "stride": 1,
+    "expected_cell_minutes": 7,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v11_refine/<sha>/cells/",
+    "canary": "One part, read before the array: Theta 3.16e10 (the band centre), 50 seeds (array 50 at INDEX_OFFSET 600 -- theta-outer enumeration puts this row at cell indices 600-799). The run spec of every cell carries NO onset_day and NO departure_day on its explicit seed, NO molecular_ascertainment_start_day in the syndromic block, num_epochs 168, the payload contract unchanged, and the row is not degenerate (a row that is all-extinct or all-burn at the band centre is itself a reportable surprise). A further canary of the declared replay is not re-declared: stage 2 remains gated and the replay cell shape is unchanged since v11 canary (b) reproduced 3458 / 0.9318 exactly. The machinery is identical to the 1,600-cell run just measured, so the canary's job is design-file and enumeration validation, not worker validation; on a clean read the array proceeds, since the user has already directed this campaign to run.",
+    "report_immediately_if": "the admissible set is a single-point pass (a fragile admissibility to report, not to build on alone); the admissible band runs to either lattice flank (1.33e10 or 7.5e10) -- i.e. the real band is wider than the located one; every interior point fails the SAME clause the 1e11 row failed (the band may be closed on the high side by the mean cap, not by median crossing); the child failure rate exceeds 5%; or any cell's run spec carries a declared onset_day or departure_day."
+  }
+}
