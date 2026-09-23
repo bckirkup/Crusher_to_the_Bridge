@@ -62,5 +62,8 @@ declared-replay cells, verbatim v10 cell shape, scored on takeoff seeds
 only by the frozen conditional_trajectory_clause (q05–q95 of
 recorded_onsets contains 197 AND median before_share within 0.10 of
 0.173; ≥5 takeoff seeds or "insufficient takeoff mass"). Frozen in
-`covid_theta_screen_v11_stage2_design.json` in the same change as this
-entry.
+`covid_theta_screen_v11_stage2_design.json`. **Stage 2 has since run
+(`8cda4c7`, 100/100 cells): the clause fails at every row — takeoff-seed
+recorded_onsets ~3,470–3,520 vs 197, mass near target 0.00 — the
+admissible set is empty and the deficit is localised to conditional
+outbreak size.** See ledger THETA-SCREEN-V11-S2.
