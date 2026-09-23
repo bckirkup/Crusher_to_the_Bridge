@@ -328,13 +328,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `covid_theta_screen_v11_refine` ran at eighth-decade spacing
   ({1.33…7.5}e10 × 200 seeds, `79a3ac3`, array
   `45cfb31d-eb50-4042-9d6d-17499d9a3934`, 1,400/1,400 cells): **the
-  admissible set is non-empty — Θ ∈ {3.16e10, 4.22e10, 5.62e10}**, an
-  interior band ~0.25 decades wide (median-floor failures below,
-  median+mean overshoot at 7.5e10). Stage 2 is enumerated and frozen —
-  100 declared-replay cells at the three admissible Θ plus flanks
-  2.37e10/7.5e10
-  (`picard_framework/runs/covid_theta_screen_v11_stage2_design.json`),
-  scored on takeoff seeds against the conditional_trajectory_clause —
-  and not yet run. Readout
-  `docs/covid/covid_theta_screen_v11_refine_readout.md`, ledger
-  `docs/ledger/THETA-SCREEN-V11-REFINE.md`.
+  stage-1 admissible set is non-empty — Θ ∈ {3.16e10, 4.22e10,
+  5.62e10}**, an interior band ~0.25 decades wide (median-floor failures
+  below, median+mean overshoot at 7.5e10). Stage 2 then ran
+  (`covid_theta_screen_v11_stage2`, `8cda4c7`, 100/100 cells): **the
+  conditional clause fails at every row — takeoff-seed recorded_onsets
+  ~3,470–3,520 vs the record's 197 (~17.7×), onset-mass-near-target
+  0.00, before_share 0.77–0.92 vs 0.173 — so the admissible set is
+  empty** and the screen's question is answered: a Θ reproducing the
+  covid.H3 fleet shape exists but cannot keep a conditioned declared
+  voyage near the record; the deficit is conditional outbreak size (the
+  during-quarantine arrest gap of COVID-VENT-AUDIT-01), not takeoff.
+  Stage 3 does not run (nothing selected). Readouts
+  `docs/covid/covid_theta_screen_v11_refine_readout.md` and
+  `docs/covid/covid_theta_screen_v11_stage2_readout.md`, ledgers
+  `docs/ledger/THETA-SCREEN-V11-REFINE.md` and
+  `docs/ledger/THETA-SCREEN-V11-S2.md`.

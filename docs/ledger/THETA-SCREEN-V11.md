@@ -120,9 +120,13 @@ Open decision resolved: the interior refinement ran at eighth-decade
 spacing ({1.33…7.5}e10 × 200 seeds, `covid_theta_screen_v11_refine`,
 `79a3ac3`) and **measured a non-empty admissible set — Θ ∈ {3.16e10,
 4.22e10, 5.62e10}** — an interior band ~0.25 decades wide, flanked by
-median-floor failures below and median+mean overshoot above. Stage 2's
-declared replay is enumerated (100 cells at those three plus flanks
-2.37e10/7.5e10, frozen in
-`picard_framework/runs/covid_theta_screen_v11_stage2_design.json`) and
-unrun at this writing. See ledger THETA-SCREEN-V11-REFINE and readout
-`docs/covid/covid_theta_screen_v11_refine_readout.md`.
+median-floor failures below and median+mean overshoot above. Stage 2
+then ran (100 declared-replay cells at those three plus flanks
+2.37e10/7.5e10, `8cda4c7`): **the conditional clause fails at every row —
+takeoff-seed recorded_onsets ~3,470–3,520 vs the record's 197, mass near
+target 0.00 — so the admissible set is empty** and the deficit is
+localised to conditional outbreak size (the during-quarantine arrest gap
+of COVID-VENT-AUDIT-01), the designed empty-set result. See ledgers
+THETA-SCREEN-V11-REFINE / THETA-SCREEN-V11-S2 and readouts
+`docs/covid/covid_theta_screen_v11_refine_readout.md` and
+`docs/covid/covid_theta_screen_v11_stage2_readout.md`.
