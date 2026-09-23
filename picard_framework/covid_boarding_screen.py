@@ -71,9 +71,12 @@ FLEET_MEAN_MAX = 0.06
 # drifting into a silently-ignored counterfactual.
 ARM_OVERRIDE_KEYS = frozenset({
     "scheduled_protocol_id",
+    "scheduled_protocol_window",
     "pathogen_pool_transport",
     "near_field_air_mode",
     "profile_route_efficiency_multipliers",
+    "infection_counters",
+    "transmission_overrides",
 })
 QUARANTINE_PROTOCOL_ID = "SOP-017"
 NEAR_FIELD_AIR_MODES = ("two_box", "off")
@@ -467,6 +470,61 @@ def _swap_scheduled_protocol(raw: dict[str, Any], protocol_id: str) -> None:
         )
 
 
+def _retime_scheduled_protocol(
+    raw: dict[str, Any],
+    window: Mapping[str, Any],
+) -> None:
+    """Move one scheduled protocol's day window, in place.
+
+    Counterfactual only: the declared replay's schedule is the record's
+    calendar, so an arm that retimes it is a sensitivity probe (how much of
+    the outbreak was committed before the order could bind), never a
+    candidate configuration.
+    """
+    protocol_id = str(window.get("protocol_id", QUARANTINE_PROTOCOL_ID))
+    protocols = (
+        raw.get("config_overrides", {})
+        .get("scenario_schedule", {})
+        .get("protocols", [])
+    )
+    for entry in protocols:
+        if entry.get("protocol_id") != protocol_id:
+            continue
+        if "start_day" in window:
+            entry["start_day"] = int(window["start_day"])
+        if "end_day" in window:
+            entry["end_day"] = (
+                None if window["end_day"] is None else int(window["end_day"])
+            )
+        return
+    raise ValueError(
+        f"the run spec's scenario_schedule schedules no {protocol_id} "
+        "entry to retime",
+    )
+
+
+def _apply_scheduled_window(raw: dict[str, Any], window: Any) -> None:
+    if not isinstance(window, Mapping):
+        raise ValueError("scheduled_protocol_window must be a mapping")
+    _retime_scheduled_protocol(raw, window)
+
+
+def _apply_infection_counters(raw: dict[str, Any], counters: Any) -> None:
+    if not isinstance(counters, list):
+        raise ValueError("infection_counters must be a list of counter defs")
+    raw.setdefault("config_overrides", {}).setdefault("ship_graph", {})[
+        "infection_counters"
+    ] = counters
+
+
+def _apply_transmission_overrides(raw: dict[str, Any], tx: Any) -> None:
+    if not isinstance(tx, Mapping):
+        raise ValueError("transmission_overrides must be a mapping")
+    raw.setdefault("config_overrides", {}).setdefault(
+        "transmission", {},
+    ).update(tx)
+
+
 def _apply_route_efficiencies(
     raw: dict[str, Any],
     arm_values: Mapping[str, Any],
@@ -511,8 +569,16 @@ def apply_arm_overrides(
                 f"unknown arm override key {key!r}; allowed: "
                 f"{sorted(ARM_OVERRIDE_KEYS)}",
             )
+    # The window retime names the DECLARED protocol id; it must run before a
+    # rename in the same arm.
+    if "scheduled_protocol_window" in overrides:
+        _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
         _swap_scheduled_protocol(raw, str(overrides["scheduled_protocol_id"]))
+    if "infection_counters" in overrides:
+        _apply_infection_counters(raw, overrides["infection_counters"])
+    if "transmission_overrides" in overrides:
+        _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
         mode = str(overrides["near_field_air_mode"])
         if mode not in NEAR_FIELD_AIR_MODES:

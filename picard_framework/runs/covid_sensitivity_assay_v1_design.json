@@ -1,0 +1,177 @@
+{
+  "design_id": "covid_sensitivity_assay_v1",
+  "parent_design": "covid_theta_screen_v11_stage2",
+  "description": "Paired-seed sensitivity assay on the declared Diamond Princess replay at the v11 admissible-band centre. THETA-SCREEN-V11-S2 measured takeoff seeds recording ~3,470-3,520 onsets against the record's 197 (~17.7x), with attack ~0.95 against the record's ~712/3,711. This assay asks which model machinery could account for that gap: it holds Theta fixed at the band centre and removes or strengthens one suppression channel per arm, scoring the conditional-on-takeoff recorded-onset mass against the record's neighbourhood on the same 20 seeds as stage 2.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": null,
+  "withdraws": null,
+  "prerequisites": [
+    "THETA-SCREEN-V11-S2 (8cda4c7 / 9ba9d5e): the measured stage-2 surface this assay interrogates. Theta-insensitivity of conditional outbreak size (~1% median range across the band) is what licenses a single-Theta assay.",
+    "QUAR-ATTR-V2 (d62f10d): the during-quarantine channel attributions at v9-lattice Theta {1e5, 1e9} -- crew confinement -74%, pool transport -66% of the during-window conditional median, A5 collapses takeoff. The assay re-measures those channels at the band-centre Theta where the bulk of the onset mass accrues.",
+    "QUAR-ORDER-01, DOSE-FRAIL-01, INDEX-GEOM-01, SEED-ONSET-01: unchanged replay machinery.",
+    "The arm-override grammar of covid_boarding_screen.py extended by this change set: config_overrides, scheduled_protocol_window, infection_counters, transmission_overrides."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [42200000000.0],
+  "thetas_note": "Single value, the admissible-band centre, and it is NOT an axis: stage 2 measured conditional recorded-onset medians moving ~1% across 2.37e10-7.5e10, so Theta carries no information about conditional size inside the band. 4.22e10 is the band's geometric centre; nothing else about the band edge is being asked here.",
+  "infection_age_days": [3.3],
+  "infection_age_note": "Single value, not an axis -- cancels exactly under the declared onset_day (QUAR-ATTR-V1, THETA-SCREEN-V9).",
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The SAME 20 seeds as stage 2 and the v9/v11 lineage, so every arm is a paired-seed read against A0 at the same Theta: the A0 row re-runs as the execution witness and must reproduce the stage-2 Theta 4.22e10 row's statistics within Monte Carlo noise (the cells are identical machinery; a systematic mismatch is a wiring defect in the arm path, not a finding).",
+  "cells": 240,
+  "cells_note": "12 arms x 20 seeds at a single Theta. The age and import axes are single-valued. Cost ~ equal to the QUAR-ATTR-V2 array.",
+  "takeoff_recorded_onsets": 10,
+  "gap_decomposition": {
+    "declared_before_running": true,
+    "statement": "The 17.7x recorded-onset gap decomposes as ~4.7x biological over-burn (takeoff-seed infections_total ~3,250-3,550 and attack ~0.95 vs the record's ~712 cases / 0.19 attack) compounded with ~3.5x observational bookkeeping (the record's 197 dated onsets are ~28-31% of its 634 confirmed positives -- covid.T3 -- while the model's recorded_onsets channel reports every symptomatic onset that a post-day-14 specimen confirms). A transmission-layer lever that produced the true ~712-case burn would still overcount recorded_onsets roughly 3.5x unless the observation channel is also implicated. The assay therefore scores BOTH reads per arm: infections_total against ~712, and recorded_onsets against 197.",
+    "note": "Decomposed from the stage-2 surface and covid.T1/T3 target definitions; no arm is allowed to claim the record by moving only the observational share."
+  },
+  "arms": [
+    {
+      "arm_id": "A0_declared",
+      "role": "baseline, and the only arm that is the declared Diamond Princess replay",
+      "overrides": {},
+      "note": "Shipped defaults. Execution witness: must reproduce the stage-2 Theta 4.22e10 row's takeoff fraction and conditional recorded-onset statistics within seed-identical equivalence (same seeds, same spec); a mismatch invalidates the run rather than becoming a finding."
+    },
+    {
+      "arm_id": "A1_crew_confined",
+      "role": "counterfactual: removes the crew channel during quarantine",
+      "overrides": {"scheduled_protocol_id": "SOP-017-ALLHANDS"},
+      "note": "Verbatim from covid_quarantine_attribution_v1: SOP-017-ALLHANDS is historically FALSE (crew kept working essential service) and may never score an anchor. Re-measured at band Theta because QUAR-ATTR-V2 read it at Theta 1e9 on a mostly post-quarantine mass; at 4.22e10 the dominant mass accrues earlier and the channel's reach may differ."
+    },
+    {
+      "arm_id": "A2_pool_transport_off",
+      "role": "counterfactual: removes cross-zone airborne transport",
+      "overrides": {"pathogen_pool_transport": "none"},
+      "note": "Verbatim from covid_quarantine_attribution_v1: no pathogen's airborne pool crosses a zone. Measures the airflow network's contribution at band Theta."
+    },
+    {
+      "arm_id": "A3_near_field_off",
+      "role": "counterfactual: removes the near-field / per-meal table channel",
+      "overrides": {"near_field_air_mode": "off"},
+      "note": "Verbatim from covid_quarantine_attribution_v1. Non-load-bearing at Theta 1e9 (+19%); re-measured here because the arm set is cheap and a different Theta regime could change which mess channel matters."
+    },
+    {
+      "arm_id": "A4_crew_confined_and_pool_off",
+      "role": "counterfactual: both during-quarantine structural channels removed",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-ALLHANDS",
+        "pathogen_pool_transport": "none"
+      },
+      "note": "Verbatim from covid_quarantine_attribution_v1: channel contributions are not additive in a saturating epidemic."
+    },
+    {
+      "arm_id": "A5_all_shared_air_off",
+      "role": "counterfactual: every shared-air dose term removed, leaving contact and fomite",
+      "overrides": {
+        "pathogen_pool_transport": "none",
+        "near_field_air_mode": "off",
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.0,
+          "hvac_airborne": 0.0
+        }
+      },
+      "note": "Verbatim from covid_quarantine_attribution_v1: physically false for SARS-CoV-2, never an anchor candidate; collapsed takeoff at Theta 1e9 (1/20). At 4.22e10 it probes whether a contact+fomite-only ship can still burn -- if yes, the shared-air terms are not the load-bearing layer for the mass."
+    },
+    {
+      "arm_id": "A6_contact_dose_half",
+      "role": "sensitivity: halves the direct-contact route's delivered dose",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {"direct_contact": 0.5}
+      },
+      "note": "route_efficiency_multipliers are independent per-route dose multipliers (not shares). This is a DOSE-side probe, deliberately partially degenerate with Theta on the contact route: the read is how much of the conditional mass rides the contact channel. If halving contact dose barely moves the medians, contact is not the carrier of the over-burn."
+    },
+    {
+      "arm_id": "A7_contact_dose_quarter",
+      "role": "sensitivity: quarters the direct-contact route's delivered dose",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {"direct_contact": 0.25}
+      },
+      "note": "As A6 at a deeper cut; together A6/A7 give a two-point dose-response on the contact route rather than a single flag."
+    },
+    {
+      "arm_id": "A8_confinement_day12",
+      "role": "counterfactual: the cabin-quarantine order issues four days earlier",
+      "overrides": {
+        "scheduled_protocol_window": {"protocol_id": "SOP-017", "start_day": 12, "end_day": 30}
+      },
+      "note": "DIAGNOSTIC COUNTERFACTUAL, historically false: MHLW ordered confinement for 5 February (day 16). Day 12 is 1 February -- the date the index case's Hong Kong result became public and the first date a confinement order could have been informed by it. Measures calendar sensitivity: how much of the conditional mass was already committed before any quarantine could bind. Never an anchor candidate."
+    },
+    {
+      "arm_id": "A9_perfect_confinement",
+      "role": "counterfactual bound: confined passengers transmit nothing",
+      "overrides": {
+        "transmission_overrides": {"confinement_isolation_factor": 0.0}
+      },
+      "note": "DIAGNOSTIC BOUND, not a proposed configuration: the shipped confinement_isolation_factor is 0.05 (platform value). Setting it to zero removes the residual confined-transmission channel entirely (cabin-corridor contact and emission terms scale to nil for confined agents), giving the upper bound on what a stronger lockdown could have done. If even this bound leaves the conditional mass far above the record, confinement strength is not the missing mechanism."
+    },
+    {
+      "arm_id": "A10_first_report_confinement",
+      "role": "counterfactual bound: symptomatic agents confined from the first reported case",
+      "overrides": {
+        "infection_counters": [
+          {"counter_id": "crew_attack_rate", "label": "Crew Attack Rate", "metric": "attack_rate", "filter": {"role_group": "crew"}},
+          {"counter_id": "passenger_attack_rate", "label": "Passenger Attack Rate", "metric": "attack_rate", "filter": {"role_group": "passenger"}},
+          {"counter_id": "all_attack_rate", "label": "Overall Attack Rate", "metric": "attack_rate", "filter": {}},
+          {"counter_id": "passenger_reported_case_rate", "label": "Passenger Reported Case Rate", "metric": "reported_case_rate", "filter": {"role_group": "passenger"}, "threshold": 0.0004, "on_exceed": "confine_symptomatic"},
+          {"counter_id": "crew_reported_case_rate", "label": "Crew Reported Case Rate", "metric": "reported_case_rate", "filter": {"role_group": "crew"}},
+          {"counter_id": "all_reported_case_rate", "label": "Overall Reported Case Rate", "metric": "reported_case_rate", "filter": {}},
+          {"counter_id": "crew_infected_count", "label": "Crew Infected", "metric": "infected_count", "filter": {"role_group": "crew"}},
+          {"counter_id": "passenger_infected_count", "label": "Passenger Infected", "metric": "infected_count", "filter": {"role_group": "passenger"}}
+        ]
+      },
+      "note": "DIAGNOSTIC COUNTERFACTUAL: the shipped VSP rule confines all symptomatic agents once reported passenger cases reach 3% (~80 passengers); the counter fires mid-window at best. Threshold 0.0004 ~= 1/2666 confines symptomatic agents from the FIRST reported sick call, the strongest possible reactive-symptomatic channel in this machinery. The counter list is crusher_labs/config.yaml's infection_counters verbatim with only passenger_reported_case_rate.threshold changed; wholesale list replacement is the override's declared semantics. Never an anchor candidate; measures the marginal reach of a perfect reactive response."
+    },
+    {
+      "arm_id": "A11_arrest_bound",
+      "role": "counterfactual floor probe: every plausible suppression channel at once",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-ALLHANDS",
+        "pathogen_pool_transport": "none",
+        "scheduled_protocol_window": {"protocol_id": "SOP-017", "start_day": 12, "end_day": 30},
+        "transmission_overrides": {"confinement_isolation_factor": 0.0},
+        "profile_route_efficiency_multipliers": {"direct_contact": 0.25}
+      },
+      "note": "Declared because single-lever reads under-determine the floor: if NO single arm approaches the record, this arm tests whether ANY combination of the assayed levers can -- and if it cannot, the ~18x gap is not reachable inside the transmission layer at all and points at the observational channel or natural history. A takeoff collapse here is itself the informative outcome (the floor is unreachable without killing the outbreak)."
+    }
+  ],
+  "cell_payload_additions": {
+    "arm_id": "The arm this cell was run under, echoed for audit.",
+    "note": "Stage-2 payload fields retained verbatim so the two surfaces read the same way: recorded_onsets, onsets_before/on_or_after_split_day, campaign_positives, asymptomatic_share, index_onset_day, index_shedding_at_day0, attack_rate, infections_total, aboard_total."
+  },
+  "scoring": {
+    "declared_before_running": true,
+    "statement": "FROZEN before any assay cell exists. Per arm, on the seeds that took off in BOTH the arm and A0 (recorded_onsets >= 10 under each): (i) median recorded_onsets of the arm and the ratio to A0's paired median; (ii) the arm's q05-q95 recorded_onsets interval and whether it contains 197; (iii) the fraction of the arm's takeoff seeds with recorded_onsets in the near-target band [98.5, 394]; (iv) median infections_total against the record's ~712; (v) median before_share against 0.173; (vi) the arm's own takeoff count -- an arm that suppresses takeoff below 5 seeds is reported 'insufficient takeoff mass' for the conditional read and its all-seed median is still quoted.",
+    "verdict_bands": {
+      "closes_the_gap": "conditional recorded_onsets q05-q95 contains 197 AND the conditional median lies in [98.5, 394]",
+      "load_bearing": "conditional recorded_onsets median falls by >= 50% vs A0",
+      "partial": "conditional median falls 20-50% vs A0",
+      "inert": "conditional median moves < 20%",
+      "takeoff_collapse": "arm takeoff < 5/20 -- the suppression bound kills the outbreak rather than resizing it"
+    },
+    "note": "No arm may be quoted as a fitted configuration: counterfactual arms are physically or historically false by declaration. The deliverable is a mechanism map, not a refit -- an arm that 'closes_the_gap' names WHERE the over-burn lives; whether that suppression is real-world justified is a provenance question for the next session, per .agents/skills/model-parameter-provenance."
+  },
+  "what_this_cannot_settle": [
+    "It cannot re-run the fleet-shape selector: arms that suppress transmission would also shift the generic 7-day surface, and re-checking covid.H3 admissibility under a suppressed configuration is a downstream question this design deliberately does not touch.",
+    "It cannot adjudicate the observational share of the gap (the 28-31% dated-onset bookkeeping); it only reports recorded_onsets beside infections_total so the decomposition stays visible.",
+    "It cannot test natural-history or susceptibility-distribution levers (infectious period, frailty spread): pathogen_overrides is not an arm axis, and DOSE-FRAIL-01's frailty draw is not seed-pairable across parameter moves. Those channels are named here as the remaining suspect class if every transmission-layer arm fails.",
+    "It cannot produce a fitted Theta, and no Theta on this surface may be quoted as one."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_sensitivity_assay_v1. The image must be built from a main that contains this design file: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "cells": 240,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_sensitivity_assay_v1/<sha>/cells/",
+    "canary": "Two canary rows because the assay extends the arm grammar (enumeration is axis-point x arm x seed, so at one Theta A0 occupies indices 0-19 and A11 occupies 220-239): (a) array of 20 at INDEX_OFFSET 0 -- the A0_declared row, inspected as the execution witness against the stage-2 Theta 4.22e10 row's statistics; (b) array of 20 at INDEX_OFFSET 220 -- the A11_arrest_bound row, inspected to prove every new override key reaches the engine: its payload must differ from A0's on the same seeds and a spec dump must show the scheduled window at day 12, confinement factor 0.0, and the replaced counter list. Preflight additionally requires the local smoke to exercise apply_arm_overrides on every arm, proving no override is silently ignored.",
+    "report_immediately_if": [
+      "any arm's conditional q05-q95 contains 197 (the record is reachable at all)",
+      "any arm's takeoff collapses below 5/20",
+      "A11_arrest_bound still over-produces by more than ~4x -- meaning the transmission layer cannot account for the gap and the deficit lives in the observational channel or natural history",
+      "the A0 witness row's statistics do not reproduce the stage-2 Theta 4.22e10 row"
+    ]
+  }
+}
