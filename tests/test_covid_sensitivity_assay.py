@@ -125,7 +125,7 @@ def test_transmission_overrides_merge_not_replace():
         profile=load_covid_profile(),
     )
     tx = raw["config_overrides"]["transmission"]
-    assert tx["confinement_isolation_factor"] == 0.0
+    assert tx["confinement_isolation_factor"] == pytest.approx(0.0)
     assert tx["sanitary_visit_mode"] == "dwell_weighted"
 
 
@@ -157,7 +157,7 @@ def test_combined_arm_applies_every_key():
     assert counters[0]["threshold"] == pytest.approx(0.0004)
     assert (
         raw["config_overrides"]["transmission"]["confinement_isolation_factor"]
-        == 0.0
+        == pytest.approx(0.0)
     )
 
 
@@ -184,7 +184,7 @@ def test_transmission_cfg_overrides_reach_the_core():
     spec = PicardRunSpec.from_picard_dict(str(REPO_ROOT), raw)
     sim = ShipSimulation(spec, display=False)
     sim.initialize()
-    assert sim.tx_core.confinement_isolation_factor == 0.0
+    assert sim.tx_core.confinement_isolation_factor == pytest.approx(0.0)
     assert sim.tx_core.corridor_direct_contact_factor == pytest.approx(0.02)
 
 
