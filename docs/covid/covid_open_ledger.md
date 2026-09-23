@@ -344,3 +344,14 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `docs/covid/covid_theta_screen_v11_stage2_readout.md`, ledgers
   `docs/ledger/THETA-SCREEN-V11-REFINE.md` and
   `docs/ledger/THETA-SCREEN-V11-S2.md`.
+- **`covid_sensitivity_assay_v1` is declared, not yet run**: a 240-cell
+  paired-seed arm sweep on the declared replay at band-centre Θ 4.22e10
+  asking which model machinery could account for the ~17.7× conditional
+  recorded-onset gap (declared decomposition: ~4.7× biological
+  over-burn × ~3.5× dated-onset bookkeeping). Arms = the QUAR-ATTR-V1
+  channel set re-measured at band Θ, contact-dose scaling, and three
+  confinement counterfactuals (earlier order, perfect confinement,
+  first-report symptomatic confinement) plus a combined arrest bound.
+  Design
+  `picard_framework/runs/covid_sensitivity_assay_v1_design.json`,
+  ledger `docs/ledger/SENS-ASSAY-V1.md`.

@@ -358,6 +358,7 @@ class ShipSimulation:
                     break
             for served in z.get("serves", []):
                 sanitary_zone_map.setdefault(served, {})[sex] = z["id"]
+        tx_overrides = self.cfg.get("transmission", {}) or {}
         self.tx_core = TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
@@ -367,15 +368,21 @@ class ShipSimulation:
             zone_floor_areas=zone_floor_areas,
             sanitary_zone_map=sanitary_zone_map,
             confinement_isolation_factor=float(
-                platform_layout.get(
+                tx_overrides.get(
                     "confinement_isolation_factor",
-                    DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
+                    platform_layout.get(
+                        "confinement_isolation_factor",
+                        DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
+                    ),
                 )
             ),
             corridor_direct_contact_factor=float(
-                platform_layout.get(
+                tx_overrides.get(
                     "corridor_direct_contact_factor",
-                    DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+                    platform_layout.get(
+                        "corridor_direct_contact_factor",
+                        DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
+                    ),
                 )
             ),
             cfg=self.cfg,
