@@ -324,6 +324,17 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   user-approved amendment (#655): generic mode drops the DP's
   `molecular_ascertainment.start_day` — the day-14 historical testing
   start — so the recorded channel is live on generic voyages; the declared
-  replay keeps it. Open decision: a half-decade interior refinement
-  ({1.8e10, 3.2e10, 5.6e10}) to learn whether any admissible Θ exists
-  inside the located band, before stage 2 can ever enumerate.
+  replay keeps it. The interior refinement
+  `covid_theta_screen_v11_refine` ran at eighth-decade spacing
+  ({1.33…7.5}e10 × 200 seeds, `79a3ac3`, array
+  `45cfb31d-eb50-4042-9d6d-17499d9a3934`, 1,400/1,400 cells): **the
+  admissible set is non-empty — Θ ∈ {3.16e10, 4.22e10, 5.62e10}**, an
+  interior band ~0.25 decades wide (median-floor failures below,
+  median+mean overshoot at 7.5e10). Stage 2 is enumerated and frozen —
+  100 declared-replay cells at the three admissible Θ plus flanks
+  2.37e10/7.5e10
+  (`picard_framework/runs/covid_theta_screen_v11_stage2_design.json`),
+  scored on takeoff seeds against the conditional_trajectory_clause —
+  and not yet run. Readout
+  `docs/covid/covid_theta_screen_v11_refine_readout.md`, ledger
+  `docs/ledger/THETA-SCREEN-V11-REFINE.md`.

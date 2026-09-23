@@ -116,6 +116,13 @@ mode only, so `recorded_onsets` measures forward-looking ascertainment
 (swabbing from embarkation). Declared replay unaffected — canary (b)
 reproduced 3458 / 0.9318 exactly.
 
-Open decision: whether an interior half-decade stage-1 refinement
-({1.8e10, 3.2e10, 5.6e10} × 200 seeds) locates an admissible Θ inside
-(1e10, 1e11) — recommended as the next session in the readout §6.
+Open decision resolved: the interior refinement ran at eighth-decade
+spacing ({1.33…7.5}e10 × 200 seeds, `covid_theta_screen_v11_refine`,
+`79a3ac3`) and **measured a non-empty admissible set — Θ ∈ {3.16e10,
+4.22e10, 5.62e10}** — an interior band ~0.25 decades wide, flanked by
+median-floor failures below and median+mean overshoot above. Stage 2's
+declared replay is enumerated (100 cells at those three plus flanks
+2.37e10/7.5e10, frozen in
+`picard_framework/runs/covid_theta_screen_v11_stage2_design.json`) and
+unrun at this writing. See ledger THETA-SCREEN-V11-REFINE and readout
+`docs/covid/covid_theta_screen_v11_refine_readout.md`.
