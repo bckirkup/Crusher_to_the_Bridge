@@ -545,6 +545,37 @@ class PerSurfaceFomiteState:
             new_total += self.mass[key]
         return new_total / old_total
 
+    def disinfect(
+        self,
+        unit_key: str,
+        pathogen_id: str,
+        cleanable_factor: float,
+        missed_factor: float,
+    ) -> float:
+        """One outbreak pass per class; return the total retention.
+
+        The cleanable compartment takes ``cleanable_factor`` and the
+        missed fraction takes ``missed_factor``, the same split the
+        pooled ``_disinfect_zone`` applies to each compartment.
+        """
+        old_total = self.total(unit_key, pathogen_id)
+        if old_total <= 0.0:
+            return 1.0
+        new_total = 0.0
+        for key in self._keys(unit_key, pathogen_id):
+            mass_c = self.mass.get(key, 0.0)
+            if mass_c <= 0.0:
+                continue
+            old_cleanable = min(mass_c, self.cleanable.get(key, 0.0))
+            old_missed = mass_c - old_cleanable
+            self.mass[key] = (
+                old_cleanable * cleanable_factor
+                + old_missed * missed_factor
+            )
+            self.cleanable[key] = old_cleanable * cleanable_factor
+            new_total += self.mass[key]
+        return new_total / old_total
+
     def _keys(
         self,
         unit_key: str,

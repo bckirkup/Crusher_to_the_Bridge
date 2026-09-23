@@ -2697,6 +2697,32 @@ class TransmissionCore:
             coverage,
             kill_multiplier,
         )
+        if self._per_surface is not None:
+            self._disinfect_zone_by_class(
+                zone_name, cleanable_factor, missed_factor,
+            )
+        else:
+            self._disinfect_zone_pools(
+                zone_name, cleanable_factor, missed_factor,
+            )
+        for _pid, patches_by_unit in (
+            self.emesis_patch_pools_by_pathogen.items()
+        ):
+            patches = patches_by_unit.get(zone_name)
+            if not patches:
+                continue
+            patches_by_unit[zone_name] = [
+                p for p in patches
+                if self._scale_emesis_patch(p, cleanable_factor) > 0.0
+            ]
+
+    def _disinfect_zone_pools(
+        self,
+        zone_name: str,
+        cleanable_factor: float,
+        missed_factor: float,
+    ) -> None:
+        """Pooled outbreak pass over each pathogen's surface compartments."""
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
             value = pools.get(zone_name)
             total = max(0.0, float(value)) if value is not None else 0.0
@@ -2722,16 +2748,48 @@ class TransmissionCore:
                         SURFACE_RESERVOIR, pathogen_id, zone_name,
                     ),
                 )
-        for _pid, patches_by_unit in (
-            self.emesis_patch_pools_by_pathogen.items()
-        ):
-            patches = patches_by_unit.get(zone_name)
-            if not patches:
+
+    def _disinfect_zone_by_class(
+        self,
+        zone_name: str,
+        cleanable_factor: float,
+        missed_factor: float,
+    ) -> None:
+        """Outbreak pass over the per-item-class sub-pools (per-surface arm).
+
+        Same roll-up contract as ``_routine_cleaning_event_by_class``: the
+        class retentions roll up to the pooled compartments, and
+        ``_scale_surface_mass`` is deliberately not called -- it would
+        re-scale the classes.
+        """
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            total = max(0.0, float(pools.get(zone_name, 0.0)))
+            if total <= 0.0:
                 continue
-            patches_by_unit[zone_name] = [
-                p for p in patches
-                if self._scale_emesis_patch(p, cleanable_factor) > 0.0
-            ]
+            retention = self._per_surface.disinfect(
+                zone_name, pathogen_id, cleanable_factor, missed_factor,
+            )
+            new_total = self._per_surface.total(zone_name, pathogen_id)
+            pools[zone_name] = new_total
+            self.surface_pools[zone_name] = max(
+                0.0,
+                float(self.surface_pools.get(zone_name, 0.0))
+                - total
+                + new_total,
+            )
+            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+                pathogen_id, {},
+            )
+            cleanable[zone_name] = self._per_surface.cleanable_total(
+                zone_name, pathogen_id,
+            )
+            if self.strain_registry is not None:
+                self._reservoir.decay(
+                    retention,
+                    ReservoirComposition.key(
+                        SURFACE_RESERVOIR, pathogen_id, zone_name,
+                    ),
+                )
 
     def _outbreak_cleaning_schedule(self, zone_name: str) -> tuple[float, float]:
         """Return outbreak coverage and passes-per-day for a zone."""

@@ -535,6 +535,107 @@ def test_under_demand_still_conserves_each_class() -> None:
     )
 
 
+def _split_compartments(core: TransmissionCore, zone: str) -> None:
+    """Mass where cleanable < total: deposit, routine pass, deposit again."""
+    core._deposit_surface_mass(PATHOGEN, zone, 1e6)
+    core._routine_cleaning_event(zone)
+    core._deposit_surface_mass(PATHOGEN, zone, 4e5)
+
+
+def test_outbreak_disinfection_matches_pooled_and_survives_next_pass() -> None:
+    pooled = _core(POOLED, seed=12)
+    arm = _core(PER_SURFACE, seed=12)
+    for core in (pooled, arm):
+        _split_compartments(core, "Lounge_A")
+    pool_before = pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    cleanable_before = pooled.surface_pools_cleanable_by_pathogen[
+        PATHOGEN
+    ]["Lounge_A"]
+    assert cleanable_before < pool_before
+    pooled.disinfect_surfaces(4.29, 0.58)
+    arm.disinfect_surfaces(4.29, 0.58)
+    assert arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(
+            pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+            rel=1e-12,
+        )
+    )
+    assert arm.surface_pools["Lounge_A"] == pytest.approx(
+        pooled.surface_pools["Lounge_A"], rel=1e-12,
+    )
+    pooled_cleanable = pooled.surface_pools_cleanable_by_pathogen[
+        PATHOGEN
+    ]["Lounge_A"]
+    assert arm.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(pooled_cleanable, rel=1e-12)
+    assert arm._per_surface.cleanable_total("Lounge_A", PATHOGEN) == (
+        pytest.approx(pooled_cleanable, rel=1e-12)
+    )
+    # The next routine pass must clean the same amount in both arms --
+    # this is the step that drifted before the per-class mirror existed.
+    pooled._routine_cleaning_event("Lounge_A")
+    arm._routine_cleaning_event("Lounge_A")
+    assert arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(
+            pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+            rel=1e-12,
+        )
+    )
+    assert arm.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(
+        pooled.surface_pools_cleanable_by_pathogen[PATHOGEN]["Lounge_A"],
+        rel=1e-12,
+    )
+
+
+def test_outbreak_disinfection_applies_per_class_factors() -> None:
+    core = _core(PER_SURFACE, seed=12)
+    _split_compartments(core, "Lounge_A")
+    state = core._per_surface
+    before = {
+        c: {
+            "mass": state.mass[("Lounge_A", PATHOGEN, c)],
+            "cleanable": state.cleanable.get(
+                ("Lounge_A", PATHOGEN, c), 0.0,
+            ),
+        }
+        for c in state.classes("Lounge_A", PATHOGEN)
+    }
+    assert any(
+        s["cleanable"] < s["mass"] for s in before.values()
+    )
+    cleanable_factor, missed_factor = core._nested_disinfection_factors(
+        core._routine_cleaning_schedule("Lounge_A")[0], 0.58, 10.0 ** -4.29,
+    )
+    core._disinfect_zone("Lounge_A", 0.58, 10.0 ** -4.29)
+    after = {
+        c: {
+            "mass": state.mass[("Lounge_A", PATHOGEN, c)],
+            "cleanable": state.cleanable.get(
+                ("Lounge_A", PATHOGEN, c), 0.0,
+            ),
+        }
+        for c in before
+    }
+    for item_class, old in before.items():
+        expected_cleanable = old["cleanable"] * cleanable_factor
+        expected_mass = (
+            old["cleanable"] * cleanable_factor
+            + (old["mass"] - old["cleanable"]) * missed_factor
+        )
+        assert after[item_class]["cleanable"] == pytest.approx(
+            expected_cleanable, rel=1e-12,
+        )
+        assert after[item_class]["mass"] == pytest.approx(
+            expected_mass, rel=1e-12,
+        )
+    assert sum(s["mass"] for s in after.values()) == pytest.approx(
+        core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"], rel=1e-12,
+    )
+
+
 def test_areal_density_is_uniform_across_classes() -> None:
     core = _core(PER_SURFACE, seed=13)
     _drive(core, _population())
