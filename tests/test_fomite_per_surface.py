@@ -431,6 +431,77 @@ def test_over_demand_cap_empties_each_class_exactly() -> None:
     )
 
 
+def test_pooled_over_demand_cap_empties_exactly_and_skips_pickup() -> None:
+    core = _core(POOLED, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e-6)
+    surface_mass = core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    targets = [_agent(7200 + i, "Lounge_A") for i in range(3)]
+    requests = [(target, surface_mass * 10.0) for target in targets]
+    delivered = core._deliver_fomite_requests(
+        requests, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    assert delivered == pytest.approx(surface_mass, abs=0.0)
+    core._consume_surface_mass(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    assert core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(0.0, abs=0.0)
+    )
+    assert core.surface_pools["Lounge_A"] == pytest.approx(0.0, abs=0.0)
+    assert core.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(0.0, abs=0.0)
+    # The next epoch skips pickup for a zeroed zone entirely: spy on the
+    # pooled request and confirm it is never called for Lounge_A while
+    # other zones (still shedding) do call it.
+    calls: list[str] = []
+    original = type(core)._fomite_pickup_request
+
+    def spy(
+        target: KorkinAgent,
+        zone_name: str,
+        mass: float,
+        epoch: int,
+    ) -> float:
+        calls.append(zone_name)
+        return original(core, target, zone_name, mass, epoch)
+
+    core._fomite_pickup_request = spy
+    occupants = _population()
+    # Lounge_A keeps only its susceptible -- no shedder re-deposits there.
+    occupants["Lounge_A"] = [
+        agent for agent in occupants["Lounge_A"]
+        if PATHOGEN not in agent.infections
+    ]
+    core._pathway_fomite(
+        1, occupants, {}, ContactTracingMatrix(epoch=1), [],
+        pathogen_id=PATHOGEN,
+        profile=core.pathogen_profiles[PATHOGEN],
+    )
+    assert calls
+    assert "Lounge_A" not in calls
+
+
+def test_pooled_under_demand_unchanged() -> None:
+    core = _core(POOLED, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e6)
+    surface_mass = core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    targets = [_agent(7300 + i, "Lounge_A") for i in range(3)]
+    requests = [(target, 1e3) for target in targets]
+    delivered = core._deliver_fomite_requests(
+        requests, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    assert delivered == pytest.approx(3e3, rel=1e-12)
+    core._consume_surface_mass(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    assert core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(surface_mass - 3e3, rel=1e-12)
+    )
+
+
 def test_under_demand_still_conserves_each_class() -> None:
     arm = _core(PER_SURFACE, seed=12)
     arm._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e6)

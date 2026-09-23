@@ -6509,6 +6509,11 @@ class TransmissionCore:
                 surface_attribution,
             )
             delivered_total += delivered
+        # A pool whose demand exceeds its supply is emptied exactly: the
+        # consumption total is the whole mass rather than the scaled
+        # request sum, which lands within an ulp of it either way.
+        if scale < 1.0:
+            delivered_total = surface_mass
         return delivered_total
 
     def _deliver_one_pickup(
@@ -7189,6 +7194,10 @@ class TransmissionCore:
                 self.sanitary_telemetry["dose_delivered"] += dose
                 self.sanitary_telemetry["recipients"] += 1
                 delivered_total += delivered
+            # A venue whose demand exceeds its supply is emptied exactly,
+            # matching _deliver_fomite_requests.
+            if scale < 1.0:
+                delivered_total = surface_mass
             self._consume_surface_mass(
                 pathogen_id, venue, delivered_total, surface_mass,
             )
