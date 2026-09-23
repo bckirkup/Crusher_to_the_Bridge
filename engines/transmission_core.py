@@ -2610,27 +2610,51 @@ class TransmissionCore:
             retention = self._per_surface.routine_clean(
                 zone_name, pathogen_id, multiplier,
             )
-            new_total = self._per_surface.total(zone_name, pathogen_id)
-            pools[zone_name] = new_total
-            self.surface_pools[zone_name] = max(
-                0.0,
-                float(self.surface_pools.get(zone_name, 0.0))
-                - total
-                + new_total,
+            self._roll_up_per_surface_zone(
+                pathogen_id, zone_name, total, retention,
+                decay_requires_registry=True,
             )
-            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-                pathogen_id, {},
+
+    def _roll_up_per_surface_zone(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        previous_total: float,
+        retention: float,
+        *,
+        decay_requires_registry: bool,
+    ) -> float:
+        """Fold per-class totals back into the pooled compartment mirrors.
+
+        Shared by routine cleaning, outbreak disinfection and pickup
+        consumption: each mutates the class masses, then the zone pool,
+        aggregate and cleanable roll to the new class totals, and the
+        strain reservoir decays by the caller's retention -- unless the
+        caller only decays under a strain registry.
+        """
+        new_total = self._per_surface.total(zone_name, pathogen_id)
+        pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
+        pools[zone_name] = new_total
+        self.surface_pools[zone_name] = max(
+            0.0,
+            float(self.surface_pools.get(zone_name, 0.0))
+            - previous_total
+            + new_total,
+        )
+        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        cleanable[zone_name] = self._per_surface.cleanable_total(
+            zone_name, pathogen_id,
+        )
+        if not decay_requires_registry or self.strain_registry is not None:
+            self._reservoir.decay(
+                retention,
+                ReservoirComposition.key(
+                    SURFACE_RESERVOIR, pathogen_id, zone_name,
+                ),
             )
-            cleanable[zone_name] = self._per_surface.cleanable_total(
-                zone_name, pathogen_id,
-            )
-            if self.strain_registry is not None:
-                self._reservoir.decay(
-                    retention,
-                    ReservoirComposition.key(
-                        SURFACE_RESERVOIR, pathogen_id, zone_name,
-                    ),
-                )
+        return new_total
 
     def _scale_emesis_patch(self, patch: EmesisPatch, factor: float) -> float:
         """Scale one patch's mass by a decay/cleaning retention; drop at ~0."""
@@ -2769,27 +2793,10 @@ class TransmissionCore:
             retention = self._per_surface.disinfect(
                 zone_name, pathogen_id, cleanable_factor, missed_factor,
             )
-            new_total = self._per_surface.total(zone_name, pathogen_id)
-            pools[zone_name] = new_total
-            self.surface_pools[zone_name] = max(
-                0.0,
-                float(self.surface_pools.get(zone_name, 0.0))
-                - total
-                + new_total,
+            self._roll_up_per_surface_zone(
+                pathogen_id, zone_name, total, retention,
+                decay_requires_registry=True,
             )
-            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-                pathogen_id, {},
-            )
-            cleanable[zone_name] = self._per_surface.cleanable_total(
-                zone_name, pathogen_id,
-            )
-            if self.strain_registry is not None:
-                self._reservoir.decay(
-                    retention,
-                    ReservoirComposition.key(
-                        SURFACE_RESERVOIR, pathogen_id, zone_name,
-                    ),
-                )
 
     def _outbreak_cleaning_schedule(self, zone_name: str) -> tuple[float, float]:
         """Return outbreak coverage and passes-per-day for a zone."""
@@ -6672,25 +6679,14 @@ class TransmissionCore:
         ):
             return
         self._per_surface.consume(zone_name, pathogen_id, delivered_by_class)
-        remaining = self._per_surface.total(zone_name, pathogen_id)
         pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
         tracked = max(0.0, float(pools.get(zone_name, 0.0)))
-        pools[zone_name] = remaining
-        self.surface_pools[zone_name] = max(
-            0.0,
-            float(self.surface_pools.get(zone_name, 0.0))
-            - tracked
-            + remaining,
-        )
-        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-            pathogen_id, {},
-        )
-        cleanable[zone_name] = self._per_surface.cleanable_total(
-            zone_name, pathogen_id,
-        )
-        self._reservoir.decay(
-            remaining / previous_mass,
-            ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        self._roll_up_per_surface_zone(
+            pathogen_id,
+            zone_name,
+            tracked,
+            self._per_surface.total(zone_name, pathogen_id) / previous_mass,
+            decay_requires_registry=False,
         )
 
     def _emesis_patch_pickup(
