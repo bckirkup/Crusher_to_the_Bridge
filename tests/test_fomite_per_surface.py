@@ -204,6 +204,30 @@ def _drive(
     return history
 
 
+def _capped_population() -> dict[str, list[KorkinAgent]]:
+    """A crowded lounge so pickup demand can exceed the deposited pool."""
+    occupants = _population()
+    crowd = [
+        _agent(5000 + index, "Lounge_A") for index in range(300)
+    ]
+    occupants["Lounge_A"] = [*occupants["Lounge_A"], *crowd]
+    return occupants
+
+
+def _cap_spy(core: TransmissionCore) -> list[tuple[float, float]]:
+    """Count _delivery_scale calls where requested exceeds a positive pool."""
+    seen: list[tuple[float, float]] = []
+    original = type(core)._delivery_scale
+
+    def spy(requested: float, pool: float) -> float:
+        if requested > pool > 0.0:
+            seen.append((requested, pool))
+        return original(requested, pool)
+
+    core._delivery_scale = spy
+    return seen
+
+
 EMESIS_PROFILE = {
     **_profile(),
     "recovery_day": 5,
@@ -254,16 +278,34 @@ def test_identity_per_surface_areal_reproduces_pooled() -> None:
     pooled = _core(dict(cleaning), seed=11)
     arm = _core({**cleaning, **PER_SURFACE}, seed=11)
     assert arm.fomite_representation == "per_surface"
-    hist_pooled = _drive(pooled, _population())
-    hist_arm = _drive(arm, _population())
+    # A light deposit against a crowded lounge forces at least one epoch
+    # where pickup demand exceeds supply -- the conservation-cap regime
+    # the arm must reproduce exactly, including the RNG stream.
+    pooled._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e-3)
+    arm._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e-3)
+    caps_pooled = _cap_spy(pooled)
+    caps_arm = _cap_spy(arm)
+    hist_pooled = _drive(pooled, _capped_population())
+    hist_arm = _drive(arm, _capped_population())
+    assert caps_pooled
+    assert caps_arm
     for pooled_step, arm_step in zip(hist_pooled, hist_arm):
         assert pooled_step["doses"].keys() == arm_step["doses"].keys()
+        # Capped epochs: pooled bookkeeping lands within an ulp of zero
+        # while the arm empties exactly -- the floor is abs=1e-9 on
+        # ~1e-3-scale residues, orders of magnitude below any real dose.
         for agent_id, dose in pooled_step["doses"].items():
-            assert dose == pytest.approx(arm_step["doses"][agent_id], rel=1e-9)
+            assert dose == pytest.approx(
+                arm_step["doses"][agent_id], rel=1e-9, abs=1e-9,
+            )
         for zone, mass in pooled_step["pools"].items():
-            assert mass == pytest.approx(arm_step["pools"][zone], rel=1e-9)
+            assert mass == pytest.approx(
+                arm_step["pools"][zone], rel=1e-9, abs=1e-9,
+            )
         for zone, mass in pooled_step["cleanable"].items():
-            assert mass == pytest.approx(arm_step["cleanable"][zone], rel=1e-9)
+            assert mass == pytest.approx(
+                arm_step["cleanable"][zone], rel=1e-9, abs=1e-9,
+            )
         assert pooled_step["areas"] == arm_step["areas"]
         assert pooled_step["rng"] == arm_step["rng"]  # no extra draws
     assert pooled._routine_cleaning_event_counts
@@ -328,6 +370,270 @@ def test_per_class_state_conserves_zone_total() -> None:
             assert sum(s["area_m2"] for s in state.values()) == pytest.approx(
                 core._fomite_surface_area_pooled(zone), rel=1e-12,
             )
+
+
+def test_over_demand_cap_empties_each_class_exactly() -> None:
+    arm = _core(PER_SURFACE, seed=12)
+    pooled = _core(POOLED, seed=12)
+    for core in (arm, pooled):
+        core._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e-6)
+    surface_mass = pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    state = arm.zone_item_class_state("Lounge_A", PATHOGEN)
+    targets = [_agent(7000 + i, "Lounge_A") for i in range(3)]
+    # Tenfold demand on every class forces the conservation cap.
+    requests_by_class = [
+        (target, {c: s["mass"] * 10.0 for c, s in state.items()})
+        for target in targets
+    ]
+    delivered = arm._deliver_fomite_requests_by_class(
+        requests_by_class, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    arm._consume_surface_mass_by_class(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    requests_pooled = [
+        (target, sum(request.values()))
+        for target, request in requests_by_class
+    ]
+    delivered_pooled = pooled._deliver_fomite_requests(
+        requests_pooled, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    pooled._consume_surface_mass(
+        PATHOGEN, "Lounge_A", delivered_pooled, surface_mass,
+    )
+    for key, mass in arm._per_surface.mass.items():
+        zone, pathogen, _ = key
+        assert (zone, pathogen) == ("Lounge_A", PATHOGEN)
+        assert mass == pytest.approx(0.0, abs=0.0)
+    for cleanable in arm._per_surface.cleanable.values():
+        assert cleanable == pytest.approx(0.0, abs=0.0)
+    assert arm._per_surface.total("Lounge_A", PATHOGEN) == pytest.approx(
+        0.0, abs=0.0,
+    )
+    assert arm._per_surface.cleanable_total(
+        "Lounge_A", PATHOGEN,
+    ) == pytest.approx(0.0, abs=0.0)
+    assert arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(0.0, abs=0.0)
+    )
+    assert (
+        arm.surface_pools_cleanable_by_pathogen[PATHOGEN]["Lounge_A"]
+        == pytest.approx(0.0, abs=0.0)
+    )
+    assert pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(0.0, abs=0.0)
+    )
+    assert (
+        pooled.surface_pools_cleanable_by_pathogen[PATHOGEN]["Lounge_A"]
+        == pytest.approx(0.0, abs=0.0)
+    )
+
+
+def test_pooled_over_demand_cap_empties_exactly_and_skips_pickup() -> None:
+    core = _core(POOLED, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e-6)
+    surface_mass = core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    targets = [_agent(7200 + i, "Lounge_A") for i in range(3)]
+    requests = [(target, surface_mass * 10.0) for target in targets]
+    delivered = core._deliver_fomite_requests(
+        requests, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    assert delivered == pytest.approx(surface_mass, abs=0.0)
+    core._consume_surface_mass(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    assert core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(0.0, abs=0.0)
+    )
+    assert core.surface_pools["Lounge_A"] == pytest.approx(0.0, abs=0.0)
+    assert core.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(0.0, abs=0.0)
+    # The next epoch skips pickup for a zeroed zone entirely: spy on the
+    # pooled request and confirm it is never called for Lounge_A while
+    # other zones (still shedding) do call it.
+    calls: list[str] = []
+    original = type(core)._fomite_pickup_request
+
+    def spy(
+        target: KorkinAgent,
+        zone_name: str,
+        mass: float,
+        epoch: int,
+    ) -> float:
+        calls.append(zone_name)
+        return original(core, target, zone_name, mass, epoch)
+
+    core._fomite_pickup_request = spy
+    occupants = _population()
+    # Lounge_A keeps only its susceptible -- no shedder re-deposits there.
+    occupants["Lounge_A"] = [
+        agent for agent in occupants["Lounge_A"]
+        if PATHOGEN not in agent.infections
+    ]
+    core._pathway_fomite(
+        1, occupants, {}, ContactTracingMatrix(epoch=1), [],
+        pathogen_id=PATHOGEN,
+        profile=core.pathogen_profiles[PATHOGEN],
+    )
+    assert calls
+    assert "Lounge_A" not in calls
+
+
+def test_pooled_under_demand_unchanged() -> None:
+    core = _core(POOLED, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e6)
+    surface_mass = core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    targets = [_agent(7300 + i, "Lounge_A") for i in range(3)]
+    requests = [(target, 1e3) for target in targets]
+    delivered = core._deliver_fomite_requests(
+        requests, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    assert delivered == pytest.approx(3e3, rel=1e-12)
+    core._consume_surface_mass(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    assert core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(surface_mass - 3e3, rel=1e-12)
+    )
+
+
+def test_under_demand_still_conserves_each_class() -> None:
+    arm = _core(PER_SURFACE, seed=12)
+    arm._deposit_surface_mass(PATHOGEN, "Lounge_A", 1e6)
+    surface_mass = arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    state = arm.zone_item_class_state("Lounge_A", PATHOGEN)
+    targets = [_agent(7100 + i, "Lounge_A") for i in range(3)]
+    # Demand well under each class mass: no class is capped.
+    requests_by_class = [
+        (target, {c: s["mass"] * 0.001 for c, s in state.items()})
+        for target in targets
+    ]
+    requested_by_class = {
+        c: sum(request[c] for _, request in requests_by_class)
+        for c in state
+    }
+    delivered = arm._deliver_fomite_requests_by_class(
+        requests_by_class, "Lounge_A", surface_mass, 0, set(), [],
+        {}, ContactTracingMatrix(epoch=0), None, PATHOGEN, None,
+    )
+    arm._consume_surface_mass_by_class(
+        PATHOGEN, "Lounge_A", delivered, surface_mass,
+    )
+    after = arm.zone_item_class_state("Lounge_A", PATHOGEN)
+    for c, s in state.items():
+        expected = s["mass"] - requested_by_class[c]
+        assert after[c]["mass"] == pytest.approx(expected, rel=1e-12)
+        assert after[c]["mass"] > 0.0
+    total = arm._per_surface.total("Lounge_A", PATHOGEN)
+    assert total == pytest.approx(
+        surface_mass - sum(delivered.values()), rel=1e-12,
+    )
+
+
+def _split_compartments(core: TransmissionCore, zone: str) -> None:
+    """Mass where cleanable < total: deposit, routine pass, deposit again."""
+    core._deposit_surface_mass(PATHOGEN, zone, 1e6)
+    core._routine_cleaning_event(zone)
+    core._deposit_surface_mass(PATHOGEN, zone, 4e5)
+
+
+def test_outbreak_disinfection_matches_pooled_and_survives_next_pass() -> None:
+    pooled = _core(POOLED, seed=12)
+    arm = _core(PER_SURFACE, seed=12)
+    for core in (pooled, arm):
+        _split_compartments(core, "Lounge_A")
+    pool_before = pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"]
+    cleanable_before = pooled.surface_pools_cleanable_by_pathogen[
+        PATHOGEN
+    ]["Lounge_A"]
+    assert cleanable_before < pool_before
+    pooled.disinfect_surfaces(4.29, 0.58)
+    arm.disinfect_surfaces(4.29, 0.58)
+    assert arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(
+            pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+            rel=1e-12,
+        )
+    )
+    assert arm.surface_pools["Lounge_A"] == pytest.approx(
+        pooled.surface_pools["Lounge_A"], rel=1e-12,
+    )
+    pooled_cleanable = pooled.surface_pools_cleanable_by_pathogen[
+        PATHOGEN
+    ]["Lounge_A"]
+    assert arm.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(pooled_cleanable, rel=1e-12)
+    assert arm._per_surface.cleanable_total("Lounge_A", PATHOGEN) == (
+        pytest.approx(pooled_cleanable, rel=1e-12)
+    )
+    # The next routine pass must clean the same amount in both arms --
+    # this is the step that drifted before the per-class mirror existed.
+    pooled._routine_cleaning_event("Lounge_A")
+    arm._routine_cleaning_event("Lounge_A")
+    assert arm.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] == (
+        pytest.approx(
+            pooled.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+            rel=1e-12,
+        )
+    )
+    assert arm.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(
+        pooled.surface_pools_cleanable_by_pathogen[PATHOGEN]["Lounge_A"],
+        rel=1e-12,
+    )
+
+
+def test_outbreak_disinfection_applies_per_class_factors() -> None:
+    core = _core(PER_SURFACE, seed=12)
+    _split_compartments(core, "Lounge_A")
+    state = core._per_surface
+    before = {
+        c: {
+            "mass": state.mass[("Lounge_A", PATHOGEN, c)],
+            "cleanable": state.cleanable.get(
+                ("Lounge_A", PATHOGEN, c), 0.0,
+            ),
+        }
+        for c in state.classes("Lounge_A", PATHOGEN)
+    }
+    assert any(
+        s["cleanable"] < s["mass"] for s in before.values()
+    )
+    cleanable_factor, missed_factor = core._nested_disinfection_factors(
+        core._routine_cleaning_schedule("Lounge_A")[0], 0.58, 10.0 ** -4.29,
+    )
+    core._disinfect_zone("Lounge_A", 0.58, 10.0 ** -4.29)
+    after = {
+        c: {
+            "mass": state.mass[("Lounge_A", PATHOGEN, c)],
+            "cleanable": state.cleanable.get(
+                ("Lounge_A", PATHOGEN, c), 0.0,
+            ),
+        }
+        for c in before
+    }
+    for item_class, old in before.items():
+        expected_cleanable = old["cleanable"] * cleanable_factor
+        expected_mass = (
+            old["cleanable"] * cleanable_factor
+            + (old["mass"] - old["cleanable"]) * missed_factor
+        )
+        assert after[item_class]["cleanable"] == pytest.approx(
+            expected_cleanable, rel=1e-12,
+        )
+        assert after[item_class]["mass"] == pytest.approx(
+            expected_mass, rel=1e-12,
+        )
+    assert sum(s["mass"] for s in after.values()) == pytest.approx(
+        core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"], rel=1e-12,
+    )
 
 
 def test_areal_density_is_uniform_across_classes() -> None:

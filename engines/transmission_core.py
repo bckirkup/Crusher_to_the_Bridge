@@ -2610,27 +2610,51 @@ class TransmissionCore:
             retention = self._per_surface.routine_clean(
                 zone_name, pathogen_id, multiplier,
             )
-            new_total = self._per_surface.total(zone_name, pathogen_id)
-            pools[zone_name] = new_total
-            self.surface_pools[zone_name] = max(
-                0.0,
-                float(self.surface_pools.get(zone_name, 0.0))
-                - total
-                + new_total,
+            self._roll_up_per_surface_zone(
+                pathogen_id, zone_name, total, retention,
+                decay_requires_registry=True,
             )
-            cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-                pathogen_id, {},
+
+    def _roll_up_per_surface_zone(
+        self,
+        pathogen_id: str,
+        zone_name: str,
+        previous_total: float,
+        retention: float,
+        *,
+        decay_requires_registry: bool,
+    ) -> float:
+        """Fold per-class totals back into the pooled compartment mirrors.
+
+        Shared by routine cleaning, outbreak disinfection and pickup
+        consumption: each mutates the class masses, then the zone pool,
+        aggregate and cleanable roll to the new class totals, and the
+        strain reservoir decays by the caller's retention -- unless the
+        caller only decays under a strain registry.
+        """
+        new_total = self._per_surface.total(zone_name, pathogen_id)
+        pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
+        pools[zone_name] = new_total
+        self.surface_pools[zone_name] = max(
+            0.0,
+            float(self.surface_pools.get(zone_name, 0.0))
+            - previous_total
+            + new_total,
+        )
+        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
+            pathogen_id, {},
+        )
+        cleanable[zone_name] = self._per_surface.cleanable_total(
+            zone_name, pathogen_id,
+        )
+        if not decay_requires_registry or self.strain_registry is not None:
+            self._reservoir.decay(
+                retention,
+                ReservoirComposition.key(
+                    SURFACE_RESERVOIR, pathogen_id, zone_name,
+                ),
             )
-            cleanable[zone_name] = self._per_surface.cleanable_total(
-                zone_name, pathogen_id,
-            )
-            if self.strain_registry is not None:
-                self._reservoir.decay(
-                    retention,
-                    ReservoirComposition.key(
-                        SURFACE_RESERVOIR, pathogen_id, zone_name,
-                    ),
-                )
+        return new_total
 
     def _scale_emesis_patch(self, patch: EmesisPatch, factor: float) -> float:
         """Scale one patch's mass by a decay/cleaning retention; drop at ~0."""
@@ -2697,6 +2721,32 @@ class TransmissionCore:
             coverage,
             kill_multiplier,
         )
+        if self._per_surface is not None:
+            self._disinfect_zone_by_class(
+                zone_name, cleanable_factor, missed_factor,
+            )
+        else:
+            self._disinfect_zone_pools(
+                zone_name, cleanable_factor, missed_factor,
+            )
+        for _pid, patches_by_unit in (
+            self.emesis_patch_pools_by_pathogen.items()
+        ):
+            patches = patches_by_unit.get(zone_name)
+            if not patches:
+                continue
+            patches_by_unit[zone_name] = [
+                p for p in patches
+                if self._scale_emesis_patch(p, cleanable_factor) > 0.0
+            ]
+
+    def _disinfect_zone_pools(
+        self,
+        zone_name: str,
+        cleanable_factor: float,
+        missed_factor: float,
+    ) -> None:
+        """Pooled outbreak pass over each pathogen's surface compartments."""
         for pathogen_id, pools in self.surface_pools_by_pathogen.items():
             value = pools.get(zone_name)
             total = max(0.0, float(value)) if value is not None else 0.0
@@ -2722,16 +2772,31 @@ class TransmissionCore:
                         SURFACE_RESERVOIR, pathogen_id, zone_name,
                     ),
                 )
-        for _pid, patches_by_unit in (
-            self.emesis_patch_pools_by_pathogen.items()
-        ):
-            patches = patches_by_unit.get(zone_name)
-            if not patches:
+
+    def _disinfect_zone_by_class(
+        self,
+        zone_name: str,
+        cleanable_factor: float,
+        missed_factor: float,
+    ) -> None:
+        """Outbreak pass over the per-item-class sub-pools (per-surface arm).
+
+        Same roll-up contract as ``_routine_cleaning_event_by_class``: the
+        class retentions roll up to the pooled compartments, and
+        ``_scale_surface_mass`` is deliberately not called -- it would
+        re-scale the classes.
+        """
+        for pathogen_id, pools in self.surface_pools_by_pathogen.items():
+            total = max(0.0, float(pools.get(zone_name, 0.0)))
+            if total <= 0.0:
                 continue
-            patches_by_unit[zone_name] = [
-                p for p in patches
-                if self._scale_emesis_patch(p, cleanable_factor) > 0.0
-            ]
+            retention = self._per_surface.disinfect(
+                zone_name, pathogen_id, cleanable_factor, missed_factor,
+            )
+            self._roll_up_per_surface_zone(
+                pathogen_id, zone_name, total, retention,
+                decay_requires_registry=True,
+            )
 
     def _outbreak_cleaning_schedule(self, zone_name: str) -> tuple[float, float]:
         """Return outbreak coverage and passes-per-day for a zone."""
@@ -6509,6 +6574,11 @@ class TransmissionCore:
                 surface_attribution,
             )
             delivered_total += delivered
+        # A pool whose demand exceeds its supply is emptied exactly: the
+        # consumption total is the whole mass rather than the scaled
+        # request sum, which lands within an ulp of it either way.
+        if scale < 1.0:
+            delivered_total = surface_mass
         return delivered_total
 
     def _deliver_one_pickup(
@@ -6586,6 +6656,14 @@ class TransmissionCore:
             )
             for c in classes:
                 delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        # A class whose demand exceeds its supply is emptied exactly: the
+        # consumption total is the class mass itself, matching the pooled
+        # path where a capped pool subtracts its whole previous mass.
+        for c in classes:
+            if scales[c] < 1.0:
+                delivered_by_class[c] = self._per_surface.mass.get(
+                    (zone_name, pathogen_id, c), 0.0,
+                )
         return delivered_by_class
 
     def _consume_surface_mass_by_class(
@@ -6601,25 +6679,14 @@ class TransmissionCore:
         ):
             return
         self._per_surface.consume(zone_name, pathogen_id, delivered_by_class)
-        remaining = self._per_surface.total(zone_name, pathogen_id)
         pools = self.surface_pools_by_pathogen.setdefault(pathogen_id, {})
         tracked = max(0.0, float(pools.get(zone_name, 0.0)))
-        pools[zone_name] = remaining
-        self.surface_pools[zone_name] = max(
-            0.0,
-            float(self.surface_pools.get(zone_name, 0.0))
-            - tracked
-            + remaining,
-        )
-        cleanable = self.surface_pools_cleanable_by_pathogen.setdefault(
-            pathogen_id, {},
-        )
-        cleanable[zone_name] = self._per_surface.cleanable_total(
-            zone_name, pathogen_id,
-        )
-        self._reservoir.decay(
-            remaining / previous_mass,
-            ReservoirComposition.key(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        self._roll_up_per_surface_zone(
+            pathogen_id,
+            zone_name,
+            tracked,
+            self._per_surface.total(zone_name, pathogen_id) / previous_mass,
+            decay_requires_registry=False,
         )
 
     def _emesis_patch_pickup(
@@ -7181,6 +7248,10 @@ class TransmissionCore:
                 self.sanitary_telemetry["dose_delivered"] += dose
                 self.sanitary_telemetry["recipients"] += 1
                 delivered_total += delivered
+            # A venue whose demand exceeds its supply is emptied exactly,
+            # matching _deliver_fomite_requests.
+            if scale < 1.0:
+                delivered_total = surface_mass
             self._consume_surface_mass(
                 pathogen_id, venue, delivered_total, surface_mass,
             )
@@ -7233,6 +7304,13 @@ class TransmissionCore:
             self.sanitary_telemetry["recipients"] += 1
             for c in classes:
                 delivered_by_class[c] += request.get(c, 0.0) * scales[c]
+        # A class whose demand exceeds its supply is emptied exactly, as
+        # in _deliver_fomite_requests_by_class.
+        for c in classes:
+            if scales[c] < 1.0:
+                delivered_by_class[c] = self._per_surface.mass.get(
+                    (venue, pathogen_id, c), 0.0,
+                )
         self._consume_surface_mass_by_class(
             pathogen_id, venue, delivered_by_class, surface_mass,
         )
