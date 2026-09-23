@@ -86,13 +86,14 @@ def test_scheduled_protocol_window_retimes_the_order():
 def test_scheduled_protocol_window_raises_without_the_order():
     raw = _raw_spec()
     raw["config_overrides"]["scenario_schedule"]["protocols"] = []
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="no SOP-017"):
         apply_arm_overrides(
             raw,
             {"scheduled_protocol_window": {
                 "protocol_id": "SOP-017", "start_day": 12, "end_day": 30,
             }},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
@@ -163,10 +164,9 @@ def test_combined_arm_applies_every_key():
 
 def test_unknown_key_still_raises():
     raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="unknown arm override key"):
-        apply_arm_overrides(
-            raw, {"bogus_channel": 1}, profile=load_covid_profile(),
-        )
+        apply_arm_overrides(raw, {"bogus_channel": 1}, profile=profile)
 
 
 # ── transmission cfg precedence at the engine ─────────────────────────────

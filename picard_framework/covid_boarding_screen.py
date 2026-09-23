@@ -503,6 +503,28 @@ def _retime_scheduled_protocol(
     )
 
 
+def _apply_scheduled_window(raw: dict[str, Any], window: Any) -> None:
+    if not isinstance(window, Mapping):
+        raise ValueError("scheduled_protocol_window must be a mapping")
+    _retime_scheduled_protocol(raw, window)
+
+
+def _apply_infection_counters(raw: dict[str, Any], counters: Any) -> None:
+    if not isinstance(counters, list):
+        raise ValueError("infection_counters must be a list of counter defs")
+    raw.setdefault("config_overrides", {}).setdefault("ship_graph", {})[
+        "infection_counters"
+    ] = counters
+
+
+def _apply_transmission_overrides(raw: dict[str, Any], tx: Any) -> None:
+    if not isinstance(tx, Mapping):
+        raise ValueError("transmission_overrides must be a mapping")
+    raw.setdefault("config_overrides", {}).setdefault(
+        "transmission", {},
+    ).update(tx)
+
+
 def _apply_route_efficiencies(
     raw: dict[str, Any],
     arm_values: Mapping[str, Any],
@@ -550,26 +572,13 @@ def apply_arm_overrides(
     # The window retime names the DECLARED protocol id; it must run before a
     # rename in the same arm.
     if "scheduled_protocol_window" in overrides:
-        window = overrides["scheduled_protocol_window"]
-        if not isinstance(window, Mapping):
-            raise ValueError("scheduled_protocol_window must be a mapping")
-        _retime_scheduled_protocol(raw, window)
+        _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
         _swap_scheduled_protocol(raw, str(overrides["scheduled_protocol_id"]))
     if "infection_counters" in overrides:
-        counters = overrides["infection_counters"]
-        if not isinstance(counters, list):
-            raise ValueError("infection_counters must be a list of counter defs")
-        raw.setdefault("config_overrides", {}).setdefault("ship_graph", {})[
-            "infection_counters"
-        ] = counters
+        _apply_infection_counters(raw, overrides["infection_counters"])
     if "transmission_overrides" in overrides:
-        tx = overrides["transmission_overrides"]
-        if not isinstance(tx, Mapping):
-            raise ValueError("transmission_overrides must be a mapping")
-        raw.setdefault("config_overrides", {}).setdefault(
-            "transmission", {},
-        ).update(tx)
+        _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
         mode = str(overrides["near_field_air_mode"])
         if mode not in NEAR_FIELD_AIR_MODES:
