@@ -95,12 +95,15 @@ same schedule. A 12-day instrumented probe at seed 20200205 confirms the
 mechanism: by epoch 288 the declared run already holds 3,271
 ever-reported passengers and 3,250 quarantined agents (~87% of the
 ship) — the baseline 3% VSP `passenger_reported_case_rate` counter fires
-within days of first reports and confines every symptomatic agent it
+on the first reporting epoch and confines every symptomatic agent it
 finds, well before the SOP-017 mass order. On a report stream this
-dense, 0.0004 and 0.03 sweep the same symptomatic roster in the same
-window; the first-report counterfactual cannot bind earlier in any
-observable way. The counter machinery works — the arm was always
-degenerate.
+dense, 0.0004 and 0.03 sweep the same symptomatic roster at the same
+moment: an epoch-level confinement trace shows the two arms'
+quarantined counts identical at every one of the 288 probed epochs,
+both first confining at epoch 44 (~day 1.8) — the first sick-call
+batch alone already crosses the 3% passenger threshold, so no lower
+threshold can bind earlier. The counter machinery works — the arm was
+always degenerate.
 
 The probe's second measurement is the more consequential one: **the
 model's reactive confinement is near-saturating early** — ~87% of the

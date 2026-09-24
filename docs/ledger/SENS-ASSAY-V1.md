@@ -84,8 +84,11 @@ of the over-production.
 A10 first-report confinement was vacuous, not defective: bit-identical
 to A0 on all 19 paired seeds because the dense VSP report stream trips
 0.03 and 0.0004 on the same schedule — an instrumented probe at seed
-20200205 shows 3,271 ever-reported passengers and 3,250 quarantined
-agents (~87% of the ship) by day 12, before SOP-017 activates. The
+20200205 shows the two arms' quarantined counts identical at every one
+of 288 epochs (first confinement epoch 44, ~day 1.8, for both: the
+first sick-call batch already crosses the 3% passenger threshold) and
+3,271 ever-reported passengers / 3,250 quarantined (~87% of the ship)
+by day 12, before SOP-017 activates. The
 model's reactive confinement is near-saturating early and the residual
 burn rides channels confinement cannot reach (cabin-mate addback,
 shared-corridor air, presymptomatic shedding).
