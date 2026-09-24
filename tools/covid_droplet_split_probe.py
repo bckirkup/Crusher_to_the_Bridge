@@ -34,6 +34,7 @@ from picard_framework.covid_boarding_screen import (
     prepare_cell_run_spec,
 )
 from picard_framework.covid_theta_fit import PATHOGEN_ID, run_fit_spec
+from simulation_utils.paths import confine_to_base, validated_open
 
 DESIGN_REL = os.path.join(
     "picard_framework", "runs", "covid_theta_screen_v11_stage2_design.json",
@@ -74,7 +75,7 @@ def _event_summary(events: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def run_one(
+def run_one(  # pragma: no cover - drives a full-voyage sim, exercised by hand
     design,
     theta: float,
     seed: int,
@@ -104,7 +105,7 @@ def run_one(
     }
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover - CLI driver
     parser = argparse.ArgumentParser()
     parser.add_argument("--theta", type=float, default=4.22e10)
     parser.add_argument(
@@ -146,8 +147,13 @@ def main() -> None:
     }
     text = json.dumps(payload, indent=2)
     if args.out:
-        os.makedirs(os.path.dirname(os.path.abspath(args.out)), exist_ok=True)
-        with open(args.out, "w", encoding="utf-8") as handle:
+        # CLI/agent-supplied path: confine the write sink to the repo root
+        # (S8707/S2083), the same pattern the campaign tools use.
+        out_path = confine_to_base(repo_root, args.out)
+        os.makedirs(os.path.dirname(out_path), exist_ok=True)
+        with validated_open(
+            out_path, "w", allowed_roots=(repo_root,), encoding="utf-8",
+        ) as handle:
             handle.write(text + "\n")
     print(text)
 
