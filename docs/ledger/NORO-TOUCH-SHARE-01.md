@@ -1,8 +1,9 @@
 # NORO-TOUCH-SHARE-01
 **Date:** 2026-09-24
-**Commit:** e64bb00
+**Commit:** e7ab09f
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 3a54ad3
 
 A numeric, provenance-backed `fomite_touch_share: declared` table for the
 `per_surface` fomite arm (`shared` item reading), wired through
@@ -176,4 +177,149 @@ Readout tool: `tools/noro_diag/touch_share_coincidence_readout.py`
 
 ## 5. Measured
 
-*Not yet run.*
+Cell as frozen in §4, run locally: arms A and D, seeds 8000–8019, 288
+epochs, `classic_cruise_1900`, `norwalk_gi`, `per_surface + shipped`, the
+§2 table (`data/config/fomite_touch_share_declared.json`). Engine and CLI
+at `3a54ad3` (the only later commits before merge, `2266431`/`6f3c0ca`,
+touch table-path canonicalisation, the readout tool and tests — no
+numeric path); readout tool at `6f3c0ca`. Readout:
+`../norovirus/noro_touch_share_01/touch_share_coincidence_per_surface_declared.json`
+(sorted, deterministic; 20/20 seeds in both arms).
+
+### 5.1 Stop conditions (measured)
+
+| Condition | Result |
+|---|---|
+| `areal` arm bit-identical to #664 | **Holds.** `deliver_calls`, `hand_to_mouth_calls` and secondaries equal the #664 §6.2 table on all 20 seeds (0 mismatches). |
+| Any declared class capped-call share > 10% in D | **None.** Max capped share over all declared classes and seeds: `dining.*` 0.002, `public.*` 0.000 (`crew_mess.*` 0.010, areal fallback). |
+| Host sets identical on every seed (inert) | **No.** Identical on 2/20 (8001, 8015). |
+| Cruise/shipboard per-class source; exact-area null contradicted | Neither occurred (§2). |
+
+### 5.2 Primary statistics (per seed)
+
+| seed | n_A | n_D | jaccard | gini_A | gini_D | top10_A | top10_D | focus gain | dep_A | dep_D | aligned |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 8000 | 445 | 386 | 0.8385 | 0.9269 | 0.9934 | 0.9336 | 1.0000 | 0.3890 | 27 | 26 | no |
+| 8001 | 245 | 245 | 1.0000 | 0.9959 | 0.9959 | 1.0000 | 1.0000 | 0.3927 | 14 | 14 | yes |
+| 8002 | 580 | 637 | 0.7638 | 0.8571 | 0.8851 | 0.7693 | 0.8414 | 0.4075 | 45 | 59 | no |
+| 8003 | 634 | 531 | 0.8375 | 0.8432 | 0.9981 | 0.7115 | 1.0000 | 0.3872 | 22 | 14 | no |
+| 8004 | 761 | 4 | 0.0039 | 0.7596 | 0.4970 | 0.6004 | 0.5819 | −0.0242 | 12 | 10 | no |
+| 8005 | 702 | 760 | 0.6101 | 0.9177 | 0.8496 | 0.8892 | 0.7332 | 0.5710 | 62 | 52 | no |
+| 8006 | 527 | 533 | 0.9887 | 0.8481 | 0.8489 | 0.7579 | 0.7629 | 0.3881 | 21 | 21 | yes |
+| 8007 | 657 | 650 | 0.9773 | 0.8171 | 0.9086 | 0.6606 | 0.8309 | 0.3890 | 58 | 49 | no |
+| 8008 | 712 | 455 | 0.6231 | 0.8738 | 0.8689 | 0.7985 | 0.7572 | 0.4658 | 34 | 28 | no |
+| 8009 | 942 | 1111 | 0.7502 | 0.9722 | 0.9675 | 0.9990 | 0.9659 | 0.8045 | 70 | 87 | no |
+| 8010 | 253 | 1 | 0.0040 | 0.7268 | 0.0000 | 0.6173 | 1.0000 | −0.0242 | 4 | 8 | no |
+| 8011 | 468 | 473 | 0.9852 | 0.8355 | 0.6743 | 0.6933 | 0.4577 | 0.4087 | 33 | 43 | no |
+| 8012 | 634 | 647 | 0.9799 | 0.8389 | 0.8527 | 0.6810 | 0.7171 | 0.4785 | 32 | 47 | no |
+| 8013 | 331 | 215 | 0.6012 | 0.9950 | 0.9587 | 0.9971 | 0.9991 | 0.8262 | 26 | 23 | no |
+| 8014 | 898 | 798 | 0.8824 | 0.6877 | 0.7940 | 0.5366 | 0.6831 | 0.3915 | 33 | 39 | no |
+| 8015 | 1 | 1 | 1.0000 | 0.0000 | 0.0000 | 1.0000 | 1.0000 | 0.0000 | 6 | 6 | yes |
+| 8016 | 374 | 462 | 0.8095 | 0.8607 | 0.8860 | 0.7941 | 0.8296 | 0.3888 | 12 | 23 | no |
+| 8017 | 3 | 4 | 0.7500 | 0.0788 | 0.7500 | 0.4020 | 1.0000 | 0.0000 | 2 | 4 | no |
+| 8018 | 695 | 659 | 0.7292 | 0.9254 | 0.7749 | 0.8761 | 0.6587 | 0.4605 | 35 | 23 | no |
+| 8019 | 508 | 347 | 0.5602 | 0.7907 | 0.7242 | 0.6596 | 0.5541 | 0.4698 | 22 | 26 | no |
+
+`focus gain` = within-`public` delivered share of `button_or_dispenser`,
+D − A. `dep_*` = `surface_deposit_calls`; `aligned` = equal deposit calls
+and deposited GEC within 1e-9 (the event-stream witness added at `6f3c0ca`
+after seed 8000 showed divergent events).
+
+Aggregate, median [min, max] over 20 seeds:
+
+| statistic | A (areal) | D (declared) |
+|---|---|---|
+| distinct credited hosts | 553.5 [1, 942] | 467.5 [1, 1111] |
+| Gini of per-host fomite-delivered share | 0.846 [0.000, 0.996] | 0.851 [0.000, 0.998] |
+| top-decile share | 0.764 [0.402, 1.000] | 0.830 [0.458, 1.000] |
+| `surface_deposit_calls` | 26.5 [2, 70] | 24.5 [4, 87] |
+| `hand_to_mouth_calls` | 4934.5 [58, 22228] | 11836.5 [80, 26389] |
+| jaccard(H_A, H_D) | 0.787 [0.004, 1.000] | |
+| focus gain | 0.392 [−0.024, 0.826] | |
+| seeds with focus gain > 0.10 | 16 / 20 | |
+| seeds with deposit events aligned | 3 / 20 (8001, 8006, 8015) | |
+
+Per (zone class, item class), median over seeds of within-zone delivered
+share A → D, and distinct hosts credited A → D (capped share max in D):
+
+| class | zone share A → D | hosts A → D | cap D |
+|---|---|---|---|
+| `public.button_or_dispenser` | 0.0242 → **0.4243** | 322 → 246 | 0.000 |
+| `public.grab_rail_m` | 0.9696 → 0.5377 | 322 → 284 | 0.000 |
+| `public.door_lever` | 0.0062 → 0.0034 | 322 → 284 | 0.000 |
+| `dining.utensil` | 0.6394 → 0.5678 | 227 → 179 | 0.000 |
+| `dining.button_or_dispenser` | 0.1918 → 0.2299 | 227 → 179 | 0.002 |
+| `dining.tap_set` | 0.1279 → 0.1533 | 227 → 179 | 0.002 |
+| `dining.door_lever` | 0.0409 → 0.0490 | 227 → 179 | 0.002 |
+| `cabin.*`, `crew_mess.*`, `galley.*` (areal fallback) | unchanged within zone | cabin 4 → 4, crew_mess 108 → 98, galley 76 → 72 | ≤ 0.010 |
+
+In D the within-zone delivered shares of the declared zones equal the §2
+table to four decimals on the median seed: with no capping, delivered share
+tracks requested share, so criterion (b) is met by construction wherever
+any public-zone mass is delivered at all (the four seeds at 0.00/−0.02 —
+8004, 8010, 8015, 8017 — have essentially no public-zone delivery).
+
+### 5.3 Secondary (distributional only; relative/paired against a withdrawn baseline)
+
+| statistic | median [min, max] over seeds |
+|---|---|
+| `sum(fomite_delivered)` D/A | 0.489 [1.7e−72, 6.8e+80] |
+| `sum(credited_scaled)` D/A | 1.24 [0.0079, 5.1e+04] |
+| secondaries D − A | 0 [0, 1] (8008, 8009: +1) |
+| runtime D/A | 0.989 [0.977, 1.013]; A median 593 s/seed |
+
+The extreme ratios come from seeds whose whole-voyage deposited mass is
+1e−81 … 1e−20 GEC in one arm (8001, 8003, 8015, 8017): these are numerically
+empty voyages, not dose results, and are reported only because the rule
+says report the distribution.
+
+### 5.4 Verdict under the frozen rule
+
+**`changes_coincidence`**: median jaccard 0.787 < 0.90 **and** focus gain
+> 0.10 on 16 ≥ 15 seeds. Predicted direction confirmed
+(`button_or_dispenser` up, `grab_rail_m` down in `public`; dining moves
+little).
+
+### 5.5 Inferred (not measured)
+
+1. **The rule fired, but not through the mechanism §1 predicted.** Deposit
+   event streams stayed aligned on only 3/20 seeds, and on those three the
+   credited-host sets are identical or nearly so (jaccard 1.000, 0.989,
+   1.000). Where the arms met the same deposits, re-weighting the share
+   within a zone changed *how much* each host received from each class,
+   not *who* received it — which follows from the delivery wrapper's
+   construction (every host in the zone is credited every class in
+   proportion to a common per-class scale). The jaccard < 0.90 on the other
+   17 seeds is therefore carried by downstream divergence of the voyage —
+   different hand loads → different hand-to-mouth events
+   (`hand_to_mouth_calls` median 4.9k → 11.8k) → different infections,
+   shedding and deposits — not by direct reallocation among touchers.
+2. The §4 rule did not anticipate this; criterion (a) cannot separate
+   direct coincidence from dynamical divergence. The event-alignment column
+   is the discriminator and should be part of the rule in any successor.
+3. Concentration (Gini, top-decile) moves in the predicted direction only
+   weakly (medians +0.005, +0.07) and inconsistently across seeds.
+
+### 5.6 Hypothesis and next decision
+
+**Hypothesis (one cell, n = 20, untested):** the D-arm divergence is
+legitimate dynamics (concentrating share on `button_or_dispenser` raises
+some hosts' hand load across an infection threshold) rather than
+RNG-stream disruption through a `<= 0` cap/empty gate on a floating-point
+residue (the `NORO-FOMITE-DISAGG-01` §6.1 archetype). The doubling of
+`hand_to_mouth_calls` with fewer deposits is the observation that would
+distinguish them and is unexplained here.
+
+**Next decision (for the operator, not taken here):** either
+(i) accept `changes_coincidence` as "the declared table changes the voyage,
+and therefore who is credited", and take a larger block to AWS with the
+alignment column in the rule; or (ii) first run a two-seed epoch-lockstep
+probe (8001 aligned vs 8000 diverged) locating the first epoch at which the
+arms' RNG states differ, to rule the §6.1 archetype in or out before any
+larger block. Nothing is adopted either way: `pooled` remains the default,
+`declared` remains a diagnostic arm.
+
+### 5.7 Void
+
+Nothing previously measured is voided: the #664 identity re-measured here
+unchanged; `NORO-HIGH-TOUCH-AREA-01`/`-SWEEP-01` are untouched.
