@@ -186,6 +186,7 @@ def _cell(
     by_class: dict,
     credited: float,
     secondaries: int,
+    witness: dict | None = None,
 ) -> dict:
     return {
         "seed": seed,
@@ -197,9 +198,41 @@ def _cell(
             str(aid): mass for aid, mass in delivered.items() if mass > 0.0
         },
         "fomite_by_class": by_class,
+        "fomite_witness": dict(witness or {}),
         "reconciliation": {"sum_credited_scaled_gec": credited},
         "transmission": {"secondaries": secondaries},
     }
+
+
+def test_readout_deposit_event_alignment() -> None:
+    witness = {
+        "surface_deposit_calls": 27,
+        "surface_mass_deposited_gec": 6832.0,
+        "hand_to_mouth_calls": 1036,
+    }
+    base = _cell(1, {1: 1.0}, {}, 10.0, 1, witness)
+    arm_aligned = _cell(1, {1: 1.0}, {}, 10.0, 1, dict(witness))
+    row = readout.compare_seed(
+        base, arm_aligned, "public.button_or_dispenser",
+    )
+    assert row["deposit_events_aligned"] is True
+    assert row["deposit_calls_areal"] == 27
+    assert row["deposit_calls_declared"] == 27
+    assert row["deposited_gec_areal"] == pytest.approx(6832.0)
+    assert row["hand_to_mouth_calls_declared"] == 1036
+    arm_diverged = _cell(1, {1: 1.0}, {}, 10.0, 1, {
+        **witness, "surface_deposit_calls": 26,
+        "hand_to_mouth_calls": 13771,
+    })
+    row_diff = readout.compare_seed(
+        base, arm_diverged, "public.button_or_dispenser",
+    )
+    assert row_diff["deposit_events_aligned"] is False
+    assert row_diff["hand_to_mouth_calls_declared"] == 13771
+    agg = readout.aggregate([row, row_diff])
+    assert agg["n_seeds_deposit_aligned"] == 1
+    assert agg["deposit_calls_declared"]["max"] == 27
+    assert agg["hand_to_mouth_calls_declared"]["max"] == 13771
 
 
 def _write_cell(directory: Path, tag: str, cell: dict) -> None:
@@ -355,6 +388,11 @@ def _fabricated_row(jaccard: float, gain: float, capped: float) -> dict:
         "credited_scaled_ratio": 1.0,
         "secondaries_delta": 0,
         "focus_share_gain": gain,
+        "deposit_calls_areal": 10,
+        "deposit_calls_declared": 10,
+        "hand_to_mouth_calls_areal": 100,
+        "hand_to_mouth_calls_declared": 100,
+        "deposit_events_aligned": True,
         "per_class": {
             "public.button_or_dispenser": {"capped_share_declared": capped},
         },

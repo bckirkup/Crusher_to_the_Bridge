@@ -142,6 +142,35 @@ def _class_stats(cell: dict[str, Any]) -> dict[str, dict[str, float]]:
     return stats
 
 
+def _stream_alignment(
+    base_cell: dict[str, Any],
+    arm_cell: dict[str, Any],
+) -> dict[str, Any]:
+    """Deposit/hand event streams from each cell's ``fomite_witness`` block."""
+    witness_a = base_cell.get("fomite_witness", {})
+    witness_d = arm_cell.get("fomite_witness", {})
+    calls_a = int(witness_a.get("surface_deposit_calls", 0))
+    calls_d = int(witness_d.get("surface_deposit_calls", 0))
+    gec_a = float(witness_a.get("surface_mass_deposited_gec", 0.0))
+    gec_d = float(witness_d.get("surface_mass_deposited_gec", 0.0))
+    return {
+        "deposit_calls_areal": calls_a,
+        "deposit_calls_declared": calls_d,
+        "deposited_gec_areal": gec_a,
+        "deposited_gec_declared": gec_d,
+        "hand_to_mouth_calls_areal": int(
+            witness_a.get("hand_to_mouth_calls", 0),
+        ),
+        "hand_to_mouth_calls_declared": int(
+            witness_d.get("hand_to_mouth_calls", 0),
+        ),
+        "deposit_events_aligned": (
+            calls_a == calls_d
+            and math.isclose(gec_a, gec_d, rel_tol=1e-9)
+        ),
+    }
+
+
 def compare_seed(
     base_cell: dict[str, Any],
     arm_cell: dict[str, Any],
@@ -199,6 +228,7 @@ def compare_seed(
     )
     return {
         "seed": int(arm_cell["seed"]),
+        **_stream_alignment(base_cell, arm_cell),
         "n_hosts_areal": len(set_a),
         "n_hosts_declared": len(set_d),
         "jaccard": jaccard,
@@ -241,6 +271,8 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "delivered_ratio", "credited_scaled_ratio",
         "secondaries_delta", "focus_share_gain",
         "n_hosts_areal", "n_hosts_declared",
+        "deposit_calls_areal", "deposit_calls_declared",
+        "hand_to_mouth_calls_areal", "hand_to_mouth_calls_declared",
     )
     summary = {
         name: _median_range(
@@ -278,6 +310,9 @@ def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
         "identical_host_sets_all_seeds": identical,
         "focus_class_share_gain_seeds": gain_seeds,
         "cap_flags": cap_flags,
+        "n_seeds_deposit_aligned": sum(
+            1 for row in rows if row["deposit_events_aligned"]
+        ),
         "verdict": verdict,
     }
 
@@ -319,7 +354,7 @@ def _print(result: dict[str, Any]) -> None:
     header = (
         f"  {'seed':>6} {'n_a':>5} {'n_d':>5} {'jaccard':>8} "
         f"{'gini_a':>7} {'gini_d':>7} {'top10_a':>8} {'top10_d':>8} "
-        f"{'focus_gain':>10}"
+        f"{'focus_gain':>10} {'dep_a':>6} {'dep_d':>6} {'aligned':>7}"
     )
     print(header)
     for row in result["per_seed"]:
@@ -329,7 +364,10 @@ def _print(result: dict[str, Any]) -> None:
             f"{row['gini_areal']:>7.4f} {row['gini_declared']:>7.4f} "
             f"{row['top_decile_areal']:>8.4f} "
             f"{row['top_decile_declared']:>8.4f} "
-            f"{row['focus_share_gain']:>10.4f}",
+            f"{row['focus_share_gain']:>10.4f} "
+            f"{row['deposit_calls_areal']:>6} "
+            f"{row['deposit_calls_declared']:>6} "
+            f"{str(row['deposit_events_aligned']):>7}",
         )
     print("aggregate (median [min, max]):")
     for name, stats in agg.items():
@@ -345,6 +383,10 @@ def _print(result: dict[str, Any]) -> None:
     print(
         f"focus class ({result['focus_class']}) share gain > "
         f"{FOCUS_SHARE_GAIN}: {agg['focus_class_share_gain_seeds']} seeds",
+    )
+    print(
+        f"deposit events aligned on {agg['n_seeds_deposit_aligned']}/"
+        f"{len(result['per_seed'])} seeds",
     )
     if agg["cap_flags"]:
         print(f"cap flags (declared capped_share > {CAPPED_SHARE_FLAG}): "
