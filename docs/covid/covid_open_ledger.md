@@ -365,8 +365,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `docs/covid/covid_sensitivity_assay_v1_readout.md`, surface
   `docs/covid/covid_sensitivity_assay_v1_surface.csv`, ledger
   `docs/ledger/SENS-ASSAY-V1.md`.
-- **`covid_sensitivity_assay_v2` is declared, not yet run** (assay-1
-  now measured in full): v1's A11 arrest bound still records
+- **`covid_sensitivity_assay_v2` is declared, stood down
+  pre-execution** (assay-1 now measured in full): v1's A11 arrest bound still records
   ~2,868 onsets on takeoff seeds vs the record's 197 under crew
   confinement + pool off + day-12 quarantine + perfect confinement +
   contact ×0.25 — the gap is not reachable inside the transmission
@@ -378,4 +378,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   same 20 seeds at Θ 4.22e10, 220 cells, plus a zero-cell observational
   annex scoring the dated-onset-equivalent on v1+v2 payloads. Design
   `picard_framework/runs/covid_sensitivity_assay_v2_design.json`,
-  ledger `docs/ledger/SENS-ASSAY-V2.md`.
+  ledger `docs/ledger/SENS-ASSAY-V2.md`. Held pending droplet
+  near-field/far-field route surgery: the v1 §2a attribution showed
+  ~99% of the burn rides the well-mixed-room droplet pool, which the
+  reach arms (B7–B9, `activity_contacts` only) cannot bound — see the
+  stood-down note in `docs/ledger/SENS-ASSAY-V2.md`.
