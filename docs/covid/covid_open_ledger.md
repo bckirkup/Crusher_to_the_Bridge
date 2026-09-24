@@ -344,26 +344,29 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `docs/covid/covid_theta_screen_v11_stage2_readout.md`, ledgers
   `docs/ledger/THETA-SCREEN-V11-REFINE.md` and
   `docs/ledger/THETA-SCREEN-V11-S2.md`.
-- **`covid_sensitivity_assay_v1` is running — canary measured, array in
-  flight**: a 240-cell paired-seed arm sweep on the declared replay at
-  band-centre Θ 4.22e10 asking which model machinery could account for
-  the ~17.7× conditional recorded-onset gap (declared decomposition:
-  ~4.7× biological over-burn × ~3.5× dated-onset bookkeeping). Canary
-  read at `b88e0ad`: the A0 witness reproduces the stage-2 row (median
-  3,483 recorded onsets, attack 0.96, before_share 0.89); **the A11
-  arrest bound still records ~2,868 (q05–q95 [1,363–3,422]) on takeoff
-  seeds vs the record's 197 — the declared report-immediately trigger
-  fired: the ~18× gap is not reachable inside the transmission layer**,
-  pointing at the observational channel or natural history. Arms =
-  the QUAR-ATTR-V1 channel set re-measured at band Θ, contact-dose
-  scaling, and three confinement counterfactuals (earlier order,
-  perfect confinement, first-report symptomatic confinement) plus the
-  combined arrest bound. Array `f3065d9e-a605-456d-86b6-b097bbb7ac43`
-  covers the remaining 200 cells (A1–A10). Design
-  `picard_framework/runs/covid_sensitivity_assay_v1_design.json`,
-  ledger `docs/ledger/SENS-ASSAY-V1.md`.
+- **`covid_sensitivity_assay_v1` is measured — all arms inert except the
+  all-shared-air bound, which collapses takeoff**: 240/240 cells at
+  `b88e0ad` (canary A0 + A11, array
+  `f3065d9e-a605-456d-86b6-b097bbb7ac43`). On the frozen paired-seed
+  metric every arm moves the conditional recorded-onset median <20%
+  (largest mover: A11 arrest bound, −17.4% → 2,868 vs the record's 197)
+  except `A5_all_shared_air_off` (3/20 takeoff → `takeoff_collapse`) —
+  so the ~18× gap is measured unreachable inside the transmission layer
+  and lives in the observational channel or natural history, per the
+  declared decomposition (~4.7× over-burn × ~3.5× dated-onset
+  bookkeeping). Structural finding: ~89% of recorded mass lands before
+  the day-17 split (median 3,509 before vs 53 during), and the VSP-3%
+  counter already confines ~87% of the ship by day 12 — the residual
+  burn rides the unconfineable channels (cabin-mate full-dose addback,
+  shared-corridor air, presymptomatic shedding). A10 first-report
+  confinement was vacuous (bit-identical to A0 on all 19 paired seeds):
+  the dense report stream trips both thresholds on the same schedule —
+  conundrum, not bug. Readout
+  `docs/covid/covid_sensitivity_assay_v1_readout.md`, surface
+  `docs/covid/covid_sensitivity_assay_v1_surface.csv`, ledger
+  `docs/ledger/SENS-ASSAY-V1.md`.
 - **`covid_sensitivity_assay_v2` is declared, not yet run** (assay-1
-  canary measured, array in flight): v1's A11 arrest bound still records
+  now measured in full): v1's A11 arrest bound still records
   ~2,868 onsets on takeoff seeds vs the record's 197 under crew
   confinement + pool off + day-12 quarantine + perfect confinement +
   contact ×0.25 — the gap is not reachable inside the transmission
