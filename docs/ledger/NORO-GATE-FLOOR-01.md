@@ -111,7 +111,7 @@ and each passing at base.
 
 | golden | move | attribution |
 |---|---|---|
-| `test_covid_hull_change_detector` `greg_mortimer_2020` (3.12) | `(0, 0, 217, 1, 0)` → `(4, 2, 217, 5, 2)` | sub-copy pickups and their hand-to-mouth draws no longer happen, the shared stream reorders, and the near-extinct cell re-ignites. 3.11 pin left pending a CI reading, as previous entries in that file were. |
+| `test_covid_hull_change_detector` `greg_mortimer_2020` (3.12) | `(0, 0, 217, 1, 0)` → `(4, 2, 217, 5, 2)` | sub-copy pickups and their hand-to-mouth draws no longer happen, the shared stream reorders, and the near-extinct cell re-ignites. CPython 3.11 reads the same tuple (CI job 107765635955, fast tier 3.11 shard 3, this branch), so both interpreters agree. |
 | `test_index_departure` transmission-gating fixture | `aboard_events 1 → 0` | the fixture's zone pool is 0.44 GEC: its entire fomite route ran **below one genome copy**. Re-based on `_profile(8.0)` (≈3.58 GEC) so it still tests the route it names. |
 | `test_index_departure` graded-departure sweep | `[10,10,7,0]` → `[10,7,10,0]` | same stream shift; the second scenario also now gets fresh susceptibles instead of hosts the first already exposed. |
 | `test_route_attribution` | `sum(routes) == ever_infected − 3` fails (5 ever-infected, 3 route events) | the equality was only ever true when no host acquired a second pathogen: `cumulative_ever_infected` counts **distinct hosts**, route attribution counts **host-pathogen acquisitions**. Replaced by the invariant it stood in for (no fiat import is attributed to a route; every non-fiat infection carries one). |

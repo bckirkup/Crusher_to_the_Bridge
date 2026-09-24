@@ -142,9 +142,10 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # holding less than one genome copy, so the pickups the engine used
         # to dispatch against sub-copy residues — and their hand-to-mouth
         # draws — no longer happen; the shared stream reorders and this
-        # near-extinct cell re-ignites. 3.11 reading pending a CI run, as
-        # the 3.11 entries above were.
-        (3, 11): (0, 0, 217, 1, 0),
+        # near-extinct cell re-ignites: (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2),
+        # read from CI job 107765635955 (fast tier, 3.11, shard 3) on this
+        # branch — both interpreters agree, as before on this cell.
+        (3, 11): (4, 2, 217, 5, 2),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
