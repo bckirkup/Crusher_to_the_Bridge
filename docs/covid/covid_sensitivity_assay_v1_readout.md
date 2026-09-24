@@ -86,6 +86,24 @@ size but epidemiologically dead (a campaign that cannot take off is not
 a DP replay). Direct contact alone cannot sustain a shipwide burn;
 shared-air terms are the load-bearing carrier of the over-production.
 
+### 2a. Exposure attribution: a day-0–5 public-zone droplet explosion
+
+A whole-voyage event-level probe at the A0 witness seed (480 epochs,
+`QuarantineAttributionLedger` per-event zone + dominant-dose route)
+shows the exposure is even more front-loaded than the onset curve
+suggests — onsets spread days ~5–20 only because incubation smears
+them. Of 3,575 transmission events, ~68% land in days 0–2 and ~88% by
+day 5 (859/1,051/521/258/180/226 events on days 0–5). The venues are
+public, not cabins: Royal_Promenade 14%, Windjammer 12%, MainDining_L
+11%, Crew_Mess_Main 10%, CentralPark 7%, MainDining_U 6%, pool deck and
+theater in the tail. Pathway attribution: 99% droplet, 1% HVAC; only
+6% of targets were already confined when hit. The during-quarantine
+cabin-droplet residual is the tail of the same wave. So the deficit's
+shape is not "reach over time" but "the first five days of normal
+public-zone mixing expose essentially everyone" — which is what
+assay-2's contact-rate/saturation (B7–B9) and effective-pool (B5/B6)
+arms are declared to cut.
+
 ## 3. A10 is a vacuous arm, not a defect
 
 A10's payloads are **bit-identical to A0's on all 19 paired seeds**
