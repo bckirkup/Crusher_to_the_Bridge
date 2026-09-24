@@ -11,7 +11,9 @@ from __future__ import annotations
 import gzip
 import json
 import math
+import shutil
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -273,7 +275,7 @@ def test_readout_gini_and_verdict() -> None:
     arm = _cell(1, {1: 4.0, 2: 4.0}, {}, 10.0, 3)
     row = readout.compare_seed(base, arm, "public.button_or_dispenser")
     assert row["jaccard"] == pytest.approx(1.0)
-    agg = readout.aggregate([row], "public.button_or_dispenser")
+    agg = readout.aggregate([row])
     assert agg["identical_host_sets_all_seeds"] is True
     assert agg["verdict"] == "inert"
 
@@ -293,6 +295,125 @@ def test_readout_loads_gz_cells(tmp_path: Path) -> None:
     )
     assert result["seeds"] == [7, 8]
     assert result["aggregate"]["verdict"] == "inert"
+
+
+def _repo_tmp() -> Path:
+    """A scratch directory under the repo root (removed by the caller)."""
+    return Path(tempfile.mkdtemp(dir=REPO_ROOT))
+
+
+def test_declared_table_outside_repo_is_refused(tmp_path: Path) -> None:
+    outside = tmp_path / "x.json"
+    outside.write_text(
+        json.dumps({"item_reading": "shared", "shares": {}}),
+    )
+    with pytest.raises(ValueError, match="outside the repository"):
+        load_declared_share_table(outside)
+
+
+def test_declared_table_missing_shares_is_refused() -> None:
+    scratch = _repo_tmp()
+    try:
+        target = scratch / "x.json"
+        target.write_text(json.dumps({"item_reading": "shared"}))
+        with pytest.raises(ValueError, match="shares"):
+            load_declared_share_table(target)
+    finally:
+        shutil.rmtree(scratch)
+
+
+def test_readout_safe_path_refuses_outside() -> None:
+    with pytest.raises(ValueError, match="outside the allowed directory"):
+        readout._safe_path("/etc/hostname")
+
+
+def test_readout_empty_host_sets_and_zero_denominators() -> None:
+    base = _cell(1, {}, {}, 0.0, 0)
+    arm = _cell(1, {}, {}, 0.0, 0)
+    row = readout.compare_seed(base, arm, "public.button_or_dispenser")
+    assert row["jaccard"] == pytest.approx(1.0)
+    assert row["gini_declared"] == pytest.approx(0.0)
+    assert row["top_decile_declared"] == pytest.approx(0.0)
+    assert row["delivered_ratio"] is None
+    assert row["credited_scaled_ratio"] is None
+    assert row["focus_share_gain"] == pytest.approx(0.0)
+    assert readout.gini([7.0]) == pytest.approx(0.0)
+    assert readout.top_decile_share([]) == pytest.approx(0.0)
+    assert readout.top_decile_share([0.0]) == pytest.approx(0.0)
+
+
+def _fabricated_row(jaccard: float, gain: float, capped: float) -> dict:
+    return {
+        "n_hosts_areal": 10,
+        "n_hosts_declared": 10,
+        "jaccard": jaccard,
+        "gini_areal": 0.5,
+        "gini_declared": 0.5,
+        "top_decile_areal": 0.5,
+        "top_decile_declared": 0.5,
+        "delivered_ratio": 1.0,
+        "credited_scaled_ratio": 1.0,
+        "secondaries_delta": 0,
+        "focus_share_gain": gain,
+        "per_class": {
+            "public.button_or_dispenser": {"capped_share_declared": capped},
+        },
+    }
+
+
+def test_readout_verdict_branches() -> None:
+    changed = readout.aggregate(
+        [_fabricated_row(0.5, 0.2, 0.2) for _ in range(15)],
+    )
+    assert changed["verdict"] == "changes_coincidence"
+    assert changed["focus_class_share_gain_seeds"] == 15
+    assert changed["cap_flags"] == ["public.button_or_dispenser"]
+    indeterminate = readout.aggregate(
+        [_fabricated_row(0.5, 0.0, 0.0)],
+    )
+    assert indeterminate["verdict"] == "indeterminate"
+    assert indeterminate["identical_host_sets_all_seeds"] is False
+
+
+def test_readout_no_shared_seeds_exits(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        readout.readout(
+            tmp_path / "d", "per_surface_declared",
+            tmp_path / "a", "per_surface_areal",
+            "public.button_or_dispenser",
+        )
+
+
+def test_readout_main_end_to_end_deterministic() -> None:
+    scratch = _repo_tmp()
+    try:
+        for seed in (7, 8):
+            _write_cell(scratch / "a", "per_surface_areal", _cell(
+                seed, {1: 1.0, 2: 0.5}, {}, 10.0, 1,
+            ))
+            _write_cell(scratch / "d", "per_surface_declared", _cell(
+                seed, {1: 1.0, 3: 0.5}, {}, 10.0, 2,
+            ))
+        _write_cell(scratch / "d", "per_surface_declared", _cell(
+            9, {1: 1.0}, {}, 10.0, 2,
+        ))
+        out_dir = scratch / "out"
+        argv = [
+            "--arm-dir", str(scratch / "d"),
+            "--base-dir", str(scratch / "a"),
+            "--out", str(out_dir),
+        ]
+        assert readout.main(list(argv)) == 0
+        written = out_dir / "touch_share_coincidence_per_surface_declared.json"
+        first = written.read_bytes()
+        result = json.loads(first)
+        assert result["aggregate"]["verdict"] == "indeterminate"
+        assert len(result["per_seed"]) == 2
+        assert result["seeds_only_in_arm"] == [9]
+        assert readout.main(list(argv)) == 0
+        assert written.read_bytes() == first
+    finally:
+        shutil.rmtree(scratch)
 
 
 def _parse(argv: list[str]):

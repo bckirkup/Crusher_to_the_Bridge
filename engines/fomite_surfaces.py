@@ -29,6 +29,10 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+_REPO_ROOT = os.path.realpath(
+    os.path.join(os.path.dirname(__file__), ".."),
+)
+
 FOMITE_REPRESENTATIONS = ("pooled", "per_surface")
 DEFAULT_FOMITE_REPRESENTATION = "pooled"
 TOUCH_SHARE_MODES = ("areal", "declared")
@@ -298,6 +302,18 @@ def _parse_item_class_coverage(cleaning: Any) -> dict[str, float]:
     return coverage
 
 
+def _safe_table_path(path: str | os.PathLike) -> str:
+    """Canonicalise a declared-table path and refuse anything outside the repo."""
+    resolved = os.path.realpath(path)
+    if resolved != _REPO_ROOT and not resolved.startswith(
+        _REPO_ROOT + os.sep,
+    ):
+        raise ValueError(
+            f"declared share table {path!r} is outside the repository",
+        )
+    return resolved
+
+
 def load_declared_share_table(
     path: str | os.PathLike,
     item_reading: str = DEFAULT_FOMITE_ITEM_READING,
@@ -310,7 +326,7 @@ def load_declared_share_table(
     raw: zone/item membership and share values are validated by
     ``_parse_declared_shares`` when the config resolves.
     """
-    with open(path, encoding="utf-8") as handle:
+    with open(_safe_table_path(path), encoding="utf-8") as handle:
         raw = json.load(handle)
     reading = raw.get("item_reading")
     if reading != item_reading:

@@ -233,10 +233,7 @@ def _median_range(values: list[float]) -> dict[str, Any]:
     }
 
 
-def aggregate(
-    rows: list[dict[str, Any]],
-    focus_class: str,
-) -> dict[str, Any]:
+def aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     """Median/[min,max] over seeds for every scalar, plus the verdict."""
     scalars = (
         "jaccard", "gini_areal", "gini_declared",
@@ -253,7 +250,7 @@ def aggregate(
     }
     identical = all(
         row["n_hosts_areal"] == row["n_hosts_declared"]
-        and row["jaccard"] == 1.0
+        and math.isclose(row["jaccard"], 1.0, rel_tol=0.0, abs_tol=1e-12)
         for row in rows
     )
     gain_seeds = sum(
@@ -309,7 +306,7 @@ def readout(
         "seeds_only_in_base": sorted(set(base_cells) - set(arm_cells)),
         "focus_class": focus_class,
         "per_seed": rows,
-        "aggregate": aggregate(rows, focus_class),
+        "aggregate": aggregate(rows),
     }
 
 
