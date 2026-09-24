@@ -2,7 +2,7 @@
 **Date:** 2026-09-24
 **Commit:** 1264f60
 **Pathogens:** sars_cov2_resp
-**Status:** measured (canary arm only; array stood down)
+**Status:** measured
 **Measured at:** 37dc215
 
 Partner-rate sensitivity assay on the AERO-SPLIT-01 droplet-partition
