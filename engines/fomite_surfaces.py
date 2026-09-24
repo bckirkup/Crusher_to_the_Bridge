@@ -22,7 +22,9 @@ constant change.
 
 from __future__ import annotations
 
+import json
 import math
+import os
 from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
@@ -296,6 +298,58 @@ def _parse_item_class_coverage(cleaning: Any) -> dict[str, float]:
     return coverage
 
 
+def load_declared_share_table(
+    path: str | os.PathLike,
+    item_reading: str = DEFAULT_FOMITE_ITEM_READING,
+) -> dict[str, dict[str, float]]:
+    """Read a declared touch-share table file (NORO-TOUCH-SHARE-01).
+
+    The file's ``item_reading`` must equal the reading the engine will
+    enumerate units under, and it must carry a ``shares`` mapping in the
+    ``transmission.fomite_touch_share_table`` shape. The returned table is
+    raw: zone/item membership and share values are validated by
+    ``_parse_declared_shares`` when the config resolves.
+    """
+    with open(path, encoding="utf-8") as handle:
+        raw = json.load(handle)
+    reading = raw.get("item_reading")
+    if reading != item_reading:
+        raise ValueError(
+            f"declared share table {path}: item_reading {reading!r} does "
+            f"not match the resolved fomite_item_reading {item_reading!r}",
+        )
+    shares = raw.get("shares")
+    if not isinstance(shares, Mapping):
+        raise ValueError(
+            f"declared share table {path}: missing 'shares' mapping",
+        )
+    return dict(shares)
+
+
+def _check_declared_completeness(
+    table: dict[str, dict[str, float]],
+    item_reading: str,
+) -> None:
+    """Refuse a declared table that drops classes a unit enumerates.
+
+    Under ``declared`` a class absent from the table receives share 0.0 in
+    ``_touch_shares`` and silently loses its deposit mass, so a zone class
+    present in the table must name exactly the classes the reading
+    enumerates. Zone classes absent from the table fall back to ``areal``
+    whole and are not checked.
+    """
+    for zone_class, shares in table.items():
+        declared = set(shares)
+        enumerated = set(unit_item_counts(zone_class, item_reading, 1))
+        if declared != enumerated:
+            raise ValueError(
+                "transmission.fomite_touch_share_table."
+                f"{zone_class}: declared classes {sorted(declared)} must "
+                f"equal the {item_reading} unit inventory "
+                f"{sorted(enumerated)}",
+            )
+
+
 def parse_per_surface_config(tx: Mapping[str, Any]) -> PerSurfaceConfig | None:
     """Resolve the fomite representation selector (NORO-FOMITE-DISAGG-01).
 
@@ -309,6 +363,15 @@ def parse_per_surface_config(tx: Mapping[str, Any]) -> PerSurfaceConfig | None:
     )
     if rep == "pooled":
         return None
+    item_reading = _validated_enum(
+        tx, "fomite_item_reading",
+        FOMITE_ITEM_READINGS, DEFAULT_FOMITE_ITEM_READING,
+    )
+    declared_shares = _parse_declared_shares(
+        tx.get("fomite_touch_share_table") or {},
+    )
+    if declared_shares:
+        _check_declared_completeness(declared_shares, item_reading)
     return PerSurfaceConfig(
         touch_share=_validated_enum(
             tx, "fomite_touch_share",
@@ -318,13 +381,8 @@ def parse_per_surface_config(tx: Mapping[str, Any]) -> PerSurfaceConfig | None:
             tx, "fomite_area_basis",
             FOMITE_AREA_BASES, DEFAULT_FOMITE_AREA_BASIS,
         ),
-        item_reading=_validated_enum(
-            tx, "fomite_item_reading",
-            FOMITE_ITEM_READINGS, DEFAULT_FOMITE_ITEM_READING,
-        ),
-        declared_shares=_parse_declared_shares(
-            tx.get("fomite_touch_share_table") or {},
-        ),
+        item_reading=item_reading,
+        declared_shares=declared_shares,
         cleaning_coverage_by_item_class=_parse_item_class_coverage(
             tx.get("surface_cleaning", {}) or {},
         ),

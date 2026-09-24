@@ -88,8 +88,10 @@ from __future__ import annotations
 
 import argparse
 import gzip
+import hashlib
 import json
 import math
+import os
 import re
 import sys
 import tempfile
@@ -109,6 +111,9 @@ if str(REPO_ROOT) not in sys.path:
 from engines import initiation as initiation_module  # noqa: E402
 from engines import natural_history as natural_history_module  # noqa: E402
 from engines import transmission_core as tc  # noqa: E402
+from engines.fomite_surfaces import (  # noqa: E402
+    load_declared_share_table,
+)
 from picard_framework.run_spec import CRUSHER_CONFIG_REL, PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
@@ -277,6 +282,26 @@ class Recorder:
     # the TransmissionCore by the deposit wrapper so a dropped override is
     # a witnessed fact rather than an assumption.
     fomite_representation_seen: str | None = None
+    fomite_touch_share_seen: str | None = None
+    # Per-item-class fomite witness (NORO-TOUCH-SHARE-01): pool-level
+    # requested/delivered/calls/capped_calls per class, and per-host
+    # delivered mass per class reconstructed in the delivery wrapper from
+    # the engine's uniform per-class scale.
+    fomite_by_class: dict[str, dict[str, float]] = field(
+        default_factory=lambda: defaultdict(
+            lambda: {
+                "requested_gec": 0.0,
+                "delivered_gec": 0.0,
+                "calls": 0,
+                "capped_calls": 0,
+            },
+        ),
+    )
+    fomite_host_class_gec: dict[int, dict[str, float]] = field(
+        default_factory=lambda: defaultdict(
+            lambda: defaultdict(float),
+        ),
+    )
 
     def host(self, agent_id: int) -> HostRecord:
         """Return (creating if needed) one host's record."""
@@ -511,6 +536,9 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         "_deliver_fomite_requests_by_class": (
             core_cls._deliver_fomite_requests_by_class
         ),
+        "_fomite_pickup_requests_by_class": (
+            core_cls._fomite_pickup_requests_by_class
+        ),
         "_hand_to_mouth_dose": core_cls._hand_to_mouth_dose,
         "_deposit_surface_mass": core_cls._deposit_surface_mass,
         "_replenish_hand": core_cls._replenish_hand,
@@ -550,6 +578,8 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         self: Any, pathogen_id: str, zone_name: str, mass: float,
     ) -> None:
         rec.fomite_representation_seen = self.fomite_representation
+        if self._per_surface is not None:
+            rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
         if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
             rec.fomite["surface_deposit_calls"] += 1
             rec.fomite["surface_mass_deposited_gec"] += float(mass)
@@ -615,6 +645,24 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             rec.fomite["mass_delivered_to_hands_gec"] += float(
                 sum(delivered.values())
             )
+            requested_by_class: dict[str, float] = defaultdict(float)
+            for _, req in requests:
+                for item_class, mass in req.items():
+                    requested_by_class[item_class] += float(mass)
+            for item_class, requested_c in requested_by_class.items():
+                bucket = rec.fomite_by_class[item_class]
+                bucket["requested_gec"] += requested_c
+                delivered_c = float(delivered.get(item_class, 0.0))
+                bucket["delivered_gec"] += delivered_c
+                if requested_c <= 0.0 or delivered_c <= 0.0:
+                    continue
+                scale_c = delivered_c / requested_c
+                for target, req in requests:
+                    share_c = float(req.get(item_class, 0.0))
+                    if share_c > 0.0:
+                        rec.fomite_host_class_gec[int(target.agent_id)][
+                            item_class
+                        ] += share_c * scale_c
             scale_witness = rec.delivery_scale
             scale_witness["deliver_calls"] += 1
             scale_witness["sum_requested_gec"] += requested
@@ -719,8 +767,38 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
                 bucket["hist_underflow"] += 1
         return request
 
+    def pickup_requests_by_class(
+        self: Any,
+        target: Any,
+        zone_name: str,
+        epoch: int,
+        pathogen_id: str,
+    ) -> Any:
+        """Count per-class pickup calls and capped requests; reads only."""
+        mass_before: dict[str, float] = {}
+        if pathogen_id == rec.pathogen_id and self._per_surface is not None:
+            inv = self._per_surface.inventory(zone_name)
+            if inv is not None:
+                for item_class in inv.counts:
+                    mass_before[item_class] = self._per_surface.mass.get(
+                        (zone_name, pathogen_id, item_class), 0.0,
+                    )
+        request = originals["_fomite_pickup_requests_by_class"](
+            self, target, zone_name, epoch, pathogen_id,
+        )
+        if request is None or not mass_before:
+            return request
+        for item_class, requested_c in request.items():
+            bucket = rec.fomite_by_class[item_class]
+            bucket["calls"] += 1
+            mass_c = mass_before.get(item_class, 0.0)
+            if mass_c > 0.0 and requested_c >= mass_c:
+                bucket["capped_calls"] += 1
+        return request
+
     core_cls._deliver_fomite_requests = deliver
     core_cls._deliver_fomite_requests_by_class = deliver_by_class
+    core_cls._fomite_pickup_requests_by_class = pickup_requests_by_class
     core_cls._hand_to_mouth_dose = hand_to_mouth
     core_cls._deposit_surface_mass = deposit
     core_cls._replenish_hand = replenish_hand
@@ -896,6 +974,8 @@ def build_spec(
     high_touch_area_scale: float | None = None,
     high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
     fomite_representation: str | None = None,
+    fomite_touch_share: str | None = None,
+    fomite_touch_share_table: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed.
 
@@ -923,6 +1003,12 @@ def build_spec(
         )
     if fomite_representation is not None:
         tx_overrides["fomite_representation"] = str(fomite_representation)
+    if fomite_touch_share is not None:
+        tx_overrides["fomite_touch_share"] = str(fomite_touch_share)
+    if fomite_touch_share_table is not None:
+        tx_overrides["fomite_touch_share_table"] = dict(
+            fomite_touch_share_table,
+        )
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
@@ -1130,6 +1216,7 @@ def summarise(
         "fomite_witness": dict(rec.fomite),
         "transfer_product_witness": _transfer_product_summary(rec),
         "delivery_scale_witness": _delivery_scale_summary(rec),
+        "fomite_by_class": _fomite_by_class_summary(rec),
         "hosts": [
             {
                 "agent_id": agent_id,
@@ -1152,6 +1239,15 @@ def summarise(
                     r.credited_epochs_challenge_evaluated
                 ),
                 "exit_reasons": dict(r.reasons),
+                "fomite_delivered_gec": float(
+                    sum(rec.fomite_host_class_gec.get(agent_id, {}).values()),
+                ),
+                "fomite_delivered_by_class": {
+                    item_class: float(mass)
+                    for item_class, mass in sorted(
+                        rec.fomite_host_class_gec.get(agent_id, {}).items(),
+                    )
+                },
             }
             for agent_id, r in sorted(
                 rec.hosts.items(),
@@ -1160,6 +1256,22 @@ def summarise(
             )
         ],
         "top_host_epoch_rows": rec.top_host_rows,
+    }
+
+
+def _fomite_by_class_summary(rec: Recorder) -> dict[str, Any]:
+    """Pool-level per-class counters plus distinct credited hosts."""
+    hosts_by_class: dict[str, int] = defaultdict(int)
+    for per_class in rec.fomite_host_class_gec.values():
+        for item_class, mass in per_class.items():
+            if mass > 0.0:
+                hosts_by_class[item_class] += 1
+    return {
+        item_class: {
+            **bucket,
+            "hosts_credited": hosts_by_class.get(item_class, 0),
+        }
+        for item_class, bucket in sorted(rec.fomite_by_class.items())
     }
 
 
@@ -1192,6 +1304,8 @@ def run_seed(
     high_touch_area_scale: float | None = None,
     high_touch_area_scale_by_zone_class: dict[str, Any] | None = None,
     fomite_representation: str | None = None,
+    fomite_touch_share: str | None = None,
+    fomite_touch_share_table: str | None = None,
     arm_tag: str | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
@@ -1205,6 +1319,12 @@ def run_seed(
         high_touch_area_scale=high_touch_area_scale,
         high_touch_area_scale_by_zone_class=high_touch_area_scale_by_zone_class,
         fomite_representation=fomite_representation,
+        fomite_touch_share=fomite_touch_share,
+        fomite_touch_share_table=(
+            load_declared_share_table(fomite_touch_share_table)
+            if fomite_touch_share_table is not None
+            else None
+        ),
     )
     if alpha_override is not None:
         alpha = float(alpha_override)
@@ -1245,6 +1365,14 @@ def run_seed(
             f"fomite_representation={fomite_representation}, resolved "
             f"{rec.fomite_representation_seen}",
         )
+    if fomite_touch_share is not None and (
+        rec.fomite_touch_share_seen != fomite_touch_share
+    ):
+        raise RuntimeError(
+            "fomite_touch_share override dropped: requested "
+            f"fomite_touch_share={fomite_touch_share}, resolved "
+            f"{rec.fomite_touch_share_seen}",
+        )
     summary = summarise(rec, alpha, beta, seed, epochs)
     summary["dose_response_resolved"] = {
         "alpha_requested": alpha,
@@ -1263,6 +1391,8 @@ def run_seed(
         or high_touch_area_scale is not None
         or high_touch_area_scale_by_zone_class is not None
         or fomite_representation is not None
+        or fomite_touch_share is not None
+        or fomite_touch_share_table is not None
     ):
         summary["arm_tag"] = arm_tag
         summary["high_touch_area_scale"] = high_touch_area_scale
@@ -1270,9 +1400,21 @@ def run_seed(
             high_touch_area_scale_by_zone_class
         )
         summary["fomite_representation"] = fomite_representation
+        summary["fomite_touch_share"] = fomite_touch_share
+        if fomite_touch_share_table is not None:
+            resolved_table = _safe_path(fomite_touch_share_table)
+            summary["fomite_touch_share_table"] = os.path.relpath(
+                resolved_table, str(REPO_ROOT),
+            )
+            summary["fomite_touch_share_table_sha256"] = hashlib.sha256(
+                Path(resolved_table).read_bytes(),
+            ).hexdigest()
+        else:
+            summary["fomite_touch_share_table"] = None
     summary["fomite_representation_resolved"] = (
         rec.fomite_representation_seen
     )
+    summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
     summary["wall_clock_seconds_run"] = wall_clock_run
     summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
     return summary
@@ -1303,6 +1445,15 @@ def print_summary(summary: dict[str, Any]) -> None:
     print(f"emesis witness: {summary['emesis_witness']}")
     print(f"emesis units: {summary['emesis_unit_names']}")
     print(f"fomite witness: {summary['fomite_witness']}")
+
+
+def _safe_path(path: str) -> str:
+    """Canonicalise a CLI-derived target and refuse anything outside the repo."""
+    resolved = os.path.realpath(path)
+    base_dir = os.path.realpath(str(REPO_ROOT))
+    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
+        raise ValueError(f"path {path!r} is outside the allowed directory")
+    return resolved
 
 
 def _identifier(value: str) -> str:
@@ -1363,10 +1514,42 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "aborts if the engine resolves a different representation",
     )
     parser.add_argument(
+        "--fomite-touch-share",
+        choices=("areal", "declared"), default=None,
+        help="NORO-TOUCH-SHARE-01 arm selector; requires "
+             "--fomite-representation per_surface",
+    )
+    parser.add_argument(
+        "--fomite-touch-share-table", type=Path, default=None,
+        help="declared share table JSON under the repository root "
+             "(required when --fomite-touch-share declared)",
+    )
+    parser.add_argument(
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
     args = parser.parse_args(argv)
+    if (
+        args.fomite_touch_share is not None
+        or args.fomite_touch_share_table is not None
+    ) and args.fomite_representation != "per_surface":
+        parser.error(
+            "--fomite-touch-share/--fomite-touch-share-table require "
+            "--fomite-representation per_surface",
+        )
+    if args.fomite_touch_share == "declared" and (
+        args.fomite_touch_share_table is None
+    ):
+        parser.error(
+            "--fomite-touch-share declared requires --fomite-touch-share-table",
+        )
+    if args.fomite_touch_share_table is not None:
+        try:
+            args.fomite_touch_share_table = _safe_path(
+                str(args.fomite_touch_share_table),
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
     if args.alpha is not None and not 0.072 <= args.alpha <= 0.161:
         parser.error(
             f"--alpha {args.alpha} is outside the frozen interval "
@@ -1394,6 +1577,12 @@ def main(argv: list[str] | None = None) -> int:
                 args.high_touch_area_scale_by_zone_class
             ),
             fomite_representation=args.fomite_representation,
+            fomite_touch_share=args.fomite_touch_share,
+            fomite_touch_share_table=(
+                str(args.fomite_touch_share_table)
+                if args.fomite_touch_share_table is not None
+                else None
+            ),
             arm_tag=args.arm_tag,
         )
         if args.arm_tag is not None:
