@@ -222,8 +222,14 @@ class TestBlockAirAndOtherZones:
         target = _agent(2)
         for agent in (shedder, target):
             agent.current_location = zone
+        # AERO-SPLIT-01: the shipped partition draws a proximity partner set
+        # per target on the shared stream, so two configs no longer read the
+        # same dose bit-for-bit; the baseline pin isolates the cabin mode.
         doses = []
-        for cfg in (None, COMPARTMENT_MODE):
+        for cfg in (
+            {"transmission": {"droplet_field_split": {"mode": "off"}}},
+            COMPARTMENT_MODE,
+        ):
             core = TransmissionCore(
                 rng=np.random.default_rng(42),
                 zone_volumes={zone: 4000.0},

@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `4d016c5` (fill with the
+> **Status:** Living. Head commit of record: `e7ab09f` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -49,6 +49,21 @@ QUAR-ORDER-01 burning and intermediate-cell figures are superseded by the
 AERO-NEAR-02 measurement (§2). The two diagnostic cells are not paired with
 their QUAR-ORDER-01 runs: per-meal table dealing consumes RNG, so the same seed
 follows a different trajectory.
+
+**AERO-SPLIT-01 supersedes every figure produced under the unbounded
+droplet far field.** The droplet pathway's zone pool now carries only the
+declared `far_field_share` (0.175, midpoint of [0.05, 0.30], Grade C) of
+continuous emission; the rest reaches a partner-bounded proximity ring at
+plume concentration, bounded by the CONTACT-ARCH-01 activity rates
+(`docs/ledger/AERO-SPLIT-01.md`, `docs/droplet_field_split_spec.md`,
+`transmission.droplet_field_split`, labelled pre-change baseline `mode:
+off`). Every measured figure whose mechanism was the well-mixed room pool —
+the v11 stage-2 ~17.7× onset overproduction and ~0.96 attack on takeoff
+seeds, the assay-1 arm table and its ~68%-day-0–2 route attribution, every
+Θ surface and admissible set on this arm, and all droplet route shares —
+is superseded pending remeasurement on the partition tree. `off` is
+bit-identical to the pre-change engine (no proximity draws on the shared
+stream), so paired-seed contrasts stay attributable.
 
 **DOSE-FRAIL-01 invalidates every Θ-arm figure measured on identical hosts.**
 The Θ arm previously installed an exponential dose-response, which gave every
@@ -146,6 +161,17 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`AERO-SPLIT-01` shipped; the Θ surface and every replay figure need a
+  re-run on the partition tree.** `transmission.droplet_field_split` defaults
+  to `partition` (spec `docs/droplet_field_split_spec.md`): the room pool
+  carries `far_field_share` = 0.175 of continuous droplet emission (declared
+  interval [0.05, 0.30], Grade C, swept-never-fitted) and the near share
+  reaches only a partner-bounded proximity ring at the AERO-NEAR-02 plume
+  concentration. Paired-seed probe evidence lands in
+  `docs/ledger/AERO-SPLIT-01.md`. Follow-on work, in order: re-run the
+  declared replay at the fleet-admissible Θs, re-run `covid_sensitivity_assay_v2`
+  (it was stood down for this change), and a declared `far_field_share`
+  sweep over [0.05, 0.30] — none of it fitted to 197.
 - **The import x Theta axis is closed as negative, and the confinement leak is
   the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
   1,180 cells) already swept imports 1-20: matching the early onset count
