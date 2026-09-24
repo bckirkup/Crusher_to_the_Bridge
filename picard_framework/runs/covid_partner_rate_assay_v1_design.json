@@ -1,0 +1,276 @@
+{
+  "design_id": "covid_partner_rate_assay_v1",
+  "parent_design": "covid_sensitivity_assay_v1",
+  "description": "Partner-rate sensitivity assay on the AERO-SPLIT-01 droplet-partition architecture. The partition (default on main since e20008d) routes only far_field_share 0.175 of continuous droplet emission into the zone's well-mixed pool; the near share reaches a partner-bounded proximity ring drawn per target-epoch from the CONTACT-ARCH-01 activity_contacts.rates_per_hour table. The AERO-SPLIT-01 paired-seed probe measured the non-takeoff seed's events halving but the takeoff-seed day-0-2 spike persisting (68.7% -> 57.1% share) -- plume per-partner dose keeps ring infections near-certain at the shipped partner rate, and the ~18x conditional gap stands (~3,470-3,520 recorded onsets on takeoff seeds vs the record's 197). This assay maps the response of that conditional gap to the partner rate itself: the same declared Diamond Princess replay at Theta 4.22e10, droplet_field_split partition, the same 20 seeds (base 20200205), with the whole rates_per_hour table scaled by {0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00} plus a mode-off pool witness. Axis verification before freezing (this session's code read, engines/transmission_core.py _proximity_shedder_ids -> _activity_contact_draw -> activity_contacts[activity][target.role]): under partition the ring's partner count IS the per-activity rate draw, so scaling rates_per_hour binds the ring's reach; no new arm grammar is needed -- the existing transmission_overrides key replaces the activity_contacts block wholesale and droplet_field_split takes the labelled off baseline. Cell shape is verbatim from covid_theta_screen_v11_stage2: onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 3.3 carried for cell-key compatibility, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). This is NOT a v2 revival: v2's B7 swept the same table on the pre-partition architecture, where it bounded only the direct-contact path -- ~0% of measured events -- and was stood down as inert-by-construction on the carrier; under partition the same table bounds the droplet carrier's near-field reach, so the question is new.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it is the first assay on the post-partition architecture; covid_sensitivity_assay_v2 remains stood down pre-execution and this design does not revive it",
+  "prerequisites": [
+    "AERO-SPLIT-01 measured (e20008d): droplet_field_split partition is the shipped default; the paired probe at Theta 4.22e10 measured non-takeoff seed events halving but the takeoff-seed day-0-2 spike persisting; the ~18x conditional gap (~3,470-3,520 vs 197) stands.",
+    "SENS-ASSAY-V1 measured (b88e0ad): the intervention-side accounting is closed (~4.7x biological over-burn x ~3.5x observational bookkeeping); ~99% of transmission events are droplet, ~68% land in days 0-2 in public zones; the unbounded far field was the carrier the partition now bounds.",
+    "covid_theta_screen_v11_stage2 measured (8cda4c7): the declared-replay cell shape and the takeoff-gate conditional clause family this design carries verbatim; its Theta 4.22e10 row is the pre-partition reference the pool-witness arm re-measures on current main.",
+    "Axis binding verified in the tree before freeze: under partition, _proximity_shedder_ids draws the ring's partner count from activity_contacts[activity][target.role] via _activity_contact_draw (transmission_core.py); the shipped config runs contact_mode per_partner_contact with the block enabled, and transmission_overrides.activity_contacts replaces the block wholesale (covid_boarding_screen._apply_transmission_overrides). All scaled rates stay inside CONTACT_RATE_PER_HOUR_BOUNDS [0, 30]."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    42200000000.0
+  ],
+  "thetas_note": "Single point: the fleet-admissible Theta the stage-2 replay runs at. This is an arm assay at fixed Theta, not a Theta screen -- Theta selection happened in the v11/refine lattices and is not re-asked here.",
+  "infection_age_days": [
+    3.3
+  ],
+  "infection_age_note": "Verbatim from v10/stage-2: NOT an axis -- under the declared onset_day -1.0 the infection age cancels exactly (THETA-SCREEN-V9, 200 of 200 triples byte-identical across 3.3 / 6.8 / 12.8 d); 3.3 is carried so cell keys and run specs match the QUAR-ATTR-V2 A0 cells exactly.",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "Verbatim from v10/stage-2/v1: the SAME 20 matched seeds at the same base, so every cell pairs seed-for-seed with the stage-2 surface and the v1 assay rows.",
+  "points": [
+    [42200000000.0, 3.3, 1]
+  ],
+  "cells": 180,
+  "cells_note": "9 arms x 1 axis point x 20 seeds = 180 cells, each a full 768-epoch (32-day) voyage (~30 min). Arm-major enumeration puts R0_declared at cells 0-19, the rate arms ascending at 20-159, and R8_pool_witness at 160-179.",
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "Unchanged from v1: the same worker fields plus the arm-attribution block, so the rate-sweep surface reads beside the v1 surface and the route attribution can separate ring-path from contact-path movement.",
+    "index_onset_day": "Must equal -1.0 in every cell; a deviation is a seeding-path defect that invalidates the cell.",
+    "index_shedding_at_day0": "True by construction: the seeded host is one day past onset at boarding.",
+    "index_departed_epoch": "The epoch the seeded host left the ship, echoed for audit.",
+    "infections_total": "Truth-channel count of hosts ever infected, index excluded.",
+    "aboard_total": "Hosts aboard at epoch 0.",
+    "attack_rate": "infections_total / aboard_total.",
+    "vsp_reported_case_fraction_max": "Recorded, not thresholded, as in v1.",
+    "quarantine_attribution": "during_quarantine_by_route -- the per-route event split that lets the readout say whether a moved conditional mass moved on the droplet ring or the direct-contact path."
+  },
+  "arms": [
+    {
+      "arm_id": "R0_declared",
+      "role": "baseline",
+      "overrides": {},
+      "note": "The declared replay under the shipped partition at multiplier 1.00. The response curve's anchor; first arm, so empty overrides per the arm grammar."
+    },
+    {
+      "arm_id": "R1_rate_0p25",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.0625,
+              "corridor": 0.0625,
+              "work_service": 0.725,
+              "work_other": 0.125,
+              "dining_table": 0.5,
+              "dining_venue": 0.5,
+              "leisure": 0.25,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x0.25 -- the deep-cut end of the reach sweep and the canary row (INDEX_OFFSET 20): it proves the override lands AND answers the declared counterfactual 'if even 0.25x over-produces, the suspect is per-partner plume dose or the ring definition, not reach'."
+    },
+    {
+      "arm_id": "R2_rate_0p50",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.125,
+              "corridor": 0.125,
+              "work_service": 1.45,
+              "work_other": 0.25,
+              "dining_table": 1.0,
+              "dining_venue": 1.0,
+              "leisure": 0.5,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x0.50."
+    },
+    {
+      "arm_id": "R3_rate_0p75",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.1875,
+              "corridor": 0.1875,
+              "work_service": 2.175,
+              "work_other": 0.375,
+              "dining_table": 1.5,
+              "dining_venue": 1.5,
+              "leisure": 0.75,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x0.75."
+    },
+    {
+      "arm_id": "R4_rate_1p25",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.3125,
+              "corridor": 0.3125,
+              "work_service": 3.625,
+              "work_other": 0.625,
+              "dining_table": 2.5,
+              "dining_venue": 2.5,
+              "leisure": 1.25,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x1.25."
+    },
+    {
+      "arm_id": "R5_rate_1p50",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.375,
+              "corridor": 0.375,
+              "work_service": 4.35,
+              "work_other": 0.75,
+              "dining_table": 3.0,
+              "dining_venue": 3.0,
+              "leisure": 1.5,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x1.50."
+    },
+    {
+      "arm_id": "R6_rate_1p75",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.4375,
+              "corridor": 0.4375,
+              "work_service": 5.075,
+              "work_other": 0.875,
+              "dining_table": 3.5,
+              "dining_venue": 3.5,
+              "leisure": 1.75,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x1.75."
+    },
+    {
+      "arm_id": "R7_rate_2p00",
+      "role": "arm",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.5,
+              "corridor": 0.5,
+              "work_service": 5.8,
+              "work_other": 1.0,
+              "dining_table": 4.0,
+              "dining_venue": 4.0,
+              "leisure": 2.0,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "Partner rate x2.00 -- the widening end; largest declared rate is 5.8/h, inside CONTACT_RATE_PER_HOUR_BOUNDS [0, 30]."
+    },
+    {
+      "arm_id": "R8_pool_witness",
+      "role": "witness",
+      "overrides": {
+        "transmission_overrides": {
+          "droplet_field_split": {
+            "mode": "off"
+          }
+        }
+      },
+      "note": "The labelled pre-change baseline: the pool carries the whole continuous share and no proximity draw exists -- the pool-era engine on current main at multiplier 1.0. Execution witness against the pre-partition stage-2 row (~3,470-3,520 conditional recorded onsets on takeoff seeds); any drift from it is an engine regression since 8cda4c7, not physics. R0 minus R8 is the partition's measured effect at the shipped rate."
+    }
+  ],
+  "arms_note": "Multiplier arms declare the complete activity_contacts block because transmission_overrides replaces it wholesale. Scaled rates are the shipped CONTACT-ARCH-01 rates times the multiplier; 'other' stays 0.0 (0 x m = 0). The same table feeds BOTH the proximity ring and the direct-contact partner draw -- that is the CONTACT-ARCH-01 architecture, not a confound: the assay maps the response to the shared partner rate, and the payload's per-route attribution separates which channel's event share moved. saturation_hours is not declared (shipped config declares none); CONTACT-ARCH-02 saturation is a separate question.",
+  "scoring": {
+    "declared_before_running": true,
+    "statement": "Stage-2 conditional clause family, scored per arm and as a response curve. FROZEN before any assay cell exists; nothing is loosened and nothing is tightened.",
+    "conditional_trajectory_clause": {
+      "criterion": "Per arm, scored only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10): the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February). The clause is scored only when an arm has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Verbatim clause family from v11/v11-stage-2/v1, restricted to each arm's own takeoff class. Reported beside it, never thresholded: the fraction of TAKEOFF seeds whose recorded_onsets lies in [98.5, 394] (the conditional analogue of onset_mass_near_target) and the full per-seed recorded_onsets vector per arm."
+    },
+    "response_curve_reads": {
+      "declared": [
+        "reach_binding: the takeoff-seed conditional recorded mass (q05-q95 and median) as a function of multiplier on {0.25, 0.50, 0.75, 1.00, 1.25, 1.50, 1.75, 2.00} -- monotone non-increasing in multiplier means the ring's reach binds the conditional gap.",
+        "linearity_elasticity: the log-log slope of the conditional median vs multiplier between 0.25 and 2.00 -- a declared read, not a fit; a flat slope says the conditional mass is reach-insensitive.",
+        "elbow: whether ANY multiplier's takeoff-seed q05-q95 contains 197 (a report-immediately trigger), and if so the smallest such multiplier -- the reach-only closure point; never a rate selection.",
+        "witness_delta: R0_declared vs R8_pool_witness at the same multiplier 1.0 -- the partition's measured effect on the conditional read, set against the paired probe's event-level measurement (non-takeoff events halved, takeoff spike persisted)."
+      ],
+      "declared_counterfactual": "If even the 0.25x arm over-produces -- its takeoff-seed q05-q95 excludes 197 upward -- then cutting reach alone cannot close the conditional gap inside the range swept, and the next suspect is the per-partner plume dose (the near-field beta/share) or the ring definition (which activities bound breathing-zone partners), not the partner rate. Declared in advance, before any cell runs.",
+      "declared_expectation": "From the AERO-SPLIT-01 probe the takeoff-seed day-0-2 spike persists at the shipped rate, so the expected result is over-production at every multiplier with the curve flattening at the low end -- a reach-bound-but-insufficient or reach-inert read that points at per-partner dose. A measured closure at some multiplier is equally a valid result."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT, verbatim from v10/v11/v1: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; a deviation is a seeding-path defect that invalidates the cell rather than excluding it from selection.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "verdict_bands": {
+      "per_arm": {
+        "closes_the_gap": "arm's takeoff-seed q05-q95 contains 197 AND conditional median in [98.5, 394] AND takeoff mass >= 5/20 -- partner-rate reach alone could close the conditional gap at that multiplier (report immediately).",
+        "load_bearing": "q05-q95 excludes 197 but the arm's conditional median falls >= 50% versus R0_declared's conditional median.",
+        "partial": "conditional median falls 20-50% versus R0_declared.",
+        "inert": "conditional median falls < 20% versus R0_declared -- the multiplier does not bind the conditional gap.",
+        "takeoff_collapse": "fewer than 5/20 takeoff seeds -- the arm produces a voyage class that cannot take off; reported as collapse, not scored on the clause."
+      },
+      "curve_level": {
+        "reach_closes": "some multiplier's arm satisfies closes_the_gap -- reach is a candidate closure mechanism at that multiplier.",
+        "reach_bound_but_short": "conditional mass is monotone and the elastic slope is steep, but the low end still over-produces -- reach is load-bearing and insufficient; suspect per-partner plume dose or ring definition next.",
+        "reach_inert": "the curve is flat across the sweep -- the conditional gap does not respond to reach; suspect per-partner plume dose or ring definition directly."
+      }
+    },
+    "rng_pairing_caveat": "Declared from stochastic-attribution: scaling rates_per_hour changes the partner-draw values, so trajectories diverge downstream even though the draw call-sequence is structurally identical across multiplier arms -- reads are distribution-level (20-seed q05-q95 per arm), never seed-paired. The mode-off witness additionally draws nothing on the proximity path, so it is not seed-pairable either. The R0-vs-R8 witness delta is a distribution-level read for the same reason.",
+    "note": "The clause gates nothing -- there is no Theta to admit. The assay's product is the response curve itself: per-arm conditional reads, the curve-level verdict, and the declared counterfactual's answer."
+  },
+  "what_this_cannot_settle": [
+    "It does not pick a partner rate -- the sweep maps the response surface; choosing a rate is a provenance question, not this assay's.",
+    "It does not separate per-partner plume dose from ring definition -- both remain suspects if the low end over-produces; the curve only says whether reach binds.",
+    "It does not re-ask far_field_share -- the [0.05, 0.30] sweep is declared separately.",
+    "R8_pool_witness equality with the pre-partition stage-2 row asserts current-main mode-off equals the pre-change engine; a drift there is an execution regression since 8cda4c7, not physics, and is reported as such.",
+    "The multiplier moves the direct-contact partner draw as well as the ring -- they share the CONTACT-ARCH-01 table by construction; the route-attribution block separates which channel's event share moved, but the design cannot sweep the ring alone."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_partner_rate_assay_v1. The image must be built from a main that contains this design file: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "cells": 180,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_partner_rate_assay_v1/<sha>/cells/",
+    "canary": "R1_rate_0p25 (multiplier 0.25), all 20 seeds -- array 20 at INDEX_OFFSET 20 (arm-major enumeration puts this row at cell indices 20-39), inspected before any further submission: every cell's spec carried the scaled activity_contacts block (the override landed, not spec-only), the payload contract is intact, the arm is not degenerate, and the index-geometry audit invariant holds. Then STOP and report -- the user decides whether the full array runs. Canary cells are skipped idempotently by _already_complete when the array is submitted.",
+    "report_immediately_if": "the canary row is read out (stop after it -- the user decides the array); any arm's takeoff-seed conditional q05-q95 contains 197; any arm collapses takeoff below ~5/20; the multiplier does not bind the proximity ring at runtime -- a spec-lands-but-inert signature is a bug, not physics; any cell's audit invariant fails (index_onset_day != -1.0 or index_shedding_at_day0 false); or the child failure rate exceeds 5%."
+  }
+}
