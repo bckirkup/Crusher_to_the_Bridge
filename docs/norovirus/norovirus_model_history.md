@@ -588,6 +588,12 @@ over-determined *given* these.
 - Per-zone high-touch surface areas (`HIGH_TOUCH_AREA_M2`, 1.5-10 m² by class):
   no study has ever measured high-touch surface area per room in m². Permanent
   Grade C. It is the denominator of the fomite pickup model.
+- Minimum pickup pool `SURFACE_PICKUP_MIN_GEC` = 1 GEC (`NORO-GATE-FLOOR-01`):
+  the quantisation of the engine's own mass unit, declared — a pool holding
+  less than one whole genome copy has no virion for a hand to take. No study
+  measures a pickup threshold; Grade C, and it gates (never zeroes) the pool,
+  so it removes no mass. Distinct from the observation swab LOD, which is 3-4
+  orders larger and belongs to the assay, not the hand.
 - The fraction of a host's vomiting episodes occurring in its own cabin:
   unmeasured, swept rather than asserted, and not a model parameter (§9f, and
   `telemetry_buffer/observation_model/park_emesis_findings.md`).

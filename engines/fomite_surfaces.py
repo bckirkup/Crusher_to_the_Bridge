@@ -52,6 +52,31 @@ SURFACE_RESIDUE_FLOOR_GEC = 1e-12
 def floor_surface_residue(mass: float) -> float:
     return 0.0 if mass < SURFACE_RESIDUE_FLOOR_GEC else mass
 
+
+# Physical pickup threshold, above the numerical floor and distinct from it:
+# genome equivalent copies are discrete, so a surface pool (pooled zone
+# total, or per_surface unit total) holding less than one whole copy has no
+# virion available for a hand to pick up. Below it the pickup gate closes
+# and no pickup RNG is drawn against the pool. What is "measured": nothing
+# environmental -- this is the quantisation of the mass unit the engine
+# carries (GEC), declared as one copy. Setting: every zone and unit, all
+# pathogens, both fomite representations, default path.
+# Value: 1 GEC (exact, not an interval; the quantum is one copy).
+# Grade C (declared assumption -- listed in norovirus_model_history.md §10).
+# Origin: Tr (transcribed from this repository's own mass-unit definition,
+# docs/ledger/NORO-GATE-FLOOR-01.md; no journal source defines a pickup
+# threshold and none is claimed).
+# Mass is *gated, not zeroed*: the sub-copy pool stays in the reservoir,
+# keeps decaying, and the gate reopens if later deposition carries the
+# total back to >= 1 GEC. Mass conservation is therefore unchanged by this
+# constant; only the 1e-12 residue floor below it discards mass.
+SURFACE_PICKUP_MIN_GEC = 1.0
+
+
+def pickup_gate_open(surface_mass: float) -> bool:
+    """True when a pool holds at least one whole genome copy to pick up."""
+    return surface_mass >= SURFACE_PICKUP_MIN_GEC
+
 # --- item areas in m2 -------------------------------------------------------
 # (area_m2, src, note). ``measured``/``qmra`` items are read off the paper
 # named in the note; ``declared`` items are this repository's geometry for an

@@ -138,7 +138,14 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # extinct: (1, 1, 217, 5, 0) -> (0, 0, 217, 1, 0), read from CI job
         # 107697563827 (fast tier, 3.11, shard 3) on this branch — both
         # interpreters agree, as before on near-extinct cells.
-        (3, 11): (0, 0, 217, 1, 0),
+        # NORO-GATE-FLOOR-01 closes the fomite pickup gate on any pool
+        # holding less than one genome copy, so the pickups the engine used
+        # to dispatch against sub-copy residues — and their hand-to-mouth
+        # draws — no longer happen; the shared stream reorders and this
+        # near-extinct cell re-ignites: (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2),
+        # read from CI job 107765635955 (fast tier, 3.11, shard 3) on this
+        # branch — both interpreters agree, as before on this cell.
+        (3, 11): (4, 2, 217, 5, 2),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -183,7 +190,10 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # also draws proximity partners on the shared stream, so this is the
         # intended physics plus the stream reorder the labelled off baseline
         # exists to isolate.
-        (3, 12): (0, 0, 217, 1, 0),
+        # NORO-GATE-FLOOR-01 (see the 3.11 note above) moves the cell
+        # (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2) on CPython 3.12, read in
+        # the local venv on this branch.
+        (3, 12): (4, 2, 217, 5, 2),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the

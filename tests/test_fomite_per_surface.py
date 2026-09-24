@@ -1025,3 +1025,96 @@ def test_scale_surface_mass_continuous_above_floor() -> None:
     assert core.surface_pools_by_pathogen[PATHOGEN][
         "Lounge_A"
     ] == pytest.approx(0.0, abs=0.0)
+
+
+# ── physical pickup gate floor (NORO-GATE-FLOOR-01) ───────────────────
+
+
+def test_pickup_gate_open_threshold() -> None:
+    assert fomite_surfaces.SURFACE_PICKUP_MIN_GEC == pytest.approx(1.0)
+    assert not fomite_surfaces.pickup_gate_open(0.0)
+    assert not fomite_surfaces.pickup_gate_open(1e-6)
+    assert not fomite_surfaces.pickup_gate_open(0.999999)
+    assert fomite_surfaces.pickup_gate_open(1.0)
+    assert fomite_surfaces.pickup_gate_open(1e6)
+
+
+def test_pickup_gate_sits_above_the_residue_floor() -> None:
+    # Two distinct thresholds: the numerical floor zeroes dust, the
+    # physical gate only closes pickup. Sub-copy mass survives both.
+    assert (
+        fomite_surfaces.SURFACE_PICKUP_MIN_GEC
+        > fomite_surfaces.SURFACE_RESIDUE_FLOOR_GEC
+    )
+    assert fomite_surfaces.floor_surface_residue(1e-6) == pytest.approx(
+        1e-6, rel=0.0, abs=0.0,
+    )
+    assert not fomite_surfaces.pickup_gate_open(1e-6)
+
+
+def _lounge_only_pickup(
+    tx: dict, deposit: float,
+) -> tuple[list[str], float, tuple[object, object]]:
+    """One epoch with susceptibles in Lounge_A only, on a pool of ``deposit``.
+
+    Returns the zones pickup was requested for, the surviving pool and
+    the core generator's bit-state before and after the epoch.
+    """
+    core = _core(tx, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", deposit)
+    calls: list[str] = []
+    for name in ("_fomite_pickup_request", "_fomite_pickup_requests_by_class"):
+        original = getattr(type(core), name)
+
+        def spy(*args: object, _o: object = original, **kwargs: object):
+            calls.append(str(args[1]))
+            return _o(core, *args, **kwargs)
+
+        setattr(core, name, spy)
+    occupants = {
+        zone: [] for zone in _population()
+    }
+    occupants["Lounge_A"] = [
+        agent for agent in _population()["Lounge_A"]
+        if PATHOGEN not in agent.infections
+    ]
+    before = core.rng.bit_generator.state
+    core._pathway_fomite(
+        1, occupants, {}, ContactTracingMatrix(epoch=1), [],
+        pathogen_id=PATHOGEN,
+        profile=core.pathogen_profiles[PATHOGEN],
+    )
+    return (
+        calls,
+        core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+        (before, core.rng.bit_generator.state),
+    )
+
+
+@pytest.mark.parametrize("tx", [POOLED, PER_SURFACE])
+def test_sub_copy_pool_consumes_no_pickup_draws(tx: dict) -> None:
+    calls, remaining, (before, after) = _lounge_only_pickup(tx, 1e-6)
+    assert calls == []
+    assert before == after
+    # Gated, not zeroed: the sub-copy mass is still in the reservoir.
+    assert remaining == pytest.approx(1e-6, rel=1e-9)
+
+
+@pytest.mark.parametrize("tx", [POOLED, PER_SURFACE])
+def test_whole_copy_pool_still_dispatches_pickup(tx: dict) -> None:
+    calls, _, (before, after) = _lounge_only_pickup(tx, 1e3)
+    assert calls
+    assert set(calls) == {"Lounge_A"}
+    assert before != after
+
+
+def test_gate_reopens_when_deposition_restores_a_whole_copy() -> None:
+    core = _core(POOLED, seed=12)
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 0.5)
+    assert not fomite_surfaces.pickup_gate_open(
+        core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+    )
+    core._deposit_surface_mass(PATHOGEN, "Lounge_A", 0.5)
+    assert fomite_surfaces.pickup_gate_open(
+        core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"],
+    )

@@ -101,9 +101,19 @@ class TestRouteAttribution:
         )
 
         fiat_imports = 2 + 1  # two norwalk seeds plus the legacy seed
-        assert sum(first_summary["infections_by_dominant_route"].values()) == (
+        seeded_summary = first.history[0]["summary"]
+        assert seeded_summary["cumulative_ever_infected"] == fiat_imports
+        assert seeded_summary["infections_by_dominant_route"] == {}, (
+            "no fiat index-case import is attributed to a route"
+        )
+        # `cumulative_ever_infected` counts distinct hosts; route attribution
+        # counts host-pathogen acquisitions, so a host that acquires its
+        # second pathogen by transmission adds a route event without adding
+        # an ever-infected host. The attribution is therefore bounded below,
+        # not equal: every transmission-infected host is attributed.
+        assert sum(first_summary["infections_by_dominant_route"].values()) >= (
             first_summary["cumulative_ever_infected"] - fiat_imports
-        ), "route events exclude all three fiat index-case imports"
+        ), "every non-fiat infection carries a route"
         assert second_summary["infections_by_dominant_route"] == {}
         assert second_summary["infection_dose_share_by_route"] == {}
         for key in (
