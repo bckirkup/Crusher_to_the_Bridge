@@ -45,6 +45,7 @@ from picard_framework.covid_theta_fit import (
     observables_from_modality,
     run_fit_spec,
 )
+from picard_framework.pathogen_overrides import deep_merge_dict
 from simulation_utils.paths import validated_open
 
 DESIGN_REL = os.path.join(
@@ -77,6 +78,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "profile_route_efficiency_multipliers",
     "infection_counters",
     "transmission_overrides",
+    "pathogen_overrides",
 })
 QUARANTINE_PROTOCOL_ID = "SOP-017"
 NEAR_FIELD_AIR_MODES = ("two_box", "off")
@@ -525,6 +527,37 @@ def _apply_transmission_overrides(raw: dict[str, Any], tx: Any) -> None:
     ).update(tx)
 
 
+def _apply_pathogen_overrides(raw: dict[str, Any], patches: Any) -> None:
+    """Deep-merge the arm's per-pathogen patches into pathogen_overrides.
+
+    The mapping is {pathogen_id: patch} shaped exactly like the spec-level
+    ``pathogen_overrides`` block; the same deep-merge the engine applies at
+    profile load is applied here, per pathogen, onto whatever earlier arms'
+    patches (e.g. route efficiencies) already wrote.
+    """
+    if not isinstance(patches, Mapping):
+        raise ValueError("pathogen_overrides must be a mapping")
+    reserved = {"remove", "add"}
+    unknown = set(patches) - reserved
+    if unknown - {PATHOGEN_ID}:
+        raise ValueError(
+            f"pathogen_overrides may only patch {PATHOGEN_ID!r} on this "
+            f"screen, got {sorted(unknown - {PATHOGEN_ID})}",
+        )
+    for pid, patch in patches.items():
+        if pid in reserved:
+            raise ValueError(
+                "pathogen_overrides arm patches may not use the reserved "
+                f"{pid!r} form",
+            )
+        if not isinstance(patch, Mapping):
+            raise ValueError(f"pathogen_overrides[{pid!r}] must be a mapping")
+        overrides_map = raw.setdefault("pathogen_overrides", {})
+        overrides_map[pid] = deep_merge_dict(
+            overrides_map.get(pid, {}), dict(patch),
+        )
+
+
 def _apply_route_efficiencies(
     raw: dict[str, Any],
     arm_values: Mapping[str, Any],
@@ -593,6 +626,8 @@ def apply_arm_overrides(
         _apply_route_efficiencies(
             raw, overrides["profile_route_efficiency_multipliers"], profile,
         )
+    if "pathogen_overrides" in overrides:
+        _apply_pathogen_overrides(raw, overrides["pathogen_overrides"])
     return raw
 
 

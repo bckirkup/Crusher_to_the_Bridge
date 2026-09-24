@@ -1,0 +1,546 @@
+{
+ "design_id": "covid_sensitivity_assay_v2",
+ "parent_design": "covid_sensitivity_assay_v1",
+ "description": "Second sensitivity assay for the ~18x conditional-size gap in the COVID arm, covering the two channels covid_sensitivity_assay_v1 named but could not reach: the observational channel (what counts as a 'recorded onset' vs the record's dated-onset bookkeeping, ~3.5x of the gap) and natural history / mixing reach (the ~4.7x over-burn: attack ~0.95 vs the record's ~712/3711 ~0.19). Same declared-replay axis as v1: Theta 4.22e10, same 20 seeds, same cell shape. All arms apply via a NEW arm grammar key 'pathogen_overrides' (a deep-merge patch into run_spec.pathogen_overrides[PATHOGEN_ID]) plus the existing transmission_overrides key (activity_contacts blocks replace wholesale, so every contact arm declares the complete block).",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": [],
+ "withdraws": [],
+ "prerequisites": [
+  "covid_sensitivity_assay_v1 measured: no transmission-layer arm or bound reaches the record; A11 (crew-confined + pool off + day-12 quarantine + perfect confinement + contact dose x0.25) still records ~2868 vs 197 on takeoff seeds",
+  "THETA-SCREEN-V11-S2 measured: conditional clause fails ~17.7x at every admissible-band row"
+ ],
+ "scenario_id": "diamond_princess_2020",
+ "thetas": [
+  42200000000.0
+ ],
+ "thetas_note": "Band centre from THETA-SCREEN-V11-REFINE; identical to v1 so B0 reproduces A0 and the two surfaces stack.",
+ "infection_age_days": [
+  3.3
+ ],
+ "infection_age_note": "Unchanged from the v10/v11/stage-2/v1-assay replay.",
+ "imports": [
+  1
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 20,
+ "seeds_note": "Same seed block as v1 (20200205..20200224) so B0 is an exact A0 rerun and arm-vs-arm comparisons share seed realisations.",
+ "cells": 220,
+ "cells_note": "1 theta x 11 arms x 20 seeds; enumeration axis-point x arm x seed (B0 = cells 0-19, B10 = cells 200-219).",
+ "takeoff_recorded_onsets": 10,
+ "gap_decomposition": {
+  "observational_share": "~3.5x: recorded_onsets counts every lab-confirmed symptomatic onset; the record's 197 dated onsets is ~28-31% of the ~634 confirmed positives (asymptomatic/paucisymptomatic positives never got a dated onset). Even a correct ~700-infection outbreak reads ~480 on the model's channel.",
+  "natural_history_share": "~4.7x: sim attack ~0.95 vs record ~0.19. Suspects: effective susceptible pool (sterile/partial immunity, unexposed hosts), infectious-period length, shedding heterogeneity, and contact-network reach (well-mixed zone pools vs a sparse real contact graph)."
+ },
+ "grammar_additions": {
+  "pathogen_overrides": "arm.overrides.pathogen_overrides merges verbatim into run_spec.pathogen_overrides[sars_cov2_resp] via the existing deep-merge machinery (picard_framework/pathogen_overrides.py); reaches symptomatic_fraction, severity_model.base_probabilities(_by_age_band), shedding_duration_days, shedding_variance_log10, secretor_negative_fraction(+relative_susceptibility), presymptomatic_shedding_days, incubation.",
+  "transmission_overrides_activity_contacts": "transmission_overrides already reaches transmission.activity_contacts; the block replaces wholesale so each contact arm declares enabled + the complete rates_per_hour dict (+ optional saturation_hours, CONTACT-ARCH-02)."
+ },
+ "arms": [
+  {
+   "arm_id": "B0_declared",
+   "role": "witness: the declared replay, verbatim",
+   "overrides": {},
+   "note": "Must reproduce A0_declared seed-for-seed (identical seed block, identical spec). Any drift fingerprints an upstream engine change since b88e0ad."
+  },
+  {
+   "arm_id": "B1_subclinical_datable",
+   "role": "observational: half of symptomatic presenters draw 'subclinical' (onset-ineligible) instead of 'mild'",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "severity_model": {
+       "base_probabilities": [
+        0.31,
+        0.3345,
+        0.3345,
+        0.0164,
+        0.0046
+       ],
+       "base_probabilities_by_age_band": {
+        "0-4": [
+         0.31,
+         0.344485,
+         0.344485,
+         0.000942,
+         8.8e-05
+        ],
+        "5-17": [
+         0.31,
+         0.3439,
+         0.3439,
+         0.00196,
+         0.00024
+        ],
+        "child": [
+         0.31,
+         0.3439,
+         0.3439,
+         0.00196,
+         0.00024
+        ],
+        "18-24": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "18-34": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "young_adult": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "25-34": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "35-44": [
+         0.31,
+         0.34005,
+         0.34005,
+         0.0082,
+         0.0017
+        ],
+        "35-49": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "adult": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "45-54": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "50-64": [
+         0.31,
+         0.323,
+         0.323,
+         0.032,
+         0.012
+        ],
+        "middle_aged": [
+         0.31,
+         0.323,
+         0.323,
+         0.032,
+         0.012
+        ],
+        "55+": [
+         0.31,
+         0.3005,
+         0.3005,
+         0.056,
+         0.033
+        ],
+        "65-74": [
+         0.31,
+         0.3005,
+         0.3005,
+         0.056,
+         0.033
+        ],
+        "senior": [
+         0.31,
+         0.2595,
+         0.2595,
+         0.088,
+         0.083
+        ],
+        "75+": [
+         0.31,
+         0.1935,
+         0.1935,
+         0.109,
+         0.194
+        ]
+       }
+      }
+     }
+    }
+   },
+   "note": "OBSERVATIONAL-CHANNEL arm, bookkeeping counterfactual: the real DP's dated-onset subset excluded paucisymptomatic confirmands. Shifts half of every band's 'mild' mass into 'subclinical' (syndrome_case_eligibility 0) in BOTH base_probabilities and all 17 base_probabilities_by_age_band entries -- onset eligibility [0,0,1,1,1] means a subclinical presenter gets no dated onset while still being SYMPTOMATIC-ill and shedding on the symptomatic curve. Reads how much of the over-read is classification, not biology. Frozen transform: new_subclinical = sub + 0.5*mild, new_mild = 0.5*mild, per band."
+  },
+  {
+   "arm_id": "B2_symptomatic_fraction_04",
+   "role": "natural history: symptomatic presentation fraction 0.69 -> 0.40",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "symptomatic_fraction": 0.4
+     }
+    }
+   },
+   "note": "symptomatic_fraction is the live presentation draw (natural_history.presentation_probability). 0.40 is the low end of early-SARS-CoV-2 meta-analytic ranges (Buitrago-Garcia's own sensitivity spread). ALSO changes shedding: non-presenters shed on ASYMPTOMATIC_SHEDDING (lower peak) so this arm is confounded biology+observation -- read it as a bound, not a bookkeeping estimate."
+  },
+  {
+   "arm_id": "B3_shedding_duration_8d",
+   "role": "natural history: infectious window 15 -> 8 days",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "shedding_duration_days": 8
+     }
+    }
+   },
+   "note": "Shortens the infectious period ~2x: fewer secondary opportunities per host AND a shorter pre-quarantine burn. Literature-anchored bound on the long end; if the over-burn is a too-long infectious window, this is the single cleanest shrink that is biology rather than bookkeeping."
+  },
+  {
+   "arm_id": "B4_shedding_variance_2",
+   "role": "natural history: shedding heterogeneity log10 sd 1.2 -> 2.0",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "shedding_variance_log10": 2.0
+     }
+    }
+   },
+   "note": "Superspreading-tail probe: wider variance concentrates emission in few shedders. On a well-mixed ship this can RAISE total infections (few hosts, huge dose) or lower takeoff; measured direction is the informative output. Declared because dispersion is the least-characterised profile field."
+  },
+  {
+   "arm_id": "B5_nonsusceptible_50",
+   "role": "natural history: 50% of the population carries sterile innate immunity",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "secretor_negative_fraction": 0.5,
+      "secretor_negative_relative_susceptibility": 0.0
+     }
+    }
+   },
+   "note": "EFFECTIVE-POPULATION bound: flags half the agents immune at init, capping attack at ~50% regardless of exposure intensity. Tests the 'the real ship's susceptible pool was much smaller than 3711' hypothesis -- cross-reactive immunity / prior-exposure frailty is the standing literature suspect for DP's 19% attack."
+  },
+  {
+   "arm_id": "B6_nonsusceptible_75",
+   "role": "natural history bound: 75% sterile immune",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "secretor_negative_fraction": 0.75,
+      "secretor_negative_relative_susceptibility": 0.0
+     }
+    }
+   },
+   "note": "Deep end of B5: ~928 susceptibles. If B5 lands near the record this arm overshoots into collapse; if B5 still over-produces, the residual is reach, not pool size."
+  },
+  {
+   "arm_id": "B7_contacts_half",
+   "role": "mixing: every activity_contacts partner rate halved",
+   "overrides": {
+    "transmission_overrides": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.125,
+       "corridor": 0.125,
+       "work_service": 1.45,
+       "work_other": 0.25,
+       "dining_table": 1.0,
+       "dining_venue": 1.0,
+       "leisure": 0.5,
+       "other": 0.0
+      }
+     }
+    }
+   },
+   "note": "REACH probe on the partner/contact channel (distinct from v1's dose-side A6/A7): halves how many distinct partners each activity draws, shrinking the exposed set rather than the per-exposure dose. Complete block declared because activity_contacts replaces wholesale."
+  },
+  {
+   "arm_id": "B8_contact_saturation",
+   "role": "mixing: per-visit contact saturation (CONTACT-ARCH-02) switched on",
+   "overrides": {
+    "transmission_overrides": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "work_service": 2.9,
+       "work_other": 0.5,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0
+      },
+      "saturation_hours": {
+       "cabin": 8,
+       "corridor": 2,
+       "work_service": 4,
+       "work_other": 4,
+       "dining_table": 1,
+       "dining_venue": 2,
+       "leisure": 2,
+       "other": 1
+      }
+     }
+    }
+   },
+   "note": "Declares saturation_hours per activity: partners per visit plateau at rate*tau*(1-exp(-t/tau)) instead of growing linearly with dwell -- the model's measured-form answer to 'a 12-hour cabin stay does not yield 12x the partners of a 1-hour stay'. Taus are STRUCTURAL declarations (a per-visit plateau exists), not fitted values; the set is a single frozen sweep point. If saturation is the missing realism, during-window mass drops while the early burn survives."
+  },
+  {
+   "arm_id": "B9_contacts_sat_halved",
+   "role": "mixing bound: half rates AND saturation",
+   "overrides": {
+    "transmission_overrides": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.125,
+       "corridor": 0.125,
+       "work_service": 1.45,
+       "work_other": 0.25,
+       "dining_table": 1.0,
+       "dining_venue": 1.0,
+       "leisure": 0.5,
+       "other": 0.0
+      },
+      "saturation_hours": {
+       "cabin": 8,
+       "corridor": 2,
+       "work_service": 4,
+       "work_other": 4,
+       "dining_table": 1,
+       "dining_venue": 2,
+       "leisure": 2,
+       "other": 1
+      }
+     }
+    }
+   },
+   "note": "Combined reach bound on the partner channel; pairs B7 and B8 to bound total reach from below."
+  },
+  {
+   "arm_id": "B10_mixed_floor",
+   "role": "counterfactual floor: observational + natural history + reach combined",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "symptomatic_fraction": 0.4,
+      "shedding_duration_days": 8,
+      "secretor_negative_fraction": 0.5,
+      "secretor_negative_relative_susceptibility": 0.0,
+      "severity_model": {
+       "base_probabilities": [
+        0.31,
+        0.3345,
+        0.3345,
+        0.0164,
+        0.0046
+       ],
+       "base_probabilities_by_age_band": {
+        "0-4": [
+         0.31,
+         0.344485,
+         0.344485,
+         0.000942,
+         8.8e-05
+        ],
+        "5-17": [
+         0.31,
+         0.3439,
+         0.3439,
+         0.00196,
+         0.00024
+        ],
+        "child": [
+         0.31,
+         0.3439,
+         0.3439,
+         0.00196,
+         0.00024
+        ],
+        "18-24": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "18-34": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "young_adult": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "25-34": [
+         0.31,
+         0.34265,
+         0.34265,
+         0.00407,
+         0.00063
+        ],
+        "35-44": [
+         0.31,
+         0.34005,
+         0.34005,
+         0.0082,
+         0.0017
+        ],
+        "35-49": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "adult": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "45-54": [
+         0.31,
+         0.3345,
+         0.3345,
+         0.0164,
+         0.0046
+        ],
+        "50-64": [
+         0.31,
+         0.323,
+         0.323,
+         0.032,
+         0.012
+        ],
+        "middle_aged": [
+         0.31,
+         0.323,
+         0.323,
+         0.032,
+         0.012
+        ],
+        "55+": [
+         0.31,
+         0.3005,
+         0.3005,
+         0.056,
+         0.033
+        ],
+        "65-74": [
+         0.31,
+         0.3005,
+         0.3005,
+         0.056,
+         0.033
+        ],
+        "senior": [
+         0.31,
+         0.2595,
+         0.2595,
+         0.088,
+         0.083
+        ],
+        "75+": [
+         0.31,
+         0.1935,
+         0.1935,
+         0.109,
+         0.194
+        ]
+       }
+      }
+     }
+    },
+    "transmission_overrides": {
+     "activity_contacts": {
+      "enabled": true,
+      "rates_per_hour": {
+       "cabin": 0.25,
+       "corridor": 0.25,
+       "work_service": 2.9,
+       "work_other": 0.5,
+       "dining_table": 2.0,
+       "dining_venue": 2.0,
+       "leisure": 1.0,
+       "other": 0.0
+      },
+      "saturation_hours": {
+       "cabin": 8,
+       "corridor": 2,
+       "work_service": 4,
+       "work_other": 4,
+       "dining_table": 1,
+       "dining_venue": 2,
+       "leisure": 2,
+       "other": 1
+      }
+     }
+    }
+   },
+   "note": "Same role as v1's A11: if even the combined observational+natural-history+reach bound cannot put 197 inside the conditional q05-q95, the residual suspect is structural -- zone-pool well-mixing itself (every susceptible reachable by every shedder) or the Theta composite -- and the next step is engine surgery, not parameter assay."
+  }
+ ],
+ "cell_payload_additions": {
+  "arm_id": "echoed",
+  "note": "Stage-2/v1 payload fields retained verbatim."
+ },
+ "observational_annex": {
+  "cells": 0,
+  "statement": "No cells: a scoring annex on this assay's and v1's payloads. Per cell compute confirmed_proxy = recorded_onsets + campaign_asymptomatic_positives and dated_share = recorded_onsets / confirmed_proxy, beside the record's 197/712 dated-confirmed bookkeeping; report the implied 'dated-onset-equivalent' = recorded_onsets x 0.31 alongside raw recorded_onsets so both metrics' gaps are visible. Declared approximate: campaign_asymptomatic_positives undercounts confirmed positives outside specimen days."
+ },
+ "scoring": {
+  "declared_before_running": true,
+  "statement": "FROZEN before any assay cell exists. Per arm, on the seeds that took off in BOTH the arm and B0 (recorded_onsets >= 10 under each): (i) median recorded_onsets and ratio to B0's takeoff-seed median; (ii) q05-q95 and whether it contains 197; (iii) fraction in the near-target band [98.5, 394]; (iv) median infections_total vs ~712; (v) median attack_rate vs ~0.19; (vi) the annex's dated-onset-equivalent median vs 197; (vii) arm takeoff count. NOTE: every arm here perturbs profile draws, so seed realisations are NOT draw-aligned with B0 -- paired-seed filters are retained for comparability but stream-pairing is not assumed; reads are distribution-level.",
+  "verdict_bands": {
+   "closes_the_gap": "conditional recorded_onsets q05-q95 contains 197 AND conditional median in [98.5, 394]",
+   "load_bearing": "conditional recorded_onsets median falls >= 50% vs B0",
+   "partial": "conditional median falls 20-50% vs B0",
+   "inert": "conditional median moves < 20%",
+   "takeoff_collapse": "arm takeoff < 5/20"
+  },
+  "note": "Same caveat as v1: counterfactual arms are physically/historically false by declaration; 'closes_the_gap' names WHERE the over-burn lives, it is not a fitted configuration."
+ },
+ "what_this_cannot_settle": [
+  "Zone-pool well-mixing: every contact/dose lever still leaves every zone-susceptible reachable by every zone-shedder. A sparse-contact-graph counterfactual needs engine surgery (a contact network), not overrides -- if B10 fails, that is the named residual.",
+  "True seed pairing: all arms perturb profile RNG draws.",
+  "The generic-voyage H3 admissibility of any suppressed configuration.",
+  "A fitted Theta."
+ ],
+ "execution": {
+  "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh DESIGN=covid_sensitivity_assay_v2; image built from a main containing this file; pinned job-def revision + sha256 digest.",
+  "cells": 220,
+  "stride": 1,
+  "expected_cell_minutes": 30,
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_sensitivity_assay_v2/<sha>/cells/",
+  "canary": "Two rows: (a) INDEX_OFFSET 0 = B0_declared, witness against A0_declared's payload statistics (identical seeds -> identical payload expected); (b) INDEX_OFFSET 200 = B10_mixed_floor, wiring proof for pathogen_overrides -- spec dump must show symptomatic_fraction 0.4, shedding_duration_days 8, secretor_negative_fraction 0.5, the patched severity bands, and the saturated activity_contacts block; payload must differ from B0's on the same seeds.",
+  "report_immediately_if": [
+   "any arm's conditional q05-q95 contains 197",
+   "any arm's takeoff collapses below 5/20",
+   "B10_mixed_floor still over-produces by more than ~4x -- the residual is then structural (well-mixed zones / Theta composite), not parametric",
+   "B0 witness does not reproduce A0_declared seed-for-seed"
+  ]
+ }
+}
