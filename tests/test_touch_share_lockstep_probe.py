@@ -120,6 +120,20 @@ def test_classification_labels():
     assert probe.classify_divergence({})["class"] == "other"
 
 
+def test_zone_gate_classification():
+    """Frozen rule on the zone-pool gate quantity itself."""
+    expected = probe.classify_divergence(
+        {"zone_pool_gec": {"a": 0.0, "d": 3.2e-7}},
+    )
+    assert expected["class"] == "expected"
+
+    archetype = probe.classify_divergence(
+        {"zone_pool_gec": {"a": 0.0, "d": 5e-13}},
+    )
+    assert archetype["class"] == "archetype"
+    assert archetype["gate_quantities"] == ["zone_pool_gec"]
+
+
 def test_tracer_passes_through_state_and_returns(tmp_path):
     gen = np.random.default_rng(1)
     tracer = probe.TracingGenerator(gen)
