@@ -110,12 +110,16 @@ def compare_statistic(
 ) -> dict[str, Any]:
     """One frozen statistic across the shared seeds."""
     deviations: dict[int, float] = {}
-    missing: list[int] = []
+    absent_both: list[int] = []
+    absent_one: list[int] = []
     for seed in seeds:
         arm = _dig(arm_cells[seed], dotted)
         base = _dig(base_cells[seed], dotted)
+        if arm is None and base is None:
+            absent_both.append(seed)
+            continue
         if arm is None or base is None:
-            missing.append(seed)
+            absent_one.append(seed)
             continue
         deviations[seed] = _relative_deviation(arm, base)
     tolerance = 0.0 if exact else RELATIVE_TOLERANCE
@@ -127,12 +131,14 @@ def compare_statistic(
         "statistic": dotted,
         "comparison": "exact" if exact else f"rel <= {RELATIVE_TOLERANCE:g}",
         "seeds_compared": len(deviations),
-        "seeds_missing_the_field": missing,
+        "seeds_absent_in_both_arms": absent_both,
+        "seeds_absent_in_one_arm": absent_one,
         "max_relative_deviation": worst[1] if worst else None,
         "max_deviation_seed": worst[0] if worst else None,
         "seeds_outside_tolerance": outside,
         "verdict": (
-            "identity" if not outside and not missing and deviations
+            "identity"
+            if not outside and not absent_one and (deviations or absent_both)
             else "DEFECT"
         ),
     }
@@ -283,10 +289,12 @@ def _print(result: dict[str, Any]) -> None:
     )
     for row in result["comparisons"]:
         dev = row["max_relative_deviation"]
+        silent = len(row.get("seeds_absent_in_both_arms", ()))
+        note = f", {silent} seeds never fired it" if silent else ""
         print(
             f"  {row['statistic']:48s} {row['comparison']:22s} "
             f"worst {dev if dev is None else format(dev, '.3e')} "
-            f"(seed {row['max_deviation_seed']})  -> {row['verdict']}",
+            f"(seed {row['max_deviation_seed']}{note})  -> {row['verdict']}",
         )
     runtime = result["runtime"]
     if runtime.get("seeds"):
