@@ -132,7 +132,14 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # records) moves one campaign positive on 3.11 the same as on 3.12:
         # (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0), read from CI job
         # 106118699889 (fast tier, 3.11, shard 3) on this branch.
-        (3, 11): (1, 1, 217, 5, 0),
+        # NORO-TOUCH-SHARE-02 floors a surface pool that decays below 1e-12
+        # GEC to exactly 0.0 (engines.fomite_surfaces.SURFACE_RESIDUE_FLOOR_GEC),
+        # so the `surface_mass <= 0` pickup gate closes on de-facto empty
+        # sars_cov2_resp pools instead of drawing pickups on residue:
+        # (1, 1, 217, 5, 0) -> (1, 1, 217, 2, 0), measured alone on CPython
+        # 3.12 locally (the pre-floor tuple returns at the parent commit);
+        # the 3.11 entry assumes the same move pending the CI reading.
+        (3, 11): (1, 1, 217, 2, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -169,7 +176,9 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # keeps first-episode records, which changes the trajectory and moves
         # one campaign positive: (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0)
         # on CPython 3.12, read in the local venv on this branch.
-        (3, 12): (1, 1, 217, 5, 0),
+        # NORO-TOUCH-SHARE-02 residue floor (see the 3.11 note):
+        # (1, 1, 217, 5, 0) -> (1, 1, 217, 2, 0) on CPython 3.12, local venv.
+        (3, 12): (1, 1, 217, 2, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
