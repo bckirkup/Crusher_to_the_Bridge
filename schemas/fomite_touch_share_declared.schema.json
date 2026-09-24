@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Declared fomite touch-share table (NORO-TOUCH-SHARE-01)",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "item_reading",
+    "shares",
+    "areal_fallback",
+    "provenance"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema_version": {"const": 1},
+    "item_reading": {"enum": ["shared", "hardware", "broad"]},
+    "shares": {
+      "type": "object",
+      "description": "zone class -> item class -> share; the transmission.fomite_touch_share_table shape",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "areal_fallback": {
+      "type": "object",
+      "description": "zone classes with no retrieved touch-share observation; they stay on the areal share",
+      "additionalProperties": {"type": "string"}
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "source",
+          "setting",
+          "counted",
+          "grade",
+          "mapping",
+          "derivation"
+        ]
+      }
+    }
+  }
+}

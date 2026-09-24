@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "ledger": "NORO-TOUCH-SHARE-01",
+  "status": "declared arm input; adopted nowhere; pooled remains the default",
+  "item_reading": "shared",
+  "notes": [
+    "Shares are per zone class over the shared_fixed item classes the engine enumerates at unit resolution (engines/fomite_surfaces.py ZONE_ITEM_SETS); per-occupant groups are not enumerated and receive no share.",
+    "Each share is an observed group share (Grade B, analogous setting) split within the group by the shipped areal share (Grade C, this repository's geometry). The observed number and the derivation are recorded under provenance.",
+    "Zone classes listed under areal_fallback have no retrieved touch-share observation and stay on the areal share; nothing is invented for them.",
+    "The engine applies the share twice (deposit split and pickup weight); under areal the two cancel against count*area, under declared they do not. This is the shipped hook's behaviour, not a change made here."
+  ],
+  "shares": {
+    "dining": {
+      "utensil": 0.567818,
+      "button_or_dispenser": 0.229884,
+      "tap_set": 0.153256,
+      "door_lever": 0.049042
+    },
+    "public": {
+      "button_or_dispenser": 0.410256,
+      "grab_rail_m": 0.585994,
+      "door_lever": 0.00375
+    }
+  },
+  "areal_fallback": {
+    "cabin": "No retrieved observation of shared-surface touch shares in a residential sleeping unit; Yuan 2024 is an all-surface dormitory rate (three of four named surfaces personal) and Lei 2017 enumerates aircraft-seat surfaces without touch counts.",
+    "crew_mess": "Jin 2022 staff rates are servers working a dining room, not crew eating in a self-service mess; no observed analogue.",
+    "sanitary": "Carling 2009 counts objects per shipboard public restroom (30.6) but reports no touches; Abney 2024 is a QMRA with assumed contact sequences, not observation.",
+    "galley": "No retrieved observation of per-surface touch frequency among commercial food handlers; Kirchner 2023 codes first-7 touches in a home kitchen study and reports no per-surface shares."
+  },
+  "provenance": {
+    "dining": {
+      "source": "Jin T. et al. 2022, Int J Infect Dis, DOI 10.1016/j.ijid.2022.05.047",
+      "setting": "Guangzhou restaurant, CCTV, 140 min, 81 visible diners and 18 staff, 41,042 touches",
+      "counted": "touches per person-hour by surface group (Results section, full text)",
+      "origin_code": "R",
+      "grade": "B",
+      "observed": {
+        "diners_T_per_h": 38.5,
+        "diners_R_per_h": 4.3,
+        "staff_T_per_h": 245.8,
+        "staff_R_per_h": 299.6,
+        "persons": {"diners": 81, "staff": 18}
+      },
+      "mapping": {
+        "T (table's object for public use)": ["utensil"],
+        "R (restaurant public and common objects)": ["door_lever", "button_or_dispenser", "tap_set"],
+        "PT (personal table objects), PP, M, H, B": "not shared or not surfaces; excluded",
+        "table_top_per_seat, chair_touched": "per-occupant group, not enumerated by the engine; no share"
+      },
+      "derivation": "T share = (81*38.5 + 18*245.8) / (81*(38.5+4.3) + 18*(245.8+299.6)) = 0.5678 (headcount-weighted touches). R share 0.4322 split over door_lever:button_or_dispenser:tap_set by shipped areal share 0.0064:0.0300:0.0200 m2 (Grade C).",
+      "interval": {
+        "utensil": [0.4507, 0.8995],
+        "note": "Lower bound staff-only T share (245.8/545.4), upper bound diner-only T share (38.5/42.8). Central is the headcount-weighted value."
+      },
+      "areal_reference": {"utensil": 0.639386, "button_or_dispenser": 0.191816, "tap_set": 0.127877, "door_lever": 0.040921}
+    },
+    "public": {
+      "source": "Ackerley L.M. et al. 2025, Perspect Public Health, DOI 10.1177/17579139251371964 (also Ackerley 2023 Eur J Public Health 10.1093/eurpub/ckad160.995)",
+      "setting": "Working hotel lobby, Arizona, 30 h direct observation, 324 individuals, 627 touches of 13 fomites",
+      "counted": "touches (per-fomite percentage of all touches, Results section); toucher fractions reported separately (55% touched the elevator button)",
+      "origin_code": "R (elevator button 32%, front-desk counter 22%); ?nr for the per-fomite split of the remaining 46% (full-text table not indexed by Consensus)",
+      "grade": "B for button_or_dispenser lower bound; C for the door_lever/grab_rail_m split",
+      "observed": {
+        "elevator_button_pct": 32,
+        "front_desk_counter_pct": 22,
+        "remaining_11_fomites_pct": 46,
+        "remaining_fomites_named": ["doors", "countertops", "seating", "credit card reader", "hand sanitizer pump", "luggage cart handle", "computer equipment", "tables"]
+      },
+      "mapping": {
+        "elevator button": ["button_or_dispenser"],
+        "front desk counter, countertops, tables, seating, computer equipment": "no class in the public shared_fixed inventory (work_plane/chair are not enumerated for public); excluded and renormalised out",
+        "doors": ["door_lever"],
+        "luggage cart handle": ["grab_rail_m"],
+        "credit card reader, hand sanitizer pump": "button_or_dispenser analogues whose touch counts are not retrieved; not added to the central value"
+      },
+      "derivation": "button_or_dispenser = 32 / (100 - 22) = 0.4103 (elevator button renormalised over touches not on the unmapped counter). Residual 0.5897 split door_lever:grab_rail_m by shipped areal share 0.0128:2.0 m2 (Grade C).",
+      "interval": {
+        "button_or_dispenser": [0.4103, 1.0],
+        "note": "Lower bound is the retrieved elevator-button share; the upper bound is not constrained by retrieved data because the per-fomite split of the remaining 46% (which includes card reader and sanitizer pump) was not retrievable. Central is the lower bound, i.e. the only retrieved point."
+      },
+      "areal_reference": {"grab_rail_m": 0.969556, "button_or_dispenser": 0.024239, "door_lever": 0.006205}
+    }
+  }
+}

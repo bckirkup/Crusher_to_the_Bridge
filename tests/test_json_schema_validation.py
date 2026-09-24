@@ -43,6 +43,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "clinical_instrument_params.schema.json": [
         "data/config/clinical_instrument_params.json",
     ],
+    "fomite_touch_share_declared.schema.json": [
+        "data/config/fomite_touch_share_declared.json",
+    ],
     "picard_run_spec.schema.json": [
         "picard_framework/runs/destroyer_baseline_default.json",
         "picard_framework/runs/smoke_2epoch.json",
