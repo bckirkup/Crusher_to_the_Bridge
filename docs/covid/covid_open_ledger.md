@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `e20008d` (fill with the
+> **Status:** Living. Head commit of record: `37dc215` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -176,6 +176,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   declared replay at the fleet-admissible Θs, re-run `covid_sensitivity_assay_v2`
   (it was stood down for this change), and a declared `far_field_share`
   sweep over [0.05, 0.30] — none of it fitted to 197.
+- **`PARTNER-RATE-V1` measured its canary arm and stood down: the ring is not
+  reach-limited.** At `rates_per_hour` ×0.25 (the bottom of the declared
+  sweep), all 20 takeoff seeds still record 1,275–3,525 onsets (q05 2,457 /
+  median 3,474 / q95 3,518) vs the record's 197 — inside the partition tree's
+  shipped-rate band (~3,470–3,520, cross-campaign contrast). The assay's
+  declared counterfactual fired: four times fewer partner draws does not move
+  the conditional mass, so the ~18× gap is bounded by per-partner plume dose
+  (β) or the ring's definition, not by reach. The response-curve arms (R0,
+  R2–R7, R8 witness, 160 cells) are unmeasured and stood down; reopening is a
+  new decision (`docs/ledger/PARTNER-RATE-V1.md`,
+  `docs/covid/covid_partner_rate_assay_v1_readout.md`, measured at `37dc215`,
+  Batch job-def rev 19, image digest `sha256:7528dcd1…`).
 - **The import x Theta axis is closed as negative, and the confinement leak is
   the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
   1,180 cells) already swept imports 1-20: matching the early onset count

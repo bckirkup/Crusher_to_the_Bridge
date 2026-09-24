@@ -2,14 +2,15 @@
 **Date:** 2026-09-24
 **Commit:** 1264f60
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 37dc215
 
 Partner-rate sensitivity assay on the AERO-SPLIT-01 droplet-partition
 architecture: the first measured response surface for the ~18× conditional-size
 gap since the partition became the shipped default. Declared in
 `picard_framework/runs/covid_partner_rate_assay_v1_design.json` (frozen before
-any assay cell ran). Nothing in this entry is a result; it moves to measured
-when the canary is read out.
+any assay cell ran). Readout:
+`docs/covid/covid_partner_rate_assay_v1_readout.md`.
 
 ## Declared (before any cell runs)
 
@@ -65,3 +66,23 @@ reach — a different question.
   inert is a bug signature, not physics;
 - any cell's audit invariant fails (index_onset_day ≠ −1.0 or
   index_shedding_at_day0 false); or the child failure rate exceeds 5%.
+
+## Measured (canary, 37dc215, Batch job-def rev 19)
+
+R1_rate_0p25 (multiplier 0.25), 20/20 seeds — takeoff gate passed on every
+seed; conditional recorded mass q05 2,457 / median 3,474 / q95 3,518 vs the
+record's 197; near-target share 0/20; the band does not contain 197;
+before_share 0.588. Audit invariant held on 20/20 cells. Execution: array
+`partner-rate-assay-canary-r1`, image
+digest `sha256:7528dcd1…` built from merged main, results under
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_partner_rate_assay_v1/37dc215/cells/cells/`.
+
+**Declared counterfactual fired: the ring is not reach-limited.** A 4× cut in
+the partner rate leaves conditional mass inside the ~3,470–3,520 band the
+partition tree produced at the shipped rate (cross-campaign, distribution-
+level — the in-campaign R0 baseline was stood down, so flatness vs 1.0× is
+not a paired contrast). The next suspect per the frozen scoring is
+per-partner plume dose (β) or the ring definition, not reach. The response
+curve reads (monotonicity, elasticity, elbow, witness delta) are unmeasured —
+the remaining 160 cells were stood down by decision after the canary read;
+reopening is a new decision.
