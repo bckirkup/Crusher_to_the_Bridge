@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `e7ab09f` (fill with the
+> **Status:** Living. Head commit of record: `e20008d` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -161,14 +161,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`AERO-SPLIT-01` shipped; the Θ surface and every replay figure need a
-  re-run on the partition tree.** `transmission.droplet_field_split` defaults
-  to `partition` (spec `docs/droplet_field_split_spec.md`): the room pool
-  carries `far_field_share` = 0.175 of continuous droplet emission (declared
-  interval [0.05, 0.30], Grade C, swept-never-fitted) and the near share
-  reaches only a partner-bounded proximity ring at the AERO-NEAR-02 plume
-  concentration. Paired-seed probe evidence lands in
-  `docs/ledger/AERO-SPLIT-01.md`. Follow-on work, in order: re-run the
+- **`AERO-SPLIT-01` shipped and its paired-seed probe is measured
+  (`docs/ledger/AERO-SPLIT-01.md`, `e20008d`).** `transmission.droplet_field_split`
+  defaults to `partition` (spec `docs/droplet_field_split_spec.md`): the room
+  pool carries `far_field_share` = 0.175 of continuous droplet emission
+  (declared interval [0.05, 0.30], Grade C, swept-never-fitted) and the near
+  share reaches only a partner-bounded proximity ring at the AERO-NEAR-02
+  plume concentration. On the takeoff seed the early spike survives
+  (3574 -> 3561 events, day-0–2 68.7% -> 57.1%) — the plume's per-partner
+  concentration keeps each ring infection near-certain, so ~2 partners/h
+  still branches at this Θ; on the non-takeoff seed the sustained phase
+  halves (3548 -> 1675) and the residual concentrates in the crew messes
+  and confinement exposure. Follow-on work, in order: re-run the
   declared replay at the fleet-admissible Θs, re-run `covid_sensitivity_assay_v2`
   (it was stood down for this change), and a declared `far_field_share`
   sweep over [0.05, 0.30] — none of it fitted to 197.
