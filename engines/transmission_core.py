@@ -50,6 +50,7 @@ from engines.crew_duty_exclusion import is_food_employee
 from engines.fomite_surfaces import (
     PerSurfaceFomiteState,
     UnitInventory,
+    floor_surface_residue,
     parse_per_surface_config,
 )
 from engines.infection_dynamics_bridge import (
@@ -2524,12 +2525,12 @@ class TransmissionCore:
         pools = self.surface_pools_by_pathogen.get(pathogen_id)
         if pools is None or zone_name not in pools:
             if pathogen_id == "_default" and zone_name in self.surface_pools:
-                self.surface_pools[zone_name] = max(
-                    0.0, self.surface_pools[zone_name] * factor,
+                self.surface_pools[zone_name] = floor_surface_residue(
+                    self.surface_pools[zone_name] * factor,
                 )
             return
         previous = max(0.0, float(pools[zone_name]))
-        remaining = previous * factor
+        remaining = floor_surface_residue(previous * factor)
         pools[zone_name] = remaining
         aggregate = max(0.0, float(self.surface_pools.get(zone_name, 0.0)))
         self.surface_pools[zone_name] = max(
