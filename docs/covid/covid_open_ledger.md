@@ -344,14 +344,35 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `docs/covid/covid_theta_screen_v11_stage2_readout.md`, ledgers
   `docs/ledger/THETA-SCREEN-V11-REFINE.md` and
   `docs/ledger/THETA-SCREEN-V11-S2.md`.
-- **`covid_sensitivity_assay_v1` is declared, not yet run**: a 240-cell
-  paired-seed arm sweep on the declared replay at band-centre Θ 4.22e10
-  asking which model machinery could account for the ~17.7× conditional
-  recorded-onset gap (declared decomposition: ~4.7× biological
-  over-burn × ~3.5× dated-onset bookkeeping). Arms = the QUAR-ATTR-V1
-  channel set re-measured at band Θ, contact-dose scaling, and three
-  confinement counterfactuals (earlier order, perfect confinement,
-  first-report symptomatic confinement) plus a combined arrest bound.
-  Design
+- **`covid_sensitivity_assay_v1` is running — canary measured, array in
+  flight**: a 240-cell paired-seed arm sweep on the declared replay at
+  band-centre Θ 4.22e10 asking which model machinery could account for
+  the ~17.7× conditional recorded-onset gap (declared decomposition:
+  ~4.7× biological over-burn × ~3.5× dated-onset bookkeeping). Canary
+  read at `b88e0ad`: the A0 witness reproduces the stage-2 row (median
+  3,483 recorded onsets, attack 0.96, before_share 0.89); **the A11
+  arrest bound still records ~2,868 (q05–q95 [1,363–3,422]) on takeoff
+  seeds vs the record's 197 — the declared report-immediately trigger
+  fired: the ~18× gap is not reachable inside the transmission layer**,
+  pointing at the observational channel or natural history. Arms =
+  the QUAR-ATTR-V1 channel set re-measured at band Θ, contact-dose
+  scaling, and three confinement counterfactuals (earlier order,
+  perfect confinement, first-report symptomatic confinement) plus the
+  combined arrest bound. Array `f3065d9e-a605-456d-86b6-b097bbb7ac43`
+  covers the remaining 200 cells (A1–A10). Design
   `picard_framework/runs/covid_sensitivity_assay_v1_design.json`,
   ledger `docs/ledger/SENS-ASSAY-V1.md`.
+- **`covid_sensitivity_assay_v2` is declared, not yet run** (assay-1
+  canary measured, array in flight): v1's A11 arrest bound still records
+  ~2,868 onsets on takeoff seeds vs the record's 197 under crew
+  confinement + pool off + day-12 quarantine + perfect confinement +
+  contact ×0.25 — the gap is not reachable inside the transmission
+  layer, so v2 interrogates the observational channel (a subclinical/
+  datable-onset bookkeeping arm) and natural history / mixing reach
+  (symptomatic fraction, infectious window, shedding dispersion,
+  effective-susceptible pool via secretor_negative_fraction,
+  activity-contacts reach and CONTACT-ARCH-02 saturation). 11 arms × the
+  same 20 seeds at Θ 4.22e10, 220 cells, plus a zero-cell observational
+  annex scoring the dated-onset-equivalent on v1+v2 payloads. Design
+  `picard_framework/runs/covid_sensitivity_assay_v2_design.json`,
+  ledger `docs/ledger/SENS-ASSAY-V2.md`.
