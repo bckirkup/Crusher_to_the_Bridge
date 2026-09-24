@@ -148,3 +148,176 @@ def test_tracer_passes_through_state_and_returns(tmp_path):
     tr2 = probe.TracingGenerator(gen2)
     ref = np.random.default_rng(2)
     assert tr2.normal(5.0, 2.0, 4) == pytest.approx(ref.normal(5.0, 2.0, 4))
+
+
+# ── classifier, witnesses and record shapes on dict fixtures ─────────
+
+
+def test_classifier_threshold_table():
+    cases = [
+        (0.0, 5e-13, "archetype"),
+        (0.0, 1e-9, "expected"),
+        (1e-9, 2e-9, "expected"),
+        (5e-13, 7e-13, "archetype"),
+    ]
+    for va, vd, label in cases:
+        result = probe.classify_divergence({"q": {"a": va, "d": vd}})
+        assert result["class"] == label, (va, vd, result)
+
+
+def _gate_event(kind: str, pathogen: str, zone: str) -> dict:
+    return {
+        "kind": kind, "pathogen": pathogen, "zone": zone,
+        "draw_start": 0, "draw_end": 10,
+    }
+
+
+def _snap(zone_masses: dict, class_masses: dict | None = None) -> dict:
+    return {
+        "zone_gec": dict(zone_masses),
+        "zone_class_gec": dict(class_masses or {}),
+    }
+
+
+def test_zone_gate_prefers_the_exact_zero_branch():
+    # KidsClub pools differ but are both macroscopic; PoolDeck is an exact
+    # 0.0 in A vs residue-free mass in D -- the gate that diverged.
+    enc_a = {"containing": _gate_event(
+        "class_pickup_requests", "norwalk_gi", "KidsClub",
+    )}
+    enc_d = {"containing": _gate_event(
+        "pickup_by_class", "norwalk_gi", "PoolDeck",
+    )}
+    snap_a = _snap({"norwalk_gi|KidsClub": 1e-3, "norwalk_gi|PoolDeck": 0.0})
+    snap_d = _snap({"norwalk_gi|KidsClub": 5e-4, "norwalk_gi|PoolDeck": 5e-8})
+    gate = probe._zone_gate(enc_a, enc_d, snap_a, snap_d, [], [])
+    assert gate["gate"] == "_pathway_fomite surface_mass <= 0"
+    assert gate["pathogen"] == "norwalk_gi"
+    assert gate["is_norwalk_gi"] is True
+    assert gate["zone"] == "PoolDeck"
+    assert gate["pool_gec"] == {"a": 0.0, "d": 5e-8}
+
+
+def _delivery(zone: str, delivered: dict, pathogen: str = "norwalk_gi"):
+    return {
+        "kind": "deliver_by_class", "zone": zone, "pathogen": pathogen,
+        "delivered_by_class_gec": dict(delivered),
+    }
+
+
+def test_ordering_witness_rules():
+    same = [_delivery("Z", {"c1": 1e-6}), _delivery("Y", {"c1": 2e-6})]
+    assert probe._ordering_witness(same, same, 3) is None
+    # Below the residue floor on either side: ignored.
+    residue = [_delivery("Z", {"c1": 5e-13})]
+    other = [_delivery("Z", {"c1": 7e-13})]
+    assert probe._ordering_witness(residue, other, 0) is None
+    # A real first difference: returns epoch/zone/class row.
+    arm_d = [_delivery("Z", {"c1": 1e-6}), _delivery("Y", {"c1": 4e-6})]
+    hit = probe._ordering_witness(same, arm_d, 7)
+    assert hit["epoch"] == 7
+    assert hit["event_index"] == 1
+    assert hit["zone"] == "Y"
+    assert hit["item_class"] == "c1"
+    assert hit["a_gec"] == pytest.approx(2e-6)
+    assert hit["d_gec"] == pytest.approx(4e-6)
+    # Pathogen filter keeps it norovirus-only when asked.
+    flu_a = [_delivery("Z", {"c1": 1e-6}, pathogen="influenza_a")]
+    flu_d = [_delivery("Z", {"c1": 2e-6}, pathogen="influenza_a")]
+    assert probe._ordering_witness(flu_a, flu_d, 0, pathogen="norwalk_gi") is None
+    assert probe._ordering_witness(flu_a, flu_d, 0) is not None
+
+
+def test_enclosing_event_and_structural_diff():
+    inner = {"kind": "h2m", "agent_id": 1, "draw_start": 5, "draw_end": 8}
+    outer = {"kind": "path", "agent_id": 1, "draw_start": 0, "draw_end": 20}
+    tail = {"kind": "h2m", "agent_id": 2, "draw_start": 30, "draw_end": 33}
+    enc = probe._enclosing_event([outer, inner, tail], 6)
+    assert enc["containing"] is inner  # innermost span wins
+    gap = probe._enclosing_event([outer, inner, tail], 25)
+    assert gap["before"] is inner  # last event in list order before d_star
+    assert gap["after"] is tail
+
+    events_a = [
+        {"kind": "a", "zone": "Z", "agent_id": 1},
+        {"kind": "b", "zone": "Z", "agent_id": 2},
+    ]
+    events_d = [
+        {"kind": "a", "zone": "Z", "agent_id": 1},
+        {"kind": "b", "zone": "Z", "agent_id": 9},
+    ]
+    last_aligned, diff = probe._structural_diff(events_a, events_d)
+    assert last_aligned == 0
+    assert diff["index"] == 1
+    assert diff["a"]["agent_id"] == 2
+    assert diff["d"]["agent_id"] == 9
+    assert probe._structural_diff(events_a, events_a) == (1, None)
+
+
+def _stub_arm(trace: list, events: list):
+    from types import SimpleNamespace
+
+    return SimpleNamespace(
+        core_rng=SimpleNamespace(trace=trace),
+        root_rng=SimpleNamespace(trace=[]),
+        events=events,
+    )
+
+
+def test_divergence_record_shape():
+    h2m = probe._ctx_id("hand_to_mouth")
+    event = {
+        "kind": "hand_to_mouth", "pathogen": "norwalk_gi", "zone": None,
+        "agent_id": 5, "hand_load_gec": 1e-6, "dose_gec": 1e-8,
+        "draw_start": 0, "draw_end": 5, "phase": "pathway_fomite|norwalk_gi",
+    }
+    arm = _stub_arm([(h2m, "uniform", ("0.008", "0.012"))], [event])
+    snap = _snap({})
+    counts = {"all": {k: 0 for k in probe.COUNTER_KEYS}}
+    record = probe._divergence_record(
+        3, "core", 0, arm, arm, snap, snap, {5: 1e-6}, {5: 1e-6},
+        {"a": counts, "d": counts}, None, None,
+    )
+    assert record["epoch"] == 3
+    assert record["generator"] == "core"
+    assert record["d_star_index"] == 0
+    assert record["counts_identical_before_divergence"] is True
+    assert record["enclosing_event_a"]["containing"] is event
+    assert record["first_structural_diff"] is None
+    assert record["zone_gate"] is None
+    for key in (
+        "entry_a", "entry_d", "window_a", "window_d", "mass_diffs",
+        "events_a", "events_d", "hand_loads_at_epoch_start",
+        "ordering_witness", "classification",
+    ):
+        assert key in record
+
+
+# ── end-to-end CLI path ──────────────────────────────────────────────
+
+
+def test_main_end_to_end_two_epochs(tmp_path):
+    import os
+    import tempfile
+
+    # --out must sit under the repo root or home (the _safe_path contract).
+    with tempfile.TemporaryDirectory(dir=os.path.expanduser("~")) as home_tmp:
+        out = os.path.join(home_tmp, "probe_out.json")
+        rc = probe.main([
+            "--seeds", "8001", "--epochs", "2", "--num-agents", "60",
+            "--out", out,
+        ])
+        assert rc == 0
+        payload = json.loads(open(out).read())
+    assert payload["measured_at"]
+    seed = payload["seeds"]["8001"]
+    divergence = seed["divergence"]
+    if divergence is not None:
+        assert divergence["counts_identical_before_divergence"] is True
+        assert divergence["epoch"] in range(2)
+    assert len(seed["epoch_rows"]) == 2
+    for row in seed["epoch_rows"]:
+        h2m = row["hand_to_mouth_calls"]
+        for key in ("a_all", "d_all", "a_norwalk", "d_norwalk"):
+            assert isinstance(h2m[key], int)
+            assert h2m[key] >= 0

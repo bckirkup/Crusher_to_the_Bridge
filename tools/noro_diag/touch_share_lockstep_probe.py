@@ -1058,12 +1058,13 @@ def _zone_gate(
             snap_d["zone_gec"].get(pz, 0.0),
         )
 
-    # The gate that *diverged* is the one where exactly one arm's pool is
-    # exactly 0.0; anything else is a downstream mass difference, not a gate.
+    # The gate that diverged is the one where exactly one arm's pool is
+    # an exact 0.0 (capped/consumed) versus residue — intentional exact test;
+    # anything else is a downstream mass difference, not a gate.
     rows = [row for row in (gate_rows(e) for e in candidates) if row]
     zero_branch = [
         row for row in rows
-        if (row[2] == 0.0) != (row[3] == 0.0) and max(row[2], row[3]) > 0.0
+        if (not row[2]) != (not row[3]) and max(row[2], row[3]) > 0.0
     ]
     pool_diff = [row for row in rows if row[2] != row[3]]
     for pathogen, zone, pool_a, pool_d in zero_branch + pool_diff:
@@ -1163,6 +1164,68 @@ def _gate_quantities_of(event: dict | None) -> dict[str, float]:
     return {}
 
 
+def _merge_zone_gate_quantities(
+    quantities: dict[str, dict[str, float]], zone_gate: dict,
+) -> None:
+    quantities["zone_pool_gec"] = {
+        "a": float(zone_gate["pool_gec"]["a"]),
+        "d": float(zone_gate["pool_gec"]["d"]),
+    }
+    classes = set(zone_gate["by_class_gec"]["a"]) | set(
+        zone_gate["by_class_gec"]["d"],
+    )
+    for cls in sorted(classes):
+        quantities[f"zone_class|{cls}"] = {
+            "a": float(zone_gate["by_class_gec"]["a"].get(cls, 0.0)),
+            "d": float(zone_gate["by_class_gec"]["d"].get(cls, 0.0)),
+        }
+
+
+def _merge_event_quantities(
+    quantities: dict[str, dict[str, float]],
+    enc_a: dict, enc_d: dict, first_diff: dict | None,
+) -> None:
+    event_a = (enc_a or {}).get("containing") or (
+        (enc_a or {}).get("before")
+    )
+    event_d = (enc_d or {}).get("containing") or (
+        (enc_d or {}).get("before")
+    )
+    qa, qd = _gate_quantities_of(event_a), _gate_quantities_of(event_d)
+    for name in sorted(set(qa) | set(qd)):
+        quantities[name] = {
+            "a": float(qa.get(name, 0.0)),
+            "d": float(qd.get(name, 0.0)),
+        }
+    if first_diff:
+        for side, event in (("a", first_diff.get("a")),
+                            ("d", first_diff.get("d"))):
+            for name, value in _gate_quantities_of(event).items():
+                quantities.setdefault(name, {"a": 0.0, "d": 0.0})
+                quantities[name][side] = float(value)
+
+
+def _merge_zone_snapshot_quantities(
+    quantities: dict[str, dict[str, float]],
+    snap_a: dict, snap_d: dict, zone_key: str | None,
+) -> None:
+    if zone_key is None:
+        return
+    quantities[f"surface_mass|{zone_key}"] = {
+        "a": float(snap_a["zone_gec"].get(zone_key, 0.0)),
+        "d": float(snap_d["zone_gec"].get(zone_key, 0.0)),
+    }
+    prefix = f"{zone_key}|"
+    for key in sorted(set(snap_a["zone_class_gec"]) | set(
+        snap_d["zone_class_gec"],
+    )):
+        if key.startswith(prefix):
+            quantities[f"class_mass|{key}"] = {
+                "a": float(snap_a["zone_class_gec"].get(key, 0.0)),
+                "d": float(snap_d["zone_class_gec"].get(key, 0.0)),
+            }
+
+
 def _gate_quantities(
     enc_a: dict, enc_d: dict, first_diff: dict | None,
     snap_a: dict, snap_d: dict, zone_key: str | None,
@@ -1170,62 +1233,30 @@ def _gate_quantities(
 ) -> dict[str, dict[str, float]]:
     """Paired gate quantities for the classifier, per the frozen rule."""
     quantities: dict[str, dict[str, float]] = {}
-
-    def merge(name: str, va: float, vd: float) -> None:
-        quantities[name] = {"a": float(va), "d": float(vd)}
-
     if zone_gate is not None:
-        merge(
-            "zone_pool_gec",
-            zone_gate["pool_gec"]["a"], zone_gate["pool_gec"]["d"],
-        )
-        classes = set(zone_gate["by_class_gec"]["a"]) | set(
-            zone_gate["by_class_gec"]["d"],
-        )
-        for cls in sorted(classes):
-            merge(
-                f"zone_class|{cls}",
-                zone_gate["by_class_gec"]["a"].get(cls, 0.0),
-                zone_gate["by_class_gec"]["d"].get(cls, 0.0),
-            )
-    event_a = (enc_a or {}).get("containing") or (
-        (enc_a or {}).get("before")
-    )
-    event_d = (enc_d or {}).get("containing") or (
-        (enc_d or {}).get("before")
-    )
-    names = set(_gate_quantities_of(event_a)) | set(
-        _gate_quantities_of(event_d),
-    )
-    for name in sorted(names):
-        merge(
-            name,
-            _gate_quantities_of(event_a).get(name, 0.0),
-            _gate_quantities_of(event_d).get(name, 0.0),
-        )
-    if first_diff:
-        for side, event in (("a", first_diff.get("a")),
-                            ("d", first_diff.get("d"))):
-            for name, value in _gate_quantities_of(event).items():
-                quantities.setdefault(name, {"a": 0.0, "d": 0.0})
-                quantities[name][side] = float(value)
-    if zone_key is not None:
-        merge(
-            f"surface_mass|{zone_key}",
-            snap_a["zone_gec"].get(zone_key, 0.0),
-            snap_d["zone_gec"].get(zone_key, 0.0),
-        )
-        prefix = f"{zone_key}|"
-        for key in sorted(set(snap_a["zone_class_gec"]) | set(
-            snap_d["zone_class_gec"],
-        )):
-            if key.startswith(prefix):
-                merge(
-                    f"class_mass|{key}",
-                    snap_a["zone_class_gec"].get(key, 0.0),
-                    snap_d["zone_class_gec"].get(key, 0.0),
-                )
+        _merge_zone_gate_quantities(quantities, zone_gate)
+    _merge_event_quantities(quantities, enc_a, enc_d, first_diff)
+    _merge_zone_snapshot_quantities(quantities, snap_a, snap_d, zone_key)
     return quantities
+
+
+def _pair_verdict(va: float, vd: float) -> tuple[bool, bool, bool]:
+    """One quantity pair -> (archetype_hit, differs, expected_ok)."""
+    va, vd = float(va), float(vd)
+    differs = va < vd or va > vd
+    residue = 0.0 < abs(va) < RESIDUE_FLOOR_GEC or (
+        0.0 < abs(vd) < RESIDUE_FLOOR_GEC
+    )
+    archetype = residue and (differs or min(va, vd) <= 0.0)
+    both_real = (
+        abs(va) >= RESIDUE_FLOOR_GEC and abs(vd) >= RESIDUE_FLOOR_GEC
+    )
+    # exact 0.0 (capped/consumed) vs residue — intentional exact test
+    exact_zero = (not va) != (not vd)
+    nonzero = max(abs(va), abs(vd)) >= RESIDUE_FLOOR_GEC
+    return archetype, differs, (not differs) or (
+        both_real or (exact_zero and nonzero)
+    )
 
 
 def classify_divergence(quantities: dict[str, dict[str, float]]) -> dict:
@@ -1253,22 +1284,12 @@ def classify_divergence(quantities: dict[str, dict[str, float]]) -> dict:
     differing: list[str] = []
     expected_ok = True
     for name, pair in evidence.items():
-        va, vd = pair["a"], pair["d"]
-        residue = 0.0 < abs(va) < RESIDUE_FLOOR_GEC or (
-            0.0 < abs(vd) < RESIDUE_FLOOR_GEC
-        )
-        if residue and (va != vd or min(va, vd) <= 0.0):
+        archetype, differs, ok = _pair_verdict(pair["a"], pair["d"])
+        if archetype:
             archetype_hits.append(name)
-        if va != vd:
+        if differs:
             differing.append(name)
-            both_real = (
-                abs(va) >= RESIDUE_FLOOR_GEC
-                and abs(vd) >= RESIDUE_FLOOR_GEC
-            )
-            exact_zero = (va == 0.0) != (vd == 0.0)
-            nonzero = max(abs(va), abs(vd)) >= RESIDUE_FLOOR_GEC
-            if not (both_real or (exact_zero and nonzero)):
-                expected_ok = False
+            expected_ok = expected_ok and ok
     if archetype_hits:
         return {
             "class": "archetype",
@@ -1345,7 +1366,7 @@ def _arm_specs(
     seed: int, platform: str, bundle: str, epochs: int, num_agents: int,
     share_table: dict[str, Any],
 ) -> tuple[dict, dict]:
-    """A = per_surface + areal + shipped; D = + declared + the #666 table."""
+    """Arm A uses per_surface/areal/shipped; arm D declared shares (#666)."""
     common = {
         "seed": seed, "platform": platform, "bundle": bundle,
         "epochs": epochs, "num_agents": num_agents,
@@ -1408,6 +1429,30 @@ def _hand_load_rows(
     }
 
 
+def _record_zone_keys(
+    enc_a: dict, enc_d: dict, first_diff: dict | None,
+    trace_a: list, d_star: int | None,
+) -> tuple[set[str], str | None]:
+    """The (pathogen|zone) keys named by the enclosing/diff events + ctx."""
+    zone_keys = {
+        f"{ev.get('pathogen', 'unknown')}|{ev.get('zone')}"
+        for ev in (
+            enc_a.get("containing"), enc_a.get("before"),
+            enc_d.get("containing"), enc_d.get("before"),
+            (first_diff or {}).get("a"), (first_diff or {}).get("d"),
+        )
+        if isinstance(ev, dict) and ev.get("zone")
+    }
+    ctx_entry = trace_a[d_star] if (
+        d_star is not None and d_star < len(trace_a)
+    ) else None
+    if ctx_entry is not None:
+        czone, cpath = _ctx_zone(ctx_entry[0]), _ctx_pathogen(ctx_entry[0])
+        if czone is not None:
+            zone_keys.add(f"{cpath}|{czone}")
+    return zone_keys, (min(zone_keys) if zone_keys else None)
+
+
 def _divergence_record(
     epoch: int, gen: str, d_star: int | None,
     arm_a: Arm, arm_d: Arm, snap_a: dict, snap_d: dict,
@@ -1427,23 +1472,9 @@ def _divergence_record(
     zone_gate = _zone_gate(
         enc_a, enc_d, snap_a, snap_d, arm_a.events, arm_d.events,
     )
-    zone_keys = {
-        f"{ev.get('pathogen', 'unknown')}|{ev.get('zone')}"
-        for ev in (
-            enc_a.get("containing"), enc_a.get("before"),
-            enc_d.get("containing"), enc_d.get("before"),
-            (first_diff or {}).get("a"), (first_diff or {}).get("d"),
-        )
-        if isinstance(ev, dict) and ev.get("zone")
-    }
-    ctx_entry = trace_a[d_star] if (
-        d_star is not None and d_star < len(trace_a)
-    ) else None
-    if ctx_entry is not None:
-        czone, cpath = _ctx_zone(ctx_entry[0]), _ctx_pathogen(ctx_entry[0])
-        if czone is not None:
-            zone_keys.add(f"{cpath}|{czone}")
-    zone_key = sorted(zone_keys)[0] if zone_keys else None
+    zone_keys, zone_key = _record_zone_keys(
+        enc_a, enc_d, first_diff, trace_a, d_star,
+    )
     quantities = _gate_quantities(
         enc_a, enc_d, first_diff, snap_a, snap_d, zone_key, zone_gate,
     )
@@ -1528,6 +1559,87 @@ def _compare_epoch(
     return None, True
 
 
+def _epoch_row(epoch: int, arm_a: Arm, arm_d: Arm) -> dict[str, Any]:
+    def h2m(arm: Arm) -> tuple[int, int]:
+        return (
+            arm.counts.get(f"hand_to_mouth_calls|{PATHOGEN_ID}", 0),
+            sum(
+                v for k, v in arm.counts.items()
+                if k.startswith("hand_to_mouth_calls|")
+            ),
+        )
+
+    a_norwalk, a_all = h2m(arm_a)
+    d_norwalk, d_all = h2m(arm_d)
+    return {
+        "epoch": epoch,
+        "draws": {"a": arm_a.core_rng.draws, "d": arm_d.core_rng.draws},
+        "hand_to_mouth_calls": {
+            "a_norwalk": a_norwalk, "d_norwalk": d_norwalk,
+            "a_all": a_all, "d_all": d_all,
+        },
+        "counts_a": _counts_snapshot(arm_a),
+        "counts_d": _counts_snapshot(arm_d),
+    }
+
+
+def _freeze_after_divergence(arm_a: Arm, arm_d: Arm) -> None:
+    for arm in (arm_a, arm_d):
+        arm.root_rng.recording = False
+        arm.core_rng.recording = False
+        arm.record_events = False
+
+
+def _step_epoch(
+    epoch: int, arm_a: Arm, arm_d: Arm, state: dict[str, Any],
+) -> dict | None:
+    """Step both arms once; return the divergence record if one appears."""
+    aligned = state["divergence"] is None
+    snap_a = snap_d = counts_start = None
+    if aligned:
+        state["prev_hands"] = {"a": state["hands_a"], "d": state["hands_d"]}
+        state["hands_a"] = _snapshot_hand_loads(arm_a.sim)
+        state["hands_d"] = _snapshot_hand_loads(arm_d.sim)
+        snap_a = _snapshot_masses(arm_a.sim.tx_core)
+        snap_d = _snapshot_masses(arm_d.sim.tx_core)
+        counts_start = {
+            "a": _counts_snapshot(arm_a),
+            "d": _counts_snapshot(arm_d),
+        }
+    for arm in (arm_a, arm_d):
+        if aligned:
+            arm.begin_epoch()
+        _ACTIVE["arm"] = arm
+        arm.sim.step()
+    _ACTIVE["arm"] = None
+    if not aligned:
+        return None
+    if state["ordering"] is None:
+        state["ordering"] = _ordering_witness(
+            arm_a.events, arm_d.events, epoch, PATHOGEN_ID,
+        )
+    if state["ordering_any"] is None:
+        state["ordering_any"] = _ordering_witness(
+            arm_a.events, arm_d.events, epoch,
+        )
+    divergence, still = _compare_epoch(
+        epoch, arm_a, arm_d, snap_a, snap_d,
+        state["hands_a"], state["hands_d"], counts_start,
+        state["ordering"], state["ordering_any"],
+    )
+    if still:
+        return None
+    divergence["hand_loads_prev_epoch"] = (
+        _hand_load_rows(
+            state["prev_hands"]["a"], state["prev_hands"]["d"], set(),
+        )
+        if state["prev_hands"].get("a") else None
+    )
+    _freeze_after_divergence(arm_a, arm_d)
+    state["divergence"] = divergence
+    return divergence
+
+
 def run_seed(
     seed: int, platform: str, bundle: str, epochs: int,
     num_agents: int, share_table_path: str,
@@ -1539,89 +1651,23 @@ def run_seed(
     )
     arm_a = Arm("areal", _build_sim(spec_a))
     arm_d = Arm("declared", _build_sim(spec_d))
+    state: dict[str, Any] = {
+        "divergence": None, "ordering": None, "ordering_any": None,
+        "hands_a": {}, "hands_d": {}, "prev_hands": {},
+    }
     epoch_rows: list[dict] = []
-    divergence: dict | None = None
-    ordering: dict | None = None
-    ordering_any: dict | None = None
-    hands_a: dict = {}
-    hands_d: dict = {}
-    prev_hands: dict = {}
     with lockstep_instrumented(_ACTIVE):
         for epoch in range(epochs):
-            aligned = divergence is None
-            snap_a = snap_d = counts_start = None
-            if aligned:
-                prev_hands = {"a": hands_a, "d": hands_d}
-                hands_a = _snapshot_hand_loads(arm_a.sim)
-                hands_d = _snapshot_hand_loads(arm_d.sim)
-                snap_a = _snapshot_masses(arm_a.sim.tx_core)
-                snap_d = _snapshot_masses(arm_d.sim.tx_core)
-                counts_start = {
-                    "a": _counts_snapshot(arm_a),
-                    "d": _counts_snapshot(arm_d),
-                }
-            for arm in (arm_a, arm_d):
-                if aligned:
-                    arm.begin_epoch()
-                _ACTIVE["arm"] = arm
-                arm.sim.step()
-            _ACTIVE["arm"] = None
-            if aligned:
-                if ordering is None:
-                    ordering = _ordering_witness(
-                        arm_a.events, arm_d.events, epoch, PATHOGEN_ID,
-                    )
-                if ordering_any is None:
-                    ordering_any = _ordering_witness(
-                        arm_a.events, arm_d.events, epoch,
-                    )
-                divergence, still = _compare_epoch(
-                    epoch, arm_a, arm_d, snap_a, snap_d,
-                    hands_a, hands_d, counts_start, ordering, ordering_any,
-                )
-                if not still:
-                    divergence["hand_loads_prev_epoch"] = (
-                        _hand_load_rows(
-                            prev_hands["a"], prev_hands["d"], set(),
-                        )
-                        if prev_hands.get("a") else None
-                    )
-                    for arm in (arm_a, arm_d):
-                        arm.root_rng.recording = False
-                        arm.core_rng.recording = False
-                        arm.record_events = False
-            epoch_rows.append({
-                "epoch": epoch,
-                "draws": {
-                    "a": arm_a.core_rng.draws, "d": arm_d.core_rng.draws,
-                },
-                "hand_to_mouth_calls": {
-                    "a_norwalk": arm_a.counts.get(
-                        f"hand_to_mouth_calls|{PATHOGEN_ID}", 0,
-                    ),
-                    "d_norwalk": arm_d.counts.get(
-                        f"hand_to_mouth_calls|{PATHOGEN_ID}", 0,
-                    ),
-                    "a_all": sum(
-                        v for k, v in arm_a.counts.items()
-                        if k.startswith("hand_to_mouth_calls|")
-                    ),
-                    "d_all": sum(
-                        v for k, v in arm_d.counts.items()
-                        if k.startswith("hand_to_mouth_calls|")
-                    ),
-                },
-                "counts_a": _counts_snapshot(arm_a),
-                "counts_d": _counts_snapshot(arm_d),
-            })
+            _step_epoch(epoch, arm_a, arm_d, state)
+            epoch_rows.append(_epoch_row(epoch, arm_a, arm_d))
     return {
         "seed": seed,
         "platform": platform,
         "num_agents": num_agents,
         "epochs": epochs,
-        "divergence": divergence,
-        "ordering_witness": ordering,
-        "ordering_witness_any_pathogen": ordering_any,
+        "divergence": state["divergence"],
+        "ordering_witness": state["ordering"],
+        "ordering_witness_any_pathogen": state["ordering_any"],
         "epoch_rows": epoch_rows,
         "final_counts": {
             "a": _counts_snapshot(arm_a),
