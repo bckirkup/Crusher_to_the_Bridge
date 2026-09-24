@@ -13,6 +13,7 @@ through the tool's own names.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 from collections import defaultdict
@@ -203,3 +204,62 @@ def enumerate_per_arm(  # pragma: no cover - CLI-driven check
             if check is not None:
                 check(design, cell, repo_root)
     return len(seen)
+
+
+def drive(  # pragma: no cover - CLI driver, exercised by hand
+    *,
+    file_name: str,
+    design_rel: str,
+    spec_check,
+    runtime_arms: tuple[str, ...],
+    cell_runner,
+    binding_check,
+    arm_line,
+    binding_line=None,
+) -> None:
+    """The shared --design/--seed/--spec-only CLI loop for the assay smokes.
+
+    ``spec_check(design, cell, repo_root)`` runs once per arm;
+    ``cell_runner(design, cell, repo_root)`` runs one truncated cell;
+    ``binding_check(design, runs, report)`` asserts the axis binds and may
+    write into ``report``; ``arm_line(arm_id, run)`` and ``binding_line``
+    format the console output.
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--design", default=design_rel)
+    parser.add_argument("--seed", type=int, default=20200205)
+    parser.add_argument(
+        "--spec-only",
+        action="store_true",
+        help="enumeration + spec-lands checks only, no engine runs",
+    )
+    args = parser.parse_args()
+
+    repo_root = repo_root_of(file_name)
+    design, declared_cells = load_declared_cells(repo_root, args.design)
+
+    report: dict[str, Any] = {"design_id": design.design_id}
+    report["cell_blocks"] = check_enumeration(design, declared_cells)
+    print(f"enumeration: {declared_cells} cells, blocks {report['cell_blocks']}")
+
+    arms = enumerate_per_arm(design, repo_root, check=spec_check)
+    print(f"spec-lands: overrides reach the run spec on all {arms} arms")
+
+    if not args.spec_only:
+        runs: dict[str, Any] = {}
+        for arm_id in runtime_arms:
+            cell = next(
+                c for c in enumerate_cells(design)
+                if c.arm_id == arm_id and c.seed == args.seed
+            )
+            runs[arm_id] = cell_runner(design, cell, repo_root)
+            print(arm_line(arm_id, runs[arm_id]))
+        report["runtime"] = {
+            arm: {k: v for k, v in r.items() if k != "ring_draws"}
+            for arm, r in runs.items()
+        }
+        binding_check(design, runs, report)
+        if binding_line is not None:
+            print(binding_line(report))
+
+    print(json.dumps(report, indent=2, default=str))

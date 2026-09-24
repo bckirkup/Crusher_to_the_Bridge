@@ -126,33 +126,33 @@ class TestEngineRates:
 class TestBinding:
     def test_scaled_draws_pass(self) -> None:
         report: dict = {}
-        _check_binding(_synthetic_runs(cut_ratio=0.25), report)
+        _check_binding(None, _synthetic_runs(cut_ratio=0.25), report)
         assert report["ring_draw_mean_ratio"]["expected"] == pytest.approx(0.25)
         assert report["ring_draw_mean_ratio"]["pooled"] == pytest.approx(0.25)
 
     def test_inert_axis_fails(self) -> None:
         # Ratio 1.0 is the spec-lands-but-inert signature the prompt flags.
         with pytest.raises(AssertionError, match="inert"):
-            _check_binding(_synthetic_runs(cut_ratio=1.0), {})
+            _check_binding(None, _synthetic_runs(cut_ratio=1.0), {})
 
     def test_witness_that_draws_fails(self) -> None:
         runs = _synthetic_runs(cut_ratio=0.25)
         runs["R8_pool_witness"]["ring_calls"] = 3
         runs["R8_pool_witness"]["ring_draws"] = {"leisure": [1]}
         with pytest.raises(AssertionError, match="bit-identical"):
-            _check_binding(runs, {})
+            _check_binding(None, runs, {})
 
     def test_wrong_engine_table_fails(self) -> None:
         runs = _synthetic_runs(cut_ratio=0.25)
         runs["R1_rate_0p25"]["engine_rates"]["leisure"]["passenger"] = 1.0
         with pytest.raises(AssertionError, match="engine rate"):
-            _check_binding(runs, {})
+            _check_binding(None, runs, {})
 
     def test_no_ring_draws_fails(self) -> None:
         runs = _synthetic_runs(cut_ratio=0.25)
         runs["R0_declared"]["ring_draws"] = {}
         with pytest.raises(AssertionError, match="drew no partners"):
-            _check_binding(runs, {})
+            _check_binding(None, runs, {})
 
 
 def test_runtime_arms_cover_baseline_cut_and_witness() -> None:

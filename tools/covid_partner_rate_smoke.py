@@ -26,24 +26,17 @@ Usage:
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from picard_framework.covid_boarding_screen import enumerate_cells
 from tools.covid_assay_smoke import (
-    check_enumeration as _check_enumeration,
-)
-from tools.covid_assay_smoke import (
+    check_enumeration,
     check_spec_lands,
+    drive,
     engine_rates,
-    enumerate_per_arm,
-    load_declared_cells,
-    repo_root_of,
     run_cell,
 )
 
@@ -77,6 +70,13 @@ def _check_spec_lands(  # pragma: no cover - CLI-driven check
     )
 
 
+def _check_enumeration(  # pragma: no cover - kept as the tool's public check
+    design, declared_cells: int,
+) -> dict[str, list[int]]:
+    """The dry-run count: enumeration must match the declared 180 cells."""
+    return check_enumeration(design, declared_cells)
+
+
 def _engine_rates(  # pragma: no cover - kept as the tool's public read-back
     tx_core,
 ) -> dict[str, dict[str, float]]:
@@ -92,7 +92,7 @@ def _run_cell(  # pragma: no cover - runs a truncated sim, exercised by hand
 
 
 def _check_binding(  # pragma: no cover - CLI-driven check
-    runs: dict[str, Any], report: dict[str, Any],
+    _design, runs: dict[str, Any], report: dict[str, Any],
 ) -> None:
     """The multiplier must move the engine table and the ring's draws."""
     witness = runs["R8_pool_witness"]
@@ -141,47 +141,22 @@ def _check_binding(  # pragma: no cover - CLI-driven check
 
 
 def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--design", default=DESIGN_REL)
-    parser.add_argument("--seed", type=int, default=20200205)
-    parser.add_argument(
-        "--spec-only",
-        action="store_true",
-        help="enumeration + spec-lands checks only, no engine runs",
+    drive(
+        file_name=__file__,
+        design_rel=DESIGN_REL,
+        spec_check=_check_spec_lands,
+        runtime_arms=RUNTIME_ARMS,
+        cell_runner=_run_cell,
+        binding_check=_check_binding,
+        arm_line=lambda arm, r: (
+            f"{arm}: ring_calls={r['ring_calls']} "
+            f"mode={r['engine_droplet_split_mode']} "
+            f"recorded={r['recorded_onsets']}"
+        ),
+        binding_line=lambda report: (
+            f"ring binding: {report['ring_draw_mean_ratio']}"
+        ),
     )
-    args = parser.parse_args()
-
-    repo_root = repo_root_of(__file__)
-    design, declared_cells = load_declared_cells(repo_root, args.design)
-
-    report: dict[str, Any] = {"design_id": design.design_id}
-    report["cell_blocks"] = _check_enumeration(design, declared_cells)
-    print(f"enumeration: {declared_cells} cells, blocks {report['cell_blocks']}")
-
-    arms = enumerate_per_arm(design, repo_root, check=_check_spec_lands)
-    print(f"spec-lands: overrides reach the run spec on all {arms} arms")
-
-    if not args.spec_only:
-        runs: dict[str, Any] = {}
-        for arm_id in RUNTIME_ARMS:
-            cell = next(
-                c for c in enumerate_cells(design)
-                if c.arm_id == arm_id and c.seed == args.seed
-            )
-            runs[arm_id] = _run_cell(design, cell, repo_root)
-            print(
-                f"{arm_id}: ring_calls={runs[arm_id]['ring_calls']} "
-                f"mode={runs[arm_id]['engine_droplet_split_mode']} "
-                f"recorded={runs[arm_id]['recorded_onsets']}",
-            )
-        report["runtime"] = {
-            arm: {k: v for k, v in r.items() if k != "ring_draws"}
-            for arm, r in runs.items()
-        }
-        _check_binding(runs, report)
-        print(f"ring binding: {report['ring_draw_mean_ratio']}")
-
-    print(json.dumps(report, indent=2, default=str))
 
 
 if __name__ == "__main__":

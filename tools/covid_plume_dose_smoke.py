@@ -32,8 +32,6 @@ Usage:
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from types import SimpleNamespace
@@ -42,19 +40,11 @@ from typing import Any
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from engines.transmission_core import TransmissionCore
-from picard_framework.covid_boarding_screen import enumerate_cells
-from tools.covid_assay_smoke import (
-    check_enumeration as _check_enumeration,
-)
 from tools.covid_assay_smoke import (
     check_spec_lands,
-    enumerate_per_arm,
-    load_declared_cells,
-    repo_root_of,
+    drive,
+    engine_near_field,
     run_cell,
-)
-from tools.covid_assay_smoke import (
-    engine_near_field as _engine_near_field,
 )
 
 DESIGN_REL = os.path.join(
@@ -152,7 +142,7 @@ def _run_cell(  # pragma: no cover - runs a truncated sim, exercised by hand
         repo_root,
         RUN_EPOCHS,
         extra_readback=lambda sim: {
-            "engine_near_field": _engine_near_field(sim.tx_core),
+            "engine_near_field": engine_near_field(sim.tx_core),
         },
     )
 
@@ -214,47 +204,20 @@ def _check_binding(  # pragma: no cover - CLI-driven check
 
 
 def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--design", default=DESIGN_REL)
-    parser.add_argument("--seed", type=int, default=20200205)
-    parser.add_argument(
-        "--spec-only",
-        action="store_true",
-        help="enumeration + spec-lands checks only, no engine runs",
+    drive(
+        file_name=__file__,
+        design_rel=DESIGN_REL,
+        spec_check=_check_spec_lands,
+        runtime_arms=RUNTIME_ARMS,
+        cell_runner=_run_cell,
+        binding_check=_check_binding,
+        arm_line=lambda arm, r: (
+            f"{arm}: ring_calls={r['ring_calls']} "
+            f"beta={r['engine_near_field']['beta']} "
+            f"mode={r['engine_droplet_split_mode']} "
+            f"recorded={r['recorded_onsets']}"
+        ),
     )
-    args = parser.parse_args()
-
-    repo_root = repo_root_of(__file__)
-    design, declared_cells = load_declared_cells(repo_root, args.design)
-
-    report: dict[str, Any] = {"design_id": design.design_id}
-    report["cell_blocks"] = _check_enumeration(design, declared_cells)
-    print(f"enumeration: {declared_cells} cells, blocks {report['cell_blocks']}")
-
-    arms = enumerate_per_arm(design, repo_root, check=_check_spec_lands)
-    print(f"spec-lands: overrides reach the run spec on all {arms} arms")
-
-    if not args.spec_only:
-        runs: dict[str, Any] = {}
-        for arm_id in RUNTIME_ARMS:
-            cell = next(
-                c for c in enumerate_cells(design)
-                if c.arm_id == arm_id and c.seed == args.seed
-            )
-            runs[arm_id] = _run_cell(design, cell, repo_root)
-            print(
-                f"{arm_id}: ring_calls={runs[arm_id]['ring_calls']} "
-                f"beta={runs[arm_id]['engine_near_field']['beta']} "
-                f"mode={runs[arm_id]['engine_droplet_split_mode']} "
-                f"recorded={runs[arm_id]['recorded_onsets']}",
-            )
-        report["runtime"] = {
-            arm: {k: v for k, v in r.items() if k != "ring_draws"}
-            for arm, r in runs.items()
-        }
-        _check_binding(design, runs, report)
-
-    print(json.dumps(report, indent=2, default=str))
 
 
 if __name__ == "__main__":

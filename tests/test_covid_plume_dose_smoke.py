@@ -15,13 +15,12 @@ import pytest
 
 from picard_framework.covid_boarding_screen import enumerate_cells, load_design
 from tools import covid_plume_dose_smoke as smoke
+from tools.covid_assay_smoke import check_enumeration, engine_near_field
 from tools.covid_plume_dose_smoke import (
     RUNTIME_ARMS,
     SHIPPED_BETA,
     _check_binding,
-    _check_enumeration,
     _check_spec_lands,
-    _engine_near_field,
     dose_scaling_ratio,
     plume_dose_at_beta,
 )
@@ -94,7 +93,7 @@ def _synthetic_runs() -> dict[str, dict]:
 
 class TestEnumeration:
     def test_declared_count_and_arm_blocks(self, design) -> None:
-        blocks = _check_enumeration(design, CELLS)
+        blocks = check_enumeration(design, CELLS)
         assert len(blocks) == len(design.arms) == 10
         for arm_id, (lo, hi) in blocks.items():
             assert hi - lo + 1 == SEEDS_PER_ARM, arm_id
@@ -106,7 +105,7 @@ class TestEnumeration:
 
     def test_wrong_declared_count_fails(self, design) -> None:
         with pytest.raises(AssertionError):
-            _check_enumeration(design, CELLS + 1)
+            check_enumeration(design, CELLS + 1)
 
 
 class TestSpecLands:
@@ -132,7 +131,7 @@ class TestEngineNearField:
             ),
             near_field_flushed_volume_m3_per_epoch=408.0,
         )
-        assert _engine_near_field(core) == {
+        assert engine_near_field(core) == {
             "beta": 816.0,
             "flushed": 408.0,
             "mode": "two_box",
