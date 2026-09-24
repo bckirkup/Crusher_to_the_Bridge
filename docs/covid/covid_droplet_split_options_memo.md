@@ -1,7 +1,9 @@
 # Phase 1 options memo — droplet near-field/far-field split (COVID arm)
 
-**Status:** design memo — produced by the Phase-1 survey session; direction
-pending. See `docs/ledger/SENS-ASSAY-V2.md` (stood-down note) for why the
+**Status:** decided — Option 1 (emission partition at source) implemented and
+merged in #669 with probe evidence + ledger in #670
+(`docs/ledger/AERO-SPLIT-01.md`, `docs/droplet_field_split_spec.md`).
+See `docs/ledger/SENS-ASSAY-V2.md` (stood-down note) for why the
 well-mixed-room reach is the operative problem.
 
 **Scope:** survey only; no implementation. Decision needed before Phase 2.
