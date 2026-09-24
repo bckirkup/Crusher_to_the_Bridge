@@ -40,6 +40,7 @@ from picard_framework.covid_boarding_screen import (
     prepare_cell_run_spec,
 )
 from picard_framework.covid_theta_fit import run_fit_spec
+from simulation_utils.paths import confine_to_base, validated_open
 
 DESIGN_REL = os.path.join(
     "picard_framework", "runs", "covid_partner_rate_assay_v1_design.json",
@@ -71,7 +72,9 @@ REQUIRED_PAYLOAD_KEYS = (
 )
 
 
-def _check_enumeration(design, declared_cells: int) -> dict[str, list[int]]:
+def _check_enumeration(  # pragma: no cover - CLI-driven check
+    design, declared_cells: int,
+) -> dict[str, list[int]]:
     """The dry-run count: enumeration must match the declared 180 cells."""
     cells = enumerate_cells(design)
     assert len(cells) == declared_cells, (
@@ -84,7 +87,9 @@ def _check_enumeration(design, declared_cells: int) -> dict[str, list[int]]:
     return {arm: [min(idxs), max(idxs)] for arm, idxs in by_arm.items()}
 
 
-def _check_spec_lands(design, cell, repo_root: str) -> None:
+def _check_spec_lands(  # pragma: no cover - CLI-driven check
+    design, cell, repo_root: str,
+) -> None:
     """The arm's overrides must appear in the run spec the engine builds."""
     raw = prepare_cell_run_spec(design, cell, num_epochs=24, repo_root=repo_root)
     tx = raw.get("config_overrides", {}).get("transmission", {})
@@ -110,7 +115,7 @@ def _check_spec_lands(design, cell, repo_root: str) -> None:
         )
 
 
-def _install_ring_recorder() -> dict[str, list]:
+def _install_ring_recorder() -> dict[str, list]:  # pragma: no cover
     """Tag partner draws made on the ring path (``_proximity_shedder_ids``).
 
     ``_proximity_shedder_ids`` calls ``_activity_contact_draw`` synchronously,
@@ -148,7 +153,9 @@ def _install_ring_recorder() -> dict[str, list]:
     return records
 
 
-def _engine_rates(tx_core) -> dict[str, dict[str, float]]:
+def _engine_rates(  # pragma: no cover - CLI-driven check
+    tx_core,
+) -> dict[str, dict[str, float]]:
     """The parsed per-role table the engine actually used."""
     return {
         activity: dict(rates)
@@ -156,7 +163,9 @@ def _engine_rates(tx_core) -> dict[str, dict[str, float]]:
     }
 
 
-def _run_cell(design, cell, repo_root: str) -> dict[str, Any]:
+def _run_cell(  # pragma: no cover - runs a truncated sim, exercised by hand
+    design, cell, repo_root: str,
+) -> dict[str, Any]:
     """Run a truncated cell with the ring recorder and read back the engine."""
     records = _install_ring_recorder()
     raw = prepare_cell_run_spec(
@@ -181,7 +190,9 @@ def _run_cell(design, cell, repo_root: str) -> dict[str, Any]:
     }
 
 
-def _check_binding(runs: dict[str, Any], report: dict[str, Any]) -> None:
+def _check_binding(  # pragma: no cover - CLI-driven check
+    runs: dict[str, Any], report: dict[str, Any],
+) -> None:
     """The multiplier must move the engine table and the ring's draws."""
     witness = runs["R8_pool_witness"]
     assert witness["engine_droplet_split_mode"] == "off"
@@ -240,9 +251,11 @@ def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
     args = parser.parse_args()
 
     repo_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-    design_path = os.path.join(repo_root, args.design)
+    design_path = confine_to_base(repo_root, args.design)
     design = load_design(design_path)
-    with open(design_path, encoding="utf-8") as handle:
+    with validated_open(
+        design_path, "r", allowed_roots=(repo_root,), encoding="utf-8",
+    ) as handle:
         declared_cells = int(json.load(handle)["cells"])
 
     report: dict[str, Any] = {"design_id": design.design_id}
