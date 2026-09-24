@@ -106,30 +106,33 @@ def test_pathogen_overrides_nested_dicts_merge():
 
 def test_pathogen_overrides_rejects_other_pathogens():
     raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="may only patch"):
         apply_arm_overrides(
             raw,
             {"pathogen_overrides": {"norwalk_gi": {"initial_infected": 2}}},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
 @pytest.mark.parametrize("bad", [{"remove": [PATHOGEN_ID]}, {"add": {}}])
 def test_pathogen_overrides_rejects_reserved_forms(bad):
     raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="reserved"):
         apply_arm_overrides(
-            raw, {"pathogen_overrides": bad}, profile=load_covid_profile(),
+            raw, {"pathogen_overrides": bad}, profile=profile,
         )
 
 
 def test_pathogen_overrides_rejects_non_mapping_patch():
     raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="must be a mapping"):
         apply_arm_overrides(
             raw,
             {"pathogen_overrides": {PATHOGEN_ID: [1, 2]}},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
