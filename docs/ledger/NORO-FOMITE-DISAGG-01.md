@@ -2,7 +2,8 @@
 **Date:** 2026-09-22
 **Commit:** 6594c6e
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 622f99f
 
 Per-item-class fomite surface representation (option B of
 `../proposals/fomite_surface_disaggregation_spec.md`) shipped as a labelled,
@@ -107,5 +108,116 @@ A4/Yuan-2024 work; no campaign or array job.
 
 ## 6. Measured
 
-Not yet run. Filled in PR3 with `Measured at` (bare SHA), per-seed table,
-verdict per §2, wall-clock ratio per §3.
+**Measured at `622f99f`** (PR #660 head at run time; the later `3530b5a`
+only extracts a shared roll-up helper with identical arithmetic), seeds
+8000–8019, 288 epochs, `classic_cruise_1900`, `norwalk_gi`, 1,910 agents,
+both arms run locally and concurrently on a 2-vCPU VM. Dumps:
+`../norovirus/noro_fomite_disagg_01/classic_cruise_1900/` (40 files);
+readout: `../norovirus/noro_fomite_disagg_01/fomite_disagg_identity_per_surface_areal.json`
+(`tools/noro_diag/fomite_disagg_identity_readout.py`).
+
+### 6.1 Two defects found and fixed before the block (measured)
+
+Both were found by an epoch-by-epoch lockstep probe on seeds 8000/8001 after
+the first block attempt (`14f98c2`) diverged in exact counts by 11–30 %.
+
+1. **Cap gate — labelled default-path change (Benjamin, option 1).** A pool
+   whose demand exceeded its supply was left at `previous − delivered`,
+   which lands on `0.0` or ~1e-22 GEC by rounding luck; a positive residue
+   made `_pathway_fomite` draw pickup RNG for a de-facto empty zone next
+   epoch. Per-class arithmetic cannot reproduce that residue bitwise, so the
+   288-epoch identity was unattainable by construction. Fix (`bd87ce9`,
+   `a71fa3d`): `delivered_total := surface_mass` when `scale < 1.0`, in
+   `_deliver_fomite_requests`, the pooled sanitary loop and the per-class
+   path. Per-target doses unchanged. **This is the only default-path
+   behaviour change in the deliverable**; the full fast tier (5,788 tests)
+   moved no golden or neutrality test, so the shipped stream is affected
+   only on seeds where a residue was positive at a cap event (seed 8001:
+   `MainDining_L` epoch 9). §4 item 1 is therefore superseded: the default
+   path is proven neutral by §4 item 2 (unit RNG-state identity) plus the
+   unmoved fast tier, not by a byte-identical dump across the cap fix.
+2. **Outbreak disinfection — arm-only.** `_disinfect_zone` (SOP-003) had no
+   per-class mirror: pooled set `cleanable := old_cleanable × cf` while the
+   arm only received the total retention, so class cleanables drifted and
+   the next routine pass removed a different amount (seed 8001: first
+   mismatch epoch 26 `Engine_Room`, pool split epoch 27). Fix (`622f99f`):
+   `PerSurfaceFomiteState.disinfect` + `_disinfect_zone_by_class`.
+
+After both, lockstep on 8000 and 8001 × 288 epochs: RNG state bit-identical
+every epoch, worst relative pool difference ≲ 4e-15.
+
+### 6.2 Identity (measured) — **holds on all 20 seeds**
+
+| statistic | tolerance | worst rel. diff (seed) |
+|---|---|---|
+| `reconciliation.sum_credited_raw_gec` | 1e-9 | 3.9e-16 (8010) |
+| `reconciliation.sum_credited_scaled_gec` | 1e-9 | 4.0e-16 (8010) |
+| `reconciliation.sum_evaluated_hazard` | 1e-9 | 3.5e-16 (8012) |
+| `fomite_witness.surface_deposit_calls` | exact | 0 |
+| `fomite_witness.surface_mass_deposited_gec` | 1e-9 | 0 |
+| `fomite_witness.deliver_calls` | exact | 0 |
+| `fomite_witness.mass_delivered_to_hands_gec` | 1e-9 | 5.3e-16 (8015) |
+| `fomite_witness.hand_to_mouth_calls` | exact | 0 |
+| `fomite_witness.hand_load_seen_gec` | 1e-9 | 4.1e-16 (8004) |
+| `fomite_witness.hand_to_mouth_dose_gec` | 1e-9 | 3.2e-16 (8009) |
+| `joint.hosts_credited_any_dose`, `transmission.secondaries/imports/attack_rate` | exact | 0 |
+| `hosts[].credited_scaled_gec` (host by host) | 1e-9 | 2.3e-14 (8014) |
+
+Swab-density denominator, emesis patch area and the paired RNG stream are
+covered by the unit identities in `tests/test_fomite_per_surface.py`
+(20 tests) as frozen in §2.
+
+Per seed (pooled = arm on every row; secondaries are near zero because every
+dose figure is withdrawn — ledger §1 — so the identity's weight is carried by
+the dose vectors and event counts, not by infections):
+
+| seed | secondaries | deliver_calls | hand_to_mouth_calls | runtime ratio |
+|---|---|---|---|---|
+| 8000 | 0 | 1022 | 1036 | 1.121 |
+| 8001 | 0 | 993 | 10959 | 1.138 |
+| 8002 | 0 | 2216 | 6810 | 1.120 |
+| 8003 | 0 | 443 | 4583 | 1.127 |
+| 8004 | 0 | 647 | 6375 | 1.127 |
+| 8005 | 0 | 1470 | 22228 | 1.157 |
+| 8006 | 0 | 763 | 2095 | 1.102 |
+| 8007 | 0 | 2233 | 8221 | 1.140 |
+| 8008 | 0 | 549 | 2003 | 1.119 |
+| 8009 | 0 | 2212 | 4215 | 1.148 |
+| 8010 | 0 | 261 | 488 | 1.127 |
+| 8011 | 0 | 342 | 4890 | 1.090 |
+| 8012 | 0 | 941 | 15961 | 1.125 |
+| 8013 | 0 | 844 | 6699 | 1.127 |
+| 8014 | 0 | 806 | 10377 | 1.211 |
+| 8015 | 0 | 257 | 66 | 1.208 |
+| 8016 | 2 | 760 | 793 | 1.077 |
+| 8017 | 0 | 514 | 58 | 1.105 |
+| 8018 | 1 | 961 | 12793 | 1.051 |
+| 8019 | 0 | 1583 | 4979 | 1.105 |
+
+### 6.3 Runtime (measured)
+
+`per_surface / pooled` wall-clock per seed: median **1.126** [1.051, 1.211];
+totals 17,413 s vs 15,474 s. **Below** spec §4's 1.5–4× envelope. Inferred:
+the arm's extra cost is one dict loop per zone-epoch over ≤ 10 item
+classes, dwarfed by the per-agent contact work, so §4's envelope was
+conservative; not a report-immediately condition (only > 4× is).
+
+### 6.4 Status of the arm
+
+`per_surface` + `areal` + `shipped` is a proven algebraic re-expression of
+`pooled` (measured, 20 seeds × 288 epochs). It carries per-class state,
+per-class cleaning coverage and per-class outbreak disinfection, and exposes
+`fomite_touch_share: declared` with an empty table. Nothing in this entry
+changes a physical constant or declares a touch share.
+
+### 6.5 Decision for the next session (hypothesis, not measured)
+
+Whether to declare graded touch shares (Jin/Zhang/Ackerley) so the arm
+departs from pooled. Under `areal` the arm is inert by construction; any
+signal requires a non-uniform `declared` table (or the `derived` area basis
+plus per-occupant inventory, see §1 open item). Given `NORO-HIGH-TOUCH-AREA-01`
+(whole-voyage dose does not scale with `A` at n = 20), the hypothesis to
+test first is whether concentrating touch share on a few high-traffic
+classes changes *which hosts* are credited (coincidence, patchiness brief
+§3), not whether it moves the whole-voyage total. Sourcing the shares is a
+provenance deliverable with its own ledger; this session did not start it.
