@@ -42,6 +42,16 @@ DEFAULT_FOMITE_AREA_BASIS = "shipped"
 FOMITE_ITEM_READINGS = ("shared", "hardware", "broad")
 DEFAULT_FOMITE_ITEM_READING = "shared"
 
+# Numerical floor, not an epidemiological constant: a surface pool (or a
+# per-unit class set) that decays below this is set to exactly 0.0 so
+# ``<= 0`` gates close on a de-facto empty pool instead of on rounding
+# luck (NORO-TOUCH-SHARE-02 §6). Far below one genome copy.
+SURFACE_RESIDUE_FLOOR_GEC = 1e-12
+
+
+def floor_surface_residue(mass: float) -> float:
+    return 0.0 if mass < SURFACE_RESIDUE_FLOOR_GEC else mass
+
 # --- item areas in m2 -------------------------------------------------------
 # (area_m2, src, note). ``measured``/``qmra`` items are read off the paper
 # named in the note; ``declared`` items are this repository's geometry for an
@@ -544,6 +554,7 @@ class PerSurfaceFomiteState:
                 self.mass[key],
                 self.cleanable.get(key, 0.0) * factor,
             )
+        self._floor_unit(unit_key, pathogen_id)
 
     def pickup_requests(
         self,
@@ -596,6 +607,7 @@ class PerSurfaceFomiteState:
                 self.cleanable.get(key, 0.0)
                 * (new_mass / old_mass if old_mass > 0.0 else 0.0),
             )
+        self._floor_unit(unit_key, pathogen_id)
 
     def routine_clean(
         self,
@@ -617,6 +629,8 @@ class PerSurfaceFomiteState:
             self.mass[key] = mass_c * retention
             self.cleanable[key] = old_cleanable * multiplier
             new_total += self.mass[key]
+        self._floor_unit(unit_key, pathogen_id)
+        new_total = self.total(unit_key, pathogen_id)
         return new_total / old_total
 
     def disinfect(
@@ -648,7 +662,17 @@ class PerSurfaceFomiteState:
             )
             self.cleanable[key] = old_cleanable * cleanable_factor
             new_total += self.mass[key]
+        self._floor_unit(unit_key, pathogen_id)
+        new_total = self.total(unit_key, pathogen_id)
         return new_total / old_total
+
+    def _floor_unit(self, unit_key: str, pathogen_id: str) -> None:
+        # Floor on the unit total, never per class, so the areal arm stays
+        # identical to pooled (which floors its zone total).
+        if self.total(unit_key, pathogen_id) < SURFACE_RESIDUE_FLOOR_GEC:
+            for key in self._keys(unit_key, pathogen_id):
+                self.mass[key] = 0.0
+                self.cleanable[key] = 0.0
 
     def _keys(
         self,

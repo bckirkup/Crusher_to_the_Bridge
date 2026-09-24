@@ -917,3 +917,111 @@ def test_sanity_checker_quiet_and_loud() -> None:
 def test_envelope_tool_reexports_the_engine_tables() -> None:
     assert htae.ITEM_AREA_M2 is fomite_surfaces.ITEM_AREA_M2
     assert htae.ZONE_ITEM_SETS is fomite_surfaces.ZONE_ITEM_SETS
+
+
+# ── surface residue floor (NORO-TOUCH-SHARE-02) ───────────────────────
+
+
+def _per_surface_state() -> "fomite_surfaces.PerSurfaceFomiteState":
+    cfg = fomite_surfaces.parse_per_surface_config(PER_SURFACE)
+    state = fomite_surfaces.PerSurfaceFomiteState(cfg)
+    state.register_unit(
+        "cabin_u1", "cabin", pooled_area_m2=1.0, water_closets=1,
+        zone_coverage=0.5,
+    )
+    return state
+
+
+def test_floor_surface_residue_threshold() -> None:
+    assert fomite_surfaces.floor_surface_residue(5e-13) == pytest.approx(
+        0.0, rel=0.0, abs=0.0,
+    )
+    assert fomite_surfaces.floor_surface_residue(1e-12) == pytest.approx(
+        1e-12, rel=0.0, abs=0.0,
+    )
+    assert fomite_surfaces.floor_surface_residue(0.3) == pytest.approx(
+        0.3, rel=0.0, abs=0.0,
+    )
+    assert fomite_surfaces.floor_surface_residue(-1.0) == pytest.approx(
+        0.0, rel=0.0, abs=0.0,
+    )
+
+
+def test_per_surface_scale_floors_on_unit_total() -> None:
+    state = _per_surface_state()
+    inv = state.inventory("cabin_u1")
+    state.deposit("cabin_u1", PATHOGEN, 1e-11, inv)
+    state.scale("cabin_u1", PATHOGEN, 0.01)
+    assert state.total("cabin_u1", PATHOGEN) == pytest.approx(0.0, abs=0.0)
+    for key in state._keys("cabin_u1", PATHOGEN):
+        assert state.mass[key] == pytest.approx(0.0, abs=0.0)
+        assert state.cleanable[key] == pytest.approx(0.0, abs=0.0)
+
+
+def test_per_surface_scale_above_floor_untouched() -> None:
+    state = _per_surface_state()
+    inv = state.inventory("cabin_u1")
+    state.deposit("cabin_u1", PATHOGEN, 1e-11, inv)
+    state.scale("cabin_u1", PATHOGEN, 0.5)
+    assert state.total("cabin_u1", PATHOGEN) == pytest.approx(5e-12)
+    for key in state._keys("cabin_u1", PATHOGEN):
+        assert state.mass[key] == pytest.approx(
+            1e-11 * inv.touch_share[key[2]] * 0.5,
+        )
+
+
+def test_per_surface_consume_floors_on_unit_total() -> None:
+    state = _per_surface_state()
+    inv = state.inventory("cabin_u1")
+    state.deposit("cabin_u1", PATHOGEN, 2e-12, inv)
+    delivered = {
+        item_class: state.mass[("cabin_u1", PATHOGEN, item_class)] * 0.75
+        for item_class in inv.counts
+    }
+    state.consume("cabin_u1", PATHOGEN, delivered)
+    # 2e-12 * 0.25 = 5e-13 remains: below the floor, so the unit empties.
+    assert state.total("cabin_u1", PATHOGEN) == pytest.approx(0.0, abs=0.0)
+    for key in state._keys("cabin_u1", PATHOGEN):
+        assert state.mass[key] == pytest.approx(0.0, abs=0.0)
+        assert state.cleanable[key] == pytest.approx(0.0, abs=0.0)
+
+
+def test_per_surface_decay_is_continuous_above_floor_then_snaps() -> None:
+    state = _per_surface_state()
+    inv = state.inventory("cabin_u1")
+    state.deposit("cabin_u1", PATHOGEN, 1e-9, inv)
+    for factor, expected in ((0.5, 5e-10), (0.1, 5e-11), (0.1, 5e-12)):
+        state.scale("cabin_u1", PATHOGEN, factor)
+        assert state.total("cabin_u1", PATHOGEN) == pytest.approx(expected)
+    state.scale("cabin_u1", PATHOGEN, 0.1)  # 5e-13 -> floored
+    assert state.total("cabin_u1", PATHOGEN) == pytest.approx(0.0, abs=0.0)
+
+
+def test_scale_surface_mass_floors_pooled_pool() -> None:
+    core = _core(POOLED)
+    core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] = 1e-11
+    core.surface_pools["Lounge_A"] = 1e-11
+    core.surface_pools_cleanable_by_pathogen[PATHOGEN]["Lounge_A"] = 1e-11
+    core._scale_surface_mass(PATHOGEN, "Lounge_A", 0.01)
+    assert core.surface_pools_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(0.0, abs=0.0)
+    assert core.surface_pools["Lounge_A"] == pytest.approx(0.0, abs=0.0)
+    assert core.surface_pools_cleanable_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(0.0, abs=0.0)
+
+
+def test_scale_surface_mass_continuous_above_floor() -> None:
+    core = _core(POOLED)
+    core.surface_pools_by_pathogen[PATHOGEN]["Lounge_A"] = 1e-11
+    core.surface_pools["Lounge_A"] = 1e-11
+    core._scale_surface_mass(PATHOGEN, "Lounge_A", 0.5)
+    assert core.surface_pools_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(5e-12, rel=0.0, abs=0.0)
+    # 5e-12 * 0.1 = 5e-13 -> floored on the next step.
+    core._scale_surface_mass(PATHOGEN, "Lounge_A", 0.1)
+    assert core.surface_pools_by_pathogen[PATHOGEN][
+        "Lounge_A"
+    ] == pytest.approx(0.0, abs=0.0)
