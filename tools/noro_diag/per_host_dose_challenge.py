@@ -645,12 +645,14 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
             rec.fomite["mass_delivered_to_hands_gec"] += float(
                 sum(delivered.values())
             )
+            zone_class = self._fomite_zone_class(zone_name)
             requested_by_class: dict[str, float] = defaultdict(float)
             for _, req in requests:
                 for item_class, mass in req.items():
                     requested_by_class[item_class] += float(mass)
             for item_class, requested_c in requested_by_class.items():
-                bucket = rec.fomite_by_class[item_class]
+                class_key = f"{zone_class}.{item_class}"
+                bucket = rec.fomite_by_class[class_key]
                 bucket["requested_gec"] += requested_c
                 delivered_c = float(delivered.get(item_class, 0.0))
                 bucket["delivered_gec"] += delivered_c
@@ -661,7 +663,7 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
                     share_c = float(req.get(item_class, 0.0))
                     if share_c > 0.0:
                         rec.fomite_host_class_gec[int(target.agent_id)][
-                            item_class
+                            class_key
                         ] += share_c * scale_c
             scale_witness = rec.delivery_scale
             scale_witness["deliver_calls"] += 1
@@ -788,8 +790,9 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         )
         if request is None or not mass_before:
             return request
+        zone_class = self._fomite_zone_class(zone_name)
         for item_class, requested_c in request.items():
-            bucket = rec.fomite_by_class[item_class]
+            bucket = rec.fomite_by_class[f"{zone_class}.{item_class}"]
             bucket["calls"] += 1
             mass_c = mass_before.get(item_class, 0.0)
             if mass_c > 0.0 and requested_c >= mass_c:
@@ -1217,6 +1220,19 @@ def summarise(
         "transfer_product_witness": _transfer_product_summary(rec),
         "delivery_scale_witness": _delivery_scale_summary(rec),
         "fomite_by_class": _fomite_by_class_summary(rec),
+        "fomite_delivered_by_host": {
+            str(agent_id): float(mass)
+            for agent_id, mass in sorted(
+                (
+                    (agent_id, sum(per_class.values()))
+                    for agent_id, per_class in (
+                        rec.fomite_host_class_gec.items()
+                    )
+                ),
+                key=lambda item: item[0],
+            )
+            if mass > 0.0
+        },
         "hosts": [
             {
                 "agent_id": agent_id,

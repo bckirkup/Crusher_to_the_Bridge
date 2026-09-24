@@ -10,14 +10,12 @@ the block ran. It re-derives nothing, fits nothing and changes no
 constant.
 
 The measured quantity is coincidence: which hosts are credited fomite mass
-delivered to hands, per item class -- not how much dose, and every dose
-quantity below is a paired ratio or share against a withdrawn baseline
-(``docs/norovirus/norovirus_open_ledger.md`` §1), never a dose result.
-
-The class witness is ship-wide, per item class only: the dump does not
-carry class x zone resolution, so no per-zone-class statistic is read
-(the ``--focus-zone`` argument is accepted for CLI compatibility and is
-unused).
+delivered to hands, per ``zone_class.item_class`` key -- not how much dose,
+and every dose quantity below is a paired ratio or share against a
+withdrawn baseline (``docs/norovirus/norovirus_open_ledger.md`` §1), never
+a dose result. The class witness is keyed by zone class, so the
+admissibility statistic reads ``public.button_or_dispenser`` directly
+rather than a ship-wide item-class mix.
 
 Admissibility (ledger §4): the declared table ``changes_coincidence`` if
 median jaccard < 0.90 and the focus class's delivered share rises by
@@ -69,13 +67,18 @@ def load_arm(directory: Path, tag: str) -> dict[int, dict[str, Any]]:
 
 
 def _host_delivered(cell: dict[str, Any]) -> dict[int, float]:
-    """Per-host voyage total of fomite mass delivered to hands."""
-    delivered: dict[int, float] = {}
-    for host in cell.get("hosts", []):
-        mass = float(host.get("fomite_delivered_gec", 0.0) or 0.0)
-        if mass > 0.0:
-            delivered[int(host["agent_id"])] = mass
-    return delivered
+    """Per-host voyage total of fomite mass delivered to hands.
+
+    Reads ``fomite_delivered_by_host`` -- the dump's dedicated top-level
+    map, which covers every host whose hands received mass, not only hosts
+    that reached the challenge/credit path (``hosts[]``). Absent key is a
+    KeyError: this readout only reads dumps written by the same tool
+    version.
+    """
+    return {
+        int(agent_id): float(mass)
+        for agent_id, mass in cell["fomite_delivered_by_host"].items()
+    }
 
 
 def gini(values: list[float]) -> float:
@@ -345,11 +348,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--base-dir", type=Path, required=True)
     parser.add_argument("--base-tag", default="per_surface_areal")
     parser.add_argument("--out", type=Path, required=True)
-    parser.add_argument("--focus-class", default="button_or_dispenser")
     parser.add_argument(
-        "--focus-zone", default=None,
-        help="accepted for symmetry; unused -- the class witness is "
-             "ship-wide per item class",
+        "--focus-class", default="public.button_or_dispenser",
+        help="dotted zone_class.item_class key in fomite_by_class",
     )
     args = parser.parse_args(argv)
     result = readout(

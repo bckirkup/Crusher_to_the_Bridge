@@ -191,6 +191,9 @@ def _cell(
             {"agent_id": aid, "fomite_delivered_gec": mass}
             for aid, mass in delivered.items()
         ],
+        "fomite_delivered_by_host": {
+            str(aid): mass for aid, mass in delivered.items() if mass > 0.0
+        },
         "fomite_by_class": by_class,
         "reconciliation": {"sum_credited_scaled_gec": credited},
         "transmission": {"secondaries": secondaries},
@@ -211,7 +214,7 @@ def test_readout_seed_statistics() -> None:
         1,
         {1: 1.0, 2: 1.0},
         {
-            "button_or_dispenser": {
+            "public.button_or_dispenser": {
                 "requested_gec": 4.0, "delivered_gec": 2.0,
                 "calls": 4, "capped_calls": 0, "hosts_credited": 2,
             },
@@ -222,14 +225,14 @@ def test_readout_seed_statistics() -> None:
         1,
         {1: 1.0, 3: 1.0},
         {
-            "button_or_dispenser": {
+            "public.button_or_dispenser": {
                 "requested_gec": 8.0, "delivered_gec": 4.0,
                 "calls": 4, "capped_calls": 1, "hosts_credited": 3,
             },
         },
         20.0, 5,
     )
-    row = readout.compare_seed(base, arm, "button_or_dispenser")
+    row = readout.compare_seed(base, arm, "public.button_or_dispenser")
     assert row["jaccard"] == pytest.approx(1.0 / 3.0)
     assert row["n_hosts_areal"] == 2
     assert row["n_hosts_declared"] == 2
@@ -239,7 +242,7 @@ def test_readout_seed_statistics() -> None:
     assert row["credited_scaled_ratio"] == pytest.approx(2.0)
     assert row["secondaries_delta"] == 2
     assert row["focus_share_gain"] == pytest.approx(1.0 - 1.0)
-    assert row["per_class"]["button_or_dispenser"][
+    assert row["per_class"]["public.button_or_dispenser"][
         "capped_share_declared"
     ] == pytest.approx(0.25)
 
@@ -249,9 +252,9 @@ def test_readout_gini_and_verdict() -> None:
     assert readout.top_decile_share([1.0, 1.0, 2.0]) == pytest.approx(0.5)
     base = _cell(1, {1: 5.0, 2: 3.0}, {}, 10.0, 3)
     arm = _cell(1, {1: 4.0, 2: 4.0}, {}, 10.0, 3)
-    row = readout.compare_seed(base, arm, "button_or_dispenser")
+    row = readout.compare_seed(base, arm, "public.button_or_dispenser")
     assert row["jaccard"] == pytest.approx(1.0)
-    agg = readout.aggregate([row], "button_or_dispenser")
+    agg = readout.aggregate([row], "public.button_or_dispenser")
     assert agg["identical_host_sets_all_seeds"] is True
     assert agg["verdict"] == "inert"
 
@@ -267,7 +270,7 @@ def test_readout_loads_gz_cells(tmp_path: Path) -> None:
     result = readout.readout(
         tmp_path / "d", "per_surface_declared",
         tmp_path / "a", "per_surface_areal",
-        "button_or_dispenser",
+        "public.button_or_dispenser",
     )
     assert result["seeds"] == [7, 8]
     assert result["aggregate"]["verdict"] == "inert"
