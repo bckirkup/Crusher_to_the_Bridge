@@ -28,15 +28,21 @@ every call unchanged to the same underlying ``numpy.random.Generator``
 consumes no randomness and alters no argument or return value.
 
 Engine context comes from read-only wrappers on the ``TransmissionCore``
-methods the fomite/challenge chain runs through (``_deposit_surface_mass``,
+fomite/contact/challenge seams (``_deposit_surface_mass``,
 ``_replenish_hand``, ``_fomite_pickup_request_for_area``,
 ``_fomite_pickup_requests_by_class``, ``_fomite_pickup_by_class``,
 ``_deliver_fomite_requests``, ``_deliver_fomite_requests_by_class``,
 ``_deliver_one_pickup``, ``_hand_to_mouth_dose``, ``_consume_surface_mass``,
-``_consume_surface_mass_by_class``, ``_resolve_pathogen_challenge`` and a
-coarse ``_pathway_fomite``), dispatched to the arm currently stepping via a
-module-level active-arm holder. Wrappers set the context string, count the
-event, record mass witnesses and call the original; they never draw.
+``_consume_surface_mass_by_class``, ``_resolve_pathogen_challenge``,
+``_pathway_fomite``, plus the hand-contact and sanitary seams
+``_hand_contact_transfers``, ``_per_partner_contact_dose``,
+``_sanitary_fomite_exposure``, ``_deliver_sanitary_requests_by_class``) and on
+``PerSurfaceFomiteState.pickup_requests`` / ``.consume`` in
+``engines/fomite_surfaces.py``, dispatched to the arm currently stepping via
+a module-level active-arm holder. Every witness event carries ``draw_start``
+/ ``draw_end`` -- its enclosing trace-index range on the arm's core stream --
+and ``phase``, the coarse enclosing context, so a trace index maps to its
+enclosing engine event. Wrappers never draw and never alter a value.
 
 Detailed trace comparison stops at ``e*`` (the tracer then drops recording);
 both arms keep stepping to ``--epochs`` so the cumulative
@@ -59,10 +65,12 @@ Outputs
 -------
 One deterministic JSON document at ``--out`` (rewritten after each seed so a
 partial run is not lost): per seed the per-epoch draw counts, cumulative
-event counters, both arms' ``hand_to_mouth_calls`` trajectories, the
-divergence record at ``e*`` (trace window, differing-index entries, restricted
-mass diffs, event lists, ordering witness, classification), and
-``measured_at`` = the working-tree ``git rev-parse HEAD``.
+event counters, both arms' ``hand_to_mouth_calls`` trajectories, and the
+divergence record at ``e*`` -- trace window, differing-index entries, the
+enclosing engine event per arm, the last aligned / first structurally
+differing event pair, start-of-epoch hand loads for the named and differing
+agents, the restricted mass diffs, the ordering witness, and the
+classification. ``measured_at`` = the working-tree ``git rev-parse HEAD``.
 
 Nothing here fits or selects a parameter value; no engine code changes.
 """
@@ -90,6 +98,7 @@ if str(REPO_ROOT) not in sys.path:
 
 from engines import transmission_core as tc  # noqa: E402
 from engines.fomite_surfaces import (  # noqa: E402
+    PerSurfaceFomiteState,
     load_declared_share_table,
 )
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
@@ -103,6 +112,7 @@ PATHOGEN_ID = "norwalk_gi"
 RESIDUE_FLOOR_GEC = 1e-12
 ORDERING_REL_TOL = 1e-9
 TRACE_WINDOW = 10
+HAND_DIFF_CAP = 200
 
 # Frozen counter vocabulary (ledger NORO-TOUCH-SHARE-02 section 2).
 COUNTER_KEYS = (
@@ -114,6 +124,8 @@ COUNTER_KEYS = (
     "deliveries",
     "deliver_one_pickups",
     "hand_to_mouth_calls",
+    "hand_contact_calls",
+    "sanitary_pickups",
     "challenge_calls",
     "consume_calls",
 )
@@ -245,6 +257,14 @@ def _kwarg(args: tuple, kwargs: dict, index: int, name: str) -> Any:
     return args[index] if len(args) > index else None
 
 
+def _mark() -> tuple[Arm | None, int, str]:
+    """(arm, draw_start, enclosing phase) at wrapper entry."""
+    arm = _arm()
+    if arm is None:
+        return None, 0, ""
+    return arm, len(arm.core_rng.trace), _ctx_name(arm.core_rng.ctx)
+
+
 def _set_ctx(name: str) -> int:
     arm = _arm()
     if arm is None:
@@ -266,8 +286,15 @@ def _bump(key: str, active_pathogen: bool = True) -> None:
         arm.counts[key] += 1
 
 
-def _witness(record: dict[str, Any]) -> None:
-    arm = _arm()
+def _emit(
+    arm: Arm | None, record: dict[str, Any], start: int, phase: str,
+) -> None:
+    """Stamp draw indices and append the witness event."""
+    record["phase"] = phase
+    record["draw_start"] = start
+    record["draw_end"] = (
+        len(arm.core_rng.trace) if arm is not None else start
+    )
     if arm is not None and arm.record_events:
         arm.events.append(record)
 
@@ -289,6 +316,10 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             "_consume_surface_mass_by_class",
             "_resolve_pathogen_challenge",
             "_pathway_fomite",
+            "_hand_contact_transfers",
+            "_per_partner_contact_dose",
+            "_sanitary_fomite_exposure",
+            "_deliver_sanitary_requests_by_class",
         )
     }
 
@@ -296,6 +327,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
         self: Any, pathogen_id: str, zone_name: str, mass: float,
     ) -> None:
         active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
         prev = _set_ctx(f"fomite.deposit|{zone_name}" if active else "other")
         try:
             originals["_deposit_surface_mass"](
@@ -305,10 +337,10 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("deposit_calls", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "deposit", "zone": zone_name,
                 "mass_gec": float(mass),
-            })
+            }, start, phase)
 
     def replenish(
         self: Any, agent: Any, pathogen_id: str, profile: Any,
@@ -319,7 +351,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             f"fomite.replenish_hand|{zone_name}" if active else "other",
         )
         try:
-            return originals["_replenish_hand"](
+            originals["_replenish_hand"](
                 self, agent, pathogen_id, profile, zone_name,
             )
         finally:
@@ -330,14 +362,22 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
         self: Any, target: Any, zone_name: str, surface_mass: float,
         surface_area_m2: float, epoch: int,
     ) -> float:
+        arm, start, phase = _mark()
         prev = _set_ctx(f"fomite.pickup_request|{zone_name}")
         try:
-            return originals["_fomite_pickup_request_for_area"](
+            request = originals["_fomite_pickup_request_for_area"](
                 self, target, zone_name, surface_mass, surface_area_m2, epoch,
             )
         finally:
             _restore_ctx(prev)
         _bump("pickup_requests")
+        _emit(arm, {
+            "kind": "pickup_request", "zone": zone_name,
+            "agent_id": int(target.agent_id),
+            "surface_mass_gec": float(surface_mass),
+            "request_gec": float(request),
+        }, start, phase)
+        return request
 
     def pickup_requests_by_class(
         self: Any, target: Any, zone_name: str, epoch: int, pathogen_id: str,
@@ -348,12 +388,13 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             if active else "other",
         )
         try:
-            return originals["_fomite_pickup_requests_by_class"](
+            request = originals["_fomite_pickup_requests_by_class"](
                 self, target, zone_name, epoch, pathogen_id,
             )
         finally:
             _restore_ctx(prev)
         _bump("pickup_by_class_calls", active)
+        return request
 
     def pickup_by_class(
         self: Any, zone_name: str, susceptible: Any, surface_mass: float,
@@ -361,7 +402,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
     ) -> None:
         prev = _set_ctx(f"fomite.pickup_by_class|{zone_name}")
         try:
-            return originals["_fomite_pickup_by_class"](
+            originals["_fomite_pickup_by_class"](
                 self, zone_name, susceptible, surface_mass, epoch,
                 *args, **kwargs,
             )
@@ -375,6 +416,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
     ) -> float:
         pathogen_id = _kwarg(args, kwargs, 6, "pathogen_id")
         active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
         prev = _set_ctx(f"fomite.deliver|{zone_name}" if active else "other")
         try:
             delivered = originals["_deliver_fomite_requests"](
@@ -384,15 +426,26 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("deliveries", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "deliver", "zone": zone_name,
                 "requested_gec": float(
                     sum(mass for _, mass in requests)
                 ),
                 "surface_mass_gec": float(surface_mass),
                 "delivered_gec": float(delivered),
-            })
+            }, start, phase)
         return delivered
+
+    def _class_masses(self: Any, zone_name: str, classes: Any) -> dict:
+        per_surface = getattr(self, "_per_surface", None)
+        if per_surface is None:
+            return {}
+        return {
+            cls: float(per_surface.mass.get(
+                (zone_name, PATHOGEN_ID, cls), 0.0,
+            ))
+            for cls in sorted(classes)
+        }
 
     def deliver_by_class(
         self: Any, requests: Any, zone_name: str, surface_mass: float,
@@ -400,6 +453,11 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
     ) -> dict:
         pathogen_id = _kwarg(args, kwargs, 6, "pathogen_id")
         active = pathogen_id == PATHOGEN_ID
+        classes = {c for _, req in requests for c in req}
+        masses_before = _class_masses(self, zone_name, classes) if (
+            active
+        ) else {}
+        arm, start, phase = _mark()
         prev = _set_ctx(
             f"fomite.deliver_by_class|{zone_name}" if active else "other",
         )
@@ -411,21 +469,20 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("deliveries", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "deliver_by_class", "zone": zone_name,
                 "requested_by_class_gec": {
                     cls: float(
                         sum(req.get(cls, 0.0) for _, req in requests)
                     )
-                    for cls in sorted(
-                        {c for _, req in requests for c in req}
-                    )
+                    for cls in sorted(classes)
                 },
+                "class_mass_before_gec": masses_before,
                 "surface_mass_gec": float(surface_mass),
                 "delivered_by_class_gec": {
                     cls: float(m) for cls, m in delivered.items()
                 },
-            })
+            }, start, phase)
         return delivered
 
     def deliver_one(
@@ -434,6 +491,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
     ) -> float:
         pathogen_id = _kwarg(args, kwargs, 5, "pathogen_id")
         active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
         prev = _set_ctx(
             f"fomite.deliver_one|{zone_name}" if active else "other",
         )
@@ -449,18 +507,19 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("deliver_one_pickups", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "deliver_one", "zone": zone_name,
                 "agent_id": int(target.agent_id),
                 "delivered_gec": float(delivered),
                 "hand_load_before_gec": hand_before,
                 "dose_gec": float(dose),
-            })
+            }, start, phase)
         return dose
 
     def hand_to_mouth(
         self: Any, target: Any, epoch: int, hand_load: float,
     ) -> float:
+        arm, start, phase = _mark()
         prev = _set_ctx("hand_to_mouth")
         try:
             dose = originals["_hand_to_mouth_dose"](
@@ -469,19 +528,88 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
         finally:
             _restore_ctx(prev)
         _bump("hand_to_mouth_calls")
-        _witness({
+        _emit(arm, {
             "kind": "hand_to_mouth",
             "agent_id": int(target.agent_id),
             "hand_load_gec": float(hand_load),
             "dose_gec": float(dose),
-        })
+        }, start, phase)
         return dose
+
+    def hand_contact_transfers(
+        self: Any, target: Any, sampled_shedders: Any, pathogen_id: str,
+        cabin_confinement: bool,
+    ) -> Any:
+        active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
+        prev = _set_ctx("hand_contact" if active else "other")
+        donors = [
+            (int(shedder.agent_id), float(
+                shedder.hand_load_by_pathogen.get(pathogen_id, 0.0),
+            ))
+            for shedder, _ in sampled_shedders
+        ] if active else []
+        try:
+            moved = originals["_hand_contact_transfers"](
+                self, target, sampled_shedders, pathogen_id,
+                cabin_confinement,
+            )
+        finally:
+            _restore_ctx(prev)
+        _bump("hand_contact_calls", active)
+        if active:
+            moved_by_id = {
+                int(shedder.agent_id): float(amount)
+                for shedder, amount in moved
+            }
+            _emit(arm, {
+                "kind": "hand_contact",
+                "agent_id": int(target.agent_id),
+                "donors": [
+                    {
+                        "agent_id": donor_id,
+                        "hand_load_gec": load,
+                        "moved_gec": moved_by_id.get(donor_id, 0.0),
+                    }
+                    for donor_id, load in donors
+                ],
+            }, start, phase)
+        return moved
+
+    def per_partner_contact_dose(
+        self: Any, target: Any, sampled_shedders: Any,
+        cabin_confinement: bool, pathogen_id: str, epoch: int,
+    ) -> Any:
+        active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
+        prev = _set_ctx("hand_contact.dose" if active else "other")
+        hand_before = (
+            float(target.hand_load_by_pathogen.get(pathogen_id, 0.0))
+            if active else 0.0
+        )
+        try:
+            dose, moved = originals["_per_partner_contact_dose"](
+                self, target, sampled_shedders, cabin_confinement,
+                pathogen_id, epoch,
+            )
+        finally:
+            _restore_ctx(prev)
+        if active:
+            _emit(arm, {
+                "kind": "hand_contact_dose",
+                "agent_id": int(target.agent_id),
+                "acquired_gec": float(sum(m for _, m in moved)),
+                "hand_load_before_gec": hand_before,
+                "dose_gec": float(dose),
+            }, start, phase)
+        return dose, moved
 
     def consume(
         self: Any, pathogen_id: str, zone_name: str, delivered: float,
         previous_mass: float,
     ) -> None:
         active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
         prev = _set_ctx(f"fomite.consume|{zone_name}" if active else "other")
         try:
             originals["_consume_surface_mass"](
@@ -491,17 +619,18 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("consume_calls", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "consume", "zone": zone_name,
                 "delivered_gec": float(delivered),
                 "previous_mass_gec": float(previous_mass),
-            })
+            }, start, phase)
 
     def consume_by_class(
         self: Any, pathogen_id: str, zone_name: str,
         delivered_by_class: dict, previous_mass: float,
     ) -> None:
         active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
         prev = _set_ctx(
             f"fomite.consume_by_class|{zone_name}" if active else "other",
         )
@@ -514,14 +643,62 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
             _restore_ctx(prev)
         _bump("consume_calls", active)
         if active:
-            _witness({
+            _emit(arm, {
                 "kind": "consume_by_class", "zone": zone_name,
                 "delivered_by_class_gec": {
                     cls: float(m)
                     for cls, m in delivered_by_class.items()
                 },
                 "previous_mass_gec": float(previous_mass),
-            })
+            }, start, phase)
+
+    def sanitary_exposure(
+        self: Any, epoch: int, zone_occupants: Any, *args: Any,
+        **kwargs: Any,
+    ) -> Any:
+        pathogen_id = _kwarg(args, kwargs, 3, "pathogen_id")
+        prev = _set_ctx(
+            "sanitary" if pathogen_id == PATHOGEN_ID else "other",
+        )
+        try:
+            return originals["_sanitary_fomite_exposure"](
+                self, epoch, zone_occupants, *args, **kwargs,
+            )
+        finally:
+            _restore_ctx(prev)
+
+    def sanitary_deliver_by_class(
+        self: Any, requests: Any, venue: str, epoch: int, *args: Any,
+        **kwargs: Any,
+    ) -> Any:
+        pathogen_id = _kwarg(args, kwargs, 3, "pathogen_id")
+        active = pathogen_id == PATHOGEN_ID
+        classes = {c for _, req in requests for c in req}
+        masses_before = _class_masses(self, venue, classes) if active else {}
+        arm, start, phase = _mark()
+        prev = _set_ctx(
+            f"sanitary.deliver_by_class|{venue}" if active else "other",
+        )
+        try:
+            result = originals["_deliver_sanitary_requests_by_class"](
+                self, requests, venue, epoch, *args, **kwargs,
+            )
+        finally:
+            _restore_ctx(prev)
+        _bump("sanitary_pickups", active)
+        if active:
+            _emit(arm, {
+                "kind": "sanitary_deliver_by_class", "zone": venue,
+                "requested_by_class_gec": {
+                    cls: float(
+                        sum(req.get(cls, 0.0) for _, req in requests)
+                    )
+                    for cls in sorted(classes)
+                },
+                "class_mass_before_gec": masses_before,
+                "return": None if result is None else float(result),
+            }, start, phase)
+        return result
 
     def challenge(
         self: Any, epoch: int, agent: Any, pathogen_id: str,
@@ -530,12 +707,13 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
         active = pathogen_id == PATHOGEN_ID
         prev = _set_ctx("challenge" if active else "other")
         try:
-            return originals["_resolve_pathogen_challenge"](
+            result = originals["_resolve_pathogen_challenge"](
                 self, epoch, agent, pathogen_id, *args, **kwargs,
             )
         finally:
             _restore_ctx(prev)
         _bump("challenge_calls", active)
+        return result
 
     def pathway_fomite(
         self: Any, epoch: int, zone_occupants: Any, *args: Any,
@@ -563,6 +741,83 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
     core_cls._consume_surface_mass_by_class = consume_by_class
     core_cls._resolve_pathogen_challenge = challenge
     core_cls._pathway_fomite = pathway_fomite
+    core_cls._hand_contact_transfers = hand_contact_transfers
+    core_cls._per_partner_contact_dose = per_partner_contact_dose
+    core_cls._sanitary_fomite_exposure = sanitary_exposure
+    core_cls._deliver_sanitary_requests_by_class = sanitary_deliver_by_class
+    return originals
+
+
+def _wrap_per_surface() -> dict[str, Any]:
+    """Read-only wrappers on ``PerSurfaceFomiteState``'s two hot seams."""
+    originals = {
+        "pickup_requests": PerSurfaceFomiteState.pickup_requests,
+        "consume": PerSurfaceFomiteState.consume,
+    }
+
+    def pickup_requests(
+        self: Any, inv: Any, unit_key: str, pathogen_id: str,
+        contacts: float, used_fraction: float, hand_area_m2: float,
+        transfer_efficiency: float,
+    ) -> dict[str, float]:
+        active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
+        prev = _set_ctx(
+            f"pickup_requests|{unit_key}" if active else "other",
+        )
+        masses_before = {
+            cls: float(self.mass.get((unit_key, pathogen_id, cls), 0.0))
+            for cls in sorted(inv.counts)
+        } if active else {}
+        try:
+            request = originals["pickup_requests"](
+                self, inv, unit_key, pathogen_id, contacts,
+                used_fraction, hand_area_m2, transfer_efficiency,
+            )
+        finally:
+            _restore_ctx(prev)
+        if active:
+            _emit(arm, {
+                "kind": "class_pickup_requests", "zone": unit_key,
+                "request_by_class_gec": {
+                    cls: float(v) for cls, v in request.items()
+                },
+                "class_mass_before_gec": masses_before,
+                "contacts": float(contacts),
+                "used_fraction": float(used_fraction),
+                "hand_area_m2": float(hand_area_m2),
+                "transfer_efficiency": float(transfer_efficiency),
+            }, start, phase)
+        return request
+
+    def consume(
+        self: Any, unit_key: str, pathogen_id: str,
+        delivered_by_class: dict,
+    ) -> None:
+        active = pathogen_id == PATHOGEN_ID
+        arm, start, phase = _mark()
+        prev = _set_ctx(f"ps.consume|{unit_key}" if active else "other")
+        masses_before = {
+            cls: float(self.mass.get((unit_key, pathogen_id, cls), 0.0))
+            for cls in sorted(delivered_by_class)
+        } if active else {}
+        try:
+            originals["consume"](
+                self, unit_key, pathogen_id, delivered_by_class,
+            )
+        finally:
+            _restore_ctx(prev)
+        if active:
+            _emit(arm, {
+                "kind": "ps_consume", "zone": unit_key,
+                "class_mass_before_gec": masses_before,
+                "delivered_by_class_gec": {
+                    cls: float(m) for cls, m in delivered_by_class.items()
+                },
+            }, start, phase)
+
+    PerSurfaceFomiteState.pickup_requests = pickup_requests
+    PerSurfaceFomiteState.consume = consume
     return originals
 
 
@@ -571,11 +826,14 @@ def lockstep_instrumented(active: dict[str, Arm | None]) -> Any:
     """Install the read-only context wrappers for the probe's duration."""
     core_cls = tc.TransmissionCore
     originals = _wrap_fomite_chain(core_cls)
+    ps_originals = _wrap_per_surface()
     try:
         yield active
     finally:
         for name, method in originals.items():
             setattr(core_cls, name, method)
+        for name, method in ps_originals.items():
+            setattr(PerSurfaceFomiteState, name, method)
         active["arm"] = None
 
 
@@ -613,15 +871,29 @@ def _snapshot_masses(core: Any, pathogen_id: str) -> dict[str, dict]:
     return {"zone_gec": zone, "zone_class_gec": by_class}
 
 
+def _snapshot_hand_loads(sim: ShipSimulation) -> dict[int, float]:
+    """Per-agent ``hand_load_by_pathogen`` at the epoch boundary."""
+    return {
+        int(agent.agent_id): float(
+            agent.hand_load_by_pathogen.get(PATHOGEN_ID, 0.0),
+        )
+        for agent in sim.engine.agents
+    }
+
+
 def _mass_diffs(
-    snap_a: dict, snap_d: dict,
+    snap_a: dict, snap_d: dict, zones: set[str] | None = None,
 ) -> dict[str, dict]:
-    """Both arms' masses restricted to keys whose values differ."""
+    """Both arms' masses restricted to differing keys (optionally zoned)."""
     diffs: dict[str, dict] = {}
     for section in ("zone_gec", "zone_class_gec"):
         keys = set(snap_a[section]) | set(snap_d[section])
         rows = {}
         for key in sorted(keys):
+            if zones is not None and key.rsplit("|", 1)[0] not in zones and (
+                key not in zones
+            ):
+                continue
             va = snap_a[section].get(key, 0.0)
             vd = snap_d[section].get(key, 0.0)
             if va == vd:
@@ -660,16 +932,181 @@ def _trace_window(trace: list, index: int) -> list[dict]:
     return [_trace_json(trace[i]) for i in range(low, high)]
 
 
+def _enclosing_event(events: list[dict], d_star: int) -> dict[str, Any]:
+    """The innermost event containing ``d_star``, else its neighbours."""
+    containing = [
+        event for event in events
+        if event.get("draw_start", -1) <= d_star < event.get("draw_end", -1)
+    ]
+    if containing:
+        innermost = min(
+            containing,
+            key=lambda e: e["draw_end"] - e["draw_start"],
+        )
+        return {"containing": innermost}
+    before = [
+        event for event in events if event.get("draw_end", -1) <= d_star
+    ]
+    after = [
+        event for event in events if event.get("draw_start", -1) > d_star
+    ]
+    return {
+        "before": before[-1] if before else None,
+        "after": after[0] if after else None,
+    }
+
+
+def _event_key(event: dict) -> tuple:
+    return (
+        event.get("kind"), event.get("zone"), event.get("agent_id"),
+    )
+
+
+def _structural_diff(
+    events_a: list[dict], events_d: list[dict],
+) -> tuple[int, dict[str, Any] | None]:
+    """Last pairwise-aligned event index, and the first mismatching pair."""
+    last_aligned = -1
+    for index, (ea, ed) in enumerate(zip(events_a, events_d)):
+        if _event_key(ea) != _event_key(ed):
+            return last_aligned, {"index": index, "a": ea, "d": ed}
+        last_aligned = index
+    if len(events_a) != len(events_d):
+        index = min(len(events_a), len(events_d))
+        return last_aligned, {
+            "index": index,
+            "a": events_a[index] if index < len(events_a) else None,
+            "d": events_d[index] if index < len(events_d) else None,
+        }
+    return last_aligned, None
+
+
+def _event_agent_ids(event: dict | None) -> set[int]:
+    ids = set()
+    if not event:
+        return ids
+    for key in ("agent_id", "target"):
+        if isinstance(event.get(key), int):
+            ids.add(event[key])
+    for donor in event.get("donors", ()):
+        ids.add(donor["agent_id"])
+    return ids
+
+
+def _named_agents(*records: Any) -> set[int]:
+    ids: set[int] = set()
+    for record in records:
+        if not isinstance(record, dict):
+            continue
+        for key in ("containing", "before", "after", "a", "d"):
+            ids |= _event_agent_ids(record.get(key))
+        ids |= _event_agent_ids(record)
+    return ids
+
+
+def _gate_quantities_of(event: dict | None) -> dict[str, float]:
+    """The mass/load that admits the draw for one event kind."""
+    if not event:
+        return {}
+    kind = event.get("kind")
+    if kind == "hand_to_mouth":
+        return {"hand_load_gec": event["hand_load_gec"]}
+    if kind == "hand_contact_dose":
+        return {
+            "acquired_gec": event["acquired_gec"],
+            "hand_load_gec": event["hand_load_before_gec"],
+        }
+    if kind == "hand_contact":
+        return {
+            f"donor_hand|{donor['agent_id']}": donor["hand_load_gec"]
+            for donor in event.get("donors", ())
+        }
+    if kind == "deliver_one":
+        return {
+            "delivered_gec": event["delivered_gec"],
+            "hand_load_gec": event["hand_load_before_gec"],
+        }
+    if kind in ("deliver", "deliver_by_class", "sanitary_deliver_by_class"):
+        gates = {
+            f"class_mass|{event['zone']}|{cls}": mass
+            for cls, mass in event.get("class_mass_before_gec", {}).items()
+        }
+        if "surface_mass_gec" in event:
+            gates["surface_mass_gec"] = event["surface_mass_gec"]
+        return gates
+    if kind in ("pickup_request",):
+        return {"surface_mass_gec": event["surface_mass_gec"]}
+    if kind in ("class_pickup_requests", "ps_consume"):
+        return {
+            f"class_mass|{event['zone']}|{cls}": mass
+            for cls, mass in event.get("class_mass_before_gec", {}).items()
+        }
+    if kind in ("consume", "consume_by_class"):
+        return {"previous_mass_gec": event["previous_mass_gec"]}
+    if kind == "deposit":
+        return {"mass_gec": event["mass_gec"]}
+    return {}
+
+
+def _gate_quantities(
+    enc_a: dict, enc_d: dict, first_diff: dict | None,
+    snap_a: dict, snap_d: dict, zone: str | None,
+) -> dict[str, dict[str, float]]:
+    """Paired gate quantities for the classifier, per the frozen rule."""
+    quantities: dict[str, dict[str, float]] = {}
+
+    def merge(name: str, va: float, vd: float) -> None:
+        quantities[name] = {"a": float(va), "d": float(vd)}
+
+    event_a = (enc_a or {}).get("containing") or (
+        (enc_a or {}).get("before")
+    )
+    event_d = (enc_d or {}).get("containing") or (
+        (enc_d or {}).get("before")
+    )
+    names = set(_gate_quantities_of(event_a)) | set(
+        _gate_quantities_of(event_d),
+    )
+    for name in sorted(names):
+        merge(
+            name,
+            _gate_quantities_of(event_a).get(name, 0.0),
+            _gate_quantities_of(event_d).get(name, 0.0),
+        )
+    if first_diff:
+        for side, event in (("a", first_diff.get("a")),
+                            ("d", first_diff.get("d"))):
+            for name, value in _gate_quantities_of(event).items():
+                quantities.setdefault(name, {"a": 0.0, "d": 0.0})
+                quantities[name][side] = float(value)
+    if zone is not None:
+        merge(
+            f"surface_mass|{zone}",
+            snap_a["zone_gec"].get(zone, 0.0),
+            snap_d["zone_gec"].get(zone, 0.0),
+        )
+        for key in sorted(set(snap_a["zone_class_gec"]) | set(
+            snap_d["zone_class_gec"],
+        )):
+            if key.rsplit("|", 1)[0] == zone:
+                merge(
+                    f"class_mass|{key}",
+                    snap_a["zone_class_gec"].get(key, 0.0),
+                    snap_d["zone_class_gec"].get(key, 0.0),
+                )
+    return quantities
+
+
 def classify_divergence(quantities: dict[str, dict[str, float]]) -> dict:
     """The frozen mechanical rule of ledger NORO-TOUCH-SHARE-02 section 1.
 
-    ``quantities`` maps a gate-quantity name (zone surface mass, item-class
-    mass, delivered mass, hand load) to ``{"a": value_A, "d": value_D}``.
+    ``quantities`` maps a gate-quantity name (the mass or hand load that
+    admits the draw at d*) to ``{"a": value_A, "d": value_D}``.
     ``archetype`` fires when any quantity is a residue ``0 < |v| < 1e-12``
-    in one arm while the other arm's is ``<= 0`` or differs in gate outcome;
-    ``expected`` needs every differing pair to be either both >= 1e-12 or an
-    exact 0.0 against >= 1e-12; anything else, and empty evidence, is
-    ``other``.
+    in one arm while the other arm's is ``<= 0`` or the pair differs (the
+    gate took the other branch); ``expected`` needs every differing pair to
+    be either both >= 1e-12 or an exact 0.0 against >= 1e-12; anything else,
+    and empty evidence, is ``other``.
     """
     if not quantities:
         return {
@@ -689,10 +1126,8 @@ def classify_divergence(quantities: dict[str, dict[str, float]]) -> dict:
         residue = 0.0 < abs(va) < RESIDUE_FLOOR_GEC or (
             0.0 < abs(vd) < RESIDUE_FLOOR_GEC
         )
-        if residue:
-            other = vd if abs(va) < RESIDUE_FLOOR_GEC else va
-            if other <= 0.0 or va != vd:
-                archetype_hits.append(name)
+        if residue and (va != vd or min(va, vd) <= 0.0):
+            archetype_hits.append(name)
         if va != vd:
             differing.append(name)
             both_real = (
@@ -725,28 +1160,6 @@ def classify_divergence(quantities: dict[str, dict[str, float]]) -> dict:
 def _ctx_zone(ctx: int) -> str | None:
     name = _ctx_name(ctx)
     return name.rsplit("|", 1)[1] if "|" in name else None
-
-
-def _relevant_quantities(
-    snap_a: dict, snap_d: dict, zone: str | None,
-) -> dict[str, dict[str, float]]:
-    """Gate quantities the classification reads for the d* context's zone."""
-    quantities: dict[str, dict[str, float]] = {}
-    if zone is not None:
-        quantities[f"surface_mass|{zone}"] = {
-            "a": snap_a["zone_gec"].get(zone, 0.0),
-            "d": snap_d["zone_gec"].get(zone, 0.0),
-        }
-    for key in sorted(set(snap_a["zone_class_gec"]) | set(
-        snap_d["zone_class_gec"],
-    )):
-        key_zone = key.rsplit("|", 1)[0]
-        if zone is None or key_zone == zone:
-            quantities[f"class_mass|{key}"] = {
-                "a": snap_a["zone_class_gec"].get(key, 0.0),
-                "d": snap_d["zone_class_gec"].get(key, 0.0),
-            }
-    return quantities
 
 
 def _ordering_witness(
@@ -816,22 +1229,66 @@ def _counts_snapshot(arm: Arm) -> dict[str, int]:
     return {key: int(arm.counts.get(key, 0)) for key in COUNTER_KEYS}
 
 
+def _hand_load_rows(
+    hands_a: dict[int, float], hands_d: dict[int, float],
+    named: set[int],
+) -> dict[str, Any]:
+    """Start-of-epoch loads for named agents and for all differing agents."""
+    differing = [
+        aid for aid in set(hands_a) | set(hands_d)
+        if hands_a.get(aid, 0.0) != hands_d.get(aid, 0.0)
+    ]
+    differing.sort(
+        key=lambda aid: -abs(
+            hands_a.get(aid, 0.0) - hands_d.get(aid, 0.0),
+        ),
+    )
+    emit = sorted(named | set(differing[:HAND_DIFF_CAP]))
+    return {
+        "differing_agent_count": len(differing),
+        "agents": {
+            str(aid): {
+                "a": hands_a.get(aid, 0.0),
+                "d": hands_d.get(aid, 0.0),
+            }
+            for aid in emit
+        },
+    }
+
+
 def _divergence_record(
     epoch: int, gen: str, d_star: int | None,
     arm_a: Arm, arm_d: Arm, snap_a: dict, snap_d: dict,
+    hands_a: dict, hands_d: dict,
     counts_start: dict[str, dict], ordering: dict | None,
 ) -> dict[str, Any]:
     trace_a = getattr(arm_a, f"{gen}_rng").trace
     trace_d = getattr(arm_d, f"{gen}_rng").trace
-    ctx = trace_a[d_star][0] if d_star is not None and d_star < len(
-        trace_a,
-    ) else 0
-    quantities = _relevant_quantities(snap_a, snap_d, _ctx_zone(ctx))
-    for event in arm_a.events[-3:] + arm_d.events[-3:]:
-        for key, value in event.items():
-            if key.endswith("_gec") or key == "hand_load_gec":
-                quantities.setdefault(f"event.{key}", {"a": value, "d": value})
-    record = {
+    enc_a = enc_d = {"containing": None, "before": None, "after": None}
+    if d_star is not None:
+        enc_a = _enclosing_event(arm_a.events, d_star)
+        enc_d = _enclosing_event(arm_d.events, d_star)
+    last_aligned, first_diff = _structural_diff(
+        arm_a.events, arm_d.events,
+    )
+    zones = {
+        ev.get("zone")
+        for ev in (
+            enc_a.get("containing"), enc_a.get("before"),
+            enc_d.get("containing"), enc_d.get("before"),
+            (first_diff or {}).get("a"), (first_diff or {}).get("d"),
+        )
+        if isinstance(ev, dict) and ev.get("zone")
+    }
+    zone = sorted(zones)[0] if zones else None
+    ctx_entry = trace_a[d_star] if (
+        d_star is not None and d_star < len(trace_a)
+    ) else None
+    if ctx_entry is not None and _ctx_zone(ctx_entry[0]) is not None:
+        zones.add(_ctx_zone(ctx_entry[0]))
+    quantities = _gate_quantities(enc_a, enc_d, first_diff, snap_a, snap_d, zone)
+    named = _named_agents(enc_a, enc_d, first_diff or {})
+    return {
         "epoch": epoch,
         "generator": gen,
         "d_star_index": d_star,
@@ -845,7 +1302,14 @@ def _divergence_record(
         ),
         "window_a": _trace_window(trace_a, d_star or 0),
         "window_d": _trace_window(trace_d, d_star or 0),
-        "mass_diffs": _mass_diffs(snap_a, snap_d),
+        "enclosing_event_a": enc_a,
+        "enclosing_event_d": enc_d,
+        "last_aligned_event_index": last_aligned,
+        "first_structural_diff": first_diff,
+        "hand_loads_at_epoch_start": _hand_load_rows(
+            hands_a, hands_d, named,
+        ),
+        "mass_diffs": _mass_diffs(snap_a, snap_d, zones),
         "events_a": arm_a.events,
         "events_d": arm_d.events,
         "counts_at_epoch_start": counts_start,
@@ -855,11 +1319,11 @@ def _divergence_record(
         "ordering_witness": ordering,
         "classification": classify_divergence(quantities),
     }
-    return record
 
 
 def _compare_epoch(
     epoch: int, arm_a: Arm, arm_d: Arm, snap_a: dict, snap_d: dict,
+    hands_a: dict, hands_d: dict,
     counts_start: dict[str, dict], ordering: dict | None,
 ) -> tuple[dict | None, bool]:
     """Compare both traced streams; return (record, aligned) for the epoch."""
@@ -879,7 +1343,8 @@ def _compare_epoch(
             return (
                 _divergence_record(
                     epoch, gen, d_star, arm_a, arm_d,
-                    snap_a, snap_d, counts_start, ordering,
+                    snap_a, snap_d, hands_a, hands_d,
+                    counts_start, ordering,
                 ),
                 False,
             )
@@ -887,7 +1352,8 @@ def _compare_epoch(
         return (
             _divergence_record(
                 epoch, "core", None, arm_a, arm_d,
-                snap_a, snap_d, counts_start, ordering,
+                snap_a, snap_d, hands_a, hands_d,
+                counts_start, ordering,
             ),
             False,
         )
@@ -908,21 +1374,25 @@ def run_seed(
     epoch_rows: list[dict] = []
     divergence: dict | None = None
     ordering: dict | None = None
+    hands_a: dict = {}
+    hands_d: dict = {}
+    prev_hands: dict = {}
     with lockstep_instrumented(_ACTIVE):
         for epoch in range(epochs):
             aligned = divergence is None
             snap_a = snap_d = counts_start = None
+            if aligned:
+                prev_hands = {"a": hands_a, "d": hands_d}
+                hands_a = _snapshot_hand_loads(arm_a.sim)
+                hands_d = _snapshot_hand_loads(arm_d.sim)
+                snap_a = _snapshot_masses(arm_a.sim.tx_core, PATHOGEN_ID)
+                snap_d = _snapshot_masses(arm_d.sim.tx_core, PATHOGEN_ID)
+                counts_start = {
+                    "a": _counts_snapshot(arm_a),
+                    "d": _counts_snapshot(arm_d),
+                }
             for arm in (arm_a, arm_d):
                 if aligned:
-                    snap = _snapshot_masses(arm.sim.tx_core, PATHOGEN_ID)
-                    if arm is arm_a:
-                        snap_a = snap
-                    else:
-                        snap_d = snap
-                    if arm is arm_a:
-                        counts_start = {"a": _counts_snapshot(arm_a)}
-                    else:
-                        counts_start["d"] = _counts_snapshot(arm_d)
                     arm.begin_epoch()
                 _ACTIVE["arm"] = arm
                 arm.sim.step()
@@ -934,9 +1404,12 @@ def run_seed(
                     )
                 divergence, still = _compare_epoch(
                     epoch, arm_a, arm_d, snap_a, snap_d,
-                    counts_start, ordering,
+                    hands_a, hands_d, counts_start, ordering,
                 )
                 if not still:
+                    divergence["hand_loads_prev_epoch"] = _hand_load_rows(
+                        prev_hands["a"], prev_hands["d"], set(),
+                    ) if prev_hands.get("a") else None
                     for arm in (arm_a, arm_d):
                         arm.root_rng.recording = False
                         arm.core_rng.recording = False
