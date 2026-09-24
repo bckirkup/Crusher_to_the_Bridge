@@ -132,7 +132,13 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # records) moves one campaign positive on 3.11 the same as on 3.12:
         # (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0), read from CI job
         # 106118699889 (fast tier, 3.11, shard 3) on this branch.
-        (3, 11): (1, 1, 217, 5, 0),
+        # AERO-SPLIT-01 partitions continuous droplet emission into a
+        # partner-bounded near-field plume and a 0.175 far-field pool share;
+        # droplet reach collapses to the proximity ring and the cell goes
+        # extinct: (1, 1, 217, 5, 0) -> (0, 0, 217, 1, 0), read from CI job
+        # 107697563827 (fast tier, 3.11, shard 3) on this branch — both
+        # interpreters agree, as before on near-extinct cells.
+        (3, 11): (0, 0, 217, 1, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
