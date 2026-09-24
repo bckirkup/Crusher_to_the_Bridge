@@ -964,6 +964,29 @@ DEFAULT_NEAR_FIELD_INTERZONAL_AIRFLOW_M3_PER_HOUR = 204.0
 # declaration, Origin: T3, and is not fitted to a campaign anchor.
 DEFAULT_NEAR_FIELD_NEIGHBOUR_TABLE_RATIO = 0.43
 
+# AERO-SPLIT-01. Of a shedder's continuous droplet-channel emission, the share
+# that room-mixes into the far-field pool. Only droplets that evaporate to
+# <=~5 um nuclei (initial diameter <=~15 um) contribute to the long-range
+# route at all (Li Y. et al. 2021, Indoor Air, DOI 10.1111/ina.12946, Guilin
+# restaurant reconstruction); coarser spray settles within ~1.5-2 m (Xie et
+# al. 2007, Indoor Air, DOI 10.1111/j.1600-0668.2007.00469.x) or deposits
+# inside the breathing zone its partners share. The <=5 um band carrying
+# ~85-90% of exhaled SARS-CoV-2 RNA (Coleman 2022, Clin Infect Dis, DOI
+# 10.1093/cid/ciab691; Alsved 2022, Infect Dis, DOI
+# 10.1080/23744235.2022.2140822) is the airborne band — the reservoir route's
+# share — so the room-reachable tail of the droplet channel is a small
+# fraction of it, not its bulk.
+# Grade C: composite bound — measured size/partition physics applied to the
+# engine's droplet channel. Declared interval [0.05, 0.30], shipped midpoint;
+# swept, never fit to a scored record.
+
+DEFAULT_DROPLET_FIELD_SPLIT_MODE = "partition"
+DEFAULT_DROPLET_FIELD_SPLIT_FAR_SHARE = 0.175
+# Share routed to surfaces/decay instead of air: the ballistic deposit. Zero
+# until a surface path consumes it; the partition conserves
+# far + near + settled = emitted.
+DEFAULT_DROPLET_FIELD_SPLIT_SETTLED_SHARE = 0.0
+
 # Hand → food transfer efficiency per bare-hand contact with communal or
 # served food. Span of the measured means across food matrices and studies:
 # finger → tomato 0.3 ± 0.5 % and → cucumber 7 ± 8 % (Tuladhar 2013, MNV-1),
@@ -1374,6 +1397,74 @@ def _parse_near_field_air(tx: dict[str, Any]) -> NearFieldAir:
         mode=mode,
         interzonal_airflow_m3_per_hour=beta,
         neighbour_table_ratio=rho,
+    )
+
+
+@dataclass(frozen=True)
+class DropletFieldSplit:
+    """Declared droplet-emission partition (AERO-SPLIT-01).
+
+    Continuous droplet emission divides three ways at the source: the far
+    field's room-pool share, the near field's partner-bounded plume share,
+    and a settled share routed to surfaces and decay. ``off`` is the
+    labelled pre-change baseline — the pool carries the whole continuous
+    share, exactly as before the partition landed.
+    """
+
+    mode: str = DEFAULT_DROPLET_FIELD_SPLIT_MODE
+    far_field_share: float = DEFAULT_DROPLET_FIELD_SPLIT_FAR_SHARE
+    settled_share: float = DEFAULT_DROPLET_FIELD_SPLIT_SETTLED_SHARE
+
+    @property
+    def active(self) -> bool:
+        return self.mode == "partition"
+
+    @property
+    def near_field_share(self) -> float:
+        return 1.0 - self.far_field_share - self.settled_share
+
+
+def _droplet_split_fraction(
+    block: dict[str, Any],
+    key: str,
+    default: float,
+) -> float:
+    raw = block.get(key, default)
+    value = float(raw)
+    if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(
+            f"transmission.droplet_field_split.{key} must be finite in "
+            f"[0, 1], got {raw!r}",
+        )
+    return value
+
+
+def _parse_droplet_field_split(tx: dict[str, Any]) -> DropletFieldSplit:
+    """Read the AERO-SPLIT-01 emission partition."""
+    block = tx.get("droplet_field_split") or {}
+    if not isinstance(block, dict):
+        raise ValueError("transmission.droplet_field_split must be a mapping")
+    mode = str(block.get("mode", DEFAULT_DROPLET_FIELD_SPLIT_MODE))
+    if mode not in {"partition", "off"}:
+        raise ValueError(
+            "transmission.droplet_field_split.mode must be 'partition' or "
+            f"'off', got {mode!r}",
+        )
+    far = _droplet_split_fraction(
+        block, "far_field_share", DEFAULT_DROPLET_FIELD_SPLIT_FAR_SHARE,
+    )
+    settled = _droplet_split_fraction(
+        block, "settled_share", DEFAULT_DROPLET_FIELD_SPLIT_SETTLED_SHARE,
+    )
+    if far + settled > 1.0:
+        raise ValueError(
+            "transmission.droplet_field_split shares must sum to <= 1, "
+            f"got far_field_share {far} + settled_share {settled}",
+        )
+    return DropletFieldSplit(
+        mode=mode,
+        far_field_share=far,
+        settled_share=settled,
     )
 
 
@@ -1812,6 +1903,9 @@ class TransmissionCore:
                 "hourly clock: a visit cannot be timed on a day-long epoch",
             )
         self.near_field_air = _parse_near_field_air(
+            (cfg or {}).get("transmission", {}) or {},
+        )
+        self.droplet_field_split = _parse_droplet_field_split(
             (cfg or {}).get("transmission", {}) or {},
         )
         self.near_field_flushed_volume_m3_per_epoch = (
@@ -3714,23 +3808,45 @@ class TransmissionCore:
         target: KorkinAgent,
         shedder: KorkinAgent,
         epoch: int,
+        proximity_ids: frozenset[int] | None = None,
     ) -> float | None:
-        """Return the near-field weight for a co-located shedding partner."""
+        """Return the near-field weight for a co-located shedding partner.
+
+        The declared rings, strongest first: cabin mate in a Cabin_Corridor
+        (1.0), same meal table (1.0), adjacent table (rho), and under
+        AERO-SPLIT-01 a shedder drawn into the target's partner-bounded
+        proximity set this epoch (1.0) — a sampled partner stands in the
+        breathing zone whatever the venue's fixed rings say. Without a
+        proximity set the weights are exactly the pre-partition rings.
+        """
         near = self.near_field_air
         if shedder.agent_id == target.agent_id:
             return None
+        weight: float | None
         if shedder.agent_id in target.cabin_mate_ids:
             if self.zone_types.get(zone_name) != "Cabin_Corridor":
-                return None
-            return 1.0
-        table = self._table_party(zone_name, target, epoch)
-        if table is None or self._table_party(zone_name, shedder, epoch) is None:
-            return None
-        if shedder.agent_id in table[0]:
-            return 1.0
-        if self._adjacent_table(target, shedder, epoch):
-            return near.neighbour_table_ratio
-        return None
+                weight = None
+            else:
+                weight = 1.0
+        else:
+            table = self._table_party(zone_name, target, epoch)
+            if (
+                table is None
+                or self._table_party(zone_name, shedder, epoch) is None
+            ):
+                weight = None
+            elif shedder.agent_id in table[0]:
+                weight = 1.0
+            elif self._adjacent_table(target, shedder, epoch):
+                weight = near.neighbour_table_ratio
+            else:
+                weight = None
+        if (
+            proximity_ids is not None
+            and shedder.agent_id in proximity_ids
+        ):
+            weight = 1.0
+        return weight
 
     def _table_party(
         self,
@@ -3893,20 +4009,39 @@ class TransmissionCore:
         target_factor: float,
         emission_fraction: float,
         epoch: int,
+        *,
+        proximity_ids: frozenset[int] | None = None,
+        near_share: float | None = None,
     ) -> float:
-        """AERO-NEAR-02 two-box excess concentration over the far field."""
+        """AERO-NEAR-02 two-box excess, or the AERO-SPLIT-01 plume share.
+
+        Pre-partition form (``near_share`` None): the difference-of-
+        concentrations excess of the near-field concentration over the far
+        field's, added on top of a pool that already carries the whole
+        continuous share. Partition form: the near share of each shedder's
+        spray delivered at plume concentration — the pool then carries only
+        the far share, so the near field is a partition of mass, not an
+        excess on top of it.
+        """
         near = self.near_field_air
         if not near.active:
             return 0.0
-        gain = (
-            1.0 / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
-            - 1.0 / max(volume, 1.0)
-        )
+        if near_share is None:
+            gain = (
+                1.0 / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
+                - 1.0 / max(volume, 1.0)
+            )
+        else:
+            gain = near_share / max(
+                self.near_field_flushed_volume_m3_per_epoch, 1.0,
+            )
         if gain <= 0.0:
             return 0.0
         dose = 0.0
         for shedder, emitted in emitted_shedders:
-            weight = self._near_field_unit(zone_name, target, shedder, epoch)
+            weight = self._near_field_unit(
+                zone_name, target, shedder, epoch, proximity_ids,
+            )
             if weight is None or weight <= 0.0:
                 continue
             pair_factor = target_factor
@@ -3924,6 +4059,41 @@ class TransmissionCore:
                 * pair_factor
             )
         return dose
+
+    def _proximity_shedder_ids(
+        self,
+        target: KorkinAgent,
+        shedders: list[tuple[KorkinAgent, float]],
+        n_occupants: int,
+        unit_name: str,
+        zone_name: str,
+        epoch: int,
+    ) -> frozenset[int]:
+        """The shedders sharing the target's breathing zone this epoch.
+
+        AERO-SPLIT-01's partner bound is the contact draw the direct-contact
+        path already samples: the CONTACT-ARCH-01 partner count is a >=3-word
+        conversation or touch (Pung 2022), i.e. inside the breathing zone the
+        near field represents. An independent draw of the same distribution —
+        rather than the contact path's own sample — keeps the two pathways'
+        RNG streams uncoupled; a shedder's reach is bounded by partner count
+        either way. Only entered under the partition, so a non-partition run
+        draws nothing here.
+        """
+        if self.activity_contacts is not None:
+            partner_draw = self._activity_contact_draw(
+                target, unit_name, zone_name, False, epoch,
+            )
+        else:
+            mean = self.clock.amount_per_epoch(POLYMOD_CONTACTS_PER_DAY)
+            mean *= float(self.voyage_contact_multiplier)
+            partner_draw = max(0, int(self.rng.poisson(mean)))
+        partners, _drawn = self._sample_contact_partners(
+            shedders, n_occupants, partner_draw,
+        )
+        return frozenset(
+            shedder.agent_id for shedder, _sv in partners
+        )
 
     def _cabin_pair_contact_factor(
         self, shedder: KorkinAgent, target: KorkinAgent,
@@ -5104,6 +5274,7 @@ class TransmissionCore:
                 pathogen_id, ledger,
                 near_field_on=near_field_on,
                 emission_fraction=emission_fraction,
+                n_occupants=len(occupants),
             )
 
     def _droplet_unit_doses(
@@ -5120,6 +5291,7 @@ class TransmissionCore:
         *,
         near_field_on: bool,
         emission_fraction: float,
+        n_occupants: int,
     ) -> None:
         """One air unit's shedders dosing its own susceptibles."""
         zone_name = self.compartment_parent(unit_name)
@@ -5127,9 +5299,21 @@ class TransmissionCore:
             (shedder, sv * self.confinement_emission_factor(shedder))
             for shedder, sv in shedders
         ]
-        total_aerosol = sum(
-            emitted * emission_fraction
-            for _, emitted in emitted_shedders
+        # AERO-SPLIT-01: under the partition the room pool receives only the
+        # declared far-field share; the near share reaches the unit's
+        # susceptibles through the partner-bounded plume alone. The mode
+        # requires the near field — without it the spray has nowhere else to
+        # go — so a ``near_field_air: off`` run keeps the whole pool.
+        partition = self.droplet_field_split.active and near_field_on
+        pool_share = (
+            self.droplet_field_split.far_field_share if partition else 1.0
+        )
+        total_aerosol = (
+            sum(
+                emitted * emission_fraction
+                for _, emitted in emitted_shedders
+            )
+            * pool_share
         )
 
         self.aerosol_pools[zone_name] = (
@@ -5159,15 +5343,28 @@ class TransmissionCore:
             dose *= target_factor
             dose += self._cabin_mate_droplet_addback(
                 target, shedders, volume, vent_factor, target_factor,
-                emission_fraction,
+                emission_fraction * pool_share,
             )
             near_dose = 0.0
             if near_field_on:
+                proximity_ids = (
+                    self._proximity_shedder_ids(
+                        target, shedders, n_occupants,
+                        unit_name, zone_name, epoch,
+                    )
+                    if partition else None
+                )
                 # Difference-of-concentrations form: against the unit's own
                 # volume, so it vanishes once the unit is the stateroom.
+                # Under the partition it is the near share's plume dose.
                 near_dose = self._near_field_droplet_dose(
                     zone_name, target, emitted_shedders, volume,
                     target_factor, emission_fraction, epoch,
+                    proximity_ids=proximity_ids,
+                    near_share=(
+                        self.droplet_field_split.near_field_share
+                        if partition else None
+                    ),
                 )
             dose += near_dose
             dose = self._accumulate(

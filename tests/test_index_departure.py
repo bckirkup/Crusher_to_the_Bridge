@@ -165,6 +165,11 @@ class TestTransmissionGating:
             pathogen_profiles={PATHOGEN: _profile()},
             zone_types={ZONE: "Dining"},
             clock=_clock(),
+            # AERO-SPLIT-01: the partition dilutes the pool to far_field_share,
+            # which drops this one-shedder fixture below the infection
+            # threshold entirely; the departure gate is exercised on the
+            # labelled pre-change pool.
+            cfg={"transmission": {"droplet_field_split": {"mode": "off"}}},
         )
         core.initialize_zones([ZONE])
         return core
@@ -223,6 +228,10 @@ class TestGradedDeparture:
             pathogen_profiles={PATHOGEN: _profile()},
             zone_types={ZONE: "Dining"},
             clock=_clock(),
+            # AERO-SPLIT-01: see TestTransmissionGating — the partition
+            # dilutes this fixture's pool below threshold; the ordered
+            # departure sweep stays meaningful on the pre-change pool.
+            cfg={"transmission": {"droplet_field_split": {"mode": "off"}}},
         )
         core.initialize_zones([ZONE])
         total = 0

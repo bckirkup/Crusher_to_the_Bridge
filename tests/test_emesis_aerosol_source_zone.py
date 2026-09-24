@@ -91,7 +91,14 @@ def _core(
         # Hold droplet on the pre-change uniform arm so the emesis switch
         # (presence of airborne_emission_mode) no longer also moves the
         # droplet share — the invariants below isolate the emesis route.
-        cfg={"transmission": {"droplet_emission_mode": "shipped_uniform"}},
+        # AERO-SPLIT-01: an emesis_conditioned arm has no near field and so
+        # keeps the whole pool under the partition while a respiratory arm
+        # carries only far_field_share — the route-separation invariant is
+        # asserted on the labelled pre-change pool.
+        cfg={"transmission": {
+            "droplet_emission_mode": "shipped_uniform",
+            "droplet_field_split": {"mode": "off"},
+        }},
     )
     core.initialize_zones([ZONE, DOWNSTREAM])
     return core

@@ -117,9 +117,16 @@ class TestAssignDiningParties:
 
 
 def _core(share: float | None, seed: int = 11) -> TransmissionCore:
-    cfg = {"transmission": {}} if share is None else {
-        "transmission": {"dining_party_contact_share": share},
-    }
+    # AERO-SPLIT-01: the shipped partition's proximity ring reads the
+    # activity through `_contact_activity`, so a seated diner draws at the
+    # dining_table rate while a partyless one draws dining_venue — different
+    # means move the stream and break the share-0 == partyless identity the
+    # contact-draw tests assert. The off baseline keeps these tests on the
+    # DINE-PARTY-01 semantics they pin.
+    tx: dict = {"droplet_field_split": {"mode": "off"}}
+    if share is not None:
+        tx["dining_party_contact_share"] = share
+    cfg = {"transmission": tx}
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={MDR: 2000.0, BUFFET: 2000.0},

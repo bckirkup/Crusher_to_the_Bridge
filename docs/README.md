@@ -87,6 +87,7 @@ python3 presidio_runner.py \
 |-----|--------|
 | [SHEDDING_AND_CABINMATES.md](SHEDDING_AND_CABINMATES.md) | Implemented — per-agent shedding variance, cabin-mate pairing |
 | [near_field_air_spec.md](near_field_air_spec.md) | Implemented, on by default (`two_box`) — `AERO-NEAR-02`, β interzonal airflow 204 m³/h with ρ 0.43; `off` is the labelled baseline and buffet/crew-mess tables are dealt per meal |
+| [droplet_field_split_spec.md](droplet_field_split_spec.md) | Implemented, on by default (`partition`) — `AERO-SPLIT-01`: the zone pool carries only `far_field_share` of continuous droplet emission, the rest reaching a partner-bounded proximity ring at plume concentration; `off` is the labelled pre-change whole-pool baseline |
 | [cabin_air_compartment_spec.md](cabin_air_compartment_spec.md) | Implemented, off by default — `AERO-CABIN-01`, the stateroom as the inhalation unit inside a `Cabin_Corridor` (`transmission.cabin_air_mode`, `zone_pool` default is the pre-change whole-corridor pool); block volume partitioned by berths, no constant added |
 | [density_contact_spec.md](density_contact_spec.md) | Implemented — `per_partner_contact` is the default; the zone-average mode it replaced was superseded by #329 |
 | [contact_architecture_spec.md](contact_architecture_spec.md) | Implemented, off by default — `transmission.activity_contacts` derives the contact draw from schedule, zone type, mixing unit and duty state; no rate adopted, no campaign run |
