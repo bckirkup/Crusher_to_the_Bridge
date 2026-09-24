@@ -218,6 +218,14 @@ def test_readout_seed_statistics() -> None:
                 "requested_gec": 4.0, "delivered_gec": 2.0,
                 "calls": 4, "capped_calls": 0, "hosts_credited": 2,
             },
+            "public.grab_rail_m": {
+                "requested_gec": 4.0, "delivered_gec": 6.0,
+                "calls": 4, "capped_calls": 0, "hosts_credited": 2,
+            },
+            "cabin.door_lever": {
+                "requested_gec": 1.0, "delivered_gec": 2.0,
+                "calls": 2, "capped_calls": 0, "hosts_credited": 1,
+            },
         },
         10.0, 3,
     )
@@ -226,8 +234,16 @@ def test_readout_seed_statistics() -> None:
         {1: 1.0, 3: 1.0},
         {
             "public.button_or_dispenser": {
-                "requested_gec": 8.0, "delivered_gec": 4.0,
+                "requested_gec": 8.0, "delivered_gec": 6.0,
                 "calls": 4, "capped_calls": 1, "hosts_credited": 3,
+            },
+            "public.grab_rail_m": {
+                "requested_gec": 8.0, "delivered_gec": 2.0,
+                "calls": 4, "capped_calls": 0, "hosts_credited": 3,
+            },
+            "cabin.door_lever": {
+                "requested_gec": 2.0, "delivered_gec": 4.0,
+                "calls": 4, "capped_calls": 0, "hosts_credited": 2,
             },
         },
         20.0, 5,
@@ -241,10 +257,13 @@ def test_readout_seed_statistics() -> None:
     assert row["delivered_ratio"] == pytest.approx(1.0)
     assert row["credited_scaled_ratio"] == pytest.approx(2.0)
     assert row["secondaries_delta"] == 2
-    assert row["focus_share_gain"] == pytest.approx(1.0 - 1.0)
-    assert row["per_class"]["public.button_or_dispenser"][
-        "capped_share_declared"
-    ] == pytest.approx(0.25)
+    button = row["per_class"]["public.button_or_dispenser"]
+    assert button["delivered_share_areal"] == pytest.approx(0.2)
+    assert button["delivered_share_declared"] == pytest.approx(0.5)
+    assert button["zone_share_areal"] == pytest.approx(0.25)
+    assert button["zone_share_declared"] == pytest.approx(0.75)
+    assert row["focus_share_gain"] == pytest.approx(0.75 - 0.25)
+    assert button["capped_share_declared"] == pytest.approx(0.25)
 
 
 def test_readout_gini_and_verdict() -> None:

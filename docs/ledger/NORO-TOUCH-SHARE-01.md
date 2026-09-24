@@ -145,7 +145,8 @@ quantity attributable to an item class. Whole-voyage credited-scaled dose
 2. `jaccard`: |H_A ∩ H_D| / |H_A ∪ H_D| over those host sets.
 3. Concentration per arm: Gini of per-host fomite-delivered share and
    top-decile share.
-4. Per item class per arm: share of delivered mass; distinct hosts credited
+4. Per (zone class, item class) per arm: share of delivered mass (of the
+   ship total, and of that zone class's total); distinct hosts credited
    from that class; capped-call share (`capped_calls / calls`).
 
 **Secondary (distributional only, no pass/fail).** Whole-voyage
@@ -154,8 +155,10 @@ all reported as median and [min, max] over seeds.
 
 **Admissibility rule.** The declared table *changes coincidence* if, over
 the 20 seeds, (a) median `jaccard` < 0.90 **and** (b) in ≥ 15 seeds the
-`public.button_or_dispenser` delivered-mass share exceeds its areal-arm
-share by > 0.10 absolute. It is *inert* if H_A == H_D on all 20 seeds
+`public.button_or_dispenser` share of the *public zone class's* delivered
+mass exceeds its areal-arm share by > 0.10 absolute (the within-zone share,
+because public-zone mass is a small fraction of the ship total and a
+ship-total share could never move by 0.10). It is *inert* if H_A == H_D on all 20 seeds
 (stop and report). Otherwise *indeterminate at n = 20* (report; a larger
 block is a later AWS decision). Predicted direction: `button_or_dispenser`
 share of delivered mass rises and `grab_rail_m` falls in `public`; dining

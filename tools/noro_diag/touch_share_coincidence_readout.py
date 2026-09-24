@@ -103,20 +103,37 @@ def top_decile_share(values: list[float]) -> float:
 
 
 def _class_stats(cell: dict[str, Any]) -> dict[str, dict[str, float]]:
-    """Per item class: delivered share, hosts credited, capped-call share."""
+    """Per dotted class key: shares, hosts credited, capped-call share.
+
+    ``delivered_share`` is over the ship-total delivered mass;
+    ``zone_share`` is over keys sharing the same zone-class prefix (the
+    text before the first ``.``), which is the share the admissibility
+    rule reads: public-zone mass is a small fraction of the ship total,
+    so a ship-total share could never move by the frozen threshold.
+    """
     by_class = cell.get("fomite_by_class") or {}
     total_delivered = sum(
         float(b.get("delivered_gec", 0.0)) for b in by_class.values()
     )
+    zone_totals: dict[str, float] = {}
+    for key, bucket in by_class.items():
+        zone = key.split(".", 1)[0]
+        zone_totals[zone] = zone_totals.get(zone, 0.0) + float(
+            bucket.get("delivered_gec", 0.0),
+        )
     stats: dict[str, dict[str, float]] = {}
     for item_class, bucket in sorted(by_class.items()):
         delivered = float(bucket.get("delivered_gec", 0.0))
         calls = int(bucket.get("calls", 0))
         capped = int(bucket.get("capped_calls", 0))
+        zone_total = zone_totals.get(item_class.split(".", 1)[0], 0.0)
         stats[item_class] = {
             "delivered_gec": delivered,
             "delivered_share": (
                 delivered / total_delivered if total_delivered > 0.0 else 0.0
+            ),
+            "zone_share": (
+                delivered / zone_total if zone_total > 0.0 else 0.0
             ),
             "hosts_credited": int(bucket.get("hosts_credited", 0)),
             "calls": calls,
@@ -146,6 +163,12 @@ def compare_seed(
             "delivered_share_declared": classes_d.get(
                 item_class, {},
             ).get("delivered_share", 0.0),
+            "zone_share_areal": classes_a.get(
+                item_class, {},
+            ).get("zone_share", 0.0),
+            "zone_share_declared": classes_d.get(
+                item_class, {},
+            ).get("zone_share", 0.0),
             "hosts_credited_areal": classes_a.get(
                 item_class, {},
             ).get("hosts_credited", 0),
@@ -171,8 +194,8 @@ def compare_seed(
         ),
     )
     focus_gain = (
-        classes_d.get(focus_class, {}).get("delivered_share", 0.0)
-        - classes_a.get(focus_class, {}).get("delivered_share", 0.0)
+        classes_d.get(focus_class, {}).get("zone_share", 0.0)
+        - classes_a.get(focus_class, {}).get("zone_share", 0.0)
     )
     return {
         "seed": int(arm_cell["seed"]),
