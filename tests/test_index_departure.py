@@ -59,10 +59,10 @@ def _shedder(agent_id: int) -> KorkinAgent:
     return agent
 
 
-def _profile() -> dict:
+def _profile(shedding_log10: float = 7.0) -> dict:
     return {
-        "shedding_curve_log10": [7.0] * 40,
-        "asymptomatic_shedding_log10": [7.0] * 40,
+        "shedding_curve_log10": [shedding_log10] * 40,
+        "asymptomatic_shedding_log10": [shedding_log10] * 40,
         "symptom_onset_day": 0.0,
         "recovery_day": 1000.0,
         "airborne_half_life_hours": 24.0,
@@ -162,7 +162,11 @@ class TestTransmissionGating:
         core = TransmissionCore(
             rng=np.random.default_rng(19),
             zone_volumes={ZONE: 50.0},
-            pathogen_profiles={PATHOGEN: _profile()},
+            # NORO-GATE-FLOOR-01: at log10 7.0 this one-shedder zone builds a
+            # surface pool of 0.44 GEC, below one genome copy, so its whole
+            # fomite route ran on less than a virion. One log more puts the
+            # pool above SURFACE_PICKUP_MIN_GEC and the route back in play.
+            pathogen_profiles={PATHOGEN: _profile(8.0)},
             zone_types={ZONE: "Dining"},
             clock=_clock(),
             # AERO-SPLIT-01: the partition dilutes the pool to far_field_share,
@@ -192,8 +196,11 @@ class TestTransmissionGating:
 
         shedder.departure_epoch = 0
         shedder.current_location = LOCATION_DEPARTED
+        # The two arms are independent scenarios: susceptibles that carried
+        # the aboard arm's cumulative exposure into the gone arm can cross
+        # the challenge threshold on exposure the departed host never gave.
         gone_matrix, gone_events = self._run_epoch(
-            0, [shedder] + susceptibles,
+            0, [shedder] + [_agent(i) for i in range(1, 6)],
         )
         gone_summary = {row["zone"]: row for row in gone_matrix.zone_contact_summary}
         assert gone_summary[ZONE]["occupant_count"] == 5
@@ -225,7 +232,9 @@ class TestGradedDeparture:
         core = TransmissionCore(
             rng=np.random.default_rng(7),
             zone_volumes={ZONE: 200.0},
-            pathogen_profiles={PATHOGEN: _profile()},
+            # NORO-GATE-FLOOR-01: see TestTransmissionGating — the shipped
+            # shedding level leaves this fixture's pool sub-copy.
+            pathogen_profiles={PATHOGEN: _profile(8.0)},
             zone_types={ZONE: "Dining"},
             clock=_clock(),
             # AERO-SPLIT-01: see TestTransmissionGating — the partition

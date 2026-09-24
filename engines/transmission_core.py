@@ -52,6 +52,7 @@ from engines.fomite_surfaces import (
     UnitInventory,
     floor_surface_residue,
     parse_per_surface_config,
+    pickup_gate_open,
 )
 from engines.infection_dynamics_bridge import (
     ALPHA,
@@ -7139,7 +7140,7 @@ class TransmissionCore:
             surface_mass = self.surface_pools_by_pathogen.get(
                 pathogen_id, {},
             ).get(zone_name, self.surface_pools.get(zone_name, 0.0))
-            if surface_mass <= 0.0:
+            if not pickup_gate_open(surface_mass):
                 continue
             susceptible = self._get_susceptible(occupants, pathogen_id)
             if not susceptible:
@@ -7371,7 +7372,7 @@ class TransmissionCore:
                     if path_pools is not None
                     else self.surface_pools.get(venue, 0.0)
                 )
-                if surface_mass <= 0.0:
+                if not pickup_gate_open(surface_mass):
                     continue
                 request = self._fomite_pickup_requests_by_class(
                     agent, venue, epoch, pathogen_id,
@@ -7403,7 +7404,7 @@ class TransmissionCore:
                 if path_pools is not None
                 else self.surface_pools.get(venue, 0.0)
             )
-            if surface_mass <= 0.0:
+            if not pickup_gate_open(surface_mass):
                 continue
             request = (
                 self._fomite_pickup_request(agent, venue, surface_mass, epoch)
@@ -7595,7 +7596,8 @@ class TransmissionCore:
                 surface_mass = self.surface_pools.get(zone_name, 0.0)
             else:
                 surface_mass = path_pools.get(zone_name, 0.0)
-            if surface_mass <= 0:
+            # NORO-GATE-FLOOR-01: sub-copy pools consume no pickup RNG.
+            if not pickup_gate_open(surface_mass):
                 continue
 
             susceptible = self._get_susceptible(occupants, pathogen_id)
