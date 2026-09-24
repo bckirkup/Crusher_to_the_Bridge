@@ -223,7 +223,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # code. The local CPython 3.11 reading at the same commit is
         # (3399, 2963, 1987, 195, 64) (numpy 2.4.6) and stays unpinned
         # pending a CI reading, as the 3.11 entries above were.
-        (3, 12): (3418, 2942, 1894, 209, 68),
+        # AERO-SPLIT-01 (#669) partitions continuous droplet emission into a
+        # partner-bounded near-field plume and a 0.175 far-field pool share:
+        # the cell's droplet reach is bounded by contact rate, and the
+        # proximity draws reorder the shared stream, so this is intended
+        # physics plus the stream reorder the labelled off baseline exists
+        # to isolate. Measured locally on CPython 3.12 on the evidence
+        # branch: (3418, 2942, 1894, 209, 68) -> (3412, 2677, 2002, 199, 81).
+        # The 3.11 reading stays pending a CI run, as above.
+        (3, 12): (3412, 2677, 2002, 199, 81),
     },
 }
 
