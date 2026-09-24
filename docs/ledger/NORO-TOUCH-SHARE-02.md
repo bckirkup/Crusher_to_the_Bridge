@@ -226,8 +226,8 @@ sars_cov2_resp gate).
 path (the pooled pool also decays without a floor and only empties on a
 cap), so the shipped stream has been drawing pickups on residue pools
 wherever a zone was picked below its cap and never fully emptied. The
-Greg Mortimer detector move in §6 is consistent with this but is one
-cell, one seed.
+pre-merge Greg Mortimer detector move in §6 is consistent with this but
+is one cell, one seed, and is superseded on `main`.
 
 ## 6. Default-path change — surface residue floor (Benjamin, in-session)
 
@@ -254,9 +254,14 @@ the §6.1 exact-empty pattern; it is labelled a default-path change.
   repinned with attribution**: `tests/test_covid_hull_change_detector.py`
   greg_mortimer_2020 `(1, 1, 217, 5, 0) → (1, 1, 217, 2, 0)` (CPython
   3.12 local; parent commit `38ee2b4` reproduces the old tuple in a scratch
-  worktree; the 3.11 pin assumes the same move pending CI). Fewer
-  campaign positives because sars_cov2_resp pickups on residue pools no
-  longer occur. `diamond_princess_2020` (slow tier) already reads
+  worktree). Fewer campaign positives because sars_cov2_resp pickups on
+  residue pools no longer occur. **Superseded on merge with `main`**
+  (`d1b11b8`): AERO-SPLIT-01 (#670) had already driven that cell extinct,
+  `(0, 0, 217, 1, 0)`; the merged tree with the floor reads the same tuple
+  on CPython 3.12 (measured) and passes the 3.11 pin in CI, so on current
+  `main` the floor moves no pinned COVID detector. The 5 → 2 move stands
+  only as the pre-merge attribution measurement above.
+  `diamond_princess_2020` (slow tier) already reads
   `(3400, 3031, 1938, 197, 47)` against its pin at `56eaa0e` before this
   change — pre-existing drift, not touched here.
 - Hand loads (`hand_load_by_pathogen`) are **not** floored; the same
@@ -357,8 +362,9 @@ sars_cov2_resp gates; none is a norovirus event.
    closes at a physical threshold (hypothesis 1) and whether the declared
    table should be pathogen-scoped (inferred 3). If both are "no change",
    the block is justified as-is at the floor commit.
-2. The residue floor is now on the default path (§6); the Greg Mortimer
-   detector repin records its effect on one COVID cell.
+2. The residue floor is now on the default path (§6); on current `main`
+   it moves no pinned COVID detector (the pre-merge 5 → 2 Greg Mortimer
+   move is superseded by AERO-SPLIT-01's extinction of that cell).
 
 Successor items (not done here): event alignment in the -01 §4 rule;
 pathogen-scoping of the declared table; hand-load floor; physical
