@@ -13,6 +13,23 @@ over-burn, attack ~0.95 vs the record's ~712/3,711 ≈ 0.19). Declared in
 before any assay cell ran). Nothing in this entry is a result; it moves
 to measured when the canary is read out.
 
+## Stood down (2026-09-22, pre-execution)
+
+Execution is held pending route-architecture work. The exposure-level
+attribution added to the v1 readout (§2a) measured ~68% of transmission
+events in days 0–2 and ~88% by day 5 in public zones, ~99% droplet —
+and the droplet route's far field is a well-mixed room pool that doses
+every co-occupant, giving one shedder unbounded reach (day-0's 859
+secondaries all derive from the single index). Arms B7–B9 bound only
+`activity_contacts`, the contact route — ~0% of measured events — so
+they are inert-by-construction on the carrier, and B10's mixed floor
+inherits the same blind spot. The over-reach lives in the well-mixed-
+room assumption itself; the next step is a droplet near-field/far-field
+split (AERO-NEAR-02 currently adds a near-field excess over the pool —
+it does not bound the pool), which is engine surgery, not an arm assay.
+B1–B6 remain meaningful suspects but will be re-asked on the new route
+architecture.
+
 ## Declared (before any cell runs)
 
 SENS-ASSAY-V1's A11 arrest bound — crew confined, airborne pool off,
