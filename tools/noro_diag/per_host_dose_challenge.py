@@ -348,6 +348,9 @@ def _wrap_execute_pathways(core_cls: type, rec: Recorder) -> Any:
         previous = rec.current_pathogen
         rec.current_pathogen = pathogen_id
         rec.epoch = int(epoch)
+        rec.fomite_representation_seen = self.fomite_representation
+        if self._per_surface is not None:
+            rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
         try:
             return original(self, epoch, *args, **kwargs)
         finally:
