@@ -210,6 +210,27 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (`docs/ledger/PLUME-DOSE-V1.md`,
   `docs/covid/covid_plume_dose_assay_v1_readout.md`, measured at `2bcdeb7`,
   Batch job-def rev 20, image digest `sha256:aca8d6b8…`).
+- **`ROUTE-ATTR-V1` measured the whole-voyage routes and the observation
+  channel on the declared replay.** `tools/covid_route_attribution.py`
+  attributes every infection event (not just the during-quarantine slice):
+  the saturating seed burns 99.8% pre-quarantine, 90% droplet, in `other`
+  venues + crew mess; the slow seeds re-centre during quarantine on cabin
+  zones — the confinement channel. The droplet dose reaching infected
+  agents is ~98% ring-side (near-field plume 60–69%, cabin-mate addback
+  30–40%, far-field pool ~2%), bimodal per-agent — both channels sit above
+  the infection threshold for most hosts, which is why every sampled-ring
+  knob measured flat. The observation channel confirms ~76% of infected and
+  dates 93–100% of confirmed datable-course cases at exact onset — vs the
+  record's 197 of ~712 (0.28); 85–89% of the dated mass is mild, the
+  stratum a real investigation dates worst. Dating ascertainment alone is
+  ~3.4× of the ~18× gap. Remaining declared suspects: the cabin-mate
+  addback / fixed rings (now the largest measured channel, ~⅓ of dose
+  weight, inexpressible in the current arm grammar), the index's day-0
+  exposure geometry, and an ascertainment arm that would split channel vs
+  transmission shares of the gap
+  (`docs/ledger/ROUTE-ATTR-V1.md`,
+  `docs/covid/covid_route_attribution_v1_readout.md`, measured at
+  `be121a0` locally on CPython 3.12).
 - **The import x Theta axis is closed as negative, and the confinement leak is
   the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
   1,180 cells) already swept imports 1-20: matching the early onset count
