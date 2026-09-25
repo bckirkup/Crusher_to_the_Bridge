@@ -9,7 +9,10 @@ recorded side the ascertainment funnel from infection to a dated onset:
 
     infected -> symptomatic -> eligible severity -> lab-confirmed -> dated
 
-plus the per-severity histogram of dated onsets. The funnel's last gap is
+plus the per-severity histogram of dated onsets, and the per-challenge
+Poisson rate lambda = susceptibility x epoch dose the engine drew against
+(the quantity whose position vs 1 decides whether infection is
+dose-limited or saturated). The funnel's last gap is
 what the published investigation's dated-onset subset (covid.T1: 197 dated
 of ~712 confirmed) cannot share — the model dates every confirmed,
 symptomatic, eligible case while the record dated roughly a quarter of the
@@ -112,6 +115,92 @@ class NearFieldShareLedger:
             t = int(ev.target_agent_id)
             if t not in self.infection_epoch:
                 self.infection_epoch[t] = int(ev.epoch)
+
+
+class HazardRateLedger:
+    """Per-challenge hazard rate lambda = susceptibility x epoch dose.
+
+    The engine's single-hit hazard is ``p = 1 - exp(-susceptibility *
+    effective_dose)``: lambda is the Poisson rate in that exponent, the
+    expected hit count of one challenged host-epoch. ``_dose_response_hazard``
+    is called exactly once per challenged host-epoch, so wrapping it tallies
+    the lambda the engine drew against. An infected agent's last recorded
+    lambda is the challenge that infected it — infected agents leave
+    ``_get_susceptible`` and are never challenged again.
+    """
+
+    def __init__(self) -> None:
+        self.lambdas: list[float] = []
+        self.last: dict[int, float] = {}
+        self.infecting: dict[int, float] = {}
+        self._installed = False
+
+    def _install(self, tx_core: Any) -> None:
+        orig = tx_core._dose_response_hazard
+        lambdas, last = self.lambdas, self.last
+
+        def hazard_wrapped(
+            agent: Any, pathogen_id: str, effective_dose: float,
+            *a: Any, **kw: Any,
+        ) -> float:
+            p = orig(agent, pathogen_id, effective_dose, *a, **kw)
+            susc = agent.dose_response_susceptibility.get(pathogen_id)
+            lam = (susc if susc is not None else 0.0) * effective_dose
+            lambdas.append(lam)
+            last[agent.agent_id] = lam
+            return p
+
+        tx_core._dose_response_hazard = hazard_wrapped
+        self._installed = True
+
+    def observe(self, sim: Any, work: Any) -> None:
+        if not self._installed:
+            self._install(sim.tx_core)
+        for ev in work.tx_events:
+            t = int(ev.target_agent_id)
+            if t not in self.infecting and t in self.last:
+                self.infecting[t] = self.last[t]
+
+
+def _quantiles(vals: list[float]) -> dict[str, Any]:
+    n = len(vals)
+    if not n:
+        return {
+            "n": 0, "mean": None, "q05": None, "q25": None,
+            "median": None, "q75": None, "q95": None,
+            "share_ge_1": None, "share_ge_0p1": None, "share_lt_0p01": None,
+        }
+    s = sorted(vals)
+
+    def q(p: float) -> float:
+        return s[min(int(p * n), n - 1)]
+
+    return {
+        "n": n,
+        "mean": sum(s) / n,
+        "q05": q(0.05),
+        "q25": q(0.25),
+        "median": q(0.5),
+        "q75": q(0.75),
+        "q95": q(0.95),
+        "share_ge_1": sum(1 for v in s if v >= 1.0) / n,
+        "share_ge_0p1": sum(1 for v in s if v >= 0.1) / n,
+        "share_lt_0p01": sum(1 for v in s if v < 0.01) / n,
+    }
+
+
+def hazard_rate_table(ledger: HazardRateLedger) -> dict[str, Any]:
+    """Lambda distribution over challenged host-epochs and infecting hits.
+
+    ``lambda_all`` is the Poisson rate of every host-epoch the engine drew
+    against; ``lambda_infecting`` the rate of the challenges that infected.
+    Where the mass sits vs lambda = 1 (certain infection per challenge) is
+    the saturation readout the flat dose/reach assays predicted.
+    """
+    return {
+        "lambda_all": _quantiles(ledger.lambdas),
+        "lambda_infecting": _quantiles(list(ledger.infecting.values())),
+    }
 
 
 def window_of(day: int, start: int, end: int | None) -> str:
@@ -291,10 +380,12 @@ def analyse_cell(
     )
     ledger = QuarantineAttributionLedger()
     near_ledger = NearFieldShareLedger()
+    hazard_ledger = HazardRateLedger()
 
     def observer(sim: Any, work: Any) -> None:
         ledger.observe(sim, work)
         near_ledger.observe(sim, work)
+        hazard_ledger.observe(sim, work)
 
     sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=observer)
     _, start, end = _quarantine_window(raw)
@@ -304,6 +395,7 @@ def analyse_cell(
         "payload": cell_payload(design, cell, sim, ledger, raw),
         "route_attribution": route_window_tables(sim, ledger, start, end),
         "near_field": near_field_share_table(near_ledger),
+        "hazard_rate": hazard_rate_table(hazard_ledger),
         "ascertainment": ascertainment_funnel(sim),
     }
 

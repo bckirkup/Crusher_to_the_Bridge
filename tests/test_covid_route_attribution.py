@@ -7,8 +7,10 @@ import pytest
 from engines.infection_dynamics_bridge import IllnessStatus
 from picard_framework.covid_boarding_screen import PATHOGEN_ID
 from tools.covid_route_attribution import (
+    HazardRateLedger,
     NearFieldShareLedger,
     ascertainment_funnel,
+    hazard_rate_table,
     near_field_share_table,
     route_window_tables,
     window_of,
@@ -141,7 +143,7 @@ def test_ascertainment_funnel_counts_rungs():
     assert out["confirmed_datable"] == 2
     assert out["dated_onsets"] == 2
     assert out["dated_by_severity"] == {"mild": 1, "moderate": 1}
-    assert out["dating_rate_confirmed_datable"] == 1.0
+    assert out["dating_rate_confirmed_datable"] == pytest.approx(1.0)
     assert out["dating_rate_confirmed"] == pytest.approx(2 / 3)
     assert 0.0 < out["record_dating_rate_confirmed"] < 1.0
 
@@ -211,3 +213,46 @@ def test_near_field_share_table_empty_is_safe():
     assert out["dose_weighted_ring_share"] is None
     assert out["ring_share_median"] is None
     assert out["share_majority_ring_dose"] is None
+
+
+class _FakeHazardCore:
+    """Stands in for TransmissionCore's _dose_response_hazard."""
+
+    def _dose_response_hazard(self, agent, pathogen_id, effective_dose):
+        return -(-0.5)  # sentinel: wrapper must pass the return through
+
+
+def _susceptible(aid, susc):
+    return SimpleNamespace(
+        agent_id=aid,
+        dose_response_susceptibility={PATHOGEN_ID: susc},
+    )
+
+
+def test_hazard_rate_table_records_lambda_and_infecting():
+    ledger = HazardRateLedger()
+    core = _FakeHazardCore()
+    sim = SimpleNamespace(tx_core=core)
+    ledger.observe(sim, _work(0))  # installs the wrapper
+    a1 = _susceptible(1, 2.0)
+    a2 = _susceptible(2, 0.5)
+    # Agent 1 challenged twice (lam 4.0, 6.0), agent 2 once (lam 0.05).
+    assert core._dose_response_hazard(a1, PATHOGEN_ID, 2.0) == pytest.approx(0.5)
+    core._dose_response_hazard(a1, PATHOGEN_ID, 3.0)
+    core._dose_response_hazard(a2, PATHOGEN_ID, 0.1)
+    ledger.observe(sim, _work(0, tx_events=[_tx(0, 1)]))
+    out = hazard_rate_table(ledger)
+    assert out["lambda_all"]["n"] == 3
+    assert out["lambda_all"]["median"] == pytest.approx(4.0)
+    assert out["lambda_all"]["share_ge_1"] == pytest.approx(2 / 3)
+    assert out["lambda_all"]["share_lt_0p01"] == pytest.approx(0.0)
+    # Agent 1's infecting challenge is its last recorded lambda.
+    assert out["lambda_infecting"]["n"] == 1
+    assert out["lambda_infecting"]["median"] == pytest.approx(6.0)
+
+
+def test_hazard_rate_table_empty_is_safe():
+    out = hazard_rate_table(HazardRateLedger())
+    assert out["lambda_all"]["n"] == 0
+    assert out["lambda_all"]["median"] is None
+    assert out["lambda_infecting"]["n"] == 0
