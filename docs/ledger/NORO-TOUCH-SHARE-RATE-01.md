@@ -2,7 +2,9 @@
 **Date:** 2026-09-25
 **Commit:** 89809781
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+
+**Measured at:** 411b0dbe
 
 `NORO-COINCIDENCE-CELL-01` (measured `995746e4`) fixed the host-coverage
 deficiency — 18/20 seeds carry ≥1 fomite-credited host at the frozen cell —
@@ -93,4 +95,101 @@ Over the pooled 100-seed set (20 committed + 80 new), all paired/relative:
 
 ## 3. Measured
 
-<!-- measured -->
+**Block.** AWS Batch array `fc21e752-3a4c-4b57-8dac-3c365cc99c19`
+(240 children = 3 arms × seeds 8020–8099), submitted 2026-09-25 ~22:26
+UTC on `picard-campaign-queue`; **all 240 children SUCCEEDED, zero Spot
+or OOM failures**, ~18 min wall. Measured ~237 s/run on 1 vCPU
+(~15 CPU-h total). 240 dumps synced to
+`docs/norovirus/touch_share_rate_01/arm_<tag>/`; readouts in
+`readouts/`. The n = 100 set pools these 80 seeds with the committed
+8000–8019 dumps from `NORO-COINCIDENCE-CELL-01`.
+
+### 3.1 Stop conditions — all clear
+
+| condition | result |
+|---|---|
+| canary child fails / no dump | 3-cell canary `7019e447` passed: all SUCCEEDED, dumps valid (arm witnesses `per_surface`/`declared`, 493 hosts, 226 s) |
+| DISAGG-01 fails any seed | **holds on all 80 new seeds** — worst rel dev 1.8e-14 (`hosts[].credited_scaled_gec`, seed 8035); every event count exact |
+| any declared class > 10% capped | none — worst `capped_share_declared` 0.0286 (`crew_mess.*`, seed 8086) |
+| Spot/OOM makes seeds unreachable | 0 failures; full 80-seed block landed |
+
+### 3.2 Expression rate (the measured quantity)
+
+`H_A ≠ H_D` ⇔ credited-host Jaccard < 1:
+
+| population | expressed | rate | Wilson 95% |
+|---|---|---|---|
+| all 100 seeds | 49 | **0.490** | [0.394, 0.587] |
+| viable (areal arm ≥1 fomite host; 8 extinct seeds excluded: 8001, 8018, 8021, 8054, 8059, 8079, 8085, 8094) | 49/92 | **0.533** | [0.431, 0.631] |
+
+The declared table is bit-inert on ~half of seeds — the n = 20 estimate
+(~44% of viable) sits inside the interval.
+
+### 3.3 Distributions
+
+| statistic | all 100 | viable 92 |
+|---|---|---|
+| median Jaccard | 1.0000 | 0.9908 (min 0.1642) |
+| Jaccard < 0.90 | 37/100 | 37/92 |
+| median focus-share gain | 0.392 | 0.394 |
+| gain > 0.10 | 73/100 | 73/92 |
+| deposit events aligned | 46/100 | 38/92 |
+
+The two rule clauses pull against each other: the gain bar (needs
+≥15/20) is met by a 73% base rate, but the median-Jaccard bar needs
+≥11/20 seeds with J < 0.90 against a 37% base rate — and both must land
+on the same draw.
+
+### 3.4 Firing probability of a fresh n = 20 canary
+
+Bootstrap (B = 100 000, sampling 20 seeds with replacement from the
+measured 100-seed joint (Jaccard, gain) distribution):
+
+- **Pr[fires] ≈ 0.11** over all seeds (fresh canary includes extinct
+  draws, as the frozen rule scores all 20 seeds).
+- **Pr[fires] ≈ 0.19** if the canary were scored on viable seeds only.
+
+At n = 20 the frozen rule resolves only ~1 draw in 9; even a
+viable-seed-restricted score resolves ~1 in 5. The n = 20 indeterminate
+is therefore structural, not cell-specific: no fresh 20-seed canary of
+this design at this cell can be expected to resolve the rule.
+
+### 3.5 Per-class `hosts_credited` deltas D − A (100-seed totals)
+
+| zone_class.item_class | Δ hosts |
+|---|---|
+| public.button_or_dispenser | −2896 |
+| public.door_lever | −1813 |
+| public.grab_rail_m | −1813 |
+| dining.utensil | +1728 |
+| dining.button_or_dispenser / door_lever / tap_set | +1635 each |
+| crew_mess.button_or_dispenser / door_lever / tap_set / utensil | +512 each |
+| galley.button_or_dispenser / door_lever / tap_set / utensil / work_plane | +412 each |
+| cabin.* (10 classes) | +8 each |
+
+Same reallocation direction as the n = 20 block (public → dining /
+galley / crew_mess), consistent in sign and rough magnitude per seed.
+Cap shares all ≤ 0.0286 — no class near 10%.
+
+### 3.6 DISAGG-01 identity
+
+Holds on all 80 new seeds (areal vs pooled): worst relative deviation
+1.8e-14 on `hosts[].credited_scaled_gec`; every event count (`deliver`,
+`hand_to_mouth`, `surface_deposit`, `transmission.secondaries`,
+`attack_rate`) exactly equal. Combined with the 20 committed seeds the
+identity now holds on **100/100 seeds** at this cell. Runtime
+per_surface/pooled median 1.005 (below the 1.5–4× envelope).
+
+### 3.7 Conclusion
+
+Measured, not hypothesised: the declared table expresses on
+**49/100 seeds (0.490, Wilson [0.394, 0.587])**. A fresh n = 20 canary
+at this cell fires the frozen rule with probability ≈ 0.11 — the
+indeterminate verdict of `NORO-COINCIDENCE-CELL-01` cannot be resolved
+by re-running 20-seed canaries. Resolving the coincidence question
+needs either a rule re-specified on an n ≳ 100 block (out of scope —
+the rule is frozen) or a different measured quantity (e.g.
+route-attributed infections rather than credited-host coincidence).
+The declared table itself behaves as designed: bit-inert where no
+pickup sits near the gate, hard divergence (J down to 0.164) where one
+does, with secondaries within ±1 of the areal arm on every seed.
