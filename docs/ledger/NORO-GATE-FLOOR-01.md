@@ -304,6 +304,14 @@ longer part company over pools that cannot yield a pickup.** One residual
 into a still-sub-copy pool, so a deposit-side counterpart of this gate is
 the remaining sub-copy asymmetry — recorded, not fixed here.
 
+> **Correction (`NORO-GATE-FLOOR-02`):** the paragraph above misreads the
+> seed-8001 witness. `0.965 GEC` is arm D's `Engine_Room` pool *before*
+> the epoch-61 deposit. The deposit itself was `0.0549 GEC` and identical
+> in both arms. The first differing draw is the existing pickup gate
+> opening legitimately in D (`1.0195 GEC`) and not in A (`0.644 GEC`). No
+> deposit-side asymmetry exists, and none of the seven divergences is
+> deposit-driven; see `NORO-GATE-FLOOR-02.md`.
+
 Seeds 8015 and 8018 stay in lockstep to epoch 96 yet are misaligned over
 288, so divergence is not confined to the first tens of epochs under
 `norwalk_only` and the `≥96` rows must not be read as "aligned to 288".
