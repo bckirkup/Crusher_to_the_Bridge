@@ -188,6 +188,28 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   new decision (`docs/ledger/PARTNER-RATE-V1.md`,
   `docs/covid/covid_partner_rate_assay_v1_readout.md`, measured at `37dc215`,
   Batch job-def rev 19, image digest `sha256:7528dcd1…`).
+- **`PLUME-DOSE-V1` measured its full array and stands negative on both
+  axes: the conditional gap is not borne on the sampled proximity ring at
+  all.** The dose sweep (β {4080, 2040, 816, 408} = dose ×{0.05–0.50} under
+  the partition's 1/β scaling, D0 shipped β 204) leaves conditional recorded
+  mass flat at medians 3,435–3,486 across the 20× range (log-log elasticity
+  0.004); no arm's q05–q95 contains 197 anywhere on the grid — no dose-only
+  closure scale exists — and the takeoff gate never collapses (lowest dose
+  still 19/20). The four per-activity ring knockouts (dining, work,
+  cabin+corridor, leisure) are equally flat (medians 3,441–3,492, 20/20
+  takeoff each): no single sampled venue's ring is load-bearing, and the
+  pool witness (3,517 vs D0 3,486) says the partition architecture itself
+  is not the carrier. Per the design's declared counterfactual the standing
+  suspects are, in order, the **fixed ring structure** (cabin-mate and
+  meal-table rings that survive every knockout), the **seeded index's
+  day-0 exposure geometry**, and the **observational channel** — consistent
+  with before_share ~0.95 vs the record's 0.173 (most recorded mass is
+  pre-quarantine burn the record never dated as onsets). Next assay, if
+  pursued: knock out the fixed rings or interrogate onset-dating — the
+  sampled-ring grammar is exhausted. 200/200 cells, 0% failures
+  (`docs/ledger/PLUME-DOSE-V1.md`,
+  `docs/covid/covid_plume_dose_assay_v1_readout.md`, measured at `2bcdeb7`,
+  Batch job-def rev 20, image digest `sha256:aca8d6b8…`).
 - **The import x Theta axis is closed as negative, and the confinement leak is
   the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
   1,180 cells) already swept imports 1-20: matching the early onset count
