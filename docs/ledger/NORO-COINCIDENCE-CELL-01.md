@@ -2,7 +2,8 @@
 **Date:** 2026-09-25
 **Commit:** cf6a3769
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 995746e4
 
 A re-run of the frozen `NORO-TOUCH-SHARE-01` coincidence canary at a **cell
 chosen so that most seeds carry at least one fomite-credited host**, the
@@ -203,4 +204,91 @@ relative only:
 
 ## 4. Measured
 
-<!-- measured -->
+Block run at `995746e4` (post-#681 main, including the §1.1 driver fix):
+60 runs = seeds 8000–8019 × arms {areal, declared, pooled}, ~2 h 40 m wall
+(~6.4 CPU-h) on the 2-vCPU VM, inside the ~4 h budget. Dumps under
+`../norovirus/noro_coincidence_cell_01/arm_*/`, readout JSONs under
+`../norovirus/noro_coincidence_cell_01/readouts/`. Every figure below is
+measured on those dumps; nothing is inferred.
+
+### 4.1 Stop conditions — all clear
+
+- **Pass threshold**: 18/20 seeds carry ≥ 1 fomite-credited host in the
+  areal arm (≥ 15 required) — **met**. Only 8001 and 8018 are extinct
+  (0 hosts, both arms). Declared arm: also 18/20.
+- **DISAGG-01 identity**: areal == pooled to `rel ≤ 1e-9`, event counts
+  exact, on all 20 seeds (worst deviation 2.9e-15, host-level). **Holds.**
+- **Cap shares**: worst `capped_calls/calls` = 0.52%
+  (`crew_mess.button_or_dispenser`, seed 8005, declared arm). No class
+  anywhere near the 10% stop.
+- **Wall clock**: 2 h 40 m ≪ ~4 h.
+
+### 4.2 Credited-host sets and Jaccard
+
+| seed | n_A | n_D | Jaccard | aligned | seed | n_A | n_D | Jaccard | aligned |
+|---|---|---|---|---|---|---|---|---|---|
+| 8000 | 83 | 83 | 1.000 | yes | 8010 | 475 | 475 | 1.000 | yes |
+| 8001 | 0 | 0 | 1.000 | yes | 8011 | 637 | 212 | 0.314 | no |
+| 8002 | 386 | 386 | 1.000 | yes | 8012 | 2 | 2 | 1.000 | yes |
+| 8003 | 1 | 1 | 1.000 | yes | 8013 | 1102 | 1102 | 1.000 | yes |
+| 8004 | 176 | 176 | 1.000 | yes | 8014 | 795 | 951 | 0.834 | no |
+| 8005 | 366 | 430 | 0.625 | no | 8015 | 66 | 66 | 1.000 | no |
+| 8006 | 587 | 593 | 0.990 | no | 8016 | 87 | 91 | 0.935 | no |
+| 8007 | 205 | 205 | 1.000 | yes | 8017 | 717 | 259 | 0.359 | no |
+| 8008 | 655 | 655 | 1.000 | yes | 8018 | 0 | 0 | 1.000 | yes |
+| 8009 | 135 | 135 | 1.000 | yes | 8019 | 139 | 173 | 0.164 | no |
+
+- **Median Jaccard: 1.000** [0.164, 1.000]. Identical host sets on 12/20
+  seeds.
+- **Event alignment (§4.2 witness): 12/20 aligned** — the same 12 seeds
+  whose credited sets are identical. On every diverged seed the deposit
+  stream also diverged (deposit calls differ, e.g. 8011: 65 vs 59;
+  8014: 114 vs 88), consistent with `-02`'s mechanism: the declared
+  reallocation tips pickups across the 1-GEC gate and the treatment
+  effect then propagates into the event stream.
+
+### 4.3 Per-class `hosts_credited` deltas (D − A, summed over 20 seeds)
+
+| zone class | per-item delta | classes |
+|---|---|---|
+| public | −715 (`button_or_dispenser`), −587 (`door_lever`, `grab_rail_m`) | 3 |
+| dining | −192 (all 4 item classes) | 4 |
+| galley | +140 (all 5 item classes) | 5 |
+| crew_mess | +43 (all 4 item classes) | 4 |
+| cabin | +4 (all 10 item classes) | 10 |
+
+The declared table reallocates delivered mass **out of** the public and
+dining zones into galley/crew-mess/cabin — the opposite sign of the
+`public.button_or_dispenser` focus-class gain on the same seeds: within
+the public class the declared table concentrates the remaining mass on
+the button/dispenser item (share gain), while shrinking the class's
+total credited-host count.
+
+### 4.4 Verdict
+
+**Still indeterminate**, on the frozen rule:
+
+- (a) median credited-host Jaccard = 1.000 — the `< 0.90` bar fails;
+- (b) `public.button_or_dispenser` share gain `> 0.10` on **12/20**
+  seeds (gains 0.386–0.868) — the `≥ 15` bar fails;
+- not **inert**: `H_A ≠ H_D` on 8/20 seeds (Jaccard down to 0.164).
+
+**Reason.** The deficiency this entry was written to fix is fixed —
+18/20 seeds now carry fomite mass, where the `-01` cell gave ~5
+interpretable seeds — but the declared reallocation expresses only on a
+seed-level subset: on 10 of the 18 viable seeds it never tips a pickup
+across the 1-GEC gate, so the arms are bit-identical there (aligned,
+Jaccard = 1). On the 8 viable seeds where it does express, the effect
+is large (Jaccard 0.164–0.990, focus-share gain 0.39–0.87, credited-set
+membership moves in both directions). The frozen rule's joint bar —
+median Jaccard < 0.90 **and** ≥ 15 expressing seeds — needs expression
+on ≳ 3/4 of seeds; measured expression is ~44% of viable seeds (8/18),
+~60% of the 20-seed window under the focus-share witness (12/20). At
+n = 20 a bimodal ~half-seed expression rate cannot fire the rule, and
+the cell itself is no longer the limiting factor.
+
+The event-alignment witness counts the treatment effect as
+misalignment on all 8 expressing seeds (the `-02` caveat); the aligned
+fraction is 12/20 and would be ~2/3 even in the best case, so the
+indeterminacy is now structural to the rule's bar, not to host
+coverage.
