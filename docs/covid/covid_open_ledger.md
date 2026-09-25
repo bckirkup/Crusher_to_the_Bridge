@@ -231,6 +231,22 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (`docs/ledger/ROUTE-ATTR-V1.md`,
   `docs/covid/covid_route_attribution_v1_readout.md`, measured at
   `be121a0` locally on CPython 3.12).
+- **`LAMBDA-CROSS-V1` is declared: a hazard-rate crossing assay on the
+  declared replay.** The engine's per-challenge hazard is single-hit
+  Poisson (`p = 1 − exp(−λ)`, λ = susceptibility × epoch dose); the
+  measured flatness of reach, dose, and every ring knockout is the
+  signature of per-epoch λ ≫ 1 — p_epoch ≈ 1 regardless of the knob. The
+  sweep rides the Θ axis itself (Θ multipliers {1.0 … 0.001} on
+  4.22e10; `theta_profile_overrides` sets `susceptibility_scale =
+  θ(α+β)/α`, so Θ IS the mean-λ scale — no arm grammar needed), 7
+  points × 20 seeds = 140 cells. Declared reads: the crossing Θ whose
+  takeoff-seed band contains 197 (if any), the collapse point, log-log
+  elasticity vs the dose axis's measured 0.004, and `before_share` vs Θ.
+  Companion instrument: `tools/covid_route_attribution.py`'s
+  `HazardRateLedger` reports the per-challenge λ distribution locally.
+  Canary at Θ ×0.001 (INDEX_OFFSET 120), then stop and report
+  (`docs/ledger/LAMBDA-CROSS-V1.md`,
+  `picard_framework/runs/covid_lambda_cross_v1_design.json`).
 - **The import x Theta axis is closed as negative, and the confinement leak is
   the live defect (COVID-VENT-AUDIT-01, `#645`).** `COVID-FIT-01` (`a686114`,
   1,180 cells) already swept imports 1-20: matching the early onset count
