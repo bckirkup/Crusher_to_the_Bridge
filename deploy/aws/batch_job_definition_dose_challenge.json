@@ -1,0 +1,62 @@
+{
+  "jobDefinitionName": "picard-dose-challenge",
+  "type": "container",
+  "platformCapabilities": ["EC2"],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:dose-challenge-v1",
+    "command": [
+      "deploy/aws/dose_challenge_entrypoint.py",
+      "--s3-prefix", "Ref::s3_prefix",
+      "--seed-count", "Ref::seed_count",
+      "--seed-base", "Ref::seed_base",
+      "--platform", "Ref::platform",
+      "--bundle", "Ref::bundle",
+      "--pathogen-id", "Ref::pathogen_id",
+      "--epochs", "Ref::epochs",
+      "--touch-share-table", "Ref::touch_share_table"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      { "type": "VCPU", "value": "1" },
+      { "type": "MEMORY", "value": "4096" }
+    ],
+    "linuxParameters": { "sharedMemorySize": 512 },
+    "environment": [
+      { "name": "PYTHONUTF8", "value": "1" },
+      { "name": "PYTHONPATH", "value": "/app" }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-dose-challenge",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "dose-challenge"
+      }
+    }
+  },
+  "parameters": {
+    "s3_prefix": "s3://<BUCKET>/campaign/dose_challenge_v1/",
+    "seed_count": "80",
+    "seed_base": "8020",
+    "platform": "spirit_cruise_3000",
+    "bundle": "norwalk_only",
+    "pathogen_id": "norwalk_gi",
+    "epochs": "168",
+    "touch_share_table": "data/config/fomite_touch_share_declared.json"
+  },
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      { "onStatusReason": "Host EC2*", "action": "retry" },
+      { "onReason": "OutOfMemoryError*", "action": "exit" },
+      { "onExitCode": "137", "action": "exit" },
+      { "onExitCode": "0", "action": "exit" },
+      { "onReason": "*", "action": "retry" }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 7200
+  }
+}
