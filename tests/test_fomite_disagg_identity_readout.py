@@ -131,6 +131,59 @@ def test_exact_count_off_by_one_is_a_defect_and_host_vector_is_checked(arms):
     assert hosts["max_deviation_seed"] == 8002
 
 
+def test_counter_absent_in_both_arms_is_agreement_not_a_defect(arms):
+    """A witness counter that never fired on a seed fires in neither arm."""
+    tmp, base, arm = arms
+    for cells in (base, arm):
+        del cells[1]["fomite_witness"]["deliver_calls"]
+    _write(tmp / "base", "pooled", base)
+    _write(tmp / "arm", "per_surface_areal", arm)
+    result = ro.readout(tmp / "arm", "per_surface_areal", tmp / "base", "pooled")
+    row = next(
+        c for c in result["comparisons"]
+        if c["statistic"] == "fomite_witness.deliver_calls"
+    )
+    assert row["seeds_absent_in_both_arms"] == [8001]
+    assert row["seeds_absent_in_one_arm"] == []
+    assert row["seeds_compared"] == 2
+    assert row["verdict"] == "identity"
+    assert result["identity_verdict"] == "holds"
+
+
+def test_counter_absent_in_one_arm_only_is_a_defect(arms):
+    """A counter one arm fires and the other never does is not an identity."""
+    tmp, base, arm = arms
+    del arm[1]["fomite_witness"]["deliver_calls"]
+    _write(tmp / "base", "pooled", base)
+    _write(tmp / "arm", "per_surface_areal", arm)
+    result = ro.readout(tmp / "arm", "per_surface_areal", tmp / "base", "pooled")
+    row = next(
+        c for c in result["comparisons"]
+        if c["statistic"] == "fomite_witness.deliver_calls"
+    )
+    assert row["seeds_absent_in_one_arm"] == [8001]
+    assert row["verdict"] == "DEFECT"
+    assert result["identity_verdict"] == "DEFECT"
+
+
+def test_statistic_no_seed_ever_fired_is_still_an_identity(arms):
+    """A counter absent from every seed leaves nothing to contradict."""
+    tmp, base, arm = arms
+    for cells in (base, arm):
+        for cell in cells:
+            del cell["fomite_witness"]["deliver_calls"]
+    _write(tmp / "base", "pooled", base)
+    _write(tmp / "arm", "per_surface_areal", arm)
+    result = ro.readout(tmp / "arm", "per_surface_areal", tmp / "base", "pooled")
+    row = next(
+        c for c in result["comparisons"]
+        if c["statistic"] == "fomite_witness.deliver_calls"
+    )
+    assert row["seeds_compared"] == 0
+    assert row["seeds_absent_in_both_arms"] == [8000, 8001, 8002]
+    assert row["verdict"] == "identity"
+
+
 def test_runtime_above_envelope_and_unshared_seeds_are_reported(arms):
     tmp, base, arm = arms
     for cell in arm:

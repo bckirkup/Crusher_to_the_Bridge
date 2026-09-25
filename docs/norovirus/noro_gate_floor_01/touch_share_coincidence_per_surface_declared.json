@@ -1,0 +1,2486 @@
+{
+ "aggregate": {
+  "cap_flags": [],
+  "credited_scaled_ratio": {
+   "max": 11.321149047331977,
+   "median": 1.0,
+   "min": 0.6390547340372582
+  },
+  "delivered_ratio": {
+   "max": 7.47033920210249,
+   "median": 1.0,
+   "min": 0.6798287714505472
+  },
+  "deposit_calls_areal": {
+   "max": 131.0,
+   "median": 38.5,
+   "min": 1.0
+  },
+  "deposit_calls_declared": {
+   "max": 131.0,
+   "median": 38.0,
+   "min": 1.0
+  },
+  "focus_class_share_gain_seeds": 12,
+  "focus_share_gain": {
+   "max": 0.7593928265575209,
+   "median": 0.41901590390473564,
+   "min": 0.0
+  },
+  "gini_areal": {
+   "max": 0.9669852789589559,
+   "median": 0.6353117946511874,
+   "min": 0.0
+  },
+  "gini_declared": {
+   "max": 0.9515487364098187,
+   "median": 0.6469668047363711,
+   "min": 0.0
+  },
+  "hand_to_mouth_calls_areal": {
+   "max": 4528.0,
+   "median": 672.0,
+   "min": 0.0
+  },
+  "hand_to_mouth_calls_declared": {
+   "max": 5203.0,
+   "median": 617.5,
+   "min": 0.0
+  },
+  "identical_host_sets_all_seeds": false,
+  "jaccard": {
+   "max": 1.0,
+   "median": 1.0,
+   "min": 0.25961538461538464
+  },
+  "n_hosts_areal": {
+   "max": 772.0,
+   "median": 187.5,
+   "min": 0.0
+  },
+  "n_hosts_declared": {
+   "max": 768.0,
+   "median": 191.0,
+   "min": 0.0
+  },
+  "n_seeds_deposit_aligned": 10,
+  "secondaries_delta": {
+   "max": 0.0,
+   "median": 0.0,
+   "min": 0.0
+  },
+  "top_decile_areal": {
+   "max": 0.9826770904633836,
+   "median": 0.5184899208127267,
+   "min": 0.0
+  },
+  "top_decile_declared": {
+   "max": 0.9826770904633836,
+   "median": 0.502608695327431,
+   "min": 0.0
+  },
+  "verdict": "indeterminate"
+ },
+ "deliverable": "NORO-TOUCH-SHARE-01",
+ "focus_class": "public.button_or_dispenser",
+ "per_seed": [
+  {
+   "credited_scaled_ratio": 0.9917179914627723,
+   "delivered_ratio": 0.9896291230748202,
+   "deposit_calls_areal": 20,
+   "deposit_calls_declared": 20,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 75.56105926422754,
+   "deposited_gec_declared": 75.56105926422754,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.5120669521046646,
+   "gini_areal": 0.7280059888730985,
+   "gini_declared": 0.7318360854769499,
+   "hand_to_mouth_calls_areal": 713,
+   "hand_to_mouth_calls_declared": 713,
+   "jaccard": 1.0,
+   "n_hosts_areal": 311,
+   "n_hosts_declared": 311,
+   "per_class": {
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.1572871234050849,
+     "delivered_share_declared": 0.19047805234515458,
+     "hosts_credited_areal": 194,
+     "hosts_credited_declared": 194,
+     "zone_share_areal": 0.19181585677749358,
+     "zone_share_declared": 0.229884
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.03355458632641812,
+     "delivered_share_declared": 0.040635384120300114,
+     "hosts_credited_areal": 194,
+     "hosts_credited_declared": 194,
+     "zone_share_areal": 0.040920716112531966,
+     "zone_share_declared": 0.049042
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.1048580822700566,
+     "delivered_share_declared": 0.12698536823010306,
+     "hosts_credited_areal": 194,
+     "hosts_credited_declared": 194,
+     "zone_share_areal": 0.12787723785166238,
+     "zone_share_declared": 0.15325600000000003
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.5242904113502831,
+     "delivered_share_declared": 0.47048453448922495,
+     "hosts_credited_areal": 194,
+     "hosts_credited_declared": 194,
+     "zone_share_areal": 0.639386189258312,
+     "zone_share_declared": 0.567818
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004363239205161849,
+     "delivered_share_declared": 0.09193175810079224,
+     "hosts_credited_areal": 132,
+     "hosts_credited_declared": 132,
+     "zone_share_areal": 0.024238898584448325,
+     "zone_share_declared": 0.5363058506891129
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0011169892365214336,
+     "delivered_share_declared": 0.0005053863503523852,
+     "hosts_credited_areal": 132,
+     "hosts_credited_declared": 132,
+     "zone_share_areal": 0.006205158037618772,
+     "zone_share_declared": 0.0029482918868497764
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.17452956820647395,
+     "delivered_share_declared": 0.07897951636407272,
+     "hosts_credited_areal": 132,
+     "hosts_credited_declared": 132,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.4607458574240375
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8000,
+   "top_decile_areal": 0.6430143327623783,
+   "top_decile_declared": 0.6489257962560563
+  },
+  {
+   "credited_scaled_ratio": 0.6390547340372582,
+   "delivered_ratio": 0.6798287714505472,
+   "deposit_calls_areal": 78,
+   "deposit_calls_declared": 98,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 23.51811759058849,
+   "deposited_gec_declared": 20.99990884242548,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.4672380564380091,
+   "gini_areal": 0.5671950293637831,
+   "gini_declared": 0.6757655392755026,
+   "hand_to_mouth_calls_areal": 1238,
+   "hand_to_mouth_calls_declared": 1110,
+   "jaccard": 0.9712230215827338,
+   "n_hosts_areal": 417,
+   "n_hosts_declared": 405,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0003278280289269861,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0001573574538849534,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.0036396724294813494
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 3.2782802892698614e-05,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.0007582650894752809
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.001639140144634931,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.037913254473764056
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0002622624231415889,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.006066120715802247
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0006556560578539722,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.015165301789505614
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0003278280289269861,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.002294796202488903,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.053078556263269655
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.003278280289269862,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.07582650894752811
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.03425802902287003,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.792387018501668
+    },
+    "crew_mess.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.04681488643666075,
+     "delivered_share_declared": 0.07369717495943594,
+     "hosts_credited_areal": 148,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.16694490818030053,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.01123557274479858,
+     "delivered_share_declared": 0.017687321990264626,
+     "hosts_credited_areal": 148,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.04006677796327213,
+     "zone_share_declared": 0.04006677796327212
+    },
+    "crew_mess.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.04681488643666075,
+     "delivered_share_declared": 0.07369717495943594,
+     "hosts_credited_areal": 148,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.16694490818030053,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.17555582413747778,
+     "delivered_share_declared": 0.27636440609788476,
+     "hosts_credited_areal": 148,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.6260434056761269,
+     "zone_share_declared": 0.6260434056761268
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.017441798289810014,
+     "delivered_share_declared": 0.25326788555902924,
+     "hosts_credited_areal": 358,
+     "hosts_credited_declared": 346,
+     "zone_share_areal": 0.024238898584448314,
+     "zone_share_declared": 0.4914769550224574
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004465100362191365,
+     "delivered_share_declared": 0.0016662038961736802,
+     "hosts_credited_areal": 358,
+     "hosts_credited_declared": 346,
+     "zone_share_areal": 0.006205158037618771,
+     "zone_share_declared": 0.0032333385479586733
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.6976719315924008,
+     "delivered_share_declared": 0.2603858720828849,
+     "hosts_credited_areal": 358,
+     "hosts_credited_declared": 346,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.505289706429584
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8001,
+   "top_decile_areal": 0.4188616540555584,
+   "top_decile_declared": 0.5456363134558986
+  },
+  {
+   "credited_scaled_ratio": 0.9861153666478059,
+   "delivered_ratio": 0.9996546202924343,
+   "deposit_calls_areal": 131,
+   "deposit_calls_declared": 131,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 114.34489969886863,
+   "deposited_gec_declared": 114.34489969886863,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.3861615521285022,
+   "gini_areal": 0.46565256958977574,
+   "gini_declared": 0.4565292407874333,
+   "hand_to_mouth_calls_areal": 2757,
+   "hand_to_mouth_calls_declared": 2757,
+   "jaccard": 1.0,
+   "n_hosts_areal": 519,
+   "n_hosts_declared": 519,
+   "per_class": {
+    "galley.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00012127122963085507,
+     "delivered_share_declared": 0.00012131312872377766,
+     "hosts_credited_areal": 94,
+     "hosts_credited_declared": 94,
+     "zone_share_areal": 0.006471922212672542,
+     "zone_share_declared": 0.006471922212672542
+    },
+    "galley.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 1.8627260871299338e-05,
+     "delivered_share_declared": 1.863369657197225e-05,
+     "hosts_credited_areal": 94,
+     "hosts_credited_declared": 94,
+     "zone_share_areal": 0.0009940872518665023,
+     "zone_share_declared": 0.0009940872518665023
+    },
+    "galley.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 5.821019022281044e-05,
+     "delivered_share_declared": 5.8230301787413286e-05,
+     "hosts_credited_areal": 94,
+     "hosts_credited_declared": 94,
+     "zone_share_areal": 0.0031065226620828204,
+     "zone_share_declared": 0.0031065226620828204
+    },
+    "galley.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0002910509511140522,
+     "delivered_share_declared": 0.0002911515089370664,
+     "hosts_credited_areal": 94,
+     "hosts_credited_declared": 94,
+     "zone_share_areal": 0.015532613310414101,
+     "zone_share_declared": 0.015532613310414101
+    },
+    "galley.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.01824889463485107,
+     "delivered_share_declared": 0.018255199610354062,
+     "hosts_credited_areal": 94,
+     "hosts_credited_declared": 94,
+     "zone_share_areal": 0.973894854562964,
+     "zone_share_declared": 0.973894854562964
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.02378470878740813,
+     "delivered_share_declared": 0.40270768787223693,
+     "hosts_credited_areal": 459,
+     "hosts_credited_declared": 459,
+     "zone_share_areal": 0.024238898584448325,
+     "zone_share_declared": 0.4104004507129505
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0060888854495764816,
+     "delivered_share_declared": 0.0036788061784472936,
+     "hosts_credited_areal": 459,
+     "hosts_credited_declared": 459,
+     "zone_share_areal": 0.006205158037618771,
+     "zone_share_declared": 0.003749080931872725
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9513883514963253,
+     "delivered_share_declared": 0.5748689777029415,
+     "hosts_credited_areal": 459,
+     "hosts_credited_declared": 459,
+     "zone_share_areal": 0.969555943377933,
+     "zone_share_declared": 0.5858504683551767
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8002,
+   "top_decile_areal": 0.2982242668364348,
+   "top_decile_declared": 0.29003891573051993
+  },
+  {
+   "credited_scaled_ratio": 0.7499555391409897,
+   "delivered_ratio": 0.8628415914175431,
+   "deposit_calls_areal": 120,
+   "deposit_calls_declared": 107,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 2885.3316291844803,
+   "deposited_gec_declared": 2441.7522010331513,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.513094445436903,
+   "gini_areal": 0.8080217373302625,
+   "gini_declared": 0.8229611325525279,
+   "hand_to_mouth_calls_areal": 4528,
+   "hand_to_mouth_calls_declared": 4411,
+   "jaccard": 0.7773386034255599,
+   "n_hosts_areal": 758,
+   "n_hosts_declared": 591,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00011645965289627668,
+     "delivered_share_declared": 4.897246427457757e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.007582650894752806,
+     "zone_share_declared": 0.0075826508947528055
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 5.5900633390212814e-05,
+     "delivered_share_declared": 2.3506782851797247e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.0036396724294813477,
+     "zone_share_declared": 0.0036396724294813485
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 1.164596528962767e-05,
+     "delivered_share_declared": 4.897246427457761e-06,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.0007582650894752809,
+     "zone_share_declared": 0.0007582650894752811
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005822982644813836,
+     "delivered_share_declared": 0.0002448623213728879,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.03791325447376404,
+     "zone_share_declared": 0.037913254473764035
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 9.316772231702137e-05,
+     "delivered_share_declared": 3.9177971419662085e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.006066120715802247,
+     "zone_share_declared": 0.006066120715802249
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00023291930579255336,
+     "delivered_share_declared": 9.794492854915514e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.015165301789505613,
+     "zone_share_declared": 0.015165301789505611
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00011645965289627668,
+     "delivered_share_declared": 4.897246427457757e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.007582650894752806,
+     "zone_share_declared": 0.0075826508947528055
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0008152175702739369,
+     "delivered_share_declared": 0.0003428072499220431,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.053078556263269655,
+     "zone_share_declared": 0.053078556263269655
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0011645965289627672,
+     "delivered_share_declared": 0.0004897246427457758,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.07582650894752808,
+     "zone_share_declared": 0.07582650894752807
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.012170033727660911,
+     "delivered_share_declared": 0.005117622516693356,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.7923870185016681
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00958020625004386,
+     "delivered_share_declared": 0.011530491237108436,
+     "hosts_credited_areal": 340,
+     "hosts_credited_declared": 341,
+     "zone_share_areal": 0.1918158567774936,
+     "zone_share_declared": 0.22988400000000003
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0020437773333426903,
+     "delivered_share_declared": 0.002459842143212541,
+     "hosts_credited_areal": 340,
+     "hosts_credited_declared": 341,
+     "zone_share_areal": 0.04092071611253197,
+     "zone_share_declared": 0.049041999999999995
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0063868041666959065,
+     "delivered_share_declared": 0.007686994158072289,
+     "hosts_credited_areal": 340,
+     "hosts_credited_declared": 341,
+     "zone_share_areal": 0.1278772378516624,
+     "zone_share_declared": 0.15325599999999998
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.03193402083347953,
+     "delivered_share_declared": 0.028480540069219417,
+     "hosts_credited_areal": 340,
+     "hosts_credited_declared": 341,
+     "zone_share_areal": 0.639386189258312,
+     "zone_share_declared": 0.5678179999999999
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.022656013486340828,
+     "delivered_share_declared": 0.5069114880201733,
+     "hosts_credited_areal": 633,
+     "hosts_credited_declared": 312,
+     "zone_share_areal": 0.024238898584448325,
+     "zone_share_declared": 0.5373333440213512
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0057999394525032515,
+     "delivered_share_declared": 0.0027752144948299203,
+     "hosts_credited_areal": 633,
+     "hosts_credited_declared": 312,
+     "zone_share_areal": 0.006205158037618771,
+     "zone_share_declared": 0.0029417666005315335
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9062405394536329,
+     "delivered_share_declared": 0.4336969412888528,
+     "hosts_credited_areal": 633,
+     "hosts_credited_declared": 312,
+     "zone_share_areal": 0.9695559433779328,
+     "zone_share_declared": 0.4597248893781172
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8003,
+   "top_decile_areal": 0.7209364910305547,
+   "top_decile_declared": 0.7330823430775985
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": null,
+   "deposit_calls_areal": 32,
+   "deposit_calls_declared": 32,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 3.355056762516649,
+   "deposited_gec_declared": 3.355056762516649,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.0,
+   "gini_declared": 0.0,
+   "hand_to_mouth_calls_areal": 18,
+   "hand_to_mouth_calls_declared": 18,
+   "jaccard": 1.0,
+   "n_hosts_areal": 0,
+   "n_hosts_declared": 0,
+   "per_class": {},
+   "secondaries_delta": 0,
+   "seed": 8004,
+   "top_decile_areal": 0.0,
+   "top_decile_declared": 0.0
+  },
+  {
+   "credited_scaled_ratio": 2.2543406019007453,
+   "delivered_ratio": 1.9145789186116902,
+   "deposit_calls_areal": 89,
+   "deposit_calls_declared": 125,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 124.8230595768225,
+   "deposited_gec_declared": 228.45903238039656,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.4435385848032547,
+   "gini_areal": 0.8084893240768185,
+   "gini_declared": 0.702697867398324,
+   "hand_to_mouth_calls_areal": 2288,
+   "hand_to_mouth_calls_declared": 4608,
+   "jaccard": 0.5091743119266054,
+   "n_hosts_areal": 661,
+   "n_hosts_declared": 655,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0007038847143070338,
+     "delivered_share_declared": 0.0008020424994068507,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.00758265089475281,
+     "zone_share_declared": 0.0075826508947528055
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00033786466286737617,
+     "delivered_share_declared": 0.00038498039971528837,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.0036396724294813485,
+     "zone_share_declared": 0.003639672429481347
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 7.038847143070334e-05,
+     "delivered_share_declared": 8.020424994068509e-05,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.0007582650894752806,
+     "zone_share_declared": 0.0007582650894752806
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.003519423571535169,
+     "delivered_share_declared": 0.004010212497034254,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.03791325447376405,
+     "zone_share_declared": 0.037913254473764035
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005631077714456268,
+     "delivered_share_declared": 0.0006416339995254807,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.006066120715802245,
+     "zone_share_declared": 0.006066120715802245
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0014077694286140675,
+     "delivered_share_declared": 0.0016040849988137014,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.01516530178950562,
+     "zone_share_declared": 0.015165301789505611
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0007038847143070338,
+     "delivered_share_declared": 0.0008020424994068507,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.00758265089475281,
+     "zone_share_declared": 0.0075826508947528055
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004927193000149236,
+     "delivered_share_declared": 0.005614297495847956,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.053078556263269676,
+     "zone_share_declared": 0.05307855626326965
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.007038847143070338,
+     "delivered_share_declared": 0.008020424994068508,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.0758265089475281,
+     "zone_share_declared": 0.07582650894752807
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.07355595264508498,
+     "delivered_share_declared": 0.08381344118801588,
+     "hosts_credited_areal": 6,
+     "hosts_credited_declared": 8,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.792387018501668
+    },
+    "crew_mess.button_or_dispenser": {
+     "capped_share_declared": 0.007194244604316547,
+     "delivered_share_areal": 0.02361135657216241,
+     "delivered_share_declared": 0.027629507914534134,
+     "hosts_credited_areal": 108,
+     "hosts_credited_declared": 233,
+     "zone_share_areal": 0.16694490818030053,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.door_lever": {
+     "capped_share_declared": 0.007194244604316547,
+     "delivered_share_areal": 0.005666725577318977,
+     "delivered_share_declared": 0.0066310818994881945,
+     "hosts_credited_areal": 108,
+     "hosts_credited_declared": 233,
+     "zone_share_areal": 0.04006677796327212,
+     "zone_share_declared": 0.04006677796327213
+    },
+    "crew_mess.tap_set": {
+     "capped_share_declared": 0.007194244604316547,
+     "delivered_share_areal": 0.02361135657216241,
+     "delivered_share_declared": 0.027629507914534134,
+     "hosts_credited_areal": 108,
+     "hosts_credited_declared": 233,
+     "zone_share_areal": 0.16694490818030053,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.utensil": {
+     "capped_share_declared": 0.007194244604316547,
+     "delivered_share_areal": 0.08854258714560902,
+     "delivered_share_declared": 0.103610654679503,
+     "hosts_credited_areal": 108,
+     "hosts_credited_declared": 233,
+     "zone_share_areal": 0.6260434056761269,
+     "zone_share_declared": 0.6260434056761268
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.03715778659499967,
+     "delivered_share_declared": 0.016791741774851807,
+     "hosts_credited_areal": 374,
+     "hosts_credited_declared": 185,
+     "zone_share_areal": 0.1918158567774936,
+     "zone_share_declared": 0.22988399999999998
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00792699447359993,
+     "delivered_share_declared": 0.003582244088854737,
+     "hosts_credited_areal": 374,
+     "hosts_credited_declared": 185,
+     "zone_share_areal": 0.040920716112531966,
+     "zone_share_declared": 0.049041999999999995
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.024771857729999784,
+     "delivered_share_declared": 0.01119449451656787,
+     "hosts_credited_areal": 374,
+     "hosts_credited_declared": 185,
+     "zone_share_areal": 0.1278772378516624,
+     "zone_share_declared": 0.15325599999999995
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.12385928864999891,
+     "delivered_share_declared": 0.041475932344629485,
+     "hosts_credited_areal": 374,
+     "hosts_credited_declared": 185,
+     "zone_share_areal": 0.639386189258312,
+     "zone_share_declared": 0.5678179999999999
+    },
+    "galley.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0011963796538026327,
+     "delivered_share_declared": 0.000944429507659024,
+     "hosts_credited_areal": 87,
+     "hosts_credited_declared": 87,
+     "zone_share_areal": 0.006471922212672542,
+     "zone_share_declared": 0.006471922212672542
+    },
+    "galley.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0001837639148240844,
+     "delivered_share_declared": 0.0001450643723764261,
+     "hosts_credited_areal": 87,
+     "hosts_credited_declared": 87,
+     "zone_share_areal": 0.0009940872518665023,
+     "zone_share_declared": 0.0009940872518665023
+    },
+    "galley.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005742622338252639,
+     "delivered_share_declared": 0.00045332616367633154,
+     "hosts_credited_areal": 87,
+     "hosts_credited_declared": 87,
+     "zone_share_areal": 0.0031065226620828204,
+     "zone_share_declared": 0.00310652266208282
+    },
+    "galley.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.002871311169126319,
+     "delivered_share_declared": 0.0022666308183816575,
+     "hosts_credited_areal": 87,
+     "hosts_credited_declared": 87,
+     "zone_share_areal": 0.015532613310414101,
+     "zone_share_declared": 0.0155326133104141
+    },
+    "galley.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.18003121030422017,
+     "delivered_share_declared": 0.14211775231252993,
+     "hosts_credited_areal": 87,
+     "hosts_credited_declared": 87,
+     "zone_share_areal": 0.9738948545629641,
+     "zone_share_declared": 0.9738948545629641
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.009384496880103224,
+     "delivered_share_declared": 0.23845156810289048,
+     "hosts_credited_areal": 158,
+     "hosts_credited_declared": 207,
+     "zone_share_areal": 0.024238898584448304,
+     "zone_share_declared": 0.467777483387703
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.002402431201306427,
+     "delivered_share_declared": 0.0017250829183140066,
+     "hosts_credited_areal": 158,
+     "hosts_credited_declared": 220,
+     "zone_share_areal": 0.00620515803761877,
+     "zone_share_declared": 0.003384146108092877
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.37537987520412924,
+     "delivered_share_declared": 0.26957761584943335,
+     "hosts_credited_areal": 158,
+     "hosts_credited_declared": 220,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.5288383705042041
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8005,
+   "top_decile_areal": 0.6942232794272902,
+   "top_decile_declared": 0.5101291109581408
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": 1.0,
+   "deposit_calls_areal": 12,
+   "deposit_calls_declared": 12,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 53.08098868438872,
+   "deposited_gec_declared": 53.08098868438872,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.4826770904633835,
+   "gini_declared": 0.4826770904633835,
+   "hand_to_mouth_calls_areal": 41,
+   "hand_to_mouth_calls_declared": 41,
+   "jaccard": 1.0,
+   "n_hosts_areal": 2,
+   "n_hosts_declared": 2,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.007582650894752809,
+     "delivered_share_declared": 0.007582650894752809,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752809
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.003639672429481349,
+     "delivered_share_declared": 0.003639672429481349,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.003639672429481349,
+     "zone_share_declared": 0.003639672429481349
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0007582650894752807,
+     "delivered_share_declared": 0.0007582650894752807,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.0007582650894752807,
+     "zone_share_declared": 0.0007582650894752807
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.037913254473764056,
+     "delivered_share_declared": 0.037913254473764056,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.037913254473764056,
+     "zone_share_declared": 0.037913254473764056
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.006066120715802246,
+     "delivered_share_declared": 0.006066120715802246,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.006066120715802246,
+     "zone_share_declared": 0.006066120715802246
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.015165301789505618,
+     "delivered_share_declared": 0.015165301789505618,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.015165301789505618,
+     "zone_share_declared": 0.015165301789505618
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.007582650894752809,
+     "delivered_share_declared": 0.007582650894752809,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752809
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.05307855626326967,
+     "delivered_share_declared": 0.05307855626326967,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.05307855626326967,
+     "zone_share_declared": 0.05307855626326967
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.07582650894752811,
+     "delivered_share_declared": 0.07582650894752811,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.07582650894752811,
+     "zone_share_declared": 0.07582650894752811
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.7923870185016681,
+     "delivered_share_declared": 0.7923870185016681,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.7923870185016681
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8006,
+   "top_decile_areal": 0.9826770904633836,
+   "top_decile_declared": 0.9826770904633836
+  },
+  {
+   "credited_scaled_ratio": 1.0859039922117515,
+   "delivered_ratio": 0.9956180557923969,
+   "deposit_calls_areal": 103,
+   "deposit_calls_declared": 92,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 265.88669076261823,
+   "deposited_gec_declared": 261.8904313047245,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.4459396043315733,
+   "gini_areal": 0.8722481449339445,
+   "gini_declared": 0.8956948126015027,
+   "hand_to_mouth_calls_areal": 2455,
+   "hand_to_mouth_calls_declared": 3292,
+   "jaccard": 0.9948186528497409,
+   "n_hosts_areal": 772,
+   "n_hosts_declared": 768,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.000120441510198502,
+     "delivered_share_declared": 5.86772136791724e-05,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752808
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 5.781192489528093e-05,
+     "delivered_share_declared": 2.816506256600276e-05,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.0036396724294813464,
+     "zone_share_declared": 0.0036396724294813485
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 1.2044151019850198e-05,
+     "delivered_share_declared": 5.86772136791724e-06,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.0007582650894752809,
+     "zone_share_declared": 0.0007582650894752809
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0006022075509925101,
+     "delivered_share_declared": 0.000293386068395862,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.03791325447376405,
+     "zone_share_declared": 0.03791325447376404
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 9.635320815880159e-05,
+     "delivered_share_declared": 4.694177094333792e-05,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.006066120715802247,
+     "zone_share_declared": 0.006066120715802247
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.000240883020397004,
+     "delivered_share_declared": 0.0001173544273583448,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.015165301789505618,
+     "zone_share_declared": 0.015165301789505616
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.000120441510198502,
+     "delivered_share_declared": 5.86772136791724e-05,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752808
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0008430905713895135,
+     "delivered_share_declared": 0.0004107404957542068,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.053078556263269634,
+     "zone_share_declared": 0.053078556263269655
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0012044151019850202,
+     "delivered_share_declared": 0.000586772136791724,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.0758265089475281,
+     "zone_share_declared": 0.07582650894752808
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.012586137815743453,
+     "delivered_share_declared": 0.0061317688294735126,
+     "hosts_credited_areal": 3,
+     "hosts_credited_declared": 3,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.792387018501668
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0014144271570014145,
+     "delivered_share_areal": 0.03073272259879815,
+     "delivered_share_declared": 0.0319810580762253,
+     "hosts_credited_areal": 348,
+     "hosts_credited_declared": 345,
+     "zone_share_areal": 0.19181585677749358,
+     "zone_share_declared": 0.22988399999999998
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0014144271570014145,
+     "delivered_share_areal": 0.006556314154410274,
+     "delivered_share_declared": 0.0068226368523874705,
+     "hosts_credited_areal": 348,
+     "hosts_credited_declared": 345,
+     "zone_share_areal": 0.04092071611253197,
+     "zone_share_declared": 0.049042
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0014144271570014145,
+     "delivered_share_areal": 0.020488481732532107,
+     "delivered_share_declared": 0.0213207053841502,
+     "hosts_credited_areal": 348,
+     "hosts_credited_declared": 345,
+     "zone_share_areal": 0.1278772378516624,
+     "zone_share_declared": 0.153256
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.10244240866266051,
+     "delivered_share_declared": 0.07899384226273293,
+     "hosts_credited_areal": 348,
+     "hosts_credited_declared": 345,
+     "zone_share_areal": 0.6393861892583119,
+     "zone_share_declared": 0.5678179999999999
+    },
+    "galley.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00014584143353869094,
+     "delivered_share_declared": 0.0001464833152534763,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.0064719222126725425,
+     "zone_share_declared": 0.0064719222126725425
+    },
+    "galley.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 2.2401244191542927e-05,
+     "delivered_share_declared": 2.2499837222933958e-05,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.0009940872518665025,
+     "zone_share_declared": 0.0009940872518665025
+    },
+    "galley.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 7.000388809857167e-05,
+     "delivered_share_declared": 7.031199132166864e-05,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.0031065226620828213,
+     "zone_share_declared": 0.0031065226620828213
+    },
+    "galley.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00035001944049285825,
+     "delivered_share_declared": 0.00035155995660834314,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.015532613310414103,
+     "zone_share_declared": 0.015532613310414103
+    },
+    "galley.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.021946218918902208,
+     "delivered_share_declared": 0.02204280927934311,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.9738948545629641,
+     "zone_share_declared": 0.9738948545629641
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.019424126467941557,
+     "delivered_share_declared": 0.3904878271999804,
+     "hosts_credited_areal": 499,
+     "hosts_credited_declared": 475,
+     "zone_share_areal": 0.02423889858444833,
+     "zone_share_declared": 0.47017850291602165
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00497257637579304,
+     "delivered_share_declared": 0.002797888649821431,
+     "hosts_credited_areal": 499,
+     "hosts_credited_declared": 481,
+     "zone_share_areal": 0.006205158037618775,
+     "zone_share_declared": 0.0033688811918458584
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.776965058717662,
+     "delivered_share_declared": 0.43722402625494355,
+     "hosts_credited_areal": 499,
+     "hosts_credited_declared": 481,
+     "zone_share_areal": 0.9695559433779328,
+     "zone_share_declared": 0.5264526158921325
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8007,
+   "top_decile_areal": 0.8540417665694238,
+   "top_decile_declared": 0.8906622649476814
+  },
+  {
+   "credited_scaled_ratio": 2.9677609944171444,
+   "delivered_ratio": 2.7342146006577988,
+   "deposit_calls_areal": 43,
+   "deposit_calls_declared": 49,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 5683.929746065691,
+   "deposited_gec_declared": 10125.678514676452,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.47675996885701305,
+   "gini_areal": 0.9669852789589559,
+   "gini_declared": 0.7998520444912196,
+   "hand_to_mouth_calls_areal": 1667,
+   "hand_to_mouth_calls_declared": 5203,
+   "jaccard": 0.25961538461538464,
+   "n_hosts_areal": 193,
+   "n_hosts_declared": 200,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00690106444358718,
+     "delivered_share_declared": 0.002133238428910299,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.007582650894752812,
+     "zone_share_declared": 0.007582650894752799
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.003312510932921847,
+     "delivered_share_declared": 0.0010239544458769453,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.00363967242948135,
+     "zone_share_declared": 0.0036396724294813494
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0006901064443587178,
+     "delivered_share_declared": 0.00021332384289102983,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.000758265089475281,
+     "zone_share_declared": 0.0007582650894752796
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.03450532221793587,
+     "delivered_share_declared": 0.010666192144551513,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.03791325447376403,
+     "zone_share_declared": 0.037913254473764056
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.005520851554869742,
+     "delivered_share_declared": 0.0017065907431282386,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.006066120715802248,
+     "zone_share_declared": 0.006066120715802236
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.01380212888717436,
+     "delivered_share_declared": 0.004266476857820598,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.015165301789505623,
+     "zone_share_declared": 0.015165301789505597
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00690106444358718,
+     "delivered_share_declared": 0.002133238428910299,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.007582650894752812,
+     "zone_share_declared": 0.007582650894752799
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.04830745110511023,
+     "delivered_share_declared": 0.014932669002372119,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.05307855626326965,
+     "zone_share_declared": 0.053078556263269676
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.06901064443587174,
+     "delivered_share_declared": 0.021332384289103026,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.07582650894752806,
+     "zone_share_declared": 0.07582650894752811
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.7211612343548597,
+     "delivered_share_declared": 0.22292341582112643,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 4,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.7923870185016681
+    },
+    "crew_mess.button_or_dispenser": {
+     "capped_share_declared": 0.009345794392523364,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.00013468317479590607,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.door_lever": {
+     "capped_share_declared": 0.009345794392523364,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 3.2323961951017454e-05,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.04006677796327212
+    },
+    "crew_mess.tap_set": {
+     "capped_share_declared": 0.009345794392523364,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.00013468317479590607,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.1669449081803005
+    },
+    "crew_mess.utensil": {
+     "capped_share_declared": 0.009345794392523364,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.0005050619054846477,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 107,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.6260434056761268
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0021787769337726242,
+     "delivered_share_declared": 0.3596479306324492,
+     "hosts_credited_areal": 192,
+     "hosts_credited_declared": 86,
+     "zone_share_areal": 0.02423889858444831,
+     "zone_share_declared": 0.5009988674414614
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005577668950457923,
+     "delivered_share_declared": 0.0022777115419021104,
+     "hosts_credited_areal": 192,
+     "hosts_credited_declared": 100,
+     "zone_share_areal": 0.006205158037618772,
+     "zone_share_declared": 0.0031729110767983477
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.087151077350905,
+     "delivered_share_declared": 0.35593612160393073,
+     "hosts_credited_areal": 192,
+     "hosts_credited_declared": 100,
+     "zone_share_areal": 0.9695559433779328,
+     "zone_share_declared": 0.4958282214817402
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8008,
+   "top_decile_areal": 0.9542015883487622,
+   "top_decile_declared": 0.6241355746241856
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": null,
+   "deposit_calls_areal": 11,
+   "deposit_calls_declared": 11,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 4.1034944200730937e-07,
+   "deposited_gec_declared": 4.1034944200730937e-07,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.0,
+   "gini_declared": 0.0,
+   "hand_to_mouth_calls_areal": 4,
+   "hand_to_mouth_calls_declared": 4,
+   "jaccard": 1.0,
+   "n_hosts_areal": 0,
+   "n_hosts_declared": 0,
+   "per_class": {},
+   "secondaries_delta": 0,
+   "seed": 8009,
+   "top_decile_areal": 0.0,
+   "top_decile_declared": 0.0
+  },
+  {
+   "credited_scaled_ratio": 0.9084511174317386,
+   "delivered_ratio": 0.9828821766373083,
+   "deposit_calls_areal": 53,
+   "deposit_calls_declared": 44,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 402823.13333166833,
+   "deposited_gec_declared": 402823.1333324587,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.4360258154349805,
+   "gini_areal": 0.656807800857556,
+   "gini_declared": 0.6955086958555137,
+   "hand_to_mouth_calls_areal": 2652,
+   "hand_to_mouth_calls_declared": 3807,
+   "jaccard": 1.0,
+   "n_hosts_areal": 172,
+   "n_hosts_declared": 172,
+   "per_class": {
+    "galley.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 5.6010209784787123e-08,
+     "delivered_share_declared": 5.698568059949202e-08,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.006471922212672541,
+     "zone_share_declared": 0.006471922212672541
+    },
+    "galley.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 8.603168222943302e-09,
+     "delivered_share_declared": 8.753000540081974e-09,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.0009940872518665023,
+     "zone_share_declared": 0.0009940872518665023
+    },
+    "galley.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 2.6884900696697827e-08,
+     "delivered_share_declared": 2.7353126687756174e-08,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.0031065226620828204,
+     "zone_share_declared": 0.0031065226620828204
+    },
+    "galley.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 1.3442450348348912e-07,
+     "delivered_share_declared": 1.3676563343878087e-07,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.015532613310414101,
+     "zone_share_declared": 0.015532613310414101
+    },
+    "galley.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 8.428416368414767e-06,
+     "delivered_share_declared": 8.575205216611559e-06,
+     "hosts_credited_areal": 83,
+     "hosts_credited_declared": 83,
+     "zone_share_areal": 0.973894854562964,
+     "zone_share_declared": 0.973894854562964
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.02423868881279934,
+     "delivered_share_declared": 0.4602606613597826,
+     "hosts_credited_areal": 96,
+     "hosts_credited_declared": 81,
+     "zone_share_areal": 0.024238898584448332,
+     "zone_share_declared": 0.4602647140194288
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.006205104336076636,
+     "delivered_share_declared": 0.0034319019961855787,
+     "hosts_credited_areal": 96,
+     "hosts_credited_declared": 96,
+     "zone_share_areal": 0.0062051580376187776,
+     "zone_share_declared": 0.003431932214563766
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9695475525119733,
+     "delivered_share_declared": 0.5362986315813739,
+     "hosts_credited_areal": 96,
+     "hosts_credited_declared": 96,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.5363033537660076
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8010,
+   "top_decile_areal": 0.3904679848545351,
+   "top_decile_declared": 0.4718459864664264
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": 1.0,
+   "deposit_calls_areal": 13,
+   "deposit_calls_declared": 13,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 429.9732897269645,
+   "deposited_gec_declared": 429.9732897269645,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.9515487364098183,
+   "gini_declared": 0.9515487364098187,
+   "hand_to_mouth_calls_areal": 294,
+   "hand_to_mouth_calls_declared": 294,
+   "jaccard": 1.0,
+   "n_hosts_areal": 182,
+   "n_hosts_declared": 182,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.006092339308442911,
+     "delivered_share_declared": 0.006092339308442911,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.00758265089475281,
+     "zone_share_declared": 0.00758265089475281
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.002924322868052598,
+     "delivered_share_declared": 0.002924322868052598,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.0036396724294813494,
+     "zone_share_declared": 0.0036396724294813494
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0006092339308442912,
+     "delivered_share_declared": 0.0006092339308442912,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.000758265089475281,
+     "zone_share_declared": 0.000758265089475281
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.030461696542214565,
+     "delivered_share_declared": 0.030461696542214565,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.037913254473764056,
+     "zone_share_declared": 0.037913254473764056
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00487387144675433,
+     "delivered_share_declared": 0.00487387144675433,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.006066120715802248,
+     "zone_share_declared": 0.006066120715802248
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.012184678616885823,
+     "delivered_share_declared": 0.012184678616885823,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.01516530178950562,
+     "zone_share_declared": 0.01516530178950562
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.006092339308442911,
+     "delivered_share_declared": 0.006092339308442911,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.00758265089475281,
+     "zone_share_declared": 0.00758265089475281
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0426463751591004,
+     "delivered_share_declared": 0.0426463751591004,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.05307855626326969,
+     "zone_share_declared": 0.05307855626326969
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.06092339308442913,
+     "delivered_share_declared": 0.06092339308442913,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.07582650894752811,
+     "zone_share_declared": 0.07582650894752811
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.6366494577322838,
+     "delivered_share_declared": 0.6366494577322838,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 2,
+     "zone_share_areal": 0.792387018501668,
+     "zone_share_declared": 0.792387018501668
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0376999281334813,
+     "delivered_share_declared": 0.04518192825471403,
+     "hosts_credited_areal": 180,
+     "hosts_credited_declared": 180,
+     "zone_share_areal": 0.1918158567774936,
+     "zone_share_declared": 0.22988399999999998
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.008042651335142677,
+     "delivered_share_declared": 0.00963882708438902,
+     "hosts_credited_areal": 180,
+     "hosts_credited_declared": 180,
+     "zone_share_areal": 0.040920716112531966,
+     "zone_share_declared": 0.049041999999999995
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.025133285422320868,
+     "delivered_share_declared": 0.03012128550314268,
+     "hosts_credited_areal": 180,
+     "hosts_credited_declared": 180,
+     "zone_share_areal": 0.1278772378516624,
+     "zone_share_declared": 0.15325599999999998
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.12566642711160433,
+     "delivered_share_declared": 0.1116002511603035,
+     "hosts_credited_areal": 180,
+     "hosts_credited_declared": 180,
+     "zone_share_areal": 0.639386189258312,
+     "zone_share_declared": 0.567818
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8011,
+   "top_decile_areal": 0.9378435313188858,
+   "top_decile_declared": 0.9378435313188858
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": null,
+   "deposit_calls_areal": 18,
+   "deposit_calls_declared": 18,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 2.295766424080995e-82,
+   "deposited_gec_declared": 2.295766424080995e-82,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.0,
+   "gini_declared": 0.0,
+   "hand_to_mouth_calls_areal": 18,
+   "hand_to_mouth_calls_declared": 18,
+   "jaccard": 1.0,
+   "n_hosts_areal": 0,
+   "n_hosts_declared": 0,
+   "per_class": {},
+   "secondaries_delta": 0,
+   "seed": 8012,
+   "top_decile_areal": 0.0,
+   "top_decile_declared": 0.0
+  },
+  {
+   "credited_scaled_ratio": null,
+   "delivered_ratio": null,
+   "deposit_calls_areal": 1,
+   "deposit_calls_declared": 1,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 2.9847375286384142e-86,
+   "deposited_gec_declared": 2.9847375286384142e-86,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.0,
+   "gini_declared": 0.0,
+   "hand_to_mouth_calls_areal": 0,
+   "hand_to_mouth_calls_declared": 0,
+   "jaccard": 1.0,
+   "n_hosts_areal": 0,
+   "n_hosts_declared": 0,
+   "per_class": {},
+   "secondaries_delta": 0,
+   "seed": 8013,
+   "top_decile_areal": 0.0,
+   "top_decile_declared": 0.0
+  },
+  {
+   "credited_scaled_ratio": 1.1327383408369613,
+   "delivered_ratio": 1.180305135585684,
+   "deposit_calls_areal": 34,
+   "deposit_calls_declared": 31,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 22.627119682426784,
+   "deposited_gec_declared": 26.066679418032965,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.49215375973574677,
+   "gini_areal": 0.7495308010198578,
+   "gini_declared": 0.7233680336624722,
+   "hand_to_mouth_calls_areal": 1161,
+   "hand_to_mouth_calls_declared": 1343,
+   "jaccard": 0.975975975975976,
+   "n_hosts_areal": 650,
+   "n_hosts_declared": 666,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0004081781622900652,
+     "delivered_share_declared": 0.00022454176859365932,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752807,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0001959255178992314,
+     "delivered_share_declared": 0.00010778004892495651,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0036396724294813494,
+     "zone_share_declared": 0.0036396724294813485
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 4.081781622900652e-05,
+     "delivered_share_declared": 2.2454176859365934e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0007582650894752807,
+     "zone_share_declared": 0.0007582650894752807
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0020408908114503254,
+     "delivered_share_declared": 0.0011227088429682966,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.03791325447376402,
+     "zone_share_declared": 0.037913254473764035
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0003265425298320522,
+     "delivered_share_declared": 0.00017963341487492747,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.006066120715802246,
+     "zone_share_declared": 0.006066120715802246
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0008163563245801304,
+     "delivered_share_declared": 0.00044908353718731863,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.015165301789505614,
+     "zone_share_declared": 0.015165301789505614
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0004081781622900652,
+     "delivered_share_declared": 0.00022454176859365932,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752807,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.002857247136030459,
+     "delivered_share_declared": 0.0015717923801556164,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0530785562632697,
+     "zone_share_declared": 0.05307855626326969
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004081781622900651,
+     "delivered_share_declared": 0.002245417685936593,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.07582650894752804,
+     "zone_share_declared": 0.07582650894752807
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0426546179593118,
+     "delivered_share_declared": 0.023464614818037393,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.792387018501668,
+     "zone_share_declared": 0.7923870185016681
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.022934105680560066,
+     "delivered_share_declared": 0.5011009453826739,
+     "hosts_credited_areal": 650,
+     "hosts_credited_declared": 629,
+     "zone_share_areal": 0.02423889858444832,
+     "zone_share_declared": 0.5163926583201951
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.005871131054223379,
+     "delivered_share_declared": 0.0029838667317723905,
+     "hosts_credited_areal": 650,
+     "hosts_credited_declared": 666,
+     "zone_share_areal": 0.006205158037618772,
+     "zone_share_declared": 0.0030749231026024992
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9173642272224027,
+     "delivered_share_declared": 0.46630261944342183,
+     "hosts_credited_areal": 650,
+     "hosts_credited_declared": 666,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.4805324185772024
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8014,
+   "top_decile_areal": 0.6169024763344269,
+   "top_decile_declared": 0.5847502225025346
+  },
+  {
+   "credited_scaled_ratio": 0.9837672079484325,
+   "delivered_ratio": 0.943681566849077,
+   "deposit_calls_areal": 79,
+   "deposit_calls_declared": 78,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 22.343245961008844,
+   "deposited_gec_declared": 22.33311983830924,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.6695003729891096,
+   "gini_areal": 0.7093510096663875,
+   "gini_declared": 0.6748928813517312,
+   "hand_to_mouth_calls_areal": 631,
+   "hand_to_mouth_calls_declared": 522,
+   "jaccard": 0.723463687150838,
+   "n_hosts_areal": 358,
+   "n_hosts_declared": 259,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005095864378256366,
+     "delivered_share_declared": 0.0005784393356319312,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752807,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00024460149015630557,
+     "delivered_share_declared": 0.00027765088110332707,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0036396724294813485,
+     "zone_share_declared": 0.0036396724294813485
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 5.095864378256366e-05,
+     "delivered_share_declared": 5.784393356319314e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0007582650894752809,
+     "zone_share_declared": 0.000758265089475281
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.002547932189128183,
+     "delivered_share_declared": 0.0028921966781596566,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.03791325447376404,
+     "zone_share_declared": 0.03791325447376404
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00040766915026050927,
+     "delivered_share_declared": 0.00046275146850554514,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.006066120715802247,
+     "zone_share_declared": 0.006066120715802248
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0010191728756512731,
+     "delivered_share_declared": 0.0011568786712638625,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.015165301789505614,
+     "zone_share_declared": 0.015165301789505614
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0005095864378256366,
+     "delivered_share_declared": 0.0005784393356319312,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752807,
+     "zone_share_declared": 0.007582650894752807
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.003567105064779456,
+     "delivered_share_declared": 0.00404907534942352,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.05307855626326966,
+     "zone_share_declared": 0.05307855626326966
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.005095864378256366,
+     "delivered_share_declared": 0.005784393356319313,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.07582650894752808,
+     "zone_share_declared": 0.07582650894752808
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.053251782752779,
+     "delivered_share_declared": 0.060446910573536794,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.7923870185016681
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.14624851616812076,
+     "delivered_share_declared": 0.18573349701979353,
+     "hosts_credited_areal": 178,
+     "hosts_credited_declared": 178,
+     "zone_share_areal": 0.1918158567774936,
+     "zone_share_declared": 0.229884
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0311996834491991,
+     "delivered_share_declared": 0.03962321066644357,
+     "hosts_credited_areal": 178,
+     "hosts_credited_declared": 178,
+     "zone_share_areal": 0.04092071611253197,
+     "zone_share_declared": 0.049042
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.09749901077874719,
+     "delivered_share_declared": 0.12382233134652901,
+     "hosts_credited_areal": 178,
+     "hosts_credited_declared": 178,
+     "zone_share_areal": 0.1278772378516624,
+     "zone_share_declared": 0.153256
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.48749505389373593,
+     "delivered_share_declared": 0.4587653895477072,
+     "hosts_credited_areal": 178,
+     "hosts_credited_declared": 178,
+     "zone_share_areal": 0.639386189258312,
+     "zone_share_declared": 0.567818
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004129180635295521,
+     "delivered_share_declared": 0.08031488354592385,
+     "hosts_credited_areal": 216,
+     "hosts_credited_declared": 116,
+     "zone_share_areal": 0.024238898584448314,
+     "zone_share_declared": 0.6937392715735579
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.001057070242635654,
+     "delivered_share_declared": 0.0002254328452774403,
+     "hosts_credited_areal": 216,
+     "hosts_credited_declared": 116,
+     "zone_share_areal": 0.0062051580376187715,
+     "zone_share_declared": 0.0019472308365124087
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.1651672254118209,
+     "delivered_share_declared": 0.03523067544518633,
+     "hosts_credited_areal": 216,
+     "hosts_credited_declared": 116,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.30431349758992987
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8015,
+   "top_decile_areal": 0.57581273804433,
+   "top_decile_declared": 0.5285314142136185
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": null,
+   "deposit_calls_areal": 12,
+   "deposit_calls_declared": 12,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 2.6283919595521772e-06,
+   "deposited_gec_declared": 2.6283919595521772e-06,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.0,
+   "gini_declared": 0.0,
+   "hand_to_mouth_calls_areal": 26,
+   "hand_to_mouth_calls_declared": 26,
+   "jaccard": 1.0,
+   "n_hosts_areal": 0,
+   "n_hosts_declared": 0,
+   "per_class": {},
+   "secondaries_delta": 0,
+   "seed": 8016,
+   "top_decile_areal": 0.0,
+   "top_decile_declared": 0.0
+  },
+  {
+   "credited_scaled_ratio": 1.2789990451600637,
+   "delivered_ratio": 1.1423023738280278,
+   "deposit_calls_areal": 51,
+   "deposit_calls_declared": 48,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 60.959475533595004,
+   "deposited_gec_declared": 52.23166091599267,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.4020059923744908,
+   "gini_areal": 0.6983148450118444,
+   "gini_declared": 0.598732355719662,
+   "hand_to_mouth_calls_areal": 790,
+   "hand_to_mouth_calls_declared": 1835,
+   "jaccard": 0.8360655737704918,
+   "n_hosts_areal": 562,
+   "n_hosts_declared": 670,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0016228168855601385,
+     "delivered_share_declared": 1.0767013284786962e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752805
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0007789521050688669,
+     "delivered_share_declared": 5.168166376697745e-06,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0036396724294813503,
+     "zone_share_declared": 0.0036396724294813485
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00016228168855601381,
+     "delivered_share_declared": 1.0767013284786962e-06,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0007582650894752807,
+     "zone_share_declared": 0.0007582650894752804
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.008114084427800688,
+     "delivered_share_declared": 5.3835066423934816e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.03791325447376402,
+     "zone_share_declared": 0.03791325447376403
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0012982535084481105,
+     "delivered_share_declared": 8.61361062782957e-06,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.006066120715802246,
+     "zone_share_declared": 0.006066120715802243
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.003245633771120277,
+     "delivered_share_declared": 2.1534026569573924e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.015165301789505618,
+     "zone_share_declared": 0.01516530178950561
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0016228168855601385,
+     "delivered_share_declared": 1.0767013284786962e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752809,
+     "zone_share_declared": 0.007582650894752805
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.011359718198920971,
+     "delivered_share_declared": 7.536909299350878e-05,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.05307855626326967,
+     "zone_share_declared": 0.05307855626326967
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.016228168855601376,
+     "delivered_share_declared": 0.00010767013284786963,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.07582650894752804,
+     "zone_share_declared": 0.07582650894752806
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.1695843645410344,
+     "delivered_share_declared": 0.0011251528882602374,
+     "hosts_credited_areal": 2,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.792387018501668
+    },
+    "dining.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.04553273551991485,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 189,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.22988400000000003
+    },
+    "dining.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.00971366608971335,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 189,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.049042
+    },
+    "dining.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.030355157013276565,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 189,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.153256
+    },
+    "dining.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0,
+     "delivered_share_declared": 0.1124667520029537,
+     "hosts_credited_areal": 0,
+     "hosts_credited_declared": 189,
+     "zone_share_areal": 0.0,
+     "zone_share_declared": 0.5678179999999999
+    },
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.019051360023568182,
+     "delivered_share_declared": 0.3412140374786617,
+     "hosts_credited_areal": 560,
+     "hosts_credited_declared": 562,
+     "zone_share_areal": 0.024238898584448318,
+     "zone_share_declared": 0.42624489095893914
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004877148166033456,
+     "delivered_share_declared": 0.002920507853589045,
+     "hosts_credited_areal": 560,
+     "hosts_credited_declared": 563,
+     "zone_share_areal": 0.006205158037618771,
+     "zone_share_declared": 0.003648301109756179
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.7620544009427275,
+     "delivered_share_declared": 0.45637719032989316,
+     "hosts_credited_areal": 560,
+     "hosts_credited_declared": 563,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.5701068079313045
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8017,
+   "top_decile_areal": 0.5920402975619032,
+   "top_decile_declared": 0.4649865481248476
+  },
+  {
+   "credited_scaled_ratio": 11.321149047331977,
+   "delivered_ratio": 7.47033920210249,
+   "deposit_calls_areal": 9,
+   "deposit_calls_declared": 10,
+   "deposit_events_aligned": false,
+   "deposited_gec_areal": 1.8723887720009136,
+   "deposited_gec_declared": 3.5105029313698535,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.7593928265575209,
+   "gini_areal": 0.6138157884448188,
+   "gini_declared": 0.6190407281210111,
+   "hand_to_mouth_calls_areal": 45,
+   "hand_to_mouth_calls_declared": 122,
+   "jaccard": 0.5964912280701754,
+   "n_hosts_areal": 34,
+   "n_hosts_declared": 57,
+   "per_class": {
+    "public.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.024238898584448318,
+     "delivered_share_declared": 0.7836317251419692,
+     "hosts_credited_areal": 34,
+     "hosts_credited_declared": 57,
+     "zone_share_areal": 0.024238898584448318,
+     "zone_share_declared": 0.7836317251419692
+    },
+    "public.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0062051580376187715,
+     "delivered_share_declared": 0.0013756984637824812,
+     "hosts_credited_areal": 34,
+     "hosts_credited_declared": 57,
+     "zone_share_areal": 0.0062051580376187715,
+     "zone_share_declared": 0.0013756984637824812
+    },
+    "public.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9695559433779329,
+     "delivered_share_declared": 0.21499257639424837,
+     "hosts_credited_areal": 34,
+     "hosts_credited_declared": 57,
+     "zone_share_areal": 0.9695559433779329,
+     "zone_share_declared": 0.21499257639424837
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8018,
+   "top_decile_areal": 0.4611671035811234,
+   "top_decile_declared": 0.4950882796967212
+  },
+  {
+   "credited_scaled_ratio": 1.0,
+   "delivered_ratio": 1.0,
+   "deposit_calls_areal": 51,
+   "deposit_calls_declared": 51,
+   "deposit_events_aligned": true,
+   "deposited_gec_areal": 517.8272854134187,
+   "deposited_gec_declared": 517.8272854134187,
+   "focus_class": "public.button_or_dispenser",
+   "focus_share_gain": 0.0,
+   "gini_areal": 0.5645912122109964,
+   "gini_declared": 0.5645912122109964,
+   "hand_to_mouth_calls_areal": 335,
+   "hand_to_mouth_calls_declared": 335,
+   "jaccard": 1.0,
+   "n_hosts_areal": 93,
+   "n_hosts_declared": 93,
+   "per_class": {
+    "cabin.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 4.665106502989012e-05,
+     "delivered_share_declared": 4.665106502989012e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752806,
+     "zone_share_declared": 0.007582650894752806
+    },
+    "cabin.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 2.239251121434725e-05,
+     "delivered_share_declared": 2.239251121434725e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.003639672429481346,
+     "zone_share_declared": 0.003639672429481346
+    },
+    "cabin.flush_actuator": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 4.6651065029890114e-06,
+     "delivered_share_declared": 4.6651065029890114e-06,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.0007582650894752805,
+     "zone_share_declared": 0.0007582650894752805
+    },
+    "cabin.grab_rail_m": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00023325532514945055,
+     "delivered_share_declared": 0.00023325532514945055,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.03791325447376403,
+     "zone_share_declared": 0.03791325447376403
+    },
+    "cabin.light_switch": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 3.732085202391209e-05,
+     "delivered_share_declared": 3.732085202391209e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.006066120715802244,
+     "zone_share_declared": 0.006066120715802244
+    },
+    "cabin.remote_or_phone": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 9.330213005978024e-05,
+     "delivered_share_declared": 9.330213005978024e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.015165301789505613,
+     "zone_share_declared": 0.015165301789505613
+    },
+    "cabin.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 4.665106502989012e-05,
+     "delivered_share_declared": 4.665106502989012e-05,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.007582650894752806,
+     "zone_share_declared": 0.007582650894752806
+    },
+    "cabin.toilet_seat": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.00032655745520923104,
+     "delivered_share_declared": 0.00032655745520923104,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.053078556263269676,
+     "zone_share_declared": 0.053078556263269676
+    },
+    "cabin.wardrobe_front": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0004665106502989011,
+     "delivered_share_declared": 0.0004665106502989011,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.07582650894752806,
+     "zone_share_declared": 0.07582650894752806
+    },
+    "cabin.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.004875036295623516,
+     "delivered_share_declared": 0.004875036295623516,
+     "hosts_credited_areal": 1,
+     "hosts_credited_declared": 1,
+     "zone_share_areal": 0.7923870185016681,
+     "zone_share_declared": 0.7923870185016681
+    },
+    "galley.button_or_dispenser": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.006432104730870669,
+     "delivered_share_declared": 0.006432104730870669,
+     "hosts_credited_areal": 92,
+     "hosts_credited_declared": 92,
+     "zone_share_areal": 0.006471922212672542,
+     "zone_share_declared": 0.006471922212672542
+    },
+    "galley.door_lever": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0009879712866617345,
+     "delivered_share_declared": 0.0009879712866617345,
+     "hosts_credited_areal": 92,
+     "hosts_credited_declared": 92,
+     "zone_share_areal": 0.0009940872518665023,
+     "zone_share_declared": 0.0009940872518665023
+    },
+    "galley.tap_set": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.0030874102708179215,
+     "delivered_share_declared": 0.0030874102708179215,
+     "hosts_credited_areal": 92,
+     "hosts_credited_declared": 92,
+     "zone_share_areal": 0.003106522662082821,
+     "zone_share_declared": 0.003106522662082821
+    },
+    "galley.utensil": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.015437051354089607,
+     "delivered_share_declared": 0.015437051354089607,
+     "hosts_credited_areal": 92,
+     "hosts_credited_declared": 92,
+     "zone_share_areal": 0.015532613310414103,
+     "zone_share_declared": 0.015532613310414103
+    },
+    "galley.work_plane": {
+     "capped_share_declared": 0.0,
+     "delivered_share_areal": 0.9679031199014181,
+     "delivered_share_declared": 0.9679031199014181,
+     "hosts_credited_areal": 92,
+     "hosts_credited_declared": 92,
+     "zone_share_areal": 0.973894854562964,
+     "zone_share_declared": 0.973894854562964
+    }
+   },
+   "secondaries_delta": 0,
+   "seed": 8019,
+   "top_decile_areal": 0.4245668007988463,
+   "top_decile_declared": 0.4245668007988463
+  }
+ ],
+ "seeds": [
+  8000,
+  8001,
+  8002,
+  8003,
+  8004,
+  8005,
+  8006,
+  8007,
+  8008,
+  8009,
+  8010,
+  8011,
+  8012,
+  8013,
+  8014,
+  8015,
+  8016,
+  8017,
+  8018,
+  8019
+ ],
+ "seeds_only_in_arm": [],
+ "seeds_only_in_base": []
+}

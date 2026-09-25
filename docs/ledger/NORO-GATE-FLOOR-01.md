@@ -2,7 +2,8 @@
 **Date:** 2026-09-24
 **Commit:** 1264f60
 **Pathogens:** all
-**Status:** declared
+**Status:** measured
+**Measured at:** 37dc215
 
 A **physical** minimum-pickup threshold for fomite surface pools
 (`SURFACE_PICKUP_MIN_GEC`), distinct from and above the numerical residue
@@ -227,5 +228,145 @@ is quoted as a result.
 
 ## 6. Measured
 
-*(empty until the Part-A/Part-B block has run; filled only from the
-measured block, with `**Measured at:** <SHA>` added to the header)*
+Measured at `37dc215` (Part A merged, #674). Block: 20 paired seeds
+8000–8019, `classic_cruise_1900`, `--bundle norwalk_only`, 288 epochs,
+three arms (`pooled`, `per_surface+areal`, `per_surface+declared`) plus
+the 96-epoch lockstep probe on all 20 seeds. Artifacts committed under
+`../norovirus/noro_gate_floor_01/`.
+
+### 6.1 Identity (§3) — holds
+
+`fomite_disagg_identity_per_surface_areal.json`: **identity holds** on all
+20 seeds. Every exact statistic (`surface_deposit_calls`,
+`deliver_calls`, `hand_to_mouth_calls`, `hosts_credited_any_dose`,
+`secondaries`, `imports`, `attack_rate`) is equal; the worst relative
+deviation over all mass/dose statistics and the per-host vectors is
+`1.5e-15` (seed 8001), i.e. float-summation order only, 6 orders inside
+the frozen `1e-9`. Part A therefore does **not** break `DISAGG-01`.
+
+Five seeds (8004, 8009, 8012, 8013, 8016) deliver no fomite mass at all
+under `norwalk_only`, so the delivery witnesses never fire — **in
+neither arm**. The readout originally scored a field absent in both arms
+as a defect, which reported `DEFECT` with every compared value equal.
+Fixed in `tools/noro_diag/fomite_disagg_identity_readout.py`: absence in
+both arms is agreement (`seeds_absent_in_both_arms`), absence in exactly
+one arm is a defect (`seeds_absent_in_one_arm`); three regression tests
+pin the three cases.
+
+**Runtime side-effect (diagnostic, not a criterion).** `per_surface` /
+`pooled` wall-clock ratio is median **1.012** [0.965, 1.159] against the
+spec envelope [1.5, 4.0] — below it, as `DISAGG-01` §7 already measured
+(**1.126** [1.051, 1.211]). Only `> 4×` was ever a report condition, so
+nothing is triggered. The two figures are not strictly comparable (that
+block ran the shipped bundle, this one `norwalk_only`), but the drop is
+in the direction Part A predicts: the per-surface arm no longer pays for
+per-class pickup dispatch against sub-copy pools.
+
+### 6.2 Event alignment (§4.2) — 10/20 at 288 epochs, 13/20 at 96
+
+| quantity | `-01` (all pathogens) | here (norwalk only, Part-A gate) |
+|---|---|---|
+| deposit streams aligned, 288 epochs | 3/20 | **10/20** |
+| still in lockstep at epoch 96 | — | **13/20** |
+
+First-divergence epochs (lockstep probe, 96-epoch window):
+
+| seed | first divergence | probe class | max \|mass\| at divergence (GEC) |
+|---|---|---|---|
+| 8000 | ≥96 | — | — |
+| 8001 | 61 | expected | 0.965 |
+| 8002 | ≥96 | — | — |
+| 8003 | 36 | expected | 48.7 |
+| 8004 | ≥96 | — | — |
+| 8005 | 65 | expected | 1.36 |
+| 8006 | ≥96 | — | — |
+| 8007 | 89 | expected | 3.90 |
+| 8008 | 45 | expected | 1.37e3 |
+| 8009 | ≥96 | — | — |
+| 8010 | ≥96 | — | — |
+| 8011 | ≥96 | — | — |
+| 8012 | ≥96 | — | — |
+| 8013 | ≥96 | — | — |
+| 8014 | 83 | expected | 1.03 |
+| 8015 | ≥96 | — | — |
+| 8016 | ≥96 | — | — |
+| 8017 | 91 | expected | 1.04 |
+| 8018 | ≥96 | — | — |
+| 8019 | ≥96 | — | — |
+
+All seven divergences inside the window are classified `expected` by the
+`-02` probe — a `norwalk_gi` class-mass reallocation between the areal
+and declared tables, on a pool the arms genuinely share. This is the
+substantive change from `-02`, where the first divergence was a
+gate-count artefact on sub-copy pools: **with the 1-GEC gate the arms no
+longer part company over pools that cannot yield a pickup.** One residual
+(seed 8001, epoch 61, 0.965 GEC in `Engine_Room`) diverges on a *deposit*
+into a still-sub-copy pool, so a deposit-side counterpart of this gate is
+the remaining sub-copy asymmetry — recorded, not fixed here.
+
+Seeds 8015 and 8018 stay in lockstep to epoch 96 yet are misaligned over
+288, so divergence is not confined to the first tens of epochs under
+`norwalk_only` and the `≥96` rows must not be read as "aligned to 288".
+
+### 6.3 Coincidence (§4.1) — rule does not fire; inert where paired
+
+`touch_share_coincidence_per_surface_declared.json`, all 20 seeds:
+median host-set Jaccard **1.000** (rule needs `< 0.90`) and the focus
+class `public.button_or_dispenser` gains `> 0.10` share in **12/20**
+seeds (rule needs `≥ 15`). Neither limb is satisfied → **indeterminate at
+n = 20**, matching `-01`.
+
+Under the frozen §4.2 interpretation rule the verdict is read only on the
+10 deposit-aligned seeds, and there it is sharper:
+
+| subset | seeds | median Jaccard | focus gain > 0.10 |
+|---|---|---|---|
+| deposit-aligned | 10 | **1.000** (all ten exactly 1.0) | 2/10 |
+| diverged | 10 | 0.807 | 10/10 |
+
+**On every seed where the arms are still paired, `H_A == H_D` exactly.**
+The entire Jaccard signal and the entire focus-class gain live on the
+seeds whose event streams had already parted — i.e. they are stream
+artefacts, which is the `-02` conclusion re-confirmed on a norovirus-only
+bundle against the physical gate. `secondaries_delta` is **0 on all 20
+seeds**, both arms, so the declared table changes no outcome.
+
+The two aligned seeds with a focus gain (8000: +0.512, 8002: +0.386) show
+the declared table doing exactly what it was predicted to do *within* a
+zone class — `button_or_dispenser` share up, `grab_rail_m` down — while
+crediting the identical host set. Declared-vs-areal is therefore a
+**re-allocation of mass among item classes, not of exposure among
+hosts**, at this cell.
+
+Caveat on power: of the 10 aligned seeds, 5 credit **no** fomite host at
+all under `norwalk_only` (8004, 8009, 8012, 8013, 8016) and one credits
+2. The interpretable n is **4–5 seeds**, not 10, so "inert" here is a
+strong hint, not a measurement at n = 20. `identical_host_sets_all_seeds`
+is `false`, so the §5 inert-design stop is **not** triggered.
+
+### 6.4 Cap-share diagnostic (§4.3) — no stop
+
+Maximum `capped_calls / calls` over every (zone class, item class) in
+arm D: **0.93%**, against the 10% report-immediately limit. `cap_flags`
+is empty. **Not triggered** — no declared class's delivered share is
+measuring the conservation cap.
+
+### 6.5 Stop conditions
+
+None triggered. Identity holds (6.1); every moved golden is attributed
+(§1.4); no class exceeds 10% capped calls (6.4); norwalk-only ran on the
+existing `--bundle` option with the engine default bundle untouched (§2);
+the constant carries a Grade C row (§1.2); host sets are not identical on
+all 20 seeds, so the inert-design stop does not apply (6.3).
+
+### 6.6 What this entry settles, and what it does not
+
+- **Settled:** a sub-copy pool no longer opens the pickup gate anywhere
+  on the default path; the pooled/per-surface identity survives it; the
+  declared touch-share table is inert on host sets on every seed where
+  the arms remain paired, and moves only within-zone-class item shares.
+- **Not settled:** the coincidence rule of `-01` remains unfired at
+  n = 20 because only ~5 aligned seeds carry fomite hosts at all under
+  `norwalk_only`; a decision on the table needs either a cell with more
+  fomite-active seeds or the deposit-side gate that would keep more
+  seeds paired (6.2). Every absolute dose figure remains withdrawn.

@@ -1,0 +1,2003 @@
+{
+ "bundle": "norwalk_only",
+ "deliverable": "NORO-GATE-FLOOR-01",
+ "epochs": 96,
+ "measured_at": "37dc2154c3d2d7df7e05e341607706252df11862",
+ "num_agents": 1910,
+ "platform": "classic_cruise_1900",
+ "probe": "NORO-TOUCH-SHARE-02 lockstep",
+ "seeds": {
+  "8000": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 513,
+      "deliveries": 4,
+      "deposit_calls": 381,
+      "hand_contact_calls": 36968,
+      "hand_to_mouth_calls": 518,
+      "pickup_by_class_calls": 513,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 513,
+      "deliveries": 4,
+      "deposit_calls": 381,
+      "hand_contact_calls": 36968,
+      "hand_to_mouth_calls": 518,
+      "pickup_by_class_calls": 513,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 513,
+      "deliveries": 4,
+      "deposit_calls": 381,
+      "hand_contact_calls": 36968,
+      "hand_to_mouth_calls": 518,
+      "pickup_by_class_calls": 513,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 513,
+      "deliveries": 4,
+      "deposit_calls": 381,
+      "hand_contact_calls": 36968,
+      "hand_to_mouth_calls": 518,
+      "pickup_by_class_calls": 513,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": {
+    "a_gec": 0.03275393962059713,
+    "d_gec": 0.8836935958940556,
+    "epoch": 63,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Casino"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.03275393962059713,
+    "d_gec": 0.8836935958940556,
+    "epoch": 63,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Casino"
+   }
+  },
+  "8001": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "deposit|norwalk_gi|Engine_Room",
+     "surface_mass|norwalk_gi|Engine_Room",
+     "class_mass|norwalk_gi|Engine_Room|button_or_dispenser",
+     "class_mass|norwalk_gi|Engine_Room|door_lever",
+     "class_mass|norwalk_gi|Engine_Room|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|Engine_Room|button_or_dispenser": {
+      "a": 0.01427630127654354,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|Engine_Room|door_lever": {
+      "a": 0.0036547331267951485,
+      "d": 0.006134245519318843
+     },
+     "class_mass|norwalk_gi|Engine_Room|grab_rail_m": {
+      "a": 0.5710520510617424,
+      "d": 0.9584571729509882
+     },
+     "deposit|norwalk_gi|Engine_Room": {
+      "a": 0.054923189392559406,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|Engine_Room": {
+      "a": 0.5889830854650812,
+      "d": 0.964591418470307
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.01427630127654354,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.0036547331267951485,
+      "d": 0.006134245519318843
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.5710520510617424,
+      "d": 0.9584571729509882
+     },
+     "zone_pool_gec": {
+      "a": 0.5889830854650812,
+      "d": 0.964591418470307
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 2,
+      "deliver_one_pickups": 281,
+      "deliveries": 2,
+      "deposit_calls": 459,
+      "hand_contact_calls": 41597,
+      "hand_to_mouth_calls": 313,
+      "pickup_by_class_calls": 281,
+      "pickup_by_class_zones": 2,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 2,
+      "deliver_one_pickups": 281,
+      "deliveries": 2,
+      "deposit_calls": 459,
+      "hand_contact_calls": 41597,
+      "hand_to_mouth_calls": 313,
+      "pickup_by_class_calls": 281,
+      "pickup_by_class_zones": 2,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 567,
+      "deliveries": 4,
+      "deposit_calls": 459,
+      "hand_contact_calls": 41597,
+      "hand_to_mouth_calls": 600,
+      "pickup_by_class_calls": 567,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 4,
+      "deliver_one_pickups": 567,
+      "deliveries": 4,
+      "deposit_calls": 459,
+      "hand_contact_calls": 41597,
+      "hand_to_mouth_calls": 600,
+      "pickup_by_class_calls": 567,
+      "pickup_by_class_zones": 4,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 61,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 0.060615074309366544,
+    "d_gec": 1.1379798301372086,
+    "epoch": 50,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Engine_Room"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.060615074309366544,
+    "d_gec": 1.1379798301372086,
+    "epoch": 50,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Engine_Room"
+   }
+  },
+  "8002": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 6,
+      "deliver_one_pickups": 1921,
+      "deliveries": 6,
+      "deposit_calls": 433,
+      "hand_contact_calls": 47941,
+      "hand_to_mouth_calls": 1940,
+      "pickup_by_class_calls": 1921,
+      "pickup_by_class_zones": 6,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 6,
+      "deliver_one_pickups": 1921,
+      "deliveries": 6,
+      "deposit_calls": 433,
+      "hand_contact_calls": 47941,
+      "hand_to_mouth_calls": 1940,
+      "pickup_by_class_calls": 1921,
+      "pickup_by_class_zones": 6,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 6,
+      "deliver_one_pickups": 1921,
+      "deliveries": 6,
+      "deposit_calls": 433,
+      "hand_contact_calls": 47941,
+      "hand_to_mouth_calls": 1940,
+      "pickup_by_class_calls": 1921,
+      "pickup_by_class_zones": 6,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 6,
+      "deliver_one_pickups": 1921,
+      "deliveries": 6,
+      "deposit_calls": 433,
+      "hand_contact_calls": 47941,
+      "hand_to_mouth_calls": 1940,
+      "pickup_by_class_calls": 1921,
+      "pickup_by_class_zones": 6,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": {
+    "a_gec": 0.6281229483805677,
+    "d_gec": 10.631308490071117,
+    "epoch": 10,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.6281229483805677,
+    "d_gec": 10.631308490071117,
+    "epoch": 10,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   }
+  },
+  "8003": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|PoolDeck",
+     "surface_mass|norwalk_gi|SpaFit",
+     "class_mass|norwalk_gi|SpaFit|button_or_dispenser",
+     "class_mass|norwalk_gi|SpaFit|door_lever",
+     "class_mass|norwalk_gi|SpaFit|grab_rail_m",
+     "class_mass|norwalk_gi|PoolDeck|button_or_dispenser",
+     "class_mass|norwalk_gi|PoolDeck|door_lever",
+     "class_mass|norwalk_gi|PoolDeck|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|PoolDeck|button_or_dispenser": {
+      "a": 0.019530198675578304,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|PoolDeck|door_lever": {
+      "a": 0.00499973086094805,
+      "d": 0.16862234869809598
+     },
+     "class_mass|norwalk_gi|PoolDeck|grab_rail_m": {
+      "a": 0.781207947023132,
+      "d": 26.34135139253546
+     },
+     "class_mass|norwalk_gi|SpaFit|button_or_dispenser": {
+      "a": 0.37617003144229294,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|SpaFit|door_lever": {
+      "a": 0.09629952804922708,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|SpaFit|grab_rail_m": {
+      "a": 15.046801257691707,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|PoolDeck": {
+      "a": 0.8057378765596583,
+      "d": 26.509973741233555
+     },
+     "surface_mass|norwalk_gi|SpaFit": {
+      "a": 15.519270817183227,
+      "d": 0.0
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.37617003144229294,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.09629952804922708,
+      "d": 0.3100192579779434
+     },
+     "zone_class|grab_rail_m": {
+      "a": 15.046801257691707,
+      "d": 48.43437379689591
+     },
+     "zone_pool_gec": {
+      "a": 15.519270817183227,
+      "d": 48.74439305487386
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 59,
+      "deliver_one_pickups": 3991,
+      "deliveries": 156,
+      "deposit_calls": 607,
+      "hand_contact_calls": 57848,
+      "hand_to_mouth_calls": 4031,
+      "pickup_by_class_calls": 3890,
+      "pickup_by_class_zones": 59,
+      "pickup_requests": 101,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 59,
+      "deliver_one_pickups": 3991,
+      "deliveries": 156,
+      "deposit_calls": 607,
+      "hand_contact_calls": 57848,
+      "hand_to_mouth_calls": 4031,
+      "pickup_by_class_calls": 3890,
+      "pickup_by_class_zones": 59,
+      "pickup_requests": 101,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 66,
+      "deliver_one_pickups": 4548,
+      "deliveries": 163,
+      "deposit_calls": 647,
+      "hand_contact_calls": 59586,
+      "hand_to_mouth_calls": 4589,
+      "pickup_by_class_calls": 4447,
+      "pickup_by_class_zones": 66,
+      "pickup_requests": 101,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 66,
+      "deliver_one_pickups": 4548,
+      "deliveries": 163,
+      "deposit_calls": 647,
+      "hand_contact_calls": 59586,
+      "hand_to_mouth_calls": 4589,
+      "pickup_by_class_calls": 4447,
+      "pickup_by_class_zones": 66,
+      "pickup_requests": 101,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 36,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 8.469814224942352,
+    "d_gec": 341.2249728252476,
+    "epoch": 19,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "SpaFit"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 8.469814224942352,
+    "d_gec": 341.2249728252476,
+    "epoch": 19,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "SpaFit"
+   }
+  },
+  "8004": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 16624,
+      "hand_to_mouth_calls": 5,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 16624,
+      "hand_to_mouth_calls": 5,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 16624,
+      "hand_to_mouth_calls": 5,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 16624,
+      "hand_to_mouth_calls": 5,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8005": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|KidsClub",
+     "class_mass|norwalk_gi|KidsClub|door_lever",
+     "class_mass|norwalk_gi|KidsClub|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|KidsClub|button_or_dispenser": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|KidsClub|door_lever": {
+      "a": 0.0,
+      "d": 0.008659671639227743
+     },
+     "class_mass|norwalk_gi|KidsClub|grab_rail_m": {
+      "a": 0.0,
+      "d": 1.3529846084278245
+     },
+     "deposit|norwalk_gi|CC_D1_F::cabin1736": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|CC_D1_F::cabin1736": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|KidsClub": {
+      "a": 0.0,
+      "d": 1.3616442800670523
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.018540343029000123,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.00474632781542403,
+      "d": 0.008659671639227743
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.741613721160004,
+      "d": 1.3529846084278245
+     },
+     "zone_pool_gec": {
+      "a": 0.7649003920044282,
+      "d": 1.3616442800670523
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 22,
+      "deliver_one_pickups": 741,
+      "deliveries": 22,
+      "deposit_calls": 1056,
+      "hand_contact_calls": 72532,
+      "hand_to_mouth_calls": 766,
+      "pickup_by_class_calls": 741,
+      "pickup_by_class_zones": 22,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 22,
+      "deliver_one_pickups": 741,
+      "deliveries": 22,
+      "deposit_calls": 1056,
+      "hand_contact_calls": 72532,
+      "hand_to_mouth_calls": 766,
+      "pickup_by_class_calls": 741,
+      "pickup_by_class_zones": 22,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 28,
+      "deliver_one_pickups": 1150,
+      "deliveries": 28,
+      "deposit_calls": 1056,
+      "hand_contact_calls": 72532,
+      "hand_to_mouth_calls": 1182,
+      "pickup_by_class_calls": 1150,
+      "pickup_by_class_zones": 28,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 28,
+      "deliver_one_pickups": 1150,
+      "deliveries": 28,
+      "deposit_calls": 1056,
+      "hand_contact_calls": 72532,
+      "hand_to_mouth_calls": 1182,
+      "pickup_by_class_calls": 1150,
+      "pickup_by_class_zones": 28,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 65,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 0.07054652020952817,
+    "d_gec": 5.295236338149841,
+    "epoch": 37,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "KidsClub"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.07054652020952817,
+    "d_gec": 5.295236338149841,
+    "epoch": 37,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "KidsClub"
+   }
+  },
+  "8006": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 402,
+      "hand_contact_calls": 47004,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 402,
+      "hand_contact_calls": 47004,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 402,
+      "hand_contact_calls": 47004,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 402,
+      "hand_contact_calls": 47004,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8007": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|PhotoShops",
+     "class_mass|norwalk_gi|PhotoShops|door_lever",
+     "class_mass|norwalk_gi|PhotoShops|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|PhotoShops|button_or_dispenser": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|PhotoShops|door_lever": {
+      "a": 0.0,
+      "d": 0.024800208721367973
+     },
+     "class_mass|norwalk_gi|PhotoShops|grab_rail_m": {
+      "a": 0.0,
+      "d": 3.8743156015093603
+     },
+     "deposit|norwalk_gi|CC_D2_F::cabin1756": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|CC_D2_F::cabin1756": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|PhotoShops": {
+      "a": 0.0,
+      "d": 3.8991158102307284
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.02069014381199842,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.0052966768158715935,
+      "d": 0.024800208721367973
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.8276057524799368,
+      "d": 3.8743156015093603
+     },
+     "zone_pool_gec": {
+      "a": 0.8535925731078069,
+      "d": 3.8991158102307284
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 41,
+      "deliver_one_pickups": 1631,
+      "deliveries": 41,
+      "deposit_calls": 622,
+      "hand_contact_calls": 62397,
+      "hand_to_mouth_calls": 1673,
+      "pickup_by_class_calls": 1631,
+      "pickup_by_class_zones": 41,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 41,
+      "deliver_one_pickups": 1631,
+      "deliveries": 41,
+      "deposit_calls": 622,
+      "hand_contact_calls": 62397,
+      "hand_to_mouth_calls": 1673,
+      "pickup_by_class_calls": 1631,
+      "pickup_by_class_zones": 41,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 50,
+      "deliver_one_pickups": 1913,
+      "deliveries": 50,
+      "deposit_calls": 622,
+      "hand_contact_calls": 62397,
+      "hand_to_mouth_calls": 1955,
+      "pickup_by_class_calls": 1913,
+      "pickup_by_class_zones": 50,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 50,
+      "deliver_one_pickups": 1913,
+      "deliveries": 50,
+      "deposit_calls": 622,
+      "hand_contact_calls": 62397,
+      "hand_to_mouth_calls": 1955,
+      "pickup_by_class_calls": 1913,
+      "pickup_by_class_zones": 50,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 89,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 0.024663310856350186,
+    "d_gec": 0.41743939904821775,
+    "epoch": 43,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Promenade"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.024663310856350186,
+    "d_gec": 0.41743939904821775,
+    "epoch": 43,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Promenade"
+   }
+  },
+  "8008": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|Reception",
+     "class_mass|norwalk_gi|Reception|door_lever",
+     "class_mass|norwalk_gi|Reception|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|button_or_dispenser": {
+      "a": 10.416254105222427,
+      "d": 10.416254105222427
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|door_lever": {
+      "a": 4.999801970506766,
+      "d": 4.999801970506766
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|flush_actuator": {
+      "a": 1.0416254105222422,
+      "d": 1.0416254105222422
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|grab_rail_m": {
+      "a": 52.08127052611215,
+      "d": 52.08127052611215
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|light_switch": {
+      "a": 8.333003284177938,
+      "d": 8.333003284177938
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|remote_or_phone": {
+      "a": 20.832508210444853,
+      "d": 20.832508210444853
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|tap_set": {
+      "a": 10.416254105222427,
+      "d": 10.416254105222427
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|toilet_seat": {
+      "a": 72.91377873655698,
+      "d": 72.91377873655698
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|wardrobe_front": {
+      "a": 104.1625410522243,
+      "d": 104.1625410522243
+     },
+     "class_mass|norwalk_gi|PC_D8_P_F::cabin1263|work_plane": {
+      "a": 1088.4985539957427,
+      "d": 1088.4985539957427
+     },
+     "class_mass|norwalk_gi|Reception|button_or_dispenser": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|Reception|door_lever": {
+      "a": 0.0,
+      "d": 0.030573928704399917
+     },
+     "class_mass|norwalk_gi|Reception|grab_rail_m": {
+      "a": 0.0,
+      "d": 4.776193536353135
+     },
+     "surface_mass|norwalk_gi|PC_D8_P_F::cabin1263": {
+      "a": 1373.6955913967329,
+      "d": 1373.6955913967329
+     },
+     "surface_mass|norwalk_gi|Reception": {
+      "a": 0.0,
+      "d": 4.806767465057535
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.020289163385533066,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.0051940258266964644,
+      "d": 0.030573928704399917
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.811566535421323,
+      "d": 4.776193536353135
+     },
+     "zone_pool_gec": {
+      "a": 0.8370497246335525,
+      "d": 4.806767465057535
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 87,
+      "deliver_one_pickups": 862,
+      "deliveries": 87,
+      "deposit_calls": 576,
+      "hand_contact_calls": 32256,
+      "hand_to_mouth_calls": 879,
+      "pickup_by_class_calls": 862,
+      "pickup_by_class_zones": 87,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 87,
+      "deliver_one_pickups": 862,
+      "deliveries": 87,
+      "deposit_calls": 576,
+      "hand_contact_calls": 32256,
+      "hand_to_mouth_calls": 879,
+      "pickup_by_class_calls": 862,
+      "pickup_by_class_zones": 87,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 142,
+      "deliver_one_pickups": 2711,
+      "deliveries": 142,
+      "deposit_calls": 576,
+      "hand_contact_calls": 32256,
+      "hand_to_mouth_calls": 2728,
+      "pickup_by_class_calls": 2711,
+      "pickup_by_class_zones": 142,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 142,
+      "deliver_one_pickups": 2711,
+      "deliveries": 142,
+      "deposit_calls": 576,
+      "hand_contact_calls": 32256,
+      "hand_to_mouth_calls": 2728,
+      "pickup_by_class_calls": 2711,
+      "pickup_by_class_zones": 142,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 45,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 1.1013037662736915,
+    "d_gec": 56.95647212124546,
+    "epoch": 22,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Reception"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 1.1013037662736915,
+    "d_gec": 56.95647212124546,
+    "epoch": 22,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "Reception"
+   }
+  },
+  "8009": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 49,
+      "hand_contact_calls": 4908,
+      "hand_to_mouth_calls": 4,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 49,
+      "hand_contact_calls": 4908,
+      "hand_to_mouth_calls": 4,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 49,
+      "hand_contact_calls": 4908,
+      "hand_to_mouth_calls": 4,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 49,
+      "hand_contact_calls": 4908,
+      "hand_to_mouth_calls": 4,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8010": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 1,
+      "deliveries": 1,
+      "deposit_calls": 489,
+      "hand_contact_calls": 40970,
+      "hand_to_mouth_calls": 17,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 1,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 1,
+      "deliveries": 1,
+      "deposit_calls": 489,
+      "hand_contact_calls": 40970,
+      "hand_to_mouth_calls": 17,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 1,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 1,
+      "deliveries": 1,
+      "deposit_calls": 489,
+      "hand_contact_calls": 40970,
+      "hand_to_mouth_calls": 17,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 1,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 1,
+      "deliveries": 1,
+      "deposit_calls": 489,
+      "hand_contact_calls": 40970,
+      "hand_to_mouth_calls": 17,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 1,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8011": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 24,
+      "deliver_one_pickups": 203,
+      "deliveries": 24,
+      "deposit_calls": 96,
+      "hand_contact_calls": 18676,
+      "hand_to_mouth_calls": 208,
+      "pickup_by_class_calls": 203,
+      "pickup_by_class_zones": 24,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 24,
+      "deliver_one_pickups": 203,
+      "deliveries": 24,
+      "deposit_calls": 96,
+      "hand_contact_calls": 18676,
+      "hand_to_mouth_calls": 208,
+      "pickup_by_class_calls": 203,
+      "pickup_by_class_zones": 24,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 24,
+      "deliver_one_pickups": 203,
+      "deliveries": 24,
+      "deposit_calls": 96,
+      "hand_contact_calls": 18676,
+      "hand_to_mouth_calls": 208,
+      "pickup_by_class_calls": 203,
+      "pickup_by_class_zones": 24,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 24,
+      "deliver_one_pickups": 203,
+      "deliveries": 24,
+      "deposit_calls": 96,
+      "hand_contact_calls": 18676,
+      "hand_to_mouth_calls": 208,
+      "pickup_by_class_calls": 203,
+      "pickup_by_class_zones": 24,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": {
+    "a_gec": 5.133552627278003,
+    "d_gec": 6.152367338108641,
+    "epoch": 32,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_L"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 5.133552627278003,
+    "d_gec": 6.152367338108641,
+    "epoch": 32,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_L"
+   }
+  },
+  "8012": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 96,
+      "hand_contact_calls": 13740,
+      "hand_to_mouth_calls": 18,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 96,
+      "hand_contact_calls": 13740,
+      "hand_to_mouth_calls": 18,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 96,
+      "hand_contact_calls": 13740,
+      "hand_to_mouth_calls": 18,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 96,
+      "hand_contact_calls": 13740,
+      "hand_to_mouth_calls": 18,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8013": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 1,
+      "hand_contact_calls": 29,
+      "hand_to_mouth_calls": 0,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 1,
+      "hand_contact_calls": 29,
+      "hand_to_mouth_calls": 0,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 1,
+      "hand_contact_calls": 29,
+      "hand_to_mouth_calls": 0,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 1,
+      "hand_contact_calls": 29,
+      "hand_to_mouth_calls": 0,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8014": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|Casino",
+     "class_mass|norwalk_gi|Casino|button_or_dispenser",
+     "class_mass|norwalk_gi|Casino|door_lever",
+     "class_mass|norwalk_gi|Casino|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|Casino|button_or_dispenser": {
+      "a": 0.013156876951627004,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|Casino|door_lever": {
+      "a": 0.0033681604996165138,
+      "d": 0.006526304529542309
+     },
+     "class_mass|norwalk_gi|Casino|grab_rail_m": {
+      "a": 0.5262750780650804,
+      "d": 1.0196813676933798
+     },
+     "deposit|norwalk_gi|Casino": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|Casino": {
+      "a": 0.542800115516324,
+      "d": 1.0262076722229223
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.013156876951627004,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.0033681604996165138,
+      "d": 0.006526304529542309
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.5262750780650804,
+      "d": 1.0196813676933798
+     },
+     "zone_pool_gec": {
+      "a": 0.542800115516324,
+      "d": 1.0262076722229223
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 18,
+      "deliver_one_pickups": 1060,
+      "deliveries": 18,
+      "deposit_calls": 336,
+      "hand_contact_calls": 36796,
+      "hand_to_mouth_calls": 1074,
+      "pickup_by_class_calls": 1060,
+      "pickup_by_class_zones": 18,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 18,
+      "deliver_one_pickups": 1060,
+      "deliveries": 18,
+      "deposit_calls": 336,
+      "hand_contact_calls": 36796,
+      "hand_to_mouth_calls": 1074,
+      "pickup_by_class_calls": 1060,
+      "pickup_by_class_zones": 18,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 19,
+      "deliver_one_pickups": 1133,
+      "deliveries": 19,
+      "deposit_calls": 336,
+      "hand_contact_calls": 36796,
+      "hand_to_mouth_calls": 1147,
+      "pickup_by_class_calls": 1133,
+      "pickup_by_class_zones": 19,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 19,
+      "deliver_one_pickups": 1133,
+      "deliveries": 19,
+      "deposit_calls": 336,
+      "hand_contact_calls": 36796,
+      "hand_to_mouth_calls": 1147,
+      "pickup_by_class_calls": 1133,
+      "pickup_by_class_zones": 19,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 83,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 0.04053535593454435,
+    "d_gec": 0.6860820398395558,
+    "epoch": 10,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.04053535593454435,
+    "d_gec": 0.6860820398395558,
+    "epoch": 10,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   }
+  },
+  "8015": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 178,
+      "deliveries": 1,
+      "deposit_calls": 329,
+      "hand_contact_calls": 46792,
+      "hand_to_mouth_calls": 195,
+      "pickup_by_class_calls": 178,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 178,
+      "deliveries": 1,
+      "deposit_calls": 329,
+      "hand_contact_calls": 46792,
+      "hand_to_mouth_calls": 195,
+      "pickup_by_class_calls": 178,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 178,
+      "deliveries": 1,
+      "deposit_calls": 329,
+      "hand_contact_calls": 46792,
+      "hand_to_mouth_calls": 195,
+      "pickup_by_class_calls": 178,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 178,
+      "deliveries": 1,
+      "deposit_calls": 329,
+      "hand_contact_calls": 46792,
+      "hand_to_mouth_calls": 195,
+      "pickup_by_class_calls": 178,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": {
+    "a_gec": 0.3119335708681905,
+    "d_gec": 0.37384050625514775,
+    "epoch": 84,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_U"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.3119335708681905,
+    "d_gec": 0.37384050625514775,
+    "epoch": 84,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_U"
+   }
+  },
+  "8016": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 181,
+      "deliveries": 1,
+      "deposit_calls": 192,
+      "hand_contact_calls": 18744,
+      "hand_to_mouth_calls": 187,
+      "pickup_by_class_calls": 181,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 181,
+      "deliveries": 1,
+      "deposit_calls": 192,
+      "hand_contact_calls": 18744,
+      "hand_to_mouth_calls": 187,
+      "pickup_by_class_calls": 181,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 181,
+      "deliveries": 1,
+      "deposit_calls": 192,
+      "hand_contact_calls": 18744,
+      "hand_to_mouth_calls": 187,
+      "pickup_by_class_calls": 181,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 1,
+      "deliver_one_pickups": 181,
+      "deliveries": 1,
+      "deposit_calls": 192,
+      "hand_contact_calls": 18744,
+      "hand_to_mouth_calls": 187,
+      "pickup_by_class_calls": 181,
+      "pickup_by_class_zones": 1,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": {
+    "a_gec": 2473.4303359196942,
+    "d_gec": 2964.3120693725623,
+    "epoch": 65,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_U"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 2473.4303359196942,
+    "d_gec": 2964.3120693725623,
+    "epoch": 65,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainDining_U"
+   }
+  },
+  "8017": {
+   "divergence_classification": {
+    "class": "expected",
+    "differing_quantities": [
+     "zone_pool_gec",
+     "zone_class|button_or_dispenser",
+     "zone_class|door_lever",
+     "zone_class|grab_rail_m",
+     "surface_mass|norwalk_gi|Casino",
+     "class_mass|norwalk_gi|Casino|button_or_dispenser",
+     "class_mass|norwalk_gi|Casino|door_lever",
+     "class_mass|norwalk_gi|Casino|grab_rail_m"
+    ],
+    "is_norwalk_gi": true,
+    "pathogen": "norwalk_gi",
+    "quantities": {
+     "class_mass|norwalk_gi|Casino|button_or_dispenser": {
+      "a": 0.018333450423712434,
+      "d": 0.0
+     },
+     "class_mass|norwalk_gi|Casino|door_lever": {
+      "a": 0.004693363308470381,
+      "d": 0.006589266222473208
+     },
+     "class_mass|norwalk_gi|Casino|grab_rail_m": {
+      "a": 0.7333380169484974,
+      "d": 1.0295629207909132
+     },
+     "deposit|norwalk_gi|Casino": {
+      "a": 0.0,
+      "d": 0.0
+     },
+     "surface_mass|norwalk_gi|Casino": {
+      "a": 0.7563648306806803,
+      "d": 1.0361521870133863
+     },
+     "zone_class|button_or_dispenser": {
+      "a": 0.018333450423712434,
+      "d": 0.0
+     },
+     "zone_class|door_lever": {
+      "a": 0.004693363308470381,
+      "d": 0.006589266222473208
+     },
+     "zone_class|grab_rail_m": {
+      "a": 0.7333380169484974,
+      "d": 1.0295629207909132
+     },
+     "zone_pool_gec": {
+      "a": 0.7563648306806803,
+      "d": 1.0361521870133863
+     }
+    },
+    "zone_gate_fired": true
+   },
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 682,
+      "deliveries": 11,
+      "deposit_calls": 288,
+      "hand_contact_calls": 33816,
+      "hand_to_mouth_calls": 703,
+      "pickup_by_class_calls": 682,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 682,
+      "deliveries": 11,
+      "deposit_calls": 288,
+      "hand_contact_calls": 33816,
+      "hand_to_mouth_calls": 703,
+      "pickup_by_class_calls": 682,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 12,
+      "deliver_one_pickups": 790,
+      "deliveries": 12,
+      "deposit_calls": 288,
+      "hand_contact_calls": 33816,
+      "hand_to_mouth_calls": 811,
+      "pickup_by_class_calls": 790,
+      "pickup_by_class_zones": 12,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 12,
+      "deliver_one_pickups": 790,
+      "deliveries": 12,
+      "deposit_calls": 288,
+      "hand_contact_calls": 33816,
+      "hand_to_mouth_calls": 811,
+      "pickup_by_class_calls": 790,
+      "pickup_by_class_zones": 12,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": 91,
+   "in_lockstep_through_96": false,
+   "ordering_witness": {
+    "a_gec": 0.7021361567594534,
+    "d_gec": 11.884020642436404,
+    "epoch": 87,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   },
+   "ordering_witness_any_pathogen": {
+    "a_gec": 0.7021361567594534,
+    "d_gec": 11.884020642436404,
+    "epoch": 87,
+    "event_index": 0,
+    "item_class": "button_or_dispenser",
+    "pathogen": "norwalk_gi",
+    "zone": "MainTheater"
+   }
+  },
+  "8018": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 15208,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 15208,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 15208,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 0,
+      "deliver_one_pickups": 0,
+      "deliveries": 0,
+      "deposit_calls": 192,
+      "hand_contact_calls": 15208,
+      "hand_to_mouth_calls": 1,
+      "pickup_by_class_calls": 0,
+      "pickup_by_class_zones": 0,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  },
+  "8019": {
+   "final_counts_all": {
+    "a": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 97,
+      "deliveries": 11,
+      "deposit_calls": 480,
+      "hand_contact_calls": 45060,
+      "hand_to_mouth_calls": 112,
+      "pickup_by_class_calls": 97,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 97,
+      "deliveries": 11,
+      "deposit_calls": 480,
+      "hand_contact_calls": 45060,
+      "hand_to_mouth_calls": 112,
+      "pickup_by_class_calls": 97,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    },
+    "d": {
+     "all": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 97,
+      "deliveries": 11,
+      "deposit_calls": 480,
+      "hand_contact_calls": 45060,
+      "hand_to_mouth_calls": 112,
+      "pickup_by_class_calls": 97,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     },
+     "norwalk_gi": {
+      "challenge_calls": 183360,
+      "consume_calls": 11,
+      "deliver_one_pickups": 97,
+      "deliveries": 11,
+      "deposit_calls": 480,
+      "hand_contact_calls": 45060,
+      "hand_to_mouth_calls": 112,
+      "pickup_by_class_calls": 97,
+      "pickup_by_class_zones": 11,
+      "pickup_requests": 0,
+      "replenish_calls": 183360,
+      "sanitary_pickups": 0
+     }
+    }
+   },
+   "first_divergence_epoch": null,
+   "in_lockstep_through_96": true,
+   "ordering_witness": null,
+   "ordering_witness_any_pathogen": null
+  }
+ }
+}
