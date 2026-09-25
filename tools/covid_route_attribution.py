@@ -51,38 +51,67 @@ WINDOWS = ("before", "during", "after")
 
 
 class NearFieldShareLedger:
-    """Per-target droplet dose split, accumulated up to their infection epoch.
+    """Per-target droplet dose split into ring / cabin-mate addback / pool.
 
-    Reads ``work.tracing_matrix.droplet_exposures`` each epoch: every row
-    carries the total droplet ``dose`` and, when the partition's near field
-    contributed, ``near_field_dose``. The near share covers every ring
-    (fixed cabin-mate/table + sampled proximity), so the residual is pool
-    far-field plus the cabin-mate addback. Exposures after a target's
-    infection epoch cannot have caused it and are excluded.
+    ``matrix.droplet_exposures`` rounds every dose to 4 decimals and the
+    per-epoch droplet drip underflows to 0.0, so the split is tallied by
+    wrapping the engine's unrounded dose functions on first ``observe``:
+
+    - ``_near_field_droplet_dose`` → the near share's plume dose (fixed
+      cabin/table pairs + the sampled proximity ring).
+    - ``_cabin_mate_droplet_addback`` → the confinement channel inside a
+      stateroom's pool.
+    - ``_accumulate(…, "droplet", …)`` → the total credited droplet dose;
+      the residual is the far-field pool.
+
+    Infected agents leave ``_get_susceptible`` and stop accruing droplet
+    dose, so lifetime tallies already end at the infection epoch.
     """
 
     def __init__(self) -> None:
         self.infection_epoch: dict[int, int] = {}
         self.total: Counter = Counter()
         self.near: Counter = Counter()
+        self.addback: Counter = Counter()
+        self._installed = False
+
+    def _install(self, tx_core: Any) -> None:
+        orig_near = tx_core._near_field_droplet_dose
+        orig_addback = tx_core._cabin_mate_droplet_addback
+        orig_accumulate = tx_core._accumulate
+        near, addback, total = self.near, self.addback, self.total
+
+        def near_wrapped(zone_name: str, target: Any, *a: Any, **kw: Any) -> float:
+            d = orig_near(zone_name, target, *a, **kw)
+            if d > 0.0:
+                near[target.agent_id] += d
+            return d
+
+        def addback_wrapped(target: Any, *a: Any, **kw: Any) -> float:
+            d = orig_addback(target, *a, **kw)
+            if d > 0.0:
+                addback[target.agent_id] += d
+            return d
+
+        def accumulate_wrapped(
+            target_id: int, pathway: str, dose: float, *a: Any, **kw: Any
+        ) -> float:
+            if pathway == "droplet" and dose > 0.0:
+                total[target_id] += dose
+            return orig_accumulate(target_id, pathway, dose, *a, **kw)
+
+        tx_core._near_field_droplet_dose = near_wrapped
+        tx_core._cabin_mate_droplet_addback = addback_wrapped
+        tx_core._accumulate = accumulate_wrapped
+        self._installed = True
 
     def observe(self, sim: Any, work: Any) -> None:
+        if not self._installed:
+            self._install(sim.tx_core)
         for ev in work.tx_events:
             t = int(ev.target_agent_id)
             if t not in self.infection_epoch:
                 self.infection_epoch[t] = int(ev.epoch)
-        matrix = work.tracing_matrix
-        if matrix is None:
-            return
-        for row in matrix.droplet_exposures:
-            t = row.get("target_id")
-            if t is None:
-                continue
-            ie = self.infection_epoch.get(int(t))
-            if ie is not None and int(work.epoch) > ie:
-                continue
-            self.total[int(t)] += float(row.get("dose", 0.0))
-            self.near[int(t)] += float(row.get("near_field_dose", 0.0))
 
 
 def window_of(day: int, start: int, end: int | None) -> str:
@@ -103,25 +132,38 @@ def _seeded_ids(sim: Any) -> set[int]:
 
 
 def near_field_share_table(ledger: NearFieldShareLedger) -> dict[str, Any]:
-    """Near-field (ring) share of droplet dose among infected agents."""
-    shares: dict[int, float] = {}
+    """Ring-vs-pool droplet dose decomposition among infected agents.
+
+    ``ring_share`` = (near-field plume + cabin-mate addback) / total
+    droplet dose; the residual is the far-field pool.
+    """
+    ring_share: dict[int, float] = {}
     for t in ledger.infection_epoch:
         tot = ledger.total.get(t, 0.0)
         if tot > 0.0:
-            shares[t] = ledger.near.get(t, 0.0) / tot
-    total_all = sum(ledger.total.get(t, 0.0) for t in shares)
-    near_all = sum(ledger.near.get(t, 0.0) for t in shares)
-    vals = sorted(shares.values())
+            ring_share[t] = (
+                ledger.near.get(t, 0.0) + ledger.addback.get(t, 0.0)
+            ) / tot
+    total_all = sum(ledger.total.get(t, 0.0) for t in ring_share)
+    near_all = sum(ledger.near.get(t, 0.0) for t in ring_share)
+    addback_all = sum(ledger.addback.get(t, 0.0) for t in ring_share)
+    vals = sorted(ring_share.values())
     n = len(vals)
     return {
         "infected_with_droplet_dose": n,
-        "dose_weighted_near_share": (
+        "dose_weighted_ring_share": (
+            (near_all + addback_all) / total_all if total_all > 0.0 else None
+        ),
+        "dose_weighted_near_field_share": (
             near_all / total_all if total_all > 0.0 else None
         ),
-        "near_share_median": vals[n // 2] if n else None,
-        "near_share_q05": vals[int(0.05 * n)] if n else None,
-        "near_share_q95": vals[min(int(0.95 * n), n - 1)] if n else None,
-        "share_majority_near_field": (
+        "dose_weighted_addback_share": (
+            addback_all / total_all if total_all > 0.0 else None
+        ),
+        "ring_share_median": vals[n // 2] if n else None,
+        "ring_share_q05": vals[int(0.05 * n)] if n else None,
+        "ring_share_q95": vals[min(int(0.95 * n), n - 1)] if n else None,
+        "share_majority_ring_dose": (
             sum(1 for v in vals if v > 0.5) / n if n else None
         ),
     }
@@ -181,10 +223,10 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
         .get("states", [])
     )
 
-    infected = symptomatic = eligible = 0
+    infected = symptomatic_now = eligible = 0
     severity_all: Counter = Counter()
-    severity_symptomatic: Counter = Counter()
-    confirmed_symptomatic_eligible = 0
+    severity_eligible_course: Counter = Counter()
+    confirmed_datable = 0
     for agent in sim.engine.agents:
         if agent.agent_id in seeded:
             continue
@@ -194,10 +236,11 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
         infected += 1
         severity = str(inf.get("symptom_severity") or "none")
         severity_all[severity] += 1
-        if inf.get("illness") != IllnessStatus.SYMPTOMATIC:
-            continue
-        symptomatic += 1
-        severity_symptomatic[severity] += 1
+        if inf.get("illness") == IllnessStatus.SYMPTOMATIC:
+            symptomatic_now += 1
+        # ``illness`` flips to RECOVERED by voyage end, so the datable-course
+        # rung is read off severity instead: an eligibility>0 severity means
+        # the host had a symptomatic course the channel could ever date.
         is_eligible = bool(
             eligibility
             and severity in states
@@ -206,26 +249,27 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
         if not is_eligible:
             continue
         eligible += 1
+        severity_eligible_course[severity] += 1
         if agent.agent_id in confirmed:
-            confirmed_symptomatic_eligible += 1
+            confirmed_datable += 1
 
     dated_severity = Counter(str(r["symptom_severity"]) for r in dated.values())
     return {
         "infected_truth": infected,
-        "symptomatic": symptomatic,
+        "symptomatic_at_end": symptomatic_now,
         "severity_of_infected": dict(severity_all),
-        "severity_of_symptomatic": dict(severity_symptomatic),
-        "eligible_symptomatic": eligible,
+        "eligible_severity_course": eligible,
+        "severity_of_datable_course": dict(severity_eligible_course),
         "lab_confirmed_total": len(confirmed),
-        "confirmed_symptomatic_eligible": confirmed_symptomatic_eligible,
+        "confirmed_datable": confirmed_datable,
         "dated_onsets": len(dated),
         "dated_by_severity": dict(dated_severity),
         "dating_rate_confirmed": (
             len(dated) / len(confirmed) if confirmed else None
         ),
-        "dating_rate_confirmed_symptomatic": (
-            len(dated) / confirmed_symptomatic_eligible
-            if confirmed_symptomatic_eligible
+        "dating_rate_confirmed_datable": (
+            len(dated) / confirmed_datable
+            if confirmed_datable
             else None
         ),
         # The record dated 197 of ~712 confirmed cases (~0.28 of confirmed,

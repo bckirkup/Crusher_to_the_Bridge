@@ -135,13 +135,13 @@ def test_ascertainment_funnel_counts_rungs():
     )
     out = ascertainment_funnel(sim)
     assert out["infected_truth"] == 3  # agent 4 excluded as seeded
-    assert out["symptomatic"] == 3
-    assert out["eligible_symptomatic"] == 2  # subclinical not eligible
+    assert out["symptomatic_at_end"] == 3
+    assert out["eligible_severity_course"] == 2  # subclinical not eligible
     assert out["lab_confirmed_total"] == 3
-    assert out["confirmed_symptomatic_eligible"] == 2
+    assert out["confirmed_datable"] == 2
     assert out["dated_onsets"] == 2
     assert out["dated_by_severity"] == {"mild": 1, "moderate": 1}
-    assert out["dating_rate_confirmed_symptomatic"] == 1.0
+    assert out["dating_rate_confirmed_datable"] == 1.0
     assert out["dating_rate_confirmed"] == pytest.approx(2 / 3)
     assert 0.0 < out["record_dating_rate_confirmed"] < 1.0
 
@@ -152,56 +152,62 @@ def test_ascertainment_funnel_empty_is_safe():
     assert out["infected_truth"] == 0
     assert out["dated_onsets"] == 0
     assert out["dating_rate_confirmed"] is None
-    assert out["dating_rate_confirmed_symptomatic"] is None
+    assert out["dating_rate_confirmed_datable"] is None
 
 
-def _work(epoch, tx_events=(), droplet_exposures=()):
-    return SimpleNamespace(
-        epoch=epoch,
-        tx_events=list(tx_events),
-        tracing_matrix=SimpleNamespace(
-            droplet_exposures=list(droplet_exposures),
-        ),
-    )
+def _work(epoch, tx_events=()):
+    return SimpleNamespace(epoch=epoch, tx_events=list(tx_events))
 
 
 def _tx(epoch, target):
     return SimpleNamespace(epoch=epoch, target_agent_id=target)
 
 
+class _FakeCore:
+    """Stands in for TransmissionCore's wrappable dose functions."""
+
+    def __init__(self):
+        self.calls = {"accumulate": 0}
+
+    def _near_field_droplet_dose(self, zone_name, target, *a, **kw):
+        return kw.get("dose", 0.0)
+
+    def _cabin_mate_droplet_addback(self, target, *a, **kw):
+        return kw.get("dose", 0.0)
+
+    def _accumulate(self, target_id, pathway, dose, *a, **kw):
+        self.calls["accumulate"] += 1
+        return dose
+
+
 def test_near_field_share_table_splits_dose():
     ledger = NearFieldShareLedger()
-    sim = SimpleNamespace()
-    # Epoch 0: no infection yet — all exposure counts for both targets.
-    ledger.observe(sim, _work(0, droplet_exposures=[
-        {"target_id": 1, "dose": 100.0, "near_field_dose": 80.0},
-        {"target_id": 2, "dose": 50.0},
-    ]))
-    # Epoch 1: target 1 infected this epoch — its epoch-1 exposure still counts.
-    ledger.observe(sim, _work(1, tx_events=[_tx(1, 1)], droplet_exposures=[
-        {"target_id": 1, "dose": 20.0, "near_field_dose": 10.0},
-        {"target_id": 2, "dose": 50.0, "near_field_dose": 10.0},
-    ]))
-    # Epoch 2: post-infection exposure for target 1 is excluded; target 2
-    # (never infected) keeps accumulating but enters no share.
-    ledger.observe(sim, _work(2, tx_events=[_tx(2, 2)], droplet_exposures=[
-        {"target_id": 1, "dose": 999.0, "near_field_dose": 999.0},
-        {"target_id": 2, "dose": 10.0},
-    ]))
+    core = _FakeCore()
+    sim = SimpleNamespace(tx_core=core)
+    t1, t2 = SimpleNamespace(agent_id=1), SimpleNamespace(agent_id=2)
+    # First observe installs the wrappers and records the infection epochs.
+    ledger.observe(sim, _work(0, tx_events=[_tx(0, 1), _tx(0, 2)]))
+    # Agent 1: 120 total droplet, 90 near, 30 addback -> ring share 1.0.
+    # Agent 2: 110 total droplet, 10 near, 0 addback -> ring share 10/110.
+    core._accumulate(1, "droplet", 120.0)
+    core._near_field_droplet_dose("z", t1, dose=90.0)
+    core._cabin_mate_droplet_addback(t1, dose=30.0)
+    core._accumulate(2, "droplet", 110.0)
+    core._near_field_droplet_dose("z", t2, dose=10.0)
+    core._accumulate(2, "hvac_airborne", 999.0)  # non-droplet ignored
     out = near_field_share_table(ledger)
-    # Agent 1: 90/120 near; agent 2: 10/110 near (its epoch-2 dose precedes
-    # its epoch-2 infection, so it counts).
     assert out["infected_with_droplet_dose"] == 2
-    assert out["dose_weighted_near_share"] == pytest.approx(100 / 230)
-    assert out["near_share_q05"] == pytest.approx(10 / 110)
-    assert out["near_share_q95"] == pytest.approx(90 / 120)
-    # Exactly one of two infected agents is majority near-field.
-    assert out["share_majority_near_field"] == pytest.approx(0.5)
+    assert out["dose_weighted_ring_share"] == pytest.approx(130 / 230)
+    assert out["dose_weighted_near_field_share"] == pytest.approx(100 / 230)
+    assert out["dose_weighted_addback_share"] == pytest.approx(30 / 230)
+    assert out["ring_share_q05"] == pytest.approx(10 / 110)
+    assert out["ring_share_q95"] == pytest.approx(1.0)
+    assert out["share_majority_ring_dose"] == pytest.approx(0.5)
 
 
 def test_near_field_share_table_empty_is_safe():
     out = near_field_share_table(NearFieldShareLedger())
     assert out["infected_with_droplet_dose"] == 0
-    assert out["dose_weighted_near_share"] is None
-    assert out["near_share_median"] is None
-    assert out["share_majority_near_field"] is None
+    assert out["dose_weighted_ring_share"] is None
+    assert out["ring_share_median"] is None
+    assert out["share_majority_ring_dose"] is None
