@@ -44,6 +44,11 @@ COPY schemas/ ./schemas/
 # scores a different model than the local screen it must pool with.
 COPY presidio/data/ ./presidio/data/
 COPY deploy/aws/bounded_design_entrypoint.py ./deploy/aws/bounded_design_entrypoint.py
+COPY deploy/aws/dose_challenge_entrypoint.py ./deploy/aws/dose_challenge_entrypoint.py
+# The per-host dose-challenge driver and its dose-response helper live under
+# tools/; only noro_diag is needed by the Batch worker.
+COPY tools/__init__.py ./tools/__init__.py
+COPY tools/noro_diag/ ./tools/noro_diag/
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
 COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
