@@ -1,6 +1,6 @@
 # LAMBDA-CROSS-V1
 **Date:** 2026-09-25
-**Commit:** pending
+**Commit:** eddbf9b
 **Pathogens:** sars_cov2_resp
 **Status:** declared
 
