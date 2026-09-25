@@ -1,35 +1,59 @@
 {
   "jobDefinitionName": "picard-dose-challenge",
   "type": "container",
-  "platformCapabilities": ["EC2"],
+  "platformCapabilities": [
+    "EC2"
+  ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:dose-challenge-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:dose-challenge-v2",
     "command": [
       "deploy/aws/dose_challenge_entrypoint.py",
-      "--s3-prefix", "Ref::s3_prefix",
-      "--seed-count", "Ref::seed_count",
-      "--seed-base", "Ref::seed_base",
-      "--platform", "Ref::platform",
-      "--bundle", "Ref::bundle",
-      "--pathogen-id", "Ref::pathogen_id",
-      "--epochs", "Ref::epochs",
-      "--touch-share-table", "Ref::touch_share_table"
+      "--s3-prefix",
+      "Ref::s3_prefix",
+      "--seed-count",
+      "Ref::seed_count",
+      "--seed-base",
+      "Ref::seed_base",
+      "--platform",
+      "Ref::platform",
+      "--bundle",
+      "Ref::bundle",
+      "--pathogen-id",
+      "Ref::pathogen_id",
+      "--epochs",
+      "Ref::epochs",
+      "--touch-share-table",
+      "Ref::touch_share_table"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
     "resourceRequirements": [
-      { "type": "VCPU", "value": "1" },
-      { "type": "MEMORY", "value": "4096" }
+      {
+        "type": "VCPU",
+        "value": "1"
+      },
+      {
+        "type": "MEMORY",
+        "value": "4096"
+      }
     ],
-    "linuxParameters": { "sharedMemorySize": 512 },
+    "linuxParameters": {
+      "sharedMemorySize": 512
+    },
     "environment": [
-      { "name": "PYTHONUTF8", "value": "1" },
-      { "name": "PYTHONPATH", "value": "/app" }
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      },
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      }
     ],
     "logConfiguration": {
       "logDriver": "awslogs",
       "options": {
-        "awslogs-group": "/aws/batch/picard-dose-challenge",
+        "awslogs-group": "/aws/batch/picard-boundary-analysis",
         "awslogs-region": "<REGION>",
         "awslogs-stream-prefix": "dose-challenge"
       }
@@ -48,11 +72,26 @@
   "retryStrategy": {
     "attempts": 10,
     "evaluateOnExit": [
-      { "onStatusReason": "Host EC2*", "action": "retry" },
-      { "onReason": "OutOfMemoryError*", "action": "exit" },
-      { "onExitCode": "137", "action": "exit" },
-      { "onExitCode": "0", "action": "exit" },
-      { "onReason": "*", "action": "retry" }
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
     ]
   },
   "propagateTags": true,
