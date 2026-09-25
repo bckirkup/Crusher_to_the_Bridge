@@ -1,15 +1,18 @@
 # LAMBDA-CROSS-V1
 **Date:** 2026-09-25
-**Commit:** eddbf9b
+**Commit:** 8649d31
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
 
 Hazard-rate crossing assay on the AERO-SPLIT-01 droplet-partition
 architecture, opened by three measured negatives and one instrument
 readout. Declared in
 `picard_framework/runs/covid_lambda_cross_v1_design.json` (frozen before
-any assay cell ran). Nothing in this entry is a result; it moves to
-measured when the canary is read out.
+any assay cell ran). Measured end-to-end on AWS Batch job-def
+`picard-covid-boarding-screen:22` (image digest `cf604057`), arrays
+`f19598ac` (canary, θ ×0.001) + `6f4228ef` (full 140); 140/140 children
+SUCCEEDED, audit invariant held everywhere. Full numbers:
+`docs/covid/covid_lambda_cross_v1_readout.md`.
 
 ## Declared (before any cell runs)
 
@@ -41,3 +44,25 @@ flat assays predicted.
 
 Canary = Θ ×0.001 (cells 120–139, INDEX_OFFSET 120), then STOP and
 report; the user decides the array. Payload contract unchanged.
+
+## Measured (8649d31)
+
+The curve bends but is shallow: conditional recorded-mass medians fall
+3,486 (×1.0) → 2,458 (×0.03) → 1,327 (×0.01) → 624 (×0.001), log-log
+elasticity 0.216 vs the dose axis's measured 0.004 — Θ binds the gap
+where every partial-Σλ knob was flat. The response is a bend plus
+bimodal extinction, not the hypothesized steep sigmoid: takeoff share
+halves across the grid (20→8 of 20) while surviving seeds still burn.
+
+**Report-trigger results:** the takeoff-seed q05–q95 band contains 197
+at θ ×0.03, ×0.01, ×0.001 — the first bands in the campaign line to do
+so — but driven by tail widening, not mass on target (near-target share
+peaks 0.25). The conditional clause (band ∋ 197 AND before_share within
+0.10 of 0.173) is satisfied at ×0.03/×0.01/×0.001 (before_share 0.201 /
+0.169 / 0.084 — the hazard scale re-centres the burn into the
+quarantine window). **No row closes_the_gap**: every conditional median
+stays above [98.5, 394]. Curve-level verdict `lambda_bound_but_short` —
+the hazard scale is load-bearing and insufficient alone; survivors at
+×0.001 still infect ~979 median, so the residual gap lives in
+seed/index structure or the observational channel (~11× over-inclusion,
+ROUTE-ATTR-V1).
