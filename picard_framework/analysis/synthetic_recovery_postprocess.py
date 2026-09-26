@@ -1050,12 +1050,9 @@ def _key_contrast_lines(agg: list[dict[str, Any]]) -> list[str]:
     ]
 
 
-def _stage_a_lines(pooled: dict[str, Any]) -> list[str]:
-    draws = pooled.get("draws")
-    if draws is None:
-        return [f"- pooled fit status: {pooled.get('status')} ({pooled.get('reason', '')})"]
+def _draws_quantile_lines(draws: Any, names: tuple[str, ...]) -> list[str]:
     lines: list[str] = []
-    for name in ("beta_d", "beta_alpha"):
+    for name in names:
         if name in draws.columns:
             s = draws[name]
             lines.append(
@@ -1063,6 +1060,30 @@ def _stage_a_lines(pooled: dict[str, Any]) -> list[str]:
                 f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
             )
     return lines
+
+
+def _stage_a_lines(pooled: dict[str, Any]) -> list[str]:
+    draws = pooled.get("draws")
+    if draws is None:
+        return [f"- pooled fit status: {pooled.get('status')} ({pooled.get('reason', '')})"]
+    return _draws_quantile_lines(draws, ("beta_d", "beta_alpha"))
+
+
+def _slope_verdict_lines(
+    ar_draws: Any, pooled_ar: dict[str, Any] | None
+) -> list[str]:
+    bd = ar_draws["beta_d"] if "beta_d" in ar_draws.columns else None
+    ba = ar_draws["beta_alpha"] if "beta_alpha" in ar_draws.columns else None
+    if bd is None or ba is None:
+        return []
+    bd_ok = float(bd.quantile(0.05)) > 0 or float(bd.quantile(0.95)) < 0
+    ba_ok = float(ba.quantile(0.05)) > 0 or float(ba.quantile(0.95)) < 0
+    return [
+        "",
+        f"- dose slope excludes 0 at 90%?: **{'yes' if bd_ok else 'no'}**; "
+        f"alpha slope excludes 0 at 90%?: **{'yes' if ba_ok else 'no'}**",
+        f"- engine: `{(pooled_ar or {}).get('engine', 'unknown')}`",
+    ]
 
 
 def _stage_b_lines(pooled_ar: dict[str, Any] | None) -> list[str]:
@@ -1074,26 +1095,8 @@ def _stage_b_lines(pooled_ar: dict[str, Any] | None) -> list[str]:
             f"({(pooled_ar or {}).get('reason', '')})"
         )
         return lines
-    for name in ("beta_d", "beta_alpha", "phi"):
-        if name in ar_draws.columns:
-            s = ar_draws[name]
-            lines.append(
-                f"- `{name}`: mean={s.mean():.3f}, "
-                f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
-            )
-    bd = ar_draws["beta_d"] if "beta_d" in ar_draws.columns else None
-    ba = ar_draws["beta_alpha"] if "beta_alpha" in ar_draws.columns else None
-    if bd is not None and ba is not None:
-        bd_ok = float(bd.quantile(0.05)) > 0 or float(bd.quantile(0.95)) < 0
-        ba_ok = float(ba.quantile(0.05)) > 0 or float(ba.quantile(0.95)) < 0
-        lines.append("")
-        lines.append(
-            f"- dose slope excludes 0 at 90%?: **{'yes' if bd_ok else 'no'}**; "
-            f"alpha slope excludes 0 at 90%?: **{'yes' if ba_ok else 'no'}**"
-        )
-        lines.append(
-            f"- engine: `{(pooled_ar or {}).get('engine', 'unknown')}`"
-        )
+    lines += _draws_quantile_lines(ar_draws, ("beta_d", "beta_alpha", "phi"))
+    lines += _slope_verdict_lines(ar_draws, pooled_ar)
     return lines
 
 

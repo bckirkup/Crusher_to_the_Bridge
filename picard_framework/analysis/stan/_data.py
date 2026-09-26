@@ -251,14 +251,14 @@ def _field_matrix(
     epochs_by_run: dict[str, dict[int, dict[str, Any]]],
     run_index: dict[str, int],
     n_runs: int,
-    T: int,
+    n_epochs: int,
     field: str,
     default: int = 0,
 ) -> list[list[int]]:
-    mat = [[default for _ in range(T)] for _ in range(n_runs)]
+    mat = [[default for _ in range(n_epochs)] for _ in range(n_runs)]
     for rid, by_ep in epochs_by_run.items():
         ri = run_index[rid]
-        for t in range(T):
+        for t in range(n_epochs):
             point = by_ep.get(t)
             if point is None:
                 continue
