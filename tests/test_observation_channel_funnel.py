@@ -345,7 +345,9 @@ def test_build_readout_pools_ratios():
     assert out["pooled_ratios"]["symptomatic_per_infected"] == pytest.approx(
         15 / 33
     )
-    assert out["pooled_ratios"]["reported_crew_share"] is None
+    # zero reporters over three crew symptomatic-onboard hosts -> 0.0,
+    # and confirmed/reported is undefined only when nobody reported.
+    assert out["pooled_ratios"]["reported_crew_share"] == pytest.approx(0.0)
     assert out["pooled_ratios"]["confirmed_per_reported"] is None
 
 
