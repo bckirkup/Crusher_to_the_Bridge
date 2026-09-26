@@ -5,6 +5,7 @@ import os
 
 import streamlit as st
 
+from dashboard.ab_diff import render_ab_diff
 from dashboard.agent_explorer import render_agent_explorer
 from dashboard.charts import (
     render_bridge_status,
@@ -233,6 +234,7 @@ def main() -> None:
         "Standing Orders & Threat Profiles",
         "Fleet Operations",
         "Operations Console",
+        "A/B Run Diff",
     ])
 
     with tabs[0]:
@@ -269,6 +271,8 @@ def main() -> None:
         render_fleet_operations(fleet_root, selected_epoch=selected_epoch)
     with tabs[8]:
         render_run_console()
+    with tabs[9]:
+        render_ab_diff(st.session_state.get("telemetry_dir") or default_telemetry_dir())
 
 
 if __name__ == "__main__":
