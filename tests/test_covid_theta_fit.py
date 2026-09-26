@@ -73,13 +73,18 @@ def test_split_declares_the_hulls_and_anchors_it_was_fixed_with(targets):
     assert [a.anchor_id for a in targets.training()] == [
         "covid.T1", "covid.T2", "covid.T3", "covid.T4",
     ]
+    # covid.H5 joined the held-out side with SERO-CHANNEL-V1: the
+    # serology-informed infections_total anchor is scored, never fitted.
     assert [a.anchor_id for a in targets.held_out()] == [
-        "covid.H1", "covid.H2", "covid.H3", "covid.H4",
+        "covid.H1", "covid.H2", "covid.H3", "covid.H4", "covid.H5",
     ]
     assert targets.objective_anchor_ids == ("covid.T1", "covid.T3")
 
 
-@pytest.mark.parametrize("anchor_id", ["covid.H1", "covid.H2", "covid.H3", "covid.H4"])
+@pytest.mark.parametrize(
+    "anchor_id",
+    ["covid.H1", "covid.H2", "covid.H3", "covid.H4", "covid.H5"],
+)
 def test_a_held_out_anchor_cannot_be_reached_from_a_fit(targets, anchor_id):
     with pytest.raises(ValueError, match="held_out"):
         targets.assert_fittable(anchor_id)
