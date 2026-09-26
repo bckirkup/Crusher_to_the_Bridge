@@ -1,10 +1,12 @@
 # NORO-CABIN-01
 **Date:** 2026-09-26
 **Commit:** b49a3ec2b0df4a94a9a2ab0c618838d292c5cf8d
-**Pathogens:** norwalk_gi (mechanism is pathogen-agnostic; measured on the
-classic_cruise_1900 voyage with norwalk_gi + influenza_a boarding)
+**Pathogens:** norwalk_gi
 **Status:** measured
 **Measured at:** b49a3ec2b0df4a94a9a2ab0c618838d292c5cf8d
+
+(The mechanism is pathogen-agnostic; the instrument arm was measured on
+the classic_cruise_1900 voyage with norwalk_gi + influenza_a boarding.)
 
 Confined cabin-mate pairs now exchange fomite dose through **their own
 stateroom's pool**. Before this change the fomite chain was dead-coded at
