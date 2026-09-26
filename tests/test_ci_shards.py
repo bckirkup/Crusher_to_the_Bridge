@@ -32,7 +32,8 @@ def test_every_module_lands_in_exactly_one_shard(count: int) -> None:
 
 
 def test_shard_assignment_is_a_pure_function_of_the_relative_path() -> None:
-    assert shard_of("tests/test_a.py", 4) == shard_of("tests/test_a.py", 4)
+    first = shard_of("tests/test_a.py", 4)
+    assert shard_of("tests/test_a.py", 4) == first
     assert shard_of("tests/test_a.py", 4) == shard_of(os.path.join("tests", "test_a.py"), 4)
 
 

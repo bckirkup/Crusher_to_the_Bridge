@@ -157,11 +157,11 @@ def test_refined_design_round_trips_through_the_screen_loader(stage1, tmp_path):
 
 
 def test_refined_design_refuses_an_empty_surface(stage1):
+    payload = stage1.as_dict()
+    surface = _surface([])
+    rule = RefinementRule()
     with pytest.raises(ValueError):
-        refined_design(
-            stage1.as_dict(), _surface([]),
-            design_id="x", rule=RefinementRule(),
-        )
+        refined_design(payload, surface, design_id="x", rule=rule)
 
 
 def _stub_payload(cell: ScreenCell) -> dict:
@@ -238,17 +238,21 @@ def test_stage3_pairs_a_stage2_midpoint_with_both_of_its_stage1_neighbours(stage
 
 def test_duplicate_cells_across_surfaces_are_refused(stage1):
     surface = _surface([_entry(1e7, 1, 0.0, None, None), _entry(1e7, 20, 1.0, 40.0, 400.0)])
+    payload = stage1.as_dict()
+    rule = RefinementRule()
     with pytest.raises(ValueError, match="more than one surface"):
         refined_design(
-            stage1.as_dict(), [surface, surface],
-            design_id="x", rule=RefinementRule(), stage=3,
+            payload, [surface, surface],
+            design_id="x", rule=rule, stage=3,
         )
 
 
 def test_refinement_stage_must_be_at_least_two(stage1):
     surface = _surface([_entry(1e7, 1, 0.0, None, None), _entry(1e7, 20, 1.0, 40.0, 400.0)])
+    payload = stage1.as_dict()
+    rule = RefinementRule()
     with pytest.raises(ValueError, match="start at 2"):
-        refined_design(stage1.as_dict(), surface, design_id="x", rule=RefinementRule(), stage=1)
+        refined_design(payload, surface, design_id="x", rule=rule, stage=1)
 
 
 @pytest.mark.parametrize("stage, takeoff, ratio", [(2, 0.25, 2.0), (3, 0.15, 1.5), (4, 0.09, 1.25)])

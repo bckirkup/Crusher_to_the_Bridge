@@ -571,16 +571,15 @@ def test_an_omitted_complement_is_the_hulls_and_a_wrong_one_is_refused(
 
     assert run["num_agents"] == declared_total(args.platform)
 
+    args = bounded_screen.parse_args(
+        [
+            "--out", "screen.json",
+            "--platform", "mega_cruise_5000",
+            "--num-agents", "450",
+        ],
+    )
     with pytest.raises(ValueError, match="classless"):
-        bounded_screen.run_metadata(
-            bounded_screen.parse_args(
-                [
-                    "--out", "screen.json",
-                    "--platform", "mega_cruise_5000",
-                    "--num-agents", "450",
-                ],
-            ),
-        )
+        bounded_screen.run_metadata(args)
 
 
 def test_cli_output_paths_are_confined_to_the_repository_root() -> None:
@@ -802,10 +801,9 @@ def test_a_duplicated_seed_block_is_refused(
     _stub_seed_mean(monkeypatch)
     one = _raw(2, shard_count=2, shard_index=0, seed_shards=2)
 
+    merged = bounded_screen.merge_effects([one, one])
     with pytest.raises(ValueError, match="pools 4 seeds, design has 2"):
-        bounded_screen.pool_effects(
-            bounded_screen.merge_effects([one, one]), 2,
-        )
+        bounded_screen.pool_effects(merged, 2)
 
 
 def test_seed_blocks_pool_by_a_seed_weighted_mean() -> None:

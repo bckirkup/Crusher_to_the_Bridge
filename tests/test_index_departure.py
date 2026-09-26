@@ -135,10 +135,10 @@ class TestSeedDeclaration:
             {PATHOGEN: _profile()},
         )
         engine = _FakeEngine()
+        rng = np.random.default_rng(1)
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="before it boards|earlier"):
-            apply_explicit_seeds(
-                plan, engine, 4, np.random.default_rng(1), {PATHOGEN: _profile()},
-            )
+            apply_explicit_seeds(plan, engine, 4, rng, profiles)
 
     def test_departure_epoch_is_written_on_the_seeded_host(self) -> None:
         plan = self._plan(departure_day=2.0)

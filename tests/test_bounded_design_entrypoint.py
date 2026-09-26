@@ -57,13 +57,11 @@ def test_a_named_subset_reaches_the_gate_with_its_own_indices(
 
 @pytest.mark.parametrize("selection", ["7,x", "-3", "1;2"])
 def test_a_subset_that_is_not_design_indices_is_refused(selection: str) -> None:
+    args = _region_args("--only-points", selection)
+    out_path = Path("/tmp/out.json")
+    rows_path = Path("/tmp/rows.jsonl")
     with pytest.raises(SystemExit, match="design indices"):
-        _region_argv(
-            _region_args("--only-points", selection),
-            0,
-            Path("/tmp/out.json"),
-            Path("/tmp/rows.jsonl"),
-        )
+        _region_argv(args, 0, out_path, rows_path)
 
 
 @pytest.mark.parametrize(

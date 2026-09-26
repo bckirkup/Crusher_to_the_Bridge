@@ -47,19 +47,17 @@ def test_the_channel_rule_names_the_complement_that_carried_the_voyage():
 
 
 def test_pairing_refuses_arms_that_cover_different_grid_indices():
+    left = [_point(1, [_row(seed=0)])]
+    right = [_point(2, [_row(seed=0)])]
     with pytest.raises(ValueError, match="different grid indices"):
-        matched.paired_points(
-            [_point(1, [_row(seed=0)])],
-            [_point(2, [_row(seed=0)])],
-        )
+        matched.paired_points(left, right)
 
 
 def test_pairing_refuses_a_point_whose_arms_ran_different_seeds():
+    left = [_point(1, [_row(seed=0), _row(seed=1)])]
+    right = [_point(1, [_row(seed=0), _row(seed=2)])]
     with pytest.raises(ValueError, match="different seeds"):
-        matched.paired_points(
-            [_point(1, [_row(seed=0), _row(seed=1)])],
-            [_point(1, [_row(seed=0), _row(seed=2)])],
-        )
+        matched.paired_points(left, right)
 
 
 def test_pairing_keeps_the_grid_order_and_matches_every_seed():

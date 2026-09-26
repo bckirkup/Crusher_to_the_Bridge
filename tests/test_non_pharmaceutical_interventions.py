@@ -89,42 +89,49 @@ def test_declared_measure_keeps_its_name_and_source() -> None:
 def test_a_measure_without_a_source_is_refused() -> None:
     block = _measure_block()
     del block["source"]
+    cfg = _cfg(buffet_prompt=block)
     with pytest.raises(ValueError, match="source is required"):
-        resolve_npi(_cfg(buffet_prompt=block))
+        resolve_npi(cfg)
 
 
 def test_an_unknown_route_is_refused_rather_than_silently_inert() -> None:
     block = _measure_block(multipliers={"fomites": 0.5})
+    cfg = _cfg(buffet_prompt=block)
     with pytest.raises(ValueError, match="unknown routes"):
-        resolve_npi(_cfg(buffet_prompt=block))
+        resolve_npi(cfg)
 
 
 @pytest.mark.parametrize("bad", [-0.1, 1.5, float("nan"), float("inf")])
 def test_a_multiplier_outside_the_unit_interval_is_refused(bad: float) -> None:
+    cfg = _cfg(m=_measure_block(multipliers={"fomite": bad}))
     with pytest.raises(ValueError, match="surviving fraction"):
-        resolve_npi(_cfg(m=_measure_block(multipliers={"fomite": bad})))
+        resolve_npi(cfg)
 
 
 @pytest.mark.parametrize("bad", [-0.1, 1.5, float("nan")])
 def test_a_coverage_outside_the_unit_interval_is_refused(bad: float) -> None:
+    cfg = _cfg(m=_measure_block(coverage={"passenger": bad}))
     with pytest.raises(ValueError, match=r"\[0, 1\]"):
-        resolve_npi(_cfg(m=_measure_block(coverage={"passenger": bad})))
+        resolve_npi(cfg)
 
 
 @pytest.mark.parametrize("bad", [-0.1, 1.5, float("nan")])
 def test_a_compliance_outside_the_unit_interval_is_refused(bad: float) -> None:
+    cfg = _cfg(m=_measure_block(compliance=bad))
     with pytest.raises(ValueError, match=r"\[0, 1\]"):
-        resolve_npi(_cfg(m=_measure_block(compliance=bad)))
+        resolve_npi(cfg)
 
 
 def test_an_empty_coverage_map_is_refused() -> None:
+    cfg = _cfg(m=_measure_block(coverage={}))
     with pytest.raises(ValueError, match="non-empty"):
-        resolve_npi(_cfg(m=_measure_block(coverage={})))
+        resolve_npi(cfg)
 
 
 def test_an_empty_multiplier_map_is_refused() -> None:
+    cfg = _cfg(m=_measure_block(multipliers={}))
     with pytest.raises(ValueError, match="non-empty"):
-        resolve_npi(_cfg(m=_measure_block(multipliers={})))
+        resolve_npi(cfg)
 
 
 def test_a_non_mapping_block_is_refused() -> None:
@@ -383,7 +390,6 @@ def test_the_module_ships_no_default_measure() -> None:
 
 
 def test_a_measure_cannot_increase_exposure() -> None:
+    block = _measure_block(multipliers={"fomite": 1.2})
     with pytest.raises(ValueError):
-        NpiMeasure.from_config(
-            "m", _measure_block(multipliers={"fomite": 1.2}),
-        )
+        NpiMeasure.from_config("m", block)

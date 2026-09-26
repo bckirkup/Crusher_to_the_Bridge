@@ -56,12 +56,12 @@ class TestRegisterIdempotent:
         assert status1["fake-engine"] is True
         assert sys.path[-1] == abs_py
         assert sys.path[: len(before)] == before
-        count_after_first = sys.path.count(abs_py)
+        count_after_first = sum(1 for entry in sys.path if entry == abs_py)
         assert count_after_first == 1
 
         status2 = register_engine_paths(engines=["fake-engine"])
         assert status2["fake-engine"] is True
-        assert sys.path.count(abs_py) == 1
+        assert sum(1 for entry in sys.path if entry == abs_py) == 1
         assert len(sys.path) == len(before) + 1
 
     def test_engine_import_paths_is_pure(

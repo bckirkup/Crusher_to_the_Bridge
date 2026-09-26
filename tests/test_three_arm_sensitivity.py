@@ -85,11 +85,13 @@ class TestServiceSurfaceKnockoutIsOffUnlessAsked:
 
     @pytest.mark.parametrize("block", [{"enabled": "yes"}, [], {"enabled": 1}])
     def test_a_non_boolean_arm_is_refused(self, block: object) -> None:
+        rng = np.random.default_rng(3)
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
         with pytest.raises(ValueError, match="service_surface_knockout"):
             TransmissionCore(
-                rng=np.random.default_rng(3),
+                rng=rng,
                 zone_types=ZONE_TYPES,
-                clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+                clock=clock,
                 cfg={"service_surface_knockout": block},
             )
 

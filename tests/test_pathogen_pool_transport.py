@@ -123,5 +123,6 @@ def test_design_round_trip_keeps_pool_transport_field() -> None:
 
 
 def test_design_rejects_unknown_pool_transport_mode() -> None:
+    design = load_design()
     with pytest.raises(ValueError, match="pathogen_pool_transport"):
-        replace(load_design(), pathogen_pool_transport="foo")
+        replace(design, pathogen_pool_transport="foo")

@@ -160,5 +160,5 @@ def test_no_point_reaches_the_anchor_and_none_is_reported_as_quiet():
 def test_load_points_refuses_paths_outside_the_repository(tmp_path):
     outside = tmp_path / "merged.json"
     outside.write_text('{"points": []}', encoding="utf-8")
-    with pytest.raises(Exception):
+    with pytest.raises(ValueError):
         low.load_points(outside)

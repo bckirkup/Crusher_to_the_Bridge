@@ -13,7 +13,6 @@ from __future__ import annotations
 import math
 
 import pytest
-
 import yaml
 
 from engines.non_pharmaceutical_interventions import resolve_npi
@@ -67,8 +66,9 @@ def test_a_partial_coordinate_set_is_refused() -> None:
 
 
 def test_an_unknown_coordinate_is_refused() -> None:
+    coordinates = _corner("post", 0.5) | {"invented": 0.5}
     with pytest.raises(ValueError, match="unknown lever"):
-        era_config_patch("post", _corner("post", 0.5) | {"invented": 0.5})
+        era_config_patch("post", coordinates)
 
 
 @pytest.mark.parametrize("position", [-0.01, 1.01, math.inf, math.nan])
