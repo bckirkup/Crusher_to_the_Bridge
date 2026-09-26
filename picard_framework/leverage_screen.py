@@ -51,7 +51,12 @@ from picard_framework.runs.mega_cruise_campaign.campaign_execution import (
     compute_derived_metrics,
     extract_timeseries,
 )
-from simulation_utils.paths import resolve_child_path, validated_open
+from simulation_utils.paths import (
+    prepare_output_directory,
+    resolve_child_path,
+    resolve_repo_path,
+    validated_open,
+)
 from simulation_utils.platform_complement import declared_complement
 from telemetry_buffer.observation_model.bounded_screen import (
     ScreenRunParams,
@@ -830,9 +835,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def _write_record(out: Path, record: dict[str, Any]) -> Path:
     name = f"{record['run_id']}.json"
-    out.mkdir(parents=True, exist_ok=True)
-    path = Path(resolve_child_path(str(out), name))
-    path.write_text(json.dumps(record, indent=2), encoding="utf-8")
+    safe_out = prepare_output_directory(
+        str(out), allowed_roots=(str(REPO_ROOT),),
+    )
+    path = Path(resolve_child_path(safe_out, name))
+    with validated_open(
+        path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        json.dump(record, handle, indent=2)
     return path
 
 
@@ -848,8 +858,12 @@ def main(argv: list[str] | None = None) -> int:
     if args.classify is not None:
         records = collect_records(args.classify)
         report = classify(design, records)
-        out = args.out or args.classify / "leverage01_classification.json"
-        out.write_text(json.dumps(report, indent=2), encoding="utf-8")
+        raw_out = args.out or args.classify / "leverage01_classification.json"
+        out = Path(resolve_repo_path(str(REPO_ROOT), str(raw_out)))
+        with validated_open(
+            out, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        ) as handle:
+            json.dump(report, handle, indent=2)
         counts = {}
         for axis in report["axes"]:
             counts[axis["lev"]] = counts.get(axis["lev"], 0) + 1
