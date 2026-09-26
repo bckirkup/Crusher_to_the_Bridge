@@ -448,15 +448,16 @@ escalation:
 # confinement are controlled separately.
 observation:
   enabled: true
-  # surface_swab_source: "airborne_fraction" (default; legacy synthetic
-  # surface_fraction of the airborne zone pool — bit-identical to pre-change
-  # behaviour) or "surface_pool_density" (repaired: the real deposited
-  # surface pool as a per-cm² density, with a per-swab copy LOD).
-  # surface_swab_source: "airborne_fraction"
-  # wastewater_assay_mode: "none" (default) or "holding_tank" — a copies/L
-  # qPCR assay on the ship's blackwater holding tank, read post-discharge
-  # each epoch; requires transmission.blackwater_plumbing to be set.
-  # wastewater_assay_mode: "none"
+  # surface_swab_source: "surface_pool_density" (default; the real
+  # deposited surface pool as a per-cm² density, with a per-swab copy
+  # LOD). "airborne_fraction" is the labelled pre-change baseline (legacy
+  # synthetic surface_fraction of the airborne zone pool).
+  surface_swab_source: "surface_pool_density"
+  # wastewater_assay_mode: "holding_tank" (default; a copies/L qPCR assay
+  # on the ship's blackwater holding tank, read post-discharge each
+  # epoch; reads only when transmission.blackwater_plumbing is set).
+  # "none" is the labelled pre-change baseline.
+  wastewater_assay_mode: "holding_tank"
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:

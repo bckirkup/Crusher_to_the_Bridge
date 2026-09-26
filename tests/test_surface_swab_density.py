@@ -249,9 +249,23 @@ class TestOrchestratorSourceWiring:
         ).swab
         return core, swab
 
-    def test_default_mode_uses_airborne_fraction(self) -> None:
+    def test_default_mode_uses_surface_pool_density(self) -> None:
         obs = _obs_mock()
         self._run({"observation": {"enabled": True}}, obs)
+        obs.surface_swab.swab_surface_zones.assert_called_once()
+        obs.surface_swab.swab_zones.assert_not_called()
+
+    def test_legacy_mode_uses_airborne_fraction(self) -> None:
+        obs = _obs_mock()
+        self._run(
+            {
+                "observation": {
+                    "enabled": True,
+                    "surface_swab_source": "airborne_fraction",
+                },
+            },
+            obs,
+        )
         obs.surface_swab.swab_zones.assert_called_once()
         obs.surface_swab.swab_surface_zones.assert_not_called()
         # Legacy feed: surface input = 0.4 x airborne pool.

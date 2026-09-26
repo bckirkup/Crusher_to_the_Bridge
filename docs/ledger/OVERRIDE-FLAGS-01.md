@@ -25,11 +25,12 @@ merged config, the resolved pathogen profiles):
   no source supports.
 - **`gates_off`** — every inert feature gate in the merged config
   (`<block>.enabled: false`, or `mode`/`*_mode` set to `off`/`none`), plus
-  two code-defaulted gates the structural walk cannot see
+  three code-defaulted gates the structural walk cannot see
   (`transmission.blackwater_plumbing`,
-  `observation.wastewater_assay_mode` — engine `.get` defaults that never
-  materialise into the merged config). An archive that claims a mechanism
-  while its gate was off now says so.
+  `observation.wastewater_assay_mode`, `observation.surface_swab_source`
+  — engine `.get` defaults / selector keys the structural walk cannot
+  see). An archive that claims a mechanism while its gate was off now
+  says so.
 
 Implementation: `sourced_window_flags.py::provenance_flags(spec, cfg,
 profiles)`, emitted from `campaign_execution.run_simulation` into
@@ -53,18 +54,18 @@ code-defaulted gates in `engines/`:
 | `wearable_monitoring.detection_sensitivity_sweep.enabled` | false | Sweep harness, not a mechanism |
 | `transmission.sanitary_visit_mode` | none | **Measured inert** — item 42: structure-only arm is a null at 500 seeds/cell without a flush term; correctly off pending that decision |
 | `transmission.blackwater_plumbing` | false (code default) | **Flipped** — item 57: additive mechanism, measured; now defaults `true`, `false` is the labelled pre-change baseline |
-| `observation.wastewater_assay_mode` | none (code default) | Opt-in by decision — reads the tank; changes the observation record, so it did not flip with the plumbing |
+| `observation.wastewater_assay_mode` | none (code default) | **Flipped** — defaults `holding_tank`; `none` is the labelled baseline. The assay draws on its own seeded instrument stream, so no dose/RNG golden moves; the observation record gains the post-discharge read |
+| `observation.surface_swab_source` | airborne_fraction (code default) | **Flipped** — defaults `surface_pool_density` (the repaired channel, item 56); `airborne_fraction` is the labelled baseline. Swab outputs change to real deposited-pool densities — the intent; no dose/RNG touched |
 
 **Finding:** the repo's default-off surface is almost entirely deliberate —
 knockouts, sweep harnesses, and subsystems waiting on evidence — not
 forgotten repairs. The exception class was `blackwater_plumbing` +
-`wastewater_assay_mode`: a measured, additive mechanism left default-off.
-The plumbing flipped to default-on (`false` is the labelled pre-change
-baseline); the assay stayed opt-in since it changes the observation
-record. One related selector sits in the same class and stays opt-in for
-the same reason: `observation.surface_swab_source` (`airborne_fraction`
-default vs the repaired `surface_pool_density` channel, ledger item 56) —
-it changes what swabs report, not what the engine runs. The systemic guard
+`wastewater_assay_mode` + `surface_swab_source`: measured mechanisms left
+default-off. All three flipped to default-on, keeping their off spellings
+as labelled pre-change baselines (`false` / `none` /
+`airborne_fraction`). The observation record changes where the repaired
+channels differ from the legacy ones — that is the intent; no dose or
+engine-RNG stream is touched. The systemic guard
 is `gates_off`:
 from this change forward, every campaign archive lists its inert gates, so
 "was this run actually running it?" is a readout question, not an audit.

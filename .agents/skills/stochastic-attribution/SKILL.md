@@ -117,12 +117,14 @@ is untouched. Distinguish the two causes in this order:
    off arm bit-identical *while the contrast is measured*. Once the mechanism
    is measured (or is additive and consumes no RNG), flip the default and keep
    the `off` spelling as the labelled baseline — that is how `cabin_air_mode`,
-   `droplet_emission_mode`, `pathogen_pool_transport`, `near_field_air` and
-   `blackwater_plumbing` all landed: default-on mechanism, selectable
-   pre-change baseline. Legitimate permanent-off gates are ablation arms,
-   sweep harnesses, and opt-in subsystems that change outputs (e.g.
-   `wastewater_assay_mode`, `long_read_sequencing`) — and those should say so
-   at the gate. Anything else resting default-off is a finding: campaign
+   `droplet_emission_mode`, `pathogen_pool_transport`, `near_field_air`,
+   `blackwater_plumbing`, `wastewater_assay_mode` and
+   `surface_swab_source`
+   all landed: default-on mechanism, selectable pre-change baseline.
+   Legitimate permanent-off gates are ablation arms,
+   sweep harnesses, and opt-in subsystems (e.g. `variant_surveillance`,
+   `long_read_sequencing`, `detection_sensitivity_sweep`) — and those should
+   say so at the gate. Anything else resting default-off is a finding: campaign
    archives list every inert gate under `provenance_flags.gates_off`
    (`docs/ledger/OVERRIDE-FLAGS-01.md`), so check whether a gate you are
    touching has been flagged as a flip candidate.

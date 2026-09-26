@@ -434,8 +434,9 @@ class TestDefaultOff:
         assert hand_a == hand_b
         assert tail_a == tail_b
 
-    def test_no_assay_record_without_mode_and_safe_degradation(self) -> None:
-        """Default config records nothing; holding_tank mode with no tank
+    def test_explicit_off_and_missing_core_degrade_cleanly(self) -> None:
+        """wastewater_assay_mode defaults to holding_tank; an explicit
+        "none" is the off arm, and a holding_tank read with no tx_core
         produces no record and does not raise."""
         from orchestrator_epoch import run_observation_sampling
 
@@ -455,19 +456,20 @@ class TestDefaultOff:
             syn_result={"sick_call_agents": []}, engine=engine,
             pathogen_profiles={},
         )
-        # Default mode: instrument exists but the mode is none -> no call.
-        ww_ht = run_observation_sampling(
-            cfg={"observation": {"enabled": True}}, **common,
-        ).wastewater_ht
-        assert ww_ht is None
-        obs.wastewater_assay.assay.assert_not_called()
-        # holding_tank mode with tx_core=None degrades to no record.
+        # Explicit off: instrument exists but the mode is none -> no call.
         ww_ht = run_observation_sampling(
             cfg={
                 "observation": {
-                    "enabled": True, "wastewater_assay_mode": "holding_tank",
+                    "enabled": True, "wastewater_assay_mode": "none",
                 },
             },
+            **common,
+        ).wastewater_ht
+        assert ww_ht is None
+        obs.wastewater_assay.assay.assert_not_called()
+        # Default (holding_tank) with tx_core=None degrades to no record.
+        ww_ht = run_observation_sampling(
+            cfg={"observation": {"enabled": True}},
             **common,
         ).wastewater_ht
         assert ww_ht is None
