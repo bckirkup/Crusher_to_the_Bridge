@@ -165,7 +165,7 @@ def _install_recorder(recorder: ChallengeRecorder) -> Any:
     return original
 
 
-def _index_agent_ids(sim: Any, pathogen_id: str) -> set[int]:
+def _index_agent_ids(sim: Any) -> set[int]:
     """The arm's planted index cases (explicit epoch-0 passenger seeds)."""
     seeded = getattr(sim.engine, "explicit_seed_agent_ids", None) or ()
     return {int(aid) for aid in seeded}
@@ -237,7 +237,7 @@ def run_cell(
 
     sim = captured["sim"]
     table = captured["table"]
-    indexes = _index_agent_ids(sim, pathogen_id)
+    indexes = _index_agent_ids(sim)
     confined_targets = {
         int(row["target_id"]) for row in table["rows"]
         if row["confined_epochs"] > 0
