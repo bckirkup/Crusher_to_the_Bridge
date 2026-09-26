@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:cabin-floor-v2",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:cabin-floor-v3",
     "command": [
       "deploy/aws/cabin_floor_entrypoint.py",
       "--s3-prefix",
