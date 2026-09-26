@@ -103,7 +103,8 @@ uses `:latest`, then:
 |--------|----------|
 | `dose_adj` | pathogen `dose_adjustment` |
 | `alpha_c` | `transmission.density_dependent.exponent` |
-| `non_susceptible` | `innate_nonsusceptible_fraction` |
+| `secretor_negative_fraction` | pathogen `secretor_negative_fraction` (FUT2 non-secretor prevalence; scalar sweep point or `{"dist", "interval"}` draw) |
+| `secretor_negative_relative_susceptibility` | pathogen `secretor_negative_relative_susceptibility` (Kambhampati 2015 window [0.04, 0.83]; scalar or `{"dist", "interval"}` draw) |
 | `λ_p` (sentinel) | itinerary `shore_infection_probability` per `port_id` |
 | `R_onboard` (sentinel) | day-type `contact_rate_multiplier` scale (1.0 = nominal) |
 | `wastewater_scan` cells (sentinel) | `wastewater_surveillance` block per run |

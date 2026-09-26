@@ -839,16 +839,27 @@ survives only as a deprecated alias (relative susceptibility 0.0) so the other
 bundles in `data/pathogens/` keep their present behaviour. The history below is
 retained because the sequence of reversals is the reason the mechanism changed.
 
-**The mega-cruise campaign still runs the withdrawn mechanism.**
-`picard_framework/runs/mega_cruise_campaign/campaign_runner.py:988` writes
-`innate_nonsusceptible_fraction` into its per-run overrides, so every campaign
-run rides the deprecated alias at relative susceptibility 0.0 — sterile immunity
-— while `data/pathogens/active_profiles.json` runs partial susceptibility. The
-behaviour is deliberately unchanged: the campaign sweeps the removed fraction,
-and converting that swept axis into a relative susceptibility is a design
-decision rather than a rename. Any campaign result must therefore be read as
-having been produced under the withdrawn mechanism until that decision is
-taken.
+**The mega-cruise campaign's susceptibility axis is repaired (ledger
+`NORO-SUSCEPT-04`).** The defect was worse than running the withdrawn
+mechanism: `_iter_synthetic_recovery_runs` wrote
+`innate_nonsusceptible_fraction` into per-run `pathogen_overrides`, but the
+engine resolves `secretor_negative_fraction` first, so under
+`active_profiles` the alias write was **silently shadowed** — the swept
+`non_susceptible` axis was recorded in `campaign_parameters` yet never reached
+the engine at all. The axis now speaks the mechanism's own vocabulary:
+parameter vectors declare `secretor_negative_fraction` and
+`secretor_negative_relative_susceptibility`, resolved per run with the same
+precedence the engine applies (vector → arm base overrides → bundle profile →
+0.0); the resolved pair is pinned into `pathogen_overrides` and recorded by
+name, so the archive shows the values the run actually executed. The
+uncertainty window is representable rather than flattened: a scalar is a grid
+sweep point, and `{"dist": "uniform"|"log_uniform", "interval": [lo, hi]}`
+draws once per run, seeded off the run seed and field name without touching
+the engine RNG stream — covering the sourced Kambhampati 2015 window
+[0.04, 0.83] the bounded screen already declares. The withdrawn spellings
+(`non_susceptible`, `innate_nonsusceptible_fraction`) in a parameter vector
+are refused at load, and campaign results archived under the shadowed axis
+remain void under the withdrawn mechanism.
 
 **The emesis titre × volume parameterisation is withdrawn and replaced by the
 quantity Kirby identifies (Wave 2, task #38).** `EMESIS_TITRE_GEC_PER_ML` is no
