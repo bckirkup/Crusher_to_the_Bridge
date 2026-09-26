@@ -135,13 +135,20 @@ remainder. Constants are as shipped at `fbad8738`.
   sourced interval is ~2–3 orders below the shipped k, and N50 = 3.85 copies
   means any confined mate who receives ~25+ copies is saturated. Every
   non-binding axis above (emission 5×, airborne share 760×, routes 3–5×,
-  susceptibility 0.65×) is consistent with that single explanation. **This is
-  inference from constants and engine code, not a measured dose** — the
-  confirming measurement is the delivered-dose distribution to confined mates,
-  which needs one instrumented run, not this session.
+  susceptibility 0.65×) is consistent with that single explanation.
+  **Resolved by FLU-DOSE-01** (ledger entry): confined-mate dose is measured
+  at median 2–9 copies — at the shipped N50, *not* above the 26-copy
+  saturation point — and implied SAR tracks observed attack. The unit
+  mismatch is confirmed as the operative term, but correcting k alone would
+  flip the arm to a ~0% MISS low: the delivered dose is ~2–3 orders below
+  the ~700–3,500-copy scale a per-TCID50-calibrated hazard needs. The arm
+  carries two compensating defects, not one.
 - **Hypothesis:** the Yan GM×48 duty-cycle extrapolation inflates emission
-  severalfold on the active arm (a second, smaller lever on top of the units
-  defect); the hardcoded 0.05 droplet fraction is a third, minor term.
+  severalfold on the active arm; the hardcoded 0.05 droplet fraction is a
+  further minor term. (FLU-DOSE-01 measured emission level as non-binding
+  for *confined* delivery — the under-delivery defect sits downstream of
+  emission, in the delivery chain — but neither term is excluded as a lever
+  on non-confined transmission.)
 - **Structural overshoot: none identified as binding.** Onset geometry,
   shedding duration, and symptomatic fraction all sit inside sourced bounds;
   the floor miss does not require a confinement-mechanics explanation.
