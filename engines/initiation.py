@@ -949,56 +949,78 @@ def _resolve_seed(
     _refuse_legacy_index_case(
         pathogen_id, location, profile, "seeds that pathogen",
     )
+    dose = raw.get("dose")
+    strain = raw.get("strain")
+    return ExplicitSeed(
+        pathogen_id=pathogen_id,
+        count=_seed_count(raw, location),
+        role=_seed_role(raw, location),
+        epoch=int(raw.get("epoch", 0)),
+        infection_age_days=_seed_infection_age_days(raw, location),
+        dose=None if dose is None else float(dose),
+        strain_id=None if strain is None else str(strain),
+        departure_day=_seed_departure_day(raw, location),
+        onset_day=_seed_onset_day(raw, location),
+    )
+
+
+def _seed_count(raw: dict[str, Any], location: str) -> int:
     count = int(raw.get("count", 1))
     if count < 0:
         raise ValueError(
             f"{location}.count = {count} is negative: a seed introduces a "
             "non-negative number of hosts",
         )
+    return count
+
+
+def _seed_role(raw: dict[str, Any], location: str) -> str | None:
     role = raw.get("role")
     if role is not None and str(role) not in _ROLES:
         raise ValueError(
             f"{location}.role = {role!r} is neither {ROLE_PASSENGER!r}, "
             f"{ROLE_CREW!r} nor null, and agent roles carry no other value",
         )
+    return None if role is None else str(role)
+
+
+def _seed_infection_age_days(raw: dict[str, Any], location: str) -> float:
     age_days = float(raw.get("infection_age_days", 0.0) or 0.0)
     if age_days < 0.0:
         raise ValueError(
             f"{location}.infection_age_days = {age_days} is negative: an "
             "infection age is measured forward from acquisition",
         )
+    return age_days
+
+
+def _seed_departure_day(raw: dict[str, Any], location: str) -> float | None:
     departure_day = raw.get("departure_day")
-    if departure_day is not None:
-        departure_day = float(departure_day)
-        if not math.isfinite(departure_day) or departure_day < 0.0:
-            raise ValueError(
-                f"{location}.departure_day = {departure_day} is not a "
-                "finite non-negative day: a host that departs does so on a "
-                "declared voyage day, and a host that never does leaves the "
-                "key unset",
-            )
+    if departure_day is None:
+        return None
+    departure_day = float(departure_day)
+    if not math.isfinite(departure_day) or departure_day < 0.0:
+        raise ValueError(
+            f"{location}.departure_day = {departure_day} is not a "
+            "finite non-negative day: a host that departs does so on a "
+            "declared voyage day, and a host that never does leaves the "
+            "key unset",
+        )
+    return departure_day
+
+
+def _seed_onset_day(raw: dict[str, Any], location: str) -> float | None:
     onset_day = raw.get("onset_day")
-    if onset_day is not None:
-        onset_day = float(onset_day)
-        if not math.isfinite(onset_day):
-            raise ValueError(
-                f"{location}.onset_day = {onset_day} is not finite: a "
-                "declared onset is a voyage day and may be signed (onset "
-                "before the seed's own epoch), never nan or infinite",
-            )
-    dose = raw.get("dose")
-    strain = raw.get("strain")
-    return ExplicitSeed(
-        pathogen_id=pathogen_id,
-        count=count,
-        role=None if role is None else str(role),
-        epoch=int(raw.get("epoch", 0)),
-        infection_age_days=age_days,
-        dose=None if dose is None else float(dose),
-        strain_id=None if strain is None else str(strain),
-        departure_day=departure_day,
-        onset_day=onset_day,
-    )
+    if onset_day is None:
+        return None
+    onset_day = float(onset_day)
+    if not math.isfinite(onset_day):
+        raise ValueError(
+            f"{location}.onset_day = {onset_day} is not finite: a "
+            "declared onset is a voyage day and may be signed (onset "
+            "before the seed's own epoch), never nan or infinite",
+        )
+    return onset_day
 
 
 def resolve_initiation_plan(
@@ -1677,35 +1699,11 @@ def draw_boarding_cohort(
         ROLE_CREW: spec.crew_prevalence,
     }
     for role in _ROLES:
-        if spec.symptomatic_stream:
-            # The symptomatic stream draws first; the eligible pool is then
-            # rebuilt, so a host now carrying the illness cannot be drawn
-            # twice.
-            _draw_symptomatic_role(
-                spec, agents, profile, clock, rng,
-                role, drawn_by_role, composition, tallies, screen_rng,
-            )
-        pool = [
-            agent for agent in agents
-            if _eligible(agent, spec.pathogen_id, role)
-        ]
-        if not pool:
-            continue
-        count = int(rng.binomial(len(pool), prevalence_by_role[role]))
-        if count <= 0:
-            continue
-        chosen = _select_prevalent(
-            pool, count, spec.pathogen_id, profile, rng,
+        _draw_prevalence_role(
+            spec, agents, profile, clock, rng, role,
+            prevalence_by_role[role], drawn_by_role, composition,
+            tallies, screen_rng,
         )
-        for agent in chosen:
-            state = _board_one_host(
-                spec, agent, profile, clock, rng, role, tallies, screen_rng,
-            )
-            if state is None or state == STATE_SCREENED_OUT:
-                continue
-            if state != STATE_CLEARED:
-                drawn_by_role[role] += 1
-            composition[state] += 1
     if spec.preboarding is None or tallies is None:
         return BoardingReport(spec.pathogen_id, drawn_by_role, composition)
     return BoardingReport(
@@ -1718,6 +1716,51 @@ def draw_boarding_cohort(
 
 
 # ── Explicit seeds ───────────────────────────────────────────────────────
+
+def _draw_prevalence_role(
+    spec: BoardingSpec,
+    agents: list[Any],
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+    role: str,
+    prevalence: float,
+    drawn_by_role: dict[str, int],
+    composition: dict[str, int],
+    tallies: Any,
+    screen_rng: np.random.Generator | None,
+) -> None:
+    """One role's prevalence draw: pool, Binomial count, without-replacement who."""
+    if spec.symptomatic_stream:
+        # The symptomatic stream draws first; the eligible pool is then
+        # rebuilt, so a host now carrying the illness cannot be drawn
+        # twice.
+        _draw_symptomatic_role(
+            spec, agents, profile, clock, rng,
+            role, drawn_by_role, composition, tallies, screen_rng,
+        )
+    pool = [
+        agent for agent in agents
+        if _eligible(agent, spec.pathogen_id, role)
+    ]
+    if not pool:
+        return
+    count = int(rng.binomial(len(pool), prevalence))
+    if count <= 0:
+        return
+    chosen = _select_prevalent(
+        pool, count, spec.pathogen_id, profile, rng,
+    )
+    for agent in chosen:
+        state = _board_one_host(
+            spec, agent, profile, clock, rng, role, tallies, screen_rng,
+        )
+        if state is None or state == STATE_SCREENED_OUT:
+            continue
+        if state != STATE_CLEARED:
+            drawn_by_role[role] += 1
+        composition[state] += 1
+
 
 def _seed_pool(seed: ExplicitSeed, engine: Any) -> list[Any]:
     from orchestrator_types import LOCATION_ISOLATED
@@ -1744,6 +1787,55 @@ def _apply_one_seed(
     time_infected = int(
         round(engine.clock.epochs_for_days(seed.infection_age_days)),
     )
+    onset_incubation, elapsed_since_onset, departure_epoch = _seed_epoch_fields(
+        seed, engine, epoch, location,
+    )
+    chosen = (
+        rng.choice(pool, size=count, replace=False) if count > 0 else []
+    )
+    for agent in chosen:
+        agent.departure_epoch = departure_epoch
+        agent.infect_with_pathogen(
+            seed.pathogen_id, dose, epoch,
+            time_infected=time_infected, rng=rng, profile=profile,
+            strain_id=seed.strain_id,
+        )
+        if seed.dose is None:
+            # A stated index case presents by construction rather than by
+            # ``illness_probability`` at a fabricated acquisition dose.
+            agent.infections[seed.pathogen_id]["will_present"] = True
+        if seed.onset_day is not None:
+            _stamp_seed_onset(
+                agent, seed, profile, engine.clock, rng,
+                onset_incubation, elapsed_since_onset, location,
+            )
+    seeded_ids = [int(a.agent_id) for a in chosen]
+    recorded = getattr(engine, "explicit_seed_agent_ids", None)
+    if recorded is None:
+        recorded = engine.explicit_seed_agent_ids = []
+    recorded.extend(seeded_ids)
+    return {
+        "pathogen": seed.pathogen_id,
+        "agent_ids": seeded_ids,
+        "epoch": epoch,
+        "role": seed.role,
+        "requested": seed.count,
+        "seeded": int(count),
+        "dose": dose,
+        "infection_age_days": seed.infection_age_days,
+        "strain": seed.strain_id,
+        "departure_day": seed.departure_day,
+        "onset_day": seed.onset_day,
+    }
+
+
+def _seed_epoch_fields(
+    seed: ExplicitSeed,
+    engine: Any,
+    epoch: int,
+    location: str,
+) -> tuple[float | None, float | None, int | None]:
+    """(onset incubation, elapsed since onset, departure epoch) — validated."""
     onset_incubation: float | None = None
     elapsed_since_onset: float | None = None
     if seed.onset_day is not None:
@@ -1775,67 +1867,47 @@ def _apply_one_seed(
                 f"{seed.epoch}: a host cannot leave the ship before it "
                 "boards",
             )
-    chosen = (
-        rng.choice(pool, size=count, replace=False) if count > 0 else []
-    )
-    for agent in chosen:
-        agent.departure_epoch = departure_epoch
-        agent.infect_with_pathogen(
-            seed.pathogen_id, dose, epoch,
-            time_infected=time_infected, rng=rng, profile=profile,
-            strain_id=seed.strain_id,
+    return onset_incubation, elapsed_since_onset, departure_epoch
+
+
+def _stamp_seed_onset(
+    agent: Any,
+    seed: ExplicitSeed,
+    profile: dict[str, Any],
+    clock: Any,
+    rng: np.random.Generator,
+    onset_incubation: float,
+    elapsed_since_onset: float,
+    location: str,
+) -> None:
+    """Write the declared onset onto the seeded host's infection record."""
+    inf = agent.infections[seed.pathogen_id]
+    inf["incubation_days"] = onset_incubation
+    inf["will_present"] = True
+    if elapsed_since_onset <= 0.0:
+        return
+    duration_days = _host_duration(agent, seed.pathogen_id, profile)
+    if elapsed_since_onset >= duration_days:
+        raise ValueError(
+            f"{location}.onset_day = {seed.onset_day} leaves "
+            f"the seeded host {elapsed_since_onset} days past "
+            "onset at its epoch, already past the authored "
+            f"shedding window of {duration_days} days: a "
+            "declared index cannot arrive cleared",
         )
-        if seed.dose is None:
-            # A stated index case presents by construction rather than by
-            # ``illness_probability`` at a fabricated acquisition dose.
-            agent.infections[seed.pathogen_id]["will_present"] = True
-        if seed.onset_day is not None:
-            inf = agent.infections[seed.pathogen_id]
-            inf["incubation_days"] = onset_incubation
-            inf["will_present"] = True
-            if elapsed_since_onset > 0.0:
-                duration_days = _host_duration(
-                    agent, seed.pathogen_id, profile,
-                )
-                if elapsed_since_onset >= duration_days:
-                    raise ValueError(
-                        f"{location}.onset_day = {seed.onset_day} leaves "
-                        f"the seeded host {elapsed_since_onset} days past "
-                        "onset at its epoch, already past the authored "
-                        f"shedding window of {duration_days} days: a "
-                        "declared index cannot arrive cleared",
-                    )
-                _stamp_symptomatic_history(
-                    agent, seed.pathogen_id, profile, engine.clock, rng,
-                    incubation_days=onset_incubation,
-                    duration_days=duration_days,
-                    # The record carries the unextended duration: the
-                    # chronic extension is applied once by clearance_days
-                    # at read time, exactly as for the lazy draw.
-                    recovery_day=float(
-                        profile.get("recovery_day", DEFAULT_RECOVERY_DAY),
-                    ),
-                    elapsed_days=elapsed_since_onset,
-                    boarding_state=None,
-                )
-    seeded_ids = [int(a.agent_id) for a in chosen]
-    recorded = getattr(engine, "explicit_seed_agent_ids", None)
-    if recorded is None:
-        recorded = engine.explicit_seed_agent_ids = []
-    recorded.extend(seeded_ids)
-    return {
-        "pathogen": seed.pathogen_id,
-        "agent_ids": seeded_ids,
-        "epoch": epoch,
-        "role": seed.role,
-        "requested": seed.count,
-        "seeded": int(count),
-        "dose": dose,
-        "infection_age_days": seed.infection_age_days,
-        "strain": seed.strain_id,
-        "departure_day": seed.departure_day,
-        "onset_day": seed.onset_day,
-    }
+    _stamp_symptomatic_history(
+        agent, seed.pathogen_id, profile, clock, rng,
+        incubation_days=onset_incubation,
+        duration_days=duration_days,
+        # The record carries the unextended duration: the
+        # chronic extension is applied once by clearance_days
+        # at read time, exactly as for the lazy draw.
+        recovery_day=float(
+            profile.get("recovery_day", DEFAULT_RECOVERY_DAY),
+        ),
+        elapsed_days=elapsed_since_onset,
+        boarding_state=None,
+    )
 
 
 def apply_explicit_seeds(

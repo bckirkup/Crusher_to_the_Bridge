@@ -269,42 +269,47 @@ def _parse_declared_shares(raw: Any) -> dict[str, dict[str, float]]:
             "transmission.fomite_touch_share_table must be a mapping from "
             "zone class to item-class shares",
         )
-    table: dict[str, dict[str, float]] = {}
-    for zone_class, shares in raw.items():
-        if zone_class not in ZONE_ITEM_SETS:
-            raise ValueError(
-                "transmission.fomite_touch_share_table: unknown zone class "
-                f"{zone_class!r}; allowed {sorted(ZONE_ITEM_SETS)}",
-            )
-        if not isinstance(shares, Mapping):
-            raise ValueError(
-                "transmission.fomite_touch_share_table."
-                f"{zone_class} must be a mapping from item class to share",
-            )
-        parsed: dict[str, float] = {}
-        for item_class, value in shares.items():
-            if item_class not in ITEM_AREA_M2:
-                raise ValueError(
-                    "transmission.fomite_touch_share_table."
-                    f"{zone_class}: unknown item class {item_class!r}; "
-                    f"allowed {sorted(ITEM_AREA_M2)}",
-                )
-            share = float(value)
-            if not math.isfinite(share) or share <= 0.0:
-                raise ValueError(
-                    "transmission.fomite_touch_share_table."
-                    f"{zone_class}.{item_class} must be finite and > 0, "
-                    f"got {value!r}",
-                )
-            parsed[item_class] = share
-        if abs(sum(parsed.values()) - 1.0) > 1e-9:
+    return {
+        zone_class: _parse_declared_share_row(zone_class, shares)
+        for zone_class, shares in raw.items()
+    }
+
+
+def _parse_declared_share_row(zone_class: Any, shares: Any) -> dict[str, float]:
+    """Validate one zone class's item-class share mapping."""
+    if zone_class not in ZONE_ITEM_SETS:
+        raise ValueError(
+            "transmission.fomite_touch_share_table: unknown zone class "
+            f"{zone_class!r}; allowed {sorted(ZONE_ITEM_SETS)}",
+        )
+    if not isinstance(shares, Mapping):
+        raise ValueError(
+            "transmission.fomite_touch_share_table."
+            f"{zone_class} must be a mapping from item class to share",
+        )
+    parsed: dict[str, float] = {}
+    for item_class, value in shares.items():
+        if item_class not in ITEM_AREA_M2:
             raise ValueError(
                 "transmission.fomite_touch_share_table."
-                f"{zone_class} shares must sum to 1 (got "
-                f"{sum(parsed.values())!r})",
+                f"{zone_class}: unknown item class {item_class!r}; "
+                f"allowed {sorted(ITEM_AREA_M2)}",
             )
-        table[zone_class] = parsed
-    return table
+        share = float(value)
+        if not math.isfinite(share) or share <= 0.0:
+            raise ValueError(
+                "transmission.fomite_touch_share_table."
+                f"{zone_class}.{item_class} must be finite and > 0, "
+                f"got {value!r}",
+            )
+        parsed[item_class] = share
+    if abs(sum(parsed.values()) - 1.0) > 1e-9:
+        raise ValueError(
+            "transmission.fomite_touch_share_table."
+            f"{zone_class} shares must sum to 1 (got "
+            f"{sum(parsed.values())!r})",
+        )
+    return parsed
 
 
 def _parse_item_class_coverage(cleaning: Any) -> dict[str, float]:

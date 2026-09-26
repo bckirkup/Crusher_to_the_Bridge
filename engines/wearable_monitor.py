@@ -591,90 +591,9 @@ class WearableMonitor:
         summary: dict[str, dict[str, Any]] = {}
 
         for ch in device.channels:
-            noise_cfg = device.get_channel_noise(ch)
-            sigma = noise_cfg.get("sigma", 1.0)
-            drift_rate = noise_cfg.get("drift_rate", 0.0)
-            dropout_prob = noise_cfg.get("dropout_prob", 0.0)
-
-            baseline = state.baselines.get(ch, 0.0)
-
-            # Confounder effects: bias + noise multiplier
-            confounder_bias = 0.0
-            confounder_noise_mult = 1.0
-            for _cid, ch_effects in confounder_effects.items():
-                if ch in ch_effects:
-                    eff = ch_effects[ch]
-                    confounder_bias += float(eff.get("bias", 0.0))
-                    confounder_noise_mult *= float(eff.get("noise_mult", 1.0))
-
-            effective_sigma = sigma * confounder_noise_mult
-
-            # Infection perturbation (scaled by chronic disease response factor)
-            inf_delta = _compute_infection_delta(
-                ch, agent, pathogen_profiles,
-                device.infection_responses, device.phase_boundaries,
+            readings = self._channel_readings(
+                ch, agent, state, device, pathogen_profiles, confounder_effects,
             )
-            if hasattr(agent, "chronic_wearable_response_scale"):
-                inf_delta *= agent.chronic_wearable_response_scale
-
-            readings: list[float | None] = []
-            for hour in range(24):
-                # Sensor dropout
-                if self.rng.random() < dropout_prob:
-                    readings.append(None)
-                    continue
-
-                # Activity modulation for relevant channels
-                activity_mult = 1.0
-                if ch in ("heart_rate", "activity_score"):
-                    activity_block = agent.schedule[hour] if hour < len(agent.schedule) else "Sleep"
-                    activity_mult = ACTIVITY_MULTIPLIERS.get(
-                        activity_block.split(":")[0] if ":" in activity_block else activity_block,
-                        0.5,
-                    )
-
-                # Circadian modulation for temp and heart rate
-                circadian = 0.0
-                if ch == "body_temp":
-                    circadian = 0.3 * math.sin(
-                        2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
-                    )
-                elif ch == "heart_rate":
-                    circadian = 3.0 * math.sin(
-                        2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
-                    )
-
-                # Sleep modulation
-                is_sleep_hour = (
-                    hour < len(agent.schedule) and agent.schedule[hour] == "Sleep"
-                )
-                sleep_mod = 0.0
-                if ch == "sleep_score" and is_sleep_hour:
-                    sleep_mod = 3.0
-                elif ch == "sleep_score" and not is_sleep_hour:
-                    sleep_mod = -2.0
-
-                # Drift accumulation
-                state.drift[ch] += float(self.rng.normal(0, drift_rate))
-                state.drift[ch] *= 0.95  # mean-revert
-
-                # Compose reading (include confounder bias)
-                value = baseline + confounder_bias + inf_delta + circadian + sleep_mod + state.drift[ch]
-
-                if ch in ("heart_rate", "activity_score"):
-                    value = (
-                        baseline + confounder_bias
-                        + (circadian + sleep_mod + state.drift[ch]) * activity_mult
-                        + inf_delta
-                    )
-
-                # Add measurement noise (with confounder-scaled sigma)
-                value += float(self.rng.normal(0, effective_sigma))
-
-                # Clamp to physiological bounds
-                value = _clamp_channel(ch, value)
-                readings.append(round(value, 2))
-
             hourly[ch] = readings
             summary[ch] = self._channel_summary(ch, readings, state, device)
 
@@ -698,6 +617,70 @@ class WearableMonitor:
             "anomaly_count": len(anomaly_channels),
         }
 
+    def _channel_readings(
+        self,
+        ch: str,
+        agent: KorkinAgent,
+        state: AgentWearableState,
+        device: WearableDevice,
+        pathogen_profiles: dict[str, dict[str, Any]],
+        confounder_effects: dict[str, dict[str, Any]],
+    ) -> list[float | None]:
+        """One channel's 24 hourly readings for a single device."""
+        noise_cfg = device.get_channel_noise(ch)
+        sigma = noise_cfg.get("sigma", 1.0)
+        drift_rate = noise_cfg.get("drift_rate", 0.0)
+        dropout_prob = noise_cfg.get("dropout_prob", 0.0)
+
+        baseline = state.baselines.get(ch, 0.0)
+
+        # Confounder effects: bias + noise multiplier
+        confounder_bias, confounder_noise_mult = _confounder_bias_and_noise(
+            ch, confounder_effects,
+        )
+        effective_sigma = sigma * confounder_noise_mult
+
+        # Infection perturbation (scaled by chronic disease response factor)
+        inf_delta = _compute_infection_delta(
+            ch, agent, pathogen_profiles,
+            device.infection_responses, device.phase_boundaries,
+        )
+        if hasattr(agent, "chronic_wearable_response_scale"):
+            inf_delta *= agent.chronic_wearable_response_scale
+
+        readings: list[float | None] = []
+        for hour in range(24):
+            # Sensor dropout
+            if self.rng.random() < dropout_prob:
+                readings.append(None)
+                continue
+
+            activity_mult = _activity_multiplier(ch, agent, hour)
+            circadian = _circadian_modulation(ch, hour)
+            sleep_mod = _sleep_modulation(ch, agent, hour)
+
+            # Drift accumulation
+            state.drift[ch] += float(self.rng.normal(0, drift_rate))
+            state.drift[ch] *= 0.95  # mean-revert
+
+            # Compose reading (include confounder bias)
+            value = baseline + confounder_bias + inf_delta + circadian + sleep_mod + state.drift[ch]
+
+            if ch in ("heart_rate", "activity_score"):
+                value = (
+                    baseline + confounder_bias
+                    + (circadian + sleep_mod + state.drift[ch]) * activity_mult
+                    + inf_delta
+                )
+
+            # Add measurement noise (with confounder-scaled sigma)
+            value += float(self.rng.normal(0, effective_sigma))
+
+            # Clamp to physiological bounds
+            value = _clamp_channel(ch, value)
+            readings.append(round(value, 2))
+        return readings
+
     def _apply_detection_profile(
         self,
         agent: KorkinAgent,
@@ -709,6 +692,33 @@ class WearableMonitor:
         if profile is None:
             return result
 
+        is_truly_infected = self._infection_alertable(agent, profile)
+
+        # Anomaly sensitivity/specificity
+        self._gate_anomaly_flags(
+            result,
+            device,
+            is_truly_infected,
+            sensitivity=float(profile.get("sensitivity", 1.0)),
+            specificity=float(profile.get("specificity", 1.0)),
+        )
+
+        # Fever sensitivity/specificity
+        self._gate_fever_flag(
+            result,
+            is_truly_infected,
+            fever_sens=float(profile.get("fever_sensitivity", 1.0)),
+            fever_spec=float(profile.get("fever_specificity", 1.0)),
+        )
+
+        return result
+
+    def _infection_alertable(
+        self,
+        agent: KorkinAgent,
+        profile: dict[str, Any],
+    ) -> bool:
+        """Whether the host's infection is past the profile's alert latency."""
         is_truly_infected = any(
             inf["status"] == InfectionStatus.INFECTED
             for inf in agent.infections.values()
@@ -724,41 +734,53 @@ class WearableMonitor:
             )
             if agent.clock.hours_elapsed(min_epochs) < latency_hours:
                 is_truly_infected = False
+        return is_truly_infected
 
-        # Anomaly sensitivity/specificity
-        sensitivity = float(profile.get("sensitivity", 1.0))
-        specificity = float(profile.get("specificity", 1.0))
-
+    def _gate_anomaly_flags(
+        self,
+        result: dict[str, Any],
+        device: WearableDevice,
+        is_truly_infected: bool,
+        *,
+        sensitivity: float,
+        specificity: float,
+    ) -> None:
+        """Suppress or inject anomaly flags per sensitivity/specificity."""
         has_anomaly = result.get("anomaly_count", 0) > 0
-        if has_anomaly and is_truly_infected:
-            if self.rng.random() > sensitivity:
+        if has_anomaly:
+            # A false positive from the raw data needs no draw; a true
+            # anomaly on a true infection survives at ``sensitivity``.
+            if is_truly_infected and self.rng.random() > sensitivity:
                 result["anomaly_channels"] = []
                 result["anomaly_count"] = 0
                 for ch_data in result.get("summary", {}).values():
                     ch_data["anomaly"] = False
-        elif has_anomaly and not is_truly_infected:
-            pass  # already a false positive from the raw data
-        elif not has_anomaly and not is_truly_infected:
-            if self.rng.random() > specificity:
-                fp_ch = self.rng.choice(device.channels) if device.channels else "heart_rate"
-                result["anomaly_channels"] = [fp_ch]
-                result["anomaly_count"] = 1
-                if fp_ch in result.get("summary", {}):
-                    result["summary"][fp_ch]["anomaly"] = True
+            return
+        if is_truly_infected:
+            return
+        if self.rng.random() > specificity:
+            fp_ch = self.rng.choice(device.channels) if device.channels else "heart_rate"
+            result["anomaly_channels"] = [fp_ch]
+            result["anomaly_count"] = 1
+            if fp_ch in result.get("summary", {}):
+                result["summary"][fp_ch]["anomaly"] = True
 
-        # Fever sensitivity/specificity
-        fever_sens = float(profile.get("fever_sensitivity", 1.0))
-        fever_spec = float(profile.get("fever_specificity", 1.0))
+    def _gate_fever_flag(
+        self,
+        result: dict[str, Any],
+        is_truly_infected: bool,
+        *,
+        fever_sens: float,
+        fever_spec: float,
+    ) -> None:
+        """Suppress or inject the fever flag per sensitivity/specificity."""
         raw_fever = result.get("fever", False)
-
         if raw_fever and is_truly_infected:
             if self.rng.random() > fever_sens:
                 result["fever"] = False
         elif not raw_fever and not is_truly_infected:
             if self.rng.random() > fever_spec:
                 result["fever"] = True
-
-        return result
 
     def get_fleet_summary(self) -> dict[str, Any]:
         """Summary of the wearable fleet configuration."""
@@ -784,6 +806,57 @@ class WearableMonitor:
             "device_deployment_counts": device_counts,
             "visibility_breakdown": visibility_counts,
         }
+
+
+def _confounder_bias_and_noise(
+    ch: str,
+    confounder_effects: dict[str, dict[str, Any]],
+) -> tuple[float, float]:
+    """Additive bias and multiplicative noise a channel gets from confounders."""
+    confounder_bias = 0.0
+    confounder_noise_mult = 1.0
+    for _cid, ch_effects in confounder_effects.items():
+        if ch in ch_effects:
+            eff = ch_effects[ch]
+            confounder_bias += float(eff.get("bias", 0.0))
+            confounder_noise_mult *= float(eff.get("noise_mult", 1.0))
+    return confounder_bias, confounder_noise_mult
+
+
+def _activity_multiplier(ch: str, agent: KorkinAgent, hour: int) -> float:
+    """Activity modulation for the channels it applies to (1.0 elsewhere)."""
+    if ch not in ("heart_rate", "activity_score"):
+        return 1.0
+    activity_block = agent.schedule[hour] if hour < len(agent.schedule) else "Sleep"
+    return ACTIVITY_MULTIPLIERS.get(
+        activity_block.split(":")[0] if ":" in activity_block else activity_block,
+        0.5,
+    )
+
+
+def _circadian_modulation(ch: str, hour: int) -> float:
+    """Circadian term for body temperature and heart rate (0 elsewhere)."""
+    if ch == "body_temp":
+        return 0.3 * math.sin(
+            2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
+        )
+    if ch == "heart_rate":
+        return 3.0 * math.sin(
+            2 * math.pi * (hour - 4) / 24.0,  # clock-exempt: hour-of-day phase
+        )
+    return 0.0
+
+
+def _sleep_modulation(ch: str, agent: KorkinAgent, hour: int) -> float:
+    """Sleep-score nudge from whether the hour's schedule block is Sleep."""
+    is_sleep_hour = (
+        hour < len(agent.schedule) and agent.schedule[hour] == "Sleep"
+    )
+    if ch == "sleep_score" and is_sleep_hour:
+        return 3.0
+    if ch == "sleep_score" and not is_sleep_hour:
+        return -2.0
+    return 0.0
 
 
 def _clamp_channel(channel: str, value: float) -> float:
@@ -960,35 +1033,7 @@ def build_wearable_monitor_from_config(
         device = build_wearable_device_from_config(dev_cfg)
         devices[device.device_id] = device
 
-    class_device_assignments: dict[str, list[DeviceAssignment]] = {}
-    for mapping in wm_cfg.get("class_device_map", []):
-        agent_class = mapping.get("agent_class", "")
-        if not agent_class:
-            continue
-
-        # New multi-device format
-        if "devices" in mapping:
-            assignments: list[DeviceAssignment] = []
-            for dev_entry in mapping["devices"]:
-                did = dev_entry.get("device_id", "")
-                if did:
-                    assignments.append(DeviceAssignment(
-                        device_id=did,
-                        coverage=float(dev_entry.get("coverage", 1.0)),
-                        visibility=dev_entry.get("visibility", "medical_staff"),
-                    ))
-            class_device_assignments[agent_class] = assignments
-        else:
-            # Old single-device format (backward compatible)
-            device_id = mapping.get("device_id", "")
-            if device_id:
-                class_device_assignments[agent_class] = [
-                    DeviceAssignment(
-                        device_id=device_id,
-                        coverage=float(mapping.get("coverage", 1.0)),
-                        visibility=mapping.get("visibility", "medical_staff"),
-                    ),
-                ]
+    class_device_assignments = _parse_class_device_map(wm_cfg)
 
     if not devices:
         return None
@@ -1003,6 +1048,72 @@ def build_wearable_monitor_from_config(
 
     chronic_disease_device_map = wm_cfg.get("chronic_disease_device_map", [])
 
+    anomaly_z_threshold, device_fusion, anomaly_scorer = _monitor_detection_options(
+        cfg, wm_cfg, devices,
+    )
+
+    return WearableMonitor(
+        devices=devices,
+        class_device_assignments=class_device_assignments,
+        chronic_disease_device_map=chronic_disease_device_map,
+        rng=rng,
+        anomaly_z_threshold=anomaly_z_threshold,
+        device_fusion=device_fusion,
+        anomaly_scorer=anomaly_scorer,
+    )
+
+
+def _parse_class_device_map(
+    wm_cfg: dict[str, Any],
+) -> dict[str, list[DeviceAssignment]]:
+    """Parse ``class_device_map`` in either the single- or multi-device form."""
+    class_device_assignments: dict[str, list[DeviceAssignment]] = {}
+    for mapping in wm_cfg.get("class_device_map", []):
+        agent_class = mapping.get("agent_class", "")
+        if not agent_class:
+            continue
+
+        # New multi-device format
+        if "devices" in mapping:
+            class_device_assignments[agent_class] = _parse_device_assignments(
+                mapping["devices"],
+            )
+        else:
+            # Old single-device format (backward compatible)
+            device_id = mapping.get("device_id", "")
+            if device_id:
+                class_device_assignments[agent_class] = [
+                    DeviceAssignment(
+                        device_id=device_id,
+                        coverage=float(mapping.get("coverage", 1.0)),
+                        visibility=mapping.get("visibility", "medical_staff"),
+                    ),
+                ]
+    return class_device_assignments
+
+
+def _parse_device_assignments(
+    dev_entries: list[dict[str, Any]],
+) -> list[DeviceAssignment]:
+    """DeviceAssignment rows from one class's multi-device entry list."""
+    assignments: list[DeviceAssignment] = []
+    for dev_entry in dev_entries:
+        did = dev_entry.get("device_id", "")
+        if did:
+            assignments.append(DeviceAssignment(
+                device_id=did,
+                coverage=float(dev_entry.get("coverage", 1.0)),
+                visibility=dev_entry.get("visibility", "medical_staff"),
+            ))
+    return assignments
+
+
+def _monitor_detection_options(
+    cfg: dict[str, Any],
+    wm_cfg: dict[str, Any],
+    devices: dict[str, WearableDevice],
+) -> tuple[float, Any, Any]:
+    """Anomaly z threshold, device fusion config, and anomaly scorer."""
     ad_cfg = wm_cfg.get("anomaly_detection", {})
     anomaly_z_threshold = ad_cfg.get(
         "anomaly_z_threshold", wm_cfg.get("anomaly_z_threshold", 2.0),
@@ -1017,13 +1128,4 @@ def build_wearable_monitor_from_config(
     )
     device_fusion = WearableDeviceFusionConfig.from_config(device_fusion_raw)
     anomaly_scorer = build_wearable_anomaly_scorer_from_config(wm_cfg, devices)
-
-    return WearableMonitor(
-        devices=devices,
-        class_device_assignments=class_device_assignments,
-        chronic_disease_device_map=chronic_disease_device_map,
-        rng=rng,
-        anomaly_z_threshold=anomaly_z_threshold,
-        device_fusion=device_fusion,
-        anomaly_scorer=anomaly_scorer,
-    )
+    return anomaly_z_threshold, device_fusion, anomaly_scorer

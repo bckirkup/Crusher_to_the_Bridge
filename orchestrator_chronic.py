@@ -65,6 +65,48 @@ def _apply_chronic_disease_to_agent(
             agent.susceptibility_multiplier[pid] = current * susc_mult
 
 
+def _roll_disease_prevalence(
+    disease_profile: dict[str, Any],
+    agent_class: str,
+) -> float:
+    """The disease's prevalence for one agent class (``default`` fallback)."""
+    prevalence_map = disease_profile.get("prevalence_by_class", {})
+    return prevalence_map.get(
+        agent_class,
+        prevalence_map.get("default", 0.0),
+    )
+
+
+def _assign_agent_diseases(
+    agent: Any,
+    disease_list: list[tuple[str, dict[str, Any]]],
+    pathogen_profiles: dict[str, dict[str, Any]],
+    allow_comorbid: bool,
+    max_comorbid: int,
+    rng: np.random.Generator,
+) -> list[str]:
+    """Roll each disease independently for one agent, honouring the caps."""
+    assigned: list[str] = []
+    for disease_id, disease_profile in disease_list:
+        if not allow_comorbid and assigned:
+            break
+        if len(assigned) >= max_comorbid:
+            break
+
+        prevalence = _roll_disease_prevalence(disease_profile, agent.agent_class)
+
+        if prevalence <= 0.0:
+            continue
+        if rng.random() >= prevalence:
+            continue
+
+        _apply_chronic_disease_to_agent(
+            agent, disease_id, disease_profile, pathogen_profiles,
+        )
+        assigned.append(disease_id)
+    return assigned
+
+
 def assign_chronic_diseases(
     engine: KorkinShipEngine,
     chronic_config: dict[str, dict[str, Any]],
@@ -99,30 +141,10 @@ def assign_chronic_diseases(
         if agent.immune:
             continue
 
-        assigned: list[str] = []
-
-        for disease_id, disease_profile in disease_list:
-            if not allow_comorbid and assigned:
-                break
-            if len(assigned) >= max_comorbid:
-                break
-
-            prevalence_map = disease_profile.get("prevalence_by_class", {})
-            prevalence = prevalence_map.get(
-                agent.agent_class,
-                prevalence_map.get("default", 0.0),
-            )
-
-            if prevalence <= 0.0:
-                continue
-            if rng.random() >= prevalence:
-                continue
-
-            _apply_chronic_disease_to_agent(
-                agent, disease_id, disease_profile, pathogen_profiles,
-            )
-            assigned.append(disease_id)
-
+        assigned = _assign_agent_diseases(
+            agent, disease_list, pathogen_profiles,
+            allow_comorbid, max_comorbid, rng,
+        )
         if assigned:
             assignments[agent.agent_id] = assigned
 

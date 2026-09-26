@@ -361,6 +361,66 @@ class TestLoaderRefusals:
         with pytest.raises(ValueError, match="sum to 1.0"):
             _validate_symptom_severity_profiles(profiles)
 
+    def test_a_profile_without_models_loads(self) -> None:
+        _validate_symptom_severity_profiles({PATHOGEN: {"notes": "no models"}})
+
+    def test_an_unpaired_severity_model_is_refused(self) -> None:
+        profiles = _authored()
+        del profiles[PATHOGEN]["observation_model"]
+        with pytest.raises(ValueError, match="must be paired"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_an_unpaired_observation_model_is_refused(self) -> None:
+        profiles = _authored()
+        del profiles[PATHOGEN]["severity_model"]
+        with pytest.raises(ValueError, match="must be paired"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_a_non_object_severity_model_is_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["severity_model"] = "ladder"
+        with pytest.raises(ValueError, match="must be an object"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_states_that_do_not_match_the_contract_are_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["severity_model"]["states"] = _STATES[:-1]
+        with pytest.raises(ValueError, match="states must equal"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_base_probabilities_of_the_wrong_length_are_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["severity_model"]["base_probabilities"] = [1.0] * 4
+        with pytest.raises(ValueError, match="length 5"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_base_probabilities_out_of_bounds_are_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["severity_model"]["base_probabilities"] = [
+            0.31, 0.0, 1.369, -0.684, 0.005,
+        ]
+        with pytest.raises(ValueError, match="finite and bounded"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_a_purely_asymptomatic_ladder_is_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["severity_model"]["base_probabilities"] = [
+            1.0, 0.0, 0.0, 0.0, 0.0,
+        ]
+        with pytest.raises(ValueError, match=r"\[0\] must be < 1"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_a_non_object_observation_model_is_refused(self) -> None:
+        profiles = _authored()
+        profiles[PATHOGEN]["observation_model"] = ["passive"]
+        with pytest.raises(ValueError, match="must be an object"):
+            _validate_symptom_severity_profiles(profiles)
+
+    def test_a_non_positive_reporting_window_is_refused(self) -> None:
+        profiles = _authored(episode_reporting_window_days=0.0)
+        with pytest.raises(ValueError, match="must be positive"):
+            _validate_symptom_severity_profiles(profiles)
+
 
 def _presenting_population(agents: int) -> list[dict[str, Any]]:
     return [

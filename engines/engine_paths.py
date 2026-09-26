@@ -133,16 +133,26 @@ def engine_import_paths(
                 print(f"  [{name}] MISSING  {entry['repo_dir']}")
             continue
 
-        for py_path in entry["py_paths"]:
-            if os.path.isdir(py_path) and py_path not in paths:
-                paths.append(py_path)
-                if verbose:
-                    print(f"  [{name}] python   {py_path}")
-
-        if verbose and not entry["py_paths"]:
-            print(f"  [{name}] present  {entry['repo_dir']}  (no Python paths)")
+        _collect_engine_py_paths(name, entry, paths, verbose)
 
     return status, paths
+
+
+def _collect_engine_py_paths(
+    name: str,
+    entry: dict[str, Any],
+    paths: list[str],
+    verbose: bool,
+) -> None:
+    """Append an engine's existing Python dirs to ``paths`` (deduplicated)."""
+    for py_path in entry["py_paths"]:
+        if os.path.isdir(py_path) and py_path not in paths:
+            paths.append(py_path)
+            if verbose:
+                print(f"  [{name}] python   {py_path}")
+
+    if verbose and not entry["py_paths"]:
+        print(f"  [{name}] present  {entry['repo_dir']}  (no Python paths)")
 
 
 def register_engine_paths(

@@ -401,6 +401,109 @@ def _executive_counter_rows(
     return lines
 
 
+def _executive_pathogen_rows(
+    row: Any,
+    pathogen_profiles: dict[str, Any] | None,
+) -> list[str]:
+    lines: list[str] = []
+    if pathogen_profiles and len(pathogen_profiles) > 1:
+        lines.append(row(f"Pathogen count:      {len(pathogen_profiles)}"))
+        for pid in pathogen_profiles:
+            lines.append(row(f"  - {pid}"))
+    return lines
+
+
+def _executive_escalation_rows(
+    row: Any,
+    escalation_log: list[dict[str, Any]],
+) -> list[str]:
+    lines: list[str] = []
+    if escalation_log:
+        lines.append(row())
+        lines.append(row("Escalation timeline:"))
+        for entry in escalation_log:
+            lines.append(row(f"  Epoch {entry['epoch']:02d}:  {entry['from']}  ->  {entry['to']}"))
+    return lines
+
+
+def _executive_compliance_rows(
+    row: Any,
+    compliance_log: list[dict[str, Any]],
+) -> list[str]:
+    if not compliance_log:
+        return []
+    refused = sum(1 for c in compliance_log if c["action"] == "refused_quarantine")
+    immediate = sum(1 for c in compliance_log if c["action"] == "immediate_compliance")
+    return [row(f"Compliance:          {immediate} immediate, {refused} refused")]
+
+
+def _executive_audit_rows(
+    row: Any,
+    divider: str,
+    thin_div: str,
+    audit: dict[str, Any],
+) -> list[str]:
+    """Person-hours, financial, and depleted-supplies audit rows."""
+    summary = audit["summary"]
+    lines = [
+        row(f"Person-hours used: {summary['total_labor_consumed_hours']:.1f} / {summary['starting_labor_capacity_hours']:.0f}"),
+        divider,
+        row("FINANCIAL & RESOURCE AUDIT"),
+        thin_div,
+        row(f"Starting allocation: ${summary['starting_financial_budget_usd']:>10,.2f}"),
+        row(f"Total spent:         ${summary['total_expenditure_usd']:>10,.2f}"),
+        row(f"  Surveillance:      ${summary['surveillance_cost_usd']:>10,.2f}"),
+        row(f"  Intervention:      ${summary['intervention_cost_usd']:>10,.2f}"),
+        row(f"Remaining:           ${summary['remaining_balance_usd']:>10,.2f}"),
+        row(),
+        row(f"Labor consumed:      {summary['total_labor_consumed_hours']:>8.1f} person-hours"),
+        row(f"  Surveillance:      {summary['surveillance_labor_hours']:>8.1f} person-hours"),
+        row(f"  Intervention:      {summary['intervention_labor_hours']:>8.1f} person-hours"),
+    ]
+
+    depleted = [
+        item for item, data in audit["material_inventory"].items()
+        if data["remaining"] == 0 and data["consumed"] > 0
+    ]
+    if depleted:
+        lines.append(row())
+        lines.append(row("DEPLETED SUPPLIES (fully consumed)"))
+        for item in depleted:
+            data = audit["material_inventory"][item]
+            lines.append(row(f"  {item}: {data['starting']} -> 0  (${data['total_cost_usd']:.2f})"))
+    return lines
+
+
+def _executive_sop_rows(
+    row: Any,
+    divider: str,
+    thin_div: str,
+    proto_summary: dict[str, Any],
+) -> list[str]:
+    """SOP activation history rows."""
+    lines = [divider, row("SOP ACTIVATION HISTORY"), thin_div]
+
+    activations = [e for e in proto_summary["event_log"] if e["event"] == "ACTIVATED"]
+    if activations:
+        seen: set[str] = set()
+        for ev in activations:
+            pid = ev["protocol_id"]
+            if pid not in seen:
+                seen.add(pid)
+                lines.append(row(f"  {pid}  {ev['name'][:40]:<40s}  Epoch {ev['epoch']:02d}"))
+    else:
+        lines.append(row("  (no protocols activated)"))
+
+    still_active = proto_summary["protocols_still_active"]
+    if still_active:
+        lines.append(row())
+        lines.append(row(f"Still active at end: {', '.join(still_active)}"))
+
+    lines.append(row(f"Total activations:   {proto_summary['total_activations']}"))
+    lines.append(row(f"Total deactivations: {proto_summary['total_deactivations']}"))
+    return lines
+
+
 def print_executive_summary(
     *,
     num_agents: int,
@@ -445,73 +548,11 @@ def print_executive_summary(
         lines.append(thin_div)
         lines.extend(_executive_counter_rows(row, thin_div, infection_counters))
 
-    if pathogen_profiles and len(pathogen_profiles) > 1:
-        lines.append(row(f"Pathogen count:      {len(pathogen_profiles)}"))
-        for pid in pathogen_profiles:
-            lines.append(row(f"  - {pid}"))
-
-    if escalation_log:
-        lines.append(row())
-        lines.append(row("Escalation timeline:"))
-        for entry in escalation_log:
-            lines.append(row(f"  Epoch {entry['epoch']:02d}:  {entry['from']}  ->  {entry['to']}"))
-
-    if compliance_log:
-        refused = sum(1 for c in compliance_log if c["action"] == "refused_quarantine")
-        immediate = sum(1 for c in compliance_log if c["action"] == "immediate_compliance")
-        lines.append(row(f"Compliance:          {immediate} immediate, {refused} refused"))
-
-    summary = audit["summary"]
-    lines.append(row(f"Person-hours used: {summary['total_labor_consumed_hours']:.1f} / {summary['starting_labor_capacity_hours']:.0f}"))
-
-    lines.append(divider)
-
-    lines.append(row("FINANCIAL & RESOURCE AUDIT"))
-    lines.append(thin_div)
-    lines.append(row(f"Starting allocation: ${summary['starting_financial_budget_usd']:>10,.2f}"))
-    lines.append(row(f"Total spent:         ${summary['total_expenditure_usd']:>10,.2f}"))
-    lines.append(row(f"  Surveillance:      ${summary['surveillance_cost_usd']:>10,.2f}"))
-    lines.append(row(f"  Intervention:      ${summary['intervention_cost_usd']:>10,.2f}"))
-    lines.append(row(f"Remaining:           ${summary['remaining_balance_usd']:>10,.2f}"))
-    lines.append(row())
-    lines.append(row(f"Labor consumed:      {summary['total_labor_consumed_hours']:>8.1f} person-hours"))
-    lines.append(row(f"  Surveillance:      {summary['surveillance_labor_hours']:>8.1f} person-hours"))
-    lines.append(row(f"  Intervention:      {summary['intervention_labor_hours']:>8.1f} person-hours"))
-
-    depleted = [
-        item for item, data in audit["material_inventory"].items()
-        if data["remaining"] == 0 and data["consumed"] > 0
-    ]
-    if depleted:
-        lines.append(row())
-        lines.append(row("DEPLETED SUPPLIES (fully consumed)"))
-        for item in depleted:
-            data = audit["material_inventory"][item]
-            lines.append(row(f"  {item}: {data['starting']} -> 0  (${data['total_cost_usd']:.2f})"))
-
-    lines.append(divider)
-
-    lines.append(row("SOP ACTIVATION HISTORY"))
-    lines.append(thin_div)
-
-    activations = [e for e in proto_summary["event_log"] if e["event"] == "ACTIVATED"]
-    if activations:
-        seen: set[str] = set()
-        for ev in activations:
-            pid = ev["protocol_id"]
-            if pid not in seen:
-                seen.add(pid)
-                lines.append(row(f"  {pid}  {ev['name'][:40]:<40s}  Epoch {ev['epoch']:02d}"))
-    else:
-        lines.append(row("  (no protocols activated)"))
-
-    still_active = proto_summary["protocols_still_active"]
-    if still_active:
-        lines.append(row())
-        lines.append(row(f"Still active at end: {', '.join(still_active)}"))
-
-    lines.append(row(f"Total activations:   {proto_summary['total_activations']}"))
-    lines.append(row(f"Total deactivations: {proto_summary['total_deactivations']}"))
+    lines.extend(_executive_pathogen_rows(row, pathogen_profiles))
+    lines.extend(_executive_escalation_rows(row, escalation_log))
+    lines.extend(_executive_compliance_rows(row, compliance_log))
+    lines.extend(_executive_audit_rows(row, divider, thin_div, audit))
+    lines.extend(_executive_sop_rows(row, divider, thin_div, proto_summary))
 
     lines.append(divider)
 

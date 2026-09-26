@@ -1999,6 +1999,54 @@ class EmesisPatch:
     epoch: int                 # deposition epoch, for diagnostics
 
 
+@dataclass(frozen=True)
+class _ContactUnitCtx:
+    """Loop-invariant context for one direct-contact mixing unit."""
+
+    epoch: int
+    unit_name: str
+    zone_name: str
+    hallway: bool
+    occupants: list[KorkinAgent]
+    shedders: list[tuple[KorkinAgent, float]]
+    shedder_ids: list[int]
+    total_shedding: float
+    n_occupants: int
+    present_ids: frozenset[int]
+    cabin_confinement: bool
+    zone_mix: EmissionMix | None
+    zone_dc_factor: float
+    use_partner: bool
+    by_activity: bool
+    use_het: bool
+    pathogen_id: str
+
+
+@dataclass(frozen=True)
+class _DropletUnitState:
+    """Loop-invariant air-unit state for the short-range droplet route."""
+
+    epoch: int
+    unit_name: str
+    zone_name: str
+    shedders: list[tuple[KorkinAgent, float]]
+    emitted_shedders: list[tuple[KorkinAgent, float]]
+    shedder_ids: list[int]
+    pathogen_id: str
+    n_occupants: int
+    volume: float
+    concentration: float
+    total_aerosol: float
+    vent_factor: float
+    residence: float
+    mix: EmissionMix | None
+    emission_fraction: float
+    pool_share: float
+    partition: bool
+    near_field_on: bool
+    in_compartment: bool
+
+
 class TransmissionCore:
     """Executes six transmission pathways per epoch.
 
@@ -2036,6 +2084,40 @@ class TransmissionCore:
         zone_air_exchange_per_hour: dict[str, float] | None = None,
     ) -> None:
         self.rng = rng
+        tx = (cfg or {}).get("transmission", {}) or {}
+        self._init_clock_and_kinetics(clock, cfg)
+        self.zone_volumes = zone_volumes or {}
+        self.pathogen_profiles = pathogen_profiles or {}
+        self.zone_types = zone_types or {}
+        self.zone_ventilation = zone_ventilation or {}
+        self.zone_floor_areas = zone_floor_areas or {}
+        # Zone name -> air changes removed per hour (ach x hvac_duty from
+        # the platform's air_flow_paths), the first-order removal rate the
+        # ROOM-AIR-01 residence factor reads. Empty map + sealed mode is
+        # the pre-change standing-mass baseline.
+        self.zone_air_exchange_per_hour = dict(zone_air_exchange_per_hour or {})
+        self.confinement_isolation_factor = confinement_isolation_factor
+        self.corridor_direct_contact_factor = corridor_direct_contact_factor
+        self.food_zone_multipliers = food_zone_multipliers or {}
+        self._init_contact_config(cfg, tx)
+        self._init_air_layout(tx)
+        self._init_contact_modes(tx)
+        self._init_sanitary_state(tx, sanitary_zone_map)
+        self._init_cleaning_config(tx)
+        self._init_pool_state()
+
+        self._init_strain_tracking(cfg, strain_registry)
+
+        # Protocol-driven pathway scalars (1.0 = no modification)
+        self.direct_contact_scalar: float = 1.0
+        self.droplet_scalar: float = 1.0
+        self.hvac_airborne_scalar: float = 1.0
+
+    def _init_clock_and_kinetics(
+        self,
+        clock: SimClock | None,
+        cfg: dict[str, Any] | None,
+    ) -> None:
         # The run's one clock, so an immunity parameter written in days of
         # natural history is aged on the same grid the biology advances on.
         self.clock = clock if clock is not None else SimClock.from_config(cfg)
@@ -2052,39 +2134,24 @@ class TransmissionCore:
         self.env_delivery_fraction_per_epoch = self.clock.amount_per_epoch(
             ENV_DELIVERY_FRACTION_PER_DAY,
         )
-        self.zone_volumes = zone_volumes or {}
-        self.pathogen_profiles = pathogen_profiles or {}
-        self.zone_types = zone_types or {}
-        self.zone_ventilation = zone_ventilation or {}
-        self.zone_floor_areas = zone_floor_areas or {}
-        # Zone name -> air changes removed per hour (ach x hvac_duty from
-        # the platform's air_flow_paths), the first-order removal rate the
-        # ROOM-AIR-01 residence factor reads. Empty map + sealed mode is
-        # the pre-change standing-mass baseline.
-        self.zone_air_exchange_per_hour = dict(zone_air_exchange_per_hour or {})
-        self.confinement_isolation_factor = confinement_isolation_factor
-        self.corridor_direct_contact_factor = corridor_direct_contact_factor
-        self.food_zone_multipliers = food_zone_multipliers or {}
-        self.dining_party_contact_share = _parse_dining_party_share(
-            (cfg or {}).get("transmission", {}) or {},
-        )
+
+    def _init_contact_config(
+        self,
+        cfg: dict[str, Any] | None,
+        tx: dict[str, Any],
+    ) -> None:
+        self.dining_party_contact_share = _parse_dining_party_share(tx)
         self.service_surface_knockout = _parse_service_surface_knockout(
             cfg or {},
         )
-        self.contact_class_exponent = _parse_contact_class_exponent(
-            (cfg or {}).get("transmission", {}) or {},
-        )
+        self.contact_class_exponent = _parse_contact_class_exponent(tx)
         # phi is only ever exactly 0.0 by default or declaration; any other
         # value, however small, is a declared class-directed kernel.
         self._class_directed_contacts = abs(self.contact_class_exponent) > 0.0
-        self.activity_contacts = _parse_activity_contacts(
-            (cfg or {}).get("transmission", {}) or {},
-        )
+        self.activity_contacts = _parse_activity_contacts(tx)
         self.activity_saturation_hours: dict[str, float] = (
             _parse_activity_saturation(
-                ((cfg or {}).get("transmission", {}) or {}).get(
-                    "activity_contacts", {},
-                ) or {},
+                tx.get("activity_contacts", {}) or {},
             )
             if self.activity_contacts is not None else {}
         )
@@ -2093,12 +2160,10 @@ class TransmissionCore:
                 "transmission.activity_contacts.saturation_hours needs an "
                 "hourly clock: a visit cannot be timed on a day-long epoch",
             )
-        self.near_field_air = _parse_near_field_air(
-            (cfg or {}).get("transmission", {}) or {},
-        )
-        self.droplet_field_split = _parse_droplet_field_split(
-            (cfg or {}).get("transmission", {}) or {},
-        )
+
+    def _init_air_layout(self, tx: dict[str, Any]) -> None:
+        self.near_field_air = _parse_near_field_air(tx)
+        self.droplet_field_split = _parse_droplet_field_split(tx)
         self.near_field_flushed_volume_m3_per_epoch = (
             self.near_field_air.interzonal_airflow_m3_per_hour
             * self.clock.hours_per_epoch
@@ -2110,7 +2175,7 @@ class TransmissionCore:
         # Voyage layer contact scale (1.0 when effects disabled)
         self.voyage_contact_multiplier: float = 1.0
 
-        tx = (cfg or {}).get("transmission", {}) or {}
+    def _init_contact_modes(self, tx: dict[str, Any]) -> None:
         self.contact_mode = _parse_contact_mode(tx)
         self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
         self.cabin_air_mode = _parse_cabin_air_mode(tx)
@@ -2122,6 +2187,12 @@ class TransmissionCore:
         # this epoch. Empty until ``register_cabin_berths`` is called.
         self._cabin_berths: dict[str, int] = {}
         self._block_berths: dict[str, int] = {}
+
+    def _init_sanitary_state(
+        self,
+        tx: dict[str, Any],
+        sanitary_zone_map: dict[str, dict[str, str]] | None,
+    ) -> None:
         self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
         # layout's per-head ``serves`` lists.
@@ -2188,6 +2259,8 @@ class TransmissionCore:
             "flush_recipients": 0,
             "flush_dose_delivered": 0.0,
         }
+
+    def _init_cleaning_config(self, tx: dict[str, Any]) -> None:
         self.density_cfg: dict[str, float] = _parse_density_cfg(tx)
         cleaning_cfg = _parse_surface_cleaning_cfg(tx)
         self.surface_cleaning_enabled = bool(cleaning_cfg["enabled"])
@@ -2225,6 +2298,7 @@ class TransmissionCore:
             self.heterogeneous_sigma_default,
         ) = _parse_heterogeneous_sigma(tx)
 
+    def _init_pool_state(self) -> None:
         # Persistent state: surface fomite pools per zone per pathogen
         # {pathogen_id: {zone: mass}}
         self.surface_pools: dict[str, float] = {}  # aggregate (legacy)
@@ -2275,13 +2349,6 @@ class TransmissionCore:
         self._prev_zone_shedders_by_pathogen: dict[str, dict[str, list[int]]] = {}
         # Per-epoch route cache, initialized before any direct helper call.
         self._last_pathogen_route_doses: dict[str, dict[int, dict[str, float]]] = {}
-
-        self._init_strain_tracking(cfg, strain_registry)
-
-        # Protocol-driven pathway scalars (1.0 = no modification)
-        self.direct_contact_scalar: float = 1.0
-        self.droplet_scalar: float = 1.0
-        self.hvac_airborne_scalar: float = 1.0
 
     # ── Strain attribution (variant surveillance) ────────────────────
 
@@ -4576,17 +4643,7 @@ class TransmissionCore:
         self._age_aerosol_pools()
 
         # Build zone occupancy maps
-        zone_occupants: dict[str, list[KorkinAgent]] = {}
-        for agent in agents:
-            loc = agent.current_location
-            if loc in ("Isolated_In_Quarters", "Ashore", "Departed"):
-                continue
-            if getattr(agent, "ashore", False) or agent.has_departed(epoch):
-                continue
-            zone_occupants.setdefault(loc, []).append(agent)
-        for zone_name, occupants in zone_occupants.items():
-            if self.zone_types.get(zone_name) == "Dining":
-                self._deal_meal_tables(zone_name, occupants, epoch)
+        zone_occupants = self._epoch_zone_occupants(agents, epoch)
 
         # Per-agent accumulated dose across all pathways (aggregate)
         agent_doses: dict[int, float] = {}
@@ -4637,6 +4694,25 @@ class TransmissionCore:
         self.collect_extinct_strains(agents)
 
         return matrix, events
+
+    def _epoch_zone_occupants(
+        self,
+        agents: list[KorkinAgent],
+        epoch: int,
+    ) -> dict[str, list[KorkinAgent]]:
+        """Zone → agents aboard this epoch; deals Dining meal tables."""
+        zone_occupants: dict[str, list[KorkinAgent]] = {}
+        for agent in agents:
+            loc = agent.current_location
+            if loc in ("Isolated_In_Quarters", "Ashore", "Departed"):
+                continue
+            if getattr(agent, "ashore", False) or agent.has_departed(epoch):
+                continue
+            zone_occupants.setdefault(loc, []).append(agent)
+        for zone_name, occupants in zone_occupants.items():
+            if self.zone_types.get(zone_name) == "Dining":
+                self._deal_meal_tables(zone_name, occupants, epoch)
+        return zone_occupants
 
     def _resolve_pathogen_challenge(
         self,
@@ -5524,52 +5600,33 @@ class TransmissionCore:
             else self._shedder_mix(shedders, pathogen_id)
         )
         present_ids = frozenset(a.agent_id for a in occupants)
+        ctx = _ContactUnitCtx(
+            epoch=epoch,
+            unit_name=unit_name,
+            zone_name=zone_name,
+            hallway=hallway,
+            occupants=occupants,
+            shedders=shedders,
+            shedder_ids=shedder_ids,
+            total_shedding=total_shedding,
+            n_occupants=n_occupants,
+            present_ids=present_ids,
+            cabin_confinement=cabin_confinement,
+            zone_mix=zone_mix,
+            zone_dc_factor=zone_dc_factor,
+            use_partner=use_partner,
+            by_activity=use_partner and self.activity_contacts is not None,
+            use_het=use_het,
+            pathogen_id=pathogen_id,
+        )
 
-        by_activity = use_partner and self.activity_contacts is not None
         for target in susceptible:
-            if by_activity:
-                r0_draw = self._activity_contact_draw(
-                    target, unit_name, zone_name, hallway, epoch,
-                )
-            else:
-                r0_draw = self._draw_contact_multiplier(
-                    n_occupants, target, epoch,
-                )
-            sampled_shedders = shedders
-            moved: list[tuple[KorkinAgent, float]] = []
-            n_contacts = r0_draw
-            if use_partner:
-                seated = self._seated_partner_sample(
-                    target, shedders, occupants, present_ids, r0_draw,
-                    zone_name, epoch,
-                )
-                sampled_shedders, n_contacts = (
-                    seated if seated is not None
-                    else self._sample_contact_partners(
-                        shedders, n_occupants, r0_draw,
-                        self._pool_class_counts(occupants, target),
-                    )
-                )
-                if hallway:
-                    sampled_shedders = self._hallway_shedders(
-                        target, sampled_shedders,
-                    )
-                dose, moved = self._per_partner_contact_dose(
-                    target, sampled_shedders, cabin_confinement,
-                    pathogen_id, epoch,
-                )
-            else:
-                unit_shedders = shedders
-                unit_shedding = total_shedding
-                if hallway:
-                    unit_shedders = self._hallway_shedders(target, shedders)
-                    unit_shedding = sum(sv for _, sv in unit_shedders)
-                dose = self._direct_contact_dose(
-                    target, unit_shedders, unit_shedding, n_occupants, r0_draw,
-                    cabin_confinement, pathogen_id, epoch,
-                )
+            r0_draw = self._contact_count_draw(ctx, target)
+            dose, moved, sampled_shedders, n_contacts = (
+                self._direct_contact_target_dose(ctx, target, r0_draw)
+            )
             dose *= self.direct_contact_scalar
-            dose *= zone_dc_factor
+            dose *= ctx.zone_dc_factor
             exposure_factor = 1.0
             if use_het:
                 exposure_factor = self._zone_exposure_factor(zone_name)
@@ -5587,26 +5644,103 @@ class TransmissionCore:
                 agent_doses, agent_pathway_doses,
                 attribution(ledger, mix),
             )
+            self._record_shared_room_exposure(
+                ctx, matrix, target, dose, r0_draw, moved, n_contacts,
+                exposure_factor,
+            )
 
-            rec: dict[str, Any] = {
-                "target_id": target.agent_id,
-                "zone": zone_name,
-                "source_ids": shedder_ids,
-                "pathogen_id": pathogen_id,
-                "dose": round(dose, 4),
-                "occupant_count": len(occupants),
-                "r0_draw": r0_draw,
-            }
-            if unit_name != zone_name:
-                rec["compartment"] = unit_name
-            if use_partner:
-                rec["source_ids"] = [
-                    shedder.agent_id for shedder, _ in moved
-                ]
-                rec["n_contacts"] = n_contacts
-            if use_het:
-                rec["zone_exposure_factor"] = round(exposure_factor, 6)
-            matrix.shared_room_exposures.append(rec)
+    def _contact_count_draw(
+        self,
+        ctx: _ContactUnitCtx,
+        target: KorkinAgent,
+    ) -> int:
+        """The r0_draw for one target under the active contact mode."""
+        if ctx.by_activity:
+            return self._activity_contact_draw(
+                target, ctx.unit_name, ctx.zone_name, ctx.hallway, ctx.epoch,
+            )
+        return self._draw_contact_multiplier(
+            ctx.n_occupants, target, ctx.epoch,
+        )
+
+    def _direct_contact_target_dose(
+        self,
+        ctx: _ContactUnitCtx,
+        target: KorkinAgent,
+        r0_draw: int,
+    ) -> tuple[
+        float,
+        list[tuple[KorkinAgent, float]],
+        list[tuple[KorkinAgent, float]],
+        int,
+    ]:
+        """Unit dose for one target; also the partners actually contacted."""
+        moved: list[tuple[KorkinAgent, float]] = []
+        n_contacts = r0_draw
+        sampled_shedders = ctx.shedders
+        if ctx.use_partner:
+            seated = self._seated_partner_sample(
+                target, ctx.shedders, ctx.occupants, ctx.present_ids,
+                r0_draw, ctx.zone_name, ctx.epoch,
+            )
+            sampled_shedders, n_contacts = (
+                seated if seated is not None
+                else self._sample_contact_partners(
+                    ctx.shedders, ctx.n_occupants, r0_draw,
+                    self._pool_class_counts(ctx.occupants, target),
+                )
+            )
+            if ctx.hallway:
+                sampled_shedders = self._hallway_shedders(
+                    target, sampled_shedders,
+                )
+            dose, moved = self._per_partner_contact_dose(
+                target, sampled_shedders, ctx.cabin_confinement,
+                ctx.pathogen_id, ctx.epoch,
+            )
+        else:
+            unit_shedders = ctx.shedders
+            unit_shedding = ctx.total_shedding
+            if ctx.hallway:
+                unit_shedders = self._hallway_shedders(target, ctx.shedders)
+                unit_shedding = sum(sv for _, sv in unit_shedders)
+            dose = self._direct_contact_dose(
+                target, unit_shedders, unit_shedding, ctx.n_occupants,
+                r0_draw, ctx.cabin_confinement, ctx.pathogen_id, ctx.epoch,
+            )
+        return dose, moved, sampled_shedders, n_contacts
+
+    def _record_shared_room_exposure(
+        self,
+        ctx: _ContactUnitCtx,
+        matrix: ContactTracingMatrix,
+        target: KorkinAgent,
+        dose: float,
+        r0_draw: int,
+        moved: list[tuple[KorkinAgent, float]],
+        n_contacts: int,
+        exposure_factor: float,
+    ) -> None:
+        """Append one target's direct-contact exposure record to the matrix."""
+        rec: dict[str, Any] = {
+            "target_id": target.agent_id,
+            "zone": ctx.zone_name,
+            "source_ids": ctx.shedder_ids,
+            "pathogen_id": ctx.pathogen_id,
+            "dose": round(dose, 4),
+            "occupant_count": len(ctx.occupants),
+            "r0_draw": r0_draw,
+        }
+        if ctx.unit_name != ctx.zone_name:
+            rec["compartment"] = ctx.unit_name
+        if ctx.use_partner:
+            rec["source_ids"] = [
+                shedder.agent_id for shedder, _ in moved
+            ]
+            rec["n_contacts"] = n_contacts
+        if ctx.use_het:
+            rec["zone_exposure_factor"] = round(exposure_factor, 6)
+        matrix.shared_room_exposures.append(rec)
 
     # ── Pathway 2: Short-Range Droplet ───────────────────────────────
 
@@ -5703,68 +5837,117 @@ class TransmissionCore:
         vent_factor = self._aerosol_ventilation_factor(zone_name)
         residence = self._room_air_residence_factor(unit_name)
         mix = self._shedder_mix(emitted_shedders, pathogen_id)
+        st = _DropletUnitState(
+            epoch=epoch,
+            unit_name=unit_name,
+            zone_name=zone_name,
+            shedders=shedders,
+            emitted_shedders=emitted_shedders,
+            shedder_ids=shedder_ids,
+            pathogen_id=pathogen_id,
+            n_occupants=n_occupants,
+            volume=volume,
+            concentration=concentration,
+            total_aerosol=total_aerosol,
+            vent_factor=vent_factor,
+            residence=residence,
+            mix=mix,
+            emission_fraction=emission_fraction,
+            pool_share=pool_share,
+            partition=partition,
+            near_field_on=near_field_on,
+            in_compartment=in_compartment,
+        )
 
         for target in susceptible:
-            dose = concentration * self.inhaled_air_volume_m3_per_epoch
-            dose *= self.droplet_scalar
-            dose *= vent_factor
-            dose *= residence
-            target_factor = self._confinement_factor(target)
-            dose *= target_factor
-            dose *= self._cabin_presence_share(target, epoch)
-            dose += self._cabin_mate_droplet_addback(
-                target, shedders, volume, vent_factor, target_factor,
-                emission_fraction * pool_share, epoch, residence,
-            )
-            near_dose = 0.0
-            if near_field_on:
-                proximity_ids = (
-                    self._proximity_shedder_ids(
-                        target, shedders, n_occupants,
-                        unit_name, zone_name, epoch,
-                    )
-                    if partition else None
-                )
-                # Difference-of-concentrations form: against the unit's own
-                # volume, so it vanishes once the unit is the stateroom.
-                # Under the partition it is the near share's plume dose.
-                near_dose = self._near_field_droplet_dose(
-                    zone_name, target, emitted_shedders, volume,
-                    target_factor, emission_fraction, epoch,
-                    proximity_ids=proximity_ids,
-                    near_share=(
-                        self.droplet_field_split.near_field_share
-                        if partition else None
-                    ),
-                )
-            dose += near_dose
+            dose, near_dose = self._droplet_target_dose(st, target)
             dose = self._accumulate(
                 target.agent_id, "droplet", dose,
                 agent_doses, agent_pathway_doses,
-                attribution(ledger, mix),
+                attribution(ledger, st.mix),
             )
+            self._record_droplet_exposure(st, matrix, target, dose, near_dose)
 
-            exposure: dict[str, Any] = {
-                "target_id": target.agent_id,
-                "zone": zone_name,
-                "source_ids": shedder_ids,
-                "pathogen_id": pathogen_id,
-                "dose": round(dose, 4),
-                "aerosol_mass": round(total_aerosol, 4),
-                "concentration_per_m3": round(concentration, 6),
-            }
-            if in_compartment:
-                # Written only under the compartment mode, so a zone-pool
-                # run's payload is the pre-change payload.
-                exposure["air_unit"] = unit_name
-            table = self._table_party(zone_name, target, epoch)
-            if near_field_on and table is not None:
-                exposure["meal_table_index"] = table[1]
-            if near_dose > 0.0:
-                # Written only when the near field is on, so the payload of
-                # a run without it is the pre-change payload.
-                exposure["near_field_dose"] = round(near_dose, 4)
-            matrix.droplet_exposures.append(exposure)
+    def _droplet_target_dose(
+        self,
+        st: _DropletUnitState,
+        target: KorkinAgent,
+    ) -> tuple[float, float]:
+        """Pooled-air dose plus near-field plume dose for one target."""
+        dose = st.concentration * self.inhaled_air_volume_m3_per_epoch
+        dose *= self.droplet_scalar
+        dose *= st.vent_factor
+        dose *= st.residence
+        target_factor = self._confinement_factor(target)
+        dose *= target_factor
+        dose *= self._cabin_presence_share(target, st.epoch)
+        dose += self._cabin_mate_droplet_addback(
+            target, st.shedders, st.volume, st.vent_factor, target_factor,
+            st.emission_fraction * st.pool_share, st.epoch, st.residence,
+        )
+        near_dose = self._droplet_near_dose(st, target, target_factor)
+        dose += near_dose
+        return dose, near_dose
+
+    def _droplet_near_dose(
+        self,
+        st: _DropletUnitState,
+        target: KorkinAgent,
+        target_factor: float,
+    ) -> float:
+        """The near-field dose term, 0.0 when the near field is off."""
+        if not st.near_field_on:
+            return 0.0
+        proximity_ids = (
+            self._proximity_shedder_ids(
+                target, st.shedders, st.n_occupants,
+                st.unit_name, st.zone_name, st.epoch,
+            )
+            if st.partition else None
+        )
+        # Difference-of-concentrations form: against the unit's own
+        # volume, so it vanishes once the unit is the stateroom.
+        # Under the partition it is the near share's plume dose.
+        return self._near_field_droplet_dose(
+            st.zone_name, target, st.emitted_shedders, st.volume,
+            target_factor, st.emission_fraction, st.epoch,
+            proximity_ids=proximity_ids,
+            near_share=(
+                self.droplet_field_split.near_field_share
+                if st.partition else None
+            ),
+        )
+
+    def _record_droplet_exposure(
+        self,
+        st: _DropletUnitState,
+        matrix: ContactTracingMatrix,
+        target: KorkinAgent,
+        dose: float,
+        near_dose: float,
+    ) -> None:
+        """Append one target's droplet exposure record to the matrix."""
+        exposure: dict[str, Any] = {
+            "target_id": target.agent_id,
+            "zone": st.zone_name,
+            "source_ids": st.shedder_ids,
+            "pathogen_id": st.pathogen_id,
+            "dose": round(dose, 4),
+            "aerosol_mass": round(st.total_aerosol, 4),
+            "concentration_per_m3": round(st.concentration, 6),
+        }
+        if st.in_compartment:
+            # Written only under the compartment mode, so a zone-pool
+            # run's payload is the pre-change payload.
+            exposure["air_unit"] = st.unit_name
+        table = self._table_party(st.zone_name, target, st.epoch)
+        if st.near_field_on and table is not None:
+            exposure["meal_table_index"] = table[1]
+        if near_dose > 0.0:
+            # Written only when the near field is on, so the payload of
+            # a run without it is the pre-change payload.
+            exposure["near_field_dose"] = round(near_dose, 4)
+        matrix.droplet_exposures.append(exposure)
 
     # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────────
 
@@ -5943,11 +6126,7 @@ class TransmissionCore:
         short-range route, as an upstream zone's own occupants already are.
         """
         units = self._cabin_air_units(zone_occupants)
-        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]] = {}
-        for zone_name, occupants in units.items():
-            shedders = self._get_shedders(occupants, pathogen_id, None)
-            if shedders:
-                zone_shedders[zone_name] = shedders
+        zone_shedders = self._hvac_zone_shedders(units, pathogen_id)
 
         upstream = self._hvac_upstream_sources(
             zone_shedders, hvac_downstream_zones,
@@ -5959,16 +6138,7 @@ class TransmissionCore:
             if mass_in_target <= 0:
                 continue
 
-            shedders = []
-            for source_zone in source_zones:
-                if source_zone in zone_shedders:
-                    shedders.extend(
-                        zone_shedders[source_zone]
-                    )
-                elif self._is_cabin_block(source_zone):
-                    for unit, unit_shedders in zone_shedders.items():
-                        if self.compartment_parent(unit) == source_zone:
-                            shedders.extend(unit_shedders)
+            shedders = self._hvac_source_shedders(source_zones, zone_shedders)
             mix = self._reservoir_mix(
                 AIRBORNE_RESERVOIR, pathogen_id, target_zone,
             ) or self._shedder_mix(shedders, pathogen_id)
@@ -5987,6 +6157,37 @@ class TransmissionCore:
             pathogen_id,
             self._airborne_composition_sources(zone_shedders),
         )
+
+    def _hvac_zone_shedders(
+        self,
+        units: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+    ) -> dict[str, list[tuple[KorkinAgent, float]]]:
+        """Emitters per air unit, for upstream routing and attribution."""
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]] = {}
+        for zone_name, occupants in units.items():
+            shedders = self._get_shedders(occupants, pathogen_id, None)
+            if shedders:
+                zone_shedders[zone_name] = shedders
+        return zone_shedders
+
+    def _hvac_source_shedders(
+        self,
+        source_zones: list[str],
+        zone_shedders: dict[str, list[tuple[KorkinAgent, float]]],
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Emitters feeding one target unit, direct or via a cabin block."""
+        shedders: list[tuple[KorkinAgent, float]] = []
+        for source_zone in source_zones:
+            if source_zone in zone_shedders:
+                shedders.extend(
+                    zone_shedders[source_zone]
+                )
+            elif self._is_cabin_block(source_zone):
+                for unit, unit_shedders in zone_shedders.items():
+                    if self.compartment_parent(unit) == source_zone:
+                        shedders.extend(unit_shedders)
+        return shedders
 
     # ── Pathway 4: Fomite Deposition & Surface Touch ─────────────────
 
@@ -7505,6 +7706,27 @@ class TransmissionCore:
         ledger: StrainDoseLedger | None,
     ) -> None:
         """Preserve the unprofiled legacy harness fomite semantics."""
+        self._legacy_fomite_deposits(epoch, zone_occupants, pathogen_id)
+
+        for zone_name, occupants in zone_occupants.items():
+            surface_mass = self.surface_pools_by_pathogen.get(
+                pathogen_id, {},
+            ).get(zone_name, self.surface_pools.get(zone_name, 0.0))
+            if not pickup_gate_open(surface_mass):
+                continue
+            self._legacy_fomite_zone_pickup(
+                zone_name, occupants, surface_mass,
+                agent_doses, matrix, agent_pathway_doses,
+                pathogen_id, ledger,
+            )
+
+    def _legacy_fomite_deposits(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+    ) -> None:
+        """Deposit shedders' surface mass into each zone's pool."""
         for zone_name, occupants in zone_occupants.items():
             shedders = self._get_shedders(occupants, pathogen_id, None)
             deposits: list[tuple[KorkinAgent, float]] = []
@@ -7523,47 +7745,53 @@ class TransmissionCore:
                 )
                 self._surface_last_deposition_epoch[key] = int(epoch)
 
-        for zone_name, occupants in zone_occupants.items():
-            surface_mass = self.surface_pools_by_pathogen.get(
-                pathogen_id, {},
-            ).get(zone_name, self.surface_pools.get(zone_name, 0.0))
-            if not pickup_gate_open(surface_mass):
+    def _legacy_fomite_zone_pickup(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        surface_mass: float,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Scale and deliver legacy pickup requests for one zone's pool."""
+        susceptible = self._get_susceptible(occupants, pathogen_id)
+        if not susceptible:
+            return
+        prev_shedders = self._prev_zone_shedders.get(zone_name, [])
+        prev_occupants = self._prev_zone_occupants.get(zone_name, set())
+        surface_attribution = attribution(
+            ledger,
+            self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        )
+        requests = [
+            (
+                target,
+                self._legacy_fomite_pickup_request(
+                    target, zone_name, surface_mass,
+                ),
+            )
+            for target in susceptible
+        ]
+        scale = self._delivery_scale(
+            sum(mass for _, mass in requests), surface_mass,
+        )
+        delivered_total = 0.0
+        for target, requested in requests:
+            delivered = requested * scale
+            if delivered <= 0.0:
                 continue
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            if not susceptible:
-                continue
-            prev_shedders = self._prev_zone_shedders.get(zone_name, [])
-            prev_occupants = self._prev_zone_occupants.get(zone_name, set())
-            surface_attribution = attribution(
-                ledger,
-                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
+            self._record_fomite_pickup(
+                target, zone_name, surface_mass, delivered, delivered,
+                prev_occupants, prev_shedders, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, surface_attribution,
             )
-            requests = [
-                (
-                    target,
-                    self._legacy_fomite_pickup_request(
-                        target, zone_name, surface_mass,
-                    ),
-                )
-                for target in susceptible
-            ]
-            scale = self._delivery_scale(
-                sum(mass for _, mass in requests), surface_mass,
-            )
-            delivered_total = 0.0
-            for target, requested in requests:
-                delivered = requested * scale
-                if delivered <= 0.0:
-                    continue
-                self._record_fomite_pickup(
-                    target, zone_name, surface_mass, delivered, delivered,
-                    prev_occupants, prev_shedders, agent_doses, matrix,
-                    agent_pathway_doses, pathogen_id, surface_attribution,
-                )
-                delivered_total += delivered
-            self._consume_surface_mass(
-                pathogen_id, zone_name, delivered_total, surface_mass,
-            )
+            delivered_total += delivered
+        self._consume_surface_mass(
+            pathogen_id, zone_name, delivered_total, surface_mass,
+        )
 
     def _legacy_fomite_pickup_request(
         self,
@@ -7702,6 +7930,34 @@ class TransmissionCore:
         agents = {
             a.agent_id: a for occ in zone_occupants.values() for a in occ
         }
+        records = self._sanitary_visit_records(epoch, zone_occupants, pathogen_id)
+        if not records:
+            return
+
+        # Deposit from shedding visitors.
+        self._sanitary_venue_deposits(
+            records, agents, epoch, pathogen_id, profile,
+        )
+
+        # Pickup by susceptible visitors, grouped per venue pool.
+        if self._per_surface is not None:
+            self._sanitary_pickup_by_class(
+                records, agents, epoch, pathogen_id,
+                agent_doses, matrix, agent_pathway_doses, ledger,
+            )
+            return
+        self._sanitary_pickup_pooled(
+            records, agents, epoch, pathogen_id,
+            agent_doses, matrix, agent_pathway_doses, ledger,
+        )
+
+    def _sanitary_visit_records(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+    ) -> dict[tuple[int, str], int]:
+        """(agent, venue) → visit count, drawn visits plus rerouted stools."""
         records: dict[tuple[int, str], int] = {}
         for aid, venues in self._draw_sanitary_visits(epoch, zone_occupants).items():
             for venue in venues:
@@ -7709,11 +7965,18 @@ class TransmissionCore:
         for aid, venue in self._sanitary_stool_venues.get(pathogen_id, {}).items():
             records[(aid, venue)] = records.get((aid, venue), 0) + 1
             self.sanitary_telemetry["stool_visits"] += 1
-        if not records:
-            return
-        share_of = self._sanitary_visit_share
+        return records
 
-        # Deposit from shedding visitors.
+    def _sanitary_venue_deposits(
+        self,
+        records: dict[tuple[int, str], int],
+        agents: dict[int, KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Deposit hand load at each venue a shedding visitor used."""
+        share_of = self._sanitary_visit_share
         deposits_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for (aid, venue), n in records.items():
             agent = agents.get(aid)
@@ -7744,40 +8007,72 @@ class TransmissionCore:
                 SURFACE_RESERVOIR, pathogen_id, venue, deposits,
             )
 
-        # Pickup by susceptible visitors, grouped per venue pool.
-        if self._per_surface is not None:
-            class_requests: dict[str, list[tuple[KorkinAgent, dict[str, float]]]] = {}
-            for (aid, venue), n in records.items():
-                agent = agents.get(aid)
-                if agent is None or agent not in self._get_susceptible(
-                    [agent], pathogen_id,
-                ):
-                    continue
-                path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
-                surface_mass = (
-                    path_pools.get(venue, 0.0)
-                    if path_pools is not None
-                    else self.surface_pools.get(venue, 0.0)
+    def _venue_surface_mass(
+        self,
+        venue: str,
+        pathogen_id: str,
+    ) -> float:
+        """The standing fomite mass at one sanitary venue."""
+        path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        return (
+            path_pools.get(venue, 0.0)
+            if path_pools is not None
+            else self.surface_pools.get(venue, 0.0)
+        )
+
+    def _sanitary_pickup_by_class(
+        self,
+        records: dict[tuple[int, str], int],
+        agents: dict[int, KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Per-surface pickup: class-scaled requests delivered per venue."""
+        share_of = self._sanitary_visit_share
+        class_requests: dict[str, list[tuple[KorkinAgent, dict[str, float]]]] = {}
+        for (aid, venue), n in records.items():
+            agent = agents.get(aid)
+            if agent is None or agent not in self._get_susceptible(
+                [agent], pathogen_id,
+            ):
+                continue
+            surface_mass = self._venue_surface_mass(venue, pathogen_id)
+            if not pickup_gate_open(surface_mass):
+                continue
+            request = self._fomite_pickup_requests_by_class(
+                agent, venue, epoch, pathogen_id,
+            )
+            if request is None:
+                continue
+            share = share_of(agent, n)
+            scaled = {c: value * share for c, value in request.items()}
+            if any(value > 0.0 for value in scaled.values()):
+                class_requests.setdefault(venue, []).append(
+                    (agent, scaled),
                 )
-                if not pickup_gate_open(surface_mass):
-                    continue
-                request = self._fomite_pickup_requests_by_class(
-                    agent, venue, epoch, pathogen_id,
-                )
-                if request is None:
-                    continue
-                share = share_of(agent, n)
-                scaled = {c: value * share for c, value in request.items()}
-                if any(value > 0.0 for value in scaled.values()):
-                    class_requests.setdefault(venue, []).append(
-                        (agent, scaled),
-                    )
-            for venue, requests in class_requests.items():
-                self._deliver_sanitary_requests_by_class(
-                    requests, venue, epoch, agent_doses, matrix,
-                    agent_pathway_doses, pathogen_id, ledger,
-                )
-            return
+        for venue, requests in class_requests.items():
+            self._deliver_sanitary_requests_by_class(
+                requests, venue, epoch, agent_doses, matrix,
+                agent_pathway_doses, pathogen_id, ledger,
+            )
+
+    def _sanitary_pickup_pooled(
+        self,
+        records: dict[tuple[int, str], int],
+        agents: dict[int, KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Pooled pickup: dwell-scaled requests scaled down to each pool."""
+        share_of = self._sanitary_visit_share
         requests_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for (aid, venue), n in records.items():
             agent = agents.get(aid)
@@ -7785,12 +8080,7 @@ class TransmissionCore:
                 [agent], pathogen_id,
             ):
                 continue
-            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
-            surface_mass = (
-                path_pools.get(venue, 0.0)
-                if path_pools is not None
-                else self.surface_pools.get(venue, 0.0)
-            )
+            surface_mass = self._venue_surface_mass(venue, pathogen_id)
             if not pickup_gate_open(surface_mass):
                 continue
             request = (
@@ -7802,12 +8092,7 @@ class TransmissionCore:
                     (agent, request),
                 )
         for venue, requests in requests_by_venue.items():
-            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
-            surface_mass = (
-                path_pools.get(venue, 0.0)
-                if path_pools is not None
-                else self.surface_pools.get(venue, 0.0)
-            )
+            surface_mass = self._venue_surface_mass(venue, pathogen_id)
             scale = self._delivery_scale(
                 sum(m for _, m in requests), surface_mass,
             )
@@ -7815,25 +8100,11 @@ class TransmissionCore:
                 ledger,
                 self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, venue),
             )
-            delivered_total = 0.0
-            for agent, requested in requests:
-                delivered = requested * scale
-                if delivered <= 0.0:
-                    continue
-                hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-                agent.hand_load_by_pathogen[pathogen_id] = hand + delivered
-                dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
-                agent.hand_load_by_pathogen[pathogen_id] = (
-                    hand + delivered - dose
-                )
-                self._record_fomite_pickup(
-                    agent, venue, surface_mass, delivered, dose,
-                    set(), [], agent_doses, matrix, agent_pathway_doses,
-                    pathogen_id, surface_attribution,
-                )
-                self.sanitary_telemetry["dose_delivered"] += dose
-                self.sanitary_telemetry["recipients"] += 1
-                delivered_total += delivered
+            delivered_total = self._deliver_sanitary_pooled_requests(
+                requests, venue, surface_mass, scale, epoch,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
             # A venue whose demand exceeds its supply is emptied exactly,
             # matching _deliver_fomite_requests.
             if scale < 1.0:
@@ -7841,6 +8112,41 @@ class TransmissionCore:
             self._consume_surface_mass(
                 pathogen_id, venue, delivered_total, surface_mass,
             )
+
+    def _deliver_sanitary_pooled_requests(
+        self,
+        requests: list[tuple[KorkinAgent, float]],
+        venue: str,
+        surface_mass: float,
+        scale: float,
+        epoch: int,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        surface_attribution: list[tuple[str, float]] | None,
+    ) -> float:
+        """Deliver scaled pickup requests at one venue; returns mass removed."""
+        delivered_total = 0.0
+        for agent, requested in requests:
+            delivered = requested * scale
+            if delivered <= 0.0:
+                continue
+            hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            agent.hand_load_by_pathogen[pathogen_id] = hand + delivered
+            dose = self._hand_to_mouth_dose(agent, epoch, hand + delivered)
+            agent.hand_load_by_pathogen[pathogen_id] = (
+                hand + delivered - dose
+            )
+            self._record_fomite_pickup(
+                agent, venue, surface_mass, delivered, dose,
+                set(), [], agent_doses, matrix, agent_pathway_doses,
+                pathogen_id, surface_attribution,
+            )
+            self.sanitary_telemetry["dose_delivered"] += dose
+            self.sanitary_telemetry["recipients"] += 1
+            delivered_total += delivered
+        return delivered_total
 
     def _deliver_sanitary_requests_by_class(
         self,
@@ -7938,94 +8244,13 @@ class TransmissionCore:
         zone_occupants = self._cabin_compartments(zone_occupants)
         pickup_units.update(zone_occupants)
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
-        for zone_name, occupants in zone_occupants.items():
-            for agent in occupants:
-                self._replenish_hand(agent, pathogen_id, profile, zone_name)
-                self._deposit_emesis(
-                    agent, pathogen_id, zone_name, epoch, profile or {},
-                )
-            shedders = self._get_shedders(occupants, pathogen_id, profile)
-            deposits: list[tuple[KorkinAgent, float]] = []
-            for agent, _sv in shedders:
-                if self._cabin_confinement_active(agent):
-                    continue
-                hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-                used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
-                transfer_efficiency = min(
-                    1.0,
-                    max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
-                ) * self._hand_to_surface_drying(profile)
-                requested = (
-                    self._fomite_surface_contacts(zone_name, agent, epoch)
-                    * used_fraction
-                    * transfer_efficiency
-                    * hand
-                )
-                deposit = min(hand, max(0.0, requested))
-                agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
-                deposits.append((agent, deposit))
-                self._deposit_surface_mass(pathogen_id, zone_name, deposit)
-            self._deposit_reservoir_strains(
-                SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
-            )
-            if self.strain_registry is not None:
-                deposited_mass = sum(mass for _, mass in deposits)
-                if deposited_mass > 0.0:
-                    key = ReservoirComposition.key(
-                        SURFACE_RESERVOIR, pathogen_id, zone_name,
-                    )
-                    self._surface_last_deposition_epoch[key] = int(epoch)
+        self._fomite_hand_deposits(epoch, zone_occupants, pathogen_id, profile)
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in pickup_units.items():
-            path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
-            if path_pools is None:
-                surface_mass = self.surface_pools.get(zone_name, 0.0)
-            else:
-                surface_mass = path_pools.get(zone_name, 0.0)
-            # NORO-GATE-FLOOR-01: sub-copy pools consume no pickup RNG.
-            if not pickup_gate_open(surface_mass):
-                continue
-
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            if not susceptible:
-                continue
-
-            # Identify trailing: agent was NOT in this zone last epoch
-            # but a shedder WAS here last epoch
-            prev_shedders = self._prev_zone_shedders.get(zone_name, [])
-            prev_occupant_ids = self._prev_zone_occupants.get(zone_name, set())
-            surface_attribution = attribution(
-                ledger,
-                self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
-            )
-
-            if self._per_surface is not None:
-                self._fomite_pickup_by_class(
-                    zone_name, susceptible, surface_mass, epoch,
-                    prev_occupant_ids, prev_shedders,
-                    agent_doses, matrix, agent_pathway_doses, pathogen_id,
-                    surface_attribution,
-                )
-                continue
-
-            requests = [
-                (
-                    target,
-                    self._fomite_pickup_request(
-                        target, zone_name, surface_mass, epoch,
-                    ),
-                )
-                for target in susceptible
-            ]
-            delivered_total = self._deliver_fomite_requests(
-                requests, zone_name, surface_mass, epoch,
-                prev_occupant_ids, prev_shedders,
-                agent_doses, matrix, agent_pathway_doses, pathogen_id,
-                surface_attribution,
-            )
-            self._consume_surface_mass(
-                pathogen_id, zone_name, delivered_total, surface_mass,
+            self._fomite_zone_pickup(
+                zone_name, occupants, epoch,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id, ledger,
             )
 
         # b2) Emesis patches: the same transfer chain as the zone pool, but
@@ -8045,6 +8270,136 @@ class TransmissionCore:
                 agent_pathway_doses, pathogen_id, profile, ledger,
             )
 
+        self._fomite_hygiene(zone_occupants, pathogen_id, profile)
+
+    def _fomite_hand_deposits(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Hand maintenance, emesis, and hand-to-surface deposit per unit."""
+        for zone_name, occupants in zone_occupants.items():
+            for agent in occupants:
+                self._replenish_hand(agent, pathogen_id, profile, zone_name)
+                self._deposit_emesis(
+                    agent, pathogen_id, zone_name, epoch, profile or {},
+                )
+            shedders = self._get_shedders(occupants, pathogen_id, profile)
+            deposits = self._shedder_surface_deposits(
+                zone_name, shedders, epoch, pathogen_id, profile,
+            )
+            self._deposit_reservoir_strains(
+                SURFACE_RESERVOIR, pathogen_id, zone_name, deposits,
+            )
+            deposited_mass = sum(mass for _, mass in deposits)
+            if self.strain_registry is not None and deposited_mass > 0.0:
+                key = ReservoirComposition.key(
+                    SURFACE_RESERVOIR, pathogen_id, zone_name,
+                )
+                self._surface_last_deposition_epoch[key] = int(epoch)
+
+    def _shedder_surface_deposits(
+        self,
+        zone_name: str,
+        shedders: list[tuple[KorkinAgent, float]],
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> list[tuple[KorkinAgent, float]]:
+        """Each shedder touches the unit's surfaces and loses the deposit."""
+        deposits: list[tuple[KorkinAgent, float]] = []
+        for agent, _sv in shedders:
+            if self._cabin_confinement_active(agent):
+                continue
+            hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+            used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+            transfer_efficiency = min(
+                1.0,
+                max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
+            ) * self._hand_to_surface_drying(profile)
+            requested = (
+                self._fomite_surface_contacts(zone_name, agent, epoch)
+                * used_fraction
+                * transfer_efficiency
+                * hand
+            )
+            deposit = min(hand, max(0.0, requested))
+            agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+            deposits.append((agent, deposit))
+            self._deposit_surface_mass(pathogen_id, zone_name, deposit)
+        return deposits
+
+    def _fomite_zone_pickup(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        epoch: int,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Pick up from one unit's pool: per-surface or pooled requests."""
+        path_pools = self.surface_pools_by_pathogen.get(pathogen_id)
+        if path_pools is None:
+            surface_mass = self.surface_pools.get(zone_name, 0.0)
+        else:
+            surface_mass = path_pools.get(zone_name, 0.0)
+        # NORO-GATE-FLOOR-01: sub-copy pools consume no pickup RNG.
+        if not pickup_gate_open(surface_mass):
+            return
+
+        susceptible = self._get_susceptible(occupants, pathogen_id)
+        if not susceptible:
+            return
+
+        # Identify trailing: agent was NOT in this zone last epoch
+        # but a shedder WAS here last epoch
+        prev_shedders = self._prev_zone_shedders.get(zone_name, [])
+        prev_occupant_ids = self._prev_zone_occupants.get(zone_name, set())
+        surface_attribution = attribution(
+            ledger,
+            self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, zone_name),
+        )
+
+        if self._per_surface is not None:
+            self._fomite_pickup_by_class(
+                zone_name, susceptible, surface_mass, epoch,
+                prev_occupant_ids, prev_shedders,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id,
+                surface_attribution,
+            )
+            return
+
+        requests = [
+            (
+                target,
+                self._fomite_pickup_request(
+                    target, zone_name, surface_mass, epoch,
+                ),
+            )
+            for target in susceptible
+        ]
+        delivered_total = self._deliver_fomite_requests(
+            requests, zone_name, surface_mass, epoch,
+            prev_occupant_ids, prev_shedders,
+            agent_doses, matrix, agent_pathway_doses, pathogen_id,
+            surface_attribution,
+        )
+        self._consume_surface_mass(
+            pathogen_id, zone_name, delivered_total, surface_mass,
+        )
+
+    def _fomite_hygiene(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """End-of-epoch hand hygiene for every occupant of every unit."""
         for occupants in zone_occupants.values():
             for agent in occupants:
                 self._apply_hand_hygiene(agent, pathogen_id, profile)
@@ -8122,8 +8477,9 @@ class TransmissionCore:
         for zone_name in food_zones:
             occupants = zone_occupants.get(zone_name, [])
             if owns_hands:
-                for agent in occupants:
-                    self._replenish_hand(agent, pathogen_id, profile, zone_name)
+                self._replenish_food_zone_hands(
+                    occupants, zone_name, pathogen_id, profile,
+                )
 
             deposits = self._food_deposits(
                 zone_name, occupants, pathogen_id, profile, fc, epoch,
@@ -8131,21 +8487,13 @@ class TransmissionCore:
             self._deposit_reservoir_strains(
                 FOOD_RESERVOIR, pathogen_id, zone_name, deposits,
             )
-            for _agent, deposit in deposits:
-                food_zones[zone_name] += deposit
+            self._add_food_deposits(food_zones, zone_name, deposits)
 
             # Net growth (reproduction minus decay), applied to the pool and to
             # its composition together so the two stay proportional
-            pool = food_zones[zone_name]
-            if pool > 0:
-                pool *= growth_factor * decay_factor
-                food_zones[zone_name] = max(pool, 0.0)
-                self._reservoir.decay(
-                    growth_factor * decay_factor,
-                    ReservoirComposition.key(
-                        FOOD_RESERVOIR, pathogen_id, zone_name,
-                    ),
-                )
+            self._grow_food_pool(
+                food_zones, zone_name, growth_factor, decay_factor, pathogen_id,
+            )
 
             if food_zones[zone_name] <= 0:
                 continue
@@ -8159,9 +8507,62 @@ class TransmissionCore:
             )
 
         if owns_hands:
-            for zone_name in food_zones:
-                for agent in zone_occupants.get(zone_name, []):
-                    self._apply_hand_hygiene(agent, pathogen_id, profile)
+            self._food_zone_hygiene(
+                food_zones, zone_occupants, pathogen_id, profile,
+            )
+
+    def _replenish_food_zone_hands(
+        self,
+        occupants: list[KorkinAgent],
+        zone_name: str,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """Maintain the hands this route deposits from."""
+        for agent in occupants:
+            self._replenish_hand(agent, pathogen_id, profile, zone_name)
+
+    def _add_food_deposits(
+        self,
+        food_zones: dict[str, float],
+        zone_name: str,
+        deposits: list[tuple[KorkinAgent, float]],
+    ) -> None:
+        """Add this epoch's hand contacts to the zone's food pool."""
+        for _agent, deposit in deposits:
+            food_zones[zone_name] += deposit
+
+    def _grow_food_pool(
+        self,
+        food_zones: dict[str, float],
+        zone_name: str,
+        growth_factor: float,
+        decay_factor: float,
+        pathogen_id: str,
+    ) -> None:
+        """Apply net growth/decay to a food pool and its composition."""
+        pool = food_zones[zone_name]
+        if pool > 0:
+            pool *= growth_factor * decay_factor
+            food_zones[zone_name] = max(pool, 0.0)
+            self._reservoir.decay(
+                growth_factor * decay_factor,
+                ReservoirComposition.key(
+                    FOOD_RESERVOIR, pathogen_id, zone_name,
+                ),
+            )
+
+    def _food_zone_hygiene(
+        self,
+        food_zones: dict[str, float],
+        zone_occupants: dict[str, list[KorkinAgent]],
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> None:
+        """End-of-epoch hand hygiene for food-zone occupants this route owns."""
+        for zone_name in food_zones:
+            for agent in zone_occupants.get(zone_name, []):
+                self._apply_hand_hygiene(agent, pathogen_id, profile)
 
     def _food_ingestion(
         self,
@@ -8414,6 +8815,31 @@ class TransmissionCore:
         """Per-zone environmental reservoirs (Legionella spa / C.diff spores)."""
         ec = profile.get("environmental_contamination", {})
         source_zones = list(ec.get("source_zones") or [])
+        emission, p_expose, spore_decay, col_factor = self._env_zone_rates(ec)
+        reservoirs = self.env_contamination.setdefault(pathogen_id, {})
+
+        # Grow / decay matching zones; ensure keys exist for occupied matches
+        self._grow_env_reservoirs(
+            zone_occupants, source_zones, reservoirs, ec,
+            col_factor * max(0.0, 1.0 - spore_decay), pathogen_id, profile,
+        )
+
+        for zone_name, occupants in zone_occupants.items():
+            if not self._zone_matches(zone_name, source_zones):
+                continue
+            contamination = float(reservoirs.get(zone_name, 0.0))
+            if contamination <= 0.0:
+                continue
+            self._env_zone_exposure(
+                zone_name, occupants, contamination, emission, p_expose,
+                agent_doses, matrix, agent_pathway_doses, pathogen_id, ledger,
+            )
+
+    def _env_zone_rates(
+        self,
+        ec: dict[str, Any],
+    ) -> tuple[float, float, float, float]:
+        """(emission, p_expose, spore_decay, col_factor) for this epoch."""
         emission = self.clock.amount_per_epoch(
             float(
                 ec.get(
@@ -8445,47 +8871,64 @@ class TransmissionCore:
                 1.0 + float(ec.get("colonization_rate_per_epoch", 0.0)),
             )
         )
-        reservoirs = self.env_contamination.setdefault(pathogen_id, {})
+        return emission, p_expose, spore_decay, col_factor
 
-        # Grow / decay matching zones; ensure keys exist for occupied matches
+    def _grow_env_reservoirs(
+        self,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        source_zones: list[str],
+        reservoirs: dict[str, float],
+        ec: dict[str, Any],
+        factor: float,
+        pathogen_id: str,
+        profile: dict[str, Any],
+    ) -> None:
+        """Grow/decay each matching zone's reservoir by its factor."""
         for zone_name in zone_occupants:
             if not self._zone_matches(zone_name, source_zones):
                 continue
             level = float(reservoirs.get(zone_name, 0.0))
             if level <= 0.0 and zone_name not in reservoirs:
                 level = float(ec.get("baseline_environmental_load", 0.0))
-            factor = col_factor * max(0.0, 1.0 - spore_decay)
             deposited = self._update_env_reservoir_strains(
                 pathogen_id, zone_name, level, factor,
                 zone_occupants[zone_name], profile,
             )
             reservoirs[zone_name] = max(level * factor + deposited, 0.0)
 
-        for zone_name, occupants in zone_occupants.items():
-            if not self._zone_matches(zone_name, source_zones):
+    def _env_zone_exposure(
+        self,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        contamination: float,
+        emission: float,
+        p_expose: float,
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Draw each susceptible's exposure against one zone's reservoir."""
+        susceptible = self._get_susceptible(occupants, pathogen_id)
+        env_attribution = self._environmental_attribution(
+            ledger, pathogen_id, zone_name, contamination,
+        )
+        for target in susceptible:
+            if self.rng.random() >= p_expose:
                 continue
-            contamination = float(reservoirs.get(zone_name, 0.0))
-            if contamination <= 0.0:
-                continue
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            env_attribution = self._environmental_attribution(
-                ledger, pathogen_id, zone_name, contamination,
+            dose = self._accumulate(
+                target.agent_id, "environmental", contamination * emission,
+                agent_doses, agent_pathway_doses, env_attribution,
             )
-            for target in susceptible:
-                if self.rng.random() >= p_expose:
-                    continue
-                dose = self._accumulate(
-                    target.agent_id, "environmental", contamination * emission,
-                    agent_doses, agent_pathway_doses, env_attribution,
-                )
-                matrix.environmental_exposures.append({
-                    "target_id": target.agent_id,
-                    "zone": zone_name,
-                    "pathogen_id": pathogen_id,
-                    "environmental_load": round(contamination, 4),
-                    "dose": round(dose, 4),
-                    "zone_scoped": True,
-                })
+            matrix.environmental_exposures.append({
+                "target_id": target.agent_id,
+                "zone": zone_name,
+                "pathogen_id": pathogen_id,
+                "environmental_load": round(contamination, 4),
+                "dose": round(dose, 4),
+                "zone_scoped": True,
+            })
 
     # ── Multi-pathogen shedder/susceptible helpers ─────────────────────
 

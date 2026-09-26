@@ -250,6 +250,62 @@ def step_fred_compliance(
 
 # ── Mid-cruise pathogen introductions ────────────────────────────────────
 
+def _run_port_call_initiation(
+    plan: Any,
+    engine: KorkinShipEngine,
+    epoch: int,
+    rng: np.random.Generator,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    state: Any | None,
+) -> frozenset[str]:
+    """Run one port call's initiation channels; return the owned pathogen ids."""
+    apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
+    reports = draw_port_call(plan, engine, epoch, pathogen_profiles)
+    record_boarding_reports(engine, reports)
+    if state is not None:
+        # A pathogen boarding at a later port call can still declare a
+        # crew reportable case; it joins the live set the sailing-port
+        # construction seeded.
+        state.ever_reported_ids.update(
+            preboarding_reportable_ids(engine),
+        )
+    return initiation_owned_pathogens(plan)
+
+
+def _seed_scheduled_introduction(
+    engine: KorkinShipEngine,
+    pid: str,
+    prof: dict[str, Any],
+    epoch: int,
+    rng: np.random.Generator,
+) -> None:
+    """Seed one profile's stated index case at its introduction_epoch."""
+    n_init = prof.get("initial_infected", 1) or 0
+    candidates = [
+        a for a in engine.agents
+        if not a.immune
+        and not a.is_infected_with(pid)
+        and a.infection_status != InfectionStatus.RECOVERED
+        and a.current_location != LOCATION_ISOLATED
+    ]
+    if not candidates:
+        return
+    chosen = rng.choice(
+        candidates,
+        size=min(n_init, len(candidates)),
+        replace=False,
+    )
+    # The profile field is days post infection; the record is epochs.
+    epochs_infected = int(round(engine.clock.epochs_for_days(
+        float(prof.get("initial_time_infected", 0)),
+    )))
+    for agent in chosen:
+        agent.infect_with_pathogen(
+            pid, 1e4, epoch,
+            time_infected=epochs_infected, rng=rng, profile=prof,
+        )
+
+
 def step_mid_cruise_introductions(
     epoch: int,
     engine: KorkinShipEngine,
@@ -269,45 +325,15 @@ def step_mid_cruise_introductions(
     plan = getattr(engine, "initiation_plan", None)
     owned: frozenset[str] = frozenset()
     if plan is not None and not plan.legacy:
-        apply_explicit_seeds(plan, engine, epoch, rng, pathogen_profiles)
-        reports = draw_port_call(plan, engine, epoch, pathogen_profiles)
-        record_boarding_reports(engine, reports)
-        if state is not None:
-            # A pathogen boarding at a later port call can still declare a
-            # crew reportable case; it joins the live set the sailing-port
-            # construction seeded.
-            state.ever_reported_ids.update(
-                preboarding_reportable_ids(engine),
-            )
-        owned = initiation_owned_pathogens(plan)
+        owned = _run_port_call_initiation(
+            plan, engine, epoch, rng, pathogen_profiles, state,
+        )
     for pid, prof in pathogen_profiles.items():
         if pid in owned:
             continue
         intro_epoch = prof.get("introduction_epoch", 0)
         if intro_epoch == epoch and epoch > 0:
-            n_init = prof.get("initial_infected", 1) or 0
-            candidates = [
-                a for a in engine.agents
-                if not a.immune
-                and not a.is_infected_with(pid)
-                and a.infection_status != InfectionStatus.RECOVERED
-                and a.current_location != LOCATION_ISOLATED
-            ]
-            if candidates:
-                chosen = rng.choice(
-                    candidates,
-                    size=min(n_init, len(candidates)),
-                    replace=False,
-                )
-                # The profile field is days post infection; the record is epochs.
-                epochs_infected = int(round(engine.clock.epochs_for_days(
-                    float(prof.get("initial_time_infected", 0)),
-                )))
-                for agent in chosen:
-                    agent.infect_with_pathogen(
-                        pid, 1e4, epoch,
-                        time_infected=epochs_infected, rng=rng, profile=prof,
-                    )
+            _seed_scheduled_introduction(engine, pid, prof, epoch, rng)
 
 
 def _shore_pathogen_id(
@@ -318,6 +344,21 @@ def _shore_pathogen_id(
     if requested:
         return requested if requested in pathogen_profiles else None
     return min(pathogen_profiles) if pathogen_profiles else None
+
+
+def _shore_draw_eligible(agent: Any, pid: str) -> bool:
+    """Whether an agent can be drawn for a shore-excursion introduction."""
+    if not getattr(agent, "ashore", False):
+        return False
+    if agent_is_departed(agent):
+        # A departed passenger can still be marked ashore by the
+        # port-call draw; it is not a shore-excursion draw target.
+        return False
+    return not (
+        agent.immune
+        or agent.is_infected_with(pid)
+        or agent.infection_status == InfectionStatus.RECOVERED
+    )
 
 
 def step_shore_introductions(
@@ -349,17 +390,7 @@ def step_shore_introductions(
     port = str(getattr(epoch_state, "port", "") or "")
     introduced: list[dict[str, Any]] = []
     for agent in engine.agents:
-        if not getattr(agent, "ashore", False):
-            continue
-        if agent_is_departed(agent):
-            # A departed passenger can still be marked ashore by the
-            # port-call draw; it is not a shore-excursion draw target.
-            continue
-        if (
-            agent.immune
-            or agent.is_infected_with(pid)
-            or agent.infection_status == InfectionStatus.RECOVERED
-        ):
+        if not _shore_draw_eligible(agent, pid):
             continue
         if rng.random() >= prob:
             continue
@@ -417,6 +448,86 @@ def _credit_event_aerosol(
         masses[target] += mass
 
 
+def _deposit_agent_emission(
+    agent: Any,
+    pid: str,
+    prof: dict[str, Any],
+    masses: dict[str, float],
+    dep_frac: float,
+    confinement_core: TransmissionCore | None,
+) -> None:
+    """Deposit one agent's continuous shedding into the zone mass pool."""
+    sv = agent.get_pathogen_shedding(pid, prof)
+    if sv <= 0:
+        return
+    loc = agent.current_location
+    if loc not in masses:
+        return
+    emission_factor = (
+        confinement_core.confinement_emission_factor(agent)
+        if confinement_core is not None
+        else 1.0
+    )
+    target = (
+        confinement_core.airborne_deposit_key(agent, loc)
+        if confinement_core is not None
+        else loc
+    )
+    masses.setdefault(target, 0.0)
+    masses[target] += sv * dep_frac * emission_factor
+
+
+def _accumulate_pathogen_zone_mass(
+    engine: KorkinShipEngine,
+    pid: str,
+    prof: dict[str, Any],
+    clock: SimClock,
+    confinement_core: TransmissionCore | None,
+) -> None:
+    """Age one pathogen's zone pool, deposit this epoch's emission, drain."""
+    dep_frac = _airborne_emission_fraction(prof)
+    survival = clock.survival_from_half_life(
+        float(
+            prof.get(
+                "airborne_half_life_hours", DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
+            ),
+        ),
+    )
+    masses = engine.get_pathogen_zone_mass(pid)
+    for zone_name in masses:
+        masses[zone_name] *= survival
+    for agent in engine.agents:
+        _deposit_agent_emission(
+            agent, pid, prof, masses, dep_frac, confinement_core,
+        )
+    if confinement_core is not None:
+        # Sanitary HVAC is exhaust-only, so a head venue normally has
+        # nothing downstream to transport to; the drains exist for
+        # parity and for cabin-compartment venues, whose mass is credited
+        # to the emitting stateroom pool.
+        _credit_event_aerosol(masses, confinement_core, confinement_core.drain_emesis_aerosol(pid))
+        _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
+    engine.set_pathogen_zone_mass(pid, masses)
+
+
+def _advance_blackwater_tank(
+    engine: KorkinShipEngine,
+    confinement_core: TransmissionCore | None,
+    clock: SimClock,
+) -> None:
+    """Discharge the blackwater tank at the epoch boundary."""
+    tank = (
+        confinement_core.blackwater_tank
+        if confinement_core is not None
+        else None
+    )
+    if tank is None:
+        return
+    if tank.complement == 0:
+        tank.complement = len(engine.agents)
+    tank.advance_epoch(clock.hours_per_epoch, clock.day_fraction_per_epoch)
+
+
 def step_infection_progression(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -454,56 +565,15 @@ def step_infection_progression(
     if not isinstance(clock, SimClock):
         clock = SimClock()
     for pid, prof in pathogen_profiles.items():
-        dep_frac = _airborne_emission_fraction(prof)
-        survival = clock.survival_from_half_life(
-            float(
-                prof.get(
-                    "airborne_half_life_hours", DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
-                ),
-            ),
+        _accumulate_pathogen_zone_mass(
+            engine, pid, prof, clock, confinement_core,
         )
-        masses = engine.get_pathogen_zone_mass(pid)
-        for zone_name in masses:
-            masses[zone_name] *= survival
-        for agent in engine.agents:
-            sv = agent.get_pathogen_shedding(pid, prof)
-            if sv > 0:
-                loc = agent.current_location
-                if loc in masses:
-                    emission_factor = (
-                        confinement_core.confinement_emission_factor(agent)
-                        if confinement_core is not None
-                        else 1.0
-                    )
-                    target = (
-                        confinement_core.airborne_deposit_key(agent, loc)
-                        if confinement_core is not None
-                        else loc
-                    )
-                    masses.setdefault(target, 0.0)
-                    masses[target] += sv * dep_frac * emission_factor
-        if confinement_core is not None:
-            # Sanitary HVAC is exhaust-only, so a head venue normally has
-            # nothing downstream to transport to; the drains exist for
-            # parity and for cabin-compartment venues, whose mass is credited
-            # to the emitting stateroom pool.
-            _credit_event_aerosol(masses, confinement_core, confinement_core.drain_emesis_aerosol(pid))
-            _credit_event_aerosol(masses, confinement_core, confinement_core.drain_flush_aerosol(pid))
-        engine.set_pathogen_zone_mass(pid, masses)
 
     # The blackwater tank discharges at the same epoch boundary as the
     # aerosol drains: this epoch's credited mass is in the tank, so the
     # assay (which runs in run_observation_sampling) reads the
     # post-discharge concentration.
-    tank = (
-        confinement_core.blackwater_tank
-        if confinement_core is not None
-        else None
-    )
-    if tank is not None:
-        if tank.complement == 0:
-            tank.complement = len(engine.agents)
-        tank.advance_epoch(clock.hours_per_epoch, clock.day_fraction_per_epoch)
+    _advance_blackwater_tank(engine, confinement_core, clock)
 
 
 # ── Chronic disease severity escalation ──────────────────────────────────
@@ -712,6 +782,199 @@ class ZoneContext:
     high_traffic: list[str]
 
 
+def _turnaround_queue(obs: ObservationEngine) -> Any:
+    """The engine's turnaround queue, or an empty-registry stand-in."""
+    queue = obs.turnaround
+    if queue is None:
+        from crusher_labs.instrument_turnaround import (
+            InstrumentTurnaroundQueue,
+            InstrumentTurnaroundRegistry,
+        )
+
+        queue = InstrumentTurnaroundQueue(InstrumentTurnaroundRegistry({"instruments": {}}))
+    return queue
+
+
+def _split_zone_mass_pools(
+    spaces: dict[str, dict[str, Any]],
+    airborne_frac: float,
+    surface_frac: float,
+) -> tuple[dict[str, float], dict[str, float]]:
+    """Split each zone's pathogen mass into airborne and surface pools."""
+    zone_airborne: dict[str, float] = {}
+    zone_surface: dict[str, float] = {}
+    for zname, zdata in spaces.items():
+        total_mass = zone_pathogen_mass(zdata)
+        zone_airborne[zname] = total_mass * airborne_frac
+        zone_surface[zname] = total_mass * surface_frac
+    return zone_airborne, zone_surface
+
+
+def _swab_surface_pool_density(
+    obs: ObservationEngine,
+    zones: ZoneContext,
+    tx_core: TransmissionCore,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    fred_compliance: float,
+    swab_targets: list[str] | None,
+) -> dict[str, Any]:
+    """Swab the real deposited pool as a per-cm² density."""
+    # zone_surface_mass pools every cabin compartment under its
+    # corridor block, so a stateroom emesis deposit is swabbable;
+    # the compartments' hardware is part of the block's touchable
+    # field, so zone_high_touch_area_cm2 is still the denominator.
+    surface_copies_by_pid = {
+        pid: {
+            zname: tx_core.zone_surface_mass(zname, pid)
+            for zname in zones.zone_names
+        }
+        for pid in pathogen_profiles
+    }
+    zone_surface_copies = {
+        zname: sum(
+            masses.get(zname, 0.0)
+            for masses in surface_copies_by_pid.values()
+        )
+        for zname in zones.zone_names
+    }
+    zone_high_touch = {
+        zname: tx_core.zone_high_touch_area_cm2(zname)
+        for zname in zones.zone_names
+    }
+    # Declared mapping: a sanitary-class zone's touchable surface is
+    # toilet-seat hardware; everything else is non-porous hard surface
+    # (docs/norovirus/environmental_observation_v1.md §2).
+    surface_classes = {
+        zname: (
+            "toilet_seat"
+            if tx_core.zone_types.get(zname) == "Sanitary"
+            else "nonporous_hard"
+        )
+        for zname in zones.zone_names
+    }
+    return obs.surface_swab.swab_surface_zones(
+        zone_surface_copies,
+        zone_high_touch,
+        fred_compliance,
+        target_zones=swab_targets,
+        surface_classes=surface_classes,
+        copies_by_pathogen=surface_copies_by_pid,
+    )
+
+
+def _run_surface_swab_sampling(
+    obs: ObservationEngine,
+    cfg: dict[str, Any],
+    zones: ZoneContext,
+    zone_surface: dict[str, float],
+    trigger_status: str,
+    tx_core: TransmissionCore | None,
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Swab by trigger status: ALERT/SUSPECTED → high-traffic zones;
+    CONFIRMED/LOCKDOWN → all zones."""
+    fred_compliance = cfg.get("fred_behavior", {}).get("quarantine_compliance", 0.85)
+    swab_targets = None
+    rank = STATUS_RANK.get(trigger_status, 0)
+    if rank >= STATUS_RANK[STATUS_CONFIRMED]:
+        swab_targets = zones.zone_names
+    elif rank >= STATUS_RANK[STATUS_ALERT]:
+        swab_targets = zones.high_traffic
+    # observation.surface_swab_source: "surface_pool_density" (default,
+    # the real deposited pool as a per-cm² density — the repaired
+    # channel) or "airborne_fraction" (labelled pre-change baseline:
+    # legacy synthetic 0.4 of the airborne pool).
+    swab_source = cfg.get("observation", {}).get(
+        "surface_swab_source", "surface_pool_density"
+    )
+    if swab_source == "surface_pool_density" and tx_core is not None:
+        return _swab_surface_pool_density(
+            obs, zones, tx_core, pathogen_profiles, fred_compliance, swab_targets,
+        )
+    return obs.surface_swab.swab_zones(
+        zone_surface, fred_compliance, target_zones=swab_targets,
+    )
+
+
+def _run_wastewater_sequencing(
+    obs: ObservationEngine,
+    cfg: dict[str, Any],
+    zones: ZoneContext,
+    zone_surface: dict[str, float],
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    """Pool greywater mass into the wastewater instrument's zones."""
+    greywater_frac = cfg.get("microflora", {}).get(
+        "greywater_fraction", DEFAULT_GREYWATER_FRACTION,
+    )
+    ww_microflora: dict[str, dict[str, float]] = {}
+    for zname, mf_data in zones.zone_microflora_shifts.items():
+        ww_microflora[zname] = mf_data
+    ww_per_pathogen = (
+        {pid: engine.get_pathogen_zone_mass(pid) for pid in pathogen_profiles}
+        if pathogen_profiles else None
+    )
+    from orchestrator_init import resolve_graywater_zones
+
+    ww_target_zones = resolve_graywater_zones(cfg, zones.zone_names)
+    ww_pathogen_mass = build_wastewater_pathogen_mass(
+        zones.zone_names, zone_surface, greywater_frac, ww_target_zones,
+    )
+    ww_per_pathogen = build_wastewater_pathogen_mass_by_id(
+        zones.zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
+    )
+    return obs.wastewater_seq.sample_all_zones(
+        ww_pathogen_mass, ww_microflora,
+        pathogen_mass_by_id=ww_per_pathogen,
+        wastewater_zones=ww_target_zones,
+    )
+
+
+def _run_holding_tank_assay(
+    obs: ObservationEngine,
+    cfg: dict[str, Any],
+    tx_core: TransmissionCore | None,
+) -> dict[str, Any] | None:
+    """The holding-tank assay is a different instrument on a different
+    stream (the blackwater tank, post-discharge); it is not submitted to
+    the turnaround queue in v1 — it has no declared TAT entry."""
+    if not (
+        cfg.get("observation", {}).get(
+            "wastewater_assay_mode", "holding_tank"
+        )
+        == "holding_tank"
+        and obs.wastewater_assay is not None
+        and tx_core is not None
+        and tx_core.blackwater_tank is not None
+    ):
+        return None
+    tank = tx_core.blackwater_tank
+    return obs.wastewater_assay.assay(
+        tank.volume_l, dict(tank.copies_by_pathogen),
+    )
+
+
+def _log_observation_epoch(
+    obs: ObservationEngine,
+    epoch: int,
+    results: ObservationResults,
+    agents: list[dict[str, Any]],
+) -> None:
+    """Write one epoch's instrument results to the lab notebook."""
+    if not obs.lab_notebook_enabled:
+        return
+    obs.notebook.log_air_sniffer(epoch, results.air)
+    obs.notebook.log_surface_swab(epoch, results.swab)
+    obs.notebook.log_wastewater_seq(epoch, results.ww)
+    obs.notebook.log_clinical_rdt(epoch, results.clin_rdt)
+    obs.notebook.log_clinical_qpcr(epoch, results.clin_qpcr)
+    obs.notebook.log_clinical_microbiology(epoch, results.clin_microbio)
+    obs.notebook.log_agent_summary(epoch, agents)
+    if results.long_read:
+        obs.notebook.log_long_read_verification(epoch, results.long_read)
+
+
 def run_observation_sampling(
     epoch: int,
     obs: ObservationEngine,
@@ -737,132 +1000,27 @@ def run_observation_sampling(
         merge_released_into_observation,
     )
 
-    queue = obs.turnaround
-    if queue is None:
-        from crusher_labs.instrument_turnaround import (
-            InstrumentTurnaroundQueue,
-            InstrumentTurnaroundRegistry,
-        )
-
-        queue = InstrumentTurnaroundQueue(InstrumentTurnaroundRegistry({"instruments": {}}))
+    queue = _turnaround_queue(obs)
 
     mf_cfg = cfg.get("microflora", {})
-    airborne_frac = mf_cfg.get("airborne_fraction", DEFAULT_AIRBORNE_FRACTION)
-    surface_frac = mf_cfg.get("surface_fraction", DEFAULT_SURFACE_FRACTION)
-    greywater_frac = mf_cfg.get("greywater_fraction", DEFAULT_GREYWATER_FRACTION)
-
-    zone_airborne: dict[str, float] = {}
-    zone_surface: dict[str, float] = {}
-    for zname, zdata in spaces.items():
-        total_mass = zone_pathogen_mass(zdata)
-        zone_airborne[zname] = total_mass * airborne_frac
-        zone_surface[zname] = total_mass * surface_frac
+    zone_airborne, zone_surface = _split_zone_mass_pools(
+        spaces,
+        mf_cfg.get("airborne_fraction", DEFAULT_AIRBORNE_FRACTION),
+        mf_cfg.get("surface_fraction", DEFAULT_SURFACE_FRACTION),
+    )
 
     air_results = obs.air_sniffer.sample_all_zones(
         zone_airborne, zones.zone_volumes,
     )
 
-    fred_compliance = cfg.get("fred_behavior", {}).get("quarantine_compliance", 0.85)
-    swab_targets = None
-    # ALERT/SUSPECTED → high-traffic swabs; CONFIRMED/LOCKDOWN → all zones
-    rank = STATUS_RANK.get(trigger_status, 0)
-    if rank >= STATUS_RANK[STATUS_CONFIRMED]:
-        swab_targets = zones.zone_names
-    elif rank >= STATUS_RANK[STATUS_ALERT]:
-        swab_targets = zones.high_traffic
-    # observation.surface_swab_source: "surface_pool_density" (default,
-    # the real deposited pool as a per-cm² density — the repaired
-    # channel) or "airborne_fraction" (labelled pre-change baseline:
-    # legacy synthetic 0.4 of the airborne pool).
-    swab_source = cfg.get("observation", {}).get(
-        "surface_swab_source", "surface_pool_density"
+    swab_results = _run_surface_swab_sampling(
+        obs, cfg, zones, zone_surface, trigger_status, tx_core,
+        pathogen_profiles,
     )
-    if swab_source == "surface_pool_density" and tx_core is not None:
-        # zone_surface_mass pools every cabin compartment under its
-        # corridor block, so a stateroom emesis deposit is swabbable;
-        # the compartments' hardware is part of the block's touchable
-        # field, so zone_high_touch_area_cm2 is still the denominator.
-        surface_copies_by_pid = {
-            pid: {
-                zname: tx_core.zone_surface_mass(zname, pid)
-                for zname in zones.zone_names
-            }
-            for pid in pathogen_profiles
-        }
-        zone_surface_copies = {
-            zname: sum(
-                masses.get(zname, 0.0)
-                for masses in surface_copies_by_pid.values()
-            )
-            for zname in zones.zone_names
-        }
-        zone_high_touch = {
-            zname: tx_core.zone_high_touch_area_cm2(zname)
-            for zname in zones.zone_names
-        }
-        # Declared mapping: a sanitary-class zone's touchable surface is
-        # toilet-seat hardware; everything else is non-porous hard surface
-        # (docs/norovirus/environmental_observation_v1.md §2).
-        surface_classes = {
-            zname: (
-                "toilet_seat"
-                if tx_core.zone_types.get(zname) == "Sanitary"
-                else "nonporous_hard"
-            )
-            for zname in zones.zone_names
-        }
-        swab_results = obs.surface_swab.swab_surface_zones(
-            zone_surface_copies,
-            zone_high_touch,
-            fred_compliance,
-            target_zones=swab_targets,
-            surface_classes=surface_classes,
-            copies_by_pathogen=surface_copies_by_pid,
-        )
-    else:
-        swab_results = obs.surface_swab.swab_zones(
-            zone_surface, fred_compliance, target_zones=swab_targets,
-        )
-
-    ww_microflora: dict[str, dict[str, float]] = {}
-    for zname, mf_data in zones.zone_microflora_shifts.items():
-        ww_microflora[zname] = mf_data
-    ww_per_pathogen = (
-        {pid: engine.get_pathogen_zone_mass(pid) for pid in pathogen_profiles}
-        if pathogen_profiles else None
+    ww_results = _run_wastewater_sequencing(
+        obs, cfg, zones, zone_surface, engine, pathogen_profiles,
     )
-    from orchestrator_init import resolve_graywater_zones
-
-    ww_target_zones = resolve_graywater_zones(cfg, zones.zone_names)
-    ww_pathogen_mass = build_wastewater_pathogen_mass(
-        zones.zone_names, zone_surface, greywater_frac, ww_target_zones,
-    )
-    ww_per_pathogen = build_wastewater_pathogen_mass_by_id(
-        zones.zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
-    )
-    ww_results = obs.wastewater_seq.sample_all_zones(
-        ww_pathogen_mass, ww_microflora,
-        pathogen_mass_by_id=ww_per_pathogen,
-        wastewater_zones=ww_target_zones,
-    )
-
-    # The holding-tank assay is a different instrument on a different
-    # stream (the blackwater tank, post-discharge); it is not submitted to
-    # the turnaround queue in v1 — it has no declared TAT entry.
-    wastewater_ht_result: dict[str, Any] | None = None
-    if (
-        cfg.get("observation", {}).get(
-            "wastewater_assay_mode", "holding_tank"
-        )
-        == "holding_tank"
-        and obs.wastewater_assay is not None
-        and tx_core is not None
-        and tx_core.blackwater_tank is not None
-    ):
-        tank = tx_core.blackwater_tank
-        wastewater_ht_result = obs.wastewater_assay.assay(
-            tank.volume_l, dict(tank.copies_by_pathogen),
-        )
+    wastewater_ht_result = _run_holding_tank_assay(obs, cfg, tx_core)
 
     sick_call_agents = [
         a for a in agents
@@ -904,18 +1062,7 @@ def run_observation_sampling(
             strain_registry=strain_registry,
         )
 
-    if obs.lab_notebook_enabled:
-        obs.notebook.log_air_sniffer(epoch, air_results)
-        obs.notebook.log_surface_swab(epoch, swab_results)
-        obs.notebook.log_wastewater_seq(epoch, ww_results)
-        obs.notebook.log_clinical_rdt(epoch, clin_rdt_results)
-        obs.notebook.log_clinical_qpcr(epoch, clin_qpcr_results)
-        obs.notebook.log_clinical_microbiology(epoch, clin_microbio_results)
-        obs.notebook.log_agent_summary(epoch, agents)
-        if long_read_results:
-            obs.notebook.log_long_read_verification(epoch, long_read_results)
-
-    return ObservationResults(
+    results = ObservationResults(
         air=air_results,
         swab=swab_results,
         ww=ww_results,
@@ -926,6 +1073,8 @@ def run_observation_sampling(
         long_read_ordered_count=long_read_ordered_count,
         wastewater_ht=wastewater_ht_result,
     )
+    _log_observation_epoch(obs, epoch, results, agents)
+    return results
 
 
 # ── Quarantine confinement ───────────────────────────────────────────────
@@ -1033,6 +1182,46 @@ def step_quarantine_confinement(
         )
 
 
+def _cabin_contact_ids(
+    agents: list[dict[str, Any]],
+    confirmed: set[int],
+) -> set[int]:
+    """Cabin-mate ids of confirmed or symptomatic agents."""
+    contact_ids: set[int] = set()
+    for agent in agents:
+        aid = agent_id(agent)
+        if aid in confirmed or agent_requires_confinement(agent):
+            mates = agent.get(AGENT_CABIN_MATE_IDS) or ()
+            contact_ids.update(int(m) for m in mates)
+    return contact_ids
+
+
+def _admit_flagged_to_quarantine(
+    epoch: int,
+    agent: dict[str, Any],
+    state: SimulationState,
+    syndromic: Any,
+    include_shedding: bool,
+    confirmed: set[int],
+    contact_ids: set[int],
+) -> None:
+    """Admit one non-exempt agent when any confinement flag applies."""
+    aid = agent_id(agent)
+    is_symptomatic = agent_requires_confinement(agent)
+    is_shedding = include_shedding and agent.get(AGENT_SHEDDING_RATE, 0.0) > 0.0
+    is_confirmed = aid in confirmed
+    is_contact = aid in contact_ids
+    if not (is_symptomatic or is_shedding or is_confirmed or is_contact):
+        return
+    try_admit_to_quarantine(
+        epoch, aid, state, syndromic,
+        action_ok="immediate_compliance",
+        action_refuse="refused_quarantine",
+        agent_class=agent.get(AGENT_CLASS),
+        is_symptomatic=is_symptomatic,
+    )
+
+
 def confine_agents(
     epoch: int,
     agents: list[dict[str, Any]],
@@ -1049,30 +1238,16 @@ def confine_agents(
     """
     _exempt = exempt_classes or set()
     _confirmed = confirmed_ids or set()
-    contact_ids: set[int] = set()
-    if include_cabin_contacts:
-        for agent in agents:
-            aid = agent_id(agent)
-            if aid in _confirmed or agent_requires_confinement(agent):
-                mates = agent.get(AGENT_CABIN_MATE_IDS) or ()
-                contact_ids.update(int(m) for m in mates)
+    contact_ids = (
+        _cabin_contact_ids(agents, _confirmed) if include_cabin_contacts else set()
+    )
 
     for agent in agents:
-        aid = agent_id(agent)
         if agent.get(AGENT_CLASS, "") in _exempt:
             continue
-        is_symptomatic = agent_requires_confinement(agent)
-        is_shedding = include_shedding and agent.get(AGENT_SHEDDING_RATE, 0.0) > 0.0
-        is_confirmed = aid in _confirmed
-        is_contact = aid in contact_ids
-        if not (is_symptomatic or is_shedding or is_confirmed or is_contact):
-            continue
-        try_admit_to_quarantine(
-            epoch, aid, state, syndromic,
-            action_ok="immediate_compliance",
-            action_refuse="refused_quarantine",
-            agent_class=agent.get(AGENT_CLASS),
-            is_symptomatic=is_symptomatic,
+        _admit_flagged_to_quarantine(
+            epoch, agent, state, syndromic,
+            include_shedding, _confirmed, contact_ids,
         )
 
 
