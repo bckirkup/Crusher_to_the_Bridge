@@ -3,11 +3,12 @@
 **Commit:** 7db0e9a6
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 8ac510b3 (pre-rebase SHA of the identical code; the
-canary's Batch image was built from it)
+**Measured at:** 8ac510b3
 
 Measured extent: canary only — period arm at theta x0.001, 20 seeds
-(cells 340-359). The remaining 340 cells have not run.
+(cells 340-359). The remaining 340 cells have not run. (The canary's
+Batch image was built from 8ac510b3, the pre-rebase SHA whose code is
+identical to the branch tip.)
 
 The observational-channel arm of the ~18x conditional-size hunt, declared
 in `picard_framework/runs/covid_sero_channel_v1_design.json` before any
