@@ -182,9 +182,17 @@ def _already_uploaded(client: Any, bucket: str, key: str) -> bool:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--s3-prefix", required=True)
+    parser.add_argument(
+        "--index", type=int, default=None,
+        help=(
+            "matrix index override for non-array canary jobs — "
+            "AWS_BATCH_* names are reserved, so a canary cannot set the "
+            "array index through container environment overrides"
+        ),
+    )
     args = parser.parse_args()
 
-    index = _array_index()
+    index = args.index if args.index is not None else _array_index()
     if not 0 <= index < len(MATRIX):
         raise SystemExit(f"Array index {index} outside 0..{len(MATRIX) - 1}")
     family, seed, spec = MATRIX[index]
