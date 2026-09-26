@@ -1,9 +1,9 @@
 # CABIN-OCC-01
 **Date:** 2026-09-26
-**Commit:** #PENDING
+**Commit:** 1b9d37ca557b1c13df0d20440cc651af7eb5171a
 **Pathogens:** all
 **Status:** measured
-**Measured at:** #PENDING
+**Measured at:** 1b9d37ca557b1c13df0d20440cc651af7eb5171a
 
 Cabin-mate exposure channels now gate on **time-partitioned co-occupancy**
 instead of treating a cabin mate as a breathing-zone contact for all ~24

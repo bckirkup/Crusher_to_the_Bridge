@@ -1,6 +1,6 @@
 # ROOM-AIR-01
 **Date:** 2026-09-26
-**Commit:** #PENDING
+**Commit:** 1b9d37ca557b1c13df0d20440cc651af7eb5171a
 **Pathogens:** all
 **Status:** open
 
