@@ -1,5 +1,6 @@
 """Coverage for tools/covid_route_attribution.py pure helpers."""
 
+import math
 from types import SimpleNamespace
 
 import pytest
@@ -272,3 +273,213 @@ def test_hazard_rate_table_empty_is_safe():
     assert out["lambda_all"]["n"] == 0
     assert out["lambda_all"]["median"] is None
     assert out["lambda_infecting"]["n"] == 0
+
+
+def _cabin_sim(agents, quarantined=frozenset(), seed=8105, profiles=None):
+    engine = SimpleNamespace(agents=agents)
+    tx_core = SimpleNamespace(
+        _quarantined_ids=set(quarantined),
+        pathogen_profiles=profiles or {},
+    )
+    return SimpleNamespace(
+        engine=engine,
+        tx_core=tx_core,
+        run_spec=SimpleNamespace(random_seed=seed),
+        _epoch=0,
+    )
+
+
+def _cabin_agent(aid, mate_ids, infections=None, susc=None):
+    return SimpleNamespace(
+        agent_id=aid,
+        cabin_mate_ids=set(mate_ids),
+        home_zone="zCabin",
+        infections=infections or {},
+        dose_response_susceptibility=susc or {},
+    )
+
+
+def _observe_work(epoch, **records):
+    matrix = SimpleNamespace(
+        droplet_exposures=records.get("droplet", []),
+        shared_room_exposures=records.get("contact", []),
+        hvac_downstream_exposures=records.get("hvac", []),
+        emesis_aerosol_exposures=records.get("emesis", []),
+        flush_aerosol_exposures=records.get("flush", []),
+    )
+    return SimpleNamespace(epoch=epoch, tracing_matrix=matrix)
+
+
+from tools.covid_route_attribution import (  # noqa: E402
+    CabinPairChallengeLedger,
+    cabin_compartment_key,
+    cabin_pair_challenge_table,
+)
+
+
+class TestCabinPairChallengeLedger:
+    """CABIN-OCC-01's lambda instrument on synthetic exposure records."""
+
+    def test_cabin_compartment_key_uses_zone_and_min_member(self):
+        a = _cabin_agent(7, {3})
+        assert cabin_compartment_key(a) == "zCabin::cabin3"
+        assert cabin_compartment_key(_cabin_agent(9, set())) is None
+
+    def test_observe_tallies_directed_dose_per_channel(self):
+        mates = [_cabin_agent(1, {2}), _cabin_agent(2, {1}),
+                 _cabin_agent(9, set())]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, quarantined={1, 2})
+        ledger.observe(sim, _observe_work(5, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 1.0, "near_field_dose": 0.25},
+        ]))
+        ledger.observe(sim, _observe_work(6, hvac=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 0.5},
+            {"air_unit": "other", "target_id": 2,
+             "pathogen_id": "p", "dose": 99.0},
+        ]))
+        key = (1, 2)
+        doses = ledger.directed_dose[(key, 2)]["p"]
+        assert doses["pool"] == pytest.approx(0.75)
+        assert doses["plume"] == pytest.approx(0.25)
+        assert doses["hvac"] == pytest.approx(0.5)
+        assert ledger.shared_epochs[key] == 2
+        assert ledger.confined_epochs[key] == 2
+        assert ledger.confined_first[key] == 5
+        assert ledger.confined_last[key] == 6
+
+    def test_observe_skips_non_members_and_zero_dose(self):
+        mates = [_cabin_agent(1, {2}), _cabin_agent(2, {1})]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates)
+        ledger.observe(sim, _observe_work(0, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 9,
+             "pathogen_id": "p", "dose": 5.0},
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 0.0},
+        ]))
+        assert ledger.directed_dose == {}
+
+    def test_observe_without_matrix_only_counts_confinement(self):
+        mates = [_cabin_agent(1, {2}), _cabin_agent(2, {1})]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, quarantined={1, 2})
+        ledger.observe(sim, SimpleNamespace(epoch=3, tracing_matrix=None))
+        assert ledger.confined_epochs[(1, 2)] == 1
+        assert ledger.directed_dose == {}
+
+    def test_table_engine_draw_lambda_and_implied_sar(self):
+        profiles = {"p": {"dose_response": {"alpha": 2.0, "beta": 8.0}}}
+        mates = [
+            _cabin_agent(1, {2}, infections={"p": {"infection_epoch": 4}},
+                         susc={"p": 0.5}),
+            _cabin_agent(2, {1}, susc={"p": 0.5}),
+        ]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, quarantined={1, 2}, profiles=profiles)
+        ledger.observe(sim, _observe_work(7, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 2.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim)
+        row = table["rows"][0]
+        assert row["lambda"] == pytest.approx(1.0)
+        assert row["susceptibility"] == "engine_draw"
+        assert row["implied_sar"] == pytest.approx(1 - math.exp(-1))
+        assert table["mate_index_pairs"] == 1
+        assert table["observed_mate_case_attack"] == pytest.approx(0.0)
+        assert table["confined_index_pairs"] == 1
+        assert table["observed_mate_case_attack_confined"] == pytest.approx(0.0)
+
+    def test_table_counterfactual_draw_and_confined_conversion(self):
+        profiles = {"p": {"dose_response": {"alpha": 1.0, "beta": 1.0}}}
+        mates = [
+            _cabin_agent(1, {2}, infections={"p": {"infection_epoch": 1,
+                                                  "first_infection_epoch": 1}}),
+            _cabin_agent(2, {1}, infections={"p": {"infection_epoch": 6,
+                                                  "first_infection_epoch": 6}}),
+        ]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, profiles=profiles)
+        ledger.observe(sim, _observe_work(0))
+        sim2 = _cabin_sim(mates, quarantined={1, 2}, profiles=profiles)
+        ledger.observe(sim2, _observe_work(6, contact=[
+            {"compartment": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 3.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim2)
+        row = table["rows"][0]
+        assert row["susceptibility"] == "counterfactual"
+        assert 0.0 < row["lambda"]
+        assert table["observed_mate_case_attack_confined"] == pytest.approx(1.0)
+
+    def test_table_exponential_model_and_preconfined_mate(self):
+        profiles = {"p": {"dose_response": {"model": "exponential",
+                                          "k": 0.01}}}
+        mates = [
+            _cabin_agent(1, {2}, infections={"p": {"infection_epoch": 1,
+                                                  "first_infection_epoch": 1}}),
+            # Mate seroconverted before confinement began at epoch 6.
+            _cabin_agent(2, {1}, infections={"p": {"infection_epoch": 3,
+                                                  "first_infection_epoch": 3}}),
+        ]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, profiles=profiles)
+        ledger.observe(sim, _observe_work(0))
+        sim2 = _cabin_sim(mates, quarantined={1, 2}, profiles=profiles)
+        ledger.observe(sim2, _observe_work(6, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 4.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim2)
+        row = table["rows"][0]
+        assert row["susceptibility"] == "counterfactual"
+        assert row["lambda"] == pytest.approx(0.04)
+        # Pre-confinement conversion: pair confined but mate held no
+        # confined-exposure slot, so the confined denominator is empty.
+        assert table["confined_index_pairs"] == 1
+        assert table["observed_mate_case_attack_confined"] is None
+        assert table["observed_mate_case_attack"] == pytest.approx(1.0)
+
+    def test_table_skips_uninfected_and_unconfined_pairs(self):
+        profiles = {"p": {"dose_response": {"alpha": 1.0, "beta": 1.0}}}
+        # pair_a's index is infected but the pair never confines; pair_b's
+        # member is infected with a pathogen the pair never exchanged.
+        pair_a = [_cabin_agent(
+            1, {2}, infections={"p": {"infection_epoch": 1}}),
+            _cabin_agent(2, {1})]
+        pair_b = [_cabin_agent(
+            3, {4}, infections={"q": {"infection_epoch": 1}}),
+            _cabin_agent(4, {3})]
+        pair_c = [_cabin_agent(5, {6}), _cabin_agent(6, {5})]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(pair_a + pair_b + pair_c, quarantined={3, 4, 5, 6},
+                         profiles=profiles)
+        ledger.observe(sim, _observe_work(2, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 1.0},
+            {"air_unit": "zCabin::cabin3", "target_id": 4,
+             "pathogen_id": "p", "dose": 1.0},
+            {"air_unit": "zCabin::cabin5", "target_id": 6,
+             "pathogen_id": "p", "dose": 1.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim)
+        assert len(table["rows"]) == 3
+        # pair_a contributes an index pair (one infected member) with no
+        # secondary; pair_b's infection is off-pathogen so it is skipped.
+        assert table["mate_index_pairs"] == 1
+        assert table["observed_mate_case_attack"] == pytest.approx(0.0)
+        # pair_a never confined; pair_b's confinement tally can't reach the
+        # confined-window branch — no confined index pair forms.
+        assert table["confined_index_pairs"] == 0
+        assert table["observed_mate_case_attack_confined"] is None
+
+    def test_table_empty_ledger_is_safe(self):
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim([], profiles={})
+        table = cabin_pair_challenge_table(ledger, sim)
+        assert table["pairs_observed"] == 0
+        assert table["observed_mate_case_attack"] is None
+        assert table["observed_mate_case_attack_confined"] is None

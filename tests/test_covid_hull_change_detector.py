@@ -145,7 +145,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # near-extinct cell re-ignites: (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2),
         # read from CI job 107765635955 (fast tier, 3.11, shard 3) on this
         # branch — both interpreters agree, as before on this cell.
-        (3, 11): (4, 2, 217, 5, 2),
+        # ROOM-AIR-01 + CABIN-OCC-01: room pools now exchange at the
+        # platform's declared ach*hvac_duty (expedition_cruise_450 cabin
+        # branches declare 6.0 at duty 0.5) and cabin-mate dose gates on
+        # time-partitioned co-presence; pool doses drop under the residence
+        # factor and pickup timing reorders the shared stream, so the
+        # near-extinct cell re-rolls: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0),
+        # read from CI job 108423507137 (fast tier, 3.11, shard 3) on this
+        # branch — identical to the 3.12 reading.
+        (3, 11): (1, 1, 217, 2, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -193,7 +201,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # NORO-GATE-FLOOR-01 (see the 3.11 note above) moves the cell
         # (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2) on CPython 3.12, read in
         # the local venv on this branch.
-        (3, 12): (4, 2, 217, 5, 2),
+        # ROOM-AIR-01 + CABIN-OCC-01 move it again on CPython 3.12: every
+        # room-pool inhalation route now doses the epoch-mean of a pool
+        # exchanging at the hull's declared AHU ach x hvac_duty (plus the
+        # stateroom bathroom-exhaust adder), and the cabin-mate channels
+        # are gated on time-partitioned co-presence — intended physics, no
+        # new shared-stream draws. The near-extinct cell loses two campaign
+        # positives: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0), read in the
+        # local venv on this branch. The 3.11 pin is stale pending a CI
+        # reading on this branch, as earlier entries were.
+        (3, 12): (1, 1, 217, 2, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
@@ -241,7 +258,17 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # to isolate. Measured locally on CPython 3.12 on the evidence
         # branch: (3418, 2942, 1894, 209, 68) -> (3412, 2677, 2002, 199, 81).
         # The 3.11 reading stays pending a CI run, as above.
-        (3, 12): (3412, 2677, 2002, 199, 81),
+        # ROOM-AIR-01 + CABIN-OCC-01 move the cell on CPython 3.12: every
+        # room-pool dose now reads the epoch-mean of a pool exchanging at
+        # the declared AHU ach x hvac_duty (plus the stateroom bathroom
+        # adder), and cabin-mate channels gate on time-partitioned
+        # co-presence. The confined regime loses 471 onsets before the
+        # split day while campaign positives rise (more of the confined
+        # cohort survives to, and converts by, the day-16 screen):
+        # (3412, 2677, 2002, 199, 81) -> (3400, 2206, 2090, 274, 120),
+        # read in the local venv on this branch. Intended physics; no new
+        # shared-stream draws.
+        (3, 12): (3400, 2206, 2090, 274, 120),
     },
 }
 

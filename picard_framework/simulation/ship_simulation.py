@@ -59,6 +59,7 @@ from engines.transmission_core import (
     DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
     TransmissionCore,
     build_hvac_downstream_map,
+    build_zone_air_exchange_map,
 )
 from engines.voyage_itinerary import agent_is_departed
 from orchestrator_chronic import (
@@ -348,6 +349,12 @@ class ShipSimulation:
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
         )
+        # Room -> air changes per hour from the hull's declared AHU figures;
+        # the room-pool routes dilute each epoch's emission through this
+        # removal instead of an implicit sealed room.
+        zone_air_exchange = (
+            build_zone_air_exchange_map(airflow_data) if airflow_data else {}
+        )
         # Served zone -> sex-keyed head block, from each head's declared
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
         # block (e.g. the bridge head) serves as "any".
@@ -394,6 +401,7 @@ class ShipSimulation:
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
         )
+        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
         if self.display:

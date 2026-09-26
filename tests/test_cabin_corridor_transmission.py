@@ -4,6 +4,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+from engines import transmission_core as tc_mod
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
@@ -230,6 +231,11 @@ class TestCabinCorridorTransmission:
                 "transmission": {
                     "cabin_air_mode": "zone_pool",
                     "near_field_air": {"mode": "off"},
+                    # Pre-CABIN-OCC-01/ROOM-AIR-01 baseline: these cases pin
+                    # the confinement factors, not the partition or the
+                    # ventilation residence factor.
+                    "cabin_cooccupancy": "off",
+                    "room_air_removal": "sealed",
                 },
             },
         )
@@ -483,7 +489,15 @@ class TestCabinCorridorTransmission:
             zone_volumes=volumes,
             zone_types=types,
             confinement_isolation_factor=0.05,
-            cfg={"transmission": {"cabin_air_mode": cabin_air_mode}},
+            # Baseline modes: this case pins the confinement factor itself;
+            # the co-occupancy presence share would attenuate it further.
+            cfg={
+                "transmission": {
+                    "cabin_air_mode": cabin_air_mode,
+                    "cabin_cooccupancy": "off",
+                    "room_air_removal": "sealed",
+                },
+            },
         )
         core.initialize_zones(list(volumes))
         matrix, _ = core.execute_transmission(
@@ -705,3 +719,188 @@ class TestCabinCorridorTransmission:
         exposure = matrix.hvac_downstream_exposures[0]
         assert exposure["source_zones"] == sorted(source_zones)
         assert exposure["source_agent_ids"] == [10, 20]
+
+
+class TestCabinCooccupancyPartition:
+    """CABIN-OCC-01: time-partitioned co-occupancy on the mate channels."""
+
+    @staticmethod
+    def _mate_droplet_dose(
+        *,
+        quarantined_ids: set[int],
+        mode: str = "time_partitioned",
+        activity: str | None = None,
+    ) -> float:
+        zone = "PC_D6_P_F"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        shedder.cabin_mate_ids = frozenset({2})
+        target.cabin_mate_ids = frozenset({1})
+        if activity is not None:
+            shedder.current_activity = activity
+            target.current_activity = activity
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={zone: 1200.0},
+            zone_types={zone: "Cabin_Corridor"},
+            cfg={
+                "transmission": {
+                    "cabin_air_mode": "zone_pool",
+                    "near_field_air": {"mode": "off"},
+                    "cabin_cooccupancy": mode,
+                    "room_air_removal": "sealed",
+                },
+            },
+        )
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids=quarantined_ids,
+        )
+        return matrix.droplet_exposures[0]["dose"]
+
+    def test_confined_awake_pair_dose_below_baseline(self) -> None:
+        """Awake confined mates lose the absence share of co-presence."""
+        off = self._mate_droplet_dose(quarantined_ids={1, 2}, mode="off")
+        on = self._mate_droplet_dose(quarantined_ids={1, 2})
+        assert 0.0 < on < off
+        # Both confined, both on the 24-token "home" (non-Sleep) schedule:
+        # each carries presence 1 - 1/24, so the copresence floor is ~0.917.
+        assert on >= off * 0.8
+
+    def test_asleep_confined_pair_recovers_full_copresence(self) -> None:
+        """Both mates asleep are co-present for the whole epoch."""
+        off = self._mate_droplet_dose(quarantined_ids={1, 2}, mode="off")
+        on = self._mate_droplet_dose(
+            quarantined_ids={1, 2}, activity="Sleep",
+        )
+        assert on == pytest.approx(off)
+
+    def test_unconfined_pair_presence_is_unity(self) -> None:
+        """Free agents' location is resolved per epoch — no absence shave."""
+        off = self._mate_droplet_dose(quarantined_ids=set(), mode="off")
+        on = self._mate_droplet_dose(quarantined_ids=set())
+        assert on == pytest.approx(off)
+
+    def test_asleep_pair_contact_factor_is_asleep_share(self) -> None:
+        zone = "PC_D6_P_F"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        shedder.cabin_mate_ids = frozenset({2})
+        target.cabin_mate_ids = frozenset({1})
+        shedder.current_activity = "Sleep"
+        target.current_activity = "Sleep"
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={zone: 1200.0},
+            zone_types={zone: "Cabin_Corridor"},
+            cfg={"transmission": {"cabin_air_mode": "zone_pool"}},
+        )
+        core.initialize_zones([zone])
+        core._quarantined_ids = {1, 2}
+        factor = core._cabin_pair_contact_factor(shedder, target, 0)
+        assert factor == pytest.approx(
+            core.cabin_cooccupancy.asleep_contact_share
+        )
+        shedder.current_activity = "Free"
+        awake = core._cabin_pair_contact_factor(shedder, target, 0)
+        assert awake > factor
+        assert awake <= 1.0
+
+
+class TestRoomAirRemoval:
+    """ROOM-AIR-01: first-order removal at the declared AHU rate."""
+
+    @staticmethod
+    def _dose_with_ach(ach: float, mode: str = "first_order") -> float:
+        zone = "Droplet_Test"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={zone: 20.0},
+            clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+            cfg={
+                "transmission": {
+                    "cabin_air_mode": "zone_pool",
+                    "near_field_air": {"mode": "off"},
+                    "room_air_removal": mode,
+                },
+            },
+        )
+        core.zone_air_exchange_per_hour = {zone: ach}
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={zone: 0.0},
+        )
+        return matrix.droplet_exposures[0]["dose"]
+
+    def test_declared_ach_scales_dose_by_residence_factor(self) -> None:
+        sealed = self._dose_with_ach(3.0, mode="sealed")
+        vented = self._dose_with_ach(3.0)
+        expected = -np.expm1(-3.0) / 3.0
+        # Exposure records round dose to 4 decimals.
+        assert vented == pytest.approx(sealed * expected, abs=1e-3)
+
+    def test_dose_decreases_monotonically_in_ach(self) -> None:
+        doses = [self._dose_with_ach(a) for a in (0.0, 1.0, 3.0, 10.0)]
+        assert doses[0] == pytest.approx(self._dose_with_ach(0.0, "sealed"))
+        assert all(d > 0.0 and np.isfinite(d) for d in doses)
+        assert doses == sorted(doses, reverse=True)
+
+    def test_build_zone_air_exchange_map_conventions(self) -> None:
+        """ach x duty for AHU branches; duty-0 100%-OA branches exhaust at ach."""
+        paths = {
+            "hvac_duty": 0.5,
+            "oa_fraction": 0.2,
+            "hvac_zones": [
+                {"ach": 3.0, "rooms": ["Cabin_Deck"]},
+                {"ach": 6.0, "hvac_duty": 1.0, "rooms": ["Dining"]},
+                {
+                    "ach": 19.2, "hvac_duty": 0.0, "oa_fraction": 1.0,
+                    "rooms": ["Heads"],
+                },
+                {
+                    "ach": 8.0, "hvac_duty": 0.0, "oa_fraction": 0.2,
+                    "rooms": ["Idle"],
+                },
+            ],
+        }
+        rates = tc_mod.build_zone_air_exchange_map(paths)
+        assert rates["Cabin_Deck"] == pytest.approx(1.5)
+        assert rates["Dining"] == pytest.approx(6.0)
+        # Exhaust-only sanitary branch: not on the AHU duty cycle.
+        assert rates["Heads"] == pytest.approx(19.2)
+        # Duty 0 with recirculated air is a genuinely idle branch.
+        assert rates["Idle"] == pytest.approx(0.0)
+        assert "Undeclared" not in rates
+
+    def test_undeclared_zone_keeps_sealed_dose(self) -> None:
+        """No declared ACH and first_order still sealed: baseline dose."""
+        zone = "Droplet_Test"
+        shedder = _agent(1, zone, infected=True)
+        target = _agent(2, zone)
+        core = TransmissionCore(
+            rng=np.random.default_rng(42),
+            zone_volumes={zone: 20.0},
+            clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
+            cfg={
+                "transmission": {
+                    "cabin_air_mode": "zone_pool",
+                    "near_field_air": {"mode": "off"},
+                },
+            },
+        )
+        core.initialize_zones([zone])
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, target],
+            zone_pathogen_mass={zone: 0.0},
+        )
+        assert matrix.droplet_exposures[0]["dose"] == pytest.approx(
+            self._dose_with_ach(0.0, mode="sealed")
+        )

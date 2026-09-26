@@ -330,7 +330,7 @@ class TestPoolAttribution:
 
         for _ in range(3):
             core._pathway_environmental(
-                occupants, {}, ContactTracingMatrix(epoch=0), {},
+            occupants, {}, ContactTracingMatrix(epoch=0), {},
                 pathogen_id=PATHOGEN, profile=profile,
                 ledger=StrainDoseLedger(),
             )

@@ -25,6 +25,9 @@ COMPARTMENT_MODE = {
     "transmission": {
         "cabin_air_mode": "cabin_compartment",
         "near_field_air": {"mode": "off"},
+        # ROOM-AIR-01 baseline: the berth-share arithmetic pinned below is
+        # the partition's; the residence factor would rescale it.
+        "room_air_removal": "sealed",
     },
 }
 
