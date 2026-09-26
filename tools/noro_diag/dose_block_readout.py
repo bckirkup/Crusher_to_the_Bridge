@@ -55,6 +55,8 @@ from tools.noro_diag.cell_readout import (  # noqa: E402
 # Below this credited total a pathway share is arithmetic on a vanishing
 # number, so the cell is reported apart from the attribution distribution.
 SHARE_FLOOR_GEC = 1e-6
+KEY_CREDITED_SCALED_GEC = "reconciliation.sum_credited_scaled_gec"
+KEY_EVALUATED_HAZARD = "reconciliation.sum_evaluated_hazard"
 BLOCK_SEEDS = tuple(range(8000, 8020))
 PAIR_SEEDS = (8105, 8106)
 # The pair values NORO-DOSE-01 reported, restated here as the comparison
@@ -170,10 +172,10 @@ def transfer_terms(cells: list[dict[str, Any]]) -> dict[str, Any]:
 def magnitude(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 3: credited dose and how few hosts hold most of it."""
     credited = [
-        number(s, "reconciliation.sum_credited_scaled_gec") for s in cells
+        number(s, KEY_CREDITED_SCALED_GEC) for s in cells
     ]
     hazards = [
-        number(s, "reconciliation.sum_evaluated_hazard") for s in cells
+        number(s, KEY_EVALUATED_HAZARD) for s in cells
     ]
     hosts_90 = [number(s, "concentration.hosts_for_90pct") for s in cells]
     return {
@@ -200,7 +202,7 @@ def unevaluated_dose(cells: list[dict[str, Any]]) -> dict[str, Any]:
     rows = []
     credited_total = evaluated_total = 0.0
     for summary in cells:
-        credited = number(summary, "reconciliation.sum_credited_scaled_gec")
+        credited = number(summary, KEY_CREDITED_SCALED_GEC)
         evaluated = number(
             summary, "reconciliation.sum_effective_dose_evaluated_gec",
         )
@@ -225,7 +227,7 @@ def unevaluated_dose(cells: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "any_negative_gap": any(
             number(s, "reconciliation.sum_effective_dose_evaluated_gec")
-            > number(s, "reconciliation.sum_credited_scaled_gec")
+            > number(s, KEY_CREDITED_SCALED_GEC)
             for s in cells
         ),
     }
@@ -236,15 +238,15 @@ def pair_position(cells: list[dict[str, Any]]) -> dict[str, Any]:
     block = [s for s in cells if s["seed"] in BLOCK_SEEDS]
     pair = [s for s in cells if s["seed"] in PAIR_SEEDS]
     dose_ordered = sorted(
-        number(s, "reconciliation.sum_credited_scaled_gec") for s in block
+        number(s, KEY_CREDITED_SCALED_GEC) for s in block
     )
     hazard_ordered = sorted(
-        number(s, "reconciliation.sum_evaluated_hazard") for s in block
+        number(s, KEY_EVALUATED_HAZARD) for s in block
     )
     rows = []
     for summary in pair:
-        dose = number(summary, "reconciliation.sum_credited_scaled_gec")
-        hazard = number(summary, "reconciliation.sum_evaluated_hazard")
+        dose = number(summary, KEY_CREDITED_SCALED_GEC)
+        hazard = number(summary, KEY_EVALUATED_HAZARD)
         rows.append({
             "seed": summary["seed"],
             "credited_scaled_gec": dose,

@@ -1143,9 +1143,12 @@ def _index_geometry_criterion(
          and bool(p.get(KEY_INDEX_SHEDDING_AT_DAY0)))
         for p in by_seed.values()
     ] if has_geometry else None
-    pass_fraction = (
-        float(np.mean(geometry_pass)) if geometry_pass else (0.0 if has_geometry else None)
-    )
+    if geometry_pass:
+        pass_fraction = float(np.mean(geometry_pass))
+    elif has_geometry:
+        pass_fraction = 0.0
+    else:
+        pass_fraction = None
     return {
         "index_geometry_pass_fraction": pass_fraction,
         "index_geometry_ok": (
