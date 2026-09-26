@@ -70,3 +70,34 @@ convention, not a powered estimate.
 - Deltas are read against which open-ledger items they support or weaken:
   the posting-surplus property, the crew-route overshoot (A5), and the
   take-off tails noted in the ledger.
+
+## Canary readout — spirit 12d, seeds 8105–8124 (measured)
+
+**Measured at:** `1935b5d4` (image `sha256:e1f7b0ccff1db48caaed2c021a17015fd658fb573d92f16805cb3ea5d0c3341c`,
+jobdef `picard-campaign:49`, array `de944b89-2b12-4fd8-bec6-4eeb32797cc3`,
+S3 `campaign/noro_rebase_01_canary/`).
+
+20/20 children SUCCEEDED. The cell **never posts** (0/20) and take-off has
+collapsed: 4/20 cross the take-off gate, all marginal (peak prevalence 10–11),
+versus the paired pre-fix voyage at seed 8105 that posted with peak 614.
+Passenger infection AR sits at 0.3–0.4% (pre-fix pair: 27.0% on 8105).
+Cell verdicts: A1 FAIL (0.0007), A2 FAIL (0.16), A4 FAIL (0.0003),
+A5 FAIL (0.0), A8 FAIL (2.1 pax / 2.3 crew), A9 FAIL (0.00).
+
+**Report-immediately trigger fired** (a platform never posts); reported to the
+requester, who directed a powered take-off measurement on the smallest hull
+before the four-hull array.
+
+## Expedition take-off power block (declared extension, same base)
+
+`noro_rebase_01_exp_block_manifest.json`: tiers `fl_exp_7d` / `fl_exp_12d`,
+seeds 8000–8999 (1000 per cell; the range covers the full 200-seed `off_s4`
+baseline block voyage-for-voyage plus 800 fresh seeds), same off-arm cell
+verbatim. 2,000 runs; Batch array `03dfc8bd-0cd2-41b5-b519-fdb4863e2f6b`
+(500 children x 4 runs), jobdef `picard-campaign:50`, image digest
+`sha256:6b5cdb0c98717002b24dee40218f9969b9ce3e2a23359970265695fb9a425ef0`
+(`picard-campaign:noro-rebase-02`, engine SHA a872367c — same engine code as
+the canary, plus this manifest), S3 `campaign/noro_rebase_01_exp_block/`.
+
+Readout: take-off fraction + posting fraction per length on expedition, with
+the paired 8105/8106 subset feeding the per-platform anchor table below.
