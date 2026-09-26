@@ -5,17 +5,15 @@ runs:
 
 1. Spec-lands: the design enumerates the declared 360 cells in
    point-major, arm-second, seed-innermost order (9 thetas x 2 channel
-   arms x 20 seeds), and the period arm's ``onset_recording`` block
-   resolves into the run spec's ``pathogen_overrides`` while the declared
-   arm's spec carries none — the additive channel is off by absence.
+   arms x 20 seeds), and each arm's declared ``onset_recording`` block
+   resolves verbatim into the run spec's ``pathogen_overrides`` — the
+   period arm's channel lands, the declared arm's stays absent.
 2. Runtime binding: truncated runs read back the resolved channel on the
    live modality — ``onset_recording_channel`` returns the declared block
-   on a period cell and None on a declared cell, and the payload echoes
-   the same — a spec-lands-but-inert channel is a bug signature, not
-   physics.
+   on a period cell and None on a declared cell, so a spec-lands-but-
+   inert channel is a bug signature, not physics.
 3. Contract: ``cell_payload`` on the truncated runs still carries the
-   declared fields (observables, index geometry, arm attribution block,
-   the onset_recording echo).
+   declared fields (observables, index geometry, arm attribution block).
 
 Shared enumeration / truncated-run machinery lives in
 ``tools/covid_assay_smoke.py``; this tool keeps only the channel checks.
@@ -28,23 +26,16 @@ Usage:
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from picard_framework.covid_boarding_screen import (
-    PATHOGEN_ID,
-    enumerate_cells,
-)
+from picard_framework.covid_boarding_screen import PATHOGEN_ID
 from tools.covid_assay_smoke import (
-    check_enumeration,
-    load_declared_cells,
+    drive,
     prepare_cell_run_spec,
-    repo_root_of,
     run_cell,
 )
 
@@ -54,6 +45,17 @@ DESIGN_REL = os.path.join(
 RUN_EPOCHS = 48
 PERIOD_ARM = "P1_period"
 DECLARED_ARM = "D0_declared"
+
+
+def declared_onset_recording(design: Any, arm_id: str) -> Any:
+    """The channel block the arm declares, or None."""
+    return (
+        design.arm_overrides(arm_id)
+        .get("pathogen_overrides", {})
+        .get(PATHOGEN_ID, {})
+        .get("observation_model", {})
+        .get("onset_recording")
+    )
 
 
 def spec_onset_recording(design: Any, cell: Any, repo_root: str) -> Any:
@@ -69,27 +71,15 @@ def spec_onset_recording(design: Any, cell: Any, repo_root: str) -> Any:
 
 
 def check_channel_spec_lands(  # pragma: no cover - CLI-driven check
-    design: Any, repo_root: str,
-) -> dict[str, Any]:
-    """Each arm's declared channel must reach the spec, verbatim."""
-    seen: dict[str, Any] = {}
-    for cell in enumerate_cells(design):
-        if cell.arm_id in seen:
-            continue
-        landed = spec_onset_recording(design, cell, repo_root)
-        declared = (
-            design.arm_overrides(cell.arm_id)
-            .get("pathogen_overrides", {})
-            .get(PATHOGEN_ID, {})
-            .get("observation_model", {})
-            .get("onset_recording")
-        )
-        assert landed == declared, (
-            f"{cell.arm_id}: spec onset_recording {landed} "
-            f"!= declared {declared}"
-        )
-        seen[cell.arm_id] = landed
-    return seen
+    design: Any, cell: Any, repo_root: str,
+) -> None:
+    """The arm's declared channel must reach the spec, verbatim."""
+    landed = spec_onset_recording(design, cell, repo_root)
+    declared = declared_onset_recording(design, cell.arm_id)
+    assert landed == declared, (
+        f"{cell.arm_id}: spec onset_recording {landed} "
+        f"!= declared {declared}"
+    )
 
 
 def engine_onset_recording(sim: Any) -> Any:
@@ -97,63 +87,44 @@ def engine_onset_recording(sim: Any) -> Any:
     return sim.modalities["syndromic"].onset_recording_channel(PATHOGEN_ID)
 
 
-def _cell_at(design: Any, arm_id: str, seed: int) -> Any:
-    return next(
-        c for c in enumerate_cells(design)
-        if c.arm_id == arm_id and c.seed == seed
+def check_channel_binds(  # pragma: no cover - CLI-driven check
+    design: Any, runs: dict[str, Any], report: dict[str, Any],
+) -> None:
+    """The period arm must resolve its block; the declared arm none."""
+    expected = declared_onset_recording(design, PERIOD_ARM)
+    assert runs[PERIOD_ARM]["engine_onset_recording"] == expected, (
+        "period arm resolved "
+        f"{runs[PERIOD_ARM]['engine_onset_recording']} != {expected}"
     )
-
-
-def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--design", default=DESIGN_REL)
-    parser.add_argument("--seed", type=int, default=20200205)
-    parser.add_argument(
-        "--spec-only",
-        action="store_true",
-        help="enumeration + spec-lands checks only, no engine runs",
+    assert runs[DECLARED_ARM]["engine_onset_recording"] is None, (
+        "declared arm resolved a channel it does not declare"
     )
-    args = parser.parse_args()
+    report["channel_binding"] = {
+        arm: r["engine_onset_recording"] for arm, r in runs.items()
+    }
 
-    repo_root = repo_root_of(__file__)
-    design, declared_cells = load_declared_cells(repo_root, args.design)
-    report: dict[str, Any] = {"design_id": design.design_id}
-    report["cell_blocks"] = check_enumeration(design, declared_cells)
-    print(f"enumeration: {declared_cells} cells")
 
-    landed = check_channel_spec_lands(design, repo_root)
-    print(f"spec-lands: channel blocks resolve on {len(landed)} arms")
-
-    if not args.spec_only:
-        runs: dict[str, Any] = {}
-        for arm_id in (DECLARED_ARM, PERIOD_ARM):
-            cell = _cell_at(design, arm_id, args.seed)
-            runs[arm_id] = run_cell(
-                design, cell, repo_root, RUN_EPOCHS,
-                extra_readback=lambda sim: {
-                    "engine_onset_recording": engine_onset_recording(sim),
-                },
-            )
-            print(
-                f"{arm_id}: channel={runs[arm_id]['engine_onset_recording']} "
-                f"recorded={runs[arm_id]['recorded_onsets']}",
-            )
-        expected = design.arm_overrides(PERIOD_ARM)["pathogen_overrides"][
-            PATHOGEN_ID
-        ]["observation_model"]["onset_recording"]
-        assert runs[PERIOD_ARM]["engine_onset_recording"] == expected, (
-            "period arm resolved "
-            f"{runs[PERIOD_ARM]['engine_onset_recording']} != {expected}"
-        )
-        assert runs[DECLARED_ARM]["engine_onset_recording"] is None, (
-            "declared arm resolved a channel it does not declare"
-        )
-        report["channel_binding"] = {
-            arm: r["engine_onset_recording"] for arm, r in runs.items()
-        }
-
-    print(json.dumps(report, indent=2, default=str))
+def _channel_run(  # pragma: no cover - CLI-driven check
+    design: Any, cell: Any, repo_root: str,
+) -> dict[str, Any]:
+    return run_cell(
+        design, cell, repo_root, RUN_EPOCHS,
+        extra_readback=lambda sim: {
+            "engine_onset_recording": engine_onset_recording(sim),
+        },
+    )
 
 
 if __name__ == "__main__":
-    main()
+    drive(
+        file_name=__file__,
+        design_rel=DESIGN_REL,
+        spec_check=check_channel_spec_lands,
+        runtime_arms=(DECLARED_ARM, PERIOD_ARM),
+        cell_runner=_channel_run,
+        binding_check=check_channel_binds,
+        arm_line=lambda arm, r: (
+            f"{arm}: channel={r['engine_onset_recording']} "
+            f"recorded={r['recorded_onsets']}"
+        ),
+    )
