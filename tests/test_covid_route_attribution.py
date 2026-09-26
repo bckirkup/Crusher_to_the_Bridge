@@ -326,7 +326,8 @@ class TestCabinPairChallengeLedger:
         assert cabin_compartment_key(_cabin_agent(9, set())) is None
 
     def test_observe_tallies_directed_dose_per_channel(self):
-        mates = [_cabin_agent(1, {2}), _cabin_agent(2, {1})]
+        mates = [_cabin_agent(1, {2}), _cabin_agent(2, {1}),
+                 _cabin_agent(9, set())]
         ledger = CabinPairChallengeLedger()
         sim = _cabin_sim(mates, quarantined={1, 2})
         ledger.observe(sim, _observe_work(5, droplet=[
@@ -413,6 +414,67 @@ class TestCabinPairChallengeLedger:
         assert row["susceptibility"] == "counterfactual"
         assert 0.0 < row["lambda"]
         assert table["observed_mate_case_attack_confined"] == pytest.approx(1.0)
+
+    def test_table_exponential_model_and_preconfined_mate(self):
+        profiles = {"p": {"dose_response": {"model": "exponential",
+                                          "k": 0.01}}}
+        mates = [
+            _cabin_agent(1, {2}, infections={"p": {"infection_epoch": 1,
+                                                  "first_infection_epoch": 1}}),
+            # Mate seroconverted before confinement began at epoch 6.
+            _cabin_agent(2, {1}, infections={"p": {"infection_epoch": 3,
+                                                  "first_infection_epoch": 3}}),
+        ]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(mates, profiles=profiles)
+        ledger.observe(sim, _observe_work(0))
+        sim2 = _cabin_sim(mates, quarantined={1, 2}, profiles=profiles)
+        ledger.observe(sim2, _observe_work(6, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 4.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim2)
+        row = table["rows"][0]
+        assert row["susceptibility"] == "counterfactual"
+        assert row["lambda"] == pytest.approx(0.04)
+        # Pre-confinement conversion: pair confined but mate held no
+        # confined-exposure slot, so the confined denominator is empty.
+        assert table["confined_index_pairs"] == 1
+        assert table["observed_mate_case_attack_confined"] is None
+        assert table["observed_mate_case_attack"] == pytest.approx(1.0)
+
+    def test_table_skips_uninfected_and_unconfined_pairs(self):
+        profiles = {"p": {"dose_response": {"alpha": 1.0, "beta": 1.0}}}
+        # pair_a's index is infected but the pair never confines; pair_b's
+        # member is infected with a pathogen the pair never exchanged.
+        pair_a = [_cabin_agent(
+            1, {2}, infections={"p": {"infection_epoch": 1}}),
+            _cabin_agent(2, {1})]
+        pair_b = [_cabin_agent(
+            3, {4}, infections={"q": {"infection_epoch": 1}}),
+            _cabin_agent(4, {3})]
+        pair_c = [_cabin_agent(5, {6}), _cabin_agent(6, {5})]
+        ledger = CabinPairChallengeLedger()
+        sim = _cabin_sim(pair_a + pair_b + pair_c, quarantined={3, 4, 5, 6},
+                         profiles=profiles)
+        ledger.observe(sim, _observe_work(2, droplet=[
+            {"air_unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 1.0},
+            {"air_unit": "zCabin::cabin3", "target_id": 4,
+             "pathogen_id": "p", "dose": 1.0},
+            {"air_unit": "zCabin::cabin5", "target_id": 6,
+             "pathogen_id": "p", "dose": 1.0},
+        ]))
+        table = cabin_pair_challenge_table(ledger, sim)
+        assert len(table["rows"]) == 3
+        # pair_a contributes an index pair (one infected member) with no
+        # secondary; pair_b's infection is off-pathogen so it is skipped.
+        assert table["mate_index_pairs"] == 1
+        assert table["observed_mate_case_attack"] == pytest.approx(0.0)
+        # pair_a never confined; pair_b's confinement tally can't reach the
+        # confined-window branch — no confined index pair forms.
+        assert table["confined_index_pairs"] == 0
+        assert table["observed_mate_case_attack_confined"] is None
 
     def test_table_empty_ledger_is_safe(self):
         ledger = CabinPairChallengeLedger()
