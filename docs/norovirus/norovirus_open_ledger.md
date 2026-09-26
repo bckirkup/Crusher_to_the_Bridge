@@ -3923,10 +3923,13 @@ its stable ID; pull requests must not append numbered items.
     pickup request divides by, and applies Park 2015's per-swab copy LOD
     (`SWAB_LOD_COPIES_BY_SURFACE`, `SWAB_RECOVERY_EFFICIENCY_BOUNDS`;
     derivation `docs/norovirus/environmental_observation_v1.md` §2). The
-    default stays `airborne_fraction`, so the decision layer reads the
-    legacy synthetic 0.4-of-airborne figure and no golden moves; the
-    repaired path ships unmeasured and awaits a matched arm — no archive
-    to date carries it. Explicitly **not done** here and owed by the
+    default stayed `airborne_fraction` at that change, so the decision
+    layer read the legacy synthetic 0.4-of-airborne figure and no golden
+    moved. **Update — default flipped:** per the OVERRIDE-FLAGS-01 audit,
+    `surface_pool_density` is now the default; `airborne_fraction`
+    remains the labelled pre-change baseline for paired contrast. Swab
+    outputs change to the real deposited-pool densities — that is the
+    intent; no dose or RNG stream is touched. Explicitly **not done** here and owed by the
     following change: the deposited share outside the high-touch
     footprint (`non_touchable` in `_emit_emesis`, `transmission_core.py`)
     is still written to the deposition record and dropped — the majority
@@ -3952,9 +3955,17 @@ its stable ID; pull requests must not append numbered items.
     samples are censored, never zeroed. v1 limitations, declared: no
     turnaround-queue entry (the assay reads immediately), no decay over
     the holding time, graywater sequencing untouched, capture only of
-    `non_touchable`. The change is additive and default-off: no dose,
+    `non_touchable`. The change is additive: no dose,
     rate, or RNG draw is touched, so no existing measurement is
     invalidated — the tank reads mass that was previously dropped.
+    **Update — defaults flipped:** the OVERRIDE-FLAGS-01 gate audit
+    flagged this pair as measured mechanisms resting default-off;
+    `transmission.blackwater_plumbing` and
+    `observation.wastewater_assay_mode` now default `true` /
+    `holding_tank` (`false` / `none` remain the labelled pre-change
+    baselines). The assay draws on its own seeded instrument stream, so
+    no dose or RNG golden moves; the observation record gains the
+    post-discharge read each epoch.
 
 58. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
     cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,

@@ -276,12 +276,12 @@ transmission:
   # "dwell_weighted" (Poisson visits resolved to the serving head, exposure
   # scaled by dwell share of the epoch, own `sanitary_visits` rng stream).
   sanitary_visit_mode: "none"
-  # blackwater_plumbing: false (default) — no holding tank. true runs the
-  # EPA 842-R-07-005 nominals (31.8 L/person/day, 62 h residence); a dict
-  # overrides l_per_person_day / residence_hours /
-  # emesis_drain_capture_fraction. The tank reads mass that is otherwise
-  # dropped and consumes no RNG, so the default is bit-identical.
-  # blackwater_plumbing: false
+  # blackwater_plumbing: true (default) — the EPA 842-R-07-005 nominals
+  # (31.8 L/person/day, 62 h residence); a dict overrides
+  # l_per_person_day / residence_hours / emesis_drain_capture_fraction.
+  # The tank reads mass that is otherwise dropped and consumes no RNG.
+  # false is the labelled pre-change baseline (no holding tank).
+  blackwater_plumbing: true
   # CONTACT-ARCH-01, switched on. Eight per-activity rates in distinct partners
   # per hour, from the sourced intervals in docs/contact_architecture_spec.md
   # section 4 (tranche 37; Pung 2022 Nat Commun 13:1956 is the only cruise
@@ -448,15 +448,16 @@ escalation:
 # confinement are controlled separately.
 observation:
   enabled: true
-  # surface_swab_source: "airborne_fraction" (default; legacy synthetic
-  # surface_fraction of the airborne zone pool — bit-identical to pre-change
-  # behaviour) or "surface_pool_density" (repaired: the real deposited
-  # surface pool as a per-cm² density, with a per-swab copy LOD).
-  # surface_swab_source: "airborne_fraction"
-  # wastewater_assay_mode: "none" (default) or "holding_tank" — a copies/L
-  # qPCR assay on the ship's blackwater holding tank, read post-discharge
-  # each epoch; requires transmission.blackwater_plumbing to be set.
-  # wastewater_assay_mode: "none"
+  # surface_swab_source: "surface_pool_density" (default; the real
+  # deposited surface pool as a per-cm² density, with a per-swab copy
+  # LOD). "airborne_fraction" is the labelled pre-change baseline (legacy
+  # synthetic surface_fraction of the airborne zone pool).
+  surface_swab_source: "surface_pool_density"
+  # wastewater_assay_mode: "holding_tank" (default; a copies/L qPCR assay
+  # on the ship's blackwater holding tank, read post-discharge each
+  # epoch; reads only when transmission.blackwater_plumbing is set).
+  # "none" is the labelled pre-change baseline.
+  wastewater_assay_mode: "holding_tank"
 
 # ── Syndromic Surveillance ────────────────────────────────────
 syndromic:

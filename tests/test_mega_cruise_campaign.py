@@ -2401,12 +2401,8 @@ def test_sourced_window_flags() -> None:
         },
     }}
     flags = provenance_flags(spec, cfg, profiles)
-    # "active" plus the two code-defaulted inert gates an empty cfg implies.
-    assert set(flags) == {"active", "gates_off"}
-    assert set(flags["gates_off"]) == {
-        "transmission.blackwater_plumbing",
-        "observation.wastewater_assay_mode",
-    }
+    # Every code-defaulted gate defaults on — an empty cfg flags none.
+    assert set(flags) == {"active"}
     assert "pathogen.norwalk_gi.dose_adjustment" in flags["active"]
     assert "cfg.transmission.density_dependent.exponent" in flags["active"]
 
@@ -2438,11 +2434,18 @@ def test_sourced_window_flags() -> None:
     # archive that claims a mechanism while its gate was off reads as such.
     cfg_gated = {
         "variant_surveillance": {"enabled": False},
-        "observation": {"wastewater_assay_mode": "none"},
-        "transmission": {"contact_mode": "per_partner_contact"},
+        "observation": {
+            "wastewater_assay_mode": "none",
+            "surface_swab_source": "airborne_fraction",
+        },
+        "transmission": {
+            "contact_mode": "per_partner_contact",
+            "blackwater_plumbing": False,
+        },
     }
     flags = provenance_flags({}, cfg_gated, {})
     assert flags["gates_off"] == [
+        "observation.surface_swab_source",
         "observation.wastewater_assay_mode",
         "transmission.blackwater_plumbing",
         "variant_surveillance.enabled",

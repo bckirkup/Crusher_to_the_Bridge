@@ -56,13 +56,13 @@ _PATHOGEN_FACTOR_TABLES: dict[str, tuple[Factor, ...]] = {
 # select a mechanism and are not flagged.
 _INERT_MODES = frozenset({"off", "none"})
 
-# Gates whose inert value lives in an engine default rather than the
-# shipped config: the key is absent from the merged cfg when off, so the
-# structural walk never sees it. path -> the inert value an explicit set
-# would also carry.
-_CODE_DEFAULT_GATES: dict[str, Any] = {
-    "transmission.blackwater_plumbing": False,
-    "observation.wastewater_assay_mode": "none",
+# Gates the structural walk cannot see: path -> (inert value,
+# absent_means_off). All three currently default on — an absent key is
+# not a flag; only an explicit inert set is (the labelled baseline arm).
+_CODE_DEFAULT_GATES: dict[str, tuple[Any, bool]] = {
+    "transmission.blackwater_plumbing": (False, False),
+    "observation.wastewater_assay_mode": ("none", False),
+    "observation.surface_swab_source": ("airborne_fraction", False),
 }
 
 
@@ -122,10 +122,11 @@ def _gate_is_off(key: str, value: Any) -> bool:
 
 
 def _code_default_gates_off(block: Mapping[str, Any]) -> Iterator[str]:
-    """Inert gates set by engine defaults — absent from the merged cfg."""
-    for path, inert in _CODE_DEFAULT_GATES.items():
+    """Explicitly-inert gates whose off spelling the walk cannot see
+    (a code default, or a source selector key rather than a mode)."""
+    for path, (inert, absent_is_off) in _CODE_DEFAULT_GATES.items():
         value = _resolve_path(block, tuple(path.split(".")))
-        if value is None or value == inert:
+        if (value is None and absent_is_off) or value == inert:
             yield path
 
 

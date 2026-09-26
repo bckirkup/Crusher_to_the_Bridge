@@ -1301,12 +1301,14 @@ def _parse_flush_cabin_emission(tx: dict[str, Any]) -> bool:
 def _parse_blackwater_plumbing(tx: dict[str, Any]) -> BlackwaterHoldingTank | None:
     """Build the ship's blackwater holding tank, or ``None`` when off.
 
-    ``transmission.blackwater_plumbing`` defaults to ``false``; ``true``
-    takes the EPA 842-R-07-005 nominals, a dict overrides any of the three
-    ctor kwargs. The tank consumes no RNG, so the off path stays
-    bit-identical.
+    ``transmission.blackwater_plumbing`` defaults to ``true``; ``false``
+    is the labelled pre-change baseline (no holding tank — the
+    non-aerosolised bowl share and emesis ``non_touchable`` are dropped).
+    ``true`` takes the EPA 842-R-07-005 nominals, a dict overrides any of
+    the three ctor kwargs. The tank consumes no RNG, so the off arm stays
+    bit-identical to pre-change behaviour.
     """
-    raw = tx.get("blackwater_plumbing", False)
+    raw = tx.get("blackwater_plumbing", True)
     if raw is True:
         return BlackwaterHoldingTank()
     if isinstance(raw, dict):

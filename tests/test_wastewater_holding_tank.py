@@ -374,13 +374,13 @@ class TestEmesisDrainRouting:
         ] == pytest.approx(record["non_touchable"] * 0.5)
 
 
-# ── Default-off ──────────────────────────────────────────────────────────
+# ── Default flip (blackwater on; labelled off baseline) ──────────────────
 
 
 class TestDefaultOff:
-    def test_no_tank_by_default_and_paired_run_is_identical(self) -> None:
-        """blackwater_tank is None unless the key is set; off vs absent are
-        bit-identical (the tank consumes no RNG)."""
+    def test_default_on_and_off_arm_is_paired_identical(self) -> None:
+        """blackwater_plumbing defaults on; the explicit-off baseline is
+        bit-identical to on (the tank consumes no RNG)."""
         def fingerprint(cfg_extra: dict | None) -> tuple[dict, dict, list[float]]:
             tx = {"sanitary_visit_mode": "dwell_weighted"}
             if cfg_extra:
@@ -421,20 +421,22 @@ class TestDefaultOff:
             tail = [float(core.rng.random()) for _ in range(5)]
             return core, route_doses, hand, tail
 
-        core_off, doses_a, hand_a, tail_a = fingerprint(None)
+        core_absent, doses_a, hand_a, tail_a = fingerprint(None)
         core_false, doses_b, hand_b, tail_b = fingerprint(
             {"blackwater_plumbing": False},
         )
         core_on, _, _, _ = fingerprint({"blackwater_plumbing": True})
-        assert core_off.blackwater_tank is None
+        assert core_absent.blackwater_tank is not None
         assert core_false.blackwater_tank is None
         assert core_on.blackwater_tank is not None
+        # The tank reads mass that was dropped; dose state is unchanged.
         assert doses_a == doses_b
         assert hand_a == hand_b
         assert tail_a == tail_b
 
-    def test_no_assay_record_without_mode_and_safe_degradation(self) -> None:
-        """Default config records nothing; holding_tank mode with no tank
+    def test_explicit_off_and_missing_core_degrade_cleanly(self) -> None:
+        """wastewater_assay_mode defaults to holding_tank; an explicit
+        "none" is the off arm, and a holding_tank read with no tx_core
         produces no record and does not raise."""
         from orchestrator_epoch import run_observation_sampling
 
@@ -454,19 +456,20 @@ class TestDefaultOff:
             syn_result={"sick_call_agents": []}, engine=engine,
             pathogen_profiles={},
         )
-        # Default mode: instrument exists but the mode is none -> no call.
-        ww_ht = run_observation_sampling(
-            cfg={"observation": {"enabled": True}}, **common,
-        ).wastewater_ht
-        assert ww_ht is None
-        obs.wastewater_assay.assay.assert_not_called()
-        # holding_tank mode with tx_core=None degrades to no record.
+        # Explicit off: instrument exists but the mode is none -> no call.
         ww_ht = run_observation_sampling(
             cfg={
                 "observation": {
-                    "enabled": True, "wastewater_assay_mode": "holding_tank",
+                    "enabled": True, "wastewater_assay_mode": "none",
                 },
             },
+            **common,
+        ).wastewater_ht
+        assert ww_ht is None
+        obs.wastewater_assay.assay.assert_not_called()
+        # Default (holding_tank) with tx_core=None degrades to no record.
+        ww_ht = run_observation_sampling(
+            cfg={"observation": {"enabled": True}},
             **common,
         ).wastewater_ht
         assert ww_ht is None

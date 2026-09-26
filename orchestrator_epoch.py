@@ -753,11 +753,12 @@ def run_observation_sampling(
         swab_targets = zone_names
     elif rank >= STATUS_RANK[STATUS_ALERT]:
         swab_targets = high_traffic
-    # observation.surface_swab_source: "airborne_fraction" (default, legacy
-    # synthetic 0.4 of the airborne pool) or "surface_pool_density" (the real
-    # deposited pool as a per-cm² density — the repaired channel).
+    # observation.surface_swab_source: "surface_pool_density" (default,
+    # the real deposited pool as a per-cm² density — the repaired
+    # channel) or "airborne_fraction" (labelled pre-change baseline:
+    # legacy synthetic 0.4 of the airborne pool).
     swab_source = cfg.get("observation", {}).get(
-        "surface_swab_source", "airborne_fraction"
+        "surface_swab_source", "surface_pool_density"
     )
     if swab_source == "surface_pool_density" and tx_core is not None:
         # zone_surface_mass pools every cabin compartment under its
@@ -833,7 +834,9 @@ def run_observation_sampling(
     # the turnaround queue in v1 — it has no declared TAT entry.
     wastewater_ht_result: dict[str, Any] | None = None
     if (
-        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        cfg.get("observation", {}).get(
+            "wastewater_assay_mode", "holding_tank"
+        )
         == "holding_tank"
         and obs.wastewater_assay is not None
         and tx_core is not None
