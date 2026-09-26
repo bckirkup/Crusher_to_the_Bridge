@@ -70,7 +70,7 @@ def delta_summary_frame(
     for key in a.keys() | b.keys():
         va, vb = a.get(key), b.get(key)
         delta = vb - va if isinstance(va, (int, float)) and isinstance(vb, (int, float)) else None
-        rows.append({"Metric": key, "Run A": va, "Run B": vb, "Delta (B-A)": delta})
+        rows.append({"Metric": key, "Run A": str(va), "Run B": str(vb), "Delta (B-A)": delta})
     return pd.DataFrame(rows)
 
 

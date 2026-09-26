@@ -175,20 +175,23 @@ def render_fleet_operations(
 ) -> None:
     st.subheader("Fleet Operations")
 
+    # ``fleet_root`` session key is written by the Operations Console after a
+    # fleet run; consume it into the widget's own key before instantiation.
+    pending_root = st.session_state.pop("fleet_root", "")
+    if pending_root:
+        st.session_state.fleet_root_input = pending_root
     fleet_root_input = st.text_input(
         "Presidio output root",
-        value=st.session_state.get("fleet_root") or default_fleet_root or os.path.join(
+        value=st.session_state.get("fleet_root_input") or default_fleet_root or os.path.join(
             REPO_ROOT, "presidio", "data", "experiences", "smoke_runs",
         ),
-        key="fleet_root",
+        key="fleet_root_input",
     )
     try:
         fleet_root = resolve_repo_path(REPO_ROOT, fleet_root_input)
     except ValueError:
         st.error("Fleet output root must be inside the repository.")
         return
-    st.session_state.fleet_root = fleet_root
-
     summary_path = resolve_child_path(fleet_root, "fleet_summary.json")
     fleet_summary: dict = {}
     try:
