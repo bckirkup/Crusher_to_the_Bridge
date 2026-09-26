@@ -2343,10 +2343,82 @@ def test_synthetic_recovery_cartesian_and_generator() -> None:
     params = spec["campaign_parameters"]
     assert params["never_symptomatic_fraction"] == pytest.approx(0.29)
     assert params["boarding_passenger_prevalence"] == pytest.approx(0.0325)
-    assert "innate_nonsusceptible_fraction" in noro
+    assert "innate_nonsusceptible_fraction" not in noro
+    assert noro["secretor_negative_fraction"] == pytest.approx(0.2)
+    assert noro["secretor_negative_relative_susceptibility"] == pytest.approx(
+        0.2
+    )
+    assert params["secretor_negative_fraction"] == pytest.approx(0.2)
+    assert params[
+        "secretor_negative_relative_susceptibility"
+    ] == pytest.approx(0.2)
     tx = spec["config_overrides"]["transmission"]
     assert tx["contact_mode"] == "density_dependent"
     assert "exponent" in tx["density_dependent"]
+
+
+def test_synthetic_recovery_secretor_axis_rules() -> None:
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _secretor_axis,
+        _secretor_declared_value,
+    )
+
+    # The withdrawn spellings are refused, not translated: under a profile
+    # carrying secretor_negative_fraction the alias write is shadowed and the
+    # archive would record a swept axis the engine never executed.
+    for key in ("non_susceptible", "innate_nonsusceptible_fraction"):
+        with pytest.raises(ValueError, match="withdrawn"):
+            _secretor_axis({key: 0.3}, {}, {}, 1)
+
+    # Declared scalar sweeps pin the exact values into the run.
+    resolved = _secretor_axis(
+        {"secretor_negative_relative_susceptibility": 0.45},
+        {"secretor_negative_fraction": 0.2},
+        {},
+        7,
+    )
+    assert resolved == {
+        "secretor_negative_fraction": pytest.approx(0.2),
+        "secretor_negative_relative_susceptibility": pytest.approx(0.45),
+    }
+
+    # A distribution declaration draws once per run, seeded off the run seed
+    # and field name — reproducible for a given seed, and inside the window.
+    decl = {"dist": "log_uniform", "interval": [0.04, 0.83]}
+    a = _secretor_declared_value(decl, seed=101, field="f")
+    b = _secretor_declared_value(decl, seed=101, field="f")
+    c = _secretor_declared_value(decl, seed=102, field="f")
+    assert a == b
+    assert a != c
+    assert 0.04 <= a <= 0.83
+    assert 0.04 <= c <= 0.83
+    uni = _secretor_declared_value(
+        {"dist": "uniform", "interval": [0.19, 0.29]}, seed=3, field="f"
+    )
+    assert 0.19 <= uni <= 0.29
+
+    # Out-of-window and malformed declarations fail loudly.
+    with pytest.raises(ValueError):
+        _secretor_declared_value({"dist": "uniform", "interval": [0, 1.5]},
+                                 seed=1, field="f")
+    with pytest.raises(ValueError):
+        _secretor_declared_value({"dist": "gaussian", "interval": [0, 1]},
+                                 seed=1, field="f")
+    with pytest.raises(ValueError):
+        _secretor_declared_value(1.5, seed=1, field="f")
+
+    # Undeclared and absent from every layer: no axis to pin.
+    assert _secretor_axis({}, {}, {}, 1) is None
+    # Undeclared but present in the profile: the profile truth is pinned
+    # so the spec records the mechanism the run actually executed.
+    prof = {
+        "secretor_negative_fraction": 0.2,
+        "secretor_negative_relative_susceptibility": 0.2,
+    }
+    assert _secretor_axis({}, prof, {}, 1) == {
+        "secretor_negative_fraction": pytest.approx(0.2),
+        "secretor_negative_relative_susceptibility": pytest.approx(0.2),
+    }
 
 
 def test_vsp_degradation_cartesian_and_generator() -> None:

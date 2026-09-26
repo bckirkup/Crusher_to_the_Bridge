@@ -38,37 +38,43 @@
           "id": "ridge_1",
           "dose_adj": 9.5,
           "alpha_c": 1.0,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         },
         {
           "id": "ridge_2",
           "dose_adj": 10.0,
           "alpha_c": 0.85,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         },
         {
           "id": "ridge_3",
           "dose_adj": 10.6,
           "alpha_c": 0.75,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         },
         {
           "id": "ridge_4",
           "dose_adj": 11.0,
           "alpha_c": 0.65,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         },
         {
           "id": "ridge_5",
           "dose_adj": 11.5,
           "alpha_c": 0.55,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         },
         {
           "id": "off_ridge",
           "dose_adj": 10.6,
           "alpha_c": 1.0,
-          "non_susceptible": 0.0
+          "secretor_negative_fraction": 0.2,
+          "secretor_negative_relative_susceptibility": 0.2
         }
       ],
       "seeds": [
