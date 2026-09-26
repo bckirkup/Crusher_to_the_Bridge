@@ -266,24 +266,29 @@ class CabinPairChallengeLedger:
         quarantined = getattr(sim.tx_core, "_quarantined_ids", set())
         epoch = int(getattr(work, "epoch", getattr(sim, "_epoch", 0)))
         for members in unit_members.values():
-            key = tuple(sorted(members))
             if members <= quarantined:
+                key = tuple(sorted(members))
                 self.confined_epochs[key] += 1
-                if key not in self.confined_first:
-                    self.confined_first[key] = epoch
+                self.confined_first.setdefault(key, epoch)
                 self.confined_last[key] = epoch
         matrix = getattr(work, "tracing_matrix", None)
-        if matrix is None:
-            return
+        if matrix is not None:
+            self._tally_exposure_records(matrix, unit_members)
+
+    def _tally_exposure_records(
+        self,
+        matrix: Any,
+        unit_members: dict[str, frozenset[int]],
+    ) -> None:
         records = (
-            (matrix.droplet_exposures, "pool", "air_unit", "source_ids"),
-            (matrix.shared_room_exposures, "contact", "compartment", "source_ids"),
-            (matrix.hvac_downstream_exposures, "hvac", "air_unit", "source_agent_ids"),
-            (matrix.emesis_aerosol_exposures, "emesis", "target_zone", "source_agent_ids"),
-            (matrix.flush_aerosol_exposures, "flush", "target_zone", "source_agent_ids"),
+            (matrix.droplet_exposures, "pool", "air_unit"),
+            (matrix.shared_room_exposures, "contact", "compartment"),
+            (matrix.hvac_downstream_exposures, "hvac", "air_unit"),
+            (matrix.emesis_aerosol_exposures, "emesis", "target_zone"),
+            (matrix.flush_aerosol_exposures, "flush", "target_zone"),
         )
         seen_shared: set[tuple[int, ...]] = set()
-        for rows, channel, unit_field, _src in records:
+        for rows, channel, unit_field in records:
             for rec in rows:
                 unit = rec.get(unit_field)
                 members = unit_members.get(unit) if unit else None
@@ -292,14 +297,13 @@ class CabinPairChallengeLedger:
                 target = int(rec["target_id"])
                 if target not in members:
                     continue
-                key = tuple(sorted(members))
-                pid = str(rec.get("pathogen_id") or "")
                 dose = float(rec.get("dose") or 0.0)
                 if dose <= 0.0:
                     continue
+                key = tuple(sorted(members))
                 by_pathogen = self.directed_dose.setdefault(
                     (key, target), {},
-                ).setdefault(pid, Counter())
+                ).setdefault(str(rec.get("pathogen_id") or ""), Counter())
                 if channel == "pool":
                     plume = float(rec.get("near_field_dose") or 0.0)
                     by_pathogen["plume"] += plume
@@ -325,131 +329,20 @@ def cabin_pair_challenge_table(
     members infected (any source). It is a held-out readout, not a fit.
     """
     agents = _agents_by_id(sim)
-    # Counterfactual frailty for hosts whose engine challenge never fired
-    # (e.g. every dose sub-copy): drawn on a labelled separate stream keyed
-    # by (run seed, agent, pathogen), never from the engine's generator —
-    # the per_host_dose_challenge convention for never-challenged hosts.
-    cf_seed = int(getattr(sim.run_spec, "random_seed", 0) or 0)
-    cf_seed = cf_seed if cf_seed else 0
-    cf_draws: dict[tuple[int, str], float] = {}
     profiles = getattr(sim.tx_core, "pathogen_profiles", {})
-
-    def _susceptibility(agent: Any, pid: str) -> tuple[float, bool]:
-        drawn = agent.dose_response_susceptibility.get(pid) if agent else None
-        if drawn is not None:
-            return float(drawn), True
-        key = (int(agent.agent_id), pid)
-        if key not in cf_draws:
-            dr = profiles.get(pid, {}).get("dose_response", {})
-            if dr.get("model", "beta_poisson") == "exponential":
-                cf_draws[key] = float(dr.get("k", 0.01))
-            else:
-                gen = np.random.default_rng(
-                    (cf_seed * 1_000_003 + key[0] * 977
-                     + zlib.crc32(pid.encode())) & 0x7FFFFFFF
-                )
-                draw = float(
-                    gen.beta(float(dr.get("alpha", 1.0)),
-                             float(dr.get("beta", 1.0)))
-                )
-                cf_draws[key] = draw * float(
-                    dr.get("susceptibility_scale", 1.0)
-                )
-        return cf_draws[key], False
-
-    rows: list[dict[str, Any]] = []
-    for (members, target), by_pathogen in sorted(
-        ledger.directed_dose.items(),
-    ):
-        agent = agents.get(target)
-        for pid, channels in sorted(by_pathogen.items()):
-            susc, drawn = _susceptibility(agent, pid)
-            dose = sum(channels.values())
-            lam = susc * dose
-            rows.append({
-                "cabin_members": list(members),
-                "target_id": target,
-                "pathogen_id": pid,
-                "lambda": lam,
-                "susceptibility": "engine_draw" if drawn else "counterfactual",
-                "implied_sar": 1.0 - math.exp(-lam),
-                "channel_dose": {c: channels.get(c, 0.0) for c in CabinPairChallengeLedger.CHANNELS if channels.get(c, 0.0)},
-                "confined_epochs": ledger.confined_epochs.get(members, 0),
-                "infected": (
-                    agent.infections.get(pid) is not None
-                    if agent is not None
-                    else None
-                ),
-            })
+    resolver = _SusceptibilityResolver(
+        seed=int(getattr(sim.run_spec, "random_seed", 0) or 0),
+        profiles=profiles,
+    )
+    rows = _challenge_rows(ledger, agents, resolver)
     lambdas = [r["lambda"] for r in rows]
-    pairs_infected: dict[tuple[int, ...], set[int]] = {}
-    for (members, _t) in ledger.directed_dose:
-        pairs_infected.setdefault(members, set())
-    for members in pairs_infected:
-        for aid in members:
-            agent = agents.get(aid)
-            if agent is not None and agent.infections:
-                pairs_infected[members].add(aid)
-    pair_pathogens: dict[tuple[int, ...], set[str]] = {}
-    for (members, _t), by_pathogen in ledger.directed_dose.items():
-        pair_pathogens.setdefault(members, set()).update(by_pathogen)
-    # Household-style secondary attack analogue: in a pair where >=1 member
-    # was infected with a pair pathogen, one is the index by convention and
-    # (infected - 1)/(members - 1) is the observed mate attack. A member who
-    # converted is still inside infected_ids, so a members-minus-infected
-    # denominator structurally reads 0 — it must not be used.
-    mate_index_pairs = 0
-    mate_secondaries = 0
-    mate_slots = 0
-    confined_index_pairs = 0
-    confined_secondaries = 0
-    confined_slots = 0
-    for members, infected_ids in pairs_infected.items():
-        if not infected_ids:
-            continue
-        pids = pair_pathogens.get(members, set())
-        first_epochs = {
-            aid: min(
-                agents[aid].infections[pid].get("first_infection_epoch",
-                                               agents[aid].infections[pid]["infection_epoch"])
-                for pid in pids if pid in agents[aid].infections
-            )
-            for aid in members
-            if (agents.get(aid) is not None
-                and any(pid in agents[aid].infections for pid in pids))
-        }
-        infected_count = len(first_epochs)
-        if not infected_count:
-            continue
-        slots = len(members) - 1
-        secondaries = infected_count - 1
-        mate_index_pairs += 1
-        mate_secondaries += secondaries
-        mate_slots += slots
-        first_confined = ledger.confined_first.get(members)
-        if first_confined is None:
-            continue
-        last_confined = ledger.confined_last[members]
-        # Confined-window analogue of the cabinmate attack rate: one index
-        # by convention (the earliest-infected member), and each other
-        # member counts as exposed if it entered confinement uninfected and
-        # converted if its first infection epoch falls inside the pair's
-        # confined window. Epoch granularity cannot separate an infection
-        # acquired on the confinement day itself before the order fired.
-        confined_index_pairs += 1
-        index = min(first_epochs, key=first_epochs.get) if first_epochs else None
-        for aid in members:
-            if aid == index:
-                continue
-            ep = first_epochs.get(aid)
-            if ep is not None and ep < first_confined:
-                continue  # already infected entering confinement
-            confined_slots += 1
-            if ep is not None and first_confined <= ep <= last_confined:
-                confined_secondaries += 1
+    mate = _mate_attack_counts(ledger, agents)
     confined_rows = [r for r in rows if r["confined_epochs"] > 0]
+    # Observed cabinmate secondary attack among pairs where a member was
+    # infected (index excluded). The confined slice is the held-out
+    # analogue of Pluciński 2020 / Wikswo 2011 / Chimonas 2008.
     return {
-        "pairs_observed": len(pairs_infected),
+        "pairs_observed": mate["pairs_observed"],
         "directed_rows": len(rows),
         "lambda_quantiles": _quantiles(lambdas),
         "lambda_confined_quantiles": _quantiles(
@@ -458,18 +351,181 @@ def cabin_pair_challenge_table(
         "implied_sar_confined_median": (
             _quantiles([r["implied_sar"] for r in confined_rows]).get("median")
         ),
-        # Observed cabinmate secondary attack among pairs where a member
-        # was infected (index excluded). The confined slice is the held-out
-        # analogue of Pluciński 2020 / Wikswo 2011 / Chimonas 2008.
+        "observed_mate_case_attack": mate["observed_mate_case_attack"],
+        "observed_mate_case_attack_confined": (
+            mate["observed_mate_case_attack_confined"]
+        ),
+        "mate_index_pairs": mate["mate_index_pairs"],
+        "confined_index_pairs": mate["confined_index_pairs"],
+        "rows": rows,
+    }
+
+
+class _SusceptibilityResolver:
+    """Persistent frailty lookup with counterfactual fallback draws.
+
+    Counterfactual frailty for hosts whose engine challenge never fired
+    (e.g. every dose sub-copy) is drawn on a labelled separate stream keyed
+    by (run seed, agent, pathogen), never from the engine's generator —
+    the per_host_dose_challenge convention for never-challenged hosts.
+    """
+
+    def __init__(self, seed: int, profiles: dict[str, Any]) -> None:
+        self.seed = seed
+        self.profiles = profiles
+        self._draws: dict[tuple[int, str], float] = {}
+
+    def susceptibility(self, agent: Any, pid: str) -> tuple[float, bool]:
+        drawn = agent.dose_response_susceptibility.get(pid) if agent else None
+        if drawn is not None:
+            return float(drawn), True
+        key = (int(agent.agent_id), pid)
+        if key not in self._draws:
+            self._draws[key] = self._counterfactual_draw(key)
+        return self._draws[key], False
+
+    def _counterfactual_draw(self, key: tuple[int, str]) -> float:
+        dr = self.profiles.get(key[1], {}).get("dose_response", {})
+        if dr.get("model", "beta_poisson") == "exponential":
+            return float(dr.get("k", 0.01))
+        gen = np.random.default_rng(
+            (self.seed * 1_000_003 + key[0] * 977
+             + zlib.crc32(key[1].encode())) & 0x7FFFFFFF
+        )
+        return float(
+            gen.beta(float(dr.get("alpha", 1.0)),
+                     float(dr.get("beta", 1.0)))
+        ) * float(dr.get("susceptibility_scale", 1.0))
+
+
+def _challenge_rows(
+    ledger: CabinPairChallengeLedger,
+    agents: dict[int, Any],
+    resolver: _SusceptibilityResolver,
+) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
+    for (members, target), by_pathogen in sorted(ledger.directed_dose.items()):
+        agent = agents.get(target)
+        for pid, channels in sorted(by_pathogen.items()):
+            susc, drawn = resolver.susceptibility(agent, pid)
+            lam = susc * sum(channels.values())
+            rows.append({
+                "cabin_members": list(members),
+                "target_id": target,
+                "pathogen_id": pid,
+                "lambda": lam,
+                "susceptibility": "engine_draw" if drawn else "counterfactual",
+                "implied_sar": 1.0 - math.exp(-lam),
+                "channel_dose": {
+                    c: channels.get(c, 0.0)
+                    for c in CabinPairChallengeLedger.CHANNELS
+                    if channels.get(c, 0.0)
+                },
+                "confined_epochs": ledger.confined_epochs.get(members, 0),
+                "infected": (
+                    agent.infections.get(pid) is not None
+                    if agent is not None
+                    else None
+                ),
+            })
+    return rows
+
+
+def _pair_first_epochs(
+    members: tuple[int, ...],
+    pids: set[str],
+    agents: dict[int, Any],
+) -> dict[int, int]:
+    return {
+        aid: min(
+            agents[aid].infections[pid].get(
+                "first_infection_epoch",
+                agents[aid].infections[pid]["infection_epoch"],
+            )
+            for pid in pids if pid in agents[aid].infections
+        )
+        for aid in members
+        if (agents.get(aid) is not None
+            and any(pid in agents[aid].infections for pid in pids))
+    }
+
+
+def _confined_window_counts(
+    members: tuple[int, ...],
+    first_epochs: dict[int, int],
+    ledger: CabinPairChallengeLedger,
+) -> tuple[int, int]:
+    """Confined-window cabinmate attack: earliest member is the index; each
+    other member exposed if it entered confinement uninfected, converting
+    if its first infection epoch lands inside the confined window. Epoch
+    granularity cannot separate an infection acquired on confinement day
+    before the order fired."""
+    first_confined = ledger.confined_first.get(members)
+    if first_confined is None:
+        return 0, 0
+    last_confined = ledger.confined_last[members]
+    index = min(first_epochs, key=first_epochs.get)
+    slots = 0
+    secondaries = 0
+    for aid in members:
+        if aid == index:
+            continue
+        ep = first_epochs.get(aid)
+        if ep is not None and ep < first_confined:
+            continue
+        slots += 1
+        if ep is not None and first_confined <= ep <= last_confined:
+            secondaries += 1
+    return slots, secondaries
+
+
+def _mate_attack_counts(
+    ledger: CabinPairChallengeLedger,
+    agents: dict[int, Any],
+) -> dict[str, Any]:
+    """Household-SAR analogue: (infected - 1)/(members - 1) per pair with a
+    member infected with a pair pathogen. A converted mate stays inside
+    infected_ids, so members-minus-infected denominators read 0 — unused."""
+    pairs_infected: dict[tuple[int, ...], set[int]] = {}
+    pair_pathogens: dict[tuple[int, ...], set[str]] = {}
+    for (members, _t), by_pathogen in ledger.directed_dose.items():
+        pairs_infected.setdefault(members, set())
+        pair_pathogens.setdefault(members, set()).update(by_pathogen)
+    for members in pairs_infected:
+        for aid in members:
+            agent = agents.get(aid)
+            if agent is not None and agent.infections:
+                pairs_infected[members].add(aid)
+    mate_index_pairs = mate_secondaries = mate_slots = 0
+    confined_index_pairs = confined_secondaries = confined_slots = 0
+    for members, infected_ids in pairs_infected.items():
+        if not infected_ids:
+            continue
+        first_epochs = _pair_first_epochs(
+            members, pair_pathogens.get(members, set()), agents,
+        )
+        if not first_epochs:
+            continue
+        mate_index_pairs += 1
+        mate_secondaries += len(first_epochs) - 1
+        mate_slots += len(members) - 1
+        slots, secondaries = _confined_window_counts(
+            members, first_epochs, ledger,
+        )
+        if slots or (members in ledger.confined_first):
+            confined_index_pairs += 1
+        confined_slots += slots
+        confined_secondaries += secondaries
+    return {
+        "pairs_observed": len(pairs_infected),
+        "mate_index_pairs": mate_index_pairs,
+        "confined_index_pairs": confined_index_pairs,
         "observed_mate_case_attack": (
             mate_secondaries / mate_slots if mate_slots else None
         ),
         "observed_mate_case_attack_confined": (
             confined_secondaries / confined_slots if confined_slots else None
         ),
-        "mate_index_pairs": mate_index_pairs,
-        "confined_index_pairs": confined_index_pairs,
-        "rows": rows,
     }
 
 

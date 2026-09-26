@@ -109,7 +109,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         for seed in args.seeds
     ]
-    args.out.write_text(json.dumps(results, indent=1), encoding="utf-8")
+    out_path = args.out.resolve()
+    if not out_path.is_relative_to(REPO_ROOT):
+        out_path = REPO_ROOT / out_path.name
+    with validated_open(
+        out_path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        handle.write(json.dumps(results, indent=1))
     print(json.dumps(results, indent=1)[:4000])
     return 0
 

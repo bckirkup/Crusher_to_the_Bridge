@@ -2081,7 +2081,6 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
-        zone_air_exchange_per_hour: dict[str, float] | None = None,
     ) -> None:
         self.rng = rng
         tx = (cfg or {}).get("transmission", {}) or {}
@@ -2094,8 +2093,9 @@ class TransmissionCore:
         # Zone name -> air changes removed per hour (ach x hvac_duty from
         # the platform's air_flow_paths), the first-order removal rate the
         # ROOM-AIR-01 residence factor reads. Empty map + sealed mode is
-        # the pre-change standing-mass baseline.
-        self.zone_air_exchange_per_hour = dict(zone_air_exchange_per_hour or {})
+        # the pre-change standing-mass baseline. ShipSimulation populates
+        # it post-construction from build_zone_air_exchange_map.
+        self.zone_air_exchange_per_hour: dict[str, float] = {}
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -4948,7 +4948,7 @@ class TransmissionCore:
 
         if ec.get("enabled", False):
             self._pathway_environmental(
-                epoch, zone_occupants, p_agent_doses, matrix,
+                zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
@@ -8729,7 +8729,6 @@ class TransmissionCore:
 
     def _pathway_environmental(
         self,
-        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -9164,7 +9163,7 @@ def build_zone_air_exchange_map(
         oa = float(hvac_zone.get("oa_fraction", default_oa))
         duty = max(duty, 0.0)
         rate = ach * duty
-        if duty == 0.0 and oa >= 1.0:
+        if duty <= 0.0 and oa >= 1.0:
             rate = ach
         for room in hvac_zone.get("rooms", []):
             rates[room] = rate

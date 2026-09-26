@@ -821,7 +821,6 @@ class TestRoomAirRemoval:
         core = TransmissionCore(
             rng=np.random.default_rng(42),
             zone_volumes={zone: 20.0},
-            zone_air_exchange_per_hour={zone: ach},
             clock=SimClock(epoch_duration_hours=1.0, mode="hours"),
             cfg={
                 "transmission": {
@@ -831,6 +830,7 @@ class TestRoomAirRemoval:
                 },
             },
         )
+        core.zone_air_exchange_per_hour = {zone: ach}
         core.initialize_zones([zone])
         matrix, _ = core.execute_transmission(
             epoch=1,

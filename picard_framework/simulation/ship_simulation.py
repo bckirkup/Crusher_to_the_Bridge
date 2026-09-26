@@ -400,8 +400,8 @@ class ShipSimulation:
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
-            zone_air_exchange_per_hour=zone_air_exchange,
         )
+        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
         if self.display:
