@@ -444,7 +444,14 @@ def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
     ]
     text = json.dumps(results, indent=1, default=str)
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as handle:
+        out_path = args.out
+        if not os.path.isabs(out_path):
+            out_path = os.path.join(repo_root, out_path)
+        out_path = os.path.realpath(out_path)
+        root = os.path.realpath(repo_root) + os.sep
+        if not out_path.startswith(root):
+            raise SystemExit(f"--out must resolve under the repo root: {args.out}")
+        with open(out_path, "w", encoding="utf-8") as handle:
             handle.write(text)
     print(text)
 

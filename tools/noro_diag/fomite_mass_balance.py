@@ -264,12 +264,11 @@ def _wrap_delivery(core_cls: type, rec: Recorder) -> dict[str, Any]:
         pathogen_id = kwargs.get("pathogen_id")
         if pathogen_id is None and len(args) >= 7:
             pathogen_id = args[6]
-        if pathogen_id != rec.pathogen_id:
-            return delivered
-        book = rec.zone(zone_name)
-        book.offered += float(surface_mass)
-        book.offer_calls += 1
-        rec.epoch_acc["offered"] += float(surface_mass)
+        if pathogen_id == rec.pathogen_id:
+            book = rec.zone(zone_name)
+            book.offered += float(surface_mass)
+            book.offer_calls += 1
+            rec.epoch_acc["offered"] += float(surface_mass)
         return delivered
 
     core_cls._record_fomite_pickup = record_pickup
