@@ -18,7 +18,8 @@ PR; mechanical fixes kept in dedicated PRs per AGENTS.md.
 ## State of play (live scan, 2026-09-26, main @ bc0230e6+)
 
 - Start: 246 open issues.
-- Now: **106 open** — 97 × `python:S3776`, 9 × `python:S107`.
+- Now: **97 open** — all `python:S3776` (the S107s closed when #706
+  merged; an earlier scan raced the post-merge re-analysis).
 - 3 PRs merged for workstreams 1–3 (#701, #703, #704), plus #706 (S107) and
   #708 (sanity_checker S3776 batch).
 - ~40 issues closed without code (S116 ×9 boundary field names accepted;
@@ -95,9 +96,6 @@ skip-and-report.
 - **S5778 hoist:** with `pytest.raises`, any constructed argument (e.g. a
   dataclass) must be built ABOVE the `with` block; two callables inside
   re-triggers the rule.
-- **S107 residue:** 9 S107s still open after #706 — verify on the next live
-  scan whether they are re-firings at new locations (config dataclass
-  constructors) or residual signatures; fix or accept with justification.
 - **S3776 count moved 87→97 despite 14 closed** — net +24 net new-code
   findings since 2026-08-28 (moved lines + extraction helpers re-scanned). The
   ceiling only ratchets on `main`; trust live scans, not stale counts.
@@ -106,9 +104,7 @@ skip-and-report.
 
 Nothing conceptual — pure scheduling: spawn the three queued batches when
 SWE-2 slots free, then a final live scan and (if any S3776 remains) a
-cleanup batch. The only judgment call queued is the S107 residue above
-(re-flagged constructor vs residual signatures — decide per issue).
-
+cleanup batch. 
 ## Do not reopen
 
 - Do not tune any epidemiological constant, do not loosen the C901=56 ceiling
