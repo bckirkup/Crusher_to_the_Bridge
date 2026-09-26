@@ -192,8 +192,38 @@ re-registering:
   ```bash
   # revision + sizing the running job is using
   aws --profile picard batch describe-jobs --jobs <jobId> --region us-east-1 --query "jobs[0].jobDefinition"
-  aws --profile picard batch describe-job-definitions --job-definition-name picard-campaign --status ACTIVE --region us-east-1 --query "jobDefinitions[-1].[revision,containerProperties.resourceRequirements]"
+  aws --profile picard batch describe-job-definitions --job-definition-name picard-campaign --status ACTIVE --region us-east-1 --query "max_by(jobDefinitions, &revision).[revision,containerProperties.resourceRequirements]"
   ```
+
+- **`describe-job-definitions` ordering is NOT by revision.** `jobDefinitions[-1]`
+  in a JMESPath query can return ANY active revision (observed returning rev 1
+  while rev 20 was latest). To clone a specific revision for re-registration,
+  fetch it by full ARN — `--job-definition-name` only takes the family:
+
+  ```bash
+  aws --profile picard batch describe-job-definitions \
+    --job-definitions "arn:aws:batch:<REGION>:<ACCOUNT_ID>:job-definition/<family>:<REV>" \
+    --region <REGION>
+  ```
+
+- **The `command` is appended to the image ENTRYPOINT — pick the Dockerfile
+  whose entrypoint matches the command grammar.** Job-def `command:
+  [deploy/aws/<worker>.py, args...]` requires `ENTRYPOINT ["python3"]` (the
+  script arrives as argv[0]). The root `Dockerfile` instead ends with
+  `ENTRYPOINT ["python3", "-m", "...campaign_runner"]`, so the same command
+  runs campaign_runner with the worker path as argv[0] → argparse usage error,
+  every child exits 2 within seconds. Worker images reset the entrypoint by
+  layering on the campaign base, e.g. the COVID boarding-screen image:
+
+  ```bash
+  docker build -t picard-campaign .            # base from merged main
+  docker build -f deploy/aws/Dockerfile.covid_hull \
+    --build-arg BASE_IMAGE=picard-campaign -t <ecr>:<tag> .
+  ```
+
+  `Dockerfile.design` is the same pattern for bounded-design jobs. Cloning a
+  working revision's `containerProperties` does not rescue the wrong image —
+  the entrypoint lives in the image, not the job def.
 
 - **Job queue may be missing.** Inventory has seen the campaign CE VALID while
   `picard-campaign-queue` was absent. `ensure_campaign_infra.sh` recreates both
@@ -249,11 +279,35 @@ aws logs create-log-group --log-group-name /aws/batch/picard-campaign --region u
 - Prefer `deploy/aws/monitor_campaign.ps1 -JobId … -Prefix campaign/<name>/ -Watch`
   on Windows. It requires `-Bucket` / `CAMPAIGN_BUCKET`, or a local
   `deploy/aws/.env` copied from `.env.example` (auto-loaded; never commit it).
+- **Poll the array job, not the children.** `describe-jobs` on the array job
+  id returns `arrayProperties.statusSummary` — per-status child counts in ONE
+  call. Do not fan out to `list-jobs` or per-child `describe-jobs` for status.
+  Poll every **10–45 min** — children take ~30 min on Spot and nothing changes
+  faster; tighter loops are wasted calls.
 - Single-line status poll with a UTC timestamp prefix and trailing newline:
 
   ```bash
   aws batch describe-jobs --jobs <jobId> --region us-east-1 --query "jobs[0].arrayProperties.statusSummary" --output json | tr -d '\n' | sed "s/^/$(date -u +%Y-%m-%dT%H:%M:%SZ) /"; echo
   ```
+
+- **`list-jobs --array-job-id` without `--job-status` can return an empty
+  list** even when children exist and failed — pass the status explicitly:
+
+  ```bash
+  aws batch list-jobs --array-job-id <jobId> --job-status FAILED \
+    --region us-east-1 --query "jobSummaryList[:2].[jobId,statusReason]"
+  ```
+
+- **Local runs: block on file presence + a live pid, not blind sleeps.** When
+  a worker writes one results file at the end:
+
+  ```bash
+  for i in $(seq 1 45); do [ -s out.json ] && break; sleep 60; done
+  ```
+
+  …and separately `ps -p <pid>` — a missing file means nothing if the writer
+  is dead. Check the file isn't a partial write (worker gone, file nonempty)
+  before parsing.
 
 - **RUNNING↔RUNNABLE bouncing on FARGATE_SPOT is normal** — it is Spot reclaim
   followed by Batch retry. Because of `--resume` + `completed_runs.txt` under
@@ -326,6 +380,9 @@ Use placeholders (or env vars) only — examples of the *shape*:
 | Array children exit **137** / `OutOfMemoryError: container killed due to memory usage` | Confirm subprocess isolation (no `--in-process`). Run `classify_batch_failures.py`. Escalate from 1/2048 → 1/4096 → 1/8192 → 2/16384. Re-register a new revision, then resubmit. |
 | Spot retry re-runs already-finished sims | Resume log not downloaded. Ensure `--resume --s3-prefix …` and that `_resume/completed_runs.shard-*.txt` uploads succeeded. |
 | Every child fails startup: `ResourceInitializationError ... ResourceNotFoundException: The specified log group does not exist` | `/aws/batch/picard-campaign` missing. `aws logs create-log-group --log-group-name /aws/batch/picard-campaign` once before submit. |
+| Every array child exits **2** within seconds; logs end `campaign_runner.py: error: unrecognized arguments: deploy/aws/<worker>.py ...` | Image ENTRYPOINT is the root Dockerfile's `python3 -m campaign_runner`; the job-def `command` is appended to it. Rebuild via the worker's layered Dockerfile (`deploy/aws/Dockerfile.covid_hull` / `Dockerfile.design`) which sets `ENTRYPOINT ["python3"]`. |
+| `describe-job-definitions ... jobDefinitions[-1]` returns a stale revision/image | Ordering isn't by revision — query `arn:aws:batch:...:job-definition/<family>:<REV>` or `max_by(jobDefinitions, &revision)`. |
+| `list-jobs --array-job-id` returns empty although children failed | Pass `--job-status FAILED` (or the status you want) explicitly. |
 | `create-job-queue` → "Compute Environment ... is not valid" | Environment still `CREATING`. Poll `describe-compute-environments` until `VALID`/`ENABLED`. |
 | `create-compute-environment` complains about a missing service-linked role | `aws iam create-service-linked-role --aws-service-name batch.amazonaws.com` once. |
 | `ec2 describe-subnets`/`describe-security-groups` AccessDenied | `picard-deploy-role` lacks `ec2:Describe*` — run in CloudShell (admin) or use the `Ec2Discovery` statement in the deploy role policy. Also ensure `--query` precedes the JMESPath expression. |
