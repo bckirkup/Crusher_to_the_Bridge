@@ -503,8 +503,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   closes vs the record at this theta. The 20200205 zero-asymptomatics
   anomaly did not recur (110/248 asymptomatic campaign positives).
   On the canary's 7/20 takeoff the user extended the design to 60 seeds
-  per cell (first 20 verbatim, +40) — 9 θ × 2 channels × 60 = 1,080
-  cells — for tighter takeoff-conditional quantiles; the full array runs
-  on a post-merge image so every scored cell shares one build. Design
+  per cell — 9 θ × 2 channels × 60 = 1,080 cells — and the full array
+  ran clean (1,080/1080, zero audit violations, `03a9db9e`, array
+  `ee429652`). **Measured verdict: the gap is unreachable on the Θ axis
+  under either channel.** Takeoff-conditional infections medians are
+  1,584–3,542 at every θ — always above the serology band top — while
+  the period channel removes a uniform ~50% of dated mass (seed-paired
+  period/declared recorded ratio 0.50–0.54 at every θ) and satisfies the
+  trajectory clause at Θ ×0.005 and ×0.001 (closest recorded median 656
+  vs 197). The gap factorizes as ~2× channel × ~2×+ truth overshoot the
+  hazard axis cannot reach; per the declared counterfactual the suspect
+  moves to seed/index structure. Design
   `picard_framework/runs/covid_sero_channel_v1_design.json`, ledger
   `docs/ledger/SERO-CHANNEL-V1.md`.

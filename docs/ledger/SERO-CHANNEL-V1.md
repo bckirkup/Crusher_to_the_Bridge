@@ -1,12 +1,14 @@
 # SERO-CHANNEL-V1
 **Date:** 2026-09-26
-**Commit:** 7db0e9a6
+**Commit:** 03a9db9e
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 8ac510b3
+**Measured at:** 03a9db9e
 
-Measured extent: canary only — period arm at theta x0.001, 20 seeds
-(cells 340-359). The remaining 340 cells have not run. (The canary's
+Measured extent: canary (20 seeds, cells 340-359 of the 20-seed
+revision) and the FULL 1,080-cell surface (60 seeds, array
+ee429652-09f3-41fc-aa77-78f040b989b5, image digest 5caf8ef on code
+03a9db9e — post-merge main + the 60-seed design revision). (The canary's
 Batch image was built from 8ac510b3, the pre-rebase SHA whose code is
 identical to the branch tip.)
 
@@ -79,11 +81,73 @@ image digest `3bff283`, cells 340-359 (P1_period, theta 4.22e7, seeds
   and `lab_confirmed_total` — the channel read-back is auditable per
   cell.
 
-Inference (not yet measured): the ~0.5 dating share vs the record's 0.28
-means the channel's undershoot arm of the gap decomposition is smaller
-than the declared expectation — under the period channel the sim still
-dates roughly twice the record's share of confirmed cases at theta
-x0.001. Whether that is the channel over-admitting or the record's
-denominator differing (sim confirms more infections than the voyage's
-712) is exactly what the paired declared arm resolves; the full array is
-the user's decision.
+Inference from the canary (superseded by the array read-out below): the
+~0.5 dating share vs the record's 0.28.
+
+## Full-array read-out (measured, 2026-09-26)
+
+Array `ee429652-09f3-41fc-aa77-78f040b989b5`
+(`picard-sero-channel-v1-full-60`), job-def
+`picard-covid-boarding-screen:24`, image digest `5caf8ef`, all 1,080
+cells SUCCEEDED, zero index-geometry violations
+(`index_onset_day == -1.0`, `index_shedding_at_day0` on every cell).
+Payloads under
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_sero_channel_v1/03a9db9e/cells/`.
+Takeoff-conditional tables below (gate recorded_onsets >= 10; every row
+carries >= 25/60 takeoff seeds, above the frozen 25% mass floor).
+
+Per-row medians among takeoff seeds, declared | period:
+
+| theta | takeoff D/P | infections med D/P | recorded med D/P | before_share D/P | dating share D/P |
+|---|---|---|---|---|---|
+| x1.0   | 56/56 | 3542/3542 | 3469/1874 | .83/.85 | .99/.54 |
+| x0.3   | 56/56 | 3468/3468 | 3229/1776 | .48/.51 | .99/.53 |
+| x0.1   | 53/52 | 3244/3278 | 2952/1596 | .27/.25 | .98/.52 |
+| x0.03  | 43/41 | 3081/3128 | 2871/1537 | .19/.20 | .98/.51 |
+| x0.01  | 39/34 | 2810/3112 | 2542/1534 | .18/.29 | .98/.51 |
+| x0.005 | 30/28 | 2593/2742 | 2332/1250 | .19/.21 | .98/.51 |
+| x0.003 | 25/25 | 2955/2955 | 2800/1457 | .29/.31 | .98/.52 |
+| x0.002 | 28/26 | 2747/2912 | 2518/1413 | .29/.37 | .99/.51 |
+| x0.001 | 28/26 | 1584/1738 | 1257/ 656 | .18/.23 | .97/.48 |
+
+Frozen-clause score:
+
+- **Serology clause fails at every theta under both channels.** The
+  takeoff-conditional infections median is 1,584-3,542 — always above
+  the band top (960). The q05-q95 interval intersects [712,960] on most
+  mid/deep rows but the median never lands inside. Per the declared
+  counterfactual: truth stays outside the band at every theta, so the
+  attack overshoot is not reachable on the hazard axis — the suspect
+  moves to seed/index structure (or the takeoff-conditioned burn class
+  itself: the lowest reachable takeoff median is ~1.7x band top).
+- **Trajectory clause satisfied on the period channel at x0.005 and
+  x0.001** (and on declared at x0.03/x0.01/x0.005/x0.001): the
+  takeoff-seed recorded_onsets q05-q95 contains 197 and median
+  before_share sits within 0.10 of 0.173 on those rows. But no takeoff
+  row's recorded MEDIAN reaches [98.5, 394] — the closest is 656 at
+  x0.001 period, still ~3.3x over 197; 10/26 takeoff seeds on that row
+  individually land in the band.
+- **Channel contrast is a clean multiplier**: seed-paired
+  period/declared recorded_onsets ratio = 0.50-0.54 across all nine
+  theta — the symptomatic-at-specimen gate + 0.56 recall draw removes
+  about half the dated mass, everywhere, independent of theta.
+- **asymptomatic_at_specimen ~0.35-0.41** on takeoff seeds (identical
+  across arms — the channel touches dating, not swabs) vs the record's
+  ~0.51; combined with the lab_confirmed denominator (the sim confirms
+  ~2x the voyage's 712 on dense rows) this is why the period dating
+  share sits at ~0.5 rather than the record's 0.277.
+
+Surface verdict per the frozen bands: **unreachable on the Theta axis
+under either channel** — no row closes the gap (no row satisfies both
+clauses, and truth never lands its clause). What the surface DID measure
+is the decomposition's shape: the observational channel is worth a
+uniform ~2x reduction in dated mass (uniform across theta — a channel
+term, not a theta interaction), while the residual attack overshoot is a
+truth-level term the hazard axis cannot reach (floor ~1.6x above the
+serology band at the deepest theta that still takes off).
+
+So the gap factorizes: ~2x channel (period-faithful dating measured
+directly) x a truth term of ~2x+ that does not move under any reachable
+theta. Next suspect per the declared counterfactual: seed/index
+structure — i.e. how many effective index cases the takeoff class
+carries, not how fast they burn.
