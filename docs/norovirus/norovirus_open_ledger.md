@@ -28,6 +28,19 @@ other pathogens' rooms and on confined-pair geometry — but pre-change
 airborne dose figures are historical regardless; `sealed`/`off` baselines
 reproduce them bit-identically for attribution.
 
+**`NORO-CABIN-01` (ledger entry): every confined-cabinmate fomite dose
+figure measured before this change is void.** Under confinement the
+fomite chain was dead-coded at both ends — confined shedders deposited
+nothing anywhere and confined targets' pickup requests returned zero on
+every unit, including their own stateroom's, which also dead-ended the
+emesis-patch pickup that shares the same request path. Recorded zeros on
+that channel were gate artefacts, not mechanism state. The repair
+(`transmission.cabin_confined_fomite`, `own_cabin` default; `off` is the
+labelled bit-identical baseline) scopes confined deposit/pickup to the
+pair's own compartment pool on a dedicated RNG stream; measured confined
+noro mate attack stays 0/266 pooled targets with per-pair λ ~1e-9–4e-4 —
+a dose-scale gap, not channel geometry.
+
 **`NORO-IMPORT-YIELD-01` (ledger entry): the `realism_ladder_v1` secondary-per-
 import figures no longer describe HEAD.** Re-measured on the frozen cell
 (spirit_cruise_3000 × norwalk_only × 168 epochs, seeds 8000–8019, shipped

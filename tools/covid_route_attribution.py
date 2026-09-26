@@ -225,7 +225,8 @@ class CabinPairChallengeLedger:
 
     Tally the compartment-channel dose each cabin-mate pair exchanges —
     droplet pool/plume/addback, contact, HVAC delivery, emesis and flush
-    aerosol — keyed by the pair's stateroom air unit. Per-pair lambda is
+    aerosol, and the stateroom's own fomite pool — keyed by the pair's
+    stateroom air unit. Per-pair lambda is
     exact: the hazard is linear in dose, so susceptibility x summed
     compartment dose is the lambda the engine drew against. The implied
     pair attack rate ``1 - exp(-lambda)`` sits beside the observed
@@ -233,7 +234,9 @@ class CabinPairChallengeLedger:
     check on this table, never a fitting target.
     """
 
-    CHANNELS = ("pool", "plume", "contact", "hvac", "emesis", "flush")
+    CHANNELS = (
+        "pool", "plume", "contact", "hvac", "emesis", "flush", "fomite",
+    )
 
     def __init__(self) -> None:
         # (member ids tuple, target id) -> {pathogen: {channel: dose}}
@@ -286,6 +289,7 @@ class CabinPairChallengeLedger:
             (matrix.hvac_downstream_exposures, "hvac", "air_unit"),
             (matrix.emesis_aerosol_exposures, "emesis", "target_zone"),
             (matrix.flush_aerosol_exposures, "flush", "target_zone"),
+            (matrix.fomite_trailing_exposures, "fomite", "unit"),
         )
         seen_shared: set[tuple[int, ...]] = set()
         for rows, channel, unit_field in records:

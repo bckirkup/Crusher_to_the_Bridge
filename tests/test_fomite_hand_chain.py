@@ -128,13 +128,13 @@ def test_eating_context_increases_mouth_contact_dose(
     target = _agent(schedule=["Meal:Lunch"] * 24)
     monkeypatch.setattr(
         core, "_fomite_mouth_contacts",
-        lambda _target, _epoch: 7.7,
+        lambda _target, _epoch, _rng=None: 7.7,
     )
     eating = core._hand_to_mouth_dose(target, 0, 100.0)
     target.schedule = ["Free"] * 24
     monkeypatch.setattr(
         core, "_fomite_mouth_contacts",
-        lambda _target, _epoch: 2.9,
+        lambda _target, _epoch, _rng=None: 2.9,
     )
     non_eating = core._hand_to_mouth_dose(target, 0, 100.0)
     assert eating > non_eating
@@ -150,7 +150,7 @@ def test_mouth_dose_is_monotonic_in_mouth_contact_frequency(
         monkeypatch.setattr(
             core,
             "_fomite_mouth_contacts",
-            lambda _target, _epoch, n=frequency: n,
+            lambda _target, _epoch, _rng=None, n=frequency: n,
         )
         values.append(core._hand_to_mouth_dose(target, 0, 100.0))
     assert values == sorted(values)
@@ -321,7 +321,7 @@ def test_fomite_delivery_is_per_capita_invariant_to_occupancy() -> None:
             lambda _target, _zone, _pool, _epoch: 1.0
         )
         core._hand_to_mouth_dose = (
-            lambda _target, _epoch, hand_load: hand_load * 0.01
+            lambda _target, _epoch, hand_load, _rng=None: hand_load * 0.01
         )
         doses: dict[int, float] = {}
         core._pathway_fomite(
