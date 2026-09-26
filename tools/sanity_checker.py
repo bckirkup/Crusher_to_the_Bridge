@@ -3445,9 +3445,9 @@ def _run_check_phase(
     print(f"  {_CYAN}Running {label}...{_RESET}")
     pre = len(report.findings)
     check()
-    added = len(report.findings) - pre
+    added = report.findings[pre:]
     if added:
-        print(f"  {fail_color}Found {added} issue(s){_RESET}")
+        print(f"  {fail_color}Found {len(added)} issue(s){_RESET}")
     else:
         print(f"  {_GREEN}{ok_msg}{_RESET}")
 
