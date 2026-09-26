@@ -172,40 +172,15 @@ def build_trajectory_stan_data(
     run_index = {rid: i for i, rid in enumerate(run_ids)}
     platforms, surveillances, plat_idx, surv_idx = _factor_indices(noro)
 
-    epochs_by_run: dict[str, dict[int, dict[str, Any]]] = {rid: {} for rid in run_ids}
-    max_epoch = 0
-    for row in epoch_rows:
-        rid = str(row.get("run_id"))
-        if rid not in run_index:
-            continue
-        ep = as_int(row.get("epoch"), -1)
-        if ep < 0:
-            continue
-        epochs_by_run[rid][ep] = row
-        max_epoch = max(max_epoch, ep)
+    epochs_by_run, max_epoch = _trajectory_epoch_index(
+        epoch_rows, run_index, run_ids,
+    )
     T = max_epoch + 1
     if T < 1:
         raise ValueError("No epoch rows for trajectory runs")
 
     n_runs = len(noro)
     gs = grainsize if grainsize is not None else max(1, n_runs // 8)
-
-    def _mat(field: str, default: int = 0) -> list[list[int]]:
-        mat = [[default for _ in range(T)] for _ in range(n_runs)]
-        for rid, by_ep in epochs_by_run.items():
-            ri = run_index[rid]
-            for t in range(T):
-                point = by_ep.get(t)
-                if point is None:
-                    continue
-                if field == "trigger_state":
-                    if "trigger_state" in point and point["trigger_state"] != "":
-                        mat[ri][t] = as_int(point["trigger_state"], 0)
-                    else:
-                        mat[ri][t] = encode_trigger_status(point.get("trigger_status"))
-                else:
-                    mat[ri][t] = as_int(point.get(field), default)
-        return mat
 
     data = {
         "N_runs": n_runs,
@@ -221,12 +196,20 @@ def build_trajectory_stan_data(
         "dose_adj": [as_float(r.get("dose_adjustment"), d0) for r in noro],
         "vsp_threshold": [_vsp_threshold_value(r) for r in noro],
         "seed": [as_int(r.get("seed"), 0) for r in noro],
-        "infected": _mat("infected"),
-        "symptomatic": _mat("symptomatic"),
-        "recovered": _mat("recovered"),
-        "new_infections": _mat("new_infections"),
-        "quarantined": _mat("quarantined"),
-        "trigger_state": _mat("trigger_state"),
+        "infected": _field_matrix(epochs_by_run, run_index, n_runs, T, "infected"),
+        "symptomatic": _field_matrix(
+            epochs_by_run, run_index, n_runs, T, "symptomatic",
+        ),
+        "recovered": _field_matrix(epochs_by_run, run_index, n_runs, T, "recovered"),
+        "new_infections": _field_matrix(
+            epochs_by_run, run_index, n_runs, T, "new_infections",
+        ),
+        "quarantined": _field_matrix(
+            epochs_by_run, run_index, n_runs, T, "quarantined",
+        ),
+        "trigger_state": _field_matrix(
+            epochs_by_run, run_index, n_runs, T, "trigger_state",
+        ),
         "d0": float(d0),
         "vsp_ref": float(vsp_ref),
     }
@@ -243,6 +226,52 @@ def build_trajectory_stan_data(
         "grainsize": int(gs),
     }
     return data, meta
+
+
+def _trajectory_epoch_index(
+    epoch_rows: list[dict[str, Any]],
+    run_index: dict[str, int],
+    run_ids: list[str],
+) -> tuple[dict[str, dict[int, dict[str, Any]]], int]:
+    epochs_by_run: dict[str, dict[int, dict[str, Any]]] = {rid: {} for rid in run_ids}
+    max_epoch = 0
+    for row in epoch_rows:
+        rid = str(row.get("run_id"))
+        if rid not in run_index:
+            continue
+        ep = as_int(row.get("epoch"), -1)
+        if ep < 0:
+            continue
+        epochs_by_run[rid][ep] = row
+        max_epoch = max(max_epoch, ep)
+    return epochs_by_run, max_epoch
+
+
+def _field_matrix(
+    epochs_by_run: dict[str, dict[int, dict[str, Any]]],
+    run_index: dict[str, int],
+    n_runs: int,
+    n_epochs: int,
+    field: str,
+    default: int = 0,
+) -> list[list[int]]:
+    mat = [[default for _ in range(n_epochs)] for _ in range(n_runs)]
+    for rid, by_ep in epochs_by_run.items():
+        ri = run_index[rid]
+        for t in range(n_epochs):
+            point = by_ep.get(t)
+            if point is None:
+                continue
+            mat[ri][t] = _epoch_cell(point, field, default)
+    return mat
+
+
+def _epoch_cell(point: dict[str, Any], field: str, default: int) -> int:
+    if field == "trigger_state":
+        if "trigger_state" in point and point["trigger_state"] != "":
+            return as_int(point["trigger_state"], 0)
+        return encode_trigger_status(point.get("trigger_status"))
+    return as_int(point.get(field), default)
 
 
 def cmdstan_available() -> bool:

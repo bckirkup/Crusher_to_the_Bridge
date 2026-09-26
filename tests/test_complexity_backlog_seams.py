@@ -7,10 +7,13 @@ existing suite files cover those.
 
 from __future__ import annotations
 
+import json
 import math
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
 from crusher_labs.diagnostic_cascade import DiagnosticCascadeEngine
@@ -406,3 +409,360 @@ def test_draw_agent_sanitary_visits_home_books_telemetry_only() -> None:
         core._draw_agent_sanitary_visits("Casino", unserved)
     assert core.sanitary_telemetry["unresolved"] > before
     assert 3 not in core._sanitary_visits
+
+
+# --- S3776 extraction seams: uncovered moved branches ------------------------
+
+
+def test_initial_infected_fallback_skips_malformed_sources() -> None:
+    from picard_framework.analysis.parse_run_id import resolve_initial_infected
+
+    # A malformed parameter value falls through to the next declared key.
+    assert (
+        resolve_initial_infected(
+            parameters={"initial_infected": "abc", "n_index": "2"},
+            run_id="x",
+        )
+        == 2
+    )
+    # Overrides skip non-mapping entries, entries without the key, and bad values.
+    assert (
+        resolve_initial_infected(
+            run_spec={
+                "pathogen_overrides": {
+                    "a": 7,
+                    "b": {"other": 1},
+                    "c": {"initial_infected": "oops"},
+                    "d": {"initial_infected": "6"},
+                }
+            },
+            run_id="x",
+        )
+        == 6
+    )
+    # Epoch-0 fallback reads infected, then new_infections, then gives up.
+    assert (
+        resolve_initial_infected(
+            run_id="x", timeseries=[{"infected": None, "new_infections": 2}]
+        )
+        == 2
+    )
+    assert (
+        resolve_initial_infected(run_id="x", timeseries=[{"infected": "oops"}])
+        is None
+    )
+
+
+def test_extract_factors_tag_fallbacks_and_pathogen_inference() -> None:
+    from picard_framework.analysis.parse_run_id import extract_factors
+
+    factors = extract_factors(
+        run_id="x_dose10_imm25_y",
+        parameters={"pathogen_bundle_id": "norovirus_only"},
+    )
+    assert factors["pathogen"] == "norovirus"
+    assert factors["dose_adjustment"] == pytest.approx(10.0)
+    assert factors["immunity_fraction"] == pytest.approx(0.25)
+
+    contam = extract_factors(
+        run_id="x", parameters={"transport_engine": "contam"}
+    )
+    assert contam["transport_engine"] == "contamx"
+
+
+def test_complement_validation_rejects_mismatched_totals() -> None:
+    from picard_framework.analysis.metrics import compute_derived_metrics
+
+    ts = [
+        {
+            "epoch": 0,
+            "infected": 2,
+            "passenger_complement": 60,
+            "crew_complement": 30,
+        }
+    ]
+    with pytest.raises(ValueError, match="role complements"):
+        compute_derived_metrics(ts, 100)
+
+    assert compute_derived_metrics([], 100) == {}
+
+
+def test_build_run_summary_row_normalizes_non_dict_blocks() -> None:
+    from picard_framework.analysis.metrics import build_run_summary_row
+
+    row = build_run_summary_row(
+        {
+            "run_id": "r_d2_s7",
+            "summary": {"parameters": "not-a-dict", "derived": {}},
+            "timeseries": "not-a-list",
+            "run_spec": 7,
+        }
+    )
+    assert row["run_id"] == "r_d2_s7"
+    assert row["seed"] == 7
+    assert row["dose_adjustment"] == pytest.approx(2.0)
+    assert row["initial_infected"] is None
+
+
+def test_run_campaign_fresh_run_truncates_completed_log(tmp_path) -> None:
+    from picard_framework.analysis.boundary.campaign import run_campaign
+    from picard_framework.analysis.boundary.posterior_lookup import (
+        load_fixture_surface,
+    )
+    from tests.test_boundary_decision_model import _base_scenario
+
+    prev = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        surface = load_fixture_surface()
+        scenario = _base_scenario(policy="P0", scenario_id="seam_p0")
+        rows = run_campaign([scenario], surface, out_dir="camp", n_mc=10, seed=7)
+        assert len(rows) == 1
+        log = Path("camp/completed_runs.txt")
+        assert log.read_text(encoding="utf-8").strip() == "seam_p0"
+        # A fresh (non-resume) rerun truncates the log, then re-appends.
+        rows = run_campaign(
+            [scenario], surface, out_dir="camp", n_mc=10, seed=7, resume=False
+        )
+        assert len(rows) == 1
+        assert log.read_text(encoding="utf-8").strip().splitlines() == ["seam_p0"]
+    finally:
+        os.chdir(prev)
+
+
+def test_aggregate_surface_min_runs_formula_cost_and_k0_skip() -> None:
+    from picard_framework.analysis.boundary.export_outbreak_surface import (
+        aggregate_outbreak_surface,
+    )
+
+    def row(k: int, **kw):
+        base = {
+            "platform_class": "mega",
+            "pathogen": "norovirus",
+            "baseline_response": "vsp",
+            "k": k,
+            "triggered": True,
+            "attack_rate": 0.1,
+            "took_off": True,
+            "peak_epoch": 5.0,
+            "num_agents": 100,
+        }
+        base.update(kw)
+        return base
+
+    rows = [
+        row(2),
+        row(0, triggered=False, attack_rate=0.0, took_off=False),
+        row(9, cumulative_cost_usd=100.0),
+    ]
+    out = aggregate_outbreak_surface(rows, min_runs=1)
+    by_k = {int(r["k"]): r for r in out}
+    # The real k=0 row suppresses the stub for this curve.
+    assert by_k[0]["n_runs"] == 1
+    # Missing cumulative_cost_usd falls back to the onboard-cost formula.
+    assert by_k[2]["E_cost_onboard"] >= 0.0
+
+    # min_runs drops undersized cells; the k0 stub still anchors the curve.
+    out2 = aggregate_outbreak_surface(rows, min_runs=2)
+    assert {int(r["k"]) for r in out2} == {0}
+    assert out2[0]["n_runs"] == 0
+
+
+def test_trajectory_stats_common_and_disjoint_epochs() -> None:
+    from picard_framework.analysis import pairwise
+
+    disjoint = pairwise._trajectory_stats(
+        [{"epoch": 1, "infected": 5}],
+        [{"epoch": 2, "infected": 5}],
+    )
+    assert disjoint["epoch_match_rate_infected"] is None
+    assert disjoint["mass_ratio_median"] is None
+
+    stats = pairwise._trajectory_stats(
+        [
+            {"epoch": 1, "infected": 5, "recovered": 0,
+             "new_infections": 5, "total_pathogen_mass": 10.0},
+            {"epoch": 2, "infected": 6, "recovered": 1,
+             "new_infections": 1, "total_pathogen_mass": 4.0},
+        ],
+        [
+            {"epoch": 1, "infected": 5, "recovered": 2,
+             "new_infections": 5, "total_pathogen_mass": 5.0},
+            {"epoch": 2, "infected": 7, "recovered": 1,
+             "new_infections": 0, "total_pathogen_mass": None},
+        ],
+    )
+    assert stats["epoch_match_rate_infected"] == pytest.approx(0.5)
+    assert stats["epoch_match_rate_recovered"] == pytest.approx(0.5)
+    assert stats["epoch_match_rate_new_infections"] == pytest.approx(0.5)
+    assert stats["max_abs_delta_infected"] == 1
+    assert stats["max_abs_delta_recovered"] == 2
+    assert stats["mass_ratio_median"] == pytest.approx(2.0)
+
+
+def test_build_report_with_posterior_sections(tmp_path, monkeypatch) -> None:
+    from picard_framework.analysis import report
+
+    monkeypatch.chdir(tmp_path)
+    analysis = tmp_path / "analysis"
+    analysis.mkdir()
+    (analysis / "aggregate_metrics.json").write_text(
+        json.dumps({"n_runs": 2, "mean_attack_rate": 0.1,
+                    "outbreak_rate": 0.5}),
+        encoding="utf-8",
+    )
+    post = tmp_path / "fit" / "posterior"
+    post.mkdir(parents=True)
+    (post / "dose_adj_calibration.csv").write_text(
+        "param,mean\nbeta,0.5\n", encoding="utf-8",
+    )
+    out = tmp_path / "report.html"
+    written = report.build_report(
+        str(analysis), str(tmp_path / "fit"), out_path=str(out)
+    )
+    body = Path(written).read_text(encoding="utf-8")
+    assert "dose_adj_calibration.csv" in body
+    assert (tmp_path / "report.md").is_file()
+    md = (tmp_path / "report.md").read_text(encoding="utf-8")
+    assert "dose_adj_calibration.csv" in md
+    assert report._read_aggregate(str(tmp_path / "missing")) == {}
+
+
+def test_trajectory_stan_data_skips_unmatched_and_bad_epoch_rows() -> None:
+    from picard_framework.analysis.stan._data import (
+        build_trajectory_stan_data,
+    )
+
+    run_rows = [
+        {
+            "run_id": "noro_a",
+            "pathogen": "norovirus",
+            "platform_id": "mega_cruise_5000",
+            "surveillance_strategy": "none",
+            "num_agents": 100,
+            "seed": 1,
+        }
+    ]
+    epoch_rows = [
+        {"run_id": "other_run", "epoch": 0, "infected": 9},
+        {"run_id": "noro_a", "epoch": "bad", "infected": 9},
+        {"run_id": "noro_a", "epoch": 0, "infected": 2,
+         "trigger_status": "CONFIRMED"},
+        {"run_id": "noro_a", "epoch": 1, "infected": 4, "trigger_state": "2"},
+        {"run_id": "noro_a", "epoch": 3, "infected": 6},
+    ]
+    data, meta = build_trajectory_stan_data(
+        run_rows, epoch_rows, outbreaks_only=False
+    )
+    assert meta["run_ids"] == ["noro_a"]
+    assert data["T"] == 4
+    assert data["infected"] == [[2, 4, 0, 6]]
+    assert data["trigger_state"][0][0] == 2
+    assert data["trigger_state"][0][1] == 2
+    assert data["trigger_state"][0][2] == 0
+
+
+def test_latent_posterior_fields_fills_quantiles_and_truth_flags() -> None:
+    from picard_framework.analysis import (
+        synthetic_recovery_postprocess as recovery,
+    )
+
+    class _Series:
+        def __init__(self, xs):
+            self._xs = np.asarray(xs, dtype=float)
+
+        def mean(self):
+            return float(self._xs.mean())
+
+        def median(self):
+            return float(np.median(self._xs))
+
+        def quantile(self, q):
+            return float(np.quantile(self._xs, q))
+
+    class _Draws:
+        columns = ("dose_adj", "alpha_c")
+
+        def __getitem__(self, key):
+            return _Series(np.linspace(0.0, 1.0, 11))
+
+    row: dict = {}
+    recovery._latent_posterior_fields(
+        row, _Draws(), {"dose_adj": 0.5, "alpha_c": None}
+    )
+    assert row["post_dose_adj_mean"] == pytest.approx(0.5)
+    assert row["abs_err_dose_adj"] == pytest.approx(0.0)
+    assert row["truth_in_90ci_dose_adj"] == 1
+    assert "abs_err_alpha_c" not in row
+
+    empty: dict = {}
+    recovery._latent_posterior_fields(empty, None, {})
+    assert empty == {}
+
+
+def test_run_id_tags_preboarding_and_mechanism_rung() -> None:
+    from picard_framework.runs.mega_cruise_campaign import boarding_axis
+
+    tier = {
+        "preboarding_crew_points": [(0.9, 2.0, 0.05)],
+        "preboarding_passenger_points": [(0.5, None, 0.01)],
+        "preboarding_crew_reportable_values": [True],
+        "boarding_mechanism_rungs": ["shipped"],
+    }
+    tags = boarding_axis.run_id_tags(
+        tier,
+        "norwalk_gi",
+        never_symptomatic_fraction=0.05,
+        presymptomatic_share=0.5,
+        passenger_prevalence=0.004,
+        crew_prevalence=0.002,
+        preboarding_crew=(0.9, 2.0, 0.05),
+        preboarding_passenger=(0.5, None, 0.01),
+        preboarding_crew_reportable=True,
+        mechanism_rung="shipped",
+    )
+    assert tags[0] == boarding_axis.mechanism_rung_tag("shipped")
+    assert [t[:3] for t in tags[1:]] == ["pbc", "pbp", "rep"]
+
+    # Unowned pathogens emit no boarding tags at all.
+    assert (
+        boarding_axis.run_id_tags(
+            tier,
+            "legionella_pneumophila",
+            never_symptomatic_fraction=0.05,
+            presymptomatic_share=0.5,
+            passenger_prevalence=0.004,
+            crew_prevalence=0.002,
+        )
+        == []
+    )
+
+
+def test_tier_cartesian_factor_and_voyage_days_paths() -> None:
+    from picard_framework.runs.mega_cruise_campaign.count_manifest_cartesian import (
+        tier_cartesian,
+    )
+
+    manifest = {"platform": "mega_cruise_5000", "tiers": {}}
+    tier = {
+        "platforms": ["p1", "p2"],
+        "factor": "x",
+        "values": [1, 2, 3],
+        "surveillance_strategies": ["none"],
+        "seeds": [1, 2],
+    }
+    assert tier_cartesian(manifest, tier) == 2 * 3 * 1 * 2
+
+    tier2 = {
+        "platform": "p1",
+        "factors": {"a": [1, 2], "b": [1, 2, 3]},
+        "seeds": [1],
+    }
+    assert tier_cartesian(manifest, tier2) == 1 * 6 * 1 * 1
+
+    # factor declared but no values/factors → a single knob position
+    tier3 = {"platform": "p1", "factor": "x", "seeds": [1]}
+    assert tier_cartesian(manifest, tier3) == 1
+
+    vs = {"voyage_days": [7, 9], "seeds": [1], "platform": "p1"}
+    assert tier_cartesian(manifest, vs) == 2

@@ -95,7 +95,22 @@ def resolve_initial_infected(
     if drawn is not None:
         return drawn
 
-    params = parameters or {}
+    from_params = _initial_infected_from_params(parameters or {})
+    if from_params is not None:
+        return from_params
+
+    from_overrides = _initial_infected_from_overrides(run_spec or {})
+    if from_overrides is not None:
+        return from_overrides
+
+    m = _INIT_TAG.search(str(run_id or ""))
+    if m:
+        return int(m.group(1))
+
+    return _initial_infected_from_timeseries(timeseries)
+
+
+def _initial_infected_from_params(params: dict[str, Any]) -> int | None:
     for key in ("initial_infected", "n_initial_infected", "n_index"):
         if params.get(key) is not None and params.get(key) != "":
             try:
@@ -103,24 +118,26 @@ def resolve_initial_infected(
             except (TypeError, ValueError):
                 # Try the next established source when a parameter is malformed.
                 pass
+    return None
 
-    spec = run_spec or {}
+
+def _initial_infected_from_overrides(spec: dict[str, Any]) -> int | None:
     overrides = spec.get("pathogen_overrides") or {}
-    if isinstance(overrides, dict):
-        for value in overrides.values():
-            if not isinstance(value, dict):
-                continue
-            if value.get("initial_infected") is None:
-                continue
-            try:
-                return max(0, int(value["initial_infected"]))
-            except (TypeError, ValueError):
-                continue
+    if not isinstance(overrides, dict):
+        return None
+    for value in overrides.values():
+        if not isinstance(value, dict):
+            continue
+        if value.get("initial_infected") is None:
+            continue
+        try:
+            return max(0, int(value["initial_infected"]))
+        except (TypeError, ValueError):
+            continue
+    return None
 
-    m = _INIT_TAG.search(str(run_id or ""))
-    if m:
-        return int(m.group(1))
 
+def _initial_infected_from_timeseries(timeseries: Any) -> int | None:
     if timeseries and isinstance(timeseries, (list, tuple)) and timeseries:
         first = timeseries[0] if isinstance(timeseries[0], dict) else {}
         for key in ("infected", "new_infections"):
@@ -208,40 +225,14 @@ def extract_factors(
         params.get("platform_id"),
         catalog.get("platform_id"),
     )
-    pathogen = _first(params.get("pathogen"), params.get("pathogen_name"))
-    pathogen_id = _first(
-        params.get("pathogen_id"),
-        params.get("pathogen_bundle_id"),
-        catalog.get("pathogen_bundle_id"),
-    )
-    if pathogen is None and pathogen_id is not None:
-        # Bundle ids often look like ``norovirus_only`` / ``multi_pathogen``.
-        pathogen = str(pathogen_id).replace("_only", "").replace("_bundle", "")
-
-    dose = _first(params.get("dose_adjustment"), params.get("dose_adj"))
-    if dose is None and tags.get("dose_tag"):
-        token = tags["dose_tag"]
-        assert token is not None
-        dose = token.lstrip("dose").lstrip("d")
-
+    pathogen = _pathogen_factor(params, catalog)
+    dose = _dose_factor(params, tags)
     density = _first(
         params.get("density_exponent"),
         params.get("density_alpha"),
         tags.get("alpha_tag"),
     )
-    immunity = _first(
-        params.get("immune_fraction"),
-        params.get("immunity_fraction"),
-        params.get("pre_immunity_fraction"),
-        ship.get("immune_fraction"),
-    )
-    if immunity is None and tags.get("imm"):
-        imm_tag = tags["imm"]
-        assert imm_tag is not None
-        # imm25 → 0.25, imm0 → 0.0
-        digits = "".join(ch for ch in imm_tag if ch.isdigit())
-        if digits:
-            immunity = float(digits) / 100.0
+    immunity = _immunity_factor(params, ship, tags)
 
     surveillance = _first(
         params.get("surveillance"),
@@ -284,7 +275,11 @@ def extract_factors(
         "platform_id": platform_id,
         "platform_class": platform_class(str(platform_id) if platform_id else None),
         "pathogen": pathogen,
-        "pathogen_id": pathogen_id,
+        "pathogen_id": _first(
+            params.get("pathogen_id"),
+            params.get("pathogen_bundle_id"),
+            catalog.get("pathogen_bundle_id"),
+        ),
         "dose_adjustment": _coerce_float(dose),
         "density_exponent": _coerce_float(density),
         "immunity_fraction": _coerce_float(immunity),
@@ -294,7 +289,59 @@ def extract_factors(
         "initial_infected": _coerce_int(initial_infected),
         "num_agents": _coerce_int(num_agents),
         "num_epochs": _coerce_int(num_epochs),
-        # Optional columns
+        **_optional_factor_fields(params),
+    }
+    # Preserve raw tags for debugging / factor dictionary.
+    factors["_tags"] = {k: v for k, v in tags.items() if v is not None}
+    return factors
+
+
+def _pathogen_factor(params: dict[str, Any], catalog: dict[str, Any]) -> Any:
+    pathogen = _first(params.get("pathogen"), params.get("pathogen_name"))
+    pathogen_id = _first(
+        params.get("pathogen_id"),
+        params.get("pathogen_bundle_id"),
+        catalog.get("pathogen_bundle_id"),
+    )
+    if pathogen is None and pathogen_id is not None:
+        # Bundle ids often look like ``norovirus_only`` / ``multi_pathogen``.
+        pathogen = str(pathogen_id).replace("_only", "").replace("_bundle", "")
+    return pathogen
+
+
+def _dose_factor(params: dict[str, Any], tags: dict[str, str | None]) -> Any:
+    dose = _first(params.get("dose_adjustment"), params.get("dose_adj"))
+    if dose is None and tags.get("dose_tag"):
+        token = tags["dose_tag"]
+        assert token is not None
+        dose = token.lstrip("dose").lstrip("d")
+    return dose
+
+
+def _immunity_factor(
+    params: dict[str, Any],
+    ship: dict[str, Any],
+    tags: dict[str, str | None],
+) -> Any:
+    immunity = _first(
+        params.get("immune_fraction"),
+        params.get("immunity_fraction"),
+        params.get("pre_immunity_fraction"),
+        ship.get("immune_fraction"),
+    )
+    if immunity is not None or not tags.get("imm"):
+        return immunity
+    imm_tag = tags["imm"]
+    assert imm_tag is not None
+    # imm25 → 0.25, imm0 → 0.0
+    digits = "".join(ch for ch in imm_tag if ch.isdigit())
+    if digits:
+        return float(digits) / 100.0
+    return immunity
+
+
+def _vsp_factor_fields(params: dict[str, Any]) -> dict[str, Any]:
+    return {
         "vsp_suspect_threshold": _coerce_float(
             _first(params.get("suspect_attack_rate"), params.get("vsp_suspect_threshold"))
         ),
@@ -307,6 +354,13 @@ def extract_factors(
                 params.get("vsp_lockdown_threshold"),
             )
         ),
+    }
+
+
+def _optional_factor_fields(params: dict[str, Any]) -> dict[str, Any]:
+    return {
+        # Optional columns
+        **_vsp_factor_fields(params),
         "sick_call_probability": _coerce_float(params.get("sick_call_probability")),
         "detection_delay_epochs": _coerce_int(
             _first(
@@ -330,6 +384,3 @@ def extract_factors(
         "contam_paired_run_id": params.get("contam_paired_run_id"),
         "native_paired_run_id": params.get("native_paired_run_id"),
     }
-    # Preserve raw tags for debugging / factor dictionary.
-    factors["_tags"] = {k: v for k, v in tags.items() if v is not None}
-    return factors

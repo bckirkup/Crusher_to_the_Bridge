@@ -221,6 +221,30 @@ def run_campaign(
     """Run all scenarios; write per-scenario summary.json and policy_comparison.csv."""
     out = ensure_out_dir(out_dir)
     runs_dir = ensure_out_dir(os.path.join(out, "runs"))
+    completed = _fresh_completed(out, resume)
+
+    scenario_list = list(scenarios)
+    # Precompute P0 baselines within the batch for VoI / VSP-avoided metrics.
+    baselines: dict[tuple[Any, ...], dict[str, Any]] = {}
+    summaries = _resumed_summaries(scenario_list, runs_dir, completed, resume)
+
+    _run_p0_scenarios(
+        scenario_list, summaries, baselines, completed, out, runs_dir, surface,
+        n_mc=n_mc, seed=seed,
+    )
+    _run_policy_scenarios(
+        scenario_list, summaries, baselines, completed, out, runs_dir, surface,
+        n_mc=n_mc, seed=seed,
+    )
+
+    # Stable CSV order: follow scenario_list order when possible
+    ordered = _ordered_summaries(scenario_list, summaries)
+    _write_campaign_csv(out, ordered)
+    _write_campaign_meta(out, scenario_list, ordered, n_mc, seed, surface)
+    return ordered
+
+
+def _fresh_completed(out: str, resume: bool) -> set[str]:
     completed = _read_completed(out) if resume else set()
     if not resume and os.path.isfile(_completed_path(out)):
         # Fresh run: truncate completed list
@@ -228,19 +252,37 @@ def run_campaign(
             _completed_path(out), "w", allowed_roots=allowed_roots(), encoding="utf-8"
         ) as fh:
             fh.write("")
+    return completed
 
-    scenario_list = list(scenarios)
-    # Precompute P0 baselines within the batch for VoI / VSP-avoided metrics.
-    baselines: dict[tuple[Any, ...], dict[str, Any]] = {}
+
+def _resumed_summaries(
+    scenario_list: list[dict[str, Any]],
+    runs_dir: str,
+    completed: set[str],
+    resume: bool,
+) -> list[dict[str, Any]]:
+    """First pass: load resumed summaries."""
     summaries: list[dict[str, Any]] = []
-
-    # First pass: load resumed summaries
     for sc in scenario_list:
         sid = sc["scenario_id"]
         summary_path = os.path.join(runs_dir, f"{sid}.json")
         if resume and sid in completed and os.path.isfile(summary_path):
             summaries.append(read_json(summary_path))
+    return summaries
 
+
+def _run_p0_scenarios(
+    scenario_list: list[dict[str, Any]],
+    summaries: list[dict[str, Any]],
+    baselines: dict[tuple[Any, ...], dict[str, Any]],
+    completed: set[str],
+    out: str,
+    runs_dir: str,
+    surface: OutbreakSurface,
+    *,
+    n_mc: int,
+    seed: int,
+) -> None:
     for sc in scenario_list:
         if sc["policy"] != "P0":
             continue
@@ -258,6 +300,19 @@ def run_campaign(
         summaries.append(summary)
         baselines[key] = summary
 
+
+def _run_policy_scenarios(
+    scenario_list: list[dict[str, Any]],
+    summaries: list[dict[str, Any]],
+    baselines: dict[tuple[Any, ...], dict[str, Any]],
+    completed: set[str],
+    out: str,
+    runs_dir: str,
+    surface: OutbreakSurface,
+    *,
+    n_mc: int,
+    seed: int,
+) -> None:
     for sc in scenario_list:
         if sc["policy"] == "P0":
             continue
@@ -274,15 +329,36 @@ def run_campaign(
         completed.add(sid)
         summaries.append(summary)
 
-    # Stable CSV order: follow scenario_list order when possible
+
+def _ordered_summaries(
+    scenario_list: list[dict[str, Any]],
+    summaries: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
     by_id = {s["scenario_id"]: s for s in summaries}
-    ordered = [by_id[s["scenario_id"]] for s in scenario_list if s["scenario_id"] in by_id]
+    return [
+        by_id[s["scenario_id"]]
+        for s in scenario_list
+        if s["scenario_id"] in by_id
+    ]
+
+
+def _write_campaign_csv(out: str, ordered: list[dict[str, Any]]) -> None:
     # Flatten None for CSV
     csv_rows = []
     for row in ordered:
         flat = {k: row.get(k) for k in SUMMARY_FIELDS}
         csv_rows.append(flat)
     write_csv(os.path.join(out, "policy_comparison.csv"), csv_rows, SUMMARY_FIELDS)
+
+
+def _write_campaign_meta(
+    out: str,
+    scenario_list: list[dict[str, Any]],
+    ordered: list[dict[str, Any]],
+    n_mc: int,
+    seed: int,
+    surface: OutbreakSurface,
+) -> None:
     write_json(
         os.path.join(out, "campaign_meta.json"),
         {
@@ -293,4 +369,3 @@ def run_campaign(
             "surface_source": surface.source,
         },
     )
-    return ordered

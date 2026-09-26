@@ -249,6 +249,55 @@ def _beliefs_from_information(information_state: dict[str, Any]) -> dict[int, di
     return beliefs
 
 
+def _zone_layout_fields(
+    platform_layout: dict[str, Any],
+) -> tuple[dict[str, str], dict[str, float], dict[str, float]]:
+    zone_ventilation: dict[str, str] = {}
+    zone_floor_areas: dict[str, float] = {}
+    food_zone_multipliers: dict[str, float] = {}
+    for z in platform_layout.get("zones", []):
+        zid = z["id"]
+        vent = z.get("cabin_ventilation_type")
+        if vent:
+            zone_ventilation[zid] = vent
+        floor_area = z.get("floor_area_m2")
+        if floor_area is not None:
+            zone_floor_areas[zid] = float(floor_area)
+        if z.get("type") == "Dining":
+            mult = z.get("food_contamination_multiplier")
+            if mult is None:
+                stype = str(z.get("dining_service_type") or "")
+                from engines.infection_dynamics_bridge import (
+                    DEFAULT_FOOD_CONTAMINATION_MULTIPLIER,
+                )
+                mult = DEFAULT_FOOD_CONTAMINATION_MULTIPLIER.get(stype, 1.0)
+            food_zone_multipliers[zid] = float(mult)
+    return zone_ventilation, zone_floor_areas, food_zone_multipliers
+
+
+def _head_sex(zone_id: str) -> str:
+    sex = "any"
+    for seg in reversed(str(zone_id).split("_")):
+        token = seg.rstrip("0123456789")
+        if token in ("M", "F"):
+            sex = "male" if token == "M" else "female"
+            break
+    return sex
+
+
+def _sanitary_zone_map(
+    platform_layout: dict[str, Any],
+) -> dict[str, dict[str, str]]:
+    sanitary_zone_map: dict[str, dict[str, str]] = {}
+    for z in platform_layout.get("zones", []):
+        if z.get("type") != "Sanitary":
+            continue
+        sex = _head_sex(str(z["id"]))
+        for served in z.get("serves", []):
+            sanitary_zone_map.setdefault(served, {})[sex] = z["id"]
+    return sanitary_zone_map
+
+
 class ShipSimulation:
     """One ship cruise: init, step, run, finalize."""
 
@@ -325,26 +374,11 @@ class ShipSimulation:
             z["name"]: z.get("volume_m3", 100.0) for z in ship.get("zones", [])
         }
         zone_types = {z["name"]: z.get("type", "") for z in ship.get("zones", [])}
-        zone_ventilation: dict[str, str] = {}
-        zone_floor_areas: dict[str, float] = {}
-        food_zone_multipliers: dict[str, float] = {}
-        for z in platform_layout.get("zones", []):
-            zid = z["id"]
-            vent = z.get("cabin_ventilation_type")
-            if vent:
-                zone_ventilation[zid] = vent
-            floor_area = z.get("floor_area_m2")
-            if floor_area is not None:
-                zone_floor_areas[zid] = float(floor_area)
-            if z.get("type") == "Dining":
-                mult = z.get("food_contamination_multiplier")
-                if mult is None:
-                    stype = str(z.get("dining_service_type") or "")
-                    from engines.infection_dynamics_bridge import (
-                        DEFAULT_FOOD_CONTAMINATION_MULTIPLIER,
-                    )
-                    mult = DEFAULT_FOOD_CONTAMINATION_MULTIPLIER.get(stype, 1.0)
-                food_zone_multipliers[zid] = float(mult)
+        (
+            zone_ventilation,
+            zone_floor_areas,
+            food_zone_multipliers,
+        ) = _zone_layout_fields(platform_layout)
         self.zone_types = zone_types
         self.hvac_downstream = (
             build_hvac_downstream_map(airflow_data) if airflow_data else {}
@@ -358,18 +392,7 @@ class ShipSimulation:
         # Served zone -> sex-keyed head block, from each head's declared
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
         # block (e.g. the bridge head) serves as "any".
-        sanitary_zone_map: dict[str, dict[str, str]] = {}
-        for z in platform_layout.get("zones", []):
-            if z.get("type") != "Sanitary":
-                continue
-            sex = "any"
-            for seg in reversed(str(z["id"]).split("_")):
-                token = seg.rstrip("0123456789")
-                if token in ("M", "F"):
-                    sex = "male" if token == "M" else "female"
-                    break
-            for served in z.get("serves", []):
-                sanitary_zone_map.setdefault(served, {})[sex] = z["id"]
+        sanitary_zone_map = _sanitary_zone_map(platform_layout)
         tx_overrides = self.cfg.get("transmission", {}) or {}
         self.tx_core = TransmissionCore(
             rng=np.random.default_rng(self.seed),

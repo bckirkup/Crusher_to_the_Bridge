@@ -51,22 +51,31 @@ NOMINAL = {
 }
 
 
-def _summary_from_zip_bytes(data: bytes, name: str) -> dict[str, Any] | None:
+def _summary_member_name(names: set[str]) -> str | None:
+    if SUMMARY_FILENAME in names:
+        return SUMMARY_FILENAME
+    for n in names:
+        if n.endswith(SUMMARY_FILENAME):
+            return n
+    return None
+
+
+def _summary_json_from_zip_bytes(data: bytes) -> dict[str, Any] | None:
     try:
         with zipfile.ZipFile(io.BytesIO(data), "r") as zf:
             names = {n.replace("\\", "/") for n in zf.namelist()}
-            key = SUMMARY_FILENAME if SUMMARY_FILENAME in names else None
-            if key is None:
-                for n in names:
-                    if n.endswith(SUMMARY_FILENAME):
-                        key = n
-                        break
+            key = _summary_member_name(names)
             if key is None:
                 return None
             summary = json.loads(zf.read(key).decode("utf-8"))
     except (OSError, zipfile.BadZipFile, json.JSONDecodeError, UnicodeDecodeError):
         return None
-    if not isinstance(summary, dict):
+    return summary if isinstance(summary, dict) else None
+
+
+def _summary_from_zip_bytes(data: bytes, name: str) -> dict[str, Any] | None:
+    summary = _summary_json_from_zip_bytes(data)
+    if summary is None:
         return None
     params = summary.get("parameters") if isinstance(summary.get("parameters"), dict) else {}
     derived = summary.get("derived") if isinstance(summary.get("derived"), dict) else {}
@@ -100,6 +109,28 @@ def _summary_from_zip_bytes(data: bytes, name: str) -> dict[str, Any] | None:
     }
 
 
+def _iter_zip_dir_summaries(zips_dir: str) -> Iterable[dict[str, Any]]:
+    for zp in iter_result_zips(zips_dir):
+        with validated_open(zp, "rb", allowed_roots=allowed_roots()) as fh:
+            row = _summary_from_zip_bytes(fh.read(), os.path.basename(zp))
+        if row:
+            yield row
+
+
+def _iter_tar_summaries(tar_path: str) -> Iterable[dict[str, Any]]:
+    with validated_open(tar_path, "rb", allowed_roots=allowed_roots()) as tar_fh:
+        with tarfile.open(fileobj=tar_fh, mode="r") as tf:
+            for m in tf.getmembers():
+                if not m.isfile() or not m.name.endswith(".zip"):
+                    continue
+                f = tf.extractfile(m)
+                if f is None:
+                    continue
+                row = _summary_from_zip_bytes(f.read(), os.path.basename(m.name))
+                if row:
+                    yield row
+
+
 def iter_summaries(source: str) -> Iterable[dict[str, Any]]:
     """Yield run rows from a zips directory or a directory containing run_zips.tar."""
     source = safe_path(source)
@@ -108,40 +139,25 @@ def iter_summaries(source: str) -> Iterable[dict[str, Any]]:
     if os.path.isdir(zips_dir) and any(
         n.endswith(".zip") for n in os.listdir(zips_dir)
     ):
-        for zp in iter_result_zips(zips_dir):
-            with validated_open(zp, "rb", allowed_roots=allowed_roots()) as fh:
-                row = _summary_from_zip_bytes(fh.read(), os.path.basename(zp))
-            if row:
-                yield row
+        yield from _iter_zip_dir_summaries(zips_dir)
         return
     if os.path.isfile(tar_path):
-        with validated_open(tar_path, "rb", allowed_roots=allowed_roots()) as tar_fh:
-            with tarfile.open(fileobj=tar_fh, mode="r") as tf:
-                for m in tf.getmembers():
-                    if not m.isfile() or not m.name.endswith(".zip"):
-                        continue
-                    f = tf.extractfile(m)
-                    if f is None:
-                        continue
-                    row = _summary_from_zip_bytes(f.read(), os.path.basename(m.name))
-                    if row:
-                        yield row
+        yield from _iter_tar_summaries(tar_path)
         return
     if os.path.isdir(source):
-        for zp in iter_result_zips(source):
-            with validated_open(zp, "rb", allowed_roots=allowed_roots()) as fh:
-                row = _summary_from_zip_bytes(fh.read(), os.path.basename(zp))
-            if row:
-                yield row
+        yield from _iter_zip_dir_summaries(source)
         return
     raise SystemExit(f"No zips or run_zips.tar under {source}")
 
 
-def _panel_name(tier_id: str) -> str:
-    t = tier_id.lower()
+def _any_token(t: str, *tokens: str) -> bool:
+    return any(token in t for token in tokens)
+
+
+def _panel_name_direct(t: str) -> str | None:
     if "threshold" in t and "compliance" in t:
         return "threshold_x_compliance"
-    if "delay" in t and ("report" in t or "scp" in t or "sick" in t):
+    if "delay" in t and _any_token(t, "report", "scp", "sick"):
         return "delay_x_reporting"
     if "worst" in t:
         return "worst_case_gradient"
@@ -149,11 +165,15 @@ def _panel_name(tier_id: str) -> str:
         return "fat_vsp_threshold"
     if "detection" in t:
         return "fat_detection_delay"
-    if "isolation" in t or "compliance" in t:
+    if _any_token(t, "isolation", "compliance"):
         return "fat_isolation_compliance"
-    if "sick" in t or "scp" in t:
+    if _any_token(t, "sick", "scp"):
         return "fat_sick_call_probability"
-    # Infer from tier short names used in manifests
+    return None
+
+
+def _panel_name_inferred(t: str) -> str | None:
+    """Infer the panel from tier short names used in manifests."""
     if re.search(r"vd1_.*vsp", t):
         return "fat_vsp_threshold"
     if re.search(r"vd1_.*det", t):
@@ -164,7 +184,12 @@ def _panel_name(tier_id: str) -> str:
         return "fat_sick_call_probability"
     if "vd2" in t:
         return "interaction_other"
-    return tier_id or "unknown"
+    return None
+
+
+def _panel_name(tier_id: str) -> str:
+    t = tier_id.lower()
+    return _panel_name_direct(t) or _panel_name_inferred(t) or tier_id or "unknown"
 
 
 def aggregate_cells(
@@ -238,6 +263,31 @@ def _matplotlib_or_none():
         return None, None
 
 
+def _plot_fat_panel(
+    ax,
+    panel: str,
+    fkey: str,
+    xlabel: str,
+    rows: list[dict[str, Any]],
+) -> None:
+    if not rows:
+        ax.set_title(f"{panel} (no data)")
+        return
+    for plat in PLATFORMS:
+        xs, ys = [], []
+        for r in sorted(rows, key=lambda z: float(z[fkey])):
+            if r["platform_id"] != plat:
+                continue
+            xs.append(float(r[fkey]))
+            ys.append(float(r["mean_attack_rate"]))
+        if xs:
+            ax.plot(xs, ys, marker="o", label=plat.replace("_cruise_", "\n"))
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel("Mean AR")
+    ax.set_title(panel.replace("fat_", ""))
+    ax.grid(True, alpha=0.3)
+
+
 def _plot_fat_curves(plt, fat_curves: dict[str, list[dict[str, Any]]], fig_dir: str) -> str:
     factor_axis = {
         "fat_vsp_threshold": ("vsp_threshold", "VSP threshold (higher = weaker)"),
@@ -253,23 +303,7 @@ def _plot_fat_curves(plt, fat_curves: dict[str, list[dict[str, Any]]], fig_dir: 
     }
     fig, axes = plt.subplots(2, 2, figsize=(11, 8), sharey=True)
     for ax, (panel, (fkey, xlabel)) in zip(axes.ravel(), factor_axis.items()):
-        rows = fat_curves.get(panel) or []
-        if not rows:
-            ax.set_title(f"{panel} (no data)")
-            continue
-        for plat in PLATFORMS:
-            xs, ys = [], []
-            for r in sorted(rows, key=lambda z: float(z[fkey])):
-                if r["platform_id"] != plat:
-                    continue
-                xs.append(float(r[fkey]))
-                ys.append(float(r["mean_attack_rate"]))
-            if xs:
-                ax.plot(xs, ys, marker="o", label=plat.replace("_cruise_", "\n"))
-        ax.set_xlabel(xlabel)
-        ax.set_ylabel("Mean AR")
-        ax.set_title(panel.replace("fat_", ""))
-        ax.grid(True, alpha=0.3)
+        _plot_fat_panel(ax, panel, fkey, xlabel, fat_curves.get(panel) or [])
     handles, labels = axes[0, 0].get_legend_handles_labels()
     if handles:
         fig.legend(handles, labels, loc="upper center", ncol=4, fontsize=7)
@@ -465,30 +499,14 @@ def _fat_max_abs_gap(
     return max_abs, max_level
 
 
-def write_report(
-    path: str,
-    *,
-    n_runs: int,
-    thr_comp_gaps: list[dict[str, Any]],
-    delay_rep_gaps: list[dict[str, Any]],
-    worst_gaps: list[dict[str, Any]],
-    fat_curves: dict[str, list[dict[str, Any]]],
-    fig_names: list[str],
-) -> None:
-    def _broken(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
-        return [r for r in rows if r.get("shadow_broken")]
+def _broken_rows(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [r for r in rows if r.get("shadow_broken")]
 
-    lines = [
-        "# VSP degradation post-process",
-        "",
-        f"Runs bundled: **{n_runs}** (expect 6360).",
-        "",
-        f"Thesis test: shadow considered **broken** when "
-        f"`|AR_expedition − AR_mega| > {100 * SHADOW_BREAK_PP:.0f} pp`.",
-        "",
-        "## Factor-at-a-time (mean AR span across platforms)",
-        "",
-    ]
+
+def _fat_summary_lines(
+    fat_curves: dict[str, list[dict[str, Any]]],
+) -> list[str]:
+    lines: list[str] = []
     for panel, rows in sorted(fat_curves.items()):
         if not rows:
             continue
@@ -501,28 +519,33 @@ def write_report(
             f"at {fkey}={max_level}"
             f"{' (shadow broken)' if max_abs > SHADOW_BREAK_PP else ''}"
         )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Knob fidelity (seed-matched sanity)",
-            "",
-            "Same platform/seed with only one knob changed:",
-            "",
-            "- `vsp_threshold` **moves AR strongly** (mega s200: 0.062 at 0.01 → 0.223 at 0.30).",
-            "- `sick_call_probability` moves AR modestly.",
-            "- `detection_delay` barely moves AR in FAT samples.",
-            "- `isolation_compliance` / `quarantine_compliance` appear **inert** in these zips:",
-            "  seed-matched runs with iso=0.1 vs 0.9 (and FAT 0.1 vs 1.0) produce **identical** AR",
-            "  even though `run_spec.json` records the intended overrides. Threshold×compliance",
-            "  heatmaps therefore collapse to a pure VSP-threshold effect.",
-            "",
-            "## Interaction: threshold × compliance",
-            "",
-            "| vsp_threshold | isolation_compliance | AR_exp | AR_mega | gap (pp) | broken? |",
-            "|---:|---:|---:|---:|---:|:---:|",
-        ]
-    )
+
+_KNOB_FIDELITY_LINES = [
+    "",
+    "## Knob fidelity (seed-matched sanity)",
+    "",
+    "Same platform/seed with only one knob changed:",
+    "",
+    "- `vsp_threshold` **moves AR strongly** (mega s200: 0.062 at 0.01 → 0.223 at 0.30).",
+    "- `sick_call_probability` moves AR modestly.",
+    "- `detection_delay` barely moves AR in FAT samples.",
+    "- `isolation_compliance` / `quarantine_compliance` appear **inert** in these zips:",
+    "  seed-matched runs with iso=0.1 vs 0.9 (and FAT 0.1 vs 1.0) produce **identical** AR",
+    "  even though `run_spec.json` records the intended overrides. Threshold×compliance",
+    "  heatmaps therefore collapse to a pure VSP-threshold effect.",
+]
+
+
+def _threshold_compliance_lines(thr_comp_gaps: list[dict[str, Any]]) -> list[str]:
+    lines = [
+        "",
+        "## Interaction: threshold × compliance",
+        "",
+        "| vsp_threshold | isolation_compliance | AR_exp | AR_mega | gap (pp) | broken? |",
+        "|---:|---:|---:|---:|---:|:---:|",
+    ]
     for r in thr_comp_gaps:
         lines.append(
             f"| {r['vsp_threshold']} | {r['isolation_compliance']} | "
@@ -531,52 +554,90 @@ def write_report(
             f"{100 * float(r['gap_expedition_minus_mega'] or 0):+.1f} | "
             f"{'Y' if r.get('shadow_broken') else 'n'} |"
         )
-    broken_tc = _broken(thr_comp_gaps)
     lines.append("")
     lines.append(
-        f"Shadow broken in **{len(broken_tc)}/{len(thr_comp_gaps)}** "
+        f"Shadow broken in **{len(_broken_rows(thr_comp_gaps))}/{len(thr_comp_gaps)}** "
         "threshold×compliance cells."
     )
+    return lines
 
-    lines.extend(
-        [
-            "",
-            "## Interaction: delay × sick-call",
-            "",
-            f"Shadow broken in **{len(_broken(delay_rep_gaps))}/{len(delay_rep_gaps)}** cells.",
-            "",
-            "## Worst-case gradient panel",
-            "",
-            f"Shadow broken in **{len(_broken(worst_gaps))}/{len(worst_gaps)}** cells.",
-            "",
-        ]
+
+def _broken_count_lines(
+    delay_rep_gaps: list[dict[str, Any]],
+    worst_gaps: list[dict[str, Any]],
+) -> list[str]:
+    lines = [
+        "",
+        "## Interaction: delay × sick-call",
+        "",
+        f"Shadow broken in **{len(_broken_rows(delay_rep_gaps))}/{len(delay_rep_gaps)}** cells.",
+        "",
+        "## Worst-case gradient panel",
+        "",
+        f"Shadow broken in **{len(_broken_rows(worst_gaps))}/{len(worst_gaps)}** cells.",
+        "",
+    ]
+    if not worst_gaps:
+        return lines
+    # mildest broken cell
+    broken = _broken_rows(worst_gaps)
+    if not broken:
+        return lines
+    mild = min(
+        broken,
+        key=lambda r: (
+            float(r["vsp_threshold"]),
+            float(r["detection_delay"]),
+            -float(r["isolation_compliance"]),
+            -float(r["sick_call_probability"]),
+        ),
     )
-    if worst_gaps:
-        # mildest broken cell
-        broken = _broken(worst_gaps)
-        if broken:
-            mild = min(
-                broken,
-                key=lambda r: (
-                    float(r["vsp_threshold"]),
-                    float(r["detection_delay"]),
-                    -float(r["isolation_compliance"]),
-                    -float(r["sick_call_probability"]),
-                ),
-            )
-            lines.append(
-                "Mildest broken cell (lowest threshold / delay, highest compliance): "
-                f"vsp={mild['vsp_threshold']}, delay={mild['detection_delay']}, "
-                f"iso={mild['isolation_compliance']}, scp={mild['sick_call_probability']}, "
-                f"gap={100 * float(mild['abs_gap'] or 0):.1f}pp."
-            )
-            lines.append("")
+    lines.append(
+        "Mildest broken cell (lowest threshold / delay, highest compliance): "
+        f"vsp={mild['vsp_threshold']}, delay={mild['detection_delay']}, "
+        f"iso={mild['isolation_compliance']}, scp={mild['sick_call_probability']}, "
+        f"gap={100 * float(mild['abs_gap'] or 0):.1f}pp."
+    )
+    lines.append("")
+    return lines
 
-    if fig_names:
-        lines.extend(["## Figures", ""])
-        for n in fig_names:
-            lines.append(f"- `figures/{n}`")
-        lines.append("")
+
+def _figure_lines(fig_names: list[str]) -> list[str]:
+    if not fig_names:
+        return []
+    lines = ["## Figures", ""]
+    for n in fig_names:
+        lines.append(f"- `figures/{n}`")
+    lines.append("")
+    return lines
+
+
+def write_report(
+    path: str,
+    *,
+    n_runs: int,
+    thr_comp_gaps: list[dict[str, Any]],
+    delay_rep_gaps: list[dict[str, Any]],
+    worst_gaps: list[dict[str, Any]],
+    fat_curves: dict[str, list[dict[str, Any]]],
+    fig_names: list[str],
+) -> None:
+    lines = [
+        "# VSP degradation post-process",
+        "",
+        f"Runs bundled: **{n_runs}** (expect 6360).",
+        "",
+        f"Thesis test: shadow considered **broken** when "
+        f"`|AR_expedition − AR_mega| > {100 * SHADOW_BREAK_PP:.0f} pp`.",
+        "",
+        "## Factor-at-a-time (mean AR span across platforms)",
+        "",
+    ]
+    lines.extend(_fat_summary_lines(fat_curves))
+    lines.extend(_KNOB_FIDELITY_LINES)
+    lines.extend(_threshold_compliance_lines(thr_comp_gaps))
+    lines.extend(_broken_count_lines(delay_rep_gaps, worst_gaps))
+    lines.extend(_figure_lines(fig_names))
 
     parent = os.path.dirname(path)
     if parent:
