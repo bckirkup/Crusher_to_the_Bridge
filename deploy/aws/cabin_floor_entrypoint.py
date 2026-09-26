@@ -6,84 +6,31 @@ The array is ``len(ROSTER) x seed_count`` children of
 ``ROSTER[i // seed_count]`` (an isolated (bundle, pathogen_id) pair) at
 seed ``seeds[i % seed_count]`` and uploads its JSON dump under
 ``s3://<bucket>/<prefix>arm_<bundle>__<pathogen_id>/``. The confined-window
-verdict table is assembled locally after ``aws s3 sync``.
-
-A Spot reclaim retries the child, and a cell is deterministic, so an
-existing S3 artifact means the cell is done rather than that it must be
-redone. The container writes nothing outside its own S3 prefix and takes
-its identity from the Batch job role through the ambient boto3 chain.
+verdict table is assembled locally after ``aws s3 sync``. Reuses the
+S3/array-cell helpers of ``dose_challenge_entrypoint`` (same retry -> done
+semantics, same ambient boto3 job-role identity).
 """
 from __future__ import annotations
 
 import argparse
-import os
 import subprocess  # noqa: S404 - fixed argv, no shell
 import sys
 from pathlib import Path
-from typing import Any
-from urllib.parse import urlparse
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from tools.cabin_floor_probe import DEFAULT_SEEDS, ROSTER  # noqa: E402
-
-_BUCKET_CHARS = set("abcdefghijklmnopqrstuvwxyz0123456789.-")
-_KEY_CHARS = set(
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._/-",
+from deploy.aws.dose_challenge_entrypoint import (  # noqa: E402
+    _already_uploaded,
+    _array_index,
+    _s3_client,
+    _s3_uri,
 )
+from tools.cabin_floor_probe import DEFAULT_SEEDS, ROSTER  # noqa: E402
 
 _DRIVER = "tools/cabin_floor_probe.py"
 _OUT_ROOT = "cabin_floor_out"
-
-
-def _s3_uri(raw: str) -> tuple[str, str]:
-    parsed = urlparse(raw)
-    bucket = parsed.netloc
-    key = parsed.path.lstrip("/")
-    bad_bucket = any(char not in _BUCKET_CHARS for char in bucket)
-    if parsed.scheme != "s3" or not bucket or bad_bucket:
-        raise SystemExit(f"Invalid S3 URI: {raw!r}")
-    if any(char not in _KEY_CHARS for char in key):
-        raise SystemExit(f"Invalid S3 key: {key!r}")
-    return bucket, key.rstrip("/")
-
-
-def _s3_client() -> Any:
-    try:
-        import boto3
-    except ImportError as exc:  # pragma: no cover - image always has boto3
-        raise SystemExit("boto3 is required in the Batch image") from exc
-    return boto3.client("s3")
-
-
-def _array_index() -> int:
-    raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
-    if raw is None:
-        raise SystemExit("AWS_BATCH_JOB_ARRAY_INDEX is required")
-    try:
-        return int(raw)
-    except ValueError as exc:
-        raise SystemExit("AWS_BATCH_JOB_ARRAY_INDEX must be an integer") from exc
-
-
-def _already_uploaded(client: Any, bucket: str, key: str) -> bool:
-    """Whether this cell's dump is already in S3 (retry -> done, not redo)."""
-    try:
-        client.head_object(Bucket=bucket, Key=key)
-    except Exception as exc:  # noqa: BLE001 - boto3 raises per-client classes
-        response = getattr(exc, "response", {}) or {}
-        status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
-        if status == 403:
-            raise SystemExit(
-                "S3 HeadObject returned 403: the block prefix must be under "
-                "the job role's campaign/* scope",
-            ) from exc
-        if status not in (404, None):
-            raise
-        return False
-    return True
 
 
 def _cell(
