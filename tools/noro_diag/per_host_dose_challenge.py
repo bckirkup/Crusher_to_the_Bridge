@@ -499,6 +499,17 @@ def _wrap_challenge(core_cls: type, rec: Recorder, top_ids: set[int]) -> Any:
             record.credited_epochs_challenge_evaluated += 1
         now_infected = bool(agent.is_infected_with(pathogen_id))
         if not state["resident"] and now_infected:
+            infection = (getattr(agent, "infections", {}) or {}).get(
+                pathogen_id,
+            ) or {}
+            route_ledger = dict(
+                infection.get("acquired_particles_by_route") or {},
+            )
+            dominant = (
+                max(route_ledger, key=route_ledger.get)
+                if route_ledger
+                else "unknown"
+            )
             rec.acquisitions.append({
                 "agent_id": int(agent.agent_id),
                 "epoch": int(epoch),
@@ -506,6 +517,11 @@ def _wrap_challenge(core_cls: type, rec: Recorder, top_ids: set[int]) -> Any:
                 "effective_dose": witness[2] if evaluated else None,
                 "frailty": witness[3] if evaluated else None,
                 "hazard": witness[4] if evaluated else None,
+                "acquired_particles_by_route": {
+                    route: float(dose)
+                    for route, dose in route_ledger.items()
+                },
+                "dominant_route": dominant,
             })
             rec.acquired_ids.add(int(agent.agent_id))
         if state["resident"] and agent.agent_id not in rec.acquired_ids:
@@ -1311,6 +1327,33 @@ def infection_tally(result: Any, pathogen_id: str) -> dict[str, Any]:
     }
 
 
+def _route_attribution_from_acquisitions(
+    acquisitions: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """Dominant-route counts and dose shares recomputed from the recorded
+    acquisitions -- the same tally ``update_route_attribution`` accumulates
+    on the run state, derived independently so the harvested counters can
+    be checked against it."""
+    dominant_counts: dict[str, int] = {}
+    dose_shares: dict[str, float] = {}
+    for acquisition in acquisitions:
+        ledger = acquisition.get("acquired_particles_by_route") or {}
+        total = sum(ledger.values())
+        if total > 0.0:
+            dominant = max(ledger, key=ledger.get)
+            dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
+            for route, dose in ledger.items():
+                dose_shares[route] = dose_shares.get(route, 0.0) + dose / total
+            continue
+        fallback = acquisition.get("dominant_route") or "unknown"
+        dominant_counts[fallback] = dominant_counts.get(fallback, 0) + 1
+        dose_shares[fallback] = dose_shares.get(fallback, 0.0) + 1.0
+    return {
+        "infections_by_dominant_route": dict(sorted(dominant_counts.items())),
+        "infection_dose_share_by_route": dict(sorted(dose_shares.items())),
+    }
+
+
 def run_seed(
     *,
     seed: int,
@@ -1405,6 +1448,26 @@ def run_seed(
     summary["platform"] = platform
     summary["num_agents"] = num_agents
     summary["run_history"] = infection_tally(result, pathogen_id)
+    history = getattr(result, "history", None) or []
+    final = (
+        history[-1]
+        if isinstance(history, list) and history and isinstance(history[-1], dict)
+        else {}
+    )
+    final_summary = final.get("summary") or {}
+    summary["transmission"]["route_attribution"] = {
+        "engine_tally": {
+            "infections_by_dominant_route": (
+                final_summary.get("infections_by_dominant_route") or {}
+            ),
+            "infection_dose_share_by_route": (
+                final_summary.get("infection_dose_share_by_route") or {}
+            ),
+        },
+        "recomputed": _route_attribution_from_acquisitions(
+            rec.acquisitions,
+        ),
+    }
     if (
         arm_tag is not None
         or high_touch_area_scale is not None
