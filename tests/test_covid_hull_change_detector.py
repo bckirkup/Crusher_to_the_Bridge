@@ -145,7 +145,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # near-extinct cell re-ignites: (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2),
         # read from CI job 107765635955 (fast tier, 3.11, shard 3) on this
         # branch — both interpreters agree, as before on this cell.
-        (3, 11): (4, 2, 217, 5, 2),
+        # ROOM-AIR-01 + CABIN-OCC-01: room pools now exchange at the
+        # platform's declared ach*hvac_duty (expedition_cruise_450 cabin
+        # branches declare 6.0 at duty 0.5) and cabin-mate dose gates on
+        # time-partitioned co-presence; pool doses drop under the residence
+        # factor and pickup timing reorders the shared stream, so the
+        # near-extinct cell re-rolls: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0),
+        # read from CI job 108423507137 (fast tier, 3.11, shard 3) on this
+        # branch — identical to the 3.12 reading.
+        (3, 11): (1, 1, 217, 2, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
