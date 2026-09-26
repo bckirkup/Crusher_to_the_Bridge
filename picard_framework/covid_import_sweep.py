@@ -167,7 +167,7 @@ def _neighbour_pairs(
     """
     rows: dict[float, list[int]] = {}
     cols: dict[int, list[float]] = {}
-    for theta, n in responses:
+    for theta, n in responses.keys():
         rows.setdefault(theta, []).append(n)
         cols.setdefault(n, []).append(theta)
     pairs: list[tuple[CellResponse, CellResponse, str]] = []

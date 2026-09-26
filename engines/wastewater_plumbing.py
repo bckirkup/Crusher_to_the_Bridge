@@ -112,7 +112,7 @@ class BlackwaterHoldingTank:
         self.telemetry["volume_discharged_l"] += discharged_l
         kept = 1.0 - drain_fraction
         copies_before = sum(self.copies_by_pathogen.values())
-        for pathogen_id in list(self.copies_by_pathogen):
+        for pathogen_id in self.copies_by_pathogen:
             self.copies_by_pathogen[pathogen_id] *= kept
         self.telemetry["copies_discharged"] += copies_before * drain_fraction
 

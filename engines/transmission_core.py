@@ -6844,7 +6844,7 @@ class TransmissionCore:
             )
             for c in classes
         }
-        delivered_by_class = {c: 0.0 for c in classes}
+        delivered_by_class = dict.fromkeys(classes, 0.0)
         for target, request in requests:
             delivered = sum(request.get(c, 0.0) * scales[c] for c in classes)
             if delivered <= 0.0:
@@ -7491,7 +7491,7 @@ class TransmissionCore:
             ledger,
             self._reservoir_mix(SURFACE_RESERVOIR, pathogen_id, venue),
         )
-        delivered_by_class = {c: 0.0 for c in classes}
+        delivered_by_class = dict.fromkeys(classes, 0.0)
         for agent, request in requests:
             delivered = sum(request.get(c, 0.0) * scales[c] for c in classes)
             if delivered <= 0.0:

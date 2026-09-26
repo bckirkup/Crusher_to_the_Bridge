@@ -569,7 +569,7 @@ class ContamTransportEngine:
         source_zone: str,
     ) -> tuple[dict[str, float], dict[str, float]]:
         """Probe the existing rate code with unit mass in one real zone."""
-        working = {zid: 0.0 for zid in self.zone_nodes}
+        working = dict.fromkeys(self.zone_nodes, 0.0)
         working[source_zone] = 1.0
         concentrations: dict[str, float] = {}
         for zone_id, mass in working.items():
@@ -578,7 +578,7 @@ class ContamTransportEngine:
                 node.concentration(mass) if node is not None else 0.0
             )
 
-        source_rate = {zid: 0.0 for zid in self._real_zone_ids}
+        source_rate = dict.fromkeys(self._real_zone_ids, 0.0)
         outflow_rate = dict.fromkeys(self._real_zone_ids, 0.0)
         for path in self.airflow_paths:
             if path.path_type in (PATH_TYPE_HVAC_RETURN, PATH_TYPE_HVAC_SUPPLY):

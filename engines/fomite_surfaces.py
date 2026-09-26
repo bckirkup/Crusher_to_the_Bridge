@@ -552,7 +552,7 @@ class PerSurfaceFomiteState:
         if declared is not None:
             return {c: declared.get(c, 0.0) for c in counts}
         if total_area <= 0.0:
-            return {c: 0.0 for c in counts}
+            return dict.fromkeys(counts, 0.0)
         return {c: counts[c] * area_each[c] / total_area for c in counts}
 
     def deposit(
