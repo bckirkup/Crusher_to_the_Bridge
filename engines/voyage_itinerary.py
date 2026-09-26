@@ -284,20 +284,13 @@ def resolve_epoch_state(
             epoch_of_day=epoch_of_day,
         )
 
-    day_entry = _day_entry_for(itinerary, voyage_day)
-    if day_entry is None:
-        # Past / before configured days → treat as sea day with effects on
-        day_type = "sea_day"
-        day_entry = {"day": voyage_day, "type": "sea_day"}
-    else:
-        day_type = str(day_entry.get("type", "sea_day"))
+    day_type, day_entry = _day_type_and_entry(itinerary, voyage_day)
 
     defaults = (voyage.get("defaults") or {}).get(day_type) or DEFAULT_DAY_DEFAULTS.get(
         day_type, DEFAULT_DAY_DEFAULTS["sea_day"],
     )
     dining = _normalize_dining_multiplier(defaults.get("dining_demand_multiplier", 1.0))
     contact = float(defaults.get("contact_rate_multiplier", 1.0))
-    onboard = float(defaults.get("onboard_passenger_fraction", 1.0))
 
     in_embark = _in_window(
         epoch_of_day, day_entry.get("embarkation_window_hours_of_day"),
@@ -308,29 +301,21 @@ def resolve_epoch_state(
     in_reembark = _in_window(
         epoch_of_day, day_entry.get("reembark_window_hours_of_day"),
     )
+    between_ashore = _between_ashore_windows(day_type, day_entry, epoch_of_day)
 
-    between_ashore = False
-    if day_type == "port_day":
-        d_win = day_entry.get("disembark_window_hours_of_day") or []
-        r_win = day_entry.get("reembark_window_hours_of_day") or []
-        if len(d_win) >= 2 and len(r_win) >= 2:
-            d_end = max(int(d_win[0]), int(d_win[1]))
-            r_start = min(int(r_win[0]), int(r_win[1]))
-            between_ashore = d_end < epoch_of_day < r_start
-
-    buffet_surge = 0.0
-    if day_type == "embarkation" and in_embark:
-        buffet_surge = float(day_entry.get("buffet_surge_fraction", 0.80))
-        if defaults.get("embarkation_buffet_surge", True):
-            contact = max(contact, float(defaults.get("contact_rate_multiplier", 1.2)))
+    buffet_surge, contact = _embarkation_surge(
+        day_type, day_entry, defaults, in_embark, contact,
+    )
 
     disembark_fraction = float(day_entry.get("disembark_fraction", 0.0) or 0.0)
-    if day_type == "port_day" and (in_disembark or between_ashore):
-        onboard = max(0.0, 1.0 - disembark_fraction)
-    elif day_type == "port_day" and in_reembark:
-        onboard = 1.0
-    elif day_type == "disembarkation" and in_disembark:
-        onboard = float(defaults.get("onboard_passenger_fraction", 0.0))
+    onboard = _onboard_fraction(
+        day_type,
+        defaults,
+        in_disembark=in_disembark,
+        in_reembark=in_reembark,
+        between_ashore=between_ashore,
+        disembark_fraction=disembark_fraction,
+    )
 
     return EpochState(
         day_type=day_type,
@@ -362,6 +347,70 @@ def resolve_epoch_state(
         ),
         notes=str(day_entry.get("notes") or ""),
     )
+
+
+def _day_type_and_entry(
+    itinerary: list[dict[str, Any]],
+    voyage_day: int,
+) -> tuple[str, dict[str, Any]]:
+    """The configured day entry and its type; sea day when unconfigured."""
+    day_entry = _day_entry_for(itinerary, voyage_day)
+    if day_entry is None:
+        # Past / before configured days → treat as sea day with effects on
+        return "sea_day", {"day": voyage_day, "type": "sea_day"}
+    return str(day_entry.get("type", "sea_day")), day_entry
+
+
+def _between_ashore_windows(
+    day_type: str,
+    day_entry: dict[str, Any],
+    epoch_of_day: int,
+) -> bool:
+    """Whether the epoch sits in the gap between disembark and reembark."""
+    if day_type != "port_day":
+        return False
+    d_win = day_entry.get("disembark_window_hours_of_day") or []
+    r_win = day_entry.get("reembark_window_hours_of_day") or []
+    if len(d_win) < 2 or len(r_win) < 2:
+        return False
+    d_end = max(int(d_win[0]), int(d_win[1]))
+    r_start = min(int(r_win[0]), int(r_win[1]))
+    return d_end < epoch_of_day < r_start
+
+
+def _embarkation_surge(
+    day_type: str,
+    day_entry: dict[str, Any],
+    defaults: dict[str, Any],
+    in_embark: bool,
+    contact: float,
+) -> tuple[float, float]:
+    """Buffet surge fraction and possibly raised contact multiplier."""
+    if day_type != "embarkation" or not in_embark:
+        return 0.0, contact
+    buffet_surge = float(day_entry.get("buffet_surge_fraction", 0.80))
+    if defaults.get("embarkation_buffet_surge", True):
+        contact = max(contact, float(defaults.get("contact_rate_multiplier", 1.2)))
+    return buffet_surge, contact
+
+
+def _onboard_fraction(
+    day_type: str,
+    defaults: dict[str, Any],
+    *,
+    in_disembark: bool,
+    in_reembark: bool,
+    between_ashore: bool,
+    disembark_fraction: float,
+) -> float:
+    """Passenger fraction aboard under the day's embark/disembark windows."""
+    if day_type == "port_day" and (in_disembark or between_ashore):
+        return max(0.0, 1.0 - disembark_fraction)
+    if day_type == "port_day" and in_reembark:
+        return 1.0
+    if day_type == "disembarkation" and in_disembark:
+        return float(defaults.get("onboard_passenger_fraction", 0.0))
+    return float(defaults.get("onboard_passenger_fraction", 1.0))
 
 
 def _shore_probability_per_epoch(raw: Any, clock: SimClock) -> float:
@@ -494,35 +543,55 @@ def apply_ashore_and_embarkation(
     )
 
     if epoch_state.day_type == "disembarkation":
-        leave = epoch_state.in_disembark_window or epoch_state.onboard_fraction <= 0.0
-        for a in passengers:
-            a.ashore = bool(leave)
-        for a in all_crew:
-            a.ashore = False
+        _apply_disembarkation_day(passengers, all_crew, epoch_state)
         return
 
     if epoch_state.day_type == "port_day":
-        if epoch_state.in_reembark_window:
-            for a in (*passengers, *all_crew):
-                a.ashore = False
-            return
-        if epoch_state.in_disembark_window:
-            _match_ashore_target(passengers, epoch_state.disembark_fraction, rng)
-            if crew_leaving:
-                _match_ashore_target(
-                    crew_leaving, epoch_state.crew_shore_leave_fraction, rng,
-                )
-            else:
-                for a in all_crew:
-                    a.ashore = False
-            return
-        if epoch_state.between_ashore_windows:
-            # Keep sticky ashore flags set during disembark window
-            return
+        _apply_port_day(passengers, all_crew, crew_leaving, epoch_state, rng)
+        return
+
+    for a in (*passengers, *all_crew):
+        a.ashore = False
+
+
+def _apply_disembarkation_day(
+    passengers: list[Any],
+    all_crew: list[Any],
+    epoch_state: EpochState,
+) -> None:
+    """Disembarkation day: passengers leave in the window, crew never do."""
+    leave = epoch_state.in_disembark_window or epoch_state.onboard_fraction <= 0.0
+    for a in passengers:
+        a.ashore = bool(leave)
+    for a in all_crew:
+        a.ashore = False
+
+
+def _apply_port_day(
+    passengers: list[Any],
+    all_crew: list[Any],
+    crew_leaving: list[Any],
+    epoch_state: EpochState,
+    rng: Any,
+) -> None:
+    """Port call ashore flags: reembark clears, disembark draws to target."""
+    if epoch_state.in_reembark_window:
         for a in (*passengers, *all_crew):
             a.ashore = False
         return
-
+    if epoch_state.in_disembark_window:
+        _match_ashore_target(passengers, epoch_state.disembark_fraction, rng)
+        if crew_leaving:
+            _match_ashore_target(
+                crew_leaving, epoch_state.crew_shore_leave_fraction, rng,
+            )
+        else:
+            for a in all_crew:
+                a.ashore = False
+        return
+    if epoch_state.between_ashore_windows:
+        # Keep sticky ashore flags set during disembark window
+        return
     for a in (*passengers, *all_crew):
         a.ashore = False
 

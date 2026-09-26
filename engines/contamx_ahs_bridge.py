@@ -55,6 +55,20 @@ def synthesize_ahs_recirculation_paths(
 
     Single-room AHUs yield return+supply legs (OA + filter removal).
     """
+    by_ahs = _group_ahs_terminal_flows(path_map_entries, path_flows_m3h, known_zones)
+
+    paths: list[ContamAirflowPath] = []
+    for ahs_nr, group in sorted(by_ahs.items()):
+        paths.extend(_ahs_group_star_paths(ahs_nr, group, oa_fraction))
+    return paths
+
+
+def _group_ahs_terminal_flows(
+    path_map_entries: list[dict[str, Any]],
+    path_flows_m3h: dict[int, float],
+    known_zones: set[str],
+) -> dict[int, dict[str, Any]]:
+    """Bucket AHS return/supply/recirc flows by AHS group number."""
     by_ahs: dict[int, dict[str, Any]] = defaultdict(
         lambda: {"returns": {}, "supplies": {}, "recirc": 0.0}
     )
@@ -79,54 +93,83 @@ def synthesize_ahs_recirculation_paths(
         elif kind == "ahs_recirc":
             group["recirc"] += flow
 
+    return by_ahs
+
+
+def _ahs_group_star_paths(
+    ahs_nr: int,
+    group: dict[str, Any],
+    oa_fraction: float,
+) -> list[ContamAirflowPath]:
+    """Star return/supply legs for one AHS group (empty when not viable)."""
+    returns: dict[str, float] = group["returns"]
+    supplies: dict[str, float] = group["supplies"]
+    recirc = float(group["recirc"])
+    rooms = sorted(set(returns) | set(supplies))
+    if not rooms:
+        return []
+
+    sum_r = sum(returns.values())
+    sum_s = sum(supplies.values())
+    if sum_r < _FLOW_EPS or sum_s < _FLOW_EPS:
+        return []
+    if recirc < _FLOW_EPS:
+        # ContamX often reports Rec/OA/exhaust Flow0 as 0 for simple AHS
+        # while terminals carry the scheduled duty flow. Recover PRJ
+        # recirculation: Rec = (1 − oa) · min(ΣR, ΣS).
+        oa = min(max(float(oa_fraction), 0.0), 1.0)
+        recirc = (1.0 - oa) * min(sum_r, sum_s)
+    if recirc < _FLOW_EPS:
+        return []
+
+    plenum_id = ahs_plenum_id(ahs_nr)
+    paths = _ahs_return_paths(ahs_nr, plenum_id, returns)
+    paths.extend(_ahs_supply_paths(ahs_nr, plenum_id, supplies, recirc, sum_s))
+    return paths
+
+
+def _ahs_return_paths(
+    ahs_nr: int,
+    plenum_id: str,
+    returns: dict[str, float],
+) -> list[ContamAirflowPath]:
+    """room → plenum legs at each room's return flow (unfiltered)."""
+    return [
+        ContamAirflowPath(
+            path_id=f"contamx_ahs{ahs_nr}_ret_{room}",
+            from_zone=room,
+            to_zone=plenum_id,
+            flow_rate_m3h=r_i,
+            path_type=PATH_TYPE_HVAC_RETURN,
+            is_hvac_ducted=False,
+        )
+        for room, r_i in returns.items()
+        if r_i >= _FLOW_EPS
+    ]
+
+
+def _ahs_supply_paths(
+    ahs_nr: int,
+    plenum_id: str,
+    supplies: dict[str, float],
+    recirc: float,
+    sum_s: float,
+) -> list[ContamAirflowPath]:
+    """plenum → room legs carrying the room's share of recirculated air."""
     paths: list[ContamAirflowPath] = []
-    for ahs_nr, group in sorted(by_ahs.items()):
-        returns: dict[str, float] = group["returns"]
-        supplies: dict[str, float] = group["supplies"]
-        recirc = float(group["recirc"])
-        rooms = sorted(set(returns) | set(supplies))
-        if not rooms:
+    for room, s_j in supplies.items():
+        if s_j < _FLOW_EPS:
             continue
-
-        sum_r = sum(returns.values())
-        sum_s = sum(supplies.values())
-        if sum_r < _FLOW_EPS or sum_s < _FLOW_EPS:
+        # Pathogen-carrying supply = share of recirculated air to room.
+        supply_flow = s_j * (recirc / sum_s)
+        if supply_flow < _FLOW_EPS:
             continue
-        if recirc < _FLOW_EPS:
-            # ContamX often reports Rec/OA/exhaust Flow0 as 0 for simple AHS
-            # while terminals carry the scheduled duty flow. Recover PRJ
-            # recirculation: Rec = (1 − oa) · min(ΣR, ΣS).
-            oa = min(max(float(oa_fraction), 0.0), 1.0)
-            recirc = (1.0 - oa) * min(sum_r, sum_s)
-        if recirc < _FLOW_EPS:
-            continue
-
-        plenum_id = ahs_plenum_id(ahs_nr)
-        for room, r_i in returns.items():
-            if r_i < _FLOW_EPS:
-                continue
-            paths.append(ContamAirflowPath(
-                path_id=f"contamx_ahs{ahs_nr}_ret_{room}",
-                from_zone=room,
-                to_zone=plenum_id,
-                flow_rate_m3h=r_i,
-                path_type=PATH_TYPE_HVAC_RETURN,
-                is_hvac_ducted=False,
-            ))
-
-        for room, s_j in supplies.items():
-            if s_j < _FLOW_EPS:
-                continue
-            # Pathogen-carrying supply = share of recirculated air to room.
-            supply_flow = s_j * (recirc / sum_s)
-            if supply_flow < _FLOW_EPS:
-                continue
-            paths.append(ContamAirflowPath(
-                path_id=f"contamx_ahs{ahs_nr}_sup_{room}",
-                from_zone=plenum_id,
-                to_zone=room,
-                flow_rate_m3h=supply_flow,
-                path_type=PATH_TYPE_HVAC_SUPPLY,
-                is_hvac_ducted=True,
-            ))
+        paths.append(ContamAirflowPath(
+            path_id=f"contamx_ahs{ahs_nr}_sup_{room}",
+            from_zone=plenum_id,
+            to_zone=room,
+            flow_rate_m3h=supply_flow,
+            path_type=PATH_TYPE_HVAC_SUPPLY,
+            is_hvac_ducted=True,
+        ))
     return paths
