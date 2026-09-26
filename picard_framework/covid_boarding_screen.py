@@ -1006,6 +1006,11 @@ def cell_payload(
             infection_age_days=_index_infection_age(raw, cell),
         ),
         **_truth_counts(sim.engine),
+        "lab_confirmed_total": syndromic.lab_confirmed_count(PATHOGEN_ID),
+        # The resolved onset-recording channel, echoed back so a cell's
+        # channel arm is auditable from the payload alone: the declared arm
+        # carries null, a period arm carries its declared block.
+        "onset_recording": syndromic.onset_recording_channel(PATHOGEN_ID),
         KEY_VSP_MAX: float(
             getattr(sim.engine, "vsp_reported_case_fraction_max", 0.0),
         ),

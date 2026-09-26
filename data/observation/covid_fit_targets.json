@@ -6,7 +6,7 @@
     "fixed_before_implementation": true,
     "training_anchors": ["covid.T1", "covid.T2", "covid.T3", "covid.T4"],
     "fitted_against": ["covid.T1", "covid.T3"],
-    "held_out_anchors": ["covid.H1", "covid.H2", "covid.H3", "covid.H4"],
+    "held_out_anchors": ["covid.H1", "covid.H2", "covid.H3", "covid.H4", "covid.H5"],
     "note": "covid.T2 and covid.T4 are training-side diagnostics and are reported, not summed into the objective: the fit spec section 5 fits the one composite against covid.T1 and covid.T3 only, and a diagnostic that entered the objective would stop being a test of the mechanism."
   },
   "anchors": [
@@ -143,6 +143,22 @@
       "evidence_grade": "B - a self-selected subgroup of one hull",
       "scorable": false,
       "notes": "Declared unscorable rather than approximated: no serology or IgG channel exists in the observation model, and the closest available channel (PCR under a campaign) measures a different quantity at a different time. Substituting PCR for serology here would score the model against an anchor it has no instrument for."
+    },
+    {
+      "anchor_id": "covid.H5",
+      "split_role": "held_out",
+      "scenario_id": "diamond_princess_2020",
+      "observable": "serology-informed true infection count for the voyage, conditional on the seeded burn taking off",
+      "channel": "infections_total",
+      "values": {
+        "infections_total": 840,
+        "admissible_band": [712, 960],
+        "pcr_confirmed": 712,
+        "estimated_missed": 128
+      },
+      "source": "Hung et al., Lancet Infectious Diseases 2020 — 9 of 215 PCR-negative repatriated Hong Kong passengers seroconverted (~4%, CI ~2–8%); extrapolated to the ~3,000 PCR-negatives aboard it implies ~120 missed infections on top of the 712 PCR-confirmed, ≈ 840 total with a CI-driven band [712, 960]. Declared in docs/covid/covid_channel_anchor_handoff_2026_09_25.md section 8.",
+      "evidence_grade": "B - subgroup extrapolation, declared",
+      "notes": "Scored against the truth channel because the anchor itself is a truth-quantity estimate: serology approximates ever-infected, which the model emits as infections_total, so the anchor is scorable without a serology instrument. The band carries the extrapolation's uncertainty; the point does not. Held out forever — a Theta chosen against it would re-run the tuning the split exists to forbid. Scored only on takeoff seeds (the anchor is a burn-seed draw: a voyage that took off, not the set of all voyages)."
     }
   ]
 }

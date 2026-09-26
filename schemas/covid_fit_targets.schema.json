@@ -63,12 +63,13 @@
           },
           "observable": {"type": "string", "minLength": 1},
           "channel": {
-            "description": "The observation channel the anchor is scored against. A truth-state channel is not admissible.",
+            "description": "The observation channel the anchor is scored against. A truth-state channel is admissible only when the anchor itself estimates a truth quantity the model emits directly: infections_total exists for the serology-derived ever-infected anchor (covid.H5), where serology approximates ever-infected and no serology instrument is needed to score it.",
             "type": "string",
             "enum": [
               "onset_observations",
               "campaign_confirmed",
-              "serology"
+              "serology",
+              "infections_total"
             ]
           },
           "values": {"type": "object", "minProperties": 1},

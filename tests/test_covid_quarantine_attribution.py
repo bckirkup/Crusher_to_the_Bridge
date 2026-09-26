@@ -281,6 +281,12 @@ class _Syndromic:
     def campaign_specimen_log(self, pathogen_id):
         return []
 
+    def lab_confirmed_count(self, pathogen_id):
+        return 0
+
+    def onset_recording_channel(self, pathogen_id):
+        return None
+
 
 class _Sim:
     """Just enough of ShipSimulation for the ledger and payload read-out."""
