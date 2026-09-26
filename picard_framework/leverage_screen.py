@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import functools
 import json
 import re
 import tempfile
@@ -338,20 +339,15 @@ def build_noro_spec(
     return spec
 
 
-_NORO_PROFILE: dict[str, Any] | None = None
-
-
+@functools.lru_cache(maxsize=1)
 def _noro_profile() -> dict[str, Any]:
     """The shipped norwalk_gi profile (the transform's reference field)."""
-    global _NORO_PROFILE
-    if _NORO_PROFILE is None:
-        from picard_framework.pathogen_overrides import load_pathogen_bundle
-        from simulation_utils import asset_defaults
-        bundle_path = REPO_ROOT / asset_defaults.pathogen_bundle_rel(
-            "active_profiles",
-        )
-        _NORO_PROFILE = load_pathogen_bundle(str(bundle_path))["norwalk_gi"]
-    return _NORO_PROFILE
+    from picard_framework.pathogen_overrides import load_pathogen_bundle
+    from simulation_utils import asset_defaults
+    bundle_path = REPO_ROOT / asset_defaults.pathogen_bundle_rel(
+        "active_profiles",
+    )
+    return load_pathogen_bundle(str(bundle_path))["norwalk_gi"]
 
 
 def run_noro_point(
