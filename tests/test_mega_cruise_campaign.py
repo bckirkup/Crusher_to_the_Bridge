@@ -2355,6 +2355,98 @@ def test_synthetic_recovery_cartesian_and_generator() -> None:
     tx = spec["config_overrides"]["transmission"]
     assert tx["contact_mode"] == "density_dependent"
     assert "exponent" in tx["density_dependent"]
+    # The engine reads activity_contacts only under per_partner_contact and
+    # refuses it under a density-family mode, so the arm must carry the
+    # companion override the hull_compounding convention documents.
+    assert tx["activity_contacts"]["enabled"] is False
+
+
+def test_density_override_keeps_activity_contacts_for_partner_mode() -> None:
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _density_contact_override,
+    )
+
+    ppc = _density_contact_override(None, contact_mode="per_partner_contact")
+    assert ppc == {"transmission": {"contact_mode": "per_partner_contact"}}
+    legacy = _density_contact_override(None, contact_mode="legacy")
+    assert legacy["transmission"]["activity_contacts"] == {"enabled": False}
+
+
+def test_sourced_window_flags() -> None:
+    from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (
+        provenance_flags,
+    )
+
+    # Clean run: active overrides listed, nothing else.
+    spec = {
+        "pathogen_overrides": {
+            "norwalk_gi": {"dose_adjustment": 9.5},
+        },
+        "config_overrides": {
+            "transmission": {"density_dependent": {"exponent": 0.5}},
+        },
+    }
+    cfg = {}
+    profiles = {"norwalk_gi": {
+        "secretor_negative_fraction": 0.2,
+        "secretor_negative_relative_susceptibility": 0.2,
+        "surface_decay_log10_per_day": 0.3,
+        "shedding_variance_log10": 1.0,
+        "emesis_titre_gec_per_ml_range": [1e5, 3e5],
+        "environmental_faecal_release_log10_g_per_epoch": 9.5,
+        "stool_events_per_day": {"baseline": 1.0, "diarrhoeal": 5.0},
+        "food_contamination": {
+            "hand_food_contacts_per_day": 5.0,
+            "ingestion_fraction_per_day": 0.3,
+        },
+    }}
+    flags = provenance_flags(spec, cfg, profiles)
+    # "active" plus the two code-defaulted inert gates an empty cfg implies.
+    assert set(flags) == {"active", "gates_off"}
+    assert set(flags["gates_off"]) == {
+        "transmission.blackwater_plumbing",
+        "observation.wastewater_assay_mode",
+    }
+    assert "pathogen.norwalk_gi.dose_adjustment" in flags["active"]
+    assert "cfg.transmission.density_dependent.exponent" in flags["active"]
+
+    # Effective value outside the sourced interval flags with the bounds.
+    profiles["norwalk_gi"]["secretor_negative_relative_susceptibility"] = 0.9
+    flags = provenance_flags(spec, cfg, profiles)
+    assert flags["window"] == {
+        "norwalk_gi.secretor_negative_relative_susceptibility": [0.9, 0.04, 0.83],
+    }
+
+    # The withdrawn alias under a profile carrying the preferred key flags
+    # as shadowed -- the archive sees the write reached no host.
+    profiles["norwalk_gi"]["secretor_negative_relative_susceptibility"] = 0.2
+    spec["pathogen_overrides"]["norwalk_gi"]["innate_nonsusceptible_fraction"] = 0.3
+    flags = provenance_flags(spec, cfg, profiles)
+    assert flags["shadowed"] == ["norwalk_gi.innate_nonsusceptible_fraction"]
+
+    # Same alias is NOT shadowed when the profile lacks the preferred key
+    # (the deprecated-bundle arm still resolves it).
+    flags = provenance_flags(spec, cfg, {"norwalk_gi": {}})
+    assert "shadowed" not in flags
+
+    # A pathogen with no declared window table flags nothing for windows.
+    spec2 = {"pathogen_overrides": {"sars_cov2_resp": {"dose_adjustment": 1.0}}}
+    flags = provenance_flags(spec2, cfg, {"sars_cov2_resp": {}})
+    assert "window" not in flags
+
+    # Inert gates in the merged config are enumerated compactly: an
+    # archive that claims a mechanism while its gate was off reads as such.
+    cfg_gated = {
+        "variant_surveillance": {"enabled": False},
+        "observation": {"wastewater_assay_mode": "none"},
+        "transmission": {"contact_mode": "per_partner_contact"},
+    }
+    flags = provenance_flags({}, cfg_gated, {})
+    assert flags["gates_off"] == [
+        "observation.wastewater_assay_mode",
+        "transmission.blackwater_plumbing",
+        "variant_surveillance.enabled",
+    ]
 
 
 def test_synthetic_recovery_secretor_axis_rules() -> None:
