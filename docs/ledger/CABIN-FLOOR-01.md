@@ -1,7 +1,7 @@
 # CABIN-FLOOR-01
 **Date:** 2026-09-26
 **Commit:** 4e499daa
-**Pathogens:** norovirus_gii4, norwalk_gi, sars_cov2_resp, influenza_a, measles_virus, legionella_pneumophila, vibrio_cholerae_parahaemolyticus, campylobacter_jejuni, clostridioides_difficile, andes_hantavirus, ebola_virus
+**Pathogens:** all
 **Status:** measured
 **Measured at:** 4e499daa
 
