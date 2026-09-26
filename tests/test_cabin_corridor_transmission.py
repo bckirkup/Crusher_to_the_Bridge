@@ -6,6 +6,7 @@ import pytest
 
 from engines import transmission_core as tc_mod
 from engines.infection_dynamics_bridge import (
+    HAND_LOAD_LOG10_GEC,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
@@ -32,6 +33,48 @@ def _agent(aid: int, loc: str, infected: bool = False) -> KorkinAgent:
         a.time_infected = 1
     a.current_location = loc
     return a
+
+
+NORO_TEST = "noro_test"
+
+
+def _noro_test_profile() -> dict:
+    """Minimal profiled pathogen so the profiled fomite arm runs."""
+    return {
+        "shedding_curve_log10": [11.0] * 12,
+        "asymptomatic_shedding_log10": [11.0] * 12,
+        "symptom_onset_day": 0.0,
+        "dose_response": {"model": "exponential", "k": 0.01},
+        "hand_inactivation_rate_per_hour": 0.61,
+        "hand_hygiene_rate_per_hour": 0.0,
+    }
+
+
+def _fomite_core(zone: str, mode: str | None) -> TransmissionCore:
+    tx: dict = {"cabin_air_mode": "zone_pool"}
+    if mode is not None:
+        tx["cabin_confined_fomite"] = {"mode": mode}
+    core = TransmissionCore(
+        rng=np.random.default_rng(0),
+        zone_volumes={zone: 1200.0},
+        zone_types={zone: "Cabin_Corridor"},
+        pathogen_profiles={NORO_TEST: _noro_test_profile()},
+        cfg={"transmission": tx},
+    )
+    core.initialize_zones([zone])
+    return core
+
+
+def _cabin_pair(zone: str) -> list[KorkinAgent]:
+    """Agent 1 shedding NORO_TEST in the pair's own cabin with agent 2."""
+    shedder = _agent(1, zone)
+    shedder.infect_with_pathogen(NORO_TEST, 1.0, 0, time_infected=24)
+    shedder.infections[NORO_TEST]["illness"] = IllnessStatus.SYMPTOMATIC
+    shedder.hand_load_by_pathogen[NORO_TEST] = 10.0 ** HAND_LOAD_LOG10_GEC
+    mate = _agent(2, zone)
+    shedder.cabin_mate_ids = frozenset({2})
+    mate.cabin_mate_ids = frozenset({1})
+    return [shedder, mate]
 
 
 def _droplet_doses(
@@ -441,6 +484,97 @@ class TestCabinCorridorTransmission:
             quarantined_ids={2},
         )
         assert matrix.fomite_trailing_exposures == []
+
+    def test_confined_mate_picks_up_from_own_cabin_pool(self) -> None:
+        """NORO-CABIN-01: a confined mate still touches the pair's fittings."""
+        zone = "PC_D6_P_M"
+        cabin = f"{zone}::cabin1"
+        shedder, mate = _cabin_pair(zone)
+        core = _fomite_core(zone, "own_cabin")
+        core.surface_pools_by_pathogen[NORO_TEST][cabin] = 1000.0
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, mate],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids={2},
+        )
+        pickups = [
+            r for r in matrix.fomite_trailing_exposures
+            if r["target_id"] == 2
+        ]
+        assert pickups
+        assert {r["unit"] for r in pickups} == {cabin}
+
+    def test_confined_mate_never_touches_the_corridor_pool(self) -> None:
+        """own_cabin scopes to the pair's compartment: the shared hallway
+        pool stays gated for a confined target. Agent 1 does not shed, so
+        the pair's own compartment pool stays empty and only the corridor
+        pool could deliver anything."""
+        zone = "PC_D6_P_M"
+        cabin = f"{zone}::cabin1"
+        shedder = _agent(1, zone)
+        mate = _agent(2, zone)
+        shedder.cabin_mate_ids = frozenset({2})
+        mate.cabin_mate_ids = frozenset({1})
+        core = _fomite_core(zone, "own_cabin")
+        core.surface_pools_by_pathogen[NORO_TEST][zone] = 1000.0
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, mate],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids={2},
+        )
+        assert [
+            r for r in matrix.fomite_trailing_exposures
+            if r["target_id"] == 2
+        ] == []
+        assert core.surface_pools_by_pathogen.get(NORO_TEST, {}).get(
+            cabin, 0.0,
+        ) == pytest.approx(0.0)
+
+    def test_confined_fomite_off_restores_the_blanket_gate(self) -> None:
+        zone = "PC_D6_P_M"
+        cabin = f"{zone}::cabin1"
+        shedder, mate = _cabin_pair(zone)
+        core = _fomite_core(zone, "off")
+        core.surface_pools_by_pathogen[NORO_TEST][cabin] = 1000.0
+        matrix, _ = core.execute_transmission(
+            epoch=1,
+            agents=[shedder, mate],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids={1, 2},
+        )
+        assert matrix.fomite_trailing_exposures == []
+
+    def test_confined_shedder_loads_own_cabin_fittings(self) -> None:
+        zone = "PC_D6_P_M"
+        cabin = f"{zone}::cabin1"
+        shedder, mate = _cabin_pair(zone)
+        core = _fomite_core(zone, "own_cabin")
+        core.execute_transmission(
+            epoch=1,
+            agents=[shedder, mate],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids={1},
+        )
+        assert core.surface_pools_by_pathogen.get(NORO_TEST, {}).get(
+            cabin, 0.0,
+        ) > 0.0
+
+    def test_confined_shedder_deposits_nothing_under_off(self) -> None:
+        zone = "PC_D6_P_M"
+        cabin = f"{zone}::cabin1"
+        shedder, mate = _cabin_pair(zone)
+        core = _fomite_core(zone, "off")
+        core.execute_transmission(
+            epoch=1,
+            agents=[shedder, mate],
+            zone_pathogen_mass={zone: 0.0},
+            quarantined_ids={1},
+        )
+        pools = core.surface_pools_by_pathogen.get(NORO_TEST, {})
+        assert pools.get(cabin, 0.0) == pytest.approx(0.0)
+        assert pools.get(zone, 0.0) == pytest.approx(0.0)
 
     def test_balcony_ventilation_reduces_droplet_dose(self) -> None:
         zone = "PC_D7_S_A"

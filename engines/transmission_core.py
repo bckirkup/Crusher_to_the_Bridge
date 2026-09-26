@@ -956,6 +956,21 @@ DEFAULT_CONFINED_CABIN_ABSENCE_HOURS_PER_DAY = 1.0
 # axis exists for measurement only (Grade C, origin I).
 DEFAULT_CABIN_ASLEEP_CONTACT_SHARE = 0.0
 
+# ── NORO-CABIN-01: confined-cabin fomite scope ──────────────────────────
+# The pre-change confinement gate assumed a quarantined host touches no
+# surfaces at all, which dead-codes the shared-fittings route the
+# confinement literature actually carries norovirus on — the head and
+# fixtures the cabinmates still share (Wikswo 2011, Chimonas 2008 cabinmate
+# clusters ran on confinement-supervised staterooms; Grade B for the
+# mechanism's existence, the shares are measured by the instrument).
+# ``own_cabin`` narrows the gate to the pair's stateroom compartment pool:
+# the confined host deposits to and picks up from that pool only, its
+# draws running on a dedicated spawned stream so the shared stream — and
+# the ``off`` baseline, which keeps the blanket gate for paired-seed
+# attribution — stay bit-identical.
+DEFAULT_CABIN_CONFINED_FOMITE_MODE = "own_cabin"
+CABIN_CONFINED_FOMITE_MODES = {"own_cabin", "off"}
+
 # ── ROOM-AIR-01: first-order ventilation removal on the room pools ────────
 # The shipped pools treated the epoch's emitted mass as standing at full
 # concentration for the whole epoch — a sealed box. The sanitary flush
@@ -1604,6 +1619,26 @@ def _parse_cabin_cooccupancy(tx: dict[str, Any]) -> CabinCooccupancy:
     )
 
 
+def _parse_cabin_confined_fomite(tx: dict[str, Any]) -> str:
+    """Read the NORO-CABIN-01 confined-cabin fomite scope declaration."""
+    raw = tx.get("cabin_confined_fomite")
+    if isinstance(raw, str):
+        raw = {"mode": raw}
+    block = raw or {}
+    if not isinstance(block, dict):
+        raise ValueError(
+            "transmission.cabin_confined_fomite must be a mapping or a "
+            "mode string",
+        )
+    mode = str(block.get("mode", DEFAULT_CABIN_CONFINED_FOMITE_MODE))
+    if mode not in CABIN_CONFINED_FOMITE_MODES:
+        raise ValueError(
+            "transmission.cabin_confined_fomite.mode must be 'own_cabin' "
+            f"or 'off', got {mode!r}",
+        )
+    return mode
+
+
 @dataclass(frozen=True)
 class RoomAirRemoval:
     """Declared first-order ventilation removal on room air (ROOM-AIR-01).
@@ -2180,6 +2215,7 @@ class TransmissionCore:
         self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
         self.cabin_air_mode = _parse_cabin_air_mode(tx)
         self.cabin_cooccupancy = _parse_cabin_cooccupancy(tx)
+        self.cabin_confined_fomite = _parse_cabin_confined_fomite(tx)
         self.room_air_removal = _parse_room_air_removal(tx)
         # Berths per stateroom and per corridor block, from the cabin roster,
         # so a compartment's share of the block volume is a fixed property of
@@ -2204,6 +2240,13 @@ class TransmissionCore:
             np.random.default_rng(self.rng.bit_generator.seed_seq.spawn(1)[0])
             if self.sanitary_visit_mode != "none"
             else None
+        )
+        # Confined-cabin fomite draws run on a dedicated stream, spawned the
+        # same way ``sanitary_visits`` is: an ``off`` arm consumes nothing
+        # here, so the labelled baseline stays bit-identical on matched
+        # seeds and the new scope never reorders the shared stream.
+        self._cabin_fomite_rng = np.random.default_rng(
+            self.rng.bit_generator.seed_seq.spawn(1)[0]
         )
         self._sanitary_epoch = -1
         self._sanitary_visits: dict[int, list[str]] = {}
@@ -4013,6 +4056,42 @@ class TransmissionCore:
             return self.confinement_isolation_factor
         return 1.0
 
+    def _cabin_fomite_scoped(
+        self,
+        agent: KorkinAgent,
+        unit_name: str,
+    ) -> bool:
+        """The confinement surface gate narrows to the pair's own cabin.
+
+        A compartment unit holds exactly one stateroom's members, so a
+        confined agent in scope touches only the fittings pool it actually
+        shares — the route the confinement literature carries norovirus
+        on (NORO-CABIN-01). Every other unit's pool — the corridor's,
+        another cabin's — stays gated exactly as before, as does the
+        whole gate under ``off``.
+        """
+        return (
+            self.cabin_confined_fomite == "own_cabin"
+            and self._cabin_confinement_active(agent)
+            and self._is_cabin_compartment(unit_name)
+        )
+
+    def _fomite_rng(
+        self,
+        agent: KorkinAgent,
+        unit_name: str,
+    ) -> np.random.Generator:
+        """Stream a unit's confined-scope fomite draws come from.
+
+        Confined-in-cabin interactions are draws the pre-change code never
+        made; running them on the dedicated spawned stream keeps the
+        shared stream — and the ``off`` baseline — bit-identical on
+        matched seeds.
+        """
+        if self._cabin_fomite_scoped(agent, unit_name):
+            return self._cabin_fomite_rng
+        return self.rng
+
     def confinement_emission_factor(self, agent: KorkinAgent) -> float:
         """Scale emission into shared pools for cabin-confined agents."""
         if self._cabin_confinement_active(agent):
@@ -4628,7 +4707,9 @@ class TransmissionCore:
             Per-pathogen mass pools: {pathogen_id: {zone: mass}}.
         quarantined_ids : set[int], optional
             Agents confined to quarters; receive reduced direct contact / droplet
-            and no fomite pickup in cabin-corridor platforms.
+            and, in cabin-corridor platforms, fomite access scoped to their
+            own stateroom's pool (``transmission.cabin_confined_fomite``;
+            ``off`` restores the pre-change blanket gate).
 
         Returns
         -------
@@ -6329,7 +6410,9 @@ class TransmissionCore:
         self,
         target: KorkinAgent,
         epoch: int,
+        rng: np.random.Generator | None = None,
     ) -> float:
+        source = self.rng if rng is None else rng
         mean, sd = (
             EATING_MOUTH_CONTACTS_PER_HOUR
             if self._fomite_is_eating(target, epoch)
@@ -6337,17 +6420,20 @@ class TransmissionCore:
         )
         return max(
             0.0,
-            float(self.rng.normal(mean, sd))
+            float(source.normal(mean, sd))
             * self.clock.hours_per_epoch,
         )
 
-    def _draw_surface_to_hand(self) -> tuple[float, float, float]:
+    def _draw_surface_to_hand(
+        self,
+        rng: np.random.Generator,
+    ) -> tuple[float, float, float]:
         """The three surface->hand draws, in the pooled order."""
-        hand_area = self.rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
-        used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+        hand_area = rng.uniform(*HAND_AREA_CM2_RANGE) / 1.0e4
+        used_fraction = rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
         transfer_efficiency = min(
             1.0,
-            max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
+            max(0.0, float(rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
         )
         return hand_area, used_fraction, transfer_efficiency
 
@@ -6382,13 +6468,17 @@ class TransmissionCore:
         (area = the patch's share of that inventory), so the transfer chain
         is identical in both and only the areal denominator differs.
         """
-        if self._cabin_confinement_active(target):
+        if (
+            self._cabin_confinement_active(target)
+            and not self._cabin_fomite_scoped(target, zone_name)
+        ):
             return 0.0
         hand_area, used_fraction, transfer_efficiency = (
-            self._draw_surface_to_hand()
+            self._draw_surface_to_hand(self._fomite_rng(target, zone_name))
         )
         request = (
             self._fomite_surface_contacts(zone_name, target, epoch)
+            * self._cabin_presence_share(target, epoch)
             * (used_fraction * hand_area / surface_area_m2)
             * transfer_efficiency
             * surface_mass
@@ -6404,15 +6494,24 @@ class TransmissionCore:
     ) -> dict[str, float] | None:
         """One target's per-item-class pickup requests (per-surface arm).
 
-        ``None`` for a cabin-confined target -- no draws, exactly as the
-        pooled request's 0.0 -- so the two arms take identical draws.
+        ``None`` for a confined target out of its own cabin's scope — no
+        draws, exactly as the pooled request's 0.0. Under ``own_cabin`` an
+        in-scope confined target takes its three surface->hand draws off
+        the dedicated cabin stream, so the shared stream sees the same
+        draw sequence the ``off`` arm takes.
         """
-        if self._cabin_confinement_active(target):
+        if (
+            self._cabin_confinement_active(target)
+            and not self._cabin_fomite_scoped(target, zone_name)
+        ):
             return None
         hand_area, used_fraction, transfer_efficiency = (
-            self._draw_surface_to_hand()
+            self._draw_surface_to_hand(self._fomite_rng(target, zone_name))
         )
-        contacts = self._fomite_surface_contacts(zone_name, target, epoch)
+        contacts = (
+            self._fomite_surface_contacts(zone_name, target, epoch)
+            * self._cabin_presence_share(target, epoch)
+        )
         inv = self._per_surface_inventory(
             zone_name, self._fomite_surface_area_pooled(zone_name),
         )
@@ -7390,7 +7489,12 @@ class TransmissionCore:
         """
         hand = target.hand_load_by_pathogen.get(pathogen_id, 0.0)
         target.hand_load_by_pathogen[pathogen_id] = hand + delivered
-        dose = self._hand_to_mouth_dose(target, epoch, hand + delivered)
+        dose = self._hand_to_mouth_dose(
+            target,
+            epoch,
+            hand + delivered,
+            self._fomite_rng(target, zone_name),
+        )
         target.hand_load_by_pathogen[pathogen_id] = (
             hand + delivered - dose
         )
@@ -7575,15 +7679,17 @@ class TransmissionCore:
         target: KorkinAgent,
         epoch: int,
         hand_load: float,
+        rng: np.random.Generator | None = None,
     ) -> float:
         if hand_load <= 0.0:
             return 0.0
-        used_fraction = self.rng.uniform(*MOUTH_CONTACT_FRACTION_RANGE)
+        source = self.rng if rng is None else rng
+        used_fraction = source.uniform(*MOUTH_CONTACT_FRACTION_RANGE)
         transfer_efficiency = float(np.clip(
-            self.rng.normal(*HAND_TO_MOUTH_NORMAL), 0.0, 1.0,
+            source.normal(*HAND_TO_MOUTH_NORMAL), 0.0, 1.0,
         ))
         dose = (
-            self._fomite_mouth_contacts(target, epoch)
+            self._fomite_mouth_contacts(target, epoch, source)
             * used_fraction
             * transfer_efficiency
             * hand_load
@@ -7632,6 +7738,10 @@ class TransmissionCore:
         matrix.fomite_trailing_exposures.append({
             "target_id": target.agent_id,
             "zone": self.compartment_parent(zone_name),
+            # The pickup unit itself — a cabin compartment key when the
+            # mass came off the stateroom's own pool — so the pair-challenge
+            # ledger can attribute stateroom fomite dose to the pair.
+            "unit": zone_name,
             "pathogen_id": pathogen_id,
             "surface_mass": round(surface_mass, 4),
             "dose": round(credited_dose, 4),
@@ -8311,16 +8421,21 @@ class TransmissionCore:
         """Each shedder touches the unit's surfaces and loses the deposit."""
         deposits: list[tuple[KorkinAgent, float]] = []
         for agent, _sv in shedders:
-            if self._cabin_confinement_active(agent):
+            if (
+                self._cabin_confinement_active(agent)
+                and not self._cabin_fomite_scoped(agent, zone_name)
+            ):
                 continue
+            rng = self._fomite_rng(agent, zone_name)
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-            used_fraction = self.rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
+            used_fraction = rng.uniform(*SURFACE_CONTACT_FRACTION_RANGE)
             transfer_efficiency = min(
                 1.0,
-                max(0.0, float(self.rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
+                max(0.0, float(rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
             ) * self._hand_to_surface_drying(profile)
             requested = (
                 self._fomite_surface_contacts(zone_name, agent, epoch)
+                * self._cabin_presence_share(agent, epoch)
                 * used_fraction
                 * transfer_efficiency
                 * hand

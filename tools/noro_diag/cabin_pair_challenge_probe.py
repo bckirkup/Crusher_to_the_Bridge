@@ -48,6 +48,7 @@ def run_seed(
     bundle: str,
     epochs: int,
     pathogen_id: str,
+    cabin_confined_fomite: str | None = None,
 ) -> dict[str, Any]:
     """One instrumented voyage; returns the cabin-pair challenge table."""
     alpha, beta = load_dose_response(pathogen_id, bundle)
@@ -58,6 +59,7 @@ def run_seed(
         high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
         fomite_representation=None, fomite_touch_share=None,
         fomite_touch_share_table=None,
+        cabin_confined_fomite=cabin_confined_fomite,
     )
     # validated_open refuses publicly writable roots; keep the spec file in
     # a private dir under the repository, as per_host_dose_challenge does.
@@ -80,6 +82,7 @@ def run_seed(
         "platform": platform,
         "pathogen_id": pathogen_id,
         "epochs": epochs,
+        "cabin_confined_fomite": cabin_confined_fomite or "own_cabin",
         "dose_response": {"alpha": alpha, "beta": beta},
         "cabin_pairs": table,
     }
@@ -96,6 +99,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--seeds", type=int, nargs="+", default=[8105, 8106],
         help="paired seeds; the norovirus pair is 8105 8106",
     )
+    parser.add_argument(
+        "--cabin-confined-fomite", choices=["own_cabin", "off"],
+        default=None,
+        help="NORO-CABIN-01 gate arm; omit for the shipped default",
+    )
     parser.add_argument("--out", type=Path, required=True)
     return parser.parse_args(argv)
 
@@ -106,6 +114,7 @@ def main(argv: list[str] | None = None) -> int:
         run_seed(
             seed=seed, platform=args.platform, bundle=args.bundle,
             epochs=args.epochs, pathogen_id=args.pathogen_id,
+            cabin_confined_fomite=args.cabin_confined_fomite,
         )
         for seed in args.seeds
     ]

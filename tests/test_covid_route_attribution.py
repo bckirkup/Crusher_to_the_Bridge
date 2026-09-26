@@ -306,6 +306,7 @@ def _observe_work(epoch, **records):
         hvac_downstream_exposures=records.get("hvac", []),
         emesis_aerosol_exposures=records.get("emesis", []),
         flush_aerosol_exposures=records.get("flush", []),
+        fomite_trailing_exposures=records.get("fomite", []),
     )
     return SimpleNamespace(epoch=epoch, tracing_matrix=matrix)
 
@@ -339,12 +340,20 @@ class TestCabinPairChallengeLedger:
              "pathogen_id": "p", "dose": 0.5},
             {"air_unit": "other", "target_id": 2,
              "pathogen_id": "p", "dose": 99.0},
+        ], fomite=[
+            {"unit": "zCabin::cabin1", "target_id": 2,
+             "pathogen_id": "p", "dose": 0.3},
+            # Corridor-pool pickups carry the parent zone, not the pair's
+            # unit, and never attribute to a cabin pair.
+            {"unit": "zCabin", "target_id": 2,
+             "pathogen_id": "p", "dose": 77.0},
         ]))
         key = (1, 2)
         doses = ledger.directed_dose[(key, 2)]["p"]
         assert doses["pool"] == pytest.approx(0.75)
         assert doses["plume"] == pytest.approx(0.25)
         assert doses["hvac"] == pytest.approx(0.5)
+        assert doses["fomite"] == pytest.approx(0.3)
         assert ledger.shared_epochs[key] == 2
         assert ledger.confined_epochs[key] == 2
         assert ledger.confined_first[key] == 5

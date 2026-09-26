@@ -673,9 +673,10 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     def hand_to_mouth(
         self: Any, target: Any, epoch: int, hand_load: float,
+        rng: Any = None,
     ) -> float:
         return _hand_to_mouth_wrapped(
-            originals, rec, self, target, epoch, hand_load,
+            originals, rec, self, target, epoch, hand_load, rng,
         )
 
     def pickup_request_for_area(
@@ -810,8 +811,11 @@ def _hand_to_mouth_wrapped(
     target: Any,
     epoch: int,
     hand_load: float,
+    rng: Any = None,
 ) -> float:
-    dose = originals["_hand_to_mouth_dose"](core, target, epoch, hand_load)
+    dose = originals["_hand_to_mouth_dose"](
+        core, target, epoch, hand_load, rng,
+    )
     if rec.current_pathogen == rec.pathogen_id:
         _record_hand_to_mouth(rec, core, target, epoch, hand_load, dose)
     return dose
@@ -1300,6 +1304,7 @@ def build_spec(
     fomite_representation: str | None = None,
     fomite_touch_share: str | None = None,
     fomite_touch_share_table: dict[str, Any] | None = None,
+    cabin_confined_fomite: str | None = None,
 ) -> dict[str, Any]:
     """The shipped run, at one seed.
 
@@ -1309,7 +1314,9 @@ def build_spec(
     patch on the pathogen's ``dose_response`` carrying the requested alpha
     and beta pinned explicitly. Each area-sweep argument, when given, adds
     its key under ``config_overrides.transmission`` -- the only block the
-    sweep touches -- and nothing else.
+    sweep touches -- and nothing else. ``cabin_confined_fomite`` writes the
+    NORO-CABIN-01 gate's mode the same way, so the ``off`` arm can be
+    re-run on matched seeds.
     """
     overrides: dict[str, Any] = {}
     if alpha is not None:
@@ -1333,6 +1340,10 @@ def build_spec(
         tx_overrides["fomite_touch_share_table"] = dict(
             fomite_touch_share_table,
         )
+    if cabin_confined_fomite is not None:
+        tx_overrides["cabin_confined_fomite"] = {
+            "mode": str(cabin_confined_fomite),
+        }
     config_overrides: dict[str, Any] = {
         "ship_graph": {"num_agents": int(num_agents)},
     }
