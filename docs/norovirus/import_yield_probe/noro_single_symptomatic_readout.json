@@ -1,0 +1,34 @@
+{
+ "n_seeds": 10,
+ "imports_per_voyage": {
+  "n": 10,
+  "min": 0.0,
+  "q25": 0.0,
+  "median": 0.0,
+  "q75": 0.0,
+  "max": 0.0,
+  "mean": 0.0
+ },
+ "composition_total": {},
+ "secondaries_per_voyage": {
+  "n": 10,
+  "min": 0.0,
+  "q25": 0.0,
+  "median": 0.0,
+  "q75": 0.75,
+  "max": 13.0,
+  "mean": 1.5
+ },
+ "yield_per_import_per_seed": {
+  "n": 0
+ },
+ "pooled_yield": null,
+ "p_zero_secondary": 0.7,
+ "secondaries_by_route_total": {
+  "fomite": 4,
+  "emesis_aerosol": 11
+ },
+ "measured": "aws_batch",
+ "job": "afdfe648-875c-466c-98e0-5057dfd49167",
+ "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/noro_single_symptomatic/"
+}

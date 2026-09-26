@@ -1,0 +1,80 @@
+{
+  "jobDefinitionName": "picard-init-probes",
+  "type": "container",
+  "platformCapabilities": [
+    "EC2"
+  ],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:init-probes-v1",
+    "command": [
+      "deploy/aws/init_probe_entrypoint.py",
+      "--s3-prefix",
+      "Ref::s3_prefix"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      {
+        "type": "VCPU",
+        "value": "1"
+      },
+      {
+        "type": "MEMORY",
+        "value": "4096"
+      }
+    ],
+    "linuxParameters": {
+      "sharedMemorySize": 512
+    },
+    "environment": [
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      },
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-boundary-analysis",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "init-probes"
+      }
+    }
+  },
+  "parameters": {
+    "s3_prefix": "s3://<BUCKET>/campaign/init_probes_01/"
+  },
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 7200
+  }
+}

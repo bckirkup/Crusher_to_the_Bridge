@@ -1,0 +1,47 @@
+{
+ "n_seeds": 20,
+ "imports_per_voyage": {
+  "n": 20,
+  "min": 2.0,
+  "q25": 5.0,
+  "median": 7.0,
+  "q75": 7.25,
+  "max": 11.0,
+  "mean": 6.4
+ },
+ "composition_total": {
+  "never_symptomatic": 34,
+  "presymptomatic": 5,
+  "convalescent": 80,
+  "cleared": 68,
+  "incubating": 0,
+  "symptomatic": 9
+ },
+ "secondaries_per_voyage": {
+  "n": 20,
+  "min": 0.0,
+  "q25": 0.0,
+  "median": 0.0,
+  "q75": 0.0,
+  "max": 14.0,
+  "mean": 0.7
+ },
+ "yield_per_import_per_seed": {
+  "n": 20,
+  "min": 0.0,
+  "q25": 0.0,
+  "median": 0.0,
+  "q75": 0.0,
+  "max": 2.3333333333333335,
+  "mean": 0.11666666666666667
+ },
+ "pooled_yield": 0.109375,
+ "p_zero_secondary": 0.95,
+ "secondaries_by_route_total": {
+  "emesis_aerosol": 7,
+  "fomite": 7
+ },
+ "measured": "aws_batch",
+ "job": "afdfe648-875c-466c-98e0-5057dfd49167",
+ "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/noro_baseline/"
+}

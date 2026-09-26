@@ -16,6 +16,21 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`NORO-IMPORT-YIELD-01` (ledger entry): the `realism_ladder_v1` secondary-per-
+import figures no longer describe HEAD.** Re-measured on the frozen cell
+(spirit_cruise_3000 × norwalk_only × 168 epochs, seeds 8000–8019, shipped
+`dose_adjustment` 4.0 — same pressure the ladder rungs used) at `4e0032a0`
+via the Batch probe matrix `afdfe648`: pooled secondaries/import is **0.11**
+(median 0, P(zero) 0.95) against the ladder's ~5–7.5 on the same platform and
+duration, and per-class single-import probes give symptomatic 1.5,
+presymptomatic 0.5, convalescent 0.0. Import *draw* pressure is unchanged
+(6.4 vs 6.9/voyage) — what collapsed is transmission per import. The ladder
+was measured at ~`49dbf18e` (2026-09-15); the 82 `engines/`+profile commits
+since (GATE-FLOOR-01 sub-copy pickup gate, fomite pool caps/sharing,
+TOUCH-SHARE-01/02, AERO-SPLIT-01, REINFECT-01, CHANNEL-02) are the candidate
+window — unattributed, bisection is the instrument. Any "imports still yield
+4.5–7" reasoning built on the ladder table is void pending that attribution.
+
 **`NORO-CHANNEL-02` (ledger entry): every reported-side reading — infirmary
 capture, reported/ever-ill, A3/A4 ascertainment scores — taken before this
 change ran with the Layer-1 `0.5 + 0.5·trust_medical` factor stacked on top
