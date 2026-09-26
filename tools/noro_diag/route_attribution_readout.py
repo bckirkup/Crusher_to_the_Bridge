@@ -53,17 +53,14 @@ DOMINANT_KEYS = (
 )
 
 
-def _load(path: Path) -> dict[str, Any]:
-    with gzip.open(path, "rt", encoding="utf-8") as handle:
-        return json.load(handle)
-
-
 def load_arm(directory: Path, tag: str) -> dict[int, dict[str, Any]]:
     """The per-seed cells one arm wrote, keyed by seed."""
-    stem = f"per_host_dose_challenge_{tag}_"
     cells = {}
-    for path in sorted(directory.glob(f"{stem}seed*.json.gz")):
-        cell = _load(path)
+    for path in sorted(
+        directory.glob(f"per_host_dose_challenge_{tag}_seed*.json.gz"),
+    ):
+        with gzip.open(path, "rt", encoding="utf-8") as handle:
+            cell = json.load(handle)
         cells[int(cell["seed"])] = cell
     return cells
 
@@ -372,11 +369,12 @@ def _print(result: dict[str, Any]) -> None:
 
 def _safe_path(path: str) -> str:
     """Canonicalise a CLI-derived target and refuse anything outside the repo."""
-    resolved = os.path.realpath(path)
-    base_dir = os.path.realpath(str(REPO_ROOT))
-    if resolved != base_dir and not resolved.startswith(base_dir + os.sep):
+    resolved = Path(os.path.realpath(path))
+    if Path(os.path.realpath(str(REPO_ROOT))) not in (
+        resolved, *resolved.parents,
+    ):
         raise ValueError(f"path {path!r} is outside the allowed directory")
-    return resolved
+    return str(resolved)
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -390,14 +388,13 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = prepare_output_directory(
         str(args.out), allowed_roots=(str(REPO_ROOT),),
     )
-    filename = resolve_child_path(
+    path = _safe_path(resolve_child_path(
         str(out_dir), "route_attribution_readout.json",
+    ))
+    Path(path).write_text(
+        json.dumps(result, indent=1, sort_keys=True, default=str) + "\n",
+        encoding="utf-8",
     )
-    path = _safe_path(filename)
-    with open(path, "w", encoding="utf-8") as handle:
-        handle.write(
-            json.dumps(result, indent=1, sort_keys=True, default=str) + "\n",
-        )
     _print(result)
     print(f"\nwritten: {path}")
     return 0
