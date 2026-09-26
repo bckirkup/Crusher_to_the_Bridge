@@ -41,6 +41,37 @@ from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
 
 
+def instrumented_voyage(spec_dict: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
+    """Run one voyage under the cabin-pair ledger; returns ``(sim, table)``."""
+    # validated_open refuses publicly writable roots; keep the spec file in
+    # a private dir under the repository, as per_host_dose_challenge does.
+    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+        spec_path = Path(tmp) / "run_spec.json"
+        with validated_open(
+            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(spec_dict))
+        picard_spec = PicardRunSpec.from_picard_json(
+            str(REPO_ROOT), str(spec_path),
+        )
+        sim = ShipSimulation(picard_spec, display=False)
+        ledger = CabinPairChallengeLedger()
+        sim.epoch_observer = ledger.observe
+        sim.run()
+    return sim, cabin_pair_challenge_table(ledger, sim)
+
+
+def write_results(results: list[dict[str, Any]], out: Path) -> None:
+    """Write rows as JSON; out paths outside the repo fall back to its root."""
+    out_path = out.resolve()
+    if not out_path.is_relative_to(REPO_ROOT):
+        out_path = REPO_ROOT / out_path.name
+    with validated_open(
+        out_path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        handle.write(json.dumps(results, indent=1))
+
+
 def run_seed(
     *,
     seed: int,
@@ -61,22 +92,7 @@ def run_seed(
         fomite_touch_share_table=None,
         cabin_confined_fomite=cabin_confined_fomite,
     )
-    # validated_open refuses publicly writable roots; keep the spec file in
-    # a private dir under the repository, as per_host_dose_challenge does.
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = Path(tmp) / "run_spec.json"
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), str(spec_path),
-        )
-        sim = ShipSimulation(picard_spec, display=False)
-        ledger = CabinPairChallengeLedger()
-        sim.epoch_observer = ledger.observe
-        sim.run()
-    table = cabin_pair_challenge_table(ledger, sim)
+    _, table = instrumented_voyage(spec_dict)
     return {
         "seed": seed,
         "platform": platform,
@@ -118,13 +134,7 @@ def main(argv: list[str] | None = None) -> int:
         )
         for seed in args.seeds
     ]
-    out_path = args.out.resolve()
-    if not out_path.is_relative_to(REPO_ROOT):
-        out_path = REPO_ROOT / out_path.name
-    with validated_open(
-        out_path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        handle.write(json.dumps(results, indent=1))
+    write_results(results, args.out)
     print(json.dumps(results, indent=1)[:4000])
     return 0
 

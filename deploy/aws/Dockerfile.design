@@ -45,10 +45,15 @@ COPY schemas/ ./schemas/
 COPY presidio/data/ ./presidio/data/
 COPY deploy/aws/bounded_design_entrypoint.py ./deploy/aws/bounded_design_entrypoint.py
 COPY deploy/aws/dose_challenge_entrypoint.py ./deploy/aws/dose_challenge_entrypoint.py
+COPY deploy/aws/cabin_floor_entrypoint.py ./deploy/aws/cabin_floor_entrypoint.py
 # The per-host dose-challenge driver and its dose-response helper live under
-# tools/; only noro_diag is needed by the Batch worker.
+# tools/; only noro_diag is needed by the Batch worker. The cabin-floor probe
+# additionally needs the cabin-pair instrument and its assay helper.
 COPY tools/__init__.py ./tools/__init__.py
 COPY tools/noro_diag/ ./tools/noro_diag/
+COPY tools/covid_assay_smoke.py ./tools/covid_assay_smoke.py
+COPY tools/covid_route_attribution.py ./tools/covid_route_attribution.py
+COPY tools/cabin_floor_probe.py ./tools/cabin_floor_probe.py
 COPY orchestrator.py ./
 COPY orchestrator_chronic.py orchestrator_display.py orchestrator_epoch.py ./
 COPY orchestrator_init.py orchestrator_record.py orchestrator_types.py ./
