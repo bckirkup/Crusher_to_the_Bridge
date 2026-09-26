@@ -47,7 +47,7 @@ from orchestrator_epoch import (
     compute_zone_microflora_shifts,
     run_observation_sampling,
 )
-from orchestrator_record import record_epoch
+from orchestrator_record import EpochRecordRequest, record_epoch
 from engines.infection_dynamics_bridge import (
     KorkinShipEngine,
     InfectionStatus,
@@ -258,7 +258,7 @@ class TestRecordEpochBoundary:
             "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="agents must be list"):
-            record_epoch(**kwargs)
+            record_epoch(EpochRecordRequest(**kwargs))
 
     def test_spaces_must_be_dict(self) -> None:
         kwargs: dict[str, Any] = {
@@ -286,7 +286,7 @@ class TestRecordEpochBoundary:
             "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="spaces must be dict"):
-            record_epoch(**kwargs)
+            record_epoch(EpochRecordRequest(**kwargs))
 
     def test_stoplights_must_be_dict(self) -> None:
         kwargs: dict[str, Any] = {
@@ -314,7 +314,7 @@ class TestRecordEpochBoundary:
             "observations": ObservationResults(),
         }
         with pytest.raises(TypeError, match="stoplights must be dict"):
-            record_epoch(**kwargs)
+            record_epoch(EpochRecordRequest(**kwargs))
 
     def test_compact_omits_heavy_keys(self) -> None:
         engine = MagicMock()
@@ -355,7 +355,7 @@ class TestRecordEpochBoundary:
             "observations": ObservationResults(air={"Bridge": {"ct": 40}}),
             "history_retention": "compact",
         }
-        rec = record_epoch(**kwargs)
+        rec = record_epoch(EpochRecordRequest(**kwargs))
         assert "agents" not in rec
         assert "contact_tracing" not in rec
         assert "observation_engine" not in rec

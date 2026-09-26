@@ -16,6 +16,7 @@ import time
 import traceback
 import zipfile
 from collections import OrderedDict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterator
 from urllib.parse import urlparse
@@ -1302,21 +1303,28 @@ def _publish_stop_rule_verdict(
         print(f"  ({name} upload failed: {exc})")
 
 
+@dataclass(frozen=True)
+class RunProgress:
+    """Live counts of the shard's run loop, snapshotted for each run."""
+
+    global_index: int
+    n_runs: int
+    total: int
+    succeeded: int
+    failed: int
+    skipped: int
+    executed: int
+
+
 def _perform_campaign_run(
     *,
     run_id: str,
     spec: dict[str, Any],
     args: argparse.Namespace,
-    global_index: int,
-    n_runs: int,
+    progress: RunProgress,
     shard_total: int,
     shard_index: int,
     shard_count: int | None,
-    total: int,
-    succeeded: int,
-    failed: int,
-    skipped: int,
-    executed: int,
     uploader: Any,
     bundle: ShardBundle,
     t0: float,
@@ -1325,11 +1333,11 @@ def _perform_campaign_run(
     if args.retry_failed:
         _cr.clear_failed_artifacts(run_id)
     elapsed = time.time() - t0
-    rate = max(executed, 1) / max(elapsed, 1e-6)
-    eta_min = max(shard_total - total, 0) / max(rate, 1e-6) / 60.0
+    rate = max(progress.executed, 1) / max(elapsed, 1e-6)
+    eta_min = max(shard_total - progress.total, 0) / max(rate, 1e-6) / 60.0
     print(
-        f"  [g{global_index + 1}/{n_runs}] {run_id}  "
-        f"({succeeded}ok {failed}err {skipped}skip  "
+        f"  [g{progress.global_index + 1}/{progress.n_runs}] {run_id}  "
+        f"({progress.succeeded}ok {progress.failed}err {progress.skipped}skip  "
         f"~{eta_min:.0f}min left)",
         end="",
         flush=True,
@@ -1359,7 +1367,7 @@ def _perform_campaign_run(
     if (
         uploader is not None
         and args.s3_log_every > 0
-        and (succeeded + 1) % args.s3_log_every == 0
+        and (progress.succeeded + 1) % args.s3_log_every == 0
     ):
         _upload_completed_log(uploader, shard_index, shard_count)
         bundle.flush(uploader)
@@ -1411,16 +1419,18 @@ def _execute_assigned_runs(
             run_id=run_id,
             spec=spec,
             args=args,
-            global_index=global_index,
-            n_runs=len(all_runs),
+            progress=RunProgress(
+                global_index=global_index,
+                n_runs=len(all_runs),
+                total=total,
+                succeeded=succeeded,
+                failed=failed,
+                skipped=skipped,
+                executed=executed,
+            ),
             shard_total=shard_total,
             shard_index=shard_index,
             shard_count=shard_count,
-            total=total,
-            succeeded=succeeded,
-            failed=failed,
-            skipped=skipped,
-            executed=executed,
             uploader=uploader,
             bundle=bundle,
             t0=t0,
