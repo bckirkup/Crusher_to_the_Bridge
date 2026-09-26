@@ -438,7 +438,7 @@ class TestDefaultOff:
         """wastewater_assay_mode defaults to holding_tank; an explicit
         "none" is the off arm, and a holding_tank read with no tx_core
         produces no record and does not raise."""
-        from orchestrator_epoch import run_observation_sampling
+        from orchestrator_epoch import ZoneContext, run_observation_sampling
 
         engine = MagicMock()
         engine.get_pathogen_zone_mass.return_value = {}
@@ -450,9 +450,14 @@ class TestDefaultOff:
         obs.wastewater_seq.sample_all_zones.return_value = {}
         obs.wastewater_assay = MagicMock()
         common = dict(
-            epoch=1, obs=obs, agents=[], spaces={}, zone_names=["Bridge"],
-            zone_volumes={"Bridge": 100.0}, zone_microflora_shifts={},
-            trigger_status="BASELINE", high_traffic=["Bridge"],
+            epoch=1, obs=obs, agents=[], spaces={},
+            zones=ZoneContext(
+                zone_names=["Bridge"],
+                zone_volumes={"Bridge": 100.0},
+                zone_microflora_shifts={},
+                high_traffic=["Bridge"],
+            ),
+            trigger_status="BASELINE",
             syn_result={"sick_call_agents": []}, engine=engine,
             pathogen_profiles={},
         )
