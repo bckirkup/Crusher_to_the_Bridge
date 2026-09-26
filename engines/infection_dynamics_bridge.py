@@ -727,6 +727,33 @@ def ever_presented(inf: dict[str, Any]) -> bool:
     )
 
 
+def earliest_shed_epoch(
+    inf: dict[str, Any], infection_epoch: int, presymptomatic_epochs: int,
+    clock: Any,
+) -> int | None:
+    """First epoch this host could emit anything.
+
+    Shedding opens ``presymptomatic_shedding_days`` before onset; a host
+    that never presents sheds by the lazy incubation draw the same way.
+    Clamped at the acquisition epoch — a host cannot emit before it is
+    infected, however short its incubation draw sits inside the
+    presymptomatic window.
+    """
+    onset = inf.get("onset_time_infected")
+    incubation = inf.get("incubation_days")
+    if onset is not None:
+        start = int(infection_epoch) + int(onset) - presymptomatic_epochs
+    elif incubation is not None:
+        start = (
+            int(infection_epoch)
+            + int(round(clock.epochs_for_days(float(incubation))))
+            - presymptomatic_epochs
+        )
+    else:
+        return None
+    return max(int(infection_epoch), start)
+
+
 def draw_shedding_multiplier(
     rng: np.random.Generator,
     profile: dict[str, Any],

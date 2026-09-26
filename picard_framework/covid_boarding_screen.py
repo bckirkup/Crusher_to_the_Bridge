@@ -24,6 +24,7 @@ from __future__ import annotations
 import json
 import math
 import os
+from collections import Counter
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from itertools import product
@@ -32,7 +33,10 @@ from typing import Any
 import numpy as np
 
 from engines.incubation import HostIncubationState, IncubationModel
-from engines.infection_dynamics_bridge import ever_presented
+from engines.infection_dynamics_bridge import (
+    earliest_shed_epoch,
+    ever_presented,
+)
 from engines.sim_clock import SimClock
 from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS, TransmissionCore
 from picard_framework.covid_fit_targets import load_fit_targets
@@ -79,6 +83,15 @@ ARM_OVERRIDE_KEYS = frozenset({
     "infection_counters",
     "transmission_overrides",
     "pathogen_overrides",
+    "seed_patch",
+})
+# Fields an arm may write onto the first explicit seed — the measured
+# boarding-geometry axes: position in the shedding course at day 0
+# (onset_day), departure day, seeded count, infection age, role. A null
+# value removes the field, handing that degree of freedom back to the
+# engine's draw.
+SEED_PATCH_KEYS = frozenset({
+    "count", "infection_age_days", "onset_day", "departure_day", "role",
 })
 QUARANTINE_PROTOCOL_ID = "SOP-017"
 NEAR_FIELD_AIR_MODES = ("two_box", "off")
@@ -145,6 +158,7 @@ class BoardingScreenDesign:
     parent_design: str | None = None
     arms: tuple[Mapping[str, Any], ...] = ()
     voyage_mode: str = VOYAGE_MODE_DECLARED
+    seed_ring_readout: bool = False
 
     def __post_init__(self) -> None:
         if self.voyage_mode not in VOYAGE_MODES:
@@ -226,6 +240,7 @@ class BoardingScreenDesign:
             "parent_design": self.parent_design,
             "arms": [dict(a) for a in self.arms],
             "voyage_mode": self.voyage_mode,
+            "seed_ring_readout": self.seed_ring_readout,
         }
 
 
@@ -259,6 +274,7 @@ def load_design(
         parent_design=raw.get("parent_design"),
         arms=tuple(dict(a) for a in raw.get("arms", [])),
         voyage_mode=str(raw.get("voyage_mode", VOYAGE_MODE_DECLARED)),
+        seed_ring_readout=bool(raw.get("seed_ring_readout", False)),
     )
     load_hull_scenarios().assert_fit_target(design.scenario_id)
     if design.is_refinement:
@@ -583,6 +599,60 @@ def _apply_route_efficiencies(
     )["route_efficiency_multipliers"] = merged
 
 
+def _validate_seed_patch_value(key: str, value: Any) -> None:
+    """Per-field validation a seed_patch arm performs at apply time."""
+    if key == "role":
+        if not isinstance(value, str):
+            raise ValueError(
+                f"seed_patch.role must be a string, got {value!r}",
+            )
+        return
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"seed_patch.{key} must be numeric, got {value!r}")
+    number = float(value)
+    if not math.isfinite(number):
+        raise ValueError(f"seed_patch.{key} must be finite, got {value!r}")
+    if key == "count" and (number < 1 or number != int(number)):
+        raise ValueError(
+            f"seed_patch.count must be an integer >= 1, got {value!r}",
+        )
+    if key == "infection_age_days" and number < 0:
+        raise ValueError(
+            f"seed_patch.infection_age_days must be >= 0, got {value!r}",
+        )
+
+
+def _apply_seed_patch(raw: dict[str, Any], patch: Any) -> None:
+    """Merge ``{key: value}`` onto the first explicit seed.
+
+    Same semantics as ``tools/covid_seed_ring_burn.py``'s ``seed_patch``:
+    a null value removes the field. Only SEED_PATCH_KEYS are accepted so an
+    arm cannot silently drift into an undeclared counterfactual.
+    """
+    if not isinstance(patch, Mapping):
+        raise ValueError("seed_patch must be a mapping")
+    unknown = set(patch) - SEED_PATCH_KEYS
+    if unknown:
+        raise ValueError(
+            f"seed_patch keys {sorted(unknown)} are not seed fields; "
+            f"allowed: {sorted(SEED_PATCH_KEYS)}",
+        )
+    seeds = (
+        raw.get("config_overrides", {})
+        .get("initiation", {}).get("explicit_seeds")
+    )
+    if not seeds:
+        raise ValueError("seed_patch needs an explicit_seeds entry to edit")
+    seed = dict(seeds[0])
+    for key, value in patch.items():
+        if value is None:
+            seed.pop(key, None)
+            continue
+        _validate_seed_patch_value(key, value)
+        seed[key] = int(value) if key == "count" else value
+    seeds[0] = seed
+
+
 def apply_arm_overrides(
     raw: dict[str, Any],
     overrides: Mapping[str, Any],
@@ -628,6 +698,8 @@ def apply_arm_overrides(
         )
     if "pathogen_overrides" in overrides:
         _apply_pathogen_overrides(raw, overrides["pathogen_overrides"])
+    if "seed_patch" in overrides:
+        _apply_seed_patch(raw, overrides["seed_patch"])
     return raw
 
 
@@ -1015,12 +1087,97 @@ def cell_payload(
             getattr(sim.engine, "vsp_reported_case_fraction_max", 0.0),
         ),
     }
+    if design.seed_ring_readout:
+        payload["seed_ring"] = _seed_ring_block(sim, ledger, raw)
     if design.arms:
         payload.update({
             "arm_id": cell.arm_id,
             **_attribution_block(sim, ledger, raw),
         })
     return payload
+
+
+def _first_secondary_shed_epoch(
+    sim: Any, seeded: set[int], presymptomatic_epochs: int,
+) -> int | None:
+    """Earliest epoch any non-seeded host could emit — the bound on clean
+    seed attribution inside the aboard window."""
+    candidates = []
+    for agent in sim.engine.agents:
+        if agent.agent_id in seeded:
+            continue
+        inf = agent.infections.get(PATHOGEN_ID)
+        if inf is None:
+            continue
+        epoch = earliest_shed_epoch(
+            inf, int(inf.get("infection_epoch") or 0),
+            presymptomatic_epochs, sim.clock,
+        )
+        if epoch is not None:
+            candidates.append(epoch)
+    return min(candidates) if candidates else None
+
+
+def _seed_ring_block(
+    sim: Any, ledger: QuarantineAttributionLedger, raw: dict[str, Any],
+) -> dict[str, Any]:
+    """Secondary yield of the boarding seed(s) — the day-0 ring burn.
+
+    Every non-seeded acquisition while at least one seeded host was still
+    aboard, split by route and day, with the clean attribution bound
+    (events before any secondary host could first emit) so ring-driven
+    burn is separated from onboard amplification. ``seed_spec`` echoes the
+    applied seed record so the arm's patched geometry is auditable from
+    the payload alone.
+    """
+    seeds = (
+        raw.get("config_overrides", {})
+        .get("initiation", {}).get("explicit_seeds", [])
+    )
+    seed0 = dict(seeds[0]) if seeds else {}
+    seeded = set(getattr(sim.engine, "explicit_seed_agent_ids", None) or ())
+    departures = [
+        int(a.departure_epoch) for a in sim.engine.agents
+        if a.agent_id in seeded and a.departure_epoch is not None
+    ]
+    window_end = max(departures) if departures else None
+    profile = sim.pathogen_profiles[PATHOGEN_ID]
+    presymptomatic_epochs = int(round(
+        sim.clock.epochs_for_days(
+            float(profile.get("presymptomatic_shedding_days", 0.0)),
+        ),
+    ))
+    first_shed = _first_secondary_shed_epoch(
+        sim, seeded, presymptomatic_epochs,
+    )
+    aboard = [
+        e for e in ledger.events
+        if window_end is None or int(e["epoch"]) < window_end
+    ]
+    clean = [
+        e for e in aboard
+        if first_shed is None or int(e["epoch"]) < first_shed
+    ]
+    by_day = Counter(sim.clock.day_index(int(e["epoch"])) for e in aboard)
+    return {
+        "seeded_count": len(seeded),
+        "seed_spec": {
+            key: seed0[key] for key in SEED_PATCH_KEYS if key in seed0
+        },
+        "index_departure_epoch": window_end,
+        "aboard_window_acquisitions": len(aboard),
+        "aboard_window_clean_bound": len(clean),
+        "first_secondary_shed_epoch": first_shed,
+        "aboard_window_by_route": dict(
+            Counter(e["pathway"] for e in aboard),
+        ),
+        "aboard_window_by_day": {
+            str(day): count for day, count in sorted(by_day.items())
+        },
+        "yield_per_seeded_host": (
+            len(aboard) / len(seeded) if seeded else None
+        ),
+    }
 
 
 def simulate_screen_cell(
@@ -1376,10 +1533,11 @@ def _cell_summary(
         o.onsets_before_split_day / o.recorded_onsets
         for o in obs.values() if o.recorded_onsets > 0
     ]
-    taken_off = [
-        o for o in obs.values()
+    taken_off_seeds = [
+        seed for seed, o in obs.items()
         if o.recorded_onsets >= design.takeoff_recorded_onsets
     ]
+    taken_off = [obs[seed] for seed in taken_off_seeds]
     return {
         "seeds": sorted(obs),
         "recorded_onsets": _summary([o.recorded_onsets for o in obs.values()]),
@@ -1407,9 +1565,60 @@ def _cell_summary(
             ),
         },
         "sanitary_witness": _witness(by_seed.values(), design.sanitary_visit_mode),
+        **_seed_ring_summary(by_seed, taken_off_seeds),
         **(_admissibility(
             by_seed, obs, targets or load_fit_targets(),
         )),
+    }
+
+
+def _seed_ring_summary(
+    by_seed: dict[int, dict[str, Any]],
+    taken_off_seeds: list[int],
+) -> dict[str, Any]:
+    """Row-level aggregate of the per-seed ring block, when present.
+
+    The takeoff-conditioned yield is the readout INDEX-GEOM-01 asked for:
+    secondary yield per seeded host among the seeds that took off.
+    """
+    rings = {
+        seed: p["seed_ring"] for seed, p in by_seed.items()
+        if isinstance(p.get("seed_ring"), Mapping)
+    }
+    if not rings:
+        return {}
+    aboard = [float(r["aboard_window_acquisitions"]) for r in rings.values()]
+    clean = [
+        float(r["aboard_window_clean_bound"]) for r in rings.values()
+        if r.get("aboard_window_clean_bound") is not None
+    ]
+    yields = [
+        float(r["yield_per_seeded_host"]) for r in rings.values()
+        if r.get("yield_per_seeded_host") is not None
+    ]
+    takeoff_yields = [
+        float(rings[s]["yield_per_seeded_host"]) for s in taken_off_seeds
+        if s in rings and rings[s].get("yield_per_seeded_host") is not None
+    ]
+    pooled_routes: Counter[str] = Counter()
+    for ring in rings.values():
+        pooled_routes.update(
+            {
+                str(route): int(count)
+                for route, count in (
+                    ring.get("aboard_window_by_route") or {}
+                ).items()
+            },
+        )
+    return {
+        "seed_ring": {
+            "n": len(rings),
+            "aboard_window_acquisitions": _summary(aboard),
+            "aboard_window_clean_bound": _summary(clean),
+            "yield_per_seeded_host": _summary(yields),
+            "yield_per_seeded_host_on_takeoff": _summary(takeoff_yields),
+            "aboard_window_by_route_pooled": dict(pooled_routes),
+        },
     }
 
 
