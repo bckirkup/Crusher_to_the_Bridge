@@ -42,9 +42,7 @@ target. The paired seeds are the probe pair for this platform, 8105/8106.
 from __future__ import annotations
 
 import argparse
-import json
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -56,14 +54,13 @@ from picard_framework.pathogen_overrides import (  # noqa: E402
     isolate_arm_overrides,
     load_pathogen_bundle,
 )
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+from simulation_utils.paths import resolve_repo_path  # noqa: E402
 from simulation_utils.platform_complement import declared_total  # noqa: E402
-from tools.covid_route_attribution import (  # noqa: E402
-    CabinPairChallengeLedger,
-    cabin_pair_challenge_table,
+from tools.covid_route_attribution import CabinPairChallengeLedger  # noqa: E402
+from tools.noro_diag.cabin_pair_challenge_probe import (  # noqa: E402
+    instrumented_voyage,
+    write_results,
 )
 from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
 
@@ -148,20 +145,7 @@ def run_arm(
         spec_dict["config_overrides"]["scenario_schedule"] = {
             "protocols": [DECLARED_CONFINEMENT],
         }
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = Path(tmp) / "run_spec.json"
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), str(spec_path),
-        )
-        sim = ShipSimulation(picard_spec, display=False)
-        ledger = CabinPairChallengeLedger()
-        sim.epoch_observer = ledger.observe
-        sim.run()
-    table = cabin_pair_challenge_table(ledger, sim)
+    sim, table = instrumented_voyage(spec_dict)
     infected = sum(
         1 for agent in sim.engine.agents
         if pathogen_id in agent.infections
@@ -246,13 +230,7 @@ def main(argv: list[str] | None = None) -> int:
         for bundle, pid in roster
         for seed in args.seeds
     ]
-    out_path = args.out.resolve()
-    if not out_path.is_relative_to(REPO_ROOT):
-        out_path = REPO_ROOT / out_path.name
-    with validated_open(
-        out_path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        handle.write(json.dumps(results, indent=1))
+    write_results(results, args.out)
     for row in results:
         print(
             f"{row['pathogen_id']} ({row['bundle']}) seed {row['seed']}: "
