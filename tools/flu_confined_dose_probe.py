@@ -38,12 +38,50 @@ ACTIVE = asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID
 SATURATION_99_COPIES = -math.log(0.01) / 0.18
 
 
+def _pair_first_epochs(
+    members: tuple[int, ...],
+    agents: dict[int, Any],
+) -> dict[int, int]:
+    """First influenza_a infection epoch for each infected member."""
+    out = {}
+    for m in members:
+        agent = agents.get(m)
+        if agent is None or "influenza_a" not in agent.infections:
+            continue
+        inf = agent.infections["influenza_a"]
+        out[m] = inf.get("first_infection_epoch", inf["infection_epoch"])
+    return out
+
+
+def _slot_member_ids(
+    members: tuple[int, ...],
+    agents: dict[int, Any],
+    confined_first: dict[tuple[int, ...], int],
+) -> set[int]:
+    """Ledger ``_confined_window_counts`` slots, resolved to member ids.
+
+    The cabin needs an index (earliest infected member) and a recorded
+    confinement start; a member is a slot when it was uninfected at the
+    pair's first confined epoch.
+    """
+    first_epochs = _pair_first_epochs(members, agents)
+    first_confined = confined_first.get(members)
+    if not first_epochs or first_confined is None:
+        return set()
+    index = min(first_epochs, key=first_epochs.get)
+    return {
+        m for m in members
+        if m != index
+        and (m not in first_epochs or first_epochs[m] >= first_confined)
+    }
+
+
 def _confined_row_doses(
     rows: list[dict[str, Any]],
     sim: Any,
     confined_first: dict[tuple[int, ...], int],
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], int]:
-    """(all confined dose rows, rows for confined-slot targets).
+    """(all confined dose rows, rows for confined-slot targets, slot count).
 
     A slot row is the ledger's own ``_confined_window_counts`` definition
     resolved to the member level: the cabin has an index (earliest infected
@@ -52,36 +90,9 @@ def _confined_row_doses(
     conditioning the sourced floors describe.
     """
     agents = {a.agent_id: a for a in sim.engine.agents}
-    pair_infected: dict[tuple[int, ...], set[int]] = {}
-    for row in rows:
-        for m in row["cabin_members"]:
-            a = agents.get(m)
-            if a is not None and "influenza_a" in a.infections:
-                pair_infected.setdefault(tuple(row["cabin_members"]), set()).add(m)
-
-    # member-level first-infection epochs per pair, then slot membership
     slot_targets: set[tuple[int, ...]] = set()  # (members..., target)
     for members in {tuple(r["cabin_members"]) for r in rows}:
-        infected = pair_infected.get(members)
-        if not infected:
-            continue
-        first_epochs = {
-            m: agents[m].infections["influenza_a"].get(
-                "first_infection_epoch",
-                agents[m].infections["influenza_a"]["infection_epoch"],
-            )
-            for m in infected
-        }
-        index = min(first_epochs, key=first_epochs.get)
-        first_confined = confined_first.get(members)
-        if first_confined is None:
-            continue
-        for m in members:
-            if m == index:
-                continue
-            ep = first_epochs.get(m)
-            if ep is not None and ep < first_confined:
-                continue
+        for m in _slot_member_ids(members, agents, confined_first):
             slot_targets.add(members + (m,))
 
     out_all = []
@@ -89,9 +100,8 @@ def _confined_row_doses(
     for row in rows:
         if row["confined_epochs"] <= 0:
             continue
-        dose = sum(row["channel_dose"].values())
         rec = {
-            "dose_copies": dose,
+            "dose_copies": sum(row["channel_dose"].values()),
             "implied_sar": row["implied_sar"],
             "infected": row["infected"],
             "channels": row["channel_dose"],
