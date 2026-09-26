@@ -16,6 +16,20 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`NORO-CHANNEL-02` (ledger entry): every reported-side reading — infirmary
+capture, reported/ever-ill, A3/A4 ascertainment scores — taken before this
+change ran with the Layer-1 `0.5 + 0.5·trust_medical` factor stacked on top
+of the declared reporting vectors.** The trace shows the v2 elicitation
+already means realized capture (reports per AGE case, net of reluctance),
+so the stack double-counted reluctance; the default path now applies the
+declared hazard unscaled (`observation_model.reporting_belief_scaling`
+`"none"`, with `"trust_medical"` kept as the labelled pre-change
+composition). The NORO-CHANNEL-01 canary's 0.375 onboard-eligible capture
+is the pre-fix measurement at `2adf1bd0`; the re-read at this change's SHA
+pooled 9/24 = 0.375 — identical at this cell because no draw landed in the
+removed factor's narrow gap. Earlier capture readings are historical, not
+wrong — they measured the channel as it then was.
+
 **`CLEAN-OUTBREAK-01` (ledger entry): every voyage measured while an
 outbreak SOP could fire ran under ~100 log10/day of surface removal —
 the SOP-triggered disinfection pass fired once *per epoch* rather than on

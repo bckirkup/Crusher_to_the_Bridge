@@ -30,7 +30,7 @@ import sys
 import warnings
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, _REPO_ROOT)
@@ -425,6 +425,7 @@ class ObservationModel(BaseModel):
     assay_sensitivity: float | None = None
     assay_sensitivity_by_time_since_infection: Any | None = None
     episode_reporting_window_days: float
+    reporting_belief_scaling: Literal["none", "trust_medical"] = "none"
 
     @model_validator(mode="after")
     def validate_vectors(self) -> "ObservationModel":

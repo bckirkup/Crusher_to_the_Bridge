@@ -561,6 +561,11 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "reporting_belief_scaling": {
+          "type": "string",
+          "enum": ["none", "trust_medical"],
+          "description": "What the reporting_probability_by_severity_* vectors denote. \"none\" (default): each entry is realized reporting — reports per syndrome-eligible host, net of every reluctance mechanism, so the Layer-1 trust_medical multiplier does not stack on it (stacking double-counts reluctance; ledger NORO-CHANNEL-02). \"trust_medical\": the labelled pre-change composition — the vector is willingness-conditional and the 0.5 + 0.5 * trust_medical factor composes on top of the declared hazard."
+        },
         "onset_recording": {
           "type": "object",
           "description": "The period-faithful onset-recording channel: a confirmed case's onset is dated only when it had presented on or before the epoch of the specimen that confirmed it (the record's symptomatic_at_specimen field — a host confirmed while asymptomatic enters the record without an onset date) and its date survived the recall/reporting draw. Absent means every confirmed symptomatic onset is dated, the shipped channel's behaviour.",

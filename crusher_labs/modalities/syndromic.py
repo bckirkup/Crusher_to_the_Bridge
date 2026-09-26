@@ -241,6 +241,7 @@ class SyndromicSurveillance:
         beliefs: dict[int, dict[str, float]],
         chronic_mods: dict[int, dict[str, float]],
         severity_hazards: dict[int, float],
+        unscaled_hazard_ids: set[int],
         sick_call_ids: list[int],
         true_positive_ids: list[int],
     ) -> None:
@@ -267,8 +268,19 @@ class SyndromicSurveillance:
             )
         else:
             prob = severity_hazards.get(aid, self.sick_call_probability)
-            trust = max(0.0, min(1.0, float(inf.get("trust_medical", 0.75))))
-            prob *= 0.5 + 0.5 * trust
+            # The declared reporting vectors are realized capture — reports
+            # per syndrome-eligible host, already net of every reluctance
+            # mechanism (the v2 elicitation constrains them to Wikswo
+            # 2011's measured ~0.60 of AGE cases, a denominator that
+            # contains hosts who chose not to report). The Layer-1 trust
+            # multiplier is the declared composition of the scalar channel;
+            # stacking it on a realized vector double-counts reluctance
+            # (ledger NORO-CHANNEL-02). A profile may restore that stacking
+            # by declaring its vectors willingness-conditional via
+            # observation_model.reporting_belief_scaling="trust_medical".
+            if aid not in unscaled_hazard_ids:
+                trust = max(0.0, min(1.0, float(inf.get("trust_medical", 0.75))))
+                prob *= 0.5 + 0.5 * trust
         agent_chronic = chronic_mods.get(aid, {})
         prob = min(1.0, prob + agent_chronic.get(
             "sick_call_probability_boost", 0.0,
@@ -349,6 +361,10 @@ class SyndromicSurveillance:
         beliefs = information_beliefs or {}
         chronic_mods = chronic_behavioral_mods or {}
         severity_hazards: dict[int, float] = {}
+        # Hazards drawn from a declared realized-reporting vector: the
+        # trust multiplier is already inside the vector and must not be
+        # applied again (ledger NORO-CHANNEL-02).
+        unscaled_hazard_ids: set[int] = set()
 
         for agent in agents:
             aid = agent["agent_id"]
@@ -362,13 +378,19 @@ class SyndromicSurveillance:
                 continue
 
             if presenting:
-                severity_hazards[aid] = self._severity_hazard(
+                resolved = self._declared_reporting_hazard(
                     agent, outbreak_recognized=outbreak_recognized,
                 )
+                if resolved is None:
+                    severity_hazards[aid] = self.sick_call_probability
+                else:
+                    severity_hazards[aid] = resolved[0]
+                    if resolved[1] == "none":
+                        unscaled_hazard_ids.add(aid)
                 self._process_symptomatic_agent(
                     aid, epoch, _observed_onset_epoch(agent, epoch),
                     overrides, beliefs, chronic_mods,
-                    severity_hazards,
+                    severity_hazards, unscaled_hazard_ids,
                     sick_call_ids, true_positive_ids,
                 )
             else:
@@ -986,20 +1008,44 @@ class SyndromicSurveillance:
         outbreak_recognized: bool = False,
     ) -> float:
         """Resolve per-day hazard; missing profiles use the unattenuated base."""
+        resolved = self._declared_reporting_hazard(
+            agent, outbreak_recognized=outbreak_recognized,
+        )
+        if resolved is None:
+            return self.sick_call_probability
+        return resolved[0]
+
+    def _declared_reporting_hazard(
+        self,
+        agent: dict[str, Any],
+        *,
+        outbreak_recognized: bool = False,
+    ) -> tuple[float, str] | None:
+        """The profile's five-state hazard and its belief-scaling semantics.
+
+        Returns ``None`` when the host's pathogen declares no observation
+        model — the caller then falls back to the scalar channel, whose
+        declared composition includes the Layer-1 trust multiplier. A
+        declared vector is ``(hazard, "none")`` when the profile's
+        ``reporting_belief_scaling`` is ``"none"`` (the default: realized
+        reporting, net of reluctance) or ``(hazard, "trust_medical")``
+        when the vector is declared willingness-conditional and the
+        multiplier still composes on top.
+        """
         infection = _symptomatic_infection(agent)
         if not infection:
-            return self.sick_call_probability
+            return None
         severity = str(infection.get("symptom_severity") or "")
         if severity == "asymptomatic":
-            return 0.0
+            return 0.0, "none"
         pathogen_id = self._infection_pathogen_id(agent, infection)
         profile = self.symptom_severity_profiles.get(pathogen_id, {})
         if "severity_model" not in profile:
-            return self.sick_call_probability
-        return self._five_state_hazard(
-            pathogen_id,
-            severity,
-            outbreak_recognized,
+            return None
+        model = self._severity_model(pathogen_id)
+        return (
+            self._five_state_hazard(pathogen_id, severity, outbreak_recognized),
+            (model or {}).get("belief_scaling", "none"),
         )
 
     @staticmethod
@@ -1061,6 +1107,9 @@ class SyndromicSurveillance:
             ),
             "window_days": float(
                 observation.get("episode_reporting_window_days", 1.0),
+            ),
+            "belief_scaling": str(
+                observation.get("reporting_belief_scaling", "none"),
             ),
         }
 
