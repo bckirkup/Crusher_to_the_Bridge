@@ -2,7 +2,9 @@
 **Date:** 2026-09-26
 **Commit:** f09ebb1b
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 4e0032a0 (probe tool + Batch entrypoint on top of f09ebb1b;
+engine/data tree identical to f09ebb1b)
 
 ## What is being measured
 
@@ -64,3 +66,61 @@ through by another's susceptibles).
   reconciling silently.
 - A near-zero yield on `single_symptomatic` would falsify the working
   hypothesis that symptomatic boarders carry the ratio.
+
+## Measured (AWS Batch, CPython 3.11 image)
+
+Array `afdfe648-875c-466c-98e0-5057dfd49167` (job def `picard-init-probes:1`,
+image `picard-campaign:init-probes-v1` digest
+`sha256:acb63327f45460026a34cb1e5260f55b8650f21657e1f4c590a9e740d53230ba`),
+per-seed `.json.gz` under
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/`,
+pooled locally with the probe's own `build_readout`.
+
+**The ladder's 4.5–7 does not reproduce at HEAD — pooled yield is 0.11.**
+Baseline arm, 20 seeds @168ep: imports/voyage mean 6.4 (q25 5, q75 7.25,
+range 2–11) — import *pressure* matches the ladder's ~6.9, so the draw is
+working. But secondaries/voyage mean 0.7 (median 0, max 14), pooled
+secondaries/imports = 14/128 = **0.109**, P(zero secondaries) = 0.95.
+Onboard-acquired routes split evenly: emesis_aerosol 7, fomite 7.
+
+Import composition across the 20 voyages (196 draws): convalescent 80,
+cleared 68 (non-infectious, excluded from the import count — consistent:
+196−68 = 128 = 6.4/voyage), never_symptomatic 34, symptomatic 9,
+presymptomatic 5, incubating 0. The stream overwhelmingly boards hosts
+that transmit weakly or not at all.
+
+**Single-import arms (10 seeds each, one import per voyage — the
+secondary count is that class's yield):**
+
+- `single_symptomatic` (onset −1.0, age 2.2): mean 1.5 secondaries, P(0)
+  0.7, max 13; routes emesis_aerosol 11 / fomite 4.
+- `single_presymptomatic` (onset +0.5, age 0.4): mean 0.5, P(0) 0.9,
+  max 5; emesis_aerosol 3 / fomite 2.
+- `single_convalescent` (onset −4.0, age 5.2): 0 secondaries on all 10
+  seeds — a convalescent tail-shedder is a dead import at HEAD.
+
+Class contribution as an inference (classes interact; no dedicated
+`never_symptomatic` arm was run): symptomatics are ~7% of infectious
+imports × yield ~1.5 ≈ 0.1 expected per voyage, presymptomatics add
+~0.1 — together ~0.2 of the observed 0.7. The remainder is consistent
+with the never_symptomatic class (27% of infectious imports) contributing
+at sub-symptomatic yield; that attribution is a hypothesis, not measured.
+
+## Interpretation
+
+The scope-change trigger fired: pooled yield 0.11 vs the declared
+4.5–7 range means the ladder numbers no longer describe HEAD. The ladder
+readout (`realism_ladder_v1_readout.md`) was measured at ~49dbf18e
+(2026-09-15); 82 commits to `engines/` + `data/pathogens/norwalk_only.json`
+have landed since, including the sub-copy fomite pickup gate
+(NORO-GATE-FLOOR-01), capped/shared fomite pools, TOUCH-SHARE-01/02,
+AERO-SPLIT-01, REINFECT-01 and NORO-CHANNEL-02. Which of those collapsed
+the yield is a hypothesis, not yet attributed — the natural instrument is
+a bisection over that window on this same frozen cell.
+
+Consequence for the open question: per-import secondary yield is **not**
+the current over-count suspect on this cell — at HEAD imports barely
+transmit at all (and the pending susceptibility repair pushes further in
+the same direction). The initiation excess the VSP comparison sees must
+live elsewhere: onset/reporting amplification, repeated imports stacking,
+or the channels the susceptibility session owns.

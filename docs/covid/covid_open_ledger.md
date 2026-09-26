@@ -110,6 +110,17 @@ The infection-age component of the geometry is NOT resolved: the seed still
 arrives at declared age 0, and the infection-age × Θ screen remains open in
 §3.
 
+*Update (2026-09-26, `4e0032a0`, `COVID-SEED-GEOM-01`): under a declared
+`onset_day`, `infection_age_days` is now a measured null axis — the 6.8 vs
+3.3 age pair is bit-identical on seeds 20200205/06 @48ep, because shedding,
+onset timing and clearance all anchor to `onset_time_infected`. The open
+geometry question that survives is onset/departure geometry, not the age
+field: one peak-shedding index aboard 5 days seeds {3…2494} aboard-window
+acquisitions (median 91; clean index-only bound median 30) across 5 seeds at
+Θ×1.0, predominantly via the droplet far-field pool (median near-field dose
+share 0.006), and the fresh-index contrast arm collapses it to a median of
+3.*
+
 **The upstream AGID attack-rate fit may not be quoted as validation of this
 port's arrest layer or dose scale.** Ledger `AGID-UPSTREAM-AR-01` settles the
 provenance question: the upstream paper (PNAS 10.1073/pnas.2422574123) does
