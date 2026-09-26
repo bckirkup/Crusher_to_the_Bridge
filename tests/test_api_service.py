@@ -19,6 +19,7 @@ sys.path.insert(0, REPO_ROOT)
 from starlette.testclient import TestClient
 
 from api.app import create_app
+from telemetry_buffer.schema import resolve_telemetry_path
 
 SMOKE_SPEC = {
     "schema_version": "1.0.0",
@@ -98,7 +99,11 @@ def test_run_lifecycle_succeeds() -> None:
 
     telemetry = detail["telemetry"]
     assert f"api_jobs/{job_id}" in telemetry["simulation_history"]
-    history_path = os.path.join(REPO_ROOT, telemetry["simulation_history"])
+    # telemetry_buffer/… paths resolve under telemetry_dir(), which xdist
+    # workers redirect via CTTB_TELEMETRY_DIR — resolve, don't join.
+    history_path = resolve_telemetry_path(
+        telemetry["simulation_history"], REPO_ROOT,
+    )
     assert os.path.isfile(history_path)
 
     listing = client.get("/v1/runs").json()
