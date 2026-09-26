@@ -176,105 +176,145 @@ class ClinicalTestCorrelation:
     ) -> dict[str, dict[str, Any]]:
         """Run selected clinical tests on one agent with correlated noise."""
         keys = test_keys or CLINICAL_TEST_KEYS
-        uniforms = self.sample_uniforms()
-        aid = int(agent["agent_id"])
-        infection, presentation, compliance = resolve_agent_axes(agent)
-        location = agent.get("location", "unknown")
+        ctx = _AgentTestCtx(
+            obs=obs,
+            agent=agent,
+            aid=int(agent["agent_id"]),
+            uniforms=self.sample_uniforms(),
+        )
         results: dict[str, dict[str, Any]] = {}
-
         for key in keys:
-            if key == "clinical_rdt":
-                results[key] = obs.clin_rdt.test_agent(
-                    aid,
-                    agent.get("shedding_rate", 0.0),
-                    agent_is_infected(agent),
-                    infection,
-                    presentation,
-                    compliance,
-                    location,
-                    uniform_draw=uniforms["clinical_rdt"],
-                    pathogen_infections=agent.get("pathogen_infections"),
-                )
-            elif key == "clinical_multiplex_panel":
-                multiplex = getattr(obs, "clin_multiplex", None)
-                if multiplex is None:
-                    results[key] = {
-                        "instrument": "clinical_multiplex_panel",
-                        "agent_id": aid,
-                        "positive": False,
-                        "informative": False,
-                    }
-                else:
-                    results[key] = multiplex.test_agent(
-                        aid,
-                        agent.get("shedding_rate", 0.0),
-                        agent_is_infected(agent),
-                        infection,
-                        presentation,
-                        compliance,
-                        location,
-                        uniform_draw=None,
-                        pathogen_infections=agent.get("pathogen_infections"),
-                        observed_syndromes=agent.get("observed_syndromes"),
-                    )
-            elif key == "clinical_impression":
-                impression = getattr(obs, "clin_impression", None)
-                if impression is None:
-                    results[key] = {
-                        "instrument": "clinical_impression",
-                        "agent_id": aid,
-                        "positive": False,
-                        "informative": False,
-                    }
-                else:
-                    from crusher_labs.clinical_instrument_params import (
-                        impression_pathogens_for_syndromes,
-                    )
-                    params = getattr(obs, "clinical_instrument_params", None) or {}
-                    candidates = impression_pathogens_for_syndromes(
-                        params, list(agent.get("observed_syndromes") or []),
-                    )
-                    results[key] = impression.test_agent(
-                        aid,
-                        agent.get("shedding_rate", 0.0),
-                        agent_is_infected(agent),
-                        infection,
-                        presentation,
-                        compliance,
-                        location,
-                        uniform_draw=None,
-                        pathogen_infections=agent.get("pathogen_infections"),
-                        days_since_symptom_onset=int(
-                            agent.get("days_since_symptom_onset") or 0,
-                        ),
-                        outbreak_aware=bool(getattr(obs, "outbreak_aware", False)),
-                        candidate_pathogens=candidates,
-                    )
-            elif key == "clinical_qpcr":
-                results[key] = obs.clin_qpcr.test_agent(
-                    aid,
-                    agent.get("shedding_rate", 0.0),
-                    infection,
-                    presentation,
-                    compliance,
-                    location,
-                    uniform_draw=uniforms["clinical_qpcr"],
-                    pathogen_infections=agent.get("pathogen_infections"),
-                    is_infected=agent_is_infected(agent),
-                )
-            elif key == "clinical_microbiology":
-                results[key] = obs.clin_microbio.test_agent(
-                    aid,
-                    agent.get("microflora_disruption", 0.0),
-                    infection,
-                    presentation,
-                    compliance,
-                    location,
-                    agent.get("pathogen_infections"),
-                    uniform_draw=uniforms["clinical_microbiology"],
-                    is_infected=agent_is_infected(agent),
-                )
+            handler = _CLINICAL_TEST_HANDLERS.get(key)
+            if handler is not None:
+                results[key] = handler(ctx)
         return results
+
+
+@dataclass
+class _AgentTestCtx:
+    obs: Any
+    agent: dict[str, Any]
+    aid: int
+    uniforms: dict[str, float]
+
+    def __post_init__(self) -> None:
+        (
+            self.infection,
+            self.presentation,
+            self.compliance,
+        ) = resolve_agent_axes(self.agent)
+        self.location = self.agent.get("location", "unknown")
+        self.infected = agent_is_infected(self.agent)
+        self.shedding_rate = self.agent.get("shedding_rate", 0.0)
+        self.pathogen_infections = self.agent.get("pathogen_infections")
+
+
+def _run_clinical_rdt(ctx: _AgentTestCtx) -> dict[str, Any]:
+    return ctx.obs.clin_rdt.test_agent(
+        ctx.aid,
+        ctx.shedding_rate,
+        ctx.infected,
+        ctx.infection,
+        ctx.presentation,
+        ctx.compliance,
+        ctx.location,
+        uniform_draw=ctx.uniforms["clinical_rdt"],
+        pathogen_infections=ctx.pathogen_infections,
+    )
+
+
+def _run_clinical_multiplex(ctx: _AgentTestCtx) -> dict[str, Any]:
+    multiplex = getattr(ctx.obs, "clin_multiplex", None)
+    if multiplex is None:
+        return {
+            "instrument": "clinical_multiplex_panel",
+            "agent_id": ctx.aid,
+            "positive": False,
+            "informative": False,
+        }
+    return multiplex.test_agent(
+        ctx.aid,
+        ctx.shedding_rate,
+        ctx.infected,
+        ctx.infection,
+        ctx.presentation,
+        ctx.compliance,
+        ctx.location,
+        uniform_draw=None,
+        pathogen_infections=ctx.pathogen_infections,
+        observed_syndromes=ctx.agent.get("observed_syndromes"),
+    )
+
+
+def _run_clinical_impression(ctx: _AgentTestCtx) -> dict[str, Any]:
+    impression = getattr(ctx.obs, "clin_impression", None)
+    if impression is None:
+        return {
+            "instrument": "clinical_impression",
+            "agent_id": ctx.aid,
+            "positive": False,
+            "informative": False,
+        }
+    from crusher_labs.clinical_instrument_params import (
+        impression_pathogens_for_syndromes,
+    )
+    params = getattr(ctx.obs, "clinical_instrument_params", None) or {}
+    candidates = impression_pathogens_for_syndromes(
+        params, list(ctx.agent.get("observed_syndromes") or []),
+    )
+    return impression.test_agent(
+        ctx.aid,
+        ctx.shedding_rate,
+        ctx.infected,
+        ctx.infection,
+        ctx.presentation,
+        ctx.compliance,
+        ctx.location,
+        uniform_draw=None,
+        pathogen_infections=ctx.pathogen_infections,
+        days_since_symptom_onset=int(
+            ctx.agent.get("days_since_symptom_onset") or 0,
+        ),
+        outbreak_aware=bool(getattr(ctx.obs, "outbreak_aware", False)),
+        candidate_pathogens=candidates,
+    )
+
+
+def _run_clinical_qpcr(ctx: _AgentTestCtx) -> dict[str, Any]:
+    return ctx.obs.clin_qpcr.test_agent(
+        ctx.aid,
+        ctx.shedding_rate,
+        ctx.infection,
+        ctx.presentation,
+        ctx.compliance,
+        ctx.location,
+        uniform_draw=ctx.uniforms["clinical_qpcr"],
+        pathogen_infections=ctx.pathogen_infections,
+        is_infected=ctx.infected,
+    )
+
+
+def _run_clinical_microbiology(ctx: _AgentTestCtx) -> dict[str, Any]:
+    return ctx.obs.clin_microbio.test_agent(
+        ctx.aid,
+        ctx.agent.get("microflora_disruption", 0.0),
+        ctx.infection,
+        ctx.presentation,
+        ctx.compliance,
+        ctx.location,
+        ctx.pathogen_infections,
+        uniform_draw=ctx.uniforms["clinical_microbiology"],
+        is_infected=ctx.infected,
+    )
+
+
+_CLINICAL_TEST_HANDLERS = {
+    "clinical_rdt": _run_clinical_rdt,
+    "clinical_multiplex_panel": _run_clinical_multiplex,
+    "clinical_impression": _run_clinical_impression,
+    "clinical_qpcr": _run_clinical_qpcr,
+    "clinical_microbiology": _run_clinical_microbiology,
+}
 
 
 def run_correlated_clinical_panel(

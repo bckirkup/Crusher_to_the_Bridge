@@ -144,6 +144,37 @@ def _collect_swab_unexpected_requests(
             )
 
 
+class _RequestSink:
+    """Accumulates verification requests; filters sources and assigns ids."""
+
+    def __init__(self, sources: set[str]) -> None:
+        self.sources = sources
+        self.requests: list[LongReadVerificationRequest] = []
+        self._seq = 0
+
+    def add(
+        self,
+        specimen_source: str,
+        collection_key: str,
+        reasons: list[str],
+        upstream_instrument: str,
+        snapshot: dict[str, Any],
+    ) -> None:
+        if specimen_source not in self.sources or not reasons:
+            return
+        self._seq += 1
+        self.requests.append(
+            LongReadVerificationRequest(
+                request_id=f"lr_{self._seq:04d}",
+                specimen_source=specimen_source,
+                collection_key=collection_key,
+                trigger_reasons=reasons,
+                upstream_instrument=upstream_instrument,
+                upstream_snapshot=snapshot,
+            ),
+        )
+
+
 def collect_long_read_escalation_requests(
     cfg: dict[str, Any],
     *,
@@ -158,58 +189,60 @@ def collect_long_read_escalation_requests(
         return []
 
     triggers = _triggers(cfg)
-    sources = allowed_specimen_sources(cfg)
-    requests: list[LongReadVerificationRequest] = []
-    seq = 0
+    sink = _RequestSink(allowed_specimen_sources(cfg))
+    _dispatch_metagenomic_requests(triggers, sink, ww_results)
+    _dispatch_discordant_requests(
+        triggers, sink, clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+    )
+    if triggers["unexpected_pathogen"] and SPECIMEN_SURVEILLANCE_SWAB in sink.sources:
+        _collect_swab_unexpected_requests(sink.add, swab_results)
+    _dispatch_special_circumstance(triggers, cfg, sink)
+    return sink.requests
 
-    def _add(
-        specimen_source: str,
-        collection_key: str,
-        reasons: list[str],
-        upstream_instrument: str,
-        snapshot: dict[str, Any],
-    ) -> None:
-        nonlocal seq
-        if specimen_source not in sources or not reasons:
-            return
-        seq += 1
-        requests.append(
-            LongReadVerificationRequest(
-                request_id=f"lr_{seq:04d}",
-                specimen_source=specimen_source,
-                collection_key=collection_key,
-                trigger_reasons=reasons,
-                upstream_instrument=upstream_instrument,
-                upstream_snapshot=snapshot,
-            ),
+
+def _dispatch_metagenomic_requests(
+    triggers: dict[str, bool],
+    sink: _RequestSink,
+    ww_results: dict[str, dict[str, Any]],
+) -> None:
+    if SPECIMEN_WASTEWATER_METAGENOMICS not in sink.sources:
+        return
+    if triggers["mixed_infection_suspected"]:
+        _collect_mixed_infection_requests(sink.add, ww_results)
+    if triggers["unexpected_pathogen"]:
+        _collect_unexpected_ww_requests(sink.add, ww_results)
+
+
+def _dispatch_discordant_requests(
+    triggers: dict[str, bool],
+    sink: _RequestSink,
+    clin_rdt_results: dict[int, dict[str, Any]],
+    clin_qpcr_results: dict[int, dict[str, Any]],
+    clin_microbio_results: dict[int, dict[str, Any]],
+) -> None:
+    if not triggers["discordant_modalities"]:
+        return
+    if SPECIMEN_CLINICAL in sink.sources:
+        _collect_discordant_clinical_requests(
+            sink.add, clin_rdt_results, clin_qpcr_results,
         )
+    if SPECIMEN_CLINICAL_CULTURE in sink.sources:
+        _collect_microbio_discordance_requests(sink.add, clin_microbio_results)
 
-    if triggers["mixed_infection_suspected"] and SPECIMEN_WASTEWATER_METAGENOMICS in sources:
-        _collect_mixed_infection_requests(_add, ww_results)
 
-    if triggers["unexpected_pathogen"] and SPECIMEN_WASTEWATER_METAGENOMICS in sources:
-        _collect_unexpected_ww_requests(_add, ww_results)
-
-    if triggers["discordant_modalities"]:
-        if SPECIMEN_CLINICAL in sources:
-            _collect_discordant_clinical_requests(
-                _add, clin_rdt_results, clin_qpcr_results,
-            )
-        if SPECIMEN_CLINICAL_CULTURE in sources:
-            _collect_microbio_discordance_requests(_add, clin_microbio_results)
-
-    if triggers["unexpected_pathogen"] and SPECIMEN_SURVEILLANCE_SWAB in sources:
-        _collect_swab_unexpected_requests(_add, swab_results)
-
-    if triggers["special_circumstance"]:
-        flag = long_read_config(cfg).get("special_circumstance_flag", False)
-        if flag and SPECIMEN_CLINICAL in sources:
-            _add(
-                SPECIMEN_CLINICAL,
-                "fleet",
-                ["special_circumstance"],
-                "operator",
-                {"flag": True},
-            )
-
-    return requests
+def _dispatch_special_circumstance(
+    triggers: dict[str, bool],
+    cfg: dict[str, Any],
+    sink: _RequestSink,
+) -> None:
+    if not triggers["special_circumstance"]:
+        return
+    flag = long_read_config(cfg).get("special_circumstance_flag", False)
+    if flag and SPECIMEN_CLINICAL in sink.sources:
+        sink.add(
+            SPECIMEN_CLINICAL,
+            "fleet",
+            ["special_circumstance"],
+            "operator",
+            {"flag": True},
+        )

@@ -127,6 +127,32 @@ class SyndromicParams:
     retest_negatives_on_indication: bool = False
 
 
+class _SickCallRoster:
+    """Per-epoch accumulators for ``query_ground_truth`` sick-call processing."""
+
+    def __init__(
+        self,
+        overrides: dict[int, str],
+        beliefs: dict[int, dict[str, float]],
+        chronic_mods: dict[int, dict[str, float]],
+        outbreak_recognized: bool,
+    ) -> None:
+        self.overrides = overrides
+        self.beliefs = beliefs
+        self.chronic_mods = chronic_mods
+        self.outbreak_recognized = outbreak_recognized
+        self.sick_call_ids: list[int] = []
+        self.true_positive_ids: list[int] = []
+        self.noise_ids: list[int] = []
+        self.noise_reasons: list[dict[str, Any]] = []
+        self.crew_screening_ids: list[int] = []
+        self.severity_hazards: dict[int, float] = {}
+        # Hazards drawn from a declared realized-reporting vector: the
+        # trust multiplier is already inside the vector and must not be
+        # applied again (ledger NORO-CHANNEL-02).
+        self.unscaled_hazard_ids: set[int] = set()
+
+
 class SyndromicSurveillance:
     """Symptom-based screening modality with FRED-style behavioral noise."""
 
@@ -361,25 +387,57 @@ class SyndromicSurveillance:
         # record already holds stay held.
         agents = [a for a in agents if not agent_is_departed(a)]
 
-        sick_call_ids: list[int] = []
-        true_positive_ids: list[int] = []
-        noise_ids: list[int] = []
-        noise_reasons: list[dict[str, Any]] = []
-        crew_screening_ids: list[int] = []
+        roster = _SickCallRoster(
+            behavioral_overrides or {},
+            information_beliefs or {},
+            chronic_behavioral_mods or {},
+            outbreak_recognized,
+        )
+        self._collect_sick_call_roster(agents, epoch, roster)
+        self._apply_crew_screening(
+            agents, epoch, roster.sick_call_ids, roster.crew_screening_ids,
+        )
+        detection_events = self._first_detection_events(
+            agents, epoch, roster.sick_call_ids,
+        )
+        episode_telemetry = (
+            self._episode_telemetry_rows(agents)
+            if include_episode_telemetry
+            else []
+        )
 
+        molecular = self.collect_specimens(
+            agents, epoch, roster.sick_call_ids,
+        )
+        onset_observations = self._record_onset_observations(agents, epoch)
+
+        return {
+            "modality": self.name,
+            "epoch": epoch,
+            "sick_call_agents": roster.sick_call_ids,
+            "true_positive_ids": roster.true_positive_ids,
+            "noise_ids": roster.noise_ids,
+            "noise_reasons": roster.noise_reasons,
+            "crew_screening_ids": roster.crew_screening_ids,
+            "sick_call_count": len(roster.sick_call_ids),
+            "total_agents": len(agents),
+            "first_detection_events": detection_events,
+            "episode_detection_telemetry": episode_telemetry,
+            **molecular,
+            "onset_observations": onset_observations,
+            "onset_observation_count": len(onset_observations),
+        }
+
+    def _collect_sick_call_roster(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        roster: _SickCallRoster,
+    ) -> None:
         from telemetry_buffer.agent_axes import (
             agent_has_symptomatic_presentation,
             agent_is_isolated,
         )
-
-        overrides = behavioral_overrides or {}
-        beliefs = information_beliefs or {}
-        chronic_mods = chronic_behavioral_mods or {}
-        severity_hazards: dict[int, float] = {}
-        # Hazards drawn from a declared realized-reporting vector: the
-        # trust multiplier is already inside the vector and must not be
-        # applied again (ledger NORO-CHANNEL-02).
-        unscaled_hazard_ids: set[int] = set()
 
         for agent in agents:
             aid = agent["agent_id"]
@@ -391,33 +449,50 @@ class SyndromicSurveillance:
                 )
             if is_isolated:
                 continue
-
             if presenting:
-                resolved = self._declared_reporting_hazard(
-                    agent, outbreak_recognized=outbreak_recognized,
-                )
-                if resolved is None:
-                    severity_hazards[aid] = self.sick_call_probability
-                else:
-                    severity_hazards[aid] = resolved[0]
-                    if resolved[1] == "none":
-                        unscaled_hazard_ids.add(aid)
-                self._process_symptomatic_agent(
-                    aid, epoch, _observed_onset_epoch(agent, epoch),
-                    overrides, beliefs, chronic_mods,
-                    severity_hazards, unscaled_hazard_ids,
-                    sick_call_ids, true_positive_ids,
-                )
+                self._process_presenting_agent(aid, agent, epoch, roster)
             else:
-                reported, reason = self._check_background_noise(aid)
-                if reported:
-                    sick_call_ids.append(aid)
-                    noise_ids.append(aid)
-                    noise_reasons.append({"agent_id": aid, "reason": reason})
+                self._record_noise_report(aid, roster)
 
-        self._apply_crew_screening(
-            agents, epoch, sick_call_ids, crew_screening_ids,
+    def _process_presenting_agent(
+        self,
+        aid: int,
+        agent: dict[str, Any],
+        epoch: int,
+        roster: _SickCallRoster,
+    ) -> None:
+        resolved = self._declared_reporting_hazard(
+            agent, outbreak_recognized=roster.outbreak_recognized,
         )
+        if resolved is None:
+            roster.severity_hazards[aid] = self.sick_call_probability
+        else:
+            roster.severity_hazards[aid] = resolved[0]
+            if resolved[1] == "none":
+                roster.unscaled_hazard_ids.add(aid)
+        self._process_symptomatic_agent(
+            aid, epoch, _observed_onset_epoch(agent, epoch),
+            roster.overrides, roster.beliefs, roster.chronic_mods,
+            roster.severity_hazards, roster.unscaled_hazard_ids,
+            roster.sick_call_ids, roster.true_positive_ids,
+        )
+
+    def _record_noise_report(
+        self, aid: int, roster: _SickCallRoster,
+    ) -> None:
+        reported, reason = self._check_background_noise(aid)
+        if not reported:
+            return
+        roster.sick_call_ids.append(aid)
+        roster.noise_ids.append(aid)
+        roster.noise_reasons.append({"agent_id": aid, "reason": reason})
+
+    def _first_detection_events(
+        self,
+        agents: list[dict[str, Any]],
+        epoch: int,
+        sick_call_ids: list[int],
+    ) -> list[dict[str, Any]]:
         detection_events = []
         agents_by_id = {int(agent["agent_id"]): agent for agent in agents}
         for aid in dict.fromkeys(sick_call_ids):
@@ -432,41 +507,24 @@ class SyndromicSurveillance:
                 "first_sick_call_epoch": int(epoch),
                 "symptom_severity": infection.get("symptom_severity", ""),
             })
-        episode_telemetry = []
-        if include_episode_telemetry:
-            for agent in agents:
-                aid = int(agent["agent_id"])
-                if aid not in self._symptom_onset_epoch:
-                    continue
-                infection = _symptomatic_infection(agent)
-                episode_telemetry.append({
-                    "agent_id": aid,
-                    "symptom_onset_epoch": self._symptom_onset_epoch[aid],
-                    "first_sick_call_epoch": self._first_sick_call_epoch.get(aid),
-                    "symptom_severity": infection.get("symptom_severity", ""),
-                })
+        return detection_events
 
-        molecular = self.collect_specimens(
-            agents, epoch, sick_call_ids,
-        )
-        onset_observations = self._record_onset_observations(agents, epoch)
-
-        return {
-            "modality": self.name,
-            "epoch": epoch,
-            "sick_call_agents": sick_call_ids,
-            "true_positive_ids": true_positive_ids,
-            "noise_ids": noise_ids,
-            "noise_reasons": noise_reasons,
-            "crew_screening_ids": crew_screening_ids,
-            "sick_call_count": len(sick_call_ids),
-            "total_agents": len(agents),
-            "first_detection_events": detection_events,
-            "episode_detection_telemetry": episode_telemetry,
-            **molecular,
-            "onset_observations": onset_observations,
-            "onset_observation_count": len(onset_observations),
-        }
+    def _episode_telemetry_rows(
+        self, agents: list[dict[str, Any]],
+    ) -> list[dict[str, Any]]:
+        rows = []
+        for agent in agents:
+            aid = int(agent["agent_id"])
+            if aid not in self._symptom_onset_epoch:
+                continue
+            infection = _symptomatic_infection(agent)
+            rows.append({
+                "agent_id": aid,
+                "symptom_onset_epoch": self._symptom_onset_epoch[aid],
+                "first_sick_call_epoch": self._first_sick_call_epoch.get(aid),
+                "symptom_severity": infection.get("symptom_severity", ""),
+            })
+        return rows
 
     # ── molecular ascertainment rung ──────────────────────────────────────
     #
@@ -1153,23 +1211,25 @@ class SyndromicSurveillance:
         """Population (or class-specific) compliance fraction, chronic-boosted."""
         base = self.quarantine_compliance
         if agent_class and self.compliance_by_class:
-            a_class = str(agent_class)
-            if a_class in self.compliance_by_class:
-                base = float(self.compliance_by_class[a_class])
-            else:
-                # role_group keys: "crew" / "passenger" match class_id prefixes
-                for key, val in self.compliance_by_class.items():
-                    if a_class.startswith(f"{key}_") or a_class == key:
-                        base = float(val)
-                        break
-                else:
-                    # passenger_young → non-elderly passenger classes
-                    if "passenger_young" in self.compliance_by_class and (
-                        a_class.startswith("passenger_")
-                        and a_class != "passenger_elderly"
-                    ):
-                        base = float(self.compliance_by_class["passenger_young"])
+            override = self._class_compliance(str(agent_class))
+            if override is not None:
+                base = override
         return min(1.0, max(0.0, base + chronic_compliance_boost))
+
+    def _class_compliance(self, a_class: str) -> float | None:
+        if a_class in self.compliance_by_class:
+            return float(self.compliance_by_class[a_class])
+        # role_group keys: "crew" / "passenger" match class_id prefixes
+        for key, val in self.compliance_by_class.items():
+            if a_class.startswith(f"{key}_") or a_class == key:
+                return float(val)
+        # passenger_young → non-elderly passenger classes
+        if "passenger_young" in self.compliance_by_class and (
+            a_class.startswith("passenger_")
+            and a_class != "passenger_elderly"
+        ):
+            return float(self.compliance_by_class["passenger_young"])
+        return None
 
     def assign_compliance_class(
         self,

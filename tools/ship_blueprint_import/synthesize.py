@@ -120,6 +120,31 @@ def _zone_geometry(
     }
 
 
+def _add_edge(
+    edges: list[dict[str, str]],
+    seen: set[tuple[str, str]],
+    a: str,
+    b: str,
+    typ: str,
+) -> None:
+    key = tuple(sorted((a, b)))
+    if key in seen or a == b:
+        return
+    seen.add(key)
+    edges.append({"from": a, "to": b, "type": typ})
+
+
+def _add_touching_pairs(
+    edges: list[dict[str, str]],
+    seen: set[tuple[str, str]],
+    group: list[OverlayPolygon],
+) -> None:
+    for i, a in enumerate(group):
+        for b in group[i + 1 :]:
+            if polygons_touch(a.points, b.points):
+                _add_edge(edges, seen, a.zone_id, b.zone_id, "passageway")
+
+
 def _adjacency_from_polygons(
     polys: list[OverlayPolygon],
     digest: ShipDigest,
@@ -127,25 +152,15 @@ def _adjacency_from_polygons(
     edges: list[dict[str, str]] = []
     seen: set[tuple[str, str]] = set()
 
-    def _add(a: str, b: str, typ: str) -> None:
-        key = tuple(sorted((a, b)))
-        if key in seen or a == b:
-            return
-        seen.add(key)
-        edges.append({"from": a, "to": b, "type": typ})
-
     for hint in digest.adjacency_hints:
-        _add(hint.from_, hint.to, hint.type or "passageway")
+        _add_edge(edges, seen, hint.from_, hint.to, hint.type or "passageway")
 
     # Same-page proximity
     by_page: dict[int | None, list[OverlayPolygon]] = {}
     for p in polys:
         by_page.setdefault(p.page, []).append(p)
     for group in by_page.values():
-        for i, a in enumerate(group):
-            for b in group[i + 1 :]:
-                if polygons_touch(a.points, b.points):
-                    _add(a.zone_id, b.zone_id, "passageway")
+        _add_touching_pairs(edges, seen, group)
 
     return edges
 
@@ -231,21 +246,10 @@ def _cross_zone_links(
     return links
 
 
-def synthesize(
-    *,
+def _select_overlay_files(
     workdir: str,
-    output_dir: str,
-    platform_id: str | None = None,
-    allowed_roots: tuple[str, ...],
-    copy_graphics: bool = True,
-    require_approved: bool = False,
-) -> dict[str, Any]:
-    """Build spatial_layout.json + air_flow_paths.json from approved overlays."""
-    digest = load_digest(workdir, allowed_roots=allowed_roots)
-    manifest = load_manifest(workdir, allowed_roots=allowed_roots)
-    pid = (platform_id or digest.platform_id).strip().lower().replace("-", "_")
-    digest.platform_id = pid
-
+    require_approved: bool,
+) -> list[tuple[int, str]]:
     overlays_dir = os.path.join(workdir, "overlays")
     overlay_files = discover_approved_overlays(overlays_dir)
     if require_approved:
@@ -263,12 +267,15 @@ def synthesize(
         raise RuntimeError(
             "no overlay SVGs found; run digest (draft) or export approved SVGs"
         )
+    return overlay_files
 
-    pages = {int(p["page"]): p for p in manifest.get("pages", [])}
-    zone_meta = digest.zone_by_id()
+
+def _load_overlay_polys(
+    overlay_files: list[tuple[int, str]],
+    allowed_roots: tuple[str, ...],
+) -> tuple[list[OverlayPolygon], dict[str, str]]:
     polys: list[OverlayPolygon] = []
     svg_hashes: dict[str, str] = {}
-
     for page_num, svg_path in overlay_files:
         with validated_open(
             svg_path, "r", allowed_roots=allowed_roots, encoding="utf-8"
@@ -279,11 +286,11 @@ def synthesize(
         ).hexdigest()
         for poly in read_overlay_svg(text, page=page_num):
             polys.append(poly)
+    return polys, svg_hashes
 
-    if not polys:
-        raise RuntimeError("approved/draft SVGs contained no named zone polygons")
 
-    # Deduplicate zone ids (last wins) while preserving order
+def _dedupe_polys(polys: list[OverlayPolygon]) -> list[OverlayPolygon]:
+    """Deduplicate zone ids (last wins) while preserving order."""
     ordered: list[OverlayPolygon] = []
     seen_ids: set[str] = set()
     for poly in reversed(polys):
@@ -292,7 +299,13 @@ def synthesize(
         seen_ids.add(poly.zone_id)
         ordered.append(poly)
     ordered.reverse()
+    return ordered
 
+
+def _berthing_zones(
+    ordered: list[OverlayPolygon],
+    zone_meta: dict[str, ZoneDigest],
+) -> list[str]:
     berthing = [
         p.zone_id
         for p in ordered
@@ -305,7 +318,57 @@ def synthesize(
             "synthesis requires at least one Room/berthing zone "
             "(type Room or id containing Berth/Quarter)"
         )
+    return berthing
 
+
+def _zone_entry(
+    poly: OverlayPolygon,
+    zone_meta: dict[str, ZoneDigest],
+    digest: ShipDigest,
+    pages: dict[int, dict[str, Any]],
+    deck_elev: dict[str, float],
+    deck_order: list[str],
+) -> dict[str, Any]:
+    meta = zone_meta.get(poly.zone_id)
+    page_meta = pages.get(poly.page or 1) or next(iter(pages.values()))
+    geom = _zone_geometry(poly, meta, digest, page_meta)
+    if geom["volume_m3"] <= 0:
+        raise RuntimeError(f"zone {poly.zone_id} has non-positive volume")
+    ztype = meta.type if meta else "Free"
+    traffic = meta.traffic if meta else "medium"
+    deck = meta.deck if meta else f"page_{poly.page or 1}"
+    if deck not in deck_order:
+        deck_order.append(deck)
+        deck_elev.setdefault(
+            deck, float(len(deck_order) - 1) * float(digest.ceiling_height_m)
+        )
+    elev = float(deck_elev.get(deck, 0.0))
+    if meta and meta.elevation_m is not None:
+        elev = float(meta.elevation_m)
+    entry: dict[str, Any] = {
+        "id": poly.zone_id,
+        "type": ztype,
+        "traffic": traffic,
+        "volume_m3": geom["volume_m3"],
+        "floor_area_m2": geom["floor_area_m2"],
+        "ceiling_height_m": geom["ceiling_height_m"],
+        "elevation_m": elev,
+        "deck": deck,
+        "display": geom["display"],
+    }
+    if meta and meta.max_occupancy:
+        entry["max_occupancy"] = int(meta.max_occupancy)
+    if meta and meta.notes:
+        entry["description"] = meta.notes
+    return entry
+
+
+def _zones_from_polys(
+    ordered: list[OverlayPolygon],
+    zone_meta: dict[str, ZoneDigest],
+    digest: ShipDigest,
+    pages: dict[int, dict[str, Any]],
+) -> list[dict[str, Any]]:
     # Contam level elevations: digest decks or stable stack by first-seen deck
     deck_elev: dict[str, float] = {}
     for i, deck_info in enumerate(digest.decks):
@@ -315,57 +378,94 @@ def synthesize(
             deck_elev[deck_info.id] = float(i) * float(digest.ceiling_height_m)
     deck_order: list[str] = []
 
-    zones_out: list[dict[str, Any]] = []
-    for poly in ordered:
-        meta = zone_meta.get(poly.zone_id)
-        page_meta = pages.get(poly.page or 1) or next(iter(pages.values()))
-        geom = _zone_geometry(poly, meta, digest, page_meta)
-        if geom["volume_m3"] <= 0:
-            raise RuntimeError(f"zone {poly.zone_id} has non-positive volume")
-        ztype = meta.type if meta else "Free"
-        traffic = meta.traffic if meta else "medium"
-        deck = meta.deck if meta else f"page_{poly.page or 1}"
-        if deck not in deck_order:
-            deck_order.append(deck)
-            deck_elev.setdefault(
-                deck, float(len(deck_order) - 1) * float(digest.ceiling_height_m)
-            )
-        elev = float(deck_elev.get(deck, 0.0))
-        if meta and meta.elevation_m is not None:
-            elev = float(meta.elevation_m)
-        entry: dict[str, Any] = {
-            "id": poly.zone_id,
-            "type": ztype,
-            "traffic": traffic,
-            "volume_m3": geom["volume_m3"],
-            "floor_area_m2": geom["floor_area_m2"],
-            "ceiling_height_m": geom["ceiling_height_m"],
-            "elevation_m": elev,
-            "deck": deck,
-            "display": geom["display"],
-        }
-        if meta and meta.max_occupancy:
-            entry["max_occupancy"] = int(meta.max_occupancy)
-        if meta and meta.notes:
-            entry["description"] = meta.notes
-        zones_out.append(entry)
+    return [
+        _zone_entry(poly, zone_meta, digest, pages, deck_elev, deck_order)
+        for poly in ordered
+    ]
 
-    graywater = list(digest.graywater_zones)
+
+def _graywater_zones(
+    digest: ShipDigest,
+    zones_out: list[dict[str, Any]],
+    zone_ids: list[str],
+) -> list[str]:
+    graywater = [g for g in digest.graywater_zones if g in zone_ids]
+    if graywater:
+        return graywater
+    for cand in ("Engine_Room", "Machinery_Space"):
+        if cand in zone_ids:
+            return [cand]
+    if zone_ids:
+        # Prefer engineering type
+        for z in zones_out:
+            if z["type"] == "Engineering":
+                return [z["id"]]
+        return [zone_ids[-1]]
+    return []
+
+
+def _copy_plan_graphics(
+    workdir: str,
+    output_dir: str,
+    pages: dict[int, dict[str, Any]],
+    allowed_roots: tuple[str, ...],
+) -> None:
+    graphics_dir = os.path.join(output_dir, "graphics")
+    prepare_output_directory(graphics_dir, allowed_roots=allowed_roots)
+    # Prefer first page as plan overview
+    first = pages[min(pages)]
+    src = os.path.join(workdir, first["file"])
+    dest_name = "plan_overview.png"
+    dest = resolve_child_path(graphics_dir, dest_name)
+    shutil.copy2(src, dest)
+    graphics_json = {
+        "schema_version": "1.0",
+        "description": "Blueprint plates copied from naval GA import workdir",
+        "plan": {
+            "file": dest_name,
+            "style": "general_arrangement_scan",
+            "credit": "Imported via tools.ship_blueprint_import",
+            "license": "Source drawing rights remain with original owner",
+        },
+        "deck_plans": {},
+    }
+    _write_json(
+        resolve_child_path(graphics_dir, "graphics.json"),
+        graphics_json,
+        allowed_roots=allowed_roots,
+    )
+
+
+def synthesize(
+    *,
+    workdir: str,
+    output_dir: str,
+    platform_id: str | None = None,
+    allowed_roots: tuple[str, ...],
+    copy_graphics: bool = True,
+    require_approved: bool = False,
+) -> dict[str, Any]:
+    """Build spatial_layout.json + air_flow_paths.json from approved overlays."""
+    digest = load_digest(workdir, allowed_roots=allowed_roots)
+    manifest = load_manifest(workdir, allowed_roots=allowed_roots)
+    pid = (platform_id or digest.platform_id).strip().lower().replace("-", "_")
+    digest.platform_id = pid
+
+    overlay_files = _select_overlay_files(workdir, require_approved)
+
+    pages = {int(p["page"]): p for p in manifest.get("pages", [])}
+    zone_meta = digest.zone_by_id()
+    polys, svg_hashes = _load_overlay_polys(overlay_files, allowed_roots)
+
+    if not polys:
+        raise RuntimeError("approved/draft SVGs contained no named zone polygons")
+
+    ordered = _dedupe_polys(polys)
+    berthing = _berthing_zones(ordered, zone_meta)
+    zones_out = _zones_from_polys(ordered, zone_meta, digest, pages)
+
     zone_ids = [z["id"] for z in zones_out]
-    graywater = [g for g in graywater if g in zone_ids]
-    if not graywater:
-        for cand in ("Engine_Room", "Machinery_Space"):
-            if cand in zone_ids:
-                graywater = [cand]
-                break
-        if not graywater and zone_ids:
-            # Prefer engineering type
-            for z in zones_out:
-                if z["type"] == "Engineering":
-                    graywater = [z["id"]]
-                    break
-            if not graywater:
-                graywater = [zone_ids[-1]]
+    graywater = _graywater_zones(digest, zones_out, zone_ids)
 
     spatial: dict[str, Any] = {
         "platform": pid,
@@ -427,30 +527,7 @@ def synthesize(
     )
 
     if copy_graphics and pages:
-        graphics_dir = os.path.join(output_dir, "graphics")
-        prepare_output_directory(graphics_dir, allowed_roots=allowed_roots)
-        # Prefer first page as plan overview
-        first = pages[min(pages)]
-        src = os.path.join(workdir, first["file"])
-        dest_name = "plan_overview.png"
-        dest = resolve_child_path(graphics_dir, dest_name)
-        shutil.copy2(src, dest)
-        graphics_json = {
-            "schema_version": "1.0",
-            "description": "Blueprint plates copied from naval GA import workdir",
-            "plan": {
-                "file": dest_name,
-                "style": "general_arrangement_scan",
-                "credit": "Imported via tools.ship_blueprint_import",
-                "license": "Source drawing rights remain with original owner",
-            },
-            "deck_plans": {},
-        }
-        _write_json(
-            resolve_child_path(graphics_dir, "graphics.json"),
-            graphics_json,
-            allowed_roots=allowed_roots,
-        )
+        _copy_plan_graphics(workdir, output_dir, pages, allowed_roots)
 
     return {
         "platform_id": pid,

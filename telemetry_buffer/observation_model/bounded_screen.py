@@ -869,28 +869,39 @@ def pool_effects(
     for factor_name, per_output in raw.items():
         block = pooled.setdefault(factor_name, {})
         for name, records in per_output.items():
-            by_trajectory: dict[int, list[Mapping[str, float]]] = {}
-            for record in records:
-                by_trajectory.setdefault(
-                    int(record["trajectory"]), [],
-                ).append(record)
-            values: list[float] = []
-            for trajectory in sorted(by_trajectory):
-                parts = by_trajectory[trajectory]
-                seen = sum(int(p["seeds"]) for p in parts)
-                if seen != total_seeds:
-                    raise ValueError(
-                        f"{factor_name}/{name} trajectory {trajectory} pools "
-                        f"{seen} seeds, design has {total_seeds}",
-                    )
-                if len(parts) == 1:
-                    values.append(float(parts[0]["value"]))
-                    continue
-                values.append(
-                    sum(p["seeds"] * p["value"] for p in parts) / total_seeds,
-                )
-            block[name] = values
+            block[name] = _pool_output_effects(
+                records, total_seeds, factor_name, name,
+            )
     return pooled
+
+
+def _pool_output_effects(
+    records: Sequence[Mapping[str, float]],
+    total_seeds: int,
+    factor_name: str,
+    name: str,
+) -> list[float]:
+    by_trajectory: dict[int, list[Mapping[str, float]]] = {}
+    for record in records:
+        by_trajectory.setdefault(
+            int(record["trajectory"]), [],
+        ).append(record)
+    values: list[float] = []
+    for trajectory in sorted(by_trajectory):
+        parts = by_trajectory[trajectory]
+        seen = sum(int(p["seeds"]) for p in parts)
+        if seen != total_seeds:
+            raise ValueError(
+                f"{factor_name}/{name} trajectory {trajectory} pools "
+                f"{seen} seeds, design has {total_seeds}",
+            )
+        if len(parts) == 1:
+            values.append(float(parts[0]["value"]))
+            continue
+        values.append(
+            sum(p["seeds"] * p["value"] for p in parts) / total_seeds,
+        )
+    return values
 
 
 def summarise_effects(

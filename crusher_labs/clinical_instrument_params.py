@@ -171,62 +171,108 @@ def expand_tier_tests_for_agent(
     the agent's active infections.
     """
     syndromes = list(agent.get("observed_syndromes") or [])
-    panels = panels_for_syndromes(params, syndromes)
-    impression_pids = impression_pathogens_for_syndromes(params, syndromes)
+    ctx = _TierExpansion(
+        panels=panels_for_syndromes(params, syndromes),
+        syndromes=syndromes,
+        impression_pids=impression_pathogens_for_syndromes(params, syndromes),
+        prefer_multiplex=prefer_multiplex,
+        out=[],
+        seen=set(),
+    )
     active = active_pathogen_ids(agent)
-    out: list[str] = []
-    seen: set[str] = set()
-
-    def _add(key: str) -> None:
-        if key not in seen:
-            seen.add(key)
-            out.append(key)
 
     for key in tier_tests:
-        if key == "clinical_multiplex_panel":
-            if prefer_multiplex or panels or not syndromes:
-                _add("clinical_multiplex_panel")
-            continue
-        if key == "clinical_rdt":
-            if prefer_multiplex and panels:
-                continue
-            _add("clinical_rdt")
-            continue
-        if key == "clinical_impression":
-            if impression_pids:
-                _add("clinical_impression")
-            continue
-        _add(key)
-
-    def _multiplex_covers_any_active() -> bool:
-        if not active or not panels:
-            return False
-        for panel_id in panels:
-            panel = (params.get("panels") or {}).get(panel_id) or {}
-            covered = set((panel.get("pathogens") or {}).keys())
-            if any(pid in covered for pid in active):
-                return True
-        return False
-
-    if prefer_multiplex and impression_pids and not _multiplex_covers_any_active():
-        _add("clinical_impression")
+        handler = _TIER_KEY_HANDLERS.get(key)
+        if handler is None:
+            _append_unique(ctx.out, ctx.seen, key)
+        else:
+            handler(ctx)
 
     if (
-        "clinical_rdt" in tier_tests
-        and "clinical_multiplex_panel" not in tier_tests
-        and impression_pids
-        and "clinical_impression" not in out
+        ctx.prefer_multiplex
+        and ctx.impression_pids
+        and not _multiplex_covers_any_active(params, ctx.panels, active)
     ):
-        has_rdt_cover = False
-        for pid in active:
-            rp = resolve_instrument_params(params, "clinical_rdt", pid)
-            if rp.covers_pathogen:
-                has_rdt_cover = True
-                break
-        if not has_rdt_cover:
-            _add("clinical_impression")
+        _append_unique(ctx.out, ctx.seen, "clinical_impression")
 
-    return out
+    if _rdt_lacks_active_cover(params, tier_tests, ctx, active):
+        _append_unique(ctx.out, ctx.seen, "clinical_impression")
+
+    return ctx.out
+
+
+@dataclass
+class _TierExpansion:
+    panels: list[str]
+    syndromes: list[str]
+    impression_pids: list[str]
+    prefer_multiplex: bool
+    out: list[str]
+    seen: set[str]
+
+
+def _append_unique(out: list[str], seen: set[str], key: str) -> None:
+    if key not in seen:
+        seen.add(key)
+        out.append(key)
+
+
+def _expand_multiplex_key(ctx: _TierExpansion) -> None:
+    if ctx.prefer_multiplex or ctx.panels or not ctx.syndromes:
+        _append_unique(ctx.out, ctx.seen, "clinical_multiplex_panel")
+
+
+def _expand_rdt_key(ctx: _TierExpansion) -> None:
+    if ctx.prefer_multiplex and ctx.panels:
+        return
+    _append_unique(ctx.out, ctx.seen, "clinical_rdt")
+
+
+def _expand_impression_key(ctx: _TierExpansion) -> None:
+    if ctx.impression_pids:
+        _append_unique(ctx.out, ctx.seen, "clinical_impression")
+
+
+_TIER_KEY_HANDLERS = {
+    "clinical_multiplex_panel": _expand_multiplex_key,
+    "clinical_rdt": _expand_rdt_key,
+    "clinical_impression": _expand_impression_key,
+}
+
+
+def _multiplex_covers_any_active(
+    params: dict[str, Any],
+    panels: list[str],
+    active: list[str],
+) -> bool:
+    if not active or not panels:
+        return False
+    for panel_id in panels:
+        panel = (params.get("panels") or {}).get(panel_id) or {}
+        covered = set((panel.get("pathogens") or {}).keys())
+        if any(pid in covered for pid in active):
+            return True
+    return False
+
+
+def _rdt_lacks_active_cover(
+    params: dict[str, Any],
+    tier_tests: list[str] | tuple[str, ...],
+    ctx: _TierExpansion,
+    active: list[str],
+) -> bool:
+    if (
+        "clinical_rdt" not in tier_tests
+        or "clinical_multiplex_panel" in tier_tests
+        or not ctx.impression_pids
+        or "clinical_impression" in ctx.out
+    ):
+        return False
+    for pid in active:
+        rp = resolve_instrument_params(params, "clinical_rdt", pid)
+        if rp.covers_pathogen:
+            return False
+    return True
 
 
 def impression_sensitivity_for_day(

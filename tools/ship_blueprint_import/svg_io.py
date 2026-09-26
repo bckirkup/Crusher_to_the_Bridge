@@ -56,108 +56,109 @@ def _local_tag(tag: str) -> str:
     return tag
 
 
+# Number of leading coordinate values a curve command carries before its
+# (absolute or relative) end point; only the end point is kept for coarse
+# zone polygons.
+_CURVE_SKIPS = {"C": 4, "c": 4, "Q": 2, "q": 2, "S": 2, "s": 2, "T": 0, "t": 0, "A": 5, "a": 5}
+
+
+class _PathCursor:
+    """Sequential cursor over SVG path tokens producing absolute points."""
+
+    def __init__(self, tokens: list[str]) -> None:
+        self.tokens = tokens
+        self.i = 0
+        self.cmd = "M"
+        self.cx, self.cy = 0.0, 0.0
+        self.start = (0.0, 0.0)
+        self.points: list[tuple[float, float]] = []
+
+    def _num(self) -> float:
+        if self.i >= len(self.tokens):
+            raise ValueError("unexpected end of path data")
+        val = float(self.tokens[self.i])
+        self.i += 1
+        return val
+
+    def step(self) -> None:
+        tok = self.tokens[self.i]
+        if re.fullmatch(r"[MmLlHhVvCcSsQqTtAaZz]", tok):
+            self.cmd = tok
+            self.i += 1
+            if self.cmd in ("Z", "z"):
+                if self.points and self.points[-1] != self.start:
+                    self.points.append(self.start)
+                return
+        else:
+            # Implicit repetition of previous command
+            if self.cmd in ("M", "m"):
+                self.cmd = "L" if self.cmd == "M" else "l"
+            elif self.cmd in ("Z", "z"):
+                raise ValueError(f"unexpected number after close-path: {tok}")
+        self._apply()
+
+    def _apply(self) -> None:
+        cmd = self.cmd
+        if cmd in ("M", "m"):
+            self._move()
+        elif cmd in ("L", "l"):
+            self._end_point()
+        elif cmd in ("H", "h"):
+            self._horizontal()
+        elif cmd in ("V", "v"):
+            self._vertical()
+        elif cmd in _CURVE_SKIPS:
+            self._curve(_CURVE_SKIPS[cmd])
+        else:
+            raise ValueError(f"unsupported SVG path command: {cmd}")
+
+    def _move(self) -> None:
+        if self.cmd == "M":
+            self.cx, self.cy = self._num(), self._num()
+            self.cmd = "L"
+        else:
+            self.cx, self.cy = self.cx + self._num(), self.cy + self._num()
+            self.cmd = "l"
+        self.start = (self.cx, self.cy)
+        self.points.append((self.cx, self.cy))
+
+    def _end_point(self) -> None:
+        if self.cmd.isupper():
+            self.cx, self.cy = self._num(), self._num()
+        else:
+            self.cx, self.cy = self.cx + self._num(), self.cy + self._num()
+        self.points.append((self.cx, self.cy))
+
+    def _horizontal(self) -> None:
+        if self.cmd == "H":
+            self.cx = self._num()
+        else:
+            self.cx += self._num()
+        self.points.append((self.cx, self.cy))
+
+    def _vertical(self) -> None:
+        if self.cmd == "V":
+            self.cy = self._num()
+        else:
+            self.cy += self._num()
+        self.points.append((self.cx, self.cy))
+
+    def _curve(self, skip: int) -> None:
+        for _ in range(skip):
+            self._num()
+        self._end_point()
+
+
 def _parse_path_d(d: str) -> list[tuple[float, float]]:
     """Parse a subset of SVG path data into absolute polyline points."""
     tokens: list[str] = []
     for match in _PATH_CMD.finditer(d.replace(",", " ")):
         tokens.append(match.group(0))
 
-    points: list[tuple[float, float]] = []
-    cmd = "M"
-    i = 0
-    cx, cy = 0.0, 0.0
-    start = (0.0, 0.0)
-
-    def _num() -> float:
-        nonlocal i
-        if i >= len(tokens):
-            raise ValueError("unexpected end of path data")
-        val = float(tokens[i])
-        i += 1
-        return val
-
-    while i < len(tokens):
-        tok = tokens[i]
-        if re.fullmatch(r"[MmLlHhVvCcSsQqTtAaZz]", tok):
-            cmd = tok
-            i += 1
-            if cmd in ("Z", "z"):
-                if points and points[-1] != start:
-                    points.append(start)
-                continue
-        else:
-            # Implicit repetition of previous command
-            if cmd in ("M", "m"):
-                cmd = "L" if cmd == "M" else "l"
-            elif cmd in ("Z", "z"):
-                raise ValueError(f"unexpected number after close-path: {tok}")
-
-        if cmd == "M":
-            cx, cy = _num(), _num()
-            start = (cx, cy)
-            points.append((cx, cy))
-            cmd = "L"
-        elif cmd == "m":
-            cx, cy = cx + _num(), cy + _num()
-            start = (cx, cy)
-            points.append((cx, cy))
-            cmd = "l"
-        elif cmd == "L":
-            cx, cy = _num(), _num()
-            points.append((cx, cy))
-        elif cmd == "l":
-            cx, cy = cx + _num(), cy + _num()
-            points.append((cx, cy))
-        elif cmd == "H":
-            cx = _num()
-            points.append((cx, cy))
-        elif cmd == "h":
-            cx += _num()
-            points.append((cx, cy))
-        elif cmd == "V":
-            cy = _num()
-            points.append((cx, cy))
-        elif cmd == "v":
-            cy += _num()
-            points.append((cx, cy))
-        elif cmd in ("C", "c"):
-            # Cubic: take end point only for coarse zone polygons
-            for _ in range(4):
-                _num()
-            if cmd == "C":
-                cx, cy = _num(), _num()
-            else:
-                cx, cy = cx + _num(), cy + _num()
-            points.append((cx, cy))
-        elif cmd in ("Q", "q"):
-            for _ in range(2):
-                _num()
-            if cmd == "Q":
-                cx, cy = _num(), _num()
-            else:
-                cx, cy = cx + _num(), cy + _num()
-            points.append((cx, cy))
-        elif cmd in ("S", "s", "T", "t"):
-            if cmd in ("S", "s"):
-                for _ in range(2):
-                    _num()
-            if cmd in ("S", "T"):
-                cx, cy = _num(), _num()
-            else:
-                cx, cy = cx + _num(), cy + _num()
-            points.append((cx, cy))
-        elif cmd in ("A", "a"):
-            for _ in range(5):
-                _num()
-            if cmd == "A":
-                cx, cy = _num(), _num()
-            else:
-                cx, cy = cx + _num(), cy + _num()
-            points.append((cx, cy))
-        else:
-            raise ValueError(f"unsupported SVG path command: {cmd}")
-
-    return points
+    cursor = _PathCursor(tokens)
+    while cursor.i < len(tokens):
+        cursor.step()
+    return cursor.points
 
 
 def _polygon_points_from_elem(elem: ET.Element) -> list[tuple[float, float]]:
@@ -196,6 +197,23 @@ def _shape_id(elem: ET.Element) -> str | None:
     return None
 
 
+def _overlay_polygon_from_elem(
+    elem: ET.Element,
+    zone_id: str,
+    page: int | None,
+) -> OverlayPolygon | None:
+    if zone_id.startswith("_"):
+        # Reserved decorative elements (e.g. _page_bounds)
+        return None
+    try:
+        pts = _polygon_points_from_elem(elem)
+    except ValueError:
+        return None
+    if len(pts) < 3:
+        return None
+    return OverlayPolygon(zone_id=zone_id, points=pts, page=page)
+
+
 def read_overlay_svg(svg_text: str, *, page: int | None = None) -> list[OverlayPolygon]:
     """Parse named zone polygons from an SVG document."""
     root = ET.fromstring(svg_text)
@@ -212,16 +230,9 @@ def read_overlay_svg(svg_text: str, *, page: int | None = None) -> list[OverlayP
         if not zone_id:
             unnamed += 1
             continue
-        if zone_id.startswith("_"):
-            # Reserved decorative elements (e.g. _page_bounds)
-            continue
-        try:
-            pts = _polygon_points_from_elem(elem)
-        except ValueError:
-            continue
-        if len(pts) < 3:
-            continue
-        polygons.append(OverlayPolygon(zone_id=zone_id, points=pts, page=page))
+        poly = _overlay_polygon_from_elem(elem, zone_id, page)
+        if poly is not None:
+            polygons.append(poly)
     if unnamed:
         raise ValueError(
             f"SVG contains {unnamed} unnamed path/polygon/rect element(s); "

@@ -486,21 +486,25 @@ def _print_job_summary(report: dict[str, Any]) -> None:
     n_time = (native.get("timing") or {}).get("seconds_mean")
     print(f"  native  mean wall time: {n_time:.4f}s" if n_time is not None else "  native: n/a")
     if report.get("contamx_available") and report.get("contamx"):
-        c_time = (report["contamx"].get("timing") or {}).get("seconds_mean")
-        print(f"  contamx mean wall time: {c_time:.4f}s" if c_time is not None else "")
-        speed = report.get("speedup_native_over_contamx")
-        if speed is not None:
-            print(f"  native is {speed:.2f}x ContamX wall time "
-                  f"(>1 means ContamX slower)")
-        if report.get("mode") == "transport" and report.get("divergence"):
-            _print_transport_divergence(report, native)
-        if report.get("delta"):
-            print(f"  outcome delta (contamx-native): {report['delta']}")
+        _print_contamx_summary(report, native)
     else:
         print(f"  ContamX skipped: {report.get('contamx_error', 'unavailable')}")
         inv = (native.get("path_inventory") or {})
         if inv.get("by_type"):
             print(f"  native path types: {inv['by_type']}")
+
+
+def _print_contamx_summary(report: dict[str, Any], native: dict[str, Any]) -> None:
+    c_time = (report["contamx"].get("timing") or {}).get("seconds_mean")
+    print(f"  contamx mean wall time: {c_time:.4f}s" if c_time is not None else "")
+    speed = report.get("speedup_native_over_contamx")
+    if speed is not None:
+        print(f"  native is {speed:.2f}x ContamX wall time "
+              f"(>1 means ContamX slower)")
+    if report.get("mode") == "transport" and report.get("divergence"):
+        _print_transport_divergence(report, native)
+    if report.get("delta"):
+        print(f"  outcome delta (contamx-native): {report['delta']}")
 
 
 def main(argv: list[str] | None = None) -> int:

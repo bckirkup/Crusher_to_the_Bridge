@@ -373,34 +373,53 @@ def _wrap_merge(core_cls: type, rec: Recorder) -> Any:
         susceptibility = original(
             self, agents, pathogen_id, p_agent_doses, *args, **kwargs,
         )
-        if pathogen_id != rec.pathogen_id:
-            return susceptibility
-        by_id = {agent.agent_id: agent for agent in agents}
-        for agent_id, dose in p_agent_doses.items():
-            if dose <= 0.0:
-                continue
-            record = rec.host(agent_id)
-            multiplier = float(susceptibility.get(agent_id, 1.0))
-            record.credited_raw += float(dose)
-            record.credited_scaled += float(dose) * multiplier
-            record.crediting_epochs += 1
-            record.susceptibility_multiplier = multiplier
-            agent = by_id.get(agent_id)
-            if agent is None:
-                continue
-            if agent.is_infected_with(pathogen_id):
-                record.credited_epochs_infected += 1
-            if bool(getattr(agent, "immune", False)):
-                record.credited_epochs_immune += 1
-            if bool(
-                getattr(agent, "secretor_negative_by_pathogen", {}).get(
-                    pathogen_id, False,
-                ),
-            ):
-                record.credited_epochs_secretor_negative += 1
+        if pathogen_id == rec.pathogen_id:
+            _record_merge_doses(
+                rec, susceptibility, p_agent_doses, agents, pathogen_id,
+            )
         return susceptibility
 
     return wrapper
+
+
+def _record_merge_doses(
+    rec: Recorder,
+    susceptibility: dict[int, float],
+    p_agent_doses: dict[int, float],
+    agents: list[Any],
+    pathogen_id: str,
+) -> None:
+    by_id = {agent.agent_id: agent for agent in agents}
+    for agent_id, dose in p_agent_doses.items():
+        if dose <= 0.0:
+            continue
+        record = rec.host(agent_id)
+        multiplier = float(susceptibility.get(agent_id, 1.0))
+        record.credited_raw += float(dose)
+        record.credited_scaled += float(dose) * multiplier
+        record.crediting_epochs += 1
+        record.susceptibility_multiplier = multiplier
+        agent = by_id.get(agent_id)
+        if agent is None:
+            continue
+        _record_credit_flags(record, agent, pathogen_id)
+
+
+def _record_credit_flags(
+    record: Any,
+    agent: Any,
+    pathogen_id: str,
+) -> None:
+    if agent.is_infected_with(pathogen_id):
+        record.credited_epochs_infected += 1
+    if bool(getattr(agent, "immune", False)):
+        record.credited_epochs_immune += 1
+    if bool(
+        getattr(agent, "secretor_negative_by_pathogen", {}).get(
+            pathogen_id, False,
+        ),
+    ):
+        record.credited_epochs_secretor_negative += 1
 
 
 def _wrap_hazard(core_cls: type, rec: Recorder) -> Any:
@@ -488,64 +507,101 @@ def _wrap_challenge(core_cls: type, rec: Recorder, top_ids: set[int]) -> Any:
             and witness[0] == int(agent.agent_id)
             and witness[1] == pathogen_id
         )
-        reason = state["reason"]
-        if reason == "pending":
-            reason = "evaluated" if evaluated else "effective_dose_zero"
-        record = rec.host(agent.agent_id)
-        record.challenge_calls += 1
-        record.challenge_dose_read += state["p_dose"]
-        record.reasons[reason] += 1
-        if state["p_dose"] > 0.0 and evaluated:
-            record.credited_epochs_challenge_evaluated += 1
-        now_infected = bool(agent.is_infected_with(pathogen_id))
-        if not state["resident"] and now_infected:
-            infection = (getattr(agent, "infections", {}) or {}).get(
-                pathogen_id,
-            ) or {}
-            route_ledger = dict(
-                infection.get("acquired_particles_by_route") or {},
-            )
-            dominant = (
-                max(route_ledger, key=route_ledger.get)
-                if route_ledger
-                else "unknown"
-            )
-            rec.acquisitions.append({
-                "agent_id": int(agent.agent_id),
-                "epoch": int(epoch),
-                "dose_read": state["p_dose"],
-                "effective_dose": witness[2] if evaluated else None,
-                "frailty": witness[3] if evaluated else None,
-                "hazard": witness[4] if evaluated else None,
-                "acquired_particles_by_route": {
-                    route: float(dose)
-                    for route, dose in route_ledger.items()
-                },
-                "dominant_route": dominant,
-            })
-            rec.acquired_ids.add(int(agent.agent_id))
-        if state["resident"] and agent.agent_id not in rec.acquired_ids:
-            rec.import_ids.add(int(agent.agent_id))
-        if agent.agent_id in top_ids and state["p_dose"] > 0.0:
-            rec.top_host_rows.append({
-                "agent_id": int(agent.agent_id),
-                "epoch": int(epoch),
-                "dose_read": state["p_dose"],
-                "resident_infected": state["resident"],
-                "immune": state["immune"],
-                "secretor_negative": state["secretor_negative"],
-                "protection": state["protection"],
-                "challenge_evaluated": bool(evaluated),
-                "effective_dose": witness[2] if evaluated else None,
-                "frailty": witness[3] if evaluated else None,
-                "hazard": witness[4] if evaluated else None,
-                "cumulative_exposure": float(
-                    agent.cumulative_exposure.get(pathogen_id, 0.0),
-                ),
-            })
+        ctx = (state, witness, evaluated)
+        _record_challenge_outcome(
+            rec, agent, pathogen_id, epoch, ctx, top_ids,
+        )
         return result
 
     return wrapper
+
+
+def _record_challenge_outcome(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+    epoch: int,
+    ctx: tuple[dict[str, Any], Any, bool],
+    top_ids: set[int],
+) -> None:
+    state, witness, evaluated = ctx
+    reason = state["reason"]
+    if reason == "pending":
+        reason = "evaluated" if evaluated else "effective_dose_zero"
+    record = rec.host(agent.agent_id)
+    record.challenge_calls += 1
+    record.challenge_dose_read += state["p_dose"]
+    record.reasons[reason] += 1
+    if state["p_dose"] > 0.0 and evaluated:
+        record.credited_epochs_challenge_evaluated += 1
+    now_infected = bool(agent.is_infected_with(pathogen_id))
+    if not state["resident"] and now_infected:
+        _record_acquisition(rec, agent, pathogen_id, epoch, ctx)
+    if state["resident"] and agent.agent_id not in rec.acquired_ids:
+        rec.import_ids.add(int(agent.agent_id))
+    if agent.agent_id in top_ids and state["p_dose"] > 0.0:
+        _record_top_host_row(rec, agent, pathogen_id, epoch, ctx)
+
+
+def _record_acquisition(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+    epoch: int,
+    ctx: tuple[dict[str, Any], Any, bool],
+) -> None:
+    state, witness, evaluated = ctx
+    infection = (getattr(agent, "infections", {}) or {}).get(
+        pathogen_id,
+    ) or {}
+    route_ledger = dict(
+        infection.get("acquired_particles_by_route") or {},
+    )
+    dominant = (
+        max(route_ledger, key=route_ledger.get)
+        if route_ledger
+        else "unknown"
+    )
+    rec.acquisitions.append({
+        "agent_id": int(agent.agent_id),
+        "epoch": int(epoch),
+        "dose_read": state["p_dose"],
+        "effective_dose": witness[2] if evaluated else None,
+        "frailty": witness[3] if evaluated else None,
+        "hazard": witness[4] if evaluated else None,
+        "acquired_particles_by_route": {
+            route: float(dose)
+            for route, dose in route_ledger.items()
+        },
+        "dominant_route": dominant,
+    })
+    rec.acquired_ids.add(int(agent.agent_id))
+
+
+def _record_top_host_row(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+    epoch: int,
+    ctx: tuple[dict[str, Any], Any, bool],
+) -> None:
+    state, witness, evaluated = ctx
+    rec.top_host_rows.append({
+        "agent_id": int(agent.agent_id),
+        "epoch": int(epoch),
+        "dose_read": state["p_dose"],
+        "resident_infected": state["resident"],
+        "immune": state["immune"],
+        "secretor_negative": state["secretor_negative"],
+        "protection": state["protection"],
+        "challenge_evaluated": bool(evaluated),
+        "effective_dose": witness[2] if evaluated else None,
+        "frailty": witness[3] if evaluated else None,
+        "hazard": witness[4] if evaluated else None,
+        "cumulative_exposure": float(
+            agent.cumulative_exposure.get(pathogen_id, 0.0),
+        ),
+    })
 
 
 def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
@@ -577,33 +633,15 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         profile: dict | None,
         zone_name: str | None = None,
     ) -> None:
-        originals["_replenish_hand"](
-            self, agent, pathogen_id, profile, zone_name,
-        )
-        if pathogen_id != rec.pathogen_id:
-            return
-        target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
-        load = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-        if target > 0.0:
-            rec.fomite["hand_target_positive_calls"] += 1
-            rec.fomite["max_hand_target_gec"] = max(
-                rec.fomite["max_hand_target_gec"], float(target),
-            )
-        rec.fomite["max_hand_load_gec"] = max(
-            rec.fomite["max_hand_load_gec"], float(load),
+        _replenish_hand_wrapped(
+            originals, rec, self, agent, pathogen_id, profile, zone_name,
         )
 
     def deposit(
         self: Any, pathogen_id: str, zone_name: str, mass: float,
     ) -> None:
-        rec.fomite_representation_seen = self.fomite_representation
-        if self._per_surface is not None:
-            rec.fomite_touch_share_seen = self._per_surface.cfg.touch_share
-        if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
-            rec.fomite["surface_deposit_calls"] += 1
-            rec.fomite["surface_mass_deposited_gec"] += float(mass)
-        return originals["_deposit_surface_mass"](
-            self, pathogen_id, zone_name, mass,
+        return _deposit_wrapped(
+            originals, rec, self, pathogen_id, zone_name, mass,
         )
 
     def deliver(
@@ -614,27 +652,10 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         *args: Any,
         **kwargs: Any,
     ) -> float:
-        delivered = originals["_deliver_fomite_requests"](
-            self, requests, zone_name, surface_mass, *args, **kwargs,
+        return _deliver_wrapped(
+            originals, rec, self, requests, zone_name, surface_mass,
+            (args, kwargs),
         )
-        if rec.current_pathogen == rec.pathogen_id:
-            requested = float(sum(mass for _, mass in requests))
-            rec.fomite["deliver_calls"] += 1
-            rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
-            rec.fomite["mass_requested_gec"] += requested
-            rec.fomite["mass_delivered_to_hands_gec"] += float(delivered)
-            scale_witness = rec.delivery_scale
-            scale_witness["deliver_calls"] += 1
-            scale_witness["sum_requested_gec"] += requested
-            scale_witness["sum_offered_gec"] += float(surface_mass)
-            if requested > float(surface_mass) > 0.0:
-                scale_witness["scaled_calls"] += 1
-                log10_scale = math.log10(float(surface_mass) / requested)
-                scale_witness["sum_log10_scale"] += log10_scale
-                scale_witness["min_log10_scale"] = min(
-                    scale_witness["min_log10_scale"], log10_scale,
-                )
-        return delivered
 
     def deliver_by_class(
         self: Any,
@@ -644,94 +665,18 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         *args: Any,
         **kwargs: Any,
     ) -> dict[str, float]:
-        """Per-class analogue of ``deliver`` feeding the same counters.
-
-        ``requests`` carries ``{item_class: mass}`` per target; the pooled
-        aggregates are reconstructed exactly: requested is the sum over
-        classes and targets, offered is ``surface_mass`` (the zone total),
-        and delivered is the sum over the returned per-class dict.
-        """
-        delivered = originals["_deliver_fomite_requests_by_class"](
-            self, requests, zone_name, surface_mass, *args, **kwargs,
+        """Per-class analogue of ``deliver`` feeding the same counters."""
+        return _deliver_by_class_wrapped(
+            originals, rec, self, requests, zone_name, surface_mass,
+            (args, kwargs),
         )
-        if rec.current_pathogen == rec.pathogen_id:
-            requested = float(
-                sum(m for _, req in requests for m in req.values())
-            )
-            rec.fomite["deliver_calls"] += 1
-            rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
-            rec.fomite["mass_requested_gec"] += requested
-            rec.fomite["mass_delivered_to_hands_gec"] += float(
-                sum(delivered.values())
-            )
-            zone_class = self._fomite_zone_class(zone_name)
-            requested_by_class: dict[str, float] = defaultdict(float)
-            for _, req in requests:
-                for item_class, mass in req.items():
-                    requested_by_class[item_class] += float(mass)
-            for item_class, requested_c in requested_by_class.items():
-                class_key = f"{zone_class}.{item_class}"
-                bucket = rec.fomite_by_class[class_key]
-                bucket["requested_gec"] += requested_c
-                delivered_c = float(delivered.get(item_class, 0.0))
-                bucket["delivered_gec"] += delivered_c
-                if requested_c <= 0.0 or delivered_c <= 0.0:
-                    continue
-                scale_c = delivered_c / requested_c
-                for target, req in requests:
-                    share_c = float(req.get(item_class, 0.0))
-                    if share_c > 0.0:
-                        rec.fomite_host_class_gec[int(target.agent_id)][
-                            class_key
-                        ] += share_c * scale_c
-            scale_witness = rec.delivery_scale
-            scale_witness["deliver_calls"] += 1
-            scale_witness["sum_requested_gec"] += requested
-            scale_witness["sum_offered_gec"] += float(surface_mass)
-            if requested > float(surface_mass) > 0.0:
-                scale_witness["scaled_calls"] += 1
-                log10_scale = math.log10(float(surface_mass) / requested)
-                scale_witness["sum_log10_scale"] += log10_scale
-                scale_witness["min_log10_scale"] = min(
-                    scale_witness["min_log10_scale"], log10_scale,
-                )
-        return delivered
 
     def hand_to_mouth(
         self: Any, target: Any, epoch: int, hand_load: float,
     ) -> float:
-        dose = originals["_hand_to_mouth_dose"](self, target, epoch, hand_load)
-        if rec.current_pathogen == rec.pathogen_id:
-            rec.fomite["hand_to_mouth_calls"] += 1
-            rec.fomite["hand_load_seen_gec"] += float(hand_load)
-            rec.fomite["hand_to_mouth_dose_gec"] += float(dose)
-            if float(hand_load) > 0.0:
-                # ``_fomite_is_eating`` only reads the schedule -- no draw --
-                # so the eating/non-eating split is free.
-                meal = (
-                    "eating"
-                    if self._fomite_is_eating(target, epoch)
-                    else "non_eating"
-                )
-                bucket = rec.mouth_touch[meal]
-                ratio = float(dose) / float(hand_load)
-                bucket["calls"] += 1
-                if dose >= hand_load:
-                    bucket["calls_capped"] += 1
-                if ratio > 0.0:
-                    log10_ratio = math.log10(ratio)
-                    bucket["sum_log10_ratio"] += log10_ratio
-                    bucket["sum_sq_log10_ratio"] += log10_ratio**2
-                    bucket["min_log10_ratio"] = min(
-                        bucket["min_log10_ratio"], log10_ratio,
-                    )
-                    bucket["max_log10_ratio"] = max(
-                        bucket["max_log10_ratio"], log10_ratio,
-                    )
-                    _hist_add(bucket, "hist_log10_ratio", log10_ratio)
-                else:
-                    bucket["hist_underflow"] += 1
-        return dose
+        return _hand_to_mouth_wrapped(
+            originals, rec, self, target, epoch, hand_load,
+        )
 
     def pickup_request_for_area(
         self: Any,
@@ -741,52 +686,11 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         surface_area_m2: float,
         epoch: int,
     ) -> float:
-        """Witness the per-touch surface->hand factor without a draw.
-
-        The original is called exactly once and both re-read helpers
-        (``_fomite_surface_contacts``, ``_fomite_zone_class``) draw nothing,
-        so this wrapper cannot perturb the RNG stream.
-        """
-        request = originals["_fomite_pickup_request_for_area"](
-            self, target, zone_name, surface_mass, surface_area_m2, epoch,
+        """Witness the per-touch surface->hand factor without a draw."""
+        return _pickup_request_wrapped(
+            originals, rec, self, target, zone_name,
+            (surface_mass, surface_area_m2, epoch),
         )
-        if rec.current_pathogen != rec.pathogen_id:
-            return request
-        source = "patch" if rec.patch_depth > 0 else "pool"
-        zone_class = self._fomite_zone_class(zone_name)
-        contacts = originals["_fomite_surface_contacts"](
-            self, zone_name, target, epoch,
-        )
-        bucket = rec.surface_touch[source][zone_class]
-        bucket["calls"] += 1
-        bucket["sum_request_gec"] += float(request)
-        bucket["sum_surface_mass_gec"] += float(surface_mass)
-        bucket["sum_contacts"] += float(contacts)
-        bucket["sum_surface_area_m2"] += float(surface_area_m2)
-        if self._cabin_confinement_active(target):
-            bucket["calls_confined"] += 1
-        elif surface_mass <= 0.0:
-            bucket["calls_zero_mass"] += 1
-        elif request >= surface_mass:
-            # min(surface_mass, ...) bound bit: f_touch is right-censored.
-            bucket["calls_capped"] += 1
-        elif contacts > 0.0:
-            bucket["calls_clean"] += 1
-            f_touch = (float(request) / float(surface_mass)) / float(contacts)
-            if f_touch > 0.0:
-                log10_f = math.log10(f_touch)
-                bucket["sum_log10_f_touch"] += log10_f
-                bucket["sum_sq_log10_f_touch"] += log10_f**2
-                bucket["min_log10_f_touch"] = min(
-                    bucket["min_log10_f_touch"], log10_f,
-                )
-                bucket["max_log10_f_touch"] = max(
-                    bucket["max_log10_f_touch"], log10_f,
-                )
-                _hist_add(bucket, "hist_log10_f_touch", log10_f)
-            else:
-                bucket["hist_underflow"] += 1
-        return request
 
     def pickup_requests_by_class(
         self: Any,
@@ -796,27 +700,9 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
         pathogen_id: str,
     ) -> Any:
         """Count per-class pickup calls and capped requests; reads only."""
-        mass_before: dict[str, float] = {}
-        if pathogen_id == rec.pathogen_id and self._per_surface is not None:
-            inv = self._per_surface.inventory(zone_name)
-            if inv is not None:
-                for item_class in inv.counts:
-                    mass_before[item_class] = self._per_surface.mass.get(
-                        (zone_name, pathogen_id, item_class), 0.0,
-                    )
-        request = originals["_fomite_pickup_requests_by_class"](
-            self, target, zone_name, epoch, pathogen_id,
+        return _pickup_by_class_wrapped(
+            originals, rec, self, target, zone_name, epoch, pathogen_id,
         )
-        if request is None or not mass_before:
-            return request
-        zone_class = self._fomite_zone_class(zone_name)
-        for item_class, requested_c in request.items():
-            bucket = rec.fomite_by_class[f"{zone_class}.{item_class}"]
-            bucket["calls"] += 1
-            mass_c = mass_before.get(item_class, 0.0)
-            if mass_c > 0.0 and requested_c >= mass_c:
-                bucket["capped_calls"] += 1
-        return request
 
     core_cls._deliver_fomite_requests = deliver
     core_cls._deliver_fomite_requests_by_class = deliver_by_class
@@ -826,6 +712,385 @@ def _wrap_fomite(core_cls: type, rec: Recorder) -> dict[str, Any]:
     core_cls._replenish_hand = replenish_hand
     core_cls._fomite_pickup_request_for_area = pickup_request_for_area
     return originals
+
+
+def _replenish_hand_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    agent: Any,
+    pathogen_id: str,
+    profile: dict | None,
+    zone_name: str | None,
+) -> None:
+    originals["_replenish_hand"](
+        core, agent, pathogen_id, profile, zone_name,
+    )
+    _record_replenish_hand(rec, agent, pathogen_id, profile)
+
+
+def _deposit_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    pathogen_id: str,
+    zone_name: str,
+    mass: float,
+) -> None:
+    _record_deposit_witness(rec, core, pathogen_id, mass)
+    return originals["_deposit_surface_mass"](
+        core, pathogen_id, zone_name, mass,
+    )
+
+
+def _deliver_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    requests: list[tuple[Any, float]],
+    zone_name: str,
+    surface_mass: float,
+    extra: tuple[tuple, dict],
+) -> float:
+    args, kwargs = extra
+    delivered = originals["_deliver_fomite_requests"](
+        core, requests, zone_name, surface_mass, *args, **kwargs,
+    )
+    if rec.current_pathogen == rec.pathogen_id:
+        requested = float(sum(mass for _, mass in requests))
+        rec.fomite["deliver_calls"] += 1
+        rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
+        rec.fomite["mass_requested_gec"] += requested
+        rec.fomite["mass_delivered_to_hands_gec"] += float(delivered)
+        _record_deliver_scale(rec.delivery_scale, requested, surface_mass)
+    return delivered
+
+
+def _deliver_by_class_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    requests: list[tuple[Any, dict[str, float]]],
+    zone_name: str,
+    surface_mass: float,
+    extra: tuple[tuple, dict],
+) -> dict[str, float]:
+    """Per-class analogue of ``_deliver_wrapped`` feeding the same counters.
+
+    ``requests`` carries ``{item_class: mass}`` per target; the pooled
+    aggregates are reconstructed exactly: requested is the sum over
+    classes and targets, offered is ``surface_mass`` (the zone total),
+    and delivered is the sum over the returned per-class dict.
+    """
+    args, kwargs = extra
+    delivered = originals["_deliver_fomite_requests_by_class"](
+        core, requests, zone_name, surface_mass, *args, **kwargs,
+    )
+    if rec.current_pathogen == rec.pathogen_id:
+        requested = float(
+            sum(m for _, req in requests for m in req.values())
+        )
+        rec.fomite["deliver_calls"] += 1
+        rec.fomite["surface_mass_offered_gec"] += float(surface_mass)
+        rec.fomite["mass_requested_gec"] += requested
+        rec.fomite["mass_delivered_to_hands_gec"] += float(
+            sum(delivered.values())
+        )
+        _record_deliver_by_class(
+            rec, core, requests, delivered, zone_name, surface_mass,
+            requested,
+        )
+    return delivered
+
+
+def _hand_to_mouth_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    epoch: int,
+    hand_load: float,
+) -> float:
+    dose = originals["_hand_to_mouth_dose"](core, target, epoch, hand_load)
+    if rec.current_pathogen == rec.pathogen_id:
+        _record_hand_to_mouth(rec, core, target, epoch, hand_load, dose)
+    return dose
+
+
+def _pickup_request_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    zone_name: str,
+    figures: tuple[float, float, int],
+) -> float:
+    """Witness the per-touch surface->hand factor without a draw.
+
+    The original is called exactly once and both re-read helpers
+    (``_fomite_surface_contacts``, ``_fomite_zone_class``) draw nothing,
+    so this wrapper cannot perturb the RNG stream.
+    """
+    surface_mass, surface_area_m2, epoch = figures
+    request = originals["_fomite_pickup_request_for_area"](
+        core, target, zone_name, surface_mass, surface_area_m2, epoch,
+    )
+    if rec.current_pathogen != rec.pathogen_id:
+        return request
+    contacts = originals["_fomite_surface_contacts"](
+        core, zone_name, target, epoch,
+    )
+    touch_figures = (surface_mass, surface_area_m2, contacts)
+    _record_surface_touch(
+        rec, core, target, zone_name, request, touch_figures,
+    )
+    return request
+
+
+def _pickup_by_class_wrapped(
+    originals: dict[str, Any],
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    zone_name: str,
+    epoch: int,
+    pathogen_id: str,
+) -> Any:
+    mass_before = _pickup_masses_before(
+        core, pathogen_id, zone_name, rec.pathogen_id,
+    )
+    request = originals["_fomite_pickup_requests_by_class"](
+        core, target, zone_name, epoch, pathogen_id,
+    )
+    if request is None or not mass_before:
+        return request
+    zone_class = core._fomite_zone_class(zone_name)
+    for item_class, requested_c in request.items():
+        bucket = rec.fomite_by_class[f"{zone_class}.{item_class}"]
+        bucket["calls"] += 1
+        mass_c = mass_before.get(item_class, 0.0)
+        if mass_c > 0.0 and requested_c >= mass_c:
+            bucket["capped_calls"] += 1
+    return request
+
+
+def _record_replenish_hand(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+    profile: dict | None,
+) -> None:
+    if pathogen_id != rec.pathogen_id:
+        return
+    target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
+    load = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+    if target > 0.0:
+        rec.fomite["hand_target_positive_calls"] += 1
+        rec.fomite["max_hand_target_gec"] = max(
+            rec.fomite["max_hand_target_gec"], float(target),
+        )
+    rec.fomite["max_hand_load_gec"] = max(
+        rec.fomite["max_hand_load_gec"], float(load),
+    )
+
+
+def _record_deposit_witness(
+    rec: Recorder,
+    core: Any,
+    pathogen_id: str,
+    mass: float,
+) -> None:
+    rec.fomite_representation_seen = core.fomite_representation
+    if core._per_surface is not None:
+        rec.fomite_touch_share_seen = core._per_surface.cfg.touch_share
+    if pathogen_id == rec.pathogen_id and float(mass) > 0.0:
+        rec.fomite["surface_deposit_calls"] += 1
+        rec.fomite["surface_mass_deposited_gec"] += float(mass)
+
+
+def _record_deliver_scale(
+    scale_witness: dict[str, Any],
+    requested: float,
+    surface_mass: float,
+) -> None:
+    scale_witness["deliver_calls"] += 1
+    scale_witness["sum_requested_gec"] += requested
+    scale_witness["sum_offered_gec"] += float(surface_mass)
+    if requested > float(surface_mass) > 0.0:
+        scale_witness["scaled_calls"] += 1
+        log10_scale = math.log10(float(surface_mass) / requested)
+        scale_witness["sum_log10_scale"] += log10_scale
+        scale_witness["min_log10_scale"] = min(
+            scale_witness["min_log10_scale"], log10_scale,
+        )
+
+
+def _record_deliver_by_class(
+    rec: Recorder,
+    core: Any,
+    requests: list[tuple[Any, dict[str, float]]],
+    delivered: dict[str, float],
+    zone_name: str,
+    surface_mass: float,
+    requested: float,
+) -> None:
+    zone_class = core._fomite_zone_class(zone_name)
+    requested_by_class: dict[str, float] = defaultdict(float)
+    for _, req in requests:
+        for item_class, mass in req.items():
+            requested_by_class[item_class] += float(mass)
+    for item_class, requested_c in requested_by_class.items():
+        _record_class_deliver(
+            rec, requests, delivered, zone_class, item_class, requested_c,
+        )
+    _record_deliver_scale(rec.delivery_scale, requested, surface_mass)
+
+
+def _record_class_deliver(
+    rec: Recorder,
+    requests: list[tuple[Any, dict[str, float]]],
+    delivered: dict[str, float],
+    zone_class: str,
+    item_class: str,
+    requested_c: float,
+) -> None:
+    class_key = f"{zone_class}.{item_class}"
+    bucket = rec.fomite_by_class[class_key]
+    bucket["requested_gec"] += requested_c
+    delivered_c = float(delivered.get(item_class, 0.0))
+    bucket["delivered_gec"] += delivered_c
+    if requested_c <= 0.0 or delivered_c <= 0.0:
+        return
+    scale_c = delivered_c / requested_c
+    for target, req in requests:
+        share_c = float(req.get(item_class, 0.0))
+        if share_c > 0.0:
+            rec.fomite_host_class_gec[int(target.agent_id)][
+                class_key
+            ] += share_c * scale_c
+
+
+def _record_hand_to_mouth(
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    epoch: int,
+    hand_load: float,
+    dose: float,
+) -> None:
+    rec.fomite["hand_to_mouth_calls"] += 1
+    rec.fomite["hand_load_seen_gec"] += float(hand_load)
+    rec.fomite["hand_to_mouth_dose_gec"] += float(dose)
+    if float(hand_load) <= 0.0:
+        return
+    # ``_fomite_is_eating`` only reads the schedule -- no draw --
+    # so the eating/non-eating split is free.
+    meal = (
+        "eating"
+        if core._fomite_is_eating(target, epoch)
+        else "non_eating"
+    )
+    bucket = rec.mouth_touch[meal]
+    ratio = float(dose) / float(hand_load)
+    bucket["calls"] += 1
+    if dose >= hand_load:
+        bucket["calls_capped"] += 1
+    if ratio > 0.0:
+        _record_log10_ratio(bucket, ratio)
+    else:
+        bucket["hist_underflow"] += 1
+
+
+def _record_log10_ratio(bucket: dict[str, Any], ratio: float) -> None:
+    log10_ratio = math.log10(ratio)
+    bucket["sum_log10_ratio"] += log10_ratio
+    bucket["sum_sq_log10_ratio"] += log10_ratio**2
+    bucket["min_log10_ratio"] = min(
+        bucket["min_log10_ratio"], log10_ratio,
+    )
+    bucket["max_log10_ratio"] = max(
+        bucket["max_log10_ratio"], log10_ratio,
+    )
+    _hist_add(bucket, "hist_log10_ratio", log10_ratio)
+
+
+def _record_surface_touch(
+    rec: Recorder,
+    core: Any,
+    target: Any,
+    zone_name: str,
+    request: float,
+    figures: tuple[float, float, Any],
+) -> None:
+    surface_mass, surface_area_m2, contacts = figures
+    source = "patch" if rec.patch_depth > 0 else "pool"
+    zone_class = core._fomite_zone_class(zone_name)
+    bucket = rec.surface_touch[source][zone_class]
+    bucket["calls"] += 1
+    bucket["sum_request_gec"] += float(request)
+    bucket["sum_surface_mass_gec"] += float(surface_mass)
+    bucket["sum_contacts"] += float(contacts)
+    bucket["sum_surface_area_m2"] += float(surface_area_m2)
+    _classify_touch(bucket, core, target, request, surface_mass, contacts)
+
+
+def _classify_touch(
+    bucket: dict[str, Any],
+    core: Any,
+    target: Any,
+    request: float,
+    surface_mass: float,
+    contacts: Any,
+) -> None:
+    if core._cabin_confinement_active(target):
+        bucket["calls_confined"] += 1
+    elif surface_mass <= 0.0:
+        bucket["calls_zero_mass"] += 1
+    elif request >= surface_mass:
+        # min(surface_mass, ...) bound bit: f_touch is right-censored.
+        bucket["calls_capped"] += 1
+    elif contacts > 0.0:
+        bucket["calls_clean"] += 1
+        _record_f_touch(bucket, request, surface_mass, contacts)
+
+
+def _record_f_touch(
+    bucket: dict[str, Any],
+    request: float,
+    surface_mass: float,
+    contacts: Any,
+) -> None:
+    f_touch = (float(request) / float(surface_mass)) / float(contacts)
+    if f_touch <= 0.0:
+        bucket["hist_underflow"] += 1
+        return
+    log10_f = math.log10(f_touch)
+    bucket["sum_log10_f_touch"] += log10_f
+    bucket["sum_sq_log10_f_touch"] += log10_f**2
+    bucket["min_log10_f_touch"] = min(
+        bucket["min_log10_f_touch"], log10_f,
+    )
+    bucket["max_log10_f_touch"] = max(
+        bucket["max_log10_f_touch"], log10_f,
+    )
+    _hist_add(bucket, "hist_log10_f_touch", log10_f)
+
+
+def _pickup_masses_before(
+    core: Any,
+    pathogen_id: str,
+    zone_name: str,
+    witness_pathogen_id: str,
+) -> dict[str, float]:
+    mass_before: dict[str, float] = {}
+    if pathogen_id == witness_pathogen_id and core._per_surface is not None:
+        inv = core._per_surface.inventory(zone_name)
+        if inv is not None:
+            for item_class in inv.counts:
+                mass_before[item_class] = core._per_surface.mass.get(
+                    (zone_name, pathogen_id, item_class), 0.0,
+                )
+    return mass_before
 
 
 def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
@@ -842,17 +1107,7 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
         agent: Any, pathogen_id: str, profile: dict, rng: Any,
     ) -> None:
         originals["draw_emesis_schedule"](agent, pathogen_id, profile, rng)
-        if pathogen_id != rec.pathogen_id:
-            return
-        rec.emesis["schedule_draws"] += 1
-        schedule = getattr(
-            agent, "emesis_episode_schedule_by_pathogen", {},
-        ).get(pathogen_id, [])
-        rec.emesis["scheduled_episodes"] += len(schedule)
-        if schedule:
-            rec.emesis["hosts_with_schedule"] += 1
-        else:
-            rec.emesis["hosts_with_empty_schedule"] += 1
+        _record_schedule_draw(rec, agent, pathogen_id)
 
     def emesis_phase(
         self: Any, agent: Any, pathogen_id: str, profile: dict,
@@ -879,18 +1134,8 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
         pool_gain = originals["_emit_emesis"](
             self, agent, pathogen_id, profile, zone_name, epoch,
         )
-        if pathogen_id != rec.pathogen_id:
-            return pool_gain
-        rec.emesis["emit_calls"] += 1
-        after = len(
-            getattr(agent, "emesis_deposition_records_by_pathogen", {}).get(
-                pathogen_id, [],
-            ),
-        )
-        rec.emesis["emesis_events"] += after - before
-        rec.emesis["patch_mass_gec"] += pool_gain
-        if after > before:
-            rec.emesis["emitting_hosts"] += 1
+        if pathogen_id == rec.pathogen_id:
+            _record_emit(rec, agent, pathogen_id, pool_gain, before)
         return pool_gain
 
     def patch_pickup(
@@ -902,24 +1147,7 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
         **kwargs: Any,
     ) -> None:
         if pathogen_id == rec.pathogen_id:
-            pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
-            filed = [unit for unit, patches in pools.items() if patches]
-            rec.emesis["patch_pickup_sweeps"] += 1
-            if filed:
-                rec.emesis["sweeps_with_filed_patch"] += 1
-                matched = [unit for unit in filed if unit in pickup_units]
-                if matched:
-                    rec.emesis["sweeps_with_matching_unit"] += 1
-                    for unit in matched:
-                        occupants = pickup_units.get(unit) or []
-                        rec.emesis["matched_unit_occupants"] += len(occupants)
-                        rec.emesis["matched_unit_susceptible"] += len(
-                            self._get_susceptible(occupants, pathogen_id),
-                        )
-                if "filed_units" not in rec.emesis_units:
-                    rec.emesis_units["filed_units"] = sorted(filed)[:10]
-                    rec.emesis_units["pickup_units"] = sorted(pickup_units)[:10]
-                    rec.emesis_units["matched_units"] = sorted(matched)[:10]
+            _record_patch_sweep(rec, self, pickup_units, pathogen_id)
         return originals["_emesis_patch_pickup"](
             self, epoch, pickup_units, pathogen_id, *args, **kwargs,
         )
@@ -946,6 +1174,80 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
     core_cls._emesis_patch_pickup = patch_pickup
     core_cls._emesis_patch_pickup_one = patch_pickup_one
     return originals
+
+
+def _record_schedule_draw(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+) -> None:
+    if pathogen_id != rec.pathogen_id:
+        return
+    rec.emesis["schedule_draws"] += 1
+    schedule = getattr(
+        agent, "emesis_episode_schedule_by_pathogen", {},
+    ).get(pathogen_id, [])
+    rec.emesis["scheduled_episodes"] += len(schedule)
+    if schedule:
+        rec.emesis["hosts_with_schedule"] += 1
+    else:
+        rec.emesis["hosts_with_empty_schedule"] += 1
+
+
+def _record_emit(
+    rec: Recorder,
+    agent: Any,
+    pathogen_id: str,
+    pool_gain: float,
+    before: int,
+) -> None:
+    rec.emesis["emit_calls"] += 1
+    after = len(
+        getattr(agent, "emesis_deposition_records_by_pathogen", {}).get(
+            pathogen_id, [],
+        ),
+    )
+    rec.emesis["emesis_events"] += after - before
+    rec.emesis["patch_mass_gec"] += pool_gain
+    if after > before:
+        rec.emesis["emitting_hosts"] += 1
+
+
+def _record_patch_sweep(
+    rec: Recorder,
+    core: Any,
+    pickup_units: dict[str, list[Any]],
+    pathogen_id: str,
+) -> None:
+    pools = core.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
+    filed = [unit for unit, patches in pools.items() if patches]
+    rec.emesis["patch_pickup_sweeps"] += 1
+    if not filed:
+        return
+    rec.emesis["sweeps_with_filed_patch"] += 1
+    matched = [unit for unit in filed if unit in pickup_units]
+    if matched:
+        rec.emesis["sweeps_with_matching_unit"] += 1
+        _record_matched_units(rec, core, matched, pickup_units, pathogen_id)
+    if "filed_units" not in rec.emesis_units:
+        rec.emesis_units["filed_units"] = sorted(filed)[:10]
+        rec.emesis_units["pickup_units"] = sorted(pickup_units)[:10]
+        rec.emesis_units["matched_units"] = sorted(matched)[:10]
+
+
+def _record_matched_units(
+    rec: Recorder,
+    core: Any,
+    matched: list[str],
+    pickup_units: dict[str, list[Any]],
+    pathogen_id: str,
+) -> None:
+    for unit in matched:
+        occupants = pickup_units.get(unit) or []
+        rec.emesis["matched_unit_occupants"] += len(occupants)
+        rec.emesis["matched_unit_susceptible"] += len(
+            core._get_susceptible(occupants, pathogen_id),
+        )
 
 
 @contextmanager
@@ -1396,6 +1698,50 @@ def run_seed(
     # the summary: a full 1,910 x 288 row dump is not needed to show what one
     # heavily dosed host's epochs looked like.
     top_ids = set(range(top_hosts))
+    resolved, result, wall_clock_run = _run_instrumented_voyage(
+        spec_dict, rec, top_ids, pathogen_id, alpha,
+    )
+    _check_override_witnesses(
+        rec, fomite_representation, fomite_touch_share,
+    )
+    summary = summarise(rec, alpha, beta, seed, epochs)
+    summary["dose_response_resolved"] = {
+        "alpha_requested": alpha,
+        "alpha_resolved": float(resolved["alpha"]),
+        "beta_resolved": float(resolved["beta"]),
+        "source": "override" if alpha_override is not None else "active_profile",
+    }
+    summary["transmission"]["attack_rate"] = (
+        len(rec.acquired_ids) / num_agents
+    )
+    summary["platform"] = platform
+    summary["num_agents"] = num_agents
+    summary["run_history"] = infection_tally(result, pathogen_id)
+    summary["transmission"]["route_attribution"] = _route_attribution_block(
+        result, rec,
+    )
+    _apply_arm_metadata(
+        summary, arm_tag, high_touch_area_scale,
+        high_touch_area_scale_by_zone_class, fomite_representation,
+        fomite_touch_share, fomite_touch_share_table,
+    )
+    summary["fomite_representation_resolved"] = (
+        rec.fomite_representation_seen
+    )
+    summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
+    summary["wall_clock_seconds_run"] = wall_clock_run
+    summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
+    return summary
+
+
+def _run_instrumented_voyage(
+    spec_dict: dict[str, Any],
+    rec: Recorder,
+    top_ids: set[int],
+    pathogen_id: str,
+    alpha: float,
+) -> tuple[dict[str, Any], Any, float]:
+    """Write the spec, run the voyage under the wrappers, return the results."""
     # The spec path lives under the repository root, not /tmp, because
     # validated_open refuses publicly writable targets; the directory is
     # still a fresh private TemporaryDirectory.
@@ -1419,6 +1765,14 @@ def run_seed(
             started_run = time.perf_counter()
             result = ShipSimulation(picard_spec, display=False).run()
             wall_clock_run = time.perf_counter() - started_run
+    return resolved, result, wall_clock_run
+
+
+def _check_override_witnesses(
+    rec: Recorder,
+    fomite_representation: str | None,
+    fomite_touch_share: str | None,
+) -> None:
     if fomite_representation is not None and (
         rec.fomite_representation_seen != fomite_representation
     ):
@@ -1435,19 +1789,9 @@ def run_seed(
             f"fomite_touch_share={fomite_touch_share}, resolved "
             f"{rec.fomite_touch_share_seen}",
         )
-    summary = summarise(rec, alpha, beta, seed, epochs)
-    summary["dose_response_resolved"] = {
-        "alpha_requested": alpha,
-        "alpha_resolved": alpha_resolved,
-        "beta_resolved": float(resolved["beta"]),
-        "source": "override" if alpha_override is not None else "active_profile",
-    }
-    summary["transmission"]["attack_rate"] = (
-        len(rec.acquired_ids) / num_agents
-    )
-    summary["platform"] = platform
-    summary["num_agents"] = num_agents
-    summary["run_history"] = infection_tally(result, pathogen_id)
+
+
+def _route_attribution_block(result: Any, rec: Recorder) -> dict[str, Any]:
     history = getattr(result, "history", None) or []
     final = (
         history[-1]
@@ -1455,7 +1799,7 @@ def run_seed(
         else {}
     )
     final_summary = final.get("summary") or {}
-    summary["transmission"]["route_attribution"] = {
+    return {
         "engine_tally": {
             "infections_by_dominant_route": (
                 final_summary.get("infections_by_dominant_route") or {}
@@ -1468,38 +1812,46 @@ def run_seed(
             rec.acquisitions,
         ),
     }
-    if (
-        arm_tag is not None
-        or high_touch_area_scale is not None
-        or high_touch_area_scale_by_zone_class is not None
-        or fomite_representation is not None
-        or fomite_touch_share is not None
-        or fomite_touch_share_table is not None
-    ):
-        summary["arm_tag"] = arm_tag
-        summary["high_touch_area_scale"] = high_touch_area_scale
-        summary["high_touch_area_scale_by_zone_class"] = (
-            high_touch_area_scale_by_zone_class
+
+
+def _apply_arm_metadata(
+    summary: dict[str, Any],
+    arm_tag: str | None,
+    high_touch_area_scale: float | None,
+    high_touch_area_scale_by_zone_class: dict[str, Any] | None,
+    fomite_representation: str | None,
+    fomite_touch_share: str | None,
+    fomite_touch_share_table: str | None,
+) -> None:
+    if not any(
+        value is not None
+        for value in (
+            arm_tag,
+            high_touch_area_scale,
+            high_touch_area_scale_by_zone_class,
+            fomite_representation,
+            fomite_touch_share,
+            fomite_touch_share_table,
         )
-        summary["fomite_representation"] = fomite_representation
-        summary["fomite_touch_share"] = fomite_touch_share
-        if fomite_touch_share_table is not None:
-            resolved_table = _safe_path(fomite_touch_share_table)
-            summary["fomite_touch_share_table"] = os.path.relpath(
-                resolved_table, str(REPO_ROOT),
-            )
-            summary["fomite_touch_share_table_sha256"] = hashlib.sha256(
-                Path(resolved_table).read_bytes(),
-            ).hexdigest()
-        else:
-            summary["fomite_touch_share_table"] = None
-    summary["fomite_representation_resolved"] = (
-        rec.fomite_representation_seen
+    ):
+        return
+    summary["arm_tag"] = arm_tag
+    summary["high_touch_area_scale"] = high_touch_area_scale
+    summary["high_touch_area_scale_by_zone_class"] = (
+        high_touch_area_scale_by_zone_class
     )
-    summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
-    summary["wall_clock_seconds_run"] = wall_clock_run
-    summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
-    return summary
+    summary["fomite_representation"] = fomite_representation
+    summary["fomite_touch_share"] = fomite_touch_share
+    if fomite_touch_share_table is not None:
+        resolved_table = _safe_path(fomite_touch_share_table)
+        summary["fomite_touch_share_table"] = os.path.relpath(
+            resolved_table, str(REPO_ROOT),
+        )
+        summary["fomite_touch_share_table_sha256"] = hashlib.sha256(
+            Path(resolved_table).read_bytes(),
+        ).hexdigest()
+    else:
+        summary["fomite_touch_share_table"] = None
 
 
 def print_summary(summary: dict[str, Any]) -> None:

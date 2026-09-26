@@ -217,6 +217,47 @@ def _role_group(role: Any) -> str:
     return "other"
 
 
+def _true_onset_epoch(inf: dict[str, Any]) -> int | None:
+    onset_offset = inf.get("onset_time_infected")
+    if inf.get("boarding_state") is not None:
+        # Boarding import: time_infected counts from a pre-voyage start,
+        # so onset sits onset_offset - age_at_boarding into the voyage;
+        # age_at_boarding is stamped nowhere else, so the observer's
+        # witness (epoch - epochs_since_symptom_onset) is the read.
+        return None
+    if onset_offset is None:
+        return None
+    return int(inf.get("infection_epoch") or 0) + int(onset_offset)
+
+
+def _infection_record(agent: Any, inf: dict[str, Any]) -> dict[str, Any]:
+    onset_offset = inf.get("onset_time_infected")
+    axes = inf.get("symptom_axes") or {}
+    boarding_state = inf.get("boarding_state")
+    return {
+        "agent_id": int(agent.agent_id),
+        "role": _role_group(getattr(agent, "role", None)),
+        "infection_epoch": int(inf.get("infection_epoch") or 0),
+        "imported": boarding_state is not None,
+        "presented": onset_offset is not None,
+        "onset_offset": (
+            int(onset_offset) if onset_offset is not None else None
+        ),
+        "true_onset_epoch": _true_onset_epoch(inf),
+        "severity_peak": str(
+            inf.get("symptom_severity_peak")
+            or inf.get("symptom_severity")
+            or "none",
+        ),
+        "severity_end": str(inf.get("symptom_severity") or "none"),
+        "vomiting": bool(axes.get("vomiting")),
+        "diarrhoea": bool(axes.get("diarrhoea")),
+        "axes_drawn": bool(axes),
+        "illness_end": _enum_name(inf.get("illness")),
+        "status_end": _enum_name(inf.get("status")),
+    }
+
+
 def harvest_infections(
     sim: Any,
     pathogen_id: str,
@@ -228,47 +269,7 @@ def harvest_infections(
         inf = agent.infections.get(pathogen_id)
         if inf is None or agent.agent_id in seeded:
             continue
-        onset_offset = inf.get("onset_time_infected")
-        axes = inf.get("symptom_axes") or {}
-        boarding_state = inf.get("boarding_state")
-        infection_epoch = int(inf.get("infection_epoch") or 0)
-        time_infected = inf.get("time_infected")
-        if boarding_state is None:
-            true_onset_epoch = (
-                infection_epoch + int(onset_offset)
-                if onset_offset is not None
-                else None
-            )
-        elif time_infected is not None and onset_offset is not None:
-            # Boarding import: time_infected counts from a pre-voyage start,
-            # so onset sits onset_offset - age_at_boarding into the voyage;
-            # age_at_boarding is stamped nowhere else, so the observer's
-            # witness (epoch - epochs_since_symptom_onset) is the read.
-            true_onset_epoch = None
-        else:
-            true_onset_epoch = None
-        records.append({
-            "agent_id": int(agent.agent_id),
-            "role": _role_group(getattr(agent, "role", None)),
-            "infection_epoch": infection_epoch,
-            "imported": boarding_state is not None,
-            "presented": onset_offset is not None,
-            "onset_offset": (
-                int(onset_offset) if onset_offset is not None else None
-            ),
-            "true_onset_epoch": true_onset_epoch,
-            "severity_peak": str(
-                inf.get("symptom_severity_peak")
-                or inf.get("symptom_severity")
-                or "none",
-            ),
-            "severity_end": str(inf.get("symptom_severity") or "none"),
-            "vomiting": bool(axes.get("vomiting")),
-            "diarrhoea": bool(axes.get("diarrhoea")),
-            "axes_drawn": bool(axes),
-            "illness_end": _enum_name(inf.get("illness")),
-            "status_end": _enum_name(inf.get("status")),
-        })
+        records.append(_infection_record(agent, inf))
     return records
 
 
@@ -322,7 +323,22 @@ def declared_channel_table(profile: dict[str, Any]) -> dict[str, Any]:
     observation = profile.get("observation_model") or {}
     states = list((profile.get("severity_model") or {}).get("states") or [])
     window = float(observation.get("episode_reporting_window_days") or 1.0)
-    rows = {}
+    rows = _declared_severity_rows(observation, states)
+    _annotate_episode_hazards(rows, window)
+    return {
+        "episode_reporting_window_days": window,
+        "per_severity": rows,
+        "active_scenario": (
+            (observation.get("prior") or {}).get("active_scenario")
+        ),
+    }
+
+
+def _declared_severity_rows(
+    observation: dict[str, Any],
+    states: list[str],
+) -> dict[str, dict[str, float]]:
+    rows: dict[str, dict[str, float]] = {}
     for name, vector in (
         ("eligibility", observation.get(
             "syndrome_case_eligibility_by_severity") or []),
@@ -337,7 +353,14 @@ def declared_channel_table(profile: dict[str, Any]) -> dict[str, Any]:
             if index >= len(states):
                 continue
             rows.setdefault(states[index], {})[name] = float(value)
-    for severity, row in rows.items():
+    return rows
+
+
+def _annotate_episode_hazards(
+    rows: dict[str, dict[str, float]],
+    window: float,
+) -> None:
+    for row in rows.values():
         for arm in ("pre", "post"):
             episode = float(row.get("eligibility", 0.0)) * float(
                 row.get(f"reporting_{arm}", 0.0),
@@ -346,13 +369,6 @@ def declared_channel_table(profile: dict[str, Any]) -> dict[str, Any]:
             row[f"per_day_hazard_{arm}"] = (
                 1.0 - (1.0 - episode) ** (1.0 / window) if episode else 0.0
             )
-    return {
-        "episode_reporting_window_days": window,
-        "per_severity": rows,
-        "active_scenario": (
-            (observation.get("prior") or {}).get("active_scenario")
-        ),
-    }
 
 
 def _recognition_summary(capture: ChannelCapture) -> dict[str, Any]:
