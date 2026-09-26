@@ -10,7 +10,6 @@ when no binary is present.
 from __future__ import annotations
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -161,3 +160,101 @@ def test_live_contamx_transport_compare() -> None:
     assert report["contamx_available"] is True
     assert report["divergence"]["final_l1"] >= 0.0
     assert report["speedup_native_over_contamx"] is not None
+
+
+def test_timing_block_stats() -> None:
+    block = cec._timing_block([1.0, 3.0])
+    assert block["repeats"] == 2
+    assert block["seconds_mean"] == pytest.approx(2.0)
+    assert block["seconds_min"] == pytest.approx(1.0)
+    assert block["seconds_max"] == pytest.approx(3.0)
+    assert block["seconds_stdev"] == pytest.approx(1.0)
+    assert cec._timing_block([2.0])["seconds_stdev"] == pytest.approx(0.0)
+
+
+def test_outcome_delta_subtracts_numeric_fields_only() -> None:
+    delta = cec._outcome_delta(
+        {"attack_rate": 0.5, "n_infected": 4,
+         "hvac_downstream_exposure_events": None,
+         "operational_impact_score": 1.0},
+        {"attack_rate": 0.7, "n_infected": "n/a",
+         "hvac_downstream_exposure_events": 9,
+         "operational_impact_score": 3.5},
+    )
+    assert delta == {"attack_rate": pytest.approx(0.2),
+                     "operational_impact_score": pytest.approx(2.5)}
+
+
+def test_full_sim_job_contamx_branch(monkeypatch) -> None:
+    """Force the ContamX success path with a fake binary + fake sim."""
+    from types import SimpleNamespace
+
+    class _FakeContam:
+        """Marker class: only its presence on the sim matters."""
+
+    class _FakeSim:
+        def __init__(self, spec, display, repo_root):
+            self.engine = None
+            self.state = None
+            self.contam_engine = _FakeContam()
+
+        def run(self, n_epochs):
+            return SimpleNamespace(
+                num_epochs=n_epochs, final_trigger_status="NORMAL",
+                history=[],
+            )
+
+    monkeypatch.setattr(cec, "find_contamx", lambda *a, **k: "/fake/contamx")
+    monkeypatch.setattr(
+        "picard_framework.simulation.ship_simulation.ShipSimulation",
+        _FakeSim,
+    )
+    monkeypatch.setattr(
+        "tools.contam_outcome_compare._build_spec", lambda *a, **k: {}
+    )
+    monkeypatch.setattr(
+        "tools.contam_outcome_compare._summarize",
+        lambda sim, result, label: {
+            "attack_rate": 0.5 if label == "native" else 0.7,
+            "contam_engine_class": "_FakeContam",
+        },
+    )
+    job = {"id": "fake", "mode": "full_sim", "platform": "x",
+           "epochs": 1, "seed": 1, "repeats": 1}
+    report = cec.run_full_sim_job(job)
+    assert report["contamx_available"] is True
+    assert report["contamx"]["timing"]["repeats"] == 1
+    assert report["contamx"]["summary"]["contam_engine_class"] == "_FakeContam"
+    assert "delta" in report
+    assert "attack_rate" in report["delta"]
+    assert report["speedup_native_over_contamx"] is not None
+
+
+def test_print_job_summary_transport_divergence(capsys) -> None:
+    report = {
+        "id": "j1", "mode": "transport", "platform": "p",
+        "native": {"n_paths": 10,
+                   "timing": {"seconds_mean": 1.0},
+                   "summary": {}},
+        "contamx_available": True,
+        "contamx": {
+            "n_paths": 8,
+            "timing": {"seconds_mean": 2.0},
+            "path_inventory": {
+                "by_type": {"passageway": 5},
+                "injection_connectivity": [
+                    {"zone": "Bridge", "out_degree": 0,
+                     "out_m3h": 0.0, "isolated": True},
+                ],
+            },
+        },
+        "divergence": {"final_l1": 0.1, "final_linf": 0.2, "mean_l1": 0.05},
+        "speedup_native_over_contamx": 0.5,
+        "delta": {"attack_rate": 0.01},
+    }
+    cec._print_job_summary(report)
+    out = capsys.readouterr().out
+    assert "final L1=0.1" in out
+    assert "ISOLATED" in out
+    assert "0.50x ContamX" in out
+    assert "outcome delta" in out

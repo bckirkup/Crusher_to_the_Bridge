@@ -28,6 +28,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -62,6 +63,41 @@ class HandProcessMoments:
         return self.conditional_mean_log10 - LIU_CONDITIONAL_MEAN_LOG10
 
 
+@dataclass(frozen=True)
+class _HandProcessKinetics:
+    survival: float
+    event_probability: float
+    ceiling: float
+    threshold: float
+    sigma_log10: float
+    additive: bool
+    wash_probability: float
+    wash_log10_reduction: float
+
+
+def _walk_loads(
+    rng: Any,
+    k: _HandProcessKinetics,
+    epochs: int,
+) -> tuple[float, list[float]]:
+    load = 0.0
+    total = 0.0
+    positive_logs: list[float] = []
+    for _ in range(epochs):
+        load *= k.survival
+        if rng.random() < k.event_probability:
+            amplitude = k.ceiling
+            if k.sigma_log10 > 0.0:
+                amplitude *= 10.0 ** rng.normal(0.0, k.sigma_log10)
+            load = load + amplitude if k.additive else max(load, amplitude)
+            if rng.random() < k.wash_probability:
+                load *= 10.0**-k.wash_log10_reduction
+        total += load
+        if load > k.threshold:
+            positive_logs.append(math.log10(load))
+    return total, positive_logs
+
+
 def hand_process_moments(
     inactivation_rate_per_hour: float,
     events_per_day: float,
@@ -84,28 +120,20 @@ def hand_process_moments(
     Liu's *lower* post-bathroom loads can arise from a defecation trigger.
     """
     rng = np.random.default_rng(seed)
-    survival = math.exp(-inactivation_rate_per_hour * epoch_hours)
-    event_probability = 1.0 - math.exp(
-        -events_per_day * epoch_hours / HOURS_PER_DAY
+    kinetics = _HandProcessKinetics(
+        survival=math.exp(-inactivation_rate_per_hour * epoch_hours),
+        event_probability=1.0 - math.exp(
+            -events_per_day * epoch_hours / HOURS_PER_DAY
+        ),
+        ceiling=10.0**ceiling_log10,
+        threshold=10.0**LIU_DETECTION_LIMIT_LOG10,
+        sigma_log10=sigma_log10,
+        additive=additive,
+        wash_probability=wash_probability,
+        wash_log10_reduction=wash_log10_reduction,
     )
-    ceiling = 10.0**ceiling_log10
-    threshold = 10.0**LIU_DETECTION_LIMIT_LOG10
     epochs = max(1, int(hours / epoch_hours))
-    load = 0.0
-    total = 0.0
-    positive_logs: list[float] = []
-    for _ in range(epochs):
-        load *= survival
-        if rng.random() < event_probability:
-            amplitude = ceiling
-            if sigma_log10 > 0.0:
-                amplitude *= 10.0 ** rng.normal(0.0, sigma_log10)
-            load = load + amplitude if additive else max(load, amplitude)
-            if rng.random() < wash_probability:
-                load *= 10.0**-wash_log10_reduction
-        total += load
-        if load > threshold:
-            positive_logs.append(math.log10(load))
+    total, positive_logs = _walk_loads(rng, kinetics, epochs)
     return HandProcessMoments(
         occupancy=len(positive_logs) / epochs,
         conditional_mean_log10=(float(np.mean(positive_logs)) if positive_logs else float("nan")),
