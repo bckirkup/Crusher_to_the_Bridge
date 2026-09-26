@@ -313,9 +313,11 @@ def declared_channel_table(profile: dict[str, Any]) -> dict[str, Any]:
 
     The episode probability ``eligibility * reporting`` is what the vector
     declares; the per-day hazard the engine rolls is
-    ``1 - (1 - p) ** (1/window_days)``, and the host-level draw then carries
-    the ``0.5 + 0.5 * trust_medical`` multiplier — neither is a parameter of
-    this tool.
+    ``1 - (1 - p) ** (1/window_days)``. The declared vectors are realized
+    capture — net of reluctance — so the host-level draw no longer carries
+    the Layer-1 ``0.5 + 0.5 * trust_medical`` multiplier unless a profile
+    declares ``observation_model.reporting_belief_scaling="trust_medical"``
+    (ledger NORO-CHANNEL-02). Neither is a parameter of this tool.
     """
     observation = profile.get("observation_model") or {}
     states = list((profile.get("severity_model") or {}).get("states") or [])
