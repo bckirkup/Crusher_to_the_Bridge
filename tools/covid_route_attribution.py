@@ -284,30 +284,38 @@ def route_window_tables(
     }
 
 
-def ascertainment_funnel(sim: Any) -> dict[str, Any]:
-    """Truth->recorded funnel for PATHOGEN_ID on one finished simulation.
+def ascertainment_funnel(
+    sim: Any,
+    *,
+    pathogen_id: str = PATHOGEN_ID,
+    record_dating_rate_confirmed: float | None = None,
+) -> dict[str, Any]:
+    """Truth->recorded funnel for ``pathogen_id`` on one finished simulation.
 
     Counts every rung the observation channel must pass for a host to get a
     dated onset in ``_onset_observations``: infected (truth), illness
     SYMPTOMATIC, syndrome-eligible severity, lab-confirmed, onset dated.
+    ``record_dating_rate_confirmed`` is the published investigation's dated
+    share, carried beside the rung it is checked against; callers without a
+    record leave it unset.
     """
     syndromic = sim.modalities["syndromic"]
     seeded = _seeded_ids(sim)
     confirmed = {
-        aid for (pid, aid) in syndromic._lab_confirmed if pid == PATHOGEN_ID
+        aid for (pid, aid) in syndromic._lab_confirmed if pid == pathogen_id
     }
     dated = {
         aid: rec
         for (pid, aid), rec in syndromic._onset_observations.items()
-        if pid == PATHOGEN_ID
+        if pid == pathogen_id
     }
     eligibility = (
-        sim.pathogen_profiles[PATHOGEN_ID]
+        sim.pathogen_profiles[pathogen_id]
         .get("observation_model", {})
         .get("syndrome_case_eligibility_by_severity", [])
     )
     states = (
-        sim.pathogen_profiles[PATHOGEN_ID]
+        sim.pathogen_profiles[pathogen_id]
         .get("severity_model", {})
         .get("states", [])
     )
@@ -319,7 +327,7 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
     for agent in sim.engine.agents:
         if agent.agent_id in seeded:
             continue
-        inf = agent.infections.get(PATHOGEN_ID)
+        inf = agent.infections.get(pathogen_id)
         if inf is None:
             continue
         infected += 1
@@ -343,7 +351,7 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
             confirmed_datable += 1
 
     dated_severity = Counter(str(r["symptom_severity"]) for r in dated.values())
-    return {
+    out = {
         "infected_truth": infected,
         "symptomatic_at_end": symptomatic_now,
         "severity_of_infected": dict(severity_all),
@@ -361,10 +369,12 @@ def ascertainment_funnel(sim: Any) -> dict[str, Any]:
             if confirmed_datable
             else None
         ),
+    }
+    if record_dating_rate_confirmed is not None:
         # The record dated 197 of ~712 confirmed cases (~0.28 of confirmed,
         # ~0.55 of symptomatic-confirmed) — the funnel's structural gap.
-        "record_dating_rate_confirmed": 197.0 / 712.0,
-    }
+        out["record_dating_rate_confirmed"] = float(record_dating_rate_confirmed)
+    return out
 
 
 def analyse_cell(
@@ -396,7 +406,9 @@ def analyse_cell(
         "route_attribution": route_window_tables(sim, ledger, start, end),
         "near_field": near_field_share_table(near_ledger),
         "hazard_rate": hazard_rate_table(hazard_ledger),
-        "ascertainment": ascertainment_funnel(sim),
+        "ascertainment": ascertainment_funnel(
+            sim, record_dating_rate_confirmed=197.0 / 712.0,
+        ),
     }
 
 

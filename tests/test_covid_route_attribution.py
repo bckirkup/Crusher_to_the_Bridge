@@ -135,7 +135,7 @@ def test_ascertainment_funnel_counts_rungs():
         eligibility=eligibility,
         seeded={4},
     )
-    out = ascertainment_funnel(sim)
+    out = ascertainment_funnel(sim, record_dating_rate_confirmed=197.0 / 712.0)
     assert out["infected_truth"] == 3  # agent 4 excluded as seeded
     assert out["symptomatic_at_end"] == 3
     assert out["eligible_severity_course"] == 2  # subclinical not eligible
@@ -145,7 +145,23 @@ def test_ascertainment_funnel_counts_rungs():
     assert out["dated_by_severity"] == {"mild": 1, "moderate": 1}
     assert out["dating_rate_confirmed_datable"] == pytest.approx(1.0)
     assert out["dating_rate_confirmed"] == pytest.approx(2 / 3)
-    assert 0.0 < out["record_dating_rate_confirmed"] < 1.0
+    assert out["record_dating_rate_confirmed"] == pytest.approx(197.0 / 712.0)
+
+
+def test_ascertainment_funnel_record_rate_is_optional():
+    agents = [_agent(1, _infected(IllnessStatus.SYMPTOMATIC, "mild"))]
+    sim = _funnel_sim(agents, confirmed={1}, dated={1: {"symptom_severity": "mild"}})
+    assert "record_dating_rate_confirmed" not in ascertainment_funnel(sim)
+    other_pid = "norwalk_gi"
+    sim.pathogen_profiles[other_pid] = sim.pathogen_profiles.pop(PATHOGEN_ID)
+    agents[0].infections = {other_pid: agents[0].infections.pop(PATHOGEN_ID)}
+    sim.modalities["syndromic"]._lab_confirmed = {(other_pid, 1): 100}
+    sim.modalities["syndromic"]._onset_observations = {
+        (other_pid, 1): {"symptom_severity": "mild"}
+    }
+    out = ascertainment_funnel(sim, pathogen_id=other_pid)
+    assert out["infected_truth"] == 1
+    assert out["dated_onsets"] == 1
 
 
 def test_ascertainment_funnel_empty_is_safe():
