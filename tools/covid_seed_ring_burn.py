@@ -191,7 +191,6 @@ def analyse_seed(
             float(profile.get("presymptomatic_shedding_days", 0.0)),
         ),
     ))
-    hours_per_epoch = clock.hours_per_epoch
     seeded_ids = set(
         getattr(sim.engine, "explicit_seed_agent_ids", None) or (),
     )
@@ -216,7 +215,7 @@ def analyse_seed(
     )
 
     departure_epoch = (
-        int(round(float(departure_day) * hours_per_epoch))
+        int(round(clock.epochs_for_days(float(departure_day))))
         if departure_day is not None else None
     )
     aboard_targets = {
