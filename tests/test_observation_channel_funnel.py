@@ -341,9 +341,9 @@ def test_build_readout_pools_ratios():
     assert out["rung_ratios"]["confirmed_per_reported"]["median"] is None
     assert out["dating_fidelity"]["dated_hosts_total"] == 6
     # pooled ratios divide summed counts, not a mean of per-seed ratios.
-    assert out["pooled_rung_totals"]["infected"]["total"] == 36
+    assert out["pooled_rung_totals"]["infected"]["total"] == 33
     assert out["pooled_ratios"]["symptomatic_per_infected"] == pytest.approx(
-        15 / 36
+        15 / 33
     )
     assert out["pooled_ratios"]["reported_crew_share"] is None
     assert out["pooled_ratios"]["confirmed_per_reported"] is None

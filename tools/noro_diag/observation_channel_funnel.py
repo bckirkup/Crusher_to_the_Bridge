@@ -753,8 +753,10 @@ _POOLED_RATIO_RUNGS: dict[str, tuple[str, str, str]] = {
 
 def _pooled_ratio(per_seed: list[dict[str, Any]], num: str, den: str,
                   role: str) -> float | None:
-    numerator = sum(row["rungs"][num].get(role, 0) for row in per_seed)
-    denominator = sum(row["rungs"][den].get(role, 0) for row in per_seed)
+    numerator = sum(
+        row["rungs"].get(num, {}).get(role, 0) for row in per_seed)
+    denominator = sum(
+        row["rungs"].get(den, {}).get(role, 0) for row in per_seed)
     return numerator / denominator if denominator else None
 
 
@@ -787,7 +789,8 @@ def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
         "pooled_rung_totals": {
             rung: {
                 role: sum(
-                    row["rungs"][rung].get(role, 0) for row in per_seed
+                    row["rungs"].get(rung, {}).get(role, 0)
+                    for row in per_seed
                 )
                 for role in ("total", "passenger", "crew", "other")
             }
