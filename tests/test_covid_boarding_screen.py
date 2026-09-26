@@ -792,3 +792,172 @@ def test_fleet_shape_fails_on_mean_with_a_single_outlier():
     assert 0.0005 <= entry["recorded_attack_rate"]["median"] <= 0.008
     assert entry["recorded_attack_rate"]["mean"] > 0.06
     assert entry["fleet_shape_ok"] is False
+
+
+# ── covid_rebase_01: seed_patch arms and the seed-ring readout ───────────
+
+REBASE_DESIGN_REL = (
+    REPO_ROOT / "picard_framework" / "runs" / "covid_rebase_01_design.json"
+)
+
+
+def test_rebase_design_is_the_declared_generic_fleet_screen():
+    rebase = load_design(str(REBASE_DESIGN_REL))
+    assert rebase.design_id == "covid_rebase_01"
+    assert rebase.scenario_id == "diamond_princess_2020"
+    assert rebase.voyage_mode == "generic"
+    assert rebase.thetas == (
+        1e4, 1e5, 1e6, 1e7, 1e8, 1e9, 1e10,
+        1.33e10, 1.78e10, 2.37e10, 3.16e10, 4.22e10, 5.62e10, 7.5e10,
+        1e11, 1e12,
+    )
+    assert rebase.infection_age_days == (0.0,)
+    assert rebase.imports == (1,)
+    assert rebase.seeds == 200
+    assert rebase.seed_base == 20201001
+    assert rebase.seed_ring_readout is False
+    cells = enumerate_cells(rebase)
+    assert len(cells) == 3200
+    # Theta-outer, seed-inner: the canary row is 4.22e10 at 2200..2399.
+    assert cells[2200].theta == pytest.approx(4.22e10)
+    assert cells[2200].seed == 20201001
+    assert cells[2219].seed == 20201020
+    assert cells[2399].theta == pytest.approx(4.22e10)
+
+
+def _arm_design(arms: list[dict]) -> BoardingScreenDesign:
+    """A declared-replay arm probe: one Theta, declared age, two seeds."""
+    return BoardingScreenDesign(
+        design_id="seed_patch_probe", scenario_id="diamond_princess_2020",
+        thetas=(1e9,), infection_age_days=(6.8,), imports=(1,),
+        sanitary_visit_mode="dwell_weighted", seed_base=20200205,
+        seeds=2, takeoff_recorded_onsets=10,
+        arms=tuple(arms), seed_ring_readout=True,
+    )
+
+
+def test_seed_patch_arm_writes_the_seed_record():
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {
+            "arm_id": "B1_late_onset",
+            "overrides": {"seed_patch": {"onset_day": 3.0, "count": 4}},
+        },
+    ])
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "B0_declared")
+    patched = next(c for c in cells if c.arm_id == "B1_late_onset")
+    seed_b = _generic_seed(prepare_cell_run_spec(design, base))
+    seed_p = _generic_seed(prepare_cell_run_spec(design, patched))
+    assert seed_b["onset_day"] == pytest.approx(-1.0)
+    assert seed_b["count"] == 1
+    assert seed_p["onset_day"] == pytest.approx(3.0)
+    assert seed_p["count"] == 4
+    assert seed_p["departure_day"] == pytest.approx(5.0)
+
+
+def test_seed_patch_null_removes_the_field():
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {"arm_id": "B2_no_onset", "overrides": {"seed_patch": {"onset_day": None}}},
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B2_no_onset"
+    )
+    seed = _generic_seed(prepare_cell_run_spec(design, cell))
+    assert "onset_day" not in seed
+    assert seed["departure_day"] == pytest.approx(5.0)
+
+
+@pytest.mark.parametrize("patch", [
+    {"bogus_field": 1},
+    {"count": 0},
+    {"count": 2.5},
+    {"count": True},
+    {"onset_day": "soon"},
+    {"infection_age_days": -1.0},
+    {"onset_day": float("inf")},
+    {"role": 7},
+    [3.0],
+])
+def test_seed_patch_rejects_out_of_grammar_values(patch):
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {"arm_id": "B1_bad", "overrides": {"seed_patch": patch}},
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad"
+    )
+    with pytest.raises(ValueError, match="seed_patch"):
+        prepare_cell_run_spec(design, cell)
+
+
+def test_seed_ring_readout_flag_round_trips(design):
+    flagged = replace(design, seed_ring_readout=True)
+    assert flagged.as_dict()["seed_ring_readout"] is True
+    assert design.as_dict()["seed_ring_readout"] is False
+
+
+def test_seed_ring_summary_aggregates_per_seed_blocks():
+    design = BoardingScreenDesign(
+        design_id="ring_probe", scenario_id="diamond_princess_2020",
+        thetas=(1e10,), infection_age_days=(6.8,), imports=(1,),
+        sanitary_visit_mode="dwell_weighted", seed_base=20200205,
+        seeds=4, takeoff_recorded_onsets=10, seed_ring_readout=True,
+    )
+    onsets = {20200205: 100, 20200206: 100, 20200207: 5, 20200208: 5}
+    yields = {20200205: 10.0, 20200206: 20.0, 20200207: 30.0, 20200208: 40.0}
+    payloads = {}
+    for cell in enumerate_cells(design):
+        payload = _per_seed_stub(cell, onsets)
+        payload["seed_ring"] = {
+            "seeded_count": 1,
+            "seed_spec": {"onset_day": -1.0, "departure_day": 5.0},
+            "index_departure_epoch": 120,
+            "aboard_window_acquisitions": int(yields[cell.seed]),
+            "aboard_window_clean_bound": int(yields[cell.seed]) - 2,
+            "first_secondary_shed_epoch": 30,
+            "aboard_window_by_route": {"droplet_far": int(yields[cell.seed])},
+            "aboard_window_by_day": {"1": int(yields[cell.seed])},
+            "yield_per_seeded_host": yields[cell.seed],
+        }
+        payloads[cell.key] = payload
+    entry = merge_screen(design, payloads)["surface"][0]
+    ring = entry["seed_ring"]
+    assert ring["n"] == 4
+    assert ring["yield_per_seeded_host"]["median"] == pytest.approx(25.0)
+    assert ring["aboard_window_clean_bound"]["median"] == pytest.approx(23.0)
+    assert ring["yield_per_seeded_host_on_takeoff"]["n"] == 2
+    assert (
+        ring["yield_per_seeded_host_on_takeoff"]["median"]
+        == pytest.approx(15.0)
+    )
+    assert ring["aboard_window_by_route_pooled"] == {"droplet_far": 100}
+
+
+def test_seed_ring_summary_absent_without_blocks():
+    entry = _single_cell_surface({20200205 + i: 9 for i in range(5)})
+    assert "seed_ring" not in entry
+
+
+def test_a_real_declared_cell_reports_the_seed_ring(design):
+    """48-epoch smoke: the ring block echoes the applied seed spec and the
+    aboard-window counts are present (emptiness is a valid reading)."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    flagged = replace(design, seed_ring_readout=True)
+    cell = ScreenCell(
+        index=0, scenario_id="diamond_princess_2020", theta=1e10,
+        infection_age_days=6.8, imports=1, seed=20200205,
+    )
+    payload = simulate_screen_cell(flagged, cell, num_epochs=48)
+    ring = payload["seed_ring"]
+    assert ring["seeded_count"] == 1
+    assert ring["seed_spec"]["onset_day"] == pytest.approx(-1.0)
+    assert ring["seed_spec"]["departure_day"] == pytest.approx(5.0)
+    assert ring["seed_spec"]["infection_age_days"] == pytest.approx(6.8)
+    assert ring["index_departure_epoch"] is not None
+    assert ring["aboard_window_acquisitions"] >= 0
+    assert ring["aboard_window_clean_bound"] <= (
+        ring["aboard_window_acquisitions"]
+    )
