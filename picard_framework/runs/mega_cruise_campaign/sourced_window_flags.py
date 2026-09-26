@@ -110,28 +110,39 @@ def _active_override_paths(spec: Mapping[str, Any]) -> list[str]:
     return out
 
 
+def _gate_is_off(key: str, value: Any) -> bool:
+    """A leaf is an off gate when it is ``enabled: false`` or a mode
+    spelled ``off``/``none``."""
+    if key == "enabled" and value is False:
+        return True
+    return (
+        (key == "mode" or key.endswith("_mode"))
+        and str(value).lower() in _INERT_MODES
+    )
+
+
+def _code_default_gates_off(block: Mapping[str, Any]) -> Iterator[str]:
+    """Inert gates set by engine defaults — absent from the merged cfg."""
+    for path, inert in _CODE_DEFAULT_GATES.items():
+        value = _resolve_path(block, tuple(path.split(".")))
+        if value is None or value == inert:
+            yield path
+
+
 def _gates_off(block: Mapping[str, Any], prefix: str) -> Iterator[str]:
     """Dotted paths of inert feature gates in the merged config.
 
-    A gate is ``<block>.enabled: false``, or a ``mode``/``*_mode`` key set
-    to ``off``/``none``. Nested blocks are walked; only the leaf is listed.
+    Nested blocks are walked; only the leaf is listed. The root call also
+    sweeps the code-defaulted gates an absent key implies.
     """
     for key, value in sorted(block.items()):
         path = f"{prefix}.{key}" if prefix else str(key)
         if isinstance(value, Mapping):
             yield from _gates_off(value, path)
-        elif key == "enabled" and value is False:
-            yield path
-        elif (
-            (key == "mode" or key.endswith("_mode"))
-            and str(value).lower() in _INERT_MODES
-        ):
+        elif _gate_is_off(key, value):
             yield path
     if not prefix:
-        for path, inert in _CODE_DEFAULT_GATES.items():
-            value = _resolve_path(block, tuple(path.split(".")))
-            if value is None or value == inert:
-                yield path
+        yield from _code_default_gates_off(block)
 
 
 def _shadowed_keys(
@@ -146,13 +157,24 @@ def _shadowed_keys(
         if not isinstance(patch, Mapping):
             continue
         profile = pathogen_profiles.get(pathogen_id) or {}
-        for preferred, aliases in _SHADOWED_BY.items():
-            if preferred not in profile:
-                continue
-            for alias in aliases:
-                if alias in patch:
-                    out.append(f"{pathogen_id}.{alias}")
+        out.extend(
+            f"{pathogen_id}.{alias}"
+            for alias in _shadowed_aliases(patch, profile)
+        )
     return out
+
+
+def _shadowed_aliases(
+    patch: Mapping[str, Any],
+    profile: Mapping[str, Any],
+) -> Iterator[str]:
+    """Alias keys in ``patch`` whose preferred key resolves in ``profile``."""
+    for preferred, aliases in _SHADOWED_BY.items():
+        if preferred not in profile:
+            continue
+        for alias in aliases:
+            if alias in patch:
+                yield alias
 
 
 def _window_breaches(
@@ -166,21 +188,30 @@ def _window_breaches(
         if not isinstance(profile, Mapping):
             continue
         for factor in factors:
-            block = cfg if factor.target == "run" else profile
-            value = _resolve_path(block, factor.path)
-            if value is None:
-                continue
-            try:
-                val = float(value)
-            except (TypeError, ValueError):
-                continue
-            if not factor.low <= val <= factor.high:
+            val = _factor_value(factor, cfg, profile)
+            if val is not None and not factor.low <= val <= factor.high:
                 out[f"{pathogen_id}.{factor.name}"] = [
                     val,
                     factor.low,
                     factor.high,
                 ]
     return out
+
+
+def _factor_value(
+    factor: Factor,
+    cfg: Mapping[str, Any],
+    profile: Mapping[str, Any],
+) -> float | None:
+    """The effective float at a factor's path on this run, or None."""
+    block = cfg if factor.target == "run" else profile
+    value = _resolve_path(block, factor.path)
+    if value is None:
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def provenance_flags(
