@@ -17,6 +17,16 @@ for the COVID arm.
 
 ## 1. Currently withdrawn
 
+**CABIN-OCC-01 + ROOM-AIR-01 move every airborne-route dose figure on any
+hull that declares AHU rates, and every confined-cabinmate figure.** Every
+room-pool inhalation route now doses the epoch-mean of a pool exchanging
+at the zone's declared `ach × hvac_duty` (plus the stateroom
+bathroom-exhaust adder), and cabin-mate plume/addback/confined-contact
+channels gate on time-partitioned co-presence (ledger `CABIN-OCC-01`,
+`ROOM-AIR-01`). Airborne dose figures and confined-pair readings measured
+before this PR's merge SHA are historical at their own `Measured at`
+entries — `sealed`/`off` reproduce them bit-identically for attribution.
+
 **REINFECT-01 voids every `infections_before/during/after_quarantine`
 figure measured at or before `861a0b9` as a count of hosts infected in the
 window.** A cleared host acquired no immunity without a strain registry and

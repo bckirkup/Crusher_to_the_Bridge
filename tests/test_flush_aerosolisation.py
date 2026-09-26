@@ -73,6 +73,9 @@ def _core(
         tx["flush_aerosol_fraction"] = fraction
     if cabin_emission is not None:
         tx["flush_cabin_emission"] = cabin_emission
+    # ROOM-AIR-01 baseline: these cases pin the flush venue formulas, not
+    # the cabin compartment's bathroom-exhaust residence factor.
+    tx["room_air_removal"] = "sealed"
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={HEAD: 30.0, THEATER: 4000.0, CABIN_ZONE: 800.0},
@@ -133,7 +136,7 @@ def _pathway(
     matrix = ContactTracingMatrix(epoch=epoch)
     agent_doses: dict[int, float] = {}
     core._pathway_flush_aerosol(
-        zone_occupants, agent_doses, matrix, {}, PATHOGEN,
+        0, zone_occupants, agent_doses, matrix, {}, PATHOGEN,
     )
     return matrix, agent_doses
 
@@ -632,7 +635,7 @@ def test_flush_witness_positive_and_consistent_when_on() -> None:
     matrix = ContactTracingMatrix(epoch=0)
     agent_doses: dict[int, float] = {}
     core._pathway_flush_aerosol(
-        {THEATER: [visitor], HEAD: []}, agent_doses, matrix, {},
+        0, {THEATER: [visitor], HEAD: []}, agent_doses, matrix, {},
         PATHOGEN,
     )
     tel = core.sanitary_telemetry

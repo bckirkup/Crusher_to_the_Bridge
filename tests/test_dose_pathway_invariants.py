@@ -848,7 +848,7 @@ def _emesis_cabin_concentration(
     matrix = ContactTracingMatrix(epoch=0)
     profile = {**_profile(), "airborne_emission_mode": "emesis_conditioned"}
     core._pathway_emesis_aerosol(
-        {deck: occupants},
+        0, {deck: occupants},
         {},
         matrix,
         None,
@@ -886,7 +886,7 @@ def test_emesis_public_zone_dose_unchanged_by_partition() -> None:
     matrix = ContactTracingMatrix(epoch=0)
     profile = {**_profile(), "airborne_emission_mode": "emesis_conditioned"}
     core._pathway_emesis_aerosol(
-        {ZONE: [target]},
+        0, {ZONE: [target]},
         {},
         matrix,
         None,

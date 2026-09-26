@@ -330,7 +330,7 @@ class TestPoolAttribution:
 
         for _ in range(3):
             core._pathway_environmental(
-                occupants, {}, ContactTracingMatrix(epoch=0), {},
+                0, occupants, {}, ContactTracingMatrix(epoch=0), {},
                 pathogen_id=PATHOGEN, profile=profile,
                 ledger=StrainDoseLedger(),
             )
@@ -345,7 +345,7 @@ class TestPoolAttribution:
         core = _core(pathogen_id=PATHOGEN, profile=profile, seed=11)
         shedder = _agent(1, "Medical_Bay", infected=True)
         core._pathway_environmental(
-            {"Medical_Bay": [shedder]}, {}, ContactTracingMatrix(epoch=0), {},
+            0, {"Medical_Bay": [shedder]}, {}, ContactTracingMatrix(epoch=0), {},
             pathogen_id=PATHOGEN, profile=profile, ledger=StrainDoseLedger(),
         )
         contributors = core._reservoir.contributors(
@@ -361,7 +361,7 @@ class TestPoolAttribution:
         core = _core(cfg=None, pathogen_id=PATHOGEN, profile=profile, seed=11)
         shedder = _agent(1, "Medical_Bay", infected=True)
         core._pathway_environmental(
-            {"Medical_Bay": [shedder]}, {}, ContactTracingMatrix(epoch=0), {},
+            0, {"Medical_Bay": [shedder]}, {}, ContactTracingMatrix(epoch=0), {},
             pathogen_id=PATHOGEN, profile=profile, ledger=None,
         )
         assert core.env_contamination[PATHOGEN]["Medical_Bay"] == pytest.approx(

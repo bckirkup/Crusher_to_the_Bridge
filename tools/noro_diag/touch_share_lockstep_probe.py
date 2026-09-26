@@ -556,7 +556,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
 
     def hand_contact_transfers(
         self: Any, target: Any, sampled_shedders: Any, pathogen_id: str,
-        cabin_confinement: bool,
+        cabin_confinement: bool, epoch: int,
     ) -> Any:
         arm, start, phase = _mark()
         prev = _set_ctx(f"hand_contact|{pathogen_id}")
@@ -569,7 +569,7 @@ def _wrap_fomite_chain(core_cls: type) -> dict[str, Any]:
         try:
             moved = originals["_hand_contact_transfers"](
                 self, target, sampled_shedders, pathogen_id,
-                cabin_confinement,
+                cabin_confinement, epoch,
             )
         finally:
             _restore_ctx(prev)

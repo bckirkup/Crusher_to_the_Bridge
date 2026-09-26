@@ -16,6 +16,18 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`CABIN-OCC-01` + `ROOM-AIR-01` (ledger entries): every airborne-route
+dose figure on any hull that declares AHU rates, and every confined-
+cabinmate figure, moves at this change's merge SHA.** Room-pool
+inhalation routes now dose the epoch-mean of a pool exchanging at the
+zone's declared `ach × hvac_duty` (plus the stateroom bathroom-exhaust
+adder), and cabin-mate plume/addback/confined-contact channels gate on
+time-partitioned co-presence. For norwalk_gi the compartment channel was
+already sub-copy on the classic hull — the change's effect there is on
+other pathogens' rooms and on confined-pair geometry — but pre-change
+airborne dose figures are historical regardless; `sealed`/`off` baselines
+reproduce them bit-identically for attribution.
+
 **`NORO-CHANNEL-02` (ledger entry): every reported-side reading — infirmary
 capture, reported/ever-ill, A3/A4 ascertainment scores — taken before this
 change ran with the Layer-1 `0.5 + 0.5·trust_medical` factor stacked on top

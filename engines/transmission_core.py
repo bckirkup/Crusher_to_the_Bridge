@@ -921,6 +921,58 @@ NON_MATE_CONFINEMENT_CONTACT_FACTOR = 0.01
 # occupants meet at full strength (see ``_cabin_compartments``).
 DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR = 0.15
 
+# ── CABIN-OCC-01: time-partitioned cabin-mate co-occupancy ────────────────
+# The pre-change cabinmate model gave a mate pair breathing-zone dose for
+# every epoch either agent was shedding: near-field weight 1.0 plus the
+# full pool-share addback, 24 draws a day, whatever either agent was doing.
+# A confined pair is not face-to-face all day: the record behind the DP
+# cabinmate attack rates (Plucinski 2020, CID 71:2997, doi:10.1093/cid/
+# ciaa1180 — held-out anchors, never a fit target) is two people
+# alternating between co-asleep co-presence and separate whereabouts.
+DEFAULT_CABIN_COOCCUPANCY_MODE = "time_partitioned"
+CABIN_COOCCUPANCY_MODES = {"time_partitioned", "off"}
+
+# Share of co-asleep co-presence inside the breathing zone: berths pushed
+# together or a shared bed put the mate's head in the plume for a large
+# share of the night, separated berths far less. No survey partitions
+# this; a declared swept axis on [0, 1] (Grade C, origin I).
+DEFAULT_CABIN_SLEEP_PLUME_SHARE = 0.5
+
+# Share of awake in-cabin co-presence within the near-field ring — two
+# people occupying a stateroom are not face-to-face for the whole awake
+# hour. Declared swept axis on [0, 1] (Grade C, origin I).
+DEFAULT_CABIN_AWAKE_PLUME_SHARE = 0.4
+
+# Out-of-cabin-airspace hours per day for a confined occupant: on the DP
+# the confined inside cabins were rotated to open deck ~60–90 min every
+# 1–3 days and balcony cabins had open balcony air on demand — a
+# composite ≈1 h/day from the confinement record (passenger accounts,
+# National Post / AP / DW wire reports, Feb 2020; Grade C, origin E).
+# Declared axis, refusal band [0, 8] hours.
+DEFAULT_CONFINED_CABIN_ABSENCE_HOURS_PER_DAY = 1.0
+
+# Direct-contact dose share for a pair while both are asleep: hand-mediated
+# transfer needs a waking contact, so the shipped value is zero and the
+# axis exists for measurement only (Grade C, origin I).
+DEFAULT_CABIN_ASLEEP_CONTACT_SHARE = 0.0
+
+# ── ROOM-AIR-01: first-order ventilation removal on the room pools ────────
+# The shipped pools treated the epoch's emitted mass as standing at full
+# concentration for the whole epoch — a sealed box. The sanitary flush
+# route already knew better: f(x) = (1 - e^-x)/x at x = ACH * T is the
+# mean of e^(-lambda*t) over the epoch for a room exchanging at ACH.
+# ROOM-AIR-01 applies that residence factor to every "inhale this epoch's
+# room air" dose at the zone's declared AHU rate (``ach`` x ``hvac_duty``
+# from the platform's air_flow_paths), plus a stateroom's own continuously
+# vented head. ``sealed`` is the labelled pre-change baseline.
+DEFAULT_ROOM_AIR_REMOVAL_MODE = "first_order"
+ROOM_AIR_REMOVAL_MODES = {"first_order", "sealed"}
+
+# Air-change rate for a zone the hull never put on an AHU branch: zero,
+# so such a zone keeps the sealed-box baseline rather than gaining an
+# invented ventilation.
+DEFAULT_UNDECLARED_ACH_PER_HOUR = 0.0
+
 # Key separator for the cabin compartments a Cabin_Corridor is split into.
 # A compartment is one stateroom: the agent and its ``cabin_mate_ids``,
 # labelled by the lowest agent id in the cabin.
@@ -1469,6 +1521,136 @@ def _parse_droplet_field_split(tx: dict[str, Any]) -> DropletFieldSplit:
     )
 
 
+@dataclass(frozen=True)
+class CabinCooccupancy:
+    """Declared cabin-mate co-occupancy partition (CABIN-OCC-01).
+
+    ``time_partitioned`` splits a mate pair's epoch exposure by the two
+    schedule tokens they stand on — co-asleep versus awake co-presence
+    versus absent — so a confined pair no longer receives breathing-zone
+    dose for 24 draws a day regardless of actual co-presence. ``off`` is
+    the labelled pre-change baseline, kept for paired-seed attribution.
+    """
+
+    mode: str = DEFAULT_CABIN_COOCCUPANCY_MODE
+    sleep_plume_share: float = DEFAULT_CABIN_SLEEP_PLUME_SHARE
+    awake_plume_share: float = DEFAULT_CABIN_AWAKE_PLUME_SHARE
+    confined_absence_hours_per_day: float = (
+        DEFAULT_CONFINED_CABIN_ABSENCE_HOURS_PER_DAY
+    )
+    asleep_contact_share: float = DEFAULT_CABIN_ASLEEP_CONTACT_SHARE
+
+    @property
+    def active(self) -> bool:
+        return self.mode == "time_partitioned"
+
+
+def _cooccupancy_fraction(
+    block: dict[str, Any],
+    key: str,
+    default: float,
+) -> float:
+    raw = block.get(key, default)
+    value = float(raw)
+    if not math.isfinite(value) or not 0.0 <= value <= 1.0:
+        raise ValueError(
+            f"transmission.cabin_cooccupancy.{key} must be finite in "
+            f"[0, 1], got {raw!r}",
+        )
+    return value
+
+
+def _parse_cabin_cooccupancy(tx: dict[str, Any]) -> CabinCooccupancy:
+    """Read the CABIN-OCC-01 co-occupancy declaration."""
+    raw = tx.get("cabin_cooccupancy")
+    if isinstance(raw, str):
+        raw = {"mode": raw}
+    block = raw or {}
+    if not isinstance(block, dict):
+        raise ValueError(
+            "transmission.cabin_cooccupancy must be a mapping or a "
+            "mode string",
+        )
+    mode = str(block.get("mode", DEFAULT_CABIN_COOCCUPANCY_MODE))
+    if mode not in CABIN_COOCCUPANCY_MODES:
+        raise ValueError(
+            "transmission.cabin_cooccupancy.mode must be 'time_partitioned' "
+            f"or 'off', got {mode!r}",
+        )
+    absence_raw = block.get(
+        "confined_absence_hours_per_day",
+        DEFAULT_CONFINED_CABIN_ABSENCE_HOURS_PER_DAY,
+    )
+    absence = float(absence_raw)
+    if not math.isfinite(absence) or not 0.0 <= absence <= 8.0:
+        raise ValueError(
+            "transmission.cabin_cooccupancy.confined_absence_hours_per_day "
+            f"must be finite in [0, 8], got {absence_raw!r}",
+        )
+    return CabinCooccupancy(
+        mode=mode,
+        sleep_plume_share=_cooccupancy_fraction(
+            block, "sleep_plume_share", DEFAULT_CABIN_SLEEP_PLUME_SHARE,
+        ),
+        awake_plume_share=_cooccupancy_fraction(
+            block, "awake_plume_share", DEFAULT_CABIN_AWAKE_PLUME_SHARE,
+        ),
+        confined_absence_hours_per_day=absence,
+        asleep_contact_share=_cooccupancy_fraction(
+            block, "asleep_contact_share", DEFAULT_CABIN_ASLEEP_CONTACT_SHARE,
+        ),
+    )
+
+
+@dataclass(frozen=True)
+class RoomAirRemoval:
+    """Declared first-order ventilation removal on room air (ROOM-AIR-01).
+
+    ``first_order`` doses a whole-epoch occupant at the epoch-mean
+    concentration of a pool exchanging at the zone's declared ACH —
+    ``(1 - e^-x)/x`` of the naive standing-mass dose, the factor the
+    sanitary flush route already uses. ``sealed`` is the labelled
+    pre-change baseline: the epoch's emitted mass stands at full
+    concentration all epoch.
+    """
+
+    mode: str = DEFAULT_ROOM_AIR_REMOVAL_MODE
+    default_ach_per_hour: float = DEFAULT_UNDECLARED_ACH_PER_HOUR
+
+    @property
+    def active(self) -> bool:
+        return self.mode == "first_order"
+
+
+def _parse_room_air_removal(tx: dict[str, Any]) -> RoomAirRemoval:
+    """Read the ROOM-AIR-01 ventilation-removal declaration."""
+    raw = tx.get("room_air_removal")
+    if isinstance(raw, str):
+        raw = {"mode": raw}
+    block = raw or {}
+    if not isinstance(block, dict):
+        raise ValueError(
+            "transmission.room_air_removal must be a mapping or a "
+            "mode string",
+        )
+    mode = str(block.get("mode", DEFAULT_ROOM_AIR_REMOVAL_MODE))
+    if mode not in ROOM_AIR_REMOVAL_MODES:
+        raise ValueError(
+            "transmission.room_air_removal.mode must be 'first_order' or "
+            f"'sealed', got {mode!r}",
+        )
+    ach_raw = block.get(
+        "default_ach_per_hour", DEFAULT_UNDECLARED_ACH_PER_HOUR,
+    )
+    ach = float(ach_raw)
+    if not math.isfinite(ach) or ach < 0.0:
+        raise ValueError(
+            "transmission.room_air_removal.default_ach_per_hour must be "
+            f"finite and non-negative, got {ach_raw!r}",
+        )
+    return RoomAirRemoval(mode=mode, default_ach_per_hour=ach)
+
+
 def _parse_contact_class_exponent(tx: dict[str, Any]) -> float:
     """Read the class-directed contact exponent phi (CONTACT-SCALE-01).
 
@@ -1849,6 +2031,7 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
+        zone_air_exchange_per_hour: dict[str, float] | None = None,
     ) -> None:
         self.rng = rng
         # The run's one clock, so an immunity parameter written in days of
@@ -1872,6 +2055,11 @@ class TransmissionCore:
         self.zone_types = zone_types or {}
         self.zone_ventilation = zone_ventilation or {}
         self.zone_floor_areas = zone_floor_areas or {}
+        # Zone name -> air changes removed per hour (ach x hvac_duty from
+        # the platform's air_flow_paths), the first-order removal rate the
+        # ROOM-AIR-01 residence factor reads. Empty map + sealed mode is
+        # the pre-change standing-mass baseline.
+        self.zone_air_exchange_per_hour = dict(zone_air_exchange_per_hour or {})
         self.confinement_isolation_factor = confinement_isolation_factor
         self.corridor_direct_contact_factor = corridor_direct_contact_factor
         self.food_zone_multipliers = food_zone_multipliers or {}
@@ -1924,6 +2112,8 @@ class TransmissionCore:
         self.contact_mode = _parse_contact_mode(tx)
         self.droplet_emission_mode = _parse_droplet_emission_mode(tx)
         self.cabin_air_mode = _parse_cabin_air_mode(tx)
+        self.cabin_cooccupancy = _parse_cabin_cooccupancy(tx)
+        self.room_air_removal = _parse_room_air_removal(tx)
         # Berths per stateroom and per corridor block, from the cabin roster,
         # so a compartment's share of the block volume is a fixed property of
         # the berthing plan rather than of who happens to be aboard the zone
@@ -2363,6 +2553,7 @@ class TransmissionCore:
         shedders: list[tuple[KorkinAgent, float]],
         pathogen_id: str,
         zone_mix: EmissionMix | None,
+        epoch: int,
     ) -> EmissionMix | None:
         """Direct-contact mix for one target.
 
@@ -2374,7 +2565,12 @@ class TransmissionCore:
             return zone_mix
         return self._shedder_mix(
             [
-                (shedder, emitted * self._cabin_pair_contact_factor(shedder, target))
+                (
+                    shedder,
+                    emitted * self._cabin_pair_contact_factor(
+                        shedder, target, epoch,
+                    ),
+                )
                 for shedder, emitted in shedders
             ],
             pathogen_id,
@@ -3775,6 +3971,142 @@ class TransmissionCore:
             return 0.0
         return DROPLET_AEROSOL_FRACTION
 
+    def _unit_air_exchange_rate(self, unit_name: str) -> float:
+        """First-order air-removal rate (changes/hour) for an air unit.
+
+        A zone's rate is its declared AHU figure — ``ach`` x ``hvac_duty``
+        from the platform's air_flow_paths, handed in as
+        ``zone_air_exchange_per_hour``; a zone the hull never provisioned
+        falls back to ``room_air_removal.default_ach_per_hour`` (zero by
+        default, the sealed-box baseline). A cabin compartment's air
+        change is the larger of the block rate and its own continuously
+        vented head — ``SANITARY_EXHAUST_M3H_PER_WC`` against the
+        compartment volume, the same provisioning figure the flush route
+        derives ~19 ACH from. The exhaust is the mechanism that pulls
+        corridor make-up air through the stateroom, so the two rates are
+        the same mass flow read two ways — summing them would count it
+        twice.
+        """
+        zone_name = self.compartment_parent(unit_name)
+        rate = float(
+            self.zone_air_exchange_per_hour.get(
+                zone_name, self.room_air_removal.default_ach_per_hour,
+            )
+        )
+        if self._is_cabin_compartment(unit_name):
+            exhaust = SANITARY_EXHAUST_M3H_PER_WC / max(
+                self._air_unit_volume(unit_name), 1.0,
+            )
+            rate = max(rate, exhaust)
+        return rate
+
+    def _room_air_residence_factor(self, unit_name: str) -> float:
+        """Epoch-mean share of a deposited air mass an occupant meets (ROOM-AIR-01).
+
+        ``f(x) = (1 - e^-x)/x`` at ``x = ACH * epoch-hours`` is the mean of
+        e^(-lambda*t) over the epoch — the pulse-decay factor the sanitary
+        flush route already applies at the head's ~19 ACH. Under ``sealed``
+        or on a zone with no declared rate the factor is 1.0, the
+        pre-change standing-mass convention. A continuous emitter spread
+        over the epoch would carry ``(1 - f)/x`` instead; the pulse form is
+        the shared convention, kept uniform across routes so every room
+        dose moves on the same physics.
+        """
+        if not self.room_air_removal.active:
+            return 1.0
+        x = (
+            self._unit_air_exchange_rate(unit_name)
+            * self.clock.hours_per_epoch
+        )
+        if x <= 0.0:
+            return 1.0
+        return -math.expm1(-x) / x
+
+    def _awake_epochs_per_day(self, agent: KorkinAgent) -> float:
+        """Non-Sleep tokens in the agent's day schedule."""
+        schedule = getattr(agent, "schedule", None) or []
+        awake = sum(
+            1 for token in schedule
+            if str(token).split(":", 1)[0] != "Sleep"
+        )
+        # A schedule with no readable tokens still owns a waking day; 15 h
+        # is the waking day behind a declared 8 h night.
+        return float(awake) if awake else 15.0
+
+    def _cabin_presence_share(self, agent: KorkinAgent, epoch: int) -> float:
+        """Share of the epoch a cabin occupant breathes its cabin air.
+
+        Only a confined agent carries the share — a free agent's location
+        is resolved each epoch already. Asleep tokens keep presence at 1.0
+        (nobody leaves the cabin mid-sleep); awake tokens lose the declared
+        ``confined_absence_hours_per_day`` spread evenly across the day's
+        awake epochs — the DP confinement record's deck rotations and
+        balcony air, a composite ~1 h/day (Grade C declared axis).
+        """
+        if (
+            not self.cabin_cooccupancy.active
+            or not self._cabin_confinement_active(agent)
+        ):
+            return 1.0
+        if self._scheduled_activity(agent, epoch).split(":", 1)[0] == "Sleep":
+            return 1.0
+        awake = self._awake_epochs_per_day(agent)
+        return max(
+            0.0,
+            1.0 - self.cabin_cooccupancy.confined_absence_hours_per_day
+            / max(awake, 1.0),
+        )
+
+    def _cabin_pair_copresence(
+        self,
+        shedder: KorkinAgent,
+        target: KorkinAgent,
+        epoch: int,
+    ) -> float:
+        """Co-presence share of a cabin-mate pair this epoch."""
+        return (
+            self._cabin_presence_share(shedder, epoch)
+            * self._cabin_presence_share(target, epoch)
+        )
+
+    def _cabin_pair_asleep(
+        self,
+        shedder: KorkinAgent,
+        target: KorkinAgent,
+        epoch: int,
+    ) -> bool:
+        """Both mates on a Sleep token this epoch."""
+        return (
+            self._scheduled_activity(shedder, epoch).split(":", 1)[0]
+            == "Sleep"
+            and self._scheduled_activity(target, epoch).split(":", 1)[0]
+            == "Sleep"
+        )
+
+    def _cabin_mate_near_weight(
+        self,
+        shedder: KorkinAgent,
+        target: KorkinAgent,
+        epoch: int,
+    ) -> float:
+        """Breathing-zone weight for a cabin-mate pair (CABIN-OCC-01).
+
+        ``off`` keeps the pre-change 1.0 ring. ``time_partitioned`` scales
+        the ring by the pair's co-presence share and the state share of
+        that presence — asleep pairs meet the plume at
+        ``sleep_plume_share``, awake pairs at ``awake_plume_share``. The
+        partition subsumes the partner draw for the pair: a cabin mate
+        drawn into the proximity set does not lift the weight above it.
+        """
+        if not self.cabin_cooccupancy.active:
+            return 1.0
+        share = (
+            self.cabin_cooccupancy.sleep_plume_share
+            if self._cabin_pair_asleep(shedder, target, epoch)
+            else self.cabin_cooccupancy.awake_plume_share
+        )
+        return self._cabin_pair_copresence(shedder, target, epoch) * share
+
     def _cabin_mate_droplet_addback(
         self,
         target: KorkinAgent,
@@ -3783,8 +4115,16 @@ class TransmissionCore:
         vent_factor: float,
         target_factor: float,
         emission_fraction: float,
+        epoch: int,
+        residence_factor: float,
     ) -> float:
-        """Restore withheld emission for cabin mates sharing the cabin."""
+        """Restore withheld emission for cabin mates sharing the cabin.
+
+        Under CABIN-OCC-01 the restored share is scaled by the pair's
+        co-presence (a shedder absent from the cabin airspace does not
+        top up its air, and a mate absent does not breathe it), and under
+        ROOM-AIR-01 by the room's air-exchange residence factor.
+        """
         addback = 0.0
         for shedder, shedding in shedders:
             if shedder.agent_id not in target.cabin_mate_ids:
@@ -3795,6 +4135,8 @@ class TransmissionCore:
                 * self.inhaled_air_volume_m3_per_epoch
                 * self.droplet_scalar
                 * vent_factor
+                * residence_factor
+                * self._cabin_pair_copresence(shedder, target, epoch)
             )
             addback += unattenuated * (
                 1.0
@@ -3824,11 +4166,12 @@ class TransmissionCore:
         if shedder.agent_id == target.agent_id:
             return None
         weight: float | None
-        if shedder.agent_id in target.cabin_mate_ids:
+        mate_pair = shedder.agent_id in target.cabin_mate_ids
+        if mate_pair:
             if self.zone_types.get(zone_name) != "Cabin_Corridor":
                 weight = None
             else:
-                weight = 1.0
+                weight = self._cabin_mate_near_weight(shedder, target, epoch)
         else:
             table = self._table_party(zone_name, target, epoch)
             if (
@@ -3845,6 +4188,7 @@ class TransmissionCore:
         if (
             proximity_ids is not None
             and shedder.agent_id in proximity_ids
+            and not (mate_pair and self.cabin_cooccupancy.active)
         ):
             weight = 1.0
         return weight
@@ -4097,16 +4441,32 @@ class TransmissionCore:
         )
 
     def _cabin_pair_contact_factor(
-        self, shedder: KorkinAgent, target: KorkinAgent,
+        self,
+        shedder: KorkinAgent,
+        target: KorkinAgent,
+        epoch: int,
     ) -> float:
         """Scale direct-contact dose for cabin-corridor confinement pairs."""
         if self.zone_types.get(target.current_location) != "Cabin_Corridor":
             return 1.0
+        if shedder.agent_id in target.cabin_mate_ids:
+            if not self.cabin_cooccupancy.active:
+                return 1.0
+            # Awake co-presence contacts at the full share; both asleep
+            # the declared asleep share — zero shipped, hand-mediated
+            # transfer needs a waking contact (CABIN-OCC-01).
+            share = (
+                self.cabin_cooccupancy.asleep_contact_share
+                if self._cabin_pair_asleep(shedder, target, epoch)
+                else 1.0
+            )
+            return (
+                self._cabin_pair_copresence(shedder, target, epoch)
+                * share
+            )
         confined_target = self._cabin_confinement_active(target)
         confined_shedder = self._cabin_confinement_active(shedder)
         if not confined_target and not confined_shedder:
-            return 1.0
-        if shedder.agent_id in target.cabin_mate_ids:
             return 1.0
         return NON_MATE_CONFINEMENT_CONTACT_FACTOR
 
@@ -4487,7 +4847,7 @@ class TransmissionCore:
             # After fomite because _emit_emesis runs inside it: the emitted
             # accumulator holds exactly this epoch's events when it is read.
             self._pathway_emesis_aerosol(
-                zone_occupants, p_agent_doses, matrix,
+                epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
@@ -4495,7 +4855,7 @@ class TransmissionCore:
             # emitted accumulator was filled by _replenish_hand inside
             # _pathway_fomite and is popped here, once.
             self._pathway_flush_aerosol(
-                zone_occupants, p_agent_doses, matrix,
+                epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id,
                 ledger=ledger,
             )
@@ -4510,7 +4870,7 @@ class TransmissionCore:
 
         if ec.get("enabled", False):
             self._pathway_environmental(
-                zone_occupants, p_agent_doses, matrix,
+                epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
             )
@@ -4664,7 +5024,9 @@ class TransmissionCore:
         if cabin_confinement:
             dose = 0.0
             for shedder, sv in shedders:
-                pair_factor = self._cabin_pair_contact_factor(shedder, target)
+                pair_factor = self._cabin_pair_contact_factor(
+                    shedder, target, epoch,
+                )
                 dose += sv * pair_factor / n_occupants * r0_draw
             return dose
         dose = total_shedding / n_occupants * r0_draw
@@ -4831,6 +5193,7 @@ class TransmissionCore:
         sampled_shedders: list[tuple[KorkinAgent, float]],
         pathogen_id: str,
         cabin_confinement: bool,
+        epoch: int,
     ) -> list[tuple[KorkinAgent, float]]:
         """Debit each donor's hand and return what each moved to the recipient.
 
@@ -4845,7 +5208,9 @@ class TransmissionCore:
                 continue
             fraction = self.rng.uniform(*HAND_TO_HAND_TRANSFER_RANGE)
             if cabin_confinement:
-                fraction *= self._cabin_pair_contact_factor(shedder, target)
+                fraction *= self._cabin_pair_contact_factor(
+                    shedder, target, epoch,
+                )
             amount = min(donor, donor * fraction)
             if amount <= 0.0:
                 continue
@@ -4870,7 +5235,7 @@ class TransmissionCore:
         fomite and food keep their own pathways and are not folded in here.
         """
         moved = self._hand_contact_transfers(
-            target, sampled_shedders, pathogen_id, cabin_confinement,
+            target, sampled_shedders, pathogen_id, cabin_confinement, epoch,
         )
         acquired = sum(amount for _, amount in moved)
         if acquired <= 0.0:
@@ -5212,7 +5577,7 @@ class TransmissionCore:
             mix = (
                 self._shedder_mix(moved, pathogen_id) if use_partner
                 else self._direct_contact_mix(
-                    target, sampled_shedders, pathogen_id, zone_mix,
+                    target, sampled_shedders, pathogen_id, zone_mix, epoch,
                 )
             )
             dose = self._accumulate(
@@ -5334,17 +5699,20 @@ class TransmissionCore:
         concentration = total_aerosol / max(volume, 1.0)
         shedder_ids = [s.agent_id for s, _ in shedders]
         vent_factor = self._aerosol_ventilation_factor(zone_name)
+        residence = self._room_air_residence_factor(unit_name)
         mix = self._shedder_mix(emitted_shedders, pathogen_id)
 
         for target in susceptible:
             dose = concentration * self.inhaled_air_volume_m3_per_epoch
             dose *= self.droplet_scalar
             dose *= vent_factor
+            dose *= residence
             target_factor = self._confinement_factor(target)
             dose *= target_factor
+            dose *= self._cabin_presence_share(target, epoch)
             dose += self._cabin_mate_droplet_addback(
                 target, shedders, volume, vent_factor, target_factor,
-                emission_fraction * pool_share,
+                emission_fraction * pool_share, epoch, residence,
             )
             near_dose = 0.0
             if near_field_on:
@@ -5411,6 +5779,7 @@ class TransmissionCore:
         pathogen_id: str,
         source_attribution: DoseAttribution | None = None,
         air_unit: str | None = None,
+        epoch: int = 0,
     ) -> None:
         unit_name = air_unit or target_zone
         volume = self._air_unit_volume(unit_name)
@@ -5418,12 +5787,15 @@ class TransmissionCore:
         susceptible = self._get_susceptible(occupants, pathogen_id)
         if not susceptible:
             return
+        residence = self._room_air_residence_factor(unit_name)
 
         for target in susceptible:
             dose = concentration * self.inhaled_air_volume_m3_per_epoch
             dose *= self.hvac_airborne_scalar
             dose *= self._aerosol_ventilation_factor(target_zone)
+            dose *= residence
             dose *= self._confinement_factor(target)
+            dose *= self._cabin_presence_share(target, epoch)
             dose = self._accumulate(
                 target.agent_id, "hvac_airborne", dose,
                 agent_doses, agent_pathway_doses, source_attribution,
@@ -5545,7 +5917,7 @@ class TransmissionCore:
 
     def _pathway_hvac_airborne(
         self,
-        _epoch: int,
+        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         zone_pathogen_mass: dict[str, float],
         hvac_downstream_zones: dict[str, list[str]],
@@ -5606,6 +5978,7 @@ class TransmissionCore:
                 agent_pathway_doses, pathogen_id,
                 attribution(ledger, mix),
                 air_unit=air_unit,
+                epoch=epoch,
             )
 
         self._airborne_composition(
@@ -6398,6 +6771,7 @@ class TransmissionCore:
 
     def _pathway_emesis_aerosol(
         self,
+        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -6460,11 +6834,14 @@ class TransmissionCore:
                 ledger, self._shedder_mix(entries, pathogen_id),
             )
             source_ids = [agent.agent_id for agent, _ in entries]
+            residence = self._room_air_residence_factor(zone_name)
             for target in susceptible:
                 dose = (
                     concentration
                     * self.inhaled_air_volume_m3_per_epoch
                     * ventilation
+                    * residence
+                    * self._cabin_presence_share(target, epoch)
                 )
                 dose = self._accumulate(
                     target.agent_id, "emesis_aerosol", dose,
@@ -6507,6 +6884,7 @@ class TransmissionCore:
 
     def _pathway_flush_aerosol(
         self,
+        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -6570,6 +6948,7 @@ class TransmissionCore:
                 self._dose_flush_cabin(
                     venue, mass, source_ids, source_attribution, units,
                     pathogen_id, agent_doses, agent_pathway_doses, matrix,
+                    epoch,
                 )
 
     def _flush_visits_at_venue(
@@ -6653,13 +7032,16 @@ class TransmissionCore:
         agent_doses: dict[int, float],
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         matrix: ContactTracingMatrix,
+        epoch: int,
     ) -> None:
         """Whole-epoch inhalation dose to a cabin venue's occupants.
 
-        The emesis treatment, at the stateroom's volume: ``mass / volume`` with the
-        compartment's berth share of its declared block volume and the
-        parent's ventilation factor, no ``f_vent`` -- the bias is downward,
-        recorded, not corrected.
+        The emesis treatment, at the stateroom's volume: ``mass / volume``
+        with the compartment's berth share of its declared block volume
+        and the parent's ventilation factor. ROOM-AIR-01 now applies the
+        venue's residence factor — the pre-change "no f_vent" note is
+        obsolete for the ventilation half of open item 31; the missing
+        bathroom split volume stands.
         """
         susceptible = self._get_susceptible(
             units.get(venue, []), pathogen_id,
@@ -6671,12 +7053,15 @@ class TransmissionCore:
         ventilation = self._aerosol_ventilation_factor(
             self.compartment_parent(venue),
         )
+        residence = self._room_air_residence_factor(venue)
         for target in susceptible:
             dose = self._accumulate(
                 target.agent_id, "flush_aerosol",
                 concentration
                 * self.inhaled_air_volume_m3_per_epoch
-                * ventilation,
+                * ventilation
+                * residence
+                * self._cabin_presence_share(target, epoch),
                 agent_doses, agent_pathway_doses, source_attribution,
             )
             self._record_flush_exposure(
@@ -7941,6 +8326,7 @@ class TransmissionCore:
 
     def _pathway_environmental(
         self,
+        epoch: int,
         zone_occupants: dict[str, list[KorkinAgent]],
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
@@ -8308,3 +8694,33 @@ def build_hvac_downstream_map(
         downstream[zone] = list(set(downstream[zone]))
 
     return downstream
+
+
+def build_zone_air_exchange_map(
+    airflow_paths: dict[str, Any],
+) -> dict[str, float]:
+    """Room -> air changes removed per hour, from air_flow_paths.json.
+
+    The declared AHU figure is ``ach`` x ``hvac_duty`` — the same ``ach *
+    volume * duty`` mass flow the CONTAM bridge uses for room->plenum
+    return (``_build_one_hvac_zone_paths``). A branch that declares
+    ``hvac_duty: 0`` with ``oa_fraction: 1.0`` is a dedicated exhaust fan
+    (the sanitary extract branches): it is not on the AHU duty cycle and
+    still removes room air at the declared ``ach``. Rooms on no declared
+    HVAC zone get no entry, and the engine reads absence as the pre-change
+    sealed-room baseline.
+    """
+    default_duty = float(airflow_paths.get("hvac_duty", 1.0))
+    default_oa = float(airflow_paths.get("oa_fraction", 0.2))
+    rates: dict[str, float] = {}
+    for hvac_zone in airflow_paths.get("hvac_zones", []):
+        ach = float(hvac_zone.get("ach", 6.0))
+        duty = float(hvac_zone.get("hvac_duty", default_duty))
+        oa = float(hvac_zone.get("oa_fraction", default_oa))
+        duty = max(duty, 0.0)
+        rate = ach * duty
+        if duty == 0.0 and oa >= 1.0:
+            rate = ach
+        for room in hvac_zone.get("rooms", []):
+            rates[room] = rate
+    return rates
