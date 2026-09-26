@@ -65,6 +65,7 @@ def _observed_onset_epoch(
 # hands out.
 _MOLECULAR_SPAWN_KEY = 7919
 _CAMPAIGN_SPAWN_KEY = 7927
+_ONSET_SPAWN_KEY = 7937
 
 
 def _molecular_stream(
@@ -201,6 +202,14 @@ class SyndromicSurveillance:
         # has an onset day), and the subset whose onset entered the record.
         self._presentation_onset_epoch: dict[int, int] = {}
         self._onset_observations: dict[tuple[str, int], dict[str, Any]] = {}
+        # The onset-recording channel's own stream: whether a confirmed
+        # case's onset survived interview and reporting is drawn once per
+        # case and memoized, since the epoch loop re-evaluates eligibility
+        # every epoch and a fresh draw each time would asymptotically admit
+        # every case. A dedicated child keeps these draws off the molecular
+        # and parent streams.
+        self._onset_rng = _molecular_stream(self.rng, _ONSET_SPAWN_KEY)
+        self._onset_recording_decisions: dict[tuple[str, int], bool] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
         if noise_categories is None:
@@ -817,6 +826,11 @@ class SyndromicSurveillance:
         severity = str(infection.get("symptom_severity") or "")
         if not self._onset_eligible(pathogen_id, severity):
             return None
+        recording = self.onset_recording_channel(pathogen_id)
+        if recording is not None and not self._onset_admitted(
+            key, onset_epoch, recording,
+        ):
+            return None
         record = {
             "agent_id": aid,
             "pathogen_id": pathogen_id,
@@ -831,6 +845,68 @@ class SyndromicSurveillance:
         }
         self._onset_observations[key] = record
         return record
+
+    def onset_recording_channel(
+        self,
+        pathogen_id: str,
+    ) -> dict[str, Any] | None:
+        """The profile's onset-recording channel, or None when undeclared.
+
+        ``observation_model.onset_recording`` declares what a dated onset
+        in the record requires beyond laboratory confirmation:
+        ``symptomatic_at_confirmation_required`` means the host had to
+        have presented on or before the epoch of the specimen that
+        confirmed it (the field a testing log reports as
+        ``symptomatic_at_specimen`` — a case confirmed while
+        asymptomatic enters the record without an onset date), and
+        ``report_probability`` is the share of the remaining datable
+        cases whose onset survived interview and reporting. A profile
+        without the block dates every confirmed symptomatic onset, the
+        shipped channel.
+        """
+        profile = self.symptom_severity_profiles.get(pathogen_id, {})
+        observation = profile.get("observation_model")
+        if not isinstance(observation, dict):
+            return None
+        block = observation.get("onset_recording")
+        if not isinstance(block, dict):
+            return None
+        return {
+            "symptomatic_at_confirmation_required": bool(
+                block.get("symptomatic_at_confirmation_required", False),
+            ),
+            "report_probability": float(block.get("report_probability", 1.0)),
+        }
+
+    def lab_confirmed_count(self, pathogen_id: str) -> int:
+        """Confirmed-case count for a pathogen, every specimen channel."""
+        return sum(
+            1 for pid, _aid in self._lab_confirmed if pid == pathogen_id
+        )
+
+    def _onset_admitted(
+        self,
+        key: tuple[str, int],
+        onset_epoch: int,
+        recording: dict[str, Any],
+    ) -> bool:
+        """Whether a declared onset-recording channel dates this case.
+
+        The specimen-epoch gate is a property of the case, checked once
+        per call; the recall draw is memoized per case because the epoch
+        loop asks this question again every epoch.
+        """
+        if recording["symptomatic_at_confirmation_required"] and (
+            int(onset_epoch) > int(self._lab_confirmed[key])
+        ):
+            return False
+        admitted = self._onset_recording_decisions.get(key)
+        if admitted is None:
+            admitted = bool(
+                self._onset_rng.random() < recording["report_probability"],
+            )
+            self._onset_recording_decisions[key] = admitted
+        return admitted
 
     def _onset_eligible(self, pathogen_id: str, severity: str) -> bool:
         """Whether this severity presents a syndrome the record can date.

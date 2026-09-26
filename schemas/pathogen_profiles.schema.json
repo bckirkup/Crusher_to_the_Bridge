@@ -561,6 +561,28 @@
           "type": "number",
           "exclusiveMinimum": 0
         },
+        "onset_recording": {
+          "type": "object",
+          "description": "The period-faithful onset-recording channel: a confirmed case's onset is dated only when it had presented on or before the epoch of the specimen that confirmed it (the record's symptomatic_at_specimen field — a host confirmed while asymptomatic enters the record without an onset date) and its date survived the recall/reporting draw. Absent means every confirmed symptomatic onset is dated, the shipped channel's behaviour.",
+          "required": [
+            "symptomatic_at_confirmation_required",
+            "report_probability"
+          ],
+          "properties": {
+            "symptomatic_at_confirmation_required": {
+              "type": "boolean",
+              "description": "Date an onset only when the stored presentation onset is on or before the confirming specimen's epoch."
+            },
+            "report_probability": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Share of gate-passing confirmed cases whose onset date survives interview and reporting — the record's dated-onset share net of the asymptomatic-at-specimen share."
+            },
+            "notes": {"type": "string"}
+          },
+          "additionalProperties": false
+        },
         "evidence_grade": {"type": "string"},
         "notes": {
           "type": "string",

@@ -1,0 +1,149 @@
+{
+ "design_id": "covid_sero_channel_v1",
+ "parent_design": "covid_lambda_cross_v1",
+ "description": "The conditional-gap hunt under a period-faithful observational channel, anchored to serology rather than the record's own channel. LAMBDA-CROSS-V1 measured Theta as the first load-bearing knob (conditional recorded-mass median 3,486 -> 624 over x1.0 -> x0.001, elasticity 0.216) but with a shallow bend plus bimodal extinction: no row lands on the record. ROUTE-ATTR-V1 measured the funnel's broken rung: the channel confirms ~76% of infected (period-rough vs 712 of a serology-informed ~840) but dates 93-100% of confirmed cases at true onset where the record dated 197/712 = 27.7%. This design adds the record's own onset-recording structure as a channel arm and sweeps the hazard scale under it: (a) the symptomatic-at-confirmation gate — a case confirmed while asymptomatic enters the record undated, the record's symptomatic_at_specimen field (51% of DP positives contributed no onset date); (b) a recall/reporting draw covering interview loss, record-derivable as (197/712) / ~0.49 ~= 0.56. The declared-channel arm is the labelled baseline and the in-image proof that the additive channel is a no-op when undeclared.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "nothing: it adds the onset-recording channel arm to the measured lambda-cross grid and scores truth against the serology anchor covid.H5 instead of the record's dating channel",
+ "prerequisites": [
+  "LAMBDA-CROSS-V1 measured (8649d31, job-def rev 22): 140/140 cells, conditional medians 3,486 (x1.0) -> 624 (x0.001), elasticity 0.216, verdict lambda_bound_but_short — the hazard scale binds but no row lands on target; survivors at x0.001 still infect ~979 median (docs/ledger/LAMBDA-CROSS-V1.md).",
+  "ROUTE-ATTR-V1 measured (be121a0, local): the channel confirms ~76% of infected and dates 93-100% of confirmed at true onset vs the record's 27.7%; 85-89% of dated mass is mild, the stratum a real investigation loses to recall (docs/ledger/ROUTE-ATTR-V1.md).",
+  "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al., Lancet Infect Dis 2020: 9/215 PCR-negative repatriated HK passengers seroconverted, ~4% CI 2-8, extrapolated to the ~3,000 PCR-negatives aboard), channel infections_total — the engine's own ever-infected count, so the anchor scores without a serology instrument. Never in fitted_against.",
+  "Channel mechanics verified in the tree before freeze: observation_model.onset_recording on sars_cov2_resp is additive and default-off; {symptomatic_at_confirmation_required, report_probability} enforced in SyndromicSurveillance._onset_observation against the confirming specimen's epoch (_lab_confirmed) plus a once-per-case memoized recall draw on a dedicated onset RNG stream — molecular and parent draws unperturbed, the declared arm bit-identical. Arm-expressible through the existing pathogen_overrides deep-merge, no new arm grammar key.",
+  "RNG accounting declared from stochastic-attribution: the onset draw lives on a dedicated child stream derived from the parent SeedSequence entropy without consuming parent state (same construction as the molecular and campaign streams), so an undeclared block draws nothing anywhere. All reads are distribution-level (20-seed q05-q95 per theta per channel), never seed-paired."
+ ],
+ "scenario_id": "diamond_princess_2020",
+ "thetas": [
+  42200000000.0,
+  12660000000.0,
+  4220000000.0,
+  1266000000.0,
+  422000000.0,
+  211000000.0,
+  126600000.0,
+  84400000.0,
+  42200000.0
+ ],
+ "thetas_note": "The measured lambda-cross grid {1.0, 0.3, 0.1, 0.03, 0.01, 0.003, 0.001} with two points added inside the bend — x0.005 (2.11e8) and x0.002 (8.44e7) — where the infected median crosses the serology band: LAMBDA-CROSS-V1's conditional infections median passes ~840 somewhere in x0.003-x0.002 and the coarse grid cannot say where. theta_profile_overrides sets dose_response.susceptibility_scale = theta*(alpha+beta)/alpha, so Theta is exactly the mean-hazard axis.",
+ "infection_age_days": [
+  3.3
+ ],
+ "infection_age_note": "Verbatim from the assay line: NOT an axis — under the declared onset_day -1.0 the infection age cancels exactly; 3.3 is carried so cell keys and run specs match the prior rows exactly.",
+ "imports": [
+  1
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 20,
+ "seeds_note": "Verbatim: the SAME 20 matched seeds at the same base, so every cell pairs seed-for-seed with the stage-2 surface and every measured assay row.",
+ "points": [
+  [42200000000.0, 3.3, 1],
+  [12660000000.0, 3.3, 1],
+  [4220000000.0, 3.3, 1],
+  [1266000000.0, 3.3, 1],
+  [422000000.0, 3.3, 1],
+  [211000000.0, 3.3, 1],
+  [126600000.0, 3.3, 1],
+  [84400000.0, 3.3, 1],
+  [42200000.0, 3.3, 1]
+ ],
+ "cells": 360,
+ "cells_note": "9 thetas x 2 channel arms x 20 seeds = 360 cells, each a full 768-epoch (32-day) voyage (~30 min). Point-major, arm-second, seed-innermost enumeration puts theta row i at cells 40i-40i+39 with the declared arm first: x1.0 declared 0-19 / period 20-39; x0.001 declared 320-339 / period 340-359 — the canary row is period at x0.001, cells 340-359.",
+ "takeoff_recorded_onsets": 10,
+ "cell_payload_additions": {
+  "note": "The assay-line payload plus two fields: lab_confirmed_total (every specimen channel pooled) gives the dating share recorded_onsets/lab_confirmed_total against the record's 197/712; onset_recording echoes the resolved channel block so a cell's channel arm is auditable from the payload alone — null on the declared arm, the declared block on the period arm.",
+  "index_onset_day": "Must equal -1.0 in every cell; a deviation is a seeding-path defect that invalidates the cell.",
+  "index_shedding_at_day0": "True by construction: the seeded host is one day past onset at boarding.",
+  "index_departed_epoch": "The epoch the seeded host left the ship, echoed for audit.",
+  "infections_total": "Truth-channel count of hosts ever infected, index excluded — the quantity covid.H5 scores.",
+  "aboard_total": "Hosts aboard at epoch 0.",
+  "attack_rate": "infections_total / aboard_total.",
+  "lab_confirmed_total": "Confirmed cases for the pathogen across every specimen channel — the denominator of the record's 197/712 dating share.",
+  "onset_recording": "Read-back witness: the resolved observation_model.onset_recording block the modality ran under, or null on the declared arm.",
+  "vsp_reported_case_fraction_max": "Recorded, not thresholded, as in v1.",
+  "quarantine_attribution": "during_quarantine_by_route — the per-route event split, recorded for continuity though ~95% of mass is pre-quarantine."
+ },
+ "arms": [
+  {
+   "arm_id": "D0_declared",
+   "role": "baseline",
+   "overrides": {},
+   "note": "The declared replay's shipped channel: every confirmed symptomatic onset is dated. First arm, so empty overrides per the arm grammar; also the in-image bit-identity check — its x0.001 row must reproduce LAMBDA-CROSS-V1's measured x0.001 row."
+  },
+  {
+   "arm_id": "P1_period",
+   "role": "period_channel",
+   "overrides": {
+    "pathogen_overrides": {
+     "sars_cov2_resp": {
+      "observation_model": {
+       "onset_recording": {
+        "symptomatic_at_confirmation_required": true,
+        "report_probability": 0.56
+       }
+      }
+     }
+    }
+   },
+   "note": "The period-faithful onset-recording channel: an onset is dated only when the host had presented on or before the epoch of the specimen that confirmed it (the record's symptomatic_at_specimen field — ~51% of DP positives were asymptomatic at specimen and contributed no onset date), times a once-per-case recall draw at 0.56, record-derivable as (197 dated / 712 confirmed) / ~0.49 symptomatic-at-confirmation ~= 0.56 — declared from the record's own arithmetic, not tuned to any model output. If the canary's dating share lands far from ~0.28 of confirmed, the declared fallback is the recall draw alone WITHOUT the symptomatic-at-specimen gate — declared before the array, never after."
+  }
+ ],
+ "arms_note": "Two arms, one channel axis: D0_declared is the shipped channel and the additive-change control; P1_period is the record's own onset-recording structure. The theta sweep runs under both, so truth-vs-serology and record-vs-197 are scored on the same cells.",
+ "scoring": {
+  "declared_before_running": true,
+  "statement": "Theta x channel surface scored against both anchors at once: truth vs the serology band, record vs 197, per channel. FROZEN before any assay cell exists; nothing is loosened and nothing is tightened.",
+  "conditional_trajectory_clause": {
+   "criterion": "Per (theta, arm), scored only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10): the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February). The clause is scored only when a row has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+   "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+   "note": "Verbatim clause family from the assay line, now scored per channel arm. Reported beside it, never thresholded: the fraction of TAKEOFF seeds whose recorded_onsets lies in [98.5, 394] and the full per-seed recorded_onsets vector per (theta, arm)."
+  },
+  "serology_anchor_clause": {
+   "criterion": "Per (theta, arm), scored only among takeoff seeds: the takeoff seeds' q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]. Scored only when a row has >= 5 takeoff seeds — the anchor is a burn-seed draw, so conditioning on takeoff is the anchor's own population, not an analyst's subsetting choice.",
+   "target_source": "covid.H5, data/observation/covid_fit_targets.json — held-out forever; this is a score, never a fit.",
+   "note": "infections_total counts ever-infected non-seeded hosts, the quantity serology approximates. covid.H5 is never in fitted_against; nothing about this surface selects a theta."
+  },
+  "channel_reads": {
+   "declared": [
+    "dating_share: per (theta, arm), the takeoff-seed distribution of recorded_onsets / lab_confirmed_total vs the record's 197/712 = 0.277 — whether the gate lands the dated share near 0.28 of confirmed or overshoots downward.",
+    "channel_contrast: per theta and seed, recorded_onsets under the period channel vs the declared channel — the channel's own share of the conditional gap, isolated from the truth overshoot.",
+    "asymptomatic_at_specimen: campaign_asymptomatic_positives / campaign_positives per arm vs the record's ~0.51 — the gate's denominator, reported beside dating_share."
+   ],
+   "declared_counterfactual": "Both directions frozen in advance. If a theta row lands infections_total inside [712, 960] AND recorded_onsets inside [98.5, 394] under the period channel on takeoff seeds, the conditional gap decomposes as declared: ~4x truth overshoot measured against serology, the rest the observational channel — and the question moves to which declared theta that is. If the period channel lands dating far below ~0.28 of confirmed, the symptomatic-at-specimen gate over-closes and the fallback (recall draw alone, no gate) is declared before the array runs. If truth stays outside the band at every theta, the overshoot lives in seed/index structure, not the channel.",
+   "declared_expectation": "Fixing dating alone leaves recorded mass ~575-740 (~3x over) at theta x1.0 — the residual is truth-level over-infection. The expected landing zone is deep theta (x0.003-x0.002, where the lambda-cross infections median crosses the band) with the period channel pulling recorded mass toward 197; the declared arm re-measures the lambda-cross curve on the new image as the bit-identity control."
+  },
+  "index_geometry": {
+   "criterion": "AUDIT INVARIANT, verbatim from the assay line: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; a deviation is a seeding-path defect that invalidates the cell rather than excluding it from selection.",
+   "reads": "the seeded host's own onset and shedding record"
+  },
+  "verdict_bands": {
+   "per_theta_channel": {
+    "closes_the_gap": "takeoff-seed q05-q95 of recorded_onsets contains 197 AND conditional median in [98.5, 394] AND infections_total q05-q95 intersects [712, 960] AND takeoff mass >= 5/20 — that (theta, channel) could close the gap as measured (report immediately).",
+    "truth_only": "infections_total in band but recorded_onsets over — the channel still over-dates.",
+    "channel_only": "recorded_onsets near 197 but infections_total over band — the channel reaches the record while truth overshoots; the residual is biology, not observation.",
+    "outside": "neither clause met.",
+    "takeoff_collapse": "fewer than 5/20 takeoff seeds — that theta produces a voyage class that cannot take off; reported as collapse, not scored on either clause."
+   },
+   "surface_level": {
+    "joint_closure": "some (theta, period) row satisfies closes_the_gap — a declared theta exists where truth matches serology and the period channel matches the record simultaneously; reported as a map, never a calibration.",
+    "decomposed": "no row closes both but the surface separates the terms — truth in band somewhere, record in band somewhere else; the gap is measured decomposable into attack overshoot x channel overshoot.",
+    "unreachable": "no (theta, channel) row lands either clause — the gap is not reachable on the hazard axis under either channel; suspect moves to seed/index structure."
+   }
+  },
+  "rng_pairing_caveat": "Declared from stochastic-attribution: theta rescales the per-host susceptibility draw's VALUE, not its count; the onset draw lives on a dedicated stream that consumes nothing when undeclared and draws once per gate-passing confirmed case when declared — RNG streams stay aligned until an infection outcome or a dating decision flips, after which trajectories diverge. All reads are distribution-level (20-seed q05-q95 per theta per arm), never seed-paired.",
+  "note": "The clauses gate nothing — there is no theta to admit beyond the grid and covid.H5 is held out forever. The assay's product is the theta x channel surface: where truth matches serology, where the record is matched under each channel, and whether any declared theta does both at once."
+ },
+ "what_this_cannot_settle": [
+  "It does not pick a theta — the surface maps where truth and record are each matched; theta 4.22e10 is the calibrated fleet-admissible value from the stage-2 screen, and moving it is a calibration question, not this assay's.",
+  "report_probability 0.56 is record-derivable ((197/712) / ~0.49), declared once and not swept; a different declared value is a different design, not a cell of this one.",
+  "covid.H5's band is a subgroup extrapolation (9 seroconversions among 215 repatriated HK passengers -> ~120 missed of ~3,000 PCR-negatives aboard); the band carries the uncertainty and the point does not.",
+  "The period channel gates dating, not ascertainment: if the truth overshoot persists at in-band recorded mass, the residual is the ~4x attack overshoot the serology anchor now measures directly."
+ ],
+ "execution": {
+  "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_sero_channel_v1. The image must be built from a main that contains this design file: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+  "cells": 360,
+  "stride": 1,
+  "expected_cell_minutes": 30,
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_sero_channel_v1/<sha>/cells/",
+  "canary": "period channel at theta x0.001 (4.22e7 — nearest the serology band), all 20 seeds — array 20 at INDEX_OFFSET 340 (point-major, arm-second enumeration puts this row at cell indices 340-359), inspected before any further submission: every cell's onset_recording echo carries the declared block (the channel resolved, not spec-only), the payload contract is intact, the row is not degenerate, the dating share recorded_onsets/lab_confirmed_total lands near ~0.28 of confirmed, and the index-geometry audit invariant holds. Then STOP and report — the user decides whether the full array runs. Canary cells are skipped idempotently by _already_complete when the array is submitted.",
+  "report_immediately_if": "the canary row is read out (stop after it — the user decides the array); the gate lands dating far from ~0.28 of confirmed (undershoot -> the declared fallback is the recall draw alone WITHOUT the symptomatic-at-specimen gate, declared before the array, never after); the known zero-asymptomatics anomaly (seed 20200205, logged in ROUTE-ATTR-V1) recurs or resolves; the channel arm does not resolve at runtime (onset_recording echo null on a period cell — spec-lands but inert is a bug signature, not physics); any cell's audit invariant fails (index_onset_day != -1.0 or index_shedding_at_day0 false); or the child failure rate exceeds 5%."
+ }
+}
