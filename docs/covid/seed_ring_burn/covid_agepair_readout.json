@@ -1,25 +1,22 @@
 {
- "design": "picard_framework/runs/covid_sero_channel_v1_design.json",
- "arm": "D0_declared",
- "theta": 42200000000.0,
- "epochs": 48,
+ "measured": "aws_batch",
+ "job": "afdfe648-875c-466c-98e0-5057dfd49167",
+ "job_definition": "picard-init-probes:1",
+ "image_digest": "sha256:acb63327f45460026a34cb1e5260f55b8650f21657e1f4c590a9e740d53230ba",
+ "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/",
  "aboard_window_acquisitions": {
   "n": 2,
-  "min": 0.0,
-  "q25": 0.0,
-  "median": 0.0,
-  "q75": 0.0,
-  "max": 0.0,
-  "mean": 0.0
+  "min": 1,
+  "median": 512.0,
+  "max": 1023,
+  "mean": 512
  },
  "aboard_window_clean": {
   "n": 2,
-  "min": 0.0,
-  "q25": 0.0,
-  "median": 0.0,
-  "q75": 0.0,
-  "max": 0.0,
-  "mean": 0.0
+  "min": 1,
+  "median": 33.0,
+  "max": 65,
+  "mean": 33
  },
  "cells": [
   {
@@ -53,13 +50,13 @@
        "will_present": true
       }
      },
-     "departure_epoch": 5,
+     "departure_epoch": 120,
      "first_secondary_shed_epoch": 9
     },
     "acquisitions": {
      "total": 1023,
-     "aboard_window": 0,
-     "aboard_window_clean": 0,
+     "aboard_window": 1023,
+     "aboard_window_clean": 65,
      "by_day": {
       "0": 402,
       "1": 621
@@ -68,10 +65,22 @@
       "droplet": 971,
       "hvac_airborne": 52
      },
-     "route_split_aboard": {},
-     "role_split_aboard": {},
+     "route_split_aboard": {
+      "droplet": 971,
+      "hvac_airborne": 52
+     },
+     "role_split_aboard": {
+      "passenger": 821,
+      "crew": 202
+     },
      "ring_share_aboard": {
-      "n": 0
+      "n": 1004,
+      "min": 0.0,
+      "q25": 0.0,
+      "median": 0.0,
+      "q75": 5.986983129168144e-06,
+      "max": 0.9989707574014652,
+      "mean": 0.13429173428983515
      }
     },
     "infected_total": 1023,
@@ -1144,23 +1153,33 @@
        "will_present": true
       }
      },
-     "departure_epoch": 5,
+     "departure_epoch": 120,
      "first_secondary_shed_epoch": 47
     },
     "acquisitions": {
      "total": 1,
-     "aboard_window": 0,
-     "aboard_window_clean": 0,
+     "aboard_window": 1,
+     "aboard_window_clean": 1,
      "by_day": {
       "0": 1
      },
      "route_split_all": {
       "droplet": 1
      },
-     "route_split_aboard": {},
-     "role_split_aboard": {},
+     "route_split_aboard": {
+      "droplet": 1
+     },
+     "role_split_aboard": {
+      "passenger": 1
+     },
      "ring_share_aboard": {
-      "n": 0
+      "n": 1,
+      "min": 0.9820209155908833,
+      "q25": 0.9820209155908833,
+      "median": 0.9820209155908833,
+      "q75": 0.9820209155908833,
+      "max": 0.9820209155908833,
+      "mean": 0.9820209155908833
      }
     },
     "infected_total": 1,

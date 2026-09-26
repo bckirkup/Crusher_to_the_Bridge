@@ -1,24 +1,21 @@
 {
- "design": "picard_framework/runs/covid_sero_channel_v1_design.json",
- "arm": "D0_declared",
- "theta": 42200000000.0,
- "epochs": 168,
+ "measured": "aws_batch",
+ "job": "afdfe648-875c-466c-98e0-5057dfd49167",
+ "job_definition": "picard-init-probes:1",
+ "image_digest": "sha256:acb63327f45460026a34cb1e5260f55b8650f21657e1f4c590a9e740d53230ba",
+ "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/",
  "aboard_window_acquisitions": {
   "n": 5,
-  "min": 0.0,
-  "q25": 0.0,
-  "median": 3.0,
-  "q75": 22.0,
-  "max": 786.0,
+  "min": 0,
+  "median": 3,
+  "max": 786,
   "mean": 162.2
  },
  "aboard_window_clean": {
   "n": 5,
-  "min": 0.0,
-  "q25": 0.0,
-  "median": 3.0,
-  "q75": 20.0,
-  "max": 25.0,
+  "min": 0,
+  "median": 3,
+  "max": 25,
   "mean": 9.6
  },
  "cells": [
@@ -84,7 +81,7 @@
       "median": 0.19669439944760478,
       "q75": 0.9135658315708559,
       "max": 0.9989707574014651,
-      "mean": 0.42109651199614345
+      "mean": 0.42109651199614384
      }
     },
     "infected_total": 786,
