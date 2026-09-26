@@ -2,7 +2,8 @@
 **Date:** 2026-09-25
 **Commit:** 8662a76f
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 86358ba1
 
 `NORO-TOUCH-SHARE-RATE-01` (measured `411b0dbe`) measured the declared
 touch-share table's *dose-crediting* expression rate at the frozen cell:
@@ -116,4 +117,81 @@ Over 100 paired seeds (declared arm vs areal arm, same seed = same run):
 
 ## 3. Measured
 
-<!-- measured -->
+**Block provenance:** AWS Batch array `ca3bcdbf-77f2-47d3-a7c2-4ad5e0cfd5e8`,
+300 children (3 arms × seeds 8000–8099), image
+`picard-boundary-analysis:dose-challenge-v2`, job def
+`picard-dose-challenge:3`, all 300 SUCCEEDED — 100/100 seeds in every arm,
+dumps committed under `docs/norovirus/route_attr_01/arm_<tag>/`; readout
+`tools/noro_diag/route_attribution_readout.py` →
+`readouts/route_attribution_readout.json`. Canary (seeds 8000, 8022 ×
+triad) verified route fields present before the full array.
+
+**Stop conditions:** none triggered — engine_tally ≡ recomputed dominant
+counts on all 300 dumps; every recorded acquisition carries
+`acquired_particles_by_route` + `dominant_route`; every seed with
+secondaries has acquisition rows.
+
+| stop condition | outcome |
+|---|---|
+| canary child fails / no dump / no route fields | pass (6/6 canary dumps instrumented) |
+| engine_tally ≠ recomputed dominant counts | 0/300 dumps |
+| acquisition missing route ledger | 0/~126 acquisitions |
+| Spot/OOM unreachable | 0 failures; 300/300 |
+
+### 3.1 Route composition per arm (§2.1)
+
+| arm | secondaries | seeds w/ ≥1 | fomite | emesis_aerosol | fomite share (Wilson 95%) |
+|---|---|---|---|---|---|
+| areal | 43 | 13 | 31 | 12 | 0.721 [0.573, 0.833] |
+| declared | 40 | 13 | 28 | 12 | 0.700 [0.546, 0.819] |
+| pooled | 43 | 13 | 31 | 12 | 0.721 [0.573, 0.833] |
+
+### 3.2 Paired secondaries delta (§2.2)
+
+Per-seed `D − A`: +1 on seed 8014, −1 on seeds 8011, 8031, 8055, 8092,
+0 on the other 95. Median 0; two-sided sign test on the 5 nonzero pairs
+p = 0.375 — no systematic direction.
+
+### 3.3 Fomite-attributed infection sets (§2.3)
+
+Fomite-attributed host sets differ on 5/100 seeds (8011, 8014, 8031,
+8055, 8092); 86/100 are vacuous (0/0 → J = 1.0 flagged). Median J = 1.0.
+The *infected* host sets differ on exactly the same 5 seeds — every
+cross-arm difference is a fomite acquisition; no non-fomite infection
+ever moves.
+
+### 3.4 Fomite dose-share delta (§2.4)
+
+On the 14 seeds with ≥1 secondary in either arm, `D − A` fomite share
+median 0.0000; nonzero on 6 seeds: −1.009 (8011), +0.948 (8014), −1.026
+(8031), −0.022 (8036), −1.000 (8055), −1.000 (8092). The ~±1 swings are
+a single fomite acquisition appearing or disappearing; 8036 is a real
+share shift among survivors.
+
+### 3.5 Discordant acquisitions (§2.5)
+
+5 discordant acquisitions, all "infected in one arm only" and all
+fomite-dominant: 8011/A2408 (areal-only), 8014/A575 (declared-only),
+8031/A2761 (areal-only), 8055/A1571 (areal-only), 8092/A1311
+(areal-only). **Zero** acquisitions keep infection in both arms with a
+different dominant route — the declared table never reroutes an
+established infection, it only adds or removes a marginal fomite
+infection.
+
+### 3.6 DISAGG-01 re-witness
+
+Areal ≡ pooled on the acquisition event set (agent_id, epoch) on
+100/100 seeds. Five seeds (8022, 8031, 8036, 8055, 8091) show last-ulp
+`dose_read` drift — the same artifact already present in the
+`411b0dbe` block (hash-order summation), not an identity break.
+
+### 3.7 Conclusion (§2.6)
+
+The declared table does move infection-level attribution, but only at
+the margin: 5 discordant acquisitions over 100 paired seeds, every one
+a marginal fomite infection the reallocation tips across (or back
+across) the pickup gate. Net fomite secondaries 31 → 28 (fomite share
+0.721 → 0.700, overlapping CIs). Its expression is not confined to
+crediting bookkeeping — but the effect size is ≈1 marginal infection
+per ~20 seeds and dominated by seed noise (sign test p = 0.375). The
+12 emesis_aerosol secondaries are untouched by the table, as expected.
