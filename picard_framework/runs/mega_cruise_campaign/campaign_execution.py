@@ -812,6 +812,10 @@ def run_simulation(
         with validated_open(ts_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
             json.dump(ts, fh)
 
+        from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (
+            provenance_flags,
+        )
+
         summary = {
             "run_id": safe_id,
             "parameters": _cr.parameters_from_spec(spec),
@@ -821,6 +825,9 @@ def run_simulation(
             "summary": last.get("summary", {}),
             "cost_accounting": last.get("cost_accounting", {}),
             "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
+            "provenance_flags": provenance_flags(
+                spec, sim.cfg, sim.pathogen_profiles,
+            ),
         }
         summary_path = resolve_child_path(run_dir, "summary.json")
         with validated_open(summary_path, "w", allowed_roots=roots, encoding="utf-8") as fh:

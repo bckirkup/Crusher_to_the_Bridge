@@ -634,6 +634,13 @@ def _density_contact_override(
         # Exponent sweeps imply density-family modes unless mode is explicit.
         # (After the early return, contact_mode is None ⇒ alpha is not None.)
         tx["contact_mode"] = "density_dependent"
+    if tx["contact_mode"] != "per_partner_contact":
+        # The engine reads activity_contacts only under per_partner_contact
+        # and refuses the block under any other mode, so a density-family
+        # arm must switch it off — the same companion override
+        # hull_compounding_v1 declares in its manifest. Part of replacing
+        # the shipped kernel, not a constant change.
+        tx["activity_contacts"] = {"enabled": False}
     if alpha is not None:
         tx["density_dependent"] = {"exponent": float(alpha)}
     return {"transmission": tx}
