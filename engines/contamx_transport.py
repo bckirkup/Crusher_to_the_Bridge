@@ -118,6 +118,28 @@ class ContamXTransportEngine(ContamTransportEngine):
         """
         known = set(self.zone_nodes)
         ordered = sorted(path_map_entries, key=lambda e: int(e["path_nr"]))
+        self.airflow_paths.extend(
+            self._contamx_field_paths(ordered, path_flows_m3h, known),
+        )
+
+        ahs_paths = synthesize_ahs_recirculation_paths(
+            ordered, path_flows_m3h, known,
+            oa_fraction=self._oa_fraction,
+        )
+        for path in ahs_paths:
+            for zid in (path.from_zone, path.to_zone):
+                if is_plenum_zone(zid):
+                    self._ensure_plenum_node(zid)
+        self.airflow_paths.extend(ahs_paths)
+
+    def _contamx_field_paths(
+        self,
+        ordered: list[dict[str, Any]],
+        path_flows_m3h: dict[int, float],
+        known: set[str],
+    ) -> list[ContamAirflowPath]:
+        """Real↔real Contam paths (adjacency, cross-zone fans) with SIM flow."""
+        paths: list[ContamAirflowPath] = []
         for entry in ordered:
             path_nr = int(entry["path_nr"])
             from_zone = entry["from_zone"]
@@ -133,7 +155,7 @@ class ContamXTransportEngine(ContamTransportEngine):
             src, dst = (from_zone, to_zone) if flow > 0 else (to_zone, from_zone)
             if src not in known or dst not in known:
                 continue
-            self.airflow_paths.append(ContamAirflowPath(
+            paths.append(ContamAirflowPath(
                 path_id=f"contamx_{path_nr}_{src}_{dst}",
                 from_zone=src,
                 to_zone=dst,
@@ -141,16 +163,7 @@ class ContamXTransportEngine(ContamTransportEngine):
                 path_type="contamx_path",
                 is_hvac_ducted=is_ducted,
             ))
-
-        ahs_paths = synthesize_ahs_recirculation_paths(
-            ordered, path_flows_m3h, known,
-            oa_fraction=self._oa_fraction,
-        )
-        for path in ahs_paths:
-            for zid in (path.from_zone, path.to_zone):
-                if is_plenum_zone(zid):
-                    self._ensure_plenum_node(zid)
-        self.airflow_paths.extend(ahs_paths)
+        return paths
 
     @classmethod
     def from_flow_field(

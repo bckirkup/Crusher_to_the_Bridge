@@ -456,67 +456,81 @@ def advance_infections(
     epoch: int = 0,
 ) -> None:
     """Advance every open infection on one host by a single epoch."""
-    clock = agent.clock
     for pid, inf in tuple(agent.infections.items()):
         if inf["status"] != InfectionStatus.INFECTED:
             continue
-        prof = pathogen_profiles.get(pid, {})
-
-        if inf["time_infected"] is not None:
-            inf["time_infected"] += 1
-
-        # The counter is in epochs; every threshold below is in days.
-        epochs_infected = inf["time_infected"] or 0
-        days_infected = clock.days_elapsed(epochs_infected)
-        # Stamp the drawn illness duration before anything below can read it:
-        # draw_symptom_onset applies treatment, which shortens this host's
-        # value, and clearance_days reads the record ahead of the profile.
-        illness_duration_days(inf, prof, rng)
-        onset = onset_day(agent, pid, inf, prof, rng)
-        if (
-            inf["illness"] == IllnessStatus.NOT_ILL
-            and crossed_day_boundary(clock, epochs_infected, onset)
-        ):
-            # Once per day of natural history, not once per epoch, so the chance
-            # of presenting does not depend on how finely time is cut — and the
-            # first chance is the epoch that crosses this host's own drawn
-            # incubation period, so onset is not rounded up to a whole day.
-            draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
-        elif inf["illness"] == IllnessStatus.SYMPTOMATIC:
-            _advance_severity(clock, inf, prof, epochs_infected)
-
-        illness_clearance_day, shedding_clearance_day = clearance_days(
-            agent, pid, inf, prof, onset,
+        _advance_one_infection(
+            agent, pid, inf, pathogen_profiles.get(pid, {}),
+            rng, strain_registry, epoch,
         )
-        if (
-            days_infected >= illness_clearance_day
-            and inf["illness"] == IllnessStatus.SYMPTOMATIC
-        ):
-            # Illness ends on its own clock, and the emesis records are part of
-            # the illness: convalescent shedding is faecal, not emetic.
-            inf["illness"] = IllnessStatus.RECOVERED
-            _clear_emesis_records(agent, pid)
-        cleared: list[str] = []
-        # Co-resident lineages clear on their own clocks, so the pathogen-level
-        # infection stays open until the last one goes: a strain acquired on
-        # day four is still being shed when the primary infection would have
-        # ended. A lineage is carried for as long as it is shed, not only for
-        # as long as the host is ill.
-        residents_left = agent.advance_resident_strains(
-            pid, shedding_clearance_day, cleared,
-        )
-        record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
-        if days_infected >= shedding_clearance_day and residents_left == 0:
-            if not cleared:
-                record_unlabeled_clearance_immunity(agent, pid, epoch)
-            # The hand load has to survive convalescent shedding, so it is
-            # dropped with the infection rather than with the illness.
-            inf["status"] = InfectionStatus.RECOVERED
-            inf["illness"] = IllnessStatus.RECOVERED
-            agent.cumulative_exposure.pop(pid, None)
-            agent.cumulative_exposure_by_route.pop(pid, None)
-            agent.hand_load_by_pathogen.pop(pid, None)
-            _clear_emesis_records(agent, pid)
+
+
+def _advance_one_infection(
+    agent: Any,
+    pid: str,
+    inf: dict[str, Any],
+    prof: dict[str, Any],
+    rng: np.random.Generator,
+    strain_registry: StrainRegistry | None,
+    epoch: int,
+) -> None:
+    """Advance one host's one open infection: onset, severity, clearance."""
+    clock = agent.clock
+    if inf["time_infected"] is not None:
+        inf["time_infected"] += 1
+
+    # The counter is in epochs; every threshold below is in days.
+    epochs_infected = inf["time_infected"] or 0
+    days_infected = clock.days_elapsed(epochs_infected)
+    # Stamp the drawn illness duration before anything below can read it:
+    # draw_symptom_onset applies treatment, which shortens this host's
+    # value, and clearance_days reads the record ahead of the profile.
+    illness_duration_days(inf, prof, rng)
+    onset = onset_day(agent, pid, inf, prof, rng)
+    if (
+        inf["illness"] == IllnessStatus.NOT_ILL
+        and crossed_day_boundary(clock, epochs_infected, onset)
+    ):
+        # Once per day of natural history, not once per epoch, so the chance
+        # of presenting does not depend on how finely time is cut — and the
+        # first chance is the epoch that crosses this host's own drawn
+        # incubation period, so onset is not rounded up to a whole day.
+        draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
+    elif inf["illness"] == IllnessStatus.SYMPTOMATIC:
+        _advance_severity(clock, inf, prof, epochs_infected)
+
+    illness_clearance_day, shedding_clearance_day = clearance_days(
+        agent, pid, inf, prof, onset,
+    )
+    if (
+        days_infected >= illness_clearance_day
+        and inf["illness"] == IllnessStatus.SYMPTOMATIC
+    ):
+        # Illness ends on its own clock, and the emesis records are part of
+        # the illness: convalescent shedding is faecal, not emetic.
+        inf["illness"] = IllnessStatus.RECOVERED
+        _clear_emesis_records(agent, pid)
+    cleared: list[str] = []
+    # Co-resident lineages clear on their own clocks, so the pathogen-level
+    # infection stays open until the last one goes: a strain acquired on
+    # day four is still being shed when the primary infection would have
+    # ended. A lineage is carried for as long as it is shed, not only for
+    # as long as the host is ill.
+    residents_left = agent.advance_resident_strains(
+        pid, shedding_clearance_day, cleared,
+    )
+    record_cleared_immunity(agent, pid, cleared, strain_registry, epoch)
+    if days_infected >= shedding_clearance_day and residents_left == 0:
+        if not cleared:
+            record_unlabeled_clearance_immunity(agent, pid, epoch)
+        # The hand load has to survive convalescent shedding, so it is
+        # dropped with the infection rather than with the illness.
+        inf["status"] = InfectionStatus.RECOVERED
+        inf["illness"] = IllnessStatus.RECOVERED
+        agent.cumulative_exposure.pop(pid, None)
+        agent.cumulative_exposure_by_route.pop(pid, None)
+        agent.hand_load_by_pathogen.pop(pid, None)
+        _clear_emesis_records(agent, pid)
 
 
 def project_legacy_illness(agent: Any) -> None:

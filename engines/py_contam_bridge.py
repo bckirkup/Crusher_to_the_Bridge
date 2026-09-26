@@ -529,6 +529,24 @@ class ContamTransportEngine:
             k_i  += Q_ret,i / V_i
             S_j  += Q_sup,j · C_mix · (1 − η)
         """
+        returns_by_plenum, supplies_by_plenum = self._ahs_star_paths_by_plenum()
+
+        for plenum_id, returns in returns_by_plenum.items():
+            self._fold_ahs_plenum(
+                returns,
+                supplies_by_plenum.get(plenum_id, []),
+                concentrations,
+                source_rate,
+                outflow_rate,
+            )
+
+    def _ahs_star_paths_by_plenum(
+        self,
+    ) -> tuple[
+        dict[str, list[ContamAirflowPath]],
+        dict[str, list[ContamAirflowPath]],
+    ]:
+        """Group HVAC return paths by plenum and supply paths by plenum."""
         returns_by_plenum: dict[str, list[ContamAirflowPath]] = {}
         supplies_by_plenum: dict[str, list[ContamAirflowPath]] = {}
         for path in self.airflow_paths:
@@ -536,33 +554,41 @@ class ContamTransportEngine:
                 returns_by_plenum.setdefault(path.to_zone, []).append(path)
             elif path.path_type == PATH_TYPE_HVAC_SUPPLY:
                 supplies_by_plenum.setdefault(path.from_zone, []).append(path)
+        return returns_by_plenum, supplies_by_plenum
 
-        for plenum_id, returns in returns_by_plenum.items():
-            supplies = supplies_by_plenum.get(plenum_id, [])
-            sum_q_ret = sum(p.flow_rate_m3h for p in returns)
-            if sum_q_ret <= 0:
+    def _fold_ahs_plenum(
+        self,
+        returns: list[ContamAirflowPath],
+        supplies: list[ContamAirflowPath],
+        concentrations: dict[str, float],
+        source_rate: dict[str, float],
+        outflow_rate: dict[str, float],
+    ) -> None:
+        """Fold one plenum's return mix and supply distribution into rates."""
+        sum_q_ret = sum(p.flow_rate_m3h for p in returns)
+        if sum_q_ret <= 0:
+            return
+
+        weighted = 0.0
+        for path in returns:
+            src = path.from_zone
+            weighted += path.flow_rate_m3h * concentrations.get(src, 0.0)
+            node = self.zone_nodes.get(src)
+            if node is not None and node.volume_m3 > 0:
+                outflow_rate[src] = (
+                    outflow_rate.get(src, 0.0)
+                    + path.flow_rate_m3h / node.volume_m3
+                )
+        c_mix = weighted / sum_q_ret
+
+        for path in supplies:
+            dst = path.to_zone
+            if dst not in source_rate:
                 continue
-
-            weighted = 0.0
-            for path in returns:
-                src = path.from_zone
-                weighted += path.flow_rate_m3h * concentrations.get(src, 0.0)
-                node = self.zone_nodes.get(src)
-                if node is not None and node.volume_m3 > 0:
-                    outflow_rate[src] = (
-                        outflow_rate.get(src, 0.0)
-                        + path.flow_rate_m3h / node.volume_m3
-                    )
-            c_mix = weighted / sum_q_ret
-
-            for path in supplies:
-                dst = path.to_zone
-                if dst not in source_rate:
-                    continue
-                arriving = path.flow_rate_m3h * c_mix
-                if path.is_hvac_ducted:
-                    arriving *= (1.0 - self.filter_efficiency)
-                source_rate[dst] += arriving
+            arriving = path.flow_rate_m3h * c_mix
+            if path.is_hvac_ducted:
+                arriving *= (1.0 - self.filter_efficiency)
+            source_rate[dst] += arriving
 
     def _probe_path_rates(
         self,

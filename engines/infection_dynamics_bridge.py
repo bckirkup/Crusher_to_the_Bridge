@@ -125,6 +125,13 @@ IMMUNE_RATIO = 0.2
 ROLE_PASSENGER = "passenger"
 ROLE_CREW = "crew"
 
+# Legacy berthing stock per role: (name markers to prefer, markers whose
+# presence in the zone list switches the draw to the preferred pool).
+_LEGACY_HOME_MARKERS: dict[str, tuple[tuple[str, ...], tuple[str, ...]]] = {
+    ROLE_PASSENGER: (("Pax_", "Passenger", "Berthing"), ("Pax_", "Passenger")),
+    ROLE_CREW: (("Crew_Corridor", "Crew", "Berthing"), ("Crew_Corridor", "Crew")),
+}
+
 # Containment threshold (from Agent.java)
 VSP_THRESHOLD_FRACTION = 0.03
 VSP_RULE_REPORTED_PASSENGER_CASES = "reported_passenger_cases"
@@ -966,14 +973,8 @@ class KorkinAgent:
         agent_behavior: dict[str, Any] | None,
     ) -> str:
         behavior = agent_behavior or {}
-        p_rotate = float(behavior.get("dining_rotation_probability", 0.0) or 0.0)
-        # Voyage dining-demand multiplier scales rotation propensity (port lunch drop).
-        dining_demand = behavior.get("_voyage_dining_multiplier") or {}
         meal_preview = self._meal_type_for_activity(activity)
-        if isinstance(dining_demand, dict) and meal_preview in dining_demand:
-            p_rotate *= float(dining_demand[meal_preview])
-        elif isinstance(dining_demand, (int, float)):
-            p_rotate *= float(dining_demand)
+        p_rotate = self._rotation_probability(behavior, meal_preview)
         if (
             rng is None
             or not dining_catalog
@@ -982,7 +983,38 @@ class KorkinAgent:
         ):
             return self.dining_zone
 
-        meal = meal_preview
+        meal_weights = self._rotation_meal_weights(behavior, meal_preview)
+        candidates, weights = self._dining_rotation_candidates(
+            dining_catalog, meal_weights,
+        )
+
+        if not candidates:
+            return self.dining_zone
+        total = sum(weights)
+        probs = [w / total for w in weights]
+        return str(rng.choice(candidates, p=probs))
+
+    def _rotation_probability(
+        self,
+        behavior: dict[str, Any],
+        meal_preview: str,
+    ) -> float:
+        """Dining rotation propensity, scaled by the voyage demand multiplier."""
+        p_rotate = float(behavior.get("dining_rotation_probability", 0.0) or 0.0)
+        # Voyage dining-demand multiplier scales rotation propensity (port lunch drop).
+        dining_demand = behavior.get("_voyage_dining_multiplier") or {}
+        if isinstance(dining_demand, dict) and meal_preview in dining_demand:
+            p_rotate *= float(dining_demand[meal_preview])
+        elif isinstance(dining_demand, (int, float)):
+            p_rotate *= float(dining_demand)
+        return p_rotate
+
+    def _rotation_meal_weights(
+        self,
+        behavior: dict[str, Any],
+        meal: str,
+    ) -> dict[str, float]:
+        """Service-type weights for the meal; crew always keep crew_mess."""
         meal_weights = (behavior.get("dining_meal_weights") or {}).get(meal) or {}
         # Crew prefer crew_mess venues when rotating.
         if self.role == "crew" and not meal_weights:
@@ -991,7 +1023,14 @@ class KorkinAgent:
             meal_weights = {**meal_weights, "crew_mess": max(
                 float(meal_weights.get("crew_mess", 0.0)), 0.5,
             )}
+        return meal_weights
 
+    def _dining_rotation_candidates(
+        self,
+        dining_catalog: list[dict[str, Any]],
+        meal_weights: dict[str, float],
+    ) -> tuple[list[str], list[float]]:
+        """Eligible venues on this role's side of the line, capacity-weighted."""
         candidates: list[str] = []
         weights: list[float] = []
         allowed = (
@@ -1016,12 +1055,7 @@ class KorkinAgent:
                 continue
             candidates.append(name)
             weights.append(max(capacity, 1.0) * type_w)
-
-        if not candidates:
-            return self.dining_zone
-        total = sum(weights)
-        probs = [w / total for w in weights]
-        return str(rng.choice(candidates, p=probs))
+        return candidates, weights
 
     def _resolve_free_location(
         self,
@@ -1741,6 +1775,62 @@ class KorkinAgent:
 
 # ── Ship simulation engine ──────────────────────────────────────────────
 
+def _merged_agent_behavior(
+    agent_behavior: dict[str, Any] | None,
+) -> dict[str, Any]:
+    """Default behavior overlaid with the config's, meal weights deep-merged."""
+    behavior = dict(DEFAULT_AGENT_BEHAVIOR)
+    if agent_behavior:
+        behavior.update({
+            k: v for k, v in agent_behavior.items()
+            if k != "dining_meal_weights"
+        })
+        if "dining_meal_weights" in agent_behavior:
+            merged_meals = dict(DEFAULT_AGENT_BEHAVIOR["dining_meal_weights"])
+            for meal, weights in (agent_behavior["dining_meal_weights"] or {}).items():
+                merged_meals[meal] = {
+                    **(merged_meals.get(meal) or {}),
+                    **(weights or {}),
+                }
+            behavior["dining_meal_weights"] = merged_meals
+    return behavior
+
+
+def _leisure_catalog_from(zones: list[dict[str, str]]) -> list[dict[str, Any]]:
+    """Free zones open to leisure access; every Free zone when none qualify."""
+    catalog: list[dict[str, Any]] = [
+        {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
+        for z in zones
+        if z.get("type") == "Free" and is_leisure_accessible(z)
+    ]
+    if not catalog:
+        catalog = [
+            {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
+            for z in zones
+            if z.get("type") == "Free"
+        ]
+    return catalog
+
+
+def _dining_catalog_from(zones: list[dict[str, str]]) -> list[dict[str, Any]]:
+    """Dining venue catalog entries resolved from the zone declarations."""
+    catalog: list[dict[str, Any]] = []
+    for z in zones:
+        if z.get("type") != "Dining":
+            continue
+        stype = resolve_dining_service_type(z)
+        catalog.append({
+            "name": z["name"],
+            "service_type": stype,
+            "max_occupancy": z.get("max_occupancy"),
+            "meal_seatings": max(int(z.get("meal_seatings") or 1), 1),
+            "food_contamination_multiplier": z.get(
+                "food_contamination_multiplier",
+            ),
+        })
+    return catalog
+
+
 class KorkinShipEngine:
     """Python bridge to the Korkin Lab infection-dynamics ABM.
 
@@ -1794,57 +1884,20 @@ class KorkinShipEngine:
         # Agent ids the explicit-seed channel actually infected, in apply
         # order, so a run can name the host the scenario calls its index.
         self.explicit_seed_agent_ids: list[int] = []
-        behavior = dict(DEFAULT_AGENT_BEHAVIOR)
-        if agent_behavior:
-            behavior.update({
-                k: v for k, v in agent_behavior.items()
-                if k != "dining_meal_weights"
-            })
-            if "dining_meal_weights" in agent_behavior:
-                merged_meals = dict(DEFAULT_AGENT_BEHAVIOR["dining_meal_weights"])
-                for meal, weights in (agent_behavior["dining_meal_weights"] or {}).items():
-                    merged_meals[meal] = {
-                        **(merged_meals.get(meal) or {}),
-                        **(weights or {}),
-                    }
-                behavior["dining_meal_weights"] = merged_meals
-        self.agent_behavior = behavior
+        self.agent_behavior = _merged_agent_behavior(agent_behavior)
         # Per-epoch voyage EpochState (set by orchestrator when effects active)
         self.voyage_epoch_state: Any = None
 
         self._dining_zones = [z["name"] for z in self.zones if z["type"] == "Dining"]
         self._free_zones = [z["name"] for z in self.zones if z["type"] == "Free"]
-        self._leisure_catalog: list[dict[str, Any]] = [
-            {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
-            for z in self.zones
-            if z.get("type") == "Free" and is_leisure_accessible(z)
-        ]
-        if not self._leisure_catalog:
-            self._leisure_catalog = [
-                {"name": z["name"], "max_occupancy": z.get("max_occupancy")}
-                for z in self.zones
-                if z.get("type") == "Free"
-            ]
+        self._leisure_catalog = _leisure_catalog_from(self.zones)
         self._room_zones = [
             z["name"] for z in self.zones
             if z["type"] in ("Room", "Cabin_Corridor")
         ]
         self._crew_corridor_by_work_zone: dict[str, str] = {}
         self._all_zone_names = [z["name"] for z in self.zones]
-        self._dining_catalog: list[dict[str, Any]] = []
-        for z in self.zones:
-            if z.get("type") != "Dining":
-                continue
-            stype = resolve_dining_service_type(z)
-            self._dining_catalog.append({
-                "name": z["name"],
-                "service_type": stype,
-                "max_occupancy": z.get("max_occupancy"),
-                "meal_seatings": max(int(z.get("meal_seatings") or 1), 1),
-                "food_contamination_multiplier": z.get(
-                    "food_contamination_multiplier",
-                ),
-            })
+        self._dining_catalog = _dining_catalog_from(self.zones)
         self._meal_seatings_by_zone: dict[str, int] = {
             str(e["name"]): int(e["meal_seatings"]) for e in self._dining_catalog
         }
@@ -2149,75 +2202,77 @@ class KorkinShipEngine:
 
         # Passengers
         for _ in range(self.num_passengers):
-            immune = immunity.draw(ROLE_PASSENGER, self.rng)
-
-            home = self.rng.choice(
-                [z for z in self._room_zones if "Pax_" in z or "Passenger" in z or "Berthing" in z]
-                if any("Pax_" in z or "Passenger" in z for z in self._room_zones)
-                else self._room_zones
+            agent, infected_remaining = self._spawn_legacy_agent(
+                agent_id, ROLE_PASSENGER, immunity, infected_remaining,
             )
-            dining = self._draw_dining_zone("passenger")
-            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
-            work = self.rng.choice(self._free_zones)
-            gender = self._assign_gender()
-            schedule, seating = self._seated_schedule(PASSENGER_SCHEDULE, dining)
-
-            agent = KorkinAgent(
-                agent_id=agent_id, role="passenger", immune=immune,
-                home_zone=home, dining_zone=dining,
-                work_zone=work, free_zone=free, schedule=schedule,
-                agent_class="passenger_general", gender=gender,
-            )
-            agent.meal_seating = seating
-
-            if not immune and infected_remaining > 0:
-                agent.infection_status = InfectionStatus.INFECTED
-                agent.time_infected = self._seed_infection_epochs
-                agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
-                ill_prob = illness_probability(agent.acquired_particles)
-                if self.rng.random() < ill_prob:
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
-                infected_remaining -= 1
-
             self.agents.append(agent)
             agent_id += 1
 
         # Crew
         for _ in range(self.num_crew):
-            immune = immunity.draw(ROLE_CREW, self.rng)
-
-            home = self.rng.choice(
-                [z for z in self._room_zones if "Crew_Corridor" in z or "Crew" in z or "Berthing" in z]
-                if any("Crew_Corridor" in z or "Crew" in z for z in self._room_zones)
-                else self._room_zones
+            agent, infected_remaining = self._spawn_legacy_agent(
+                agent_id, ROLE_CREW, immunity, infected_remaining,
             )
-            dining = self._draw_dining_zone("crew")
-            free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
-            work = self.rng.choice(self._free_zones + self._dining_zones)
-            gender = self._assign_gender()
-            schedule, seating = self._seated_schedule(CREW_SCHEDULE, dining)
-
-            agent = KorkinAgent(
-                agent_id=agent_id, role="crew", immune=immune,
-                home_zone=home, dining_zone=dining,
-                work_zone=work, free_zone=free, schedule=schedule,
-                agent_class="crew_general", gender=gender,
-            )
-            agent.meal_seating = seating
-
-            if not immune and infected_remaining > 0:
-                agent.infection_status = InfectionStatus.INFECTED
-                agent.time_infected = self._seed_infection_epochs
-                agent.acquired_particles = math.pow(10, SYMPTOMATIC_SHEDDING[1] - DOSE_ADJUSTMENT)
-                ill_prob = illness_probability(agent.acquired_particles)
-                if self.rng.random() < ill_prob:
-                    agent.illness_status = IllnessStatus.SYMPTOMATIC
-                infected_remaining -= 1
-
             self.agents.append(agent)
             agent_id += 1
 
         return agent_id
+
+    def _legacy_home_zone(self, role: str) -> str:
+        """A room zone drawn from the role's berthing stock when present."""
+        markers, required = _LEGACY_HOME_MARKERS[role]
+        preferred = [
+            z for z in self._room_zones
+            if any(marker in z for marker in markers)
+        ]
+        if any(
+            marker in z
+            for z in self._room_zones
+            for marker in required
+        ):
+            return self.rng.choice(preferred)
+        return self.rng.choice(self._room_zones)
+
+    def _spawn_legacy_agent(
+        self,
+        agent_id: int,
+        role: str,
+        immunity: _ImmunityAtEmbarkation,
+        infected_remaining: int,
+    ) -> tuple[KorkinAgent, int]:
+        """Build one legacy-class agent; seed it when infections remain.
+
+        The RNG call order is the contract: immunity, home, dining, free,
+        work, gender, schedule, then the illness draw when seeded.
+        """
+        immune = immunity.draw(role, self.rng)
+        home = self._legacy_home_zone(role)
+        dining = self._draw_dining_zone(role)
+        free = weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
+        work = self.rng.choice(
+            self._free_zones
+            if role == ROLE_PASSENGER
+            else self._free_zones + self._dining_zones
+        )
+        gender = self._assign_gender()
+        schedule, seating = self._seated_schedule(
+            PASSENGER_SCHEDULE if role == ROLE_PASSENGER else CREW_SCHEDULE,
+            dining,
+        )
+
+        agent = KorkinAgent(
+            agent_id=agent_id, role=role, immune=immune,
+            home_zone=home, dining_zone=dining,
+            work_zone=work, free_zone=free, schedule=schedule,
+            agent_class=f"{role}_general", gender=gender,
+        )
+        agent.meal_seating = seating
+
+        if not immune and infected_remaining > 0:
+            self._seed_initial_infection(agent, self.rng)
+            infected_remaining -= 1
+
+        return agent, infected_remaining
 
     def _advance_illness_and_recovery(self) -> None:
         """Age every infection one epoch, then present and recover on days.
@@ -2317,15 +2372,7 @@ class KorkinShipEngine:
                 rng=self.rng,
                 dining_catalog=self._dining_catalog,
             )
-            behavior = dict(self.agent_behavior)
-            if getattr(voyage_state, "effects_active", False):
-                behavior["_voyage_dining_multiplier"] = dict(
-                    voyage_state.dining_multiplier or {},
-                )
-            else:
-                behavior.pop("_voyage_dining_multiplier", None)
-        else:
-            behavior = self.agent_behavior
+        behavior = self._voyage_behavior(voyage_state)
 
         # 1. Update agent locations. The token is recorded beside the location
         # so a downstream reader of "what is this agent doing" sees the token
@@ -2335,30 +2382,8 @@ class KorkinShipEngine:
             for agent in self.agents
         }
         for agent in self.agents:
-            agent.current_activity = agent.scheduled_token(hour)
-            if agent.has_departed(self.epoch):
-                agent.current_location = LOCATION_DEPARTED
-                continue
-            if getattr(agent, "ashore", False):
-                agent.current_location = LOCATION_ASHORE
-                continue
-            if agent.agent_id in self.isolated_ids:
-                agent.current_location = "Isolated_In_Quarters"
-                continue
-            if agent.agent_id in self.quarantined_ids:
-                agent.current_location = agent.home_zone
-                continue
-            randomness = self.rng.uniform(-1.0, 1.0)
-            if self.clock.mode != LEGACY_EPOCH_DAY:
-                randomness = 0.0
-            agent.current_activity = agent.scheduled_token(hour, randomness)
-            agent.current_location = agent.get_location_for_hour(
-                hour,
-                randomness,
-                rng=self.rng,
-                dining_catalog=self._dining_catalog,
-                free_catalog=self._leisure_catalog,
-                agent_behavior=behavior,
+            self._place_agent(
+                agent, hour, behavior, LOCATION_ASHORE, LOCATION_DEPARTED,
             )
 
         if voyage_state is not None:
@@ -2383,7 +2408,67 @@ class KorkinShipEngine:
         # 5. VSP quarantine check
         self._check_vsp_trigger()
 
-        # 6. Zone pathogen mass: new deposits from shedders
+        # 6. Zone pathogen mass: decay then new deposits from shedders
+        self._decay_and_deposit_pathogen_mass()
+
+        # 7. Export payload
+        return self._export_payload()
+
+    def _voyage_behavior(self, voyage_state: Any) -> dict[str, Any]:
+        """Agent behavior with the voyage dining multiplier attached or removed."""
+        if voyage_state is None:
+            return self.agent_behavior
+        behavior = dict(self.agent_behavior)
+        if getattr(voyage_state, "effects_active", False):
+            behavior["_voyage_dining_multiplier"] = dict(
+                voyage_state.dining_multiplier or {},
+            )
+        else:
+            behavior.pop("_voyage_dining_multiplier", None)
+        return behavior
+
+    def _place_agent(
+        self,
+        agent: KorkinAgent,
+        hour: int,
+        behavior: dict[str, Any],
+        ashore_location: str,
+        departed_location: str,
+    ) -> None:
+        """Place one agent for the epoch's hour under its schedule token.
+
+        Departed, ashore, isolated and quarantined agents hold fixed
+        locations; everyone else draws the legacy jitter and resolves the
+        schedule token's location.
+        """
+        agent.current_activity = agent.scheduled_token(hour)
+        if agent.has_departed(self.epoch):
+            agent.current_location = departed_location
+            return
+        if getattr(agent, "ashore", False):
+            agent.current_location = ashore_location
+            return
+        if agent.agent_id in self.isolated_ids:
+            agent.current_location = "Isolated_In_Quarters"
+            return
+        if agent.agent_id in self.quarantined_ids:
+            agent.current_location = agent.home_zone
+            return
+        randomness = self.rng.uniform(-1.0, 1.0)
+        if self.clock.mode != LEGACY_EPOCH_DAY:
+            randomness = 0.0
+        agent.current_activity = agent.scheduled_token(hour, randomness)
+        agent.current_location = agent.get_location_for_hour(
+            hour,
+            randomness,
+            rng=self.rng,
+            dining_catalog=self._dining_catalog,
+            free_catalog=self._leisure_catalog,
+            agent_behavior=behavior,
+        )
+
+    def _decay_and_deposit_pathogen_mass(self) -> None:
+        """Legacy airborne decay, then shedders' surface/aerosol deposits."""
         # NOTE: Decay is now handled externally by the CONTAM transport
         # engine (py_contam_bridge) when available.  If no transport engine
         # is configured, the orchestrator falls back to the legacy flat
@@ -2402,9 +2487,6 @@ class KorkinShipEngine:
                 if loc in self._zone_pathogen_mass:
                     deposited = agent.current_shedding * SURFACE_DEPOSITION_FRACTION
                     self._zone_pathogen_mass[loc] += deposited
-
-        # 7. Export payload
-        return self._export_payload()
 
     def _native_transmission(self, ashore_location: str) -> None:
         """Legacy monolithic transmission used when TransmissionCore is off.
