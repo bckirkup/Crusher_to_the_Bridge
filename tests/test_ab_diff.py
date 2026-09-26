@@ -76,8 +76,8 @@ class TestDeltaSummaryFrame:
         b = _history([0, 8, 6])
         df = delta_summary_frame(a, b)
         row = df[df["Metric"] == "peak_infected"].iloc[0]
-        assert row["Run A"] == 5
-        assert row["Run B"] == 8
+        assert row["Run A"] == "5"
+        assert row["Run B"] == "8"
         assert row["Delta (B-A)"] == 3
 
     def test_status_column_no_numeric_delta(self) -> None:
