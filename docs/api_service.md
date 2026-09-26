@@ -69,6 +69,16 @@ unless the spec's `run` block names its own `simulation_history` /
 `ground_truth` / `lab_notebook` paths (all confined to the repo tree by the
 usual path validators).
 
+## Testing
+
+`tests/test_api_service.py` exercises the full lifecycle but is opt-in —
+each test spins real voyages, so it does not run in CI or routine pytest
+invocations. Run it explicitly:
+
+```bash
+CTTB_API_TESTS=1 python3 -m pytest tests/test_api_service.py -v
+```
+
 ## Limits (v1)
 
 - Jobs run in-process on a thread pool (`--workers`, default 2 or
