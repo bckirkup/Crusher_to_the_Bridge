@@ -312,6 +312,49 @@ def build_flow_compare_report(
     }
 
 
+def _shared_flow_notes(contamx: dict[str, Any]) -> list[str]:
+    kept = contamx.get("kept_links") or []
+    if not contamx.get("sim_flows_loaded") or len(kept) < 2:
+        return []
+    rounded = [round(float(k["flow_m3h"]), 6) for k in kept]
+    counts: dict[float, int] = defaultdict(int)
+    for val in rounded:
+        counts[val] += 1
+    mode_val, mode_n = max(counts.items(), key=lambda kv: kv[1])
+    if mode_n == len(kept):
+        mass_at_1_2 = mode_val / 3600.0 * 1.2
+        return [
+            f"ALL {mode_n} kept links share identical flow "
+            f"{mode_val:g} m³/h (≈{mass_at_1_2:.4g} kg/s at ρ=1.2) — "
+            "impossible for distinct fan_cvf/orifice design rates; suspect "
+            "SIM Flow0 parse/join bug or Contam ignoring fan elements. "
+            "Verify with SimRead3 LFR for path_nr 12/14/22."
+        ]
+    if mode_n >= max(3, len(kept) // 2):
+        return [
+            f"{mode_n}/{len(kept)} kept links share flow {mode_val:g} m³/h "
+            "— check for SIM stride/join issues."
+        ]
+    return []
+
+
+def _isolation_notes(
+    native: dict[str, Any],
+    contamx: dict[str, Any],
+    focus: list[str],
+) -> list[str]:
+    notes: list[str] = []
+    for gap in connectivity_gap(native, contamx, focus):
+        if gap["bridge_isolated"]:
+            notes.append(
+                f"Zone {gap['zone']!r} is ContamX-isolated "
+                f"(native out_edges={gap['native_out_edges']}, "
+                f"out_m3h={gap['native_out_m3h']:.2f}) — injectate cannot leave "
+                "via ContamX Crusher edges."
+            )
+    return notes
+
+
 def _hypotheses(
     native: dict[str, Any],
     contamx: dict[str, Any],
@@ -329,27 +372,7 @@ def _hypotheses(
             f"{contamx['n_zero_flow_real_candidates']} real↔real Contam paths "
             "have near-zero SIM flow (orifices/fans dropped by filter)."
         )
-    kept = contamx.get("kept_links") or []
-    if contamx.get("sim_flows_loaded") and len(kept) >= 2:
-        rounded = [round(float(k["flow_m3h"]), 6) for k in kept]
-        counts: dict[float, int] = defaultdict(int)
-        for val in rounded:
-            counts[val] += 1
-        mode_val, mode_n = max(counts.items(), key=lambda kv: kv[1])
-        if mode_n == len(kept):
-            mass_at_1_2 = mode_val / 3600.0 * 1.2
-            notes.append(
-                f"ALL {mode_n} kept links share identical flow "
-                f"{mode_val:g} m³/h (≈{mass_at_1_2:.4g} kg/s at ρ=1.2) — "
-                "impossible for distinct fan_cvf/orifice design rates; suspect "
-                "SIM Flow0 parse/join bug or Contam ignoring fan elements. "
-                "Verify with SimRead3 LFR for path_nr 12/14/22."
-            )
-        elif mode_n >= max(3, len(kept) // 2):
-            notes.append(
-                f"{mode_n}/{len(kept)} kept links share flow {mode_val:g} m³/h "
-                "— check for SIM stride/join issues."
-            )
+    notes.extend(_shared_flow_notes(contamx))
     if (
         contamx.get("sim_flows_loaded")
         and int(contamx.get("n_synth_ahs_paths") or 0) == 0
@@ -359,20 +382,42 @@ def _hypotheses(
             "AHS synth emitted 0 edges (supply/return/recirc SIM Flow0 ~0) — "
             "no ContamX→Crusher HVAC recirculation bridge."
         )
-    for gap in connectivity_gap(native, contamx, focus):
-        if gap["bridge_isolated"]:
-            notes.append(
-                f"Zone {gap['zone']!r} is ContamX-isolated "
-                f"(native out_edges={gap['native_out_edges']}, "
-                f"out_m3h={gap['native_out_m3h']:.2f}) — injectate cannot leave "
-                "via ContamX Crusher edges."
-            )
+    notes.extend(_isolation_notes(native, contamx, focus))
     if not contamx["sim_flows_loaded"]:
         notes.append(
             "SIM flows not loaded — re-run with ContamX binary or --sim PATH "
             "to confirm zero-flow orifices/fans."
         )
     return notes
+
+
+def _print_contamx_links(cx: dict[str, Any]) -> None:
+    if cx["kept_links"]:
+        print("kept real↔real links (ContamX→Crusher):")
+        for k in sorted(
+            cx["kept_links"], key=lambda r: (-r["flow_m3h"], r["path_nr"]),
+        ):
+            print(
+                f"  p{k['path_nr']:03d} {str(k.get('kind', '')):22s} "
+                f"{k['from_zone']}->{k['to_zone']}  "
+                f"{k['flow_m3h']:.4g} m3/h"
+            )
+    if cx["synth_ahs_links"]:
+        print("AHS synth links (top):")
+        for s in sorted(
+            cx["synth_ahs_links"], key=lambda r: -r["flow_m3h"],
+        )[:8]:
+            print(
+                f"  {s['path_id']:40s} "
+                f"{s['from_zone']}->{s['to_zone']}  "
+                f"{s['flow_m3h']:.2f} m3/h"
+            )
+    else:
+        print(
+            "AHS synth links: none "
+            "(AHS supply/return/recirc SIM Flow0 all ~0 — "
+            "no room↔room HVAC bridge)"
+        )
 
 
 def _print_summary(report: dict[str, Any]) -> None:
@@ -398,32 +443,7 @@ def _print_summary(report: dict[str, Any]) -> None:
                 f"{z['from_zone']}->{z['to_zone']}  "
                 f"flow={z['sim_flow_m3h']:.4g}"
             )
-        if cx["kept_links"]:
-            print("kept real↔real links (ContamX→Crusher):")
-            for k in sorted(
-                cx["kept_links"], key=lambda r: (-r["flow_m3h"], r["path_nr"]),
-            ):
-                print(
-                    f"  p{k['path_nr']:03d} {str(k.get('kind', '')):22s} "
-                    f"{k['from_zone']}->{k['to_zone']}  "
-                    f"{k['flow_m3h']:.4g} m3/h"
-                )
-        if cx["synth_ahs_links"]:
-            print("AHS synth links (top):")
-            for s in sorted(
-                cx["synth_ahs_links"], key=lambda r: -r["flow_m3h"],
-            )[:8]:
-                print(
-                    f"  {s['path_id']:40s} "
-                    f"{s['from_zone']}->{s['to_zone']}  "
-                    f"{s['flow_m3h']:.2f} m3/h"
-                )
-        else:
-            print(
-                "AHS synth links: none "
-                "(AHS supply/return/recirc SIM Flow0 all ~0 — "
-                "no room↔room HVAC bridge)"
-            )
+        _print_contamx_links(cx)
     print("connectivity gap:")
     for g in report["connectivity_gap"]:
         print(
