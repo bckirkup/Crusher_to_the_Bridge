@@ -7328,7 +7328,7 @@ class TransmissionCore:
             if not pickup_gate_open(surface_mass):
                 continue
             self._legacy_fomite_zone_pickup(
-                zone_name, occupants, surface_mass, epoch,
+                zone_name, occupants, surface_mass,
                 agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, ledger,
             )
@@ -7363,7 +7363,6 @@ class TransmissionCore:
         zone_name: str,
         occupants: list[KorkinAgent],
         surface_mass: float,
-        epoch: int,
         agent_doses: dict[int, float],
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
