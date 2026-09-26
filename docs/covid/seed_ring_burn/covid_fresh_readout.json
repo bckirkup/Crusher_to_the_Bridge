@@ -85,7 +85,7 @@
      }
     },
     "infected_total": 786,
-    "infection_epochs": {
+    "infections_by_epoch": {
      "0": 130,
      "4": 62,
      "8": 84,
@@ -935,7 +935,7 @@
      }
     },
     "infected_total": 3,
-    "infection_epochs": {
+    "infections_by_epoch": {
      "1438": 81,
      "1449": 81,
      "1697": 122
@@ -987,7 +987,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   },
   {
@@ -1051,7 +1051,7 @@
      }
     },
     "infected_total": 22,
-    "infection_epochs": {
+    "infections_by_epoch": {
      "15": 137,
      "68": 140,
      "840": 161,
@@ -1122,7 +1122,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   }
  ]

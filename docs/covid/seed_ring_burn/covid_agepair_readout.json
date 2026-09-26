@@ -84,7 +84,7 @@
      }
     },
     "infected_total": 1023,
-    "infection_epochs": {
+    "infections_by_epoch": {
      "2": 10,
      "4": 8,
      "6": 46,
@@ -1183,7 +1183,7 @@
      }
     },
     "infected_total": 1,
-    "infection_epochs": {
+    "infections_by_epoch": {
      "1697": 23
     }
    },

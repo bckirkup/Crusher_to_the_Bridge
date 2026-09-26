@@ -279,7 +279,7 @@ def analyse_seed(
             1 for aid in records if aid not in seeded_ids
         ),
         # Epoch-resolution infection map for the paired-age diff.
-        "infection_epochs": {
+        "infections_by_epoch": {
             str(aid): int(records[aid].get("infection_epoch") or 0)
             for aid in sorted(records)
             if aid not in seeded_ids
@@ -289,8 +289,8 @@ def analyse_seed(
 
 def _diff_age_pair(base: dict[str, Any], other: dict[str, Any]) -> dict[str, Any]:
     """Bit-level outcome diff between two age arms on the same seed."""
-    b = base["infection_epochs"]
-    o = other["infection_epochs"]
+    b = base["infections_by_epoch"]
+    o = other["infections_by_epoch"]
     shared = set(b) & set(o)
     moved = {str(a): [b[a], o[a]] for a in shared if b[a] != o[a]}
     return {

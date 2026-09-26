@@ -66,7 +66,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   },
   {
@@ -116,7 +116,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   },
   {
@@ -166,7 +166,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   },
   {
@@ -216,7 +216,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   },
   {
@@ -266,7 +266,7 @@
      }
     },
     "infected_total": 0,
-    "infection_epochs": {}
+    "infections_by_epoch": {}
    }
   }
  ]

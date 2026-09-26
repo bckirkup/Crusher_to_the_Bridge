@@ -3,8 +3,10 @@
 **Commit:** f09ebb1b
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 4e0032a0 (probe tools + Batch entrypoint on top of f09ebb1b;
-engine/data tree identical to f09ebb1b)
+**Measured at:** 4e0032a0
+
+Measurement provenance: probe tools + Batch entrypoint on top of f09ebb1b;
+engine/data tree identical to f09ebb1b.
 
 ## What is being measured
 
