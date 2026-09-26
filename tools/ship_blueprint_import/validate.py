@@ -27,7 +27,6 @@ def validate_against_schemas(
     schemas_dir: str | None = None,
 ) -> list[str]:
     """Return list of error strings (empty = ok). Uses jsonschema if present."""
-    errors: list[str] = []
     schemas_dir = schemas_dir or os.path.join(_REPO_ROOT, "schemas")
     pairs = [
         ("spatial_layout.json", "spatial_layout.schema.json"),
@@ -36,27 +35,48 @@ def validate_against_schemas(
     try:
         import jsonschema
     except ImportError:
-        for data_name, schema_name in pairs:
-            data_path = resolve_child_path(platform_dir, data_name)
-            schema_path = resolve_child_path(schemas_dir, schema_name)
-            if not os.path.isfile(data_path):
-                errors.append(f"missing {data_name}")
-                continue
-            cmd = [
-                sys.executable,
-                "-m",
-                "check_jsonschema",
-                "--schemafile",
-                schema_path,
-                data_path,
-            ]
-            proc = subprocess.run(cmd, capture_output=True, text=True)
-            if proc.returncode != 0:
-                errors.append(
-                    f"{data_name}: {proc.stdout.strip() or proc.stderr.strip() or 'schema fail'}"
-                )
-        return errors
+        return _validate_via_cli(pairs, platform_dir, schemas_dir)
+    return _validate_via_jsonschema(
+        jsonschema, pairs, platform_dir, schemas_dir, allowed_roots
+    )
 
+
+def _validate_via_cli(
+    pairs: list[tuple[str, str]],
+    platform_dir: str,
+    schemas_dir: str,
+) -> list[str]:
+    errors: list[str] = []
+    for data_name, schema_name in pairs:
+        data_path = resolve_child_path(platform_dir, data_name)
+        schema_path = resolve_child_path(schemas_dir, schema_name)
+        if not os.path.isfile(data_path):
+            errors.append(f"missing {data_name}")
+            continue
+        cmd = [
+            sys.executable,
+            "-m",
+            "check_jsonschema",
+            "--schemafile",
+            schema_path,
+            data_path,
+        ]
+        proc = subprocess.run(cmd, capture_output=True, text=True)
+        if proc.returncode != 0:
+            errors.append(
+                f"{data_name}: {proc.stdout.strip() or proc.stderr.strip() or 'schema fail'}"
+            )
+    return errors
+
+
+def _validate_via_jsonschema(
+    jsonschema: Any,
+    pairs: list[tuple[str, str]],
+    platform_dir: str,
+    schemas_dir: str,
+    allowed_roots: tuple[str, ...],
+) -> list[str]:
+    errors: list[str] = []
     for data_name, schema_name in pairs:
         data_path = resolve_child_path(platform_dir, data_name)
         schema_path = resolve_child_path(schemas_dir, schema_name)
@@ -103,41 +123,13 @@ def validate_platform(
     ok = (not schema_errors) and sanity_ok
 
     if contam_bootstrap and ok:
-        from tools.ship_blueprint_import.author_contam import author_contam
-
-        try:
-            result = author_contam(
-                platform_dir=platform_dir,
-                workdir=workdir,
-                allowed_roots=allowed_roots,
-                hobbyist=True,
-                run_offline_gate=True,
-            )
-            gate = result.get("offline_gate") or {}
-            contam_msg = (
-                f"author_contam ok: {result['prj_path']} "
-                f"({result['openings_count']} openings); "
-                f"offline_gate={'PASS' if gate.get('ok') else 'FAIL'}"
-            )
-            if not gate.get("ok", True):
-                ok = False
-                contam_gate_result = gate
-        except Exception as exc:  # noqa: BLE001
-            contam_msg = f"author_contam FAILED: {exc}"
-            ok = False
+        ok, contam_msg, contam_gate_result = _run_contam_bootstrap(
+            platform_dir, allowed_roots, workdir
+        )
 
     if contam_gate:
-        from tools.ship_blueprint_import.author_contam import validate_prj_offline
-
-        prj = os.path.join(platform_dir, "contam", "platform.prj")
-        if not os.path.isfile(prj):
-            contam_gate_result = "missing contam/platform.prj"
-            ok = False
-        else:
-            gate = validate_prj_offline(prj, allowed_roots=allowed_roots)
-            contam_gate_result = gate
-            if not gate.get("ok"):
-                ok = False
+        gate_ok, contam_gate_result = _run_contam_gate(platform_dir, allowed_roots)
+        ok = ok and gate_ok
 
     return {
         "ok": ok,
@@ -147,3 +139,44 @@ def validate_platform(
         "contam_bootstrap": contam_msg,
         "contam_gate": contam_gate_result,
     }
+
+
+def _run_contam_bootstrap(
+    platform_dir: str,
+    allowed_roots: tuple[str, ...],
+    workdir: str | None,
+) -> tuple[bool, str, dict[str, Any] | None]:
+    from tools.ship_blueprint_import.author_contam import author_contam
+
+    try:
+        result = author_contam(
+            platform_dir=platform_dir,
+            workdir=workdir,
+            allowed_roots=allowed_roots,
+            hobbyist=True,
+            run_offline_gate=True,
+        )
+    except Exception as exc:  # noqa: BLE001
+        return False, f"author_contam FAILED: {exc}", None
+    gate = result.get("offline_gate") or {}
+    msg = (
+        f"author_contam ok: {result['prj_path']} "
+        f"({result['openings_count']} openings); "
+        f"offline_gate={'PASS' if gate.get('ok') else 'FAIL'}"
+    )
+    if not gate.get("ok", True):
+        return False, msg, gate
+    return True, msg, None
+
+
+def _run_contam_gate(
+    platform_dir: str,
+    allowed_roots: tuple[str, ...],
+) -> tuple[bool, dict[str, Any] | str]:
+    from tools.ship_blueprint_import.author_contam import validate_prj_offline
+
+    prj = os.path.join(platform_dir, "contam", "platform.prj")
+    if not os.path.isfile(prj):
+        return False, "missing contam/platform.prj"
+    gate = validate_prj_offline(prj, allowed_roots=allowed_roots)
+    return bool(gate.get("ok")), gate

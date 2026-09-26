@@ -1597,26 +1597,37 @@ class ClinicalMicrobiology(PerAgentAssay):
 
     def _disruption_site(self, pathogen_infections: dict[str, Any]) -> str:
         from crusher_labs.clinical_instrument_params import active_pathogen_ids
-        from crusher_labs.clinical_presentation import presentation_for_pathogen
 
         for pid in active_pathogen_ids({"pathogen_infections": pathogen_infections}):
-            presentation = presentation_for_pathogen(pid, self.pathogen_profiles)
-            syndromes = presentation.get("syndromes") or []
-            if "gastrointestinal" in syndromes:
-                return "gastrointestinal"
-            if "respiratory" in syndromes:
-                return "respiratory"
-            sample_types = presentation.get("sample_types") or []
-            if "stool" in sample_types:
-                return "gastrointestinal"
-            if "np_swab" in sample_types or "respiratory_specimen" in sample_types:
-                return "respiratory"
-            profile = self.pathogen_profiles.get(pid) or {}
-            dtype = (profile.get("microflora_disruption") or {}).get("disruption_type", "")
-            if "gastro" in str(dtype):
-                return "gastrointestinal"
-            if "resp" in str(dtype):
-                return "respiratory"
+            site = self._presentation_site(pid)
+            if site is not None:
+                return site
+        return self._legacy_disruption_site(pathogen_infections)
+
+    def _presentation_site(self, pid: str) -> str | None:
+        from crusher_labs.clinical_presentation import presentation_for_pathogen
+
+        presentation = presentation_for_pathogen(pid, self.pathogen_profiles)
+        syndromes = presentation.get("syndromes") or []
+        if "gastrointestinal" in syndromes:
+            return "gastrointestinal"
+        if "respiratory" in syndromes:
+            return "respiratory"
+        sample_types = presentation.get("sample_types") or []
+        if "stool" in sample_types:
+            return "gastrointestinal"
+        if "np_swab" in sample_types or "respiratory_specimen" in sample_types:
+            return "respiratory"
+        profile = self.pathogen_profiles.get(pid) or {}
+        dtype = (profile.get("microflora_disruption") or {}).get("disruption_type", "")
+        if "gastro" in str(dtype):
+            return "gastrointestinal"
+        if "resp" in str(dtype):
+            return "respiratory"
+        return None
+
+    @staticmethod
+    def _legacy_disruption_site(pathogen_infections: dict[str, Any]) -> str:
         # Legacy substring fallback
         for pid in pathogen_infections:
             pid_lower = pid.lower()

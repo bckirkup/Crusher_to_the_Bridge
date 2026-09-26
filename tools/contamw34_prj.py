@@ -1992,6 +1992,15 @@ def _parse_simple_ahs(body: list[str]) -> list[dict[str, Any]]:
     return hvac_zones
 
 
+@dataclass(frozen=True)
+class _FlowPathMaps:
+    zone_nr_to_id: dict[int, str]
+    phantom_nrs: set[int]
+    elem_is_fan: dict[int, bool]
+    elem_flow_m3h: dict[int, float]
+    ahs_zone_set: dict[int, set[str]]
+
+
 def _parse_simplify_flow_paths(
     body: list[str],
     *,
@@ -2002,43 +2011,59 @@ def _parse_simplify_flow_paths(
     ahs_zone_set: dict[int, set[str]],
 ) -> tuple[list[dict[str, str]], list[dict[str, Any]]]:
     """``flow paths`` → (adjacency, cross_zone_links); fills *ahs_zone_set*."""
+    maps = _FlowPathMaps(
+        zone_nr_to_id=zone_nr_to_id,
+        phantom_nrs=phantom_nrs,
+        elem_is_fan=elem_is_fan,
+        elem_flow_m3h=elem_flow_m3h,
+        ahs_zone_set=ahs_zone_set,
+    )
     adjacency: list[dict[str, str]] = []
     cross_zone_links: list[dict[str, Any]] = []
     for ln in body:
         row = _parse_prj_path_row(ln)
         if row is None:
             continue
-        _pnr, _flag, from_nr, to_nr, elem_nr, ahs_nr = row
-        from_id = zone_nr_to_id.get(from_nr)
-        to_id = zone_nr_to_id.get(to_nr)
-        from_phantom = from_nr in phantom_nrs or from_nr < 0
-        to_phantom = to_nr in phantom_nrs or to_nr < 0
-
-        # Track room membership via supply/return paths
-        if ahs_nr > 0:
-            if not from_phantom and to_phantom and from_id:
-                ahs_zone_set.setdefault(ahs_nr, set()).add(from_id)
-            if from_phantom and not to_phantom and to_id:
-                ahs_zone_set.setdefault(ahs_nr, set()).add(to_id)
-
-        if from_phantom or to_phantom or not from_id or not to_id:
-            continue
-
-        if elem_is_fan.get(elem_nr, False):
-            cross_zone_links.append({
-                "from": from_id,
-                "to": to_id,
-                "flow_rate_m3h": round(elem_flow_m3h.get(elem_nr, 50.0), 6),
-                "is_hvac_ducted": True,
-                "path": f"contam_path_{from_id}_{to_id}",
-            })
-        else:
-            adjacency.append({
-                "from": from_id,
-                "to": to_id,
-                "type": "passageway",
-            })
+        _handle_flow_path_row(row, maps, adjacency, cross_zone_links)
     return adjacency, cross_zone_links
+
+
+def _handle_flow_path_row(
+    row: tuple[int, int, int, int, int, int],
+    maps: _FlowPathMaps,
+    adjacency: list[dict[str, str]],
+    cross_zone_links: list[dict[str, Any]],
+) -> None:
+    _pnr, _flag, from_nr, to_nr, elem_nr, ahs_nr = row
+    from_id = maps.zone_nr_to_id.get(from_nr)
+    to_id = maps.zone_nr_to_id.get(to_nr)
+    from_phantom = from_nr in maps.phantom_nrs or from_nr < 0
+    to_phantom = to_nr in maps.phantom_nrs or to_nr < 0
+
+    # Track room membership via supply/return paths
+    if ahs_nr > 0:
+        if not from_phantom and to_phantom and from_id:
+            maps.ahs_zone_set.setdefault(ahs_nr, set()).add(from_id)
+        if from_phantom and not to_phantom and to_id:
+            maps.ahs_zone_set.setdefault(ahs_nr, set()).add(to_id)
+
+    if from_phantom or to_phantom or not from_id or not to_id:
+        return
+
+    if maps.elem_is_fan.get(elem_nr, False):
+        cross_zone_links.append({
+            "from": from_id,
+            "to": to_id,
+            "flow_rate_m3h": round(maps.elem_flow_m3h.get(elem_nr, 50.0), 6),
+            "is_hvac_ducted": True,
+            "path": f"contam_path_{from_id}_{to_id}",
+        })
+    else:
+        adjacency.append({
+            "from": from_id,
+            "to": to_id,
+            "type": "passageway",
+        })
 
 
 def _recover_platform_name(text: str) -> str:

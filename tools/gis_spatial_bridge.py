@@ -43,6 +43,7 @@ import argparse
 import json
 import os
 import sys
+from dataclasses import dataclass
 from typing import Any
 
 import geopandas as gpd
@@ -97,6 +98,18 @@ def _resolve_column(
 
 # ── Polygon → layout nodes ───────────────────────────────────────────────
 
+@dataclass(frozen=True)
+class _ZoneColumns:
+    """Resolved column names for polygon → zone conversion."""
+
+    id: str | None
+    type: str | None
+    volume: str | None
+    ach: str | None
+    deck: str | None
+    traffic: str | None
+
+
 def _polygons_to_zones(
     gdf: gpd.GeoDataFrame,
     col_id: str | None,
@@ -108,43 +121,58 @@ def _polygons_to_zones(
 ) -> list[dict[str, Any]]:
     """Convert polygon features to spatial_layout zone dicts."""
     cols = list(gdf.columns)
-    id_col = _resolve_column(cols, _ID_CANDIDATES, col_id)
-    type_col = _resolve_column(cols, _TYPE_CANDIDATES, col_type)
-    vol_col = _resolve_column(cols, _VOL_CANDIDATES, col_volume)
-    ach_col = _resolve_column(cols, _ACH_CANDIDATES, col_ach)
-    deck_col = _resolve_column(cols, _DECK_CANDIDATES, col_deck)
-    traffic_col = _resolve_column(cols, _TRAFFIC_CANDIDATES, col_traffic)
+    columns = _ZoneColumns(
+        id=_resolve_column(cols, _ID_CANDIDATES, col_id),
+        type=_resolve_column(cols, _TYPE_CANDIDATES, col_type),
+        volume=_resolve_column(cols, _VOL_CANDIDATES, col_volume),
+        ach=_resolve_column(cols, _ACH_CANDIDATES, col_ach),
+        deck=_resolve_column(cols, _DECK_CANDIDATES, col_deck),
+        traffic=_resolve_column(cols, _TRAFFIC_CANDIDATES, col_traffic),
+    )
 
     zones: list[dict[str, Any]] = []
     for idx, row in gdf.iterrows():
-        geom = row.geometry
-        if geom is None or geom.is_empty:
-            continue
-        if not isinstance(geom, (Polygon, MultiPolygon)):
-            continue
-
-        centroid = geom.centroid
-        zone_id = str(row[id_col]) if id_col and id_col in row.index else f"Zone_{idx}"
-        zone_id = zone_id.replace(" ", "_")
-
-        zone: dict[str, Any] = {
-            "id": zone_id,
-            "type": str(row[type_col]) if type_col and type_col in row.index else _DEFAULT_ROOM_TYPE,
-            "traffic": str(row[traffic_col]).lower() if traffic_col and traffic_col in row.index else _DEFAULT_TRAFFIC,
-            "volume_m3": float(row[vol_col]) if vol_col and vol_col in row.index else _DEFAULT_VOLUME,
-            "deck": str(row[deck_col]).lower() if deck_col and deck_col in row.index else _DEFAULT_DECK,
-            "display": {
-                "x": round(centroid.x, 2),
-                "y": round(centroid.y, 2),
-            },
-        }
-
-        if ach_col and ach_col in row.index:
-            zone["base_ach"] = float(row[ach_col])
-
-        zones.append(zone)
-
+        zone = _zone_from_row(row, idx, columns)
+        if zone is not None:
+            zones.append(zone)
     return zones
+
+
+def _zone_from_row(
+    row: Any,
+    idx: int,
+    columns: _ZoneColumns,
+) -> dict[str, Any] | None:
+    geom = row.geometry
+    if geom is None or geom.is_empty:
+        return None
+    if not isinstance(geom, (Polygon, MultiPolygon)):
+        return None
+
+    centroid = geom.centroid
+    zone_id = (
+        str(row[columns.id])
+        if columns.id and columns.id in row.index
+        else f"Zone_{idx}"
+    )
+    zone_id = zone_id.replace(" ", "_")
+
+    zone: dict[str, Any] = {
+        "id": zone_id,
+        "type": str(row[columns.type]) if columns.type and columns.type in row.index else _DEFAULT_ROOM_TYPE,
+        "traffic": str(row[columns.traffic]).lower() if columns.traffic and columns.traffic in row.index else _DEFAULT_TRAFFIC,
+        "volume_m3": float(row[columns.volume]) if columns.volume and columns.volume in row.index else _DEFAULT_VOLUME,
+        "deck": str(row[columns.deck]).lower() if columns.deck and columns.deck in row.index else _DEFAULT_DECK,
+        "display": {
+            "x": round(centroid.x, 2),
+            "y": round(centroid.y, 2),
+        },
+    }
+
+    if columns.ach and columns.ach in row.index:
+        zone["base_ach"] = float(row[columns.ach])
+
+    return zone
 
 
 # ── Line layers → HVAC / adjacency edges ────────────────────────────────
@@ -217,27 +245,42 @@ def _lines_to_edges(
             continue
 
         lines = [line_geom] if isinstance(line_geom, LineString) else list(line_geom.geoms)
-        flow_rate, is_ducted = _edge_attributes(line_row, flow_col, ducted_col)
+        edge_attrs = _edge_attributes(line_row, flow_col, ducted_col)
+        _trace_line_edges(lines, poly_gdf, zone_ids, edge_attrs, G, adjacency)
 
-        for single_line in lines:
-            connected = _connected_zone_ids(single_line, poly_gdf, zone_ids)
+    return _cross_zone_links(G), adjacency
 
-            for from_z, to_z in zip(connected, connected[1:]):
-                if G.has_edge(from_z, to_z):
-                    continue
-                G.add_edge(
-                    from_z, to_z,
-                    flow_rate_m3h=flow_rate,
-                    is_hvac_ducted=is_ducted,
-                )
-                adjacency.append({
-                    "from": from_z,
-                    "to": to_z,
-                    "type": "hvac_duct" if is_ducted else "passageway",
-                })
 
+def _trace_line_edges(
+    lines: list[LineString],
+    poly_gdf: gpd.GeoDataFrame,
+    zone_ids: list[str],
+    edge_attrs: tuple[float, bool],
+    graph: nx.DiGraph,
+    adjacency: list[dict[str, str]],
+) -> None:
+    flow_rate, is_ducted = edge_attrs
+    for single_line in lines:
+        connected = _connected_zone_ids(single_line, poly_gdf, zone_ids)
+
+        for from_z, to_z in zip(connected, connected[1:]):
+            if graph.has_edge(from_z, to_z):
+                continue
+            graph.add_edge(
+                from_z, to_z,
+                flow_rate_m3h=flow_rate,
+                is_hvac_ducted=is_ducted,
+            )
+            adjacency.append({
+                "from": from_z,
+                "to": to_z,
+                "type": "hvac_duct" if is_ducted else "passageway",
+            })
+
+
+def _cross_zone_links(graph: nx.DiGraph) -> list[dict[str, Any]]:
     cross_zone_links: list[dict[str, Any]] = []
-    for u, v, data in G.edges(data=True):
+    for u, v, data in graph.edges(data=True):
         cross_zone_links.append({
             "from": u,
             "to": v,
@@ -245,8 +288,7 @@ def _lines_to_edges(
             "is_hvac_ducted": data["is_hvac_ducted"],
             "path": f"{u}_to_{v}",
         })
-
-    return cross_zone_links, adjacency
+    return cross_zone_links
 
 
 def _compute_polygon_adjacency(
@@ -258,20 +300,32 @@ def _compute_polygon_adjacency(
     seen: set[tuple[str, str]] = set()
 
     for i in range(len(poly_gdf)):
-        geom_i = poly_gdf.iloc[i].geometry
-        if geom_i is None or geom_i.is_empty:
-            continue
-        for j in range(i + 1, len(poly_gdf)):
-            geom_j = poly_gdf.iloc[j].geometry
-            if geom_j is None or geom_j.is_empty:
-                continue
-            if geom_i.touches(geom_j) or geom_i.intersects(geom_j):
-                a, b = zone_ids[i], zone_ids[j]
-                if (a, b) not in seen:
-                    seen.add((a, b))
-                    adjacency.append({"from": a, "to": b, "type": "passageway"})
+        _accumulate_adjacent_pairs(poly_gdf, zone_ids, i, seen, adjacency)
 
     return adjacency
+
+
+def _accumulate_adjacent_pairs(
+    poly_gdf: gpd.GeoDataFrame,
+    zone_ids: list[str],
+    i: int,
+    seen: set[tuple[str, str]],
+    adjacency: list[dict[str, str]],
+) -> None:
+    geom_i = poly_gdf.iloc[i].geometry
+    if geom_i is None or geom_i.is_empty:
+        return
+    for j in range(i + 1, len(poly_gdf)):
+        geom_j = poly_gdf.iloc[j].geometry
+        if geom_j is None or geom_j.is_empty:
+            continue
+        if not (geom_i.touches(geom_j) or geom_i.intersects(geom_j)):
+            continue
+        a, b = zone_ids[i], zone_ids[j]
+        if (a, b) in seen:
+            continue
+        seen.add((a, b))
+        adjacency.append({"from": a, "to": b, "type": "passageway"})
 
 
 # ── HVAC zone grouping ───────────────────────────────────────────────────
@@ -449,81 +503,22 @@ def emit_deck_graphics(
     line_gdf = gdf[line_mask].reset_index(drop=True)
 
     cols = list(gdf.columns)
-    id_col = _resolve_column(cols, _ID_CANDIDATES, None)
-    deck_col = _resolve_column(cols, _DECK_CANDIDATES, None)
-    type_col = _resolve_column(cols, _TYPE_CANDIDATES, None)
-
-    features: list[dict[str, Any]] = []
-
-    def _ring_from_geom(geom: Any) -> list[list[float]] | None:
-        if geom is None or geom.is_empty:
-            return None
-        if isinstance(geom, MultiPolygon):
-            geom = max(geom.geoms, key=lambda g: g.area)
-        if not isinstance(geom, Polygon):
-            return None
-        ext = list(geom.exterior.coords)
-        return [[float(x), float(y)] for x, y in ext]
+    columns = _ZoneColumns(
+        id=_resolve_column(cols, _ID_CANDIDATES, None),
+        type=_resolve_column(cols, _TYPE_CANDIDATES, None),
+        volume=None,
+        ach=None,
+        deck=_resolve_column(cols, _DECK_CANDIDATES, None),
+        traffic=None,
+    )
 
     xs: list[float] = []
     ys: list[float] = []
-
-    for idx, row in poly_gdf.iterrows():
-        geom = row.geometry
-        ring = _ring_from_geom(geom)
-        if not ring:
-            continue
-        for pt in ring:
-            xs.append(pt[0])
-            ys.append(pt[1])
-        zid = str(row[id_col]) if id_col and id_col in row.index else f"Zone_{idx}"
-        zid = zid.replace(" ", "_")
-        props: dict[str, Any] = {
-            "kind": "compartment",
-            "zone_id": zid,
-            "deck": str(row[deck_col]) if deck_col and deck_col in row.index else "main",
-        }
-        if type_col and type_col in row.index:
-            props["room_type"] = str(row[type_col])
-        features.append({
-            "type": "Feature",
-            "properties": props,
-            "geometry": {"type": "Polygon", "coordinates": [ring]},
-        })
-
-    for _, row in line_gdf.iterrows():
-        geom = row.geometry
-        if geom is None or geom.is_empty:
-            continue
-        if isinstance(geom, MultiLineString):
-            lines = list(geom.geoms)
-            geom = lines[0] if lines else None
-        if not isinstance(geom, LineString):
-            continue
-        coords = [[float(x), float(y)] for x, y in geom.coords]
-        for pt in coords:
-            xs.append(pt[0])
-            ys.append(pt[1])
-        features.append({
-            "type": "Feature",
-            "properties": {"kind": "hvac_path"},
-            "geometry": {"type": "LineString", "coordinates": coords},
-        })
-
-    if xs and ys:
-        pad = 3.0
-        hull_ring = [
-            [min(xs) - pad, min(ys) - pad],
-            [max(xs) + pad, min(ys) - pad],
-            [max(xs) + pad, max(ys) + pad],
-            [min(xs) - pad, max(ys) + pad],
-            [min(xs) - pad, min(ys) - pad],
-        ]
-        features.insert(0, {
-            "type": "Feature",
-            "properties": {"kind": "hull_outline", "platform_id": pid},
-            "geometry": {"type": "Polygon", "coordinates": [hull_ring]},
-        })
+    features = _compartment_features(poly_gdf, columns, xs, ys)
+    features += _hvac_path_features(line_gdf, xs, ys)
+    hull = _hull_outline_feature(xs, ys, pid)
+    if hull is not None:
+        features.insert(0, hull)
 
     collection = {"type": "FeatureCollection", "features": features}
     output_path = resolve_repo_path(REPO_ROOT, output_path)
@@ -531,6 +526,116 @@ def emit_deck_graphics(
     with validated_open(output_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
         json.dump(collection, fh, indent=2, ensure_ascii=False)
     return output_path
+
+
+def _ring_from_geom(geom: Any) -> list[list[float]] | None:
+    if geom is None or geom.is_empty:
+        return None
+    if isinstance(geom, MultiPolygon):
+        geom = max(geom.geoms, key=lambda g: g.area)
+    if not isinstance(geom, Polygon):
+        return None
+    ext = list(geom.exterior.coords)
+    return [[float(x), float(y)] for x, y in ext]
+
+
+def _compartment_props(
+    row: Any,
+    idx: int,
+    columns: _ZoneColumns,
+) -> dict[str, Any]:
+    zid = (
+        str(row[columns.id])
+        if columns.id and columns.id in row.index
+        else f"Zone_{idx}"
+    )
+    zid = zid.replace(" ", "_")
+    props: dict[str, Any] = {
+        "kind": "compartment",
+        "zone_id": zid,
+        "deck": (
+            str(row[columns.deck])
+            if columns.deck and columns.deck in row.index
+            else "main"
+        ),
+    }
+    if columns.type and columns.type in row.index:
+        props["room_type"] = str(row[columns.type])
+    return props
+
+
+def _compartment_features(
+    poly_gdf: gpd.GeoDataFrame,
+    columns: _ZoneColumns,
+    xs: list[float],
+    ys: list[float],
+) -> list[dict[str, Any]]:
+    features: list[dict[str, Any]] = []
+    for idx, row in poly_gdf.iterrows():
+        ring = _ring_from_geom(row.geometry)
+        if not ring:
+            continue
+        xs.extend(pt[0] for pt in ring)
+        ys.extend(pt[1] for pt in ring)
+        features.append({
+            "type": "Feature",
+            "properties": _compartment_props(row, idx, columns),
+            "geometry": {"type": "Polygon", "coordinates": [ring]},
+        })
+    return features
+
+
+def _linestring_coords(geom: Any) -> list[list[float]] | None:
+    if geom is None or geom.is_empty:
+        return None
+    if isinstance(geom, MultiLineString):
+        lines = list(geom.geoms)
+        geom = lines[0] if lines else None
+    if not isinstance(geom, LineString):
+        return None
+    return [[float(x), float(y)] for x, y in geom.coords]
+
+
+def _hvac_path_features(
+    line_gdf: gpd.GeoDataFrame,
+    xs: list[float],
+    ys: list[float],
+) -> list[dict[str, Any]]:
+    features: list[dict[str, Any]] = []
+    for _, row in line_gdf.iterrows():
+        coords = _linestring_coords(row.geometry)
+        if coords is None:
+            continue
+        xs.extend(pt[0] for pt in coords)
+        ys.extend(pt[1] for pt in coords)
+        features.append({
+            "type": "Feature",
+            "properties": {"kind": "hvac_path"},
+            "geometry": {"type": "LineString", "coordinates": coords},
+        })
+    return features
+
+
+def _hull_outline_feature(
+    xs: list[float],
+    ys: list[float],
+    pid: str,
+) -> dict[str, Any] | None:
+    if not (xs and ys):
+        return None
+    pad = 3.0
+    hull_ring = [
+        [min(xs) - pad, min(ys) - pad],
+        [max(xs) + pad, min(ys) - pad],
+        [max(xs) + pad, max(ys) + pad],
+        [min(xs) - pad, max(ys) + pad],
+        [min(xs) - pad, min(ys) - pad],
+    ]
+    return {
+        "type": "Feature",
+        "properties": {"kind": "hull_outline", "platform_id": pid},
+        "geometry": {"type": "Polygon", "coordinates": [hull_ring]},
+    }
 
 
 # ── CLI ──────────────────────────────────────────────────────────────────

@@ -73,46 +73,73 @@ def catalog_area_m2(adj_type: str, *, overrides: dict[str, Any] | None = None) -
     return float(meta.get("area_m2", 2.0))
 
 
-def build_openings_draft(
-    airflow: dict[str, Any],
+def _opening_hints_index(
     digest: ShipDigest | None,
-) -> list[dict[str, Any]]:
-    """Merge adjacency + digest opening_hints into an engineer checklist."""
+) -> dict[tuple[str, str], OpeningHint]:
     hints: dict[tuple[str, str], OpeningHint] = {}
     if digest:
         for oh in digest.opening_hints:
             key = tuple(sorted((oh.from_, oh.to)))
             hints[key] = oh
+    return hints
+
+
+def _adjacency_opening_row(
+    adj: dict[str, Any],
+    hint: OpeningHint | None,
+) -> dict[str, Any]:
+    a, b = str(adj["from"]), str(adj["to"])
+    adj_type = str(adj.get("type") or "passageway")
+    area = hint.area_m2 if hint and hint.area_m2 else catalog_area_m2(adj_type)
+    return {
+        "from": a,
+        "to": b,
+        "type": hint.type if hint else adj_type,
+        "area_m2": round(float(area), 4),
+        "area_source": (
+            "digest_opening_hint"
+            if hint and hint.area_m2
+            else "hobbyist_orifice_catalog"
+        ),
+        "schedule": hint.schedule if hint else None,
+        "status": hint.status if hint else "draft",
+        "notes": (hint.notes if hint else "")
+        or "Starter opening from GA adjacency — confirm clear area in ContamW",
+        "contam_element": "plr_orfc",
+    }
+
+
+def _digest_opening_row(oh: OpeningHint) -> dict[str, Any]:
+    area = oh.area_m2 or catalog_area_m2(oh.type)
+    return {
+        "from": oh.from_,
+        "to": oh.to,
+        "type": oh.type,
+        "area_m2": round(float(area), 4),
+        "area_source": "digest_opening_hint",
+        "schedule": oh.schedule,
+        "status": oh.status,
+        "notes": oh.notes
+        or "Opening from digest; not yet mirrored in adjacency",
+        "contam_element": "plr_orfc",
+    }
+
+
+def build_openings_draft(
+    airflow: dict[str, Any],
+    digest: ShipDigest | None,
+) -> list[dict[str, Any]]:
+    """Merge adjacency + digest opening_hints into an engineer checklist."""
+    hints = _opening_hints_index(digest)
 
     openings: list[dict[str, Any]] = []
     seen: set[tuple[str, str]] = set()
     for adj in airflow.get("adjacency", []):
-        a, b = str(adj["from"]), str(adj["to"])
-        key = tuple(sorted((a, b)))
+        key = tuple(sorted((str(adj["from"]), str(adj["to"]))))
         if key in seen:
             continue
         seen.add(key)
-        adj_type = str(adj.get("type") or "passageway")
-        hint = hints.get(key)
-        area = hint.area_m2 if hint and hint.area_m2 else catalog_area_m2(adj_type)
-        openings.append(
-            {
-                "from": a,
-                "to": b,
-                "type": hint.type if hint else adj_type,
-                "area_m2": round(float(area), 4),
-                "area_source": (
-                    "digest_opening_hint"
-                    if hint and hint.area_m2
-                    else "hobbyist_orifice_catalog"
-                ),
-                "schedule": hint.schedule if hint else None,
-                "status": hint.status if hint else "draft",
-                "notes": (hint.notes if hint else "")
-                or "Starter opening from GA adjacency — confirm clear area in ContamW",
-                "contam_element": "plr_orfc",
-            }
-        )
+        openings.append(_adjacency_opening_row(adj, hints.get(key)))
 
     # Digest-only openings not yet in adjacency
     if digest:
@@ -121,21 +148,7 @@ def build_openings_draft(
             if key in seen:
                 continue
             seen.add(key)
-            area = oh.area_m2 or catalog_area_m2(oh.type)
-            openings.append(
-                {
-                    "from": oh.from_,
-                    "to": oh.to,
-                    "type": oh.type,
-                    "area_m2": round(float(area), 4),
-                    "area_source": "digest_opening_hint",
-                    "schedule": oh.schedule,
-                    "status": oh.status,
-                    "notes": oh.notes
-                    or "Opening from digest; not yet mirrored in adjacency",
-                    "contam_element": "plr_orfc",
-                }
-            )
+            openings.append(_digest_opening_row(oh))
     return openings
 
 
@@ -163,11 +176,10 @@ def apply_openings_to_airflow(
     return out
 
 
-def ensure_zone_geometry(spatial: dict[str, Any], digest: ShipDigest | None) -> dict[str, Any]:
-    """Fill Contam geometry fields (floor area, height, elevation) when missing."""
-    out = dict(spatial)
-    zones = []
-    ceiling_default = float(digest.ceiling_height_m) if digest else 2.8
+def _deck_elevations(
+    digest: ShipDigest | None,
+    ceiling_default: float,
+) -> dict[str, float]:
     deck_elev: dict[str, float] = {}
     if digest:
         for i, deck in enumerate(digest.decks):
@@ -178,38 +190,128 @@ def ensure_zone_geometry(spatial: dict[str, Any], digest: ShipDigest | None) -> 
         for z in digest.zones:
             if z.elevation_m is not None:
                 deck_elev.setdefault(z.deck, float(z.elevation_m))
+    return deck_elev
 
-    # Stable stack for decks not in digest
+
+def _fill_unseen_decks(
+    zones_in: list[dict[str, Any]],
+    deck_elev: dict[str, float],
+    ceiling_default: float,
+) -> None:
+    """Stable stack for decks not in digest."""
     seen_decks: list[str] = []
-    for z in out.get("zones", []):
+    for z in zones_in:
         deck = str(z.get("deck") or "main")
         if deck not in seen_decks:
             seen_decks.append(deck)
     for i, deck in enumerate(seen_decks):
         deck_elev.setdefault(deck, float(i) * ceiling_default)
 
+
+def _zone_geometry_row(
+    z: dict[str, Any],
+    zone_meta: dict[str, Any],
+    ceiling_default: float,
+    deck_elev: dict[str, float],
+) -> dict[str, Any]:
+    zz = dict(z)
+    zid = zz["id"]
+    ceiling = float(zz.get("ceiling_height_m") or ceiling_default)
+    zz["ceiling_height_m"] = ceiling
+    if "floor_area_m2" not in zz or not zz["floor_area_m2"]:
+        meta = zone_meta.get(zid)
+        if meta and meta.floor_area_m2_est:
+            zz["floor_area_m2"] = float(meta.floor_area_m2_est)
+        else:
+            zz["floor_area_m2"] = round(float(zz["volume_m3"]) / ceiling, 2)
+    deck = str(zz.get("deck") or "main")
+    if "elevation_m" not in zz or zz.get("elevation_m") is None:
+        meta = zone_meta.get(zid)
+        if meta and meta.elevation_m is not None:
+            zz["elevation_m"] = float(meta.elevation_m)
+        else:
+            zz["elevation_m"] = float(deck_elev.get(deck, 0.0))
+    return zz
+
+
+def ensure_zone_geometry(spatial: dict[str, Any], digest: ShipDigest | None) -> dict[str, Any]:
+    """Fill Contam geometry fields (floor area, height, elevation) when missing."""
+    out = dict(spatial)
+    ceiling_default = float(digest.ceiling_height_m) if digest else 2.8
+    deck_elev = _deck_elevations(digest, ceiling_default)
+    _fill_unseen_decks(out.get("zones", []), deck_elev, ceiling_default)
+
     zone_meta = digest.zone_by_id() if digest else {}
-    for z in out.get("zones", []):
-        zz = dict(z)
-        zid = zz["id"]
-        ceiling = float(zz.get("ceiling_height_m") or ceiling_default)
-        zz["ceiling_height_m"] = ceiling
-        if "floor_area_m2" not in zz or not zz["floor_area_m2"]:
-            meta = zone_meta.get(zid)
-            if meta and meta.floor_area_m2_est:
-                zz["floor_area_m2"] = float(meta.floor_area_m2_est)
-            else:
-                zz["floor_area_m2"] = round(float(zz["volume_m3"]) / ceiling, 2)
-        deck = str(zz.get("deck") or "main")
-        if "elevation_m" not in zz or zz.get("elevation_m") is None:
-            meta = zone_meta.get(zid)
-            if meta and meta.elevation_m is not None:
-                zz["elevation_m"] = float(meta.elevation_m)
-            else:
-                zz["elevation_m"] = float(deck_elev.get(deck, 0.0))
-        zones.append(zz)
-    out["zones"] = zones
+    out["zones"] = [
+        _zone_geometry_row(z, zone_meta, ceiling_default, deck_elev)
+        for z in out.get("zones", [])
+    ]
     return out
+
+
+def _deck_temp_offsets(
+    spatial: dict[str, Any],
+    hints: ContamHints,
+) -> dict[str, float]:
+    deck_temps = dict(hints.deck_temp_offset_K)
+    if not deck_temps:
+        # Mild engineering heat bias for decks containing Engineering zones
+        eng_decks = {
+            z.get("deck")
+            for z in spatial.get("zones", [])
+            if z.get("type") == "Engineering"
+        }
+        for z in spatial.get("zones", []):
+            deck = z.get("deck")
+            if deck in eng_decks:
+                deck_temps.setdefault(str(deck), 4.0)
+    return deck_temps
+
+
+def _zone_wall_azimuth(z: dict[str, Any], length: float, beam: float) -> float:
+    x = float((z.get("display") or {}).get("x") or length / 2)
+    # Bow=0°, stern=180°, port/stbd rough
+    if x > 0.7 * length:
+        return 0.0
+    if x < 0.3 * length:
+        return 180.0
+    y = float((z.get("display") or {}).get("y") or 0)
+    return 90.0 if y >= beam / 2 else 270.0
+
+
+def _wall_azimuths(spatial: dict[str, Any]) -> dict[str, float]:
+    dims = spatial.get("deck_dimensions") or {}
+    length = float(dims.get("length_m") or 100.0)
+    beam = float(dims.get("beam_m") or 12.0)
+    return {
+        z["id"]: _zone_wall_azimuth(z, length, beam)
+        for z in spatial.get("zones", [])
+    }
+
+
+def _hvac_filter_map(
+    spatial: dict[str, Any],
+    airflow: dict[str, Any],
+    digest: ShipDigest | None,
+) -> dict[str, str]:
+    hvac_filter: dict[str, str] = {}
+    for hz in airflow.get("hvac_zones", []):
+        hid = hz["id"]
+        rooms = hz.get("rooms") or []
+        # Medical / engineering AHUs get HEPA starter suggestion
+        room_types = {
+            z["id"]: z.get("type")
+            for z in spatial.get("zones", [])
+            if z["id"] in rooms
+        }
+        if any(t in ("Medical", "Engineering") for t in room_types.values()):
+            hvac_filter[hid] = "HEPA"
+
+    if digest:
+        for hh in digest.hvac_hints:
+            if hh.filter_preset:
+                hvac_filter[hh.id] = hh.filter_preset
+    return hvac_filter
 
 
 def build_naval_hobbyist_overrides(
@@ -231,18 +333,7 @@ def build_naval_hobbyist_overrides(
     }
     orifice_map.update(hints.orifice_type_map)
 
-    deck_temps = dict(hints.deck_temp_offset_K)
-    if not deck_temps:
-        # Mild engineering heat bias for decks containing Engineering zones
-        eng_decks = {
-            z.get("deck")
-            for z in spatial.get("zones", [])
-            if z.get("type") == "Engineering"
-        }
-        for z in spatial.get("zones", []):
-            deck = z.get("deck")
-            if deck in eng_decks:
-                deck_temps.setdefault(str(deck), 4.0)
+    deck_temps = _deck_temp_offsets(spatial, hints)
 
     annotations = {
         z["id"]: (z.get("description") or z["id"])[:48]
@@ -250,37 +341,9 @@ def build_naval_hobbyist_overrides(
         if z.get("description")
     }
 
-    wall_az = {}
-    length = float((spatial.get("deck_dimensions") or {}).get("length_m") or 100.0)
-    for z in spatial.get("zones", []):
-        x = float((z.get("display") or {}).get("x") or length / 2)
-        # Bow=0°, stern=180°, port/stbd rough
-        if x > 0.7 * length:
-            wall_az[z["id"]] = 0.0
-        elif x < 0.3 * length:
-            wall_az[z["id"]] = 180.0
-        else:
-            y = float((z.get("display") or {}).get("y") or 0)
-            beam = float((spatial.get("deck_dimensions") or {}).get("beam_m") or 12.0)
-            wall_az[z["id"]] = 90.0 if y >= beam / 2 else 270.0
+    wall_az = _wall_azimuths(spatial)
 
-    hvac_filter: dict[str, str] = {}
-    for hz in airflow.get("hvac_zones", []):
-        hid = hz["id"]
-        rooms = hz.get("rooms") or []
-        # Medical / engineering AHUs get HEPA starter suggestion
-        room_types = {
-            z["id"]: z.get("type")
-            for z in spatial.get("zones", [])
-            if z["id"] in rooms
-        }
-        if any(t in ("Medical", "Engineering") for t in room_types.values()):
-            hvac_filter[hid] = "HEPA"
-
-    if digest:
-        for hh in digest.hvac_hints:
-            if hh.filter_preset:
-                hvac_filter[hh.id] = hh.filter_preset
+    hvac_filter = _hvac_filter_map(spatial, airflow, digest)
 
     duct_ids = list(hints.duct_hvac_ids)
     if hints.skip_duct_spines:
