@@ -1,0 +1,20 @@
+# Initiation-probe worker — the campaign image plus tools/ and the probe entry.
+#
+# The base picard-campaign image carries engines/, picard_framework/ and data/
+# but not tools/; both probe drivers import tools.* helpers, so this layer adds
+# the directory wholesale rather than enumerating the shared modules.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.init_probes -t picard-init-probes .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign deploy/aws/init_probe_entrypoint.py \
+    ./deploy/aws/init_probe_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
