@@ -132,8 +132,9 @@ class TestBinding:
 
     def test_inert_axis_fails(self) -> None:
         # Ratio 1.0 is the spec-lands-but-inert signature the prompt flags.
+        runs = _synthetic_runs(cut_ratio=1.0)
         with pytest.raises(AssertionError, match="inert"):
-            _check_binding(None, _synthetic_runs(cut_ratio=1.0), {})
+            _check_binding(None, runs, {})
 
     def test_witness_that_draws_fails(self) -> None:
         runs = _synthetic_runs(cut_ratio=0.25)

@@ -1166,7 +1166,7 @@ class TestCascadeQuarantineCompliance:
 class TestObservationEnabledGate:
     def test_disabled_returns_empty_results(self) -> None:
         """Golden: observation.enabled=false yields empty instrument payloads."""
-        from orchestrator_epoch import run_observation_sampling
+        from orchestrator_epoch import ZoneContext, run_observation_sampling
 
         engine = MagicMock()
         obs = MagicMock()
@@ -1175,11 +1175,13 @@ class TestObservationEnabledGate:
             obs=obs,
             agents=[],
             spaces={},
-            zone_names=["Bridge"],
-            zone_volumes={"Bridge": 100.0},
-            zone_microflora_shifts={},
+            zones=ZoneContext(
+                zone_names=["Bridge"],
+                zone_volumes={"Bridge": 100.0},
+                zone_microflora_shifts={},
+                high_traffic=["Bridge"],
+            ),
             trigger_status=STATUS_BASELINE,
-            high_traffic=["Bridge"],
             syn_result={"sick_call_agents": []},
             engine=engine,
             pathogen_profiles={},
@@ -1198,7 +1200,7 @@ class TestObservationEnabledGate:
 
     def test_enabled_sensitivity_invokes_air_sniffer(self) -> None:
         """Config sensitivity: enabled=true samples; false does not."""
-        from orchestrator_epoch import run_observation_sampling
+        from orchestrator_epoch import ZoneContext, run_observation_sampling
 
         engine = MagicMock()
         engine.get_pathogen_zone_mass.return_value = {}
@@ -1220,11 +1222,13 @@ class TestObservationEnabledGate:
             epoch=1,
             agents=[],
             spaces=spaces,
-            zone_names=["Bridge"],
-            zone_volumes={"Bridge": 100.0},
-            zone_microflora_shifts={},
+            zones=ZoneContext(
+                zone_names=["Bridge"],
+                zone_volumes={"Bridge": 100.0},
+                zone_microflora_shifts={},
+                high_traffic=["Bridge"],
+            ),
             trigger_status=STATUS_BASELINE,
-            high_traffic=["Bridge"],
             syn_result={"sick_call_agents": []},
             engine=engine,
             pathogen_profiles={},

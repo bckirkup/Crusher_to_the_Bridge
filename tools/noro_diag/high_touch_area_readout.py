@@ -245,7 +245,6 @@ def _k_threshold_alpha05(n: int) -> int | None:
 def paired_dose_distribution(
     arm: dict[int, dict[str, Any]],
     base: dict[int, dict[str, Any]],
-    scales: dict[str, float],
     predicted_direction: str,
 ) -> dict[str, Any]:
     """Criterion 2b, rescored: paired per-seed log10 dose shift.
@@ -430,7 +429,7 @@ def readout(
         "patch_pickups_arm": patch_pickups(arm),
         "patch_pickups_base": patch_pickups(base),
         "paired_dose_distribution": paired_dose_distribution(
-            arm, base, scales, predicted_direction,
+            arm, base, predicted_direction,
         ),
         "saturation_arm": saturation(arm),
         "saturation_base": saturation(base),

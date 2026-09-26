@@ -319,6 +319,37 @@ def run_transport_job(job: dict[str, Any]) -> dict[str, Any]:
     return report
 
 
+def _timing_block(samples: list[float]) -> dict[str, Any]:
+    return {
+        "repeats": len(samples),
+        "seconds_mean": statistics.fmean(samples),
+        "seconds_min": min(samples),
+        "seconds_max": max(samples),
+        "seconds_stdev": (
+            statistics.pstdev(samples) if len(samples) > 1 else 0.0
+        ),
+    }
+
+
+def _outcome_delta(
+    native_summary: dict[str, Any],
+    cx_summary: dict[str, Any],
+) -> dict[str, Any]:
+    delta: dict[str, Any] = {}
+    for key in (
+        "attack_rate", "n_infected",
+        "hvac_downstream_exposure_events", "operational_impact_score",
+    ):
+        nv, xv = native_summary.get(key), cx_summary.get(key)
+        if nv is not None and xv is not None:
+            try:
+                delta[key] = xv - nv
+            except TypeError:
+                # Omit deltas for fields that cannot be subtracted.
+                pass
+    return delta
+
+
 def run_full_sim_job(job: dict[str, Any]) -> dict[str, Any]:
     from picard_framework.simulation.ship_simulation import ShipSimulation
     from tools.contam_outcome_compare import _build_spec, _summarize
@@ -357,15 +388,7 @@ def run_full_sim_job(job: dict[str, Any]) -> dict[str, Any]:
         "seed": seed,
         "native": {
             "summary": native_summary,
-            "timing": {
-                "repeats": len(native_samples),
-                "seconds_mean": statistics.fmean(native_samples),
-                "seconds_min": min(native_samples),
-                "seconds_max": max(native_samples),
-                "seconds_stdev": (
-                    statistics.pstdev(native_samples) if len(native_samples) > 1 else 0.0
-                ),
-            },
+            "timing": _timing_block(native_samples),
         },
         "contamx": None,
         "delta": None,
@@ -391,30 +414,10 @@ def run_full_sim_job(job: dict[str, Any]) -> dict[str, Any]:
         report["contamx_available"] = True
         report["contamx"] = {
             "summary": cx_summary,
-            "timing": {
-                "repeats": len(cx_samples),
-                "seconds_mean": statistics.fmean(cx_samples),
-                "seconds_min": min(cx_samples),
-                "seconds_max": max(cx_samples),
-                "seconds_stdev": (
-                    statistics.pstdev(cx_samples) if len(cx_samples) > 1 else 0.0
-                ),
-            },
+            "timing": _timing_block(cx_samples),
         }
-        delta: dict[str, Any] = {}
         assert native_summary is not None and cx_summary is not None
-        for key in (
-            "attack_rate", "n_infected",
-            "hvac_downstream_exposure_events", "operational_impact_score",
-        ):
-            nv, xv = native_summary.get(key), cx_summary.get(key)
-            if nv is not None and xv is not None:
-                try:
-                    delta[key] = xv - nv
-                except TypeError:
-                    # Omit deltas for fields that cannot be subtracted.
-                    pass
-        report["delta"] = delta
+        report["delta"] = _outcome_delta(native_summary, cx_summary)
         nt = report["native"]["timing"]["seconds_mean"]
         ct = report["contamx"]["timing"]["seconds_mean"]
         report["speedup_native_over_contamx"] = (ct / nt) if nt > 0 else None
@@ -454,6 +457,28 @@ def load_suite(suite_path: str) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     return suite, jobs
 
 
+def _print_transport_divergence(
+    report: dict[str, Any],
+    native: dict[str, Any],
+) -> None:
+    div = report["divergence"]
+    print(f"  final L1={div['final_l1']:.4g}  L∞={div['final_linf']:.4g}  "
+          f"mean L1={div['mean_l1']:.4g}")
+    n_paths = (native.get("n_paths"),
+               (report.get("contamx") or {}).get("n_paths"))
+    print(f"  n_paths native/contamx: {n_paths[0]}/{n_paths[1]}")
+    inv = (report.get("contamx") or {}).get("path_inventory") or {}
+    if inv.get("by_type"):
+        print(f"  ContamX path types: {inv['by_type']}")
+    for conn in inv.get("injection_connectivity") or []:
+        flag = " ISOLATED" if conn.get("isolated") else ""
+        print(
+            f"  ContamX inject {conn['zone']}: "
+            f"out_degree={conn['out_degree']} "
+            f"out_m3h={conn['out_m3h']}{flag}"
+        )
+
+
 def _print_job_summary(report: dict[str, Any]) -> None:
     print(f"\n=== {report.get('id')} ({report.get('mode')}) "
           f"platform={report.get('platform')} ===")
@@ -468,22 +493,7 @@ def _print_job_summary(report: dict[str, Any]) -> None:
             print(f"  native is {speed:.2f}x ContamX wall time "
                   f"(>1 means ContamX slower)")
         if report.get("mode") == "transport" and report.get("divergence"):
-            div = report["divergence"]
-            print(f"  final L1={div['final_l1']:.4g}  L∞={div['final_linf']:.4g}  "
-                  f"mean L1={div['mean_l1']:.4g}")
-            n_paths = (native.get("n_paths"),
-                       (report.get("contamx") or {}).get("n_paths"))
-            print(f"  n_paths native/contamx: {n_paths[0]}/{n_paths[1]}")
-            inv = (report.get("contamx") or {}).get("path_inventory") or {}
-            if inv.get("by_type"):
-                print(f"  ContamX path types: {inv['by_type']}")
-            for conn in inv.get("injection_connectivity") or []:
-                flag = " ISOLATED" if conn.get("isolated") else ""
-                print(
-                    f"  ContamX inject {conn['zone']}: "
-                    f"out_degree={conn['out_degree']} "
-                    f"out_m3h={conn['out_m3h']}{flag}"
-                )
+            _print_transport_divergence(report, native)
         if report.get("delta"):
             print(f"  outcome delta (contamx-native): {report['delta']}")
     else:

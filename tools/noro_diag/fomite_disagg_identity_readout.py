@@ -210,6 +210,12 @@ def runtime_ratio(
     values = sorted(ratios.values())
     median = statistics.median(values)
     low, high = RUNTIME_ENVELOPE
+    if median > high:
+        verdict = "above envelope"
+    elif low <= median:
+        verdict = "inside envelope"
+    else:
+        verdict = "below envelope"
     return {
         "seeds": len(values),
         "median_ratio": median,
@@ -222,11 +228,7 @@ def runtime_ratio(
         "sum_seconds_pooled": sum(
             _wall_clock(base_cells[s]) or 0.0 for s in ratios
         ),
-        "verdict": (
-            "inside envelope" if low <= median <= high
-            else "above envelope" if median > high
-            else "below envelope"
-        ),
+        "verdict": verdict,
     }
 
 

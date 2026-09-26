@@ -222,6 +222,7 @@ class TestPhiIsADesignArm:
     def _spec(self, phi: float) -> dict:
         from telemetry_buffer.observation_model.admissible_region import Design
         from telemetry_buffer.observation_model.bounded_screen import (
+            ScreenRunParams,
             build_run_spec,
         )
         design = Design(
@@ -232,8 +233,10 @@ class TestPhiIsADesignArm:
         )
         units = [0.5] * len(design.factors)
         return build_run_spec(
-            design.factors, units, seed=3, description="phi_probe",
-            **design.run_kwargs(),
+            design.factors, units,
+            ScreenRunParams(
+                seed=3, description="phi_probe", **design.run_kwargs(),
+            ),
         )
 
     def test_the_control_arm_is_the_pre_change_spec(self) -> None:

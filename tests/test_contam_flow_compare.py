@@ -160,3 +160,52 @@ def test_contamx_report_kept_links_use_flow_m3h() -> None:
     )
     assert report["contamx"]["n_kept_real_paths"] == 2
     assert report["connectivity_gap"][0]["contamx_out_edges"] >= 1
+
+
+def test_shared_flow_notes_mode_branches() -> None:
+    from tools.contam_flow_compare import _shared_flow_notes
+
+    # No SIM flows or too few kept links → no note.
+    assert _shared_flow_notes({"sim_flows_loaded": False}) == []
+    assert _shared_flow_notes({
+        "sim_flows_loaded": True,
+        "kept_links": [{"flow_m3h": 3.0}],
+    }) == []
+    # All identical → the impossible-mode note.
+    all_same = {"sim_flows_loaded": True, "kept_links": [
+        {"flow_m3h": 4.0}, {"flow_m3h": 4.0},
+    ]}
+    notes = _shared_flow_notes(all_same)
+    assert len(notes) == 1
+    assert "identical flow" in notes[0]
+    # Majority share → stride/join note.
+    majority = {"sim_flows_loaded": True, "kept_links": [
+        {"flow_m3h": 4.0}, {"flow_m3h": 4.0}, {"flow_m3h": 4.0},
+        {"flow_m3h": 9.0},
+    ]}
+    notes = _shared_flow_notes(majority)
+    assert len(notes) == 1
+    assert "stride/join" in notes[0]
+
+
+def test_print_contamx_links(capsys) -> None:
+    from tools.contam_flow_compare import _print_contamx_links
+
+    _print_contamx_links({
+        "kept_links": [
+            {"path_nr": 7, "kind": "passageway", "from_zone": "A",
+             "to_zone": "B", "flow_m3h": 15.0},
+        ],
+        "synth_ahs_links": [
+            {"path_id": "ahs_1", "from_zone": "A", "to_zone": "C",
+             "flow_m3h": 99.0},
+        ],
+    })
+    out = capsys.readouterr().out
+    assert "kept real↔real links" in out
+    assert "p007" in out
+    assert "AHS synth links (top)" in out
+
+    _print_contamx_links({"kept_links": [], "synth_ahs_links": []})
+    out = capsys.readouterr().out
+    assert "AHS synth links: none" in out

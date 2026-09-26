@@ -86,6 +86,7 @@ from telemetry_buffer.observation_model.bounded_screen import (
     DEFAULT_PLATFORM,
     FACTOR_SETS,
     Factor,
+    ScreenRunParams,
     build_run_spec,
 )
 from telemetry_buffer.observation_model.midrs_incidence_targets import (
@@ -369,9 +370,11 @@ def run_row(
     spec = build_run_spec(
         factors,
         units,
-        seed=seed,
-        description=f"admissible_region_p{point_index:04d}_s{seed}",
-        **design.run_kwargs(),
+        ScreenRunParams(
+            seed=seed,
+            description=f"admissible_region_p{point_index:04d}_s{seed}",
+            **design.run_kwargs(),
+        ),
     )
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"

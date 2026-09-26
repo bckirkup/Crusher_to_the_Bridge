@@ -276,9 +276,10 @@ class TestDesignResolution:
         assert exponent["exponent"] == pytest.approx(0.75)
 
     def test_missing_surveillance_config_is_rejected(self):
+        design = ia.ArmsDesign(surveillance="wearable")
         with pytest.raises(SystemExit, match="surveillance config"):
             ia.run_spec_payload(
-                ia.ArmsDesign(surveillance="wearable"),
+                design,
                 manifest=MANIFEST,
                 arm=ia.ARM_DISTRIBUTION,
                 variant="standard",
@@ -786,5 +787,6 @@ class TestCli:
         assert sampler.iter_warmup == 1600
 
     def test_an_unknown_arm_is_rejected_by_the_cli(self):
+        parser = ia.build_parser()
         with pytest.raises(SystemExit):
-            ia.build_parser().parse_args(["simulate", "--arm", "nope"])
+            parser.parse_args(["simulate", "--arm", "nope"])

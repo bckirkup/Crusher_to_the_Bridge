@@ -35,11 +35,11 @@ jobs:
         run: |
           # F-rules are blocking (undefined names / unused imports).
           ruff check --select F --target-version py311 \
-            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            api/ engines/ crusher_labs/ picard_framework/ decision_engine/ \
             orchestrator*.py presidio_runner.py deploy/aws/
           # E/W/I and complexity are blocking.
           ruff check --select E,W,I,C901 --ignore E501,E741 --target-version py311 \
-            engines/ crusher_labs/ picard_framework/ decision_engine/ \
+            api/ engines/ crusher_labs/ picard_framework/ decision_engine/ \
             orchestrator*.py presidio_runner.py deploy/aws/
 
   sonar-mechanical-guard:

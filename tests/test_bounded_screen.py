@@ -17,6 +17,13 @@ from simulation_utils.platform_complement import (
 from telemetry_buffer.observation_model import bounded_screen
 
 PATHOGEN = "norwalk_gi"
+_STUB_RUN_KWARGS = {
+    "pathogen_id": PATHOGEN,
+    "bundle": "active_profiles",
+    "platform": "mega_cruise_5000",
+    "epochs": 1,
+    "num_agents": 1,
+}
 
 
 def _factor(name: str) -> bounded_screen.Factor:
@@ -221,7 +228,7 @@ def _constant_run_point(weights: dict[str, float]):
     def run_point(
         factors: bounded_screen.Factor,
         units: list[float],
-        **_kwargs: object,
+        _params: bounded_screen.ScreenRunParams,
     ) -> dict[str, float]:
         total = sum(
             weights[factor.name] * float(unit)
@@ -238,12 +245,10 @@ def _seeded_run_point(values: dict[int, float], seen_units: list[list[float]]):
     def run_point(
         factors: bounded_screen.Factor,
         units: list[float],
-        *,
-        seed: int,
-        **_kwargs: object,
+        params: bounded_screen.ScreenRunParams,
     ) -> dict[str, float]:
         seen_units.append([float(unit) for unit in units])
-        return dict.fromkeys(bounded_screen.SCORED_OUTPUTS, values[seed])
+        return dict.fromkeys(bounded_screen.SCORED_OUTPUTS, values[params.seed])
 
     return run_point
 
@@ -302,6 +307,7 @@ def test_elementary_effects_recover_a_linear_response_slope(
 
     effects = bounded_screen.elementary_effects(
         bounded_screen.NOROVIRUS_FACTORS, 2, [1], np.random.default_rng(3),
+        **_STUB_RUN_KWARGS,
     )
 
     assert {
@@ -321,6 +327,7 @@ def test_elementary_effects_rank_a_stronger_factor_above_a_weaker_one(
 
     effects = bounded_screen.elementary_effects(
         bounded_screen.NOROVIRUS_FACTORS, 2, [1], np.random.default_rng(5),
+        **_STUB_RUN_KWARGS,
     )
     ranked = sorted(
         effects,
@@ -342,6 +349,7 @@ def test_elementary_effects_report_no_spread_for_a_linear_response(
 
     effects = bounded_screen.elementary_effects(
         bounded_screen.NOROVIRUS_FACTORS, 3, [1], np.random.default_rng(7),
+        **_STUB_RUN_KWARGS,
     )
 
     assert effects["surface_decay_log10_per_day"]["attack_rate"]["sigma"] == pytest.approx(
@@ -359,6 +367,7 @@ def test_elementary_effects_count_one_effect_per_factor_per_trajectory(
 
     effects = bounded_screen.elementary_effects(
         bounded_screen.NOROVIRUS_FACTORS, 4, [1], np.random.default_rng(9),
+        **_STUB_RUN_KWARGS,
     )
 
     first = bounded_screen.NOROVIRUS_FACTORS[0].name
@@ -373,7 +382,9 @@ def test_noise_floor_is_the_seed_to_seed_standard_deviation(
         bounded_screen, "run_point", _seeded_run_point(values, []),
     )
 
-    floor = bounded_screen.noise_floor(bounded_screen.NOROVIRUS_FACTORS, list(values))
+    floor = bounded_screen.noise_floor(
+        bounded_screen.NOROVIRUS_FACTORS, list(values), **_STUB_RUN_KWARGS,
+    )
 
     assert floor["attack_rate"] == pytest.approx(statistics.stdev(values.values()))
 
@@ -386,7 +397,9 @@ def test_noise_floor_samples_the_box_centre(
         bounded_screen, "run_point", _seeded_run_point({500: 0.0, 501: 1.0}, seen),
     )
 
-    bounded_screen.noise_floor(bounded_screen.NOROVIRUS_FACTORS, [500, 501])
+    bounded_screen.noise_floor(
+        bounded_screen.NOROVIRUS_FACTORS, [500, 501], **_STUB_RUN_KWARGS,
+    )
 
     assert seen == [[0.5] * len(bounded_screen.NOROVIRUS_FACTORS)] * 2
 
@@ -398,7 +411,9 @@ def test_noise_floor_of_a_single_seed_is_zero(
         bounded_screen, "run_point", _seeded_run_point({500: 0.4}, []),
     )
 
-    floor = bounded_screen.noise_floor(bounded_screen.NOROVIRUS_FACTORS, [500])
+    floor = bounded_screen.noise_floor(
+        bounded_screen.NOROVIRUS_FACTORS, [500], **_STUB_RUN_KWARGS,
+    )
 
     assert floor["peak_epoch"] == pytest.approx(0.0)
 
@@ -483,12 +498,14 @@ def test_an_isolated_run_seeds_only_the_screened_pathogen(
     bounded_screen.run_point(
         bounded_screen.NOROVIRUS_FACTORS,
         [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
-        seed=500,
-        pathogen_id=PATHOGEN,
-        bundle="active_profiles",
-        platform="mega_cruise_5000",
-        epochs=2,
-        num_agents=10,
+        bounded_screen.ScreenRunParams(
+            seed=500,
+            pathogen_id=PATHOGEN,
+            bundle="active_profiles",
+            platform="mega_cruise_5000",
+            epochs=2,
+            num_agents=10,
+        ),
     )
 
     boarding = seen["spec"]["config_overrides"]["initiation"]["boarding"]
@@ -505,13 +522,15 @@ def test_a_bundle_run_leaves_the_declared_seeding_alone(
     bounded_screen.run_point(
         bounded_screen.NOROVIRUS_FACTORS,
         [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
-        seed=500,
-        pathogen_id=PATHOGEN,
-        bundle="active_profiles",
-        platform="mega_cruise_5000",
-        epochs=2,
-        num_agents=10,
-        co_seeded="bundle",
+        bounded_screen.ScreenRunParams(
+            seed=500,
+            pathogen_id=PATHOGEN,
+            bundle="active_profiles",
+            platform="mega_cruise_5000",
+            epochs=2,
+            num_agents=10,
+            co_seeded="bundle",
+        ),
     )
 
     assert list(seen["spec"]["pathogen_overrides"]) == [PATHOGEN]
@@ -571,16 +590,15 @@ def test_an_omitted_complement_is_the_hulls_and_a_wrong_one_is_refused(
 
     assert run["num_agents"] == declared_total(args.platform)
 
+    args = bounded_screen.parse_args(
+        [
+            "--out", "screen.json",
+            "--platform", "mega_cruise_5000",
+            "--num-agents", "450",
+        ],
+    )
     with pytest.raises(ValueError, match="classless"):
-        bounded_screen.run_metadata(
-            bounded_screen.parse_args(
-                [
-                    "--out", "screen.json",
-                    "--platform", "mega_cruise_5000",
-                    "--num-agents", "450",
-                ],
-            ),
-        )
+        bounded_screen.run_metadata(args)
 
 
 def test_cli_output_paths_are_confined_to_the_repository_root() -> None:
@@ -802,10 +820,9 @@ def test_a_duplicated_seed_block_is_refused(
     _stub_seed_mean(monkeypatch)
     one = _raw(2, shard_count=2, shard_index=0, seed_shards=2)
 
+    merged = bounded_screen.merge_effects([one, one])
     with pytest.raises(ValueError, match="pools 4 seeds, design has 2"):
-        bounded_screen.pool_effects(
-            bounded_screen.merge_effects([one, one]), 2,
-        )
+        bounded_screen.pool_effects(merged, 2)
 
 
 def test_seed_blocks_pool_by_a_seed_weighted_mean() -> None:
@@ -986,13 +1003,15 @@ def _spec(*, crew_duty_exclusion: bool) -> dict[str, object]:
     return bounded_screen.build_run_spec(
         bounded_screen.NOROVIRUS_FACTORS,
         [0.5] * len(bounded_screen.NOROVIRUS_FACTORS),
-        seed=11,
-        pathogen_id=PATHOGEN,
-        bundle="active_profiles",
-        platform="mega_cruise_5000",
-        epochs=24,
-        num_agents=200,
-        crew_duty_exclusion=crew_duty_exclusion,
+        bounded_screen.ScreenRunParams(
+            seed=11,
+            pathogen_id=PATHOGEN,
+            bundle="active_profiles",
+            platform="mega_cruise_5000",
+            epochs=24,
+            num_agents=200,
+            crew_duty_exclusion=crew_duty_exclusion,
+        ),
     )
 
 

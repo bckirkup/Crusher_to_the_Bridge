@@ -286,6 +286,32 @@ def import_prj(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
     return simplify_contamw34(text)
 
 
+def _interchange_platform(lines: list[str]) -> str:
+    for raw in lines[1:]:
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("!"):
+            continue
+        return stripped.split()[0]
+    return "imported_platform"
+
+
+def _dispatch_sections(
+    lines: list[str],
+    section_parsers: dict[str, Any],
+) -> None:
+    i = 0
+    while i < len(lines):
+        header = lines[i].strip()
+        i += 1
+        if not header.startswith("!------"):
+            continue
+        for prefix, parse in section_parsers.items():
+            if header.startswith(prefix):
+                rows, i = _iter_records(lines, i + 1)
+                parse(rows)
+                break
+
+
 def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
     lines = text.splitlines()
     if not lines or not lines[0].strip().startswith("ContamW"):
@@ -293,19 +319,12 @@ def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
             "Not a recognized CONTAM .prj file (missing 'ContamW' signature)"
         )
 
-    platform = "imported_platform"
+    platform = _interchange_platform(lines)
     zones: list[dict[str, Any]] = []
     adjacency: list[dict[str, str]] = []
     hvac_zones: list[dict[str, Any]] = []
     cross_zone_links: list[dict[str, Any]] = []
     levels: dict[int, str] = {}
-
-    for raw in lines[1:]:
-        stripped = raw.strip()
-        if not stripped or stripped.startswith("!"):
-            continue
-        platform = stripped.split()[0]
-        break
 
     section_parsers = {
         "!------ levels": lambda rows: _parse_interchange_levels(rows, levels),
@@ -323,17 +342,7 @@ def _import_interchange(text: str) -> tuple[dict[str, Any], dict[str, Any]]:
         ),
     }
 
-    i = 0
-    while i < len(lines):
-        header = lines[i].strip()
-        i += 1
-        if not header.startswith("!------"):
-            continue
-        for prefix, parse in section_parsers.items():
-            if header.startswith(prefix):
-                rows, i = _iter_records(lines, i + 1)
-                parse(rows)
-                break
+    _dispatch_sections(lines, section_parsers)
 
     spatial_layout: dict[str, Any] = {
         "platform": platform,

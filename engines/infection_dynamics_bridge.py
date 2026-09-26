@@ -21,6 +21,14 @@ Key parameters extracted from the Java source
 - **Passenger.java / StrucCrew.java**: Role-specific behavior schedules.
 - **Compartmental-models**: SEIQR parameters (R0=2.1, σ=0.20, γ=0.091).
 
+The R source's stratified S-E-I-Q-R compartmental structure
+(``SEIQR-SCM-diamond.Rmd``: Euler-multinomial transitions, λ = R_eff·γ·(I_own/N_own
++ mixpc·I_other/N_other), quarantine compartment with qfrac/qrate) is **not**
+implemented here and is superseded by design: this bridge replaces it with
+agent-based transmission over zone colocation. The SEIQR constants below are
+retained as calibration reference only — they are inputs the ABM's emergent
+dynamics are compared against, not rates the engine integrates.
+
 The bridge outputs agent states compatible with ``telemetry_buffer.schema``.
 """
 

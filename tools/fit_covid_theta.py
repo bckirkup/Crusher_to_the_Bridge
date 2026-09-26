@@ -147,14 +147,14 @@ def _merge(args: argparse.Namespace) -> int:
     scored = held_out["scored"]
     if scored is None:
         print("held-out: no cells at the fitted Theta", flush=True)
-        return 0
-    for score in scored["scores"]:
-        print(f"{score['anchor_id']}: {score['verdicts']}", flush=True)
-    print(
-        f"{scored['placement']['anchor_id']}: above IQR in "
-        f"{scored['placement']['frequency_above_iqr']} of defined seeds",
-        flush=True,
-    )
+    else:
+        for score in scored["scores"]:
+            print(f"{score['anchor_id']}: {score['verdicts']}", flush=True)
+        print(
+            f"{scored['placement']['anchor_id']}: above IQR in "
+            f"{scored['placement']['frequency_above_iqr']} of defined seeds",
+            flush=True,
+        )
     return 0
 
 

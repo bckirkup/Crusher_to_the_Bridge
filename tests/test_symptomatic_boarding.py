@@ -452,8 +452,9 @@ class TestRefusals:
         block = cfg["initiation"]["boarding"][PATHOGEN]
         block["rate_mode"] = "screening_prevalence"
         block["prevalence"] = {"passenger": 0.03, "crew": 0.02}
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="renewal"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_party_mode_refuses_the_stream(self) -> None:
         cfg = _cfg({"enabled": True, "notes": "x"})
@@ -462,8 +463,9 @@ class TestRefusals:
         block.pop("renewal")
         block["mode"] = "party"
         block["party"] = {"probability": 0.1, "size": 3}
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="party"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_negative_partition_is_refused(self) -> None:
         # A mean illness longer than the detectable window empties p_asym.
@@ -481,8 +483,9 @@ class TestRefusals:
     def test_a_non_mapping_stream_is_refused(self) -> None:
         cfg = _cfg({"enabled": True, "notes": "x"})
         cfg["initiation"]["boarding"][PATHOGEN]["symptomatic_stream"] = "on"
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="must be a mapping"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_disabled_stream_reads_no_further_keys(self) -> None:
         spec = _resolve({"enabled": False, "notes": "x"})

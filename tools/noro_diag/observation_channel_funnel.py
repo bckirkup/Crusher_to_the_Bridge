@@ -150,7 +150,7 @@ class ChannelCapture:
         self.exposure: dict[int, HostExposure] = {}
         self.beliefs_nonempty_epochs = 0
 
-    def observe(self, sim: Any, work: Any) -> None:
+    def observe(self, _sim: Any, work: Any) -> None:
         epoch = int(work.epoch)
         self.status_by_epoch[epoch] = str(work.state.trigger_status)
         syn = work.syn_result or {}
@@ -288,7 +288,7 @@ def illness_class(record: dict[str, Any]) -> str:
 
 def _split(records: list[dict[str, Any]], ids: set[int]) -> dict[str, int]:
     """Count records in ``ids`` total and per role group."""
-    out = {"total": 0, **{role: 0 for role in ROLES}}
+    out = {"total": 0, **dict.fromkeys(ROLES, 0)}
     for record in records:
         if record["agent_id"] not in ids:
             continue

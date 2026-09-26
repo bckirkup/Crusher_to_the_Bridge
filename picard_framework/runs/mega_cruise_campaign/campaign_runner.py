@@ -17,7 +17,9 @@ Windows:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
+import math
 import os
 import re
 import shutil
@@ -33,8 +35,10 @@ import yaml
 from picard_framework.analysis.sentinel.wastewater_assays import (
     DEFAULT_ASSAY_MODE,
 )
+from picard_framework.catalog.registry import CatalogRegistry
 from picard_framework.pathogen_overrides import (
     isolate_arm_overrides,
+    load_pathogen_bundle,
 )
 from picard_framework.runs.mega_cruise_campaign import (
     boarding_axis,
@@ -413,6 +417,125 @@ def get_pathogen_config(
     )
 
 
+def _bundle_pathogen_profile(
+    bundle: str, pathogen_id: str,
+) -> dict[str, Any]:
+    """The pathogen's own entry in the named bundle, or {} when unresolvable."""
+    registry = CatalogRegistry.from_repo(str(REPO_ROOT))
+    try:
+        path = registry.resolve_pathogen_bundle(bundle)
+    except KeyError:
+        return {}
+    return dict(load_pathogen_bundle(path).get(pathogen_id) or {})
+
+
+# The campaign's susceptibility-ceiling axis speaks the mechanism's own
+# vocabulary: ``secretor_negative_fraction`` (per-host Bernoulli prevalence of
+# the FUT2 non-secretor phenotype) and
+# ``secretor_negative_relative_susceptibility`` (a drawn host's susceptibility
+# relative to a secretor). The withdrawn spellings are refused rather than
+# honoured: under a profile carrying ``secretor_negative_fraction`` the engine
+# resolves it first, so an ``innate_nonsusceptible_fraction`` override is
+# silently shadowed and the run would archive a swept axis it never executed
+# (norovirus open ledger, Wave-1 task #21).
+SECRETOR_AXIS_KEYS = (
+    "secretor_negative_fraction",
+    "secretor_negative_relative_susceptibility",
+)
+_WITHDRAWN_NONSUSCEPTIBLE_KEYS = (
+    "non_susceptible",
+    "innate_nonsusceptible_fraction",
+)
+
+
+def _secretor_declared_value(decl: Any, *, seed: int, field: str) -> float:
+    """Resolve one vector declaration to the run's value in [0, 1].
+
+    A scalar is a swept point. ``{"dist": "uniform"|"log_uniform",
+    "interval": [lo, hi]}`` draws once per run, derived as a pure hash of the
+    run seed and the field name, so a tier can sample a sourced window
+    instead of gridding it, without touching any engine RNG stream.
+    """
+    if isinstance(decl, Mapping):
+        bounds = decl.get("interval")
+        if (
+            not isinstance(bounds, Sequence)
+            or isinstance(bounds, str)
+            or len(bounds) != 2
+        ):
+            raise ValueError(
+                f"{field} declaration needs 'interval': [lo, hi], got {bounds!r}"
+            )
+        lo, hi = float(bounds[0]), float(bounds[1])
+        if not 0.0 <= lo <= hi <= 1.0:
+            raise ValueError(
+                f"{field} interval must lie in [0, 1], got [{lo}, {hi}]"
+            )
+        u = int.from_bytes(
+            hashlib.sha256(f"{seed}:{field}".encode()).digest()[:8]
+        ) / float(1 << 64)
+        dist = str(decl.get("dist"))
+        if dist == "uniform":
+            return lo + u * (hi - lo)
+        if dist == "log_uniform":
+            if lo <= 0.0:
+                raise ValueError(
+                    f"{field} log_uniform interval needs lo > 0, got {lo}"
+                )
+            return 10.0 ** (
+                math.log10(lo) + u * (math.log10(hi) - math.log10(lo))
+            )
+        raise ValueError(f"{field} dist {dist!r} unsupported: uniform|log_uniform")
+    val = float(decl)
+    if not 0.0 <= val <= 1.0:
+        raise ValueError(f"{field} must lie in [0, 1], got {val}")
+    return val
+
+
+def _secretor_axis(
+    vec: Mapping[str, Any],
+    profile: Mapping[str, Any],
+    base_patch: Mapping[str, Any],
+    seed: int,
+) -> dict[str, float] | None:
+    """Resolved ``{fraction, relative_susceptibility}`` pair for one run.
+
+    Per coordinate the precedence is vector declaration, then the arm's base
+    override patch, then the bundle profile, then 0.0 — the same order the
+    engine applies to the merged profile — and the resolved pair is what gets
+    written into ``pathogen_overrides`` and recorded in
+    ``campaign_parameters``, so the archive names the mechanism the run
+    actually executed rather than the knob a stale axis claimed to move.
+
+    Returns ``None`` when no layer declares the mechanism and the profile
+    carries none (a fraction of 0.0): there is then no axis to pin, and the
+    spec stays silent rather than claiming one.
+    """
+    for key in _WITHDRAWN_NONSUSCEPTIBLE_KEYS:
+        if key in vec:
+            raise ValueError(
+                f"parameter_vectors key {key!r} is the withdrawn "
+                f"sterile-immunity axis; declare secretor_negative_fraction "
+                f"and/or secretor_negative_relative_susceptibility instead. "
+                f"The innate_nonsusceptible_fraction alias is shadowed by "
+                f"secretor_negative_fraction in any current bundle and never "
+                f"reaches the engine."
+            )
+    declared = any(k in vec for k in SECRETOR_AXIS_KEYS)
+    resolved = {
+        key: _secretor_declared_value(
+            vec[key] if key in vec
+            else base_patch.get(key, profile.get(key, 0.0)),
+            seed=seed,
+            field=key,
+        )
+        for key in SECRETOR_AXIS_KEYS
+    }
+    if not declared and resolved["secretor_negative_fraction"] <= 0.0:
+        return None
+    return resolved
+
+
 def combo_overrides(manifest: dict[str, Any], combo: str) -> tuple[str, dict[str, Any]]:
     cfg = manifest["combo_configs"][combo]
     bundle = cfg["bundle"]
@@ -511,6 +634,13 @@ def _density_contact_override(
         # Exponent sweeps imply density-family modes unless mode is explicit.
         # (After the early return, contact_mode is None ⇒ alpha is not None.)
         tx["contact_mode"] = "density_dependent"
+    if tx["contact_mode"] != "per_partner_contact":
+        # The engine reads activity_contacts only under per_partner_contact
+        # and refuses the block under any other mode, so a density-family
+        # arm must switch it off — the same companion override
+        # hull_compounding_v1 declares in its manifest. Part of replacing
+        # the shipped kernel, not a constant change.
+        tx["activity_contacts"] = {"enabled": False}
     if alpha is not None:
         tx["density_dependent"] = {"exponent": float(alpha)}
     return {"transmission": tx}
@@ -607,6 +737,8 @@ def _iter_synthetic_recovery_runs(
     """Yield Picard specs for synthetic_recovery (sr*) tiers."""
     pathogen = tier["pathogen"]
     bundle, pathogen_id, base_overrides = get_pathogen_config(manifest, pathogen)
+    profile = _bundle_pathogen_profile(bundle, pathogen_id)
+    base_patch = dict((base_overrides or {}).get(pathogen_id) or {})
     platforms = _resolve_tier_platforms(
         tier,
         fallback_platform=manifest["platform"],
@@ -627,11 +759,11 @@ def _iter_synthetic_recovery_runs(
         )
         dose = float(vec["dose_adj"])
         alpha = float(vec["alpha_c"])
-        nonsus = float(vec.get("non_susceptible", 0.0))
+        secretor = _secretor_axis(vec, profile, base_patch, seed)
         vec_id = str(vec.get("id", "vec"))
         path_over = index_axis.pathogen_overrides(
             base_overrides, point,
-            dose_adjustment=dose, innate_nonsusceptible_fraction=nonsus,
+            dose_adjustment=dose, **(secretor or {}),
         )
         rid = "_".join(
             [
@@ -653,7 +785,7 @@ def _iter_synthetic_recovery_runs(
             surveillance=sname,
             dose_adjustment=dose,
             density_exponent=alpha,
-            non_susceptible=nonsus,
+            **(secretor or {}),
             parameter_vector=vec_id,
             **index_axis.factors(point),
         )

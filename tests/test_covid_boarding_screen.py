@@ -329,9 +329,11 @@ def test_v8_axis_cannot_reintroduce_the_baseline_contradiction():
         },
         {"sars_cov2_resp": sars},
     )
+    engine = _Engine()
+    rng = np.random.default_rng(0)
     with pytest.raises(ValueError, match="onset"):
         apply_explicit_seeds(
-            plan, _Engine(), 0, np.random.default_rng(0),
+            plan, engine, 0, rng,
             {"sars_cov2_resp": sars},
         )
 

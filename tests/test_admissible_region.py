@@ -281,9 +281,11 @@ def test_a_gate_run_isolates_the_pathogen_through_initiation() -> None:
     spec = gate.build_run_spec(
         NOROVIRUS_FACTORS,
         [0.5] * len(NOROVIRUS_FACTORS),
-        seed=500,
-        description="gate_probe",
-        **gate.Design().run_kwargs(),
+        gate.ScreenRunParams(
+            seed=500,
+            description="gate_probe",
+            **gate.Design().run_kwargs(),
+        ),
     )
     boarding = spec["config_overrides"]["initiation"]["boarding"]
     assert boarding["enabled"] is True
@@ -637,21 +639,23 @@ def test_a_cell_missing_a_seed_block_is_refused_rather_than_scored_small(
     )
     monkeypatch.setattr(gate, "REPO_ROOT", tmp_path)
     stream = _write_blocks(tmp_path, [first])
+    design = gate.Design()
     with pytest.raises(SystemExit, match="missing seed block"):
         gate.pooled_row_points(
             [stream],
             expected=[7],
             seeds=seeds,
             seed_shards=2,
-            design=gate.Design(),
+            design=design,
         )
+    design = gate.Design()
     with pytest.raises(SystemExit, match="design points are absent"):
         gate.pooled_row_points(
             [stream],
             expected=[7, 8],
             seeds=seeds,
             seed_shards=1,
-            design=gate.Design(),
+            design=design,
         )
 
 
@@ -669,13 +673,14 @@ def test_a_seed_block_pooled_twice_is_refused(
         "rows": [_quiet_row(500, 0.001)],
     }
     stream = _write_blocks(tmp_path, [block, dict(block)])
+    design = gate.Design()
     with pytest.raises(SystemExit, match="more than one shard stream"):
         gate.pooled_row_points(
             [stream],
             expected=[7],
             seeds=[500],
             seed_shards=1,
-            design=gate.Design(),
+            design=design,
         )
 
 
@@ -693,13 +698,14 @@ def test_pooling_a_different_seed_set_than_the_design_is_refused(
         "rows": [_quiet_row(500, 0.001)],
     }
     stream = _write_blocks(tmp_path, [block])
+    design = gate.Design()
     with pytest.raises(SystemExit, match="pools 1 seeds"):
         gate.pooled_row_points(
             [stream],
             expected=[7],
             seeds=[500, 501],
             seed_shards=1,
-            design=gate.Design(),
+            design=design,
         )
 
 

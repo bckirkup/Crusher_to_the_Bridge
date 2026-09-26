@@ -544,27 +544,33 @@ def observation_scenario_patch(
     return patch
 
 
+@dataclass(frozen=True)
+class ScreenRunParams:
+    """The shared run configuration one design point evaluates under."""
+
+    seed: int
+    pathogen_id: str
+    bundle: str
+    platform: str
+    epochs: int
+    num_agents: int
+    description: str = "bounded_screen"
+    observation_scenario: str | None = None
+    co_seeded: str = "isolated"
+    crew_duty_exclusion: bool = False
+    service_surface_knockout: bool = False
+    contact_class_exponent: float = 0.0
+    near_field_mode: str = "two_box"
+    near_field_interzonal_airflow_m3_per_hour: float = 204.0
+    near_field_neighbour_table_ratio: float = 0.43
+    activity_contacts: Mapping[str, float] | None = None
+    activity_saturation_hours: Mapping[str, float] | None = None
+
+
 def build_run_spec(
     factors: Sequence[Factor],
     units: Sequence[float],
-    *,
-    seed: int,
-    pathogen_id: str,
-    bundle: str,
-    platform: str,
-    epochs: int,
-    num_agents: int,
-    description: str = "bounded_screen",
-    observation_scenario: str | None = None,
-    co_seeded: str = "isolated",
-    crew_duty_exclusion: bool = False,
-    service_surface_knockout: bool = False,
-    contact_class_exponent: float = 0.0,
-    near_field_mode: str = "two_box",
-    near_field_interzonal_airflow_m3_per_hour: float = 204.0,
-    near_field_neighbour_table_ratio: float = 0.43,
-    activity_contacts: Mapping[str, float] | None = None,
-    activity_saturation_hours: Mapping[str, float] | None = None,
+    params: ScreenRunParams,
 ) -> dict[str, object]:
     """The Picard spec for one design point at one seed.
 
@@ -573,6 +579,25 @@ def build_run_spec(
     screen in the arrival channel or the isolation mechanism, and the two
     results would then be about different models.
     """
+    seed = params.seed
+    pathogen_id = params.pathogen_id
+    bundle = params.bundle
+    platform = params.platform
+    epochs = params.epochs
+    num_agents = params.num_agents
+    description = params.description
+    observation_scenario = params.observation_scenario
+    co_seeded = params.co_seeded
+    crew_duty_exclusion = params.crew_duty_exclusion
+    service_surface_knockout = params.service_surface_knockout
+    contact_class_exponent = params.contact_class_exponent
+    near_field_mode = params.near_field_mode
+    near_field_interzonal_airflow_m3_per_hour = (
+        params.near_field_interzonal_airflow_m3_per_hour
+    )
+    near_field_neighbour_table_ratio = params.near_field_neighbour_table_ratio
+    activity_contacts = params.activity_contacts
+    activity_saturation_hours = params.activity_saturation_hours
     overrides = build_overrides(factors, units, pathogen_id)
     config_overrides: dict[str, object] = {"ship_graph": {"num_agents": int(num_agents)}}
     _merge_run_overrides(config_overrides, build_run_overrides(factors, units))
@@ -669,53 +694,18 @@ def build_run_spec(
 def run_point(
     factors: Sequence[Factor],
     units: Sequence[float],
-    *,
-    seed: int,
-    pathogen_id: str,
-    bundle: str,
-    platform: str,
-    epochs: int,
-    num_agents: int,
-    observation_scenario: str | None = None,
-    co_seeded: str = "isolated",
-    crew_duty_exclusion: bool = False,
-    service_surface_knockout: bool = False,
-    contact_class_exponent: float = 0.0,
-    near_field_mode: str = "two_box",
-    near_field_interzonal_airflow_m3_per_hour: float = 204.0,
-    near_field_neighbour_table_ratio: float = 0.43,
-    activity_contacts: Mapping[str, float] | None = None,
-    activity_saturation_hours: Mapping[str, float] | None = None,
+    params: ScreenRunParams,
 ) -> dict[str, float]:
     """Run one design point at one seed and return the scored outputs."""
-    spec = build_run_spec(
-        factors,
-        units,
-        seed=seed,
-        pathogen_id=pathogen_id,
-        bundle=bundle,
-        platform=platform,
-        epochs=epochs,
-        num_agents=num_agents,
-        observation_scenario=observation_scenario,
-        co_seeded=co_seeded,
-        crew_duty_exclusion=crew_duty_exclusion,
-        service_surface_knockout=service_surface_knockout,
-        contact_class_exponent=contact_class_exponent,
-        near_field_mode=near_field_mode,
-        near_field_interzonal_airflow_m3_per_hour=(
-            near_field_interzonal_airflow_m3_per_hour
-        ),
-        near_field_neighbour_table_ratio=near_field_neighbour_table_ratio,
-        activity_contacts=activity_contacts,
-        activity_saturation_hours=activity_saturation_hours,
-    )
+    spec = build_run_spec(factors, units, params)
     with tempfile.TemporaryDirectory() as tmp:
         spec_path = Path(tmp) / "run_spec.json"
         spec_path.write_text(json.dumps(spec), encoding="utf-8")
         picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), str(spec_path))
         result = ShipSimulation(picard_spec, display=False).run()
-    derived = compute_derived_metrics(extract_timeseries(result.history), num_agents)
+    derived = compute_derived_metrics(
+        extract_timeseries(result.history), params.num_agents,
+    )
     scored = {
         name: float(derived.get(name, 0.0) or 0.0)
         for name in SCORED_OUTPUTS
@@ -733,7 +723,9 @@ def seed_mean(
 ) -> dict[str, float]:
     """Mean scored output over the shared seed set at one design point."""
     draws = [
-        run_point(factors, units, seed=seed, **run_kwargs)  # type: ignore[arg-type]
+        run_point(
+            factors, units, ScreenRunParams(seed=seed, **run_kwargs),
+        )  # type: ignore[arg-type]
         for seed in seeds
     ]
     return {
@@ -985,7 +977,9 @@ def noise_floor(
     """Seed-to-seed standard deviation of each output at the box centre."""
     centre = [0.5] * len(factors)
     draws = [
-        run_point(factors, centre, seed=seed, **run_kwargs)  # type: ignore[arg-type]
+        run_point(
+            factors, centre, ScreenRunParams(seed=seed, **run_kwargs),
+        )  # type: ignore[arg-type]
         for seed in seeds
     ]
     return {

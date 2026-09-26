@@ -2343,10 +2343,177 @@ def test_synthetic_recovery_cartesian_and_generator() -> None:
     params = spec["campaign_parameters"]
     assert params["never_symptomatic_fraction"] == pytest.approx(0.29)
     assert params["boarding_passenger_prevalence"] == pytest.approx(0.0325)
-    assert "innate_nonsusceptible_fraction" in noro
+    assert "innate_nonsusceptible_fraction" not in noro
+    assert noro["secretor_negative_fraction"] == pytest.approx(0.2)
+    assert noro["secretor_negative_relative_susceptibility"] == pytest.approx(
+        0.2
+    )
+    assert params["secretor_negative_fraction"] == pytest.approx(0.2)
+    assert params[
+        "secretor_negative_relative_susceptibility"
+    ] == pytest.approx(0.2)
     tx = spec["config_overrides"]["transmission"]
     assert tx["contact_mode"] == "density_dependent"
     assert "exponent" in tx["density_dependent"]
+    # The engine reads activity_contacts only under per_partner_contact and
+    # refuses it under a density-family mode, so the arm must carry the
+    # companion override the hull_compounding convention documents.
+    assert tx["activity_contacts"]["enabled"] is False
+
+
+def test_density_override_keeps_activity_contacts_for_partner_mode() -> None:
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _density_contact_override,
+    )
+
+    ppc = _density_contact_override(None, contact_mode="per_partner_contact")
+    assert ppc == {"transmission": {"contact_mode": "per_partner_contact"}}
+    legacy = _density_contact_override(None, contact_mode="legacy")
+    assert legacy["transmission"]["activity_contacts"] == {"enabled": False}
+
+
+def test_sourced_window_flags() -> None:
+    from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (
+        provenance_flags,
+    )
+
+    # Clean run: active overrides listed, nothing else.
+    spec = {
+        "pathogen_overrides": {
+            "norwalk_gi": {"dose_adjustment": 9.5},
+        },
+        "config_overrides": {
+            "transmission": {"density_dependent": {"exponent": 0.5}},
+        },
+    }
+    cfg = {}
+    profiles = {"norwalk_gi": {
+        "secretor_negative_fraction": 0.2,
+        "secretor_negative_relative_susceptibility": 0.2,
+        "surface_decay_log10_per_day": 0.3,
+        "shedding_variance_log10": 1.0,
+        "emesis_titre_gec_per_ml_range": [1e5, 3e5],
+        "environmental_faecal_release_log10_g_per_epoch": 9.5,
+        "stool_events_per_day": {"baseline": 1.0, "diarrhoeal": 5.0},
+        "food_contamination": {
+            "hand_food_contacts_per_day": 5.0,
+            "ingestion_fraction_per_day": 0.3,
+        },
+    }}
+    flags = provenance_flags(spec, cfg, profiles)
+    # Every code-defaulted gate defaults on — an empty cfg flags none.
+    assert set(flags) == {"active"}
+    assert "pathogen.norwalk_gi.dose_adjustment" in flags["active"]
+    assert "cfg.transmission.density_dependent.exponent" in flags["active"]
+
+    # Effective value outside the sourced interval flags with the bounds.
+    profiles["norwalk_gi"]["secretor_negative_relative_susceptibility"] = 0.9
+    flags = provenance_flags(spec, cfg, profiles)
+    assert flags["window"] == {
+        "norwalk_gi.secretor_negative_relative_susceptibility": [0.9, 0.04, 0.83],
+    }
+
+    # The withdrawn alias under a profile carrying the preferred key flags
+    # as shadowed -- the archive sees the write reached no host.
+    profiles["norwalk_gi"]["secretor_negative_relative_susceptibility"] = 0.2
+    spec["pathogen_overrides"]["norwalk_gi"]["innate_nonsusceptible_fraction"] = 0.3
+    flags = provenance_flags(spec, cfg, profiles)
+    assert flags["shadowed"] == ["norwalk_gi.innate_nonsusceptible_fraction"]
+
+    # Same alias is NOT shadowed when the profile lacks the preferred key
+    # (the deprecated-bundle arm still resolves it).
+    flags = provenance_flags(spec, cfg, {"norwalk_gi": {}})
+    assert "shadowed" not in flags
+
+    # A pathogen with no declared window table flags nothing for windows.
+    spec2 = {"pathogen_overrides": {"sars_cov2_resp": {"dose_adjustment": 1.0}}}
+    flags = provenance_flags(spec2, cfg, {"sars_cov2_resp": {}})
+    assert "window" not in flags
+
+    # Inert gates in the merged config are enumerated compactly: an
+    # archive that claims a mechanism while its gate was off reads as such.
+    cfg_gated = {
+        "variant_surveillance": {"enabled": False},
+        "observation": {
+            "wastewater_assay_mode": "none",
+            "surface_swab_source": "airborne_fraction",
+        },
+        "transmission": {
+            "contact_mode": "per_partner_contact",
+            "blackwater_plumbing": False,
+        },
+    }
+    flags = provenance_flags({}, cfg_gated, {})
+    assert flags["gates_off"] == [
+        "observation.surface_swab_source",
+        "observation.wastewater_assay_mode",
+        "transmission.blackwater_plumbing",
+        "variant_surveillance.enabled",
+    ]
+
+
+def test_synthetic_recovery_secretor_axis_rules() -> None:
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        _secretor_axis,
+        _secretor_declared_value,
+    )
+
+    # The withdrawn spellings are refused, not translated: under a profile
+    # carrying secretor_negative_fraction the alias write is shadowed and the
+    # archive would record a swept axis the engine never executed.
+    for key in ("non_susceptible", "innate_nonsusceptible_fraction"):
+        with pytest.raises(ValueError, match="withdrawn"):
+            _secretor_axis({key: 0.3}, {}, {}, 1)
+
+    # Declared scalar sweeps pin the exact values into the run.
+    resolved = _secretor_axis(
+        {"secretor_negative_relative_susceptibility": 0.45},
+        {"secretor_negative_fraction": 0.2},
+        {},
+        7,
+    )
+    assert resolved == {
+        "secretor_negative_fraction": pytest.approx(0.2),
+        "secretor_negative_relative_susceptibility": pytest.approx(0.45),
+    }
+
+    # A distribution declaration draws once per run, seeded off the run seed
+    # and field name — reproducible for a given seed, and inside the window.
+    decl = {"dist": "log_uniform", "interval": [0.04, 0.83]}
+    a = _secretor_declared_value(decl, seed=101, field="f")
+    b = _secretor_declared_value(decl, seed=101, field="f")
+    c = _secretor_declared_value(decl, seed=102, field="f")
+    assert a == b
+    assert a != c
+    assert 0.04 <= a <= 0.83
+    assert 0.04 <= c <= 0.83
+    uni = _secretor_declared_value(
+        {"dist": "uniform", "interval": [0.19, 0.29]}, seed=3, field="f"
+    )
+    assert 0.19 <= uni <= 0.29
+
+    # Out-of-window and malformed declarations fail loudly.
+    with pytest.raises(ValueError):
+        _secretor_declared_value({"dist": "uniform", "interval": [0, 1.5]},
+                                 seed=1, field="f")
+    with pytest.raises(ValueError):
+        _secretor_declared_value({"dist": "gaussian", "interval": [0, 1]},
+                                 seed=1, field="f")
+    with pytest.raises(ValueError):
+        _secretor_declared_value(1.5, seed=1, field="f")
+
+    # Undeclared and absent from every layer: no axis to pin.
+    assert _secretor_axis({}, {}, {}, 1) is None
+    # Undeclared but present in the profile: the profile truth is pinned
+    # so the spec records the mechanism the run actually executed.
+    prof = {
+        "secretor_negative_fraction": 0.2,
+        "secretor_negative_relative_susceptibility": 0.2,
+    }
+    assert _secretor_axis({}, prof, {}, 1) == {
+        "secretor_negative_fraction": pytest.approx(0.2),
+        "secretor_negative_relative_susceptibility": pytest.approx(0.2),
+    }
 
 
 def test_vsp_degradation_cartesian_and_generator() -> None:

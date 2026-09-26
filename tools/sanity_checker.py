@@ -321,32 +321,38 @@ class DoseResponse(BaseModel):
     @model_validator(mode="after")
     def check_model_params(self) -> "DoseResponse":
         if self.model == "beta_poisson":
-            if self.alpha is None:
-                raise ValueError("beta_poisson model requires 'alpha' parameter")
-            if self.beta is None:
-                raise ValueError("beta_poisson model requires 'beta' parameter")
-            if self.alpha <= 0:
-                raise ValueError(f"alpha must be positive, got {self.alpha}")
-            if self.beta <= 0:
-                raise ValueError(f"beta must be positive, got {self.beta}")
-            if (
-                self.susceptibility_scale is not None
-                and (
-                    not math.isfinite(self.susceptibility_scale)
-                    or self.susceptibility_scale <= 0
-                )
-            ):
-                raise ValueError(
-                    "susceptibility_scale must be finite and positive",
-                )
+            self._check_beta_poisson_params()
         elif self.model == "exponential":
-            if self.k is None:
-                raise ValueError("exponential model requires 'k' parameter")
-            if self.k <= 0:
-                raise ValueError(f"k must be positive, got {self.k}")
+            self._check_exponential_params()
         else:
             raise ValueError(f"Unknown dose-response model: {self.model}")
         return self
+
+    def _check_beta_poisson_params(self) -> None:
+        if self.alpha is None:
+            raise ValueError("beta_poisson model requires 'alpha' parameter")
+        if self.beta is None:
+            raise ValueError("beta_poisson model requires 'beta' parameter")
+        if self.alpha <= 0:
+            raise ValueError(f"alpha must be positive, got {self.alpha}")
+        if self.beta <= 0:
+            raise ValueError(f"beta must be positive, got {self.beta}")
+        if (
+            self.susceptibility_scale is not None
+            and (
+                not math.isfinite(self.susceptibility_scale)
+                or self.susceptibility_scale <= 0
+            )
+        ):
+            raise ValueError(
+                "susceptibility_scale must be finite and positive",
+            )
+
+    def _check_exponential_params(self) -> None:
+        if self.k is None:
+            raise ValueError("exponential model requires 'k' parameter")
+        if self.k <= 0:
+            raise ValueError(f"k must be positive, got {self.k}")
 
 
 class SeverityModel(BaseModel):
@@ -826,44 +832,60 @@ _VALID_TRANSMISSION_ROUTES = {
 }
 
 
+def _check_protocol_modifier_bounds(
+    protocols: ProtocolsConfig | None,
+    report: Report,
+) -> None:
+    """Check protocol modifier probability values are in [0, 1]."""
+    if not protocols:
+        return
+    for proto in protocols.protocols:
+        for key, val in proto.modifiers.items():
+            if key in _PROBABILITY_MODIFIER_KEYS and isinstance(val, (int, float)):
+                if val < 0.0 or val > 1.0:
+                    report.error(
+                        _PROTOCOLS_JSON,
+                        "MATH_BOUND",
+                        f"{proto.protocol_id}.modifiers.{key} = {val} "
+                        f"is outside [0.0, 1.0]",
+                    )
+
+
+def _check_pathogen_probability_bounds(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Check pathogen probability fields are in [0, 1]."""
+    if not pathogens:
+        return
+    for p in pathogens.pathogens:
+        illness = p.illness_probability
+        for key, val in illness.items():
+            if isinstance(val, (int, float)) and (val < 0 or val > 1):
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "MATH_BOUND",
+                    f"{p.pathogen_id}.illness_probability.{key} = {val} "
+                    f"is outside [0.0, 1.0]",
+                )
+        val = p.symptomatic_fraction
+        if val is not None and (val < 0 or val > 1):
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "MATH_BOUND",
+                f"{p.pathogen_id}.symptomatic_fraction = {val} "
+                f"is outside [0.0, 1.0]",
+            )
+
+
 def _check_mathematical_bounds(
     protocols: ProtocolsConfig | None,
     pathogens: PathogensFile | None,
     report: Report,
 ) -> None:
     """Check probability/scalar values are in [0, 1]."""
-
-    if protocols:
-        for proto in protocols.protocols:
-            for key, val in proto.modifiers.items():
-                if key in _PROBABILITY_MODIFIER_KEYS and isinstance(val, (int, float)):
-                    if val < 0.0 or val > 1.0:
-                        report.error(
-                            _PROTOCOLS_JSON,
-                            "MATH_BOUND",
-                            f"{proto.protocol_id}.modifiers.{key} = {val} "
-                            f"is outside [0.0, 1.0]",
-                        )
-
-    if pathogens:
-        for p in pathogens.pathogens:
-            illness = p.illness_probability
-            for key, val in illness.items():
-                if isinstance(val, (int, float)) and (val < 0 or val > 1):
-                    report.error(
-                        _ACTIVE_PROFILES_JSON,
-                        "MATH_BOUND",
-                        f"{p.pathogen_id}.illness_probability.{key} = {val} "
-                        f"is outside [0.0, 1.0]",
-                    )
-            val = p.symptomatic_fraction
-            if val is not None and (val < 0 or val > 1):
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "MATH_BOUND",
-                    f"{p.pathogen_id}.symptomatic_fraction = {val} "
-                    f"is outside [0.0, 1.0]",
-                )
+    _check_protocol_modifier_bounds(protocols, report)
+    _check_pathogen_probability_bounds(pathogens, report)
 
 
 def _check_emesis_airborne_exclusion(
@@ -998,90 +1020,132 @@ def _check_symptomatic_stream(
     if pathogens is None:
         return
     for p in pathogens.pathogens:
-        boarding = p.boarding or {}
-        stream = boarding.get("symptomatic_stream")
-        # Unstated rate_mode follows the input block present; unstated
-        # enabled under renewal is the realism chain's default.
-        rate_mode = boarding.get("rate_mode") or (
-            "renewal" if boarding.get("renewal") else "screening_prevalence"
+        _check_symptomatic_stream_profile(p, report)
+
+
+def _check_symptomatic_stream_profile(
+    p: PathogenProfile,
+    report: Report,
+) -> None:
+    """Check one profile's boarding.symptomatic_stream enablement."""
+    boarding = p.boarding or {}
+    stream = boarding.get("symptomatic_stream")
+    # Unstated rate_mode follows the input block present; unstated
+    # enabled under renewal is the realism chain's default.
+    rate_mode = boarding.get("rate_mode") or (
+        "renewal" if boarding.get("renewal") else "screening_prevalence"
+    )
+    location = f"{p.pathogen_id}.boarding.symptomatic_stream"
+    if isinstance(stream, dict) and stream.get("enabled") is False and (
+        rate_mode == "renewal"
+    ):
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "SYMPTOMATIC_STREAM",
+            f"{location} is explicitly disabled under rate_mode "
+            "'renewal': a legitimate historical-comparator arm, noted "
+            "so the pairing is deliberate and not a stale key",
         )
-        location = f"{p.pathogen_id}.boarding.symptomatic_stream"
-        if isinstance(stream, dict) and stream.get("enabled") is False and (
-            rate_mode == "renewal"
-        ):
-            report.warn(
-                _ACTIVE_PROFILES_JSON,
-                "SYMPTOMATIC_STREAM",
-                f"{location} is explicitly disabled under rate_mode "
-                "'renewal': a legitimate historical-comparator arm, noted "
-                "so the pairing is deliberate and not a stale key",
-            )
-        if not isinstance(stream, dict):
-            stream = {}
-        if not stream.get("enabled", rate_mode == "renewal"):
-            continue
-        if rate_mode != "renewal":
-            report.error(
-                _ACTIVE_PROFILES_JSON,
-                "SYMPTOMATIC_STREAM",
-                f"{location} is enabled while boarding.rate_mode is "
-                f"{rate_mode!r}: the symptomatic stream is "
-                "a partition of the renewal identity and requires "
-                "rate_mode 'renewal'",
-            )
-            continue
-        renewal = boarding.get("renewal") or {}
-        incidence = renewal.get("case_incidence_per_1000_py") or {}
-        missing = [
-            role for role in ("passenger", "crew")
-            if incidence.get(role) is None
-        ]
-        if missing:
-            report.error(
-                _ACTIVE_PROFILES_JSON,
-                "SYMPTOMATIC_STREAM",
-                f"{location} is enabled but renewal."
-                "case_incidence_per_1000_py is missing "
-                f"{', '.join(missing)}",
-            )
-        detectable = renewal.get("detectable_duration_days")
-        if detectable is None:
-            report.error(
-                _ACTIVE_PROFILES_JSON,
-                "SYMPTOMATIC_STREAM",
-                f"{location} is enabled but renewal.detectable_duration_days "
-                "is unset",
-            )
-        if missing or detectable is None:
-            continue
-        illness = p.illness_duration or {}
-        mean_days = p.recovery_day
-        if illness.get("draw") == "empirical_survival":
-            try:
-                model = IllnessDurationModel.from_mapping(illness)
-            except ValueError:
-                # The illness-duration check reports the malformed block.
-                continue
-            if model is not None:
-                mean_days = model.mean_days()
-        never = (
-            (boarding.get("state_split") or {})
-            .get("never_symptomatic_fraction")
+    if not isinstance(stream, dict):
+        stream = {}
+    if not stream.get("enabled", rate_mode == "renewal"):
+        return
+    if rate_mode != "renewal":
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "SYMPTOMATIC_STREAM",
+            f"{location} is enabled while boarding.rate_mode is "
+            f"{rate_mode!r}: the symptomatic stream is "
+            "a partition of the renewal identity and requires "
+            "rate_mode 'renewal'",
         )
-        for role, rate in incidence.items():
-            p_sym = (float(rate) / 1000.0) * (float(mean_days) / 365.25)
-            p_total = (
-                (float(rate) / 1000.0) / (1.0 - float(never or 0.0))
-                * (float(detectable) / 365.25)
+        return
+    _check_symptomatic_stream_partition(p, boarding, location, report)
+
+
+def _check_symptomatic_stream_partition(
+    p: PathogenProfile,
+    boarding: dict[str, Any],
+    location: str,
+    report: Report,
+) -> None:
+    """Check an enabled stream's renewal inputs and partition positivity."""
+    renewal = boarding.get("renewal") or {}
+    incidence = renewal.get("case_incidence_per_1000_py") or {}
+    detectable = renewal.get("detectable_duration_days")
+    if not _stream_renewal_inputs_present(incidence, detectable, location, report):
+        return
+    illness = p.illness_duration or {}
+    mean_days = p.recovery_day
+    if illness.get("draw") == "empirical_survival":
+        try:
+            model = IllnessDurationModel.from_mapping(illness)
+        except ValueError:
+            # The illness-duration check reports the malformed block.
+            return
+        if model is not None:
+            mean_days = model.mean_days()
+    never = (
+        (boarding.get("state_split") or {})
+        .get("never_symptomatic_fraction")
+    )
+    _check_stream_partition_positivity(
+        incidence, detectable, mean_days, never, location, report,
+    )
+
+
+def _stream_renewal_inputs_present(
+    incidence: dict[str, Any],
+    detectable: Any,
+    location: str,
+    report: Report,
+) -> bool:
+    """Report missing renewal inputs; True when the partition can be checked."""
+    missing = [
+        role for role in ("passenger", "crew")
+        if incidence.get(role) is None
+    ]
+    if missing:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "SYMPTOMATIC_STREAM",
+            f"{location} is enabled but renewal."
+            "case_incidence_per_1000_py is missing "
+            f"{', '.join(missing)}",
+        )
+    if detectable is None:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "SYMPTOMATIC_STREAM",
+            f"{location} is enabled but renewal.detectable_duration_days "
+            "is unset",
+        )
+    return not missing and detectable is not None
+
+
+def _check_stream_partition_positivity(
+    incidence: dict[str, Any],
+    detectable: Any,
+    mean_days: Any,
+    never: Any,
+    location: str,
+    report: Report,
+) -> None:
+    """Check the symptomatic partition does not go negative per role."""
+    for role, rate in incidence.items():
+        p_sym = (float(rate) / 1000.0) * (float(mean_days) / 365.25)
+        p_total = (
+            (float(rate) / 1000.0) / (1.0 - float(never or 0.0))
+            * (float(detectable) / 365.25)
+        )
+        if p_sym > p_total:
+            report.error(
+                _ACTIVE_PROFILES_JSON,
+                "SYMPTOMATIC_STREAM",
+                f"{location} partition goes negative for {role}: "
+                f"p_sym {p_sym:.6f} > p_total {p_total:.6f} (mean "
+                f"illness {mean_days} d vs detectable {detectable} d)",
             )
-            if p_sym > p_total:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "SYMPTOMATIC_STREAM",
-                    f"{location} partition goes negative for {role}: "
-                    f"p_sym {p_sym:.6f} > p_total {p_total:.6f} (mean "
-                    f"illness {mean_days} d vs detectable {detectable} d)",
-                )
 
 
 def _check_preboarding_assessment(
@@ -1099,75 +1163,103 @@ def _check_preboarding_assessment(
     if pathogens is None:
         return
     for p in pathogens.pathogens:
-        boarding = p.boarding or {}
-        assessment = boarding.get("preboarding_assessment") or {}
-        location = f"{p.pathogen_id}.boarding.preboarding_assessment"
-        lookback = assessment.get("lookback_days")
-        if lookback is not None and float(lookback) < 0.0:
-            report.error(
-                _ACTIVE_PROFILES_JSON,
-                "PREBOARDING_ASSESSMENT",
-                f"{location}.lookback_days = {lookback} is negative; the "
-                "window counts days of onset back from boarding",
-            )
-        for role in ("passenger", "crew"):
-            sub = assessment.get(role) or {}
-            role_location = f"{location}.{role}"
-            compliance = sub.get("declaration_compliance")
-            if compliance is not None and not 0.0 <= float(compliance) <= 1.0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location}.declaration_compliance = {compliance} "
-                    "is outside [0, 1]",
-                )
-            halflife = sub.get("recall_halflife_days")
-            if halflife is not None and float(halflife) <= 0.0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location}.recall_halflife_days = {halflife} "
-                    "must be positive; null states perfect recall",
-                )
-            denial = sub.get("denial_probability")
-            if denial is not None and not 0.0 <= float(denial) <= 1.0:
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location}.denial_probability = {denial} is "
-                    "outside [0, 1]",
-                )
-            rate_mode = boarding.get("rate_mode") or (
-                "renewal" if boarding.get("renewal")
-                else "screening_prevalence"
-            )
-            if role == "crew" and sub.get("enabled") is False and (
-                rate_mode == "renewal"
-            ):
-                report.warn(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location} is explicitly disabled under rate_mode "
-                    "'renewal': a legitimate historical-comparator arm, "
-                    "noted so the pairing is deliberate and not a stale key",
-                )
-            if role == "passenger" and sub.get("reportable"):
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location}.reportable is true: the VSP 4.1.1.2 "
-                    "three-day reportable AGE clause is crew-only, so a "
-                    "passenger reportable case is not licensed",
-                )
-            if sub.get("enabled") and boarding.get("mode") == "party":
-                report.error(
-                    _ACTIVE_PROFILES_JSON,
-                    "PREBOARDING_ASSESSMENT",
-                    f"{role_location} is enabled on a party-mode boarding "
-                    "block: a party boards its members incubating and no "
-                    "member carries an onset age, so no host can ever be "
-                    "eligible for the screen",
-                )
+        _check_preboarding_assessment_profile(p, report)
+
+
+def _check_preboarding_assessment_profile(
+    p: PathogenProfile,
+    report: Report,
+) -> None:
+    """Check one profile's boarding.preboarding_assessment block."""
+    boarding = p.boarding or {}
+    assessment = boarding.get("preboarding_assessment") or {}
+    location = f"{p.pathogen_id}.boarding.preboarding_assessment"
+    lookback = assessment.get("lookback_days")
+    if lookback is not None and float(lookback) < 0.0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{location}.lookback_days = {lookback} is negative; the "
+            "window counts days of onset back from boarding",
+        )
+    for role in ("passenger", "crew"):
+        _check_preboarding_role(boarding, assessment, role, location, report)
+
+
+def _check_preboarding_role(
+    boarding: dict[str, Any],
+    assessment: dict[str, Any],
+    role: str,
+    location: str,
+    report: Report,
+) -> None:
+    """Check one role arm of a preboarding_assessment block."""
+    sub = assessment.get(role) or {}
+    role_location = f"{location}.{role}"
+    _check_preboarding_role_scalars(sub, role_location, report)
+    rate_mode = boarding.get("rate_mode") or (
+        "renewal" if boarding.get("renewal")
+        else "screening_prevalence"
+    )
+    if role == "crew" and sub.get("enabled") is False and (
+        rate_mode == "renewal"
+    ):
+        report.warn(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location} is explicitly disabled under rate_mode "
+            "'renewal': a legitimate historical-comparator arm, "
+            "noted so the pairing is deliberate and not a stale key",
+        )
+    if role == "passenger" and sub.get("reportable"):
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location}.reportable is true: the VSP 4.1.1.2 "
+            "three-day reportable AGE clause is crew-only, so a "
+            "passenger reportable case is not licensed",
+        )
+    if sub.get("enabled") and boarding.get("mode") == "party":
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location} is enabled on a party-mode boarding "
+            "block: a party boards its members incubating and no "
+            "member carries an onset age, so no host can ever be "
+            "eligible for the screen",
+        )
+
+
+def _check_preboarding_role_scalars(
+    sub: dict[str, Any],
+    role_location: str,
+    report: Report,
+) -> None:
+    """Check the scalar fields of one preboarding role arm."""
+    compliance = sub.get("declaration_compliance")
+    if compliance is not None and not 0.0 <= float(compliance) <= 1.0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location}.declaration_compliance = {compliance} "
+            "is outside [0, 1]",
+        )
+    halflife = sub.get("recall_halflife_days")
+    if halflife is not None and float(halflife) <= 0.0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location}.recall_halflife_days = {halflife} "
+            "must be positive; null states perfect recall",
+        )
+    denial = sub.get("denial_probability")
+    if denial is not None and not 0.0 <= float(denial) <= 1.0:
+        report.error(
+            _ACTIVE_PROFILES_JSON,
+            "PREBOARDING_ASSESSMENT",
+            f"{role_location}.denial_probability = {denial} is "
+            "outside [0, 1]",
+        )
 
 
 def _check_incubation_shape(
@@ -1310,6 +1402,20 @@ def _check_graph_integrity(
 
     valid_zones = {z.id for z in layout.zones}
 
+    _check_graywater_zones(layout, valid_zones, report)
+    _check_zone_serves(layout, valid_zones, report)
+    if airflow:
+        _check_airflow_graph_refs(airflow, valid_zones, report)
+    if protocols:
+        _check_protocol_close_zones(protocols, valid_zones, report)
+
+
+def _check_graywater_zones(
+    layout: SpatialLayout,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Ensure graywater_zones lists existing collection zone IDs."""
     if layout.graywater_zones:
         for gz in layout.graywater_zones:
             if gz not in valid_zones:
@@ -1325,6 +1431,13 @@ def _check_graph_integrity(
             "graywater_zones must list downstream wastewater collection zone(s)",
         )
 
+
+def _check_zone_serves(
+    layout: SpatialLayout,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Ensure zone.serves entries point to existing zone IDs."""
     for zone in layout.zones:
         for served in zone.serves or []:
             if served not in valid_zones:
@@ -1335,58 +1448,92 @@ def _check_graph_integrity(
                     f"spatial_layout zones",
                 )
 
-    if airflow:
-        # Check HVAC zone room references
-        for hz in airflow.hvac_zones:
-            for room in hz.rooms:
-                if room not in valid_zones:
-                    report.error(
-                        _AIR_FLOW_PATHS_JSON,
-                        "GRAPH_REF",
-                        f"HVAC zone '{hz.id}' references room '{room}' "
-                        f"not found in spatial_layout.json zones: {valid_zones}",
-                    )
 
-        # Check cross-zone link endpoints
-        hvac_zone_ids = {hz.id for hz in airflow.hvac_zones}
-        for link in airflow.cross_zone_links:
-            for endpoint_name, endpoint_val in [("from", link.from_zone), ("to", link.to_zone)]:
-                if endpoint_val not in valid_zones and endpoint_val not in hvac_zone_ids:
-                    report.error(
-                        _AIR_FLOW_PATHS_JSON,
-                        "GRAPH_REF",
-                        f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' "
-                        f"has '{endpoint_name}' = '{endpoint_val}' not found in "
-                        f"zones or HVAC zone IDs",
-                    )
+def _check_airflow_graph_refs(
+    airflow: AirFlowPaths,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Ensure airflow zone, link, and adjacency references resolve."""
+    _check_hvac_zone_rooms(airflow, valid_zones, report)
+    _check_cross_zone_link_endpoints(airflow, valid_zones, report)
+    _check_adjacency_endpoints(airflow, valid_zones, report)
 
-        # Check adjacency edges
-        for adj in airflow.adjacency:
-            for endpoint_name, endpoint_val in [("from", adj.from_zone), ("to", adj.to_zone)]:
-                if endpoint_val not in valid_zones:
-                    report.error(
-                        _AIR_FLOW_PATHS_JSON,
-                        "GRAPH_REF",
-                        f"Adjacency edge '{adj.from_zone}' -> '{adj.to_zone}' "
-                        f"has '{endpoint_name}' = '{endpoint_val}' not found in "
-                        f"spatial_layout.json zones: {valid_zones}",
-                    )
 
-    if protocols:
-        for proto in protocols.protocols:
-            close_zones = proto.modifiers.get("close_zones", [])
-            if isinstance(close_zones, list):
-                for zone in close_zones:
-                    if zone not in valid_zones:
-                        # Shared protocols.json follows the config.yaml default
-                        # platform; other platforms may omit these zone IDs.
-                        report.warn(
-                            _PROTOCOLS_JSON,
-                            "GRAPH_REF",
-                            f"{proto.protocol_id}.modifiers.close_zones references "
-                            f"'{zone}' not found in spatial_layout.json zones: "
-                            f"{valid_zones}",
-                        )
+def _check_hvac_zone_rooms(
+    airflow: AirFlowPaths,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Check HVAC zone room references resolve to spatial zones."""
+    for hz in airflow.hvac_zones:
+        for room in hz.rooms:
+            if room not in valid_zones:
+                report.error(
+                    _AIR_FLOW_PATHS_JSON,
+                    "GRAPH_REF",
+                    f"HVAC zone '{hz.id}' references room '{room}' "
+                    f"not found in spatial_layout.json zones: {valid_zones}",
+                )
+
+
+def _check_cross_zone_link_endpoints(
+    airflow: AirFlowPaths,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Check cross-zone link endpoints resolve to zones or HVAC zone IDs."""
+    hvac_zone_ids = {hz.id for hz in airflow.hvac_zones}
+    for link in airflow.cross_zone_links:
+        for endpoint_name, endpoint_val in [("from", link.from_zone), ("to", link.to_zone)]:
+            if endpoint_val not in valid_zones and endpoint_val not in hvac_zone_ids:
+                report.error(
+                    _AIR_FLOW_PATHS_JSON,
+                    "GRAPH_REF",
+                    f"Cross-zone link '{link.from_zone}' -> '{link.to_zone}' "
+                    f"has '{endpoint_name}' = '{endpoint_val}' not found in "
+                    f"zones or HVAC zone IDs",
+                )
+
+
+def _check_adjacency_endpoints(
+    airflow: AirFlowPaths,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Check adjacency edge endpoints resolve to spatial zones."""
+    for adj in airflow.adjacency:
+        for endpoint_name, endpoint_val in [("from", adj.from_zone), ("to", adj.to_zone)]:
+            if endpoint_val not in valid_zones:
+                report.error(
+                    _AIR_FLOW_PATHS_JSON,
+                    "GRAPH_REF",
+                    f"Adjacency edge '{adj.from_zone}' -> '{adj.to_zone}' "
+                    f"has '{endpoint_name}' = '{endpoint_val}' not found in "
+                    f"spatial_layout.json zones: {valid_zones}",
+                )
+
+
+def _check_protocol_close_zones(
+    protocols: ProtocolsConfig,
+    valid_zones: set[str],
+    report: Report,
+) -> None:
+    """Ensure protocol close_zones modifiers reference existing zones."""
+    for proto in protocols.protocols:
+        close_zones = proto.modifiers.get("close_zones", [])
+        if isinstance(close_zones, list):
+            for zone in close_zones:
+                if zone not in valid_zones:
+                    # Shared protocols.json follows the config.yaml default
+                    # platform; other platforms may omit these zone IDs.
+                    report.warn(
+                        _PROTOCOLS_JSON,
+                        "GRAPH_REF",
+                        f"{proto.protocol_id}.modifiers.close_zones references "
+                        f"'{zone}' not found in spatial_layout.json zones: "
+                        f"{valid_zones}",
+                    )
 
 
 def _check_zone_geometry(
@@ -2038,28 +2185,45 @@ def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
         ("outbreak_response", outbreak),
     )
     for name, block in blocks:
-        if not isinstance(block, dict):
-            report.error(_CONFIG_YAML, "CONFIG",
-                         f"surface_cleaning.{name} must be a mapping")
-            continue
-        coverage = block.get("coverage")
-        if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
-            report.error(
-                _CONFIG_YAML, "MATH_BOUND",
-                f"surface_cleaning.{name}.coverage must be in [0,1]",
-            )
-        reduction = block.get("log10_reduction")
-        if isinstance(reduction, (int, float)) and reduction < 0:
-            report.error(
-                _CONFIG_YAML, "MATH_BOUND",
-                f"surface_cleaning.{name}.log10_reduction must be >= 0",
-            )
+        _check_surface_cleaning_block(name, block, report)
     events = routine.get("events_per_day")
     if isinstance(events, (int, float)) and events < 0:
         report.error(
             _CONFIG_YAML, "MATH_BOUND",
             "surface_cleaning.routine.events_per_day must be >= 0",
         )
+    _check_surface_cleaning_zone_classes(routine, report)
+
+
+def _check_surface_cleaning_block(
+    name: str,
+    block: Any,
+    report: Report,
+) -> None:
+    """Check coverage and log10_reduction of one surface-cleaning block."""
+    if not isinstance(block, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     f"surface_cleaning.{name} must be a mapping")
+        return
+    coverage = block.get("coverage")
+    if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"surface_cleaning.{name}.coverage must be in [0,1]",
+        )
+    reduction = block.get("log10_reduction")
+    if isinstance(reduction, (int, float)) and reduction < 0:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"surface_cleaning.{name}.log10_reduction must be >= 0",
+        )
+
+
+def _check_surface_cleaning_zone_classes(
+    routine: dict[str, Any],
+    report: Report,
+) -> None:
+    """Check routine.by_zone_class overrides against known zone classes."""
     by_zone_class = routine.get("by_zone_class", {})
     if by_zone_class is None:
         by_zone_class = {}
@@ -2070,40 +2234,49 @@ def _check_surface_cleaning(cfg: dict[str, Any], report: Report) -> None:
         )
         return
     for zone_class, values in by_zone_class.items():
-        if zone_class not in HIGH_TOUCH_AREA_M2:
-            report.error(
-                _CONFIG_YAML, "CONFIG",
-                f"unknown surface-cleaning zone class: {zone_class}",
-            )
-            continue
-        if not isinstance(values, dict):
-            report.error(
-                _CONFIG_YAML, "CONFIG",
-                f"surface_cleaning.routine.by_zone_class.{zone_class} "
-                "must be a mapping",
-            )
-            continue
-        unknown_fields = set(values) - {"coverage", "events_per_day"}
-        if unknown_fields:
-            report.error(
-                _CONFIG_YAML, "CONFIG",
-                f"unknown fields in surface-cleaning zone class "
-                f"{zone_class}: {sorted(unknown_fields)}",
-            )
-        coverage = values.get("coverage")
-        if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
-            report.error(
-                _CONFIG_YAML, "MATH_BOUND",
-                f"surface_cleaning.routine.by_zone_class.{zone_class}."
-                "coverage must be in [0,1]",
-            )
-        events = values.get("events_per_day")
-        if isinstance(events, (int, float)) and events < 0:
-            report.error(
-                _CONFIG_YAML, "MATH_BOUND",
-                f"surface_cleaning.routine.by_zone_class.{zone_class}."
-                "events_per_day must be >= 0",
-            )
+        _check_surface_cleaning_zone_class(zone_class, values, report)
+
+
+def _check_surface_cleaning_zone_class(
+    zone_class: str,
+    values: Any,
+    report: Report,
+) -> None:
+    """Check one zone-class surface-cleaning override."""
+    if zone_class not in HIGH_TOUCH_AREA_M2:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"unknown surface-cleaning zone class: {zone_class}",
+        )
+        return
+    if not isinstance(values, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"surface_cleaning.routine.by_zone_class.{zone_class} "
+            "must be a mapping",
+        )
+        return
+    unknown_fields = set(values) - {"coverage", "events_per_day"}
+    if unknown_fields:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"unknown fields in surface-cleaning zone class "
+            f"{zone_class}: {sorted(unknown_fields)}",
+        )
+    coverage = values.get("coverage")
+    if isinstance(coverage, (int, float)) and not 0 <= coverage <= 1:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"surface_cleaning.routine.by_zone_class.{zone_class}."
+            "coverage must be in [0,1]",
+        )
+    events = values.get("events_per_day")
+    if isinstance(events, (int, float)) and events < 0:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"surface_cleaning.routine.by_zone_class.{zone_class}."
+            "events_per_day must be >= 0",
+        )
 
 
 def _check_variant_surveillance(cfg: dict[str, Any], report: Report) -> None:
@@ -2196,31 +2369,40 @@ def _check_long_read_sequencing(cfg: dict[str, Any], report: Report) -> None:
                 )
     params_path = lr.get("params_path")
     if params_path:
-        full = params_path if os.path.isabs(params_path) else os.path.join(_REPO_ROOT, params_path)
-        if not os.path.isfile(full):
-            report.error(
-                _CONFIG_YAML, "LONG_READ",
-                f"long_read_sequencing.params_path not found: {params_path}",
+        _check_long_read_params_file(lr, params_path, report)
+
+
+def _check_long_read_params_file(
+    lr: dict[str, Any],
+    params_path: str,
+    report: Report,
+) -> None:
+    """Check the long-read params file exists and names a known profile."""
+    full = params_path if os.path.isabs(params_path) else os.path.join(_REPO_ROOT, params_path)
+    if not os.path.isfile(full):
+        report.error(
+            _CONFIG_YAML, "LONG_READ",
+            f"long_read_sequencing.params_path not found: {params_path}",
+        )
+    else:
+        try:
+            with open(full, "r", encoding="utf-8") as fh:
+                params = json.load(fh)
+            profile = lr.get(
+                "default_profile",
+                params.get("simulation_parameters", {}).get("default_profile"),
             )
-        else:
-            try:
-                with open(full, "r", encoding="utf-8") as fh:
-                    params = json.load(fh)
-                profile = lr.get(
-                    "default_profile",
-                    params.get("simulation_parameters", {}).get("default_profile"),
-                )
-                profiles = params.get("deployment_profiles", {})
-                if profile and profile not in profiles:
-                    report.error(
-                        _CONFIG_YAML, "LONG_READ",
-                        f"long_read_sequencing.default_profile unknown: {profile}",
-                    )
-            except json.JSONDecodeError as exc:
+            profiles = params.get("deployment_profiles", {})
+            if profile and profile not in profiles:
                 report.error(
-                    params_path, "LONG_READ",
-                    f"long_read_sequencing.params_path invalid JSON: {exc}",
+                    _CONFIG_YAML, "LONG_READ",
+                    f"long_read_sequencing.default_profile unknown: {profile}",
                 )
+        except json.JSONDecodeError as exc:
+            report.error(
+                params_path, "LONG_READ",
+                f"long_read_sequencing.params_path invalid JSON: {exc}",
+            )
 
 
 def _check_agent_classes(
@@ -2243,25 +2425,42 @@ def _check_agent_classes(
                          f"agent_classes[{i}]: {e}")
 
     if parsed:
-        total = sum(c.fraction for c in parsed)
-        if abs(total - 1.0) > 0.01:
-            report.error(_CONFIG_YAML, "MATH_BOUND",
-                         f"agent_classes fractions sum to {total:.4f}, "
-                         f"expected ~1.0 (tolerance 0.01)")
-
-        ids = [c.class_id for c in parsed]
-        if len(ids) != len(set(ids)):
-            report.error(_CONFIG_YAML, "LOGIC_DUP",
-                         f"Duplicate class_id values in agent_classes: {ids}")
+        _check_agent_class_totals(parsed, report)
 
     if zone_ids and parsed:
-        for c in parsed:
-            for field_name in ("home_zone_preference", "free_zone_preference", "duty_zone"):
-                val = getattr(c, field_name)
-                if val and not any(val in zid for zid in zone_ids):
-                    report.warn(_CONFIG_YAML, "GRAPH_REF",
-                                f"agent_classes.{c.class_id}.{field_name} = '{val}' "
-                                f"does not match any zone in spatial_layout")
+        _warn_agent_class_zone_refs(parsed, zone_ids, report)
+
+
+def _check_agent_class_totals(
+    parsed: list[AgentClassEntry],
+    report: Report,
+) -> None:
+    """Check fraction sum and class_id uniqueness across parsed entries."""
+    total = sum(c.fraction for c in parsed)
+    if abs(total - 1.0) > 0.01:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"agent_classes fractions sum to {total:.4f}, "
+                     f"expected ~1.0 (tolerance 0.01)")
+
+    ids = [c.class_id for c in parsed]
+    if len(ids) != len(set(ids)):
+        report.error(_CONFIG_YAML, "LOGIC_DUP",
+                     f"Duplicate class_id values in agent_classes: {ids}")
+
+
+def _warn_agent_class_zone_refs(
+    parsed: list[AgentClassEntry],
+    zone_ids: set[str],
+    report: Report,
+) -> None:
+    """Warn on zone-preference fields that match no spatial_layout zone."""
+    for c in parsed:
+        for field_name in ("home_zone_preference", "free_zone_preference", "duty_zone"):
+            val = getattr(c, field_name)
+            if val and not any(val in zid for zid in zone_ids):
+                report.warn(_CONFIG_YAML, "GRAPH_REF",
+                            f"agent_classes.{c.class_id}.{field_name} = '{val}' "
+                            f"does not match any zone in spatial_layout")
 
 
 def _check_gender_distribution(cfg: dict[str, Any], report: Report) -> None:
@@ -2315,52 +2514,68 @@ def _check_infection_counters(cfg: dict[str, Any], report: Report) -> None:
                          f"infection_counters[{i}] missing counter_id")
             continue
         counter_ids.append(cid)
-
-        metric = cdef.get("metric")
-        if metric not in _VALID_COUNTER_METRICS:
-            report.error(_CONFIG_YAML, "SCHEMA",
-                         f"infection_counters.{cid}.metric = '{metric}' "
-                         f"not in {_VALID_COUNTER_METRICS}")
-
-        on_exceed = cdef.get("on_exceed", "log_only")
-        if on_exceed not in _VALID_ON_EXCEED:
-            report.error(_CONFIG_YAML, "SCHEMA",
-                         f"infection_counters.{cid}.on_exceed = '{on_exceed}' "
-                         f"not in {_VALID_ON_EXCEED}")
-
-        threshold = cdef.get("threshold")
-        if threshold is not None:
-            if not isinstance(threshold, (int, float)) or threshold < 0:
-                report.error(_CONFIG_YAML, "MATH_BOUND",
-                             f"infection_counters.{cid}.threshold = {threshold} "
-                             f"must be a non-negative number")
-
-        cfilter = cdef.get("filter", {})
-        rg = cfilter.get("role_group")
-        if rg and rg not in ("crew", "passenger"):
-            report.error(_CONFIG_YAML, "SCHEMA",
-                         f"infection_counters.{cid}.filter.role_group = '{rg}' "
-                         f"must be 'crew' or 'passenger'")
-
-        filter_classes = cfilter.get("classes", [])
-        if class_ids and filter_classes:
-            for fc in filter_classes:
-                if fc not in class_ids:
-                    report.warn(_CONFIG_YAML, "GRAPH_REF",
-                                f"infection_counters.{cid}.filter.classes "
-                                f"references '{fc}' not in agent_classes")
-
-        exempt = cdef.get("exempt_classes", [])
-        if class_ids and exempt:
-            for ec in exempt:
-                if ec not in class_ids:
-                    report.warn(_CONFIG_YAML, "GRAPH_REF",
-                                f"infection_counters.{cid}.exempt_classes "
-                                f"references '{ec}' not in agent_classes")
+        _check_infection_counter(cid, cdef, class_ids, report)
 
     if len(counter_ids) != len(set(counter_ids)):
         report.error(_CONFIG_YAML, "LOGIC_DUP",
                      f"Duplicate counter_id values: {counter_ids}")
+
+
+def _check_infection_counter(
+    cid: str,
+    cdef: dict[str, Any],
+    class_ids: set[str],
+    report: Report,
+) -> None:
+    """Check one infection_counters entry: metric, on_exceed, filter refs."""
+    metric = cdef.get("metric")
+    if metric not in _VALID_COUNTER_METRICS:
+        report.error(_CONFIG_YAML, "SCHEMA",
+                     f"infection_counters.{cid}.metric = '{metric}' "
+                     f"not in {_VALID_COUNTER_METRICS}")
+
+    on_exceed = cdef.get("on_exceed", "log_only")
+    if on_exceed not in _VALID_ON_EXCEED:
+        report.error(_CONFIG_YAML, "SCHEMA",
+                     f"infection_counters.{cid}.on_exceed = '{on_exceed}' "
+                     f"not in {_VALID_ON_EXCEED}")
+
+    threshold = cdef.get("threshold")
+    if threshold is not None:
+        if not isinstance(threshold, (int, float)) or threshold < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"infection_counters.{cid}.threshold = {threshold} "
+                         f"must be a non-negative number")
+
+    cfilter = cdef.get("filter", {})
+    rg = cfilter.get("role_group")
+    if rg and rg not in ("crew", "passenger"):
+        report.error(_CONFIG_YAML, "SCHEMA",
+                     f"infection_counters.{cid}.filter.role_group = '{rg}' "
+                     f"must be 'crew' or 'passenger'")
+
+    _warn_counter_class_refs(
+        cid, "filter.classes", cfilter.get("classes", []), class_ids, report,
+    )
+    _warn_counter_class_refs(
+        cid, "exempt_classes", cdef.get("exempt_classes", []), class_ids, report,
+    )
+
+
+def _warn_counter_class_refs(
+    cid: str,
+    field: str,
+    values: list[Any],
+    class_ids: set[str],
+    report: Report,
+) -> None:
+    """Warn on counter class references absent from agent_classes."""
+    if class_ids and values:
+        for fc in values:
+            if fc not in class_ids:
+                report.warn(_CONFIG_YAML, "GRAPH_REF",
+                            f"infection_counters.{cid}.{field} "
+                            f"references '{fc}' not in agent_classes")
 
 
 def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
@@ -2369,6 +2584,17 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
     if not wm or not wm.get("enabled", False):
         return
 
+    device_ids = _check_wearable_devices(wm, report)
+    _check_wearable_device_maps(wm, device_ids, report)
+    _check_wearable_scalar_bounds(wm, report)
+    _check_wearable_anomaly_detection(wm, report)
+
+
+def _check_wearable_devices(
+    wm: dict[str, Any],
+    report: Report,
+) -> set[str]:
+    """Validate each wearable device; return the set of known device_ids."""
     devices = wm.get("devices", [])
     device_ids: set[str] = set()
     device_channels: dict[str, set[str]] = {}
@@ -2381,38 +2607,71 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
                          f"wearable_monitoring.devices[{i}]: {e}")
             continue
 
-        if dev.device_id in device_ids:
-            report.error(_CONFIG_YAML, "LOGIC_DUP",
-                         f"Duplicate device_id '{dev.device_id}' in wearable_monitoring.devices")
-        device_ids.add(dev.device_id)
-        device_channels[dev.device_id] = set(dev.channels)
+        _check_wearable_device(dev, device_ids, device_channels, report)
+    return device_ids
 
-        ch_set = set(dev.channels)
-        for noise in dev.noise:
-            if noise.channel not in ch_set:
+
+def _check_wearable_device(
+    dev: WearableDeviceEntry,
+    device_ids: set[str],
+    device_channels: dict[str, set[str]],
+    report: Report,
+) -> None:
+    """Check one wearable device: duplicate id and channel references."""
+    if dev.device_id in device_ids:
+        report.error(_CONFIG_YAML, "LOGIC_DUP",
+                     f"Duplicate device_id '{dev.device_id}' in wearable_monitoring.devices")
+    device_ids.add(dev.device_id)
+    device_channels[dev.device_id] = set(dev.channels)
+
+    _check_wearable_channel_refs(dev, report)
+    _check_wearable_confounder_refs(dev, report)
+
+
+def _check_wearable_channel_refs(
+    dev: WearableDeviceEntry,
+    report: Report,
+) -> None:
+    """Check noise and infection_response channel references."""
+    ch_set = set(dev.channels)
+    for noise in dev.noise:
+        if noise.channel not in ch_set:
+            report.error(_CONFIG_YAML, "GRAPH_REF",
+                         f"Device '{dev.device_id}' noise references channel "
+                         f"'{noise.channel}' not in device channels: {ch_set}")
+
+    for ir in dev.infection_responses:
+        for cr in ir.channel_responses:
+            if cr.channel not in ch_set:
                 report.error(_CONFIG_YAML, "GRAPH_REF",
-                             f"Device '{dev.device_id}' noise references channel "
-                             f"'{noise.channel}' not in device channels: {ch_set}")
+                             f"Device '{dev.device_id}' infection_response for "
+                             f"'{ir.pathogen_category}' references channel "
+                             f"'{cr.channel}' not in device channels: {ch_set}")
 
-        for ir in dev.infection_responses:
-            for cr in ir.channel_responses:
-                if cr.channel not in ch_set:
-                    report.error(_CONFIG_YAML, "GRAPH_REF",
-                                 f"Device '{dev.device_id}' infection_response for "
-                                 f"'{ir.pathogen_category}' references channel "
-                                 f"'{cr.channel}' not in device channels: {ch_set}")
 
-        # Validate confounder channel references
-        for ci, conf in enumerate(dev.confounders):
-            affected = conf.get("affected_channels", {})
-            for conf_ch in affected:
-                if conf_ch not in ch_set:
-                    cid = conf.get("confounder_id", f"index {ci}")
-                    report.error(_CONFIG_YAML, "GRAPH_REF",
-                                 f"Device '{dev.device_id}' confounder '{cid}' "
-                                 f"references channel '{conf_ch}' not in device "
-                                 f"channels: {ch_set}")
+def _check_wearable_confounder_refs(
+    dev: WearableDeviceEntry,
+    report: Report,
+) -> None:
+    """Check confounder affected_channels references."""
+    ch_set = set(dev.channels)
+    for ci, conf in enumerate(dev.confounders):
+        affected = conf.get("affected_channels", {})
+        for conf_ch in affected:
+            if conf_ch not in ch_set:
+                cid = conf.get("confounder_id", f"index {ci}")
+                report.error(_CONFIG_YAML, "GRAPH_REF",
+                             f"Device '{dev.device_id}' confounder '{cid}' "
+                             f"references channel '{conf_ch}' not in device "
+                             f"channels: {ch_set}")
 
+
+def _check_wearable_device_maps(
+    wm: dict[str, Any],
+    device_ids: set[str],
+    report: Report,
+) -> None:
+    """Validate class_device_map and chronic_disease_device_map references."""
     cdm = wm.get("class_device_map", [])
     for entry_raw in cdm:
         try:
@@ -2421,17 +2680,7 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
             report.error(_CONFIG_YAML, "SCHEMA",
                          f"wearable_monitoring.class_device_map: {e}")
             continue
-        # Validate device references for both old and new formats
-        if entry.devices:
-            for dev_entry in entry.devices:
-                if dev_entry.device_id not in device_ids:
-                    report.error(_CONFIG_YAML, "GRAPH_REF",
-                                 f"class_device_map assigns '{entry.agent_class}' → "
-                                 f"'{dev_entry.device_id}' which is not in devices: {device_ids}")
-        elif entry.device_id and entry.device_id not in device_ids:
-            report.error(_CONFIG_YAML, "GRAPH_REF",
-                         f"class_device_map assigns '{entry.agent_class}' → "
-                         f"'{entry.device_id}' which is not in devices: {device_ids}")
+        _check_class_device_map_entry(entry, device_ids, report)
 
     # Validate chronic disease device map
     cddm = wm.get("chronic_disease_device_map", [])
@@ -2447,6 +2696,30 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
                          f"chronic_disease_device_map assigns '{cd_entry.disease_id}' → "
                          f"'{cd_entry.device_id}' which is not in devices: {device_ids}")
 
+
+def _check_class_device_map_entry(
+    entry: ClassDeviceMapEntry,
+    device_ids: set[str],
+    report: Report,
+) -> None:
+    """Validate device references for both old and new map formats."""
+    if entry.devices:
+        for dev_entry in entry.devices:
+            if dev_entry.device_id not in device_ids:
+                report.error(_CONFIG_YAML, "GRAPH_REF",
+                             f"class_device_map assigns '{entry.agent_class}' → "
+                             f"'{dev_entry.device_id}' which is not in devices: {device_ids}")
+    elif entry.device_id and entry.device_id not in device_ids:
+        report.error(_CONFIG_YAML, "GRAPH_REF",
+                     f"class_device_map assigns '{entry.agent_class}' → "
+                     f"'{entry.device_id}' which is not in devices: {device_ids}")
+
+
+def _check_wearable_scalar_bounds(
+    wm: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate top-level wearable noise/dropout/anomaly scalars."""
     obs_sigma = wm.get("observation_noise_sigma", 0.5)
     if isinstance(obs_sigma, (int, float)) and obs_sigma < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
@@ -2462,6 +2735,13 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"wearable_monitoring.anomaly_z_threshold = {z_thresh} must be positive")
 
+
+def _check_wearable_anomaly_detection(
+    wm: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate the wearable_monitoring.anomaly_detection sub-block."""
+    z_thresh = wm.get("anomaly_z_threshold", 2.0)
     ad_cfg = wm.get("anomaly_detection")
     if ad_cfg and ad_cfg.get("enabled", True):
         ad_z = ad_cfg.get("anomaly_z_threshold", z_thresh)
@@ -2469,14 +2749,7 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"wearable_monitoring.anomaly_detection.anomaly_z_threshold "
                          f"= {ad_z} must be positive")
-        for key in ("fleet_anomaly_floor", "fleet_anomaly_downweight",
-                    "confounder_match_threshold"):
-            val = ad_cfg.get(key)
-            if val is not None and isinstance(val, (int, float)):
-                if val < 0 or val > 1:
-                    report.error(_CONFIG_YAML, "MATH_BOUND",
-                                 f"wearable_monitoring.anomaly_detection.{key} "
-                                 f"= {val} outside [0,1]")
+        _check_anomaly_fraction_keys(ad_cfg, report)
         inf_thresh = ad_cfg.get("infection_score_threshold", 1.5)
         if isinstance(inf_thresh, (int, float)) and inf_thresh <= 0:
             report.error(_CONFIG_YAML, "MATH_BOUND",
@@ -2484,11 +2757,34 @@ def _check_wearable_monitoring(cfg: dict[str, Any], report: Report) -> None:
                          f"= {inf_thresh} must be positive")
         weights = ad_cfg.get("channel_infection_weights", {})
         if isinstance(weights, dict):
-            for ch, w in weights.items():
-                if isinstance(w, (int, float)) and (w < 0 or w > 1):
-                    report.error(_CONFIG_YAML, "MATH_BOUND",
-                                 f"wearable_monitoring.anomaly_detection."
-                                 f"channel_infection_weights.{ch} = {w} outside [0,1]")
+            _check_anomaly_channel_weights(weights, report)
+
+
+def _check_anomaly_fraction_keys(
+    ad_cfg: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate the [0,1]-bounded anomaly_detection keys."""
+    for key in ("fleet_anomaly_floor", "fleet_anomaly_downweight",
+                "confounder_match_threshold"):
+        val = ad_cfg.get(key)
+        if val is not None and isinstance(val, (int, float)):
+            if val < 0 or val > 1:
+                report.error(_CONFIG_YAML, "MATH_BOUND",
+                             f"wearable_monitoring.anomaly_detection.{key} "
+                             f"= {val} outside [0,1]")
+
+
+def _check_anomaly_channel_weights(
+    weights: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate anomaly_detection.channel_infection_weights values."""
+    for ch, w in weights.items():
+        if isinstance(w, (int, float)) and (w < 0 or w > 1):
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"wearable_monitoring.anomaly_detection."
+                         f"channel_infection_weights.{ch} = {w} outside [0,1]")
 
 
 def _check_crew_screening_interval(cfg: dict[str, Any], report: Report) -> None:
@@ -2650,6 +2946,17 @@ def _check_emod_progression(cfg: dict[str, Any], report: Report) -> None:
 def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
     """Validate escalation thresholds and decision latency."""
     esc = cfg.get("escalation", {})
+    _check_escalation_scalar_bounds(esc, report)
+    _check_escalation_lockdown_and_ct(esc, report)
+    _check_escalation_latency(esc, report)
+    _check_escalation_respiratory_overrides(esc, report)
+
+
+def _check_escalation_scalar_bounds(
+    esc: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate escalation threshold/rate scalar bounds."""
     for key in (
         "syndromic_suspect_threshold",
         "alert_sick_call_threshold",
@@ -2663,6 +2970,13 @@ def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
         if val is not None and isinstance(val, (int, float)) and (val < 0 or val > 1):
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"escalation.{key} = {val} outside [0,1]")
+
+
+def _check_escalation_lockdown_and_ct(
+    esc: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate lockdown_attack_rate and pcr_confirm_ct_threshold."""
     lockdown = esc.get("lockdown_attack_rate")
     if lockdown is not None and lockdown != "never":
         if isinstance(lockdown, (int, float)) and (lockdown < 0 or lockdown > 1):
@@ -2672,6 +2986,13 @@ def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
     if pct is not None and isinstance(pct, (int, float)) and pct <= 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"escalation.pcr_confirm_ct_threshold = {pct} must be positive")
+
+
+def _check_escalation_latency(
+    esc: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate escalation.decision_latency delay fields."""
     latency = esc.get("decision_latency") or {}
     for key in (
         "alert_delay_epochs",
@@ -2683,6 +3004,13 @@ def _check_escalation_params(cfg: dict[str, Any], report: Report) -> None:
         if val is not None and isinstance(val, (int, float)) and val < 0:
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"escalation.decision_latency.{key} = {val} is negative")
+
+
+def _check_escalation_respiratory_overrides(
+    esc: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate escalation.respiratory_overrides fields."""
     resp = esc.get("respiratory_overrides") or {}
     ac = resp.get("alert_confirmed_cases")
     if ac is not None and isinstance(ac, (int, float)) and ac < 0:
@@ -2719,12 +3047,27 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     if rd is not None and isinstance(rd, (int, float)) and rd < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.reluctant_delay_hours = {rd} is negative")
+    _check_fred_compliance_by_class(fred, report)
+    _check_fred_healthy_noise(fred, report)
+
+
+def _check_fred_compliance_by_class(
+    fred: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate fred_behavior.compliance_by_class values."""
     for key, val in (fred.get("compliance_by_class") or {}).items():
         if isinstance(val, (int, float)) and (val < 0 or val > 1):
             report.error(_CONFIG_YAML, "MATH_BOUND",
                          f"fred_behavior.compliance_by_class[{key}] = {val} "
                          f"outside [0,1]")
 
+
+def _check_fred_healthy_noise(
+    fred: dict[str, Any],
+    report: Report,
+) -> None:
+    """Validate fred_behavior.healthy_noise_categories probabilities."""
     for i, cat in enumerate(fred.get("healthy_noise_categories", [])):
         prob = cat.get("probability")
         if prob is not None and isinstance(prob, (int, float)):
@@ -2792,54 +3135,75 @@ def _check_chronic_disease(cfg: dict[str, Any], report: Report) -> None:
         return
 
     for i, d in enumerate(diseases):
-        did = d.get("disease_id", "")
-        if not did:
-            report.error(config_path, "SCHEMA",
-                          f"diseases[{i}] missing disease_id")
-            continue
-
-        prev_map = d.get("prevalence_by_class", {})
-        for cls_name, prev in prev_map.items():
-            if isinstance(prev, (int, float)) and (prev < 0 or prev > 1):
-                report.error(config_path, "MATH_BOUND",
-                              f"{did}.prevalence_by_class.{cls_name} = {prev} "
-                              f"outside [0,1]")
-
-        pmods = d.get("pathogen_modifiers", {})
-        for pid, mods in pmods.items():
-            susc = mods.get("susceptibility_multiplier")
-            if susc is not None and isinstance(susc, (int, float)) and susc < 0:
-                report.error(config_path, "MATH_BOUND",
-                              f"{did}.pathogen_modifiers.{pid}."
-                              f"susceptibility_multiplier = {susc} is negative")
-            sev = mods.get("severity_multiplier")
-            if sev is not None and isinstance(sev, (int, float)) and sev < 0:
-                report.error(config_path, "MATH_BOUND",
-                              f"{did}.pathogen_modifiers.{pid}."
-                              f"severity_multiplier = {sev} is negative")
-            rec = mods.get("recovery_day_extension")
-            if rec is not None and isinstance(rec, (int, float)) and rec < 0:
-                report.error(config_path, "MATH_BOUND",
-                              f"{did}.pathogen_modifiers.{pid}."
-                              f"recovery_day_extension = {rec} is negative")
-            boost = mods.get("illness_probability_boost")
-            if boost is not None and isinstance(boost, (int, float)):
-                if boost < 0 or boost > 1:
-                    report.error(config_path, "MATH_BOUND",
-                                  f"{did}.pathogen_modifiers.{pid}."
-                                  f"illness_probability_boost = {boost} "
-                                  f"outside [0,1]")
-
-        wscale = d.get("wearable_infection_response_scale")
-        if wscale is not None and isinstance(wscale, (int, float)) and wscale < 0:
-            report.error(config_path, "MATH_BOUND",
-                          f"{did}.wearable_infection_response_scale = {wscale} "
-                          f"is negative")
+        _check_chronic_disease_entry(d, i, config_path, report)
 
     max_comorbid = cd.get("max_comorbid")
     if max_comorbid is not None and isinstance(max_comorbid, int) and max_comorbid < 1:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                       f"chronic_disease.max_comorbid = {max_comorbid} must be >= 1")
+
+
+def _check_chronic_disease_entry(
+    d: dict[str, Any],
+    i: int,
+    config_path: str,
+    report: Report,
+) -> None:
+    """Check one diseases[] entry of the chronic disease file."""
+    did = d.get("disease_id", "")
+    if not did:
+        report.error(config_path, "SCHEMA",
+                      f"diseases[{i}] missing disease_id")
+        return
+
+    prev_map = d.get("prevalence_by_class", {})
+    for cls_name, prev in prev_map.items():
+        if isinstance(prev, (int, float)) and (prev < 0 or prev > 1):
+            report.error(config_path, "MATH_BOUND",
+                          f"{did}.prevalence_by_class.{cls_name} = {prev} "
+                          f"outside [0,1]")
+
+    pmods = d.get("pathogen_modifiers", {})
+    for pid, mods in pmods.items():
+        _check_chronic_pathogen_modifier(did, pid, mods, config_path, report)
+
+    wscale = d.get("wearable_infection_response_scale")
+    if wscale is not None and isinstance(wscale, (int, float)) and wscale < 0:
+        report.error(config_path, "MATH_BOUND",
+                      f"{did}.wearable_infection_response_scale = {wscale} "
+                      f"is negative")
+
+
+def _check_chronic_pathogen_modifier(
+    did: str,
+    pid: str,
+    mods: dict[str, Any],
+    config_path: str,
+    report: Report,
+) -> None:
+    """Check one pathogen_modifiers entry of a chronic disease."""
+    susc = mods.get("susceptibility_multiplier")
+    if susc is not None and isinstance(susc, (int, float)) and susc < 0:
+        report.error(config_path, "MATH_BOUND",
+                      f"{did}.pathogen_modifiers.{pid}."
+                      f"susceptibility_multiplier = {susc} is negative")
+    sev = mods.get("severity_multiplier")
+    if sev is not None and isinstance(sev, (int, float)) and sev < 0:
+        report.error(config_path, "MATH_BOUND",
+                      f"{did}.pathogen_modifiers.{pid}."
+                      f"severity_multiplier = {sev} is negative")
+    rec = mods.get("recovery_day_extension")
+    if rec is not None and isinstance(rec, (int, float)) and rec < 0:
+        report.error(config_path, "MATH_BOUND",
+                      f"{did}.pathogen_modifiers.{pid}."
+                      f"recovery_day_extension = {rec} is negative")
+    boost = mods.get("illness_probability_boost")
+    if boost is not None and isinstance(boost, (int, float)):
+        if boost < 0 or boost > 1:
+            report.error(config_path, "MATH_BOUND",
+                          f"{did}.pathogen_modifiers.{pid}."
+                          f"illness_probability_boost = {boost} "
+                          f"outside [0,1]")
 
 
 def _check_microflora_params(
@@ -2922,6 +3286,94 @@ def run_checks(
     print(f"  Pathogen file:  {pathogen_file}")
     print(f"  {'─' * 50}\n")
 
+    inputs = _load_and_parse_inputs(
+        config_dir, platform_dir, pathogen_file, pathogen_label, report,
+    )
+    if inputs is None:
+        return report
+
+    # Run checks
+    _run_check_phase(
+        report,
+        "mathematical bound checks",
+        "All bounds valid",
+        lambda: _check_bounds_phase(inputs, report),
+        fail_color=_RED,
+    )
+    _run_check_phase(
+        report,
+        "graph referential integrity checks",
+        "All references resolved",
+        lambda: _check_graph_integrity(
+            inputs.layout, inputs.airflow, inputs.protocols, report,
+        ),
+        fail_color=_RED,
+    )
+    _run_check_phase(
+        report,
+        "zone geometry checks",
+        "All zone geometry consistent",
+        lambda: _check_zone_geometry(inputs.layout, report),
+    )
+    _run_check_phase(
+        report,
+        "logical contradiction checks",
+        "No contradictions detected",
+        lambda: _check_logical_contradictions(
+            inputs.protocols, inputs.resource_costs, inputs.pathogens, report,
+        ),
+    )
+    _run_check_phase(
+        report,
+        "incubation distribution checks",
+        "Incubation distributions valid",
+        lambda: _check_incubation_models(inputs.pathogens, report),
+    )
+    _run_check_phase(
+        report,
+        "illness-duration checks",
+        "Illness-duration blocks valid",
+        lambda: _check_illness_duration_models(inputs.pathogens, report),
+    )
+    _run_check_phase(
+        report,
+        "symptomatic-stream checks",
+        "Symptomatic-stream blocks valid",
+        lambda: _check_boarding_stream_phase(inputs.pathogens, report),
+    )
+    _run_check_phase(
+        report,
+        "strain evolution checks",
+        "Strain parameters valid",
+        lambda: _check_strain_evolution(inputs.pathogens, report),
+    )
+
+    if cfg is not None:
+        _run_config_yaml_phase(cfg, inputs.layout, report)
+
+    return report
+
+
+@dataclass
+class _LoadedInputs:
+    """Parsed config models plus the raw pathogen profile data."""
+
+    layout: SpatialLayout | None
+    airflow: AirFlowPaths | None
+    protocols: ProtocolsConfig | None
+    pathogens: PathogensFile | None
+    resource_costs: ResourceCosts | None
+    pathogen_data: dict[str, Any] | None
+
+
+def _load_and_parse_inputs(
+    config_dir: str,
+    platform_dir: str,
+    pathogen_file: str,
+    pathogen_label: str,
+    report: Report,
+) -> _LoadedInputs | None:
+    """Load and pydantic-parse all config files; None when nothing was found."""
     # Load files
     spatial_data = _load_json(os.path.join(platform_dir, _SPATIAL_LAYOUT_JSON))
     airflow_data = _load_json(os.path.join(platform_dir, _AIR_FLOW_PATHS_JSON))
@@ -2944,15 +3396,18 @@ def run_checks(
 
     if not any(files_found.values()):
         report.error("(all)", "FILE", "No configuration files found.")
-        return report
+        return None
 
     # Parse with pydantic
     print(f"  {_CYAN}Parsing schemas...{_RESET}")
-    layout = _parse_model(SpatialLayout, spatial_data, _SPATIAL_LAYOUT_JSON, report)
-    airflow = _parse_model(AirFlowPaths, airflow_data, _AIR_FLOW_PATHS_JSON, report)
-    protocols = _parse_model(ProtocolsConfig, protocols_data, _PROTOCOLS_JSON, report)
-    pathogens = _parse_model(PathogensFile, pathogen_data, pathogen_label, report)
-    resource_costs = _parse_model(ResourceCosts, resource_data, _RESOURCE_COSTS_JSON, report)
+    inputs = _LoadedInputs(
+        layout=_parse_model(SpatialLayout, spatial_data, _SPATIAL_LAYOUT_JSON, report),
+        airflow=_parse_model(AirFlowPaths, airflow_data, _AIR_FLOW_PATHS_JSON, report),
+        protocols=_parse_model(ProtocolsConfig, protocols_data, _PROTOCOLS_JSON, report),
+        pathogens=_parse_model(PathogensFile, pathogen_data, pathogen_label, report),
+        resource_costs=_parse_model(ResourceCosts, resource_data, _RESOURCE_COSTS_JSON, report),
+        pathogen_data=pathogen_data,
+    )
 
     schema_errors = len(report.errors)
     if schema_errors:
@@ -2960,102 +3415,66 @@ def run_checks(
     else:
         print(f"  {_GREEN}All schemas valid{_RESET}")
     print()
+    return inputs
 
-    # Run checks
-    print(f"  {_CYAN}Running mathematical bound checks...{_RESET}")
-    pre = len(report.findings)
-    _check_mathematical_bounds(protocols, pathogens, report)
-    _check_emesis_airborne_exclusion(pathogen_data, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_RED}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}All bounds valid{_RESET}")
 
-    print(f"  {_CYAN}Running graph referential integrity checks...{_RESET}")
-    pre = len(report.findings)
-    _check_graph_integrity(layout, airflow, protocols, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_RED}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}All references resolved{_RESET}")
+def _check_bounds_phase(inputs: _LoadedInputs, report: Report) -> None:
+    """Mathematical bound + emesis-exclusion checks for one phase."""
+    _check_mathematical_bounds(inputs.protocols, inputs.pathogens, report)
+    _check_emesis_airborne_exclusion(inputs.pathogen_data, report)
 
-    print(f"  {_CYAN}Running zone geometry checks...{_RESET}")
-    pre = len(report.findings)
-    _check_zone_geometry(layout, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}All zone geometry consistent{_RESET}")
 
-    print(f"  {_CYAN}Running logical contradiction checks...{_RESET}")
-    pre = len(report.findings)
-    _check_logical_contradictions(protocols, resource_costs, pathogens, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}No contradictions detected{_RESET}")
-
-    print(f"  {_CYAN}Running incubation distribution checks...{_RESET}")
-    pre = len(report.findings)
-    _check_incubation_models(pathogens, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}Incubation distributions valid{_RESET}")
-
-    print(f"  {_CYAN}Running illness-duration checks...{_RESET}")
-    pre = len(report.findings)
-    _check_illness_duration_models(pathogens, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}Illness-duration blocks valid{_RESET}")
-
-    print(f"  {_CYAN}Running symptomatic-stream checks...{_RESET}")
-    pre = len(report.findings)
+def _check_boarding_stream_phase(
+    pathogens: PathogensFile | None,
+    report: Report,
+) -> None:
+    """Symptomatic-stream + preboarding-assessment checks for one phase."""
     _check_symptomatic_stream(pathogens, report)
     _check_preboarding_assessment(pathogens, report)
-    added = len(report.findings) - pre
-    if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
-    else:
-        print(f"  {_GREEN}Symptomatic-stream blocks valid{_RESET}")
 
-    print(f"  {_CYAN}Running strain evolution checks...{_RESET}")
+
+def _run_check_phase(
+    report: Report,
+    label: str,
+    ok_msg: str,
+    check: Any,
+    *,
+    fail_color: str = _YELLOW,
+) -> None:
+    """Run one check phase and print its added-findings summary."""
+    print(f"  {_CYAN}Running {label}...{_RESET}")
     pre = len(report.findings)
-    _check_strain_evolution(pathogens, report)
+    check()
+    added = report.findings[pre:]
+    if added:
+        print(f"  {fail_color}Found {len(added)} issue(s){_RESET}")
+    else:
+        print(f"  {_GREEN}{ok_msg}{_RESET}")
+
+
+def _run_config_yaml_phase(
+    cfg: dict[str, Any],
+    layout: SpatialLayout | None,
+    report: Report,
+) -> None:
+    """Run the config.yaml validation phase and print its error/warning split."""
+    zone_ids = {z.id for z in layout.zones} if layout else None
+    print(f"\n  {_CYAN}Running config.yaml validation checks...{_RESET}")
+    pre = len(report.findings)
+    _check_config_yaml(cfg, report, zone_ids)
     added = len(report.findings) - pre
     if added:
-        print(f"  {_YELLOW}Found {added} issue(s){_RESET}")
+        errs = sum(1 for f in report.findings[pre:] if f.severity == Severity.ERROR)
+        warns = added - errs
+        parts = []
+        if errs:
+            parts.append(f"{errs} error(s)")
+        if warns:
+            parts.append(f"{warns} warning(s)")
+        color = _RED if errs else _YELLOW
+        print(f"  {color}Found {', '.join(parts)}{_RESET}")
     else:
-        print(f"  {_GREEN}Strain parameters valid{_RESET}")
-
-    if cfg is not None:
-        zone_ids = {z.id for z in layout.zones} if layout else None
-        print(f"\n  {_CYAN}Running config.yaml validation checks...{_RESET}")
-        pre = len(report.findings)
-        _check_config_yaml(cfg, report, zone_ids)
-        added = len(report.findings) - pre
-        if added:
-            errs = sum(1 for f in report.findings[pre:] if f.severity == Severity.ERROR)
-            warns = added - errs
-            parts = []
-            if errs:
-                parts.append(f"{errs} error(s)")
-            if warns:
-                parts.append(f"{warns} warning(s)")
-            color = _RED if errs else _YELLOW
-            print(f"  {color}Found {', '.join(parts)}{_RESET}")
-        else:
-            print(f"  {_GREEN}All config.yaml values valid{_RESET}")
-
-    return report
+        print(f"  {_GREEN}All config.yaml values valid{_RESET}")
 
 
 def print_report(report: Report) -> None:

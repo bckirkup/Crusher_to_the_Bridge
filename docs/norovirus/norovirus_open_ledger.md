@@ -16,6 +16,7 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+<<<<<<< HEAD
 **`CABIN-OCC-01` + `ROOM-AIR-01` (ledger entries): every airborne-route
 dose figure on any hull that declares AHU rates, and every confined-
 cabinmate figure, moves at this change's merge SHA.** Room-pool
@@ -27,6 +28,21 @@ already sub-copy on the classic hull — the change's effect there is on
 other pathogens' rooms and on confined-pair geometry — but pre-change
 airborne dose figures are historical regardless; `sealed`/`off` baselines
 reproduce them bit-identically for attribution.
+
+**`NORO-IMPORT-YIELD-01` (ledger entry): the `realism_ladder_v1` secondary-per-
+import figures no longer describe HEAD.** Re-measured on the frozen cell
+(spirit_cruise_3000 × norwalk_only × 168 epochs, seeds 8000–8019, shipped
+`dose_adjustment` 4.0 — same pressure the ladder rungs used) at `4e0032a0`
+via the Batch probe matrix `afdfe648`: pooled secondaries/import is **0.11**
+(median 0, P(zero) 0.95) against the ladder's ~5–7.5 on the same platform and
+duration, and per-class single-import probes give symptomatic 1.5,
+presymptomatic 0.5, convalescent 0.0. Import *draw* pressure is unchanged
+(6.4 vs 6.9/voyage) — what collapsed is transmission per import. The ladder
+was measured at ~`49dbf18e` (2026-09-15); the 82 `engines/`+profile commits
+since (GATE-FLOOR-01 sub-copy pickup gate, fomite pool caps/sharing,
+TOUCH-SHARE-01/02, AERO-SPLIT-01, REINFECT-01, CHANNEL-02) are the candidate
+window — unattributed, bisection is the instrument. Any "imports still yield
+4.5–7" reasoning built on the ladder table is void pending that attribution.
 
 **`NORO-CHANNEL-02` (ledger entry): every reported-side reading — infirmary
 capture, reported/ever-ill, A3/A4 ascertainment scores — taken before this
@@ -851,16 +867,27 @@ survives only as a deprecated alias (relative susceptibility 0.0) so the other
 bundles in `data/pathogens/` keep their present behaviour. The history below is
 retained because the sequence of reversals is the reason the mechanism changed.
 
-**The mega-cruise campaign still runs the withdrawn mechanism.**
-`picard_framework/runs/mega_cruise_campaign/campaign_runner.py:988` writes
-`innate_nonsusceptible_fraction` into its per-run overrides, so every campaign
-run rides the deprecated alias at relative susceptibility 0.0 — sterile immunity
-— while `data/pathogens/active_profiles.json` runs partial susceptibility. The
-behaviour is deliberately unchanged: the campaign sweeps the removed fraction,
-and converting that swept axis into a relative susceptibility is a design
-decision rather than a rename. Any campaign result must therefore be read as
-having been produced under the withdrawn mechanism until that decision is
-taken.
+**The mega-cruise campaign's susceptibility axis is repaired (ledger
+`NORO-SUSCEPT-04`).** The defect was worse than running the withdrawn
+mechanism: `_iter_synthetic_recovery_runs` wrote
+`innate_nonsusceptible_fraction` into per-run `pathogen_overrides`, but the
+engine resolves `secretor_negative_fraction` first, so under
+`active_profiles` the alias write was **silently shadowed** — the swept
+`non_susceptible` axis was recorded in `campaign_parameters` yet never reached
+the engine at all. The axis now speaks the mechanism's own vocabulary:
+parameter vectors declare `secretor_negative_fraction` and
+`secretor_negative_relative_susceptibility`, resolved per run with the same
+precedence the engine applies (vector → arm base overrides → bundle profile →
+0.0); the resolved pair is pinned into `pathogen_overrides` and recorded by
+name, so the archive shows the values the run actually executed. The
+uncertainty window is representable rather than flattened: a scalar is a grid
+sweep point, and `{"dist": "uniform"|"log_uniform", "interval": [lo, hi]}`
+draws once per run, seeded off the run seed and field name without touching
+the engine RNG stream — covering the sourced Kambhampati 2015 window
+[0.04, 0.83] the bounded screen already declares. The withdrawn spellings
+(`non_susceptible`, `innate_nonsusceptible_fraction`) in a parameter vector
+are refused at load, and campaign results archived under the shadowed axis
+remain void under the withdrawn mechanism.
 
 **The emesis titre × volume parameterisation is withdrawn and replaced by the
 quantity Kirby identifies (Wave 2, task #38).** `EMESIS_TITRE_GEC_PER_ML` is no
@@ -3924,10 +3951,13 @@ its stable ID; pull requests must not append numbered items.
     pickup request divides by, and applies Park 2015's per-swab copy LOD
     (`SWAB_LOD_COPIES_BY_SURFACE`, `SWAB_RECOVERY_EFFICIENCY_BOUNDS`;
     derivation `docs/norovirus/environmental_observation_v1.md` §2). The
-    default stays `airborne_fraction`, so the decision layer reads the
-    legacy synthetic 0.4-of-airborne figure and no golden moves; the
-    repaired path ships unmeasured and awaits a matched arm — no archive
-    to date carries it. Explicitly **not done** here and owed by the
+    default stayed `airborne_fraction` at that change, so the decision
+    layer read the legacy synthetic 0.4-of-airborne figure and no golden
+    moved. **Update — default flipped:** per the OVERRIDE-FLAGS-01 audit,
+    `surface_pool_density` is now the default; `airborne_fraction`
+    remains the labelled pre-change baseline for paired contrast. Swab
+    outputs change to the real deposited-pool densities — that is the
+    intent; no dose or RNG stream is touched. Explicitly **not done** here and owed by the
     following change: the deposited share outside the high-touch
     footprint (`non_touchable` in `_emit_emesis`, `transmission_core.py`)
     is still written to the deposition record and dropped — the majority
@@ -3953,9 +3983,17 @@ its stable ID; pull requests must not append numbered items.
     samples are censored, never zeroed. v1 limitations, declared: no
     turnaround-queue entry (the assay reads immediately), no decay over
     the holding time, graywater sequencing untouched, capture only of
-    `non_touchable`. The change is additive and default-off: no dose,
+    `non_touchable`. The change is additive: no dose,
     rate, or RNG draw is touched, so no existing measurement is
     invalidated — the tank reads mass that was previously dropped.
+    **Update — defaults flipped:** the OVERRIDE-FLAGS-01 gate audit
+    flagged this pair as measured mechanisms resting default-off;
+    `transmission.blackwater_plumbing` and
+    `observation.wastewater_assay_mode` now default `true` /
+    `holding_tank` (`false` / `none` remain the labelled pre-change
+    baselines). The assay draws on its own seeded instrument stream, so
+    no dose or RNG golden moves; the observation record gains the
+    post-discharge read each epoch.
 
 58. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
     cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,

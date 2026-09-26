@@ -10,6 +10,7 @@ and microflora disruption computation.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
@@ -641,6 +642,17 @@ def _agent_by_id(engine: KorkinShipEngine, collection_key: str) -> Any | None:
     return None
 
 
+@dataclass(frozen=True)
+class ClinicalLabResults:
+    """The per-epoch specimen results a long-read escalation request reads."""
+
+    ww_results: dict[str, dict[str, Any]]
+    swab_results: dict[str, dict[str, Any]]
+    clin_rdt_results: dict[int, dict[str, Any]]
+    clin_qpcr_results: dict[int, dict[str, Any]]
+    clin_microbio_results: dict[int, dict[str, Any]]
+
+
 def _run_long_read_escalation(
     obs: ObservationEngine,
     queue: Any,
@@ -649,11 +661,7 @@ def _run_long_read_escalation(
     spaces: dict[str, dict[str, Any]],
     agents: list[dict[str, Any]],
     pathogen_profiles: dict[str, dict[str, Any]],
-    ww_results: dict[str, dict[str, Any]],
-    swab_results: dict[str, dict[str, Any]],
-    clin_rdt_results: dict[int, dict[str, Any]],
-    clin_qpcr_results: dict[int, dict[str, Any]],
-    clin_microbio_results: dict[int, dict[str, Any]],
+    labs: ClinicalLabResults,
     engine: KorkinShipEngine | None = None,
     strain_registry: StrainRegistry | None = None,
 ) -> tuple[dict[str, dict[str, Any]], int]:
@@ -667,11 +675,11 @@ def _run_long_read_escalation(
 
     requests = collect_long_read_escalation_requests(
         cfg,
-        ww_results=ww_results,
-        swab_results=swab_results,
-        clin_rdt_results=clin_rdt_results,
-        clin_qpcr_results=clin_qpcr_results,
-        clin_microbio_results=clin_microbio_results,
+        ww_results=labs.ww_results,
+        swab_results=labs.swab_results,
+        clin_rdt_results=labs.clin_rdt_results,
+        clin_qpcr_results=labs.clin_qpcr_results,
+        clin_microbio_results=labs.clin_microbio_results,
     )
     if not requests:
         return long_read_results, long_read_ordered_count
@@ -694,16 +702,23 @@ def _run_long_read_escalation(
     return long_read_results, long_read_ordered_count
 
 
+@dataclass(frozen=True)
+class ZoneContext:
+    """Zone geometry, microflora shifts, and traffic flags for one epoch."""
+
+    zone_names: list[str]
+    zone_volumes: dict[str, float]
+    zone_microflora_shifts: dict[str, dict[str, float]]
+    high_traffic: list[str]
+
+
 def run_observation_sampling(
     epoch: int,
     obs: ObservationEngine,
     agents: list[dict[str, Any]],
     spaces: dict[str, dict[str, Any]],
-    zone_names: list[str],
-    zone_volumes: dict[str, float],
-    zone_microflora_shifts: dict[str, dict[str, float]],
+    zones: ZoneContext,
     trigger_status: str,
-    high_traffic: list[str],
     syn_result: dict[str, Any],
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -743,21 +758,24 @@ def run_observation_sampling(
         zone_airborne[zname] = total_mass * airborne_frac
         zone_surface[zname] = total_mass * surface_frac
 
-    air_results = obs.air_sniffer.sample_all_zones(zone_airborne, zone_volumes)
+    air_results = obs.air_sniffer.sample_all_zones(
+        zone_airborne, zones.zone_volumes,
+    )
 
     fred_compliance = cfg.get("fred_behavior", {}).get("quarantine_compliance", 0.85)
     swab_targets = None
     # ALERT/SUSPECTED → high-traffic swabs; CONFIRMED/LOCKDOWN → all zones
     rank = STATUS_RANK.get(trigger_status, 0)
     if rank >= STATUS_RANK[STATUS_CONFIRMED]:
-        swab_targets = zone_names
+        swab_targets = zones.zone_names
     elif rank >= STATUS_RANK[STATUS_ALERT]:
-        swab_targets = high_traffic
-    # observation.surface_swab_source: "airborne_fraction" (default, legacy
-    # synthetic 0.4 of the airborne pool) or "surface_pool_density" (the real
-    # deposited pool as a per-cm² density — the repaired channel).
+        swab_targets = zones.high_traffic
+    # observation.surface_swab_source: "surface_pool_density" (default,
+    # the real deposited pool as a per-cm² density — the repaired
+    # channel) or "airborne_fraction" (labelled pre-change baseline:
+    # legacy synthetic 0.4 of the airborne pool).
     swab_source = cfg.get("observation", {}).get(
-        "surface_swab_source", "airborne_fraction"
+        "surface_swab_source", "surface_pool_density"
     )
     if swab_source == "surface_pool_density" and tx_core is not None:
         # zone_surface_mass pools every cabin compartment under its
@@ -767,7 +785,7 @@ def run_observation_sampling(
         surface_copies_by_pid = {
             pid: {
                 zname: tx_core.zone_surface_mass(zname, pid)
-                for zname in zone_names
+                for zname in zones.zone_names
             }
             for pid in pathogen_profiles
         }
@@ -776,11 +794,11 @@ def run_observation_sampling(
                 masses.get(zname, 0.0)
                 for masses in surface_copies_by_pid.values()
             )
-            for zname in zone_names
+            for zname in zones.zone_names
         }
         zone_high_touch = {
             zname: tx_core.zone_high_touch_area_cm2(zname)
-            for zname in zone_names
+            for zname in zones.zone_names
         }
         # Declared mapping: a sanitary-class zone's touchable surface is
         # toilet-seat hardware; everything else is non-porous hard surface
@@ -791,7 +809,7 @@ def run_observation_sampling(
                 if tx_core.zone_types.get(zname) == "Sanitary"
                 else "nonporous_hard"
             )
-            for zname in zone_names
+            for zname in zones.zone_names
         }
         swab_results = obs.surface_swab.swab_surface_zones(
             zone_surface_copies,
@@ -807,7 +825,7 @@ def run_observation_sampling(
         )
 
     ww_microflora: dict[str, dict[str, float]] = {}
-    for zname, mf_data in zone_microflora_shifts.items():
+    for zname, mf_data in zones.zone_microflora_shifts.items():
         ww_microflora[zname] = mf_data
     ww_per_pathogen = (
         {pid: engine.get_pathogen_zone_mass(pid) for pid in pathogen_profiles}
@@ -815,12 +833,12 @@ def run_observation_sampling(
     )
     from orchestrator_init import resolve_graywater_zones
 
-    ww_target_zones = resolve_graywater_zones(cfg, zone_names)
+    ww_target_zones = resolve_graywater_zones(cfg, zones.zone_names)
     ww_pathogen_mass = build_wastewater_pathogen_mass(
-        zone_names, zone_surface, greywater_frac, ww_target_zones,
+        zones.zone_names, zone_surface, greywater_frac, ww_target_zones,
     )
     ww_per_pathogen = build_wastewater_pathogen_mass_by_id(
-        zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
+        zones.zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
     )
     ww_results = obs.wastewater_seq.sample_all_zones(
         ww_pathogen_mass, ww_microflora,
@@ -833,7 +851,9 @@ def run_observation_sampling(
     # the turnaround queue in v1 — it has no declared TAT entry.
     wastewater_ht_result: dict[str, Any] | None = None
     if (
-        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        cfg.get("observation", {}).get(
+            "wastewater_assay_mode", "holding_tank"
+        )
         == "holding_tank"
         and obs.wastewater_assay is not None
         and tx_core is not None
@@ -873,8 +893,13 @@ def run_observation_sampling(
     if queue is not None:
         long_read_results, long_read_ordered_count = _run_long_read_escalation(
             obs, queue, cfg, epoch, spaces, agents, pathogen_profiles,
-            ww_results, swab_results,
-            clin_rdt_results, clin_qpcr_results, clin_microbio_results,
+            ClinicalLabResults(
+                ww_results=ww_results,
+                swab_results=swab_results,
+                clin_rdt_results=clin_rdt_results,
+                clin_qpcr_results=clin_qpcr_results,
+                clin_microbio_results=clin_microbio_results,
+            ),
             engine=engine,
             strain_registry=strain_registry,
         )

@@ -353,10 +353,9 @@ class TestResolution:
         assert not spec.preboarding.crew.enabled
 
     def test_passenger_reportable_is_a_load_error(self) -> None:
+        block = _assessment(passenger=_role(reportable=True))
         with pytest.raises(ValueError, match="crew-only"):
-            _resolve(_assessment(
-                passenger=_role(reportable=True),
-            ))
+            _resolve(block)
 
     @pytest.mark.parametrize(
         ("role_block", "match"),
@@ -372,20 +371,22 @@ class TestResolution:
     def test_role_coordinates_are_bounded(
         self, role_block: dict[str, Any], match: str,
     ) -> None:
+        block = _assessment(crew=role_block)
         with pytest.raises(ValueError, match=match):
-            _resolve(_assessment(crew=role_block))
+            _resolve(block)
 
     def test_negative_lookback_is_refused(self) -> None:
+        block = _assessment(lookback_days=-1)
         with pytest.raises(ValueError, match="negative"):
-            _resolve(_assessment(lookback_days=-1))
+            _resolve(block)
 
     def test_unknown_keys_are_refused(self) -> None:
+        block = _assessment(lookback_years=3)
         with pytest.raises(ValueError, match="unknown keys"):
-            _resolve(_assessment(lookback_years=3))
+            _resolve(block)
+        block = _assessment(crew=_role(declaration_rate=1.0))
         with pytest.raises(ValueError, match="unknown keys"):
-            _resolve(_assessment(
-                crew=_role(declaration_rate=1.0),
-            ))
+            _resolve(block)
 
     def test_a_non_mapping_block_is_refused(self) -> None:
         with pytest.raises(ValueError, match="must be a mapping"):
@@ -698,8 +699,9 @@ class TestReportFolding:
 
 class TestRoleBlockValidation:
     def test_a_non_mapping_role_block_is_refused(self) -> None:
+        block = _assessment(crew="yes")
         with pytest.raises(ValueError, match="must be a mapping"):
-            _resolve(_assessment(crew="yes"))
+            _resolve(block)
 
 
 class TestCampaignAxis:

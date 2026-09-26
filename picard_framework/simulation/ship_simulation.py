@@ -70,6 +70,7 @@ from orchestrator_chronic import (
     print_chronic_disease_summary,
 )
 from orchestrator_epoch import (
+    ZoneContext,
     apply_chronic_severity_escalation,
     apply_zone_closures,
     build_cascade_context,
@@ -116,7 +117,11 @@ from orchestrator_init import (
     update_ever_reported_ids,
     update_route_attribution,
 )
-from orchestrator_record import finalize_simulation, record_epoch
+from orchestrator_record import (
+    EpochRecordRequest,
+    finalize_simulation,
+    record_epoch,
+)
 from orchestrator_types import (
     REPO_ROOT,
     STATUS_ALERT,
@@ -1183,9 +1188,14 @@ class ShipSimulation:
     def _step_labs(self, work: _EpochWork) -> None:
         self._query_pcr_seq(work)
         work.observations = run_observation_sampling(
-            work.epoch, self.obs, work.agents, work.spaces, self.zone_names,
-            self.zone_volumes, work.zone_microflora_shifts,
-            work.state.trigger_status, self.high_traffic, work.syn_result,
+            work.epoch, self.obs, work.agents, work.spaces,
+            ZoneContext(
+                zone_names=self.zone_names,
+                zone_volumes=self.zone_volumes,
+                zone_microflora_shifts=work.zone_microflora_shifts,
+                high_traffic=self.high_traffic,
+            ),
+            work.state.trigger_status, work.syn_result,
             self.engine, self.pathogen_profiles, work.cfg,
             strain_registry=(
                 None if self.tx_core is None else self.tx_core.strain_registry
@@ -1508,32 +1518,34 @@ class ShipSimulation:
         )
         work.state.agent_behavioral_overrides.clear()
         work.epoch_record = record_epoch(
-            epoch=work.epoch,
-            trigger_status=work.state.trigger_status,
-            agents=work.agents,
-            spaces=work.spaces,
-            engine=self.engine,
-            contam_engine=self.contam_engine,
-            pathogen_profiles=self.pathogen_profiles,
-            zone_names=self.zone_names,
-            zone_microflora_shifts=work.zone_microflora_shifts,
-            syn_result=work.syn_result,
-            rdt_result=work.rdt_result,
-            pcr_result=work.pcr_result,
-            seq_result=work.seq_result,
-            tracing_matrix=work.tracing_matrix,
-            state=work.state,
-            obs=self.obs,
-            active_mods=work.active_mods,
-            merged_mods=work.merged_mods,
-            stoplights=work.stoplights,
-            epoch_cost=self.proto_ctx.cost_ledger.get_epoch_summary(work.epoch),
-            cfg=work.cfg,
-            observations=replace(work.observations, cascade=work.cascade_result),
-            wearable_result=work.wearable_result,
-            infection_counters=work.counter_results,
-            history_retention=self.run_spec.history_retention,
-            final_epoch=(work.epoch + 1 >= self.num_epochs),
+            EpochRecordRequest(
+                epoch=work.epoch,
+                trigger_status=work.state.trigger_status,
+                agents=work.agents,
+                spaces=work.spaces,
+                engine=self.engine,
+                contam_engine=self.contam_engine,
+                pathogen_profiles=self.pathogen_profiles,
+                zone_names=self.zone_names,
+                zone_microflora_shifts=work.zone_microflora_shifts,
+                syn_result=work.syn_result,
+                rdt_result=work.rdt_result,
+                pcr_result=work.pcr_result,
+                seq_result=work.seq_result,
+                tracing_matrix=work.tracing_matrix,
+                state=work.state,
+                obs=self.obs,
+                active_mods=work.active_mods,
+                merged_mods=work.merged_mods,
+                stoplights=work.stoplights,
+                epoch_cost=self.proto_ctx.cost_ledger.get_epoch_summary(work.epoch),
+                cfg=work.cfg,
+                observations=replace(work.observations, cascade=work.cascade_result),
+                    wearable_result=work.wearable_result,
+                    infection_counters=work.counter_results,
+                    history_retention=self.run_spec.history_retention,
+                    final_epoch=(work.epoch + 1 >= self.num_epochs),
+                ),
         )
         if work.applied and self.run_spec.history_retention != "compact":
             work.epoch_record["decisions"] = work.applied

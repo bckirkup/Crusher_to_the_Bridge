@@ -554,6 +554,37 @@ def route_window_tables(
     }
 
 
+def _funnel_rung(
+    agent: Any,
+    pathogen_id: str,
+    seeded: set[int],
+    confirmed: set[int],
+    eligibility: list[float],
+    states: list[str],
+) -> dict[str, Any] | None:
+    """One host's place in the truth→recorded funnel, or None if uninfected."""
+    if agent.agent_id in seeded:
+        return None
+    inf = agent.infections.get(pathogen_id)
+    if inf is None:
+        return None
+    severity = str(inf.get("symptom_severity") or "none")
+    # ``illness`` flips to RECOVERED by voyage end, so the datable-course
+    # rung is read off severity instead: an eligibility>0 severity means
+    # the host had a symptomatic course the channel could ever date.
+    is_eligible = bool(
+        eligibility
+        and severity in states
+        and eligibility[states.index(severity)] > 0.0
+    ) or not eligibility
+    return {
+        "severity": severity,
+        "symptomatic": inf.get("illness") == IllnessStatus.SYMPTOMATIC,
+        "eligible": is_eligible,
+        "confirmed": is_eligible and agent.agent_id in confirmed,
+    }
+
+
 def ascertainment_funnel(
     sim: Any,
     *,
@@ -590,35 +621,23 @@ def ascertainment_funnel(
         .get("states", [])
     )
 
-    infected = symptomatic_now = eligible = 0
+    infected, symptomatic_now, eligible, confirmed_datable = 0, 0, 0, 0
     severity_all: Counter = Counter()
     severity_eligible_course: Counter = Counter()
-    confirmed_datable = 0
     for agent in sim.engine.agents:
-        if agent.agent_id in seeded:
-            continue
-        inf = agent.infections.get(pathogen_id)
-        if inf is None:
+        rung = _funnel_rung(
+            agent, pathogen_id, seeded, confirmed, eligibility, states,
+        )
+        if rung is None:
             continue
         infected += 1
-        severity = str(inf.get("symptom_severity") or "none")
-        severity_all[severity] += 1
-        if inf.get("illness") == IllnessStatus.SYMPTOMATIC:
-            symptomatic_now += 1
-        # ``illness`` flips to RECOVERED by voyage end, so the datable-course
-        # rung is read off severity instead: an eligibility>0 severity means
-        # the host had a symptomatic course the channel could ever date.
-        is_eligible = bool(
-            eligibility
-            and severity in states
-            and eligibility[states.index(severity)] > 0.0
-        ) or not eligibility
-        if not is_eligible:
+        severity_all[rung["severity"]] += 1
+        symptomatic_now += int(rung["symptomatic"])
+        if not rung["eligible"]:
             continue
         eligible += 1
-        severity_eligible_course[severity] += 1
-        if agent.agent_id in confirmed:
-            confirmed_datable += 1
+        severity_eligible_course[rung["severity"]] += 1
+        confirmed_datable += int(rung["confirmed"])
 
     dated_severity = Counter(str(r["symptom_severity"]) for r in dated.values())
     out = {
@@ -726,7 +745,14 @@ def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
     ]
     text = json.dumps(results, indent=1, default=str)
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as handle:
+        out_path = args.out
+        if not os.path.isabs(out_path):
+            out_path = os.path.join(repo_root, out_path)
+        out_path = os.path.realpath(out_path)
+        root = os.path.realpath(repo_root) + os.sep
+        if not out_path.startswith(root):
+            raise SystemExit(f"--out must resolve under the repo root: {args.out}")
+        with open(out_path, "w", encoding="utf-8") as handle:
             handle.write(text)
     print(text)
 

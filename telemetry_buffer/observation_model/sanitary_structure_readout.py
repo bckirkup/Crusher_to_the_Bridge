@@ -115,7 +115,7 @@ EPOCHS_PER_DAY = 24.0
 def _witness(summary: dict[str, Any]) -> dict[str, Any]:
     block = (summary.get("summary") or {}).get("sanitary_activity")
     if not isinstance(block, dict):
-        return {key: None for key in WITNESS_KEYS}
+        return dict.fromkeys(WITNESS_KEYS)
     return {key: block.get(key) for key in WITNESS_KEYS}
 
 

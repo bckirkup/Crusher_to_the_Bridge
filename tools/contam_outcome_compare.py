@@ -86,34 +86,23 @@ def _build_spec(
     return spec
 
 
-def _summarize(sim: ShipSimulation, result: Any, engine_label: str) -> dict[str, Any]:
-    summary: dict[str, Any] = {
-        "transport_engine": engine_label,
-        "num_epochs": result.num_epochs,
-        "final_trigger_status": result.final_trigger_status,
+def _agent_outcomes(agents: list[Any]) -> dict[str, Any]:
+    infected = 0
+    for ag in agents:
+        status = str(getattr(ag, "infection_status", "") or "").lower()
+        if status and status not in ("susceptible", "s", "none"):
+            infected += 1
+    n = len(agents)
+    return {
+        "n_agents": n,
+        "n_infected": infected,
+        "attack_rate": infected / n if n else 0.0,
     }
 
-    engine = sim.engine
-    if engine is not None and getattr(engine, "agents", None):
-        agents = engine.agents
-        n = len(agents)
-        infected = 0
-        for ag in agents:
-            status = str(getattr(ag, "infection_status", "") or "").lower()
-            if status and status not in ("susceptible", "s", "none"):
-                infected += 1
-        summary["n_agents"] = n
-        summary["n_infected"] = infected
-        summary["attack_rate"] = infected / n if n else 0.0
 
-    state = sim.state
-    if state is not None:
-        cost = getattr(state, "cost_accounting", None)
-        if isinstance(cost, dict):
-            summary["operational_impact_score"] = cost.get("operational_impact_score")
-
+def _hvac_exposure_events(history: Any) -> int:
     hvac_exposures = 0
-    for epoch in result.history or []:
+    for epoch in history or []:
         if not isinstance(epoch, dict):
             continue
         tx = epoch.get("transmission_summary") or epoch.get("transmission") or {}
@@ -124,7 +113,29 @@ def _summarize(sim: ShipSimulation, result: Any, engine_label: str) -> dict[str,
             val = epoch.get(key)
             if isinstance(val, list):
                 hvac_exposures += len(val)
-    summary["hvac_downstream_exposure_events"] = hvac_exposures
+    return hvac_exposures
+
+
+def _summarize(sim: ShipSimulation, result: Any, engine_label: str) -> dict[str, Any]:
+    summary: dict[str, Any] = {
+        "transport_engine": engine_label,
+        "num_epochs": result.num_epochs,
+        "final_trigger_status": result.final_trigger_status,
+    }
+
+    engine = sim.engine
+    if engine is not None and getattr(engine, "agents", None):
+        summary.update(_agent_outcomes(engine.agents))
+
+    state = sim.state
+    if state is not None:
+        cost = getattr(state, "cost_accounting", None)
+        if isinstance(cost, dict):
+            summary["operational_impact_score"] = cost.get("operational_impact_score")
+
+    summary["hvac_downstream_exposure_events"] = _hvac_exposure_events(
+        result.history,
+    )
 
     contam = sim.contam_engine
     if contam is not None:

@@ -92,8 +92,9 @@ def test_validate_requires_jsonschema(monkeypatch: pytest.MonkeyPatch) -> None:
         return real_import(name, *args, **kwargs)
 
     monkeypatch.setattr("builtins.__import__", _block_jsonschema)
+    payload = fixture()
     with pytest.raises(SystemExit, match="jsonschema"):
-        mod.validate(fixture())
+        mod.validate(payload)
 
 
 def test_cli_validate_and_verify(

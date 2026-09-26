@@ -1,0 +1,273 @@
+{
+ "measured": "aws_batch",
+ "job": "afdfe648-875c-466c-98e0-5057dfd49167",
+ "job_definition": "picard-init-probes:1",
+ "image_digest": "sha256:acb63327f45460026a34cb1e5260f55b8650f21657e1f4c590a9e740d53230ba",
+ "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/init_probes_01/",
+ "aboard_window_acquisitions": {
+  "n": 5,
+  "min": 0,
+  "median": 0,
+  "max": 0,
+  "mean": 0
+ },
+ "aboard_window_clean": {
+  "n": 5,
+  "min": 0,
+  "median": 0,
+  "max": 0,
+  "mean": 0
+ },
+ "cells": [
+  {
+   "base": {
+    "cell": {
+     "index": 0,
+     "scenario_id": "diamond_princess_2020",
+     "theta": 42200000000.0,
+     "infection_age_days": 3.3,
+     "imports": 1,
+     "seed": 20200205,
+     "arm_id": "D0_declared",
+     "key": "screen_diamond_princess_2020_theta1e10p63_age3p3d_imports1_seed20200205_armD0_declared.json"
+    },
+    "age_override": null,
+    "index": {
+     "seed": {
+      "pathogen": "sars_cov2_resp",
+      "count": 1,
+      "role": "passenger",
+      "epoch": 0,
+      "infection_age_days": 3.3,
+      "departure_day": 0.0,
+      "onset_day": -1.0
+     },
+     "agents": {
+      "1826": {
+       "infection_epoch": 0,
+       "onset_time_infected": 55,
+       "incubation_days": 2.3,
+       "will_present": true
+      }
+     },
+     "departure_epoch": 0,
+     "first_secondary_shed_epoch": null
+    },
+    "acquisitions": {
+     "total": 0,
+     "aboard_window": 0,
+     "aboard_window_clean": 0,
+     "by_day": {},
+     "route_split_all": {},
+     "route_split_aboard": {},
+     "role_split_aboard": {},
+     "ring_share_aboard": {
+      "n": 0
+     }
+    },
+    "infected_total": 0,
+    "infections_by_epoch": {}
+   }
+  },
+  {
+   "base": {
+    "cell": {
+     "index": 1,
+     "scenario_id": "diamond_princess_2020",
+     "theta": 42200000000.0,
+     "infection_age_days": 3.3,
+     "imports": 1,
+     "seed": 20200206,
+     "arm_id": "D0_declared",
+     "key": "screen_diamond_princess_2020_theta1e10p63_age3p3d_imports1_seed20200206_armD0_declared.json"
+    },
+    "age_override": null,
+    "index": {
+     "seed": {
+      "pathogen": "sars_cov2_resp",
+      "count": 1,
+      "role": "passenger",
+      "epoch": 0,
+      "infection_age_days": 3.3,
+      "departure_day": 0.0,
+      "onset_day": -1.0
+     },
+     "agents": {
+      "1581": {
+       "infection_epoch": 0,
+       "onset_time_infected": 55,
+       "incubation_days": 2.3,
+       "will_present": true
+      }
+     },
+     "departure_epoch": 0,
+     "first_secondary_shed_epoch": null
+    },
+    "acquisitions": {
+     "total": 0,
+     "aboard_window": 0,
+     "aboard_window_clean": 0,
+     "by_day": {},
+     "route_split_all": {},
+     "route_split_aboard": {},
+     "role_split_aboard": {},
+     "ring_share_aboard": {
+      "n": 0
+     }
+    },
+    "infected_total": 0,
+    "infections_by_epoch": {}
+   }
+  },
+  {
+   "base": {
+    "cell": {
+     "index": 2,
+     "scenario_id": "diamond_princess_2020",
+     "theta": 42200000000.0,
+     "infection_age_days": 3.3,
+     "imports": 1,
+     "seed": 20200207,
+     "arm_id": "D0_declared",
+     "key": "screen_diamond_princess_2020_theta1e10p63_age3p3d_imports1_seed20200207_armD0_declared.json"
+    },
+    "age_override": null,
+    "index": {
+     "seed": {
+      "pathogen": "sars_cov2_resp",
+      "count": 1,
+      "role": "passenger",
+      "epoch": 0,
+      "infection_age_days": 3.3,
+      "departure_day": 0.0,
+      "onset_day": -1.0
+     },
+     "agents": {
+      "391": {
+       "infection_epoch": 0,
+       "onset_time_infected": 55,
+       "incubation_days": 2.3,
+       "will_present": true
+      }
+     },
+     "departure_epoch": 0,
+     "first_secondary_shed_epoch": null
+    },
+    "acquisitions": {
+     "total": 0,
+     "aboard_window": 0,
+     "aboard_window_clean": 0,
+     "by_day": {},
+     "route_split_all": {},
+     "route_split_aboard": {},
+     "role_split_aboard": {},
+     "ring_share_aboard": {
+      "n": 0
+     }
+    },
+    "infected_total": 0,
+    "infections_by_epoch": {}
+   }
+  },
+  {
+   "base": {
+    "cell": {
+     "index": 3,
+     "scenario_id": "diamond_princess_2020",
+     "theta": 42200000000.0,
+     "infection_age_days": 3.3,
+     "imports": 1,
+     "seed": 20200208,
+     "arm_id": "D0_declared",
+     "key": "screen_diamond_princess_2020_theta1e10p63_age3p3d_imports1_seed20200208_armD0_declared.json"
+    },
+    "age_override": null,
+    "index": {
+     "seed": {
+      "pathogen": "sars_cov2_resp",
+      "count": 1,
+      "role": "passenger",
+      "epoch": 0,
+      "infection_age_days": 3.3,
+      "departure_day": 0.0,
+      "onset_day": -1.0
+     },
+     "agents": {
+      "1259": {
+       "infection_epoch": 0,
+       "onset_time_infected": 55,
+       "incubation_days": 2.3,
+       "will_present": true
+      }
+     },
+     "departure_epoch": 0,
+     "first_secondary_shed_epoch": null
+    },
+    "acquisitions": {
+     "total": 0,
+     "aboard_window": 0,
+     "aboard_window_clean": 0,
+     "by_day": {},
+     "route_split_all": {},
+     "route_split_aboard": {},
+     "role_split_aboard": {},
+     "ring_share_aboard": {
+      "n": 0
+     }
+    },
+    "infected_total": 0,
+    "infections_by_epoch": {}
+   }
+  },
+  {
+   "base": {
+    "cell": {
+     "index": 4,
+     "scenario_id": "diamond_princess_2020",
+     "theta": 42200000000.0,
+     "infection_age_days": 3.3,
+     "imports": 1,
+     "seed": 20200209,
+     "arm_id": "D0_declared",
+     "key": "screen_diamond_princess_2020_theta1e10p63_age3p3d_imports1_seed20200209_armD0_declared.json"
+    },
+    "age_override": null,
+    "index": {
+     "seed": {
+      "pathogen": "sars_cov2_resp",
+      "count": 1,
+      "role": "passenger",
+      "epoch": 0,
+      "infection_age_days": 3.3,
+      "departure_day": 0.0,
+      "onset_day": -1.0
+     },
+     "agents": {
+      "1139": {
+       "infection_epoch": 0,
+       "onset_time_infected": 55,
+       "incubation_days": 2.3,
+       "will_present": true
+      }
+     },
+     "departure_epoch": 0,
+     "first_secondary_shed_epoch": null
+    },
+    "acquisitions": {
+     "total": 0,
+     "aboard_window": 0,
+     "aboard_window_clean": 0,
+     "by_day": {},
+     "route_split_all": {},
+     "route_split_aboard": {},
+     "role_split_aboard": {},
+     "ring_share_aboard": {
+      "n": 0
+     }
+    },
+    "infected_total": 0,
+    "infections_by_epoch": {}
+   }
+  }
+ ]
+}

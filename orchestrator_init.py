@@ -2048,7 +2048,7 @@ def init_observation_engine(
     )
     wastewater_assay = None
     if (
-        cfg.get("observation", {}).get("wastewater_assay_mode", "none")
+        cfg.get("observation", {}).get("wastewater_assay_mode", "holding_tank")
         == "holding_tank"
     ):
         wastewater_assay = WastewaterHoldingTankAssay(

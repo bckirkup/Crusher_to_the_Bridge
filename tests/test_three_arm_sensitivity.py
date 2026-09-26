@@ -34,6 +34,7 @@ from telemetry_buffer.observation_model.bounded_screen import (
     EXPEDITION_SENSITIVITY_FACTORS,
     FACTOR_SETS,
     NOROVIRUS_FACTORS,
+    ScreenRunParams,
     build_overrides,
     build_run_overrides,
     build_run_spec,
@@ -85,11 +86,13 @@ class TestServiceSurfaceKnockoutIsOffUnlessAsked:
 
     @pytest.mark.parametrize("block", [{"enabled": "yes"}, [], {"enabled": 1}])
     def test_a_non_boolean_arm_is_refused(self, block: object) -> None:
+        rng = np.random.default_rng(3)
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
         with pytest.raises(ValueError, match="service_surface_knockout"):
             TransmissionCore(
-                rng=np.random.default_rng(3),
+                rng=rng,
                 zone_types=ZONE_TYPES,
-                clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+                clock=clock,
                 cfg={"service_surface_knockout": block},
             )
 
@@ -297,9 +300,11 @@ class TestTheRunSpecCarriesEachArmOnce:
         return build_run_spec(
             design.factors,
             UNITS,
-            seed=1,
-            description="three_arm_probe",
-            **design.run_kwargs(),
+            ScreenRunParams(
+                seed=1,
+                description="three_arm_probe",
+                **design.run_kwargs(),
+            ),
         )
 
     def test_the_immunity_axis_does_not_displace_the_complement(self) -> None:

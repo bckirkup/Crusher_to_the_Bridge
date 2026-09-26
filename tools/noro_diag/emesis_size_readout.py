@@ -57,17 +57,22 @@ MIN_EMESIS_VOYAGES = 3
 HAZARD_PLAUSIBLE = 0.105
 HAZARD_LIKELY = 0.693
 
+KEY_EMESIS_EVENTS = "emesis_witness.emesis_events"
+KEY_PATCH_PICKUP_DOSE_GEC = "emesis_witness.patch_pickup_dose_gec"
+KEY_CREDITED_SCALED_GEC = "reconciliation.sum_credited_scaled_gec"
+KEY_EVALUATED_HAZARD = "reconciliation.sum_evaluated_hazard"
+
 COLUMNS = (
     ("seed", "seed"),
     ("imports", "transmission.imports"),
     ("secondaries", "transmission.secondaries"),
-    ("emesis_events", "emesis_witness.emesis_events"),
+    ("emesis_events", KEY_EMESIS_EVENTS),
     ("scheduled_episodes", "emesis_witness.scheduled_episodes"),
     ("patch_mass_gec", "emesis_witness.patch_mass_gec"),
     ("patch_pickups", "emesis_witness.patch_pickups"),
-    ("patch_pickup_dose_gec", "emesis_witness.patch_pickup_dose_gec"),
-    ("credited_scaled_gec", "reconciliation.sum_credited_scaled_gec"),
-    ("sum_evaluated_hazard", "reconciliation.sum_evaluated_hazard"),
+    ("patch_pickup_dose_gec", KEY_PATCH_PICKUP_DOSE_GEC),
+    ("credited_scaled_gec", KEY_CREDITED_SCALED_GEC),
+    ("sum_evaluated_hazard", KEY_EVALUATED_HAZARD),
 )
 
 
@@ -98,7 +103,7 @@ def _spread(values: list[float]) -> dict[str, float]:
 
 def incidence(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 1: how often does an emesis event happen, and how many."""
-    counts = [int(_number(s, "emesis_witness.emesis_events")) for s in cells]
+    counts = [int(_number(s, KEY_EMESIS_EVENTS)) for s in cells]
     with_event = [c for c in counts if c >= 1]
     distribution: dict[str, int] = {}
     for count in counts:
@@ -119,11 +124,11 @@ def size(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 2: patch mass, pickup dose, and the route's own attenuation."""
     rows = []
     for summary in cells:
-        events = int(_number(summary, "emesis_witness.emesis_events"))
+        events = int(_number(summary, KEY_EMESIS_EVENTS))
         if events < 1:
             continue
         mass = _number(summary, "emesis_witness.patch_mass_gec")
-        dose = _number(summary, "emesis_witness.patch_pickup_dose_gec")
+        dose = _number(summary, KEY_PATCH_PICKUP_DOSE_GEC)
         rows.append({
             "seed": summary["seed"],
             "events": events,
@@ -154,8 +159,8 @@ def share(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 3: emesis pickup dose against the voyage's credited dose."""
     rows = []
     for summary in cells:
-        credited = _number(summary, "reconciliation.sum_credited_scaled_gec")
-        dose = _number(summary, "emesis_witness.patch_pickup_dose_gec")
+        credited = _number(summary, KEY_CREDITED_SCALED_GEC)
+        dose = _number(summary, KEY_PATCH_PICKUP_DOSE_GEC)
         rows.append({
             "seed": summary["seed"],
             "credited_scaled_gec": credited,
@@ -177,7 +182,7 @@ def share(cells: list[dict[str, Any]]) -> dict[str, Any]:
 def consequence(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Question 4: does any voyage get close to producing a secondary."""
     hazards = [
-        _number(s, "reconciliation.sum_evaluated_hazard") for s in cells
+        _number(s, KEY_EVALUATED_HAZARD) for s in cells
     ]
     secondaries = [int(_number(s, "transmission.secondaries")) for s in cells]
     return {
@@ -200,7 +205,7 @@ def association(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """The across-seed emesis-on / emesis-off comparison, clearly labelled."""
     groups: dict[str, list[dict[str, Any]]] = {"with": [], "without": []}
     for summary in cells:
-        events = int(_number(summary, "emesis_witness.emesis_events"))
+        events = int(_number(summary, KEY_EMESIS_EVENTS))
         groups["with" if events >= 1 else "without"].append(summary)
     out: dict[str, Any] = {
         "labelled": (
@@ -216,11 +221,11 @@ def association(cells: list[dict[str, Any]]) -> dict[str, Any]:
             "n": len(group),
             "seeds": [s["seed"] for s in group],
             "credited_scaled_gec": _spread([
-                _number(s, "reconciliation.sum_credited_scaled_gec")
+                _number(s, KEY_CREDITED_SCALED_GEC)
                 for s in group
             ]),
             "sum_evaluated_hazard": _spread([
-                _number(s, "reconciliation.sum_evaluated_hazard")
+                _number(s, KEY_EVALUATED_HAZARD)
                 for s in group
             ]),
         }

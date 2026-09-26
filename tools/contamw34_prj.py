@@ -23,6 +23,7 @@ import itertools
 import math
 import re
 import warnings
+from dataclasses import dataclass
 from typing import Any
 
 from engines.py_contam_bridge import derive_volume_m3
@@ -613,6 +614,23 @@ class _NetworkBuilder:
 
     # ── flow paths ────────────────────────────────────────────────────────
 
+    @dataclass(frozen=True)
+    class PathFields:
+        """The CONTAM path record's optional numeric/slot fields."""
+
+        ahs_nr: int = 0
+        ahs_group: int = 0
+        level: int = 1
+        flag: int = 0
+        fahs: float = 0.0
+        wazm: float = -1.0
+        filter_nr: int = 0
+        wind_p: int = 0
+        sched_nr: int = 0
+        x: float = 0.0
+        y: float = 0.0
+        w_pmod: float = 0.0
+
     def _add_path(
         self,
         from_nr: int,
@@ -624,36 +642,25 @@ class _NetworkBuilder:
         kind: str,
         is_hvac_ducted: bool,
         crusher_transfer: bool,
-        ahs_nr: int = 0,
-        ahs_group: int = 0,
-        level: int = 1,
-        flag: int = 0,
-        fahs: float = 0.0,
-        wazm: float = -1.0,
-        filter_nr: int = 0,
-        wind_p: int = 0,
-        sched_nr: int = 0,
-        x: float = 0.0,
-        y: float = 0.0,
-        w_pmod: float = 0.0,
+        fields: PathFields = PathFields(),
     ) -> int:
         pnr = len(self.paths) + 1
         self.paths.append({
             "nr": pnr,
-            "flag": flag,
+            "flag": fields.flag,
             "from_nr": from_nr,
             "to_nr": to_nr,
             "elem_nr": elem_nr,
-            "ahs_nr": ahs_nr,
-            "level": level,
-            "fahs": fahs,
-            "wazm": wazm,
-            "filter_nr": filter_nr,
-            "wind_nr": wind_p,
-            "sched_nr": sched_nr,
-            "x": x,
-            "y": y,
-            "w_pmod": w_pmod,
+            "ahs_nr": fields.ahs_nr,
+            "level": fields.level,
+            "fahs": fields.fahs,
+            "wazm": fields.wazm,
+            "filter_nr": fields.filter_nr,
+            "wind_nr": fields.wind_p,
+            "sched_nr": fields.sched_nr,
+            "x": fields.x,
+            "y": fields.y,
+            "w_pmod": fields.w_pmod,
         })
         self.path_map.append({
             "path_nr": pnr,
@@ -662,7 +669,7 @@ class _NetworkBuilder:
             "is_hvac_ducted": is_hvac_ducted,
             "kind": kind,
             "crusher_transfer": crusher_transfer,
-            "ahs_nr": ahs_group or ahs_nr,
+            "ahs_nr": fields.ahs_group or fields.ahs_nr,
         })
         return pnr
 
@@ -686,13 +693,14 @@ class _NetworkBuilder:
                 kind="envelope_leak",
                 is_hvac_ducted=False,
                 crusher_transfer=False,
-                flag=0,
-                level=int(z["level"]),
-                wazm=wazm,
-                wind_p=w_nr,
-                w_pmod=wmod,
-                x=float(z["x"]),
-                y=float(z["y"]),
+                fields=self.PathFields(
+                    level=int(z["level"]),
+                    wazm=wazm,
+                    wind_p=w_nr,
+                    w_pmod=wmod,
+                    x=float(z["x"]),
+                    y=float(z["y"]),
+                ),
             )
 
     def _adjacency_element(self, adj_type: str) -> tuple[int, int]:
@@ -722,10 +730,11 @@ class _NetworkBuilder:
                 kind=adj_type,
                 is_hvac_ducted=False,
                 crusher_transfer=True,
-                flag=0,
-                sched_nr=adj_sched,
-                x=0.5 * (float(za["x"]) + float(zb["x"])),
-                y=0.5 * (float(za["y"]) + float(zb["y"])),
+                fields=self.PathFields(
+                    sched_nr=adj_sched,
+                    x=0.5 * (float(za["x"]) + float(zb["x"])),
+                    y=0.5 * (float(za["y"]) + float(zb["y"])),
+                ),
             )
 
     def _endpoint_rooms(self, token: str) -> list[str]:
@@ -780,8 +789,7 @@ class _NetworkBuilder:
                     kind=kind,
                     is_hvac_ducted=ducted,
                     crusher_transfer=True,
-                    flag=0,
-                    sched_nr=sched_nr,
+                    fields=self.PathFields(sched_nr=sched_nr),
                 )
 
     # ── air-handling systems ──────────────────────────────────────────────
@@ -870,21 +878,28 @@ class _NetworkBuilder:
             -1, info["sup_nr"], 0,
             from_name="ambient", to_name=info["sup_name"],
             kind="ahs_oa", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_OA, fahs=0.0, wazm=-1.0,
+            fields=self.PathFields(
+                ahs_group=ahs_i, flag=_PATH_AHS_OA,
+            ),
         )
         ex_path = self._add_path(
             info["ret_nr"], -1, 0,
             from_name=info["ret_name"], to_name="ambient",
             kind="ahs_exhaust", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_EXHAUST, fahs=0.0, wazm=-1.0,
+            fields=self.PathFields(
+                ahs_group=ahs_i, flag=_PATH_AHS_EXHAUST,
+            ),
         )
         recirc_path = self._add_path(
             info["ret_nr"], info["sup_nr"], 0,
             from_name=info["ret_name"], to_name=info["sup_name"],
             kind="ahs_recirc", is_hvac_ducted=True, crusher_transfer=False,
-            ahs_nr=0, ahs_group=ahs_i, flag=_PATH_AHS_RECIRC, fahs=recirc_fahs, wazm=-1.0,
-            filter_nr=filt_nr,
-            sched_nr=oa_sched if self.hobbyist else _OA_SCHEDULE_NR,
+            fields=self.PathFields(
+                ahs_group=ahs_i, flag=_PATH_AHS_RECIRC,
+                fahs=recirc_fahs,
+                filter_nr=filt_nr,
+                sched_nr=oa_sched if self.hobbyist else _OA_SCHEDULE_NR,
+            ),
         )
         return oa_path, ex_path, recirc_path
 
@@ -903,19 +918,23 @@ class _NetworkBuilder:
                 info["sup_nr"], rnr, 0,
                 from_name=info["sup_name"], to_name=room,
                 kind="ahs_supply", is_hvac_ducted=True, crusher_transfer=False,
-                ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
-                fahs=per_room_fahs, wazm=0.0,
-                sched_nr=duty_sched,
-                x=float(zrec["x"]), y=float(zrec["y"]),
+                fields=self.PathFields(
+                    ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
+                    fahs=per_room_fahs, wazm=0.0,
+                    sched_nr=duty_sched,
+                    x=float(zrec["x"]), y=float(zrec["y"]),
+                ),
             )
             self._add_path(
                 rnr, info["ret_nr"], 0,
                 from_name=room, to_name=info["ret_name"],
                 kind="ahs_return", is_hvac_ducted=True, crusher_transfer=False,
-                ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
-                fahs=per_room_fahs, wazm=0.0,
-                sched_nr=duty_sched,
-                x=float(zrec["x"]), y=float(zrec["y"]),
+                fields=self.PathFields(
+                    ahs_nr=ahs_i, ahs_group=ahs_i, flag=_PATH_AHS_TERMINAL,
+                    fahs=per_room_fahs, wazm=0.0,
+                    sched_nr=duty_sched,
+                    x=float(zrec["x"]), y=float(zrec["y"]),
+                ),
             )
 
     def _add_ahs_paths(self) -> None:
