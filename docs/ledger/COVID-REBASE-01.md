@@ -1,9 +1,14 @@
-# COVID-REBASE-01 — Θ window re-screened on the post-721 base: admissible set EMPTY; boarding structure measured and is not the takeoff burn
-
+# COVID-REBASE-01
 **Date:** 2026-09-26
-**Commit:** 6a7dfe4e (design/probe code at f280e348; stage-2/3 design files at 802cef9a — engine/data tree identical)
+**Commit:** 6a7dfe4e
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 6a7dfe4e
+
+Θ window re-screened on the post-721 base: admissible set EMPTY;
+boarding structure measured and is not the takeoff burn. Stage-A cells
+ran on the `f280e348` image; stage-2/3 cells on `6a7dfe4e` (design files
+only — the engine/data tree is identical).
 
 Readout of record: `docs/covid/covid_rebase_01_readout.md`.
 Designs: `picard_framework/runs/covid_rebase_01{,_stage2,_boarding}_design.json`
