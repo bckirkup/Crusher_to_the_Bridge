@@ -524,7 +524,7 @@ def _record_challenge_outcome(
     ctx: tuple[dict[str, Any], Any, bool],
     top_ids: set[int],
 ) -> None:
-    state, witness, evaluated = ctx
+    state, _, evaluated = ctx
     reason = state["reason"]
     if reason == "pending":
         reason = "evaluated" if evaluated else "effective_dose_zero"

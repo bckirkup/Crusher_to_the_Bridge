@@ -268,21 +268,25 @@ def _deck_temp_offsets(
     return deck_temps
 
 
+def _zone_wall_azimuth(z: dict[str, Any], length: float, beam: float) -> float:
+    x = float((z.get("display") or {}).get("x") or length / 2)
+    # Bow=0°, stern=180°, port/stbd rough
+    if x > 0.7 * length:
+        return 0.0
+    if x < 0.3 * length:
+        return 180.0
+    y = float((z.get("display") or {}).get("y") or 0)
+    return 90.0 if y >= beam / 2 else 270.0
+
+
 def _wall_azimuths(spatial: dict[str, Any]) -> dict[str, float]:
-    wall_az = {}
-    length = float((spatial.get("deck_dimensions") or {}).get("length_m") or 100.0)
-    for z in spatial.get("zones", []):
-        x = float((z.get("display") or {}).get("x") or length / 2)
-        # Bow=0°, stern=180°, port/stbd rough
-        if x > 0.7 * length:
-            wall_az[z["id"]] = 0.0
-        elif x < 0.3 * length:
-            wall_az[z["id"]] = 180.0
-        else:
-            y = float((z.get("display") or {}).get("y") or 0)
-            beam = float((spatial.get("deck_dimensions") or {}).get("beam_m") or 12.0)
-            wall_az[z["id"]] = 90.0 if y >= beam / 2 else 270.0
-    return wall_az
+    dims = spatial.get("deck_dimensions") or {}
+    length = float(dims.get("length_m") or 100.0)
+    beam = float(dims.get("beam_m") or 12.0)
+    return {
+        z["id"]: _zone_wall_azimuth(z, length, beam)
+        for z in spatial.get("zones", [])
+    }
 
 
 def _hvac_filter_map(
