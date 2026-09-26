@@ -274,6 +274,50 @@ ship_graph:
 To add a new class, append an entry to the `agent_classes` list.
 No code changes required.
 
+#### Per-Class Schedules
+
+Each class entry may carry a `schedule` block selecting its 24-hour day
+template (tokens `Sleep`, `Work`, `Free`, `Meal:Breakfast|Lunch|Dinner`):
+
+```yaml
+    - class_id: "crew_engineering"
+      role_group: "crew"
+      fraction: 0.14
+      duty_zone: "MainEng"
+      schedule:
+        template: "crew_engineering"   # a CLASS_SCHEDULES name
+        watch_sections: 3              # deal agents across N watch variants
+        night_watch_fraction: 0.05     # Bernoulli share on the night watch
+      berth_group: "enlisted"          # shared berthing pool across classes
+```
+
+- `template` — a `CLASS_SCHEDULES` name (`crew_general`, `crew_medical`,
+  `crew_engineering`, `crew_galley`, `passenger_general`, `passenger_family`,
+  `passenger_elderly`). A bare string `schedule: "crew_general"` is the same.
+- `tokens` — an inline list of 24 hourly tokens; wins over `template`.
+- `watch_sections: N` — N phase-rotated variants of the template dealt
+  round-robin across the class; meal tokens stay pinned to their hours so
+  sections all eat together but work and sleep in rotation — a starship's
+  three- (or four-) watch day.
+- `night_watch_fraction` — per-crew-member probability of riding the
+  Java-parity night watch (inverted Work/Sleep: work 01:00–07:00, sleep
+  20:00–24:00). `0.05` reproduces `StrucCrew.java`'s ~5% minority crew.
+- `berth_group` — cabin fills group by `(home_zone, berth_group)` instead of
+  `(home_zone, class_id)`, so several classes share one berthing pool.
+  Combined with a `Cabin_Corridor` zone's `hot_bunk_ratio: 2` in
+  `spatial_layout.json`, each stateroom houses `cabin_size × ratio`
+  occupants — the hot-bunking arrangement of a submarine or cramped
+  combatant, where anti-phase watch sections share bunks.
+
+A class that omits `schedule` and is not a `CLASS_SCHEDULES` key inherits
+its role's generic day template — the sanity checker warns on this.
+
+`agent_behavior.schedule_jitter_hours` draws each agent's persistent phase
+jitter once at spawn (Java's constructor `randomness`): a scalar applies to
+everyone, or `{passenger: 2.0, crew: 1.0}` reproduces the Java per-role
+ranges. Individual schedules stay mutable on the agent for future
+wearable-triggered rest cycles.
+
 #### Infection Counters
 
 Configured under `ship_graph.infection_counters` in `config.yaml`. Supports

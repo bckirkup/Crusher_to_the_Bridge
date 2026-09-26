@@ -24,6 +24,7 @@ import pytest
 from crusher_labs import load_config
 from engines.infection_dynamics_bridge import (
     CLASS_SCHEDULES,
+    CREW_NIGHT_WATCH_SCHEDULE,
     CREW_SCHEDULE,
     PASSENGER_DINING_SERVICE_TYPES,
     PASSENGER_SCHEDULE,
@@ -252,8 +253,17 @@ class TestSingleSittingIsUnchanged:
         engine = _engine(zones, 7, None)
         for a in engine.agents:
             assert a.meal_seating == 0
-            template = PASSENGER_SCHEDULE if a.role == "passenger" else CREW_SCHEDULE
-            assert a.schedule == template
+            if a.role == "passenger":
+                assert a.schedule == PASSENGER_SCHEDULE
+            elif a.night_watch:
+                # The StrucCrew.java minority lottery (issue #104) rides the
+                # night watch; the roll==0 member sleeps hour 1 as well.
+                assert a.schedule == CREW_NIGHT_WATCH_SCHEDULE or (
+                    a.schedule[2:] == CREW_NIGHT_WATCH_SCHEDULE[2:]
+                    and a.schedule[:2] == ["Sleep", "Sleep"]
+                )
+            else:
+                assert a.schedule == CREW_SCHEDULE
 
     def test_expedition_deals_both_roles_across_their_sittings(self) -> None:
         graph = load_config()["ship_graph"]

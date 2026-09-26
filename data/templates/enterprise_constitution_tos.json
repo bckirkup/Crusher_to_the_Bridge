@@ -24,7 +24,8 @@
       "fraction": 0.08,
       "home_zone_preference": "OC_D5_F",
       "free_zone_preference": "Bridge",
-      "duty_zone": "Bridge"
+      "duty_zone": "Bridge",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_helm_ops",
@@ -32,7 +33,9 @@
       "fraction": 0.1,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Bridge",
-      "duty_zone": "Bridge"
+      "duty_zone": "Bridge",
+      "schedule": {"template": "crew_general", "watch_sections": 3},
+      "berth_group": "enlisted"
     },
     {
       "class_id": "crew_security",
@@ -40,7 +43,9 @@
       "fraction": 0.08,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Security",
-      "duty_zone": "Security"
+      "duty_zone": "Security",
+      "schedule": {"template": "crew_general", "watch_sections": 3},
+      "berth_group": "enlisted"
     },
     {
       "class_id": "crew_engineering",
@@ -48,7 +53,9 @@
       "fraction": 0.18,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "EngMain",
-      "duty_zone": "EngMain"
+      "duty_zone": "EngMain",
+      "schedule": {"template": "crew_engineering", "watch_sections": 3},
+      "berth_group": "enlisted"
     },
     {
       "class_id": "crew_sciences",
@@ -56,7 +63,8 @@
       "fraction": 0.12,
       "home_zone_preference": "OC_D5_F",
       "free_zone_preference": "Science1",
-      "duty_zone": "Science1"
+      "duty_zone": "Science1",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_medical",
@@ -64,7 +72,8 @@
       "fraction": 0.08,
       "home_zone_preference": "OC_D5_F",
       "free_zone_preference": "Sickbay",
-      "duty_zone": "Sickbay"
+      "duty_zone": "Sickbay",
+      "schedule": {"template": "crew_medical"}
     },
     {
       "class_id": "crew_communications",
@@ -72,7 +81,9 @@
       "fraction": 0.06,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Comms",
-      "duty_zone": "Comms"
+      "duty_zone": "Comms",
+      "schedule": {"template": "crew_general", "watch_sections": 3},
+      "berth_group": "enlisted"
     },
     {
       "class_id": "crew_services",
@@ -80,7 +91,9 @@
       "fraction": 0.1,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Galley",
-      "duty_zone": "Galley"
+      "duty_zone": "Galley",
+      "schedule": {"template": "crew_galley"},
+      "berth_group": "enlisted"
     },
     {
       "class_id": "crew_general",
@@ -88,7 +101,9 @@
       "fraction": 0.2,
       "home_zone_preference": "EC_D5_P_F",
       "free_zone_preference": "Mess_Hall",
-      "duty_zone": "Mess_Hall"
+      "duty_zone": "Mess_Hall",
+      "schedule": {"template": "crew_general", "night_watch_fraction": 0.05},
+      "berth_group": "enlisted"
     }
   ],
   "gender_distribution": {

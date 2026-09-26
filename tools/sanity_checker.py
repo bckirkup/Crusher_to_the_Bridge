@@ -171,6 +171,16 @@ class SpatialZone(BaseModel):
     description: str | None = None
     base_ach: float | None = None
     serves: list[str] | None = None
+    hot_bunk_ratio: int | None = None
+
+    @field_validator("hot_bunk_ratio")
+    @classmethod
+    def hot_bunk_ratio_sane(cls, v: int | None) -> int | None:
+        if v is not None and (isinstance(v, bool) or v < 1):
+            raise ValueError(
+                f"hot_bunk_ratio must be a positive integer, got {v}",
+            )
+        return v
 
     @field_validator("type")
     @classmethod
@@ -1447,6 +1457,13 @@ def _check_zone_serves(
                     f"zone '{zone.id}' serves '{served}' not found in "
                     f"spatial_layout zones",
                 )
+        if zone.hot_bunk_ratio and zone.type != "Cabin_Corridor":
+            report.warn(
+                _SPATIAL_LAYOUT_JSON,
+                "LOGIC_BERTHING",
+                f"zone '{zone.id}' declares hot_bunk_ratio but is not a "
+                f"Cabin_Corridor; the ratio only applies to cabin fills",
+            )
 
 
 def _check_airflow_graph_refs(
@@ -1886,6 +1903,74 @@ def _parse_model(
 
 # ── Pydantic models for config.yaml sections ─────────────────────────────
 
+# Schedule vocabulary shared with engines.infection_dynamics_bridge: the
+# bare tokens plus any "Meal:<name>" block.
+_VALID_SCHEDULE_TOKENS = {"Sleep", "Work", "Free"}
+
+
+class AgentClassScheduleSpec(BaseModel):
+    """An agent class's ``schedule`` block.
+
+    ``template`` names a CLASS_SCHEDULES entry, ``tokens`` is an inline
+    24-hour token list, ``watch_sections`` deals the class across that many
+    phase-rotated variants, and ``night_watch_fraction`` draws a share of
+    the class onto the Java-parity night-watch schedule.
+    """
+
+    template: str | None = None
+    tokens: list[str] | None = None
+    watch_sections: int = 1
+    night_watch_fraction: float = 0.0
+
+    @field_validator("watch_sections")
+    @classmethod
+    def watch_sections_bounded(cls, v: int) -> int:
+        if isinstance(v, bool) or v < 1 or v > 24:
+            raise ValueError(
+                f"watch_sections must be an integer in [1,24], got {v}",
+            )
+        return v
+
+    @field_validator("night_watch_fraction")
+    @classmethod
+    def night_watch_fraction_bounded(cls, v: float) -> float:
+        if v < 0 or v > 1:
+            raise ValueError(
+                f"night_watch_fraction must be in [0,1], got {v}",
+            )
+        return v
+
+    @field_validator("tokens")
+    @classmethod
+    def tokens_valid(cls, v: list[str] | None) -> list[str] | None:
+        if v is None:
+            return v
+        if len(v) != 24:
+            raise ValueError(
+                f"schedule.tokens must hold 24 hourly tokens, got {len(v)}",
+            )
+        for token in v:
+            if (
+                token not in _VALID_SCHEDULE_TOKENS
+                and not str(token).startswith("Meal:")
+            ):
+                raise ValueError(
+                    f"schedule token {token!r} is not Sleep/Work/Free/Meal:*",
+                )
+        return v
+
+    @model_validator(mode="after")
+    def template_known(self) -> "AgentClassScheduleSpec":
+        if self.template:
+            from engines.infection_dynamics_bridge import CLASS_SCHEDULES
+            if self.template not in CLASS_SCHEDULES:
+                raise ValueError(
+                    f"schedule template {self.template!r} is not a "
+                    f"CLASS_SCHEDULES entry {sorted(CLASS_SCHEDULES)}",
+                )
+        return self
+
+
 class AgentClassEntry(BaseModel):
     class_id: str
     role_group: str
@@ -1893,6 +1978,8 @@ class AgentClassEntry(BaseModel):
     home_zone_preference: str = ""
     free_zone_preference: str = ""
     duty_zone: str = ""
+    schedule: AgentClassScheduleSpec | list[str] | str | None = None
+    berth_group: str | None = None
 
     @field_validator("fraction")
     @classmethod
@@ -2426,6 +2513,7 @@ def _check_agent_classes(
 
     if parsed:
         _check_agent_class_totals(parsed, report)
+        _warn_agent_class_schedules(parsed, report)
 
     if zone_ids and parsed:
         _warn_agent_class_zone_refs(parsed, zone_ids, report)
@@ -2446,6 +2534,27 @@ def _check_agent_class_totals(
     if len(ids) != len(set(ids)):
         report.error(_CONFIG_YAML, "LOGIC_DUP",
                      f"Duplicate class_id values in agent_classes: {ids}")
+
+
+def _warn_agent_class_schedules(
+    parsed: list[AgentClassEntry],
+    report: Report,
+) -> None:
+    """Warn when a class silently inherits its role's generic schedule.
+
+    A class_id that names no CLASS_SCHEDULES entry and declares no
+    ``schedule`` block gets the role-generic day schedule — nearly always a
+    modelling accident for a specialised class, so flag it.
+    """
+    from engines.infection_dynamics_bridge import CLASS_SCHEDULES
+    for c in parsed:
+        if c.schedule is None and c.class_id not in CLASS_SCHEDULES:
+            report.warn(
+                _CONFIG_YAML, "LOGIC_SCHEDULE",
+                f"agent_classes.{c.class_id} declares no schedule and is not "
+                f"a built-in template; it inherits the {c.role_group} "
+                f"schedule unchanged",
+            )
 
 
 def _warn_agent_class_zone_refs(

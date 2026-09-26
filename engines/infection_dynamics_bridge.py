@@ -41,7 +41,7 @@ from typing import Any
 
 import numpy as np
 
-from engines.sim_clock import LEGACY_CLOCK, LEGACY_EPOCH_DAY, SimClock, crossed_day_boundary
+from engines.sim_clock import LEGACY_CLOCK, SimClock, crossed_day_boundary
 from engines.strain_state import ImmuneRecord, Phenotype
 
 # ── Korkin Lab parameters (from Person.java) ─────────────────────────────
@@ -319,7 +319,23 @@ DEFAULT_AGENT_BEHAVIOR: dict[str, Any] = {
         "lunch": {"buffet": 0.5, "mdr": 0.3, "specialty": 0.2},
         "dinner": {"buffet": 0.2, "mdr": 0.5, "specialty": 0.3},
     },
+    # Per-agent schedule phase jitter, in hours — Person.java draws
+    # ``randomness = U(-1, 1)`` once per agent. 0 disables the draw.
+    "schedule_jitter_hours": 1.0,
 }
+
+
+def _jitter_for_role(agent_behavior: dict[str, Any], role_group: str) -> float:
+    """The spawn-time phase-jitter half-range for one role.
+
+    ``schedule_jitter_hours`` is a scalar shared by all agents, or a
+    ``{"passenger": x, "crew": y}`` map — the Java source draws ±2h for
+    passengers (Passenger.java) and ±1h for crew (StrucCrew.java).
+    """
+    jitter = agent_behavior.get("schedule_jitter_hours", 0.0)
+    if isinstance(jitter, dict):
+        return float(jitter.get(role_group, 0.0))
+    return float(jitter)
 
 # Dining venues by side of the crew/passenger line. Cruise crew eat in the
 # crew mess (the mechanism the outbreak record credits for the crew attack-rate
@@ -474,7 +490,7 @@ MEDICAL_CREW_SCHEDULE = [
     "Work", "Work", "Free", "Work",
 ]
 
-# Engineering crew: 3-section watchbill, heavy work hours
+# Engineering crew: watch-standing day, heavy work hours
 ENGINEERING_CREW_SCHEDULE = [
     "Work", "Work", "Work", "Work", "Sleep", "Sleep",
     "Sleep", "Sleep",
@@ -483,7 +499,7 @@ ENGINEERING_CREW_SCHEDULE = [
     MEAL_LUNCH,
     "Work", "Work", "Work", "Free",
     MEAL_DINNER,
-    "Work", "Work", "Sleep", "Sleep",
+    "Work", "Work", "Work", "Sleep", "Sleep",
 ]
 
 # Galley crew: early starts for meal prep, split shifts
@@ -522,8 +538,88 @@ PASSENGER_FAMILY_SCHEDULE = [
     "Free", "Free", "Free", "Sleep",
 ]
 
+# Crew minority ("night watch") 24-hour schedule — the StrucCrew.java
+# ``workOrSleep <= numStrucCrew/20`` branch: a small share of crew invert
+# the overnight pattern (Sleep at 0 and 20–23, Work through 1–7). Meals stay
+# at mess hours for every crew member. The Java lottery rolls one integer in
+# [0, crew_count) per crew member; ``roll <= count/20`` rides the night
+# watch and ``roll == 0`` sleeps through hour 1 as well (the audit's
+# 1.8c minority schedule).
+CREW_NIGHT_WATCH_SCHEDULE = [
+    "Sleep", "Work", "Work", "Work", "Work", "Work",
+    "Work", "Work",
+    MEAL_BREAKFAST,
+    "Work", "Work", "Work", "Work",
+    MEAL_LUNCH,
+    "Work", "Work", "Work", "Work", "Work",
+    MEAL_DINNER,
+    "Sleep", "Sleep", "Sleep", "Sleep",
+]
+
+# Java parity: the minority branch fires for ``workOrSleep <= N/20``.
+NIGHT_WATCH_DIVISOR = 20
+
 # Meal-block token prefix shared by every schedule above.
 MEAL_PREFIX = "Meal"
+
+
+def rotate_watch_schedule(
+    schedule: list[str], section: int, sections: int,
+) -> list[str]:
+    """The schedule as watch section ``section`` of ``sections``.
+
+    A watchbill rotates the day's Work/Sleep/Free tokens by one share of the
+    non-meal hours per section; ``Meal:*`` tokens stay pinned at their mess
+    hours, as they are in the Java source where meals are universal. The
+    rotation is over non-meal *positions*, so every variant keeps the
+    template's token multiset and a section's work block lands in a different
+    part of the day (section 0 is the template unchanged).
+    """
+    if sections <= 1:
+        return list(schedule)
+    non_meal = [
+        h for h in range(len(schedule))
+        if not str(schedule[h]).startswith(MEAL_PREFIX)
+    ]
+    if not non_meal:
+        return list(schedule)
+    shift = len(non_meal) * section // sections
+    out = list(schedule)
+    for i, h in enumerate(non_meal):
+        out[h] = schedule[non_meal[(i - shift) % len(non_meal)]]
+    return out
+
+
+def _schedule_spec(cls_cfg: dict[str, Any]) -> dict[str, Any]:
+    """The class's ``schedule`` block as a dict; list/str forms normalize."""
+    spec = cls_cfg.get("schedule")
+    if isinstance(spec, dict):
+        return spec
+    if isinstance(spec, list):
+        return {"tokens": spec}
+    if isinstance(spec, str):
+        return {"template": spec}
+    return {}
+
+
+def _schedule_template(cls_cfg: dict[str, Any], role_group: str) -> list[str]:
+    """The class's base schedule: inline tokens, named template, or defaults.
+
+    Lookup order: ``schedule.tokens`` > ``schedule.template`` (a
+    CLASS_SCHEDULES key) > ``class_id`` in CLASS_SCHEDULES > the role's
+    generic schedule.
+    """
+    spec = _schedule_spec(cls_cfg)
+    tokens = spec.get("tokens")
+    if tokens:
+        return list(tokens)
+    default = CREW_SCHEDULE if role_group == ROLE_CREW else PASSENGER_SCHEDULE
+    template = spec.get("template")
+    if template:
+        return list(CLASS_SCHEDULES.get(str(template), default))
+    return list(CLASS_SCHEDULES.get(
+        str(cls_cfg.get("class_id", "")), default,
+    ))
 
 
 def stagger_meal_seating(
@@ -691,6 +787,7 @@ class KorkinAgent:
         "time_infected", "acquired_particles",
         "home_zone", "dining_zone", "work_zone", "free_zone",
         "current_location", "current_activity", "dwell_epochs", "schedule",
+        "phase_jitter", "watch_section", "night_watch", "berth_group",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "secretor_negative_by_pathogen",
@@ -770,6 +867,18 @@ class KorkinAgent:
         self.schedule = list(schedule)
         # Which of the dining venue's successive cohorts this agent eats with.
         self.meal_seating: int = 0
+        # Persistent per-agent schedule phase offset in hours — the Java
+        # ``randomness`` field, drawn once at spawn rather than per epoch.
+        # Applied to the schedule lookup under every clock mode.
+        self.phase_jitter: float = 0.0
+        # Which of the class's watch sections this agent stands (0 when the
+        # class runs no watchbill).
+        self.watch_section: int = 0
+        # Whether this agent rides the Java minority night-watch schedule.
+        self.night_watch: bool = False
+        # Which berthing pool this agent draws cabin-mates from; defaults to
+        # its own class, so undeclared groups behave exactly as before.
+        self.berth_group: str = ""
 
         # Multi-pathogen co-infection tracking:
         # {pathogen_id: {"status": InfectionStatus, "illness": IllnessStatus,
@@ -1762,15 +1871,23 @@ class KorkinAgent:
             "susceptibility_multiplier": dict(self.susceptibility_multiplier),
             "microflora_disruption": round(self.microflora_disruption_status, 4),
         }
+        self._export_optional_state(result)
+        return result
+
+    def _export_optional_state(self, result: dict[str, Any]) -> None:
+        """Attach optional agent-state fields to the schema dict in place."""
         if self.chronic_disease_ids:
             result["chronic_disease_ids"] = list(self.chronic_disease_ids)
         if self.cabin_mate_ids:
             result["cabin_mate_ids"] = sorted(self.cabin_mate_ids)
+        if self.watch_section:
+            result["watch_section"] = self.watch_section
+        if self.night_watch:
+            result["night_watch"] = True
         if self.dining_party_ids:
             result["dining_party_ids"] = sorted(self.dining_party_ids)
         if self.dining_table_index >= 0:
             result["dining_table_index"] = self.dining_table_index
-        return result
 
 
 # ── Ship simulation engine ──────────────────────────────────────────────
@@ -2133,33 +2250,28 @@ class KorkinShipEngine:
     ) -> tuple[int, int]:
         class_id = cls_cfg.get("class_id", "crew_general")
         role_group = cls_cfg.get("role_group", ROLE_CREW)
-        schedule_template = CLASS_SCHEDULES.get(
-            class_id, CREW_SCHEDULE if role_group == "crew" else PASSENGER_SCHEDULE,
-        )
-        home_pref = cls_cfg.get("home_zone_preference", "Berthing")
-        duty_zone = cls_cfg.get("duty_zone", "")
-        free_pref = cls_cfg.get("free_zone_preference", "")
+        spec = _schedule_spec(cls_cfg)
+        template = _schedule_template(cls_cfg, role_group)
+        # Watchbill: the class's agents are dealt across ``watch_sections``
+        # phase-rotated variants of its base schedule, exactly as diners are
+        # dealt across a venue's seatings. One section is no rotation.
+        sections = max(int(spec.get("watch_sections", 1) or 1), 1)
+        variants = [
+            rotate_watch_schedule(template, section, sections)
+            for section in range(sections)
+        ]
+        night_fraction = float(spec.get("night_watch_fraction", 0.0) or 0.0)
+        berth_group = str(cls_cfg.get("berth_group") or class_id)
+        jitter = _jitter_for_role(self.agent_behavior, role_group)
 
-        for _ in range(count):
+        for i in range(count):
             immune = immunity.draw(role_group, self.rng)
-
-            dining = self._draw_dining_zone(role_group)
-            if duty_zone:
-                work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
-            elif role_group == "crew":
-                work = str(self.rng.choice(self._free_zones + self._dining_zones))
-            else:
-                work = str(self.rng.choice(self._free_zones))
-            if role_group == "crew":
-                home = self._resolve_crew_home(home_pref, work)
-            else:
-                home = self._resolve_zone(home_pref, self._room_zones)
-            free = (
-                self._resolve_zone(free_pref, self._free_zones)
-                if free_pref
-                else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
+            dining, work, home, free = self._resolve_class_zones(cls_cfg, role_group)
+            section = i % sections
+            watch_template, night = self._night_watch_draw(
+                role_group, night_fraction, count, variants[section],
             )
-            schedule, seating = self._seated_schedule(schedule_template, dining)
+            schedule, seating = self._seated_schedule(watch_template, dining)
 
             agent = KorkinAgent(
                 agent_id=agent_id, role=role_group, immune=immune,
@@ -2169,6 +2281,11 @@ class KorkinShipEngine:
                 agent_class=class_id, gender=self._assign_gender(),
             )
             agent.meal_seating = seating
+            agent.watch_section = section
+            agent.night_watch = night
+            agent.berth_group = berth_group
+            if jitter > 0.0:
+                agent.phase_jitter = float(self.rng.uniform(-jitter, jitter))
 
             if not immune and infected_remaining > 0:
                 self._seed_initial_infection(agent, self.rng)
@@ -2178,6 +2295,53 @@ class KorkinShipEngine:
             agent_id += 1
 
         return agent_id, infected_remaining
+
+    def _resolve_class_zones(
+        self, cls_cfg: dict[str, Any], role_group: str,
+    ) -> tuple[str, str, str, str]:
+        """Draw a class-spawned agent's dining, work, home, and free zones."""
+        dining = self._draw_dining_zone(role_group)
+        duty_zone = cls_cfg.get("duty_zone", "")
+        home_pref = cls_cfg.get("home_zone_preference", "Berthing")
+        free_pref = cls_cfg.get("free_zone_preference", "")
+        if duty_zone:
+            work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
+        elif role_group == "crew":
+            work = str(self.rng.choice(self._free_zones + self._dining_zones))
+        else:
+            work = str(self.rng.choice(self._free_zones))
+        home = (
+            self._resolve_crew_home(home_pref, work)
+            if role_group == "crew"
+            else self._resolve_zone(home_pref, self._room_zones)
+        )
+        free = (
+            self._resolve_zone(free_pref, self._free_zones)
+            if free_pref
+            else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
+        )
+        return dining, work, home, free
+
+    def _night_watch_draw(
+        self,
+        role_group: str,
+        night_fraction: float,
+        count: int,
+        template: list[str],
+    ) -> tuple[list[str], bool]:
+        """Bernoulli-deal the night-watch schedule to crew, as StrucCrew.java."""
+        if (
+            role_group != ROLE_CREW
+            or night_fraction <= 0.0
+            or self.rng.random() >= night_fraction
+        ):
+            return template, False
+        watch = list(CREW_NIGHT_WATCH_SCHEDULE)
+        # Java: the single deepest lottery number (workOrSleep == 0) sleeps
+        # through hour 1 as well — one crew member per class in expectation.
+        if self.rng.random() < 1.0 / max(night_fraction * count, 1.0):
+            watch[1] = "Sleep"
+        return watch, True
 
     def _seed_initial_infection(
         self, agent: KorkinAgent, rng: np.random.Generator,
@@ -2243,7 +2407,8 @@ class KorkinShipEngine:
         """Build one legacy-class agent; seed it when infections remain.
 
         The RNG call order is the contract: immunity, home, dining, free,
-        work, gender, schedule, then the illness draw when seeded.
+        work, gender, the crew night-watch lottery, the schedule and phase
+        jitter, then the illness draw when seeded.
         """
         immune = immunity.draw(role, self.rng)
         home = self._legacy_home_zone(role)
@@ -2255,10 +2420,22 @@ class KorkinShipEngine:
             else self._free_zones + self._dining_zones
         )
         gender = self._assign_gender()
-        schedule, seating = self._seated_schedule(
-            PASSENGER_SCHEDULE if role == ROLE_PASSENGER else CREW_SCHEDULE,
-            dining,
+
+        template = (
+            PASSENGER_SCHEDULE if role == ROLE_PASSENGER else CREW_SCHEDULE
         )
+        night = False
+        if role == ROLE_CREW:
+            # StrucCrew.java: one workOrSleep draw per crew member; the
+            # minority (roll <= numStrucCrew/20) rides the night watch, and
+            # roll == 0 sleeps through hour 1 too.
+            roll = int(self.rng.integers(0, max(self.num_crew, 1)))
+            if roll <= self.num_crew // NIGHT_WATCH_DIVISOR:
+                template = list(CREW_NIGHT_WATCH_SCHEDULE)
+                if roll == 0:
+                    template[1] = "Sleep"
+                night = True
+        schedule, seating = self._seated_schedule(template, dining)
 
         agent = KorkinAgent(
             agent_id=agent_id, role=role, immune=immune,
@@ -2267,6 +2444,10 @@ class KorkinShipEngine:
             agent_class=f"{role}_general", gender=gender,
         )
         agent.meal_seating = seating
+        agent.night_watch = night
+        jitter = _jitter_for_role(self.agent_behavior, role)
+        if jitter > 0.0:
+            agent.phase_jitter = float(self.rng.uniform(-jitter, jitter))
 
         if not immune and infected_remaining > 0:
             self._seed_initial_infection(agent, self.rng)
@@ -2454,9 +2635,9 @@ class KorkinShipEngine:
         if agent.agent_id in self.quarantined_ids:
             agent.current_location = agent.home_zone
             return
-        randomness = self.rng.uniform(-1.0, 1.0)
-        if self.clock.mode != LEGACY_EPOCH_DAY:
-            randomness = 0.0
+        # The per-agent phase jitter drawn at spawn — Java's ``randomness``
+        # field — applies under every clock mode.
+        randomness = agent.phase_jitter
         agent.current_activity = agent.scheduled_token(hour, randomness)
         agent.current_location = agent.get_location_for_hour(
             hour,

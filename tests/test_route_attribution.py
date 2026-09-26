@@ -84,6 +84,13 @@ class TestRouteAttribution:
         # the first length at which the fixture again establishes at least
         # one transmission event.
         spec.num_epochs = 72
+        # SCHED-WATCH-01 activates per-agent phase jitter and the StrucCrew
+        # night-watch lottery at spawn; those draws reorder the shared RNG
+        # stream and the shipped seed's fiat cases no longer transmit at all
+        # (sterile out to 96 epochs). Seed 18 keeps all three fiat imports
+        # aboard at epoch 0 and again produces a transmission event — one
+        # fomite event at 72 epochs on the shipped config.
+        spec.random_seed = 18
         first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,

@@ -185,19 +185,21 @@ Hours 20–23:Work (4h)
 | Aspect | Verdict | Detail |
 |--------|---------|--------|
 | Majority schedule (≈95% of crew) | **MATCH** | All 24 hours identical to the `workOrSleep > numStrucCrew/20` branch |
-| Minority schedule (≈5% of crew) | **APPROXIMATION** | Java assigns inverted Work/Sleep at hours 0, 1–7, 20–23 for ~5% of crew via `workOrSleep <= numStrucCrew/20`. Python uses the majority schedule for all crew. |
+| Minority schedule (≈5% of crew) | **MATCH** | `CREW_NIGHT_WATCH_SCHEDULE` inverts Work/Sleep at hours 0, 1–7, 20–23 exactly as the `workOrSleep <= numStrucCrew/20` branch; legacy spawn reproduces the same `roll <= num_crew // 20` lottery (roll 0 sleeps hour 1), and class-based spawn draws a configurable `night_watch_fraction` per crew member. |
 
 ### 1.9 Agent Randomness
 
 | Parameter | Source | Target | Verdict |
 |-----------|--------|--------|---------|
-| Passenger randomness range | `Passenger.java:13` `nextDouble()*4 − 2` → [−2, +2] | `infection_dynamics_bridge.py:440` `uniform(-2.0, 2.0)` → [−2, +2] | **MATCH** |
-| Crew randomness range | `StrucCrew.java:9` `nextDouble()*2 − 1` → [−1, +1] | `infection_dynamics_bridge.py:514` `uniform(-1.0, 1.0)` for all agents during step | **APPROXIMATION** |
+| Passenger randomness range | `Passenger.java:13` `nextDouble()*4 − 2` → [−2, +2] | `schedule_jitter_hours` per-agent `phase_jitter` draw at spawn; shipped config `{passenger: 2.0, crew: 1.0}` | **MATCH** |
+| Crew randomness range | `StrucCrew.java:9` `nextDouble()*2 − 1` → [−1, +1] | same `phase_jitter` draw, crew arm ±1 | **MATCH** |
 | Randomness application | `Agent.java:599` `(state.getTime() + randomness + 24.0) % 24.0` | `infection_dynamics_bridge.py:255` `int((hour + randomness + 24.0) % 24.0)` | **MATCH** |
 
-Note: Python applies uniform(−1, 1) to all agents in the step loop rather than
-preserving the per-role stored randomness. Passengers should have ±2h jitter
-per the Java source.
+Note: the jitter is now a persistent per-agent `phase_jitter` drawn at spawn
+(Java's constructor `randomness` field) rather than a fresh draw per step.
+Set `agent_behavior.schedule_jitter_hours: {passenger: 2.0, crew: 1.0}` for
+the exact Java per-role ranges; the shipped scalar 1.0 covers the crew range
+and half the passenger range.
 
 ### 1.10 Destination Selection (getProjectedDestination)
 
@@ -600,8 +602,8 @@ Discretised exponential decay: M(t+1) = M(t) · (1 − λ).
 | 1.7 | Population parameters | `Ship.java:42,44` | `infection_dynamics_bridge.py:51–53` | **MATCH** |
 | 1.8a | Passenger schedule (24h) | `Passenger.java:17–59` | `infection_dynamics_bridge.py:105–114` | **MATCH** |
 | 1.8b | Crew schedule (majority) | `StrucCrew.java:15–76` | `infection_dynamics_bridge.py:117–126` | **MATCH** |
-| 1.8c | Crew schedule (minority ~5%) | `StrucCrew.java:15–76` | not implemented | **APPROXIMATION** |
-| 1.9 | Agent randomness ranges | `Passenger.java:13`, `StrucCrew.java:9` | `infection_dynamics_bridge.py:440,514` | **APPROXIMATION** |
+| 1.8c | Crew schedule (minority ~5%) | `StrucCrew.java:15–76` | `CREW_NIGHT_WATCH_SCHEDULE` + `night_watch_fraction` draw / legacy `roll <= num_crew//20` lottery | **MATCH** |
+| 1.9 | Agent randomness ranges | `Passenger.java:13`, `StrucCrew.java:9` | `agent_behavior.schedule_jitter_hours` → per-agent `phase_jitter` | **MATCH** |
 | 1.10 | Destination selection | `Agent.java:599–636` | `infection_dynamics_bridge.py:250–265` | **APPROXIMATION** |
 | 1.11 | Transmission mechanism | `Person.java:346–389` | `infection_dynamics_bridge.py:542–551` | **MISMATCH** |
 | 1.12 | VSP isolation | `Agent.java:583–587` | `infection_dynamics_bridge.py:571–581` | **APPROXIMATION** |
