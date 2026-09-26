@@ -1,9 +1,10 @@
 # SERO-CHANNEL-V1
 **Date:** 2026-09-26
-**Commit:** 8ac510b3
+**Commit:** 7db0e9a6
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 8ac510b3
+**Measured at:** 8ac510b3 (pre-rebase SHA of the identical code; the
+canary's Batch image was built from it)
 
 Measured extent: canary only — period arm at theta x0.001, 20 seeds
 (cells 340-359). The remaining 340 cells have not run.
