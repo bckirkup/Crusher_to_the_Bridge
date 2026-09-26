@@ -108,6 +108,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--platform", default="classic_cruise_1900")
     parser.add_argument("--epochs", type=int, default=288)
+    parser.add_argument(
+        "--confinement", choices=("organic", "declared"), default="organic",
+    )
     return parser.parse_args(argv)
 
 
@@ -120,7 +123,7 @@ def main(argv: list[str] | None = None) -> int:
     if prefix:
         prefix += "/"
     client = _s3_client()
-    name = f"cabin_floor_{pathogen_id}_seed{seed}.json"
+    name = f"cabin_floor_{pathogen_id}_{args.confinement}_seed{seed}.json"
     key = f"{prefix}arm_{bundle}__{pathogen_id}/{name}"
     if _already_uploaded(client, bucket, key):
         print(f"Already complete: s3://{bucket}/{key}", flush=True)
@@ -136,6 +139,7 @@ def main(argv: list[str] | None = None) -> int:
         "--seeds", str(seed),
         "--arm", pathogen_id,
         "--bundle", bundle,
+        "--confinement", args.confinement,
         "--out", str(dump),
     ]
     print(" ".join(command), flush=True)

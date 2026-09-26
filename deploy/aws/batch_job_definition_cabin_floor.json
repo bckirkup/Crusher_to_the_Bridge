@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:cabin-floor-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-boundary-analysis:cabin-floor-v2",
     "command": [
       "deploy/aws/cabin_floor_entrypoint.py",
       "--s3-prefix",
@@ -15,7 +15,9 @@
       "--platform",
       "Ref::platform",
       "--epochs",
-      "Ref::epochs"
+      "Ref::epochs",
+      "--confinement",
+      "Ref::confinement"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
@@ -55,7 +57,8 @@
     "s3_prefix": "s3://<BUCKET>/campaign/cabin_floor_01/",
     "seeds": "8105,8106",
     "platform": "classic_cruise_1900",
-    "epochs": "288"
+    "epochs": "288",
+    "confinement": "organic"
   },
   "retryStrategy": {
     "attempts": 10,

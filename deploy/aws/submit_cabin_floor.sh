@@ -16,6 +16,7 @@ JOB_DEFINITION="${4:-picard-cabin-floor}"
 PLATFORM="${PLATFORM:-classic_cruise_1900}"
 EPOCHS="${EPOCHS:-288}"
 SEEDS="${SEEDS:-8105,8106}"
+CONFINEMENT="${CONFINEMENT:-organic}"
 S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/cabin_floor_01/}"
 JOB_NAME="${JOB_NAME:-picard-cabin-floor-$(date +%Y%m%d-%H%M%S)}"
 
@@ -29,12 +30,13 @@ echo "  name      : $JOB_NAME"
 echo "  platform  : $PLATFORM"
 echo "  epochs    : $EPOCHS"
 echo "  seeds     : $SEEDS"
+echo "  confine   : $CONFINEMENT"
 echo "  array     : $ARRAY_SIZE = $ARM_COUNT arms x $SEED_COUNT seeds"
 echo "  queue     : $JOB_QUEUE"
 echo "  s3 prefix : $S3_PREFIX"
 
-PARAMETERS=$(printf '{"s3_prefix":"%s","seeds":"%s","platform":"%s","epochs":"%s"}' \
-  "$S3_PREFIX" "$SEEDS" "$PLATFORM" "$EPOCHS")
+PARAMETERS=$(printf '{"s3_prefix":"%s","seeds":"%s","platform":"%s","epochs":"%s","confinement":"%s"}' \
+  "$S3_PREFIX" "$SEEDS" "$PLATFORM" "$EPOCHS" "$CONFINEMENT")
 
 env -u AWS_ACCESS_KEY_ID -u AWS_SECRET_ACCESS_KEY -u AWS_SESSION_TOKEN \
   AWS_PROFILE=picard aws batch submit-job \

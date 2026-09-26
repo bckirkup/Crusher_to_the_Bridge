@@ -16,6 +16,21 @@ would be vacuous by construction. ``initial_infected`` is nulled per arm
 because the initiation engine refuses an explicit seed over a profile that
 still carries one (legionella ships ``0``).
 
+Two confinement arms exist. ``organic`` lets the voyage's own surveillance
+drive whatever confinement it produces — small outbreaks may never reach
+CONFIRMED escalation, whose cabin-contact rule is what puts both members
+of a stateroom pair under quarters, so an organic arm can end with zero
+confined pairs and no measurable window. ``declared`` holds SOP-017
+(Replayed Cabin Quarantine of All Passengers, crew exempt — the Diamond
+Princess passenger/crew asymmetry) active from day 1 through voyage end
+via ``scenario_schedule``, the replay calendar's mechanism for an
+authority's order that binds whether or not simulated surveillance got
+there; every passenger pair is then confined for the whole infectious
+span, which is the household-exposure window the sourced floors describe
+and the only way the check is non-vacuous for pathogens whose own
+outbreak never escalates (legionella sheds to nobody, and a party-seeded
+measles or ebola index infects too few to trip CONFIRMED).
+
 The confined-window mate attack — secondaries among mates who entered
 confinement uninfected — is the all-route composite the
 ``CabinPairChallengeLedger`` tallies across pool, plume, contact, hvac,
@@ -80,6 +95,15 @@ ROSTER: tuple[tuple[str, str], ...] = (
 
 DEFAULT_SEEDS = (8105, 8106)
 
+# Replay calendar confinement: SOP-017 confines every passenger while all
+# crew classes stay working, held from the first full simulated day (after
+# embarkation churn settles) through voyage end.
+DECLARED_CONFINEMENT = {
+    "protocol_id": "SOP-017",
+    "start_day": 1,
+    "end_day": None,
+}
+
 
 def _party_size(profile: dict[str, Any]) -> int:
     """The declared party size when the profile imports as a party, else 2."""
@@ -94,6 +118,7 @@ def run_arm(
     seed: int,
     platform: str,
     epochs: int,
+    confinement: str = "organic",
 ) -> dict[str, Any]:
     """One isolated, instrumented voyage for one pathogen at one seed."""
     profiles = load_pathogen_bundle(
@@ -119,6 +144,10 @@ def run_arm(
             "epoch": 0,
         }],
     }
+    if confinement == "declared":
+        spec_dict["config_overrides"]["scenario_schedule"] = {
+            "protocols": [DECLARED_CONFINEMENT],
+        }
     with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
         spec_path = Path(tmp) / "run_spec.json"
         with validated_open(
@@ -150,6 +179,7 @@ def run_arm(
         "pathogen_id": pathogen_id,
         "seed": seed,
         "platform": platform,
+        "confinement": confinement,
         "num_epoch_steps": epochs,
         "explicit_seed_count": _party_size(profile),
         "infections_total": infected,
@@ -187,6 +217,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--bundle", default=None,
         help="restrict --arm to this bundle (edison/active share two ids)",
     )
+    parser.add_argument(
+        "--confinement", choices=("organic", "declared"), default="organic",
+        help="organic: the voyage's own escalation; declared: SOP-017 held "
+        "over passengers day 1 to end via scenario_schedule",
+    )
     parser.add_argument("--out", type=Path, required=True)
     return parser.parse_args(argv)
 
@@ -206,6 +241,7 @@ def main(argv: list[str] | None = None) -> int:
         run_arm(
             bundle=bundle, pathogen_id=pid, seed=seed,
             platform=args.platform, epochs=args.epochs,
+            confinement=args.confinement,
         )
         for bundle, pid in roster
         for seed in args.seeds
