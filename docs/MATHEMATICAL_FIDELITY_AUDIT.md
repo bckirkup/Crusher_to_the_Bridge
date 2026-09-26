@@ -320,7 +320,10 @@ and accumulator variables C_p, C_c.
 **Target** — `infection_dynamics_bridge.py`:
 Parameters are declared (lines 67–72) but the full compartmental structure
 is not implemented. The Python bridge uses agent-based transmission, not
-Euler-multinomial compartment transitions.
+Euler-multinomial compartment transitions. **Resolution:** this is a settled
+design decision — the ABM formally supersedes the SEIQR structure, and the
+module docstring now declares the constants calibration-reference only.
+No compartmental mode will be added.
 
 | Aspect | Verdict | Detail |
 |--------|---------|--------|
