@@ -1,6 +1,7 @@
 """Per-tier cartesian products used by generate_tier_runs."""
 from __future__ import annotations
 
+from dataclasses import dataclass
 from itertools import product
 from typing import Any, Iterator
 
@@ -67,41 +68,44 @@ def _phi_override(phi: float | None) -> dict[str, Any] | None:
     return {"transmission": {"contact_class_exponent": float(phi)}}
 
 
-def _calibration_rid(
-    ctx: Any,
-    *,
-    pathogen: str,
-    plat: str,
-    dose: Any,
-    index_tags: list[str],
-    alpha: Any,
-    cmode: Any,
-    phi: Any,
-    n_agents: int | None,
-    sweep_epochs: bool,
-    n_epochs: int,
-    imm_tag: str,
-    sname: str,
-    seed: int,
-) -> str:
-    parts = [ctx.short, pathogen, plat]
-    if dose is not None:
-        parts.append(ctx.dose_tag(dose))
-    parts.extend(index_tags)
-    if alpha is not None:
-        parts.append(ctx.alpha_tag(alpha))
-    if cmode is not None:
-        parts.append(ctx.contact_mode_tag(cmode))
-    if phi is not None:
-        parts.append(_phi_tag(phi))
-    if n_agents is not None:
-        parts.append(f"n{n_agents}")
-    if sweep_epochs:
-        parts.append(f"ep{int(n_epochs)}")
-    if imm_tag:
-        parts.append(imm_tag.lstrip("_"))
-    parts.append(sname)
-    parts.append(f"s{seed}")
+@dataclass(frozen=True)
+class CalibrationCell:
+    """The sweep coordinates that distinguish one calibration run id."""
+
+    pathogen: str
+    plat: str
+    dose: Any
+    index_tags: list[str]
+    alpha: Any
+    cmode: Any
+    phi: Any
+    n_agents: int | None
+    sweep_epochs: bool
+    n_epochs: int
+    imm_tag: str
+    sname: str
+    seed: int
+
+
+def _calibration_rid(ctx: Any, cell: CalibrationCell) -> str:
+    parts = [ctx.short, cell.pathogen, cell.plat]
+    if cell.dose is not None:
+        parts.append(ctx.dose_tag(cell.dose))
+    parts.extend(cell.index_tags)
+    if cell.alpha is not None:
+        parts.append(ctx.alpha_tag(cell.alpha))
+    if cell.cmode is not None:
+        parts.append(ctx.contact_mode_tag(cell.cmode))
+    if cell.phi is not None:
+        parts.append(_phi_tag(cell.phi))
+    if cell.n_agents is not None:
+        parts.append(f"n{cell.n_agents}")
+    if cell.sweep_epochs:
+        parts.append(f"ep{int(cell.n_epochs)}")
+    if cell.imm_tag:
+        parts.append(cell.imm_tag.lstrip("_"))
+    parts.append(cell.sname)
+    parts.append(f"s{cell.seed}")
     return "_".join(parts)
 
 def _iter_t1_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
@@ -597,19 +601,21 @@ def _iter_calibration_runs(ctx: Any) -> Iterator[tuple[str, dict[str, Any]]]:
         yield ctx.yield_run(
             _calibration_rid(
                 ctx,
-                pathogen=pathogen,
-                plat=plat,
-                dose=dose,
-                index_tags=index_axis.tags(point),
-                alpha=alpha,
-                cmode=cmode,
-                phi=phi,
-                n_agents=n_agents if rid_carries_n else None,
-                sweep_epochs=sweep_epochs,
-                n_epochs=n_epochs,
-                imm_tag=imm_tag,
-                sname=sname,
-                seed=seed,
+                CalibrationCell(
+                    pathogen=pathogen,
+                    plat=plat,
+                    dose=dose,
+                    index_tags=index_axis.tags(point),
+                    alpha=alpha,
+                    cmode=cmode,
+                    phi=phi,
+                    n_agents=n_agents if rid_carries_n else None,
+                    sweep_epochs=sweep_epochs,
+                    n_epochs=n_epochs,
+                    imm_tag=imm_tag,
+                    sname=sname,
+                    seed=seed,
+                ),
             ),
             bundle=bundle,
             pathogen_overrides=index_axis.pathogen_overrides(

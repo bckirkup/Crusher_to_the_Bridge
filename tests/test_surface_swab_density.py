@@ -224,7 +224,7 @@ def _core_with_pool() -> TransmissionCore:
 
 class TestOrchestratorSourceWiring:
     def _run(self, cfg: dict, obs: MagicMock) -> dict:
-        from orchestrator_epoch import run_observation_sampling
+        from orchestrator_epoch import ZoneContext, run_observation_sampling
 
         core = _core_with_pool()
         engine = MagicMock()
@@ -234,13 +234,15 @@ class TestOrchestratorSourceWiring:
             obs=obs,
             agents=[],
             spaces={"Galley_M": {"pathogen_mass": 1.0}},
-            zone_names=["Galley_M", "Head_1", "Corridor_A"],
-            zone_volumes={
-                "Galley_M": 80.0, "Head_1": 3.0, "Corridor_A": 60.0,
-            },
-            zone_microflora_shifts={},
+            zones=ZoneContext(
+                zone_names=["Galley_M", "Head_1", "Corridor_A"],
+                zone_volumes={
+                    "Galley_M": 80.0, "Head_1": 3.0, "Corridor_A": 60.0,
+                },
+                zone_microflora_shifts={},
+                high_traffic=["Galley_M", "Head_1"],
+            ),
             trigger_status="LOCKDOWN",
-            high_traffic=["Galley_M", "Head_1"],
             syn_result={"sick_call_agents": []},
             engine=engine,
             pathogen_profiles={"norwalk_gi": {}},

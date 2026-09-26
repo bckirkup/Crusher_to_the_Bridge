@@ -281,9 +281,11 @@ def test_a_gate_run_isolates_the_pathogen_through_initiation() -> None:
     spec = gate.build_run_spec(
         NOROVIRUS_FACTORS,
         [0.5] * len(NOROVIRUS_FACTORS),
-        seed=500,
-        description="gate_probe",
-        **gate.Design().run_kwargs(),
+        gate.ScreenRunParams(
+            seed=500,
+            description="gate_probe",
+            **gate.Design().run_kwargs(),
+        ),
     )
     boarding = spec["config_overrides"]["initiation"]["boarding"]
     assert boarding["enabled"] is True

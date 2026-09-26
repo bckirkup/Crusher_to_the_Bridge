@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import math
 from collections.abc import Iterable
+from dataclasses import dataclass, replace
 from typing import Any
 
 import numpy as np
@@ -99,6 +100,33 @@ def _agent_is_crew(agent: dict[str, Any]) -> bool:
     return a_class.startswith("crew")
 
 
+@dataclass(frozen=True)
+class SyndromicParams:
+    """Config surface of ``SyndromicSurveillance``; defaults are the record's."""
+
+    sick_call_probability: float = 0.70
+    background_noise_rate: float = 0.015
+    noise_categories: list[dict[str, Any]] | None = None
+    quarantine_compliance: float = 0.85
+    compliance_delay_epochs: int = 1
+    reluctant_fraction: float = 0.75
+    reluctant_delay_epochs: int = 48
+    compliance_by_class: dict[str, float] | None = None
+    detection_delay_epochs: int = 0
+    crew_screening_interval_epochs: int | None = None
+    reluctant_delay_hours: float | None = None
+    compliance_delay_hours: float | None = None
+    detection_delay_hours: float | None = None
+    crew_screening_interval_hours: float | None = None
+    sick_call_severity_mode: str = "own_severity"
+    symptom_severity_profiles: dict[str, dict[str, Any]] | None = None
+    clock: SimClock | None = None
+    rng: np.random.Generator | None = None
+    testing_campaigns: Iterable[TestingCampaign] | None = None
+    molecular_ascertainment_start_day: int | None = None
+    retest_negatives_on_indication: bool = False
+
+
 class SyndromicSurveillance:
     """Symptom-based screening modality with FRED-style behavioral noise."""
 
@@ -106,78 +134,28 @@ class SyndromicSurveillance:
 
     def __init__(
         self,
-        sick_call_probability: float = 0.70,
-        background_noise_rate: float = 0.015,
-        noise_categories: list[dict[str, Any]] | None = None,
-        quarantine_compliance: float = 0.85,
-        compliance_delay_epochs: int = 1,
-        reluctant_fraction: float = 0.75,
-        reluctant_delay_epochs: int = 48,
-        compliance_by_class: dict[str, float] | None = None,
-        detection_delay_epochs: int = 0,
-        crew_screening_interval_epochs: int | None = None,
-        reluctant_delay_hours: float | None = None,
-        compliance_delay_hours: float | None = None,
-        detection_delay_hours: float | None = None,
-        crew_screening_interval_hours: float | None = None,
-        sick_call_severity_mode: str = "own_severity",
-        symptom_severity_profiles: dict[str, dict[str, Any]] | None = None,
-        clock: SimClock | None = None,
-        rng: np.random.Generator | None = None,
-        testing_campaigns: Iterable[TestingCampaign] | None = None,
-        molecular_ascertainment_start_day: int | None = None,
-        retest_negatives_on_indication: bool = False,
+        params: SyndromicParams | None = None,
+        **overrides: Any,
     ) -> None:
-        self.sick_call_probability = sick_call_probability
+        p = replace(params or SyndromicParams(), **overrides)
+        self.sick_call_probability = p.sick_call_probability
         # Whether a host whose specimen came back negative may be swabbed
         # again on a later day when there is an indication to: it presents
         # to sick call, or a campaign indication tier reaches it. A record
         # that counts repeat tests declares this; off, one specimen per host
         # per pathogen is the ceiling for the voyage.
         self.retest_negatives_on_indication = bool(
-            retest_negatives_on_indication,
+            p.retest_negatives_on_indication,
         )
-        # First simulated day any specimen can be taken. ``None`` leaves the
-        # swab channel open from embarkation; a hull whose record says the
-        # test arrived on a dated day declares it, and no specimen precedes it.
-        self.molecular_ascertainment_start_day = (
-            int(molecular_ascertainment_start_day)
-            if molecular_ascertainment_start_day is not None
-            else None
-        )
-        self.sick_call_severity_mode = sick_call_severity_mode
-        self.symptom_severity_profiles = dict(symptom_severity_profiles or {})
-        self.clock = clock or SimClock()
-        self.background_noise_rate = background_noise_rate
-        self.quarantine_compliance = quarantine_compliance
-        # Deprecated: forced post-delay compliance removed. Kept for config compat.
-        self.compliance_delay_epochs = (
-            self.clock.epochs_for_hours(compliance_delay_hours)
-            if compliance_delay_hours is not None
-            else compliance_delay_epochs
-        )
-        self.reluctant_fraction = float(reluctant_fraction)
-        self.reluctant_delay_epochs = (
-            self.clock.epochs_for_hours(reluctant_delay_hours)
-            if reluctant_delay_hours is not None
-            else int(reluctant_delay_epochs)
-        )
-        self.compliance_by_class = dict(compliance_by_class or {})
-        self.detection_delay_epochs = (
-            self.clock.epochs_for_hours(detection_delay_hours)
-            if detection_delay_hours is not None
-            else max(0, int(detection_delay_epochs))
-        )
-        if crew_screening_interval_hours is not None:
-            crew_screening_interval_epochs = self.clock.epochs_for_hours(
-                crew_screening_interval_hours,
-            )
-        if crew_screening_interval_epochs is None:
-            self.crew_screening_interval_epochs: int | None = None
-        else:
-            interval = int(crew_screening_interval_epochs)
-            self.crew_screening_interval_epochs = interval if interval > 0 else None
-        self.rng = rng if rng is not None else default_simulation_rng()
+        self.sick_call_severity_mode = p.sick_call_severity_mode
+        self.symptom_severity_profiles = dict(p.symptom_severity_profiles or {})
+        self.clock = p.clock or SimClock()
+        self.background_noise_rate = p.background_noise_rate
+        self.quarantine_compliance = p.quarantine_compliance
+        self.reluctant_fraction = float(p.reluctant_fraction)
+        self.compliance_by_class = dict(p.compliance_by_class or {})
+        self._resolve_timing(p)
+        self.rng = p.rng if p.rng is not None else default_simulation_rng()
         self._molecular_rng = _molecular_stream(self.rng)
         # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
         self._compliance_class: dict[int, str] = {}
@@ -192,7 +170,7 @@ class SyndromicSurveillance:
         # Replicated campaigns, one per pathogen; each spends its day's
         # capacity exactly once, on the first epoch of that day.
         self._campaign_rng = _molecular_stream(self.rng, _CAMPAIGN_SPAWN_KEY)
-        self._campaigns = self._index_campaigns(testing_campaigns)
+        self._campaigns = self._index_campaigns(p.testing_campaigns)
         self._campaign_days_run: set[tuple[str, int]] = set()
         # One entry per specimen the campaign took, in the order taken: what
         # the ship's own testing log held at the end of the voyage.
@@ -212,14 +190,51 @@ class SyndromicSurveillance:
         self._onset_recording_decisions: dict[tuple[str, int], bool] = {}
 
         # None → built-in defaults; explicit [] disables background noise categories.
-        if noise_categories is None:
+        if p.noise_categories is None:
             self.noise_categories = [
                 {"reason": "seasickness",  "probability_per_day": 0.0042},
                 {"reason": "fatigue",      "probability_per_day": 0.0030},
                 {"reason": "minor_injury", "probability_per_day": 0.0020},
             ]
         else:
-            self.noise_categories = list(noise_categories)
+            self.noise_categories = list(p.noise_categories)
+
+    def _resolve_timing(self, p: "SyndromicParams") -> None:
+        # First simulated day any specimen can be taken. ``None`` leaves the
+        # swab channel open from embarkation; a hull whose record says the
+        # test arrived on a dated day declares it, and no specimen precedes it.
+        self.molecular_ascertainment_start_day = (
+            int(p.molecular_ascertainment_start_day)
+            if p.molecular_ascertainment_start_day is not None
+            else None
+        )
+        # Deprecated: forced post-delay compliance removed. Kept for config compat.
+        self.compliance_delay_epochs = (
+            self.clock.epochs_for_hours(p.compliance_delay_hours)
+            if p.compliance_delay_hours is not None
+            else p.compliance_delay_epochs
+        )
+        self.reluctant_delay_epochs = (
+            self.clock.epochs_for_hours(p.reluctant_delay_hours)
+            if p.reluctant_delay_hours is not None
+            else int(p.reluctant_delay_epochs)
+        )
+        self.detection_delay_epochs = (
+            self.clock.epochs_for_hours(p.detection_delay_hours)
+            if p.detection_delay_hours is not None
+            else max(0, int(p.detection_delay_epochs))
+        )
+        if p.crew_screening_interval_hours is not None:
+            crew_screening_interval_epochs = self.clock.epochs_for_hours(
+                p.crew_screening_interval_hours,
+            )
+        else:
+            crew_screening_interval_epochs = p.crew_screening_interval_epochs
+        if crew_screening_interval_epochs is None:
+            self.crew_screening_interval_epochs: int | None = None
+        else:
+            interval = int(crew_screening_interval_epochs)
+            self.crew_screening_interval_epochs = interval if interval > 0 else None
 
     @staticmethod
     def effective_sick_call_probability(

@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import os
+from dataclasses import dataclass
 from typing import Any
 
 from crusher_labs.lab_notebook import load_logging_profile
@@ -345,34 +346,39 @@ def _active_protocol_records(active_mods: list[dict[str, Any]]) -> list[dict[str
     ]
 
 
-def record_epoch(
-    epoch: int,
-    trigger_status: str,
-    agents: list[dict[str, Any]],
-    spaces: dict[str, dict[str, Any]],
-    engine: KorkinShipEngine,
-    contam_engine: ContamTransportEngine | None,
-    pathogen_profiles: dict[str, dict[str, Any]],
-    zone_names: list[str],
-    zone_microflora_shifts: dict[str, dict[str, float]],
-    syn_result: dict[str, Any],
-    rdt_result: dict[str, Any],
-    pcr_result: dict[str, Any] | None,
-    seq_result: dict[str, Any] | None,
-    tracing_matrix: Any,
-    state: SimulationState,
-    obs: ObservationEngine,
-    active_mods: list[dict[str, Any]],
-    merged_mods: dict[str, Any],
-    stoplights: dict[str, dict[str, str]],
-    epoch_cost: dict[str, Any],
-    cfg: dict[str, Any],
-    observations: ObservationResults,
-    wearable_result: dict[str, Any] | None = None,
-    infection_counters: dict[str, dict[str, Any]] | None = None,
-    history_retention: str = "full",
-    final_epoch: bool = False,
-) -> dict[str, Any]:
+@dataclass(frozen=True)
+class EpochRecordRequest:
+    """Every epoch input ``record_epoch`` serializes into one history row."""
+
+    epoch: int
+    trigger_status: str
+    agents: list[dict[str, Any]]
+    spaces: dict[str, dict[str, Any]]
+    engine: KorkinShipEngine
+    contam_engine: ContamTransportEngine | None
+    pathogen_profiles: dict[str, dict[str, Any]]
+    zone_names: list[str]
+    zone_microflora_shifts: dict[str, dict[str, float]]
+    syn_result: dict[str, Any]
+    rdt_result: dict[str, Any]
+    pcr_result: dict[str, Any] | None
+    seq_result: dict[str, Any] | None
+    tracing_matrix: Any
+    state: SimulationState
+    obs: ObservationEngine
+    active_mods: list[dict[str, Any]]
+    merged_mods: dict[str, Any]
+    stoplights: dict[str, dict[str, str]]
+    epoch_cost: dict[str, Any]
+    cfg: dict[str, Any]
+    observations: ObservationResults
+    wearable_result: dict[str, Any] | None = None
+    infection_counters: dict[str, dict[str, Any]] | None = None
+    history_retention: str = "full"
+    final_epoch: bool = False
+
+
+def record_epoch(request: EpochRecordRequest) -> dict[str, Any]:
     """Build an epoch record for simulation_history.
 
     ``observations`` carries every instrument result for the epoch (the
@@ -380,6 +386,32 @@ def record_epoch(
     ``history_retention="compact"`` keeps only scalars needed for campaign
     timeseries / summary (no per-agent, contact-tracing, or raw assay blobs).
     """
+    epoch = request.epoch
+    trigger_status = request.trigger_status
+    agents = request.agents
+    spaces = request.spaces
+    engine = request.engine
+    contam_engine = request.contam_engine
+    pathogen_profiles = request.pathogen_profiles
+    zone_names = request.zone_names
+    zone_microflora_shifts = request.zone_microflora_shifts
+    syn_result = request.syn_result
+    rdt_result = request.rdt_result
+    pcr_result = request.pcr_result
+    seq_result = request.seq_result
+    tracing_matrix = request.tracing_matrix
+    state = request.state
+    obs = request.obs
+    active_mods = request.active_mods
+    merged_mods = request.merged_mods
+    stoplights = request.stoplights
+    epoch_cost = request.epoch_cost
+    cfg = request.cfg
+    observations = request.observations
+    wearable_result = request.wearable_result
+    infection_counters = request.infection_counters
+    history_retention = request.history_retention
+    final_epoch = request.final_epoch
     if not isinstance(agents, list):
         raise TypeError(f"record_epoch: agents must be list, got {type(agents).__name__}")
     if not isinstance(spaces, dict):

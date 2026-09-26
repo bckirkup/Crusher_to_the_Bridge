@@ -34,6 +34,7 @@ from telemetry_buffer.observation_model.bounded_screen import (
     EXPEDITION_SENSITIVITY_FACTORS,
     FACTOR_SETS,
     NOROVIRUS_FACTORS,
+    ScreenRunParams,
     build_overrides,
     build_run_overrides,
     build_run_spec,
@@ -299,9 +300,11 @@ class TestTheRunSpecCarriesEachArmOnce:
         return build_run_spec(
             design.factors,
             UNITS,
-            seed=1,
-            description="three_arm_probe",
-            **design.run_kwargs(),
+            ScreenRunParams(
+                seed=1,
+                description="three_arm_probe",
+                **design.run_kwargs(),
+            ),
         )
 
     def test_the_immunity_axis_does_not_displace_the_complement(self) -> None:

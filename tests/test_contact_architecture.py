@@ -590,13 +590,16 @@ class TestTheActivityArmOfTheGate:
 
     def _spec(self, text: str | None) -> dict:
         from telemetry_buffer.observation_model.bounded_screen import (
+            ScreenRunParams,
             build_run_spec,
         )
         design = self._design(text)
         units = [0.5] * len(design.factors)
         return build_run_spec(
-            design.factors, units, seed=3, description="arch_probe",
-            **design.run_kwargs(),
+            design.factors, units,
+            ScreenRunParams(
+                seed=3, description="arch_probe", **design.run_kwargs(),
+            ),
         )
 
     def test_the_control_arm_is_the_pre_change_spec(self) -> None:
@@ -720,13 +723,16 @@ class TestTheSaturationArmOfTheGate:
 
     def _spec(self, rates: str | None, taus: str | None) -> dict:
         from telemetry_buffer.observation_model.bounded_screen import (
+            ScreenRunParams,
             build_run_spec,
         )
         design = self._design(rates, taus)
         units = [0.5] * len(design.factors)
         return build_run_spec(
-            design.factors, units, seed=3, description="tau_probe",
-            **design.run_kwargs(),
+            design.factors, units,
+            ScreenRunParams(
+                seed=3, description="tau_probe", **design.run_kwargs(),
+            ),
         )
 
     def test_an_unsaturated_activity_arm_is_the_first_campaign_spec(self) -> None:
@@ -763,6 +769,7 @@ class TestTheSaturationArmOfTheGate:
             parse_activity_saturation,
         )
         from telemetry_buffer.observation_model.bounded_screen import (
+            ScreenRunParams,
             build_run_spec,
         )
         with pytest.raises(ValueError, match="activity arm"):
@@ -773,11 +780,9 @@ class TestTheSaturationArmOfTheGate:
             **design.run_kwargs(),
             "activity_saturation_hours": {"leisure": 2.0},
         }
+        params = ScreenRunParams(seed=3, description="x", **run_kwargs)
         with pytest.raises(ValueError, match="activity_contacts"):
-            build_run_spec(
-                design.factors, point, seed=3,
-                description="x", **run_kwargs,
-            )
+            build_run_spec(design.factors, point, params)
 
     @pytest.mark.parametrize("bad", [
         "lounge=2.0",
