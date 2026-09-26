@@ -591,6 +591,36 @@ def run_id_tags(
         rung_tags = []
     if not owns(pathogen_id):
         return []
+    tags = _sweep_tags(
+        tier,
+        pathogen_id,
+        never_symptomatic_fraction=never_symptomatic_fraction,
+        presymptomatic_share=presymptomatic_share,
+        passenger_prevalence=passenger_prevalence,
+        crew_prevalence=crew_prevalence,
+        party=party,
+    )
+    tags.extend(
+        _preboarding_tags(
+            tier,
+            preboarding_crew,
+            preboarding_passenger,
+            preboarding_crew_reportable,
+        )
+    )
+    return rung_tags + tags
+
+
+def _sweep_tags(
+    tier: Mapping[str, Any],
+    pathogen_id: str,
+    *,
+    never_symptomatic_fraction: float,
+    presymptomatic_share: float,
+    passenger_prevalence: float,
+    crew_prevalence: float,
+    party: tuple[float, int | None] | None,
+) -> list[str]:
     tags: list[str] = []
     if sweeps_never_symptomatic(tier):
         tags.append(never_symptomatic_tag(never_symptomatic_fraction))
@@ -601,6 +631,16 @@ def run_id_tags(
         tags.append(prevalence_tag(passenger_prevalence, crew_prevalence))
     if sweeps_party(tier) and party is not None and not prevalence_mode:
         tags.append(party_tag(*party))
+    return tags
+
+
+def _preboarding_tags(
+    tier: Mapping[str, Any],
+    preboarding_crew: _PreboardingPoint | None,
+    preboarding_passenger: _PreboardingPoint | None,
+    preboarding_crew_reportable: bool | None,
+) -> list[str]:
+    tags: list[str] = []
     if preboarding_crew is not None and PREBOARDING_CREW_KEY in tier:
         tags.append(preboarding_tag("pbc", preboarding_crew))
     if preboarding_passenger is not None and PREBOARDING_PASSENGER_KEY in tier:
@@ -610,7 +650,7 @@ def run_id_tags(
         and PREBOARDING_REPORTABLE_KEY in tier
     ):
         tags.append(preboarding_reportable_tag(preboarding_crew_reportable))
-    return rung_tags + tags
+    return tags
 
 
 def _preboarding_factors(

@@ -82,32 +82,37 @@ def _percentile(sorted_vals: list[float], q: float) -> float:
     return sorted_vals[lo] * (1 - frac) + sorted_vals[hi] * frac
 
 
-def _trajectory_stats(
-    rows_a: list[dict[str, Any]],
-    rows_b: list[dict[str, Any]],
-) -> dict[str, Any]:
-    by_epoch_a = {int(r["epoch"]): r for r in rows_a if r.get("epoch") is not None}
-    by_epoch_b = {int(r["epoch"]): r for r in rows_b if r.get("epoch") is not None}
-    common = sorted(set(by_epoch_a) & set(by_epoch_b))
-    if not common:
-        return {
-            "epoch_match_rate_infected": None,
-            "epoch_match_rate_recovered": None,
-            "epoch_match_rate_new_infections": None,
-            "max_abs_delta_infected": None,
-            "max_abs_delta_recovered": None,
-            "mass_ratio_median": None,
-            "mass_ratio_iqr_low": None,
-            "mass_ratio_iqr_high": None,
-        }
+def _empty_trajectory_stats() -> dict[str, Any]:
+    return {
+        "epoch_match_rate_infected": None,
+        "epoch_match_rate_recovered": None,
+        "epoch_match_rate_new_infections": None,
+        "max_abs_delta_infected": None,
+        "max_abs_delta_recovered": None,
+        "mass_ratio_median": None,
+        "mass_ratio_iqr_low": None,
+        "mass_ratio_iqr_high": None,
+    }
 
-    def _match_rate(field: str) -> float:
-        matches = 0
-        for ep in common:
-            if by_epoch_a[ep].get(field) == by_epoch_b[ep].get(field):
-                matches += 1
-        return round(matches / len(common), 6)
 
+def _epoch_match_rate(
+    by_epoch_a: dict[int, dict[str, Any]],
+    by_epoch_b: dict[int, dict[str, Any]],
+    common: list[int],
+    field: str,
+) -> float:
+    matches = 0
+    for ep in common:
+        if by_epoch_a[ep].get(field) == by_epoch_b[ep].get(field):
+            matches += 1
+    return round(matches / len(common), 6)
+
+
+def _deltas_and_mass_ratios(
+    by_epoch_a: dict[int, dict[str, Any]],
+    by_epoch_b: dict[int, dict[str, Any]],
+    common: list[int],
+) -> tuple[int, int, list[float]]:
     max_d_inf = 0
     max_d_rec = 0
     mass_ratios: list[float] = []
@@ -124,12 +129,34 @@ def _trajectory_stats(
         )
         if ratio is not None:
             mass_ratios.append(ratio)
+    return max_d_inf, max_d_rec, mass_ratios
+
+
+def _trajectory_stats(
+    rows_a: list[dict[str, Any]],
+    rows_b: list[dict[str, Any]],
+) -> dict[str, Any]:
+    by_epoch_a = {int(r["epoch"]): r for r in rows_a if r.get("epoch") is not None}
+    by_epoch_b = {int(r["epoch"]): r for r in rows_b if r.get("epoch") is not None}
+    common = sorted(set(by_epoch_a) & set(by_epoch_b))
+    if not common:
+        return _empty_trajectory_stats()
+
+    max_d_inf, max_d_rec, mass_ratios = _deltas_and_mass_ratios(
+        by_epoch_a, by_epoch_b, common,
+    )
 
     mass_ratios.sort()
     return {
-        "epoch_match_rate_infected": _match_rate("infected"),
-        "epoch_match_rate_recovered": _match_rate("recovered"),
-        "epoch_match_rate_new_infections": _match_rate("new_infections"),
+        "epoch_match_rate_infected": _epoch_match_rate(
+            by_epoch_a, by_epoch_b, common, "infected",
+        ),
+        "epoch_match_rate_recovered": _epoch_match_rate(
+            by_epoch_a, by_epoch_b, common, "recovered",
+        ),
+        "epoch_match_rate_new_infections": _epoch_match_rate(
+            by_epoch_a, by_epoch_b, common, "new_infections",
+        ),
         "max_abs_delta_infected": max_d_inf,
         "max_abs_delta_recovered": max_d_rec,
         "mass_ratio_median": (

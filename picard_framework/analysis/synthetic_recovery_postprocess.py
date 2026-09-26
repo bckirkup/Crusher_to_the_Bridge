@@ -15,6 +15,7 @@ import re
 import sys
 import zipfile
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import Any
 
 from picard_framework.analysis._io import (
@@ -57,20 +58,30 @@ def _parameter_vector(run_id: str, params: dict[str, Any]) -> str:
     return m.group(1) if m else "unknown"
 
 
-def _row_from_summary_zip(zip_path: str) -> dict[str, Any] | None:
+def _summary_member_key(names: set[str]) -> str | None:
+    if SUMMARY_FILENAME in names:
+        return SUMMARY_FILENAME
+    for n in names:
+        if n.endswith(SUMMARY_FILENAME):
+            return n
+    return None
+
+
+def _summary_json_from_zip(zip_path: str) -> Any:
     try:
         with zipfile.ZipFile(zip_path, "r") as zf:
             names = {n.replace("\\", "/") for n in zf.namelist()}
-            key = SUMMARY_FILENAME if SUMMARY_FILENAME in names else None
-            if key is None:
-                for n in names:
-                    if n.endswith(SUMMARY_FILENAME):
-                        key = n
-                        break
+            key = _summary_member_key(names)
             if key is None:
                 return None
-            summary = json.loads(zf.read(key).decode("utf-8"))
+            return json.loads(zf.read(key).decode("utf-8"))
     except (OSError, zipfile.BadZipFile, json.JSONDecodeError, UnicodeDecodeError):
+        return None
+
+
+def _row_from_summary_zip(zip_path: str) -> dict[str, Any] | None:
+    summary = _summary_json_from_zip(zip_path)
+    if summary is None:
         return None
 
     params = summary.get("parameters") if isinstance(summary, dict) else {}
@@ -613,6 +624,90 @@ def fit_pooled_covariate(
     )
 
 
+@dataclass(frozen=True)
+class _LatentFitConfig:
+    stan_path: str
+    out_root: str
+    beta_d: float
+    beta_alpha_size: float
+    chains: int
+    iter_warmup: int
+    iter_sampling: int
+    seed: int
+    show_progress: bool
+
+
+def _latent_posterior_fields(
+    row: dict[str, Any], draws: Any, truth: dict[str, float]
+) -> None:
+    if draws is None or "dose_adj" not in draws.columns:
+        return
+    for name, key in (("dose_adj", "dose_adj"), ("alpha_c", "alpha_c")):
+        s = draws[name]
+        row[f"post_{key}_mean"] = float(s.mean())
+        row[f"post_{key}_q05"] = float(s.quantile(0.05))
+        row[f"post_{key}_q50"] = float(s.quantile(0.50))
+        row[f"post_{key}_q95"] = float(s.quantile(0.95))
+        truth_v = truth.get("dose_adj" if key == "dose_adj" else "alpha_c")
+        if truth_v is not None:
+            row[f"abs_err_{key}"] = abs(float(s.median()) - float(truth_v))
+            row[f"truth_in_90ci_{key}"] = int(
+                float(s.quantile(0.05)) <= float(truth_v) <= float(s.quantile(0.95))
+            )
+
+
+def _fit_one_latent_vector(
+    i: int,
+    vec: str,
+    group: list[dict[str, Any]],
+    cfg: _LatentFitConfig,
+) -> dict[str, Any]:
+    platforms, _plat = _platform_index(group)
+    log_ns = [math.log(max(int(r.get("num_agents") or 1), 1)) for r in group]
+    mean_log_n = sum(log_ns) / len(log_ns)
+    data = {
+        "N_runs": len(group),
+        "outbreak": [int(r["outbreak_occurred"]) for r in group],
+        "log_n_c": [x - mean_log_n for x in log_ns],
+        "d0": DEFAULT_D0,
+        "a0": DEFAULT_A0,
+        "beta_d_fixed": float(cfg.beta_d),
+        "beta_alpha_size_fixed": float(cfg.beta_alpha_size),
+    }
+    fit_dir = os.path.join(cfg.out_root, vec)
+    result = _fit_cmdstan(
+        cfg.stan_path,
+        data,
+        fit_dir,
+        chains=cfg.chains,
+        iter_warmup=cfg.iter_warmup,
+        iter_sampling=cfg.iter_sampling,
+        seed=cfg.seed + i,
+        show_progress=cfg.show_progress,
+    )
+    if result.get("status") != "ok":
+        result = _fit_latent_numpy(
+            data,
+            fit_dir,
+            chains=cfg.chains,
+            iter_warmup=cfg.iter_warmup,
+            iter_sampling=cfg.iter_sampling,
+            seed=cfg.seed + i,
+        )
+    truth = TRUE_VECTORS.get(vec, {})
+    row: dict[str, Any] = {
+        "parameter_vector": vec,
+        "true_dose_adj": truth.get("dose_adj"),
+        "true_alpha_c": truth.get("alpha_c"),
+        "status": result.get("status"),
+        "engine": result.get("engine"),
+        "n_runs": len(group),
+    }
+    _latent_posterior_fields(row, result.get("draws"), truth)
+    write_json(os.path.join(fit_dir, META_FILENAME), {"platforms": platforms, "vector": vec})
+    return row
+
+
 def fit_latent_per_vector(
     rows: list[dict[str, Any]],
     out_root: str,
@@ -625,73 +720,26 @@ def fit_latent_per_vector(
     seed: int,
     show_progress: bool,
 ) -> list[dict[str, Any]]:
-    stan = os.path.join(
-        os.path.dirname(__file__), "stan", "synthetic_recovery_latent.stan"
+    cfg = _LatentFitConfig(
+        stan_path=os.path.join(
+            os.path.dirname(__file__), "stan", "synthetic_recovery_latent.stan"
+        ),
+        out_root=out_root,
+        beta_d=beta_d,
+        beta_alpha_size=beta_alpha_size,
+        chains=chains,
+        iter_warmup=iter_warmup,
+        iter_sampling=iter_sampling,
+        seed=seed,
+        show_progress=show_progress,
     )
-    recovery_rows: list[dict[str, Any]] = []
     by_vec: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for r in rows:
         by_vec[str(r["parameter_vector"])].append(r)
 
+    recovery_rows: list[dict[str, Any]] = []
     for i, vec in enumerate(sorted(by_vec)):
-        group = by_vec[vec]
-        platforms, _plat = _platform_index(group)
-        log_ns = [math.log(max(int(r.get("num_agents") or 1), 1)) for r in group]
-        mean_log_n = sum(log_ns) / len(log_ns)
-        data = {
-            "N_runs": len(group),
-            "outbreak": [int(r["outbreak_occurred"]) for r in group],
-            "log_n_c": [x - mean_log_n for x in log_ns],
-            "d0": DEFAULT_D0,
-            "a0": DEFAULT_A0,
-            "beta_d_fixed": float(beta_d),
-            "beta_alpha_size_fixed": float(beta_alpha_size),
-        }
-        fit_dir = os.path.join(out_root, vec)
-        result = _fit_cmdstan(
-            stan,
-            data,
-            fit_dir,
-            chains=chains,
-            iter_warmup=iter_warmup,
-            iter_sampling=iter_sampling,
-            seed=seed + i,
-            show_progress=show_progress,
-        )
-        if result.get("status") != "ok":
-            result = _fit_latent_numpy(
-                data,
-                fit_dir,
-                chains=chains,
-                iter_warmup=iter_warmup,
-                iter_sampling=iter_sampling,
-                seed=seed + i,
-            )
-        truth = TRUE_VECTORS.get(vec, {})
-        row: dict[str, Any] = {
-            "parameter_vector": vec,
-            "true_dose_adj": truth.get("dose_adj"),
-            "true_alpha_c": truth.get("alpha_c"),
-            "status": result.get("status"),
-            "engine": result.get("engine"),
-            "n_runs": len(group),
-        }
-        draws = result.get("draws")
-        if draws is not None and "dose_adj" in draws.columns:
-            for name, key in (("dose_adj", "dose_adj"), ("alpha_c", "alpha_c")):
-                s = draws[name]
-                row[f"post_{key}_mean"] = float(s.mean())
-                row[f"post_{key}_q05"] = float(s.quantile(0.05))
-                row[f"post_{key}_q50"] = float(s.quantile(0.50))
-                row[f"post_{key}_q95"] = float(s.quantile(0.95))
-                truth_v = truth.get("dose_adj" if key == "dose_adj" else "alpha_c")
-                if truth_v is not None:
-                    row[f"abs_err_{key}"] = abs(float(s.median()) - float(truth_v))
-                    row[f"truth_in_90ci_{key}"] = int(
-                        float(s.quantile(0.05)) <= float(truth_v) <= float(s.quantile(0.95))
-                    )
-        recovery_rows.append(row)
-        write_json(os.path.join(fit_dir, META_FILENAME), {"platforms": platforms, "vector": vec})
+        recovery_rows.append(_fit_one_latent_vector(i, vec, by_vec[vec], cfg))
     return recovery_rows
 
 
@@ -944,6 +992,125 @@ def _write_figures(
 
 
 
+_METHOD_NOTES_LINES = [
+    "## Method notes",
+    "",
+    "Boundary-style hurdle models treat `dose_adj` / `alpha_c` as **covariates**,",
+    "not latent targets. Within a single parameter vector both are constant, so",
+    "`beta_d` / `beta_alpha` are not identified from that slice alone.",
+    "",
+    "This pipeline therefore:",
+    "",
+    "1. Aggregates outbreak rate and mean AR by vector × platform (design step 1).",
+    "2. Stage A: pooled Bernoulli hurdle with dose + alpha covariates.",
+    "3. Stage B: pooled Beta-AR with the same covariates (severity / ridge signal).",
+    "4. Per-vector latent `(dose_adj, alpha_c)` recovery with slopes fixed from Stage A.",
+    "5. Plots ridge geometry and recovery intervals.",
+    "",
+    "Sampler: CmdStan when the local toolchain can compile; otherwise a NumPy",
+    "random-walk Metropolis fallback with the same likelihood/priors",
+    "(`engine` recorded in `fit_status.json`).",
+    "",
+    "## Aggregate outbreak rates",
+    "",
+    "| vector | platform | n | outbreak_rate | mean_AR | true dose | true α |",
+    "|---|---|---:|---:|---:|---:|---:|",
+]
+
+
+def _aggregate_table_lines(agg: list[dict[str, Any]]) -> list[str]:
+    return [
+        f"| {r['parameter_vector']} | {r['platform_id']} | {r['n_runs']} | "
+        f"{r['outbreak_rate']:.3f} | {r['mean_attack_rate']:.4f} | "
+        f"{r.get('true_dose_adj')} | {r.get('true_alpha_c')} |"
+        for r in agg
+    ]
+
+
+def _mean_outbreak_rate(agg: list[dict[str, Any]], vec: str) -> float:
+    sub = [r for r in agg if r["parameter_vector"] == vec]
+    return sum(r["outbreak_rate"] for r in sub) / len(sub) if sub else float("nan")
+
+
+def _key_contrast_lines(agg: list[dict[str, Any]]) -> list[str]:
+    return [
+        "",
+        "## Key contrast: `ridge_3` vs `off_ridge`",
+        "",
+        "Same `dose_adj=10.6`, different `alpha_c` (0.75 vs 1.0).",
+        f"- mean outbreak rate ridge_3: {_mean_outbreak_rate(agg, 'ridge_3'):.3f}",
+        f"- mean outbreak rate off_ridge: {_mean_outbreak_rate(agg, 'off_ridge'):.3f}",
+        f"- gap (pp): {100 * (_mean_outbreak_rate(agg, 'off_ridge') - _mean_outbreak_rate(agg, 'ridge_3')):.1f}",
+        "",
+        "Attack rates separate the ridge more than outbreak indicators "
+        "(see aggregate table; mega mean AR falls from ~0.28 at ridge_1 to ~0.06 at ridge_5).",
+        "",
+        "## Stage A — pooled Bernoulli slopes",
+        "",
+    ]
+
+
+def _stage_a_lines(pooled: dict[str, Any]) -> list[str]:
+    draws = pooled.get("draws")
+    if draws is None:
+        return [f"- pooled fit status: {pooled.get('status')} ({pooled.get('reason', '')})"]
+    lines: list[str] = []
+    for name in ("beta_d", "beta_alpha"):
+        if name in draws.columns:
+            s = draws[name]
+            lines.append(
+                f"- `{name}`: mean={s.mean():.3f}, "
+                f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
+            )
+    return lines
+
+
+def _stage_b_lines(pooled_ar: dict[str, Any] | None) -> list[str]:
+    lines = ["", "## Stage B — pooled Beta-AR slopes", ""]
+    ar_draws = (pooled_ar or {}).get("draws")
+    if ar_draws is None:
+        lines.append(
+            f"- AR fit status: {(pooled_ar or {}).get('status')} "
+            f"({(pooled_ar or {}).get('reason', '')})"
+        )
+        return lines
+    for name in ("beta_d", "beta_alpha", "phi"):
+        if name in ar_draws.columns:
+            s = ar_draws[name]
+            lines.append(
+                f"- `{name}`: mean={s.mean():.3f}, "
+                f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
+            )
+    bd = ar_draws["beta_d"] if "beta_d" in ar_draws.columns else None
+    ba = ar_draws["beta_alpha"] if "beta_alpha" in ar_draws.columns else None
+    if bd is not None and ba is not None:
+        bd_ok = float(bd.quantile(0.05)) > 0 or float(bd.quantile(0.95)) < 0
+        ba_ok = float(ba.quantile(0.05)) > 0 or float(ba.quantile(0.95)) < 0
+        lines.append("")
+        lines.append(
+            f"- dose slope excludes 0 at 90%?: **{'yes' if bd_ok else 'no'}**; "
+            f"alpha slope excludes 0 at 90%?: **{'yes' if ba_ok else 'no'}**"
+        )
+        lines.append(
+            f"- engine: `{(pooled_ar or {}).get('engine', 'unknown')}`"
+        )
+    return lines
+
+
+def _recovery_table_lines(recovery: list[dict[str, Any]]) -> list[str]:
+    lines = ["", "## Latent recovery vs truth", "", "| vector | true dose | post dose (q50) | in 90% CI? | true α | post α (q50) | in 90% CI? |", "|---|---:|---:|---:|---:|---:|---:|"]
+    for r in recovery:
+        lines.append(
+            f"| {r['parameter_vector']} | {r.get('true_dose_adj')} | "
+            f"{r.get('post_dose_adj_q50', float('nan')):.3f} | "
+            f"{r.get('truth_in_90ci_dose_adj', '')} | "
+            f"{r.get('true_alpha_c')} | "
+            f"{r.get('post_alpha_c_q50', float('nan')):.3f} | "
+            f"{r.get('truth_in_90ci_alpha_c', '')} |"
+        )
+    return lines
+
+
 def write_report(
     path: str,
     *,
@@ -959,110 +1126,14 @@ def write_report(
         "",
         f"Runs bundled: **{n_runs}** (expect 1200).",
         "",
-        "## Method notes",
-        "",
-        "Boundary-style hurdle models treat `dose_adj` / `alpha_c` as **covariates**,",
-        "not latent targets. Within a single parameter vector both are constant, so",
-        "`beta_d` / `beta_alpha` are not identified from that slice alone.",
-        "",
-        "This pipeline therefore:",
-        "",
-        "1. Aggregates outbreak rate and mean AR by vector × platform (design step 1).",
-        "2. Stage A: pooled Bernoulli hurdle with dose + alpha covariates.",
-        "3. Stage B: pooled Beta-AR with the same covariates (severity / ridge signal).",
-        "4. Per-vector latent `(dose_adj, alpha_c)` recovery with slopes fixed from Stage A.",
-        "5. Plots ridge geometry and recovery intervals.",
-        "",
-        "Sampler: CmdStan when the local toolchain can compile; otherwise a NumPy",
-        "random-walk Metropolis fallback with the same likelihood/priors",
-        "(`engine` recorded in `fit_status.json`).",
-        "",
-        "## Aggregate outbreak rates",
-        "",
-        "| vector | platform | n | outbreak_rate | mean_AR | true dose | true α |",
-        "|---|---|---:|---:|---:|---:|---:|",
+        *_METHOD_NOTES_LINES,
     ]
-    for r in agg:
-        lines.append(
-            f"| {r['parameter_vector']} | {r['platform_id']} | {r['n_runs']} | "
-            f"{r['outbreak_rate']:.3f} | {r['mean_attack_rate']:.4f} | "
-            f"{r.get('true_dose_adj')} | {r.get('true_alpha_c')} |"
-        )
-
+    lines.extend(_aggregate_table_lines(agg))
     # Distinguishability: ridge_3 vs off_ridge (same dose, different alpha)
-    def _mean_or(vec: str) -> float:
-        sub = [r for r in agg if r["parameter_vector"] == vec]
-        return sum(r["outbreak_rate"] for r in sub) / len(sub) if sub else float("nan")
-
-    lines.extend(
-        [
-            "",
-            "## Key contrast: `ridge_3` vs `off_ridge`",
-            "",
-            "Same `dose_adj=10.6`, different `alpha_c` (0.75 vs 1.0).",
-            f"- mean outbreak rate ridge_3: {_mean_or('ridge_3'):.3f}",
-            f"- mean outbreak rate off_ridge: {_mean_or('off_ridge'):.3f}",
-            f"- gap (pp): {100 * (_mean_or('off_ridge') - _mean_or('ridge_3')):.1f}",
-            "",
-            "Attack rates separate the ridge more than outbreak indicators "
-            "(see aggregate table; mega mean AR falls from ~0.28 at ridge_1 to ~0.06 at ridge_5).",
-            "",
-            "## Stage A — pooled Bernoulli slopes",
-            "",
-        ]
-    )
-    draws = pooled.get("draws")
-    if draws is not None:
-        for name in ("beta_d", "beta_alpha"):
-            if name in draws.columns:
-                s = draws[name]
-                lines.append(
-                    f"- `{name}`: mean={s.mean():.3f}, "
-                    f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
-                )
-    else:
-        lines.append(f"- pooled fit status: {pooled.get('status')} ({pooled.get('reason', '')})")
-
-    lines.extend(["", "## Stage B — pooled Beta-AR slopes", ""])
-    ar_draws = (pooled_ar or {}).get("draws")
-    if ar_draws is not None:
-        for name in ("beta_d", "beta_alpha", "phi"):
-            if name in ar_draws.columns:
-                s = ar_draws[name]
-                lines.append(
-                    f"- `{name}`: mean={s.mean():.3f}, "
-                    f"90% CI [{s.quantile(0.05):.3f}, {s.quantile(0.95):.3f}]"
-                )
-        bd = ar_draws["beta_d"] if "beta_d" in ar_draws.columns else None
-        ba = ar_draws["beta_alpha"] if "beta_alpha" in ar_draws.columns else None
-        if bd is not None and ba is not None:
-            bd_ok = float(bd.quantile(0.05)) > 0 or float(bd.quantile(0.95)) < 0
-            ba_ok = float(ba.quantile(0.05)) > 0 or float(ba.quantile(0.95)) < 0
-            lines.append("")
-            lines.append(
-                f"- dose slope excludes 0 at 90%?: **{'yes' if bd_ok else 'no'}**; "
-                f"alpha slope excludes 0 at 90%?: **{'yes' if ba_ok else 'no'}**"
-            )
-            lines.append(
-                f"- engine: `{(pooled_ar or {}).get('engine', 'unknown')}`"
-            )
-    else:
-        lines.append(
-            f"- AR fit status: {(pooled_ar or {}).get('status')} "
-            f"({(pooled_ar or {}).get('reason', '')})"
-        )
-
-    lines.extend(["", "## Latent recovery vs truth", "", "| vector | true dose | post dose (q50) | in 90% CI? | true α | post α (q50) | in 90% CI? |", "|---|---:|---:|---:|---:|---:|---:|"])
-    for r in recovery:
-        lines.append(
-            f"| {r['parameter_vector']} | {r.get('true_dose_adj')} | "
-            f"{r.get('post_dose_adj_q50', float('nan')):.3f} | "
-            f"{r.get('truth_in_90ci_dose_adj', '')} | "
-            f"{r.get('true_alpha_c')} | "
-            f"{r.get('post_alpha_c_q50', float('nan')):.3f} | "
-            f"{r.get('truth_in_90ci_alpha_c', '')} |"
-        )
-
+    lines.extend(_key_contrast_lines(agg))
+    lines.extend(_stage_a_lines(pooled))
+    lines.extend(_stage_b_lines(pooled_ar))
+    lines.extend(_recovery_table_lines(recovery))
     lines.extend(["", "## Figures", ""])
     for n in fig_names:
         lines.append(f"- `figures/{n}`")

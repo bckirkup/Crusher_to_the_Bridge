@@ -122,22 +122,10 @@ def encode_trigger_status(status: Any) -> int:
     return TRIGGER_NONE
 
 
-def compute_derived_metrics(
-    timeseries: list[dict[str, Any]], num_agents: int
-) -> dict[str, Any]:
-    """Compute publication-ready scalar metrics from an epoch time series.
-
-    Mirrors ``campaign_runner.compute_derived_metrics`` so bundle regeneration
-    matches runner-embedded ``derived`` blocks when those are absent.
-    """
-    if not timeseries:
-        return {}
-
-    infected_by_epoch = [int(e.get("infected", 0) or 0) for e in timeseries]
-    peak_infected = max(infected_by_epoch)
-    peak_epoch = infected_by_epoch.index(peak_infected)
-
-    final = timeseries[-1]
+def _complement_fields(
+    final: dict[str, Any], num_agents: int
+) -> tuple[Any, Any, bool]:
+    """Validate role complements; return (passenger, crew, present)."""
     passenger_complement = final.get("passenger_complement")
     crew_complement = final.get("crew_complement")
     complements_present = (
@@ -156,14 +144,12 @@ def compute_derived_metrics(
             "timeseries role complements must be positive integers summing "
             f"to num_agents ({num_agents})",
         )
-    recovered = int(final.get("recovered", 0) or 0)
-    infected_final = int(final.get("infected", 0) or 0)
-    ever_infected = infected_final + recovered
-    attack_rate = ever_infected / num_agents if num_agents > 0 else 0.0
-    # Takeoff vs fizzle: VSP onset while incidence still accelerating.
-    outbreak_occurred = epidemic_took_off(timeseries)
-    seeded = seed_established(ever_infected)
+    return passenger_complement, crew_complement, complements_present
 
+
+def _detection_epochs(
+    timeseries: list[dict[str, Any]],
+) -> tuple[Any, Any]:
     detection_epoch = None
     confirmation_epoch = None
     for e in timeseries:
@@ -172,16 +158,87 @@ def compute_derived_metrics(
             detection_epoch = e.get("epoch")
         if status == "CONFIRMED" and confirmation_epoch is None:
             confirmation_epoch = e.get("epoch")
+    return detection_epoch, confirmation_epoch
+
+
+def _r_effective_at_peak(
+    timeseries: list[dict[str, Any]],
+    infected_by_epoch: list[int],
+    peak_epoch: int,
+) -> float | None:
+    if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
+        new_at_peak = int(timeseries[peak_epoch].get("new_infections", 0) or 0)
+        return new_at_peak / infected_by_epoch[peak_epoch - 1]
+    return None
+
+
+def compute_derived_metrics(
+    timeseries: list[dict[str, Any]], num_agents: int
+) -> dict[str, Any]:
+    """Compute publication-ready scalar metrics from an epoch time series.
+
+    Mirrors ``campaign_runner.compute_derived_metrics`` so bundle regeneration
+    matches runner-embedded ``derived`` blocks when those are absent.
+    """
+    if not timeseries:
+        return {}
+
+    infected_by_epoch = [int(e.get("infected", 0) or 0) for e in timeseries]
+    peak_infected = max(infected_by_epoch)
+    peak_epoch = infected_by_epoch.index(peak_infected)
+
+    final = timeseries[-1]
+    (
+        passenger_complement,
+        crew_complement,
+        complements_present,
+    ) = _complement_fields(final, num_agents)
+    recovered = int(final.get("recovered", 0) or 0)
+    infected_final = int(final.get("infected", 0) or 0)
+    ever_infected = infected_final + recovered
+    attack_rate = ever_infected / num_agents if num_agents > 0 else 0.0
+    # Takeoff vs fizzle: VSP onset while incidence still accelerating.
+    outbreak_occurred = epidemic_took_off(timeseries)
+    seeded = seed_established(ever_infected)
+
+    detection_epoch, confirmation_epoch = _detection_epochs(timeseries)
 
     total_quarantine_epochs = sum(int(e.get("quarantined", 0) or 0) for e in timeseries)
 
-    r_eff_at_peak = None
-    if peak_epoch > 0 and infected_by_epoch[peak_epoch - 1] > 0:
-        new_at_peak = int(timeseries[peak_epoch].get("new_infections", 0) or 0)
-        r_eff_at_peak = new_at_peak / infected_by_epoch[peak_epoch - 1]
+    r_eff_at_peak = _r_effective_at_peak(timeseries, infected_by_epoch, peak_epoch)
 
+    detection_lag = (
+        peak_epoch - detection_epoch if detection_epoch is not None else None
+    )
+    r_eff_rounded = (
+        round(r_eff_at_peak, 3) if r_eff_at_peak is not None else None
+    )
+    final_susceptible_fraction = round(
+        int(final.get("susceptible", 0) or 0) / max(num_agents, 1),
+        4,
+    )
     derived = {
         "attack_rate": round(attack_rate, 4),
+        **_role_rate_fields(final),
+        "peak_prevalence": peak_infected,
+        "peak_epoch": peak_epoch,
+        "outbreak_occurred": outbreak_occurred,
+        "seed_established": seeded,
+        "detection_epoch": detection_epoch,
+        "confirmation_epoch": confirmation_epoch,
+        "detection_lag": detection_lag,
+        "total_quarantine_person_epochs": total_quarantine_epochs,
+        "r_effective_at_peak": r_eff_rounded,
+        "final_susceptible_fraction": final_susceptible_fraction,
+    }
+    if complements_present:
+        derived["passenger_complement"] = passenger_complement
+        derived["crew_complement"] = crew_complement
+    return derived
+
+
+def _role_rate_fields(final: dict[str, Any]) -> dict[str, Any]:
+    return {
         "infection_attack_rate_passenger": round(
             float(final.get("infection_attack_rate_passenger", 0.0) or 0.0),
             4,
@@ -196,28 +253,7 @@ def compute_derived_metrics(
         "reported_case_attack_rate_crew": round(
             float(final.get("reported_case_rate_crew", 0.0) or 0.0), 4,
         ),
-        "peak_prevalence": peak_infected,
-        "peak_epoch": peak_epoch,
-        "outbreak_occurred": outbreak_occurred,
-        "seed_established": seeded,
-        "detection_epoch": detection_epoch,
-        "confirmation_epoch": confirmation_epoch,
-        "detection_lag": (
-            peak_epoch - detection_epoch if detection_epoch is not None else None
-        ),
-        "total_quarantine_person_epochs": total_quarantine_epochs,
-        "r_effective_at_peak": (
-            round(r_eff_at_peak, 3) if r_eff_at_peak is not None else None
-        ),
-        "final_susceptible_fraction": round(
-            int(final.get("susceptible", 0) or 0) / max(num_agents, 1),
-            4,
-        ),
     }
-    if complements_present:
-        derived["passenger_complement"] = passenger_complement
-        derived["crew_complement"] = crew_complement
-    return derived
 
 
 def _cost_fields(summary: dict[str, Any], timeseries: list[dict[str, Any]]) -> tuple[Any, Any]:
@@ -233,6 +269,60 @@ def _cost_fields(summary: dict[str, Any], timeseries: list[dict[str, Any]]) -> t
     return usd, ois
 
 
+def _derived_row_fields(
+    derived: dict[str, Any], usd: Any, ois: Any
+) -> dict[str, Any]:
+    return {
+        "attack_rate": derived.get("attack_rate"),
+        "passenger_complement": derived.get("passenger_complement"),
+        "crew_complement": derived.get("crew_complement"),
+        "outbreak_occurred": derived.get("outbreak_occurred"),
+        "peak_prevalence": derived.get("peak_prevalence"),
+        "peak_epoch": derived.get("peak_epoch"),
+        "detection_epoch": derived.get("detection_epoch"),
+        "confirmation_epoch": derived.get("confirmation_epoch"),
+        "detection_lag": derived.get("detection_lag"),
+        "total_quarantine_person_epochs": derived.get(
+            "total_quarantine_person_epochs"
+        ),
+        "r_effective_at_peak": derived.get("r_effective_at_peak"),
+        "final_susceptible_fraction": derived.get("final_susceptible_fraction"),
+        "cumulative_cost_usd": usd,
+        "cumulative_ois": ois,
+        "infection_attack_rate_passenger": derived.get(
+            "infection_attack_rate_passenger",
+        ),
+        "infection_attack_rate_crew": derived.get(
+            "infection_attack_rate_crew",
+        ),
+        "ever_ill_attack_rate_crew": derived.get(
+            "ever_ill_attack_rate_crew",
+        ),
+        "reported_case_attack_rate_crew": derived.get(
+            "reported_case_attack_rate_crew",
+        ),
+    }
+
+
+def _fill_initial_infected(
+    row: dict[str, Any],
+    payload: dict[str, Any],
+    params: dict[str, Any],
+    timeseries: list[dict[str, Any]],
+) -> None:
+    """Fill introductions k from epoch-0 prevalence when not in parameters."""
+    if row.get("initial_infected") not in (None, ""):
+        return
+    run_spec = payload.get("run_spec")
+    row["initial_infected"] = resolve_initial_infected(
+        parameters=params,
+        run_spec=run_spec if isinstance(run_spec, dict) else {},
+        run_id=str(row.get("run_id") or ""),
+        timeseries=timeseries,
+        initiation=payload.get("initiation"),
+    )
+
+
 def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
     """Build one ``run_summary.csv`` row from a loaded run zip payload."""
     summary = payload.get("summary") or {}
@@ -240,12 +330,17 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(timeseries, list):
         timeseries = []
     params = summary.get("parameters") or {}
+    if not isinstance(params, dict):
+        params = {}
+    run_spec = payload.get("run_spec")
+    if not isinstance(run_spec, dict):
+        run_spec = {}
     derived = dict(summary.get("derived") or {})
 
     factors = extract_factors(
         run_id=str(payload.get("run_id") or summary.get("run_id") or ""),
-        parameters=params if isinstance(params, dict) else {},
-        run_spec=payload.get("run_spec") if isinstance(payload.get("run_spec"), dict) else {},
+        parameters=params,
+        run_spec=run_spec,
         summary=summary if isinstance(summary, dict) else {},
     )
     num_agents = int(factors.get("num_agents") or 0)
@@ -258,50 +353,9 @@ def build_run_summary_row(payload: dict[str, Any]) -> dict[str, Any]:
 
     usd, ois = _cost_fields(summary, timeseries)
     row = {c: factors.get(c) for c in RUN_SUMMARY_COLUMNS}
-    row.update(
-        {
-            "attack_rate": derived.get("attack_rate"),
-            "passenger_complement": derived.get("passenger_complement"),
-            "crew_complement": derived.get("crew_complement"),
-            "outbreak_occurred": derived.get("outbreak_occurred"),
-            "peak_prevalence": derived.get("peak_prevalence"),
-            "peak_epoch": derived.get("peak_epoch"),
-            "detection_epoch": derived.get("detection_epoch"),
-            "confirmation_epoch": derived.get("confirmation_epoch"),
-            "detection_lag": derived.get("detection_lag"),
-            "total_quarantine_person_epochs": derived.get(
-                "total_quarantine_person_epochs"
-            ),
-            "r_effective_at_peak": derived.get("r_effective_at_peak"),
-            "final_susceptible_fraction": derived.get("final_susceptible_fraction"),
-            "cumulative_cost_usd": usd,
-            "cumulative_ois": ois,
-            "infection_attack_rate_passenger": derived.get(
-                "infection_attack_rate_passenger",
-            ),
-            "infection_attack_rate_crew": derived.get(
-                "infection_attack_rate_crew",
-            ),
-            "ever_ill_attack_rate_crew": derived.get(
-                "ever_ill_attack_rate_crew",
-            ),
-            "reported_case_attack_rate_crew": derived.get(
-                "reported_case_attack_rate_crew",
-            ),
-        }
-    )
+    row.update(_derived_row_fields(derived, usd, ois))
     row["run_id"] = factors["run_id"]
-    # Fill introductions k from epoch-0 prevalence when not in parameters.
-    if row.get("initial_infected") in (None, ""):
-        row["initial_infected"] = resolve_initial_infected(
-            parameters=params if isinstance(params, dict) else {},
-            run_spec=payload.get("run_spec")
-            if isinstance(payload.get("run_spec"), dict)
-            else {},
-            run_id=str(row.get("run_id") or ""),
-            timeseries=timeseries,
-            initiation=payload.get("initiation"),
-        )
+    _fill_initial_infected(row, payload, params, timeseries)
     return row
 
 

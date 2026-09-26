@@ -749,6 +749,31 @@ def run_simulation(
     prepare_output_directory(run_dir, allowed_roots=roots)
 
     # Always copy so we can set retention / telemetry paths without mutating caller.
+    spec = _telemetry_run_spec(spec, run_dir, full_telemetry)
+    _arm_sentinel_line_list(spec, run_dir)
+    _arm_lineage_census(spec, run_dir)
+
+    spec_path = resolve_child_path(run_dir, "run_spec.json")
+    with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(spec, fh, indent=2)
+
+    try:
+        _run_and_write_outputs(
+            spec_path, spec, run_dir, roots, safe_id, full_telemetry,
+        )
+        _zip_and_accumulate(
+            run_dir, root_str, roots, safe_id, accumulation_suffix, keep_workdir,
+        )
+        return True
+
+    except Exception as exc:
+        _write_run_error(run_dir, roots, exc)
+        return False
+
+
+def _telemetry_run_spec(
+    spec: dict[str, Any], run_dir: str, full_telemetry: bool
+) -> dict[str, Any]:
     spec = dict(spec)
     spec["run"] = dict(spec.get("run") or {})
     if full_telemetry:
@@ -767,106 +792,131 @@ def run_simulation(
         # Campaign default: compact in-RAM history (summary / spaces / cost only).
         spec["run"].setdefault("history_retention", "compact")
         spec["run"].setdefault("write_ground_truth", False)
-    _arm_sentinel_line_list(spec, run_dir)
-    _arm_lineage_census(spec, run_dir)
+    return spec
 
-    spec_path = resolve_child_path(run_dir, "run_spec.json")
-    with validated_open(spec_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-        json.dump(spec, fh, indent=2)
 
-    try:
-        from picard_framework.run_spec import PicardRunSpec
-        from picard_framework.simulation.ship_simulation import ShipSimulation
+def _run_and_write_outputs(
+    spec_path: str,
+    spec: dict[str, Any],
+    run_dir: str,
+    roots: tuple[str, ...],
+    safe_id: str,
+    full_telemetry: bool,
+) -> None:
+    from picard_framework.run_spec import PicardRunSpec
+    from picard_framework.simulation.ship_simulation import ShipSimulation
 
-        picard_spec = PicardRunSpec.from_picard_json(_cr._REPO_ROOT_STR, spec_path)
-        sim = ShipSimulation(picard_spec, display=False)
-        result = sim.run()
-        if full_telemetry:
-            sim.finalize(display=False)
+    picard_spec = PicardRunSpec.from_picard_json(_cr._REPO_ROOT_STR, spec_path)
+    sim = ShipSimulation(picard_spec, display=False)
+    result = sim.run()
+    if full_telemetry:
+        sim.finalize(display=False)
 
-        profiles_path = resolve_child_path(
-            run_dir, "resolved_pathogen_profiles.json",
-        )
-        with validated_open(
-            profiles_path, "w", allowed_roots=roots, encoding="utf-8",
-        ) as fh:
-            json.dump(
-                {
-                    "pathogen_ids": sorted(sim.pathogen_profiles),
-                    "profiles": sim.pathogen_profiles,
-                    # How this run started: a drawn boarding cohort, explicit
-                    # seeds, both, or the legacy per-profile index case. The
-                    # key always exists, so analysis never has to infer it.
-                    "initiation": getattr(
-                        getattr(sim, "engine", None),
-                        "initiation_manifest",
-                        None,
-                    ) or dict(LEGACY_MANIFEST),
-                },
-                fh,
-                indent=2,
-            )
+    _write_resolved_profiles(run_dir, roots, sim)
+    _write_timeseries_and_summary(run_dir, roots, safe_id, spec, sim, result)
 
-        last = result.history[-1] if result.history else {}
-        ts = extract_timeseries(result.history)
-        ts_path = resolve_child_path(run_dir, "timeseries.json")
-        with validated_open(ts_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-            json.dump(ts, fh)
 
-        from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (
-            provenance_flags,
+def _write_resolved_profiles(run_dir: str, roots: tuple[str, ...], sim: Any) -> None:
+    profiles_path = resolve_child_path(
+        run_dir, "resolved_pathogen_profiles.json",
+    )
+    with validated_open(
+        profiles_path, "w", allowed_roots=roots, encoding="utf-8",
+    ) as fh:
+        json.dump(
+            {
+                "pathogen_ids": sorted(sim.pathogen_profiles),
+                "profiles": sim.pathogen_profiles,
+                # How this run started: a drawn boarding cohort, explicit
+                # seeds, both, or the legacy per-profile index case. The
+                # key always exists, so analysis never has to infer it.
+                "initiation": getattr(
+                    getattr(sim, "engine", None),
+                    "initiation_manifest",
+                    None,
+                ) or dict(LEGACY_MANIFEST),
+            },
+            fh,
+            indent=2,
         )
 
-        summary = {
-            "run_id": safe_id,
-            "parameters": _cr.parameters_from_spec(spec),
-            "num_epochs": result.num_epochs,
-            "trigger_status": result.final_trigger_status,
-            "pathogen_ids": sorted(sim.pathogen_profiles),
-            "summary": last.get("summary", {}),
-            "cost_accounting": last.get("cost_accounting", {}),
-            "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
-            "provenance_flags": provenance_flags(
-                spec, sim.cfg, sim.pathogen_profiles,
-            ),
-        }
-        summary_path = resolve_child_path(run_dir, "summary.json")
-        with validated_open(summary_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-            json.dump(summary, fh, indent=2)
 
-        zip_name = validate_path_component(f"{safe_id}.zip", label="zip artifact")
-        zip_path = resolve_child_path(root_str, zip_name)
-        with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-            for dirpath, _dirnames, filenames in os.walk(run_dir):
-                for fname in filenames:
-                    fpath = os.path.join(dirpath, fname)
-                    zf.write(fpath, os.path.relpath(fpath, run_dir))
-        accumulation_base = confine_to_base(
-            root_str, os.path.join(root_str, "_shard_runs"),
-        )
-        prepare_output_directory(accumulation_base, allowed_roots=roots)
-        accumulation_root = resolve_child_path(
-            accumulation_base,
-            validate_path_component(
-                accumulation_suffix, label="shard suffix",
-            ),
-        )
-        prepare_output_directory(accumulation_root, allowed_roots=roots)
-        accumulation_dir = resolve_child_path(accumulation_root, safe_id)
-        if os.path.isdir(accumulation_dir):
-            shutil.rmtree(accumulation_dir)
-        if keep_workdir:
-            shutil.copytree(run_dir, accumulation_dir)
-        else:
-            shutil.move(run_dir, accumulation_dir)
-        return True
+def _write_timeseries_and_summary(
+    run_dir: str,
+    roots: tuple[str, ...],
+    safe_id: str,
+    spec: dict[str, Any],
+    sim: Any,
+    result: Any,
+) -> None:
+    last = result.history[-1] if result.history else {}
+    ts = extract_timeseries(result.history)
+    ts_path = resolve_child_path(run_dir, "timeseries.json")
+    with validated_open(ts_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(ts, fh)
 
-    except Exception as exc:
-        err_path = resolve_child_path(run_dir, "error.txt")
-        with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
-            fh.write(f"{type(exc).__name__}: {exc}\n")
-            fh.write(traceback.format_exc())
-        return False
+    from picard_framework.runs.mega_cruise_campaign.sourced_window_flags import (
+        provenance_flags,
+    )
+
+    summary = {
+        "run_id": safe_id,
+        "parameters": _cr.parameters_from_spec(spec),
+        "num_epochs": result.num_epochs,
+        "trigger_status": result.final_trigger_status,
+        "pathogen_ids": sorted(sim.pathogen_profiles),
+        "summary": last.get("summary", {}),
+        "cost_accounting": last.get("cost_accounting", {}),
+        "derived": compute_derived_metrics(ts, _spec_num_agents(spec)),
+        "provenance_flags": provenance_flags(
+            spec, sim.cfg, sim.pathogen_profiles,
+        ),
+    }
+    summary_path = resolve_child_path(run_dir, "summary.json")
+    with validated_open(summary_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        json.dump(summary, fh, indent=2)
+
+
+def _zip_and_accumulate(
+    run_dir: str,
+    root_str: str,
+    roots: tuple[str, ...],
+    safe_id: str,
+    accumulation_suffix: str,
+    keep_workdir: bool,
+) -> None:
+    zip_name = validate_path_component(f"{safe_id}.zip", label="zip artifact")
+    zip_path = resolve_child_path(root_str, zip_name)
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for dirpath, _dirnames, filenames in os.walk(run_dir):
+            for fname in filenames:
+                fpath = os.path.join(dirpath, fname)
+                zf.write(fpath, os.path.relpath(fpath, run_dir))
+    accumulation_base = confine_to_base(
+        root_str, os.path.join(root_str, "_shard_runs"),
+    )
+    prepare_output_directory(accumulation_base, allowed_roots=roots)
+    accumulation_root = resolve_child_path(
+        accumulation_base,
+        validate_path_component(
+            accumulation_suffix, label="shard suffix",
+        ),
+    )
+    prepare_output_directory(accumulation_root, allowed_roots=roots)
+    accumulation_dir = resolve_child_path(accumulation_root, safe_id)
+    if os.path.isdir(accumulation_dir):
+        shutil.rmtree(accumulation_dir)
+    if keep_workdir:
+        shutil.copytree(run_dir, accumulation_dir)
+    else:
+        shutil.move(run_dir, accumulation_dir)
+
+
+def _write_run_error(run_dir: str, roots: tuple[str, ...], exc: Exception) -> None:
+    err_path = resolve_child_path(run_dir, "error.txt")
+    with validated_open(err_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
+        fh.write(f"{type(exc).__name__}: {exc}\n")
+        fh.write(traceback.format_exc())
 
 
 def _poll_child(proc: subprocess.Popen[str], timeout: int) -> tuple[bool, int | None]:
@@ -1517,13 +1567,7 @@ def _resolve_stop_rule(
 def main(argv: list[str] | None = None) -> int:
     args = _campaign_parser().parse_args(argv)
     if args.single:
-        spec_path, outdir = args.single
-        return _run_single(
-            spec_path, outdir,
-            full_telemetry=args.full_telemetry,
-            keep_workdir=args.keep_workdir,
-            accumulation_suffix=args.accumulation_suffix,
-        )
+        return _single_run(args)
     if args.output_dir is not None:
         _cr.set_output_root(args.output_dir)
     _apply_smoke_defaults(args)
@@ -1537,13 +1581,7 @@ def main(argv: list[str] | None = None) -> int:
     shard_count, shard_index = _resolve_shard(args)
     uploader = S3Uploader(args.s3_prefix) if args.s3_prefix else None
     bundle = ShardBundle(shard_index, shard_count)
-    if args.resume or args.retry_failed:
-        bundle.load_local_manifest()
-    if uploader is not None and (args.resume or args.retry_failed):
-        _download_completed_log(uploader, shard_index, shard_count)
-        bundle.download(uploader)
-    done = _cr.completed_runs() if (args.resume or args.retry_failed) else set()
-    retry_only = _cr.failed_runs() if args.retry_failed else None
+    done, retry_only = _resume_state(args, uploader, shard_index, shard_count, bundle)
     if args.retry_failed and not retry_only:
         print(f"  --retry-failed: {_cr.FAILED_RUNS_FILENAME} is empty; nothing to retry.")
         return 0
@@ -1554,15 +1592,7 @@ def main(argv: list[str] | None = None) -> int:
     all_runs = order_runs(_collect_all_runs(manifest, tiers, args), args.order)
     if args.order != ORDER_MANIFEST:
         print(f"\n  Global run order: {args.order} (shard-independent)")
-    shard_total = sum(
-        1 for gi in range(len(all_runs))
-        if shard_count is None or gi % shard_count == shard_index
-    )
-    if shard_count is not None:
-        print(
-            f"\n  Shard {shard_index}/{shard_count}: "
-            f"{shard_total} of {len(all_runs)} runs assigned to this shard",
-        )
+    shard_total = _shard_assigned_count(all_runs, shard_count, shard_index)
     if args.dry_run:
         return _print_dry_run(
             all_runs, tiers, shard_count, shard_index, shard_total, order=args.order,
@@ -1581,6 +1611,48 @@ def main(argv: list[str] | None = None) -> int:
         t0=time.time(),
         stop_rule=stop_rule,
     )
+
+
+def _single_run(args: argparse.Namespace) -> int:
+    spec_path, outdir = args.single
+    return _run_single(
+        spec_path, outdir,
+        full_telemetry=args.full_telemetry,
+        keep_workdir=args.keep_workdir,
+        accumulation_suffix=args.accumulation_suffix,
+    )
+
+
+def _resume_state(
+    args: argparse.Namespace,
+    uploader: S3Uploader | None,
+    shard_index: int,
+    shard_count: int | None,
+    bundle: ShardBundle,
+) -> tuple[set[str], Any]:
+    if args.resume or args.retry_failed:
+        bundle.load_local_manifest()
+    if uploader is not None and (args.resume or args.retry_failed):
+        _download_completed_log(uploader, shard_index, shard_count)
+        bundle.download(uploader)
+    done = _cr.completed_runs() if (args.resume or args.retry_failed) else set()
+    retry_only = _cr.failed_runs() if args.retry_failed else None
+    return done, retry_only
+
+
+def _shard_assigned_count(
+    all_runs: list[Any], shard_count: int | None, shard_index: int
+) -> int:
+    shard_total = sum(
+        1 for gi in range(len(all_runs))
+        if shard_count is None or gi % shard_count == shard_index
+    )
+    if shard_count is not None:
+        print(
+            f"\n  Shard {shard_index}/{shard_count}: "
+            f"{shard_total} of {len(all_runs)} runs assigned to this shard",
+        )
+    return shard_total
 
 
 def _resume_log_key(shard_index: int, shard_count: int | None) -> str:

@@ -55,18 +55,12 @@ def index_axis_size(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
 
 def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
     """Arithmetic run count for one tier (generator-aware for sr/vd/vs)."""
-    tid_hint = ""
-    for k, v in (manifest.get("tiers") or {}).items():
-        if v is tier:
-            tid_hint = k
-            break
+    tid_hint = _tier_id_hint(manifest, tier)
 
     if tid_hint.startswith("vs") or "voyage_days" in tier:
         return variant_campaign.tier_run_count(manifest, tier)
 
-    plats = tier.get("platforms") or (
-        [tier["platform"]] if "platform" in tier else [manifest["platform"]]
-    )
+    plats = _tier_platforms(manifest, tier)
     surv = tier.get("surveillance_strategies") or [tier.get("surveillance", "none")]
     seeds = tier["seeds"]
 
@@ -78,14 +72,18 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
         return len(plats) * n_vec * len(surv) * len(seeds)
 
     if tid_hint.startswith("vd") or "factor" in tier or "factors" in tier:
-        if "factor" in tier and "values" in tier:
-            n_knobs = len(tier["values"])
-        elif "factors" in tier:
-            n_knobs = math.prod(len(v) for v in tier["factors"].values())
-        else:
-            n_knobs = 1
-        return len(plats) * n_knobs * len(surv) * len(seeds)
+        return len(plats) * _vd_factor_count(tier) * len(surv) * len(seeds)
 
+    return _default_axis_count(manifest, tier, plats, surv, seeds)
+
+
+def _default_axis_count(
+    manifest: dict[str, Any],
+    tier: dict[str, Any],
+    plats: list[Any],
+    surv: list[Any],
+    seeds: list[Any],
+) -> int:
     doses = tier.get("dose_adjustments") or [tier.get("dose_adjustment")]
     imm = tier.get("pre_immunity_fractions") or [None]
     dens = tier.get("density_exponents") or [None]
@@ -102,6 +100,27 @@ def tier_cartesian(manifest: dict[str, Any], tier: dict[str, Any]) -> int:
         * len(surv)
         * len(seeds)
     )
+
+
+def _tier_id_hint(manifest: dict[str, Any], tier: dict[str, Any]) -> str:
+    for k, v in (manifest.get("tiers") or {}).items():
+        if v is tier:
+            return k
+    return ""
+
+
+def _tier_platforms(manifest: dict[str, Any], tier: dict[str, Any]) -> list[Any]:
+    return tier.get("platforms") or (
+        [tier["platform"]] if "platform" in tier else [manifest["platform"]]
+    )
+
+
+def _vd_factor_count(tier: dict[str, Any]) -> int:
+    if "factor" in tier and "values" in tier:
+        return len(tier["values"])
+    if "factors" in tier:
+        return math.prod(len(v) for v in tier["factors"].values())
+    return 1
 
 
 def summarize(manifest: dict[str, Any]) -> tuple[int, int]:

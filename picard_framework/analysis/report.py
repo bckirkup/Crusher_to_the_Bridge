@@ -11,6 +11,7 @@ import argparse
 import csv
 import html
 import os
+from typing import Any
 
 from picard_framework.analysis._io import (
     allowed_roots,
@@ -67,14 +68,35 @@ def build_report(
     if parent:
         ensure_out_dir(parent)
 
-    aggregate = {}
-    agg_path = os.path.join(analysis_dir, "aggregate_metrics.json")
-    if os.path.isfile(agg_path):
-        aggregate = read_json(agg_path)
-
+    aggregate = _read_aggregate(analysis_dir)
     run_rows = _read_csv_rows(os.path.join(analysis_dir, "run_summary.csv"))
     pairwise = _read_csv_rows(os.path.join(analysis_dir, "pairwise_deltas.csv"))
 
+    posterior_bits, md_posterior = _posterior_sections(stan_fit_dir)
+
+    html_body = _html_document(
+        analysis_dir, aggregate, run_rows, pairwise, posterior_bits,
+    )
+
+    with validated_open(
+        out_path, "w", allowed_roots=allowed_roots(), encoding="utf-8"
+    ) as fh:
+        fh.write(html_body)
+
+    _write_markdown_sibling(out_path, aggregate, run_rows, md_posterior)
+    return out_path
+
+
+def _read_aggregate(analysis_dir: str) -> dict[str, Any]:
+    agg_path = os.path.join(analysis_dir, "aggregate_metrics.json")
+    if os.path.isfile(agg_path):
+        return read_json(agg_path)
+    return {}
+
+
+def _posterior_sections(
+    stan_fit_dir: str | None,
+) -> tuple[list[str], list[str]]:
     posterior_bits: list[str] = []
     md_posterior: list[str] = []
     if stan_fit_dir:
@@ -104,7 +126,16 @@ def build_report(
                     "| " + " | ".join(str(row.get(c, "")) for c in row) + " |\n"
                 )
             md_posterior.append("\n")
+    return posterior_bits, md_posterior
 
+
+def _html_document(
+    analysis_dir: str,
+    aggregate: dict[str, Any],
+    run_rows: list[dict[str, Any]],
+    pairwise: list[dict[str, Any]],
+    posterior_bits: list[str],
+) -> str:
     figures = [
         "figures/dose_response.png",
         "figures/surveillance_heatmap.png",
@@ -114,7 +145,7 @@ def build_report(
     ]
     fig_html = "".join(_img_tag(analysis_dir, rel) for rel in figures)
 
-    html_body = f"""<!DOCTYPE html>
+    return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
@@ -159,11 +190,13 @@ code {{ background: #f0f0f0; padding: 0.1rem 0.3rem; }}
 </html>
 """
 
-    with validated_open(
-        out_path, "w", allowed_roots=allowed_roots(), encoding="utf-8"
-    ) as fh:
-        fh.write(html_body)
 
+def _write_markdown_sibling(
+    out_path: str,
+    aggregate: dict[str, Any],
+    run_rows: list[dict[str, Any]],
+    md_posterior: list[str],
+) -> None:
     md_path = out_path.rsplit(".", 1)[0] + ".md" if "." in os.path.basename(out_path) else out_path + ".md"
     md_lines = [
         "# Campaign Analysis Report\n\n",
@@ -182,8 +215,6 @@ code {{ background: #f0f0f0; padding: 0.1rem 0.3rem; }}
         md_path, "w", allowed_roots=allowed_roots(), encoding="utf-8"
     ) as fh:
         fh.writelines(md_lines)
-
-    return out_path
 
 
 def main(argv: list[str] | None = None) -> int:

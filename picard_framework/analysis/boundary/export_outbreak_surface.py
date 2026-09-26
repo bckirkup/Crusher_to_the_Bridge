@@ -245,15 +245,7 @@ def aggregate_outbreak_surface(
     use_cost_formula_if_missing: bool = True,
 ) -> list[dict[str, Any]]:
     """Aggregate per-run rows into outbreak_surface table rows."""
-    buckets: dict[tuple[str, str, str, int], list[dict[str, Any]]] = defaultdict(list)
-    for row in run_rows:
-        key = (
-            str(row["platform_class"]),
-            str(row["pathogen"]),
-            str(row["baseline_response"]),
-            int(row["k"]),
-        )
-        buckets[key].append(row)
+    buckets = _surface_buckets(run_rows)
 
     out: list[dict[str, Any]] = []
     curve_keys = {(p, path, resp) for p, path, resp, _k in buckets}
@@ -262,62 +254,15 @@ def aggregate_outbreak_surface(
         group = buckets[(platform, pathogen, response, k)]
         if len(group) < min_runs:
             continue
-        n = len(group)
-        p_trigger = sum(1 for r in group if r["triggered"]) / n
-        e_ar = sum(float(r["attack_rate"]) for r in group) / n
-        p_accel = sum(1 for r in group if r["took_off"]) / n
-        peaks = [r["peak_epoch"] for r in group if r.get("peak_epoch") is not None]
-        e_peak = sum(peaks) / len(peaks) if peaks else None
-        costs = [
-            r["cumulative_cost_usd"]
-            for r in group
-            if r.get("cumulative_cost_usd") is not None
-        ]
-        if costs:
-            e_cost = sum(costs) / len(costs)
-        elif use_cost_formula_if_missing:
-            n_agents = int(
-                round(sum(int(r.get("num_agents") or 0) for r in group) / n)
-            )
-            e_cost = formula_onboard_cost(
-                p_trigger=p_trigger, e_ar=e_ar, n_agents=n_agents
-            )
-        else:
-            e_cost = 0.0
         out.append(
-            {
-                "platform_class": platform,
-                "pathogen": pathogen,
-                "baseline_response": response,
-                "k": k,
-                "P_trigger": round(p_trigger, 6),
-                "E_AR": round(e_ar, 6),
-                "P_accel": round(p_accel, 6),
-                "E_cost_onboard": round(float(e_cost), 2),
-                "E_peak_epoch": round(e_peak, 3) if e_peak is not None else "",
-                "n_runs": n,
-            }
+            _aggregate_surface_cell(
+                platform, pathogen, response, k, group,
+                use_cost_formula_if_missing=use_cost_formula_if_missing,
+            )
         )
 
     if include_k0:
-        have_k0 = {(r["platform_class"], r["pathogen"], r["baseline_response"]) for r in out if int(r["k"]) == 0}
-        for platform, pathogen, response in sorted(curve_keys):
-            if (platform, pathogen, response) in have_k0:
-                continue
-            out.append(
-                {
-                    "platform_class": platform,
-                    "pathogen": pathogen,
-                    "baseline_response": response,
-                    "k": 0,
-                    "P_trigger": 0.0,
-                    "E_AR": 0.0,
-                    "P_accel": 0.0,
-                    "E_cost_onboard": 0.0,
-                    "E_peak_epoch": "",
-                    "n_runs": 0,
-                }
-            )
+        out.extend(_k0_stub_rows(curve_keys, out))
 
     out.sort(
         key=lambda r: (
@@ -328,6 +273,105 @@ def aggregate_outbreak_surface(
         )
     )
     return out
+
+
+def _surface_buckets(
+    run_rows: Sequence[dict[str, Any]],
+) -> dict[tuple[str, str, str, int], list[dict[str, Any]]]:
+    buckets: dict[tuple[str, str, str, int], list[dict[str, Any]]] = defaultdict(list)
+    for row in run_rows:
+        key = (
+            str(row["platform_class"]),
+            str(row["pathogen"]),
+            str(row["baseline_response"]),
+            int(row["k"]),
+        )
+        buckets[key].append(row)
+    return buckets
+
+
+def _aggregate_surface_cell(
+    platform: str,
+    pathogen: str,
+    response: str,
+    k: int,
+    group: list[dict[str, Any]],
+    *,
+    use_cost_formula_if_missing: bool,
+) -> dict[str, Any]:
+    n = len(group)
+    p_trigger = sum(1 for r in group if r["triggered"]) / n
+    e_ar = sum(float(r["attack_rate"]) for r in group) / n
+    p_accel = sum(1 for r in group if r["took_off"]) / n
+    peaks = [r["peak_epoch"] for r in group if r.get("peak_epoch") is not None]
+    e_peak = sum(peaks) / len(peaks) if peaks else None
+    e_cost = _cell_cost(group, p_trigger, e_ar, use_cost_formula_if_missing)
+    return {
+        "platform_class": platform,
+        "pathogen": pathogen,
+        "baseline_response": response,
+        "k": k,
+        "P_trigger": round(p_trigger, 6),
+        "E_AR": round(e_ar, 6),
+        "P_accel": round(p_accel, 6),
+        "E_cost_onboard": round(float(e_cost), 2),
+        "E_peak_epoch": round(e_peak, 3) if e_peak is not None else "",
+        "n_runs": n,
+    }
+
+
+def _cell_cost(
+    group: list[dict[str, Any]],
+    p_trigger: float,
+    e_ar: float,
+    use_cost_formula_if_missing: bool,
+) -> float:
+    costs = [
+        r["cumulative_cost_usd"]
+        for r in group
+        if r.get("cumulative_cost_usd") is not None
+    ]
+    if costs:
+        return sum(costs) / len(costs)
+    if use_cost_formula_if_missing:
+        n = len(group)
+        n_agents = int(
+            round(sum(int(r.get("num_agents") or 0) for r in group) / n)
+        )
+        return formula_onboard_cost(
+            p_trigger=p_trigger, e_ar=e_ar, n_agents=n_agents
+        )
+    return 0.0
+
+
+def _k0_stub_rows(
+    curve_keys: set[tuple[str, str, str]],
+    out: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    have_k0 = {
+        (r["platform_class"], r["pathogen"], r["baseline_response"])
+        for r in out
+        if int(r["k"]) == 0
+    }
+    stubs: list[dict[str, Any]] = []
+    for platform, pathogen, response in sorted(curve_keys):
+        if (platform, pathogen, response) in have_k0:
+            continue
+        stubs.append(
+            {
+                "platform_class": platform,
+                "pathogen": pathogen,
+                "baseline_response": response,
+                "k": 0,
+                "P_trigger": 0.0,
+                "E_AR": 0.0,
+                "P_accel": 0.0,
+                "E_cost_onboard": 0.0,
+                "E_peak_epoch": "",
+                "n_runs": 0,
+            }
+        )
+    return stubs
 
 
 def surface_rows_to_json_payload(
