@@ -1,6 +1,9 @@
 """Tests for the api/ FastAPI simulation service.
 
-Skipped wholesale when the ``api`` extra (fastapi/uvicorn) is not installed.
+Opt-in only: each test spins real voyages, so the module is skipped during
+CI, routine ``pytest tests/``, and campaign work. Run it explicitly with
+``CTTB_API_TESTS=1 python3 -m pytest tests/test_api_service.py``.
+Also skipped when the ``api`` extra (fastapi/uvicorn) is not installed.
 """
 
 from __future__ import annotations
@@ -11,6 +14,11 @@ import time
 
 import pytest
 
+if not os.environ.get("CTTB_API_TESTS"):
+    pytest.skip(
+        "API service tests are opt-in (CTTB_API_TESTS=1); they run real voyages",
+        allow_module_level=True,
+    )
 pytest.importorskip("fastapi")
 
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
