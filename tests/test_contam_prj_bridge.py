@@ -260,13 +260,16 @@ class TestPrjRoundTrip:
     def test_path_map_includes_cross_and_adjacency(self) -> None:
         spatial, airflow = _destroyer_layout()
         _prj, path_map = contam_prj_bridge.export_prj_with_path_map(spatial, airflow)
-        kinds = {e["kind"] for e in path_map}
         assert any(e["crusher_transfer"] for e in path_map)
-        assert "cross_zone" in kinds or any(
-            e["kind"] not in ("ahs_oa", "ahs_exhaust", "ahs_recirc", "ahs_supply", "ahs_return")
-            and e["crusher_transfer"]
-            for e in path_map
-        )
+        non_ahs_kinds = {
+            "ahs_oa", "ahs_exhaust", "ahs_recirc", "ahs_supply", "ahs_return",
+        }
+        cross_or_non_ahs = [
+            e for e in path_map
+            if e["kind"] == "cross_zone"
+            or (e["kind"] not in non_ahs_kinds and e["crusher_transfer"])
+        ]
+        assert cross_or_non_ahs
         transfer = [e for e in path_map if e["crusher_transfer"]]
         assert len(transfer) >= len(airflow["adjacency"]) + len(airflow["cross_zone_links"])
 
@@ -311,3 +314,14 @@ class TestGeometryConsistencyCheck:
             report,
         )
         assert not report.warnings
+
+
+def test_interchange_platform_falls_back_on_all_comments() -> None:
+    from tools.contam_prj_bridge import _interchange_platform
+
+    assert _interchange_platform(
+        ["ContamW 3.4", "! comment", "", "   "],
+    ) == "imported_platform"
+    assert _interchange_platform(
+        ["ContamW 3.4", "! comment", "my_platform extra tokens"],
+    ) == "my_platform"
