@@ -1,0 +1,88 @@
+{
+  "campaign": "noro_rebase_01_canary",
+  "description": "NORO-REBASE-01 canary: the spirit_cruise_3000 12-day cell of noro_rebase_01 at seeds 8105-8124 (20 seeds). Highest pre-fix posting cell in the FLUSH-S4 `off` baseline (20 per 1,000 at 12d), so it is the cell most likely to expose a posting-regime change and the cheapest strong read on whether post-724 posting still fires. Gate before the array: pipeline end-to-end (run -> zip -> summary.json -> score_anchors) must parse clean and the posting field must be populated. Read out before the 16-run array is submitted.",
+  "platform": "classic_cruise_1900",
+  "default_epochs": 168,
+  "default_num_agents": 1910,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    }
+  },
+  "tiers": {
+    "fl_spr_12d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    }
+  }
+}

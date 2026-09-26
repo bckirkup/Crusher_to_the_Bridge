@@ -71,6 +71,7 @@ from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from engines.infection_dynamics_bridge import earliest_shed_epoch  # noqa: E402
 from picard_framework.covid_boarding_screen import (  # noqa: E402
     PATHOGEN_ID,
     QuarantineAttributionLedger,
@@ -103,33 +104,6 @@ def _infection_records(sim: Any, pathogen_id: str) -> dict[int, dict[str, Any]]:
             continue
         out[int(agent.agent_id)] = inf
     return out
-
-
-def _earliest_shed_epoch(
-    inf: dict[str, Any], infection_epoch: int, presymptomatic_epochs: int,
-    clock: Any,
-) -> int | None:
-    """First epoch this host could emit anything.
-
-    Shedding opens ``presymptomatic_shedding_days`` before onset; a host
-    that never presents sheds by the lazy incubation draw the same way.
-    Clamped at the acquisition epoch — a host cannot emit before it is
-    infected, however short its incubation draw sits inside the
-    presymptomatic window.
-    """
-    onset = inf.get("onset_time_infected")
-    incubation = inf.get("incubation_days")
-    if onset is not None:
-        start = int(infection_epoch) + int(onset) - presymptomatic_epochs
-    elif incubation is not None:
-        start = (
-            int(infection_epoch)
-            + int(round(clock.epochs_for_days(float(incubation))))
-            - presymptomatic_epochs
-        )
-    else:
-        return None
-    return max(int(infection_epoch), start)
 
 
 def analyse_seed(
@@ -199,7 +173,7 @@ def _postrun_readout(
         s for aid, inf in records.items()
         if aid not in seeded_ids
         for s in [
-            _earliest_shed_epoch(
+            earliest_shed_epoch(
                 inf, int(inf.get("infection_epoch") or 0), presymp_epochs,
                 clock,
             )
