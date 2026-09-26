@@ -3952,9 +3952,15 @@ its stable ID; pull requests must not append numbered items.
     samples are censored, never zeroed. v1 limitations, declared: no
     turnaround-queue entry (the assay reads immediately), no decay over
     the holding time, graywater sequencing untouched, capture only of
-    `non_touchable`. The change is additive and default-off: no dose,
+    `non_touchable`. The change is additive: no dose,
     rate, or RNG draw is touched, so no existing measurement is
     invalidated — the tank reads mass that was previously dropped.
+    **Update — default flipped:** the OVERRIDE-FLAGS-01 gate audit
+    flagged this pair as a measured mechanism resting default-off;
+    `transmission.blackwater_plumbing` now defaults `true` (`false` is
+    the labelled pre-change baseline, still bit-identical off).
+    `observation.wastewater_assay_mode` stays opt-in (`none`): it
+    changes the observation record, a separate decision.
 
 58. **`AERO-CABIN-06`: per-stateroom airborne pools now replace the
     cabin-compartment block pool.** Under `cabin_air_mode: cabin_compartment`,

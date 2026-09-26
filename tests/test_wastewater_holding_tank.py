@@ -374,13 +374,13 @@ class TestEmesisDrainRouting:
         ] == pytest.approx(record["non_touchable"] * 0.5)
 
 
-# ── Default-off ──────────────────────────────────────────────────────────
+# ── Default flip (blackwater on; labelled off baseline) ──────────────────
 
 
 class TestDefaultOff:
-    def test_no_tank_by_default_and_paired_run_is_identical(self) -> None:
-        """blackwater_tank is None unless the key is set; off vs absent are
-        bit-identical (the tank consumes no RNG)."""
+    def test_default_on_and_off_arm_is_paired_identical(self) -> None:
+        """blackwater_plumbing defaults on; the explicit-off baseline is
+        bit-identical to on (the tank consumes no RNG)."""
         def fingerprint(cfg_extra: dict | None) -> tuple[dict, dict, list[float]]:
             tx = {"sanitary_visit_mode": "dwell_weighted"}
             if cfg_extra:
@@ -421,14 +421,15 @@ class TestDefaultOff:
             tail = [float(core.rng.random()) for _ in range(5)]
             return core, route_doses, hand, tail
 
-        core_off, doses_a, hand_a, tail_a = fingerprint(None)
+        core_absent, doses_a, hand_a, tail_a = fingerprint(None)
         core_false, doses_b, hand_b, tail_b = fingerprint(
             {"blackwater_plumbing": False},
         )
         core_on, _, _, _ = fingerprint({"blackwater_plumbing": True})
-        assert core_off.blackwater_tank is None
+        assert core_absent.blackwater_tank is not None
         assert core_false.blackwater_tank is None
         assert core_on.blackwater_tank is not None
+        # The tank reads mass that was dropped; dose state is unchanged.
         assert doses_a == doses_b
         assert hand_a == hand_b
         assert tail_a == tail_b

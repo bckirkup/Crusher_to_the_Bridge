@@ -150,8 +150,8 @@ is a prediction to check rather than a target to hit.
 `BlackwaterHoldingTank`, the CSTR pool: `complement × l_per_person_day ×
 day_fraction_per_epoch` of inflow per epoch, then discharge at
 `min(1, epoch_hours / residence_hours)` applied to volume and per-pathogen
-copies alike. `transmission.blackwater_plumbing` (default `false`; `true`
-for the EPA nominals, or a dict overriding the three ctor kwargs) builds
+copies alike. `transmission.blackwater_plumbing` (default `true`; `false` is the
+labelled pre-change baseline, or a dict overriding the three ctor kwargs) builds
 the tank on `TransmissionCore` and routes the two copy streams: the bowl
 deposit's non-aerosolised share `bowl × (1 − f_aero)` for every resolved
 defecation venue — independent of `flush_aerosol_fraction`, including the
@@ -223,9 +223,12 @@ It is not narrowed, and no decade of it is selected.
 The surface swab's rewiring changes an observation the decision layer reads, so
 it ships behind `observation.surface_swab_source` with the legacy
 airborne-fraction path as the default, and is measured as a matched arm before
-any default flips. The holding tank and its assay are **additive** and ship
-behind `transmission.blackwater_plumbing` (default `false`) and
-`observation.wastewater_assay_mode` (default `none`): they read mass that was
+any default flips. The holding tank is **additive** and defaults on
+(`transmission.blackwater_plumbing: true`; `false` is the labelled
+pre-change baseline) since the OVERRIDE-FLAGS-01 audit flagged it as a
+measured mechanism resting default-off. The assay stays opt-in
+(`observation.wastewater_assay_mode`, default `none`): it changes the
+observation record, a separate decision. Both read mass that was
 dropped on the floor and remove nothing from any existing pool, so no dose and
 no golden moves — which is also why a null in the infection outcome would say
 nothing about whether they are right. The emesis source term is **not

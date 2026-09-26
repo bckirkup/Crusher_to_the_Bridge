@@ -52,14 +52,19 @@ code-defaulted gates in `engines/`:
 | `long_read_sequencing.enabled` | false | Escalation-only by design |
 | `wearable_monitoring.detection_sensitivity_sweep.enabled` | false | Sweep harness, not a mechanism |
 | `transmission.sanitary_visit_mode` | none | **Measured inert** — item 42: structure-only arm is a null at 500 seeds/cell without a flush term; correctly off pending that decision |
-| `transmission.blackwater_plumbing` | false (code default) | **Flip candidate** — item 57: additive mechanism, measured; off only by convention |
-| `observation.wastewater_assay_mode` | none (code default) | Same — reads the tank; meaningless without `blackwater_plumbing` |
+| `transmission.blackwater_plumbing` | false (code default) | **Flipped** — item 57: additive mechanism, measured; now defaults `true`, `false` is the labelled pre-change baseline |
+| `observation.wastewater_assay_mode` | none (code default) | Opt-in by decision — reads the tank; changes the observation record, so it did not flip with the plumbing |
 
 **Finding:** the repo's default-off surface is almost entirely deliberate —
 knockouts, sweep harnesses, and subsystems waiting on evidence — not
-forgotten repairs. The exception class is `blackwater_plumbing` +
+forgotten repairs. The exception class was `blackwater_plumbing` +
 `wastewater_assay_mode`: a measured, additive mechanism left default-off.
-Flipping it is a modelling decision (it changes mass balance and RNG), so
-it is flagged here rather than changed. The systemic guard is `gates_off`:
+The plumbing flipped to default-on (`false` is the labelled pre-change
+baseline); the assay stayed opt-in since it changes the observation
+record. One related selector sits in the same class and stays opt-in for
+the same reason: `observation.surface_swab_source` (`airborne_fraction`
+default vs the repaired `surface_pool_density` channel, ledger item 56) —
+it changes what swabs report, not what the engine runs. The systemic guard
+is `gates_off`:
 from this change forward, every campaign archive lists its inert gates, so
 "was this run actually running it?" is a readout question, not an audit.

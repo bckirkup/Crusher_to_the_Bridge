@@ -112,6 +112,20 @@ is untouched. Distinguish the two causes in this order:
    `pathogen_pool_transport: none`, `near_field_air: off`) — each is "the
    labelled pre-change baseline", kept so a contrast can be run against the
    current engine rather than against an old commit.
+
+   **Default-off is scaffolding, not a resting state.** It exists to keep the
+   off arm bit-identical *while the contrast is measured*. Once the mechanism
+   is measured (or is additive and consumes no RNG), flip the default and keep
+   the `off` spelling as the labelled baseline — that is how `cabin_air_mode`,
+   `droplet_emission_mode`, `pathogen_pool_transport`, `near_field_air` and
+   `blackwater_plumbing` all landed: default-on mechanism, selectable
+   pre-change baseline. Legitimate permanent-off gates are ablation arms,
+   sweep harnesses, and opt-in subsystems that change outputs (e.g.
+   `wastewater_assay_mode`, `long_read_sequencing`) — and those should say so
+   at the gate. Anything else resting default-off is a finding: campaign
+   archives list every inert gate under `provenance_flags.gates_off`
+   (`docs/ledger/OVERRIDE-FLAGS-01.md`), so check whether a gate you are
+   touching has been flagged as a flip candidate.
 2. **Run the null contrast.** Run the new code with the feature *off* against
    the pre-change code on the same paired seeds. If those two differ, the diff
    disturbed the stream (or is not a no-op), and no arm contrast from it is

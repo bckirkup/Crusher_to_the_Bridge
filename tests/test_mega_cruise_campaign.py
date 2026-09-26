@@ -2401,12 +2401,10 @@ def test_sourced_window_flags() -> None:
         },
     }}
     flags = provenance_flags(spec, cfg, profiles)
-    # "active" plus the two code-defaulted inert gates an empty cfg implies.
+    # "active" plus the one absent-means-off gate an empty cfg implies
+    # (blackwater_plumbing defaults on, so an absent key is not a flag).
     assert set(flags) == {"active", "gates_off"}
-    assert set(flags["gates_off"]) == {
-        "transmission.blackwater_plumbing",
-        "observation.wastewater_assay_mode",
-    }
+    assert set(flags["gates_off"]) == {"observation.wastewater_assay_mode"}
     assert "pathogen.norwalk_gi.dose_adjustment" in flags["active"]
     assert "cfg.transmission.density_dependent.exponent" in flags["active"]
 
@@ -2439,7 +2437,10 @@ def test_sourced_window_flags() -> None:
     cfg_gated = {
         "variant_surveillance": {"enabled": False},
         "observation": {"wastewater_assay_mode": "none"},
-        "transmission": {"contact_mode": "per_partner_contact"},
+        "transmission": {
+            "contact_mode": "per_partner_contact",
+            "blackwater_plumbing": False,
+        },
     }
     flags = provenance_flags({}, cfg_gated, {})
     assert flags["gates_off"] == [
