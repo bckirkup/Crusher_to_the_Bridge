@@ -1,0 +1,301 @@
+{
+  "campaign": "noro_rebase_01",
+  "description": "NORO-REBASE-01: the canonical posting cell replayed at paired seeds 8105/8106 on the post-#724 engine across all four real hulls (expedition, classic, spirit, mega) at their declared complements and both canonical voyage lengths (168/288 epochs, hours clock). The cell is the FLUSH-S4 `off`-arm configuration verbatim -- dose_adjustment 4.0, syndromic_comp65, the reportable boarding rung, dwell_weighted sanitary visits, flush off, cabin_compartment, airflow pool transport -- so the post-724 deltas pair voyage-for-voyage against the flush_sweep_v1_off_s4 archive for expedition/classic/spirit and record mega's first declared-complement reading in this cell. The cabin-fomite channel (PR #721) and crew watch schedules (PR #723) are live at shipped defaults; secretor-negative fraction 0.2 is live in the norwalk_gi profile (NORO-SUSCEPT-04). Nothing is calibrated to an anchor; dose figures stay void pending refit. Readout: score_anchors A1/A2/A4/A5/A8/A9 per hull x length.",
+  "platform": "classic_cruise_1900",
+  "default_epochs": 168,
+  "default_num_agents": 1910,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    }
+  },
+  "tiers": {
+    "fl_exp_7d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_exp_12d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_cls_7d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_cls_12d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_spr_7d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_spr_12d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_mega_7d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    },
+    "fl_mega_12d": {
+      "description": "Declared-complement posting cell on the post-#724 engine: this hull's own layout and complement under the shipped kernel, the reportable boarding rung, sanitary_visit_mode dwell_weighted, flush_aerosol_fraction off and the cabin-compartment/pool-transport settings of the FLUSH-S4 `off` arm it replays voyage-for-voyage at paired seeds 8105/8106. Posting frequency and attack rate are readable because the complement is the hull's own; the cabin-fomite channel and crew watch schedules land on the engine defaults, untouched by this cell's overrides.",
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        }
+      }
+    }
+  }
+}
