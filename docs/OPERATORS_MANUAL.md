@@ -1490,6 +1490,16 @@ Lab notebook LOW / MID / HIGH fidelity.
 
 Pathogen dossiers; SOP cards with **Exempt Divisions** when `exempt_classes` is set.
 
+### Station 6: A/B Run Diff
+
+Two telemetry directories (each containing `simulation_history.json`) —
+e.g. a protocol arm vs baseline, or a paired-seed pair — rendered as an
+overlaid active-cases curve, a per-epoch delta chart (Run B − Run A for
+infected / symptomatic / isolated), a run-level delta summary table
+(peak cases, peak epoch, finals, first non-BASELINE epoch, OIS cumulative,
+credits spent, labor hours), and a pivot of per-epoch metric deltas over
+the shared epoch prefix. Defaults Run A to the active telemetry directory.
+
 ---
 
 ## 10. Simulation Output Reference
