@@ -486,18 +486,22 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   ~99% of the burn rides the well-mixed-room droplet pool, which the
   reach arms (B7–B9, `activity_contacts` only) cannot bound — see the
   stood-down note in `docs/ledger/SENS-ASSAY-V2.md`.
-- **`SERO-CHANNEL-V1` is declared**: the observational-channel arm of the
-  ~18× hunt. A new held-out-forever anchor `covid.H5` (serology-informed
-  true infections ≈ 840, admissible band [712, 960], Hung et al. 2020,
-  channel `infections_total`) joins the split, and an additive
-  default-off `observation_model.onset_recording` channel on
-  `sars_cov2_resp` gates dated onsets to presentations at or before the
-  confirming-specimen epoch, times a once-per-case recall draw at 0.56
-  (record-derivable: 197/712 ÷ ~0.49 symptomatic-at-specimen). The design
-  replays LAMBDA-CROSS-V1's Θ axis {1.0 … 0.001} × channel {declared,
-  period} × the same 20 seeds, 360 cells, with frozen scoring: H5's band
-  scored on takeoff seeds' `infections_total`, recorded_onsets vs 197 per
-  channel, before_share, takeoff share. Canary = period arm at Θ ×0.001,
-  20 seeds (cells 340–359); nothing further runs before the user decides.
-  Design `picard_framework/runs/covid_sero_channel_v1_design.json`,
+- **`SERO-CHANNEL-V1` is declared and its canary is measured** (period
+  arm, Θ ×0.001, 20 seeds at `8ac510b3`, array `f340c7b9`): the
+  observational-channel arm of the ~18× hunt. A new held-out-forever
+  anchor `covid.H5` (serology-informed true infections ≈ 840, admissible
+  band [712, 960], Hung et al. 2020, channel `infections_total`) joins
+  the split, and an additive default-off `observation_model.onset_recording`
+  channel on `sars_cov2_resp` gates dated onsets to presentations at or
+  before the confirming-specimen epoch, times a once-per-case recall draw
+  at 0.56. Canary verdict: 7/20 takeoff; takeoff-seed infections q05–q95
+  [753, 3025] intersects the band but median 1,025 sits above it;
+  recorded_onsets q05–q95 [161, 1,536] contains 197 (median 315) but the
+  before_share median 0.020 misses the record's 0.173 ± 0.10. The gate
+  lands dating ~0.43–0.53 of confirmed — ABOVE the record's 0.277, so
+  the declared recall-only fallback is not engaged; the channel under-
+  closes vs the record at this theta. The 20200205 zero-asymptomatics
+  anomaly did not recur (110/248 asymptomatic campaign positives).
+  The full array (360 cells, both channels × Θ axis) awaits the user's
+  decision. Design `picard_framework/runs/covid_sero_channel_v1_design.json`,
   ledger `docs/ledger/SERO-CHANNEL-V1.md`.
