@@ -16,7 +16,6 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
-<<<<<<< HEAD
 **`CABIN-OCC-01` + `ROOM-AIR-01` (ledger entries): every airborne-route
 dose figure on any hull that declares AHU rates, and every confined-
 cabinmate figure, moves at this change's merge SHA.** Room-pool
