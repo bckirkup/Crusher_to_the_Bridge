@@ -130,16 +130,19 @@ class TestDeclaration:
     @pytest.mark.parametrize("dropped", list(CONTACT_ACTIVITIES))
     def test_a_missing_activity_is_refused(self, dropped: str) -> None:
         rates = {a: r for a, r in FLAT.items() if a != dropped}
+        block = _block(rates)
         with pytest.raises(ValueError, match=dropped):
-            _core(_block(rates))
+            _core(block)
 
     def test_an_unknown_activity_is_refused(self) -> None:
+        block = _block(dict(FLAT, gym=1.0))
         with pytest.raises(ValueError, match="gym"):
-            _core(_block(dict(FLAT, gym=1.0)))
+            _core(block)
 
     def test_a_per_role_rate_missing_a_role_is_refused(self) -> None:
+        block = _block(dict(FLAT, leisure={"passenger": 1.0}))
         with pytest.raises(ValueError, match="crew"):
-            _core(_block(dict(FLAT, leisure={"passenger": 1.0})))
+            _core(block)
 
     @pytest.mark.parametrize(
         "bad",
@@ -152,8 +155,9 @@ class TestDeclaration:
         ],
     )
     def test_a_rate_outside_the_band_is_refused(self, bad: object) -> None:
+        block = _block(dict(FLAT, leisure=bad))
         with pytest.raises(ValueError):
-            _core(_block(dict(FLAT, leisure=bad)))
+            _core(block)
 
     def test_the_block_requires_the_per_partner_mode(self) -> None:
         tx = dict(_block(FLAT), contact_mode="density_dependent")
@@ -444,25 +448,32 @@ class TestDwellSaturation:
         assert _core(block).activity_saturation_hours == {}
 
     def test_an_unknown_activity_is_refused(self) -> None:
+        block = _saturating(FLAT, {"buffet": 1.0})
         with pytest.raises(ValueError, match="unknown activities"):
-            _core(_saturating(FLAT, {"buffet": 1.0}))
+            _core(block)
 
     @pytest.mark.parametrize("bad", [0.0, -1.0, 25.0, float("inf"), float("nan"), "soon"])
     def test_a_time_scale_outside_the_band_is_refused(self, bad: object) -> None:
+        block = _saturating(FLAT, {"leisure": bad})
         with pytest.raises(ValueError, match="saturation_hours"):
-            _core(_saturating(FLAT, {"leisure": bad}))
+            _core(block)
 
     def test_a_not_a_mapping_declaration_is_refused(self) -> None:
+        block = _saturating(FLAT, 2.0)
         with pytest.raises(ValueError, match="mapping"):
-            _core(_saturating(FLAT, 2.0))
+            _core(block)
 
     def test_a_day_long_epoch_cannot_time_a_visit(self) -> None:
+        rng = np.random.default_rng(0)
+        zone_types = dict(ZONE_TYPES)
+        transmission = _saturating(FLAT, {"leisure": 2.0})
+        clock = SimClock()
         with pytest.raises(ValueError, match="hourly clock"):
             TransmissionCore(
-                rng=np.random.default_rng(0),
-                zone_types=dict(ZONE_TYPES),
-                cfg={"transmission": _saturating(FLAT, {"leisure": 2.0})},
-                clock=SimClock(),
+                rng=rng,
+                zone_types=zone_types,
+                cfg={"transmission": transmission},
+                clock=clock,
             )
 
     def test_the_first_hour_starts_at_the_declared_rate(self) -> None:
@@ -757,13 +768,15 @@ class TestTheSaturationArmOfTheGate:
         with pytest.raises(ValueError, match="activity arm"):
             parse_activity_saturation(TAUS, None)
         design = self._design(None, None)
+        point = [0.5] * len(design.factors)
+        run_kwargs = {
+            **design.run_kwargs(),
+            "activity_saturation_hours": {"leisure": 2.0},
+        }
         with pytest.raises(ValueError, match="activity_contacts"):
             build_run_spec(
-                design.factors, [0.5] * len(design.factors), seed=3,
-                description="x", **{
-                    **design.run_kwargs(),
-                    "activity_saturation_hours": {"leisure": 2.0},
-                },
+                design.factors, point, seed=3,
+                description="x", **run_kwargs,
             )
 
     @pytest.mark.parametrize("bad", [
@@ -777,8 +790,9 @@ class TestTheSaturationArmOfTheGate:
             parse_activity_contacts,
             parse_activity_saturation,
         )
+        contacts = parse_activity_contacts(ARM)
         with pytest.raises(ValueError):
-            parse_activity_saturation(bad, parse_activity_contacts(ARM))
+            parse_activity_saturation(bad, contacts)
 
     def test_the_engine_refuses_an_out_of_band_tau_the_arm_lets_through(self) -> None:
         from picard_framework.run_spec import merge_config_overrides
@@ -787,11 +801,13 @@ class TestTheSaturationArmOfTheGate:
             {"transmission": {"contact_mode": "per_partner_contact"}},
             spec["config_overrides"],
         )
+        rng = np.random.default_rng(1)
+        clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
         with pytest.raises(ValueError, match="saturation_hours"):
             TransmissionCore(
                 cfg={"transmission": merged["transmission"]},
-                rng=np.random.default_rng(1),
-                clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+                rng=rng,
+                clock=clock,
             )
 
     def test_the_arm_reaches_the_engine_through_the_merged_config(self) -> None:

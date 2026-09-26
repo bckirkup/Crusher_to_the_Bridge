@@ -334,18 +334,16 @@ class TestLoaderRefusals:
     def test_a_curve_that_is_not_probabilities_is_refused(
         self, curve: list[float],
     ) -> None:
+        profiles = _authored(assay_sensitivity_by_time_since_infection=curve)
         with pytest.raises(ValueError, match="assay_sensitivity"):
-            _validate_symptom_severity_profiles(
-                _authored(assay_sensitivity_by_time_since_infection=curve),
-            )
+            _validate_symptom_severity_profiles(profiles)
 
     def test_an_unimplemented_curve_shape_stays_unimplemented(self) -> None:
+        profiles = _authored(
+            assay_sensitivity_by_time_since_infection={"day_1": 0.4},
+        )
         with pytest.raises(NotImplementedError, match="assay"):
-            _validate_symptom_severity_profiles(
-                _authored(
-                    assay_sensitivity_by_time_since_infection={"day_1": 0.4},
-                ),
-            )
+            _validate_symptom_severity_profiles(profiles)
 
     def test_a_band_that_moves_the_asymptomatic_share_is_refused(self) -> None:
         profiles = _authored()

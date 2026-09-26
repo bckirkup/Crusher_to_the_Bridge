@@ -176,8 +176,9 @@ class TestBinding:
         monkeypatch.setattr(
             smoke, "plume_dose_at_beta", lambda _beta: 1.0,
         )
+        runs = _synthetic_runs()
         with pytest.raises(AssertionError, match="does not bind"):
-            _check_binding(design, _synthetic_runs(), {})
+            _check_binding(design, runs, {})
 
     def test_knockout_rate_not_zero_fails(self, design) -> None:
         runs = _synthetic_runs()

@@ -135,6 +135,10 @@ class TestPopulationGeometry:
         assert sum(rc.count for rc in mortimer.role_classes) == 223
 
     def test_role_classes_must_sum_to_the_population(self):
+        role_classes = (
+            RoleClass("passenger_general", "passenger", 60),
+            RoleClass("crew_general", "crew", 39),
+        )
         with pytest.raises(ValueError, match="role classes total"):
             HullScenario(
                 scenario_id="mismatch",
@@ -146,10 +150,7 @@ class TestPopulationGeometry:
                 epoch_duration_hours=1.0,
                 clock_mode="hours",
                 population_total=100,
-                role_classes=(
-                    RoleClass("passenger_general", "passenger", 60),
-                    RoleClass("crew_general", "crew", 39),
-                ),
+                role_classes=role_classes,
                 campaign_id="unit_campaign",
                 campaign_start_day=0,
             )

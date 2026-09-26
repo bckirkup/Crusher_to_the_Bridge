@@ -198,7 +198,8 @@ class TestProgressionSeam:
         drawn = illness_duration_days(inf, profile, np.random.default_rng(1))
         assert drawn is not None
         assert inf["recovery_day"] == drawn
-        assert drawn == float(int(drawn)) and 1 <= drawn <= 13
+        assert drawn == float(int(drawn))
+        assert 1 <= drawn <= 13
 
     def test_the_draw_is_once_per_infection(self) -> None:
         agent = _agent(SimClock(epoch_duration_hours=1.0, mode=HOURS))

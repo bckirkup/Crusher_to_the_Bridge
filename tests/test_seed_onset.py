@@ -118,15 +118,15 @@ class TestImpliedIncubation:
 
     def test_onset_before_acquisition_is_refused(self) -> None:
         engine = _FakeEngine()
+        plan = _plan(infection_age_days=0.0, onset_day=-1.0)
         with pytest.raises(ValueError, match="explicit_seeds.*onset"):
-            _apply(_plan(infection_age_days=0.0, onset_day=-1.0), engine)
+            _apply(plan, engine)
 
     def test_onset_past_the_shedding_window_is_refused(self) -> None:
         engine = _FakeEngine()
+        plan = _plan(infection_age_days=40.0, onset_day=-35.0)
         with pytest.raises(ValueError, match="shedding window"):
-            _apply(
-                _plan(infection_age_days=40.0, onset_day=-35.0), engine,
-            )
+            _apply(plan, engine)
 
 
 class TestSymptomaticAtBoarding:

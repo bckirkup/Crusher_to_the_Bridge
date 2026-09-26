@@ -334,23 +334,20 @@ class TestCampaignRefusals:
             _campaign([1], tiers=("symptomatic", "nurses"))
 
     def test_source_and_grade_are_required_at_the_definition(self) -> None:
+        ladder = _ladder()
+        day = CampaignDay(0, 1, ("crew",))
         with pytest.raises(ValueError, match="source"):
-            TestingCampaign(
-                "x", PATHOGEN, "", "", _ladder(),
-                [CampaignDay(0, 1, ("crew",))],
-            )
+            TestingCampaign("x", PATHOGEN, "", "", ladder, [day])
 
     def test_negative_and_duplicate_days_are_refused(self) -> None:
+        ladder = _ladder()
+        day = CampaignDay(0, -1, ("crew",))
         with pytest.raises(ValueError, match="negative"):
-            TestingCampaign(
-                "x", PATHOGEN, "s", "B", _ladder(),
-                [CampaignDay(0, -1, ("crew",))],
-            )
+            TestingCampaign("x", PATHOGEN, "s", "B", ladder, [day])
+        ladder = _ladder()
+        days = [CampaignDay(0, 1, ("crew",)), CampaignDay(0, 2, ("crew",))]
         with pytest.raises(ValueError, match="duplicate"):
-            TestingCampaign(
-                "x", PATHOGEN, "s", "B", _ladder(),
-                [CampaignDay(0, 1, ("crew",)), CampaignDay(0, 2, ("crew",))],
-            )
+            TestingCampaign("x", PATHOGEN, "s", "B", ladder, days)
 
 
 # ── the modality ──────────────────────────────────────────────────────────
@@ -506,17 +503,20 @@ class TestCampaignInsideTheModality:
         assert result["lab_sampled_count"] == 0
 
     def test_two_campaigns_for_one_pathogen_are_refused(self) -> None:
+        severity_profiles = _profile()
+        campaigns = [_campaign([1]), _campaign([2])]
         with pytest.raises(ValueError, match="two testing campaigns"):
             SyndromicSurveillance(
-                symptom_severity_profiles=_profile(),
-                testing_campaigns=[_campaign([1]), _campaign([2])],
+                symptom_severity_profiles=severity_profiles,
+                testing_campaigns=campaigns,
             )
 
     def test_a_campaign_for_an_unmodelled_pathogen_is_refused(self) -> None:
+        campaigns = [_campaign([1])]
         with pytest.raises(ValueError, match="no observation_model"):
             SyndromicSurveillance(
                 symptom_severity_profiles={},
-                testing_campaigns=[_campaign([1])],
+                testing_campaigns=campaigns,
             )
 
 

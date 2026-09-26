@@ -607,12 +607,13 @@ class TestPlanResolution:
         assert len(plan.seeds) == 1
 
     def test_boarding_and_a_fiat_index_case_is_an_error(self) -> None:
+        cfg = _cfg()
+        profiles = {PATHOGEN: _profile(initial_infected=1)}
         with pytest.raises(ValueError, match="initial_infected"):
-            resolve_initiation_plan(
-                _cfg(), {PATHOGEN: _profile(initial_infected=1)},
-            )
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_seed_over_a_fiat_index_case_is_an_error(self) -> None:
+        profiles = {PATHOGEN: _profile(initial_infected=1)}
         with pytest.raises(ValueError, match="initial_infected"):
             resolve_initiation_plan(
                 {
@@ -620,7 +621,7 @@ class TestPlanResolution:
                         "explicit_seeds": [{"pathogen": PATHOGEN, "count": 2}],
                     },
                 },
-                {PATHOGEN: _profile(initial_infected=1)},
+                profiles,
             )
 
     def test_a_seed_leaves_another_pathogens_index_case_alone(self) -> None:
@@ -642,45 +643,51 @@ class TestPlanResolution:
         cfg["initiation"]["boarding"][PATHOGEN]["state_split"][
             "never_symptomatic_fraction"
         ] = None
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="never_symptomatic_fraction"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_missing_state_split_is_an_error(self) -> None:
         cfg = _cfg()
         del cfg["initiation"]["boarding"][PATHOGEN]["state_split"]
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="never_symptomatic_fraction"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     @pytest.mark.parametrize("prevalence", [-0.1, 1.4])
     def test_a_prevalence_outside_the_unit_interval_is_an_error(
         self, prevalence: float,
     ) -> None:
+        cfg = _cfg(passenger=prevalence)
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match=r"outside \[0, 1\]"):
-            resolve_initiation_plan(
-                _cfg(passenger=prevalence), {PATHOGEN: _profile()},
-            )
+            resolve_initiation_plan(cfg, profiles)
 
     @pytest.mark.parametrize("share", [-0.1, 1.4])
     def test_a_split_coordinate_outside_the_unit_interval_is_an_error(
         self, share: float,
     ) -> None:
+        cfg = _cfg(pre=share)
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match=r"outside \[0, 1\]"):
-            resolve_initiation_plan(
-                _cfg(pre=share), {PATHOGEN: _profile()},
-            )
+            resolve_initiation_plan(cfg, profiles)
 
     def test_an_unknown_boarding_pathogen_is_an_error(self) -> None:
+        cfg = _cfg()
+        profiles = {"other": _profile()}
         with pytest.raises(ValueError, match="absent from the loaded profiles"):
-            resolve_initiation_plan(_cfg(), {"other": _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_an_unknown_seed_pathogen_is_an_error(self) -> None:
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="absent from the loaded profiles"):
             resolve_initiation_plan(
                 {"initiation": {"explicit_seeds": [{"pathogen": "nope"}]}},
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_a_negative_seed_count_is_an_error(self) -> None:
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="count"):
             resolve_initiation_plan(
                 {
@@ -690,10 +697,11 @@ class TestPlanResolution:
                         ],
                     },
                 },
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_a_negative_infection_age_is_an_error(self) -> None:
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="infection_age_days"):
             resolve_initiation_plan(
                 {
@@ -703,10 +711,11 @@ class TestPlanResolution:
                         ],
                     },
                 },
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_an_unknown_seed_role_is_an_error(self) -> None:
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="role"):
             resolve_initiation_plan(
                 {
@@ -716,7 +725,7 @@ class TestPlanResolution:
                         ],
                     },
                 },
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
 
@@ -893,8 +902,9 @@ class TestInitWiring:
     def test_a_negative_epoch_is_refused(self) -> None:
         cfg = _cfg(passenger=0.1, crew=0.1)
         cfg["initiation"]["boarding"][PATHOGEN]["epoch"] = -1
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="epoch = -1"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_boarding_run_leaves_no_fiat_index_case(self) -> None:
         engine, _ = _init_run(_cfg(passenger=0.2, crew=0.2))
@@ -1049,10 +1059,11 @@ class TestPartyResolution:
     def test_a_party_alongside_a_prevalence_is_an_error(self) -> None:
         block = _party_block()
         block["prevalence"] = {"passenger": 0.1, "crew": 0.1}
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="also carries a prevalence"):
             resolve_initiation_plan(
                 {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     @pytest.mark.parametrize(
@@ -1067,21 +1078,24 @@ class TestPartyResolution:
     def test_a_malformed_party_is_an_error(
         self, party: dict[str, Any], match: str,
     ) -> None:
+        block = _party_block(**party)
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match=match):
             resolve_initiation_plan(
                 {"initiation": {"boarding": {
-                    "enabled": True, PATHOGEN: _party_block(**party),
+                    "enabled": True, PATHOGEN: block,
                 }}},
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_an_unknown_mode_is_an_error(self) -> None:
         block = _party_block()
         block["mode"] = "cluster"
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="mode"):
             resolve_initiation_plan(
                 {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_the_manifest_records_the_party(self) -> None:
@@ -1335,31 +1349,33 @@ class TestRenewalRateMode:
         cfg["initiation"]["boarding"][PATHOGEN]["prevalence"] = {
             "passenger": 0.01, "crew": 0.01,
         }
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="attributable to neither"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_missing_role_incidence_is_an_error(self) -> None:
         cfg = _renewal_cfg()
         cfg["initiation"]["boarding"][PATHOGEN]["renewal"][
             "case_incidence_per_1000_py"
         ].pop("crew")
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="case_incidence_per_1000_py"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_an_unknown_rate_mode_is_an_error(self) -> None:
         cfg = _cfg()
         cfg["initiation"]["boarding"][PATHOGEN]["rate_mode"] = "empirical"
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(
             ValueError, match="screening_prevalence.*renewal|renewal",
         ):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_an_unbounded_derived_prevalence_is_an_error(self) -> None:
+        cfg = _renewal_cfg(passenger_rate=1e9, crew_rate=1e9)
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match=r"\[0, 1\]"):
-            resolve_initiation_plan(
-                _renewal_cfg(passenger_rate=1e9, crew_rate=1e9),
-                {PATHOGEN: _profile()},
-            )
+            resolve_initiation_plan(cfg, profiles)
 
 
 class TestStationaryAgeDraw:
@@ -1413,10 +1429,11 @@ class TestStationaryAgeDraw:
     def test_an_unknown_age_draw_is_an_error(self) -> None:
         cfg = _cfg()
         cfg["initiation"]["boarding"][PATHOGEN]["age_draw"] = "free"
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(
             ValueError, match="engine_window.*stationary_detectable",
         ):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)
 
     def test_a_renewal_rate_in_party_mode_is_an_error(self) -> None:
         block = _party_block()
@@ -1425,10 +1442,11 @@ class TestStationaryAgeDraw:
             "case_incidence_per_1000_py": {"passenger": 39.0, "crew": 39.0},
             "detectable_duration_days": 28,
         }
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="party mode"):
             resolve_initiation_plan(
                 {"initiation": {"boarding": {"enabled": True, PATHOGEN: block}}},
-                {PATHOGEN: _profile()},
+                profiles,
             )
 
     def test_stationary_without_a_detectable_duration_is_an_error(self) -> None:
@@ -1436,5 +1454,6 @@ class TestStationaryAgeDraw:
         cfg["initiation"]["boarding"][PATHOGEN][
             "age_draw"
         ] = "stationary_detectable"
+        profiles = {PATHOGEN: _profile()}
         with pytest.raises(ValueError, match="detectable_duration_days"):
-            resolve_initiation_plan(cfg, {PATHOGEN: _profile()})
+            resolve_initiation_plan(cfg, profiles)

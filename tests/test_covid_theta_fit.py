@@ -349,7 +349,7 @@ def _stub_runner(scenario_id: str, theta: float, seed: int) -> HullObservables:
     return _stub_observables(scenario_id, theta, seed)
 
 
-@pytest.fixture()
+@pytest.fixture
 def objective(targets):
     return ThetaObjective(targets=targets, runner=_stub_runner)
 

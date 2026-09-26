@@ -46,7 +46,8 @@ from tools.sanity_checker import (
 
 def test_heatmap_matrix_empty_and_populated() -> None:
     empty = figures_mod._heatmap_matrix({}, ["p1"], ["s1"])
-    assert len(empty) == 1 and len(empty[0]) == 1
+    assert len(empty) == 1
+    assert len(empty[0]) == 1
     assert math.isnan(empty[0][0])
     heat = {("p1", "s1"): [0.2, 0.4], ("p1", "s2"): [0.5]}
     mat = figures_mod._heatmap_matrix(heat, ["p1"], ["s1", "s2"])
@@ -205,7 +206,8 @@ def test_shedding_curve_length_and_sign_bounds() -> None:
 
     ok = Report()
     _check_pathogen_shedding_curve(_pathogen(), ok)
-    assert not ok.errors and not any(f.rule == "LOGIC_SHED" for f in ok.warnings)
+    assert not ok.errors
+    assert not any(f.rule == "LOGIC_SHED" for f in ok.warnings)
 
 
 def test_ois_weights_non_negative_bounds() -> None:
@@ -294,7 +296,8 @@ def test_native_transmission_in_zone_needs_both_shedders_and_susceptible() -> No
     eng, _ = _native_engine_in_one_zone(10)
     shedders = [a for a in eng.agents if a.current_shedding > 0]
     susceptible = [a for a in eng.agents if a.infection_status == InfectionStatus.SUSCEPTIBLE]
-    assert shedders and susceptible
+    assert shedders
+    assert susceptible
 
     eng._native_transmission_in_zone(shedders)
     eng._native_transmission_in_zone(susceptible)
@@ -352,7 +355,8 @@ def test_record_transmission_event_dominant_and_breakdown_filter() -> None:
     TransmissionCore._record_transmission_event(
         3, agent, "noro", 0.9, False, "", None, {"droplet": 0.9}, pw, matrix, events,
     )
-    assert len(events) == 1 and len(matrix.transmission_events) == 1
+    assert len(events) == 1
+    assert len(matrix.transmission_events) == 1
     assert events[0].pathway == "flu:droplet"
     assert events[0].source_strain_id is None
     rec = matrix.transmission_events[0]
