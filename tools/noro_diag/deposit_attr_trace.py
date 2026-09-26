@@ -29,12 +29,15 @@ Arms (declared in the ledger before any run)
 ``gate_off``        ``fomite_surfaces.SURFACE_PICKUP_MIN_GEC`` patched to 0.0
                     in-process for the run (equivalent to reverting the
                     constant; the gate consumes no RNG either way).
-``emesis_zonepool`` in-process semantic revert of ``_emit_emesis`` /
-                    ``_deposit_emesis`` to the pre-#604 filing: touchable
-                    share ``min(1, high_touch/footprint)`` and zone-pool
-                    deposit instead of EmesisPatch. Draw order inside the
-                    emitter is preserved; downstream patch-pickup draws vanish
-                    with the patches, so the arm is not bit-identical.
+``emesis_zonepool`` in-process semantic revert of the #604 filing via the
+                    shipped emitter: ``_zone_floor_area_m2`` is patched to
+                    answer the zone's fomite surface area (making the shipped
+                    ``min(1, high_touch/max(floor, area))`` equal the
+                    pre-change ``min(1, high_touch/area)``) and each
+                    EmesisPatch filed is immediately re-filed into the zone
+                    surface pool. Draw order inside the emitter is preserved;
+                    downstream patch-pickup draws vanish with the patches, so
+                    the arm is not bit-identical.
 ``report_scale``    ``pathogen_overrides.norwalk_gi.observation_model
                     .reporting_belief_scaling = "trust_medical"`` -- the
                     pre-NORO-CHANNEL-02 stacking, as a labelled baseline.
@@ -57,7 +60,6 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
-import math
 import re
 import sys
 import tempfile
@@ -84,6 +86,7 @@ from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: 
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
+    resolve_repo_path,
     validated_open,
 )
 
@@ -227,6 +230,12 @@ class Recorder:
         )
 
 
+def _pool_mass(core: Any, pathogen_id: str, zone_name: str) -> float:
+    """Current surface-pool mass for one (pathogen, zone) cell."""
+    pools = core.surface_pools_by_pathogen.get(pathogen_id) or {}
+    return float(pools.get(zone_name, 0.0))
+
+
 def _wrap_mass_books(core_cls: type, rec: Recorder) -> dict[str, Any]:
     """Wrap the functions moving mass into/out of the surface pools."""
     originals = {
@@ -253,17 +262,12 @@ def _wrap_mass_books(core_cls: type, rec: Recorder) -> dict[str, Any]:
     def scale(
         self: Any, pathogen_id: str, zone_name: str, factor: float,
     ) -> None:
-        pools = self.surface_pools_by_pathogen.get(pathogen_id) or {}
-        before = float(pools.get(zone_name, 0.0))
+        on_pathogen = pathogen_id == rec.pathogen_id
+        before = _pool_mass(self, pathogen_id, zone_name) if on_pathogen else 0.0
         originals["_scale_surface_mass"](self, pathogen_id, zone_name, factor)
-        if pathogen_id != rec.pathogen_id:
+        if not on_pathogen:
             return
-        after = float(
-            (self.surface_pools_by_pathogen.get(pathogen_id) or {}).get(
-                zone_name, 0.0,
-            ),
-        )
-        removed = before - after
+        removed = before - _pool_mass(self, pathogen_id, zone_name)
         if removed <= 0.0:
             return
         site = _caller_name()
@@ -463,111 +467,46 @@ def instrumented(rec: Recorder) -> Any:
             setattr(core_cls, name, method)
 
 
-def _emit_emesis_pre604(
-    self: Any,
-    agent: Any,
-    pathogen_id: str,
-    profile: dict,
-    zone_name: str,
-    epoch: int,
-) -> float:
-    """Pre-#604 emesis filing: footprint share, zone-pool deposit.
+def _fomite_area_as_floor(self: Any, zone_name: str) -> float:
+    """Pre-#604 touchable denominator, posed as the zone's floor area.
 
-    Identical draw order to the shipped emitter (volume, then aerosol
-    fraction, per due episode); only the filing target and the touchable
-    share's denominator differ. ``_deposit_emesis_pre604`` adds the zone-pool
-    deposit the shipped code moved into ``EmesisPatch``.
+    Installed over ``_zone_floor_area_m2`` on the ``emesis_zonepool`` arm so
+    the shipped emitter's ``min(1, high_touch / max(floor, area))`` reduces
+    to the pre-change ``min(1, high_touch / area)`` — identical whether
+    fomite area exceeds the bolus footprint (both saturate at 1) or not
+    (both give fomite/area).
     """
-    eligible = self._emesis_phase(agent, pathogen_id, profile)
-    if eligible is None:
-        return 0.0
-    _, age = eligible
-    schedule = agent.emesis_episode_schedule_by_pathogen.get(pathogen_id, [])
-    due = [event_age for event_age in schedule if event_age <= age]
-    if not due:
-        return 0.0
-    agent.emesis_episode_schedule_by_pathogen[pathogen_id] = [
-        event_age for event_age in schedule if event_age > age
-    ]
-    volume_low, volume_high = self._emesis_range(
-        profile, "emesis_volume_ml_range", tc.EMESIS_VOLUME_ML_RANGE,
-    )
-    aerosol_low, aerosol_high = self._emesis_range(
-        profile,
-        "emesis_aerosol_fraction_range",
-        tc.EMESIS_AEROSOL_FRACTION_RANGE,
-    )
-    host_titre = self._emesis_host_titre(agent, pathogen_id, profile)
-    censored = agent.emesis_censored_below_lod_by_pathogen.get(
-        pathogen_id, False,
-    )
-    area = float(profile.get(
-        "emesis_deposition_area_m2", tc.EMESIS_DEPOSITION_AREA_M2,
-    ))
-    touchable_fraction = min(
-        1.0, self._fomite_surface_area(zone_name) / area,
-    )
-    records = agent.emesis_deposition_records_by_pathogen.setdefault(
-        pathogen_id, [],
-    )
-    pool_gain_total = 0.0
-    for _ in due:
-        volume = math.exp(self.rng.uniform(
-            math.log(volume_low), math.log(volume_high),
-        ))
-        aerosol_fraction = math.exp(self.rng.uniform(
-            math.log(aerosol_low), math.log(aerosol_high),
-        ))
-        episode_load = volume * host_titre
-        surface_load = episode_load * (1.0 - aerosol_fraction)
-        aerosol_load = episode_load * aerosol_fraction
-        pending = self.emesis_aerosol_pending_by_pathogen.setdefault(
-            pathogen_id, {},
-        )
-        pending[zone_name] = pending.get(zone_name, 0.0) + aerosol_load
-        emitted = self._emesis_aerosol_emitted_by_pathogen.setdefault(
-            pathogen_id, {},
-        )
-        emitted.setdefault(zone_name, []).append((agent, aerosol_load))
-        pool_gain = surface_load * touchable_fraction
-        records.append({
-            "epoch": int(epoch),
-            "zone": zone_name,
-            "volume_ml": volume,
-            "titre_gec_per_ml": host_titre,
-            "censored_below_lod": bool(censored),
-            "episode_load": episode_load,
-            "surface_load": surface_load,
-            "aerosol_load": aerosol_load,
-            "pool_gain": pool_gain,
-            "non_touchable": surface_load - pool_gain,
-            "touchable_fraction": touchable_fraction,
-        })
-        if pool_gain > 0.0:
-            self._deposit_surface_mass(pathogen_id, zone_name, pool_gain)
-        if self.blackwater_tank is not None:
-            self.blackwater_tank.add_copies(
-                pathogen_id,
-                (surface_load - pool_gain)
-                * self.blackwater_tank.emesis_drain_capture_fraction,
-                "emesis",
-            )
-        pool_gain_total += pool_gain
-    return pool_gain_total
+    return float(self._fomite_surface_area(zone_name))
 
 
-def _deposit_emesis_pre604(
-    self: Any,
-    agent: Any,
-    pathogen_id: str,
-    zone_name: str,
-    epoch: int,
-    profile: dict,
-) -> float:
-    """Pre-#604 counterpart: pool deposit already filed inside the emitter."""
-    return self._emit_emesis(
-        agent, pathogen_id, profile, zone_name, epoch,
-    )
+def _zonepool_emitter(saved_emit: Any) -> Any:
+    """Wrap the shipped emitter with the pre-#604 zone-pool filing.
+
+    The shipped emit body runs verbatim — same draws, same records — while
+    the patched floor makes its touchable share the pre-change one; each
+    ``EmesisPatch`` it files is re-filed into the zone surface pool via
+    ``_deposit_surface_mass``, where pre-#604 ``_deposit_emesis`` put the
+    gain. Call-site accounting records the deposit under this wrapper.
+    """
+    def emit_emesis_zonepool(
+        self: Any,
+        agent: Any,
+        pathogen_id: str,
+        profile: dict,
+        zone_name: str,
+        epoch: int,
+    ) -> float:
+        gained = saved_emit(
+            self, agent, pathogen_id, profile, zone_name, epoch,
+        )
+        pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
+        for patch in pools.pop(zone_name, []):
+            if float(patch.mass) > 0.0:
+                self._deposit_surface_mass(
+                    pathogen_id, zone_name, float(patch.mass),
+                )
+        return gained
+    return emit_emesis_zonepool
 
 
 @contextmanager
@@ -583,14 +522,14 @@ def arm_patches(arm: str) -> Any:
         return
     if arm == "emesis_zonepool":
         saved_emit = tc.TransmissionCore._emit_emesis
-        saved_deposit = tc.TransmissionCore._deposit_emesis
-        tc.TransmissionCore._emit_emesis = _emit_emesis_pre604
-        tc.TransmissionCore._deposit_emesis = _deposit_emesis_pre604
+        saved_floor = tc.TransmissionCore._zone_floor_area_m2
+        tc.TransmissionCore._emit_emesis = _zonepool_emitter(saved_emit)
+        tc.TransmissionCore._zone_floor_area_m2 = _fomite_area_as_floor
         try:
             yield
         finally:
             tc.TransmissionCore._emit_emesis = saved_emit
-            tc.TransmissionCore._deposit_emesis = saved_deposit
+            tc.TransmissionCore._zone_floor_area_m2 = saved_floor
         return
     yield
 
@@ -599,7 +538,13 @@ def _tier_specs(
     manifest_path: Path, tier: str, epochs_override: int | None = None,
 ) -> dict[int, dict[str, Any]]:
     """seed -> verbatim campaign spec dict for the tier."""
-    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    safe_manifest = Path(
+        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
+    )
+    with validated_open(
+        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        manifest = json.load(handle)
     specs = {}
     for _rid, spec in generate_tier_runs(
         manifest, tier, epochs_override=epochs_override,

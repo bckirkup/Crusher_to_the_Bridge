@@ -47,7 +47,7 @@ wrapper draws RNG.
 
 | candidate | arm | method |
 |---|---|---|
-| emesis footprint localization (#604, `9daa4a8f`) | `emesis_zonepool` | in-process revert of `_emit_emesis`/`_deposit_emesis` to the pre-604 filing (share `min(1, high_touch/footprint)`, zone-pool deposit); draw order preserved in the emitter |
+| emesis footprint localization (#604, `9daa4a8f`) | `emesis_zonepool` | in-process revert via the shipped emitter: floor-area lookup patched to the fomite surface (making the shipped share equal the pre-604 `min(1, high_touch/area)`) + each filed EmesisPatch re-filed into the zone surface pool; draw order preserved |
 | blackwater bowl share (`transmission.blackwater_plumbing`, default-on `b120ad3d`) | `blackwater_off` | labelled config baseline `false`; documented stream-neutral |
 | crew watch schedules (#723, `e86b73bf`) | `watch_off` | `ship_graph.agent_classes` without `schedule` keys (pre-723 verbatim state) + `agent_behavior.schedule_jitter_hours` zeroed; spawn draws reorder — distribution caveat |
 | sub-copy pickup gate (NORO-GATE-FLOOR-01, #674/677) | `gate_off` | in-process `SURFACE_PICKUP_MIN_GEC = 0.0` for the run — equivalent to reverting the constant; gate consumes no RNG either way |
