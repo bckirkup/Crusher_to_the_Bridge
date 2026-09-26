@@ -1,0 +1,141 @@
+{
+  "design_id": "covid_rebase_01_boarding",
+  "parent_design": "covid_rebase_01",
+  "description": "Stage 3 of COVID-REBASE-01: the boarding-structure readout. INDEX-GEOM-01 and SEED-ONSET-01 are measured, not hypothesized -- the takeoff-class day-0 ring burn is decomposed per seed position in the shedding course (onset_day axis) and per seeded-head count (the effective-co-primaries axis), each arm a seed_patch on the declared Diamond Princess replay. Every cell carries the seed_ring payload block: seed_spec echo, seeded_count, index_departure_epoch, aboard_window_acquisitions, aboard_window_clean_bound (acquisitions before the first non-seeded host's earliest shed epoch -- the clean index-only bound), aboard_window_by_route, aboard_window_by_day, yield_per_seeded_host. Theta is the parent's declared fallback 4.22e10: the stage-1 admissible set came back empty at f280e348, so there is no admissible centre; 4.22e10 is the v11 band centre and is used as a fixed measurement point, never as a fit. Cell shape is the declared replay verbatim (onset_day -1.0 baseline, departure_day 5.0, dwell_weighted, imports 1, infection_age_days 6.8 carried as bookkeeping, 20 matched seeds at base 20200205, 768 epochs) so every arm pairs seed-for-seed with the stage-2 replay rows and with the QUAR-ATTR-V2 lineage.",
+  "supersedes": "nothing: it is the stage_3_boarding_structure enumeration declared in covid_rebase_01",
+  "prerequisites": [
+    "covid_rebase_01 stage 1 measured (f280e348): fleet-shape admissible set EMPTY on the union lattice; boarding Theta falls back to 4.22e10 (v11 band centre) per the frozen stage_3_boarding_structure.theta clause.",
+    "covid_rebase_01 stage 2 (sibling design) re-measures the conditional clause at the v11 set on the same post-721 base; stage-3 arms pair seed-for-seed with those cells at Theta 4.22e10.",
+    "COVID-SEED-GEOM-01 (4e0032a0): under a declared onset_day, infection_age_days is a measured null axis; the surviving boarding levers are onset_day (position in the shedding course) and count (co-primaries). One peak-shedding index aboard 5 d gave a median 91 aboard-window acquisitions (clean index-only bound median 30) on the pre-721 base -- this design re-measures that structure at the v11 band centre on the post-721 base.",
+    "SERO-CHANNEL-V1 (03a9db9e/7db0e9a6): the recorded channel stays default-off in these cells; the seed-ring readout is a truth-channel measurement of the day-0 burn, not an ascertainment statement."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    42200000000.0
+  ],
+  "thetas_note": "Declared fallback per covid_rebase_01.stage_3_boarding_structure.theta: the stage-1 admissible set is empty, so the v11 band centre 4.22e10 is the fixed measurement point. It is not admissible on this base and must not be quoted as a fit.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim declared value in every arm; under a declared onset_day it is a measured null (incubation = age + onset_day - seed_day) -- onset_day carries the seed-age axis.",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at base 20200205 as stage 2, so each arm pairs seed-for-seed with the replay rows at the same Theta.",
+  "points": [
+    [
+      42200000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "B0_declared",
+      "role": "baseline: the declared replay, unpatched (onset_day -1.0, count 1, departure_day 5.0)",
+      "overrides": {},
+      "note": "Pairs cell-for-cell with the covid_rebase_01_stage2 row at Theta 4.22e10: same seeds, same seed spec, plus the seed_ring block. The ring readout here is the reference column every sweep arm is differenced against."
+    },
+    {
+      "arm_id": "B_onset_p3",
+      "role": "seed-age sweep: boarder incubating, onset 3 days after boarding",
+      "overrides": {
+        "seed_patch": { "onset_day": 3.0 }
+      },
+      "note": "infection_age 6.8 + onset_day +3 -> incubation 9.8 d; shed opens on voyage day 1 (onset minus presymptomatic_shedding_days 2.0): the index boards non-emitting. Lower bound of the ring-burn axis."
+    },
+    {
+      "arm_id": "B_onset_p1",
+      "role": "seed-age sweep: onset 1 day after boarding",
+      "overrides": {
+        "seed_patch": { "onset_day": 1.0 }
+      },
+      "note": "incubation 7.8 d; boarder sheds presymptomatically from voyage day -1-equivalent -- i.e. already shedding at day 0 but near the start of the course."
+    },
+    {
+      "arm_id": "B_onset_0",
+      "role": "seed-age sweep: onset exactly at boarding",
+      "overrides": {
+        "seed_patch": { "onset_day": 0.0 }
+      },
+      "note": "incubation 6.8 d; day 0 sits at onset, two days into shedding -- just short of the shedding peak (curve peak index 4 of 15, ~day 2 post-onset under presymptomatic_shedding_days 2.0)."
+    },
+    {
+      "arm_id": "B_onset_m3",
+      "role": "seed-age sweep: boarder 3 days post-onset",
+      "overrides": {
+        "seed_patch": { "onset_day": -3.0 }
+      },
+      "note": "incubation 3.8 d; boarding lands at the top of the shedding curve and inside the symptomatic window -- the high-burn end of the axis the prompt calls the boarding suspect."
+    },
+    {
+      "arm_id": "B_onset_m5",
+      "role": "seed-age sweep: boarder 5 days post-onset",
+      "overrides": {
+        "seed_patch": { "onset_day": -5.0 }
+      },
+      "note": "incubation 1.8 d; five days past onset at boarding, still aboard until departure_day 5.0 -- symptomatic, late-course shedding across the day-0 ring window."
+    },
+    {
+      "arm_id": "B_count_2",
+      "role": "co-primaries sweep: two declared seed hosts",
+      "overrides": {
+        "seed_patch": { "count": 2 }
+      },
+      "note": "Two identical declared index hosts (same pathogen, role passenger, onset_day -1.0, departure_day 5.0) -- the first step of the effective-co-primaries axis that SERO-CHANNEL-V1 hypothesized as the takeoff-class burn mechanism."
+    },
+    {
+      "arm_id": "B_count_4",
+      "role": "co-primaries sweep: four declared seed hosts",
+      "overrides": {
+        "seed_patch": { "count": 4 }
+      },
+      "note": "Four co-primaries: the midpoint of the count axis."
+    },
+    {
+      "arm_id": "B_count_8",
+      "role": "co-primaries sweep: eight declared seed hosts",
+      "overrides": {
+        "seed_patch": { "count": 8 }
+      },
+      "note": "Eight co-primaries."
+    },
+    {
+      "arm_id": "B_count_32",
+      "role": "co-primaries sweep: thirty-two declared seed hosts",
+      "overrides": {
+        "seed_patch": { "count": 32 }
+      },
+      "note": "32 co-primaries -- the far end of the axis, chosen so 'boarding structure alone accounts for the majority of takeoff-class burn' is decidable: if 32 co-primaries at day-0 shedding still leave the takeoff tail unexplained, boarding structure is not the majority term."
+    }
+  ],
+  "cells": 200,
+  "cells_note": "1 point x 10 arms x 20 seeds = 200 declared-replay cells, each a full 768-epoch voyage (~30 min). Enumeration order (axis point, arm, seed) puts B0_declared at indices 0-19, the onset sweep at 20-119 in the order above, and the count sweep at 120-199.",
+  "takeoff_recorded_onsets": 10,
+  "readout": {
+    "per_seed_block": "Every cell payload carries seed_ring: the seed_spec echo (audit: patched fields land verbatim), seeded_count, index_departure_epoch, aboard_window_acquisitions, aboard_window_clean_bound, first_secondary_shed_epoch, aboard_window_by_route, aboard_window_by_day, yield_per_seeded_host.",
+    "aggregate": "_seed_ring_summary pools per arm over seeds: median/IQR of aboard_window_acquisitions and aboard_window_clean_bound, yield_per_seeded_host_on_takeoff (takeoff seeds only, recorded_onsets >= 10), aboard_window_by_route_pooled, plus the standard per-row observables so ring burn can be read beside takeoff class.",
+    "decisions": "INDEX-GEOM-01 reads the onset sweep (does a non-emitting boarder still take off; does a late-course boarder saturate the day-0 ring); SEED-ONSET-01 reads the count sweep (yield_per_seeded_host flat -> pure co-primaries scaling; sub-linear -> the ring saturates). 'Boarding structure alone accounts for the majority of takeoff-class burn' is checked against B0's clean bound vs the takeoff-class recorded_onsets at the same seeds."
+  },
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any stage-3 cell exists. This design scores NO anchor: it is a measurement readout over the seed_ring payload. The audit invariant below is the only hard criterion.",
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT, verbatim from v10/v11 plus the patch echo: every cell's seed_ring.seed_spec shows exactly the arm's declared patch fields (and only those) on the declared seed; baseline cells keep onset_day -1.0, count 1, departure_day 5.0. index_shedding_at_day0 varies BY ARM by construction (B_onset_p3 boards non-emitting) and is reported per arm, never treated as a defect. A patch field missing from the echo or an undeclared field present invalidates the cell.",
+      "reads": "seed_ring.seed_spec on every payload"
+    }
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_rebase_01_boarding. The image must be built from a main that contains this design file and the seed_ring_readout code path (merged at f280e348). Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_3_cells": 200,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_rebase_01_boarding/<sha>/cells/",
+    "canary": "B0_declared row (cell indices 0-19): INDEX_OFFSET 0, ARRAY_SIZE 20 -- audit-invariant + ring-block presence check on the baseline arm (it is also a second measurement of the stage-2 Theta 4.22e10 row under identical seeds, so its observables must pair with the stage-2 row seed-for-seed). On a clean read the remaining 180 cells proceed (submitted as the full 200; canary cells skip via _already_complete).",
+    "report_immediately_if": "any cell's seed_spec echo fails the audit; the child failure rate exceeds 5%; or the count sweep shows the majority-of-takeoff-burn pattern declared in the prompt (boarding structure alone accounts for the majority of the takeoff-class burn)."
+  }
+}
