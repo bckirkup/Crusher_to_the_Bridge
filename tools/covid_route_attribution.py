@@ -356,7 +356,11 @@ def cabin_pair_challenge_table(
             mate["observed_mate_case_attack_confined"]
         ),
         "mate_index_pairs": mate["mate_index_pairs"],
+        "mate_secondaries": mate["mate_secondaries"],
+        "mate_slots": mate["mate_slots"],
         "confined_index_pairs": mate["confined_index_pairs"],
+        "confined_secondaries": mate["confined_secondaries"],
+        "confined_slots": mate["confined_slots"],
         "rows": rows,
     }
 
@@ -519,7 +523,11 @@ def _mate_attack_counts(
     return {
         "pairs_observed": len(pairs_infected),
         "mate_index_pairs": mate_index_pairs,
+        "mate_secondaries": mate_secondaries,
+        "mate_slots": mate_slots,
         "confined_index_pairs": confined_index_pairs,
+        "confined_secondaries": confined_secondaries,
+        "confined_slots": confined_slots,
         "observed_mate_case_attack": (
             mate_secondaries / mate_slots if mate_slots else None
         ),
