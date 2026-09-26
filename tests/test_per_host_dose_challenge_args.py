@@ -104,7 +104,7 @@ def test_fomite_representation_arg_rejects_unknown_value():
 def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
-        bundle="active_profiles", epochs=4, pathogen_id="norwalk_gi",
+        bundle="active_profiles", epochs=24, pathogen_id="norwalk_gi",
         top_hosts=4, fomite_representation=arm, arm_tag=arm,
     )
     assert summary["fomite_representation"] == arm
