@@ -17,10 +17,10 @@ Windows:
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import os
-import random
 import re
 import shutil
 import subprocess
@@ -452,9 +452,9 @@ def _secretor_declared_value(decl: Any, *, seed: int, field: str) -> float:
     """Resolve one vector declaration to the run's value in [0, 1].
 
     A scalar is a swept point. ``{"dist": "uniform"|"log_uniform",
-    "interval": [lo, hi]}`` draws once per run, seeded off the run seed and
-    the field name, so a tier can sample a sourced window instead of gridding
-    it, without disturbing any engine RNG stream.
+    "interval": [lo, hi]}`` draws once per run, derived as a pure hash of the
+    run seed and the field name, so a tier can sample a sourced window
+    instead of gridding it, without touching any engine RNG stream.
     """
     if isinstance(decl, Mapping):
         bounds = decl.get("interval")
@@ -471,7 +471,9 @@ def _secretor_declared_value(decl: Any, *, seed: int, field: str) -> float:
             raise ValueError(
                 f"{field} interval must lie in [0, 1], got [{lo}, {hi}]"
             )
-        u = random.Random(f"{seed}:{field}").random()
+        u = int.from_bytes(
+            hashlib.sha256(f"{seed}:{field}".encode()).digest()[:8]
+        ) / float(1 << 64)
         dist = str(decl.get("dist"))
         if dist == "uniform":
             return lo + u * (hi - lo)

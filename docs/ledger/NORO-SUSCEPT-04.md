@@ -57,9 +57,9 @@ axis carries its sourced window with it rather than flattening to one value:
 
 - A scalar declaration is a grid sweep point, as before.
 - `{"dist": "uniform"|"log_uniform", "interval": [lo, hi]}` draws once per
-  run, seeded off `f"{seed}:{field}"` — deterministic per run and disjoint
-  from every engine RNG stream, so the draw is reproducible and re-phases
-  nothing downstream.
+  run, derived as a sha256 hash of `f"{seed}:{field}"` — deterministic per
+  run, a pure function of the label rather than an RNG stream, so the draw
+  is reproducible and re-phases nothing downstream.
 - `secretor_negative_relative_susceptibility`'s sourced window is
   **[0.04, 0.83]**, Kambhampati et al. 2015 pooled secretor:non-secretor
   odds ratios (GII.4 → 0.10 [0.04–0.26]; GII non-4 → 0.45 [0.24–0.83]);
