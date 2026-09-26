@@ -184,46 +184,65 @@ def assign_cabin_mates(
         agents_by_cabin_group[group].append(agent)
 
     for (zone_name, berth_group), group_agents in agents_by_cabin_group.items():
-        # Deal the pool across (watch_section, agent_class) buckets so a
-        # cabin spreads across sections and classes — hot-bunked staterooms
-        # hold complementary rotations, not same-shift neighbours. A single
-        # un-sectioned class reduces to the previous contiguous fill.
-        buckets: dict[tuple[int, str], deque[KorkinAgent]] = (
-            defaultdict(deque)
+        group_agents = _interleave_watch_buckets(group_agents)
+        cabin_size = _group_cabin_size(
+            zone_name, berth_group, group_agents[0].agent_class,
+            zone_meta.get(zone_name, {}),
         )
-        for agent in group_agents:
-            buckets[
-                (getattr(agent, "watch_section", 0), agent.agent_class)
-            ].append(agent)
-        ordered: list[KorkinAgent] = []
-        while True:
-            dealt = False
-            for key in sorted(buckets):
-                if buckets[key]:
-                    ordered.append(buckets[key].popleft())
-                    dealt = True
-            if not dealt:
-                break
-        group_agents = ordered
-        meta = zone_meta.get(zone_name, {})
-        by_class = meta.get("cabin_size_by_class") or {}
-        cabin_size = default_cabin_size(
-            zone_name,
-            meta.get("type", ""),
-            by_class.get(
-                berth_group,
-                by_class.get(group_agents[0].agent_class, meta.get("cabin_size")),
-            ),
-        )
-        if cabin_size is None or cabin_size < 1:
+        if cabin_size is None:
             continue
-        hot_ratio = int(meta.get("hot_bunk_ratio") or 1)
-        cabin_size = cabin_size * max(hot_ratio, 1)
         for i in range(0, len(group_agents), cabin_size):
             cabin_group = group_agents[i : i + cabin_size]
             cabin_ids = {a.agent_id for a in cabin_group}
             for agent in cabin_group:
                 agent.cabin_mate_ids = frozenset(cabin_ids - {agent.agent_id})
+
+
+def _interleave_watch_buckets(
+    group_agents: list[KorkinAgent],
+) -> list[KorkinAgent]:
+    """Deal a berthing pool across (watch_section, agent_class) buckets.
+
+    A cabin spreads across sections and classes — hot-bunked staterooms hold
+    complementary rotations, not same-shift neighbours. A single un-sectioned
+    class reduces to the previous contiguous fill.
+    """
+    buckets: dict[tuple[int, str], deque[KorkinAgent]] = defaultdict(deque)
+    for agent in group_agents:
+        buckets[
+            (getattr(agent, "watch_section", 0), agent.agent_class)
+        ].append(agent)
+    ordered: list[KorkinAgent] = []
+    while True:
+        dealt = False
+        for key in sorted(buckets):
+            if buckets[key]:
+                ordered.append(buckets[key].popleft())
+                dealt = True
+        if not dealt:
+            return ordered
+
+
+def _group_cabin_size(
+    zone_name: str,
+    berth_group: str,
+    first_class: str,
+    meta: dict[str, Any],
+) -> int | None:
+    """Occupants per cabin for one berthing pool, honouring overrides.
+
+    ``cabin_size_by_class`` names classes or berth groups; ``hot_bunk_ratio``
+    multiplies occupants so every berth is shared across watch rotations.
+    """
+    by_class = meta.get("cabin_size_by_class") or {}
+    cabin_size = default_cabin_size(
+        zone_name,
+        meta.get("type", ""),
+        by_class.get(berth_group, by_class.get(first_class, meta.get("cabin_size"))),
+    )
+    if cabin_size is None or cabin_size < 1:
+        return None
+    return cabin_size * max(int(meta.get("hot_bunk_ratio") or 1), 1)
 
 
 def _table_size_by_zone(zones: list[dict[str, Any]]) -> dict[str, int]:

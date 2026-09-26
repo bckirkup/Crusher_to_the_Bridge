@@ -1871,6 +1871,11 @@ class KorkinAgent:
             "susceptibility_multiplier": dict(self.susceptibility_multiplier),
             "microflora_disruption": round(self.microflora_disruption_status, 4),
         }
+        self._export_optional_state(result)
+        return result
+
+    def _export_optional_state(self, result: dict[str, Any]) -> None:
+        """Attach optional agent-state fields to the schema dict in place."""
         if self.chronic_disease_ids:
             result["chronic_disease_ids"] = list(self.chronic_disease_ids)
         if self.cabin_mate_ids:
@@ -1883,7 +1888,6 @@ class KorkinAgent:
             result["dining_party_ids"] = sorted(self.dining_party_ids)
         if self.dining_table_index >= 0:
             result["dining_table_index"] = self.dining_table_index
-        return result
 
 
 # ── Ship simulation engine ──────────────────────────────────────────────
@@ -2259,44 +2263,14 @@ class KorkinShipEngine:
         night_fraction = float(spec.get("night_watch_fraction", 0.0) or 0.0)
         berth_group = str(cls_cfg.get("berth_group") or class_id)
         jitter = _jitter_for_role(self.agent_behavior, role_group)
-        home_pref = cls_cfg.get("home_zone_preference", "Berthing")
-        duty_zone = cls_cfg.get("duty_zone", "")
-        free_pref = cls_cfg.get("free_zone_preference", "")
 
         for i in range(count):
             immune = immunity.draw(role_group, self.rng)
-
-            dining = self._draw_dining_zone(role_group)
-            if duty_zone:
-                work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
-            elif role_group == "crew":
-                work = str(self.rng.choice(self._free_zones + self._dining_zones))
-            else:
-                work = str(self.rng.choice(self._free_zones))
-            if role_group == "crew":
-                home = self._resolve_crew_home(home_pref, work)
-            else:
-                home = self._resolve_zone(home_pref, self._room_zones)
-            free = (
-                self._resolve_zone(free_pref, self._free_zones)
-                if free_pref
-                else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
-            )
+            dining, work, home, free = self._resolve_class_zones(cls_cfg, role_group)
             section = i % sections
-            watch_template = variants[section]
-            night = False
-            if (
-                role_group == ROLE_CREW
-                and night_fraction > 0.0
-                and self.rng.random() < night_fraction
-            ):
-                watch_template = list(CREW_NIGHT_WATCH_SCHEDULE)
-                # Java: the single deepest lottery number (workOrSleep == 0)
-                # sleeps through hour 1 as well — one crew member per class
-                # in expectation.
-                if self.rng.random() < 1.0 / max(night_fraction * count, 1.0):
-                    watch_template[1] = "Sleep"
-                night = True
+            watch_template, night = self._night_watch_draw(
+                role_group, night_fraction, count, variants[section],
+            )
             schedule, seating = self._seated_schedule(watch_template, dining)
 
             agent = KorkinAgent(
@@ -2321,6 +2295,53 @@ class KorkinShipEngine:
             agent_id += 1
 
         return agent_id, infected_remaining
+
+    def _resolve_class_zones(
+        self, cls_cfg: dict[str, Any], role_group: str,
+    ) -> tuple[str, str, str, str]:
+        """Draw a class-spawned agent's dining, work, home, and free zones."""
+        dining = self._draw_dining_zone(role_group)
+        duty_zone = cls_cfg.get("duty_zone", "")
+        home_pref = cls_cfg.get("home_zone_preference", "Berthing")
+        free_pref = cls_cfg.get("free_zone_preference", "")
+        if duty_zone:
+            work = self._resolve_zone(duty_zone, self._free_zones + self._dining_zones)
+        elif role_group == "crew":
+            work = str(self.rng.choice(self._free_zones + self._dining_zones))
+        else:
+            work = str(self.rng.choice(self._free_zones))
+        home = (
+            self._resolve_crew_home(home_pref, work)
+            if role_group == "crew"
+            else self._resolve_zone(home_pref, self._room_zones)
+        )
+        free = (
+            self._resolve_zone(free_pref, self._free_zones)
+            if free_pref
+            else weighted_zone_choice(self._leisure_catalog, self.rng) or "unknown"
+        )
+        return dining, work, home, free
+
+    def _night_watch_draw(
+        self,
+        role_group: str,
+        night_fraction: float,
+        count: int,
+        template: list[str],
+    ) -> tuple[list[str], bool]:
+        """Bernoulli-deal the night-watch schedule to crew, as StrucCrew.java."""
+        if (
+            role_group != ROLE_CREW
+            or night_fraction <= 0.0
+            or self.rng.random() >= night_fraction
+        ):
+            return template, False
+        watch = list(CREW_NIGHT_WATCH_SCHEDULE)
+        # Java: the single deepest lottery number (workOrSleep == 0) sleeps
+        # through hour 1 as well — one crew member per class in expectation.
+        if self.rng.random() < 1.0 / max(night_fraction * count, 1.0):
+            watch[1] = "Sleep"
+        return watch, True
 
     def _seed_initial_infection(
         self, agent: KorkinAgent, rng: np.random.Generator,
