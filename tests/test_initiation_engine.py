@@ -933,6 +933,17 @@ class TestInitWiring:
         assert len(infected) == 2
         assert engine.initiation_manifest == {"mode": MODE_LEGACY}
 
+    def test_a_zero_immunocompromised_fraction_flags_nobody(self) -> None:
+        engine = _FakeEngine()
+        profile = _profile(initial_infected=0)
+        ids = init_multi_pathogen(
+            engine, {PATHOGEN: profile},
+            {"multi_pathogen": {"immunocompromised_fraction": 0.0}},
+            np.random.default_rng(45),
+        )
+        assert ids == set()
+        assert not any(a.immunocompromised for a in engine.agents)
+
 
 # ── Party mode and profile-carried blocks ────────────────────────────────
 

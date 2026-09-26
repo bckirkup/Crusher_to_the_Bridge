@@ -14,6 +14,7 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 from engines.voyage_itinerary import (  # noqa: E402
     apply_ashore_and_embarkation,
     apply_embarkation_surge_locations,
+    dining_meal_weights_from_config,
     load_voyage_config,
     merge_voyage_overrides,
     normalize_voyage_config,
@@ -25,7 +26,6 @@ from orchestrator_init import (  # noqa: E402
     apply_voyage_medical_response,
     load_and_merge_voyage_config,
 )
-
 
 PLATFORMS = ("expedition_cruise_450", "classic_cruise_1900", "spirit_cruise_3000", "mega_cruise_5000")
 
@@ -264,6 +264,30 @@ def test_expedition_meal_weights_replace_yaml_buffet_defaults() -> None:
     breakfast = merged["agent_behavior"]["dining_meal_weights"]["breakfast"]
     assert breakfast["buffet"] == 0.0
     assert breakfast["mdr"] == 0.85
+
+
+def test_explicit_meal_weights_overlay_the_platform_table() -> None:
+    voyage = load_voyage_config(
+        voyage_config_path_for_platform(str(REPO_ROOT), "expedition_cruise_450"),
+    )
+    platform_meals = dining_meal_weights_from_config(voyage)
+    assert platform_meals is not None
+    cfg = {
+        "agent_behavior": {
+            "dining_meal_weights": {
+                "breakfast": {"buffet": 0.99},
+                "snack": {"galley_grill": 1.0},
+            },
+        },
+    }
+
+    merged = apply_voyage_dining_meal_weights(cfg, voyage)
+    meals = merged["agent_behavior"]["dining_meal_weights"]
+
+    assert meals["breakfast"]["buffet"] == pytest.approx(0.99)
+    assert meals["breakfast"]["mdr"] == platform_meals["breakfast"]["mdr"]
+    assert meals["lunch"] == platform_meals["lunch"]
+    assert meals["snack"] == {"galley_grill": 1.0}
 
 
 def test_effects_off_ignores_configured_itinerary() -> None:

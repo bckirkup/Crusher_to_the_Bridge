@@ -424,18 +424,28 @@ def apply_voyage_dining_meal_weights(
             for meal, weights in platform_weights.items()
         }
     else:
-        merged_meals: dict[str, Any] = {}
-        for meal in ("breakfast", "lunch", "dinner"):
-            base = dict(platform_weights.get(meal) or {})
-            overlay = dict(cfg_meals.get(meal) or {})
-            merged_meals[meal] = {**base, **overlay} if (base or overlay) else {}
-        for meal, weights in cfg_meals.items():
-            if meal not in merged_meals:
-                merged_meals[meal] = weights
-        behavior["dining_meal_weights"] = merged_meals
+        behavior["dining_meal_weights"] = _merge_dining_meal_weights(
+            platform_weights, cfg_meals,
+        )
     cfg = dict(cfg)
     cfg["agent_behavior"] = behavior
     return cfg
+
+
+def _merge_dining_meal_weights(
+    platform_weights: dict[str, Any],
+    cfg_meals: dict[str, Any],
+) -> dict[str, Any]:
+    """Overlay explicit per-meal config weights onto the platform table."""
+    merged_meals: dict[str, Any] = {}
+    for meal in ("breakfast", "lunch", "dinner"):
+        base = dict(platform_weights.get(meal) or {})
+        overlay = dict(cfg_meals.get(meal) or {})
+        merged_meals[meal] = {**base, **overlay} if (base or overlay) else {}
+    for meal, weights in cfg_meals.items():
+        if meal not in merged_meals:
+            merged_meals[meal] = weights
+    return merged_meals
 
 
 # Stock modality / FRED defaults (config.yaml). Voyage medical_response seeds
@@ -1289,17 +1299,88 @@ def _validate_route_parameterisation(
             )
 
 
+_SEVERITY_STATES = [
+    "asymptomatic",
+    "subclinical",
+    "mild",
+    "moderate",
+    "severe_critical",
+]
+
+
+def _check_severity_model(pathogen_id: str, severity: Any) -> None:
+    """Check one profile's five-state severity model block."""
+    if not isinstance(severity, dict):
+        raise ValueError(
+            f"{pathogen_id}.severity_model must be an object",
+        )
+    actual_states = severity.get("states")
+    if actual_states != _SEVERITY_STATES:
+        raise ValueError(
+            f"{pathogen_id}.severity_model.states must equal {_SEVERITY_STATES}",
+        )
+    probabilities = severity.get("base_probabilities")
+    if not isinstance(probabilities, list) or len(probabilities) != 5:
+        raise ValueError(
+            f"{pathogen_id}.severity_model.base_probabilities must have length 5",
+        )
+    values = [float(value) for value in probabilities]
+    if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in values):
+        raise ValueError(
+            f"{pathogen_id}.severity_model.base_probabilities must be finite and bounded",
+        )
+    if not np.isclose(sum(values), 1.0):
+        raise ValueError(
+            f"{pathogen_id}.severity_model.base_probabilities must sum to 1.0",
+        )
+    if values[0] >= 1.0:
+        raise ValueError(
+            f"{pathogen_id}.severity_model.base_probabilities[0] must be < 1",
+        )
+    _validate_severity_age_bands(pathogen_id, severity)
+
+
+def _check_observation_model(pathogen_id: str, observation: Any) -> None:
+    """Check one profile's observation model block."""
+    if not isinstance(observation, dict):
+        raise ValueError(
+            f"{pathogen_id}.observation_model must be an object",
+        )
+    for key in ASCERTAINMENT_VECTORS:
+        _validate_ascertainment_vector(
+            f"{pathogen_id}.observation_model.{key}",
+            observation.get(key),
+        )
+    window = observation.get("episode_reporting_window_days")
+    if window is None or not np.isfinite(float(window)) or float(window) <= 0:
+        raise ValueError(
+            f"{pathogen_id}.observation_model.episode_reporting_window_days "
+            "must be positive",
+        )
+
+
+def _validate_severity_observation_pair(
+    pathogen_id: str,
+    severity: Any,
+    observation: Any,
+) -> None:
+    """Validate one profile's paired severity and observation models."""
+    _check_severity_model(pathogen_id, severity)
+    _check_observation_model(pathogen_id, observation)
+    if severity.get("fatality_probability_by_severity") is not None:
+        raise NotImplementedError(
+            f"{pathogen_id}: severity-conditioned fatality is not implemented",
+        )
+    _validate_assay_sensitivity_curve(pathogen_id, observation)
+    _validate_severity_trajectory(pathogen_id, severity)
+    _validate_molecular_observation(pathogen_id, observation)
+    _validate_observation_scenario_set(pathogen_id, observation)
+
+
 def _validate_symptom_severity_profiles(
     profiles: dict[str, dict[str, Any]],
 ) -> None:
     """Validate the authored five-state severity and observation models."""
-    states = [
-        "asymptomatic",
-        "subclinical",
-        "mild",
-        "moderate",
-        "severe_critical",
-    ]
     for pathogen_id, profile in profiles.items():
         if "symptom_severity" in profile:
             raise ValueError(
@@ -1313,57 +1394,7 @@ def _validate_symptom_severity_profiles(
             raise ValueError(
                 f"{pathogen_id}.severity_model and observation_model must be paired",
             )
-        if not isinstance(severity, dict):
-            raise ValueError(
-                f"{pathogen_id}.severity_model must be an object",
-            )
-        actual_states = severity.get("states")
-        if actual_states != states:
-            raise ValueError(
-                f"{pathogen_id}.severity_model.states must equal {states}",
-            )
-        probabilities = severity.get("base_probabilities")
-        if not isinstance(probabilities, list) or len(probabilities) != 5:
-            raise ValueError(
-                f"{pathogen_id}.severity_model.base_probabilities must have length 5",
-            )
-        values = [float(value) for value in probabilities]
-        if not all(np.isfinite(value) and 0.0 <= value <= 1.0 for value in values):
-            raise ValueError(
-                f"{pathogen_id}.severity_model.base_probabilities must be finite and bounded",
-            )
-        if not np.isclose(sum(values), 1.0):
-            raise ValueError(
-                f"{pathogen_id}.severity_model.base_probabilities must sum to 1.0",
-            )
-        if values[0] >= 1.0:
-            raise ValueError(
-                f"{pathogen_id}.severity_model.base_probabilities[0] must be < 1",
-            )
-        _validate_severity_age_bands(pathogen_id, severity)
-        if not isinstance(observation, dict):
-            raise ValueError(
-                f"{pathogen_id}.observation_model must be an object",
-            )
-        for key in ASCERTAINMENT_VECTORS:
-            _validate_ascertainment_vector(
-                f"{pathogen_id}.observation_model.{key}",
-                observation.get(key),
-            )
-        window = observation.get("episode_reporting_window_days")
-        if window is None or not np.isfinite(float(window)) or float(window) <= 0:
-            raise ValueError(
-                f"{pathogen_id}.observation_model.episode_reporting_window_days "
-                "must be positive",
-            )
-        if severity.get("fatality_probability_by_severity") is not None:
-            raise NotImplementedError(
-                f"{pathogen_id}: severity-conditioned fatality is not implemented",
-            )
-        _validate_assay_sensitivity_curve(pathogen_id, observation)
-        _validate_severity_trajectory(pathogen_id, severity)
-        _validate_molecular_observation(pathogen_id, observation)
-        _validate_observation_scenario_set(pathogen_id, observation)
+        _validate_severity_observation_pair(pathogen_id, severity, observation)
 
 
 def _validate_assay_sensitivity_curve(
@@ -1874,6 +1905,60 @@ def _run_initiation(
     )
 
 
+def _seed_host_susceptibility(
+    engine: KorkinShipEngine,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    genetics_rng: np.random.Generator,
+) -> None:
+    """Seed per-agent susceptibility and the secretor-negative draw."""
+    for agent in engine.agents:
+        for pid, prof in pathogen_profiles.items():
+            base_susc = prof.get("base_susceptibility", 1.0)
+            agent.init_pathogen_susceptibility(pid, base_susc)
+            frac, rel_susc = _resolve_secretor_status(prof)
+            drawn = frac > 0.0 and genetics_rng.random() < frac
+            agent.secretor_negative_by_pathogen[pid] = drawn
+            if drawn:
+                # Secretor-negative hosts are partially, not absolutely,
+                # protected against GII norovirus: Teunis 2020 GII infection
+                # risk 0.015 (Se-) vs 0.076 (Se+), and 4 of 8 secretor-negative
+                # challenges became ill at top dose in Rouphael's GII.2 trial.
+                agent.susceptibility_multiplier[pid] *= rel_susc
+
+
+def _flag_immunocompromised(
+    engine: KorkinShipEngine,
+    n_immunocompromised: int,
+    pathogen_profiles: dict[str, dict[str, Any]],
+    chronic_rng: np.random.Generator,
+    rng: np.random.Generator,
+) -> set[int]:
+    """Draw the immunocompromised cohort and flag chronic shedding on it."""
+    immunocompromised_ids: set[int] = set()
+    candidate_ids = [
+        a.agent_id for a in engine.agents
+        if not a.immune and a.infection_status == InfectionStatus.SUSCEPTIBLE
+    ]
+    if not candidate_ids or n_immunocompromised <= 0:
+        return immunocompromised_ids
+    chosen = rng.choice(
+        candidate_ids,
+        size=min(n_immunocompromised, len(candidate_ids)),
+        replace=False,
+    )
+    for aid in chosen:
+        immunocompromised_ids.add(int(aid))
+        agent = engine.agents[int(aid)]
+        # Host biology, and specifically not acquisition: no source
+        # measures the relative risk of acquiring norovirus while
+        # immunocompromised, while duration is measured directly. The flag
+        # lengthens incubation, drives the wearable path, and selects the
+        # hosts eligible for chronic shedding below.
+        agent.immunocompromised = True
+        _assign_chronic_shedding(agent, pathogen_profiles, chronic_rng)
+    return immunocompromised_ids
+
+
 def init_multi_pathogen(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -1902,23 +1987,10 @@ def init_multi_pathogen(
 
     imm_frac = mp_cfg.get("immunocompromised_fraction", 0.05)
     n_immunocompromised = int(len(engine.agents) * imm_frac)
-    immunocompromised_ids: set[int] = set()
     genetics_rng = _host_genetics_rng(rng, cfg)
     chronic_rng = _chronic_shedding_rng(rng, cfg)
 
-    for agent in engine.agents:
-        for pid, prof in pathogen_profiles.items():
-            base_susc = prof.get("base_susceptibility", 1.0)
-            agent.init_pathogen_susceptibility(pid, base_susc)
-            frac, rel_susc = _resolve_secretor_status(prof)
-            drawn = frac > 0.0 and genetics_rng.random() < frac
-            agent.secretor_negative_by_pathogen[pid] = drawn
-            if drawn:
-                # Secretor-negative hosts are partially, not absolutely,
-                # protected against GII norovirus: Teunis 2020 GII infection
-                # risk 0.015 (Se-) vs 0.076 (Se+), and 4 of 8 secretor-negative
-                # challenges became ill at top dose in Rouphael's GII.2 trial.
-                agent.susceptibility_multiplier[pid] *= rel_susc
+    _seed_host_susceptibility(engine, pathogen_profiles, genetics_rng)
 
     pharmacology = resolve_pharmacology(cfg)
     if pharmacology:
@@ -1938,26 +2010,9 @@ def init_multi_pathogen(
             engine.agents, npi_measures, _npi_rng(rng, cfg),
         )
 
-    candidate_ids = [
-        a.agent_id for a in engine.agents
-        if not a.immune and a.infection_status == InfectionStatus.SUSCEPTIBLE
-    ]
-    if candidate_ids and n_immunocompromised > 0:
-        chosen = rng.choice(
-            candidate_ids,
-            size=min(n_immunocompromised, len(candidate_ids)),
-            replace=False,
-        )
-        for aid in chosen:
-            immunocompromised_ids.add(int(aid))
-            agent = engine.agents[int(aid)]
-            # Host biology, and specifically not acquisition: no source
-            # measures the relative risk of acquiring norovirus while
-            # immunocompromised, while duration is measured directly. The flag
-            # lengthens incubation, drives the wearable path, and selects the
-            # hosts eligible for chronic shedding below.
-            agent.immunocompromised = True
-            _assign_chronic_shedding(agent, pathogen_profiles, chronic_rng)
+    immunocompromised_ids = _flag_immunocompromised(
+        engine, n_immunocompromised, pathogen_profiles, chronic_rng, rng,
+    )
 
     if plan.legacy:
         _seed_legacy_infections(engine, pathogen_profiles, rng)
@@ -2206,6 +2261,42 @@ def init_protocol_engine(
 
 # ── Wearable monitor initialization ─────────────────────────────────────
 
+def _shift_wearable_baselines(
+    state: Any,
+    offsets: dict[str, float],
+) -> None:
+    for ch, offset in offsets.items():
+        if ch in state.baselines:
+            state.baselines[ch] = round(state.baselines[ch] + offset, 2)
+
+
+def _apply_chronic_wearable_offsets(
+    monitor: WearableMonitor,
+    chronic_wearable_offsets: dict[int, dict[str, float]],
+) -> None:
+    """Shift wearable baselines by the agent's chronic disease offsets."""
+    for agent_id, offsets in chronic_wearable_offsets.items():
+        states = monitor.agent_states.get(agent_id)
+        if not states:
+            continue
+        for state in states:
+            _shift_wearable_baselines(state, offsets)
+
+
+def _build_wearable_data_stream(
+    cfg: dict[str, Any],
+    seed: int,
+) -> WearableDataStream:
+    """Build the Crusher Labs wearable modality from monitoring config."""
+    wm_cfg = cfg.get("wearable_monitoring", {})
+    return WearableDataStream(
+        observation_noise_sigma=wm_cfg.get("observation_noise_sigma", 0.5),
+        sync_dropout_prob=wm_cfg.get("sync_dropout_prob", 0.02),
+        anomaly_z_threshold=wm_cfg.get("anomaly_z_threshold", 2.0),
+        rng=np.random.default_rng(seed),
+    )
+
+
 def init_wearable_monitors(
     engine: KorkinShipEngine,
     cfg: dict[str, Any],
@@ -2237,21 +2328,6 @@ def init_wearable_monitors(
 
     # Apply chronic disease wearable baseline offsets
     if chronic_wearable_offsets:
-        for agent_id, offsets in chronic_wearable_offsets.items():
-            states = monitor.agent_states.get(agent_id)
-            if not states:
-                continue
-            for state in states:
-                for ch, offset in offsets.items():
-                    if ch in state.baselines:
-                        state.baselines[ch] = round(state.baselines[ch] + offset, 2)
+        _apply_chronic_wearable_offsets(monitor, chronic_wearable_offsets)
 
-    wm_cfg = cfg.get("wearable_monitoring", {})
-    modality = WearableDataStream(
-        observation_noise_sigma=wm_cfg.get("observation_noise_sigma", 0.5),
-        sync_dropout_prob=wm_cfg.get("sync_dropout_prob", 0.02),
-        anomaly_z_threshold=wm_cfg.get("anomaly_z_threshold", 2.0),
-        rng=np.random.default_rng(seed),
-    )
-
-    return monitor, modality
+    return monitor, _build_wearable_data_stream(cfg, seed)
