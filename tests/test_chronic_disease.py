@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import json
 import os
-import tempfile
 from typing import Any
 from unittest.mock import MagicMock
 
@@ -12,8 +10,6 @@ import numpy as np
 import pytest
 
 from engines.infection_dynamics_bridge import (
-    InfectionStatus,
-    IllnessStatus,
     KorkinAgent,
     KorkinShipEngine,
 )
@@ -284,6 +280,78 @@ class TestOrchestratorChronic:
         )
         assert len(assignments.get(0, [])) <= 1
 
+    def test_assign_returns_empty_when_config_empty(self) -> None:
+        from orchestrator_chronic import assign_chronic_diseases
+
+        engine = MagicMock(spec=KorkinShipEngine)
+        engine.agents = [_make_agent(agent_id=0)]
+        cfg = {"chronic_disease": {"enabled": True}}
+
+        assignments = assign_chronic_diseases(
+            engine, {}, {}, cfg, np.random.default_rng(1),
+        )
+        assert assignments == {}
+
+    def test_assign_skips_zero_prevalence_disease(self) -> None:
+        from orchestrator_chronic import assign_chronic_diseases
+
+        engine = MagicMock(spec=KorkinShipEngine)
+        engine.agents = [_make_agent(agent_id=0)]
+        cfg = {
+            "chronic_disease": {
+                "enabled": True, "allow_comorbid": True, "max_comorbid": 2,
+            },
+        }
+        mixed_config = {
+            "never": {
+                "disease_id": "never",
+                "prevalence_by_class": {"default": 0.0},
+                "pathogen_modifiers": {},
+                "wearable_infection_response_scale": 1.0,
+            },
+            "always": {
+                "disease_id": "always",
+                "prevalence_by_class": {"default": 1.0},
+                "pathogen_modifiers": {},
+                "wearable_infection_response_scale": 1.0,
+            },
+        }
+
+        assignments = assign_chronic_diseases(
+            engine, mixed_config, {}, cfg, np.random.default_rng(1),
+        )
+        assert assignments == {0: ["always"]}
+
+    def test_assign_without_comorbid_stops_after_first_hit(self) -> None:
+        from orchestrator_chronic import assign_chronic_diseases
+
+        engine = MagicMock(spec=KorkinShipEngine)
+        engine.agents = [_make_agent(agent_id=0)]
+        cfg = {
+            "chronic_disease": {
+                "enabled": True, "allow_comorbid": False, "max_comorbid": 2,
+            },
+        }
+        multi_config = {
+            "d1": {
+                "disease_id": "d1",
+                "prevalence_by_class": {"default": 1.0},
+                "pathogen_modifiers": {},
+                "wearable_infection_response_scale": 1.0,
+            },
+            "d2": {
+                "disease_id": "d2",
+                "prevalence_by_class": {"default": 1.0},
+                "pathogen_modifiers": {},
+                "wearable_infection_response_scale": 1.0,
+            },
+        }
+
+        assignments = assign_chronic_diseases(
+            engine, multi_config, {}, cfg, np.random.default_rng(1),
+        )
+        assert assignments == {0: ["d1"]}
+
     def test_assign_skips_immune_agents(self) -> None:
         from orchestrator_chronic import assign_chronic_diseases
 
@@ -453,8 +521,8 @@ class TestSeverityEscalation:
     def test_escalation_applies_to_chronic_agents(self) -> None:
         from orchestrator_epoch import apply_chronic_severity_escalation
         from telemetry_buffer.agent_axes import (
-            PRESENTATION_SYMPTOMATIC,
             PRESENTATION_SEVERE,
+            PRESENTATION_SYMPTOMATIC,
         )
 
         engine = MagicMock(spec=KorkinShipEngine)
