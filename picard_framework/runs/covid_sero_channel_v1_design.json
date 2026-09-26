@@ -9,7 +9,7 @@
   "ROUTE-ATTR-V1 measured (be121a0, local): the channel confirms ~76% of infected and dates 93-100% of confirmed at true onset vs the record's 27.7%; 85-89% of dated mass is mild, the stratum a real investigation loses to recall (docs/ledger/ROUTE-ATTR-V1.md).",
   "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al., Lancet Infect Dis 2020: 9/215 PCR-negative repatriated HK passengers seroconverted, ~4% CI 2-8, extrapolated to the ~3,000 PCR-negatives aboard), channel infections_total — the engine's own ever-infected count, so the anchor scores without a serology instrument. Never in fitted_against.",
   "Channel mechanics verified in the tree before freeze: observation_model.onset_recording on sars_cov2_resp is additive and default-off; {symptomatic_at_confirmation_required, report_probability} enforced in SyndromicSurveillance._onset_observation against the confirming specimen's epoch (_lab_confirmed) plus a once-per-case memoized recall draw on a dedicated onset RNG stream — molecular and parent draws unperturbed, the declared arm bit-identical. Arm-expressible through the existing pathogen_overrides deep-merge, no new arm grammar key.",
-  "RNG accounting declared from stochastic-attribution: the onset draw lives on a dedicated child stream derived from the parent SeedSequence entropy without consuming parent state (same construction as the molecular and campaign streams), so an undeclared block draws nothing anywhere. All reads are distribution-level (20-seed q05-q95 per theta per channel), never seed-paired."
+  "RNG accounting declared from stochastic-attribution: the onset draw lives on a dedicated child stream derived from the parent SeedSequence entropy without consuming parent state (same construction as the molecular and campaign streams), so an undeclared block draws nothing anywhere. All reads are distribution-level (60-seed q05-q95 per theta per channel), never seed-paired."
  ],
  "scenario_id": "diamond_princess_2020",
  "thetas": [
@@ -33,8 +33,8 @@
  ],
  "sanitary_visit_mode": "dwell_weighted",
  "seed_base": 20200205,
- "seeds": 20,
- "seeds_note": "Verbatim: the SAME 20 matched seeds at the same base, so every cell pairs seed-for-seed with the stage-2 surface and every measured assay row.",
+ "seeds": 60,
+ "seeds_note": "The first 20 seeds verbatim (seed_base+i -> 20200205-224), still paired seed-for-seed with the stage-2 surface and every measured assay row; extended +40 (20200225-264) per the user's call after the 20-seed canary at theta x0.001 returned only 7 takeoff seeds — 60 draws put ~21 takeoff seeds on a deep-theta row instead of ~7, tightening the takeoff-conditional q05-q95 the scoring clauses read.",
  "points": [
   [42200000000.0, 3.3, 1],
   [12660000000.0, 3.3, 1],
@@ -46,8 +46,8 @@
   [84400000.0, 3.3, 1],
   [42200000.0, 3.3, 1]
  ],
- "cells": 360,
- "cells_note": "9 thetas x 2 channel arms x 20 seeds = 360 cells, each a full 768-epoch (32-day) voyage (~30 min). Point-major, arm-second, seed-innermost enumeration puts theta row i at cells 40i-40i+39 with the declared arm first: x1.0 declared 0-19 / period 20-39; x0.001 declared 320-339 / period 340-359 — the canary row is period at x0.001, cells 340-359.",
+ "cells": 1080,
+ "cells_note": "9 thetas x 2 channel arms x 60 seeds = 1080 cells, each a full 768-epoch (32-day) voyage (~30 min). Point-major, arm-second, seed-innermost enumeration puts theta row i at cells 120i-120i+119 with the declared arm first: x1.0 declared 0-59 / period 60-119; x0.001 declared 960-1019 / period 1020-1079. The 20-seed canary row (period at x0.001, cells 340-359 of the 20-seed revision) re-runs inside this array on the post-merge build so every scored cell shares one image.",
  "takeoff_recorded_onsets": 10,
  "cell_payload_additions": {
   "note": "The assay-line payload plus two fields: lab_confirmed_total (every specimen channel pooled) gives the dating share recorded_onsets/lab_confirmed_total against the record's 197/712; onset_recording echoes the resolved channel block so a cell's channel arm is auditable from the payload alone — null on the declared arm, the declared block on the period arm.",
@@ -128,7 +128,7 @@
     "unreachable": "no (theta, channel) row lands either clause — the gap is not reachable on the hazard axis under either channel; suspect moves to seed/index structure."
    }
   },
-  "rng_pairing_caveat": "Declared from stochastic-attribution: theta rescales the per-host susceptibility draw's VALUE, not its count; the onset draw lives on a dedicated stream that consumes nothing when undeclared and draws once per gate-passing confirmed case when declared — RNG streams stay aligned until an infection outcome or a dating decision flips, after which trajectories diverge. All reads are distribution-level (20-seed q05-q95 per theta per arm), never seed-paired.",
+  "rng_pairing_caveat": "Declared from stochastic-attribution: theta rescales the per-host susceptibility draw's VALUE, not its count; the onset draw lives on a dedicated stream that consumes nothing when undeclared and draws once per gate-passing confirmed case when declared — RNG streams stay aligned until an infection outcome or a dating decision flips, after which trajectories diverge. All reads are distribution-level (60-seed q05-q95 per theta per arm), never seed-paired.",
   "note": "The clauses gate nothing — there is no theta to admit beyond the grid and covid.H5 is held out forever. The assay's product is the theta x channel surface: where truth matches serology, where the record is matched under each channel, and whether any declared theta does both at once."
  },
  "what_this_cannot_settle": [
@@ -139,11 +139,11 @@
  ],
  "execution": {
   "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_sero_channel_v1. The image must be built from a main that contains this design file: the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
-  "cells": 360,
+  "cells": 1080,
   "stride": 1,
   "expected_cell_minutes": 30,
   "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_sero_channel_v1/<sha>/cells/",
-  "canary": "period channel at theta x0.001 (4.22e7 — nearest the serology band), all 20 seeds — array 20 at INDEX_OFFSET 340 (point-major, arm-second enumeration puts this row at cell indices 340-359), inspected before any further submission: every cell's onset_recording echo carries the declared block (the channel resolved, not spec-only), the payload contract is intact, the row is not degenerate, the dating share recorded_onsets/lab_confirmed_total lands near ~0.28 of confirmed, and the index-geometry audit invariant holds. Then STOP and report — the user decides whether the full array runs. Canary cells are skipped idempotently by _already_complete when the array is submitted.",
+  "canary": "DONE under the 20-seed revision (period at theta x0.001, array f340c7b9, cells 340-359, seeds 20200205-224 — read out in docs/ledger/SERO-CHANNEL-V1.md): the channel resolved on every cell (onset_recording echo present), the row was not degenerate (7/20 takeoff), dating share landed ~0.43-0.53 of lab-confirmed — above the record's 0.277, so the recall-only fallback is NOT engaged — and the index-geometry invariant held. The user then directed the full array at 60 seeds. Under this 60-seed revision the same row is cells 1020-1079; it re-runs because the S3 prefix keys on the post-merge image sha and _already_complete only skips within a prefix.",
   "report_immediately_if": "the canary row is read out (stop after it — the user decides the array); the gate lands dating far from ~0.28 of confirmed (undershoot -> the declared fallback is the recall draw alone WITHOUT the symptomatic-at-specimen gate, declared before the array, never after); the known zero-asymptomatics anomaly (seed 20200205, logged in ROUTE-ATTR-V1) recurs or resolves; the channel arm does not resolve at runtime (onset_recording echo null on a period cell — spec-lands but inert is a bug signature, not physics); any cell's audit invariant fails (index_onset_day != -1.0 or index_shedding_at_day0 false); or the child failure rate exceeds 5%."
  }
 }

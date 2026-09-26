@@ -225,17 +225,18 @@ class TestStreamIsolation:
 
 
 class TestArmReachability:
-    def test_design_enumerates_the_declared_360_cells(self) -> None:
+    def test_design_enumerates_the_declared_1080_cells(self) -> None:
         design = load_design(os.path.join(REPO_ROOT, DESIGN_REL))
         cells = enumerate_cells(design)
-        assert len(cells) == 360
-        # Canary row: period channel at theta x0.001, seeds 20200205-224.
-        canary = cells[340:360]
+        assert len(cells) == 1080
+        # Canary row under the 60-seed revision: period channel at
+        # theta x0.001, seeds 20200205-264 (first 20 unchanged).
+        canary = cells[1020:1080]
         assert all(c.arm_id == "P1_period" for c in canary)
-        assert [c.seed for c in canary] == list(range(20200205, 20200225))
+        assert [c.seed for c in canary] == list(range(20200205, 20200265))
         assert all(c.theta == pytest.approx(4.22e7) for c in canary)
         # The declared arm's matching row sits immediately before.
-        declared = cells[320:340]
+        declared = cells[960:1020]
         assert all(c.arm_id == "D0_declared" for c in declared)
         assert [c.seed for c in declared] == [c.seed for c in canary]
 

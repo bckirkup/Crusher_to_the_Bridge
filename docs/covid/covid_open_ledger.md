@@ -502,6 +502,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   the declared recall-only fallback is not engaged; the channel under-
   closes vs the record at this theta. The 20200205 zero-asymptomatics
   anomaly did not recur (110/248 asymptomatic campaign positives).
-  The full array (360 cells, both channels × Θ axis) awaits the user's
-  decision. Design `picard_framework/runs/covid_sero_channel_v1_design.json`,
-  ledger `docs/ledger/SERO-CHANNEL-V1.md`.
+  On the canary's 7/20 takeoff the user extended the design to 60 seeds
+  per cell (first 20 verbatim, +40) — 9 θ × 2 channels × 60 = 1,080
+  cells — for tighter takeoff-conditional quantiles; the full array runs
+  on a post-merge image so every scored cell shares one build. Design
+  `picard_framework/runs/covid_sero_channel_v1_design.json`, ledger
+  `docs/ledger/SERO-CHANNEL-V1.md`.
