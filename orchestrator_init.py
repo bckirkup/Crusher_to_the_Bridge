@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import os
 import warnings
-from collections import defaultdict
+from collections import defaultdict, deque
 from functools import lru_cache
 from typing import Any
 
@@ -123,6 +123,7 @@ def load_spatial_layout(cfg: dict[str, Any]) -> list[dict[str, Any]] | None:
             "cabin_ventilation_type": z.get("cabin_ventilation_type", ""),
             "cabin_size": z.get("cabin_size"),
             "cabin_size_by_class": dict(z.get("cabin_size_by_class") or {}),
+            "hot_bunk_ratio": z.get("hot_bunk_ratio"),
             "max_occupancy": z.get("max_occupancy"),
             "description": z.get("description", ""),
             "dining_service_type": z.get("dining_service_type", ""),
@@ -160,26 +161,64 @@ def assign_cabin_mates(
 
     Cabins are filled within one ``agent_class`` at a time, so cabin mates share
     a department (crew are berthed by department and shift; passengers by
-    booking class). A zone's ``cabin_size_by_class`` overrides ``cabin_size``
-    for the classes it names, e.g. junior galley ranks berthed three or four
-    to a cabin where the corridor norm is two.
+    booking class). Classes may declare a shared ``berth_group`` so several
+    classes draw from one berthing pool — e.g. watch sections that hot-bunk.
+    A zone's ``cabin_size_by_class`` overrides ``cabin_size`` for the classes
+    (or berth groups) it names, e.g. junior galley ranks berthed three or
+    four to a cabin where the corridor norm is two.
+
+    A zone's ``hot_bunk_ratio`` (default 1) multiplies the number of
+    occupants each cabin houses: ratio 2 means every berth is shared between
+    agents on complementary watch rotations, as enlisted berthing on a
+    submarine or small combatant does. The agents' own schedules keep the
+    sections from co-occupying the cabin, so the shared pool is what the
+    contact model needs — bunk-level pairing is finer than the model reads.
     """
     zone_meta = {z["name"]: z for z in zones}
     agents_by_cabin_group: dict[tuple[str, str], list[KorkinAgent]] = defaultdict(list)
     for agent in agents:
-        group = (agent.home_zone, agent.agent_class)
+        group = (
+            agent.home_zone,
+            getattr(agent, "berth_group", "") or agent.agent_class,
+        )
         agents_by_cabin_group[group].append(agent)
 
-    for (zone_name, agent_class), group_agents in agents_by_cabin_group.items():
+    for (zone_name, berth_group), group_agents in agents_by_cabin_group.items():
+        # Deal the pool across (watch_section, agent_class) buckets so a
+        # cabin spreads across sections and classes — hot-bunked staterooms
+        # hold complementary rotations, not same-shift neighbours. A single
+        # un-sectioned class reduces to the previous contiguous fill.
+        buckets: dict[tuple[int, str], deque[KorkinAgent]] = (
+            defaultdict(deque)
+        )
+        for agent in group_agents:
+            buckets[
+                (getattr(agent, "watch_section", 0), agent.agent_class)
+            ].append(agent)
+        ordered: list[KorkinAgent] = []
+        while True:
+            dealt = False
+            for key in sorted(buckets):
+                if buckets[key]:
+                    ordered.append(buckets[key].popleft())
+                    dealt = True
+            if not dealt:
+                break
+        group_agents = ordered
         meta = zone_meta.get(zone_name, {})
         by_class = meta.get("cabin_size_by_class") or {}
         cabin_size = default_cabin_size(
             zone_name,
             meta.get("type", ""),
-            by_class.get(agent_class, meta.get("cabin_size")),
+            by_class.get(
+                berth_group,
+                by_class.get(group_agents[0].agent_class, meta.get("cabin_size")),
+            ),
         )
         if cabin_size is None or cabin_size < 1:
             continue
+        hot_ratio = int(meta.get("hot_bunk_ratio") or 1)
+        cabin_size = cabin_size * max(hot_ratio, 1)
         for i in range(0, len(group_agents), cabin_size):
             cabin_group = group_agents[i : i + cabin_size]
             cabin_ids = {a.agent_id for a in cabin_group}
@@ -710,6 +749,8 @@ def _copy_optional_agent_fields(
         "clinical_features",
         "days_since_symptom_onset",
         "cabin_mate_ids",
+        "watch_section",
+        "night_watch",
         "role",
     ):
         if key in a:

@@ -210,7 +210,12 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # positives: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0), read in the
         # local venv on this branch. The 3.11 pin is stale pending a CI
         # reading on this branch, as earlier entries were.
-        (3, 12): (1, 1, 217, 2, 0),
+        # SCHED-WATCH-01 activates per-agent phase jitter (±2 h passengers,
+        # ±1 h crew) and the StrucCrew night-watch lottery at spawn; the
+        # draws reorder the shared stream and the near-extinct cell drops
+        # one campaign positive: (1, 1, 217, 2, 0) -> (1, 1, 217, 1, 0) on
+        # CPython 3.12, read in the local venv on this branch.
+        (3, 12): (1, 1, 217, 1, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the

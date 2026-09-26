@@ -143,6 +143,11 @@
           },
           "description": "Stateroom occupancy per agent_class, overriding cabin_size for that class (e.g. junior galley ranks berthed 3-4 where the corridor norm is 2)"
         },
+        "hot_bunk_ratio": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Berth-sharing multiplier for Cabin_Corridor zones (default 1). Ratio N means each stateroom houses N times cabin_size occupants, as watch sections sharing bunks on a submarine or cramped combatant do; pair it with per-class schedule.watch_sections so co-cabin watch sections rotate in anti-phase."
+        },
         "meal_seatings": {
           "type": "integer",
           "minimum": 1,

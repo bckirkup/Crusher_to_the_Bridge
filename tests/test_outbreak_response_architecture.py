@@ -108,7 +108,10 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     # shifted the seeded stream again on this hull (63 head blocks on
     # mega_cruise_5000): seed 7 moved into the never-escalating tail, and
     # seed 5 escalates at 122 h, still inside the voyage.
-    spec.random_seed = 5
+    # SCHED-WATCH-01 shifts it once more — per-agent phase jitter and the
+    # StrucCrew night-watch lottery draw on the shared stream at spawn;
+    # seed 5 now never escalates, while seed 2 escalates at 34 h.
+    spec.random_seed = 2
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     sim.initialize()
 

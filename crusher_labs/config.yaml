@@ -32,6 +32,20 @@ ship_graph:
   # schedule profile, preferred zones, and duty station.  When
   # present, these override the legacy passenger/crew binary split.
   # Fractions must sum to 1.0.
+  #
+  # The optional `schedule` block picks the class's day template:
+  #   schedule: "crew_general"                    # named CLASS_SCHEDULES template
+  #   schedule: ["Sleep", ...]                    # inline 24 hourly tokens
+  #   schedule:
+  #     template: "crew_general"                  # named template (as above)
+  #     tokens: [...]                             # inline 24 tokens (wins over template)
+  #     watch_sections: 3                         # deal the class across N
+  #                                               # phase-rotated watch variants
+  #     night_watch_fraction: 0.05                # Bernoulli share onto the
+  #                                               # Java night-watch schedule
+  # `berth_group` pools classes into shared berthing for cabin fills
+  # (see spatial_layout zone `hot_bunk_ratio`).  A class that omits
+  # `schedule` inherits its role's generic day template.
   agent_classes:
     - class_id: "passenger_general"
       role_group: "passenger"
@@ -57,24 +71,28 @@ ship_graph:
       home_zone_preference: "CC_"
       free_zone_preference: ""
       duty_zone: ""
+      schedule: {template: "crew_general", night_watch_fraction: 0.05}
     - class_id: "crew_medical"
       role_group: "crew"
       fraction: 0.05
       home_zone_preference: "CC_"
       free_zone_preference: "Medical"
       duty_zone: "Medical_Center"
+      schedule: {template: "crew_medical", night_watch_fraction: 0.05}
     - class_id: "crew_engineering"
       role_group: "crew"
       fraction: 0.10
       home_zone_preference: "CC_"
       free_zone_preference: "Engine"
       duty_zone: "Engine"
+      schedule: {template: "crew_engineering", night_watch_fraction: 0.05}
     - class_id: "crew_galley"
       role_group: "crew"
       fraction: 0.05
       home_zone_preference: "CC_"
       free_zone_preference: ""
       duty_zone: "Galley"
+      schedule: {template: "crew_galley", night_watch_fraction: 0.05}
 
   # ── Infection Counters ─────────────────────────────────────
   # Configurable per-group attack rate and infection count
@@ -246,6 +264,12 @@ emod_progression:
 agent_behavior:
   dining_rotation_probability: 0.0
   free_zone_rotation_probability: 0.0
+  # schedule_jitter_hours: persistent per-agent phase offset on the hourly
+  # clock, drawn uniform(-jitter, +jitter) at spawn — Java's `randomness`
+  # field. A scalar applies to all agents (1.0 = Java crew ±1h); a
+  # {passenger: 2.0, crew: 1.0} map matches the Java per-role ranges
+  # (Passenger.java ±2h, StrucCrew.java ±1h). 0.0 disables the draw.
+  schedule_jitter_hours: {passenger: 2.0, crew: 1.0}
   dining_meal_weights:
     breakfast:
       buffet: 0.6

@@ -24,7 +24,8 @@
       "fraction": 0.06,
       "home_zone_preference": "OC_D8_F",
       "free_zone_preference": "Bridge",
-      "duty_zone": "Bridge"
+      "duty_zone": "Bridge",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_helm_ops",
@@ -32,7 +33,8 @@
       "fraction": 0.06,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "Bridge",
-      "duty_zone": "Bridge"
+      "duty_zone": "Bridge",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_security",
@@ -40,7 +42,8 @@
       "fraction": 0.07,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "Security",
-      "duty_zone": "Security"
+      "duty_zone": "Security",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_engineering",
@@ -48,7 +51,8 @@
       "fraction": 0.14,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "MainEng",
-      "duty_zone": "MainEng"
+      "duty_zone": "MainEng",
+      "schedule": {"template": "crew_engineering", "watch_sections": 3}
     },
     {
       "class_id": "crew_sciences",
@@ -56,7 +60,8 @@
       "fraction": 0.09,
       "home_zone_preference": "OC_D8_F",
       "free_zone_preference": "Science1",
-      "duty_zone": "Science1"
+      "duty_zone": "Science1",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_medical",
@@ -64,7 +69,8 @@
       "fraction": 0.07,
       "home_zone_preference": "OC_D8_F",
       "free_zone_preference": "Sickbay",
-      "duty_zone": "Sickbay"
+      "duty_zone": "Sickbay",
+      "schedule": {"template": "crew_medical"}
     },
     {
       "class_id": "crew_operations",
@@ -72,7 +78,8 @@
       "fraction": 0.05,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "TenFwd",
-      "duty_zone": "TenFwd"
+      "duty_zone": "TenFwd",
+      "schedule": {"template": "crew_general", "watch_sections": 3}
     },
     {
       "class_id": "crew_services",
@@ -80,7 +87,8 @@
       "fraction": 0.08,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "Galley",
-      "duty_zone": "Galley"
+      "duty_zone": "Galley",
+      "schedule": {"template": "crew_galley"}
     },
     {
       "class_id": "passenger_family",
@@ -96,7 +104,8 @@
       "fraction": 0.09,
       "home_zone_preference": "FC_D24_P_F",
       "free_zone_preference": "TenFwd",
-      "duty_zone": "Arboretum"
+      "duty_zone": "Arboretum",
+      "schedule": {"template": "passenger_general"}
     },
     {
       "class_id": "crew_general",
@@ -104,7 +113,8 @@
       "fraction": 0.15,
       "home_zone_preference": "EC_D9_P_M",
       "free_zone_preference": "Mess_Hall",
-      "duty_zone": "Mess_Hall"
+      "duty_zone": "Mess_Hall",
+      "schedule": {"template": "crew_general", "night_watch_fraction": 0.05}
     }
   ],
   "gender_distribution": {

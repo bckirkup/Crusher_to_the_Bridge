@@ -363,7 +363,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 4 Port Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 4 Port Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D4_P_A",
@@ -378,7 +379,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 4 Port Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 4 Port Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D4_S_F",
@@ -393,7 +395,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 4 Stbd Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 4 Stbd Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D4_S_A",
@@ -408,7 +411,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 4 Stbd Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 4 Stbd Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D5_P_F",
@@ -423,7 +427,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 5 Port Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 5 Port Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D5_P_A",
@@ -438,7 +443,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 5 Port Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 5 Port Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D5_S_F",
@@ -453,7 +459,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 5 Stbd Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 5 Stbd Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D5_S_A",
@@ -468,7 +475,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 5 Stbd Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 5 Stbd Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D6_P_F",
@@ -483,7 +491,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 6 Port Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 6 Port Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D6_P_A",
@@ -498,7 +507,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 6 Port Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 6 Port Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D6_S_F",
@@ -513,7 +523,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 6 Stbd Fwd. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 6 Stbd Fwd. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "EC_D6_S_A",
@@ -528,7 +539,8 @@
       },
       "cabin_ventilation_type": "interior_hvac",
       "cabin_size": 2,
-      "description": "Enlisted cabin corridor, saucer deck 6 Stbd Aft. ~16 cabins, ventilation=interior_hvac."
+      "description": "Enlisted cabin corridor, saucer deck 6 Stbd Aft. ~16 cabins, ventilation=interior_hvac.",
+      "hot_bunk_ratio": 2
     },
     {
       "id": "OC_D5_F",
