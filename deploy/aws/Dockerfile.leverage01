@@ -1,0 +1,22 @@
+# LEVERAGE-01 worker — the campaign image plus the leverage driver and its
+# array-cell entrypoint.
+#
+# The leverage driver and design file live under picard_framework/, which the
+# campaign image already ships; this layer adds only the two files the base
+# predates and the worker script itself.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.leverage01 -t picard-leverage01 .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign picard_framework/leverage_screen.py ./picard_framework/leverage_screen.py
+COPY --chown=campaign:campaign picard_framework/runs/leverage01_design.json ./picard_framework/runs/leverage01_design.json
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py ./deploy/aws/dose_challenge_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/leverage01_entrypoint.py ./deploy/aws/leverage01_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
