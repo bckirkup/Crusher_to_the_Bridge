@@ -2,8 +2,11 @@
 **Date:** 2026-09-26
 **Commit:** 8ac510b3
 **Pathogens:** sars_cov2_resp
-**Status:** measured (canary only — period arm, theta x0.001, 20 seeds)
+**Status:** measured
 **Measured at:** 8ac510b3
+
+Measured extent: canary only — period arm at theta x0.001, 20 seeds
+(cells 340-359). The remaining 340 cells have not run.
 
 The observational-channel arm of the ~18x conditional-size hunt, declared
 in `picard_framework/runs/covid_sero_channel_v1_design.json` before any
