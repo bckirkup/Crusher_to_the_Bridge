@@ -68,6 +68,7 @@ python3 presidio_runner.py \
 | [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) | Living | Ship manual: run specs, API, outputs |
 | [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) | Living | Fleet, Stackelberg, OIS, utility export/import |
 | [simulation_step_order.md](simulation_step_order.md) | Living | Epoch phase order |
+| [api_service.md](api_service.md) | Implemented (`api/`) | REST job API over PicardRunSpec/ShipSimulation (issue #101) |
 | [OPERATORS_MANUAL.md](OPERATORS_MANUAL.md) | Historical reference — **but load-bearing** | The pre-split monolith. §§5–11 are the *only* documentation in the repo for SOP authoring, the GIS spatial bridge CLI, sanity-checker categories, lab-notebook fidelity tiers, the LCARS dashboard stations, console output format, and upstream-project provenance. Do not treat as a duplicate. Appendix A's test count (~875) is stale; the suite is 3229. |
 | [../picard_framework/runs/mega_cruise_campaign/README.md](../picard_framework/runs/mega_cruise_campaign/README.md) | Living | ~17,780-run mega cruise campaign |
 

@@ -16,6 +16,10 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+api = [
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+]
 dashboard = [
     "streamlit>=1.28",
     "plotly>=5.0",
@@ -48,14 +52,17 @@ dev = [
     "pytest-xdist>=3.6",
     "ruff>=0.4",
     "check-jsonschema>=0.28",
+    "httpx2>=2.0",
 ]
 
 [project.scripts]
 crusher-orchestrator = "orchestrator:run"
 crusher-presidio = "presidio_runner:main"
+crusher-api = "api.app:main"
 
 [tool.setuptools.packages.find]
 include = [
+    "api*",
     "engines*",
     "crusher_labs*",
     "picard_framework*",
