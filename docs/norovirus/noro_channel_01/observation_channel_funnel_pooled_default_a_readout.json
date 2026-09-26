@@ -1,0 +1,182 @@
+{
+ "seeds": [
+  8000
+ ],
+ "n_seeds": 1,
+ "infected_per_seed": {
+  "median": 7.0,
+  "min": 7,
+  "max": 7
+ },
+ "rung_ratios": {
+  "confirmed_per_reported": {
+   "median": 0.0,
+   "q05": 0.0,
+   "q95": 0.0
+  },
+  "confirmed_per_symptomatic": {
+   "median": 0.0,
+   "q05": 0.0,
+   "q95": 0.0
+  },
+  "dated_per_confirmed": {
+   "median": null,
+   "q05": null,
+   "q95": null
+  },
+  "dated_per_infected": {
+   "median": 0.0,
+   "q05": 0.0,
+   "q95": 0.0
+  },
+  "eligible_per_symptomatic": {
+   "median": 1.0,
+   "q05": 1.0,
+   "q95": 1.0
+  },
+  "infected": {
+   "median": 7.0,
+   "q05": 7.0,
+   "q95": 7.0
+  },
+  "reported_crew_share": {
+   "median": null,
+   "q05": null,
+   "q95": null
+  },
+  "reported_passenger_share": {
+   "median": 1.0,
+   "q05": 1.0,
+   "q95": 1.0
+  },
+  "reported_per_eligible": {
+   "median": 0.16666666666666666,
+   "q05": 0.16666666666666666,
+   "q95": 0.16666666666666666
+  },
+  "reported_per_eligible_onboard": {
+   "median": 1.0,
+   "q05": 1.0,
+   "q95": 1.0
+  },
+  "reported_per_symptomatic": {
+   "median": 0.16666666666666666,
+   "q05": 0.16666666666666666,
+   "q95": 0.16666666666666666
+  },
+  "reported_per_symptomatic_onboard": {
+   "median": 1.0,
+   "q05": 1.0,
+   "q95": 1.0
+  },
+  "symptomatic_onboard_per_infected": {
+   "median": 0.14285714285714285,
+   "q05": 0.14285714285714285,
+   "q95": 0.14285714285714285
+  },
+  "symptomatic_per_infected": {
+   "median": 0.8571428571428571,
+   "q05": 0.8571428571428571,
+   "q95": 0.8571428571428571
+  }
+ },
+ "pooled_rung_totals": {
+  "infected": {
+   "total": 7,
+   "passenger": 6,
+   "crew": 1,
+   "other": 0
+  },
+  "symptomatic_course": {
+   "total": 6,
+   "passenger": 5,
+   "crew": 1,
+   "other": 0
+  },
+  "symptomatic_onboard": {
+   "total": 1,
+   "passenger": 1,
+   "crew": 0,
+   "other": 0
+  },
+  "syndrome_eligible": {
+   "total": 6,
+   "passenger": 5,
+   "crew": 1,
+   "other": 0
+  },
+  "eligible_onboard": {
+   "total": 1,
+   "passenger": 1,
+   "crew": 0,
+   "other": 0
+  },
+  "reported_infirmary": {
+   "total": 1,
+   "passenger": 1,
+   "crew": 0,
+   "other": 0
+  },
+  "lab_sampled": {
+   "total": 0,
+   "passenger": 0,
+   "crew": 0,
+   "other": 0
+  },
+  "lab_confirmed": {
+   "total": 0,
+   "passenger": 0,
+   "crew": 0,
+   "other": 0
+  },
+  "onset_dated": {
+   "total": 0,
+   "passenger": 0,
+   "crew": 0,
+   "other": 0
+  }
+ },
+ "pooled_ratios": {
+  "symptomatic_per_infected": 0.8571428571428571,
+  "symptomatic_onboard_per_infected": 0.14285714285714285,
+  "eligible_per_symptomatic": 1.0,
+  "reported_per_eligible": 0.16666666666666666,
+  "reported_per_eligible_onboard": 1.0,
+  "reported_per_symptomatic_onboard": 1.0,
+  "reported_per_symptomatic": 0.16666666666666666,
+  "confirmed_per_reported": 0.0,
+  "confirmed_per_symptomatic": 0.0,
+  "dated_per_confirmed": null,
+  "dated_per_infected": 0.0,
+  "reported_passenger_share": 1.0,
+  "reported_crew_share": null
+ },
+ "per_seed_ratios": [
+  {
+   "seed": 8000,
+   "infected": 7,
+   "symptomatic_per_infected": 0.8571428571428571,
+   "symptomatic_onboard_per_infected": 0.14285714285714285,
+   "eligible_per_symptomatic": 1.0,
+   "reported_per_eligible": 0.16666666666666666,
+   "reported_per_eligible_onboard": 1.0,
+   "reported_per_symptomatic_onboard": 1.0,
+   "reported_per_symptomatic": 0.16666666666666666,
+   "confirmed_per_reported": 0.0,
+   "confirmed_per_symptomatic": 0.0,
+   "dated_per_confirmed": null,
+   "dated_per_infected": 0.0,
+   "reported_passenger_share": 1.0,
+   "reported_crew_share": null
+  }
+ ],
+ "dating_fidelity": {
+  "dated_hosts_total": 0,
+  "exact_share_min": null,
+  "max_abs_error": 0
+ },
+ "confirmed_never_dated_total": {},
+ "non_report_total": {
+  "course_not_symptomatic_onboard": 5
+ }
+}
