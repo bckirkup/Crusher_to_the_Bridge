@@ -33,8 +33,11 @@ entry measures anchors only and publishes no dose numbers.
   clean, posting field populated, and the cell is read out before the array
   is submitted.
 - **AWS**: `picard-campaign-queue`, prefix `campaign/noro_rebase_01/` and
-  `campaign/noro_rebase_01_canary/`, jobdef `picard-campaign:<REV>` pinned to
-  image digest (recorded at submission, below — never a bare tag).
+  `campaign/noro_rebase_01_canary/`, jobdef `picard-campaign:49`, image digest
+  `sha256:e1f7b0ccff1db48caaed2c021a17015fd658fb573d92f16805cb3ea5d0c3341c`
+  (`picard-campaign:noro-rebase-01`, engine SHA 1935b5d4 = fbad8738 +
+  manifest/declared-ledger commit only). Canary Batch array
+  `de944b89-2b12-4fd8-bec6-4eeb32797cc3` (20 children).
 - **Harness**: `telemetry_buffer/observation_model/score_anchors.py`
   (`--vsp-era pre`), scoring A1/A2/A4/A5/A8/A9 conditional on take-off
   (`peak_prevalence >= 10`); A3 is a construction band, reported not scored.
