@@ -91,6 +91,7 @@ from simulation_utils.paths import (  # noqa: E402
 from simulation_utils.platform_complement import declared_total  # noqa: E402
 from tools.noro_diag import per_host_dose_challenge as _pdc  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
+from tools.readout_stats import quantiles  # noqa: E402
 
 
 def _role_group(role: Any) -> str:
@@ -274,24 +275,6 @@ def run_seed(
     }
 
 
-def _quantiles(vals: list[float]) -> dict[str, Any]:
-    if not vals:
-        return {"n": 0}
-    ordered = sorted(float(v) for v in vals)
-    n = len(ordered)
-
-    def q(p: float) -> float:
-        k = (n - 1) * p
-        lo = int(k)
-        hi = min(lo + 1, n - 1)
-        return ordered[lo] + (ordered[hi] - ordered[lo]) * (k - lo)
-
-    return {
-        "n": n, "min": ordered[0], "q25": q(0.25), "median": q(0.5),
-        "q75": q(0.75), "max": ordered[-1], "mean": sum(ordered) / n,
-    }
-
-
 def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
     imports = [s["imports_drawn_total"] for s in per_seed]
     secondaries = [s["secondaries_total"] for s in per_seed]
@@ -308,10 +291,10 @@ def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
         route.update(s.get("secondaries_by_route") or {})
     return {
         "n_seeds": len(per_seed),
-        "imports_per_voyage": _quantiles(imports),
+        "imports_per_voyage": quantiles(imports),
         "composition_total": dict(composition),
-        "secondaries_per_voyage": _quantiles(secondaries),
-        "yield_per_import_per_seed": _quantiles(yields),
+        "secondaries_per_voyage": quantiles(secondaries),
+        "yield_per_import_per_seed": quantiles(yields),
         "pooled_yield": (
             total_secondaries / total_imports if total_imports else None
         ),

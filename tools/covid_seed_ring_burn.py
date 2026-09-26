@@ -78,31 +78,13 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
     prepare_cell_run_spec,
 )
 from picard_framework.covid_theta_fit import run_fit_spec  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    confine_to_base,
+    validated_open,
+)
 from tools.covid_assay_smoke import load_declared_cells, repo_root_of  # noqa: E402
 from tools.covid_route_attribution import NearFieldShareLedger  # noqa: E402
-
-
-def _quantiles(vals: list[float]) -> dict[str, Any]:
-    if not vals:
-        return {"n": 0}
-    ordered = sorted(float(v) for v in vals)
-    n = len(ordered)
-
-    def q(p: float) -> float:
-        k = (n - 1) * p
-        lo = int(k)
-        hi = min(lo + 1, n - 1)
-        return ordered[lo] + (ordered[hi] - ordered[lo]) * (k - lo)
-
-    return {
-        "n": n,
-        "min": ordered[0],
-        "q25": q(0.25),
-        "median": q(0.5),
-        "q75": q(0.75),
-        "max": ordered[-1],
-        "mean": sum(ordered) / n,
-    }
+from tools.readout_stats import quantiles  # noqa: E402
 
 
 def _seed_spec(raw: dict[str, Any]) -> dict[str, Any]:
@@ -174,7 +156,6 @@ def analyse_seed(
             else:
                 seed_spec[key] = value
     seed_spec = _seed_spec(raw)
-    departure_day = seed_spec.get("departure_day")
     ledger = QuarantineAttributionLedger()
     near = NearFieldShareLedger()
 
@@ -184,6 +165,21 @@ def analyse_seed(
 
     sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=observer)
 
+    return _postrun_readout(
+        sim, seed_spec, cell, age_override, ledger, near,
+    )
+
+
+def _postrun_readout(
+    sim: Any,
+    seed_spec: dict[str, Any],
+    cell: Any,
+    age_override: float | None,
+    ledger: Any,
+    near: Any,
+) -> dict[str, Any]:
+    """Assemble the per-seed readout from a finished simulation."""
+    departure_day = seed_spec.get("departure_day")
     profile = sim.pathogen_profiles[PATHOGEN_ID]
     clock = sim.clock
     presymp_epochs = int(round(
@@ -273,7 +269,7 @@ def analyse_seed(
             "route_split_all": _route_split(events),
             "route_split_aboard": _route_split(aboard),
             "role_split_aboard": _role_split(aboard),
-            "ring_share_aboard": _quantiles(ring_share),
+            "ring_share_aboard": quantiles(ring_share),
         },
         "infected_total": sum(
             1 for aid in records if aid not in seeded_ids
@@ -382,13 +378,16 @@ def main() -> None:  # pragma: no cover - CLI driver, exercised by hand
         "arm": args.arm,
         "theta": float(args.theta),
         "epochs": args.epochs,
-        "aboard_window_acquisitions": _quantiles(aboard),
-        "aboard_window_clean": _quantiles(clean),
+        "aboard_window_acquisitions": quantiles(aboard),
+        "aboard_window_clean": quantiles(clean),
         "cells": results,
     }
     text = json.dumps(readout, indent=1, default=str)
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as handle:
+        out_path = confine_to_base(repo_root, args.out)
+        with validated_open(
+            out_path, "w", allowed_roots=(repo_root,), encoding="utf-8",
+        ) as handle:
             handle.write(text)
     print(text)
 
