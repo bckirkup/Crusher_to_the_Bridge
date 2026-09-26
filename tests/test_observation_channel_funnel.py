@@ -323,7 +323,11 @@ def test_build_readout_pools_ratios():
             "reported_per_eligible": 0.5,
             "confirmed_per_reported": None,
             "dated_per_confirmed": 1.0,
-        }, "rungs": {"infected": {"total": 10 + s}},
+        }, "rungs": {
+            "infected": {"total": 10 + s, "passenger": 8, "crew": 2},
+            "symptomatic_course": {"total": 5, "passenger": 4, "crew": 1},
+            "symptomatic_onboard": {"total": 4, "passenger": 3, "crew": 1},
+        },
          "dating_fidelity": {"dated_hosts": 2, "exact_share": 1.0,
                              "max_abs_error": 0},
          "confirmed_never_dated": {}, "non_report_decomposition": {}}
@@ -336,3 +340,37 @@ def test_build_readout_pools_ratios():
     )
     assert out["rung_ratios"]["confirmed_per_reported"]["median"] is None
     assert out["dating_fidelity"]["dated_hosts_total"] == 6
+    # pooled ratios divide summed counts, not a mean of per-seed ratios.
+    assert out["pooled_rung_totals"]["infected"]["total"] == 36
+    assert out["pooled_ratios"]["symptomatic_per_infected"] == pytest.approx(
+        15 / 36
+    )
+    assert out["pooled_ratios"]["reported_crew_share"] is None
+    assert out["pooled_ratios"]["confirmed_per_reported"] is None
+
+
+def test_build_readout_pooled_crew_share():
+    row = {
+        "seed": 1,
+        "ratios": {"infected": 4.0},
+        "rungs": {
+            "infected": {"total": 4, "passenger": 3, "crew": 1},
+            "symptomatic_course": {"total": 4, "passenger": 3, "crew": 1},
+            "symptomatic_onboard": {"total": 4, "passenger": 3, "crew": 1},
+            "syndrome_eligible": {"total": 4, "passenger": 3, "crew": 1},
+            "eligible_onboard": {"total": 4, "passenger": 3, "crew": 1},
+            "reported_infirmary": {
+                "total": 2, "passenger": 1, "crew": 1,
+                "pre_recognition": 1, "post_recognition": 1,
+            },
+            "lab_sampled": {"total": 2, "passenger": 1, "crew": 1},
+            "lab_confirmed": {"total": 2, "passenger": 1, "crew": 1},
+            "onset_dated": {"total": 2, "passenger": 1, "crew": 1},
+        },
+        "dating_fidelity": {"dated_hosts": 2, "exact_share": 1.0,
+                            "max_abs_error": 0},
+        "confirmed_never_dated": {}, "non_report_decomposition": {},
+    }
+    out = build_readout([row])
+    assert out["pooled_ratios"]["reported_crew_share"] == pytest.approx(1.0)
+    assert out["pooled_ratios"]["dated_per_confirmed"] == pytest.approx(1.0)

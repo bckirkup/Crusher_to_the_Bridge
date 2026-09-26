@@ -723,8 +723,48 @@ def _quantiles(values: list[float]) -> dict[str, float | None]:
     }
 
 
+_POOLED_RATIO_RUNGS: dict[str, tuple[str, str, str]] = {
+    # ratio key -> (numerator rung, denominator rung, role)
+    "symptomatic_per_infected": ("symptomatic_course", "infected", "total"),
+    "symptomatic_onboard_per_infected": (
+        "symptomatic_onboard", "infected", "total"),
+    "eligible_per_symptomatic": (
+        "syndrome_eligible", "symptomatic_course", "total"),
+    "reported_per_eligible": (
+        "reported_infirmary", "syndrome_eligible", "total"),
+    "reported_per_eligible_onboard": (
+        "reported_infirmary", "eligible_onboard", "total"),
+    "reported_per_symptomatic_onboard": (
+        "reported_infirmary", "symptomatic_onboard", "total"),
+    "reported_per_symptomatic": (
+        "reported_infirmary", "symptomatic_course", "total"),
+    "confirmed_per_reported": (
+        "lab_confirmed", "reported_infirmary", "total"),
+    "confirmed_per_symptomatic": (
+        "lab_confirmed", "symptomatic_course", "total"),
+    "dated_per_confirmed": ("onset_dated", "lab_confirmed", "total"),
+    "dated_per_infected": ("onset_dated", "infected", "total"),
+    "reported_passenger_share": (
+        "reported_infirmary", "symptomatic_onboard", "passenger"),
+    "reported_crew_share": (
+        "reported_infirmary", "symptomatic_onboard", "crew"),
+}
+
+
+def _pooled_ratio(per_seed: list[dict[str, Any]], num: str, den: str,
+                  role: str) -> float | None:
+    numerator = sum(row["rungs"][num].get(role, 0) for row in per_seed)
+    denominator = sum(row["rungs"][den].get(role, 0) for row in per_seed)
+    return numerator / denominator if denominator else None
+
+
 def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
-    """Pool per-seed funnel ratios into median + spread for the ledger."""
+    """Pool per-seed funnel ratios into median + spread for the ledger.
+
+    ``rung_ratios`` is the distribution of per-seed ratios (None-bearing
+    seeds skipped). ``pooled_ratios`` divides summed numerators by summed
+    denominators -- the right view when per-seed populations are thin.
+    """
     keys = sorted(per_seed[0]["ratios"]) if per_seed else []
     pooled = {}
     for key in keys:
@@ -744,6 +784,21 @@ def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
             "max": max(infected_counts, default=None),
         },
         "rung_ratios": pooled,
+        "pooled_rung_totals": {
+            rung: {
+                role: sum(
+                    row["rungs"][rung].get(role, 0) for row in per_seed
+                )
+                for role in ("total", "passenger", "crew", "other")
+            }
+            for rung in (
+                per_seed[0]["rungs"] if per_seed else {}
+            )
+        },
+        "pooled_ratios": {
+            key: _pooled_ratio(per_seed, num, den, role)
+            for key, (num, den, role) in _POOLED_RATIO_RUNGS.items()
+        },
         "per_seed_ratios": [
             {"seed": row["seed"], **row["ratios"]} for row in per_seed
         ],
