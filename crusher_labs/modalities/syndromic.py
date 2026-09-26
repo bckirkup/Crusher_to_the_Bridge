@@ -147,48 +147,14 @@ class SyndromicSurveillance:
         self.retest_negatives_on_indication = bool(
             p.retest_negatives_on_indication,
         )
-        # First simulated day any specimen can be taken. ``None`` leaves the
-        # swab channel open from embarkation; a hull whose record says the
-        # test arrived on a dated day declares it, and no specimen precedes it.
-        self.molecular_ascertainment_start_day = (
-            int(p.molecular_ascertainment_start_day)
-            if p.molecular_ascertainment_start_day is not None
-            else None
-        )
         self.sick_call_severity_mode = p.sick_call_severity_mode
         self.symptom_severity_profiles = dict(p.symptom_severity_profiles or {})
         self.clock = p.clock or SimClock()
         self.background_noise_rate = p.background_noise_rate
         self.quarantine_compliance = p.quarantine_compliance
-        # Deprecated: forced post-delay compliance removed. Kept for config compat.
-        self.compliance_delay_epochs = (
-            self.clock.epochs_for_hours(p.compliance_delay_hours)
-            if p.compliance_delay_hours is not None
-            else p.compliance_delay_epochs
-        )
         self.reluctant_fraction = float(p.reluctant_fraction)
-        self.reluctant_delay_epochs = (
-            self.clock.epochs_for_hours(p.reluctant_delay_hours)
-            if p.reluctant_delay_hours is not None
-            else int(p.reluctant_delay_epochs)
-        )
         self.compliance_by_class = dict(p.compliance_by_class or {})
-        self.detection_delay_epochs = (
-            self.clock.epochs_for_hours(p.detection_delay_hours)
-            if p.detection_delay_hours is not None
-            else max(0, int(p.detection_delay_epochs))
-        )
-        if p.crew_screening_interval_hours is not None:
-            crew_screening_interval_epochs = self.clock.epochs_for_hours(
-                p.crew_screening_interval_hours,
-            )
-        else:
-            crew_screening_interval_epochs = p.crew_screening_interval_epochs
-        if crew_screening_interval_epochs is None:
-            self.crew_screening_interval_epochs: int | None = None
-        else:
-            interval = int(crew_screening_interval_epochs)
-            self.crew_screening_interval_epochs = interval if interval > 0 else None
+        self._resolve_timing(p)
         self.rng = p.rng if p.rng is not None else default_simulation_rng()
         self._molecular_rng = _molecular_stream(self.rng)
         # Sticky per-agent compliance class for the cruise (compliant/reluctant/defiant)
@@ -232,6 +198,43 @@ class SyndromicSurveillance:
             ]
         else:
             self.noise_categories = list(p.noise_categories)
+
+    def _resolve_timing(self, p: "SyndromicParams") -> None:
+        # First simulated day any specimen can be taken. ``None`` leaves the
+        # swab channel open from embarkation; a hull whose record says the
+        # test arrived on a dated day declares it, and no specimen precedes it.
+        self.molecular_ascertainment_start_day = (
+            int(p.molecular_ascertainment_start_day)
+            if p.molecular_ascertainment_start_day is not None
+            else None
+        )
+        # Deprecated: forced post-delay compliance removed. Kept for config compat.
+        self.compliance_delay_epochs = (
+            self.clock.epochs_for_hours(p.compliance_delay_hours)
+            if p.compliance_delay_hours is not None
+            else p.compliance_delay_epochs
+        )
+        self.reluctant_delay_epochs = (
+            self.clock.epochs_for_hours(p.reluctant_delay_hours)
+            if p.reluctant_delay_hours is not None
+            else int(p.reluctant_delay_epochs)
+        )
+        self.detection_delay_epochs = (
+            self.clock.epochs_for_hours(p.detection_delay_hours)
+            if p.detection_delay_hours is not None
+            else max(0, int(p.detection_delay_epochs))
+        )
+        if p.crew_screening_interval_hours is not None:
+            crew_screening_interval_epochs = self.clock.epochs_for_hours(
+                p.crew_screening_interval_hours,
+            )
+        else:
+            crew_screening_interval_epochs = p.crew_screening_interval_epochs
+        if crew_screening_interval_epochs is None:
+            self.crew_screening_interval_epochs: int | None = None
+        else:
+            interval = int(crew_screening_interval_epochs)
+            self.crew_screening_interval_epochs = interval if interval > 0 else None
 
     @staticmethod
     def effective_sick_call_probability(

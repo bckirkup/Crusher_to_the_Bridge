@@ -257,8 +257,9 @@ class TestRecordEpochBoundary:
             "cfg": {},
             "observations": ObservationResults(),
         }
+        request = EpochRecordRequest(**kwargs)
         with pytest.raises(TypeError, match="agents must be list"):
-            record_epoch(EpochRecordRequest(**kwargs))
+            record_epoch(request)
 
     def test_spaces_must_be_dict(self) -> None:
         kwargs: dict[str, Any] = {
@@ -285,8 +286,9 @@ class TestRecordEpochBoundary:
             "cfg": {},
             "observations": ObservationResults(),
         }
+        request = EpochRecordRequest(**kwargs)
         with pytest.raises(TypeError, match="spaces must be dict"):
-            record_epoch(EpochRecordRequest(**kwargs))
+            record_epoch(request)
 
     def test_stoplights_must_be_dict(self) -> None:
         kwargs: dict[str, Any] = {
@@ -313,8 +315,9 @@ class TestRecordEpochBoundary:
             "cfg": {},
             "observations": ObservationResults(),
         }
+        request = EpochRecordRequest(**kwargs)
         with pytest.raises(TypeError, match="stoplights must be dict"):
-            record_epoch(EpochRecordRequest(**kwargs))
+            record_epoch(request)
 
     def test_compact_omits_heavy_keys(self) -> None:
         engine = MagicMock()

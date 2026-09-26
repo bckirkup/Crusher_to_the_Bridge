@@ -780,11 +780,9 @@ class TestTheSaturationArmOfTheGate:
             **design.run_kwargs(),
             "activity_saturation_hours": {"leisure": 2.0},
         }
+        params = ScreenRunParams(seed=3, description="x", **run_kwargs)
         with pytest.raises(ValueError, match="activity_contacts"):
-            build_run_spec(
-                design.factors, point,
-                ScreenRunParams(seed=3, description="x", **run_kwargs),
-            )
+            build_run_spec(design.factors, point, params)
 
     @pytest.mark.parametrize("bad", [
         "lounge=2.0",
