@@ -158,7 +158,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (1, 1, 217, 2, 0) -> (1, 1, 217, 1, 0) on CPython 3.11, read from
         # CI job 108452677626 (fast tier, 3.11, shard 3) on this branch —
         # identical to the 3.12 reading, as before on this near-extinct cell.
-        (3, 11): (1, 1, 217, 1, 0),
+        # SHIP-RHYTHM-02: expedition_cruise_450 now runs the labelled
+        # day-program rhythm layer by default; schedule-conditioned
+        # co-presence reorders the shared stream on this near-extinct cell:
+        # (1, 1, 217, 1, 0) -> (2, 1, 217, 2, 1), read from CI job
+        # 108679167789 (fast tier, 3.11, shard 3) on this branch. The
+        # flag-off cell reproduces (1, 1, 217, 1, 0) exactly on this
+        # branch (rhythm.enabled: false), so the move is fully attributed
+        # to the rhythm layer.
+        (3, 11): (2, 1, 217, 2, 1),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -221,7 +229,11 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # one campaign positive: (1, 1, 217, 2, 0) -> (1, 1, 217, 1, 0) on
         # CPython 3.12, read in the local venv on this branch. The 3.11 CI
         # shard reads the same tuple (see above).
-        (3, 12): (1, 1, 217, 1, 0),
+        # SHIP-RHYTHM-02 (see the 3.11 note above): the rhythm layer moves
+        # the cell the same way on CPython 3.12:
+        # (1, 1, 217, 1, 0) -> (2, 1, 217, 2, 1), read from CI job
+        # 108679167822 (fast tier, 3.12, shard 3) on this branch.
+        (3, 12): (2, 1, 217, 2, 1),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
