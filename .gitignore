@@ -130,3 +130,8 @@ out_test_sentinel_cli/
 
 # Diagnostic run output
 out/
+# local diagnostic scratch
+.smoke_*/
+canary_growth/
+growth_runs/
+growth_*.log
