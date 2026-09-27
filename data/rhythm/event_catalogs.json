@@ -1,0 +1,522 @@
+{
+  "schema_version": "1.0",
+  "task_id": "SHIP-RHYTHM-01",
+  "status": "spec-stage catalog: transcribed daily-program timetables plus notional reconstructions; not yet wired into the engine",
+  "description": "Schedule-conditioned shipboard event catalogs. Documented templates are transcribed from real daily-program documents (Princess Patter, Holland America THE DAILY, NCL Freestyle Daily, Silversea Chronicles class) archived as public PDFs — Tr-class primary sources. Templates whose day type is not covered by a document for that ship class are marked class 'notional' and carry an explicit construction_rule. Naval platforms (destroyer_baseline, fletcher_class_destroyer, legend_class_nsc, san_antonio_class_lpd) and legacy cruise hulls (messy_cruise_500, expedition_cruise_300) are out of scope for SHIP-RHYTHM-01.",
+  "conventions": {
+    "time_format": "HH:MM 24-hour ship-local time; windows crossing midnight wrap (e.g. ['21:00','01:00'])",
+    "window_semantics": "[start, end] inclusive start, exclusive end. An event's participants occupy its venue(s) for the stated occupancy_share of the window, then egress on the stated egress_mode.",
+    "venue_roles": "Portable venue names resolved to platform zone ids by venue_map in each ship_class_catalog entry. Zone ids are verbatim from data/platforms/<platform>/spatial_layout.json.",
+    "participation_fraction": "Fraction of the eligible population attending, drawn per eligible agent per event occurrence (bernoulli_per_occurrence) unless stated otherwise.",
+    "occupancy_share": "Fraction of the event window a drawn participant spends inside the venue; the remainder is transit/corridor time governed by the egress front.",
+    "egress_mode": "synchronized_end = attendees leave on a shared clock at window end, producing a corridor front; rolling = continuous arrival/departure with no coherent front; windowed = arrivals constrained to a stated sub-window (e.g. tender tickets).",
+    "notional_marking": "A day_template with class 'notional' is a reconstruction: no daily-program document exists for that hull. Its construction_rule states exactly how the entries were assembled.",
+    "sop_conditioning": "sop_variants names match protocols.json 'name' fields. Each variant is an ordered set of overrides applied to the baseline template."
+  },
+  "documents": [
+    {
+      "document_id": "sun_princess_patter_2025-03-22",
+      "document_class": "daily_program",
+      "vessel": "Sun Princess (Sphere class, ~4,300 pax)",
+      "cruise_line": "Princess Cruises",
+      "day_type": "sea_day",
+      "date": "2025-03-22",
+      "url": "https://www.stonejongleux.com/Sun250322Day37.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["mega_cruise"],
+      "notes": "Full day-at-sea Patter: trivia/bingo/game shows from ~09:00, production show 'Stage Struck' 20:00 and 21:45 in Princess Arena, Captain's Welcome 19:00 Piazza, ABBA party 21:00 Dome, karaoke and DJ to ~midnight; shops 18:30-23:00, casino 19:00-late."
+    },
+    {
+      "document_id": "majestic_princess_patter_2025-08-14",
+      "document_class": "daily_program",
+      "vessel": "Majestic Princess (Royal class, ~3,560 pax)",
+      "cruise_line": "Princess Cruises",
+      "day_type": "port_day",
+      "date": "2025-08-14",
+      "url": "https://img1.wsimg.com/blobby/go/b01573eb-d2ef-46ff-a105-a9ee8fb84495/downloads/b52183be-bfac-42c8-90d0-c60ef93efc44/Princess%20Patter%2C%20August%2014%2C%202025%20Majestic%20prin.pdf?ver=1782645601046",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["mega_cruise"],
+      "notes": "Alaska-itinerary port-day Patter (Canadian customs note, disembarkation Q&A). Dining hours verbatim: Allegro/Concerto dining rooms breakfast 07:00-09:00, dinner 17:00-21:00; Crown Grill/Sabatini's/Ocean Terrace/The Catch 17:00-21:00; Alfredo's 11:00-23:00; shops 18:30-23:00; casino 19:00-late; Lotus Spa 08:00-23:00; medical center 08:00-10:00 and 16:00-18:00; shore excursions desk 16:30-19:00; theatrical show 'Fantastic Journey' 19:30 and 21:30 Princess Theater."
+    },
+    {
+      "document_id": "ncl_escape_freestyle_2023-11-10",
+      "document_class": "daily_program",
+      "vessel": "Norwegian Escape (Breakaway-Plus class, ~4,266 pax)",
+      "cruise_line": "Norwegian Cruise Line",
+      "day_type": "embarkation",
+      "date": "2023-11-10",
+      "url": "https://cruisetipstv.com/wp-content/uploads/2023/12/Norwegian-Escape-Freestyle-daily.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["mega_cruise"],
+      "notes": "Day-1 embarkation Freestyle Daily: Garden Cafe buffet lunch 11:00-16:00, snacks 16:00-17:00, dinner buffet 17:00-21:30; main dining rooms lunch 12:00-14:00; Splash Academy registration 11:30-18:00."
+    },
+    {
+      "document_id": "hal_nieuw_amsterdam_daily_2024-04-02",
+      "document_class": "daily_program",
+      "vessel": "Nieuw Amsterdam (Signature class, ~2,106 pax)",
+      "cruise_line": "Holland America Line",
+      "day_type": "port_day",
+      "date": "2024-04-02",
+      "url": "https://thejellybeans.net/docs/HollandAmerica-NieuwAmsterdam/HollandAmericaNieuwAmsterdam-2024-03-DailySchedule-04.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["contemporary_cruise"],
+      "notes": "Grand Turk port day: ship arrives 08:00, all-aboard/depart 16:30; Dining Room breakfast 07:30-09:00, dinner 17:00-21:00; Tamarind 17:00-21:30; World Stage shows 19:30 and 21:00; activities from 07:00. Scale-matched substitute for the Carnival Spirit-class hull (Fun Times scans exist for Carnival Spirit but are image-only and not text-transcribable)."
+    },
+    {
+      "document_id": "hal_volendam_daily_2026-01-09",
+      "document_class": "daily_program",
+      "vessel": "Volendam (Rotterdam class, ~1,432 pax)",
+      "cruise_line": "Holland America Line",
+      "day_type": "sea_day",
+      "date": "2026-01-09",
+      "url": "https://www.theinsidecabin.com/wp-content/uploads/2026/01/9-Jan-The-Daily.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["classic_cruise"],
+      "notes": "Sea day: activities 07:00-22:00+ (ballroom classes 10:00 and 15:00, trivia, lectures); World Stage shows 19:30 and 21:00; movie 15:00 and 20:30; French Afternoon Tea 15:00 in Dining Room. Volendam is a sister of Veendam, the stated model for classic_cruise_1900."
+    },
+    {
+      "document_id": "hal_volendam_daily_2026-01-12",
+      "document_class": "daily_program",
+      "vessel": "Volendam (Rotterdam class, ~1,432 pax)",
+      "cruise_line": "Holland America Line",
+      "day_type": "port_day",
+      "date": "2026-01-12",
+      "url": "https://www.theinsidecabin.com/wp-content/uploads/2026/01/12-Jan-The-Daily.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["classic_cruise"],
+      "notes": "Belem tender port day: arrive 08:00, tender tickets distributed 08:00 at Ocean Bar, ~20 min tender ride, first return tender 11:00, last tender 16:30, depart 16:50; Dining Room 07:30-09:00 and 17:00-21:00; Lido Market 06:50-10:00, 11:30-14:00, 14:00-16:00*, 17:30-20:00, 22:30-23:30*; happy hours 16:00-17:00 and 18:30-19:30."
+    },
+    {
+      "document_id": "silversea_chronicles_2025-02-24",
+      "document_class": "daily_program",
+      "vessel": "Silver Dawn (Muse class, ~596 pax)",
+      "cruise_line": "Silversea",
+      "day_type": "port_day",
+      "date": "2025-02-24",
+      "url": "https://www.travelsrtw.com/wp-content/uploads/2025/02/Day-1-24-February-Mahe-DA-intransit-print.pdf",
+      "origin_grade": "Tr",
+      "maps_to_ship_classes": ["expedition_cruise"],
+      "notes": "Mahe port day (overnight stay): Atlantide a-la-carte breakfast 07:30 last seating 09:30; La Terrazza buffet breakfast 06:30-09:00, lunch buffet 12:30-15:30; dinner seatings Atlantide to 20:30 last seating, other venues 18:30-21:00, Silver Note 19:30-22:00; Arts Cafe 06:30-23:00; Spaccanapoli 11:00-23:00. Sister line and luxury tier to the Silver Cloud / Le Boreal models stated for expedition_cruise_450; vessel is ~150 pax larger, noted as scale mismatch."
+    },
+    {
+      "document_id": "starfleet_canonical_watch",
+      "document_class": "fiction_convention",
+      "vessel": "USS Enterprise NCC-1701-D / NCC-1701 (fictional)",
+      "cruise_line": "n/a",
+      "day_type": "all",
+      "date": "n/a",
+      "url": "n/a",
+      "origin_grade": "Tr (fiction source corpus)",
+      "maps_to_ship_classes": ["starship_galaxy", "starship_constitution"],
+      "notes": "No real timetable exists; canonical convention is a three-watch rotation (alpha/beta/gamma, 8-hour duty periods) for bridge/engineering watchstanders, with a four-shift variant ordered by Capt. Jellico in TNG 'Chain of Command'. Construction rule for the notional catalogs states this verbatim."
+    }
+  ],
+  "event_class_definitions": {
+    "meal_seating": "Fixed-window dining service (breakfast, lunch, dinner) at a dining venue. Synchronized-ish egress at window end; seating staggering handled by the engine's stagger_meal_seating, not duplicated here.",
+    "show_performance": "Timed seated performance (production show, comedy, movie). Strongest synchronized_end egress: full venue pours out on a shared clock.",
+    "scheduled_activity": "Timed participatory activity (trivia, bingo, dance class, lecture, game show). Synchronized start and end; moderate participation.",
+    "open_venue": "Continuous-operations venue with posted hours (casino, shops, spa, pools, gym, lounges, cafe). Rolling egress; participation = per-hour dwell probability.",
+    "embarkation_flow": "Day-1 boarding surge: gangway/check-in flow, buffet surge, cabin availability, mandatory muster drill, sailaway.",
+    "disembarkation_flow": "Final-morning off-load: early breakfast, staggered gangway calls by group.",
+    "port_call": "Tender or gangway windows, shore-excursion dispatch, all-aboard deadline. On port days this is the dominant occupancy driver.",
+    "watch_turnover": "Crew watch rotation boundaries. Cruise crews mostly work long single-duty hotel shifts; engineering/watchkeeping crews rotate. Starships use canonical watch sections.",
+    "cleaning_rotation": "Housekeeping/service passes through stateroom corridors and public venues. Crew-only participation; relevant because it moves crew through passenger cabin corridors twice daily.",
+    "queue_event": "Front events where a line forms in a corridor/lobby: tender-ticket distribution, shore-excursion desk, photo gallery, muster station check-in."
+  },
+  "sop_conditioning": {
+    "description": "Public-health SOPs decay or rearrange the baseline template. Each key below is a protocols.json 'name'; each value lists the event-class-level transformation it applies. The full per-ship effect tables live in each catalog's sop_variants.",
+    "Galley Closure & Meal Isolation": "Buffet self-service suspended (crew-served or closed); meal_seating events at buffet venues cancelled or converted to delivered-to-cabin.",
+    "Individual Symptomatic Confinement to Quarters": "Symptomatic agents exit the rhythm layer entirely: participation = 0, meals delivered.",
+    "General Confinement to Quarters": "All passenger events cancelled; passengers occupy cabins except sanctioned egress windows; crew service reduced to essential watches + cabin delivery.",
+    "VSP-Threshold Mass Isolation": "Public-venue events cancelled or capacity-capped; self-serve buffet closed (crew-served); port-call activity suspended.",
+    "Selective Passenger Confinement (Diamond Princess)": "Passenger events cancelled; scheduled cabin-door meal delivery and supervised deck-airing rotations (documented Diamond Princess practice).",
+    "Replayed Cabin Quarantine of All Passengers": "Identical occupancy effect to General Confinement; the rhythm layer treats it as the same rearrangement.",
+    "Surface Disinfection Protocol": "No schedule change; cleaning_rotation events increase in frequency and move into occupied windows.",
+    "Enhanced Ventilation": "No schedule change (ventilation is a route property, not a rhythm property).",
+    "PPE Deployment - Standard": "No schedule change.",
+    "Increased Diagnostic Cadence": "Adds a queue_event class for scheduled screening/visit windows where present."
+  },
+  "ship_class_catalogs": {
+    "mega_cruise": {
+      "platforms": ["mega_cruise_5000"],
+      "catalog_status": "documented",
+      "documents": ["sun_princess_patter_2025-03-22", "majestic_princess_patter_2025-08-14", "ncl_escape_freestyle_2023-11-10"],
+      "venue_map": {
+        "main_theater": ["Main_Theater"],
+        "secondary_show_venue": ["Aqua_Theater", "ComedyClub"],
+        "piazza_promenade": ["Royal_Promenade"],
+        "pool_deck": ["Main_Pool_Deck", "Waterpark"],
+        "quiet_deck": ["Solarium"],
+        "casino": ["Casino"],
+        "shops": ["ShopRetail"],
+        "spa_fitness": ["SpaFitness"],
+        "kids_venue": ["Kids_Club", "Teen_Zone"],
+        "buffet": ["Windjammer", "Pool_Bar_Grill", "CafeBakery"],
+        "mdr": ["MainDining_L", "MainDining_U"],
+        "specialty": ["SpecRest_A", "SpecRest_B"],
+        "crew_mess": ["Crew_Mess_Main", "CrewMess_Fwd"],
+        "gangway_corridor": ["Reception", "CentralPark"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "documented",
+          "source": "sun_princess_patter_2025-03-22",
+          "events": [
+            {"event_id": "breakfast_buffet", "event_class": "meal_seating", "window": ["06:30", "10:30"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "dining rooms breakfast 07:00-09:00; buffet breakfast window interpolated from Lido Market hours on sister-class documents"}},
+            {"event_id": "breakfast_mdr", "event_class": "meal_seating", "window": ["07:00", "09:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.5, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "Allegro/Concerto Dining Room breakfast 07:00-09:00"}},
+            {"event_id": "morning_activities", "event_class": "scheduled_activity", "window": ["09:00", "12:00"], "venue_roles": ["piazza_promenade", "secondary_show_venue", "quiet_deck"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.4, "egress_mode": "synchronized_end", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "trivia, bingo, game shows, lectures scheduled in hourly blocks from ~09:00"}},
+            {"event_id": "pool_open", "event_class": "open_venue", "window": ["08:00", "18:00"], "venue_roles": ["pool_deck"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.4, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "Lido Pool deck activities and pool hours run daylight hours on the sea-day program"}},
+            {"event_id": "lunch_buffet", "event_class": "meal_seating", "window": ["11:30", "14:00"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.55, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market lunch 11:30-14:00 pattern; contemporary-class buffet lunch window"}},
+            {"event_id": "lunch_mdr", "event_class": "meal_seating", "window": ["12:00", "14:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.15, "occupancy_share": 0.5, "egress_mode": "synchronized_end", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "main dining rooms lunch 12:00-14:00"}},
+            {"event_id": "afternoon_activities", "event_class": "scheduled_activity", "window": ["14:00", "17:30"], "venue_roles": ["piazza_promenade", "secondary_show_venue", "quiet_deck"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "afternoon trivia/game-show blocks through ~17:00"}},
+            {"event_id": "shops_open", "event_class": "open_venue", "window": ["18:30", "23:00"], "venue_roles": ["shops"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.2, "occupancy_share": 0.2, "egress_mode": "rolling", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "Shops of Princess 18:30-23:00"}},
+            {"event_id": "casino_open", "event_class": "open_venue", "window": ["19:00", "02:00"], "venue_roles": ["casino"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.2, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "Grand Casino 19:00-late"}},
+            {"event_id": "captains_welcome", "event_class": "queue_event", "window": ["19:00", "19:45"], "venue_roles": ["piazza_promenade"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.9, "egress_mode": "synchronized_end", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "Captain's Welcome 19:00 The Piazza"}},
+            {"event_id": "dinner_mdr_seating", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.45, "occupancy_share": 0.4, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "Allegro/Concerto dinner 17:00-21:00; two seatings inside the window via stagger_meal_seating"}},
+            {"event_id": "dinner_buffet", "event_class": "meal_seating", "window": ["17:30", "21:30"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "Garden Cafe dinner buffet 17:00-21:30"}},
+            {"event_id": "dinner_specialty", "event_class": "meal_seating", "window": ["17:00", "21:30"], "venue_roles": ["specialty"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.15, "occupancy_share": 0.6, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "Crown Grill/Sabatini's/Ocean Terrace/The Catch 17:00-21:00 (to ~21:30 service tail)"}},
+            {"event_id": "main_show_early", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "Theatrical show 'Fantastic Journey' 19:30 and 21:30 Princess Theater; Sun Patter production shows 20:00 and 21:45 Princess Arena"}},
+            {"event_id": "main_show_late", "event_class": "show_performance", "window": ["21:30", "22:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "second seating of the production show"}},
+            {"event_id": "nightlife", "event_class": "open_venue", "window": ["21:00", "01:00"], "venue_roles": ["piazza_promenade", "secondary_show_venue", "casino"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"document_id": "sun_princess_patter_2025-03-22", "evidence": "ABBA party 21:00 Dome, karaoke, DJ sets to ~midnight"}},
+            {"event_id": "crew_mess", "event_class": "meal_seating", "window": ["06:00", "09:30"], "venue_roles": ["crew_mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.7, "occupancy_share": 0.2, "egress_mode": "rolling", "source": {"class": "notional", "rule": "Crew mess windows are not printed in passenger programs; declared as a meal window bracketing the passenger breakfast service, mirrored at lunch (11:00-14:00) and dinner (17:00-21:30) by extending this event to a three-window set"}},
+            {"event_id": "housekeeping_am", "event_class": "cleaning_rotation", "window": ["08:00", "13:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"], "classes": ["crew_general", "crew_services"]}, "participation_fraction": 0.6, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "Standard hotel practice: stateroom morning service pass, not printed in passenger programs"}},
+            {"event_id": "housekeeping_pm", "event_class": "cleaning_rotation", "window": ["18:00", "21:30"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"], "classes": ["crew_general", "crew_services"]}, "participation_fraction": 0.4, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "Evening turndown service pass, not printed in passenger programs"}}
+          ]
+        },
+        "port_day": {
+          "class": "documented",
+          "source": "majestic_princess_patter_2025-08-14",
+          "events": [
+            {"event_id": "gangway_open", "event_class": "port_call", "window": ["08:00", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.05, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "ship arrives 08:00, all-aboard 16:30; Majestic Patter shows shore-excursions desk 16:30-19:00 on port days"}},
+            {"event_id": "breakfast_port", "event_class": "meal_seating", "window": ["07:00", "09:30"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "dining rooms breakfast 07:00-09:00 on a port day"}},
+            {"event_id": "shore_excursion_dispatch", "event_class": "queue_event", "window": ["08:00", "10:30"], "venue_roles": ["piazza_promenade", "gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.45, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "excursion dispatch and ticketing concentrated in first ~2.5h after arrival"}},
+            {"event_id": "all_aboard_front", "event_class": "queue_event", "window": ["15:30", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.5, "occupancy_share": 0.3, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "all-aboard 16:30 concentrates return flow in the final hour"}},
+            {"event_id": "dinner_port", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "buffet", "specialty"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.8, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "dinner venues 17:00-21:00 on port day"}},
+            {"event_id": "show_port", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "theatrical show 19:30 and 21:30 on the port-day Patter"}},
+            {"event_id": "show_port_late", "event_class": "show_performance", "window": ["21:30", "22:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "second seating"}}
+          ]
+        },
+        "embarkation": {
+          "class": "documented",
+          "source": "ncl_escape_freestyle_2023-11-10",
+          "events": [
+            {"event_id": "boarding_flow", "event_class": "embarkation_flow", "window": ["11:00", "16:00"], "venue_roles": ["gangway_corridor", "piazza_promenade"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "Day-1 daily opens venue service ~11:00; embarkation flow is the whole population"}},
+            {"event_id": "embark_buffet_surge", "event_class": "meal_seating", "window": ["11:00", "16:00"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.75, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "Garden Cafe buffet lunch 11:00-16:00 on embarkation day — the documented embark-day lunch venue while cabins are readied"}},
+            {"event_id": "muster_drill", "event_class": "queue_event", "window": ["15:30", "16:15"], "venue_roles": ["muster_station"], "eligible": {"role_groups": ["passenger", "crew"]}, "participation_fraction": 1.0, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "SOLAS mandatory muster before departure; printed times vary by sailing so the window is declared at the conventional pre-departure slot"}},
+            {"event_id": "kids_registration", "event_class": "queue_event", "window": ["11:30", "18:00"], "venue_roles": ["kids_venue"], "eligible": {"role_groups": ["passenger"], "classes": ["passenger_family"]}, "participation_fraction": 0.7, "occupancy_share": 0.15, "egress_mode": "windowed", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "Splash Academy registration 11:30-18:00"}},
+            {"event_id": "dinner_embark", "event_class": "meal_seating", "window": ["17:00", "21:30"], "venue_roles": ["mdr", "buffet", "specialty"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "ncl_escape_freestyle_2023-11-10", "evidence": "Garden Cafe dinner buffet 17:00-21:30; MDR dinner service on embark day"}}
+          ]
+        },
+        "disembarkation": {
+          "class": "notional",
+          "construction_rule": "No extracted disembarkation-day program; built from the Majestic Patter's disembarkation-information block (last-day alcohol delivery, customs notes) and the universal cruise pattern of early breakfast plus staggered gangway calls.",
+          "events": [
+            {"event_id": "breakfast_disembark", "event_class": "meal_seating", "window": ["06:00", "08:30"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "Disembarkation breakfast service opens early to clear passengers by gangway groups"}},
+            {"event_id": "gangway_offload", "event_class": "disembarkation_flow", "window": ["07:00", "10:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"class": "notional", "rule": "Staggered offload by group call over the morning window"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "scheduled_activity": "capacity_multiplier 0.75", "queue_event": "unchanged", "meal_seating": "unchanged", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation", "Selective Passenger Confinement (Diamond Princess)"], "effects": {"meal_seating@buffet": "cancelled_or_crew_served", "show_performance": "cancelled", "scheduled_activity": "cancelled", "open_venue": "capacity_multiplier 0.4", "port_call": "cancelled", "queue_event": "cancelled", "cleaning_rotation": "unchanged"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters", "Replayed Cabin Quarantine of All Passengers"], "effects": {"all_passenger_events": "cancelled", "meal_seating": "delivered_to_cabin", "cleaning_rotation": "essential_only", "watch_turnover": "unchanged"}}
+      }
+    },
+    "contemporary_cruise": {
+      "platforms": ["spirit_cruise_3000"],
+      "catalog_status": "documented",
+      "documents": ["hal_nieuw_amsterdam_daily_2024-04-02"],
+      "construction_note": "spirit_cruise_3000 is a Carnival Spirit-class hull (~2,100 pax); Carnival 'Fun Times' editions exist as image-only scans, so the scale-matched HAL Signature-class daily is the transcriber. Port-day hours are documented; the sea-day template is documented-in-structure (same line's Volendam sea-day pattern, rescaled to a slightly larger program).",
+      "venue_map": {
+        "main_theater": ["MainTheater"],
+        "secondary_show_venue": ["SmallLounge", "Nightclub"],
+        "pool_deck": ["MainPool", "AftPool"],
+        "promenade": ["Promenade"],
+        "casino": ["Casino"],
+        "shops": ["PhotoShops"],
+        "spa_fitness": ["SpaFit"],
+        "kids_venue": ["KidsClub", "TeenZone"],
+        "buffet": ["LidoBuffet", "PizzaGrill"],
+        "mdr": ["MainDining_L", "MainDining_U"],
+        "specialty": ["SpecialtyA", "SpecialtyB", "SpecialtyC"],
+        "crew_mess": ["CrewMessMain", "CrewMessOff"],
+        "gangway_corridor": ["Reception"],
+        "cabin_corridor": ["Cabin_Corridor"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "documented",
+          "source": "hal_volendam_daily_2026-01-09 (structure) + hal_nieuw_amsterdam_daily_2024-04-02 (dining hours)",
+          "events": [
+            {"event_id": "breakfast", "event_class": "meal_seating", "window": ["07:00", "10:00"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market 06:50-10:00; Dining Room breakfast 07:30-09:00"}},
+            {"event_id": "morning_activities", "event_class": "scheduled_activity", "window": ["09:00", "12:00"], "venue_roles": ["promenade", "secondary_show_venue"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.4, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "ballroom class 10:00, trivia, lectures in morning blocks"}},
+            {"event_id": "lunch", "event_class": "meal_seating", "window": ["11:30", "14:00"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market lunch 11:30-14:00"}},
+            {"event_id": "afternoon_activities", "event_class": "scheduled_activity", "window": ["14:00", "17:00"], "venue_roles": ["promenade", "secondary_show_venue"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "afternoon movie 15:00, tea service 15:00, ballroom class 15:00"}},
+            {"event_id": "dinner", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "specialty", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "Dining Room dinner 17:00-21:00; Tamarind 17:00-21:30"}},
+            {"event_id": "main_show_early", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "World Stage shows 19:30 and 21:00"}},
+            {"event_id": "main_show_late", "event_class": "show_performance", "window": ["21:00", "22:00"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "World Stage second show 21:00"}},
+            {"event_id": "casino_nightlife", "event_class": "open_venue", "window": ["18:00", "01:00"], "venue_roles": ["casino", "secondary_show_venue"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.35, "egress_mode": "rolling", "source": {"document_id": "majestic_princess_patter_2025-08-14", "evidence": "casino 19:00-late pattern, scale-matched"}},
+            {"event_id": "housekeeping_am", "event_class": "cleaning_rotation", "window": ["08:00", "13:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.6, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "hotel-standard stateroom service pass"}},
+            {"event_id": "housekeeping_pm", "event_class": "cleaning_rotation", "window": ["18:00", "21:30"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.4, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "evening turndown pass"}},
+            {"event_id": "crew_mess", "event_class": "meal_seating", "window": ["06:00", "21:30"], "venue_roles": ["crew_mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.7, "occupancy_share": 0.15, "egress_mode": "rolling", "source": {"class": "notional", "rule": "crew mess serves three windows inside the bracketed span"}}
+          ]
+        },
+        "port_day": {
+          "class": "documented",
+          "source": "hal_nieuw_amsterdam_daily_2024-04-02",
+          "events": [
+            {"event_id": "breakfast_port", "event_class": "meal_seating", "window": ["07:00", "09:30"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "Dining Room breakfast 07:30-09:00 on Grand Turk day"}},
+            {"event_id": "gangway_open", "event_class": "port_call", "window": ["08:00", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.05, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "arrive 08:00, all-aboard/depart 16:30"}},
+            {"event_id": "shore_excursion_dispatch", "event_class": "queue_event", "window": ["08:00", "10:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.45, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "morning excursion dispatch window"}},
+            {"event_id": "all_aboard_front", "event_class": "queue_event", "window": ["15:30", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.5, "occupancy_share": 0.3, "egress_mode": "windowed", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "all-aboard deadline 16:30"}},
+            {"event_id": "dinner_port", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "specialty", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.8, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "Dining Room 17:00-21:00, Tamarind to 21:30"}},
+            {"event_id": "show_port", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "World Stage 19:30"}},
+            {"event_id": "show_port_late", "event_class": "show_performance", "window": ["21:00", "22:00"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_nieuw_amsterdam_daily_2024-04-02", "evidence": "World Stage 21:00"}}
+          ]
+        },
+        "embarkation": {
+          "class": "notional",
+          "construction_rule": "No extracted embarkation document for this class; same structure as mega_cruise embarkation (buffet surge + muster + dinner) scaled to the smaller hull.",
+          "events": [
+            {"event_id": "boarding_flow", "event_class": "embarkation_flow", "window": ["11:00", "16:00"], "venue_roles": ["gangway_corridor", "promenade"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "embarkation structure from NCL day-1 pattern"}},
+            {"event_id": "embark_buffet_surge", "event_class": "meal_seating", "window": ["11:00", "16:00"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.75, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"class": "notional", "rule": "buffet is the embark-day lunch venue"}},
+            {"event_id": "muster_drill", "event_class": "queue_event", "window": ["15:30", "16:15"], "venue_roles": ["gangway_corridor", "promenade"], "eligible": {"role_groups": ["passenger", "crew"]}, "participation_fraction": 1.0, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "SOLAS mandatory pre-departure muster"}},
+            {"event_id": "dinner_embark", "event_class": "meal_seating", "window": ["17:00", "21:30"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "embark-day dinner at full service"}}
+          ]
+        },
+        "disembarkation": {
+          "class": "notional",
+          "construction_rule": "Same construction rule as mega_cruise disembarkation.",
+          "events": [
+            {"event_id": "breakfast_disembark", "event_class": "meal_seating", "window": ["06:00", "08:30"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "early clearing breakfast"}},
+            {"event_id": "gangway_offload", "event_class": "disembarkation_flow", "window": ["07:00", "10:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"class": "notional", "rule": "staggered offload by group call"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "scheduled_activity": "capacity_multiplier 0.75", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation", "Selective Passenger Confinement (Diamond Princess)"], "effects": {"meal_seating@buffet": "cancelled_or_crew_served", "show_performance": "cancelled", "scheduled_activity": "cancelled", "open_venue": "capacity_multiplier 0.4", "port_call": "cancelled"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters", "Replayed Cabin Quarantine of All Passengers"], "effects": {"all_passenger_events": "cancelled", "meal_seating": "delivered_to_cabin", "cleaning_rotation": "essential_only", "watch_turnover": "unchanged"}}
+      }
+    },
+    "classic_cruise": {
+      "platforms": ["classic_cruise_1900"],
+      "catalog_status": "documented",
+      "documents": ["hal_volendam_daily_2026-01-09", "hal_volendam_daily_2026-01-12"],
+      "construction_note": "Volendam is a Rotterdam-class sister of Veendam, the stated model for classic_cruise_1900 (~1,350 pax); both sea-day and tender-port-day templates are directly transcribed.",
+      "venue_map": {
+        "main_theater": ["MainTheater"],
+        "lounge": ["PhotoShops", "Promenade"],
+        "pool_deck": ["PoolDeck"],
+        "casino": ["Casino"],
+        "library": ["Library"],
+        "spa_fitness": ["SpaFit"],
+        "kids_venue": ["KidsClub"],
+        "buffet": ["LidoBuffet"],
+        "mdr": ["MainDining_L", "MainDining_U"],
+        "specialty": ["Specialty"],
+        "crew_mess": ["CrewMess"],
+        "gangway_corridor": ["Reception"],
+        "cabin_corridor": ["Cabin_Corridor"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "documented",
+          "source": "hal_volendam_daily_2026-01-09",
+          "events": [
+            {"event_id": "breakfast", "event_class": "meal_seating", "window": ["06:50", "10:00"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market 06:50-10:00; Dining Room 07:30-09:00"}},
+            {"event_id": "morning_activities", "event_class": "scheduled_activity", "window": ["09:30", "12:00"], "venue_roles": ["lounge", "main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.4, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "ballroom class 10:00, trivia, lectures"}},
+            {"event_id": "lunch", "event_class": "meal_seating", "window": ["11:30", "14:00"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market lunch 11:30-14:00"}},
+            {"event_id": "afternoon_tea_movie", "event_class": "scheduled_activity", "window": ["15:00", "16:30"], "venue_roles": ["mdr", "main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.7, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "French Afternoon Tea 15:00 Dining Room; movie 15:00; ballroom class 15:00"}},
+            {"event_id": "happy_hour", "event_class": "open_venue", "window": ["16:00", "17:00"], "venue_roles": ["lounge"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.8, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "happy hours 16:00-17:00 and 18:30-19:30"}},
+            {"event_id": "dinner", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "specialty", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Dining Room 17:00-21:00; Lido Market dinner 17:30-20:00"}},
+            {"event_id": "main_show_early", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "World Stage 19:30"}},
+            {"event_id": "main_show_late", "event_class": "show_performance", "window": ["21:00", "22:00"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-09", "evidence": "World Stage 21:00"}},
+            {"event_id": "late_snack", "event_class": "meal_seating", "window": ["22:30", "23:30"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.1, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market late snack 22:30-23:30"}},
+            {"event_id": "housekeeping_am", "event_class": "cleaning_rotation", "window": ["08:00", "13:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.6, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "hotel-standard stateroom service pass"}},
+            {"event_id": "housekeeping_pm", "event_class": "cleaning_rotation", "window": ["18:00", "21:30"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.4, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "evening turndown"}},
+            {"event_id": "crew_mess", "event_class": "meal_seating", "window": ["06:00", "21:30"], "venue_roles": ["crew_mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.7, "occupancy_share": 0.15, "egress_mode": "rolling", "source": {"class": "notional", "rule": "three service windows inside the bracket"}}
+          ]
+        },
+        "port_day": {
+          "class": "documented",
+          "source": "hal_volendam_daily_2026-01-12",
+          "events": [
+            {"event_id": "breakfast_port", "event_class": "meal_seating", "window": ["06:50", "10:00"], "venue_roles": ["buffet", "mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Lido Market 06:50-10:00; Dining Room 07:30-09:00"}},
+            {"event_id": "tender_ticket_distribution", "event_class": "queue_event", "window": ["08:00", "09:30"], "venue_roles": ["lounge", "gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.5, "egress_mode": "windowed", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "tender tickets distributed 08:00 at Ocean Bar"}},
+            {"event_id": "tender_service", "event_class": "port_call", "window": ["08:30", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.05, "egress_mode": "windowed", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "~20 min tender ride, first return tender 11:00, last tender 16:30, depart 16:50"}},
+            {"event_id": "tender_return_front", "event_class": "queue_event", "window": ["15:00", "16:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.5, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "last tender 16:30 concentrates return flow"}},
+            {"event_id": "dinner_port", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "specialty", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.8, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "Dining Room 17:00-21:00; Lido dinner 17:30-20:00"}},
+            {"event_id": "happy_hour_port", "event_class": "open_venue", "window": ["18:30", "19:30"], "venue_roles": ["lounge"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.8, "egress_mode": "rolling", "source": {"document_id": "hal_volendam_daily_2026-01-12", "evidence": "happy hour 18:30-19:30"}},
+            {"event_id": "show_port", "event_class": "show_performance", "window": ["19:30", "20:30"], "venue_roles": ["main_theater"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.95, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "evening show retained on port days per the sea-day pattern of this class"}}
+          ]
+        },
+        "embarkation": {
+          "class": "notional",
+          "construction_rule": "Same embarkation structure as the other cruise classes, scaled to the smaller hull.",
+          "events": [
+            {"event_id": "boarding_flow", "event_class": "embarkation_flow", "window": ["11:00", "16:00"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "NCL day-1 structure"}},
+            {"event_id": "embark_buffet_surge", "event_class": "meal_seating", "window": ["11:00", "16:00"], "venue_roles": ["buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.75, "occupancy_share": 0.25, "egress_mode": "rolling", "source": {"class": "notional", "rule": "buffet embark lunch"}},
+            {"event_id": "muster_drill", "event_class": "queue_event", "window": ["15:30", "16:15"], "venue_roles": ["gangway_corridor", "promenade"], "eligible": {"role_groups": ["passenger", "crew"]}, "participation_fraction": 1.0, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "SOLAS mandatory muster"}},
+            {"event_id": "dinner_embark", "event_class": "meal_seating", "window": ["17:00", "21:00"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "full dinner service"}}
+          ]
+        },
+        "disembarkation": {
+          "class": "notional",
+          "construction_rule": "As other cruise classes.",
+          "events": [
+            {"event_id": "breakfast_disembark", "event_class": "meal_seating", "window": ["06:00", "08:30"], "venue_roles": ["mdr", "buffet"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "early clearing breakfast"}},
+            {"event_id": "gangway_offload", "event_class": "disembarkation_flow", "window": ["07:00", "10:00"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"class": "notional", "rule": "staggered offload"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "scheduled_activity": "capacity_multiplier 0.75", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation", "Selective Passenger Confinement (Diamond Princess)"], "effects": {"meal_seating@buffet": "cancelled_or_crew_served", "show_performance": "cancelled", "scheduled_activity": "cancelled", "open_venue": "capacity_multiplier 0.4", "port_call": "cancelled"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters", "Replayed Cabin Quarantine of All Passengers"], "effects": {"all_passenger_events": "cancelled", "meal_seating": "delivered_to_cabin", "cleaning_rotation": "essential_only", "watch_turnover": "unchanged"}}
+      }
+    },
+    "expedition_cruise": {
+      "platforms": ["expedition_cruise_450"],
+      "catalog_status": "documented",
+      "documents": ["silversea_chronicles_2025-02-24"],
+      "construction_note": "Silver Dawn (Muse class ~596 pax) daily from the same luxury line as the stated Silver Cloud / Le Boreal models for expedition_cruise_450; the documented day is an overnight port call. Sea-day template is declared from the same venue hours since expedition programs run shorter activity grids.",
+      "venue_map": {
+        "theater": ["TheaterLng"],
+        "observation_lounge": ["ObsLounge", "ExpedLounge"],
+        "pool_deck": ["PoolDeck"],
+        "casino": ["Casino"],
+        "library": ["Library"],
+        "gym_spa": ["Gym", "Spa"],
+        "mdr": ["MainDining", "CasualDining"],
+        "crew_mess": ["CrewMess"],
+        "gangway_corridor": ["Reception"],
+        "cabin_corridor": ["Cabin_Corridor"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "notional",
+          "construction_rule": "No sea-day Chronicles extracted; assembled from the documented port-day venue hours (Atlantide/La Terrazza/dinner seatings) plus the expedition-standard pattern of morning lecture + afternoon zodiac/recap blocks, flagged notional.",
+          "events": [
+            {"event_id": "breakfast_buffet", "event_class": "meal_seating", "window": ["06:30", "09:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.35, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "La Terrazza buffet breakfast 06:30-09:00; Atlantide a la carte 07:30 last seating 09:30"}},
+            {"event_id": "breakfast_alacarte", "event_class": "meal_seating", "window": ["07:30", "09:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.6, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "Atlantide breakfast last seating 09:30"}},
+            {"event_id": "morning_lecture", "event_class": "scheduled_activity", "window": ["10:00", "11:30"], "venue_roles": ["theater", "observation_lounge"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.8, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "expedition-standard lecture block"}},
+            {"event_id": "lunch_buffet", "event_class": "meal_seating", "window": ["12:30", "15:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "La Terrazza lunch buffet 12:30-15:30"}},
+            {"event_id": "afternoon_activities", "event_class": "scheduled_activity", "window": ["15:00", "17:30"], "venue_roles": ["observation_lounge", "pool_deck"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.4, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "expedition-standard recap/enrichment block"}},
+            {"event_id": "dinner", "event_class": "meal_seating", "window": ["18:30", "21:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.9, "occupancy_share": 0.6, "egress_mode": "synchronized_end", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "dinner seatings 18:30-21:00, Atlantide last seating 20:30, Silver Note 19:30-22:00"}},
+            {"event_id": "evening_lounge", "event_class": "open_venue", "window": ["21:00", "00:00"], "venue_roles": ["observation_lounge", "casino"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.3, "occupancy_share": 0.5, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "Arts Cafe 06:30-23:00; evening venue pattern to ~midnight"}},
+            {"event_id": "housekeeping_am", "event_class": "cleaning_rotation", "window": ["08:00", "13:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.6, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "hotel-standard service pass"}},
+            {"event_id": "crew_mess", "event_class": "meal_seating", "window": ["06:00", "21:30"], "venue_roles": ["crew_mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.7, "occupancy_share": 0.15, "egress_mode": "rolling", "source": {"class": "notional", "rule": "crew mess service windows"}}
+          ]
+        },
+        "port_day": {
+          "class": "documented",
+          "source": "silversea_chronicles_2025-02-24",
+          "events": [
+            {"event_id": "breakfast_port", "event_class": "meal_seating", "window": ["06:30", "09:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "breakfast service as documented"}},
+            {"event_id": "gangway_overnight", "event_class": "port_call", "window": ["08:00", "22:00"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.8, "occupancy_share": 0.03, "egress_mode": "windowed", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "overnight port call — gangway effectively open through the evening"}},
+            {"event_id": "lunch_port", "event_class": "meal_seating", "window": ["12:30", "15:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.5, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "La Terrazza lunch buffet 12:30-15:30"}},
+            {"event_id": "dinner_port", "event_class": "meal_seating", "window": ["18:30", "22:00"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.85, "occupancy_share": 0.6, "egress_mode": "synchronized_end", "source": {"document_id": "silversea_chronicles_2025-02-24", "evidence": "dinner seatings to Silver Note 22:00"}}
+          ]
+        },
+        "embarkation": {
+          "class": "notional",
+          "construction_rule": "Same structure; luxury embarkations run lighter buffet surges (welcome drinks + single-seating dinner).",
+          "events": [
+            {"event_id": "boarding_flow", "event_class": "embarkation_flow", "window": ["14:00", "17:00"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "luxury embarkation afternoon window"}},
+            {"event_id": "muster_drill", "event_class": "queue_event", "window": ["17:00", "17:30"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger", "crew"]}, "participation_fraction": 1.0, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "SOLAS mandatory muster"}},
+            {"event_id": "dinner_embark", "event_class": "meal_seating", "window": ["18:30", "21:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.9, "occupancy_share": 0.6, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "embark-day dinner at documented seating hours"}}
+          ]
+        },
+        "disembarkation": {
+          "class": "notional",
+          "construction_rule": "As other cruise classes.",
+          "events": [
+            {"event_id": "breakfast_disembark", "event_class": "meal_seating", "window": ["06:30", "08:30"], "venue_roles": ["mdr"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"class": "notional", "rule": "clearing breakfast"}},
+            {"event_id": "gangway_offload", "event_class": "disembarkation_flow", "window": ["07:30", "10:00"], "venue_roles": ["gangway_corridor"], "eligible": {"role_groups": ["passenger"]}, "participation_fraction": 1.0, "occupancy_share": 0.4, "egress_mode": "windowed", "source": {"class": "notional", "rule": "staggered offload"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "scheduled_activity": "capacity_multiplier 0.75", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation", "Selective Passenger Confinement (Diamond Princess)"], "effects": {"show_performance": "cancelled", "scheduled_activity": "cancelled", "open_venue": "capacity_multiplier 0.4", "port_call": "cancelled"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters", "Replayed Cabin Quarantine of All Passengers"], "effects": {"all_passenger_events": "cancelled", "meal_seating": "delivered_to_cabin", "cleaning_rotation": "essential_only", "watch_turnover": "unchanged"}}
+      }
+    },
+    "starship_galaxy": {
+      "platforms": ["enterprise_galaxy_tng"],
+      "catalog_status": "notional",
+      "construction_rule": "Fictional hull. Built from canonical Starfleet convention: three 8-hour watch sections (alpha ~08:00-16:00, beta ~16:00-24:00, gamma ~00:00-08:00) for duty-posted crew (bridge, engineering, security, sciences, medical); Ten Forward / lounges run continuous evening hours; crew mess services at watch boundaries. Families/civilians follow a school-day + leisure pattern. No port calls; away missions substitute at reduced population. Every event carries class 'notional'.",
+      "documents": ["starfleet_canonical_watch"],
+      "venue_map": {
+        "bridge": ["Bridge"],
+        "engineering": ["MainEng"],
+        "security": ["Security"],
+        "science": ["Science1"],
+        "medical": ["Sickbay"],
+        "lounge": ["TenFwd"],
+        "mess": ["MessHall"],
+        "holodeck": ["Holodeck"],
+        "cabin_corridor": ["Cabin_Corridor"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "notional",
+          "construction_rule": "Starship 'routine operations' day: watch boundaries at 08:00/16:00/24:00, crew mess at each boundary, evening leisure occupancy in Ten Forward and holodecks.",
+          "events": [
+            {"event_id": "watch_alpha", "event_class": "watch_turnover", "window": ["08:00", "08:15"], "venue_roles": ["bridge", "engineering", "security", "science", "medical"], "eligible": {"role_groups": ["crew"], "classes": ["crew_command", "crew_helm_ops", "crew_security", "crew_engineering", "crew_sciences", "crew_medical", "crew_operations"]}, "participation_fraction": 0.34, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "alpha shift turnover 08:00; off-going gamma-section crew egress through corridor at the same instant"}},
+            {"event_id": "watch_beta", "event_class": "watch_turnover", "window": ["16:00", "16:15"], "venue_roles": ["bridge", "engineering", "security", "science", "medical"], "eligible": {"role_groups": ["crew"], "classes": ["crew_command", "crew_helm_ops", "crew_security", "crew_engineering", "crew_sciences", "crew_medical", "crew_operations"]}, "participation_fraction": 0.34, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "beta shift turnover 16:00"}},
+            {"event_id": "watch_gamma", "event_class": "watch_turnover", "window": ["00:00", "00:15"], "venue_roles": ["bridge", "engineering", "security", "science", "medical"], "eligible": {"role_groups": ["crew"], "classes": ["crew_command", "crew_helm_ops", "crew_security", "crew_engineering", "crew_sciences", "crew_medical", "crew_operations"]}, "participation_fraction": 0.32, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "gamma shift turnover 00:00; smallest section"}},
+            {"event_id": "mess_morning", "event_class": "meal_seating", "window": ["06:30", "08:30"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew", "passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "crew mess at watch boundary"}},
+            {"event_id": "mess_midday", "event_class": "meal_seating", "window": ["11:30", "13:30"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew", "passenger"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "midday meal"}},
+            {"event_id": "mess_evening", "event_class": "meal_seating", "window": ["17:30", "20:00"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew", "passenger"]}, "participation_fraction": 0.7, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "main evening meal"}},
+            {"event_id": "ten_fwd_evening", "event_class": "open_venue", "window": ["19:00", "01:00"], "venue_roles": ["lounge"], "eligible": {"role_groups": ["crew", "passenger"]}, "participation_fraction": 0.35, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"class": "notional", "rule": "canonical Ten Forward evening hours"}},
+            {"event_id": "holodeck_evening", "event_class": "scheduled_activity", "window": ["18:00", "23:00"], "venue_roles": ["holodeck"], "eligible": {"role_groups": ["crew", "passenger"]}, "participation_fraction": 0.25, "occupancy_share": 0.5, "egress_mode": "rolling", "source": {"class": "notional", "rule": "evening recreation blocks"}},
+            {"event_id": "school_block", "event_class": "scheduled_activity", "window": ["09:00", "15:00"], "venue_roles": ["lounge"], "eligible": {"role_groups": ["passenger"], "classes": ["passenger_family"]}, "participation_fraction": 0.6, "occupancy_share": 0.7, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "children's instructional block for the embarked-family population"}},
+            {"event_id": "cleaning_pass", "event_class": "cleaning_rotation", "window": ["10:00", "14:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"], "classes": ["crew_services", "crew_general"]}, "participation_fraction": 0.4, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "services section stateroom pass"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation"], "effects": {"scheduled_activity": "cancelled", "open_venue": "capacity_multiplier 0.4", "mess": "crew_served"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters"], "effects": {"all_passenger_events": "cancelled", "meal_seating": "delivered_to_cabin", "watch_turnover": "unchanged"}}
+      }
+    },
+    "starship_constitution": {
+      "platforms": ["enterprise_constitution_tos"],
+      "catalog_status": "notional",
+      "construction_rule": "Fictional hull, all-crew complement. Same three-watch convention as starship_galaxy; recreation runs through the mess deck and rec rooms rather than Ten Forward; no civilian passenger population.",
+      "documents": ["starfleet_canonical_watch"],
+      "venue_map": {
+        "bridge": ["Bridge"],
+        "engineering": ["EngMain"],
+        "medical": ["Sickbay"],
+        "mess": ["MessHall"],
+        "rec": ["RecRoom"],
+        "cabin_corridor": ["Cabin_Corridor"]
+      },
+      "baseline_day_templates": {
+        "sea_day": {
+          "class": "notional",
+          "construction_rule": "TOS routine operations: three watch sections, mess at watch boundaries, evening rec-room occupancy.",
+          "events": [
+            {"event_id": "watch_alpha", "event_class": "watch_turnover", "window": ["08:00", "08:15"], "venue_roles": ["bridge", "engineering", "medical"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.34, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "three-watch rotation"}},
+            {"event_id": "watch_beta", "event_class": "watch_turnover", "window": ["16:00", "16:15"], "venue_roles": ["bridge", "engineering", "medical"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.34, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "three-watch rotation"}},
+            {"event_id": "watch_gamma", "event_class": "watch_turnover", "window": ["00:00", "00:15"], "venue_roles": ["bridge", "engineering", "medical"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.32, "occupancy_share": 1.0, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "three-watch rotation"}},
+            {"event_id": "mess_morning", "event_class": "meal_seating", "window": ["06:30", "08:30"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "mess at watch boundary"}},
+            {"event_id": "mess_midday", "event_class": "meal_seating", "window": ["11:30", "13:30"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.6, "occupancy_share": 0.3, "egress_mode": "rolling", "source": {"class": "notional", "rule": "midday mess"}},
+            {"event_id": "mess_evening", "event_class": "meal_seating", "window": ["17:30", "20:00"], "venue_roles": ["mess"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.7, "occupancy_share": 0.35, "egress_mode": "synchronized_end", "source": {"class": "notional", "rule": "evening mess"}},
+            {"event_id": "rec_evening", "event_class": "open_venue", "window": ["19:00", "23:00"], "venue_roles": ["rec"], "eligible": {"role_groups": ["crew"]}, "participation_fraction": 0.3, "occupancy_share": 0.4, "egress_mode": "rolling", "source": {"class": "notional", "rule": "off-watch recreation"}},
+            {"event_id": "cleaning_pass", "event_class": "cleaning_rotation", "window": ["10:00", "14:00"], "venue_roles": ["cabin_corridor"], "eligible": {"role_groups": ["crew"], "classes": ["crew_services", "crew_general"]}, "participation_fraction": 0.3, "occupancy_share": 1.0, "egress_mode": "rolling", "source": {"class": "notional", "rule": "services pass"}}
+          ]
+        }
+      },
+      "sop_variants": {
+        "heightened_sanitation": {"trigger_sop_names": ["Surface Disinfection Protocol", "Increased Diagnostic Cadence"], "effects": {"open_venue": "capacity_multiplier 0.75", "cleaning_rotation": "frequency_multiplier 1.5"}},
+        "outbreak_level": {"trigger_sop_names": ["VSP-Threshold Mass Isolation", "Galley Closure & Meal Isolation"], "effects": {"open_venue": "capacity_multiplier 0.4", "mess": "crew_served"}},
+        "confinement": {"trigger_sop_names": ["General Confinement to Quarters"], "effects": {"all_crew_leisure_events": "cancelled", "meal_seating": "delivered_to_cabin", "watch_turnover": "unchanged"}}
+      }
+    }
+  }
+}

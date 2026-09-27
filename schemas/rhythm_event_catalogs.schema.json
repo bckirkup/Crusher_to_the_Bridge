@@ -1,0 +1,138 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://crusher-to-the-bridge/schemas/rhythm_event_catalogs.schema.json",
+  "title": "RhythmEventCatalogs",
+  "description": "Schedule-conditioned shipboard event catalogs for SHIP-RHYTHM-01: transcribed daily-program timetables and notional reconstructions, plus SOP-conditioning variants. Companion spec: docs/rhythm/rhythm_spec.md.",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["schema_version", "documents", "event_class_definitions", "sop_conditioning", "ship_class_catalogs"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "task_id": { "type": "string" },
+    "status": { "type": "string" },
+    "description": { "type": "string" },
+    "conventions": { "type": "object" },
+    "documents": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["document_id", "document_class", "vessel", "day_type", "origin_grade", "maps_to_ship_classes"],
+        "properties": {
+          "document_id": { "type": "string" },
+          "document_class": { "type": "string" },
+          "vessel": { "type": "string" },
+          "cruise_line": { "type": "string" },
+          "day_type": { "type": "string" },
+          "date": { "type": "string" },
+          "url": { "type": "string" },
+          "origin_grade": { "type": "string" },
+          "maps_to_ship_classes": { "type": "array", "items": { "type": "string" } },
+          "notes": { "type": "string" }
+        },
+        "additionalProperties": true
+      }
+    },
+    "event_class_definitions": {
+      "type": "object",
+      "description": "Taxonomy of event classes; each key is a class name used by event entries."
+    },
+    "sop_conditioning": {
+      "type": "object",
+      "description": "SOP-name-keyed decay rules applied to baseline templates; names must match protocols.json 'name' fields."
+    },
+    "ship_class_catalogs": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "required": ["platforms", "catalog_status", "baseline_day_templates"],
+        "properties": {
+          "platforms": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+          "catalog_status": { "type": "string", "enum": ["documented", "notional", "mixed"] },
+          "documents": { "type": "array", "items": { "type": "string" } },
+          "construction_rule": { "type": "string" },
+          "construction_note": { "type": "string" },
+          "venue_map": {
+            "type": "object",
+            "additionalProperties": { "type": "array", "items": { "type": "string" } }
+          },
+          "baseline_day_templates": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "type": "object",
+              "required": ["class", "events"],
+              "properties": {
+                "class": { "type": "string", "enum": ["documented", "notional"] },
+                "source": { "type": "string" },
+                "construction_rule": { "type": "string" },
+                "events": {
+                  "type": "array",
+                  "items": { "$ref": "#/$defs/event" }
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "sop_variants": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "trigger_sop_names": { "type": "array", "items": { "type": "string" } },
+                "effects": { "type": "object" }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "additionalProperties": true
+      }
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["event_id", "event_class", "window", "venue_roles", "eligible", "participation_fraction", "egress_mode", "source"],
+      "properties": {
+        "event_id": { "type": "string" },
+        "event_class": { "type": "string" },
+        "window": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^([01]?[0-9]|2[0-3]):[0-5][0-9]$" },
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "venue_roles": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "eligible": {
+          "type": "object",
+          "required": ["role_groups"],
+          "properties": {
+            "role_groups": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+            "classes": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": true
+        },
+        "participation_fraction": { "type": "number", "minimum": 0, "maximum": 1 },
+        "occupancy_share": { "type": "number", "minimum": 0, "maximum": 1 },
+        "egress_mode": { "type": "string", "enum": ["synchronized_end", "rolling", "windowed"] },
+        "source": {
+          "type": "object",
+          "description": "Every timetable entry traceable: either a document citation or an explicit notional marker with a construction rule.",
+          "properties": {
+            "document_id": { "type": "string" },
+            "evidence": { "type": "string" },
+            "class": { "type": "string" },
+            "rule": { "type": "string" }
+          },
+          "additionalProperties": true,
+          "anyOf": [
+            { "required": ["document_id"] },
+            { "required": ["class", "rule"], "properties": { "class": { "const": "notional" } } }
+          ]
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}
