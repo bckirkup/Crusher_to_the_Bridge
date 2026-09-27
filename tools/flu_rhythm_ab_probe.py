@@ -23,14 +23,10 @@ from __future__ import annotations
 
 import argparse
 import copy
-import gzip
-import hashlib
 import json
 import re
 import sys
-import tempfile
 import time
-import zipfile
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -41,20 +37,12 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.pathogen_overrides import (  # noqa: E402
-    isolate_arm_overrides,
-    load_pathogen_bundle,
-)
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
-    resolve_child_path,
     resolve_repo_path,
     validated_open,
 )
-from simulation_utils.platform_complement import declared_total  # noqa: E402
-from tools.cabin_floor_probe import DECLARED_CONFINEMENT, _party_size  # noqa: E402
+from tools.cabin_floor_probe import conditioned_spec  # noqa: E402
 from tools.covid_route_attribution import (  # noqa: E402
     CabinPairChallengeLedger,
     cabin_pair_challenge_table,
@@ -66,12 +54,14 @@ from tools.flu_delivery_stages_probe import (  # noqa: E402
 )
 from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
     _attach_voyage_blocks,
-    build_spec,
 )
 from tools.noro_diag.rhythm_ab_probe import (  # noqa: E402
     RhythmRecorder,
     _epoch_observer,
     _inject_arm,
+    _rhythm_payload,
+    _sim_for_spec,
+    _write_run_zip,
     instrumented,
 )
 
@@ -133,35 +123,10 @@ def flu_cell_spec(
     confinement: str = "declared",
 ) -> dict[str, Any]:
     """The FLU-DELIVERY-01 conditioning verbatim (no arm injected)."""
-    profiles = load_pathogen_bundle(
-        resolve_repo_path(
-            str(REPO_ROOT),
-            asset_defaults.pathogen_bundle_rel(ACTIVE_BUNDLE),
-        ),
+    spec_dict, _profile = conditioned_spec(
+        bundle=ACTIVE_BUNDLE, pathogen_id=PATHOGEN, seed=seed,
+        platform=platform, epochs=epochs, confinement=confinement,
     )
-    spec_dict = build_spec(
-        seed=seed, platform=platform, bundle=ACTIVE_BUNDLE,
-        epochs=epochs, num_agents=declared_total(platform),
-        pathogen_id=PATHOGEN, alpha=None, beta=0.0,
-        high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
-        fomite_representation=None, fomite_touch_share=None,
-        fomite_touch_share_table=None,
-    )
-    spec_dict["pathogen_overrides"] = isolate_arm_overrides(
-        ACTIVE_BUNDLE, PATHOGEN, {PATHOGEN: {"initial_infected": None}},
-    )
-    spec_dict["config_overrides"]["initiation"] = {
-        "explicit_seeds": [{
-            "pathogen": PATHOGEN,
-            "count": _party_size(profiles[PATHOGEN]),
-            "role": "passenger",
-            "epoch": 0,
-        }],
-    }
-    if confinement == "declared":
-        spec_dict["config_overrides"]["scenario_schedule"] = {
-            "protocols": [DECLARED_CONFINEMENT],
-        }
     spec_dict["description"] = f"flu_rhythm_ab_{platform}_s{seed}"
     return spec_dict
 
@@ -196,43 +161,6 @@ def _mechanism_block(
     }
 
 
-def _rhythm_payload(
-    rec: RhythmRecorder,
-    spec_dict: dict[str, Any],
-    arm: str | None,
-    engine: Any,
-) -> dict[str, Any]:
-    """Shared noro-probe witness fields minus the noro-only tables."""
-    rhythm_cfg = (spec_dict.get("config_overrides") or {}).get("rhythm") or {}
-    attached = getattr(engine, "_rhythm", None) is not None
-    requested = rhythm_cfg.get("enabled")
-    if arm == "on" and not attached:
-        raise RuntimeError(
-            "rhythm.enabled=true did not attach a layer "
-            "(platform uncatalogued or non-hourly clock?)",
-        )
-    if arm == "off" and attached:
-        raise RuntimeError("rhythm.enabled=false still attached a layer")
-    voyage_digest = hashlib.sha256(
-        "".join(rec.epoch_state_digests).encode(),
-    ).hexdigest()
-    return {
-        "arm": arm,
-        "rhythm_requested": requested,
-        "rhythm_attached": attached,
-        "commitments_total": rec.commitments_total,
-        "dealt_days": rec.dealt_days,
-        "ashore_dosed_epochs": rec.ashore_dosed_epochs,
-        "ashore_dosed_rows": rec.ashore_dosed_rows,
-        "n_acquired": len(rec.acquired_ids),
-        "n_imports": len(rec.import_ids),
-        "acquisition_rows": rec.acquisition_rows,
-        "epoch_rows": rec.epoch_rows,
-        "epoch_state_digests": rec.epoch_state_digests,
-        "telemetry_sha256": voyage_digest,
-    }
-
-
 def run_cell(
     *,
     seed: int,
@@ -260,34 +188,25 @@ def run_cell(
     stage = StageRecorder(PATHOGEN)
     ledger = CabinPairChallengeLedger()
     started_total = time.perf_counter()
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
+    with instrumented(rec):
+        stage.install()
+        saved_challenge = tc.TransmissionCore._resolve_pathogen_challenge
+        tc.TransmissionCore._resolve_pathogen_challenge = (
+            _wrap_dosed_set(tc.TransmissionCore, mech)
         )
-        with instrumented(rec):
-            stage.install()
-            saved_challenge = tc.TransmissionCore._resolve_pathogen_challenge
-            tc.TransmissionCore._resolve_pathogen_challenge = (
-                _wrap_dosed_set(tc.TransmissionCore, mech)
-            )
-            try:
-                sim = ShipSimulation(picard_spec, display=False)
+        try:
+            with _sim_for_spec(spec) as sim:
                 sim.epoch_observer = _fanout_observer(
                     ledger.observe, _epoch_observer(rec),
                 )
                 started_run = time.perf_counter()
                 result = sim.run()
                 wall_clock_run = time.perf_counter() - started_run
-            finally:
-                tc.TransmissionCore._resolve_pathogen_challenge = (
-                    saved_challenge
-                )
-                stage.restore()
+        finally:
+            tc.TransmissionCore._resolve_pathogen_challenge = (
+                saved_challenge
+            )
+            stage.restore()
     summary: dict[str, Any] = {
         "run_id": str(spec.get("description", "")),
         "seed": int(spec["run"]["random_seed"]),
@@ -362,31 +281,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     if args.emit_spec is None and (args.out is None or args.arm is None):
         parser.error("running a cell requires --out and --arm")
     return args
-
-
-def _write_run_zip(
-    out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
-) -> Path:
-    """``summary.json`` (campaign layout) + ``rhythm.json.gz`` payload."""
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
-    anchor = {
-        "run_id": run_id,
-        "parameters": payload["parameters"],
-        "num_epochs": payload["num_epochs"],
-        "trigger_status": payload.get("trigger_status"),
-        "summary": payload["summary"],
-        "cost_accounting": payload["cost_accounting"],
-        "derived": payload["derived"],
-    }
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr(
-            "rhythm.json.gz",
-            gzip.compress(json.dumps(payload["rhythm"]).encode()),
-        )
-    return zip_path
 
 
 def _emit_spec(args: argparse.Namespace) -> None:

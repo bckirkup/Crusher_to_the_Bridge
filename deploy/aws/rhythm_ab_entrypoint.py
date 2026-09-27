@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import subprocess  # noqa: S404 - fixed argv, no shell
 import sys
 from pathlib import Path
@@ -33,6 +32,7 @@ from campaign_runner import generate_tier_runs  # noqa: E402
 
 from deploy.aws.dose_challenge_entrypoint import (  # noqa: E402
     _already_uploaded,
+    _array_index,
     _s3_client,
     _s3_uri,
 )
@@ -41,23 +41,6 @@ _DRIVER = "tools/noro_diag/rhythm_ab_probe.py"
 _TIERS = ("fl_exp_7d", "fl_exp_12d", "fl_spr_12d", "fl_cls_12d", "fl_mega_12d")
 _OUT_ROOT = "out/noro_diag/rhythm_ab"
 ARMS = ("off", "on")
-
-
-def _cell_index(args: argparse.Namespace) -> int:
-    """``--index`` (canary override) else the Batch array env."""
-    if args.index is not None:
-        return int(args.index)
-    raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
-    if raw is None:
-        raise SystemExit(
-            "AWS_BATCH_JOB_ARRAY_INDEX is required (or pass --index)",
-        )
-    try:
-        return int(raw)
-    except ValueError as exc:
-        raise SystemExit(
-            "AWS_BATCH_JOB_ARRAY_INDEX must be an integer",
-        ) from exc
 
 
 def _tier_cell(index: int, manifest_path: Path) -> tuple[str, int]:
@@ -85,7 +68,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 def main(argv: list[str] | None = None) -> None:
     """Run this array child's manifest spec and upload its run zip."""
     args = parse_args(argv)
-    index = _cell_index(args)
+    index = _array_index(args.index)
     manifest_path = (_REPO_ROOT / args.manifest).resolve()
     tier, index_in_tier = _tier_cell(index, manifest_path)
 

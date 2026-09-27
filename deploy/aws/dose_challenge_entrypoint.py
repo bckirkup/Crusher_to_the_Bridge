@@ -62,10 +62,15 @@ def _s3_client() -> Any:
     return boto3.client("s3")
 
 
-def _array_index() -> int:
+def _array_index(explicit: int | None = None) -> int:
+    """``--index`` (canary override) else the Batch array env var."""
+    if explicit is not None:
+        return int(explicit)
     raw = os.environ.get("AWS_BATCH_JOB_ARRAY_INDEX")
     if raw is None:
-        raise SystemExit("AWS_BATCH_JOB_ARRAY_INDEX is required")
+        raise SystemExit(
+            "AWS_BATCH_JOB_ARRAY_INDEX is required (or pass --index)",
+        )
     try:
         return int(raw)
     except ValueError as exc:

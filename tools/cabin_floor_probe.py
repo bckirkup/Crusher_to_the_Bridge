@@ -108,7 +108,7 @@ def _party_size(profile: dict[str, Any]) -> int:
     return int(party.get("size") or 0) or 2
 
 
-def run_arm(
+def conditioned_spec(
     *,
     bundle: str,
     pathogen_id: str,
@@ -116,8 +116,15 @@ def run_arm(
     platform: str,
     epochs: int,
     confinement: str = "organic",
-) -> dict[str, Any]:
-    """One isolated, instrumented voyage for one pathogen at one seed."""
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The conditioned spec shared by the confined-window probes.
+
+    Isolated arm (every other bundle pathogen removed, own
+    ``initial_infected`` nulled), a passenger seed party at epoch 0 via
+    ``initiation.explicit_seeds``, and — under ``declared`` — SOP-017 held
+    by the replay calendar from day 1 to voyage end. Returns the spec and
+    the pathogen's bundle profile.
+    """
     profiles = load_pathogen_bundle(
         resolve_repo_path(str(REPO_ROOT), asset_defaults.pathogen_bundle_rel(bundle)),
     )
@@ -145,6 +152,23 @@ def run_arm(
         spec_dict["config_overrides"]["scenario_schedule"] = {
             "protocols": [DECLARED_CONFINEMENT],
         }
+    return spec_dict, profile
+
+
+def run_arm(
+    *,
+    bundle: str,
+    pathogen_id: str,
+    seed: int,
+    platform: str,
+    epochs: int,
+    confinement: str = "organic",
+) -> dict[str, Any]:
+    """One isolated, instrumented voyage for one pathogen at one seed."""
+    spec_dict, profile = conditioned_spec(
+        bundle=bundle, pathogen_id=pathogen_id, seed=seed,
+        platform=platform, epochs=epochs, confinement=confinement,
+    )
     sim, table = instrumented_voyage(spec_dict)
     infected = sum(
         1 for agent in sim.engine.agents
