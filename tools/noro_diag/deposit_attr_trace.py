@@ -41,6 +41,12 @@ Arms (declared in the ledger before any run)
 ``report_scale``    ``pathogen_overrides.norwalk_gi.observation_model
                     .reporting_belief_scaling = "trust_medical"`` -- the
                     pre-NORO-CHANNEL-02 stacking, as a labelled baseline.
+``pre_all``       joint pre-change baseline: all six candidates at their
+                    labelled baseline simultaneously (config arms merged;
+                    gate floor and emesis filing patched in-process). Added
+                    before running, after the single-arm grid: the decisive
+                    test for a collapse that is multiplicative across the
+                    named set rather than carried by one change.
 ``cabin_fomite_off`` ``transmission.cabin_confined_fomite.mode: "off"`` --
                     labelled baseline for the in-window NORO-CABIN-01 pickup
                     path.
@@ -161,6 +167,20 @@ def _arm_overrides(arm: str) -> tuple[dict[str, Any], dict[str, Any]]:
         }
     if arm == "cabin_fomite_off":
         return {"transmission": {"cabin_confined_fomite": {"mode": "off"}}}, {}
+    if arm == "pre_all":
+        # Joint pre-change baseline: every candidate at its labelled
+        # baseline/off state simultaneously. The in-process arms
+        # (gate_off, emesis_zonepool) return empty patches here and apply
+        # inside ``arm_patches``.
+        config_patch: dict[str, Any] = {}
+        pathogen_patch: dict[str, Any] = {}
+        for sub in (
+            "blackwater_off", "watch_off", "cabin_fomite_off", "report_scale",
+        ):
+            c_patch, p_patch = _arm_overrides(sub)
+            config_patch = _deep_merge(config_patch, c_patch)
+            pathogen_patch = _deep_merge(pathogen_patch, p_patch)
+        return config_patch, pathogen_patch
     raise ValueError(f"unknown arm: {arm!r}")
 
 
@@ -172,6 +192,7 @@ ARMS = (
     "emesis_zonepool",
     "report_scale",
     "cabin_fomite_off",
+    "pre_all",
 )
 
 
@@ -511,7 +532,7 @@ def _zonepool_emitter(saved_emit: Any) -> Any:
 
 @contextmanager
 def arm_patches(arm: str) -> Any:
-    """The in-process arms: gate floor at zero, pre-#604 emesis filing."""
+    """In-process arms: gate floor at zero, pre-#604 emesis filing, both."""
     if arm == "gate_off":
         saved = fomite_surfaces.SURFACE_PICKUP_MIN_GEC
         fomite_surfaces.SURFACE_PICKUP_MIN_GEC = 0.0
@@ -528,6 +549,20 @@ def arm_patches(arm: str) -> Any:
         try:
             yield
         finally:
+            tc.TransmissionCore._emit_emesis = saved_emit
+            tc.TransmissionCore._zone_floor_area_m2 = saved_floor
+        return
+    if arm == "pre_all":
+        saved_gate = fomite_surfaces.SURFACE_PICKUP_MIN_GEC
+        saved_emit = tc.TransmissionCore._emit_emesis
+        saved_floor = tc.TransmissionCore._zone_floor_area_m2
+        fomite_surfaces.SURFACE_PICKUP_MIN_GEC = 0.0
+        tc.TransmissionCore._emit_emesis = _zonepool_emitter(saved_emit)
+        tc.TransmissionCore._zone_floor_area_m2 = _fomite_area_as_floor
+        try:
+            yield
+        finally:
+            fomite_surfaces.SURFACE_PICKUP_MIN_GEC = saved_gate
             tc.TransmissionCore._emit_emesis = saved_emit
             tc.TransmissionCore._zone_floor_area_m2 = saved_floor
         return
