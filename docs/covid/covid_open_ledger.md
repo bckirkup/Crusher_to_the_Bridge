@@ -104,6 +104,20 @@ Every prior Θ figure and the v6 readout were also measured with the voluntary
 FRED draw applied to scheduled SOP-017, so they are void pending remeasurement
 under the authority-enforced quarantine declaration.
 
+*Update (2026-09-26, `6a7dfe4e`, `COVID-REBASE-01`): the void Θ window was
+re-screened on the post-721 base over a 16-point union lattice × 200 seeds —
+**the admissible set is EMPTY**; the v11 band {3.16e10, 4.22e10, 5.62e10} fails
+the fleet-shape median floor everywhere (interior medians pinned at 0.00027),
+and the window is bracketed in (1e11, 1e12). The conditional clause still
+fails at all three band points in the same ~17× mass class, but its
+before_share halved to 0.45–0.66 (v11: 0.77–0.92, target 0.173). The boarding
+axes are now measured: at the declared geometry the day-0→5 index window is a
+median 0.5% of takeoff-class infections (clean index-only bound median 3), so
+boarding structure is not the takeoff burn; co-primaries reach majority scale
+only at count ≥ ~8 and saturate by 32
+(`docs/ledger/COVID-REBASE-01.md`,
+`docs/covid/covid_rebase_01_readout.md`).*
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
