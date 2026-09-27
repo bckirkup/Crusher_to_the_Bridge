@@ -1,0 +1,127 @@
+{
+  "design_id": "covid_theta_screen_v12_stage2",
+  "parent_design": "covid_theta_screen_v12",
+  "description": "Stage 2 of the COVID-THETA-V12 bisection: the declared Diamond Princess replay on the post-721 base, scored on takeoff seeds against the conditional_trajectory_clause carried verbatim from v11. This file is committed together with the stage-1 design so both live inside the same campaign image; its points list enumerates the CANDIDATE UNIVERSE (the Theta 1e9 canary anchor plus the nine stage-1 lattice Thetas), and which rows actually submit is fixed by the parent's frozen stage_2_declared_replay.theta_points rule -- admissible rows plus flanks, the window-straddling pair on an empty-but-crossed surface, or nothing when the window is illusory. The cell shape is verbatim from v11 stage 2 / covid_rebase_01_stage2: declared replay, onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (the declared value; under a declared onset_day the age axis is a measured null, SEED-ONSET-01, carried only for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). No Theta on this design may be quoted as a fit unless its row is a stage-1-admissible interior point AND the clause passes -- flank, boundary and anchor rows are reported beside the clause, never selected.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it is the conditional-clause re-measurement declared in covid_theta_screen_v12, gated on that design's stage-1 surface",
+  "prerequisites": [
+    "covid_theta_screen_v12 stage 1 (this design's parent): the (1e11, 1e12) bisection surface -- the admissible set and the located crossing are read off it, per the frozen rule in its stage_2_declared_replay.theta_points block.",
+    "covid_rebase_01_stage2 measured (6a7dfe4e-era base): conditional_trajectory_clause fails ~17x on before_share at every v11 band point {3.16e10, 4.22e10, 5.62e10}; Theta 1e9 re-measures QUAR-ATTR-V2 at 3,365 / 0.9068 with mass-near-197 0.09 -- the anchor row's comparator of record.",
+    "v11 stage 2 measured (8cda4c7-era base): the clause fails ~17.7x at every replayed point {2.37e10, 3.16e10, 4.22e10, 5.62e10, 7.5e10} -- recorded_onsets ~3470-3520 vs target 197, before_share 0.77-0.92 vs target 0.173.",
+    "The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim: no criterion is loosened and no Theta on this design may be quoted as a fit."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "thetas": [
+    1000000000.0,
+    100000000000.0,
+    133000000000.0,
+    178000000000.0,
+    237000000000.0,
+    316000000000.0,
+    422000000000.0,
+    562000000000.0,
+    750000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "Candidate universe, not a submission list: Theta 1e9 is the QUAR-ATTR-V2 replay-canary anchor row (never an admissibility candidate), then the nine stage-1 lattice Thetas ascending. The rows that submit are chosen by the parent's frozen rule (a/b/c in its stage_2_declared_replay.theta_points) once the stage-1 surface exists -- no row outside this list may be added after the surface is seen, and no interior row selected by the rule may be dropped.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "The declared value, carried for cell-key bookkeeping only: under a declared onset_day the infection age is a measured null axis (COVID-SEED-GEOM-01, 200 of 200 triples byte-identical across ages) -- incubation = age + onset_day - seed_day.",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "Verbatim from v10/v11/rebase_01 stage 2: the SAME 20 matched seeds at the same base, so each replay cell pairs seed-for-seed with the v10/v11/rebase_01 surfaces and the QUAR-ATTR-V2 canary cell.",
+  "points": [
+    [
+      1000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      133000000000.0,
+      6.8,
+      1
+    ],
+    [
+      178000000000.0,
+      6.8,
+      1
+    ],
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      316000000000.0,
+      6.8,
+      1
+    ],
+    [
+      422000000000.0,
+      6.8,
+      1
+    ],
+    [
+      562000000000.0,
+      6.8,
+      1
+    ],
+    [
+      750000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "cells": 200,
+  "cells_note": "10 point rows x 1 age x 1 import x 20 seeds = 200 declared-replay cells enumerated (each a full 768-epoch voyage, ~30 min). Row r of the points list occupies indices r*20..r*20+19: Theta 1e9 anchor = 0-19, then lattice Thetas ascending -- 1e11 = 20-39, 1.33e11 = 40-59, 1.78e11 = 60-79, 2.37e11 = 80-99, 3.16e11 = 100-119, 4.22e11 = 120-139, 5.62e11 = 140-159, 7.5e11 = 160-179, 1e12 = 180-199. Only rows selected by the parent's frozen rule submit; the rest of the candidate universe stays unrun and unmerged.",
+  "takeoff_recorded_onsets": 10,
+  "cell_payload_additions": {
+    "note": "Verbatim from v10/v11/rebase_01 stage 2: the same worker fields so the replay surface reads beside the earlier replay surfaces per (Theta, seed).",
+    "index_onset_day": "Must equal -1.0 in every cell; a deviation is a seeding-path defect that invalidates the cell.",
+    "index_shedding_at_day0": "True by construction: the seeded host is one day past onset at boarding.",
+    "index_departed_epoch": "The epoch the seeded host left the ship, echoed for audit.",
+    "infections_total": "Truth-channel count of hosts ever infected, index excluded.",
+    "aboard_total": "Hosts aboard at epoch 0.",
+    "attack_rate": "infections_total / aboard_total.",
+    "vsp_reported_case_fraction_max": "Recorded, not thresholded, as in v10."
+  },
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any stage-2 cell exists. The conditional_trajectory_clause is carried verbatim from covid_theta_screen_v11 via covid_rebase_01 (itself the v7-v10 covid.T1 restricted to the takeoff class); nothing is loosened and nothing is tightened. Which rows run is fixed by the parent's frozen selection rule; a row that runs as a flank, boundary or anchor is reported beside the clause and is never an admissible candidate.",
+    "conditional_trajectory_clause": {
+      "criterion": "STAGE-2 CLAUSE, verbatim from v11: scored only at stage-1-admissible Thetas and only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10) of the declared replay: the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February). The clause is scored only when a cell has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Verbatim from v11. Scored only on rows the parent's frozen rule selects; the deliverable beside it (never thresholded): takeoff-seed count, fraction of TAKEOFF seeds whose recorded_onsets lies in [98.5, 394], median and q05-q95 of before_share, and the full per-seed recorded_onsets / before_share vectors -- the THETA-SCREEN-V12 composition table.",
+      "flank_scoring": "Flank, boundary and Theta 1e9 rows score the clause identically but are read as boundary measurements of where the clause sits relative to the admissible span (or the window crossing, on an empty set) -- never as candidates."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT, verbatim from v10/v11: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; a deviation is a seeding-path defect that invalidates the cell rather than excluding it from selection.",
+      "reads": "the seeded host's own onset and shedding record"
+    }
+  },
+  "stage_3_held_out": "covid.H1/H2/H5 remain held out; covid.H3 is the stage-1 selection anchor (verbatim from v11/v12); covid.T1 is this stage's clause anchor.",
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v12_stage2. The same campaign image as stage 1 (built from a main containing BOTH design files); job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_2_cells": 200,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v12_stage2/<sha>/cells/",
+    "canary": "Theta 1e9 anchor row (cell indices 0-19): INDEX_OFFSET 0, ARRAY_SIZE 20 -- the QUAR-ATTR-V2 re-measure AND the audit-invariant check (index_onset_day == -1.0, index_shedding_at_day0 true in every cell) plus a non-degenerate row read. On a clean read the rule-selected rows proceed (submitted as per-row INDEX_OFFSET blocks; already-uploaded cells skip via _already_complete), the user having directed this campaign contingent on the stage-1 canary.",
+    "report_immediately_if": "any cell's audit invariant fails (index_onset_day != -1.0 or index_shedding_at_day0 false) -- a seeding-path defect; every rule-selected row reports 'insufficient takeoff mass' (fewer than 5 takeoff seeds) -- the declared geometry does not take off where the generic fleet does; the clause passes ONLY at a boundary endpoint (the v11 outcome at a different coordinate); the clause failure changes sign or magnitude class vs the rebase_01 ~17x before_share read at the v11 band; or the child failure rate exceeds 5%."
+  }
+}
