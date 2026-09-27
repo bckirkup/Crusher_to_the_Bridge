@@ -98,6 +98,16 @@ def _attack_rate(c: dict[str, Any]) -> float | None:
     return _recorded(c) / float(aboard)
 
 
+def _p_infection_mean(c: dict[str, Any]) -> float | None:
+    """Mean counterfactual P(infection) over challenged-uninfected hosts."""
+    acc = (
+        c["summary"].get("mechanism", {}).get("susceptibility", {})
+        .get("accrued_hazard", {})
+    )
+    value = acc.get("challenged_uninfected_p_infection_mean")
+    return float(value) if value is not None else None
+
+
 def _t1_clause(cells: list[dict[str, Any]], takeoff_min: int) -> dict[str, Any]:
     """The conditional_trajectory_clause, verbatim from v12 stage 2.
 
@@ -163,6 +173,16 @@ def _exposure_pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
         ])
         for chan in CHANNELS
     }
+    haz = [
+        m["susceptibility"]["accrued_hazard"] for m in mechanisms
+        if m.get("susceptibility", {}).get("accrued_hazard")
+    ]
+
+    def _haz(key: str) -> list[float]:
+        return [
+            float(h[key]) for h in haz if h.get(key) is not None
+        ]
+
     return {
         "dosed_targets_by_epoch_median": _quantiles([
             float(d["median"]) for d in dosed
@@ -171,6 +191,25 @@ def _exposure_pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
             max(float(d["q95"]) for d in dosed) if dosed else None
         ),
         "challenged_share_of_aboard": _quantiles(challenged),
+        "accrued_hazard": {
+            "challenged_uninfected_median": _quantiles([
+                float(h["challenged_uninfected"]["median"]) for h in haz
+                if h.get("challenged_uninfected", {}).get("median")
+                is not None
+            ]),
+            "challenged_uninfected_p_infection_mean": _quantiles(
+                _haz("challenged_uninfected_p_infection_mean")
+            ),
+            "share_p_ge_0p5": _quantiles(
+                _haz("challenged_uninfected_share_p_ge_0p5")
+            ),
+            "share_p_ge_0p1": _quantiles(
+                _haz("challenged_uninfected_share_p_ge_0p1")
+            ),
+            "never_challenged_hosts": _quantiles(
+                _haz("never_challenged_hosts")
+            ),
+        },
         "route_split_onset_share_quantiles": shares,
     }
 
@@ -370,6 +409,14 @@ def _paired_spread(
         "challenged_share_dropped": bool(
             challenged_on and _quantiles(challenged_on)["q95"] < 1.0
         ),
+        "p_infection_mean_off_median": _quantiles([
+            _p_infection_mean(c) for c in off
+            if _p_infection_mean(c) is not None
+        ])["median"],
+        "p_infection_mean_on_median": _quantiles([
+            _p_infection_mean(c) for c in on
+            if _p_infection_mean(c) is not None
+        ])["median"],
     }
 
 

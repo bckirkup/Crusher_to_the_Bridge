@@ -148,6 +148,10 @@ class TakeoffAttributionLedger:
         # Results.
         self.onsets: list[dict[str, Any]] = []
         self.challenged_susc: dict[int, float] = {}
+        # Cumulative per-host hazard Lambda = sum over challenged epochs of
+        # susc * p_dose * (1 - protection): the host's counterfactual
+        # infection probability at horizon is 1 - exp(-Lambda).
+        self.accrued_hazard: dict[int, float] = {}
         self.reach_by_channel: dict[str, list[int]] = {
             c: [] for c in CHANNELS
         }
@@ -482,12 +486,20 @@ class TakeoffAttributionLedger:
                 all_parts.get(tid, Counter()),
             ))
 
-        # Susceptibility bookkeeping for every challenged host.
+        # Susceptibility bookkeeping for every challenged host. The accrued
+        # hazard includes the epoch that infected a host: on its onset row
+        # it is the terminal hazard the draw beat.
         for tid, challenge in self._challenges.items():
+            susc = challenge["susceptibility"]
+            if susc is None:
+                continue
+            self.accrued_hazard[tid] = self.accrued_hazard.get(tid, 0.0) + (
+                float(susc)
+                * float(challenge["p_dose"])
+                * (1.0 - float(challenge["protection"]))
+            )
             if tid not in self._seen_infected:
-                susc = challenge["susceptibility"]
-                if susc is not None:
-                    self.challenged_susc[tid] = float(susc)
+                self.challenged_susc[tid] = float(susc)
 
         # COVID-RHYTHM-01 zone tallies: corridor occupancy vs the program
         # clock and the crew-zone emptiness measurement. Locations are the
@@ -606,6 +618,9 @@ class TakeoffAttributionLedger:
             "confined": tid in quarantined,
             "susceptibility": susc,
             "lambda_infecting": susc * effective,
+            "hazard_at_onset": (
+                self.accrued_hazard.get(tid, 0.0) + susc * effective
+            ),
             "p_dose": challenge["p_dose"],
             "protection": challenge["protection"],
             "dominant_channel": dominant,
@@ -756,6 +771,20 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         if aid not in challenged_ids and aid not in seeded
         and a.infections.get(pid) is None
     ]
+
+    # Proximity to threshold: accrued hazard Lambda per host. For a
+    # challenged-uninfected host, P(counterfactual infection) =
+    # 1 - exp(-Lambda) — the quantity challenged_share alone cannot show.
+    haz_at_onset = [
+        r["hazard_at_onset"] for r in infected
+        if r.get("hazard_at_onset") is not None
+    ]
+    haz_challenged = [
+        ledger.accrued_hazard.get(tid, 0.0)
+        for tid in ledger.challenged_susc
+        if tid not in infected_ids
+    ]
+    p_cf = [1.0 - math.exp(-h) for h in haz_challenged]
 
     # Shedder geometry: dominant-shedder onsets plus share-weighted credit.
     credit_totals: Counter = Counter()
@@ -913,6 +942,24 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
                 "challenged_share_of_aboard": (
                     len(challenged_ids) / max(len(agents) - len(seeded), 1)
                 ),
+                "accrued_hazard": {
+                    "infected_at_onset": _quantiles(haz_at_onset),
+                    "challenged_uninfected": _quantiles(haz_challenged),
+                    "challenged_uninfected_p_infection_mean": (
+                        sum(p_cf) / len(p_cf) if p_cf else None
+                    ),
+                    "challenged_uninfected_share_p_ge_0p5": (
+                        sum(1 for p in p_cf if p >= 0.5) / len(p_cf)
+                        if p_cf else None
+                    ),
+                    "challenged_uninfected_share_p_ge_0p1": (
+                        sum(1 for p in p_cf if p >= 0.1) / len(p_cf)
+                        if p_cf else None
+                    ),
+                    "never_challenged_hosts": max(
+                        len(agents) - len(seeded) - len(challenged_ids), 0
+                    ),
+                },
             },
             "lambda_infecting": _quantiles(lam),
         },
