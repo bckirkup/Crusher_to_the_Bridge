@@ -696,5 +696,6 @@ class RhythmLayer:
                 cur_start = i
             cur_len = cur_len + 1 if tok == "Sleep" else 0
             if cur_len > best_len:
-                best_len, best_start = cur_len, cur_start or i
+                best_len = cur_len
+                best_start = cur_start if cur_start is not None else i
         return (best_start + best_len // 2) % 24

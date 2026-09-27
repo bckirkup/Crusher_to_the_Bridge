@@ -239,6 +239,31 @@ def test_sleep_share_moves_the_awake_minority_out() -> None:
     assert all(a._test_away == "Lounge_Y" for a in agents)
 
 
+def test_sleep_midpoint_tracks_runs_starting_at_index_zero() -> None:
+    """Regression: a schedule whose longest Sleep run starts at index 0 must
+    report midpoint ~4 — a falsy-`cur_start or i` slips it to ~12 and
+    inverts the night in-cabin share."""
+    layer = _layer()
+    assert layer is not None
+    agent = _agent(1)
+    assert layer._sleep_midpoint(agent) == 4
+
+
+def test_graded_sleep_curve_keeps_night_sleepers_in_cabin() -> None:
+    """At 03:00 the shipped ATUS curve sits near its plateau: almost every
+    agent on a Sleep token resolves to home_zone, not the free zone."""
+    zones = _load_zones("spirit_cruise_3000")
+    layer = _layer("spirit_cruise_3000", zones)
+    assert layer is not None
+    agents = [_agent(i, zones=zones) for i in range(60)]
+    for a in agents:
+        a.home_zone, a.free_zone = "Cabin_X", "Lounge_Y"
+    home = sum(
+        layer.location_for(a, 3, "Sleep") == "Cabin_X" for a in agents
+    )
+    assert home > 45  # plateau share ≈0.94; buggy midpoint gives ≈0.05
+
+
 def test_flag_off_engine_consumes_no_draws() -> None:
     """Engine-level baseline inertness: disabled leaves _rhythm None and the
     post-prandial sentinel untouched on every agent."""
