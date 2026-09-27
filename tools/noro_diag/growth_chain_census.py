@@ -164,6 +164,12 @@ _GATE_CALLERS = (
     "_sanitary_pickup_by_class",
     "_pathway_fomite_legacy_default",
 )
+_KNOWN_CALLSITES = frozenset(
+    set(_DEPOSIT_CALLSITES)
+    | set(_REMOVAL_CALLSITES)
+    | set(_PATCH_REMOVAL_CALLSITES)
+    | set(_GATE_CALLERS)
+)
 
 
 def _gen_class(gen: int | None) -> str:
@@ -267,6 +273,45 @@ class CensusRecorder:
         return row
 
 
+def _frame_agent(frame: Any, out: dict[str, Any]) -> None:
+    if out["agent"] is not None:
+        return
+    agent = frame.f_locals.get("agent")
+    if hasattr(agent, "agent_id"):
+        out["agent"] = agent
+
+
+def _frame_epoch(frame: Any, out: dict[str, Any]) -> None:
+    if out["epoch"] is not None:
+        return
+    epoch = frame.f_locals.get("epoch")
+    if isinstance(epoch, int):
+        out["epoch"] = int(epoch)
+
+
+def _frame_unit(frame: Any, out: dict[str, Any]) -> None:
+    if out["unit"] is not None:
+        return
+    for key in ("zone_name", "unit_name", "venue"):
+        unit = frame.f_locals.get(key)
+        if isinstance(unit, str):
+            out["unit"] = unit
+            break
+
+
+def _frame_callsite(frame: Any, out: dict[str, Any]) -> None:
+    name = frame.f_code.co_name
+    if out["callsite"] == "other" and name in _KNOWN_CALLSITES:
+        out["callsite"] = name
+
+
+def _frame_facts(frame: Any, out: dict[str, Any]) -> None:
+    _frame_agent(frame, out)
+    _frame_epoch(frame, out)
+    _frame_unit(frame, out)
+    _frame_callsite(frame, out)
+
+
 def _frame_probe(depth_limit: int = _FRAME_WALK_LIMIT) -> dict[str, Any]:
     """Nearest enclosing ``agent`` local / epoch / recognised callsite.
 
@@ -284,28 +329,8 @@ def _frame_probe(depth_limit: int = _FRAME_WALK_LIMIT) -> dict[str, Any]:
         while frame is not None and depth < depth_limit:
             frame = frame.f_back
             depth += 1
-            if frame is None:
-                break
-            if out["agent"] is None:
-                agent = frame.f_locals.get("agent")
-                if hasattr(agent, "agent_id"):
-                    out["agent"] = agent
-            if out["epoch"] is None:
-                epoch = frame.f_locals.get("epoch")
-                if isinstance(epoch, int):
-                    out["epoch"] = int(epoch)
-            if out["unit"] is None:
-                for key in ("zone_name", "unit_name", "venue"):
-                    unit = frame.f_locals.get(key)
-                    if isinstance(unit, str):
-                        out["unit"] = unit
-                        break
-            name = frame.f_code.co_name
-            if name in _DEPOSIT_CALLSITES or name in _REMOVAL_CALLSITES or (
-                name in _PATCH_REMOVAL_CALLSITES or name in _GATE_CALLERS
-            ):
-                if out["callsite"] == "other":
-                    out["callsite"] = name
+            if frame is not None:
+                _frame_facts(frame, out)
         return out
     finally:
         del frame
@@ -326,7 +351,7 @@ def _mix_scale(
         return {}
     factor = max(0.0, min(1.0, factor))
     removed: dict[str, float] = {}
-    for gen_class, mass in list(state.items()):
+    for gen_class, mass in state.items():
         kept = mass * factor
         removed[gen_class] = mass - kept
         state[gen_class] = kept
@@ -571,17 +596,16 @@ def _wrap_pickup_gate(rec: CensusRecorder) -> Any:
         open_ = original(surface_mass)
         # Opens are the common case -- count them. Closes are the
         # mechanism evidence: which unit held how much sub-gate mass.
-        if open_:
-            probe = _frame_probe(depth_limit=6)
-            rec.gate_open_by_caller[probe["callsite"]] += 1
-            return open_
         probe = _frame_probe(depth_limit=6)
-        rec.gate_rows.append({
-            "epoch": probe["epoch"],
-            "caller": probe["callsite"],
-            "unit": probe["unit"],
-            "mass": float(surface_mass),
-        })
+        if open_:
+            rec.gate_open_by_caller[probe["callsite"]] += 1
+        else:
+            rec.gate_rows.append({
+                "epoch": probe["epoch"],
+                "caller": probe["callsite"],
+                "unit": probe["unit"],
+                "mass": float(surface_mass),
+            })
         return open_
 
     return wrapper
@@ -972,6 +996,39 @@ def _wrap_hazard(core_cls: type, rec: CensusRecorder) -> Any:
     return wrapper
 
 
+def _acquired_gen(
+    rec: CensusRecorder, source_id: Any, parent_strain: Any,
+    acquired_strain: Any,
+) -> int:
+    if source_id is not None:
+        return rec.gen_of(int(source_id)) + 1
+    if parent_strain and parent_strain in rec.strain_home:
+        return rec.gen_of(rec.strain_home[parent_strain]) + 1
+    if acquired_strain and str(acquired_strain) in rec.strain_home:
+        # Norwalk runs a single strain -- the acquired strain's home host
+        # is the source lineage.
+        return rec.gen_of(rec.strain_home[str(acquired_strain)]) + 1
+    return GEN_UNRESOLVED
+
+
+def _dose_provenance(
+    rec: CensusRecorder, aid: int, epoch: int,
+) -> dict[str, float]:
+    """Source generation of the mass the converting dose drew from."""
+    src = {GEN_IMPORT: 0.0, GEN_ACQUIRED: 0.0, GEN_UNKNOWN: 0.0}
+    for pr in rec.pickup_rows:
+        if pr["target"] != aid or pr["epoch"] != int(epoch):
+            continue
+        share_a = pr["source_acquired_share"]
+        share_i = pr["source_import_share"]
+        src[GEN_ACQUIRED] += pr["delivered"] * share_a
+        src[GEN_IMPORT] += pr["delivered"] * share_i
+        src[GEN_UNKNOWN] += pr["delivered"] * max(
+            0.0, 1.0 - share_a - share_i,
+        )
+    return src
+
+
 def _record_acquisition(
     rec: CensusRecorder, agent: Any, epoch: int, p_dose: float,
     witness: Any, new_events: list,
@@ -984,16 +1041,7 @@ def _record_acquisition(
     acquired_strain = (
         (agent.infections.get(rec.pathogen_id) or {}).get("strain_id")
     )
-    if source_id is not None:
-        gen = rec.gen_of(int(source_id)) + 1
-    elif parent_strain and parent_strain in rec.strain_home:
-        gen = rec.gen_of(rec.strain_home[parent_strain]) + 1
-    elif acquired_strain and str(acquired_strain) in rec.strain_home:
-        # Norwalk runs a single strain -- the acquired strain's home host
-        # is the source lineage.
-        gen = rec.gen_of(rec.strain_home[str(acquired_strain)]) + 1
-    else:
-        gen = GEN_UNRESOLVED
+    gen = _acquired_gen(rec, source_id, parent_strain, acquired_strain)
     aid = int(agent.agent_id)
     rec.host_gen[aid] = gen
     rec.acquired_ids.add(aid)
@@ -1004,18 +1052,7 @@ def _record_acquisition(
     row["epoch_acquired"] = int(epoch)
     row["source_agent_id"] = source_id
     row["dominant_pathway"] = getattr(event, "pathway", None) if event else None
-    # Dose provenance: which source generation's mass the converting dose
-    # drew from, summed over this epoch's recorded deliveries to `aid`.
-    src = {GEN_IMPORT: 0.0, GEN_ACQUIRED: 0.0, GEN_UNKNOWN: 0.0}
-    for pr in rec.pickup_rows:
-        if pr["target"] != aid or pr["epoch"] != int(epoch):
-            continue
-        share_a = pr["source_acquired_share"]
-        share_i = pr["source_import_share"]
-        share_u = max(0.0, 1.0 - share_a - share_i)
-        src[GEN_ACQUIRED] += pr["delivered"] * share_a
-        src[GEN_IMPORT] += pr["delivered"] * share_i
-        src[GEN_UNKNOWN] += pr["delivered"] * share_u
+    src = _dose_provenance(rec, aid, epoch)
     rec.acquisition_rows.append({
         "epoch": int(epoch),
         "agent_id": aid,
@@ -1074,6 +1111,53 @@ def _wrap_challenge(core_cls: type, rec: CensusRecorder) -> Any:
     return wrapper
 
 
+def _epoch_prime_imports(
+    rec: CensusRecorder, agent: Any, inf: dict, aid: int,
+) -> None:
+    """Epoch-0 priming: pre-run infections are imports."""
+    if rec.epoch0_snapshotted or aid in rec.acquired_ids:
+        return
+    rec.host_gen.setdefault(aid, 0)
+    rec.import_ids.add(aid)
+    strain = inf.get("strain_id")
+    if strain:
+        rec.strain_home.setdefault(str(strain), aid)
+
+
+def _class_infected(
+    rec: CensusRecorder, aid: int, counts: dict[str, int],
+) -> None:
+    if aid in rec.acquired_ids:
+        counts["infected_acquired"] += 1
+    elif aid in rec.import_ids:
+        counts["infected_import"] += 1
+    else:
+        counts["infected_unattributed"] = (
+            counts.get("infected_unattributed", 0) + 1
+        )
+
+
+def _epoch_agent(
+    rec: CensusRecorder, agent: Any, pathogen_id: str, core: Any,
+    counts: dict[str, int],
+) -> None:
+    aid = int(agent.agent_id)
+    inf = (getattr(agent, "infections", {}) or {}).get(pathogen_id)
+    if inf is None:
+        if (
+            not getattr(agent, "immune", False)
+            and agent.hand_load_by_pathogen.get(pathogen_id, 0.0) > 0.0
+        ):
+            counts["hand_positive_susceptible"] += 1
+        return
+    _epoch_prime_imports(rec, agent, inf, aid)
+    if not agent.is_infected_with(pathogen_id):
+        return
+    counts["infected"] += 1
+    _class_infected(rec, aid, counts)
+    _observe_host_row(rec, agent, inf, core, counts)
+
+
 def _epoch_snapshot(
     rec: CensusRecorder, sim: Any, work: Any, pathogen_id: str,
 ) -> dict[str, Any]:
@@ -1083,33 +1167,7 @@ def _epoch_snapshot(
         "symptomatic": 0, "confined": 0, "hand_positive_susceptible": 0,
     }
     for agent in sim.engine.agents:
-        aid = int(agent.agent_id)
-        inf = (getattr(agent, "infections", {}) or {}).get(pathogen_id)
-        if inf is None:
-            if (
-                not getattr(agent, "immune", False)
-                and agent.hand_load_by_pathogen.get(pathogen_id, 0.0) > 0.0
-            ):
-                counts["hand_positive_susceptible"] += 1
-            continue
-        if not rec.epoch0_snapshotted and aid not in rec.acquired_ids:
-            rec.host_gen.setdefault(aid, 0)
-            rec.import_ids.add(aid)
-            strain = inf.get("strain_id")
-            if strain:
-                rec.strain_home.setdefault(str(strain), aid)
-        if not agent.is_infected_with(pathogen_id):
-            continue
-        counts["infected"] += 1
-        if aid in rec.acquired_ids:
-            counts["infected_acquired"] += 1
-        elif aid in rec.import_ids:
-            counts["infected_import"] += 1
-        else:
-            counts["infected_unattributed"] = (
-                counts.get("infected_unattributed", 0) + 1
-            )
-        _observe_host_row(rec, agent, inf, core, counts)
+        _epoch_agent(rec, agent, pathogen_id, core, counts)
     rec.epoch0_snapshotted = True
     epoch = int(getattr(work, "epoch", 0) or 0)
     patches = core.emesis_patch_pools_by_pathogen.get(pathogen_id, {})
@@ -1345,13 +1403,14 @@ def _load_manifest(manifest_path: Path) -> dict[str, Any]:
         resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
     )
     with validated_open(
-        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(safe_manifest), "r",
+        allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         return json.load(handle)
 
 
 def run_seed(
-    *, seed: int, pathogen_id: str, spec_dict: dict[str, Any],
+    *, pathogen_id: str, spec_dict: dict[str, Any],
 ) -> dict[str, Any]:
     """Run one voyage under the census wrappers and fold the summary."""
     rec = CensusRecorder(pathogen_id=pathogen_id)
@@ -1475,7 +1534,7 @@ def main(argv: list[str] | None = None) -> int:
     for run_id, spec in runs:
         seed = int(spec["run"]["random_seed"])
         payload = run_seed(
-            seed=seed, pathogen_id=args.pathogen_id, spec_dict=spec,
+            pathogen_id=args.pathogen_id, spec_dict=spec,
         )
         payload["run_id"] = run_id
         zip_path = _write_run_zip(out_dir, args.tier, run_id, payload)

@@ -312,16 +312,16 @@ def _named_link(run: dict[str, Any]) -> dict[str, Any]:
     named = "none (chain intact end-to-end)"
     if acquired["n"] == 0:
         named = "L0: no secondaries at all (ignition produced none)"
-    elif acquired["shedding_gec"] == 0.0 and acquired["deposit_gec"] == 0.0:
+    elif acquired["shedding_gec"] <= 0.0 and acquired["deposit_gec"] <= 0.0:
         named = "L1: secondaries never shed (shedding+deposit both zero)"
     elif sum(
         v.get(GEN_ACQUIRED, 0.0)
         for v in l2["deposited_by_unit_class"].values()
-    ) == 0.0:
+    ) <= 0.0:
         named = "L2: acquired-sourced mass never lands in pools"
     elif l3["acquired_sourced_pickups"] == 0:
         named = "L3: no susceptible picked up acquired-sourced mass"
-    elif l4["hazard_acquired_sourced"] == 0.0:
+    elif l4["hazard_acquired_sourced"] <= 0.0:
         named = "L4: acquired-sourced doses never reached a challenge"
     elif l4["n_acquired_sourced"] == 0:
         named = "L4: challenge drew on acquired mass but converted none"
@@ -355,45 +355,97 @@ def _fmt(x: float, sig: int = 3) -> str:
     return f"{x:.{sig}g}"
 
 
+_L1_KEYS = (
+    "n", "sym_epochs", "emesis_scheduled", "emesis_emitted",
+    "emesis_patch_gec", "shedding_gec", "deposit_gec", "stool_events",
+    "confined_epochs",
+)
+
+_L4_KEYS = (
+    "hazard_total", "hazard_acquired_sourced", "n_acquisitions",
+    "n_acquired_sourced",
+)
+
+
+def _pooled_l1(runs: list[dict[str, Any]]) -> dict[str, Any]:
+    return {
+        cls: {
+            key: sum(r["l1"][cls][key] for r in runs) for key in _L1_KEYS
+        }
+        for cls in ("index", "import", "acquired", "unresolved")
+    }
+
+
+def _merge_nested(slot_map: dict, source: dict) -> None:
+    """Sum ``source[key][inner]`` into ``slot_map[key][inner]``."""
+    for key, inner in source.items():
+        slot = slot_map.setdefault(key, defaultdict(float))
+        for inner_key, val in inner.items():
+            slot[inner_key] += val
+
+
+def _merge_flat(slot: dict, source: dict) -> None:
+    for key, val in source.items():
+        slot[key] += val
+
+
+def _accumulate_run(pooled: dict[str, Any], run: dict[str, Any]) -> None:
+    l2 = run["l2"]
+    _merge_nested(
+        pooled["l2_deposited_by_unit_class"], l2["deposited_by_unit_class"],
+    )
+    _merge_nested(pooled["l2_removals"], l2["removals"])
+    _merge_nested(pooled["l2_patch_sweeps"], l2["patch_sweeps"])
+    pooled["l2_patch_delivered"]["import"] += l2[
+        "patch_delivered_import_gec"
+    ]
+    pooled["l2_patch_delivered"]["acquired"] += l2[
+        "patch_delivered_acquired_gec"
+    ]
+    l3 = pooled["l3"]
+    _merge_flat(l3["pickup_counts"], run["l3"]["pickup_counts"])
+    _merge_nested(
+        l3["delivered_by_channel"], run["l3"]["delivered_by_channel"],
+    )
+    l3["acquired_sourced_pickups"] += run["l3"][
+        "acquired_sourced_pickups"
+    ]
+    _merge_flat(l3["co_presence"], run["l3"]["co_presence"])
+    _merge_flat(
+        l3["gate_closed_by_caller"], run["l3"]["gate_closed_by_caller"],
+    )
+    l3["gate_closed_mass_gec"] += run["l3"]["gate_closed_mass_gec"]
+    _merge_flat(
+        l3["gate_open_by_caller"], run["l3"]["gate_open_by_caller"],
+    )
+    for key in _L4_KEYS:
+        pooled["l4"][key] += run["l4"][key]
+
+
+def _freeze_defaultdicts(pooled: dict[str, Any]) -> None:
+    for key in (
+        "l2_deposited_by_unit_class", "l2_removals", "l2_patch_sweeps",
+    ):
+        pooled[key] = {k: dict(v) for k, v in pooled[key].items()}
+    pooled["l3"] = {
+        key: (dict(val) if isinstance(val, defaultdict) else val)
+        for key, val in pooled["l3"].items()
+    }
+    pooled["l3"]["delivered_by_channel"] = {
+        ch: dict(totals)
+        for ch, totals in pooled["l3"]["delivered_by_channel"].items()
+    }
+
+
 def readout(payloads: list[dict[str, Any]]) -> dict[str, Any]:
     runs = [
         summarise_run(p) for p in payloads if _emitting_imports(p)
     ]
-    skipped = len(payloads) - len(runs)
     pooled = {
         "n_runs": len(payloads),
         "n_ignited": len(runs),
-        "n_skipped_cold": skipped,
-        "l1": {
-            cls: {
-                "n": sum(r["l1"][cls]["n"] for r in runs),
-                "sym_epochs": sum(
-                    r["l1"][cls]["sym_epochs"] for r in runs
-                ),
-                "emesis_scheduled": sum(
-                    r["l1"][cls]["emesis_scheduled"] for r in runs
-                ),
-                "emesis_emitted": sum(
-                    r["l1"][cls]["emesis_emitted"] for r in runs
-                ),
-                "emesis_patch_gec": sum(
-                    r["l1"][cls]["emesis_patch_gec"] for r in runs
-                ),
-                "shedding_gec": sum(
-                    r["l1"][cls]["shedding_gec"] for r in runs
-                ),
-                "deposit_gec": sum(
-                    r["l1"][cls]["deposit_gec"] for r in runs
-                ),
-                "stool_events": sum(
-                    r["l1"][cls]["stool_events"] for r in runs
-                ),
-                "confined_epochs": sum(
-                    r["l1"][cls]["confined_epochs"] for r in runs
-                ),
-            }
-            for cls in ("index", "import", "acquired", "unresolved")
-        },
+        "n_skipped_cold": len(payloads) - len(runs),
+        "l1": _pooled_l1(runs),
         "l2_deposited_by_unit_class": {},
         "l2_removals": {},
         "l2_patch_sweeps": {},
@@ -416,75 +468,8 @@ def readout(payloads: list[dict[str, Any]]) -> dict[str, Any]:
         "named_links": [r["l5"]["named"] for r in runs],
     }
     for run in runs:
-        for unit, by_gen in run["l2"]["deposited_by_unit_class"].items():
-            slot = pooled["l2_deposited_by_unit_class"].setdefault(
-                unit, defaultdict(float),
-            )
-            for gen_class, mass in by_gen.items():
-                slot[gen_class] += mass
-        for cause, by_gen in run["l2"]["removals"].items():
-            slot = pooled["l2_removals"].setdefault(
-                cause, defaultdict(float),
-            )
-            for gen_class, mass in by_gen.items():
-                slot[gen_class] += mass
-        for cls, sweep in run["l2"]["patch_sweeps"].items():
-            slot = pooled["l2_patch_sweeps"].setdefault(
-                cls, defaultdict(float),
-            )
-            for key, val in sweep.items():
-                slot[key] += val
-        pooled["l2_patch_delivered"]["import"] += run["l2"][
-            "patch_delivered_import_gec"
-        ]
-        pooled["l2_patch_delivered"]["acquired"] += run["l2"][
-            "patch_delivered_acquired_gec"
-        ]
-        for ch, n in run["l3"]["pickup_counts"].items():
-            pooled["l3"]["pickup_counts"][ch] += n
-        for ch, totals in run["l3"]["delivered_by_channel"].items():
-            for key, val in totals.items():
-                pooled["l3"]["delivered_by_channel"][ch][key] += val
-        pooled["l3"]["acquired_sourced_pickups"] += run["l3"][
-            "acquired_sourced_pickups"
-        ]
-        for key, val in run["l3"]["co_presence"].items():
-            pooled["l3"]["co_presence"][key] += val
-        for key, val in run["l3"]["gate_closed_by_caller"].items():
-            pooled["l3"]["gate_closed_by_caller"][key] += val
-        pooled["l3"]["gate_closed_mass_gec"] += run["l3"][
-            "gate_closed_mass_gec"
-        ]
-        for key, val in run["l3"]["gate_open_by_caller"].items():
-            pooled["l3"]["gate_open_by_caller"][key] += val
-        pooled["l4"]["hazard_total"] += run["l4"]["hazard_total"]
-        pooled["l4"]["hazard_acquired_sourced"] += run["l4"][
-            "hazard_acquired_sourced"
-        ]
-        pooled["l4"]["n_acquisitions"] += run["l4"]["n_acquisitions"]
-        pooled["l4"]["n_acquired_sourced"] += run["l4"][
-            "n_acquired_sourced"
-        ]
-    pooled["l2_deposited_by_unit_class"] = {
-        unit: dict(by_gen)
-        for unit, by_gen in pooled["l2_deposited_by_unit_class"].items()
-    }
-    pooled["l2_removals"] = {
-        cause: dict(by_gen)
-        for cause, by_gen in pooled["l2_removals"].items()
-    }
-    pooled["l2_patch_sweeps"] = {
-        cls: dict(slot)
-        for cls, slot in pooled["l2_patch_sweeps"].items()
-    }
-    pooled["l3"] = {
-        key: (dict(val) if isinstance(val, defaultdict) else val)
-        for key, val in pooled["l3"].items()
-    }
-    pooled["l3"]["delivered_by_channel"] = {
-        ch: dict(totals)
-        for ch, totals in pooled["l3"]["delivered_by_channel"].items()
-    }
+        _accumulate_run(pooled, run)
+    _freeze_defaultdicts(pooled)
     return {"runs": runs, "pooled": pooled}
 
 
@@ -574,7 +559,9 @@ def main(argv: list[str] | None = None) -> int:
     result["pooled"]["runs"] = result["runs"]
     print(_markdown(result["pooled"]))
     if args.json_out:
-        args.json_out.write_text(json.dumps(result, indent=1))
+        args.json_out.write_text(  # NOSONAR -- operator-specified report path in a local diagnostic tool
+            json.dumps(result, indent=1),
+        )
     return 0
 
 
