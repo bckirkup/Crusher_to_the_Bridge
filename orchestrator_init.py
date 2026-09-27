@@ -331,21 +331,26 @@ def resolve_graywater_zones(
     cfg: dict[str, Any],
     zone_names: list[str] | None = None,
 ) -> list[str]:
-    """Resolve wastewater collection zones for ship-wide greywater sampling.
+    """Resolve wastewater collection zones for ship-wide graywater sampling.
 
     Priority:
     1. ``microflora.graywater_zones`` in config (explicit override)
     2. ``graywater_zones`` on the active platform ``spatial_layout.json``
     3. All simulation zones (per-zone sampling fallback)
+
+    ``greywater_zones`` (British spelling) is accepted as a deprecated alias
+    at both levels; ``graywater_zones`` is the canonical key.
     """
     mf_cfg = cfg.get("microflora", {})
-    explicit = mf_cfg.get("graywater_zones")
+    explicit = mf_cfg.get("graywater_zones") or mf_cfg.get("greywater_zones")
     if explicit:
         return list(explicit)
 
     layout = _shared_platform_layout_doc(cfg)
     if layout:
-        platform_zones = layout.get("graywater_zones")
+        platform_zones = (
+            layout.get("graywater_zones") or layout.get("greywater_zones")
+        )
         if platform_zones:
             return list(platform_zones)
 

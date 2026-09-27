@@ -49,8 +49,8 @@ from engines.voyage_itinerary import agent_is_departed
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
     DEFAULT_AIRBORNE_FRACTION,
+    DEFAULT_GRAYWATER_FRACTION,
     DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
-    DEFAULT_GREYWATER_FRACTION,
     DEFAULT_SURFACE_FRACTION,
     LOCATION_ISOLATED,
     STATUS_ALERT,
@@ -91,12 +91,12 @@ def _all_confined(state: SimulationState) -> set[int]:
 def build_wastewater_pathogen_mass(
     zone_names: list[str],
     zone_surface: dict[str, float],
-    greywater_frac: float,
+    graywater_frac: float,
     graywater_zones: list[str],
 ) -> dict[str, float]:
-    """Pool greywater pathogen mass from all zones into collection points."""
+    """Pool graywater pathogen mass from all zones into collection points."""
     per_zone = {
-        zname: zone_surface.get(zname, 0.0) * greywater_frac
+        zname: zone_surface.get(zname, 0.0) * graywater_frac
         for zname in zone_names
     }
     if not graywater_zones:
@@ -109,10 +109,10 @@ def build_wastewater_pathogen_mass(
 def build_wastewater_pathogen_mass_by_id(
     zone_names: list[str],
     pathogen_mass_by_id: dict[str, dict[str, float]] | None,
-    greywater_frac: float,
+    graywater_frac: float,
     graywater_zones: list[str],
 ) -> dict[str, dict[str, float]] | None:
-    """Pool per-pathogen greywater mass from all zones into collection points."""
+    """Pool per-pathogen graywater mass from all zones into collection points."""
     if not pathogen_mass_by_id:
         return None
     if not graywater_zones:
@@ -120,7 +120,7 @@ def build_wastewater_pathogen_mass_by_id(
 
     pooled_by_id: dict[str, dict[str, float]] = {}
     for pid, masses in pathogen_mass_by_id.items():
-        pooled = sum(masses.get(zname, 0.0) * greywater_frac for zname in zone_names)
+        pooled = sum(masses.get(zname, 0.0) * graywater_frac for zname in zone_names)
         pooled_by_id[pid] = dict.fromkeys(graywater_zones, pooled)
     return pooled_by_id
 
@@ -904,9 +904,12 @@ def _run_wastewater_sequencing(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
 ) -> dict[str, Any]:
-    """Pool greywater mass into the wastewater instrument's zones."""
-    greywater_frac = cfg.get("microflora", {}).get(
-        "greywater_fraction", DEFAULT_GREYWATER_FRACTION,
+    """Pool graywater mass into the wastewater instrument's zones."""
+    mf_cfg = cfg.get("microflora", {})
+    graywater_frac = mf_cfg.get(
+        # deprecated alias: ``greywater_fraction`` (British spelling)
+        "graywater_fraction",
+        mf_cfg.get("greywater_fraction", DEFAULT_GRAYWATER_FRACTION),
     )
     ww_microflora: dict[str, dict[str, float]] = {}
     for zname, mf_data in zones.zone_microflora_shifts.items():
@@ -919,10 +922,10 @@ def _run_wastewater_sequencing(
 
     ww_target_zones = resolve_graywater_zones(cfg, zones.zone_names)
     ww_pathogen_mass = build_wastewater_pathogen_mass(
-        zones.zone_names, zone_surface, greywater_frac, ww_target_zones,
+        zones.zone_names, zone_surface, graywater_frac, ww_target_zones,
     )
     ww_per_pathogen = build_wastewater_pathogen_mass_by_id(
-        zones.zone_names, ww_per_pathogen, greywater_frac, ww_target_zones,
+        zones.zone_names, ww_per_pathogen, graywater_frac, ww_target_zones,
     )
     return obs.wastewater_seq.sample_all_zones(
         ww_pathogen_mass, ww_microflora,

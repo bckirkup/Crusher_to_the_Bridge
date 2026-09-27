@@ -34,7 +34,7 @@ Resolution order (`engines/contamx_runner.find_contamx`):
 2. From the repo root, run:
 
 ```bat
-run_contam_compare.bat
+scripts\run_contam_compare.bat
 ```
 
 Or set an explicit path:

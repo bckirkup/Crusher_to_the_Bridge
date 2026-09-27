@@ -4,7 +4,7 @@ REM Run this from any terminal to launch the Streamlit dashboard.
 REM It will generate fresh simulation data and open the dashboard.
 REM ──────────────────────────────────────────────────────────────────────
 
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 echo [1/3] Preparing deck blueprint assets (class plates for tactical map)...
 set PYTHONIOENCODING=utf-8

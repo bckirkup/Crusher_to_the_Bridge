@@ -1,0 +1,2635 @@
+{
+  "config": "crusher_labs/config.yaml",
+  "keys": [
+    {
+      "key": "agent_behavior.dining_meal_weights.breakfast.buffet",
+      "value": 0.6,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.breakfast.mdr",
+      "value": 0.3,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.breakfast.specialty",
+      "value": 0.1,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.dinner.buffet",
+      "value": 0.2,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.dinner.mdr",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.dinner.specialty",
+      "value": 0.3,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.lunch.buffet",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.lunch.mdr",
+      "value": 0.3,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_meal_weights.lunch.specialty",
+      "value": 0.2,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:481 (get)"
+    },
+    {
+      "key": "agent_behavior.dining_rotation_probability",
+      "value": 0.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/infection_dynamics_bridge.py, tests/test_s3776_extracted_helpers.py"
+    },
+    {
+      "key": "agent_behavior.free_zone_rotation_probability",
+      "value": 0.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/infection_dynamics_bridge.py"
+    },
+    {
+      "key": "agent_behavior.schedule_jitter_hours.crew",
+      "value": 1.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/infection_dynamics_bridge.py, engines/initiation.py, engines/transmission_core.py"
+    },
+    {
+      "key": "agent_behavior.schedule_jitter_hours.passenger",
+      "value": 2.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/initiation.py, orchestrator_init.py, orchestrator_record.py"
+    },
+    {
+      "key": "chronic_disease.allow_comorbid",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_chronic.py:133 (get)"
+    },
+    {
+      "key": "chronic_disease.config_path",
+      "value": "data/config/chronic_diseases.json",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_chronic.py:36 (get)"
+    },
+    {
+      "key": "chronic_disease.enabled",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_chronic.py:34 (get)"
+    },
+    {
+      "key": "chronic_disease.max_comorbid",
+      "value": 2,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_chronic.py:134 (get)"
+    },
+    {
+      "key": "clinical_diagnostics.autocorrelation_matrix",
+      "value": [
+        [
+          1.0,
+          0.0,
+          0.0
+        ],
+        [
+          0.0,
+          1.0,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          1.0
+        ]
+      ],
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/clinical_correlation.py:145 (get)"
+    },
+    {
+      "key": "clinical_diagnostics.description",
+      "value": "Correlated measurement noise across clinical_rdt, clinical_qpcr, clinical_microbiology",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "clinical_diagnostics.test_order",
+      "value": [
+        "clinical_rdt",
+        "clinical_qpcr",
+        "clinical_microbiology"
+      ],
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/clinical_correlation.py:139 (get)"
+    },
+    {
+      "key": "clinical_instruments.config_path",
+      "value": "data/config/clinical_instrument_params.json",
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/clinical_instrument_params.py:48 (get)"
+    },
+    {
+      "key": "clinical_instruments.outbreak_aware",
+      "value": false,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2278 (get)"
+    },
+    {
+      "key": "clinical_rdt.base_sensitivity",
+      "value": 0.95,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:287 (get)"
+    },
+    {
+      "key": "clinical_rdt.cadence",
+      "value": 1,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py, tests/test_sanity_checker.py"
+    },
+    {
+      "key": "clinical_rdt.description",
+      "value": "Rapid Diagnostic Test (antigen lateral-flow)",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "clinical_rdt.sigmoid_k",
+      "value": 0.08,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:288 (get)"
+    },
+    {
+      "key": "clinical_rdt.sigmoid_midpoint",
+      "value": 50.0,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:289 (get)"
+    },
+    {
+      "key": "clinical_rdt.specificity",
+      "value": 0.97,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:290 (get)"
+    },
+    {
+      "key": "crew_duty_exclusion.compliance_fraction",
+      "value": 1.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/crew_duty_exclusion.py, tests/test_crew_duty_exclusion.py"
+    },
+    {
+      "key": "crew_duty_exclusion.enabled",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "crew_duty_exclusion.food_employee_symptom_free_hours",
+      "value": 48,
+      "status": "indirect-name-match",
+      "evidence": "engines/crew_duty_exclusion.py"
+    },
+    {
+      "key": "crew_duty_exclusion.medical_clearance_delay_hours",
+      "value": 0,
+      "status": "indirect-name-match",
+      "evidence": "engines/crew_duty_exclusion.py, tests/test_crew_duty_exclusion.py"
+    },
+    {
+      "key": "crew_duty_exclusion.nonfood_crew_symptom_free_hours",
+      "value": 24,
+      "status": "indirect-name-match",
+      "evidence": "engines/crew_duty_exclusion.py"
+    },
+    {
+      "key": "decision_engine.command_policy",
+      "value": "threshold",
+      "status": "consumed-downstream",
+      "evidence": "decision_engine/policy.py:139 (get)"
+    },
+    {
+      "key": "decision_engine.command_threshold.infected_rate_threshold",
+      "value": 0.05,
+      "status": "indirect-literal",
+      "evidence": "decision_engine/policy.py"
+    },
+    {
+      "key": "decision_engine.command_threshold.ois_escalation_threshold",
+      "value": 15.0,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_decision_engine.py"
+    },
+    {
+      "key": "decision_engine.medical_policy",
+      "value": "threshold",
+      "status": "consumed-downstream",
+      "evidence": "decision_engine/policy.py:140 (get)"
+    },
+    {
+      "key": "decision_engine.medical_threshold.sick_call_threshold",
+      "value": 3,
+      "status": "consumed-bulk",
+      "evidence": "decision_engine/policy.py:146 (iterate)"
+    },
+    {
+      "key": "decision_engine.population_policy",
+      "value": "threshold_belief",
+      "status": "consumed-downstream",
+      "evidence": "decision_engine/policy.py:138 (get)"
+    },
+    {
+      "key": "decision_engine.threshold_belief.hide_severity_ceiling",
+      "value": 0.25,
+      "status": "indirect-literal",
+      "evidence": "decision_engine/policy.py"
+    },
+    {
+      "key": "decision_engine.threshold_belief.hide_trust_ceiling",
+      "value": 0.35,
+      "status": "indirect-literal",
+      "evidence": "decision_engine/policy.py"
+    },
+    {
+      "key": "decision_engine.threshold_belief.severity_report_threshold",
+      "value": 0.35,
+      "status": "indirect-literal",
+      "evidence": "decision_engine/policy.py, tests/test_decision_config_resolution.py"
+    },
+    {
+      "key": "decision_engine.threshold_belief.trust_report_floor",
+      "value": 0.4,
+      "status": "indirect-literal",
+      "evidence": "decision_engine/policy.py, tests/test_decision_config_resolution.py"
+    },
+    {
+      "key": "diagnostic_cascade.config_path",
+      "value": "data/config/diagnostic_cascade_multiplex.json",
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/diagnostic_cascade.py:672 (get)"
+    },
+    {
+      "key": "diagnostic_cascade.enabled",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/diagnostic_cascade.py:669 (get)"
+    },
+    {
+      "key": "emod_progression.incubation_days",
+      "value": 2,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:84 (get)"
+    },
+    {
+      "key": "emod_progression.phase_durations_days",
+      "value": [
+        3,
+        5,
+        4
+      ],
+      "status": "indirect-literal",
+      "evidence": "tools/sanity_checker.py"
+    },
+    {
+      "key": "emod_progression.shedding_phases",
+      "value": [
+        {
+          "name": "early",
+          "max_rate": 20.0,
+          "sensitivity_cap": 0.3
+        },
+        {
+          "name": "peak",
+          "max_rate": 80.0,
+          "sensitivity_cap": 0.95
+        },
+        {
+          "name": "late",
+          "max_rate": 40.0,
+          "sensitivity_cap": 0.8
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:81 (get)"
+    },
+    {
+      "key": "epoch_duration_hours",
+      "value": 1,
+      "status": "consumed-downstream",
+      "evidence": "engines/sim_clock.py:132 (get)"
+    },
+    {
+      "key": "escalation.alert_sick_call_threshold",
+      "value": 3,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1106 (get)"
+    },
+    {
+      "key": "escalation.confirm_attack_rate",
+      "value": 0.03,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1051 (get)"
+    },
+    {
+      "key": "escalation.decision_latency.alert_delay_hours",
+      "value": 0,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_tier_iterators.py"
+    },
+    {
+      "key": "escalation.decision_latency.confirmed_delay_hours",
+      "value": 0,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_outbreak_response_architecture.py, tests/test_tier_iterators.py"
+    },
+    {
+      "key": "escalation.decision_latency.lockdown_delay_hours",
+      "value": 0,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_tier_iterators.py"
+    },
+    {
+      "key": "escalation.decision_latency.suspected_delay_hours",
+      "value": 0,
+      "status": "indirect-literal",
+      "evidence": "orchestrator_init.py, picard_framework/runs/mega_cruise_campaign/tier_iterators.py, tests/test_clock_units.py"
+    },
+    {
+      "key": "escalation.detection_modes.syndromic.amber_sick_call_count",
+      "value": 2,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:65 (get)"
+    },
+    {
+      "key": "escalation.detection_modes.syndromic.red_sick_call_count",
+      "value": 5,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:66 (get)"
+    },
+    {
+      "key": "escalation.lockdown_attack_rate",
+      "value": "never",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1034 (get)"
+    },
+    {
+      "key": "escalation.pcr_confirm_ct_threshold",
+      "value": 35.0,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:3117 (get)"
+    },
+    {
+      "key": "escalation.respiratory_overrides.alert_confirmed_cases",
+      "value": 1,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1052 (get)"
+    },
+    {
+      "key": "escalation.respiratory_overrides.suspect_attack_rate",
+      "value": 0.01,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1047 (get)"
+    },
+    {
+      "key": "escalation.suspect_attack_rate",
+      "value": 0.02,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1049 (get)"
+    },
+    {
+      "key": "escalation.syndromic_suspect_threshold",
+      "value": 3,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1108 (get)"
+    },
+    {
+      "key": "fred_behavior.compliance_by_class.crew",
+      "value": 0.85,
+      "status": "consumed-bulk",
+      "evidence": "crusher_labs/__init__.py:269 (get)"
+    },
+    {
+      "key": "fred_behavior.compliance_by_class.passenger_elderly",
+      "value": 0.7,
+      "status": "consumed-bulk",
+      "evidence": "crusher_labs/__init__.py:269 (get)"
+    },
+    {
+      "key": "fred_behavior.compliance_by_class.passenger_young",
+      "value": 0.45,
+      "status": "consumed-bulk",
+      "evidence": "crusher_labs/__init__.py:269 (get)"
+    },
+    {
+      "key": "fred_behavior.healthy_noise_categories",
+      "value": [
+        {
+          "reason": "seasickness",
+          "probability_per_day": 0.0042,
+          "syndrome": "gastrointestinal"
+        },
+        {
+          "reason": "fatigue",
+          "probability_per_day": 0.003,
+          "syndrome": "systemic_febrile"
+        },
+        {
+          "reason": "minor_injury",
+          "probability_per_day": 0.002,
+          "syndrome": "wound_soft_tissue"
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:74 (get)"
+    },
+    {
+      "key": "fred_behavior.quarantine_compliance",
+      "value": 0.85,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:68 (get)"
+    },
+    {
+      "key": "fred_behavior.reluctant_delay_hours",
+      "value": 48,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:72 (get)"
+    },
+    {
+      "key": "fred_behavior.reluctant_fraction",
+      "value": 0.75,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:69 (get)"
+    },
+    {
+      "key": "grumb_seeding.kingdoms",
+      "value": [
+        "Bacteria",
+        "Archaea",
+        "Fungi",
+        "Virus"
+      ],
+      "status": "UNREFERENCED",
+      "evidence": "section read crusher_labs/__init__.py:139 (get); key never"
+    },
+    {
+      "key": "grumb_seeding.pseudocount",
+      "value": 1e-06,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:147 (get)"
+    },
+    {
+      "key": "hvac.contamx.binary_path",
+      "value": "",
+      "status": "consumed-downstream",
+      "evidence": "engines/contamx_runner.py:123 (get)"
+    },
+    {
+      "key": "hvac.contamx.prj_path",
+      "value": "",
+      "status": "consumed-downstream",
+      "evidence": "tools/contam_outcome_compare.py:75 (subscript)"
+    },
+    {
+      "key": "hvac.filter_efficiency",
+      "value": 0.5,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:3035 (get)"
+    },
+    {
+      "key": "hvac.filter_type",
+      "value": "unlabelled",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_record.py:333 (get)"
+    },
+    {
+      "key": "hvac.natural_decay_rate",
+      "value": 0.1,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:3039 (get)"
+    },
+    {
+      "key": "hvac.pathogen_pool_transport",
+      "value": "airflow",
+      "status": "consumed-downstream",
+      "evidence": "tests/test_pathogen_pool_transport.py:56 (subscript)"
+    },
+    {
+      "key": "hvac.transport_engine",
+      "value": "native",
+      "status": "consumed-downstream",
+      "evidence": "picard_framework/analysis/parse_run_id.py:245 (get)"
+    },
+    {
+      "key": "initiation.boarding.enabled",
+      "value": true,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_surface_strain_recovery.py:455 (subscript)"
+    },
+    {
+      "key": "instrument_turnaround.config_path",
+      "value": "data/config/instrument_turnaround.json",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2223 (get)"
+    },
+    {
+      "key": "long_read_sequencing.default_profile",
+      "value": "flongle_rapid",
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2501 (get)"
+    },
+    {
+      "key": "long_read_sequencing.description",
+      "value": "Oxford Nanopore long-read verification and pathogen typing",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "long_read_sequencing.enabled",
+      "value": false,
+      "status": "consumed-downstream",
+      "evidence": "tests/test_sequencing_config.py:64 (subscript)"
+    },
+    {
+      "key": "long_read_sequencing.escalation_triggers.discordant_modalities",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "long_read_sequencing.escalation_triggers.mixed_infection_suspected",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "long_read_sequencing.escalation_triggers.special_circumstance",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/long_read_escalation.py"
+    },
+    {
+      "key": "long_read_sequencing.escalation_triggers.unexpected_pathogen",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "long_read_sequencing.params_path",
+      "value": "data/config/long_read_sequencing_params.json",
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2480 (get)"
+    },
+    {
+      "key": "long_read_sequencing.special_circumstance_flag",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/long_read_escalation.py"
+    },
+    {
+      "key": "long_read_sequencing.specimen_sources",
+      "value": [
+        "wastewater_metagenomics",
+        "clinical_specimen",
+        "clinical_culture",
+        "surveillance_swab"
+      ],
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2472 (get)"
+    },
+    {
+      "key": "microflora.aitchison_anomaly_threshold",
+      "value": 0.08,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:152 (get)"
+    },
+    {
+      "key": "microflora.clr_shift_scale",
+      "value": 0.15,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:171 (get)"
+    },
+    {
+      "key": "microflora.disrupted_shed_mass",
+      "value": 50.0,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_epoch.py:1543 (get)"
+    },
+    {
+      "key": "microflora.enable_dual_signal",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py"
+    },
+    {
+      "key": "multi_pathogen.enable_coinfection",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_decision_config_resolution.py"
+    },
+    {
+      "key": "multi_pathogen.immunocompromised_fraction",
+      "value": 0.05,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2053 (get)"
+    },
+    {
+      "key": "multi_pathogen.profiles_path",
+      "value": "data/pathogens/active_profiles.json",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1290 (get)"
+    },
+    {
+      "key": "natural_history_clock",
+      "value": "hours",
+      "status": "consumed-downstream",
+      "evidence": "picard_framework/runs/mega_cruise_campaign/campaign_runner.py:1277 (get)"
+    },
+    {
+      "key": "num_epochs",
+      "value": 24,
+      "status": "consumed-downstream",
+      "evidence": "picard_framework/run_spec.py:156 (get)"
+    },
+    {
+      "key": "observation.enabled",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_epoch.py:999 (get)"
+    },
+    {
+      "key": "observation.surface_swab_source",
+      "value": "surface_pool_density",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_epoch.py:887 (get)"
+    },
+    {
+      "key": "observation.wastewater_assay_mode",
+      "value": "holding_tank",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2171 (get)"
+    },
+    {
+      "key": "random_seed",
+      "value": 42,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:1737 (get)"
+    },
+    {
+      "key": "sequencing.aitchison_anomaly_threshold",
+      "value": 0.08,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:174 (get)"
+    },
+    {
+      "key": "sequencing.cadence",
+      "value": 4,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py, tests/test_sanity_checker.py"
+    },
+    {
+      "key": "sequencing.clr_shift_scale",
+      "value": 0.15,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:171 (get)"
+    },
+    {
+      "key": "sequencing.description",
+      "value": "Metagenomic shotgun sequencing of environmental samples",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "sequencing.pseudocount",
+      "value": 1e-06,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:168 (get)"
+    },
+    {
+      "key": "sequencing.read_depth",
+      "value": 100000,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:166 (get)"
+    },
+    {
+      "key": "service_surface_knockout.enabled",
+      "value": false,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1792 (get)"
+    },
+    {
+      "key": "ship_graph.agent_classes",
+      "value": [
+        {
+          "class_id": "passenger_general",
+          "role_group": "passenger",
+          "fraction": 0.5,
+          "home_zone_preference": "PC_",
+          "free_zone_preference": "",
+          "duty_zone": ""
+        },
+        {
+          "class_id": "passenger_family",
+          "role_group": "passenger",
+          "fraction": 0.1,
+          "home_zone_preference": "PC_",
+          "free_zone_preference": "",
+          "duty_zone": ""
+        },
+        {
+          "class_id": "passenger_elderly",
+          "role_group": "passenger",
+          "fraction": 0.1,
+          "home_zone_preference": "PC_",
+          "free_zone_preference": "",
+          "duty_zone": ""
+        },
+        {
+          "class_id": "crew_general",
+          "role_group": "crew",
+          "fraction": 0.1,
+          "home_zone_preference": "CC_",
+          "free_zone_preference": "",
+          "duty_zone": "",
+          "schedule": {
+            "template": "crew_general",
+            "night_watch_fraction": 0.05
+          }
+        },
+        {
+          "class_id": "crew_medical",
+          "role_group": "crew",
+          "fraction": 0.05,
+          "home_zone_preference": "CC_",
+          "free_zone_preference": "Medical",
+          "duty_zone": "Medical_Center",
+          "schedule": {
+            "template": "crew_medical",
+            "night_watch_fraction": 0.05
+          }
+        },
+        {
+          "class_id": "crew_engineering",
+          "role_group": "crew",
+          "fraction": 0.1,
+          "home_zone_preference": "CC_",
+          "free_zone_preference": "Engine",
+          "duty_zone": "Engine",
+          "schedule": {
+            "template": "crew_engineering",
+            "night_watch_fraction": 0.05
+          }
+        },
+        {
+          "class_id": "crew_galley",
+          "role_group": "crew",
+          "fraction": 0.05,
+          "home_zone_preference": "CC_",
+          "free_zone_preference": "",
+          "duty_zone": "Galley",
+          "schedule": {
+            "template": "crew_galley",
+            "night_watch_fraction": 0.05
+          }
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:393 (get)"
+    },
+    {
+      "key": "ship_graph.agent_roles.crew_fraction",
+      "value": 0.3,
+      "status": "indirect-name-match",
+      "evidence": "engines/infection_dynamics_bridge.py, tests/test_sentinel_attribution.py, tests/test_sentinel_exposure.py"
+    },
+    {
+      "key": "ship_graph.agent_roles.passenger_fraction",
+      "value": 0.7,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:388 (get)"
+    },
+    {
+      "key": "ship_graph.air_flow_paths",
+      "value": "data/platforms/mega_cruise_5000/air_flow_paths.json",
+      "status": "consumed-downstream",
+      "evidence": "picard_framework/run_spec.py:141 (get)"
+    },
+    {
+      "key": "ship_graph.counter_confinement_enabled",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py, tests/test_mega_cruise_campaign.py"
+    },
+    {
+      "key": "ship_graph.gender_distribution.female",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:394 (get)"
+    },
+    {
+      "key": "ship_graph.gender_distribution.male",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "orchestrator_init.py:394 (get)"
+    },
+    {
+      "key": "ship_graph.infection_counters",
+      "value": [
+        {
+          "counter_id": "crew_attack_rate",
+          "label": "Crew Attack Rate",
+          "metric": "attack_rate",
+          "filter": {
+            "role_group": "crew"
+          }
+        },
+        {
+          "counter_id": "passenger_attack_rate",
+          "label": "Passenger Attack Rate",
+          "metric": "attack_rate",
+          "filter": {
+            "role_group": "passenger"
+          }
+        },
+        {
+          "counter_id": "all_attack_rate",
+          "label": "Overall Attack Rate",
+          "metric": "attack_rate",
+          "filter": {}
+        },
+        {
+          "counter_id": "passenger_reported_case_rate",
+          "label": "Passenger Reported Case Rate",
+          "metric": "reported_case_rate",
+          "filter": {
+            "role_group": "passenger"
+          },
+          "threshold": 0.03,
+          "on_exceed": "confine_symptomatic"
+        },
+        {
+          "counter_id": "crew_reported_case_rate",
+          "label": "Crew Reported Case Rate",
+          "metric": "reported_case_rate",
+          "filter": {
+            "role_group": "crew"
+          }
+        },
+        {
+          "counter_id": "all_reported_case_rate",
+          "label": "Overall Reported Case Rate",
+          "metric": "reported_case_rate",
+          "filter": {}
+        },
+        {
+          "counter_id": "crew_infected_count",
+          "label": "Crew Infected",
+          "metric": "infected_count",
+          "filter": {
+            "role_group": "crew"
+          }
+        },
+        {
+          "counter_id": "passenger_infected_count",
+          "label": "Passenger Infected",
+          "metric": "infected_count",
+          "filter": {
+            "role_group": "passenger"
+          }
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "orchestrator_display.py:54 (get)"
+    },
+    {
+      "key": "ship_graph.num_agents",
+      "value": 20,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:386 (get)"
+    },
+    {
+      "key": "ship_graph.spatial_layout",
+      "value": "data/platforms/mega_cruise_5000/spatial_layout.json",
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:314 (get)"
+    },
+    {
+      "key": "ship_graph.zones",
+      "value": [
+        {
+          "name": "Bridge",
+          "type": "Free",
+          "traffic": "low"
+        },
+        {
+          "name": "MedBay",
+          "type": "Free",
+          "traffic": "low"
+        },
+        {
+          "name": "Mess_Hall",
+          "type": "Dining",
+          "traffic": "high"
+        },
+        {
+          "name": "Engine_Room",
+          "type": "Room",
+          "traffic": "medium"
+        },
+        {
+          "name": "Galley",
+          "type": "Dining",
+          "traffic": "high"
+        },
+        {
+          "name": "Berthing",
+          "type": "Room",
+          "traffic": "medium"
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:251 (iterate)"
+    },
+    {
+      "key": "syndromic.background_noise_rate",
+      "value": 0.015,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:263 (get)"
+    },
+    {
+      "key": "syndromic.cadence",
+      "value": 1,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py, tests/test_sanity_checker.py"
+    },
+    {
+      "key": "syndromic.description",
+      "value": "Symptom-based screening (fever, GI distress, etc.)",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "syndromic.detection_delay_hours",
+      "value": 0,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:574 (get)"
+    },
+    {
+      "key": "syndromic.sick_call_probability_per_day",
+      "value": 0.7,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:261 (get)"
+    },
+    {
+      "key": "targeted_pcr.cadence",
+      "value": 4,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/simulation/ship_simulation.py, tests/test_sanity_checker.py"
+    },
+    {
+      "key": "targeted_pcr.ct_intercept",
+      "value": 40.0,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:297 (get)"
+    },
+    {
+      "key": "targeted_pcr.ct_slope",
+      "value": -3.322,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:296 (get)"
+    },
+    {
+      "key": "targeted_pcr.description",
+      "value": "RT-qPCR panel for environmental / surface wipe samples",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "targeted_pcr.extraction_efficiency",
+      "value": 0.35,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:295 (get)"
+    },
+    {
+      "key": "targeted_pcr.lod_ct_threshold",
+      "value": 38.0,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:298 (get)"
+    },
+    {
+      "key": "transmission.activity_contacts.enabled",
+      "value": true,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.cabin",
+      "value": 0.25,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.corridor",
+      "value": 0.25,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.dining_table",
+      "value": 2.0,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.dining_venue",
+      "value": 2.0,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.leisure",
+      "value": 1.0,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.other",
+      "value": 0.0,
+      "status": "consumed-downstream",
+      "evidence": "tests/test_contact_architecture.py:629 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.work_other",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "tests/test_contact_architecture.py:890 (subscript)"
+    },
+    {
+      "key": "transmission.activity_contacts.rates_per_hour.work_service",
+      "value": 2.9,
+      "status": "consumed-downstream",
+      "evidence": "tests/test_contact_architecture.py:628 (subscript)"
+    },
+    {
+      "key": "transmission.blackwater_plumbing",
+      "value": true,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1378 (get)"
+    },
+    {
+      "key": "transmission.cabin_air_mode",
+      "value": "cabin_compartment",
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1261 (get)"
+    },
+    {
+      "key": "transmission.contact_mode",
+      "value": "per_partner_contact",
+      "status": "consumed-downstream",
+      "evidence": "tests/test_density_contact.py:313 (subscript)"
+    },
+    {
+      "key": "transmission.density_dependent.base_contacts",
+      "value": 1.33,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1841 (get)"
+    },
+    {
+      "key": "transmission.density_dependent.crew_contact_multiplier",
+      "value": 2.0,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1841 (get)"
+    },
+    {
+      "key": "transmission.density_dependent.exponent",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1841 (get)"
+    },
+    {
+      "key": "transmission.density_dependent.max_contacts",
+      "value": 20,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1841 (get)"
+    },
+    {
+      "key": "transmission.density_dependent.reference_occupancy",
+      "value": 50,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1841 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.default_sigma",
+      "value": 0.75,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1874 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Cabin_Corridor",
+      "value": 0.25,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Dining",
+      "value": 1.0,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Engineering",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Free",
+      "value": 0.75,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Medical",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_by_zone_type.Room",
+      "value": 0.5,
+      "status": "consumed-bulk",
+      "evidence": "engines/transmission_core.py:1866 (get)"
+    },
+    {
+      "key": "transmission.heterogeneous_zone_dose.sigma_service",
+      "value": 1.0,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1871 (get)"
+    },
+    {
+      "key": "transmission.sanitary_visit_mode",
+      "value": "none",
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1271 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.enabled",
+      "value": true,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1916 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.outbreak_response.by_zone_class.cabin.events_per_day",
+      "value": 1.0,
+      "status": "indirect-name-match",
+      "evidence": "engines/transmission_core.py, telemetry_buffer/observation_model/cleaning_schedule_sweep.py, tests/test_hand_occupancy_readout.py"
+    },
+    {
+      "key": "transmission.surface_cleaning.outbreak_response.coverage",
+      "value": 0.58,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1902 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.outbreak_response.events_per_day",
+      "value": 24.0,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1909 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.outbreak_response.log10_reduction",
+      "value": 4.29,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1928 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.routine.coverage",
+      "value": 0.37,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1947 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.routine.events_per_day",
+      "value": 1.0,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2299 (get)"
+    },
+    {
+      "key": "transmission.surface_cleaning.routine.log10_reduction",
+      "value": 1.29,
+      "status": "consumed-downstream",
+      "evidence": "engines/transmission_core.py:1957 (get)"
+    },
+    {
+      "key": "variant_surveillance.census_interval_hours",
+      "value": 1,
+      "status": "consumed-downstream",
+      "evidence": "tests/test_strain_state.py:475 (subscript)"
+    },
+    {
+      "key": "variant_surveillance.enabled",
+      "value": false,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2109 (get)"
+    },
+    {
+      "key": "variant_surveillance.founder_strains_per_pathogen",
+      "value": 1,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2399 (get)"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.default_recovery",
+      "value": 0.25,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.enabled",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.min_lineage_abundance",
+      "value": 0.0,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.min_lineage_fraction",
+      "value": 0.02,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py, picard_framework/analysis/sentinel/wastewater_assays.py, tests/test_surface_strain_recovery.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Cabin_Corridor",
+      "value": 0.4,
+      "status": "indirect-literal",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py, engines/infection_dynamics_bridge.py, engines/transmission_core.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Dining",
+      "value": 0.75,
+      "status": "indirect-name-match",
+      "evidence": "tests/test_cabin_corridor_transmission.py, tests/test_clock_units.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Engineering",
+      "value": 0.6,
+      "status": "indirect-literal",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py, engines/transmission_core.py, scripts/build_enterprise_platforms.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Free",
+      "value": 0.25,
+      "status": "indirect-literal",
+      "evidence": "crusher_labs/modalities/sequencing.py, crusher_labs/modalities/surface_strain_recovery.py, dashboard/deck_geometry.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Medical",
+      "value": 0.85,
+      "status": "indirect-literal",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py, engines/transmission_core.py, scripts/cruise_platform_recipes.py"
+    },
+    {
+      "key": "variant_surveillance.surface_sampling.recovery_by_surface_type.Room",
+      "value": 0.5,
+      "status": "indirect-literal",
+      "evidence": "crusher_labs/modalities/sequencing.py, crusher_labs/modalities/surface_strain_recovery.py, engines/infection_dynamics_bridge.py"
+    },
+    {
+      "key": "wastewater_sequencing.aitchison_anomaly_threshold",
+      "value": 0.08,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:150 (get)"
+    },
+    {
+      "key": "wastewater_sequencing.description",
+      "value": "Dirichlet-multinomial metagenomic sampling from wastewater pools",
+      "status": "indirect-name-match",
+      "evidence": ".agents/skills/download-deepwiki/fetch_deepwiki.py, _epoch_timing/time_epochs.py, api/app.py"
+    },
+    {
+      "key": "wastewater_sequencing.dirichlet_concentration",
+      "value": 100.0,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:144 (get)"
+    },
+    {
+      "key": "wastewater_sequencing.pseudocount",
+      "value": 1e-06,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:147 (get)"
+    },
+    {
+      "key": "wastewater_sequencing.read_depth",
+      "value": 50000,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/__init__.py:142 (get)"
+    },
+    {
+      "key": "wastewater_surveillance.assay_mode",
+      "value": "metagenomic",
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/observations.py, picard_framework/analysis/sentinel/wastewater_ops.py, picard_framework/runs/mega_cruise_campaign/campaign_runner.py"
+    },
+    {
+      "key": "wastewater_surveillance.background_read_fraction",
+      "value": 0.9999,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_ops.py"
+    },
+    {
+      "key": "wastewater_surveillance.collection_points",
+      "value": [
+        "aft_main"
+      ],
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_ops.py, picard_framework/runs/mega_cruise_campaign/campaign_runner.py, tests/test_wastewater_assay_modes.py"
+    },
+    {
+      "key": "wastewater_surveillance.enabled",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "wastewater_surveillance.holding_tank_residence_hours",
+      "value": 4.0,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_ops.py, picard_framework/runs/mega_cruise_campaign/campaign_runner.py, tests/test_wastewater_assay_modes.py"
+    },
+    {
+      "key": "wastewater_surveillance.pathogen",
+      "value": "norovirus",
+      "status": "indirect-name-match",
+      "evidence": "deploy/aws/boundary_analysis_entrypoint.py, deploy/aws/sentinel_recovery_analysis_entrypoint.py, engines/initiation.py"
+    },
+    {
+      "key": "wastewater_surveillance.pathogen_id",
+      "value": "norwalk_gi",
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/lab_notebook.py, crusher_labs/modalities/clinical_strain_typing.py"
+    },
+    {
+      "key": "wastewater_surveillance.pathogen_shedding_to_reads_scale",
+      "value": 1.0,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_ops.py"
+    },
+    {
+      "key": "wastewater_surveillance.sampling_interval_epochs",
+      "value": 6,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_ops.py, picard_framework/runs/mega_cruise_campaign/campaign_runner.py, tests/test_wastewater_assay_modes.py"
+    },
+    {
+      "key": "wastewater_surveillance.sequencing_depth",
+      "value": 250000,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_assays.py, picard_framework/analysis/sentinel/wastewater_ops.py, picard_framework/runs/mega_cruise_campaign/campaign_runner.py"
+    },
+    {
+      "key": "wastewater_surveillance.strain_deconvolution.dirichlet_concentration",
+      "value": 200.0,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/__init__.py, crusher_labs/lab_notebook.py, orchestrator_init.py"
+    },
+    {
+      "key": "wastewater_surveillance.strain_deconvolution.enabled",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "wastewater_surveillance.strain_deconvolution.min_lineage_fraction",
+      "value": 0.02,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/modalities/surface_strain_recovery.py, picard_framework/analysis/sentinel/wastewater_assays.py, tests/test_surface_strain_recovery.py"
+    },
+    {
+      "key": "wastewater_surveillance.strain_deconvolution.min_lineage_reads",
+      "value": 20,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_assays.py, tests/test_wastewater_deconvolution.py"
+    },
+    {
+      "key": "wastewater_surveillance.strain_deconvolution.min_pathogen_reads",
+      "value": 100,
+      "status": "indirect-name-match",
+      "evidence": "picard_framework/analysis/sentinel/wastewater_assays.py, tests/test_wastewater_deconvolution.py"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.anomaly_z_threshold",
+      "value": 2.0,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2879 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.activity_score",
+      "value": 0.4,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.body_temp",
+      "value": 1.0,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.glucose",
+      "value": 1.0,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.heart_rate",
+      "value": 0.3,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.hrv",
+      "value": 0.3,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.respiratory_rate",
+      "value": 0.6,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.sleep_score",
+      "value": 0.2,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.channel_infection_weights.spo2",
+      "value": 0.8,
+      "status": "consumed-bulk",
+      "evidence": "tools/sanity_checker.py:2890 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.confounder_match_threshold",
+      "value": 0.7,
+      "status": "indirect-name-match",
+      "evidence": "engines/wearable_anomaly_scorer.py, tests/test_wearable_anomaly_scorer.py"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.enabled",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2878 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.fleet_anomaly_downweight",
+      "value": 0.1,
+      "status": "indirect-name-match",
+      "evidence": "engines/wearable_anomaly_scorer.py, tests/test_wearable_anomaly_scorer.py"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.fleet_anomaly_floor",
+      "value": 0.15,
+      "status": "indirect-name-match",
+      "evidence": "engines/wearable_anomaly_scorer.py, tests/test_wearable_anomaly_scorer.py"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_detection.infection_score_threshold",
+      "value": 1.5,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2885 (get)"
+    },
+    {
+      "key": "wearable_monitoring.anomaly_z_threshold",
+      "value": 2.0,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2360 (get)"
+    },
+    {
+      "key": "wearable_monitoring.deployment_profile",
+      "value": "crew_plus_byod",
+      "status": "consumed-downstream",
+      "evidence": "engines/wearable_monitor.py:885 (get)"
+    },
+    {
+      "key": "wearable_monitoring.detection_sensitivity_scale",
+      "value": 1.0,
+      "status": "consumed-downstream",
+      "evidence": "tests/test_wearable_enhanced.py:849 (subscript)"
+    },
+    {
+      "key": "wearable_monitoring.detection_sensitivity_sweep.enabled",
+      "value": false,
+      "status": "indirect-name-match",
+      "evidence": "crusher_labs/diagnostic_cascade.py, crusher_labs/long_read_escalation.py, crusher_labs/modalities/long_read_sequencing.py"
+    },
+    {
+      "key": "wearable_monitoring.detection_sensitivity_sweep.num_epochs",
+      "value": 6,
+      "status": "consumed-downstream",
+      "evidence": "scripts/wearable_sensitivity_sweep.py:72 (get)"
+    },
+    {
+      "key": "wearable_monitoring.detection_sensitivity_sweep.values",
+      "value": [
+        0.2,
+        0.3,
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8,
+        0.9
+      ],
+      "status": "consumed-downstream",
+      "evidence": "scripts/wearable_sensitivity_sweep.py:37 (get)"
+    },
+    {
+      "key": "wearable_monitoring.devices",
+      "value": [
+        {
+          "device_id": "oura_ring",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "sleep_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.78,
+            "specificity": 0.92,
+            "alert_latency_hours": 6,
+            "fever_sensitivity": 0.85,
+            "fever_specificity": 0.94
+          },
+          "confounders": [
+            {
+              "confounder_id": "seasickness",
+              "prevalence_per_day": 0.15,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 8.0,
+                  "noise_mult": 1.5
+                },
+                "hrv": {
+                  "bias": -12.0,
+                  "noise_mult": 1.8
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family",
+                "passenger_elderly"
+              ],
+              "susceptible_role_group": "passenger"
+            },
+            {
+              "confounder_id": "alcohol",
+              "prevalence_per_day": 0.08,
+              "affected_channels": {
+                "hrv": {
+                  "bias": -10.0,
+                  "noise_mult": 2.0
+                },
+                "heart_rate": {
+                  "bias": 6.0,
+                  "noise_mult": 1.4
+                },
+                "sleep_score": {
+                  "bias": -8.0,
+                  "noise_mult": 1.5
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family"
+              ]
+            },
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.2,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 2.5,
+              "drift_rate": 0.1,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "hrv",
+              "sigma": 6.0,
+              "drift_rate": 0.5,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.1,
+              "drift_rate": 0.01,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.4,
+              "drift_rate": 0.02,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "sleep_score",
+              "sigma": 3.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 1.0,
+              "drift_rate": 0.05,
+              "dropout_prob": 0.005
+            }
+          ],
+          "infection_responses": [
+            {
+              "pathogen_category": "enteric_viral",
+              "channel_responses": [
+                {
+                  "channel": "heart_rate",
+                  "early": 3.0,
+                  "peak": 10.0,
+                  "late": 5.0,
+                  "recovery": 1.0
+                },
+                {
+                  "channel": "body_temp",
+                  "early": 0.3,
+                  "peak": 1.5,
+                  "late": 0.8,
+                  "recovery": 0.1
+                },
+                {
+                  "channel": "spo2",
+                  "early": 0.0,
+                  "peak": -0.5,
+                  "late": -0.3,
+                  "recovery": 0.0
+                },
+                {
+                  "channel": "respiratory_rate",
+                  "early": 0.5,
+                  "peak": 2.0,
+                  "late": 1.0,
+                  "recovery": 0.2
+                },
+                {
+                  "channel": "hrv",
+                  "early": -3.0,
+                  "peak": -15.0,
+                  "late": -8.0,
+                  "recovery": -2.0
+                },
+                {
+                  "channel": "sleep_score",
+                  "early": -5.0,
+                  "peak": -25.0,
+                  "late": -15.0,
+                  "recovery": -3.0
+                }
+              ]
+            },
+            {
+              "pathogen_category": "respiratory_viral",
+              "channel_responses": [
+                {
+                  "channel": "heart_rate",
+                  "early": 2.0,
+                  "peak": 12.0,
+                  "late": 6.0,
+                  "recovery": 1.5
+                },
+                {
+                  "channel": "body_temp",
+                  "early": 0.4,
+                  "peak": 1.8,
+                  "late": 1.0,
+                  "recovery": 0.2
+                },
+                {
+                  "channel": "spo2",
+                  "early": -0.5,
+                  "peak": -3.0,
+                  "late": -1.5,
+                  "recovery": -0.3
+                },
+                {
+                  "channel": "respiratory_rate",
+                  "early": 1.0,
+                  "peak": 5.0,
+                  "late": 2.5,
+                  "recovery": 0.5
+                },
+                {
+                  "channel": "hrv",
+                  "early": -4.0,
+                  "peak": -18.0,
+                  "late": -10.0,
+                  "recovery": -3.0
+                },
+                {
+                  "channel": "sleep_score",
+                  "early": -5.0,
+                  "peak": -30.0,
+                  "late": -18.0,
+                  "recovery": -5.0
+                }
+              ]
+            }
+          ],
+          "phase_boundaries": [
+            {
+              "day": 0,
+              "phase": "early"
+            },
+            {
+              "day": 3,
+              "phase": "peak"
+            },
+            {
+              "day": 8,
+              "phase": "late"
+            },
+            {
+              "day": 12,
+              "phase": "recovery"
+            }
+          ]
+        },
+        {
+          "device_id": "garmin_watch",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "activity_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.82,
+            "specificity": 0.9,
+            "alert_latency_hours": 4,
+            "fever_sensitivity": 0.8,
+            "fever_specificity": 0.92
+          },
+          "confounders": [
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.25,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                },
+                "activity_score": {
+                  "bias": 20.0,
+                  "noise_mult": 1.0
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 1.8,
+              "drift_rate": 0.08,
+              "dropout_prob": 0.003
+            },
+            {
+              "channel": "hrv",
+              "sigma": 5.0,
+              "drift_rate": 0.4,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.15,
+              "drift_rate": 0.02,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.5,
+              "drift_rate": 0.03,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "activity_score",
+              "sigma": 4.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 0.9,
+              "drift_rate": 0.04,
+              "dropout_prob": 0.004
+            }
+          ],
+          "infection_responses": [
+            {
+              "pathogen_category": "enteric_viral",
+              "channel_responses": [
+                {
+                  "channel": "heart_rate",
+                  "early": 3.0,
+                  "peak": 10.0,
+                  "late": 5.0,
+                  "recovery": 1.0
+                },
+                {
+                  "channel": "body_temp",
+                  "early": 0.2,
+                  "peak": 1.2,
+                  "late": 0.6,
+                  "recovery": 0.1
+                },
+                {
+                  "channel": "spo2",
+                  "early": 0.0,
+                  "peak": -0.5,
+                  "late": -0.3,
+                  "recovery": 0.0
+                },
+                {
+                  "channel": "respiratory_rate",
+                  "early": 0.5,
+                  "peak": 2.0,
+                  "late": 1.0,
+                  "recovery": 0.2
+                },
+                {
+                  "channel": "hrv",
+                  "early": -3.0,
+                  "peak": -14.0,
+                  "late": -7.0,
+                  "recovery": -2.0
+                },
+                {
+                  "channel": "activity_score",
+                  "early": -5.0,
+                  "peak": -20.0,
+                  "late": -10.0,
+                  "recovery": -2.0
+                }
+              ]
+            },
+            {
+              "pathogen_category": "respiratory_viral",
+              "channel_responses": [
+                {
+                  "channel": "heart_rate",
+                  "early": 2.0,
+                  "peak": 12.0,
+                  "late": 6.0,
+                  "recovery": 1.5
+                },
+                {
+                  "channel": "body_temp",
+                  "early": 0.3,
+                  "peak": 1.4,
+                  "late": 0.8,
+                  "recovery": 0.15
+                },
+                {
+                  "channel": "spo2",
+                  "early": -0.5,
+                  "peak": -3.0,
+                  "late": -1.5,
+                  "recovery": -0.3
+                },
+                {
+                  "channel": "respiratory_rate",
+                  "early": 1.0,
+                  "peak": 5.0,
+                  "late": 2.5,
+                  "recovery": 0.5
+                },
+                {
+                  "channel": "hrv",
+                  "early": -4.0,
+                  "peak": -18.0,
+                  "late": -10.0,
+                  "recovery": -3.0
+                },
+                {
+                  "channel": "activity_score",
+                  "early": -5.0,
+                  "peak": -25.0,
+                  "late": -12.0,
+                  "recovery": -3.0
+                }
+              ]
+            }
+          ],
+          "phase_boundaries": [
+            {
+              "day": 0,
+              "phase": "early"
+            },
+            {
+              "day": 3,
+              "phase": "peak"
+            },
+            {
+              "day": 8,
+              "phase": "late"
+            },
+            {
+              "day": 12,
+              "phase": "recovery"
+            }
+          ]
+        },
+        {
+          "device_id": "cgm_patch",
+          "channels": [
+            "body_temp",
+            "glucose"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.72,
+            "specificity": 0.88,
+            "alert_latency_hours": 12,
+            "fever_sensitivity": 0.75,
+            "fever_specificity": 0.9
+          },
+          "confounders": [
+            {
+              "confounder_id": "meal_glucose_spike",
+              "prevalence_per_day": 0.4,
+              "affected_channels": {
+                "glucose": {
+                  "bias": 30.0,
+                  "noise_mult": 1.8
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "body_temp",
+              "sigma": 0.12,
+              "drift_rate": 0.015,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "glucose",
+              "sigma": 8.0,
+              "drift_rate": 0.5,
+              "dropout_prob": 0.01
+            }
+          ],
+          "channel_baselines": [
+            {
+              "channel": "glucose",
+              "mean": 95.0,
+              "std": 12.0
+            }
+          ]
+        },
+        {
+          "device_id": "oura_ring_3",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "sleep_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.74,
+            "specificity": 0.88,
+            "alert_latency_hours": 8,
+            "fever_sensitivity": 0.8,
+            "fever_specificity": 0.91
+          },
+          "confounders": [
+            {
+              "confounder_id": "seasickness",
+              "prevalence_per_day": 0.15,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 8.0,
+                  "noise_mult": 1.5
+                },
+                "hrv": {
+                  "bias": -12.0,
+                  "noise_mult": 1.8
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family",
+                "passenger_elderly"
+              ],
+              "susceptible_role_group": "passenger"
+            },
+            {
+              "confounder_id": "alcohol",
+              "prevalence_per_day": 0.08,
+              "affected_channels": {
+                "hrv": {
+                  "bias": -10.0,
+                  "noise_mult": 2.0
+                },
+                "heart_rate": {
+                  "bias": 6.0,
+                  "noise_mult": 1.4
+                },
+                "sleep_score": {
+                  "bias": -8.0,
+                  "noise_mult": 1.5
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family"
+              ]
+            },
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.2,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 3.0,
+              "drift_rate": 0.12,
+              "dropout_prob": 0.015
+            },
+            {
+              "channel": "hrv",
+              "sigma": 7.0,
+              "drift_rate": 0.6,
+              "dropout_prob": 0.015
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.12,
+              "drift_rate": 0.015,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.5,
+              "drift_rate": 0.03,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "sleep_score",
+              "sigma": 4.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 1.2,
+              "drift_rate": 0.06,
+              "dropout_prob": 0.008
+            }
+          ]
+        },
+        {
+          "device_id": "oura_ring_4",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "sleep_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.78,
+            "specificity": 0.92,
+            "alert_latency_hours": 6,
+            "fever_sensitivity": 0.85,
+            "fever_specificity": 0.94
+          },
+          "confounders": [
+            {
+              "confounder_id": "seasickness",
+              "prevalence_per_day": 0.15,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 8.0,
+                  "noise_mult": 1.5
+                },
+                "hrv": {
+                  "bias": -12.0,
+                  "noise_mult": 1.8
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family",
+                "passenger_elderly"
+              ],
+              "susceptible_role_group": "passenger"
+            },
+            {
+              "confounder_id": "alcohol",
+              "prevalence_per_day": 0.08,
+              "affected_channels": {
+                "hrv": {
+                  "bias": -10.0,
+                  "noise_mult": 2.0
+                },
+                "heart_rate": {
+                  "bias": 6.0,
+                  "noise_mult": 1.4
+                },
+                "sleep_score": {
+                  "bias": -8.0,
+                  "noise_mult": 1.5
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family"
+              ]
+            },
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.2,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 2.5,
+              "drift_rate": 0.1,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "hrv",
+              "sigma": 6.0,
+              "drift_rate": 0.5,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.1,
+              "drift_rate": 0.01,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.4,
+              "drift_rate": 0.02,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "sleep_score",
+              "sigma": 3.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 1.0,
+              "drift_rate": 0.05,
+              "dropout_prob": 0.005
+            }
+          ]
+        },
+        {
+          "device_id": "oura_ring_5",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "sleep_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.8,
+            "specificity": 0.93,
+            "alert_latency_hours": 5,
+            "fever_sensitivity": 0.87,
+            "fever_specificity": 0.95
+          },
+          "confounders": [
+            {
+              "confounder_id": "seasickness",
+              "prevalence_per_day": 0.15,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 8.0,
+                  "noise_mult": 1.4
+                },
+                "hrv": {
+                  "bias": -12.0,
+                  "noise_mult": 1.7
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family",
+                "passenger_elderly"
+              ],
+              "susceptible_role_group": "passenger"
+            },
+            {
+              "confounder_id": "alcohol",
+              "prevalence_per_day": 0.08,
+              "affected_channels": {
+                "hrv": {
+                  "bias": -10.0,
+                  "noise_mult": 1.9
+                },
+                "heart_rate": {
+                  "bias": 6.0,
+                  "noise_mult": 1.3
+                },
+                "sleep_score": {
+                  "bias": -8.0,
+                  "noise_mult": 1.4
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family"
+              ]
+            },
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.2,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 2.2,
+              "drift_rate": 0.08,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "hrv",
+              "sigma": 5.5,
+              "drift_rate": 0.45,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.08,
+              "drift_rate": 0.008,
+              "dropout_prob": 0.004
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.35,
+              "drift_rate": 0.018,
+              "dropout_prob": 0.006
+            },
+            {
+              "channel": "sleep_score",
+              "sigma": 2.5,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 0.9,
+              "drift_rate": 0.04,
+              "dropout_prob": 0.004
+            }
+          ]
+        },
+        {
+          "device_id": "apple_watch_s10",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "activity_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.82,
+            "specificity": 0.88,
+            "alert_latency_hours": 4,
+            "fever_sensitivity": 0.83,
+            "fever_specificity": 0.9
+          },
+          "confounders": [
+            {
+              "confounder_id": "seasickness",
+              "prevalence_per_day": 0.15,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 10.0,
+                  "noise_mult": 1.6
+                },
+                "hrv": {
+                  "bias": -14.0,
+                  "noise_mult": 2.0
+                },
+                "activity_score": {
+                  "bias": -10.0,
+                  "noise_mult": 1.3
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family",
+                "passenger_elderly"
+              ],
+              "susceptible_role_group": "passenger"
+            },
+            {
+              "confounder_id": "alcohol",
+              "prevalence_per_day": 0.08,
+              "affected_channels": {
+                "hrv": {
+                  "bias": -10.0,
+                  "noise_mult": 2.0
+                },
+                "heart_rate": {
+                  "bias": 6.0,
+                  "noise_mult": 1.4
+                }
+              },
+              "susceptible_classes": [
+                "passenger_general",
+                "passenger_family"
+              ]
+            },
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.25,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 20.0,
+                  "noise_mult": 1.5
+                },
+                "activity_score": {
+                  "bias": 25.0,
+                  "noise_mult": 1.0
+                }
+              },
+              "susceptible_classes": []
+            },
+            {
+              "confounder_id": "wrist_motion",
+              "prevalence_per_day": 0.3,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 3.0,
+                  "noise_mult": 1.3
+                },
+                "spo2": {
+                  "bias": 0.0,
+                  "noise_mult": 1.5
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 2.0,
+              "drift_rate": 0.08,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "hrv",
+              "sigma": 5.5,
+              "drift_rate": 0.4,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.06,
+              "drift_rate": 0.005,
+              "dropout_prob": 0.003
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.6,
+              "drift_rate": 0.04,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "activity_score",
+              "sigma": 4.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 1.0,
+              "drift_rate": 0.05,
+              "dropout_prob": 0.005
+            }
+          ]
+        },
+        {
+          "device_id": "garmin_venu3",
+          "channels": [
+            "heart_rate",
+            "hrv",
+            "body_temp",
+            "spo2",
+            "activity_score",
+            "respiratory_rate"
+          ],
+          "detection_profile": {
+            "sensitivity": 0.8,
+            "specificity": 0.88,
+            "alert_latency_hours": 5,
+            "fever_sensitivity": 0.78,
+            "fever_specificity": 0.9
+          },
+          "confounders": [
+            {
+              "confounder_id": "exercise",
+              "prevalence_per_day": 0.25,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 15.0,
+                  "noise_mult": 1.2
+                },
+                "activity_score": {
+                  "bias": 20.0,
+                  "noise_mult": 1.0
+                }
+              },
+              "susceptible_classes": []
+            },
+            {
+              "confounder_id": "wrist_motion",
+              "prevalence_per_day": 0.3,
+              "affected_channels": {
+                "heart_rate": {
+                  "bias": 3.0,
+                  "noise_mult": 1.3
+                },
+                "spo2": {
+                  "bias": 0.0,
+                  "noise_mult": 1.5
+                }
+              },
+              "susceptible_classes": []
+            }
+          ],
+          "noise": [
+            {
+              "channel": "heart_rate",
+              "sigma": 2.2,
+              "drift_rate": 0.1,
+              "dropout_prob": 0.005
+            },
+            {
+              "channel": "hrv",
+              "sigma": 5.5,
+              "drift_rate": 0.45,
+              "dropout_prob": 0.01
+            },
+            {
+              "channel": "body_temp",
+              "sigma": 0.18,
+              "drift_rate": 0.025,
+              "dropout_prob": 0.015
+            },
+            {
+              "channel": "spo2",
+              "sigma": 0.6,
+              "drift_rate": 0.04,
+              "dropout_prob": 0.008
+            },
+            {
+              "channel": "activity_score",
+              "sigma": 5.0,
+              "drift_rate": 0.0,
+              "dropout_prob": 0.0
+            },
+            {
+              "channel": "respiratory_rate",
+              "sigma": 1.1,
+              "drift_rate": 0.05,
+              "dropout_prob": 0.006
+            }
+          ]
+        }
+      ],
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2730 (get)"
+    },
+    {
+      "key": "wearable_monitoring.enabled",
+      "value": true,
+      "status": "consumed-direct",
+      "evidence": "tools/sanity_checker.py:2716 (get)"
+    },
+    {
+      "key": "wearable_monitoring.observation_noise_sigma",
+      "value": 0.5,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2358 (get)"
+    },
+    {
+      "key": "wearable_monitoring.scale_fever_sensitivity",
+      "value": true,
+      "status": "consumed-downstream",
+      "evidence": "engines/wearable_monitor.py:1046 (get)"
+    },
+    {
+      "key": "wearable_monitoring.stoplight_thresholds.fleet_anomaly_rate_amber",
+      "value": 0.05,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:54 (get)"
+    },
+    {
+      "key": "wearable_monitoring.stoplight_thresholds.fleet_anomaly_rate_red",
+      "value": 0.12,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:55 (get)"
+    },
+    {
+      "key": "wearable_monitoring.stoplight_thresholds.fleet_fever_rate_amber",
+      "value": 0.03,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:52 (get)"
+    },
+    {
+      "key": "wearable_monitoring.stoplight_thresholds.fleet_fever_rate_red",
+      "value": 0.08,
+      "status": "consumed-direct",
+      "evidence": "crusher_labs/protocol_engine.py:53 (get)"
+    },
+    {
+      "key": "wearable_monitoring.sync_dropout_prob",
+      "value": 0.02,
+      "status": "consumed-direct",
+      "evidence": "orchestrator_init.py:2359 (get)"
+    }
+  ]
+}

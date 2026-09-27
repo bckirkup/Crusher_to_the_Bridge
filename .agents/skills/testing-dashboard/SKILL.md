@@ -54,7 +54,7 @@ python3 -m streamlit run dashboard.py
 ```
 Or use the launcher scripts:
 ```bash
-./run_dashboard.sh
+./scripts/run_dashboard.sh
 ```
 
 ### 5. Verify pathway aggregation logic

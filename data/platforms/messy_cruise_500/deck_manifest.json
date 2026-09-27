@@ -192,6 +192,7 @@
     "deck_blueprint_bg": "deck_blueprint_bg.png",
     "architectural_graphics": "graphics/graphics.json"
   },
+  "superseded_by": "mega_cruise_5000",
   "background_plate": "reference_photo_composite",
   "reference_photo": {
     "wikimedia_title": "File:Icon of the Seas (kahunapulej).jpg",

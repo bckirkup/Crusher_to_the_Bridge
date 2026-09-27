@@ -142,4 +142,4 @@ Full config.yaml, SOP, instrument, and GIS reference: [OPERATORS_MANUAL.md](OPER
 
 Mega-cruise factorial campaign (~17,780 Picard runs):
 [`picard_framework/runs/mega_cruise_campaign/README.md`](../picard_framework/runs/mega_cruise_campaign/README.md)
-(`run_campaign.bat` / `run_campaign.sh` from the repo root).
+(`scripts\run_campaign.bat` / `scripts/run_campaign.sh` from the repo root).

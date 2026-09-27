@@ -41,7 +41,14 @@
       "type": "array",
       "minItems": 1,
       "items": {"type": "string"},
-      "description": "Downstream greywater/blackwater collection zones for ship-wide wastewater sequencing grid sampling"
+      "description": "Canonical key: downstream graywater/blackwater collection zones for ship-wide wastewater sequencing grid sampling"
+    },
+    "greywater_zones": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"type": "string"},
+      "deprecated": true,
+      "description": "DEPRECATED British-spelling alias for graywater_zones. Accepted for backward compatibility; graywater_zones wins when both are present."
     },
     "zones": {
       "type": "array",

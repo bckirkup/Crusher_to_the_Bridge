@@ -228,10 +228,10 @@ python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner \
 Double-click or from a prompt at the repo root:
 
 ```bat
-run_campaign.bat --smoke
-run_campaign.bat --tier t1
-run_campaign.bat --dry-run
-run_campaign.bat --resume --tier t4
+scripts\run_campaign.bat --smoke
+scripts\run_campaign.bat --tier t1
+scripts\run_campaign.bat --dry-run
+scripts\run_campaign.bat --resume --tier t4
 ```
 
 ### Linux / macOS (`.sh`)

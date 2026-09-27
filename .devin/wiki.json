@@ -107,7 +107,7 @@
     },
     {
       "title": "Streamlit Dashboard",
-      "purpose": "Document dashboard.py — the Streamlit 4-tab Tactical Command Deck for visualization. Cover the dashboard tabs, how it reads simulation_history.json and lab_notebook outputs, and launch instructions (streamlit run dashboard.py, run_dashboard.bat, run_dashboard.sh)."
+      "purpose": "Document dashboard.py — the Streamlit 4-tab Tactical Command Deck for visualization. Cover the dashboard tabs, how it reads simulation_history.json and lab_notebook outputs, and launch instructions (streamlit run dashboard.py, scripts/run_dashboard.bat, scripts/run_dashboard.sh)."
     },
     {
       "title": "Test Suite",

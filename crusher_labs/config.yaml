@@ -681,7 +681,7 @@ sequencing:
   cadence: 4                          # baseline; escalation may override
 
 # ── Wastewater Sequencing Grid (observation instrument) ──────
-# Pooled greywater metagenomics via WastewaterSequencingGrid (every epoch).
+# Pooled graywater metagenomics via WastewaterSequencingGrid (every epoch).
 wastewater_sequencing:
   description: "Dirichlet-multinomial metagenomic sampling from wastewater pools"
   read_depth: 50000                   # total reads per zone sample

@@ -9,25 +9,25 @@ REM    - ContamX binary under third_party\contamx\  (e.g. ContamX3.exe)
 REM      OR set CONTAMX_BINARY / CONTAMX_HOME
 REM
 REM  From the repo root (or double-click this file):
-REM    run_contam_compare.bat
-REM    run_contam_compare.bat --job data\config\contam_compare\jobs\destroyer_transport.json
+REM    scripts\run_contam_compare.bat
+REM    scripts\run_contam_compare.bat --job data\config\contam_compare\jobs\destroyer_transport.json
 REM ============================================================================
 
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 if not defined CONTAMX_BINARY (
-  if exist "%~dp0third_party\contamx\ContamX3.exe" (
-    set "CONTAMX_BINARY=%~dp0third_party\contamx\ContamX3.exe"
-  ) else if exist "%~dp0third_party\contamx\contamx3.exe" (
-    set "CONTAMX_BINARY=%~dp0third_party\contamx\contamx3.exe"
-  ) else if exist "%~dp0third_party\contamx\ContamX.exe" (
-    set "CONTAMX_BINARY=%~dp0third_party\contamx\ContamX.exe"
+  if exist "%~dp0..\third_party\contamx\ContamX3.exe" (
+    set "CONTAMX_BINARY=%~dp0..\third_party\contamx\ContamX3.exe"
+  ) else if exist "%~dp0..\third_party\contamx\contamx3.exe" (
+    set "CONTAMX_BINARY=%~dp0..\third_party\contamx\contamx3.exe"
+  ) else if exist "%~dp0..\third_party\contamx\ContamX.exe" (
+    set "CONTAMX_BINARY=%~dp0..\third_party\contamx\ContamX.exe"
   )
 )
 
 if not defined CONTAMX_HOME (
-  if exist "%~dp0third_party\contamx\" (
-    set "CONTAMX_HOME=%~dp0third_party\contamx"
+  if exist "%~dp0..\third_party\contamx\" (
+    set "CONTAMX_HOME=%~dp0..\third_party\contamx"
   )
 )
 

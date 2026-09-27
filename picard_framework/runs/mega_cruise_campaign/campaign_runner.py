@@ -11,8 +11,8 @@ Usage (from repo root):
     python3 -m picard_framework.runs.mega_cruise_campaign.campaign_runner --smoke
 
 Windows:
-    run_campaign.bat --tier t1
-    run_campaign.bat --smoke
+    scripts\run_campaign.bat --tier t1
+    scripts\run_campaign.bat --smoke
 """
 from __future__ import annotations
 

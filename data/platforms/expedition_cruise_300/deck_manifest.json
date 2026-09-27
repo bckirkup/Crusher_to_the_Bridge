@@ -67,6 +67,7 @@
     "deck_blueprint_bg": "deck_blueprint_bg.png",
     "architectural_graphics": "graphics/graphics.json"
   },
+  "superseded_by": "expedition_cruise_450",
   "background_plate": "reference_photo_composite",
   "reference_photo": {
     "wikimedia_title": "File:Cruise ship side view.png",

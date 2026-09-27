@@ -60,7 +60,7 @@ python3 presidio_runner.py \
 
 Manuals: [OPERATORS_MANUAL_SHIP.md](docs/OPERATORS_MANUAL_SHIP.md) (ship), [OPERATORS_MANUAL_GAME_THEORY.md](docs/OPERATORS_MANUAL_GAME_THEORY.md) (fleet / Stackelberg).
 
-Mega cruise factorial campaign (~17,780 runs): [picard_framework/runs/mega_cruise_campaign/README.md](picard_framework/runs/mega_cruise_campaign/README.md) — `run_campaign.bat` / `run_campaign.sh`.
+Mega cruise factorial campaign (~17,780 runs): [picard_framework/runs/mega_cruise_campaign/README.md](picard_framework/runs/mega_cruise_campaign/README.md) — `scripts/run_campaign.bat` / `scripts/run_campaign.sh`.
 
 ## Architecture
 
