@@ -698,7 +698,13 @@ still accepted as a legacy alias) was last fitted against a contact layer that n
 longer exists: #351 rebuilt the fomite chain, #352 added emesis, and #353
 raised the direct-contact kernel about 10x and the shared-surface touch rates
 4-10x. A dose fitted before those is not transferable, and no refit has been
-run since.
+run since. **NORO-DOSE-REFIT-01 replaces this one figure:** `dose_adjustment`
+is re-derived as the chain-composed hand-route release per ill host-day,
+**7.57 (interval [7.14, 8.86])**, and the canary deposit accounting
+verifies the magnitude inside its interval — see
+`docs/ledger/NORO-DOSE-REFIT-01.md`. Every other figure under this stamp
+(attack rates, route shares, ladder tables, per-host dose tables measured
+pre-refit) stays void; the refit reads the two canary cells only.
 
 Also withdrawn and not yet replaced:
 
