@@ -91,11 +91,9 @@ _CAMPAIGN_DIR = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 if str(_CAMPAIGN_DIR) not in sys.path:
     sys.path.insert(0, str(_CAMPAIGN_DIR))
 
-from campaign_execution import extract_timeseries  # noqa: E402
-from campaign_runner import generate_tier_runs, parameters_from_spec  # noqa: E402
+from campaign_runner import generate_tier_runs  # noqa: E402
 
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.analysis.metrics import compute_derived_metrics  # noqa: E402
 from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
@@ -104,10 +102,12 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
-from telemetry_buffer.fields import (  # noqa: E402
-    RECORD_COST_ACCOUNTING,
-    RECORD_SUMMARY,
-    record_block,
+from tools.noro_diag.growth_chain_census import (  # noqa: E402
+    GEN_UNRESOLVED,
+    _acquired_gen,
+)
+from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
+    _attach_voyage_blocks,
 )
 
 try:  # the pre-rhythm tree has no module; the off arm must still run there
@@ -120,8 +120,6 @@ MINUTES_PER_DAY = 1440  # clock-exempt: minutes-of-day, not a unit conversion
 _ASHORE_LOCATION = "Ashore"
 _ISOLATED_LOCATION = "Isolated_In_Quarters"
 _DEPARTED_LOCATION = "Departed"
-
-GEN_UNRESOLVED = -1
 
 
 # ── Recorder ──────────────────────────────────────────────────────────
@@ -272,22 +270,6 @@ def _wrap_emit_emesis(core_cls: type, rec: RhythmRecorder) -> Any:
     return wrapper
 
 
-def _acquired_gen(
-    rec: RhythmRecorder,
-    source_id: Any,
-    parent_strain: Any,
-    acquired_strain: Any,
-) -> int:
-    """Generation of a new acquisition from the transmission pedigree."""
-    if source_id is not None:
-        return rec.gen_of(int(source_id)) + 1
-    if parent_strain and parent_strain in rec.strain_home:
-        return rec.gen_of(rec.strain_home[parent_strain]) + 1
-    if acquired_strain and str(acquired_strain) in rec.strain_home:
-        return rec.gen_of(rec.strain_home[str(acquired_strain)]) + 1
-    return GEN_UNRESOLVED
-
-
 def _record_acquisition(
     rec: RhythmRecorder,
     agent: Any,
@@ -295,32 +277,35 @@ def _record_acquisition(
     p_dose: float,
     new_events: list,
 ) -> None:
-    event = new_events[-1] if new_events else None
-    source_id = getattr(event, "source_agent_id", None) if event else None
-    parent_strain = (
-        getattr(event, "source_strain_id", None) if event else None
-    )
+    aid = int(agent.agent_id)
     acquired_strain = (
         (agent.infections.get(rec.pathogen_id) or {}).get("strain_id")
     )
-    gen = _acquired_gen(rec, source_id, parent_strain, acquired_strain)
-    aid = int(agent.agent_id)
+    row: dict[str, Any] = {
+        "epoch": int(epoch),
+        "agent_id": aid,
+        "dose_read": float(p_dose),
+        "location": str(agent.current_location),
+        "ashore": bool(getattr(agent, "ashore", False)),
+        "source_agent_id": None,
+        "dominant_pathway": None,
+    }
+    if new_events:
+        event = new_events[-1]
+        row["source_agent_id"] = getattr(event, "source_agent_id", None)
+        row["dominant_pathway"] = getattr(event, "pathway", None)
+        parent_strain = getattr(event, "source_strain_id", None)
+    else:
+        parent_strain = None
+    gen = _acquired_gen(
+        rec, row["source_agent_id"], parent_strain, acquired_strain,
+    )
+    row["gen"] = gen if 0 <= gen < GEN_UNRESOLVED else "unresolved"
     rec.host_gen[aid] = gen
     rec.acquired_ids.add(aid)
     if acquired_strain:
         rec.strain_home.setdefault(str(acquired_strain), aid)
-    rec.acquisition_rows.append({
-        "epoch": int(epoch),
-        "agent_id": aid,
-        "gen": gen if gen != GEN_UNRESOLVED else "unresolved",
-        "source_agent_id": source_id,
-        "dose_read": float(p_dose),
-        "dominant_pathway": (
-            getattr(event, "pathway", None) if event else None
-        ),
-        "location": str(agent.current_location),
-        "ashore": bool(getattr(agent, "ashore", False)),
-    })
+    rec.acquisition_rows.append(row)
 
 
 def _wrap_challenge(core_cls: type, rec: RhythmRecorder) -> Any:
@@ -333,12 +318,12 @@ def _wrap_challenge(core_cls: type, rec: RhythmRecorder) -> Any:
         matrix: Any, events: list,
     ) -> None:
         if pathogen_id != rec.pathogen_id:
-            return original(
+            original(
                 self, epoch, agent, pathogen_id, agent_pathogen_doses,
                 agent_pathway_doses, matrix, events,
             )
+            return
         aid = int(agent.agent_id)
-        was_infected = bool(agent.is_infected_with(pathogen_id))
         p_dose = float(
             agent_pathogen_doses.get(aid, {}).get(pathogen_id, 0.0),
         )
@@ -349,10 +334,10 @@ def _wrap_challenge(core_cls: type, rec: RhythmRecorder) -> Any:
             rec.ashore_dosed_epochs += 1
             if len(rec.ashore_dosed_rows) < 64:
                 rec.ashore_dosed_rows.append({
-                    "epoch": int(epoch),
-                    "agent_id": aid,
-                    "dose_read": float(p_dose),
+                    "epoch": int(epoch), "agent_id": aid,
+                    "dose_read": p_dose,
                 })
+        was_infected = bool(agent.is_infected_with(pathogen_id))
         n_events = len(events)
         original(
             self, epoch, agent, pathogen_id, agent_pathogen_doses,
@@ -521,80 +506,6 @@ def _inject_arm(spec_dict: dict[str, Any], arm: str | None) -> None:
     rhythm = dict(overrides.get("rhythm") or {})
     rhythm["enabled"] = arm == "on"
     overrides["rhythm"] = rhythm
-
-
-def _attach_voyage_blocks(
-    summary: dict[str, Any],
-    spec_dict: dict[str, Any],
-    result: Any,
-    num_agents: int,
-    natural_history_clock: str | None,
-) -> None:
-    """The anchor-shaped campaign blocks (score_anchors-compatible)."""
-    history = getattr(result, "history", None) or []
-    series = extract_timeseries(history)
-    parameters = parameters_from_spec(spec_dict)
-    parameters["natural_history_clock"] = (
-        spec_dict.get("natural_history_clock")
-        or natural_history_clock
-        or "hours"
-    )
-    summary["parameters"] = parameters
-    summary["trigger_status"] = getattr(result, "final_trigger_status", None)
-    summary["timeseries"] = series
-    summary["derived"] = compute_derived_metrics(series, num_agents)
-    final = history[-1] if history else {}
-    summary["summary"] = record_block(final, RECORD_SUMMARY)
-    summary["cost_accounting"] = record_block(final, RECORD_COST_ACCOUNTING)
-    _restore_rate_precision(summary["summary"])
-
-
-_RATE_COUNT_PAIRS = (
-    (
-        "cumulative_ever_infected_passenger",
-        "infection_attack_rate_passenger",
-        "passenger_complement",
-    ),
-    (
-        "cumulative_ever_infected_crew",
-        "infection_attack_rate_crew",
-        "crew_complement",
-    ),
-    (
-        "cumulative_ever_ill_passenger",
-        "ever_ill_rate_passenger",
-        "passenger_complement",
-    ),
-    (
-        "cumulative_ever_ill_crew",
-        "ever_ill_rate_crew",
-        "crew_complement",
-    ),
-    (
-        "cumulative_reported_cases_passenger",
-        "reported_case_rate_passenger",
-        "passenger_complement",
-    ),
-    (
-        "cumulative_reported_cases_crew",
-        "reported_case_rate_crew",
-        "crew_complement",
-    ),
-)
-
-
-def _restore_rate_precision(block: dict[str, Any]) -> None:
-    """Rewrite role rates as count / complement at full precision."""
-    for count_key, rate_key, complement_key in _RATE_COUNT_PAIRS:
-        count = block.get(count_key)
-        complement = block.get(complement_key)
-        if (
-            rate_key in block
-            and isinstance(count, (int, float))
-            and isinstance(complement, (int, float))
-            and complement > 0
-        ):
-            block[rate_key] = count / complement
 
 
 def _rhythm_payload(
