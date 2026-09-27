@@ -45,6 +45,7 @@ NON_INPUTS: tuple[tuple[str, str], ...] = (
     ("telemetry_buffer/portout*/**", "port-call run output"),
     ("telemetry_buffer/postfix_pilot/**", "pilot run output"),
     ("telemetry_buffer/v4_results/**", "campaign v4 run output"),
+    ("telemetry_buffer/flu_rhythm_ab/**", "FLU-RHYTHM-01 witness + canary evidence"),
     ("data/platforms/*/deck_blueprint_bg.png", "dashboard deck art"),
     ("data/platforms/*/deck_hull.png", "dashboard deck art"),
     ("data/platforms/*/deck_graphics.geojson", "dashboard deck geometry"),

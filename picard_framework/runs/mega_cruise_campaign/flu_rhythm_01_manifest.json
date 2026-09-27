@@ -1,0 +1,32 @@
+{
+  "campaign": "FLU-RHYTHM-01",
+  "description": "Paired rhythm-layer A/B on the isolated influenza_a arm across the four real cruise classes. Every cell runs the FLU-DELIVERY-01 confined-window conditioning verbatim: active_profiles bundle with the other two pathogens removed, explicit passenger seed pair at epoch 0, declared SOP-017 confinement day 1 to end, k shipped at 0.0006/copy (no overrides). Frozen gates: (1) rhythm.enabled=false on post-#742 main must reproduce the pre-rhythm tree's per-epoch state digests byte-identically before any cell runs; (2) a canary confined-window cell must show emitted metrics move under rhythm.on or the flag is reported inert and the campaign stops; (3) readout is descriptive — confined cabinmate attack fraction vs the 15-25% floor per class per arm, delivered confined dose, per-epoch dosed-set size, challenged share, corridor-front correlation — declared here before runs; no constant is retuned on the result.",
+  "bundle": "active_profiles",
+  "pathogen_id": "influenza_a",
+  "confinement": "declared",
+  "natural_history_clock": "hours",
+  "default_epochs": 288,
+  "cell_command": "tools/flu_rhythm_ab_probe.py --platform <tier.platform> --seed <seed> --epochs <tier.epochs> --arm <arm> --tier <tier> --confinement declared",
+  "tiers": {
+    "flu_exp_12d": {
+      "platform": "expedition_cruise_450",
+      "epochs": 288,
+      "seeds": {"start": 8105, "count": 100}
+    },
+    "flu_spr_12d": {
+      "platform": "spirit_cruise_3000",
+      "epochs": 288,
+      "seeds": {"start": 8105, "count": 100}
+    },
+    "flu_cls_12d": {
+      "platform": "classic_cruise_1900",
+      "epochs": 288,
+      "seeds": {"start": 8105, "count": 100}
+    },
+    "flu_mega_12d": {
+      "platform": "mega_cruise_5000",
+      "epochs": 288,
+      "seeds": {"start": 8105, "count": 100}
+    }
+  }
+}

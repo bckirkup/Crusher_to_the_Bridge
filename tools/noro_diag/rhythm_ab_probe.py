@@ -549,6 +549,21 @@ def _rhythm_payload(
     }
 
 
+@contextmanager
+def _sim_for_spec(spec: dict[str, Any]) -> Any:
+    """Materialise one spec dict into a loaded (unrun) ShipSimulation."""
+    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+        spec_path = resolve_child_path(tmp, "run_spec.json")
+        with validated_open(
+            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(spec))
+        picard_spec = PicardRunSpec.from_picard_json(
+            str(REPO_ROOT), spec_path,
+        )
+        yield ShipSimulation(picard_spec, display=False)
+
+
 def run_spec(
     spec_dict: dict[str, Any],
     *,
@@ -566,21 +581,11 @@ def run_spec(
     )
     rec = RhythmRecorder(pathogen_id=pathogen_id)
     started_total = time.perf_counter()
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
-        with instrumented(rec):
-            sim = ShipSimulation(picard_spec, display=False)
-            sim.epoch_observer = _epoch_observer(rec)
-            started_run = time.perf_counter()
-            result = sim.run()
-            wall_clock_run = time.perf_counter() - started_run
+    with instrumented(rec), _sim_for_spec(spec) as sim:
+        sim.epoch_observer = _epoch_observer(rec)
+        started_run = time.perf_counter()
+        result = sim.run()
+        wall_clock_run = time.perf_counter() - started_run
     summary: dict[str, Any] = {
         "run_id": str(spec.get("description", "")),
         "seed": int(spec["run"]["random_seed"]),

@@ -1,0 +1,53 @@
+{
+ "actors": [],
+ "catalog": {
+  "pathogen_bundle_id": "active_profiles",
+  "platform_id": "classic_cruise_1900"
+ },
+ "config_overrides": {
+  "initiation": {
+   "explicit_seeds": [
+    {
+     "count": 2,
+     "epoch": 0,
+     "pathogen": "influenza_a",
+     "role": "passenger"
+    }
+   ]
+  },
+  "rhythm": {
+   "enabled": false
+  },
+  "scenario_schedule": {
+   "protocols": [
+    {
+     "end_day": null,
+     "protocol_id": "SOP-017",
+     "start_day": 1
+    }
+   ]
+  },
+  "ship_graph": {
+   "num_agents": 1910
+  }
+ },
+ "description": "flu_rhythm_ab_classic_cruise_1900_s8105",
+ "incentives": {},
+ "legacy_yaml": "crusher_labs/config.yaml",
+ "pathogen_overrides": {
+  "influenza_a": {
+   "initial_infected": null
+  },
+  "remove": [
+   "norwalk_gi",
+   "sars_cov2_resp"
+  ]
+ },
+ "run": {
+  "history_retention": "compact",
+  "num_epochs": 96,
+  "random_seed": 8105,
+  "write_ground_truth": false
+ },
+ "schema_version": "1.0.0"
+}
