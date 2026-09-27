@@ -1,8 +1,9 @@
 # COVID-TAKEOFF-ATTR-01
 **Date:** 2026-09-27
-**Commit:** ce8e3020
+**Commit:** bcf2ac95
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** bcf2ac95
 
 Decomposition of the covid.H3 takeoff burn — the ~2,400–3,580 recorded
 onsets the declared replay produces against the record's 197 — into
@@ -112,13 +113,146 @@ the cells still serve as the canary targets.)
 
 ## Measured
 
-(pending — instrument canary + 20-seed array at Θ2.37e11 on image
-pinned to this commit)
+All numbers below are measured on the 20 instrumented takeoff cells at
+Θ 2.37e11 (seeds 20200205–20200224), AWS Batch array job
+`95251e9a-6a1d-422e-847a-e2ee3f7fa92d`, job definition revision
+`picard-covid-takeoff-attr:1`, image
+`picard-campaign:covid-takeoff-attr-bcf2ac95`
+(digest `sha256:ea0980f997eeb2c92388b1757b05f46b039129e89bff4f069c423a25568a235b`),
+cells under
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_takeoff_attr_v1/bcf2ac95/cells/`,
+readout `tools/covid_takeoff_attr_readout.py`.
+
+**Canary gate (passed, stronger than declared):** the instrumented
+pipeline reproduces the stage-2 record **bitwise on all 20 cells** —
+every payload observable (recorded_onsets, infections_total,
+aboard_total, attack_rate, lab_confirmed_total, split-day onsets,
+campaign positives), the full onset_curve and sanitary_activity, for
+all 20 seeds vs `covid_theta_screen_v12_stage2/f42901aa/cells/cells/`.
+The instrument is a pure observer; the local (Python 3.12) canary is
+within the documented ~1% interpreter drift (3,589 vs 3,590 infections,
+an uninstrumented local control bitwise-identical to the instrumented
+run). Per-seed recorded onsets now range 2,330–3,556 (median 3,475) —
+the same ~12–18×-over-197 mass class the clause scores.
+
+**Takeoff-beat accounting:** 71,298 attributed infection events across
+20 seeds; `droplet_unattributed_onsets = 0` — every infection's
+infecting-epoch dose vector was fully apportioned; nothing fell to
+`other` (share 0.0 exactly).
+
+**Route split** (share of takeoff infections, per infecting-epoch
+channel shares; per-seed median ± spread):
+
+| channel | pooled share | per-seed median | q05–q95 |
+|---|---|---|---|
+| zone_pool | 43.2% | 43.3% | 39.2–48.7% |
+| dining_ring | 23.7% | 24.1% | 21.0–26.6% |
+| near_field_plume | 22.2% | 22.6% | 18.8–24.7% |
+| cabin_mate_ring | 8.4% | 8.0% | 7.5–11.2% |
+| hvac_airborne | 2.6% | 1.6% | 1.0–8.0% |
+| contact | ~0.001% | ~0 | — |
+
+No channel ≥80% (the report trigger does not fire): the burn is
+multi-channel. Two other attribution bases for the same events —
+infecting-epoch dose mass: plume 68.4%, dining 24.1%, cabin-mate 6.9%,
+pool 0.5%; lifetime cumulative dose of the infected: cabin-mate 44.0%,
+plume 37.1%, dining 16.7%, pool 2.2%, hvac 0.02% — i.e. plume carries
+the rare-but-huge doses, pool carries the largest count of small
+challenges, cabin-mate dominates the *cumulative* exposure of the
+infected without dominating final push.
+
+**Geometry — diffuse, not concentrated:**
+
+- Shedders: 3,711 hosts ever credited (essentially every infected
+  host sheds); median credited onsets/shedder 8.8 (q95 69.5); the top
+  single shedder carries 457.6 credited onsets (~0.64%) and the top-5
+  carry 2.7% pooled. Dominant-credit basis: median 9, q95 74, top-5
+  2.9%. No superspreader structure.
+- Epochs: 605 distinct infecting epochs produce infections; median 39
+  infections/epoch, q95 447; the top-5 epochs carry only 5.1%.
+- Venues: top venue Windjammer 8,401 (11.8%); second Crew_Mess_Main
+  6,780 (9.5%); 16 venues each hold ≥2% — no single-venue dominance.
+- Timing: infecting-day histogram peaks on day 5 (7,462 events) and
+  days 4–8 jointly carry 47%; days 0–2 carry 11.5% — the burn is
+  a sustained takeoff swell, not a boarding spike nor an
+  off-window artifact.
+
+**Mechanism evidence:**
+
+- Exposure-set saturation: the number of distinct hosts receiving any
+  dose per epoch has per-seed median 705 (range 577–865 across seeds;
+  per-epoch q95 up to 3,621 ≈ the whole ship of 3,711). Per-channel
+  footprints (median of per-seed medians, targets per epoch): hvac 560
+  (q95 max 3,548 — the AHS loop effectively offers dose to most of the
+  ship), cabin_mate_ring 150 (q95 860), contact 66, zone_pool 16
+  (q95 2,061 — the pool's tail reaches zone-scale sets), plume 10,
+  dining 10.
+- Reach per shedder-epoch: hvac median 9 targets (q95 up to 306);
+  zone_pool median 1 with q95 80 (a strong shedder floods a zone set);
+  plume/mate/contact medians 1 — per-shedder reach is large only on
+  the airborne/pool channels.
+- Challenge coverage: `challenged_share_of_aboard` = 1.0 on every seed
+  — **every susceptible aboard was challenged at least once**;
+  never-challenged hosts = 0 in all 20 cells. Susceptibles aboard per
+  epoch fall to median 186 (q95 3,710) as the burn depletes the pool.
+- Heterogeneity is present and selecting: infected hosts' susceptibility
+  median 2.3e10 (q05 9.9e5) vs challenged-but-uninfected median-of-
+  medians ~327 (per-seed range 106–1,135) — ~5–7 decades of selection
+  *within* challenge events.
+- Infecting λ (susceptibility × effective dose): median 0.42; only
+  34.6% of infections at λ ≥ 1 (sure things); 25.7% at λ < 0.1 —
+  a lottery-volume process: enormous challenge count × modest per-
+  challenge probability.
 
 ## Inferred
 
-(pending)
+The takeoff burn is mechanism class **(b) exposure-set partitioning
+absent**, with class (a) as the same defect seen source-side:
+
+- Per-epoch dosed sets cover ~600–870 hosts (median-of-medians 705) on
+  a 3,711-person ship, and every susceptible is challenged during the
+  voyage — the model has no mechanism that partitions the exposure set
+  (venue-capacity limits, occupancy windows, asymmetric contact
+  sampling) so the takeoff machinery doses essentially the entire
+  remaining susceptible pool every epoch.
+- (a) Reach is implicated jointly: it is the source-side arithmetic of
+  the same defect — a pool or AHS shedder reaches 9–306 targets in one
+  epoch — rather than an independent failure.
+- (c) is *not* the missing mechanism: susceptibility heterogeneity
+  exists and selects strongly within challenges (infected vs
+  challenged-uninfected medians ~5–7 decades apart), but with challenge
+  coverage at 100% there is no residual protected pool for depletion to
+  produce — selection happens inside a fully-exposed population.
+- The lottery signature (median λ 0.42, 26% of infections at λ<0.1)
+  means the burn does not need per-challenge doses to shrink much; it
+  needs the *challenge count* per epoch to shrink — a partitioning
+  mechanism, not a titre mechanism. This is consistent with the v12
+  verdict that the residual is mechanism-shaped not Θ-shaped: Θ rescales
+  per-challenge hazard, but with 705-host dosed sets the hazard mass
+  lands regardless.
+
+**What ~197 implies for the winning class** (sourced-quantity
+statement, not a fit): for recorded takeoff onsets to sit near 197
+while the instrumented run produces 2,330–3,556, the *fraction of the
+aboard ever challenged* during the takeoff window must be on the order
+of ~5–10% rather than the measured 100% — i.e. the exposure-set
+partitioning the model lacks must cut the per-epoch reachable set by
+roughly an order of magnitude (705 → ~50–100 hosts/epoch), or bound
+the per-shedder reach likewise. The exact partition rule (venue
+capacity? cohort? contact budget?) is a sourcing question for the next
+session: what real Diamond Princess contact structure limited each
+person's exposure set, and which of cabin-ring / meal-table / shared-
+venue partition does that structure correspond to.
 
 ## Hypothesis
 
-(pending)
+- The dining ring's 24% share is mostly the `neighbour_table_ratio`
+  extension (adjacent tables), not fixed table parties — worth checking
+  whether partitioning tables to fixed parties alone removes most of
+  it.
+- Zone pool dominance may partly be pool *spillover* into crowded
+  venues (pool q95 footprint 2,061 ≈ a packed venue), i.e. (b) may fix
+  itself at the venue-capacity level rather than needing a zone-pool
+  cap.
+- Boarding structure stays off the suspect list: days 0–2 carry only
+  11.5% of infecting-day mass — consistent with COVID-REBASE-01 stage 3.

@@ -61,6 +61,72 @@ def _cell_summaries(cells_dir: str) -> list[dict[str, Any]]:
     return rows
 
 
+def _median_band(dicts: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pool same-shape quantile dicts by per-seed median + extremes."""
+    vals = [d for d in dicts if d and d.get("median") is not None]
+    if not vals:
+        return {"n": 0}
+    medians = sorted(float(d["median"]) for d in vals)
+    q95s = sorted(float(d["q95"]) for d in vals if d.get("q95") is not None)
+    return {
+        "n": len(vals),
+        "median_of_medians": _quantiles(medians)["median"],
+        "median_min": medians[0],
+        "median_max": medians[-1],
+        "q95_max": q95s[-1] if q95s else None,
+    }
+
+
+def _mechanism_pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pool the per-seed mechanism blocks (reach/footprint/susceptibility)."""
+    mechanisms = [c["summary"]["mechanism"] for c in cells]
+    footprint: dict[str, dict[str, Any]] = {}
+    reach: dict[str, dict[str, Any]] = {}
+    for channel in CHANNELS:
+        footprint[channel] = _median_band([
+            m.get("footprint_targets_by_epoch", {})
+            .get(channel, {})
+            .get("targets_by_epoch_quantiles")
+            for m in mechanisms
+        ])
+        reach[channel] = _median_band([
+            m.get("reach_per_shedder_epoch", {})
+            .get(channel, {})
+            .get("quantiles")
+            for m in mechanisms
+        ])
+    return {
+        "dosed_targets_by_epoch": _median_band([
+            m.get("dosed_targets_by_epoch") for m in mechanisms
+        ]),
+        "footprint_targets_by_epoch": footprint,
+        "reach_per_shedder_epoch": reach,
+        "susceptibles_aboard": _median_band([
+            m.get("susceptibles_aboard") for m in mechanisms
+        ]),
+        "challenged_share_of_aboard": {
+            "mean": sum(
+                float(m["susceptibility"]["challenged_share_of_aboard"])
+                for m in mechanisms
+            ) / len(mechanisms),
+        },
+        "challenged_uninfected_susceptibility": _median_band([
+            m["susceptibility"].get("challenged_uninfected")
+            for m in mechanisms
+        ]),
+        "challenged_hosts_total": sum(
+            int(m["susceptibility"].get("challenged_hosts", 0))
+            for m in mechanisms
+        ),
+        "never_challenged_hosts": sum(
+            int(m["susceptibility"]
+                .get("never_challenged_counterfactual", {})
+                .get("n") or 0)
+            for m in mechanisms
+        ),
+    }
+
+
 def pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
     """Pool per-seed summaries into the campaign readout."""
     per_seed = []
@@ -206,6 +272,7 @@ def pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
         },
         "susceptibility_infected": _quantiles(susc_infected),
         "lambda_infecting": _quantiles(lam),
+        "mechanism": _mechanism_pool(cells),
         "per_seed": per_seed,
     }
 
