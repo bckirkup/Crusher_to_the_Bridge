@@ -79,6 +79,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "voyage_config.schema.json": [
         "picard_framework/analysis/sentinel/data/example_itinerary.json",
     ],
+    "rhythm_event_catalogs.schema.json": [
+        "data/rhythm/event_catalogs.json",
+    ],
     "sentinel_observations.schema.json": [
         "picard_framework/analysis/sentinel/data/example_observations.json",
     ],

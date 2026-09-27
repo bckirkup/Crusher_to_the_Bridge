@@ -590,6 +590,37 @@ set `boarding_party_points: [{"probability": 1.0}]` so a party pathogen's
 baseline is "given the party boarded", with the profile's own size; the
 default probability is for unconditional voyage-level designs.
 
+### 3.6 Daily-rhythm layer constants (SHIP-RHYTHM-01)
+
+The constants the rhythm spec introduces
+([`rhythm/rhythm_spec.md`](rhythm/rhythm_spec.md); data at
+`data/rhythm/event_catalogs.json`). Two populations here: **timetable
+fields** (windows, venues, sequencing) are transcribed from Tr-class
+primary documents — daily programs are *measured* shipboard schedule, so
+they carry Origin **Tr** and Class **M** for the window itself; the
+**participation/occupancy fractions** attached to those events have no
+measurement in any document and are `declared` at the weakest defensible
+bound (Class C or ∅lit as marked). Port-day constants are usable only for
+port-day rows per the sourcing instruction.
+
+| Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
+|---|---|---|---|---|---|---|---|---|---|
+| `event_windows` (meal seating, show, activity, port-call times per ship class) | catalog `window` fields | M (schedule as printed) | Princess Patter (Sun 2025-03-22 sea; Majestic 2025-08-14 port), HAL THE DAILY (Nieuw Amsterdam 2024-04-02 port; Volendam 2026-01-09 sea, 2026-01-12 tender port), NCL Freestyle Daily (Escape 2023-11-10 embarkation), Silversea Chronicles (Silver Dawn 2025-02-24 port) | Tr | documented HH:MM windows; notional templates carry stated construction rules | point (as printed) | L0 | — in tree (catalog) | SHIP-RHYTHM-01 |
+| `meal_participation_fraction` (per meal, per service type) | catalog `participation_fraction` | C | No passenger headcount is published in any program; bounded by venue capacity vs complement and by `dining_meal_weights` shares | declared | [0.15, 0.95] per service type/day type; per-event values as catalogued | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `event_participation_fraction` (show/activity/open_venue/queue) | catalog `participation_fraction` | C | Same bound; muster drill 1.0 is regulatory (SOLAS), not declared | declared; muster: SOLAS | [0.20, 0.50] shows/activities; [0.2, 0.45] open venues; muster = 1.0 point | U (muster: point) | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `occupancy_share` (fraction of window inside venue) | catalog `occupancy_share` | C | Shows ~captive (0.95); meals and open venues partial | declared | [0.2, 0.95] per class | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `egress_front_minutes` | — (spec only) | C | Shared-clock egress duration; no published measurement | declared | [5, 20] min | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `corridor_transit_minutes` | — (spec only) | C | Time an egressing agent occupies corridor zones | declared | [3, 15] min | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `post_prandial_emesis_multiplier` | — (spec only) | ∅lit | No norovirus-specific meal-timing study surfaced in the deeper Consensus pass (SHIP-RHYTHM-01). Physiological anchors only: Vijayvargiya 2018 Gut meta (vomiting OR ≈ 2.0 under delayed gastric emptying), Carbone 2021 CGH (nausea elevated ~90 min post-meal), Zelner 2013 PLoS ONE (infectiousness spike at onset). **Candidate E-tier query** | declared | [1.0, 3.0] wide | U | L0 | ∅lit — declared; E-tier candidate | SHIP-RHYTHM-01 |
+| `post_prandial_window_minutes` | — (spec only) | C | ~90 min post-meal nausea elevation (Carbone 2021) as the physiological anchor; pathogen-unspecific | declared | [30, 120] min | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `asleep_in_cabin_share(h)` | — (spec only) | B | ATUS share-asleep-by-clock-hour profile (Basner 2007 Sleep; Davis 2023 Healthcare; Sturm 2019 PCD) — time-use survey, analogous setting | R/Ab | night plateau [0.85, 1.0] ~01:00-05:00; shoulders declared by curve | empirical | L0 | — sourced shape, hourly values declared | SHIP-RHYTHM-01 |
+| `crew_offduty_cabin_hours` | — (spec only) | M (regulation) / B (practice) | MLC 2006 Reg 2.3: ≥10 h rest per 24 h in ≤2 periods, one ≥6 h; ≥77 h per 7 d; 6-on/6-off watchkeeping documented by Baumler 2020 Marine Policy | Tr (treaty text) + R | [10, 14] h per 24 h | U | L0 | — in tree (regulation), watch realisation B | SHIP-RHYTHM-01 |
+| `port_day_onboard_fraction(h)` | voyage default 0.30 (existing) | B → refined | Existing constant becomes time-varying: midday residual around 0.30; CBJ Juneau passenger survey 2023 (mean 5.3 h ashore; 70% purchased ≥1 tour) anchors the ashore duration | R (survey) + declared shape | residual [0.15, 0.45] midday; morning/evening approaches 1.0 | U-shaped | L0 | — in tree (0.30) + declared hourly shape | SHIP-RHYTHM-01 |
+| `port_return_front_concentration` | — (spec only) | C | Share of ashore passengers returning in the final tender/all-aboard hour | declared | [0.3, 0.7] | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `cleaning_passes_per_day` | — (spec only) | C | Hotel convention (AM service + PM turndown); not printed in programs | declared | 2 (declared) | point | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `sop_capacity_multiplier` (per SOP variant × event class) | sop_variants values | C | Policy-imposed capacity/scheduler decay; Diamond Princess cabin quarantine is documented practice (Selective Passenger Confinement SOP) | declared | [0.3, 1.0] per level; cancellations are point values | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
+| `starship_watch_sections` | templates `watch_sections: 3` | X | Canonical Starfleet three-watch convention (alpha/beta/gamma 8-h sections; four-shift Jellico variant noted) — fiction-grade construction | Tr (fiction corpus) | 3 (4 variant) | point | L0 | — in tree | SHIP-RHYTHM-01 |
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
