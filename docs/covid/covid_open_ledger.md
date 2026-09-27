@@ -118,6 +118,19 @@ only at count ≥ ~8 and saturate by 32
 (`docs/ledger/COVID-REBASE-01.md`,
 `docs/covid/covid_rebase_01_readout.md`).*
 
+*Update (2026-09-27, `f42901aa`, `THETA-SCREEN-V12`): the bracketed window
+was bisected to eighth-decade resolution — **the fleet-shape admissible set
+is {1.33e11, 1.78e11, 2.37e11, 3.16e11, 4.22e11}** (medians 0.00054–0.0062
+inside the H3 band; 1e11 fails the floor, 5.62e11+ fails the ceiling). But
+the conditional clause fails at every admissible Θ in the same ~17× mass
+class: all 20/20 takeoff seeds per row saturate at ~2,200–3,580 recorded
+onsets (the q05 floor alone is 11–15× the record's 197) and before_share
+medians run 0.70–0.96, rising monotonically with Θ. The clause's only pass
+is the Θ1e9 anchor — a fleet-shape-inadmissible boundary row. **No Θ inside
+the admissible window fits; the Θ axis in the bracket is exhausted and the
+residual is mechanism-shaped** (`docs/ledger/THETA-SCREEN-V12.md`,
+`docs/covid/covid_theta_screen_v12_readout.md`).*
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
@@ -208,7 +221,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   still branches at this Θ; on the non-takeoff seed the sustained phase
   halves (3548 -> 1675) and the residual concentrates in the crew messes
   and confinement exposure. Follow-on work, in order: re-run the
-  declared replay at the fleet-admissible Θs, re-run `covid_sensitivity_assay_v2`
+  declared replay at the fleet-admissible Θs (done — `THETA-SCREEN-V12`
+  stage 2, `f42901aa`: saturates at ~3,400–3,570 recorded onsets at all
+  five fleet-admissible Θs), re-run `covid_sensitivity_assay_v2`
   (it was stood down for this change), and a declared `far_field_share`
   sweep over [0.05, 0.30] — none of it fitted to 197.
 - **`PARTNER-RATE-V1` measured its canary arm and stood down: the ring is not
