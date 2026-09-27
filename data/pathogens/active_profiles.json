@@ -815,7 +815,8 @@
       "airborne_emission_notes": "Fine (<=5 um) share of exhaled emission, 3.8e4 / (3.8e4 + 1.2e4) = 0.76 from the same Yan 2018 paired measurement. The coarse remainder deposits near the source, which is what the fomite route draws on. Replaces the Edison bundle's surface_deposition_fraction 1e-3, which was the deprecated alias of this key with no stated referent. Sourced interval [0.76, 0.92], grade B (#42, literature tranche 27): the floor is Yan 2018's own ratio, the ceiling is Chow 2023's fine load ~12x coarse, and Coleman 2021's SARS-CoV-2 0.85 falls inside. Dimensionless only because this arm's level is a measured exhaled rate rather than a specimen titre; the scalar ships at the interval floor and #36 sweeps the span.",
       "dose_response": {
         "model": "exponential",
-        "k": 0.18
+        "k": 0.0006,
+        "notes": "Sourced bound converted to the engine's per-copy unit, not a fit: Alford 1966 aerosol ID50 0.6-3 TCID50 (grade Ab/R) implies k 0.23-1.16 per TCID50, divided by Van Wesenbeeck 2015's paired NP-swab >=1e3 genome copies per TCID50 gives k ~= 2e-4-1e-3 per copy (N50 ~= 693-3,466). Ships at the interval's arithmetic midpoint per register convention; the pre-conversion 0.18 applied a per-TCID50 rate to per-copy doses. FLU-DELIVERY-01."
       },
       "symptomatic_fraction": 0.669,
       "severity_model": {
@@ -855,10 +856,10 @@
         "dispersion": 1.51,
         "min_days": 0.5,
         "max_days": 7.0,
-        "dose_reference_log10": 0.59,
+        "dose_reference_log10": 3.06,
         "dose_log10_shortening": 0.1,
         "dose_floor": 0.4,
-        "notes": "Human influenza A: mu 0.336, sigma 0.412 (median 1.4 d, GSD 1.51) from Lessler et al. 2009 via docs/ctb_incubation_spec.md, truncated 0.5-7.0 d to match the tng_shipboard_influenza analogue that already carries this same kernel as a shape. Dose terms dose_shift 0.10 / floor 0.4 from the spec. dose_reference_log10 0.59 is this profile's own exponential-model N50 (ln(2)/k = 0.693/0.18 = 3.85 particles), the exponential analogue of the beta-Poisson N50 convention documented on norwalk_gi in active_profiles.json: acquired_particles is in model units, so referencing a literature TCID50 or EID50 figure would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a near-ID50 host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted, as on the shipped profiles."
+        "notes": "Human influenza A: mu 0.336, sigma 0.412 (median 1.4 d, GSD 1.51) from Lessler et al. 2009 via docs/ctb_incubation_spec.md, truncated 0.5-7.0 d to match the tng_shipboard_influenza analogue that already carries this same kernel as a shape. Dose terms dose_shift 0.10 / floor 0.4 from the spec. dose_reference_log10 3.06 is this profile's own exponential-model N50 (ln(2)/k = 0.693/0.0006 = 1155 particles), the exponential analogue of the beta-Poisson N50 convention documented on norwalk_gi in active_profiles.json: acquired_particles is in model units, so referencing a literature TCID50 or EID50 figure would put every simulated host on the dose floor and turn a conditioning term into a constant. Consequence: a near-ID50 host presents at the literature median, and the dose effect is anchored in direction but not calibrated in magnitude. host_factors omitted, as on the shipped profiles."
       },
       "recovery_day": 5,
       "shedding_duration_days": 7,

@@ -33,9 +33,10 @@ from tools.cabin_floor_probe import EDISON  # noqa: E402
 
 ACTIVE = asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID
 
-# k = 0.18/copy exponential: 1 - exp(-0.18 d) crosses 0.50 at d = 3.85 and
-# 0.99 at d ~= 25.6 delivered copies.
-SATURATION_99_COPIES = -math.log(0.01) / 0.18
+# Exponential k sits on the profile; the 99%-saturation dose is read off the
+# bundle being measured (k = 6e-4/copy -> ~7,676 copies).
+def _saturation_99(profile: dict[str, Any]) -> float:
+    return -math.log(0.01) / float(profile["dose_response"]["k"])
 
 
 def _pair_first_epochs(
@@ -207,6 +208,8 @@ def run_dose_arm(*, bundle: str, seed: int, platform: str, epochs: int,
         table["rows"], sim, ledger.confined_first,
     )
 
+    sat99 = _saturation_99(profile)
+
     def block(
         rows: list[dict[str, Any]], total: int | None = None,
     ) -> dict[str, Any]:
@@ -224,7 +227,7 @@ def run_dose_arm(*, bundle: str, seed: int, platform: str, epochs: int,
             "dose_quantiles_copies": _quantiles(doses_padded),
             "implied_sar_quantiles": _quantiles(sars),
             "share_above_99pct_saturation": (
-                sum(d > SATURATION_99_COPIES for d in doses) / denom
+                sum(d > sat99 for d in doses) / denom
                 if denom else None
             ),
             "channel_dose_totals": channel_totals,
