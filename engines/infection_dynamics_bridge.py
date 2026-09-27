@@ -41,6 +41,7 @@ from typing import Any
 
 import numpy as np
 
+from engines.rhythm_layer import RhythmLayer
 from engines.sim_clock import LEGACY_CLOCK, SimClock, crossed_day_boundary
 from engines.strain_state import ImmuneRecord, Phenotype
 
@@ -846,6 +847,9 @@ class KorkinAgent:
         "age_band", "immunocompromised",
         # Shared epoch/day conversion; every day-valued comparison goes through it
         "clock",
+        # SHIP-RHYTHM-02: None = rhythm layer off (baseline emesis path);
+        # bool = post-prandial hazard-window flag for the current epoch.
+        "_rhythm_post_prandial",
     )
 
     def __init__(
@@ -984,6 +988,9 @@ class KorkinAgent:
         # Epoch the host leaves the ship for the rest of the run; ``None``
         # means aboard for the whole run
         self.departure_epoch: int | None = None
+        # SHIP-RHYTHM-02: set each epoch by the rhythm layer when enabled;
+        # left None under the labelled baseline so the emesis gate is inert.
+        self._rhythm_post_prandial: bool | None = None
 
         # {pathogen_id: genotype} the agent's pre-existing immunity was raised
         # against; empty unless variant surveillance is on
@@ -1998,6 +2005,8 @@ class KorkinShipEngine:
         agent_behavior: dict[str, Any] | None = None,
         clock: SimClock | None = None,
         vsp_trigger_rule: str = VSP_RULE_REPORTED_PASSENGER_CASES,
+        rhythm_config: dict[str, Any] | None = None,
+        platform_id: str = "",
     ) -> None:
         if vsp_trigger_rule not in {
             VSP_RULE_REPORTED_PASSENGER_CASES,
@@ -2064,6 +2073,20 @@ class KorkinShipEngine:
         self._multi_pathogen_mass: dict[str, dict[str, float]] = {}
         self._external_transport: bool = False
         self._external_transmission: bool = False
+
+        # SHIP-RHYTHM-02: schedule-conditioned co-presence layer
+        # (docs/rhythm/rhythm_spec.md). ``rhythm.enabled: false`` (or a
+        # platform with no event catalog, or the legacy clock) leaves this
+        # None and every branch below untouched — the labelled baseline.
+        # Active SOP names are pushed per epoch by the orchestrating sim.
+        self.active_sop_names: list[str] = []
+        self._rhythm = RhythmLayer.from_platform(
+            platform_id,
+            self.zones,
+            seed=seed,
+            clock=self.clock,
+            config=rhythm_config,
+        )
 
         self._initialize_agents()
 
@@ -2573,13 +2596,39 @@ class KorkinShipEngine:
         )
 
         voyage_state = self.voyage_epoch_state
-        if voyage_state is not None:
-            apply_ashore_and_embarkation(
-                self.agents,
-                voyage_state,
-                rng=self.rng,
-                dining_catalog=self._dining_catalog,
+        rhythm = self._rhythm
+        if rhythm is not None:
+            # Deal the day template at the first epoch of each ship day. The
+            # voyage state's day_type is "sea_day" unless the platform's
+            # itinerary activates richer types; the SOP set the sim pushed
+            # selects the §4.6 decay variant.
+            voyage_day = (
+                int(getattr(voyage_state, "voyage_day", 0) or 0)
+                if voyage_state is not None
+                else self.clock.day_index(self.epoch - 1) + 1
             )
+            day_type = (
+                str(getattr(voyage_state, "day_type", "") or "sea_day")
+                if voyage_state is not None
+                else "sea_day"
+            )
+            if rhythm.dealt_day != voyage_day:
+                rhythm.deal_day(
+                    self.agents,
+                    day_type,
+                    set(self.active_sop_names),
+                    voyage_day,
+                )
+        if voyage_state is not None:
+            if rhythm is None or not rhythm.apply_ashore(
+                self.agents, voyage_state, hour,
+            ):
+                apply_ashore_and_embarkation(
+                    self.agents,
+                    voyage_state,
+                    rng=self.rng,
+                    dining_catalog=self._dining_catalog,
+                )
         behavior = self._voyage_behavior(voyage_state)
 
         # 1. Update agent locations. The token is recorded beside the location
@@ -2595,12 +2644,20 @@ class KorkinShipEngine:
             )
 
         if voyage_state is not None:
-            apply_embarkation_surge_locations(
-                self.agents,
-                voyage_state,
-                rng=self.rng,
-                dining_catalog=self._dining_catalog,
+            # The embarkation template's own flow/surge events replace the
+            # legacy buffet surge draw when the rhythm layer dealt the day.
+            suppress_surge = (
+                rhythm is not None
+                and voyage_state.day_type == "embarkation"
+                and rhythm.embarkation_covered
             )
+            if not suppress_surge:
+                apply_embarkation_surge_locations(
+                    self.agents,
+                    voyage_state,
+                    rng=self.rng,
+                    dining_catalog=self._dining_catalog,
+                )
         self._record_dwell(placed_before)
 
         # 2. Infection transmission
@@ -2649,6 +2706,12 @@ class KorkinShipEngine:
         locations; everyone else draws the legacy jitter and resolves the
         schedule token's location.
         """
+        if self._rhythm is not None:
+            # Post-prandial flag for the emesis hazard gate; set before the
+            # early-return branches so confined hosts carry it too.
+            agent._rhythm_post_prandial = self._rhythm.is_post_prandial(
+                agent.agent_id, hour,
+            )
         agent.current_activity = agent.scheduled_token(hour)
         if agent.has_departed(self.epoch):
             agent.current_location = departed_location
@@ -2666,6 +2729,15 @@ class KorkinShipEngine:
         # field — applies under every clock mode.
         randomness = agent.phase_jitter
         agent.current_activity = agent.scheduled_token(hour, randomness)
+        if self._rhythm is not None:
+            # Committed events own their occupants; uncommitted epochs fall
+            # back to the schedule-token draw unchanged.
+            location = self._rhythm.location_for(
+                agent, hour, agent.current_activity,
+            )
+            if location is not None:
+                agent.current_location = location
+                return
         agent.current_location = agent.get_location_for_hour(
             hour,
             randomness,

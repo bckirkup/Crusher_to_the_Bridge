@@ -958,6 +958,15 @@ class ShipSimulation:
             self.engine.vsp_reported_case_fraction_max,
             state.vsp_reported_case_fraction,
         )
+        # SHIP-RHYTHM-02 §4.6: the SOP set the rhythm layer reads. Runs one
+        # epoch behind evaluate_epoch because biology steps before protocols.
+        pe = getattr(self.proto_ctx, "protocol_engine", None)
+        if pe is not None:
+            name_by_id = {p.protocol_id: p.name for p in pe.protocols}
+            self.engine.active_sop_names = [
+                name_by_id.get(pid, pid)
+                for pid in pe.get_active_protocols()
+            ]
         self.engine.step()
         self._note_shore_introductions(
             step_shore_introductions(

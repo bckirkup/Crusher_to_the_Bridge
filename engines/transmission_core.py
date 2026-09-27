@@ -69,6 +69,7 @@ from engines.infection_dynamics_bridge import (
     resolve_dining_service_type,
     seated_diners_in_booking_order,
 )
+from engines.rhythm_layer import DEFAULT_POST_PRANDIAL_EMESIS_MULTIPLIER
 from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
@@ -2147,6 +2148,20 @@ class TransmissionCore:
         self.direct_contact_scalar: float = 1.0
         self.droplet_scalar: float = 1.0
         self.hvac_airborne_scalar: float = 1.0
+
+        # SHIP-RHYTHM-02 §4.5: per-epoch fire probability for a pending
+        # emesis episode outside a post-prandial window (1.0 inside). The
+        # constant lives in rhythm_layer with the other rhythm defaults; the
+        # gate stays inert while every agent's ``_rhythm_post_prandial``
+        # flag is None — the labelled baseline.
+        rhythm_cfg = (cfg or {}).get("rhythm", {}) or {}
+        self._rhythm_pp_outside = 1.0 / max(
+            float(rhythm_cfg.get(
+                "post_prandial_emesis_multiplier",
+                DEFAULT_POST_PRANDIAL_EMESIS_MULTIPLIER,
+            )),
+            1.0,
+        )
 
     def _init_clock_and_kinetics(
         self,
@@ -6868,6 +6883,32 @@ class TransmissionCore:
             return None
         return phase, age
 
+    def _emesis_due_split(
+        self,
+        due: list[float],
+        post_prandial: bool | None,
+    ) -> tuple[list[float], list[float]]:
+        """SHIP-RHYTHM-02 §4.5: post-prandial hazard gate on pending episodes.
+
+        ``post_prandial`` is None under the labelled baseline (the rhythm
+        layer is off and never touches the flag): the due set fires verbatim.
+        Inside a post-meal window the hazard multiplier saturates and every
+        due episode fires; outside it each defers with probability
+        1 - 1/multiplier, re-attempted on later epochs while the emetic
+        phase lasts. Episodes still pending at phase exit flush on the first
+        epoch the phase is inactive — deferral shifts timing, never count.
+        """
+        if post_prandial is not False:
+            return list(due), []
+        fired: list[float] = []
+        held: list[float] = []
+        for event_age in due:
+            if self.rng.random() < self._rhythm_pp_outside:
+                fired.append(event_age)
+            else:
+                held.append(event_age)
+        return fired, held
+
     def _emit_emesis(
         self,
         agent: KorkinAgent,
@@ -6876,19 +6917,28 @@ class TransmissionCore:
         zone_name: str,
         epoch: int,
     ) -> float:
-        eligible = self._emesis_phase(agent, pathogen_id, profile)
-        if eligible is None:
-            return 0.0
-        _, age = eligible
+        post_prandial = getattr(agent, "_rhythm_post_prandial", None)
         schedule = agent.emesis_episode_schedule_by_pathogen.get(
             pathogen_id, [],
         )
-        due = [event_age for event_age in schedule if event_age <= age]
-        if not due:
-            return 0.0
-        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = [
-            event_age for event_age in schedule if event_age > age
-        ]
+        eligible = self._emesis_phase(agent, pathogen_id, profile)
+        if eligible is None:
+            if post_prandial is None or not schedule:
+                return 0.0
+            due = list(schedule)
+            remaining: list[float] = []
+        else:
+            _, age = eligible
+            due, remaining = self._emesis_due_split(
+                [event_age for event_age in schedule if event_age <= age],
+                post_prandial,
+            )
+            remaining += [
+                event_age for event_age in schedule if event_age > age
+            ]
+            if not due:
+                return 0.0
+        agent.emesis_episode_schedule_by_pathogen[pathogen_id] = remaining
         volume_low, volume_high = self._emesis_range(
             profile, "emesis_volume_ml_range", EMESIS_VOLUME_ML_RANGE,
         )

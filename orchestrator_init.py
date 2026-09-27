@@ -723,6 +723,8 @@ def build_engine(
         gender_distribution=gender_distribution,
         agent_behavior=cfg.get("agent_behavior"),
         clock=clock or SimClock.from_config(cfg),
+        rhythm_config=cfg.get("rhythm"),
+        platform_id=resolve_platform_id_from_cfg(cfg),
         **engine_kwargs,
     )
 
