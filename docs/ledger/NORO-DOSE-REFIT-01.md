@@ -1,5 +1,4 @@
 # NORO-DOSE-REFIT-01
-
 **Date:** 2026-09-27
 **Commit:** 4a619493
 **Pathogens:** norwalk_gi

@@ -90,6 +90,8 @@ def _profile_with(**strain_evolution: float) -> dict:
     profile = copy.deepcopy(
         next(p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN),
     )
+    # Calibrated at the pre-refit release scale (see test_strain_dose_ledger).
+    profile["dose_adjustment"] = 4.0
     profile.setdefault("strain_evolution", {}).update(strain_evolution)
     return profile
 
