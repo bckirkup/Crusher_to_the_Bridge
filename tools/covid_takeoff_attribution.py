@@ -709,7 +709,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
             "epochs_with_dosed_targets": sum(
                 1 for (_e, c) in ledger.footprint_counts if c == channel
             ),
-            "targets_per_epoch_quantiles": _quantiles(
+            "targets_by_epoch_quantiles": _quantiles(
                 [float(v) for (e, c), v in ledger.footprint_counts.items()
                  if c == channel],
             ),
@@ -721,7 +721,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
             "epochs_with_records": sum(
                 1 for (_e, c) in ledger.offered_counts if c == channel
             ),
-            "targets_per_epoch_quantiles": _quantiles(
+            "targets_by_epoch_quantiles": _quantiles(
                 [float(v) for (e, c), v in ledger.offered_counts.items()
                  if c == channel],
             ),
@@ -772,7 +772,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
                     [float(v) for v in sorted_dominant],
                 ),
             },
-            "onsets_per_epoch": {
+            "onsets_by_epoch": {
                 "n_epochs_with_onsets": len(epoch_hist),
                 "top5_share": (
                     sum(sorted(epoch_hist.values(), reverse=True)[:5])
@@ -792,9 +792,9 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
                 c: _channel_quantiles(ledger.reach_by_channel, c)
                 for c in CHANNELS
             },
-            "footprint_targets_per_epoch": footprint,
-            "offered_targets_per_epoch": offered,
-            "dosed_targets_per_epoch": _quantiles(
+            "footprint_targets_by_epoch": footprint,
+            "offered_targets_by_epoch": offered,
+            "dosed_targets_by_epoch": _quantiles(
                 [float(v) for v in ledger.dosed_targets_epoch.values()],
             ),
             "droplet_unattributed_onsets": ledger.droplet_unattributed,

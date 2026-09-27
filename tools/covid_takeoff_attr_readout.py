@@ -21,7 +21,14 @@ from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
+from simulation_utils.paths import (  # noqa: E402
+    resolve_repo_path,
+    safe_listdir,
+    validated_open,
+)
 from tools.covid_route_attribution import _quantiles  # noqa: E402
+
+REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
 
 CHANNELS = (
     "cabin_mate_ring",
@@ -35,11 +42,18 @@ CHANNELS = (
 
 
 def _cell_summaries(cells_dir: str) -> list[dict[str, Any]]:
+    safe_dir = resolve_repo_path(REPO_ROOT, cells_dir)
     rows = []
-    for name in sorted(os.listdir(cells_dir)):
+    for name in sorted(
+        safe_listdir(safe_dir, allowed_roots=(REPO_ROOT,)),
+    ):
         if not name.endswith(".json"):
             continue
-        payload = json.load(open(os.path.join(cells_dir, name)))
+        with validated_open(
+            os.path.join(safe_dir, name), "r",
+            allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as handle:
+            payload = json.load(handle)
         if "summary" not in payload:
             continue
         payload["_file"] = name
@@ -174,7 +188,7 @@ def pool(cells: list[dict[str, Any]]) -> dict[str, Any]:
                 "top5_share": sum(sorted_dom[:5]) / n,
                 "quantiles": _quantiles([float(v) for v in sorted_dom]),
             },
-            "onsets_per_epoch": {
+            "onsets_by_epoch": {
                 "n_epochs": len(epoch_hist),
                 "top5_share": (
                     sum(sorted(epoch_hist.values(), reverse=True)[:5]) / n
@@ -206,9 +220,12 @@ def main() -> None:  # pragma: no cover - CLI driver
         raise SystemExit(f"no cell payloads under {args.cells_dir}")
     text = json.dumps(pool(cells), indent=1, default=str)
     if args.out:
-        with open(args.out, "w", encoding="utf-8") as handle:
+        out_path = resolve_repo_path(REPO_ROOT, args.out)
+        with validated_open(
+            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as handle:
             handle.write(text)
-        print(f"wrote {args.out}")
+        print(f"wrote {out_path}")
     else:
         print(text)
 
