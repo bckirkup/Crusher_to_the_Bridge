@@ -633,7 +633,12 @@ class RhythmLayer:
                 return best.zone
         if token == "Sleep":
             share = self._share_for(agent, hour)
-            return agent.home_zone if self.rng.random() < share else None
+            # The baseline resolves every Sleep token to home_zone; the
+            # complement of the in-cabin share is the awake minority —
+            # they sit in free space, not in the berth block.
+            if self.rng.random() < share:
+                return agent.home_zone
+            return str(getattr(agent, "free_zone", "") or agent.home_zone)
         if (
             self.meals_to_cabin
             and getattr(agent, "role", "") == "passenger"

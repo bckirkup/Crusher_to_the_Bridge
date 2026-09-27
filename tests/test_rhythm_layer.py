@@ -217,6 +217,27 @@ def test_post_prandial_window_opens_after_meals() -> None:
     assert flagged > 0
 
 
+def test_sleep_share_moves_the_awake_minority_out() -> None:
+    """The in-cabin share is graded: pinning it to 1.0 puts every Sleeper in
+    its berth, 0.0 puts none (they resolve to the agent's free zone)."""
+    zones = _load_zones("spirit_cruise_3000")
+    agents = [_agent(i, zones=zones) for i in range(30)]
+    for a in agents:
+        a.home_zone, a.free_zone = "Cabin_X", "Lounge_Y"
+
+    full = _layer("spirit_cruise_3000", zones,
+                  asleep_in_cabin_share=[1.0] * 24)
+    empty = _layer("spirit_cruise_3000", zones,
+                   asleep_in_cabin_share=[0.0] * 24)
+    assert full is not None and empty is not None
+    for a in agents:
+        # No deal — commitments empty, so the Sleep-token branch is hit.
+        a._test_home = full.location_for(a, 3, "Sleep")
+        a._test_away = empty.location_for(a, 3, "Sleep")
+    assert all(a._test_home == "Cabin_X" for a in agents)
+    assert all(a._test_away == "Lounge_Y" for a in agents)
+
+
 def test_flag_off_engine_consumes_no_draws() -> None:
     """Engine-level baseline inertness: disabled leaves _rhythm None and the
     post-prandial sentinel untouched on every agent."""
