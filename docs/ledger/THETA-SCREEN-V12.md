@@ -2,7 +2,8 @@
 **Date:** 2026-09-27
 **Commit:** 51285178
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** f42901aa
 
 Declared before any v12 cell ran. Bisection of the bracketed H3-admissible
 window (1e11, 1e12) on the post-721 base, per COVID-REBASE-01 (PR #733):
@@ -55,5 +56,48 @@ endpoint rows disagree with the seed-paired rebase_01 read beyond a
 
 ## Result
 
-_To be filled at readout: admissible Θ set (or empty), conditional clause
-per admissible point, takeoff-mass and before_share composition table._
+Measured on image `covid-theta-v12-f42901aa` (jobdef rev 27): 1,860 cells,
+0 failures. Endpoint drift check — all 400 seed-paired cells at Θ 1e11 and
+1e12 are byte-identical to rebase_01 at `f280e348`; the engine path is
+unchanged.
+
+**Stage 1 — the window is real. Admissible set = {1.33e11, 1.78e11,
+2.37e11, 3.16e11, 4.22e11}.** Median recorded attack climbs monotonically
+through the H3 window (0.00054 → 0.0062); 1e11 fails the floor (0.00027),
+5.62e11/7.5e11/1e12 fail the ceiling (0.0097/0.0109/0.0154, and means over
+the 0.06 cap at the top two). Window edges resolve to ~0.1 decade:
+lower ∈ (1e11, 1.33e11], upper ∈ [4.22e11, 5.62e11).
+
+**Stage 2 — the clause fails at every admissible Θ, same ~17× mass class
+as v11.** Takeoff-mass and before_share composition (declared replay,
+20 seeds at base 20200205; clause needs the takeoff seeds' q05–q95 of
+recorded_onsets to contain 197 and median before_share within 0.10 of
+0.173):
+
+| Θ | role | n_takeoff | rec. onsets q05/med/q95 | before_share med | clause |
+|---|------|-----:|----------------------|-----------------|:------:|
+| 1e9 | anchor | 11/20 | 85 / 862 / 3,164 | 0.087 | PASS (boundary — not selectable) |
+| 1e11 | boundary | 20/20 | 2,966 / 3,471 / 3,523 | 0.699 | FAIL |
+| 1.33e11 | admissible | 20/20 | 2,877 / 3,500 / 3,534 | 0.789 | FAIL |
+| 1.78e11 | admissible | 20/20 | 2,693 / 3,496 / 3,538 | 0.876 | FAIL |
+| 2.37e11 | admissible | 20/20 | 2,563 / 3,468 / 3,551 | 0.905 | FAIL |
+| 3.16e11 | admissible | 20/20 | 2,407 / 3,484 / 3,570 | 0.921 | FAIL |
+| 4.22e11 | admissible | 20/20 | 2,393 / 3,513 / 3,564 | 0.920 | FAIL |
+| 5.62e11 | flank | 20/20 | 2,190 / 3,390 / 3,565 | 0.956 | FAIL |
+
+Every admissible row saturates takeoff seeds at ~2,200–3,580 recorded
+onsets — the q05 floor alone is 11–15× the record's 197 — and
+before_share rises monotonically with Θ (0.70 → 0.96): more transmission
+pulls the burn earlier into the pre-split window. The only clause pass is
+the Θ1e9 anchor, a fleet-shape-inadmissible boundary row.
+
+**Verdict: same outcome, different coordinate.** The bracket contains a
+real admissible interior set, but no admissible Θ passes the conditional
+clause and the clause's only pass sits outside the admissible band. The
+takeoff trajectory is saturated throughout the window — the residual is
+mechanism-shaped, not Θ-shaped. The Θ axis inside the bracket is
+exhausted.
+
+Full readout: `docs/covid/covid_theta_screen_v12_readout.md`; surfaces
+`covid_theta_screen_v12{,_stage2}_surface.csv`, drift table
+`covid_theta_screen_v12_pairs.csv`.
