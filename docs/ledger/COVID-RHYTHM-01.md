@@ -1,6 +1,6 @@
 # COVID-RHYTHM-01
 **Date:** 2026-09-27
-**Commit:** fae3a49f (machinery SHA reported at readout)
+**Commit:** fae3a49f
 **Pathogens:** sars_cov2_resp
 **Status:** declared
 
