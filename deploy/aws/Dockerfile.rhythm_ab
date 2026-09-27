@@ -1,22 +1,22 @@
-# COVID-RHYTHM-01 worker — the campaign image with the rhythm-A/B
-# entrypoint and its tools layered on.
+# NORO-RHYTHM-01 A/B worker — the campaign image plus tools/ and the probe
+# entry.
+#
+# The base picard-campaign image carries engines/, picard_framework/ and data/
+# but not tools/; the probe driver imports tools.* helpers, so this layer adds
+# the directory wholesale rather than enumerating the shared modules.
 #
 # Build (from the repository root; the base must be built first):
-#   docker build -t picard-campaign .
+#   docker build --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) -t picard-campaign .
 #   docker build -f deploy/aws/Dockerfile.rhythm_ab -t picard-rhythm-ab .
 ARG BASE_IMAGE=picard-campaign
 FROM ${BASE_IMAGE}
 
 USER root
-COPY --chown=campaign:campaign deploy/aws/covid_hull_entrypoint.py ./deploy/aws/covid_hull_entrypoint.py
-COPY --chown=campaign:campaign deploy/aws/covid_boarding_screen_entrypoint.py ./deploy/aws/covid_boarding_screen_entrypoint.py
-COPY --chown=campaign:campaign deploy/aws/covid_rhythm_ab_entrypoint.py ./deploy/aws/covid_rhythm_ab_entrypoint.py
-COPY --chown=campaign:campaign picard_framework/covid_rhythm_cells.py ./picard_framework/covid_rhythm_cells.py
-COPY --chown=campaign:campaign tools/__init__.py ./tools/__init__.py
-COPY --chown=campaign:campaign tools/covid_assay_smoke.py ./tools/covid_assay_smoke.py
-COPY --chown=campaign:campaign tools/covid_route_attribution.py ./tools/covid_route_attribution.py
-COPY --chown=campaign:campaign tools/covid_takeoff_attribution.py ./tools/covid_takeoff_attribution.py
-COPY --chown=campaign:campaign tools/covid_rhythm_ab.py ./tools/covid_rhythm_ab.py
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign deploy/aws/rhythm_ab_entrypoint.py \
+    ./deploy/aws/rhythm_ab_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
+    ./deploy/aws/dose_challenge_entrypoint.py
 USER campaign
 
 # The job definition supplies the worker script as argv[0].
