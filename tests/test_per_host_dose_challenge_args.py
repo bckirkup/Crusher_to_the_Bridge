@@ -102,10 +102,17 @@ def test_fomite_representation_arg_rejects_unknown_value():
 
 @pytest.mark.parametrize("arm", ["pooled", "per_surface"])
 def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
+    spec = _spec(fomite_representation=arm)
+    # SHIP-RHYTHM-02: the delivery witness asserts instrument plumbing on the
+    # labelled baseline placement stream; under rhythm, schedule-conditioned
+    # co-presence legitimately produces zero fomite deliveries in this
+    # 24-epoch window (flag-off reproduces deliver_calls = 5).
+    spec["config_overrides"]["rhythm"] = {"enabled": False}
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=24, pathogen_id="norwalk_gi",
         top_hosts=4, fomite_representation=arm, arm_tag=arm,
+        spec_dict=spec,
     )
     assert summary["fomite_representation"] == arm
     assert summary["fomite_representation_resolved"] == arm

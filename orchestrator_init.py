@@ -710,7 +710,7 @@ def build_engine(
     # VSP threshold confinement is handled by configurable infection counters
     # in the orchestrator, not by the engine's internal check.  The
     # ``vsp_trigger_rule`` governs that engine path when a caller enables it.
-    return KorkinShipEngine(
+    engine = KorkinShipEngine(
         num_passengers=num_passengers,
         num_crew=num_crew,
         # The engine's own pathogen-unaware index case is retired for any run
@@ -730,6 +730,8 @@ def build_engine(
         clock=clock or SimClock.from_config(cfg),
         **engine_kwargs,
     )
+    engine.attach_rhythm(cfg.get("rhythm"), resolve_platform_id_from_cfg(cfg))
+    return engine
 
 
 def _agent_compliance_state(

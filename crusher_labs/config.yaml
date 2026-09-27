@@ -284,6 +284,27 @@ agent_behavior:
       mdr: 0.5
       specialty: 0.3
 
+# ── SHIP-RHYTHM-02: schedule-conditioned daily program ─────────
+# The rhythm layer deals each ship day from the platform's event catalog
+# (data/rhythm/event_catalogs.json) — day templates, class-scoped
+# eligibility, pour-out corridor fronts, sleep and post-prandial coupling,
+# SOP-variant decay wired to protocols.json names — per
+# docs/rhythm/rhythm_spec.md. `enabled: false` is the labelled baseline:
+# the layer never builds and every epoch draws exactly as before.
+# Platform ids without a catalog entry (naval hulls, legacy hulls) stay on
+# the baseline regardless of this flag.
+rhythm:
+  enabled: true
+  # Post-prandial emesis hazard coupling (spec §4.5; register §3.6):
+  # inside the window after a completed meal participation a pending
+  # episode fires, outside it defers with probability 1/multiplier.
+  post_prandial_emesis_multiplier: 2.0
+  post_prandial_window_minutes: 90
+  # Share of ashore passengers whose return falls in the last tender hour.
+  port_return_front_concentration: 0.5
+  # Midday onboard residual on port days (voyage onboard_passenger_fraction).
+  port_day_onboard_midday_residual: 0.30
+
 # ── Transmission contact model ─────────────────────────────────
 # Direct-contact r0_draw: per_partner_contact (default) samples distinct
 # partners; density_dependent scales contacts with zone occupancy; legacy uses
