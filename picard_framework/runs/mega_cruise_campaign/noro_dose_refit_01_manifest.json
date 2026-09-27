@@ -1,0 +1,251 @@
+{
+ "campaign": "noro_dose_refit_01",
+ "description": "NORO-DOSE-REFIT-01 canary: the declared posting cell on the post-#724 engine at the chain-derived dose_adjustment (7.57 = -log10 of the composed faecal release per ill host-day; see tools/noro_diag/dose_release_composition.py), run through the instrumented probe so each run emits both a score_anchors-compatible summary.json and the refit payload (per-host emesis schedule/emit for ignition conditioning, deposit callsite totals for the release composition). Seed block 8105..8164 contiguous (60 seeds) is powered for the ignition rate: P(import vomits|voyage) ~0.45 on spirit and ~0.75 on mega, giving ~27/~45 expected ignited voyages per cell against the >=20 gate.",
+ "platform": "classic_cruise_1900",
+ "default_epochs": 168,
+ "default_num_agents": 1910,
+ "embarkation_date": "2026-01-10",
+ "natural_history_clock": "hours",
+ "pathogen_configs": {
+  "norovirus": {
+   "bundle": "active_profiles",
+   "pathogen_id": "norwalk_gi",
+   "overrides": {
+    "remove": [
+     "sars_cov2_resp"
+    ]
+   }
+  }
+ },
+ "surveillance_configs": {
+  "syndromic_comp65": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.65,
+    "compliance_by_class": {
+     "crew": 0.65,
+     "passenger_elderly": 0.54,
+     "passenger_young": 0.34
+    }
+   }
+  }
+ },
+ "tiers": {
+  "fl_spr_12d": {
+   "description": "Refit canary cell on spirit_cruise_3000 at declared complement: dose_adjustment 7.57 (chain-derived), syndromic_comp65, reportable boarding rung, dwell_weighted, flush off, cabin_compartment, airflow pool; 60 contiguous seeds 8105-8164.",
+   "platform": "spirit_cruise_3000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "boarding_mechanism_rungs": [
+    "reportable"
+   ],
+   "num_agents": 3000,
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164
+   ],
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment"
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   }
+  },
+  "fl_mega_12d": {
+   "description": "Refit canary cell on mega_cruise_5000 at declared complement 7000: same overrides as fl_spr_12d; the larger hull's higher import flow raises the per-voyage ignition rate, widening the conditioning contrast for the readout.",
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "boarding_mechanism_rungs": [
+    "reportable"
+   ],
+   "num_agents": 7000,
+   "seeds": [
+    8105,
+    8106,
+    8107,
+    8108,
+    8109,
+    8110,
+    8111,
+    8112,
+    8113,
+    8114,
+    8115,
+    8116,
+    8117,
+    8118,
+    8119,
+    8120,
+    8121,
+    8122,
+    8123,
+    8124,
+    8125,
+    8126,
+    8127,
+    8128,
+    8129,
+    8130,
+    8131,
+    8132,
+    8133,
+    8134,
+    8135,
+    8136,
+    8137,
+    8138,
+    8139,
+    8140,
+    8141,
+    8142,
+    8143,
+    8144,
+    8145,
+    8146,
+    8147,
+    8148,
+    8149,
+    8150,
+    8151,
+    8152,
+    8153,
+    8154,
+    8155,
+    8156,
+    8157,
+    8158,
+    8159,
+    8160,
+    8161,
+    8162,
+    8163,
+    8164
+   ],
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment"
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   }
+  },
+  "fl_exp_smoke": {
+   "description": "Local-smoke tier, excluded from the Batch array: expedition hull, 24 epochs, one seed, proving the manifest path reaches the engine and the zip contract holds before the array.",
+   "platform": "expedition_cruise_450",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    24
+   ],
+   "boarding_mechanism_rungs": [
+    "reportable"
+   ],
+   "num_agents": 450,
+   "seeds": [
+    8105
+   ],
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment"
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   }
+  }
+ }
+}

@@ -66,6 +66,16 @@ exactly one override, a ``pathogen_overrides`` patch on
 ``norwalk_gi.dose_response`` that sets ``alpha`` to the requested value and
 pins ``beta`` at the profile value; everything else is unchanged.
 
+``--manifest``/``--tier``/``--index`` switch the driver to verbatim campaign
+mode (NORO-DOSE-REFIT-01): each run replays one spec generated from the
+manifest tier exactly as the Batch campaign would run it -- boarding rung,
+surveillance strategy, complement, overrides -- and the output is one
+``.zip`` per run carrying ``summary.json`` in the campaign layout (so
+``score_anchors`` scores it directly) plus ``refit.json`` with the full
+probe payload (per-host emesis schedule/emit records for the ignition
+conditioning, deposit callsite totals for the release composition, and the
+dose reconciliation chain).
+
 Outputs
 -------
 One gzipped JSON per seed at ``--out`` (``*.json.gz``; gzipped because the
@@ -96,6 +106,7 @@ import re
 import sys
 import tempfile
 import time
+import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -120,10 +131,31 @@ from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
+    resolve_repo_path,
     validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from telemetry_buffer.fields import (  # noqa: E402
+    RECORD_COST_ACCOUNTING,
+    RECORD_SUMMARY,
+    record_block,
+)
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
+
+_CAMPAIGN_DIR = (
+    REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
+)
+if str(_CAMPAIGN_DIR) not in sys.path:
+    sys.path.insert(0, str(_CAMPAIGN_DIR))
+
+from campaign_execution import (  # noqa: E402
+    compute_derived_metrics,
+    extract_timeseries,
+)
+from campaign_runner import (  # noqa: E402
+    generate_tier_runs,
+    parameters_from_spec,
+)
 
 # Frailties for hosts the engine never challenged are not in the run: the
 # engine draws one lazily at the first hazard evaluation. A counterfactual
@@ -256,6 +288,12 @@ class Recorder:
     acquisitions: list[dict[str, Any]] = field(default_factory=list)
     acquired_ids: set[int] = field(default_factory=set)
     import_ids: set[int] = field(default_factory=set)
+    # Per-host emesis record for the NORO-DOSE-REFIT-01 ignition conditioning:
+    # for every ill host, the schedule it drew (episodes, titre, censored,
+    # vomiting axis) joined with the episodes it actually emitted, so the
+    # voyage-level readout splits "the import carried a vomiting axis" from
+    # "the import deposited emesis on this voyage".
+    emesis_hosts: dict[int, dict[str, Any]] = field(default_factory=dict)
     # Slot the hazard wrapper writes and the challenge wrapper reads, so that
     # "a challenge was evaluated this epoch" is a witnessed fact rather than a
     # re-derivation of the engine's early returns.
@@ -302,6 +340,27 @@ class Recorder:
             lambda: defaultdict(float),
         ),
     )
+    # Release-composition witness (NORO-DOSE-REFIT-01): which callsites move
+    # mass into the fomite/emesis environment per voyage, so the release the
+    # profile's ``dose_adjustment`` asserts is measured rather than assumed.
+    deposit_callsite_gec: dict[str, float] = field(
+        default_factory=lambda: defaultdict(float),
+    )
+    deposit_venue_gec: dict[str, float] = field(
+        default_factory=lambda: defaultdict(float),
+    )
+    stool_venues: dict[str, int] = field(
+        default_factory=lambda: defaultdict(int),
+    )
+    sanitary_delivered_gec: float = 0.0
+    emesis_zone_mass_gec: dict[str, float] = field(
+        default_factory=lambda: defaultdict(float),
+    )
+    emesis_aerosol_gec: float = 0.0
+    emesis_episode_load_gec: float = 0.0
+    # Infected census summed over epochs -> ill host-epochs, the denominator
+    # the per-ill-host-day release is divided by.
+    ill_host_epochs: int = 0
 
     def host(self, agent_id: int) -> HostRecord:
         """Return (creating if needed) one host's record."""
@@ -1139,7 +1198,9 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
             self, agent, pathogen_id, profile, zone_name, epoch,
         )
         if pathogen_id == rec.pathogen_id:
-            _record_emit(rec, agent, pathogen_id, pool_gain, before)
+            _record_emit(
+                rec, agent, pathogen_id, pool_gain, before, zone_name, self,
+            )
         return pool_gain
 
     def patch_pickup(
@@ -1180,6 +1241,88 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
     return originals
 
 
+def _caller_name(depth: int = 2) -> str:
+    """The engine function that called the wrapper, for callsite tagging."""
+    return str(sys._getframe(depth).f_code.co_name)
+
+
+def _venue_class(core: Any, venue: str) -> str:
+    """Classify a deposit venue for the release-composition split."""
+    if core._is_cabin_compartment(venue):
+        return "cabin_fittings"
+    if core.zone_types.get(venue) == "Sanitary":
+        return "shared_head"
+    return "other_zone"
+
+
+def _wrap_mass_books(core_cls: type, rec: Recorder) -> dict[str, Any]:
+    """Deposit callsite, stool-venue and sanitary-delivery witnesses."""
+    originals = {
+        "_deposit_surface_mass": core_cls._deposit_surface_mass,
+        "_route_stool_event_venue": core_cls._route_stool_event_venue,
+        "_deliver_sanitary_pooled_requests": (
+            core_cls._deliver_sanitary_pooled_requests
+        ),
+    }
+
+    def deposit(
+        self: Any, pathogen_id: str, zone_name: str, mass: float,
+    ) -> None:
+        originals["_deposit_surface_mass"](self, pathogen_id, zone_name, mass)
+        if pathogen_id != rec.pathogen_id or float(mass) <= 0.0:
+            return
+        rec.deposit_callsite_gec[_caller_name()] += float(mass)
+        rec.deposit_venue_gec[_venue_class(self, zone_name)] += float(mass)
+
+    def stool_route(
+        self: Any, agent: Any, pathogen_id: str, profile: Any,
+        zone_name: str | None,
+    ) -> None:
+        venue = (
+            self._sanitary_venue(zone_name, agent)
+            if zone_name is not None
+            else None
+        )
+        originals["_route_stool_event_venue"](
+            self, agent, pathogen_id, profile, zone_name,
+        )
+        if pathogen_id == rec.pathogen_id:
+            vclass = (
+                _venue_class(self, venue) if venue is not None else "none"
+            )
+            rec.stool_venues[vclass] += 1
+
+    def deliver_pooled(
+        self: Any, requests: list, venue: str, surface_mass: float,
+        scale: float, epoch: int, *args: Any, **kwargs: Any,
+    ) -> float:
+        delivered = originals["_deliver_sanitary_pooled_requests"](
+            self, requests, venue, surface_mass, scale, epoch,
+            *args, **kwargs,
+        )
+        if rec.current_pathogen == rec.pathogen_id:
+            rec.sanitary_delivered_gec += float(delivered)
+        return delivered
+
+    core_cls._deposit_surface_mass = deposit
+    core_cls._route_stool_event_venue = stool_route
+    core_cls._deliver_sanitary_pooled_requests = deliver_pooled
+    return originals
+
+
+def _ill_census(rec: Recorder, pathogen_id: str) -> Any:
+    """Epoch observer: count infected hosts, summing ill host-epochs."""
+
+    def observe(sim: Any, _work: Any) -> None:
+        rec.ill_host_epochs += sum(
+            1
+            for agent in sim.engine.agents
+            if agent.is_infected_with(pathogen_id)
+        )
+
+    return observe
+
+
 def _record_schedule_draw(
     rec: Recorder,
     agent: Any,
@@ -1196,6 +1339,25 @@ def _record_schedule_draw(
         rec.emesis["hosts_with_schedule"] += 1
     else:
         rec.emesis["hosts_with_empty_schedule"] += 1
+    infection = (getattr(agent, "infections", {}) or {}).get(pathogen_id) or {}
+    rec.emesis_hosts[int(agent.agent_id)] = {
+        "scheduled_episodes": len(schedule),
+        "vomiting_axis": bool(
+            tc.has_symptom_axis(infection, tc.VOMITING_AXIS),
+        ),
+        "censored": bool(
+            getattr(
+                agent, "emesis_censored_below_lod_by_pathogen", {},
+            ).get(pathogen_id, False),
+        ),
+        "titre_gec_per_ml": float(
+            getattr(
+                agent, "emesis_titre_gec_per_ml_by_pathogen", {},
+            ).get(pathogen_id, 0.0),
+        ),
+        "emitted_episodes": 0,
+        "patch_mass_gec": 0.0,
+    }
 
 
 def _record_emit(
@@ -1204,17 +1366,35 @@ def _record_emit(
     pathogen_id: str,
     pool_gain: float,
     before: int,
+    zone_name: str,
+    core: Any,
 ) -> None:
     rec.emesis["emit_calls"] += 1
-    after = len(
-        getattr(agent, "emesis_deposition_records_by_pathogen", {}).get(
-            pathogen_id, [],
-        ),
-    )
+    records = getattr(
+        agent, "emesis_deposition_records_by_pathogen", {},
+    ).get(pathogen_id, [])
+    after = len(records)
     rec.emesis["emesis_events"] += after - before
     rec.emesis["patch_mass_gec"] += pool_gain
     if after > before:
         rec.emesis["emitting_hosts"] += 1
+    if float(pool_gain) > 0.0:
+        rec.emesis_zone_mass_gec[_venue_class(core, zone_name)] += float(
+            pool_gain,
+        )
+    # Only real emits extend the per-host table: _emit_emesis is called every
+    # epoch for every host and mostly returns early, so an unconditional
+    # setdefault would file a stub row for the whole ship.
+    if after > before or float(pool_gain) != 0.0:
+        host = rec.emesis_hosts.setdefault(
+            int(agent.agent_id),
+            {"emitted_episodes": 0, "patch_mass_gec": 0.0},
+        )
+        host["emitted_episodes"] += after - before
+        host["patch_mass_gec"] += float(pool_gain)
+    for record in records[before:]:
+        rec.emesis_aerosol_gec += float(record.get("aerosol_load", 0.0))
+        rec.emesis_episode_load_gec += float(record.get("episode_load", 0.0))
 
 
 def _record_patch_sweep(
@@ -1274,12 +1454,15 @@ def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
     )
     emesis_saved = _wrap_emesis(core_cls, rec)
     fomite_saved = _wrap_fomite(core_cls, rec)
+    mass_saved = _wrap_mass_books(core_cls, rec)
     try:
         yield
     finally:
         for name, method in saved.items():
             setattr(core_cls, name, method)
         for name, method in fomite_saved.items():
+            setattr(core_cls, name, method)
+        for name, method in mass_saved.items():
             setattr(core_cls, name, method)
         core_cls._emesis_phase = emesis_saved["_emesis_phase"]
         core_cls._emit_emesis = emesis_saved["_emit_emesis"]
@@ -1546,7 +1729,21 @@ def summarise(
         "naive_hazard": _naive_hazard(records, generator, alpha, beta),
         "frailty_drawn": frailty_drawn,
         "transmission": transmission,
+        "import_ids": sorted(rec.import_ids),
+        "acquired_ids": sorted(rec.acquired_ids),
+        "emesis_by_host": {
+            str(agent_id): dict(record)
+            for agent_id, record in sorted(rec.emesis_hosts.items())
+        },
         "emesis_witness": dict(rec.emesis),
+        "emesis_mass_gec": {
+            "patch": float(sum(rec.emesis_zone_mass_gec.values())),
+            "patch_by_venue_class": dict(
+                sorted(rec.emesis_zone_mass_gec.items()),
+            ),
+            "aerosol": float(rec.emesis_aerosol_gec),
+            "episode_load": float(rec.emesis_episode_load_gec),
+        },
         "emesis_unit_names": dict(rec.emesis_units),
         "fomite_witness": dict(rec.fomite),
         "transfer_product_witness": _transfer_product_summary(rec),
@@ -1564,6 +1761,17 @@ def summarise(
                 key=lambda item: item[0],
             )
             if mass > 0.0
+        },
+        "release_composition": {
+            "deposit_by_callsite_gec": dict(
+                sorted(rec.deposit_callsite_gec.items()),
+            ),
+            "deposit_by_venue_class_gec": dict(
+                sorted(rec.deposit_venue_gec.items()),
+            ),
+            "sanitary_delivered_gec": float(rec.sanitary_delivered_gec),
+            "stool_venue_destinations": dict(sorted(rec.stool_venues.items())),
+            "ill_host_epochs": int(rec.ill_host_epochs),
         },
         "hosts": [
             {
@@ -1682,25 +1890,44 @@ def run_seed(
     fomite_touch_share: str | None = None,
     fomite_touch_share_table: str | None = None,
     arm_tag: str | None = None,
+    spec_dict: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     started_total = time.perf_counter()
+    verbatim = spec_dict is not None
+    if verbatim:
+        catalog = spec_dict.get("catalog") or {}
+        platform = str(catalog.get("platform_id") or platform)
+        bundle = str(catalog.get("pathogen_bundle_id") or bundle)
+        epochs = int((spec_dict.get("run") or {}).get("num_epochs", epochs))
+        seed = int((spec_dict.get("run") or {}).get("random_seed", seed))
     num_agents = declared_total(platform)
     alpha, beta = load_dose_response(pathogen_id, bundle)
-    spec_dict = build_spec(
-        seed=seed, platform=platform, bundle=bundle,
-        epochs=epochs, num_agents=num_agents,
-        pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
-        high_touch_area_scale=high_touch_area_scale,
-        high_touch_area_scale_by_zone_class=high_touch_area_scale_by_zone_class,
-        fomite_representation=fomite_representation,
-        fomite_touch_share=fomite_touch_share,
-        fomite_touch_share_table=(
-            load_declared_share_table(fomite_touch_share_table)
-            if fomite_touch_share_table is not None
-            else None
-        ),
-    )
+    if spec_dict is None:
+        spec_dict = build_spec(
+            seed=seed, platform=platform, bundle=bundle,
+            epochs=epochs, num_agents=num_agents,
+            pathogen_id=pathogen_id, alpha=alpha_override, beta=beta,
+            high_touch_area_scale=high_touch_area_scale,
+            high_touch_area_scale_by_zone_class=(
+                high_touch_area_scale_by_zone_class
+            ),
+            fomite_representation=fomite_representation,
+            fomite_touch_share=fomite_touch_share,
+            fomite_touch_share_table=(
+                load_declared_share_table(fomite_touch_share_table)
+                if fomite_touch_share_table is not None
+                else None
+            ),
+        )
+    # The campaign's declared complement for this spec, when it carries one:
+    # declared-complement cells equal ``declared_total`` but a spec is the
+    # stronger witness.
+    spec_agents = (
+        (spec_dict.get("config_overrides") or {}).get("ship_graph") or {}
+    ).get("num_agents")
+    if spec_agents is not None:
+        num_agents = int(spec_agents)
     if alpha_override is not None:
         alpha = float(alpha_override)
     rec = Recorder(pathogen_id=pathogen_id)
@@ -1740,9 +1967,37 @@ def run_seed(
         rec.fomite_representation_seen
     )
     summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
+    if verbatim:
+        _attach_voyage_blocks(summary, spec_dict, result, num_agents)
     summary["wall_clock_seconds_run"] = wall_clock_run
     summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
     return summary
+
+
+def _attach_voyage_blocks(
+    summary: dict[str, Any],
+    spec_dict: dict[str, Any],
+    result: Any,
+    num_agents: int,
+) -> None:
+    """The anchor-shaped blocks a verbatim campaign spec produces.
+
+    ``parameters`` is the spec's own campaign-parameters block, ``summary``
+    the final epoch's summary record, and ``derived`` the campaign's
+    publication metrics (attack rates, peak prevalence, take-off, VSP
+    trigger) recomputed from the run's compact history by the same functions
+    the runner uses -- so a probe zip scores identically under
+    ``score_anchors`` to a campaign-produced zip.
+    """
+    history = getattr(result, "history", None) or []
+    series = extract_timeseries(history)
+    summary["parameters"] = parameters_from_spec(spec_dict)
+    summary["trigger_status"] = getattr(result, "final_trigger_status", None)
+    summary["timeseries"] = series
+    summary["derived"] = compute_derived_metrics(series, num_agents)
+    final = history[-1] if history else {}
+    summary["summary"] = record_block(final, RECORD_SUMMARY)
+    summary["cost_accounting"] = record_block(final, RECORD_COST_ACCOUNTING)
 
 
 def _run_instrumented_voyage(
@@ -1773,8 +2028,10 @@ def _run_instrumented_voyage(
                 f"resolved alpha={alpha_resolved}",
             )
         with instrumented(rec, top_ids):
+            sim = ShipSimulation(picard_spec, display=False)
+            sim.epoch_observer = _ill_census(rec, pathogen_id)
             started_run = time.perf_counter()
-            result = ShipSimulation(picard_spec, display=False).run()
+            result = sim.run()
             wall_clock_run = time.perf_counter() - started_run
     return resolved, result, wall_clock_run
 
@@ -1973,7 +2230,52 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
+    parser.add_argument(
+        "--manifest", type=Path, default=None,
+        help="campaign manifest JSON; runs the tier's verbatim specs "
+             "(NORO-DOSE-REFIT-01 canary mode) instead of build_spec",
+    )
+    parser.add_argument(
+        "--tier", type=_identifier, default=None,
+        help="tier inside --manifest; required with --manifest",
+    )
+    parser.add_argument(
+        "--index", type=int, default=None,
+        help="run only the tier's runs[index] (Batch array child)",
+    )
     args = parser.parse_args(argv)
+    if args.manifest is not None:
+        if args.tier is None:
+            parser.error("--manifest requires --tier")
+        forbidden = {
+            "--platform": args.platform != "classic_cruise_1900",
+            "--epochs": args.epochs != 288,
+            "--seeds": args.seeds != [8105, 8106],
+            "--bundle": (
+                args.bundle != asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID
+            ),
+            "--alpha": args.alpha is not None,
+            "--arm-tag": args.arm_tag is not None,
+            "--high-touch-area-scale": args.high_touch_area_scale is not None,
+            "--high-touch-area-scale-by-zone-class": (
+                args.high_touch_area_scale_by_zone_class is not None
+            ),
+            "--fomite-representation": args.fomite_representation is not None,
+            "--fomite-touch-share": args.fomite_touch_share is not None,
+            "--fomite-touch-share-table": (
+                args.fomite_touch_share_table is not None
+            ),
+        }
+        used = [flag for flag, present in forbidden.items() if present]
+        if used:
+            parser.error(
+                "verbatim manifest mode does not accept spec-shaping flags: "
+                + ", ".join(used),
+            )
+        if args.index is not None and args.index < 0:
+            parser.error("--index must be non-negative")
+    elif args.tier is not None or args.index is not None:
+        parser.error("--tier/--index require --manifest")
     if (
         args.fomite_touch_share is not None
         or args.fomite_touch_share_table is not None
@@ -2003,8 +2305,83 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     return args
 
 
+def _tier_run_list(
+    manifest_path: Path, tier: str,
+) -> list[tuple[str, dict[str, Any]]]:
+    """Ordered ``(run_id, spec)`` list the tier generates, verbatim."""
+    safe_manifest = Path(
+        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
+    )
+    with validated_open(
+        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        manifest = json.load(handle)
+    return list(generate_tier_runs(manifest, tier))
+
+
+def _write_run_zip(
+    out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
+) -> Path:
+    """One campaign-shaped run zip: ``summary.json`` + ``refit.json``.
+
+    ``summary.json`` carries the same ``parameters``/``summary``/``derived``
+    blocks a campaign runner zip carries, so ``score_anchors`` ingests the
+    probe output directly; ``refit.json`` carries the full probe payload
+    (per-host dose table, emesis-by-host, release composition).
+    """
+    cell_dir = Path(resolve_child_path(str(out_dir), tier))
+    cell_dir.mkdir(parents=True, exist_ok=True)
+    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
+    anchor = {
+        "run_id": run_id,
+        "parameters": payload["parameters"],
+        "num_epochs": payload["epochs"],
+        "trigger_status": payload.get("trigger_status"),
+        "summary": payload["summary"],
+        "cost_accounting": payload["cost_accounting"],
+        "derived": payload["derived"],
+    }
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr("summary.json", json.dumps(anchor))
+        archive.writestr("refit.json", json.dumps(payload))
+    return zip_path
+
+
+def _main_manifest(args: argparse.Namespace) -> int:
+    """Canary mode: run the tier's verbatim specs, one run zip each."""
+    runs = _tier_run_list(args.manifest, args.tier)
+    if args.index is not None:
+        if args.index >= len(runs):
+            raise SystemExit(
+                f"--index {args.index} outside tier {args.tier} "
+                f"({len(runs)} runs)",
+            )
+        runs = [runs[args.index]]
+    out_dir = Path(
+        prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
+    )
+    for run_id, spec in runs:
+        seed = int(spec["run"]["random_seed"])
+        summary = run_seed(
+            seed=seed,
+            platform=str(spec["catalog"]["platform_id"]),
+            bundle=str(spec["catalog"]["pathogen_bundle_id"]),
+            epochs=int(spec["run"]["num_epochs"]),
+            pathogen_id=args.pathogen_id,
+            top_hosts=args.top_hosts,
+            spec_dict=spec,
+        )
+        summary["run_id"] = run_id
+        zip_path = _write_run_zip(out_dir, args.tier, run_id, summary)
+        print_summary(summary)
+        print(f"written: {zip_path}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
+    if args.manifest is not None:
+        return _main_manifest(args)
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )

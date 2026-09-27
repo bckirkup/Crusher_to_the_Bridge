@@ -47,6 +47,7 @@ COPY deploy/aws/bounded_design_entrypoint.py ./deploy/aws/bounded_design_entrypo
 COPY deploy/aws/dose_challenge_entrypoint.py ./deploy/aws/dose_challenge_entrypoint.py
 COPY deploy/aws/cabin_floor_entrypoint.py ./deploy/aws/cabin_floor_entrypoint.py
 COPY deploy/aws/deposit_attr_entrypoint.py ./deploy/aws/deposit_attr_entrypoint.py
+COPY deploy/aws/dose_refit_entrypoint.py ./deploy/aws/dose_refit_entrypoint.py
 # The per-host dose-challenge driver and its dose-response helper live under
 # tools/; only noro_diag is needed by the Batch worker. The cabin-floor probe
 # additionally needs the cabin-pair instrument and its assay helper.
