@@ -50,7 +50,10 @@ def _norwalk_profile() -> dict:
     )
     return copy.deepcopy(
         {
+            # Calibrated at the pre-refit release scale (see
+            # test_strain_dose_ledger).
             **next(p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN),
+            "dose_adjustment": 4.0,
             "symptom_onset_day": 0,
         },
     )

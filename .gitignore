@@ -127,3 +127,6 @@ out_test_sentinel_cli/
 
 # uv-managed virtual environment
 .venv/
+
+# Diagnostic run output
+out/

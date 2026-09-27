@@ -53,9 +53,12 @@ def _norwalk_profile() -> dict:
     data = json.loads(
         (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
     )
-    return copy.deepcopy(
+    profile = copy.deepcopy(
         next(p for p in data["pathogens"] if p["pathogen_id"] == PATHOGEN),
     )
+    # Calibrated at the pre-refit release scale (see test_strain_dose_ledger).
+    profile["dose_adjustment"] = 4.0
+    return profile
 
 
 def _agent(aid: int = 1, loc: str = "MainDining_L") -> KorkinAgent:

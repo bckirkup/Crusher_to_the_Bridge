@@ -52,7 +52,7 @@
         7.75,
         7.75
       ],
-      "dose_adjustment": 4.0,
+      "dose_adjustment": 7.57,
       "dose_response": {
         "model": "beta_poisson",
         "alpha": 0.111,

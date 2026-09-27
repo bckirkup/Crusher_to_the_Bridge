@@ -64,10 +64,15 @@ def _norwalk_profile() -> dict:
     data = json.loads(
         (REPO_ROOT / "data/pathogens/active_profiles.json").read_text(),
     )
-    profile = next(
-        p for p in data["pathogens"] if p["pathogen_id"] == "norwalk_gi"
+    profile = copy.deepcopy(
+        next(p for p in data["pathogens"] if p["pathogen_id"] == "norwalk_gi"),
     )
-    return copy.deepcopy(profile)
+    # Scenarios were calibrated at the pre-refit release scale: at the
+    # refit value (NORO-DOSE-REFIT-01: 7.57) this fixture's emission
+    # produces no transmission events, which is the real post-#724
+    # magnitude, not a fixture defect.
+    profile["dose_adjustment"] = 4.0
+    return profile
 
 
 def _agent(aid: int, loc: str, *, infected: bool = False) -> KorkinAgent:
