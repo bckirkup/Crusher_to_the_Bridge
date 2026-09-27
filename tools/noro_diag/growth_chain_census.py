@@ -1112,7 +1112,7 @@ def _wrap_challenge(core_cls: type, rec: CensusRecorder) -> Any:
 
 
 def _epoch_prime_imports(
-    rec: CensusRecorder, agent: Any, inf: dict, aid: int,
+    rec: CensusRecorder, inf: dict, aid: int,
 ) -> None:
     """Epoch-0 priming: pre-run infections are imports."""
     if rec.epoch0_snapshotted or aid in rec.acquired_ids:
@@ -1150,7 +1150,7 @@ def _epoch_agent(
         ):
             counts["hand_positive_susceptible"] += 1
         return
-    _epoch_prime_imports(rec, agent, inf, aid)
+    _epoch_prime_imports(rec, inf, aid)
     if not agent.is_infected_with(pathogen_id):
         return
     counts["infected"] += 1
