@@ -146,7 +146,7 @@ def main(argv: list[str] | None = None) -> int:
     text = json.dumps(report, indent=1)
     print(text)
     if args.out is not None:
-        args.out.write_text(text + "\n", encoding="utf-8")
+        args.out.write_text(text + "\n", encoding="utf-8")  # NOSONAR — operator-specified report path in a local diagnostic tool
     return 0
 
 

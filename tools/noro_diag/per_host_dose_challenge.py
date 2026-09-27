@@ -1387,7 +1387,7 @@ def _record_emit(
     # Only real emits extend the per-host table: _emit_emesis is called every
     # epoch for every host and mostly returns early, so an unconditional
     # setdefault would file a stub row for the whole ship.
-    if after > before or float(pool_gain) != 0.0:
+    if after > before or abs(float(pool_gain)) > 0.0:
         host = rec.emesis_hosts.setdefault(
             int(agent.agent_id),
             {"emitted_episodes": 0, "patch_mass_gec": 0.0},
