@@ -293,7 +293,7 @@ def _emit_spec(args: argparse.Namespace) -> None:
         resolve_repo_path(str(REPO_ROOT), str(args.emit_spec)),
     )
     with validated_open(
-        out, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(out), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         handle.write(json.dumps(spec, indent=1, sort_keys=True))
     print(f"wrote {out}")

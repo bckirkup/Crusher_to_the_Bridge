@@ -47,28 +47,42 @@ def _quantiles(values: list[float]) -> dict[str, float | None]:
     }
 
 
-def _confined_block(runs: list[tuple[Path, dict, dict]]) -> dict[str, Any]:
-    slots = secondaries = 0
-    delivered: list[float] = []
-    implied_sar: list[float] = []
-    stage_totals: dict[str, float] = {}
-    emitted = delivered_copies = 0.0
-    for _, _, r in runs:
-        confined = r.get("confined") or {}
-        slots += int(confined.get("confined_slots") or 0)
-        secondaries += int(confined.get("confined_secondaries") or 0)
-        emitted += float(
-            (confined.get("stage_totals") or {}).get(
-                "emitted_member_copies", 0.0,
-            ),
+def _accumulate_confined(
+    confined: dict[str, Any],
+    acc: dict[str, Any],
+) -> None:
+    acc["slots"] += int(confined.get("confined_slots") or 0)
+    acc["secondaries"] += int(confined.get("confined_secondaries") or 0)
+    stage_totals = confined.get("stage_totals") or {}
+    acc["emitted"] += float(stage_totals.get("emitted_member_copies", 0.0))
+    acc["delivered_copies"] += float(
+        confined.get("delivered_dose_copies") or 0.0,
+    )
+    for field, value in stage_totals.items():
+        acc["stage_totals"][field] = (
+            acc["stage_totals"].get(field, 0.0) + float(value)
         )
-        delivered_copies += float(confined.get("delivered_dose_copies") or 0.0)
-        for field, value in (confined.get("stage_totals") or {}).items():
-            stage_totals[field] = stage_totals.get(field, 0.0) + float(value)
-        for row in confined.get("slot_rows") or []:
-            delivered.append(float(row.get("delivered_p_dose") or 0.0))
-        for row in confined.get("slot_dose_rows") or []:
-            implied_sar.append(float(row.get("implied_sar") or 0.0))
+    for row in confined.get("slot_rows") or []:
+        acc["delivered"].append(float(row.get("delivered_p_dose") or 0.0))
+    for row in confined.get("slot_dose_rows") or []:
+        acc["implied_sar"].append(float(row.get("implied_sar") or 0.0))
+
+
+def _confined_block(runs: list[tuple[Path, dict, dict]]) -> dict[str, Any]:
+    acc: dict[str, Any] = {
+        "slots": 0, "secondaries": 0, "emitted": 0.0,
+        "delivered_copies": 0.0, "delivered": [], "implied_sar": [],
+        "stage_totals": {},
+    }
+    for _, _, r in runs:
+        _accumulate_confined(r.get("confined") or {}, acc)
+    slots = acc["slots"]
+    secondaries = acc["secondaries"]
+    emitted = acc["emitted"]
+    delivered_copies = acc["delivered_copies"]
+    delivered = acc["delivered"]
+    implied_sar = acc["implied_sar"]
+    stage_totals = acc["stage_totals"]
     lo, hi = _wilson(secondaries, slots)
     return {
         "n_slots": slots,
