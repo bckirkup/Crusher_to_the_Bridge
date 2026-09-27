@@ -291,7 +291,20 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (3412, 2677, 2002, 199, 81) -> (3400, 2206, 2090, 274, 120),
         # read in the local venv on this branch. Intended physics; no new
         # shared-stream draws.
-        (3, 12): (3400, 2206, 2090, 274, 120),
+        # That pin went stale under SCHED-WATCH-01's spawn-time draws —
+        # the same shared-stream reorder that moved the greg_mortimer
+        # cell — but the cell is slow-tier, so the move surfaced only in
+        # nightly run 36313479313 (2026-09-27, pre-rhythm main) reading
+        # (3371, 2099, 2178, 252, 100) and was never repinned.
+        # SHIP-RHYTHM-02: mega_cruise_5000 now runs the labelled
+        # day-program rhythm layer by default; schedule-conditioned
+        # co-presence reorders the shared stream:
+        # (3371, 2099, 2178, 252, 100) -> (3373, 2005, 2139, 306, 113),
+        # measured in the local venv on this branch — the flag-off cell
+        # (rhythm.enabled: false) reproduces the nightly pre-rhythm
+        # reading exactly, so the second hop is fully attributed to the
+        # rhythm layer.
+        (3, 12): (3373, 2005, 2139, 306, 113),
     },
 }
 

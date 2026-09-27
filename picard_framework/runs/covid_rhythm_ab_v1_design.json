@@ -1,0 +1,103 @@
+{
+  "design_id": "covid_rhythm_ab_v1",
+  "task_id": "COVID-RHYTHM-01",
+  "schema_version": "1.0.0",
+  "description": "Paired A/B of the rhythm layer (docs/rhythm/rhythm_spec.md, PRs #741/#742) on the sars_cov2 arm: the same takeoff-conditioned cells at the v12 admissible-band midpoint Theta = 2.37e11, rhythm.enabled false vs true, across all four real cruise classes. Arms are 'off' (labelled baseline: rhythm.enabled=false, the spec's claim of byte-identical draws) and 'on' (rhythm.enabled=true). Cells enumerate leg-major, then arm, then seed: mega_cruise occupies indices 0-39 (off 0-19, on 20-39), contemporary_cruise 40-79, classic_cruise 80-119, expedition_cruise 120-159.",
+  "cell_conditioning": {
+    "note": "Identical to TAKEOFF-ATTR-01 (docs/ledger/COVID-TAKEOFF-ATTR-01.md): declared replay on the record hulls, one import, infection_age_days 6.8, onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, SOP-017 confinement days 16-30, 768 hourly epochs (mega/contemporary/classic), syndromic onset observation. Scenario legs inherit their records (expedition = greg_mortimer_2020: 28 days, SOP-017 8-27, the generic boarding axis per the v12 stage-3 convention - the held-out seed declares no onset day, so its incubation is drawn and the DP-particular ascertainment gate is dropped). Generic legs exist because the covid arm has no spirit/classic-class event record: they carry the DP index geometry verbatim on the platform's own complement - contemporary 2100 pax + 900 crew (nominal), classic 1332 pax + 560 crew (all passenger berths; the layout holds 1332 PC_ + 570 CC_ beds). Generic legs carry no testing_campaign (none exists for those classes) - recorded_onsets comes from the syndromic onset curve as on the record legs.",
+    "theta": "2.37e11 - v12 admissible-band midpoint; fixed, no re-screen",
+    "imports": 1,
+    "infection_age_days": 6.8,
+    "onset_day": -1.0,
+    "departure_day": 5.0,
+    "sanitary_visit_mode": "dwell_weighted"
+  },
+  "theta": 237000000000.0,
+  "infection_age_days": 6.8,
+  "imports": 1,
+  "sanitary_visit_mode": "dwell_weighted",
+  "takeoff_recorded_onsets": 10,
+  "arms": [
+    {
+      "arm_id": "off",
+      "overrides": {"rhythm": {"enabled": false}},
+      "note": "labelled baseline; the byte-identity claim under test"
+    },
+    {
+      "arm_id": "on",
+      "overrides": {"rhythm": {"enabled": true}},
+      "note": "rhythm layer deals daily itineraries from the class catalog"
+    }
+  ],
+  "legs": [
+    {
+      "class_id": "mega_cruise",
+      "platform_id": "mega_cruise_5000",
+      "kind": "scenario",
+      "scenario_id": "diamond_princess_2020",
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "contemporary_cruise",
+      "platform_id": "spirit_cruise_3000",
+      "kind": "generic",
+      "passengers": 2100,
+      "crew": 900,
+      "duration_days": 32,
+      "sop017_window": [16, 30],
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "classic_cruise",
+      "platform_id": "classic_cruise_1900",
+      "kind": "generic",
+      "passengers": 1332,
+      "crew": 560,
+      "duration_days": 32,
+      "sop017_window": [16, 30],
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "expedition_cruise",
+      "platform_id": "expedition_cruise_450",
+      "kind": "scenario",
+      "scenario_id": "greg_mortimer_2020",
+      "voyage_mode": "generic",
+      "sop017_window": [8, 27],
+      "seed_base": 20200315,
+      "seeds": 20
+    }
+  ],
+  "freeze": {
+    "declared_before_running": true,
+    "byte_identity_gate": "Before any array: a takeoff-conditioned cell run with rhythm.enabled=false on the A/B SHA must be byte-identical (payload observables + full onset_curve + sanitary_activity) to the same spec run on the pre-#742 tree under the same interpreter; on AWS the off-arm canary must reproduce the stored stage-2 record of record for the same (theta, seed) cell. Any divergence halts the campaign.",
+    "attribution_criterion": "Declared before runs (stochastic-attribution skill): an effect counts only if |on - off| exceeds the paired-seed spread of the off arm for the same class on both reporting seeds; challenged_share_of_aboard and per-epoch dosed-set quantiles are the primary exposure-set metrics; route re-split is read off by_infecting_epoch_dose.",
+    "metrics": [
+      "median + q95 per-epoch dosed-set size (mechanism.dosed_targets_by_epoch)",
+      "challenged_share_of_aboard (mechanism.susceptibility.challenged_share_of_aboard)",
+      "per-route share re-split (route_split.by_infecting_epoch_dose)",
+      "onset count distribution + clause ratio vs ~197 + before_share (recorded_onsets, observables.onsets_before_split_day / recorded_onsets, target 0.173 +/- 0.10, takeoff seeds >= 10 recorded onsets, clause needs >= 5 takeoff seeds)",
+      "clock correlation: rhythm_ab.occupancy_sync_corr (point-biserial r, transit-zone occupancy vs catalog synchronized-end epochs) + occupancy_lift_at_sync_end",
+      "class scoping: rhythm_ab.crew_zone_passenger_epochs and crew_zone_passenger_challenges must be 0 under the on arm",
+      "anchors: takeoff gate (takeoff seeds among recorded>=10), H1-H3 hull placements, MIDRS/A8 where in scope - scored not shaped"
+    ],
+    "report_immediately_if": [
+      "byte-identity gate fails or the flag is inert (metrics do not move)",
+      "challenged_share_of_aboard stays 1.0 under the on arm (co-presence partition broken)",
+      "crew-only zones show passenger exposure epochs under the on arm (class scoping broken)",
+      "takeoff collapses to zero everywhere (over-partitioning)"
+    ],
+    "non_goals": "No Theta re-screen; no participation-fraction sweeps; no register edits; no mechanism fixes - filed, not fixed; naval/starship hulls out of scope."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot per .agents/skills/aws-batch-campaign/SKILL.md; deploy/aws/submit_covid_rhythm_ab.sh; jobdef revision + image digest pinned per campaign-preflight, never a bare tag",
+    "canary": "indices 0 and 20 via --index (mega/off/seed-20200205 and its on pair): off must byte-match the stored stage-2 record for the same (theta, seed); on must move the claimed metrics. Then the four class arrays.",
+    "stride": 1,
+    "cells": 160,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_rhythm_ab_v1/<sha>/cells/"
+  }
+}
