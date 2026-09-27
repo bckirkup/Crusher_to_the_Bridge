@@ -2011,6 +2011,62 @@ def _attach_voyage_blocks(
     final = history[-1] if history else {}
     summary["summary"] = record_block(final, RECORD_SUMMARY)
     summary["cost_accounting"] = record_block(final, RECORD_COST_ACCOUNTING)
+    _restore_rate_precision(summary["summary"])
+
+
+# ``score_anchors`` cross-checks the emitted role complements by recovering
+# them from ``count / rate`` pairs in the summary block.  The engine rounds
+# those rates to 6 decimals, which recovers an off-by-one complement on
+# low-count runs (e.g. 17 / 0.003469 -> 4901, not 4900) that still sums to
+# num_agents and round-trips — the disagreement the scorer rejects.  The
+# unrounded rate (count / emitted complement) is the same quantity at full
+# precision and recovers the emitted complement exactly.
+_RATE_COUNT_PAIRS = (
+    (
+        "cumulative_ever_infected_passenger",
+        "infection_attack_rate_passenger",
+        "passenger_complement",
+    ),
+    (
+        "cumulative_ever_infected_crew",
+        "infection_attack_rate_crew",
+        "crew_complement",
+    ),
+    (
+        "cumulative_ever_ill_passenger",
+        "ever_ill_rate_passenger",
+        "passenger_complement",
+    ),
+    (
+        "cumulative_ever_ill_crew",
+        "ever_ill_rate_crew",
+        "crew_complement",
+    ),
+    (
+        "cumulative_reported_cases_passenger",
+        "reported_case_rate_passenger",
+        "passenger_complement",
+    ),
+    (
+        "cumulative_reported_cases_crew",
+        "reported_case_rate_crew",
+        "crew_complement",
+    ),
+)
+
+
+def _restore_rate_precision(block: dict[str, Any]) -> None:
+    """Rewrite the summary block's role rates as count / complement."""
+    for count_key, rate_key, complement_key in _RATE_COUNT_PAIRS:
+        count = block.get(count_key)
+        complement = block.get(complement_key)
+        if (
+            rate_key in block
+            and isinstance(count, (int, float))
+            and isinstance(complement, (int, float))
+            and complement > 0
+        ):
+            block[rate_key] = count / complement
 
 
 def _run_instrumented_voyage(
