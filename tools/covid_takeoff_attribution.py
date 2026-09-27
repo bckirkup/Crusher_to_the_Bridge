@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import sys
 from collections import Counter
@@ -111,8 +112,20 @@ class TakeoffAttributionLedger:
     the susceptibility / reach aggregates before the buffers are dropped.
     """
 
-    def __init__(self, pathogen_id: str = PATHOGEN_ID) -> None:
+    def __init__(self, pathogen_id: str = PATHOGEN_ID, *,
+                 zone_sets: dict[str, frozenset[str]] | None = None,
+                 sync_mask: list[bool] | None = None) -> None:
         self.pathogen_id = pathogen_id
+        # COVID-RHYTHM-01: when provided, {"transit": names, "crew": names}
+        # zone sets plus the catalog synchronized-end epoch mask enable the
+        # rhythm A/B tallies (corridor occupancy vs the program clock, and
+        # the crew-zone emptiness check). Read-only: no draws.
+        self._transit_zones = frozenset((zone_sets or {}).get("transit") or ())
+        self._crew_zones = frozenset((zone_sets or {}).get("crew") or ())
+        self._sync_mask = list(sync_mask) if sync_mask is not None else None
+        self.transit_occupancy: list[int] = []
+        self.crew_zone_passengers: list[int] = []
+        self.crew_zone_passenger_challenge_epochs: dict[int, int] = {}
         self._installed = False
         self._epoch = -1
 
@@ -476,6 +489,32 @@ class TakeoffAttributionLedger:
                 if susc is not None:
                     self.challenged_susc[tid] = float(susc)
 
+        # COVID-RHYTHM-01 zone tallies: corridor occupancy vs the program
+        # clock and the crew-zone emptiness measurement. Locations are the
+        # epoch's dealt positions — under the rhythm arm, commitments.
+        if self._transit_zones or self._crew_zones:
+            transit = 0
+            crew_pax = 0
+            agents_by_id = {a.agent_id: a for a in sim.engine.agents}
+            for agent in sim.engine.agents:
+                loc = agent.current_location
+                if loc in self._transit_zones:
+                    transit += 1
+                if loc in self._crew_zones and getattr(agent, "role", "") == "passenger":
+                    crew_pax += 1
+            self.transit_occupancy.append(transit)
+            self.crew_zone_passengers.append(crew_pax)
+            for tid, challenge in self._challenges.items():
+                target = agents_by_id.get(tid)
+                if (
+                    target is not None
+                    and getattr(target, "role", "") == "passenger"
+                    and challenge.get("location") in self._crew_zones
+                ):
+                    self.crew_zone_passenger_challenge_epochs[epoch] = (
+                        self.crew_zone_passenger_challenge_epochs.get(epoch, 0) + 1
+                    )
+
         self._droplet, self._addback, self._near = {}, {}, {}
         self._other_src, self._challenges = {}, {}
         self._epoch_units, self._reach_buf = {}, {}
@@ -622,6 +661,70 @@ def _channel_quantiles(vals: dict[str, list[int]],
     }
 
 
+def _rhythm_ab_block(ledger: TakeoffAttributionLedger) -> dict[str, Any]:
+    """COVID-RHYTHM-01 readout: program-clock coupling and class scoping.
+
+    Emitted only when the cell ran with zone sets — the keys are absent on
+    plain takeoff-attribution cells so the records stay comparable.
+    """
+    if not (ledger._transit_zones or ledger._crew_zones):
+        return {}
+    occupancy = ledger.transit_occupancy
+    mask = ledger._sync_mask or []
+    n = min(len(occupancy), len(mask))
+    front_epochs = [i for i in range(n) if mask[i]]
+    rest_epochs = [i for i in range(n) if not mask[i]]
+    occ_front = [occupancy[i] for i in front_epochs]
+    occ_rest = [occupancy[i] for i in rest_epochs]
+    mean_front = sum(occ_front) / len(occ_front) if occ_front else None
+    mean_rest = sum(occ_rest) / len(occ_rest) if occ_rest else None
+    # Point-biserial r between the occupancy series and the sync-end mask.
+    n_all = len(occupancy[:n])
+    r = None
+    if n_all > 1 and front_epochs and rest_epochs:
+        mean_all = sum(occupancy[:n_all]) / n_all
+        var_all = sum(
+            (v - mean_all) ** 2 for v in occupancy[:n_all]
+        )
+        p1 = len(front_epochs) / n_all
+        if var_all > 0.0 and 0.0 < p1 < 1.0:
+            sd = math.sqrt(var_all / n_all)
+            r = (
+                (mean_front - mean_rest) / sd
+            ) * math.sqrt(p1 * (1.0 - p1))
+    return {
+        "rhythm_ab": {
+            "transit_zones": len(ledger._transit_zones),
+            "crew_zones": len(ledger._crew_zones),
+            "transit_occupancy_quantiles": _quantiles(
+                [float(v) for v in occupancy],
+            ),
+            "sync_end_epochs": len(front_epochs),
+            "occupancy_mean_at_sync_end": mean_front,
+            "occupancy_mean_other": mean_rest,
+            "occupancy_lift_at_sync_end": (
+                mean_front / mean_rest
+                if mean_front is not None and mean_rest
+                else None
+            ),
+            "occupancy_sync_corr": r,
+            "crew_zone_passenger_epochs": sum(
+                1 for v in ledger.crew_zone_passengers if v > 0
+            ),
+            "crew_zone_passenger_max": (
+                max(ledger.crew_zone_passengers)
+                if ledger.crew_zone_passengers else 0
+            ),
+            "crew_zone_passenger_challenge_epochs": len(
+                ledger.crew_zone_passenger_challenge_epochs
+            ),
+            "crew_zone_passenger_challenges": sum(
+                ledger.crew_zone_passenger_challenge_epochs.values()
+            ),
+        },
+    }
+
+
 def summarise(sim: Any, ledger: TakeoffAttributionLedger,
               payload: dict[str, Any], takeoff_min: int) -> dict[str, Any]:
     """Aggregate one finished cell into the readout structure."""
@@ -733,6 +836,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         "recorded_onsets": recorded,
         "takeoff": recorded >= takeoff_min,
         "seeded_count": len(seeded),
+        **_rhythm_ab_block(ledger),
         "confined_onsets": confined_n,
         "route_split": {
             "by_infecting_epoch_dose": {
@@ -815,14 +919,25 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
     }
 
 
-def analyse_cell(design: Any, cell: Any, *,
-                 num_epochs: int | None, repo_root: str) -> dict[str, Any]:
-    """Run one instrumented declared-replay cell."""
-    raw = prepare_cell_run_spec(
-        design, cell, num_epochs=num_epochs, repo_root=repo_root,
-    )
+def analyse_spec(
+    raw: dict[str, Any],
+    design: Any,
+    cell: Any,
+    *,
+    repo_root: str,
+    zone_sets: dict[str, frozenset[str]] | None = None,
+    sync_mask: list[bool] | None = None,
+) -> dict[str, Any]:
+    """Run one pre-built spec under the instrument stack.
+
+    The cell/design arguments need only the attribute surface
+    ``cell_payload``/``summarise`` read — ``covid_rhythm_cells``' A/B cells
+    satisfy it without owning a hull-scenario record.
+    """
     quarantine_ledger = QuarantineAttributionLedger()
-    ledger = TakeoffAttributionLedger()
+    ledger = TakeoffAttributionLedger(
+        zone_sets=zone_sets, sync_mask=sync_mask,
+    )
 
     def observer(sim: Any, work: Any) -> None:
         quarantine_ledger.observe(sim, work)
@@ -853,6 +968,15 @@ def analyse_cell(design: Any, cell: Any, *,
         ),
         "onsets": ledger.onsets,
     }
+
+
+def analyse_cell(design: Any, cell: Any, *,
+                 num_epochs: int | None, repo_root: str) -> dict[str, Any]:
+    """Run one instrumented declared-replay cell."""
+    raw = prepare_cell_run_spec(
+        design, cell, num_epochs=num_epochs, repo_root=repo_root,
+    )
+    return analyse_spec(raw, design, cell, repo_root=repo_root)
 
 
 def main() -> None:  # pragma: no cover - CLI driver
