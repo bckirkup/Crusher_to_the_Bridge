@@ -18,10 +18,13 @@ MANIFEST="${MANIFEST:-picard_framework/runs/mega_cruise_campaign/noro_dose_refit
 PATHOGEN_ID="${PATHOGEN_ID:-norwalk_gi}"
 S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/noro_dose_refit_01/}"
 JOB_NAME="${JOB_NAME:-picard-dose-refit-$(date +%Y%m%d-%H%M%S)}"
+AWS_PROFILE="${AWS_PROFILE:-picard}"
+export AWS_PROFILE
 
 # Array size is the sum of the declared tiers' run counts (the smoke tier is
-# excluded by the entrypoint's _TIERS).
-ARRAY_SIZE="$(python3 - "${MANIFEST}" <<'PYEOF'
+# excluded by the entrypoint's _TIERS). The count needs the project venv.
+PYTHON_BIN="${PYTHON_BIN:-.venv/bin/python3}"
+ARRAY_SIZE="$("${PYTHON_BIN}" - "${MANIFEST}" <<'PYEOF'
 import json, sys
 sys.path.insert(0, 'picard_framework/runs/mega_cruise_campaign')
 from campaign_runner import generate_tier_runs
@@ -46,7 +49,4 @@ aws batch submit-job \
   --job-queue "$JOB_QUEUE" \
   --job-definition "$JOB_DEFINITION" \
   --array-properties "{\"size\": $ARRAY_SIZE}" \
-  --parameters \
-    "s3_prefix=$S3_PREFIX" \
-    "manifest=$MANIFEST" \
-    "pathogen_id=$PATHOGEN_ID"
+  --parameters "s3_prefix=$S3_PREFIX,manifest=$MANIFEST,pathogen_id=$PATHOGEN_ID"
