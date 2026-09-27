@@ -229,7 +229,8 @@ def test_sleep_share_moves_the_awake_minority_out() -> None:
                   asleep_in_cabin_share=[1.0] * 24)
     empty = _layer("spirit_cruise_3000", zones,
                    asleep_in_cabin_share=[0.0] * 24)
-    assert full is not None and empty is not None
+    assert full is not None
+    assert empty is not None
     for a in agents:
         # No deal — commitments empty, so the Sleep-token branch is hit.
         a._test_home = full.location_for(a, 3, "Sleep")
@@ -250,11 +251,32 @@ def test_flag_off_engine_consumes_no_draws() -> None:
         zones=zones,
         seed=7,
         clock=SimClock(mode=HOURS),
-        rhythm_config={"enabled": False},
-        platform_id="spirit_cruise_3000",
     )
+    engine.attach_rhythm({"enabled": False}, "spirit_cruise_3000")
     assert engine._rhythm is None
     engine.step()
     assert all(
         a._rhythm_post_prandial is None for a in engine.agents
+    )
+
+
+def test_engine_rhythm_attach_enables(
+) -> None:
+    """attach_rhythm on a cataloged platform builds the layer; the engine
+    then stamps post-prandial flags on agents each epoch."""
+    from engines.infection_dynamics_bridge import KorkinShipEngine
+
+    zones = _load_zones("spirit_cruise_3000")
+    engine = KorkinShipEngine(
+        num_passengers=20,
+        num_crew=10,
+        zones=zones,
+        seed=7,
+        clock=SimClock(mode=HOURS),
+    )
+    engine.attach_rhythm({"enabled": True}, "spirit_cruise_3000")
+    assert engine._rhythm is not None
+    engine.step()
+    assert all(
+        a._rhythm_post_prandial is not None for a in engine.agents
     )

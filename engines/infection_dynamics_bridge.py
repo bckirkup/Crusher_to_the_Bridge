@@ -2005,8 +2005,6 @@ class KorkinShipEngine:
         agent_behavior: dict[str, Any] | None = None,
         clock: SimClock | None = None,
         vsp_trigger_rule: str = VSP_RULE_REPORTED_PASSENGER_CASES,
-        rhythm_config: dict[str, Any] | None = None,
-        platform_id: str = "",
     ) -> None:
         if vsp_trigger_rule not in {
             VSP_RULE_REPORTED_PASSENGER_CASES,
@@ -2080,15 +2078,25 @@ class KorkinShipEngine:
         # None and every branch below untouched — the labelled baseline.
         # Active SOP names are pushed per epoch by the orchestrating sim.
         self.active_sop_names: list[str] = []
+        self._rhythm: RhythmLayer | None = None
+        self._seed = seed
+
+        self._initialize_agents()
+
+    def attach_rhythm(
+        self,
+        rhythm_config: dict[str, Any] | None,
+        platform_id: str,
+    ) -> None:
+        """Opt-in attach for SHIP-RHYTHM-02; never attaching leaves the
+        labelled baseline (``_rhythm`` stays None, zero draws consumed)."""
         self._rhythm = RhythmLayer.from_platform(
             platform_id,
             self.zones,
-            seed=seed,
+            seed=self._seed,
             clock=self.clock,
             config=rhythm_config,
         )
-
-        self._initialize_agents()
 
     def _assign_gender(self) -> str:
         """Sample a gender string from the configured distribution."""
@@ -2569,6 +2577,57 @@ class KorkinShipEngine:
             else:
                 agent.dwell_epochs = 0
 
+    def _deal_and_ashore(
+        self,
+        voyage_state: Any,
+        hour: int,
+        apply_ashore_and_embarkation: Any,
+    ) -> bool:
+        """Rhythm day-dealing plus ashore placement; returns True when the
+        embarkation template already covers the surge draw this day."""
+        rhythm = self._rhythm
+        if rhythm is not None:
+            # Deal the day template at the first epoch of each ship day. The
+            # voyage state's day_type is "sea_day" unless the platform's
+            # itinerary activates richer types; the SOP set the sim pushed
+            # selects the §4.6 decay variant.
+            voyage_day = (
+                int(getattr(voyage_state, "voyage_day", 0) or 0)
+                if voyage_state is not None
+                else self.clock.day_index(self.epoch - 1) + 1
+            )
+            day_type = (
+                str(getattr(voyage_state, "day_type", "") or "sea_day")
+                if voyage_state is not None
+                else "sea_day"
+            )
+            if rhythm.dealt_day != voyage_day:
+                rhythm.deal_day(
+                    self.agents,
+                    day_type,
+                    set(self.active_sop_names),
+                    voyage_day,
+                )
+        if voyage_state is None:
+            return False
+        ashore_owned = rhythm is not None and rhythm.apply_ashore(
+            self.agents, voyage_state, hour,
+        )
+        if not ashore_owned:
+            apply_ashore_and_embarkation(
+                self.agents,
+                voyage_state,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
+            )
+        # The embarkation template's own flow/surge events replace the
+        # legacy buffet surge draw when the rhythm layer dealt the day.
+        return (
+            rhythm is not None
+            and voyage_state.day_type == "embarkation"
+            and rhythm.embarkation_covered
+        )
+
     def step(self) -> dict[str, Any]:
         """Advance the simulation by one epoch.
 
@@ -2596,39 +2655,9 @@ class KorkinShipEngine:
         )
 
         voyage_state = self.voyage_epoch_state
-        rhythm = self._rhythm
-        if rhythm is not None:
-            # Deal the day template at the first epoch of each ship day. The
-            # voyage state's day_type is "sea_day" unless the platform's
-            # itinerary activates richer types; the SOP set the sim pushed
-            # selects the §4.6 decay variant.
-            voyage_day = (
-                int(getattr(voyage_state, "voyage_day", 0) or 0)
-                if voyage_state is not None
-                else self.clock.day_index(self.epoch - 1) + 1
-            )
-            day_type = (
-                str(getattr(voyage_state, "day_type", "") or "sea_day")
-                if voyage_state is not None
-                else "sea_day"
-            )
-            if rhythm.dealt_day != voyage_day:
-                rhythm.deal_day(
-                    self.agents,
-                    day_type,
-                    set(self.active_sop_names),
-                    voyage_day,
-                )
-        if voyage_state is not None:
-            if rhythm is None or not rhythm.apply_ashore(
-                self.agents, voyage_state, hour,
-            ):
-                apply_ashore_and_embarkation(
-                    self.agents,
-                    voyage_state,
-                    rng=self.rng,
-                    dining_catalog=self._dining_catalog,
-                )
+        suppress_surge = self._deal_and_ashore(
+            voyage_state, hour, apply_ashore_and_embarkation,
+        )
         behavior = self._voyage_behavior(voyage_state)
 
         # 1. Update agent locations. The token is recorded beside the location
@@ -2643,21 +2672,13 @@ class KorkinShipEngine:
                 agent, hour, behavior, LOCATION_ASHORE, LOCATION_DEPARTED,
             )
 
-        if voyage_state is not None:
-            # The embarkation template's own flow/surge events replace the
-            # legacy buffet surge draw when the rhythm layer dealt the day.
-            suppress_surge = (
-                rhythm is not None
-                and voyage_state.day_type == "embarkation"
-                and rhythm.embarkation_covered
+        if voyage_state is not None and not suppress_surge:
+            apply_embarkation_surge_locations(
+                self.agents,
+                voyage_state,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
             )
-            if not suppress_surge:
-                apply_embarkation_surge_locations(
-                    self.agents,
-                    voyage_state,
-                    rng=self.rng,
-                    dining_catalog=self._dining_catalog,
-                )
         self._record_dwell(placed_before)
 
         # 2. Infection transmission

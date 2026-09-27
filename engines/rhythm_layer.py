@@ -263,23 +263,36 @@ class RhythmLayer:
 
     def _resolve_venue(self, roles: list[str]) -> list[str]:
         """Event venue zone names for the catalog's venue_roles."""
+        names = self._mapped_venues(roles)
+        if names:
+            return names
+        names = self._venues_by_zone_type(roles)
+        if names:
+            return names
+        return self._venues_by_name_token(roles)
+
+    def _mapped_venues(self, roles: list[str]) -> list[str]:
         venue_map = self.catalog.get("venue_map", {})
         names: list[str] = []
         for role in roles:
             for name in venue_map.get(role, []):
                 if name in self._zone_by_name and name not in names:
                     names.append(name)
-        if names:
-            return names
-        # Fallbacks for roles a class's venue_map does not declare (e.g.
-        # mega's cabin_corridor): zone-type match, then zone-id substring.
+        return names
+
+    def _venues_by_zone_type(self, roles: list[str]) -> list[str]:
+        """Fallback for roles a class's venue_map does not declare (e.g.
+        mega's cabin_corridor): match on the zone's declared type."""
+        names: list[str] = []
         for role in roles:
             normed = role.lower()
             for ztype, zone_names in self._type_zones.items():
                 if ztype.lower() == normed:
                     names.extend(n for n in zone_names if n not in names)
-        if names:
-            return names
+        return names
+
+    def _venues_by_name_token(self, roles: list[str]) -> list[str]:
+        names: list[str] = []
         for role in roles:
             token = role.lower()
             for name in self._name_index:
@@ -339,6 +352,41 @@ class RhythmLayer:
             out.append(a)
         return out
 
+    def _sop_shape(
+        self, event: dict[str, Any], effects: dict[str, str]
+    ) -> tuple[float, float, int] | None:
+        """(participation, capacity multiplier, occurrences) after the active
+        SOP variant's effect on this event — None when it is cancelled or
+        delivered to cabins (§4.6)."""
+        role_groups = set(
+            (event.get("eligible", {}) or {}).get("role_groups") or []
+        )
+        if "passenger" in role_groups and (
+            effects.get("all_passenger_events") == "cancelled"
+        ):
+            return None
+        p = float(event.get("participation_fraction", 0.0))
+        effect = self._effect_for(effects, event) or ""
+        if effect == "cancelled":
+            return None
+        if effect == "delivered_to_cabin":
+            self.meals_to_cabin = True
+            return None
+        if effect.startswith("capacity_multiplier"):
+            m = float(effect.split()[-1])
+            return min(1.0, p * m), m, 1
+        if effect.startswith("frequency_multiplier"):
+            return p, 1.0, max(1, round(float(effect.split()[-1])))
+        if effect in ("cancelled_or_crew_served", "crew_served"):
+            return (
+                min(1.0, p * _CREW_SERVED_CAPACITY),
+                _CREW_SERVED_CAPACITY,
+                1,
+            )
+        if effect == "essential_only":
+            return min(1.0, p * _ESSENTIAL_ONLY_SHARE), 1.0, 1
+        return p, 1.0, 1
+
     @staticmethod
     def _event_subtype(event: dict[str, Any]) -> str:
         roles = set(event.get("venue_roles", []))
@@ -367,31 +415,10 @@ class RhythmLayer:
         eligible = self._eligible(event, agents)
         if not eligible:
             return
-        has_passengers = "passenger" in set(
-            (event.get("eligible", {}) or {}).get("role_groups") or []
-        )
-        if has_passengers and effects.get("all_passenger_events") == "cancelled":
+        shaped = self._sop_shape(event, effects)
+        if shaped is None:
             return
-
-        p = float(event.get("participation_fraction", 0.0))
-        cap_mult = 1.0
-        occurrences = 1
-        effect = self._effect_for(effects, event)
-        if effect == "cancelled":
-            return
-        if effect == "delivered_to_cabin":
-            self.meals_to_cabin = True
-            return
-        if effect and effect.startswith("capacity_multiplier"):
-            cap_mult = float(effect.split()[-1])
-            p = min(1.0, p * cap_mult)
-        elif effect and effect.startswith("frequency_multiplier"):
-            occurrences = max(1, round(float(effect.split()[-1])))
-        elif effect in ("cancelled_or_crew_served", "crew_served"):
-            cap_mult = _CREW_SERVED_CAPACITY
-            p = min(1.0, p * _CREW_SERVED_CAPACITY)
-        elif effect == "essential_only":
-            p = min(1.0, p * _ESSENTIAL_ONLY_SHARE)
+        p, cap_mult, occurrences = shaped
 
         zones = self._resolve_venue(list(event.get("venue_roles", [])))
         if not zones:
