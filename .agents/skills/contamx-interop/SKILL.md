@@ -77,7 +77,7 @@ Flow0 fingerprints in hypotheses.
 
 ```bash
 python3 tools/contam_engine_compare.py --suite data/config/contam_compare/suite.json
-# Windows: run_contam_compare.bat
+# Windows: scripts\run_contam_compare.bat
 ```
 
 Transport reports include `path_inventory` and `contamx_injection_isolated`.

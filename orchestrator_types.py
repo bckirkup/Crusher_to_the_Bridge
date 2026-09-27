@@ -76,7 +76,7 @@ LOCATION_ASHORE = "Ashore"
 # ── Defaults for configurable fractions (Law 1: no hardcoded ops) ────────
 DEFAULT_AIRBORNE_FRACTION = 0.6
 DEFAULT_SURFACE_FRACTION = 0.4
-DEFAULT_GREYWATER_FRACTION = 0.1
+DEFAULT_GRAYWATER_FRACTION = 0.1
 DEFAULT_GRAYWATER_PROPAGATION_FACTOR = 0.3
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))

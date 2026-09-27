@@ -5,7 +5,7 @@
 # ──────────────────────────────────────────────────────────────────────
 
 set -e
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 echo "[1/3] Preparing deck blueprint assets (class plates for tactical map)..."
 PYTHONIOENCODING=utf-8 python3 scripts/precompute_deck_assets.py

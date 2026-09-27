@@ -252,14 +252,14 @@ Job configs live under [`data/config/contam_compare/`](../data/config/contam_com
 | `tools/contam_engine_compare.py` | **Primary** — results (L1/L∞ or attack-rate deltas) **and** wall-clock timing with repeats |
 | `tools/contam_benchmark.py` | Transport concentrations only |
 | `tools/contam_outcome_compare.py` | Full Picard outcomes only |
-| `run_contam_compare.bat` | Windows one-click runner for the suite |
+| `scripts/run_contam_compare.bat` | Windows one-click runner for the suite |
 
 ```bash
 # Full suite (native always; ContamX when binary present)
 python3 tools/contam_engine_compare.py --suite data/config/contam_compare/suite.json
 
 # Windows
-run_contam_compare.bat
+scripts\run_contam_compare.bat
 ```
 
 Reports write to `telemetry_buffer/contam_compare/` (gitignored).

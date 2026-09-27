@@ -58,6 +58,21 @@ def test_resolve_graywater_zones_config_override() -> None:
     assert resolve_graywater_zones(cfg, zone_names) == ["WasteTreat"]
 
 
+def test_resolve_graywater_zones_accepts_greywater_alias() -> None:
+    # Deprecated British spelling still resolves; canonical key wins.
+    cfg = {"ship_graph": {}, "microflora": {"greywater_zones": ["WasteTreat"]}}
+    assert resolve_graywater_zones(cfg, ["Bridge", "WasteTreat"]) == ["WasteTreat"]
+
+    both = {
+        "ship_graph": {},
+        "microflora": {
+            "graywater_zones": ["Holding_Tank"],
+            "greywater_zones": ["WasteTreat"],
+        },
+    }
+    assert resolve_graywater_zones(both, ["Bridge"]) == ["Holding_Tank"]
+
+
 def test_resolve_graywater_zones_fallback_to_all_zones() -> None:
     cfg = {"ship_graph": {}, "microflora": {}}
     zone_names = ["Bridge", "Galley"]
@@ -73,7 +88,7 @@ def test_wastewater_pathogen_mass_pools_ship_wide() -> None:
     pooled = build_wastewater_pathogen_mass(
         list(zone_surface),
         zone_surface,
-        greywater_frac=0.1,
+        graywater_frac=0.1,
         graywater_zones=["Engine_Room_Aft"],
     )
     assert pooled == {"Engine_Room_Aft": pytest.approx(15.5)}
@@ -86,7 +101,7 @@ def test_wastewater_pathogen_mass_by_id_pools_ship_wide() -> None:
     pooled = build_wastewater_pathogen_mass_by_id(
         ["Bridge", "Galley"],
         masses,
-        greywater_frac=0.1,
+        graywater_frac=0.1,
         graywater_zones=["Engine_Room_Aft"],
     )
     assert pooled is not None

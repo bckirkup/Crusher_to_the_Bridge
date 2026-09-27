@@ -36,9 +36,9 @@ python3 "$RUNNER" --dry-run --shard-count 4 --shard-index 0
 python3 "$RUNNER" --dry-run --shard-count 4 --shard-index 1
 
 # Wrapper scripts
-./run_campaign.sh --smoke
-./run_campaign.sh --dry-run
-run_campaign.bat --smoke
+./scripts/run_campaign.sh --smoke
+./scripts/run_campaign.sh --dry-run
+scripts\run_campaign.bat --smoke
 ```
 
 ## Output layout

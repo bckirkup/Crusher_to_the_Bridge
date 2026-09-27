@@ -23,7 +23,7 @@ Usage::
     python3 tools/contam_engine_compare.py \\
         --job data/config/contam_compare/jobs/destroyer_transport.json
 
-    # Windows operators: run_contam_compare.bat
+    # Windows operators: scripts\run_contam_compare.bat
 
 For per-path SIM vs native ACH diagnosis (why concentrations diverge)::
 

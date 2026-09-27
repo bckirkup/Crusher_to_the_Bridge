@@ -35,7 +35,7 @@ from orchestrator_types import (
     LOCATION_ISOLATED,
     DEFAULT_AIRBORNE_FRACTION,
     DEFAULT_SURFACE_FRACTION,
-    DEFAULT_GREYWATER_FRACTION,
+    DEFAULT_GRAYWATER_FRACTION,
     DEFAULT_GRAYWATER_PROPAGATION_FACTOR,
     SimulationState,
 )
@@ -780,7 +780,7 @@ class TestDefaultConstants:
     def test_fractions_in_range(self) -> None:
         assert 0.0 < DEFAULT_AIRBORNE_FRACTION < 1.0
         assert 0.0 < DEFAULT_SURFACE_FRACTION < 1.0
-        assert 0.0 < DEFAULT_GREYWATER_FRACTION < 1.0
+        assert 0.0 < DEFAULT_GRAYWATER_FRACTION < 1.0
         assert 0.0 < DEFAULT_GRAYWATER_PROPAGATION_FACTOR < 1.0
 
 

@@ -8,13 +8,13 @@ REM    - Python 3.11+ on PATH as "python" or "python3"
 REM    - uv sync --locked --all-extras --no-install-project --no-build  (from repo root)
 REM
 REM  From the repo root (or double-click this file):
-REM    run_campaign.bat --smoke
-REM    run_campaign.bat --tier t1
-REM    run_campaign.bat --dry-run
-REM    run_campaign.bat --resume --tier t2
+REM    scripts\run_campaign.bat --smoke
+REM    scripts\run_campaign.bat --tier t1
+REM    scripts\run_campaign.bat --dry-run
+REM    scripts\run_campaign.bat --resume --tier t2
 REM ============================================================================
 
-cd /d "%~dp0"
+cd /d "%~dp0.."
 
 set "PY="
 where python >nul 2>&1 && set "PY=python"

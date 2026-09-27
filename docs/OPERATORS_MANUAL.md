@@ -57,15 +57,15 @@ python3 -m streamlit run dashboard.py
 
 ### Windows Launcher (Any Directory)
 
-Double-click `run_dashboard.bat` or run it from any command prompt.
+Double-click `scripts\run_dashboard.bat` or run it from any command prompt.
 It auto-detects the repository root, runs the orchestrator, and launches
 the dashboard.
 
 ### Linux/macOS Launcher
 
 ```bash
-chmod +x run_dashboard.sh
-./run_dashboard.sh
+chmod +x scripts/run_dashboard.sh
+./scripts/run_dashboard.sh
 ```
 
 ---
@@ -1485,7 +1485,7 @@ Beyond the `records` array, the notebook includes:
 ## 9. The USS Crusher LCARS Command Deck
 
 TNG LCARS-styled Streamlit UI (`dashboard/` package; entry: `streamlit run dashboard.py`).
-Run `python3 orchestrator.py`, then `streamlit run dashboard.py` or `./run_dashboard.sh`.
+Run `python3 orchestrator.py`, then `streamlit run dashboard.py` or `./scripts/run_dashboard.sh`.
 
 **Ship class:** The dashboard resolves the active platform from telemetry zone
 fingerprints, `crusher_labs/config.yaml`, or the sidebar selector. Precomputed deck

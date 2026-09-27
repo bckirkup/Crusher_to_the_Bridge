@@ -148,7 +148,7 @@ def build_manifest(
     tier = footprint_tier
     disclaimer = _footprint_disclaimer(tier)
     decks = sorted({str(z.get("deck", "main")) for z in layout.get("zones", [])})
-    return {
+    manifest = {
         "platform_id": platform_id,
         "ship_class_label": labels.get(platform_id, platform_id.replace("_", " ").title()),
         "footprint_tier": tier,
@@ -169,3 +169,7 @@ def build_manifest(
             "architectural_graphics": "graphics/graphics.json",
         },
     }
+    superseded_by = layout.get("superseded_by")
+    if superseded_by:
+        manifest["superseded_by"] = superseded_by
+    return manifest

@@ -3,14 +3,14 @@
 #  run_campaign.sh — Mega Cruise ~17780 Picard campaign (Linux / macOS)
 #
 #  From the repo root:
-#    ./run_campaign.sh --smoke
-#    ./run_campaign.sh --tier t1
-#    ./run_campaign.sh --dry-run
-#    ./run_campaign.sh --resume --tier t2
+#    ./scripts/run_campaign.sh --smoke
+#    ./scripts/run_campaign.sh --tier t1
+#    ./scripts/run_campaign.sh --dry-run
+#    ./scripts/run_campaign.sh --resume --tier t2
 # ============================================================================
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 export PYTHONUTF8=1

@@ -218,7 +218,14 @@ class SpatialLayout(BaseModel):
     zones: list[SpatialZone]
     description: str | None = None
     deck_dimensions: dict[str, Any] | None = None
+    # ``graywater_zones`` is the canonical key; ``greywater_zones`` (British
+    # spelling) is accepted as a deprecated alias and resolved below.
     graywater_zones: list[str] | None = None
+    greywater_zones: list[str] | None = None
+
+    @property
+    def effective_graywater_zones(self) -> list[str] | None:
+        return self.graywater_zones or self.greywater_zones
 
 
 class HVACZone(BaseModel):
@@ -1426,15 +1433,31 @@ def _check_graywater_zones(
     report: Report,
 ) -> None:
     """Ensure graywater_zones lists existing collection zone IDs."""
-    if layout.graywater_zones:
-        for gz in layout.graywater_zones:
+    if layout.greywater_zones is not None:
+        if layout.graywater_zones:
+            report.warn(
+                _SPATIAL_LAYOUT_JSON,
+                "SCHEMA",
+                "both graywater_zones and deprecated alias greywater_zones "
+                "declared; graywater_zones wins",
+            )
+        else:
+            report.warn(
+                _SPATIAL_LAYOUT_JSON,
+                "SCHEMA",
+                "greywater_zones is a deprecated spelling; rename to "
+                "graywater_zones",
+            )
+    effective_zones = layout.effective_graywater_zones
+    if effective_zones:
+        for gz in effective_zones:
             if gz not in valid_zones:
                 report.error(
                     _SPATIAL_LAYOUT_JSON,
                     "GRAPH_REF",
                     f"graywater_zones entry '{gz}' not found in spatial_layout zones",
                 )
-    else:
+    else:  # neither spelling present
         report.error(
             _SPATIAL_LAYOUT_JSON,
             "GRAPH_REF",
@@ -3332,7 +3355,19 @@ def _check_microflora_params(
                      f"microflora.clr_shift_scale = {scale} is negative")
 
     if zone_ids:
+        legacy_explicit = mf.get("greywater_zones")
         explicit = mf.get("graywater_zones")
+        if legacy_explicit is not None:
+            if explicit:
+                report.warn(_CONFIG_YAML, "SCHEMA",
+                            "microflora declares both graywater_zones and "
+                            "deprecated alias greywater_zones; "
+                            "graywater_zones wins")
+            else:
+                report.warn(_CONFIG_YAML, "SCHEMA",
+                            "microflora.greywater_zones is a deprecated "
+                            "spelling; rename to graywater_zones")
+                explicit = legacy_explicit
         if explicit:
             for gz in explicit:
                 if gz not in zone_ids:
