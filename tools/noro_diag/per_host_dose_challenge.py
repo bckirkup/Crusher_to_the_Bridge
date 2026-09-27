@@ -148,11 +148,13 @@ _CAMPAIGN_DIR = (
 if str(_CAMPAIGN_DIR) not in sys.path:
     sys.path.insert(0, str(_CAMPAIGN_DIR))
 
+import variant_campaign  # noqa: E402
 from campaign_execution import (  # noqa: E402
     compute_derived_metrics,
     extract_timeseries,
 )
 from campaign_runner import (  # noqa: E402
+    DEFAULT_NATURAL_HISTORY_CLOCK,
     generate_tier_runs,
     parameters_from_spec,
 )
@@ -1891,6 +1893,7 @@ def run_seed(
     fomite_touch_share_table: str | None = None,
     arm_tag: str | None = None,
     spec_dict: dict[str, Any] | None = None,
+    natural_history_clock: str | None = None,
 ) -> dict[str, Any]:
     """Run one instrumented voyage and return its measurement."""
     started_total = time.perf_counter()
@@ -1968,7 +1971,10 @@ def run_seed(
     )
     summary["fomite_touch_share_resolved"] = rec.fomite_touch_share_seen
     if verbatim:
-        _attach_voyage_blocks(summary, spec_dict, result, num_agents)
+        _attach_voyage_blocks(
+            summary, spec_dict, result, num_agents,
+            natural_history_clock=natural_history_clock,
+        )
     summary["wall_clock_seconds_run"] = wall_clock_run
     summary["wall_clock_seconds_total"] = time.perf_counter() - started_total
     return summary
@@ -1979,6 +1985,7 @@ def _attach_voyage_blocks(
     spec_dict: dict[str, Any],
     result: Any,
     num_agents: int,
+    natural_history_clock: str | None = None,
 ) -> None:
     """The anchor-shaped blocks a verbatim campaign spec produces.
 
@@ -1991,7 +1998,13 @@ def _attach_voyage_blocks(
     """
     history = getattr(result, "history", None) or []
     series = extract_timeseries(history)
-    summary["parameters"] = parameters_from_spec(spec_dict)
+    parameters = parameters_from_spec(spec_dict)
+    parameters["natural_history_clock"] = (
+        spec_dict.get("natural_history_clock")
+        or natural_history_clock
+        or DEFAULT_NATURAL_HISTORY_CLOCK
+    )
+    summary["parameters"] = parameters
     summary["trigger_status"] = getattr(result, "final_trigger_status", None)
     summary["timeseries"] = series
     summary["derived"] = compute_derived_metrics(series, num_agents)
@@ -2309,14 +2322,19 @@ def _tier_run_list(
     manifest_path: Path, tier: str,
 ) -> list[tuple[str, dict[str, Any]]]:
     """Ordered ``(run_id, spec)`` list the tier generates, verbatim."""
+    manifest = _load_manifest(manifest_path)
+    return list(generate_tier_runs(manifest, tier))
+
+
+def _load_manifest(manifest_path: Path) -> dict[str, Any]:
+    """Read the campaign manifest under the repository root."""
     safe_manifest = Path(
         resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
     )
     with validated_open(
         safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
-        manifest = json.load(handle)
-    return list(generate_tier_runs(manifest, tier))
+        return json.load(handle)
 
 
 def _write_run_zip(
@@ -2349,6 +2367,16 @@ def _write_run_zip(
 
 def _main_manifest(args: argparse.Namespace) -> int:
     """Canary mode: run the tier's verbatim specs, one run zip each."""
+    manifest = _load_manifest(args.manifest)
+    manifest_clock = manifest.get("natural_history_clock")
+    if manifest_clock is not None:
+        declared = str(manifest_clock)
+        if declared not in variant_campaign.CLOCKS:
+            raise SystemExit(
+                f"manifest natural_history_clock must be one of "
+                f"{variant_campaign.CLOCKS}, got {declared!r}",
+            )
+        manifest_clock = declared
     runs = _tier_run_list(args.manifest, args.tier)
     if args.index is not None:
         if args.index >= len(runs):
@@ -2370,6 +2398,7 @@ def _main_manifest(args: argparse.Namespace) -> int:
             pathogen_id=args.pathogen_id,
             top_hosts=args.top_hosts,
             spec_dict=spec,
+            natural_history_clock=manifest_clock,
         )
         summary["run_id"] = run_id
         zip_path = _write_run_zip(out_dir, args.tier, run_id, summary)
