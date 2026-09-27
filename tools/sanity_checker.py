@@ -3355,25 +3355,34 @@ def _check_microflora_params(
                      f"microflora.clr_shift_scale = {scale} is negative")
 
     if zone_ids:
-        legacy_explicit = mf.get("greywater_zones")
-        explicit = mf.get("graywater_zones")
-        if legacy_explicit is not None:
-            if explicit:
-                report.warn(_CONFIG_YAML, "SCHEMA",
-                            "microflora declares both graywater_zones and "
-                            "deprecated alias greywater_zones; "
-                            "graywater_zones wins")
-            else:
-                report.warn(_CONFIG_YAML, "SCHEMA",
-                            "microflora.greywater_zones is a deprecated "
-                            "spelling; rename to graywater_zones")
-                explicit = legacy_explicit
+        _check_microflora_graywater(mf, zone_ids, report)
+
+
+def _check_microflora_graywater(
+    mf: dict[str, Any],
+    zone_ids: set[str],
+    report: Report,
+) -> None:
+    """Validate the microflora graywater_zones override (legacy alias ok)."""
+    explicit = mf.get("graywater_zones")
+    legacy_explicit = mf.get("greywater_zones")
+    if legacy_explicit is not None:
         if explicit:
-            for gz in explicit:
-                if gz not in zone_ids:
-                    report.warn(_CONFIG_YAML, "GRAPH_REF",
-                                f"microflora.graywater_zones override references '{gz}' "
-                                f"not found in spatial_layout zones")
+            report.warn(_CONFIG_YAML, "SCHEMA",
+                        "microflora declares both graywater_zones and "
+                        "deprecated alias greywater_zones; "
+                        "graywater_zones wins")
+        else:
+            report.warn(_CONFIG_YAML, "SCHEMA",
+                        "microflora.greywater_zones is a deprecated "
+                        "spelling; rename to graywater_zones")
+            explicit = legacy_explicit
+    if explicit:
+        for gz in explicit:
+            if gz not in zone_ids:
+                report.warn(_CONFIG_YAML, "GRAPH_REF",
+                            f"microflora.graywater_zones override references '{gz}' "
+                            f"not found in spatial_layout zones")
 
 
 # ── Path resolution (orchestrator-aligned) ───────────────────────────────

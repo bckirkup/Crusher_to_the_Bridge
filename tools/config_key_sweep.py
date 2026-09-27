@@ -47,7 +47,6 @@ import argparse
 import ast
 import json
 import os
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Iterable
@@ -153,50 +152,87 @@ class _FileScan(ast.NodeVisitor):
         if node is None:
             return None
         if isinstance(node, ast.Name):
-            if node.id in self.aliases:
-                return self.aliases[node.id]
-            if node.id in ROOT_NAMES:
-                return ""
-            return None
+            return self._resolve_name(node)
         if isinstance(node, ast.Attribute):
-            if node.attr in ROOT_ATTRS:
-                return ""
-            inner = self._resolve(node.value)
-            return f"{inner}.{node.attr}" if inner is not None else None
+            return self._resolve_attribute(node)
         if isinstance(node, ast.Subscript):
-            key = _const_str(node.slice)
-            inner = self._resolve(node.value)
-            if inner is not None and key is not None:
-                return f"{inner}.{key}" if inner else key
-            return inner
+            return self._resolve_subscript(node)
         if isinstance(node, ast.Call):
-            func = node.func
-            if isinstance(func, ast.Name) and func.id in LOADER_NAMES:
-                return ""
-            if isinstance(func, ast.Name) and func.id in {"dict", "Dict"} and node.args:
-                return self._resolve(node.args[0])
-            if isinstance(func, ast.Attribute):
-                inner = self._resolve(func.value)
-                if inner is None:
-                    return None
-                if func.attr in {"get", "pop", "setdefault"} and node.args:
-                    key = _const_str(node.args[0])
-                    if key is not None:
-                        return f"{inner}.{key}" if inner else key
-                if func.attr == "copy" or func.attr in {"items", "keys", "values"}:
-                    return inner
-                return inner if func.attr in {"get"} else None
-        if isinstance(node, ast.BoolOp) and isinstance(node.op, ast.Or):
-            for v in node.values:
-                r = self._resolve(v)
-                if r is not None:
-                    return r
+            return self._resolve_call(node)
+        if isinstance(node, ast.BoolOp):
+            return self._resolve_boolop(node)
         if isinstance(node, ast.IfExp):
             return self._resolve(node.body) or self._resolve(node.orelse)
         return None
 
+    def _resolve_name(self, node: ast.Name) -> str | None:
+        if node.id in self.aliases:
+            return self.aliases[node.id]
+        if node.id in ROOT_NAMES:
+            return ""
+        return None
+
+    def _resolve_attribute(self, node: ast.Attribute) -> str | None:
+        if node.attr in ROOT_ATTRS:
+            return ""
+        inner = self._resolve(node.value)
+        return f"{inner}.{node.attr}" if inner is not None else None
+
+    def _resolve_subscript(self, node: ast.Subscript) -> str | None:
+        key = _const_str(node.slice)
+        inner = self._resolve(node.value)
+        if inner is not None and key is not None:
+            return f"{inner}.{key}" if inner else key
+        return inner
+
+    def _resolve_call(self, node: ast.Call) -> str | None:
+        func = node.func
+        if isinstance(func, ast.Name):
+            return self._resolve_named_call(func, node)
+        if isinstance(func, ast.Attribute):
+            return self._resolve_method_call(func, node)
+        return None
+
+    def _resolve_named_call(self, func: ast.Name, node: ast.Call) -> str | None:
+        if func.id in LOADER_NAMES:
+            return ""
+        if func.id in {"dict", "Dict"} and node.args:
+            return self._resolve(node.args[0])
+        return None
+
+    def _resolve_method_call(self, func: ast.Attribute,
+                             node: ast.Call) -> str | None:
+        inner = self._resolve(func.value)
+        if inner is None:
+            return None
+        if func.attr in {"get", "pop", "setdefault"} and node.args:
+            key = _const_str(node.args[0])
+            if key is not None:
+                return f"{inner}.{key}" if inner else key
+        if func.attr == "copy" or func.attr in {"items", "keys", "values"}:
+            return inner
+        return inner if func.attr == "get" else None
+
+    def _resolve_boolop(self, node: ast.BoolOp) -> str | None:
+        if not isinstance(node.op, ast.Or):
+            return None
+        for v in node.values:
+            r = self._resolve(v)
+            if r is not None:
+                return r
+        return None
+
     # ── visitors ─────────────────────────────────────────────────────
     def visit_ClassDef(self, node: ast.ClassDef) -> None:
+        info, params = self._class_surface(node)
+        if info.fields or params:
+            self.models[node.name] = info
+            self.callable_params[node.name] = info.fields | params
+        self.generic_visit(node)
+
+    @staticmethod
+    def _class_surface(node: ast.ClassDef) -> tuple["_ModelInfo", set[str]]:
+        """Annotated/assigned field names + init-method params of a class."""
         info = _ModelInfo(node.name)
         params: set[str] = set()
         for stmt in node.body:
@@ -207,20 +243,11 @@ class _FileScan(ast.NodeVisitor):
                     if isinstance(t, ast.Name):
                         info.fields.add(t.id)
             elif isinstance(stmt, ast.FunctionDef) and stmt.args:
-                params |= {
-                    a.arg for a in stmt.args.args + stmt.args.kwonlyargs
-                    if a.arg not in {"self", "cls"}
-                }
-        if info.fields or params:
-            self.models[node.name] = info
-            self.callable_params[node.name] = info.fields | params
-        self.generic_visit(node)
+                params |= _param_names(stmt.args)
+        return info, params
 
     def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
-        params = {
-            a.arg for a in node.args.args + node.args.kwonlyargs
-            if a.arg not in {"self", "cls"}
-        }
+        params = _param_names(node.args)
         if params:
             self.callable_params.setdefault(node.name, set()).update(params)
         self.generic_visit(node)
@@ -271,61 +298,77 @@ class _FileScan(ast.NodeVisitor):
         self.generic_visit(node)
 
     def visit_Call(self, node: ast.Call) -> None:
-        func = node.func
+        self._record_kwarg_names(node)
+        self._record_splat_reads(node)
+        self._record_model_reads(node)
+        self._record_method_reads(node)
+        self.generic_visit(node)
+
+    def _record_kwarg_names(self, node: ast.Call) -> None:
         # name= keyword arguments count as key use (ctor/param names often
         # mirror config keys)
         for kw in node.keywords:
             if kw.arg is not None:
                 self.key_uses.add(kw.arg)
+
+    def _record_splat_reads(self, node: ast.Call) -> None:
         # splat: f(**<alias>)
         for kw in node.keywords:
-            if kw.arg is None:
-                src = self._resolve(kw.value)
-                if src is not None:
-                    callee = ""
-                    if isinstance(func, ast.Name):
-                        callee = func.id
-                    elif isinstance(func, ast.Attribute):
-                        callee = func.attr
-                    self._record(src, node.lineno, "splat")
-                    params = self.callable_params.get(callee)
-                    for p in params or ():
-                        self._record(f"{src}.{p}" if src else p,
-                                     node.lineno, "splat")
+            if kw.arg is not None:
+                continue
+            src = self._resolve(kw.value)
+            if src is None:
+                continue
+            callee = ""
+            if isinstance(node.func, ast.Name):
+                callee = node.func.id
+            elif isinstance(node.func, ast.Attribute):
+                callee = node.func.attr
+            self._record(src, node.lineno, "splat")
+            for p in self.callable_params.get(callee, ()):
+                self._record(f"{src}.{p}" if src else p,
+                             node.lineno, "splat")
+
+    def _record_model_reads(self, node: ast.Call) -> None:
         # model_validate / Model(**x) / Model(x)
+        func = node.func
         if isinstance(func, ast.Attribute) and func.attr in {
             "model_validate", "parse_obj",
         }:
-            model = ""
-            if isinstance(func.value, ast.Name):
-                model = func.value.id
+            model = func.value.id if isinstance(func.value, ast.Name) else ""
             if node.args:
                 src = self._resolve(node.args[0])
                 if src is not None:
                     self._apply_model(model, src, node.lineno)
         elif isinstance(func, ast.Name) and func.id in self.models:
-            if node.args and self._resolve(node.args[0]) is not None:
-                self._apply_model(func.id, self._resolve(node.args[0]) or "",
-                                  node.lineno)
-        # <alias>.get/pop/setdefault("k") / <alias>["k"]
+            src = self._resolve(node.args[0]) if node.args else None
+            if src is not None:
+                self._apply_model(func.id, src, node.lineno)
+
+    def _record_method_reads(self, node: ast.Call) -> None:
+        # <alias>.get/pop/setdefault("k") / <alias>.items()/.keys()/.values()
+        func = node.func
+        if not isinstance(func, ast.Attribute):
+            return
+        if func.attr in {"get", "pop", "setdefault"}:
+            self._record_keyed_read(node, func)
+        elif func.attr in {"items", "keys", "values"}:
+            src = self._resolve(node)
+            if src is not None:
+                self._record(src, node.lineno, "iterate")
+
+    def _record_keyed_read(self, node: ast.Call, func: ast.Attribute) -> None:
+        key = _const_str(node.args[0]) if node.args else None
+        if key is not None:
+            self.key_uses.add(key)
+        base = self._resolve(func.value)
+        if base is not None and key is not None:
+            self._record(f"{base}.{key}" if base else key,
+                         node.lineno, func.attr)
+            return
         src = self._resolve(node)
-        if isinstance(func, ast.Attribute) and func.attr in {
-            "get", "pop", "setdefault",
-        }:
-            key = _const_str(node.args[0]) if node.args else None
-            if key is not None:
-                self.key_uses.add(key)
-            base = self._resolve(func.value)
-            if base is not None and key is not None:
-                self._record(f"{base}.{key}" if base else key,
-                             node.lineno, func.attr)
-            elif src is not None:
-                self._record(src, node.lineno, func.attr)
-        elif src is not None and isinstance(func, ast.Attribute) and func.attr in {
-            "items", "keys", "values",
-        }:
-            self._record(src, node.lineno, "iterate")
-        self.generic_visit(node)
+        if src is not None:
+            self._record(src, node.lineno, func.attr)
 
     def visit_Subscript(self, node: ast.Subscript) -> None:
         src = self._resolve(node.value)
@@ -366,6 +409,14 @@ class _FileScan(ast.NodeVisitor):
                     changed = True
             if not changed:
                 break
+
+
+def _param_names(args: ast.arguments) -> set[str]:
+    """Callable param names minus the bound-method slots."""
+    return {
+        a.arg for a in args.args + args.kwonlyargs
+        if a.arg not in {"self", "cls"}
+    }
 
 
 def _const_str(node: ast.expr | None) -> str | None:
@@ -424,9 +475,15 @@ def _build_literal_index(scans: list[_FileScan]) -> dict[str, set[str]]:
     return idx
 
 
-def classify(leaves: dict[str, Any], scans: list[_FileScan],
-             name_index: dict[str, set[str]],
-             literal_index: dict[str, set[str]]) -> list[dict[str, Any]]:
+def _ancestors(path: str) -> Iterable[str]:
+    anc = path
+    while "." in anc:
+        anc = anc.rsplit(".", 1)[0]
+        yield anc
+
+
+def _index_reads(scans: list[_FileScan]) -> tuple[
+        dict[str, list[Read]], dict[str, list[Read]], set[str]]:
     direct: dict[str, list[Read]] = {}
     downstream: dict[str, list[Read]] = {}
     iterated: set[str] = set()   # parents consumed wholesale
@@ -436,44 +493,71 @@ def classify(leaves: dict[str, Any], scans: list[_FileScan],
                 r.path, []).append(r)
             if r.kind in {"iterate", "splat", "model"}:
                 iterated.add(r.path)
+    return direct, downstream, iterated
 
-    def _ancestors(path: str) -> Iterable[str]:
-        anc = path
-        while "." in anc:
-            anc = anc.rsplit(".", 1)[0]
-            yield anc
 
-    def _any_read(anc: str) -> Read | None:
-        rs = direct.get(anc) or downstream.get(anc)
-        return rs[0] if rs else None
+def _any_read(path: str, direct: dict[str, list[Read]],
+              downstream: dict[str, list[Read]]) -> Read | None:
+    rs = direct.get(path) or downstream.get(path)
+    return rs[0] if rs else None
 
-    def status(path: str) -> tuple[str, str]:
-        if path in direct:
-            return "consumed-direct", _fmt(direct[path][0])
-        if path in downstream:
-            return "consumed-downstream", _fmt(downstream[path][0])
-        # An ancestor consumed wholesale (items()/splat/model) covers leaves.
-        for anc in _ancestors(path):
-            if anc in iterated:
-                ev = _any_read(anc)
-                return "consumed-bulk", _fmt(ev) if ev else ""
-        leaf = path.rsplit(".", 1)[-1]
-        if leaf in name_index:
-            where = sorted(name_index[leaf])[:3]
-            return "indirect-name-match", ", ".join(where)
-        if leaf in literal_index:
-            where = sorted(literal_index[leaf])[:3]
-            return "indirect-literal", ", ".join(where)
-        # Parent section was fetched but this leaf never: strong dead signal.
-        for anc in _ancestors(path):
-            ev = _any_read(anc)
-            if ev is not None:
-                return "UNREFERENCED", f"section read {_fmt(ev)}; key never"
-        return "UNREFERENCED", "no consumer reads this key"
 
+def _bulk_status(path: str, iterated: set[str],
+                 direct: dict[str, list[Read]],
+                 downstream: dict[str, list[Read]]) -> tuple[str, str] | None:
+    # An ancestor consumed wholesale (items()/splat/model) covers leaves.
+    for anc in _ancestors(path):
+        if anc in iterated:
+            ev = _any_read(anc, direct, downstream)
+            return "consumed-bulk", _fmt(ev) if ev else ""
+    return None
+
+
+def _weak_status(path: str, name_index: dict[str, set[str]],
+                 literal_index: dict[str, set[str]]) -> tuple[str, str] | None:
+    leaf = path.rsplit(".", 1)[-1]
+    if leaf in name_index:
+        return "indirect-name-match", ", ".join(sorted(name_index[leaf])[:3])
+    if leaf in literal_index:
+        return "indirect-literal", ", ".join(sorted(literal_index[leaf])[:3])
+    return None
+
+
+def _dead_status(path: str, direct: dict[str, list[Read]],
+                 downstream: dict[str, list[Read]]) -> tuple[str, str]:
+    # Parent section was fetched but this leaf never: strong dead signal.
+    for anc in _ancestors(path):
+        ev = _any_read(anc, direct, downstream)
+        if ev is not None:
+            return "UNREFERENCED", f"section read {_fmt(ev)}; key never"
+    return "UNREFERENCED", "no consumer reads this key"
+
+
+def _row_status(path: str, direct: dict[str, list[Read]],
+                downstream: dict[str, list[Read]], iterated: set[str],
+                name_index: dict[str, set[str]],
+                literal_index: dict[str, set[str]]) -> tuple[str, str]:
+    if path in direct:
+        return "consumed-direct", _fmt(direct[path][0])
+    if path in downstream:
+        return "consumed-downstream", _fmt(downstream[path][0])
+    bulk = _bulk_status(path, iterated, direct, downstream)
+    if bulk is not None:
+        return bulk
+    weak = _weak_status(path, name_index, literal_index)
+    if weak is not None:
+        return weak
+    return _dead_status(path, direct, downstream)
+
+
+def classify(leaves: dict[str, Any], scans: list[_FileScan],
+             name_index: dict[str, set[str]],
+             literal_index: dict[str, set[str]]) -> list[dict[str, Any]]:
+    direct, downstream, iterated = _index_reads(scans)
     rows = []
     for path in sorted(leaves):
-        st, ev = status(path)
+        st, ev = _row_status(path, direct, downstream, iterated,
+                             name_index, literal_index)
         rows.append({"key": path, "value": leaves[path],
                      "status": st, "evidence": ev})
     return rows
@@ -537,7 +621,7 @@ def render_markdown(rows: list[dict[str, Any]],
     return "\n".join(parts)
 
 
-def main() -> int:
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--stdout", action="store_true",
                     help="print the markdown report instead of writing reports/")
@@ -558,7 +642,7 @@ def main() -> int:
 
     if args.stdout:
         print(md)
-        return 0
+        return
 
     REPORTS_DIR.mkdir(exist_ok=True)
     md_path = REPORTS_DIR / "config_key_sweep.md"
@@ -572,8 +656,7 @@ def main() -> int:
     n_unref = sum(1 for r in rows if r["status"] == "UNREFERENCED")
     print(f"Wrote {md_path} and {json_path}")
     print(f"{len(rows)} keys scanned; {n_unref} unreferenced candidates")
-    return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

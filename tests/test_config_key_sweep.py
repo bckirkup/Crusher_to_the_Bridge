@@ -14,7 +14,6 @@ import pytest
 
 from tools import config_key_sweep as cks
 
-
 CONFIG_YAML = """\
 engine:
   read_get: 1.0
@@ -115,7 +114,7 @@ def consume(cfg):
 BROKEN_SRC = "def broken(:\n"
 
 
-@pytest.fixture()
+@pytest.fixture
 def fake_repo(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (tmp_path / "crusher_labs").mkdir()
     (tmp_path / "engines").mkdir()
@@ -191,7 +190,7 @@ def test_report_contains_all_sections(fake_repo: Path) -> None:
 def test_main_writes_reports(fake_repo: Path,
                              monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(sys, "argv", ["config_key_sweep.py"])
-    assert cks.main() == 0
+    cks.main()
     md = (fake_repo / "reports" / "config_key_sweep.md").read_text()
     data = json.loads(
         (fake_repo / "reports" / "config_key_sweep.json").read_text())
@@ -203,7 +202,7 @@ def test_main_writes_reports(fake_repo: Path,
 def test_main_stdout(fake_repo: Path, monkeypatch: pytest.MonkeyPatch,
                      capsys: pytest.CaptureFixture) -> None:
     monkeypatch.setattr(sys, "argv", ["config_key_sweep.py", "--stdout"])
-    assert cks.main() == 0
+    cks.main()
     out = capsys.readouterr().out
     assert out.startswith("# config.yaml key sweep")
     assert not (fake_repo / "reports").exists()
