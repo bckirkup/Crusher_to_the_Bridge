@@ -87,5 +87,9 @@
         "action": "retry"
       }
     ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 10800
   }
 }
