@@ -1,8 +1,8 @@
 # COVID-TAKEOFF-ATTR-01
 **Date:** 2026-09-27
-**Commit:** ce8e3020 (instrument); engine identical to v12 measurement SHA f42901aa
+**Commit:** ce8e3020
 **Pathogens:** sars_cov2_resp
-**Status:** in-progress
+**Status:** declared
 
 Decomposition of the covid.H3 takeoff burn — the ~2,400–3,580 recorded
 onsets the declared replay produces against the record's 197 — into
@@ -10,7 +10,8 @@ routes, rings and timing, and the mechanism class the pattern implicates.
 Measurement only: no Θ selection, no clause repair, no model or constant
 changes. Companion to THETA-SCREEN-V12 (§stage 2: the clause fails at
 every admissible Θ in the same ~17× mass class, so the residual is
-mechanism-shaped, not Θ-shaped).
+mechanism-shaped, not Θ-shaped). Engine code at this commit is identical
+to the v12 measurement SHA f42901aa.
 
 ## Declared before running
 
