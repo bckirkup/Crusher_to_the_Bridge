@@ -78,6 +78,7 @@
     "metrics": [
       "median + q95 per-epoch dosed-set size (mechanism.dosed_targets_by_epoch)",
       "challenged_share_of_aboard (mechanism.susceptibility.challenged_share_of_aboard)",
+      "accrued hazard Lambda per challenged host (mechanism.susceptibility.accrued_hazard): Lambda = sum of susc * p_dose * (1 - protection) over challenged epochs; challenged-uninfected quantiles, mean counterfactual P(infection) = 1 - exp(-Lambda), share with P >= 0.5 and >= 0.1, infected-at-onset Lambda, never-challenged count — proximity to the infection threshold alongside the cumulative share; instrument added before the array",
       "per-route share re-split (route_split.by_infecting_epoch_dose)",
       "onset count distribution + clause ratio vs ~197 + before_share (recorded_onsets, observables.onsets_before_split_day / recorded_onsets, target 0.173 +/- 0.10, takeoff seeds >= 10 recorded onsets, clause needs >= 5 takeoff seeds)",
       "clock correlation: rhythm_ab.occupancy_sync_corr (point-biserial r, transit-zone occupancy vs catalog synchronized-end epochs) + occupancy_lift_at_sync_end",
