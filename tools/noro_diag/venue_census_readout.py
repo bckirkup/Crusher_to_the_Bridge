@@ -7,6 +7,11 @@ and emits the ledger-ready tables:
 * the join integrity row (emitted events, unattributed, record-less calls);
 * the 3xN landing table: confinement class x site group, in both event
   counts and episode-load mass;
+* the NORO-VENUE-02 first-emesis table: ``first_emit`` rows only,
+  site class x emitter class, with the ``ordered_mobile`` count (emits
+  inside the escort window) per site class;
+* the conversion check: per-cell acquisitions and attack rates read from
+  each zip's ``summary.json`` ``derived`` block;
 * placement quality: fraction of landings with >=1 susceptible occupant,
   re-sliced by confinement class and site class, with Wilson CIs and
   small-denominator flags;
@@ -88,6 +93,11 @@ def load_cells(runs_dir: Path) -> dict[str, list[dict[str, Any]]]:
                 summary.get("platform", venue.get("platform", "")),
             ),
             "ignited": bool(venue.get("ignited")),
+            "escort_delay_hours": summary.get("escort_delay_hours"),
+            "escort_delay_epochs": venue.get("escort_delay_epochs"),
+            "num_agents": summary.get("num_agents"),
+            "derived": summary.get("derived") or {},
+            "parameters": summary.get("parameters") or {},
             "venue": venue,
         })
     return dict(cells)
@@ -119,56 +129,100 @@ def aggregate_cell(runs: list[dict[str, Any]]) -> dict[str, Any]:
         "emit_calls_no_records": 0,
         "n_emesis": 0,
         "n_unattributed": 0,
+        "n_acquired": 0,
+        "n_acquired_ignited": 0,
         "by_confinement_site": {},
         "by_confinement_emitter": {},
         "by_site_class": {},
+        "first_emit_table": {},
+        "first_emit_mobile": 0,
+        "escort_delay_epochs": {
+            r["escort_delay_epochs"] for r in runs
+        },
+        "attack_rates": defaultdict(list),
+        "num_agents": set(),
         "confinement_actions": defaultdict(int),
         "confined_host_classes": defaultdict(int),
         "latency": defaultdict(list),
         "seeds": [],
     }
+    agg["escort_delay_epochs"] = sorted(
+        v for v in agg["escort_delay_epochs"] if v is not None
+    )
     for run in runs:
-        venue = run["venue"]
-        agg["emit_calls"] += int(venue.get("emit_calls", 0))
-        agg["emit_calls_no_records"] += int(
-            venue.get("emit_calls_no_records", 0),
-        )
-        agg["n_emesis"] += int(venue.get("n_emesis_emitted", 0))
-        agg["n_unattributed"] += int(venue.get("n_unattributed", 0))
-        agg["seeds"].append({
-            "seed": run["seed"],
-            "ignited": run["ignited"],
-            "n_emesis": int(venue.get("n_emesis_emitted", 0)),
-            "n_acquired": int(venue.get("n_acquired", 0)),
-            "n_confined_hosts": sum(
-                1 for h in venue.get("host_rows", [])
-                if h.get("first_confined_epoch") is not None
-            ),
-        })
-        for row in venue.get("emit_rows", []):
-            conf = str(row.get("confinement_class", "unclassified"))
-            site = str(row.get("site_group", "other"))
-            emitter = str(row.get("emitter_class", "unknown"))
-            _add_emit(
-                agg["by_confinement_site"], f"{conf}|{site}", row,
-            )
-            _add_emit(
-                agg["by_confinement_emitter"], f"{conf}|{emitter}", row,
-            )
-            _add_emit(
-                agg["by_site_class"],
-                f"{conf}|{row.get('site_class', 'other')}",
-                row,
-            )
-        _aggregate_hosts(agg, venue)
-        for event in venue.get("confinement_events", []):
+        _accumulate_run(agg, run)
+        _aggregate_emit_rows(agg, run["venue"])
+        _aggregate_hosts(agg, run["venue"])
+        for event in run["venue"].get("confinement_events", []):
             agg["confinement_actions"][str(event.get("action"))] += 1
     agg["confinement_actions"] = dict(agg["confinement_actions"])
     agg["confined_host_classes"] = dict(agg["confined_host_classes"])
+    agg["attack_rates"] = {
+        key: quantiles(vals) for key, vals in agg["attack_rates"].items()
+    }
+    agg["num_agents"] = sorted(agg["num_agents"])
     agg["latency"] = {
         key: quantiles(vals) for key, vals in agg["latency"].items()
     }
     return agg
+
+
+def _accumulate_run(agg: dict[str, Any], run: dict[str, Any]) -> None:
+    venue = run["venue"]
+    agg["emit_calls"] += int(venue.get("emit_calls", 0))
+    agg["emit_calls_no_records"] += int(
+        venue.get("emit_calls_no_records", 0),
+    )
+    agg["n_emesis"] += int(venue.get("n_emesis_emitted", 0))
+    agg["n_unattributed"] += int(venue.get("n_unattributed", 0))
+    acquired = int(venue.get("n_acquired", 0))
+    agg["n_acquired"] += acquired
+    if run["ignited"]:
+        agg["n_acquired_ignited"] += acquired
+    derived = run.get("derived") or {}
+    for key in _ATTACK_RATE_KEYS:
+        value = derived.get(key)
+        if isinstance(value, (int, float)):
+            agg["attack_rates"][key].append(float(value))
+    if run.get("num_agents"):
+        agg["num_agents"].add(int(run["num_agents"]))
+    agg["seeds"].append({
+        "seed": run["seed"],
+        "ignited": run["ignited"],
+        "n_emesis": int(venue.get("n_emesis_emitted", 0)),
+        "n_acquired": int(venue.get("n_acquired", 0)),
+        "n_confined_hosts": sum(
+            1 for h in venue.get("host_rows", [])
+            if h.get("first_confined_epoch") is not None
+        ),
+    })
+
+
+def _aggregate_emit_rows(
+    agg: dict[str, Any], venue: dict[str, Any],
+) -> None:
+    for row in venue.get("emit_rows", []):
+        conf = str(row.get("confinement_class", "unclassified"))
+        site = str(row.get("site_group", "other"))
+        emitter = str(row.get("emitter_class", "unknown"))
+        _add_emit(agg["by_confinement_site"], f"{conf}|{site}", row)
+        _add_emit(agg["by_confinement_emitter"], f"{conf}|{emitter}", row)
+        _add_emit(
+            agg["by_site_class"],
+            f"{conf}|{row.get('site_class', 'other')}",
+            row,
+        )
+        if not row.get("first_emit"):
+            continue
+        key = f"{row.get('site_class', 'other')}|{emitter}"
+        _add_emit(agg["first_emit_table"], key, row)
+        # ordered_not_admitted at the confined epoch is still mobile:
+        # transmission runs before the escorted admission lands
+        # end-of-epoch.
+        if row.get("order_subclass") in (
+            "ordered_mobile", "ordered_not_admitted",
+        ):
+            agg["first_emit_mobile"] += 1
 
 
 def _aggregate_hosts(agg: dict[str, Any], venue: dict[str, Any]) -> None:
@@ -221,6 +275,8 @@ def render_markdown(cells: dict[str, Any]) -> str:
         )
         lines.append("")
         lines += _landing_table(agg)
+        lines += _first_emit_table(agg)
+        lines += _conversion_block(cell, cells[cell])
         lines += _placement_quality_table(agg)
         lines += _latency_table(agg)
         lines += _actions_table(agg)
@@ -259,6 +315,65 @@ def _landing_table(agg: dict[str, Any]) -> list[str]:
             + f" | {total_mass:.3g} |",
         )
     return lines + [""]
+
+
+def _first_emit_table(agg: dict[str, Any]) -> list[str]:
+    """NORO-VENUE-02 first-emesis landing census (``first_emit`` rows)."""
+    table = agg["first_emit_table"]
+    if not table:
+        return []
+    escort = agg.get("escort_delay_epochs") or []
+    escort_label = "/".join(str(v) for v in escort) or "-"
+    lines = [
+        f"First-emesis landings (escort k = {escort_label} ep; "
+        f"in-window mobile rows: {agg['first_emit_mobile']}):",
+        "",
+        "| site class | emitter class | first landings | mass | "
+        ">=1 susceptible |",
+        "|---|---|---|---|---|",
+    ]
+    for key in sorted(table):
+        site_class, emitter = key.split("|", 1)
+        entry = table[key]
+        lines.append(
+            f"| {site_class} | {emitter} | {entry['n']} | "
+            f"{entry['mass']:.3g} | "
+            f"{_pct(entry['susceptible_present'], entry['n'])} |",
+        )
+    return lines + [""]
+
+
+def _conversion_block(cell: str, agg: dict[str, Any]) -> list[str]:
+    """Acquisitions + attack rates per cell for the VENUE-02 conversion check."""
+    ignited = [s for s in agg["seeds"] if s["ignited"]]
+    mean_acquired = (
+        agg["n_acquired_ignited"] / len(ignited) if ignited else None
+    )
+    lines = [
+        f"Conversion for `{cell}` (ignited runs only):",
+        "",
+        "| metric | value |",
+        "|---|---|",
+        f"| ignited runs | {len(ignited)} / {agg['n_runs']} |",
+        "| acquisitions, mean per ignited run | "
+        + (f"{mean_acquired:.2f}" if mean_acquired is not None else "-")
+        + " |",
+    ]
+    rates = agg.get("attack_rates") or {}
+    for key, q in rates.items():
+        if q.get("n", 0) == 0:
+            continue
+        lines.append(
+            f"| {key} (mean over {q['n']} runs) | {q['mean']:.4f} |",
+        )
+    return lines + [""]
+
+
+_ATTACK_RATE_KEYS = (
+    "infection_attack_rate",
+    "infection_attack_rate_passenger",
+    "infection_attack_rate_crew",
+)
 
 
 def _placement_quality_table(agg: dict[str, Any]) -> list[str]:

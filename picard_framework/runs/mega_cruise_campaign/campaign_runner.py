@@ -1297,9 +1297,11 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
             ("quarantine_compliance", "quarantine_compliance"),
             ("reluctant_fraction", "reluctant_fraction"),
             ("reluctant_delay_hours", "reluctant_delay_epochs"),
+            ("escort_delay_hours", "escort_delay_hours"),
         ),
         skip_if_present=frozenset({
             "reluctant_fraction", "reluctant_delay_epochs",
+            "escort_delay_hours",
         }),
     )
     wear = cfg.get("wearable_monitoring") or {}
@@ -1431,7 +1433,10 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     _copy_present(
         params,
         cfg.get("fred_behavior") or {},
-        (("quarantine_compliance", "quarantine_compliance"),),
+        (
+            ("quarantine_compliance", "quarantine_compliance"),
+            ("escort_delay_hours", "escort_delay_hours"),
+        ),
     )
     _copy_present(
         params,
