@@ -420,17 +420,38 @@ def _paired_spread(
     }
 
 
-def pool(
+def _group_cells(
     cells: list[dict[str, Any]],
-    *,
-    takeoff_min: int = 10,
-) -> dict[str, Any]:
+) -> dict[tuple[str, str], list[dict[str, Any]]]:
+    """Cell payloads keyed by (class_id, arm_id)."""
     groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
     for c in cells:
         groups.setdefault(
             (str(c["cell"]["class_id"]), str(c["cell"]["arm_id"])),
             [],
         ).append(c)
+    return groups
+
+
+def _emit_text(text: str, out: str | None) -> None:
+    """Write the readout to --out under the repo root, else stdout."""
+    if out:
+        out_path = resolve_repo_path(REPO_ROOT, out)
+        with validated_open(
+            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
+        ) as handle:
+            handle.write(text)
+        print(f"wrote {out_path}")
+    else:
+        print(text)
+
+
+def pool(
+    cells: list[dict[str, Any]],
+    *,
+    takeoff_min: int = 10,
+) -> dict[str, Any]:
+    groups = _group_cells(cells)
     targets = load_fit_targets()
     classes: dict[str, Any] = {}
     for class_id in sorted({k[0] for k in groups}):
@@ -465,15 +486,7 @@ def main() -> None:  # pragma: no cover - CLI driver
         raise SystemExit(f"no cell payloads under {args.cells_dir}")
     text = json.dumps(pool(cells, takeoff_min=args.takeoff_min),
                       indent=1, default=str)
-    if args.out:
-        out_path = resolve_repo_path(REPO_ROOT, args.out)
-        with validated_open(
-            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as handle:
-            handle.write(text)
-        print(f"wrote {out_path}")
-    else:
-        print(text)
+    _emit_text(text, args.out)
 
 
 if __name__ == "__main__":

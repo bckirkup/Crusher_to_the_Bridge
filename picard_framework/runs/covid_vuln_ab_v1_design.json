@@ -1,0 +1,109 @@
+{
+  "design_id": "covid_vuln_ab_v1",
+  "task_id": "COVID-VULN-01",
+  "schema_version": "1.0.0",
+  "description": "Endpoint-only A/B of the sars_cov2 dose-response shape parameter alpha (beta_poisson susceptibility draw), beta held at 58.0 (register-locked: beta^-1 is a scale factor degenerate with Theta to within 0.7% on the 5th-95th quantiles, so alpha alone carries the shape) and Theta fixed at the v12 midpoint 2.37e11 via susceptibility_scale = Theta*(alpha+58)/alpha (E[s] = Theta on every arm). Arms are the two endpoints of the declared widest honest alpha interval [0.05, 2.0]: alpha_lo CV ~= 4.4 (heavier tail than the shipped 0.18, CV 2.33) and alpha_hi CV ~= 0.69 (the near-homogeneous direction the only coronavirus challenge fits point to: Aganovic 2023 HCoV-229E exponential best; Miura 2023 bimodal-with-homogeneous-rest, continuous gamma variation rejected). Every cell pins rhythm.enabled=true and transmission.exposure_cap.enabled=true so the axis is read on the same exposure-set context as the cap-on baseline. Cells enumerate leg-major, then arm (lo before hi), then seed: mega_cruise occupies indices 0-39 (lo 0-19, hi 20-39), contemporary_cruise 40-79, classic_cruise 80-119, expedition_cruise 120-159.",
+  "cell_conditioning": {
+    "note": "Identical to TAKEOFF-ATTR-01 and RHYTHM-01 (docs/ledger/COVID-TAKEOFF-ATTR-01.md, COVID-RHYTHM-01 ledger): declared replay on the record hulls, one import, infection_age_days 6.8, onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, SOP-017 confinement days 16-30, 768 hourly epochs (mega/contemporary/classic), syndromic onset observation. Scenario legs inherit their records (expedition = greg_mortimer_2020: 28 days, SOP-017 8-27, generic boarding axis per the v12 stage-3 convention). Generic legs carry the DP index geometry verbatim on the platform's own complement - contemporary 2100 pax + 900 crew, classic 1332 + 560. Generic legs carry no testing_campaign - recorded_onsets comes from the syndromic onset curve as on the record legs.",
+    "theta": "2.37e11 - v12 admissible-band midpoint; fixed, no re-screen",
+    "imports": 1,
+    "infection_age_days": 6.8,
+    "onset_day": -1.0,
+    "departure_day": 5.0,
+    "sanitary_visit_mode": "dwell_weighted",
+    "rhythm": "enabled: true on every cell (the exposure-set partition stays on both arms)",
+    "exposure_cap": "enabled: true on every cell (pinned; default-on for catalogued cruise platforms)"
+  },
+  "theta": 237000000000.0,
+  "beta": 58.0,
+  "infection_age_days": 6.8,
+  "imports": 1,
+  "sanitary_visit_mode": "dwell_weighted",
+  "takeoff_recorded_onsets": 10,
+  "arms": [
+    {
+      "arm_id": "alpha_lo",
+      "alpha": 0.05,
+      "note": "declared-widest heavy-tail endpoint: CV ~= 4.4; susceptibility scale = 2.37e11 * 58.05/0.05 = 2.751e14"
+    },
+    {
+      "arm_id": "alpha_hi",
+      "alpha": 2.0,
+      "note": "near-homogeneous endpoint: CV ~= 0.69; susceptibility scale = 2.37e11 * 60/2 = 7.11e12; finite stand-in for the exponential limit the family challenge fits favor"
+    }
+  ],
+  "legs": [
+    {
+      "class_id": "mega_cruise",
+      "platform_id": "mega_cruise_5000",
+      "kind": "scenario",
+      "scenario_id": "diamond_princess_2020",
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "contemporary_cruise",
+      "platform_id": "spirit_cruise_3000",
+      "kind": "generic",
+      "passengers": 2100,
+      "crew": 900,
+      "duration_days": 32,
+      "sop017_window": [16, 30],
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "classic_cruise",
+      "platform_id": "classic_cruise_1900",
+      "kind": "generic",
+      "passengers": 1332,
+      "crew": 560,
+      "duration_days": 32,
+      "sop017_window": [16, 30],
+      "seed_base": 20200205,
+      "seeds": 20
+    },
+    {
+      "class_id": "expedition_cruise",
+      "platform_id": "expedition_cruise_450",
+      "kind": "scenario",
+      "scenario_id": "greg_mortimer_2020",
+      "voyage_mode": "generic",
+      "sop017_window": [8, 27],
+      "seed_base": 20200315,
+      "seeds": 20
+    }
+  ],
+  "freeze": {
+    "declared_before_running": true,
+    "landing_gate": "The alpha endpoints must reach the profile the engine consumes: every cell's summary carries mechanism-resolved dose_response (model, alpha, beta, susceptibility_scale echoed from the consumed pathogen profile) plus drawn-susceptibility quantiles per arm; an arm whose resolved alpha does not equal its declared endpoint halts the campaign. The drawn-vs-declared quantile check (NORO-FRAIL-01 convention) is reported per arm.",
+    "attribution_criterion": "Declared before runs (stochastic-attribution skill): the dose_response.alpha change re-phases the draw stream, so the same seed on both arms is a legal paired realization, not a bit-aligned one. An alpha effect counts only if |alpha_hi - alpha_lo| on a per-seed quantity exceeds the paired-seed spread of the same quantity within one arm for the same class. Primary endpoints: takeoff burn distribution (recorded_onsets quantiles among takeoff seeds), clause ratio (median recorded_onsets / 197 over takeoff seeds), ignition share (fraction of seeds with recorded_onsets >= 10) with 95% Wilson interval, challenged_share_of_aboard, accrued-hazard quantiles + p_infection shares. All are reported; none is selected on.",
+    "metrics": [
+      "resolved dose_response per cell (summary.dose_response: model, alpha, beta, susceptibility_scale as consumed) - the override-landing proof",
+      "drawn susceptibility quantiles infected / challenged-uninfected / never-challenged (mechanism.susceptibility) - the drawn-vs-declared check",
+      "per-host challenged-uninfected (susceptibility, accrued_hazard) pairs (mechanism.susceptibility.challenged_pairs) - D~ = Lambda/s per host for the analytic companion; instrument added before the array",
+      "median + q95 per-epoch dosed-set size (mechanism.dosed_targets_by_epoch)",
+      "challenged_share_of_aboard (mechanism.susceptibility.challenged_share_of_aboard)",
+      "accrued hazard Lambda block (mechanism.susceptibility.accrued_hazard): challenged-uninfected quantiles, mean counterfactual P = 1 - exp(-Lambda), share P >= 0.5 and >= 0.1, infected-at-onset Lambda",
+      "onset count distribution + clause ratio vs ~197 + before_share (recorded_onsets, observables.onsets_before_split_day / recorded_onsets, target 0.173 +/- 0.10, takeoff seeds >= 10 recorded onsets, clause needs >= 5 takeoff seeds)",
+      "ignition share per (class, arm): fraction of seeds with recorded_onsets >= 10, Wilson 95% interval",
+      "analytic companion (tools/covid_vuln_analytic.py): per-cell counterfactual infection mass M(alpha') = sum over challenged-uninfected hosts of 1 - 1F1(alpha'; alpha'+58; -scale_alpha' * D~_i) with D~_i = Lambda_i / s_i, evaluated at alpha' in {0.05, 0.18 shipped, 0.5, 1.0, 1.5, 2.0, inf}; predicted-vs-measured arm contrast on paired seeds"
+    ],
+    "report_immediately_if": [
+      "no sourced bound on alpha is defensible - the shipped 0.18 becomes a declared-widest row and its register class changes",
+      "either alpha endpoint flips a scored output (cov_theta stops being the sole L2) - cross-report to the LEVERAGE-02 session",
+      "the analytic prediction and the measured A/B disagree by more than 2x - the Lambda instrument or the frailty application is misread; instrument defect until proven otherwise",
+      "the canary arms produce identical burns (dead axis - the verdict is immediate)",
+      "the resolved dose_response in a cell summary does not echo the arm's declared alpha (override did not land - an unexercised axis is not a measurement)"
+    ],
+    "non_goals": "No alpha adoption (this maps the axis; licensing is the user's); no Theta retune; no frailty-draw machinery or register-row changes beyond recorded evidence; Noro alpha is a separate sibling item; naval/starship hulls out of scope."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot per .agents/skills/aws-batch-campaign/SKILL.md; deploy/aws/submit_covid_vuln_ab.sh; jobdef revision + image digest pinned per campaign-preflight, never a bare tag",
+    "canary": "indices 0 and 20 via --index (mega_cruise alpha_lo and alpha_hi, seed 20200205): both must echo their declared alpha in summary.dose_response and the burn metric must move between arms; identical burns stop the campaign (dead axis, immediate verdict). Then the four-class array.",
+    "stride": 1,
+    "cells": 160,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_vuln_ab_v1/<sha>/cells/"
+  }
+}

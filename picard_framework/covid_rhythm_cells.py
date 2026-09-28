@@ -101,6 +101,129 @@ class RhythmLeg:
         return self.scenario_id or self.class_id
 
 
+def validate_leg_fields(legs: tuple[RhythmLeg, ...]) -> None:
+    """The per-leg invariants every takeoff-conditioned design shares."""
+    class_ids = [leg.class_id for leg in legs]
+    if len(set(class_ids)) != len(class_ids):
+        raise ValueError("leg class_ids must be distinct")
+    for leg in legs:
+        if leg.voyage_mode not in VOYAGE_MODES:
+            raise ValueError(
+                f"leg {leg.class_id!r} voyage_mode must be one of "
+                f"{VOYAGE_MODES}, got {leg.voyage_mode!r}",
+            )
+        if leg.kind not in ("scenario", "generic"):
+            raise ValueError(
+                f"leg {leg.class_id!r} kind must be 'scenario' or "
+                f"'generic', got {leg.kind!r}",
+            )
+        if leg.kind == "scenario" and not leg.scenario_id:
+            raise ValueError(
+                f"scenario leg {leg.class_id!r} needs a scenario_id",
+            )
+        if leg.kind == "generic" and leg.passengers < 1:
+            raise ValueError(
+                f"generic leg {leg.class_id!r} needs a passenger count",
+            )
+
+
+def find_leg(legs: tuple[RhythmLeg, ...], class_id: str) -> RhythmLeg:
+    """The one leg a class id resolves to."""
+    for leg in legs:
+        if leg.class_id == class_id:
+            return leg
+    raise KeyError(f"unknown class_id {class_id!r}")
+
+
+def campaign_cell_key(
+    prefix: str,
+    class_id: str,
+    theta: float,
+    infection_age_days: float,
+    imports: int,
+    seed: int,
+    tag: str,
+) -> str:
+    """The cell filename: campaign prefix, conditioning, seed, arm tag."""
+    exponent = f"{math.log10(theta):.2f}".replace(".", "p")
+    age = f"{infection_age_days:g}".replace(".", "p")
+    return (
+        f"{prefix}_{class_id}_theta1e{exponent}_age{age}d"
+        f"_imports{imports}_seed{seed}_{tag}.json"
+    )
+
+
+def campaign_cell_dict(cell: Any) -> dict[str, Any]:
+    """The fields every per-campaign cell serialises identically."""
+    return {
+        "index": cell.index,
+        "class_id": cell.class_id,
+        "platform_id": cell.platform_id,
+        "scenario_id": cell.scenario_id,
+        "theta": cell.theta,
+        "infection_age_days": cell.infection_age_days,
+        "imports": cell.imports,
+        "seed": cell.seed,
+        "arm_id": cell.arm_id,
+        "key": cell.key,
+    }
+
+
+def enumerate_campaign_cells(
+    design: Any,
+    cell_cls: Any,
+    arm_fields: Any,
+) -> tuple[Any, ...]:
+    """Every (leg, arm, seed) cell in fixed order for a cell class."""
+    cells: list[Any] = []
+    for leg in design.legs:
+        for arm in design.arms:
+            for seed in leg.seed_values:
+                cells.append(cell_cls(
+                    index=len(cells),
+                    class_id=leg.class_id,
+                    platform_id=leg.platform_id,
+                    scenario_id=leg.label,
+                    theta=float(design.theta),
+                    infection_age_days=float(design.infection_age_days),
+                    imports=int(design.imports),
+                    seed=int(seed),
+                    arm_id=str(arm["arm_id"]),
+                    **arm_fields(arm),
+                ))
+    return tuple(cells)
+
+
+def load_design_json(path: str) -> dict[str, Any]:
+    """A design file's raw body; every criterion must already be in it."""
+    with validated_open(
+        path, allowed_roots=(os.path.dirname(path) or ".",), encoding="utf-8",
+    ) as handle:
+        return json.load(handle)
+
+
+def parse_leg_dicts(raw_legs: Any) -> tuple[RhythmLeg, ...]:
+    """RhythmLeg objects from a design file's ``legs`` list."""
+    return tuple(
+        RhythmLeg(
+            class_id=str(leg["class_id"]),
+            platform_id=str(leg["platform_id"]),
+            kind=str(leg["kind"]),
+            seed_base=int(leg["seed_base"]),
+            seeds=int(leg["seeds"]),
+            scenario_id=leg.get("scenario_id"),
+            passengers=int(leg.get("passengers") or 0),
+            crew=int(leg.get("crew") or 0),
+            duration_days=int(leg.get("duration_days") or 32),
+            sop017_window=tuple(
+                leg.get("sop017_window") or SOP017_WINDOW
+            ),
+            voyage_mode=str(leg.get("voyage_mode") or VOYAGE_MODE_DECLARED),
+        )
+        for leg in raw_legs
+    )
+
+
 @dataclass(frozen=True)
 class RhythmABDesign:
     """The A/B as declared before any cell ran."""
@@ -139,34 +262,10 @@ class RhythmABDesign:
                     f"arm {arm.get('arm_id')!r} must set rhythm.enabled to a "
                     f"boolean, got {enabled!r}",
                 )
-        class_ids = [leg.class_id for leg in self.legs]
-        if len(set(class_ids)) != len(class_ids):
-            raise ValueError("leg class_ids must be distinct")
-        for leg in self.legs:
-            if leg.voyage_mode not in VOYAGE_MODES:
-                raise ValueError(
-                    f"leg {leg.class_id!r} voyage_mode must be one of "
-                    f"{VOYAGE_MODES}, got {leg.voyage_mode!r}",
-                )
-            if leg.kind not in ("scenario", "generic"):
-                raise ValueError(
-                    f"leg {leg.class_id!r} kind must be 'scenario' or "
-                    f"'generic', got {leg.kind!r}",
-                )
-            if leg.kind == "scenario" and not leg.scenario_id:
-                raise ValueError(
-                    f"scenario leg {leg.class_id!r} needs a scenario_id",
-                )
-            if leg.kind == "generic" and leg.passengers < 1:
-                raise ValueError(
-                    f"generic leg {leg.class_id!r} needs a passenger count",
-                )
+        validate_leg_fields(self.legs)
 
     def leg(self, class_id: str) -> RhythmLeg:
-        for leg in self.legs:
-            if leg.class_id == class_id:
-                return leg
-        raise KeyError(f"unknown class_id {class_id!r}")
+        return find_leg(self.legs, class_id)
 
     def arm_enabled(self, arm_id: str) -> bool:
         """The rhythm flag one arm writes into every cell spec."""
@@ -192,46 +291,21 @@ class RhythmCell:
 
     @property
     def key(self) -> str:
-        exponent = f"{math.log10(self.theta):.2f}".replace(".", "p")
-        age = f"{self.infection_age_days:g}".replace(".", "p")
-        return (
-            f"rhythm_{self.class_id}_theta1e{exponent}_age{age}d"
-            f"_imports{self.imports}_seed{self.seed}_arm{self.arm_id}.json"
+        return campaign_cell_key(
+            "rhythm", self.class_id, self.theta,
+            self.infection_age_days, self.imports, self.seed,
+            f"arm{self.arm_id}",
         )
 
     def as_dict(self) -> dict[str, Any]:
-        return {
-            "index": self.index,
-            "class_id": self.class_id,
-            "platform_id": self.platform_id,
-            "scenario_id": self.scenario_id,
-            "theta": self.theta,
-            "infection_age_days": self.infection_age_days,
-            "imports": self.imports,
-            "seed": self.seed,
-            "arm_id": self.arm_id,
-            "key": self.key,
-        }
+        return campaign_cell_dict(self)
 
 
 def enumerate_rhythm_cells(design: RhythmABDesign) -> tuple[RhythmCell, ...]:
     """Every cell in a fixed order: leg, then arm, then seed."""
-    cells: list[RhythmCell] = []
-    for leg in design.legs:
-        for arm in design.arms:
-            for seed in leg.seed_values:
-                cells.append(RhythmCell(
-                    index=len(cells),
-                    class_id=leg.class_id,
-                    platform_id=leg.platform_id,
-                    scenario_id=leg.label,
-                    theta=float(design.theta),
-                    infection_age_days=float(design.infection_age_days),
-                    imports=int(design.imports),
-                    seed=int(seed),
-                    arm_id=str(arm["arm_id"]),
-                ))
-    return tuple(cells)
+    return enumerate_campaign_cells(
+        design, RhythmCell, lambda arm: {},
+    )
 
 
 def _generic_leg_spec(
@@ -377,6 +451,19 @@ def _scenario_leg_spec(
     return raw
 
 
+def leg_spec(
+    design: Any,
+    leg: RhythmLeg,
+    cell: Any,
+    *,
+    repo_root: str,
+) -> dict[str, Any]:
+    """The takeoff-conditioned spec for a cell's leg kind."""
+    if leg.kind == "scenario":
+        return _scenario_leg_spec(design, leg, cell, repo_root=repo_root)
+    return _generic_leg_spec(design, leg, cell, repo_root=repo_root)
+
+
 def prepare_rhythm_cell_spec(
     design: RhythmABDesign,
     cell: RhythmCell,
@@ -384,11 +471,7 @@ def prepare_rhythm_cell_spec(
     repo_root: str = REPO_ROOT,
 ) -> dict[str, Any]:
     """Build the run spec one cell executes, arm flag written explicitly."""
-    leg = design.leg(cell.class_id)
-    if leg.kind == "scenario":
-        raw = _scenario_leg_spec(design, leg, cell, repo_root=repo_root)
-    else:
-        raw = _generic_leg_spec(design, leg, cell, repo_root=repo_root)
+    raw = leg_spec(design, design.leg(cell.class_id), cell, repo_root=repo_root)
     raw.setdefault("config_overrides", {})["rhythm"] = {
         "enabled": design.arm_enabled(cell.arm_id),
     }
@@ -397,28 +480,7 @@ def prepare_rhythm_cell_spec(
 
 def load_rhythm_design(path: str) -> RhythmABDesign:
     """Parse the A/B design file; every criterion must already be in it."""
-    with validated_open(
-        path, allowed_roots=(os.path.dirname(path) or ".",), encoding="utf-8",
-    ) as handle:
-        raw = json.load(handle)
-    legs = tuple(
-        RhythmLeg(
-            class_id=str(leg["class_id"]),
-            platform_id=str(leg["platform_id"]),
-            kind=str(leg["kind"]),
-            seed_base=int(leg["seed_base"]),
-            seeds=int(leg["seeds"]),
-            scenario_id=leg.get("scenario_id"),
-            passengers=int(leg.get("passengers") or 0),
-            crew=int(leg.get("crew") or 0),
-            duration_days=int(leg.get("duration_days") or 32),
-            sop017_window=tuple(
-                leg.get("sop017_window") or SOP017_WINDOW
-            ),
-            voyage_mode=str(leg.get("voyage_mode") or VOYAGE_MODE_DECLARED),
-        )
-        for leg in raw["legs"]
-    )
+    raw = load_design_json(path)
     return RhythmABDesign(
         design_id=str(raw["design_id"]),
         theta=float(raw["theta"]),
@@ -427,7 +489,7 @@ def load_rhythm_design(path: str) -> RhythmABDesign:
         sanitary_visit_mode=str(raw["sanitary_visit_mode"]),
         takeoff_recorded_onsets=int(raw["takeoff_recorded_onsets"]),
         arms=tuple(raw["arms"]),
-        legs=legs,
+        legs=parse_leg_dicts(raw["legs"]),
     )
 
 

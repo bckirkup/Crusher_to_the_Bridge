@@ -70,14 +70,14 @@ def run_cell(design: Any, cell: Any, *, repo_root: str) -> dict[str, Any]:
 
 
 def select_cells(
-    design: Any,
+    cells: list[Any],
     *,
     index: int | None,
     class_id: str | None,
     arm_id: str | None,
     seeds: set[int] | None,
 ) -> list[Any]:
-    cells = list(enumerate_rhythm_cells(design))
+    cells = list(cells)
     if index is not None:
         if index < 0 or index >= len(cells):
             raise SystemExit(
@@ -95,21 +95,30 @@ def select_cells(
     return cells
 
 
-def main() -> None:  # pragma: no cover - CLI driver
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--design", default=DEFAULT_DESIGN)
+def ab_cli_main(
+    *,
+    description: str,
+    default_design: str,
+    load_design: Any,
+    enumerate_cells: Any,
+    arm_choices: tuple[str, ...],
+    run_cell_fn: Any,
+) -> None:  # pragma: no cover - CLI driver
+    """The shared cell-driver CLI: design in, filtered cells, JSON out."""
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument("--design", default=default_design)
     parser.add_argument("--index", type=int, default=None,
                         help="Run exactly the cell at this enumeration index")
     parser.add_argument("--class", dest="class_id", default=None)
     parser.add_argument("--arm", dest="arm_id", default=None,
-                        choices=[None, "off", "on"])
+                        choices=[None, *arm_choices])
     parser.add_argument("--seeds", default=None,
                         help="Comma-separated seed list")
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
     repo_root = repo_root_of(__file__)
-    design = load_rhythm_design(
+    design = load_design(
         str(resolve_repo_path(repo_root, args.design))
         if not os.path.isabs(args.design) else args.design,
     )
@@ -117,14 +126,14 @@ def main() -> None:  # pragma: no cover - CLI driver
         {int(s) for s in args.seeds.split(",")} if args.seeds else None
     )
     cells = select_cells(
-        design,
+        list(enumerate_cells(design)),
         index=args.index,
         class_id=args.class_id,
         arm_id=args.arm_id,
         seeds=seeds,
     )
     results = [
-        run_cell(design, c, repo_root=repo_root) for c in cells
+        run_cell_fn(design, c, repo_root=repo_root) for c in cells
     ]
     text = json.dumps(results, indent=1, default=str)
     if args.out:
@@ -136,6 +145,17 @@ def main() -> None:  # pragma: no cover - CLI driver
         print(f"wrote {resolved}")
     else:
         print(text)
+
+
+def main() -> None:  # pragma: no cover - CLI driver
+    ab_cli_main(
+        description=__doc__.splitlines()[0],
+        default_design=DEFAULT_DESIGN,
+        load_design=load_rhythm_design,
+        enumerate_cells=enumerate_rhythm_cells,
+        arm_choices=("off", "on"),
+        run_cell_fn=run_cell,
+    )
 
 
 if __name__ == "__main__":
