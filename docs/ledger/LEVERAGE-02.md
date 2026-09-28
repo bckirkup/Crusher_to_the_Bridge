@@ -3,7 +3,7 @@
 **Commit:** 6085e726
 **Pathogens:** norwalk_gi, sars_cov2_resp
 **Status:** measured
-**Measured at:** 6085e726 (post-NORO-VENUE-02 main tip)
+**Measured at:** 6085e726
 
 ## Contract and method
 
