@@ -70,14 +70,14 @@ def run_cell(design: Any, cell: Any, *, repo_root: str) -> dict[str, Any]:
 
 
 def select_cells(
-    design: Any,
+    cells: list[Any],
     *,
     index: int | None,
     class_id: str | None,
     arm_id: str | None,
     seeds: set[int] | None,
 ) -> list[Any]:
-    cells = list(enumerate_rhythm_cells(design))
+    cells = list(cells)
     if index is not None:
         if index < 0 or index >= len(cells):
             raise SystemExit(
@@ -117,7 +117,7 @@ def main() -> None:  # pragma: no cover - CLI driver
         {int(s) for s in args.seeds.split(",")} if args.seeds else None
     )
     cells = select_cells(
-        design,
+        list(enumerate_rhythm_cells(design)),
         index=args.index,
         class_id=args.class_id,
         arm_id=args.arm_id,
