@@ -179,6 +179,7 @@ def _landing_partition(
     secondary = [row for row in emesis_rows if row.get("gen_class") == "acquired"]
     cabin = [row for row in secondary if row.get("zone_type") in _CABIN_ZONE_TYPES]
     cabin_empty = [row for row in cabin if row.get("n_occupants") == 0]
+    cabin_solo = [row for row in cabin if row.get("n_occupants") == 1]
     cabin_immune = [
         row
         for row in cabin
@@ -202,6 +203,7 @@ def _landing_partition(
         "secondary_emesis": len(secondary),
         "secondary_cabin": len(cabin),
         "secondary_cabin_empty": len(cabin_empty),
+        "secondary_cabin_solo": len(cabin_solo),
         "secondary_cabin_immune_occupancy": len(cabin_immune),
         "secondary_cabin_susceptible_present": len(cabin_susceptible),
         "immune_cabin_share": (
@@ -509,6 +511,8 @@ def render_markdown(readout: dict[str, Any]) -> str:
             f" ({lp['on']['secondary_cabin_immune_occupancy']}/"
             f"{lp['on']['secondary_cabin']}), susceptible-present "
             f"{lp['on']['secondary_cabin_susceptible_present']}; "
+            f"solo-shedder cabins off {lp['off']['secondary_cabin_solo']} "
+            f"on {lp['on']['secondary_cabin_solo']}; "
             f"cabin median occupants off "
             f"{lp['off']['cabin_median_occupants']} on "
             f"{lp['on']['cabin_median_occupants']}; "
