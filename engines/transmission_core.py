@@ -1580,6 +1580,30 @@ def _parse_exposure_cap_enabled(tx: dict[str, Any]) -> bool:
     return enabled
 
 
+def _parse_exposure_cap_include_fixed_rings(tx: dict[str, Any]) -> bool:
+    """Read ``transmission.exposure_cap.include_fixed_rings`` (RING-CAP-V1).
+
+    Absent or false is the v13-measured baseline: the pre-committed fixed
+    rings (cabin mates, same-table party) dose outside the per-epoch
+    contact budget, and the pooled cohort draws the whole draw. True
+    makes each shedder's fixed-ring deals consume its budget first —
+    unavoidable contacts displace incidental pooled reach, so the cohort
+    draws only the remainder. Inert while the cap itself is inactive.
+    """
+    block = tx.get("exposure_cap")
+    if block is None:
+        return False
+    if not isinstance(block, Mapping):
+        raise ValueError("transmission.exposure_cap must be a mapping")
+    flag = block.get("include_fixed_rings", False)
+    if not isinstance(flag, bool):
+        raise ValueError(
+            f"transmission.exposure_cap.include_fixed_rings must be a "
+            f"bool, got {flag!r}",
+        )
+    return flag
+
+
 @dataclass(frozen=True)
 class CabinCooccupancy:
     """Declared cabin-mate co-occupancy partition (CABIN-OCC-01).
@@ -2247,8 +2271,16 @@ class TransmissionCore:
                 if seed_seq is not None
                 else self.rng
             )
+        self._exposure_cap_include_fixed_rings = (
+            _parse_exposure_cap_include_fixed_rings(tx)
+        )
         self._exposure_budgets: dict[tuple[int, str, int], int] = {}
         self._exposure_budget_epoch = -1
+        # agent_id -> agent, populated by register_cabin_berths so a
+        # shedder's cabin-mate and table ring partners are resolvable
+        # outside its own air unit. No draws; the map alone changes
+        # nothing.
+        self._agent_by_id: dict[int, KorkinAgent] = {}
 
     def _init_clock_and_kinetics(
         self,
@@ -2677,6 +2709,7 @@ class TransmissionCore:
         self._cabin_berths = {}
         self._block_berths = {}
         for agent in agents:
+            self._agent_by_id[agent.agent_id] = agent
             zone = agent.home_zone
             if self.zone_types.get(zone) != "Cabin_Corridor":
                 continue
@@ -6207,8 +6240,95 @@ class TransmissionCore:
                 shedder, unit_name, zone_name, epoch,
             )
             budget = max(0, int(self._exposure_cap_rng.poisson(mean)))
+            if self._exposure_cap_include_fixed_rings:
+                # RING-CAP-V1: pre-committed ring deals spend first; the
+                # pooled cohort draws only what is left.
+                budget = max(
+                    0,
+                    budget
+                    - len(
+                        self._fixed_ring_contacts(
+                            shedder, epoch, pathogen_id,
+                        )
+                    ),
+                )
             self._exposure_budgets[key] = budget
         return budget
+
+    def _ring_partner_open(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        epoch: int,
+    ) -> bool:
+        """Whether a fixed-ring partner can still form dose this epoch."""
+        return (
+            not agent.immune
+            and not agent.is_infected_with(pathogen_id)
+            and not agent.has_departed(epoch)
+            and not getattr(agent, "ashore", False)
+            and getattr(agent, "current_location", "")
+            != "Isolated_In_Quarters"
+        )
+
+    def _fixed_ring_table_ids(
+        self,
+        shedder: KorkinAgent,
+        epoch: int,
+    ) -> frozenset[int]:
+        """The shedder's same-table partners when it dines this epoch.
+
+        A dealt entry exists only for a diner the venue deal seated this
+        epoch; a fixed dining party (mdr/specialty seating) co-sits when
+        the shedder stands on a Meal token.
+        """
+        zone = getattr(shedder, "dining_zone", "") or ""
+        if not zone:
+            return frozenset()
+        dealt = self._meal_tables.get((zone, epoch), {}).get(
+            shedder.agent_id,
+        )
+        if dealt is not None:
+            return dealt[1]
+        if (
+            getattr(shedder, "dining_party_ids", None)
+            and self._scheduled_activity(shedder, epoch).split(":", 1)[0]
+            == "Meal"
+        ):
+            return shedder.dining_party_ids
+        return frozenset()
+
+    def _fixed_ring_contacts(
+        self,
+        shedder: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+    ) -> set[int]:
+        """The shedder's dose-forming fixed-ring contacts this epoch.
+
+        Cabin mates sharing the cabin's air (any co-presence share) plus
+        same-table dining partners — distinct, still-susceptible partners
+        the ring routes deliver dose to outside the pooled budget.
+        Adjacent-table neighbours stay inside the pooled reach: that
+        deal is venue structure, not a pre-committed ring.
+        """
+        contacts: set[int] = set()
+        for mate_id in getattr(shedder, "cabin_mate_ids", ()) or ():
+            mate = self._agent_by_id.get(mate_id)
+            if (
+                mate is not None
+                and self._ring_partner_open(mate, pathogen_id, epoch)
+                and self._cabin_pair_copresence(shedder, mate, epoch)
+                > 0.0
+            ):
+                contacts.add(mate_id)
+        for partner_id in self._fixed_ring_table_ids(shedder, epoch):
+            partner = self._agent_by_id.get(partner_id)
+            if partner is not None and self._ring_partner_open(
+                partner, pathogen_id, epoch,
+            ):
+                contacts.add(partner_id)
+        return contacts
 
     def _exposure_cap_cohort(
         self,

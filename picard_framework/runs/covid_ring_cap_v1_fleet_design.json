@@ -1,0 +1,68 @@
+{
+  "design_id": "covid_ring_cap_v1_fleet",
+  "task_id": "COVID-RINGCAP-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_ring_cap_v1",
+  "description": "Fleet-shape response check for COVID-RINGCAP-V1: coarse generic-voyage cells at the five THETA-SCREEN-V13 admissible Thetas under the same two arms as the parent replay assay. Rings-first budgeting shrinks the pooled cohort by the fixed-ring spend, so the fleet-shape medians are expected to sag below their v13 rows -- this design measures the direction and magnitude class of that shift at 50 seeds per row. It is NOT a re-admission: 50-seed medians at the band points answer 'did the band move' and point a follow-on re-screen where to look; they carry no selector verdict and no Theta is admitted from this surface.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "covid_ring_cap_v1 (parent): the clause-response replay assay this fleet check accompanies -- same arms, same image, same campaign submission.",
+    "THETA-SCREEN-V13 measured (edb7fc41): the admissible band {1.78e11..5.62e11} this response check is centered on; the v13 stage-1 rows at these Thetas are the comparator of record."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "generic",
+  "voyage_mode_note": "Generic voyages verbatim from covid_theta_screen_v13 stage 1: the explicit seed's onset_day/departure_day are dropped, its infection age is drawn from the profile's incubation distribution, 168 epochs, no interventions, the scenario's molecular_ascertainment_start_day dropped (a DP particular) so the modality's default swab channel stays open from embarkation. Carried: imports 1, dwell_weighted sanitary visits.",
+  "thetas": [
+    178000000000.0,
+    237000000000.0,
+    316000000000.0,
+    422000000000.0,
+    562000000000.0
+  ],
+  "thetas_note": "The five v13 admissible interior points verbatim -- no boundary or anchor rows: the question is how the measured band points move under the arm, not where the new band's edges sit.",
+  "infection_age_days": [
+    0.0
+  ],
+  "infection_age_note": "Placeholder required by the cell enumeration grammar, verbatim from v13: under generic mode the import's age is drawn per voyage and age0d carries no meaning.",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20201001,
+  "seeds": 50,
+  "seeds_note": "First 50 of the v13 stage-1 seed block (base 20201001) so every fleet cell pairs seed-for-seed with the first 50 v13 cells at the same Theta -- coarse (50-seed) read by declaration; a band re-screen under the arm is a separate design if the parent's verdict calls for one.",
+  "takeoff_recorded_onsets": 10,
+  "arms": [
+    {
+      "arm_id": "cap_on",
+      "overrides": {},
+      "note": "v13 baseline arm -- seed-for-seed pairing against the v13 stage-1 rows."
+    },
+    {
+      "arm_id": "rings_first",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "Fixed-ring deals spend the shedder's per-epoch budget first (RING-CAP-V1)."
+    }
+  ],
+  "cells_note": "5 Thetas x 2 arms x 50 seeds = 500 generic cells (~7 min each).",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN: the fleet_shape_selector numbers are quoted verbatim for reporting only -- no row on this design is admitted or rejected. The readout reports median attack rate, IQR, takeoff fraction, P(attack >= 0.10) per (theta, arm) beside the v13 row, and the paired per-seed deltas between arms.",
+    "fleet_shape_selector_report_only": "median recorded attack rate in [0.0005, 0.008], IQR overlapping [0.0003, 0.015], mean <= 0.06 -- reported as in/out per row arm, never as a selection verdict: the coarse seed count does not re-admit anything."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_ring_cap_v1_fleet, on the same image as the parent design.",
+    "stage_cells": 500,
+    "stride": 1,
+    "expected_cell_minutes": 7,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_ring_cap_v1_fleet/<sha>/cells/",
+    "canary": "First row on both arms: INDEX_OFFSET 0, ARRAY_SIZE 100 covers Theta 1.78e11 x 2 arms x 50 seeds (cell order point x arm x seed: cap_on = 0-49, rings_first = 50-99) -- flag-lands proof plus contract integrity. Remaining rows proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "an arm row's median lands more than one lattice notch from its v13 comparator in EITHER direction (mechanism moves the band more than expected -- the parent's clause read needs the shifted band); the rings_first arm's spec dump lacks include_fixed_rings (flag did not reach the engine); or child failure rate exceeds 5%."
+  }
+}

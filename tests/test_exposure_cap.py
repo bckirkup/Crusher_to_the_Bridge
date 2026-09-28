@@ -39,6 +39,7 @@ from engines.sim_clock import HOURS, SimClock  # noqa: E402
 from engines.transmission_core import (  # noqa: E402
     TransmissionCore,
     _parse_exposure_cap_enabled,
+    _parse_exposure_cap_include_fixed_rings,
 )
 
 CATALOGED_LAYOUT = "data/platforms/mega_cruise_5000/spatial_layout.json"
@@ -68,6 +69,36 @@ def _shedder(agent_id: int) -> SimpleNamespace:
         agent_id=agent_id,
         role="passenger",
         agent_class="passenger",
+    )
+
+
+def _ring_agent(
+    agent_id: int,
+    *,
+    immune: bool = False,
+    infected: bool = False,
+    departed: bool = False,
+    ashore: bool = False,
+    location: str = "Cabin",
+    cabin_mate_ids: frozenset = frozenset(),
+    dining_zone: str = "",
+    dining_party_ids: frozenset = frozenset(),
+    current_activity: str = "",
+) -> SimpleNamespace:
+    """The KorkinAgent surface the fixed-ring contact count reads."""
+    return SimpleNamespace(
+        agent_id=agent_id,
+        role="passenger",
+        immune=immune,
+        is_infected_with=lambda pid: infected,
+        has_departed=lambda epoch: departed,
+        ashore=ashore,
+        current_location=location,
+        cabin_mate_ids=cabin_mate_ids,
+        dining_zone=dining_zone,
+        dining_party_ids=dining_party_ids,
+        current_activity=current_activity,
+        schedule=[],
     )
 
 
@@ -244,3 +275,114 @@ def test_budget_mean_uses_polymod_fallback_rate() -> None:
         * float(core.voyage_contact_multiplier)
     )
     assert mean == pytest.approx(expected)
+
+
+# ── RING-CAP-V1: fixed rings spend the budget first ─────────────────
+
+
+def test_include_fixed_rings_defaults_off() -> None:
+    assert _parse_exposure_cap_include_fixed_rings({}) is False
+    assert _parse_exposure_cap_include_fixed_rings(
+        {"exposure_cap": {"enabled": True}},
+    ) is False
+
+
+def test_include_fixed_rings_rejects_non_bool() -> None:
+    with pytest.raises(ValueError, match="bool"):
+        _parse_exposure_cap_include_fixed_rings(
+            {"exposure_cap": {"include_fixed_rings": "yes"}},
+        )
+
+
+def test_flag_off_leaves_budget_untouched_by_rings() -> None:
+    """The v13 baseline: ring partners present but the cohort still
+    draws the full Poisson budget."""
+    core = _core(_cfg())
+    shedder = _ring_agent(1, cabin_mate_ids=frozenset({2, 3}))
+    core._agent_by_id = {
+        a.agent_id: a
+        for a in (shedder, _ring_agent(2), _ring_agent(3))
+    }
+
+    class _TinyRng:
+        def poisson(self, mean: float) -> int:
+            return 5
+
+    core._exposure_cap_rng = _TinyRng()
+    assert core._exposure_cap_budget(
+        shedder, "Unit", "Zone", 0, "pathogen_x",
+    ) == 5
+
+
+def test_cabin_mates_spend_budget_when_flag_on() -> None:
+    """Each susceptible cabin mate with a co-presence share consumes one
+    unit of the shedder's budget before the pooled cohort draws."""
+    core = _core(_cfg({"enabled": True, "include_fixed_rings": True}))
+    shedder = _ring_agent(1, cabin_mate_ids=frozenset({2, 3, 4}))
+    infected_mate = _ring_agent(4, infected=True)
+    core._agent_by_id = {
+        a.agent_id: a
+        for a in (shedder, _ring_agent(2), _ring_agent(3), infected_mate)
+    }
+
+    class _TinyRng:
+        def poisson(self, mean: float) -> int:
+            return 5
+
+    core._exposure_cap_rng = _TinyRng()
+    # Two open mates (2, 3) spend; the infected mate forms no dose.
+    assert core._exposure_cap_budget(
+        shedder, "Unit", "Zone", 0, "pathogen_x",
+    ) == 3
+
+
+def test_dealt_table_and_fixed_party_spend_when_flag_on() -> None:
+    """A dealt meal-table entry or a fixed dining party on a Meal token
+    both count; neither counts when the shedder did not dine."""
+    core = _core(_cfg({"enabled": True, "include_fixed_rings": True}))
+    shedder = _ring_agent(
+        1,
+        dining_zone="Buffet",
+        current_activity="Meal",
+        cabin_mate_ids=frozenset(),
+    )
+    partners = {p.agent_id: p for p in (_ring_agent(7), _ring_agent(8))}
+    core._agent_by_id = {1: shedder, **partners}
+    core._meal_tables[("Buffet", 0)] = {1: (0, frozenset({7, 8}))}
+    assert core._fixed_ring_contacts(shedder, 0, "pathogen_x") == {7, 8}
+
+    # Fixed party: no dealt entry, Meal token required.
+    core._meal_tables.clear()
+    shedder.dining_party_ids = frozenset({7})
+    assert core._fixed_ring_contacts(shedder, 0, "pathogen_x") == {7}
+    shedder.current_activity = "Promenade"
+    assert core._fixed_ring_contacts(shedder, 0, "pathogen_x") == set()
+
+
+def test_ring_contacts_isolated_or_departed_partners_do_not_spend() -> None:
+    core = _core(_cfg({"enabled": True, "include_fixed_rings": True}))
+    shedder = _ring_agent(1, cabin_mate_ids=frozenset({2, 3, 4}))
+    core._agent_by_id = {
+        1: shedder,
+        2: _ring_agent(2, location="Isolated_In_Quarters"),
+        3: _ring_agent(3, departed=True),
+        4: _ring_agent(4),
+    }
+    assert core._fixed_ring_contacts(shedder, 0, "pathogen_x") == {4}
+
+
+def test_flag_on_still_draws_only_cap_rng() -> None:
+    """Ring accounting adds no draws: the shared engine stream is
+    untouched by a flag-on budget computation."""
+    rng = np.random.default_rng(13)
+    core = TransmissionCore(
+        rng=rng,
+        cfg=_cfg({"enabled": True, "include_fixed_rings": True}),
+        clock=SimClock(mode=HOURS),
+    )
+    shedder = _ring_agent(1, cabin_mate_ids=frozenset({2}))
+    core._agent_by_id = {1: shedder, 2: _ring_agent(2)}
+    rng_copy = np.random.default_rng(13)
+    expected = rng_copy.random(8)
+    core._exposure_cap_budget(shedder, "Unit", "Zone", 0, "pathogen_x")
+    np.testing.assert_array_equal(rng.random(8), expected)

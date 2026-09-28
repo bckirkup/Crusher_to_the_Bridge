@@ -1,0 +1,140 @@
+{
+  "design_id": "covid_susc_pool_v1",
+  "task_id": "COVID-SUSCPOOL-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_screen_v13",
+  "description": "Mechanism assay on the THETA-SCREEN-V13 residual: a hard non-susceptible fraction of hosts drawn per voyage at initialization -- the effective-susceptible-pool candidate for the measured ~2x+ truth overshoot (takeoff seeds burn ~94% of 3,711 aboard vs the serology-informed truth ~840 / ~22%). The mechanism reuses the shipped secretor-negative grammar verbatim: secretor_negative_fraction + secretor_negative_relative_susceptibility on the sars_cov2_resp profile via pathogen_overrides, so drawn hosts take susceptibility x0 and can neither infect nor shed -- the same zero-draw shape the noro line uses for FUT2 secretor status. The declared sweep {0.25, 0.5, 0.75} resolves the response curve: 0.5 and 0.75 are the SENS-ASSAY-V2 arm labels verbatim (that screen stood down unmeasured at the stale band); 0.25 extends the curve below them. The fractions are assay arms, NOT an adopted constant -- parameter provenance is satisfied by the sweep being read as a response curve against the clause; no value is fitted to the record and none is adopted from this design. The assay replays the v13 stage-2 cell family verbatim at the measured admissible band plus the Theta 1e9 anchor: per (theta, fraction) the takeoff-conditioned recorded_onsets and before_share vectors answer whether a bounded susceptible pool moves the clause outcome class at any admissible Theta.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "THETA-SCREEN-V13 measured (edb7fc41): admissible band {1.78e11..5.62e11} under capped reach; conditional clause FAILS at every admissible Theta -- takeoff-seed q05 floors 1,770-2,024 vs the record's 197, before_share medians 0.81-0.94 vs 0.173; PASS only at the Theta 1e9 boundary anchor.",
+    "SERO-CHANNEL-V1 measured: the ~18x conditional-size gap factorizes ~2x channel x ~2x+ truth overshoot; truth overshoot is the half a bounded susceptible pool addresses (it bounds truth without flattening takeoff, which LAMBDA-CROSS-V1 showed hazard-rate scaling alone cannot do).",
+    "SENS-ASSAY-V2 declared (stood down): the same secretor_negative_fraction grammar at {0.5, 0.75} on the stale band; this design carries those arm labels verbatim so its rows are the same arms at the measured band.",
+    "Baseline cells are unaffected by the new draws: secretor_negative_fraction absent or 0 short-circuits the genetics_rng draw (frac > 0 gate in _seed_host_susceptibility), so the declared arm stays byte-paired with v13; arms with f > 0 consume the genetics stream per agent and are their own cohort -- declared, not an accident."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_theta_screen_v13_stage2: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (measured null axis carried for cell-key bookkeeping), 20 matched seeds at base 20200205, 768 epochs.",
+  "thetas": [
+    1000000000.0,
+    178000000000.0,
+    237000000000.0,
+    316000000000.0,
+    422000000000.0,
+    562000000000.0
+  ],
+  "thetas_note": "Theta 1e9 anchor (QUAR-ATTR-V2 re-measurement, never a candidate) plus the five v13 admissible interior points verbatim -- the clause is read as a function of the non-susceptible fraction at fixed admissible Theta, so the response curve carries the mechanism's dose-size interaction.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds as every stage-2 surface since v10 -- seed-for-seed pairing against the v13 rows.",
+  "takeoff_recorded_onsets": 10,
+  "points": [
+    [
+      1000000000.0,
+      6.8,
+      1
+    ],
+    [
+      178000000000.0,
+      6.8,
+      1
+    ],
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      316000000000.0,
+      6.8,
+      1
+    ],
+    [
+      422000000000.0,
+      6.8,
+      1
+    ],
+    [
+      562000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "declared",
+      "overrides": {},
+      "note": "v13 baseline: sars_cov2_resp ships innate_nonsusceptible_fraction 0.0 / no secretor draw -- the whole pool is susceptible."
+    },
+    {
+      "arm_id": "f025",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "secretor_negative_fraction": 0.25,
+            "secretor_negative_relative_susceptibility": 0.0
+          }
+        }
+      },
+      "note": "25% hard zero draw (relative susceptibility 0.0): declared extension below the V2 arm grid to resolve the curve downward."
+    },
+    {
+      "arm_id": "f050",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "secretor_negative_fraction": 0.5,
+            "secretor_negative_relative_susceptibility": 0.0
+          }
+        }
+      },
+      "note": "50% hard zero -- SENS-ASSAY-V2 arm label verbatim."
+    },
+    {
+      "arm_id": "f075",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "secretor_negative_fraction": 0.75,
+            "secretor_negative_relative_susceptibility": 0.0
+          }
+        }
+      },
+      "note": "75% hard zero -- SENS-ASSAY-V2 arm label verbatim; the truth-overshoot scale (~94% vs ~22% burn) puts the interesting region near this end."
+    }
+  ],
+  "cells_note": "6 points x 4 arms x 20 seeds = 480 declared-replay cells (~30 min each). Companion design covid_susc_pool_v1_fleet runs the coarse generic-voyage fleet-shape response at the five admissible Thetas, 50 seeds per row, same arms.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_theta_screen_v13_stage2; the verdict grammar is an assay's, not a screen's.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v13 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND median before_share within 0.10 of 0.173; scored only when >= 5 takeoff seeds.",
+      "note": "Scored per (theta, arm) row. The deliverable beside it: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed vectors -- the response curve across the fraction sweep."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "verdict_grammar": "Assay verdict, frozen: (a) the clause outcome class per (theta, fraction); (b) the monotone shape of recorded_onsets vs fraction at fixed Theta (the mechanism's signature -- a bounded pool should lower takeoff mass roughly in proportion to susceptible count); (c) whether any fraction moves before_share toward 0.173. A clause PASS inside the sweep triggers a re-screen design on that arm, never an adoption; a flat response across the sweep rules the pool-size mechanism out at the declared geometry."
+  },
+  "diagnostics": {
+    "fleet_shape_indicator": "Reported never thresholded, per arm: P(attack <= 0.01), takeoff fraction, P(attack >= 0.10), attack-rate quantiles -- the replay distribution under each fraction.",
+    "paired_vs_v13": "The declared arm pairs seed-for-seed with covid_theta_screen_v13_stage2 at each Theta (engine-drift check); armed rows additionally report per-seed deltas against the declared arm's own row (the mechanism's marginal effect on the same cohort).",
+    "pool_spend_readout": "Per row: realized susceptible-pool fraction (fraction of aboard hosts with susceptibility_multiplier > 0 at epoch 0, echoed from the run spec's draw) vs its arm's declared fraction -- wiring proof that the override reached the population; ~0 is a flag-did-not-land defect, not a result."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_susc_pool_v1, on the same campaign image as covid_ring_cap_v1 (pathogen_overrides is a shipped grammar; no engine change is needed beyond what that image already carries).",
+    "stage_cells": 480,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_susc_pool_v1/<sha>/cells/",
+    "canary": "Theta 1e9 anchor row on all four arms (cell order point x arm x seed: indices 0-79) -- wiring proof the override lands (spec dump shows the declared fraction per arm) plus the audit invariant and non-degeneracy: INDEX_OFFSET 0, ARRAY_SIZE 80. Remaining rows proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "any cell's audit invariant fails; every row at f075 reports insufficient takeoff mass (the mechanism killed takeoff before bounding it -- a geometry finding); the clause passes only at a boundary endpoint; the response in fraction is non-monotone at two consecutive admissible Thetas (stream-disruption suspicion, not biology); or child failure rate exceeds 5%."
+  }
+}

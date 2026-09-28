@@ -102,6 +102,19 @@ alone is not sufficient: without the platform gate a naval run would leave
 its measured baseline. Legacy hulls (e.g. `messy_cruise_500`) and
 platform-less rigs have no catalog and are unchanged either way.
 
+`include_fixed_rings` (default `false`, RING-CAP-V1 labelled arm) changes
+what the budget *spends on* rather than whether it binds: when true, each
+shedder's pre-committed fixed-ring deals — susceptible cabin mates with a
+positive co-presence share this epoch, plus same-table partners (a dealt
+meal-table entry, or the fixed dining party while the shedder stands on a
+Meal token) — are counted at its first budget draw of the epoch and
+subtracted from the draw, so the pooled cohort samples only the remainder.
+The rings still dose; unavoidable contacts displace incidental pooled
+reach. Adjacent-table deals stay in the pooled reach — that ring is venue
+structure, not a pre-committed contact. The accounting is deterministic
+(counted, not drawn), so a flag-off run stays byte-identical and no stream
+is consumed; it is inert while the cap itself is inactive.
+
 ## 5. Expected signature and the bounded re-rank
 
 The cap bounds the two saturating routes; the residual dosed set is then

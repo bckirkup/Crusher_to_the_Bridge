@@ -1,0 +1,115 @@
+{
+  "design_id": "covid_ring_cap_v1",
+  "task_id": "COVID-RINGCAP-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_screen_v13",
+  "description": "Mechanism assay on the THETA-SCREEN-V13 residual: declare the pre-committed fixed rings (cabin-mate ring, same-table dining party) as the first spend against each shedder's per-epoch exposure-cap budget, so the pooled droplet/HVAC cohort draws only the remainder. Motivation is measured, not speculative: ROUTE-ATTR-V1 read ~98% of infected dose weight ring-side (near-field plume 60-69%, cabin-mate addback 30-40%, pooled far-field ~2%) and THETA-SCREEN-V13 measured the clause outcome cap-invariant -- the EXPO-CAP-01 budget gates only the pooled routes while the fixed rings deliver unattenuated dose outside it. Under RING-CAP-V1 (transmission.exposure_cap.include_fixed_rings: true) a shedder's unavoidable ring contacts displace incidental pooled reach inside the same Poisson budget; rings themselves still dose. The assay replays the v13 stage-2 cell family verbatim at the measured admissible band plus the Theta 1e9 anchor: per (theta, arm) the takeoff-conditioned recorded_onsets and before_share vectors answer whether ring-first budgeting moves the clause outcome class at any admissible Theta. This is an assay, not a re-admission: no Theta is selected on this design, and a clause-class change is followed by a re-screen design, not an adoption.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "THETA-SCREEN-V13 measured (edb7fc41): admissible band {1.78e11..5.62e11} under capped reach; conditional clause FAILS at every admissible Theta -- takeoff-seed q05 floors 1,770-2,024 recorded onsets vs the record's 197, before_share medians 0.81-0.94 vs 0.173; PASS only at the Theta 1e9 boundary anchor.",
+    "ROUTE-ATTR-V1 measured: ~98% of infected dose weight ring-side; the pooled far-field routes the cap bounds carry ~2%.",
+    "EXPO-CAP-01 internals verified: the per-epoch budget bounds only _droplet_unit_doses and _apply_hvac_downstream_doses; the cabin-mate addback, near-field unit and table deals bypass it entirely.",
+    "RING-CAP-V1 flag ships default-off: absent or include_fixed_rings false is byte-identical to the v13 baseline (no extra RNG draws -- ring accounting is deterministic). Naval and uncatalogued platforms unchanged: the flag is inert while the cap itself is inactive."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_theta_screen_v13_stage2: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day, carried for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    1000000000.0,
+    178000000000.0,
+    237000000000.0,
+    316000000000.0,
+    422000000000.0,
+    562000000000.0
+  ],
+  "thetas_note": "Theta 1e9 anchor (QUAR-ATTR-V2 re-measurement, never a candidate) plus the five THETA-SCREEN-V13 admissible interior points verbatim. The v13 clause failed identically at all five; the assay asks whether ring-first budgeting changes the failure's class, not whether a Theta outside this set would pass.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as v10/v11/rebase_01/v13 stage 2 -- every replay cell pairs seed-for-seed with the v13 stage-2 rows at the same Theta.",
+  "takeoff_recorded_onsets": 10,
+  "points": [
+    [
+      1000000000.0,
+      6.8,
+      1
+    ],
+    [
+      178000000000.0,
+      6.8,
+      1
+    ],
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      316000000000.0,
+      6.8,
+      1
+    ],
+    [
+      422000000000.0,
+      6.8,
+      1
+    ],
+    [
+      562000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "cap_on",
+      "overrides": {},
+      "note": "v13 measured baseline: cap active, fixed rings outside the budget -- seed-for-seed pairing against the v13 stage-2 surface."
+    },
+    {
+      "arm_id": "rings_first",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "RING-CAP-V1 arm: the shedder's susceptible cabin-mate contacts (any co-presence share) and same-table partners (dealt entry this epoch, or fixed dining party while the shedder stands on a Meal token) consume the per-epoch budget before the pooled cohort draws. Adjacent-table deals stay in the pooled reach -- venue structure, not a pre-committed ring."
+    }
+  ],
+  "cells_note": "6 points x 2 arms x 20 seeds = 240 declared-replay cells (~30 min each). Companion design covid_ring_cap_v1_fleet runs the coarse generic-voyage fleet-shape response at the five admissible Thetas, 50 seeds per row, same arms.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_theta_screen_v13_stage2; the verdict grammar is an assay's, not a screen's.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v13 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND median before_share within 0.10 of 0.173; scored only when >= 5 takeoff seeds.",
+      "note": "Scored per (theta, arm) row. The deliverable beside it: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed vectors -- reported per arm so the rings-first row pairs directly against the cap_on row and the v13 row at the same Theta."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "verdict_grammar": "Assay verdict, frozen: (a) the clause outcome class per (theta, arm) -- PASS/FAIL/insufficient-mass; (b) the magnitude class of any residual gap vs the v13 ~9-10x read; (c) whether ring-first budgeting changes the before_share direction. A PASS under rings_first at an admissible Theta is a mechanism finding that triggers a re-screen design, not an admission on this design; identical failures are a mechanism-ruled-out measurement, not a null result."
+  },
+  "diagnostics": {
+    "fleet_shape_indicator": "Per v11 convention, reported never thresholded: P(attack <= 0.01), takeoff fraction, P(attack >= 0.10), attack-rate quantiles per arm -- the replay distribution under each arm read against the generic fleet block's.",
+    "paired_vs_v13": "Each cap_on replay cell pairs seed-for-seed with the covid_theta_screen_v13_stage2 cell at the same Theta on image covid-theta-v13-edb7fc41: per-seed recorded_onsets / before_share deltas reported as an engine-drift check between the two images.",
+    "ring_spend_readout": "Per row: the shedder-epoch mean fixed-ring spend (cabin-mate + same-table contacts counted) as a share of the drawn budget -- the mechanism's dose-free reach displaced, reported so a null clause move can be read against how much budget the rings actually consumed."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_ring_cap_v1. Image built from a main containing the RING-CAP-V1 flag and all four covid_ring_cap_v1* / covid_susc_pool_v1* design files; job-definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_cells": 240,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_ring_cap_v1/<sha>/cells/",
+    "canary": "Theta 1e9 anchor row on both arms (cell order is point x arm x seed: cap_on anchor = indices 0-19, rings_first anchor = 20-39) -- proves the flag lands (spec dump shows include_fixed_rings true on arm 1 only), the audit invariant holds, and the rows are non-degenerate: INDEX_OFFSET 0, ARRAY_SIZE 40 covers both. On a clean read the remaining rows proceed per the campaign gate.",
+    "report_immediately_if": "any cell's audit invariant fails; every rings_first row reports insufficient takeoff mass; the clause passes only at a boundary endpoint; the clause failure changes sign or magnitude class vs the v13 read; ring-spend readout shows zero contacts consumed on any arm row (the flag did not reach the engine); or child failure rate exceeds 5%."
+  }
+}
