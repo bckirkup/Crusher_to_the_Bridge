@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:import-map-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:import-map-6c574204",
     "command": [
       "deploy/aws/import_map_entrypoint.py",
       "--s3-prefix",
