@@ -85,9 +85,7 @@ import argparse
 import copy
 import gzip
 import json
-import re
 import sys
-import tempfile
 import time
 import zipfile
 from contextlib import contextmanager
@@ -96,11 +94,10 @@ from pathlib import Path
 from typing import Any
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
-if str(REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(REPO_ROOT))
-_CAMPAIGN_DIR = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
-if str(_CAMPAIGN_DIR) not in sys.path:
-    sys.path.insert(0, str(_CAMPAIGN_DIR))
+sys.path.insert(0, str(REPO_ROOT))
+sys.path.insert(
+    0, str(REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"),
+)
 
 from campaign_runner import generate_tier_runs  # noqa: E402
 
@@ -110,20 +107,28 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     IllnessStatus,
     resolve_dining_service_type,
 )
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
-from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
     resolve_repo_path,
     validated_open,
 )
-from tools.noro_diag.growth_chain_census import (  # noqa: E402
-    GEN_UNRESOLVED,
-    _acquired_gen,
-)
 from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
     _attach_voyage_blocks,
+)
+
+# The occupancy/pedigree plumbing is shared verbatim with the rhythm
+# probe rather than re-typed: identical wrappers keep the two censuses'
+# landing snapshots comparable cell-for-cell.
+from tools.noro_diag.rhythm_ab_probe import (  # noqa: E402
+    RhythmRecorder,
+    _identifier,
+    _load_manifest,
+    _occupancy_snapshot,
+    _sim_for_spec,
+    _wrap_cabin_compartments,
+    _wrap_challenge,
+    _wrap_zone_occupants,
 )
 
 ASHORE_LOCATION = "Ashore"
@@ -172,23 +177,15 @@ CREW_DECK_TOKENS = ("crew", "engine", "bridge")
 
 
 @dataclass
-class VenueRecorder:
-    """Every observation taken from one instrumented voyage."""
+class VenueRecorder(RhythmRecorder):
+    """Rhythm-census pedigree plus confinement-clock observations.
 
-    pathogen_id: str
-    # host -> generation (0 = import); filled lazily as hosts appear.
-    host_gen: dict[int, int] = field(default_factory=dict)
-    strain_home: dict[str, int] = field(default_factory=dict)
-    acquired_ids: set[int] = field(default_factory=set)
-    import_ids: set[int] = field(default_factory=set)
-    epoch0_done: bool = False
-    # Latest engine occupancy maps (epoch the core is processing).
-    zone_occupants: dict[str, list[Any]] = field(default_factory=dict)
-    compartment_occupants: dict[str, list[Any]] = field(default_factory=dict)
-    # Row tables.
-    emesis_rows: list[dict[str, Any]] = field(default_factory=list)
-    acquisition_rows: list[dict[str, Any]] = field(default_factory=list)
-    epoch_rows: list[dict[str, Any]] = field(default_factory=list)
+    Inheriting ``RhythmRecorder`` reuses its generation pedigree, epoch0
+    import capture and the ashore-dosing witness fields (captured and
+    ignored here) so the shared wrappers work unmodified on either
+    recorder.
+    """
+
     confined_membership: list[dict[str, Any]] = field(default_factory=list)
     confinement_events: list[dict[str, Any]] = field(default_factory=list)
     escalation_events: list[dict[str, Any]] = field(default_factory=list)
@@ -198,29 +195,13 @@ class VenueRecorder:
     first_noro_symptomatic: dict[int, int] = field(default_factory=dict)
     ever_symptomatic: set[int] = field(default_factory=set)
     first_reported: dict[int, int] = field(default_factory=dict)
-    # Emit-call accounting (censored/record-less emits stay visible).
-    emit_calls: int = 0
-    emit_calls_no_records: int = 0
-    ignited: bool = False
+    # Emit-call accounting (invocations vs record-producing emits).
+    emit_invocations: int = 0
+    emit_idle_invocations: int = 0
     # Observer cursors.
     _compliance_seen: int = 0
     _escalation_seen: int = 0
     _reported_seen: set[int] = field(default_factory=set)
-
-    def gen_of(self, agent_id: Any) -> int:
-        if agent_id is None:
-            return GEN_UNRESOLVED
-        return self.host_gen.get(int(agent_id), GEN_UNRESOLVED)
-
-    def gen_class_of(self, agent_id: Any) -> str:
-        if agent_id is None:
-            return "unknown"
-        aid = int(agent_id)
-        if aid in self.acquired_ids:
-            return "acquired"
-        if aid in self.import_ids:
-            return "import"
-        return "unknown"
 
 
 # ── Site classification (pure; exercised by unit tests) ──────────────
@@ -328,48 +309,6 @@ def _zone_parent(zone_name: str) -> str:
 # ── Wrappers ──────────────────────────────────────────────────────────
 
 
-def _wrap_zone_occupants(core_cls: type, rec: VenueRecorder) -> Any:
-    """Cache the engine's own zone -> occupants map for the emit wrapper."""
-    original = core_cls._epoch_zone_occupants
-
-    def wrapper(self: Any, agents: list, epoch: int) -> Any:
-        out = original(self, agents, epoch)
-        rec.zone_occupants = out
-        return out
-
-    return wrapper
-
-
-def _wrap_cabin_compartments(core_cls: type, rec: VenueRecorder) -> Any:
-    """Cache the post-split ``zone::cabinNNN`` -> occupants map."""
-    original = core_cls._cabin_compartments
-
-    def wrapper(self: Any, zone_occupants: dict) -> dict:
-        out = original(self, zone_occupants)
-        rec.compartment_occupants = out
-        return out
-
-    return wrapper
-
-
-def _occupancy_snapshot(
-    rec: VenueRecorder, zone_name: str,
-) -> dict[str, int]:
-    occupants = (
-        rec.compartment_occupants.get(zone_name)
-        or rec.zone_occupants.get(zone_name)
-        or []
-    )
-    susceptible = sum(
-        1 for a in occupants if not a.is_infected_with(rec.pathogen_id)
-    )
-    return {
-        "n_occupants": len(occupants),
-        "n_susceptible": int(susceptible),
-        "n_infected": len(occupants) - int(susceptible),
-    }
-
-
 def _wrap_emit_emesis(core_cls: type, rec: VenueRecorder) -> Any:
     """Per-bolus landing record plus the depositor's confinement state."""
     original = core_cls._emit_emesis
@@ -388,17 +327,17 @@ def _wrap_emit_emesis(core_cls: type, rec: VenueRecorder) -> Any:
         )
         if pathogen_id != rec.pathogen_id:
             return pool_gain
-        rec.emit_calls += 1
+        rec.emit_invocations += 1
         records = agent.emesis_deposition_records_by_pathogen.get(
             pathogen_id, [],
         )[before:]
         if not records:
-            rec.emit_calls_no_records += 1
+            rec.emit_idle_invocations += 1
             return pool_gain
         if pool_gain > 0:
             rec.ignited = True
         aid = int(agent.agent_id)
-        occupancy = _occupancy_snapshot(rec, zone_name)
+        occupancy = _occupancy_snapshot(rec, self, zone_name)
         inf = agent.infections.get(pathogen_id) or {}
         confined = aid in self._quarantined_ids
         for record in records:
@@ -428,73 +367,12 @@ def _wrap_emit_emesis(core_cls: type, rec: VenueRecorder) -> Any:
     return wrapper
 
 
-def _record_acquisition(
-    rec: VenueRecorder,
-    agent: Any,
-    epoch: int,
-    p_dose: float,
-    new_events: list,
-) -> None:
-    aid = int(agent.agent_id)
-    acquired_strain = (
-        (agent.infections.get(rec.pathogen_id) or {}).get("strain_id")
-    )
-    row: dict[str, Any] = {
-        "epoch": int(epoch),
-        "agent_id": aid,
-        "dose_read": float(p_dose),
-        "location": str(agent.current_location),
-        "source_agent_id": None,
-        "dominant_pathway": None,
-    }
-    if new_events:
-        event = new_events[-1]
-        row["source_agent_id"] = getattr(event, "source_agent_id", None)
-        row["dominant_pathway"] = getattr(event, "pathway", None)
-        parent_strain = getattr(event, "source_strain_id", None)
-    else:
-        parent_strain = None
-    gen = _acquired_gen(
-        rec, row["source_agent_id"], parent_strain, acquired_strain,
-    )
-    row["gen"] = gen if 0 <= gen < GEN_UNRESOLVED else "unresolved"
-    rec.host_gen[aid] = gen
-    rec.acquired_ids.add(aid)
-    if acquired_strain:
-        rec.strain_home.setdefault(str(acquired_strain), aid)
-    rec.acquisition_rows.append(row)
-
-
-def _wrap_challenge(core_cls: type, rec: VenueRecorder) -> Any:
-    """Acquisition pedigree (same construction as growth_chain_census)."""
-    original = core_cls._resolve_pathogen_challenge
-
-    def wrapper(
-        self: Any, epoch: int, agent: Any, pathogen_id: str,
-        agent_pathogen_doses: dict, agent_pathway_doses: Any,
-        matrix: Any, events: list,
-    ) -> None:
-        aid = int(agent.agent_id)
-        was_infected = bool(agent.is_infected_with(pathogen_id))
-        n_events = len(events)
-        original(
-            self, epoch, agent, pathogen_id, agent_pathogen_doses,
-            agent_pathway_doses, matrix, events,
-        )
-        if pathogen_id != rec.pathogen_id:
-            return
-        p_dose = float(
-            agent_pathogen_doses.get(aid, {}).get(pathogen_id, 0.0),
-        )
-        if not was_infected and agent.is_infected_with(pathogen_id):
-            _record_acquisition(
-                rec, agent, epoch, p_dose, events[n_events:],
-            )
-        elif was_infected and aid not in rec.acquired_ids:
-            rec.import_ids.add(aid)
-            rec.host_gen.setdefault(aid, 0)
-
-    return wrapper
+_WRAPPED_CORE_METHODS = (
+    "_epoch_zone_occupants",
+    "_emit_emesis",
+    "_resolve_pathogen_challenge",
+    "_cabin_compartments",
+)
 
 
 @contextmanager
@@ -502,10 +380,7 @@ def instrumented(rec: VenueRecorder) -> Any:
     """Install every wrapper for the duration of one run."""
     core_cls = tc.TransmissionCore
     saved = {
-        "_epoch_zone_occupants": core_cls._epoch_zone_occupants,
-        "_emit_emesis": core_cls._emit_emesis,
-        "_resolve_pathogen_challenge": core_cls._resolve_pathogen_challenge,
-        "_cabin_compartments": core_cls._cabin_compartments,
+        name: getattr(core_cls, name) for name in _WRAPPED_CORE_METHODS
     }
     core_cls._epoch_zone_occupants = _wrap_zone_occupants(core_cls, rec)
     core_cls._emit_emesis = _wrap_emit_emesis(core_cls, rec)
@@ -801,8 +676,8 @@ def _venue_payload(
     confined_index = _confined_epochs_index(rec)
     return {
         "ignited": rec.ignited,
-        "emit_calls": rec.emit_calls,
-        "emit_calls_no_records": rec.emit_calls_no_records,
+        "emit_calls": rec.emit_invocations,
+        "emit_calls_no_records": rec.emit_idle_invocations,
         "n_emesis_emitted": len(rec.emesis_rows),
         "n_unattributed": unattributed,
         "n_acquired": len(rec.acquired_ids),
@@ -824,19 +699,23 @@ def _venue_payload(
 # ── Run driver ────────────────────────────────────────────────────────
 
 
-@contextmanager
-def _sim_for_spec(spec: dict[str, Any]) -> Any:
-    """Materialise one spec dict into a loaded (unrun) ShipSimulation."""
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
-        yield ShipSimulation(picard_spec, display=False)
+def _run_summary(
+    spec: dict[str, Any],
+    wall_clock_run: float,
+    wall_clock_total: float,
+) -> dict[str, Any]:
+    overrides = spec.get("config_overrides") or {}
+    return {
+        "run_id": str(spec.get("description", "")),
+        "seed": int(spec["run"]["random_seed"]),
+        "num_epochs": int(spec["run"]["num_epochs"]),
+        "num_agents": int(
+            overrides.get("ship_graph", {}).get("num_agents", 0),
+        ),
+        "platform": str(spec["catalog"]["platform_id"]),
+        "wall_clock_seconds_run": wall_clock_run,
+        "wall_clock_seconds_total": wall_clock_total,
+    }
 
 
 def run_spec(
@@ -847,11 +726,6 @@ def run_spec(
 ) -> dict[str, Any]:
     """Run one spec under the wrappers; return the run payload."""
     spec = copy.deepcopy(spec_dict)
-    num_agents = int(
-        (spec.get("config_overrides") or {})
-        .get("ship_graph", {})
-        .get("num_agents", 0),
-    )
     rec = VenueRecorder(pathogen_id=pathogen_id)
     started_total = time.perf_counter()
     with instrumented(rec), _sim_for_spec(spec) as sim:
@@ -859,29 +733,17 @@ def run_spec(
         started_run = time.perf_counter()
         result = sim.run()
         wall_clock_run = time.perf_counter() - started_run
-    summary: dict[str, Any] = {
-        "run_id": str(spec.get("description", "")),
-        "seed": int(spec["run"]["random_seed"]),
-        "num_epochs": int(spec["run"]["num_epochs"]),
-        "num_agents": num_agents,
-        "platform": str(spec["catalog"]["platform_id"]),
-        "wall_clock_seconds_run": wall_clock_run,
-        "wall_clock_seconds_total": time.perf_counter() - started_total,
-    }
+    summary = _run_summary(
+        spec, wall_clock_run, time.perf_counter() - started_total,
+    )
     _attach_voyage_blocks(
-        summary, spec, result, num_agents, natural_history_clock,
+        summary, spec, result, summary["num_agents"], natural_history_clock,
     )
     summary["venue"] = _venue_payload(rec, spec, sim)
     return summary
 
 
 # ── CLI / campaign-cell plumbing ──────────────────────────────────────
-
-
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
 
 
 def _seed_list(value: str) -> list[int]:
@@ -936,30 +798,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="zip filename stem under <out>/<tier>/ (spec-json mode)",
     )
     args = parser.parse_args(argv)
-    if args.manifest is not None:
-        if args.tier is None:
-            parser.error("--manifest requires --tier")
-        if args.spec_json is not None:
-            parser.error("--manifest and --spec-json are exclusive")
+    manifest_mode = args.manifest is not None
+    if manifest_mode:
+        for problem in (
+            "--manifest requires --tier" if args.tier is None else None,
+            "--manifest and --spec-json are exclusive"
+            if args.spec_json is not None else None,
+        ):
+            if problem:
+                parser.error(problem)
     elif args.tier is not None or args.index is not None:
         parser.error("--tier/--index require --manifest")
-    if args.index is not None and args.index < 0:
-        parser.error("--index must be non-negative")
-    if args.seeds is not None and args.manifest is None:
+    for label, value, floor in (
+        ("--index", args.index, 0),
+        ("--epochs-override", args.epochs_override, 1),
+    ):
+        if value is not None and value < floor:
+            parser.error(f"{label} must be >= {floor}")
+    if args.seeds is not None and not manifest_mode:
         parser.error("--seeds requires --manifest")
-    if args.epochs_override is not None and args.epochs_override <= 0:
-        parser.error("--epochs-override must be positive")
     return args
-
-
-def _load_manifest(manifest_path: Path) -> dict[str, Any]:
-    safe_manifest = Path(
-        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
-    )
-    with validated_open(
-        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        return json.load(handle)
 
 
 def _apply_overrides(spec: dict[str, Any], args: argparse.Namespace) -> None:
@@ -971,6 +829,12 @@ def _apply_overrides(spec: dict[str, Any], args: argparse.Namespace) -> None:
         )["num_agents"] = int(args.num_agents)
 
 
+_ANCHOR_KEYS = (
+    "parameters", "num_epochs", "trigger_status", "summary",
+    "cost_accounting", "derived",
+)
+
+
 def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
 ) -> Path:
@@ -978,21 +842,14 @@ def _write_run_zip(
     cell_dir = Path(resolve_child_path(str(out_dir), tier))
     cell_dir.mkdir(parents=True, exist_ok=True)
     zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
-    anchor = {
-        "run_id": run_id,
-        "parameters": payload["parameters"],
-        "num_epochs": payload["num_epochs"],
-        "trigger_status": payload.get("trigger_status"),
-        "summary": payload["summary"],
-        "cost_accounting": payload["cost_accounting"],
-        "derived": payload["derived"],
-    }
+    anchor = {"run_id": run_id}
+    anchor.update({key: payload[key] for key in _ANCHOR_KEYS})
+    census_blob = gzip.compress(
+        json.dumps(payload["venue"]).encode(),
+    )
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr(
-            "venue.json.gz",
-            gzip.compress(json.dumps(payload["venue"]).encode()),
-        )
+        archive.writestr("venue.json.gz", census_blob)
     return zip_path
 
 
@@ -1027,26 +884,29 @@ def _run_one(
     )
 
 
+def _report_zip(
+    tag: str, tier: str, run_id: str, payload: dict[str, Any],
+    zip_path: Path,
+) -> None:
+    venue = payload["venue"]
+    print(
+        f"{tag} {tier} {run_id}: ignited={venue['ignited']} "
+        f"acquired={venue['n_acquired']} emits={venue['n_emesis_emitted']} "
+        f"unattributed={venue['n_unattributed']} -> {zip_path}",
+        flush=True,
+    )
+
+
 def _main_manifest(args: argparse.Namespace) -> None:
     manifest = _load_manifest(args.manifest)
-    manifest_clock = manifest.get("natural_history_clock")
-    runs = _select_runs(manifest, args.tier, args)
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
-    for run_id, spec in runs:
-        payload = _run_one(spec, args, manifest_clock)
+    clock = manifest.get("natural_history_clock")
+    for run_id, spec in _select_runs(manifest, args.tier, args):
+        payload = _run_one(spec, args, clock)
         zip_path = _write_run_zip(out_dir, args.tier, run_id, payload)
-        venue = payload["venue"]
-        print(
-            f"{args.tier} {run_id}: "
-            f"ignited={venue['ignited']} "
-            f"acquired={venue['n_acquired']} "
-            f"emits={venue['n_emesis_emitted']} "
-            f"unattributed={venue['n_unattributed']} "
-            f"-> {zip_path}",
-            flush=True,
-        )
+        _report_zip("cell", args.tier, run_id, payload, zip_path)
 
 
 def _main_spec_json(args: argparse.Namespace) -> None:
@@ -1070,24 +930,15 @@ def _main_spec_json(args: argparse.Namespace) -> None:
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
     zip_path = _write_run_zip(out_dir, tier, run_id, payload)
-    venue = payload["venue"]
-    print(
-        f"spec-json {run_id}: "
-        f"ignited={venue['ignited']} "
-        f"acquired={venue['n_acquired']} "
-        f"emits={venue['n_emesis_emitted']} "
-        f"unattributed={venue['n_unattributed']} "
-        f"-> {zip_path}",
-        flush=True,
-    )
+    _report_zip("spec-json", tier, run_id, payload, zip_path)
 
 
 def main(argv: list[str] | None = None) -> None:
     args = parse_args(argv)
-    if args.manifest is not None:
-        _main_manifest(args)
-    else:
+    if args.manifest is None:
         _main_spec_json(args)
+    else:
+        _main_manifest(args)
 
 
 if __name__ == "__main__":
