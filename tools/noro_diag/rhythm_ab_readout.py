@@ -122,6 +122,18 @@ def tiers_under(results_root: Path) -> list[str]:
     return sorted(tiers)
 
 
+def load_cells(
+    results_root: Path,
+) -> dict[tuple[str, str], list[tuple[Path, dict[str, Any], dict[str, Any]]]]:
+    """Every (arm, tier) slice keyed ``(arm, tier)`` — the pre-streaming
+    loader shape kept for ``tools.flu_rhythm_ab_readout``."""
+    return {
+        (arm, tier): load_tier_runs(results_root, arm, tier)
+        for tier in tiers_under(results_root)
+        for arm in _ARMS
+    }
+
+
 def _ignition_counts(
     runs: list[tuple[Path, dict[str, Any], dict[str, Any]]],
 ) -> dict[str, Any]:
