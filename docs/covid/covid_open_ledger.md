@@ -146,6 +146,19 @@ admitted and the residual remains mechanism-shaped**
 (`docs/ledger/THETA-SCREEN-V13.md`,
 `docs/covid/covid_theta_screen_v13_readout.md`).*
 
+*Update (2026-09-28, declared): two mechanism assays on the v13 residual
+are declared — **COVID-RINGCAP-V1** (`transmission.exposure_cap.
+include_fixed_rings`: the cabin-mate and same-table rings spend the
+shedder's per-epoch budget first, pool draws the remainder; the measured
+top suspect since ROUTE-ATTR-V1 read ~98% of dose weight ring-side) and
+**COVID-SUSCPOOL-V1** (hard non-susceptible fraction on the shipped
+secretor-negative grammar at {0.25, 0.5, 0.75} — bounds the ~2x+ truth
+overshoot SERO-CHANNEL-V1 factorized). Each runs the v13 stage-2 replay
+cells verbatim at the admissible band plus a coarse generic-voyage
+fleet-shape response check; a clause PASS triggers a re-screen design on
+that arm, never an adoption (`docs/ledger/COVID-RINGCAP-V1.md`,
+`docs/ledger/COVID-SUSCPOOL-V1.md`).*
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection

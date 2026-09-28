@@ -1,0 +1,67 @@
+# COVID-RINGCAP-V1
+**Date:** 2026-09-28
+**Commit:** 6085e726
+**Pathogens:** sars_cov2_resp
+**Status:** declared
+
+Declared before any cell ran. Mechanism candidate 1 of the THETA-SCREEN-V13
+residual hunt: the fixed rings (cabin-mate ring, same-table dining party)
+spend the shedder's per-epoch exposure-cap budget FIRST, so the pooled
+droplet/HVAC cohort draws only the remainder. THETA-SCREEN-V13 measured
+the conditional clause cap-invariant — the band shifted to
+{1.78e11..5.62e11} while takeoff-seed recorded-onsets floors stayed
+1,770-2,024 (~9-10x the record's 197) — consistent with ROUTE-ATTR-V1's
+~98% ring-side dose weight: the v12/v13 cap gates only the pooled routes
+(`_droplet_unit_doses`, `_apply_hvac_downstream_doses`) while the ring
+routes (`_cabin_mate_droplet_addback`, `_near_field_unit`, dealt tables)
+dose outside it.
+
+## Mechanism
+
+New flag `transmission.exposure_cap.include_fixed_rings` (default false =
+v13 baseline, byte-identical — ring accounting adds no RNG draws). When
+true, at each shedder's first budget draw of an epoch the count of its
+dose-forming fixed-ring contacts is subtracted from the Poisson draw:
+
+- cabin mates aboard and open to infection with a positive co-presence
+  share this epoch;
+- same-table partners — the dealt meal-table entry when a deal ran this
+  epoch, or the fixed dining party (mdr/specialty seating) while the
+  shedder stands on a Meal token.
+
+Adjacent-table deals stay inside the pooled reach by declaration: that
+ring is venue structure, not a pre-committed contact. Rings still dose;
+what changes is how much incidental pooled reach remains. Inert while the
+cap is inactive (naval/uncatalogued platforms unchanged).
+
+## Declared
+
+- `picard_framework/runs/covid_ring_cap_v1_design.json` — declared-replay
+  clause assay: {1e9 anchor + 1.78e11, 2.37e11, 3.16e11, 4.22e11,
+  5.62e11} x arms {cap_on, rings_first} x 20 seeds (base 20200205) = 240
+  cells, verbatim v13 stage-2 shape (768 epochs, onset_day −1.0,
+  departure_day 5.0, dwell_weighted).
+- `picard_framework/runs/covid_ring_cap_v1_fleet_design.json` — coarse
+  generic-voyage fleet-shape response: the five admissible Thetas x same
+  arms x 50 seeds (base 20201001) = 500 cells. Response check only; no
+  selector verdict, no Theta admitted from it.
+
+## Frozen criteria
+
+`conditional_trajectory_clause` and `index_geometry` audit invariant
+carried verbatim from covid_theta_screen_v13_stage2. Verdict grammar
+(frozen in the design): clause outcome class per (theta, arm), magnitude
+class of any residual gap vs the v13 ~9-10x read, before_share direction.
+A clause PASS under rings_first triggers a re-screen design on that arm —
+it is not an admission.
+
+## Report-immediately-if (carried)
+
+Audit-invariant failure in any cell; every rings_first row reporting
+insufficient takeoff mass; clause PASS confined to a boundary endpoint;
+failure sign/magnitude-class change vs the v13 read; ring-spend readout
+zero on an arm row (flag did not reach the engine); child failures >5%.
+
+## Result
+
+Pending.
