@@ -23,25 +23,25 @@ hi-arm pair at index 20.
 
 from __future__ import annotations
 
-import json
 import math
-import os
 from dataclasses import dataclass
 from typing import Any
 
 from picard_framework.covid_boarding_screen import (
     PATHOGEN_ID,
     SANITARY_VISIT_MODES,
-    VOYAGE_MODE_DECLARED,
-    VOYAGE_MODES,
 )
 from picard_framework.covid_rhythm_cells import (
-    SOP017_WINDOW,
     RhythmLeg,
-    _generic_leg_spec,
-    _scenario_leg_spec,
+    campaign_cell_dict,
+    campaign_cell_key,
+    enumerate_campaign_cells,
+    find_leg,
+    leg_spec,
+    load_design_json,
+    parse_leg_dicts,
+    validate_leg_fields,
 )
-from simulation_utils.paths import validated_open
 
 # Register-locked: beta^-1 is degenerate with the emission scale (Theta),
 # so beta stays at the shipped value and alpha alone carries the shape.
@@ -89,34 +89,10 @@ class VulnABDesign:
             alphas.append(float(alpha))
         if alphas[0] == alphas[1]:
             raise ValueError("the two arms must carry distinct alpha endpoints")
-        class_ids = [leg.class_id for leg in self.legs]
-        if len(set(class_ids)) != len(class_ids):
-            raise ValueError("leg class_ids must be distinct")
-        for leg in self.legs:
-            if leg.voyage_mode not in VOYAGE_MODES:
-                raise ValueError(
-                    f"leg {leg.class_id!r} voyage_mode must be one of "
-                    f"{VOYAGE_MODES}, got {leg.voyage_mode!r}",
-                )
-            if leg.kind not in ("scenario", "generic"):
-                raise ValueError(
-                    f"leg {leg.class_id!r} kind must be 'scenario' or "
-                    f"'generic', got {leg.kind!r}",
-                )
-            if leg.kind == "scenario" and not leg.scenario_id:
-                raise ValueError(
-                    f"scenario leg {leg.class_id!r} needs a scenario_id",
-                )
-            if leg.kind == "generic" and leg.passengers < 1:
-                raise ValueError(
-                    f"generic leg {leg.class_id!r} needs a passenger count",
-                )
+        validate_leg_fields(self.legs)
 
     def leg(self, class_id: str) -> RhythmLeg:
-        for leg in self.legs:
-            if leg.class_id == class_id:
-                return leg
-        raise KeyError(f"unknown class_id {class_id!r}")
+        return find_leg(self.legs, class_id)
 
     def arm_alpha(self, arm_id: str) -> float:
         """The declared alpha endpoint one arm writes into every cell."""
@@ -148,49 +124,24 @@ class VulnCell:
 
     @property
     def key(self) -> str:
-        exponent = f"{math.log10(self.theta):.2f}".replace(".", "p")
-        age = f"{self.infection_age_days:g}".replace(".", "p")
         alpha = f"{self.alpha:g}".replace(".", "p")
-        return (
-            f"vuln_{self.class_id}_theta1e{exponent}_age{age}d"
-            f"_imports{self.imports}_seed{self.seed}_a{alpha}.json"
+        return campaign_cell_key(
+            "vuln", self.class_id, self.theta,
+            self.infection_age_days, self.imports, self.seed, f"a{alpha}",
         )
 
     def as_dict(self) -> dict[str, Any]:
         return {
-            "index": self.index,
-            "class_id": self.class_id,
-            "platform_id": self.platform_id,
-            "scenario_id": self.scenario_id,
-            "theta": self.theta,
-            "infection_age_days": self.infection_age_days,
-            "imports": self.imports,
-            "seed": self.seed,
-            "arm_id": self.arm_id,
+            **campaign_cell_dict(self),
             "alpha": self.alpha,
-            "key": self.key,
         }
 
 
 def enumerate_vuln_cells(design: VulnABDesign) -> tuple[VulnCell, ...]:
     """Every cell in a fixed order: leg, then arm, then seed."""
-    cells: list[VulnCell] = []
-    for leg in design.legs:
-        for arm in design.arms:
-            for seed in leg.seed_values:
-                cells.append(VulnCell(
-                    index=len(cells),
-                    class_id=leg.class_id,
-                    platform_id=leg.platform_id,
-                    scenario_id=leg.label,
-                    theta=float(design.theta),
-                    infection_age_days=float(design.infection_age_days),
-                    imports=int(design.imports),
-                    seed=int(seed),
-                    arm_id=str(arm["arm_id"]),
-                    alpha=float(arm["alpha"]),
-                ))
-    return tuple(cells)
+    return enumerate_campaign_cells(
+        design, VulnCell, lambda arm: {"alpha": float(arm["alpha"])},
+    )
 
 
 def prepare_vuln_cell_spec(
@@ -208,11 +159,8 @@ def prepare_vuln_cell_spec(
     ``config_overrides`` pins rhythm on and the exposure cap on so the
     axis is measured on the declared exposure-set context.
     """
-    leg = design.leg(cell.class_id)
-    if leg.kind == "scenario":
-        raw = _scenario_leg_spec(design, leg, cell, repo_root=repo_root)
-    else:
-        raw = _generic_leg_spec(design, leg, cell, repo_root=repo_root)
+    raw = leg_spec(design, design.leg(cell.class_id), cell,
+                   repo_root=repo_root)
     overrides = raw.setdefault("config_overrides", {})
     overrides["rhythm"] = {"enabled": True}
     overrides.setdefault("transmission", {})["exposure_cap"] = {
@@ -232,28 +180,7 @@ def prepare_vuln_cell_spec(
 
 def load_vuln_design(path: str) -> VulnABDesign:
     """Parse the A/B design file; every criterion must already be in it."""
-    with validated_open(
-        path, allowed_roots=(os.path.dirname(path) or ".",), encoding="utf-8",
-    ) as handle:
-        raw = json.load(handle)
-    legs = tuple(
-        RhythmLeg(
-            class_id=str(leg["class_id"]),
-            platform_id=str(leg["platform_id"]),
-            kind=str(leg["kind"]),
-            seed_base=int(leg["seed_base"]),
-            seeds=int(leg["seeds"]),
-            scenario_id=leg.get("scenario_id"),
-            passengers=int(leg.get("passengers") or 0),
-            crew=int(leg.get("crew") or 0),
-            duration_days=int(leg.get("duration_days") or 32),
-            sop017_window=tuple(
-                leg.get("sop017_window") or SOP017_WINDOW
-            ),
-            voyage_mode=str(leg.get("voyage_mode") or VOYAGE_MODE_DECLARED),
-        )
-        for leg in raw["legs"]
-    )
+    raw = load_design_json(path)
     return VulnABDesign(
         design_id=str(raw["design_id"]),
         theta=float(raw["theta"]),
@@ -263,5 +190,5 @@ def load_vuln_design(path: str) -> VulnABDesign:
         sanitary_visit_mode=str(raw["sanitary_visit_mode"]),
         takeoff_recorded_onsets=int(raw["takeoff_recorded_onsets"]),
         arms=tuple(raw["arms"]),
-        legs=legs,
+        legs=parse_leg_dicts(raw["legs"]),
     )

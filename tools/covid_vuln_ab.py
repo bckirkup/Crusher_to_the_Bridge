@@ -18,8 +18,6 @@ Usage:
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from typing import Any
@@ -34,11 +32,9 @@ from picard_framework.covid_vuln_cells import (  # noqa: E402
     load_vuln_design,
     prepare_vuln_cell_spec,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
-from tools.covid_assay_smoke import repo_root_of  # noqa: E402
 from tools.covid_rhythm_ab import (  # noqa: E402
+    ab_cli_main,
     cell_zone_sets,
-    select_cells,
 )
 from tools.covid_takeoff_attribution import analyse_spec  # noqa: E402
 
@@ -68,46 +64,14 @@ def run_cell(design: Any, cell: Any, *, repo_root: str) -> dict[str, Any]:
 
 
 def main() -> None:  # pragma: no cover - CLI driver
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--design", default=DEFAULT_DESIGN)
-    parser.add_argument("--index", type=int, default=None,
-                        help="Run exactly the cell at this enumeration index")
-    parser.add_argument("--class", dest="class_id", default=None)
-    parser.add_argument("--arm", dest="arm_id", default=None,
-                        choices=[None, "alpha_lo", "alpha_hi"])
-    parser.add_argument("--seeds", default=None,
-                        help="Comma-separated seed list")
-    parser.add_argument("--out", default=None)
-    args = parser.parse_args()
-
-    repo_root = repo_root_of(__file__)
-    design = load_vuln_design(
-        str(resolve_repo_path(repo_root, args.design))
-        if not os.path.isabs(args.design) else args.design,
+    ab_cli_main(
+        description=__doc__.splitlines()[0],
+        default_design=DEFAULT_DESIGN,
+        load_design=load_vuln_design,
+        enumerate_cells=enumerate_vuln_cells,
+        arm_choices=("alpha_lo", "alpha_hi"),
+        run_cell_fn=run_cell,
     )
-    seeds = (
-        {int(s) for s in args.seeds.split(",")} if args.seeds else None
-    )
-    cells = select_cells(
-        list(enumerate_vuln_cells(design)),
-        index=args.index,
-        class_id=args.class_id,
-        arm_id=args.arm_id,
-        seeds=seeds,
-    )
-    results = [
-        run_cell(design, c, repo_root=repo_root) for c in cells
-    ]
-    text = json.dumps(results, indent=1, default=str)
-    if args.out:
-        resolved = resolve_repo_path(repo_root, args.out)
-        with validated_open(
-            resolved, "w", allowed_roots=(repo_root,), encoding="utf-8",
-        ) as handle:
-            handle.write(text)
-        print(f"wrote {resolved}")
-    else:
-        print(text)
 
 
 if __name__ == "__main__":

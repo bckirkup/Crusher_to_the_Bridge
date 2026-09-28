@@ -34,13 +34,12 @@ from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-from simulation_utils.paths import (  # noqa: E402
-    resolve_repo_path,
-    validated_open,
-)
+from simulation_utils.paths import resolve_repo_path  # noqa: E402
 from tools.covid_rhythm_ab_readout import (  # noqa: E402
     _cell_summaries,
+    _emit_text,
     _exposure_pool,
+    _group_cells,
     _p_infection_mean,
     _recorded,
     _t1_clause,
@@ -251,12 +250,7 @@ def pool(
     arm_scales: dict[str, float] | None = None,
     beta: float = 58.0,
 ) -> dict[str, Any]:
-    groups: dict[tuple[str, str], list[dict[str, Any]]] = {}
-    for c in cells:
-        groups.setdefault(
-            (str(c["cell"]["class_id"]), str(c["cell"]["arm_id"])),
-            [],
-        ).append(c)
+    groups = _group_cells(cells)
     classes: dict[str, Any] = {}
     for class_id in sorted({k[0] for k in groups}):
         arms = {
@@ -329,15 +323,7 @@ def main() -> None:  # pragma: no cover - CLI driver
         indent=1,
         default=str,
     )
-    if args.out:
-        out_path = resolve_repo_path(REPO_ROOT, args.out)
-        with validated_open(
-            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as handle:
-            handle.write(text)
-        print(f"wrote {out_path}")
-    else:
-        print(text)
+    _emit_text(text, args.out)
 
 
 if __name__ == "__main__":
