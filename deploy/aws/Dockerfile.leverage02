@@ -13,6 +13,7 @@ USER root
 COPY --chown=campaign:campaign engines/rhythm_layer.py ./engines/rhythm_layer.py
 COPY --chown=campaign:campaign picard_framework/leverage_screen.py ./picard_framework/leverage_screen.py
 COPY --chown=campaign:campaign picard_framework/runs/leverage02_design.json ./picard_framework/runs/leverage02_design.json
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py ./deploy/aws/dose_challenge_entrypoint.py
 COPY --chown=campaign:campaign deploy/aws/leverage01_entrypoint.py ./deploy/aws/leverage01_entrypoint.py
 USER campaign
 

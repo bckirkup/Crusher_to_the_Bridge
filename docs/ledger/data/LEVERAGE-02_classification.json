@@ -1,0 +1,6173 @@
+{
+  "axes": [
+    {
+      "axis_id": "noro_rhythm_meal_participation",
+      "register_rows": [
+        609
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.15,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.95,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_event_participation",
+      "register_rows": [
+        610
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.2,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.5,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_occupancy_share",
+      "register_rows": [
+        611
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.2,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.95,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_pp_emesis_multiplier",
+      "register_rows": [
+        614
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 3.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_pp_window_minutes",
+      "register_rows": [
+        615
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 30,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 120,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_asleep_share",
+      "register_rows": [
+        616
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.85,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_port_onboard",
+      "register_rows": [
+        618
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured; the scored cell is all sea days, so the port-day channel never fires \u2014 an L0 here is unexercised, not measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.15,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.45,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_port_return_front",
+      "register_rows": [
+        619
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured; the scored cell is all sea days, so the port-day channel never fires \u2014 an L0 here is unexercised, not measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.3,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.7,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_rhythm_sop_capacity",
+      "register_rows": [
+        621
+      ],
+      "rank_note": "first rank \u2014 \u00a73.6 rhythm constant, never measured; only fires if a capacity_multiplier SOP variant activates during the run",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.3,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_voyage_contact_multiplier",
+      "register_rows": [
+        639
+      ],
+      "rank_note": "first rank \u2014 EXPO-CAP-01 contact-budget row, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.2,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              false
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.09216589861751152,
+                0.5299539170506913
+              ],
+              "diamond_princess_2020": [
+                0.060765718299964876,
+                0.0
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.2,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.48847926267281105,
+                0.5391705069124424
+              ],
+              "diamond_princess_2020": [
+                0.058765915768854066,
+                0.12969525159461376
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_activity_contact_rate",
+      "register_rows": [
+        639,
+        640
+      ],
+      "rank_note": "first rank \u2014 EXPO-CAP-01 contact-budget row, never measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 10,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.30414746543778803,
+                0.511520737327189
+              ],
+              "diamond_princess_2020": [
+                0.06268364348677767,
+                0.17117726657645466
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 36,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.30414746543778803,
+                0.511520737327189
+              ],
+              "diamond_princess_2020": [
+                0.06268364348677767,
+                0.17117726657645466
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_direct_contact",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_droplet",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_hvac_airborne",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_fomite",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_food_contamination",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_route_environmental_source",
+      "register_rows": [
+        303
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_emesis_aerosol_fraction",
+      "register_rows": [
+        301
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 7.2e-07,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.000267,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_airborne_half_life",
+      "register_rows": [
+        302
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.45,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cfg_hvac_filter_efficiency",
+      "register_rows": [
+        306
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.99,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_emesis_titre",
+      "register_rows": [
+        311
+      ],
+      "rank_note": "reopened \u2014 emesis episodes now land through the meal-gated post-prandial partition",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 160000.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 800000.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_emesis_censored_titre",
+      "register_rows": [
+        312
+      ],
+      "rank_note": "reopened \u2014 emesis episodes now land through the meal-gated post-prandial partition",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 5000.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 15000.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_hand_drying",
+      "register_rows": [
+        321
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.008,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_food_hand_contacts",
+      "register_rows": [
+        329
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.6,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 15.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_food_handler_multiplier",
+      "register_rows": [
+        330
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 40.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_food_ingestion",
+      "register_rows": [
+        331
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.05,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_surface_decay",
+      "register_rows": [
+        300
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.067,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.79,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cfg_high_touch_area_scale",
+      "register_rows": [
+        350
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.92,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_stool_baseline",
+      "register_rows": [
+        343
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.43,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 3.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_stool_diarrhoeal",
+      "register_rows": [
+        344
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 3.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 8.5,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cfg_blackwater_lppd",
+      "register_rows": [
+        360
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 4.16,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 102.2,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cfg_blackwater_residence",
+      "register_rows": [
+        361
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.5,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 170.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cfg_emesis_drain_capture",
+      "register_rows": [
+        363
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.5,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_symptom_vomiting",
+      "register_rows": [
+        345
+      ],
+      "rank_note": "reopened \u2014 emesis episodes now land through the meal-gated post-prandial partition",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.45,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.9,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_symptom_diarrhoea_given_vomiting",
+      "register_rows": [
+        345
+      ],
+      "rank_note": "reopened \u2014 emesis episodes now land through the meal-gated post-prandial partition",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.25,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.75,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_presym_share",
+      "register_rows": [
+        347
+      ],
+      "rank_note": "reopened \u2014 the symptomatic-stream partition feeds bounded pooled routes",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.1,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_direct_contact",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_droplet",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_hvac_airborne",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_fomite",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_food_contamination",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_route_environmental_source",
+      "register_rows": [
+        391
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.0,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_airborne_half_life",
+      "register_rows": [
+        375
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through the per-shedder contact budget",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 1.43,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 2.7,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_symptomatic_fraction",
+      "register_rows": [
+        390
+      ],
+      "rank_note": "reopened \u2014 the symptomatic-stream partition feeds bounded pooled routes",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.649,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 0.69,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "cov_surface_decay",
+      "register_rows": [
+        376
+      ],
+      "rank_note": "reopened \u2014 the row's channel runs through event-cohort partitioning",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.8,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        },
+        {
+          "endpoint": 1.45,
+          "baseline_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "endpoint_verdicts": {
+            "h1_verdicts": [
+              false,
+              true
+            ],
+            "h2_verdicts": [
+              false,
+              false
+            ],
+            "h3_verdicts": [
+              true,
+              true
+            ],
+            "positive_share": {
+              "greg_mortimer_2020": [
+                0.3778801843317972,
+                0.5622119815668203
+              ],
+              "diamond_princess_2020": [
+                0.06007182500816193,
+                0.13156146179401992
+              ]
+            }
+          },
+          "verdict_flips": [],
+          "moved_quantities": []
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_import_prevalence",
+      "register_rows": [
+        296
+      ],
+      "rank_note": "re-measured \u2014 L1 re-confirmation under the rhythm + exposure-cap stack",
+      "lev": "L1",
+      "endpoints": [
+        {
+          "endpoint": 0.0014,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.0164,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "FAIL",
+            "A2_ill_per_infected": "FAIL",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "FAIL",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [
+            "A1_ever_ill_passenger",
+            "infection_attack_rate_passenger",
+            "reported_case_attack_rate_passenger"
+          ],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 2,
+            "takeoff_fraction": 1.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 10.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 10.0,
+            "A8_crew": 0.0,
+            "A9": 0.0,
+            "A1_ever_ill_passenger": 0.00185,
+            "infection_attack_rate_passenger": 0.009000000000000001,
+            "infection_attack_rate_crew": 0.00785,
+            "reported_case_attack_rate_passenger": 0.0007,
+            "reported_case_attack_rate_crew": 0.0,
+            "ever_ill_attack_rate_crew": 0.0,
+            "A2_ill_per_infected__per_seed_median": 0.18333333333333335,
+            "A2_ill_per_infected__n_defined": 2,
+            "A2_ill_per_infected__n_undefined": 0,
+            "A3_reported_per_symptomatic__per_seed_median": 0.6166666666666667,
+            "A3_reported_per_symptomatic__n_defined": 2,
+            "A3_reported_per_symptomatic__n_undefined": 0,
+            "A5_passenger_crew_ratio__per_seed_median": null,
+            "A5_passenger_crew_ratio__n_defined": 0,
+            "A5_passenger_crew_ratio__n_undefined": 2,
+            "A2_ill_per_infected__of_medians": 0.20555555555555555,
+            "A3_reported_per_symptomatic__of_medians": 0.37837837837837834,
+            "A5_passenger_crew_ratio__of_medians": null
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_never_symptomatic",
+      "register_rows": [
+        341
+      ],
+      "rank_note": "re-measured \u2014 L1 re-confirmation under the rhythm + exposure-cap stack",
+      "lev": "L1",
+      "endpoints": [
+        {
+          "endpoint": 0.22,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 5.0,
+            "A8_crew_incidence": 12.142857142857142,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 5.0,
+            "A8_crew": 12.142857142857142,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.36,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 0.59,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "FAIL",
+            "A2_ill_per_infected": "FAIL",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "FAIL",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 1,
+            "takeoff_fraction": 0.5,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0,
+            "A1_ever_ill_passenger": 0.0,
+            "infection_attack_rate_passenger": 0.0082,
+            "infection_attack_rate_crew": 0.0052,
+            "reported_case_attack_rate_passenger": 0.0,
+            "reported_case_attack_rate_crew": 0.0,
+            "ever_ill_attack_rate_crew": 0.0,
+            "A2_ill_per_infected__per_seed_median": 0.0,
+            "A2_ill_per_infected__n_defined": 1,
+            "A2_ill_per_infected__n_undefined": 0,
+            "A3_reported_per_symptomatic__per_seed_median": null,
+            "A3_reported_per_symptomatic__n_defined": 0,
+            "A3_reported_per_symptomatic__n_undefined": 1,
+            "A5_passenger_crew_ratio__per_seed_median": null,
+            "A5_passenger_crew_ratio__n_defined": 0,
+            "A5_passenger_crew_ratio__n_undefined": 1,
+            "A2_ill_per_infected__of_medians": 0.0,
+            "A3_reported_per_symptomatic__of_medians": null,
+            "A5_passenger_crew_ratio__of_medians": null
+          }
+        },
+        {
+          "endpoint": 0.68,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "FAIL",
+            "A2_ill_per_infected": "FAIL",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "FAIL",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [
+            "infection_attack_rate_passenger"
+          ],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 1,
+            "takeoff_fraction": 0.5,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0,
+            "A1_ever_ill_passenger": 0.0,
+            "infection_attack_rate_passenger": 0.0112,
+            "infection_attack_rate_crew": 0.0035,
+            "reported_case_attack_rate_passenger": 0.0,
+            "reported_case_attack_rate_crew": 0.0,
+            "ever_ill_attack_rate_crew": 0.0,
+            "A2_ill_per_infected__per_seed_median": 0.0,
+            "A2_ill_per_infected__n_defined": 1,
+            "A2_ill_per_infected__n_undefined": 0,
+            "A3_reported_per_symptomatic__per_seed_median": null,
+            "A3_reported_per_symptomatic__n_defined": 0,
+            "A3_reported_per_symptomatic__n_undefined": 1,
+            "A5_passenger_crew_ratio__per_seed_median": null,
+            "A5_passenger_crew_ratio__n_defined": 0,
+            "A5_passenger_crew_ratio__n_undefined": 1,
+            "A2_ill_per_infected__of_medians": 0.0,
+            "A3_reported_per_symptomatic__of_medians": null,
+            "A5_passenger_crew_ratio__of_medians": null
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_illness_duration",
+      "register_rows": [
+        284
+      ],
+      "rank_note": "re-measured \u2014 L1 re-confirmation under the rhythm + exposure-cap stack",
+      "lev": "L1",
+      "endpoints": [
+        {
+          "endpoint": 1,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 13,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [
+            "A1_ever_ill_passenger",
+            "reported_case_attack_rate_passenger"
+          ],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 10.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 10.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    },
+    {
+      "axis_id": "noro_escort_delay_hours",
+      "register_rows": [
+        659
+      ],
+      "rank_note": "first rank \u2014 NORO-VENUE-02 response-chain constant, never leverage-measured",
+      "lev": "L0",
+      "endpoints": [
+        {
+          "endpoint": 0.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        },
+        {
+          "endpoint": 3.0,
+          "baseline_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "endpoint_verdicts": {
+            "A1_ever_ill_passenger": "n/a",
+            "A2_ill_per_infected": "n/a",
+            "A5_passenger_crew_ratio": "n/a",
+            "A4_vsp_iqr": "n/a",
+            "A8": "FAIL",
+            "A9": "FAIL"
+          },
+          "verdict_flips": [],
+          "moved_quantities": [],
+          "baseline_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          },
+          "endpoint_cell": {
+            "n_seeds": 2,
+            "n_takeoff": 0,
+            "takeoff_fraction": 0.0,
+            "A9_eligible_runs": 2,
+            "A9_ineligible_runs": 0,
+            "A8_A9_no_reporting": false,
+            "A8_pax_incidence": 0.0,
+            "A8_crew_incidence": 0.0,
+            "A9_posted_eligible": 0,
+            "A9_posted_passenger_channel": 0,
+            "A9_flag_disagreements": 0,
+            "A9_posting_probability": 0.0,
+            "A9_posting_probability_passenger_channel": 0.0,
+            "A8_pax": 0.0,
+            "A8_crew": 0.0,
+            "A9": 0.0
+          }
+        }
+      ]
+    }
+  ],
+  "design": "LEVERAGE-02",
+  "campaign_label": "LEVERAGE-02",
+  "baseline_sha": "6085e72692b6c793122ce384298f763fde7a756a"
+}
