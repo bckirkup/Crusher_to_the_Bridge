@@ -31,6 +31,7 @@ from engines.crew_duty_exclusion import (
 from engines.infection_dynamics_bridge import (
     DEFAULT_AIRBORNE_HALF_LIFE_HOURS,
     UNSOURCED_AIRBORNE_EMISSION_FRACTION,
+    IllnessStatus,
     InfectionStatus,
     KorkinShipEngine,
 )
@@ -44,7 +45,11 @@ from engines.initiation import (
 from engines.natural_history import advance_infections, project_legacy_illness
 from engines.sim_clock import SimClock, config_epochs_for_hours
 from engines.strain_state import StrainRegistry
-from engines.transmission_core import TransmissionCore
+from engines.transmission_core import (
+    VOMITING_AXIS,
+    TransmissionCore,
+    has_symptom_axis,
+)
 from engines.voyage_itinerary import agent_is_departed
 from engines.wearable_monitor import WearableMonitor
 from orchestrator_types import (
@@ -162,6 +167,134 @@ def step_escort_admissions(epoch: int, state: SimulationState) -> None:
         })
 
 
+# ── Presenting-sign detection (NORO-DETECT-01) ────────────────────────
+#
+# A config-declared trigger switches symptomatic confinement from
+# model-truth onset to the pathogen profile's declared observable sign
+# (observation_model.presenting_sign). One observer pair per wired sign
+# name lives here; a pathogen joins the channel by declaration in its
+# profile, never by a pathogen-named branch. Hosts whose symptomatic
+# infections can never present the declared sign keep the onset-order
+# channel.
+
+
+def _emesis_can_present(
+    agent: Any, pathogen_id: str, infection: dict[str, Any],
+) -> bool:
+    """Whether this infection can still produce an observable emesis.
+
+    The onset-relative schedule is drawn at symptomatic onset and only
+    for the vomiting axis; a non-vomiting axis or an empty episode draw
+    means no sign ever arrives, so the host must stay on the onset
+    channel rather than wait forever. Already-deposited records count
+    as can-present.
+    """
+    if not has_symptom_axis(infection, VOMITING_AXIS):
+        return False
+    records = getattr(agent, "emesis_deposition_records_by_pathogen", None) or {}
+    if records.get(pathogen_id):
+        return True
+    schedule = getattr(agent, "emesis_episode_schedule_by_pathogen", None) or {}
+    return bool(schedule.get(pathogen_id))
+
+
+def _emesis_first_sign_epoch(agent: Any, pathogen_id: str) -> int | None:
+    """The epoch the host's first emesis physically landed, if any has."""
+    records = getattr(agent, "emesis_deposition_records_by_pathogen", None) or {}
+    epochs = [
+        int(rec["epoch"])
+        for rec in records.get(pathogen_id) or ()
+        if rec.get("epoch") is not None
+    ]
+    return min(epochs) if epochs else None
+
+
+# sign name -> (can this infection still produce the sign, epoch the
+# first sign physically landed). The schema enum and this registry grow
+# together when a new sign is wired.
+_SIGN_OBSERVERS: dict[str, tuple[Any, Any]] = {
+    "emesis": (_emesis_can_present, _emesis_first_sign_epoch),
+}
+
+
+def _sign_channel_scan_agent(
+    agent: Any, sign_by_pathogen: dict[str, str],
+) -> tuple[bool, bool, list[int]]:
+    """One host's sign-channel status: (gated, onset_channel, sign epochs).
+
+    Each symptomatic infection resolves independently: an infection on a
+    pathogen declaring no wired sign, or one that can never present its
+    declared sign, puts the host on the onset channel — one such
+    infection is enough to order at onset. Otherwise the host is gated
+    until the earliest observed sign plus the clinic wait.
+    """
+    gated = False
+    onset_channel = False
+    sign_epochs: list[int] = []
+    for pid, infection in agent.infections.items():
+        if infection.get("illness") != IllnessStatus.SYMPTOMATIC:
+            continue
+        observers = _SIGN_OBSERVERS.get(sign_by_pathogen.get(pid, ""))
+        if observers is None:
+            onset_channel = True
+            continue
+        can_present, first_epoch = observers
+        if not can_present(agent, pid, infection):
+            onset_channel = True
+            continue
+        gated = True
+        seen = first_epoch(agent, pid)
+        if seen is not None:
+            sign_epochs.append(seen)
+    return gated, onset_channel, sign_epochs
+
+
+def step_presenting_sign_detection(
+    epoch: int,
+    engine: KorkinShipEngine,
+    state: SimulationState,
+    syndromic: Any,
+) -> None:
+    """Stamp presenting-sign observations and maintain the sign gate.
+
+    Runs once per epoch before the confinement pass, on the engine's own
+    infection records — the sign is a physical event (first emesis
+    deposited), which the projected order-layer agent dicts do not
+    carry. ``sign_gated_ids`` holds hosts whose only symptomatic
+    channel is the declared sign; ``presenting_sign_epoch`` latches the
+    first observed sign; ``sign_order_due_epoch`` is that epoch plus
+    the resolved clinic wait.
+
+    Draws nothing — the RNG stream is untouched, so the ``onset``
+    trigger arm reproduces the baseline trajectory seed-for-seed.
+    """
+    trigger = getattr(syndromic, "symptomatic_order_trigger", "onset")
+    if trigger != "presenting_sign":
+        return
+    wait = int(getattr(syndromic, "clinic_wait_epochs", 0) or 0)
+    sign_by_pathogen = (
+        getattr(syndromic, "presenting_sign_by_pathogen", None) or {}
+    )
+    for agent in engine.agents:
+        aid = int(agent.agent_id)
+        gated, onset_channel, sign_epochs = _sign_channel_scan_agent(
+            agent, sign_by_pathogen,
+        )
+        if onset_channel or not gated:
+            state.sign_gated_ids.discard(aid)
+            state.sign_order_due_epoch.pop(aid, None)
+            continue
+        state.sign_gated_ids.add(aid)
+        if not sign_epochs:
+            state.sign_order_due_epoch.pop(aid, None)
+            continue
+        if aid not in state.presenting_sign_epoch:
+            state.presenting_sign_epoch[aid] = min(sign_epochs)
+        state.sign_order_due_epoch[aid] = (
+            state.presenting_sign_epoch[aid] + wait
+        )
+
+
 def try_admit_to_quarantine(
     epoch: int,
     aid: int,
@@ -173,6 +306,7 @@ def try_admit_to_quarantine(
     epochs_since_order: int = 0,
     agent_class: str | None = None,
     is_symptomatic: bool = False,
+    detection_channel: str | None = None,
 ) -> bool:
     """Admit *aid* to quarantine if FRED compliance check passes.
 
@@ -203,28 +337,37 @@ def try_admit_to_quarantine(
         escort_delay = _escort_delay_epochs(syndromic)
         if escort_delay > 0:
             state.escort_pending[aid] = epoch + escort_delay
-            state.compliance_log.append({
+            entry = {
                 "epoch": epoch, "agent_id": aid,
                 "action": "escort_order",
                 "compliance_class": cls,
                 "escort_due_epoch": epoch + escort_delay,
-            })
+            }
+            if detection_channel is not None:
+                entry["detection_channel"] = detection_channel
+            state.compliance_log.append(entry)
             return False
         state.quarantined_ids.add(aid)
-        state.compliance_log.append({
+        entry = {
             "epoch": epoch, "agent_id": aid, "action": action_ok,
             "compliance_class": cls,
-        })
+        }
+        if detection_channel is not None:
+            entry["detection_channel"] = detection_channel
+        state.compliance_log.append(entry)
         return True
     cls = getattr(syndromic, "_compliance_class", {}).get(aid)
     if cls is not None:
         state.compliance_class_by_agent[aid] = cls
     state.quarantine_refusers.add(aid)
     state.quarantine_order_epoch[aid] = epoch
-    state.compliance_log.append({
+    entry = {
         "epoch": epoch, "agent_id": aid, "action": action_refuse,
         "compliance_class": cls,
-    })
+    }
+    if detection_channel is not None:
+        entry["detection_channel"] = detection_channel
+    state.compliance_log.append(entry)
     return False
 
 
@@ -1267,6 +1410,21 @@ def _admit_flagged_to_quarantine(
     """Admit one non-exempt agent when any confinement flag applies."""
     aid = agent_id(agent)
     is_symptomatic = agent_requires_confinement(agent)
+    # detection_channel names what released the symptomatic flag on the
+    # log entry: "onset" for the model-truth channel, "sign" once the
+    # declared presenting sign has been observed and the clinic wait has
+    # elapsed, absent when a non-symptomatic flag (confirmed case,
+    # cabin contact, shedding) carried the order.
+    detection_channel = "onset" if is_symptomatic else None
+    if is_symptomatic and aid in state.sign_gated_ids:
+        due = state.sign_order_due_epoch.get(aid)
+        if due is None or epoch < due:
+            # Sign not yet observed (or the clinic wait still running):
+            # the symptomatic flag is not yet observable on this host.
+            is_symptomatic = False
+            detection_channel = None
+        else:
+            detection_channel = "sign"
     is_shedding = include_shedding and agent.get(AGENT_SHEDDING_RATE, 0.0) > 0.0
     is_confirmed = aid in confirmed
     is_contact = aid in contact_ids
@@ -1278,6 +1436,7 @@ def _admit_flagged_to_quarantine(
         action_refuse="refused_quarantine",
         agent_class=agent.get(AGENT_CLASS),
         is_symptomatic=is_symptomatic,
+        detection_channel=detection_channel,
     )
 
 

@@ -252,6 +252,17 @@ def build_modalities(
         fred_cfg, "escort_delay_hours", "escort_delay_epochs",
         run_clock, default=1,
     )
+    # Presenting-sign detection (NORO-DETECT-01): shipped ON — the
+    # confinement order waits for the pathogen's declared observable
+    # presenting sign plus the clinic wait; "onset" is the labelled
+    # omniscient-detection baseline.
+    order_trigger = fred_cfg.get(
+        "symptomatic_order_trigger", "presenting_sign",
+    )
+    clinic_wait = config_epochs_for_hours(
+        fred_cfg, "clinic_wait_hours", "clinic_wait_epochs",
+        run_clock, default=6,
+    )
     detection_delay = config_epochs_for_hours(
         syn_cfg, "detection_delay_hours", "detection_delay_epochs",
         run_clock, default=0,
@@ -274,6 +285,8 @@ def build_modalities(
             reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
             reluctant_delay_epochs=reluctant_delay or 0,
             escort_delay_epochs=escort_delay or 0,
+            symptomatic_order_trigger=order_trigger,
+            clinic_wait_epochs=clinic_wait or 0,
             compliance_by_class=fred_cfg.get("compliance_by_class"),
             detection_delay_epochs=detection_delay or 0,
             crew_screening_interval_epochs=screening_interval,

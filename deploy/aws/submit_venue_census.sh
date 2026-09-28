@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
-# Submit one NORO-VENUE-01/02 placement-census cell block as an AWS
-# Batch EC2 Spot array. NORO-VENUE-02 adds the ESCORT_DELAY_HOURS arm
-# (order->admission delay; 0 = instant-admission baseline) and the
-# _k<delay> cell-label suffix.
+# Submit one placement-census cell block as an AWS Batch array.
+# NORO-VENUE-02 arms: ESCORT_DELAY_HOURS (order->admission delay;
+# 0 = instant-admission baseline) -> _k<delay> cell label.
+# NORO-DETECT-01 arms: SYMPTOMATIC_ORDER_TRIGGER (onset = labelled
+# baseline -> _onset label; presenting_sign -> _w$CLINIC_WAIT_HOURS
+# label, escort stays k=1 across arms).
 #
 # One submission per cell block: child i runs the tier run whose
 # run.random_seed equals SEEDS[i] through venue_census_entrypoint and
@@ -29,10 +31,21 @@ SEEDS="${SEEDS:-8105,8114,8124,8129,8132,8135,8137,8148,8156,8158,8159,8106}"
 PLATFORM_ID="${PLATFORM_ID:-}"
 NUM_AGENTS="${NUM_AGENTS:-0}"
 ESCORT_DELAY_HOURS="${ESCORT_DELAY_HOURS:-1}"
+SYMPTOMATIC_ORDER_TRIGGER="${SYMPTOMATIC_ORDER_TRIGGER:-}"
+CLINIC_WAIT_HOURS="${CLINIC_WAIT_HOURS:-6}"
 MANIFEST="${MANIFEST:-picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json}"
 PATHOGEN_ID="${PATHOGEN_ID:-norwalk_gi}"
-S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/noro_venue_02/}"
-CELL_LABEL="${PLATFORM_ID:-$TIER}_k${ESCORT_DELAY_HOURS}"
+S3_PREFIX="${S3_PREFIX:-s3://${BUCKET}/campaign/noro_detect_01/}"
+if [ -n "$SYMPTOMATIC_ORDER_TRIGGER" ]; then
+  if [ "$SYMPTOMATIC_ORDER_TRIGGER" = onset ]; then
+    ARM_SUFFIX="_onset"
+  else
+    ARM_SUFFIX="_w${CLINIC_WAIT_HOURS}"
+  fi
+else
+  ARM_SUFFIX="_k${ESCORT_DELAY_HOURS}"
+fi
+CELL_LABEL="${PLATFORM_ID:-$TIER}${ARM_SUFFIX}"
 JOB_NAME="${JOB_NAME:-picard-venue-census-${CELL_LABEL}-$(date +%Y%m%d-%H%M%S)}"
 AWS_PROFILE="${AWS_PROFILE:-picard}"
 export AWS_PROFILE
@@ -49,6 +62,8 @@ echo "  seeds       : $SEEDS (array size $ARRAY_SIZE)"
 echo "  platform_id : ${PLATFORM_ID:-<tier default>}"
 echo "  num_agents  : $NUM_AGENTS"
 echo "  escort k    : $ESCORT_DELAY_HOURS"
+echo "  trigger     : ${SYMPTOMATIC_ORDER_TRIGGER:-<unset — k arm>}"
+echo "  clinic wait : ${CLINIC_WAIT_HOURS}h (sign arms)"
 echo "  cell label  : $CELL_LABEL"
 echo "  pathogen    : $PATHOGEN_ID"
 echo "  prefix      : $S3_PREFIX"
@@ -82,7 +97,9 @@ read -r -d '' SUBMIT_JSON <<JSON || true
     "tier": "$TIER",
     "seeds": "$SEEDS",
     "num_agents": "$NUM_AGENTS",
-    "escort_delay_hours": "$ESCORT_DELAY_HOURS"
+    "escort_delay_hours": "$ESCORT_DELAY_HOURS",
+    "symptomatic_order_trigger": "${SYMPTOMATIC_ORDER_TRIGGER:-none}",
+    "clinic_wait_hours": "$CLINIC_WAIT_HOURS"
   }
 }
 JSON
@@ -95,6 +112,10 @@ if '$PLATFORM_ID':
     j['parameters']['platform_id'] = '$PLATFORM_ID'
 if int('$NUM_AGENTS' or 0):
     cmd += ['--num-agents', '$NUM_AGENTS']
+if '$SYMPTOMATIC_ORDER_TRIGGER':
+    cmd += ['--symptomatic-order-trigger', '$SYMPTOMATIC_ORDER_TRIGGER']
+    if '$SYMPTOMATIC_ORDER_TRIGGER' != 'onset':
+        cmd += ['--clinic-wait-hours', '$CLINIC_WAIT_HOURS']
 print(json.dumps(j))
 " <<<"$SUBMIT_JSON")"
 
