@@ -1,9 +1,16 @@
 # NORO-VENUE-01
 **Date:** 2026-09-28
-**Commit:** 27d818d8 (instrument merge; census driver `tools/noro_diag/venue_placement_census.py`, readout `tools/noro_diag/venue_census_readout.py`)
+**Commit:** 27d818d893ccbdb3f4dc9d080dc196a2de824bb4
 **Pathogens:** norwalk_gi
 **Status:** measured
-**Measured at:** 27d818d8 — AWS Batch `picard-venue-census:1` on image `picard-campaign@sha256:4a0f4165a73721e98db18f287ded159dd0a79e1eca659eb682adc05bf7f67fcc` (tag `venue-census-27d818d8`, `ENGINE_GIT_SHA=27d818d8`); spirit block also reproduced locally on the same tree.
+**Measured at:** 27d818d893ccbdb3f4dc9d080dc196a2de824bb4
+
+Census driver `tools/noro_diag/venue_placement_census.py`, readout
+`tools/noro_diag/venue_census_readout.py` (instrument merge 27d818d8, PR
+#760). Cells ran on AWS Batch `picard-venue-census:1`, image
+`picard-campaign@sha256:4a0f4165a73721e98db18f287ded159dd0a79e1eca659eb682adc05bf7f67fcc`
+(tag `venue-census-27d818d8`, `ENGINE_GIT_SHA=27d818d8`); the spirit
+block was also reproduced locally on the same tree.
 
 Emesis-vs-confinement placement census on the norovirus arm,
 `dose_adjustment` 7.57 (the NORO-DOSE-REFIT-01 value — withdrawn pending
