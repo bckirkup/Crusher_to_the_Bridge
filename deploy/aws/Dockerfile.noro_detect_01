@@ -1,0 +1,53 @@
+# NORO-DETECT-01 image — venue-census-v3 built as an overlay on
+# picard-campaign:venue-census-v2 (built at c5f39ac9, VENUE-02 merge).
+#
+# The mechanism commit (7a863de8, merged to main as c09a34cc) only adds
+# or modifies the files listed below — nothing was deleted between
+# c5f39ac9 and c09a34cc, so copying those paths verbatim yields image
+# content identical to a clean build at the merged SHA. The overlay
+# exists because docker.io rate-limited the python:3.11-slim base pull
+# for a full rebuild on the build VM.
+#
+# Build (from the repository root at the merged SHA):
+#   docker build -f deploy/aws/Dockerfile.noro_detect_01 \
+#     --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+#     -t picard-campaign:venue-census-v3 .
+ARG BASE_IMAGE=994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:venue-census-v2
+FROM ${BASE_IMAGE}
+
+USER root
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+# Mechanism (NORO-DETECT-01 commit, merged c09a34cc).
+COPY --chown=campaign:campaign crusher_labs/__init__.py ./crusher_labs/
+COPY --chown=campaign:campaign crusher_labs/config.yaml ./crusher_labs/
+COPY --chown=campaign:campaign \
+    crusher_labs/modalities/syndromic.py ./crusher_labs/modalities/
+COPY --chown=campaign:campaign data/pathogens/active_profiles.json \
+    data/pathogens/norwalk_only.json ./data/pathogens/
+COPY --chown=campaign:campaign orchestrator_epoch.py orchestrator_types.py ./
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/campaign_runner.py \
+    ./picard_framework/runs/mega_cruise_campaign/
+COPY --chown=campaign:campaign \
+    picard_framework/simulation/ship_simulation.py \
+    ./picard_framework/simulation/
+COPY --chown=campaign:campaign \
+    schemas/pathogen_profiles.schema.json ./schemas/
+
+# Census instruments + Batch entry.
+COPY --chown=campaign:campaign \
+    tools/noro_diag/venue_census_readout.py \
+    tools/noro_diag/venue_placement_census.py ./tools/noro_diag/
+COPY --chown=campaign:campaign deploy/aws/venue_census_entrypoint.py \
+    deploy/aws/submit_venue_census.sh ./deploy/aws/
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/
+COPY --chown=campaign:campaign \
+    tests/test_presenting_sign_detection.py ./tests/
+
+USER campaign
+ENTRYPOINT ["python3"]
