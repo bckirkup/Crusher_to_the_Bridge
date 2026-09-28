@@ -94,17 +94,28 @@ def test_paired_discordance_keys_on_run_id() -> None:
 def test_landing_partition_splits_immune_cabin_and_venue() -> None:
     rhythm = {
         "emesis_rows": [
-            {"gen_class": "acquired", "zone_type": "Cabin", "n_susceptible": 0},
-            {"gen_class": "acquired", "zone_type": "Cabin", "n_susceptible": 2},
-            {"gen_class": "acquired", "zone_type": "Dining", "n_susceptible": 5},
-            {"gen_class": "import", "zone_type": "Dining", "n_susceptible": 5},
+            {"gen_class": "acquired", "zone_type": "Cabin",
+             "n_occupants": 2, "n_susceptible": 0},
+            {"gen_class": "acquired", "zone_type": "Cabin",
+             "n_occupants": 3, "n_susceptible": 2},
+            {"gen_class": "acquired", "zone_type": "Cabin",
+             "n_occupants": 0, "n_susceptible": 0},
+            {"gen_class": "acquired", "zone_type": "Dining",
+             "n_occupants": 160, "n_susceptible": 150},
+            {"gen_class": "import", "zone_type": "Dining",
+             "n_occupants": 160, "n_susceptible": 150},
         ],
     }
     part = readout._landing_partition([(_P("r"), {}, rhythm)])
-    assert part["secondary_emesis"] == 3
+    assert part["secondary_emesis"] == 4
+    assert part["secondary_cabin"] == 3
     assert part["secondary_cabin_immune_occupancy"] == 1
-    assert part["immune_cabin_share"] == pytest.approx(0.5)
-    assert part["shared_venue_share"] == pytest.approx(1 / 3)
+    assert part["secondary_cabin_susceptible_present"] == 1
+    assert part["secondary_cabin_empty"] == 1
+    assert part["immune_cabin_share"] == pytest.approx(1 / 3)
+    assert part["empty_cabin_share"] == pytest.approx(1 / 3)
+    assert part["shared_venue_share"] == pytest.approx(0.25)
+    assert part["shared_venue_median_susceptibles"] == 150
 
 
 def test_defect_witness_flags_unconsumed_flag() -> None:

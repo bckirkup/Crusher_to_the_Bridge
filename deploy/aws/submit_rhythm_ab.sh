@@ -35,9 +35,10 @@ import json, sys
 sys.path.insert(0, 'picard_framework/runs/mega_cruise_campaign')
 from campaign_runner import generate_tier_runs
 manifest = json.load(open(sys.argv[1]))
-print(sum(len(list(generate_tier_runs(manifest, t)))
-          for t in ('fl_exp_7d', 'fl_exp_12d', 'fl_spr_12d',
-                    'fl_cls_12d', 'fl_mega_12d')))
+tiers = ('fl_exp_7d', 'fl_exp_12d', 'fl_spr_12d',
+         'fl_cls_12d', 'fl_mega_12d')
+present = [t for t in tiers if t in manifest['tiers']]
+print(sum(len(list(generate_tier_runs(manifest, t))) for t in present))
 PYEOF
 )"
 
@@ -45,7 +46,7 @@ echo "Submitting rhythm A/B ${ARM} array:"
 echo "  name        : $JOB_NAME"
 echo "  manifest    : $MANIFEST"
 echo "  arm         : $ARM"
-echo "  tiers       : fl_exp_7d + fl_exp_12d + fl_spr_12d + fl_cls_12d + fl_mega_12d (array size $ARRAY_SIZE)"
+echo "  tiers       : declared in manifest (array size $ARRAY_SIZE)"
 echo "  pathogen    : $PATHOGEN_ID"
 echo "  prefix      : $S3_PREFIX"
 echo "  queue       : $JOB_QUEUE"

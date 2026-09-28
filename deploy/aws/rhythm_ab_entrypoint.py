@@ -48,6 +48,8 @@ def _tier_cell(index: int, manifest_path: Path) -> tuple[str, int]:
     manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
     offset = 0
     for tier in _TIERS:
+        if tier not in manifest["tiers"]:
+            continue
         runs = list(generate_tier_runs(manifest, tier))
         if index < offset + len(runs):
             return tier, index - offset

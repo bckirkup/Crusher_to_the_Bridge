@@ -13,6 +13,9 @@ FROM ${BASE_IMAGE}
 
 USER root
 COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_rhythm_01_class_rerun_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/
 COPY --chown=campaign:campaign deploy/aws/rhythm_ab_entrypoint.py \
     ./deploy/aws/rhythm_ab_entrypoint.py
 COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
