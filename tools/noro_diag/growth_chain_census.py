@@ -1494,6 +1494,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--pathogen-id", type=str, default="norwalk_gi",
     )
     parser.add_argument(
+        "--exposure-cap", choices=("on", "off"), default=None,
+        help="EXPO-CAP-01 arm: inject transmission.exposure_cap.enabled "
+             "into each spec's config_overrides (unset leaves the tier "
+             "spec's own transmission block)",
+    )
+    parser.add_argument(
         "--epochs-override", type=int, default=None,
         help="smoke-only: override the tier's epoch count",
     )
@@ -1528,6 +1534,13 @@ def main(argv: list[str] | None = None) -> int:
             pair for pair in runs
             if int(pair[1]["run"]["random_seed"]) in wanted
         ]
+    if args.exposure_cap is not None:
+        enabled = args.exposure_cap == "on"
+        for _run_id, spec in runs:
+            tx = spec.setdefault("config_overrides", {}).setdefault(
+                "transmission", {},
+            )
+            tx["exposure_cap"] = {"enabled": enabled}
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )

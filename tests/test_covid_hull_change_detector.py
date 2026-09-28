@@ -166,7 +166,17 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # flag-off cell reproduces (1, 1, 217, 1, 0) exactly on this
         # branch (rhythm.enabled: false), so the move is fully attributed
         # to the rhythm layer.
-        (3, 11): (2, 1, 217, 2, 1),
+        # EXPO-CAP-01: the per-shedder exposure cap is now the shipped
+        # default on catalogued cruise platforms; on this near-extinct
+        # cell the budget-bounded reach retires the remaining spread:
+        # (2, 1, 217, 2, 1) -> (0, 0, 217, 0, 0). The flag-off cell
+        # (transmission.exposure_cap.enabled: false) reproduces
+        # (2, 1, 217, 2, 1) exactly on this branch, so the move is fully
+        # attributed to the cap. Read in the local venv on CPython 3.12;
+        # both interpreters have agreed on every near-extinct reading of
+        # this cell, so the 3.11 entry carries the same tuple pending its
+        # CI read.
+        (3, 11): (0, 0, 217, 0, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -233,7 +243,11 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # the cell the same way on CPython 3.12:
         # (1, 1, 217, 1, 0) -> (2, 1, 217, 2, 1), read from CI job
         # 108679167822 (fast tier, 3.12, shard 3) on this branch.
-        (3, 12): (2, 1, 217, 2, 1),
+        # EXPO-CAP-01 (see the 3.11 note above): the cap retires the
+        # remaining spread on this near-extinct cell:
+        # (2, 1, 217, 2, 1) -> (0, 0, 217, 0, 0), read in the local venv
+        # on this branch; flag-off reproduces the prior tuple exactly.
+        (3, 12): (0, 0, 217, 0, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
@@ -304,7 +318,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (rhythm.enabled: false) reproduces the nightly pre-rhythm
         # reading exactly, so the second hop is fully attributed to the
         # rhythm layer.
-        (3, 12): (3373, 2005, 2139, 306, 113),
+        # EXPO-CAP-01: the per-shedder per-epoch contact budget ships
+        # on for catalogued cruise platforms; the cell goes extinct —
+        # the index's bounded reach never converts a secondary:
+        # (3373, 2005, 2139, 306, 113) -> (0, 0, 3047, 0, 0), measured
+        # in the local venv on this branch. Flag-off is byte-identical
+        # to the pre-change tree (per-epoch state digests match on the
+        # spec-json replay, seeds 20200205/20200206), so the move is
+        # fully attributed to the cap.
+        (3, 12): (0, 0, 3047, 0, 0),
     },
 }
 

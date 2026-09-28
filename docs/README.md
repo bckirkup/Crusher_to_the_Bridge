@@ -95,7 +95,8 @@ python3 presidio_runner.py \
 | [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Implemented (Phase A route weights / dose / FUT2; Phase B dining, food, source zones) |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented — SOP policy, decision latency, bimodal compliance |
 | [ship_operations_spec.md](ship_operations_spec.md) | Implemented — data model and config hooks; `effects_enabled` flag-gated |
-| [rhythm/rhythm_spec.md](rhythm/rhythm_spec.md) | Proposed — SHIP-RHYTHM-01 schedule-conditioned co-presence spec + `data/rhythm/event_catalogs.json` (transcribed daily programs); no engine code yet |
+| [rhythm/rhythm_spec.md](rhythm/rhythm_spec.md) | Implemented, on by default — SHIP-RHYTHM-01 schedule-conditioned co-presence + `data/rhythm/event_catalogs.json` (transcribed daily programs); `rhythm.enabled: false` is the labelled baseline, catalogued cruise platforms only |
+| [exposure_cap_spec.md](exposure_cap_spec.md) | Implemented, on by default — `EXPO-CAP-01` per-shedder contact budget bounds per-epoch dose-forming reach (`transmission.exposure_cap.enabled: false` is the labelled baseline); catalogued cruise platforms only, naval unchanged |
 | [medical_response_spec.md](medical_response_spec.md) | Implemented — per-platform medical response via `voyage_config.json` |
 | [ctb_incubation_spec.md](ctb_incubation_spec.md) | Implemented — stochastic incubation, dose-dependent onset, host frailty |
 | [incubation_sensitivity_protocol.md](incubation_sensitivity_protocol.md) | Implemented (`picard_framework/analysis/incubation_arms.py`) |

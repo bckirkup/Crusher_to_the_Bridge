@@ -620,6 +620,32 @@ port-day rows per the sourcing instruction.
 | `cleaning_passes_per_day` | catalog `cleaning_rotation` events | C | Hotel convention (AM service + PM turndown); not printed in programs | declared | 2 (declared) | point | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
 | `sop_capacity_multiplier` (per SOP variant × event class) | sop_variants values | C | Policy-imposed capacity/scheduler decay; Diamond Princess cabin quarantine is documented practice (Selective Passenger Confinement SOP) | declared | [0.3, 1.0] per level; cancellations are point values | U | L0 | ∅lit — declared | SHIP-RHYTHM-01 |
 
+### 3.7 Per-epoch exposure cap (EXPO-CAP-01)
+
+EXPO-CAP-01 bounds the count of **distinct hosts** a shedder's pooled
+droplet/HVAC dose can reach in one epoch, not the dose itself — the
+challenge-count half of the takeoff residual measured in
+[`ledger/COVID-TAKEOFF-ATTR-01-RERANK.md`](ledger/COVID-TAKEOFF-ATTR-01-RERANK.md).
+It introduces **no new magnitude constants**: each shedder's per-epoch
+budget is Poisson-sampled at the same rate its own partner draw already
+uses (the CONTACT-ARCH-01 activity rate for its unit, or
+`POLYMOD_CONTACTS_PER_DAY` where no activity block is declared), so the
+bound inherits those rows' grades rather than minting a new one. What is
+new is the *mechanism claim* — that a per-host contact budget, not a
+venue head-count, is the operative bound on dose-forming reach:
+
+| Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
+|---|---|---|---|---|---|---|---|---|---|
+| per-host contact budget as dose-reach bound (mechanism claim) | Poisson(CONTACT-ARCH-01 unit rate × `voyage_contact_multiplier`) per (epoch, shedder) | B | Pung et al. 2022 Nat Commun 13:1956 — cruise wearable close-contact network: pax median ~20 contacts/day (IQR 10–36), crew ~10 (IQR 6–18); Shirreff 2024 φ≈0 (contacts do not scale with occupancy) rules out the venue-capacity reading | R (wearable cohort, analogous setting) | per-day IQR spans ~10–36 pax contacts; per-epoch budget is the epoch share of the declared rate | empirical | L0 | — sourced mechanism, rate reused | EXPO-CAP-01 |
+| `POLYMOD_CONTACTS_PER_DAY` reuse as the unit-less fallback | 13.4/day (unchanged) | C | POLYMOD all-age daily contact mean — the population control arm where a venue's CONTACT-ARCH-01 block is not declared | R (survey) | existing §row interval | empirical | L0 | in tree unchanged | EXPO-CAP-01 |
+
+Shipped default-on under `transmission.exposure_cap.enabled` on the
+catalogued cruise platforms only (the rhythm-catalog gate keeps naval
+hulls and uncatalogued platforms byte-identical without a flag line);
+`enabled: false` is the labelled pre-change baseline. Budget draws run on
+a dedicated RNG stream spawned only when the cap is active, so flag-off
+is draw-identical to the pre-change code path.
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
