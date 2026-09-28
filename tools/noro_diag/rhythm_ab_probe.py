@@ -138,6 +138,7 @@ class RhythmRecorder:
     epoch0_done: bool = False
     # Latest engine zone map (epoch the core is processing).
     zone_occupants: dict[str, list[Any]] = field(default_factory=dict)
+    compartment_occupants: dict[str, list[Any]] = field(default_factory=dict)
     # Row tables.
     emesis_rows: list[dict[str, Any]] = field(default_factory=list)
     acquisition_rows: list[dict[str, Any]] = field(default_factory=list)
@@ -176,6 +177,20 @@ class RhythmRecorder:
 # ── Wrappers ──────────────────────────────────────────────────────────
 
 
+def _wrap_cabin_compartments(core_cls: type, rec: RhythmRecorder) -> Any:
+    """Cache the post-split compartment map (``zone::cabinNNN`` -> occupants)
+    that ``_pathway_fomite`` feeds ``_fomite_hand_deposits`` — emesis lands in
+    these per-stateroom keys, which never appear in the parent zone map."""
+    original = core_cls._cabin_compartments
+
+    def wrapper(self: Any, zone_occupants: dict) -> dict:
+        out = original(self, zone_occupants)
+        rec.compartment_occupants = out
+        return out
+
+    return wrapper
+
+
 def _wrap_zone_occupants(core_cls: type, rec: RhythmRecorder) -> Any:
     """Cache the engine's own zone -> occupants map for the emit wrapper."""
     original = core_cls._epoch_zone_occupants
@@ -198,7 +213,11 @@ def _pp_state(agent: Any) -> str:
 def _occupancy_snapshot(
     rec: RhythmRecorder, core: Any, zone_name: str,
 ) -> dict[str, int]:
-    occupants = rec.zone_occupants.get(zone_name) or []
+    occupants = (
+        rec.compartment_occupants.get(zone_name)
+        or rec.zone_occupants.get(zone_name)
+        or []
+    )
     susceptible = sum(
         1 for a in occupants if not a.is_infected_with(rec.pathogen_id)
     )
@@ -411,10 +430,12 @@ def instrumented(rec: RhythmRecorder) -> Any:
         "_epoch_zone_occupants": core_cls._epoch_zone_occupants,
         "_emit_emesis": core_cls._emit_emesis,
         "_resolve_pathogen_challenge": core_cls._resolve_pathogen_challenge,
+        "_cabin_compartments": core_cls._cabin_compartments,
     }
     core_cls._epoch_zone_occupants = _wrap_zone_occupants(core_cls, rec)
     core_cls._emit_emesis = _wrap_emit_emesis(core_cls, rec)
     core_cls._resolve_pathogen_challenge = _wrap_challenge(core_cls, rec)
+    core_cls._cabin_compartments = _wrap_cabin_compartments(core_cls, rec)
     deal_day_saved = None
     if RhythmLayer is not None:
         deal_day_saved = RhythmLayer.deal_day

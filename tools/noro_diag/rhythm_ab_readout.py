@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Fold the NORO-RHYTHM-01 paired A/B run zips into the ledger readout.
 
-Reads a results root shaped ``<arm>/<tier>/<run_id>.zip`` where each zip
+Reads a results root shaped ``<arm>/<tier>/<run_id>.zip`` — loaded one
+(arm, tier) slice at a time so large arrays fit in memory — where each zip
 carries ``summary.json`` (the standard probe block) and ``rhythm.json.gz``
 (the rhythm payload). Emits a machine JSON + a markdown readout covering:
 
@@ -34,16 +35,16 @@ from pathlib import Path
 from statistics import median
 from typing import Any
 
-from simulation_utils.paths import (
-    prepare_output_directory,
-    validated_open,
-)
-
 REPO_ROOT = Path(__file__).resolve().parents[2]
 _CAMPAIGN_DIR = REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
 for _p in (str(REPO_ROOT), str(_CAMPAIGN_DIR)):
     if _p not in sys.path:
         sys.path.insert(0, _p)
+
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    validated_open,
+)
 
 TAKEOFF_PEAK_PREVALENCE = 10
 _ARMS = ("off", "on")
@@ -92,22 +93,33 @@ def _cell_dir(results_root: Path, arm: str, tier: str) -> Path:
     return results_root / arm / tier
 
 
-def load_cells(results_root: Path) -> dict[tuple[str, str], list[tuple[Path, dict[str, Any], dict[str, Any]]]]:
-    cells: dict[tuple[str, str], list[Any]] = defaultdict(list)
+def load_tier_runs(
+    results_root: Path, arm: str, tier: str,
+) -> list[tuple[Path, dict[str, Any], dict[str, Any]]]:
+    """One (arm, tier) slice of the results root — loaded, used, freed."""
+    runs: list[tuple[Path, dict[str, Any], dict[str, Any]]] = []
+    tier_dir = _cell_dir(results_root, arm, tier)
+    if not tier_dir.is_dir():
+        return runs
+    for zip_path in sorted(tier_dir.glob("*.zip")):
+        loaded = _load_zip(zip_path)
+        if loaded is None:
+            continue
+        summary, rhythm = loaded
+        runs.append((zip_path, summary, rhythm))
+    return runs
+
+
+def tiers_under(results_root: Path) -> list[str]:
+    """Tier directory names present under either arm."""
+    tiers: set[str] = set()
     for arm in _ARMS:
         arm_dir = results_root / arm
-        if not arm_dir.is_dir():
-            continue
-        for tier_dir in sorted(arm_dir.iterdir()):
-            if not tier_dir.is_dir():
-                continue
-            for zip_path in sorted(tier_dir.glob("*.zip")):
-                loaded = _load_zip(zip_path)
-                if loaded is None:
-                    continue
-                summary, rhythm = loaded
-                cells[(arm, tier_dir.name)].append((zip_path, summary, rhythm))
-    return cells
+        if arm_dir.is_dir():
+            tiers.update(
+                d.name for d in arm_dir.iterdir() if d.is_dir()
+            )
+    return sorted(tiers)
 
 
 def _ignition_counts(
@@ -166,23 +178,48 @@ def _landing_partition(
         emesis_rows.extend(r.get("emesis_rows") or [])
     secondary = [row for row in emesis_rows if row.get("gen_class") == "acquired"]
     cabin = [row for row in secondary if row.get("zone_type") in _CABIN_ZONE_TYPES]
-    cabin_immune = [row for row in cabin if row.get("n_susceptible") == 0]
+    cabin_empty = [row for row in cabin if row.get("n_occupants") == 0]
+    cabin_immune = [
+        row
+        for row in cabin
+        if row.get("n_occupants", 0) > 0 and row.get("n_susceptible") == 0
+    ]
+    cabin_susceptible = [
+        row
+        for row in cabin
+        if row.get("n_occupants", 0) > 0 and row.get("n_susceptible", 0) > 0
+    ]
     shared_venue = [
         row
         for row in secondary
         if row.get("zone_type") not in _CABIN_ZONE_TYPES
     ]
+    shared_susceptible = [
+        row.get("n_susceptible", 0) for row in shared_venue
+    ]
     return {
         "emesis_total": len(emesis_rows),
         "secondary_emesis": len(secondary),
         "secondary_cabin": len(cabin),
+        "secondary_cabin_empty": len(cabin_empty),
         "secondary_cabin_immune_occupancy": len(cabin_immune),
+        "secondary_cabin_susceptible_present": len(cabin_susceptible),
         "immune_cabin_share": (
             len(cabin_immune) / len(cabin) if cabin else None
+        ),
+        "empty_cabin_share": (
+            len(cabin_empty) / len(cabin) if cabin else None
+        ),
+        "cabin_median_occupants": (
+            median([row.get("n_occupants", 0) for row in cabin])
+            if cabin else None
         ),
         "shared_venue_landings": len(shared_venue),
         "shared_venue_share": (
             len(shared_venue) / len(secondary) if secondary else None
+        ),
+        "shared_venue_median_susceptibles": (
+            median(shared_susceptible) if shared_susceptible else None
         ),
     }
 
@@ -200,19 +237,19 @@ def _growth_depth(
         for _, r in ignited
     ]
     gen_hist: dict[int, int] = defaultdict(int)
-    gen_infected: dict[int, int] = defaultdict(int)
+    unresolved = 0
     for _, r in ignited:
         for acq in r.get("acquisition_rows") or []:
-            gen_hist[int(acq.get("gen", -1))] += 1
-        infected_ids = {acq.get("agent_id") for acq in r.get("acquisition_rows") or []}
-        for acq in r.get("acquisition_rows") or []:
-            if acq.get("agent_id") in infected_ids:
-                gen_infected[int(acq.get("gen", -1))] += 1
+            gen = acq.get("gen")
+            if isinstance(gen, int):
+                gen_hist[gen] += 1
+            else:
+                unresolved += 1
     per_gen_r: dict[str, float] = {}
     for gen in sorted(gen_hist):
-        if gen < 0 or gen_infected.get(gen - 1, 0) <= 0:
+        if gen <= 0 or gen_hist.get(gen - 1, 0) <= 0:
             continue
-        per_gen_r[str(gen)] = gen_hist[gen] / gen_infected[gen - 1]
+        per_gen_r[str(gen)] = gen_hist[gen] / gen_hist[gen - 1]
     return {
         "n_ignited": len(ignited),
         "concurrent_peak_median": median(peaks) if peaks else None,
@@ -221,9 +258,27 @@ def _growth_depth(
             str(p): peaks.count(p) for p in sorted(set(peaks))
         },
         "generation_histogram": {str(g): gen_hist[g] for g in sorted(gen_hist)},
+        "generation_unresolved": unresolved,
         "per_generation_reproduction": per_gen_r,
         "max_generation": max(gen_hist) if gen_hist else None,
     }
+
+
+def _zone_types(platform_id: Any) -> dict[str, str]:
+    """zone id -> type from the platform's spatial layout; {} if unknown."""
+    if not platform_id:
+        return {}
+    layout = (
+        REPO_ROOT / "data" / "platforms" / str(platform_id)
+        / "spatial_layout.json"
+    )
+    if not layout.is_file():
+        return {}
+    try:
+        zones = json.loads(layout.read_text(encoding="utf-8")).get("zones", [])
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {str(z["id"]): str(z.get("type") or "") for z in zones}
 
 
 def _clock_correlation(
@@ -232,11 +287,18 @@ def _clock_correlation(
     emit_calls: dict[str, int] = defaultdict(int)
     corridor_at_egress: list[int] = []
     corridor_at_non_egress: list[int] = []
+    dining_at_egress: list[int] = []
+    dining_at_non_egress: list[int] = []
     emesis_minute_hist_pp: dict[int, int] = defaultdict(int)
     emesis_minute_hist_other: dict[int, int] = defaultdict(int)
-    for _, _, r in runs:
+    zone_types: dict[str, str] | None = None
+    for _, s, r in runs:
         if not r.get("rhythm_attached"):
             continue
+        if zone_types is None:
+            zone_types = _zone_types(
+                (s.get("parameters") or {}).get("platform_id")
+            )
         for state, n in (r.get("emit_calls") or {}).items():
             emit_calls[state] += int(n)
         egress_epochs: set[int] = set()
@@ -256,15 +318,19 @@ def _clock_correlation(
                 emesis_minute_hist_other[hour_bin] += 1
         for erow in r.get("epoch_rows") or []:
             epoch = int(erow.get("epoch", 0))
-            corridor = sum(
-                int(count)
-                for zone, count in (erow.get("zones") or {}).items()
-                if "corridor" in str(zone).lower()
-            )
+            corridor = dining = 0
+            for zone, count in (erow.get("zones") or {}).items():
+                ztype = zone_types.get(str(zone), "")
+                if ztype == "Cabin_Corridor":
+                    corridor += int(count)
+                elif ztype == "Dining":
+                    dining += int(count)
             if epoch in egress_epochs:
                 corridor_at_egress.append(corridor)
+                dining_at_egress.append(dining)
             else:
                 corridor_at_non_egress.append(corridor)
+                dining_at_non_egress.append(dining)
     pp = emit_calls.get("post_prandial", 0)
     non_pp = emit_calls.get("outside_window", 0) + emit_calls.get("off", 0)
     return {
@@ -286,6 +352,16 @@ def _clock_correlation(
         "corridor_occupancy_baseline_mean": (
             sum(corridor_at_non_egress) / len(corridor_at_non_egress)
             if corridor_at_non_egress
+            else None
+        ),
+        "dining_occupancy_at_egress_mean": (
+            sum(dining_at_egress) / len(dining_at_egress)
+            if dining_at_egress
+            else None
+        ),
+        "dining_occupancy_baseline_mean": (
+            sum(dining_at_non_egress) / len(dining_at_non_egress)
+            if dining_at_non_egress
             else None
         ),
         "corridor_egress_epoch_count": len(corridor_at_egress),
@@ -339,8 +415,7 @@ def _anchor_cell(results_root: Path, arm: str, tier: str) -> dict[str, Any] | No
 
 
 def build_readout(results_root: Path) -> dict[str, Any]:
-    cells = load_cells(results_root)
-    tiers = sorted({tier for _, tier in cells})
+    tiers = tiers_under(results_root)
     takeoff: dict[str, Any] = {}
     discordance: dict[str, Any] = {}
     landing: dict[str, Any] = {}
@@ -349,8 +424,8 @@ def build_readout(results_root: Path) -> dict[str, Any]:
     defects: dict[str, Any] = {}
     anchors: dict[str, Any] = {}
     for tier in tiers:
-        off_runs = cells.get(("off", tier), [])
-        on_runs = cells.get(("on", tier), [])
+        off_runs = load_tier_runs(results_root, "off", tier)
+        on_runs = load_tier_runs(results_root, "on", tier)
         takeoff[tier] = {
             "off": _ignition_counts(off_runs),
             "on": _ignition_counts(on_runs),
@@ -374,6 +449,7 @@ def build_readout(results_root: Path) -> dict[str, Any]:
         anchors[tier] = {
             arm: _anchor_cell(results_root, arm, tier) for arm in _ARMS
         }
+        del off_runs, on_runs
     return {
         "results_root": str(results_root),
         "takeoff": takeoff,
@@ -417,15 +493,30 @@ def render_markdown(readout: dict[str, Any]) -> str:
         )
         lp = readout["landing_partition"][tier]
         lines.append(
-            "\nsecondary-vomit landing partition: "
-            f"off immune-cabin share {_fmt_pct(lp['off']['immune_cabin_share'])}"
+            "\nsecondary-vomit landing partition (cabin landings split by "
+            "occupancy at emission): off empty "
+            f"{_fmt_pct(lp['off']['empty_cabin_share'])}"
+            f" ({lp['off']['secondary_cabin_empty']}/"
+            f"{lp['off']['secondary_cabin']}), immune-occupied "
+            f"{_fmt_pct(lp['off']['immune_cabin_share'])}"
             f" ({lp['off']['secondary_cabin_immune_occupancy']}/"
-            f"{lp['off']['secondary_cabin']}), "
-            f"on {_fmt_pct(lp['on']['immune_cabin_share'])}"
+            f"{lp['off']['secondary_cabin']}), susceptible-present "
+            f"{lp['off']['secondary_cabin_susceptible_present']}"
+            f" | on empty {_fmt_pct(lp['on']['empty_cabin_share'])}"
+            f" ({lp['on']['secondary_cabin_empty']}/"
+            f"{lp['on']['secondary_cabin']}), immune-occupied "
+            f"{_fmt_pct(lp['on']['immune_cabin_share'])}"
             f" ({lp['on']['secondary_cabin_immune_occupancy']}/"
-            f"{lp['on']['secondary_cabin']}); "
+            f"{lp['on']['secondary_cabin']}), susceptible-present "
+            f"{lp['on']['secondary_cabin_susceptible_present']}; "
+            f"cabin median occupants off "
+            f"{lp['off']['cabin_median_occupants']} on "
+            f"{lp['on']['cabin_median_occupants']}; "
             f"shared-venue share off {_fmt_pct(lp['off']['shared_venue_share'])}"
-            f" on {_fmt_pct(lp['on']['shared_venue_share'])}",
+            f" on {_fmt_pct(lp['on']['shared_venue_share'])}"
+            " (median susceptibles present: off "
+            f"{lp['off']['shared_venue_median_susceptibles']}"
+            f" on {lp['on']['shared_venue_median_susceptibles']})",
         )
         g = readout["growth_chain"][tier]
         lines.append(
@@ -445,6 +536,45 @@ def render_markdown(readout: dict[str, Any]) -> str:
             f"{dw['on']['runs_attached']}/{dw['on']['runs_total']} | emit calls "
             f"{dw['on']['emit_calls']}",
         )
+        c = readout["clock_correlation"][tier]["on"]
+        if c:
+            lines.append(
+                "\nclock (on arm): post-prandial emit share "
+                f"{_fmt_pct(c.get('post_prandial_share'))}"
+                " | corridor occupancy mean at egress epochs "
+                f"{c.get('corridor_occupancy_at_egress_mean')}"
+                " vs non-egress "
+                f"{c.get('corridor_occupancy_baseline_mean')}"
+                " | dining mean at egress "
+                f"{c.get('dining_occupancy_at_egress_mean')}"
+                " vs non-egress "
+                f"{c.get('dining_occupancy_baseline_mean')}"
+                f" ({c.get('corridor_egress_epoch_count')} egress epochs,"
+                f" {c.get('corridor_baseline_epoch_count')} baseline)"
+                " | emesis hour histogram post-prandial "
+                f"{c.get('emesis_hour_hist_post_prandial')}"
+                f" vs other {c.get('emesis_hour_hist_other')}",
+            )
+        a = readout["anchors"][tier]
+        if a.get("off") or a.get("on"):
+            lines.append("")
+            lines.append(
+                "| arm | A8 pax | A8 crew | A9 posting | pax infection AR"
+                " | pax reported AR | crew infection AR |",
+            )
+            lines.append("|---|---|---|---|---|---|---|")
+            for arm in _ARMS:
+                cell = a.get(arm)
+                if not cell:
+                    lines.append(f"| {arm} | n/a | n/a | n/a | n/a | n/a | n/a |")
+                    continue
+                lines.append(
+                    f"| {arm} | {cell.get('A8_pax')} | {cell.get('A8_crew')}"
+                    f" | {cell.get('A9')}"
+                    f" | {cell.get('infection_attack_rate_passenger')}"
+                    f" | {cell.get('reported_case_attack_rate_passenger')}"
+                    f" | {cell.get('infection_attack_rate_crew')} |",
+                )
         lines.append("")
     return "\n".join(lines)
 
