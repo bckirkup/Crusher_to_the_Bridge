@@ -734,7 +734,11 @@ def point_factors(
             (FACTOR_PASSENGER_PREVALENCE, "passenger"),
             (FACTOR_CREW_PREVALENCE, "crew"),
         ):
-            if key in prevalence:
+            # An explicit prevalence sweep is the coordinate: the rung's own
+            # prevalence only records the resolved reference when the tier
+            # did not sweep one, otherwise it would clobber the swept point
+            # for both the label and the engine-facing initiation block.
+            if key in prevalence and not prevalence_swept:
                 factors[factor] = prevalence[key]
     return factors
 

@@ -125,6 +125,72 @@ if str(_CAMPAIGN_DIR) not in sys.path:
 
 from campaign_runner import generate_tier_runs  # noqa: E402
 
+
+def _voyage_blocks(
+    spec_dict: dict[str, Any],
+    result: Any,
+    num_agents: int,
+    natural_history_clock: str | None,
+) -> dict[str, Any]:
+    """The campaign-layout blocks a verbatim campaign spec produces.
+
+    Deferred import: ``per_host_dose_challenge`` already imports this
+    module for ``GEN_UNRESOLVED``/``_acquired_gen``, so a top-level import
+    of it here would cycle.
+    """
+    from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
+        _attach_voyage_blocks,
+    )
+
+    summary: dict[str, Any] = {}
+    _attach_voyage_blocks(
+        summary,
+        spec_dict,
+        result,
+        num_agents,
+        natural_history_clock=natural_history_clock,
+    )
+    return summary
+
+
+def _initiation_witness(
+    sim: Any, pathogen_id: str, profile: dict[str, Any],
+) -> dict[str, Any]:
+    """The consumed import configuration: resolved boarding spec + manifest.
+
+    A renewal-mode arm proves the symptomatic partition was exercised by
+    the resolved ``symptomatic_*_prevalence`` fields plus the manifest's
+    realised ``composition`` counter, not by trusting the tier label.
+    """
+    plan = getattr(sim.engine, "initiation_plan", None)
+    manifest = getattr(sim.engine, "initiation_manifest", None) or {}
+    resolved: dict[str, Any] = {}
+    if plan is not None and not plan.legacy:
+        for spec in plan.boarding:
+            if spec.pathogen_id != pathogen_id:
+                continue
+            resolved = {
+                "rate_mode": spec.rate_mode,
+                "symptomatic_stream": bool(spec.symptomatic_stream),
+                "symptomatic_passenger_prevalence": (
+                    spec.symptomatic_passenger_prevalence
+                ),
+                "symptomatic_crew_prevalence": (
+                    spec.symptomatic_crew_prevalence
+                ),
+                "passenger_prevalence": spec.passenger_prevalence,
+                "crew_prevalence": spec.crew_prevalence,
+                "never_symptomatic_fraction": spec.never_symptomatic_fraction,
+                "presymptomatic_share_of_presenting": (
+                    spec.presymptomatic_share_of_presenting
+                ),
+            }
+    return {
+        "resolved": resolved,
+        "dose_response": dict(profile.get("dose_response") or {}),
+        "manifest": manifest,
+    }
+
 # Source-generation classes. ``import`` covers explicit seeds and boarding
 # (resident-at-epoch-0) infections; ``acquired`` covers anything established
 # by a challenge draw, with ``generation`` from the source pedigree.
@@ -456,6 +522,9 @@ def _wrap_emit_emesis(core_cls: type, rec: CensusRecorder) -> Any:
                 "gen": rec.gen_of(int(agent.agent_id)),
                 "gen_class": rec.gen_class_of(int(agent.agent_id)),
                 "zone": zone_name,
+                "zone_type": getattr(self, "zone_types", {}).get(
+                    zone_name, "shared",
+                ),
                 "episode_load": float(record.get("episode_load", 0.0)),
                 "surface_load": float(record.get("surface_load", 0.0)),
                 "aerosol_load": float(record.get("aerosol_load", 0.0)),
@@ -1411,8 +1480,10 @@ def _load_manifest(manifest_path: Path) -> dict[str, Any]:
 
 def run_seed(
     *, pathogen_id: str, spec_dict: dict[str, Any],
-) -> dict[str, Any]:
-    """Run one voyage under the census wrappers and fold the summary."""
+    natural_history_clock: str | None = None,
+) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
+    """Run one voyage under the census wrappers; fold summary + voyage
+    blocks + the initiation witness."""
     rec = CensusRecorder(pathogen_id=pathogen_id)
     with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
         spec_path = resolve_child_path(tmp, "run_spec.json")
@@ -1447,30 +1518,53 @@ def run_seed(
                 rec.host_row(agent)
             sim.epoch_observer = _census_observer(rec, pathogen_id)
             started = time.perf_counter()
-            sim.run()
+            result = sim.run()
             wall_clock_s = time.perf_counter() - started
         rec.seed_ids = set(
             getattr(sim.engine, "explicit_seed_agent_ids", None) or (),
         )
         core = sim.tx_core
-    return _summarise_run(rec, spec_dict, wall_clock_s, core)
+        initiation = _initiation_witness(sim, pathogen_id, rec.profile)
+    num_agents = int(
+        (spec_dict.get("config_overrides") or {})
+        .get("ship_graph", {})
+        .get("num_agents", 0),
+    )
+    voyage = _voyage_blocks(
+        spec_dict, result, num_agents, natural_history_clock,
+    )
+    return (
+        _summarise_run(rec, spec_dict, wall_clock_s, core),
+        voyage,
+        initiation,
+    )
 
 
 def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
+    voyage: dict[str, Any], initiation: dict[str, Any],
 ) -> Path:
+    """``summary.json`` (campaign layout + census + initiation witness)
+    plus the ``growth_census.json.gz`` link payload."""
     cell_dir = Path(resolve_child_path(str(out_dir), tier))
     cell_dir.mkdir(parents=True, exist_ok=True)
     zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {
         "run_id": run_id,
-        "parameters": payload["meta"],
-        "summary": {
+        "parameters": voyage["parameters"],
+        "num_epochs": payload["meta"]["epochs"],
+        "trigger_status": voyage.get("trigger_status"),
+        "summary": voyage["summary"],
+        "cost_accounting": voyage["cost_accounting"],
+        "derived": voyage["derived"],
+        "timeseries": voyage["timeseries"],
+        "census": {
             "ignited": payload["ignited"],
             "n_imports": payload["n_imports"],
             "n_acquired": payload["n_acquired"],
             "acquisitions_by_gen": payload["acquisitions_by_gen"],
         },
+        "initiation": initiation,
     }
     with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("summary.json", json.dumps(anchor))
@@ -1546,11 +1640,14 @@ def main(argv: list[str] | None = None) -> int:
     )
     for run_id, spec in runs:
         seed = int(spec["run"]["random_seed"])
-        payload = run_seed(
+        payload, voyage, initiation = run_seed(
             pathogen_id=args.pathogen_id, spec_dict=spec,
+            natural_history_clock=clock,
         )
         payload["run_id"] = run_id
-        zip_path = _write_run_zip(out_dir, args.tier, run_id, payload)
+        zip_path = _write_run_zip(
+            out_dir, args.tier, run_id, payload, voyage, initiation,
+        )
         print(
             f"seed {seed}: ignited={payload['ignited']} "
             f"imports={payload['n_imports']} "

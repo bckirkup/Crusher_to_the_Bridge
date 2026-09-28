@@ -1,0 +1,29 @@
+# NORO-IMPORT-01 worker — the campaign image plus tools/ and the
+# per-tier entrypoint.
+#
+# The base picard-campaign image carries engines/, picard_framework/ and
+# data/ but not tools/; the census driver imports tools.* helpers, so
+# this layer adds the directory wholesale rather than enumerating the
+# shared modules. The manifest ships inside picard_framework/ from the
+# pinned base SHA; the COPY below is belt-and-braces so the file can be
+# iterated without a base rebuild.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.import_map -t picard-import-map .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_import_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/
+COPY --chown=campaign:campaign deploy/aws/import_map_entrypoint.py \
+    ./deploy/aws/import_map_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
+    ./deploy/aws/dose_challenge_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]

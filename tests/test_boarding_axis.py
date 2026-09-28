@@ -313,6 +313,32 @@ def test_recorded_factors_are_the_pathogen_s_effective_coordinates() -> None:
     assert party["boarding_party_size"] == 3
 
 
+def test_swept_prevalence_overrides_the_rungs_reference_point() -> None:
+    """A rung + prevalence tier sweeps the point, not the rung's canned one.
+
+    The rung supplies the mechanism shape (rate_mode, stream, pre-boarding);
+    the tier's declared ``boarding_prevalence_points`` is the coordinate and
+    must reach the engine-facing block — otherwise the sweep is a run-id
+    fiction, every cell replicating the rung's fixed prevalence.
+    """
+    factors = boarding_axis.point_factors(
+        never_symptomatic_fraction=0.29,
+        passenger_prevalence=0.025,
+        crew_prevalence=0.007,
+        mechanism_rung="shipped",
+        prevalence_swept=True,
+    )
+    assert factors["boarding_passenger_prevalence"] == pytest.approx(0.025)
+    assert factors["boarding_crew_prevalence"] == pytest.approx(0.007)
+    assert factors["boarding_rate_mode"] == "screening_prevalence"
+    block = boarding_axis.initiation_override(
+        "active_profiles", None,
+        {**factors, boarding_axis.FACTOR_SWEPT_PATHOGEN: "norwalk_gi"},
+    )["initiation"]["boarding"]["norwalk_gi"]
+    assert block["rate_mode"] == "screening_prevalence"
+    assert block["prevalence"] == {"passenger": 0.025, "crew": 0.007}
+
+
 def test_mixed_tier_gives_each_pathogen_its_own_axis() -> None:
     manifest = {
         "pathogen_configs": {
