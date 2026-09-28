@@ -27,3 +27,15 @@ def quantiles(vals: list[float]) -> dict[str, Any]:
         "max": ordered[-1],
         "mean": sum(ordered) / n,
     }
+
+
+def wilson_interval(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
+    """Wilson score interval for a binomial fraction ``k/n``."""
+    if n <= 0:
+        return (0.0, 0.0)
+    p = k / n
+    z2 = z * z
+    denom = 1.0 + z2 / n
+    centre = (p + z2 / (2 * n)) / denom
+    half = (z / denom) * ((p * (1 - p) + z2 / (4 * n)) / n) ** 0.5
+    return (max(0.0, centre - half), min(1.0, centre + half))

@@ -95,7 +95,7 @@ def main(argv: list[str] | None = None) -> int:
     if prefix:
         prefix += "/"
 
-    run_id = _run_id(ref)
+    run_id = _run_id(ref, design)
     key = f"{prefix}{ref['channel']}/{run_id}.json"
     client = _s3_client()
     if _already_uploaded(client, bucket, key):
@@ -116,18 +116,19 @@ def main(argv: list[str] | None = None) -> int:
     return 0
 
 
-def _run_id(ref: dict[str, Any]) -> str:
+def _run_id(ref: dict[str, Any], design: dict[str, Any]) -> str:
     """The record filename stem the driver writes.
 
     The driver renders ``args.endpoint`` (a float) verbatim, so the design's
     JSON ints must be formatted as floats here too: ``5`` -> ``5.0``.
     """
+    label = design.get("run_label", "leverage01")
     axis = ref["axis_id"]
     endpoint = ref.get("endpoint")
     ep = repr(float(endpoint)) if endpoint is not None else "None"
     if ref["channel"] == "covid":
-        return f"leverage01_{axis}_{ep}_{ref['hull']}_{ref['seed']}"
-    return f"leverage01_{axis}_{ep}_{ref['seed']}"
+        return f"{label}_{axis}_{ep}_{ref['hull']}_{ref['seed']}"
+    return f"{label}_{axis}_{ep}_{ref['seed']}"
 
 
 if __name__ == "__main__":
