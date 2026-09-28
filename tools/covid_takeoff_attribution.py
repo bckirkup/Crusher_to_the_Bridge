@@ -152,6 +152,10 @@ class TakeoffAttributionLedger:
         # susc * p_dose * (1 - protection): the host's counterfactual
         # infection probability at horizon is 1 - exp(-Lambda).
         self.accrued_hazard: dict[int, float] = {}
+        # Susceptibility-free accrued dose D~ = sum(p_dose * (1 -
+        # protection)) per challenged host — the field any counterfactual
+        # susceptibility law convolves over (COVID-VULN-01).
+        self.accrued_dose: dict[int, float] = {}
         self.reach_by_channel: dict[str, list[int]] = {
             c: [] for c in CHANNELS
         }
@@ -490,6 +494,15 @@ class TakeoffAttributionLedger:
         # hazard includes the epoch that infected a host: on its onset row
         # it is the terminal hazard the draw beat.
         for tid, challenge in self._challenges.items():
+            # The susceptibility-free accrued dose D~ = sum of
+            # p_dose * (1 - protection) — the dose field this host stood
+            # in, which any counterfactual susceptibility law convolves
+            # over (COVID-VULN-01). Accrued for every challenged host;
+            # the hazard accrual below additionally needs the draw.
+            self.accrued_dose[tid] = self.accrued_dose.get(tid, 0.0) + (
+                float(challenge["p_dose"])
+                * (1.0 - float(challenge["protection"]))
+            )
             susc = challenge["susceptibility"]
             if susc is None:
                 continue
@@ -786,6 +799,27 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
     ]
     p_cf = [1.0 - math.exp(-h) for h in haz_challenged]
 
+    # Per-host (susceptibility, accrued hazard, accrued dose) rows for
+    # challenged-uninfected hosts (COVID-VULN-01): accrued_dose is the
+    # susceptibility-free dose field D~ = sum(p_dose * (1 - protection))
+    # the analytic companion convolves the marginal P(inf|D~) curve
+    # over. The emitted resolved dose_response is the override-landing
+    # proof for the alpha A/B: it echoes the profile values the engine
+    # actually consumed.
+    challenged_pairs = [
+        {
+            "id": int(tid),
+            "susceptibility": float(ledger.challenged_susc[tid]),
+            "accrued_hazard": float(ledger.accrued_hazard.get(tid, 0.0)),
+            "accrued_dose": float(ledger.accrued_dose.get(tid, 0.0)),
+        }
+        for tid in sorted(ledger.challenged_susc)
+        if tid not in infected_ids
+    ]
+    dose_response_resolved = dict(
+        (profiles.get(pid) or {}).get("dose_response") or {}
+    )
+
     # Shedder geometry: dominant-shedder onsets plus share-weighted credit.
     credit_totals: Counter = Counter()
     dominant_counts: Counter = Counter()
@@ -865,6 +899,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         "recorded_onsets": recorded,
         "takeoff": recorded >= takeoff_min,
         "seeded_count": len(seeded),
+        "dose_response": dose_response_resolved,
         **_rhythm_ab_block(ledger),
         "confined_onsets": confined_n,
         "route_split": {
@@ -942,6 +977,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
                 "challenged_share_of_aboard": (
                     len(challenged_ids) / max(len(agents) - len(seeded), 1)
                 ),
+                "challenged_pairs": challenged_pairs,
                 "accrued_hazard": {
                     "infected_at_onset": _quantiles(haz_at_onset),
                     "challenged_uninfected": _quantiles(haz_challenged),
