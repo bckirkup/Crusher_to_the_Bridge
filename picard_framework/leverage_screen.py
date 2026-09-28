@@ -31,6 +31,7 @@ import argparse
 import copy
 import functools
 import json
+import os
 import re
 import tempfile
 from pathlib import Path
@@ -64,12 +65,18 @@ from telemetry_buffer.observation_model.bounded_screen import (
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-DESIGN_REL = "picard_framework/runs/leverage01_design.json"
+DESIGN_REL = "picard_framework/runs/leverage02_design.json"
 BASELINE_AXIS = "baseline"
 
 
 def load_design(path: Path | None = None) -> dict[str, Any]:
-    """The frozen LEVERAGE-01 design: axes, endpoints, gate, seed pair."""
+    """The frozen LEVERAGE design: axes, endpoints, gate, seed pair.
+
+    ``--design`` wins, then the ``LEVERAGE_DESIGN`` env var (the Batch
+    entrypoint's selector), then the current campaign's file.
+    """
+    if path is None and os.environ.get("LEVERAGE_DESIGN"):
+        path = Path(os.environ["LEVERAGE_DESIGN"])
     design_path = path or (REPO_ROOT / DESIGN_REL)
     with validated_open(
         design_path, allowed_roots=(REPO_ROOT,), encoding="utf-8",
@@ -257,8 +264,70 @@ def axis_patch(
     if kind == "incubation_median":
         parent, _, _leaf = axis["path"].rpartition(".")
         return {parent: _incubation_median(profile, axis["path"], endpoint)}
+    if kind == "rhythm_event_field":
+        # A dealt-event field across whole event classes: the row's
+        # declared endpoint as a whole-block move on the shared field.
+        return {
+            "rhythm": {
+                "event_overrides": {
+                    klass: {axis["field"]: endpoint}
+                    for klass in axis["event_classes"]
+                },
+            },
+        }
+    if kind == "asleep_share":
+        return {
+            "rhythm": {
+                "asleep_in_cabin_share": _asleep_share(endpoint),
+            },
+        }
+    if kind == "voyage_sea_contact":
+        # The voyage multiplier only consumes when effects are on; the
+        # unconfigured itinerary is all sea days either way, so day type,
+        # onboard share and dining weights stay identical and the endpoint
+        # is the single moved quantity.
+        return {
+            "voyage": {
+                "effects_enabled": True,
+                "defaults": {
+                    "sea_day": {"contact_rate_multiplier": endpoint},
+                },
+            },
+        }
+    if kind == "activity_rate_block":
+        return {
+            "transmission": {
+                "activity_contacts": {
+                    "rates_per_hour": _activity_rate_block(axis, endpoint),
+                },
+            },
+        }
     transform = TRANSFORMS[kind]
     return {axis["path"]: transform(profile, axis["path"], endpoint)}
+
+
+def _asleep_share(endpoint: float) -> list[float]:
+    """The shipped 24-hour cabin-share curve rescaled to the endpoint
+    plateau (the register's declared bound is the night plateau)."""
+    from engines.rhythm_layer import ASLEEP_IN_CABIN_SHARE
+    shipped = [float(v) for v in ASLEEP_IN_CABIN_SHARE]
+    peak = max(shipped)
+    return [min(1.0, v * float(endpoint) / peak) for v in shipped]
+
+
+def _activity_rate_block(
+    axis: dict[str, Any], endpoint: float,
+) -> dict[str, Any]:
+    """All eight CONTACT-ARCH-01 activity rates at the endpoint's per-day
+    IQR corner, per role; ``crew_endpoints`` pairs the crew arm by index."""
+    from engines.transmission_core import CONTACT_ACTIVITIES
+    idx = axis["endpoints"].index(endpoint)
+    crew_days = axis.get("crew_endpoints") or axis["endpoints"]
+    rate = {
+        "passenger": float(endpoint) / 24.0,  # clock-exempt: per-day IQR -> per-hour rate unit conversion
+        "crew": float(crew_days[idx]) / 24.0,  # clock-exempt: per-day IQR -> per-hour rate unit conversion
+    }
+    return {activity: dict(rate) for activity in CONTACT_ACTIVITIES}
 
 
 def _observation_vectors_patch(
@@ -381,7 +450,9 @@ def run_noro_point(
         pax, crew = declared_complement(channel["platform"])
         derived["passenger_complement"] = pax
         derived["crew_complement"] = crew
-    run_id = f"leverage01_{axis_id}_{endpoint}_{seed}"
+    run_id = (
+        f"{design.get('run_label', 'leverage01')}_{axis_id}_{endpoint}_{seed}"
+    )
     return {
         "run_id": run_id,
         "axis_id": axis_id,
@@ -420,10 +491,15 @@ def run_covid_point(
     channel = design["channels"]["covid"]
     theta = channel["theta"]
     profile = load_covid_profile(str(REPO_ROOT))
+    config_patch: dict[str, Any] = {}
     if axis["kind"] == "theta" and endpoint is not None:
         theta = float(endpoint)
     elif endpoint is not None:
-        profile = _deep_merge(profile, axis_patch(axis, float(endpoint), profile))
+        patch = axis_patch(axis, float(endpoint), profile)
+        if axis.get("scope") == "config":
+            config_patch = patch
+        else:
+            profile = _deep_merge(profile, patch)
     raw = build_fit_run_spec(
         hull,
         theta,
@@ -432,10 +508,15 @@ def run_covid_point(
         cabin_air_mode=channel["cabin_air_mode"],
         pathogen_pool_transport=channel["pathogen_pool_transport"],
     )
+    if config_patch:
+        _deep_merge(raw["config_overrides"], config_patch)
     raw["pathogen_overrides"][COVID_ID] = theta_profile_overrides(
         profile, theta,
     )
     sim = run_fit_spec(raw, repo_root=str(REPO_ROOT))
+    witness = None
+    if axis.get("scope") == "config" and endpoint is not None:
+        witness = _get_dotted(sim.run_spec.legacy_cfg, axis["path"])
     observables = observables_from_modality(
         sim.modalities["syndromic"],
         scenario_id=hull,
@@ -445,7 +526,8 @@ def run_covid_point(
         turn_day=channel["turn_day"],
     )
     return {
-        "run_id": f"leverage01_{axis_id}_{endpoint}_{hull}_{seed}",
+        "run_id": f"{design.get('run_label', 'leverage01')}_{axis_id}_{endpoint}_{hull}_{seed}",
+        "resolved_witness": witness,
         "axis_id": axis_id,
         "endpoint": endpoint,
         "seed": int(seed),
@@ -757,10 +839,16 @@ def classify(
         axes_out.append({
             "axis_id": axis["axis_id"],
             "register_rows": axis["register_rows"],
+            "rank_note": axis.get("rank_note"),
             "lev": lev,
             "endpoints": per_endpoint,
         })
-    return {"axes": axes_out, "design": "leverage01"}
+    return {
+        "axes": axes_out,
+        "design": design.get("campaign_label", "leverage01"),
+        "campaign_label": design.get("campaign_label"),
+        "baseline_sha": design.get("baseline_sha"),
+    }
 
 
 _LEV_RANK = {"L0": 0, "L1": 1, "L2": 2}
@@ -783,19 +871,34 @@ def row_levs(report: dict[str, Any]) -> dict[int, str]:
 def write_lev(report: dict[str, Any], register: Path | None = None) -> dict[int, str]:
     """Rewrite the ``Lev`` cell of each classified register row in place.
 
-    Only cell 8 of the 12-column row is touched; blocked and not-rankable
-    rows keep ``L?``.
+    Cell 8 of the 12-column row carries the measured rank. Rows the
+    campaign re-ranked get the campaign mark appended to their State cell
+    — ``<label> @<sha> — <reason>`` from the report's metadata and the
+    axis's ``rank_note``. Blocked and not-rankable rows keep ``L?``.
     """
     register = register or _REGISTER
     levs = row_levs(report)
+    label = report.get("campaign_label") or ""
+    sha = report.get("baseline_sha") or ""
+    note_by_row: dict[int, str] = {}
+    for axis in report["axes"]:
+        for row in axis["register_rows"]:
+            note_by_row.setdefault(row, axis.get("rank_note") or "")
     lines = register.read_text(encoding="utf-8").splitlines(keepends=True)
     for row, lev in levs.items():
         cells = re.split(r"(?<!\\)\|", lines[row - 1])
-        if cells[8].strip() not in ("L?", "—"):
+        if cells[8].strip() not in ("L?", "—", "L0", "L1", "L2"):
             raise SystemExit(
                 f"register row {row} Lev cell already set: {cells[8].strip()}",
             )
         cells[8] = f" {lev} "
+        reason = note_by_row.get(row)
+        if reason:
+            mark = (
+                f"{label} @{sha} — {reason}" if sha else f"{label} — {reason}"
+            )
+            if mark.strip() and mark.strip() not in cells[9]:
+                cells[9] = cells[9].rstrip() + f" · {mark} "
         lines[row - 1] = "|".join(cells)
     register.write_text("".join(lines), encoding="utf-8")
     return levs

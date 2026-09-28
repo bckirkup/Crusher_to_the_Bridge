@@ -183,6 +183,16 @@ class RhythmLayer:
         self.port_onboard_midday_floor = float(
             cfg.get("port_day_onboard_midday_residual", 0.30)
         )
+        # Declared-parameter overrides: ``event_overrides`` maps ``*`` /
+        # event_class / event_id to a field patch merged onto each dealt
+        # event before the SOP shape reads it; ``sop_capacity_multiplier``
+        # replaces the parsed ``capacity_multiplier <m>`` effect value.
+        # Unset, the catalog values run untouched.
+        self.event_overrides = dict(cfg.get("event_overrides") or {})
+        sop_cap = cfg.get("sop_capacity_multiplier")
+        self.sop_capacity_multiplier = (
+            float(sop_cap) if sop_cap is not None else None
+        )
 
         self._zone_by_name = {str(z["name"]): z for z in zones}
         self._zone_capacity = {
@@ -373,7 +383,11 @@ class RhythmLayer:
             self.meals_to_cabin = True
             return None
         if effect.startswith("capacity_multiplier"):
-            m = float(effect.split()[-1])
+            m = (
+                float(self.sop_capacity_multiplier)
+                if self.sop_capacity_multiplier is not None
+                else float(effect.split()[-1])
+            )
             return min(1.0, p * m), m, 1
         if effect.startswith("frequency_multiplier"):
             return p, 1.0, max(1, round(float(effect.split()[-1])))
@@ -405,12 +419,29 @@ class RhythmLayer:
                 return str(effects[key])
         return None
 
+    def _event_with_overrides(self, event: dict[str, Any]) -> dict[str, Any]:
+        """The event merged with any declared overrides keyed by ``*``, its
+        class, then its id (later keys win)."""
+        if not self.event_overrides:
+            return event
+        patch: dict[str, Any] = {}
+        for key in (
+            "*",
+            str(event.get("event_class", "")),
+            str(event.get("event_id", "")),
+        ):
+            block = self.event_overrides.get(key)
+            if isinstance(block, dict):
+                patch.update(block)
+        return {**event, **patch} if patch else event
+
     def _deal_event(
         self,
         event: dict[str, Any],
         agents: list[Any],
         effects: dict[str, str],
     ) -> None:
+        event = self._event_with_overrides(event)
         eclass = str(event.get("event_class", ""))
         eligible = self._eligible(event, agents)
         if not eligible:
