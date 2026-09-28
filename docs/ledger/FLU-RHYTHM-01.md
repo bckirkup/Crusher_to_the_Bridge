@@ -178,4 +178,7 @@ itself needs re-calibration** (recommend the floor spec owner re-draw it
 around the delivered-dose-derived SAR expectation, or widen n before
 treating 15% as a hard edge). This is a floor-spec finding for the audit
 session, not a rhythm defect and not a flu delivery defect — filed here,
-not fixed.
+not fixed. **Resolved by `CABIN-FLOOR-03` / `docs/confined_attack_floor_spec.md`:
+the 15–25% band is withdrawn (it was the norovirus Wikswo/Chimonas pair,
+not a flu quantity); the corrected band is the declared-k expected SAR,
+3.7–12.1% pooled, and both arms sit inside it.**

@@ -57,6 +57,12 @@ Attack = secondaries / slots, pooled over the two seeds.
 | edison legionella_pneumophila | 0 | 0 | — | vacuous | ~0 | consistent (0 secondaries) |
 | edison ebola_virus | 56 | 56 | 5 | 8.9% | (no floor) | measured only |
 
+*Band note (2026-09-28): the 15–25% "sourced floor" on the influenza_a rows
+was the norovirus Wikswo/Chimonas cabinmate pair reused generically —
+withdrawn for flu and recalibrated as the declared-k expected-SAR band in
+`CABIN-FLOOR-03` / `docs/confined_attack_floor_spec.md`. The norovirus row's
+floor was that pathogen's own anchor and stands.*
+
 Legionella's explicit seeds landed in non-paired cabins on both seeds, so no
 confined index pair exists to measure; total infections were the 2 planted
 seeds per arm with zero secondaries, consistent with its ~0 person-to-person

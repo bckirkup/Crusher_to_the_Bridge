@@ -67,7 +67,10 @@ as an open item only.
 At `k = 6e-4` per copy the expected confined cabinmate SAR is **13.4%**
 (mean per-slot `1−e^(−hazard)`, 4.6 expected secondaries over 34 slots);
 observed confined attack is **7/34 = 20.6%** (6/28, 1/6) — inside the 15–25%
-floor band. Expected sits ~1.1× under the floor's lower edge, within Poisson
+floor band. (That band is withdrawn: it was the norovirus Wikswo/Chimonas
+pair reused generically — the corrected band is the declared-k expected-SAR
+interval, `docs/confined_attack_floor_spec.md`, CABIN-FLOOR-03.) Expected
+sits ~1.1× under the floor's lower edge, within Poisson
 scatter of the observed count. The per-slot distribution is heavy-tailed:
 median SAR ~3%, q90 ~50% — the mean is carried by long-overlap shedding
 windows.
