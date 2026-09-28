@@ -131,6 +131,21 @@ the admissible window fits; the Θ axis in the bracket is exhausted and the
 residual is mechanism-shaped** (`docs/ledger/THETA-SCREEN-V12.md`,
 `docs/covid/covid_theta_screen_v12_readout.md`).*
 
+*Update (2026-09-28, `edb7fc41`, `THETA-SCREEN-V13`): the same lattice and
+declared replay re-ran under capped reach (COVID-EXPOCAP-01 default-on).
+**The fleet-shape admissible set shifts one notch up at each edge —
+{1.78e11, 2.37e11, 3.16e11, 4.22e11, 5.62e11}** (1.33e11 now fails the
+floor, 5.62e11 now clears the ceiling; the budget flattens outbreak tails
+so the mean cap never binds). But the conditional clause again fails at
+every admissible Θ in the same magnitude class: takeoff-seed q05 floors
+sit at 1,770–2,024 recorded onsets (9–10× the record's 197) and
+before_share medians run 0.81–0.94 rising with Θ; the only pass is the
+Θ1e9 boundary anchor (before_share 0.175 ≈ 0.173). **The cap moved where
+the window sits, not what takeoff trajectories do inside it — no Θ is
+admitted and the residual remains mechanism-shaped**
+(`docs/ledger/THETA-SCREEN-V13.md`,
+`docs/covid/covid_theta_screen_v13_readout.md`).*
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
