@@ -646,6 +646,18 @@ hulls and uncatalogued platforms byte-identical without a flag line);
 a dedicated RNG stream spawned only when the cap is active, so flag-off
 is draw-identical to the pre-change code path.
 
+### 3.8 Response-chain latency constants (NORO-VENUE-02)
+
+The confinement response chain's declared latencies — the order→admission
+escort delay the NORO-VENUE-02 instrument introduced
+([`ledger/NORO-VENUE-02.md`](ledger/NORO-VENUE-02.md)). Inside the window
+the ordered host stays fully mobile, so the constant prices the
+pre-confinement exposure window directly.
+
+| Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
+|---|---|---|---|---|---|---|---|---|---|
+| `fred_behavior.escort_delay_hours` (order→admission escort latency; hours, resolved to epochs) | 1 | C | No published flag→in-quarters escort measurement exists; 1 h shipped as the expeditious bound for a dispatched escort on a passenger ship; 0 is the labelled instant-admission baseline | declared | [0, 3] (NORO-VENUE-02 swept {0,1,2,3}) | U | L? | ∅lit — declared; shipped bound | NORO-VENUE-02 / LEVERAGE-02 |
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and
