@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""AWS Batch entrypoint for the NORO-VENUE-01 placement census.
+"""AWS Batch entrypoint for the NORO-VENUE-01/02 placement census.
+
+NORO-VENUE-02: ``--escort-delay-hours`` selects the escort-latency arm
+(order-to-admission delay k epochs; 0 = instant-admission baseline) and
+suffices the S3 cell label ``<tier-or-platform>_k<delay>`` so arms write
+disjoint prefixes.
 
 Each array child runs ONE (tier, seed) cell through the venue census
 probe (``tools/noro_diag/venue_placement_census.py``) and uploads one
@@ -69,6 +74,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     parser.add_argument("--platform-id", default=None)
     parser.add_argument("--num-agents", type=int, default=None)
+    parser.add_argument(
+        "--escort-delay-hours", type=float, default=None,
+        help="order-to-admission escort delay in hours (arm id; "
+             "0 restores the instant-admission baseline)",
+    )
     parser.add_argument("--index", type=int, default=None)
     return parser.parse_args(argv)
 
@@ -89,6 +99,12 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     cell_label = args.platform_id or args.tier
+    if args.escort_delay_hours is not None:
+        delay = args.escort_delay_hours
+        delay_label = str(int(delay)) if float(delay).is_integer() else (
+            str(delay).replace(".", "p")
+        )
+        cell_label = f"{cell_label}_k{delay_label}"
     bucket, prefix = _s3_uri(args.s3_prefix)
     if prefix:
         prefix += "/"
@@ -112,6 +128,8 @@ def main(argv: list[str] | None = None) -> None:
         command += ["--platform-id", args.platform_id]
     if args.num_agents:
         command += ["--num-agents", str(args.num_agents)]
+    if args.escort_delay_hours is not None:
+        command += ["--escort-delay-hours", str(args.escort_delay_hours)]
     print(" ".join(command), flush=True)
     subprocess.run(command, check=True, cwd=_REPO_ROOT)  # noqa: S603
 

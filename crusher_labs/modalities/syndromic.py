@@ -118,6 +118,11 @@ class SyndromicParams:
     compliance_delay_hours: float | None = None
     detection_delay_hours: float | None = None
     crew_screening_interval_hours: float | None = None
+    # Order-to-admission escort latency: a compliant host stays mobile
+    # this many epochs after the confinement order before the escorted
+    # admission lands. 0 restores the instant-admission baseline.
+    escort_delay_epochs: int = 0
+    escort_delay_hours: float | None = None
     sick_call_severity_mode: str = "own_severity"
     symptom_severity_profiles: dict[str, dict[str, Any]] | None = None
     clock: SimClock | None = None
@@ -244,6 +249,11 @@ class SyndromicSurveillance:
             self.clock.epochs_for_hours(p.reluctant_delay_hours)
             if p.reluctant_delay_hours is not None
             else int(p.reluctant_delay_epochs)
+        )
+        self.escort_delay_epochs = (
+            self.clock.epochs_for_hours(p.escort_delay_hours)
+            if p.escort_delay_hours is not None
+            else int(p.escort_delay_epochs)
         )
         self.detection_delay_epochs = (
             self.clock.epochs_for_hours(p.detection_delay_hours)

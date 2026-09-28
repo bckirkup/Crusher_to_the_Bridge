@@ -94,6 +94,9 @@ class SimulationState:
     isolation_unit_capacity: int = 0
     quarantine_refusers: set[int] = field(default_factory=set)
     quarantine_order_epoch: dict[int, int] = field(default_factory=dict)
+    # NORO-VENUE-02 escort latency: agent_id -> epoch the escorted
+    # admission lands (order fired but the host is still mobile).
+    escort_pending: dict[int, int] = field(default_factory=dict)
     escalation_log: list[dict[str, Any]] = field(default_factory=list)
     compliance_log: list[dict[str, Any]] = field(default_factory=list)
     simulation_history: list[dict[str, Any]] = field(default_factory=list)

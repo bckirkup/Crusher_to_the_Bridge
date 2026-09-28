@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:venue-census-v1",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:venue-census-v2",
     "command": [
       "deploy/aws/venue_census_entrypoint.py",
       "--s3-prefix",
@@ -21,7 +21,9 @@
       "--platform-id",
       "Ref::platform_id",
       "--num-agents",
-      "Ref::num_agents"
+      "Ref::num_agents",
+      "--escort-delay-hours",
+      "Ref::escort_delay_hours"
     ],
     "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
     "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
@@ -58,13 +60,14 @@
     }
   },
   "parameters": {
-    "s3_prefix": "s3://<BUCKET>/campaign/noro_venue_01/",
+    "s3_prefix": "s3://<BUCKET>/campaign/noro_venue_02/",
     "manifest": "picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json",
     "pathogen_id": "norwalk_gi",
     "tier": "fl_spr_12d",
     "seeds": "8105,8114,8124,8129,8132,8135,8137,8148,8156,8158,8159,8106",
     "platform_id": "",
-    "num_agents": "0"
+    "num_agents": "0",
+    "escort_delay_hours": "1"
   },
   "retryStrategy": {
     "attempts": 10,

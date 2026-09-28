@@ -10,8 +10,13 @@ from __future__ import annotations
 import pytest
 
 from tools.noro_diag.venue_placement_census import (
+    ADMIT_ACTIONS,
+    ORDER_ACTIONS,
+    VenueRecorder,
     _emit_confinement_class,
     _emitter_class,
+    _host_timeline,
+    _join_emits,
     _seed_list,
     classify_site,
 )
@@ -155,6 +160,72 @@ class TestEmitterClass:
         ) == "never_symptomatic_onboard"
 
 
+class TestEscortActions:
+    def test_escort_actions_classified(self) -> None:
+        assert "escort_order" in ORDER_ACTIONS
+        assert "escorted_admission" in ADMIT_ACTIONS
+        assert "escort_order" not in ADMIT_ACTIONS
+        assert "escorted_admission" not in ORDER_ACTIONS
+
+    def test_host_timeline_carries_escort_due(self) -> None:
+        rec = VenueRecorder(pathogen_id="norwalk_gi")
+        rec.confinement_events.extend([
+            {
+                "epoch": 10, "agent_id": 7, "action": "escort_order",
+                "compliance_class": "compliant", "escort_due_epoch": 12,
+            },
+            {
+                "epoch": 12, "agent_id": 7, "action": "escorted_admission",
+                "compliance_class": "compliant",
+            },
+        ])
+        timeline = _host_timeline(rec, 7)
+        assert timeline["first_order_epoch"] == 10
+        assert timeline["first_admit_event_epoch"] == 12
+        assert timeline["escort_due_epochs"] == [12]
+
+
+class TestFirstEmitJoin:
+    def _rec(self) -> VenueRecorder:
+        rec = VenueRecorder(pathogen_id="norwalk_gi")
+        rec.emesis_rows.extend([
+            {"epoch": 11, "agent_id": 7, "zone": "Theatre",
+             "confined_at_emit": False},
+            {"epoch": 12, "agent_id": 7, "zone": "PC_D4::cabin0001",
+             "confined_at_emit": True},
+            {"epoch": 12, "agent_id": 8, "zone": "Theatre",
+             "confined_at_emit": False},
+        ])
+        rec.confinement_events.extend([
+            {"epoch": 10, "agent_id": 7, "action": "escort_order",
+             "compliance_class": "compliant", "escort_due_epoch": 12},
+            {"epoch": 12, "agent_id": 7, "action": "escorted_admission",
+             "compliance_class": "compliant"},
+        ])
+        rec.confined_membership.extend([
+            {"epoch": 11, "ids": []},
+            {"epoch": 12, "ids": [7]},
+        ])
+        rec.host_meta[7] = {"will_present": True}
+        rec.host_meta[8] = {"will_present": True}
+        rec.ever_symptomatic.update({7, 8})
+        return rec
+
+    def test_first_emit_flag_and_mobile_class(self) -> None:
+        rows, unattributed = _join_emits(self._rec(), {})
+        assert unattributed == 0
+        by_agent = {}
+        for row in rows:
+            by_agent.setdefault(row["agent_id"], []).append(row)
+        firsts = [r for r in by_agent[7] if r["first_emit"]]
+        assert len(firsts) == 1
+        assert firsts[0]["epoch"] == 11
+        assert firsts[0]["confinement_class"] == "pre_confinement"
+        assert firsts[0]["order_subclass"] == "ordered_mobile"
+        assert firsts[0]["site_class"] == "shared_venue"
+        assert [r["first_emit"] for r in by_agent[8]] == [True]
+
+
 class TestHelpers:
     def test_seed_list(self) -> None:
         assert _seed_list("8105, 8114,,8159") == [8105, 8114, 8159]
@@ -167,4 +238,5 @@ class TestHelpers:
         lo, hi = wilson_interval(4, 10)
         assert 0.0 < lo < 0.4 < hi < 1.0
         lo, hi = wilson_interval(10, 10)
-        assert hi <= 1.0 and lo > 0.5
+        assert hi <= 1.0
+        assert lo > 0.5

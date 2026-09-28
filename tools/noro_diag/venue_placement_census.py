@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""NORO-VENUE-01 census probe: emesis placement vs the confinement clock.
+"""NORO-VENUE-01/02 census probe: emesis placement vs the confinement clock.
 
 Purpose
 -------
@@ -12,6 +12,14 @@ confined before they vomit* (the confinement clock is the named gap), or
 does meaningful emesis mass still land pre-confinement / on never-confined
 hosts in susceptible-rich shared venues (the barrier is downstream, in
 pickup/conversion)?
+
+NORO-VENUE-02 adds the escort-latency arm: ``--escort-delay-hours`` sets
+``config_overrides.fred_behavior.escort_delay_hours``, so a compliant
+host stays mobile for k epochs between order and escorted admission
+(``escort_order``/``escorted_admission`` log actions) and emits at its
+scheduled location inside the window. Emits inside the window classify
+as ``pre_confinement/ordered_mobile``; ``first_emit`` flags each host's
+first emesis row for the placement census.
 
 Method
 ------
@@ -150,6 +158,7 @@ ORDER_ACTIONS = frozenset({
     "refused_general_confinement",
     "crew_age_duty_exclusion",
     "refused_crew_age_duty_exclusion",
+    "escort_order",
 })
 # actions under which the host physically enters the confined set.
 ADMIT_ACTIONS = frozenset({
@@ -159,6 +168,7 @@ ADMIT_ACTIONS = frozenset({
     "enforced_confinement",
     "general_confinement",
     "crew_age_duty_exclusion",
+    "escorted_admission",
 })
 REFUSE_ACTIONS = frozenset({
     "refused_quarantine",
@@ -202,6 +212,7 @@ class VenueRecorder(RhythmRecorder):
     _compliance_seen: int = 0
     _escalation_seen: int = 0
     _reported_seen: set[int] = field(default_factory=set)
+    escort_pending_last: dict[int, int] = field(default_factory=dict)
 
 
 # ── Site classification (pure; exercised by unit tests) ──────────────
@@ -420,12 +431,16 @@ def _capture_event_deltas(rec: VenueRecorder, epoch: int, state: Any) -> None:
     for entry in state.compliance_log[rec._compliance_seen:]:
         if entry.get("agent_id") is None:
             continue
-        rec.confinement_events.append({
+        row = {
             "epoch": int(entry.get("epoch", epoch)),
             "agent_id": int(entry.get("agent_id")),
             "action": str(entry.get("action", "")),
             "compliance_class": entry.get("compliance_class"),
-        })
+        }
+        for key in ("escort_due_epoch", "delay"):
+            if key in entry:
+                row[key] = entry[key]
+        rec.confinement_events.append(row)
     rec._compliance_seen = len(state.compliance_log)
     for entry in state.escalation_log[rec._escalation_seen:]:
         row = {"epoch": epoch}
@@ -472,6 +487,7 @@ def _epoch_observer(rec: VenueRecorder) -> Any:
             "ids": sorted(confined),
         })
         _capture_event_deltas(rec, epoch, state)
+        rec.escort_pending_last = dict(state.escort_pending)
         symptomatic = _capture_agent_axes(rec, epoch, engine)
         sick_calls = 0
         if work.syn_result:
@@ -523,11 +539,16 @@ def _host_timeline(rec: VenueRecorder, aid: int) -> dict[str, Any]:
     admits = [e["epoch"] for e in events if e["action"] in ADMIT_ACTIONS]
     refusals = [e["epoch"] for e in events if e["action"] in REFUSE_ACTIONS]
     releases = [e["epoch"] for e in events if e["action"] in RELEASE_ACTIONS]
+    escort_dues = [
+        e["escort_due_epoch"] for e in events
+        if e["action"] == "escort_order" and e.get("escort_due_epoch")
+    ]
     return {
         "first_order_epoch": min(orders) if orders else None,
         "first_admit_event_epoch": min(admits) if admits else None,
         "refusal_epochs": refusals,
         "release_epochs": releases,
+        "escort_due_epochs": escort_dues,
         "actions": [
             {"epoch": e["epoch"], "action": e["action"]} for e in events
         ],
@@ -591,6 +612,12 @@ def _join_emits(
 ) -> tuple[list[dict[str, Any]], int]:
     confined_index = _confined_epochs_index(rec)
     timelines: dict[int, dict[str, Any]] = {}
+    first_emit_epoch: dict[int, int] = {}
+    for row in rec.emesis_rows:
+        aid = int(row["agent_id"])
+        epoch = int(row["epoch"])
+        if aid not in first_emit_epoch or epoch < first_emit_epoch[aid]:
+            first_emit_epoch[aid] = epoch
     rows: list[dict[str, Any]] = []
     unattributed = 0
     for row in rec.emesis_rows:
@@ -614,6 +641,7 @@ def _join_emits(
             "confinement_class": conf_class,
             "order_subclass": order_sub,
             "emitter_class": _emitter_class(rec, aid),
+            "first_emit": int(row["epoch"]) == first_emit_epoch[aid],
             **site,
         })
     return rows, unattributed
@@ -674,7 +702,16 @@ def _venue_payload(
     zones_meta = _zones_meta(sim.engine)
     emit_rows, unattributed = _join_emits(rec, zones_meta)
     confined_index = _confined_epochs_index(rec)
+    syndromic = (sim.modalities or {}).get("syndromic")
     return {
+        "escort_delay_epochs": int(
+            getattr(syndromic, "escort_delay_epochs", 0) or 0
+        ),
+        "escort_delay_hours_requested": (
+            (spec_dict.get("config_overrides") or {})
+            .get("fred_behavior", {}).get("escort_delay_hours")
+        ),
+        "escort_pending_final": len(rec.escort_pending_last),
         "ignited": rec.ignited,
         "emit_calls": rec.emit_invocations,
         "emit_calls_no_records": rec.emit_idle_invocations,
@@ -711,6 +748,9 @@ def _run_summary(
         "num_epochs": int(spec["run"]["num_epochs"]),
         "num_agents": int(
             overrides.get("ship_graph", {}).get("num_agents", 0),
+        ),
+        "escort_delay_hours": (
+            overrides.get("fred_behavior", {}).get("escort_delay_hours")
         ),
         "platform": str(spec["catalog"]["platform_id"]),
         "wall_clock_seconds_run": wall_clock_run,
@@ -782,6 +822,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="override spec ship_graph.num_agents for the platform swap",
     )
     parser.add_argument(
+        "--escort-delay-hours", type=float, default=None,
+        help="escort-latency arm: fred_behavior.escort_delay_hours "
+             "(0 = instant-admission baseline)",
+    )
+    parser.add_argument(
         "--spec-json", type=Path, default=None,
         help="run an arbitrary spec file verbatim",
     )
@@ -812,6 +857,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     for label, value, floor in (
         ("--index", args.index, 0),
         ("--epochs-override", args.epochs_override, 1),
+        ("--escort-delay-hours", args.escort_delay_hours, 0),
     ):
         if value is not None and value < floor:
             parser.error(f"{label} must be >= {floor}")
@@ -827,6 +873,15 @@ def _apply_overrides(spec: dict[str, Any], args: argparse.Namespace) -> None:
         spec.setdefault("config_overrides", {}).setdefault(
             "ship_graph", {},
         )["num_agents"] = int(args.num_agents)
+    if args.escort_delay_hours is not None:
+        spec.setdefault("config_overrides", {}).setdefault(
+            "fred_behavior", {},
+        )["escort_delay_hours"] = float(args.escort_delay_hours)
+        # campaign_parameters is baked at spec generation; stamp the
+        # runtime-injected arm so the anchor stays self-describing.
+        spec.setdefault("campaign_parameters", {})["escort_delay_hours"] = (
+            float(args.escort_delay_hours)
+        )
 
 
 _ANCHOR_KEYS = (

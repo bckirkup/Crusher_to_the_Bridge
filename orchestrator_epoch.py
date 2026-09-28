@@ -127,6 +127,41 @@ def build_wastewater_pathogen_mass_by_id(
 
 # ── Quarantine admission (shared compliance gate) ────────────────────────
 
+def _escort_delay_epochs(syndromic: Any) -> int:
+    """Resolved order-to-admission escort latency in epochs.
+
+    Zero restores the instant-admission baseline (the order lands the host
+    in ``quarantined_ids`` the same epoch it is written). Mocked/stub
+    modalities that fabricate the attribute read as the baseline, not a
+    configured delay.
+    """
+    value = getattr(syndromic, "escort_delay_epochs", 0)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return 0
+    return int(value or 0)
+
+
+def step_escort_admissions(epoch: int, state: SimulationState) -> None:
+    """Admit hosts whose escorted arrival lands this epoch.
+
+    Runs at the same end-of-epoch stage that writes confinement orders, so
+    a delay of *k* epochs keeps the ordered host mobile -- and emitting at
+    its scheduled location -- for exactly *k* transmission epochs after
+    the order.
+    """
+    for aid in sorted(
+        aid for aid, due in state.escort_pending.items() if epoch >= due
+    ):
+        state.escort_pending.pop(aid, None)
+        state.quarantine_order_epoch.pop(aid, None)
+        state.quarantined_ids.add(aid)
+        state.compliance_log.append({
+            "epoch": epoch, "agent_id": aid,
+            "action": "escorted_admission",
+            "compliance_class": state.compliance_class_by_agent.get(aid),
+        })
+
+
 def try_admit_to_quarantine(
     epoch: int,
     aid: int,
@@ -142,10 +177,13 @@ def try_admit_to_quarantine(
     """Admit *aid* to quarantine if FRED compliance check passes.
 
     Returns ``True`` when the agent is added to ``quarantined_ids``,
-    ``False`` when they refuse (tracked in ``quarantine_refusers``) or
-    are already confined / already refusing.
+    ``False`` when they refuse (tracked in ``quarantine_refusers``), are
+    already confined / already refusing, or -- under a non-zero escort
+    delay -- are queued in ``escort_pending`` and admit when it elapses.
     """
     if aid in _all_confined(state) or aid in state.quarantine_refusers:
+        return False
+    if aid in state.escort_pending:
         return False
     override = state.agent_behavioral_overrides.get(aid)
     chronic_boost = state.chronic_behavioral_mods.get(
@@ -162,6 +200,16 @@ def try_admit_to_quarantine(
         cls = getattr(syndromic, "_compliance_class", {}).get(aid)
         if cls is not None:
             state.compliance_class_by_agent[aid] = cls
+        escort_delay = _escort_delay_epochs(syndromic)
+        if escort_delay > 0:
+            state.escort_pending[aid] = epoch + escort_delay
+            state.compliance_log.append({
+                "epoch": epoch, "agent_id": aid,
+                "action": "escort_order",
+                "compliance_class": cls,
+                "escort_due_epoch": epoch + escort_delay,
+            })
+            return False
         state.quarantined_ids.add(aid)
         state.compliance_log.append({
             "epoch": epoch, "agent_id": aid, "action": action_ok,
@@ -236,7 +284,6 @@ def step_fred_compliance(
             is_symptomatic=agent_requires_confinement(agent) if agent else False,
         ):
             state.quarantine_refusers.discard(aid)
-            state.quarantined_ids.add(aid)
             cls = getattr(syndromic, "_compliance_class", {}).get(aid)
             if cls is not None:
                 state.compliance_class_by_agent[aid] = cls
@@ -246,6 +293,11 @@ def step_fred_compliance(
                 "delay": epochs_since,
                 "compliance_class": cls,
             })
+            escort_delay = _escort_delay_epochs(syndromic)
+            if escort_delay > 0:
+                state.escort_pending[aid] = epoch + escort_delay
+            else:
+                state.quarantined_ids.add(aid)
 
 
 # ── Mid-cruise pathogen introductions ────────────────────────────────────
@@ -1121,6 +1173,10 @@ def step_quarantine_confinement(
     - CONFIRMED: symptomatic + confirmed + cabin-mate contacts
     - LOCKDOWN: all non-exempt agents
     """
+    # Escorted arrivals land at this stage regardless of which orders are
+    # active now: an escort already dispatched completes on schedule.
+    step_escort_admissions(epoch, state)
+
     orders = _confinement_orders(merged_mods, active_mods)
     merged_exempt: set[str] = set(merged_mods.get("exempt_classes", []))
 
@@ -1268,6 +1324,7 @@ def _admit_enforced(
         state.compliance_class_by_agent[aid] = cls
     state.quarantine_refusers.discard(aid)
     state.quarantine_order_epoch.pop(aid, None)
+    state.escort_pending.pop(aid, None)
     state.quarantined_ids.add(aid)
     state.compliance_log.append({
         "epoch": epoch, "agent_id": aid,
@@ -1368,6 +1425,7 @@ def _admit_to_duty_exclusion(
     tracker.note_symptoms(epoch, (aid,))
     state.quarantined_ids.add(aid)
     state.quarantine_refusers.discard(aid)
+    state.escort_pending.pop(aid, None)
     state.compliance_log.append({
         "epoch": epoch, "agent_id": aid, "action": ACTION_EXCLUDED,
         "compliance_class": None,

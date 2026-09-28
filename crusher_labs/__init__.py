@@ -245,6 +245,13 @@ def build_modalities(
         fred_cfg, "compliance_delay_hours", "compliance_delay_epochs",
         run_clock, default=1,
     )
+    # Order-to-admission escort latency (NORO-VENUE-02): shipped ON at the
+    # declared expeditious bound (1 h); escort_delay_hours 0 is the
+    # labelled instant-admission baseline.
+    escort_delay = config_epochs_for_hours(
+        fred_cfg, "escort_delay_hours", "escort_delay_epochs",
+        run_clock, default=1,
+    )
     detection_delay = config_epochs_for_hours(
         syn_cfg, "detection_delay_hours", "detection_delay_epochs",
         run_clock, default=0,
@@ -266,6 +273,7 @@ def build_modalities(
             compliance_delay_epochs=compliance_delay or 0,
             reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
             reluctant_delay_epochs=reluctant_delay or 0,
+            escort_delay_epochs=escort_delay or 0,
             compliance_by_class=fred_cfg.get("compliance_by_class"),
             detection_delay_epochs=detection_delay or 0,
             crew_screening_interval_epochs=screening_interval,
