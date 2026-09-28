@@ -305,3 +305,69 @@ def test_engine_rhythm_attach_enables(
     assert all(
         a._rhythm_post_prandial is not None for a in engine.agents
     )
+
+
+def test_event_overrides_merge_star_class_id() -> None:
+    """`*` < event_class < event_id — later keys win on the merged event."""
+    layer = _layer("spirit_cruise_3000")
+    assert layer is not None
+    layer.event_overrides = {
+        "*": {"occupancy_share": 0.5},
+        "meal_seating": {"participation_fraction": 0.15},
+        "lunch": {"participation_fraction": 0.2},
+    }
+    event = {"event_class": "meal_seating", "event_id": "lunch",
+             "participation_fraction": 0.7, "occupancy_share": 0.35}
+    merged = layer._event_with_overrides(event)
+    assert merged["participation_fraction"] == pytest.approx(0.2)
+    assert merged["occupancy_share"] == pytest.approx(0.5)
+    other = {"event_class": "show_performance", "event_id": "x",
+             "participation_fraction": 0.3}
+    merged2 = layer._event_with_overrides(other)
+    assert merged2["participation_fraction"] == pytest.approx(0.3)
+    assert merged2["occupancy_share"] == pytest.approx(0.5)
+
+
+def test_event_overrides_unset_returns_event_untouched() -> None:
+    layer = _layer("spirit_cruise_3000")
+    assert layer is not None
+    event = {"event_class": "meal_seating", "participation_fraction": 0.7}
+    assert layer._event_with_overrides(event) is event
+
+
+def test_event_overrides_reduce_meal_commitments() -> None:
+    """A 0.15 meal_seating participation endpoint deals far fewer meal
+    commitments than the catalogued ~0.7 on the same seed."""
+    zones = _load_zones("spirit_cruise_3000")
+    agents = [_agent(i, zones=zones) for i in range(600)]
+    meals = []
+    for cfg in ({}, {"event_overrides": {
+            "meal_seating": {"participation_fraction": 0.15}}}):
+        layer = _layer("spirit_cruise_3000", zones, **cfg)
+        assert layer is not None
+        layer.deal_day(agents, "sea_day", set(), 1)
+        meals.append(sum(
+            1 for v in layer._commitments.values()
+            for c in v if c.is_meal
+        ))
+    assert meals[0] > 0
+    assert meals[1] < meals[0]
+
+
+def test_sop_capacity_multiplier_overrides_parsed_effect() -> None:
+    """`sop_capacity_multiplier` replaces the effect's parsed value; unset,
+    the parsed `capacity_multiplier <m>` value is used."""
+    layer = _layer("spirit_cruise_3000")
+    assert layer is not None
+    event = {"event_class": "open_venue", "participation_fraction": 0.4,
+             "eligible": {"role_groups": ["passenger"]}}
+    effects = {"open_venue": "capacity_multiplier 0.75"}
+    p, m, occ = layer._sop_shape(event, effects)
+    assert p == pytest.approx(0.3)
+    assert m == pytest.approx(0.75)
+    assert occ == 1
+    layer.sop_capacity_multiplier = 0.5
+    p, m, occ = layer._sop_shape(event, effects)
+    assert p == pytest.approx(0.2)
+    assert m == pytest.approx(0.5)
+    assert occ == 1

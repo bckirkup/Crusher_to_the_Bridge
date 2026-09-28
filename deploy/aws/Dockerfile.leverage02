@@ -1,0 +1,20 @@
+# LEVERAGE-02 worker — the campaign image plus the leverage driver, the
+# re-rank design file, and the rhythm-layer override wiring the §3.6 axes
+# perturb through.
+#
+# Build (from the repository root; the base must be built at the campaign's
+# measured_at_commit first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.leverage02 -t picard-leverage02 .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign engines/rhythm_layer.py ./engines/rhythm_layer.py
+COPY --chown=campaign:campaign picard_framework/leverage_screen.py ./picard_framework/leverage_screen.py
+COPY --chown=campaign:campaign picard_framework/runs/leverage02_design.json ./picard_framework/runs/leverage02_design.json
+COPY --chown=campaign:campaign deploy/aws/leverage01_entrypoint.py ./deploy/aws/leverage01_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
