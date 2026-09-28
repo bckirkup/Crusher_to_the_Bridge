@@ -312,6 +312,20 @@ rhythm:
 # heterogeneous_zone_dose: density mean + optional mean-1 lognormal
 # within-zone exposure factor.
 transmission:
+  # EXPO-CAP-01, switched on: each shedder's pooled-air reach per epoch —
+  # the droplet far-field pool and the HVAC drift, the two routes that
+  # otherwise dose every susceptible in the air unit — is bounded by a
+  # Poisson draw of the shedder's own contact budget (the CONTACT-ARCH-01
+  # activity rate when declared, POLYMOD 13.4/day otherwise). The bound is
+  # the sourced per-host contact structure (Pung et al. 2022 cruise
+  # wearables, Grade B; Shirreff et al. 2024 occupancy-independence),
+  # not a venue capacity. enabled: false is the labelled baseline — no
+  # cap stream is created and every susceptible in the unit inhales the
+  # pool as before. Applies only on the catalogued cruise classes;
+  # naval and legacy hulls are unchanged either way.
+  # docs/exposure_cap_spec.md.
+  exposure_cap:
+    enabled: true
   # cabin_compartment is the default: short-range inhalation is resolved per
   # stateroom. zone_pool is the labelled pre-change baseline for paired
   # measurement.

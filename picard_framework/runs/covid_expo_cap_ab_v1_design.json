@@ -1,0 +1,41 @@
+{
+  "design_id": "covid_expo_cap_ab_v1",
+  "task_id": "COVID-EXPOCAP-01",
+  "schema_version": "1.0.0",
+  "description": "Bounded re-rank of the COVID-TAKEOFF-ATTR-01(-RERANK) metrics under EXPO-CAP-01 (docs/exposure_cap_spec.md): the same takeoff-conditioned cell family — diamond_princess_2020 (mega_cruise_5000), Theta = 2.37e11, seeds 20200205-20200214, 768 epochs — at cap_on vs the labelled baseline (exposure_cap.enabled: false, byte-identical to the pre-change tree). Arm order follows the BoardingScreenDesign contract: the first arm carries empty overrides (the shipped default, cap on); the second declares the baseline flag explicitly.",
+  "cell_conditioning": {
+    "note": "Identical to COVID-TAKEOFF-ATTR-01-RERANK (docs/ledger/COVID-TAKEOFF-ATTR-01-RERANK.md): declared replay on the DP record hull, one import, infection_age_days 6.8, onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, SOP-017 confinement days 16-30, 768 hourly epochs, syndromic onset observation. Rhythm stays default-on; the cap flag is the only arm axis.",
+    "theta": "2.37e11 - v12 admissible-band midpoint; fixed, no re-screen",
+    "imports": 1,
+    "infection_age_days": 6.8,
+    "onset_day": -1.0,
+    "departure_day": 5.0,
+    "sanitary_visit_mode": "dwell_weighted"
+  },
+  "scenario_id": "diamond_princess_2020",
+  "theta": 237000000000.0,
+  "thetas": [237000000000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "takeoff_recorded_onsets": 10,
+  "points": [[237000000000.0, 6.8, 1]],
+  "arms": [
+    {
+      "arm_id": "cap_on",
+      "overrides": {},
+      "note": "shipped default: transmission.exposure_cap enabled on the catalogued class"
+    },
+    {
+      "arm_id": "baseline",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {"enabled": false}
+        }
+      },
+      "note": "labelled baseline; the byte-identity claim under test"
+    }
+  ]
+}

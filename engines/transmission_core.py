@@ -69,7 +69,10 @@ from engines.infection_dynamics_bridge import (
     resolve_dining_service_type,
     seated_diners_in_booking_order,
 )
-from engines.rhythm_layer import DEFAULT_POST_PRANDIAL_EMESIS_MULTIPLIER
+from engines.rhythm_layer import (
+    DEFAULT_POST_PRANDIAL_EMESIS_MULTIPLIER,
+    platform_has_rhythm_catalog,
+)
 from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
     UNRESOLVED_STRAIN,
@@ -1539,6 +1542,44 @@ def _parse_droplet_field_split(tx: dict[str, Any]) -> DropletFieldSplit:
     )
 
 
+def _platform_id_from_cfg(cfg: dict[str, Any] | None) -> str:
+    """Platform id parsed from the declared ``ship_graph.spatial_layout``
+    path — the same convention ``orchestrator_init`` resolves the rhythm
+    platform by, kept local so the transmission engine stays importable
+    below it."""
+    layout = str(
+        ((cfg or {}).get("ship_graph") or {}).get("spatial_layout") or ""
+    )
+    parts = layout.replace("\\", "/").split("/")
+    if "platforms" in parts:
+        idx = parts.index("platforms")
+        if idx + 1 < len(parts):
+            return parts[idx + 1]
+    return ""
+
+
+def _parse_exposure_cap_enabled(tx: dict[str, Any]) -> bool:
+    """Read ``transmission.exposure_cap.enabled`` (EXPO-CAP-01).
+
+    Absent or true arms the cap; ``enabled: false`` is the labelled
+    baseline — the pooled routes dose every susceptible in the air unit,
+    byte-identical, and no cap stream is ever created. The platform gate
+    (catalogued cruise classes only) is applied by the caller.
+    """
+    block = tx.get("exposure_cap")
+    if block is None:
+        return True
+    if not isinstance(block, Mapping):
+        raise ValueError("transmission.exposure_cap must be a mapping")
+    enabled = block.get("enabled", True)
+    if not isinstance(enabled, bool):
+        raise ValueError(
+            f"transmission.exposure_cap.enabled must be a bool, "
+            f"got {enabled!r}",
+        )
+    return enabled
+
+
 @dataclass(frozen=True)
 class CabinCooccupancy:
     """Declared cabin-mate co-occupancy partition (CABIN-OCC-01).
@@ -2081,6 +2122,9 @@ class _DropletUnitState:
     partition: bool
     near_field_on: bool
     in_compartment: bool
+    # EXPO-CAP-01: the susceptibles the pooled far-field term may dose this
+    # epoch (None = the uncapped labelled baseline: every susceptible).
+    pool_recipients: frozenset[int] | None = None
 
 
 class TransmissionCore:
@@ -2162,6 +2206,49 @@ class TransmissionCore:
             )),
             1.0,
         )
+        self._init_exposure_cap(cfg, tx)
+
+    def _init_exposure_cap(
+        self,
+        cfg: dict[str, Any] | None,
+        tx: dict[str, Any],
+    ) -> None:
+        """EXPO-CAP-01 — per-shedder per-epoch pooled-route reach budget.
+
+        The contact-structure record (Pung et al. 2022, Nat Commun
+        13:1956, cruise-ship wearables — passengers median ~20 unique
+        close contacts/day, crew ~10; POLYMOD 13.4/day control arm;
+        Shirreff et al. 2024 aggregate contact rate is frequency-
+        independent, i.e. contacts do not scale with venue occupancy)
+        bounds a host's dose-forming exposure set by its contact budget,
+        not by the venue's capacity. When active, each shedder's
+        pooled-air reach per epoch — the droplet far-field pool and the
+        HVAC downstream drift, the two routes that otherwise dose every
+        susceptible in the air unit — is bounded by a Poisson draw of
+        that budget on the dedicated ``_exposure_cap_rng`` stream, which
+        is spawned only while the cap is active, so the labelled
+        baseline (``enabled: false``) consumes zero extra draws and
+        stays byte-identical. Application is gated to the catalogued
+        cruise classes (``platform_has_rhythm_catalog``); naval hulls and
+        legacy platforms are unchanged either way.
+        """
+        self._exposure_cap_active = (
+            _parse_exposure_cap_enabled(tx)
+            and platform_has_rhythm_catalog(_platform_id_from_cfg(cfg))
+        )
+        if not self._exposure_cap_active:
+            self._exposure_cap_rng = None
+        else:
+            seed_seq = getattr(
+                getattr(self.rng, "bit_generator", None), "seed_seq", None,
+            )
+            self._exposure_cap_rng = (
+                np.random.default_rng(seed_seq.spawn(1)[0])
+                if seed_seq is not None
+                else self.rng
+            )
+        self._exposure_budgets: dict[tuple[int, str, int], int] = {}
+        self._exposure_budget_epoch = -1
 
     def _init_clock_and_kinetics(
         self,
@@ -5933,6 +6020,20 @@ class TransmissionCore:
         vent_factor = self._aerosol_ventilation_factor(zone_name)
         residence = self._room_air_residence_factor(unit_name)
         mix = self._shedder_mix(emitted_shedders, pathogen_id)
+        pool_recipients: frozenset[int] | None = None
+        if self._exposure_cap_active and total_aerosol > 0.0:
+            pool_recipients = frozenset(
+                self._exposure_cap_cohort(
+                    [
+                        (shedder, unit_name, zone_name)
+                        for shedder, emitted in emitted_shedders
+                        if emitted > 0.0
+                    ],
+                    susceptible,
+                    epoch,
+                    pathogen_id,
+                ),
+            )
         st = _DropletUnitState(
             epoch=epoch,
             unit_name=unit_name,
@@ -5953,6 +6054,7 @@ class TransmissionCore:
             partition=partition,
             near_field_on=near_field_on,
             in_compartment=in_compartment,
+            pool_recipients=pool_recipients,
         )
 
         for target in susceptible:
@@ -5977,6 +6079,15 @@ class TransmissionCore:
         target_factor = self._confinement_factor(target)
         dose *= target_factor
         dose *= self._cabin_presence_share(target, st.epoch)
+        if (
+            st.pool_recipients is not None
+            and target.agent_id not in st.pool_recipients
+        ):
+            # EXPO-CAP-01: the shedders' contact-budgeted cohort did not
+            # reach this target — its pooled share is not dose-forming
+            # this epoch. The partner-bounded near-field term and the
+            # unconfineable cabin-mate addback stand regardless.
+            dose = 0.0
         dose += self._cabin_mate_droplet_addback(
             target, st.shedders, st.volume, st.vent_factor, target_factor,
             st.emission_fraction * st.pool_share, st.epoch, st.residence,
@@ -6045,6 +6156,95 @@ class TransmissionCore:
             exposure["near_field_dose"] = round(near_dose, 4)
         matrix.droplet_exposures.append(exposure)
 
+    # ── EXPO-CAP-01: per-shedder exposure-reach budget ────────────────
+
+    def _exposure_cap_rate(
+        self,
+        shedder: KorkinAgent,
+        unit_name: str,
+        zone_name: str,
+        epoch: int,
+    ) -> float:
+        """The shedder's per-epoch contact-budget mean.
+
+        The same rate its own partner draw would use in this unit this
+        epoch — the CONTACT-ARCH-01 activity rate when the block is
+        declared, the uniform POLYMOD draw otherwise — so the bound on a
+        shedder's dose-forming reach is the bound the contact
+        architecture already samples.
+        """
+        if self.activity_contacts is not None:
+            activity = self._contact_activity(
+                shedder, unit_name, zone_name, False, epoch,
+            )
+            per_hour = self.activity_contacts[activity][shedder.role]
+            tau = self.activity_saturation_hours.get(activity)
+            mean = (
+                self._saturated_visit_contacts(shedder, per_hour, tau)
+                if tau is not None
+                else self.clock.amount_per_epoch(per_hour * HOURS_PER_DAY)
+            )
+        else:
+            mean = self.clock.amount_per_epoch(POLYMOD_CONTACTS_PER_DAY)
+        return mean * float(self.voyage_contact_multiplier)
+
+    def _exposure_cap_budget(
+        self,
+        shedder: KorkinAgent,
+        unit_name: str,
+        zone_name: str,
+        epoch: int,
+        pathogen_id: str,
+    ) -> int:
+        """The shedder's remaining dose-forming reach this epoch."""
+        if self._exposure_budget_epoch != epoch:
+            self._exposure_budget_epoch = epoch
+            self._exposure_budgets.clear()
+        key = (epoch, pathogen_id, shedder.agent_id)
+        budget = self._exposure_budgets.get(key)
+        if budget is None:
+            mean = self._exposure_cap_rate(
+                shedder, unit_name, zone_name, epoch,
+            )
+            budget = max(0, int(self._exposure_cap_rng.poisson(mean)))
+            self._exposure_budgets[key] = budget
+        return budget
+
+    def _exposure_cap_cohort(
+        self,
+        shedder_ctx: list[tuple[KorkinAgent, str, str]],
+        susceptible: list[KorkinAgent],
+        epoch: int,
+        pathogen_id: str,
+    ) -> set[int]:
+        """The dose-forming cohort of one air unit under EXPO-CAP-01.
+
+        The union over shedders of each shedder's sampled reach — at most
+        its remaining per-epoch contact budget of this unit's
+        susceptibles — the shedder-side reading of the same bound the
+        partner draw applies target-side. A susceptible outside the union
+        receives no pooled dose from this unit this epoch.
+        """
+        cohort: set[int] = set()
+        n = len(susceptible)
+        if n == 0:
+            return cohort
+        for shedder, unit_name, zone_name in shedder_ctx:
+            remaining = self._exposure_cap_budget(
+                shedder, unit_name, zone_name, epoch, pathogen_id,
+            )
+            if remaining <= 0:
+                continue
+            k = min(remaining, n)
+            picked = self._exposure_cap_rng.choice(n, size=k, replace=False)
+            cohort.update(
+                susceptible[int(i)].agent_id for i in np.atleast_1d(picked)
+            )
+            self._exposure_budgets[
+                (epoch, pathogen_id, shedder.agent_id)
+            ] = remaining - k
+        return cohort
+
     # ── Pathway 3: Long-Range Airborne (HVAC Drift) ──────────────────
 
     def _apply_hvac_downstream_doses(
@@ -6061,6 +6261,7 @@ class TransmissionCore:
         source_attribution: DoseAttribution | None = None,
         air_unit: str | None = None,
         epoch: int = 0,
+        shedder_ctx: list[tuple[KorkinAgent, str, str]] | None = None,
     ) -> None:
         unit_name = air_unit or target_zone
         volume = self._air_unit_volume(unit_name)
@@ -6068,6 +6269,15 @@ class TransmissionCore:
         susceptible = self._get_susceptible(occupants, pathogen_id)
         if not susceptible:
             return
+        if shedder_ctx is not None:
+            # EXPO-CAP-01: only the drifted shedders' contact-budgeted
+            # cohort inhales the transported share.
+            cohort = self._exposure_cap_cohort(
+                shedder_ctx, susceptible, epoch, pathogen_id,
+            )
+            susceptible = [t for t in susceptible if t.agent_id in cohort]
+            if not susceptible:
+                return
         residence = self._room_air_residence_factor(unit_name)
 
         for target in susceptible:
@@ -6223,6 +6433,13 @@ class TransmissionCore:
         """
         units = self._cabin_air_units(zone_occupants)
         zone_shedders = self._hvac_zone_shedders(units, pathogen_id)
+        shedder_units: dict[int, str] = {}
+        if self._exposure_cap_active:
+            shedder_units = {
+                s.agent_id: unit
+                for unit, unit_shedders in zone_shedders.items()
+                for s, _ in unit_shedders
+            }
 
         upstream = self._hvac_upstream_sources(
             zone_shedders, hvac_downstream_zones,
@@ -6238,6 +6455,17 @@ class TransmissionCore:
             mix = self._reservoir_mix(
                 AIRBORNE_RESERVOIR, pathogen_id, target_zone,
             ) or self._shedder_mix(shedders, pathogen_id)
+            shedder_ctx = None
+            if self._exposure_cap_active:
+                shedder_ctx = [
+                    (
+                        s,
+                        shedder_units[s.agent_id],
+                        self.compartment_parent(shedder_units[s.agent_id]),
+                    )
+                    for s, _sv in shedders
+                    if s.agent_id in shedder_units
+                ]
             self._apply_hvac_downstream_doses(
                 target_zone, source_zones,
                 [s.agent_id for s, _ in shedders],
@@ -6247,6 +6475,7 @@ class TransmissionCore:
                 attribution(ledger, mix),
                 air_unit=air_unit,
                 epoch=epoch,
+                shedder_ctx=shedder_ctx,
             )
 
         self._airborne_composition(
