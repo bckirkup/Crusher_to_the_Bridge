@@ -97,6 +97,14 @@ class SimulationState:
     # NORO-VENUE-02 escort latency: agent_id -> epoch the escorted
     # admission lands (order fired but the host is still mobile).
     escort_pending: dict[int, int] = field(default_factory=dict)
+    # NORO-DETECT-01 presenting-sign detection (written by
+    # step_presenting_sign_detection before the confinement pass):
+    # first epoch the host's declared presenting sign was physically
+    # observed; the epoch its confinement order may fire (sign + clinic
+    # wait); and hosts whose only symptomatic channel is the sign gate.
+    presenting_sign_epoch: dict[int, int] = field(default_factory=dict)
+    sign_order_due_epoch: dict[int, int] = field(default_factory=dict)
+    sign_gated_ids: set[int] = field(default_factory=set)
     escalation_log: list[dict[str, Any]] = field(default_factory=list)
     compliance_log: list[dict[str, Any]] = field(default_factory=list)
     simulation_history: list[dict[str, Any]] = field(default_factory=list)

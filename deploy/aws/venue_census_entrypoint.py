@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""AWS Batch entrypoint for the NORO-VENUE-01/02 placement census.
+"""AWS Batch entrypoint for the NORO-VENUE/DETECT placement census.
 
 NORO-VENUE-02: ``--escort-delay-hours`` selects the escort-latency arm
 (order-to-admission delay k epochs; 0 = instant-admission baseline) and
 suffices the S3 cell label ``<tier-or-platform>_k<delay>`` so arms write
 disjoint prefixes.
+
+NORO-DETECT-01: ``--symptomatic-order-trigger`` selects the detection
+arm (``onset`` = labelled baseline -> ``_onset`` suffix;
+``presenting_sign`` gates on the profile's declared sign plus
+``--clinic-wait-hours`` -> ``_w<wait>`` suffix).
 
 Each array child runs ONE (tier, seed) cell through the venue census
 probe (``tools/noro_diag/venue_placement_census.py``) and uploads one
@@ -79,6 +84,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="order-to-admission escort delay in hours (arm id; "
              "0 restores the instant-admission baseline)",
     )
+    parser.add_argument(
+        "--clinic-wait-hours", type=float, default=None,
+        help="presenting-sign->order clinic latency in hours "
+             "(DETECT-01 arm id; required with the presenting_sign arm)",
+    )
+    parser.add_argument(
+        "--symptomatic-order-trigger", default=None,
+        help="detection trigger arm: 'onset' (labelled baseline) or "
+             "'presenting_sign' (sign-gated ordering)",
+    )
     parser.add_argument("--index", type=int, default=None)
     return parser.parse_args(argv)
 
@@ -99,12 +114,28 @@ def main(argv: list[str] | None = None) -> None:
     )
 
     cell_label = args.platform_id or args.tier
-    if args.escort_delay_hours is not None:
+    if args.escort_delay_hours is not None and (
+        args.symptomatic_order_trigger is None
+    ):
         delay = args.escort_delay_hours
         delay_label = str(int(delay)) if float(delay).is_integer() else (
             str(delay).replace(".", "p")
         )
         cell_label = f"{cell_label}_k{delay_label}"
+    if args.symptomatic_order_trigger == "onset":
+        cell_label = f"{cell_label}_onset"
+    elif args.symptomatic_order_trigger is not None:
+        if args.clinic_wait_hours is None:
+            raise SystemExit(
+                "--symptomatic-order-trigger="
+                f"{args.symptomatic_order_trigger} requires "
+                "--clinic-wait-hours so the cell label names its arm",
+            )
+        wait = args.clinic_wait_hours
+        wait_label = str(int(wait)) if float(wait).is_integer() else (
+            str(wait).replace(".", "p")
+        )
+        cell_label = f"{cell_label}_w{wait_label}"
     bucket, prefix = _s3_uri(args.s3_prefix)
     if prefix:
         prefix += "/"
@@ -130,6 +161,12 @@ def main(argv: list[str] | None = None) -> None:
         command += ["--num-agents", str(args.num_agents)]
     if args.escort_delay_hours is not None:
         command += ["--escort-delay-hours", str(args.escort_delay_hours)]
+    if args.clinic_wait_hours is not None:
+        command += ["--clinic-wait-hours", str(args.clinic_wait_hours)]
+    if args.symptomatic_order_trigger is not None:
+        command += [
+            "--symptomatic-order-trigger", args.symptomatic_order_trigger,
+        ]
     print(" ".join(command), flush=True)
     subprocess.run(command, check=True, cwd=_REPO_ROOT)  # noqa: S603
 

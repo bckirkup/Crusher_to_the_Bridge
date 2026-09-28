@@ -68,6 +68,12 @@ _MOLECULAR_SPAWN_KEY = 7919
 _CAMPAIGN_SPAWN_KEY = 7927
 _ONSET_SPAWN_KEY = 7937
 
+# Symptomatic confinement-order triggers (NORO-DETECT-01): "onset" flags
+# at model-truth onset (the labelled baseline); "presenting_sign" gates
+# on the pathogen profile's declared observable sign plus the clinic
+# wait. New triggers join here.
+_ORDER_TRIGGERS = frozenset({"onset", "presenting_sign"})
+
 
 def _molecular_stream(
     rng: np.random.Generator,
@@ -123,6 +129,15 @@ class SyndromicParams:
     # admission lands. 0 restores the instant-admission baseline.
     escort_delay_epochs: int = 0
     escort_delay_hours: float | None = None
+    # Detection trigger for symptomatic confinement orders
+    # (NORO-DETECT-01). "presenting_sign" gates the order on the first
+    # observed declared sign per pathogen profile
+    # (observation_model.presenting_sign) plus clinic_wait_epochs;
+    # symptomatics that can never present the declared sign keep the
+    # onset-order channel. "onset" is the labelled omniscient baseline.
+    symptomatic_order_trigger: str = "onset"
+    clinic_wait_epochs: int = 0
+    clinic_wait_hours: float | None = None
     sick_call_severity_mode: str = "own_severity"
     symptom_severity_profiles: dict[str, dict[str, Any]] | None = None
     clock: SimClock | None = None
@@ -180,6 +195,27 @@ class SyndromicSurveillance:
         )
         self.sick_call_severity_mode = p.sick_call_severity_mode
         self.symptom_severity_profiles = dict(p.symptom_severity_profiles or {})
+        # Presenting-sign detection: which observation a symptomatic
+        # confinement order keys on. The sign map is the contract — the
+        # profile declares its observable sign and the order layer holds
+        # the observers, so a pathogen joins the channel by declaration,
+        # not by a noro-special-cased branch.
+        self.symptomatic_order_trigger = str(p.symptomatic_order_trigger)
+        if self.symptomatic_order_trigger not in _ORDER_TRIGGERS:
+            raise ValueError(
+                f"unknown symptomatic_order_trigger "
+                f"{self.symptomatic_order_trigger!r}; "
+                f"expected one of {sorted(_ORDER_TRIGGERS)}",
+            )
+        self.presenting_sign_by_pathogen = {
+            pid: sign
+            for pid, prof in self.symptom_severity_profiles.items()
+            if (
+                sign := (prof.get("observation_model") or {}).get(
+                    "presenting_sign",
+                )
+            )
+        }
         self.clock = p.clock or SimClock()
         self.background_noise_rate = p.background_noise_rate
         self.quarantine_compliance = p.quarantine_compliance
@@ -259,6 +295,11 @@ class SyndromicSurveillance:
             self.clock.epochs_for_hours(p.detection_delay_hours)
             if p.detection_delay_hours is not None
             else max(0, int(p.detection_delay_epochs))
+        )
+        self.clinic_wait_epochs = (
+            self.clock.epochs_for_hours(p.clinic_wait_hours)
+            if p.clinic_wait_hours is not None
+            else max(0, int(p.clinic_wait_epochs))
         )
         if p.crew_screening_interval_hours is not None:
             crew_screening_interval_epochs = self.clock.epochs_for_hours(

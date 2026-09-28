@@ -83,6 +83,7 @@
       },
       "observation_model": {
         "system": "VSP_AGE",
+        "presenting_sign": "emesis",
         "syndrome_case_eligibility_by_severity": [0, 0.55, 0.98, 1, 1],
         "reporting_probability_by_severity_pre_recognition": [
           0, 0.45, 0.70, 0.94, 1

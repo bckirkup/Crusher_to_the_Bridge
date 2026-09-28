@@ -505,6 +505,11 @@
       ],
       "properties": {
         "system": {"type": "string"},
+        "presenting_sign": {
+          "type": "string",
+          "enum": ["emesis"],
+          "description": "The pathogen's observable presenting sign for presenting-sign detection (NORO-DETECT-01): the physical event an observer could actually notice, on which a symptomatic confinement order may be gated instead of model-truth onset. The enum is the vocabulary the order layer has observers wired for; adding a sign means adding its observer there. Absent means the profile's symptomatics always keep the onset-order channel. \"emesis\": the host's first deposited emesis event."
+        },
         "syndrome_case_eligibility_by_severity": {
           "type": "array",
           "minItems": 5,

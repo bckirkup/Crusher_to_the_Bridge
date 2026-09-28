@@ -213,6 +213,10 @@ class VenueRecorder(RhythmRecorder):
     _escalation_seen: int = 0
     _reported_seen: set[int] = field(default_factory=set)
     escort_pending_last: dict[int, int] = field(default_factory=dict)
+    # NORO-DETECT-01: sign-channel clocks, last observer snapshot.
+    presenting_sign_epoch_last: dict[int, int] = field(default_factory=dict)
+    sign_order_due_last: dict[int, int] = field(default_factory=dict)
+    sign_gated_last: set[int] = field(default_factory=set)
 
 
 # ── Site classification (pure; exercised by unit tests) ──────────────
@@ -437,7 +441,7 @@ def _capture_event_deltas(rec: VenueRecorder, epoch: int, state: Any) -> None:
             "action": str(entry.get("action", "")),
             "compliance_class": entry.get("compliance_class"),
         }
-        for key in ("escort_due_epoch", "delay"):
+        for key in ("escort_due_epoch", "delay", "detection_channel"):
             if key in entry:
                 row[key] = entry[key]
         rec.confinement_events.append(row)
@@ -488,6 +492,13 @@ def _epoch_observer(rec: VenueRecorder) -> Any:
         })
         _capture_event_deltas(rec, epoch, state)
         rec.escort_pending_last = dict(state.escort_pending)
+        rec.presenting_sign_epoch_last = dict(
+            getattr(state, "presenting_sign_epoch", {}),
+        )
+        rec.sign_order_due_last = dict(
+            getattr(state, "sign_order_due_epoch", {}),
+        )
+        rec.sign_gated_last = set(getattr(state, "sign_gated_ids", ()))
         symptomatic = _capture_agent_axes(rec, epoch, engine)
         sick_calls = 0
         if work.syn_result:
@@ -543,8 +554,15 @@ def _host_timeline(rec: VenueRecorder, aid: int) -> dict[str, Any]:
         e["escort_due_epoch"] for e in events
         if e["action"] == "escort_order" and e.get("escort_due_epoch")
     ]
+    ordered = sorted(
+        (e for e in events if e["action"] in ORDER_ACTIONS),
+        key=lambda e: e["epoch"],
+    )
     return {
         "first_order_epoch": min(orders) if orders else None,
+        "first_order_channel": (
+            ordered[0].get("detection_channel") if ordered else None
+        ),
         "first_admit_event_epoch": min(admits) if admits else None,
         "refusal_epochs": refusals,
         "release_epochs": releases,
@@ -589,6 +607,31 @@ def _emitter_class(rec: VenueRecorder, aid: int) -> str:
     if meta.get("will_present") is False:
         return "never_symptomatic_course"
     return "never_symptomatic_onboard"
+
+
+def _emitter_channel(
+    rec: VenueRecorder,
+    row: dict[str, Any],
+    timeline: dict[str, Any],
+) -> str:
+    """Which order channel carried this emit's landing (NORO-DETECT-01).
+
+    Resolved against the emitter's whole-voyage timeline, not the
+    emit-time order state: a pre-order emit by a host who later refuses
+    is a refuser-channel landing, and a sign-gated host awaiting its
+    clinic-wait order is already inside the compliant window.
+    """
+    aid = int(row["agent_id"])
+    if timeline["refusal_epochs"]:
+        return "refuser"
+    if row["confined_at_emit"]:
+        return "confined"
+    if (
+        timeline["first_order_epoch"] is not None
+        or aid in rec.presenting_sign_epoch_last
+    ):
+        return "compliant_in_window"
+    return "never_ordered"
 
 
 def _zones_meta(engine: Any) -> dict[str, dict[str, Any]]:
@@ -641,6 +684,7 @@ def _join_emits(
             "confinement_class": conf_class,
             "order_subclass": order_sub,
             "emitter_class": _emitter_class(rec, aid),
+            "emitter_channel": _emitter_channel(rec, row, timelines[aid]),
             "first_emit": int(row["epoch"]) == first_emit_epoch[aid],
             **site,
         })
@@ -690,6 +734,10 @@ def _host_rows(
             "actions": timeline["actions"],
             "n_emesis_emits": len(emit_epochs),
             "first_emit_epoch": min(emit_epochs) if emit_epochs else None,
+            "presenting_sign_epoch": rec.presenting_sign_epoch_last.get(aid),
+            "sign_order_due_epoch": rec.sign_order_due_last.get(aid),
+            "sign_gated": aid in rec.sign_gated_last,
+            "first_order_channel": timeline["first_order_channel"],
         })
     return rows
 
@@ -712,6 +760,18 @@ def _venue_payload(
             .get("fred_behavior", {}).get("escort_delay_hours")
         ),
         "escort_pending_final": len(rec.escort_pending_last),
+        "clinic_wait_epochs": int(
+            getattr(syndromic, "clinic_wait_epochs", 0) or 0
+        ),
+        "symptomatic_order_trigger": str(
+            getattr(syndromic, "symptomatic_order_trigger", "onset")
+        ),
+        "clinic_wait_hours_requested": (
+            (spec_dict.get("config_overrides") or {})
+            .get("fred_behavior", {}).get("clinic_wait_hours")
+        ),
+        "sign_gated_final": len(rec.sign_gated_last),
+        "n_sign_observed": len(rec.presenting_sign_epoch_last),
         "ignited": rec.ignited,
         "emit_calls": rec.emit_invocations,
         "emit_calls_no_records": rec.emit_idle_invocations,
@@ -751,6 +811,14 @@ def _run_summary(
         ),
         "escort_delay_hours": (
             overrides.get("fred_behavior", {}).get("escort_delay_hours")
+        ),
+        "clinic_wait_hours": (
+            overrides.get("fred_behavior", {}).get("clinic_wait_hours")
+        ),
+        "symptomatic_order_trigger": (
+            overrides.get("fred_behavior", {}).get(
+                "symptomatic_order_trigger",
+            )
         ),
         "platform": str(spec["catalog"]["platform_id"]),
         "wall_clock_seconds_run": wall_clock_run,
@@ -827,6 +895,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
              "(0 = instant-admission baseline)",
     )
     parser.add_argument(
+        "--clinic-wait-hours", type=float, default=None,
+        help="presenting-sign->order clinic latency arm: "
+             "fred_behavior.clinic_wait_hours",
+    )
+    parser.add_argument(
+        "--symptomatic-order-trigger", type=_identifier, default=None,
+        help="detection trigger arm: fred_behavior.symptomatic_order_trigger "
+             "(onset = labelled baseline, presenting_sign = sign-gated)",
+    )
+    parser.add_argument(
         "--spec-json", type=Path, default=None,
         help="run an arbitrary spec file verbatim",
     )
@@ -858,6 +936,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         ("--index", args.index, 0),
         ("--epochs-override", args.epochs_override, 1),
         ("--escort-delay-hours", args.escort_delay_hours, 0),
+        ("--clinic-wait-hours", args.clinic_wait_hours, 0),
     ):
         if value is not None and value < floor:
             parser.error(f"{label} must be >= {floor}")
@@ -882,6 +961,20 @@ def _apply_overrides(spec: dict[str, Any], args: argparse.Namespace) -> None:
         spec.setdefault("campaign_parameters", {})["escort_delay_hours"] = (
             float(args.escort_delay_hours)
         )
+    if args.clinic_wait_hours is not None:
+        spec.setdefault("config_overrides", {}).setdefault(
+            "fred_behavior", {},
+        )["clinic_wait_hours"] = float(args.clinic_wait_hours)
+        spec.setdefault("campaign_parameters", {})["clinic_wait_hours"] = (
+            float(args.clinic_wait_hours)
+        )
+    if args.symptomatic_order_trigger is not None:
+        spec.setdefault("config_overrides", {}).setdefault(
+            "fred_behavior", {},
+        )["symptomatic_order_trigger"] = args.symptomatic_order_trigger
+        spec.setdefault("campaign_parameters", {})[
+            "symptomatic_order_trigger"
+        ] = args.symptomatic_order_trigger
 
 
 _ANCHOR_KEYS = (

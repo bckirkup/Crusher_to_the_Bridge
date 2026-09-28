@@ -88,6 +88,7 @@ from orchestrator_epoch import (
     step_long_read_cost_accounting,
     step_mid_cruise_introductions,
     step_operational_impact_accounting,
+    step_presenting_sign_detection,
     step_quarantine_confinement,
     step_shore_introductions,
     step_wearable_monitoring,
@@ -1526,6 +1527,13 @@ class ShipSimulation:
         )
         step_crew_duty_exclusion(
             work.epoch, work.agents, work.state, self.clock, self.crew_exclusion,
+        )
+        # Presenting-sign detection (NORO-DETECT-01): emeses land earlier
+        # this epoch in _step_biology, so the sign scan sees this epoch's
+        # deposits; at clinic_wait 0 an observed sign is orderable the
+        # same epoch it lands.
+        step_presenting_sign_detection(
+            work.epoch, self.engine, work.state, work.syndromic,
         )
         step_quarantine_confinement(
             work.epoch, work.agents, work.merged_mods, work.state.trigger_status,

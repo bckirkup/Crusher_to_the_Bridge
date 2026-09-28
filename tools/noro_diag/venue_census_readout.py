@@ -69,6 +69,38 @@ EMITTER_CLASSES = (
 )
 SMALL_DENOMINATOR = 30
 
+# NORO-DETECT-01 emitter-class axis: whether the emitting host was in
+# the compliant mobile window (ordered or order-pending but still
+# unconfined), a refuser, already confined, or never ordered.
+_WINDOW_CLASSES = (
+    "compliant_in_window",
+    "refuser",
+    "confined",
+    "never_ordered",
+)
+
+
+def _emit_window_class(row: dict[str, Any]) -> str:
+    """The emitter's order channel for this landing.
+
+    New cells stamp ``emitter_channel`` at join time against the host's
+    whole-voyage timeline; fall back to the emit-time order subclass on
+    older payloads that predate the stamp.
+    """
+    stamped = row.get("emitter_channel")
+    if stamped:
+        return str(stamped)
+    subclass = str(row.get("order_subclass", ""))
+    if subclass == "ordered_refused":
+        return "refuser"
+    if subclass in (
+        "pre_order", "ordered_mobile", "ordered_not_admitted",
+    ):
+        return "compliant_in_window"
+    if row.get("confinement_class") == "post_confinement":
+        return "confined"
+    return "never_ordered"
+
 
 # ── Loading ───────────────────────────────────────────────────────────
 
@@ -95,6 +127,11 @@ def load_cells(runs_dir: Path) -> dict[str, list[dict[str, Any]]]:
             "ignited": bool(venue.get("ignited")),
             "escort_delay_hours": summary.get("escort_delay_hours"),
             "escort_delay_epochs": venue.get("escort_delay_epochs"),
+            "clinic_wait_hours": summary.get("clinic_wait_hours"),
+            "clinic_wait_epochs": venue.get("clinic_wait_epochs"),
+            "symptomatic_order_trigger": venue.get(
+                "symptomatic_order_trigger",
+            ),
             "num_agents": summary.get("num_agents"),
             "derived": summary.get("derived") or {},
             "parameters": summary.get("parameters") or {},
@@ -136,9 +173,28 @@ def aggregate_cell(runs: list[dict[str, Any]]) -> dict[str, Any]:
         "by_site_class": {},
         "first_emit_table": {},
         "first_emit_mobile": 0,
+        "first_emit_window": {},
+        "subsequent_emit_window": {},
         "escort_delay_epochs": {
             r["escort_delay_epochs"] for r in runs
         },
+        "clinic_wait_epochs": sorted({
+            v for v in (r["clinic_wait_epochs"] for r in runs)
+            if v is not None
+        }),
+        "clinic_wait_hours": sorted({
+            v for v in (r["clinic_wait_hours"] for r in runs)
+            if v is not None
+        }),
+        "symptomatic_order_trigger": sorted({
+            str(v) for v in (
+                r["symptomatic_order_trigger"] for r in runs
+            )
+            if v is not None
+        }),
+        "n_sign_observed": 0,
+        "sign_gated_final": 0,
+        "detection_channels": defaultdict(int),
         "attack_rates": defaultdict(list),
         "num_agents": set(),
         "confinement_actions": defaultdict(int),
@@ -153,9 +209,19 @@ def aggregate_cell(runs: list[dict[str, Any]]) -> dict[str, Any]:
         _accumulate_run(agg, run)
         _aggregate_emit_rows(agg, run["venue"])
         _aggregate_hosts(agg, run["venue"])
+        agg["n_sign_observed"] += int(
+            run["venue"].get("n_sign_observed", 0),
+        )
+        agg["sign_gated_final"] += int(
+            run["venue"].get("sign_gated_final", 0),
+        )
         for event in run["venue"].get("confinement_events", []):
             agg["confinement_actions"][str(event.get("action"))] += 1
+            channel = event.get("detection_channel")
+            if channel is not None:
+                agg["detection_channels"][str(channel)] += 1
     agg["confinement_actions"] = dict(agg["confinement_actions"])
+    agg["detection_channels"] = dict(agg["detection_channels"])
     agg["confined_host_classes"] = dict(agg["confined_host_classes"])
     agg["attack_rates"] = {
         key: quantiles(vals) for key, vals in agg["attack_rates"].items()
@@ -212,10 +278,14 @@ def _aggregate_emit_rows(
             f"{conf}|{row.get('site_class', 'other')}",
             row,
         )
+        window = _emit_window_class(row)
+        window_key = f"{row.get('site_class', 'other')}|{window}"
         if not row.get("first_emit"):
+            _add_emit(agg["subsequent_emit_window"], window_key, row)
             continue
         key = f"{row.get('site_class', 'other')}|{emitter}"
         _add_emit(agg["first_emit_table"], key, row)
+        _add_emit(agg["first_emit_window"], window_key, row)
         # ordered_not_admitted at the confined epoch is still mobile:
         # transmission runs before the escorted admission lands
         # end-of-epoch.
@@ -266,16 +336,29 @@ def render_markdown(cells: dict[str, Any]) -> str:
     for cell, agg in cells.items():
         lines.append(f"### `{cell}`")
         lines.append("")
+        trigger = "/".join(agg.get("symptomatic_order_trigger") or []) or "-"
+        clinic = "/".join(
+            str(v) for v in agg.get("clinic_wait_epochs") or []
+        ) or "-"
         lines.append(
             f"runs {agg['n_runs']} | ignited {agg['n_ignited']} | "
             f"emit events {agg['n_emesis']} "
             f"(_emit_emesis invoked {agg['emit_calls']}x — once per "
             f"agent-epoch; record-less invocations are the idle path) | "
-            f"unattributed {agg['n_unattributed']}",
+            f"unattributed {agg['n_unattributed']} | "
+            f"trigger {trigger} | clinic wait {clinic} ep | "
+            f"sign observed {agg['n_sign_observed']} hosts | "
+            f"still sign-gated {agg['sign_gated_final']}",
         )
         lines.append("")
         lines += _landing_table(agg)
         lines += _first_emit_table(agg)
+        lines += _window_emit_table(
+            agg["first_emit_window"], "first emesis",
+        )
+        lines += _window_emit_table(
+            agg["subsequent_emit_window"], "subsequent emeses",
+        )
         lines += _conversion_block(cell, cells[cell])
         lines += _placement_quality_table(agg)
         lines += _latency_table(agg)
@@ -337,6 +420,38 @@ def _first_emit_table(agg: dict[str, Any]) -> list[str]:
         entry = table[key]
         lines.append(
             f"| {site_class} | {emitter} | {entry['n']} | "
+            f"{entry['mass']:.3g} | "
+            f"{_pct(entry['susceptible_present'], entry['n'])} |",
+        )
+    return lines + [""]
+
+
+def _window_emit_table(
+    table: dict[str, dict[str, Any]], label: str,
+) -> list[str]:
+    """Site-class x emitter window-class table (NORO-DETECT-01)."""
+    if not table:
+        return []
+    lines = [
+        f"{label.capitalize()} by site class x emitter channel:",
+        "",
+        "| site class | emitter channel | landings | mass | "
+        ">=1 susceptible |",
+        "|---|---|---|---|---|",
+    ]
+    for key in sorted(
+        table,
+        key=lambda k: (
+            k.split("|", 1)[0],
+            _WINDOW_CLASSES.index(k.split("|", 1)[1])
+            if k.split("|", 1)[1] in _WINDOW_CLASSES
+            else len(_WINDOW_CLASSES),
+        ),
+    ):
+        site_class, window = key.split("|", 1)
+        entry = table[key]
+        lines.append(
+            f"| {site_class} | {window} | {entry['n']} | "
             f"{entry['mass']:.3g} | "
             f"{_pct(entry['susceptible_present'], entry['n'])} |",
         )
@@ -419,6 +534,12 @@ def _actions_table(agg: dict[str, Any]) -> list[str]:
     lines = ["| action | count |", "|---|---|"]
     for action, count in sorted(actions.items(), key=lambda kv: -kv[1]):
         lines.append(f"| {action} | {count} |")
+    channels = agg.get("detection_channels") or {}
+    if channels:
+        lines.append("")
+        lines += ["| detection channel | orders+refusals |", "|---|---|"]
+        for channel, count in sorted(channels.items()):
+            lines.append(f"| {channel} | {count} |")
     return lines + [""]
 
 
