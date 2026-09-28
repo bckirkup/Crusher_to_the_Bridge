@@ -55,10 +55,49 @@ echo "  prefix      : $S3_PREFIX"
 echo "  queue       : $JOB_QUEUE"
 echo "  jobdef      : $JOB_DEFINITION"
 
+# submit-job's --parameters shorthand splits comma lists (the seeds)
+# and rejects empty values, so the cell goes in as a literal argv via
+# --container-overrides instead of Ref:: parameter substitution.
+read -r -d '' SUBMIT_JSON <<JSON || true
+{
+  "jobName": "$JOB_NAME",
+  "jobQueue": "$JOB_QUEUE",
+  "jobDefinition": "$JOB_DEFINITION",
+  "arrayProperties": {"size": $ARRAY_SIZE},
+  "containerOverrides": {
+    "command": [
+      "deploy/aws/venue_census_entrypoint.py",
+      "--s3-prefix", "$S3_PREFIX",
+      "--manifest", "$MANIFEST",
+      "--pathogen-id", "$PATHOGEN_ID",
+      "--tier", "$TIER",
+      "--seeds", "$SEEDS",
+      "--escort-delay-hours", "$ESCORT_DELAY_HOURS"
+    ]
+  },
+  "parameters": {
+    "s3_prefix": "$S3_PREFIX",
+    "manifest": "$MANIFEST",
+    "pathogen_id": "$PATHOGEN_ID",
+    "tier": "$TIER",
+    "seeds": "$SEEDS",
+    "num_agents": "$NUM_AGENTS",
+    "escort_delay_hours": "$ESCORT_DELAY_HOURS"
+  }
+}
+JSON
+SUBMIT_JSON="$(python3 -c "
+import json, sys
+j = json.loads(sys.stdin.read())
+cmd = j['containerOverrides']['command']
+if '$PLATFORM_ID':
+    cmd += ['--platform-id', '$PLATFORM_ID']
+    j['parameters']['platform_id'] = '$PLATFORM_ID'
+if int('$NUM_AGENTS' or 0):
+    cmd += ['--num-agents', '$NUM_AGENTS']
+print(json.dumps(j))
+" <<<"$SUBMIT_JSON")"
+
 aws batch submit-job \
   --region "$AWS_REGION" \
-  --job-name "$JOB_NAME" \
-  --job-queue "$JOB_QUEUE" \
-  --job-definition "$JOB_DEFINITION" \
-  --array-properties "{\"size\": $ARRAY_SIZE}" \
-  --parameters "s3_prefix=$S3_PREFIX,manifest=$MANIFEST,pathogen_id=$PATHOGEN_ID,tier=$TIER,seeds=$SEEDS,platform_id=$PLATFORM_ID,num_agents=$NUM_AGENTS,escort_delay_hours=$ESCORT_DELAY_HOURS"
+  --cli-input-json "$SUBMIT_JSON"
