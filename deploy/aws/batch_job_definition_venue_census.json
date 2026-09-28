@@ -1,0 +1,98 @@
+{
+  "jobDefinitionName": "picard-venue-census",
+  "type": "container",
+  "platformCapabilities": [
+    "EC2"
+  ],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:venue-census-v1",
+    "command": [
+      "deploy/aws/venue_census_entrypoint.py",
+      "--s3-prefix",
+      "Ref::s3_prefix",
+      "--manifest",
+      "Ref::manifest",
+      "--pathogen-id",
+      "Ref::pathogen_id",
+      "--tier",
+      "Ref::tier",
+      "--seeds",
+      "Ref::seeds",
+      "--platform-id",
+      "Ref::platform_id",
+      "--num-agents",
+      "Ref::num_agents"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      {
+        "type": "VCPU",
+        "value": "1"
+      },
+      {
+        "type": "MEMORY",
+        "value": "4096"
+      }
+    ],
+    "linuxParameters": {
+      "sharedMemorySize": 512
+    },
+    "environment": [
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      },
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-campaign",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "venue-census"
+      }
+    }
+  },
+  "parameters": {
+    "s3_prefix": "s3://<BUCKET>/campaign/noro_venue_01/",
+    "manifest": "picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json",
+    "pathogen_id": "norwalk_gi",
+    "tier": "fl_spr_12d",
+    "seeds": "8105,8114,8124,8129,8132,8135,8137,8148,8156,8158,8159,8106",
+    "platform_id": "",
+    "num_agents": "0"
+  },
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 14400
+  }
+}
