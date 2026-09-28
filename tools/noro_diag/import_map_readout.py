@@ -36,6 +36,11 @@ if str(_REPO_ROOT / "tools" / "noro_diag") not in sys.path:
 
 from rhythm_ab_readout import TAKEOFF_PEAK_PREVALENCE, _wilson  # noqa: E402
 
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    validated_open,
+)
+
 _MEMBER = "summary.json"
 _CENSUS_MEMBER = "growth_census.json.gz"
 
@@ -375,13 +380,25 @@ def main() -> None:
     report = build_report(args.runs_dir, args.tiers)
     md = render_markdown(report)
     if args.md_out:
-        args.md_out.write_text(md, encoding="utf-8")
+        out_dir = prepare_output_directory(
+            str(args.md_out.parent), allowed_roots=(str(_REPO_ROOT),),
+        )
+        with validated_open(
+            str(Path(out_dir) / args.md_out.name), "w",
+            encoding="utf-8", allowed_roots=(str(_REPO_ROOT),),
+        ) as fh:
+            fh.write(md + "\n")
     else:
         print(md)
     if args.json_out:
-        args.json_out.write_text(
-            json.dumps(report, indent=1, default=str), encoding="utf-8",
+        json_dir = prepare_output_directory(
+            str(args.json_out.parent), allowed_roots=(str(_REPO_ROOT),),
         )
+        with validated_open(
+            str(Path(json_dir) / args.json_out.name), "w",
+            encoding="utf-8", allowed_roots=(str(_REPO_ROOT),),
+        ) as fh:
+            fh.write(json.dumps(report, indent=1, default=str) + "\n")
 
 
 if __name__ == "__main__":
