@@ -101,7 +101,10 @@ absorbs it — the conditioning gap is the finding, as on measles.
 
 CABIN-FLOOR-02 measured 56.9% (active) / 56.2% (Edison) confined attack vs the
 15–25% floor band — overshoot on both bundles. Lau 2012's full PCR-SIR spread
-is 3–38%, so both bundles sit above even the widest literature read. Below:
+is 3–38%, so both bundles sit above even the widest literature read.
+(The 15–25% band was the norovirus Wikswo/Chimonas cabinmate pair reused
+generically; on flu it is withdrawn — the corrected band is derived from the
+declared k, `docs/confined_attack_floor_spec.md`, CABIN-FLOOR-03.) Below:
 each shipped constant against its register interval, then the structural
 remainder. Constants are as shipped at `fbad8738`.
 

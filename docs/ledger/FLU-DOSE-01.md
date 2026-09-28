@@ -73,6 +73,8 @@ plume 101; pool 42; fomite 0.17; contact ~0.0003; hvac/emesis/flush nil.
   the measured doses (median 2–9 copies, p90 ≤ ~36) yield per-slot SAR
   ≈ 0.05–1% — the arm would then read ~0% confined attack, a MISS low
   against the 15–25% floor band rather than the current MISS high.
+  (The 15–25% band is since withdrawn on flu — recalibrated as the
+  declared-k expected-SAR band, CABIN-FLOOR-03.)
 - The flu arm therefore carries two compensating defects of roughly
   matched magnitude: `dose_response.k` ~2–3 orders above its converted
   sourced bound, and confined-mate delivered dose ~2–3 orders below the

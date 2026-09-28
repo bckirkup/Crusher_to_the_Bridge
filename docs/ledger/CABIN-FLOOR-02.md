@@ -34,6 +34,12 @@ prefix `campaign/cabin_floor_02_declared/`; 26/26 cells clean.
 | edison legionella_pneumophila | vacuous (0 idx) | vacuous (0 idx) | ~0 | consistent (0 sec) |
 | edison ebola_virus | 5/56 = 8.9% | 11/77 = 14.3% | (no floor) | measured only |
 
+*Band note (2026-09-28): the 15–25% "Floor" column on the influenza_a rows
+was the norovirus Wikswo/Chimonas cabinmate pair reused generically —
+withdrawn for flu and recalibrated as the declared-k expected-SAR band in
+`CABIN-FLOOR-03` / `docs/confined_attack_floor_spec.md`. The norovirus rows'
+floor was that pathogen's own anchor and stands.*
+
 ## What the fomite fix changed (measured)
 
 - **Norovirus confined secondaries now exist at all.** edison norovirus_gii4

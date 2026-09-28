@@ -34,9 +34,11 @@ measles or ebola index infects too few to trip CONFIRMED).
 The confined-window mate attack — secondaries among mates who entered
 confinement uninfected — is the all-route composite the
 ``CabinPairChallengeLedger`` tallies across pool, plume, contact, hvac,
-emesis and flush. The sourced floors it is read against live in the
-CABIN-FLOOR-01 ledger entry; they are a held-out check, never a fitting
-target. The paired seeds are the probe pair for this platform, 8105/8106.
+emesis and flush. The floors it is read against live in the
+CABIN-FLOOR-01 ledger entry and, per pathogen, are derived bands on the
+arm's declared k — ``docs/confined_attack_floor_spec.md`` (CABIN-FLOOR-03);
+they are a held-out check, never a fitting target. The paired seeds are
+the probe pair for this platform, 8105/8106.
 """
 
 from __future__ import annotations

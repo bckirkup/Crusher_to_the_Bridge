@@ -2,16 +2,20 @@
 """FLU-RHYTHM-01 readout — folds ``<arm>/<tier>/*.zip`` cells per class.
 
 Per (class, arm): pooled confined cabinmate attack fraction vs the
-sourced 15–25% floor, delivered confined dose (stage-probe slot rows +
-engine-drawn implied SAR), per-epoch dosed-set size and challenged share
-(covid-probe fields), corridor-front correlation at event-egress epochs,
-and the wiring witnesses (rhythm attached, dealt commitments, ashore
-dosing). Per-seed paired deltas join on the run stem ``s<seed>``.
+dose-derived expected-SAR floor band (``docs/confined_attack_floor_spec.md``
+— the band bounds E[1−exp(−k·D_slot)] over the cell's own pooled slot
+doses at the declared k sourced interval; the withdrawn 15–25% fixed band
+is filed in CABIN-FLOOR-03), delivered confined dose (stage-probe slot
+rows + engine-drawn implied SAR), per-epoch dosed-set size and challenged
+share (covid-probe fields), corridor-front correlation at event-egress
+epochs, and the wiring witnesses (rhythm attached, dealt commitments,
+ashore dosing). Per-seed paired deltas join on the run stem ``s<seed>``.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import math
 import statistics
 import sys
 from pathlib import Path
@@ -28,7 +32,17 @@ from tools.noro_diag.rhythm_ab_readout import (  # noqa: E402
 )
 
 _ARMS = ("off", "on")
-FLOOR = (0.15, 0.25)
+# Declared sourced interval of influenza_a ``dose_response.k`` (per copy):
+# Alford 1966 aerosol ID50 0.6–3 TCID50 ÷ Van Wesenbeeck 2015 ≥1e3
+# copies/TCID50, shipped midpoint 6e-4 (profile ``dose_response.notes``,
+# FLU-DELIVERY-01). The floor band is [E[SAR](k_lo), E[SAR](k_hi)] on the
+# cell's pooled slot doses — docs/confined_attack_floor_spec.md.
+K_SOURCED_INTERVAL = (2e-4, 1e-3)
+K_DECLARED = 6e-4
+
+
+def _expected_sar(doses: list[float], k: float) -> float:
+    return sum(1.0 - math.exp(-k * d) for d in doses) / len(doses)
 
 
 def _median(values: list[float]) -> float | None:
@@ -84,14 +98,25 @@ def _confined_block(runs: list[tuple[Path, dict, dict]]) -> dict[str, Any]:
     implied_sar = acc["implied_sar"]
     stage_totals = acc["stage_totals"]
     lo, hi = _wilson(secondaries, slots)
+    band = (
+        [_expected_sar(delivered, k) for k in K_SOURCED_INTERVAL]
+        if delivered else None
+    )
+    in_band = None
+    if band is not None and slots > 0:
+        # n-aware: the band bounds the expectation, so consistency is
+        # Wilson-interval overlap, not a hard edge on the point estimate.
+        in_band = lo <= band[1] and band[0] <= hi
     return {
         "n_slots": slots,
         "confined_secondaries": secondaries,
         "attack": secondaries / slots if slots else None,
         "attack_wilson": [lo, hi],
-        "in_floor_band": (
-            slots > 0 and FLOOR[0] <= secondaries / slots <= FLOOR[1]
+        "expected_sar": (
+            _expected_sar(delivered, K_DECLARED) if delivered else None
         ),
+        "floor_band": band,
+        "in_floor_band": in_band,
         "delivered_p_dose": _quantiles(delivered),
         "implied_sar": _quantiles(implied_sar),
         "capture_ratio": (
@@ -195,11 +220,15 @@ def render_markdown(readout: dict[str, Any]) -> str:
             c = per_arm[arm]["confined"]
             m = per_arm[arm]["mechanism"]
             lo, hi = c["attack_wilson"]
+            if c["in_floor_band"] is None:
+                floor_cell = "—"
+            else:
+                floor_cell = "in" if c["in_floor_band"] else "OUT"
             lines.append(
                 f"| {tier} | {arm} | {m['n_runs']} | {c['n_slots']} | "
                 f"{c['confined_secondaries']} | "
                 f"{_fmt(c['attack'])} [{_fmt(lo)}–{_fmt(hi)}] | "
-                f"{'in' if c['in_floor_band'] else 'OUT'} |",
+                f"{floor_cell} |",
             )
         paired = per_arm["paired"]
         lines.append(

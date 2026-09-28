@@ -122,6 +122,7 @@ python3 presidio_runner.py \
 | [stan_hurdle_lessons.md](stan_hurdle_lessons.md) | Field notes (C12c + C14/C14b Step-2) |
 | [boundary_aws_pipeline_lessons.md](boundary_aws_pipeline_lessons.md) | Field notes — boundary surface AWS pipeline |
 | [synthetic_recovery_and_vsp_degradation.md](synthetic_recovery_and_vsp_degradation.md) | Findings — synthetic recovery + VSP degradation campaigns |
+| [confined_attack_floor_spec.md](confined_attack_floor_spec.md) | Implemented — the confined-attack band bounds the declared-k expected confined-mate SAR `E[1−e^(−k·D)]`, derived per cell from pooled slot doses; the fixed 15–25% band is withdrawn (CABIN-FLOOR-03) |
 
 ## Parameter sources
 
