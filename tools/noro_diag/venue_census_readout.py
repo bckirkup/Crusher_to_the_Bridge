@@ -214,9 +214,9 @@ def render_markdown(cells: dict[str, Any]) -> str:
         lines.append("")
         lines.append(
             f"runs {agg['n_runs']} | ignited {agg['n_ignited']} | "
-            f"emit calls {agg['emit_calls']} "
-            f"(record-less {agg['emit_calls_no_records']}) | "
-            f"emit events {agg['n_emesis']} | "
+            f"emit events {agg['n_emesis']} "
+            f"(_emit_emesis invoked {agg['emit_calls']}x — once per "
+            f"agent-epoch; record-less invocations are the idle path) | "
             f"unattributed {agg['n_unattributed']}",
         )
         lines.append("")

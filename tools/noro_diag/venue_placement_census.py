@@ -732,6 +732,10 @@ def _join_emits(
         )
         rows.append({
             **row,
+            # pedigree is finalized post-run: epoch-0 emits predate the
+            # observer's import capture, so re-resolve the class here.
+            "gen": rec.gen_of(aid),
+            "gen_class": rec.gen_class_of(aid),
             "confinement_class": conf_class,
             "order_subclass": order_sub,
             "emitter_class": _emitter_class(rec, aid),
