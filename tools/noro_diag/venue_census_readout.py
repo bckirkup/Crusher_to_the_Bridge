@@ -150,61 +150,10 @@ def aggregate_cell(runs: list[dict[str, Any]]) -> dict[str, Any]:
         v for v in agg["escort_delay_epochs"] if v is not None
     )
     for run in runs:
-        venue = run["venue"]
-        agg["emit_calls"] += int(venue.get("emit_calls", 0))
-        agg["emit_calls_no_records"] += int(
-            venue.get("emit_calls_no_records", 0),
-        )
-        agg["n_emesis"] += int(venue.get("n_emesis_emitted", 0))
-        agg["n_unattributed"] += int(venue.get("n_unattributed", 0))
-        acquired = int(venue.get("n_acquired", 0))
-        agg["n_acquired"] += acquired
-        if run["ignited"]:
-            agg["n_acquired_ignited"] += acquired
-        derived = run.get("derived") or {}
-        for key in _ATTACK_RATE_KEYS:
-            value = derived.get(key)
-            if isinstance(value, (int, float)):
-                agg["attack_rates"][key].append(float(value))
-        if run.get("num_agents"):
-            agg["num_agents"].add(int(run["num_agents"]))
-        agg["seeds"].append({
-            "seed": run["seed"],
-            "ignited": run["ignited"],
-            "n_emesis": int(venue.get("n_emesis_emitted", 0)),
-            "n_acquired": int(venue.get("n_acquired", 0)),
-            "n_confined_hosts": sum(
-                1 for h in venue.get("host_rows", [])
-                if h.get("first_confined_epoch") is not None
-            ),
-        })
-        for row in venue.get("emit_rows", []):
-            conf = str(row.get("confinement_class", "unclassified"))
-            site = str(row.get("site_group", "other"))
-            emitter = str(row.get("emitter_class", "unknown"))
-            _add_emit(
-                agg["by_confinement_site"], f"{conf}|{site}", row,
-            )
-            _add_emit(
-                agg["by_confinement_emitter"], f"{conf}|{emitter}", row,
-            )
-            _add_emit(
-                agg["by_site_class"],
-                f"{conf}|{row.get('site_class', 'other')}",
-                row,
-            )
-            if row.get("first_emit"):
-                key = f"{row.get('site_class', 'other')}|{emitter}"
-                _add_emit(agg["first_emit_table"], key, row)
-                # ordered_not_admitted at the confined epoch is still
-                # mobile: transmission runs before the escorted
-                # admission lands end-of-epoch.
-                if row.get("order_subclass") in (
-                    "ordered_mobile", "ordered_not_admitted",
-                ):
-                    agg["first_emit_mobile"] += 1
-        _aggregate_hosts(agg, venue)
-        for event in venue.get("confinement_events", []):
+        _accumulate_run(agg, run)
+        _aggregate_emit_rows(agg, run["venue"])
+        _aggregate_hosts(agg, run["venue"])
+        for event in run["venue"].get("confinement_events", []):
             agg["confinement_actions"][str(event.get("action"))] += 1
     agg["confinement_actions"] = dict(agg["confinement_actions"])
     agg["confined_host_classes"] = dict(agg["confined_host_classes"])
@@ -216,6 +165,64 @@ def aggregate_cell(runs: list[dict[str, Any]]) -> dict[str, Any]:
         key: quantiles(vals) for key, vals in agg["latency"].items()
     }
     return agg
+
+
+def _accumulate_run(agg: dict[str, Any], run: dict[str, Any]) -> None:
+    venue = run["venue"]
+    agg["emit_calls"] += int(venue.get("emit_calls", 0))
+    agg["emit_calls_no_records"] += int(
+        venue.get("emit_calls_no_records", 0),
+    )
+    agg["n_emesis"] += int(venue.get("n_emesis_emitted", 0))
+    agg["n_unattributed"] += int(venue.get("n_unattributed", 0))
+    acquired = int(venue.get("n_acquired", 0))
+    agg["n_acquired"] += acquired
+    if run["ignited"]:
+        agg["n_acquired_ignited"] += acquired
+    derived = run.get("derived") or {}
+    for key in _ATTACK_RATE_KEYS:
+        value = derived.get(key)
+        if isinstance(value, (int, float)):
+            agg["attack_rates"][key].append(float(value))
+    if run.get("num_agents"):
+        agg["num_agents"].add(int(run["num_agents"]))
+    agg["seeds"].append({
+        "seed": run["seed"],
+        "ignited": run["ignited"],
+        "n_emesis": int(venue.get("n_emesis_emitted", 0)),
+        "n_acquired": int(venue.get("n_acquired", 0)),
+        "n_confined_hosts": sum(
+            1 for h in venue.get("host_rows", [])
+            if h.get("first_confined_epoch") is not None
+        ),
+    })
+
+
+def _aggregate_emit_rows(
+    agg: dict[str, Any], venue: dict[str, Any],
+) -> None:
+    for row in venue.get("emit_rows", []):
+        conf = str(row.get("confinement_class", "unclassified"))
+        site = str(row.get("site_group", "other"))
+        emitter = str(row.get("emitter_class", "unknown"))
+        _add_emit(agg["by_confinement_site"], f"{conf}|{site}", row)
+        _add_emit(agg["by_confinement_emitter"], f"{conf}|{emitter}", row)
+        _add_emit(
+            agg["by_site_class"],
+            f"{conf}|{row.get('site_class', 'other')}",
+            row,
+        )
+        if not row.get("first_emit"):
+            continue
+        key = f"{row.get('site_class', 'other')}|{emitter}"
+        _add_emit(agg["first_emit_table"], key, row)
+        # ordered_not_admitted at the confined epoch is still mobile:
+        # transmission runs before the escorted admission lands
+        # end-of-epoch.
+        if row.get("order_subclass") in (
+            "ordered_mobile", "ordered_not_admitted",
+        ):
+            agg["first_emit_mobile"] += 1
 
 
 def _aggregate_hosts(agg: dict[str, Any], venue: dict[str, Any]) -> None:
