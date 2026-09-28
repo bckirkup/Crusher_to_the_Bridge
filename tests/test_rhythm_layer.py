@@ -319,13 +319,13 @@ def test_event_overrides_merge_star_class_id() -> None:
     event = {"event_class": "meal_seating", "event_id": "lunch",
              "participation_fraction": 0.7, "occupancy_share": 0.35}
     merged = layer._event_with_overrides(event)
-    assert merged["participation_fraction"] == 0.2
-    assert merged["occupancy_share"] == 0.5
+    assert merged["participation_fraction"] == pytest.approx(0.2)
+    assert merged["occupancy_share"] == pytest.approx(0.5)
     other = {"event_class": "show_performance", "event_id": "x",
              "participation_fraction": 0.3}
     merged2 = layer._event_with_overrides(other)
-    assert merged2["participation_fraction"] == 0.3
-    assert merged2["occupancy_share"] == 0.5
+    assert merged2["participation_fraction"] == pytest.approx(0.3)
+    assert merged2["occupancy_share"] == pytest.approx(0.5)
 
 
 def test_event_overrides_unset_returns_event_untouched() -> None:
@@ -363,7 +363,11 @@ def test_sop_capacity_multiplier_overrides_parsed_effect() -> None:
              "eligible": {"role_groups": ["passenger"]}}
     effects = {"open_venue": "capacity_multiplier 0.75"}
     p, m, occ = layer._sop_shape(event, effects)
-    assert p == pytest.approx(0.3) and m == 0.75 and occ == 1
+    assert p == pytest.approx(0.3)
+    assert m == pytest.approx(0.75)
+    assert occ == 1
     layer.sop_capacity_multiplier = 0.5
     p, m, occ = layer._sop_shape(event, effects)
-    assert p == pytest.approx(0.2) and m == 0.5 and occ == 1
+    assert p == pytest.approx(0.2)
+    assert m == pytest.approx(0.5)
+    assert occ == 1

@@ -887,21 +887,35 @@ def write_lev(report: dict[str, Any], register: Path | None = None) -> dict[int,
     lines = register.read_text(encoding="utf-8").splitlines(keepends=True)
     for row, lev in levs.items():
         cells = re.split(r"(?<!\\)\|", lines[row - 1])
-        if cells[8].strip() not in ("L?", "—", "L0", "L1", "L2"):
-            raise SystemExit(
-                f"register row {row} Lev cell already set: {cells[8].strip()}",
-            )
-        cells[8] = f" {lev} "
-        reason = note_by_row.get(row)
-        if reason:
-            mark = (
-                f"{label} @{sha} — {reason}" if sha else f"{label} — {reason}"
-            )
-            if mark.strip() and mark.strip() not in cells[9]:
-                cells[9] = cells[9].rstrip() + f" · {mark} "
+        cells[8] = _lev_cell(row, lev, cells[8])
+        cells[9] = _campaign_mark(cells[9], note_by_row.get(row), label, sha)
         lines[row - 1] = "|".join(cells)
     register.write_text("".join(lines), encoding="utf-8")
     return levs
+
+
+def _lev_cell(row: int, lev: str, cell: str) -> str:
+    """The rewritten Lev cell — any prior rank cell may be re-marked."""
+    if cell.strip() not in ("L?", "—", "L0", "L1", "L2"):
+        raise SystemExit(
+            f"register row {row} Lev cell already set: {cell.strip()}",
+        )
+    return f" {lev} "
+
+
+def _campaign_mark(
+    cell: str,
+    reason: str | None,
+    label: str,
+    sha: str,
+) -> str:
+    """The State cell with the campaign mark appended (idempotent)."""
+    if not reason:
+        return cell
+    mark = f"{label} @{sha} — {reason}" if sha else f"{label} — {reason}"
+    if not mark.strip() or mark.strip() in cell:
+        return cell
+    return cell.rstrip() + f" · {mark} "
 
 
 def collect_records(run_dir: Path) -> list[dict[str, Any]]:
