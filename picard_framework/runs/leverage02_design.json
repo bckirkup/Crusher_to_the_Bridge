@@ -3,8 +3,8 @@
   "campaign_label": "LEVERAGE-02",
   "run_label": "leverage02",
   "title": "LEVERAGE-02: bounded re-rank after the rhythm + exposure-cap landings",
-  "baseline_sha": "d424673d55dbf8a4728582f33f784c577d201307",
-  "measured_at_commit": "d424673d55dbf8a4728582f33f784c577d201307",
+  "baseline_sha": "27d818d893ccbdb3f4dc9d080dc196a2de824bb4",
+  "measured_at_commit": "27d818d893ccbdb3f4dc9d080dc196a2de824bb4",
   "contract": "docs/sourcing_protocol.md section 3: one-at-a-time endpoint perturbation across each register row's declared interval; L2 = interval move flips an anchor verdict, L1 = moves an anchor measurably without flipping, L0 = no detectable movement in any scored output across the whole interval.",
   "reopened_criterion": "a pre-change L0 is reopened iff the row's scored channel runs through event-cohort partitioning (SHIP-RHYTHM-02) or the per-shedder contact budget (EXPO-CAP-01); natural-history, susceptibility, ascertainment and dose-response rows whose channels are unchanged stay L0 by their LEVERAGE-01 measurement",
   "noise_gate": {
@@ -75,7 +75,7 @@
     "obs_vectors": "covid only: set observation_model ascertainment vectors (eligibility + reporting rungs) to all-0 or all-1 as one whole-vector endpoint",
     "rhythm_event_field": "write rhythm.event_overrides.<class>.<field> = endpoint for every listed event class ('*' hits all dealt events)",
     "asleep_share": "rescale the shipped 24-tuple asleep_in_cabin_share so its night plateau equals the endpoint",
-    "voyage_sea_contact": "enable voyage effects on the all-sea-day itinerary and set defaults.sea_day.contact_rate_multiplier = endpoint",
+    "voyage_sea_contact": "enable voyage effects with a one-entry all-sea-day itinerary (resolve_epoch_state short-circuits on an empty itinerary) and set defaults.sea_day.contact_rate_multiplier = endpoint",
     "activity_rate_block": "write every CONTACT-ARCH-01 activity rate to {passenger: endpoint/24, crew: crew_endpoint/24} per hour"
   },
   "axes": [

@@ -282,13 +282,16 @@ def axis_patch(
             },
         }
     if kind == "voyage_sea_contact":
-        # The voyage multiplier only consumes when effects are on; the
-        # unconfigured itinerary is all sea days either way, so day type,
-        # onboard share and dining weights stay identical and the endpoint
-        # is the single moved quantity.
+        # resolve_epoch_state returns the identity state unless BOTH
+        # effects_enabled and a non-empty itinerary are present, so the patch
+        # must declare a sea-day entry; every uncovered day then resolves to
+        # the same sea_day type with the defaults block, keeping day type,
+        # onboard share and dining weights identical and the endpoint the
+        # single moved quantity.
         return {
             "voyage": {
                 "effects_enabled": True,
+                "itinerary": [{"day": 1, "type": "sea_day"}],
                 "defaults": {
                     "sea_day": {"contact_rate_multiplier": endpoint},
                 },
