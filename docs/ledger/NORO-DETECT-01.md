@@ -79,6 +79,21 @@ Ignited spirit seed 8105, w = 6, k = 1: first emesis epoch 0 ->
 pre_confinement). Host 119 (symptomatic, non-vomiting axis) ordered
 epoch 0 via `detection_channel="onset"`. 0 unattributed joins.
 
+## Interim: baseline-arm gate (measured at c09a34cc, jobs running)
+
+`tools/noro_diag/arm_seed_compare.py` diffs every completed `_onset`
+seed against the VENUE-02 `_k1` payload (emit rows, host order/confined
+epochs, confinement event stream, acquisitions, ignition, all
+bit-exact):
+
+- fl_spr_12d_onset: 12/12 seeds IDENTICAL to fl_spr_12d_k1.
+- classic_cruise_1900_onset: 60/60 seeds IDENTICAL.
+- fl_mega_12d_onset: pending at time of check.
+
+The presenting-sign path draws nothing under `symptomatic_order_trigger
+= "onset"`: baseline behavior preserved seed-for-seed (per the
+validation gate, a move here is a defect, not a finding).
+
 ## Results
 
 (Array in flight — placement tables, conversion check, and verdict
