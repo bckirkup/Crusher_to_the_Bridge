@@ -3,7 +3,7 @@
 **Commit:** 6085e726
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 472cdf13 (canary only — full arrays unsubmitted)
+**Measured at:** 472cdf13
 
 Declared before any cell ran. Mechanism candidate 3 of the
 THETA-SCREEN-V13 residual hunt, shape (a) per the user's pick: a hard
