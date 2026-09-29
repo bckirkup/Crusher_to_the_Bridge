@@ -2,7 +2,7 @@
 **Date:** 2026-09-29
 **Commit:** 19035a51
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
 
 The genogroup declaration the `dose_response.alpha`/`beta` register row was
 waiting on. Decision record, not a measurement: it settles *how* strain-level
@@ -154,22 +154,65 @@ Readout (declared list, 20 seeds 8105–8124):
 - Non-secretor share among ever-infected: 28/151 = 0.185 vs population
   share 0.190 — imports dominate and founders bypass the gate, so this
   sits at population share as designed.
-- Non-secretor share among aboard acquisitions: 0/3 on cell A — the
-  discriminating comparison waits for cell B.
+- Non-secretor share among aboard acquisitions: 0/3 on cell A.
 - Postings: 0.20 per 1,000 (report-never-select marginal).
-- Gate checks: no report-immediately trigger fired (override resolved,
-  attribution present, acquisitions nonzero). The "A > B share" check is
-  pending cell B.
 
-**Status stays `open`.** Cells B (`geno_mono_nongii4`) and C
-(`geno_mixture`) are staged but not run — they wait for the user's go.
-The `measured` flip waits for the full 3-cell read.
+## Canary — cells B and C (measured)
+
+**Measured at:** `2713e566`, same image/jobdef as cell A. Cell B
+(`geno_mono_nongii4`, prior `{"GII.17": 0.375, "GII.2": 0.625}` —
+verified in its result zip): array `a9e72930-a4a3-4853-a7a5-57f134eb48ed`,
+S3 `campaign/noro_geno_01_nongii4/`, 20/20 SUCCEEDED. Cell C
+(`geno_mixture`, shipped era-`pre` profile): array
+`bac84296-b5c6-4dc5-b265-b1508ae8fcc7`, S3
+`campaign/noro_geno_01_mixture/`, 20/20 SUCCEEDED.
+
+Side-by-side (20 seeds each, 8105–8124):
+
+| readout | A mono-GII.4 | B mono-non-GII.4 | C mixture |
+|---|---|---|---|
+| ever_infected (AR) | 151 (0.25%) | 154 (0.26%) | 151 (0.25%) |
+| acquired aboard | 3 (3/20 seeds) | 6 (3/20 seeds) | 3 (3/20 seeds) |
+| ns share ever-infected | 0.185 | 0.188 | 0.185 |
+| ns share aboard | 0/3 = 0.0 | 1/6 = 0.167 | 0/3 = 0.0 |
+| classes ever-infected | gii4 151 | non_gii4 154 | gii4 94 / non_gii4 57 |
+| genotypes carried | GII.4 | GII.2 96 / GII.17 58 | GII.4 94 / GII.2 44 / GII.17 13 |
+| postings per 1,000 | 0.20 | 0.23 | 0.20 |
+
+Readings:
+
+- **Seed-paired as designed:** the same three seeds (8115, 8123, 8124)
+  carry all aboard events in every cell, and A vs C totals are
+  identical — the per-founder genotype draw consumes RNG uniformly, so
+  the class label changes attribution, not the epidemic.
+- **Mixture attribution lands on the declared split:** C's ever-infected
+  attribute 94/57 = 62%/38% gii4/non_gii4 against the declared era-`pre`
+  60/40 — the founder draw reproduces the declared shares at n=151.
+- **The gate's discriminating readout moves in the declared direction**:
+  B carries the only non-secretor aboard acquisition (1/6 vs A's 0/3)
+  and doubles A's aboard count (6 vs 3) on the same seeds. The ~4.5×
+  share ratio is not resolvable at 3-vs-6 events — the canary proves the
+  channel exists and points the right way; powered cells resolve the
+  magnitude.
+- **A < B on share** — the gate is not folded backwards (the
+  report-immediately inversion check passes).
+- No report-immediately trigger fired on any cell (override resolved,
+  attribution present, nonzero acquisitions everywhere).
+
+**Entry moves to `measured`**: the class structure is measured end-to-end
+— founders mint class phenotypes, the split secretor gate applies per
+challenge, and per-class acquisition attribution reads out of the
+observer. `transmissibility_multiplier` stays declared-neutral 1.0
+across all cells (the swept axis, unfitted). The suppressed-aboard
+regime is the post-724 baseline, unchanged by class structure.
 
 ## Next
 
 - ~~Implementation session: founder-level class draw → split secretor
   gate + declared `transmissibility_multiplier` axis; resolve
   `dose_reference_log10`; era flag for the share intervals.~~ Done.
-- ~~Canary~~: cell A run and read out above; cells B and C on user go,
-  then the mixture-marginal and the secretor-share comparison.
-- This entry moves to `measured` when the full 3-cell canary reads out.
+- ~~Canary~~: full 3-cell read above.
+- If a powered gate measurement is wanted, a cell with more aboard
+  events (longer voyage or higher-dose cell) gives the ~4.5× share
+  ratio a resolvable denominator — a design decision for the next
+  stage, not this entry.

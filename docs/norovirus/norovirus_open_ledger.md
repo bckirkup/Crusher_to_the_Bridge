@@ -1110,8 +1110,11 @@ non-secretor hosts with the flat field as the unattributed fallback,
 incubation through the inoculum, not through a class-dependent reference —
 declared, no code change), and `prior_genotype_distribution_by_era` +
 `genotype_share_era` replace the uniform placeholder on the shipped profiles.
-What remains open is the canary readout that moves this entry to measured:
-mono-class cells + one mixture cell with per-class attribution.**
+**The 3-cell canary has now read out (`2713e566`):** mono-GII.4, mono-non-GII.4,
+and mixture cells on the frozen `fl_spr_12d` block carry per-class attribution in
+every result — the mixture's ever-infected attribute 62%/38% against the declared
+60/40 pre-era split, and the split secretor gate moves the aboard-acquisition
+non-secretor share in the declared direction. NORO-GENO-01 is `measured`.**
 
 **The exact and approximate dose-response forms are also an open implementation
 item, not a repair in this change.** Production reaches
