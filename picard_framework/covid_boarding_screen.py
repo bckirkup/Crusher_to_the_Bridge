@@ -1083,6 +1083,15 @@ def cell_payload(
         # channel arm is auditable from the payload alone: the declared arm
         # carries null, a period arm carries its declared block.
         "onset_recording": syndromic.onset_recording_channel(PATHOGEN_ID),
+        # The resolved syndrome-eligibility ladder and the dated mass's
+        # severity split, echoed so a severity-scoped observation arm
+        # (a mild-stratum corner) is auditable the same way.
+        "onset_eligibility_by_severity": (
+            sim.pathogen_profiles[PATHOGEN_ID].get("observation_model") or {}
+        ).get("syndrome_case_eligibility_by_severity"),
+        "recorded_onsets_by_severity": (
+            syndromic.onset_observation_severity_counts(PATHOGEN_ID)
+        ),
         KEY_VSP_MAX: float(
             getattr(sim.engine, "vsp_reported_case_fraction_max", 0.0),
         ),

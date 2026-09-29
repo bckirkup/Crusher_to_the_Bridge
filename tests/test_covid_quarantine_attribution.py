@@ -287,6 +287,9 @@ class _Syndromic:
     def onset_recording_channel(self, pathogen_id):
         return None
 
+    def onset_observation_severity_counts(self, pathogen_id):
+        return {}
+
 
 class _Sim:
     """Just enough of ShipSimulation for the ledger and payload read-out."""

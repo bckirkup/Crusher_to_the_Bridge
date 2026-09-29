@@ -1,0 +1,234 @@
+{
+  "design_id": "covid_ascertain_v1",
+  "task_id": "ASCERTAIN-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_sero_channel_v1",
+  "description": "ASCERTAIN-V1: the conditioned array that splits the ~18x conditional recorded-onset gap into channel vs transmission (truth) shares, declared before any cell ran. SERO-CHANNEL-V1 measured the decomposition's shape -- the period-faithful onset-recording channel removes a uniform ~2x of dated mass at every theta while the truth overshoot (~2x+ above the serology band) never moves on the hazard axis -- and ROUTE-ATTR-V1 measured dating ascertainment alone at ~3.4x of the ~18x gap with the mild stratum the worst-dated (~85-89% of dated mass). The channel exists (observation_model.onset_recording, default-off, additive) so this is a declared sweep, not a mechanism change: arms over the channel's two parameters (the symptomatic-at-confirmation gate and the once-per-case recall draw) PLUS the mild-stratum ascertainment corners expressed through the existing observation_model.syndrome_case_eligibility_by_severity ladder (mild rung -> 0: a mild case never presents and never dates -- the deep corner of the stratum the published investigation loses to recall and non-presentation). Scored against BOTH anchors: the record's 197 dated onsets / 0.173 before-share AND the held-out serology anchor covid.H5 (infections_total band [712, 960], never fitted). The readout is the channel-vs-truth decomposition: at each declared ascertainment point, how much of the residual gap the observational channel closes and how much stays truth-level.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "SERO-CHANNEL-V1 measured (03a9db9e, 1080/1080 cells, jobdef rev 24): observation_model.onset_recording on sars_cov2_resp gates dated onsets to presentations at/before the confirming-specimen epoch x once-per-case recall draw 0.56; the channel removes ~50% of dated mass uniformly across theta (seed-paired period/declared ratio 0.50-0.54); gap factorizes ~2x channel x ~2x+ truth overshoot; no theta row lands either clause (docs/ledger/SERO-CHANNEL-V1.md).",
+    "ROUTE-ATTR-V1 measured (be121a0, local): the channel confirms ~76% of infected and dates 93-100% of confirmed at true onset vs the record's 197/712 = 0.277; dating ascertainment is a ~3.4x multiplier inside the ~18x conditional gap and 85-89% of dated mass is mild -- the stratum a shipboard investigation loses to recall and non-presentation (docs/ledger/ROUTE-ATTR-V1.md).",
+    "THETA-SCREEN-V13 measured (edb7fc41): under capped reach the fleet-shape admissible band is {1.78e11..5.62e11} and the conditional clause fails at every admissible Theta -- takeoff-seed q05 floors 1,770-2,024 recorded onsets (~9-10x the record), before_share medians 0.81-0.94 vs 0.173. The D0_declared arm on this design replays that measured-failing physics as the in-design baseline, seed-for-seed at the same lattice.",
+    "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al. 2020); scored on infections_total conditional on takeoff; never in fitted_against.",
+    "Channel mechanics settled (SERO-CHANNEL-V1): the onset draw lives on a dedicated child stream off the parent SeedSequence -- an undeclared block draws nothing anywhere and the declared arm is bit-identical to pre-change main. syndrome_case_eligibility_by_severity is an existing profile vector (shipped [0,0,1,1,1] on sars_cov2_resp states [asymptomatic, subclinical, mild, moderate, severe_critical]) read through the same observation_model deep-merge; it gates both syndrome presentation hazard (episode_probability = eligibility x reporting) and onset dating eligibility, so mild -> 0 removes the mild stratum from presentation AND dating -- the declared worst-ascertained corner. Setting the vector changes hazard VALUES, not draw counts (the modality's own rng draws regardless), so streams stay aligned until an outcome flips; all reads are distribution-level.",
+    "Payload echo (this PR): under arm designs cell_payload emits two new audit fields beside the existing onset_recording/dose_response echoes -- onset_eligibility_by_severity (the resolved observation_model ladder, so a mild-corner arm's declared vector is provable from its payload) and recorded_onsets_by_severity (the dated onset mass split by symptom_severity, so the mild stratum's share of recorded mass is measured directly on every arm). Readout additions only; no physics, no engine path touched."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_coop_v1 / covid_susc_pool_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day -- COVID-SEED-GEOM-01 -- carried for cell-key bookkeeping and seed-pairing against the coop/susc_pool lattice), seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice, identical to covid_coop_v1: Theta 2.37e11 is the anchor cell (inside the v13 admissible band, the known ~1,928-onset class on the shipped channel); 1e11 sits below and 1e12 above the band edges so the channel-vs-truth split is read where baseline physics is measured-failing in both directions. Points ordered anchor-first so the canary block (cells 0-89) is the densest slice.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14, the first ten of the matched block every conditioned design since v10 replays -- seed-for-seed pairing against the covid_coop_v1 beta_poisson rows and the v13 stage-2 surface at the same (theta, seed). Ten seeds is the declared count: scoring is takeoff-conditional (>= 5 takeoff seeds per row) and the arm grid, not seed depth, is the axis under test.",
+  "takeoff_recorded_onsets": 10,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline REQUIRED by the task: the shipped channel (no onset_recording block -- every confirmed symptomatic onset dated, every severity that presents is datable). First arm so empty overrides per the arm grammar; also the in-design control replaying THETA-SCREEN-V13's measured-failing baseline physics seed-for-seed, and the engine-drift check against the coop v1 beta_poisson row on this same lattice."
+    },
+    {
+      "arm_id": "G1_gate",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 1.0
+              }
+            }
+          }
+        }
+      },
+      "note": "The symptomatic-at-specimen gate ALONE (recall draw at 1.0 = always): isolates the gate's own share of the channel term -- dating = the share of confirmed cases already presenting at their confirming specimen's epoch (the record's symptomatic_at_specimen field, ~0.49-0.51)."
+    },
+    {
+      "arm_id": "P1_period",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "SERO-CHANNEL-V1's P1_period arm VERBATIM (gate + recall 0.56, the record-derivable point (197/712) / ~0.49): the required period-channel reference row, and the middle rung of the gated recall ladder {1.0, 0.56, 0.28, 0.15}."
+    },
+    {
+      "arm_id": "P28_gate",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.28
+              }
+            }
+          }
+        }
+      },
+      "note": "Gated recall at the record's own dated-share point estimate (197/712 = 0.277). Under the measured ~0.5 gate share this predicts a dating share near ~0.14 of confirmed -- below the record's 0.277 unless the sim's confirmed denominator also shrinks; that residual is itself diagnostic (the sim confirms ~2x the voyage's 712)."
+    },
+    {
+      "arm_id": "P15_gate",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.15
+              }
+            }
+          }
+        }
+      },
+      "note": "The deep-recall point of the gated ladder: the declared level at which the channel ALONE approaches the record's dated count at the anchor theta (~0.5 gate x 0.15 recall ~ 0.075 of confirmed datable mass) -- marks where the channel closes the count leg and any residual is truth-level."
+    },
+    {
+      "arm_id": "R56_recall",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": false,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "Recall alone at 0.56 WITHOUT the symptomatic-at-specimen gate -- SERO-CHANNEL-V1's declared fallback arm, never measured because the gated dating share overshot (~0.5 of confirmed vs the declared ~0.28 trigger). Runs here as the gate-off member of the 2x2 gate x recall contrast at p = 0.56."
+    },
+    {
+      "arm_id": "R28_recall",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": false,
+                "report_probability": 0.28
+              }
+            }
+          }
+        }
+      },
+      "note": "Recall alone at 0.28: the second matched recall point, so the gate's marginal share (period/recall ratio at fixed p) is measured at TWO recall levels -- SERO showed the channel contrast is a uniform ~0.50-0.54 multiplier; this arm tests whether that uniformity survives under the recall axis."
+    },
+    {
+      "arm_id": "M0_declared",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [0.0, 0.0, 0.0, 1.0, 1.0]
+            }
+          }
+        }
+      },
+      "note": "The mild-stratum deep corner on the SHIPPED channel (no onset_recording block): mild rung of syndrome_case_eligibility_by_severity -> 0, so a mild case never presents (episode_probability = 0) and never dates -- the stratum the published investigation loses to non-presentation, deleted from the observable. ROUTE-ATTR-V1 measured ~85-89% of dated mass as mild, so this arm reads how much of the residual gap the worst-dated stratum alone carries; moderate/severe keep the shipped ladder."
+    },
+    {
+      "arm_id": "M0P56_period",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [0.0, 0.0, 0.0, 1.0, 1.0],
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "The mild-stratum deep corner under the period channel (mild eligibility 0 + gate + recall 0.56): pairs against M0_declared and P1_period seed-for-seed so the mild stratum's contribution and the channel's contribution are separately identified -- recorded mass here is moderate/severe onsets under period-faithful dating."
+    }
+  ],
+  "cells_note": "3 points x 9 arms x 10 seeds = 270 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first and arms in declared order: cells 0-89 = Theta 2.37e11 (D0 0-9, G1_gate 10-19, P1_period 20-29, P28_gate 30-39, P15_gate 40-49, R56_recall 50-59, R28_recall 60-69, M0_declared 70-79, M0P56_period 80-89); 90-179 = Theta 1e11; 180-269 = Theta 1e12.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_sero_channel_v1 / covid_theta_screen_v13_stage2; the serology_anchor_clause is verbatim from covid_sero_channel_v1. This is an assay/decomposition grid, not a screen: no arm point is admitted or fitted on this design, and a clause PASS marks a declared point worth a refinement design, never an adoption.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 27 rows of 10 seeds. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_sero_channel_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts. The onset_recording arms cannot move infections_total beyond RNG-divergence noise -- any systematic shift of truth under an observation-only arm is itself a wiring defect signature, reported as such. The mild-eligibility arms are the declared exception: deleting mild from presentation removes those cases' confirmation/isolation pathway, so a small systematic shift is expected and reported arm-paired."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell rather than excluding it from selection.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "channel_vs_truth_decomposition": {
+      "statement": "The design's deliverable: at every declared ascertainment point, the residual gap decomposes into a channel share (recorded_onsets ratio of arm vs paired baseline on the same seed -- the observational term) and a truth share (infections_total vs the serology band -- the transmission term the channel cannot move). Declared reads, frozen:",
+      "reads": [
+        "recorded_gap: per (theta, arm) takeoff-seed median recorded_onsets vs the record's 197 -- residual = median/197 at each arm point.",
+        "channel_share: seed-paired arm/D0_declared ratio of recorded_onsets per (theta, arm) -- the observational channel's measured multiplier at each declared point (gate alone ~0.5 expected at p = 1.0; the p ladder traces recall's marginal share; the mild corner reads the worst-dated stratum's mass).",
+        "gate_vs_recall_split: seed-paired P*-gate / R*-recall ratios at matched p {0.56, 0.28} -- whether the symptomatic-at-specimen gate's share is recall-independent (SERO's uniform-multiplier signature) or interacts.",
+        "mild_share: recorded_onsets_by_severity per (theta, arm) -- the mild stratum's measured share of dated mass, and M0-arm residual mass vs the paired channel-off/period rows (whether deleting the worst-dated stratum alone approaches the count anchor). MEASURED COUPLING (168-epoch local smoke, this PR): the mild corner is not pure observation -- a mild case that never presents is also never confirmed/isolated, so M0/M0P56 shift infections_total itself (3268 -> 3295, ~1%). mild_share is therefore read against the M0 arm's OWN arm-paired infections_total, reported beside the residual.",
+        "dating_share: per (theta, arm) takeoff-seed recorded_onsets / lab_confirmed_total vs the record's 197/712 = 0.277, with lab_confirmed_total and campaign asymptomatic_at_specimen reported beside it (the denominator problem SERO measured: the sim confirms ~2x the voyage's 712).",
+        "truth_share: per (theta, arm) takeoff-seed median/q05-q95 infections_total vs [712, 960]. The onset_recording arms (G1/P1/P28/P15/R56/R28) are identical-physics -- this read is the cross-arm consistency check AND the truth overshoot the residual must carry once the channel share is removed. The mild-eligibility arms (M0, M0P56) are NOT identical-physics (measured ~1% infections shift at e168: un-presented mild cases escape isolation), so their truth share reads arm-paired vs D0_declared rather than as a consistency check.",
+        "before_share_clause: the timing leg -- per (theta, arm) takeoff-seed median before_share vs 0.173 (the channel cannot move truth's burn timing; a count leg that closes with a broken timing leg is a different failure class)."
+      ],
+      "declared_expectation": "At the anchor theta the gated ladder should trace recorded medians roughly ~x0.5 (gate), x0.28 (sero point), x0.14, x0.075 of the D0 row; M0_declared removes the ~85-89% mild share of dated mass; truth (infections_total) stays ~1,900-3,500-class at every arm modulo the M0/M0P56 mild-isolation coupling (~1% at e168, reported arm-paired) -- the expected verdict is a measured channel term (~2-3x worth) over an unmoved truth term (~2x+), quantifying ROUTE-ATTR-V1's ~3.4x dating-ascertainment estimate on the conditioned lattice."
+    },
+    "verdict_grammar": "Decomposition assay verdict, frozen: (a) per (theta, arm) the channel-vs-truth split -- recorded residual (vs 197) factorized into the arm's measured channel multiplier and the invariant truth overshoot (vs [712, 960]); (b) which declared ascertainment point, if any, lands recorded_onsets inside [98.5, 394] with infections_total q05-q95 intersecting the band -- a 'channel_only' class (record reached, truth overshoots) names the channel's full measured share and leaves the residual as biology; a joint landing names a declared point where the whole gap is observational; (c) the mild-stratum corner's measured share of the dated mass."
+  },
+  "what_this_cannot_settle": [
+    "Case ascertainment outside dating: the arms sweep dating/presentation of confirmed cases; the sim's ~2x confirmed-count overshoot (lab_confirmed_total vs 712) is a separate channel term this design measures but does not gate.",
+    "A per-severity recall draw is NOT expressible in the shipped channel (report_probability is uniform over severities) -- the mild corners are expressed through syndrome_case_eligibility_by_severity instead (mild stratum fully ascertained vs fully lost), which is the corner, not a mild recall interior. A mild-interior recall point would need a channel field that does not exist; per the task's non-goals that is reported, not built.",
+    "report_probability points {1.0, 0.56, 0.28, 0.15} are declared lattice points, not fitted values -- 0.56 and 0.28 are record-derivable (the dated share's two factorizations), 1.0 isolates the gate, 0.15 probes where the channel alone lands the count.",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_ascertain_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag (rev 32 predates this design). Same batch path as RINGCAP-V1/COOP-V1: new image, new jobdef rev, canary echo, in-band trigger.",
+    "stage_cells": 270,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_ascertain_v1/<sha>/cells/",
+    "canary": "The Theta 2.37e11 anchor block on all 9 arms: INDEX_OFFSET 0, ARRAY_SIZE 90 (cells 0-89). Reads: every arm's payload echo proves its declared channel resolved (onset_recording block per arm -- null on D0_declared and M0_declared, the declared block on the rest; onset_eligibility_by_severity [0,0,0,1,1] on the two mild corners, [0,0,1,1,1] elsewhere; dose_response carries the swept susceptibility_scale); recorded_onsets_by_severity shows the mild stratum absent exactly on M0 arms; the index-geometry invariant holds on every cell; rows are non-degenerate; the D0 row pairs against the coop v1 beta_poisson anchor read as the cross-image engine-drift check. Remaining theta blocks (90-269) proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "dry-run count mismatches the declared 270; a canary cell's payload echo lacks its arm's declared block (onset_recording or onset_eligibility_by_severity) or the mild stratum appears in an M0 arm's recorded_onsets_by_severity (the arm did not fire in cloud -- wiring defect, not a result); a D0_declared or P1_period row lands far outside its measured band (D0 ~1,900-3,500-class recorded at the anchor, P1 ~0.5 of that -- the cross-image drift check); any arm row's takeoff-seed recorded_onsets land inside ~[150, 250] (in-band record-adjacent signal, per the RINGCAP/COOP flow); infections_total shifts systematically between arms (an observation-only arm cannot move truth); any cell's audit invariant fails; or child failure rate exceeds 5%."
+  }
+}

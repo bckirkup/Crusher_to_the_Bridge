@@ -1125,6 +1125,24 @@ class SyndromicSurveillance:
             day[record["role"]] += 1
         return dict(sorted(curve.items()))
 
+    def onset_observation_severity_counts(
+        self,
+        pathogen_id: str,
+    ) -> dict[str, int]:
+        """Recorded onsets for a pathogen, split by symptom severity.
+
+        The severity split of dated mass is what a severity-scoped
+        observation arm (e.g. a mild-stratum eligibility corner) moves;
+        the day curve alone cannot show it.
+        """
+        counts: dict[str, int] = {}
+        for (pid, _aid), record in self._onset_observations.items():
+            if pid != str(pathogen_id):
+                continue
+            severity = str(record.get("symptom_severity") or "")
+            counts[severity] = counts.get(severity, 0) + 1
+        return dict(sorted(counts.items()))
+
     def _severity_hazard(
         self,
         agent: dict[str, Any],
