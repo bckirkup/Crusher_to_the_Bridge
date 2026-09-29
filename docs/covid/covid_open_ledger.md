@@ -159,6 +159,18 @@ fleet-shape response check; a clause PASS triggers a re-screen design on
 that arm, never an adoption (`docs/ledger/COVID-RINGCAP-V1.md`,
 `docs/ledger/COVID-SUSCPOOL-V1.md`).*
 
+*Update (2026-09-28, canary measured at `472cdf13`, image
+`covid-mech-v1-472cdf13`, jobdef rev 31): both declared canaries clean —
+120/120 children, 0% failures, audit invariant 1.0 on every arm row —
+and both mechanisms produced a **clause PASS at the Θ1e9 anchor row**:
+`rings_first` (takeoff n 6, q05–q95 [133–3146] ∋ 197, before_share
+0.128) and `f050` (n 5, [81–1466] ∋ 197, 0.213). `cap_on`/`declared`
+reproduce the v13 anchor bit-for-bit (0.373, FAIL); `f025` fails with
+its q05 floor above 197; `f075` leaves only 3 takeoff seeds — below the
+≥5 floor, not the every-row trigger. Boundary-endpoint PASSes only: the
+full arrays decide whether either survives the admissible band
+(`docs/covid/covid_mech_v1_canary_readout.md`).*
+
 **The declared index case is wrong by about six days and never disembarks.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
