@@ -2,7 +2,8 @@
 **Date:** 2026-09-28
 **Commit:** 6085e726
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 472cdf13
 
 Declared before any cell ran. Mechanism candidate 3 of the
 THETA-SCREEN-V13 residual hunt, shape (a) per the user's pick: a hard
@@ -54,4 +55,25 @@ non-monotone response in fraction at two consecutive admissible Thetas
 
 ## Result
 
-Pending.
+Canary measured 2026-09-28 (readout:
+`docs/covid/covid_mech_v1_canary_readout.md`). Full replay array (480
+cells) and fleet design (1000 cells) not yet submitted — paused after
+the declared canary.
+
+Execution: image `covid-mech-v1-472cdf13` (engine `472cdf13`, PR #767;
+digest `sha256:10902239ff…`), jobdef `picard-covid-boarding-screen:31`,
+Batch `205ca152-3ea8-4f67-a979-b1a9506abfd8`, 80/80 children SUCCEEDED
+on the Θ1e9 anchor row (INDEX_OFFSET 0, four arms, seeds 20200205-224).
+
+Fractions landed: per-arm max recorded_onsets falls monotonically in
+fraction — declared 3123, f025 2400, f050 1477, f075 629; `declared`
+reproduces the v13/cap_on anchor row bit-for-bit (stream-drift ruled
+out). Audit invariant clean everywhere; 0% failures.
+
+Anchor-row clause read: declared FAIL (0.373); f025 FAIL (q05 floor
+441.2 sits above 197); **f050 PASS** (q05-q95 [80.6, 1466.0] contains
+197, before_share med 0.213, 5 takeoff seeds — exactly at the >=5
+floor); f075 unevaluable — only 3 takeoff seeds, the 75% draw
+suppresses ignition at this Theta (one row; the every-row trigger is
+not yet tripped). As at ring: the PASS is a boundary-endpoint read; the
+full array decides whether it holds at the admissible band.

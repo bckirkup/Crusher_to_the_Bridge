@@ -2,7 +2,8 @@
 **Date:** 2026-09-28
 **Commit:** 6085e726
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 472cdf13
 
 Declared before any cell ran. Mechanism candidate 1 of the THETA-SCREEN-V13
 residual hunt: the fixed rings (cabin-mate ring, same-table dining party)
@@ -64,4 +65,23 @@ zero on an arm row (flag did not reach the engine); child failures >5%.
 
 ## Result
 
-Pending.
+Canary measured 2026-09-28 (readout:
+`docs/covid/covid_mech_v1_canary_readout.md`). Full replay array (240
+cells) and fleet design (500 cells) not yet submitted — paused after the
+declared canary.
+
+Execution: image `covid-mech-v1-472cdf13` (engine `472cdf13`, PR #767;
+digest `sha256:10902239ff…`), jobdef `picard-covid-boarding-screen:31`,
+Batch `5a815be5-3804-4eaf-9c53-4356d6c36db3`, 40/40 children SUCCEEDED on
+the Θ1e9 anchor row (INDEX_OFFSET 0, both arms, seeds 20200205-224).
+
+Flag landed: 9/20 paired seeds differ cap_on vs rings_first (e.g.
+20200210: 14 -> 880 recorded onsets; identical pairs are extinct cells).
+Audit invariant clean (index_geometry frac 1.0 both arms); rows
+non-degenerate; 0% failures.
+
+Anchor-row clause read: cap_on FAIL (before_share med 0.373, q05-q95
+[11.75, 3087.25]) — the v13 anchor arm exactly — **rings_first PASS**
+(q05-q95 [133.25, 3146.0] contains 197, before_share med 0.128, 6 takeoff
+seeds). The PASS is at the boundary endpoint only; whether it survives
+the admissible rows is what the full array answers.
