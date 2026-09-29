@@ -68,27 +68,47 @@ Both are sweep intervals sourced on the external-typing denominator
 (genotyped outbreaks), never fitted. The China GII.2[P16]-dominant record
 (69%) is recorded as a geographic bound, not a cruise input.
 
-## Mechanism wiring — declared, not implemented
+## Mechanism wiring — implemented
 
-- The founder genotype draw already exists (`_founder_genotype` +
-  `prior_genotype_distribution`); it registers every class at
-  `Phenotype()` offsets 1.0 — **identity without difference**. The work is
-  attaching class-conditioned offsets to the two hooks that exist:
-  - **secretor gate splits per class**: non-secretor relative
-    susceptibility 0.10 (0.04–0.26) GII.4 vs 0.45 (0.24–0.83) non-4 — which
-    *narrows* today's [0.04, 0.83] interval, since its width was the
-    unresolved composition problem.
-  - **`transmissibility_multiplier`** on `StrainState` as the declared,
-    swept per-class dose-side offset (exact-₁F₁ form: m shifts ID50
-    literally). Unadopted; the ID50 table cannot set it (tranche 49 §Q2:
-    two single-dose GII.4 arms + one GII.2 fit is the whole per-class
-    challenge evidence).
-- **Open consequence:** `dose_reference_log10` (incubation dose-
-  conditioning) would silently become class-dependent under a per-founder
-  multiplier — the implementation must declare whether the reference
-  follows the class.
-- **Not widened:** the mutation window stays (±0.1 log can't generate a
-  2.6-log cloud; importation owns that work).
+Landed as `6e1da4ae` (branch `devin/…-geno-class-mechanism`); the founder
+genotype draw already existed and now mints the *class phenotype* — where
+it previously registered every class at `Phenotype()` offsets 1.0
+(identity without difference). Both hooks the ruling named are wired:
+
+- **split secretor gate**: `genotype_classes.<class>.
+  secretor_negative_relative_susceptibility` — shipped 0.10 (0.04–0.26)
+  GII.4 vs 0.45 (0.24–0.83) non-GII.4, the Kambhampati ORs 9.9 / 2.2 — is
+  applied **per challenge** in `_merge_pathogen_doses` as the
+  dose-share-weighted class rel over the strain ledger's contributors
+  (the exact linear fold: identical math to scaling each contributor's
+  dose by its class factor). The FUT2 flag still draws at init — the
+  trait is a host property — but the init-time flat bake is skipped when
+  a class gate is declared, and the flat
+  `secretor_negative_relative_susceptibility` stays as the fallback for
+  challenges with no resolvable strain mix (untracked path, unresolved
+  bin, empty ledger). A profile with no class gate keeps the legacy
+  init bake as the labelled baseline. This narrows the [0.04, 0.83]
+  screening interval: its width was the unresolved composition problem.
+- **`transmissibility_multiplier`** on `StrainState` minted per-founder
+  from the class declaration — shipped at the declared-neutral 1.0 as
+  the swept axis. The ID50 table cannot set it (tranche 49 §Q2), so the
+  mono-class canary cells sweep it.
+- **era-resolved shares**: `prior_genotype_distribution_by_era` +
+  `genotype_share_era` replace the unsourced uniform placeholder on the
+  shipped profiles (`pre` ships: GII.4 0.60 / GII.17 0.15 / GII.2 0.25;
+  `post_2020` declared 0.15/0.75/0.10 — within-class genotype splits are
+  declared conveniences; the class is the measured unit). The explicit
+  `prior_genotype_distribution` field is the sweep override path —
+  a mono-class arm is `{"GII.4": 1.0}` etc.
+- **`dose_reference_log10` resolved analytically — fixed reference, no
+  code change.** The incubation model reads the *delivered inoculum*
+  (`inf["acquired_particles"]` → `sample_days`), and the class
+  `transmissibility_multiplier` already enters that inoculum through the
+  emission factor — class differences reach incubation through dose,
+  which is the physically correct coupling. A class-dependent reference
+  would have double-counted the multiplier.
+- **Not widened:** the mutation window stays [0.05, 20] (±0.1 log can't
+  generate a 2.6-log cloud; importation owns that work).
 
 ## Differential evidence now on record
 

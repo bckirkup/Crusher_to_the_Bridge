@@ -1102,8 +1102,16 @@ from external typing surveillance in
 GII.17 succession), never fitted. GI.1 is a scenario arm, not a class. The
 dose-response consequence: the α interval stands as the GII arm's declared
 span and the class difference enters at the founder (split secretor gate,
-declared `transmissibility_multiplier` axis) — still unadopted pending the
-implementation session NORO-GENO-01 lists.**
+declared `transmissibility_multiplier` axis) — **the mechanism is now
+implemented**: founders mint the class phenotype, the challenge-time gate
+applies the dose-share-weighted class rel (0.10 GII.4 / 0.45 non-GII.4) to
+non-secretor hosts with the flat field as the unattributed fallback,
+`dose_reference_log10` stays a fixed reference (the class multiplier reaches
+incubation through the inoculum, not through a class-dependent reference —
+declared, no code change), and `prior_genotype_distribution_by_era` +
+`genotype_share_era` replace the uniform placeholder on the shipped profiles.
+What remains open is the canary readout that moves this entry to measured:
+mono-class cells + one mixture cell with per-class attribution.**
 
 **The exact and approximate dose-response forms are also an open implementation
 item, not a repair in this change.** Production reaches
