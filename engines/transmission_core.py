@@ -5380,17 +5380,16 @@ class TransmissionCore:
                 key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
                 merged[key] = merged.get(key, 0.0) + pw_dose
 
-        if p_agent_coop and agent_coop_doses is not None:
-            self._merge_coop_class_doses(
-                p_agent_coop, pathogen_id, agent_coop_doses,
-                route_weights, npi, susceptibility,
-            )
+        self._merge_coop_class_doses(
+            p_agent_coop, pathogen_id, agent_coop_doses,
+            route_weights, npi, susceptibility,
+        )
 
     @staticmethod
     def _merge_coop_class_doses(
         p_agent_coop: dict[int, dict[str, float]],
         pathogen_id: str,
-        agent_coop_doses: dict[int, dict[str, float]],
+        agent_coop_doses: dict[int, dict[str, float]] | None,
         route_weights: dict[str, float],
         npi: dict[int, dict[str, float]],
         susceptibility: dict[int, float],
@@ -5402,6 +5401,8 @@ class TransmissionCore:
         susceptibility multipliers the lump received — keeping class doses
         on the ``p_dose`` scale for the arm's hazard.
         """
+        if not p_agent_coop or agent_coop_doses is None:
+            return
         droplet_key = PATHWAY_EFFICIENCY_KEYS["droplet"]
         for aid, terms in p_agent_coop.items():
             npi_w = float((npi.get(aid) or {}).get(droplet_key, 1.0))

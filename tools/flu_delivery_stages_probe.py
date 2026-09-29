@@ -120,9 +120,7 @@ class StageRecorder:
         def wrapper(core: Any, epoch: int, unit_name: str, shedders: list,
                     susceptible: list, agent_doses: dict, matrix: Any,
                     agent_pathway_doses: Any, pathogen_id: str,
-                    ledger: Any, *, near_field_on: bool,
-                    emission_fraction: float, n_occupants: int,
-                    agent_coop_doses: Any = None) -> None:
+                    ledger: Any, **unit_kwargs: Any) -> None:
             if (pathogen_id == self.pathogen_id
                     and core._is_cabin_compartment(unit_name)):
                 zone = core.compartment_parent(unit_name)
@@ -130,12 +128,17 @@ class StageRecorder:
                     sv * core.confinement_emission_factor(s)
                     for s, sv in shedders
                 ]
-                partition = core.droplet_field_split.active and near_field_on
+                partition = (
+                    core.droplet_field_split.active
+                    and unit_kwargs["near_field_on"]
+                )
                 pool_share = (
                     core.droplet_field_split.far_field_share
                     if partition else 1.0
                 )
-                aerosol = sum(emitted) * emission_fraction
+                aerosol = (
+                    sum(emitted) * unit_kwargs["emission_fraction"]
+                )
                 volume = core._air_unit_volume(unit_name)
                 self.unit_rows.append({
                     "epoch": epoch,
@@ -151,17 +154,14 @@ class StageRecorder:
                     "concentration": aerosol * pool_share / max(volume, 1.0),
                     "vent_factor": core._aerosol_ventilation_factor(zone),
                     "residence": core._room_air_residence_factor(unit_name),
-                    "emission_fraction": emission_fraction,
+                    "emission_fraction": unit_kwargs["emission_fraction"],
                     "pool_share": pool_share,
                     "n_susceptible": len(susceptible),
                 })
             return original(
                 core, epoch, unit_name, shedders, susceptible, agent_doses,
                 matrix, agent_pathway_doses, pathogen_id, ledger,
-                near_field_on=near_field_on,
-                emission_fraction=emission_fraction,
-                n_occupants=n_occupants,
-                agent_coop_doses=agent_coop_doses,
+                **unit_kwargs,
             )
         return wrapper
 

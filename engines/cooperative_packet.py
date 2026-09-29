@@ -154,7 +154,7 @@ def classify_pathway_doses(
     pw_total = sum(matched.values())
     ratio = p_dose / pw_total if pw_total > 0.0 else 0.0
 
-    classes = {cls: 0.0 for cls in COOP_CLASSES}
+    classes = dict.fromkeys(COOP_CLASSES, 0.0)
     coop = coop_doses or {}
     coop_total = 0.0
     for cls in ("dry", "wet"):
