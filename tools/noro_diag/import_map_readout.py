@@ -122,6 +122,7 @@ def _cell_metrics(rows: list[dict]) -> dict:
     n = len(rows)
     ign = sum(r["ignited"] for r in rows)
     off = sum(r["took_off"] for r in rows)
+    est = sum(r["n_acquired"] > 0 for r in rows)
     post = sum(r["posted"] for r in rows)
     peaks = sorted(r["peak"] for r in rows)
     acq = sorted(r["n_acquired"] for r in rows)
@@ -131,6 +132,8 @@ def _cell_metrics(rows: list[dict]) -> dict:
         "ignition_ci": _wilson(ign, n),
         "took_off": off,
         "takeoff_ci": _wilson(off, n),
+        "established": est,
+        "establishment_ci": _wilson(est, n),
         "posted": post,
         "posting_ci": _wilson(post, n),
         "median_acquired": acq[n // 2] if acq else 0,
@@ -144,11 +147,14 @@ def _concurrent_peak(census: dict) -> int:
     return max((int(r.get("infected", 0)) for r in rows), default=0)
 
 
-def _placement(censuses: list[dict]) -> dict:
+def _emit_counts(census: dict) -> dict[str, int]:
     counts: dict[str, int] = defaultdict(int)
-    for census in censuses:
-        for emit in census.get("emits") or []:
-            counts[str(emit.get("zone_type") or "unknown")] += 1
+    for emit in census.get("emits") or []:
+        counts[str(emit.get("zone_type") or "unknown")] += 1
+    return counts
+
+
+def _placement(counts: dict[str, int]) -> dict:
     total = sum(counts.values()) or 1
     return {
         "total_emits": sum(counts.values()),
@@ -159,20 +165,11 @@ def _placement(censuses: list[dict]) -> dict:
     }
 
 
-def _stream_witness(summaries: list[dict], num_agents: float) -> dict:
+def _stream_witness(records: list[dict], num_agents: float) -> dict:
     """Resolved-stream fields plus drawn symptomatic counts vs binomial."""
-    resolved = []
-    total_sym = 0
-    n = 0
-    for summary in summaries:
-        block = (summary.get("initiation") or {})
-        res = block.get("resolved") or {}
-        manifest = block.get("manifest") or {}
-        comp = ((manifest.get("boarding") or {}).get("norwalk_gi")
-                or {}).get("composition") or {}
-        resolved.append(res)
-        total_sym += int(comp.get("symptomatic") or 0)
-        n += 1
+    resolved = [r["resolved"] for r in records]
+    total_sym = sum(r["symptomatic"] for r in records)
+    n = len(records)
     first = resolved[0] if resolved else {}
     uniform = all(r == first for r in resolved)
     p_sym = float(first.get("symptomatic_passenger_prevalence") or 0.0)
@@ -203,8 +200,6 @@ def collect(root: Path, tiers: list[str] | None = None) -> dict:
         if tiers and tier not in tiers:
             continue
         cells: dict[tuple, dict] = {}
-        censuses: dict[tuple, list[dict]] = defaultdict(list)
-        summaries: dict[tuple, list[dict]] = defaultdict(list)
         for zip_path in sorted(tier_dir.glob("*.zip")):
             summary = _load_summary(zip_path)
             if summary is None:
@@ -213,18 +208,30 @@ def collect(root: Path, tiers: list[str] | None = None) -> dict:
             key = _cell_key(params)
             entry = cells.setdefault(key, {
                 "params": params, "rows": [], "by_seed": {},
+                "witness": [],
+                "emit_counts": defaultdict(int),
             })
             row = {"seed": _seed_of(params), **_outcomes(summary)}
             entry["rows"].append(row)
             entry["by_seed"][row["seed"]] = row
-            summaries[key].append(summary)
+            block = summary.get("initiation") or {}
+            comp = ((block.get("manifest") or {}).get("boarding")
+                    or {}).get("norwalk_gi") or {}
+            entry["witness"].append({
+                "resolved": block.get("resolved") or {},
+                "symptomatic": int(
+                    (comp.get("composition") or {}).get("symptomatic")
+                    or 0
+                ),
+            })
             if row["ignited"]:
                 census = _load_census(zip_path)
                 if census:
                     entry.setdefault("peaks", []).append(
                         _concurrent_peak(census),
                     )
-                    censuses[key].append(census)
+                    for zone, n_emits in _emit_counts(census).items():
+                        entry["emit_counts"][zone] += n_emits
         table = []
         witness = []
         for key, entry in sorted(
@@ -238,12 +245,12 @@ def collect(root: Path, tiers: list[str] | None = None) -> dict:
                 peaks[len(peaks) // 2] if peaks else 0
             )
             metrics["depth_max"] = peaks[-1] if peaks else 0
-            metrics["placement"] = _placement(censuses.get(key, []))
+            metrics["placement"] = _placement(entry["emit_counts"])
             table.append(metrics)
             witness.append({
                 "label": metrics["label"],
                 **_stream_witness(
-                    summaries[key],
+                    entry["witness"],
                     float(entry["params"].get("num_agents") or 0),
                 ),
             })
@@ -299,13 +306,14 @@ def _rate(x: int, n: int) -> str:
 
 def _cell_lines(rows: list[dict]) -> list[str]:
     lines = [
-        "| cell | n | ignited | takeoff | posted | med acq | peak med/max | depth med/max |",
-        "|---|---|---|---|---|---|---|---|",
+        "| cell | n | ignited | takeoff | acq>0 | posted | med acq | peak med/max | depth med/max |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for r in rows:
         lines.append(
             f"| {r['label']} | {r['n']} | {_rate(r['ignited'], r['n'])} | "
-            f"{_rate(r['took_off'], r['n'])} | {_rate(r['posted'], r['n'])} | "
+            f"{_rate(r['took_off'], r['n'])} | {_rate(r['established'], r['n'])} | "
+            f"{_rate(r['posted'], r['n'])} | "
             f"{r['median_acquired']} | {r['peak_median']:.0f}/{r['peak_max']:.0f} | "
             f"{r['depth_median']}/{r['depth_max']} |"
         )
@@ -394,11 +402,18 @@ def main() -> None:
         json_dir = prepare_output_directory(
             str(args.json_out.parent), allowed_roots=(str(_REPO_ROOT),),
         )
+        slim = {
+            "tiers": {
+                tier: {"table": blob["table"], "witness": blob["witness"]}
+                for tier, blob in report["tiers"].items()
+            },
+            "discordance": report["discordance"],
+        }
         with validated_open(
             str(Path(json_dir) / args.json_out.name), "w",
             encoding="utf-8", allowed_roots=(str(_REPO_ROOT),),
         ) as fh:
-            fh.write(json.dumps(report, indent=1, default=str) + "\n")
+            fh.write(json.dumps(slim, indent=1, default=str) + "\n")
 
 
 if __name__ == "__main__":
