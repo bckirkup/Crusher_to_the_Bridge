@@ -10,15 +10,20 @@ and the tail sums stay inside their mathematical bounds.
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 
 import pytest
 from scipy.stats import poisson
 
+import tools.covid_packet_analytic as packet_analytic
+import tools.covid_rhythm_ab_readout as rhythm_readout
 from tools.covid_packet_analytic import (
+    _load_cells,
     cell_packet_read,
     channel_read,
     poisson_tail,
+    pool,
 )
 from tools.covid_takeoff_attribution import (
     PACKET_ARRIVAL_LOG10_HI,
@@ -65,6 +70,10 @@ class TestLog10Histogram:
     def test_empty_is_zero(self) -> None:
         assert sum(_log10_histogram([])["counts"]) == 0
 
+    def test_non_positive_values_are_skipped(self) -> None:
+        hist = _log10_histogram([0.0, -1e-3, 1e-6])
+        assert sum(hist["counts"]) == 1
+
 
 class TestArrivalRecording:
     def test_opt_in_records_per_epoch_per_channel(self) -> None:
@@ -82,6 +91,35 @@ class TestArrivalRecording:
         assert ledger.arrival_epoch_channel[(3, "zone_pool")] == [2.5]
         assert ledger.arrival_host_channel[7]["hvac_airborne"] == [2.0]
         assert ledger.arrival_host_channel[5]["near_field_plume"] == [7.5]
+
+    def test_challenged_hosts_in_parts_are_not_double_counted(
+            self) -> None:
+        """Hosts the droplet wrappers saw stay out of the second loop."""
+        ledger = TakeoffAttributionLedger(packet_arrivals=True)
+        parts = {
+            5: Counter({"near_field_plume": 3.0}),
+            9: Counter({"near_field_plume": 1.0}),
+        }
+        ledger._challenges = {
+            5: {"pathways": {"droplet": 10.0, "hvac_airborne": 1.0}},
+            6: {"pathways": {"hvac_airborne": 2.0}},
+            8: {"pathways": {"hvac_airborne": 0.0}},
+            9: {"pathways": {"droplet": 0.0}},
+        }
+        ledger._record_arrivals(0, parts)
+
+        # Host 5 is in parts: the first loop records its challenge's
+        # droplet split (all parts mass in near_field -> 10.0) plus its
+        # hvac pathway — each exactly once, so the second loop's skip
+        # means no challenge values are appended again.
+        assert ledger.arrival_host_channel[5]["near_field_plume"] == [
+            pytest.approx(10.0)]
+        assert ledger.arrival_host_channel[5]["hvac_airborne"] == [1.0]
+        # Host 6 (challenge-only) records its non-droplet pathway.
+        assert ledger.arrival_host_channel[6]["hvac_airborne"] == [2.0]
+        # Hosts 8 and 9's all-zero challenges record nothing.
+        assert 8 not in ledger.arrival_host_channel
+        assert 9 not in ledger.arrival_host_channel
 
     def test_default_off_leaves_buffers_empty(self) -> None:
         ledger = TakeoffAttributionLedger()
@@ -212,3 +250,76 @@ class TestCellPacketRead:
         row = read["channels"]["near_field_plume"]["n_ge_2"]
         lo, hi = row["expected_hosts_any_interval"]
         assert 0.0 <= lo <= hi <= 1.0 + 1e-9
+
+    def test_missing_arrivals_points_at_the_flag(self) -> None:
+        with pytest.raises(SystemExit, match="packet_arrivals"):
+            cell_packet_read({"cell": {}, "summary": {"mechanism": {}}})
+
+
+class TestPool:
+    def test_pooled_totals_sum_cells_and_keep_channel_classes(self) -> None:
+        cells = [_synthetic_cell(1e-4, 1e-4),
+                 _synthetic_cell(3e-4, 1e-4)]
+        out = pool(cells)
+        assert out["design"] == "covid_packet_01"
+        assert out["pooled"]["n_cells"] == 2
+        assert out["pooled"]["n_dosed_hosts_quantiles"]["n"] == 2
+        assert out["pooled"]["n_dosed_hosts_quantiles"]["median"] == 2.0
+
+        totals = out["pooled"]["channel_totals"]
+        zp = totals["zone_pool"]
+        assert zp["carrier_class"] == "dry"
+        assert zp["n_increments"] == 20
+        assert zp["dose_sum"] == pytest.approx(4e-4)
+        lo, hi = zp["n_ge_2"]["expected_packets_interval"]
+        assert hi > lo > 0.0
+        # Interval endpoints sum cell-by-cell: pooled hi equals the
+        # sum of per-cell his.
+        per_cell = [
+            r["channels"]["zone_pool"]["n_ge_2"][
+                "expected_packets_interval"
+            ][1]
+            for r in out["cells"]
+        ]
+        assert hi == pytest.approx(sum(per_cell))
+        # Contact carries its delivered dose but no packet claims.
+        assert "n_ge_2" not in totals["contact"]
+
+
+class TestLoadCells:
+    def test_single_file_list_and_dict_payloads(
+            self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(packet_analytic, "REPO_ROOT", str(tmp_path))
+        cell = _synthetic_cell(1e-4, 1e-4)
+
+        list_path = tmp_path / "cells.json"
+        list_path.write_text(json.dumps([cell]))
+        assert _load_cells(str(list_path)) == [cell]
+
+        dict_path = tmp_path / "one.json"
+        dict_path.write_text(json.dumps(cell))
+        assert _load_cells(str(dict_path)) == [cell]
+
+    def test_dir_mode_reads_summaries_and_skips_the_rest(
+            self, tmp_path, monkeypatch) -> None:
+        # _cell_summaries resolves roots against its own module's
+        # REPO_ROOT; point both loaders at the tmp dir.
+        monkeypatch.setattr(packet_analytic, "REPO_ROOT", str(tmp_path))
+        monkeypatch.setattr(rhythm_readout, "REPO_ROOT", str(tmp_path))
+        cell = _synthetic_cell(1e-4, 1e-4)
+        (tmp_path / "a.json").write_text(json.dumps(cell))
+        (tmp_path / "not_a_cell.json").write_text(
+            json.dumps({"no_summary": True}))
+        (tmp_path / "ignore.txt").write_text("nope")
+
+        cells = _load_cells(str(tmp_path))
+        assert len(cells) == 1
+        assert cells[0]["_file"] == "a.json"
+
+    def test_unrecognized_payload_is_a_system_exit(
+            self, tmp_path, monkeypatch) -> None:
+        monkeypatch.setattr(packet_analytic, "REPO_ROOT", str(tmp_path))
+        bad = tmp_path / "bad.json"
+        bad.write_text(json.dumps({"not": "a cell"}))
+        with pytest.raises(SystemExit, match="unrecognized"):
+            _load_cells(str(bad))
