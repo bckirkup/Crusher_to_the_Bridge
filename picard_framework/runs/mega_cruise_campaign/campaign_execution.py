@@ -905,6 +905,97 @@ def _infection_voyage_role(inf: dict[str, Any]) -> tuple[bool, bool]:
     return imported, aboard
 
 
+def _accumulate_agent_attribution(
+    block: dict[str, Any],
+    agent: Any,
+    inf: dict[str, Any],
+    pid: str,
+    config: Any,
+    registry: Any,
+    non_secretor: bool,
+) -> None:
+    genotypes = _agent_strain_genotypes(agent, pid, registry)
+    class_key = _class_attribution_key(genotypes, config)
+    imported, aboard = _infection_voyage_role(inf)
+    block["ever_infected"] += 1
+    block["classes_ever_infected"][class_key] = (
+        block["classes_ever_infected"].get(class_key, 0) + 1
+    )
+    for genotype in genotypes:
+        carried = block["genotypes_ever_carried"]
+        carried[genotype] = carried.get(genotype, 0) + 1
+    if non_secretor:
+        block["non_secretor_ever_infected"] += 1
+    if imported:
+        block["imported"] += 1
+    if aboard:
+        block["acquired_aboard"] += 1
+        block["classes_acquired_aboard"][class_key] = (
+            block["classes_acquired_aboard"].get(class_key, 0) + 1
+        )
+        if non_secretor:
+            block["non_secretor_acquired_aboard"] += 1
+
+
+def _finalize_attribution_block(block: dict[str, Any]) -> None:
+    block["genotypes_ever_carried"] = dict(
+        sorted(block["genotypes_ever_carried"].items()),
+    )
+    block["non_secretor_share_ever_infected"] = round(
+        block["non_secretor_ever_infected"] / max(block["ever_infected"], 1),
+        4,
+    )
+    block["non_secretor_share_acquired_aboard"] = round(
+        block["non_secretor_acquired_aboard"]
+        / max(block["acquired_aboard"], 1),
+        4,
+    )
+    block["non_secretor_share_population"] = round(
+        block["non_secretor_population"] / max(block["population"], 1), 4,
+    )
+    block["attack_rate_ever_infected"] = round(
+        block["ever_infected"] / max(block["population"], 1), 4,
+    )
+    block["attack_rate_acquired_aboard"] = round(
+        block["acquired_aboard"] / max(block["population"], 1), 4,
+    )
+
+
+def _strain_attribution_block(
+    agents: Any, pid: str, config: Any, registry: Any,
+) -> dict[str, Any]:
+    """Accumulate one pathogen's attribution counters across the cohort."""
+    block: dict[str, Any] = {
+        "population": len(agents),
+        "non_secretor_population": 0,
+        "ever_infected": 0,
+        "imported": 0,
+        "acquired_aboard": 0,
+        "non_secretor_ever_infected": 0,
+        "non_secretor_acquired_aboard": 0,
+        "classes_ever_infected": {},
+        "classes_acquired_aboard": {},
+        "genotypes_ever_carried": {},
+    }
+    for agent in agents:
+        non_secretor = bool(
+            getattr(agent, "secretor_negative_by_pathogen", {}).get(pid),
+        )
+        if non_secretor:
+            block["non_secretor_population"] += 1
+        inf = agent.infections.get(pid)
+        if inf is None or (
+            "first_infection_epoch" not in inf
+            and "boarding_state" not in inf
+        ):
+            continue
+        _accumulate_agent_attribution(
+            block, agent, inf, pid, config, registry, non_secretor,
+        )
+    _finalize_attribution_block(block)
+    return block
+
+
 def _strain_attribution(sim: Any) -> dict[str, Any]:
     """Per-class acquisition attribution from the run's strain registry.
 
@@ -922,77 +1013,10 @@ def _strain_attribution(sim: Any) -> dict[str, Any]:
     if registry is None or not configs or engine is None:
         return {}
     agents = getattr(engine, "agents", ())
-    out: dict[str, Any] = {}
-    for pid, config in configs.items():
-        block: dict[str, Any] = {
-            "population": len(agents),
-            "non_secretor_population": 0,
-            "ever_infected": 0,
-            "imported": 0,
-            "acquired_aboard": 0,
-            "non_secretor_ever_infected": 0,
-            "non_secretor_acquired_aboard": 0,
-            "classes_ever_infected": {},
-            "classes_acquired_aboard": {},
-            "genotypes_ever_carried": {},
-        }
-        for agent in agents:
-            non_secretor = bool(
-                getattr(agent, "secretor_negative_by_pathogen", {}).get(pid),
-            )
-            if non_secretor:
-                block["non_secretor_population"] += 1
-            inf = agent.infections.get(pid)
-            if inf is None or (
-                "first_infection_epoch" not in inf
-                and "boarding_state" not in inf
-            ):
-                continue
-            genotypes = _agent_strain_genotypes(agent, pid, registry)
-            class_key = _class_attribution_key(genotypes, config)
-            imported, aboard = _infection_voyage_role(inf)
-            block["ever_infected"] += 1
-            block["classes_ever_infected"][class_key] = (
-                block["classes_ever_infected"].get(class_key, 0) + 1
-            )
-            for genotype in genotypes:
-                carried = block["genotypes_ever_carried"]
-                carried[genotype] = carried.get(genotype, 0) + 1
-            if non_secretor:
-                block["non_secretor_ever_infected"] += 1
-            if imported:
-                block["imported"] += 1
-            if aboard:
-                block["acquired_aboard"] += 1
-                block["classes_acquired_aboard"][class_key] = (
-                    block["classes_acquired_aboard"].get(class_key, 0) + 1
-                )
-                if non_secretor:
-                    block["non_secretor_acquired_aboard"] += 1
-        block["genotypes_ever_carried"] = dict(
-            sorted(block["genotypes_ever_carried"].items()),
-        )
-        block["non_secretor_share_ever_infected"] = round(
-            block["non_secretor_ever_infected"]
-            / max(block["ever_infected"], 1),
-            4,
-        )
-        block["non_secretor_share_acquired_aboard"] = round(
-            block["non_secretor_acquired_aboard"]
-            / max(block["acquired_aboard"], 1),
-            4,
-        )
-        block["non_secretor_share_population"] = round(
-            block["non_secretor_population"] / max(len(agents), 1), 4,
-        )
-        block["attack_rate_ever_infected"] = round(
-            block["ever_infected"] / max(len(agents), 1), 4,
-        )
-        block["attack_rate_acquired_aboard"] = round(
-            block["acquired_aboard"] / max(len(agents), 1), 4,
-        )
-        out[pid] = block
-    return out
+    return {
+        pid: _strain_attribution_block(agents, pid, config, registry)
+        for pid, config in configs.items()
+    }
 
 
 def _write_timeseries_and_summary(
