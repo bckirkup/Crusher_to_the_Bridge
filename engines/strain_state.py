@@ -210,6 +210,56 @@ class Phenotype:
 
 
 @dataclass(frozen=True)
+class GenotypeClass:
+    """A declared class of genotypes sharing phenotype offsets.
+
+    Per ``docs/proposals/pathogen_class_structure_decision.md`` the class —
+    not the genotype — is the unit of declared strain difference: genotype
+    identity still labels lineages, but the offsets the literature can support
+    attach to the class. Two offsets are declared:
+
+    ``transmissibility_multiplier``
+        The founder's emission-side dose multiplier (exact-₁F₁ form: *m*
+        shifts the challenge ID50 literally). Swept, never fitted.
+    ``secretor_negative_relative_susceptibility``
+        Relative susceptibility of a secretor-negative (FUT2) host challenged
+        by this class — the Kambhampati split that drew the class boundary.
+        ``None`` means the profile's flat field governs challenges by this
+        class.
+    """
+
+    name: str
+    genotypes: tuple[str, ...]
+    secretor_negative_relative_susceptibility: float | None = None
+    transmissibility_multiplier: float = 1.0
+
+    def __post_init__(self) -> None:
+        if not self.name:
+            raise StrainConfigError("genotype class name must be non-empty")
+        if not self.genotypes:
+            raise StrainConfigError(
+                f"genotype class {self.name!r} must list genotypes",
+            )
+        _require_positive(
+            f"genotype_classes.{self.name}.transmissibility_multiplier",
+            self.transmissibility_multiplier,
+        )
+        rel = self.secretor_negative_relative_susceptibility
+        if rel is not None:
+            _require_unit_interval(
+                f"genotype_classes.{self.name}."
+                "secretor_negative_relative_susceptibility",
+                rel,
+            )
+
+    def phenotype(self) -> Phenotype:
+        """Founder phenotype for this class: only the declared axis moves."""
+        return Phenotype(
+            transmissibility_multiplier=self.transmissibility_multiplier,
+        )
+
+
+@dataclass(frozen=True)
 class PhenotypeEffectRanges:
     """Effect sizes a phenotype mutation draws from.
 
@@ -402,6 +452,7 @@ class StrainEvolutionConfig:
     effect_ranges: PhenotypeEffectRanges = field(default_factory=PhenotypeEffectRanges)
     min_strain_fraction: float = 0.0
     immune_waning: ImmuneWaningConfig = field(default_factory=ImmuneWaningConfig)
+    genotype_classes: Mapping[str, GenotypeClass] = field(default_factory=dict)
 
     @classmethod
     def from_profile(
@@ -445,7 +496,7 @@ class StrainEvolutionConfig:
             ),
             genotypes=genotypes,
             prior_genotype_distribution=_normalized_prior(
-                raw.get("prior_genotype_distribution"), genotypes,
+                _resolve_prior(raw), genotypes,
             ),
             cross_immunity=_validated_cross_immunity(
                 raw.get("cross_immunity"), genotypes,
@@ -455,6 +506,9 @@ class StrainEvolutionConfig:
                 "min_strain_fraction", raw.get("min_strain_fraction", 0.0),
             ),
             immune_waning=ImmuneWaningConfig.from_config(raw.get("immune_waning")),
+            genotype_classes=_validated_genotype_classes(
+                raw.get("genotype_classes"), genotypes,
+            ),
         )
         if not cfg.pathogen_id:
             raise StrainConfigError("strain_evolution requires a pathogen_id")
@@ -500,6 +554,133 @@ class StrainEvolutionConfig:
         return self.immune_waning.protection_at(
             matched, days_since_resolution, challenge_strain.immune_escape,
         )
+
+    # ── genotype classes ────────────────────────────────────────────────
+
+    def class_of(self, genotype: str) -> GenotypeClass | None:
+        """The declared class containing *genotype*, or ``None``."""
+        for cls_ in self.genotype_classes.values():
+            if genotype in cls_.genotypes:
+                return cls_
+        return None
+
+    @property
+    def has_class_secretor_gate(self) -> bool:
+        """True when any class declares a secretor-negative susceptibility.
+
+        A profile with this gate keeps the flat
+        ``secretor_negative_relative_susceptibility`` as the fallback for
+        unattributed challenges but otherwise applies the class split per
+        exposure; without it the flat value applies at initialization as
+        before.
+        """
+        return any(
+            cls_.secretor_negative_relative_susceptibility is not None
+            for cls_ in self.genotype_classes.values()
+        )
+
+    def class_secretor_rel(self, genotype: str) -> float | None:
+        """Class-declared secretor-negative susceptibility for *genotype*."""
+        cls_ = self.class_of(genotype)
+        if cls_ is None:
+            return None
+        return cls_.secretor_negative_relative_susceptibility
+
+    def class_phenotype(self, genotype: str) -> Phenotype:
+        """Founder phenotype for *genotype*'s class; neutral when unmapped."""
+        cls_ = self.class_of(genotype)
+        return cls_.phenotype() if cls_ is not None else Phenotype()
+
+
+def _resolve_prior(raw: Mapping[str, Any]) -> Mapping[str, Any] | None:
+    """Pick the prior genotype distribution a run draws from.
+
+    An explicit ``prior_genotype_distribution`` wins — that is the sweep
+    override path, including the degenerate one-entry maps mono-class arms
+    declare. Otherwise ``prior_genotype_distribution_by_era`` resolves
+    through ``genotype_share_era``, the profile's declared era-resolved
+    shares; a single-era map needs no selector.
+    """
+    explicit = raw.get("prior_genotype_distribution")
+    if explicit is not None:
+        return explicit
+    by_era = raw.get("prior_genotype_distribution_by_era")
+    if not by_era:
+        return None
+    if not isinstance(by_era, Mapping) or not by_era:
+        raise StrainConfigError(
+            "prior_genotype_distribution_by_era must be an object of "
+            "era name -> weights",
+        )
+    era = raw.get("genotype_share_era")
+    if era is None:
+        if len(by_era) == 1:
+            return next(iter(by_era.values()))
+        raise StrainConfigError(
+            "genotype_share_era is required when "
+            "prior_genotype_distribution_by_era lists more than one era",
+        )
+    if era not in by_era:
+        raise StrainConfigError(
+            f"genotype_share_era {era!r} is not a key of "
+            "prior_genotype_distribution_by_era",
+        )
+    return by_era[era]
+
+
+def _claim_class_members(
+    class_name: str,
+    members: tuple[str, ...],
+    genotypes: tuple[str, ...],
+    claimed: dict[str, str],
+) -> None:
+    """Check a class's genotype members exist and are unclaimed; claim them."""
+    for member in members:
+        if genotypes and member not in genotypes:
+            raise StrainConfigError(
+                f"genotype_classes[{class_name!r}] has unknown genotype "
+                f"{member!r}",
+            )
+        if member in claimed:
+            raise StrainConfigError(
+                f"genotype {member!r} is claimed by both "
+                f"{claimed[member]!r} and {class_name!r}: a class "
+                "boundary cannot overlap",
+            )
+        claimed[member] = class_name
+
+
+def _validated_genotype_classes(
+    raw: Mapping[str, Any] | None,
+    genotypes: tuple[str, ...],
+) -> dict[str, GenotypeClass]:
+    """Validate a ``genotype_classes`` block: declared genotypes, disjoint."""
+    if not raw:
+        return {}
+    if not isinstance(raw, Mapping):
+        raise StrainConfigError("genotype_classes must be an object")
+    classes: dict[str, GenotypeClass] = {}
+    claimed: dict[str, str] = {}
+    for name, spec in raw.items():
+        class_name = str(name)
+        if not isinstance(spec, Mapping):
+            raise StrainConfigError(
+                f"genotype_classes[{class_name!r}] must be an object",
+            )
+        members = tuple(str(g) for g in spec.get("genotypes") or ())
+        _claim_class_members(class_name, members, genotypes, claimed)
+        rel = spec.get("secretor_negative_relative_susceptibility")
+        classes[class_name] = GenotypeClass(
+            name=class_name,
+            genotypes=members,
+            secretor_negative_relative_susceptibility=(
+                None if rel is None else float(rel)
+            ),
+            transmissibility_multiplier=float(
+                spec.get("transmissibility_multiplier", 1.0),
+            ),
+        )
+    return classes
 
 
 def _normalized_prior(
