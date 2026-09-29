@@ -120,12 +120,56 @@ cruise denominator: GII.4 outbreak cases run heavier vomiting (aOR 1.67 for
 canary readouts once the mechanism lands; mono-class arms are the
 discriminating cells.
 
+## Canary — cell A `geno_mono_gii4` (measured, instrument gate passed)
+
+**Measured at:** `2713e566` (merge of the canary package: design
+`docs/norovirus/noro_geno_01_design.md`, three cell manifests, and the
+`strain_attribution` summary instrument). Image
+`picard-campaign:noro-geno-01-2713e566` digest
+`sha256:071b0854ffaf8ff051037200d53b7c4d269db029772c527b5b6fd3fc755c5149`,
+jobdef `picard-campaign:51`, array `c458c0df-0f6e-4e9f-81bc-26f63874bec1`
+(20 children, all SUCCEEDED), S3 `campaign/noro_geno_01_gii4/`.
+
+Instrument witnesses, all green:
+
+- `resolved_pathogen_profiles.json` carries the pinned prior
+  `{"GII.4": 1.0}` and intact `genotype_classes` (gii4 rel 0.10 /
+  non_gii4 rel 0.45, mult 1.0) — the override reaches the engine inside
+  the Batch image.
+- `summary.json → strain_attribution` is present on every seed and fully
+  attributed: `classes_ever_infected {"gii4": N}`,
+  `genotypes_ever_carried {"GII.4": N}` — no `untracked`/`unattributed`
+  on any run.
+- `lineage_census.json` carries 288 per-epoch snapshots with genotype
+  presence (all strains GII.4; ~10 founder carriers persistent through
+  the voyage).
+
+Readout (declared list, 20 seeds 8105–8124):
+
+- Total acquisitions `ever_infected`: mean 7.5/run (range 2–12, total
+  151), attack rate ~0.25% — all import-dominated.
+- Acquired aboard: **3 events total** across 3/20 seeds — the post-724
+  suppressed-outbreak regime recorded in NORO-REBASE-01 at this same
+  cell (0/20 postings there), not a new signal.
+- Non-secretor share among ever-infected: 28/151 = 0.185 vs population
+  share 0.190 — imports dominate and founders bypass the gate, so this
+  sits at population share as designed.
+- Non-secretor share among aboard acquisitions: 0/3 on cell A — the
+  discriminating comparison waits for cell B.
+- Postings: 0.20 per 1,000 (report-never-select marginal).
+- Gate checks: no report-immediately trigger fired (override resolved,
+  attribution present, acquisitions nonzero). The "A > B share" check is
+  pending cell B.
+
+**Status stays `open`.** Cells B (`geno_mono_nongii4`) and C
+(`geno_mixture`) are staged but not run — they wait for the user's go.
+The `measured` flip waits for the full 3-cell read.
+
 ## Next
 
-- Implementation session: founder-level class draw → split secretor gate +
-  declared `transmissibility_multiplier` axis; resolve
-  `dose_reference_log10`; era flag for the share intervals.
-- Canary: mono-class cells (pure GII.4 vs pure non-GII.4 founders, same
-  seeds) + one mixture cell on the frozen fl_spr_12d block, reporting
-  per-class acquisition attribution.
-- This entry moves to `measured` when the canary reads out.
+- ~~Implementation session: founder-level class draw → split secretor
+  gate + declared `transmissibility_multiplier` axis; resolve
+  `dose_reference_log10`; era flag for the share intervals.~~ Done.
+- ~~Canary~~: cell A run and read out above; cells B and C on user go,
+  then the mixture-marginal and the secretor-share comparison.
+- This entry moves to `measured` when the full 3-cell canary reads out.
