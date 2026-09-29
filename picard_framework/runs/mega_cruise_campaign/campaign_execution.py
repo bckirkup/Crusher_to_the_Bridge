@@ -22,6 +22,7 @@ from typing import Any, Iterator
 from urllib.parse import urlparse
 
 from engines.initiation import LEGACY_MANIFEST
+from engines.strain_state import IMMUNITY_FROM_INFECTION
 
 # Late-bound access to generation + shared mutable campaign state.
 from picard_framework.runs.mega_cruise_campaign import campaign_runner as _cr
@@ -841,6 +842,159 @@ def _write_resolved_profiles(run_dir: str, roots: tuple[str, ...], sim: Any) -> 
         )
 
 
+def _agent_strain_genotypes(
+    agent: Any, pathogen_id: str, registry: Any,
+) -> set[str]:
+    """Genotypes an agent ever carried for *pathogen_id*.
+
+    Cleared lineages live in ``immune_history`` (each record keeps the
+    genotype it was written with); still-resident ones resolve through the
+    registry. Strains the registry collected are not re-looked-up — their
+    genotype survives in the immune record written when the host cleared
+    them.
+    """
+    genotypes: set[str] = set()
+    for rec in getattr(agent, "immune_history", ()):
+        if (
+            rec.pathogen_id == pathogen_id
+            and rec.origin == IMMUNITY_FROM_INFECTION
+            and rec.genotype
+        ):
+            genotypes.add(rec.genotype)
+    inf = agent.infections.get(pathogen_id)
+    if inf is None:
+        return genotypes
+    strain_ids = []
+    primary = inf.get("strain_id")
+    if primary:
+        strain_ids.append(primary)
+    strain_ids.extend((inf.get("strains") or {}).keys())
+    for sid in strain_ids:
+        if sid in registry:
+            genotype = registry.get(sid).genotype
+            if genotype:
+                genotypes.add(genotype)
+    return genotypes
+
+
+def _class_attribution_key(genotypes: set[str], config: Any) -> str:
+    classes = {
+        cls.name
+        for cls in (config.class_of(g) for g in genotypes)
+        if cls is not None
+    }
+    if not classes:
+        return "untracked" if not genotypes else "unattributed"
+    return "+".join(sorted(classes))
+
+
+def _infection_voyage_role(inf: dict[str, Any]) -> tuple[bool, bool]:
+    """(imported, acquired_aboard) for one infection record.
+
+    A boarding import carries ``boarding_state``; any later episode epoch is
+    an aboard acquisition, so an import who re-acquires counts in both
+    buckets. An epoch-0 infection with no boarding marker (a fiat seed)
+    counts as aboard — it is not an import the voyage drew.
+    """
+    first = inf.get("first_infection_epoch")
+    episodes = [int(e) for e in (inf.get("episode_epochs") or [])]
+    if first is not None:
+        episodes.append(int(first))
+    imported = bool(inf.get("boarding_state"))
+    aboard = not imported or any(e > 0 for e in episodes)
+    return imported, aboard
+
+
+def _strain_attribution(sim: Any) -> dict[str, Any]:
+    """Per-class acquisition attribution from the run's strain registry.
+
+    Post-run agent walk producing the observer aggregate a genotype-class
+    campaign scores: who ever carried which class (import vs aboard
+    acquisition) and the non-secretor share in each bucket — the
+    class-conditioned gate's discriminating readout. Per-strain detail and
+    the per-epoch census live in ``lineage_census.json``; this block is the
+    summary-level roll-up, keyed by pathogen id.
+    """
+    tx = getattr(sim, "tx_core", None)
+    registry = getattr(tx, "strain_registry", None)
+    configs = getattr(tx, "strain_configs", {})
+    engine = getattr(sim, "engine", None)
+    if registry is None or not configs or engine is None:
+        return {}
+    agents = getattr(engine, "agents", ())
+    out: dict[str, Any] = {}
+    for pid, config in configs.items():
+        block: dict[str, Any] = {
+            "population": len(agents),
+            "non_secretor_population": 0,
+            "ever_infected": 0,
+            "imported": 0,
+            "acquired_aboard": 0,
+            "non_secretor_ever_infected": 0,
+            "non_secretor_acquired_aboard": 0,
+            "classes_ever_infected": {},
+            "classes_acquired_aboard": {},
+            "genotypes_ever_carried": {},
+        }
+        for agent in agents:
+            non_secretor = bool(
+                getattr(agent, "secretor_negative_by_pathogen", {}).get(pid),
+            )
+            if non_secretor:
+                block["non_secretor_population"] += 1
+            inf = agent.infections.get(pid)
+            if inf is None or (
+                "first_infection_epoch" not in inf
+                and "boarding_state" not in inf
+            ):
+                continue
+            genotypes = _agent_strain_genotypes(agent, pid, registry)
+            class_key = _class_attribution_key(genotypes, config)
+            imported, aboard = _infection_voyage_role(inf)
+            block["ever_infected"] += 1
+            block["classes_ever_infected"][class_key] = (
+                block["classes_ever_infected"].get(class_key, 0) + 1
+            )
+            for genotype in genotypes:
+                carried = block["genotypes_ever_carried"]
+                carried[genotype] = carried.get(genotype, 0) + 1
+            if non_secretor:
+                block["non_secretor_ever_infected"] += 1
+            if imported:
+                block["imported"] += 1
+            if aboard:
+                block["acquired_aboard"] += 1
+                block["classes_acquired_aboard"][class_key] = (
+                    block["classes_acquired_aboard"].get(class_key, 0) + 1
+                )
+                if non_secretor:
+                    block["non_secretor_acquired_aboard"] += 1
+        block["genotypes_ever_carried"] = dict(
+            sorted(block["genotypes_ever_carried"].items()),
+        )
+        block["non_secretor_share_ever_infected"] = round(
+            block["non_secretor_ever_infected"]
+            / max(block["ever_infected"], 1),
+            4,
+        )
+        block["non_secretor_share_acquired_aboard"] = round(
+            block["non_secretor_acquired_aboard"]
+            / max(block["acquired_aboard"], 1),
+            4,
+        )
+        block["non_secretor_share_population"] = round(
+            block["non_secretor_population"] / max(len(agents), 1), 4,
+        )
+        block["attack_rate_ever_infected"] = round(
+            block["ever_infected"] / max(len(agents), 1), 4,
+        )
+        block["attack_rate_acquired_aboard"] = round(
+            block["acquired_aboard"] / max(len(agents), 1), 4,
+        )
+        out[pid] = block
+    return out
+
+
 def _write_timeseries_and_summary(
     run_dir: str,
     roots: tuple[str, ...],
@@ -872,6 +1026,9 @@ def _write_timeseries_and_summary(
             spec, sim.cfg, sim.pathogen_profiles,
         ),
     }
+    attribution = _strain_attribution(sim)
+    if attribution:
+        summary["strain_attribution"] = attribution
     summary_path = resolve_child_path(run_dir, "summary.json")
     with validated_open(summary_path, "w", allowed_roots=roots, encoding="utf-8") as fh:
         json.dump(summary, fh, indent=2)
