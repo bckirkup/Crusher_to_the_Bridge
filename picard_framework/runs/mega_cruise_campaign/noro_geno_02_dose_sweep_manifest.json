@@ -1,0 +1,101 @@
+{
+  "campaign": "noro_geno_02_dose_sweep",
+  "description": "NORO-GENO-02 dose sweep (instrumentation, pre-freeze): norovirus GII.4-class monoprior (strain_evolution.prior_genotype_distribution {GII.4: 1.0}) on the frozen fl_spr_12d block of the NORO-GENO-01 canary (spirit_cruise_3000, syndromic_comp65, rung reportable, 288 epochs, 3000 agents, identical config_overrides, seeds 8105-8124) sweeping dose_adjustment {3.0,2.0,1.0,0.0} to locate the design point reaching >=40 aboard acquisitions per arm across 20 seeds. Design: docs/norovirus/noro_geno_02_design.md.",
+  "platform": "classic_cruise_1900",
+  "default_epochs": 168,
+  "default_num_agents": 1910,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ],
+        "norwalk_gi": {
+          "strain_evolution": {
+            "prior_genotype_distribution": {
+              "GII.4": 1.0
+            }
+          }
+        }
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    }
+  },
+  "tiers": {
+    "fl_spr_12d_geno02_sweep": {
+      "description": "NORO-GENO-02 dose-sweep tier: the frozen fl_spr_12d spirit_cruise_3000 12-day block verbatim (GII.4-class monoprior, variant_surveillance armed) with dose_adjustments {3.0,2.0,1.0,0.0} as the scenario dial under test. Run ids carry the dose tag; the S3 prefix carries the sweep.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        3.0,
+        2.0,
+        1.0,
+        0.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      }
+    }
+  }
+}
