@@ -573,33 +573,28 @@ class TakeoffAttributionLedger:
         for tid, parts in all_parts.items():
             challenge = self._challenges.get(tid)
             pw = (challenge or {}).get("pathways", {})
-            chan_post = _post_channel_doses(pw, parts)
-            if not any(v > 0.0 for v in chan_post.values()):
-                continue
-            for channel, dose in chan_post.items():
-                if dose <= 0.0:
-                    continue
-                key = (epoch, channel)
-                self.arrival_epoch_channel.setdefault(key, []).append(dose)
-                self.arrival_host_channel.setdefault(
-                    tid, {},
-                ).setdefault(channel, []).append(float(dose))
+            self._note_arrival(
+                epoch, tid, _post_channel_doses(pw, parts))
         # Challenged hosts the droplet wrappers never saw (non-droplet
         # channels only).
         for tid, challenge in self._challenges.items():
             if tid in all_parts:
                 continue
-            chan_post = _post_channel_doses(
-                challenge.get("pathways", {}), Counter(),
-            )
-            for channel, dose in chan_post.items():
-                if dose <= 0.0:
-                    continue
-                key = (epoch, channel)
-                self.arrival_epoch_channel.setdefault(key, []).append(dose)
-                self.arrival_host_channel.setdefault(
-                    tid, {},
-                ).setdefault(channel, []).append(float(dose))
+            self._note_arrival(
+                epoch, tid,
+                _post_channel_doses(
+                    challenge.get("pathways", {}), Counter()))
+
+    def _note_arrival(self, epoch: int, tid: int,
+                      chan_post: dict[str, float]) -> None:
+        for channel, dose in chan_post.items():
+            if dose <= 0.0:
+                continue
+            self.arrival_epoch_channel.setdefault(
+                (epoch, channel), []).append(dose)
+            self.arrival_host_channel.setdefault(
+                tid, {},
+            ).setdefault(channel, []).append(float(dose))
 
     def _onset_row(
         self, sim: Any, ev: Any, tid: int, epoch: int,

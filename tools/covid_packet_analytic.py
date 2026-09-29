@@ -144,6 +144,49 @@ def channel_read(dose_sum: float, cls: str, bracket: float,
     return out
 
 
+def _channel_row(channel: str, rec: dict[str, Any],
+                 hosts: list[dict[str, Any]],
+                 brackets: list[float]) -> dict[str, Any]:
+    """One channel's expected >=n-copy packet intervals."""
+    cls = CHANNEL_CLASS.get(channel, "unresolved")
+    dose_sum = float(rec.get("dose_sum") or 0.0)
+    row: dict[str, Any] = {
+        "carrier_class": cls,
+        "n_increments": int(rec.get("n_increments") or 0),
+        "dose_sum": dose_sum,
+        "dose_max": float(rec.get("dose_max") or 0.0),
+        "delivered_copies_interval": _interval(
+            [dose_sum * b for b in brackets]
+        ),
+    }
+    if cls not in CARRIER_LOADING_COPIES:
+        return row
+    for n in N_GRID:
+        e_bounds = [
+            dose_sum * b * _packets_per_copy(mu, n)
+            for b in brackets
+            for mu in _mu_envelope(cls)
+        ]
+        # Per-host expected >=n packet counts -> share of challenged
+        # hosts whose stream ever carries one.
+        host_bounds: list[float] = []
+        for b in brackets:
+            for mu in _mu_envelope(cls):
+                coef = b * _packets_per_copy(mu, n)
+                host_bounds.append(sum(
+                    -math.expm1(
+                        -float(h["channels"][channel]["dose_sum"]) * coef,
+                    )
+                    for h in hosts
+                    if channel in h.get("channels", {})
+                ))
+        row[f"n_ge_{n}"] = {
+            "expected_packets_interval": _interval(e_bounds),
+            "expected_hosts_any_interval": _interval(host_bounds),
+        }
+    return row
+
+
 def cell_packet_read(cell: dict[str, Any]) -> dict[str, Any]:
     """One cell's packet read across channels x n x declared corners."""
     arrivals = (
@@ -159,46 +202,10 @@ def cell_packet_read(cell: dict[str, Any]) -> dict[str, Any]:
     by_channel = arrivals.get("by_channel", {})
     hosts = arrivals.get("by_host_channel", [])
 
-    channels: dict[str, Any] = {}
-    for channel, rec in sorted(by_channel.items()):
-        cls = CHANNEL_CLASS.get(channel, "unresolved")
-        dose_sum = float(rec.get("dose_sum") or 0.0)
-        row: dict[str, Any] = {
-            "carrier_class": cls,
-            "n_increments": int(rec.get("n_increments") or 0),
-            "dose_sum": dose_sum,
-            "dose_max": float(rec.get("dose_max") or 0.0),
-            "delivered_copies_interval": _interval(
-                [dose_sum * b for b in brackets]
-            ),
-        }
-        if cls in CARRIER_LOADING_COPIES:
-            for n in N_GRID:
-                e_bounds = [
-                    rate
-                    for b in brackets
-                    for mu in _mu_envelope(cls)
-                    for rate in [dose_sum * b * _packets_per_copy(mu, n)]
-                ]
-                # Per-host expected >=n packet counts -> share of
-                # challenged hosts whose stream ever carries one.
-                host_bounds: list[float] = []
-                for b in brackets:
-                    for mu in _mu_envelope(cls):
-                        coef = b * _packets_per_copy(mu, n)
-                        host_bounds.append(sum(
-                            -math.expm1(
-                                -float(h["channels"][channel]["dose_sum"])
-                                * coef,
-                            )
-                            for h in hosts
-                            if channel in h.get("channels", {})
-                        ))
-                row[f"n_ge_{n}"] = {
-                    "expected_packets_interval": _interval(e_bounds),
-                    "expected_hosts_any_interval": _interval(host_bounds),
-                }
-        channels[channel] = row
+    channels = {
+        channel: _channel_row(channel, rec, hosts, brackets)
+        for channel, rec in sorted(by_channel.items())
+    }
 
     return {
         "index": cell["cell"].get("index"),
@@ -214,6 +221,14 @@ def cell_packet_read(cell: dict[str, Any]) -> dict[str, Any]:
         "n_dosed_hosts": len(hosts),
         "channels": channels,
     }
+
+
+def _accumulate_interval(sub: dict[str, list[float]],
+                         src: dict[str, Any]) -> None:
+    for field in ("expected_packets_interval",
+                  "expected_hosts_any_interval"):
+        for i, v in enumerate(src[field]):
+            sub[field][i] += float(v or 0.0)
 
 
 def _channel_totals(reads: list[dict[str, Any]]) -> dict[str, Any]:
@@ -232,15 +247,10 @@ def _channel_totals(reads: list[dict[str, Any]]) -> dict[str, Any]:
                 key = f"n_ge_{n}"
                 if key not in row:
                     continue
-                sub = slot.setdefault(key, {
+                _accumulate_interval(slot.setdefault(key, {
                     "expected_packets_interval": [0.0, 0.0],
                     "expected_hosts_any_interval": [0.0, 0.0],
-                })
-                for i, v in enumerate(row[key]["expected_packets_interval"]):
-                    sub["expected_packets_interval"][i] += float(v or 0.0)
-                for i, v in enumerate(
-                        row[key]["expected_hosts_any_interval"]):
-                    sub["expected_hosts_any_interval"][i] += float(v or 0.0)
+                }), row[key])
     return totals
 
 
