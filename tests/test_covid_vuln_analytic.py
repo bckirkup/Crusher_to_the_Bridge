@@ -15,6 +15,7 @@ from scipy.integrate import quad
 from scipy.stats import beta as beta_dist
 
 from tools.covid_vuln_analytic import (
+    _cross_check,
     marginal_p_infection,
     susceptibility_scale,
 )
@@ -96,3 +97,62 @@ class TestScaleInvariance:
             scale = susceptibility_scale(alpha, BETA, THETA)
             mean_s = scale * alpha / (alpha + BETA)
             assert mean_s == pytest.approx(THETA, rel=1e-9)
+
+
+def _pred(
+    arm: str,
+    alpha: float,
+    infections: float,
+    n_pairs: int,
+    mass_2: float,
+) -> dict:
+    return {
+        "class_id": "mega_cruise",
+        "seed": 20200205,
+        "arm_id": arm,
+        "alpha": alpha,
+        "n_challenged_pairs": n_pairs,
+        "infections_total": infections,
+        "seeded_count": 1.0,
+        "predicted_mass": {"2": mass_2, "0.05": 0.0},
+    }
+
+
+class TestCrossCheck:
+    """Predicted tail-move vs measured tail-move on paired arms.
+
+    The check compares the lo arm's predicted survivor-conversions
+    under the sharper alpha against the measured arm difference, only
+    where the basis arm's field can stand in for the shared trajectory.
+    """
+
+    def test_applicable_pair_ratio_is_tail_move(self) -> None:
+        lo = _pred("alpha_lo", 0.05, 1001.0, 100, 770.0)
+        hi = _pred("alpha_hi", 2.0, 1773.0, 10, 0.0)
+        (check,) = _cross_check([lo, hi])
+        assert check["applicable"]
+        assert check["predicted_tail_move"] == 770.0
+        assert check["measured_tail_move"] == 772.0
+        assert check["ratio"] == pytest.approx(770.0 / 772.0)
+        assert not check["exceeds_2x"]
+
+    def test_flags_only_genuine_disagreement(self) -> None:
+        lo = _pred("alpha_lo", 0.05, 1001.0, 100, 100.0)
+        hi = _pred("alpha_hi", 2.0, 1773.0, 10, 0.0)
+        (check,) = _cross_check([lo, hi])
+        assert check["applicable"]
+        assert check["exceeds_2x"]
+
+    def test_extinct_basis_is_not_applicable(self) -> None:
+        lo = _pred("alpha_lo", 0.05, 1.0, 30, 1.0)
+        hi = _pred("alpha_hi", 2.0, 3701.0, 10, 0.0)
+        (check,) = _cross_check([lo, hi])
+        assert not check["applicable"]
+        assert not check["exceeds_2x"]
+
+    def test_only_heavier_to_sharper_direction(self) -> None:
+        lo = _pred("alpha_lo", 0.05, 1001.0, 100, 770.0)
+        hi = _pred("alpha_hi", 2.0, 1773.0, 10, 0.0)
+        checks = _cross_check([hi, lo])
+        assert len(checks) == 1
+        assert checks[0]["field_basis_arm"] == "alpha_lo"

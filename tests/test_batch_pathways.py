@@ -1,8 +1,11 @@
-"""Guards for the EC2 scale-to-zero Batch pathways under deploy/aws/.
+"""Guards for the scale-to-zero Batch pathways under deploy/aws/.
 
-These lock the properties that are expensive to discover in AWS: a job
-definition that silently keeps Fargate keys, a compute environment that no
-longer scales to zero, or a simulation container with no budget timeout.
+These lock the properties that are expensive to discover in AWS: an EC2
+job definition that silently keeps Fargate keys, a Fargate job
+definition missing the public IP its no-NAT subnets require, a compute
+environment that no longer scales to zero, or a simulation container
+with no budget timeout. The declared platformCapabilities select which
+contract each jobdef file is checked against.
 """
 
 from __future__ import annotations
@@ -23,24 +26,51 @@ MAX_EVALUATE_ON_EXIT = 5
 # No unmonitored container runs longer than a day.
 MAX_ATTEMPT_SECONDS = 86400
 FARGATE_ONLY_KEYS = ("fargatePlatformConfiguration", "networkConfiguration", "ephemeralStorage")
+# EC2-only container keys Batch rejects on Fargate jobdefs.
+FARGATE_REJECTED_KEYS = ("sharedMemorySize",)
 
 
 def _load(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-@pytest.mark.parametrize("path", JOB_DEFS, ids=lambda p: p.name)
+def _job_defs(capability: str) -> list[Path]:
+    return [
+        p for p in JOB_DEFS
+        if _load(p).get("platformCapabilities") == [capability]
+    ]
+
+
+EC2_JOB_DEFS = _job_defs("EC2")
+FARGATE_JOB_DEFS = _job_defs("FARGATE")
+
+
+@pytest.mark.parametrize("path", EC2_JOB_DEFS, ids=lambda p: p.name)
 def test_job_definition_targets_ec2(path: Path) -> None:
     assert _load(path)["platformCapabilities"] == ["EC2"]
 
 
-@pytest.mark.parametrize("path", JOB_DEFS, ids=lambda p: p.name)
+@pytest.mark.parametrize("path", EC2_JOB_DEFS, ids=lambda p: p.name)
 def test_job_definition_drops_fargate_only_keys(path: Path) -> None:
     container = _load(path)["containerProperties"]
     assert [key for key in FARGATE_ONLY_KEYS if key in container] == []
 
 
-@pytest.mark.parametrize("path", JOB_DEFS, ids=lambda p: p.name)
+@pytest.mark.parametrize("path", FARGATE_JOB_DEFS, ids=lambda p: p.name)
+def test_fargate_job_definition_drops_ec2_only_keys(path: Path) -> None:
+    linux = _load(path)["containerProperties"].get("linuxParameters", {})
+    assert [key for key in FARGATE_REJECTED_KEYS if key in linux] == []
+
+
+@pytest.mark.parametrize("path", FARGATE_JOB_DEFS, ids=lambda p: p.name)
+def test_fargate_job_definition_assigns_public_ip(path: Path) -> None:
+    # The Fargate CE's subnets have no NAT/VPC endpoints — without a
+    # public IP tasks hang in STARTING forever.
+    net = _load(path)["containerProperties"]["networkConfiguration"]
+    assert net["assignPublicIp"] == "ENABLED"
+
+
+@pytest.mark.parametrize("path", EC2_JOB_DEFS, ids=lambda p: p.name)
 def test_job_definition_sizes_shared_memory(path: Path) -> None:
     shm = _load(path)["containerProperties"]["linuxParameters"]["sharedMemorySize"]
     assert shm >= 512
@@ -52,11 +82,16 @@ def test_job_definition_has_bounded_timeout(path: Path) -> None:
     assert 0 < seconds <= MAX_ATTEMPT_SECONDS
 
 
-@pytest.mark.parametrize("path", JOB_DEFS, ids=lambda p: p.name)
+@pytest.mark.parametrize("path", EC2_JOB_DEFS, ids=lambda p: p.name)
 def test_job_definition_retries_host_loss_first(path: Path) -> None:
     rules = _load(path)["retryStrategy"]["evaluateOnExit"]
     assert len(rules) <= MAX_EVALUATE_ON_EXIT
     assert rules[0] == {"onStatusReason": "Host EC2*", "action": "retry"}
+
+
+@pytest.mark.parametrize("path", FARGATE_JOB_DEFS, ids=lambda p: p.name)
+def test_fargate_job_definition_has_retry_attempts(path: Path) -> None:
+    assert _load(path)["retryStrategy"]["attempts"] >= 1
 
 
 @pytest.mark.parametrize("pathway", [k for k in PATHWAYS if not k.startswith("_")])

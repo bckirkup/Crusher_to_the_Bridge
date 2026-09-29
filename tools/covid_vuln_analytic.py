@@ -185,42 +185,74 @@ def cell_prediction(
 
 
 def _cross_check(preds: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Predicted-vs-realized per paired (class, seed) across arms.
+    """Predicted tail-move vs measured tail-move per paired seed.
 
-    ``predicted`` is the alpha-lo cell's counterfactual mass under
-    alpha_hi on its own measured field; ``realized`` is the hi-arm
-    cell's actual secondaries (infections_total - seeded_count). The
-    symmetric direction uses the hi cell's field to predict the lo arm.
-    Ratios > 2x are the design's instrument-defect trigger.
+    The informative direction runs from the heavier-tail arm to the
+    sharper one: the basis arm's challenged-uninfected survivors each
+    carry an accrued dose field, and the counterfactual mass under the
+    target alpha is the *predicted tail-move* — the extra conversions
+    the sharper law would have produced on the same exposure
+    trajectory. It is checked against the *measured tail-move*
+    (mate secondaries - own secondaries), the same quantity the A/B
+    reports. A ratio outside [0.5, 2.0] on an applicable pair is the
+    design's instrument-defect trigger.
+
+    A pair is applicable only when the basis arm's survivor field can
+    stand in for the shared exposure trajectory: the basis arm must
+    have ignited (secondaries > 0, dosed pairs present) and the two
+    burns must be comparable (own >= 0.5 * mate). On extinct or weak
+    basis cells the counterfactual field is structurally thin — the
+    arms then differ by ignition, not by the marginal law on a shared
+    field — so those pairs are reported as not applicable rather than
+    as disagreement.
     """
     by_key = {
         (p["class_id"], p["seed"], p["arm_id"]): p for p in preds
     }
     checks = []
     for (class_id, seed, arm), p in sorted(by_key.items()):
-        other = "alpha_hi" if arm == "alpha_lo" else "alpha_lo"
-        mate = by_key.get((class_id, seed, other))
-        if mate is None:
-            continue
-        other_alpha = mate["alpha"]
-        key = "inf" if other_alpha is None else f"{other_alpha:g}"
-        predicted = p["predicted_mass"].get(key)
-        realized = mate["infections_total"] - mate["seeded_count"]
-        if predicted is None:
-            continue
-        ratio = None
-        if predicted > 0.0 and realized > 0.0:
-            ratio = max(predicted, realized) / min(predicted, realized)
-        checks.append({
-            "class_id": class_id,
-            "seed": seed,
-            "field_basis_arm": arm,
-            "target_arm": other,
-            "predicted_mass": predicted,
-            "realized_secondaries": realized,
-            "ratio": ratio,
-            "exceeds_2x": bool(ratio is not None and ratio > 2.0),
-        })
+        alpha = p["alpha"] if p["alpha"] is not None else math.inf
+        for other, mate in by_key.items():
+            if mate["class_id"] != class_id or mate["seed"] != seed:
+                continue
+            mate_alpha = (
+                mate["alpha"] if mate["alpha"] is not None else math.inf
+            )
+            if not alpha < mate_alpha:
+                continue
+            key = "inf" if mate["alpha"] is None else f"{mate['alpha']:g}"
+            predicted = p["predicted_mass"].get(key)
+            if predicted is None:
+                continue
+            own = p["infections_total"] - p["seeded_count"]
+            realized = mate["infections_total"] - mate["seeded_count"]
+            delta = realized - own
+            applicable = (
+                own > 0.0
+                and p["n_challenged_pairs"] > 0
+                and own >= 0.5 * realized
+                and delta > 0.0
+            )
+            ratio = (
+                predicted / delta if applicable and predicted > 0.0
+                else None
+            )
+            checks.append({
+                "class_id": class_id,
+                "seed": seed,
+                "field_basis_arm": arm,
+                "target_arm": mate["arm_id"],
+                "predicted_tail_move": predicted,
+                "measured_tail_move": delta,
+                "own_secondaries": own,
+                "mate_secondaries": realized,
+                "applicable": applicable,
+                "ratio": ratio,
+                "exceeds_2x": bool(
+                    applicable and ratio is not None
+                    and (ratio > 2.0 or ratio < 0.5)
+                ),
+            })
     return checks
 
 
@@ -288,8 +320,10 @@ def pool(
             "exponential limit 1 - exp(-theta*D~). Predicted mass is "
             "over the cell's own measured challenged-uninfected dose "
             "field (accrued_dose); cross-check compares the predicted "
-            "mass under the counterfactual alpha with the paired arm's "
-            "realized secondaries."
+            "tail-move (counterfactual survivor conversions under the "
+            "sharper arm) with the measured tail-move (paired arm "
+            "difference), on pairs where the basis arm ignited and the "
+            "two burns are comparable (own >= 0.5 * mate)."
         ),
         "marginal_curves": marginal_curve(
             alphas, beta, theta,
