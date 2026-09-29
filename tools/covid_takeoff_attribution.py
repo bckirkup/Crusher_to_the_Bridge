@@ -114,8 +114,20 @@ class TakeoffAttributionLedger:
 
     def __init__(self, pathogen_id: str = PATHOGEN_ID, *,
                  zone_sets: dict[str, frozenset[str]] | None = None,
-                 sync_mask: list[bool] | None = None) -> None:
+                 sync_mask: list[bool] | None = None,
+                 packet_arrivals: bool = False) -> None:
         self.pathogen_id = pathogen_id
+        # COVID-PACKET-01: when set, every positive post-efficiency
+        # per-channel dose increment a challenged host absorbs in an
+        # epoch is recorded, so the emitted arrival series is the field
+        # a carrier-packet occupancy model convolves over. Opt-in
+        # because the per-cell payload grows; off keeps the record
+        # byte-identical.
+        self._packet_arrivals = bool(packet_arrivals)
+        # (epoch, channel) -> per-host post-efficiency dose increments.
+        self.arrival_epoch_channel: dict[tuple[int, str], list[float]] = {}
+        # host -> channel -> the epoch's increments (summarised at emit).
+        self.arrival_host_channel: dict[int, dict[str, list[float]]] = {}
         # COVID-RHYTHM-01: when provided, {"transit": names, "crew": names}
         # zone sets plus the catalog synchronized-end epoch mask enable the
         # rhythm A/B tallies (corridor occupancy vs the program clock, and
@@ -458,6 +470,9 @@ class TakeoffAttributionLedger:
             if tids:
                 self.footprint_counts[(epoch, channel)] = len(tids)
 
+        if self._packet_arrivals:
+            self._record_arrivals(epoch, all_parts)
+
         # Footprint + reach aggregates.
         for unit, info in self._epoch_units.items():
             self.unit_sizes[unit] = max(
@@ -544,6 +559,43 @@ class TakeoffAttributionLedger:
         self._other_src, self._challenges = {}, {}
         self._epoch_units, self._reach_buf = {}, {}
 
+    def _record_arrivals(self, epoch: int,
+                         all_parts: dict[int, Counter]) -> None:
+        """Log this epoch's per-channel dose increments per dosed host.
+
+        The post-efficiency basis matches ``channel_dose_post``: droplet
+        sub-channels split the post-efficiency droplet pathway by naive
+        shares; every other pathway maps onto its channel directly.
+        Hosts carrying droplet parts but no challenge record still
+        report their naive split — the far-field footprint is not
+        conditional on the challenge pass having observed the host.
+        """
+        for tid, parts in all_parts.items():
+            challenge = self._challenges.get(tid)
+            pw = (challenge or {}).get("pathways", {})
+            self._note_arrival(
+                epoch, tid, _post_channel_doses(pw, parts))
+        # Challenged hosts the droplet wrappers never saw (non-droplet
+        # channels only).
+        for tid, challenge in self._challenges.items():
+            if tid in all_parts:
+                continue
+            self._note_arrival(
+                epoch, tid,
+                _post_channel_doses(
+                    challenge.get("pathways", {}), Counter()))
+
+    def _note_arrival(self, epoch: int, tid: int,
+                      chan_post: dict[str, float]) -> None:
+        for channel, dose in chan_post.items():
+            if dose <= 0.0:
+                continue
+            self.arrival_epoch_channel.setdefault(
+                (epoch, channel), []).append(dose)
+            self.arrival_host_channel.setdefault(
+                tid, {},
+            ).setdefault(channel, []).append(float(dose))
+
     def _onset_row(
         self, sim: Any, ev: Any, tid: int, epoch: int,
         quarantined: set[int], parts: Counter,
@@ -555,19 +607,7 @@ class TakeoffAttributionLedger:
         pw = challenge["pathways"]
         droplet_post = pw.get("droplet", 0.0)
         droplet_naive = sum(parts.get(c, 0.0) for c in DROPLET_CHANNELS)
-        chan_post: Counter = Counter()
-        if droplet_naive > 0.0:
-            for channel in DROPLET_CHANNELS:
-                chan_post[channel] += (
-                    droplet_post * parts.get(channel, 0.0) / droplet_naive
-                )
-        elif droplet_post > 0.0:
-            chan_post["droplet_unattributed"] += droplet_post
-        for name, dose in pw.items():
-            channel = PATHWAY_CHANNEL.get(name)
-            if channel is None:
-                continue
-            chan_post[channel] += dose
+        chan_post = _post_channel_doses(pw, parts)
         post_total = sum(chan_post.values())
         shares = (
             {c: chan_post.get(c, 0.0) / post_total for c in CHANNELS}
@@ -652,6 +692,32 @@ class TakeoffAttributionLedger:
         }
 
 
+def _post_channel_doses(pw: dict[str, float],
+                        parts: Counter) -> Counter:
+    """Post-efficiency channel doses for one host-epoch.
+
+    Droplet sub-channels split the pathway's post-efficiency dose by
+    their naive shares; every other pathway maps straight onto its
+    channel — the ``channel_dose_post`` basis.
+    """
+    droplet_post = pw.get("droplet", 0.0)
+    droplet_naive = sum(parts.get(c, 0.0) for c in DROPLET_CHANNELS)
+    chan_post: Counter = Counter()
+    if droplet_naive > 0.0:
+        for channel in DROPLET_CHANNELS:
+            chan_post[channel] += (
+                droplet_post * parts.get(channel, 0.0) / droplet_naive
+            )
+    elif droplet_post > 0.0:
+        chan_post["droplet_unattributed"] += droplet_post
+    for name, dose in pw.items():
+        channel = PATHWAY_CHANNEL.get(name)
+        if channel is None:
+            continue
+        chan_post[channel] += dose
+    return chan_post
+
+
 def _near_ring(tx_core: Any, zone_name: str, target: Any, shedder: Any,
                epoch: int, proximity_ids: Any) -> str:
     """Which declared ring delivered one near-field contribution.
@@ -686,6 +752,99 @@ def _channel_quantiles(vals: dict[str, list[int]],
     return {
         "n": len(series),
         "quantiles": _quantiles([float(v) for v in series]),
+    }
+
+
+# Declared log10 binning for the increment histograms (model dose
+# units): covers 1e-12 .. 1e8 plus under/overflow buckets.
+PACKET_ARRIVAL_LOG10_LO = -12.0
+PACKET_ARRIVAL_LOG10_HI = 8.0
+
+
+def _log10_histogram(values: list[float]) -> dict[str, Any]:
+    """Log10-spaced counts over the declared dose-unit range."""
+    lo = PACKET_ARRIVAL_LOG10_LO
+    hi = PACKET_ARRIVAL_LOG10_HI
+    n_bins = int(hi - lo)
+    counts = [0] * (n_bins + 2)  # underflow + n_bins + overflow
+    for v in values:
+        if v <= 0.0:
+            continue
+        b = int(math.log10(v) - lo) + 1
+        counts[min(max(b, 0), n_bins + 1)] += 1
+    return {
+        "log10_lo": lo,
+        "log10_hi": hi,
+        "counts": counts,
+    }
+
+
+def _packet_arrivals_block(
+        ledger: TakeoffAttributionLedger) -> dict[str, Any]:
+    """COVID-PACKET-01: the per-epoch x route dose-arrival field.
+
+    ``by_epoch_channel`` rows carry the epoch-level structure — how many
+    hosts an epoch's route reached and how concentrated the burst was.
+    ``by_host_channel`` keeps each host's increment distribution as a
+    log10 histogram so the tail question (which hosts ever saw a large
+    single-epoch increment) is answerable without storing the raw
+    series; epoch ordering is dropped because carrier-packet occupancy
+    is per-carrier, set at emission, and does not combine across epochs.
+    ``by_channel`` pools the same increments for direct convolution.
+    Doses are model dose units (post-efficiency, susceptibility-free);
+    conversion to physical copies is the analytic companion's declared
+    step, not this record's.
+    """
+    by_epoch_channel = [
+        {
+            "epoch": int(epoch),
+            "channel": channel,
+            "n_hosts": len(increments),
+            "dose_sum": float(sum(increments)),
+            "dose_max": float(max(increments)),
+            "quantiles": _quantiles([float(v) for v in increments]),
+        }
+        for (epoch, channel), increments in sorted(
+            ledger.arrival_epoch_channel.items(),
+            key=lambda kv: (kv[0][0], kv[0][1]),
+        )
+    ]
+    by_channel: dict[str, list[float]] = {}
+    for (_e, channel), increments in ledger.arrival_epoch_channel.items():
+        by_channel.setdefault(channel, []).extend(increments)
+    by_host_channel = [
+        {
+            "id": int(tid),
+            "channels": {
+                channel: {
+                    "n_epochs": len(increments),
+                    "dose_sum": float(sum(increments)),
+                    "dose_max": float(max(increments)),
+                    "increment_histogram": _log10_histogram(increments),
+                }
+                for channel, increments in sorted(channels.items())
+            },
+        }
+        for tid, channels in sorted(ledger.arrival_host_channel.items())
+    ]
+    return {
+        "dose_basis": (
+            "post-efficiency post-NPI pathway dose (droplet sub-channels "
+            "split by naive shares), susceptibility-free; arrivals are "
+            "per-epoch increments on hosts dosed that epoch"
+        ),
+        "by_epoch_channel": by_epoch_channel,
+        "by_channel": {
+            channel: {
+                "n_increments": len(increments),
+                "dose_sum": float(sum(increments)),
+                "dose_max": float(max(increments)),
+                "quantiles": _quantiles([float(v) for v in increments]),
+                "increment_histogram": _log10_histogram(increments),
+            }
+            for channel, increments in sorted(by_channel.items())
+        },
+        "by_host_channel": by_host_channel,
     }
 
 
@@ -956,6 +1115,10 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
             "onsets_per_venue": dict(venue_hist.most_common(16)),
         },
         "mechanism": {
+            **(
+                {"packet_arrivals": _packet_arrivals_block(ledger)}
+                if ledger._packet_arrivals else {}
+            ),
             "reach_per_shedder_epoch": {
                 c: _channel_quantiles(ledger.reach_by_channel, c)
                 for c in CHANNELS
@@ -1010,6 +1173,7 @@ def analyse_spec(
     repo_root: str,
     zone_sets: dict[str, frozenset[str]] | None = None,
     sync_mask: list[bool] | None = None,
+    packet_arrivals: bool = False,
 ) -> dict[str, Any]:
     """Run one pre-built spec under the instrument stack.
 
@@ -1020,6 +1184,7 @@ def analyse_spec(
     quarantine_ledger = QuarantineAttributionLedger()
     ledger = TakeoffAttributionLedger(
         zone_sets=zone_sets, sync_mask=sync_mask,
+        packet_arrivals=packet_arrivals,
     )
 
     def observer(sim: Any, work: Any) -> None:
@@ -1054,12 +1219,16 @@ def analyse_spec(
 
 
 def analyse_cell(design: Any, cell: Any, *,
-                 num_epochs: int | None, repo_root: str) -> dict[str, Any]:
+                 num_epochs: int | None, repo_root: str,
+                 packet_arrivals: bool = False) -> dict[str, Any]:
     """Run one instrumented declared-replay cell."""
     raw = prepare_cell_run_spec(
         design, cell, num_epochs=num_epochs, repo_root=repo_root,
     )
-    return analyse_spec(raw, design, cell, repo_root=repo_root)
+    return analyse_spec(
+        raw, design, cell, repo_root=repo_root,
+        packet_arrivals=packet_arrivals,
+    )
 
 
 def main() -> None:  # pragma: no cover - CLI driver
@@ -1072,6 +1241,14 @@ def main() -> None:  # pragma: no cover - CLI driver
     parser.add_argument("--theta", type=float, required=True)
     parser.add_argument("--seeds", default="20200205")
     parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument(
+        "--packet-arrivals", action="store_true",
+        help=(
+            "also emit mechanism.packet_arrivals: per-epoch per-channel "
+            "post-efficiency dose increments per dosed host "
+            "(COVID-PACKET-01)"
+        ),
+    )
     parser.add_argument("--out", default=None)
     args = parser.parse_args()
 
@@ -1087,7 +1264,10 @@ def main() -> None:  # pragma: no cover - CLI driver
             f"no cells match theta={args.theta} seeds={sorted(seeds)}",
         )
     results = [
-        analyse_cell(design, c, num_epochs=args.epochs, repo_root=repo_root)
+        analyse_cell(
+            design, c, num_epochs=args.epochs, repo_root=repo_root,
+            packet_arrivals=args.packet_arrivals,
+        )
         for c in cells
     ]
     text = json.dumps(results, indent=1, default=str)
