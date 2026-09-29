@@ -22,6 +22,10 @@ void pending a refit.
 | [cruise_pathogen_severity_observation_priors_v2.md](cruise_pathogen_severity_observation_priors_v2.md) | Living — prior elicitation | Severity and observation priors for all ten pathogen profiles. Grades its own vectors `[A]` = assumption |
 | `vsp_covid_discontinuity.png` | Figure | The VSP discontinuity plot. **The numbers read off this image are withdrawn** — see the ledger; use the measured series instead |
 
+This table holds the calibration spine. The fuller per-document index —
+including every campaign readout, design file, and generated measurement in
+this directory — lives in [`../README.md`](../README.md).
+
 ## Work-products live elsewhere, deliberately
 
 The measurement harnesses, their raw output, and the per-investigation findings

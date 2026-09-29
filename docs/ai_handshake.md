@@ -71,30 +71,32 @@ Default `σ = 0` → multiplier = 1.0. See `docs/SHEDDING_AND_CABINMATES.md`.
 - `IllnessStatus` / `InfectionStatus` — Enum states for SIR transitions
 - `infection_probability(dose, alpha, beta)` — Scalar dose-response function
 
-### 2.2 Six-Pathway Transmission Core
+### 2.2 Eight-Route Transmission Core
 
 **Module:** `engines/transmission_core.py`
 
-Pathogens navigate the shipboard environment through six distinct,
-independent transport pathways:
+Pathogens navigate the shipboard environment through eight distinct,
+independent transport routes:
 
-| # | Pathway | Mechanism | Dose Source |
-|---|---------|-----------|-------------|
-| 1 | **Direct Contact** | Zone-colocation with avgR scaling; cabin-mate pairing under confinement on `Cabin_Corridor` zones | Agent shedding × contact pool × host multiplier |
-| 2 | **Short-Range Droplet** | Immediate room-level aerosolization | 5% of total shedding → room aerosol pool |
-| 3 | **Long-Range HVAC Airborne** | py-contam bridge distributes aerosol through ductwork | CONTAM mass-balance equation |
-| 4 | **Fomite Deposition** | Surface pool accumulation + stochastic pickup | 10% pickup probability × 1% transfer fraction |
-| 5 | **Food Contamination** | Pathogen mass deposited in dining zone food pools by infected food handlers | `food_contamination` profile block |
-| 6 | **Environmental Colonization** | Persistent pathogen mass in zone environmental reservoirs | `environmental_contamination` profile block |
+| # | Route | Mechanism | Dose Source |
+|---|-------|-----------|-------------|
+| 1 | **Direct Contact** | Per-partner shedding from sampled co-located partners (`transmission.contact_mode`, default `per_partner_contact`); cabin-mate pairing under confinement on `Cabin_Corridor` zones | Agent shedding × contact pool × host multiplier |
+| 2 | **Short-Range Droplet** | Near-field ring + room far-field pool (droplet field split `partition`) | Profile-conditioned continuous droplet emission |
+| 3 | **Long-Range HVAC Airborne** | py-contam bridge distributes aerosol through ductwork; cabin air resolved per stateroom (`cabin_compartment`) | CONTAM mass-balance equation |
+| 4 | **Emesis Aerosol** | Aerosolised share of vomit events | Emesis source term |
+| 5 | **Flush Aerosol** | Bowl-load aerosolisation at defecation events | `transmission.flush_aerosol_fraction` (default off, refusal band swept) |
+| 6 | **Fomite Deposition** | Surface pool accumulation + stochastic pickup | High-touch areal deposition and hand transfer |
+| 7 | **Food Contamination** | Pathogen mass deposited in dining zone food pools by infected food handlers | `food_contamination` profile block |
+| 8 | **Environmental Source** | Persistent pathogen mass in zone environmental reservoirs | `environmental_contamination` profile block |
 
-Each pathway produces:
+Each route produces:
 - A **dose contribution** to susceptible agents
 - A **contact-tracing record** for the surveillance inference hook
 
-Combined dose feeds the Korkin Lab dose-response function.  All six
-pathways are independently toggleable via protocol modifier scalars
-(`direct_contact_scalar`, `droplet_scalar`, `hvac_airborne_scalar`,
-`fomite_scalar`, `food_contamination_scalar`, `environmental_scalar`).
+Combined dose feeds the Korkin Lab dose-response function. Four routes
+carry protocol modifier scalars (`direct_contact_scalar`,
+`droplet_scalar`, `hvac_airborne_scalar`, `fomite_scalar`); per-route dose
+efficiency lives on the profile's `route_efficiency_multipliers`.
 
 ### 2.3 CONTAM-Style Airflow Transport (py-contam Bridge)
 
@@ -161,7 +163,7 @@ law (see `.cursorrules` Law 1).
 
 ## 3. Instrument Asset Scope
 
-All six diagnostic instruments use **fast, matrix-driven sampling noise
+The diagnostic instruments use **fast, matrix-driven sampling noise
 models implemented natively in Python** (numpy).  They simulate realistic
 instrument-level telemetry without requiring external bioinformatics
 tool dependencies.
@@ -171,9 +173,13 @@ tool dependencies.
 | ENV 1 | Continuous Air Sniffer | `ContinuousAirSniffer` | zone airborne mass | Ct values, amplification curves |
 | ENV 2 | Targeted Surface Swab | `TargetedSurfaceSwab` | zone surface mass + compliance | Ct values, technique variance |
 | ENV 3 | Wastewater Sequencing Grid | `WastewaterSequencingGrid` | pooled pathogen mass + microflora shifts | Dirichlet-multinomial kingdom reads |
-| CLN 4 | Clinical RDT | `ClinicalRapidDiagnostic` | agent shedding rate | Binary DETECTED/NOT DETECTED |
-| CLN 5 | Clinical qPCR | `ClinicalQPCR` | agent specimen mass | Patient viral load Ct |
-| CLN 6 | Clinical Microbiology | `ClinicalMicrobiology` | agent microflora status | Culture/staining, flora shift flags |
+| ENV 4 | Wastewater Holding-Tank Assay | `WastewaterHoldingTankAssay` | blackwater CSTR pool | Copies/L qPCR read, post-discharge |
+| CLN 5 | Clinical RDT | `ClinicalRapidDiagnostic` | agent shedding rate | Binary DETECTED/NOT DETECTED |
+| CLN 6 | Clinical qPCR | `ClinicalQPCR` | agent specimen mass | Patient viral load Ct |
+| CLN 7 | Clinical Microbiology | `ClinicalMicrobiology` | agent microflora status | Culture/staining, flora shift flags |
+| CLN 8 | Clinical Multiplex Panel | `ClinicalMultiplexPanel` | agent specimen mass | Multi-target panel reads |
+| CLN 9 | Clinical Impression | `ClinicalImpression` | presenting signs | Sick-call channel impressions |
+| VRF 10 | Long-Read Verification | `LongReadVerificationSequencing` | escalated routine signals | Nanopore confirmation + pathogen typing |
 
 **Quality Control:**  All instruments share the `InstrumentQC` engine:
 - Configurable `cross_contamination_rate` (default: 0.01% mass carryover)

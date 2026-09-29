@@ -85,12 +85,12 @@ epoch loop:
        │          │             │              │
        ▼          ▼             ▼              ▼
  ┌──────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────┐
- │ Korkin   │ │ Six-Pathway│ │ py-contam  │ │ Wearable       │
+ │ Korkin   │ │ Eight-Route│ │ py-contam  │ │ Wearable       │
  │ Lab ABM  │ │ Transmis.  │ │ HVAC       │ │ Monitor        │
  │ Bridge   │ │ Core       │ │ Transport  │ │                │
- │          │ │ Direct–4   │ │ Mass-      │ │ Oura / Garmin  │
- │ Agents   │ │ Food/Env   │ │ balance    │ │ Agent + fleet  │
- │ SIR      │ │ 5–6        │ │ Filter η   │ │ stoplights     │
+ │          │ │ 8 routes   │ │ Mass-      │ │ Oura / Garmin  │
+ │ Agents   │ │ incl. food │ │ balance    │ │ Agent + fleet  │
+ │ SIR      │ │ /env/flush │ │ Filter η   │ │ stoplights     │
  │ Dose-resp│ │            │ │            │ │                │
  └──────────┘ └────────────┘ └────────────┘ └────────────────┘
        │          │             │              │
@@ -130,16 +130,18 @@ The simulation runs a closed-loop control cycle:
 This loop is **fully autonomous** — SOPs activate and deactivate based
 on diagnostic conditions.  There are no hardcoded epoch schedules.
 
-### Six-Pathway Transmission Core
+### Eight-Route Transmission Core
 
-Pathways 1–4: direct, droplet, HVAC airborne, fomite. Pathways 5–6: food
-contamination and environmental colonization (per-pathogen profile blocks).
+Routes: direct, droplet, HVAC airborne, fomite, emesis aerosol, flush
+aerosol, food contamination, and environmental colonization
+(per-pathogen profile blocks).
 Dashboard uses `pathway_breakdown` in contact-tracing events.
 
 Direct-contact intensity follows `transmission.contact_mode` in
-`crusher_labs/config.yaml` (default `density_dependent`; see
-`docs/density_contact_spec.md`). Pathway doses may be scaled by profile
-`transmission_route_weights`. Food pathway doses honor Dining-zone
+`crusher_labs/config.yaml` (default `per_partner_contact`; see
+`docs/density_contact_spec.md`). Route doses may be scaled by profile
+`route_efficiency_multipliers` (legacy `transmission_route_weights`).
+Food pathway doses honor Dining-zone
 `food_contamination_multiplier`. Environmental colonization may be limited
 to `environmental_contamination.source_zones` when that list is present.
 Dining/free venue rotation is under `agent_behavior` (default off).
