@@ -173,6 +173,9 @@ longer justifications.
 | [literature/consensus_tranche_44_transfer_product.md](literature/consensus_tranche_44_transfer_product.md) | Living — per-touch transfer chain vs literature; feeds NORO-TRANSFER-PRODUCT-01 |
 | [literature/consensus_tranche_45_high_touch_area.md](literature/consensus_tranche_45_high_touch_area.md) | Living — literature record for ledger NORO-HIGH-TOUCH-AREA-01; adopts nothing |
 | [literature/consensus_tranche_46_touch_behaviour.md](literature/consensus_tranche_46_touch_behaviour.md) | Living — which surfaces observation counts as touched (multi-user vs single-user), the evidence behind ledger NORO-HIGH-TOUCH-DEFINITION-01; adopts nothing |
+| [literature/consensus_tranche_47_touch_shares.md](literature/consensus_tranche_47_touch_shares.md) | Living — per-class touch counts/shares that could populate `fomite_touch_share_table`; written for ledger NORO-TOUCH-SHARE-01; adopts nothing |
+| [literature/consensus_tranche_48_noro_observation_channel.md](literature/consensus_tranche_48_noro_observation_channel.md) | Living — observation-funnel literature checks read against the shipped channel's ratios in NORO-CHANNEL-01; feeds no register row, nothing enters `fitted_against` |
+| [literature/consensus_tranche_49_genotype_class_shares.md](literature/consensus_tranche_49_genotype_class_shares.md) | Evidence assembled — era-resolved GII.4-vs-non-GII.4 class shares from external typing surveillance (incl. the VSP cruise denominator's GII.17 succession), per-class challenge data thickness, and the GI.1 cruise-share null; feeds `prior_genotype_distribution` and ledger NORO-GENO-01; adopts nothing |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs
