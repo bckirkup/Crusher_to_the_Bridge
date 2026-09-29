@@ -45,7 +45,7 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | Streamlit dashboard | `python3 -m streamlit run dashboard.py --server.headless true` | Run orchestrator first for telemetry |
 | Deck asset precompute | `python3 scripts/precompute_deck_assets.py` | Writes `deck_graphics.geojson`, hull PNG, manifest per platform |
 | Sanity checker | `python3 tools/sanity_checker.py --from-config` | Ship + fleet + Stackelberg social configs |
-| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~3,240 tests, ~41 min. Fast tier: add `-m 'not slow'` (~4.5 min) |
+| Full test suite | `python3 -m pytest tests/ -v --tb=short` | ~6,400 tests. Fast tier: add `-m 'not slow'` |
 | Wearable anomaly scoring | `python3 -m pytest tests/test_wearable_anomaly_scorer.py tests/test_cascade_entry.py -v` | Confounder-aware infection_score + cascade entry fusion |
 | Diagnostic cascade smoke | `python3 -m pytest tests/test_smoke_diagnostic_cascade.py -v` | 6-epoch runs with cascade enabled (standard + multiplex specs) |
 | Long-read / TAT tests | `python3 -m pytest tests/test_long_read_sequencing.py tests/test_instrument_turnaround.py -v` | Nanopore + turnaround queue |
@@ -65,6 +65,13 @@ Pure-Python simulation (no databases or external APIs for local dev). **Python 3
 | `dashboard/` | LCARS Streamlit package (`dashboard.py` is the entry script) |
 | `scripts/` | Enterprise platform builder, deck graphics, asset precompute |
 | `telemetry_buffer/agent_axes.py` | Canonical orthogonal agent state literals |
+| `engines/` | Transmission core, CONTAM/ContamX bridges, natural history, strain, wearable, rhythm, wastewater |
+| `api/` | REST job API over PicardRunSpec (`docs/api_service.md`) |
+| `deploy/aws/` | AWS Batch jobdefs, per-campaign Dockerfiles, entrypoints, submit scripts |
+| `simulation_utils/` | Shared helpers (paths, numeric, epidemic labels, platform complement) |
+| `third_party/contamx/` | ContamX interop reference artifacts |
+| `docs/ledger/` | Defect/measurement ledger entries, one file per ID |
+| `reports/` | Generated analysis reports |
 
 ### Operator manuals
 
@@ -128,6 +135,14 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 | `preboarding-wearable-decision` | Pre-boarding wearable ROI / policy Monte Carlo (`picard_framework/analysis/boundary/`); fixture or Stan `outbreak_surface` lookup |
 | `boundary-aws-pipeline` | `boundary_surface_v1` EC2 Spot campaign + On-Demand compute/memory surface/Stan/MC pathways (`deploy/aws/`, Bernoulli+Beta-AR) |
 | `aws-batch-campaign` | Running large Crusher simulation batches on AWS Batch / EC2 Spot |
+| `campaign-preflight` | The fixed gate before any campaign array submission (smoke, dry-run count, pinned image digest, canary, frozen admissibility criteria) |
+| `informative-shard-ordering` | `--order informative` shard ordering and `--stop-rule` early shard stopping |
+| `transmission-blocker-cascade` | "Dose delivered, nobody infected" — ordered diagnostic cascade for zero/near-zero secondaries |
+| `stochastic-attribution` | Attributing a moved baseline/golden/campaign number: paired seeds, replicate counts, pre-declared criteria |
+| `searching-literature-evidence` | Consensus MCP literature search for constants, rates, fractions, kernels, anchors |
+| `clock-unit-safety` | Unit-declared time config converted through SimClock |
+| `session-handoff-ledger` | Retiring long sessions: handoff ledger template + stop conditions |
+| `provisioning-devin-aws-access` | Role-based AWS access setup/repair for Devin sessions |
 | `managing-github-issues` | Issue triage, batching, PR lifecycle |
 | `download-deepwiki` | Offline DeepWiki export for a public GitHub repo |
 
@@ -140,7 +155,7 @@ Install from the lockfile: `uv sync --locked --all-extras --no-install-project -
 - **Law 1:** No hardcoded epoch SOP schedules; Stackelberg `authorize_sop_subset` filters stoplight-eligible SOPs; `activate_sop` can force protocols via `forced_protocol_ids`.
 - **OIS:** Fourth ledger dimension in `cost_accounting`; configured via `operational_impact_weights` in `resource_costs.json`.
 - Utility **weights and optimization** are out-of-repo; only feature export and action apply are in-repo.
-- Nine ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `messy_cruise_500`); see `README.md` Platforms table.
+- Twelve ship platforms in `data/platforms/` (including fiction-adapted Enterprise bundles and legacy `expedition_cruise_300`/`messy_cruise_500`); see `README.md` Platforms table.
 - **Wearable cascade entry** uses confounder-aware `infection_score` (not raw `anomaly_count`) via `diagnostic_cascade.entry.wearable_alert_fusion` or defaults in `data/config/diagnostic_cascade*.json`. Fleet stoplight SOPs (SOP-013/014) still use shipwide `anomaly_rate`.
 - **Complexity backlog:** new functions stay at cognitive complexity ≤15. Campaign `t1`–`t16` / calibration iterators live in `tier_iterators.py`; `ShipSimulation.step` is `_begin_epoch` plus `_step_*` phases. See skill `sonar-quality`.
 - **Outbreak response architecture:** SOP policy (attack-rate escalation + `min_escalation_status`), organizational decision latency (`escalation.decision_latency` / SOP `activation_delay_hours`), and bimodal compliance (compliant/reluctant/defiant) are separate systems — see `docs/tiered_escalation_spec.md` and skill `outbreak-response-architecture`. Default `lockdown_attack_rate: never` for n=20 smokes; mega-cruise campaign injects `0.05`.

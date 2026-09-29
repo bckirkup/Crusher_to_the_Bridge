@@ -88,14 +88,30 @@ Key knobs in `crusher_labs/config.yaml` (overridable via Picard `config_override
 
 | Knob | Default | Notes |
 |------|---------|-------|
-| `transmission.contact_mode` | `density_dependent` | Also `legacy` or opt-in `heterogeneous_zone_dose` |
+| `transmission.contact_mode` | `per_partner_contact` | Each susceptible receives shedding from the specific partners sampled; alternates `density_dependent`, `heterogeneous_zone_dose`, `legacy` ([density_contact_spec.md](density_contact_spec.md)) |
+| `transmission.cabin_air_mode` | `cabin_compartment` | Short-range inhalation resolved per stateroom; `zone_pool` is the labelled pre-change baseline ([cabin_air_compartment_spec.md](cabin_air_compartment_spec.md)) |
+| `transmission.droplet_emission_mode` | `profile_conditioned` | `shipped_uniform` restores the pre-deletion uniform droplet fraction as a selectable baseline |
+| `transmission.droplet_field_split.mode` | `partition` | Zone pool carries `far_field_share`; the rest reaches a partner-bounded proximity ring ([droplet_field_split_spec.md](droplet_field_split_spec.md)) |
+| `transmission.near_field_air.mode` | `two_box` | `off` is the labelled baseline ([near_field_air_spec.md](near_field_air_spec.md)) |
+| `transmission.exposure_cap.enabled` | `true` | Per-shedder contact budget, catalogued cruise platforms only ([exposure_cap_spec.md](exposure_cap_spec.md)) |
+| `transmission.activity_contacts.enabled` | `true` | Schedule-conditioned contact draw ([contact_architecture_spec.md](contact_architecture_spec.md)) |
+| `transmission.blackwater_plumbing` | `true` | CSTR holding tank; `false` is the labelled baseline |
+| `transmission.sanitary_visit_mode` | `none` | `dwell_weighted` resolves shared-head visits ([shared_sanitary_zones.md](shared_sanitary_zones.md)) |
+| `hvac.pathogen_pool_transport` | `airflow` | Per-pathogen pools move through the declared airflow network; `none` is the labelled baseline |
+| `rhythm.enabled` | `true` | SHIP-RHYTHM daily program on catalogued platforms; `false` is the labelled baseline ([rhythm/rhythm_spec.md](rhythm/rhythm_spec.md)) |
+| `observation.surface_swab_source` | `surface_pool_density` | `airborne_fraction` is the labelled pre-change baseline |
+| `observation.wastewater_assay_mode` | `holding_tank` | Copies/L assay on the blackwater tank; `none` is the labelled baseline |
 | `agent_behavior.dining_rotation_probability` | `0.0` | Keep 0 for golden stability; raise in campaigns for venue mixing |
 | `agent_behavior.free_zone_rotation_probability` | `0.0` | Same pattern for Free zones; the underlying draw is capacity-weighted over passenger-accessible venues |
 | `voyage.effects_enabled` | `false` | Flag-gated port/embarkation effects; see [ship_operations_spec.md](ship_operations_spec.md) |
 
-Pathogen profiles (`data/pathogens/`): `dose_adjustment` (log10 shedding offset),
-`transmission_route_weights`, `innate_nonsusceptible_fraction`, and optional
-`environmental_contamination.source_zones`. Dining zones may set
+Pathogen profiles (`data/pathogens/`): `route_efficiency_multipliers`
+(legacy `transmission_route_weights`; independent per-route dose
+multipliers, not shares), `environmental_faecal_release_log10_g_per_epoch`
+(legacy `dose_adjustment`), `secretor_negative_fraction` with
+`secretor_negative_relative_susceptibility` (legacy
+`innate_nonsusceptible_fraction`), `airborne_emission_fraction`, and
+optional `environmental_contamination.source_zones`. Dining zones may set
 `dining_service_type` and `food_contamination_multiplier` in `spatial_layout.json`.
 
 ### Voyage itinerary (ship operations)

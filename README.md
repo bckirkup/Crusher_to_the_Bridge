@@ -27,7 +27,7 @@ python3 orchestrator.py --epochs 250
 # Launch LCARS dashboard (after simulation)
 python3 -m streamlit run dashboard.py
 
-# Run the test suite (~1,500 tests)
+# Run the test suite (~6,400 tests; fast tier: `-m 'not slow'`)
 python3 -m pytest tests/ -v --tb=short
 ```
 
@@ -74,42 +74,99 @@ orchestrator.py              Standalone epoch-loop CLI (see also ShipSimulation 
 
 presidio_runner.py           Fleet loop over Picard cruises + experience store
 picard_framework/            PicardRunSpec, catalog, ShipSimulation.step()
-decision_engine/             StackelbergRound, diffusion, lived experience, utility I/O
-presidio/data/               Fleet catalog, economics, social, intelligence libraries
-picard_framework/data/       Agent profile bundles
+├── simulation/              ShipSimulation step phases
+├── catalog/                 Platform/pathogen bundle resolution
+├── analysis/                Campaign analysis: sentinel/, shore/, stan/,
+│                            boundary/, economics/, phylodynamics/, bundles
+├── runs/                    Run specs + frozen campaign designs
+│   └── mega_cruise_campaign/   ~17,780-run factorial matrix
+├── covid_*.py, leverage_screen.py   COVID/leverage campaign entry modules
+└── data/                    Agent profile bundles
+decision_engine/             StackelbergRound, diffusion, lived experience,
+                             utility I/O (information/, observation/, social/,
+                             stackelberg/, utility/)
+presidio/                    presidio/run_spec.py + presidio/data/ fleet
+                             catalog, economics, social, intelligence libraries
 
 crusher_labs/                Dr. Crusher's Bio-Diagnostic Suite
 ├── __init__.py              Config loader, modality builder
 ├── config.yaml              ★ Master configuration file (see below)
-├── observation_core.py      Six routine instruments + optional long-read verification
+├── observation_core.py      Routine instruments (air sniffer, surface swab,
+│                            wastewater grid + holding-tank assay, per-agent assays)
 ├── instrument_turnaround.py Per-instrument assay delivery delays (TAT queue)
 ├── long_read_escalation.py  Nanopore escalation from routine modality signals
+├── diagnostic_cascade.py    Tier 0–3 cascade evaluation (multiplex panels)
+├── cascade_entry.py         Cascade Tier-0 entry fusion (infection_score gating)
+├── clinical_instrument_params.py  Per-pathogen instrument parameter resolution
+├── clinical_presentation.py Presenting-sign → sick-call/latency channel
+├── clinical_correlation.py  Cross-instrument correlation bookkeeping
 ├── protocol_engine.py       Stoplight computation, SOP activation, modifier application
 ├── lab_notebook.py          Artificial lab notebook (audit trail)
 ├── cost_ledger.py           Financial/material/labor/OIS cost tracking
 ├── stoplight.py             Ct → stoplight conversion
+├── testing_campaign.py      Assay-campaign runner helpers
 └── modalities/
     ├── syndromic.py         Symptom-based screening
     ├── clinical_rdt.py      Rapid antigen lateral-flow test
     ├── targeted_pcr.py      RT-qPCR panel
     ├── sequencing.py        Metagenomic shotgun sequencing
     ├── long_read_sequencing.py  Oxford Nanopore verification & pathogen typing
+    ├── clinical_strain_typing.py  Clinical isolate strain typing (genogroup/class)
+    ├── surface_strain_recovery.py Environmental surface strain recovery
     └── wearable.py          Wearable physiological data stream
 
-engines/                     External simulation bridges
+engines/                     Simulation cores and external bridges
+├── transmission_core.py           Eight-route pathogen transmission
 ├── infection_dynamics_bridge.py   Korkin agent-based model (KorkinShipEngine)
 ├── py_contam_bridge.py            HVAC zone-to-zone airborne transport
-├── transmission_core.py           Six-pathway pathogen transmission
+├── contamx_runner.py, contamx_transport.py, contamx_ahs_bridge.py
+│                                  ContamX interop (SIM reader, AHS bridge)
+├── natural_history.py, incubation.py, illness_duration.py, initiation.py
+│                                  Infection natural history & voyage initiation
+├── stateroom_air.py               Per-stateroom air compartment exchange
+├── rhythm_layer.py                SHIP-RHYTHM schedule-conditioned co-presence
+├── strain_state.py, strain_mutation.py, strain_dose_ledger.py
+│                                  Variant state, mutation, per-strain dose ledger
+├── sim_clock.py                   Declared-unit simulation clock (hours/days)
+├── voyage_itinerary.py, scenario_schedule.py, crew_duty_exclusion.py
+│                                  Voyage program, scenarios, duty exclusion
+├── wastewater_plumbing.py         Blackwater holding-tank pool (CSTR)
+├── fomite_surfaces.py             Per-surface fomite pool bookkeeping
+├── non_pharmaceutical_interventions.py, pharmaceutical_interventions.py
+├── engine_paths.py                Engine artifact path resolution
 ├── wearable_monitor.py            Wearable device registry & physiological model
 └── wearable_anomaly_scorer.py     Confounder-aware infection scoring for cascade entry
 
-tools/
-├── sanity_checker.py        Pre-run config validation (pydantic + cross-refs)
-└── gis_spatial_bridge.py    GIS shapefile → spatial layout converter
+api/                         REST job API over PicardRunSpec/ShipSimulation
+                             (docs/api_service.md)
+
+deploy/aws/                  AWS Batch campaign machinery — per-campaign
+                             Dockerfiles + job definitions, entrypoints,
+                             submit/monitor scripts, IAM role JSON
+                             (deploy/aws/README.md)
+
+tools/                       Validators, campaign readouts, and diagnostic
+                             probes (sanity_checker.py, gis_spatial_bridge.py,
+                             fit_covid_theta.py, covid_* readouts/smokes,
+                             flu_* probes, contam_* compares, noro_diag/,
+                             smalln_diag/)
+
+simulation_utils/            Shared helpers (paths, numeric, epidemic labels,
+                             asset defaults, platform complement)
+
+third_party/contamx/         ContamX interop reference artifacts
+
+_epoch_timing/               Epoch timing harness + per-platform timing JSON
+
+reports/                     Generated analysis reports (config sweeps, checks)
 
 data/
-├── config/                  Standing protocols, resource costs, logging, TAT, long-read params
-├── pathogens/               Pathogen profiles (dose-response, shedding curves)
+├── config/                  Standing protocols, resource costs, logging, TAT,
+│                            long-read params, diagnostic cascade specs
+├── pathogens/               Pathogen profile bundles — active bundle is
+│                            norwalk_gi + sars_cov2_resp + influenza_a
+│                            (active_profiles.json); edison 10-pathogen and
+│                            Enterprise bundles also ship
 ├── platforms/               Ship spatial layouts and HVAC definitions
 │   ├── destroyer_baseline/
 │   ├── expedition_cruise_300/   (legacy — superseded by expedition_cruise_450)
@@ -119,9 +176,16 @@ data/
 │   ├── fletcher_class_destroyer/
 │   ├── legend_class_nsc/
 │   ├── mega_cruise_5000/
+│   ├── messy_cruise_500/        (legacy archived berthing model)
 │   ├── san_antonio_class_lpd/
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
+│   (plus committed architectural deck plates — class_photo_catalog.json,
+│    deck_provenance.json, CLASS_PHOTO_ATTRIBUTION.md)
+├── rhythm/                  Event catalogs for the SHIP-RHYTHM daily program
+├── observation/             Observation-channel data
+├── scenarios/               Scenario definitions
+├── contam_hobbyist/         ContamW hobbyist projects per hull
 ├── microbiome_profiles/     GRUMB kingdom profiles by environment
 ├── shp/                     GIS shapefiles for spatial bridge
 └── templates/               Reference configs (cruise ship, multi-pathogen)
@@ -129,15 +193,21 @@ data/
 schemas/                     JSON Schema definitions for all data contracts
 dashboard.py                 Streamlit entry script → dashboard/ LCARS package
 dashboard/                   Modular command deck (theme, charts, spatial_viz, deck_geometry)
-scripts/                     Enterprise platform builder, deck graphics, asset precompute
+scripts/                     Enterprise platform builder, deck graphics, asset precompute,
+                             campaign manifest builders, sonar_guard.py, run_campaign.*
 telemetry_buffer/
 │   agent_axes.py            Orthogonal agent state (infection / presentation / compliance)
-tests/                       ~1,500 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read, TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic cascade, Sentinel, boundary)
+tests/                       ~6,400 tests (ship, fleet, Stackelberg, OIS, behavioral, long-read,
+                             TAT, enterprise, CONTAM, schemas, wearable scoring, diagnostic
+                             cascade, Sentinel, boundary, transmission & campaign probes)
 docs/AGENTS.md               Cursor Cloud / agent development notes
+docs/ledger/                 Repository-wide defect/measurement ledger entries
+                             (one file per <ID>; see docs/ledger/README.md)
 ```
 
 CI and quality gates: see [Testing & code quality](#testing--code-quality).
-Workflows: `.github/workflows/ci.yml` (full suite + smokes) and
+Workflows: `.github/workflows/ci.yml` (fast-tier suite + smokes),
+`.github/workflows/nightly.yml` (whole suite on cron / on demand), and
 `.github/workflows/picard-presidio.yml` (framework-focused + Stackelberg schema checks).
 
 ## Configuration Reference (`crusher_labs/config.yaml`)
@@ -320,10 +390,12 @@ multi_pathogen:
 ```
 
 Pathogen profiles are defined in JSON files under `data/pathogens/`.
-Each profile specifies dose-response parameters, shedding curves,
+The active bundle (`active_profiles.json`) carries three pathogens:
+`norwalk_gi` (norovirus), `sars_cov2_resp` (SARS-CoV-2), and
+`influenza_a` — each with dose-response parameters, shedding curves,
 transmission routes, illness probabilities, and microflora disruption
 signatures.  See `data/templates/multi_pathogen_cruise_ship.json` for
-a reference example with concurrent Norovirus + SARS-CoV-2.
+a reference example.
 
 ### Microflora Disruption
 
@@ -465,7 +537,7 @@ grumb_seeding:
 
 ## Platforms
 
-Nine ship platforms are included, each with spatial layout and HVAC
+Twelve ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -496,9 +568,33 @@ python tools/sanity_checker.py --from-config
 
 ## Transmission Pathways
 
-Six pathways in `engines/transmission_core.py`: direct contact, droplet,
-HVAC airborne, fomite, food contamination (`food_contamination` profile block),
-environmental (`environmental_contamination` profile block).
+Eight routes in `engines/transmission_core.py`: direct contact, droplet,
+HVAC airborne, fomite, emesis aerosol, flush aerosol, food contamination
+(`food_contamination` profile block), environmental
+(`environmental_contamination` profile block). Per-route dose efficiency
+lives on the profile's `route_efficiency_multipliers` (legacy
+`transmission_route_weights`) — independent multipliers, not shares.
+Route and mechanism defaults of record: `docs/README.md` (mechanisms
+live in-tree) and `docs/ledger/`.
+
+Current mechanism defaults (each ships with a labelled pre-change
+baseline mode for paired measurement):
+
+| Knob | Default | Spec |
+|------|---------|------|
+| `transmission.contact_mode` | `per_partner_contact` | `docs/density_contact_spec.md` |
+| `transmission.cabin_air_mode` | `cabin_compartment` | `docs/cabin_air_compartment_spec.md` (AERO-CABIN-01) |
+| `transmission.droplet_emission_mode` | `profile_conditioned` | `docs/density_contact_spec.md` (ledger item 40) |
+| `transmission.droplet_field_split.mode` | `partition` | `docs/droplet_field_split_spec.md` (AERO-SPLIT-01) |
+| `transmission.near_field_air.mode` | `two_box` | `docs/near_field_air_spec.md` (AERO-NEAR-02) |
+| `transmission.exposure_cap.enabled` | `true` (cruise hulls) | `docs/exposure_cap_spec.md` (EXPO-CAP-01) |
+| `transmission.activity_contacts.enabled` | `true` | `docs/contact_architecture_spec.md` (CONTACT-ARCH-01) |
+| `transmission.blackwater_plumbing` | `true` | `docs/norovirus/environmental_observation_v1.md` |
+| `transmission.sanitary_visit_mode` | `none` | `docs/shared_sanitary_zones.md` |
+| `hvac.pathogen_pool_transport` | `airflow` | AERO-CABIN-03 |
+| `observation.surface_swab_source` | `surface_pool_density` | `docs/norovirus/environmental_observation_v1.md` |
+| `observation.wastewater_assay_mode` | `holding_tank` | `docs/norovirus/environmental_observation_v1.md` §3 |
+| `rhythm.enabled` | `true` (catalogued platforms) | `docs/rhythm/rhythm_spec.md` (SHIP-RHYTHM-01/02) |
 
 ## Confinement: Quarantine vs. Isolation
 
@@ -601,8 +697,11 @@ python tools/sanity_checker.py --config-dir data/config \
 ## Testing & code quality
 
 ```bash
-# Full suite (~1,500 tests)
+# Full suite (~6,400 tests)
 python3 -m pytest tests/ -v --tb=short
+
+# Fast tier (what ci.yml runs per push, sharded by module)
+python3 -m pytest tests/ -m 'not slow' -v --tb=short
 
 # Picard / Presidio / Stackelberg
 python3 -m pytest tests/test_picard_framework.py tests/test_decision_engine.py \
@@ -648,7 +747,7 @@ honest as the suite grows:
 | **Sonar mechanical guards** | `scripts/sonar_guard.py` (CI + pre-commit) | Fast, conservative checks for Sonar-class patterns and unsafe workflow install commands without waiting on a live Sonar scan |
 | **Workflow lint** | `ci.yml` (`workflow-lint`) | zizmor on `ci.yml` and `picard-presidio.yml` |
 | **Config & schema contracts** | `tools/sanity_checker.py`, `schemas/`, `tests/test_json_schema_validation.py` | Pydantic + cross-refs for ship/fleet/social config; JSON Schema validation for data contracts and platforms |
-| **Full pytest + coverage** | `ci.yml` (`test`) | ~1,500 tests on Python **3.11** and **3.12** with `--cov` / XML coverage artifact |
+| **Full pytest + coverage** | `ci.yml` (`test`) | ~6,400 tests on Python **3.11** and **3.12** with `--cov` / XML coverage artifact |
 | **Import & smoke gates** | `ci.yml` | Picard/Presidio/Stackelberg import hygiene; orchestrator module split + stoplight dedup; dashboard LCARS import; Presidio 1-cruise smoke; Sentinel analysis smoke; 24-epoch orchestrator + OIS telemetry fields; campaign Docker image `--smoke` |
 | **Framework CI slice** | `.github/workflows/picard-presidio.yml` | Focused Picard/Presidio/Stackelberg/OIS/behavioral/long-read/TAT/CONTAM/campaign/outbreak/boundary pytest set, Stackelberg + all-platform schema checks, Presidio smoke (runs on `main` and `cursor/**`) |
 | **SonarQube Cloud** | `.sonarcloud.properties` + `ci.yml` (`sonar`) | Autoscan configuration (Python 3.11/3.12, `tests/` as test code); optional CI scan uploads coverage when `SONAR_TOKEN` is set |

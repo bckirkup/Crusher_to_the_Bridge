@@ -1,8 +1,11 @@
 # Rhythm layer spec — schedule-conditioned co-presence (SHIP-RHYTHM-01)
 
-> **Status:** Proposed — spec and data catalog only; nothing below is wired into
-> the engine. Companion data file: `data/rhythm/event_catalogs.json`. Register
-> rows: `docs/parameter_provenance_register.md` §3.6.
+> **Status:** Implemented, on by default — SHIP-RHYTHM-01/02,
+> `engines/rhythm_layer.py` over `data/rhythm/event_catalogs.json`
+> (`rhythm.enabled: false` is the labelled baseline; catalogued cruise
+> platforms only — hulls without a catalog entry stay on the baseline
+> regardless of the flag). Register rows:
+> `docs/parameter_provenance_register.md` §3.6.
 
 This document specifies the daily-rhythm layer the two failure ledgers ask for.
 [COVID-TAKEOFF-ATTR-01](../ledger/COVID-TAKEOFF-ATTR-01.md) measured the model's
