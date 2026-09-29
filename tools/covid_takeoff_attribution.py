@@ -308,7 +308,8 @@ class TakeoffAttributionLedger:
 
         def resolve_wrapped(epoch: int, agent: Any, pathogen_id: str,
                             apd: Any, apw: Any, matrix: Any,
-                            events: list) -> None:
+                            events: list, *args: Any,
+                            **kwargs: Any) -> None:
             watched = (
                 pathogen_id == pid and not agent.is_infected_with(pid)
             )
@@ -327,6 +328,7 @@ class TakeoffAttributionLedger:
                 }
             orig_resolve(
                 epoch, agent, pathogen_id, apd, apw, matrix, events,
+                *args, **kwargs,
             )
             if watched:
                 ledger._challenges[int(agent.agent_id)] = {

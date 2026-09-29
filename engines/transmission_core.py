@@ -46,6 +46,12 @@ from typing import Any
 import numpy as np
 
 from crusher_labs.clinical_presentation import resolve_phase
+from engines.cooperative_packet import (
+    COOP_CLASSES,
+    COOP_MODEL,
+    classify_pathway_doses,
+    coop_class_weights,
+)
 from engines.crew_duty_exclusion import is_food_employee
 from engines.fomite_surfaces import (
     PerSurfaceFomiteState,
@@ -742,6 +748,10 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
 }
 # Deprecated alias, kept for external readers.
 DEFAULT_ROUTE_WEIGHTS = DEFAULT_ROUTE_EFFICIENCY
+
+_DOSE_RESPONSE_MODELS = frozenset(
+    {"beta_poisson", "exponential", COOP_MODEL},
+)
 
 # Internal pathway dose keys → route_efficiency_multipliers keys
 PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
@@ -3840,10 +3850,27 @@ class TransmissionCore:
         )
         return max(0.0, min(1.0, weighted / total))
 
+    def _dose_response_model(self, pathogen_id: str) -> str:
+        """The declared dose-response model for one pathogen, validated."""
+        dr = self.pathogen_profiles.get(pathogen_id, {}).get(
+            "dose_response", {},
+        )
+        model = dr.get("model", "beta_poisson")
+        if model not in _DOSE_RESPONSE_MODELS:
+            raise ValueError(
+                f"{pathogen_id}: unknown dose_response.model {model!r}",
+            )
+        return model
+
     def _dose_response(self, pathogen_id: str, dose: float) -> float:
-        """Probability one epoch's dose of a pathogen establishes an infection."""
+        """Probability one epoch's dose of a pathogen establishes an infection.
+
+        Under ``cooperative_packet`` a bare scalar dose is a bolus-class
+        challenge — one carrier delivers it whole — so the marginal
+        probability keeps the baseline beta-Poisson form.
+        """
         dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
-        if dr.get("model", "beta_poisson") == "exponential":
+        if self._dose_response_model(pathogen_id) == "exponential":
             return 1.0 - math.exp(-dr.get("k", 0.01) * dose)
         scale = self._beta_poisson_susceptibility_scale(pathogen_id, dr)
         return 1.0 - math.pow(
@@ -3873,7 +3900,7 @@ class TransmissionCore:
         if existing is not None:
             return existing
         dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
-        if dr.get("model", "beta_poisson") == "exponential":
+        if self._dose_response_model(pathogen_id) == "exponential":
             susceptibility = float(dr.get("k", 0.01))
         else:
             draw = float(
@@ -4959,6 +4986,10 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]] = {}
         # Per-agent per-pathogen dose accumulator
         agent_pathogen_doses: dict[int, dict[str, float]] = {}
+        # Per-agent cooperative carrier-class doses (dry/wet split of the
+        # droplet lump); populated only while a cooperative_packet profile
+        # is armed
+        agent_coop_doses: dict[int, dict[str, float]] = {}
         # Strain-resolved shadow of the same doses (empty when flag is off);
         # the pooled doses are kept so the shadow can be checked against the
         # dose that actually drove the draw
@@ -4975,6 +5006,7 @@ class TransmissionCore:
                 hvac_downstream_zones, multi_pathogen_mass,
                 pathogen_id, agent_doses, agent_pathway_doses, agent_pathogen_doses,
                 matrix, events,
+                agent_coop_doses=agent_coop_doses,
             )
 
         # ── Apply combined dose-response per pathogen ───────────────
@@ -4989,6 +5021,7 @@ class TransmissionCore:
                     epoch, agent, pathogen_id,
                     agent_pathogen_doses, agent_pathway_doses,
                     matrix, events,
+                    agent_coop_doses=agent_coop_doses,
                 )
 
         # ── Per-zone contact summary (occupancy map used for doses) ──
@@ -5031,6 +5064,7 @@ class TransmissionCore:
         agent_pathway_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
+        agent_coop_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         """Dose-response draw for one agent against one pathogen this epoch.
 
@@ -5053,6 +5087,7 @@ class TransmissionCore:
             effective_dose *= self._superinfection_susceptibility(pathogen_id)
         if effective_dose <= 0.0:
             return
+        model = self._dose_response_model(pathogen_id)
 
         cumulative_dose = (
             agent.cumulative_exposure.get(pathogen_id, 0.0)
@@ -5069,9 +5104,15 @@ class TransmissionCore:
         )
         for route, route_dose in route_doses.items():
             route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
-        inf_prob = self._dose_response_hazard(
-            agent, pathogen_id, effective_dose,
-        )
+        if model == COOP_MODEL:
+            inf_prob = self._cooperative_hazard(
+                agent, pathogen_id, p_dose, effective_dose,
+                agent_pathway_doses, agent_coop_doses,
+            )
+        else:
+            inf_prob = self._dose_response_hazard(
+                agent, pathogen_id, effective_dose,
+            )
 
         if self.rng.random() >= inf_prob:
             return
@@ -5093,6 +5134,43 @@ class TransmissionCore:
             agent_pathway_doses.get(agent.agent_id, {}),
             matrix, events,
         )
+
+    def _cooperative_hazard(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        p_dose: float,
+        effective_dose: float,
+        agent_pathway_doses: dict[int, dict[str, float]],
+        agent_coop_doses: dict[int, dict[str, float]] | None,
+    ) -> float:
+        """Packet-weighted hazard for the cooperative dose-law arm.
+
+        Each carrier class's dose is weighted by the share of its copies
+        arriving inside >= n_star packets; the host's persistent beta
+        frailty draw scales the packet-arrival rate exactly as it scales
+        the independent-action rate in the baseline, so the A/B isolates
+        the dose law alone.
+        """
+        dr = self.pathogen_profiles.get(pathogen_id, {}).get(
+            "dose_response", {},
+        )
+        weights = coop_class_weights(dr)
+        classes = classify_pathway_doses(
+            agent_pathway_doses.get(agent.agent_id, {}),
+            pathogen_id,
+            (agent_coop_doses or {}).get(agent.agent_id),
+            p_dose,
+        )
+        post_factor = effective_dose / p_dose
+        lam = sum(
+            classes.get(cls, 0.0) * post_factor * weights[cls]
+            for cls in COOP_CLASSES
+        )
+        susceptibility = self._dose_response_susceptibility(
+            agent, pathogen_id,
+        )
+        return -math.expm1(-susceptibility * lam)
 
     @staticmethod
     def _record_transmission_event(
@@ -5206,11 +5284,16 @@ class TransmissionCore:
         agent_pathogen_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
+        agent_coop_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         profile = self.pathogen_profiles.get(pathogen_id, {})
         p_mass = (multi_pathogen_mass or {}).get(pathogen_id, zone_pathogen_mass)
         p_agent_doses: dict[int, float] = {}
         p_agent_pw: dict[int, dict[str, float]] = {}
+        p_agent_coop: dict[int, dict[str, float]] = {}
+        coop_arm = (
+            profile.get("dose_response", {}).get("model") == COOP_MODEL
+        )
         ledger = StrainDoseLedger() if self.strain_tracking else None
         ec = profile.get("environmental_contamination", {})
         person_to_person = ec.get("person_to_person", True)
@@ -5225,6 +5308,7 @@ class TransmissionCore:
                 epoch, zone_occupants, p_agent_doses, matrix, events,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
+                agent_coop_doses=p_agent_coop if coop_arm else None,
             )
 
         self._pathway_hvac_airborne(
@@ -5295,6 +5379,45 @@ class TransmissionCore:
             for pw_name, pw_dose in pw.items():
                 key = f"{pw_name}:{pathogen_id}" if pathogen_id != "_default" else pw_name
                 merged[key] = merged.get(key, 0.0) + pw_dose
+
+        self._merge_coop_class_doses(
+            p_agent_coop, pathogen_id, agent_coop_doses,
+            route_weights, npi, susceptibility,
+        )
+
+    @staticmethod
+    def _merge_coop_class_doses(
+        p_agent_coop: dict[int, dict[str, float]],
+        pathogen_id: str,
+        agent_coop_doses: dict[int, dict[str, float]] | None,
+        route_weights: dict[str, float],
+        npi: dict[int, dict[str, float]],
+        susceptibility: dict[int, float],
+    ) -> None:
+        """Fold the droplet class split through the droplet route's factors.
+
+        The cooperative terms are recorded raw at the droplet site, so the
+        merged class doses pick up the same route efficiency, NPI and host
+        susceptibility multipliers the lump received — keeping class doses
+        on the ``p_dose`` scale for the arm's hazard.
+        """
+        if not p_agent_coop or agent_coop_doses is None:
+            return
+        droplet_key = PATHWAY_EFFICIENCY_KEYS["droplet"]
+        for aid, terms in p_agent_coop.items():
+            npi_w = float((npi.get(aid) or {}).get(droplet_key, 1.0))
+            factor = (
+                float(route_weights.get(droplet_key, 1.0))
+                * npi_w
+                * susceptibility.get(aid, 1.0)
+            )
+            merged = agent_coop_doses.setdefault(aid, {})
+            for cls, cls_dose in terms.items():
+                key = (
+                    f"{cls}:{pathogen_id}"
+                    if pathogen_id != "_default" else cls
+                )
+                merged[key] = merged.get(key, 0.0) + cls_dose * factor
 
     def _route_efficiencies(
         self, profile: dict[str, Any] | None,
@@ -6075,6 +6198,7 @@ class TransmissionCore:
         pathogen_id: str = "_default",
         profile: dict | None = None,
         ledger: StrainDoseLedger | None = None,
+        agent_coop_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         """Immediate aerosol exposure from shedders sharing the same air.
 
@@ -6097,6 +6221,7 @@ class TransmissionCore:
                 near_field_on=near_field_on,
                 emission_fraction=emission_fraction,
                 n_occupants=len(occupants),
+                agent_coop_doses=agent_coop_doses,
             )
 
     def _droplet_unit_doses(
@@ -6114,6 +6239,7 @@ class TransmissionCore:
         near_field_on: bool,
         emission_fraction: float,
         n_occupants: int,
+        agent_coop_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         """One air unit's shedders dosing its own susceptibles."""
         zone_name = self.compartment_parent(unit_name)
@@ -6195,20 +6321,44 @@ class TransmissionCore:
         )
 
         for target in susceptible:
-            dose, near_dose = self._droplet_target_dose(st, target)
+            dose, near_dose, pool_dose, addback_dose = (
+                self._droplet_target_dose(st, target)
+            )
+            source_attribution = attribution(ledger, st.mix)
             dose = self._accumulate(
                 target.agent_id, "droplet", dose,
                 agent_doses, agent_pathway_doses,
-                attribution(ledger, st.mix),
+                source_attribution,
             )
             self._record_droplet_exposure(st, matrix, target, dose, near_dose)
+            if agent_coop_doses is not None:
+                emission = (
+                    source_attribution.emission_factor
+                    if source_attribution is not None else 1.0
+                )
+                slot = agent_coop_doses.setdefault(target.agent_id, {})
+                pool_cls = "wet" if st.in_compartment else "dry"
+                slot[pool_cls] = (
+                    slot.get(pool_cls, 0.0) + pool_dose * emission
+                )
+                slot["wet"] = (
+                    slot.get("wet", 0.0)
+                    + (addback_dose + near_dose) * emission
+                )
 
     def _droplet_target_dose(
         self,
         st: _DropletUnitState,
         target: KorkinAgent,
-    ) -> tuple[float, float]:
-        """Pooled-air dose plus near-field plume dose for one target."""
+    ) -> tuple[float, float, float, float]:
+        """Pooled-air plus near-field dose for one target, with the parts.
+
+        Returns ``(dose, near_dose, pool_dose, addback_dose)`` — the
+        pooled corridor/compartment term and the cabin-mate addback
+        separately, so the cooperative arm can class the pool term by
+        whether the emitting unit is a compartment (wet) or a corridor
+        (dry) without reconstructing it downstream.
+        """
         dose = st.concentration * self.inhaled_air_volume_m3_per_epoch
         dose *= self.droplet_scalar
         dose *= st.vent_factor
@@ -6225,13 +6375,15 @@ class TransmissionCore:
             # this epoch. The partner-bounded near-field term and the
             # unconfineable cabin-mate addback stand regardless.
             dose = 0.0
+        pool_dose = dose
         dose += self._cabin_mate_droplet_addback(
             target, st.shedders, st.volume, st.vent_factor, target_factor,
             st.emission_fraction * st.pool_share, st.epoch, st.residence,
         )
+        addback_dose = dose - pool_dose
         near_dose = self._droplet_near_dose(st, target, target_factor)
         dose += near_dose
-        return dose, near_dose
+        return dose, near_dose, pool_dose, addback_dose
 
     def _droplet_near_dose(
         self,
