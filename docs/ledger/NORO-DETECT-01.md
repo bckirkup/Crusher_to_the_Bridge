@@ -2,7 +2,8 @@
 **Date:** 2026-09-28
 **Commit:** c09a34cc2a4cbe8a23a2e690ebe2ee90541257d4
 **Pathogens:** norwalk_gi
-**Status:** open
+**Status:** measured
+**Measured at:** c09a34cc2a4cbe8a23a2e690ebe2ee90541257d4
 
 Presenting-sign detection: the first emesis triggers attention and a
 clinic-path latency (`clinic_wait_hours`) separates the observed sign
@@ -79,22 +80,131 @@ Ignited spirit seed 8105, w = 6, k = 1: first emesis epoch 0 ->
 pre_confinement). Host 119 (symptomatic, non-vomiting axis) ordered
 epoch 0 via `detection_channel="onset"`. 0 unattributed joins.
 
-## Interim: baseline-arm gate (measured at c09a34cc, jobs running)
+## Baseline-arm gate (measured at c09a34cc)
 
-`tools/noro_diag/arm_seed_compare.py` diffs every completed `_onset`
-seed against the VENUE-02 `_k1` payload (emit rows, host order/confined
-epochs, confinement event stream, acquisitions, ignition, all
-bit-exact):
+`tools/noro_diag/arm_seed_compare.py` diffs every `_onset` seed against
+the VENUE-02 `_k1` payload (emit rows, host order/confined epochs,
+confinement event stream, acquisitions, ignition — all bit-exact):
 
 - fl_spr_12d_onset: 12/12 seeds IDENTICAL to fl_spr_12d_k1.
 - classic_cruise_1900_onset: 60/60 seeds IDENTICAL.
-- fl_mega_12d_onset: pending at time of check.
+- fl_mega_12d_onset: 60/60 seeds IDENTICAL.
 
 The presenting-sign path draws nothing under `symptomatic_order_trigger
-= "onset"`: baseline behavior preserved seed-for-seed (per the
-validation gate, a move here is a defect, not a finding).
+= "onset"`: baseline behavior preserved seed-for-seed on all three
+cells.
 
-## Results
+## Results (measured at c09a34cc, all 660 children)
 
-(Array in flight — placement tables, conversion check, and verdict
-land here on completion.)
+Completeness: 15/15 cells landed, 660/660 children SUCCEEDED, 0
+unattributed joins (>=99% requirement met outright), 0
+`escort_pending_final` everywhere. Per-run stamps resolve
+`clinic_wait_epochs` to the arm label (1/6/12/24) and
+`symptomatic_order_trigger` to `presenting_sign`; `n_sign_observed`
+16-82 hosts per sign-arm cell — the mechanism fires at scale, not in
+a corner. `sign_gated_final` <= 8 run-ends (voyage ended before a
+late sign order landed). Onset-channel confinement orders persist on
+every sign arm (non-vomiting symptomatics keep confinement — the
+channel-preservation check).
+
+### Placement — the compliant window re-opens
+
+Pre-confinement emit events (was ~0 under omniscient onset detection):
+
+| cell | onset | w1 | w6 | w12 | w24 |
+|---|---|---|---|---|---|
+| fl_spr_12d | 0 | 17 | 20 | 21 | 23 |
+| classic_cruise_1900 | 1 | 12 | 15 | 24 | 26 |
+| fl_mega_12d | 0 | 63 | 72 | 80 | 75 |
+
+First-emit shared-venue landings by emitter channel
+(compliant_in_window / refuser):
+
+| cell | onset | w1 | w6 | w12 | w24 |
+|---|---|---|---|---|---|
+| fl_spr_12d | 0 / 2 | 8 / 0 | 9 / 0 | 7 / 3 | 9 / 0 |
+| classic_cruise_1900 | 0 / 1 | 4 / 2 | 6 / 0 | 7 / 1 | 7 / 0 |
+| fl_mega_12d | 1 / 8 | 42 / 8 | 39 / 8 | 51 / 1 | 51 / 4 |
+
+Subsequent-emit shared-venue landings (same split):
+
+| cell | onset | w1 | w6 | w12 | w24 |
+|---|---|---|---|---|---|
+| fl_spr_12d | 0 / 6 | 1 / 1 | 2 / 0 | 4 / 0 | 10 / 0 |
+| classic_cruise_1900 | 0 / 3 | 0 / 6 | 2 / 1 | 6 / 0 | 14 / 1 |
+| fl_mega_12d | 0 / 12 | 1 / 5 | 10 / 6 | 13 / 13 | 28 / 7 |
+
+Every compliant shared-venue landing carried >=1 susceptible occupant
+(100% on all sign arms). Refuser first-landings shrink on sign arms
+(mega 8 -> 1-4) because the compliance draw re-seats at the shifted
+order epoch — a different set of hosts draws refusal, not a lost
+channel.
+
+### Conversion check (vs VENUE-02 k1 same-seed baseline)
+
+Acquisitions attributed to shared-venue landings by location +
+epoch-persistence (an acquisition counts when its location saw a
+shared landing at any epoch <= the acquisition epoch), split by the
+landing channel present at that location (`@other` = no shared landing
+at that site). Counts are over ignited runs (VENUE-02 ignited
+criterion); the single non-ignited spirit onset seed (8159) carried 2
+unattributed-by-venue acquisitions not shown here:
+
+| cell | arm | acq | @comp-only | @ref-only | @mixed | @other |
+|---|---|---|---|---|---|---|
+| fl_spr_12d | onset | 10 | 0 | 6 | 0 | 4 |
+| fl_spr_12d | w1 | 9 | 3 | 1 | 0 | 5 |
+| fl_spr_12d | w6 | 6 | 3 | 0 | 0 | 3 |
+| fl_spr_12d | w12 | 10 | 6 | 0 | 0 | 4 |
+| fl_spr_12d | w24 | 11 | 7 | 0 | 0 | 4 |
+| classic_cruise_1900 | onset | 6 | 0 | 2 | 0 | 4 |
+| classic_cruise_1900 | w1 | 18 | 1 | 6 | 3 | 8 |
+| classic_cruise_1900 | w6 | 6 | 2 | 0 | 0 | 4 |
+| classic_cruise_1900 | w12 | 21 | 6 | 0 | 0 | 15 |
+| classic_cruise_1900 | w24 | 19 | 11 | 0 | 0 | 8 |
+| fl_mega_12d | onset | 30 | 0 | 14 | 0 | 16 |
+| fl_mega_12d | w1 | 38 | 8 | 1 | 0 | 29 |
+| fl_mega_12d | w6 | 40 | 17 | 4 | 0 | 19 |
+| fl_mega_12d | w12 | 67 | 17 | 5 | 4 | 41 |
+| fl_mega_12d | w24 | 72 | 42 | 1 | 1 | 28 |
+
+`source_agent_id` attribution: 0 anywhere (aerosol/patch pathway
+carries no source). Attack rates stay at baseline (~0.0023-0.0032)
+because absolute counts are small — the acquisition count is the
+sensitive metric.
+
+Compliant-only-attributed acquisitions: onset 0/0/0 -> w24 7/11/42
+(spirit/classic/mega) — conversions from the reopened channel are real
+on every cell, not a venue-geometry artifact. Per-landing yield ~0.4-0.5
+acq/compliant-landing, tracking the refuser-channel rate (~0.7 on
+mega baseline) — conversion per landing does NOT collapse as the
+window expands, and on mega it rises monotonically with w (8/17/17/42
+at w1/6/12/24 on 42 ignited runs): longer exposure per landing, not
+just more landings.
+
+### Verdict: (a)
+
+Emesis-first detection restores the compliant venue channel AND it
+converts. The compliant-in-window shared-venue first-landing mass goes
+from ~0-1 to 7/9/51 (classic/spirit/mega at w24), all with susceptible
+occupants, and acquisitions at compliant-only landing sites go from
+0 to 7/11/42 — the downstream L3 pickup -> L4 frailty barrier bounds
+each landing to ~half a conversion but does not starve the expanded
+window. The barrier's signature survives only in the per-landing yield
+(sub-linear: mega landings x6 buy acq x3, not x6).
+
+Caveats: window attribution is location + epoch-persistence (patch
+pickups land at the venue for many epochs; the strict same-epoch
+matcher undercounts — e.g. mega w24 26 strict vs 44 window); the
+`@other` bucket also grows on mega (16 -> 28-41), so the mobile
+window adds exposure outside shared venues too; w-dose-response is
+monotone on mega, noisy-flat on classic (6/6/21/19 over 13 ignited
+runs) and flat on spirit (12 seeds).
+
+## Artifacts
+
+- Census zips: `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_detect_01/<cell>_<arm>/`
+- Aggregates: `results/noro_detect_01/{aggregate,conversion}.json` (local)
+- Tools: `tools/noro_diag/arm_seed_compare.py` (baseline gate),
+  `tools/noro_diag/venue_conversion_check.py` (attribution),
+  `venue_census_readout.py --runs results/noro_detect_01` (full tables)
