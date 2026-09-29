@@ -1,0 +1,313 @@
+{
+  "design_id": "covid_coop_v1",
+  "task_id": "COVID-COOP-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_screen_v13",
+  "description": "Conditioned array for the cooperative-packet dose-law arm (COVID-COOP-02, merged PR #778): the full declared envelope cross -- n* {2,3,5} x carrier_loading {four envelope corners + interior} -- as arm points over the takeoff-conditioned lattice, each paired seed-for-seed with the beta-Poisson baseline arm on the same (theta, seed). The scientific question the canary could not answer: at full voyage scale, does any declared (n*, mu_dry, mu_wet) arm point land the takeoff-conditioned recorded_onsets/before_share record (~197 / 0.173) that the baseline law overshoots ~9-10x at every admissible Theta (THETA-SCREEN-V13)? The arm weights each channel's dose by its >=n*-packet share w_c = P(K >= n*) / mu_c over the declared occupancy model: the dry axis is monotone in mu inside its envelope (0.004 nearly inert, 0.1 partially live at n* = 2), the wet axis is nonmonotone -- qualifying-carrier share peaks at interior loading and falls as 1/mu at the high corner where copies fuse into fewer, bigger packets -- so the four corners bracket the wet axis in both directions and the interior sits near its weight peak. The bolus family is untouched (w = 1) and sets the hard floor. This is an assay grid, not a fit: every arm point is a declared COVID-COOP-01 envelope point, none is fitted to the record, and a clause PASS triggers a refinement design, never an adoption.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "COVID-COOP-01 sourced bounds (committed ledger, 52ca748e): n* graded envelope {2,3,5} anchored on the VSV cellular-Allee optimum ~3; dry-class carrier loading [0.004, 0.1] copies/carrier (measured <=5 um spectrum); wet-ring loading [0.04, 500] (declared 20-100 um envelope); copies->IU and complete-virion fraction stay ?nr-term -- n* >= 3 far-field inertness is robust to both.",
+    "COVID-PACKET-01 measured (29a15344): on the anchor cell's emitted field the zone pool holds thousands of >=2-copy packets only at bracket-high and collapses to <=206 at n >= 3 and <=0.1 at n >= 5; HVAC is dead to cooperativity at every corner; cabin/dining/plume wet rings hold ~1e5-1e6 >=2-copy packets reaching ~200-450 hosts -- the only guaranteed multi-virion carriers.",
+    "COVID-COOP-02 measured (b44aa416, PR #778): the cooperative_packet arm ships opt-in via pathogen_overrides deep-merge (dose_response.model + n_star + carrier_loading {dry, wet}); frailty draw, RNG order and the beta-Poisson baseline are bitwise-preserved; 40-epoch anchor canary at interior loading {0.05, 20} graded infections 386 -> 167 (n*2) -> 129 (n*3), zone_pool dominant 77 -> 9 at n*3, wet rings 93% of arm infections.",
+    "THETA-SCREEN-V13 measured (edb7fc41): under capped reach the admissible band is {1.78e11..5.62e11} and the conditional clause FAILS at every admissible Theta -- takeoff-seed q05 floors 1,770-2,024 recorded onsets vs the 197 record, before_share medians 0.81-0.94 vs 0.173; PASS only at the Theta 1e9 boundary anchor. The beta_poisson arm on this design replays that known-failing physics as the in-design baseline.",
+    "Payload echo (this PR): cell_payload emits the resolved dose_response block under arm designs (key 'dose_response' beside 'arm_id'), so a cloud cell's coop-arm parameters are auditable from its payload alone -- the canary inspection reads this field; no physics touched."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_theta_screen_v13_stage2 / covid_susc_pool_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day, carried for cell-key bookkeeping), seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice: Theta 2.37e11 is the anchor cell (the baseline row's known ~1,928-onset read at seed 20200205 and every prior mechanism assay's comparator); 1e11 sits below and 1e12 above the v13 admissible band {1.78e11..5.62e11} -- the arm-grid admissibility map is read where baseline physics is measured-failing, not re-admitted. Points are ordered anchor-first so the canary block (indices 0-159) is the densest slice.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14: the first ten of the matched 20-seed block every conditioned design since v10 replays -- seed-for-seed pairing against the v13 stage-2 and susc_pool rows at Theta 2.37e11. Ten seeds is the declared count for this stage: the clause scores on takeoff seeds (>= 5 required) and the arm grid, not seed depth, is the axis under test.",
+  "takeoff_recorded_onsets": 10,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "beta_poisson",
+      "overrides": {},
+      "note": "Declared baseline: the shipped beta-Poisson frailty law (model beta_poisson, alpha 0.18, beta 58.0) -- pairs each row seed-for-seed against every coop arm and against the v13 stage-2 surface."
+    },
+    {
+      "arm_id": "n2_lolo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 2,
+              "carrier_loading": {"dry": 0.004, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*2 x dry-low/wet-low: dry carriers ~empty (w_dry ~ 2e-3) and wet carriers almost never reach 2 (w_wet ~ 2e-2 vs interior 5e-2) -- both air classes thinned toward the bolus floor."
+    },
+    {
+      "arm_id": "n2_lohi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 2,
+              "carrier_loading": {"dry": 0.004, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*2 x dry-low/wet-high: dry pool near-inert; wet copies fused into ~500-copy carriers (w_wet ~ 2e-3, below the interior) -- wet dose converts in fewer, bigger units, so ring dose survives qualitatively but its per-copy packet rate is the lowest on the wet axis."
+    },
+    {
+      "arm_id": "n2_hilo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 2,
+              "carrier_loading": {"dry": 0.1, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*2 x dry-high/wet-low: dry pool at its measured <=5 um ceiling where the n*2 far field stays partially live (w_dry ~ 4.7e-2, PACKET-01 bracket-high), wet rings nearly empty -- isolates the surviving far-field channel's dose."
+    },
+    {
+      "arm_id": "n2_hihi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 2,
+              "carrier_loading": {"dry": 0.1, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*2 x dry-high/wet-high: the most permissive declared corner -- dry pool partially live AND wet rings maximally fused -- brackets the grid toward baseline behaviour."
+    },
+    {
+      "arm_id": "n2_int",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 2,
+              "carrier_loading": {"dry": 0.05, "wet": 20.0}
+            }
+          }
+        }
+      },
+      "note": "n*2 x interior {0.05, 20}: the COVID-COOP-02 canary loading -- wet weight near its axis peak; pairs this row with the measured 40-epoch canary suppression (386 -> 167 infections)."
+    },
+    {
+      "arm_id": "n3_lolo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 3,
+              "carrier_loading": {"dry": 0.004, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*3 x dry-low/wet-low: the cellular-Allee anchor threshold at the emptiest loading -- far field inert by packet arithmetic (w_dry ~ 3e-6), wet rings nearly never qualify (w_wet ~ 3e-7): near-total airborne suppression toward the bolus floor."
+    },
+    {
+      "arm_id": "n3_lohi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 3,
+              "carrier_loading": {"dry": 0.004, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*3 x dry-low/wet-high: far field inert; wet rings fused into giant carriers (w_wet ~ 2e-3) -- isolates how much ring dose alone lands against the record."
+    },
+    {
+      "arm_id": "n3_hilo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 3,
+              "carrier_loading": {"dry": 0.1, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*3 x dry-high/wet-low: dry pool at its ceiling still inert at n*3 (w_dry ~ 1.6e-3) and wet rings empty -- the design's strongest airborne suppression at the anchor threshold."
+    },
+    {
+      "arm_id": "n3_hihi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 3,
+              "carrier_loading": {"dry": 0.1, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*3 x dry-high/wet-high: far field inert at the dry ceiling; wet rings fused (w_wet ~ 2e-3)."
+    },
+    {
+      "arm_id": "n3_int",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 3,
+              "carrier_loading": {"dry": 0.05, "wet": 20.0}
+            }
+          }
+        }
+      },
+      "note": "n*3 x interior: the leading declared candidate -- wet rings at their weight peak (~5e-2) while the far field is inert; pairs with the canary's 129-infection 40-epoch read."
+    },
+    {
+      "arm_id": "n5_lolo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 5,
+              "carrier_loading": {"dry": 0.004, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*5 x dry-low/wet-low: the strictest threshold at the emptiest loading -- both air classes carry effectively zero qualifying packets; reads the bolus floor."
+    },
+    {
+      "arm_id": "n5_lohi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 5,
+              "carrier_loading": {"dry": 0.004, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*5 x dry-low/wet-high: strictest law, rings fused to ~500-copy carriers -- w_wet ~ 2e-3 keeps a thin qualifying-packet stream against the bolus floor."
+    },
+    {
+      "arm_id": "n5_hilo",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 5,
+              "carrier_loading": {"dry": 0.1, "wet": 0.04}
+            }
+          }
+        }
+      },
+      "note": "n*5 x dry-high/wet-low: both air classes near-inert (w_dry ~ 1e-7, w_wet ~ 0) -- the grid's strongest suppression of everything but bolus."
+    },
+    {
+      "arm_id": "n5_hihi",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 5,
+              "carrier_loading": {"dry": 0.1, "wet": 500.0}
+            }
+          }
+        }
+      },
+      "note": "n*5 x dry-high/wet-high: strictest law at the loading extremes -- dry inert even at its ceiling; wet rings' fused carriers still qualify (w_wet ~ 2e-3), the only live airborne channel left."
+    },
+    {
+      "arm_id": "n5_int",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "dose_response": {
+              "model": "cooperative_packet",
+              "n_star": 5,
+              "carrier_loading": {"dry": 0.05, "wet": 20.0}
+            }
+          }
+        }
+      },
+      "note": "n*5 x interior: completes the n* axis at the canary loading -- wet rings near their weight peak even at the strictest threshold (w_wet ~ 5e-2)."
+    }
+  ],
+  "cells_note": "3 points x 16 arms x 10 seeds = 480 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first: indices 0-159 = Theta 2.37e11 x all 16 arms x 10 seeds; 160-319 = Theta 1e11; 320-479 = Theta 1e12. Companion design covid_coop_v1_fleet runs the coarse generic-voyage fleet-shape response at the same three Thetas, 50 seeds per row, same arms.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_theta_screen_v13_stage2 / covid_susc_pool_v1; the verdict grammar is an assay grid's, not a screen's -- no arm point is admitted or fitted on this design.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v13 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND median before_share within 0.10 of 0.173; scored only when >= 5 takeoff seeds.",
+      "note": "Scored per (theta, arm) row -- 48 rows of 10 seeds. The deliverable beside it: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, the full per-seed vectors, and per-arm dose_response echo -- the arm-grid admissibility map."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "verdict_grammar": "Arm-grid assay verdict, frozen: (a) the clause outcome class per (theta, n*, loading) arm point and on the paired beta-Poisson rows; (b) the n*-graded suppression shape at fixed loading (the mechanism's signature -- PACKET-01 predicts far-field conversion dies at n* >= 3 at every corner, survives partially at n* = 2); (c) the loading-direction of the residual at fixed n* (wet rings near their weight peak at interior vs emptied at wet-low vs fused at wet-high; dry monotone in mu inside its envelope); (d) which declared points, if any, land the record. A clause PASS at a declared point triggers a stage-2 refinement around that point, never an adoption; an all-fail map rules the cooperative law out at the declared envelope, no pin moved."
+  },
+  "diagnostics": {
+    "fleet_shape_indicator": "Reported never thresholded, per arm: P(attack <= 0.01), takeoff fraction, P(attack >= 0.10), attack-rate quantiles -- the replay distribution under each arm read against the paired baseline row.",
+    "paired_vs_baseline": "Every coop row pairs seed-for-seed with the design's own beta_poisson row at the same Theta on the same image: per-seed recorded_onsets / before_share deltas are the mechanism's marginal effect on the same cohort, and the baseline row itself pairs against the v13 stage-2 surface as the cross-image engine-drift check.",
+    "dose_response_echo": "Every arm cell echoes its resolved dose_response block in the payload (this PR): the canary's wiring proof that a coop arm's declared (n*, carrier_loading) reached the engine, and the standing audit that each arm row ran what the design declared.",
+    "suppression_signature": "Per coop row: the route split of arm infections (during_quarantine_by_route / onset_curve) against the paired baseline row -- the measured far-field-inertness signature is zone_pool/hvac share collapsing while cabin/dining/plume ring share concentrates (canary: wet rings 93% at n*3)."
+  },
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_coop_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull) so the image carries the coop arm and both design files; a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag (rev 31 predates the arm).",
+    "stage_cells": 480,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_coop_v1/<sha>/cells/",
+    "canary": "The Theta 2.37e11 anchor block on all 16 arms: INDEX_OFFSET 0, ARRAY_SIZE 160 (cell order point x arm x seed, anchor point first). Reads: the beta_poisson row pairs against the anchor's known ~1,928-onset class (COVID-COOP-02); every coop row's dose_response payload echo shows its declared (n*, carrier_loading) resolved in the cloud image; the audit invariant holds on every cell; rows are non-degenerate. Remaining Theta blocks proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "dry-run count mismatches the declared 480; a canary cell's dose_response echo lacks the arm's declared (n*, carrier_loading) or the suppression signature is absent (the arm did not fire in cloud); any arm row's recorded_onsets land inside ~[150, 250] (record-adjacent signal); any cell's audit invariant fails; every coop row at n* >= 3 reports onset mass indistinguishable from baseline (the law did not suppress -- a wiring defect, not a result); or child failure rate exceeds 5%."
+  }
+}

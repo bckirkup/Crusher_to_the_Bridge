@@ -961,3 +961,45 @@ def test_a_real_declared_cell_reports_the_seed_ring(design):
     assert ring["aboard_window_clean_bound"] <= (
         ring["aboard_window_acquisitions"]
     )
+
+
+def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
+    """48-epoch smoke: a cooperative_packet arm's payload echoes the
+    resolved dose_response block (model, n_star, carrier_loading, and the
+    beta-frailty params that ride over the deep-merge)."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_coop",
+            "overrides": {
+                "pathogen_overrides": {
+                    "sars_cov2_resp": {
+                        "dose_response": {
+                            "model": "cooperative_packet",
+                            "n_star": 3,
+                            "carrier_loading": {"dry": 0.05, "wet": 20.0},
+                        },
+                    },
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    coop = next(c for c in cells if c.arm_id == "B1_coop")
+    payload = simulate_screen_cell(design, coop, num_epochs=48)
+    echo = payload["dose_response"]
+    assert echo["model"] == "cooperative_packet"
+    assert echo["n_star"] == 3
+    assert echo["carrier_loading"] == {"dry": 0.05, "wet": 20.0}
+    assert echo["alpha"] == pytest.approx(0.18)
+    assert echo["beta"] == pytest.approx(58.0)
+    assert echo["susceptibility_scale"] > 0.0
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_echo = simulate_screen_cell(design, base, num_epochs=48)[
+        "dose_response"
+    ]
+    assert base_echo["model"] == "beta_poisson"
+    assert "n_star" not in base_echo

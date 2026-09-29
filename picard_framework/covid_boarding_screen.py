@@ -1092,6 +1092,13 @@ def cell_payload(
     if design.arms:
         payload.update({
             "arm_id": cell.arm_id,
+            # The resolved dose_response after arm overrides, echoed so a
+            # cell's declared law (model, n_star, carrier_loading, and the
+            # swept susceptibility_scale composite) is auditable from the
+            # payload alone.
+            "dose_response": dict(
+                sim.pathogen_profiles[PATHOGEN_ID].get("dose_response") or {}
+            ),
             **_attribution_block(sim, ledger, raw),
         })
     return payload
