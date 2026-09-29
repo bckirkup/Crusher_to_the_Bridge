@@ -281,3 +281,112 @@ class TestArmReachability:
             "symptomatic_at_confirmation_required": True,
             "report_probability": pytest.approx(0.56),
         }
+
+
+ASCERTAIN_DESIGN_REL = os.path.join(
+    "picard_framework", "runs", "covid_ascertain_v1_design.json",
+)
+ASCERTAIN_ARMS = (
+    "D0_declared",
+    "G1_gate",
+    "P1_period",
+    "P28_gate",
+    "P15_gate",
+    "R56_recall",
+    "R28_recall",
+    "M0_declared",
+    "M0P56_period",
+)
+MILD_OUT_LADDER = [0.0, 0.0, 0.0, 1.0, 1.0]
+
+
+def _agent_at_severity(aid: int, elapsed: int, severity: str) -> dict:
+    agent = _agent(aid, elapsed)
+    agent["pathogen_infections"][PATHOGEN_ID]["symptom_severity"] = severity
+    return agent
+
+
+class TestSeverityCounts:
+    def test_dated_mass_splits_by_severity(self) -> None:
+        modality = _modality()
+        for aid, severity in (
+            (1, "mild"), (2, "mild"), (3, "moderate"), (4, "severe_critical"),
+        ):
+            _confirmed_at(modality, aid, epoch=20)
+            modality.query_ground_truth({
+                "epoch": 30,
+                "agents": [_agent_at_severity(aid, 10, severity)],
+            })
+        assert modality.onset_observation_severity_counts(
+            PATHOGEN_ID,
+        ) == {"mild": 2, "moderate": 1, "severe_critical": 1}
+
+    def test_other_pathogens_do_not_mix_in(self) -> None:
+        modality = _modality()
+        _confirmed_at(modality, 1, epoch=20)
+        modality._onset_observations[("norwalk_gi", 9)] = {
+            "symptom_severity": "mild",
+        }
+        _observe_at(modality, 1, epoch=30, elapsed=10)
+        assert modality.onset_observation_severity_counts(
+            PATHOGEN_ID,
+        ) == {"moderate": 1}
+
+    def test_no_observations_counts_empty(self) -> None:
+        modality = _modality()
+        assert modality.onset_observation_severity_counts(PATHOGEN_ID) == {}
+
+
+class TestAscertainV1Design:
+    def test_design_enumerates_the_declared_270_cells(self) -> None:
+        design = load_design(os.path.join(REPO_ROOT, ASCERTAIN_DESIGN_REL))
+        cells = enumerate_cells(design)
+        assert len(cells) == 270
+        # Cell order is point x arm x seed, anchor theta first: the
+        # canary block is cells 0-89 = theta 2.37e11 x all 9 arms.
+        anchor = cells[:90]
+        assert all(c.theta == pytest.approx(2.37e11) for c in anchor)
+        for arm_index, arm_id in enumerate(ASCERTAIN_ARMS):
+            block = anchor[arm_index * 10:(arm_index + 1) * 10]
+            assert all(c.arm_id == arm_id for c in block)
+            assert [c.seed for c in block] == list(
+                range(20200205, 20200215),
+            )
+        assert sorted({c.theta for c in cells}) == pytest.approx(
+            [1e11, 2.37e11, 1e12],
+        )
+
+    def test_mild_corner_ladder_reaches_the_run_spec(self) -> None:
+        design = load_design(os.path.join(REPO_ROOT, ASCERTAIN_DESIGN_REL))
+        cells = enumerate_cells(design)
+        mild = next(c for c in cells if c.arm_id == "M0P56_period")
+        raw = prepare_cell_run_spec(design, mild, num_epochs=24)
+        observation = (
+            raw["pathogen_overrides"][PATHOGEN_ID]["observation_model"]
+        )
+        assert observation["syndrome_case_eligibility_by_severity"] == (
+            MILD_OUT_LADDER
+        )
+        assert observation["onset_recording"] == PERIOD_BLOCK
+
+    def test_mild_off_arm_carries_no_onset_recording_block(self) -> None:
+        design = load_design(os.path.join(REPO_ROOT, ASCERTAIN_DESIGN_REL))
+        cells = enumerate_cells(design)
+        mild = next(c for c in cells if c.arm_id == "M0_declared")
+        raw = prepare_cell_run_spec(design, mild, num_epochs=24)
+        observation = (
+            raw["pathogen_overrides"][PATHOGEN_ID]["observation_model"]
+        )
+        assert observation["syndrome_case_eligibility_by_severity"] == (
+            MILD_OUT_LADDER
+        )
+        assert "onset_recording" not in observation
+
+    def test_period_reference_arm_is_verbatim_sero_channel(self) -> None:
+        """The required reference row: the P1_period block is identical
+        across the two designs so their rows pair cell-for-cell."""
+        design = load_design(os.path.join(REPO_ROOT, ASCERTAIN_DESIGN_REL))
+        sero = load_design(os.path.join(REPO_ROOT, DESIGN_REL))
+        period_new = design.arm_overrides("P1_period")
+        period_old = sero.arm_overrides("P1_period")
+        assert period_new == period_old
