@@ -79,6 +79,7 @@ def _inject_fixed_dose(
         agent_pathogen_doses: dict[int, dict[str, float]],
         _matrix: object,
         _events: list[object],
+        **_kwargs: object,
     ) -> None:
         for agent in agents:
             agent_pathogen_doses.setdefault(agent.agent_id, {})[pathogen_id] = dose

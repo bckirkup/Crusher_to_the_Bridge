@@ -121,7 +121,8 @@ class StageRecorder:
                     susceptible: list, agent_doses: dict, matrix: Any,
                     agent_pathway_doses: Any, pathogen_id: str,
                     ledger: Any, *, near_field_on: bool,
-                    emission_fraction: float, n_occupants: int) -> None:
+                    emission_fraction: float, n_occupants: int,
+                    agent_coop_doses: Any = None) -> None:
             if (pathogen_id == self.pathogen_id
                     and core._is_cabin_compartment(unit_name)):
                 zone = core.compartment_parent(unit_name)
@@ -160,12 +161,13 @@ class StageRecorder:
                 near_field_on=near_field_on,
                 emission_fraction=emission_fraction,
                 n_occupants=n_occupants,
+                agent_coop_doses=agent_coop_doses,
             )
         return wrapper
 
     def _wrap_droplet_target(self, original: Any) -> Any:
         def wrapper(core: Any, st: Any, target: Any) -> tuple:
-            dose, near = original(core, st, target)
+            dose, near, pool, addback = original(core, st, target)
             if (st.pathogen_id == self.pathogen_id and st.in_compartment):
                 tf = core._confinement_factor(target)
                 presence = core._cabin_presence_share(target, st.epoch)
@@ -193,7 +195,7 @@ class StageRecorder:
                     "vent_factor": st.vent_factor,
                     "residence": st.residence,
                 })
-            return dose, near
+            return dose, near, pool, addback
         return wrapper
 
     def _wrap_hvac(self, original: Any) -> Any:
