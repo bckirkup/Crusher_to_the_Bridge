@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `efc30bf` (fill with the
+> **Status:** Living. Head commit of record: `a2586422` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -249,6 +249,27 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`COVID-COOP-V1` measured the full conditioned array + fleet companion
+  and stands negative: the cooperative-packet dose law does not produce
+  the record at any declared point.** 480-cell conditioned lattice
+  (n* {2,3,5} × carrier_loading corners + interior, θ {1e11, 2.37e11,
+  1e12}, seeds 20200205–14, 480/480) + 2400-cell fleet-shape companion
+  (2400/2400), measured at `a2586422` (`docs/ledger/COVID-COOP-03.md`,
+  design `picard_framework/runs/covid_coop_v1_design.json`, Batch
+  job-def rev 32, image digest `sha256:316b27ee…`). Every scored row
+  (≥5 takeoff seeds) fails the count leg — suppression floor ~3× the
+  record (lowest scored median 647); the under-scored n5_{dry:lo}
+  corners bracket the count at the anchor (n5_lolo s20200208 = 194,
+  n5_hilo = 218 on the same seed) but at n = 2/10 takeoffs and
+  before_share .07–.08 vs the record's .173 — the law's suppression
+  delays onsets past the split day, so count and timing legs are
+  structurally opposed, and the same corners collapse fleet takeoff to
+  0/50 at every θ. Mechanism fires as designed (n*-graded suppression,
+  nonmonotone wet-loading peak, bolus untouched) but is **retired as an
+  explanation of the 197/0.173 record**; standing suspects stay the
+  fixed ring structure, index day-0 exposure geometry, and the
+  observational channel (ROUTE-ATTR-V1). Complete-virion bound and
+  stage-2 refinement both ruled out by the opposed legs.
 - **`AERO-SPLIT-01` shipped and its paired-seed probe is measured
   (`docs/ledger/AERO-SPLIT-01.md`, `e20008d`).** `transmission.droplet_field_split`
   defaults to `partition` (spec `docs/droplet_field_split_spec.md`): the room
