@@ -1,0 +1,20 @@
+# NORO-GENO-02 class-magnitude campaign image — overlay on the NORO-GENO-01
+# canary image (engine byte-identical to the measured frozen block at
+# 2713e566), adding this stage's design file, the dose-sweep manifest, and
+# the three arm manifests pinned at the chosen dose point.
+#
+# Build after the design + manifests merge; restamp ENGINE_GIT_SHA to the
+# merge SHA. The geno-01 base is digest-pinned so engine content stays
+# identical to the canary runs.
+#
+#   docker build -f deploy/aws/Dockerfile.noro_geno_02 -t picard-campaign:noro-geno-02-<sha> .
+
+FROM 994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:071b0854ffaf8ff051037200d53b7c4d269db029772c527b5b6fd3fc755c5149
+
+ENV ENGINE_GIT_SHA=MERGED_SHA
+
+COPY docs/norovirus/noro_geno_02_design.md docs/norovirus/noro_geno_02_design.md
+COPY picard_framework/runs/mega_cruise_campaign/noro_geno_02_dose_sweep_manifest.json picard_framework/runs/mega_cruise_campaign/noro_geno_02_dose_sweep_manifest.json
+COPY picard_framework/runs/mega_cruise_campaign/noro_geno_02_mono_gii4_manifest.json picard_framework/runs/mega_cruise_campaign/noro_geno_02_mono_gii4_manifest.json
+COPY picard_framework/runs/mega_cruise_campaign/noro_geno_02_mono_nongii4_manifest.json picard_framework/runs/mega_cruise_campaign/noro_geno_02_mono_nongii4_manifest.json
+COPY picard_framework/runs/mega_cruise_campaign/noro_geno_02_mixture_manifest.json picard_framework/runs/mega_cruise_campaign/noro_geno_02_mixture_manifest.json

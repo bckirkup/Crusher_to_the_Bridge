@@ -1,0 +1,1501 @@
+{
+  "campaign": "noro_geno_02_mixture",
+  "description": "NORO-GENO-02 mass surface, cell C \u2014 declared era-pre mixture: genotype-class prior \"era-pre shipped\" across 4 hulls x {168,288,504} epochs x 4 import conditions {reportable (canary parity), shipped@lo 0.025/0.007, shipped@mid 0.0325/0.0185, shipped@hi 0.04/0.03} x 20 seeds, on the frozen block (syndromic_comp65, dose_adjustment 4.0, identical config_overrides). reportable and shipped tiers are split so no dead replicate cells are generated (renewal rungs ignore declared prevalence points). Design: docs/norovirus/noro_geno_02_design.md.",
+  "platform": "classic_cruise_1900",
+  "default_epochs": 168,
+  "default_num_agents": 1910,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ]
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    }
+  },
+  "tiers": {
+    "fl_exp_7d_rep_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 7d (168 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_exp_7d_ship_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 7d (168 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_exp_12d_rep_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 12d (288 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_exp_12d_ship_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 12d (288 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_exp_21d_rep_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 21d (504 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_exp_21d_ship_mixture": {
+      "platform": "expedition_cruise_450",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 450,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on expedition_cruise_450 21d (504 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_cls_7d_rep_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 7d (168 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_cls_7d_ship_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 7d (168 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_cls_12d_rep_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 12d (288 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_cls_12d_ship_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 12d (288 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_cls_21d_rep_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 21d (504 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_cls_21d_ship_mixture": {
+      "platform": "classic_cruise_1900",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 1910,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on classic_cruise_1900 21d (504 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_spr_7d_rep_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 7d (168 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_spr_7d_ship_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 7d (168 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_spr_12d_rep_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 12d (288 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_spr_12d_ship_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 12d (288 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_spr_21d_rep_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 21d (504 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_spr_21d_ship_mixture": {
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on spirit_cruise_3000 21d (504 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_mega_7d_rep_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 7d (168 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_mega_7d_ship_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        168
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 7d (168 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_mega_12d_rep_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 12d (288 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_mega_12d_ship_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 12d (288 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    },
+    "fl_mega_21d_rep_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 21d (504 epochs), import condition = reportable rung (canary parity; renewal-derived boarding prevalence ~0.39% both roles). Frozen block verbatim.",
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ]
+    },
+    "fl_mega_21d_ship_mixture": {
+      "platform": "mega_cruise_5000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        504
+      ],
+      "num_agents": 7000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      },
+      "description": "NORO-GENO-02 cell C \u2014 declared era-pre mixture on mega_cruise_5000 21d (504 epochs), import condition = shipped rung at the licensed prevalence interval {lo 0.025/0.007, mid 0.0325/0.0185, hi 0.04/0.03}. Frozen block otherwise verbatim.",
+      "boarding_mechanism_rungs": [
+        "shipped"
+      ],
+      "boarding_prevalence_points": [
+        {
+          "passenger": 0.025,
+          "crew": 0.007
+        },
+        {
+          "passenger": 0.0325,
+          "crew": 0.0185
+        },
+        {
+          "passenger": 0.04,
+          "crew": 0.03
+        }
+      ]
+    }
+  }
+}
