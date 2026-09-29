@@ -1,0 +1,99 @@
+{
+  "campaign": "noro_geno_01_mono_nongii4",
+  "description": "NORO-GENO-01 canary cell B: norovirus non-GII.4-class monoprior (strain_evolution.prior_genotype_distribution {GII.17: 0.375, GII.2: 0.625} — the declared pre-era within-class split renormalized, the class is the measured unit) on the frozen fl_spr_12d cell of noro_rebase_01 at seeds 8105-8124 (20 seeds, paired with the NORO-REBASE-01 baseline canary). variant_surveillance armed at nominal mutation for per-class acquisition attribution and the strain_census; the class-conditioned secretor gate (0.10 GII.4 / 0.45 non-GII.4) is the discriminating readout. Design: docs/norovirus/noro_geno_01_design.md.",
+  "platform": "classic_cruise_1900",
+  "default_epochs": 168,
+  "default_num_agents": 1910,
+  "embarkation_date": "2026-01-10",
+  "natural_history_clock": "hours",
+  "pathogen_configs": {
+    "norovirus": {
+      "bundle": "active_profiles",
+      "pathogen_id": "norwalk_gi",
+      "overrides": {
+        "remove": [
+          "sars_cov2_resp"
+        ],
+        "norwalk_gi": {
+          "strain_evolution": {
+            "prior_genotype_distribution": {
+              "GII.17": 0.375,
+              "GII.2": 0.625
+            }
+          }
+        }
+      }
+    }
+  },
+  "surveillance_configs": {
+    "syndromic_comp65": {
+      "diagnostic_cascade": {
+        "enabled": false
+      },
+      "fred_behavior": {
+        "quarantine_compliance": 0.65,
+        "compliance_by_class": {
+          "crew": 0.65,
+          "passenger_elderly": 0.54,
+          "passenger_young": 0.34
+        }
+      }
+    }
+  },
+  "tiers": {
+    "fl_spr_12d_nongii4": {
+      "description": "NORO-GENO-01 cell B: the frozen fl_spr_12d spirit_cruise_3000 12-day cell verbatim with the non-GII.4-class monoprior pinned and variant_surveillance armed. Run ids are shared with cells A/C; the S3 prefix and manifest carry cell identity.",
+      "platform": "spirit_cruise_3000",
+      "pathogen": "norovirus",
+      "dose_adjustments": [
+        4.0
+      ],
+      "surveillance_strategies": [
+        "syndromic_comp65"
+      ],
+      "epoch_durations": [
+        288
+      ],
+      "boarding_mechanism_rungs": [
+        "reportable"
+      ],
+      "num_agents": 3000,
+      "seeds": [
+        8105,
+        8106,
+        8107,
+        8108,
+        8109,
+        8110,
+        8111,
+        8112,
+        8113,
+        8114,
+        8115,
+        8116,
+        8117,
+        8118,
+        8119,
+        8120,
+        8121,
+        8122,
+        8123,
+        8124
+      ],
+      "config_overrides": {
+        "transmission": {
+          "sanitary_visit_mode": "dwell_weighted",
+          "flush_aerosol_fraction": 0.0,
+          "flush_cabin_emission": true,
+          "cabin_air_mode": "cabin_compartment"
+        },
+        "hvac": {
+          "pathogen_pool_transport": "airflow"
+        },
+        "variant_surveillance": {
+          "enabled": true
+        }
+      }
+    }
+  }
+}

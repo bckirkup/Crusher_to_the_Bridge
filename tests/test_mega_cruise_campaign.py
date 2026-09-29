@@ -2660,3 +2660,130 @@ def test_sentinel_recovery_null_onboard_seed() -> None:
     assert prevalence(empty[0]) == {"passenger": 0.0, "crew": 0.0}
     for spec in (seeded[0], empty[0]):
         assert "initial_infected" not in spec["pathogen_overrides"]["norwalk_gi"]
+
+
+def test_strain_attribution_rolls_up_class_and_secretor_buckets() -> None:
+    from types import SimpleNamespace
+
+    from engines.strain_state import (
+        IMMUNITY_FROM_INFECTION,
+        ImmuneRecord,
+        StrainEvolutionConfig,
+        StrainRegistry,
+    )
+    from picard_framework.runs.mega_cruise_campaign.campaign_execution import (
+        _strain_attribution,
+    )
+
+    config = StrainEvolutionConfig.from_profile(
+        {
+            "pathogen_id": "norwalk_gi",
+            "strain_evolution": {
+                "genotypes": ["GII.4", "GII.17", "GII.2"],
+                "prior_genotype_distribution": {"GII.4": 1.0},
+                "genotype_classes": {
+                    "gii4": {
+                        "genotypes": ["GII.4"],
+                        "secretor_negative_relative_susceptibility": 0.10,
+                    },
+                    "non_gii4": {
+                        "genotypes": ["GII.17", "GII.2"],
+                        "secretor_negative_relative_susceptibility": 0.45,
+                    },
+                },
+            },
+        },
+    )
+    registry = StrainRegistry()
+    g4 = registry.mint("norwalk_gi", genotype="GII.4")
+    g17 = registry.mint("norwalk_gi", genotype="GII.17")
+
+    def agent(inf=None, immune=(), non_secretor=False):
+        return SimpleNamespace(
+            infections={"norwalk_gi": inf} if inf else {},
+            immune_history=list(immune),
+            secretor_negative_by_pathogen={"norwalk_gi": non_secretor},
+        )
+
+    sim = SimpleNamespace(
+        tx_core=SimpleNamespace(
+            strain_registry=registry,
+            strain_configs={"norwalk_gi": config},
+        ),
+        engine=SimpleNamespace(
+            agents=[
+                agent(  # non-secretor GII.4 import
+                    {
+                        "boarding_state": "symptomatic",
+                        "first_infection_epoch": 0,
+                        "infection_epoch": 0,
+                        "strain_id": g4.strain_id,
+                        "strains": {g4.strain_id: {}},
+                    },
+                    non_secretor=True,
+                ),
+                agent(  # aboard acquisition of a non-GII.4 strain
+                    {
+                        "first_infection_epoch": 12,
+                        "infection_epoch": 12,
+                        "strain_id": g17.strain_id,
+                        "strains": {g17.strain_id: {}},
+                    },
+                ),
+                agent(  # cleared import: genotype only in immune_history
+                    {
+                        "boarding_state": "asymptomatic",
+                        "first_infection_epoch": 0,
+                        "infection_epoch": 0,
+                        "strains": {},
+                    },
+                    immune=[
+                        ImmuneRecord(
+                            "norwalk_gi",
+                            "GII.2",
+                            origin=IMMUNITY_FROM_INFECTION,
+                        ),
+                    ],
+                ),
+                agent(  # import who re-acquired aboard: both buckets
+                    {
+                        "boarding_state": "symptomatic",
+                        "first_infection_epoch": 0,
+                        "infection_epoch": 40,
+                        "episode_epochs": [0, 40],
+                        "strain_id": g17.strain_id,
+                        "strains": {g17.strain_id: {}},
+                    },
+                ),
+                agent({"status": "IMMUNE", "is_immune": True}),
+                agent(),
+                agent(non_secretor=True),
+            ],
+        ),
+    )
+    block = _strain_attribution(sim)["norwalk_gi"]
+    assert block["population"] == 7
+    assert block["non_secretor_population"] == 2
+    assert block["ever_infected"] == 4
+    assert block["imported"] == 3
+    assert block["acquired_aboard"] == 2
+    assert block["non_secretor_ever_infected"] == 1
+    assert block["non_secretor_acquired_aboard"] == 0
+    assert block["classes_ever_infected"] == {"gii4": 1, "non_gii4": 3}
+    assert block["classes_acquired_aboard"] == {"non_gii4": 2}
+    assert block["genotypes_ever_carried"] == {
+        "GII.17": 2,
+        "GII.2": 1,
+        "GII.4": 1,
+    }
+    assert block["non_secretor_share_ever_infected"] == pytest.approx(0.25)
+    assert block["non_secretor_share_acquired_aboard"] == pytest.approx(0.0)
+
+    registry_free = SimpleNamespace(
+        tx_core=SimpleNamespace(
+            strain_registry=None,
+            strain_configs={},
+        ),
+        engine=SimpleNamespace(agents=[]),
+    )
+    assert _strain_attribution(registry_free) == {}
