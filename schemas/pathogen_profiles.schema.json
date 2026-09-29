@@ -207,8 +207,48 @@
         },
         "prior_genotype_distribution": {
           "type": "object",
-          "description": "Weights over genotypes for pre-existing immunity in baseline immune agents. Renormalized on load; keys must be declared genotypes.",
+          "description": "Weights over genotypes for pre-existing immunity in baseline immune agents. Renormalized on load; keys must be declared genotypes. Takes precedence over prior_genotype_distribution_by_era when present — the sweep/override path, including the degenerate one-entry maps mono-class arms declare.",
           "additionalProperties": {"type": "number", "minimum": 0}
+        },
+        "prior_genotype_distribution_by_era": {
+          "type": "object",
+          "description": "Era-resolved prior genotype distributions: each key is an era name mapping to per-genotype weights, renormalized on load. The entry named by genotype_share_era is the resolved prior; a single-era map needs no selector.",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {"type": "number", "minimum": 0}
+          }
+        },
+        "genotype_share_era": {
+          "type": "string",
+          "description": "Era selector into prior_genotype_distribution_by_era; required when that map lists more than one era."
+        },
+        "genotype_classes": {
+          "type": "object",
+          "description": "Declared classes of genotypes sharing phenotype offsets (the class-structure ruling: the class, not the genotype, is the unit of declared strain difference). Keys are class names; each declares the genotypes it claims (disjoint across classes) and optional class offsets.",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["genotypes"],
+            "properties": {
+              "genotypes": {
+                "type": "array",
+                "items": {"type": "string"},
+                "minItems": 1,
+                "description": "Genotypes this class claims; each declared genotype belongs to at most one class."
+              },
+              "secretor_negative_relative_susceptibility": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Relative susceptibility of a secretor-negative (FUT2) host challenged by this class — the Kambhampati split (0.10 GII.4 vs 0.45 non-GII.4). When any class declares it, the init-time flat bake is skipped and each exposure applies the dose-share-weighted class value."
+              },
+              "transmissibility_multiplier": {
+                "type": "number",
+                "exclusiveMinimum": 0,
+                "description": "Founder emission-side dose multiplier for this class (exact-1F1 form: m shifts the challenge ID50 literally). Declared and swept, never fitted."
+              }
+            },
+            "additionalProperties": false
+          }
         },
         "cross_immunity": {
           "type": "object",

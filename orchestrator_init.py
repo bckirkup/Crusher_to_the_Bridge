@@ -76,6 +76,7 @@ from engines.py_contam_bridge import (
     ContamTransportEngine,
 )
 from engines.sim_clock import SimClock, config_epochs_for_hours
+from engines.strain_state import StrainEvolutionConfig
 from engines.voyage_itinerary import agent_is_departed
 from engines.wearable_monitor import (
     WearableMonitor,
@@ -1893,6 +1894,21 @@ def _resolve_secretor_status(profile: dict[str, Any]) -> tuple[float, float]:
     return 0.0, 0.0
 
 
+def _profile_has_class_secretor_gate(
+    pid: str, profile: dict[str, Any],
+) -> bool:
+    """True when *profile* splits the secretor gate by genotype class.
+
+    With a class gate the gate's effect is per-exposure — the challenging
+    founder's class picks which relative susceptibility a non-secretor host
+    carries into that challenge — so the init-time flat bake is skipped and
+    each exposure applies the class value. The flat field stays as the
+    fallback for challenges whose strain mix cannot be resolved.
+    """
+    config = StrainEvolutionConfig.from_profile({**profile, "pathogen_id": pid})
+    return bool(config and config.has_class_secretor_gate)
+
+
 def _seed_legacy_infections(
     engine: KorkinShipEngine,
     pathogen_profiles: dict[str, dict[str, Any]],
@@ -1978,6 +1994,10 @@ def _seed_host_susceptibility(
     genetics_rng: np.random.Generator,
 ) -> None:
     """Seed per-agent susceptibility and the secretor-negative draw."""
+    class_gate = {
+        pid: _profile_has_class_secretor_gate(pid, prof)
+        for pid, prof in pathogen_profiles.items()
+    }
     for agent in engine.agents:
         for pid, prof in pathogen_profiles.items():
             base_susc = prof.get("base_susceptibility", 1.0)
@@ -1985,7 +2005,7 @@ def _seed_host_susceptibility(
             frac, rel_susc = _resolve_secretor_status(prof)
             drawn = frac > 0.0 and genetics_rng.random() < frac
             agent.secretor_negative_by_pathogen[pid] = drawn
-            if drawn:
+            if drawn and not class_gate.get(pid):
                 # Secretor-negative hosts are partially, not absolutely,
                 # protected against GII norovirus: Teunis 2020 GII infection
                 # risk 0.015 (Se-) vs 0.076 (Se+), and 4 of 8 secretor-negative

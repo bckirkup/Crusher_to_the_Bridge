@@ -2677,6 +2677,20 @@ class TransmissionCore:
         probs = [config.prior_genotype_distribution[g] for g in genotypes]
         return str(self.rng.choice(genotypes, p=probs))
 
+    def _founder_phenotype(self, pathogen_id: str, genotype: str) -> Phenotype:
+        """Class-declared phenotype offsets for a founder of *genotype*.
+
+        The class-structure ruling draws the class at the founder, where
+        between-voyage strain variability mechanically lives: every
+        descendant inherits these offsets through ``Phenotype.of`` unless a
+        mutation perturbs them inside the declared window. A genotype
+        unclaimed by any class mints the neutral phenotype as before.
+        """
+        config = self.strain_configs.get(pathogen_id)
+        if config is None:
+            return Phenotype()
+        return config.class_phenotype(genotype)
+
     def _resident_strain_id(self, agent: KorkinAgent, pathogen_id: str) -> str | None:
         """Strain an agent is shedding, minting a founder for seeded infections.
 
@@ -2689,10 +2703,12 @@ class TransmissionCore:
         strain_id = agent.strain_id_for(pathogen_id)
         if strain_id is not None:
             return strain_id
+        genotype = self._founder_genotype(pathogen_id)
         founder = self.strain_registry.mint(
             pathogen_id,
-            genotype=self._founder_genotype(pathogen_id),
+            genotype=genotype,
             origin="founder",
+            phenotype=self._founder_phenotype(pathogen_id, genotype),
         )
         agent.assign_strain(
             pathogen_id, founder.strain_id, Phenotype.of(founder),
@@ -2740,10 +2756,12 @@ class TransmissionCore:
             return None
         strain_id = self._env_strain_ids.get(pathogen_id)
         if strain_id is None:
+            genotype = self._founder_genotype(pathogen_id)
             founder = self.strain_registry.mint(
                 pathogen_id,
-                genotype=self._founder_genotype(pathogen_id),
+                genotype=genotype,
                 origin="founder",
+                phenotype=self._founder_phenotype(pathogen_id, genotype),
             )
             strain_id = founder.strain_id
             self._env_strain_ids[pathogen_id] = strain_id
@@ -3529,12 +3547,7 @@ class TransmissionCore:
         """
         if ledger is None:
             return
-        pathway_weights = {
-            pathway: float(
-                weights.get(PATHWAY_EFFICIENCY_KEYS.get(pathway, pathway), 1.0),
-            )
-            for pathway in PATHWAY_EFFICIENCY_KEYS
-        }
+        pathway_weights = self._efficiency_pathway_weights(weights)
         for agent_id in ledger.agent_ids():
             mult = susceptibility.get(agent_id, 1.0)
             by_pathogen = self._strain_doses.setdefault(agent_id, {})
@@ -3563,6 +3576,83 @@ class TransmissionCore:
             )
             for pathway, weight in pathway_weights.items()
         }
+
+    @staticmethod
+    def _efficiency_pathway_weights(weights: dict[str, float]) -> dict[str, float]:
+        """Route efficiencies remapped onto the ledger's pathway keys."""
+        return {
+            pathway: float(
+                weights.get(PATHWAY_EFFICIENCY_KEYS.get(pathway, pathway), 1.0),
+            )
+            for pathway in PATHWAY_EFFICIENCY_KEYS
+        }
+
+    def _strain_secretor_rel(
+        self,
+        config,
+        strain_id: str,
+        flat: float,
+    ) -> float:
+        """Secretor-negative susceptibility a challenge by *strain_id* carries."""
+        if (
+            strain_id == UNRESOLVED_STRAIN
+            or self.strain_registry is None
+            or strain_id not in self.strain_registry
+        ):
+            return flat
+        rel = config.class_secretor_rel(
+            self.strain_registry.get(strain_id).genotype,
+        )
+        return flat if rel is None else rel
+
+    def _class_gate_rel(
+        self,
+        agent: KorkinAgent | None,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None,
+        weights: dict[str, float] | None,
+        npi: dict[int, dict[str, float]] | None = None,
+    ) -> float | None:
+        """Class-split secretor-negative susceptibility for one challenge.
+
+        FUT2 non-secretor status is a host trait drawn at initialization, but
+        its *effect* depends on which genotype class challenges the host — the
+        class-structure ruling's split gate (Kambhampati OR 9.9 GII.4 vs 2.2
+        non-GII.4). With a gate declared, initialization skips the flat bake
+        and each exposure applies the dose-share-weighted class value —
+        algebraically identical to scaling each contributor's dose by its own
+        class factor. Challenges without a resolvable strain mix fall back to
+        the profile's flat value; returns ``None`` when no gate applies.
+        """
+        if agent is None or not agent.secretor_negative_by_pathogen.get(
+            pathogen_id,
+        ):
+            return None
+        config = self.strain_configs.get(pathogen_id)
+        if config is None or not config.has_class_secretor_gate:
+            return None
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        flat = float(
+            profile.get("secretor_negative_relative_susceptibility", 0.0) or 0.0,
+        )
+        if ledger is None or weights is None:
+            return flat
+        shares = ledger.strain_doses(
+            agent.agent_id,
+            self._host_pathway_weights(
+                self._efficiency_pathway_weights(weights),
+                (npi or {}).get(agent.agent_id),
+            ),
+        )
+        total = sum(shares.values())
+        if total <= 0.0:
+            return flat
+        rel = 0.0
+        for (strain_id, _source), dose in shares.items():
+            rel += (dose / total) * self._strain_secretor_rel(
+                config, strain_id, flat,
+            )
+        return rel
 
     def _draw_source(self, agent_id: int, pathogen_id: str) -> Contributor:
         """Draw the parent strain (and its shedder) from the dose shares.
@@ -3886,10 +3976,12 @@ class TransmissionCore:
         """
         if self.strain_registry is None:
             return ""
+        genotype = self._founder_genotype(pathogen_id)
         founder = self.strain_registry.mint(
             pathogen_id,
-            genotype=self._founder_genotype(pathogen_id),
+            genotype=genotype,
             origin="founder",
+            phenotype=self._founder_phenotype(pathogen_id, genotype),
         )
         return founder.strain_id
 
@@ -5049,11 +5141,16 @@ class TransmissionCore:
         p_agent_doses: dict[int, float],
         agent_doses: dict[int, float],
         agent_pathogen_doses: dict[int, dict[str, float]],
+        ledger: StrainDoseLedger | None = None,
+        weights: dict[str, float] | None = None,
+        npi: dict[int, dict[str, float]] | None = None,
     ) -> dict[int, float]:
         """Scale one pathogen's doses by susceptibility and merge them in.
 
         Returns the per-agent susceptibility multipliers, so the strain-resolved
-        shadow can be scaled by exactly the same factors.
+        shadow can be scaled by exactly the same factors. When the pathogen
+        declares a class secretor gate, a non-secretor host's factor comes
+        from the challenge's strain mix rather than the init-time flat bake.
         """
         susceptibility: dict[int, float] = {}
         for aid, dose in p_agent_doses.items():
@@ -5062,6 +5159,11 @@ class TransmissionCore:
                 agent_obj.susceptibility_multiplier.get(pathogen_id, 1.0)
                 if agent_obj is not None else 1.0
             )
+            gate_rel = self._class_gate_rel(
+                agent_obj, pathogen_id, ledger, weights, npi,
+            )
+            if gate_rel is not None:
+                mult *= gate_rel
             susceptibility[aid] = mult
             scaled_dose = dose * mult
             agent_doses[aid] = agent_doses.get(aid, 0.0) + scaled_dose
@@ -5173,13 +5275,15 @@ class TransmissionCore:
         npi = self._npi_route_multipliers(agents)
         self._apply_npi_dose_reduction(npi, p_agent_doses, p_agent_pw)
 
+        route_weights = self._route_efficiencies(profile)
         susceptibility = self._merge_pathogen_doses(
             agents, pathogen_id, p_agent_doses,
             agent_doses, agent_pathogen_doses,
+            ledger=ledger, weights=route_weights, npi=npi,
         )
 
         self._fold_strain_doses(
-            pathogen_id, ledger, self._route_efficiencies(profile), susceptibility,
+            pathogen_id, ledger, route_weights, susceptibility,
             npi,
         )
         self._last_pathogen_route_doses[pathogen_id] = {

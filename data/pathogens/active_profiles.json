@@ -293,10 +293,35 @@
           "GII.17",
           "GII.2"
         ],
-        "prior_genotype_distribution": {
-          "GII.4": 0.3333,
-          "GII.17": 0.3333,
-          "GII.2": 0.3333
+        "prior_genotype_distribution_by_era": {
+          "pre": {
+            "GII.4": 0.6,
+            "GII.17": 0.15,
+            "GII.2": 0.25
+          },
+          "post_2020": {
+            "GII.4": 0.15,
+            "GII.17": 0.75,
+            "GII.2": 0.1
+          }
+        },
+        "genotype_share_era": "pre",
+        "genotype_classes": {
+          "gii4": {
+            "genotypes": [
+              "GII.4"
+            ],
+            "secretor_negative_relative_susceptibility": 0.1,
+            "transmissibility_multiplier": 1.0
+          },
+          "non_gii4": {
+            "genotypes": [
+              "GII.17",
+              "GII.2"
+            ],
+            "secretor_negative_relative_susceptibility": 0.45,
+            "transmissibility_multiplier": 1.0
+          }
         },
         "cross_immunity": {
           "GII.4": {
@@ -340,7 +365,7 @@
           "residual_protection": 0.0
         },
         "min_strain_fraction": 0.001,
-        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 56 and half_life_days 1095 are anchored on homotypic challenge protection lasting at least months and modelled immunity duration of 4.1-8.7 years (Simmons et al., Emerg Infect Dis 2013); the homotypic HR 0.39 of Ford-Siltz et al. (Clin Infect Dis 2020) is a multi-year hazard ratio, not a per-epoch susceptibility. Both are sensitivity axes. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract."
+        "notes": "Rates from docs/paper3/variant_surveillance_spec.md \u00a71.3. superinfection_susceptibility and recombination_rate are placeholders pending a literature anchor (docs/paper3/variant_surveillance_plan.md \u00a77). immune_waning: refractory_days 56 and half_life_days 1095 are anchored on homotypic challenge protection lasting at least months and modelled immunity duration of 4.1-8.7 years (Simmons et al., Emerg Infect Dis 2013); the homotypic HR 0.39 of Ford-Siltz et al. (Clin Infect Dis 2020) is a multi-year hazard ratio, not a per-epoch susceptibility. Both are sensitivity axes. refractory_protection is applied as a per-epoch hazard reduction, so any value below 1.0 leaks at that rate every hour: 1.0 makes within-window re-infection escape-only, which is the intended contract. genotype_classes and prior_genotype_distribution_by_era are declared per docs/proposals/pathogen_class_structure_decision.md and ledger NORO-GENO-01: the class — not the genotype — is the unit of declared strain difference. Class shares from era-resolved external typing surveillance (tranche 49: GII.4 \u2248 0.60 [0.47, 0.75] pre-2020, \u2248 0.15 [0.05, 0.30] post-2020 under the GII.17 succession; within-class genotype splits are declared conveniences, the class is the measured unit). Class secretor_negative_relative_susceptibility 0.10 vs 0.45 from Kambhampati et al. 2016 OR 9.9 (GII.4) vs 2.2 (non-GII.4), the split that drew the class boundary; the flat profile field stays as the fallback for unattributed challenges. transmissibility_multiplier 1.0 is the declared-neutral axis the mono-class canaries sweep; nothing here is fitted to VSP or any other model anchor."
       },
       "sequencing_assay": {
         "amplicon_target": "Capsid (VP1)",
