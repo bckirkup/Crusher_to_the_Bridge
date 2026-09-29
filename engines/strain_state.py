@@ -628,6 +628,28 @@ def _resolve_prior(raw: Mapping[str, Any]) -> Mapping[str, Any] | None:
     return by_era[era]
 
 
+def _claim_class_members(
+    class_name: str,
+    members: tuple[str, ...],
+    genotypes: tuple[str, ...],
+    claimed: dict[str, str],
+) -> None:
+    """Check a class's genotype members exist and are unclaimed; claim them."""
+    for member in members:
+        if genotypes and member not in genotypes:
+            raise StrainConfigError(
+                f"genotype_classes[{class_name!r}] has unknown genotype "
+                f"{member!r}",
+            )
+        if member in claimed:
+            raise StrainConfigError(
+                f"genotype {member!r} is claimed by both "
+                f"{claimed[member]!r} and {class_name!r}: a class "
+                "boundary cannot overlap",
+            )
+        claimed[member] = class_name
+
+
 def _validated_genotype_classes(
     raw: Mapping[str, Any] | None,
     genotypes: tuple[str, ...],
@@ -646,19 +668,7 @@ def _validated_genotype_classes(
                 f"genotype_classes[{class_name!r}] must be an object",
             )
         members = tuple(str(g) for g in spec.get("genotypes") or ())
-        for member in members:
-            if genotypes and member not in genotypes:
-                raise StrainConfigError(
-                    f"genotype_classes[{class_name!r}] has unknown genotype "
-                    f"{member!r}",
-                )
-            if member in claimed:
-                raise StrainConfigError(
-                    f"genotype {member!r} is claimed by both "
-                    f"{claimed[member]!r} and {class_name!r}: a class "
-                    "boundary cannot overlap",
-                )
-            claimed[member] = class_name
+        _claim_class_members(class_name, members, genotypes, claimed)
         rel = spec.get("secretor_negative_relative_susceptibility")
         classes[class_name] = GenotypeClass(
             name=class_name,

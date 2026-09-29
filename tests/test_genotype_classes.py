@@ -175,10 +175,9 @@ class TestClassConfigParsing:
         assert mono.prior_genotype_distribution == {"GII.4": 1.0}
 
     def test_multi_era_requires_a_selector(self) -> None:
+        profile = _profile_with(genotype_share_era=None)
         with pytest.raises(StrainConfigError, match="genotype_share_era"):
-            StrainEvolutionConfig.from_profile(
-                _profile_with(genotype_share_era=None),
-            )
+            StrainEvolutionConfig.from_profile(profile)
 
     def test_single_era_needs_no_selector(self) -> None:
         cfg = StrainEvolutionConfig.from_profile(_profile_with(
@@ -192,25 +191,26 @@ class TestClassConfigParsing:
         )
 
     def test_unknown_era_name_rejected(self) -> None:
+        profile = _profile_with(genotype_share_era="bronze_age")
         with pytest.raises(StrainConfigError, match="genotype_share_era"):
-            StrainEvolutionConfig.from_profile(
-                _profile_with(genotype_share_era="bronze_age"),
-            )
+            StrainEvolutionConfig.from_profile(profile)
 
     def test_class_boundaries_cannot_overlap(self) -> None:
+        profile = _profile_with(
+            genotype_classes={
+                "a": {"genotypes": ["GII.4", "GII.2"]},
+                "b": {"genotypes": ["GII.2"]},
+            },
+        )
         with pytest.raises(StrainConfigError, match="both"):
-            StrainEvolutionConfig.from_profile(_profile_with(
-                genotype_classes={
-                    "a": {"genotypes": ["GII.4", "GII.2"]},
-                    "b": {"genotypes": ["GII.2"]},
-                },
-            ))
+            StrainEvolutionConfig.from_profile(profile)
 
     def test_class_must_claim_declared_genotypes(self) -> None:
+        profile = _profile_with(
+            genotype_classes={"alien": {"genotypes": ["GIX.0"]}},
+        )
         with pytest.raises(StrainConfigError, match="unknown genotype"):
-            StrainEvolutionConfig.from_profile(_profile_with(
-                genotype_classes={"alien": {"genotypes": ["GIX.0"]}},
-            ))
+            StrainEvolutionConfig.from_profile(profile)
 
 
 # ── Founder minting carries the class phenotype ──────────────────────────
