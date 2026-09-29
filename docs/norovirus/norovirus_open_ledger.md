@@ -1093,6 +1093,17 @@ then settles how the ~2.6 logs of spread across these measurements is
 *structured* — as GII.4-versus-non-GII.4 classes, with the shares declared from
 external typing rather than fitted, since the VSP series carries no genotype in
 any of its 428 postings — and adopts no dose value either.
+**The declaration is now made (ledger [`NORO-GENO-01`](../ledger/NORO-GENO-01.md)):
+the arm declares the pooled GII genogroup and adopts the two-class ruling —
+GII.4 vs non-GII.4 drawn per-founder — with era-resolved class shares declared
+from external typing surveillance in
+[tranche 49](../literature/consensus_tranche_49_genotype_class_shares.md)
+(GII.4 ≈0.60 [0.47, 0.75] pre-2020, ≈0.15 [0.05, 0.30] post-2020 under the
+GII.17 succession), never fitted. GI.1 is a scenario arm, not a class. The
+dose-response consequence: the α interval stands as the GII arm's declared
+span and the class difference enters at the founder (split secretor gate,
+declared `transmissibility_multiplier` axis) — still unadopted pending the
+implementation session NORO-GENO-01 lists.**
 
 **The exact and approximate dose-response forms are also an open implementation
 item, not a repair in this change.** Production reaches
