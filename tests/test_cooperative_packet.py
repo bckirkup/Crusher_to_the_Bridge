@@ -423,3 +423,77 @@ class TestDropletClassBookkeeping:
         assert slot.get("wet", 0.0) > 0.0
         assert slot.get("dry", 0.0) == pytest.approx(0.0)
         assert slot["wet"] == pytest.approx(lump)
+
+
+class TestMergeCoopClassDoses:
+    """The merged class doses ride the droplet route's own factors."""
+
+    def test_factors_scale_both_classes(self) -> None:
+        p_coop = {7: {"dry": 2.0, "wet": 4.0}}
+        merged: dict[int, dict[str, float]] = {}
+        TransmissionCore._merge_coop_class_doses(
+            p_coop, PID, merged,
+            route_weights={"droplet": 0.5},
+            npi={7: {"droplet": 0.5}},
+            susceptibility={7: 0.25},
+        )
+        factor = 0.5 * 0.5 * 0.25
+        assert merged[7][f"dry:{PID}"] == pytest.approx(2.0 * factor)
+        assert merged[7][f"wet:{PID}"] == pytest.approx(4.0 * factor)
+
+    def test_default_pathogen_uses_bare_class_key(self) -> None:
+        merged: dict[int, dict[str, float]] = {}
+        TransmissionCore._merge_coop_class_doses(
+            {7: {"dry": 1.0}}, "_default", merged,
+            route_weights={}, npi={}, susceptibility={},
+        )
+        assert merged[7]["dry"] == pytest.approx(1.0)
+
+    def test_missing_factors_default_to_identity(self) -> None:
+        merged: dict[int, dict[str, float]] = {7: {f"dry:{PID}": 0.5}}
+        TransmissionCore._merge_coop_class_doses(
+            {7: {"dry": 2.0}}, PID, merged,
+            route_weights={}, npi={}, susceptibility={},
+        )
+        assert merged[7][f"dry:{PID}"] == pytest.approx(0.5 + 2.0)
+
+    def test_execute_pathways_merges_coop_terms_under_arm(self) -> None:
+        core = _core(_profile())
+        target = _agent(2)
+        agent_coop: dict[int, dict[str, float]] = {}
+
+        def fake_droplet(*_args: object, **kwargs: object) -> None:
+            kwargs["agent_coop_doses"][target.agent_id] = {
+                "dry": 1.0, "wet": 2.0,
+            }
+
+        core._pathway_droplet = fake_droplet  # type: ignore[method-assign]
+        core._execute_pathogen_pathways(
+            0, [target], {}, {}, None, None, PID,
+            agent_doses={}, agent_pathway_doses={},
+            agent_pathogen_doses={}, matrix=ContactTracingMatrix(epoch=0),
+            events=[], agent_coop_doses=agent_coop,
+        )
+        assert agent_coop[2][f"dry:{PID}"] > 0.0
+        assert agent_coop[2][f"wet:{PID}"] == pytest.approx(
+            2.0 * agent_coop[2][f"dry:{PID}"],
+        )
+
+    def test_execute_pathways_skips_merge_outside_arm(self) -> None:
+        core = _core(_profile(model="beta_poisson"))
+        target = _agent(2)
+        agent_coop: dict[int, dict[str, float]] = {}
+
+        def fake_droplet(*_args: object, **kwargs: object) -> None:
+            slot = kwargs.get("agent_coop_doses")
+            if slot is not None:
+                slot[target.agent_id] = {"dry": 1.0}
+
+        core._pathway_droplet = fake_droplet  # type: ignore[method-assign]
+        core._execute_pathogen_pathways(
+            0, [target], {}, {}, None, None, PID,
+            agent_doses={}, agent_pathway_doses={},
+            agent_pathogen_doses={}, matrix=ContactTracingMatrix(epoch=0),
+            events=[], agent_coop_doses=agent_coop,
+        )
+        assert agent_coop == {}
