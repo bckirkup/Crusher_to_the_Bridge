@@ -20,8 +20,6 @@ cell.
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 
@@ -33,29 +31,17 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
     enumerate_cells,
     load_design,
 )
-from simulation_utils.paths import (  # noqa: E402
-    repo_root,
-    resolve_child_path,
-    resolve_repo_path,
-    validated_open,
+from simulation_utils.paths import repo_root  # noqa: E402
+from tools.covid_screen_readout_common import (  # noqa: E402
+    anchor_legs,
+    band_stats,
+    quantile,
+    resolve_design_arg,
+    run_readout,
+    takeoff_split,
 )
 
 REPO_ROOT = repo_root()
-
-TAKEOFF_MIN_ONSETS = 10
-T1_RECORDED = 197.0
-T1_BEFORE_SHARE = 0.173
-BEFORE_SHARE_TOL = 0.10
-H5_BAND = (712.0, 960.0)
-MIN_TAKEOFF_SEEDS = 5
-
-
-def _q(values: list[float], p: float) -> float | None:
-    if not values:
-        return None
-    srt = sorted(values)
-    i = min(len(srt) - 1, max(0, int(round(p * (len(srt) - 1)))))
-    return float(srt[i])
 
 
 def _declared(arm: dict) -> dict:
@@ -157,7 +143,9 @@ def _audit_channel_echoes(payload: dict, declared: dict) -> list[str]:
     return failures
 
 
-def audit_cell(payload: dict, declared: dict) -> list[str]:
+def audit_cell(
+    payload: dict, declared: dict, theta: float | None = None,
+) -> list[str]:
     """Return the list of audit violations for one cell payload."""
     ring = payload.get("seed_ring")
     if not isinstance(ring, dict):
@@ -171,207 +159,62 @@ def audit_cell(payload: dict, declared: dict) -> list[str]:
 
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians/quantiles for one (theta, arm) row."""
-    obs = [p["observables"] for p in payloads]
-    takeoff = [
-        p for p, o in zip(payloads, obs)
-        if int(o["recorded_onsets"]) >= TAKEOFF_MIN_ONSETS
-    ]
-    rec = [float(o["recorded_onsets"]) for o in obs]
-    shares = [
-        float(o["onsets_before_split_day"]) / float(o["recorded_onsets"])
-        for o in obs
-        if int(o["recorded_onsets"]) > 0
-    ]
-    t_rec = [float(p["observables"]["recorded_onsets"]) for p in takeoff]
-    t_inf = [
-        float(p["infections_total"]) for p in takeoff
-        if p.get("infections_total") is not None
-    ]
-    t_share = [
-        float(p["observables"]["onsets_before_split_day"])
-        / float(p["observables"]["recorded_onsets"])
-        for p in takeoff
-    ]
+    takeoff, vectors = takeoff_split(payloads)
     shed_flags = [
         p.get(KEY_INDEX_SHEDDING_AT_DAY0) for p in payloads
         if p.get(KEY_INDEX_SHEDDING_AT_DAY0) is not None
     ]
-    med_inf = _q(t_inf, 0.5)
-    med_share = _q(t_share, 0.5)
-    enough = len(takeoff) >= MIN_TAKEOFF_SEEDS
-    in_band = (
-        med_inf is not None and H5_BAND[0] <= med_inf <= H5_BAND[1]
-    )
-    timing_hit = (
-        med_share is not None
-        and abs(med_share - T1_BEFORE_SHARE) <= BEFORE_SHARE_TOL
-    )
     return {
         "n": len(payloads),
         "takeoff_n": len(takeoff),
-        "recorded_onsets": {
-            "median": _q(rec, 0.5), "q05": _q(rec, 0.05),
-            "q95": _q(rec, 0.95),
-        },
-        "before_share": {"median": _q(shares, 0.5)},
+        "recorded_onsets": band_stats(vectors["rec"]),
+        "before_share": {"median": quantile(vectors["shares"], 0.5)},
         "index_shedding_day0_fraction": (
             sum(bool(f) for f in shed_flags) / len(shed_flags)
             if shed_flags else None
         ),
-        "takeoff_recorded_onsets": {
-            "median": _q(t_rec, 0.5), "q05": _q(t_rec, 0.05),
-            "q95": _q(t_rec, 0.95),
+        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
+        "takeoff_infections_total": band_stats(vectors["t_inf"]),
+        "takeoff_before_share": band_stats(vectors["t_share"]),
+        **{
+            k: v for k, v in anchor_legs(
+                len(takeoff), vectors["t_inf"], vectors["t_share"],
+            ).items()
+            if k != "enough_takeoff"
         },
-        "takeoff_infections_total": {
-            "median": med_inf, "q05": _q(t_inf, 0.05),
-            "q95": _q(t_inf, 0.95),
-        },
-        "takeoff_before_share": {
-            "median": med_share, "q05": _q(t_share, 0.05),
-            "q95": _q(t_share, 0.95),
-        },
-        "truth_leg_in_band": bool(in_band and enough),
-        "timing_leg_in_band": bool(timing_hit and enough),
-        "both_legs": bool(in_band and timing_hit and enough),
     }
 
 
-def _load_payloads(cells_dir: str) -> dict[str, dict]:
-    """Read every cell JSON under *cells_dir* (contained to the dir)."""
-    payloads: dict[str, dict] = {}
-    for name in sorted(os.listdir(cells_dir)):
-        if not name.endswith(".json"):
-            continue
-        path = resolve_child_path(cells_dir, name)
-        with validated_open(
-            path, allowed_roots=(cells_dir,), encoding="utf-8",
-        ) as fh:
-            payloads[name] = json.load(fh)
-    return payloads
-
-
-def _audit_all(
-    payloads: dict[str, dict],
-    cells: list,
-    declared_by_arm: dict[str, dict],
-) -> tuple[dict[str, list[str]], dict[tuple, list[dict]]]:
-    """Audit each payload and bucket by (theta, arm)."""
-    by_key = {(c.theta, c.arm_id, c.seed): c for c in cells}
-    audit_failures: dict[str, list[str]] = {}
-    rows: dict[tuple, list[dict]] = {}
-    for name, payload in payloads.items():
-        cell = payload.get("cell") or {}
-        key = (
-            float(cell.get("theta")), cell.get("arm_id"),
-            int(cell.get("seed")),
-        )
-        if key not in by_key:
-            audit_failures[name] = ["cell key not in the declared lattice"]
-            continue
-        declared = declared_by_arm.get(cell.get("arm_id"))
-        failures = audit_cell(payload, declared) if declared else [
-            f"unknown arm {cell.get('arm_id')}",
-        ]
-        if failures:
-            audit_failures[name] = failures
-        rows.setdefault((key[0], key[1]), []).append(payload)
-    return audit_failures, rows
-
-
-def _print_rows(report: dict) -> None:
-    for label, stats in report["rows"].items():
-        ti = stats["takeoff_infections_total"]
-        ts = stats["takeoff_before_share"]
-        tr = stats["takeoff_recorded_onsets"]
-        flags = []
-        if stats["truth_leg_in_band"]:
-            flags.append("TRUTH-IN-BAND")
-        if stats["timing_leg_in_band"]:
-            flags.append("TIMING-IN-BAND")
-
-        def med(v: float | None) -> str:
-            return "n/a" if v is None else f"{v:.3g}"
-
-        print(
-            f"  {label}: takeoff {stats['takeoff_n']}/{stats['n']} "
-            f"rec med {med(tr['median'])} "
-            f"[{med(tr['q05'])},{med(tr['q95'])}] "
-            f"inf med {med(ti['median'])} "
-            f"[{med(ti['q05'])},{med(ti['q95'])}] "
-            f"bshr med {med(ts['median'])} {' '.join(flags)}",
-        )
+def _in_band_trigger(
+    theta: float, arm_id: str, stats: dict,
+) -> dict | None:
+    if not (stats["truth_leg_in_band"] or stats["timing_leg_in_band"]):
+        return None
+    return {
+        "theta": theta, "arm_id": arm_id,
+        "truth_leg_in_band": stats["truth_leg_in_band"],
+        "timing_leg_in_band": stats["timing_leg_in_band"],
+        "takeoff_infections_total": stats["takeoff_infections_total"],
+        "takeoff_before_share": stats["takeoff_before_share"],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cells", required=True)
-    parser.add_argument("--design", required=True)
-    parser.add_argument("--out", default=None)
-    parser.add_argument(
-        "--allow-partial", action="store_true",
-        help="read whatever cells exist (canary/incomplete arrays)",
+    design = load_design(
+        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
     )
-    args = parser.parse_args(argv)
-
-    cells_dir = resolve_repo_path(REPO_ROOT, args.cells)
-    design_path = resolve_repo_path(REPO_ROOT, args.design)
-    design = load_design(design_path, repo_root=REPO_ROOT)
-    cells = enumerate_cells(design)
-    declared_by_arm = {
-        arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-    }
-
-    payloads = _load_payloads(cells_dir)
-    if not args.allow_partial and len(payloads) < len(cells):
-        print(
-            f"{len(payloads)} of {len(cells)} cells present; "
-            "pass --allow-partial for a partial read",
-            file=sys.stderr,
-        )
-        return 2
-
-    audit_failures, rows = _audit_all(payloads, cells, declared_by_arm)
-
-    report = {
-        "cells_found": len(payloads),
-        "cells_expected": len(cells),
-        "audit_failures": audit_failures,
-        "rows": {},
-        "in_band_landings": [],
-    }
-    for (theta, arm_id), row in sorted(rows.items()):
-        stats = _row_stats(row)
-        report["rows"][f"theta={theta:.4g}|arm={arm_id}"] = stats
-        if stats["truth_leg_in_band"] or stats["timing_leg_in_band"]:
-            report["in_band_landings"].append(
-                {
-                    "theta": theta, "arm_id": arm_id,
-                    "truth_leg_in_band": stats["truth_leg_in_band"],
-                    "timing_leg_in_band": stats["timing_leg_in_band"],
-                    "takeoff_infections_total": (
-                        stats["takeoff_infections_total"]
-                    ),
-                    "takeoff_before_share": stats["takeoff_before_share"],
-                },
-            )
-
-    if args.out:
-        out_path = resolve_repo_path(REPO_ROOT, args.out)
-        with validated_open(
-            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as fh:
-            json.dump(report, fh, indent=2, sort_keys=True)
-
-    print(
-        f"{report['cells_found']}/{report['cells_expected']} cells; "
-        f"{len(audit_failures)} audit failures",
+    return run_readout(
+        argv,
+        repo_root=REPO_ROOT,
+        cells=enumerate_cells(design),
+        declared_by_arm={
+            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
+        },
+        audit_cell=audit_cell,
+        row_stats=_row_stats,
+        report_key="in_band_landings",
+        row_triggers=_in_band_trigger,
     )
-    _print_rows(report)
-    if report["in_band_landings"]:
-        print("IN-BAND LANDINGS:", json.dumps(
-            report["in_band_landings"], indent=1,
-        ))
-    return 0
 
 
 if __name__ == "__main__":
