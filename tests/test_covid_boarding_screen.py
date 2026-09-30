@@ -1047,3 +1047,207 @@ def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
     ]
     assert base_echo["model"] == "beta_poisson"
     assert "n_star" not in base_echo
+
+
+# ── SUSCEPT-V1: susceptibility / effective-population arms ───────────────
+
+SUSCEPT_V1_DESIGN = (
+    REPO_ROOT
+    / "picard_framework"
+    / "runs"
+    / "covid_suscept_v1_design.json"
+)
+
+
+def test_suscept_v1_design_is_the_declared_480_cell_screen():
+    design = load_design(str(SUSCEPT_V1_DESIGN))
+    cells = enumerate_cells(design)
+    assert len(cells) == 480
+    assert design.arm_ids == (
+        "D0_declared", "REF_M0P56", "IMM10", "IMM25", "IMM50", "IMM75",
+        "IMM25_C0", "IMM25_C90", "IMM0_C90", "FRAIL_A05", "FRAIL_A1",
+        "FRAIL_A2", "CAP_OFF", "CAP_FR", "IMM50_CAPOFF",
+        "FRAIL_A05_CAPOFF",
+    )
+    # Point x arm x seed, anchor theta first, seeds innermost.
+    assert cells[0].theta == pytest.approx(2.37e11)
+    assert cells[0].seed == 20200205
+    assert cells[9].seed == 20200214
+    assert cells[150].arm_id == "FRAIL_A05_CAPOFF"
+    assert cells[159].theta == pytest.approx(2.37e11)
+    assert cells[160].theta == pytest.approx(1e11)
+    assert cells[320].theta == pytest.approx(1e12)
+
+
+def _suscept_spec(arm_id: str, theta: float = 2.37e11) -> dict:
+    design = load_design(str(SUSCEPT_V1_DESIGN))
+    cell = next(
+        c for c in enumerate_cells(design)
+        if c.arm_id == arm_id
+        and c.theta == pytest.approx(theta)
+        and c.seed == 20200205
+    )
+    return prepare_cell_run_spec(design, cell)
+
+
+def test_ship_graph_arm_writes_the_declared_fractions():
+    raw = _suscept_spec("IMM25_C90")
+    graph = raw["config_overrides"]["ship_graph"]
+    assert graph["immune_fraction"] == pytest.approx(0.25)
+    assert graph["crew_immune_fraction"] == pytest.approx(0.90)
+    # The baseline keeps the fit's pinned zero, not the engine default 0.2.
+    base = _suscept_spec("D0_declared")
+    assert base["config_overrides"]["ship_graph"][
+        "immune_fraction"
+    ] == pytest.approx(0.0)
+    assert "crew_immune_fraction" not in base["config_overrides"]["ship_graph"]
+
+
+def test_dose_response_frailty_preserves_theta_at_every_lattice_point():
+    design = load_design(str(SUSCEPT_V1_DESIGN))
+    for theta in design.thetas:
+        cell = next(
+            c for c in enumerate_cells(design)
+            if c.arm_id == "FRAIL_A05"
+            and c.theta == pytest.approx(theta)
+            and c.seed == 20200205
+        )
+        dr = prepare_cell_run_spec(design, cell)[
+            "pathogen_overrides"
+        ]["sars_cov2_resp"]["dose_response"]
+        assert dr["model"] == "beta_poisson"
+        assert dr["alpha"] == pytest.approx(0.05)
+        assert dr["beta"] == pytest.approx(58.0)
+        # E[s] = theta: scale * alpha/(alpha+beta) == theta.
+        assert dr["susceptibility_scale"] * dr["alpha"] / (
+            dr["alpha"] + dr["beta"]
+        ) == pytest.approx(theta)
+
+
+@pytest.mark.parametrize("sg", [
+    {"num_agents": 100},
+    {"immune_fraction": None},
+    {"immune_fraction": -0.1},
+    {"immune_fraction": 1.5},
+    {"crew_immune_fraction": "most"},
+    [0.25],
+])
+def test_ship_graph_overrides_reject_out_of_grammar_values(sg):
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {"arm_id": "B1_bad", "overrides": {"ship_graph_overrides": sg}},
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad"
+    )
+    with pytest.raises(ValueError, match="ship_graph_overrides"):
+        prepare_cell_run_spec(design, cell)
+
+
+@pytest.mark.parametrize("spec", [
+    {"gamma": 2.0},
+    {"alpha": 0.0},
+    {"alpha": -1.0},
+    {"alpha": "heavy"},
+    {"alpha": float("nan")},
+    [0.05],
+])
+def test_dose_response_frailty_rejects_out_of_grammar_values(spec):
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {"arm_id": "B1_bad", "overrides": {"dose_response_frailty": spec}},
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad"
+    )
+    with pytest.raises(ValueError, match="dose_response_frailty"):
+        prepare_cell_run_spec(design, cell)
+
+
+def test_dose_response_frailty_needs_the_cell_theta():
+    from picard_framework.covid_boarding_screen import apply_arm_overrides
+    from picard_framework.covid_theta_fit import load_covid_profile
+
+    raw = build_fit_run_spec("diamond_princess_2020", 1e10, 20200205)
+    apply_boarding_axis(
+        raw, infection_age_days=6.8, imports=1,
+        sanitary_visit_mode="dwell_weighted",
+        voyage_mode="declared", incubation_profile=load_covid_profile(),
+    )
+    with pytest.raises(ValueError, match="dose_response_frailty"):
+        apply_arm_overrides(
+            raw, {"dose_response_frailty": {"alpha": 0.05}},
+            profile=load_covid_profile(),
+        )
+
+
+def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
+    """48-epoch smoke on an immune-split arm: the immune block echoes
+    declared + resolved + realized counts, the acquisition curve and
+    susceptibility draw blocks are populated, and the resolved cap flag
+    is echoed."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_imm_split",
+            "overrides": {
+                "ship_graph_overrides": {
+                    "immune_fraction": 0.25,
+                    "crew_immune_fraction": 0.9,
+                },
+            },
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_imm_split"
+    )
+    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    immune = payload["ship_graph_immune"]
+    assert immune["declared"]["immune_fraction"] == pytest.approx(0.25)
+    assert immune["declared"]["crew_immune_fraction"] == pytest.approx(0.9)
+    assert immune["resolved"]["immune_ratio"] == pytest.approx(0.25)
+    assert immune["resolved"]["crew_immune_ratio"] == pytest.approx(0.9)
+    realized = immune["realized"]["by_role"]
+    complement = immune["realized"]["complement_by_role"]
+    # The pools deal without replacement: per-role realized == the
+    # integer pool share of that role's complement.
+    assert realized["passenger"] == int(complement["passenger"] * 0.25)
+    assert realized["crew"] == int(complement["crew"] * 0.9)
+    assert payload["exposure_cap_active"] is True
+    curve = payload["acquisition_curve"]
+    assert set(curve) == {"total_by_day", "confined_by_day"}
+    assert all(day.isdigit() for day in curve["total_by_day"])
+    draw = payload["susceptibility_draw"]
+    assert draw["n"] > 0
+    assert draw["q05"] <= draw["q50"] <= draw["q95"]
+
+
+def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
+    """48-epoch smoke: the frailty arm's payload echoes the arm-written
+    beta-Poisson block (declared alpha, recomputed scale) and the draw
+    quantiles report the challenged hosts' realized susceptibilities."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_frail",
+            "overrides": {"dose_response_frailty": {"alpha": 0.05}},
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_frail"
+    )
+    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    echo = payload["dose_response"]
+    assert echo["model"] == "beta_poisson"
+    assert echo["alpha"] == pytest.approx(0.05)
+    assert echo["susceptibility_scale"] == pytest.approx(
+        cell.theta * (0.05 + 58.0) / 0.05
+    )
+    draw = payload["susceptibility_draw"]
+    assert draw["n"] > 0
+    # The challenged hosts' draws sit on the heavy-tailed scale.
+    assert draw["mean"] <= echo["susceptibility_scale"]
