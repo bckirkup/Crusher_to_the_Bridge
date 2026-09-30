@@ -1,0 +1,19 @@
+{
+ "checks": [
+  {
+   "seed": 8105,
+   "platform": "spirit_cruise_3000",
+   "instrument": "growth_chain_census+hand_occupancy",
+   "fingerprint_keys": [
+    "cost_accounting",
+    "derived",
+    "parameters",
+    "summary",
+    "timeseries",
+    "trigger_status"
+   ],
+   "voyage_fingerprint_equal": true,
+   "verdict": "PASS"
+  }
+ ]
+}

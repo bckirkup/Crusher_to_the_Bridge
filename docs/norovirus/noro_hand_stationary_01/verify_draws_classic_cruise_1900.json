@@ -1,0 +1,19 @@
+{
+ "checks": [
+  {
+   "seed": 8000,
+   "platform": "classic_cruise_1900",
+   "instrument": "fomite_mass_balance+hand_occupancy",
+   "fingerprint_keys": [
+    "cost_accounting",
+    "derived",
+    "parameters",
+    "summary",
+    "timeseries",
+    "trigger_status"
+   ],
+   "voyage_fingerprint_equal": true,
+   "verdict": "PASS"
+  }
+ ]
+}

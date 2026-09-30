@@ -125,6 +125,8 @@ if str(_CAMPAIGN_DIR) not in sys.path:
 
 from campaign_runner import generate_tier_runs  # noqa: E402
 
+from tools.noro_diag import hand_occupancy  # noqa: E402
+
 
 def _voyage_blocks(
     spec_dict: dict[str, Any],
@@ -294,6 +296,8 @@ class CensusRecorder:
     )
     census_rows: list[dict[str, Any]] = field(default_factory=list)
     hazard_witness: tuple[int, str, float, float, float] | None = None
+    # NORO-HAND-STATIONARY-01: per host-epoch hand-load occupancy rows.
+    occupancy: hand_occupancy.OccupancyRecorder | None = None
 
     def gen_of(self, agent_id: int | None) -> int:
         if agent_id is None:
@@ -1145,12 +1149,12 @@ def _wrap_challenge(core_cls: type, rec: CensusRecorder) -> Any:
     def wrapper(
         self: Any, epoch: int, agent: Any, pathogen_id: str,
         agent_pathogen_doses: dict, agent_pathway_doses: Any,
-        matrix: Any, events: list,
+        matrix: Any, events: list, *args: Any, **kwargs: Any,
     ) -> None:
         if pathogen_id != rec.pathogen_id:
             return original(
                 self, epoch, agent, pathogen_id, agent_pathogen_doses,
-                agent_pathway_doses, matrix, events,
+                agent_pathway_doses, matrix, events, *args, **kwargs,
             )
         aid = int(agent.agent_id)
         was_infected = bool(agent.is_infected_with(pathogen_id))
@@ -1161,7 +1165,7 @@ def _wrap_challenge(core_cls: type, rec: CensusRecorder) -> Any:
         rec.hazard_witness = None
         original(
             self, epoch, agent, pathogen_id, agent_pathogen_doses,
-            agent_pathway_doses, matrix, events,
+            agent_pathway_doses, matrix, events, *args, **kwargs,
         )
         witness = rec.hazard_witness
         if (
@@ -1357,6 +1361,12 @@ def instrumented(rec: CensusRecorder) -> Any:
     )
     for name, wrapped in _install_wrappers(core_cls, rec).items():
         setattr(core_cls, name, wrapped)
+    if rec.occupancy is not None:
+        # Installed last so the occupancy wrappers call the census wrappers
+        # on shared methods; every census counter still sees every call.
+        occ_saved = hand_occupancy.install(core_cls, rec.occupancy)
+        for name, method in occ_saved.items():
+            saved.setdefault(name, method)
     tc.pickup_gate_open = _wrap_pickup_gate(rec)
     tc.draw_emesis_schedule = _wrap_schedule_module(tc, rec)
     initiation_module.draw_emesis_schedule = _wrap_schedule_module(
@@ -1448,6 +1458,13 @@ def _summarise_run(
         "food_venues": rec.food_rows,
         "patch_pickups": rec.patch_rows,
         "patch_sweeps": rec.patch_sweep_rows,
+        "hand_occupancy": (
+            hand_occupancy.summarise(rec.occupancy)
+            if rec.occupancy is not None else None
+        ),
+        "hand_occupancy_rows": (
+            rec.occupancy.rows if rec.occupancy is not None else []
+        ),
         "removal_totals": {
             cause: dict(by_gen)
             for cause, by_gen in rec.removal_totals.items()
@@ -1485,6 +1502,7 @@ def run_seed(
     """Run one voyage under the census wrappers; fold summary + voyage
     blocks + the initiation witness."""
     rec = CensusRecorder(pathogen_id=pathogen_id)
+    rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
     with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
         spec_path = resolve_child_path(tmp, "run_spec.json")
         with validated_open(
@@ -1538,6 +1556,57 @@ def run_seed(
         voyage,
         initiation,
     )
+
+
+def _control_voyage(
+    spec_dict: dict[str, Any], natural_history_clock: str | None,
+) -> dict[str, Any]:
+    """The same spec run with no wrappers -- the draw-neutrality control."""
+    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+        spec_path = resolve_child_path(tmp, "run_spec.json")
+        with validated_open(
+            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(spec_dict))
+        picard_spec = PicardRunSpec.from_picard_json(
+            str(REPO_ROOT), spec_path,
+        )
+        result = ShipSimulation(picard_spec, display=False).run()
+    num_agents = int(
+        (spec_dict.get("config_overrides") or {})
+        .get("ship_graph", {})
+        .get("num_agents", 0),
+    )
+    return _voyage_blocks(spec_dict, result, num_agents, natural_history_clock)
+
+
+def verify_draws(
+    *, pathogen_id: str, spec_dict: dict[str, Any],
+    natural_history_clock: str | None,
+) -> dict[str, Any]:
+    """Instrumented vs control voyage on the identical spec.
+
+    The census and occupancy wrappers consume no RNG by construction; the
+    ledger requires the claim measured, so the two runs must produce a
+    byte-identical voyage fingerprint.
+    """
+    _payload, voyage, _initiation = run_seed(
+        pathogen_id=pathogen_id, spec_dict=spec_dict,
+        natural_history_clock=natural_history_clock,
+    )
+    control = _control_voyage(spec_dict, natural_history_clock)
+    equal = (
+        json.dumps(voyage, sort_keys=True, default=str)
+        == json.dumps(control, sort_keys=True, default=str)
+    )
+    return {
+        "seed": int(spec_dict["run"]["random_seed"]),
+        "platform": spec_dict["catalog"]["platform_id"],
+        "instrument": "growth_chain_census+hand_occupancy",
+        "fingerprint_keys": sorted(voyage),
+        "voyage_fingerprint_equal": equal,
+        "verdict": "PASS" if equal else "FAIL",
+    }
 
 
 def _write_run_zip(
@@ -1602,6 +1671,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="smoke-only: override the declared complement",
     )
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--verify-draws", action="store_true",
+        help="run each selected seed twice (instrumented vs control) and "
+             "report whether the voyage fingerprints are identical; writes "
+             "verify_draws_<tier>.json and no cell zips",
+    )
     return parser.parse_args(argv)
 
 
@@ -1638,6 +1713,23 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
+    if args.verify_draws:
+        checks = [
+            verify_draws(
+                pathogen_id=args.pathogen_id, spec_dict=spec,
+                natural_history_clock=clock,
+            )
+            for _run_id, spec in runs
+        ]
+        path = resolve_child_path(
+            str(out_dir), f"verify_draws_{args.tier}.json",
+        )
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump({"checks": checks}, handle, indent=1)
+        ok = all(check["voyage_fingerprint_equal"] for check in checks)
+        print(json.dumps({"checks": checks}, indent=1))
+        print(f"written: {path}")
+        return 0 if ok else 1
     for run_id, spec in runs:
         seed = int(spec["run"]["random_seed"])
         payload, voyage, initiation = run_seed(

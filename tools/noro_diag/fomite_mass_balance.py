@@ -90,6 +90,7 @@ from simulation_utils.paths import (  # noqa: E402
     validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from tools.noro_diag import hand_occupancy  # noqa: E402
 
 # Relative tolerances for the conservation criterion, declared in the ledger
 # entry before any cell ran.
@@ -153,6 +154,8 @@ class Recorder:
     )
     symptomatic_hosts: set[int] = field(default_factory=set)
     infected_hosts: set[int] = field(default_factory=set)
+    # NORO-HAND-STATIONARY-01: per host-epoch hand-load occupancy rows.
+    occupancy: hand_occupancy.OccupancyRecorder | None = None
 
     def zone(self, zone_name: str) -> ZoneBalance:
         """Return (creating if needed) one zone's book."""
@@ -422,6 +425,15 @@ def instrumented(rec: Recorder) -> Any:
     saved.update(_wrap_delivery(core_cls, rec))
     saved.update(_wrap_hand_and_phase(core_cls, rec))
     saved.update(_wrap_epochs(core_cls, rec))
+    if rec.occupancy is not None:
+        # Installed last so these wrappers call the ones above: the hand
+        # witness counters still see every call. ``setdefault`` keeps the
+        # pre-wrap originals on shared names so the restore loop unwraps
+        # the whole chain, not just this layer.
+        for name, method in hand_occupancy.install(
+            core_cls, rec.occupancy,
+        ).items():
+            saved.setdefault(name, method)
     try:
         yield
     finally:
@@ -531,7 +543,7 @@ def _voyage_balance(rec: Recorder, rows: list[dict[str, Any]]) -> dict[str, Any]
 def summarise(rec: Recorder, seed: int, epochs: int) -> dict[str, Any]:
     """The balance, the delivery witness, and the eligibility decomposition."""
     rows = _zone_rows(rec)
-    return {
+    summary = {
         "seed": seed,
         "epochs": epochs,
         "pathogen_id": rec.pathogen_id,
@@ -547,6 +559,83 @@ def summarise(rec: Recorder, seed: int, epochs: int) -> dict[str, Any]:
         "hosts_infected": len(rec.infected_hosts),
         "hosts_symptomatic": len(rec.symptomatic_hosts),
     }
+    if rec.occupancy is not None:
+        summary["hand_occupancy"] = hand_occupancy.summarise(rec.occupancy)
+        summary["hand_occupancy_rows"] = rec.occupancy.rows
+    return summary
+
+
+def _run_voyage(
+    spec_dict: dict[str, Any], rec: Recorder | None,
+) -> Any:
+    """Write the spec, run one voyage (instrumented iff ``rec``), return it."""
+    # The spec path lives under the repository root, not /tmp, because
+    # validated_open refuses publicly writable targets; the directory is
+    # still a fresh private TemporaryDirectory.
+    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
+        spec_path = resolve_child_path(tmp, "run_spec.json")
+        with validated_open(
+            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
+        ) as handle:
+            handle.write(json.dumps(spec_dict))
+        picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), spec_path)
+        if rec is None:
+            return ShipSimulation(picard_spec, display=False).run()
+        with instrumented(rec):
+            sim = ShipSimulation(picard_spec, display=False)
+            return sim.run()
+
+
+def _voyage_fingerprint(
+    spec_dict: dict[str, Any], result: Any, num_agents: int,
+) -> dict[str, Any]:
+    """The campaign-shaped voyage blocks -- the draw-neutrality fingerprint."""
+    from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
+        _attach_voyage_blocks,
+    )
+    summary: dict[str, Any] = {}
+    _attach_voyage_blocks(summary, spec_dict, result, num_agents)
+    return summary
+
+
+def _fingerprints_equal(left: dict[str, Any], right: dict[str, Any]) -> bool:
+    return json.dumps(left, sort_keys=True, default=str) == json.dumps(
+        right, sort_keys=True, default=str,
+    )
+
+
+def verify_draws(
+    *, seed: int, platform: str, bundle: str, epochs: int,
+    pathogen_id: str,
+) -> dict[str, Any]:
+    """Instrumented vs control voyage on the identical spec.
+
+    The occupancy wrappers consume no RNG by construction, but the ledger
+    requires the claim *measured*: any wrapper that drew would reshuffle
+    every downstream draw and the two voyage fingerprints would differ.
+    """
+    num_agents = declared_total(platform)
+    spec_dict = build_spec(
+        seed=seed, platform=platform, bundle=bundle,
+        epochs=epochs, num_agents=num_agents,
+    )
+    rec = Recorder(pathogen_id=pathogen_id)
+    rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
+    instrumented_voyage = _voyage_fingerprint(
+        spec_dict, _run_voyage(spec_dict, rec), num_agents,
+    )
+    control_voyage = _voyage_fingerprint(
+        spec_dict, _run_voyage(spec_dict, None), num_agents,
+    )
+    equal = _fingerprints_equal(instrumented_voyage, control_voyage)
+    return {
+        "seed": seed,
+        "platform": platform,
+        "instrument": "fomite_mass_balance+hand_occupancy",
+        "fingerprint_keys": sorted(instrumented_voyage),
+        "voyage_fingerprint_equal": equal,
+        "verdict": "PASS" if equal else "FAIL",
+    }
 
 
 def run_seed(
@@ -559,19 +648,10 @@ def run_seed(
         epochs=epochs, num_agents=num_agents,
     )
     rec = Recorder(pathogen_id=pathogen_id)
-    # The spec path lives under the repository root, not /tmp, because
-    # validated_open refuses publicly writable targets; the directory is
-    # still a fresh private TemporaryDirectory.
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), spec_path)
-        with instrumented(rec):
-            ShipSimulation(picard_spec, display=False).run()
+    rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
+    result = _run_voyage(spec_dict, rec)
     summary = summarise(rec, seed, epochs)
+    summary["voyage"] = _voyage_fingerprint(spec_dict, result, num_agents)
     summary["platform"] = platform
     summary["num_agents"] = num_agents
     summary["bundle"] = bundle
@@ -637,6 +717,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="the seeds NORO-EMESIS-CANARY-01 measured on this hull",
     )
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--verify-draws", action="store_true",
+        help="run each seed twice (instrumented vs control) and report "
+             "whether the voyage fingerprints are identical; writes "
+             "verify_draws_<platform>.json and no cell dumps",
+    )
     return parser.parse_args(argv)
 
 
@@ -645,6 +731,23 @@ def main(argv: list[str] | None = None) -> int:
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
+    if args.verify_draws:
+        checks = [
+            verify_draws(
+                seed=seed, platform=args.platform, bundle=args.bundle,
+                epochs=args.epochs, pathogen_id=args.pathogen_id,
+            )
+            for seed in args.seeds
+        ]
+        path = resolve_child_path(
+            str(out_dir), f"verify_draws_{args.platform}.json",
+        )
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump({"checks": checks}, handle, indent=1)
+        ok = all(check["voyage_fingerprint_equal"] for check in checks)
+        print(json.dumps({"checks": checks}, indent=1))
+        print(f"written: {path}")
+        return 0 if ok else 1
     for seed in args.seeds:
         summary = run_seed(
             seed=seed,
