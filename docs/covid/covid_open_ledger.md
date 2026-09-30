@@ -690,6 +690,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `immune_fraction` ~0.70–0.80) or mid-growth truncation (pooled-route
   force ~×0.12–0.25) or a mix — discriminating observables enumerated
   in `docs/covid/dp_growth_cooling_bound.md`.
+
 - **`SUSCEPT-V1` is measured — susceptibility/effective-population
   structure is retired for the joint record: immune depth reaches the
   serology band only at the 0.75 corner, where it still fails the
@@ -720,3 +721,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   protection — non-sterilizing immunity was not on this lattice).
   Design `picard_framework/runs/covid_suscept_v1_design.json`,
   ledger `docs/ledger/SUSCEPT-V1.md`.
+- **`HEAT-V1` is measured — pooled-route delivery machinery is retired
+  as the truth-gap suspect: `delivery_incapable`** (660 cells, 22
+  arms: half-life {0.5, 1.1, 2.0, 4.0}h, droplet/hvac/joint
+  efficiency ×{0.5, 0.25, 0.1}, exposure-cap corners {OFF, POLY,
+  ACT_HALF, FR, ACT_HALF_FR}, pool transport {none}, the persistence ×
+  efficiency corner, + D0 + REF_M0P56, θ {1e11, 2.37e11, 1e12} ×
+  seeds 20200205–14, 660/660, 0/660 audit failures, measured at
+  `98d0edd2`, `docs/ledger/HEAT-V1.md`, job-def rev 37, image digest
+  `sha256:4143ba7c…60d9`). Truth leg: every takeoff row medians
+  3,044–3,611; the coldest declared corner (joint ×0.1 + 0.5h) buys
+  only ~230 infections seed-paired at the best θ — ×0.1 pooled-route
+  efficiency removes <7% of the burn, ~an order too weak vs the
+  bound's estimated ×0.12–0.25 sustained-force requirement. Timing
+  leg: four row landings (CAP_FR@anchor 0.205; DROP/JOINT_X0P1 + IX
+  @1e11 ~0.24) but seed-paired Δbshr ≈ 0 — takeoff-set composition,
+  same signature as SEED-GEOM's FR_IN (same mechanism). Route
+  decomposition: droplet carries ~99.7% of acquisitions at every θ —
+  hvac-efficiency, half-life and pool-transport arms are inert by
+  construction (paired |Δinf| ≤ 5); deep droplet cooling *defers*
+  ~40% of droplet acquisitions across the quarantine boundary
+  (during_share 0.028→0.38, day-16 kink 0.70→2.7, cabin + crew-mess
+  late wave) — suppression-shaped, the converse of the record's
+  mid-growth-at-confinement. Surviving suspect class narrows to
+  susceptibility / effective-population structure or unconditioned
+  mid-voyage suppression dynamics. Design
+  `picard_framework/runs/covid_heat_v1_design.json`, ledger
+  `docs/ledger/HEAT-V1.md`.
