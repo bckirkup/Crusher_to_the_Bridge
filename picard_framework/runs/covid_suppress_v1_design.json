@@ -1,0 +1,257 @@
+{
+  "design_id": "covid_suppress_v1",
+  "task_id": "SUPPRESS-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_heat_v1",
+  "description": "SUPPRESS-V1: the conditioned array over mid-voyage suppression dynamics -- the surviving suspect class after six measured retirements (COOP-V1 dose law, the Theta axis V12/V13 + SERO-CHANNEL-V1, ASCERTAIN-V1 ascertainment channel, SEED-GEOM-V1 index/seed geometry, SUSCEPT-V1 susceptibility structure, HEAT-V1 delivery machinery). HEAT-V1 measured delivery_incapable (all arms median 3,044-3,611 infected vs band [712,960]; the coldest declared corner buys ~230 infections, ~an order short; deep droplet cooling DEFERS ~40% of droplet acquisitions past day 16 -- suppression-shaped but converse of the record's mid-growth-at-confinement). This design declares arms on the single scheduled-protocol slot over {protocol x window} -- the mechanism class the record actually documents (the Feb 5 quarantine order): SOP-017 retimed to start_day {4, 6, 8, 10, 12, 14} (the deep corners bound the axis: day-4 confinement is ~11 days before the record's order and lands while the burn is still exponential), SOP-009 retimed {10, 12} (the LOCKDOWN-grade order: confine_all + hard channel scalars {direct_contact 0.1, droplet 0.1, fomite 0.2, hvac_airborne 0.7} + galley/mess closed, medical+engineering exempt only), SOP-017-ALLHANDS {12} (the historically-false crew-confinement diagnostic -- zero exemptions; non-scoring: real DP crew kept working), SOP-011 {10} (confine_symptomatic_to_quarters -- the honest pre-Feb-5 signature: what individual isolation alone could do before any formal order), SOP-007 {10, 12} (galley + crew-mess closure with zone_occupancy_cap 2, no confinement -- venue removal against the dominant zone-pool venue), and SOP-017 at {40,45} (the never-binds witness: a window wholly past the 32-day voyage, proving the harness tolerates a dead schedule and measuring what the window tally reads when nothing fires), plus D0_declared (shipped schedule verbatim) and REF_M0P56 (the ASCERTAIN-V1 count-matched channel row). Scheduled (forced) protocols bypass the trigger/escalation/activation-delay gates entirely -- forced_on sets should_active unconditionally for the declared window (crusher_labs/protocol_engine.py), so SOP-009 (LOCKDOWN-gated) and SOP-011 (24 h delay) DO fire on schedule. before_share is scored at the RECORD's day-16 boundary on every arm (observables.onsets_before_split_day, split_day 17 constant): a retimed window moves the arm's kink, not the record's split. Shape discriminators per the task: during-window-dominant + cabin/crew-mess concentration + crew onset lag = the truncation signature (the record's confined-phase = cabin-sharer + working crew only); starved during stratum = the ceiling signature (suppression binds but mass was already committed); mass deferred across the arm's own start day = HEAT-V1's deferral signature, the converse of the record. Harness note (readout additions only, no physics, no engine path touched): _quarantine_window now falls back to the run's single scheduled entry when no SOP-017-prefixed entry exists (the swap arms put SOP-009/011/007 into the one slot), and _attribution_block emits the during-window infection tallies unconditionally (infections_during_window + during_window_by_{role,zone_class,route} + confined_passenger_infections_during_window) -- previously gated on whole-body confinement activation, which would have left the SOP-011/SOP-007/never-binds arms blind on exactly the discriminators this design exists to measure.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "Six axes measured retired (do not re-derive): COOP-V1 dose law; the Theta axis (V12/V13) + SERO-CHANNEL-V1; ASCERTAIN-V1 channel_only (M0P56 count-matches degenerately -- recorded 207-270 vs 197 but before_share 0.60-0.84, infections 3,536-3,599 vs band); SEED-GEOM-V1 geometry_incapable (all index-geometry arms median 3,461-3,612); SUSCEPT-V1 susceptibility structure; HEAT-V1 delivery_incapable (660/660 cells, 0 audit failures -- pooled-route cooling at the deepest declared corner is ~an order too weak, and what it does buy is deferral-shaped).",
+    "Anchors (docs/covid/dp_growth_cooling_bound.md section 4 + data/observation/covid_fit_targets.json): T1 recorded onsets 197 with before_share 0.173 +/- 0.10 (34/197 before day 17 = Feb 6); held-out covid.H5 true-infection band [712, 960] ~19-26% of 3,710 aboard; record ramp ~1.2x/day vs the model's ~1.8x/day; incidence peaked Feb 2-4 AT confinement; crew-onset lag ~10 d; the confined-phase record = cabin-sharer + working crew only.",
+    "SEED-GEOM-V1's window measurement on the declared schedule: SOP-017 day 16-30 is inert on truth -- ~3,570 infected before vs ~7 during the order -- because the burn is already committed when it fires. That measures the schedule's marginal capacity; this design measures the same machinery RELOCATED inside the growth phase.",
+    "Scheduled-protocol machinery (verified this session): the DP scenario carries exactly ONE scheduled_protocols entry -- SOP-017 {start_day 16, end_day 30} (data/scenarios/covid_hull_scenarios.json); voyage is 32 days / 768 epochs from day 0 = Jan 20. ARM_OVERRIDE_KEYS admits scheduled_protocol_id (rename the slot's entry) and scheduled_protocol_window (retime it; start_day/end_day, applied BEFORE the id swap in apply order); a ScheduledProtocol with end_day < start_day raises at resolution, so the day-40 arm declares {40,45}. protocol_engine forced_on -> should_active=True for the window: scheduled entries bypass trigger class, escalation gate and activation_delay. orchestrator_epoch enforces whole-body confine_all orders first (they supersede symptomatic orders); LOCKDOWN status forces confine_all; status-driven symptomatic confinement at ALERT+ ships on every arm uniformly -- SOP-011's arm adds its SCHEDULED symptomatic order on top, not a new channel.",
+    "Protocol modifier sets (data/config/protocols.json, verbatim): SOP-007 {close_zones [Main_Galley_Aft, Crew_Mess_Main], zone_occupancy_cap 2, no confinement}; SOP-009 {confine_all_to_quarters, direct_contact 0.1, droplet 0.1, fomite 0.2, hvac_airborne 0.7, close_zones galley+mess, exempt {crew_medical, crew_engineering}}; SOP-011 {confine_symptomatic_to_quarters, all four crew classes exempt}; SOP-017 {confine_all_to_quarters, confinement_enforced, all four crew classes exempt -- suppression is purely spatial: confined hosts keep transmitting inside cabin rings}; SOP-017-ALLHANDS = SOP-017 with zero exemptions (historically false -- real DP crew kept working).",
+    "Payload contract (this design's harness additions): quarantine_witness echoes the resolved slot {protocol_id, window_days, activated, activation_epoch, confined_at_activation, exempt_classes, protocol_ids}; infections_{before,after}_quarantine are window counts on every arm; infections_during_quarantine_* stay whole-body-gated (None on SOP-011/007/D40); the new infections_during_window + during_window_by_{role,zone_class,route} + confined_passenger_infections_during_window are the unconditional window tallies; acquisition_curve {total_by_day, confined_by_day} is the per-day incidence/confined trace on every arm; onset_curve {day: {role: count}} carries the crew-lag read; delta pairing vs D0 is computed in the readout's paired_rows block (per-seed, takeoff-conditional).",
+    "Count arithmetic flagged at design time (design declared verbatim per the task; resolved before merge): the lattice as written is 15 arms x 3 theta x the 10-seed block = 450 cells, under the task's ~540-660 estimate, and a canary row carries 10 seeds where the task names >=20. Both are one-line changes (seeds 14 -> 630, inside the envelope; seeds 20 -> 900 with the canary spec met). The 10-seed matched block is declared here as the canonical reading -- it is the block every conditioned design since ASCERTAIN-V1 replays, and seed-for-seed pairing vs those rows is the engine-drift check."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from the conditioned lineage (covid_ascertain_v1 -> covid_heat_v1): index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis), seeds at base 20200205, full 32-day voyage (768 epochs), the single scheduled-protocol slot shipped as SOP-017 day 16-30 unless an arm moves it.",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice, identical to every conditioned design since ASCERTAIN-V1: Theta 2.37e11 is the anchor; 1e11 sits below and 1e12 above the v13 admissible band edges, so the suppression response is read where baseline physics is measured-failing in both directions. Points ordered anchor-first so the canary block (cells 0-29) is the densest slice of the three named canary arms.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14, the matched block every conditioned design since v10 replays -- seed-for-seed pairing against the ascertain / seed-geom / suscept / heat rows at the same (theta, seed). Three of the ten (20200207, 20200210, 20200211) are measured all-arms fizzle seeds at the anchor (ASCERTAIN-V1); rows score takeoff-conditional. FLAG: the task's canary spec asks >=20 seeds/row and its estimate reads ~540-660 cells; 10 seeds gives 450. Declared verbatim at 10 pending the author's call (seeds 14 -> 630; seeds 20 -> 900).",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline: the shipped schedule verbatim (the slot stays SOP-017 day 16-30). First arm so empty overrides per the arm grammar; the in-design control replaying the measured-failing physics seed-for-seed and the engine-drift check against ASCERTAIN/SEED-GEOM/SUSCEPT/HEAT on this same lattice."
+    },
+    {
+      "arm_id": "SOP017_D4",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 4
+        }
+      },
+      "note": "SOP-017 retimed to start day 4 (Jan 24) -- ~11 days before the record's order, landing while the burn is still exponential. The deepest declared corner on the window axis: confine-all+enforced with crew exempt, end day 30. If even this cannot hold truth in band or move before_share toward 0.173, scheduled whole-body confinement is bounded from above and the record's slowdown needs a mechanism outside this grammar. Canary row."
+    },
+    {
+      "arm_id": "SOP009_D12",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 12
+        },
+        "scheduled_protocol_id": "SOP-009"
+      },
+      "note": "The LOCKDOWN-grade order in the slot at day 12: window retimes the entry (default protocol_id SOP-017), then the id swap renames it -> SOP-009 {12,30}: confine_all + hard channel scalars {direct_contact 0.1, droplet 0.1, fomite 0.2, hvac_airborne 0.7} + galley/mess closed + only medical/engineering crew exempt. Stronger suppression machinery than SOP-017's purely-spatial set; scheduled forcing bypasses its LOCKDOWN escalation gate. Canary row."
+    },
+    {
+      "arm_id": "REF_M0P56",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0
+              ],
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "ASCERTAIN-V1's count-matched reference row, verbatim (M0P56_period): mild eligibility 0 + symptomatic-at-confirmation gate + recall 0.56, measured 207-270 recorded vs the record's 197 at all three theta. Carried as the calibration row: a suppression arm that lands the COUNT but not truth repeats the ascertain failure class; one that lands truth in band is a different result class entirely. Observation-only at truth level modulo its measured mild-isolation coupling (~1%)."
+    },
+    {
+      "arm_id": "SOP017_D6",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 6
+        }
+      },
+      "note": "SOP-017 retimed to start day 6 (end 30). Second rung of the retime ladder."
+    },
+    {
+      "arm_id": "SOP017_D8",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 8
+        }
+      },
+      "note": "SOP-017 retimed to start day 8 (end 30). Third rung."
+    },
+    {
+      "arm_id": "SOP017_D10",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 10
+        }
+      },
+      "note": "SOP-017 retimed to start day 10 (end 30). The ladder's middle rung -- nearest the record-adjacent side while still inside mid-growth."
+    },
+    {
+      "arm_id": "SOP017_D12",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 12
+        }
+      },
+      "note": "SOP-017 retimed to start day 12 (end 30). Four days before the record's order -- the window the other protocols share at day 12 (SOP-009, SOP-017-ALLHANDS, SOP-007), isolating protocol identity at constant timing."
+    },
+    {
+      "arm_id": "SOP017_D14",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 14
+        }
+      },
+      "note": "SOP-017 retimed to start day 14 (end 30) -- two days before the record's order; the shallowest retimed corner, expected closest to the measured-inert day-16 landing."
+    },
+    {
+      "arm_id": "SOP009_D10",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 10
+        },
+        "scheduled_protocol_id": "SOP-009"
+      },
+      "note": "SOP-009 (confine_all + channel scalars + galley/mess closed) at day 10. Pairs with SOP009_D12 for the protocol's own timing slope, and with SOP017_D10 / SOP011_D10 / SOP007_D10 for the day-10 protocol-identity contrast."
+    },
+    {
+      "arm_id": "SOP017AH_D12",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 12
+        },
+        "scheduled_protocol_id": "SOP-017-ALLHANDS"
+      },
+      "note": "SOP-017 with ZERO exemptions at day 12 -- confine_all+enforced on every agent aboard including all four crew classes. Historically false (the record's crew kept working; the confined phase's ongoing spread ran through working crew and cabin-sharers) -- declared NON-SCORING: a diagnostic corner measuring what the crew-exemption leak contributes to confinement's measured inertness, never a candidate reconstruction."
+    },
+    {
+      "arm_id": "SOP011_D10",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 10
+        },
+        "scheduled_protocol_id": "SOP-011"
+      },
+      "note": "Symptomatic-only confinement (confine_symptomatic_to_quarters, all crew exempt) in the slot at day 10 -- the honest pre-Feb-5 signature: what individual isolation alone could do before any formal order, on top of the status-driven symptomatic confinement that already ships at ALERT+ on every arm. No whole-body activation: witness.activated stays False by construction and the unconditional during-window tallies carry the read."
+    },
+    {
+      "arm_id": "SOP007_D10",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 10
+        },
+        "scheduled_protocol_id": "SOP-007"
+      },
+      "note": "Venue removal only at day 10: Main_Galley_Aft + Crew_Mess_Main closed, zone_occupancy_cap 2, no confinement. Tests whether shutting the dominant zone-pool dining venues (and the cap) mid-voyage moves the curve at all -- the weakest suppression mechanism in the lattice."
+    },
+    {
+      "arm_id": "SOP007_D12",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 12
+        },
+        "scheduled_protocol_id": "SOP-007"
+      },
+      "note": "SOP-007 at day 12 -- the venue-closure arm at the day-12 protocol-identity contrast point (vs SOP-017/SOP-009/SOP-017-ALLHANDS at the same start)."
+    },
+    {
+      "arm_id": "SOP017_D40",
+      "overrides": {
+        "scheduled_protocol_window": {
+          "start_day": 40,
+          "end_day": 45
+        }
+      },
+      "note": "SOP-017 retimed wholly past the voyage ({40,45}; voyage ends day 32) -- the never-binds witness: the schedule resolves cleanly, nothing ever fires, witness.activated=False, infections_during_window=0 with all mass in the before stratum. Proves the harness tolerates a dead schedule and anchors the window-tally readout's zero."
+    }
+  ],
+  "arms_note": "Arm grammar verification (this session's code read): every arm is inside ARM_OVERRIDE_KEYS -- scheduled_protocol_window retimes the scheduled entry (start_day/end_day; an end_day < start_day raises at ScheduledProtocol resolution, so only the day-40 arm declares an end) and scheduled_protocol_id renames it; apply order is window BEFORE id, so a swap arm's window lands on the slot before the rename -- every arm's resolved slot is {its protocol, its start day, end day 30} except the {40,45} witness. retime-only arms keep protocol_id SOP-017. No arm touches seed_patch (the record's index geometry is constant), dose_response, or any physics constant: the ONLY thing moved is when -- and which shipped protocol -- occupies the one scheduled slot. Payload echoes audited per cell: quarantine_witness.protocol_id == declared protocol and quarantine_witness.window_days == the declared [start, end]; REF_M0P56's channel echoes resolve as declared; seed_ring.seed_spec echoes the record's seed on every arm.",
+  "cells_note": "3 points x 15 arms x 10 seeds = 450 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first and arms in declared order, the three canary arms front-loaded: cells 0-149 = Theta 2.37e11 (D0_declared 0-9, SOP017_D4 10-19, SOP009_D12 20-29, REF_M0P56 30-39, SOP017_D6 40-49, SOP017_D8 50-59, SOP017_D10 60-69, SOP017_D12 70-79, SOP017_D14 80-89, SOP009_D10 90-99, SOP017AH_D12 100-109, SOP011_D10 110-119, SOP007_D10 120-129, SOP007_D12 130-139, SOP017_D40 140-149); 150-299 = Theta 1e11; 300-449 = Theta 1e12. The canary is one contiguous block: INDEX_OFFSET 0, ARRAY_SIZE 30 at the anchor.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. conditional_trajectory_clause and serology_anchor_clause carried verbatim from the conditioned lineage; the audit block is a scheduled_protocol audit (payload echo matches the declared slot); the both_legs_test gains the shape-discriminator grammar the task names. This is an assay/decomposition grid, not a screen: no arm point is admitted or fitted on this design, and a clause PASS marks a declared point worth a refinement design, never an adoption.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 45 rows of 10 seeds. before_share is computed at the RECORD's day-16 boundary on every arm (split_day 17, arm-invariant): a retimed window moves the arm's kink, not the record's split. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_ascertain_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts. Declared expectation per arm class: retimed SOP-017 corners bound how much of the burn is post-start deferrable at all (a day-4 confinement is the axis's upper bound); SOP-009 arms add hard channel scalars + venue closures -- the strongest scheduled machinery; SOP-011 measures symptomatic-only isolation; SOP-007 measures venue removal alone; SOP-017-ALLHANDS (non-scoring) isolates the crew-exemption leak; SOP-017_D40 is the never-binds zero. REF_M0P56 is observation-only at truth level modulo its measured mild-isolation coupling (~1%)."
+    },
+    "scheduled_protocol_audit": {
+      "criterion": "Per cell, the payload's scheduled-slot echo matches the arm's declaration resolved: (a) quarantine_witness.protocol_id == the arm's declared scheduled_protocol_id (SOP-017 where undeclared, the swap id on SOP-009/SOP-011/SOP-007/SOP-017-ALLHANDS arms); (b) quarantine_witness.window_days == [declared start_day, declared end_day] (end 30 where undeclared, [40,45] on the never-binds arm); (c) seed geometry untouched -- seed_ring.seed_spec echoes the record's seed on every arm (no seed_patch on this design); (d) REF_M0P56's observation echoes (eligibility vector, onset_recording gate + p) resolve as declared; (e) the during-window tally block is present (infections_during_window + during_window_by_{role,zone_class,route} -- non-null on every arm including the never-binds one). witness.activated and witness.protocol_ids are engine-emergent (a confine_all modifier must actually fire) and are REPORTED, never audited. Deviation on the audited echoes invalidates the cell rather than excluding it.",
+      "reads": "payload.quarantine_witness.*, payload.infections_during_window, payload.during_window_by_*, payload.infections_{before,after}_quarantine, seed_ring.seed_spec / seeded_count / seeded_hosts, onset_recording + onset_eligibility_by_severity echoes -- all payload echoes, no engine state."
+    },
+    "both_legs_test": {
+      "statement": "The design's deliverable, frozen: per (theta, arm) -- does the declared scheduled-protocol arm move takeoff-seed infections_total into covid.H5's band [712,960] AND takeoff-seed median before_share toward 0.173 within 0.10, SIMULTANEOUSLY; and what does each leg do to recorded_onsets and to the outbreak's SHAPE. Declared reads:",
+      "reads": [
+        "truth_leg: per (theta, arm) takeoff-seed median and q05-q95 infections_total vs [712, 960] -- the leg every prior axis failed to move.",
+        "timing_leg: per (theta, arm) takeoff-seed median before_share vs 0.173 at the RECORD's day-16 boundary -- suppression that lands mass late enough moves it; suppression that only slows growth shifts the split's numerator, not just the median.",
+        "count_leg: per (theta, arm) takeoff-seed median and q05-q95 recorded_onsets vs the record's 197 (and the clause's [98.5, 394] window).",
+        "shape_leg: the suppression signature per (theta, arm) takeoff-seed pooled -- (i) stratum mass: median infections_{before,during_window,after} and during_share; (ii) during-window concentration: during_window_by_zone_class pooled (cabin + crew_mess vs pooled-public), by_role, by_route; (iii) whole-body firing: witness.activated fraction, confined_at_activation median, confined_by_day rise at the arm's start; (iv) the onset_curve kink at the ARM's own start day (mean daily recorded onsets [start-3..start-1] vs [start..start+2]); (v) crew-onset lag = median crew onset day - median passenger onset day from onset_curve; (vi) confined_passenger_infections_during_window (the cabin-ring residual). Truncation signature = during-window-dominant + cabin/crew-mess concentration + crew lag at/above D0's -- the record's confined-phase shape. Ceiling signature = starved during stratum (during_share ~0) while truth stays near D0 -- suppression bound too late for the committed burn. Deferral signature = mass shifted across the arm's own start day without a truth drop -- HEAT-V1's converse-of-record shape.",
+        "paired_deltas: seed-paired delta vs D0_declared per (theta, arm) on recorded_onsets, onsets_before_split_day, infections_total, infections_during_window, and post-arm-start acquisition mass -- the paired_rows block; takeoff-conditional pairing (both cells takeoff). Timing landings REQUIRE nonzero paired deltas: an in-band median with delta~0 vs D0 is takeoff-set composition, not suppression."
+      ],
+      "declared_expectation": "The day-4 SOP-017 corner is the strongest scheduled suppression the grammar admits -- if truth cannot be held in band there the axis is bounded; the ladder {4..14} measures WHERE the burn becomes committed (the takeoff-conditional survival of the late-window arms bounds the committed fraction vs the record's peak-at-confinement). SOP-009 arms measure confinement + hard channel suppression jointly (the scalars are the difference vs SOP-017's purely-spatial order). SOP-011 isolates symptomatic-only isolation pre-order; SOP-007 isolates the venue channel; SOP-017-ALLHANDS bounds the crew leak (non-scoring). A both-legs landing at a declared (not fitted) corner names a suppression point for a stage-2 refinement design -- never an adoption. If every corner leaves truth at ~3.5k while reshaping timing, suppression is a timing instrument only and the truth gap needs a mechanism outside the scheduled-protocol grammar -- that IS the measurement this design exists to make."
+    },
+    "verdict_grammar": "Verdict in the task's grammar, frozen: suppression_capable_at_corner = at least one scoring arm lands takeoff-conditional truth in band AND timing in band WITH nonzero seed-paired deltas vs D0 (the suppression did it, not the takeoff set); deferral_only = no both-legs landing, but at least one scoring arm materially reshapes the curve (during-window mass share, kink at arm start, or stratum shift with paired deltas) without moving truth toward band -- suppression as a timing instrument only; suppression_incapable = no scoring arm moves truth toward band and none reshapes the curve beyond D0's envelope. SOP017AH_D12 is non-scoring (diagnostic corner) and SOP017_D40 is a witness, not a verdict arm; both report their reads but never satisfy a clause. Rows with < 5 takeoff seeds are reported as insufficient takeoff mass, not failed. The paired-baseline and REF_M0P56 rows reproduce their measured reads (D0 ~1,900-3,500-class recorded at the anchor; REF ~207-270); a systematic miss there is an engine-drift signature, reported as such."
+  },
+  "what_this_cannot_settle": [
+    "Whether a REAL mid-voyage suppression protocol -- adaptive, detection-driven, compliance-decaying -- would differ from the shipped forced protocols: this lattice moves WHEN and WHICH shipped protocol occupies the one scheduled slot; it cannot construct a protocol that does not exist in protocols.json (non-goal per the task: no new protocols, no detection-driven/emergent behaviour channel).",
+    "Compliance/behaviour under confinement beyond what confinement_enforced + exempt_classes already encode: bimodal compliance, fatigue, testing-triggered release -- all unmodeled here.",
+    "SOP-011's arm fires on top of the status-driven symptomatic confinement already shipped at ALERT+ on every arm -- the contrast is order-vs-baseline symptomatic isolation, not isolation-vs-nothing.",
+    "Non-sterilizing effects of confinement on susceptibility are out of grammar (non-goal).",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_suppress_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_suppress_v1, entrypoint --help verified); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag. Spot drought >1h -> approved Fargate fallback (queue picard-analysis-fargate-queue, jobdef with containerProperties.networkConfiguration.assignPublicIp ENABLED).",
+    "stage_cells": 450,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_suppress_v1/<sha>/cells/",
+    "canary": "The three named canary rows at the anchor theta -- D0_declared + SOP017_D4 + SOP009_D12: INDEX_OFFSET 0, ARRAY_SIZE 30 (cells 0-29, contiguous under the canary-first arm order). Reads: every cell's quarantine_witness echoes its arm's declared {protocol_id, window_days} (SOP-017/{4,30} on the retimed corner, SOP-009/{12,30} on the swap, SOP-017/{16,30} on D0); witness.activated=True with activation at the arm's own start on both suppression arms; the during-window tallies present and consistent (infections_during_window == before/during/after decomposition of infections_total); seed_ring.seed_spec echoes the record's seed; D0 pairs against the conditioned lineage's anchor read as the cross-image drift check. STOP AND REPORT after the canary per the campaign gate -- the full array (remaining 420 cells) runs only on the author's go-ahead.",
+    "report_immediately_if": "dry-run count mismatches the declared 450; a canary cell's witness echo lacks its arm's declared slot (the arm did not fire in cloud -- wiring defect, not a result); the scheduled_protocol audit fails on any cell; a D0_declared or REF_M0P56 row lands far outside its measured band (the cross-image drift check); ANY scoring row's takeoff-seed infections_total median lands inside [712,960] (in-band truth landing); ANY scoring row's takeoff-seed before_share median lands inside 0.173 +/- 0.10 WITH nonzero paired deltas (in-band timing landing -- deltas ~0 are takeoff-set composition, still reported but labeled); ANY arm produces the truncation signature -- the composite, declared: median infections_during_window > median infections_before_window AND pooled (cabin + crew_mess) share of during-window events > 0.5 AND median crew-minus-passenger onset lag > 0 days, on >=5 takeoff seeds; ANY arm fizzles on more than half the seeds; or child failure rate exceeds 5%."
+  }
+}

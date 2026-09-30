@@ -214,13 +214,17 @@ def run_readout(
     row_stats: Callable[[list[dict]], dict],
     report_key: str,
     row_triggers: Callable[[float, str, dict], dict | None],
+    paired_rows: Callable[[dict[tuple, list[dict]]], dict] | None = None,
 ) -> int:
     """The readout CLI skeleton every conditioned array shares.
 
     ``row_triggers`` returns the report-immediately entry for one row
     (or None); entries collect under ``report_key`` and print at the
     end. A row's stats may set ``row_extra`` to append per-campaign
-    columns to the printed line.
+    columns to the printed line. ``paired_rows``, when given, receives
+    the whole (theta, arm) -> payloads map once every row is scored and
+    returns the cross-row block stored under ``report["paired_rows"]``
+    (seed-paired deltas against the baseline arm and the like).
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--cells", required=True)
@@ -258,6 +262,8 @@ def run_readout(
         trigger = row_triggers(theta, arm_id, stats)
         if trigger:
             report[report_key].append(trigger)
+    if paired_rows is not None:
+        report["paired_rows"] = paired_rows(rows)
 
     if args.out:
         out_path = resolve_repo_path(repo_root, args.out)

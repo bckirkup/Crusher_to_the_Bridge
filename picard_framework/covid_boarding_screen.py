@@ -966,23 +966,35 @@ def _first_onset_day(curve: dict[int, dict[str, int]]) -> int | None:
 
 
 def _quarantine_window(raw: dict[str, Any]) -> tuple[dict[str, Any], int, int | None]:
-    """The scheduled quarantine entry and its inclusive day window."""
+    """The scheduled quarantine entry and its inclusive day window.
+
+    The screened scenarios carry a single scheduled-protocol slot, so the
+    entry is found by the SOP-017 prefix first (SOP-017 or an arm's
+    renamed copy of it) and otherwise by the run's only scheduled entry —
+    an arm that swapped the slot to another protocol (SOP-009/011/007)
+    still occupies the window these tallies are computed against.
+    """
     protocols = (
         raw.get("config_overrides", {})
         .get("scenario_schedule", {})
         .get("protocols", [])
     )
-    for entry in protocols:
-        # SOP-017 or an arm's renamed copy of it (same window).
-        if entry.get("protocol_id", "").startswith(QUARANTINE_PROTOCOL_ID):
-            end = entry.get("end_day")
-            return (
-                entry,
-                int(entry["start_day"]),
-                None if end is None else int(end),
-            )
-    raise ValueError(
-        "the run spec schedules no quarantine entry for the payload window",
+    entry = next(
+        (
+            e for e in protocols
+            if e.get("protocol_id", "").startswith(QUARANTINE_PROTOCOL_ID)
+        ),
+        protocols[0] if len(protocols) == 1 else None,
+    )
+    if entry is None:
+        raise ValueError(
+            "the run spec schedules no quarantine entry for the payload window",
+        )
+    end = entry.get("end_day")
+    return (
+        entry,
+        int(entry["start_day"]),
+        None if end is None else int(end),
     )
 
 
@@ -1092,6 +1104,15 @@ def _attribution_block(
         "invalid_reason": None if activated else "quarantine_never_activated",
     }
     return {
+        # Window tallies are unconditional: an arm whose scheduled slot
+        # carries no whole-body confinement (symptomatic-only, venue
+        # closure, never-binds) still needs its during-window mass and
+        # zone/route mix for the suppression-shape discriminators.
+        "infections_during_window": window_counts["during"],
+        "during_window_by_role": by_role,
+        "during_window_by_zone_class": by_zone,
+        "during_window_by_route": by_route,
+        "confined_passenger_infections_during_window": confined_passengers,
         "infections_before_quarantine": window_counts["before"],
         "infections_during_quarantine": (
             window_counts["during"] if activated else None
