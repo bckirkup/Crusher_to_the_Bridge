@@ -1,6 +1,6 @@
 # SUPPRESS-V1
 **Date:** 2026-09-30
-**Commit:** <fill at merge>
+**Commit:** bbdb7990
 **Pathogens:** sars_cov2_resp
 **Status:** declared
 
