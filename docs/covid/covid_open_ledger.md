@@ -690,3 +690,33 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `immune_fraction` ~0.70–0.80) or mid-growth truncation (pooled-route
   force ~×0.12–0.25) or a mix — discriminating observables enumerated
   in `docs/covid/dp_growth_cooling_bound.md`.
+- **`SUSCEPT-V1` is measured — susceptibility/effective-population
+  structure is retired for the joint record: immune depth reaches the
+  serology band only at the 0.75 corner, where it still fails the
+  timing and count legs and fizzles half its seeds** (480/480 cells, 16 arms: immune depth {0.10, 0.25, 0.50, 0.75}, placement
+  corners IMM25_C0/IMM25_C90/IMM0_C90, frailty α {0.05, 1.0, 2.0} at
+  Θ-preserved susceptibility_scale, cap corners CAP_OFF/CAP_FR +
+  IMM50_CAPOFF/FRAIL_A05_CAPOFF, + D0_declared + REF_M0P56, θ {1e11,
+  2.37e11, 1e12} × seeds 20200205–14, 0/480 audit failures, measured
+  at `2e12ccf1`, `docs/ledger/SUSCEPT-V1.md`, job-def rev 36, image
+  digest `sha256:966eb54b…`). Truth leg: IMM75 lands takeoff infections
+  median 869/877/884 at all three θ — θ-invariant ~24% of aboard —
+  the only declared lever in the band; elasticity below it is
+  sub-linear (IMM10 ~3,200 → IMM50 ~1,750). Timing leg: IMM75's
+  before_share stays 0.90–0.96; the lone TIMING-in-band median
+  (CAP_FR@anchor 0.205) is takeoff-set composition on paired seeds.
+  Placement carries real mixing (crew-90% at 25% mass cuts truth to
+  ~2,000 vs ~2,900 passenger-only) but cannot reach the band alone;
+  FRAIL_A05 thins ~1.6–3.6× to ~2,100–2,370, still ~2.5× over the
+  band ceiling; cap corners move nothing. Shape leg: no row is
+  during-dominant or kinked — IMM75 reads smooth-thinned (kink 0.11–
+  0.14 ≈ baseline 0.15–0.27, pooled during stratum 45/5 seeds, no
+  cabin/confined concentration). Verdict
+  `susceptibility_structure_incapable`: the serology band is reachable
+  only by brute sterilizing depth, which cannot also produce the
+  0.173 onset split — surviving suspect class is mid-voyage
+  suppression dynamics with an earlier/other signature than SOP-017,
+  or a combined-structure hypothesis (frailty tail × partial
+  protection — non-sterilizing immunity was not on this lattice).
+  Design `picard_framework/runs/covid_suscept_v1_design.json`,
+  ledger `docs/ledger/SUSCEPT-V1.md`.
