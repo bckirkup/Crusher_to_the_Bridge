@@ -1,0 +1,202 @@
+{
+  "design_id": "covid_suscept_v1",
+  "task_id": "SUSCEPT-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_seed_geom_v1",
+  "description": "SUSCEPT-V1: the conditioned array over susceptibility / effective-population structure -- the surviving lever class after four measured retirements (COOP dose law, Theta, ascertainment channel, index/seed geometry) all left truth at ~96% of aboard while the held-out serology band sits at 19-26%. This design declares arms on the susceptibility axes: (a) immune depth via ship_graph.immune_fraction {0.10, 0.25, 0.50, 0.75} -- the engineered health paradox (pre-screened, aged, mostly affluent passengers plausibly carried substantial non-detecting immunity); (b) immune placement/role split via ship_graph.crew_immune_ratio corners -- all-immunity-on-passengers vs 90%-immune-crew vs the crew-hub-isolation corner (passengers 0%, crew 90%); (c) frailty dispersion via dose_response_frailty alpha at beta 58.0 fixed, taking the COVID-VULN-01 envelope knots {0.05, 1.0, 2.0} around shipped 0.18, each at the theta-preserved susceptibility_scale = theta*(alpha+beta)/alpha so E[susceptibility] never moves and only the draw's shape does (alpha 0.05: CV~4.4 heavy near-immune tail; alpha 2.0: CV~0.69 near-homogeneous); (d) mixing-saturation interaction corners via transmission.exposure_cap -- CAP_OFF (no per-epoch contact budget: saturation unbounded) and CAP_FR (fixed rings spend the budget first), plus the interaction cells IMM50_CAPOFF (does thinning bite even when reach is unbounded) and FRAIL_A05_CAPOFF (does the hyper-susceptible tail burn anyway without the cap). Everything runs under the shipped arm grammar (ship_graph_overrides + dose_response_frailty added this PR, both payload-echoed) -- no engine change. Scored against BOTH anchors: the record's 197 dated onsets / 0.173 before-share AND the held-out serology anchor covid.H5 (infections_total band [712, 960], never fitted), PLUS the suppression discriminator the payload already carries (during_quarantine_by_role/zone_class/route, confined_passenger_infections_during_quarantine) extended by the acquisition_curve echo this PR adds (per-day non-seeded acquisitions, confined split): smooth attenuation = structure-shaped, a day-16 kink + cabin/crew concentration = suppression-shaped.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "SEED-GEOM-V1 measured (1dfac0e4, 480/480 cells, 0 audit failures): verdict geometry_incapable -- every index-geometry arm at every Theta medians infections_total 3,461-3,612 (~93-97% of aboard); the lone timing-band median (FR_IN@2.37e11 = 0.205) is takeoff-set composition (seed-paired delta ~0); the D0_declared and REF_M0P56 rows on this design are the same arms on the same lattice and carry the same cross-image drift check (docs/ledger/SEED-GEOM-V1.md).",
+    "ASCERTAIN-V1 measured (cb519c97, 270/270): the count leg is ~fully observational at the declared corner (mild ~7.5x, recall ~1.8x, gate ~1.03x); M0P56 count-matches but is degenerate; the residual is truth-level -- REF_M0P56 is carried verbatim as this design's count-matched reference row (docs/ledger/ASCERTAIN-V1.md).",
+    "QUAR-ORDER-01 / QUAR-ATTR-V2 measured: SOP-017 (days 16-30, confinement enforced, four exempt crew classes) is already declared and fully enforced on this voyage, and is INERT on the shipped susceptibility structure because the burn completes pre-activation (infections_before_quarantine ~3,570 vs during ~7). On this design the during-window readout does double duty: a susceptibility arm that thins truth into the band AND leaves the burn pre-quarantine reads structure-shaped; one that defers mass into an enforced quarantine reads suppression-shaped.",
+    "COVID-VULN-01 measured/declared: the beta-Poisson frailty alpha envelope is [0.05, 2.0] with beta fixed 58.0 and susceptibility_scale recomputed per arm at preserved E[s] = Theta (picard_framework/covid_vuln_cells.py BETA_FIXED convention); shipped 0.18; challenge fits favor alpha >= ~0.7 (heavier-than-shipped dispersion is ALSO declared at alpha 0.05 to test the near-immune-tail reading).",
+    "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al. 2020); scored on infections_total conditional on takeoff; never in fitted_against.",
+    "Immunity grammar verification (this session's code read): orchestrator_init maps ship_graph.immune_fraction -> engine.immune_ratio and ship_graph.crew_immune_fraction -> engine.crew_immune_ratio (None = single role-blind pool; set = per-role pools dealt without replacement, _ImmunityAtEmbarkation/_ImmunePool: passengers at immune_ratio, crew at crew_immune_ratio -- so a split arm reads immune_fraction as the PASSENGER share). Both spawn paths draw it (legacy role allocation and agent_classes -- the DP hull is the class path; _spawn_class_agents draws per role_group). Immune hosts board InfectionStatus.IMMUNE with absolute legacy protection (engines/transmission_core._protection: 1.0 absent a cross_immunity strain config, which covid does not declare) and are excluded from seeding by initiation._eligible, so an immune arm thins susceptibles without fizzling the index. IMPORTANT: the engine default immune_ratio is 0.2; build_fit_run_spec pins ship_graph.immune_fraction = 0.0 -- the fit assumption is ZERO embarkation immunity, and every IMM arm is a counterfactual against it, not against a naive engine default.",
+    "Exposure-cap grammar verification (this session's code read): transmission.exposure_cap.enabled defaults TRUE on this hull (platform_has_rhythm_catalog gates it; mega_cruise_5000 qualifies); include_fixed_rings defaults false. enabled:false removes the per-shedder per-epoch Poisson contact budget entirely (a labelled baseline cap-mode, byte-identical semantics); include_fixed_rings:true makes pre-committed cabin/table ring contacts spend the budget first. Payload echoes exposure_cap_active (engine-resolved) and exposure_cap_include_fixed_rings (declared) so cap arms are auditable per cell.",
+    "Payload echo (this PR): three harness additions, all readouts/no physics -- ship_graph_immune {declared fractions, resolved engine ratios, realized immune counts by role}, acquisition_curve {total_by_day, confined_by_day over QuarantineAttributionLedger.events: the day-16 kink discriminator}, susceptibility_draw {n, mean, q05-q95 over drawn dose_response_susceptibility values: the drawn-vs-declared frailty audit}. During-quarantine fields (by_role/by_zone_class/by_route/confined_passenger_infections_during_quarantine) already carried by _attribution_block."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_seed_geom_v1 / covid_ascertain_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (measured null axis), seeds at base 20200205, full 32-day voyage (768 epochs), SOP-017 scheduled days 16-30 as shipped.",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice, identical to the ascertain/seed-geom screens: Theta 2.37e11 anchor cell first so the canary block (cells 0-159) is the densest slice; 1e11 and 1e12 bracket the admissible band edges. On frailty arms susceptibility_scale rescales per theta so E[s] = Theta holds arm-for-arm.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14, the matched block every conditioned design since v10 replays -- seed-for-seed pairing against the seed-geom and ascertain rows at the same (theta, seed). Three of the ten (20200207, 20200210, 20200211) are measured all-arms fizzle seeds at the anchor; rows score takeoff-conditional. Ten seeds is the declared count: the susceptibility-arm grid, not seed depth, is the axis under test. NOTE: immunity draws consume the main RNG stream (one draw per agent while the pool is non-empty), so IMM arms are NOT draw-paired with D0 -- comparison is row-median vs row-median, which is what the readout scores.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline REQUIRED by the task: the shipped susceptibility structure verbatim -- immune_fraction pinned 0.0 by the fit spec, dose_response alpha 0.18 / beta 58.0, exposure cap enabled (platform default), no crew split. First arm so empty overrides per the arm grammar; the in-design control replaying SEED-GEOM-V1's measured-failing physics and the cross-image engine-drift check (~3,500-class truth, ~1,900-3,500-class recorded at the anchor)."
+    },
+    {
+      "arm_id": "REF_M0P56",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [0.0, 0.0, 0.0, 1.0, 1.0],
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "ASCERTAIN-V1's count-landing corner VERBATIM on the shipped susceptibility structure: the required count-matched reference row. Measured at 207-270 recorded vs 197 (inside [98.5,394]) but degenerate (before_share 0.60-0.84, infections ~3,568) -- it anchors what a count-landing channel arm looks like so susceptibility arms' count moves are read against a measured reference."
+    },
+    {
+      "arm_id": "IMM10",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.10 } },
+      "note": "Axis A, immune depth: 10% of aboard immune at embarkation, role-blind pool. Below the serology band's implied susceptible share (~74-81% must be susceptible for the band to be reachable on saturation) -- the shallow rung of the depth sweep."
+    },
+    {
+      "arm_id": "IMM25",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.25 } },
+      "note": "Axis A: 25% immune at embarkation -- the naive linear read puts truth near ~2,700, still ~3x over band; whether thinning is sub- or super-linear IS the measurement."
+    },
+    {
+      "arm_id": "IMM50",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.50 } },
+      "note": "Axis A: 50% immune -- naive linear ~1,780, still above band; this rung separates 'thinning is linear' (still fails) from 'thinning compounds with saturation' (plausibly lands)."
+    },
+    {
+      "arm_id": "IMM75",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.75 } },
+      "note": "Axis A, the band corner: 75% immune -- naive linear ~890 lands inside [712,960]; if truth here still overshoots, thinning alone cannot reach the record at any declared depth and effective-population structure is measured-incapable on this axis."
+    },
+    {
+      "arm_id": "IMM25_C0",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.25, "crew_immune_fraction": 0.0 } },
+      "note": "Axis B, placement corner: passenger pool 25% immune, crew pool 0% -- all immunity concentrated on passengers, the crew mixing hub fully susceptible. Pairs against IMM25 (role-blind 25%): if crew-side immunity matters, this row overshoots IMM25."
+    },
+    {
+      "arm_id": "IMM25_C90",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.25, "crew_immune_fraction": 0.90 } },
+      "note": "Axis B, opposite corner: passengers 25%, crew 90% immune -- the mess/waitstaff mixing hub mostly immune while the total immune share is the SAME as IMM25_C0's passenger-side placement (both draw ~927 immune by pool shares). The passenger-side vs crew-side contrast at fixed immune mass."
+    },
+    {
+      "arm_id": "IMM0_C90",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.0, "crew_immune_fraction": 0.90 } },
+      "note": "Axis B, crew-hub isolation: passengers fully susceptible, crew 90% immune -- the sharpest test of whether the crew mixing stratum carries the burn; if this row's truth drop is small, crew-hub structure is not the lever."
+    },
+    {
+      "arm_id": "FRAIL_A05",
+      "overrides": { "dose_response_frailty": { "alpha": 0.05 } },
+      "note": "Axis C, heavy-tail corner: beta-Poisson alpha 0.05 at beta 58.0, susceptibility_scale rescaled to preserve E[s] = theta. CV ~4.4: a large near-immune mass plus a hyper-susceptible tail -- the within-population frailty reading of 'effective population is smaller than aboard'. VULN-01 envelope knot."
+    },
+    {
+      "arm_id": "FRAIL_A1",
+      "overrides": { "dose_response_frailty": { "alpha": 1.0 } },
+      "note": "Axis C: alpha 1.0 -- exponential-shape dispersion, between shipped 0.18 and the challenge-fit region; VULN-01 knot."
+    },
+    {
+      "arm_id": "FRAIL_A2",
+      "overrides": { "dose_response_frailty": { "alpha": 2.0 } },
+      "note": "Axis C, near-homogeneous corner: alpha 2.0, CV ~0.69 -- the direction the challenge fits favor (alpha >= ~0.7). If truth moves toward band going UP in alpha while going UP in dispersion (alpha down) also moves it, dispersion sign is measured. VULN-01 knot."
+    },
+    {
+      "arm_id": "CAP_OFF",
+      "overrides": { "transmission_overrides": { "exposure_cap": { "enabled": false } } },
+      "note": "Axis D, saturation corner: removes the per-shedder per-epoch Poisson contact budget entirely -- reach unbounded. If the cap is what holds truth at ~96% (instead of ~100%), CAP_OFF measures the cap's saturating contribution; if truth is unchanged, the burn is pool-limited, not reach-limited."
+    },
+    {
+      "arm_id": "CAP_FR",
+      "overrides": { "transmission_overrides": { "exposure_cap": { "include_fixed_rings": true } } },
+      "note": "Axis D, ring-in-budget corner: cabin/table ring contacts spend the budget first -- narrows pooled breadth per shedder epoch-wide (not just the index as in SEED-GEOM-V1's FR_IN, which read as index geometry because the index dominated the aboard window; here every shedder's every epoch is affected for the whole voyage)."
+    },
+    {
+      "arm_id": "IMM50_CAPOFF",
+      "overrides": { "ship_graph_overrides": { "immune_fraction": 0.50 }, "transmission_overrides": { "exposure_cap": { "enabled": false } } },
+      "note": "Interaction corner: half the population immune AND reach unbounded. If IMM50 alone lands near band and CAP_OFF restores the ~3,500 class, the IMM thinning was reach-mediated; if truth stays low, thinning holds under saturated reach -- the structure-vs-suppression discriminator this design needs."
+    },
+    {
+      "arm_id": "FRAIL_A05_CAPOFF",
+      "overrides": { "dose_response_frailty": { "alpha": 0.05 }, "transmission_overrides": { "exposure_cap": { "enabled": false } } },
+      "note": "Interaction corner: heavy-tail frailty without the reach cap -- if the near-immune mass shields most hosts but removing the cap lets the hyper-susceptible tail burn anyway, the tail (not the mass) drives the burn; if it stays thinned, frailty structure is robust to reach saturation."
+    }
+  ],
+  "arms_note": "Arm grammar (this PR): ship_graph_overrides accepts only {immune_fraction, crew_immune_fraction} -- values in [0,1]; null crew_immune_fraction removes the field (role-blind pool); null immune_fraction is REFUSED (removing it would restore the engine default 0.2, not the fit's pinned 0.0). dose_response_frailty accepts {alpha[, beta]}; it REWRITES the whole dose_response block to {model: beta_poisson, alpha, beta, susceptibility_scale: theta*(alpha+beta)/alpha} after theta_profile_overrides ran, so E[s]=theta holds exactly on every theta row -- declared, not fitted (the cell's theta is a lattice point, not a fit output). transmission_overrides.exposure_cap replaces the whole shipped block; enabled:false / include_fixed_rings:true both resolve at _init_exposure_cap (platform-gated, mega_cruise_5000 qualifies). Application order inside apply_arm_overrides: transmission_overrides and pathogen_overrides before ship_graph_overrides and dose_response_frailty, so a frailty arm always lands on the theta-resolved spec.",
+  "cells_note": "3 points x 16 arms x 10 seeds = 480 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first and arms in declared order: cells 0-159 = Theta 2.37e11 (D0 0-9, REF_M0P56 10-19, IMM10 20-29, IMM25 30-39, IMM50 40-49, IMM75 50-59, IMM25_C0 60-69, IMM25_C90 70-79, IMM0_C90 80-89, FRAIL_A05 90-99, FRAIL_A1 100-109, FRAIL_A2 110-119, CAP_OFF 120-129, CAP_FR 130-139, IMM50_CAPOFF 140-149, FRAIL_A05_CAPOFF 150-159); 160-319 = Theta 1e11; 320-479 = Theta 1e12.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and serology_anchor_clause are carried verbatim from covid_ascertain_v1 / covid_seed_geom_v1; the susceptibility_structure_audit is the per-arm payload-echo-matches-declared invariant for the new axes. This is an assay/decomposition grid, not a screen: no arm point is admitted or fitted on this design, and a clause PASS marks a declared point worth a refinement design, never an adoption.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 48 rows of 10 seeds. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_ascertain_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts; aboard_total still counts immune hosts (they are aboard), so IMM arms move the truth leg through the susceptible share, not the denominator. Declared expectation per axis: depth arms scale truth ~with the susceptible share (super-linear if saturation compounds); placement arms move truth only if the crew mixing stratum carries a disproportionate share; frailty arms move truth via the near-immune mass (alpha down) or via homogenized challenge (alpha up); CAP_OFF removes the reach bound (truth flat or up); CAP_FR narrows pooled breadth (truth flat or down); the interaction corners separate reach-mediated from structure-mediated thinning."
+    },
+    "susceptibility_structure_audit": {
+      "criterion": "Per cell: (a) ship_graph_immune.declared echoes the arm's declared fractions verbatim (null crew_immune_fraction only on pooled arms); (b) ship_graph_immune.resolved matches declared (engine ratios == declared); (c) ship_graph_immune.realized.by_role counts match the pool shares exactly (the pool deals without replacement: passengers = int(complement_passengers * passenger share), crew = int(complement_crew * crew share)); (d) on dose_response_frailty arms, dose_response echoes model beta_poisson, the declared alpha/beta, and susceptibility_scale == theta*(alpha+beta)/alpha for the cell's theta; (e) susceptibility_draw.n > 0 and its mean is of order theta (the lazy draw only covers challenged hosts -- n < complement is expected); (f) on cap arms, exposure_cap_active matches declared enabled (false only on CAP_OFF / IMM50_CAPOFF / FRAIL_A05_CAPOFF) and exposure_cap_include_fixed_rings is true only on CAP_FR. Deviation invalidates the cell rather than excluding it.",
+      "reads": "ship_graph_immune.{declared,resolved,realized}, dose_response.{alpha,beta,susceptibility_scale,model}, susceptibility_draw.{n,mean}, exposure_cap_active, exposure_cap_include_fixed_rings -- all payload echoes, no engine state."
+    },
+    "suppression_discriminator": {
+      "criterion": "The shape readout, frozen: for every (theta, arm) row report (a) infections_during_quarantine and its by_role/by_zone_class/by_route splits; (b) confined_passenger_infections_during_quarantine; (c) acquisition_curve.total_by_day and confined_by_day -- the day-16 kink read. STRUCTURE-SHAPED signature: the incidence curve attenuates smoothly (same shape scaled down), during-quarantine mass stays near zero, confined share unchanged. SUPPRESSION-SHAPED signature: a kink at day 16 (SOP-017 activation) PLUS during-quarantine infections concentrating in cabin zones and among confined passengers/crew. A truth-in-band landing that reads suppression-shaped transfers the causal claim to quarantine timing, not susceptibility structure -- a different answer than this design's question and reported as such.",
+      "reads": "infections_{before,during,after}_quarantine, during_quarantine_by_{role,zone_class,route}, confined_passenger_infections_during_quarantine, acquisition_curve.{total_by_day,confined_by_day}, quarantine_witness.activated -- all payload echoes."
+    },
+    "both_legs_test": {
+      "statement": "The design's deliverable, frozen: per (theta, arm) -- does the declared susceptibility structure move takeoff-seed infections_total into covid.H5's band [712,960] AND takeoff-seed median before_share toward 0.173 within 0.10, SIMULTANEOUSLY; and what does each leg do to takeoff-seed recorded_onsets; and does any winner read smooth-thinned or suppression-kinked. Declared reads:",
+      "reads": [
+        "truth_leg: per (theta, arm) takeoff-seed median and q05-q95 infections_total vs [712, 960] -- the leg every prior axis failed to move, and the axis where immunity depth has a naive prediction (~linear in the susceptible share) this design tests.",
+        "timing_leg: per (theta, arm) takeoff-seed median before_share vs 0.173 (target window 0.173 +/- 0.10) -- thinning the susceptible pool should not re-time the burn by itself, so any large timing move is itself a measurement.",
+        "count_leg: per (theta, arm) takeoff-seed median and q05-q95 recorded_onsets vs the record's 197 ([98.5, 394] window) -- a susceptibility arm that lands truth in band but keeps recorded ~1,900 still fails the count leg on the shipped channel; landing both truth and count while timing stays off reads differently than landing all three.",
+        "shape_leg: the suppression_discriminator block per (theta, arm) -- smooth attenuation vs day-16 kink + cabin/crew concentration; the classifier that decides whether a both-legs landing is a structure answer or a transferred suppression answer.",
+        "paired_deltas: seed-paired delta vs D0_declared on recorded_onsets, infections_total, and before_share per (theta, arm) -- the merge's delta_vs_baseline block; on IMM arms the pairing is seed-matched but not draw-matched (immunity consumes RNG draws), so deltas are ensemble-level, read as such."
+      ],
+      "declared_expectation": "IMM arms: truth scales sub-linearly if the burn saturates before exhausting susceptibles (the SEED-GEOM-V1 saturation shape suggests reach-limited, so 0.75 immune may still overshoot) -- the depth sweep measures the actual elasticity. Placement arms: if the crew stratum carries the mixing, IMM25_C90 and especially IMM0_C90 move truth more than IMM25_C0 at equal immune mass. Frailty arms: alpha 0.05 concentrates susceptibility in a small tail -- truth could drop sharply if the near-immune mass removes most hosts from effective circulation; alpha 2.0 approaches the homogeneous limit and should move truth least (or most, if dispersion was protecting). Cap arms: CAP_OFF tests whether the cap itself bounds the burn; CAP_FR tests ring-vs-pool budget share. If NO declared susceptibility arm moves both legs, effective-population structure is measured-incapable too and the surviving suspect class is mid-voyage suppression dynamics -- the day-16 kink read is the discriminator already wired for that pivot."
+    },
+    "verdict_grammar": "Assay verdict, frozen: per (theta, arm) report which legs moved (truth into band / timing toward 0.173 / count toward 197 / shape smooth-vs-kinked), which direction each moved, and whether ANY declared susceptibility structure moves the truth AND timing legs simultaneously. A both-legs landing names a declared point for a stage-2 refinement design -- never an adoption. Rows with < 5 takeoff seeds are reported as insufficient takeoff mass, not failed. The paired-baseline and REF_M0P56 rows reproduce their measured reads (D0 ~3,500-class truth / ~1,900-3,500-class recorded at the anchor; REF ~207-270 recorded); a systematic miss there is an engine-drift signature, reported as such. Report-immediately triggers extended per the task: any arm's takeoff infections median in [712,960] or before_share median in 0.173 +/- 0.10; any arm fizzling on > half its takeoff seeds at a theta; or during-quarantine infections becoming the dominant stratum on any row."
+  },
+  "what_this_cannot_settle": [
+    "Which SPECIFIC hosts are immune: the pool deals a declared share without replacement, so realized membership is a draw -- auditable via ship_graph_immune.realized counts, never declared per-host. A class- or cabin-targeted immunity arm is not expressible in the shipped grammar (immune pools are role-stratified at most).",
+    "Waning or breakthrough immunity: embarkation immunity is absolute for the whole voyage under the legacy protection path (no cross_immunity strain config on covid); a partial-protection or decaying-immunity arm is not expressible and is a different mechanism anyway.",
+    "Frailty correlation with other structure: dose_response_frailty redraws the per-host susceptibility independently of cabin/class/schedule -- a correlated-frailty corner (e.g. susceptibility concentrated in exposed classes) is not expressible.",
+    "Individual suppression before Feb 3-5 is absent from the record and not declared on this design: SOP-017 is the only suppression in play; the day-16 discriminator detects whether an arm's landing is actually a deferral into enforced quarantine.",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_suscept_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag. Same batch path as SEED-GEOM-V1: new image, new jobdef rev, canary echo, in-band trigger.",
+    "stage_cells": 480,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_suscept_v1/<sha>/cells/",
+    "canary": "The Theta 2.37e11 anchor block on all 16 arms: INDEX_OFFSET 0, ARRAY_SIZE 160 (cells 0-159). Reads: every IMM arm's ship_graph_immune.declared/resolved/realized echo matches its declared fractions and per-role pool shares; every FRAIL arm's dose_response echo carries the declared alpha with susceptibility_scale == theta*(alpha+beta)/alpha; CAP arms' exposure_cap_active and exposure_cap_include_fixed_rings match declared; acquisition_curve and susceptibility_draw blocks present and populated; the D0 row pairs against SEED-GEOM-V1's anchor read (~3,500-class truth) as the cross-image engine-drift check, and REF_M0P56 reproduces ~207-270. Remaining theta blocks (160-479) proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "dry-run count mismatches the declared 480; a canary cell's payload echo lacks its arm's declared ship_graph_immune/dose_response/exposure_cap values (the arm did not fire in cloud -- wiring defect, not a result); the audit invariant fails on any cell; a D0_declared or REF_M0P56 row lands far outside its measured band (the cross-image drift check); ANY arm row's takeoff-seed infections_total median lands inside [712,960] (in-band truth landing); ANY arm row's takeoff-seed before_share median lands inside 0.173 +/- 0.10 (in-band timing landing); ANY arm fizzles on > half its takeoff seeds at a theta (immune arms cannot fizzle the index by construction -- a fizzle there signals wiring, not structure); during-quarantine infections become the dominant stratum on any row; or child failure rate exceeds 5%."
+  }
+}

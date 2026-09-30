@@ -84,7 +84,23 @@ ARM_OVERRIDE_KEYS = frozenset({
     "transmission_overrides",
     "pathogen_overrides",
     "seed_patch",
+    "ship_graph_overrides",
+    "dose_response_frailty",
 })
+# The embarkation-immunity structure an arm may write onto
+# ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
+# and IMMUNE-ROLE-01's role split (``crew_immune_fraction``). A null
+# crew fraction removes the field, returning the engine to the
+# role-blind pool; ``immune_fraction`` may not be null because removing
+# it would restore the ENGINE default (0.2), not the fit's pinned 0.0.
+SHIP_GRAPH_OVERRIDE_KEYS = frozenset({
+    "immune_fraction", "crew_immune_fraction",
+})
+# Fields a dose_response_frailty arm may declare. The arm writes the
+# whole beta-Poisson block at the cell's theta so E[susceptibility] is
+# preserved on every arm and only the draw's shape moves (the
+# covid_vuln_cells convention).
+DOSE_RESPONSE_FRAILTY_KEYS = frozenset({"alpha", "beta"})
 # Fields an arm may write onto the first explicit seed — the measured
 # boarding-geometry axes: position in the shedding course at day 0
 # (onset_day), departure day, seeded count, infection age, role. A null
@@ -653,11 +669,103 @@ def _apply_seed_patch(raw: dict[str, Any], patch: Any) -> None:
     seeds[0] = seed
 
 
+def _apply_ship_graph_overrides(raw: dict[str, Any], sg: Any) -> None:
+    """Write the arm's embarkation-immunity structure onto ship_graph."""
+    if not isinstance(sg, Mapping):
+        raise ValueError("ship_graph_overrides must be a mapping")
+    unknown = set(sg) - SHIP_GRAPH_OVERRIDE_KEYS
+    if unknown:
+        raise ValueError(
+            f"ship_graph_overrides keys {sorted(unknown)} are not "
+            f"immunity fields; allowed: {sorted(SHIP_GRAPH_OVERRIDE_KEYS)}",
+        )
+    graph = raw.setdefault("config_overrides", {}).setdefault(
+        "ship_graph", {},
+    )
+    for key, value in sg.items():
+        if value is None:
+            if key == "immune_fraction":
+                raise ValueError(
+                    "ship_graph_overrides.immune_fraction may not be null: "
+                    "removing it restores the engine default 0.2, not the "
+                    "fit's pinned 0.0 — declare the fraction explicitly",
+                )
+            graph.pop(key, None)
+            continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(
+                f"ship_graph_overrides.{key} must be a fraction in [0, 1], "
+                f"got {value!r}",
+            )
+        fraction = float(value)
+        if not math.isfinite(fraction) or not 0.0 <= fraction <= 1.0:
+            raise ValueError(
+                f"ship_graph_overrides.{key} must be a fraction in [0, 1], "
+                f"got {value!r}",
+            )
+        graph[key] = fraction
+
+
+def _apply_dose_response_frailty(
+    raw: dict[str, Any],
+    spec: Any,
+    theta: float,
+    profile: dict[str, Any],
+) -> None:
+    """A beta-Poisson shape arm at preserved E[susceptibility] = theta.
+
+    ``dose_response_frailty`` declares ``{"alpha": a}`` with ``beta``
+    optional (default the profile's); it rewrites the resolved
+    dose_response block so ``susceptibility_scale`` is recomputed as
+    ``theta * (alpha + beta) / alpha`` — the covid_vuln_cells
+    convention. Every arm therefore varies only the draw's dispersion
+    (alpha < profile is a heavy near-immune tail; alpha > profile is
+    near-homogeneous) while the mean challenge stays the cell's Theta.
+    """
+    if not isinstance(spec, Mapping):
+        raise ValueError("dose_response_frailty must be a mapping")
+    unknown = set(spec) - DOSE_RESPONSE_FRAILTY_KEYS
+    if unknown:
+        raise ValueError(
+            f"dose_response_frailty keys {sorted(unknown)} are not "
+            f"shape fields; allowed: {sorted(DOSE_RESPONSE_FRAILTY_KEYS)}",
+        )
+    shipped = profile["dose_response"]
+    resolved = {"alpha": shipped["alpha"], "beta": shipped["beta"], **spec}
+    alpha = resolved["alpha"]
+    beta = resolved["beta"]
+    for key, value in resolved.items():
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(
+                f"dose_response_frailty.{key} must be numeric, got {value!r}",
+            )
+        if not math.isfinite(float(value)) or float(value) <= 0.0:
+            raise ValueError(
+                f"dose_response_frailty.{key} must be finite and > 0, "
+                f"got {value!r}",
+            )
+    if not math.isfinite(theta) or theta <= 0.0:
+        raise ValueError(
+            f"dose_response_frailty needs the cell's positive theta, "
+            f"got {theta!r}",
+        )
+    raw.setdefault("pathogen_overrides", {}).setdefault(
+        PATHOGEN_ID, {},
+    )["dose_response"] = {
+        "model": "beta_poisson",
+        "alpha": float(alpha),
+        "beta": float(beta),
+        "susceptibility_scale": float(theta) * (float(alpha) + float(beta))
+        / float(alpha),
+    }
+
+
 def apply_arm_overrides(
     raw: dict[str, Any],
     overrides: Mapping[str, Any],
     *,
     profile: dict[str, Any],
+    theta: float | None = None,
 ) -> dict[str, Any]:
     """Apply one arm's override block to a built run spec, in place.
 
@@ -698,6 +806,17 @@ def apply_arm_overrides(
         )
     if "pathogen_overrides" in overrides:
         _apply_pathogen_overrides(raw, overrides["pathogen_overrides"])
+    if "ship_graph_overrides" in overrides:
+        _apply_ship_graph_overrides(raw, overrides["ship_graph_overrides"])
+    if "dose_response_frailty" in overrides:
+        if theta is None:
+            raise ValueError(
+                "dose_response_frailty needs the cell's theta to hold "
+                "E[susceptibility] constant",
+            )
+        _apply_dose_response_frailty(
+            raw, overrides["dose_response_frailty"], float(theta), profile,
+        )
     if "seed_patch" in overrides:
         _apply_seed_patch(raw, overrides["seed_patch"])
     return raw
@@ -988,6 +1107,89 @@ def _attribution_block(
     }
 
 
+def _immune_block(raw: dict[str, Any], sim: Any) -> dict[str, Any]:
+    """Declared + resolved + realized embarkation-immunity echo.
+
+    The declared block is what the arm wrote onto
+    ``config_overrides.ship_graph``; the resolved pair is what the
+    engine built its pools from; the realized counts prove the draw
+    delivered the declared share (the pool deals without replacement,
+    so realized == declared share exactly).
+    """
+    graph = raw.get("config_overrides", {}).get("ship_graph", {})
+    engine = sim.engine
+    realized = Counter(
+        str(getattr(a, "role", "unknown"))
+        for a in engine.agents if getattr(a, "immune", False)
+    )
+    complement = Counter(str(getattr(a, "role", "unknown")) for a in engine.agents)
+    return {
+        "declared": {
+            "immune_fraction": graph.get("immune_fraction"),
+            "crew_immune_fraction": graph.get("crew_immune_fraction"),
+        },
+        "resolved": {
+            "immune_ratio": getattr(engine, "immune_ratio", None),
+            "crew_immune_ratio": getattr(engine, "crew_immune_ratio", None),
+        },
+        "realized": {
+            "by_role": dict(realized),
+            "complement_by_role": dict(complement),
+        },
+    }
+
+
+def _acquisition_curve(
+    sim: Any,
+    ledger: QuarantineAttributionLedger,
+) -> dict[str, Any]:
+    """Truth-level daily incidence — the day-16 kink readout.
+
+    Per-day counts of non-seeded acquisitions across the whole voyage,
+    split by whether the target was confined at the event's epoch, so a
+    suppression-shaped arm (incidence kinks at day 16 and concentrates
+    in cabins/crew) separates from a structure-shaped arm (smooth
+    attenuation of the same curve).
+    """
+    by_day: Counter[int] = Counter()
+    confined_by_day: Counter[int] = Counter()
+    for ev in ledger.events:
+        day = sim.clock.day_index(int(ev["epoch"]))
+        by_day[day] += 1
+        if ev["confined"]:
+            confined_by_day[day] += 1
+    return {
+        "total_by_day": {str(d): c for d, c in sorted(by_day.items())},
+        "confined_by_day": {str(d): c for d, c in sorted(confined_by_day.items())},
+    }
+
+
+def _susceptibility_draw_stats(sim: Any) -> dict[str, Any]:
+    """Quantiles of the drawn per-host susceptibilities (landing proof).
+
+    The beta-Poisson draw is lazy: only hosts the engine actually
+    challenged carry a value, so the quantiles describe the challenged
+    set — the drawn-vs-declared check a frailty arm needs, and on other
+    arms a no-op echo of the shipped shape.
+    """
+    draws = [
+        float(a.dose_response_susceptibility[PATHOGEN_ID])
+        for a in sim.engine.agents
+        if PATHOGEN_ID in getattr(a, "dose_response_susceptibility", {})
+    ]
+    if not draws:
+        return {"n": 0}
+    return {
+        "n": len(draws),
+        "mean": float(np.mean(draws)),
+        "q05": _quantile(draws, 0.05),
+        "q25": _quantile(draws, 0.25),
+        "q50": _quantile(draws, 0.5),
+        "q75": _quantile(draws, 0.75),
+        "q95": _quantile(draws, 0.95),
+    }
+
+
 def prepare_cell_run_spec(
     design: BoardingScreenDesign,
     cell: ScreenCell,
@@ -1025,7 +1227,9 @@ def prepare_cell_run_spec(
             if design.voyage_mode == VOYAGE_MODE_GENERIC else None
         ),
     )
-    apply_arm_overrides(raw, arm_overrides, profile=profile)
+    apply_arm_overrides(
+        raw, arm_overrides, profile=profile, theta=cell.theta,
+    )
     return raw
 
 
@@ -1117,6 +1321,15 @@ def cell_payload(
                 .get("exposure_cap", {})
                 .get("include_fixed_rings")
             ),
+            # The engine-resolved cap state, echoed so a cap arm's
+            # declared switch is auditable against what actually ran
+            # (the hull gates the feature on the platform).
+            "exposure_cap_active": bool(
+                getattr(sim.tx_core, "_exposure_cap_active", False)
+            ),
+            "ship_graph_immune": _immune_block(raw, sim),
+            "acquisition_curve": _acquisition_curve(sim, ledger),
+            "susceptibility_draw": _susceptibility_draw_stats(sim),
             **_attribution_block(sim, ledger, raw),
         })
     return payload
