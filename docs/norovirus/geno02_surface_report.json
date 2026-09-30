@@ -1,0 +1,4385 @@
+{
+ "n_runs": {
+  "mono_gii4": 960,
+  "mono_nongii4": 960,
+  "mixture": 960
+ },
+ "n_cells": 144,
+ "n_powered": 51,
+ "per_cell": {
+  "mixture|classic_cruise_1900|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.02617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 32,
+    "gii4": 63
+   },
+   "genotypes_ever": {
+    "GII.2": 24,
+    "GII.4": 63,
+    "GII.17": 8
+   }
+  },
+  "mixture|classic_cruise_1900|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 47,
+   "nonsec_aboard": 4,
+   "share": 0.0851063829787234,
+   "ci": [
+    0.03359412322441163,
+    0.19931537901751437
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1177,
+   "attack_rate_ever": 0.03081151832460733,
+   "postings_per_1000": 0.680628272251309,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 36,
+    "non_gii4": 11
+   },
+   "classes_ever": {
+    "non_gii4": 463,
+    "gii4": 714
+   },
+   "genotypes_ever": {
+    "GII.17": 191,
+    "GII.2": 272,
+    "GII.4": 714
+   }
+  },
+  "mixture|classic_cruise_1900|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 16,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.1936076829974049
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 656,
+   "attack_rate_ever": 0.01717277486910995,
+   "postings_per_1000": 0.2617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 14,
+    "gii4": 2
+   },
+   "classes_ever": {
+    "non_gii4": 264,
+    "gii4": 392
+   },
+   "genotypes_ever": {
+    "GII.17": 103,
+    "GII.2": 161,
+    "GII.4": 392
+   }
+  },
+  "mixture|classic_cruise_1900|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 21,
+   "nonsec_aboard": 3,
+   "share": 0.14285714285714285,
+   "ci": [
+    0.04981012460790432,
+    0.34636060466862695
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 910,
+   "attack_rate_ever": 0.02382198952879581,
+   "postings_per_1000": 0.39267015706806285,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 12,
+    "gii4": 9
+   },
+   "classes_ever": {
+    "non_gii4": 374,
+    "gii4": 536
+   },
+   "genotypes_ever": {
+    "GII.17": 155,
+    "GII.2": 219,
+    "GII.4": 536
+   }
+  },
+  "mixture|classic_cruise_1900|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.13089005235602094,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 32,
+    "gii4": 63
+   },
+   "genotypes_ever": {
+    "GII.2": 24,
+    "GII.4": 63,
+    "GII.17": 8
+   }
+  },
+  "mixture|classic_cruise_1900|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 46,
+   "nonsec_aboard": 3,
+   "share": 0.06521739130434782,
+   "ci": [
+    0.02242786125459427,
+    0.1750274119695449
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1176,
+   "attack_rate_ever": 0.030785340314136125,
+   "postings_per_1000": 0.7853403141361257,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 34,
+    "non_gii4": 12
+   },
+   "classes_ever": {
+    "non_gii4": 464,
+    "gii4": 712
+   },
+   "genotypes_ever": {
+    "GII.17": 193,
+    "GII.2": 271,
+    "GII.4": 712
+   }
+  },
+  "mixture|classic_cruise_1900|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 5,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.43448246865939283
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 645,
+   "attack_rate_ever": 0.016884816753926703,
+   "postings_per_1000": 0.2617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 2,
+    "gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 252,
+    "gii4": 393
+   },
+   "genotypes_ever": {
+    "GII.17": 102,
+    "GII.2": 150,
+    "GII.4": 393
+   }
+  },
+  "mixture|classic_cruise_1900|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 23,
+   "nonsec_aboard": 2,
+   "share": 0.08695652173913043,
+   "ci": [
+    0.02418000426569175,
+    0.2679598125741516
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 912,
+   "attack_rate_ever": 0.02387434554973822,
+   "postings_per_1000": 0.36649214659685864,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 10,
+    "gii4": 13
+   },
+   "classes_ever": {
+    "non_gii4": 372,
+    "gii4": 540
+   },
+   "genotypes_ever": {
+    "GII.17": 153,
+    "GII.2": 219,
+    "GII.4": 540
+   }
+  },
+  "mixture|classic_cruise_1900|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.07853403141361257,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 32,
+    "gii4": 63
+   },
+   "genotypes_ever": {
+    "GII.2": 24,
+    "GII.4": 63,
+    "GII.17": 8
+   }
+  },
+  "mixture|classic_cruise_1900|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 44,
+   "nonsec_aboard": 4,
+   "share": 0.09090909090909091,
+   "ci": [
+    0.035922192977593276,
+    0.21159239286889966
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1174,
+   "attack_rate_ever": 0.030732984293193717,
+   "postings_per_1000": 0.7068062827225131,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 30,
+    "non_gii4": 14
+   },
+   "classes_ever": {
+    "non_gii4": 466,
+    "gii4": 708
+   },
+   "genotypes_ever": {
+    "GII.17": 193,
+    "GII.2": 273,
+    "GII.4": 708
+   }
+  },
+  "mixture|classic_cruise_1900|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 17,
+   "nonsec_aboard": 1,
+   "share": 0.058823529411764705,
+   "ci": [
+    0.010460400868949865,
+    0.26982030858456973
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 657,
+   "attack_rate_ever": 0.01719895287958115,
+   "postings_per_1000": 0.36649214659685864,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 13,
+    "gii4": 4
+   },
+   "classes_ever": {
+    "non_gii4": 263,
+    "gii4": 394
+   },
+   "genotypes_ever": {
+    "GII.17": 102,
+    "GII.2": 161,
+    "GII.4": 394
+   }
+  },
+  "mixture|classic_cruise_1900|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 27,
+   "nonsec_aboard": 2,
+   "share": 0.07407407407407407,
+   "ci": [
+    0.020554653875390336,
+    0.23369592848118886
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 916,
+   "attack_rate_ever": 0.023979057591623037,
+   "postings_per_1000": 0.4712041884816754,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 10,
+    "gii4": 17
+   },
+   "classes_ever": {
+    "non_gii4": 372,
+    "gii4": 544
+   },
+   "genotypes_ever": {
+    "GII.17": 153,
+    "GII.2": 219,
+    "GII.4": 544
+   }
+  },
+  "mixture|expedition_cruise_450|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 10,
+    "gii4": 14
+   },
+   "genotypes_ever": {
+    "GII.2": 8,
+    "GII.4": 14,
+    "GII.17": 2
+   }
+  },
+  "mixture|expedition_cruise_450|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 10,
+   "nonsec_aboard": 3,
+   "share": 0.3,
+   "ci": [
+    0.10779126655639398,
+    0.6032218546540291
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 302,
+   "attack_rate_ever": 0.033555555555555554,
+   "postings_per_1000": 1.0,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 5,
+    "gii4": 5
+   },
+   "classes_ever": {
+    "non_gii4": 110,
+    "gii4": 192
+   },
+   "genotypes_ever": {
+    "GII.17": 38,
+    "GII.2": 72,
+    "GII.4": 192
+   }
+  },
+  "mixture|expedition_cruise_450|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 5,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 58,
+    "gii4": 103
+   },
+   "genotypes_ever": {
+    "GII.17": 18,
+    "GII.2": 40,
+    "GII.4": 103
+   }
+  },
+  "mixture|expedition_cruise_450|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 4,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.4898908403969213
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 241,
+   "attack_rate_ever": 0.02677777777777778,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 4
+   },
+   "classes_ever": {
+    "non_gii4": 85,
+    "gii4": 156
+   },
+   "genotypes_ever": {
+    "GII.17": 29,
+    "GII.2": 56,
+    "GII.4": 156
+   }
+  },
+  "mixture|expedition_cruise_450|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 6,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 10,
+    "gii4": 14
+   },
+   "genotypes_ever": {
+    "GII.2": 8,
+    "GII.4": 14,
+    "GII.17": 2
+   }
+  },
+  "mixture|expedition_cruise_450|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 11,
+   "nonsec_aboard": 3,
+   "share": 0.2727272727272727,
+   "ci": [
+    0.09746059213308628,
+    0.5656453033189257
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 303,
+   "attack_rate_ever": 0.033666666666666664,
+   "postings_per_1000": 1.2222222222222223,
+   "alert_voyages": 6,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 5,
+    "gii4": 6
+   },
+   "classes_ever": {
+    "non_gii4": 110,
+    "gii4": 193
+   },
+   "genotypes_ever": {
+    "GII.17": 38,
+    "GII.2": 72,
+    "GII.4": 193
+   }
+  },
+  "mixture|expedition_cruise_450|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 160,
+   "attack_rate_ever": 0.017777777777777778,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 58,
+    "gii4": 102
+   },
+   "genotypes_ever": {
+    "GII.17": 18,
+    "GII.2": 40,
+    "GII.4": 102
+   }
+  },
+  "mixture|expedition_cruise_450|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 85,
+    "gii4": 155
+   },
+   "genotypes_ever": {
+    "GII.17": 29,
+    "GII.2": 56,
+    "GII.4": 155
+   }
+  },
+  "mixture|expedition_cruise_450|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.0,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 10,
+    "gii4": 14
+   },
+   "genotypes_ever": {
+    "GII.2": 8,
+    "GII.4": 14,
+    "GII.17": 2
+   }
+  },
+  "mixture|expedition_cruise_450|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 21,
+   "nonsec_aboard": 5,
+   "share": 0.23809523809523808,
+   "ci": [
+    0.10628012955399624,
+    0.45091173858212674
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 313,
+   "attack_rate_ever": 0.034777777777777776,
+   "postings_per_1000": 1.7777777777777777,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 15,
+    "gii4": 6
+   },
+   "classes_ever": {
+    "non_gii4": 120,
+    "gii4": 193
+   },
+   "genotypes_ever": {
+    "GII.17": 47,
+    "GII.2": 74,
+    "GII.4": 193
+   }
+  },
+  "mixture|expedition_cruise_450|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 58,
+    "gii4": 103
+   },
+   "genotypes_ever": {
+    "GII.17": 18,
+    "GII.2": 40,
+    "GII.4": 103
+   }
+  },
+  "mixture|expedition_cruise_450|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 85,
+    "gii4": 155
+   },
+   "genotypes_ever": {
+    "GII.17": 29,
+    "GII.2": 56,
+    "GII.4": 155
+   }
+  },
+  "mixture|mega_cruise_5000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 31,
+   "nonsec_aboard": 2,
+   "share": 0.06451612903225806,
+   "ci": [
+    0.01787478336061983,
+    0.2071863688721744
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 372,
+   "attack_rate_ever": 0.002657142857142857,
+   "postings_per_1000": 0.22142857142857142,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 7,
+    "non_gii4": 24
+   },
+   "classes_ever": {
+    "non_gii4": 160,
+    "gii4": 212
+   },
+   "genotypes_ever": {
+    "GII.17": 67,
+    "GII.2": 93,
+    "GII.4": 212
+   }
+  },
+  "mixture|mega_cruise_5000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 138,
+   "nonsec_aboard": 14,
+   "share": 0.10144927536231885,
+   "ci": [
+    0.06139728960793857,
+    0.1630889722539295
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4233,
+   "attack_rate_ever": 0.030235714285714286,
+   "postings_per_1000": 0.6214285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 45,
+    "gii4": 92,
+    "gii4+non_gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 1661,
+    "gii4": 2571,
+    "gii4+non_gii4": 1
+   },
+   "genotypes_ever": {
+    "GII.17": 651,
+    "GII.2": 1012,
+    "GII.4": 2572
+   }
+  },
+  "mixture|mega_cruise_5000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 54,
+   "nonsec_aboard": 3,
+   "share": 0.05555555555555555,
+   "ci": [
+    0.019073268306186872,
+    0.1510721441996239
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2289,
+   "attack_rate_ever": 0.01635,
+   "postings_per_1000": 0.2714285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 28,
+    "non_gii4": 25,
+    "gii4+non_gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 914,
+    "gii4": 1374,
+    "gii4+non_gii4": 1
+   },
+   "genotypes_ever": {
+    "GII.17": 353,
+    "GII.2": 562,
+    "GII.4": 1375
+   }
+  },
+  "mixture|mega_cruise_5000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 105,
+   "nonsec_aboard": 12,
+   "share": 0.11428571428571428,
+   "ci": [
+    0.06659701975349097,
+    0.18920126857761527
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3318,
+   "attack_rate_ever": 0.0237,
+   "postings_per_1000": 0.37857142857142856,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 59,
+    "non_gii4": 46
+   },
+   "classes_ever": {
+    "non_gii4": 1313,
+    "gii4": 2005
+   },
+   "genotypes_ever": {
+    "GII.17": 510,
+    "GII.2": 803,
+    "GII.4": 2005
+   }
+  },
+  "mixture|mega_cruise_5000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 31,
+   "nonsec_aboard": 3,
+   "share": 0.0967741935483871,
+   "ci": [
+    0.033464643902175836,
+    0.24899938594300403
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 372,
+   "attack_rate_ever": 0.002657142857142857,
+   "postings_per_1000": 0.22857142857142856,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 26,
+    "gii4": 5
+   },
+   "classes_ever": {
+    "non_gii4": 162,
+    "gii4": 210
+   },
+   "genotypes_ever": {
+    "GII.17": 68,
+    "GII.2": 94,
+    "GII.4": 210
+   }
+  },
+  "mixture|mega_cruise_5000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 152,
+   "nonsec_aboard": 16,
+   "share": 0.10526315789473684,
+   "ci": [
+    0.06583783862065143,
+    0.16414883590474774
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4247,
+   "attack_rate_ever": 0.030335714285714285,
+   "postings_per_1000": 0.6142857142857143,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 87,
+    "non_gii4": 65
+   },
+   "classes_ever": {
+    "non_gii4": 1681,
+    "gii4": 2566
+   },
+   "genotypes_ever": {
+    "GII.17": 666,
+    "GII.2": 1015,
+    "GII.4": 2566
+   }
+  },
+  "mixture|mega_cruise_5000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 56,
+   "nonsec_aboard": 5,
+   "share": 0.08928571428571429,
+   "ci": [
+    0.038742148204398044,
+    0.19256001487876628
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2291,
+   "attack_rate_ever": 0.016364285714285713,
+   "postings_per_1000": 0.38571428571428573,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 33,
+    "gii4": 23
+   },
+   "classes_ever": {
+    "non_gii4": 922,
+    "gii4": 1369
+   },
+   "genotypes_ever": {
+    "GII.17": 355,
+    "GII.2": 567,
+    "GII.4": 1369
+   }
+  },
+  "mixture|mega_cruise_5000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 89,
+   "nonsec_aboard": 8,
+   "share": 0.0898876404494382,
+   "ci": [
+    0.0462524289083875,
+    0.16746091769751437
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3302,
+   "attack_rate_ever": 0.023585714285714286,
+   "postings_per_1000": 0.42142857142857143,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 54,
+    "non_gii4": 35
+   },
+   "classes_ever": {
+    "non_gii4": 1302,
+    "gii4": 2000
+   },
+   "genotypes_ever": {
+    "GII.17": 505,
+    "GII.2": 797,
+    "GII.4": 2000
+   }
+  },
+  "mixture|mega_cruise_5000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 32,
+   "nonsec_aboard": 3,
+   "share": 0.09375,
+   "ci": [
+    0.03240155104567083,
+    0.24218154876313192
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 373,
+   "attack_rate_ever": 0.002664285714285714,
+   "postings_per_1000": 0.2357142857142857,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 4,
+    "non_gii4": 28
+   },
+   "classes_ever": {
+    "non_gii4": 164,
+    "gii4": 209
+   },
+   "genotypes_ever": {
+    "GII.17": 70,
+    "GII.2": 94,
+    "GII.4": 209
+   }
+  },
+  "mixture|mega_cruise_5000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 138,
+   "nonsec_aboard": 12,
+   "share": 0.08695652173913043,
+   "ci": [
+    0.050442010521770754,
+    0.14584375177143794
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4233,
+   "attack_rate_ever": 0.030235714285714286,
+   "postings_per_1000": 0.6571428571428571,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 89,
+    "non_gii4": 49
+   },
+   "classes_ever": {
+    "non_gii4": 1665,
+    "gii4": 2568
+   },
+   "genotypes_ever": {
+    "GII.17": 648,
+    "GII.2": 1017,
+    "GII.4": 2568
+   }
+  },
+  "mixture|mega_cruise_5000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 41,
+   "nonsec_aboard": 2,
+   "share": 0.04878048780487805,
+   "ci": [
+    0.013480945243651773,
+    0.16138978994036302
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2276,
+   "attack_rate_ever": 0.016257142857142855,
+   "postings_per_1000": 0.36428571428571427,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 22,
+    "gii4": 19
+   },
+   "classes_ever": {
+    "non_gii4": 911,
+    "gii4": 1365
+   },
+   "genotypes_ever": {
+    "GII.17": 348,
+    "GII.2": 563,
+    "GII.4": 1365
+   }
+  },
+  "mixture|mega_cruise_5000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 117,
+   "nonsec_aboard": 18,
+   "share": 0.15384615384615385,
+   "ci": [
+    0.09958656252777705,
+    0.23011368480565464
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3330,
+   "attack_rate_ever": 0.023785714285714285,
+   "postings_per_1000": 0.4857142857142857,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 57,
+    "non_gii4": 60
+   },
+   "classes_ever": {
+    "non_gii4": 1327,
+    "gii4": 2003
+   },
+   "genotypes_ever": {
+    "GII.17": 509,
+    "GII.2": 818,
+    "GII.4": 2003
+   }
+  },
+  "mixture|spirit_cruise_3000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 151,
+   "attack_rate_ever": 0.0025166666666666666,
+   "postings_per_1000": 0.16666666666666666,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 2,
+    "gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 57,
+    "gii4": 94
+   },
+   "genotypes_ever": {
+    "GII.17": 13,
+    "GII.2": 44,
+    "GII.4": 94
+   }
+  },
+  "mixture|spirit_cruise_3000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 50,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.07134760017861413
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1857,
+   "attack_rate_ever": 0.03095,
+   "postings_per_1000": 0.5,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 21,
+    "gii4": 29
+   },
+   "classes_ever": {
+    "non_gii4": 739,
+    "gii4": 1117,
+    "gii4+non_gii4": 1
+   },
+   "genotypes_ever": {
+    "GII.17": 305,
+    "GII.2": 435,
+    "GII.4": 1118
+   }
+  },
+  "mixture|spirit_cruise_3000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 32,
+   "nonsec_aboard": 2,
+   "share": 0.0625,
+   "ci": [
+    0.017310566875458913,
+    0.2014712329186364
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 992,
+   "attack_rate_ever": 0.016533333333333334,
+   "postings_per_1000": 0.31666666666666665,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 11,
+    "non_gii4": 21
+   },
+   "classes_ever": {
+    "non_gii4": 416,
+    "gii4": 576
+   },
+   "genotypes_ever": {
+    "GII.17": 172,
+    "GII.2": 244,
+    "GII.4": 576
+   }
+  },
+  "mixture|spirit_cruise_3000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 35,
+   "nonsec_aboard": 3,
+   "share": 0.08571428571428572,
+   "ci": [
+    0.02958236803634305,
+    0.22379274105450336
+   ],
+   "powered": false,
+   "imported": 1379,
+   "ever_infected": 1414,
+   "attack_rate_ever": 0.023566666666666666,
+   "postings_per_1000": 0.5166666666666667,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 26,
+    "non_gii4": 9
+   },
+   "classes_ever": {
+    "non_gii4": 559,
+    "gii4": 855
+   },
+   "genotypes_ever": {
+    "GII.17": 221,
+    "GII.2": 338,
+    "GII.4": 855
+   }
+  },
+  "mixture|spirit_cruise_3000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 151,
+   "attack_rate_ever": 0.0025166666666666666,
+   "postings_per_1000": 0.2,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 2,
+    "gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 57,
+    "gii4": 94
+   },
+   "genotypes_ever": {
+    "GII.17": 13,
+    "GII.2": 44,
+    "GII.4": 94
+   }
+  },
+  "mixture|spirit_cruise_3000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 63,
+   "nonsec_aboard": 3,
+   "share": 0.047619047619047616,
+   "ci": [
+    0.01632616874092256,
+    0.1309096792792932
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1870,
+   "attack_rate_ever": 0.031166666666666665,
+   "postings_per_1000": 0.6833333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 33,
+    "gii4": 29,
+    "gii4+non_gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 751,
+    "gii4": 1117,
+    "gii4+non_gii4": 2
+   },
+   "genotypes_ever": {
+    "GII.17": 299,
+    "GII.2": 454,
+    "GII.4": 1119
+   }
+  },
+  "mixture|spirit_cruise_3000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 45,
+   "nonsec_aboard": 3,
+   "share": 0.06666666666666667,
+   "ci": [
+    0.022932032420618545,
+    0.17856602080532263
+   ],
+   "powered": true,
+   "imported": 960,
+   "ever_infected": 1005,
+   "attack_rate_ever": 0.01675,
+   "postings_per_1000": 0.38333333333333336,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 10,
+    "non_gii4": 35
+   },
+   "classes_ever": {
+    "non_gii4": 430,
+    "gii4": 575
+   },
+   "genotypes_ever": {
+    "GII.17": 180,
+    "GII.2": 250,
+    "GII.4": 575
+   }
+  },
+  "mixture|spirit_cruise_3000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 29,
+   "nonsec_aboard": 2,
+   "share": 0.06896551724137931,
+   "ci": [
+    0.01912126599683843,
+    0.2196458030800441
+   ],
+   "powered": false,
+   "imported": 1379,
+   "ever_infected": 1408,
+   "attack_rate_ever": 0.023466666666666667,
+   "postings_per_1000": 0.43333333333333335,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 22,
+    "non_gii4": 7
+   },
+   "classes_ever": {
+    "non_gii4": 557,
+    "gii4": 851
+   },
+   "genotypes_ever": {
+    "GII.17": 220,
+    "GII.2": 337,
+    "GII.4": 851
+   }
+  },
+  "mixture|spirit_cruise_3000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 5,
+   "nonsec_aboard": 1,
+   "share": 0.2,
+   "ci": [
+    0.03622410822563066,
+    0.6244653729700049
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 153,
+   "attack_rate_ever": 0.00255,
+   "postings_per_1000": 0.16666666666666666,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3,
+    "non_gii4": 2
+   },
+   "classes_ever": {
+    "non_gii4": 57,
+    "gii4": 96
+   },
+   "genotypes_ever": {
+    "GII.17": 13,
+    "GII.2": 44,
+    "GII.4": 96
+   }
+  },
+  "mixture|spirit_cruise_3000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 79,
+   "nonsec_aboard": 4,
+   "share": 0.05063291139240506,
+   "ci": [
+    0.019864042642025466,
+    0.12307717352201739
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1886,
+   "attack_rate_ever": 0.031433333333333334,
+   "postings_per_1000": 0.7666666666666667,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 47,
+    "gii4": 30,
+    "gii4+non_gii4": 2
+   },
+   "classes_ever": {
+    "non_gii4": 765,
+    "gii4": 1118,
+    "gii4+non_gii4": 3
+   },
+   "genotypes_ever": {
+    "GII.17": 334,
+    "GII.2": 435,
+    "GII.4": 1121
+   }
+  },
+  "mixture|spirit_cruise_3000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 25,
+   "nonsec_aboard": 2,
+   "share": 0.08,
+   "ci": [
+    0.022220401084126262,
+    0.24966109123460217
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 985,
+   "attack_rate_ever": 0.016416666666666666,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 8,
+    "non_gii4": 17
+   },
+   "classes_ever": {
+    "non_gii4": 412,
+    "gii4": 573
+   },
+   "genotypes_ever": {
+    "GII.17": 164,
+    "GII.2": 248,
+    "GII.4": 573
+   }
+  },
+  "mixture|spirit_cruise_3000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 62,
+   "nonsec_aboard": 5,
+   "share": 0.08064516129032258,
+   "ci": [
+    0.03493834676486676,
+    0.17528571443417862
+   ],
+   "powered": true,
+   "imported": 1379,
+   "ever_infected": 1441,
+   "attack_rate_ever": 0.024016666666666665,
+   "postings_per_1000": 0.65,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 52,
+    "non_gii4": 10
+   },
+   "classes_ever": {
+    "non_gii4": 560,
+    "gii4": 881
+   },
+   "genotypes_ever": {
+    "GII.17": 219,
+    "GII.2": 341,
+    "GII.4": 881
+   }
+  },
+  "mono_gii4|classic_cruise_1900|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.02617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.4": 95
+   }
+  },
+  "mono_gii4|classic_cruise_1900|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 43,
+   "nonsec_aboard": 4,
+   "share": 0.09302325581395349,
+   "ci": [
+    0.036771640376074596,
+    0.21602703763487746
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1173,
+   "attack_rate_ever": 0.030706806282722512,
+   "postings_per_1000": 0.7068062827225131,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 43
+   },
+   "classes_ever": {
+    "gii4": 1173
+   },
+   "genotypes_ever": {
+    "GII.4": 1173
+   }
+  },
+  "mono_gii4|classic_cruise_1900|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 11,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.25883296999442634
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 651,
+   "attack_rate_ever": 0.017041884816753925,
+   "postings_per_1000": 0.2879581151832461,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 11
+   },
+   "classes_ever": {
+    "gii4": 651
+   },
+   "genotypes_ever": {
+    "GII.4": 651
+   }
+  },
+  "mono_gii4|classic_cruise_1900|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 17,
+   "nonsec_aboard": 2,
+   "share": 0.11764705882352941,
+   "ci": [
+    0.032879773465990136,
+    0.3433635080603935
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 906,
+   "attack_rate_ever": 0.023717277486910996,
+   "postings_per_1000": 0.44502617801047123,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 17
+   },
+   "classes_ever": {
+    "gii4": 906
+   },
+   "genotypes_ever": {
+    "GII.4": 906
+   }
+  },
+  "mono_gii4|classic_cruise_1900|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.13089005235602094,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.4": 95
+   }
+  },
+  "mono_gii4|classic_cruise_1900|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 46,
+   "nonsec_aboard": 3,
+   "share": 0.06521739130434782,
+   "ci": [
+    0.02242786125459427,
+    0.1750274119695449
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1176,
+   "attack_rate_ever": 0.030785340314136125,
+   "postings_per_1000": 0.7853403141361257,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 46
+   },
+   "classes_ever": {
+    "gii4": 1176
+   },
+   "genotypes_ever": {
+    "GII.4": 1176
+   }
+  },
+  "mono_gii4|classic_cruise_1900|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 5,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.43448246865939283
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 645,
+   "attack_rate_ever": 0.016884816753926703,
+   "postings_per_1000": 0.2617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 5
+   },
+   "classes_ever": {
+    "gii4": 645
+   },
+   "genotypes_ever": {
+    "GII.4": 645
+   }
+  },
+  "mono_gii4|classic_cruise_1900|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 17,
+   "nonsec_aboard": 2,
+   "share": 0.11764705882352941,
+   "ci": [
+    0.032879773465990136,
+    0.3433635080603935
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 906,
+   "attack_rate_ever": 0.023717277486910996,
+   "postings_per_1000": 0.418848167539267,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 17
+   },
+   "classes_ever": {
+    "gii4": 906
+   },
+   "genotypes_ever": {
+    "GII.4": 906
+   }
+  },
+  "mono_gii4|classic_cruise_1900|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.07853403141361257,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.4": 95
+   }
+  },
+  "mono_gii4|classic_cruise_1900|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 45,
+   "nonsec_aboard": 4,
+   "share": 0.08888888888888889,
+   "ci": [
+    0.03511111648229477,
+    0.20733575452693148
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1175,
+   "attack_rate_ever": 0.030759162303664923,
+   "postings_per_1000": 0.680628272251309,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 45
+   },
+   "classes_ever": {
+    "gii4": 1175
+   },
+   "genotypes_ever": {
+    "GII.4": 1175
+   }
+  },
+  "mono_gii4|classic_cruise_1900|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 16,
+   "nonsec_aboard": 1,
+   "share": 0.0625,
+   "ci": [
+    0.011119344641247308,
+    0.283287377981482
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 656,
+   "attack_rate_ever": 0.01717277486910995,
+   "postings_per_1000": 0.39267015706806285,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 16
+   },
+   "classes_ever": {
+    "gii4": 656
+   },
+   "genotypes_ever": {
+    "GII.4": 656
+   }
+  },
+  "mono_gii4|classic_cruise_1900|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 19,
+   "nonsec_aboard": 1,
+   "share": 0.05263157894736842,
+   "ci": [
+    0.009351993958601784,
+    0.24638731374732356
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 908,
+   "attack_rate_ever": 0.023769633507853404,
+   "postings_per_1000": 0.39267015706806285,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 19
+   },
+   "classes_ever": {
+    "gii4": 908
+   },
+   "genotypes_ever": {
+    "GII.4": 908
+   }
+  },
+  "mono_gii4|expedition_cruise_450|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.4": 24
+   }
+  },
+  "mono_gii4|expedition_cruise_450|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 12,
+   "nonsec_aboard": 2,
+   "share": 0.16666666666666666,
+   "ci": [
+    0.04696514175692082,
+    0.4480308646118111
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 304,
+   "attack_rate_ever": 0.033777777777777775,
+   "postings_per_1000": 1.2222222222222223,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 12
+   },
+   "classes_ever": {
+    "gii4": 304
+   },
+   "genotypes_ever": {
+    "GII.4": 304
+   }
+  },
+  "mono_gii4|expedition_cruise_450|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 5,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 1
+   },
+   "classes_ever": {
+    "gii4": 161
+   },
+   "genotypes_ever": {
+    "GII.4": 161
+   }
+  },
+  "mono_gii4|expedition_cruise_450|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.4": 240
+   }
+  },
+  "mono_gii4|expedition_cruise_450|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 6,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.4": 24
+   }
+  },
+  "mono_gii4|expedition_cruise_450|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 12,
+   "nonsec_aboard": 2,
+   "share": 0.16666666666666666,
+   "ci": [
+    0.04696514175692082,
+    0.4480308646118111
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 304,
+   "attack_rate_ever": 0.033777777777777775,
+   "postings_per_1000": 1.1111111111111112,
+   "alert_voyages": 5,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 12
+   },
+   "classes_ever": {
+    "gii4": 304
+   },
+   "genotypes_ever": {
+    "GII.4": 304
+   }
+  },
+  "mono_gii4|expedition_cruise_450|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 160,
+   "attack_rate_ever": 0.017777777777777778,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 160
+   },
+   "genotypes_ever": {
+    "GII.4": 160
+   }
+  },
+  "mono_gii4|expedition_cruise_450|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.4": 240
+   }
+  },
+  "mono_gii4|expedition_cruise_450|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.0,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.4": 24
+   }
+  },
+  "mono_gii4|expedition_cruise_450|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 17,
+   "nonsec_aboard": 2,
+   "share": 0.11764705882352941,
+   "ci": [
+    0.032879773465990136,
+    0.3433635080603935
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 309,
+   "attack_rate_ever": 0.034333333333333334,
+   "postings_per_1000": 1.7777777777777777,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 17
+   },
+   "classes_ever": {
+    "gii4": 309
+   },
+   "genotypes_ever": {
+    "GII.4": 309
+   }
+  },
+  "mono_gii4|expedition_cruise_450|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 1
+   },
+   "classes_ever": {
+    "gii4": 161
+   },
+   "genotypes_ever": {
+    "GII.4": 161
+   }
+  },
+  "mono_gii4|expedition_cruise_450|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.4": 240
+   }
+  },
+  "mono_gii4|mega_cruise_5000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 32,
+   "nonsec_aboard": 1,
+   "share": 0.03125,
+   "ci": [
+    0.00553786010270331,
+    0.15744263967668448
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 373,
+   "attack_rate_ever": 0.002664285714285714,
+   "postings_per_1000": 0.22142857142857142,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 32
+   },
+   "classes_ever": {
+    "gii4": 373
+   },
+   "genotypes_ever": {
+    "GII.4": 373
+   }
+  },
+  "mono_gii4|mega_cruise_5000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 123,
+   "nonsec_aboard": 8,
+   "share": 0.06504065040650407,
+   "ci": [
+    0.033322636208810964,
+    0.12310460025071715
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4218,
+   "attack_rate_ever": 0.030128571428571428,
+   "postings_per_1000": 0.6,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 123
+   },
+   "classes_ever": {
+    "gii4": 4218
+   },
+   "genotypes_ever": {
+    "GII.4": 4218
+   }
+  },
+  "mono_gii4|mega_cruise_5000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 52,
+   "nonsec_aboard": 4,
+   "share": 0.07692307692307693,
+   "ci": [
+    0.030319344974210377,
+    0.18173562490878953
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2287,
+   "attack_rate_ever": 0.016335714285714287,
+   "postings_per_1000": 0.2857142857142857,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 52
+   },
+   "classes_ever": {
+    "gii4": 2287
+   },
+   "genotypes_ever": {
+    "GII.4": 2287
+   }
+  },
+  "mono_gii4|mega_cruise_5000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 79,
+   "nonsec_aboard": 7,
+   "share": 0.08860759493670886,
+   "ci": [
+    0.04358529574944131,
+    0.17178342327397822
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3292,
+   "attack_rate_ever": 0.023514285714285713,
+   "postings_per_1000": 0.37142857142857144,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 79
+   },
+   "classes_ever": {
+    "gii4": 3292
+   },
+   "genotypes_ever": {
+    "GII.4": 3292
+   }
+  },
+  "mono_gii4|mega_cruise_5000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 34,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.10151455559221921
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 375,
+   "attack_rate_ever": 0.0026785714285714286,
+   "postings_per_1000": 0.21428571428571427,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 34
+   },
+   "classes_ever": {
+    "gii4": 375
+   },
+   "genotypes_ever": {
+    "GII.4": 375
+   }
+  },
+  "mono_gii4|mega_cruise_5000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 135,
+   "nonsec_aboard": 11,
+   "share": 0.08148148148148149,
+   "ci": [
+    0.04610554458846829,
+    0.14001651930737016
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4230,
+   "attack_rate_ever": 0.030214285714285714,
+   "postings_per_1000": 0.6714285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 135
+   },
+   "classes_ever": {
+    "gii4": 4230
+   },
+   "genotypes_ever": {
+    "GII.4": 4230
+   }
+  },
+  "mono_gii4|mega_cruise_5000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 48,
+   "nonsec_aboard": 3,
+   "share": 0.0625,
+   "ci": [
+    0.02148323274107221,
+    0.16835438166384809
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2283,
+   "attack_rate_ever": 0.016307142857142857,
+   "postings_per_1000": 0.37142857142857144,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 48
+   },
+   "classes_ever": {
+    "gii4": 2283
+   },
+   "genotypes_ever": {
+    "GII.4": 2283
+   }
+  },
+  "mono_gii4|mega_cruise_5000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 93,
+   "nonsec_aboard": 6,
+   "share": 0.06451612903225806,
+   "ci": [
+    0.029901431443733403,
+    0.1336799423221633
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3306,
+   "attack_rate_ever": 0.023614285714285713,
+   "postings_per_1000": 0.45714285714285713,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 93
+   },
+   "classes_ever": {
+    "gii4": 3306
+   },
+   "genotypes_ever": {
+    "GII.4": 3306
+   }
+  },
+  "mono_gii4|mega_cruise_5000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 42,
+   "nonsec_aboard": 1,
+   "share": 0.023809523809523808,
+   "ci": [
+    0.004215404087799045,
+    0.12321201693783071
+   ],
+   "powered": true,
+   "imported": 341,
+   "ever_infected": 383,
+   "attack_rate_ever": 0.0027357142857142858,
+   "postings_per_1000": 0.21428571428571427,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 42
+   },
+   "classes_ever": {
+    "gii4": 383
+   },
+   "genotypes_ever": {
+    "GII.4": 383
+   }
+  },
+  "mono_gii4|mega_cruise_5000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 129,
+   "nonsec_aboard": 6,
+   "share": 0.046511627906976744,
+   "ci": [
+    0.021488585874298125,
+    0.09776227913954935
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4224,
+   "attack_rate_ever": 0.03017142857142857,
+   "postings_per_1000": 0.6285714285714286,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 129
+   },
+   "classes_ever": {
+    "gii4": 4224
+   },
+   "genotypes_ever": {
+    "GII.4": 4224
+   }
+  },
+  "mono_gii4|mega_cruise_5000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 36,
+   "nonsec_aboard": 2,
+   "share": 0.05555555555555555,
+   "ci": [
+    0.015369986525553617,
+    0.18144657344678355
+   ],
+   "powered": false,
+   "imported": 2235,
+   "ever_infected": 2271,
+   "attack_rate_ever": 0.01622142857142857,
+   "postings_per_1000": 0.35714285714285715,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 36
+   },
+   "classes_ever": {
+    "gii4": 2271
+   },
+   "genotypes_ever": {
+    "GII.4": 2271
+   }
+  },
+  "mono_gii4|mega_cruise_5000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 91,
+   "nonsec_aboard": 12,
+   "share": 0.13186813186813187,
+   "ci": [
+    0.07707107481937107,
+    0.216486818634614
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3304,
+   "attack_rate_ever": 0.0236,
+   "postings_per_1000": 0.4714285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 91
+   },
+   "classes_ever": {
+    "gii4": 3304
+   },
+   "genotypes_ever": {
+    "GII.4": 3304
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 151,
+   "attack_rate_ever": 0.0025166666666666666,
+   "postings_per_1000": 0.16666666666666666,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "gii4": 151
+   },
+   "genotypes_ever": {
+    "GII.4": 151
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 49,
+   "nonsec_aboard": 1,
+   "share": 0.02040816326530612,
+   "ci": [
+    0.003611672549881484,
+    0.10693521629394014
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1856,
+   "attack_rate_ever": 0.030933333333333334,
+   "postings_per_1000": 0.5666666666666667,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 49
+   },
+   "classes_ever": {
+    "gii4": 1856
+   },
+   "genotypes_ever": {
+    "GII.4": 1856
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 27,
+   "nonsec_aboard": 3,
+   "share": 0.1111111111111111,
+   "ci": [
+    0.03852034798244741,
+    0.2805780098213858
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 987,
+   "attack_rate_ever": 0.01645,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 27
+   },
+   "classes_ever": {
+    "gii4": 987
+   },
+   "genotypes_ever": {
+    "GII.4": 987
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 33,
+   "nonsec_aboard": 4,
+   "share": 0.12121212121212122,
+   "ci": [
+    0.048161612759131084,
+    0.2732550531619836
+   ],
+   "powered": false,
+   "imported": 1379,
+   "ever_infected": 1412,
+   "attack_rate_ever": 0.023533333333333333,
+   "postings_per_1000": 0.4666666666666667,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 33
+   },
+   "classes_ever": {
+    "gii4": 1412
+   },
+   "genotypes_ever": {
+    "GII.4": 1412
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.5614970356393196
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 151,
+   "attack_rate_ever": 0.0025166666666666666,
+   "postings_per_1000": 0.2,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 3
+   },
+   "classes_ever": {
+    "gii4": 151
+   },
+   "genotypes_ever": {
+    "GII.4": 151
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 51,
+   "nonsec_aboard": 1,
+   "share": 0.0196078431372549,
+   "ci": [
+    0.0034696926026897695,
+    0.10304568828715492
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1858,
+   "attack_rate_ever": 0.030966666666666667,
+   "postings_per_1000": 0.6,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 51
+   },
+   "classes_ever": {
+    "gii4": 1858
+   },
+   "genotypes_ever": {
+    "GII.4": 1858
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 30,
+   "nonsec_aboard": 2,
+   "share": 0.06666666666666667,
+   "ci": [
+    0.018477023624516822,
+    0.21323458516874166
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 990,
+   "attack_rate_ever": 0.0165,
+   "postings_per_1000": 0.2833333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 30
+   },
+   "classes_ever": {
+    "gii4": 990
+   },
+   "genotypes_ever": {
+    "GII.4": 990
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 33,
+   "nonsec_aboard": 5,
+   "share": 0.15151515151515152,
+   "ci": [
+    0.06650457239529714,
+    0.30919876025212834
+   ],
+   "powered": false,
+   "imported": 1379,
+   "ever_infected": 1412,
+   "attack_rate_ever": 0.023533333333333333,
+   "postings_per_1000": 0.45,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 33
+   },
+   "classes_ever": {
+    "gii4": 1412
+   },
+   "genotypes_ever": {
+    "GII.4": 1412
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 5,
+   "nonsec_aboard": 1,
+   "share": 0.2,
+   "ci": [
+    0.03622410822563066,
+    0.6244653729700049
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 153,
+   "attack_rate_ever": 0.00255,
+   "postings_per_1000": 0.16666666666666666,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 5
+   },
+   "classes_ever": {
+    "gii4": 153
+   },
+   "genotypes_ever": {
+    "GII.4": 153
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 69,
+   "nonsec_aboard": 3,
+   "share": 0.043478260869565216,
+   "ci": [
+    0.014895903780291452,
+    0.12021202832927613
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1876,
+   "attack_rate_ever": 0.031266666666666665,
+   "postings_per_1000": 0.65,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 69
+   },
+   "classes_ever": {
+    "gii4": 1876
+   },
+   "genotypes_ever": {
+    "GII.4": 1876
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 22,
+   "nonsec_aboard": 2,
+   "share": 0.09090909090909091,
+   "ci": [
+    0.025295428762322658,
+    0.278149470278251
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 982,
+   "attack_rate_ever": 0.016366666666666668,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 22
+   },
+   "classes_ever": {
+    "gii4": 982
+   },
+   "genotypes_ever": {
+    "GII.4": 982
+   }
+  },
+  "mono_gii4|spirit_cruise_3000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 49,
+   "nonsec_aboard": 4,
+   "share": 0.08163265306122448,
+   "ci": [
+    0.032202817443934884,
+    0.19189127707939885
+   ],
+   "powered": true,
+   "imported": 1379,
+   "ever_infected": 1428,
+   "attack_rate_ever": 0.0238,
+   "postings_per_1000": 0.6,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "gii4": 49
+   },
+   "classes_ever": {
+    "gii4": 1428
+   },
+   "genotypes_ever": {
+    "GII.4": 1428
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.02617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.17": 37,
+    "GII.2": 58
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 51,
+   "nonsec_aboard": 13,
+   "share": 0.2549019607843137,
+   "ci": [
+    0.15545768094375859,
+    0.38868281951024375
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1181,
+   "attack_rate_ever": 0.030916230366492145,
+   "postings_per_1000": 0.8115183246073299,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 51
+   },
+   "classes_ever": {
+    "non_gii4": 1181
+   },
+   "genotypes_ever": {
+    "GII.17": 465,
+    "GII.2": 716
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 13,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.22809537513180025
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 653,
+   "attack_rate_ever": 0.017094240837696336,
+   "postings_per_1000": 0.2617801047120419,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 13
+   },
+   "classes_ever": {
+    "non_gii4": 653
+   },
+   "genotypes_ever": {
+    "GII.17": 256,
+    "GII.2": 397
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 18,
+   "nonsec_aboard": 2,
+   "share": 0.1111111111111111,
+   "ci": [
+    0.031019522364791025,
+    0.32799765336109676
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 907,
+   "attack_rate_ever": 0.023743455497382198,
+   "postings_per_1000": 0.39267015706806285,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 18
+   },
+   "classes_ever": {
+    "non_gii4": 907
+   },
+   "genotypes_ever": {
+    "GII.17": 337,
+    "GII.2": 570
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.13089005235602094,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.17": 37,
+    "GII.2": 58
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 57,
+   "nonsec_aboard": 8,
+   "share": 0.14035087719298245,
+   "ci": [
+    0.07287276105928868,
+    0.25324464713776723
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1187,
+   "attack_rate_ever": 0.03107329842931937,
+   "postings_per_1000": 1.0471204188481675,
+   "alert_voyages": 19,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 57
+   },
+   "classes_ever": {
+    "non_gii4": 1187
+   },
+   "genotypes_ever": {
+    "GII.17": 466,
+    "GII.2": 721
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 9,
+   "nonsec_aboard": 1,
+   "share": 0.1111111111111111,
+   "ci": [
+    0.01989088741690992,
+    0.4349997083707909
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 649,
+   "attack_rate_ever": 0.016989528795811518,
+   "postings_per_1000": 0.2879581151832461,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 9
+   },
+   "classes_ever": {
+    "non_gii4": 649
+   },
+   "genotypes_ever": {
+    "GII.17": 257,
+    "GII.2": 392
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 21,
+   "nonsec_aboard": 2,
+   "share": 0.09523809523809523,
+   "ci": [
+    0.026518767198269788,
+    0.2891413926484656
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 910,
+   "attack_rate_ever": 0.02382198952879581,
+   "postings_per_1000": 0.3403141361256545,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 21
+   },
+   "classes_ever": {
+    "non_gii4": 910
+   },
+   "genotypes_ever": {
+    "GII.17": 342,
+    "GII.2": 568
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 95,
+   "ever_infected": 95,
+   "attack_rate_ever": 0.0024869109947643978,
+   "postings_per_1000": 0.07853403141361257,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 95
+   },
+   "genotypes_ever": {
+    "GII.17": 37,
+    "GII.2": 58
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 43,
+   "nonsec_aboard": 6,
+   "share": 0.13953488372093023,
+   "ci": [
+    0.06555723389691778,
+    0.2726358809127827
+   ],
+   "powered": true,
+   "imported": 1130,
+   "ever_infected": 1173,
+   "attack_rate_ever": 0.030706806282722512,
+   "postings_per_1000": 0.7591623036649214,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 43
+   },
+   "classes_ever": {
+    "non_gii4": 1173
+   },
+   "genotypes_ever": {
+    "GII.17": 454,
+    "GII.2": 719
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 20,
+   "nonsec_aboard": 1,
+   "share": 0.05,
+   "ci": [
+    0.008881448702335523,
+    0.23613119546428119
+   ],
+   "powered": false,
+   "imported": 640,
+   "ever_infected": 660,
+   "attack_rate_ever": 0.017277486910994764,
+   "postings_per_1000": 0.39267015706806285,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 20
+   },
+   "classes_ever": {
+    "non_gii4": 660
+   },
+   "genotypes_ever": {
+    "GII.17": 258,
+    "GII.2": 402
+   }
+  },
+  "mono_nongii4|classic_cruise_1900|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 25,
+   "nonsec_aboard": 2,
+   "share": 0.08,
+   "ci": [
+    0.022220401084126262,
+    0.24966109123460217
+   ],
+   "powered": false,
+   "imported": 889,
+   "ever_infected": 914,
+   "attack_rate_ever": 0.02392670157068063,
+   "postings_per_1000": 0.4712041884816754,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 25
+   },
+   "classes_ever": {
+    "non_gii4": 914
+   },
+   "genotypes_ever": {
+    "GII.17": 344,
+    "GII.2": 570
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.2": 13,
+    "GII.17": 11
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 10,
+   "nonsec_aboard": 3,
+   "share": 0.3,
+   "ci": [
+    0.10779126655639398,
+    0.6032218546540291
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 302,
+   "attack_rate_ever": 0.033555555555555554,
+   "postings_per_1000": 1.0,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 10
+   },
+   "classes_ever": {
+    "non_gii4": 302
+   },
+   "genotypes_ever": {
+    "GII.17": 116,
+    "GII.2": 186
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 5,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 161
+   },
+   "genotypes_ever": {
+    "GII.17": 62,
+    "GII.2": 99
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 1,
+   "share": 0.3333333333333333,
+   "ci": [
+    0.06149194402093078,
+    0.7923404011921757
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.17": 90,
+    "GII.2": 150
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.1111111111111111,
+   "alert_voyages": 6,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.2": 13,
+    "GII.17": 11
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 10,
+   "nonsec_aboard": 3,
+   "share": 0.3,
+   "ci": [
+    0.10779126655639398,
+    0.6032218546540291
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 302,
+   "attack_rate_ever": 0.033555555555555554,
+   "postings_per_1000": 1.4444444444444444,
+   "alert_voyages": 6,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 10
+   },
+   "classes_ever": {
+    "non_gii4": 302
+   },
+   "genotypes_ever": {
+    "GII.17": 116,
+    "GII.2": 186
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 160,
+   "attack_rate_ever": 0.017777777777777778,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 4,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 160
+   },
+   "genotypes_ever": {
+    "GII.17": 61,
+    "GII.2": 99
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 1,
+   "share": 0.3333333333333333,
+   "ci": [
+    0.06149194402093078,
+    0.7923404011921757
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.3333333333333333,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.17": 90,
+    "GII.2": 150
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 0,
+   "nonsec_aboard": 0,
+   "share": NaN,
+   "ci": [
+    NaN,
+    NaN
+   ],
+   "powered": false,
+   "imported": 24,
+   "ever_infected": 24,
+   "attack_rate_ever": 0.0026666666666666666,
+   "postings_per_1000": 0.0,
+   "alert_voyages": 7,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {},
+   "classes_ever": {
+    "non_gii4": 24
+   },
+   "genotypes_ever": {
+    "GII.2": 13,
+    "GII.17": 11
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 24,
+   "nonsec_aboard": 6,
+   "share": 0.25,
+   "ci": [
+    0.11999366158732966,
+    0.4489944416883343
+   ],
+   "powered": false,
+   "imported": 292,
+   "ever_infected": 316,
+   "attack_rate_ever": 0.035111111111111114,
+   "postings_per_1000": 1.5555555555555556,
+   "alert_voyages": 8,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 24
+   },
+   "classes_ever": {
+    "non_gii4": 316
+   },
+   "genotypes_ever": {
+    "GII.17": 116,
+    "GII.2": 200
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 1,
+   "nonsec_aboard": 0,
+   "share": 0.0,
+   "ci": [
+    0.0,
+    0.7934506882081973
+   ],
+   "powered": false,
+   "imported": 160,
+   "ever_infected": 161,
+   "attack_rate_ever": 0.017888888888888888,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 1
+   },
+   "classes_ever": {
+    "non_gii4": 161
+   },
+   "genotypes_ever": {
+    "GII.17": 62,
+    "GII.2": 99
+   }
+  },
+  "mono_nongii4|expedition_cruise_450|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 3,
+   "nonsec_aboard": 1,
+   "share": 0.3333333333333333,
+   "ci": [
+    0.06149194402093078,
+    0.7923404011921757
+   ],
+   "powered": false,
+   "imported": 237,
+   "ever_infected": 240,
+   "attack_rate_ever": 0.02666666666666667,
+   "postings_per_1000": 0.2222222222222222,
+   "alert_voyages": 9,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 3
+   },
+   "classes_ever": {
+    "non_gii4": 240
+   },
+   "genotypes_ever": {
+    "GII.17": 90,
+    "GII.2": 150
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 36,
+   "nonsec_aboard": 2,
+   "share": 0.05555555555555555,
+   "ci": [
+    0.015369986525553617,
+    0.18144657344678355
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 377,
+   "attack_rate_ever": 0.0026928571428571427,
+   "postings_per_1000": 0.22857142857142856,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 36
+   },
+   "classes_ever": {
+    "non_gii4": 377
+   },
+   "genotypes_ever": {
+    "GII.17": 133,
+    "GII.2": 244
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 163,
+   "nonsec_aboard": 23,
+   "share": 0.1411042944785276,
+   "ci": [
+    0.09590067617508198,
+    0.20283477732366195
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4258,
+   "attack_rate_ever": 0.030414285714285713,
+   "postings_per_1000": 0.6285714285714286,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 163
+   },
+   "classes_ever": {
+    "non_gii4": 4258
+   },
+   "genotypes_ever": {
+    "GII.17": 1615,
+    "GII.2": 2643
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 55,
+   "nonsec_aboard": 6,
+   "share": 0.10909090909090909,
+   "ci": [
+    0.05096724971003366,
+    0.21825549191596536
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2290,
+   "attack_rate_ever": 0.01635714285714286,
+   "postings_per_1000": 0.3,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 55
+   },
+   "classes_ever": {
+    "non_gii4": 2290
+   },
+   "genotypes_ever": {
+    "GII.17": 887,
+    "GII.2": 1404
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 106,
+   "nonsec_aboard": 13,
+   "share": 0.12264150943396226,
+   "ci": [
+    0.07309121394518682,
+    0.1985863400970006
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3319,
+   "attack_rate_ever": 0.023707142857142857,
+   "postings_per_1000": 0.40714285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 106
+   },
+   "classes_ever": {
+    "non_gii4": 3319
+   },
+   "genotypes_ever": {
+    "GII.17": 1268,
+    "GII.2": 2051
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 38,
+   "nonsec_aboard": 3,
+   "share": 0.07894736842105263,
+   "ci": [
+    0.027214595294883195,
+    0.2079937158975197
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 379,
+   "attack_rate_ever": 0.002707142857142857,
+   "postings_per_1000": 0.2571428571428571,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 38
+   },
+   "classes_ever": {
+    "non_gii4": 379
+   },
+   "genotypes_ever": {
+    "GII.17": 132,
+    "GII.2": 247
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 159,
+   "nonsec_aboard": 25,
+   "share": 0.15723270440251572,
+   "ci": [
+    0.10882678303865537,
+    0.22181050829477564
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4254,
+   "attack_rate_ever": 0.030385714285714287,
+   "postings_per_1000": 0.6357142857142857,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 159
+   },
+   "classes_ever": {
+    "non_gii4": 4254
+   },
+   "genotypes_ever": {
+    "GII.17": 1635,
+    "GII.2": 2619
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 52,
+   "nonsec_aboard": 4,
+   "share": 0.07692307692307693,
+   "ci": [
+    0.030319344974210377,
+    0.18173562490878953
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2287,
+   "attack_rate_ever": 0.016335714285714287,
+   "postings_per_1000": 0.38571428571428573,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 52
+   },
+   "classes_ever": {
+    "non_gii4": 2287
+   },
+   "genotypes_ever": {
+    "GII.17": 880,
+    "GII.2": 1407
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 108,
+   "nonsec_aboard": 13,
+   "share": 0.12037037037037036,
+   "ci": [
+    0.0717106396469066,
+    0.19510865240979408
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3321,
+   "attack_rate_ever": 0.02372142857142857,
+   "postings_per_1000": 0.42142857142857143,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 108
+   },
+   "classes_ever": {
+    "non_gii4": 3321
+   },
+   "genotypes_ever": {
+    "GII.17": 1274,
+    "GII.2": 2047
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 34,
+   "nonsec_aboard": 2,
+   "share": 0.058823529411764705,
+   "ci": [
+    0.016282655063251508,
+    0.19093607045929484
+   ],
+   "powered": false,
+   "imported": 341,
+   "ever_infected": 375,
+   "attack_rate_ever": 0.0026785714285714286,
+   "postings_per_1000": 0.2357142857142857,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 34
+   },
+   "classes_ever": {
+    "non_gii4": 375
+   },
+   "genotypes_ever": {
+    "GII.17": 130,
+    "GII.2": 245
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 158,
+   "nonsec_aboard": 19,
+   "share": 0.12025316455696203,
+   "ci": [
+    0.07835191912406944,
+    0.18018170489612043
+   ],
+   "powered": true,
+   "imported": 4095,
+   "ever_infected": 4253,
+   "attack_rate_ever": 0.03037857142857143,
+   "postings_per_1000": 0.75,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 158
+   },
+   "classes_ever": {
+    "non_gii4": 4253
+   },
+   "genotypes_ever": {
+    "GII.17": 1620,
+    "GII.2": 2633
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 45,
+   "nonsec_aboard": 3,
+   "share": 0.06666666666666667,
+   "ci": [
+    0.022932032420618545,
+    0.17856602080532263
+   ],
+   "powered": true,
+   "imported": 2235,
+   "ever_infected": 2280,
+   "attack_rate_ever": 0.016285714285714285,
+   "postings_per_1000": 0.37857142857142856,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 45
+   },
+   "classes_ever": {
+    "non_gii4": 2280
+   },
+   "genotypes_ever": {
+    "GII.17": 876,
+    "GII.2": 1405
+   }
+  },
+  "mono_nongii4|mega_cruise_5000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 81,
+   "nonsec_aboard": 13,
+   "share": 0.16049382716049382,
+   "ci": [
+    0.09626154187680647,
+    0.255470491904555
+   ],
+   "powered": true,
+   "imported": 3213,
+   "ever_infected": 3294,
+   "attack_rate_ever": 0.02352857142857143,
+   "postings_per_1000": 0.40714285714285714,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 81
+   },
+   "classes_ever": {
+    "non_gii4": 3294
+   },
+   "genotypes_ever": {
+    "GII.17": 1257,
+    "GII.2": 2037
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|168|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 7,
+   "nonsec_aboard": 1,
+   "share": 0.14285714285714285,
+   "ci": [
+    0.025679624057823897,
+    0.5131278321392249
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 155,
+   "attack_rate_ever": 0.0025833333333333333,
+   "postings_per_1000": 0.18333333333333332,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 7
+   },
+   "classes_ever": {
+    "non_gii4": 155
+   },
+   "genotypes_ever": {
+    "GII.17": 59,
+    "GII.2": 96
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|168|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 52,
+   "nonsec_aboard": 3,
+   "share": 0.057692307692307696,
+   "ci": [
+    0.019814171957984003,
+    0.1564251147378795
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1859,
+   "attack_rate_ever": 0.030983333333333335,
+   "postings_per_1000": 0.5,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 52
+   },
+   "classes_ever": {
+    "non_gii4": 1859
+   },
+   "genotypes_ever": {
+    "GII.17": 719,
+    "GII.2": 1141
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|168|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 32,
+   "nonsec_aboard": 6,
+   "share": 0.1875,
+   "ci": [
+    0.0888954463773112,
+    0.35309155347561394
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 992,
+   "attack_rate_ever": 0.016533333333333334,
+   "postings_per_1000": 0.35,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 32
+   },
+   "classes_ever": {
+    "non_gii4": 992
+   },
+   "genotypes_ever": {
+    "GII.17": 366,
+    "GII.2": 626
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|168|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 39,
+   "nonsec_aboard": 5,
+   "share": 0.1282051282051282,
+   "ci": [
+    0.05602817501519075,
+    0.2670574351095147
+   ],
+   "powered": false,
+   "imported": 1379,
+   "ever_infected": 1418,
+   "attack_rate_ever": 0.023633333333333333,
+   "postings_per_1000": 0.55,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 39
+   },
+   "classes_ever": {
+    "non_gii4": 1418
+   },
+   "genotypes_ever": {
+    "GII.17": 546,
+    "GII.2": 872
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|288|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 6,
+   "nonsec_aboard": 1,
+   "share": 0.16666666666666666,
+   "ci": [
+    0.030053369411815023,
+    0.5635028250257673
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 154,
+   "attack_rate_ever": 0.0025666666666666667,
+   "postings_per_1000": 0.23333333333333334,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 6
+   },
+   "classes_ever": {
+    "non_gii4": 154
+   },
+   "genotypes_ever": {
+    "GII.17": 58,
+    "GII.2": 96
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|288|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 68,
+   "nonsec_aboard": 4,
+   "share": 0.058823529411764705,
+   "ci": [
+    0.023110765379066117,
+    0.14171688519609416
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1875,
+   "attack_rate_ever": 0.03125,
+   "postings_per_1000": 0.75,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 68
+   },
+   "classes_ever": {
+    "non_gii4": 1875
+   },
+   "genotypes_ever": {
+    "GII.17": 725,
+    "GII.2": 1152
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|288|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 44,
+   "nonsec_aboard": 3,
+   "share": 0.06818181818181818,
+   "ci": [
+    0.02345939572462935,
+    0.18225044489111314
+   ],
+   "powered": true,
+   "imported": 960,
+   "ever_infected": 1004,
+   "attack_rate_ever": 0.016733333333333333,
+   "postings_per_1000": 0.36666666666666664,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 44
+   },
+   "classes_ever": {
+    "non_gii4": 1004
+   },
+   "genotypes_ever": {
+    "GII.17": 367,
+    "GII.2": 637
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|288|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 43,
+   "nonsec_aboard": 7,
+   "share": 0.16279069767441862,
+   "ci": [
+    0.08116627302914933,
+    0.29972406017992526
+   ],
+   "powered": true,
+   "imported": 1379,
+   "ever_infected": 1422,
+   "attack_rate_ever": 0.0237,
+   "postings_per_1000": 0.55,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 43
+   },
+   "classes_ever": {
+    "non_gii4": 1422
+   },
+   "genotypes_ever": {
+    "GII.17": 552,
+    "GII.2": 870
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|504|rep_reportable": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 14,
+   "nonsec_aboard": 4,
+   "share": 0.2857142857142857,
+   "ci": [
+    0.11721378562701742,
+    0.5464908452599742
+   ],
+   "powered": false,
+   "imported": 148,
+   "ever_infected": 162,
+   "attack_rate_ever": 0.0027,
+   "postings_per_1000": 0.21666666666666667,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 14
+   },
+   "classes_ever": {
+    "non_gii4": 162
+   },
+   "genotypes_ever": {
+    "GII.17": 66,
+    "GII.2": 96
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|504|ship_hi": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 74,
+   "nonsec_aboard": 2,
+   "share": 0.02702702702702703,
+   "ci": [
+    0.0074433525712693654,
+    0.09329292593622623
+   ],
+   "powered": true,
+   "imported": 1807,
+   "ever_infected": 1881,
+   "attack_rate_ever": 0.03135,
+   "postings_per_1000": 0.7833333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 74
+   },
+   "classes_ever": {
+    "non_gii4": 1881
+   },
+   "genotypes_ever": {
+    "GII.17": 731,
+    "GII.2": 1152
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|504|ship_lo": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 23,
+   "nonsec_aboard": 4,
+   "share": 0.17391304347826086,
+   "ci": [
+    0.0697865351446468,
+    0.3713764781499663
+   ],
+   "powered": false,
+   "imported": 960,
+   "ever_infected": 983,
+   "attack_rate_ever": 0.016383333333333333,
+   "postings_per_1000": 0.2833333333333333,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 23
+   },
+   "classes_ever": {
+    "non_gii4": 983
+   },
+   "genotypes_ever": {
+    "GII.17": 365,
+    "GII.2": 618
+   }
+  },
+  "mono_nongii4|spirit_cruise_3000|504|ship_mid": {
+   "runs": 20,
+   "seeds": 20,
+   "aboard": 49,
+   "nonsec_aboard": 5,
+   "share": 0.10204081632653061,
+   "ci": [
+    0.04437954646391447,
+    0.21756361661925666
+   ],
+   "powered": true,
+   "imported": 1379,
+   "ever_infected": 1428,
+   "attack_rate_ever": 0.0238,
+   "postings_per_1000": 0.65,
+   "alert_voyages": 20,
+   "missing_attribution_runs": 0,
+   "classes_aboard": {
+    "non_gii4": 49
+   },
+   "classes_ever": {
+    "non_gii4": 1428
+   },
+   "genotypes_ever": {
+    "GII.17": 563,
+    "GII.2": 865
+   }
+  }
+ },
+ "gate_surface": [
+  {
+   "cell": "classic_cruise_1900|168|ship_hi",
+   "aboard_A": 43,
+   "nonsec_A": 4,
+   "share_A": 0.09302325581395349,
+   "ci_A": [
+    0.036771640376074596,
+    0.21602703763487746
+   ],
+   "aboard_B": 51,
+   "nonsec_B": 13,
+   "share_B": 0.2549019607843137,
+   "ci_B": [
+    0.15545768094375859,
+    0.38868281951024375
+   ],
+   "ratio_B_over_A": 2.7401960784313726
+  },
+  {
+   "cell": "classic_cruise_1900|288|ship_hi",
+   "aboard_A": 46,
+   "nonsec_A": 3,
+   "share_A": 0.06521739130434782,
+   "ci_A": [
+    0.02242786125459427,
+    0.1750274119695449
+   ],
+   "aboard_B": 57,
+   "nonsec_B": 8,
+   "share_B": 0.14035087719298245,
+   "ci_B": [
+    0.07287276105928868,
+    0.25324464713776723
+   ],
+   "ratio_B_over_A": 2.152046783625731
+  },
+  {
+   "cell": "classic_cruise_1900|504|ship_hi",
+   "aboard_A": 45,
+   "nonsec_A": 4,
+   "share_A": 0.08888888888888889,
+   "ci_A": [
+    0.03511111648229477,
+    0.20733575452693148
+   ],
+   "aboard_B": 43,
+   "nonsec_B": 6,
+   "share_B": 0.13953488372093023,
+   "ci_B": [
+    0.06555723389691778,
+    0.2726358809127827
+   ],
+   "ratio_B_over_A": 1.569767441860465
+  },
+  {
+   "cell": "mega_cruise_5000|168|ship_hi",
+   "aboard_A": 123,
+   "nonsec_A": 8,
+   "share_A": 0.06504065040650407,
+   "ci_A": [
+    0.033322636208810964,
+    0.12310460025071715
+   ],
+   "aboard_B": 163,
+   "nonsec_B": 23,
+   "share_B": 0.1411042944785276,
+   "ci_B": [
+    0.09590067617508198,
+    0.20283477732366195
+   ],
+   "ratio_B_over_A": 2.1694785276073616
+  },
+  {
+   "cell": "mega_cruise_5000|168|ship_lo",
+   "aboard_A": 52,
+   "nonsec_A": 4,
+   "share_A": 0.07692307692307693,
+   "ci_A": [
+    0.030319344974210377,
+    0.18173562490878953
+   ],
+   "aboard_B": 55,
+   "nonsec_B": 6,
+   "share_B": 0.10909090909090909,
+   "ci_B": [
+    0.05096724971003366,
+    0.21825549191596536
+   ],
+   "ratio_B_over_A": 1.418181818181818
+  },
+  {
+   "cell": "mega_cruise_5000|168|ship_mid",
+   "aboard_A": 79,
+   "nonsec_A": 7,
+   "share_A": 0.08860759493670886,
+   "ci_A": [
+    0.04358529574944131,
+    0.17178342327397822
+   ],
+   "aboard_B": 106,
+   "nonsec_B": 13,
+   "share_B": 0.12264150943396226,
+   "ci_B": [
+    0.07309121394518682,
+    0.1985863400970006
+   ],
+   "ratio_B_over_A": 1.3840970350404314
+  },
+  {
+   "cell": "mega_cruise_5000|288|ship_hi",
+   "aboard_A": 135,
+   "nonsec_A": 11,
+   "share_A": 0.08148148148148149,
+   "ci_A": [
+    0.04610554458846829,
+    0.14001651930737016
+   ],
+   "aboard_B": 159,
+   "nonsec_B": 25,
+   "share_B": 0.15723270440251572,
+   "ci_B": [
+    0.10882678303865537,
+    0.22181050829477564
+   ],
+   "ratio_B_over_A": 1.92967409948542
+  },
+  {
+   "cell": "mega_cruise_5000|288|ship_lo",
+   "aboard_A": 48,
+   "nonsec_A": 3,
+   "share_A": 0.0625,
+   "ci_A": [
+    0.02148323274107221,
+    0.16835438166384809
+   ],
+   "aboard_B": 52,
+   "nonsec_B": 4,
+   "share_B": 0.07692307692307693,
+   "ci_B": [
+    0.030319344974210377,
+    0.18173562490878953
+   ],
+   "ratio_B_over_A": 1.2307692307692308
+  },
+  {
+   "cell": "mega_cruise_5000|288|ship_mid",
+   "aboard_A": 93,
+   "nonsec_A": 6,
+   "share_A": 0.06451612903225806,
+   "ci_A": [
+    0.029901431443733403,
+    0.1336799423221633
+   ],
+   "aboard_B": 108,
+   "nonsec_B": 13,
+   "share_B": 0.12037037037037036,
+   "ci_B": [
+    0.0717106396469066,
+    0.19510865240979408
+   ],
+   "ratio_B_over_A": 1.8657407407407407
+  },
+  {
+   "cell": "mega_cruise_5000|504|ship_hi",
+   "aboard_A": 129,
+   "nonsec_A": 6,
+   "share_A": 0.046511627906976744,
+   "ci_A": [
+    0.021488585874298125,
+    0.09776227913954935
+   ],
+   "aboard_B": 158,
+   "nonsec_B": 19,
+   "share_B": 0.12025316455696203,
+   "ci_B": [
+    0.07835191912406944,
+    0.18018170489612043
+   ],
+   "ratio_B_over_A": 2.5854430379746836
+  },
+  {
+   "cell": "mega_cruise_5000|504|ship_mid",
+   "aboard_A": 91,
+   "nonsec_A": 12,
+   "share_A": 0.13186813186813187,
+   "ci_A": [
+    0.07707107481937107,
+    0.216486818634614
+   ],
+   "aboard_B": 81,
+   "nonsec_B": 13,
+   "share_B": 0.16049382716049382,
+   "ci_B": [
+    0.09626154187680647,
+    0.255470491904555
+   ],
+   "ratio_B_over_A": 1.2170781893004115
+  },
+  {
+   "cell": "spirit_cruise_3000|168|ship_hi",
+   "aboard_A": 49,
+   "nonsec_A": 1,
+   "share_A": 0.02040816326530612,
+   "ci_A": [
+    0.003611672549881484,
+    0.10693521629394014
+   ],
+   "aboard_B": 52,
+   "nonsec_B": 3,
+   "share_B": 0.057692307692307696,
+   "ci_B": [
+    0.019814171957984003,
+    0.1564251147378795
+   ],
+   "ratio_B_over_A": 2.826923076923077
+  },
+  {
+   "cell": "spirit_cruise_3000|288|ship_hi",
+   "aboard_A": 51,
+   "nonsec_A": 1,
+   "share_A": 0.0196078431372549,
+   "ci_A": [
+    0.0034696926026897695,
+    0.10304568828715492
+   ],
+   "aboard_B": 68,
+   "nonsec_B": 4,
+   "share_B": 0.058823529411764705,
+   "ci_B": [
+    0.023110765379066117,
+    0.14171688519609416
+   ],
+   "ratio_B_over_A": 3.0
+  },
+  {
+   "cell": "spirit_cruise_3000|504|ship_hi",
+   "aboard_A": 69,
+   "nonsec_A": 3,
+   "share_A": 0.043478260869565216,
+   "ci_A": [
+    0.014895903780291452,
+    0.12021202832927613
+   ],
+   "aboard_B": 74,
+   "nonsec_B": 2,
+   "share_B": 0.02702702702702703,
+   "ci_B": [
+    0.0074433525712693654,
+    0.09329292593622623
+   ],
+   "ratio_B_over_A": 0.6216216216216217
+  },
+  {
+   "cell": "spirit_cruise_3000|504|ship_mid",
+   "aboard_A": 49,
+   "nonsec_A": 4,
+   "share_A": 0.08163265306122448,
+   "ci_A": [
+    0.032202817443934884,
+    0.19189127707939885
+   ],
+   "aboard_B": 49,
+   "nonsec_B": 5,
+   "share_B": 0.10204081632653061,
+   "ci_B": [
+    0.04437954646391447,
+    0.21756361661925666
+   ],
+   "ratio_B_over_A": 1.2500000000000002
+  }
+ ],
+ "pooled_gate": {
+  "cell": "pooled_powered",
+  "aboard_A": 1102,
+  "nonsec_A": 77,
+  "share_A": 0.06987295825771325,
+  "ci_A": [
+   0.05626757346102473,
+   0.08646668343776563
+  ],
+  "aboard_B": 2516,
+  "nonsec_B": 268,
+  "share_B": 0.10651828298887123,
+  "ci_B": [
+   0.09505794634213748,
+   0.11917833307877619
+  ],
+  "ratio_B_over_A": 1.5244564656329362
+ },
+ "wrong_class_founder_runs": {}
+}

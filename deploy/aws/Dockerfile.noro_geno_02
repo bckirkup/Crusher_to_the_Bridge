@@ -11,7 +11,7 @@
 
 FROM 994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:071b0854ffaf8ff051037200d53b7c4d269db029772c527b5b6fd3fc755c5149
 
-ENV ENGINE_GIT_SHA=MERGED_SHA
+ENV ENGINE_GIT_SHA=4f5e7fbe
 
 COPY docs/norovirus/noro_geno_02_design.md docs/norovirus/noro_geno_02_design.md
 COPY picard_framework/runs/mega_cruise_campaign/noro_geno_02_dose_sweep_manifest.json picard_framework/runs/mega_cruise_campaign/noro_geno_02_dose_sweep_manifest.json
