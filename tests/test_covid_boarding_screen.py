@@ -1049,6 +1049,63 @@ def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
     assert "n_star" not in base_echo
 
 
+def test_a_delivery_arm_cell_echoes_the_resolved_delivery_block():
+    """48-epoch smoke on delivery-machinery arms (HEAT-V1 lineage): the
+    payload's delivery block echoes the resolved half-life, the merged
+    route-efficiency map, the pool transport mode, the exposure_cap
+    sub-block + engine-active flag, and the resolved activity_contacts
+    table."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_heat",
+            "overrides": {
+                "pathogen_overrides": {
+                    "sars_cov2_resp": {"airborne_half_life_hours": 0.5},
+                },
+                "profile_route_efficiency_multipliers": {
+                    "droplet": 0.03,
+                    "hvac_airborne": 0.03,
+                },
+                "pathogen_pool_transport": "none",
+                "transmission_overrides": {
+                    "exposure_cap": {"include_fixed_rings": True},
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    heat = next(c for c in cells if c.arm_id == "B1_heat")
+    delivery = simulate_screen_cell(design, heat, num_epochs=48)[
+        "delivery"
+    ]
+    assert delivery["airborne_half_life_hours"] == pytest.approx(0.5)
+    eff = delivery["route_efficiency_multipliers"]
+    assert eff["droplet"] == pytest.approx(0.03)
+    assert eff["hvac_airborne"] == pytest.approx(0.03)
+    assert eff["direct_contact"] == pytest.approx(0.25)
+    assert eff["fomite"] == pytest.approx(0.1)
+    assert delivery["pathogen_pool_transport"] == "none"
+    assert delivery["exposure_cap"] == {"include_fixed_rings": True}
+    assert delivery["exposure_cap_active"] is True
+    contacts = delivery["activity_contacts"]
+    assert contacts["dining_table"]["passenger"] == pytest.approx(2.0)
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_delivery = simulate_screen_cell(design, base, num_epochs=48)[
+        "delivery"
+    ]
+    assert base_delivery["airborne_half_life_hours"] == pytest.approx(1.1)
+    assert base_delivery["route_efficiency_multipliers"]["droplet"] == (
+        pytest.approx(0.3)
+    )
+    assert base_delivery["pathogen_pool_transport"] == "airflow"
+    assert base_delivery["exposure_cap"] == {}
+    assert base_delivery["exposure_cap_active"] is True
+
+
 # ── SUSCEPT-V1: susceptibility / effective-population arms ───────────────
 
 SUSCEPT_V1_DESIGN = (
