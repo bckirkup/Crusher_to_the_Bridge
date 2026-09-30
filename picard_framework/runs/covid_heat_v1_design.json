@@ -1,0 +1,361 @@
+{
+  "design_id": "covid_heat_v1",
+  "task_id": "HEAT-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_seed_geom_v1",
+  "description": "HEAT-V1: the conditioned array over delivery machinery -- the surviving suspect class after four measured retirements (COOP-V1 dose law, the Theta axis, ASCERTAIN-V1 ascertainment channel, SEED-GEOM-V1 index/seed geometry). SEED-GEOM-V1 measured geometry_incapable (all index-geometry arms median 3,461-3,612 infected, ~96% of aboard, vs band [712,960] = 19-26%) and AERO-SPLIT-01 measured far-field descoped at source (far_field_share 0.175 of emission enters the zone pool; residual pooled routes carry ~99.4% of acquisitions) -- 'too hot' is pooled-route DELIVERY, not emission scale. This design declares arms on the four pooled-route heat axes the task names: (a) airborne persistence via pathogen_overrides.airborne_half_life_hours as declared RH regimes {0.5, 1.1, 2.0, 4.0}h (0.5 = humidified corner, the cooling direction; 1.1 = shipped echo through the arm channel; 2.0/4.0 = dry corners, the heating direction); (b) pooled-route efficiency via profile_route_efficiency_multipliers on droplet and hvac_airborne singly and jointly at {x0.5, x0.25, x0.1} of shipped (droplet 0.3 -> 0.15/0.075/0.03; hvac_airborne 0.3 -> same); (c) per-shedder reach budgets via exposure_cap at contact-structured bounds including the include_fixed_rings corners (shipped cap state verbatim: enabled true and the bound ALREADY contact-structured -- crusher_labs/config.yaml ships activity_contacts.enabled:true with the authored unit table, and _exposure_cap_rate derives the budget from it; include_fixed_rings absent = false -- CAP_OFF is the unbounded corner isolating the shipped cap's total contribution, CAP_POLY the legacy POLYMOD-uniform corner, CAP_ACT_HALF the structured table tightened x0.5); (d) pool transport law via pathogen_pool_transport {airflow, none} -- the only variants the grammar admits; (e) the interaction corner persistence x efficiency at the coldest declared settings (half-life 0.5 h x joint x0.1). Everything runs under the shipped arm grammar (pathogen_overrides / profile_route_efficiency_multipliers / transmission_overrides.exposure_cap / transmission_overrides.activity_contacts / pathogen_pool_transport) -- no engine change. Scored against BOTH anchors: the record's 197 dated onsets / 0.173 before-share AND the held-out serology anchor covid.H5 (infections_total band [712, 960], never fitted). The readout is the both-legs test PLUS the route decomposition the payload already carries (seed_ring.aboard_window_by_route, during_quarantine_by_route / by_zone_class / by_role, the day-16 incidence kink): which route each cooling arm actually suppresses and whether suppressed mass shifts late enough to move before_share toward the record's timing -- a growth-rate mechanism test, not just totals.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "ASCERTAIN-V1 measured (cb519c97, 270/270 cells): channel multiplicative/near-exact; M0P56 count-matches (recorded 207-270 vs the record's 197) but degenerately (0% mild, dating rate 0.072 vs 0.277, before_share 0.60-0.84, infections 3,536-3,599 vs band [712,960]) -- verdict channel_only; the residual is truth-level (docs/ledger/ASCERTAIN-V1.md).",
+    "SEED-GEOM-V1 measured (1dfac0e4, 480/480 cells): geometry_incapable -- all index-geometry arms median 3,461-3,612 infected (~96% of aboard) at all theta; suppression cannot carry it (SOP-017 declared day 16-30, fully enforced, lands post-burn ~3,570 before vs ~7 during); individual suppression absent from the record before Feb 3-5 (docs/ledger/SEED-GEOM-V1.md).",
+    "AERO-SPLIT-01 measured (e20008d): far-field already descoped at source -- far_field_share 0.175 of emission enters the zone pool, reach contact-rate-bounded; residual pooled routes still carry ~99.4% of acquisitions (SEED-GEOM-01). 'Too hot' is pooled-route delivery, not emission scale (theta retired).",
+    "DP environment (Yamagishi EID 2020): Yokohama outdoor RH Feb 2020 median 73% / range 17-98%; marine-HVAC inference indoor ~30-45% -> shipped 1.1 h plausibly honest; the humidified corner (<=0.5 h) is the cooling direction, dry (>=2 h) the heating direction. Cross-cabin inference: real infections concentrated Jan 28-Feb 6 in public areas; cabin-mate only under quarantine -- the real outbreak was mid-growth at confinement with slower growth than the model's.",
+    "Shipped delivery constants (sars_cov2_resp, data/pathogens/active_profiles.json + crusher_labs/config.yaml -- verified this session): route_efficiency_multipliers {direct_contact 0.25, droplet 0.3, hvac_airborne 0.3, fomite 0.1, environmental_source 0.05, food_contamination 0.0}; airborne_half_life_hours 1.1 (~40% RH lab value); transmission.exposure_cap ships enabled:true with include_fixed_rings absent (false) AND transmission.activity_contacts ships enabled:true with the authored CONTACT-ARCH-01 unit table {cabin 0.25, corridor 0.25, work_service 2.9, work_other 0.5, dining_table 2.0, dining_venue 2.0, leisure 1.0, other 0.0} -- the shipped reach bound is ALREADY contact-structured (_exposure_cap_rate derives the budget from the declared table; the POLYMOD 13.4/day uniform draw is only the absent-block fallback), so the task's 'exposure_cap shipped off' does not hold in either reading; CAP_OFF measures the shipped cap's total contribution as the unbounded corner; pathogen_pool_transport is a build-time arm axis (airflow shipped default, none admitted); near_field_air two_box.",
+    "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al. 2020); scored on infections_total conditional on takeoff; never in fitted_against.",
+    "Delivery grammar verification (this session's code read): pathogen_overrides deep-merges per-pathogen patches onto sars_cov2_resp -- airborne_half_life_hours is a top-level profile field consumed at engines/transmission_core.py (profile.get('airborne_half_life_hours', 1.1)); profile_route_efficiency_multipliers merges ABSOLUTE resolved values onto the shipped profile map with key validation (covid_boarding_screen._apply_route_efficiencies) -- a x0.5 droplet arm declares droplet 0.15, not 0.5; transmission_overrides shallow-updates config_overrides.transmission so an exposure_cap sub-block replaces the shipped block wholesale (enabled defaults true when the key is absent, _parse_exposure_cap_enabled); activity_contacts (CONTACT-ARCH-01) requires enabled:true plus rates_per_hour for all eight CONTACT_ACTIVITIES {cabin, corridor, work_service, work_other, dining_table, dining_venue, leisure, other} and sets BOTH the cap bound and the proximity partner-draw rate (_exposure_cap_rate prefers it when declared) -- the coupling is declared, not a defect; pathogen_pool_transport is a build-time arg to build_fit_run_spec -> config_overrides.hvac.pathogen_pool_transport, admitted variants ('none','airflow') only (engines/py_contam_bridge.PATHOGEN_POOL_TRANSPORT_MODES). Payload echo (this PR): the resolved delivery constants -- airborne_half_life_hours, the merged route_efficiency_multipliers map, pathogen_pool_transport, the resolved exposure_cap block + engine-active flag, and the resolved activity_contacts table -- echo under payload['delivery'] on every arm cell, audited against the declared arm in the readout. Readout additions only; no physics, no engine path touched."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_ascertain_v1 / covid_seed_geom_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis -- COVID-SEED-GEOM-01), seeds at base 20200205, full 32-day voyage (768 epochs), SOP-017 declared day 16-30.",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice, identical to covid_ascertain_v1 / covid_seed_geom_v1: Theta 2.37e11 is the anchor cell; 1e11 sits below and 1e12 above the v13 admissible band edges so the delivery response is read where baseline physics is measured-failing in both directions. Points ordered anchor-first so the canary block (cells 0-219) is the densest slice.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14, the first ten of the matched block every conditioned design since v10 replays -- seed-for-seed pairing against the ascertain and seed-geom rows at the same (theta, seed). Three of the ten (20200207, 20200210, 20200211) are measured all-arms fizzle seeds at the anchor (ASCERTAIN-V1); rows score takeoff-conditional, so fizzle seeds contribute to the takeoff-mass readout, not to noise. Ten seeds is the declared count: the arm grid, not seed depth, is the axis under test.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline REQUIRED by the task: the shipped delivery constants verbatim (half-life 1.1 h, route efficiencies shipped, exposure_cap enabled with fixed rings excluded under the ALREADY-structured bound -- shipped activity_contacts.enabled:true with the authored unit table, so the bound and partner draw are contact-structured by default; pool transport airflow, near_field two_box). First arm so empty overrides per the arm grammar; the in-design control replaying THETA-SCREEN-V13 / ASCERTAIN-V1 / SEED-GEOM-V1's measured-failing physics seed-for-seed, and the engine-drift check against all three on this same lattice."
+    },
+    {
+      "arm_id": "REF_M0P56",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [
+                0.0,
+                0.0,
+                0.0,
+                1.0,
+                1.0
+              ],
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "ASCERTAIN-V1's count-matched reference row, verbatim (M0P56_period): mild eligibility 0 + symptomatic-at-confirmation gate + recall 0.56, measured 207-270 recorded vs the record's 197 at all three theta. Carried as the calibration row: a delivery arm that lands the COUNT but moves truth nowhere is the ascertain-channel failure class again; a delivery arm that lands truth in band is a different result class entirely. Observation-only at truth level modulo its measured mild-isolation coupling (~1%)."
+    },
+    {
+      "arm_id": "HL_0P5",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "airborne_half_life_hours": 0.5
+          }
+        }
+      },
+      "note": "Airborne persistence at 0.5 h -- the humidified corner (the task's declared cooling direction under the RH-viability proxy). Doubles the airborne pool's decay rate vs shipped 1.1 h: the pool halves every ~30 min instead of hourly-ish, so during-window accumulation flattens and late-zone delivery dies faster. Declared expectation: hvac_airborne-dominant suppression concentrated in aboard-window mass; whether before_share moves is the growth-rate read."
+    },
+    {
+      "arm_id": "HL_1P1",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "airborne_half_life_hours": 1.1
+          }
+        }
+      },
+      "note": "Half-life 1.1 h = the shipped value written through the arm channel -- the wiring-audit corner: the resolved profile is identical to D0 so every seed should reproduce D0 exactly; any divergence is an arm-path defect, not a result. Declared expected outcome: seed-for-seed identical to D0_declared."
+    },
+    {
+      "arm_id": "HL_2P0",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "airborne_half_life_hours": 2.0
+          }
+        }
+      },
+      "note": "Half-life 2.0 h -- the dry-side corner (heating direction). Bounds how much additional persistence the airborne pool can deliver: if 2.0 h barely moves infections_total vs D0 the airborne pool is already saturated/deposition-limited and persistence is not the binding lever; if it moves materially the half-life axis is live."
+    },
+    {
+      "arm_id": "HL_4P0",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "airborne_half_life_hours": 4.0
+          }
+        }
+      },
+      "note": "Half-life 4.0 h -- the driest declared corner. With HL_2P0 it brackets the persistence axis's ceiling: the pair measures whether pooled airborne delivery is half-life-sensitive at all at these theta (deposition/settling may already dominate decay)."
+    },
+    {
+      "arm_id": "DROP_X0P5",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.15
+        }
+      },
+      "note": "Droplet route efficiency at x0.5 of shipped (0.3 -> 0.15 resolved, ABSOLUTE value per _apply_route_efficiencies semantics). The droplet far-field pool is SEED-GEOM-01's measured aboard-window carrier; halving it tests droplet-delivery sensitivity directly."
+    },
+    {
+      "arm_id": "DROP_X0P25",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.075
+        }
+      },
+      "note": "Droplet x0.25 (resolved 0.075)."
+    },
+    {
+      "arm_id": "DROP_X0P1",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.03
+        }
+      },
+      "note": "Droplet x0.1 (resolved 0.03) -- the deep droplet corner."
+    },
+    {
+      "arm_id": "HVAC_X0P5",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "hvac_airborne": 0.15
+        }
+      },
+      "note": "HVAC-airborne route efficiency at x0.5 of shipped (0.3 -> 0.15 resolved). Tests the recirculated-zone-pool channel independently of the droplet pool."
+    },
+    {
+      "arm_id": "HVAC_X0P25",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "hvac_airborne": 0.075
+        }
+      },
+      "note": "HVAC-airborne x0.25 (resolved 0.075)."
+    },
+    {
+      "arm_id": "HVAC_X0P1",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "hvac_airborne": 0.03
+        }
+      },
+      "note": "HVAC-airborne x0.1 (resolved 0.03) -- the deep HVAC corner."
+    },
+    {
+      "arm_id": "JOINT_X0P5",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.15,
+          "hvac_airborne": 0.15
+        }
+      },
+      "note": "Joint pooled-route cooling x0.5 on both carriers (droplet 0.15 + hvac_airborne 0.15 resolved). The single-route rows show WHERE delivery is carried; the joint rows show whether cooling one route just shifts acquisitions to the other (route substitution) or compounds."
+    },
+    {
+      "arm_id": "JOINT_X0P25",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.075,
+          "hvac_airborne": 0.075
+        }
+      },
+      "note": "Joint x0.25 (both resolved 0.075)."
+    },
+    {
+      "arm_id": "JOINT_X0P1",
+      "overrides": {
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.03,
+          "hvac_airborne": 0.03
+        }
+      },
+      "note": "Joint x0.1 (both resolved 0.03) -- the deep efficiency corner short of the IX persistence interaction."
+    },
+    {
+      "arm_id": "CAP_OFF",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {
+            "enabled": false
+          }
+        }
+      },
+      "note": "The reach-budget unbounded corner: exposure_cap disabled outright (shipped is enabled:true under the POLYMOD 13.4/day uniform bound -- verified this session in crusher_labs/config.yaml; the task's 'shipped off' reads as the include_fixed_rings flag). Measures the shipped cap's cooling contribution: if CAP_OFF heats truth further, the bound is already load-bearing; if it changes nothing the cap never binds."
+    },
+    {
+      "arm_id": "CAP_POLY",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": false
+          }
+        }
+      },
+      "note": "The legacy unstructured-bound corner: activity_contacts disabled -> _parse_activity_contacts returns None, so BOTH the cap bound and the proximity partner draw fall back to the uniform POLYMOD 13.4/day draw (DECLARED COUPLING -- the grammar couples bound and draw to the same table; a bound-only or draw-only arm is not expressible). Measures the shipped structured-contact machinery's total contribution vs the uniform-draw predecessor: if CAP_POLY heats truth further, the structured table is already cooling; if it cools, the structured table's work-heavy crew rates are pouring fuel."
+    },
+    {
+      "arm_id": "CAP_ACT_HALF",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.125,
+              "corridor": 0.125,
+              "work_service": 1.45,
+              "work_other": 0.25,
+              "dining_table": 1.0,
+              "dining_venue": 1.0,
+              "leisure": 0.5,
+              "other": 0.0
+            }
+          }
+        }
+      },
+      "note": "The contact-structured bound tightened x0.5: the authored unit table halved (verbatim the sensitivity assay's B7_contacts_half row). The cooling direction on the reach axis -- every shedder's budget mean and partner-draw rate cut in half with the same activity mix preserved. Same declared coupling as CAP_POLY."
+    },
+    {
+      "arm_id": "CAP_FR",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "Fixed-ring-first budget spend at the shipped structured bound (include_fixed_rings true; enabled defaults true under the wholesale-block semantics). RING-CAP-V1's flag on the reach axis: the shedder spends its daily budget on cabin-mate/dining-party ring members first, narrowing pooled breadth by ring count -- the spend-order corner."
+    },
+    {
+      "arm_id": "CAP_ACT_HALF_FR",
+      "overrides": {
+        "transmission_overrides": {
+          "activity_contacts": {
+            "enabled": true,
+            "rates_per_hour": {
+              "cabin": 0.125,
+              "corridor": 0.125,
+              "work_service": 1.45,
+              "work_other": 0.25,
+              "dining_table": 1.0,
+              "dining_venue": 1.0,
+              "leisure": 0.5,
+              "other": 0.0
+            }
+          },
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "The deepest contact-structured corner: the halved unit-table bound + ring-first spend. Pairs CAP_ACT_HALF's tightened bound with CAP_FR's spend order -- if the record's slower growth needs BOTH a tighter structured bound and ring-first spend, this is where it shows."
+    },
+    {
+      "arm_id": "POOL_NONE",
+      "overrides": {
+        "pathogen_pool_transport": "none"
+      },
+      "note": "Pool transport law 'none' -- the pool never crosses a zone (the labelled baseline mode of the CONTAM operator axis; 'airflow' is the shipped default). Kills HVAC-mediated far-field transport at the mechanism level rather than the efficiency level: HVAC_X0P* scales delivery through the duct graph, POOL_NONE removes cross-zone transport entirely while in-zone airborne decay/re-emission still runs. The cleanest test of how much of the burn is inter-zone."
+    },
+    {
+      "arm_id": "IX_HL0P5_JX0P1",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "airborne_half_life_hours": 0.5
+          }
+        },
+        "profile_route_efficiency_multipliers": {
+          "droplet": 0.03,
+          "hvac_airborne": 0.03
+        }
+      },
+      "note": "The task's declared interaction corner: persistence x efficiency at the coldest declared settings (half-life 0.5 h x joint x0.1 resolved {droplet 0.03, hvac_airborne 0.03}). Expected near-extinct rows -- the machinery floor: the magnitude of what survives bounds how much of the burn is non-pooled (contact/near-field), and a both-legs landing here would still be a machinery answer."
+    }
+  ],
+  "arms_note": "Arm grammar verification (this session's code read): every axis is inside ARM_OVERRIDE_KEYS and reaches the engine through the shipped paths (apply_arm_overrides order line ~656: window -> protocol -> infection_counters -> transmission_overrides -> near_field_air_mode -> route_efficiencies -> pathogen_overrides -> seed_patch; pathogen_pool_transport is build-time in prepare_cell_run_spec). profile_route_efficiency_multipliers takes ABSOLUTE resolved values merged onto the shipped map -- the declared numbers are post-multiplier (0.3 x0.5 = 0.15 declared as 0.15). The exposure_cap sub-block replaces wholesale: CAP_FR/CAP_ACT_HALF_FR declare only include_fixed_rings (enabled resolves true by default); CAP_OFF declares enabled:false. activity_contacts declares enabled + all eight rates_per_hour (bare numbers = every role per CONTACT_RATE_ROLES); enabled:false resolves the table to None and reverts bound+draw to POLYMOD. The shipped config ALREADY enables activity_contacts with the unit table -- the D0 delivery echo resolves it -- so the reach arms contrast {unbounded, uniform fallback, structured x0.5, ring-first, structured x0.5 + ring-first}, not structured-vs-uniform. HL_1P1 writes the shipped value through the arm channel -- its resolved profile equals D0's, so seed-identical output is the declared expectation and any divergence is a wiring defect. No arm touches seed_patch: the record's index geometry (passenger, count 1, onset_day -1.0, departure_day 5.0) is the constant on this design.",
+  "cells_note": "3 points x 22 arms x 10 seeds = 660 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first and arms in declared order: cells 0-219 = Theta 2.37e11 (D0 0-9, REF_M0P56 10-19, HL_0P5 20-29, HL_1P1 30-39, HL_2P0 40-49, HL_4P0 50-59, DROP_X0P5 60-69, DROP_X0P25 70-79, DROP_X0P1 80-89, HVAC_X0P5 90-99, HVAC_X0P25 100-109, HVAC_X0P1 110-119, JOINT_X0P5 120-129, JOINT_X0P25 130-139, JOINT_X0P1 140-149, CAP_OFF 150-159, CAP_POLY 160-169, CAP_ACT_HALF 170-179, CAP_FR 180-189, CAP_ACT_HALF_FR 190-199, POOL_NONE 200-209, IX_HL0P5_JX0P1 210-219); 220-439 = Theta 1e11; 440-659 = Theta 1e12.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and serology_anchor_clause are carried verbatim from covid_seed_geom_v1 / covid_ascertain_v1; the index_geometry audit is generalized here to a delivery_machinery audit (the arms deliberately change delivery constants, so the invariant is payload-echo-matches-declared on the delivery block, seed geometry constant). This is an assay/decomposition grid, not a screen: no arm point is admitted or fitted on this design, and a clause PASS marks a declared point worth a refinement design, never an adoption.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 66 rows of 10 seeds. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_ascertain_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts. Declared expectation per axis: half-life arms move truth via the airborne pool's decay rate (shorter half-life -> less during-window accumulation -> lower infections, concentrated on hvac_airborne-dominant acquisitions); route-efficiency arms move truth linearly-ish in the cooled route's share, with route substitution the open read; CAP_OFF measures the shipped cap's existing contribution (heating direction if the cap binds); CAP_POLY measures the structured-contact machinery's contribution vs the uniform POLYMOD draw (coupled bound+draw); CAP_ACT_HALF tightens the structured bound x0.5; CAP_FR/CAP_ACT_HALF_FR narrow effective pooled breadth by ring-first spend order; POOL_NONE removes inter-zone transport; the IX corner bounds the machinery floor. REF_M0P56 is observation-only at truth level modulo its measured mild-isolation coupling (~1%)."
+    },
+    "delivery_machinery_audit": {
+      "criterion": "Per cell, the payload's delivery block echoes the arm's declared constants resolved: (a) delivery.airborne_half_life_hours == the declared half-life (shipped 1.1 on non-HL arms); (b) delivery.route_efficiency_multipliers == the shipped map merged with the arm's declared absolute values; (c) delivery.pathogen_pool_transport == 'none' on POOL_NONE and 'airflow' elsewhere; (d) delivery.exposure_cap == the arm's declared block (absent/empty where the shipped block stands, enabled:false on CAP_OFF, include_fixed_rings:true on CAP_FR/CAP_ACT_HALF_FR) and delivery.exposure_cap_active true wherever enabled resolves true on this catalogued hull; (e) delivery.activity_contacts == the declared rates table resolved per role (the shipped unit table on arms that do not touch the block -- it is enabled:true in shipped config -- null on CAP_POLY enabled:false, the halved table on CAP_ACT_HALF/CAP_ACT_HALF_FR); (f) seed geometry untouched -- seed_ring.seed_spec echoes the record's seed (no seed_patch on any arm); (g) REF_M0P56's observation echoes (eligibility vector, onset_recording gate + p) resolve as declared. Deviation invalidates the cell rather than excluding it.",
+      "reads": "payload.delivery.*, payload.exposure_cap_include_fixed_rings, payload.dose_response, seed_ring.seed_spec / seeded_count / seeded_hosts, syndromic eligibility + onset_recording echoes -- all payload echoes, no engine state."
+    },
+    "both_legs_test": {
+      "statement": "The design's deliverable, frozen: per (theta, arm) -- does the declared delivery-cooling arm move takeoff-seed infections_total into covid.H5's band [712,960] AND takeoff-seed median before_share toward 0.173 within 0.10, SIMULTANEOUSLY; and what does each leg do to recorded_onsets. Declared reads:",
+      "reads": [
+        "truth_leg: per (theta, arm) takeoff-seed median and q05-q95 infections_total vs [712, 960] -- the leg every prior axis failed to move.",
+        "timing_leg: per (theta, arm) takeoff-seed median before_share vs 0.173 (target window 0.173 +/- 0.10) -- a cooling arm that only slows growth shifts onset mass toward quarantine; whether the suppressed mass shifts LATE ENOUGH to move before_share toward target is the growth-rate mechanism read, not just the median.",
+        "count_leg: per (theta, arm) takeoff-seed median and q05-q95 recorded_onsets vs the record's 197 (and the clause's [98.5, 394] p10-p90 window) -- a cooling arm that lands count but not truth is the ascertain failure class repeated at delivery level.",
+        "route_decomposition: the payload-carried reads, per (theta, arm) takeoff-seed pooled: seed_ring.aboard_window_by_route (which route carries the day-0-5 burn under each arm), during_quarantine_by_route / during_quarantine_by_zone_class / during_quarantine_by_role (where suppressed mass resurfaces -- and whether the quarantine-era stratum is cabin-ring (cabin_mate/zone-crew) or still pooled-public), and the day-16 incidence kink (recorded onset_curve around the SOP-017 boundary: onsets on days 13-15 vs 16-18 -- a quarantine-arrest kink vs a shallower pre-boundary slope are different mechanisms). 'Which route the cooling lands on' is answered from these columns, not inferred from totals.",
+        "paired_deltas: seed-paired delta vs D0_declared on recorded_onsets, onsets_before_split_day, infections_total, and the during/before stratum shares per (theta, arm) -- the merge's delta_vs_baseline block extended to the stratum reads."
+      ],
+      "declared_expectation": "Persistence cooling (HL_0P5) concentrates on hvac_airborne-carried mass and the during-window tail; efficiency cooling lands where each route carries acquisitions (SEED-GEOM-01: droplet pool dominant, near-field ~0.6%); CAP_OFF heats or does nothing (cap binding read); CAP_POLY tests whether the shipped structured-contact machinery cools or pours fuel vs the uniform draw; CAP_ACT_HALF tightens the structured bound x0.5; CAP_FR narrows pooled breadth by ring size; POOL_NONE isolates inter-zone transport; IX bounds the floor. A both-legs landing at a declared (not fitted) corner names a machinery point for a stage-2 refinement design -- never an adoption. If cooling moves truth toward band but before_share barely moves (mass suppressed uniformly, not shifted late), the growth-rate signature of the record is not a delivery-constant problem -- that IS the measurement this design exists to make."
+    },
+    "verdict_grammar": "Assay verdict, frozen: per (theta, arm) report which legs moved (truth into band / timing toward 0.173 / count toward 197), which direction each moved, which route the suppression landed on (aboard_window_by_route + during_quarantine_by_route decomposition), whether suppressed mass reshaped the curve toward the record's timing (before_share move + day-16 kink + stratum shift), and whether ANY declared delivery arm moves the truth AND timing legs simultaneously. Rows with < 5 takeoff seeds are reported as insufficient takeoff mass, not failed. The paired-baseline and REF_M0P56 rows reproduce their measured reads (D0 ~1,900-3,500-class recorded at the anchor; REF ~207-270); a systematic miss there is an engine-drift signature, reported as such."
+  },
+  "what_this_cannot_settle": [
+    "Humidity is not an engine field: no RH/evaporation/settling physics exists in the shipped engine. RH enters arms ONLY as the airborne_half_life_hours viability proxy (0.5 h humidified / 2-4 h dry) -- an RH->droplet-size->settling cascade, ventilation-rate coupling, and any RH effect on non-airborne routes are unmodeled and unreadable here.",
+    "The activity_contacts coupling: every arm touching the structured-contact table (CAP_POLY, CAP_ACT_HALF, CAP_ACT_HALF_FR) moves the cap bound AND the proximity partner-draw rate together (_exposure_cap_rate prefers the declared table) -- a bound-vs-draw separation is not expressible in the shipped grammar; the arms measure the coupled statement by design.",
+    "Which physical mechanism a moved leg corresponds to beyond the route/stratum decomposition: the readout attributes suppression to a ROUTE (droplet vs hvac_airborne vs contact) and a stratum (before/during, zone class, ring), not to a real-world intervention (e.g. 'ventilation' vs 'masking' can both look like hvac_airborne cooling).",
+    "Half-life values are declared regimes, not measured DP conditions: the 0.5-4.0 h bracket scans the axis's leverage; a both-legs landing bounds WHERE the answer could live, not what RH Yokohama actually saw.",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_heat_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull, entrypoint --help verified); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag (rev 34 predates this design). Same batch path as SEED-GEOM-V1: new image, new jobdef rev, canary echo, in-band triggers.",
+    "stage_cells": 660,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_heat_v1/<sha>/cells/",
+    "canary": "The Theta 2.37e11 anchor block on all 22 arms: INDEX_OFFSET 0, ARRAY_SIZE 220 (cells 0-219). Reads: every cell's delivery block echoes its arm's declared constants (half-life per HL_*, the merged route-efficiency map per DROP/HVAC/JOINT, pool_transport none on POOL_NONE, the exposure_cap block + active flag per CAP_*, the activity_contacts table -- shipped on non-touching arms, null on CAP_POLY, halved on CAP_ACT_HALF*); seed_ring.seed_spec echoes the record geometry on every arm (no seed_patch anywhere); the D0 row pairs against ASCERTAIN/SEED-GEOM's anchor read (~1,900-3,500-class recorded onsets) as the cross-image engine-drift check, REF_M0P56 reproduces ~207-270, and HL_1P1 reproduces D0 seed-for-seed (the shipped-value arm-channel audit). Remaining theta blocks (220-659) proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "dry-run count mismatches the declared 660; a canary cell's delivery echo lacks its arm's declared constants (the arm did not fire in cloud -- wiring defect, not a result); the delivery_machinery audit fails on any cell; a D0_declared or REF_M0P56 row lands far outside its measured band (the cross-image drift check); ANY arm row's takeoff-seed infections_total median lands inside [712,960] (in-band truth landing); ANY arm row's takeoff-seed before_share median lands inside 0.173 +/- 0.10 (in-band timing landing); ANY arm fizzles on more than half the seeds (row takeoff count < 5 -- machinery collapsed below takeoff, a different result class than cooling); during-quarantine infections become the DOMINANT stratum on any arm row (median infections_during_quarantine > infections_before_quarantine -- the suppressed mass shifted past the record's timing structure entirely); or child failure rate exceeds 5%."
+  }
+}

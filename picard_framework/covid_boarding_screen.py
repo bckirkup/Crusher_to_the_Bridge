@@ -1118,8 +1118,41 @@ def cell_payload(
                 .get("include_fixed_rings")
             ),
             **_attribution_block(sim, ledger, raw),
+            # The resolved pooled-route delivery constants, echoed so a
+            # delivery-machinery arm's declared values are auditable from
+            # the payload alone (HEAT-V1 lineage).
+            "delivery": _delivery_block(sim, raw),
         })
     return payload
+
+
+def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
+    """Resolved delivery-machinery constants for the audit echo.
+
+    Reads the post-override profile fields the cell actually ran with
+    (half-life, merged route-efficiency map), the build-time pool transport
+    mode, the declared exposure_cap sub-block plus the engine-resolved
+    active flag, and the resolved activity_contacts table (null when the
+    arm leaves the POLYMOD draw shipped).
+    """
+    profile = sim.pathogen_profiles.get(PATHOGEN_ID) or {}
+    tx_over = raw.get("config_overrides", {}).get("transmission", {})
+    tx_core = getattr(sim, "tx_core", None)
+    resolved_contacts = (
+        getattr(tx_core, "activity_contacts", None) if tx_core is not None else None
+    )
+    return {
+        "airborne_half_life_hours": profile.get("airborne_half_life_hours"),
+        "route_efficiency_multipliers": dict(
+            profile.get("route_efficiency_multipliers") or {}
+        ),
+        "pathogen_pool_transport": getattr(sim, "pathogen_pool_transport", None),
+        "exposure_cap": dict(tx_over.get("exposure_cap") or {}),
+        "exposure_cap_active": bool(
+            getattr(tx_core, "_exposure_cap_active", False)
+        ),
+        "activity_contacts": resolved_contacts,
+    }
 
 
 def _first_secondary_shed_epoch(
