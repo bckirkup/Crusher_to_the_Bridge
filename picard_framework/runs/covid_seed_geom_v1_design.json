@@ -1,0 +1,261 @@
+{
+  "design_id": "covid_seed_geom_v1",
+  "task_id": "SEED-GEOM-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_ascertain_v1",
+  "description": "SEED-GEOM-V1: the conditioned array over index/seed structure -- the surviving suspect after three measured retirements (COOP dose law, the Theta axis, the ASCERTAIN-V1 ascertainment axis) all converged on seed/index structure, and COVID-SEED-GEOM-01 measured infection_age_days a null axis (all clocks anchor to the stamped onset_day), a peak-shedding index aboard ~5 days IS the outbreak via the droplet far-field pool (near-field share ~0.006), and the surviving lever is index onset geometry. This design declares arms on the three index-geometry axes: (a) index onset epoch relative to boarding day-0 at fixed departure_day 5.0, (b) index ring/placement membership -- the seed's role pool plus the fixed-ring inclusion corners (RING-CAP-V1's include_fixed_rings flag applied where the index is the shedder), (c) co-primary count / day-0 exposure breadth (seed_patch.count, with the 30-arm injecting SEED-GEOM-01's measured median clean co-primary yield directly at day 0). Everything runs under the shipped seed grammar (seed_patch onto explicit_seeds[0] + transmission_overrides.exposure_cap.include_fixed_rings) -- no engine change. Scored against BOTH anchors: the record's 197 dated onsets / 0.173 before-share AND the held-out serology anchor covid.H5 (infections_total band [712, 960], never fitted). The readout is the both-legs test: does any declared index geometry move infections_total into [712,960] AND before_share toward 0.173 +/- 0.10 simultaneously, and what each leg does to recorded_onsets.",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "ASCERTAIN-V1 measured (cb519c97, 270/270 cells): the channel-vs-truth decomposition is multiplicative and near-exact -- gate ~0.97, recall tracks p, mild stratum carries ~87% of dated mass; M0P56 lands the count at 207-270 vs 197 inside [98.5,394] at all three theta but degenerately (0% mild, dating rate 0.072 vs 0.277, before_share 0.60-0.84, infections 3,536-3,599 vs band [712,960]) -- verdict channel_only; the residual is truth-level (docs/ledger/ASCERTAIN-V1.md).",
+    "COVID-SEED-GEOM-01 measured (4e0032a0): infection_age_days is a bit-identical null axis under a declared onset_day; the aboard-window burn {3,50,91,1678,2494} (median 91) with clean co-primary bound median ~30 rides the droplet far-field pool (near-field share 0.006), not the proximity ring; departure_day 0 is a clean null (the explicit seed is the only infection source); a never-departing fresh index seeds FEWER cases in 7 days than the peak-shedding index does in 5 aboard -- the declared mid-course peak-shedding window IS the outbreak (docs/ledger/COVID-SEED-GEOM-01.md).",
+    "THETA-SCREEN-V13 measured (edb7fc41): under capped reach the fleet-shape admissible band is {1.78e11..5.62e11} and the conditional clause fails at every admissible Theta -- takeoff-seed q05 floors 1,770-2,024 recorded onsets (~9-10x the record), before_share medians 0.81-0.94 vs 0.173. The D0_declared arm replays that measured-failing physics as the in-design baseline, seed-for-seed at the same lattice.",
+    "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al. 2020); scored on infections_total conditional on takeoff; never in fitted_against.",
+    "Seed grammar verification (this session's code read): seed_patch merges onto explicit_seeds[0] under SEED_PATCH_KEYS {count, infection_age_days, onset_day, departure_day, role} with null-removes-field semantics (covid_boarding_screen._apply_seed_patch). Legality bounds (engines/initiation.py _seed_epoch_fields/_stamp_seed_onset): onset_incubation = infection_age_days + onset_day - seed_epoch must be > 0, and elapsed_since_onset < shedding_duration_days (15.0 on sars_cov2_resp) -- at the declared age 6.8 the legal onset window is (-6.8, +inf) and every declared point { -6, -4, -2, 0, +2, +4, +6 } resolves inside it (implied incubations 0.8-12.8 d, inside the profile's lognormal support [0.5, 21]). role filters the seed pool to passenger/crew (initiation._seed_role/_eligible); null removes the filter (free draw over all eligible). count draws replace=False so co-primaries are distinct hosts, each stamped with the same declared onset geometry.",
+    "Ring/placement verification (this session's code read): fixed rings are cabin_mate_ids (2-berth passenger, 3-berth Crew_, 4-berth FC_, 1-berth OC_ staterooms) plus same-table dining_party_ids dealt at init (orchestrator_init.assign_cabin_mates / dining parties); transmission.exposure_cap.include_fixed_rings (RING-CAP-V1, default false) makes a shedder's dose-forming fixed-ring contacts consume its per-epoch Poisson exposure budget before the pooled cohort draws (transmission_core._init_exposure_cap / _fixed_ring_contacts). A crew index lands a 3-berth ring + crew-mess dealt tables + work-zone schedule; a passenger index lands a 2-berth ring + fixed dining party.",
+    "Payload echo (this PR): seed_ring.seeded_hosts records each seeded host's realized placement -- role, agent_class, home/dining/work zones, and the fixed-ring sizes it landed on (cabin_ring_size = len(cabin_mate_ids), table_ring_size = len(dining_party_ids)) -- so placement arms are auditable from the payload, not just declared (the draw inside the role pool is stochastic). cell_payload also echoes exposure_cap_include_fixed_rings (the resolved transmission.exposure_cap flag) so a ring-inclusion arm is provable per cell without inferring from paired-seed divergence. Readout additions only; no physics, no engine path touched."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_ascertain_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day -- COVID-SEED-GEOM-01 -- carried for cell-key bookkeeping and seed-pairing against the ascertain lattice), seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    237000000000.0,
+    100000000000.0,
+    1000000000000.0
+  ],
+  "thetas_note": "The takeoff-conditioned lattice, identical to covid_ascertain_v1 / covid_coop_v1: Theta 2.37e11 is the anchor cell (inside the v13 admissible band, the known ~1,900-3,500-onset class on the shipped geometry); 1e11 sits below and 1e12 above the band edges so the geometry response is read where baseline physics is measured-failing in both directions. Points ordered anchor-first so the canary block (cells 0-159) is the densest slice.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 10,
+  "seeds_note": "Seeds 20200205-14, the first ten of the matched block every conditioned design since v10 replays -- seed-for-seed pairing against the ascertain rows and the v13 stage-2 surface at the same (theta, seed). Three of the ten (20200207, 20200210, 20200211) are measured all-arms fizzle seeds at the anchor (ASCERTAIN-V1); rows score takeoff-conditional, so fizzle seeds contribute to the takeoff-mass readout, not to noise. Ten seeds is the declared count: the arm grid, not seed depth, is the axis under test.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline REQUIRED by the task: the shipped index geometry verbatim (passenger, count 1, onset_day -1.0, departure_day 5.0 -- index onsets the day before boarding, sheds at day 0 on the tail of its peak, departs day 5). First arm so empty overrides per the arm grammar; the in-design control replaying THETA-SCREEN-V13's measured-failing physics and ASCERTAIN-V1's D0 row seed-for-seed, and the engine-drift check against both on this same lattice."
+    },
+    {
+      "arm_id": "REF_M0P56",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "syndrome_case_eligibility_by_severity": [0.0, 0.0, 0.0, 1.0, 1.0],
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "ASCERTAIN-V1's count-landing corner VERBATIM (mild eligibility 0 + symptomatic-at-specimen gate + recall 0.56) on the shipped seed geometry: the required count-matched reference row. ASCERTAIN measured it at 207-270 recorded vs 197 (inside [98.5,394]) but degenerate (0% mild, dating rate 0.072, before_share 0.60-0.84, infections ~3,568) -- here it anchors what a count-landing channel arm looks like so the geometry arms' count moves are read against a measured reference, not a theory."
+    },
+    {
+      "arm_id": "ONSET_M6",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": -6.0
+        }
+      },
+      "note": "Axis A, deepest legal past-onset corner: the index onsets 6 days BEFORE boarding (implied incubation 0.8 d -- the physical bound onset_incubation > 0 at age 6.8) and boards on the shedding tail's end (aboard = onset-relative days +6..+11 of a 15 d shedding window). Declared-expected: index_shedding_at_day0 true (onset <= 2), index_onset_day -6."
+    },
+    {
+      "arm_id": "ONSET_M4",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": -4.0
+        }
+      },
+      "note": "Axis A: index onsets 4 days before boarding; aboard window carries onset-relative days +4..+9 -- mostly post-peak curve under the profile's recovery_day 7 shape (implied incubation 2.8 d)."
+    },
+    {
+      "arm_id": "ONSET_M2",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": -2.0
+        }
+      },
+      "note": "Axis A: index onsets 2 days before boarding; aboard = onset-relative +2..+7, straddling the recorded-geometry shape at one step earlier phase than baseline -1 (implied incubation 4.8 d)."
+    },
+    {
+      "arm_id": "ONSET_P0",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": 0.0
+        }
+      },
+      "note": "Axis A: index onsets AT boarding (implied incubation 6.8 d = the profile median); aboard = onset-relative 0..+5 -- the whole window is early-course, peak shedding lands mid-window instead of at boarding."
+    },
+    {
+      "arm_id": "ONSET_P2",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": 2.0
+        }
+      },
+      "note": "Axis A, the shedding-at-day-0 boundary: index onsets voyage day +2 (implied incubation 8.8 d) so its presymptomatic window (2.0 d) opens shedding exactly at epoch 0 -- index_shedding_at_day0 stays true by construction and is the declared boundary point of that readout."
+    },
+    {
+      "arm_id": "ONSET_P4",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": 4.0
+        }
+      },
+      "note": "Axis A: index onsets voyage day +4 (implied incubation 10.8 d); aboard = onset-relative -4..+1 so only the opening day of the presymptomatic window emits before departure -- shedding opens voyage day 2, the index onsets day 4, departs day 5 (its onset IS presented aboard, so index_onset_day reads +4)."
+    },
+    {
+      "arm_id": "ONSET_P6",
+      "overrides": {
+        "seed_patch": {
+          "onset_day": 6.0
+        }
+      },
+      "note": "Axis A, the silent-aboard corner: index onsets voyage day +6 (implied incubation 12.8 d) but departs day 5 -- the index never presents aboard; shedding opens voyage day 4 so the whole aboard window is presymptomatic-only. index_shedding_at_day0 false by construction; index_onset_day payload reads null (never presented aboard) with the declared value provable via seed_spec.onset_day -- declared, not a defect."
+    },
+    {
+      "arm_id": "ROLE_CREW",
+      "overrides": {
+        "seed_patch": {
+          "role": "crew"
+        }
+      },
+      "note": "Axis B, class placement: the index draw is restricted to crew -- lands a 3-berth Crew_ cabin ring (vs passenger 2-berth), crew-mess dealt tables instead of a fixed dining party, and a work-zone schedule. Which ring memberships it landed is auditable per cell via seed_ring.seeded_hosts (role, zones, ring sizes)."
+    },
+    {
+      "arm_id": "ROLE_ANY",
+      "overrides": {
+        "seed_patch": {
+          "role": null
+        }
+      },
+      "note": "Axis B, unrestricted placement: seed_patch.role null removes the field so the index draws over ALL eligible hosts (~72% passenger mass) -- the declared 'record's passenger assumption relaxed' corner. Realized role is per-seed stochastic, read from seed_ring.seeded_hosts."
+    },
+    {
+      "arm_id": "FR_IN",
+      "overrides": {
+        "transmission_overrides": {
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "Axis B, fixed-ring inclusion corner at baseline geometry (passenger index, onset -1): RING-CAP-V1's flag verbatim -- the index's pre-committed cabin-mate/table ring spends its per-epoch Poisson exposure budget BEFORE the pooled far-field draw, so ring membership is fed first and day-0 pooled breadth narrows by the ring's contact count. During the aboard window the index is effectively the only shedder, so this reads as an index-geometry corner, not a fleet-wide one. Payload echoes exposure_cap_include_fixed_rings true."
+    },
+    {
+      "arm_id": "CREW_FR_IN",
+      "overrides": {
+        "seed_patch": {
+          "role": "crew"
+        },
+        "transmission_overrides": {
+          "exposure_cap": {
+            "include_fixed_rings": true
+          }
+        }
+      },
+      "note": "Axis B cross corner: crew placement under ring-first budgeting -- the crew index's 3-berth ring and crew-mess contacts spend its budget first; pairs against ROLE_CREW and FR_IN so placement and ring-inclusion are separately identified."
+    },
+    {
+      "arm_id": "CP2",
+      "overrides": {
+        "seed_patch": {
+          "count": 2
+        }
+      },
+      "note": "Axis C, co-primary breadth: two passengers seeded at embarkation, each stamped with the declared geometry (onset -1, departure 5) -- day-0 exposure breadth doubled through two independent placement draws (distinct cabins/tables)."
+    },
+    {
+      "arm_id": "CP8",
+      "overrides": {
+        "seed_patch": {
+          "count": 8
+        }
+      },
+      "note": "Axis C: eight co-primaries at the declared geometry -- the middle rung between the record's 1 and the measured clean-yield corner; each draw lands its own cabin/table ring, so breadth scales with distinct placements."
+    },
+    {
+      "arm_id": "CP30",
+      "overrides": {
+        "seed_patch": {
+          "count": 30
+        }
+      },
+      "note": "Axis C, the co-primary-saturated corner: 30 passengers at day 0 = SEED-GEOM-01's measured median clean co-primary yield (~30 aboard-window index-only acquisitions on the takeoff cells), injected directly as seeded hosts -- tests whether the outbreak the index GROWS (its ~30 clean co-primaries) reproduces the outbreak when declared as seeds, and whether truth mass or timing moves when the burn is front-loaded."
+    }
+  ],
+  "arms_note": "Arm grammar verification (this session's code read): seed_patch merges onto explicit_seeds[0] after apply_boarding_axis sets count=imports/age=6.8, so a patched count/onset/role wins the cell (covid_boarding_screen.apply_arm_overrides order, lines ~656-703). All patch keys are inside SEED_PATCH_KEYS and pass _validate_seed_patch_value (count an integer >= 1; role a string). include_fixed_rings replaces config_overrides.transmission.exposure_cap wholesale (the shipped block carries only the flag), verbatim from the RING-CAP-V1 design. Onset points are all legal under _seed_epoch_fields at age 6.8 (onset > -6.8) and _stamp_seed_onset's shed-window bound (elapsed < 15 d only binds for past onsets; future onsets stamp incubation + will_present and return early).",
+  "cells_note": "3 points x 16 arms x 10 seeds = 480 declared-replay cells (~30 min each). Cell order is point x arm x seed with the anchor point first and arms in declared order: cells 0-159 = Theta 2.37e11 (D0 0-9, REF_M0P56 10-19, ONSET_M6 20-29, ONSET_M4 30-39, ONSET_M2 40-49, ONSET_P0 50-59, ONSET_P2 60-69, ONSET_P4 70-79, ONSET_P6 80-89, ROLE_CREW 90-99, ROLE_ANY 100-109, FR_IN 110-119, CREW_FR_IN 120-129, CP2 130-139, CP8 140-149, CP30 150-159); 160-319 = Theta 1e11; 320-479 = Theta 1e12.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and serology_anchor_clause are carried verbatim from covid_ascertain_v1; the index_geometry audit is generalized to per-arm declared values (the arms deliberately change the index's geometry, so the invariant is payload-echo-matches-declared, not payload-echo-matches-record). This is an assay/decomposition grid, not a screen: no arm point is admitted or fitted on this design, and a clause PASS marks a declared point worth a refinement design, never an adoption.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 48 rows of 10 seeds. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_ascertain_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts. Declared expectation per axis: onset-epoch arms move truth via the aboard-window shedding phase (earlier-phase aboard = weaker pre-departure dose -> lower infections, and coarser before_share); role arms move truth via the index's ring class and schedule only; FR_IN arms move truth via budget spend order (ring fed first, pooled breadth narrowed); count arms move truth via day-0 breadth (~linear in count under pool-mediated spread). REF_M0P56 is observation-only at truth level modulo its measured mild-isolation coupling (~1%)."
+    },
+    "index_geometry_audit": {
+      "criterion": "GENERALIZED from the v11-lineage invariant (the arms' declared purpose is to move the index's geometry): per cell, (a) seed_ring.seed_spec echoes the arm's declared patch verbatim (onset_day/count/role as declared; role absent on ROLE_ANY); (b) seed_ring.seeded_count == declared count; (c) seed_ring.seeded_hosts[*].role matches the declared role filter (crew on ROLE_CREW/CREW_FR_IN; any on ROLE_ANY; passenger elsewhere); (d) index_onset_day == the arm's declared onset_day on arms whose index presents aboard (declared onset < departure day 5), and null on ONSET_P6 (the declared silent-aboard corner: index departs presymptomatic); (e) index_shedding_at_day0 == (declared onset_day <= 2.0). Deviation invalidates the cell rather than excluding it.",
+      "note": "The shipped merge_screen column index_geometry_pass_fraction keeps its v11-lineage meaning (share of seeds with onset <= 0 AND shedding at day 0 = the RECORD's geometry); on the ONSET_P* arms it is declared-expected ~0 -- the audit lives in (a)-(e), not that column.",
+      "reads": "seed_ring.seed_spec, seed_ring.seeded_count, seed_ring.seeded_hosts, index_onset_day, index_shedding_at_day0, index_departed_epoch, exposure_cap_include_fixed_rings -- all payload echoes, no engine state."
+    },
+    "both_legs_test": {
+      "statement": "The design's deliverable, frozen: per (theta, arm) -- does the declared index geometry move takeoff-seed infections_total into covid.H5's band [712,960] AND takeoff-seed median before_share toward 0.173 within 0.10, SIMULTANEOUSLY; and what does each leg do to takeoff-seed recorded_onsets. Declared reads:",
+      "reads": [
+        "truth_leg: per (theta, arm) takeoff-seed median and q05-q95 infections_total vs [712, 960] -- the leg every prior axis failed to move.",
+        "timing_leg: per (theta, arm) takeoff-seed median before_share vs 0.173 (target window 0.173 +/- 0.10) -- an earlier-phase or narrower day-0 exposure is expected to shrink the pre-quarantine onset share; the leg's direction per arm is itself the measurement.",
+        "count_leg: per (theta, arm) takeoff-seed median and q05-q95 recorded_onsets vs the record's 197 (and the clause's [98.5, 394] p10-p90 window) -- the two anchors jointly constrain the count: a geometry that lands truth in band but keeps recorded ~1,900 is a different failure class than one that moves both.",
+        "breadth_read: seed_ring per (theta, arm) -- aboard_window_acquisitions, aboard_window_clean_bound, yield_per_seeded_host (and on takeoff seeds), aboard_window_by_day/by_route, first_secondary_shed_epoch: the day-0 exposure mechanism each arm actually moved, so a moved leg is attributed to the declared lever (phase, placement, ring inclusion, or breadth) and not to an unseen one.",
+        "paired_deltas: seed-paired delta vs D0_declared on recorded_onsets and onsets_before_split_day per (theta, arm) -- the merge's delta_vs_baseline block."
+      ],
+      "declared_expectation": "Onset arms: earlier aboard-phase (M6->P4) trades peak shedding for early-course shedding -- infections_total falls as the pre-departure dose drops, and recorded onsets fall with it; before_share direction is the open read (a later-onset index pushes its own mass later but the aboard burn happens earlier). ONSET_P6 is the near-null corner (4 epochs of presymptomatic emission) -- expected near-extinct rows, and the magnitude of what survives bounds the presymptomatic-window share of the burn. ROLE arms move the index's ring class without moving its phase -- a placement effect, if any, reads as ring-size/schedule share, not timing. FR_IN narrows day-0 pooled breadth by ring count (1-3 contacts) -- a small shift expected at these theta, read via paired deltas. CP arms scale day-0 breadth directly -- expected to RAISE infections_total (worse overshoot) but shift onset mass EARLIER (more pre-quarantine onsets), the one axis that plausibly moves the timing leg toward 0.173; if the timing leg moves toward target only while truth moves away, the two anchors are separated, not reconciled -- which IS the answer this design exists to measure."
+    },
+    "verdict_grammar": "Assay verdict, frozen: per (theta, arm) report which legs moved (truth into band / timing toward 0.173 / count toward 197), which direction each moved, and whether ANY declared geometry moves the truth AND timing legs simultaneously. A both-legs landing names a declared geometry point for a stage-2 refinement design -- never an adoption. Rows with < 5 takeoff seeds are reported as insufficient takeoff mass, not failed. The paired-baseline and REF_M0P56 rows reproduce their measured reads (D0 ~1,900-3,500-class recorded at the anchor; REF ~207-270); a systematic miss there is an engine-drift signature, reported as such."
+  },
+  "what_this_cannot_settle": [
+    "Per-agent placement inside the role pool: seed_patch.role restricts the draw to a class; WHICH cabin/table the seeded host lands is a draw -- auditable via seed_ring.seeded_hosts, never declared. A specific-cabin or specific-table index is not expressible in the shipped grammar.",
+    "A ring-excluded index corner: no seed field deletes the drawn host's cabin-mate/table memberships (assign_cabin_mates runs at init for every Cabin_Corridor agent, before seeds apply). The closest expressible corner is FR_IN (the ring spends the budget first), which is a spend-order corner, not a membership deletion -- reported, not built, per the non-goals.",
+    "Multiple or staggered seed entries: the seed grammar patches explicit_seeds[0] only (apply_boarding_axis asserts a single seed), and SEED_PATCH_KEYS excludes epoch -- a second seed epoch or a late-voyage introduction arm is not expressible. Co-primary breadth is expressed through count at day 0 only.",
+    "infection_age_days: a measured null axis under declared onset (COVID-SEED-GEOM-01, bit-identical) -- carried at 6.8 for cell-key bookkeeping; it is not re-swept.",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_seed_geom_v1. Two-layer image build at the merged main SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag (rev 33 predates this design). Same batch path as RINGCAP-V1/ASCERTAIN-V1: new image, new jobdef rev, canary echo, in-band trigger.",
+    "stage_cells": 480,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_seed_geom_v1/<sha>/cells/",
+    "canary": "The Theta 2.37e11 anchor block on all 16 arms: INDEX_OFFSET 0, ARRAY_SIZE 160 (cells 0-159). Reads: every cell's seed_ring.seed_spec echoes its arm's declared patch verbatim (onset_day per ONSET_*, count per CP*, role per ROLE_*); seeded_count matches declared count; seeded_hosts role matches the declared filter (crew on ROLE_CREW/CREW_FR_IN); index_onset_day matches declared onset on every arm except ONSET_P6 where it is null by declaration; index_shedding_at_day0 true through ONSET_P2 and false on ONSET_P4/P6; exposure_cap_include_fixed_rings true on FR_IN/CREW_FR_IN and null elsewhere; the D0 row pairs against ASCERTAIN's anchor read (~1,900-3,500-class recorded onsets) as the cross-image engine-drift check, and REF_M0P56 reproduces ~207-270. Remaining theta blocks (160-479) proceed on a clean read per the campaign gate.",
+    "report_immediately_if": "dry-run count mismatches the declared 480; a canary cell's payload echo lacks its arm's declared seed_spec patch / seeded_hosts / exposure_cap_include_fixed_rings (the arm did not fire in cloud -- wiring defect, not a result); the audit invariant fails on any cell; a D0_declared or REF_M0P56 row lands far outside its measured band (the cross-image drift check); ANY arm row's takeoff-seed infections_total median lands inside [712,960] (in-band truth landing); ANY arm row's takeoff-seed before_share median lands inside 0.173 +/- 0.10 (in-band timing landing); or child failure rate exceeds 5%."
+  }
+}

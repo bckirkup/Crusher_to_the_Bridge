@@ -956,11 +956,55 @@ def test_a_real_declared_cell_reports_the_seed_ring(design):
     assert ring["seed_spec"]["onset_day"] == pytest.approx(-1.0)
     assert ring["seed_spec"]["departure_day"] == pytest.approx(5.0)
     assert ring["seed_spec"]["infection_age_days"] == pytest.approx(6.8)
+    assert len(ring["seeded_hosts"]) == 1
+    host = ring["seeded_hosts"][0]
+    assert host["role"] == "passenger"
+    assert host["agent_class"]
+    assert host["home_zone"]
+    assert host["cabin_ring_size"] >= 0
+    assert host["table_ring_size"] >= 0
     assert ring["index_departure_epoch"] is not None
     assert ring["aboard_window_acquisitions"] >= 0
     assert ring["aboard_window_clean_bound"] <= (
         ring["aboard_window_acquisitions"]
     )
+
+
+def test_a_placement_arm_cell_reports_seeded_host_placement():
+    """48-epoch smoke on a crew + count + ring-inclusion arm: the
+    seeded_hosts echo reports each drawn host's realized role and ring
+    sizes, and the resolved exposure-cap flag is echoed."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_crew_ring",
+            "overrides": {
+                "seed_patch": {"role": "crew", "count": 3},
+                "transmission_overrides": {
+                    "exposure_cap": {"include_fixed_rings": True},
+                },
+            },
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_crew_ring"
+    )
+    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    assert payload["exposure_cap_include_fixed_rings"] is True
+    ring = payload["seed_ring"]
+    assert ring["seeded_count"] == 3
+    assert ring["seed_spec"]["role"] == "crew"
+    assert ring["seed_spec"]["count"] == 3
+    hosts = ring["seeded_hosts"]
+    assert len(hosts) == 3
+    assert len({h["agent_id"] for h in hosts}) == 3
+    for host in hosts:
+        assert host["role"] == "crew"
+        assert host["home_zone"].startswith("CC_")
+        assert isinstance(host["cabin_ring_size"], int)
+        assert isinstance(host["table_ring_size"], int)
 
 
 def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():

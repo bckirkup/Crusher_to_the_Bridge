@@ -1108,6 +1108,15 @@ def cell_payload(
             "dose_response": dict(
                 sim.pathogen_profiles[PATHOGEN_ID].get("dose_response") or {}
             ),
+            # The resolved exposure-cap ring-inclusion flag, echoed so a
+            # fixed-ring-inclusion arm is auditable from the payload
+            # alone (null on arms that do not declare the block).
+            "exposure_cap_include_fixed_rings": (
+                raw.get("config_overrides", {})
+                .get("transmission", {})
+                .get("exposure_cap", {})
+                .get("include_fixed_rings")
+            ),
             **_attribution_block(sim, ledger, raw),
         })
     return payload
@@ -1134,6 +1143,29 @@ def _first_secondary_shed_epoch(
     return min(candidates) if candidates else None
 
 
+def _seeded_host_rows(sim: Any, seeded: set[int]) -> list[dict[str, Any]]:
+    """Realized placement of each seeded host — the placement-arm audit.
+
+    ``seed_spec.role`` echoes the declared filter; the draw inside the
+    role pool is stochastic, so the payload records which host class and
+    ring memberships each seeded agent actually landed on.
+    """
+    return [
+        {
+            "agent_id": int(a.agent_id),
+            "role": a.role,
+            "agent_class": a.agent_class,
+            "home_zone": a.home_zone,
+            "dining_zone": a.dining_zone,
+            "work_zone": a.work_zone,
+            "cabin_ring_size": len(getattr(a, "cabin_mate_ids", None) or ()),
+            "table_ring_size": len(getattr(a, "dining_party_ids", None) or ()),
+        }
+        for a in sim.engine.agents
+        if a.agent_id in seeded
+    ]
+
+
 def _seed_ring_block(
     sim: Any, ledger: QuarantineAttributionLedger, raw: dict[str, Any],
 ) -> dict[str, Any]:
@@ -1144,7 +1176,8 @@ def _seed_ring_block(
     (events before any secondary host could first emit) so ring-driven
     burn is separated from onboard amplification. ``seed_spec`` echoes the
     applied seed record so the arm's patched geometry is auditable from
-    the payload alone.
+    the payload alone; ``seeded_hosts`` echoes each seeded agent's
+    realized role and ring memberships so placement arms are auditable.
     """
     seeds = (
         raw.get("config_overrides", {})
@@ -1180,6 +1213,7 @@ def _seed_ring_block(
         "seed_spec": {
             key: seed0[key] for key in SEED_PATCH_KEYS if key in seed0
         },
+        "seeded_hosts": _seeded_host_rows(sim, seeded),
         "index_departure_epoch": window_end,
         "aboard_window_acquisitions": len(aboard),
         "aboard_window_clean_bound": len(clean),
