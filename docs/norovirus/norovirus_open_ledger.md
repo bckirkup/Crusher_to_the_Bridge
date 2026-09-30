@@ -4206,6 +4206,29 @@ than the 15-day `shedding_duration_days`, to multi-voyage immune history, and
 to any arm that shortens shedding duration inside its screened [12, 30] band;
 none is opened. No constant, profile, or engine path was changed.
 
+**`NORO-HAND-STATIONARY-01` (measured — `defect_candidate`): the hand
+reservoir is almost always empty; its occupancy misses Liu 2013's measured
+rinse positivity by 38×.** Measured at `063e9978` on the frozen cells
+(`fl_spr_12d` ignited 22 seeds + `classic_cruise_1900` 8000–8019, 288 epochs,
+read-only census, draw-neutrality byte-verified on both drivers): across
+62,523 shedding host-epoch rows, the end-of-epoch hand load reaches Liu's
+10^2.15 LOD on 0.66% (spirit 0.82%, classic 0.34%), against 18/71 = 25.4% of
+infected-subject rinses positive in the field (primary R = 0.026 vs the
+declared 5× band). The spike still fires — 723 defecation-event rows — but
+72% of event epochs decay below LOD before epoch end, and between events the
+load underflows outright; positive reads, when they occur, sit at the right
+magnitude (3.28 log10 vs Liu's 3.30–4.45 band). The ordering is sign-flipped:
+the model puts occupancy after defecation events (0.38 vs 0.003 routine)
+where Liu measured post-bathroom rinses *lower* than routine (0.124 vs 0.375,
+P<0.05). The mechanism answers a question the data does not ask. Upstream of
+every fomite dose: `NORO-TRANSFER-PRODUCT-01`'s queued measurement inherits
+this reservoir, and every hand-scaled fomite figure reads against a hand that
+is clean ~99% of shedding time. Repair options filed in
+`docs/ledger/NORO-HAND-STATIONARY-01.md` (persistent reservoir / event-windowed
+/ explicit washing); no repair implemented. No constant, profile, or engine
+path was changed. Dumps: `docs/norovirus/noro_hand_stationary_01/` (full row
+tables in S3 `campaign/noro_hand_stationary_01/`).
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

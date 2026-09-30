@@ -66,10 +66,24 @@ IGNITED_SEEDS = [
 CLASSIC_SEEDS = list(range(8000, 8020))
 
 
+def _project(payload: dict[str, Any]) -> dict[str, Any]:
+    """Keep only what this readout needs; the rest is released per cell."""
+    return {
+        "seed": _seed_of(payload),
+        "rows": payload.get("hand_occupancy_rows") or [],
+        "zones": payload.get("zones") or [],
+        # Lean per-seed extracts carry the flag precomputed; full dumps
+        # carry the pickups row table it is derived from.
+        "has_pickups": payload.get(
+            "has_pickups", bool(payload.get("pickups")),
+        ),
+    }
+
+
 def _spirit_cells(raw_dir: Path) -> list[dict[str, Any]]:
-    """One growth-census payload per seed, from the campaign-layout zips."""
-    cells = []
+    """Projected cells, parsed one at a time -- payloads are ~300MB each."""
     cell_dir = raw_dir / SPIRIT_TIER
+    cells = []
     for path in sorted(cell_dir.glob("*.zip")):
         with zipfile.ZipFile(path) as archive:
             payload = json.loads(
@@ -77,9 +91,9 @@ def _spirit_cells(raw_dir: Path) -> list[dict[str, Any]]:
                     archive.read("growth_census.json.gz"),
                 ).decode("utf-8"),
             )
-            payload["zip"] = path.name
-            cells.append(payload)
-    return sorted(cells, key=lambda c: c["meta"]["seed"])
+        cells.append(_project(payload))
+        del payload
+    return sorted(cells, key=lambda c: c["seed"])
 
 
 def _classic_cells(raw_dir: Path) -> list[dict[str, Any]]:
@@ -87,7 +101,7 @@ def _classic_cells(raw_dir: Path) -> list[dict[str, Any]]:
     cells = []
     for path in sorted(cell_dir.glob("*.json.gz")):
         with gzip.open(path, "rt", encoding="utf-8") as handle:
-            cells.append(json.load(handle))
+            cells.append(_project(json.load(handle)))
     return sorted(cells, key=lambda c: c["seed"])
 
 
@@ -95,20 +109,15 @@ def _seed_of(cell: dict[str, Any]) -> int:
     return int(cell.get("meta", {}).get("seed", cell.get("seed", -1)))
 
 
-def _rows(cell: dict[str, Any]) -> list[dict[str, Any]]:
-    return cell.get("hand_occupancy_rows") or []
-
-
 def _is_admissible(cell: dict[str, Any]) -> bool:
     """The declared void rule: zero norwalk_gi fomite deliveries -> void."""
-    zones = cell.get("zones") or []
-    if zones:
-        return sum(int(z.get("delivery_calls", 0)) for z in zones) > 0
-    return bool(cell.get("pickups"))
+    if cell["zones"]:
+        return sum(int(z.get("delivery_calls", 0)) for z in cell["zones"]) > 0
+    return cell["has_pickups"]
 
 
 def _shedding_rows(cell: dict[str, Any]) -> list[dict[str, Any]]:
-    return [row for row in _rows(cell) if row.get("shedding")]
+    return [row for row in cell["rows"] if row.get("shedding")]
 
 
 def _log10_of(load: float) -> float:
@@ -340,16 +349,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    spirit = _cell_readout(
-        _spirit_cells(args.raw_dir), IGNITED_SEEDS,
-    )
-    classic = _cell_readout(
-        _classic_cells(args.raw_dir), CLASSIC_SEEDS,
-    )
-    all_rows: list[dict[str, Any]] = []
-    for cell in _spirit_cells(args.raw_dir) + _classic_cells(args.raw_dir):
-        if _is_admissible(cell):
-            all_rows.extend(_shedding_rows(cell))
+    spirit_cells = _spirit_cells(args.raw_dir)
+    classic_cells = _classic_cells(args.raw_dir)
+    spirit = _cell_readout(spirit_cells, IGNITED_SEEDS)
+    classic = _cell_readout(classic_cells, CLASSIC_SEEDS)
+    all_rows = [
+        row
+        for cell in spirit_cells + classic_cells
+        if _is_admissible(cell)
+        for row in _shedding_rows(cell)
+    ]
     end_pairs = _end_loads(all_rows)
     pooled_pos = _positivity(end_pairs)
     pooled_pos["ordering_sign"] = _ordering(all_rows)[
