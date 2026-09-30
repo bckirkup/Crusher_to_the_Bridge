@@ -22,38 +22,31 @@ Pools the synced campaign cells (``aws s3 sync .../cells/ <dir>``) for
 
 CLI paths are confined under the repository root (sync cells to
 ``campaign_results/<design>/cells/``); an audit failure is reported per
-cell.
+cell. The audit+score CLI skeleton is shared with the other conditioned
+readouts in tools/covid_screen_readout.py.
 """
 
 from __future__ import annotations
 
-import argparse
-import json
 import os
 import sys
 from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from picard_framework.covid_boarding_screen import (  # noqa: E402
-    enumerate_cells,
-    load_design,
-)
-from simulation_utils.paths import (  # noqa: E402
-    repo_root,
-    resolve_child_path,
-    resolve_repo_path,
-    validated_open,
-)
+from simulation_utils.paths import repo_root  # noqa: E402
+from tools import covid_screen_readout as _common  # noqa: E402
 
 REPO_ROOT = repo_root()
 
-TAKEOFF_MIN_ONSETS = 10
-T1_RECORDED = 197.0
-T1_BEFORE_SHARE = 0.173
-BEFORE_SHARE_TOL = 0.10
-H5_BAND = (712.0, 960.0)
-MIN_TAKEOFF_SEEDS = 5
+TAKEOFF_MIN_ONSETS = _common.TAKEOFF_MIN_ONSETS
+T1_RECORDED = _common.T1_RECORDED
+T1_BEFORE_SHARE = _common.T1_BEFORE_SHARE
+BEFORE_SHARE_TOL = _common.BEFORE_SHARE_TOL
+H5_BAND = _common.H5_BAND
+MIN_TAKEOFF_SEEDS = _common.MIN_TAKEOFF_SEEDS
+
+_q = _common.q
 
 # Shipped delivery constants (data/pathogens/active_profiles.json
 # sars_cov2_resp + crusher_labs/config.yaml, verified at design time).
@@ -85,14 +78,6 @@ SHIPPED_ACTIVITY_RATES = {
 RECORD_SEED_SPEC = {"count": 1, "onset_day": -1.0, "role": "passenger"}
 KINK_PRE_DAYS = (13, 14, 15)
 KINK_POST_DAYS = (16, 17, 18)
-
-
-def _q(values: list[float], p: float) -> float | None:
-    if not values:
-        return None
-    srt = sorted(values)
-    i = min(len(srt) - 1, max(0, int(round(p * (len(srt) - 1)))))
-    return float(srt[i])
 
 
 def _declared(arm: dict) -> dict:
@@ -312,27 +297,8 @@ def _kink_stats(payloads: list[dict]) -> dict:
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians/quantiles + route decomposition for
     one (theta, arm) row."""
-    obs = [p["observables"] for p in payloads]
-    takeoff = [
-        p for p, o in zip(payloads, obs)
-        if int(o["recorded_onsets"]) >= TAKEOFF_MIN_ONSETS
-    ]
-    rec = [float(o["recorded_onsets"]) for o in obs]
-    shares = [
-        float(o["onsets_before_split_day"]) / float(o["recorded_onsets"])
-        for o in obs
-        if int(o["recorded_onsets"]) > 0
-    ]
-    t_rec = [float(p["observables"]["recorded_onsets"]) for p in takeoff]
-    t_inf = [
-        float(p["infections_total"]) for p in takeoff
-        if p.get("infections_total") is not None
-    ]
-    t_share = [
-        float(p["observables"]["onsets_before_split_day"])
-        / float(p["observables"]["recorded_onsets"])
-        for p in takeoff
-    ]
+    split = _common.takeoff_split(payloads)
+    takeoff = split["takeoff"]
     t_before = [
         float(p["infections_before_quarantine"]) for p in takeoff
         if p.get("infections_before_quarantine") is not None
@@ -348,219 +314,104 @@ def _row_stats(payloads: list[dict]) -> dict:
         if p.get("infections_during_quarantine") is not None
         and p.get("infections_total")
     ]
-    med_inf = _q(t_inf, 0.5)
-    med_share = _q(t_share, 0.5)
     med_before = _q(t_before, 0.5)
     med_during = _q(t_during, 0.5)
-    enough = len(takeoff) >= MIN_TAKEOFF_SEEDS
-    in_band = (
-        med_inf is not None and H5_BAND[0] <= med_inf <= H5_BAND[1]
-    )
-    timing_hit = (
-        med_share is not None
-        and abs(med_share - T1_BEFORE_SHARE) <= BEFORE_SHARE_TOL
-    )
-    return {
-        "n": len(payloads),
-        "takeoff_n": len(takeoff),
-        "fizzled_over_half": len(takeoff) < MIN_TAKEOFF_SEEDS,
-        "recorded_onsets": {
-            "median": _q(rec, 0.5), "q05": _q(rec, 0.05),
-            "q95": _q(rec, 0.95),
-        },
-        "before_share": {"median": _q(shares, 0.5)},
-        "takeoff_recorded_onsets": {
-            "median": _q(t_rec, 0.5), "q05": _q(t_rec, 0.05),
-            "q95": _q(t_rec, 0.95),
-        },
-        "takeoff_infections_total": {
-            "median": med_inf, "q05": _q(t_inf, 0.05),
-            "q95": _q(t_inf, 0.95),
-        },
-        "takeoff_before_share": {
-            "median": med_share, "q05": _q(t_share, 0.05),
-            "q95": _q(t_share, 0.95),
-        },
-        "strata": {
-            "infections_before_quarantine_med": med_before,
-            "infections_during_quarantine_med": med_during,
-            "during_share_med": _q(t_during_share, 0.5),
-            "during_dominant": bool(
-                med_during is not None
-                and med_before is not None
-                and med_during > med_before
-            ),
-        },
-        "route_decomposition": {
-            "aboard_window_by_route_pooled": _pooled_counter(
-                takeoff, "seed_ring", "aboard_window_by_route",
-            ),
-            "during_quarantine_by_route_pooled": _pooled_counter(
-                takeoff, "during_quarantine_by_route",
-            ),
-            "during_quarantine_by_zone_class_pooled": _pooled_counter(
-                takeoff, "during_quarantine_by_zone_class",
-            ),
-            "during_quarantine_by_role_pooled": _pooled_counter(
-                takeoff, "during_quarantine_by_role",
-            ),
-        },
-        "day16_kink": _kink_stats(takeoff),
-        "truth_leg_in_band": bool(in_band and enough),
-        "timing_leg_in_band": bool(timing_hit and enough),
-        "both_legs": bool(in_band and timing_hit and enough),
+    stats = _common.scored_row(split)
+    stats["fizzled_over_half"] = stats["takeoff_n"] < MIN_TAKEOFF_SEEDS
+    stats["strata"] = {
+        "infections_before_quarantine_med": med_before,
+        "infections_during_quarantine_med": med_during,
+        "during_share_med": _q(t_during_share, 0.5),
+        "during_dominant": bool(
+            med_during is not None
+            and med_before is not None
+            and med_during > med_before
+        ),
     }
+    stats["route_decomposition"] = {
+        "aboard_window_by_route_pooled": _pooled_counter(
+            takeoff, "seed_ring", "aboard_window_by_route",
+        ),
+        "during_quarantine_by_route_pooled": _pooled_counter(
+            takeoff, "during_quarantine_by_route",
+        ),
+        "during_quarantine_by_zone_class_pooled": _pooled_counter(
+            takeoff, "during_quarantine_by_zone_class",
+        ),
+        "during_quarantine_by_role_pooled": _pooled_counter(
+            takeoff, "during_quarantine_by_role",
+        ),
+    }
+    stats["day16_kink"] = _kink_stats(takeoff)
+    return stats
 
 
-def _load_payloads(cells_dir: str) -> dict[str, dict]:
-    """Read every cell JSON under *cells_dir* (contained to the dir)."""
-    payloads: dict[str, dict] = {}
-    for name in sorted(os.listdir(cells_dir)):
-        if not name.endswith(".json"):
-            continue
-        path = resolve_child_path(cells_dir, name)
-        with validated_open(
-            path, "r", allowed_roots=(cells_dir,), encoding="utf-8",
-        ) as fh:
-            payloads[name] = json.load(fh)
-    return payloads
+def _row_line(stats: dict) -> str:
+    ti = stats["takeoff_infections_total"]
+    ts = stats["takeoff_before_share"]
+    tr = stats["takeoff_recorded_onsets"]
+    flags = []
+    if stats["truth_leg_in_band"]:
+        flags.append("TRUTH-IN-BAND")
+    if stats["timing_leg_in_band"]:
+        flags.append("TIMING-IN-BAND")
+    if stats["fizzled_over_half"]:
+        flags.append("FIZZLE>HALF")
+    if stats["strata"]["during_dominant"]:
+        flags.append("DURING-DOMINANT")
+    med = _common.med
+    return (
+        f"takeoff {stats['takeoff_n']}/{stats['n']} "
+        f"rec med {med(tr['median'])} "
+        f"[{med(tr['q05'])},{med(tr['q95'])}] "
+        f"inf med {med(ti['median'])} "
+        f"[{med(ti['q05'])},{med(ti['q95'])}] "
+        f"bshr med {med(ts['median'])} "
+        f"during-share {med(stats['strata']['during_share_med'])} "
+        f"{' '.join(flags)}"
+    )
 
 
-def _audit_all(
-    payloads: dict[str, dict],
-    cells: list,
-    declared_by_arm: dict[str, dict],
-) -> tuple[dict[str, list[str]], dict[tuple, list[dict]]]:
-    """Audit each payload and bucket by (theta, arm)."""
-    by_key = {(c.theta, c.arm_id, c.seed): c for c in cells}
-    audit_failures: dict[str, list[str]] = {}
-    rows: dict[tuple, list[dict]] = {}
-    for name, payload in payloads.items():
-        cell = payload.get("cell") or {}
-        key = (
-            float(cell.get("theta")), cell.get("arm_id"),
-            int(cell.get("seed")),
+def _collect(report: dict, theta: float, arm_id: str, stats: dict) -> None:
+    report.setdefault("in_band_landings", [])
+    report.setdefault("fizzle_rows", [])
+    report.setdefault("during_dominant_rows", [])
+    label = f"theta={theta:.4g}|arm={arm_id}"
+    if stats["truth_leg_in_band"] or stats["timing_leg_in_band"]:
+        report["in_band_landings"].append(
+            {
+                "theta": theta, "arm_id": arm_id,
+                "truth_leg_in_band": stats["truth_leg_in_band"],
+                "timing_leg_in_band": stats["timing_leg_in_band"],
+                "takeoff_infections_total": (
+                    stats["takeoff_infections_total"]
+                ),
+                "takeoff_before_share": stats["takeoff_before_share"],
+            },
         )
-        if key not in by_key:
-            audit_failures[name] = ["cell key not in the declared lattice"]
-            continue
-        declared = declared_by_arm.get(cell.get("arm_id"))
-        failures = audit_cell(payload, declared) if declared else [
-            f"unknown arm {cell.get('arm_id')}",
-        ]
-        if failures:
-            audit_failures[name] = failures
-        rows.setdefault((key[0], key[1]), []).append(payload)
-    return audit_failures, rows
-
-
-def _print_rows(report: dict) -> None:
-    for label, stats in report["rows"].items():
-        ti = stats["takeoff_infections_total"]
-        ts = stats["takeoff_before_share"]
-        tr = stats["takeoff_recorded_onsets"]
-        flags = []
-        if stats["truth_leg_in_band"]:
-            flags.append("TRUTH-IN-BAND")
-        if stats["timing_leg_in_band"]:
-            flags.append("TIMING-IN-BAND")
-        if stats["fizzled_over_half"]:
-            flags.append("FIZZLE>HALF")
-        if stats["strata"]["during_dominant"]:
-            flags.append("DURING-DOMINANT")
-
-        def med(v: float | None) -> str:
-            return "n/a" if v is None else f"{v:.3g}"
-
-        print(
-            f"  {label}: takeoff {stats['takeoff_n']}/{stats['n']} "
-            f"rec med {med(tr['median'])} "
-            f"[{med(tr['q05'])},{med(tr['q95'])}] "
-            f"inf med {med(ti['median'])} "
-            f"[{med(ti['q05'])},{med(ti['q95'])}] "
-            f"bshr med {med(ts['median'])} "
-            f"during-share {med(stats['strata']['during_share_med'])} "
-            f"{' '.join(flags)}",
-        )
+    if stats["fizzled_over_half"]:
+        report["fizzle_rows"].append(label)
+    if stats["strata"]["during_dominant"]:
+        report["during_dominant_rows"].append(label)
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cells", required=True)
-    parser.add_argument("--design", required=True)
-    parser.add_argument("--out", default=None)
-    parser.add_argument(
-        "--allow-partial", action="store_true",
-        help="read whatever cells exist (canary/incomplete arrays)",
+    report = _common.run_readout(
+        argv,
+        root=REPO_ROOT,
+        description=__doc__,
+        declared_fn=_declared,
+        audit_fn=audit_cell,
+        row_stats_fn=_row_stats,
+        row_line_fn=_row_line,
+        collect_fn=_collect,
     )
-    args = parser.parse_args(argv)
-
-    cells_dir = resolve_repo_path(REPO_ROOT, args.cells)
-    design_path = resolve_repo_path(REPO_ROOT, args.design)
-    design = load_design(design_path, repo_root=REPO_ROOT)
-    cells = enumerate_cells(design)
-    declared_by_arm = {
-        arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-    }
-
-    payloads = _load_payloads(cells_dir)
-    if not args.allow_partial and len(payloads) < len(cells):
-        print(
-            f"{len(payloads)} of {len(cells)} cells present; "
-            "pass --allow-partial for a partial read",
-            file=sys.stderr,
-        )
+    if report is None:
         return 2
-
-    audit_failures, rows = _audit_all(payloads, cells, declared_by_arm)
-
-    report = {
-        "cells_found": len(payloads),
-        "cells_expected": len(cells),
-        "audit_failures": audit_failures,
-        "rows": {},
-        "in_band_landings": [],
-        "fizzle_rows": [],
-        "during_dominant_rows": [],
-    }
-    for (theta, arm_id), row in sorted(rows.items()):
-        stats = _row_stats(row)
-        label = f"theta={theta:.4g}|arm={arm_id}"
-        report["rows"][label] = stats
-        if stats["truth_leg_in_band"] or stats["timing_leg_in_band"]:
-            report["in_band_landings"].append(
-                {
-                    "theta": theta, "arm_id": arm_id,
-                    "truth_leg_in_band": stats["truth_leg_in_band"],
-                    "timing_leg_in_band": stats["timing_leg_in_band"],
-                    "takeoff_infections_total": (
-                        stats["takeoff_infections_total"]
-                    ),
-                    "takeoff_before_share": stats["takeoff_before_share"],
-                },
-            )
-        if stats["fizzled_over_half"]:
-            report["fizzle_rows"].append(label)
-        if stats["strata"]["during_dominant"]:
-            report["during_dominant_rows"].append(label)
-
-    if args.out:
-        out_path = resolve_repo_path(REPO_ROOT, args.out)
-        with validated_open(
-            out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
-        ) as fh:
-            json.dump(report, fh, indent=2, sort_keys=True)
-
-    print(
-        f"{report['cells_found']}/{report['cells_expected']} cells; "
-        f"{len(audit_failures)} audit failures",
+    _common.print_extras(
+        report,
+        ["in_band_landings", "fizzle_rows", "during_dominant_rows"],
     )
-    _print_rows(report)
-    for key in ("in_band_landings", "fizzle_rows", "during_dominant_rows"):
-        if report[key]:
-            print(
-                key.upper() + ":", json.dumps(report[key], indent=1),
-            )
     return 0
 
 
