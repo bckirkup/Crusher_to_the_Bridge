@@ -654,3 +654,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   i.e. whatever can move both truth legs at once. Design
   `picard_framework/runs/covid_ascertain_v1_design.json`, ledger
   `docs/ledger/ASCERTAIN-V1.md`.
+- **`SEED-GEOM-V1` is measured — index/seed structure is retired as the
+  truth-gap suspect: no declared geometry moves both legs, and none
+  moves the truth leg at all** (480 cells, 16 arms: onset epoch
+  {−6…+6} incl. the silent-aboard P6 corner, placement {ROLE_CREW,
+  ROLE_ANY, FR_IN, CREW_FR_IN}, breadth {2, 8, 30}, + D0 baseline +
+  REF_M0P56 reference, θ {1e11, 2.37e11, 1e12} × seeds 20200205–14,
+  480/480, 0/480 audit failures, measured at `1dfac0e4`,
+  `docs/ledger/SEED-GEOM-V1.md`, job-def rev 34, image digest
+  `sha256:976993cd…`). Truth leg: every takeoff row medians
+  infections_total 3,461–3,612 (~93–97% of aboard) at every θ — the
+  once-ignited burn is θ- and geometry-invariant; breadth scaled the
+  index's aboard-window acquisitions ~1,000× (3 → 2,991 at CP30) for
+  ~0× truth change — the NORO-GENO-02 saturation shape on covid.
+  Timing leg: exactly one row median lands in 0.173±0.10
+  (FR_IN@anchor 0.205) but seed-paired Δ ≈ 0 — takeoff-set
+  composition, not a per-seed shift; 0.173 sits inside D0's own
+  cross-seed spread. Count leg: every non-channel takeoff row medians
+  1,523–3,590 (REF_M0P56 reproduces 215/234/270 by θ as designed). Closest
+  single cell: FR_IN@1e11 s20200207 = 178 recorded / 932 infected —
+  inside the band, before_share 0.000, one seed only. Verdict
+  `geometry_incapable`: all four suspect axes now measured as unable
+  to reach the truth band; the residual is structural — on ignition
+  ~96% of aboard burns. Surviving suspect classes: susceptibility /
+  effective-population structure (the band ≈ 19–26% of 3,710 aboard)
+  or mid-voyage suppression dynamics — not further seed tuning.
+  Design `picard_framework/runs/covid_seed_geom_v1_design.json`,
+  ledger `docs/ledger/SEED-GEOM-V1.md`.
