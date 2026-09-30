@@ -627,3 +627,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   moves to seed/index structure. Design
   `picard_framework/runs/covid_sero_channel_v1_design.json`, ledger
   `docs/ledger/SERO-CHANNEL-V1.md`.
+- **`ASCERTAIN-V1` is measured — the channel-vs-truth decomposition of
+  the ~18× count gap is now quantified on the conditioned lattice**
+  (270 cells, 9 arms over `observation_model.onset_recording` plus the
+  mild-eligibility corners, θ {1e11, 2.37e11, 1e12} × seeds
+  20200205–14, takeoff-conditional, measured at `cb519c97`,
+  `docs/ledger/ASCERTAIN-V1.md`, job-def rev 33, image digest
+  `sha256:f8f56c23…`). The channel shares are multiplicative and
+  near-exact: the symptomatic-at-specimen gate is nearly non-binding
+  (~0.97 of dated mass), the recall draw tracks p almost exactly
+  (0.567 @0.56, 0.28 @0.28), and the mild stratum carries ~0.87 of
+  dated mass — deleting it alone (M0) drops the takeoff median to
+  ~2.0–2.5× the 197 record, and mild-corner × period channel
+  (M0P56) lands the count at 207–270 vs 197 — inside the declared
+  ~[150, 250] band at all three θ. But the landing is degenerate: it
+  deletes the record's dominant mild stratum (dating rate of confirmed
+  collapses to 0.072 vs 0.277), before_share stays 0.60–0.84 vs
+  0.173 on every row, and infections_total medians 3,536–3,599 never
+  move at any arm or θ — q05–q95 never intersects the held-out band
+  [712, 960]. Frozen-grammar verdict `channel_only`: the count leg is
+  ~fully observational at the declared corner (mild ≈ 7.5×, recall
+  ≈ 1.8×, gate ≈ 1.03×); the residual is truth-level (~3.5–4× the
+  serology band plus the timing leg ~3–5× off), reachable on neither
+  the θ axis nor the ascertainment axis. Standing suspects narrow to
+  seed/index structure — day-0 exposure geometry and ring membership —
+  i.e. whatever can move both truth legs at once. Design
+  `picard_framework/runs/covid_ascertain_v1_design.json`, ledger
+  `docs/ledger/ASCERTAIN-V1.md`.
