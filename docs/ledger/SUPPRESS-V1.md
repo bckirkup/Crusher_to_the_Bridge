@@ -2,7 +2,8 @@
 **Date:** 2026-09-30
 **Commit:** bbdb7990
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 99d090b4
 
 The SUPPRESS-V1 conditioned array: mid-voyage suppression dynamics —
 the surviving suspect class after six measured retirements (COOP-V1
@@ -75,3 +76,60 @@ Verdict grammar (frozen): `suppression_capable_at_corner` /
 `deferral_only` / `suppression_incapable`. Design
 `picard_framework/runs/covid_suppress_v1_design.json`; readout
 `tools/covid_suppress_v1_readout.py`.
+
+## Measured (630/630 cells, 0 audit failures)
+
+Jobdef `picard-covid-boarding-screen` rev 38, image digest
+`sha256:1281629a…`; canary job `6d190169` (42 cells), full job
+`6a0c71db` (588). D0 reproduces the measured-failing baseline
+seed-for-seed (inf med ~3,558 / rec ~3,237 / bshr 0.606 at anchor)
+— the cross-image drift check is clean.
+
+**Truth leg — nothing lands in band.** The axis floor is the
+deepest corner: SOP017_D4 inf med 1,121–1,197 across all three θ
+(seed-paired Δinf ≈ −2,390 vs D0 — real ~67% suppression, still
+~160 over the band top 960), and it halves takeoff (7–9/14 seeds).
+Every shallower corner degrades monotonically toward baseline
+(D6 ~1,160–1,750, D8 ~2,270–3,370, D10+ ≈ baseline), D14 ≈ inert,
+and SOP017_D40 is the clean never-binds witness (during 0,
+Δ ≈ RNG reorder only).
+
+**Timing leg — nothing approaches 0.173 ± 0.10.** Every arm's
+takeoff before_share median is 0.51–0.88; the best is SOP009_D10's
+0.51 — 2× the top edge.
+
+**Shape — the truncation composite fires but degenerately.** Five
+rows carry the declared signature (during-window dominant AND
+pooled cabin+crew-mess share > 0.5 AND crew-lagged onsets, on ≥5
+takeoff seeds): SOP-017 retimes {4,6,8} — θ1e11 {D4,D6,D8}, anchor
+D6, θ1e12 D6 (during ~1,070–1,130 vs ~86–105 before on D0;
+cabin+mess share 0.78–0.86; crew lag +0.8–1.8 d, vs record's ~10 d
+and D4's inverted −2.1 to −0.9 at the two hotter θ). It is the
+machinery's genuine confinement signature — and it cannot co-land
+with the record: the confinement that concentrates spread into
+cabins+crew-mess is the same confinement leaking ≥160 infections
+above the band. Suppression-shaped mass that shouldn't exist, not
+truncation.
+
+**Protocol contrast at constant window** (day 12, anchor): SOP-009
+Δinf −377, SOP-017-ALLHANDS −471, SOP-017 −333 — channel scalars +
+venue closures and zero exemptions each buy real mass over pure
+spatial confinement. The crew-exemption leak: ALLHANDS collapses
+during-window mass to ~174–207 vs SOP-017's 459–800 at the same
+window — roughly half the during-window leak is working crew.
+SOP-011 ≡ SOP-007 ≡ baseline (Δinf +5 to +19 — symptomatic-only
+adds nothing over the shipped status-driven floor; galley/mess
+closure alone is inert). REF_M0P56 reproduces its degenerate
+count-match (rec 234–268).
+
+**Verdict: `suppression_incapable`.** Not capable_at_corner — no
+declared corner reaches the band (floor ~1,120, and it costs half
+the seeds). Not deferral_only — totals genuinely drop ~2,400 paired,
+not conserved-and-shifted; during-window dominance is contemporaneous
+leak-through (exempt crew + cabin rings + unprotected zones), not
+postponed mass. Every declared mechanism class in the conditioned
+grammar is now measured-retired: dose law, Θ, ascertainment channel,
+index geometry, susceptibility structure, delivery machinery,
+scheduled suppression. The residual — the record's ~19–26% attack
+with a mid-growth slowdown at confinement — needs a mechanism
+outside this grammar.

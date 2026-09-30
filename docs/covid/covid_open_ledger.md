@@ -748,3 +748,35 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   mid-voyage suppression dynamics. Design
   `picard_framework/runs/covid_heat_v1_design.json`, ledger
   `docs/ledger/HEAT-V1.md`.
+- **`SUPPRESS-V1` is measured — scheduled mid-voyage suppression is
+  retired: `suppression_incapable`** (630 cells, 15 arms on the
+  single scheduled-protocol slot {protocol × window}: SOP-017 retimed
+  start {4,6,8,10,12,14}, SOP-009 {10,12}, SOP-017-ALLHANDS {12}
+  non-scoring, SOP-011 {10}, SOP-007 {10,12}, SOP-017 {40,45}
+  never-binds witness, + D0 + REF_M0P56, θ {1e11, 2.37e11, 1e12} ×
+  seeds 20200205–18, 630/630, 0/630 audit failures, measured at
+  `99d090b4`, `docs/ledger/SUPPRESS-V1.md`, job-def rev 38, image
+  digest `sha256:1281629a…`). Truth leg: the axis floor is the
+  deepest corner — SOP017_D4 inf med 1,121–1,197 at all θ (paired
+  Δinf ≈ −2,390 vs D0, real ~67% suppression, still ~160 over the
+  band top; takeoff halves to 7–9/14) — every shallower window
+  degrades monotonically to baseline; D14 ≈ inert; D40 never-binds
+  clean. Timing leg: every arm's before_share median 0.51–0.88, no
+  in-band landing (best SOP009_D10 0.51 ≈ 2× the top edge). Shape:
+  the declared truncation composite (during-dominant + cabin/mess
+  >0.5 + crew lag, ≥5 takeoff) fires on five SOP-017 retime rows
+  {4,6,8} — genuinely, but degenerately: those rows still carry
+  inf ≥1,121 and bshr ≥0.73, so the machinery produces the
+  suppression shape only where it also leaks ≥160 over the band.
+  Protocol contrast at day 12/anchor: SOP-009 Δinf −377,
+  ALLHANDS −471, SOP-017 −333 (the crew-exemption leak ≈ half the
+  during-window mass: ALLHANDS during ~174–207 vs SOP-017 459–800);
+  SOP-011 ≡ SOP-007 ≡ baseline (Δ +5–19 — symptomatic-only adds
+  nothing over the shipped status floor; venue closure alone inert).
+  Verdict `suppression_incapable` — not deferral (totals drop, not
+  conserved): the scheduled-protocol grammar cannot reproduce the
+  record at any corner. Every declared mechanism class is now
+  measured-retired — the residual needs a mechanism outside this
+  grammar. Design
+  `picard_framework/runs/covid_suppress_v1_design.json`, ledger
+  `docs/ledger/SUPPRESS-V1.md`.
