@@ -14,23 +14,25 @@ founders**. Design frozen before first cell:
 `docs/norovirus/noro_geno_02_readout.md`; aggregator:
 `tools/noro_diag/geno02_surface_readout.py`.
 
-## Verdict: gate real but compressed — measured 1.52× vs declared ~4.2×
+## Verdict: gate real but compressed — measured 1.76× vs declared ~4.2×
 
 Pooled aboard non-secretor share over the 15 dual-powered cells
-(≥40 aboard/20 seeds on both mono arms):
+(≥40 aboard/20 seeds on both mono arms; mixture runs excluded from
+the pools):
 
 - mono_gii4 (rel 0.10): **77/1,102 = 6.99%** [5.6, 8.6] Wilson
-- mono_nongii4 (rel 0.45): **268/2,516 = 10.65%** [9.5, 11.9]
-- ratio **1.52×**; per-cell ratios 1.22–3.00, 14/15 in the declared
+- mono_nongii4 (rel 0.45): **157/1,276 = 12.30%** [10.6, 14.2]
+- ratio **1.76×**; per-cell ratios 1.22–3.00, 14/15 in the declared
   direction (one powered inversion, spr 21d ship@hi, 3-vs-2 counts)
 
-B lands on its naive prediction (~9.5%); **A carries a ~7% floor, ~3×
-above the 2.3% formula** — the class rel does not gate every aboard
-acquisition. Which channel bypasses it is not resolved by this stage
-(candidate hypotheses: dose-saturated cabinmate/emesis-near-field
+Both arms land above their naive shares — **A ~3× above** (6.99% vs
+the 2.3% formula), B ~1.3× above (12.3% vs ~9.5%) — and the excess
+dominates A's small denominator: the class rel does not gate every
+aboard acquisition. Which channel bypasses it is not resolved by this
+stage (candidate hypotheses: dose-saturated cabinmate/emesis-near-field
 challenges, imported-lineage contact chains). The two-class structure is
-supported (B > A everywhere mass exists) but its realized share ratio is
-~1.5×–2.6×, materially below the naive ~4.2×.
+supported (B > A everywhere mass exists) but its realized share ratio
+pools at 1.76× (per-cell 1.22–3.00), materially below the naive ~4.2×.
 
 ## Mass surface (the "where does aboard mass exist" map)
 

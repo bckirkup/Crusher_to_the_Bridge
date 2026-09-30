@@ -233,7 +233,9 @@ def gate_row(cell: str, a: CellAgg, b: CellAgg) -> dict:
     }
 
 
-def build_report(arms: dict[str, list[Run]]) -> dict:
+def _accumulate_cells(
+    arms: dict[str, list[Run]],
+) -> tuple[dict, dict[str, int]]:
     cells: dict[tuple[str, str, int, str], CellAgg] = defaultdict(CellAgg)
     wrong_class: dict[str, int] = defaultdict(int)
     for arm, runs in arms.items():
@@ -243,44 +245,79 @@ def build_report(arms: dict[str, list[Run]]) -> dict:
                 wrong_class[run.run_id] += 1
             if arm == "mono_nongii4" and run.classes_aboard.get("gii4", 0) > 0:
                 wrong_class[run.run_id] += 1
-    per_cell = {}
-    for (arm, plat, ep, imp), agg in sorted(cells.items()):
-        p, lo, hi = wilson(agg.nonsec_aboard, agg.aboard)
-        per_cell[f"{arm}|{plat}|{ep}|{imp}"] = {
-            "runs": agg.runs, "seeds": len(agg.seeds),
-            "aboard": agg.aboard, "nonsec_aboard": agg.nonsec_aboard,
-            "share": p, "ci": [lo, hi], "powered": agg.powered,
-            "imported": agg.imported, "ever_infected": agg.ever,
-            "attack_rate_ever": agg.ever / agg.agents if agg.agents else 0.0,
-            "postings_per_1000": 1000.0 * agg.reported / agg.agents if agg.agents else 0.0,
-            "alert_voyages": agg.alerts,
-            "missing_attribution_runs": agg.missing_attribution,
-            "classes_aboard": dict(agg.classes_aboard),
-            "classes_ever": dict(agg.classes_ever),
-            "genotypes_ever": dict(agg.genotypes_ever),
-        }
+    return cells, wrong_class
+
+
+def _cell_row(agg: CellAgg) -> dict:
+    p, lo, hi = wilson(agg.nonsec_aboard, agg.aboard)
+    return {
+        "runs": agg.runs, "seeds": len(agg.seeds),
+        "aboard": agg.aboard, "nonsec_aboard": agg.nonsec_aboard,
+        "share": p, "ci": [lo, hi], "powered": agg.powered,
+        "imported": agg.imported, "ever_infected": agg.ever,
+        "attack_rate_ever": agg.ever / agg.agents if agg.agents else 0.0,
+        "postings_per_1000": 1000.0 * agg.reported / agg.agents if agg.agents else 0.0,
+        "alert_voyages": agg.alerts,
+        "missing_attribution_runs": agg.missing_attribution,
+        "classes_aboard": dict(agg.classes_aboard),
+        "classes_ever": dict(agg.classes_ever),
+        "genotypes_ever": dict(agg.genotypes_ever),
+    }
+
+
+def _dual_powered(
+    cells: dict, plat: str, ep: int, imp: str,
+) -> tuple[CellAgg, CellAgg] | None:
+    a = cells.get(("mono_gii4", plat, ep, imp))
+    b = cells.get(("mono_nongii4", plat, ep, imp))
+    if a and b and a.powered and b.powered:
+        return a, b
+    return None
+
+
+def _cell_coords(arms: dict[str, list[Run]]) -> set[tuple[str, int, str]]:
+    return {cell_key(r) for rs in arms.values() for r in rs}
+
+
+def _gate_surface(cells: dict, arms: dict[str, list[Run]]) -> list[dict]:
     gate = []
-    for (plat, ep, imp) in sorted({cell_key(r) for rs in arms.values() for r in rs}):
-        a = cells.get(("mono_gii4", plat, ep, imp))
-        b = cells.get(("mono_nongii4", plat, ep, imp))
-        if a and b and a.powered and b.powered:
-            gate.append(gate_row(f"{plat}|{ep}|{imp}", a, b))
-    pool_a = CellAgg()
-    pool_b = CellAgg()
-    for (arm, plat, ep, imp), agg in cells.items():
-        mate = "mono_nongii4" if arm == "mono_gii4" else "mono_gii4"
-        other = cells.get((mate, plat, ep, imp))
-        if agg.powered and other and other.powered:
-            for run in [r for r in arms[arm] if cell_key(r) == (plat, ep, imp)]:
-                (pool_a if arm == "mono_gii4" else pool_b).add(run)
-    pooled = gate_row("pooled_powered", pool_a, pool_b) if pool_a.aboard else None
+    for (plat, ep, imp) in sorted(_cell_coords(arms)):
+        pair = _dual_powered(cells, plat, ep, imp)
+        if pair:
+            gate.append(gate_row(f"{plat}|{ep}|{imp}", *pair))
+    return gate
+
+
+def _pooled_gate(cells: dict, arms: dict[str, list[Run]]) -> dict | None:
+    powered = {
+        coord for coord in _cell_coords(arms)
+        if _dual_powered(cells, *coord)
+    }
+    pools = {"mono_gii4": CellAgg(), "mono_nongii4": CellAgg()}
+    for arm, runs in arms.items():
+        if arm not in pools:
+            continue
+        for run in runs:
+            if cell_key(run) in powered:
+                pools[arm].add(run)
+    if pools["mono_gii4"].aboard:
+        return gate_row("pooled_powered", pools["mono_gii4"], pools["mono_nongii4"])
+    return None
+
+
+def build_report(arms: dict[str, list[Run]]) -> dict:
+    cells, wrong_class = _accumulate_cells(arms)
+    per_cell = {
+        f"{arm}|{plat}|{ep}|{imp}": _cell_row(agg)
+        for (arm, plat, ep, imp), agg in sorted(cells.items())
+    }
     return {
         "n_runs": {arm: len(rs) for arm, rs in arms.items()},
         "n_cells": len(per_cell),
         "n_powered": sum(1 for c in per_cell.values() if c["powered"]),
         "per_cell": per_cell,
-        "gate_surface": gate,
-        "pooled_gate": pooled,
+        "gate_surface": _gate_surface(cells, arms),
+        "pooled_gate": _pooled_gate(cells, arms),
         "wrong_class_founder_runs": dict(wrong_class),
     }
 

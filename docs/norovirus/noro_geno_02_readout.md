@@ -20,20 +20,26 @@ Ledger entry: `docs/ledger/NORO-GENO-02.md`.
 - Aggregator: `tools/noro_diag/geno02_surface_readout.py`; full JSON at
   `geno02_surface_report.json` beside this file's companion data.
 
-## Headline: the gate is real but compressed — 1.52×, not ~4.2×
+## Headline: the gate is real but compressed — 1.76×, not ~4.2×
 
 Pooled over the 15 dual-powered cells (both mono arms ≥40 aboard):
 
 | arm | aboard | non-secretor aboard | share | Wilson 95% |
 |---|---|---|---|---|
 | A mono_gii4 (rel 0.10) | 1,102 | 77 | 6.99% | [5.6, 8.6] |
-| B mono_nongii4 (rel 0.45) | 2,516 | 268 | 10.65% | [9.5, 11.9] |
+| B mono_nongii4 (rel 0.45) | 1,276 | 157 | 12.30% | [10.6, 14.2] |
 
-**Ratio B/A = 1.52×.** The declared shares predicted 2.3% vs 9.5%
-(~4.2×). B lands at its naive prediction; **A carries a ~7% floor, ~3×
-above the 2.3% formula** — the compression is entirely on the GII.4
-side. Whole-surface (all cells incl. unpowered): A 7.15%, B 12.29%,
-mixture 8.92%.
+**Ratio B/A = 1.76×.** The declared shares predicted 2.3% vs 9.5%
+(~4.2×). Both arms land above their naive predictions — **A ~3×
+above** (6.99% vs 2.3%), B ~1.3× above (12.3% vs 9.5%) — and the
+excess dominates A's small denominator, so the compression is on the
+GII.4 side. Whole-surface (all cells incl. unpowered): A 7.15%, B
+12.29%, mixture 8.92%.
+
+Provenance note: pooled figures above exclude mixture-arm runs — an
+earlier aggregator revision let mixture runs at dual-powered cells
+into the B pool (denominator 2,516 instead of 1,276), understating the
+ratio at 1.52×. Per-cell figures were never affected.
 
 Interpretation (inferred, not measured): the naive share
 `f·rel/(1−f+f·rel)` assumes the rel gates *every* acquisition. A
@@ -41,7 +47,8 @@ floor on A means some fraction of aboard acquisitions bypass the
 secretor gate — candidate channels (hypothesis, unproven): high-dose
 challenges (cabinmate / emesis near-field) where 0.10× susceptibility
 still clears the infection dose, or acquisitions attributed to imported
-lineages' immediate contacts where challenge dose saturates. The gate
+lineages' immediate contacts where challenge dose saturates. The same
+channel plausibly carries B's smaller above-naive excess. The gate
 differentially suppresses non-GII.4 acquisitions as declared, but the
 A-arm floor caps the achievable ratio well below ~4×.
 
