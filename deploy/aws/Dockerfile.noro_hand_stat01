@@ -1,0 +1,20 @@
+# NORO-HAND-STATIONARY-01 worker — the campaign image with a worker
+# entry. The occupancy census instruments (tools/noro_diag/hand_occupancy.py
+# plus the extended growth_chain_census / fomite_mass_balance) ship inside
+# the base image built at the merged SHA; this layer only adds the array
+# entrypoint and resets ENTRYPOINT so the job definition's argv[0] is a
+# script (the base image's `-m campaign_runner` entrypoint would eat it).
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.noro_hand_stat01 \
+#     -t picard-campaign:noro-hand-stat01 .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/hand_occupancy_entrypoint.py ./deploy/aws/hand_occupancy_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
