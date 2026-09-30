@@ -163,38 +163,39 @@ def test_declared_defaults_and_corners():
 
 def test_audit_cell_clean_and_delivery_failures():
     declared = _declared_for()
-    assert mod.audit_cell(_payload(), declared) == []
-    assert mod.audit_cell(_payload(with_ring=False), declared) == [
-        "missing seed_ring block",
-    ]
+    assert mod.audit_cell(_payload(), declared, THETA) == []
+    assert mod.audit_cell(
+        _payload(with_ring=False), declared, THETA,
+    ) == ["missing seed_ring block"]
 
     fails = mod.audit_cell(
-        _payload(delivery=_delivery(half_life=0.5)), declared,
+        _payload(delivery=_delivery(half_life=0.5)), declared, THETA,
     )
     assert fails
     assert "airborne_half_life_hours" in fails[0]
 
     fails = mod.audit_cell(
         _payload(delivery=_delivery(route_eff={"droplet": 0.03})),
-        declared,
+        declared, THETA,
     )
     assert fails
     assert "route_efficiency_multipliers" in fails[0]
 
     fails = mod.audit_cell(
-        _payload(delivery=_delivery(pool="none")), declared,
+        _payload(delivery=_delivery(pool="none")), declared, THETA,
     )
     assert fails
     assert "pathogen_pool_transport" in fails[0]
 
     fails = mod.audit_cell(
-        _payload(delivery=_delivery(cap_active=False)), declared,
+        _payload(delivery=_delivery(cap_active=False)), declared, THETA,
     )
     assert fails
     assert "exposure_cap_active" in fails[0]
 
     fails = mod.audit_cell(
-        _payload(delivery=_delivery(contacts_absent=True)), declared,
+        _payload(delivery=_delivery(contacts_absent=True)),
+        declared, THETA,
     )
     assert fails
     assert "activity_contacts" in fails[0]
@@ -222,7 +223,7 @@ def test_audit_cell_armed_corners():
         ),
         expo_flag=True,
     )
-    assert mod.audit_cell(good, heat) == []
+    assert mod.audit_cell(good, heat, THETA) == []
 
     poly = _declared_for({
         "transmission_overrides": {
@@ -230,13 +231,13 @@ def test_audit_cell_armed_corners():
         },
     })
     assert mod.audit_cell(
-        _payload(delivery=_delivery(contacts_absent=True)), poly,
+        _payload(delivery=_delivery(contacts_absent=True)), poly, THETA,
     ) == []
 
     fails = mod.audit_cell(
         _payload(spec={"onset_day": -2.0, "count": 2, "role": "crew"},
                  seeded_count=2),
-        _declared_for(),
+        _declared_for(), THETA,
     )
     assert any("seed_spec.onset_day" in f for f in fails)
     assert any("seed_spec.count" in f for f in fails)
@@ -261,12 +262,12 @@ def test_audit_cell_ref_channel_echoes():
         },
         eligibility=[0, 0, 0, 1, 1],
     )
-    assert mod.audit_cell(good, ref) == []
+    assert mod.audit_cell(good, ref, THETA) == []
     bad = _payload(
         onset_recording={"report_probability": 0.28},
         eligibility=[0, 0, 1, 1, 1],
     )
-    fails = mod.audit_cell(bad, ref)
+    fails = mod.audit_cell(bad, ref, THETA)
     assert "onset_recording echo != declared block" in fails
     assert "onset_eligibility_by_severity echo != declared ladder" in fails
 
@@ -281,11 +282,23 @@ def test_row_stats_takeoff_bands_strata_and_kink():
     assert stats["timing_leg_in_band"] is True
     assert stats["truth_leg_in_band"] is False
     assert stats["both_legs"] is False
-    assert stats["strata"]["during_dominant"] is False
-    assert stats["day16_kink"]["post_over_pre_med"] == pytest.approx(1.0)
+    assert stats["during_dominant"] is False
+    assert stats["day16_kink"]["post_over_pre_median"] == pytest.approx(
+        1.0,
+    )
 
+    # A fizzle-majority row: fewer than half the seeds reach takeoff.
+    fizzle = [
+        _payload(seed=s, rec=3000, before=600, inf=3550.0)
+        for s in range(20200205, 20200209)
+    ] + [
+        _payload(seed=s, rec=0, before=0, inf=0.0)
+        for s in range(20200209, 20200215)
+    ]
+    stats = mod._row_stats(fizzle)
+    assert stats["fizzle_majority"] is True
     stats = mod._row_stats(payloads[:4])
-    assert stats["fizzled_over_half"] is True
+    assert stats["fizzle_majority"] is False
     assert stats["timing_leg_in_band"] is False
 
     in_band = [
@@ -303,8 +316,8 @@ def test_row_stats_takeoff_bands_strata_and_kink():
         for s in range(20200205, 20200215)
     ]
     stats = mod._row_stats(late)
-    assert stats["strata"]["during_dominant"] is True
-    assert stats["strata"]["during_share_med"] == pytest.approx(0.625)
+    assert stats["during_dominant"] is True
+    assert stats["during_share"]["median"] == pytest.approx(0.625)
 
     payloads = [_payload(rec=0, before=0, inf=0.0)]
     stats = mod._row_stats(payloads)
@@ -324,15 +337,14 @@ def test_row_stats_route_decomposition_pools_takeoff_only():
         for s in range(20200205, 20200215)
     ]
     stats = mod._row_stats(payloads)
-    dec = stats["route_decomposition"]
-    assert dec["aboard_window_by_route_pooled"] == {
+    assert stats["aboard_window_by_route_pooled"] == {
         "droplet": 200, "hvac_airborne": 100,
     }
-    assert dec["during_quarantine_by_route_pooled"] == {"droplet": 50}
-    assert dec["during_quarantine_by_zone_class_pooled"] == {
+    assert stats["during_quarantine_by_route_pooled"] == {"droplet": 50}
+    assert stats["during_quarantine_by_zone_class_pooled"] == {
         "public": 40, "cabin": 10,
     }
-    assert dec["during_quarantine_by_role_pooled"] == {
+    assert stats["during_quarantine_by_role_pooled"] == {
         "passenger": 40, "crew": 10,
     }
 

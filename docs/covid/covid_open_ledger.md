@@ -681,3 +681,12 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   or mid-voyage suppression dynamics — not further seed tuning.
   Design `picard_framework/runs/covid_seed_geom_v1_design.json`,
   ledger `docs/ledger/SEED-GEOM-V1.md`.
+- **Record-side cooling bound quantified** — the real outbreak ramped
+  ~1.2×/day (R₀ lit. 2.28–4.73 at serial interval 5–6 d; infection
+  incidence peaked Feb 2–4, AT confinement) vs the model's measured
+  ~1.8×/day median ramp; but rate alone cannot land 19–26% attack
+  (homogeneous R 2–4 → 80–98% final size), so the record needs a
+  susceptibility ceiling (~0.24 ± 0.07 effective share →
+  `immune_fraction` ~0.70–0.80) or mid-growth truncation (pooled-route
+  force ~×0.12–0.25) or a mix — discriminating observables enumerated
+  in `docs/covid/dp_growth_cooling_bound.md`.

@@ -15,8 +15,7 @@ Pools the synced campaign cells (``aws s3 sync .../cells/ <dir>``) for
 
 CLI paths are confined under the repository root (sync cells to
 ``campaign_results/<design>/cells/``); an audit failure is reported per
-cell. The audit+score CLI skeleton is shared with the other conditioned
-readouts in tools/covid_screen_readout.py.
+cell.
 """
 
 from __future__ import annotations
@@ -29,20 +28,20 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from picard_framework.covid_boarding_screen import (  # noqa: E402
     KEY_INDEX_ONSET_DAY,
     KEY_INDEX_SHEDDING_AT_DAY0,
+    enumerate_cells,
+    load_design,
 )
 from simulation_utils.paths import repo_root  # noqa: E402
-from tools import covid_screen_readout as _common  # noqa: E402
+from tools.covid_screen_readout_common import (  # noqa: E402
+    anchor_legs,
+    band_stats,
+    quantile,
+    resolve_design_arg,
+    run_readout,
+    takeoff_split,
+)
 
 REPO_ROOT = repo_root()
-
-TAKEOFF_MIN_ONSETS = _common.TAKEOFF_MIN_ONSETS
-T1_RECORDED = _common.T1_RECORDED
-T1_BEFORE_SHARE = _common.T1_BEFORE_SHARE
-BEFORE_SHARE_TOL = _common.BEFORE_SHARE_TOL
-H5_BAND = _common.H5_BAND
-MIN_TAKEOFF_SEEDS = _common.MIN_TAKEOFF_SEEDS
-
-_q = _common.q
 
 
 def _declared(arm: dict) -> dict:
@@ -144,7 +143,9 @@ def _audit_channel_echoes(payload: dict, declared: dict) -> list[str]:
     return failures
 
 
-def audit_cell(payload: dict, declared: dict) -> list[str]:
+def audit_cell(
+    payload: dict, declared: dict, theta: float | None = None,
+) -> list[str]:
     """Return the list of audit violations for one cell payload."""
     ring = payload.get("seed_ring")
     if not isinstance(ring, dict):
@@ -158,70 +159,62 @@ def audit_cell(payload: dict, declared: dict) -> list[str]:
 
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians/quantiles for one (theta, arm) row."""
-    split = _common.takeoff_split(payloads)
+    takeoff, vectors = takeoff_split(payloads)
     shed_flags = [
         p.get(KEY_INDEX_SHEDDING_AT_DAY0) for p in payloads
         if p.get(KEY_INDEX_SHEDDING_AT_DAY0) is not None
     ]
-    stats = _common.scored_row(split)
-    stats["index_shedding_day0_fraction"] = (
-        sum(bool(f) for f in shed_flags) / len(shed_flags)
-        if shed_flags else None
-    )
-    return stats
+    return {
+        "n": len(payloads),
+        "takeoff_n": len(takeoff),
+        "recorded_onsets": band_stats(vectors["rec"]),
+        "before_share": {"median": quantile(vectors["shares"], 0.5)},
+        "index_shedding_day0_fraction": (
+            sum(bool(f) for f in shed_flags) / len(shed_flags)
+            if shed_flags else None
+        ),
+        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
+        "takeoff_infections_total": band_stats(vectors["t_inf"]),
+        "takeoff_before_share": band_stats(vectors["t_share"]),
+        **{
+            k: v for k, v in anchor_legs(
+                len(takeoff), vectors["t_inf"], vectors["t_share"],
+            ).items()
+            if k != "enough_takeoff"
+        },
+    }
 
 
-def _row_line(stats: dict) -> str:
-    ti = stats["takeoff_infections_total"]
-    ts = stats["takeoff_before_share"]
-    tr = stats["takeoff_recorded_onsets"]
-    flags = []
-    if stats["truth_leg_in_band"]:
-        flags.append("TRUTH-IN-BAND")
-    if stats["timing_leg_in_band"]:
-        flags.append("TIMING-IN-BAND")
-    med = _common.med
-    return (
-        f"takeoff {stats['takeoff_n']}/{stats['n']} "
-        f"rec med {med(tr['median'])} "
-        f"[{med(tr['q05'])},{med(tr['q95'])}] "
-        f"inf med {med(ti['median'])} "
-        f"[{med(ti['q05'])},{med(ti['q95'])}] "
-        f"bshr med {med(ts['median'])} {' '.join(flags)}"
-    )
-
-
-def _collect(report: dict, theta: float, arm_id: str, stats: dict) -> None:
-    report.setdefault("in_band_landings", [])
-    if stats["truth_leg_in_band"] or stats["timing_leg_in_band"]:
-        report["in_band_landings"].append(
-            {
-                "theta": theta, "arm_id": arm_id,
-                "truth_leg_in_band": stats["truth_leg_in_band"],
-                "timing_leg_in_band": stats["timing_leg_in_band"],
-                "takeoff_infections_total": (
-                    stats["takeoff_infections_total"]
-                ),
-                "takeoff_before_share": stats["takeoff_before_share"],
-            },
-        )
+def _in_band_trigger(
+    theta: float, arm_id: str, stats: dict,
+) -> dict | None:
+    if not (stats["truth_leg_in_band"] or stats["timing_leg_in_band"]):
+        return None
+    return {
+        "theta": theta, "arm_id": arm_id,
+        "truth_leg_in_band": stats["truth_leg_in_band"],
+        "timing_leg_in_band": stats["timing_leg_in_band"],
+        "takeoff_infections_total": stats["takeoff_infections_total"],
+        "takeoff_before_share": stats["takeoff_before_share"],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    report = _common.run_readout(
-        argv,
-        root=REPO_ROOT,
-        description=__doc__,
-        declared_fn=_declared,
-        audit_fn=audit_cell,
-        row_stats_fn=_row_stats,
-        row_line_fn=_row_line,
-        collect_fn=_collect,
+    design = load_design(
+        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
     )
-    if report is None:
-        return 2
-    _common.print_extras(report, ["in_band_landings"])
-    return 0
+    return run_readout(
+        argv,
+        repo_root=REPO_ROOT,
+        cells=enumerate_cells(design),
+        declared_by_arm={
+            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
+        },
+        audit_cell=audit_cell,
+        row_stats=_row_stats,
+        report_key="in_band_landings",
+        row_triggers=_in_band_trigger,
+    )
 
 
 if __name__ == "__main__":

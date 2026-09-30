@@ -14,16 +14,18 @@ Pools the synced campaign cells (``aws s3 sync .../cells/ <dir>``) for
   [712, 960]),
 * the route decomposition: aboard_window_by_route and
   during_quarantine_by_route / by_zone_class / by_role pooled over
-  takeoff seeds, the quarantine stratum shares, and the day-16 onset
-  kink (recorded onsets days 13-15 vs 16-18),
-* the report-immediately triggers: in-band truth/timing landings, rows
-  fizzling on more than half the seeds (takeoff < 5), and rows where
-  during-quarantine infections become the dominant stratum.
+  takeoff seeds, the quarantine stratum sizes, and the day-16 onset
+  kink (mean daily recorded onsets days 13-15 vs 16-18 — a softened
+  kink means the cooling arm shifts incidence earlier rather than
+  clipping the tail),
+* the report-immediately triggers: in-band truth/timing landings,
+  fizzle-majority rows (takeoff on fewer than half the seeds), and
+  during-quarantine-dominant rows.
 
 CLI paths are confined under the repository root (sync cells to
 ``campaign_results/<design>/cells/``); an audit failure is reported per
 cell. The audit+score CLI skeleton is shared with the other conditioned
-readouts in tools/covid_screen_readout.py.
+readouts in tools/covid_screen_readout_common.py.
 """
 
 from __future__ import annotations
@@ -34,19 +36,21 @@ from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+from picard_framework.covid_boarding_screen import (  # noqa: E402
+    enumerate_cells,
+    load_design,
+)
 from simulation_utils.paths import repo_root  # noqa: E402
-from tools import covid_screen_readout as _common  # noqa: E402
+from tools.covid_screen_readout_common import (  # noqa: E402
+    anchor_legs,
+    band_stats,
+    quantile,
+    resolve_design_arg,
+    run_readout,
+    takeoff_split,
+)
 
 REPO_ROOT = repo_root()
-
-TAKEOFF_MIN_ONSETS = _common.TAKEOFF_MIN_ONSETS
-T1_RECORDED = _common.T1_RECORDED
-T1_BEFORE_SHARE = _common.T1_BEFORE_SHARE
-BEFORE_SHARE_TOL = _common.BEFORE_SHARE_TOL
-H5_BAND = _common.H5_BAND
-MIN_TAKEOFF_SEEDS = _common.MIN_TAKEOFF_SEEDS
-
-_q = _common.q
 
 # Shipped delivery constants (data/pathogens/active_profiles.json
 # sars_cov2_resp + crusher_labs/config.yaml, verified at design time).
@@ -61,9 +65,10 @@ SHIPPED_ROUTE_EFFICIENCIES = {
     "environmental_source": 0.05,
 }
 SHIPPED_POOL_TRANSPORT = "airflow"
-# crusher_labs/config.yaml ships transmission.activity_contacts enabled:true
-# with this authored CONTACT-ARCH-01 unit table -- so the resolved table is
-# the shipped default, not a null, on every arm that leaves the block alone.
+# crusher_labs/config.yaml ships transmission.activity_contacts
+# enabled:true with this authored CONTACT-ARCH-01 unit table -- so the
+# resolved table is the shipped default, not a null, on every arm that
+# leaves the block alone.
 SHIPPED_ACTIVITY_RATES = {
     "cabin": 0.25,
     "corridor": 0.25,
@@ -143,6 +148,35 @@ def _audit_seed_echoes(ring: dict) -> list[str]:
     return failures
 
 
+def _audit_contact_rates(
+    got_contacts: dict | None, want_rates: dict | None,
+) -> list[str]:
+    """activity_contacts echo vs the arm's expected resolved table."""
+    if want_rates is None:
+        if got_contacts is not None:
+            return [
+                "delivery.activity_contacts present on an arm whose "
+                "declared block resolves to None",
+            ]
+        return []
+    got_rates = got_contacts or {}
+    failures: list[str] = []
+    for act, want in want_rates.items():
+        got = got_rates.get(act)
+        per_role_ok = isinstance(got, dict) and all(
+            abs(float(v) - float(want)) < 1e-9 for v in got.values()
+        )
+        scalar_ok = isinstance(got, (int, float)) and (
+            abs(float(got) - float(want)) < 1e-9
+        )
+        if not (per_role_ok or scalar_ok):
+            failures.append(
+                f"delivery.activity_contacts.{act} {got} "
+                f"!= declared {want}",
+            )
+    return failures
+
+
 def _audit_delivery_echoes(payload: dict, declared: dict) -> list[str]:
     """payload.delivery vs the arm's declared delivery constants."""
     failures: list[str] = []
@@ -187,30 +221,9 @@ def _audit_delivery_echoes(payload: dict, declared: dict) -> list[str]:
             f"{delivery.get('exposure_cap_active')} != resolved "
             f"{want_active}",
         )
-    got_contacts = delivery.get("activity_contacts")
-    want_rates = declared["activity_contacts"]
-    if want_rates is None:
-        if got_contacts is not None:
-            failures.append(
-                "delivery.activity_contacts present on an arm whose "
-                "declared block resolves to None",
-            )
-    else:
-        got_rates = got_contacts or {}
-        for act, want in want_rates.items():
-            got = got_rates.get(act)
-            per_role_ok = isinstance(got, dict) and all(
-                abs(float(v) - float(want)) < 1e-9 for v in got.values()
-            )
-            scalar_ok = isinstance(got, (int, float)) and (
-                abs(float(got) - float(want)) < 1e-9
-            )
-            if not (per_role_ok or scalar_ok):
-                failures.append(
-                    f"delivery.activity_contacts.{act} {got} "
-                    f"!= declared {want}",
-                )
-    return failures
+    return failures + _audit_contact_rates(
+        delivery.get("activity_contacts"), declared["activity_contacts"],
+    )
 
 
 def _audit_channel_echoes(payload: dict, declared: dict) -> list[str]:
@@ -237,7 +250,7 @@ def _audit_channel_echoes(payload: dict, declared: dict) -> list[str]:
     return failures
 
 
-def audit_cell(payload: dict, declared: dict) -> list[str]:
+def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
     ring = payload.get("seed_ring")
     failures = (
@@ -252,167 +265,143 @@ def audit_cell(payload: dict, declared: dict) -> list[str]:
     )
 
 
-def _pooled_counter(payloads: list[dict], *keys: str) -> dict[str, int]:
-    """Sum a nested counter field across takeoff-seed payloads."""
-    pooled: Counter[str] = Counter()
-    for p in payloads:
-        node = p
-        for key in keys:
-            node = (node or {}).get(key)
-        for route, count in (node or {}).items():
-            pooled[str(route)] += int(count)
-    return dict(pooled)
+def _kink_ratio(p: dict) -> float | None:
+    """Post/pre mean daily recorded onsets across the day-16 SOP-017
+    boundary for one takeoff seed (None when pre-window is silent)."""
+    curve = p.get("onset_curve") or {}
 
+    def _mean(days: tuple[int, ...]) -> float:
+        total = sum(
+            sum((curve.get(str(d)) or {}).values()) for d in days
+        )
+        return float(total) / len(days)
 
-def _kink_stats(payloads: list[dict]) -> dict:
-    """Recorded onset kink at the SOP-017 boundary: per-seed mean daily
-    recorded onsets on days 13-15 vs 16-18, and the post/pre ratio."""
-    pre_vals: list[float] = []
-    post_vals: list[float] = []
-    ratios: list[float] = []
-    for p in payloads:
-        curve = p.get("onset_curve") or {}
-
-        def _mean(days: tuple[int, ...]) -> float:
-            total = sum(
-                sum((curve.get(str(d)) or {}).values()) for d in days
-            )
-            return float(total) / len(days)
-
-        pre = _mean(KINK_PRE_DAYS)
-        post = _mean(KINK_POST_DAYS)
-        pre_vals.append(pre)
-        post_vals.append(post)
-        if pre > 0:
-            ratios.append(post / pre)
-    return {
-        "pre_mean_daily_med": _q(pre_vals, 0.5),
-        "post_mean_daily_med": _q(post_vals, 0.5),
-        "post_over_pre_med": _q(ratios, 0.5),
-        "post_over_pre_q05": _q(ratios, 0.05),
-        "post_over_pre_q95": _q(ratios, 0.95),
-    }
+    pre = _mean(KINK_PRE_DAYS)
+    post = _mean(KINK_POST_DAYS)
+    if pre <= 0:
+        return None
+    return post / pre
 
 
 def _row_stats(payloads: list[dict]) -> dict:
-    """Takeoff-conditional medians/quantiles + route decomposition for
-    one (theta, arm) row."""
-    split = _common.takeoff_split(payloads)
-    takeoff = split["takeoff"]
-    t_before = [
-        float(p["infections_before_quarantine"]) for p in takeoff
-        if p.get("infections_before_quarantine") is not None
-    ]
-    t_during = [
+    """Takeoff-conditional medians + route decomposition for one row."""
+    takeoff, vectors = takeoff_split(payloads)
+    during = [
         float(p["infections_during_quarantine"]) for p in takeoff
         if p.get("infections_during_quarantine") is not None
     ]
-    t_during_share = [
+    before = [
+        float(p["infections_before_quarantine"]) for p in takeoff
+        if p.get("infections_before_quarantine") is not None
+    ]
+    during_share = [
         float(p["infections_during_quarantine"])
         / float(p["infections_total"])
         for p in takeoff
         if p.get("infections_during_quarantine") is not None
         and p.get("infections_total")
     ]
-    med_before = _q(t_before, 0.5)
-    med_during = _q(t_during, 0.5)
-    stats = _common.scored_row(split)
-    stats["fizzled_over_half"] = stats["takeoff_n"] < MIN_TAKEOFF_SEEDS
-    stats["strata"] = {
-        "infections_before_quarantine_med": med_before,
-        "infections_during_quarantine_med": med_during,
-        "during_share_med": _q(t_during_share, 0.5),
-        "during_dominant": bool(
-            med_during is not None
-            and med_before is not None
-            and med_during > med_before
-        ),
-    }
-    stats["route_decomposition"] = {
-        "aboard_window_by_route_pooled": _pooled_counter(
-            takeoff, "seed_ring", "aboard_window_by_route",
-        ),
-        "during_quarantine_by_route_pooled": _pooled_counter(
-            takeoff, "during_quarantine_by_route",
-        ),
-        "during_quarantine_by_zone_class_pooled": _pooled_counter(
-            takeoff, "during_quarantine_by_zone_class",
-        ),
-        "during_quarantine_by_role_pooled": _pooled_counter(
-            takeoff, "during_quarantine_by_role",
-        ),
-    }
-    stats["day16_kink"] = _kink_stats(takeoff)
-    return stats
-
-
-def _row_line(stats: dict) -> str:
-    ti = stats["takeoff_infections_total"]
-    ts = stats["takeoff_before_share"]
-    tr = stats["takeoff_recorded_onsets"]
-    flags = []
-    if stats["truth_leg_in_band"]:
-        flags.append("TRUTH-IN-BAND")
-    if stats["timing_leg_in_band"]:
-        flags.append("TIMING-IN-BAND")
-    if stats["fizzled_over_half"]:
-        flags.append("FIZZLE>HALF")
-    if stats["strata"]["during_dominant"]:
-        flags.append("DURING-DOMINANT")
-    med = _common.med
-    return (
-        f"takeoff {stats['takeoff_n']}/{stats['n']} "
-        f"rec med {med(tr['median'])} "
-        f"[{med(tr['q05'])},{med(tr['q95'])}] "
-        f"inf med {med(ti['median'])} "
-        f"[{med(ti['q05'])},{med(ti['q95'])}] "
-        f"bshr med {med(ts['median'])} "
-        f"during-share {med(stats['strata']['during_share_med'])} "
-        f"{' '.join(flags)}"
-    )
-
-
-def _collect(report: dict, theta: float, arm_id: str, stats: dict) -> None:
-    report.setdefault("in_band_landings", [])
-    report.setdefault("fizzle_rows", [])
-    report.setdefault("during_dominant_rows", [])
-    label = f"theta={theta:.4g}|arm={arm_id}"
-    if stats["truth_leg_in_band"] or stats["timing_leg_in_band"]:
-        report["in_band_landings"].append(
-            {
-                "theta": theta, "arm_id": arm_id,
-                "truth_leg_in_band": stats["truth_leg_in_band"],
-                "timing_leg_in_band": stats["timing_leg_in_band"],
-                "takeoff_infections_total": (
-                    stats["takeoff_infections_total"]
-                ),
-                "takeoff_before_share": stats["takeoff_before_share"],
-            },
+    aboard_route: Counter[str] = Counter()
+    during_route: Counter[str] = Counter()
+    during_zone: Counter[str] = Counter()
+    during_role: Counter[str] = Counter()
+    kinks = [k for p in takeoff if (k := _kink_ratio(p)) is not None]
+    for p in takeoff:
+        aboard_route.update(
+            (p.get("seed_ring") or {}).get("aboard_window_by_route") or {}
         )
-    if stats["fizzled_over_half"]:
-        report["fizzle_rows"].append(label)
-    if stats["strata"]["during_dominant"]:
-        report["during_dominant_rows"].append(label)
+        during_route.update(p.get("during_quarantine_by_route") or {})
+        during_zone.update(
+            p.get("during_quarantine_by_zone_class") or {}
+        )
+        during_role.update(p.get("during_quarantine_by_role") or {})
+
+    med_during = quantile(during, 0.5)
+    med_before = quantile(before, 0.5)
+    med_share = quantile(during_share, 0.5)
+    med_kink = quantile(kinks, 0.5)
+    dominant = (
+        med_during is not None and med_before is not None
+        and med_during > med_before
+    )
+    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
+    return {
+        "n": len(payloads),
+        "takeoff_n": len(takeoff),
+        "fizzle_majority": len(takeoff) * 2 < len(payloads),
+        "recorded_onsets": band_stats(vectors["rec"]),
+        "before_share": {"median": quantile(vectors["shares"], 0.5)},
+        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
+        "takeoff_infections_total": band_stats(vectors["t_inf"]),
+        "takeoff_before_share": band_stats(vectors["t_share"]),
+        "truth_leg_in_band": legs["truth_leg_in_band"],
+        "timing_leg_in_band": legs["timing_leg_in_band"],
+        "both_legs": legs["both_legs"],
+        "infections_before_quarantine": band_stats(before),
+        "during_quarantine": band_stats(during),
+        "during_share": {"median": med_share},
+        "during_dominant": bool(dominant and legs["enough_takeoff"]),
+        "day16_kink": {
+            "post_over_pre_median": med_kink,
+            "post_over_pre_q05": quantile(kinks, 0.05),
+            "post_over_pre_q95": quantile(kinks, 0.95),
+        },
+        "aboard_window_by_route_pooled": dict(aboard_route),
+        "during_quarantine_by_route_pooled": dict(during_route),
+        "during_quarantine_by_zone_class_pooled": dict(during_zone),
+        "during_quarantine_by_role_pooled": dict(during_role),
+        "row_extra": (
+            f"during med {_fmt(med_during)} "
+            f"share {_fmt(med_share)} kink {_fmt(med_kink)}"
+        ),
+    }
+
+
+def _fmt(v: float | None) -> str:
+    return "n/a" if v is None else f"{v:.3g}"
+
+
+def _row_triggers(
+    theta: float, arm_id: str, stats: dict,
+) -> dict | None:
+    """The report-immediately rows: in-band, fizzle, during-dominant."""
+    kinds = [
+        name
+        for name, on in (
+            ("TRUTH-IN-BAND", stats["truth_leg_in_band"]),
+            ("TIMING-IN-BAND", stats["timing_leg_in_band"]),
+            ("FIZZLE-MAJORITY", stats["fizzle_majority"]),
+            ("DURING-DOMINANT", stats["during_dominant"]),
+        )
+        if on
+    ]
+    if not kinds:
+        return None
+    return {
+        "theta": theta, "arm_id": arm_id, "triggers": kinds,
+        "takeoff_infections_total": stats["takeoff_infections_total"],
+        "takeoff_before_share": stats["takeoff_before_share"],
+        "during_quarantine": stats["during_quarantine"],
+        "day16_kink": stats["day16_kink"],
+    }
 
 
 def main(argv: list[str] | None = None) -> int:
-    report = _common.run_readout(
+    design = load_design(
+        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
+    )
+    return run_readout(
         argv,
-        root=REPO_ROOT,
-        description=__doc__,
-        declared_fn=_declared,
-        audit_fn=audit_cell,
-        row_stats_fn=_row_stats,
-        row_line_fn=_row_line,
-        collect_fn=_collect,
+        repo_root=REPO_ROOT,
+        cells=enumerate_cells(design),
+        declared_by_arm={
+            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
+        },
+        audit_cell=audit_cell,
+        row_stats=_row_stats,
+        report_key="triggered_rows",
+        row_triggers=_row_triggers,
     )
-    if report is None:
-        return 2
-    _common.print_extras(
-        report,
-        ["in_band_landings", "fizzle_rows", "during_dominant_rows"],
-    )
-    return 0
 
 
 if __name__ == "__main__":
