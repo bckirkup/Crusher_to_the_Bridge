@@ -1,0 +1,486 @@
+{
+ "cells": {
+  "classic_cruise_1900": {
+   "admissible_cells": 18,
+   "cells_loaded": 20,
+   "end_load_missing_rows": 0,
+   "never_positive": {
+    "hosts": 96,
+    "never_positive_hosts": 77,
+    "never_positive_share": 0.8020833333333334
+   },
+   "occupancy": {
+    "at_target_rows": 234,
+    "continuous_path_rows": 0,
+    "event_rows": 221,
+    "first_seen_rows": 92,
+    "underflowed_rows": 19905
+   },
+   "ordering": {
+    "event_end": {
+     "positive_mean_gec": 1532.7306636563417,
+     "positive_mean_log10": 3.1854658459408007,
+     "positive_samples": 38,
+     "positive_sd_log10": 0.6233501019486016,
+     "positive_share": 0.17194570135746606,
+     "samples": 221
+    },
+    "event_rows": 221,
+    "liu_ordering": "post_bathroom_lower",
+    "model_ordering_end_vs_end": "event_higher",
+    "model_ordering_post_vs_routine": "event_higher",
+    "post_defecation": {
+     "positive_mean_gec": 1249.3169945210007,
+     "positive_mean_log10": 3.096672647744928,
+     "positive_samples": 54,
+     "positive_sd_log10": 0.6544070729116553,
+     "positive_share": 0.24434389140271492,
+     "samples": 221
+    },
+    "routine_end": {
+     "positive_mean_gec": 1221.7563134329775,
+     "positive_mean_log10": 3.0869845919253125,
+     "positive_samples": 33,
+     "positive_sd_log10": 0.9388805045729951,
+     "positive_share": 0.0016030311862430778,
+     "samples": 20586
+    },
+    "routine_rows": 20586
+   },
+   "per_seed": [
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8000,
+     "shedding_rows": 755
+    },
+    {
+     "never_positive_share": 0.6,
+     "positive_share": 0.0029282576866764276,
+     "seed": 8001,
+     "shedding_rows": 1366
+    },
+    {
+     "never_positive_share": 0.625,
+     "positive_share": 0.005886681383370125,
+     "seed": 8002,
+     "shedding_rows": 1359
+    },
+    {
+     "never_positive_share": 0.8571428571428571,
+     "positive_share": 0.002044989775051125,
+     "seed": 8003,
+     "shedding_rows": 1467
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8005,
+     "shedding_rows": 1455
+    },
+    {
+     "never_positive_share": 0.3333333333333333,
+     "positive_share": 0.003472222222222222,
+     "seed": 8006,
+     "shedding_rows": 864
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8007,
+     "shedding_rows": 1064
+    },
+    {
+     "never_positive_share": 0.6666666666666666,
+     "positive_share": 0.003472222222222222,
+     "seed": 8008,
+     "shedding_rows": 864
+    },
+    {
+     "never_positive_share": 0.7692307692307693,
+     "positive_share": 0.007921539041870993,
+     "seed": 8009,
+     "shedding_rows": 2651
+    },
+    {
+     "never_positive_share": 0.0,
+     "positive_share": 0.01593625498007968,
+     "seed": 8010,
+     "shedding_rows": 251
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8011,
+     "shedding_rows": 543
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8012,
+     "shedding_rows": 1436
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8013,
+     "shedding_rows": 776
+    },
+    {
+     "never_positive_share": 0.8571428571428571,
+     "positive_share": 0.0069605568445475635,
+     "seed": 8014,
+     "shedding_rows": 1724
+    },
+    {
+     "never_positive_share": 0.5,
+     "positive_share": 0.00684931506849315,
+     "seed": 8016,
+     "shedding_rows": 1022
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8017,
+     "shedding_rows": 473
+    },
+    {
+     "never_positive_share": 0.75,
+     "positive_share": 0.0010869565217391304,
+     "seed": 8018,
+     "shedding_rows": 1840
+    },
+    {
+     "never_positive_share": 0.8333333333333334,
+     "positive_share": 0.004459308807134894,
+     "seed": 8019,
+     "shedding_rows": 897
+    }
+   ],
+   "positivity": {
+    "positive_mean_gec": 1379.4084076101037,
+    "positive_mean_log10": 3.139692868722334,
+    "positive_samples": 71,
+    "positive_sd_log10": 0.7815379055096973,
+    "positive_share": 0.0034123131638390926,
+    "samples": 20807
+   },
+   "positivity_symptomatic_only": {
+    "positive_mean_gec": 788.6822046737329,
+    "positive_mean_log10": 2.896902041790663,
+    "positive_samples": 30,
+    "positive_sd_log10": 0.4974254213579831,
+    "positive_share": 0.024370430544272948,
+    "samples": 1231
+   },
+   "seeds_missing": [],
+   "shedding_host_epoch_rows": 20807,
+   "void_seeds": [
+    8004,
+    8015
+   ]
+  },
+  "fl_spr_12d": {
+   "admissible_cells": 22,
+   "cells_loaded": 22,
+   "end_load_missing_rows": 0,
+   "never_positive": {
+    "hosts": 176,
+    "never_positive_hosts": 132,
+    "never_positive_share": 0.75
+   },
+   "occupancy": {
+    "at_target_rows": 509,
+    "continuous_path_rows": 0,
+    "event_rows": 503,
+    "first_seen_rows": 177,
+    "underflowed_rows": 39594
+   },
+   "ordering": {
+    "event_end": {
+     "positive_mean_gec": 3282.887816484915,
+     "positive_mean_log10": 3.516256042182889,
+     "positive_samples": 164,
+     "positive_sd_log10": 0.9297821835892592,
+     "positive_share": 0.3260437375745527,
+     "samples": 503
+    },
+    "event_rows": 503,
+    "liu_ordering": "post_bathroom_lower",
+    "model_ordering_end_vs_end": "event_higher",
+    "model_ordering_post_vs_routine": "event_higher",
+    "post_defecation": {
+     "positive_mean_gec": 3415.74030853937,
+     "positive_mean_log10": 3.533484844787591,
+     "positive_samples": 222,
+     "positive_sd_log10": 1.0014942755630538,
+     "positive_share": 0.441351888667992,
+     "samples": 503
+    },
+    "routine_end": {
+     "positive_mean_gec": 1288.137436921381,
+     "positive_mean_log10": 3.1099622022413884,
+     "positive_samples": 178,
+     "positive_sd_log10": 0.7312777700938539,
+     "positive_share": 0.004319025550190474,
+     "samples": 41213
+    },
+    "routine_rows": 41213
+   },
+   "per_seed": [
+    {
+     "never_positive_share": 0.7,
+     "positive_share": 0.0053309640159928924,
+     "seed": 8105,
+     "shedding_rows": 2251
+    },
+    {
+     "never_positive_share": 0.8571428571428571,
+     "positive_share": 0.001034126163391934,
+     "seed": 8107,
+     "shedding_rows": 1934
+    },
+    {
+     "never_positive_share": 0.7142857142857143,
+     "positive_share": 0.02025931928687196,
+     "seed": 8110,
+     "shedding_rows": 1234
+    },
+    {
+     "never_positive_share": 0.75,
+     "positive_share": 0.018259935553168637,
+     "seed": 8112,
+     "shedding_rows": 1862
+    },
+    {
+     "never_positive_share": 0.7,
+     "positive_share": 0.02428343949044586,
+     "seed": 8113,
+     "shedding_rows": 2512
+    },
+    {
+     "never_positive_share": 0.6666666666666666,
+     "positive_share": 0.0014825796886582653,
+     "seed": 8114,
+     "shedding_rows": 1349
+    },
+    {
+     "never_positive_share": 0.875,
+     "positive_share": 0.009983361064891847,
+     "seed": 8115,
+     "shedding_rows": 1803
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8117,
+     "shedding_rows": 1309
+    },
+    {
+     "never_positive_share": 1.0,
+     "positive_share": 0.0,
+     "seed": 8121,
+     "shedding_rows": 1473
+    },
+    {
+     "never_positive_share": 0.9090909090909091,
+     "positive_share": 0.0063119927862939585,
+     "seed": 8123,
+     "shedding_rows": 2218
+    },
+    {
+     "never_positive_share": 0.8,
+     "positive_share": 0.001763668430335097,
+     "seed": 8124,
+     "shedding_rows": 1134
+    },
+    {
+     "never_positive_share": 0.7777777777777778,
+     "positive_share": 0.0027793218454697055,
+     "seed": 8129,
+     "shedding_rows": 1799
+    },
+    {
+     "never_positive_share": 0.8181818181818182,
+     "positive_share": 0.020316027088036117,
+     "seed": 8132,
+     "shedding_rows": 2215
+    },
+    {
+     "never_positive_share": 0.8333333333333334,
+     "positive_share": 0.007845934379457917,
+     "seed": 8135,
+     "shedding_rows": 1402
+    },
+    {
+     "never_positive_share": 0.7777777777777778,
+     "positive_share": 0.004955401387512388,
+     "seed": 8137,
+     "shedding_rows": 2018
+    },
+    {
+     "never_positive_share": 0.8181818181818182,
+     "positive_share": 0.0035530990919857876,
+     "seed": 8148,
+     "shedding_rows": 2533
+    },
+    {
+     "never_positive_share": 0.7777777777777778,
+     "positive_share": 0.0029914529914529917,
+     "seed": 8149,
+     "shedding_rows": 2340
+    },
+    {
+     "never_positive_share": 0.6666666666666666,
+     "positive_share": 0.00590717299578059,
+     "seed": 8156,
+     "shedding_rows": 2370
+    },
+    {
+     "never_positive_share": 0.7,
+     "positive_share": 0.0075681130171543895,
+     "seed": 8158,
+     "shedding_rows": 1982
+    },
+    {
+     "never_positive_share": 0.5,
+     "positive_share": 0.009465020576131687,
+     "seed": 8159,
+     "shedding_rows": 2430
+    },
+    {
+     "never_positive_share": 0.625,
+     "positive_share": 0.0028790786948176585,
+     "seed": 8162,
+     "shedding_rows": 2084
+    },
+    {
+     "never_positive_share": 0.7142857142857143,
+     "positive_share": 0.018442622950819672,
+     "seed": 8163,
+     "shedding_rows": 1464
+    }
+   ],
+   "positivity": {
+    "positive_mean_gec": 2017.40534170994,
+    "positive_mean_log10": 3.304793166423862,
+    "positive_samples": 342,
+    "positive_sd_log10": 0.8556465802183529,
+    "positive_share": 0.008198293220826542,
+    "samples": 41716
+   },
+   "positivity_symptomatic_only": {
+    "positive_mean_gec": 2650.513276159455,
+    "positive_mean_log10": 3.423329983906098,
+    "positive_samples": 228,
+    "positive_sd_log10": 0.886978593124295,
+    "positive_share": 0.06447963800904978,
+    "samples": 3536
+   },
+   "seeds_missing": [],
+   "shedding_host_epoch_rows": 41716,
+   "void_seeds": []
+  }
+ },
+ "end_load_spread_log10": {
+  "max": 5.9012850504479974,
+  "median": -1.2588959614972555,
+  "min": -274.5010017919751,
+  "n": 3480,
+  "p25": -6.168414828172189,
+  "p75": 0.8041808399959244
+ },
+ "liu_targets": {
+  "never_positive_share": 0.3333333333333333,
+  "positive_mean_log10": [
+   3.3,
+   4.45
+  ],
+  "positive_share": 0.2535211267605634,
+  "post_bathroom": {
+   "mean_log10": 2.3,
+   "positive_share": 0.12359550561797752
+  },
+  "routine": {
+   "mean_log10": 3.32,
+   "positive_share": 0.375
+  }
+ },
+ "pooled": {
+  "never_positive": {
+   "hosts": 266,
+   "never_positive_hosts": 203,
+   "never_positive_share": 0.7631578947368421
+  },
+  "ordering": {
+   "event_end": {
+    "positive_mean_gec": 2844.645704370924,
+    "positive_mean_log10": 3.454028183483882,
+    "positive_samples": 202,
+    "positive_sd_log10": 0.8884707193455752,
+    "positive_share": 0.27900552486187846,
+    "samples": 724
+   },
+   "event_rows": 724,
+   "liu_ordering": "post_bathroom_lower",
+   "model_ordering_end_vs_end": "event_higher",
+   "model_ordering_post_vs_routine": "event_higher",
+   "post_defecation": {
+    "positive_mean_gec": 2805.573099948998,
+    "positive_mean_log10": 3.4480215888444614,
+    "positive_samples": 276,
+    "positive_sd_log10": 0.9584944807010565,
+    "positive_share": 0.3812154696132597,
+    "samples": 724
+   },
+   "routine_end": {
+    "positive_mean_gec": 1277.5224699539456,
+    "positive_mean_log10": 3.106368547547405,
+    "positive_samples": 211,
+    "positive_sd_log10": 0.7649350414218706,
+    "positive_share": 0.0034142947296881827,
+    "samples": 61799
+   },
+   "routine_rows": 61799
+  },
+  "positivity": {
+   "ordering_sign": "event_higher",
+   "positive_mean_gec": 1889.7759014163385,
+   "positive_mean_log10": 3.2764103065284425,
+   "positive_samples": 413,
+   "positive_sd_log10": 0.8447660360903372,
+   "positive_share": 0.006605569150552597,
+   "samples": 62523
+  },
+  "shedding_host_epoch_rows": 62523
+ },
+ "raw_dir": "/home/ubuntu/repos/Crusher-to-the-Bridge/docs/norovirus/noro_hand_stationary_01",
+ "verdict": {
+  "primary": {
+   "liu_positive_share": 0.2535211267605634,
+   "positive_share": 0.006605569150552597,
+   "primary_positivity_miss": true,
+   "ratio": 0.026055300538290797,
+   "ratio_tolerance": 5.0
+  },
+  "secondary": {
+   "never_positive_miss": false,
+   "never_positive_share": 0.7631578947368421,
+   "never_positive_window": [
+    0.05,
+    0.8
+   ],
+   "ordering_miss": true,
+   "ordering_note": "weighs toward defect but alone never decides: the engine's routine rows are near-underflow by construction of the mechanism being measured",
+   "ordering_sign": "event_higher",
+   "positive_mean_log10": 3.2764103065284425,
+   "positive_mean_miss": false,
+   "positive_mean_window": [
+    2.3,
+    5.45
+   ]
+  },
+  "secondary_misses": 1,
+  "verdict": "defect_candidate"
+ }
+}

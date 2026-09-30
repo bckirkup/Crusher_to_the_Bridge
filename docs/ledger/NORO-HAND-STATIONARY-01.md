@@ -2,7 +2,8 @@
 **Date:** 2026-09-30
 **Commit:** b548056b
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 063e9978
 
 `NORO-EXP-FOMITE-RECONCILE-01` filed this entry; `NORO-DOSE-BLOCK-01` named it
 "the mechanism study behind" the unexplained 2.7-log10 surface→hand spread.
@@ -67,7 +68,7 @@ produced byte-identical voyage fingerprints (`timeseries`, `summary`,
 overridden smoke shape) under `docs/norovirus/noro_hand_stationary_01/` —
 both `PASS`. The instrument consumed no draws on either driver.
 
-**Sampling map (declared, not measured yet):** Liu's rinse is a point-in-time
+**Sampling map (declared before the run):** Liu's rinse is a point-in-time
 sample of an infected subject's hand. The model analogue is the *end-of-epoch
 realized load* (post-replenish, post-deposit, post-hygiene) on each
 shedding-host epoch row — one sample per host-epoch. The "post-defecation"
@@ -135,3 +136,100 @@ finishes.
 carried only inside a post-defecation window), explicit washing (hygiene
 events with Liu-informed frequency/efficacy shaping the occupancy) — and
 stop. No repair implementation in this entry.
+
+## Measured readout
+
+**Run provenance.** Cells ran on AWS Batch queue `picard-campaign-queue`
+(EC2 Spot), jobdef `picard-hand-occupancy` rev 2 (`attemptDurationSeconds`
+14400), image `picard-campaign@sha256:2ced6f8415ce9bda114d5ad34881ff7ee
+180e3cb5954a7d1060e2604257b9a54` built at `063e9978`; array jobs
+`9cba78f5` (fl_spr_12d, 22 children) and `3c6d4e12` (classic_cruise_1900,
+20 children), all SUCCEEDED in ~20 min. Full per-seed dumps:
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_hand_stationary_01/`;
+the committed `docs/norovirus/noro_hand_stationary_01/<cell>/` dumps carry
+all shedding rows verbatim plus a non-shedding tail histogram (the full row
+tables — ~200k carrier rows per spirit cell — stay in S3). Aggregates:
+`hand_occupancy_cells.json` in the same directory. Readout:
+`tools/noro_diag/hand_occupancy_readout.py`.
+
+**Admissibility.** 40 of 42 cells admissible; void: classic seeds 8004, 8015
+(zero `norwalk_gi` fomite deliveries). ≤4 of 42 → study GO.
+
+**Primary reading — pooled positivity.** 62,523 shedding host-epoch rows
+across the admissible block: end-of-epoch load ≥10^2.15 on **413 rows =
+0.0066 (0.66%)** vs Liu's 0.254. `R = 0.026` — 38× below the reference,
+vs the declared 5× band. **Primary miss.** Per cell: `fl_spr_12d` 0.0082
+(342/41,716; 22 admissible), `classic_cruise_1900` 0.0034 (71/20,807; 18
+admissible); the >5× report-immediately trigger fired at the first cell and
+was reported before the array. Symptomatic-only subcensus (declared as a
+secondary, outside the verdict): spirit 0.065, classic 0.024 — still 4–10×
+low.
+
+**Secondary readings.**
+
+- *Positive-mean:* 3.28 log10 pooled — inside the declared [2.30, 5.45]
+  window. The rare above-LOD reads sit at mid-ceiling magnitude
+  (geometric mean ~1.9e3 GEC); the mechanism's defect is occupancy, not
+  level.
+- *Never-positive share:* **0.763** (203/266 shedding hosts never reach LOD
+  in any shedding epoch) vs Liu's 0.33 — inside the declared [0.05, 0.80]
+  window, narrowly. Per seed it ranges 0.50–1.00.
+- *Ordering sign:* **miss.** Post-defecation analogue positivity 0.381
+  (276/724 rows post-replenish ≥ LOD; event-end 0.279) vs routine
+  end-of-epoch 0.0034 (211/61,799) — model ordering `event_higher`; Liu's
+  measured ordering is post-bathroom *lower* (0.124 @2.30 vs 0.375 @3.32).
+  The engine's replenishment concentrates occupancy exactly where the data
+  says hands are cleanest.
+
+**Occupancy structure.** The spike-and-crash is confirmed inside the epoch
+boundary: 723 defecation-event rows exist in the shedding census; 72% of
+them decay below LOD before epoch end (event-end positivity 0.28) — the
+U(0.61,1.7)/h inactivation halves the ceiling inside a single 30-minute
+epoch most of the time. Between events the load underflows: 39,594/41,716
+spirit rows and 19,905/20,807 classic rows show `at_target`/stationary
+underflow; the hand spends ~1.2% of shedding epochs at the ceiling, matching
+`NORO-EXP-FOMITE-RECONCILE-01`'s ~1% estimate.
+
+## Verdict
+
+**`defect_candidate`.** The primary reading misses by 38× on the low side
+(R = 0.026 < 0.2): under the shipped spike-and-crash reservoir, a shedding
+host's hand sits above Liu's LOD 0.66% of host-epochs, against 25.4% of
+infected-subject rinses positive in the field. Secondary misses: 1 of 3
+(ordering sign). The mechanism answers the occupancy question with the wrong
+distribution — essentially every hand reads clean except inside the fraction
+of a defecation epoch it takes the crash to reach LOD — and the ordering the
+mechanism implies (defecation events replenish) is the opposite sign of what
+Liu measured. Because the hand load is the per-host-per-epoch scaling
+upstream of every fomite dose and every hand→mouth dose in the model, this
+verdict propagates to `NORO-TRANSFER-PRODUCT-01` (queued behind it) and to
+the withdrawn dose line generally: fomite-route figures inherit a reservoir
+that is almost always empty.
+
+**Repair options (reported, not implemented; per the filing rule this entry
+stops here).**
+
+1. *Persistent reservoir.* Replace the spike-and-crash with a load relaxed
+   toward a sustained non-ceiling level — e.g. an Ornstein–Uhlenbeck-style
+   mean-reversion, or floor + decay: the Liu per-subject positive means
+   (3.30–4.45 log10) become a mid-level attractor the hand returns to between
+   events rather than an underflow it decays into. Simplest structural fix;
+   preserves the event spike as an excursion. Does not by itself answer the
+   sign-flipped ordering (a sustained level needs a routine source, not the
+   stool-event source).
+2. *Event-windowed.* Keep the defecation-event replenishment but hold the
+   load inside a post-event window (hours-scale residence, informed by hand
+   persistence studies) instead of intra-epoch decay — the canopy fix: the
+   spike survives several epochs, lifting event-adjacent occupancy. Direction
+   mismatch with Liu's ordering worsens unless paired with a routine source.
+3. *Explicit washing.* Model hygiene events (frequency/efficacy informed by
+   the post-bathroom finding — hands rinsed *lower* after bathroom visits) as
+   the occupancy-shaping process rather than a passive decay; the routine vs
+   post-defecation contrast falls out of the washing event itself, which is
+   the only option that can reproduce Liu's sign-flipped ordering
+   mechanically. Largest engine surface: hygiene becomes a scheduled
+   per-agent activity with its own parameters and evidence grades.
+
+Which option is a `NORO-HAND-RESERVOIR-*` design question; the measurement
+needed to choose between them (a routine-load source the data does not yet
+constrain) is filed with this verdict.

@@ -64,8 +64,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--block", required=True, choices=("fl_spr_12d", "classic_cruise_1900"),
     )
     parser.add_argument(
-        "--seeds", required=True,
-        help="comma-separated seeds; array index walks it",
+        "--seeds", required=True, type=str, nargs="+",
+        help="seed list; accepts comma-joined tokens and/or bare tokens "
+             "(--container-overrides splits commas into separate argv "
+             "items, and jobdef Ref:: substitution joins them back)",
     )
     parser.add_argument(
         "--manifest",
@@ -121,7 +123,12 @@ def main(argv: list[str] | None = None) -> int:
     """Run this array child's cell and upload exactly its own dump."""
     args = parse_args(argv)
     index = _array_index(args.index)
-    seeds = [int(v) for v in args.seeds.split(",") if v.strip()]
+    seeds = [
+        int(v)
+        for item in args.seeds
+        for v in item.split(",")
+        if v.strip()
+    ]
     if index >= len(seeds):
         raise SystemExit(
             f"array index {index} outside 0..{len(seeds) - 1}",
