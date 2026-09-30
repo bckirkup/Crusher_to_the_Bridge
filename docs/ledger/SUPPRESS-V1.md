@@ -33,12 +33,12 @@ window.
 - **D0_declared + REF_M0P56** — paired baseline + the ASCERTAIN-V1
   count-matched channel row.
 
-15 arms × θ {1e11, 2.37e11, 1e12} × seeds 20200205–14 = **450 cells**
-(anchor-first, canary arms front-loaded: cells 0–9 D0, 10–19
-SOP017_D4, 20–29 SOP009_D12). Arithmetic flagged to the author at
-design time: the task's ~540–660 estimate and ≥20-seeds/row canary
-both imply a wider seed block — declared at the canonical 10-seed
-matched block pending his call (seeds 14 → 630; seeds 20 → 900).
+15 arms × θ {1e11, 2.37e11, 1e12} × seeds 20200205–18 = **630 cells**
+(anchor-first, canary arms front-loaded: cells 0–13 D0, 14–27
+SOP017_D4, 28–41 SOP009_D12). Author-resolved at merge: 14 seeds,
+inside the task's ~540–660 envelope; the first ten (20200205–14)
+are the matched block every conditioned design replays, 20200215–18
+are fresh draws.
 
 ## Legs
 
@@ -67,9 +67,9 @@ hook for cross-row seed-paired deltas.
 
 ## Gate
 
-Canary = cells 0–29 (D0 + SOP017_D4 + SOP009_D12 at θ 2.37e11,
-INDEX_OFFSET 0 / ARRAY_SIZE 30). **Stop and report after the canary;
-the remaining 420 cells run only on the author's go-ahead.**
+Canary = cells 0–41 (D0 + SOP017_D4 + SOP009_D12 at θ 2.37e11,
+INDEX_OFFSET 0 / ARRAY_SIZE 42). **Stop and report after the canary;
+the remaining 588 cells run only on the author's go-ahead.**
 
 Verdict grammar (frozen): `suppression_capable_at_corner` /
 `deferral_only` / `suppression_incapable`. Design

@@ -298,7 +298,7 @@ def test_main_end_to_end(tmp_path, monkeypatch, capsys):
         "--cells", str(cells_dir), "--design", str(design_path),
     ])
     assert rc == 2
-    assert "450" in capsys.readouterr().err
+    assert "630" in capsys.readouterr().err
 
     with pytest.raises(ValueError, match="escapes"):
         mod.main([
