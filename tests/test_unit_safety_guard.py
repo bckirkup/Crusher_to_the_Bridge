@@ -6,6 +6,7 @@ import ast
 import fnmatch
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -64,12 +65,27 @@ ALLOWED_EPOCH_KEYS = (
 ALLOWED_PER_EPOCH_CONSTANTS: dict[str, str] = {}
 
 
+def _iter_tracked_files(*globs: str) -> list[Path]:
+    """Tracked files only — an untracked local artifact is not under the guard.
+
+    The former ``REPO_ROOT.rglob`` scan also walked stray probe/readout files a
+    session left in the worktree and failed on content CI never sees.
+    """
+    listing = subprocess.run(
+        ["git", "ls-files", "--", *globs],
+        cwd=REPO_ROOT,
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.splitlines()
+    return [REPO_ROOT / rel for rel in listing]
+
+
 def _iter_config_files() -> list[Path]:
     return [
         path
-        for suffix in ("*.json", "*.yaml", "*.yml")
-        for path in REPO_ROOT.rglob(suffix)
-        if "telemetry_buffer" not in path.parts and ".git" not in path.parts
+        for path in _iter_tracked_files("*.json", "*.yaml", "*.yml")
+        if "telemetry_buffer" not in path.parts
     ]
 
 
@@ -199,7 +215,7 @@ class E:
 
 def test_per_epoch_constants_do_not_accumulate_without_units() -> None:
     offenders: list[tuple[Path, str, str]] = []
-    for path in REPO_ROOT.rglob("*.py"):
+    for path in _iter_tracked_files("*.py"):
         if "tests" in path.parts or "telemetry_buffer" in path.parts:
             continue
         try:

@@ -89,7 +89,10 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     Detection timing is seed-dependent; this run only checks that escalation
     occurs during the voyage.
     """
-    epochs = 168
+    # 96 h covers the seeded escalation (seed 2 fires at 74 h, see below) with
+    # margin; the previous 168 h paid for another full voyage after the last
+    # status transition was already settled.
+    epochs = 96
     spec = PicardRunSpec.from_legacy_yaml(REPO_ROOT, num_epochs=epochs)
     # The ladder needs a case aboard, and the smoke complement is 20 agents:
     # at the declared boarding prevalence a single draw boards nobody about
@@ -111,6 +114,9 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     # SCHED-WATCH-01 shifts it once more — per-agent phase jitter and the
     # StrucCrew night-watch lottery draw on the shared stream at spawn;
     # seed 5 now never escalates, while seed 2 escalates at 34 h.
+    # NORO-HAND-RESERVOIR-01 (wash_reuptake shipped default) shifted the
+    # stream again: seed 2's first true-positive call now lands at 73 h and
+    # escalation at 74 h, so the horizon is 96 h.
     spec.random_seed = 2
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     sim.initialize()
