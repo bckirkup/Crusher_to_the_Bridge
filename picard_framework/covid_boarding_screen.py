@@ -45,6 +45,7 @@ from picard_framework.covid_theta_fit import (
     PATHOGEN_ID,
     HullObservables,
     build_fit_run_spec,
+    build_fit_sim,
     load_covid_profile,
     observables_from_modality,
     run_fit_spec,
@@ -1510,6 +1511,30 @@ def simulate_screen_cell(
     )
     ledger = QuarantineAttributionLedger()
     sim = run_fit_spec(raw, repo_root=repo_root, epoch_observer=ledger.observe)
+    return cell_payload(design, cell, sim, ledger, raw)
+
+
+def echo_screen_cell(
+    design: BoardingScreenDesign,
+    cell: ScreenCell,
+    *,
+    repo_root: str = REPO_ROOT,
+) -> dict[str, Any]:
+    """Read one cell's payload at initialize(), without stepping a voyage.
+
+    The resolved-config echoes a payload carries — dose_response, delivery,
+    ship_graph_immune, the exposure-cap flags, the seed-ring spec and
+    seeded-host placement rows — are fixed when the spec applies at
+    initialize(), so asserting on them needs no voyage epochs. Epoch-accrual
+    fields (the aboard-window attribution counts, acquisition_curve buckets,
+    susceptibility draws) read their empty state; assertions on those still
+    run a voyage.
+    """
+    raw = prepare_cell_run_spec(design, cell, repo_root=repo_root)
+    ledger = QuarantineAttributionLedger()
+    sim = build_fit_sim(
+        raw, repo_root=repo_root, epoch_observer=ledger.observe,
+    )
     return cell_payload(design, cell, sim, ledger, raw)
 
 

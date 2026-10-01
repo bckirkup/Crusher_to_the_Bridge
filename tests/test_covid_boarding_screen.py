@@ -17,6 +17,7 @@ from picard_framework.covid_boarding_screen import (
     BoardingScreenDesign,
     ScreenCell,
     apply_boarding_axis,
+    echo_screen_cell,
     enumerate_cells,
     load_design,
     merge_screen,
@@ -941,16 +942,15 @@ def test_seed_ring_summary_absent_without_blocks():
 
 
 def test_a_real_declared_cell_reports_the_seed_ring(design):
-    """48-epoch smoke: the ring block echoes the applied seed spec and the
-    aboard-window counts are present (emptiness is a valid reading)."""
-    from picard_framework.covid_boarding_screen import simulate_screen_cell
-
+    """Echo readout at initialize(): the ring block echoes the applied seed
+    spec and the aboard-window counts are present (emptiness is a valid
+    reading)."""
     flagged = replace(design, seed_ring_readout=True)
     cell = ScreenCell(
         index=0, scenario_id="diamond_princess_2020", theta=1e10,
         infection_age_days=6.8, imports=1, seed=20200205,
     )
-    payload = simulate_screen_cell(flagged, cell, num_epochs=48)
+    payload = echo_screen_cell(flagged, cell)
     ring = payload["seed_ring"]
     assert ring["seeded_count"] == 1
     assert ring["seed_spec"]["onset_day"] == pytest.approx(-1.0)
@@ -971,10 +971,9 @@ def test_a_real_declared_cell_reports_the_seed_ring(design):
 
 
 def test_a_placement_arm_cell_reports_seeded_host_placement():
-    """48-epoch smoke on a crew + count + ring-inclusion arm: the
+    """Echo readout on a crew + count + ring-inclusion arm: the
     seeded_hosts echo reports each drawn host's realized role and ring
     sizes, and the resolved exposure-cap flag is echoed."""
-    from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
         {"arm_id": "B0_baseline", "overrides": {}},
@@ -991,7 +990,7 @@ def test_a_placement_arm_cell_reports_seeded_host_placement():
     cell = next(
         c for c in enumerate_cells(design) if c.arm_id == "B1_crew_ring"
     )
-    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    payload = echo_screen_cell(design, cell)
     assert payload["exposure_cap_include_fixed_rings"] is True
     ring = payload["seed_ring"]
     assert ring["seeded_count"] == 3
@@ -1008,10 +1007,9 @@ def test_a_placement_arm_cell_reports_seeded_host_placement():
 
 
 def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
-    """48-epoch smoke: a cooperative_packet arm's payload echoes the
+    """Echo readout: a cooperative_packet arm's payload echoes the
     resolved dose_response block (model, n_star, carrier_loading, and the
     beta-frailty params that ride over the deep-merge)."""
-    from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
         {"arm_id": "B0_baseline", "overrides": {}},
@@ -1032,7 +1030,7 @@ def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
     ])
     cells = enumerate_cells(design)
     coop = next(c for c in cells if c.arm_id == "B1_coop")
-    payload = simulate_screen_cell(design, coop, num_epochs=48)
+    payload = echo_screen_cell(design, coop)
     echo = payload["dose_response"]
     assert echo["model"] == "cooperative_packet"
     assert echo["n_star"] == 3
@@ -1042,20 +1040,17 @@ def test_a_real_coop_arm_cell_echoes_the_resolved_dose_response():
     assert echo["susceptibility_scale"] > 0.0
 
     base = next(c for c in cells if c.arm_id == "B0_baseline")
-    base_echo = simulate_screen_cell(design, base, num_epochs=48)[
-        "dose_response"
-    ]
+    base_echo = echo_screen_cell(design, base)["dose_response"]
     assert base_echo["model"] == "beta_poisson"
     assert "n_star" not in base_echo
 
 
 def test_a_delivery_arm_cell_echoes_the_resolved_delivery_block():
-    """48-epoch smoke on delivery-machinery arms (HEAT-V1 lineage): the
+    """Echo readout on delivery-machinery arms (HEAT-V1 lineage): the
     payload's delivery block echoes the resolved half-life, the merged
     route-efficiency map, the pool transport mode, the exposure_cap
     sub-block + engine-active flag, and the resolved activity_contacts
     table."""
-    from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
         {"arm_id": "B0_baseline", "overrides": {}},
@@ -1078,9 +1073,7 @@ def test_a_delivery_arm_cell_echoes_the_resolved_delivery_block():
     ])
     cells = enumerate_cells(design)
     heat = next(c for c in cells if c.arm_id == "B1_heat")
-    delivery = simulate_screen_cell(design, heat, num_epochs=48)[
-        "delivery"
-    ]
+    delivery = echo_screen_cell(design, heat)["delivery"]
     assert delivery["airborne_half_life_hours"] == pytest.approx(0.5)
     eff = delivery["route_efficiency_multipliers"]
     assert eff["droplet"] == pytest.approx(0.03)
@@ -1094,9 +1087,7 @@ def test_a_delivery_arm_cell_echoes_the_resolved_delivery_block():
     assert contacts["dining_table"]["passenger"] == pytest.approx(2.0)
 
     base = next(c for c in cells if c.arm_id == "B0_baseline")
-    base_delivery = simulate_screen_cell(design, base, num_epochs=48)[
-        "delivery"
-    ]
+    base_delivery = echo_screen_cell(design, base)["delivery"]
     assert base_delivery["airborne_half_life_hours"] == pytest.approx(1.1)
     assert base_delivery["route_efficiency_multipliers"]["droplet"] == (
         pytest.approx(0.3)
@@ -1239,10 +1230,11 @@ def test_dose_response_frailty_needs_the_cell_theta():
 
 
 def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
-    """48-epoch smoke on an immune-split arm: the immune block echoes
+    """8-epoch smoke on an immune-split arm: the immune block echoes
     declared + resolved + realized counts, the acquisition curve and
     susceptibility draw blocks are populated, and the resolved cap flag
-    is echoed."""
+    is echoed. Susceptibility draws land lazily on the first challenge
+    (epoch ~3), so 8 epochs replaces the full-voyage smoke."""
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
@@ -1260,7 +1252,7 @@ def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
     cell = next(
         c for c in enumerate_cells(design) if c.arm_id == "B1_imm_split"
     )
-    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    payload = simulate_screen_cell(design, cell, num_epochs=8)
     immune = payload["ship_graph_immune"]
     assert immune["declared"]["immune_fraction"] == pytest.approx(0.25)
     assert immune["declared"]["crew_immune_fraction"] == pytest.approx(0.9)
@@ -1282,9 +1274,12 @@ def test_a_real_immune_arm_cell_reports_the_susceptibility_echoes():
 
 
 def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
-    """48-epoch smoke: the frailty arm's payload echoes the arm-written
+    """8-epoch smoke: the frailty arm's payload echoes the arm-written
     beta-Poisson block (declared alpha, recomputed scale) and the draw
-    quantiles report the challenged hosts' realized susceptibilities."""
+    quantiles report the challenged hosts' realized susceptibilities.
+    Susceptibility draws land lazily on the first challenge (epoch ~2), so
+    the echo fields could read at initialize() but the draw block needs a
+    few epochs."""
     from picard_framework.covid_boarding_screen import simulate_screen_cell
 
     design = _arm_design([
@@ -1297,7 +1292,7 @@ def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
     cell = next(
         c for c in enumerate_cells(design) if c.arm_id == "B1_frail"
     )
-    payload = simulate_screen_cell(design, cell, num_epochs=48)
+    payload = simulate_screen_cell(design, cell, num_epochs=8)
     echo = payload["dose_response"]
     assert echo["model"] == "beta_poisson"
     assert echo["alpha"] == pytest.approx(0.05)
