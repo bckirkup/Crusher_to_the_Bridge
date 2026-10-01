@@ -196,7 +196,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # interpreters read the identical tuple: local CPython 3.12,
         # CI job 110382436238 (fast tier, 3.11, shard 3) and CI job
         # 110382436325 (fast tier, 3.12, shard 3).
-        (3, 11): (1, 1, 217, 2, 1),
+        # NORO-HAND-CARRIAGE-01 delayed sequestration: the arm now draws
+        # one extra per-infection uniform for the sequester settling
+        # timescale, so the shared stream reorders and the near-extinct
+        # cell re-rolls: (1, 1, 217, 2, 1) -> (2, 1, 217, 3, 0). The new
+        # draw lives only inside _hand_practice, which only the
+        # hygiene_cycle arm calls, so the wash_reuptake cell cannot reach
+        # it and the move is fully attributed to the arm's new draw. Read
+        # from CI job 110627187029 (fast tier, 3.11, shard 3) on this
+        # branch -- identical to the local 3.12 reading.
+        (3, 11): (2, 1, 217, 3, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -279,7 +288,13 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # reproduces its PRACTICE-01 reading exactly on this branch,
         # so the move is fully attributed to the arm. Identical to the
         # 3.11 CI reading, as before on this cell.
-        (3, 12): (1, 1, 217, 2, 1),
+        # NORO-HAND-CARRIAGE-01 delayed sequestration (see the 3.11 note
+        # above): the per-infection settling-timescale draw, reachable
+        # only through the hygiene_cycle arm's _hand_practice, reorders
+        # the shared stream and the cell re-rolls: (1, 1, 217, 2, 1) ->
+        # (2, 1, 217, 3, 0), read in the local venv on CPython 3.12 on
+        # this branch. Identical to the 3.11 CI reading, as before.
+        (3, 12): (2, 1, 217, 3, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
