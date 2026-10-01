@@ -184,6 +184,9 @@ class BoardingScreenDesign:
     arms: tuple[Mapping[str, Any], ...] = ()
     voyage_mode: str = VOYAGE_MODE_DECLARED
     seed_ring_readout: bool = False
+    split_role: str | None = None
+    split_day: int = SPLIT_DAY
+    turn_day: int = TURN_DAY
 
     def __post_init__(self) -> None:
         if self.voyage_mode not in VOYAGE_MODES:
@@ -209,6 +212,8 @@ class BoardingScreenDesign:
                 raise ValueError(f"malformed refinement point {(theta, age, imports)}")
         if len(set(self.points)) != len(self.points):
             raise ValueError("refinement points must be distinct")
+        if self.split_day < 0 or self.turn_day < 0:
+            raise ValueError("split_day and turn_day must be non-negative")
         _validate_arms(self.arms)
 
     @property
@@ -266,6 +271,9 @@ class BoardingScreenDesign:
             "arms": [dict(a) for a in self.arms],
             "voyage_mode": self.voyage_mode,
             "seed_ring_readout": self.seed_ring_readout,
+            "split_role": self.split_role,
+            "split_day": self.split_day,
+            "turn_day": self.turn_day,
         }
 
 
@@ -300,8 +308,25 @@ def load_design(
         arms=tuple(dict(a) for a in raw.get("arms", [])),
         voyage_mode=str(raw.get("voyage_mode", VOYAGE_MODE_DECLARED)),
         seed_ring_readout=bool(raw.get("seed_ring_readout", False)),
+        split_role=(
+            None if raw.get("split_role") is None
+            else str(raw["split_role"])
+        ),
+        split_day=int(raw.get("split_day", SPLIT_DAY)),
+        turn_day=int(raw.get("turn_day", TURN_DAY)),
     )
-    load_hull_scenarios().assert_fit_target(design.scenario_id)
+    scenarios = load_hull_scenarios()
+    if design.split_role is None:
+        # Legacy: a design that declares no split role is a fit-side
+        # screen and its scenario must be the training hull.
+        scenarios.assert_fit_target(design.scenario_id)
+    else:
+        declared = scenarios[design.scenario_id].split_role
+        if declared != design.split_role:
+            raise ValueError(
+                f"design declares split_role {design.split_role!r} but the "
+                f"fixed split says {design.scenario_id} is {declared!r}",
+            )
     if design.is_refinement:
         return design
     if design.arms:
@@ -1364,8 +1389,8 @@ def cell_payload(
         scenario_id=cell.scenario_id,
         theta=cell.theta,
         seed=cell.seed,
-        split_day=SPLIT_DAY,
-        turn_day=TURN_DAY,
+        split_day=design.split_day,
+        turn_day=design.turn_day,
     )
     curve = syndromic.onset_observation_curve(PATHOGEN_ID)
     payload = {

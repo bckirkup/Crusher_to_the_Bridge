@@ -69,6 +69,35 @@ def band_stats(values: list[float]) -> dict[str, float | None]:
     }
 
 
+def declared_hand_mode(arm: dict, shipped_mode: str) -> dict:
+    """The arm's declared hand-reservoir mode projection.
+
+    An arm whose overrides leave ``transmission.hand_reservoir_mode``
+    alone resolves the shipped default (``hygiene_cycle`` since
+    NORO-HAND-PRACTICE-01, PR #804); each readout passes its own
+    shipped-mode constant so a stale readout still audits what its
+    design declared.
+    """
+    tx = (arm.get("overrides") or {}).get("transmission_overrides") or {}
+    return {
+        "hand_reservoir_mode": str(
+            tx.get("hand_reservoir_mode", shipped_mode),
+        ),
+    }
+
+
+def audit_hand_mode(payload: dict, declared: dict) -> list[str]:
+    """Audit a cell's delivery-mode echo against its arm's declaration."""
+    delivery = payload.get("delivery") or {}
+    resolved_mode = delivery.get("hand_reservoir_mode")
+    if resolved_mode == declared["hand_reservoir_mode"]:
+        return []
+    return [
+        f"hand_reservoir_mode resolved {resolved_mode!r}, "
+        f"declared {declared['hand_reservoir_mode']!r}",
+    ]
+
+
 def load_cell_payloads(cells_dir: str) -> dict[str, dict]:
     """Read every cell JSON under *cells_dir* (contained to the dir)."""
     payloads: dict[str, dict] = {}

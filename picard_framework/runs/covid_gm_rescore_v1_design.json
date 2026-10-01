@@ -1,0 +1,97 @@
+{
+ "design_id": "covid_gm_rescore_v1",
+ "task_id": "COVID-GM-RESCORE-01",
+ "schema_version": "1.0.0",
+ "description": "COVID-GM-RESCORE-01: re-score the held-out Greg Mortimer hull under the post-PRACTICE-01 hand line. A scoring design, not a screen: the scenario is the fixed split's held-out hull (split_role 'held_out', declared in this file and verified against the split at load), Theta is the v13 admissible lattice verbatim (no per-hull refit -- composite Theta is a pathogen constant), and the only arms are the two labelled hand-reservoir baselines. Cells: greg_mortimer_2020 as-declared (one import at infection age 0.0, SOP-017 cabin isolation voyage day 8 to end, single ship-wide screen voyage day 20, expedition_cruise_450 declared substitution) x hand_reservoir_mode in {hygiene_cycle (shipped baseline, empty overrides), spike_decay (the pre-#804 physics the stale score ran under)} x Theta {1e11, 2.37e11, 1e12} x 50 seeds @20200205 = 300 cells. The seed set is the matched block every conditioned design replays (20200205 onward) so rows pair seed-for-seed against the DP conditioned lineage at the same theta. This is the cross-hull measurement the DP-only re-approach ladder (covid_hand_ab_v1 -> covid_theta_screen_v14) cannot produce: whether the current engine's miss on the small hull is the same direction as the DP over-production.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "the held-out column of covid_first_look_readout.md only (first-look v3, pre-refine Theta 1e9, spike-decay-era physics): P(takeoff >=10 onsets) <= 0.04-0.06, campaign positives median ~3, q95 <= 18 vs H1's 128",
+ "prerequisites": [
+  "NORO-HAND-PRACTICE-01 (PR #804, merged d0466064): hygiene_cycle shipped default-ON -- compliance-gated post-visit washes U(0.35,0.75), routine washes U(2,8)/day, per-act soap/water efficacy, wet-window deposit drying, self-contact re-loading; wash_reuptake and spike_decay kept as labelled baselines, bit-identical on matched seeds.",
+  "SUPPRESS-V1 suppression_incapable (630/630, docs/ledger/SUPPRESS-V1.md): all seven conditioned DP axes measured-retired; the residual needs an outside-grammar mechanism.",
+  "COVID-HAND-AB-01 + v14 ladder declared in covid_open_ledger.md section 3 (this campaign complements it; the canary is quoted beside the anchor row when landed).",
+  "covid_theta_screen_v13: admissible set {1.78e11..5.62e11}, midpoint 2.37e11; the lattice {1e11, 2.37e11, 1e12} brackets it below and above. Composite Theta is a pathogen constant -- GM scores at the same theta, no refit."
+ ],
+ "scenario_id": "greg_mortimer_2020",
+ "split_role": "held_out",
+ "split_role_note": "Declared in writing before any cell ran: this design scores the split's held-out hull. load_design verifies the declaration against the fixed split (a mismatch refuses at load); the field being absent on every prior design keeps them on the fit-target gate unchanged.",
+ "cell_conditioning": {
+  "note": "As-declared replay of the greg_mortimer_2020 scenario record: explicit seed is one passenger at epoch 0 with infection_age_days 0.0 (a declared assumption in the scenario file, deliberately identical to the training hull's convention), scheduled SOP-017 cabin isolation voyage day 8 -> end_day 27, single ship-wide testing campaign voyage day 20 (everyone tier), molecular_ascertainment_start_day 20 (no specimen channel before the screen), boarding channel off, platform expedition_cruise_450 declared not fitted. imports axis holds the declared 1; the imports:3 probe lives in covid_gm_rescore_v1_imports3, not here.",
+  "theta": "1e11 | 2.37e11 | 1e12 -- the v13 conditioning lattice verbatim",
+  "imports": 1,
+  "infection_age_days": 0.0,
+  "sanitary_visit_mode": "dwell_weighted",
+  "voyage_mode": "declared",
+  "split_day": 20,
+  "turn_day": 8,
+  "split_day_note": "On GM the scored date cut is the day-20 screen (split_day 20 -> onsets_before/on_or_after_split_day straddle the campaign) and the window pair is the day-8 isolation order (turn_day 8 -> the +/-7d passenger/crew onset counts bracket the confinement). The observables layer stays record-honest: campaign counts come from the campaign specimen log only."
+ },
+ "thetas": [
+  100000000000.0,
+  237000000000.0,
+  1000000000000.0
+ ],
+ "infection_age_days": [
+  0.0
+ ],
+ "imports": [
+  1
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 50,
+ "takeoff_recorded_onsets": 10,
+ "voyage_mode": "declared",
+ "split_day": 20,
+ "turn_day": 8,
+ "seed_ring_readout": true,
+ "arms": [
+  {
+   "arm_id": "hygiene_cycle",
+   "overrides": {},
+   "note": "Shipped default since PR #804 -- the practice cycle (compliance-gated post-visit washes, routine washes, self-contact re-loading, wet-window deposit blend). Empty overrides per the baseline-arm convention; the engine resolves hand_reservoir_mode hygiene_cycle and the delivery block echoes it."
+  },
+  {
+   "arm_id": "spike_decay",
+   "overrides": {
+    "transmission_overrides": {
+     "hand_reservoir_mode": "spike_decay"
+    }
+   },
+   "note": "Pre-repair baseline: propensity-thinned spike-and-decay -- the hand physics the stale first-look score ran under, so the spike_decay column is the like-for-like comparison against it and the seed-paired delta reads the whole post-v13 hand line on the held-out leg."
+  }
+ ],
+ "cells": 300,
+ "cells_note": "3 Theta x 2 arms x 50 seeds = 300 cells, declared-replay (~2-10 min each on the 223-agent hull; the ~30 min/cell figure in the task statement is the DP carryover). Cell order is theta x arm x seed: cells 0-99 = Theta 1e11 (hygiene_cycle 0-49, spike_decay 50-99), 100-199 = Theta 2.37e11 (hygiene_cycle 100-149, spike_decay 150-199), 200-299 = Theta 1e12.",
+ "freeze": {
+  "declared_before_running": true,
+  "metrics": [
+   "per-seed recorded_onsets (takeoff channel: >=10), campaign_positives / campaign_specimens / asymptomatic_share from the day-20 campaign log, infections_total and attack_rate",
+   "P(takeoff >=10 recorded onsets) per (theta, arm) row",
+   "campaign_positives median + q05-q95 per row vs H1's 128 of 217 (share 0.5899)",
+   "asymptomatic_share among positives per row vs H2's 0.8125 (defined cells only)",
+   "recorded-onsets attack share per seed vs covid.H3's Willebrand IQR [0.0003, 0.015] (median 0.002, mean 0.037) -- a tail-placement read, the right tail is expected",
+   "takeoff-conditional campaign_positives (the count among ignited seeds only -- separates ignition failure from size failure)",
+   "onset timing: first_onset_day median + pooled onset_curve day mass per row, under the day-20 screen channel",
+   "seed-paired spike_decay - hygiene_cycle deltas on recorded_onsets, campaign_positives, infections_total, and takeoff-class flips per theta (the held-out counterpart of HAND-AB's DP read)"
+  ],
+  "verdict_grammar": "replays | under_fires | over_fires | mixed. A row 'lands H1' when its campaign_positives median sits within 2x of 128 ([64, 256]) with the q05-q95 interval containing 128. 'replays' needs the anchor row (theta 2.37e11, hygiene_cycle) to land H1 AND H2's median asymptomatic share within 0.81 +/- 0.10; 'under_fires' = the anchor row's positives median lands under 64 or takeoff probability under 0.5; 'over_fires' = median over 256; 'mixed' = the arms or theta rows split verdicts or H1 lands with H2 outside its band."
+ },
+ "admissibility": {
+  "declared_before_running": true,
+  "note": "No selection criterion -- this is a scoring pass on held-out anchors measured as-declared, not a screen and not a fit. Nothing here moves Theta or any constant; the lattice is fixed at the three declared rows.",
+  "audit_invariants": [
+   "delivery.hand_reservoir_mode echoes the cell's arm on every payload (hygiene_cycle on the baseline arm, spike_decay on the baseline-labelled arm) -- the arm channel fired, or the cell is a defect.",
+   "seed_ring.seed_spec echoes the declared seed on every cell (count == the cell's imports axis, infection_age_days 0.0, role passenger; onset_day/departure_day absent -- GM's record carries neither) and seeded_count matches.",
+   "cell pairing is keyed on (theta, seed) across arms; a payload whose cell key is not on this lattice is a failure by construction.",
+   "every cell is a 672-epoch declared replay of greg_mortimer_2020 (28 days, 1-hour epochs) with aboard_total 223 -- truncated voyages or wrong hull are defects."
+  ],
+  "report_immediately_if": "P(takeoff) ~= 0 at anchor theta on either arm (the import/early-contact regime is dead under current physics -- the small-hull class has no transmission story); the as-declared hygiene_cycle arm lands H1 at anchor theta (first cross-hull replay -- re-orders every queued session); or the seed-paired spike_decay - hygiene_cycle delta reverses sign vs HAND-AB's DP read once that canary lands."
+ },
+ "execution": {
+  "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_gm_rescore_v1, STRIDE 1, job-definition picard-covid-boarding-screen rev bump digest-pinned to the rescore image (deploy/aws/Dockerfile.covid_gm_rescore, FROM picard-campaign built at the merged design SHA).",
+  "expected_cell_minutes": "~5 (223-agent hull, 672 epochs; measure from the canary, not from the DP 30-min figure)",
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_gm_rescore_v1/<sha>/cells/",
+  "canary": "INDEX_OFFSET 100, ARRAY_SIZE 20, STRIDE 1 -> cells 100-119 = theta 2.37e11 x hygiene_cycle x seeds 20200205-20200224, a contiguous block of the anchor row. STOP AND REPORT after the canary per the campaign gate; the remaining 280 scoring cells plus the imports3 diagnostic design run only on the author's go-ahead. Canary cells land in the scoring prefix, so the full array resumes over them.",
+  "readout": "tools/covid_gm_rescore_readout.py --cells campaign_results/covid_gm_rescore_v1/cells --design picard_framework/runs/covid_gm_rescore_v1_design.json"
+ }
+}
