@@ -88,6 +88,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "ship_graph_overrides",
     "dose_response_frailty",
     "hazard_frailty",
+    "info_suppression",
 })
 # The embarkation-immunity structure an arm may write onto
 # ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
@@ -909,7 +910,31 @@ def apply_arm_overrides(
         _apply_hazard_frailty(raw, overrides["hazard_frailty"])
     if "seed_patch" in overrides:
         _apply_seed_patch(raw, overrides["seed_patch"])
+    if "info_suppression" in overrides:
+        _apply_info_suppression(raw, overrides["info_suppression"])
     return raw
+
+
+def _apply_info_suppression(
+    raw: dict[str, Any],
+    block: Any,
+) -> None:
+    """Write an INFO-SUPPRESS-V1 arm's block onto config_overrides.
+
+    The whole declared block lands verbatim -- resolution and
+    validation happen in ``InfoSuppressionSpec.from_config`` at
+    ``initialize()``, so an invalid arm raises at cell build, not
+    silently mid-voyage. ``None`` clears the block back to the
+    engine default (disabled).
+    """
+    if block is None:
+        raw["config_overrides"].pop("info_suppression", None)
+        return
+    if not isinstance(block, Mapping):
+        raise ValueError(
+            "info_suppression arm override must be a mapping or null",
+        )
+    raw["config_overrides"]["info_suppression"] = dict(block)
 
 
 class QuarantineAttributionLedger:
@@ -1465,8 +1490,39 @@ def cell_payload(
             # delivery-machinery arm's declared values are auditable from
             # the payload alone (HEAT-V1 lineage).
             "delivery": _delivery_block(sim, raw),
+            # The declared recognition-keyed suppression block plus its
+            # live witnesses, so an INFO-SUPPRESS-V1 arm is auditable
+            # from the payload alone (null fields on a never-recognised
+            # cell are the mechanism-cannot-fire witness).
+            "info_suppression": _info_suppression_block(sim, raw),
         })
     return payload
+
+
+def _info_suppression_block(
+    sim: Any,
+    raw: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Declared info_suppression block plus the run's witness fields."""
+    declared = (
+        raw.get("config_overrides", {}).get("info_suppression") or {}
+    )
+    state = getattr(sim, "state", None)
+    engine = getattr(sim, "engine", None)
+    return {
+        **declared,
+        "recognition_epoch": getattr(state, "info_recognition_epoch", None),
+        "armed_epoch": getattr(state, "info_suppression_epoch", None),
+        "closed_zones_applied": list(
+            getattr(state, "info_suppression_closed_zones", ())
+        ),
+        "closed_venue_ids_engine": sorted(
+            getattr(engine, "closed_venue_ids", ())
+        ),
+        "self_isolated_count": len(
+            getattr(state, "info_suppression_admitted_ids", ())
+        ),
+    }
 
 
 def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:

@@ -37,7 +37,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 
@@ -2060,6 +2060,9 @@ class KorkinShipEngine:
         # order, so a run can name the host the scenario calls its index.
         self.explicit_seed_agent_ids: list[int] = []
         self.agent_behavior = _merged_agent_behavior(agent_behavior)
+        # INFO-SUPPRESS-V1: venue ids cancelled by a recognition-keyed
+        # info event (one-shot; cancelled venues never reopen).
+        self.closed_venue_ids: set[str] = set()
         # Per-epoch voyage EpochState (set by orchestrator when effects active)
         self.voyage_epoch_state: Any = None
 
@@ -2156,6 +2159,52 @@ class KorkinShipEngine:
             else self._passenger_dining_catalog
         )
         return weighted_zone_choice(catalog, self.rng) or "unknown"
+
+    def cancel_venues(self, zone_names: Iterable[str]) -> set[str]:
+        """Cancel the declared venues for the rest of the voyage.
+
+        INFO-SUPPRESS-V1: a cancelled venue leaves every venue catalog
+        (so no rotation draw can pick it), each agent assigned it as a
+        fixed dining/free venue is re-pointed home (meals and leisure in
+        quarters), and occupants currently standing in one relocate
+        home. One-shot at the info event -- cancelled venues never
+        reopen. Returns the venue ids actually cancelled.
+        """
+        closed = {str(z) for z in zone_names}
+        if not closed:
+            return set()
+        venue_names = {
+            row["name"]
+            for catalog in (
+                self._dining_catalog,
+                self._crew_dining_catalog,
+                self._passenger_dining_catalog,
+                self._leisure_catalog,
+            )
+            for row in catalog
+        }
+        matched = closed & venue_names
+        self.closed_venue_ids |= matched
+        self._dining_catalog = [
+            e for e in self._dining_catalog if e["name"] not in closed
+        ]
+        self._crew_dining_catalog = [
+            e for e in self._crew_dining_catalog if e["name"] not in closed
+        ]
+        self._passenger_dining_catalog = [
+            e for e in self._passenger_dining_catalog if e["name"] not in closed
+        ]
+        self._leisure_catalog = [
+            e for e in self._leisure_catalog if e["name"] not in closed
+        ]
+        for agent in self.agents:
+            if agent.dining_zone in closed:
+                agent.dining_zone = agent.home_zone
+            if agent.free_zone in closed:
+                agent.free_zone = agent.home_zone
+            if agent.current_location in closed:
+                agent.current_location = agent.home_zone
+        return matched
 
     def _seated_schedule(
         self, template: list[str], dining_zone: str,

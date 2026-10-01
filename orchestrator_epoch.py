@@ -81,6 +81,7 @@ from telemetry_buffer.agent_axes import (
 from telemetry_buffer.fields import (
     AGENT_CABIN_MATE_IDS,
     AGENT_CLASS,
+    AGENT_ROLE,
     AGENT_SHEDDING_RATE,
     AGENT_SYMPTOM_PRESENTATION,
     agent_id,
@@ -369,6 +370,60 @@ def try_admit_to_quarantine(
         entry["detection_channel"] = detection_channel
     state.compliance_log.append(entry)
     return False
+
+
+def step_self_isolation(
+    epoch: int,
+    agents: list[dict[str, Any]],
+    state: SimulationState,
+    syndromic: Any,
+    scope_role: str,
+    epochs_since_offer: int,
+) -> int:
+    """Voluntary self-isolation under a latched recognition state.
+
+    INFO-SUPPRESS-V1: the shipped FRED sticky classes govern
+    participation -- compliant isolate at once, reluctant once the
+    declared delay elapses or when symptomatic, defiant never. Unlike a
+    confinement ORDER a declined offer leaves no refuser mark:
+    declining voluntary isolation is not refusing an order, so the
+    symptomatic path keeps working on non-participants. Agents already
+    confined, escorted, or refusers of a formal order are left alone.
+
+    Returns the count newly admitted this epoch.
+    """
+    admitted = 0
+    for agent in agents:
+        aid = agent_id(agent)
+        if (
+            aid in _all_confined(state)
+            or aid in state.escort_pending
+            or aid in state.quarantine_refusers
+        ):
+            continue
+        if scope_role != "all" and agent.get(AGENT_ROLE) != scope_role:
+            continue
+        if syndromic.check_quarantine_compliance(
+            aid, epochs_since_offer,
+            behavioral_override=state.agent_behavioral_overrides.get(aid),
+            chronic_compliance_boost=state.chronic_behavioral_mods.get(
+                aid, {},
+            ).get("quarantine_compliance_boost", 0.0),
+            agent_class=agent.get(AGENT_CLASS),
+            is_symptomatic=agent_requires_confinement(agent),
+        ):
+            cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+            if cls is not None:
+                state.compliance_class_by_agent[aid] = cls
+            state.quarantined_ids.add(aid)
+            state.info_suppression_admitted_ids.add(aid)
+            state.compliance_log.append({
+                "epoch": epoch, "agent_id": aid,
+                "action": "self_isolation",
+                "compliance_class": cls,
+            })
+            admitted += 1
+    return admitted
 
 
 # ── VSP state synchronization ────────────────────────────────────────────
