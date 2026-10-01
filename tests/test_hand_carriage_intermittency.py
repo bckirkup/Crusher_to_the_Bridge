@@ -27,8 +27,12 @@ from engines.transmission_core import (
 
 PATHOGEN = "test_pathogen"
 ZONE = "Public_Lounge"
-# Any carried copies on the hand count as detectable carriage.
-DETECTION_LOAD = 1.0
+# Detectable carriage at the Liu 2013 rinse LOD (2.15 log10 GEC per rinse).
+# NORO-HAND-PRACTICE-01: the hygiene_cycle arm adds a routine self-contact
+# re-loading stream, so a 1-GEC floor is saturated for every shedding host
+# and no longer reads intermittency; the claims this suite makes about
+# occupancy and never-carriers are the claims Liu's rinses could see.
+DETECTION_LOAD = 10.0 ** 2.15
 
 PHASES = [
     {"name": "acute", "dpi_min": 0, "dpi_max": 2,

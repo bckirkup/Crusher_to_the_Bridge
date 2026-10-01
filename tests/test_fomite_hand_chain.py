@@ -64,6 +64,7 @@ def _core(
     zone_type: str = "Free",
     profile: dict | None = None,
     seed: int = 7,
+    reservoir_mode: str | None = None,
 ) -> TransmissionCore:
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
@@ -71,6 +72,11 @@ def _core(
         pathogen_profiles={PATHOGEN: profile or _profile()},
         zone_types={zone: zone_type},
         clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+        cfg=(
+            {"transmission": {"hand_reservoir_mode": reservoir_mode}}
+            if reservoir_mode
+            else None
+        ),
     )
     core.initialize_zones([zone])
     return core
@@ -157,9 +163,13 @@ def test_mouth_dose_is_monotonic_in_mouth_contact_frequency(
 
 
 def test_hand_relaxation_uses_sim_clock_hourly_rate() -> None:
-    hourly = _core(seed=23)
+    # Continuous-arm deterministic relaxation, pinned to the wash_reuptake
+    # baseline: under hygiene_cycle the same path draws stochastic routine
+    # washes, so the one-call and two-call trajectories legitimately differ
+    # (NORO-HAND-PRACTICE-01).
+    hourly = _core(seed=23, reservoir_mode="wash_reuptake")
     half_hour = _core(
-        seed=23,
+        seed=23, reservoir_mode="wash_reuptake",
     )
     hourly.clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
     half_hour.clock = SimClock(epoch_duration_hours=0.5, mode=HOURS)
@@ -178,7 +188,10 @@ def test_hand_relaxation_uses_sim_clock_hourly_rate() -> None:
 
 
 def test_replenishment_reaches_the_liu_hand_target() -> None:
-    core = _core(seed=29)
+    # Pinned to wash_reuptake: the continuous arm there relaxes
+    # deterministically to the target; hygiene_cycle washes sit the
+    # reservoir below it (NORO-HAND-PRACTICE-01).
+    core = _core(seed=29, reservoir_mode="wash_reuptake")
     agent = _agent(infected=True)
     profile = _profile(hand_inactivation_rate_per_hour=1.155)
     target = agent.get_pathogen_hand_target(PATHOGEN, profile)
@@ -240,9 +253,12 @@ def test_a_peak_shift_moves_the_faecal_and_hand_routes_by_one_factor(
 
 
 def test_replenishment_is_invariant_to_one_hour_or_half_hour_epochs() -> None:
+    # Pinned to wash_reuptake for the same reason as the test above:
+    # stochastic practice is not invariant across clock grids, deterministic
+    # relaxation is (NORO-HAND-PRACTICE-01).
     profile = _profile(hand_inactivation_rate_per_hour=1.155)
-    hourly = _core(seed=31)
-    half_hour = _core(seed=31)
+    hourly = _core(seed=31, reservoir_mode="wash_reuptake")
+    half_hour = _core(seed=31, reservoir_mode="wash_reuptake")
     hourly.clock = SimClock(epoch_duration_hours=1.0, mode=HOURS)
     half_hour.clock = SimClock(epoch_duration_hours=0.5, mode=HOURS)
     first = _agent(infected=True)

@@ -173,6 +173,55 @@ HAND_TO_MOUTH_NORMAL = (0.339, 0.132)
 # draws uniformly across them. Origin: Ab.
 HAND_TO_HAND_TRANSFER_RANGE = (0.028, 0.066)
 HAND_INACTIVATION_RATE_PER_HOUR_RANGE = (0.61, 1.7)
+# NORO-HAND-PRACTICE-01 (tranche 51): the hygiene_cycle arm's practice
+# constants. Post-toilet wash compliance -- the probability a bathroom visit
+# ends in a hand wash at all. Observed restroom fractions: Lawson et al. 2019
+# (IJERPH 16:5036) 51.1% basic compliance; Drankiewicz & Dundes 2003 (AJIC
+# 31:67) 63% washed at all. The interval covers both. Grade B. Origin: Ab.
+HAND_WASH_COMPLIANCE_RANGE = (0.35, 0.75)
+# Share of wash acts that use soap rather than water only. Drankiewicz 2003:
+# 38% of observed washers used soap. Grade B. Origin: Ab.
+HAND_WASH_SOAP_SHARE = 0.4
+# Per-act log10 removal on hands, soap + water, virus arm: summary LRV 2.03,
+# 95% CI [1.45, 2.62]. Hilton et al. 2025, BMJ Global Health
+# (10.1136/bmjgh-2025-018925) systematic review for the WHO community
+# hand-hygiene guidelines. The draw's spread is declared wider than the
+# meta-analytic CI -- a CI over a summary mean is not a per-act spread.
+# Standing liability: Hilton's field-study LRVs are 0.45-0.55, far below the
+# lab-seeded arm. Grade B. Origin: R/T2.
+HAND_WASH_EFFICACY_SOAP_LOG10 = (2.03, 0.5, 0.5, 3.5)
+# Per-act log10 removal, water-only virus arm: summary LRV 1.55,
+# 95% CI [0.74, 2.35] over five studies. Hilton 2025. Grade B. Origin: R/T2.
+HAND_WASH_EFFICACY_WATER_LOG10 = (1.55, 0.6, 0.2, 3.0)
+# Non-bathroom routine washes per day. Measured totals 5-10/day (Machida
+# 2020 median 5 IQR 3-8; Machida 2021 mean 10.2; Glabska 2020 3-10
+# pre-pandemic); the stool-event stream already carries 1.0-5.63/day, so the
+# residual is declared. Grade C. Origin: Ab.
+ROUTINE_WASHES_PER_DAY_RANGE = (2.0, 8.0)
+# Routine self-contact re-loading episodes per day: activity contacts that
+# re-inoculate a shedding host's own hands between bathroom visits. Ram 2011
+# reads within-person hand titres as 2-3.5 log10 swings over hours -- bursts
+# then decay, not a plateau -- so the stream runs at the daily scale of the
+# activities that plausibly re-inoculate (food handling, own environment),
+# not the per-hour scale of all hand contact. Declared (tranche 40 section
+# 4); no dedicated frequency measurement retrieved. Grade C.
+SELF_CONTACT_TICKS_PER_DAY_RANGE = (2.0, 8.0)
+# GEC added to the hand per self-contact tick, scaled by the host's carriage
+# propensity: Pickering 2011 per-activity increments ~50-6310 CFU
+# fecal-indicator bacteria (tranche 40 section 4). The interval spans two
+# orders of magnitude, so the draw is log-uniform -- an arithmetic-uniform
+# draw would live at the top of the band and saturate every host's
+# occupancy. Grade C. Origin: T.
+SELF_CONTACT_INCREMENT_GEC_RANGE = (50.0, 6300.0)
+# Seconds a hand stays wet after one wash act -- the residual-moisture window
+# Patrick 1997 showed controls touch-contact translocation; no duration
+# series retrieved, declared. Grade C. Origin: Ab.
+HAND_WET_SECONDS_RANGE = (20.0, 90.0)
+# Deposit-side transfer efficiency of a dry hand as a fraction of the shipped
+# wet-contact parameterisation: Tuladhar 2013 hand->surface 13% -> 0.1% over
+# 10 min (~0.008); Sharps 2012 59% -> <1% (<0.017); Patrick 1997 wet:dry
+# translocation ratios 47-486x bracket the reciprocal. Grade B. Origin: Ab.
+HAND_DRY_TRANSFER_MULTIPLIER_RANGE = (0.005, 0.08)
 # Defecation events per day: the frequency at which a faecally shedding host
 # recontaminates its own hands, and so the only quantity through which symptom
 # status reaches the faecal-hand-fomite-food chain. Two arms, because that is
@@ -1277,16 +1326,16 @@ DEFAULT_CABIN_AIR_MODE = "cabin_compartment"
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
 DEFAULT_SANITARY_VISIT_MODE = "none"
 
-# NORO-HAND-RESERVOIR-01: the hand-reservoir mechanism arm.
-# ``wash_reuptake`` (default) treats each stool event as a bathroom visit --
-# propensity-gated contamination followed by a drawn-efficacy wash -- and
-# lets every occupant draw on the surface->hand pickup chain (dose
-# bookkeeping stays challengeable-only). ``spike_decay`` is the labelled
-# pre-repair baseline: propensity-thinned defecation spike with decay only,
-# pickup challengeable-only -- bit-identical to the shipped mechanism on
-# matched seeds.
-HAND_RESERVOIR_MODES = ("wash_reuptake", "spike_decay")
-DEFAULT_HAND_RESERVOIR_MODE = "wash_reuptake"
+# NORO-HAND-PRACTICE-01: the hand-reservoir mechanism arm.
+# ``hygiene_cycle`` (default) runs the practice cycle of tranche 51 --
+# compliance-gated per-act washes on stool events, a routine non-bathroom
+# wash stream, self-contact re-loading ticks, and a post-wash wet window
+# driving the deposit-side drying multiplier. ``wash_reuptake`` is the
+# labelled NORO-HAND-RESERVOIR-01 baseline (deterministic post-event wash,
+# all-occupant pickup), and ``spike_decay`` the labelled pre-repair baseline;
+# both reproduce their shipped behaviour bit-identically on matched seeds.
+HAND_RESERVOIR_MODES = ("hygiene_cycle", "wash_reuptake", "spike_decay")
+DEFAULT_HAND_RESERVOIR_MODE = "hygiene_cycle"
 
 
 def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
@@ -5756,7 +5805,9 @@ class TransmissionCore:
             donor = shedder.hand_load_by_pathogen.get(pathogen_id, 0.0)
             if donor <= 0.0:
                 continue
-            fraction = self.rng.uniform(*HAND_TO_HAND_TRANSFER_RANGE)
+            fraction = self.rng.uniform(
+                *HAND_TO_HAND_TRANSFER_RANGE,
+            ) * self._hand_deposit_factor(shedder, pathogen_id)
             if cabin_confinement:
                 fraction *= self._cabin_pair_contact_factor(
                     shedder, target, epoch,
@@ -7245,10 +7296,12 @@ class TransmissionCore:
         A profile declaring ``stool_events_per_day`` runs the event-driven
         arm; a profile without that declaration keeps the continuous
         relaxation toward the ceiling. The event-driven arm splits on
-        ``hand_reservoir_mode``: ``wash_reuptake`` treats each event as a
-        bathroom visit (propensity-gated contamination followed by a wash,
-        with routine re-uptake through the shared pickup path), while the
-        ``spike_decay`` baseline keeps the shipped propensity-thinned
+        ``hand_reservoir_mode``: ``hygiene_cycle`` runs the practice cycle
+        of tranche 51 (compliance-gated washes, routine washes, self-contact
+        re-loading, post-wash wet window); ``wash_reuptake`` treats each
+        event as a bathroom visit (propensity-gated contamination followed
+        by a wash, with routine re-uptake through the shared pickup path);
+        the ``spike_decay`` baseline keeps the shipped propensity-thinned
         spike-and-decay.
         """
         target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
@@ -7261,8 +7314,29 @@ class TransmissionCore:
             agent, pathogen_id, profile,
         )
         if events_per_day is None:
-            agent.hand_load_by_pathogen[pathogen_id] = (
-                target + (current - target) * survival
+            relaxed = target + (current - target) * survival
+            if self.hand_reservoir_mode == "hygiene_cycle":
+                # Continuous-arm profiles still practise routine hygiene:
+                # non-bathroom washes suppress the relaxed load and mark
+                # the wet window. No stool events or self-contact ticks --
+                # continuous shedding is the emission term.
+                wet_seconds = 0.0
+                routine = max(0, int(self.rng.poisson(
+                    self._hand_practice(agent, pathogen_id)[
+                        "routine_washes_per_day"
+                    ] * self.clock.day_fraction_per_epoch,
+                )))
+                for _ in range(routine):
+                    efficacy, wet = self._hand_wash_act()
+                    relaxed *= math.pow(10.0, -efficacy)
+                    wet_seconds += wet
+                self._set_hand_wet_factor(agent, pathogen_id, wet_seconds)
+            agent.hand_load_by_pathogen[pathogen_id] = relaxed
+            return
+        if self.hand_reservoir_mode == "hygiene_cycle":
+            self._replenish_hand_hygiene_cycle(
+                agent, pathogen_id, profile, zone_name, target, current,
+                rate, survival, events_per_day,
             )
             return
         if self.hand_reservoir_mode == "wash_reuptake":
@@ -7335,6 +7409,156 @@ class TransmissionCore:
                 agent, pathogen_id, profile, zone_name,
             )
         agent.hand_load_by_pathogen[pathogen_id] = decayed
+
+    def _hand_practice(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> dict[str, float]:
+        """This host's persistent hygiene-practice traits (hygiene_cycle).
+
+        Drawn once per infection: post-visit wash compliance, the routine
+        non-bathroom wash rate, and the self-contact re-loading tick rate.
+        """
+        existing = agent.hand_practice_by_pathogen.get(pathogen_id)
+        if existing is not None:
+            return existing
+        practice = {
+            "wash_compliance": float(
+                self.rng.uniform(*HAND_WASH_COMPLIANCE_RANGE),
+            ),
+            "routine_washes_per_day": float(
+                self.rng.uniform(*ROUTINE_WASHES_PER_DAY_RANGE),
+            ),
+            "self_contacts_per_day": float(
+                self.rng.uniform(*SELF_CONTACT_TICKS_PER_DAY_RANGE),
+            ),
+        }
+        agent.hand_practice_by_pathogen[pathogen_id] = practice
+        return practice
+
+    def _hand_wash_act(self) -> tuple[float, float]:
+        """One wash act: (log10 efficacy drawn, wet seconds marked).
+
+        Soap use is drawn per act at the observed share, then efficacy from
+        that act's family (tranche 51 section 3). The wet seconds are the
+        residual-moisture window Patrick 1997 showed controls deposit-side
+        translocation.
+        """
+        mean, sd, low, high = (
+            HAND_WASH_EFFICACY_SOAP_LOG10
+            if self.rng.random() < HAND_WASH_SOAP_SHARE
+            else HAND_WASH_EFFICACY_WATER_LOG10
+        )
+        efficacy = float(np.clip(self.rng.normal(mean, sd), low, high))
+        wet = float(self.rng.uniform(*HAND_WET_SECONDS_RANGE))
+        return efficacy, wet
+
+    def _set_hand_wet_factor(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        wet_seconds: float,
+    ) -> None:
+        """Epoch deposit-side drying blend for this host (PRACTICE-01 iv).
+
+        The shipped hand->surface distribution is a wet-contact
+        parameterisation; a hand is wet for ``wet_seconds`` of the epoch and
+        dry otherwise, when it deposits at ``dry`` times that calibration.
+        The expected blend applies to every donor-hand deposit path.
+        """
+        epoch_seconds = self.clock.hours_per_epoch * 3600.0
+        wet_share = min(1.0, max(0.0, wet_seconds) / max(epoch_seconds, 1.0))
+        dry = float(self.rng.uniform(*HAND_DRY_TRANSFER_MULTIPLIER_RANGE))
+        agent.hand_wet_transfer_by_pathogen[pathogen_id] = (
+            wet_share + (1.0 - wet_share) * dry
+        )
+
+    def _hand_deposit_factor(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """Wet/dry deposit multiplier; 1.0 outside the hygiene_cycle arm."""
+        return agent.hand_wet_transfer_by_pathogen.get(pathogen_id, 1.0)
+
+    def _replenish_hand_hygiene_cycle(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+        zone_name: str | None,
+        target: float,
+        current: float,
+        inactivation_rate: float,
+        survival: float,
+        events_per_day: float,
+    ) -> None:
+        """Practice-cycle arm of ``_replenish_hand`` (NORO-HAND-PRACTICE-01).
+
+        A stool event is a bathroom visit: the hand contaminates when the
+        host's carriage propensity fires, and the visit ends in a wash only
+        when this host's compliance draw fires -- a coin flip, not a
+        certainty. Routine non-bathroom washes run as their own Poisson
+        stream, and routine self-contact ticks reload the hand between
+        visits at a propensity-scaled increment capped at the visit ceiling.
+        Every wash act marks a residual-moisture window that drives the
+        epoch's deposit-side drying blend.
+
+        At epoch granularity the placement of events inside the hour is
+        unidentifiable; the declared order is decay, then the visit's
+        contaminate-then-maybe-wash, then routine washes, then ticks --
+        so an event row reads the post-visit residual and a routine row
+        reads the tick equilibrium.
+        """
+        wet_seconds = 0.0
+        if pathogen_id not in agent.hand_load_by_pathogen:
+            propensity = self._hand_carriage_propensity(agent, pathogen_id)
+            current = self._stationary_hand_load(
+                target, inactivation_rate,
+                events_per_day * propensity,
+            )
+            efficacy, wet = self._hand_wash_act()
+            current *= math.pow(10.0, -efficacy)
+            wet_seconds += wet
+        practice = self._hand_practice(agent, pathogen_id)
+        decayed = current * survival
+        propensity = self._hand_carriage_propensity(agent, pathogen_id)
+        if self._stool_event_occurs(events_per_day):
+            if self.rng.random() < propensity:
+                decayed = max(decayed, target)
+            if self.rng.random() < practice["wash_compliance"]:
+                efficacy, wet = self._hand_wash_act()
+                decayed *= math.pow(10.0, -efficacy)
+                wet_seconds += wet
+            self._route_stool_event_venue(
+                agent, pathogen_id, profile, zone_name,
+            )
+        routine = max(0, int(self.rng.poisson(
+            practice["routine_washes_per_day"]
+            * self.clock.day_fraction_per_epoch,
+        )))
+        for _ in range(routine):
+            efficacy, wet = self._hand_wash_act()
+            decayed *= math.pow(10.0, -efficacy)
+            wet_seconds += wet
+        ticks = max(0, int(self.rng.poisson(
+            practice["self_contacts_per_day"]
+            * self.clock.day_fraction_per_epoch,
+        )))
+        inc_lo, inc_hi = SELF_CONTACT_INCREMENT_GEC_RANGE
+        for _ in range(ticks):
+            decayed = min(
+                target,
+                decayed + propensity * math.pow(
+                    10.0,
+                    self.rng.uniform(
+                        math.log10(inc_lo), math.log10(inc_hi),
+                    ),
+                ),
+            )
+        agent.hand_load_by_pathogen[pathogen_id] = decayed
+        self._set_hand_wet_factor(agent, pathogen_id, wet_seconds)
 
     def _route_stool_event_venue(
         self,
@@ -9186,7 +9410,9 @@ class TransmissionCore:
             transfer_efficiency = min(
                 1.0,
                 max(0.0, float(rng.lognormal(*HAND_TO_SURFACE_LOGNORMAL))),
-            ) * self._hand_to_surface_drying(profile)
+            ) * self._hand_to_surface_drying(
+                profile,
+            ) * self._hand_deposit_factor(agent, pathogen_id)
             requested = (
                 self._fomite_surface_contacts(zone_name, agent, epoch)
                 * self._cabin_presence_share(agent, epoch)
@@ -9525,7 +9751,9 @@ class TransmissionCore:
             hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
             if hand <= 0.0:
                 continue
-            transfer = self.rng.uniform(*HAND_TO_FOOD_TRANSFER_FRACTION_RANGE)
+            transfer = self.rng.uniform(
+                *HAND_TO_FOOD_TRANSFER_FRACTION_RANGE,
+            ) * self._hand_deposit_factor(agent, pathogen_id)
             requested = (
                 self._food_hand_contacts(zone_name, agent, food_cfg, epoch)
                 * transfer
