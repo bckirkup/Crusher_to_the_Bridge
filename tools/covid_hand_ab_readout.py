@@ -27,6 +27,8 @@ from functools import partial
 from typing import Any
 
 from tools.covid_screen_readout_common import (
+    audit_hand_mode,
+    declared_hand_mode,
     design_readout_main,
     fmt3g,
     load_cell_payloads,  # noqa: F401  (re-exported for tests)
@@ -48,24 +50,12 @@ RECORD_SEED_SPEC = {"count": 1, "onset_day": -1.0, "role": "passenger"}
 
 def _declared(arm: dict) -> dict:
     """The arm's declared hand-reservoir mode."""
-    tx = (arm.get("overrides") or {}).get("transmission_overrides") or {}
-    return {
-        "hand_reservoir_mode": str(
-            tx.get("hand_reservoir_mode", SHIPPED_HAND_MODE)
-        ),
-    }
+    return declared_hand_mode(arm, SHIPPED_HAND_MODE)
 
 
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
-    failures: list[str] = []
-    delivery = payload.get("delivery") or {}
-    resolved_mode = delivery.get("hand_reservoir_mode")
-    if resolved_mode != declared["hand_reservoir_mode"]:
-        failures.append(
-            f"hand_reservoir_mode resolved {resolved_mode!r}, "
-            f"declared {declared['hand_reservoir_mode']!r}",
-        )
+    failures: list[str] = audit_hand_mode(payload, declared)
     spec = payload.get("seed_spec") or {}
     for key, want in RECORD_SEED_SPEC.items():
         if spec.get(key) != want:

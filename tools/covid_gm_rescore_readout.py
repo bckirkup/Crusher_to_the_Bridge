@@ -48,7 +48,9 @@ from simulation_utils.paths import (  # noqa: E402
 from tools.covid_screen_readout_common import (  # noqa: E402
     TAKEOFF_MIN_ONSETS,
     audit_all,
+    audit_hand_mode,
     band_stats,
+    declared_hand_mode,
     fmt3g,
     load_cell_payloads,
     quantile,
@@ -90,24 +92,12 @@ DELTA_REVERSAL_FIELDS = (
 
 def _declared(arm: dict) -> dict:
     """The arm's declared hand-reservoir mode."""
-    tx = (arm.get("overrides") or {}).get("transmission_overrides") or {}
-    return {
-        "hand_reservoir_mode": str(
-            tx.get("hand_reservoir_mode", SHIPPED_HAND_MODE)
-        ),
-    }
+    return declared_hand_mode(arm, SHIPPED_HAND_MODE)
 
 
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
-    failures: list[str] = []
-    delivery = payload.get("delivery") or {}
-    resolved_mode = delivery.get("hand_reservoir_mode")
-    if resolved_mode != declared["hand_reservoir_mode"]:
-        failures.append(
-            f"hand_reservoir_mode resolved {resolved_mode!r}, "
-            f"declared {declared['hand_reservoir_mode']!r}",
-        )
+    failures: list[str] = audit_hand_mode(payload, declared)
     cell = payload.get("cell") or {}
     ring = payload.get("seed_ring") or {}
     spec = ring.get("seed_spec") or {}
@@ -116,7 +106,7 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
             f"seed_spec.count {spec.get('count')!r} != cell imports "
             f"{cell.get('imports')!r}",
         )
-    if float(spec.get("infection_age_days", -1.0)) != 0.0:
+    if abs(float(spec.get("infection_age_days", -1.0))) > 1e-9:
         failures.append(
             f"seed_spec.infection_age_days {spec.get('infection_age_days')!r} "
             "!= declared 0.0",
@@ -375,6 +365,93 @@ def _bucket_external(
     return rows
 
 
+def _delta_reversal_trigger(paired: dict[str, Any]) -> dict | None:
+    """Flag when the held-out hand-arm delta reverses HAND-AB's DP sign.
+
+    HAND-AB measured the repair suppressive-leaning: hygiene_cycle sits
+    below spike_decay, so a positive median on every shared delta field
+    is the declared report-immediately reversal.
+    """
+    for label, delta in paired.items():
+        if not label.startswith("theta=") or "minus_external" in label:
+            continue
+        medians = [
+            (delta.get(field) or {}).get("median")
+            for field in DELTA_REVERSAL_FIELDS
+        ]
+        if (
+            medians
+            and all(m is not None for m in medians)
+            and all(float(m) > 0.0 for m in medians)
+        ):
+            return {"paired_row": label, "triggers": ["DELTA-REVERSAL"]}
+    return None
+
+
+def _build_report(
+    design: Any,
+    cells: list[Any],
+    payloads: dict[str, dict],
+    external: dict[tuple, list[dict]] | None,
+) -> dict[str, Any]:
+    """Audit cells and pool them into the frozen per-row stats."""
+    declared_by_arm = {
+        arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
+    }
+    audit_failures, rows = audit_all(
+        payloads, cells, declared_by_arm, audit_cell,
+    )
+    report: dict[str, Any] = {
+        "design_id": design.design_id,
+        "cells_found": len(payloads),
+        "cells_expected": len(cells),
+        "audit_failures": audit_failures,
+        "anchors": {
+            "covid.H1": {"positives": H1_POSITIVES, "tested": H1_TESTED},
+            "covid.H2": {"asymptomatic_share": H2_SHARE, "tol": H2_TOL},
+            "covid.H3": {
+                "median": WILLEBRAND_MEDIAN, "iqr": WILLEBRAND_IQR,
+            },
+        },
+        "rows": {},
+        "triggered_rows": [],
+    }
+    for (theta, arm_id), row in sorted(rows.items()):
+        stats = _row_stats(row)
+        report["rows"][f"theta={theta:.4g}|arm={arm_id}"] = stats
+        trigger = _row_triggers(theta, arm_id, stats)
+        if trigger:
+            report["triggered_rows"].append(trigger)
+    report["paired_rows"] = _paired_rows(rows, external)
+    reversal = _delta_reversal_trigger(report["paired_rows"])
+    if reversal:
+        report["triggered_rows"].append(reversal)
+    return report
+
+
+def _print_report(report: dict[str, Any]) -> None:
+    """The console summary: counts, one line per row, triggered rows."""
+    print(
+        f"{report['cells_found']}/{report['cells_expected']} cells; "
+        f"{len(report['audit_failures'])} audit failures",
+    )
+    for label, stats in report["rows"].items():
+        print(
+            f"  {label}: takeoff {stats['takeoff_n']}/{stats['n']} "
+            f"P={fmt3g(stats['p_takeoff'])} "
+            f"pos med {fmt3g(stats['campaign_positives']['median'])} "
+            f"[{fmt3g(stats['campaign_positives']['q05'])},"
+            f"{fmt3g(stats['campaign_positives']['q95'])}] "
+            f"asym {fmt3g(stats['asymptomatic_share']['median'])} "
+            f"{'H1-LANDS' if stats['h1_lands'] else ''}"
+        )
+    if report["triggered_rows"]:
+        print(
+            "TRIGGERED_ROWS:",
+            json.dumps(report["triggered_rows"], indent=1),
+        )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--cells", required=True)
@@ -402,66 +479,20 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    declared_by_arm = {
-        arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-    }
-    audit_failures, rows = audit_all(
-        payloads, cells, declared_by_arm, audit_cell,
-    )
     external = None
     if args.pair_cells:
         pair_dir = resolve_repo_path(REPO_ROOT, args.pair_cells)
         external = _bucket_external(
             load_cell_payloads(pair_dir), args.pair_arm,
         )
-
-    report: dict[str, Any] = {
-        "design_id": design.design_id,
-        "cells_found": len(payloads),
-        "cells_expected": len(cells),
-        "audit_failures": audit_failures,
-        "anchors": {
-            "covid.H1": {"positives": H1_POSITIVES, "tested": H1_TESTED},
-            "covid.H2": {"asymptomatic_share": H2_SHARE, "tol": H2_TOL},
-            "covid.H3": {"median": WILLEBRAND_MEDIAN, "iqr": WILLEBRAND_IQR},
-        },
-        "rows": {},
-        "triggered_rows": [],
-    }
-    for (theta, arm_id), row in sorted(rows.items()):
-        stats = _row_stats(row)
-        report["rows"][f"theta={theta:.4g}|arm={arm_id}"] = stats
-        trigger = _row_triggers(theta, arm_id, stats)
-        if trigger:
-            report["triggered_rows"].append(trigger)
-    report["paired_rows"] = _paired_rows(rows, external)
-
+    report = _build_report(design, cells, payloads, external)
     if args.out:
         out_path = resolve_repo_path(REPO_ROOT, args.out)
         with validated_open(
             out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8",
         ) as fh:
             json.dump(report, fh, indent=2, sort_keys=True)
-
-    print(
-        f"{report['cells_found']}/{report['cells_expected']} cells; "
-        f"{len(audit_failures)} audit failures",
-    )
-    for label, stats in report["rows"].items():
-        print(
-            f"  {label}: takeoff {stats['takeoff_n']}/{stats['n']} "
-            f"P={fmt3g(stats['p_takeoff'])} "
-            f"pos med {fmt3g(stats['campaign_positives']['median'])} "
-            f"[{fmt3g(stats['campaign_positives']['q05'])},"
-            f"{fmt3g(stats['campaign_positives']['q95'])}] "
-            f"asym {fmt3g(stats['asymptomatic_share']['median'])} "
-            f"{'H1-LANDS' if stats['h1_lands'] else ''}"
-        )
-    if report["triggered_rows"]:
-        print(
-            "TRIGGERED_ROWS:",
-            json.dumps(report["triggered_rows"], indent=1),
-        )
+    _print_report(report)
     return 0
 
 
