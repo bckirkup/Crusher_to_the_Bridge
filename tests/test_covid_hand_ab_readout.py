@@ -5,10 +5,7 @@ import json
 import shutil
 from pathlib import Path
 
-import pytest
-
 from tools import covid_hand_ab_readout as mod
-
 
 DESIGN = (
     Path(__file__).resolve().parents[1]
@@ -93,6 +90,21 @@ def test_audit_cell_flags_index_geometry_breaks():
         _payload(spec={"count": 2, "onset_day": -1.0, "role": "passenger"}),
         declared, THETA,
     )
+    assert fails and "seed_spec.count" in fails[0]
+
+
+def test_audit_cell_skips_the_spec_when_none_is_emitted():
+    # The covid_hand_ab_v1 design does not enable seed_ring_readout, so
+    # its cells emit no seed spec anywhere; the spec assertions are
+    # inert rather than failing every real payload.
+    declared = _declared_for()
+    payload = _payload()
+    del payload["seed_spec"]
+    assert mod.audit_cell(payload, declared, THETA) == []
+    nested = _payload()
+    del nested["seed_spec"]
+    nested["seed_ring"] = {"seed_spec": {"count": 2}}
+    fails = mod.audit_cell(nested, declared, THETA)
     assert fails and "seed_spec.count" in fails[0]
 
 
