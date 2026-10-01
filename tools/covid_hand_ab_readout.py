@@ -23,21 +23,16 @@ Usage:
 from __future__ import annotations
 
 import os
-from collections import Counter
+from functools import partial
 from typing import Any
 
-from picard_framework.covid_boarding_screen import (
-    enumerate_cells,
-    load_design,
-)
 from tools.covid_screen_readout_common import (
-    anchor_legs,
-    band_stats,
+    design_readout_main,
+    fmt3g,
     load_cell_payloads,  # noqa: F401  (re-exported for tests)
     quantile,
-    resolve_design_arg,
-    run_readout,
-    takeoff_split,
+    row_triggers,
+    standard_row_stats,
 )
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -87,78 +82,19 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     return failures
 
 
-def _fmt(v: float | None) -> str:
-    return "n/a" if v is None else f"{v:.3g}"
+def _hand_extras(takeoff: list[dict], stats: dict) -> dict:
+    """The row_extra columns: during-quarantine median and share."""
+    return {
+        "row_extra": (
+            f"during med {fmt3g(stats['during_quarantine']['median'])} "
+            f"share {fmt3g(stats['during_share']['median'])}"
+        ),
+    }
 
 
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians + route decomposition for one row."""
-    takeoff, vectors = takeoff_split(payloads)
-    during = [
-        float(p["infections_during_quarantine"]) for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-    ]
-    before = [
-        float(p["infections_before_quarantine"]) for p in takeoff
-        if p.get("infections_before_quarantine") is not None
-    ]
-    during_share = [
-        float(p["infections_during_quarantine"])
-        / float(p["infections_total"])
-        for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-        and p.get("infections_total")
-    ]
-    aboard_route: Counter[str] = Counter()
-    during_route: Counter[str] = Counter()
-    for p in takeoff:
-        aboard_route.update(p.get("aboard_window_by_route") or {})
-        during_route.update(p.get("during_quarantine_by_route") or {})
-    med_during = quantile(during, 0.5)
-    med_share = quantile(during_share, 0.5)
-    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
-    return {
-        "n": len(payloads),
-        "takeoff_n": len(takeoff),
-        "fizzle_majority": len(takeoff) * 2 < len(payloads),
-        "recorded_onsets": band_stats(vectors["rec"]),
-        "before_share": {"median": quantile(vectors["shares"], 0.5)},
-        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
-        "takeoff_infections_total": band_stats(vectors["t_inf"]),
-        "takeoff_before_share": band_stats(vectors["t_share"]),
-        "truth_leg_in_band": legs["truth_leg_in_band"],
-        "timing_leg_in_band": legs["timing_leg_in_band"],
-        "both_legs": legs["both_legs"],
-        "infections_before_quarantine": band_stats(before),
-        "during_quarantine": band_stats(during),
-        "during_share": {"median": med_share},
-        "aboard_window_by_route_pooled": dict(aboard_route),
-        "during_quarantine_by_route_pooled": dict(during_route),
-        "row_extra": f"during med {_fmt(med_during)} share {_fmt(med_share)}",
-    }
-
-
-def _row_triggers(
-    theta: float, arm_id: str, stats: dict,
-) -> dict | None:
-    """Report-immediately rows: an arm landing in band or degenerate."""
-    kinds = [
-        name
-        for name, on in (
-            ("TRUTH-IN-BAND", stats["truth_leg_in_band"]),
-            ("TIMING-IN-BAND", stats["timing_leg_in_band"]),
-            ("FIZZLE-MAJORITY", stats["fizzle_majority"]),
-        )
-        if on
-    ]
-    if not kinds:
-        return None
-    return {
-        "theta": theta, "arm_id": arm_id, "triggers": kinds,
-        "takeoff_infections_total": stats["takeoff_infections_total"],
-        "takeoff_before_share": stats["takeoff_before_share"],
-        "during_quarantine": stats["during_quarantine"],
-    }
+    return standard_row_stats(payloads, extra_fields=_hand_extras)
 
 
 def _paired_rows(
@@ -234,22 +170,27 @@ def _paired_rows(
 
 
 def main(argv: list[str] | None = None) -> int:
-    design = load_design(
-        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
-    )
-    return run_readout(
+    return design_readout_main(
         argv,
         repo_root=REPO_ROOT,
-        cells=enumerate_cells(design),
-        declared_by_arm={
-            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-        },
+        declared_fn=_declared,
         audit_cell=audit_cell,
         row_stats=_row_stats,
         report_key="triggered_rows",
-        row_triggers=_row_triggers,
-        paired_rows=lambda rows: _paired_rows(
-            rows, design.arms[0]["arm_id"],
+        row_triggers=partial(
+            row_triggers,
+            kind_flags=(
+                ("TRUTH-IN-BAND", "truth_leg_in_band"),
+                ("TIMING-IN-BAND", "timing_leg_in_band"),
+                ("FIZZLE-MAJORITY", "fizzle_majority"),
+            ),
+            fields=(
+                "takeoff_infections_total", "takeoff_before_share",
+                "during_quarantine",
+            ),
+        ),
+        paired_rows_of=lambda design: (
+            lambda rows: _paired_rows(rows, design.arms[0]["arm_id"])
         ),
     )
 
