@@ -125,9 +125,9 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
             "— the draw set is not the challenged set",
         )
     cv = float(declared["frailty_cv"])
-    if cv == 0.0:
+    if cv <= 0.0:
         for key in ("mean", "q05", "q50", "q95"):
-            if draw.get(key) != 1.0:
+            if abs(float(draw.get(key) or 0.0) - 1.0) > 1e-12:
                 failures.append(
                     f"inert corner frailty_draw.{key} {draw.get(key)} "
                     "!= 1.0",
