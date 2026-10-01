@@ -1,8 +1,8 @@
 # NORO-HAND-PRACTICE-01
 **Date:** 2026-10-01
-**Commit:** (pending)
-**Pathogens:** norwalk_gi (primary), sars_cov2_resp (continuous arm inherits)
-**Status:** design frozen, implementation in progress
+**Commit:** #804
+**Pathogens:** norwalk_gi, sars_cov2_resp
+**Status:** open
 
 Repair campaign for the `NORO-HAND-RESERVOIR-01` verdict `still_starved`
 (PR #802): under `wash_reuptake`, occupancy on the frozen cells measured
