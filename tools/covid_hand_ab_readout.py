@@ -56,12 +56,19 @@ def _declared(arm: dict) -> dict:
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
     failures: list[str] = audit_hand_mode(payload, declared)
-    spec = payload.get("seed_spec") or {}
-    for key, want in RECORD_SEED_SPEC.items():
-        if spec.get(key) != want:
-            failures.append(
-                f"seed_spec.{key} is {spec.get(key)!r}, want {want!r}",
-            )
+    # Cells emit the spec only under ``seed_ring.seed_spec`` and only when
+    # the design enables ``seed_ring_readout``; this design fixes the
+    # record geometry instead, so an absent spec is not auditable here
+    # (the index_* invariants below carry that check).
+    spec = (payload.get("seed_ring") or {}).get("seed_spec") or payload.get(
+        "seed_spec",
+    )
+    if spec:
+        for key, want in RECORD_SEED_SPEC.items():
+            if spec.get(key) != want:
+                failures.append(
+                    f"seed_spec.{key} is {spec.get(key)!r}, want {want!r}",
+                )
     if float(payload.get("index_onset_day") or 0.0) > 0.0:
         failures.append(
             f"index_onset_day {payload.get('index_onset_day')} violates "
