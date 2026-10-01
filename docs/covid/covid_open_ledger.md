@@ -889,3 +889,25 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   channel admits nobody — parallel machinery confirmed, inert by
   occupation. The information event is a working suppression trigger;
   it is not the timing mechanism the record needs.
+- **`COVID-GM-RESCORE-01` measured the held-out hull on the post-#811/#812
+  engine and stands `mixed`** (300/300 scoring + 50/50 diagnostic cells,
+  0 audit failures, image `591d21b1`, `docs/ledger/COVID-GM-RESCORE-01.md`,
+  job-def `picard-covid-boarding-screen:42`, image `sha256:74721d9d…`).
+  The stale first-look verdict (P(takeoff) ≤ 0.04–0.06, positives median
+  ~3, q95 ≤ 18) is retired: ignition is now the norm — P(takeoff)
+  0.76–0.86 across θ {1e11, 2.37e11, 1e12} — and the campaign-positive
+  envelope reaches the record's 128 on both arms at the anchor and at
+  1e12 (medians 105/96 and 116/111, intervals [1, 131]–[1, 135]). But the
+  landing is envelope-only: q05 sits at 1 (ignition-or-bust, ~1-in-5
+  seeds fizzle everywhere) and the asymptomatic share misses the 0.81
+  record by ~10× on every row (medians 0.026–0.122) — replay is excluded
+  under the frozen grammar. Onsets peak day 13–16 with ~85–95% recorded
+  before the day-20 screen, matching the record's near-complete-outbreak
+  shape. Seed-paired hygiene_cycle↔spike_decay deltas are null (medians
+  0–2, intervals straddle zero): the hand-reservoir repair is not
+  measurable on the GM leg and the DELTA-REVERSAL clause did not fire.
+  The imports:3 diagnostic is the sleeper: P(takeoff) → 1.0 and q05 lifts
+  1 → 89 — the residual at imports 1 is an *ignition* defect, not a
+  transmission-size defect. Standing residual order: (a) asymptomatic
+  composition vs 0.81 (~10×, largest); (b) the imports/early-contact
+  fizzle tail; (c) ignited-seed count dispersion (~35–131 interior).
