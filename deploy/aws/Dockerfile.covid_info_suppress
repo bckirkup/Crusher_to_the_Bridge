@@ -1,0 +1,16 @@
+# INFO-SUPPRESS-V1 boarding-screen worker — the campaign image with the
+# array-cell entry layered on.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.covid_info_suppress -t picard-covid-info-suppress-v1 .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/covid_hull_entrypoint.py ./deploy/aws/covid_hull_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/covid_boarding_screen_entrypoint.py ./deploy/aws/covid_boarding_screen_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
