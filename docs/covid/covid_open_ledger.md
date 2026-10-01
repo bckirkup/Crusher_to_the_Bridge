@@ -275,13 +275,28 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `delivery.hand_reservoir_mode` echo and the `arm` column now carried
   by `tools/covid_theta_screen_csv.py` (parent-cell pairing stays keyed
   on (theta, age, seed) so armed rows still pair to armless v13 cells).
+  **The `covid_hand_ab_v1` canary is measured (60/60 cells at
+  `1c94de2d`, `docs/ledger/COVID-HAND-AB-01.md`,
+  `docs/covid/covid_hand_ab_v1_readout.md`): verdict
+  `hand_line_replay_neutral`** — all arms burn ~96% attack, the two
+  baselines are byte-identical on this scenario (their contrast lives
+  on the stool-event path the COVID arm never exercises), every arm
+  delta sits inside the stream-reorder band, and pooled
+  during-quarantine routes show fomite = 0 on all 60 cells — the hand
+  reservoir is not the during-quarantine carrier on this hull. Open
+  decision for stage 1: run v14 verbatim (3,600 cells, pairing kept
+  for bit-comparable contrast vs v13), single-arm hygiene_cycle
+  (1,800 cells), or skip the re-screen — the measured neutrality
+  argues the pairing sees nothing at these coordinates.
   **Execution state:** the array was held on the prior mechanism after
   the PRACTICE-01 `still_starved` census, then resumed on the
   `1c94de2d` image under a fresh prefix —
-  `campaign/covid_hand_carriage01/` (58-cell array
-  `e503114d-9164-4bbb-a1f1-248156ca64b3`, jobdef
-  `picard-covid-boarding-screen:43`, digest `sha256:5f4485e5…`,
-  cells 2–59 via `--index-offset 2`; cells 0–1 ran as the canary).
+  `campaign/covid_hand_carriage01/` (58-child array
+  `e503114d-9164-4bbb-a1f1-248156ca64b3` covering cells 0–57 — jobdef
+  `:43`'s command map lacks `--index-offset` so the submitted
+  `index_offset` parameter was silently dropped — plus 2-child tail
+  `df330100-9cd9-42ea-b0af-55bc88b0ee56` for cells 58–59 via
+  `--container-overrides`; cells 0–1 ran as the canary).
   The earlier prefix `campaign/covid_hand_ab_v1/` keeps the two
   prior-mechanism canary cells as the *recorded* baseline — labelled
   by their own `delivery.hand_reservoir_mode` echo, not voided.

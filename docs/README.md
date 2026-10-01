@@ -158,6 +158,7 @@ longer justifications.
 | [covid/covid_plume_dose_assay_v1_readout.md](covid/covid_plume_dose_assay_v1_readout.md) | Findings — complete readout, all 10 arms × 20 seeds = 200 cells |
 | [covid/covid_route_attribution_v1_readout.md](covid/covid_route_attribution_v1_readout.md) | Findings — ROUTE-ATTR-V1 whole-voyage route attribution + ascertainment funnel (local run; structural, not Batch-comparable) |
 | [covid/covid_lambda_cross_v1_readout.md](covid/covid_lambda_cross_v1_readout.md) | Findings — LAMBDA-CROSS-V1 hazard-rate (Θ) response curve, 140/140 cells, audit invariant held |
+| [covid/covid_hand_ab_v1_readout.md](covid/covid_hand_ab_v1_readout.md) | Findings — COVID-HAND-AB-01 three-arm canary, 60/60 cells at `1c94de2d`: verdict `hand_line_replay_neutral` — baselines byte-identical on this scenario, arm deltas inside the stream-reorder band, fomite = 0 pooled during-quarantine; v14 stage-1 decision open |
 | [covid/covid_mech_v1_canary_readout.md](covid/covid_mech_v1_canary_readout.md) | Canary measured (anchor row only) — COVID-RINGCAP-V1 + COVID-SUSCPOOL-V1 mechanism assays on the v13 residual; full arrays not submitted |
 | [covid/covid_dp_ventilation_sourcing.md](covid/covid_dp_ventilation_sourcing.md) | Sourcing and audit complete; no constant adopted — Diamond Princess ventilation and the confinement leak |
 | [covid/covid_droplet_split_options_memo.md](covid/covid_droplet_split_options_memo.md) | Decided — Option 1 (emission partition at source) implemented as AERO-SPLIT-01 (`droplet_field_split_spec.md`); survey memo |
