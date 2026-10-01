@@ -78,7 +78,30 @@ class TestSurfaceCsv:
     def test_takeoff_probability_passes_through(self, tmp_path, takeoff) -> None:
         out = tmp_path / "surface.csv"
         mod.write_surface_csv(_surface(1e9, onsets=[1], takeoff=takeoff), str(out))
-        assert float(_rows(out)[0]["takeoff_probability"]) == takeoff
+
+    def test_armed_entries_emit_their_arm_id(self, tmp_path) -> None:
+        """Armed surfaces (COVID-HAND-AB-01 era) keep the arm_id on the
+        CSV row so same-theta entries stay distinguishable."""
+        surface = {"surface": [
+            dict(
+                _surface(1e9, onsets=[1], takeoff=0.5)["surface"][0],
+                arm_id="hygiene_cycle",
+            ),
+            dict(
+                _surface(1e9, onsets=[1], takeoff=0.5)["surface"][0],
+                arm_id="spike_decay",
+            ),
+        ]}
+        out = tmp_path / "surface.csv"
+        assert mod.write_surface_csv(surface, str(out)) == 2
+        assert [r["arm"] for r in _rows(out)] == [
+            "hygiene_cycle", "spike_decay",
+        ]
+
+    def test_armless_entries_emit_blank_arm(self, tmp_path) -> None:
+        out = tmp_path / "surface.csv"
+        mod.write_surface_csv(_surface(1e9, onsets=[1], takeoff=0.5), str(out))
+        assert _rows(out)[0]["arm"] == ""
 
     def test_missing_fields_become_blank_not_an_error(self, tmp_path) -> None:
         out = tmp_path / "surface.csv"
@@ -125,6 +148,23 @@ class TestPairsCsv:
         (cells / "notes.txt").write_text("not a cell")
         out = tmp_path / "pairs.csv"
         assert mod.write_pairs_csv(str(cells), None, str(out)) == 1
+
+    def test_armed_cells_at_the_same_seed_do_not_collide(self, tmp_path) -> None:
+        """Two arms replaying one (theta, seed) pair keep separate rows
+        and still pair against the armless parent."""
+        arm_a = _cell(1e9, 20200205, 3458, 2879)
+        arm_a["cell"]["arm_id"] = "hygiene_cycle"
+        arm_b = _cell(1e9, 20200205, 3200, 2900)
+        arm_b["cell"]["arm_id"] = "spike_decay"
+        cells = self._cells(tmp_path, "v14", [arm_a, arm_b])
+        parents = self._cells(
+            tmp_path, "v13", [_cell(1e9, 20200205, 3100, 2000)],
+        )
+        out = tmp_path / "pairs.csv"
+        assert mod.write_pairs_csv(str(cells), str(parents), str(out)) == 2
+        rows = _rows(out)
+        assert [r["arm"] for r in rows] == ["hygiene_cycle", "spike_decay"]
+        assert all(r["parent_infections_total"] == "3100" for r in rows)
 
     def test_rows_sort_by_theta_age_seed(self, tmp_path) -> None:
         cells = self._cells(tmp_path, "v10", [

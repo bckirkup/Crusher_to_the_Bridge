@@ -1097,6 +1097,33 @@ def test_a_delivery_arm_cell_echoes_the_resolved_delivery_block():
     assert base_delivery["exposure_cap_active"] is True
 
 
+def test_a_hand_mode_arm_cell_echoes_the_resolved_hand_mode():
+    """Echo readout on hand-reservoir arms (COVID-HAND-AB-01): the
+    delivery block echoes the engine-resolved transmission
+    .hand_reservoir_mode so the arm is auditable from the payload."""
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_hand",
+            "overrides": {
+                "transmission_overrides": {
+                    "hand_reservoir_mode": "spike_decay",
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    arm = next(c for c in cells if c.arm_id == "B1_hand")
+    delivery = echo_screen_cell(design, arm)["delivery"]
+    assert delivery["hand_reservoir_mode"] == "spike_decay"
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_delivery = echo_screen_cell(design, base)["delivery"]
+    # The baseline arm resolves the shipped default (hygiene_cycle).
+    assert base_delivery["hand_reservoir_mode"] == "hygiene_cycle"
+
+
 # ── SUSCEPT-V1: susceptibility / effective-population arms ───────────────
 
 SUSCEPT_V1_DESIGN = (
