@@ -87,6 +87,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "seed_patch",
     "ship_graph_overrides",
     "dose_response_frailty",
+    "hazard_frailty",
 })
 # The embarkation-immunity structure an arm may write onto
 # ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
@@ -102,6 +103,13 @@ SHIP_GRAPH_OVERRIDE_KEYS = frozenset({
 # preserved on every arm and only the draw's shape moves (the
 # covid_vuln_cells convention).
 DOSE_RESPONSE_FRAILTY_KEYS = frozenset({"alpha", "beta"})
+# Fields a hazard_frailty arm may declare (FRAILTY-V1): the draw family
+# and its coefficient of variation. The mean is pinned at 1.0 inside the
+# engine so a corner declares dispersion only — never a refit of the
+# cell's mean hazard. ``cv`` 0 is the degenerate inert corner (multiplier
+# identically 1.0) kept for binding audits.
+HAZARD_FRAILTY_ARM_KEYS = frozenset({"distribution", "cv"})
+HAZARD_FRAILTY_ARM_DISTRIBUTIONS = ("gamma", "lognormal")
 # Fields an arm may write onto the first explicit seed — the measured
 # boarding-geometry axes: position in the shedding course at day 0
 # (onset_day), departure day, seeded count, infection age, role. A null
@@ -786,6 +794,58 @@ def _apply_dose_response_frailty(
     }
 
 
+def _apply_hazard_frailty(raw: dict[str, Any], spec: Any) -> None:
+    """A continuous per-host frailty draw on the infection hazard.
+
+    ``hazard_frailty`` declares ``{"distribution": "gamma"|"lognormal",
+    "cv": c}`` and writes ``dose_response.frailty`` onto the resolved
+    block. Where ``dose_response_frailty`` reshapes the existing beta
+    susceptibility draw, this arm multiplies a second, orthogonal mixing
+    variable into the hazard — drawn per challenged host on a dedicated
+    stream with mean pinned at 1.0, so E[susceptibility] and the cell's
+    theta are untouched and only the burn's dispersion moves (the frail
+    burn early; the surviving pool thins). ``cv`` 0 is the inert corner:
+    every challenged host carries a recorded 1.0 so the payload echo
+    proves the binding without moving the hazard.
+    """
+    if not isinstance(spec, Mapping):
+        raise ValueError("hazard_frailty must be a mapping")
+    unknown = set(spec) - HAZARD_FRAILTY_ARM_KEYS
+    if unknown:
+        raise ValueError(
+            f"hazard_frailty keys {sorted(unknown)} are not frailty "
+            f"fields; allowed: {sorted(HAZARD_FRAILTY_ARM_KEYS)}",
+        )
+    missing = HAZARD_FRAILTY_ARM_KEYS - set(spec)
+    if missing:
+        raise ValueError(
+            f"hazard_frailty is missing {sorted(missing)}; both "
+            "distribution and cv are declared together",
+        )
+    distribution = spec["distribution"]
+    if distribution not in HAZARD_FRAILTY_ARM_DISTRIBUTIONS:
+        raise ValueError(
+            f"hazard_frailty.distribution must be one of "
+            f"{HAZARD_FRAILTY_ARM_DISTRIBUTIONS}, got {distribution!r}",
+        )
+    cv = spec["cv"]
+    if isinstance(cv, bool) or not isinstance(cv, (int, float)):
+        raise ValueError(
+            f"hazard_frailty.cv must be numeric, got {cv!r}",
+        )
+    if not math.isfinite(float(cv)) or float(cv) < 0.0:
+        raise ValueError(
+            f"hazard_frailty.cv must be finite and >= 0, got {cv!r}",
+        )
+    raw.setdefault("pathogen_overrides", {}).setdefault(
+        PATHOGEN_ID, {},
+    ).setdefault("dose_response", {})["frailty"] = {
+        "enabled": True,
+        "distribution": str(distribution),
+        "cv": float(cv),
+    }
+
+
 def apply_arm_overrides(
     raw: dict[str, Any],
     overrides: Mapping[str, Any],
@@ -843,6 +903,10 @@ def apply_arm_overrides(
         _apply_dose_response_frailty(
             raw, overrides["dose_response_frailty"], float(theta), profile,
         )
+    if "hazard_frailty" in overrides:
+        # Runs after the block-rewriting arms above so the frailty
+        # sub-key lands on whatever dose_response block they resolved.
+        _apply_hazard_frailty(raw, overrides["hazard_frailty"])
     if "seed_patch" in overrides:
         _apply_seed_patch(raw, overrides["seed_patch"])
     return raw
@@ -1211,18 +1275,18 @@ def _acquisition_curve(
     }
 
 
-def _susceptibility_draw_stats(sim: Any) -> dict[str, Any]:
-    """Quantiles of the drawn per-host susceptibilities (landing proof).
+def _host_draw_stats(sim: Any, attribute: str) -> dict[str, Any]:
+    """Quantiles of one lazy per-host draw over the challenged set.
 
-    The beta-Poisson draw is lazy: only hosts the engine actually
-    challenged carry a value, so the quantiles describe the challenged
-    set — the drawn-vs-declared check a frailty arm needs, and on other
-    arms a no-op echo of the shipped shape.
+    Both the beta susceptibility draw and the frailty multiplier are
+    lazy: only hosts the engine actually challenged carry a value, so
+    the quantiles describe the challenged set — the drawn-vs-declared
+    check a dispersion arm needs, and on other arms a no-op echo.
     """
     draws = [
-        float(a.dose_response_susceptibility[PATHOGEN_ID])
+        float(getattr(a, attribute)[PATHOGEN_ID])
         for a in sim.engine.agents
-        if PATHOGEN_ID in getattr(a, "dose_response_susceptibility", {})
+        if PATHOGEN_ID in getattr(a, attribute, {})
     ]
     if not draws:
         return {"n": 0}
@@ -1235,6 +1299,20 @@ def _susceptibility_draw_stats(sim: Any) -> dict[str, Any]:
         "q75": _quantile(draws, 0.75),
         "q95": _quantile(draws, 0.95),
     }
+
+
+def _susceptibility_draw_stats(sim: Any) -> dict[str, Any]:
+    """Quantiles of the drawn per-host susceptibilities (landing proof)."""
+    return _host_draw_stats(sim, "dose_response_susceptibility")
+
+
+def _frailty_draw_stats(sim: Any) -> dict[str, Any]:
+    """Quantiles of the drawn per-host frailty multipliers (landing proof).
+
+    ``{"n": 0}`` on every arm that leaves the frailty surface unarmed —
+    the off-arm stays bit-identical and this echo is what proves it.
+    """
+    return _host_draw_stats(sim, "frailty_multiplier")
 
 
 def prepare_cell_run_spec(
@@ -1377,6 +1455,11 @@ def cell_payload(
             "ship_graph_immune": _immune_block(raw, sim),
             "acquisition_curve": _acquisition_curve(sim, ledger),
             "susceptibility_draw": _susceptibility_draw_stats(sim),
+            # The realized frailty-multiplier draws, echoed so a
+            # hazard_frailty arm's declared corner (distribution, cv)
+            # is auditable against what actually landed on challenged
+            # hosts — {"n": 0} on every unarmed arm.
+            "frailty_draw": _frailty_draw_stats(sim),
             **_attribution_block(sim, ledger, raw),
             # The resolved pooled-route delivery constants, echoed so a
             # delivery-machinery arm's declared values are auditable from

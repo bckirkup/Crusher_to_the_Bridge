@@ -819,7 +819,8 @@ class KorkinAgent:
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "secretor_negative_by_pathogen",
-        "dose_response_susceptibility", "cumulative_exposure",
+        "dose_response_susceptibility",
+        "frailty_multiplier", "cumulative_exposure",
         "cumulative_exposure_by_route",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
@@ -925,6 +926,10 @@ class KorkinAgent:
         self.secretor_negative_by_pathogen: dict[str, bool] = {}
         # Persistent beta-Poisson host mixing variable, drawn lazily per pathogen.
         self.dose_response_susceptibility: dict[str, float] = {}
+        # Declared continuous frailty multiplier on the infection hazard,
+        # drawn lazily per pathogen on the engine's dedicated frailty
+        # stream (FRAILTY-V1); empty under shipped behaviour.
+        self.frailty_multiplier: dict[str, float] = {}
         # Effective dose accumulated during the current infection challenge.
         self.cumulative_exposure: dict[str, float] = {}
         # Effective dose accumulated by route during the current challenge.
