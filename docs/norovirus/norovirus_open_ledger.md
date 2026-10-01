@@ -4279,9 +4279,9 @@ Design + criteria: `docs/ledger/NORO-HAND-PRACTICE-01.md`;
 decomposition appended to `docs/ledger/NORO-HAND-RESERVOIR-01.md`;
 readout `docs/norovirus/noro_hand_practice_01/`.
 
-**`NORO-HAND-CARRIAGE-01` (shipped, open): the second repair pass —
-the two structural absences the PRACTICE-01 verdict's decomposition
-named.** (i) A wash-resistant *protected* compartment: each
+**`NORO-HAND-CARRIAGE-01` (shipped, measured — `partial`): the second
+repair pass lands the reservoir in Liu's restored band; the ordering
+miss persists.** (i) A wash-resistant *protected* compartment: each
 propensity-fired contaminating visit sequesters `logU(50, 3200)` GEC —
 Liu's own post-bathroom arm (12.4% ≥ 2.30 log10 after visit + wash)
 bounds it — into sites washes cannot reach (subungual/crease, Lin 2003
@@ -4295,14 +4295,25 @@ measured `SURFACE_TO_HAND` fraction of the standing pool — the
 concentrated personal reservoir replacing the additive propensity-
 scaled increment (`SELF_CONTACT_INCREMENT_GEC_RANGE` superseded,
 deleted). `hand_load` stays the total (accessible + protected); every
-hand-scaled reader is unchanged by construction. Design + criteria:
-`docs/ledger/NORO-HAND-CARRIAGE-01.md`; sources:
-`docs/literature/consensus_tranche_52_hand_carriage.md`; register rows
-for the two new constants + the superseded increment. The Liu frozen
-criteria are unchanged; the re-census of the same 42 cells against
-them follows the image rebuild at the merged SHA. The Diamond Princess
-`covid_hand_ab_v1` array stays held on the prior mechanism until the
-measured verdict lands.
+hand-scaled reader is unchanged by construction — and every hand-scaled
+figure measured before `1c94de2d` (merged #811) describes the
+superseded reservoir. **Verdict, measured on the same 42 frozen cells
+at `1c94de2d`: `partial`** — occupancy 18.69% vs Liu's 25.4% (R = 0.737,
+inside the [1/3, 3] restored band; was 0.111 `still_starved`),
+positive-mean 2.743 log10 and never-positive 0.362 inside their
+windows, ordering still `event_higher` (one secondary miss). The
+carriage witnesses confirm the declared structure produced it:
+protected floor mean 154 GEC (771 on positive rows), own pool 43–56
+GEC on 100% of shedding rows, underflowed rows 41% (was 87%). The
+residual miss is a sampling-lens question — the census's post-defecation
+rows are pre-wash row-time loads where Liu's post-bathroom arm is
+post-wash; the post-wash-conditioned comparator is the open declared-
+scope decision (`noro_hand_carriage_handoff_2026_10_01.md` §8). Design +
+criteria + full verdict: `docs/ledger/NORO-HAND-CARRIAGE-01.md`;
+sources: `docs/literature/consensus_tranche_52_hand_carriage.md`;
+merged cell table
+`docs/norovirus/noro_hand_carriage01/hand_occupancy_cells.json`;
+records S3 `campaign/noro_hand_carriage01/`.
 
 ## 5. Held fixed by assumption
 
