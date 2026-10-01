@@ -252,8 +252,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 - **`COVID-HAND-AB-01` (v14) is the declared Diamond Princess re-approach
   under the repaired hand line — three designs, one gate.** The hand
   reservoir gained practice variability + drying under PR #804
-  (`NORO-HAND-PRACTICE-01`, merged `d0466064`; `hygiene_cycle` shipped
-  default-ON, `wash_reuptake` and `spike_decay` kept as labelled
+  (`NORO-HAND-PRACTICE-01`, merged `d0466064`), then the wash-resistant
+  protected compartment + own-environment pool under PR #811
+  (`NORO-HAND-CARRIAGE-01`, merged `1c94de2d`; `hygiene_cycle` shipped
+  default-ON throughout, `wash_reuptake`/`spike_decay` labelled
   baselines). The re-approach ladder: (1) `covid_hand_ab_v1` — the 60-cell
   canary, declared replay at Θ 2.37e11 × 3 arms (hygiene_cycle baseline,
   wash_reuptake = RESERVOIR-01 marginal, spike_decay = v13-era marginal)
@@ -273,6 +275,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `delivery.hand_reservoir_mode` echo and the `arm` column now carried
   by `tools/covid_theta_screen_csv.py` (parent-cell pairing stays keyed
   on (theta, age, seed) so armed rows still pair to armless v13 cells).
+  **Execution state:** the array was held on the prior mechanism after
+  the PRACTICE-01 `still_starved` census, then resumed on the
+  `1c94de2d` image under a fresh prefix —
+  `campaign/covid_hand_carriage01/` (58-cell array
+  `e503114d-9164-4bbb-a1f1-248156ca64b3`, jobdef
+  `picard-covid-boarding-screen:43`, digest `sha256:5f4485e5…`,
+  cells 2–59 via `--index-offset 2`; cells 0–1 ran as the canary).
+  The earlier prefix `campaign/covid_hand_ab_v1/` keeps the two
+  prior-mechanism canary cells as the *recorded* baseline — labelled
+  by their own `delivery.hand_reservoir_mode` echo, not voided.
 - **`COVID-COOP-V1` measured the full conditioned array + fleet companion
   and stands negative: the cooperative-packet dose law does not produce
   the record at any declared point.** 480-cell conditioned lattice

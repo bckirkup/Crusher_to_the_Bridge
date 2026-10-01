@@ -2,7 +2,8 @@
 **Date:** 2026-10-01
 **Commit:** #811
 **Pathogens:** norwalk_gi, sars_cov2_resp
-**Status:** open
+**Status:** measured
+**Measured at:** 1c94de2d
 
 Second repair pass on the hand reservoir, on the measured
 `NORO-HAND-PRACTICE-01` verdict (PR #808): under `hygiene_cycle` the
@@ -131,3 +132,64 @@ seed 8001 positive-share 17.05% (1206/7075), seed 8002 21.11%
 restored band where the same block read 2.8%-class before this
 change. Ordering / never-positive / positive-mean wait for the pooled
 42-cell census; these numbers bound direction, not the verdict.
+
+## Measured verdict — 42-cell re-census at `1c94de2d`
+
+Measured at `1c94de2d` (merged #811) on the same frozen cells —
+`fl_spr_12d` 22 ignited seeds + `classic_cruise_1900` 8000–8019, 288
+epochs, read-only census, jobdef `picard-hand-occupancy:6` pinned to
+image digest `sha256:ec35bcfb…` (`noro-hand-carriage01-1c94de2d`);
+records in S3 `campaign/noro_hand_carriage01/`, merged cell table
+`docs/norovirus/noro_hand_carriage01/hand_occupancy_cells.json`
+(334,926 shedding host-epoch rows, all 42 cells admissible, no void
+seeds).
+
+**Verdict `partial` — the starvation is repaired; the ordering miss
+persists.** Primary occupancy 18.69% vs Liu's 25.4% → **R = 0.737**,
+inside the [1/3, 3] restored band (was 0.111 `still_starved` under
+PRACTICE-01, 0.132 under RESERVOIR-01, 0.026 at STATIONARY-01). Both
+secondary windows pass: positive-mean 2.743 log10 ∈ [2.30, 5.45],
+never-positive 0.362 ∈ (0.05, 0.80). One secondary miss remains:
+ordering `event_higher` — event-end rows 35.3% @2.935 vs post-defecation
+35.9% @2.944 vs routine-end 17.6% @2.717, where Liu measured
+post-bathroom *lower* than routine. The frozen rule calls the run
+`intended_reading` (primary pass + one secondary miss); the reservoir
+map lands `partial` because `mechanism_restored` requires the flip.
+
+Per-block consistency: fl_spr_12d share 0.187 (R = 0.74), classic 0.186
+(R = 0.73) — the band pass is not a single-hull artefact. Symptomatic-
+only lens: 0.329 positive (both blocks ~0.33), R ≈ 1.30 — the same
+reading the RESERVOIR-01 lens gave, now above the Liu point rather than
+under it.
+
+Carriage witnesses confirm the declared structure is what produced the
+numbers: protected compartment mean 153.9 GEC per shedding row (771 GEC
+on positive rows — a standing sub-LOD floor the wash cannot strip),
+own-environment pool mean 43–56 GEC live on 100% of shedding rows,
+`at_target` occupancy rows 20.5% (was ~0% — ticks now land on a stocked
+pool), `underflowed` 41.0% (was 87%), first-seen rows 178. Wet window
+open 4.6% of rows, mean deposit transfer factor 0.046 — the drying
+blend unchanged. `reservoir_delivered_gec = 0` persists — the witness
+counter still reads only the `wash_reuptake` channel; an instrument
+hole, not a zero term (same caveat as the PRACTICE-01 census).
+
+**What the miss is.** The ordering's event arm is not sampling what
+Liu's post-bathroom arm sampled: the census's post-defecation rows are
+row-time loads recorded at event end — fresh contamination *before*
+the compliance-gated wash completes — while Liu's post-bathroom rinses
+were taken after the bathroom episode, i.e. post-wash. With a wash
+that now floors at the protected compartment instead of zero, a
+post-wash-conditioned comparator is the mechanism's honest version of
+Liu's arm: event rows would carry protected-only load while routine
+rows carry protected + rebuilt accessible — the declared structure
+that produces event < routine. Conditioning the comparator on
+wash-completed rows is a sampling-lens question on the readout, not a
+mechanism change; it is recorded as the open declared-scope decision
+in `docs/norovirus/noro_hand_carriage_handoff_2026_10_01.md` §8 and is
+**Benjamin's call, not a silent fix.**
+
+The Diamond Princess `covid_hand_ab_v1` array's hold lifted on this
+verdict: resumed on image `covid-hand-carriage-1c94de2d` into fresh
+prefix `campaign/covid_hand_carriage01/` (the `covid_hand_ab_v1/`
+prefix's two prior-mechanism canary cells stand as the recorded
+baseline, labelled, not voided).
