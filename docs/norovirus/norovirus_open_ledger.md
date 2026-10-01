@@ -4305,10 +4305,17 @@ windows, ordering still `event_higher` (one secondary miss). The
 carriage witnesses confirm the declared structure produced it:
 protected floor mean 154 GEC (771 on positive rows), own pool 43–56
 GEC on 100% of shedding rows, underflowed rows 41% (was 87%). The
-residual miss is a sampling-lens question — the census's post-defecation
-rows are pre-wash row-time loads where Liu's post-bathroom arm is
-post-wash; the post-wash-conditioned comparator is the open declared-
-scope decision (`noro_hand_carriage_handoff_2026_10_01.md` §8). Design +
+residual miss is **measured not a sampling lens** (2026-10-01, approved
+post-wash conditioning on the same cells): every shedding row carries a
+post-wash load and the `event_end` arm is the post-visit post-wash
+sample — event post-wash positivity 35.3% vs routine post-wash 17.6%
+(`event_higher` ~2×, both blocks), while Liu reads post-bathroom 12.4%
+*below* routine 37.5%. The wash is near-inert on the event arm because
+the protected sequestration draws at the event instant — the open
+mechanism-scope decision is whether sequestration should be delayed
+(accessible→protected over contact-time) so the post-visit wash can
+strip the fresh load first (hypothesis recorded in
+`docs/ledger/NORO-HAND-CARRIAGE-01.md`). Design +
 criteria + full verdict: `docs/ledger/NORO-HAND-CARRIAGE-01.md`;
 sources: `docs/literature/consensus_tranche_52_hand_carriage.md`;
 merged cell table
