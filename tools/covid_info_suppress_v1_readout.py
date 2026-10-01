@@ -106,8 +106,15 @@ def _audit_echo_fields(block: dict, declared: dict) -> list[str]:
     return failures
 
 
-def _audit_witnesses(block: dict, declared: dict) -> list[str]:
-    """The live witness fields resolve as the declaration says."""
+def _audit_witnesses(
+    block: dict, declared: dict, takeoff: bool,
+) -> list[str]:
+    """The live witness fields resolve as the declaration says.
+
+    CANNOT-FIRE only counts on conditioned cells: a fizzle legitimately
+    never reaches the ~1% group attack rate that raises SUSPECTED, so a
+    null armed_epoch there is not evidence the mechanism can't fire.
+    """
     failures: list[str] = []
     armed = block.get("armed_epoch")
     if not declared["enabled"]:
@@ -115,10 +122,11 @@ def _audit_witnesses(block: dict, declared: dict) -> list[str]:
             failures.append("D0 cell armed a disabled mechanism")
         return failures
     if armed is None:
-        failures.append(
-            "info_suppression armed_epoch is null -- the mechanism "
-            "never fired (CANNOT-FIRE)",
-        )
+        if takeoff:
+            failures.append(
+                "info_suppression armed_epoch is null -- the mechanism "
+                "never fired (CANNOT-FIRE)",
+            )
         return failures
     rec = block.get("recognition_epoch")
     if rec is None or int(rec) > int(armed):
@@ -146,10 +154,13 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     block = payload.get("info_suppression")
     if not isinstance(block, dict):
         return failures + ["missing info_suppression block"]
+    takeoff = int(
+        (payload.get("observables") or {}).get("recorded_onsets") or 0
+    ) >= TAKEOFF_MIN
     return (
         failures
         + _audit_echo_fields(block, declared)
-        + _audit_witnesses(block, declared)
+        + _audit_witnesses(block, declared, takeoff)
     )
 
 
