@@ -866,7 +866,18 @@
               "exclusiveMinimum": 0,
               "description": "Positive scale applied to each beta-Poisson host susceptibility draw; defaults to 1.0."
             },
-            "k": {"type": "number", "exclusiveMinimum": 0, "description": "Rate parameter for exponential model"}
+            "k": {"type": "number", "exclusiveMinimum": 0, "description": "Rate parameter for exponential model"},
+            "frailty": {
+              "type": "object",
+              "required": ["enabled", "distribution", "cv"],
+              "additionalProperties": false,
+              "properties": {
+                "enabled": {"type": "boolean"},
+                "distribution": {"type": "string", "enum": ["gamma", "lognormal"]},
+                "cv": {"type": "number", "minimum": 0}
+              },
+              "description": "FRAILTY-V1: a declared continuous per-host frailty multiplier on the infection hazard, drawn lazily per challenged host on a dedicated RNG stream with mean pinned at 1.0 (gamma: shape 1/cv^2, scale cv^2; lognormal: sigma^2 = ln(1+cv^2), mu = -sigma^2/2). Only dispersion is declared; E[susceptibility] is untouched. Absent or enabled false is the shipped behaviour, bit-identical; cv 0 is the degenerate inert corner. Surfaces on the campaign arm grammar as hazard_frailty {distribution, cv}."
+            }
           },
           "if": {"properties": {"model": {"const": "beta_poisson"}}},
           "then": {"required": ["alpha", "beta"]},

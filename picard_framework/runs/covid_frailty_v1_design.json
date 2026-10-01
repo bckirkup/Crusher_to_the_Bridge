@@ -1,0 +1,117 @@
+{
+  "design_id": "covid_frailty_v1",
+  "task_id": "FRAILTY-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_suscept_v1",
+  "description": "FRAILTY-V1: continuous susceptibility heterogeneity — a declared per-host frailty multiplier on the infection hazard, the last named class of the SUSCEPT-V1 surviving set. SUSCEPT-V1 measured the binary immune-fraction reading of 'effective population is smaller than aboard' as susceptible-structure incapable (IMM75 reaches the truth band only at the 0.75 corner and fails the count and timing legs); CONSENSUS-50 declined partial-protection immunity as unsourced, so no protection fraction exists to fit — every frailty parameter on this design is a DECLARED corner, swept, never fitted to anchors. The mechanism differs from both SUSCEPT-V1 axes: instead of a binary immune share (removes hosts entirely) or a beta-shape retune (one mixing variable, theta-preserved), this arm multiplies a SECOND orthogonal mixing variable f_i into the hazard — hazard = 1 - exp(-s_i * f_i * d) with s_i the shipped beta draw and f_i a continuous per-host draw at mean pinned exactly 1.0, so E[challenge] is untouched and only the dispersion of the hazard moves. At cv > 0 the hyper-frail burn early and the effective susceptible pool thins as the voyage proceeds — count AND timing legs both addressable in principle, where the binary fraction moved count only. The surface is a new engine block (this PR): dose_response.frailty {enabled, distribution: gamma|lognormal, cv} resolved at init, drawn lazily per challenged host on a dedicated stream (SeedSequence(entropy, spawn_key=(0x5F1A17,)) — derives from the run seed's own material without consuming the shared stream or shifting spawn indices), echoed on the payload as frailty_draw quantiles; absent or disabled = shipped behaviour bit-identical. Corners: the inert corner (cv 0, multiplier identically 1.0 — the bit-identity binding audit), a gamma dispersion ladder {0.5, 1.0, 2.0} (cv 1.0 is the exponential shape; cv 2.0 carries a large near-immune mass plus a hyper-frail tail), and a lognormal ladder {1.0, 2.0} at matched cv (heavier right tail, less near-zero mass — the family contrast at fixed dispersion).",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "prerequisites": [
+    "SUSCEPT-V1 measured (docs/ledger/SUSCEPT-V1.md): susceptibility_structure_incapable on the declared axes — binary immune depth lands truth in band only at IMM75 (869-884) and fails the timing leg there; dose_response_frailty shape arms overshoot ~2.5x at alpha 0.05 (~2,100-2,370); D0 anchor medians ~3,558 truth / ~3,008 recorded. The binary-fraction reading is measured-retired; this arm tests the continuous-mixing reading instead.",
+    "CONSENSUS-50 settled: partial-protection immunity is unsourced and COMBINED-V1 was declined — there is no protection fraction to fit, so frailty parameters are DECLARED corners only. This design sweeps family x dispersion; it does not fit.",
+    "INFO-SUPPRESS-V1 readout (docs/covid/covid_open_ledger.md section 3) states what the information channel did or didn't buy; this arm is the remaining half of the surviving set.",
+    "covid.H5 anchored held-out (data/observation/covid_fit_targets.json): serology-informed true infections ~840, admissible band [712, 960] (Hung et al. 2020); scored on infections_total conditional on takeoff; never in fitted_against.",
+    "Hazard-site verification (this session's code read): the infection hazard for a challenged host is computed in engines/transmission_core._dose_response_hazard as -expm1(-susceptibility * effective_dose) (and identically in _cooperative_hazard with the packet-arrival rate lam); susceptibility is the lazy persistent beta draw agent.dose_response_susceptibility. The frailty multiplier lands as susceptibility * frailty * dose at BOTH hazard sites — with frailty identically 1.0 the product is bit-identical (x * 1.0 == x under IEEE), so the off-arm and the inert corner reproduce shipped outcomes exactly.",
+    "RNG-ordering verification (this session's code read): the frailty stream is built as np.random.default_rng(np.random.SeedSequence(self.rng.bit_generator.seed_seq.entropy, spawn_key=(0x5F1A17,))) — order-indexed .spawn() on the shared sequence is never touched, so no draw ordering on the shared stream can shift; a run with the frailty block absent consumes zero draws anywhere and stays byte-identical to D0.",
+    "QUAR-ORDER-01 / QUAR-ATTR-V2 measured: SOP-017 (days 16-30, confinement enforced) is declared and enforced on this voyage and inert on the shipped structure because the burn completes pre-activation. A frailty arm that defers mass into an enforced quarantine reads suppression-shaped on the during-window readout — the discriminator is already wired."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "DP replay: the declared scenario carries the record's dated onset stream and the quarantine activation, so the timing leg (before_share) and the suppression discriminator are exercised.",
+  "thetas": [237000000000.0],
+  "thetas_note": "The anchor corner only — this design IS the canary (a conditioned readout at the anchor), not an array. The anchor theta is the fitted point carried verbatim from the v11/v13 lineage; it is a lattice coordinate, not a fit output on this design.",
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "20 seeds per arm at the shared seed_base — twice the campaign lattice so each arm's paired delta vs D0 carries ~19-20 takeoff seeds and the canary satisfies the >=20-seed gate at one cell per arm. Seeds 20200205-20200214 overlap SUSCEPT-V1's measured D0 block (cross-image drift check); 20200215-20200224 are fresh.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "Paired baseline REQUIRED by the task: the shipped susceptibility structure verbatim — no frailty block, so zero frailty draws and byte-identical shipped behaviour. First arm so empty overrides per the arm grammar; also the cross-image drift check against SUSCEPT-V1's measured D0 row (~3,500-class truth at the anchor on seeds 0-9)."
+    },
+    {
+      "arm_id": "FRAIL_INERT",
+      "overrides": {"hazard_frailty": {"distribution": "gamma", "cv": 0.0}},
+      "note": "The degenerate corner: frailty armed at cv 0 — every challenged host carries a recorded multiplier of exactly 1.0, so outcomes are bit-identical to D0 by construction (susceptibility * 1.0 == susceptibility) while the frailty_draw echo proves the binding fired and quantifies the challenged-host coverage. Any per-seed divergence from D0 on this arm is a wiring defect, not a result."
+    },
+    {
+      "arm_id": "FRAIL_G05",
+      "overrides": {"hazard_frailty": {"distribution": "gamma", "cv": 0.5}},
+      "note": "Gamma ladder, mild corner: shape 4, scale 0.25 — half the challenged mass within roughly [0.44, 1.46]. Dispersion thin enough that truth should stay near D0; measures the response's small-cv slope."
+    },
+    {
+      "arm_id": "FRAIL_G10",
+      "overrides": {"hazard_frailty": {"distribution": "gamma", "cv": 1.0}},
+      "note": "Gamma ladder, exponential corner: shape 1, scale 1 — ~63% of challenged mass below the mean with a right tail to ~3x. Near-immune mass now material; the burn concentrates on the frail tail early."
+    },
+    {
+      "arm_id": "FRAIL_G20",
+      "overrides": {"hazard_frailty": {"distribution": "gamma", "cv": 2.0}},
+      "note": "Gamma ladder, heavy corner: shape 0.25, scale 4 — median ~0.13, most hosts near-decoupled, a thin hyper-frail tail (~5% above ~4x). The sharpest expression of 'the frail burn early and the pool thins': if continuous frailty moves truth toward band anywhere on this ladder it is here; timing should move the wrong way (earlier burn) unless the surviving low-frailty pool is slow enough to slip under quarantine."
+    },
+    {
+      "arm_id": "FRAIL_L10",
+      "overrides": {"hazard_frailty": {"distribution": "lognormal", "cv": 1.0}},
+      "note": "Lognormal ladder at matched cv 1.0: sigma^2 = ln 2, median e^-0.347 ~ 0.71 — less near-zero mass than gamma at the same cv but a heavier right tail. The family contrast: if truth/timing differ between G10 and L10 at matched dispersion, the landing is tail-shape driven, not dispersion driven."
+    },
+    {
+      "arm_id": "FRAIL_L20",
+      "overrides": {"hazard_frailty": {"distribution": "lognormal", "cv": 2.0}},
+      "note": "Lognormal ladder, heavy corner: sigma^2 = ln 5, median ~0.45 — the family contrast at cv 2.0 (gamma's median is 0.13 at the same cv). Together with G20 this brackets the near-immune-mass reading at fixed declared dispersion."
+    }
+  ],
+  "arms_note": "Arm grammar (this PR): hazard_frailty accepts {distribution: gamma|lognormal, cv >= 0} and writes pathogen_overrides[sars_cov2_resp].dose_response.frailty = {enabled: true, distribution, cv}, landing on the theta-resolved dose_response block (it dispatches after dose_response_frailty and pathogen_overrides inside apply_arm_overrides so the key merges onto whatever block they resolved). The engine resolves the block at init (spec-lands), draws each challenged host's multiplier lazily on the dedicated frailty stream at mean pinned 1.0 (gamma: shape 1/cv^2, scale cv^2; lognormal: mu = -sigma^2/2, sigma^2 = ln(1+cv^2)), and echoes the drawn quantiles as payload.frailty_draw. No anchor fitting anywhere: cv values are declared sweep corners and the mean is pinned by construction.",
+  "cells_note": "1 axis point x 7 arms x 20 seeds = 140 declared-replay cells (~30 min each). Cell order is arm-major then seed: cells 0-19 D0_declared, 20-39 FRAIL_INERT, 40-59 FRAIL_G05, 60-79 FRAIL_G10, 80-99 FRAIL_G20, 100-119 FRAIL_L10, 120-139 FRAIL_L20.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and serology_anchor_clause are carried verbatim from covid_suscept_v1; the frailty_structure_audit is the per-cell payload-echo-matches-declared invariant for the new surface, including the bit-identity claim on the inert corner. This is a conditioned canary at the anchor, not a screen: no corner is admitted or fitted on this design.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per arm row — 7 rows of 20 seeds. Reported beside it, never thresholded: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, and the full per-seed recorded_onsets vector."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_suscept_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit.",
+      "note": "infections_total counts ever-infected non-seeded hosts. Declared expectation per corner: monotone thinning in cv if the near-immune mass dominates, with the family contrast (G vs L at matched cv) exposing tail-shape sensitivity; the inert corner is bit-identical to D0 by construction."
+    },
+    "frailty_structure_audit": {
+      "criterion": "Per cell: (a) on armed cells dose_response.frailty echoes {enabled: true, the declared distribution, the declared cv}; on D0 cells dose_response carries no frailty key; (b) frailty_draw.n > 0 on every armed cell and == 0 on every D0 cell; (c) FRAIL_INERT frailty_draw.mean == 1.0 exactly and its per-seed recorded_onsets, infections_total, before_share match D0 EXACTLY — the bit-identity audit, any deviation is a wiring defect invalidating the cell; (d) on cv > 0 arms frailty_draw.mean lies in [0.7, 1.3] (mean pinned by construction; sample deviation only) and the q05-q95 spread orders by declared cv (G20 widest, G05 narrowest); (e) susceptibility_draw.n equals frailty_draw.n exactly — the same challenged hosts carry both draws. Deviation invalidates the cell rather than excluding it.",
+      "reads": "dose_response.frailty.{enabled,distribution,cv}, frailty_draw.{n,mean,q05,q95}, susceptibility_draw.n, and per-seed recorded_onsets/infections_total/before_share for the D0-vs-INERT identity check — all payload echoes, no engine state."
+    },
+    "both_legs_test": {
+      "statement": "The design's deliverable, frozen: per arm — does the declared frailty corner move takeoff-seed infections_total toward covid.H5's band [712,960] AND takeoff-seed median before_share toward 0.173 within 0.10, SIMULTANEOUSLY; what does each corner do to takeoff-seed recorded_onsets; and does any landing read smooth-thinned or suppression-kinked. Declared reads:",
+      "reads": [
+        "truth_leg: per arm, takeoff-seed median and q05-q95 infections_total vs [712, 960] — the leg every prior axis failed to move; continuous frailty is the last named susceptibility class, so this read decides the class.",
+        "timing_leg: per arm, takeoff-seed median before_share vs 0.173 (window 0.173 +/- 0.10) — the mechanism the binary fraction could not touch: hyper-frail early burn normally pushes before_share UP (away from the record), so a corner that lands truth while worsening timing repeats the IMM75 failure shape; a corner whose surviving low-f pool defers mass under quarantine is the only shape that could move both legs.",
+        "count_leg: per arm, takeoff-seed median and q05-q95 recorded_onsets vs the record's 197 ([98.5, 394] window) — on the shipped observation channel, truth thinning scales recorded onsets roughly proportionally.",
+        "shape_leg: acquisition_curve.total_by_day / confined_by_day and the during-quarantine splits — smooth thinning is the frailty signature; a day-16 kink + cabin/crew concentration reads suppression-shaped and transfers the causal claim to quarantine timing.",
+        "binding_leg: FRAIL_INERT vs D0 per-seed identity and the frailty_draw quantiles vs declared corners — proves the arm fired as declared before any contrast is read.",
+        "paired_deltas: seed-paired delta vs D0_declared on recorded_onsets, infections_total, and before_share per arm — on cv > 0 arms the pairing is seed-matched and additionally draw-matched (the shared stream is untouched, so deltas are per-seed exact, stronger than the IMM arms' ensemble-level pairing)."
+      ],
+      "declared_expectation": "D0 reproduces the measured ~3,500-class truth / ~3,000-class recorded (cross-image drift check). FRAIL_INERT is bit-identical to D0 per seed. On cv > 0 arms truth should thin monotonically-ish in cv (the near-immune mass removes hosts from effective circulation while the hyper-frail tail saturates and dies early); the open question is whether thinning compounds enough to reach [712,960] (~4-5x below D0 median — larger than IMM75's linear ~890 landing suggests for a pure susceptibility thinning, so the elastic region is what is being measured) and whether before_share moves UP (early burn) or DOWN (surviving pool too frail-poor to burn before quarantine). Family contrast: if G and L diverge at matched cv, the landing is tail-shape driven."
+    },
+    "verdict_grammar": "Canary verdict, frozen: per arm report which legs moved (truth toward band / timing toward 0.173 / count toward 197 / shape smooth-vs-kinked), which direction each moved, and whether ANY declared continuous-frailty corner moves the truth AND timing legs simultaneously. A both-legs landing names a declared corner for a follow-on design — never an adoption, and no cv value outside the declared ladder may be reported as a candidate. Rows with < 5 takeoff seeds are reported as insufficient takeoff mass, not failed. The D0 row reproduces its measured reads; a systematic miss there is an engine-drift signature, reported as such. A FRAIL_INERT row not bit-identical to D0 is a wiring defect, reported as such, and every armed read is void."
+  },
+  "what_this_cannot_settle": [
+    "Frailty correlated with structure: the draw is independent of cabin, class, role, and schedule — a correlated-frailty corner (susceptibility concentrated in exposed strata) is not expressible in this grammar.",
+    "Frailty that wanes or compounds with age or dosing: the multiplier is drawn once per challenged host and held for the voyage — a time-varying frailty is a different mechanism.",
+    "Which distribution family is 'right': the ladder only measures the response surface at two declared families; it cannot select a family, and no corner is a fit to anything.",
+    "Whether thinning below D0's truth could EVER reach band: the ladder's heaviest corner (cv 2.0) is the deepest declared cut; a deeper cv is in-grammar but out of design — report the measured response, not an extrapolation.",
+    "covid.H5's band is a subgroup extrapolation; the band carries the uncertainty and the point does not."
+  ],
+  "execution": {
+    "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_frailty_v1. Two-layer image build at the branch SHA (docker build -t picard-campaign . then docker build -f deploy/aws/Dockerfile.covid_hull — the thin campaign layer copies both entrypoints and sets ENTRYPOINT [python3]); a NEW revision of jobdef picard-covid-boarding-screen digest-pins the pushed tag. Same batch path as SUSCEPT-V1.",
+    "stage_cells": 140,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_frailty_v1/<sha>/cells/",
+    "canary": "The whole design is the canary: INDEX_OFFSET 0, ARRAY_SIZE 140 (all 7 arms x 20 seeds at the anchor). Reads: every armed cell's dose_response.frailty echo carries the declared {distribution, cv}; every armed cell's frailty_draw.n > 0 and equals susceptibility_draw.n; D0 cells carry no frailty key and frailty_draw.n == 0; FRAIL_INERT per-seed outcomes match D0 exactly; frailty_draw.mean in [0.7, 1.3] with q05-q95 spread ordering by declared cv; the D0 row pairs against SUSCEPT-V1's measured anchor read (~3,500-class truth on seeds 0-9) as the cross-image engine-drift check.",
+    "report_immediately_if": "dry-run count mismatches the declared 140; a cell's payload echo lacks its arm's declared dose_response.frailty values (the arm did not fire in cloud — wiring defect, not a result); the frailty_structure_audit fails on any cell, including any per-seed FRAIL_INERT-vs-D0 divergence; a D0 row lands far outside its measured band (cross-image drift); ANY arm row's takeoff-seed infections_total median lands inside [712,960] (in-band truth landing); ANY arm row's takeoff-seed before_share median lands inside 0.173 +/- 0.10 (in-band timing landing); ANY armed row fizzles on > half its takeoff seeds (the index host is exempt from frailty only if unchallenged — a fizzle pattern would signal wiring, not structure); during-quarantine infections become the dominant stratum on any row; corner moves prove to come from takeoff composition only (paired deltas flat while marginal stats move); or child failure rate exceeds 5%."
+  }
+}

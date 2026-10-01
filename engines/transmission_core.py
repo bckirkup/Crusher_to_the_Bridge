@@ -809,6 +809,20 @@ _DOSE_RESPONSE_MODELS = frozenset(
     {"beta_poisson", "exponential", COOP_MODEL},
 )
 
+# FRAILTY-V1: the continuous frailty families a ``dose_response.frailty``
+# block may declare. The multiplier's mean is pinned at 1.0 so the cell's
+# theta still carries the mean hazard — a corner declares dispersion only
+# (survival-analysis frailty: the hyper-frail burn early and the surviving
+# susceptible pool thins), never a refit of the mean.
+HAZARD_FRAILTY_DISTRIBUTIONS = ("gamma", "lognormal")
+# Spawn-tree address of the frailty stream. ``SeedSequence(entropy,
+# spawn_key=(KEY,))`` derives the run seed's own material at a fixed
+# address far from the sequential indices ``.spawn()`` hands out, so the
+# stream is deterministic per seed, order-independent, and touches neither
+# the shared stream's draws nor the parent sequence's spawn counter —
+# a frailty-off run stays bit-identical by construction.
+_FRAILTY_STREAM_KEY = 0x5F1A17
+
 # Internal pathway dose keys → route_efficiency_multipliers keys
 PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "direct_contact": "direct_contact",
@@ -1691,6 +1705,57 @@ def _parse_exposure_cap_include_fixed_rings(tx: dict[str, Any]) -> bool:
     return flag
 
 
+def _parse_hazard_frailty(
+    pathogen_id: str,
+    dose_response: dict[str, Any],
+) -> dict[str, Any] | None:
+    """Resolve a pathogen's declared frailty draw, or None when unarmed.
+
+    ``dose_response.frailty`` = ``{enabled, distribution, cv}`` — a
+    continuous per-host multiplier on the infection hazard with mean
+    pinned at 1.0 (FRAILTY-V1). Absent or ``enabled`` false resolves to
+    None: zero draws, shipped behaviour bit-identical. ``cv`` is the
+    declared coefficient of variation; ``cv`` 0 is the degenerate inert
+    corner (multiplier identically 1.0, still written per host so the
+    binding is auditable on the payload echo).
+    """
+    spec = dose_response.get("frailty")
+    if spec is None:
+        return None
+    if not isinstance(spec, Mapping):
+        raise ValueError(
+            f"{pathogen_id}: dose_response.frailty must be a mapping, "
+            f"got {spec!r}",
+        )
+    if not spec.get("enabled", False):
+        return None
+    unknown = set(spec) - {"enabled", "distribution", "cv"}
+    if unknown:
+        raise ValueError(
+            f"{pathogen_id}: dose_response.frailty keys {sorted(unknown)} "
+            "are not frailty fields; allowed: "
+            f"{sorted(('enabled', 'distribution', 'cv'))}",
+        )
+    distribution = spec.get("distribution")
+    if distribution not in HAZARD_FRAILTY_DISTRIBUTIONS:
+        raise ValueError(
+            f"{pathogen_id}: dose_response.frailty.distribution must be "
+            f"one of {HAZARD_FRAILTY_DISTRIBUTIONS}, got {distribution!r}",
+        )
+    cv = spec.get("cv")
+    if isinstance(cv, bool) or not isinstance(cv, (int, float)):
+        raise ValueError(
+            f"{pathogen_id}: dose_response.frailty.cv must be numeric, "
+            f"got {cv!r}",
+        )
+    if not math.isfinite(float(cv)) or float(cv) < 0.0:
+        raise ValueError(
+            f"{pathogen_id}: dose_response.frailty.cv must be finite and "
+            f">= 0, got {cv!r}",
+        )
+    return {"distribution": distribution, "cv": float(cv)}
+
+
 @dataclass(frozen=True)
 class CabinCooccupancy:
     """Declared cabin-mate co-occupancy partition (CABIN-OCC-01).
@@ -2318,6 +2383,42 @@ class TransmissionCore:
             1.0,
         )
         self._init_exposure_cap(cfg, tx)
+        self._init_hazard_frailty()
+
+    def _init_hazard_frailty(self) -> None:
+        """FRAILTY-V1 — the declared continuous per-host frailty surface.
+
+        Resolves every pathogen's ``dose_response.frailty`` block once at
+        init, so a malformed block raises at spec-lands, not mid-voyage.
+        Draws run on a dedicated stream derived from the run's own seed
+        material (``SeedSequence(entropy, spawn_key=(KEY,))``) — never
+        ``self.rng`` and never a shared spawn index — so an armed arm
+        cannot reorder the shared stream: arm-vs-baseline differences
+        travel only through changed infection outcomes, and a run with no
+        armed pathogen keeps the shipped draw order bit-identical.
+        """
+        self._hazard_frailty: dict[str, dict[str, Any]] = {}
+        for pid, profile in (self.pathogen_profiles or {}).items():
+            dose_response = (profile or {}).get("dose_response") or {}
+            spec = _parse_hazard_frailty(str(pid), dose_response)
+            if spec is not None:
+                self._hazard_frailty[str(pid)] = spec
+        if not self._hazard_frailty:
+            self._frailty_rng = None
+            return
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._frailty_rng = (
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    entropy, spawn_key=(_FRAILTY_STREAM_KEY,),
+                ),
+            )
+            if entropy is not None
+            else self.rng
+        )
 
     def _init_exposure_cap(
         self,
@@ -3990,6 +4091,45 @@ class TransmissionCore:
         agent.dose_response_susceptibility[pathogen_id] = susceptibility
         return susceptibility
 
+    def _hazard_frailty_multiplier(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+    ) -> float:
+        """The host's persistent frailty multiplier; exactly 1.0 unarmed.
+
+        Drawn lazily on the host's first challenge on the dedicated frailty
+        stream — the same laziness convention as the beta susceptibility
+        draw, so challenged hosts are exactly the hosts carrying one. The
+        draw families pin the mean at 1.0: a ``cv`` declares dispersion
+        only, never a shift of the cell's mean hazard.
+        """
+        existing = agent.frailty_multiplier.get(pathogen_id)
+        if existing is not None:
+            return existing
+        spec = self._hazard_frailty.get(pathogen_id)
+        if spec is None:
+            return 1.0
+        cv = spec["cv"]
+        if cv <= 0.0:
+            frailty = 1.0
+        elif spec["distribution"] == "gamma":
+            # Gamma(k, theta) with k*theta = 1: k = 1/cv^2, theta = cv^2.
+            frailty = float(
+                self._frailty_rng.gamma(1.0 / (cv * cv), cv * cv),
+            )
+        else:
+            # Lognormal(mu, sigma): mean-pinned at mu = -sigma^2/2 with
+            # sigma^2 = ln(1 + cv^2).
+            sigma2 = math.log1p(cv * cv)
+            frailty = float(
+                self._frailty_rng.lognormal(
+                    -0.5 * sigma2, math.sqrt(sigma2),
+                ),
+            )
+        agent.frailty_multiplier[pathogen_id] = frailty
+        return frailty
+
     def _dose_response_hazard(
         self,
         agent: KorkinAgent,
@@ -3998,7 +4138,8 @@ class TransmissionCore:
     ) -> float:
         """Compute one epoch's hazard from persistent host susceptibility."""
         susceptibility = self._dose_response_susceptibility(agent, pathogen_id)
-        return -math.expm1(-susceptibility * effective_dose)
+        frailty = self._hazard_frailty_multiplier(agent, pathogen_id)
+        return -math.expm1(-susceptibility * frailty * effective_dose)
 
     def _superinfection_susceptibility(self, pathogen_id: str) -> float:
         """How much of a naive host's susceptibility an infected host retains.
@@ -5248,7 +5389,8 @@ class TransmissionCore:
         susceptibility = self._dose_response_susceptibility(
             agent, pathogen_id,
         )
-        return -math.expm1(-susceptibility * lam)
+        frailty = self._hazard_frailty_multiplier(agent, pathogen_id)
+        return -math.expm1(-susceptibility * frailty * lam)
 
     @staticmethod
     def _record_transmission_event(

@@ -1330,3 +1330,180 @@ def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
     assert draw["n"] > 0
     # The challenged hosts' draws sit on the heavy-tailed scale.
     assert draw["mean"] <= echo["susceptibility_scale"]
+
+
+# ── FRAILTY-V1: continuous per-host frailty on the infection hazard ────────
+
+FRAILTY_V1_DESIGN = (
+    REPO_ROOT
+    / "picard_framework"
+    / "runs"
+    / "covid_frailty_v1_design.json"
+)
+
+
+def test_frailty_v1_design_is_the_declared_140_cell_canary():
+    design = load_design(str(FRAILTY_V1_DESIGN))
+    cells = enumerate_cells(design)
+    assert len(cells) == 140
+    assert design.arm_ids == (
+        "D0_declared", "FRAIL_INERT", "FRAIL_G05", "FRAIL_G10",
+        "FRAIL_G20", "FRAIL_L10", "FRAIL_L20",
+    )
+    # One anchor point, arm-major then seed-innermost.
+    assert all(c.theta == pytest.approx(2.37e11) for c in cells)
+    assert cells[0].arm_id == "D0_declared"
+    assert cells[0].seed == 20200205
+    assert cells[19].seed == 20200224
+    assert cells[20].arm_id == "FRAIL_INERT"
+    assert cells[139].arm_id == "FRAIL_L20"
+    assert len({c.key for c in cells}) == 140
+
+
+def test_hazard_frailty_writes_the_declared_block():
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {
+            "arm_id": "B1_frail",
+            "overrides": {
+                "hazard_frailty": {"distribution": "gamma", "cv": 1.0},
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    armed = next(c for c in cells if c.arm_id == "B1_frail")
+    raw = prepare_cell_run_spec(design, armed)
+    dr = raw["pathogen_overrides"]["sars_cov2_resp"]["dose_response"]
+    assert dr["frailty"] == {
+        "enabled": True, "distribution": "gamma", "cv": 1.0,
+    }
+    # The theta-preserved beta block is untouched by the frailty key.
+    assert dr["susceptibility_scale"] * dr["alpha"] / (
+        dr["alpha"] + dr["beta"]
+    ) == pytest.approx(armed.theta)
+    base = next(c for c in cells if c.arm_id == "B0_declared")
+    dr0 = prepare_cell_run_spec(design, base)[
+        "pathogen_overrides"
+    ]["sars_cov2_resp"]["dose_response"]
+    assert "frailty" not in dr0
+
+
+@pytest.mark.parametrize("spec", [
+    {"distribution": "weibull", "cv": 1.0},
+    {"distribution": "gamma"},
+    {"cv": 1.0},
+    {"distribution": "gamma", "cv": -1.0},
+    {"distribution": "gamma", "cv": "high"},
+    {"distribution": "gamma", "cv": True},
+    {"distribution": "gamma", "cv": float("nan")},
+    {"distribution": "gamma", "cv": 1.0, "shape": 2.0},
+    [1.0],
+])
+def test_hazard_frailty_rejects_out_of_grammar_values(spec):
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {"arm_id": "B1_bad", "overrides": {"hazard_frailty": spec}},
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad"
+    )
+    with pytest.raises(ValueError, match="hazard_frailty"):
+        prepare_cell_run_spec(design, cell)
+
+
+def test_hazard_frailty_cell_reports_the_draw_echoes():
+    """8-epoch smoke on an armed arm: the resolved frailty block echoes on
+    dose_response, frailty_draw quantiles report the challenged hosts'
+    realized multipliers at declared cv, and the draw set is exactly the
+    challenged set (same n as the susceptibility draw)."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_frail",
+            "overrides": {
+                "hazard_frailty": {"distribution": "gamma", "cv": 1.0},
+            },
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_frail"
+    )
+    payload = simulate_screen_cell(design, cell, num_epochs=8)
+    echo = payload["dose_response"]["frailty"]
+    assert echo == {"enabled": True, "distribution": "gamma", "cv": 1.0}
+    draw = payload["frailty_draw"]
+    assert draw["n"] > 0
+    # The same challenged hosts carry both draws.
+    assert draw["n"] == payload["susceptibility_draw"]["n"]
+    assert draw["q05"] <= draw["q50"] <= draw["q95"]
+    # Mean pinned 1.0 by construction; a smoke-sized draw is loose but
+    # cannot sit near zero or explode.
+    assert 0.2 <= draw["mean"] <= 5.0
+
+
+def test_hazard_frailty_inert_corner_is_bit_identical_to_baseline():
+    """The cv 0 corner must reproduce the baseline exactly: frailty fires,
+    every challenged host carries a recorded 1.0, and the shared stream is
+    untouched so the whole payload — outcomes and draw quantiles alike —
+    is identical between B0 and the inert arm at the same seed."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_inert",
+            "overrides": {
+                "hazard_frailty": {"distribution": "gamma", "cv": 0.0},
+            },
+        },
+    ])
+    cells = {
+        c.arm_id: c for c in enumerate_cells(design) if c.seed == 20200205
+    }
+    base = simulate_screen_cell(design, cells["B0_baseline"], num_epochs=8)
+    inert = simulate_screen_cell(design, cells["B1_inert"], num_epochs=8)
+    assert inert["frailty_draw"]["n"] > 0
+    # Exact 1.0 — the inert corner writes float(1.0), never a draw.
+    assert inert["frailty_draw"]["mean"] == pytest.approx(
+        1.0, rel=0.0, abs=0.0,
+    )
+    assert inert["frailty_draw"]["q05"] == pytest.approx(
+        1.0, rel=0.0, abs=0.0,
+    )
+    assert inert["frailty_draw"]["q95"] == pytest.approx(
+        1.0, rel=0.0, abs=0.0,
+    )
+    assert base["frailty_draw"] == {"n": 0}
+    for key in (
+        "infections_total", "aboard_total", "observables",
+        "onset_curve", "acquisition_curve", "susceptibility_draw",
+    ):
+        assert inert[key] == base[key], key
+
+
+def test_hazard_frailty_draws_are_deterministic_per_seed():
+    """Same seed, same armed corner -> identical frailty draws (the
+    dedicated stream keys on the run seed's own seed material)."""
+    from picard_framework.covid_boarding_screen import simulate_screen_cell
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_frail",
+            "overrides": {
+                "hazard_frailty": {
+                    "distribution": "lognormal", "cv": 2.0,
+                },
+            },
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design)
+        if c.arm_id == "B1_frail" and c.seed == 20200205
+    )
+    first = simulate_screen_cell(design, cell, num_epochs=8)
+    second = simulate_screen_cell(design, cell, num_epochs=8)
+    assert first["frailty_draw"] == second["frailty_draw"]
+    assert first["infections_total"] == second["infections_total"]
