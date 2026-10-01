@@ -193,3 +193,32 @@ verdict: resumed on image `covid-hand-carriage-1c94de2d` into fresh
 prefix `campaign/covid_hand_carriage01/` (the `covid_hand_ab_v1/`
 prefix's two prior-mechanism canary cells stand as the recorded
 baseline, labelled, not voided).
+
+**Post-wash comparator — measured (2026-10-01, same cells).**
+Benjamin approved conditioning the ordering on wash-completed rows.
+It turns out the rows already carry the conditioning: every shedding
+row in the 42-cell census has `hygiene_calls` ≥ 1, and
+`load_end_epoch_gec` is the load after the epoch's last wash — the
+readout's `event_end` arm *is* the post-wash post-visit sample. The
+answer is negative: pooled event post-wash positivity **35.3%**
+(7,343/20,774 rows, positive mean 2.93 log10) vs routine post-wash
+**17.6%** (55,246/314,152) — ordering stays `event_higher`, ~2×, in
+both blocks (classic 33.9% vs 17.6%; fl_spr 35.8% vs 17.6%). Liu's
+comparator reads post-bathroom 12.4% @2.30 *below* routine 37.5%
+@3.32. The wash is nearly inert on the event arm
+(post_defecation 35.9% → event_end 35.3%, ~0.6pp): the fresh event
+load sits ~entirely inside the protected compartment by the time the
+wash runs, so the post-visit wash only sees the accessible sliver.
+
+**What this makes the miss be.** Not a sampling lens — a mechanism
+property. Liu's wash drops post-visit hands *below* routine because a
+real wash acts on freshly-deposited accessible contamination. Ours
+cannot: the protected sequestration (`10^U(log10 50, log10 3200)`
+GEC) draws **at the event instant**, so there is nothing accessible
+left for the wash to strip. Inference (hypothesis, not implemented):
+real subungual/crease colonization accrues over contact-time, not at
+the visit instant — a delayed accessible→protected transfer (hours,
+like the drying wet-window) would let the post-visit wash strip the
+fresh accessible load first and is the plausible honest shape of the
+Liu ordering. That is a mechanism-scope decision — Benjamin's call,
+recorded in the outstanding ledger.
