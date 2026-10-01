@@ -1,0 +1,21 @@
+# COVID-GM-RESCORE-01 worker — the campaign image with the boarding-screen
+# array-cell entry layered on.
+#
+# The held-out Greg Mortimer re-score runs the same boarding-screen cell
+# machinery as the DP ladder: the job definition supplies
+# covid_boarding_screen_entrypoint.py as argv[0] plus --design naming the
+# frozen GM design under picard_framework/runs/.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.covid_gm_rescore -t picard-covid-gm-rescore .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/covid_hull_entrypoint.py ./deploy/aws/covid_hull_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/covid_boarding_screen_entrypoint.py ./deploy/aws/covid_boarding_screen_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]

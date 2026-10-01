@@ -1,0 +1,74 @@
+{
+ "design_id": "covid_gm_rescore_v1_imports3",
+ "task_id": "COVID-GM-RESCORE-01",
+ "schema_version": "1.0.0",
+ "description": "COVID-GM-RESCORE-01 diagnostic (non-scoring, labelled): the first-look probe of 'one import too few'. greg_mortimer_2020 with the explicit seed's count raised to 3 -- does a fatter import tail rescue ignition without touching transmission machinery? Anchored at theta 2.37e11 x hygiene_cycle x the same 50 seeds @20200205 so every cell pairs seed-for-seed against the scoring row at the anchor. Diagnostic only: no anchor is re-scored on it and it admits no tuning; it separates 'the voyage needed more than one introduction' from 'the transmission regime is dead'.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "nothing: it is the declared diagnostic inside COVID-GM-RESCORE-01, not a re-screening",
+ "prerequisites": [
+  "covid_gm_rescore_v1 scoring design (this task): same scenario, seeds, and baseline arm; the delta between this design's row and the anchor row is the import-tail marginal.",
+  "NORO-HAND-PRACTICE-01 (PR #804): hygiene_cycle baseline as on the scoring design."
+ ],
+ "scenario_id": "greg_mortimer_2020",
+ "split_role": "held_out",
+ "cell_conditioning": {
+  "note": "Identical to the scoring design except imports is 3: one seed entry with count 3 (three co-primary passengers boarding infected at epoch 0, infection_age 0.0) instead of the declared 1. Everything else -- SOP-017 day 8-27, day-20 universal screen, dwell_weighted, declared voyage -- is the scenario record verbatim.",
+  "theta": "2.37e11 -- the v13 admissible-band midpoint; fixed",
+  "imports": 3,
+  "infection_age_days": 0.0,
+  "sanitary_visit_mode": "dwell_weighted",
+  "voyage_mode": "declared",
+  "split_day": 20,
+  "turn_day": 8
+ },
+ "thetas": [
+  237000000000.0
+ ],
+ "infection_age_days": [
+  0.0
+ ],
+ "imports": [
+  3
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 50,
+ "takeoff_recorded_onsets": 10,
+ "voyage_mode": "declared",
+ "split_day": 20,
+ "turn_day": 8,
+ "seed_ring_readout": true,
+ "arms": [
+  {
+   "arm_id": "hygiene_cycle",
+   "overrides": {},
+   "note": "Baseline arm only (empty overrides; the shipped hand line). The probe is an import-count question, not a hand-arm question."
+  }
+ ],
+ "cells": 50,
+ "cells_note": "1 Theta x 1 arm x 50 seeds = 50 cells (seeds 20200205-20200254, identical to the scoring design's seed block). Cell order: indices 0-49 = theta 2.37e11 x hygiene_cycle x seed order.",
+ "freeze": {
+  "declared_before_running": true,
+  "metrics": [
+   "P(takeoff >=10 recorded onsets) at 3 imports vs the scoring design's 1-import anchor row",
+   "campaign_positives median + q05-q95 vs H1's 128, takeoff-conditional positives, asymptomatic_share -- same reads as the scoring readout",
+   "seed-paired delta vs the scoring row on (theta 2.37e11, seed): does tripling imports move P(takeoff) materially, and does the conditional count move with it"
+  ],
+  "verdict_grammar": "Diagnostic readout only -- no verdict class. 'imports rescue' = P(takeoff) lifts materially AND the takeoff-conditional campaign_positives median moves toward 128; 'ignition fixed, size still wrong' = takeoff up but positives stay low; 'regime dead' = P(takeoff) ~ 0 even at 3 imports."
+ },
+ "admissibility": {
+  "declared_before_running": true,
+  "note": "Labelled diagnostic, not a scoring row: GM's record declares one import and the as-declared cell is the scoring row; this cell measures the import-count sensitivity around it.",
+  "audit_invariants": [
+   "delivery.hand_reservoir_mode echoes hygiene_cycle on every payload.",
+   "seed_ring.seed_spec.count == 3 (the probe) with infection_age_days 0.0 and role passenger; seeded_count == 3.",
+   "cell pairing to the scoring rows keyed on (theta, seed) -- the same seeds in both files."
+  ]
+ },
+ "execution": {
+  "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_gm_rescore_v1_imports3, STRIDE 1, ARRAY_SIZE 50 -- runs only on the author's go-ahead after the scoring canary, per the campaign gate.",
+  "expected_cell_minutes": "~5",
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_gm_rescore_v1_imports3/<sha>/cells/",
+  "readout": "tools/covid_gm_rescore_readout.py --cells campaign_results/covid_gm_rescore_v1_imports3/cells --design picard_framework/runs/covid_gm_rescore_v1_imports3_design.json"
+ }
+}

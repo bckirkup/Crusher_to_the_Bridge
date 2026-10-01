@@ -1330,3 +1330,105 @@ def test_a_real_frailty_arm_cell_echoes_the_rewritten_dose_response():
     assert draw["n"] > 0
     # The challenged hosts' draws sit on the heavy-tailed scale.
     assert draw["mean"] <= echo["susceptibility_scale"]
+
+
+# ---------------------------------------------------------------------------
+# COVID-GM-RESCORE-01: the held-out Greg Mortimer re-score rides this harness.
+# Its design's split_role declares the held-out side of the fixed split;
+# load_design still refuses a mismatched or absent declaration.
+# ---------------------------------------------------------------------------
+
+GM_RESCORE_DESIGN_REL = Path(
+    "picard_framework/runs/covid_gm_rescore_v1_design.json",
+)
+GM_IMPORTS3_DESIGN_REL = Path(
+    "picard_framework/runs/covid_gm_rescore_v1_imports3_design.json",
+)
+_TMP_DESIGN_REL = Path(
+    "picard_framework/runs/_gm_rescore_split_role_test.json",
+)
+_DELETE = object()
+
+
+def _gm_design_raw() -> dict:
+    import json
+    path = REPO_ROOT / GM_RESCORE_DESIGN_REL
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _load_mutated_gm(**changes) -> BoardingScreenDesign:
+    """Load a copy of the GM design with one field mutated, from disk."""
+    import json
+    raw = _gm_design_raw()
+    for key, value in changes.items():
+        if value is _DELETE:
+            raw.pop(key, None)
+        else:
+            raw[key] = value
+    path = REPO_ROOT / _TMP_DESIGN_REL
+    try:
+        path.write_text(json.dumps(raw), encoding="utf-8")
+        return load_design(str(_TMP_DESIGN_REL))
+    finally:
+        path.unlink(missing_ok=True)
+
+
+def test_gm_rescore_design_is_the_declared_300_cell_scoring():
+    design = load_design(str(GM_RESCORE_DESIGN_REL))
+    assert design.scenario_id == "greg_mortimer_2020"
+    assert design.split_role == "held_out"
+    assert design.split_day == 20
+    assert design.turn_day == 8
+    cells = enumerate_cells(design)
+    assert len(cells) == 300
+    # Theta-outer, arm-major, seed-inner: the canary row is theta 2.37e11
+    # x hygiene_cycle at indices 100..149.
+    assert cells[100].theta == pytest.approx(2.37e11)
+    assert cells[100].arm_id == "hygiene_cycle"
+    assert cells[100].seed == 20200205
+    assert cells[149].seed == 20200254
+    assert cells[150].arm_id == "spike_decay"
+    assert cells[150].seed == 20200205
+
+
+def test_imports3_diagnostic_design_is_50_labelled_cells():
+    design = load_design(str(GM_IMPORTS3_DESIGN_REL))
+    assert design.imports == (3,)
+    cells = enumerate_cells(design)
+    assert len(cells) == 50
+    assert all(c.imports == 3 for c in cells)
+    assert {c.arm_id for c in cells} == {"hygiene_cycle"}
+
+
+def test_split_role_mismatch_against_the_fixed_split_refuses():
+    # diamond_princess_2020 is the fit hull: a held_out declaration on it
+    # must refuse, as must a training declaration on greg_mortimer_2020.
+    with pytest.raises(ValueError, match="split_role"):
+        _load_mutated_gm(scenario_id="diamond_princess_2020")
+    with pytest.raises(ValueError, match="split_role"):
+        _load_mutated_gm(split_role="training")
+
+
+def test_absent_split_role_keeps_the_fit_gate():
+    # Legacy designs declare no role: the held-out hull must still refuse.
+    with pytest.raises(ValueError):
+        _load_mutated_gm(split_role=_DELETE)
+
+
+def test_gm_cell_echoes_the_declared_hand_mode_and_seed_ring():
+    design = load_design(str(GM_RESCORE_DESIGN_REL))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "hygiene_cycle")
+    arm = next(c for c in cells if c.arm_id == "spike_decay")
+    base_payload = echo_screen_cell(design, base)
+    arm_payload = echo_screen_cell(design, arm)
+    assert (
+        base_payload["delivery"]["hand_reservoir_mode"] == "hygiene_cycle"
+    )
+    assert arm_payload["delivery"]["hand_reservoir_mode"] == "spike_decay"
+    for payload in (base_payload, arm_payload):
+        spec = payload["seed_ring"]["seed_spec"]
+        assert spec["count"] == 1
+        assert spec["infection_age_days"] == pytest.approx(0.0)
+        assert spec["role"] == "passenger"
+        assert payload["aboard_total"] == 223
