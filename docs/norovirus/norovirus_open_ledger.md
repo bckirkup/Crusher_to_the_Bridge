@@ -4279,6 +4279,31 @@ Design + criteria: `docs/ledger/NORO-HAND-PRACTICE-01.md`;
 decomposition appended to `docs/ledger/NORO-HAND-RESERVOIR-01.md`;
 readout `docs/norovirus/noro_hand_practice_01/`.
 
+**`NORO-HAND-CARRIAGE-01` (shipped, open): the second repair pass —
+the two structural absences the PRACTICE-01 verdict's decomposition
+named.** (i) A wash-resistant *protected* compartment: each
+propensity-fired contaminating visit sequesters `logU(50, 3200)` GEC —
+Liu's own post-bathroom arm (12.4% ≥ 2.30 log10 after visit + wash)
+bounds it — into sites washes cannot reach (subungual/crease, Lin 2003
+FCV + Walaszek 2018); every wash act now strips only the accessible
+part and the protected compartment decays at a sheltered per-infection
+rate U(0.01, 0.06)/h, an order below the pad inactivation. (ii) An
+*own-environment pool*: the host's own deposits on its own fittings
+(own cabin compartment / home zone) are bookkept and decay at the
+profile's surface inactivation, and each self-contact tick draws a
+measured `SURFACE_TO_HAND` fraction of the standing pool — the
+concentrated personal reservoir replacing the additive propensity-
+scaled increment (`SELF_CONTACT_INCREMENT_GEC_RANGE` superseded,
+deleted). `hand_load` stays the total (accessible + protected); every
+hand-scaled reader is unchanged by construction. Design + criteria:
+`docs/ledger/NORO-HAND-CARRIAGE-01.md`; sources:
+`docs/literature/consensus_tranche_52_hand_carriage.md`; register rows
+for the two new constants + the superseded increment. The Liu frozen
+criteria are unchanged; the re-census of the same 42 cells against
+them follows the image rebuild at the merged SHA. The Diamond Princess
+`covid_hand_ab_v1` array stays held on the prior mechanism until the
+measured verdict lands.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

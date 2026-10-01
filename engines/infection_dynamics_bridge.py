@@ -824,6 +824,7 @@ class KorkinAgent:
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
         "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
+        "hand_protected_load_by_pathogen", "hand_self_pool_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
         "emesis_titre_gec_per_ml_by_pathogen",
         "emesis_censored_below_lod_by_pathogen",
@@ -941,6 +942,13 @@ class KorkinAgent:
         self.hand_practice_by_pathogen: dict[str, dict[str, float]] = {}
         # Per-epoch wet/dry deposit-side transfer blend under hygiene_cycle.
         self.hand_wet_transfer_by_pathogen: dict[str, float] = {}
+        # Wash-resistant compartment under hygiene_cycle: copies sequestered
+        # in sites washes cannot reach (subungual folds, creases). The
+        # recorded hand_load is accessible + protected.
+        self.hand_protected_load_by_pathogen: dict[str, float] = {}
+        # Mass this host deposited on its own environment (own cabin
+        # compartment / home zone), feeding the routine self-contact ticks.
+        self.hand_self_pool_by_pathogen: dict[str, float] = {}
         # Elapsed days since onset, drawn once for each symptomatic illness.
         self.emesis_episode_schedule_by_pathogen: dict[str, list[float]] = {}
         # Per-illness emesis titre (GEC/mL) drawn once with the schedule, and
@@ -1270,6 +1278,8 @@ class KorkinAgent:
         self.hand_carriage_propensity_by_pathogen.pop(pathogen_id, None)
         self.hand_practice_by_pathogen.pop(pathogen_id, None)
         self.hand_wet_transfer_by_pathogen.pop(pathogen_id, None)
+        self.hand_protected_load_by_pathogen.pop(pathogen_id, None)
+        self.hand_self_pool_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
             if rng is not None
@@ -2557,6 +2567,8 @@ class KorkinShipEngine:
                 agent.infection_status = InfectionStatus.RECOVERED
                 agent.illness_status = IllnessStatus.RECOVERED
                 agent.hand_load_by_pathogen.clear()
+                agent.hand_protected_load_by_pathogen.clear()
+                agent.hand_self_pool_by_pathogen.clear()
 
     def _draw_fallback_onset(self, agent: KorkinAgent) -> None:
         """Present a host that has no per-pathogen record, on the fixed day."""

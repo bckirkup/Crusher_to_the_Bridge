@@ -376,14 +376,25 @@ def _mean_hand_load_under_practice(
 
 
 def test_hygiene_cycle_keeps_the_load_under_the_visit_ceiling() -> None:
-    """Invariant: ticks and spikes can never exceed the contamination load."""
+    """Invariant: the accessible part can never exceed the contamination
+    ceiling -- ticks and spikes are capped at the measured target.
+
+    NORO-HAND-CARRIAGE-01: the recorded total is accessible + protected,
+    and the protected compartment is deliberately exempt from the visit
+    ceiling (a contaminating event presses measured post-bathroom mass
+    into it on top of the capped accessible part).
+    """
     core = _core(seed=13)
     agent = _agent()
     profile = _profile()
     target = agent.get_pathogen_hand_target(PATHOGEN, profile)
     for _ in range(96):
         core._replenish_hand(agent, PATHOGEN, profile)
-        assert agent.hand_load_by_pathogen[PATHOGEN] <= target
+        accessible = (
+            agent.hand_load_by_pathogen[PATHOGEN]
+            - agent.hand_protected_load_by_pathogen[PATHOGEN]
+        )
+        assert accessible <= target
 
 
 def test_hygiene_cycle_draws_the_practice_traits_once() -> None:
@@ -397,7 +408,10 @@ def test_hygiene_cycle_draws_the_practice_traits_once() -> None:
         core._replenish_hand(agent, PATHOGEN, profile)
     assert agent.hand_practice_by_pathogen[PATHOGEN] == first
     assert set(first) == {
-        "wash_compliance", "routine_washes_per_day", "self_contacts_per_day",
+        "wash_compliance",
+        "routine_washes_per_day",
+        "self_contacts_per_day",
+        "protected_inactivation_per_hour",
     }
 
 
@@ -447,3 +461,117 @@ def test_routine_wash_frequency_moves_the_hand_load(
         routine_washes=(20.0, 20.0), monkeypatch=monkeypatch,
     )
     assert low > high
+
+
+# --- the carriage compartments (NORO-HAND-CARRIAGE-01) ------------------
+
+
+def test_contaminating_visit_sequesters_a_wash_resistant_floor() -> None:
+    """A propensity-fired visit grows the protected compartment; the
+    recorded total is always at least that floor, through every wash."""
+    profile = _profile(stool_events_per_day={
+        "baseline": 5.63, "diarrhoeal": 5.63,
+    })
+    core = _core(profile=profile, seed=23, reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    saw_floor = False
+    for _ in range(96):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        protected = agent.hand_protected_load_by_pathogen[PATHOGEN]
+        assert agent.hand_load_by_pathogen[PATHOGEN] >= protected
+        saw_floor = saw_floor or protected > 0.0
+    assert saw_floor
+
+
+def test_routine_washes_cannot_strip_below_the_protected_floor(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Once the compartment is seeded, maximal routine washing leaves the
+    total at the protected floor -- washes act on the accessible part only."""
+    monkeypatch.setattr(
+        transmission_core, "ROUTINE_WASHES_PER_DAY_RANGE", (240.0, 240.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 5.63, "diarrhoeal": 5.63},
+        hand_inactivation_per_hour=0.0,
+    )
+    core = _core(profile=profile, seed=29, reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    agent.hand_protected_load_by_pathogen[PATHOGEN] = 500.0
+    for _ in range(96):
+        core._replenish_hand(agent, PATHOGEN, profile)
+    protected = agent.hand_protected_load_by_pathogen[PATHOGEN]
+    assert protected > 0.0
+    assert agent.hand_load_by_pathogen[PATHOGEN] >= protected
+
+
+def test_own_environment_pool_credits_only_own_deposits() -> None:
+    """A deposit on the host's home zone enters its self pool; a deposit on
+    someone else's unit does not."""
+    core = _core(reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    core._credit_own_environment_pool(agent, PATHOGEN, ZONE, 1000.0)
+    assert agent.hand_self_pool_by_pathogen[PATHOGEN] == pytest.approx(
+        1000.0,
+    )
+    core._credit_own_environment_pool(agent, PATHOGEN, "Other_Deck", 1000.0)
+    assert agent.hand_self_pool_by_pathogen[PATHOGEN] == pytest.approx(
+        1000.0,
+    )
+    core._credit_own_environment_pool(agent, PATHOGEN, ZONE, -5.0)
+    assert agent.hand_self_pool_by_pathogen[PATHOGEN] == pytest.approx(
+        1000.0,
+    )
+
+
+def test_self_contact_ticks_draw_from_the_own_environment_pool(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Each tick moves a measured surface-to-hand fraction of the standing
+    pool onto the accessible hand, bounded by the pool itself."""
+    monkeypatch.setattr(
+        transmission_core, "SELF_CONTACT_TICKS_PER_DAY_RANGE",
+        (240.0, 240.0),
+    )
+    monkeypatch.setattr(
+        transmission_core, "ROUTINE_WASHES_PER_DAY_RANGE", (0.0, 0.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 0.0, "diarrhoeal": 0.0},
+        hand_inactivation_per_hour=0.0,
+    )
+    core = _core(profile=profile, seed=31, reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    agent.hand_self_pool_by_pathogen[PATHOGEN] = 500_000.0
+    agent.hand_load_by_pathogen[PATHOGEN] = 0.0
+    core._replenish_hand(agent, PATHOGEN, profile)
+    pool_after = agent.hand_self_pool_by_pathogen[PATHOGEN]
+    load = agent.hand_load_by_pathogen[PATHOGEN]
+    target = agent.get_pathogen_hand_target(PATHOGEN, profile)
+    assert pool_after < 500_000.0
+    assert 0.0 < load <= target
+
+
+def test_ticks_leave_the_hand_dry_without_an_own_environment_pool(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """With no own deposits the pool is empty and ticks add nothing --
+    the source is coupled to the host's environment, not a fixed
+    increment."""
+    monkeypatch.setattr(
+        transmission_core, "SELF_CONTACT_TICKS_PER_DAY_RANGE",
+        (240.0, 240.0),
+    )
+    monkeypatch.setattr(
+        transmission_core, "ROUTINE_WASHES_PER_DAY_RANGE", (0.0, 0.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 0.0, "diarrhoeal": 0.0},
+        hand_inactivation_per_hour=0.0,
+    )
+    core = _core(profile=profile, seed=37, reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    agent.hand_load_by_pathogen[PATHOGEN] = 0.0
+    for _ in range(24):
+        core._replenish_hand(agent, PATHOGEN, profile)
+    assert agent.hand_load_by_pathogen[PATHOGEN] == pytest.approx(0.0)
