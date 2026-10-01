@@ -38,18 +38,16 @@ from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from picard_framework.covid_boarding_screen import (  # noqa: E402
-    enumerate_cells,
-    load_design,
-)
 from simulation_utils.paths import repo_root  # noqa: E402
 from tools.covid_screen_readout_common import (  # noqa: E402
-    anchor_legs,
+    MIN_TAKEOFF_SEEDS,
+    audit_seed_ring,
     band_stats,
+    design_readout_main,
+    fmt3g,
     quantile,
-    resolve_design_arg,
-    run_readout,
-    takeoff_split,
+    row_triggers,
+    standard_row_stats,
 )
 
 REPO_ROOT = repo_root()
@@ -82,32 +80,6 @@ def _declared(arm: dict) -> dict:
         "scope": block.get("self_isolation_scope"),
         "closed_zones": list(block.get("closed_zones") or []),
     }
-
-
-def _audit_seed_echoes(ring: dict) -> list[str]:
-    """seed_spec echoes the record's seed on every arm (no seed_patch)."""
-    failures: list[str] = []
-    spec = ring.get("seed_spec") or {}
-    for key, want in RECORD_SEED_SPEC.items():
-        if spec.get(key) != want:
-            failures.append(
-                f"seed_spec.{key} {spec.get(key)} != record {want}"
-            )
-    if ring.get("seeded_count") != RECORD_SEED_SPEC["count"]:
-        failures.append(
-            f"seeded_count {ring.get('seeded_count')} "
-            f"!= record {RECORD_SEED_SPEC['count']}",
-        )
-    bad = [
-        h for h in ring.get("seeded_hosts") or []
-        if h.get("role") != RECORD_SEED_SPEC["role"]
-    ]
-    if bad:
-        failures.append(
-            f"{len(bad)} seeded host(s) with role outside "
-            f"{RECORD_SEED_SPEC['role']!r}",
-        )
-    return failures
 
 
 def _audit_echo_fields(block: dict, declared: dict) -> list[str]:
@@ -170,12 +142,7 @@ def _audit_witnesses(block: dict, declared: dict) -> list[str]:
 
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
-    ring = payload.get("seed_ring")
-    failures = (
-        ["missing seed_ring block"]
-        if not isinstance(ring, dict)
-        else _audit_seed_echoes(ring)
-    )
+    failures = audit_seed_ring(payload, RECORD_SEED_SPEC)
     block = payload.get("info_suppression")
     if not isinstance(block, dict):
         return failures + ["missing info_suppression block"]
@@ -221,8 +188,12 @@ def _crew_lag(p: dict) -> float | None:
 
 
 def _row_stats(payloads: list[dict]) -> dict:
-    """Takeoff-conditional medians + the recognition witnesses per row."""
-    takeoff, vectors = takeoff_split(payloads)
+    """The standard row plus the recognition witnesses per row."""
+    return standard_row_stats(payloads, extra_fields=_info_extra_fields)
+
+
+def _info_extra_fields(takeoff: list[dict], stats: dict) -> dict:
+    """Armed-day / isolation / post-arming mass / crew-lag bands."""
     armed = [
         d for p in takeoff if (d := _armed_day(p)) is not None
     ]
@@ -237,37 +208,21 @@ def _row_stats(payloads: list[dict]) -> dict:
     lags = [
         lag for p in takeoff if (lag := _crew_lag(p)) is not None
     ]
-    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
     med_armed = quantile(armed, 0.5)
     med_iso = quantile(isolated, 0.5)
     return {
-        "n": len(payloads),
-        "takeoff_n": len(takeoff),
-        "fizzle_majority": len(takeoff) * 2 < len(payloads),
-        "recorded_onsets": band_stats(vectors["rec"]),
-        "before_share": {"median": quantile(vectors["shares"], 0.5)},
-        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
-        "takeoff_infections_total": band_stats(vectors["t_inf"]),
-        "takeoff_before_share": band_stats(vectors["t_share"]),
-        "truth_leg_in_band": legs["truth_leg_in_band"],
-        "timing_leg_in_band": legs["timing_leg_in_band"],
-        "both_legs": legs["both_legs"],
-        "enough_takeoff": legs["enough_takeoff"],
+        "enough_takeoff": stats["takeoff_n"] >= MIN_TAKEOFF_SEEDS,
         "armed_day": band_stats(armed),
         "self_isolated_count": band_stats(isolated),
         "post_arming_mass": band_stats(post),
         "crew_lag_days": {"median": quantile(lags, 0.5)},
         "row_extra": (
-            f"armed {_fmt(med_armed)} "
-            f"iso {_fmt(med_iso)} "
-            f"post {_fmt(quantile(post, 0.5))} "
-            f"lag {_fmt(quantile(lags, 0.5))}"
+            f"armed {fmt3g(med_armed)} "
+            f"iso {fmt3g(med_iso)} "
+            f"post {fmt3g(quantile(post, 0.5))} "
+            f"lag {fmt3g(quantile(lags, 0.5))}"
         ),
     }
-
-
-def _fmt(v: float | None) -> str:
-    return "n/a" if v is None else f"{v:.3g}"
 
 
 def _share(p: dict) -> float | None:
@@ -363,42 +318,34 @@ def _row_triggers(
     """The report-immediately rows (the baseline arm never triggers)."""
     if arm_id == BASELINE_ARM:
         return None
-    kinds = [
-        name
-        for name, on in (
-            ("TRUTH-IN-BAND", stats["truth_leg_in_band"]),
-            ("TIMING-IN-BAND", stats["timing_leg_in_band"]),
-            ("FIZZLE-MAJORITY", stats["fizzle_majority"]),
-        )
-        if on
-    ]
-    if not kinds:
-        return None
-    return {
-        "theta": theta, "arm_id": arm_id, "triggers": kinds,
-        "takeoff_infections_total": stats["takeoff_infections_total"],
-        "takeoff_before_share": stats["takeoff_before_share"],
-        "armed_day": stats["armed_day"],
-        "self_isolated_count": stats["self_isolated_count"],
-    }
+    return row_triggers(
+        theta,
+        arm_id,
+        stats,
+        (
+            ("TRUTH-IN-BAND", "truth_leg_in_band"),
+            ("TIMING-IN-BAND", "timing_leg_in_band"),
+            ("FIZZLE-MAJORITY", "fizzle_majority"),
+        ),
+        (
+            "takeoff_infections_total",
+            "takeoff_before_share",
+            "armed_day",
+            "self_isolated_count",
+        ),
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
-    design = load_design(
-        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
-    )
-    return run_readout(
+    return design_readout_main(
         argv,
         repo_root=REPO_ROOT,
-        cells=enumerate_cells(design),
-        declared_by_arm={
-            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-        },
+        declared_fn=_declared,
         audit_cell=audit_cell,
         row_stats=_row_stats,
         report_key="triggered_rows",
         row_triggers=_row_triggers,
-        paired_rows=_paired_rows,
+        paired_rows_of=lambda design: _paired_rows,
     )
 
 
