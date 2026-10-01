@@ -414,13 +414,13 @@ def build_fit_run_spec(
     return raw
 
 
-def run_fit_spec(
+def build_fit_sim(
     raw: dict[str, Any],
     *,
     repo_root: str = REPO_ROOT,
     epoch_observer: Any = None,
 ) -> Any:
-    """Run a fit run-spec mapping to the end and return the finished simulation."""
+    """Build a fit run-spec's simulation through initialize(), unstepped."""
     from picard_framework.simulation.ship_simulation import ShipSimulation
 
     spec = PicardRunSpec.from_picard_dict(repo_root, raw)
@@ -428,6 +428,18 @@ def run_fit_spec(
         sim = ShipSimulation(spec, display=False)
         sim.epoch_observer = epoch_observer
         sim.initialize()
+    return sim
+
+
+def run_fit_spec(
+    raw: dict[str, Any],
+    *,
+    repo_root: str = REPO_ROOT,
+    epoch_observer: Any = None,
+) -> Any:
+    """Run a fit run-spec mapping to the end and return the finished simulation."""
+    sim = build_fit_sim(raw, repo_root=repo_root, epoch_observer=epoch_observer)
+    with contextlib.redirect_stdout(io.StringIO()):
         for _ in range(sim.num_epochs):
             sim.step()
     return sim
