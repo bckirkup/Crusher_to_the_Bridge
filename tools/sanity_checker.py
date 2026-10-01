@@ -328,12 +328,32 @@ class ProtocolsConfig(BaseModel):
     description: str | None = None
 
 
+class HazardFrailty(BaseModel):
+    """FRAILTY-V1 declared per-host frailty draw on the infection hazard."""
+
+    enabled: bool
+    distribution: str
+    cv: float
+
+    @model_validator(mode="after")
+    def check_frailty(self) -> "HazardFrailty":
+        if self.distribution not in ("gamma", "lognormal"):
+            raise ValueError(
+                f"frailty.distribution must be gamma|lognormal, "
+                f"got {self.distribution!r}",
+            )
+        if not math.isfinite(self.cv) or self.cv < 0:
+            raise ValueError(f"frailty.cv must be finite and >= 0, got {self.cv}")
+        return self
+
+
 class DoseResponse(BaseModel):
     model: str = "beta_poisson"
     alpha: float | None = None
     beta: float | None = None
     susceptibility_scale: float | None = None
     k: float | None = None
+    frailty: HazardFrailty | None = None
 
     @model_validator(mode="after")
     def check_model_params(self) -> "DoseResponse":
