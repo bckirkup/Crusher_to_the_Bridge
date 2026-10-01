@@ -56,6 +56,7 @@ ALLOWED_EPOCH_KEYS = (
     ("picard_framework/analysis/sentinel/data/*.json", "disembark_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/analysis/sentinel/data/*.json", "embarkation_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/analysis/sentinel/data/*.json", "reembark_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
+    ("presidio/data/experiences/smoke_runs/*.json", "num_epochs"),  # gitignored presidio smoke output; run-length bookkeeping
 )
 
 # No current module constant should be incremented or multiplied inside an

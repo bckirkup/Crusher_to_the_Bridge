@@ -108,6 +108,15 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     # co-presence legitimately produces zero fomite deliveries in this
     # 24-epoch window (flag-off reproduces deliver_calls = 5).
     spec["config_overrides"]["rhythm"] = {"enabled": False}
+    # NORO-HAND-RESERVOIR-01: same pin for the reservoir arm — under the
+    # shipped wash_reuptake mode this seed's six imported hosts fire no
+    # propensity-gated contamination in the window, so hand loads (and the
+    # deposits they feed) legitimately stay ~0 and the delivery witness is
+    # empty. The spike_decay baseline reproduces the window the test was
+    # authored on (deliver_calls > 0).
+    spec["config_overrides"].setdefault(
+        "transmission", {},
+    )["hand_reservoir_mode"] = "spike_decay"
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=24, pathogen_id="norwalk_gi",

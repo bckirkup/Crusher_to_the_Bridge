@@ -131,6 +131,7 @@ class Recorder:
     deposit_by_site: dict[str, float] = field(
         default_factory=lambda: defaultdict(float),
     )
+    reservoir_delivered: float = 0.0
     delivery_by_site: dict[str, float] = field(
         default_factory=lambda: defaultdict(float),
     )
@@ -248,10 +249,18 @@ def _wrap_delivery(core_cls: type, rec: Recorder) -> dict[str, Any]:
         book = rec.zone(zone_name)
         book.delivered += float(delivered)
         book.delivery_calls += 1
-        book.dose += float(dose)
+        # NORO-HAND-RESERVOIR-01: deliveries to non-challengeable hands
+        # still draw pool mass but book no challenge dose -- count them
+        # separately as the reservoir share of the fomite draw, not as
+        # dosed mass.
+        if target not in self._get_susceptible([target], pathogen_id):
+            rec.reservoir_delivered += float(delivered)
+            rec.epoch_acc["delivered_reservoir"] += float(delivered)
+        else:
+            book.dose += float(dose)
+            rec.epoch_acc["dose"] += float(dose)
         rec.delivery_by_site[site] += float(delivered)
         rec.epoch_acc["delivered"] += float(delivered)
-        rec.epoch_acc["dose"] += float(dose)
 
     def deliver(
         self: Any,
@@ -530,6 +539,10 @@ def _voyage_balance(rec: Recorder, rows: list[dict[str, Any]]) -> dict[str, Any]
         "deposit_by_call_site_gec": dict(rec.deposit_by_site),
         "delivered_all_paths_gec": delivered,
         "delivered_by_call_site_gec": dict(rec.delivery_by_site),
+        # Mass drawn by non-challengeable hands (the reservoir share of the
+        # pickup draw under hand_reservoir_mode=wash_reuptake; zero under
+        # the spike_decay baseline).
+        "delivered_to_reservoir_gec": rec.reservoir_delivered,
         "offered_gec": sum(row["offered_gec"] for row in rows),
         "zones_with_deposit_never_offered": len(zones_never_offered),
         "deposited_into_never_offered_zones_gec": never_offered_mass,

@@ -23,11 +23,11 @@ from engines.transmission_core import (
     ContactTracingMatrix,
     TransmissionCore,
 )
+from orchestrator_epoch import _airborne_emission_fraction, step_infection_progression
 from picard_framework.covid_theta_fit import (
     load_covid_profile,
     theta_profile_overrides,
 )
-from orchestrator_epoch import _airborne_emission_fraction, step_infection_progression
 
 ZONE = "Test_Zone"
 PATHOGEN = "test_pathogen"
@@ -94,6 +94,7 @@ def _core(
     clock: SimClock | None = None,
     volume: float = 50.0,
     food: bool = False,
+    reservoir_mode: str | None = None,
 ) -> TransmissionCore:
     core = TransmissionCore(
         rng=np.random.default_rng(19),
@@ -101,6 +102,11 @@ def _core(
         pathogen_profiles={PATHOGEN: _profile(food=food)},
         zone_types={ZONE: "Dining"},
         clock=clock,
+        cfg=(
+            {"transmission": {"hand_reservoir_mode": reservoir_mode}}
+            if reservoir_mode is not None
+            else None
+        ),
     )
     core.initialize_zones([ZONE])
     return core
@@ -445,7 +451,12 @@ def test_reservoir_doses_are_invariant_to_scaled_zone_size(
             "dining",
             high_touch_area,
         )
-        core = _core(volume=50.0)
+        # NORO-HAND-RESERVOIR-01: under the shipped wash_reuptake arm the
+        # extra (immune) occupant legitimately draws its own share of the
+        # request mass, so the occupancy invariance this test was authored
+        # for no longer holds. The labelled spike_decay baseline keeps the
+        # challengeable-only requester set the invariant describes.
+        core = _core(volume=50.0, reservoir_mode="spike_decay")
         core.surface_pools[ZONE] = mass
         core.surface_pools_by_pathogen[PATHOGEN][ZONE] = mass
         occupants = [_agent(1)] + [
