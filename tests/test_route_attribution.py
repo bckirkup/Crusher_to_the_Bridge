@@ -91,6 +91,14 @@ class TestRouteAttribution:
         # aboard at epoch 0 and again produces a transmission event — one
         # fomite event at 72 epochs on the shipped config.
         spec.random_seed = 18
+        # NORO-HAND-RESERVOIR-01: the shipped wash_reuptake arm widens the
+        # fomite requester set to every occupant, which reorders the shared
+        # RNG stream again and leaves this seed's fixture sterile. The
+        # spike_decay baseline is the mechanism seed 18 was re-tuned on and
+        # reproduces the one fomite transmission event.
+        spec.legacy_cfg.setdefault("transmission", {})[
+            "hand_reservoir_mode"
+        ] = "spike_decay"
         first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,

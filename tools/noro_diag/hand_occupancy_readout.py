@@ -68,6 +68,9 @@ CLASSIC_SEEDS = list(range(8000, 8020))
 
 def _project(payload: dict[str, Any]) -> dict[str, Any]:
     """Keep only what this readout needs; the rest is released per cell."""
+    balance = payload.get("voyage_balance") or {}
+    pickups = payload.get("pickups") or []
+    doses = payload.get("doses") or []
     return {
         "seed": _seed_of(payload),
         "rows": payload.get("hand_occupancy_rows") or [],
@@ -76,6 +79,34 @@ def _project(payload: dict[str, Any]) -> dict[str, Any]:
         # carry the pickups row table it is derived from.
         "has_pickups": payload.get(
             "has_pickups", bool(payload.get("pickups")),
+        ),
+        # NORO-HAND-RESERVOIR-01 witness: pool mass drawn by
+        # non-challengeable hands. Classic cells carry it precomputed in
+        # the voyage balance; spirit cells carry the tagged row tables --
+        # zone/patch pickups plus the sanitary channel's dose rows.
+        # Dumps from the defect census have no ``challengeable`` field and
+        # correctly project 0: baseline cells had no reservoir deliveries.
+        "reservoir_delivered_gec": float(
+            balance.get("delivered_to_reservoir_gec", 0.0),
+        )
+        + sum(
+            float(row.get("delivered", 0.0)) for row in pickups
+            if row.get("challengeable") is False
+        )
+        + sum(
+            float(row.get("delivered", 0.0)) for row in doses
+            if row.get("channel") == "sanitary"
+            and row.get("challengeable") is False
+        ),
+        "pickup_delivered_gec": float(
+            balance.get("delivered_all_paths_gec", 0.0),
+        )
+        or sum(
+            float(row.get("delivered", 0.0)) for row in pickups
+        )
+        + sum(
+            float(row.get("delivered", 0.0)) for row in doses
+            if row.get("channel") == "sanitary"
         ),
     }
 
@@ -231,6 +262,14 @@ def _cell_readout(
         ),
         "never_positive": _never_positive(all_rows),
         "ordering": _ordering(all_rows),
+        "reservoir_witness": {
+            "reservoir_delivered_gec": sum(
+                c["reservoir_delivered_gec"] for c in admissible
+            ),
+            "pickup_delivered_gec": sum(
+                c["pickup_delivered_gec"] for c in admissible
+            ),
+        },
         "occupancy": {
             "at_target_rows": sum(1 for r in all_rows if r.get("at_target")),
             "underflowed_rows": sum(
@@ -334,6 +373,59 @@ def _verdict(
     }
 
 
+def _reservoir_verdict(
+    pooled: dict[str, Any], never: dict[str, Any],
+    ordering_sign: str | None,
+) -> dict[str, Any]:
+    """NORO-HAND-RESERVOIR-01 verdict map, frozen before the re-census ran.
+
+    ``mechanism_restored`` needs the tighter band R in [1/3, 3], the
+    ordering actually flipped (event < routine -- the mechanism's whole
+    prediction), and both secondary windows. ``still_starved`` is R < 0.2:
+    deposited mass cannot carry the reservoir. R > 5 is an over-supply
+    miss, reported as ``partial`` with ``over_supply`` flagged.
+    """
+    share = pooled.get("positive_share")
+    ratio = share / LIU_POSITIVE_SHARE if share is not None else None
+    mean_log = pooled.get("positive_mean_log10")
+    never_share = never.get("never_positive_share")
+    flipped = ordering_sign == "event_lower"
+    over_supply = ratio is not None and ratio > RATIO_TOLERANCE
+    starved = ratio is None or ratio < 1 / RATIO_TOLERANCE
+    restored_band = ratio is not None and (1 / 3.0) <= ratio <= 3.0
+    mean_ok = (
+        mean_log is not None
+        and POSITIVE_MEAN_LO <= mean_log <= POSITIVE_MEAN_HI
+    )
+    never_ok = (
+        never_share is not None
+        and NEVER_POSITIVE_LO <= never_share <= NEVER_POSITIVE_HI
+    )
+    if restored_band and flipped and mean_ok and never_ok:
+        verdict = "mechanism_restored"
+    elif starved:
+        verdict = "still_starved"
+    else:
+        verdict = "partial"
+    return {
+        "verdict": verdict,
+        "positive_share": share,
+        "liu_positive_share": LIU_POSITIVE_SHARE,
+        "ratio_vs_liu": ratio,
+        "restored_band": [1 / 3.0, 3.0],
+        "defect_band": [1 / RATIO_TOLERANCE, RATIO_TOLERANCE],
+        "ordering_sign": ordering_sign,
+        "ordering_flipped": flipped,
+        "positive_mean_log10": mean_log,
+        "positive_mean_window": [POSITIVE_MEAN_LO, POSITIVE_MEAN_HI],
+        "positive_mean_ok": mean_ok,
+        "never_positive_share": never_share,
+        "never_positive_window": [NEVER_POSITIVE_LO, NEVER_POSITIVE_HI],
+        "never_positive_ok": never_ok,
+        "over_supply": over_supply,
+    }
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -365,6 +457,16 @@ def main(argv: list[str] | None = None) -> int:
         "model_ordering_post_vs_routine"
     ]
     pooled_never = _never_positive(all_rows)
+    reservoir_witness = {
+        "reservoir_delivered_gec": sum(
+            c["reservoir_delivered_gec"]
+            for c in spirit_cells + classic_cells if _is_admissible(c)
+        ),
+        "pickup_delivered_gec": sum(
+            c["pickup_delivered_gec"]
+            for c in spirit_cells + classic_cells if _is_admissible(c)
+        ),
+    }
     payload = {
         "raw_dir": str(args.raw_dir),
         "liu_targets": {
@@ -394,7 +496,12 @@ def main(argv: list[str] | None = None) -> int:
     }
     verdict = _verdict(pooled_pos, pooled_never)
     payload["verdict"] = verdict
-    for key in ("cells", "pooled", "verdict"):
+    payload["reservoir_witness"] = reservoir_witness
+    payload["reservoir_verdict"] = _reservoir_verdict(
+        pooled_pos, pooled_never, pooled_pos["ordering_sign"],
+    )
+    for key in ("cells", "pooled", "verdict", "reservoir_verdict",
+                "reservoir_witness"):
         print_block(key, payload[key])
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),

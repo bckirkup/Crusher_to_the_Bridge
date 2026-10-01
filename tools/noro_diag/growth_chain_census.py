@@ -690,7 +690,7 @@ def _current_channel(rec: CensusRecorder) -> tuple[str, str]:
 
 def _record_pickup(
     rec: CensusRecorder, target: Any, delivered: float, unit: str,
-    dose: float,
+    dose: float, challengeable: bool,
 ) -> None:
     channel, _ = _current_channel(rec)
     if channel == "patch" and rec.patch_ctx:
@@ -704,6 +704,7 @@ def _record_pickup(
         "channel": channel,
         "delivered": float(delivered),
         "dose": float(dose),
+        "challengeable": bool(challengeable),
         "source_acquired_share": source_share.get(GEN_ACQUIRED, 0.0),
         "source_import_share": source_share.get(GEN_IMPORT, 0.0),
     })
@@ -814,7 +815,11 @@ def _wrap_patch_pickup_one(core_cls: type, rec: CensusRecorder) -> Any:
             "depositor": getattr(patch, "_growth_depositor", None),
             "occupant_share": float(patch.occupant_share),
             "mass_before": float(patch.mass),
-            "n_susceptible": len(susceptible),
+            # Under wash_reuptake this arg carries the widened requester
+            # set; the field keeps its challengeable meaning in both arms.
+            "n_susceptible": len(
+                self._get_susceptible(susceptible, pathogen_id),
+            ),
             "n_requests": 0,
         }
         rec.channel_stack.append(("patch", unit_name))
@@ -867,7 +872,19 @@ def _wrap_deliver_one_pickup(core_cls: type, rec: CensusRecorder) -> Any:
     ) -> float:
         dose = original(self, target, delivered, zone_name, *args, **kwargs)
         if delivered > 0.0:
-            _record_pickup(rec, target, delivered, zone_name, dose)
+            # NORO-HAND-RESERVOIR-01: under wash_reuptake non-challengeable
+            # occupants also draw pool mass -- tag whether this delivery
+            # could challenge (dose-booked) or went to the reservoir.
+            pathogen_id = kwargs.get("pathogen_id")
+            if pathogen_id is None and len(args) >= 2:
+                pathogen_id = args[-2]
+            challengeable = (
+                pathogen_id is not None
+                and target in self._get_susceptible([target], pathogen_id)
+            )
+            _record_pickup(
+                rec, target, delivered, zone_name, dose, challengeable,
+            )
         return dose
 
     return wrapper
@@ -919,6 +936,14 @@ def _wrap_hand_to_mouth(core_cls: type, rec: CensusRecorder) -> Any:
             "channel": channel,
             "hand_load": float(hand_load),
             "dose": float(dose),
+            # Under wash_reuptake a non-challengeable hand also swallows
+            # mass; tag it so the reservoir share of the sanitary path is
+            # measurable too.
+            "challengeable": bool(
+                target in self._get_susceptible(
+                    [target], rec.pathogen_id,
+                )
+            ),
         }
         if channel == "sanitary":
             delivered, venue = rec.sanitary_ctx.get(

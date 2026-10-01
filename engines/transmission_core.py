@@ -206,6 +206,13 @@ DIARRHOEAL_STOOL_EVENTS_PER_DAY = 5.63
 DIARRHOEAL_PHASE_FEATURES = frozenset({
     "watery_diarrhea", "diarrhea", "bloody_diarrhea",
 })
+# Per-act handwash log10 reduction on carried hand load, [mean, sd, low,
+# high]. Authored inside the fomite-chain corridor (the chain's "efficacy
+# from the same source" as its Rusin/Julian/Wilson legs); bounded from
+# above by Tuladhar 2015's infectious-MNV1 finger-pad intervals (soap
+# [2.6, 3.4], alcohol rub [1.3, 4.3] log10) — the shipped mean sits below
+# both, the direction expected for RNA copies vs infectious titre.
+# Grade C declared; no primary reading of this exact tuple.
 HAND_HYGIENE_EFFICACY_LOG10 = (1.06, 0.54, 0.0, 1.89)
 HAND_HYGIENE_RATE_PER_HOUR_DEFAULT = 0.0
 NON_EATING_MOUTH_CONTACTS_PER_HOUR = (2.9, 2.5)
@@ -1270,6 +1277,17 @@ DEFAULT_CABIN_AIR_MODE = "cabin_compartment"
 SANITARY_VISIT_MODES = ("none", "dwell_weighted")
 DEFAULT_SANITARY_VISIT_MODE = "none"
 
+# NORO-HAND-RESERVOIR-01: the hand-reservoir mechanism arm.
+# ``wash_reuptake`` (default) treats each stool event as a bathroom visit --
+# propensity-gated contamination followed by a drawn-efficacy wash -- and
+# lets every occupant draw on the surface->hand pickup chain (dose
+# bookkeeping stays challengeable-only). ``spike_decay`` is the labelled
+# pre-repair baseline: propensity-thinned defecation spike with decay only,
+# pickup challengeable-only -- bit-identical to the shipped mechanism on
+# matched seeds.
+HAND_RESERVOIR_MODES = ("wash_reuptake", "spike_decay")
+DEFAULT_HAND_RESERVOIR_MODE = "wash_reuptake"
+
 
 def _parse_cabin_air_mode(tx: dict[str, Any]) -> str:
     mode = str(tx.get("cabin_air_mode", DEFAULT_CABIN_AIR_MODE))
@@ -1285,6 +1303,16 @@ def _parse_sanitary_visit_mode(tx: dict[str, Any]) -> str:
     mode = str(tx.get("sanitary_visit_mode", DEFAULT_SANITARY_VISIT_MODE))
     if mode not in SANITARY_VISIT_MODES:
         return DEFAULT_SANITARY_VISIT_MODE
+    return mode
+
+
+def _parse_hand_reservoir_mode(tx: dict[str, Any]) -> str:
+    mode = str(tx.get("hand_reservoir_mode", DEFAULT_HAND_RESERVOIR_MODE))
+    if mode not in HAND_RESERVOIR_MODES:
+        raise ValueError(
+            "transmission.hand_reservoir_mode must be one of "
+            f"{HAND_RESERVOIR_MODES}, got {mode!r}",
+        )
     return mode
 
 
@@ -2374,6 +2402,7 @@ class TransmissionCore:
         sanitary_zone_map: dict[str, dict[str, str]] | None,
     ) -> None:
         self.sanitary_visit_mode = _parse_sanitary_visit_mode(tx)
+        self.hand_reservoir_mode = _parse_hand_reservoir_mode(tx)
         # Served zone id -> {"male"/"female"/"any": head zone id}, from the
         # layout's per-head ``serves`` lists.
         self.sanitary_zone_map = sanitary_zone_map or {}
@@ -7213,11 +7242,14 @@ class TransmissionCore:
     ) -> None:
         """Relax one host's hand load over one epoch.
 
-        A profile declaring ``stool_events_per_day`` recontaminates the hand at
-        a defecation *event*: between events the load only decays, and an event
-        returns it to the measured Liu ceiling. A profile without that
-        declaration keeps the continuous relaxation toward the ceiling, which
-        holds every shedding host's hand near its maximum at all times.
+        A profile declaring ``stool_events_per_day`` runs the event-driven
+        arm; a profile without that declaration keeps the continuous
+        relaxation toward the ceiling. The event-driven arm splits on
+        ``hand_reservoir_mode``: ``wash_reuptake`` treats each event as a
+        bathroom visit (propensity-gated contamination followed by a wash,
+        with routine re-uptake through the shared pickup path), while the
+        ``spike_decay`` baseline keeps the shipped propensity-thinned
+        spike-and-decay.
         """
         target = agent.get_pathogen_hand_target(pathogen_id, profile or {})
         current = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
@@ -7231,6 +7263,12 @@ class TransmissionCore:
         if events_per_day is None:
             agent.hand_load_by_pathogen[pathogen_id] = (
                 target + (current - target) * survival
+            )
+            return
+        if self.hand_reservoir_mode == "wash_reuptake":
+            self._replenish_hand_wash_reuptake(
+                agent, pathogen_id, profile, zone_name, target, current,
+                rate, survival, events_per_day,
             )
             return
         # Thin the defecation rate by this host's carriage propensity here and
@@ -7248,6 +7286,51 @@ class TransmissionCore:
         decayed = current * survival
         if self._stool_event_occurs(events_per_day):
             decayed = max(decayed, target)
+            self._route_stool_event_venue(
+                agent, pathogen_id, profile, zone_name,
+            )
+        agent.hand_load_by_pathogen[pathogen_id] = decayed
+
+    def _replenish_hand_wash_reuptake(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+        zone_name: str | None,
+        target: float,
+        current: float,
+        inactivation_rate: float,
+        survival: float,
+        events_per_day: float,
+    ) -> None:
+        """Wash-reuptake arm of ``_replenish_hand`` (NORO-HAND-RESERVOIR-01).
+
+        A stool event is a bathroom visit: the hand contaminates only when
+        the host's carriage propensity fires, and every visit ends in a
+        wash of drawn per-act efficacy. Between visits the load decays at
+        the inactivation rate; the re-uptake half of the reservoir lives in
+        the shared surface->hand pickup path, which under this arm serves
+        every occupant.
+
+        A host first seen mid-illness starts at the stationary load of
+        its own propensity-thinned contamination stream suppressed by one
+        drawn wash -- the routine-sample analogue, where a host with a
+        tiny propensity effectively never carries.
+        """
+        if pathogen_id not in agent.hand_load_by_pathogen:
+            propensity = self._hand_carriage_propensity(agent, pathogen_id)
+            current = self._stationary_hand_load(
+                target, inactivation_rate,
+                events_per_day * propensity,
+            ) * math.pow(10.0, -self._hand_hygiene_efficacy(profile))
+        decayed = current * survival
+        if self._stool_event_occurs(events_per_day):
+            propensity = self._hand_carriage_propensity(agent, pathogen_id)
+            if self.rng.random() < propensity:
+                decayed = max(decayed, target)
+            decayed *= math.pow(
+                10.0, -self._hand_hygiene_efficacy(profile),
+            )
             self._route_stool_event_venue(
                 agent, pathogen_id, profile, zone_name,
             )
@@ -8257,8 +8340,12 @@ class TransmissionCore:
             patches = patches_by_unit.get(unit_name)
             if not patches:
                 continue
-            susceptible = self._get_susceptible(occupants, pathogen_id)
-            if not susceptible:
+            # Under wash_reuptake every occupant draws on the patch (the
+            # reservoir arm), not only the challengeable subset.
+            targets = occupants
+            if self.hand_reservoir_mode != "wash_reuptake":
+                targets = self._get_susceptible(occupants, pathogen_id)
+            if not targets:
                 continue
             prev_occupant_ids = self._prev_zone_occupants.get(unit_name, set())
             prev_shedders = self._prev_zone_shedders.get(unit_name, [])
@@ -8269,7 +8356,7 @@ class TransmissionCore:
             kept: list[EmesisPatch] = []
             for patch in patches:
                 delivered = self._emesis_patch_pickup_one(
-                    patch, susceptible, unit_name, epoch,
+                    patch, targets, unit_name, epoch,
                     prev_occupant_ids, prev_shedders,
                     agent_doses, matrix, agent_pathway_doses, pathogen_id,
                     surface_attribution,
@@ -8282,7 +8369,7 @@ class TransmissionCore:
     def _emesis_patch_pickup_one(
         self,
         patch: EmesisPatch,
-        susceptible: list[KorkinAgent],
+        targets: list[KorkinAgent],
         unit_name: str,
         epoch: int,
         prev_occupant_ids: set[int],
@@ -8295,7 +8382,7 @@ class TransmissionCore:
     ) -> float:
         """Deliver one patch to the occupants its footprint covers."""
         exposed = [
-            target for target in susceptible
+            target for target in targets
             if self.rng.random() < patch.occupant_share
         ]
         if not exposed:
@@ -8380,6 +8467,12 @@ class TransmissionCore:
         pathogen_id: str,
         surface_attribution: DoseAttribution | None = None,
     ) -> None:
+        # Under wash_reuptake every occupant picks mass up, but only a
+        # challengeable target can be dosed: reservoir pickups draw and
+        # carry mass like any other yet book nothing -- no challenge dose,
+        # no trailing exposure.
+        if target not in self._get_susceptible([target], pathogen_id):
+            return
         credited_dose = self._accumulate(
             target.agent_id, "fomite", dose,
             agent_doses, agent_pathway_doses, surface_attribution,
@@ -8426,7 +8519,7 @@ class TransmissionCore:
     def _fomite_pickup_by_class(
         self,
         zone_name: str,
-        susceptible: list[KorkinAgent],
+        targets: list[KorkinAgent],
         surface_mass: float,
         epoch: int,
         prev_occupant_ids: set[int],
@@ -8444,7 +8537,7 @@ class TransmissionCore:
         is unchanged.
         """
         requests = []
-        for target in susceptible:
+        for target in targets:
             request = self._fomite_pickup_requests_by_class(
                 target, zone_name, epoch, pathogen_id,
             )
@@ -8798,11 +8891,13 @@ class TransmissionCore:
     ) -> None:
         """Per-surface pickup: class-scaled requests delivered per venue."""
         share_of = self._sanitary_visit_share
+        reservoir_arm = self.hand_reservoir_mode == "wash_reuptake"
         class_requests: dict[str, list[tuple[KorkinAgent, dict[str, float]]]] = {}
         for (aid, venue), n in records.items():
             agent = agents.get(aid)
-            if agent is None or agent not in self._get_susceptible(
-                [agent], pathogen_id,
+            if agent is None or (
+                not reservoir_arm
+                and agent not in self._get_susceptible([agent], pathogen_id)
             ):
                 continue
             surface_mass = self._venue_surface_mass(venue, pathogen_id)
@@ -8838,11 +8933,13 @@ class TransmissionCore:
     ) -> None:
         """Pooled pickup: dwell-scaled requests scaled down to each pool."""
         share_of = self._sanitary_visit_share
+        reservoir_arm = self.hand_reservoir_mode == "wash_reuptake"
         requests_by_venue: dict[str, list[tuple[KorkinAgent, float]]] = {}
         for (aid, venue), n in records.items():
             agent = agents.get(aid)
-            if agent is None or agent not in self._get_susceptible(
-                [agent], pathogen_id,
+            if agent is None or (
+                not reservoir_arm
+                and agent not in self._get_susceptible([agent], pathogen_id)
             ):
                 continue
             surface_mass = self._venue_surface_mass(venue, pathogen_id)
@@ -8908,8 +9005,9 @@ class TransmissionCore:
                 set(), [], agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, surface_attribution,
             )
-            self.sanitary_telemetry["dose_delivered"] += dose
-            self.sanitary_telemetry["recipients"] += 1
+            if agent in self._get_susceptible([agent], pathogen_id):
+                self.sanitary_telemetry["dose_delivered"] += dose
+                self.sanitary_telemetry["recipients"] += 1
             delivered_total += delivered
         return delivered_total
 
@@ -8957,8 +9055,9 @@ class TransmissionCore:
                 set(), [], agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, surface_attribution,
             )
-            self.sanitary_telemetry["dose_delivered"] += dose
-            self.sanitary_telemetry["recipients"] += 1
+            if agent in self._get_susceptible([agent], pathogen_id):
+                self.sanitary_telemetry["dose_delivered"] += dose
+                self.sanitary_telemetry["recipients"] += 1
             for c in classes:
                 delivered_by_class[c] += request.get(c, 0.0) * scales[c]
         # A class whose demand exceeds its supply is emptied exactly, as
@@ -9122,8 +9221,15 @@ class TransmissionCore:
         if not pickup_gate_open(surface_mass):
             return
 
-        susceptible = self._get_susceptible(occupants, pathogen_id)
-        if not susceptible:
+        # NORO-HAND-RESERVOIR-01: under wash_reuptake every occupant draws
+        # on the pool -- the surface->hand transfer does not check infection
+        # state -- while dose bookkeeping stays challengeable-only inside
+        # _record_fomite_pickup. The spike_decay baseline keeps the shipped
+        # challengeable-only requester set.
+        targets = occupants
+        if self.hand_reservoir_mode != "wash_reuptake":
+            targets = self._get_susceptible(occupants, pathogen_id)
+        if not targets:
             return
 
         # Identify trailing: agent was NOT in this zone last epoch
@@ -9137,7 +9243,7 @@ class TransmissionCore:
 
         if self._per_surface is not None:
             self._fomite_pickup_by_class(
-                zone_name, susceptible, surface_mass, epoch,
+                zone_name, targets, surface_mass, epoch,
                 prev_occupant_ids, prev_shedders,
                 agent_doses, matrix, agent_pathway_doses, pathogen_id,
                 surface_attribution,
@@ -9151,7 +9257,7 @@ class TransmissionCore:
                     target, zone_name, surface_mass, epoch,
                 ),
             )
-            for target in susceptible
+            for target in targets
         ]
         delivered_total = self._deliver_fomite_requests(
             requests, zone_name, surface_mass, epoch,

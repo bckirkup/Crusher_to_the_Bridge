@@ -94,13 +94,20 @@ def _core(
     profile: dict | None = None,
     seed: int = 7,
     epoch_hours: float = 1.0,
+    reservoir_mode: str | None = None,
 ) -> TransmissionCore:
+    cfg = (
+        {"transmission": {"hand_reservoir_mode": reservoir_mode}}
+        if reservoir_mode
+        else {}
+    )
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={ZONE: 50.0},
         pathogen_profiles={PATHOGEN: profile or _profile()},
         zone_types={ZONE: "Free"},
         clock=SimClock(epoch_duration_hours=epoch_hours, mode=HOURS),
+        cfg=cfg,
     )
     core.initialize_zones([ZONE])
     return core
@@ -222,11 +229,15 @@ def _mean_hand_load(
     epoch_hours: float = 1.0,
     seed: int = 5,
     days: int = 4,
+    reservoir_mode: str | None = None,
 ) -> float:
     profile = _profile(stool_events_per_day={
         "baseline": events_per_day, "diarrhoeal": events_per_day,
     })
-    core = _core(profile=profile, seed=seed, epoch_hours=epoch_hours)
+    core = _core(
+        profile=profile, seed=seed, epoch_hours=epoch_hours,
+        reservoir_mode=reservoir_mode,
+    )
     agent = _agent()
     loads = []
     epochs = int(days * 24 / epoch_hours)
@@ -238,8 +249,17 @@ def _mean_hand_load(
 
 def test_hand_load_rises_with_stool_frequency_and_stays_under_ceiling(
 ) -> None:
+    # This shape guard predates the reservoir repair: the ratio band is a
+    # change-detector on the spike-decay mechanism, where the per-event
+    # ceiling is identical in both stool arms. The wash arm legitimately
+    # steepens the ratio (post-wash residuals plus a thinned first-seen
+    # floor shrink the low-frequency mean more than the high-frequency
+    # one), so the guard pins the labelled baseline it was authored for.
     ceiling = _agent().get_pathogen_hand_target(PATHOGEN, _profile())
-    means = [_mean_hand_load(rate) for rate in (0.43, 1.0, 3.0, 5.63, 8.5)]
+    means = [
+        _mean_hand_load(rate, reservoir_mode="spike_decay")
+        for rate in (0.43, 1.0, 3.0, 5.63, 8.5)
+    ]
     assert all(
         low < high for low, high in zip(means, means[1:], strict=False)
     )
@@ -248,6 +268,29 @@ def test_hand_load_rises_with_stool_frequency_and_stays_under_ceiling(
     # The diarrhoeal arm is worth a factor, not an order of magnitude: the
     # per-event ceiling is the same in both arms.
     assert 1.5 < means[3] / means[1] < 4.0
+
+
+def test_the_wash_arm_suppresses_the_post_event_load() -> None:
+    """wash_reuptake: no epoch carries more than the unsuppressed spike.
+
+    Every stool event ends in a wash, so the modal post-visit state is a
+    suppressed residual -- the ordering-flip mechanism Liu's post-bathroom
+    samples show.
+    """
+    profile = _profile(stool_events_per_day={
+        "baseline": 20.0, "diarrhoeal": 20.0,
+    })
+    core = _core(profile=profile, seed=5)
+    agent = _agent()
+    target = agent.get_pathogen_hand_target(PATHOGEN, profile)
+    suppressed = 0
+    epochs = 96
+    for _ in range(epochs):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        load = agent.hand_load_by_pathogen[PATHOGEN]
+        assert load <= target
+        suppressed += load < target * 10 ** -0.5
+    assert suppressed / epochs > 0.5
 
 
 def test_stool_event_count_is_invariant_across_clock_grids() -> None:
