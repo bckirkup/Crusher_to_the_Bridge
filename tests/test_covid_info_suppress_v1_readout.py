@@ -120,6 +120,16 @@ def test_audit_cell_cannot_fire_witness():
     assert any("CANNOT-FIRE" in f for f in fails)
 
 
+def test_audit_cell_fizzle_null_armed_is_not_cannot_fire():
+    armed = _declared_for(IS_BLOCK)
+    fails = mod.audit_cell(
+        _payload(rec=0, before=0, inf=1.0,
+                 info=_armed_info(armed_epoch=None)),
+        armed, THETA,
+    )
+    assert not any("CANNOT-FIRE" in f for f in fails)
+
+
 def test_audit_cell_baseline_armed_is_a_failure():
     base = _declared_for(None)
     fails = mod.audit_cell(_payload(info={"armed_epoch": 5}), base, THETA)
