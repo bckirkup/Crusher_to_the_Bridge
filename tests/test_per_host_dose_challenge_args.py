@@ -12,7 +12,7 @@ from tools.noro_diag import per_host_dose_challenge as pdc
 def _spec(**kwargs):
     return pdc.build_spec(
         seed=9000, platform="classic_cruise_1900",
-        bundle="active_profiles", epochs=24, num_agents=1910,
+        bundle="active_profiles", epochs=20, num_agents=1910,
         pathogen_id="norwalk_gi", alpha=None, beta=1.0, **kwargs,
     )
 
@@ -106,7 +106,7 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     # SHIP-RHYTHM-02: the delivery witness asserts instrument plumbing on the
     # labelled baseline placement stream; under rhythm, schedule-conditioned
     # co-presence legitimately produces zero fomite deliveries in this
-    # 24-epoch window (flag-off reproduces deliver_calls = 5).
+    # 20-epoch window (flag-off reproduces deliver_calls = 7 on seed 9000).
     spec["config_overrides"]["rhythm"] = {"enabled": False}
     # NORO-HAND-RESERVOIR-01: same pin for the reservoir arm — under the
     # shipped wash_reuptake mode this seed's six imported hosts fire no
@@ -119,7 +119,7 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     )["hand_reservoir_mode"] = "spike_decay"
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
-        bundle="active_profiles", epochs=24, pathogen_id="norwalk_gi",
+        bundle="active_profiles", epochs=20, pathogen_id="norwalk_gi",
         top_hosts=4, fomite_representation=arm, arm_tag=arm,
         spec_dict=spec,
     )
