@@ -799,3 +799,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   Bounds recorded: the ~15% non-susceptible the deepest corner needs is
   unsourceable, and a time-constant susceptibility floor cannot move
   before_share at all. Register §3.2 carries the three rows.
+- **`COMBINED-V1` (frailty tail × partial protection): declined by owner
+  decision 2026-10-01.** The tranche-50 retrieval left the protection
+  fraction unsourced (∅lit under the declared 2020 window), and
+  "sourced or not at all" rules the declared path out. The surviving
+  class from SUPPRESS-V1 narrows to what the frailty tail can do
+  alone — or a mechanism the grammar has not yet named.
