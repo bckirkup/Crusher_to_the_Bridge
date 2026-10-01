@@ -270,6 +270,7 @@ def _cell_readout(
                 c["pickup_delivered_gec"] for c in admissible
             ),
         },
+        "wet_window_witness": _wet_window_witness(all_rows),
         "occupancy": {
             "at_target_rows": sum(1 for r in all_rows if r.get("at_target")),
             "underflowed_rows": sum(
@@ -322,6 +323,32 @@ def _evaluate(positivity: dict[str, Any]) -> dict[str, Any]:
     )
     checks["primary_positivity_miss"] = primary_miss
     return checks
+
+
+def _wet_window_witness(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """NORO-HAND-PRACTICE-01 witness: the deposit-side drying blend.
+
+    ``hand_wet_transfer`` is recorded per row only under the
+    ``hygiene_cycle`` arm; rows from every other arm carry ``None`` and
+    count as unmeasured, not dry. A row counts as wet-window-open when
+    its blend factor exceeds the dry ceiling of the declared interval
+    (0.08).
+    """
+    factors = [
+        row["hand_wet_transfer"] for row in rows
+        if row.get("hand_wet_transfer") is not None
+    ]
+    wet_open = [f for f in factors if f > 0.08]
+    return {
+        "rows_with_factor": len(factors),
+        "wet_window_open_rows": len(wet_open),
+        "wet_window_open_share": (
+            len(wet_open) / len(factors) if factors else None
+        ),
+        "mean_transfer_factor": (
+            statistics.fmean(factors) if factors else None
+        ),
+    }
 
 
 def _verdict(
@@ -500,8 +527,9 @@ def main(argv: list[str] | None = None) -> int:
     payload["reservoir_verdict"] = _reservoir_verdict(
         pooled_pos, pooled_never, pooled_pos["ordering_sign"],
     )
+    payload["wet_window_witness"] = _wet_window_witness(all_rows)
     for key in ("cells", "pooled", "verdict", "reservoir_verdict",
-                "reservoir_witness"):
+                "reservoir_witness", "wet_window_witness"):
         print_block(key, payload[key])
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
