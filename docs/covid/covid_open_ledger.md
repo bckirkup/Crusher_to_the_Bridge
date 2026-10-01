@@ -829,3 +829,31 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   "sourced or not at all" rules the declared path out. The surviving
   class from SUPPRESS-V1 narrows to what the frailty tail can do
   alone — or a mechanism the grammar has not yet named.
+- **`FRAILTY-V1` is measured — the last named class of the SUSCEPT-V1
+  surviving set retires: `frailty_structure_incapable`** (140 cells, 7
+  arms on the new `dose_response.frailty` surface — γ cv {0.5, 1.0,
+  2.0} × ln cv {1.0, 2.0} declared mean-1.0-pinned corners + FRAIL_INERT
+  cv-0 binding audit + D0_declared — at the anchor Θ 2.37e11 × seeds
+  20200205–24, 140/140, one audit flag explained as small-sample
+  scatter on an extinction cell, measured at `c950e57`,
+  `docs/ledger/FRAILTY-V1.md`, job-def rev 40, image digest
+  `sha256:56536971…`). The binding is proven: INERT is bit-identical to
+  D0 on all 20 seeds, and every armed cell echoes the declared draw
+  (n ≈ 3,710 challenged hosts, sample mean 0.99–1.01, q95−q05 spread
+  1.6→4.8 with cv). Legs: no arm moves any leg — truth medians
+  3,373–3,561 vs the [712, 960] band, before_share 0.71–0.89 vs 0.173,
+  recorded 3,193–3,495 vs 197, kink 0.117–0.169 vs baseline 0.120.
+  Paired deltas vs D0 show the mechanism's signature in the right
+  direction only at cv 2 (Δinf med −197, acquisitions pushed later,
+  dur 154 vs 93 — frail tail burns early, hardened survivors persist)
+  but the magnitude is ~5% of the needed suppression and inside the
+  20-seed spread (Δinf q95 +849). Structural incapability: at Θ 2.37e11
+  every host's dose sits decades above the hazard kink, so a
+  mean-pinned multiplier only reshuffles hazard inside the saturating
+  regime — dispersion cannot put hosts below the kink, only removal
+  can, and removal was measured incapable under SUSCEPT-V1. D0 drift
+  note: truth leg reproduces 2e12ccf1 (3,567 vs 3,558); recorded/before_share
+  read higher (3,413/0.742 vs 3,008/0.606) across the intervening
+  `hygiene_cycle` default-ON merge — reported as engine drift, all
+  contrasts same-image paired. The surviving class narrows to a
+  mechanism the grammar has not yet named.
