@@ -780,3 +780,22 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   grammar. Design
   `picard_framework/runs/covid_suppress_v1_design.json`, ledger
   `docs/ledger/SUPPRESS-V1.md`.
+- **`CONSENSUS-50` (SARS-CoV-2 partial-immunity retrieval, 2020 window)
+  returned `recognition_only_no_protection`: the immunity half of the
+  surviving combined-structure class is a declaration, not a mechanism.**
+  Under the declared 2020-season window
+  (`docs/literature/consensus_tranche_50_sarscov2_partial_immunity.md`)
+  the retrieval licenses cross-reactive *recognition* in the unexposed
+  (T-cell ~[0.20, 0.60]: Grifoni/Braun/Le Bert/Mateus via Sette & Crotty;
+  antibody ~[0.05, 0.23]: Ng/Anderson/Song) but **no** acquisition
+  protection — Sagar 2020 (similar acquisition, milder disease only),
+  Gombar (similar rate and severity), Anderson (~23% Ab bearers not
+  protected) all read null, and the sole positive association (Aran
+  OR 0.76) is a claims proxy explicitly non-attributable to immunity;
+  the prospective protection papers (Swadling, Kundu) are 2021–22,
+  outside the window. Age susceptibility licenses a *continuous
+  multiplier* only (Davies ~0.5 under-20; Ayoub peaking at 60–69y) —
+  adverse direction on this elder-skewed hull, no binary fraction.
+  Bounds recorded: the ~15% non-susceptible the deepest corner needs is
+  unsourceable, and a time-constant susceptibility floor cannot move
+  before_share at all. Register §3.2 carries the three rows.

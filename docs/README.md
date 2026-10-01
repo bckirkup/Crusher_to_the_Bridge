@@ -204,6 +204,7 @@ longer justifications.
 | [literature/consensus_tranche_47_touch_shares.md](literature/consensus_tranche_47_touch_shares.md) | Living — per-class touch counts/shares that could populate `fomite_touch_share_table`; written for ledger NORO-TOUCH-SHARE-01; adopts nothing |
 | [literature/consensus_tranche_48_noro_observation_channel.md](literature/consensus_tranche_48_noro_observation_channel.md) | Living — observation-funnel literature checks read against the shipped channel's ratios in NORO-CHANNEL-01; feeds no register row, nothing enters `fitted_against` |
 | [literature/consensus_tranche_49_genotype_class_shares.md](literature/consensus_tranche_49_genotype_class_shares.md) | Evidence assembled — era-resolved GII.4-vs-non-GII.4 class shares from external typing surveillance (incl. the VSP cruise denominator's GII.17 succession), per-class challenge data thickness, and the GI.1 cruise-share null; feeds `prior_genotype_distribution` and ledger NORO-GENO-01; adopts nothing |
+| [literature/consensus_tranche_50_sarscov2_partial_immunity.md](literature/consensus_tranche_50_sarscov2_partial_immunity.md) | Evidence assembled — 2020-window retrieval for the surviving "partial protection" class: cross-reactive recognition licensed (~20–60% T-cell / ~5–23% antibody), acquisition protection ∅lit (Sagar/Gombar/Anderson measured-null); feeds register §3.2; adopts nothing |
 | [literature/](literature/) | Raw search output behind the above |
 
 ## Where to edit docs
