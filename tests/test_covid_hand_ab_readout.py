@@ -105,7 +105,8 @@ def test_audit_cell_skips_the_spec_when_none_is_emitted():
     del nested["seed_spec"]
     nested["seed_ring"] = {"seed_spec": {"count": 2}}
     fails = mod.audit_cell(nested, declared, THETA)
-    assert fails and "seed_spec.count" in fails[0]
+    assert fails
+    assert "seed_spec.count" in fails[0]
 
 
 def test_main_paired_rows_report_seed_paired_deltas(tmp_path, monkeypatch):
