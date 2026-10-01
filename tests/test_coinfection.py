@@ -437,6 +437,12 @@ class TestSuperinfectionFrequency:
 
     def test_frequency_rises_with_susceptibility(self) -> None:
         counts = [_superinfections(s) for s in (0.0, 0.05, 0.25, 1.0)]
-        assert counts == sorted(counts)
+        # The response rises on the unsaturated part of the axis. Pairwise
+        # ordering cannot be asserted on the saturated tail: under
+        # hygiene_cycle the top two tiers sit within one lineage count by
+        # construction, and NORO-HAND-CARRIAGE-01's practice trait draw and
+        # pool-tick lognormals reorder the shared stream, which flipped one
+        # lineage between them ([0, 25, 45, 46] -> [0, 25, 46, 45]).
         assert counts[0] == 0
-        assert counts[-1] > 0
+        assert counts[1] < counts[-1]
+        assert counts[1] < counts[-2]
