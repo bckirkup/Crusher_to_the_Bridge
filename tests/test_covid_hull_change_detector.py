@@ -382,7 +382,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # wash_reuptake baseline cell reproduces (0, 0, 3047, 0, 0)
         # exactly on the same tree, so the move is fully attributed
         # to the arm's new draws.
-        (3, 12): (2, 2, 3048, 2, 0),
+        # NORO-HAND-CARRIAGE-01 delayed sequestration: the arm now draws
+        # one more per-infection uniform for the sequester settling
+        # timescale inside _hand_practice, so the shared stream reorders
+        # again and the cell follows a different Bernoulli path into the
+        # burning regime: (2, 2, 3048, 2, 0) -> (2968, 298, 3063, 627,
+        # 215), measured in the local venv on CPython 3.12 on this
+        # branch. The draw is reachable only through the hygiene_cycle
+        # arm, so the move is fully attributed to it.
+        (3, 12): (2968, 298, 3063, 627, 215),
     },
 }
 
