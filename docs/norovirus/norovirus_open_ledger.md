@@ -4225,9 +4225,31 @@ every fomite dose: `NORO-TRANSFER-PRODUCT-01`'s queued measurement inherits
 this reservoir, and every hand-scaled fomite figure reads against a hand that
 is clean ~99% of shedding time. Repair options filed in
 `docs/ledger/NORO-HAND-STATIONARY-01.md` (persistent reservoir / event-windowed
-/ explicit washing); no repair implemented. No constant, profile, or engine
-path was changed. Dumps: `docs/norovirus/noro_hand_stationary_01/` (full row
-tables in S3 `campaign/noro_hand_stationary_01/`).
+/ explicit washing). Repair measured — still_starved, see
+`NORO-HAND-RESERVOIR-01` below. Dumps: `docs/norovirus/noro_hand_stationary_01/`
+(full row tables in S3 `campaign/noro_hand_stationary_01/`).
+
+**`NORO-HAND-RESERVOIR-01` (measured — `still_starved`): the wash-reuptake
+repair is shipped and moves the reservoir 5× toward Liu, but the routine
+source cannot carry occupancy — a new emission term is the open scope.**
+Measured at `55cb6b61` (merged `9850c4b3`) on the same frozen cells
+(`fl_spr_12d` 22 ignited seeds + `classic_cruise_1900` 8000–8019, 288
+epochs): occupancy 3.35% vs 25.4% → R = 0.132 (was 0.026), short of the
+declared defect-band floor 0.2; ordering unflipped pooled; never-positive
+0.745 and positive-mean 3.47 log10 both inside their windows (two of four
+criteria now pass). The mechanism fired as designed — stool-event washes,
+deterministic per event; routine re-uptake through the widened pickup
+requester set carries 80% of delivered mass onto non-challengeable hands —
+and the deficit is *retention*: 87% of shedding rows underflow at end-epoch
+against per-event washes plus inactivation. Per the declared map,
+`still_starved` means the routine source needs a new emission term — scope
+change reported, not built. On the symptomatic-only lens the spirit cell
+reaches R = 0.78; whether Liu's challenge cohort is better matched by that
+lens is an open sampling-map question. The −7.14 bridge stays shipped; the
+within-study pairing (−3.5…−4.4) bounds the same row, flagged not resolved.
+`spike_decay` remains the labelled baseline gate. Design + verdict:
+`docs/ledger/NORO-HAND-RESERVOIR-01.md`; dumps in S3
+`campaign/noro_hand_reservoir_01/`.
 
 ## 5. Held fixed by assumption
 

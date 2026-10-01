@@ -233,3 +233,15 @@ stops here).**
 Which option is a `NORO-HAND-RESERVOIR-*` design question; the measurement
 needed to choose between them (a routine-load source the data does not yet
 constrain) is filed with this verdict.
+
+## Follow-up
+
+`NORO-HAND-RESERVOIR-01` implemented the routine-re-uptake + explicit-wash
+direction (merged `9850c4b3`, gate `transmission.hand_reservoir_mode`) and
+re-measured on these frozen cells: occupancy 3.35% vs 25.4% (R = 0.132,
+was 0.026), ordering unflipped pooled, never-positive 0.745 and
+positive-mean 3.47 log10 inside their windows — verdict **still_starved**
+per the declared map; the routine source as built cannot carry occupancy
+and a new emission term is the open scope change. Measured verdict and
+decomposition: `docs/ledger/NORO-HAND-RESERVOIR-01.md`; re-census dumps in
+S3 `campaign/noro_hand_reservoir_01/`.
