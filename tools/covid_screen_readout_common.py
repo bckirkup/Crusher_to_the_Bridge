@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import sys
+from collections import Counter
 from collections.abc import Callable
 from typing import Any
 
@@ -148,6 +149,120 @@ def takeoff_split(payloads: list[dict]) -> tuple[list[dict], dict[str, list[floa
             for p in takeoff
         ],
     }
+
+
+def standard_row_stats(
+    payloads: list[dict],
+    extra_fields: Callable[[list[dict], dict], dict] | None = None,
+) -> dict:
+    """The quarantine-window row stats every conditioned array reports.
+
+    Takeoff-conditional band stats on recorded_onsets / infections_total /
+    before_share, the during-quarantine count + share, the pooled route /
+    zone-class / role tallies, and the anchor legs. ``extra_fields`` is
+    a campaign hook receiving (takeoff payloads, computed stats) and
+    returning any campaign-specific keys (kink ratios, row_extra, ...).
+    """
+    takeoff, vectors = takeoff_split(payloads)
+    during = [
+        float(p["infections_during_quarantine"]) for p in takeoff
+        if p.get("infections_during_quarantine") is not None
+    ]
+    before = [
+        float(p["infections_before_quarantine"]) for p in takeoff
+        if p.get("infections_before_quarantine") is not None
+    ]
+    during_share = [
+        float(p["infections_during_quarantine"])
+        / float(p["infections_total"])
+        for p in takeoff
+        if p.get("infections_during_quarantine") is not None
+        and p.get("infections_total")
+    ]
+    aboard_route: Counter[str] = Counter()
+    during_route: Counter[str] = Counter()
+    during_zone: Counter[str] = Counter()
+    during_role: Counter[str] = Counter()
+    for p in takeoff:
+        aboard_route.update(
+            p.get("aboard_window_by_route")
+            or (p.get("seed_ring") or {}).get("aboard_window_by_route")
+            or {}
+        )
+        during_route.update(p.get("during_quarantine_by_route") or {})
+        during_zone.update(
+            p.get("during_quarantine_by_zone_class") or {}
+        )
+        during_role.update(p.get("during_quarantine_by_role") or {})
+
+    med_during = quantile(during, 0.5)
+    med_before = quantile(before, 0.5)
+    med_share = quantile(during_share, 0.5)
+    dominant = (
+        med_during is not None and med_before is not None
+        and med_during > med_before
+    )
+    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
+    stats = {
+        "n": len(payloads),
+        "takeoff_n": len(takeoff),
+        "fizzle_majority": len(takeoff) * 2 < len(payloads),
+        "recorded_onsets": band_stats(vectors["rec"]),
+        "before_share": {"median": quantile(vectors["shares"], 0.5)},
+        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
+        "takeoff_infections_total": band_stats(vectors["t_inf"]),
+        "takeoff_before_share": band_stats(vectors["t_share"]),
+        "truth_leg_in_band": legs["truth_leg_in_band"],
+        "timing_leg_in_band": legs["timing_leg_in_band"],
+        "both_legs": legs["both_legs"],
+        "infections_before_quarantine": band_stats(before),
+        "during_quarantine": band_stats(during),
+        "during_share": {"median": med_share},
+        "during_dominant": bool(dominant and legs["enough_takeoff"]),
+        "aboard_window_by_route_pooled": dict(aboard_route),
+        "during_quarantine_by_route_pooled": dict(during_route),
+        "during_quarantine_by_zone_class_pooled": dict(during_zone),
+        "during_quarantine_by_role_pooled": dict(during_role),
+    }
+    if extra_fields is not None:
+        stats.update(extra_fields(takeoff, stats))
+    return stats
+
+
+def row_trigger_report(
+    theta: float,
+    arm_id: str,
+    stats: dict,
+    kinds: list[str],
+    fields: tuple[str, ...],
+) -> dict:
+    """One report-immediately entry: the trigger kinds plus the named
+    stat blocks the row printed."""
+    return {
+        "theta": theta,
+        "arm_id": arm_id,
+        "triggers": kinds,
+        **{name: stats[name] for name in fields},
+    }
+
+
+def row_triggers(
+    theta: float,
+    arm_id: str,
+    stats: dict,
+    kind_flags: tuple[tuple[str, str], ...],
+    fields: tuple[str, ...],
+) -> dict | None:
+    """A campaign's whole ``row_triggers`` callback as data.
+
+    ``kind_flags`` pairs a report label with the stats key that fires it
+    (``("TRUTH-IN-BAND", "truth_leg_in_band")``); ``fields`` names the
+    stat blocks copied into the entry. Returns None when nothing fires.
+    """
+    kinds = [label for label, flag in kind_flags if stats.get(flag)]
+    if not kinds:
+        return None
+    return row_trigger_report(theta, arm_id, stats, kinds, fields)
 
 
 def anchor_legs(

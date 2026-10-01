@@ -23,7 +23,6 @@ Usage:
 from __future__ import annotations
 
 import os
-from collections import Counter
 from typing import Any
 
 from picard_framework.covid_boarding_screen import (
@@ -31,13 +30,12 @@ from picard_framework.covid_boarding_screen import (
     load_design,
 )
 from tools.covid_screen_readout_common import (
-    anchor_legs,
-    band_stats,
     load_cell_payloads,  # noqa: F401  (re-exported for tests)
     quantile,
     resolve_design_arg,
+    row_trigger_report,
     run_readout,
-    takeoff_split,
+    standard_row_stats,
 )
 
 REPO_ROOT = os.path.realpath(os.path.join(os.path.dirname(__file__), ".."))
@@ -91,51 +89,19 @@ def _fmt(v: float | None) -> str:
     return "n/a" if v is None else f"{v:.3g}"
 
 
+def _hand_extras(takeoff: list[dict], stats: dict) -> dict:
+    """The row_extra columns: during-quarantine median and share."""
+    return {
+        "row_extra": (
+            f"during med {_fmt(stats['during_quarantine']['median'])} "
+            f"share {_fmt(stats['during_share']['median'])}"
+        ),
+    }
+
+
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians + route decomposition for one row."""
-    takeoff, vectors = takeoff_split(payloads)
-    during = [
-        float(p["infections_during_quarantine"]) for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-    ]
-    before = [
-        float(p["infections_before_quarantine"]) for p in takeoff
-        if p.get("infections_before_quarantine") is not None
-    ]
-    during_share = [
-        float(p["infections_during_quarantine"])
-        / float(p["infections_total"])
-        for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-        and p.get("infections_total")
-    ]
-    aboard_route: Counter[str] = Counter()
-    during_route: Counter[str] = Counter()
-    for p in takeoff:
-        aboard_route.update(p.get("aboard_window_by_route") or {})
-        during_route.update(p.get("during_quarantine_by_route") or {})
-    med_during = quantile(during, 0.5)
-    med_share = quantile(during_share, 0.5)
-    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
-    return {
-        "n": len(payloads),
-        "takeoff_n": len(takeoff),
-        "fizzle_majority": len(takeoff) * 2 < len(payloads),
-        "recorded_onsets": band_stats(vectors["rec"]),
-        "before_share": {"median": quantile(vectors["shares"], 0.5)},
-        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
-        "takeoff_infections_total": band_stats(vectors["t_inf"]),
-        "takeoff_before_share": band_stats(vectors["t_share"]),
-        "truth_leg_in_band": legs["truth_leg_in_band"],
-        "timing_leg_in_band": legs["timing_leg_in_band"],
-        "both_legs": legs["both_legs"],
-        "infections_before_quarantine": band_stats(before),
-        "during_quarantine": band_stats(during),
-        "during_share": {"median": med_share},
-        "aboard_window_by_route_pooled": dict(aboard_route),
-        "during_quarantine_by_route_pooled": dict(during_route),
-        "row_extra": f"during med {_fmt(med_during)} share {_fmt(med_share)}",
-    }
+    return standard_row_stats(payloads, extra_fields=_hand_extras)
 
 
 def _row_triggers(
@@ -153,12 +119,13 @@ def _row_triggers(
     ]
     if not kinds:
         return None
-    return {
-        "theta": theta, "arm_id": arm_id, "triggers": kinds,
-        "takeoff_infections_total": stats["takeoff_infections_total"],
-        "takeoff_before_share": stats["takeoff_before_share"],
-        "during_quarantine": stats["during_quarantine"],
-    }
+    return row_trigger_report(
+        theta, arm_id, stats, kinds,
+        (
+            "takeoff_infections_total", "takeoff_before_share",
+            "during_quarantine",
+        ),
+    )
 
 
 def _paired_rows(

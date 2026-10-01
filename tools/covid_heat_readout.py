@@ -32,7 +32,6 @@ from __future__ import annotations
 
 import os
 import sys
-from collections import Counter
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -42,12 +41,11 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
 )
 from simulation_utils.paths import repo_root  # noqa: E402
 from tools.covid_screen_readout_common import (  # noqa: E402
-    anchor_legs,
-    band_stats,
     quantile,
     resolve_design_arg,
+    row_trigger_report,
     run_readout,
-    takeoff_split,
+    standard_row_stats,
 )
 
 REPO_ROOT = repo_root()
@@ -283,78 +281,29 @@ def _kink_ratio(p: dict) -> float | None:
     return post / pre
 
 
-def _row_stats(payloads: list[dict]) -> dict:
-    """Takeoff-conditional medians + route decomposition for one row."""
-    takeoff, vectors = takeoff_split(payloads)
-    during = [
-        float(p["infections_during_quarantine"]) for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-    ]
-    before = [
-        float(p["infections_before_quarantine"]) for p in takeoff
-        if p.get("infections_before_quarantine") is not None
-    ]
-    during_share = [
-        float(p["infections_during_quarantine"])
-        / float(p["infections_total"])
-        for p in takeoff
-        if p.get("infections_during_quarantine") is not None
-        and p.get("infections_total")
-    ]
-    aboard_route: Counter[str] = Counter()
-    during_route: Counter[str] = Counter()
-    during_zone: Counter[str] = Counter()
-    during_role: Counter[str] = Counter()
+def _heat_extras(takeoff: list[dict], stats: dict) -> dict:
+    """HEAT-V1's campaign-specific row fields: the day-16 kink ratio
+    distribution plus its row_extra columns."""
     kinks = [k for p in takeoff if (k := _kink_ratio(p)) is not None]
-    for p in takeoff:
-        aboard_route.update(
-            (p.get("seed_ring") or {}).get("aboard_window_by_route") or {}
-        )
-        during_route.update(p.get("during_quarantine_by_route") or {})
-        during_zone.update(
-            p.get("during_quarantine_by_zone_class") or {}
-        )
-        during_role.update(p.get("during_quarantine_by_role") or {})
-
-    med_during = quantile(during, 0.5)
-    med_before = quantile(before, 0.5)
-    med_share = quantile(during_share, 0.5)
     med_kink = quantile(kinks, 0.5)
-    dominant = (
-        med_during is not None and med_before is not None
-        and med_during > med_before
-    )
-    legs = anchor_legs(len(takeoff), vectors["t_inf"], vectors["t_share"])
+    med_during = stats["during_quarantine"]["median"]
+    med_share = stats["during_share"]["median"]
     return {
-        "n": len(payloads),
-        "takeoff_n": len(takeoff),
-        "fizzle_majority": len(takeoff) * 2 < len(payloads),
-        "recorded_onsets": band_stats(vectors["rec"]),
-        "before_share": {"median": quantile(vectors["shares"], 0.5)},
-        "takeoff_recorded_onsets": band_stats(vectors["t_rec"]),
-        "takeoff_infections_total": band_stats(vectors["t_inf"]),
-        "takeoff_before_share": band_stats(vectors["t_share"]),
-        "truth_leg_in_band": legs["truth_leg_in_band"],
-        "timing_leg_in_band": legs["timing_leg_in_band"],
-        "both_legs": legs["both_legs"],
-        "infections_before_quarantine": band_stats(before),
-        "during_quarantine": band_stats(during),
-        "during_share": {"median": med_share},
-        "during_dominant": bool(dominant and legs["enough_takeoff"]),
         "day16_kink": {
             "post_over_pre_median": med_kink,
             "post_over_pre_q05": quantile(kinks, 0.05),
             "post_over_pre_q95": quantile(kinks, 0.95),
         },
-        "aboard_window_by_route_pooled": dict(aboard_route),
-        "during_quarantine_by_route_pooled": dict(during_route),
-        "during_quarantine_by_zone_class_pooled": dict(during_zone),
-        "during_quarantine_by_role_pooled": dict(during_role),
         "row_extra": (
             f"during med {_fmt(med_during)} "
             f"share {_fmt(med_share)} kink {_fmt(med_kink)}"
         ),
     }
+
+
+def _row_stats(payloads: list[dict]) -> dict:
+    """Takeoff-conditional medians + route decomposition for one row."""
+    return standard_row_stats(payloads, extra_fields=_heat_extras)
 
 
 def _fmt(v: float | None) -> str:
@@ -377,13 +326,13 @@ def _row_triggers(
     ]
     if not kinds:
         return None
-    return {
-        "theta": theta, "arm_id": arm_id, "triggers": kinds,
-        "takeoff_infections_total": stats["takeoff_infections_total"],
-        "takeoff_before_share": stats["takeoff_before_share"],
-        "during_quarantine": stats["during_quarantine"],
-        "day16_kink": stats["day16_kink"],
-    }
+    return row_trigger_report(
+        theta, arm_id, stats, kinds,
+        (
+            "takeoff_infections_total", "takeoff_before_share",
+            "during_quarantine", "day16_kink",
+        ),
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
