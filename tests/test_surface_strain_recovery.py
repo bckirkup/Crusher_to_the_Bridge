@@ -334,7 +334,17 @@ class TestSurfaceReservoirIntegration:
             zone_volumes={ZONE: 60.0},
             pathogen_profiles={PATHOGEN: profile},
             zone_types=ZONE_TYPES,
-            cfg={"variant_surveillance": {"enabled": True}},
+            # NORO-HAND-PRACTICE-01: hygiene_cycle's deposit-side drying
+            # blend shrinks the three deposits ~20x; two land below the
+            # registry's one-copy floor and the composition reduces to
+            # {GII.17}. This test exercises the strain-recovery round
+            # trip, not the hand arm, so it pins the wash_reuptake
+            # baseline (the move is attributed to the arm, not the seed:
+            # dry multiplier forced to 1.0 restores all three lineages).
+            cfg={
+                "variant_surveillance": {"enabled": True},
+                "transmission": {"hand_reservoir_mode": "wash_reuptake"},
+            },
         )
         core.initialize_zones(ZONES)
         assert core.strain_registry is not None
