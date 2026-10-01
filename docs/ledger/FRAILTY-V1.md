@@ -1,6 +1,6 @@
 # FRAILTY-V1
 **Date:** 2026-10-01
-**Commit:** pending
+**Commit:** c950e57
 **Pathogens:** sars_cov2_resp
 **Status:** declared
 
