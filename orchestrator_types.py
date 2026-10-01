@@ -134,6 +134,14 @@ class SimulationState:
     # Voyage itinerary layer (ship operations)
     voyage_config: dict[str, Any] = field(default_factory=dict)
     epoch_voyage: Any = None  # EpochState | None from engines.voyage_itinerary
+    # INFO-SUPPRESS-V1 witness fields: epoch the escalation status first
+    # reached the declared trigger, epoch the suppression channels armed
+    # (recognition + declared response delay), the venues cancelled at
+    # arming, and the hosts who took the voluntary self-isolation offer.
+    info_recognition_epoch: int | None = None
+    info_suppression_epoch: int | None = None
+    info_suppression_closed_zones: list[str] = field(default_factory=list)
+    info_suppression_admitted_ids: set[int] = field(default_factory=set)
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

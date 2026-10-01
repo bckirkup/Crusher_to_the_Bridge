@@ -1,0 +1,108 @@
+{
+  "design_id": "covid_info_suppress_v1",
+  "parent_design": "covid_suppress_v1",
+  "title": "INFO-SUPPRESS-V1 -- recognition-keyed suppression at the DP replay",
+  "description": "Suppression keyed on the outbreak becoming KNOWN (the escalation status reaching the declared trigger), not on a protocol schedule. The channel is model-default OFF; these arms opt it on for the Diamond Princess replay, whose record shows passengers self-isolating and ship operations changing when the disembarked-case news broke ~Feb 1-3 -- days before the formal Feb 5 confinement announcement.",
+  "prerequisites": [
+    "Settled inputs (do not re-derive): all seven conditioned axes measured-retired; SUPPRESS-V1 suppression_incapable (scheduled SOP-017 inert -- burn completes pre-activation); CONSENSUS-50 recognition_only_no_protection; COMBINED-V1 declined (covid section 3, PR #801).",
+    "Anchors: T1 recorded onsets 197 with before_share 0.173 +/- 0.10 (34/197 before day 17 = Feb 6); held-out covid.H5 true-infection band [712, 960]; the DP record's incidence peaked AT the Feb 5 confinement announcement.",
+    "Recognition timing on the replay (measured this session, anchor corner seed 20200205, theta 2.37e11): ALERT epoch 1, SUSPECTED epoch 73 (day 3.04, ever_ill 29), CONFIRMED epoch 88 (day 3.67). The model's observation channel recognizes the outbreak ~9 days ahead of the record's ~day-12 news window -- a measured property of the model's faster burn, not a bug. Mechanism fires at the model's own recognition point; nothing here retimes it to the record's calendar.",
+    "Mechanism surfaces (verified in code): trigger = STATUS_RANK[trigger_status] >= STATUS_RANK[declared trigger_status] latched post-escalation each epoch (the same ranking outbreak_recognized uses upstream); self_isolation admits via the shipped FRED sticky compliance classes through check_quarantine_compliance WITHOUT the refuser mark (declining a voluntary offer is not refusing an order); closed_zones is engine.cancel_venues -- catalogs filtered + per-agent fixed dining/free venues re-pointed home + occupants relocated, one-shot at arming (NOT the per-epoch relocation sweep SOP-009 uses); route_scalars multiply the tx_core channel scalars every latched epoch, composed multiplicatively with protocol modifiers.",
+    "Replay geometry: diamond_princess_2020, 32 days / 768 hourly epochs from day 0 = Jan 20; 3,711 = 2,666 passengers + 1,045 crew; scheduled_protocols = SOP-017 {16,30} only; molecular ascertainment day 14; testing campaign day 16. passenger classes draw FRED base compliance 0.45 (compliance_by_class passenger_* fallback), crew 0.85.",
+    "Definition audit (settled): model before_share and the 34/197 anchor are the same quantity class (dated-onset share, dated denominator, split Feb 6). before_share is a share -- only a lever asymmetric across the day-17 split moves it; the readout reports the seed-paired share delta so a composition-only move is distinguishable from a real one."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [2.37e11],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "points": [[237000000000.0, 6.8, 1]],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 14,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "note": "Baseline: mechanism absent (default OFF). The paired-delta reference for every IS arm.",
+      "overrides": {}
+    },
+    {
+      "arm_id": "IS01_dp_replay",
+      "note": "The declared DP replay corner: on recognition (SUSPECTED), passengers are offered voluntary self-isolation under the shipped FRED classes; the 23 passenger public/dining venues cancel (crew work zones, galleys, crew messes, medical stay open -- crew kept working on the record); direct-contact carries a declared 0.5 residual for the crew-service change. response_delay_hours 0: the mechanism fires at the model's own recognition point (measured ~day 3.0 at this corner), NOT retimed to the record's ~day-12 news window -- retiming would be a fitted constant.",
+      "overrides": {
+        "info_suppression": {
+          "enabled": true,
+          "trigger_status": "suspected",
+          "response_delay_hours": 0.0,
+          "self_isolation_scope": "passengers",
+          "closed_zones": [
+            "Solarium", "Main_Pool_Deck", "Sports_Court", "Waterpark",
+            "SpaFitness", "Kids_Club", "Teen_Zone", "CentralPark",
+            "Royal_Promenade", "ShopRetail", "Casino", "LibraryCard",
+            "Main_Theater", "Aqua_Theater", "Ice_Rink_Studio",
+            "Pool_Bar_Grill", "MainDining_L", "MainDining_U",
+            "Windjammer", "SpecRest_A", "SpecRest_B", "CafeBakery",
+            "ComedyClub"
+          ],
+          "route_scalars": {
+            "direct_contact_scalar": 0.5
+          }
+        }
+      }
+    },
+    {
+      "arm_id": "IS02_isolation_only",
+      "note": "Channel decomposition: voluntary passenger self-isolation alone (FRED classes), no venue cancellation, no service scalar. Reads how much of the bundle's move the isolation channel carries on its own.",
+      "overrides": {
+        "info_suppression": {
+          "enabled": true,
+          "trigger_status": "suspected",
+          "response_delay_hours": 0.0,
+          "self_isolation_scope": "passengers",
+          "closed_zones": [],
+          "route_scalars": {}
+        }
+      }
+    }
+  ],
+  "arms_note": "Three arms at the anchor corner: the D0 baseline, the declared DP replay bundle (isolation + venue cancellation + service scalar), and the isolation-only corner. 1 point x 3 arms x 14 seeds = 42 cells. Arm grammar: the new ARM_OVERRIDE_KEYS entry 'info_suppression' writes config_overrides.info_suppression verbatim; InfoSuppressionSpec.from_config resolves it at initialize().",
+  "cells_note": "Canary only -- no array beyond the 42 cells declared here (the task's 'no array beyond canary' bound). Cells run on the campaign image built at the PR-head SHA.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. conditional_trajectory_clause and serology_anchor_clause carried verbatim from the conditioned lineage; the recognition witness and mechanism-echo clauses are this design's additions; the paired-share composition check is the task's report-immediately trigger. This is a mechanism canary, not a screen: no arm is admitted or fitted on this design, and a clause PASS marks a declared corner worth a follow-up design, never an adoption.",
+    "recognition_witness_clause": {
+      "criterion": "On every IS-arm cell, payload.info_suppression.armed_epoch is non-null AND recognition_epoch <= armed_epoch AND self_isolated_count > 0 AND closed_zones_applied equals the arm's declared closed_zones. A null armed_epoch means the outbreak was never recognized at the declared trigger -- the mechanism cannot fire -- and is reported immediately, not scored. On every D0 cell the witness fields are null (mechanism off).",
+      "note": "Measured on the local probe before any array cell: SUSPECTED lands at epoch ~73 (day ~3.0) at the anchor corner, so the witness should be armed_epoch ~= 73 + response_delay_epochs on every IS cell."
+    },
+    "mechanism_echo_clause": {
+      "criterion": "payload.info_suppression carries the arm's declared block verbatim (enabled, trigger_status, response_delay_hours, self_isolation_scope, closed_zones, route_scalars) plus the witness fields (recognition_epoch, armed_epoch, closed_zones_applied, closed_venue_ids_engine, self_isolated_count). A missing or altered declared field is an apply defect, reported per cell.",
+      "note": "The echo is the spec-lands proof per cell, the same audit class the scheduled-protocol slot echo provides on SOP arms."
+    },
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim (v11 lineage): among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10), the q05-q95 interval of recorded_onsets contains 197 AND the median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when a row has >= 5 takeoff seeds, reported as 'insufficient takeoff mass' below that.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per (theta, arm) row -- 3 rows of 14 seeds. before_share is computed at the RECORD's day-16 boundary on every arm (split_day 17, arm-invariant)."
+    },
+    "serology_anchor_clause": {
+      "criterion": "Verbatim from covid_ascertain_v1: among takeoff seeds, the q05-q95 interval of infections_total intersects covid.H5's admissible band [712, 960] AND the takeoff seeds' median infections_total lies within [712, 960]; scored only when a row has >= 5 takeoff seeds.",
+      "target_source": "covid.H5, data/observation/covid_fit_targets.json -- held-out forever; this is a score, never a fit."
+    },
+    "seed_pair_audit": {
+      "criterion": "All deltas are seed-paired: per seed, IS arm minus the same seed's D0_declared cell on recorded_onsets, before_share, and infections_total, restricted to seeds where BOTH cells are takeoff (recorded_onsets >= 10). COMPOSITION-ONLY fires when the takeoff-row median before_share differs from D0's by >= 0.05 while the paired median delta_before_share's q05-q95 straddles 0 -- a share move driven by which seeds stay takeoff, not by the mechanism. That is the task's report-immediately trigger and is reported before anything else.",
+      "note": "The share is vulnerable to selection: suppression changes which seeds keep >= 10 recorded onsets, so an unpaired row-level share comparison conflates composition with mechanism. The paired delta answers the question the anchor asks."
+    },
+    "stream_neutrality_clause": {
+      "criterion": "With info_suppression absent or enabled:false the mechanism consumes no draws and touches no state: _step_info_suppression returns before reading anything but the spec's enabled flag. Unit tests pin the no-op path (identical trajectory fingerprints for absent vs disabled config); the D0 seed-echo audit carries it at cell level.",
+      "note": "Default-off here is an opt-in subsystem (a declared scenario mechanism), not scaffolding -- the task declares it model-default OFF, so it stays off after the contrast is measured."
+    },
+    "reported_never_selected_on": [
+      "armed_epoch distribution per IS row (the model's own recognition day at the corner)",
+      "self_isolated_count distribution per IS row (FRED participation)",
+      "crew_lag_days (crew minus passenger mean onset day)",
+      "post_arming acquisition mass per row (infections acquired on/after armed_day = armed_epoch/24)",
+      "delta before_share per seed pair (the composition check above)"
+    ]
+  }
+}

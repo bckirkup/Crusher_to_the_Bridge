@@ -90,6 +90,7 @@ from orchestrator_epoch import (
     step_operational_impact_accounting,
     step_presenting_sign_detection,
     step_quarantine_confinement,
+    step_self_isolation,
     step_shore_introductions,
     step_wearable_monitoring,
     surveillance_is_active,
@@ -134,6 +135,7 @@ from orchestrator_types import (
 )
 from picard_framework.run_spec import PicardRunSpec
 from picard_framework.simulation.action_applier import apply_action_envelope
+from picard_framework.simulation.info_suppression import InfoSuppressionSpec
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
@@ -493,6 +495,12 @@ class ShipSimulation:
         self.mp_cfg = cfg.get("multi_pathogen", {})
         self.mf_cfg = cfg.get("microflora", {})
         self.enable_dual_signal = self.mf_cfg.get("enable_dual_signal", True)
+        self._info_suppression = InfoSuppressionSpec.from_config(
+            cfg.get("info_suppression"),
+            hours_per_epoch=self.clock.hours_per_epoch,
+        )
+        self._info_recognition_epoch: int | None = None
+        self._info_suppression_epoch: int | None = None
         init_multi_pathogen(self.engine, self.pathogen_profiles, cfg, self.rng)
 
         if self.display:
@@ -865,6 +873,7 @@ class ShipSimulation:
         self._step_escalation(work)
         self._step_command(work)
         self._step_protocols(work)
+        self._step_info_suppression(work)
         self._step_record(work)
         if self.epoch_observer is not None:
             self.epoch_observer(self, work)
@@ -1515,6 +1524,53 @@ class ShipSimulation:
         work.epoch_record.setdefault("contact_tracing", {})["agent_adjacency"] = (
             dr.contact_graph.to_dict().get("agent_adjacency", {})
         )
+
+    def _step_info_suppression(self, work: _EpochWork) -> None:
+        """INFO-SUPPRESS-V1: suppression keyed on outbreak recognition.
+
+        A parallel channel to the scheduled-SOP machinery: the info
+        state latches when the escalation status reaches the declared
+        trigger (plus the declared response delay) and never unlatches.
+        Venue cancellation lands one-shot at arming; route scalars and
+        the voluntary self-isolation offer apply every epoch while
+        latched. Default OFF -- absent/disabled blocks return before
+        touching anything, so the baseline consumes no draws.
+        """
+        spec = self._info_suppression
+        if not spec.enabled:
+            return
+        if self._info_recognition_epoch is None:
+            if (
+                STATUS_RANK.get(work.state.trigger_status, 0)
+                < spec.trigger_rank
+            ):
+                return
+            self._info_recognition_epoch = work.epoch
+            work.state.info_recognition_epoch = work.epoch
+        if (
+            work.epoch
+            < self._info_recognition_epoch + spec.response_delay_epochs
+        ):
+            return
+        if self._info_suppression_epoch is None:
+            self._info_suppression_epoch = work.epoch
+            work.state.info_suppression_epoch = work.epoch
+            if spec.closed_zones:
+                work.state.info_suppression_closed_zones = sorted(
+                    self.engine.cancel_venues(spec.closed_zones)
+                )
+        for channel, scalar in spec.route_scalars.items():
+            setattr(
+                self.tx_core,
+                channel,
+                getattr(self.tx_core, channel) * scalar,
+            )
+        if spec.scope_role is not None:
+            step_self_isolation(
+                work.epoch, work.agents, work.state, work.syndromic,
+                spec.scope_role,
+                work.epoch - self._info_suppression_epoch,
+            )
 
     def _step_record(self, work: _EpochWork) -> None:
         step_cost_accounting(
