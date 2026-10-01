@@ -1,7 +1,6 @@
 # INFO-SUPPRESS-V1
 **Date:** 2026-10-01
-**Commit:** `cbe3b478` (mechanism, merged `591d21b1`); readout audited at the
-verdict branch tip
+**Commit:** `cbe3b478`
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 
