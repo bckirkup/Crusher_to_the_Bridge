@@ -249,6 +249,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`COVID-HAND-AB-01` (v14) is the declared Diamond Princess re-approach
+  under the repaired hand line — three designs, one gate.** The hand
+  reservoir gained practice variability + drying under PR #804
+  (`NORO-HAND-PRACTICE-01`, merged `d0466064`; `hygiene_cycle` shipped
+  default-ON, `wash_reuptake` and `spike_decay` kept as labelled
+  baselines). The re-approach ladder: (1) `covid_hand_ab_v1` — the 60-cell
+  canary, declared replay at Θ 2.37e11 × 3 arms (hygiene_cycle baseline,
+  wash_reuptake = RESERVOIR-01 marginal, spike_decay = v13-era marginal)
+  × 20 seeds @20200205, scored on per-seed recorded_onsets/infections_total
+  /before_share, takeoff q05–q95 vs the 197/0.173 record, route
+  re-split and during-quarantine share, plus seed-paired arm deltas —
+  its readout is `tools/covid_hand_ab_readout.py` and it doubles as the
+  stage-2 campaign canary; (2) `covid_theta_screen_v14` — the verbatim
+  stage-1 lattice (9 Θ eighth-decade × 200 seeds @20201001 generic
+  voyages) × 2 arms (hygiene_cycle vs spike_decay, so every row pairs
+  against the v13-era physics bit-comparably), 3,600 cells, with a
+  120-cell arm-bracket verification gate (arm pairing off by one index
+  would silently re-lattice the screen); (3) `covid_theta_screen_v14_
+  stage2` — the verbatim stage-2 declared replay (10 points × 20 seeds
+  @20200205, 768 epochs), gated on the stage-1 surface. Design files
+  under `picard_framework/runs/`; cells are auditable by
+  `delivery.hand_reservoir_mode` echo and the `arm` column now carried
+  by `tools/covid_theta_screen_csv.py` (parent-cell pairing stays keyed
+  on (theta, age, seed) so armed rows still pair to armless v13 cells).
 - **`COVID-COOP-V1` measured the full conditioned array + fleet companion
   and stands negative: the cooperative-packet dose law does not produce
   the record at any declared point.** 480-cell conditioned lattice

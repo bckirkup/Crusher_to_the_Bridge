@@ -39,6 +39,10 @@ def _allowed_roots() -> tuple[str, str]:
 SURFACE_COLUMNS = (
     "theta",
     "infection_age_days",
+    # Armed designs (v14: hygiene_cycle vs spike_decay) emit one surface
+    # entry per (theta, arm); "arm" is the entry's arm_id, blank on
+    # armless surfaces (v13 and earlier).
+    "arm",
     "index_geometry_pass_fraction",
     "recorded_onsets_p10",
     "recorded_onsets_p90",
@@ -67,6 +71,7 @@ def _surface_row(entry: dict[str, Any]) -> dict[str, Any]:
     return {
         "theta": entry.get("theta"),
         "infection_age_days": entry.get("infection_age_days"),
+        "arm": entry.get("arm_id"),
         "index_geometry_pass_fraction": entry.get("index_geometry_pass_fraction"),
         "recorded_onsets_p10": entry.get("recorded_onsets_p10"),
         "recorded_onsets_p90": entry.get("recorded_onsets_p90"),
@@ -92,7 +97,13 @@ def _surface_row(entry: dict[str, Any]) -> dict[str, Any]:
 
 def write_surface_csv(surface: dict[str, Any], out: str) -> int:
     rows = [_surface_row(e) for e in surface.get("surface", [])]
-    rows.sort(key=lambda r: (float(r["theta"]), float(r["infection_age_days"])))
+    rows.sort(
+        key=lambda r: (
+            float(r["theta"]),
+            float(r["infection_age_days"]),
+            str(r["arm"]),
+        ),
+    )
     with validated_open(out, "w", allowed_roots=_allowed_roots(), newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=SURFACE_COLUMNS)
         writer.writeheader()
@@ -100,8 +111,10 @@ def write_surface_csv(surface: dict[str, Any], out: str) -> int:
     return len(rows)
 
 
-def _load_cells(cells_dir: str) -> dict[tuple[float, float, int], dict[str, Any]]:
-    out: dict[tuple[float, float, int], dict[str, Any]] = {}
+def _load_cells(cells_dir: str) -> dict[tuple[float, float, int, Any], dict[str, Any]]:
+    # The key carries arm_id so an armed design's cells (same theta/seed
+    # across arms) don't collide; armless payloads key on None.
+    out: dict[tuple[float, float, int, Any], dict[str, Any]] = {}
     roots = _allowed_roots()
     for name in safe_listdir(cells_dir, allowed_roots=roots):
         if not name.endswith(".json"):
@@ -115,6 +128,7 @@ def _load_cells(cells_dir: str) -> dict[tuple[float, float, int], dict[str, Any]
             float(cell["theta"]),
             float(cell["infection_age_days"]),
             int(cell["seed"]),
+            cell.get("arm_id"),
         )
         out[key] = payload
     return out
@@ -134,6 +148,7 @@ def _cell_triplet(payload: dict[str, Any] | None) -> tuple[Any, Any, Any]:
 PAIR_COLUMNS = (
     "theta",
     "infection_age_days",
+    "arm",
     "seed",
     "infections_total",
     "attack_rate",
@@ -154,10 +169,15 @@ def write_pairs_csv(cells_dir: str, parent_dir: str | None, out: str) -> int:
     for key in sorted(cells):
         payload = cells[key]
         total, rate, onsets = _cell_triplet(payload)
-        p_total, p_rate, p_onsets = _cell_triplet(parent.get(key))
+        # Parent surfaces are armless (arm_id None on their keys): pair on
+        # (theta, age, seed) alone so an armed cell still finds its parent.
+        p_total, p_rate, p_onsets = _cell_triplet(
+            parent.get((key[0], key[1], key[2], None))
+        )
         rows.append({
             "theta": key[0],
             "infection_age_days": key[1],
+            "arm": key[3] if key[3] is not None else "",
             "seed": key[2],
             "infections_total": total,
             "attack_rate": rate,

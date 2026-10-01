@@ -1386,6 +1386,11 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         "exposure_cap_active": bool(
             getattr(tx_core, "_exposure_cap_active", False)
         ),
+        # The engine-resolved hand-reservoir arm, echoed so a
+        # transmission_overrides hand_reservoir_mode arm is auditable from
+        # the payload alone (COVID-HAND-AB-01: None only on payloads
+        # written before the reservoir machinery shipped).
+        "hand_reservoir_mode": getattr(tx_core, "hand_reservoir_mode", None),
         "activity_contacts": resolved_contacts,
     }
 

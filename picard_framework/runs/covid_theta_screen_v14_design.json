@@ -1,0 +1,119 @@
+{
+ "design_id": "covid_theta_screen_v14",
+ "parent_design": "covid_theta_screen_v13",
+ "description": "Stage 1 criterion screen: the v13 eighth-decade lattice verbatim, re-measured under the shipped hand-reservoir arm. NORO-HAND-PRACTICE-01 (PR #804, merged image base d0466064) ships hygiene_cycle default-ON -- compliance-gated post-visit washes, a routine non-bathroom wash stream, self-contact re-loading episodes, and a post-wash wet window driving a deposit-side drying multiplier. On the continuous sars_cov2_resp arm (no stool_events) that adds routine-wash and wet-window draws per epoch per occupant plus the wet/dry blend on every hand-routed deposit, so every seeded cell re-rolls. This design re-runs the frozen fleet-shape selector across the same bracketed window (1e11, 1e12) and pairs each (Theta, seed) with the spike_decay baseline arm -- the pre-reservoir hand behaviour -- so the readout attributes any surface move to the post-v13 hand line (RESERVOIR-01 + PRACTICE-01) inside one image rather than across image builds. The admissible set is the interior Thetas satisfying the frozen fleet_shape_selector; the conditional_trajectory_clause is then re-measured per admissible point by the companion design covid_theta_screen_v14_stage2 (committed in the same change, inside the same image). If the window is illusory the readout reports the located crossing and states that no admissible Theta exists in the bracket on this arm. No Theta on this design may be quoted as a fit until stage 2 passes.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "covid_theta_screen_v13 as the stage-1 fleet-shape surface of record: its rows are quoted, not re-run, as the pre-hand-line comparison. The endpoint rows 1e11 and 1e12 ARE re-run here (not quoted) because they are the bracket boundaries and the canary's bracket verification must show the undershoot-to-overshoot crossing on the v14 image itself. The paired spike_decay arm additionally re-measures every lattice row under the pre-reservoir hand behaviour on this image, so seed-paired deltas carry the hand-line attribution rather than cross-image drift.",
+ "prerequisites": [
+  "covid_theta_screen_v13 (PR #761, image edb7fc41, jobdef rev 28): admissible set {1.78e11..5.62e11} under capped reach -- 1.33e11 fails the floor, 5.62e11 clears the ceiling, mean cap never binds; the conditional clause still failed at every admissible Theta (takeoff-seed q05 floors 1,770-2,024 recorded onsets, before_share 0.81-0.94). Residual mechanism-shaped, no pins moved.",
+  "NORO-HAND-RESERVOIR-01 (PRs #799/#802): hand-reservoir machinery shipped; wash_reuptake labelled baseline; the 42-cell frozen census read still_starved (occupancy 3.35% vs Liu 25.4%).",
+  "NORO-HAND-PRACTICE-01 (PR #804, this image): hygiene_cycle shipped default-ON; spike_decay and wash_reuptake labelled baselines reproducing their shipped behaviour bit-identically on matched seeds.",
+  "Boarding structure measured closed: index window = median 0.5% of takeoff infections (INDEX-GEOM-01 / SEED-ONSET-01). No boarding-structure axis on this design.",
+  "covid.H3's role change is declared in admissibility.h3_role_change below: it stays out of the held-out set as the stage-1 selection anchor; covid.H1/H2/H5 remain held out.",
+  "The fleet_shape_selector, conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_theta_screen_v11 (unchanged since v10): no criterion is loosened, tightened, or invented after the surface exists."
+ ],
+ "scenario_id": "diamond_princess_2020",
+ "voyage_mode": "generic",
+ "voyage_mode_note": "Verbatim from v11 (unchanged through v13): stage 1 cells are generic voyages, not the declared replay: the explicit seed's onset_day and departure_day are dropped, its infection age is drawn from the profile's incubation distribution (a typical voyage's introduction is not a dated case report), and the voyage runs 7 days (168 epochs on the hourly clock). Interventions never fire because every declared mechanism starts after the voyage ends (SOP-017 day 16, testing campaign day 16). Ascertainment is NOT an intervention: the scenario's molecular_ascertainment_start_day 14 is a Diamond Princess particular, and carrying it into a generic voyage leaves the recorded channel open the whole voyage -- generic cells read recorded_onsets under the always-on ascertainment the fleet anchor presumes.",
+ "thetas": [
+  100000000000.0,
+  133000000000.0,
+  178000000000.0,
+  237000000000.0,
+  316000000000.0,
+  422000000000.0,
+  562000000000.0,
+  750000000000.0,
+  1000000000000.0
+ ],
+ "thetas_note": "Verbatim from v13: the bisection lattice over the bracketed window (1e11, 1e12): the two endpoints plus the seven interior eighth-decade points. Endpoints 1e11 and 1e12 are boundary rows -- re-measured on this image for bracket verification and reported beside the interior, but per the v11 convention a boundary hit is reported, never selected on: the admissible set is drawn from the seven interior points only. If the set touches a boundary the readout says the bracket was tighter than measured, not that a boundary Theta fits.",
+ "infection_age_days": [
+  0.0
+ ],
+ "infection_age_note": "Placeholder required by the cell enumeration grammar, NOT an axis: under voyage_mode generic the import's infection age is drawn per voyage from the profile's incubation distribution and the 0.0 in the cell key (age0d) carries no meaning. Declared so a reader of the S3 prefix is not misled into reading a seeded age. Verbatim from v11.",
+ "imports": [
+  1
+ ],
+ "imports_note": "One import per voyage, verbatim from the v10 stage-2 block and licensed by the record (Sekizuka 2020, single introduction before quarantine). The number/timing-of-imports axis is the rejected alternative recorded under v11, not an axis of this screen.",
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20201001,
+ "seeds": 200,
+ "seeds_note": "200 voyages per (Theta, arm), verbatim from the v10 stage-2 fleet-shape block (seed base 20201001, a different stream from the replay's 20200205). The Binomial standard error on a 0.25 tail share at 200 voyages is about 3%. Same seed base as covid_rebase_01 and v13, so each row pairs seed-for-seed with both prior surfaces for the crossing check, and the spike_decay arm pairs cell-for-cell on this image for the hand-line attribution.",
+ "takeoff_recorded_onsets": 10,
+ "arms": [
+  {
+   "arm_id": "hygiene_cycle",
+   "overrides": {},
+   "note": "Shipped default since PR #804 (transmission.hand_reservoir_mode: hygiene_cycle -- practice cycle of tranche 51). Declared first with empty overrides per the baseline-arm convention; cells read whatever the image ships."
+  },
+  {
+   "arm_id": "spike_decay",
+   "overrides": {
+    "transmission_overrides": {
+     "hand_reservoir_mode": "spike_decay"
+    }
+   },
+   "note": "Pre-reservoir baseline: the hand behaviour the v13 surface was measured under (propensity-thinned spike-and-decay, no wash/reuptake machinery). Seed-paired deltas against hygiene_cycle attribute the surface move to the post-v13 hand line on this image."
+  }
+ ],
+ "cells": 3600,
+ "cells_note": "9 Theta x 2 arms x 200 seeds = 3,600 stage-1 cells, each a 168-epoch generic voyage (~7 min). Enumeration is axis point x arm x seed: Theta row r occupies arm-hygiene_cycle indices r*400..r*400+199 and arm-spike_decay r*400+200..r*400+399. Stage-2 replay cells are enumerated in covid_theta_screen_v14_stage2_design.json (committed in the same change, inside the same image) and are NOT in this count.",
+ "admissibility": {
+  "declared_before_running": true,
+  "note": "FROZEN before any v14 cell exists, verbatim from v13 (itself verbatim from v11 via covid_rebase_01). Bimodality is not a failure criterion and its absence is not a success criterion -- covid.H3 records a median voyage attack rate of 0.2% with Diamond Princess at 712 cases, so the real fleet IS near-critical. Both arms score against the identical selector; arms are reported per-row and never pooled.",
+  "h3_role_change": "covid.H3 stays out of the held-out set as the stage-1 selection anchor (its v11 role change); covid.H1/H2/H5 remain held out.",
+  "fleet_shape_selector": {
+   "criterion": "STAGE-1 SELECTOR, verbatim from v11 (itself verbatim from the v10 stage_2_fleet_shape block): across the 200 generic voyages at each (Theta, arm), the median recorded attack rate lies within [0.0005, 0.008], the interquartile range overlaps [0.0003, 0.015], and the mean is not above 0.06.",
+   "target_source": "covid.H3 (median 0.002, IQR 0.0003-0.015, mean 0.037; 79 ships, 104 voyages, Willebrand 2022), data/observation/covid_fit_targets.json",
+   "numerator": "recorded_onsets / aboard_total per voyage -- the RECORDED channel, not the truth channel, verbatim from the v10 stage-2 note. Median [0.0005, 0.008] is a median of 2-30 recorded onsets on a 3,711-host hull.",
+   "note": "An approximation, declared: the model has one hull and one voyage length, not 79 hulls and a voyage mixture, so what is compared is the SHAPE of the across-voyage distribution. Reported beside it but never thresholded: P(attack >= 0.015), P(attack >= 0.10), P(attack <= 0.01), takeoff probability, and attack-rate quantiles at 0.1/0.25/0.5/0.75/0.9. The endpoint rows carry a second declared use: bracket verification -- 1e11 must still sit below-window and 1e12 above-window on this image for the interior lattice to be a bisection rather than an extrapolation. The admissible set is read off the hygiene_cycle arm (the shipped default); the spike_decay arm is the attribution read, and its selector outcomes are reported beside the surface, never selected."
+  },
+  "conditional_trajectory_clause": {
+   "criterion": "STAGE-2 CLAUSE, verbatim from v11: scored only at stage-1-admissible Thetas and only among takeoff seeds (recorded_onsets >= takeoff_recorded_onsets = 10) of the declared replay: the takeoff seeds' q05-q95 interval of recorded_onsets contains 197 AND the takeoff seeds' median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February). The clause is scored only when a cell has >= 5 takeoff seeds; below that it is reported as 'insufficient takeoff mass', not failed.",
+   "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+   "note": "Verbatim from v11. Scored on the stage-2 declared-replay cells enumerated in covid_theta_screen_v14_stage2_design.json. Reported beside it, never thresholded: the fraction of TAKEOFF seeds whose recorded_onsets lies in [98.5, 394] (mass-near-197 vs interval-spanning-197), the takeoff-seed count per row, and the full per-seed recorded_onsets and before_share vectors -- the deliverable's takeoff-mass and before_share composition table."
+  },
+  "index_geometry": {
+   "criterion": "AUDIT INVARIANT, verbatim from v10/v11: on stage-2 replay cells, index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of seeds; a deviation is a seeding-path defect that invalidates the cell. On stage-1 generic-voyage cells the converse invariant holds: the run spec's explicit seed carries NO onset_day and NO departure_day, the drawn incubation and the 168-epoch duration are read back from the payload, and molecular_ascertainment_start_day is absent -- a deviation is a spec-construction defect that invalidates the cell."
+  }
+ },
+ "diagnostics": {
+  "covid_T2": "Reported on replay cells, never selected on: direction of the passenger and crew onset turn in the 7 days after day 16.",
+  "covid_T3": "Reported, never used in selection: campaign positives interval against 634 and median specimens against 3,063. Demoted since v7 on saturation evidence; on this hull the campaign saturates against its own day capacities.",
+  "covid_T4": "Reported, never used in selection: asymptomatic share among positives, target 0.5047. Emergent from delivered dose, not a natural-history parameter; it cannot be met by a choice of Theta.",
+  "fleet_shape_indicator": "On replay cells, verbatim from v11: P(attack <= 0.01), takeoff fraction, P(attack >= 0.10), attack-rate quantiles -- reported so the replay's own distribution can be read against the fleet block's, declaring the conditioning-set difference (a dated symptomatic index is a stronger introduction than a drawn one).",
+  "burn_tail": "Reported on replay cells, verbatim from v11: whether the attack-rate q05-q95 interval excludes 0.19 entirely.",
+  "cross_pathogen": "vsp_reported_case_fraction_max and vsp_threshold_crossing_fraction carried in the payload and reported, verbatim from v11's cross_pathogen_readout block.",
+  "paired_vs_v13": "Every lattice row pairs seed-for-seed with the covid_theta_screen_v13 cells at the same Theta: per-seed deltas on recorded_onsets and takeoff class reported as the engine-drift check between the v13 image and the v14 image, never selected on.",
+  "paired_arm_delta": "On this image, every (Theta, seed) runs twice -- hygiene_cycle vs spike_decay: per-seed deltas on recorded_onsets, takeoff class, and attack-rate quantiles carry the post-v13 hand-line attribution (RESERVOIR-01 + PRACTICE-01 combined, spike_decay being the pre-reservoir behaviour). Reported per row; never selected on. The wash_reuptake middle rung is measured on the declared replay by covid_hand_ab_v1 (same image), not on this generic-voyage lattice."
+ },
+ "stage_2_declared_replay": {
+  "status": "enumerated up front in covid_theta_screen_v14_stage2_design.json (same change, same image); which of its rows submit is fixed by the frozen rule below",
+  "cell_shape": "Verbatim from v11/covid_rebase_01_stage2: declared replay, onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, a measured null axis under a declared onset_day -- carried only for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). Stage-2 cells run on the shipped default (hygiene_cycle); the arm attribution on the record leg is the covid_hand_ab_v1 design's job, run first as the canary.",
+  "theta_points": "FROZEN SELECTION RULE over the stage-2 candidate rows (1e9 anchor plus the nine lattice Thetas, ascending): (a) if the stage-1 admissible set is non-empty, run the clause at every admissible Theta plus the nearest non-admissible lattice neighbour on each side of its span as boundary flanks; (b) if the set is empty but the interior medians cross the selector window inside the lattice (at least one interior row below the floor and at least one above the ceiling or over the mean cap), run the clause at the two lattice points straddling the crossing plus their adjacent interior neighbours -- boundary re-measurements, never candidates; (c) if the window is illusory (every interior row fails on the SAME side of the selector, or monotone overshoot at both ends), stage 2 does not run -- that is a report_immediately_if condition: the engine needs a mechanism, not a Theta; (d) the Theta 1e9 anchor row runs in every submitted set as the QUAR-ATTR-V2 re-measurement and canary. Endpoint rows run their replay cells only when (a) or (b) selects them, and are always reported as boundary, never selected.",
+  "note": "The conditional_trajectory_clause is scored only on rows this rule selects. The v13 stage-2 surface (image edb7fc41) is the comparison of record and is quoted beside whatever this stage produces; the v14 spike_decay stage-1 rows carry the within-image attribution for the hand line."
+ },
+ "stage_3_held_out": {
+  "status": "designed, not submitted until stages 1 and 2 close",
+  "scenario_id": "greg_mortimer_2020",
+  "seed_base": 20200315,
+  "seeds": 50,
+  "note": "Verbatim from v10/v11: scored once at the selected Theta and reported at its half-decade neighbours as sensitivity. The Greg Mortimer seed declares no onset day, so its incubation is drawn and its geometry is not an invariant there. covid.H1/H2 remain held out and are the check this screen never selected on. A miss here is a result to record, not a reason to reopen the grid."
+ },
+ "execution": {
+  "platform": "AWS Batch EC2 Spot, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_screen_v14. The image must be built from a main that contains this design file AND covid_theta_screen_v14_stage2_design.json AND covid_hand_ab_v1_design.json; the design is read inside the container. Job definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+  "stage_1_cells": 3600,
+  "stride": 1,
+  "expected_cell_minutes": 7,
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v14/<sha>/cells/",
+  "canary": "The canary is the covid_hand_ab_v1 design run in full first (60 declared-replay cells, 3 arms x 20 seeds at Theta 2.37e11) -- it is the campaign gate per the bounded-campaign rule AND the mechanism-attribution read on the record leg. Only after it reads out do the stage-1 bracket-verification canary cells submit: INDEX_OFFSET 0 ARRAY_SIZE 20 (Theta 1e11, arm hygiene_cycle, seeds 20201001-20201020), INDEX_OFFSET 200 ARRAY_SIZE 20 (1e11, spike_decay), INDEX_OFFSET 1600 (3.16e11 midpoint, hygiene_cycle), INDEX_OFFSET 1800 (3.16e11, spike_decay), INDEX_OFFSET 3200 (1e12, hygiene_cycle), INDEX_OFFSET 3400 (1e12, spike_decay) -- 120 cells covering both endpoints and the midpoint on both arms. Checks, verbatim in spirit from v13/v11: every cell's run spec carries NO onset_day and NO departure_day on its explicit seed and no molecular_ascertainment_start_day; num_epochs 168; the payload contract is unchanged; no row is degenerate; arm cells carry their arm_id and resolved transmission.hand_reservoir_mode. Bracket verification on this image: 1e11 still below the selector window AND 1e12 still above it on the shipped arm. Assess the canary readout before committing the full lattice; on a clean read the remaining 3,480 cells proceed (submitted as the full 3,600 -- canary cells skip via _already_complete), the user having directed this campaign contingent on the canary.",
+  "report_immediately_if": "the bracket contains no admissible point on the shipped arm -- monotone overshoot or monotone undershoot at both endpoints, i.e. the window is illusory and the engine needs a mechanism, not a Theta; the admissible set is non-empty only at a boundary endpoint (a boundary hit is reported, never selected); the fleet takeoff transition sits outside the bracket (zero takeoff at 1e12 or saturation at 1e11); any stage-1 cell's run spec carries a declared onset_day or departure_day; the spike_decay arm disagrees with the v13 rows at the same (Theta, seed) beyond seed-band noise (a taken-off seed count shift beyond a 20/200 band at the same Theta) -- that would mean the image carries drift beyond the hand line; or the child failure rate exceeds 5%."
+ },
+ "rejected_alternatives": {
+  "sequential_midpoint_bisection": "REJECTED as the submission plan, not as the measurement (verbatim from v13): one-midpoint-at-a-time bisection serialises the same information into ~30-min array+readout cycles per halving level and loses the per-seed pairing between every adjacent lattice point. The eighth-decade lattice contains every bisection path to the same depth, costs one array, and pairs seed-for-seed with the v13 and rebase_01 endpoints.",
+  "deeper_than_eighth_decade_lattice": "Not this stage: sixteenth-decade points (+18 arm-rows) are gated on the eighth-decade surface showing a crossing that the selector resolves -- if interior rows all fail on one side the deeper lattice measures nothing, and if the clause passes at an admissible point the refit is done at lattice precision per the v11 convention.",
+  "quoting_v13_endpoints": "REJECTED: the endpoints are the bracket itself -- the canary's bracket verification must observe the undershoot-to-overshoot crossing on the v14 image, not infer it across image builds.",
+  "wash_reuptake_third_arm": "Adding the RESERVOIR-01 middle rung to the lattice would make the design 5,400 cells; its marginal attribution (PRACTICE-01 over RESERVOIR-01) is measured cheaper and more informatively on the declared replay by covid_hand_ab_v1, which carries all three arms at the record leg's own conditioning.",
+  "single_arm_stage1": "Running the lattice without the spike_decay pairing (1,800 cells) would force the surface-vs-v13 attribution across two image builds and the whole inter-merged queue; the paired arm prices it within one image at 2x the cell count."
+ }
+}

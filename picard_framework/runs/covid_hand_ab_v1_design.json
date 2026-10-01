@@ -1,0 +1,86 @@
+{
+ "design_id": "covid_hand_ab_v1",
+ "task_id": "COVID-HAND-AB-01",
+ "schema_version": "1.0.0",
+ "description": "Paired three-arm measurement of the post-v13 hand line on the Diamond Princess record leg: the same 20 seeds at the v13 admissible-band midpoint Theta = 2.37e11, declared replay, hand_reservoir_mode in {hygiene_cycle, wash_reuptake, spike_decay}. hygiene_cycle is the shipped default (PR #804) and carries empty overrides per the baseline-arm convention; wash_reuptake is the NORO-HAND-RESERVOIR-01 arm and spike_decay the pre-repair baseline, so the pairwise deltas decompose the whole hand line into its RESERVOIR-01 and PRACTICE-01 steps on the record leg. This is the campaign canary AND the attribution instrument for the v14 re-screen: it runs in full (60 cells) before covid_theta_screen_v14 stage 1 submits, and its spike_decay-vs-hygiene_cycle deltas are quoted beside every v14 stage-2 row at 2.37e11. Cells enumerate arm-major: hygiene_cycle 0-19, wash_reuptake 20-39, spike_decay 40-59.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "supersedes": "nothing: it is the canary/attribution pair declared inside covid_theta_screen_v14.execution.canary, not a rescreening",
+ "prerequisites": [
+  "NORO-HAND-RESERVOIR-01 (PRs #799/#802): hand-reservoir machinery; wash_reuptake arm; 42-cell census still_starved.",
+  "NORO-HAND-PRACTICE-01 (PR #804, this image): hygiene_cycle shipped default-ON; wash_reuptake and spike_decay labelled baselines, bit-identical on matched seeds.",
+  "covid_theta_screen_v13 (image edb7fc41): admissible set {1.78e11..5.62e11}, midpoint 2.37e11 carried here as the canary coordinate; the spike_decay arm approximates its hand physics on this image."
+ ],
+ "scenario_id": "diamond_princess_2020",
+ "cell_conditioning": {
+  "note": "Declared replay, verbatim from the v10/v11/v13 stage-2 convention: diamond_princess_2020 scenario, onset_day -1.0 and departure_day 5.0 come from the scenario's own index record (the voyage_mode declared path), dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value; measured-null under a declared onset_day, SEED-ONSET-01 -- carried only for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs, ~30 min/cell).",
+  "theta": "2.37e11 -- v13 admissible-band midpoint; fixed, no re-screen",
+  "imports": 1,
+  "infection_age_days": 6.8,
+  "onset_day": -1.0,
+  "departure_day": 5.0,
+  "sanitary_visit_mode": "dwell_weighted"
+ },
+ "theta": 237000000000.0,
+ "thetas": [
+  237000000000.0
+ ],
+ "infection_age_days": [
+  6.8
+ ],
+ "imports": [
+  1
+ ],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 20,
+ "takeoff_recorded_onsets": 10,
+ "arms": [
+  {
+   "arm_id": "hygiene_cycle",
+   "overrides": {},
+   "note": "Shipped default since PR #804 -- the practice cycle (compliance-gated post-visit washes, routine washes, self-contact re-loading, wet-window deposit blend). Empty overrides per the baseline-arm convention."
+  },
+  {
+   "arm_id": "wash_reuptake",
+   "overrides": {
+    "transmission_overrides": {
+     "hand_reservoir_mode": "wash_reuptake"
+    }
+   },
+   "note": "NORO-HAND-RESERVOIR-01 arm: deterministic post-event wash + all-occupant pickup. wash_reuptake-vs-hygiene_cycle isolates PRACTICE-01's marginal effect on the record leg."
+  },
+  {
+   "arm_id": "spike_decay",
+   "overrides": {
+    "transmission_overrides": {
+     "hand_reservoir_mode": "spike_decay"
+    }
+   },
+   "note": "Pre-repair baseline: propensity-thinned spike-and-decay, the hand behaviour the v13 surfaces were measured under. spike_decay-vs-hygiene_cycle prices the whole post-v13 hand line on the record leg."
+  }
+ ],
+ "cells": 60,
+ "cells_note": "1 Theta x 3 arms x 20 seeds = 60 declared-replay cells (~30 min each). Arm-major enumeration: indices 0-19 hygiene_cycle, 20-39 wash_reuptake, 40-59 spike_decay, each over seeds 20200205-20200224 -- the same matched-seed block every stage-2 surface uses.",
+ "freeze": {
+  "declared_before_running": true,
+  "attribution_criterion": "Declared before runs (stochastic-attribution skill): an arm effect counts only if the paired-seed delta on recorded_onsets or before_share exceeds the same-seed spread inside the baseline arm; takeoff class flips are counted per seed and reported as the fraction of 20 pairs. The clause itself is NOT rescored here -- the clause lives on the parent's stage-2 rows; this design reads the mechanism's marginal effect.",
+  "metrics": [
+   "per-seed recorded_onsets, infections_total, before_share (observables.onsets_before_split_day / recorded_onsets)",
+   "takeoff-seed count and q05-q95 recorded_onsets interval per arm (vs the clause's 197-containment test)",
+   "median before_share per arm vs the 0.173 anchor",
+   "route split by_infecting_epoch_dose (does the hand line's deposit blend move the direct_contact/fomite share measurably)",
+   "during-quarantine infection share per arm (does the practice cycle's dry-epoch deposit floor shift post-confinement transmission)"
+  ]
+ },
+ "admissibility": {
+  "declared_before_running": true,
+  "note": "No selection criterion -- this design is a mechanism assay and canary, not a screen. Nothing here may be quoted as a Theta fit; admissibility lives on the parent's frozen selector.",
+  "index_geometry": "Audit invariant verbatim from the parent: index_onset_day == -1.0 and index_shedding_at_day0 true on 100% of seeds; a deviation invalidates the cell."
+ },
+ "execution": {
+  "platform": "AWS Batch EC2 Spot via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_hand_ab_v1 --ARRAY_SIZE 60 --STRIDE 1 (the whole design is the canary). Job definition revision and image digest pinned per campaign-preflight step 3.",
+  "expected_cell_minutes": 30,
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_hand_ab_v1/<sha>/cells/",
+  "report_immediately_if": "the hygiene_cycle arm reads materially SUPPRESSIVE vs spike_decay on the record leg (the practice cycle's dry-epoch deposit floor cutting fomite/direct_contact acquisition enough to move the takeoff-seed median by more than the baseline's paired-seed spread) -- that is the mechanism the replay residual has been missing and it reroutes the stage-2 read; any arm is degenerate (zero hand-mediated pickup mass where the ledger requires it); the index-geometry invariant fails; or the child failure rate exceeds 5%."
+ }
+}
