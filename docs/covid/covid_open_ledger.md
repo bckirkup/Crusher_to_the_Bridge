@@ -869,3 +869,23 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   `hygiene_cycle` default-ON merge — reported as engine drift, all
   contrasts same-image paired. The surviving class narrows to a
   mechanism the grammar has not yet named.
+- **`INFO-SUPPRESS-V1` measured the recognition-keyed channel and stands
+  `recognition_suppression_real_bshr_composition_only`** (42/42 cells,
+  0 audit failures, mechanism `591d21b1`, `docs/ledger/INFO-SUPPRESS-V1.md`,
+  job-def `picard-covid-boarding-screen:41`, image `sha256:48be838b…`).
+  The channel — suppression on `trigger_status` reaching a declared
+  stoplight (voluntary self-isolation under FRED classes, real venue
+  cancellation, route scalars), default OFF — fires on every conditioned
+  cell (median arming day 9.6, vs the scheduled SOP-017's day-16 slot)
+  and suppresses for real: seed-paired vs D0 (n=12) Δrecorded_onsets
+  −276 and Δinfections −269 for the full DP arm; −215/−205 on
+  isolation-only — mass voluntary isolation (~2,190 of ~2,660
+  passengers) carries it, a real ~8% paired cut. But the frozen
+  composition check flags the whole timing story: row before_share
+  0.742 → 0.63/0.68 while the paired Δbshr (−0.03, band straddling
+  zero) marks it takeoff-seed selection, not a lever — and an 8% cut
+  ordered at day ~10 cannot span the ~18× count gap or the 0.173 split.
+  Where the SOP sweep lands first (two late-recognition seeds), the
+  channel admits nobody — parallel machinery confirmed, inert by
+  occupation. The information event is a working suppression trigger;
+  it is not the timing mechanism the record needs.

@@ -106,8 +106,15 @@ def _audit_echo_fields(block: dict, declared: dict) -> list[str]:
     return failures
 
 
-def _audit_witnesses(block: dict, declared: dict) -> list[str]:
-    """The live witness fields resolve as the declaration says."""
+def _audit_witnesses(
+    block: dict, declared: dict, takeoff: bool, payload: dict,
+) -> list[str]:
+    """The live witness fields resolve as the declaration says.
+
+    CANNOT-FIRE only counts on conditioned cells: a fizzle legitimately
+    never reaches the ~1% group attack rate that raises SUSPECTED, so a
+    null armed_epoch there is not evidence the mechanism can't fire.
+    """
     failures: list[str] = []
     armed = block.get("armed_epoch")
     if not declared["enabled"]:
@@ -115,21 +122,35 @@ def _audit_witnesses(block: dict, declared: dict) -> list[str]:
             failures.append("D0 cell armed a disabled mechanism")
         return failures
     if armed is None:
-        failures.append(
-            "info_suppression armed_epoch is null -- the mechanism "
-            "never fired (CANNOT-FIRE)",
-        )
+        if takeoff:
+            failures.append(
+                "info_suppression armed_epoch is null -- the mechanism "
+                "never fired (CANNOT-FIRE)",
+            )
         return failures
     rec = block.get("recognition_epoch")
     if rec is None or int(rec) > int(armed):
         failures.append(
             f"recognition_epoch {rec} not <= armed_epoch {armed}",
         )
-    if declared["scope"] and int(block.get("self_isolated_count") or 0) <= 0:
+    # A scoped arm armed after the scheduled confinement already swept
+    # the scope legitimately admits nobody; zero uptake only flags when
+    # the offer had an unconfined pool to draw from.
+    sop_epoch = (
+        (payload.get("quarantine_witness") or {}).get("activation_epoch")
+    )
+    scope_already_confined = sop_epoch is not None and int(sop_epoch) <= int(
+        armed
+    )
+    if (
+        declared["scope"]
+        and int(block.get("self_isolated_count") or 0) <= 0
+        and not scope_already_confined
+    ):
         failures.append(
             "self_isolated_count == 0 on a scoped arm",
         )
-    if list(block.get("closed_zones_applied") or []) != list(
+    if sorted(block.get("closed_zones_applied") or []) != sorted(
         declared["closed_zones"]
     ):
         failures.append("closed_zones_applied != declared closed_zones")
@@ -146,10 +167,13 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     block = payload.get("info_suppression")
     if not isinstance(block, dict):
         return failures + ["missing info_suppression block"]
+    takeoff = int(
+        (payload.get("observables") or {}).get("recorded_onsets") or 0
+    ) >= TAKEOFF_MIN
     return (
         failures
         + _audit_echo_fields(block, declared)
-        + _audit_witnesses(block, declared)
+        + _audit_witnesses(block, declared, takeoff, payload)
     )
 
 
@@ -272,10 +296,29 @@ def _paired_delta_row(
         m_base = _post_arming_mass(b)
         if m_arm is not None and m_base is not None:
             deltas["post_arming_mass"].append(m_arm - m_base)
+    arm_shares = [
+        s for p in row
+        if int((p.get("observables") or {}).get("recorded_onsets") or 0)
+        >= TAKEOFF_MIN
+        and (s := _share(p)) is not None
+    ]
+    base_shares = [
+        s for b in base if (s := _share(b)) is not None
+    ]
+    delta_share = band_stats(deltas["before_share"])
     return {
         "theta": theta,
         "arm_id": arm_id,
         "n_paired": len(deltas["recorded_onsets"]),
+        "takeoff_before_share_median": {
+            "arm": quantile(arm_shares, 0.5),
+            "baseline": quantile(base_shares, 0.5),
+        },
+        "bshr_composition_only": _composition_flag(
+            quantile(arm_shares, 0.5),
+            quantile(base_shares, 0.5),
+            delta_share,
+        ),
         **{
             f"delta_{k}": band_stats(v) for k, v in deltas.items()
         },
@@ -296,19 +339,16 @@ def _paired_rows(rows: dict[tuple, list[dict]]) -> dict:
 
 
 def _composition_flag(
-    stats: dict, paired: dict | None, base_stats: dict | None,
+    arm_median: float | None,
+    base_median: float | None,
+    delta_share: dict,
 ) -> bool:
     """Row-level share moved but the paired delta straddles zero."""
-    if not paired or not base_stats:
+    if arm_median is None or base_median is None:
         return False
-    med_share = stats["takeoff_before_share"]["median"]
-    base_share = base_stats["takeoff_before_share"]["median"]
-    if med_share is None or base_share is None:
+    if abs(arm_median - base_median) < COMPOSITION_ROW_MOVE:
         return False
-    if abs(med_share - base_share) < COMPOSITION_ROW_MOVE:
-        return False
-    delta = paired.get("delta_before_share") or {}
-    lo, hi = delta.get("q05"), delta.get("q95")
+    lo, hi = delta_share.get("q05"), delta_share.get("q95")
     return lo is not None and hi is not None and lo <= 0.0 <= hi
 
 

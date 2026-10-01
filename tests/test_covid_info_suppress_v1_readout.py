@@ -120,6 +120,24 @@ def test_audit_cell_cannot_fire_witness():
     assert any("CANNOT-FIRE" in f for f in fails)
 
 
+def test_audit_cell_zero_isolation_after_mass_confinement():
+    armed = _declared_for(IS_BLOCK)
+    payload = _payload(info=_armed_info(self_isolated_count=0))
+    payload["quarantine_witness"] = {"activation_epoch": 50}
+    fails = mod.audit_cell(payload, armed, THETA)
+    assert not any("self_isolated_count" in f for f in fails)
+
+
+def test_audit_cell_fizzle_null_armed_is_not_cannot_fire():
+    armed = _declared_for(IS_BLOCK)
+    fails = mod.audit_cell(
+        _payload(rec=0, before=0, inf=1.0,
+                 info=_armed_info(armed_epoch=None)),
+        armed, THETA,
+    )
+    assert not any("CANNOT-FIRE" in f for f in fails)
+
+
 def test_audit_cell_baseline_armed_is_a_failure():
     base = _declared_for(None)
     fails = mod.audit_cell(_payload(info={"armed_epoch": 5}), base, THETA)
@@ -209,19 +227,12 @@ def test_paired_rows_skips_non_takeoff_seeds():
 
 
 def test_composition_flag_logic():
-    stats = {"takeoff_before_share": {"median": 0.30}}
-    base = {"takeoff_before_share": {"median": 0.17}}
-    paired_straddling = {
-        "delta_before_share": {"q05": -0.02, "q95": 0.03},
-    }
-    paired_moved = {
-        "delta_before_share": {"q05": 0.05, "q95": 0.10},
-    }
-    assert mod._composition_flag(stats, paired_straddling, base) is True
-    assert mod._composition_flag(stats, paired_moved, base) is False
-    small_move = {"takeoff_before_share": {"median": 0.20}}
-    assert mod._composition_flag(small_move, paired_straddling, base) is False
-    assert mod._composition_flag(stats, None, base) is False
+    straddling = {"q05": -0.02, "q95": 0.03}
+    moved = {"q05": 0.05, "q95": 0.10}
+    assert mod._composition_flag(0.30, 0.17, straddling) is True
+    assert mod._composition_flag(0.30, 0.17, moved) is False
+    assert mod._composition_flag(0.20, 0.17, straddling) is False
+    assert mod._composition_flag(0.30, None, straddling) is False
 
 
 def test_row_triggers_skip_baseline_and_flag_landings():
