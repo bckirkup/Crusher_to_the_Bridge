@@ -165,3 +165,19 @@ pytest slice over touched paths + `pre-commit` + `sonar_guard` +
 AWS Batch at the merged SHA (same `picard-hand-occupancy` instrument and
 S3 `campaign/noro_hand_reservoir_01/` dump prefix family) and the
 measured verdict is appended here.
+
+## Measured verdict: `still_starved` (census at merged `d0466064`)
+
+Frozen-cell re-census on the built arm (`picard-hand-occupancy:5`,
+digest-pinned at the merge SHA; 42 cells: spirit 22/22, classic 18/20
+void 8011+8015; S3 `campaign/noro_hand_practice_01/`): occupancy
+2.82% vs Liu's 25.4% → **R = 0.111** (was 0.132 under `wash_reuptake`);
+ordering `event_higher`, un-flipped; never-positive 0.564 and
+positive-mean 2.586 log10 inside their windows. The emission term
+fires on every cell and still starves: the additive propensity-scaled
+ticks are erased by the multiplicative wash + inactivation strip, and
+the ordering cannot flip while the routine source rides the same Beta
+carriage trait as the events. Drying witness active: mean deposit
+factor 0.046, window open on 4.7% of rows. Full decomposition appended
+to `docs/ledger/NORO-HAND-RESERVOIR-01.md`; readout at
+`docs/norovirus/noro_hand_practice_01/hand_occupancy_cells.json`.

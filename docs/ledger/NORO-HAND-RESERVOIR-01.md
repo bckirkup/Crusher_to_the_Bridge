@@ -212,3 +212,54 @@ the within-study pairing (−3.5…−4.4) bounds the same row.
 No constant, profile, or default moved after the measurement — the
 mechanism, its gate and both arms are exactly `55cb6b61`; `spike_decay`
 remains the labelled baseline.
+
+## Re-measured at `d0466064` under `hygiene_cycle` (PR #804) — verdict: `still_starved`
+
+Same frozen cells, probes and aggregation; `picard-hand-occupancy:5`
+digest-pinned to the image built at the PR #804 merge SHA:
+`fl_spr_12d` 22/22 (job `21b2d82f`), `classic_cruise_1900` 18/20
+(void 8011, 8015; job `877f22f2`), 288 epochs, dumps in S3
+`campaign/noro_hand_practice_01/`; 62,162 shedding host-epoch rows
+(readout `docs/norovirus/noro_hand_practice_01/hand_occupancy_cells.json`).
+
+**Primary: occupancy 2.82% vs Liu's 25.4% → R = 0.111 — `still_starved`
+a second time.** R moved 0.132 → 0.111: the declared routine-source
+emission term runs on every cell (hygiene counters fire fleet-wide) but
+the tick equilibrium sits below the 141 GEC LOD on ~97% of routine
+rows. By tier: spirit ~4.0% (per-seed 0.6–7.5%), classic ~1.7%.
+
+**Secondary: the same two of four pass.** never-positive 0.564 (was
+0.745; inside (0.05, 0.80); Liu 0.33) and positive-mean 2.586 log10
+inside [2.30, 5.45]. Ordering still `event_higher` — event rows 5.99%
+(3,235 samples) vs routine 2.65% (58,927 samples): Liu's post-bathroom
+depression cannot appear while routine rows stay this empty, and under
+this arm it cannot appear at all — the criterion asks routine rows to
+exceed event rows while both ride the same carriage propensity.
+
+**Witnesses.** `reservoir_delivered_gec` sums 0.0 on every cell — an
+instrument hole, not a zero emission: that counter reads the
+`challengeable = false` pickup channel `wash_reuptake` used, while
+`hygiene_cycle`'s self-contact increments land directly on
+`hand_load_by_pathogen`, outside its row path (the delivered-mass tally
+of the new term is simply unmeasured by this census). The drying blend
+is active and strong: mean deposit factor 0.046, window open on 4.7%
+of rows — hand→surface deposits run ~20× below the wet calibration
+almost all the time.
+
+**Decomposition: the strip is multiplicative, the source is additive
+and propensity-scaled.** Each routine tick adds `propensity ×
+logU(50, 6300)` GEC (Beta(0.911, 3.489) mean 0.207 → ~90 GEC on a
+typical tick, 2–8 ticks/day); each routine wash multiplies the load by
+`10^(−eff)` (eff ~ N(1.06, 0.54) clipped to 1.89, 2–8 washes/day) plus
+inactivation U(0.61, 1.7)/h — order-of-magnitude, the strip removes
+~10⁻⁵ or more per day while the source adds ~10² GEC/day, so the
+equilibrium sits below LOD on most hosts (measured: routine
+positive-mean 345 GEC on the 2.65% of rows that make LOD at all). What
+this census adds over the retention-deficit reading: the emission term
+now exists and fires, and it still starves — its magnitude is bounded
+by the same Beta carriage trait that gates the events, and its
+additive increments are erased by an orders-of-magnitude-larger
+multiplicative strip. A Liu-occupying reservoir needs either a routine
+source of order the strip loss (not a Pickering increment) or the
+symptomatic-lens sampling question resolved first — both are declared
+scope questions, not a re-tune of what was declared.

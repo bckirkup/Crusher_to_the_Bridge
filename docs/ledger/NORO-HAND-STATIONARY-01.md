@@ -245,3 +245,15 @@ per the declared map; the routine source as built cannot carry occupancy
 and a new emission term is the open scope change. Measured verdict and
 decomposition: `docs/ledger/NORO-HAND-RESERVOIR-01.md`; re-census dumps in
 S3 `campaign/noro_hand_reservoir_01/`.
+
+`NORO-HAND-PRACTICE-01` then shipped that declared emission term as
+`hygiene_cycle` (merged `d0466064`, now the default `hand_reservoir_mode`)
+and re-measured on the same frozen cells: occupancy 2.82% vs 25.4%
+(R = 0.111), ordering still un-flipped — **`still_starved` a second
+time.** The mechanism finding added: the routine source's magnitude is
+bounded by the same carriage propensity that gates the events, and its
+additive increments are erased by the multiplicative wash + inactivation
+strip; a Liu-occupying reservoir needs either a source of order the strip
+or the symptomatic-lens sampling question resolved first. Decomposition:
+`docs/ledger/NORO-HAND-RESERVOIR-01.md`; dumps in S3
+`campaign/noro_hand_practice_01/`.

@@ -4251,7 +4251,7 @@ within-study pairing (−3.5…−4.4) bounds the same row, flagged not resolved
 `docs/ledger/NORO-HAND-RESERVOIR-01.md`; dumps in S3
 `campaign/noro_hand_reservoir_01/`.
 
-**`NORO-HAND-PRACTICE-01` (shipped, census pending): the routine-source
+**`NORO-HAND-PRACTICE-01` (shipped, measured): the routine-source
 emission term the `still_starved` verdict called for is built as
 `hygiene_cycle`, now the shipped `hand_reservoir_mode`.** The arm adds
 what the retention-deficit decomposition named: compliance-gated
@@ -4266,8 +4266,18 @@ U(20, 90) s at full wet transfer against a dry multiplier U(0.005,
 seeds; the occupancy/ordering/never-positive figures above describe
 `wash_reuptake` and are **not transferable across this change** — every
 hand-scaled measurement taken before it re-reads against the new
-reservoir. Verdict pending the frozen-cell census; design + criteria:
-`docs/ledger/NORO-HAND-PRACTICE-01.md`.
+reservoir. **Verdict, measured on the frozen cells: `still_starved` a
+second time** — occupancy 2.82% vs Liu's 25.4% (R = 0.111, was 0.132),
+ordering still `event_higher`, never-positive 0.564 and positive-mean
+2.586 log10 inside their windows. The emission term fires on every cell
+and still starves: its additive propensity-scaled ticks are erased by
+the multiplicative wash + inactivation strip, and the ordering cannot
+flip while the routine source rides the same Beta carriage trait as the
+events — a Liu-occupying reservoir needs either a source of order the
+strip loss or the symptomatic-lens sampling question resolved first.
+Design + criteria: `docs/ledger/NORO-HAND-PRACTICE-01.md`;
+decomposition appended to `docs/ledger/NORO-HAND-RESERVOIR-01.md`;
+readout `docs/norovirus/noro_hand_practice_01/`.
 
 ## 5. Held fixed by assumption
 
