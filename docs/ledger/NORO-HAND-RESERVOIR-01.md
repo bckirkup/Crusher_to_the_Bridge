@@ -1,6 +1,6 @@
 # NORO-HAND-RESERVOIR-01
 **Date:** 2026-09-30
-**Commit:** fa0e162f (declared) / 55cb6b61 (measured, merged as 9850c4b3)
+**Commit:** 55cb6b61
 **Pathogens:** norwalk_gi
 **Status:** measured
 
