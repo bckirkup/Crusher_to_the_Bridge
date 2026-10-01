@@ -1,8 +1,8 @@
 # NORO-HAND-RESERVOIR-01
 **Date:** 2026-09-30
-**Commit:** fa0e162f
+**Commit:** fa0e162f (declared) / 55cb6b61 (measured, merged as 9850c4b3)
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
 
 Repair campaign for the `NORO-HAND-STATIONARY-01` defect_candidate (PR #797):
 the shipped hand reservoir is a spike-and-crash that occupies the Liu 2013
@@ -158,3 +158,57 @@ pytest slice over the touched paths + `tools/sanity_checker.py
 --from-config` + the frozen-cell re-census on AWS Batch before merge; the
 measured verdict is appended to this entry and `NORO-HAND-STATIONARY-01`
 is pointed at it.
+
+## Measured at `55cb6b61` (merged `9850c4b3`) — verdict: `still_starved`
+
+Frozen-cell re-census under `transmission.hand_reservoir_mode:
+wash_reuptake` (shipped default), same cells and probes as
+`NORO-HAND-STATIONARY-01`: `fl_spr_12d` 22 ignited seeds 8105–8163
+(growth-chain census zips) + `classic_cruise_1900` 8000–8019, 288 epochs,
+`picard-hand-occupancy:4` / image `noro-hand-reservoir01`, dumps in S3
+`campaign/noro_hand_reservoir_01/`; 14/20 classic cells admissible, the
+same six void as the baseline census (8000, 8007, 8011, 8013, 8015, 8017 —
+no shedding rows to occupy). Aggregation:
+`tools/noro_diag/hand_occupancy_readout.py` over 70,705 shedding
+host-epoch rows.
+
+**Primary: occupancy 3.35% vs Liu's 25.4% → R = 0.132 — inside no band.**
+R moved 0.026 → 0.132 (5×), short of the defect-band floor 0.2; per the
+declared map that is `still_starved`, reported, not repaired with a new
+emission term. By cell: spirit 3.99% (22/22 seeds admissible, per-seed
+0.0–14.0%), classic 1.65%.
+
+**Secondary: two of four criteria now pass.** never-positive 0.745 moved
+inside (0.05, 0.80) from 0.763 (Liu 0.33); positive-mean 3.47 log10 inside
+[2.30, 5.45] (was 3.28). Ordering unflipped pooled — event 7.8% vs routine
+3.1% (`event_higher`), Liu measures post-bathroom *below* routine; the
+declared requirement fails. Positive-mean remains the only criterion
+unchanged across designs.
+
+**Witness (i): the shared pickup chain carries the mass.** 242.8M GEC of
+302.7M delivered (80%) landed on non-challengeable hands — zero under the
+susceptible-only requester set — and shedders redeposit through the
+existing surface-deposit path. Deposited mass exists and reaches hands;
+the reservoir is fed.
+
+**Decomposition: the deficit is retention, not delivery.** 87% of
+shedding rows underflow at end-epoch: per-event washes (1.06–1.89 log10 ×
+~8978 spirit events) plus inactivation [0.61, 1.7]/h remove load faster
+than ~250 GEC/host-epoch mean routine re-uptake rebuilds ≥141 GEC, and
+delivery concentrates on hosts co-located with contaminated units. A
+routine-only source holding Liu's occupancy against the sourced removals
+needs a *new emission term* — the declared scope change — not a
+re-balance of existing constants.
+
+**Lens note (measured, not re-declared):** on the symptomatic-only lens
+the spirit cell reads 19.7% vs 25.4% (R = 0.78, inside [1/3, 3]) and
+classic 10.9%; the deficit concentrates in pre-/a-symptomatic shedding
+rows. Whether Liu's challenge cohort is better matched by the symptomatic
+lens is a sampling-map question for the next repair, not re-decided here.
+
+**Interaction flagged, not resolved:** the −7.14 bridge stays shipped;
+the within-study pairing (−3.5…−4.4) bounds the same row.
+
+No constant, profile, or default moved after the measurement — the
+mechanism, its gate and both arms are exactly `55cb6b61`; `spike_decay`
+remains the labelled baseline.
