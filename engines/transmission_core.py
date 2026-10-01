@@ -206,13 +206,6 @@ ROUTINE_WASHES_PER_DAY_RANGE = (2.0, 8.0)
 # not the per-hour scale of all hand contact. Declared (tranche 40 section
 # 4); no dedicated frequency measurement retrieved. Grade C.
 SELF_CONTACT_TICKS_PER_DAY_RANGE = (2.0, 8.0)
-# GEC added to the hand per self-contact tick, scaled by the host's carriage
-# propensity: Pickering 2011 per-activity increments ~50-6310 CFU
-# fecal-indicator bacteria (tranche 40 section 4). The interval spans two
-# orders of magnitude, so the draw is log-uniform -- an arithmetic-uniform
-# draw would live at the top of the band and saturate every host's
-# occupancy. Grade C. Origin: T.
-SELF_CONTACT_INCREMENT_GEC_RANGE = (50.0, 6300.0)
 # Seconds a hand stays wet after one wash act -- the residual-moisture window
 # Patrick 1997 showed controls touch-contact translocation; no duration
 # series retrieved, declared. Grade C. Origin: Ab.
@@ -222,6 +215,30 @@ HAND_WET_SECONDS_RANGE = (20.0, 90.0)
 # 10 min (~0.008); Sharps 2012 59% -> <1% (<0.017); Patrick 1997 wet:dry
 # translocation ratios 47-486x bracket the reciprocal. Grade B. Origin: Ab.
 HAND_DRY_TRANSFER_MULTIPLIER_RANGE = (0.005, 0.08)
+# NORO-HAND-CARRIAGE-01: the protected compartment -- load sequestered in
+# sites a wash cannot reach (subungual folds, creases, rings). Lin et al.
+# 2003 (J Food Prot 66:2296, DOI 10.4315/0362-028x-66.12.2296): the
+# subungual region harbors the most microorganisms and is the most
+# difficult to clean, FCV persisting beneath natural and artificial nails
+# through every method except soap + nailbrush; Walaszek 2018 (J Hosp
+# Infect, DOI 10.1016/j.jhin.2018.06.023) nail colonization after hand
+# disinfection. Grade B for the mechanism.
+#
+# GEC sequestered per propensity-fired contaminating event: bounded by
+# Liu's own post-bathroom arm -- after a bathroom visit + wash, 12.4% of
+# the rinses still read >= 2.30 log10 and the positive band runs ~2.3-4
+# log10, i.e. the surviving mass is the protected compartment measured
+# directly. Two-order span, so the draw is log-uniform. Grade B
+# (magnitude), the band is the same Liu 2013 dataset the hand target
+# comes from. Origin: T.
+HAND_PROTECTED_SEQUESTER_GEC_RANGE = (50.0, 3200.0)
+# Per-hour inactivation of the protected compartment, drawn once per
+# infection: sheltered sites lose virus at a fraction of the fingertip-pad
+# rate HAND_INACTIVATION_RATE_PER_HOUR_RANGE carries -- nail folds and
+# creases hold material against the desiccation that drives pad
+# inactivation. No dedicated under-nail survival series retrieved, so the
+# interval is declared an order below the pad rate. Grade C. Origin: Ab.
+HAND_PROTECTED_INACTIVATION_PER_HOUR_RANGE = (0.01, 0.06)
 # Defecation events per day: the frequency at which a faecally shedding host
 # recontaminates its own hands, and so the only quantity through which symptom
 # status reaches the faecal-hand-fomite-food chain. Two arms, because that is
@@ -7456,23 +7473,31 @@ class TransmissionCore:
             agent, pathogen_id, profile,
         )
         if events_per_day is None:
-            relaxed = target + (current - target) * survival
             if self.hand_reservoir_mode == "hygiene_cycle":
                 # Continuous-arm profiles still practise routine hygiene:
-                # non-bathroom washes suppress the relaxed load and mark
-                # the wet window. No stool events or self-contact ticks --
-                # continuous shedding is the emission term.
-                wet_seconds = 0.0
-                routine = max(0, int(self.rng.poisson(
-                    self._hand_practice(agent, pathogen_id)[
-                        "routine_washes_per_day"
-                    ] * self.clock.day_fraction_per_epoch,
-                )))
-                for _ in range(routine):
-                    efficacy, wet = self._hand_wash_act()
-                    relaxed *= math.pow(10.0, -efficacy)
-                    wet_seconds += wet
+                # non-bathroom washes suppress the relaxed accessible load
+                # (the protected compartment floors every wash),
+                # self-contact ticks reload from the own-environment pool,
+                # and every wash act marks the wet window. No stool events
+                # -- continuous shedding is the emission term.
+                practice = self._hand_practice(agent, pathogen_id)
+                protected, accessible = self._hand_protected_decay(
+                    agent, pathogen_id, current, practice,
+                )
+                accessible = target + (accessible - target) * survival
+                accessible, wet_seconds = self._hand_practice_epoch(
+                    agent, pathogen_id, profile, target, practice,
+                    accessible,
+                )
+                agent.hand_load_by_pathogen[pathogen_id] = (
+                    accessible + protected
+                )
+                agent.hand_protected_load_by_pathogen[pathogen_id] = (
+                    protected
+                )
                 self._set_hand_wet_factor(agent, pathogen_id, wet_seconds)
+                return
+            relaxed = target + (current - target) * survival
             agent.hand_load_by_pathogen[pathogen_id] = relaxed
             return
         if self.hand_reservoir_mode == "hygiene_cycle":
@@ -7575,6 +7600,13 @@ class TransmissionCore:
             "self_contacts_per_day": float(
                 self.rng.uniform(*SELF_CONTACT_TICKS_PER_DAY_RANGE),
             ),
+            # Sheltered inactivation of the wash-resistant protected
+            # compartment (NORO-HAND-CARRIAGE-01 ii).
+            "protected_inactivation_per_hour": float(
+                self.rng.uniform(
+                    *HAND_PROTECTED_INACTIVATION_PER_HOUR_RANGE,
+                ),
+            ),
         }
         agent.hand_practice_by_pathogen[pathogen_id] = practice
         return practice
@@ -7595,6 +7627,116 @@ class TransmissionCore:
         efficacy = float(np.clip(self.rng.normal(mean, sd), low, high))
         wet = float(self.rng.uniform(*HAND_WET_SECONDS_RANGE))
         return efficacy, wet
+
+    def _hand_protected_decay(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        current: float,
+        practice: dict[str, float],
+    ) -> tuple[float, float]:
+        """Decay the protected compartment; returns (protected, accessible).
+
+        The recorded ``hand_load`` is the rinse's total -- accessible plus
+        the wash-resistant part sequestered in subungual/crease sites
+        (NORO-HAND-CARRIAGE-01). External draws (deposits, pickups) act on
+        the total, so the protected share is clamped to what remains;
+        everything above it is the compartment washes can reach. Sheltered
+        material decays at its own per-infection rate, an order below the
+        fingertip-pad inactivation the accessible part sees.
+        """
+        protected = min(
+            agent.hand_protected_load_by_pathogen.get(pathogen_id, 0.0),
+            current,
+        )
+        protected *= math.exp(
+            -practice["protected_inactivation_per_hour"]
+            * self.clock.hours_per_epoch
+        )
+        return protected, max(0.0, current - protected)
+
+    def _hand_practice_epoch(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+        target: float,
+        practice: dict[str, float],
+        accessible: float,
+    ) -> tuple[float, float]:
+        """One epoch's routine washes and own-environment self-contact ticks.
+
+        Returns ``(accessible_load, wet_seconds)``; the wash acts strip
+        only the accessible part (the protected compartment is
+        unreachable, NORO-HAND-CARRIAGE-01 iii). Each self-contact tick
+        draws a measured surface->hand fraction of the host's own-
+        environment pool -- the concentrated personal reservoir its own
+        deposits built (own cabin fittings/home zone, bookkept by
+        ``_credit_own_environment_pool`` and decaying at the profile's
+        surface inactivation rate) -- rather than a fixed propensity-
+        scaled increment.
+        """
+        wet_seconds = 0.0
+        routine = max(0, int(self.rng.poisson(
+            practice["routine_washes_per_day"]
+            * self.clock.day_fraction_per_epoch,
+        )))
+        for _ in range(routine):
+            efficacy, wet = self._hand_wash_act()
+            accessible *= math.pow(10.0, -efficacy)
+            wet_seconds += wet
+        pool = (
+            agent.hand_self_pool_by_pathogen.get(pathogen_id, 0.0)
+            * self._surface_survival(profile)
+        )
+        ticks = max(0, int(self.rng.poisson(
+            practice["self_contacts_per_day"]
+            * self.clock.day_fraction_per_epoch,
+        )))
+        for _ in range(ticks):
+            if pool <= 0.0:
+                break
+            uptake = min(
+                1.0,
+                max(0.0, float(self.rng.lognormal(*SURFACE_TO_HAND_LOGNORMAL))),
+            )
+            gain = min(pool, pool * uptake)
+            accessible = min(target, accessible + gain)
+            pool -= gain
+        agent.hand_self_pool_by_pathogen[pathogen_id] = pool
+        return accessible, wet_seconds
+
+    def _credit_own_environment_pool(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        unit_name: str,
+        deposit: float,
+    ) -> None:
+        """Bookkeep a hand deposit on the host's own environment.
+
+        The own-environment pool (NORO-HAND-CARRIAGE-01 iv) counts only
+        what this host put on its own fittings -- its own cabin
+        compartment key, or its ``home_zone`` on hulls without cabin
+        compartments. A deposit on any other unit belongs to someone
+        else's environment and stays only in the shared surface pool.
+        """
+        if self.hand_reservoir_mode != "hygiene_cycle" or deposit <= 0.0:
+            return
+        own = unit_name == agent.home_zone
+        if not own and self._is_cabin_compartment(unit_name):
+            parent = self.compartment_parent(unit_name)
+            own = (
+                parent == agent.home_zone
+                and unit_name
+                == self._cabin_compartment_key(parent, agent)
+            )
+        if not own:
+            return
+        agent.hand_self_pool_by_pathogen[pathogen_id] = (
+            agent.hand_self_pool_by_pathogen.get(pathogen_id, 0.0)
+            + deposit
+        )
 
     def _set_hand_wet_factor(
         self,
@@ -7664,42 +7806,37 @@ class TransmissionCore:
             current *= math.pow(10.0, -efficacy)
             wet_seconds += wet
         practice = self._hand_practice(agent, pathogen_id)
-        decayed = current * survival
+        protected, accessible = self._hand_protected_decay(
+            agent, pathogen_id, current, practice,
+        )
+        accessible *= survival
         propensity = self._hand_carriage_propensity(agent, pathogen_id)
         if self._stool_event_occurs(events_per_day):
             if self.rng.random() < propensity:
-                decayed = max(decayed, target)
+                accessible = max(accessible, target)
+                # A contaminating visit presses material into the
+                # protected sites at the measured post-bathroom magnitude
+                # (NORO-HAND-CARRIAGE-01 i).
+                protected += math.pow(
+                    10.0,
+                    self.rng.uniform(
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[0]),
+                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[1]),
+                    ),
+                )
             if self.rng.random() < practice["wash_compliance"]:
                 efficacy, wet = self._hand_wash_act()
-                decayed *= math.pow(10.0, -efficacy)
+                accessible *= math.pow(10.0, -efficacy)
                 wet_seconds += wet
             self._route_stool_event_venue(
                 agent, pathogen_id, profile, zone_name,
             )
-        routine = max(0, int(self.rng.poisson(
-            practice["routine_washes_per_day"]
-            * self.clock.day_fraction_per_epoch,
-        )))
-        for _ in range(routine):
-            efficacy, wet = self._hand_wash_act()
-            decayed *= math.pow(10.0, -efficacy)
-            wet_seconds += wet
-        ticks = max(0, int(self.rng.poisson(
-            practice["self_contacts_per_day"]
-            * self.clock.day_fraction_per_epoch,
-        )))
-        inc_lo, inc_hi = SELF_CONTACT_INCREMENT_GEC_RANGE
-        for _ in range(ticks):
-            decayed = min(
-                target,
-                decayed + propensity * math.pow(
-                    10.0,
-                    self.rng.uniform(
-                        math.log10(inc_lo), math.log10(inc_hi),
-                    ),
-                ),
-            )
-        agent.hand_load_by_pathogen[pathogen_id] = decayed
+        accessible, wet = self._hand_practice_epoch(
+            agent, pathogen_id, profile, target, practice, accessible,
+        )
+        wet_seconds += wet
+        agent.hand_load_by_pathogen[pathogen_id] = accessible + protected
+        agent.hand_protected_load_by_pathogen[pathogen_id] = protected
         self._set_hand_wet_factor(agent, pathogen_id, wet_seconds)
 
     def _route_stool_event_venue(
@@ -7850,7 +7987,18 @@ class TransmissionCore:
             -max(hygiene_rate, 0.0) * self.clock.hours_per_epoch,
         )
         if event_probability > 0.0 and self.rng.random() < event_probability:
-            hand *= math.pow(10.0, -self._hand_hygiene_efficacy(profile))
+            # The wash acts on the accessible part only: the protected
+            # compartment (always zero outside hygiene_cycle, where the
+            # arithmetic below is identical to multiplying the whole
+            # load) floors the act (NORO-HAND-CARRIAGE-01 iii).
+            protected = min(
+                agent.hand_protected_load_by_pathogen.get(pathogen_id, 0.0),
+                hand,
+            )
+            accessible = max(0.0, hand - protected)
+            hand = protected + accessible * math.pow(
+                10.0, -self._hand_hygiene_efficacy(profile),
+            )
         agent.hand_load_by_pathogen[pathogen_id] = max(hand, 0.0)
 
     @staticmethod
@@ -9226,6 +9374,9 @@ class TransmissionCore:
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
             deposits_by_venue.setdefault(venue, []).append((agent, deposit))
             self._deposit_surface_mass(pathogen_id, venue, deposit)
+            self._credit_own_environment_pool(
+                agent, pathogen_id, venue, deposit,
+            )
         for venue, deposits in deposits_by_venue.items():
             self._deposit_reservoir_strains(
                 SURFACE_RESERVOIR, pathogen_id, venue, deposits,
@@ -9566,6 +9717,9 @@ class TransmissionCore:
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
             deposits.append((agent, deposit))
             self._deposit_surface_mass(pathogen_id, zone_name, deposit)
+            self._credit_own_environment_pool(
+                agent, pathogen_id, zone_name, deposit,
+            )
         return deposits
 
     def _fomite_zone_pickup(

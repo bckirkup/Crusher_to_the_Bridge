@@ -271,6 +271,7 @@ def _cell_readout(
             ),
         },
         "wet_window_witness": _wet_window_witness(all_rows),
+        "carriage_witness": _carriage_witness(all_rows),
         "occupancy": {
             "at_target_rows": sum(1 for r in all_rows if r.get("at_target")),
             "underflowed_rows": sum(
@@ -347,6 +348,46 @@ def _wet_window_witness(rows: list[dict[str, Any]]) -> dict[str, Any]:
         ),
         "mean_transfer_factor": (
             statistics.fmean(factors) if factors else None
+        ),
+    }
+
+
+def _carriage_witness(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """NORO-HAND-CARRIAGE-01 witness: the protected compartment and the
+    host's own-environment pool.
+
+    Both columns carry ``None`` under arms that never allocate them, so
+    their row counts themselves distinguish the arm under test. The
+    protected share of a positive row is what the sequester design
+    predicts dominates routine positivity; the pool level is the mass
+    the own-environment reservoir holds.
+    """
+    protected = [
+        row["hand_protected_gec"] for row in rows
+        if row.get("hand_protected_gec") is not None
+    ]
+    pool = [
+        row["hand_self_pool_gec"] for row in rows
+        if row.get("hand_self_pool_gec") is not None
+    ]
+    positive_protected = [
+        row["hand_protected_gec"] for row in rows
+        if row.get("hand_protected_gec") is not None
+        and row.get("load_end_epoch_gec") is not None
+        and row["load_end_epoch_gec"] >= LIU_LOD_GEC
+    ]
+    return {
+        "rows_with_protected": len(protected),
+        "mean_protected_gec": (
+            statistics.fmean(protected) if protected else None
+        ),
+        "mean_protected_on_positive_gec": (
+            statistics.fmean(positive_protected)
+            if positive_protected else None
+        ),
+        "rows_with_pool": len(pool),
+        "mean_self_pool_gec": (
+            statistics.fmean(pool) if pool else None
         ),
     }
 

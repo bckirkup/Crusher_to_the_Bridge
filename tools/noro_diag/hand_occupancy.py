@@ -224,6 +224,15 @@ def _wrap_replenish(core_cls: type, rec: OccupancyRecorder) -> dict[str, Any]:
             "hand_wet_transfer": (
                 agent.hand_wet_transfer_by_pathogen.get(pathogen_id)
             ),
+            # NORO-HAND-CARRIAGE-01 witnesses: the wash-resistant
+            # compartment and the host's own-environment pool (None
+            # where the arm never allocates them).
+            "hand_protected_gec": (
+                agent.hand_protected_load_by_pathogen.get(pathogen_id)
+            ),
+            "hand_self_pool_gec": (
+                agent.hand_self_pool_by_pathogen.get(pathogen_id)
+            ),
             "hygiene_calls": 0,
             "load_end_epoch_gec": None,
         })
