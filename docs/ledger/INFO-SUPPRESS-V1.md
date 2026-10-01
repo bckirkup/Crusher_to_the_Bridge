@@ -1,6 +1,6 @@
 # INFO-SUPPRESS-V1
 **Date:** 2026-10-01
-**Commit:** `cbe3b478`
+**Commit:** cbe3b478
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 
