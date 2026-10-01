@@ -32,19 +32,18 @@ from __future__ import annotations
 
 import os
 import sys
+from functools import partial
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from picard_framework.covid_boarding_screen import (  # noqa: E402
-    enumerate_cells,
-    load_design,
-)
 from simulation_utils.paths import repo_root  # noqa: E402
 from tools.covid_screen_readout_common import (  # noqa: E402
+    audit_observation_echoes,
+    audit_seed_ring,
+    design_readout_main,
+    fmt3g,
     quantile,
-    resolve_design_arg,
-    row_trigger_report,
-    run_readout,
+    row_triggers,
     standard_row_stats,
 )
 
@@ -118,32 +117,6 @@ def _expected_contacts(tx: dict) -> dict | None:
     if not bool(block.get("enabled", False)):
         return None
     return dict(block.get("rates_per_hour") or {})
-
-
-def _audit_seed_echoes(ring: dict) -> list[str]:
-    """seed_spec echoes the record's seed on every arm (no seed_patch)."""
-    failures: list[str] = []
-    spec = ring.get("seed_spec") or {}
-    for key, want in RECORD_SEED_SPEC.items():
-        if spec.get(key) != want:
-            failures.append(
-                f"seed_spec.{key} {spec.get(key)} != record {want}"
-            )
-    if ring.get("seeded_count") != RECORD_SEED_SPEC["count"]:
-        failures.append(
-            f"seeded_count {ring.get('seeded_count')} "
-            f"!= record {RECORD_SEED_SPEC['count']}",
-        )
-    bad = [
-        h for h in ring.get("seeded_hosts") or []
-        if h.get("role") != RECORD_SEED_SPEC["role"]
-    ]
-    if bad:
-        failures.append(
-            f"{len(bad)} seeded host(s) with role outside "
-            f"{RECORD_SEED_SPEC['role']!r}",
-        )
-    return failures
 
 
 def _audit_contact_rates(
@@ -234,30 +207,13 @@ def _audit_channel_echoes(payload: dict, declared: dict) -> list[str]:
             f"{payload.get('exposure_cap_include_fixed_rings')} "
             f"!= declared {want_fr}",
         )
-    if declared["onset_recording"] is not None and (
-        payload.get("onset_recording") != declared["onset_recording"]
-    ):
-        failures.append("onset_recording echo != declared block")
-    if declared["eligibility"] is not None and (
-        payload.get("onset_eligibility_by_severity")
-        != declared["eligibility"]
-    ):
-        failures.append(
-            "onset_eligibility_by_severity echo != declared ladder",
-        )
-    return failures
+    return failures + audit_observation_echoes(payload, declared)
 
 
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the list of audit violations for one cell payload."""
-    ring = payload.get("seed_ring")
-    failures = (
-        ["missing seed_ring block"]
-        if not isinstance(ring, dict)
-        else _audit_seed_echoes(ring)
-    )
     return (
-        failures
+        audit_seed_ring(payload, RECORD_SEED_SPEC)
         + _audit_delivery_echoes(payload, declared)
         + _audit_channel_echoes(payload, declared)
     )
@@ -295,8 +251,8 @@ def _heat_extras(takeoff: list[dict], stats: dict) -> dict:
             "post_over_pre_q95": quantile(kinks, 0.95),
         },
         "row_extra": (
-            f"during med {_fmt(med_during)} "
-            f"share {_fmt(med_share)} kink {_fmt(med_kink)}"
+            f"during med {fmt3g(med_during)} "
+            f"share {fmt3g(med_share)} kink {fmt3g(med_kink)}"
         ),
     }
 
@@ -306,50 +262,27 @@ def _row_stats(payloads: list[dict]) -> dict:
     return standard_row_stats(payloads, extra_fields=_heat_extras)
 
 
-def _fmt(v: float | None) -> str:
-    return "n/a" if v is None else f"{v:.3g}"
-
-
-def _row_triggers(
-    theta: float, arm_id: str, stats: dict,
-) -> dict | None:
-    """The report-immediately rows: in-band, fizzle, during-dominant."""
-    kinds = [
-        name
-        for name, on in (
-            ("TRUTH-IN-BAND", stats["truth_leg_in_band"]),
-            ("TIMING-IN-BAND", stats["timing_leg_in_band"]),
-            ("FIZZLE-MAJORITY", stats["fizzle_majority"]),
-            ("DURING-DOMINANT", stats["during_dominant"]),
-        )
-        if on
-    ]
-    if not kinds:
-        return None
-    return row_trigger_report(
-        theta, arm_id, stats, kinds,
-        (
-            "takeoff_infections_total", "takeoff_before_share",
-            "during_quarantine", "day16_kink",
-        ),
-    )
-
-
 def main(argv: list[str] | None = None) -> int:
-    design = load_design(
-        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
-    )
-    return run_readout(
+    return design_readout_main(
         argv,
         repo_root=REPO_ROOT,
-        cells=enumerate_cells(design),
-        declared_by_arm={
-            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-        },
+        declared_fn=_declared,
         audit_cell=audit_cell,
         row_stats=_row_stats,
         report_key="triggered_rows",
-        row_triggers=_row_triggers,
+        row_triggers=partial(
+            row_triggers,
+            kind_flags=(
+                ("TRUTH-IN-BAND", "truth_leg_in_band"),
+                ("TIMING-IN-BAND", "timing_leg_in_band"),
+                ("FIZZLE-MAJORITY", "fizzle_majority"),
+                ("DURING-DOMINANT", "during_dominant"),
+            ),
+            fields=(
+                "takeoff_infections_total", "takeoff_before_share",
+                "during_quarantine", "day16_kink",
+            ),
+        ),
     )
 
 

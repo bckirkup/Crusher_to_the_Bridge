@@ -23,18 +23,15 @@ Usage:
 from __future__ import annotations
 
 import os
+from functools import partial
 from typing import Any
 
-from picard_framework.covid_boarding_screen import (
-    enumerate_cells,
-    load_design,
-)
 from tools.covid_screen_readout_common import (
+    design_readout_main,
+    fmt3g,
     load_cell_payloads,  # noqa: F401  (re-exported for tests)
     quantile,
-    resolve_design_arg,
-    row_trigger_report,
-    run_readout,
+    row_triggers,
     standard_row_stats,
 )
 
@@ -85,16 +82,12 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     return failures
 
 
-def _fmt(v: float | None) -> str:
-    return "n/a" if v is None else f"{v:.3g}"
-
-
 def _hand_extras(takeoff: list[dict], stats: dict) -> dict:
     """The row_extra columns: during-quarantine median and share."""
     return {
         "row_extra": (
-            f"during med {_fmt(stats['during_quarantine']['median'])} "
-            f"share {_fmt(stats['during_share']['median'])}"
+            f"during med {fmt3g(stats['during_quarantine']['median'])} "
+            f"share {fmt3g(stats['during_share']['median'])}"
         ),
     }
 
@@ -102,30 +95,6 @@ def _hand_extras(takeoff: list[dict], stats: dict) -> dict:
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional medians + route decomposition for one row."""
     return standard_row_stats(payloads, extra_fields=_hand_extras)
-
-
-def _row_triggers(
-    theta: float, arm_id: str, stats: dict,
-) -> dict | None:
-    """Report-immediately rows: an arm landing in band or degenerate."""
-    kinds = [
-        name
-        for name, on in (
-            ("TRUTH-IN-BAND", stats["truth_leg_in_band"]),
-            ("TIMING-IN-BAND", stats["timing_leg_in_band"]),
-            ("FIZZLE-MAJORITY", stats["fizzle_majority"]),
-        )
-        if on
-    ]
-    if not kinds:
-        return None
-    return row_trigger_report(
-        theta, arm_id, stats, kinds,
-        (
-            "takeoff_infections_total", "takeoff_before_share",
-            "during_quarantine",
-        ),
-    )
 
 
 def _paired_rows(
@@ -201,22 +170,27 @@ def _paired_rows(
 
 
 def main(argv: list[str] | None = None) -> int:
-    design = load_design(
-        resolve_design_arg(argv, REPO_ROOT), repo_root=REPO_ROOT,
-    )
-    return run_readout(
+    return design_readout_main(
         argv,
         repo_root=REPO_ROOT,
-        cells=enumerate_cells(design),
-        declared_by_arm={
-            arm["arm_id"]: _declared(arm) for arm in (design.arms or ())
-        },
+        declared_fn=_declared,
         audit_cell=audit_cell,
         row_stats=_row_stats,
         report_key="triggered_rows",
-        row_triggers=_row_triggers,
-        paired_rows=lambda rows: _paired_rows(
-            rows, design.arms[0]["arm_id"],
+        row_triggers=partial(
+            row_triggers,
+            kind_flags=(
+                ("TRUTH-IN-BAND", "truth_leg_in_band"),
+                ("TIMING-IN-BAND", "timing_leg_in_band"),
+                ("FIZZLE-MAJORITY", "fizzle_majority"),
+            ),
+            fields=(
+                "takeoff_infections_total", "takeoff_before_share",
+                "during_quarantine",
+            ),
+        ),
+        paired_rows_of=lambda design: (
+            lambda rows: _paired_rows(rows, design.arms[0]["arm_id"])
         ),
     )
 
