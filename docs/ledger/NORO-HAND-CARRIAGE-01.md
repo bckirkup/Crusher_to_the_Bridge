@@ -222,3 +222,21 @@ like the drying wet-window) would let the post-visit wash strip the
 fresh accessible load first and is the plausible honest shape of the
 Liu ordering. That is a mechanism-scope decision — Benjamin's call,
 recorded in the outstanding ledger.
+
+**Delayed sequestration — declared and implemented (2026-10-01,
+approved).** Benjamin approved the mechanism-scope rebuild: a
+contaminating visit's sequester draw (`HAND_PROTECTED_SEQUESTER_GEC_RANGE`
+unchanged, Liu-bounded logU(50, 3200)) now lands in
+`hand_protected_pending_by_pathogen` and settles into the protected
+compartment at a per-infection exponential rate with timescale τ ∈
+`HAND_PROTECTED_SEQUESTER_HOURS_RANGE` = U(24, 72) h — order-days,
+declared Grade C: McNeil 2001 (Clin Infect Dis 32:367, artificial-nail
+pathogen colonization 21% positive day-1 → 71% day-15) plus McGinley
+1988's standing ~10⁵-CFU subungual reservoir bound the shape; no
+mass-accretion-rate series exists (`?nr`). Post-visit washes now act on
+the fresh accessible load first — the measured event-post-wash vs
+routine ordering gets its honest shot at flipping toward Liu. Pending
+mass is not rinse-visible until it settles; the practice dict carries
+one extra per-infection uniform (τ). Whether routine-row occupancy
+holds the R = 0.737 band — and whether ordering flips — is the frozen
+42-cell re-census, pending at merge.

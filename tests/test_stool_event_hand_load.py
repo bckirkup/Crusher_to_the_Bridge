@@ -9,6 +9,8 @@ routes.
 
 from __future__ import annotations
 
+import math
+
 import numpy as np
 import pytest
 
@@ -412,6 +414,8 @@ def test_hygiene_cycle_draws_the_practice_traits_once() -> None:
         "routine_washes_per_day",
         "self_contacts_per_day",
         "protected_inactivation_per_hour",
+        # CARRIAGE-01 delayed sequestration: the per-infection settle rate.
+        "protected_sequester_per_hour",
     }
 
 
@@ -481,6 +485,40 @@ def test_contaminating_visit_sequesters_a_wash_resistant_floor() -> None:
         assert agent.hand_load_by_pathogen[PATHOGEN] >= protected
         saw_floor = saw_floor or protected > 0.0
     assert saw_floor
+
+
+def test_queued_sequester_settles_over_the_declared_timescale(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A contaminating event's draw is not rinse-visible at the visit
+    instant: it queues and settles into the protected compartment at
+    1/tau per epoch (NORO-HAND-CARRIAGE-01 iii, McNeil 2001)."""
+    monkeypatch.setattr(
+        transmission_core, "HAND_PROTECTED_SEQUESTER_HOURS_RANGE",
+        (24.0, 24.0),
+    )
+    monkeypatch.setattr(
+        transmission_core, "ROUTINE_WASHES_PER_DAY_RANGE", (0.0, 0.0),
+    )
+    monkeypatch.setattr(
+        transmission_core, "SELF_CONTACT_TICKS_PER_DAY_RANGE", (0.0, 0.0),
+    )
+    profile = _profile(
+        stool_events_per_day={"baseline": 0.0, "diarrhoeal": 0.0},
+        hand_inactivation_per_hour=0.0,
+    )
+    core = _core(profile=profile, seed=41, reservoir_mode="hygiene_cycle")
+    agent = _agent()
+    agent.hand_load_by_pathogen[PATHOGEN] = 0.0
+    agent.hand_protected_pending_by_pathogen[PATHOGEN] = 1000.0
+    core._replenish_hand(agent, PATHOGEN, profile)
+    expected = 1000.0 * (1.0 - math.exp(-1.0 / 24.0))
+    assert agent.hand_protected_load_by_pathogen[PATHOGEN] == (
+        pytest.approx(expected)
+    )
+    assert agent.hand_protected_pending_by_pathogen[PATHOGEN] == (
+        pytest.approx(1000.0 - expected)
+    )
 
 
 def test_routine_washes_cannot_strip_below_the_protected_floor(
