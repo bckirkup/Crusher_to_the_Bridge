@@ -823,6 +823,7 @@ class KorkinAgent:
         "cumulative_exposure_by_route",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
+        "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
         "emesis_titre_gec_per_ml_by_pathogen",
         "emesis_censored_below_lod_by_pathogen",
@@ -934,6 +935,12 @@ class KorkinAgent:
         self.hand_inactivation_rate_by_pathogen: dict[str, float] = {}
         # Per-host/pathogen hand-carriage propensity, drawn once per infection.
         self.hand_carriage_propensity_by_pathogen: dict[str, float] = {}
+        # Per-host/pathogen hygiene-practice traits (wash compliance, routine
+        # washes/day, self-contact ticks/h), drawn lazily under the
+        # hygiene_cycle reservoir arm.
+        self.hand_practice_by_pathogen: dict[str, dict[str, float]] = {}
+        # Per-epoch wet/dry deposit-side transfer blend under hygiene_cycle.
+        self.hand_wet_transfer_by_pathogen: dict[str, float] = {}
         # Elapsed days since onset, drawn once for each symptomatic illness.
         self.emesis_episode_schedule_by_pathogen: dict[str, list[float]] = {}
         # Per-illness emesis titre (GEC/mL) drawn once with the schedule, and
@@ -1261,6 +1268,8 @@ class KorkinAgent:
         self.emesis_censored_below_lod_by_pathogen.pop(pathogen_id, None)
         self.emesis_deposition_records_by_pathogen.pop(pathogen_id, None)
         self.hand_carriage_propensity_by_pathogen.pop(pathogen_id, None)
+        self.hand_practice_by_pathogen.pop(pathogen_id, None)
+        self.hand_wet_transfer_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
             if rng is not None

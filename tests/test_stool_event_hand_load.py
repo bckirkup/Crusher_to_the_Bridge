@@ -12,6 +12,7 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
+import engines.transmission_core as transmission_core
 from engines.infection_dynamics_bridge import (
     IllnessStatus,
     InfectionStatus,
@@ -275,12 +276,16 @@ def test_the_wash_arm_suppresses_the_post_event_load() -> None:
 
     Every stool event ends in a wash, so the modal post-visit state is a
     suppressed residual -- the ordering-flip mechanism Liu's post-bathroom
-    samples show.
+    samples show. Pinned to the labelled baseline it was authored for:
+    under hygiene_cycle the post-visit wash is compliance-gated, so most
+    visits carry no suppression at all (NORO-HAND-PRACTICE-01).
     """
     profile = _profile(stool_events_per_day={
         "baseline": 20.0, "diarrhoeal": 20.0,
     })
-    core = _core(profile=profile, seed=5)
+    core = _core(
+        profile=profile, seed=5, reservoir_mode="wash_reuptake",
+    )
     agent = _agent()
     target = agent.get_pathogen_hand_target(PATHOGEN, profile)
     suppressed = 0
@@ -341,3 +346,104 @@ def test_a_never_symptomatic_host_still_sheds_rna() -> None:
     assert carrier.get_pathogen_shedding(PATHOGEN, profile) > 0.0
     core = _core()
     assert core._emesis_phase(carrier, PATHOGEN, profile) is None
+
+
+# --- the hygiene_cycle arm (NORO-HAND-PRACTICE-01) ------------------------
+
+
+def _mean_hand_load_under_practice(
+    *,
+    seed: int = 11,
+    days: int = 4,
+    events_per_day: float = 5.63,
+    routine_washes: tuple[float, float] | None = None,
+    monkeypatch: pytest.MonkeyPatch | None = None,
+) -> float:
+    if routine_washes is not None and monkeypatch is not None:
+        monkeypatch.setattr(
+            transmission_core, "ROUTINE_WASHES_PER_DAY_RANGE", routine_washes,
+        )
+    profile = _profile(stool_events_per_day={
+        "baseline": events_per_day, "diarrhoeal": events_per_day,
+    })
+    core = _core(profile=profile, seed=seed)
+    agent = _agent()
+    loads = []
+    for _ in range(days * 24):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        loads.append(agent.hand_load_by_pathogen[PATHOGEN])
+    return float(np.mean(loads))
+
+
+def test_hygiene_cycle_keeps_the_load_under_the_visit_ceiling() -> None:
+    """Invariant: ticks and spikes can never exceed the contamination load."""
+    core = _core(seed=13)
+    agent = _agent()
+    profile = _profile()
+    target = agent.get_pathogen_hand_target(PATHOGEN, profile)
+    for _ in range(96):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        assert agent.hand_load_by_pathogen[PATHOGEN] <= target
+
+
+def test_hygiene_cycle_draws_the_practice_traits_once() -> None:
+    """Compliance and the two routine rates are per-infection traits."""
+    core = _core(seed=5)
+    agent = _agent()
+    profile = _profile()
+    core._replenish_hand(agent, PATHOGEN, profile)
+    first = dict(agent.hand_practice_by_pathogen[PATHOGEN])
+    for _ in range(24):
+        core._replenish_hand(agent, PATHOGEN, profile)
+    assert agent.hand_practice_by_pathogen[PATHOGEN] == first
+    assert set(first) == {
+        "wash_compliance", "routine_washes_per_day", "self_contacts_per_day",
+    }
+
+
+def test_hygiene_cycle_marks_wet_and_dry_epochs_differently() -> None:
+    """The deposit-side factor sits in (0, 1] and varies by epoch."""
+    core = _core(seed=7)
+    agent = _agent()
+    profile = _profile()
+    factors = set()
+    for _ in range(96):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        factors.add(round(
+            agent.hand_wet_transfer_by_pathogen[PATHOGEN], 6,
+        ))
+    assert all(0.0 < f <= 1.0 for f in factors)
+    assert len(factors) > 1
+
+
+def test_hygiene_cycle_suppresses_less_than_the_deterministic_wash() -> None:
+    """Arm sensitivity: compliance-gated washes leave more mass post-visit
+    than the wash_reuptake baseline's deterministic wash."""
+    under_practice = _mean_hand_load_under_practice(
+        seed=17, events_per_day=20.0,
+    )
+    profile = _profile(stool_events_per_day={
+        "baseline": 20.0, "diarrhoeal": 20.0,
+    })
+    core = _core(profile=profile, seed=17, reservoir_mode="wash_reuptake")
+    agent = _agent()
+    loads = []
+    for _ in range(96):
+        core._replenish_hand(agent, PATHOGEN, profile)
+        loads.append(agent.hand_load_by_pathogen[PATHOGEN])
+    assert under_practice > float(np.mean(loads))
+
+
+def test_routine_wash_frequency_moves_the_hand_load(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Graded sensitivity on the new term, not a golden: more routine
+    washes per day -> lower mean hand load, same seeds and profile."""
+    low = _mean_hand_load_under_practice(
+        routine_washes=(0.5, 0.5), monkeypatch=monkeypatch,
+    )
+    monkeypatch.undo()
+    high = _mean_hand_load_under_practice(
+        routine_washes=(20.0, 20.0), monkeypatch=monkeypatch,
+    )
+    assert low > high

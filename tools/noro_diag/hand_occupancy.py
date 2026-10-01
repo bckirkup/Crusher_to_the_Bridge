@@ -219,6 +219,11 @@ def _wrap_replenish(core_cls: type, rec: OccupancyRecorder) -> dict[str, Any]:
             "inactivation_rate_per_hour": (
                 agent.hand_inactivation_rate_by_pathogen.get(pathogen_id)
             ),
+            # NORO-HAND-PRACTICE-01 witness: the epoch's deposit-side
+            # drying blend under hygiene_cycle (None on every other arm).
+            "hand_wet_transfer": (
+                agent.hand_wet_transfer_by_pathogen.get(pathogen_id)
+            ),
             "hygiene_calls": 0,
             "load_end_epoch_gec": None,
         })

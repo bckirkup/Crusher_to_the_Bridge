@@ -4251,6 +4251,24 @@ within-study pairing (−3.5…−4.4) bounds the same row, flagged not resolved
 `docs/ledger/NORO-HAND-RESERVOIR-01.md`; dumps in S3
 `campaign/noro_hand_reservoir_01/`.
 
+**`NORO-HAND-PRACTICE-01` (shipped, census pending): the routine-source
+emission term the `still_starved` verdict called for is built as
+`hygiene_cycle`, now the shipped `hand_reservoir_mode`.** The arm adds
+what the retention-deficit decomposition named: compliance-gated
+post-visit washes (U(0.35, 0.75) per host; soap/water efficacy families
+Hilton 2025), routine Poisson washes U(2, 8)/day (Machida/Głąbska
+totals minus the stool stream), self-contact re-loading episodes
+U(2, 8)/day at `propensity × logU(50, 6300)` GEC (Pickering 2011
+increments), and the deposit-side drying blend — post-wash wet window
+U(20, 90) s at full wet transfer against a dry multiplier U(0.005,
+0.08) — on every donor-hand deposit path. `wash_reuptake` and
+`spike_decay` stay as labelled baselines, bit-identical on matched
+seeds; the occupancy/ordering/never-positive figures above describe
+`wash_reuptake` and are **not transferable across this change** — every
+hand-scaled measurement taken before it re-reads against the new
+reservoir. Verdict pending the frozen-cell census; design + criteria:
+`docs/ledger/NORO-HAND-PRACTICE-01.md`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

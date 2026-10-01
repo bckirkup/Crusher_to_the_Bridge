@@ -176,7 +176,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # both interpreters have agreed on every near-extinct reading of
         # this cell, so the 3.11 entry carries the same tuple pending its
         # CI read.
-        (3, 11): (0, 0, 217, 0, 0),
+        # NORO-HAND-PRACTICE-01: hygiene_cycle ships default-ON; the
+        # continuous COVID arm now draws routine washes plus wet-window
+        # factors per epoch (shared-stream reorder) and its donor-hand
+        # deposits blend wet/dry. The near-extinct cell re-rolls:
+        # (0, 0, 217, 0, 0) -> (2, 1, 217, 2, 0). The wash_reuptake
+        # baseline cell reproduces (0, 0, 217, 0, 0) exactly on this
+        # branch, so the move is fully attributed to the arm. Both
+        # interpreters read the identical tuple: local CPython 3.12 and
+        # CI job 110331284782 (fast tier, 3.11, shard 3).
+        (3, 11): (2, 1, 217, 2, 0),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -247,7 +256,13 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # remaining spread on this near-extinct cell:
         # (2, 1, 217, 2, 1) -> (0, 0, 217, 0, 0), read in the local venv
         # on this branch; flag-off reproduces the prior tuple exactly.
-        (3, 12): (0, 0, 217, 0, 0),
+        # NORO-HAND-PRACTICE-01 (see the 3.11 note above): the practice
+        # cycle's extra draws and wet/dry deposit blend re-roll the
+        # extinct cell: (0, 0, 217, 0, 0) -> (2, 1, 217, 2, 0); the
+        # wash_reuptake cell reproduces the prior tuple exactly on this
+        # branch. Identical to the 3.11 CI reading, as before on this
+        # cell.
+        (3, 12): (2, 1, 217, 2, 0),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
