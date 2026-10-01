@@ -358,7 +358,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # to the pre-change tree (per-epoch state digests match on the
         # spec-json replay, seeds 20200205/20200206), so the move is
         # fully attributed to the cap.
-        (3, 12): (0, 0, 3047, 0, 0),
+        # NORO-HAND-CARRIAGE-01: the shipped hygiene_cycle arm draws a
+        # per-infection protected-inactivation trait and per-tick
+        # lognormal uptakes from the new own-environment pool, so the
+        # shared stream reorders and the extinct cell reignites:
+        # (0, 0, 3047, 0, 0) -> (2, 2, 3048, 2, 0), measured in the
+        # local venv on CPython 3.12 on the merged tree. The
+        # wash_reuptake baseline cell reproduces (0, 0, 3047, 0, 0)
+        # exactly on the same tree, so the move is fully attributed
+        # to the arm's new draws.
+        (3, 12): (2, 2, 3048, 2, 0),
     },
 }
 
