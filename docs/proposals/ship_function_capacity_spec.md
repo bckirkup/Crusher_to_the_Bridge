@@ -142,9 +142,20 @@ solved; §8 specifies only what remains.
 A new `ship_functions` block, declared per platform — in
 `data/platforms/<platform>/voyage_config.json` beside `medical_response`,
 deep-mergeable via `config_overrides` like `voyage`. Function IDs are
-free-form; the registry is platform-agnostic by construction. The same
-engine reads `food_service` on a cruise ship and `fishing_ops` on a fishing
-vessel.
+free-form; the registry is platform-agnostic by construction.
+
+Function *vocabulary* is shared across vessel classes — it is the
+parameters that differ. `food_service` exists on a fishing vessel and a
+merchant hull exactly as on a cruise ship; what changes is **who it serves
+and at what scale**, not what it is. A function therefore declares
+`serves`: `passengers` (cruise dining — thousands of covers across venue
+tiers), `crew` (a fishing boat's galley feeding its own complement), or
+`both` (merchant marine: a crew mess plus a small passenger complement).
+Serves determines which population draws on the function and which
+feedback kinds are meaningful — degraded cruise dining reroutes passenger
+venue weights; a degraded crew galley on a fishing boat degrades the crew
+that staffs `fishing_ops` itself (a second-order staffing channel, §6.2
+note), because the crew has nowhere else to eat.
 
 ```json
 "ship_functions": {
@@ -152,6 +163,7 @@ vessel.
   "functions": [
     {
       "function_id": "food_service",
+      "serves": "passengers",
       "staffing": {
         "crew_galley": {"required_on_watch": 6, "minimum_on_watch": 2}
       },
@@ -166,6 +178,7 @@ vessel.
     },
     {
       "function_id": "housekeeping",
+      "serves": "both",
       "staffing": {"crew_general": {"required_on_watch": 8}},
       "required_systems": [],
       "capacity_model": "staffing_fraction",
@@ -175,6 +188,7 @@ vessel.
     },
     {
       "function_id": "engineering_watch",
+      "serves": "mission",
       "staffing": {"crew_engineering": {"required_on_watch": 3, "minimum_on_watch": 1}},
       "required_zone_types": ["Engine"],
       "required_systems": ["propulsion"],
@@ -185,12 +199,24 @@ vessel.
 }
 ```
 
-A fishing platform declares instead:
+A fishing platform declares the same vocabulary — the galley is still
+`food_service`, just crew-served and non-optional — plus its mission
+functions:
 
 ```json
 "functions": [
   {
+    "function_id": "food_service",
+    "serves": "crew",
+    "staffing": {"crew_galley": {"required_on_watch": 1, "minimum_on_watch": 1}},
+    "required_zone_types": ["Galley", "Mess"],
+    "required_systems": ["refrigeration"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
     "function_id": "fishing_ops",
+    "serves": "mission",
     "staffing": {"crew_deck": {"required_on_watch": 4, "minimum_on_watch": 2}},
     "required_zone_types": ["Fishing_Deck"],
     "required_systems": ["winch", "fish_hold_refrigeration"],
@@ -199,6 +225,7 @@ A fishing platform declares instead:
   },
   {
     "function_id": "catch_processing",
+    "serves": "mission",
     "staffing": {"crew_processing": {"required_on_watch": 3}},
     "required_zone_types": ["Factory_Deck"],
     "required_systems": ["processing_line"],
@@ -210,6 +237,14 @@ A fishing platform declares instead:
 
 Rules:
 
+- **`serves`** takes `passengers` | `crew` | `both` | `mission`: which
+  population draws on the function. `mission` marks functions whose output
+  is the vessel's work itself (engineering watch, fishing ops, flight ops)
+  — their degraded feedback is operational readout and inter-function
+  dependency, not population behaviour. `crew`-served functions are the
+  subtle ones: the crew they feed is also the crew that staffs every other
+  function, so a dead galley on a fishing boat degrades `fishing_ops` one
+  step removed (§6.2 second-order channel).
 - **Staffing resolution.** A function names the `agent_class` IDs that staff
   it — resolved against the platform's own `agent_classes` block, not a
   built-in list. Legacy binary platforms (passenger/crew only) may instead
@@ -360,6 +395,19 @@ Writer rules, because this is where the loop can go wrong:
   convention of discrete operational states; continuous modulation stays on
   `cleaning_coverage_scale`/`route_scalar_scale` where the consumer is
   already a smooth input.
+- **`crew`-served functions get a second-order staffing channel.** When a
+  crew-served function degrades (galley down, mess closed), its consumers
+  *are the staff*: missed or degraded meals accumulate on the serving crew
+  as a `sustenance_deficit` — a declared input to the fatigue accumulator
+  in §7 (the same write any other fatigue source makes) and, if the
+  platform declares it, to `symptomatic_effectiveness`-style impairment in
+  §4. This is how a fishing boat's dead galley propagates into
+  `fishing_ops` without any function named "morale". The channel is
+  declared per function (`feedback.crew_sustenance: true`) and defaults
+  off — a cruise ship's passengers are not a staffing input, and enabling
+  it there would silently couple the passenger outbreak into crew
+  performance, which is exactly the kind of unscoped widening the registry
+  exists to prevent.
 - **Feedback is optional per function and off with the block.** A platform
   with `ship_functions.enabled: false` is the labelled baseline; each
   function's `feedback` may additionally be disabled to run
@@ -383,6 +431,13 @@ role coverage map, so coverage is read not assumed. Each PPE-bearing
 protocol may declare `ppe_fatigue_rate_per_epoch` (N95 > surgical is a
 declared ordering, not a shipped number); absent key = zero fatigue, so
 legacy protocols are unaffected.
+
+Wear-hours is one *input* to fatigue, not fatigue itself. The accumulator
+is `fatigue_score`, fed by declared sources: PPE wear (this section) and
+the `sustenance_deficit` a degraded crew-served function writes (§6.2).
+Keeping the accumulator a sum of declared contributions — rather than a
+PPE-specific counter — is what lets the same downstream consumers
+(§7.2 compliance, §7.3 conditions) read one number whatever produced it.
 
 ### 7.2 Fatigue → compliance decay
 
