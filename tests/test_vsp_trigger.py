@@ -341,6 +341,75 @@ def test_campaign_metrics_include_reported_case_and_vsp_fields() -> None:
     assert derived["vsp_trigger_epoch"] == 1
 
 
+def test_campaign_metrics_vsp_epoch_from_crew_channel() -> None:
+    """VSP-EITHER-CHANNEL-01: a crew-channel breach alone posts the voyage."""
+    ts = [
+        {
+            "epoch": 0,
+            "infected": 1,
+            "recovered": 0,
+            "susceptible": 9,
+            "passenger_complement": 8,
+            "crew_complement": 2,
+            "new_infections": 1,
+            "trigger_status": "none",
+            "reported_case_rate_passenger": 0.0,
+            "infection_counters": {
+                "passenger_reported_case_rate": {
+                    "value": 0.0,
+                    "newly_confined": 0,
+                    "exceeded": False,
+                },
+                "crew_reported_case_rate": {
+                    "value": 0.0,
+                    "newly_confined": 0,
+                    "exceeded": False,
+                },
+            },
+        },
+        {
+            "epoch": 1,
+            "infected": 2,
+            "recovered": 0,
+            "susceptible": 8,
+            "new_infections": 1,
+            "trigger_status": "none",
+            "reported_case_rate_passenger": 0.0,
+            "passenger_complement": 8,
+            "crew_complement": 2,
+            "infection_counters": {
+                "passenger_reported_case_rate": {
+                    "value": 0.01,
+                    "newly_confined": 0,
+                    "exceeded": False,
+                },
+                "crew_reported_case_rate": {
+                    "value": 0.5,
+                    "newly_confined": 1,
+                    "exceeded": True,
+                },
+            },
+        },
+    ]
+    derived = compute_derived_metrics(ts, num_agents=10)
+    assert derived["vsp_trigger_epoch"] == 1
+
+
+def test_campaign_metrics_vsp_epoch_from_flat_crew_field() -> None:
+    ts = [
+        {
+            "epoch": 0,
+            "infected": 1,
+            "recovered": 0,
+            "susceptible": 9,
+            "passenger_complement": 8,
+            "crew_complement": 2,
+            "crew_reported_case_rate_exceeded": True,
+        },
+    ]
+    assert compute_derived_metrics(ts, num_agents=10)["vsp_trigger_epoch"] == 0
+
+
 def test_campaign_metrics_have_no_vsp_epoch_without_counter() -> None:
     ts = [
         {
@@ -378,12 +447,19 @@ def test_timeseries_emits_reported_case_counter_fields() -> None:
                 "newly_confined": 3,
                 "exceeded": True,
             },
+            "crew_reported_case_rate": {
+                "value": 0.0625,
+                "newly_confined": 1,
+                "exceeded": True,
+            },
         },
     }]
     series = extract_timeseries(history)
     assert series[0]["reported_case_rate_passenger"] == pytest.approx(0.03125)
     assert series[0]["passenger_reported_case_rate_newly_confined"] == 3
     assert series[0]["passenger_reported_case_rate_exceeded"] is True
+    assert series[0]["crew_reported_case_rate_newly_confined"] == 1
+    assert series[0]["crew_reported_case_rate_exceeded"] is True
     assert series[0]["cumulative_ever_infected"] == 2
     assert series[0]["cumulative_ever_infected_passenger"] == 1
     assert series[0]["cumulative_ever_infected_crew"] == 1

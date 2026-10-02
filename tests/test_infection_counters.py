@@ -349,5 +349,11 @@ class TestVSPCounterConfiguration:
         )
         assert by_id["crew_reported_case_rate"]["metric"] == "reported_case_rate"
         assert by_id["all_reported_case_rate"]["metric"] == "reported_case_rate"
-        assert "threshold" not in by_id["crew_reported_case_rate"]
+        # VSP-EITHER-CHANNEL-01: the published rule posts at 3% of passengers
+        # OR 3% of crew, so the crew counter carries the same trigger.
+        assert by_id["crew_reported_case_rate"]["threshold"] == 0.03
+        assert (
+            by_id["crew_reported_case_rate"]["on_exceed"]
+            == "confine_symptomatic"
+        )
         assert "threshold" not in by_id["all_reported_case_rate"]

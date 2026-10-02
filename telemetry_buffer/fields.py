@@ -171,6 +171,7 @@ VOYAGE_PORT: Final = "port"
 # ── infection_counters block (not in the schema) ─────────────────────────
 
 COUNTER_PASSENGER_REPORTED_CASE_RATE: Final = "passenger_reported_case_rate"
+COUNTER_CREW_REPORTED_CASE_RATE: Final = "crew_reported_case_rate"
 COUNTER_VALUE: Final = "value"
 COUNTER_NEWLY_CONFINED: Final = "newly_confined"
 COUNTER_EXCEEDED: Final = "exceeded"

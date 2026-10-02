@@ -297,7 +297,7 @@ def test_verdicts_report_unknown_hull_and_no_eligible_runs() -> None:
     assert unknown["A8"] == "n/a (unknown hull)"
 
 
-def test_a9_reports_passenger_trigger_disagreements() -> None:
+def test_a9_reports_trigger_disagreements() -> None:
     row = _row(reported_pax=0.02, trigger_epoch=10)
 
     cell = score_anchors.summarise_cell([row])
@@ -306,6 +306,14 @@ def test_a9_reports_passenger_trigger_disagreements() -> None:
     assert score_anchors.summarise_cell(
         [_row(reported_pax=0.03, trigger_epoch=None)],
     )["A9_flag_disagreements"] == 1
+    # VSP-EITHER-CHANNEL-01: the crew channel is part of the same posting
+    # rule — a crew-only post with no flag disagrees, with a flag it agrees.
+    assert score_anchors.summarise_cell(
+        [_row(reported_pax=0.02, reported_crew=0.03, trigger_epoch=None)],
+    )["A9_flag_disagreements"] == 1
+    assert score_anchors.summarise_cell(
+        [_row(reported_pax=0.02, reported_crew=0.03, trigger_epoch=7)],
+    )["A9_flag_disagreements"] == 0
 
 
 

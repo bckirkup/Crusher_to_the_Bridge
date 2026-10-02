@@ -150,6 +150,12 @@ ship_graph:
       metric: "reported_case_rate"
       filter:
         role_group: "crew"
+      threshold: 0.03
+      # The published VSP rule posts at 3% of passengers OR 3% of crew
+      # (docs/reports/05_vsp.tex, equation vsp-trigger); the crew channel was
+      # log-only until VSP-EITHER-CHANNEL-01. The response is the same
+      # ship-wide symptomatic confinement either channel triggers.
+      on_exceed: "confine_symptomatic"
     - counter_id: "all_reported_case_rate"
       label: "Overall Reported Case Rate"
       metric: "reported_case_rate"

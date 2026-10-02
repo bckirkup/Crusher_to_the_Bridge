@@ -530,9 +530,13 @@ def _a8_a9_channels(
         row for row in eligible
         if row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
     ]
+    # The in-sim trigger and the scored posting are the same either-channel
+    # rule since VSP-EITHER-CHANNEL-01, so this counts only real harness
+    # mismatches; pre-change payloads disagree exactly on crew-only postings.
     disagreements = sum(
         (
             row["reported_case_attack_rate_passenger"] >= A9_POSTING_THRESHOLD
+            or row["reported_case_attack_rate_crew"] >= A9_POSTING_THRESHOLD
         ) != (row["vsp_trigger_epoch"] is not None)
         for row in rows
     )
