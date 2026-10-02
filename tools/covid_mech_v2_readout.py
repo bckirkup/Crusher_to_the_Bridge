@@ -76,6 +76,15 @@ from tools.covid_theta_v15_stage2_readout import (  # noqa: E402
 SECRETOR_DRAW_TOL = 0.08
 CHILD_FAILURE_TRIGGER = 0.05
 
+# The arms whose stale-canary (472cdf13) anchor PASSes made them the
+# assay premise; a scored anchor FAIL on any of them is the declared
+# "premise collapses" trigger (docs/covid/covid_mech_v1_canary_readout.md).
+# FAILs on arms that never passed (f025, f075) are not premise events.
+PREMISE_ARMS: dict[str, frozenset[str]] = {
+    "covid_ring_cap_v1": frozenset({"rings_first"}),
+    "covid_susc_pool_v1": frozenset({"f050"}),
+}
+
 
 def _arm_expectations(arm: dict[str, Any]) -> dict[str, Any]:
     """The declared projection one arm's payload must echo."""
@@ -101,6 +110,8 @@ def _audit_delivery(delivery: dict[str, Any], want: dict[str, Any]) -> list[str]
         got = delivery.get(field)
         if got != want_value:
             failures.append(f"delivery.{field} {got!r} != {want_value!r}")
+    if "include_fixed_rings" not in want:
+        return failures
     engine_flag = delivery.get("exposure_cap_include_fixed_rings_engine")
     if bool(engine_flag) != want["include_fixed_rings"]:
         failures.append(
@@ -111,6 +122,8 @@ def _audit_delivery(delivery: dict[str, Any], want: dict[str, Any]) -> list[str]
 
 
 def _audit_cap_echo(payload: dict[str, Any], want: dict[str, Any]) -> list[str]:
+    if "include_fixed_rings" not in want:
+        return []
     spec_flag = payload.get("exposure_cap_include_fixed_rings")
     if spec_flag == want["include_fixed_rings"]:
         return []
@@ -133,6 +146,8 @@ def _audit_secretor_echo(
     payload: dict[str, Any], want: dict[str, Any],
 ) -> list[str]:
     """Declared/resolved/realized pool draw against the arm's fraction."""
+    if "secretor_fraction" not in want:
+        return []
     block = payload.get("secretor_negative")
     if not isinstance(block, dict):
         return ["missing secretor_negative audit echo"]
@@ -296,6 +311,7 @@ def _row_trigger_entries(
     baseline_arm: str,
     anchor: float,
     admissible: set[float],
+    design_id: str,
 ) -> list[dict[str, Any]]:
     """The frozen report-immediately grammar, one (theta, arm) row."""
     triggers: list[dict[str, Any]] = []
@@ -303,10 +319,11 @@ def _row_trigger_entries(
     row = {"theta": theta, "arm_id": arm_id, "takeoff_n": stats["takeoff_n"]}
     if stats["takeoff_n"] < MIN_TAKEOFF_SEEDS:
         triggers.append({**row, "trigger": "insufficient_takeoff_mass"})
-    if theta == anchor and arm_id != baseline_arm and clause["scored"] and (
-        not clause["clause_ok"]
-    ):
-        triggers.append({**row, "trigger": "anchor_premise_collapsed"})
+    if theta == anchor and clause["scored"] and not clause["clause_ok"]:
+        if arm_id in PREMISE_ARMS.get(design_id, frozenset()):
+            triggers.append({**row, "trigger": "anchor_premise_collapsed"})
+        elif arm_id != baseline_arm:
+            triggers.append({**row, "trigger": "anchor_clause_fail"})
     if theta in admissible and clause["scored"] and clause["clause_ok"]:
         triggers.append({**row, "trigger": "clause_pass_at_admissible"})
     return triggers
@@ -363,7 +380,15 @@ def main(argv: list[str] | None = None) -> int:
     anchor = design.thetas[0]
     admissible = set(design.thetas[1:])
 
-    payloads = load_cell_payloads(args.cells)
+    # The mech_v2 replay prefix is shared by both assays, so a cells dir
+    # holds foreign-design payloads; they belong to the sibling readout.
+    loaded = load_cell_payloads(args.cells)
+    payloads = {
+        n: p
+        for n, p in loaded.items()
+        if p.get("design_id") == design.design_id
+    }
+    foreign_design_cells = len(loaded) - len(payloads)
     audit_failures: dict[str, list[str]] = {}
     rows: dict[tuple, list[dict]] = {}
     for name, payload in sorted(payloads.items()):
@@ -399,6 +424,7 @@ def main(argv: list[str] | None = None) -> int:
         row_summaries[key] = stats
         triggers += _row_trigger_entries(
             key[0], key[1], stats, baseline, anchor, admissible,
+            design.design_id,
         )
         missing_seeds = design.seeds - len(row)
         if missing_seeds / design.seeds > CHILD_FAILURE_TRIGGER:
@@ -465,6 +491,7 @@ def main(argv: list[str] | None = None) -> int:
     report = {
         "cells_found": len(payloads),
         "cells_expected": len(lattice),
+        "foreign_design_cells_skipped": foreign_design_cells,
         "baseline_arm": baseline,
         "anchor_theta": anchor,
         "audit_failures": audit_failures,
