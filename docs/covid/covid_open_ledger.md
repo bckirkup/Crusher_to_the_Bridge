@@ -191,6 +191,25 @@ its q05 floor above 197; `f075` leaves only 3 takeoff seeds — below the
 full arrays decide whether either survives the admissible band
 (`docs/covid/covid_mech_v1_canary_readout.md`).*
 
+*Update (2026-10-02, `def39066`, anchor canary re-measured under
+`once_per_course` — the `472cdf13` readings above are STALE and
+superseded): both assays' Θ1e9 anchor rows re-ran on the v15-paired
+designs (PR #850; image digest `sha256:516b0b57…`, jobdef rev 46,
+120/120 cells, 0 audit failures, `cap_on`/`declared` reproduce the v15
+stage-2 parent seed-for-seed). **rings_first's premise collapsed —
+the anchor clause now FAILs on both legs (takeoff n 11, q05–q95
+405–2460 does not contain 197, before_share 0.343). f050's premise
+survives — the only PASS still standing under the repaired draw
+(n 6, 169–1193 ∋ 197, share 0.150).** `f025` fails the count leg high
+(227 > 197, same direction as the stale run); `f075` now contains 197
+on the count leg (61–553) but fails the share leg (0.410). The
+mechanism-arms do move the rows vs v15 (6–10 takeoff-class flips each),
+so these are measured deltas, not dead wiring — the payload now carries
+`delivery.exposure_cap_include_fixed_rings_engine` and a
+`secretor_negative` declared/resolved/realized block proving the
+overrides landed. Whether f050 survives the admissible band awaits the
+full-array decision (`docs/covid/covid_mech_v2_canary_readout.md`).*
+
 **The declared index case is repaired — earlier text here was stale.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020). Declared per-agent departure exists
