@@ -1,6 +1,6 @@
 # NORO-CHANNEL-03
 **Date:** 2026-10-02
-**Commit:** (declared PR — SHA at merge)
+**Commit:** #848
 **Pathogens:** norwalk_gi
 **Status:** declared
 
