@@ -34,73 +34,89 @@ def _e_sar(doses: list[float], k: float) -> float:
     )
 
 
-def main() -> int:
-    out: dict = {"modes": {}, "paired": {}}
+def _load_cells() -> dict[tuple[str, int], dict]:
     cells: dict[tuple[str, int], dict] = {}
     for path in sorted(RUNS.glob("classic_cruise_1900_s*.json")):
         parts = path.stem.split("_")
         seed = int(parts[3].lstrip("s"))
         mode = "_".join(parts[4:])
         cells[(mode, seed)] = json.loads(path.read_text())
+    return cells
 
-    for mode in ("once_per_course", "daily_hazard"):
-        slots = sec = 0
-        doses: list[float] = []
-        ill = inf = rep = 0
-        for (m, seed), s in sorted(cells.items()):
-            if m != mode:
-                continue
-            confined = s["rhythm"]["confined"]
-            slots += int(confined["confined_slots"])
-            sec += int(confined["confined_secondaries"])
-            for row in confined.get("slot_rows") or []:
-                doses.append(float(row.get("delivered_p_dose") or 0.0))
-            summ = s.get("summary") or {}
-            ill += int(summ.get("cumulative_ever_ill_passenger") or 0)
-            inf += int(summ.get("cumulative_ever_infected_passenger") or 0)
-            rep += int(summ.get("cumulative_reported_cases_passenger") or 0)
-        lo, hi = _wilson(sec, slots)
-        band = (_e_sar(doses, K_LO), _e_sar(doses, K_HI))
-        out["modes"][mode] = {
-            "confined_slots": slots,
-            "confined_secondaries": sec,
-            "confined_sar": sec / slots if slots else None,
-            "wilson_95": [lo, hi],
-            "band_e_sar": [band[0], band[1]],
-            "e_sar_k_ship": _e_sar(doses, K_SHIP),
-            "f1_overlap": bool(lo < F1[1] and hi > F1[0]),
-            "dosed_rows": len(doses),
-            "ever_ill_pax": ill,
-            "ever_infected_pax": inf,
-            "reported_pax": rep,
-        }
-        print(f"=== {mode} ===")
+
+def _accumulate_mode(
+    cells: dict[tuple[str, int], dict], mode: str
+) -> tuple[dict, list[float]]:
+    slots = sec = ill = inf = rep = 0
+    doses: list[float] = []
+    for (m, _seed), s in sorted(cells.items()):
+        if m != mode:
+            continue
+        confined = s["rhythm"]["confined"]
+        slots += int(confined["confined_slots"])
+        sec += int(confined["confined_secondaries"])
+        for row in confined.get("slot_rows") or []:
+            doses.append(float(row.get("delivered_p_dose") or 0.0))
+        summ = s.get("summary") or {}
+        ill += int(summ.get("cumulative_ever_ill_passenger") or 0)
+        inf += int(summ.get("cumulative_ever_infected_passenger") or 0)
+        rep += int(summ.get("cumulative_reported_cases_passenger") or 0)
+    lo, hi = _wilson(sec, slots)
+    stats = {
+        "confined_slots": slots,
+        "confined_secondaries": sec,
+        "confined_sar": sec / slots if slots else None,
+        "wilson_95": [lo, hi],
+        "band_e_sar": [_e_sar(doses, K_LO), _e_sar(doses, K_HI)],
+        "e_sar_k_ship": _e_sar(doses, K_SHIP),
+        "f1_overlap": bool(lo < F1[1] and hi > F1[0]),
+        "dosed_rows": len(doses),
+        "ever_ill_pax": ill,
+        "ever_infected_pax": inf,
+        "reported_pax": rep,
+    }
+    return stats, doses
+
+
+def _print_mode(mode: str, stats: dict, doses: list[float]) -> None:
+    slots = stats["confined_slots"]
+    sec = stats["confined_secondaries"]
+    lo, hi = stats["wilson_95"]
+    band = stats["band_e_sar"]
+    print(f"=== {mode} ===")
+    print(
+        f"confined SAR {sec}/{slots} = {sec/slots*100:.1f}% "
+        f"Wilson [{lo*100:.1f}, {hi*100:.1f}]"
+    )
+    print(
+        f"band [E(k_lo),E(k_hi)] = [{band[0]*100:.1f}%, {band[1]*100:.1f}%]; "
+        f"E[SAR]@k=6e-4 = {stats['e_sar_k_ship']*100:.1f}%; "
+        f"F1 [{F1[0]*100:.0f},{F1[1]*100:.0f}] "
+        f"{'IN' if stats['f1_overlap'] else 'OUT'}"
+    )
+    if slots:
+        median = sorted(doses)[len(doses) // 2] if doses else 0
         print(
-            f"confined SAR {sec}/{slots} = {sec/slots*100:.1f}% "
-            f"Wilson [{lo*100:.1f}, {hi*100:.1f}]"
+            f"dose p50 = {median:.2f} copies over {len(doses)} dosed rows "
+            f"({len(doses)/slots:.0%} of slots)"
         )
-        print(
-            f"band [E(k_lo),E(k_hi)] = [{band[0]*100:.1f}%, {band[1]*100:.1f}%]; "
-            f"E[SAR]@k=6e-4 = {_e_sar(doses, K_SHIP)*100:.1f}%; "
-            f"F1 [{F1[0]*100:.0f},{F1[1]*100:.0f}] "
-            f"{'IN' if lo < F1[1] and hi > F1[0] else 'OUT'}"
-        )
-        print(
-            f"dose p50 = {sorted(doses)[len(doses)//2] if doses else 0:.2f} "
-            f"copies over {len(doses)} dosed rows "
-            f"({len(doses)/slots:.0%} of slots)" if slots else ""
-        )
-        print(
-            f"ever_ill/ever_infected pax = {ill}/{inf} "
-            f"({ill/inf:.2f})" if inf else "no pax infections"
-        )
-        print(
-            f"reported/infected pax = {rep}/{inf} ({rep/inf:.2f}) "
-            f"(F5 ~0.08)" if inf else ""
-        )
+    inf = stats["ever_infected_pax"]
+    if not inf:
+        print("no pax infections")
         print()
+        return
+    print(
+        f"ever_ill/ever_infected pax = {stats['ever_ill_pax']}/{inf} "
+        f"({stats['ever_ill_pax']/inf:.2f})"
+    )
+    print(
+        f"reported/infected pax = {stats['reported_pax']}/{inf} "
+        f"({stats['reported_pax']/inf:.2f}) (F5 ~0.08)"
+    )
+    print()
 
-    print("=== paired deltas ===")
+
+def _paired_deltas(cells: dict[tuple[str, int], dict], out: dict) -> None:
     for (m, seed), s in sorted(cells.items()):
         if m != "once_per_course":
             continue
@@ -121,6 +137,16 @@ def main() -> int:
             f"{b['confined_slots']}={sb*100:.1f}%  d={(sa-sb)*100:+.1f}pp"
         )
 
+
+def main() -> int:
+    out: dict = {"modes": {}, "paired": {}}
+    cells = _load_cells()
+    for mode in ("once_per_course", "daily_hazard"):
+        stats, doses = _accumulate_mode(cells, mode)
+        out["modes"][mode] = stats
+        _print_mode(mode, stats, doses)
+    print("=== paired deltas ===")
+    _paired_deltas(cells, out)
     SUMMARY_OUT.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
     return 0
 
