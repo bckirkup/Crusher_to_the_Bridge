@@ -150,6 +150,12 @@ def _audit_witnesses(
         failures.append(
             "self_isolated_count == 0 on a scoped arm",
         )
+    failures.extend(_audit_zone_echo(block, declared))
+    return failures
+
+
+def _audit_zone_echo(block: dict, declared: dict) -> list[str]:
+    failures: list[str] = []
     if sorted(block.get("closed_zones_applied") or []) != sorted(
         declared["closed_zones"]
     ):
@@ -272,30 +278,12 @@ def _paired_delta_row(
         "post_arming_mass": [],
     }
     for p in row:
-        seed = int((p.get("cell") or {}).get("seed"))
-        b = base_by_seed.get(seed)
+        b = base_by_seed.get(int((p.get("cell") or {}).get("seed")))
         if b is None:
             continue
         if int(p["observables"]["recorded_onsets"]) < TAKEOFF_MIN:
             continue
-        deltas["recorded_onsets"].append(
-            float(p["observables"]["recorded_onsets"])
-            - float(b["observables"]["recorded_onsets"])
-        )
-        s_arm = _share(p)
-        s_base = _share(b)
-        if s_arm is not None and s_base is not None:
-            deltas["before_share"].append(s_arm - s_base)
-        if p.get("infections_total") is not None and (
-            b.get("infections_total") is not None
-        ):
-            deltas["infections_total"].append(
-                float(p["infections_total"]) - float(b["infections_total"])
-            )
-        m_arm = _post_arming_mass(p)
-        m_base = _post_arming_mass(b)
-        if m_arm is not None and m_base is not None:
-            deltas["post_arming_mass"].append(m_arm - m_base)
+        _append_pair_deltas(deltas, p, b)
     arm_shares = [
         s for p in row
         if int((p.get("observables") or {}).get("recorded_onsets") or 0)
@@ -323,6 +311,29 @@ def _paired_delta_row(
             f"delta_{k}": band_stats(v) for k, v in deltas.items()
         },
     }
+
+
+def _append_pair_deltas(
+    deltas: dict[str, list[float]], p: dict, b: dict,
+) -> None:
+    deltas["recorded_onsets"].append(
+        float(p["observables"]["recorded_onsets"])
+        - float(b["observables"]["recorded_onsets"])
+    )
+    s_arm = _share(p)
+    s_base = _share(b)
+    if s_arm is not None and s_base is not None:
+        deltas["before_share"].append(s_arm - s_base)
+    if p.get("infections_total") is not None and (
+        b.get("infections_total") is not None
+    ):
+        deltas["infections_total"].append(
+            float(p["infections_total"]) - float(b["infections_total"])
+        )
+    m_arm = _post_arming_mass(p)
+    m_base = _post_arming_mass(b)
+    if m_arm is not None and m_base is not None:
+        deltas["post_arming_mass"].append(m_arm - m_base)
 
 
 def _paired_rows(rows: dict[tuple, list[dict]]) -> dict:

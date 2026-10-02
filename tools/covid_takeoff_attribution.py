@@ -42,6 +42,7 @@ import math
 import os
 import sys
 from collections import Counter
+from functools import partial
 from typing import Any
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -102,6 +103,184 @@ def _dose_shares(weights: dict[int, float]) -> dict[int, float]:
     if total <= 0.0:
         return {}
     return {sid: w / total for sid, w in weights.items() if w > 0.0}
+
+
+def _record_droplet_wrapped(
+    ledger: TakeoffAttributionLedger,
+    orig_record: Any,
+    st: Any, matrix: Any, target: Any,
+    dose: float, near_dose: float,
+) -> None:
+    orig_record(st, matrix, target, dose, near_dose)
+    tid = int(target.agent_id)
+    slot = ledger._droplet.setdefault(tid, {
+        "dose": 0.0, "near": 0.0, "unit": st.unit_name,
+        "zone": st.zone_name, "src": {},
+    })
+    slot["dose"] += float(dose)
+    slot["near"] += float(near_dose)
+    slot["src"].update(
+        {int(s.agent_id): float(em) for s, em in st.emitted_shedders}
+    )
+    unit = ledger._epoch_units.setdefault(
+        st.unit_name, {"zone": st.zone_name, "targets": 0, "src": {}},
+    )
+    unit["targets"] += 1
+    unit["src"].update(
+        {int(s.agent_id): float(em) for s, em in st.emitted_shedders}
+    )
+
+
+def _addback_wrapped(
+    ledger: TakeoffAttributionLedger,
+    tx_core: Any,
+    orig_addback: Any,
+    target: Any, shedders: list, volume: Any,
+    vent_factor: Any, target_factor: float,
+    emission_fraction: Any, epoch: int,
+    residence_factor: Any,
+) -> float:
+    dose = orig_addback(
+        target, shedders, volume, vent_factor, target_factor,
+        emission_fraction, epoch, residence_factor,
+    )
+    if dose > 0.0:
+        weights = {}
+        for shedder, sv in shedders:
+            if shedder.agent_id not in target.cabin_mate_ids:
+                continue
+            factor = tx_core.confinement_emission_factor(shedder)
+            copresence = tx_core._cabin_pair_copresence(
+                shedder, target, epoch,
+            )
+            # Per-shedder addback contribution, engine form.
+            weights[shedder.agent_id] = (
+                sv * copresence * (1.0 - factor * target_factor)
+            )
+        ledger._addback[int(target.agent_id)] = {
+            "dose": float(dose),
+            "src": weights,
+        }
+    return dose
+
+
+def _near_wrapped(
+    ledger: TakeoffAttributionLedger,
+    tx_core: Any,
+    orig_near: Any,
+    zone_name: str, target: Any, emitted: list,
+    volume: Any, target_factor: float,
+    emission_fraction: Any, epoch: int,
+    **kw: Any,
+) -> float:
+    ledger._near_ctx = (int(epoch), int(target.agent_id))
+    ledger._near_weights = {}
+    try:
+        dose = orig_near(
+            zone_name, target, emitted, volume, target_factor,
+            emission_fraction, epoch, **kw,
+        )
+    finally:
+        weights = dict(ledger._near_weights)
+        ledger._near_weights = {}
+        ledger._near_ctx = None
+    if dose <= 0.0 or not weights:
+        return dose
+    emitted_of = {s.agent_id: em for s, em in emitted}
+    shedder_of = {s.agent_id: s for s, _ in emitted}
+    shares: dict[int, float] = {}
+    ring_doses: Counter = Counter()
+    for sid, (w, ring) in weights.items():
+        em = emitted_of.get(sid, 0.0)
+        if em <= 0.0:
+            continue
+        shedder = shedder_of[sid]
+        if sid in target.cabin_mate_ids:
+            factor = tx_core.confinement_emission_factor(shedder)
+            contribution = w * (em / factor if factor > 0 else em)
+        else:
+            contribution = w * em * target_factor
+        shares[sid] = contribution
+    shares = _dose_shares(shares)
+    for sid, share in shares.items():
+        ring_doses[weights[sid][1]] += dose * share
+    ledger._near[int(target.agent_id)] = {
+        "dose": float(dose),
+        "weights": {s: w for s, (w, _r) in weights.items()},
+        "ring_doses": dict(ring_doses),
+        "src": shares,
+    }
+    return dose
+
+
+def _unit_wrapped(
+    ledger: TakeoffAttributionLedger,
+    tx_core: Any,
+    orig_unit: Any,
+    zone_name: str, target: Any, shedder: Any,
+    epoch: int, proximity_ids: Any = None,
+) -> Any:
+    weight = orig_unit(
+        zone_name, target, shedder, epoch, proximity_ids,
+    )
+    ctx = ledger._near_ctx
+    if (
+        ctx is not None
+        and ctx[0] == int(epoch)
+        and ctx[1] == target.agent_id
+        and weight is not None
+        and weight > 0.0
+    ):
+        ledger._near_weights[int(shedder.agent_id)] = (
+            float(weight),
+            _near_ring(tx_core, zone_name, target, shedder,
+                       epoch, proximity_ids),
+        )
+    return weight
+
+
+def _resolve_wrapped(
+    ledger: TakeoffAttributionLedger,
+    tx_core: Any,
+    pid: str,
+    orig_resolve: Any,
+    epoch: int, agent: Any, pathogen_id: str,
+    apd: Any, apw: Any, matrix: Any,
+    events: list, *args: Any,
+    **kwargs: Any,
+) -> None:
+    watched = (
+        pathogen_id == pid and not agent.is_infected_with(pid)
+    )
+    p_dose = 0.0
+    pw: dict[str, float] = {}
+    protection = 0.0
+    if watched:
+        p_dose = float(apd.get(agent.agent_id, {}).get(pid, 0.0))
+        watched = p_dose > 0.0
+    if watched:
+        protection = tx_core._challenge_protection(agent, pid, epoch)
+        pw = {
+            name.rsplit(":", 1)[0]: float(dose)
+            for name, dose in apw.get(agent.agent_id, {}).items()
+            if name.endswith(f":{pid}")
+        }
+    orig_resolve(
+        epoch, agent, pathogen_id, apd, apw, matrix, events,
+        *args, **kwargs,
+    )
+    if watched:
+        ledger._challenges[int(agent.agent_id)] = {
+            "epoch": int(epoch),
+            "p_dose": p_dose,
+            "protection": float(protection),
+            "pathways": pw,
+            "susceptibility": (
+                agent.dose_response_susceptibility.get(pid)
+            ),
+            "infected": pid in agent.infections,
+            "location": agent.current_location,
+        }
 
 
 class TakeoffAttributionLedger:
@@ -187,167 +366,23 @@ class TakeoffAttributionLedger:
     # ── wrappers ────────────────────────────────────────────────────
 
     def _install(self, tx_core: Any) -> None:
-        orig_record = tx_core._record_droplet_exposure
-        orig_addback = tx_core._cabin_mate_droplet_addback
-        orig_near = tx_core._near_field_droplet_dose
-        orig_unit = tx_core._near_field_unit
-        orig_resolve = tx_core._resolve_pathogen_challenge
-        ledger = self
-        pid = self.pathogen_id
-
-        def record_wrapped(st: Any, matrix: Any, target: Any,
-                           dose: float, near_dose: float) -> None:
-            orig_record(st, matrix, target, dose, near_dose)
-            tid = int(target.agent_id)
-            slot = ledger._droplet.setdefault(tid, {
-                "dose": 0.0, "near": 0.0, "unit": st.unit_name,
-                "zone": st.zone_name, "src": {},
-            })
-            slot["dose"] += float(dose)
-            slot["near"] += float(near_dose)
-            slot["src"].update(
-                {int(s.agent_id): float(em) for s, em in st.emitted_shedders}
-            )
-            unit = ledger._epoch_units.setdefault(
-                st.unit_name, {"zone": st.zone_name, "targets": 0, "src": {}},
-            )
-            unit["targets"] += 1
-            unit["src"].update(
-                {int(s.agent_id): float(em) for s, em in st.emitted_shedders}
-            )
-
-        def addback_wrapped(target: Any, shedders: list, volume: Any,
-                            vent_factor: Any, target_factor: float,
-                            emission_fraction: Any, epoch: int,
-                            residence_factor: Any) -> float:
-            dose = orig_addback(
-                target, shedders, volume, vent_factor, target_factor,
-                emission_fraction, epoch, residence_factor,
-            )
-            if dose > 0.0:
-                weights = {}
-                for shedder, sv in shedders:
-                    if shedder.agent_id not in target.cabin_mate_ids:
-                        continue
-                    factor = tx_core.confinement_emission_factor(shedder)
-                    copresence = tx_core._cabin_pair_copresence(
-                        shedder, target, epoch,
-                    )
-                    # Per-shedder addback contribution, engine form.
-                    weights[shedder.agent_id] = (
-                        sv * copresence * (1.0 - factor * target_factor)
-                    )
-                ledger._addback[int(target.agent_id)] = {
-                    "dose": float(dose),
-                    "src": weights,
-                }
-            return dose
-
-        def near_wrapped(zone_name: str, target: Any, emitted: list,
-                         volume: Any, target_factor: float,
-                         emission_fraction: Any, epoch: int,
-                         **kw: Any) -> float:
-            ledger._near_ctx = (int(epoch), int(target.agent_id))
-            ledger._near_weights = {}
-            try:
-                dose = orig_near(
-                    zone_name, target, emitted, volume, target_factor,
-                    emission_fraction, epoch, **kw,
-                )
-            finally:
-                weights = dict(ledger._near_weights)
-                ledger._near_weights = {}
-                ledger._near_ctx = None
-            if dose <= 0.0 or not weights:
-                return dose
-            emitted_of = {s.agent_id: em for s, em in emitted}
-            shedder_of = {s.agent_id: s for s, _ in emitted}
-            shares: dict[int, float] = {}
-            ring_doses: Counter = Counter()
-            for sid, (w, ring) in weights.items():
-                em = emitted_of.get(sid, 0.0)
-                if em <= 0.0:
-                    continue
-                shedder = shedder_of[sid]
-                if sid in target.cabin_mate_ids:
-                    factor = tx_core.confinement_emission_factor(shedder)
-                    contribution = w * (em / factor if factor > 0 else em)
-                else:
-                    contribution = w * em * target_factor
-                shares[sid] = contribution
-            shares = _dose_shares(shares)
-            for sid, share in shares.items():
-                ring_doses[weights[sid][1]] += dose * share
-            ledger._near[int(target.agent_id)] = {
-                "dose": float(dose),
-                "weights": {s: w for s, (w, _r) in weights.items()},
-                "ring_doses": dict(ring_doses),
-                "src": shares,
-            }
-            return dose
-
-        def unit_wrapped(zone_name: str, target: Any, shedder: Any,
-                         epoch: int, proximity_ids: Any = None) -> Any:
-            weight = orig_unit(
-                zone_name, target, shedder, epoch, proximity_ids,
-            )
-            ctx = ledger._near_ctx
-            if (
-                ctx is not None
-                and ctx[0] == int(epoch)
-                and ctx[1] == target.agent_id
-                and weight is not None
-                and weight > 0.0
-            ):
-                ledger._near_weights[int(shedder.agent_id)] = (
-                    float(weight),
-                    _near_ring(tx_core, zone_name, target, shedder,
-                               epoch, proximity_ids),
-                )
-            return weight
-
-        def resolve_wrapped(epoch: int, agent: Any, pathogen_id: str,
-                            apd: Any, apw: Any, matrix: Any,
-                            events: list, *args: Any,
-                            **kwargs: Any) -> None:
-            watched = (
-                pathogen_id == pid and not agent.is_infected_with(pid)
-            )
-            p_dose = 0.0
-            pw: dict[str, float] = {}
-            protection = 0.0
-            if watched:
-                p_dose = float(apd.get(agent.agent_id, {}).get(pid, 0.0))
-                watched = p_dose > 0.0
-            if watched:
-                protection = tx_core._challenge_protection(agent, pid, epoch)
-                pw = {
-                    name.rsplit(":", 1)[0]: float(dose)
-                    for name, dose in apw.get(agent.agent_id, {}).items()
-                    if name.endswith(f":{pid}")
-                }
-            orig_resolve(
-                epoch, agent, pathogen_id, apd, apw, matrix, events,
-                *args, **kwargs,
-            )
-            if watched:
-                ledger._challenges[int(agent.agent_id)] = {
-                    "epoch": int(epoch),
-                    "p_dose": p_dose,
-                    "protection": float(protection),
-                    "pathways": pw,
-                    "susceptibility": (
-                        agent.dose_response_susceptibility.get(pid)
-                    ),
-                    "infected": pid in agent.infections,
-                    "location": agent.current_location,
-                }
-
-        tx_core._record_droplet_exposure = record_wrapped
-        tx_core._cabin_mate_droplet_addback = addback_wrapped
-        tx_core._near_field_droplet_dose = near_wrapped
-        tx_core._near_field_unit = unit_wrapped
-        tx_core._resolve_pathogen_challenge = resolve_wrapped
+        tx_core._record_droplet_exposure = partial(
+            _record_droplet_wrapped, self, tx_core._record_droplet_exposure,
+        )
+        tx_core._cabin_mate_droplet_addback = partial(
+            _addback_wrapped, self, tx_core,
+            tx_core._cabin_mate_droplet_addback,
+        )
+        tx_core._near_field_droplet_dose = partial(
+            _near_wrapped, self, tx_core, tx_core._near_field_droplet_dose,
+        )
+        tx_core._near_field_unit = partial(
+            _unit_wrapped, self, tx_core, tx_core._near_field_unit,
+        )
+        tx_core._resolve_pathogen_challenge = partial(
+            _resolve_wrapped, self, tx_core, self.pathogen_id,
+            tx_core._resolve_pathogen_challenge,
+        )
         self._installed = True
 
     # ── per-epoch helpers ───────────────────────────────────────────
@@ -371,19 +406,24 @@ class TakeoffAttributionLedger:
         )
         for rows, channel, source_keys in records:
             for rec in rows:
-                tid = int(rec["target_id"])
-                self.offered_counts[(epoch, channel)] += 1
-                sources: list[int] = []
-                for key in source_keys:
-                    if rec.get(key):
-                        sources = [int(s) for s in rec[key]]
-                        break
-                if sources:
-                    slot = self._other_src.setdefault(tid, {})
-                    cur = slot.setdefault(channel, Counter())
-                    for sid in sources:
-                        cur[sid] += 1
-                        self._reach_add(sid, channel)
+                self._tally_record(epoch, rec, channel, source_keys)
+
+    def _tally_record(
+        self, epoch: int, rec: Any, channel: str, source_keys: tuple,
+    ) -> None:
+        tid = int(rec["target_id"])
+        self.offered_counts[(epoch, channel)] += 1
+        sources: list[int] = []
+        for key in source_keys:
+            if rec.get(key):
+                sources = [int(s) for s in rec[key]]
+                break
+        if sources:
+            slot = self._other_src.setdefault(tid, {})
+            cur = slot.setdefault(channel, Counter())
+            for sid in sources:
+                cur[sid] += 1
+                self._reach_add(sid, channel)
 
     def _channel_parts(self, tid: int) -> Counter:
         """This epoch's naive droplet dose split into the named rings."""
@@ -423,6 +463,26 @@ class TakeoffAttributionLedger:
         quarantined = set(
             getattr(sim.engine, "quarantined_ids", None) or ()
         )
+        self._count_susceptibles(sim, epoch, seeded)
+
+        all_parts = self._epoch_channel_parts()
+        self._tally_dosed_footprints(epoch, all_parts)
+
+        if self._packet_arrivals:
+            self._record_arrivals(epoch, all_parts)
+
+        self._tally_reach()
+        self._record_onsets(sim, work, epoch, seeded, quarantined, all_parts)
+        self._accrue_susceptibility()
+        self._tally_zone_occupancy(sim, epoch)
+
+        self._droplet, self._addback, self._near = {}, {}, {}
+        self._other_src, self._challenges = {}, {}
+        self._epoch_units, self._reach_buf = {}, {}
+
+    def _count_susceptibles(
+        self, sim: Any, epoch: int, seeded: set[int],
+    ) -> None:
         susceptible = 0
         for agent in sim.engine.agents:
             if agent.agent_id in seeded:
@@ -434,16 +494,20 @@ class TakeoffAttributionLedger:
                 susceptible += 1
         self.susceptibles_aboard.append(susceptible)
 
-        # This epoch's per-target droplet-channel parts (naive basis).
+    def _epoch_channel_parts(self) -> dict[int, Counter]:
+        """This epoch's per-target droplet-channel parts (naive basis)."""
         all_parts: dict[int, Counter] = {}
         for tid in self._droplet:
             all_parts[tid] = self._channel_parts(tid)
-
         for tid, parts in all_parts.items():
             lt = self.lifetime_sub.setdefault(tid, Counter())
             for channel, dose in parts.items():
                 lt[channel] += dose
+        return all_parts
 
+    def _tally_dosed_footprints(
+        self, epoch: int, all_parts: dict[int, Counter],
+    ) -> None:
         # Dosed footprint: droplet channels from the measured parts, every
         # other channel from the challenged host's pathway vector.
         dosed_tids: dict[str, set[int]] = {c: set() for c in CHANNELS}
@@ -451,6 +515,18 @@ class TakeoffAttributionLedger:
             for channel, dose in parts.items():
                 if dose > 0.0:
                     dosed_tids.setdefault(channel, set()).add(tid)
+        self._tally_challenge_footprints(epoch, all_parts, dosed_tids)
+        for tid, parts in all_parts.items():
+            if tid not in self._challenges and any(parts.values()):
+                self.dosed_targets_epoch[epoch] += 1
+        for channel, tids in dosed_tids.items():
+            if tids:
+                self.footprint_counts[(epoch, channel)] = len(tids)
+
+    def _tally_challenge_footprints(
+        self, epoch: int, all_parts: dict[int, Counter],
+        dosed_tids: dict[str, set[int]],
+    ) -> None:
         for tid, challenge in self._challenges.items():
             pw = challenge["pathways"]
             droplet_pw = pw.get("droplet", 0.0)
@@ -465,16 +541,8 @@ class TakeoffAttributionLedger:
                     dosed_tids[channel].add(tid)
             if challenge["p_dose"] > 0.0:
                 self.dosed_targets_epoch[epoch] += 1
-        for tid, parts in all_parts.items():
-            if tid not in self._challenges and any(parts.values()):
-                self.dosed_targets_epoch[epoch] += 1
-        for channel, tids in dosed_tids.items():
-            if tids:
-                self.footprint_counts[(epoch, channel)] = len(tids)
 
-        if self._packet_arrivals:
-            self._record_arrivals(epoch, all_parts)
-
+    def _tally_reach(self) -> None:
         # Footprint + reach aggregates.
         for unit, info in self._epoch_units.items():
             self.unit_sizes[unit] = max(
@@ -483,6 +551,11 @@ class TakeoffAttributionLedger:
             for sid, em in info["src"].items():
                 if em > 0.0:
                     self._reach_add(sid, "zone_pool", n=info["targets"])
+        self._tally_ring_reach()
+        for (sid, channel), n in self._reach_buf.items():
+            self.reach_by_channel.setdefault(channel, []).append(n)
+
+    def _tally_ring_reach(self) -> None:
         for tid, near in self._near.items():
             for sid, share in near["src"].items():
                 if share > 0.0:
@@ -491,8 +564,11 @@ class TakeoffAttributionLedger:
             for sid, w in addback["src"].items():
                 if w > 0.0:
                     self._reach_add(sid, "cabin_mate_ring")
-        for (sid, channel), n in self._reach_buf.items():
-            self.reach_by_channel.setdefault(channel, []).append(n)
+
+    def _record_onsets(
+        self, sim: Any, work: Any, epoch: int, seeded: set[int],
+        quarantined: set[int], all_parts: dict[int, Counter],
+    ) -> None:
         # Onset rows for hosts infected this epoch.
         for ev in work.tx_events:
             tid = int(ev.target_agent_id)
@@ -507,6 +583,7 @@ class TakeoffAttributionLedger:
                 all_parts.get(tid, Counter()),
             ))
 
+    def _accrue_susceptibility(self) -> None:
         # Susceptibility bookkeeping for every challenged host. The accrued
         # hazard includes the epoch that infected a host: on its onset row
         # it is the terminal hazard the draw beat.
@@ -531,35 +608,33 @@ class TakeoffAttributionLedger:
             if tid not in self._seen_infected:
                 self.challenged_susc[tid] = float(susc)
 
+    def _tally_zone_occupancy(self, sim: Any, epoch: int) -> None:
         # COVID-RHYTHM-01 zone tallies: corridor occupancy vs the program
         # clock and the crew-zone emptiness measurement. Locations are the
         # epoch's dealt positions — under the rhythm arm, commitments.
-        if self._transit_zones or self._crew_zones:
-            transit = 0
-            crew_pax = 0
-            agents_by_id = {a.agent_id: a for a in sim.engine.agents}
-            for agent in sim.engine.agents:
-                loc = agent.current_location
-                if loc in self._transit_zones:
-                    transit += 1
-                if loc in self._crew_zones and getattr(agent, "role", "") == "passenger":
-                    crew_pax += 1
-            self.transit_occupancy.append(transit)
-            self.crew_zone_passengers.append(crew_pax)
-            for tid, challenge in self._challenges.items():
-                target = agents_by_id.get(tid)
-                if (
-                    target is not None
-                    and getattr(target, "role", "") == "passenger"
-                    and challenge.get("location") in self._crew_zones
-                ):
-                    self.crew_zone_passenger_challenge_epochs[epoch] = (
-                        self.crew_zone_passenger_challenge_epochs.get(epoch, 0) + 1
-                    )
-
-        self._droplet, self._addback, self._near = {}, {}, {}
-        self._other_src, self._challenges = {}, {}
-        self._epoch_units, self._reach_buf = {}, {}
+        if not self._transit_zones and not self._crew_zones:
+            return
+        transit = 0
+        crew_pax = 0
+        agents_by_id = {a.agent_id: a for a in sim.engine.agents}
+        for agent in sim.engine.agents:
+            loc = agent.current_location
+            if loc in self._transit_zones:
+                transit += 1
+            if loc in self._crew_zones and getattr(agent, "role", "") == "passenger":
+                crew_pax += 1
+        self.transit_occupancy.append(transit)
+        self.crew_zone_passengers.append(crew_pax)
+        for tid, challenge in self._challenges.items():
+            target = agents_by_id.get(tid)
+            if (
+                target is not None
+                and getattr(target, "role", "") == "passenger"
+                and challenge.get("location") in self._crew_zones
+            ):
+                self.crew_zone_passenger_challenge_epochs[epoch] = (
+                    self.crew_zone_passenger_challenge_epochs.get(epoch, 0) + 1
+                )
 
     def _record_arrivals(self, epoch: int,
                          all_parts: dict[int, Counter]) -> None:
@@ -618,46 +693,10 @@ class TakeoffAttributionLedger:
         susc = float(challenge["susceptibility"] or 0.0)
         effective = challenge["p_dose"] * (1.0 - challenge["protection"])
 
-        # Shedder credit on post-efficiency dose: pool by emitted share,
-        # addback by the engine's per-shedder weight, near field by the
-        # weight x emitted share, other channels by record appearance share
-        # (the matrix records carry the offer set, not per-source doses).
-        credit: Counter = Counter()
-        droplet = self._droplet.get(tid, {})
-        near = self._near.get(tid, {})
-        addback = self._addback.get(tid, {})
-        other_src = self._other_src.get(tid, {})
-        pool_naive = (
-            droplet.get("dose", 0.0)
-            - float(near.get("dose", droplet.get("near", 0.0)))
-            - addback.get("dose", 0.0)
+        credit = self._shedder_credit(
+            tid, droplet_naive, droplet_post, chan_post,
         )
-        emitted_total = sum(droplet.get("src", {}).values())
-        if droplet_naive > 0.0 and emitted_total > 0.0:
-            pool_post = droplet_post * max(pool_naive, 0.0) / droplet_naive
-            for sid, em in droplet["src"].items():
-                credit[sid] += pool_post * em / emitted_total
-        addback_total = sum(addback.get("src", {}).values())
-        if droplet_naive > 0.0 and addback_total > 0.0:
-            addback_post = (
-                droplet_post * addback.get("dose", 0.0) / droplet_naive
-            )
-            for sid, w in addback["src"].items():
-                credit[sid] += addback_post * w / addback_total
-        if droplet_naive > 0.0:
-            near_post = (
-                droplet_post * near.get("dose", 0.0) / droplet_naive
-            )
-            for sid, share in near.get("src", {}).items():
-                credit[sid] += near_post * share
-        for channel in ("contact", "hvac_airborne", "other"):
-            src = other_src.get(channel)
-            post = chan_post.get(channel, 0.0)
-            if not src or post <= 0.0:
-                continue
-            src_total = sum(src.values())
-            for sid, appearances in src.items():
-                credit[sid] += post * appearances / src_total
+        droplet = self._droplet.get(tid, {})
         credit_total = sum(credit.values())
 
         dominant = (
@@ -692,6 +731,57 @@ class TakeoffAttributionLedger:
                 if credit_total > 0 else {}
             ),
         }
+
+    def _shedder_credit(
+        self, tid: int, droplet_naive: float, droplet_post: float,
+        chan_post: Counter,
+    ) -> Counter:
+        # Shedder credit on post-efficiency dose: pool by emitted share,
+        # addback by the engine's per-shedder weight, near field by the
+        # weight x emitted share, other channels by record appearance share
+        # (the matrix records carry the offer set, not per-source doses).
+        credit: Counter = Counter()
+        droplet = self._droplet.get(tid, {})
+        near = self._near.get(tid, {})
+        addback = self._addback.get(tid, {})
+        other_src = self._other_src.get(tid, {})
+        pool_naive = (
+            droplet.get("dose", 0.0)
+            - float(near.get("dose", droplet.get("near", 0.0)))
+            - addback.get("dose", 0.0)
+        )
+        emitted_total = sum(droplet.get("src", {}).values())
+        if droplet_naive > 0.0 and emitted_total > 0.0:
+            pool_post = droplet_post * max(pool_naive, 0.0) / droplet_naive
+            for sid, em in droplet["src"].items():
+                credit[sid] += pool_post * em / emitted_total
+        addback_total = sum(addback.get("src", {}).values())
+        if droplet_naive > 0.0 and addback_total > 0.0:
+            addback_post = (
+                droplet_post * addback.get("dose", 0.0) / droplet_naive
+            )
+            for sid, w in addback["src"].items():
+                credit[sid] += addback_post * w / addback_total
+        if droplet_naive > 0.0:
+            near_post = (
+                droplet_post * near.get("dose", 0.0) / droplet_naive
+            )
+            for sid, share in near.get("src", {}).items():
+                credit[sid] += near_post * share
+        self._other_channel_credit(credit, other_src, chan_post)
+        return credit
+
+    def _other_channel_credit(
+        self, credit: Counter, other_src: dict, chan_post: Counter,
+    ) -> None:
+        for channel in ("contact", "hvac_airborne", "other"):
+            src = other_src.get(channel)
+            post = chan_post.get(channel, 0.0)
+            if not src or post <= 0.0:
+                continue
+            src_total = sum(src.values())
+            for sid, appearances in src.items():
+                credit[sid] += post * appearances / src_total
 
 
 def _post_channel_doses(pw: dict[str, float],
@@ -928,7 +1018,93 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
     infected = ledger.onsets
     recorded = int(payload.get("observables", {}).get("recorded_onsets") or 0)
 
-    # Susceptibility: infected vs challenged-uninfected vs never challenged.
+    susc_block = _susceptibility_block(
+        ledger, infected, agents, seeded, resolver, pid,
+    )
+    dose_response_resolved = dict(
+        (profiles.get(pid) or {}).get("dose_response") or {}
+    )
+
+    n_infected = max(len(infected), 1)
+    geometry = _onset_geometry(infected, n_infected)
+    confined_n = sum(1 for r in infected if r["confined"])
+    route_split = _route_split_block(infected, n_infected)
+    return {
+        "infections_total": len(infected),
+        "recorded_onsets": recorded,
+        "takeoff": recorded >= takeoff_min,
+        "seeded_count": len(seeded),
+        "dose_response": dose_response_resolved,
+        **_rhythm_ab_block(ledger),
+        "confined_onsets": confined_n,
+        "route_split": route_split,
+        "geometry": geometry,
+        "mechanism": _mechanism_block(ledger, infected, susc_block),
+    }
+
+
+def _epoch_counts_block(
+    counts: dict,
+    key_name: str,
+) -> dict[str, Any]:
+    return {
+        channel: {
+            key_name: sum(
+                1 for (_e, c) in counts if c == channel
+            ),
+            "targets_by_epoch_quantiles": _quantiles(
+                [float(v) for (e, c), v in counts.items()
+                 if c == channel],
+            ),
+        }
+        for channel in CHANNELS
+    }
+
+
+def _mechanism_block(
+    ledger: TakeoffAttributionLedger,
+    infected: list[dict[str, Any]],
+    susc_block: dict[str, Any],
+) -> dict[str, Any]:
+    lam = [r["lambda_infecting"] for r in infected]
+    footprint = _epoch_counts_block(
+        ledger.footprint_counts, "epochs_with_dosed_targets",
+    )
+    offered = _epoch_counts_block(
+        ledger.offered_counts, "epochs_with_records",
+    )
+    return {
+        **(
+            {"packet_arrivals": _packet_arrivals_block(ledger)}
+            if ledger._packet_arrivals else {}
+        ),
+        "reach_per_shedder_epoch": {
+            c: _channel_quantiles(ledger.reach_by_channel, c)
+            for c in CHANNELS
+        },
+        "footprint_targets_by_epoch": footprint,
+        "offered_targets_by_epoch": offered,
+        "dosed_targets_by_epoch": _quantiles(
+            [float(v) for v in ledger.dosed_targets_epoch.values()],
+        ),
+        "droplet_unattributed_onsets": ledger.droplet_unattributed,
+        "susceptibles_aboard": _quantiles(
+            [float(v) for v in ledger.susceptibles_aboard],
+        ),
+        "susceptibility": susc_block,
+        "lambda_infecting": _quantiles(lam),
+    }
+
+
+def _susceptibility_block(
+    ledger: TakeoffAttributionLedger,
+    infected: list[dict[str, Any]],
+    agents: dict[int, Any],
+    seeded: set[int],
+    resolver: Any,
+    pid: str,
+) -> dict[str, Any]:
+    """Infected vs challenged-uninfected vs never-challenged draws."""
     infected_ids = {r["agent_id"] for r in infected}
     susc_infected = [
         r["susceptibility"] for r in infected
@@ -946,9 +1122,31 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         and a.infections.get(pid) is None
     ]
 
-    # Proximity to threshold: accrued hazard Lambda per host. For a
-    # challenged-uninfected host, P(counterfactual infection) =
-    # 1 - exp(-Lambda) — the quantity challenged_share alone cannot show.
+    challenged_pairs = _challenged_pairs(ledger, infected_ids)
+    return {
+        "infected": _quantiles(susc_infected),
+        "challenged_uninfected": _quantiles(susc_challenged),
+        "never_challenged_counterfactual": _quantiles(susc_never),
+        "challenged_hosts": len(challenged_ids),
+        "challenged_share_of_aboard": (
+            len(challenged_ids) / max(len(agents) - len(seeded), 1)
+        ),
+        "challenged_pairs": challenged_pairs,
+        "accrued_hazard": _accrued_hazard_block(
+            ledger, infected, infected_ids,
+            len(agents) - len(seeded), challenged_ids,
+        ),
+    }
+
+
+def _accrued_hazard_block(
+    ledger: TakeoffAttributionLedger,
+    infected: list[dict[str, Any]],
+    infected_ids: set[int],
+    n_unseeded: int,
+    challenged_ids: set[int],
+) -> dict[str, Any]:
+    """Accrued-hazard quantiles and counterfactual-infection shares."""
     haz_at_onset = [
         r["hazard_at_onset"] for r in infected
         if r.get("hazard_at_onset") is not None
@@ -959,7 +1157,30 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         if tid not in infected_ids
     ]
     p_cf = [1.0 - math.exp(-h) for h in haz_challenged]
+    return {
+        "infected_at_onset": _quantiles(haz_at_onset),
+        "challenged_uninfected": _quantiles(haz_challenged),
+        "challenged_uninfected_p_infection_mean": (
+            sum(p_cf) / len(p_cf) if p_cf else None
+        ),
+        "challenged_uninfected_share_p_ge_0p5": (
+            sum(1 for p in p_cf if p >= 0.5) / len(p_cf)
+            if p_cf else None
+        ),
+        "challenged_uninfected_share_p_ge_0p1": (
+            sum(1 for p in p_cf if p >= 0.1) / len(p_cf)
+            if p_cf else None
+        ),
+        "never_challenged_hosts": max(
+            n_unseeded - len(challenged_ids), 0
+        ),
+    }
 
+
+def _challenged_pairs(
+    ledger: TakeoffAttributionLedger,
+    infected_ids: set[int],
+) -> list[dict[str, Any]]:
     # Per-host (susceptibility, accrued hazard, accrued dose) rows for
     # challenged-uninfected hosts (COVID-VULN-01): accrued_dose is the
     # susceptibility-free dose field D~ = sum(p_dose * (1 - protection))
@@ -967,7 +1188,7 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
     # over. The emitted resolved dose_response is the override-landing
     # proof for the alpha A/B: it echoes the profile values the engine
     # actually consumed.
-    challenged_pairs = [
+    return [
         {
             "id": int(tid),
             "susceptibility": float(ledger.challenged_susc[tid]),
@@ -977,10 +1198,13 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
         for tid in sorted(ledger.challenged_susc)
         if tid not in infected_ids
     ]
-    dose_response_resolved = dict(
-        (profiles.get(pid) or {}).get("dose_response") or {}
-    )
 
+
+def _onset_geometry(
+    infected: list[dict[str, Any]],
+    n_infected: int,
+) -> dict[str, Any]:
+    """Shedder/epoch/day/venue geometry of the onsets."""
     # Shedder geometry: dominant-shedder onsets plus share-weighted credit.
     credit_totals: Counter = Counter()
     dominant_counts: Counter = Counter()
@@ -994,177 +1218,107 @@ def summarise(sim: Any, ledger: TakeoffAttributionLedger,
             credit_totals[int(sid)] += float(share)
     sorted_credits = sorted(credit_totals.values(), reverse=True)
     sorted_dominant = sorted(dominant_counts.values(), reverse=True)
-    n_infected = max(len(infected), 1)
 
     epoch_hist = Counter(r["epoch"] for r in infected)
     day_hist = Counter(r["day"] for r in infected)
     venue_hist = Counter(str(r["venue"]) for r in infected)
-    confined_n = sum(1 for r in infected if r["confined"])
+    return {
+        "onsets_per_shedder_credit": {
+            "n_shedders_credited": len(sorted_credits),
+            "top1": sorted_credits[0] if sorted_credits else None,
+            "top5_share": (
+                sum(sorted_credits[:5]) / n_infected
+                if sorted_credits else None
+            ),
+            "quantiles": _quantiles(sorted_credits),
+        },
+        "onsets_per_shedder_dominant": {
+            "n_shedders": len(sorted_dominant),
+            "top1": sorted_dominant[0] if sorted_dominant else None,
+            "top5_share": (
+                sum(sorted_dominant[:5]) / n_infected
+                if sorted_dominant else None
+            ),
+            "quantiles": _quantiles(
+                [float(v) for v in sorted_dominant],
+            ),
+        },
+        "onsets_by_epoch": {
+            "n_epochs_with_onsets": len(epoch_hist),
+            "top5_share": (
+                sum(sorted(epoch_hist.values(), reverse=True)[:5])
+                / n_infected
+            ),
+            "quantiles": _quantiles(
+                [float(v) for v in epoch_hist.values()],
+            ),
+        },
+        "onsets_per_day": {
+            str(d): n for d, n in sorted(day_hist.items())
+        },
+        "onsets_per_venue": dict(venue_hist.most_common(16)),
+    }
+
+
+def _route_split_block(
+    infected: list[dict[str, Any]],
+    n_infected: int,
+) -> dict[str, Any]:
+    """Onset dose split by channel on four bases."""
     chan_dom = Counter(r["dominant_channel"] for r in infected)
     chan_dose: Counter = Counter()
     chan_lifetime: Counter = Counter()
     for row in infected:
         for channel, dose in row["channel_dose_post"].items():
             chan_dose[channel] += dose
-        lt = row["lifetime_route"]
-        sub = row["lifetime_sub"]
-        sub_droplet = sum(
-            sub.get(c, 0.0) for c in DROPLET_CHANNELS
-        )
-        for route, dose in lt.items():
-            route = route.split(":", 1)[0]
-            if route == "droplet" and sub_droplet > 0:
-                for channel in DROPLET_CHANNELS:
-                    chan_lifetime[channel] += (
-                        dose * sub.get(channel, 0.0) / sub_droplet
-                    )
-            elif route in ("contact", "direct_contact"):
-                chan_lifetime["contact"] += dose
-            elif route == "hvac_airborne":
-                chan_lifetime["hvac_airborne"] += dose
-            else:
-                chan_lifetime["other"] += dose
+        chan_lifetime.update(_lifetime_channel_doses(row))
     total_dose = sum(chan_dose.values())
     total_lt = sum(chan_lifetime.values())
     chan_share = Counter()
     for row in infected:
         for channel, share in row["channel_shares"].items():
             chan_share[channel] += share
-    lam = [r["lambda_infecting"] for r in infected]
-    footprint = {
-        channel: {
-            "epochs_with_dosed_targets": sum(
-                1 for (_e, c) in ledger.footprint_counts if c == channel
-            ),
-            "targets_by_epoch_quantiles": _quantiles(
-                [float(v) for (e, c), v in ledger.footprint_counts.items()
-                 if c == channel],
-            ),
-        }
-        for channel in CHANNELS
-    }
-    offered = {
-        channel: {
-            "epochs_with_records": sum(
-                1 for (_e, c) in ledger.offered_counts if c == channel
-            ),
-            "targets_by_epoch_quantiles": _quantiles(
-                [float(v) for (e, c), v in ledger.offered_counts.items()
-                 if c == channel],
-            ),
-        }
-        for channel in CHANNELS
-    }
     return {
-        "infections_total": len(infected),
-        "recorded_onsets": recorded,
-        "takeoff": recorded >= takeoff_min,
-        "seeded_count": len(seeded),
-        "dose_response": dose_response_resolved,
-        **_rhythm_ab_block(ledger),
-        "confined_onsets": confined_n,
-        "route_split": {
-            "by_infecting_epoch_dose": {
-                c: (chan_dose.get(c, 0.0) / total_dose
-                    if total_dose else None)
-                for c in CHANNELS
-            },
-            "by_onset_share": {
-                c: chan_share.get(c, 0.0) / n_infected
-                for c in CHANNELS
-            },
-            "by_dominant_channel": dict(chan_dom),
-            "by_lifetime_dose": {
-                c: (chan_lifetime.get(c, 0.0) / total_lt
-                    if total_lt else None)
-                for c in CHANNELS
-            },
+        "by_infecting_epoch_dose": {
+            c: (chan_dose.get(c, 0.0) / total_dose
+                if total_dose else None)
+            for c in CHANNELS
         },
-        "geometry": {
-            "onsets_per_shedder_credit": {
-                "n_shedders_credited": len(sorted_credits),
-                "top1": sorted_credits[0] if sorted_credits else None,
-                "top5_share": (
-                    sum(sorted_credits[:5]) / n_infected
-                    if sorted_credits else None
-                ),
-                "quantiles": _quantiles(sorted_credits),
-            },
-            "onsets_per_shedder_dominant": {
-                "n_shedders": len(sorted_dominant),
-                "top1": sorted_dominant[0] if sorted_dominant else None,
-                "top5_share": (
-                    sum(sorted_dominant[:5]) / n_infected
-                    if sorted_dominant else None
-                ),
-                "quantiles": _quantiles(
-                    [float(v) for v in sorted_dominant],
-                ),
-            },
-            "onsets_by_epoch": {
-                "n_epochs_with_onsets": len(epoch_hist),
-                "top5_share": (
-                    sum(sorted(epoch_hist.values(), reverse=True)[:5])
-                    / n_infected
-                ),
-                "quantiles": _quantiles(
-                    [float(v) for v in epoch_hist.values()],
-                ),
-            },
-            "onsets_per_day": {
-                str(d): n for d, n in sorted(day_hist.items())
-            },
-            "onsets_per_venue": dict(venue_hist.most_common(16)),
+        "by_onset_share": {
+            c: chan_share.get(c, 0.0) / n_infected
+            for c in CHANNELS
         },
-        "mechanism": {
-            **(
-                {"packet_arrivals": _packet_arrivals_block(ledger)}
-                if ledger._packet_arrivals else {}
-            ),
-            "reach_per_shedder_epoch": {
-                c: _channel_quantiles(ledger.reach_by_channel, c)
-                for c in CHANNELS
-            },
-            "footprint_targets_by_epoch": footprint,
-            "offered_targets_by_epoch": offered,
-            "dosed_targets_by_epoch": _quantiles(
-                [float(v) for v in ledger.dosed_targets_epoch.values()],
-            ),
-            "droplet_unattributed_onsets": ledger.droplet_unattributed,
-            "susceptibles_aboard": _quantiles(
-                [float(v) for v in ledger.susceptibles_aboard],
-            ),
-            "susceptibility": {
-                "infected": _quantiles(susc_infected),
-                "challenged_uninfected": _quantiles(susc_challenged),
-                "never_challenged_counterfactual": _quantiles(susc_never),
-                "challenged_hosts": len(challenged_ids),
-                "challenged_share_of_aboard": (
-                    len(challenged_ids) / max(len(agents) - len(seeded), 1)
-                ),
-                "challenged_pairs": challenged_pairs,
-                "accrued_hazard": {
-                    "infected_at_onset": _quantiles(haz_at_onset),
-                    "challenged_uninfected": _quantiles(haz_challenged),
-                    "challenged_uninfected_p_infection_mean": (
-                        sum(p_cf) / len(p_cf) if p_cf else None
-                    ),
-                    "challenged_uninfected_share_p_ge_0p5": (
-                        sum(1 for p in p_cf if p >= 0.5) / len(p_cf)
-                        if p_cf else None
-                    ),
-                    "challenged_uninfected_share_p_ge_0p1": (
-                        sum(1 for p in p_cf if p >= 0.1) / len(p_cf)
-                        if p_cf else None
-                    ),
-                    "never_challenged_hosts": max(
-                        len(agents) - len(seeded) - len(challenged_ids), 0
-                    ),
-                },
-            },
-            "lambda_infecting": _quantiles(lam),
+        "by_dominant_channel": dict(chan_dom),
+        "by_lifetime_dose": {
+            c: (chan_lifetime.get(c, 0.0) / total_lt
+                if total_lt else None)
+            for c in CHANNELS
         },
     }
+
+
+def _lifetime_channel_doses(row: dict[str, Any]) -> Counter:
+    """One onset's lifetime route dose, mapped onto the channels."""
+    out: Counter = Counter()
+    lt = row["lifetime_route"]
+    sub = row["lifetime_sub"]
+    sub_droplet = sum(
+        sub.get(c, 0.0) for c in DROPLET_CHANNELS
+    )
+    for route, dose in lt.items():
+        route = route.split(":", 1)[0]
+        if route == "droplet" and sub_droplet > 0:
+            for channel in DROPLET_CHANNELS:
+                out[channel] += (
+                    dose * sub.get(channel, 0.0) / sub_droplet
+                )
+        elif route in ("contact", "direct_contact"):
+            out["contact"] += dose
+        elif route == "hvac_airborne":
+            out["hvac_airborne"] += dose
+        else:
+            out["other"] += dose
+    return out
 
 
 def analyse_spec(

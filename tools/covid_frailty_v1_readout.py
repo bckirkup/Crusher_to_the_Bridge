@@ -95,35 +95,78 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
         if draw.get("n"):
             failures.append("baseline frailty_draw.n > 0")
         return failures
+    _audit_armed_cell(
+        failures, frailty_block, draw, sus, declared, dr, theta,
+    )
+    return failures
+
+
+def _audit_armed_cell(
+    failures: list[str],
+    frailty_block: Any,
+    draw: dict,
+    sus: dict,
+    declared: dict,
+    dr: dict,
+    theta: float,
+) -> None:
     # Armed cell: the block echoes declared verbatim.
     if not isinstance(frailty_block, dict):
         failures.append("armed cell missing dose_response.frailty")
     else:
-        if frailty_block.get("enabled") is not True:
-            failures.append("dose_response.frailty.enabled is not true")
-        if frailty_block.get("distribution") != (
-            declared["frailty_distribution"]
-        ):
-            failures.append(
-                f"dose_response.frailty.distribution "
-                f"{frailty_block.get('distribution')!r} != declared "
-                f"{declared['frailty_distribution']!r}",
-            )
-        if abs(float(frailty_block.get("cv", -1.0))
-               - float(declared["frailty_cv"])) > 1e-12:
-            failures.append(
-                f"dose_response.frailty.cv {frailty_block.get('cv')} "
-                f"!= declared {declared['frailty_cv']}",
-            )
+        _audit_armed_block(failures, frailty_block, declared)
     n = int(draw.get("n") or 0)
     if n <= 0:
         failures.append("armed cell frailty_draw.n == 0")
-        return failures
+        return
     if n != int(sus.get("n") or -1):
         failures.append(
             f"frailty_draw.n {n} != susceptibility_draw.n {sus.get('n')} "
             "— the draw set is not the challenged set",
         )
+    _audit_draw(failures, draw, declared)
+    # The theta-preserved beta block must be untouched by the arm.
+    _audit_scale(failures, dr, theta)
+
+
+def _audit_scale(failures: list[str], dr: dict, theta: float) -> None:
+    scale = float(dr.get("susceptibility_scale", -1.0))
+    want_scale = theta * (SHIPPED_ALPHA + SHIPPED_BETA) / SHIPPED_ALPHA
+    if scale <= 0 or abs(scale - want_scale) / want_scale > 1e-6:
+        failures.append(
+            f"dose_response.susceptibility_scale {scale} "
+            f"!= theta-preserved {want_scale:.4g}",
+        )
+
+
+def _audit_armed_block(
+    failures: list[str],
+    frailty_block: dict,
+    declared: dict,
+) -> None:
+    if frailty_block.get("enabled") is not True:
+        failures.append("dose_response.frailty.enabled is not true")
+    if frailty_block.get("distribution") != (
+        declared["frailty_distribution"]
+    ):
+        failures.append(
+            f"dose_response.frailty.distribution "
+            f"{frailty_block.get('distribution')!r} != declared "
+            f"{declared['frailty_distribution']!r}",
+        )
+    if abs(float(frailty_block.get("cv", -1.0))
+           - float(declared["frailty_cv"])) > 1e-12:
+        failures.append(
+            f"dose_response.frailty.cv {frailty_block.get('cv')} "
+            f"!= declared {declared['frailty_cv']}",
+        )
+
+
+def _audit_draw(
+    failures: list[str],
+    draw: dict,
+    declared: dict,
+) -> None:
     cv = float(declared["frailty_cv"])
     if cv <= 0.0:
         for key in ("mean", "q05", "q50", "q95"):
@@ -132,30 +175,21 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
                     f"inert corner frailty_draw.{key} {draw.get(key)} "
                     "!= 1.0",
                 )
-    else:
-        mean = draw.get("mean")
-        if mean is None or not (
-            FRAILTY_MEAN_BAND[0] <= float(mean) <= FRAILTY_MEAN_BAND[1]
-        ):
-            failures.append(
-                f"frailty_draw.mean {mean} outside the declared "
-                f"pinning band {FRAILTY_MEAN_BAND}",
-            )
-        if not float(draw.get("q05", 1.0)) < float(
-            draw.get("q95", 0.0)
-        ):
-            failures.append(
-                "cv > 0 corner has a degenerate draw (q05 >= q95)",
-            )
-    # The theta-preserved beta block must be untouched by the arm.
-    scale = float(dr.get("susceptibility_scale", -1.0))
-    want_scale = theta * (SHIPPED_ALPHA + SHIPPED_BETA) / SHIPPED_ALPHA
-    if not scale > 0 or abs(scale - want_scale) / want_scale > 1e-6:
+        return
+    mean = draw.get("mean")
+    if mean is None or not (
+        FRAILTY_MEAN_BAND[0] <= float(mean) <= FRAILTY_MEAN_BAND[1]
+    ):
         failures.append(
-            f"dose_response.susceptibility_scale {scale} "
-            f"!= theta-preserved {want_scale:.4g}",
+            f"frailty_draw.mean {mean} outside the declared "
+            f"pinning band {FRAILTY_MEAN_BAND}",
         )
-    return failures
+    if float(draw.get("q05", 1.0)) >= float(
+        draw.get("q95", 0.0)
+    ):
+        failures.append(
+            "cv > 0 corner has a degenerate draw (q05 >= q95)",
+        )
 
 
 def _day_counts(payload: dict, days: tuple[int, ...]) -> list[float]:
