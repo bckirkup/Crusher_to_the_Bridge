@@ -1,0 +1,30 @@
+# NORO-OUTBREAK-01 worker — the flu-rhythm-02 campaign image plus the code
+# changed since its base SHA (1ab8dd98): natural_history presentation-share
+# draw, the pathogen schema carrying the flag, and tools/ wholesale, plus the
+# campaign manifest and the import-map entrypoint pair (the tier enumerator
+# and S3 helpers are manifest-agnostic).
+#
+# Build (from the repository root; the base must exist in ECR):
+#   docker build -f deploy/aws/Dockerfile.noro_outbreak_01 \
+#     --build-arg BASE_IMAGE=<acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:flu-rhythm-02-1ab8dd98 \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:noro-outbreak-01-<sha> .
+ARG BASE_IMAGE=picard-campaign:flu-rhythm-02-1ab8dd98
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign engines/natural_history.py \
+    ./engines/natural_history.py
+COPY --chown=campaign:campaign schemas/pathogen_profiles.schema.json \
+    ./schemas/pathogen_profiles.schema.json
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign deploy/aws/import_map_entrypoint.py \
+    ./deploy/aws/import_map_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
+    ./deploy/aws/dose_challenge_entrypoint.py
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
