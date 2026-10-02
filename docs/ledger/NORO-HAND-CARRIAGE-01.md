@@ -267,3 +267,75 @@ this box while materializing ~13M shedding-row dicts; its pooled and
 per-block aggregation is now a one-pass streaming fold (validated
 bit-exact against the previous helpers on a full cell — positivity,
 mean, sd, never-positive, all three ordering arms, wet window).
+
+## Measured verdict — event-deposit magnitude: unreachable (2026-10-02)
+
+The residual ordering miss was carried into this stage as the
+event-deposit magnitude question. The measured answer is stronger than
+the question asked: **no deposit value flips the ordering — the dial is
+the wrong dial.** A paired counterfactual sweep scaled the deposit line
+(`accessible = max(accessible, target)` → `target*F`, consuming no RNG —
+draw streams verified identical: same per-host propensity lists, same
+stool-event witness counts) over F ∈ {1, 0.1, 0.01, 0.001, 0.0001} on
+classic_cruise_1900 seeds 8000+8001, 288 epochs, folded through the
+frozen `_Fold`. Ordering reads `event_higher` at every F — post-event
+21.1 / 20.3 / 23.9 / 23.9 / 22.2% vs routine-end 14.2 / 18.8 / 17.1 /
+15.7 / 16.2% — including F = 10⁻⁴, where the deposit is 0.72 GEC at
+peak titre, ~200× below the 141-GEC rinse LOD. Pooled occupancy stays in
+band throughout (R = 0.57–0.74). Numbers and the decomposition table:
+`docs/norovirus/noro_hand_carriage02/event_deposit_sweep.json`.
+
+**Attribution, measured.** Event-row positivity is the wash-resistant
+protected compartment, not the fresh deposit: at F = 10⁻⁴ every
+event-positive row had protected ≥ LOD (98/98; event rows without it
+read 0% positive), and at declared F = 1 the protected compartment
+carries 95–100% of event-positive rows (61/64 local; 96%, 100%, 85% on
+frozen cells classic-8000, classic-8005, spirit-8105). The deposit's own
+contribution is ~1pp (3/303 rows at F = 1). The arm gap is
+compositional: the event arm over-samples symptomatic epochs 2–3×
+(36.2% vs 11.0% locally; 52.3% vs 17.9% on classic-8005; 40.7% vs
+16.2% on spirit-8105) because the stool-event Poisson rate is
+symptom-conditioned (tranche 32: diarrhoeal [3.0, 8.5]/day vs baseline
+[0.43, 3.0]/day), and within strata the arms are at parity — 36.9 vs
+36.8% symptomatic and 13.8 vs 13.6% non-symptomatic at F = 10⁻⁴; on the
+frozen cells the event share is reproduced to within ~0.2pp (8005) by
+reweighting routine within-strata positivity to the event arm's
+symptomatic share. Reweighting leaves a residual within-stratum premium
+on some seeds (8000) — the propensity-correlated carryover: hosts whose
+propensity is high fire more contaminating events and accumulate more
+settled sequester.
+
+**The bound that closes the question.** Sourced floor on a fresh
+contaminating-event deposit: a defecation event's hand residue cannot
+sit below the routine-hand residual it replenishes —
+~10⁻⁶·⁹ g stool-equivalent/hand (envelope floor, tranche 39), i.e.
+≥ ~10⁴·² GEC at the 10¹¹ reference peak, corroborated by Oie 2021's
+direct post-defecation 39,499 ± 77,768 CFU/glove (denominator `?nr`,
+bound only), Wang 2017 SaniPath hand-rinse E. coli 2.25–1.55×10⁵
+CFU/pair, and Liu's own within-study −3.5…−4.4 log10 g bridge. The
+declared deposit (10⁻⁷·¹⁴ g-equiv, 7,244 GEC at peak) already sits at
+the floor's bottom edge — zero within-bounds room downward — and the
+sweep shows even four orders below the floor cannot flip the sign.
+Vomit-side bound (the other event type): emesis titres are ~10⁴·⁶–5·⁹
+GEC/mL (Kirby 2016; tranche 4 measured GII.2 1.6×10⁵) — ~5 orders below
+stool peak, so an emesis→hand link would only add event-arm load; no
+help to the ordering either.
+
+**Superseded attribution.** The `a3c76061` census entry's "residual miss
+is the event-deposit magnitude question" is corrected by this
+measurement: the fresh deposit is a ~1pp term. What keeps the event arm
+above routine is that post-defecation epochs preferentially land on
+symptomatic, high-titre days and on high-propensity hosts carrying
+settled protected load — both properties of the declared and sourced
+mechanism, not of the deposit constant.
+
+**Open declared-scope decision (Benjamin's call).** The frozen ordering
+criterion compares a symptom-biased event arm against an unconditioned
+routine arm; Liu's post-bathroom rinses were not symptom-stratified.
+Options on the table: (a) a composition-matched comparator in the
+readout (reweight the event arm to the routine symptomatic share, or
+stratify the comparison), a readout-side change; (b) revisit the
+tranche-32 defecation-rate symptom gradient — a sourced constant, not
+tunable to the anchor; (c) accept `event_higher` as the honest reading
+of post-bathroom epochs that over-sample shedding-peak days. No
+mechanism change is proposed here; no campaign gate is triggered.
