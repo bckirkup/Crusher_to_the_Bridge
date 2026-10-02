@@ -161,8 +161,19 @@ def _row_side(entry: dict[str, Any]) -> str | None:
     return "iqr"
 
 
-def _audit_cell(payload: dict[str, Any], expected_arm: str) -> list[str]:
-    """Per-cell audit: the resolved hand mode must be the declared arm."""
+def _audit_cell(
+    payload: dict[str, Any],
+    expected_arm: str,
+    expected_thetas: set[float],
+    expected_design: str,
+) -> list[str]:
+    """Per-cell audit of the stage-1 generic-voyage contract.
+
+    Lattice cells carry no declared replay geometry — index_onset_day /
+    index_shedding_at_day0 are stage-2 fields. What a stage-1 cell must
+    echo instead: the resolved hand mode and arm, the lattice theta, a
+    drawn infection age, and a scoreable recorded_onsets channel.
+    """
     failures: list[str] = []
     delivery = payload.get("delivery") or {}
     mode = delivery.get("hand_reservoir_mode")
@@ -170,8 +181,21 @@ def _audit_cell(payload: dict[str, Any], expected_arm: str) -> list[str]:
         failures.append(
             f"delivery.hand_reservoir_mode {mode!r} != {expected_arm!r}",
         )
-    if payload.get("index_onset_day") is None:
-        failures.append("index_onset_day missing")
+    cell = payload.get("cell") or {}
+    if cell.get("arm_id") != expected_arm:
+        failures.append(
+            f"cell.arm_id {cell.get('arm_id')!r} != {expected_arm!r}",
+        )
+    if cell.get("theta") not in expected_thetas:
+        failures.append(f"cell.theta {cell.get('theta')!r} not in the lattice")
+    if cell.get("infection_age_days") is None:
+        failures.append("cell.infection_age_days missing")
+    if payload.get("design_id") != expected_design:
+        failures.append(
+            f"design_id {payload.get('design_id')!r} != {expected_design!r}",
+        )
+    if (payload.get("observables") or {}).get("recorded_onsets") is None:
+        failures.append("observables.recorded_onsets missing")
     return failures
 
 
@@ -363,8 +387,11 @@ def main(argv: list[str] | None = None) -> int:
         return 2
 
     audit_failures: dict[str, list[str]] = {}
+    expected_thetas = set(design.thetas)
     for key, payload in payloads.items():
-        failures = _audit_cell(payload, "hygiene_cycle")
+        failures = _audit_cell(
+            payload, "hygiene_cycle", expected_thetas, design.design_id,
+        )
         if failures:
             audit_failures[key] = failures
 

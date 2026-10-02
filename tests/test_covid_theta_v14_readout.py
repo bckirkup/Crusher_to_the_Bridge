@@ -22,7 +22,13 @@ def _payload(
     index_shedding: bool = True,
 ) -> dict:
     return {
-        "cell": {"theta": theta, "arm_id": arm, "seed": seed},
+        "design_id": "covid_theta_screen_v14",
+        "cell": {
+            "theta": theta,
+            "arm_id": arm,
+            "seed": seed,
+            "infection_age_days": 0.0,
+        },
         "observables": {
             "recorded_onsets": rec,
             "onsets_before_split_day": before,
@@ -67,14 +73,28 @@ def test_row_side_classifies_floor_ceiling_iqr():
     assert mod._row_side(_entry(3e11, median=0.002, mean=0.01, ok=True)) is None
 
 
-def test_audit_cell_flags_mode_mismatch_and_missing_geometry():
-    assert mod._audit_cell(_payload(), "hygiene_cycle") == []
-    fails = mod._audit_cell(_payload(mode="spike_decay"), "hygiene_cycle")
+THETAS = {1e11, 1.33e11, 1.78e11, 2.37e11, 3.16e11, 4.22e11, 5.62e11, 7.5e11, 1e12}
+DESIGN_ID = "covid_theta_screen_v14"
+
+
+def test_audit_cell_flags_contract_breaks():
+    assert mod._audit_cell(_payload(), "hygiene_cycle", THETAS, DESIGN_ID) == []
+    fails = mod._audit_cell(
+        _payload(mode="spike_decay"), "hygiene_cycle", THETAS, DESIGN_ID,
+    )
     assert fails
     assert "hand_reservoir_mode" in fails[0]
-    fails = mod._audit_cell(_payload(index_onset_day=None), "hygiene_cycle")
+    fails = mod._audit_cell(
+        _payload(theta=9e99), "hygiene_cycle", THETAS, DESIGN_ID,
+    )
     assert fails
-    assert "index_onset_day" in fails[0]
+    assert "theta" in fails[0]
+    fails = mod._audit_cell(
+        _payload(mode="hygiene_cycle", arm="spike_decay"),
+        "hygiene_cycle", THETAS, DESIGN_ID,
+    )
+    assert fails
+    assert "arm_id" in fails[0]
 
 
 def test_evaluate_reads_interior_admissible_and_triggers():
