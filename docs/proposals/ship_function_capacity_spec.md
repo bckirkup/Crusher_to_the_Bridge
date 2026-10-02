@@ -144,18 +144,32 @@ A new `ship_functions` block, declared per platform — in
 deep-mergeable via `config_overrides` like `voyage`. Function IDs are
 free-form; the registry is platform-agnostic by construction.
 
-Function *vocabulary* is shared across vessel classes — it is the
-parameters that differ. `food_service` exists on a fishing vessel and a
-merchant hull exactly as on a cruise ship; what changes is **who it serves
-and at what scale**, not what it is. A function therefore declares
-`serves`: `passengers` (cruise dining — thousands of covers across venue
-tiers), `crew` (a fishing boat's galley feeding its own complement), or
-`both` (merchant marine: a crew mess plus a small passenger complement).
-Serves determines which population draws on the function and which
-feedback kinds are meaningful — degraded cruise dining reroutes passenger
-venue weights; a degraded crew galley on a fishing boat degrades the crew
-that staffs `fishing_ops` itself (a second-order staffing channel, §6.2
-note), because the crew has nowhere else to eat.
+Function *vocabulary* is shared across vessel classes — what differs is
+which *instances* of each kind a vessel carries and who they serve.
+`(function_id, serves)` is the instance key, not `function_id` alone: a
+cruise ship carries `food_service` **twice** — `serves: passengers`
+(thousands of covers across venue tiers) and `serves: crew` (the crew
+mess, feeding the staff themselves) — while a fishing boat carries only
+the `crew` instance. What reads as a cruise-unique function is not a
+different kind: `entertainment`, `cabin_housekeeping`,
+`passenger_food_service` are instances whose `serves` population the
+vessel lacks, so a platform with no passengers simply declares no
+passenger-serving instances. `serves` takes `passengers` | `crew` |
+`both` | `mission` (mission = the vessel's work itself: engineering watch,
+fishing ops, flight ops — operational readout and inter-function
+dependency, not population behaviour).
+
+Two consequences. Instances of one kind need not share parameters: the
+cruise `food_service:serves=passengers` instance needs galley crew across
+venue tiers and Dining zones; the `food_service:serves=crew` instance
+needs the same `crew_galley` class at mess scale — and that is a **shared
+staffing pool**: two instances drawing on `crew_galley` compete for the
+same watches, so capacity is scored against summed demand across all
+instances a class staffs, never each instance against the pool in
+isolation (§4). And `crew`-served functions are the subtle ones: the crew
+they feed is also the crew that staffs every other function, so a dead
+crew mess on a fishing boat degrades `fishing_ops` one step removed (§6.2
+second-order channel) — the crew has nowhere else to eat.
 
 ```json
 "ship_functions": {
@@ -177,14 +191,35 @@ note), because the crew has nowhere else to eat.
       }
     },
     {
+      "function_id": "food_service",
+      "serves": "crew",
+      "staffing": {
+        "crew_galley": {"required_on_watch": 1, "minimum_on_watch": 1}
+      },
+      "required_zone_types": ["Mess", "Dining"],
+      "required_systems": ["refrigeration"],
+      "capacity_model": "bottleneck_min",
+      "feedback": {"kind": "readout_only"}
+    },
+    {
       "function_id": "housekeeping",
-      "serves": "both",
+      "serves": "passengers",
       "staffing": {"crew_general": {"required_on_watch": 8}},
+      "required_zone_types": ["Cabin_Corridor"],
       "required_systems": [],
       "capacity_model": "staffing_fraction",
       "feedback": {
         "kind": "cleaning_coverage_scale"
       }
+    },
+    {
+      "function_id": "entertainment",
+      "serves": "passengers",
+      "staffing": {"crew_general": {"required_on_watch": 4}},
+      "required_zone_types": ["Theater", "Pool_Deck"],
+      "required_systems": [],
+      "capacity_model": "staffing_fraction",
+      "feedback": {"kind": "readout_only"}
     },
     {
       "function_id": "engineering_watch",
@@ -194,14 +229,23 @@ note), because the crew has nowhere else to eat.
       "required_systems": ["propulsion"],
       "capacity_model": "bottleneck_min",
       "feedback": {"kind": "readout_only"}
+    },
+    {
+      "function_id": "navigation",
+      "serves": "mission",
+      "staffing": {"crew_deck": {"required_on_watch": 3, "minimum_on_watch": 1}},
+      "required_zone_types": ["Bridge"],
+      "required_systems": ["propulsion"],
+      "capacity_model": "bottleneck_min",
+      "feedback": {"kind": "readout_only"}
     }
   ]
 }
 ```
 
-A fishing platform declares the same vocabulary — the galley is still
-`food_service`, just crew-served and non-optional — plus its mission
-functions:
+A fishing platform declares the same vocabulary — `food_service` in its
+only instance, crew-served and non-optional — and its own mission
+functions alongside the universal navigation/engineering core:
 
 ```json
 "functions": [
@@ -211,6 +255,24 @@ functions:
     "staffing": {"crew_galley": {"required_on_watch": 1, "minimum_on_watch": 1}},
     "required_zone_types": ["Galley", "Mess"],
     "required_systems": ["refrigeration"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
+    "function_id": "navigation",
+    "serves": "mission",
+    "staffing": {"crew_deck": {"required_on_watch": 2, "minimum_on_watch": 1}},
+    "required_zone_types": ["Bridge"],
+    "required_systems": ["propulsion"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
+    "function_id": "engineering_watch",
+    "serves": "mission",
+    "staffing": {"crew_engineering": {"required_on_watch": 1, "minimum_on_watch": 1}},
+    "required_zone_types": ["Engine"],
+    "required_systems": ["propulsion"],
     "capacity_model": "bottleneck_min",
     "feedback": {"kind": "readout_only"}
   },
@@ -238,13 +300,21 @@ functions:
 Rules:
 
 - **`serves`** takes `passengers` | `crew` | `both` | `mission`: which
-  population draws on the function. `mission` marks functions whose output
-  is the vessel's work itself (engineering watch, fishing ops, flight ops)
-  — their degraded feedback is operational readout and inter-function
-  dependency, not population behaviour. `crew`-served functions are the
-  subtle ones: the crew they feed is also the crew that staffs every other
-  function, so a dead galley on a fishing boat degrades `fishing_ops` one
-  step removed (§6.2 second-order channel).
+  population draws on the function. The axis resolves the vessel-class
+  question into three layers: **`mission` is the universal core** —
+  navigation and engineering exist on every powered vessel, whatever else
+  it carries; **`crew` is the universal sustenance layer** — every crewed
+  vessel feeds and berths its own; **`passengers`/`both` appear only where
+  a passenger population exists**, so `entertainment` and cruise dining
+  are cruise instances of kinds, not cruise kinds. A vessel's function set
+  is thus completely described by `serves` coverage — no new
+  function-specific code between platform families. `mission` marks
+  functions whose output is the vessel's work itself — their degraded
+  feedback is operational readout and inter-function dependency, not
+  population behaviour. `crew`-served functions are the subtle ones: the
+  crew they feed is also the crew that staffs every other function, so a
+  dead galley on a fishing boat degrades `fishing_ops` one step removed
+  (§6.2 second-order channel).
 - **Staffing resolution.** A function names the `agent_class` IDs that staff
   it — resolved against the platform's own `agent_classes` block, not a
   built-in list. Legacy binary platforms (passenger/crew only) may instead
@@ -301,6 +371,15 @@ not reimplement it. Functions that need "on watch *and* at a duty zone" use
 the class's `duty_zone`; generic watch functions use the schedule token
 alone (a galley worker off shift in the crew mess is not staffing the
 galley).
+
+Because `(function_id, serves)` instances share crew classes, the read
+computes class pools once per epoch — `fit_in_pool[class]`,
+`impaired_in_pool[class]` — then scores each instance against the *summed*
+`required_on_watch` of every instance that draws that class. The cruise
+example's two `food_service` instances both draw `crew_galley`: passenger
+dining and the crew mess compete for the same galley watches, so a galley
+shortfall hits both capacities jointly rather than each reading the pool as
+if it were private.
 
 ## 5. Ship systems and maintenance
 
