@@ -3,9 +3,13 @@ from __future__ import annotations
 
 import csv
 import io
+import json
+import shutil
+from pathlib import Path
 
 import pytest
 
+from tools import covid_theta_screen_csv
 from tools import covid_theta_v14_readout as mod
 
 
@@ -170,3 +174,159 @@ def test_write_pairs_csv_round_trip(tmp_path, monkeypatch):
     rows = list(csv.DictReader(io.StringIO(out.read_text())))
     assert rows[0]["seed"] == "7"
     assert rows[0]["parent_recorded_onsets"] == "50"
+
+
+DESIGN_FILES = {
+    "v14": Path(__file__).resolve().parents[1]
+    / "picard_framework/runs/covid_theta_screen_v14_design.json",
+    "v13": Path(__file__).resolve().parents[1]
+    / "picard_framework/runs/covid_theta_screen_v13_design.json",
+}
+
+
+def _screen_payload(cell, rec: int, *, parent: bool = False) -> dict:
+    """A merge-compatible lattice cell payload for one enumerate_cells cell."""
+    theta, seed = cell.theta, cell.seed
+    return {
+        "design_id": "covid_theta_screen_v13" if parent else "covid_theta_screen_v14",
+        "cell": {
+            "theta": theta,
+            "arm_id": cell.arm_id,
+            "seed": seed,
+            "infection_age_days": cell.infection_age_days,
+            "imports": cell.imports,
+            "index": cell.index,
+            "key": cell.key,
+            "scenario_id": cell.scenario_id,
+        },
+        "observables": {
+            "scenario_id": cell.scenario_id,
+            "theta": theta,
+            "seed": seed,
+            "recorded_onsets": rec,
+            "onsets_before_split_day": 0,
+            "onsets_on_or_after_split_day": rec,
+            "passenger_onsets_before": 0,
+            "passenger_onsets_after": rec,
+            "crew_onsets_before": 0,
+            "crew_onsets_after": 0,
+            "campaign_specimens": 0,
+            "campaign_positives": 0,
+            "campaign_asymptomatic_positives": 0,
+        },
+        "infections_total": rec * 2,
+        "attack_rate": (rec * 2) / 3711.0,
+        "aboard_total": 3711,
+        "first_onset_day": None,
+        "index_onset_day": -1.0,
+        "index_shedding_at_day0": True,
+        "delivery": {"hand_reservoir_mode": "hygiene_cycle"},
+        "sanitary_activity": {"visits": 1.0},
+    }
+
+
+class _FakePaginator:
+    def __init__(self, keys):
+        self._keys = keys
+
+    def paginate(self, **_kwargs):
+        return [{"Contents": [{"Key": k} for k in self._keys]}]
+
+
+class _FakeS3Client:
+    def __init__(self, objects):
+        self._objects = objects
+
+    def get_paginator(self, _name):
+        return _FakePaginator(list(self._objects))
+
+    def get_object(self, Bucket, Key):
+        return {"Body": io.BytesIO(json.dumps(self._objects[Key]).encode())}
+
+
+def _lattice_cells(design_path, n_seeds=20):
+    design = mod.load_design(str(design_path), repo_root=mod.REPO_ROOT)
+    # The v13 lattice predates arms; its cells carry arm_id=None.
+    cells = [c for c in mod.enumerate_cells(design)
+             if c.arm_id in (None, "hygiene_cycle")]
+    by_theta: dict[float, list] = {}
+    for c in cells:
+        by_theta.setdefault(c.theta, []).append(c)
+    return [c for group in by_theta.values() for c in group[:n_seeds]]
+
+
+def test_stream_cells_lists_and_fetches_in_parallel():
+    objects = {
+        "pfx/cells/a.json": {"cell": {"theta": 1e11}},
+        "pfx/cells/nested/b.json": {"cell": {"theta": 2e11}},
+        "pfx/cells/not_a_cell.txt": None,
+    }
+    client = _FakeS3Client(objects)
+    out = mod.stream_cells(client, "bkt", "pfx/cells/", workers=4)
+    assert set(out) == {"a.json", "b.json"}
+    assert out["a.json"]["cell"]["theta"] == pytest.approx(1e11)
+    assert out["b.json"]["cell"]["theta"] == pytest.approx(2e11)
+
+
+def test_main_end_to_end(tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "REPO_ROOT", str(tmp_path))
+    monkeypatch.setattr(covid_theta_screen_csv, "REPO_ROOT", str(tmp_path))
+    v14 = tmp_path / "v14.json"
+    v13 = tmp_path / "v13.json"
+    shutil.copy(DESIGN_FILES["v14"], v14)
+    shutil.copy(DESIGN_FILES["v13"], v13)
+
+    cells = _lattice_cells(v14)
+    payloads = {c.key: _screen_payload(c, rec=5) for c in cells}
+    parents = {
+        c.key: _screen_payload(c, rec=100, parent=True)
+        for c in _lattice_cells(v13)
+    }
+
+    monkeypatch.setattr(mod, "_s3_client", lambda: object())
+
+    def fake_stream(_client, _bucket, prefix):
+        return dict(parents if "v13" in prefix else payloads)
+
+    monkeypatch.setattr(mod, "stream_cells", fake_stream)
+
+    out = tmp_path / "report.json"
+    surface = tmp_path / "surface.csv"
+    pairs = tmp_path / "pairs.csv"
+    rc = mod.main([
+        "--design", str(v14), "--s3-prefix", "s3://bkt/v14/",
+        "--parent-design", str(v13), "--parent-s3-prefix", "s3://bkt/v13/",
+        "--out", str(out), "--surface-out", str(surface),
+        "--pairs-out", str(pairs), "--expected-cells", "1800",
+        "--allow-partial",
+    ])
+    assert rc == 0
+    report = json.loads(out.read_text())
+    assert report["cells_found"] == 180
+    assert report["audit_failures"] == {}
+    assert report["admissible_thetas"] == pytest.approx([
+        1.33e11, 1.78e11, 2.37e11, 3.16e11, 4.22e11, 5.62e11, 7.5e11,
+    ])
+    assert report["boundary_passing"] == pytest.approx([1e11, 1e12])
+    triggers = {t["trigger"] for t in report["report_immediately"]}
+    assert "takeoff_transition_outside_bracket" in triggers
+    assert "suppression_shaped_delta" in triggers
+    assert len(list(csv.DictReader(surface.open()))) == 9
+    assert len(list(csv.DictReader(pairs.open()))) == 180
+    row = report["paired_vs_v13"]["237000000000.0"]
+    assert row["n_paired"] == 20
+    assert row["takeoff_class_flips"] == 20
+    assert row["suppression_candidate"] is True
+
+
+def test_main_returns_2_when_cells_missing(tmp_path, monkeypatch):
+    monkeypatch.setattr(mod, "REPO_ROOT", str(tmp_path))
+    v14 = tmp_path / "v14.json"
+    shutil.copy(DESIGN_FILES["v14"], v14)
+    monkeypatch.setattr(mod, "_s3_client", lambda: object())
+    monkeypatch.setattr(mod, "stream_cells", lambda *_a, **_kw: {})
+    rc = mod.main([
+        "--design", str(v14), "--s3-prefix", "s3://bkt/v14/",
+        "--expected-cells", "1800",
+    ])
+    assert rc == 2
