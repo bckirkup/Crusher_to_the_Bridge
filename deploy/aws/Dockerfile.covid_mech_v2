@@ -1,0 +1,20 @@
+# COVID-MECH-V2 boarding-screen worker — the campaign image with the
+# array-cell entry layered on.
+#
+# The RINGCAP-V1 / SUSCPOOL-V1 re-measurement runs the standard
+# covid_boarding_screen_entrypoint worker, so this layers the same thin
+# convention the other boarding-screen campaigns use onto the base image
+# built at the merged design-PR SHA.
+#
+# Build (from the repository root; the base must be built first):
+#   docker build -t picard-campaign .
+#   docker build -f deploy/aws/Dockerfile.covid_mech_v2 -t picard-covid-mech-v2 .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/covid_boarding_screen_entrypoint.py ./deploy/aws/covid_boarding_screen_entrypoint.py
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]

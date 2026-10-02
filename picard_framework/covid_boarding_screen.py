@@ -1288,6 +1288,60 @@ def _immune_block(raw: dict[str, Any], sim: Any) -> dict[str, Any]:
     }
 
 
+def _secretor_negative_block(raw: dict[str, Any], sim: Any) -> dict[str, Any]:
+    """Declared + resolved + realized secretor-negative echo.
+
+    The declared pair is what the arm wrote onto
+    ``pathogen_overrides.sars_cov2_resp`` (null on arms that do not
+    declare it); the resolved triple is what the merged profile carried
+    into ``_resolve_secretor_status`` — ``innate_nonsusceptible_fraction``
+    echoed alongside so a spec resolving through the deprecated alias is
+    visible; the realized counts are the per-agent draw outcomes at
+    epoch 0 — the flag-did-not-land proof a susceptible-pool arm needs.
+    """
+    declared = raw.get("pathogen_overrides", {}).get(PATHOGEN_ID) or {}
+    profile = sim.pathogen_profiles.get(PATHOGEN_ID) or {}
+    drawn = sum(
+        1 for a in sim.engine.agents
+        if a.secretor_negative_by_pathogen.get(PATHOGEN_ID)
+    )
+    zero_susc = sum(
+        1 for a in sim.engine.agents
+        if a.susceptibility_multiplier.get(PATHOGEN_ID) == 0.0
+    )
+    n_agents = len(sim.engine.agents)
+    return {
+        "declared": {
+            "secretor_negative_fraction": declared.get(
+                "secretor_negative_fraction"
+            ),
+            "secretor_negative_relative_susceptibility": declared.get(
+                "secretor_negative_relative_susceptibility"
+            ),
+        },
+        "resolved": {
+            "secretor_negative_fraction": profile.get(
+                "secretor_negative_fraction"
+            ),
+            "secretor_negative_relative_susceptibility": profile.get(
+                "secretor_negative_relative_susceptibility"
+            ),
+            "innate_nonsusceptible_fraction": profile.get(
+                "innate_nonsusceptible_fraction"
+            ),
+        },
+        "realized": {
+            "agents": n_agents,
+            "secretor_negative_drawn": drawn,
+            "drawn_fraction": drawn / n_agents if n_agents else 0.0,
+            "zero_susceptibility": zero_susc,
+            "zero_susceptibility_fraction": (
+                zero_susc / n_agents if n_agents else 0.0
+            ),
+        },
+    }
+
+
 def _acquisition_curve(
     sim: Any,
     ledger: QuarantineAttributionLedger,
@@ -1498,6 +1552,11 @@ def cell_payload(
             # is auditable against what actually landed on challenged
             # hosts — {"n": 0} on every unarmed arm.
             "frailty_draw": _frailty_draw_stats(sim),
+            # The declared / resolved / realized secretor-negative
+            # block, echoed so a susceptible-pool arm's fraction is
+            # auditable against the draw that actually landed on the
+            # boarding population (SUSCPOOL-V1).
+            "secretor_negative": _secretor_negative_block(raw, sim),
             **_attribution_block(sim, ledger, raw),
             # The resolved pooled-route delivery constants, echoed so a
             # delivery-machinery arm's declared values are auditable from
@@ -1562,6 +1621,13 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         "exposure_cap": dict(tx_over.get("exposure_cap") or {}),
         "exposure_cap_active": bool(
             getattr(tx_core, "_exposure_cap_active", False)
+        ),
+        # The engine-resolved ring-inclusion flag, echoed so a
+        # rings-first arm is auditable against what the transmission
+        # core actually parsed (the spec-level sibling above echoes
+        # only what the arm declared).
+        "exposure_cap_include_fixed_rings_engine": bool(
+            getattr(tx_core, "_exposure_cap_include_fixed_rings", False)
         ),
         # The engine-resolved hand-reservoir arm, echoed so a
         # transmission_overrides hand_reservoir_mode arm is auditable from

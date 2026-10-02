@@ -1124,6 +1124,79 @@ def test_a_hand_mode_arm_cell_echoes_the_resolved_hand_mode():
     assert base_delivery["hand_reservoir_mode"] == "hygiene_cycle"
 
 
+def test_a_rings_first_cell_echoes_the_engine_cap_flag():
+    """Echo readout on a rings-first arm (RING-CAP-V1): the delivery
+    block echoes the engine-resolved include_fixed_rings flag beside the
+    spec-level echo — the override-reached-the-engine audit."""
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_rings",
+            "overrides": {
+                "transmission_overrides": {
+                    "exposure_cap": {"include_fixed_rings": True},
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    arm = next(c for c in cells if c.arm_id == "B1_rings")
+    payload = echo_screen_cell(design, arm)
+    assert payload["exposure_cap_include_fixed_rings"] is True
+    delivery = payload["delivery"]
+    assert delivery["exposure_cap_include_fixed_rings_engine"] is True
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_delivery = echo_screen_cell(design, base)["delivery"]
+    assert base_delivery["exposure_cap_include_fixed_rings_engine"] is False
+
+
+def test_a_secretor_arm_cell_echoes_the_pool_draw():
+    """Echo readout on a secretor-negative arm (SUSCPOOL-V1): the
+    payload's secretor_negative block echoes the declared fraction, the
+    resolved profile values, and the realized epoch-0 draw — the
+    flag-did-not-land audit for the susceptible-pool assay."""
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_f050",
+            "overrides": {
+                "pathogen_overrides": {
+                    "sars_cov2_resp": {
+                        "secretor_negative_fraction": 0.5,
+                        "secretor_negative_relative_susceptibility": 0.0,
+                    },
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    arm = next(c for c in cells if c.arm_id == "B1_f050")
+    block = echo_screen_cell(design, arm)["secretor_negative"]
+    assert block["declared"]["secretor_negative_fraction"] == pytest.approx(0.5)
+    assert block["resolved"]["secretor_negative_fraction"] == pytest.approx(0.5)
+    assert (
+        block["resolved"]["secretor_negative_relative_susceptibility"]
+        == pytest.approx(0.0)
+    )
+    realized = block["realized"]
+    assert realized["agents"] > 0
+    assert realized["secretor_negative_drawn"] > 0
+    assert 0.0 < realized["drawn_fraction"] < 1.0
+    # relative susceptibility 0.0: every drawn host is a hard zero.
+    assert realized["zero_susceptibility"] == realized[
+        "secretor_negative_drawn"
+    ]
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_block = echo_screen_cell(design, base)["secretor_negative"]
+    assert base_block["declared"]["secretor_negative_fraction"] is None
+    assert base_block["realized"]["secretor_negative_drawn"] == 0
+    assert base_block["realized"]["drawn_fraction"] == 0.0
+
+
 # ── SUSCEPT-V1: susceptibility / effective-population arms ───────────────
 
 SUSCEPT_V1_DESIGN = (
