@@ -191,21 +191,24 @@ its q05 floor above 197; `f075` leaves only 3 takeoff seeds — below the
 full arrays decide whether either survives the admissible band
 (`docs/covid/covid_mech_v1_canary_readout.md`).*
 
-**The declared index case is wrong by about six days and never disembarks.**
+**The declared index case is repaired — earlier text here was stale.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
-at Hong Kong on 25 Jan (Yamagishi 2020); the scenario seeds him at infection
-age 0 on day 0 and keeps him aboard. There is no per-agent permanent
-disembarkation in the engine. Every fit above scores a curve that includes a
-host the record excludes.
-
-**INDEX-GEOM-01 supersedes every Θ-arm figure measured with the index case
-aboard for the whole voyage.** Declared per-agent departure now exists
-(`docs/ledger/INDEX-GEOM-01.md`) and the seed disembarks on day 5 as the
-record states, so every Θ-arm figure of record — which scores a curve that
-includes a host the record excludes — is superseded pending remeasurement.
-The infection-age component of the geometry is NOT resolved: the seed still
-arrives at declared age 0, and the infection-age × Θ screen remains open in
-§3.
+at Hong Kong on 25 Jan (Yamagishi 2020). Declared per-agent departure exists
+(`docs/ledger/INDEX-GEOM-01.md`: `departure_epoch` gates transmission and
+every aboard denominator through `LOCATION_DEPARTED`), and every stage-2
+replay since v11 declares the record's geometry verbatim —
+`onset_day: -1.0`, `departure_day: 5.0`, `infection_age_days: 6.8`
+(bookkeeping only; under a declared `onset_day` the age axis is a measured
+null, COVID-SEED-GEOM-01). Verified live on the v15 cells:
+`index_onset_day = -1.0`, `index_departed_epoch = 120`, shedding at day 0 in
+100% of seeds (audit invariant; a deviation invalidates the cell). The
+seeding-geometry axis itself is measured `geometry_incapable`
+(SEED-GEOM-V1): onset-epoch / placement / co-primary / departure arms at
+every Θ sit at medians ~3,461–3,612 — the residual does not move with index
+geometry. Declared omissions remaining: the 22 Jan Kagoshima excursion (out
+of scope, aboard-side) and off-ship progression of the departed host
+(cosmetic). Figures predating INDEX-GEOM-01 (v11 and earlier) scored a
+curve that kept him aboard all 32 days.
 
 *Update (2026-09-26, `4e0032a0`, `COVID-SEED-GEOM-01`): under a declared
 `onset_day`, `infection_age_days` is now a measured null axis — the 6.8 vs
