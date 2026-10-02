@@ -465,6 +465,19 @@ def advance_infections(
         )
 
 
+def _daily_presentation_hazard(profile: dict[str, Any]) -> bool:
+    """Whether the profile keeps the legacy per-day presentation hazard.
+
+    ``presentation_draw_mode: "daily_hazard"`` is the labelled baseline:
+    the share constant is redrawn once per day of natural history while the
+    course has not presented, so asymptomatic courses only survive the
+    product of daily failures. The default ``"once_per_course"`` (and any
+    unstated mode) spends the share exactly once, which is what the
+    declared ``symptomatic_fraction``/``illness_probability`` values state.
+    """
+    return str(profile.get("presentation_draw_mode") or "") == "daily_hazard"
+
+
 def _advance_one_infection(
     agent: Any,
     pid: str,
@@ -487,14 +500,23 @@ def _advance_one_infection(
     # value, and clearance_days reads the record ahead of the profile.
     illness_duration_days(inf, prof, rng)
     onset = onset_day(agent, pid, inf, prof, rng)
+    daily_hazard = _daily_presentation_hazard(prof)
     if (
         inf["illness"] == IllnessStatus.NOT_ILL
         and crossed_day_boundary(clock, epochs_infected, onset)
+        and (daily_hazard or not inf.get("presentation_drawn"))
     ):
-        # Once per day of natural history, not once per epoch, so the chance
-        # of presenting does not depend on how finely time is cut — and the
-        # first chance is the epoch that crosses this host's own drawn
-        # incubation period, so onset is not rounded up to a whole day.
+        # The declared presentation probability is a share of courses, so
+        # the default spends it once, at the epoch that crosses this host's
+        # own drawn incubation period — onset is not rounded up to a whole
+        # day. A course that fails its one draw never presents: the share
+        # constant is not a per-day hazard, and redraws would let nearly
+        # every infection present within days. ``daily_hazard`` keeps the
+        # labelled baseline, which redraws the share once per day of
+        # natural history so the chance does not depend on how finely
+        # time is cut.
+        if not daily_hazard:
+            inf["presentation_drawn"] = True
         draw_symptom_onset(agent, pid, inf, prof, rng, epoch)
     elif inf["illness"] == IllnessStatus.SYMPTOMATIC:
         _advance_severity(clock, inf, prof, epochs_infected)

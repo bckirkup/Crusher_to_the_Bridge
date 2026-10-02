@@ -321,10 +321,17 @@ class TestDefaultInertness:
     # the shared RNG stream, so downstream draws (and the trajectory rows
     # they feed) change. The arm's own invariant -- no stamp, no extra draw
     # -- is unaffected.
+    # Moved again by the once-per-course presentation draw: the profile's
+    # illness_probability share is now spent once per infection at the
+    # incubation crossing instead of being re-rolled once per day while the
+    # course has not presented. Fewer shared-stream draws reposition the
+    # cursor, and more courses keep the failed draw's asymptomatic stamp, so
+    # the trajectory rows and the fingerprint move with the mechanism. The
+    # arm's own invariant -- no stamp, no extra draw -- is again unaffected.
     _INERTNESS_FINGERPRINT = (
-        "6db842e264407f2c756e11dbf9f8c8142e5affd67ad997d7cca6bfc51414bb95"
+        "058faaf712ea4f6ad74c7b56b2bfe0b70805a6486ad3685aca6220a14688a203"
     )
-    _INERTNESS_RNG_NEXT = 0.39807554513852694
+    _INERTNESS_RNG_NEXT = 0.7053805876830577
 
     def _run(
         self, illness_duration: dict[str, Any] | None,

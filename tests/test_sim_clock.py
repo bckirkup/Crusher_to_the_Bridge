@@ -317,22 +317,48 @@ class _NeverIllRng:
 
 
 @pytest.mark.parametrize(
-    ("clock", "epochs", "expected_draws"),
-    [(HOURLY, 96, 4), (LEGACY_CLOCK, 4, 4), (SIX_HOURLY, 16, 4)],
+    ("clock", "epochs"), [(HOURLY, 96), (LEGACY_CLOCK, 4), (SIX_HOURLY, 16)],
 )
-def test_the_illness_draw_is_per_day_not_per_epoch(
-    clock: SimClock, epochs: int, expected_draws: int,
+def test_the_presentation_draw_runs_once_per_course(
+    clock: SimClock, epochs: int,
 ) -> None:
-    """A finer grid must not hand a host more chances to present.
+    """The declared share is a share of courses, not a per-day hazard.
 
-    The incubation day plus three symptomatic days before day-four clearance
-    provide four chances at symptoms whatever the epoch length, so a host who
-    declines every draw declines exactly four.
+    Under the default ``once_per_course`` semantics a host who declines its
+    single draw at the incubation crossing never presents and never draws
+    again — one draw on every clock — and the course clears unworn at the
+    shedding boundary. The previous per-day redraw made the share's
+    asymptomatic fraction unreachable: only a product of daily failures
+    stayed un-presented.
     """
     agent = _infected_agent(clock)
     rng = _NeverIllRng()
     for _ in range(epochs):
         advance_infections(agent, {"noro": NORO}, rng)
+    assert rng.draws == 1
+    assert agent.infections["noro"]["presentation_drawn"] is True
+    assert agent.infections["noro"]["illness"] == IllnessStatus.RECOVERED
+
+
+@pytest.mark.parametrize(
+    ("clock", "epochs", "expected_draws"),
+    [(HOURLY, 96, 4), (LEGACY_CLOCK, 4, 4), (SIX_HOURLY, 16, 4)],
+)
+def test_daily_hazard_baseline_keeps_the_per_day_draw(
+    clock: SimClock, epochs: int, expected_draws: int,
+) -> None:
+    """``daily_hazard`` is the labelled pre-share baseline: one draw per day.
+
+    The incubation day plus three symptomatic days before day-four clearance
+    provide four chances at symptoms whatever the epoch length, so a host who
+    declines every draw declines exactly four — the behaviour the
+    once-per-course default replaces.
+    """
+    profile = {**NORO, "presentation_draw_mode": "daily_hazard"}
+    agent = _infected_agent(clock)
+    rng = _NeverIllRng()
+    for _ in range(epochs):
+        advance_infections(agent, {"noro": profile}, rng)
     assert rng.draws == expected_draws
     assert agent.infections["noro"]["illness"] == IllnessStatus.RECOVERED
 

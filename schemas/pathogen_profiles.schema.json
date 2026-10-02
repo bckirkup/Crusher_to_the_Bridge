@@ -904,6 +904,11 @@
           "maximum": 1,
           "description": "Dose-independent probability that an infected host presents, drawn once past incubation. Mutually exclusive with illness_probability: a profile declares either the dose-conditional Hill pair or this measured proportion, never both. influenza_a carries 0.669, 95% CI 0.583-0.745, evidence grade B: Carrat 2008 (Am J Epidemiol 2008;167:775-785, DOI 10.1093/aje/kwm375) measures the proportion of symptomatic infection as 66.9% (95% CI 58.3, 74.5) over 522 infected individuals in 38 subgroups from 56 volunteer challenge studies (1,280 challenged), with no significant association with the initial infectious dose (p = 0.12) across inocula spanning 3-7.2 log10 TCID50. The Hill form 1 - (1 + eta*dose)^-gamma is strictly increasing in dose and the measured endpoint is flat over 4.2 orders, so the eta/gamma pair is deleted on that arm rather than re-sourced. B and not A because Carrat is a pooled cross-study meta-regression in clinical facilities, an analogous setting rather than the target setting."
         },
+        "presentation_draw_mode": {
+          "type": "string",
+          "enum": ["once_per_course", "daily_hazard"],
+          "description": "How the declared presentation probability (symptomatic_fraction or the illness_probability Hill pair) is spent over a course. 'once_per_course' (the default when absent) draws it exactly once, at the epoch crossing the host's drawn incubation, so the share of infections that never present is the constant itself — which is what the cited measurements state. 'daily_hazard' is the labelled baseline the pre-share code ran: the same constant redrawn once per day of natural history while the course has not presented, so only a product of daily failures stays asymptomatic and nearly every infection presents within days."
+        },
         "severity_model": {"$ref": "#/$defs/SeverityModel"},
         "observation_model": {"$ref": "#/$defs/ObservationModel"},
         "recovery_day": {"type": "integer", "minimum": 0},

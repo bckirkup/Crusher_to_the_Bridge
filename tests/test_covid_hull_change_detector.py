@@ -205,7 +205,19 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # it and the move is fully attributed to the arm's new draw. Read
         # from CI job 110627187029 (fast tier, 3.11, shard 3) on this
         # branch -- identical to the local 3.12 reading.
-        (3, 11): (2, 1, 217, 3, 0),
+        # PRESENT-SHARE-01: the symptomatic_fraction share is spent once
+        # per course at the incubation crossing instead of being re-rolled
+        # once per day of natural history, so courses that fail the draw
+        # never present — the near-extinct cell re-rolls:
+        # (2, 1, 217, 3, 0) -> (2, 2, 217, 4, 1). The
+        # presentation_draw_mode: daily_hazard baseline cell reproduces
+        # (2, 1, 217, 3, 0) exactly on this branch, so the move is fully
+        # attributed to the share semantics — including
+        # campaign_asymptomatic_positives 0 -> 1, the intended direction.
+        # Read in the local venv on CPython 3.12; the 3.11 entry carries
+        # the same tuple pending its CI read, as on prior near-extinct
+        # repins.
+        (3, 11): (2, 2, 217, 4, 1),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -294,7 +306,12 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # the shared stream and the cell re-rolls: (1, 1, 217, 2, 1) ->
         # (2, 1, 217, 3, 0), read in the local venv on CPython 3.12 on
         # this branch. Identical to the 3.11 CI reading, as before.
-        (3, 12): (2, 1, 217, 3, 0),
+        # PRESENT-SHARE-01 (see the 3.11 note above): the once-per-course
+        # presentation draw re-rolls the cell the same way on CPython 3.12:
+        # (2, 1, 217, 3, 0) -> (2, 2, 217, 4, 1), read in the local venv on
+        # this branch; the daily_hazard baseline reproduces the prior tuple
+        # exactly on this branch.
+        (3, 12): (2, 2, 217, 4, 1),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
@@ -390,7 +407,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # 215), measured in the local venv on CPython 3.12 on this
         # branch. The draw is reachable only through the hygiene_cycle
         # arm, so the move is fully attributed to it.
-        (3, 12): (2968, 298, 3063, 627, 215),
+        # PRESENT-SHARE-01: the symptomatic_fraction share is spent once
+        # per course at the incubation crossing instead of being
+        # re-rolled once per day of natural history, so ~31% of courses
+        # now never present. The burning-regime cell re-reads the
+        # mechanism at campaign scale: recorded onsets fall (courses
+        # stay silent), onsets cluster earlier (silent shedders
+        # circulate), and campaign_asymptomatic_positives triples —
+        # (2968, 298, 3063, 627, 215) -> (2575, 2131, 2617, 688, 618),
+        # measured in the local venv on CPython 3.12 on this branch.
+        (3, 12): (2575, 2131, 2617, 688, 618),
     },
 }
 
