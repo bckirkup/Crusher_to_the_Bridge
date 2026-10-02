@@ -53,6 +53,10 @@ from engines.cooperative_packet import (
     coop_class_weights,
 )
 from engines.crew_duty_exclusion import is_food_employee
+from engines.environmental_hazards import (
+    CUMULATIVE_TOXICITY_MODEL,
+    cumulative_toxicity_spec,
+)
 from engines.fomite_surfaces import (
     PerSurfaceFomiteState,
     UnitInventory,
@@ -837,7 +841,7 @@ DEFAULT_ROUTE_EFFICIENCY: dict[str, float] = {
 DEFAULT_ROUTE_WEIGHTS = DEFAULT_ROUTE_EFFICIENCY
 
 _DOSE_RESPONSE_MODELS = frozenset(
-    {"beta_poisson", "exponential", COOP_MODEL},
+    {"beta_poisson", "exponential", COOP_MODEL, CUMULATIVE_TOXICITY_MODEL},
 )
 
 # FRAILTY-V1: the continuous frailty families a ``dose_response.frailty``
@@ -5358,6 +5362,11 @@ class TransmissionCore:
         )
         for route, route_dose in route_doses.items():
             route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
+        if model == CUMULATIVE_TOXICITY_MODEL:
+            self._resolve_toxicity_challenge(
+                agent, pathogen_id, cumulative_dose, epoch,
+            )
+            return
         if model == COOP_MODEL:
             inf_prob = self._cooperative_hazard(
                 agent, pathogen_id, p_dose, effective_dose,
@@ -5388,6 +5397,35 @@ class TransmissionCore:
             agent_pathway_doses.get(agent.agent_id, {}),
             matrix, events,
         )
+
+    def _resolve_toxicity_challenge(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        cumulative_dose: float,
+        epoch: int,
+    ) -> None:
+        """Non-infectious onset for the cumulative-toxicity arm (spec §8).
+
+        The Haber c·t declaration is a deterministic threshold law on the
+        agent's ``cumulative_exposure`` ledger: the first crossing records
+        the onset epoch and, when the declaration says the hazard presents
+        symptomatically, flips the §7 symptomatic-presentation flag. It
+        draws nothing — a threshold crossing is not a stochastic event —
+        and it never touches ``illness_status``, ``infections``, or the
+        shedding machinery, so the host presents without ever becoming a
+        source.
+        """
+        if pathogen_id in agent.hazard_onset_epochs:
+            return
+        spec = cumulative_toxicity_spec(
+            self.pathogen_profiles.get(pathogen_id, {}),
+        )
+        if spec is None or cumulative_dose < spec["haber_ct_threshold"]:
+            return
+        agent.hazard_onset_epochs[pathogen_id] = epoch
+        if spec["symptomatic"]:
+            agent.hazard_symptomatic_active = True
 
     def _cooperative_hazard(
         self,

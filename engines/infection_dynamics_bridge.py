@@ -862,6 +862,9 @@ class KorkinAgent:
         # the §5 repair-labor hook, and the endogenous-condition record.
         "ppe_wear_hours_by_type", "fatigue_score", "ppe_dexterity_impairment",
         "ppe_condition_ids", "ppe_fatigue_refused", "ppe_symptomatic_active",
+        # Environmental-hazard arm (spec §8): presentation flag and the
+        # per-hazard first-crossing epoch record.
+        "hazard_symptomatic_active", "hazard_onset_epochs",
     )
 
     def __init__(
@@ -1049,6 +1052,16 @@ class KorkinAgent:
         # history loops can never clear it and the shedding path never
         # mistakes it for a symptomatic infection.
         self.ppe_symptomatic_active: bool = False
+
+        # Environmental-hazard presentation (ship_function_capacity_spec §8):
+        # the same endogenous-presentation contract as ppe_symptomatic_active
+        # — set by the cumulative-toxicity arm at its threshold crossing,
+        # never cleared by the natural-history loops, and never read by the
+        # shedding path. hazard_onset_epochs records the first crossing epoch
+        # per hazard for audit; a host carries both keys only while a hazard
+        # declaration enabled the arm.
+        self.hazard_symptomatic_active: bool = False
+        self.hazard_onset_epochs: dict[str, int] = {}
 
         # {pathogen_id: genotype} the agent's pre-existing immunity was raised
         # against; empty unless variant surveillance is on
@@ -1923,7 +1936,11 @@ class KorkinAgent:
         # duty exclusion and the VSP counters see it through the same axis
         # (ship_function_capacity_spec §7.4). It cannot move any existing
         # read: nothing sets it unless the fatigue channel is enabled.
-        presenting = self.is_symptomatic or self.ppe_symptomatic_active
+        presenting = (
+            self.is_symptomatic
+            or self.ppe_symptomatic_active
+            or self.hazard_symptomatic_active
+        )
         symptom_presentation = (
             PRESENTATION_SYMPTOMATIC if presenting else PRESENTATION_ASYMPTOMATIC
         )

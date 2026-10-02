@@ -168,12 +168,18 @@ class ObservationEngine:
     clinical_instrument_params: dict | None = None
     pathogen_profiles: dict | None = None
     outbreak_aware: bool = False
+    # Environmental-hazard sensors (spec §8b): hazard_id -> modality ->
+    # instrument; absent and empty both mean no chemical surface.
+    chemical_sensors: dict[str, dict[str, Any]] = field(default_factory=dict)
 
 
 @dataclass
 class ObservationResults:
     """Delivered instrument results for one epoch (turnaround already applied)."""
 
+    # Chemical-hazard reads land immediately — a continuous monitor has no
+    # lab turnaround. hazard_id -> {"air"|"surface" -> zone -> sample}.
+    chemical: dict[str, dict[str, Any]] = field(default_factory=dict)
     air: dict[str, dict[str, Any]] = field(default_factory=dict)
     swab: dict[str, dict[str, Any]] = field(default_factory=dict)
     ww: dict[str, dict[str, Any]] = field(default_factory=dict)

@@ -1,8 +1,11 @@
 # Ship Function Capacity, Maintenance Degradation, and Wear-Fatigue Channels
 
-> **Status:** Proposed. Nothing in this document describes current behaviour.
-> The seams it names exist and are identified by their in-tree identifiers; the
-> mechanisms specified in §§3–8 do not exist.
+> **Status:** Implemented. §§3–6 in `engines/ship_functions.py` /
+> `engines/ship_systems.py`; §7 in `engines/ppe_fatigue.py`; §8 in
+> `engines/environmental_hazards.py` and
+> `crusher_labs/modalities/chemical_sensor.py` (default-off; declared-disabled
+> is bit-identical to absent). Constants are registered in
+> `docs/ship_functions/parameter_sources.md`.
 
 ## 1. Why this document exists
 

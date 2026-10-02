@@ -168,7 +168,7 @@ longer justifications.
 | [sonar_sweep_handoff_2026_09_26.md](sonar_sweep_handoff_2026_09_26.md) | Handoff record (2026-09-26) — maintenance sweep, no model numbers: the Sonar backlog state (246 → 106 open), landed/queued S3776 batches, running child sessions, and the Sonar new-code gate gotchas (moved lines need coverage; extraction-induced S2583 FPs) |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
-| [ship_functions/ship_function_capacity_spec.md](ship_functions/ship_function_capacity_spec.md) | Partially implemented (§3–§7) — the function registry, availability read, systems/maintenance engine, feedback writers, and PPE wear-fatigue channel; §8 names the remaining hazard work |
+| [ship_functions/ship_function_capacity_spec.md](ship_functions/ship_function_capacity_spec.md) | Implemented (§3–§8) — the function registry, availability read, systems/maintenance engine, feedback writers, PPE wear-fatigue channel, and the environmental/chemical hazard arm (ENV-HAZARD-01) |
 | [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md) | Sourcing record (SHIP-FUNC-01) — every tunable in `ship_functions/ship_function_capacity_spec.md` with interval, grade and origin, or an explicit NULL-SOURCE; adopts nothing |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |

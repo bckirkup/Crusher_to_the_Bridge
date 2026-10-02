@@ -235,6 +235,63 @@ def _surface_swab_record(
     return record
 
 
+def _chemical_sensor_record(
+    epoch: int,
+    zone: str,
+    substance_id: str,
+    modality: str,
+    data: dict[str, Any],
+    fidelity_name: str,
+) -> dict[str, Any]:
+    """Continuous chemical-monitor record (spec §8b) — no Ct, no controls."""
+    detected = data.get("detected", False)
+    if modality == "air":
+        measured = data.get("measured_concentration_per_m3", 0.0)
+        lod = data.get("lod_mass_per_m3", 0.0)
+    else:
+        measured = data.get("measured_density_mass_per_cm2", 0.0)
+        lod = data.get("lod_mass_per_cm2", 0.0)
+    anomaly = (
+        round(min(1.0, measured / (2.0 * lod)), 4)
+        if detected and lod > 0.0
+        else 0.0
+    )
+
+    record: dict[str, Any] = {
+        "sample_id": _sample_id(
+            epoch, zone, "CAIR" if modality == "air" else "CSRF",
+        ),
+        "timestamp_epoch": epoch,
+        "collection_point_type": (
+            "chemical_air_monitor"
+            if modality == "air"
+            else "chemical_surface_monitor"
+        ),
+        "collection_zone": zone,
+        "assay_type": "chemical_detector",
+        "fidelity_tier": fidelity_name,
+        "substance_id": substance_id,
+        "binary_result": BINARY_DETECTED if detected else BINARY_NOT_DETECTED,
+        "inferred_anomaly_score": anomaly,
+    }
+
+    if fidelity_name == FIDELITY_LOW:
+        record["stoplight"] = "RED" if detected else "GREEN"
+        return record
+
+    if modality == "air":
+        record["measured_concentration_per_m3"] = measured
+        record["concentration_per_m3"] = data.get("concentration_per_m3")
+        record["lod_mass_per_m3"] = lod
+    else:
+        record["measured_density_mass_per_cm2"] = measured
+        record["surface_density_mass_per_cm2"] = data.get(
+            "surface_density_mass_per_cm2",
+        )
+        record["lod_mass_per_cm2"] = lod
+    return record
+
+
 def _wastewater_record(
     epoch: int,
     zone: str,
@@ -588,6 +645,22 @@ class ArtificialLabNotebook:
             self.records.append(
                 _surface_swab_record(epoch, zone_name, data, self.fidelity_name, self.fidelity)
             )
+
+    def log_chemical_sensor(
+        self,
+        epoch: int,
+        results: dict[str, dict[str, Any]],
+    ) -> None:
+        """Environmental-hazard reads (spec §8b): {substance_id: {modality: {zone: sample}}}."""
+        for substance_id, modality in results.items():
+            for mode, zone_results in modality.items():
+                for zone_name, data in zone_results.items():
+                    self.records.append(
+                        _chemical_sensor_record(
+                            epoch, zone_name, substance_id, mode, data,
+                            self.fidelity_name,
+                        )
+                    )
 
     def log_wastewater_seq(
         self,

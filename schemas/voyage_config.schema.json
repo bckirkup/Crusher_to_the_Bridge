@@ -88,7 +88,7 @@
     "ship_functions": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Ship-function capacity declarations (docs/proposals/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
+      "description": "Ship-function capacity declarations (docs/ship_functions/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
       "properties": {
         "enabled": { "type": "boolean", "default": false },
         "symptomatic_effectiveness": {
@@ -107,6 +107,19 @@
       "type": "array",
       "description": "Named ship systems with health state, degradation, and repair labor (spec §5).",
       "items": { "$ref": "#/$defs/ship_system" }
+    },
+    "environmental_hazards": {
+      "type": "object",
+      "description": "Chemical/environmental hazard arm (docs/ship_functions/ship_function_capacity_spec.md §8): chemical substances declared as pathogen-schema profiles (category 'chemical', dose_response.model 'cumulative_toxicity'). enabled: false by default; absent or disabled = bit-identical — the merge into pathogen_profiles is the only enablement gate.",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "hazards": {
+          "type": "array",
+          "description": "Hazard profiles; each is a pathogen-schema profile carrying category 'chemical' and a cumulative_toxicity dose_response with haber_ct_threshold.",
+          "items": { "type": "object", "required": ["pathogen_id", "name", "category", "dose_response"] }
+        }
+      }
     }
   },
   "$defs": {

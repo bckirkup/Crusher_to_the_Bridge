@@ -701,7 +701,7 @@
         "name": {"type": "string"},
         "category": {
           "type": "string",
-          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal", "bacterial_waterborne", "enteric_bacterial", "filovirus"]
+          "enum": ["enteric_viral", "respiratory_viral", "bacterial", "fungal", "bacterial_waterborne", "enteric_bacterial", "filovirus", "chemical"]
         },
         "transmission_routes": {
           "type": "array",
@@ -858,7 +858,16 @@
           "type": "object",
           "required": ["model"],
           "properties": {
-            "model": {"type": "string", "enum": ["beta_poisson", "exponential"]},
+            "model": {"type": "string", "enum": ["beta_poisson", "exponential", "cumulative_toxicity"]},
+            "haber_ct_threshold": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "ENV-HAZARD-01 (ship_function_capacity_spec §8): the Haber c·t threshold the cumulative_exposure ledger must reach for non-infectious onset. Declared in agent dose-units accumulated over epochs; deterministic — the crossing draws nothing, produces a symptomatic presentation on the §7 seam with zero shedding and no incubation, and never creates an infection record."
+            },
+            "symptomatic": {
+              "type": "boolean",
+              "description": "For cumulative_toxicity only: whether the threshold crossing presents symptomatically. Defaults true; false records the onset epoch without a presentation (the hazard still books cumulative dose)."
+            },
             "alpha": {"type": "number", "exclusiveMinimum": 0},
             "beta": {"type": "number", "exclusiveMinimum": 0},
             "susceptibility_scale": {
@@ -883,7 +892,11 @@
           "then": {"required": ["alpha", "beta"]},
           "else": {
             "if": {"properties": {"model": {"const": "exponential"}}},
-            "then": {"required": ["k"]}
+            "then": {"required": ["k"]},
+            "else": {
+              "if": {"properties": {"model": {"const": "cumulative_toxicity"}}},
+              "then": {"required": ["haber_ct_threshold"]}
+            }
           }
         },
         "illness_probability": {
