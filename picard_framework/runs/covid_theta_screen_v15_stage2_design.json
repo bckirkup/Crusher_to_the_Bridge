@@ -11,16 +11,82 @@
     "QUAR-ATTR-V2 on the post-721 base measured Theta 1e9 (3,365 / 0.9068) -- boundary anchor, never selected; re-measured on this image as row 0 of every submitted set."
   ],
   "scenario_id": "diamond_princess_2020",
-  "thetas": [1000000000.0, 100000000000.0, 133000000000.0, 178000000000.0, 237000000000.0, 316000000000.0, 422000000000.0, 562000000000.0, 750000000000.0, 1000000000000.0],
+  "thetas": [
+    1000000000.0,
+    100000000000.0,
+    133000000000.0,
+    178000000000.0,
+    237000000000.0,
+    316000000000.0,
+    422000000000.0,
+    562000000000.0,
+    750000000000.0,
+    1000000000000.0
+  ],
   "thetas_note": "Candidate universe, not a submission list (verbatim from v14 stage 2, itself verbatim from v13 stage 2): Theta 1e9 is the QUAR-ATTR-V2 replay-canary anchor row (never an admissibility candidate), then the nine stage-1 lattice Thetas ascending. The rows that submit are chosen by the parent's frozen rule (a/b/c/d in its stage_2_declared_replay.theta_points) once the stage-1 surface exists -- no row outside this list may be added after the surface is seen, and no interior row selected by the rule may be dropped.",
-  "infection_age_days": [6.8],
+  "infection_age_days": [
+    6.8
+  ],
   "infection_age_note": "The declared value, carried for cell-key bookkeeping only: under a declared onset_day the infection age is a measured null axis (COVID-SEED-GEOM-01, 200 of 200 triples byte-identical across ages) -- incubation = age + onset_day - seed_day.",
-  "imports": [1],
+  "imports": [
+    1
+  ],
   "sanitary_visit_mode": "dwell_weighted",
   "seed_base": 20200205,
   "seeds": 20,
   "seeds_note": "Verbatim from v10/v11/rebase_01/v13/v14 stage 2: the SAME 20 matched seeds at the same base, so each replay cell pairs seed-for-seed with every prior stage-2 surface.",
-  "points": [[1000000000.0, 6.8, 1], [100000000000.0, 6.8, 1], [133000000000.0, 6.8, 1], [178000000000.0, 6.8, 1], [237000000000.0, 6.8, 1], [316000000000.0, 6.8, 1], [422000000000.0, 6.8, 1], [562000000000.0, 6.8, 1], [750000000000.0, 6.8, 1], [1000000000000.0, 6.8, 1]],
+  "points": [
+    [
+      1000000000.0,
+      6.8,
+      1
+    ],
+    [
+      100000000000.0,
+      6.8,
+      1
+    ],
+    [
+      133000000000.0,
+      6.8,
+      1
+    ],
+    [
+      178000000000.0,
+      6.8,
+      1
+    ],
+    [
+      237000000000.0,
+      6.8,
+      1
+    ],
+    [
+      316000000000.0,
+      6.8,
+      1
+    ],
+    [
+      422000000000.0,
+      6.8,
+      1
+    ],
+    [
+      562000000000.0,
+      6.8,
+      1
+    ],
+    [
+      750000000000.0,
+      6.8,
+      1
+    ],
+    [
+      1000000000000.0,
+      6.8,
+      1
+    ]
+  ],
   "cells": 200,
   "cells_note": "10 point rows x 1 age x 1 import x 20 seeds = 200 declared-replay cells enumerated (each a full 768-epoch voyage, ~30 min). Row r of the points list occupies indices r*20..r*20+19: Theta 1e9 anchor = 0-19, then lattice Thetas ascending -- 1e11 = 20-39, 1.33e11 = 40-59, 1.78e11 = 60-79, 2.37e11 = 80-99, 3.16e11 = 100-119, 4.22e11 = 120-139, 5.62e11 = 140-159, 7.5e11 = 160-179, 1e12 = 180-199. Only rows selected by the parent's frozen rule submit; the rest of the candidate universe stays unrun and unmerged.",
   "takeoff_recorded_onsets": 10,
@@ -61,5 +127,12 @@
     "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_screen_v15_stage2/<sha>/cells/",
     "canary": "The Theta 1e9 anchor row (indices 0-19) runs in every submitted set as the QUAR-ATTR-V2 re-measurement and canary.",
     "report_immediately_if": "the parent's rule selects no rows (illusory window); the anchor row diverges from its QUAR-ATTR-V2 record beyond the cross-generation drift the v13 pairing tolerates; any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; any cell echoes presentation_draw_mode != once_per_course or hand_reservoir_mode != hygiene_cycle; or the child failure rate exceeds 5%."
-  }
+  },
+  "arms": [
+    {
+      "arm_id": "once_per_course",
+      "overrides": {}
+    }
+  ],
+  "arms_note": "Single baseline arm so replay cells carry the armed-payload contract (delivery.presentation_draw_mode / hand_reservoir_mode, dose_response, attribution echoes). Stage-2 varies no axis; the arm only declares that the replay runs the shipped default."
 }

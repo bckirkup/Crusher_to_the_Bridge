@@ -23,7 +23,7 @@ def _payload(
     *,
     theta: float = 3.16e11,
     seed: int = 20200205,
-    arm: str | None = None,
+    arm: str | None = "once_per_course",
     draw_mode: str | None = "once_per_course",
     hand_mode: str | None = "hygiene_cycle",
     rec: int = 200,

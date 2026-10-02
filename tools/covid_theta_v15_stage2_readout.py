@@ -86,10 +86,8 @@ def _audit_cell(payload: dict[str, Any], design_id: str) -> list[str]:
         if got != want:
             failures.append(f"delivery.{field} {got!r} != {want!r}")
     cell = payload.get("cell") or {}
-    # The stage-2 replay is armless (v13 precedent); a declared arm echoes
-    # the screen's own arm, anything else is foreign.
-    if cell.get("arm_id") not in (None, "once_per_course"):
-        failures.append(f"cell.arm_id {cell.get('arm_id')!r} foreign")
+    if cell.get("arm_id") != "once_per_course":
+        failures.append(f"cell.arm_id {cell.get('arm_id')!r} != 'once_per_course'")
     if payload.get("design_id") != design_id:
         failures.append(
             f"design_id {payload.get('design_id')!r} != {design_id!r}",
