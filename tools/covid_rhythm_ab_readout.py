@@ -456,10 +456,9 @@ def pool(
     classes: dict[str, Any] = {}
     for class_id in sorted({k[0] for k in groups}):
         arms = {
-            arm: _arm_pool(groups[(class_id, arm)], takeoff_min, targets)
-            for arm in sorted(
-                a for (cid, a) in groups if cid == class_id
-            )
+            arm: _arm_pool(pool, takeoff_min, targets)
+            for (cid, arm), pool in sorted(groups.items())
+            if cid == class_id
         }
         entry: dict[str, Any] = {"arms": arms}
         if "off" in arms and "on" in arms:

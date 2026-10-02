@@ -185,13 +185,13 @@ def format_report(
     if not degenerate:
         lines.append("Every rung is distinguishable from every other rung.")
         return "\n".join(lines) + "\n"
-    lines.append("## Collapsed rungs")
-    lines.append("")
-    lines.append(
+    lines.extend([
+        "## Collapsed rungs",
+        "",
         "Each group below produced identical outputs at every shared "
         "replicate, so the axis carries no information across it.",
-    )
-    lines.append("")
+        "",
+    ])
     for members in degenerate:
         rendered = ", ".join(str(member) for member in members)
         lines.append(f"- {rendered}")

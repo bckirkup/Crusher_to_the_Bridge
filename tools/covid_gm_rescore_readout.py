@@ -337,17 +337,26 @@ def _paired_rows(
             key = f"theta={theta:.4g}|{BASELINE_ARM}_minus_{arm_id}"
             out[key] = _seed_paired_delta(base, cells)
     if external:
-        for (theta, arm_id), payloads in external.items():
-            seeded = {_cell_seed(p): p for p in payloads}
-            for own_theta, arms in by_theta.items():
-                if own_theta != float(theta):
-                    continue
-                base = arms.get(BASELINE_ARM, {})
-                key = (
-                    f"theta={theta:.4g}|{BASELINE_ARM}_minus_external:"
-                    f"{arm_id}"
-                )
-                out[key] = _seed_paired_delta(base, seeded)
+        out.update(_external_deltas(external, by_theta))
+    return out
+
+
+def _external_deltas(
+    external: dict[tuple, list[dict]],
+    by_theta: dict[float, dict[str, dict[int, dict]]],
+) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    for (theta, arm_id), payloads in external.items():
+        seeded = {_cell_seed(p): p for p in payloads}
+        for own_theta, arms in by_theta.items():
+            if own_theta != float(theta):
+                continue
+            base = arms.get(BASELINE_ARM, {})
+            key = (
+                f"theta={theta:.4g}|{BASELINE_ARM}_minus_external:"
+                f"{arm_id}"
+            )
+            out[key] = _seed_paired_delta(base, seeded)
     return out
 
 

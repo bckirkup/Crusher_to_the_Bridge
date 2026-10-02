@@ -878,15 +878,7 @@ def apply_arm_overrides(
     if "transmission_overrides" in overrides:
         _apply_transmission_overrides(raw, overrides["transmission_overrides"])
     if "near_field_air_mode" in overrides:
-        mode = str(overrides["near_field_air_mode"])
-        if mode not in NEAR_FIELD_AIR_MODES:
-            raise ValueError(
-                f"near_field_air_mode must be one of {NEAR_FIELD_AIR_MODES}, "
-                f"got {mode!r}",
-            )
-        raw["config_overrides"].setdefault("transmission", {}).setdefault(
-            "near_field_air", {},
-        )["mode"] = mode
+        _apply_near_field_air_mode(raw, overrides["near_field_air_mode"])
     if "profile_route_efficiency_multipliers" in overrides:
         _apply_route_efficiencies(
             raw, overrides["profile_route_efficiency_multipliers"], profile,
@@ -896,13 +888,8 @@ def apply_arm_overrides(
     if "ship_graph_overrides" in overrides:
         _apply_ship_graph_overrides(raw, overrides["ship_graph_overrides"])
     if "dose_response_frailty" in overrides:
-        if theta is None:
-            raise ValueError(
-                "dose_response_frailty needs the cell's theta to hold "
-                "E[susceptibility] constant",
-            )
-        _apply_dose_response_frailty(
-            raw, overrides["dose_response_frailty"], float(theta), profile,
+        _apply_frailty_override(
+            raw, overrides["dose_response_frailty"], theta, profile,
         )
     if "hazard_frailty" in overrides:
         # Runs after the block-rewriting arms above so the frailty
@@ -913,6 +900,32 @@ def apply_arm_overrides(
     if "info_suppression" in overrides:
         _apply_info_suppression(raw, overrides["info_suppression"])
     return raw
+
+
+def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
+    mode = str(mode)
+    if mode not in NEAR_FIELD_AIR_MODES:
+        raise ValueError(
+            f"near_field_air_mode must be one of {NEAR_FIELD_AIR_MODES}, "
+            f"got {mode!r}",
+        )
+    raw["config_overrides"].setdefault("transmission", {}).setdefault(
+        "near_field_air", {},
+    )["mode"] = mode
+
+
+def _apply_frailty_override(
+    raw: dict[str, Any],
+    block: Any,
+    theta: float | None,
+    profile: dict[str, Any],
+) -> None:
+    if theta is None:
+        raise ValueError(
+            "dose_response_frailty needs the cell's theta to hold "
+            "E[susceptibility] constant",
+        )
+    _apply_dose_response_frailty(raw, block, float(theta), profile)
 
 
 def _apply_info_suppression(

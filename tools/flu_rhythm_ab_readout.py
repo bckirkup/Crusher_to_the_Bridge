@@ -184,7 +184,7 @@ def _paired_table(
 
 def build_readout(results_root: Path) -> dict[str, Any]:
     cells = load_cells(results_root)
-    tiers = sorted({tier for _, tier in cells})
+    tiers = sorted({key[1] for key in cells})
     out: dict[str, Any] = {"tiers": {}}
     for tier in tiers:
         per_arm = {}

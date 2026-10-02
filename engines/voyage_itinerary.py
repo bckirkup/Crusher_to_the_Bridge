@@ -213,6 +213,8 @@ def merge_voyage_overrides(
         "voyage" in overrides
         or "dining_meal_weights" in overrides
         or "medical_response" in overrides
+        or "ship_functions" in overrides
+        or "ship_systems" in overrides
     ):
         return deep_merge_dict(platform_cfg, overrides)
     return deep_merge_dict(platform_cfg, {"voyage": overrides})
@@ -284,6 +286,19 @@ def resolve_epoch_state(
             epoch_of_day=epoch_of_day,
         )
 
+    return _effects_epoch_state(
+        voyage, itinerary, clock, voyage_day, epoch_of_day,
+    )
+
+
+def _effects_epoch_state(
+    voyage: dict[str, Any],
+    itinerary: list[dict[str, Any]],
+    clock: SimClock,
+    voyage_day: int,
+    epoch_of_day: float,
+) -> EpochState:
+    """The effects-active branch of :func:`resolve_epoch_state`."""
     day_type, day_entry = _day_type_and_entry(itinerary, voyage_day)
 
     defaults = (voyage.get("defaults") or {}).get(day_type) or DEFAULT_DAY_DEFAULTS.get(

@@ -2229,6 +2229,104 @@ def _check_config_yaml(
     _check_surface_cleaning(cfg, report)
     _check_high_touch_area_scale(cfg, report)
     _check_fomite_representation(cfg, report)
+    _check_ppe_fatigue(cfg, report)
+
+
+def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
+    """Validate the §7 ppe_types registry and ppe_fatigue policy block.
+
+    Absent is the labelled baseline and always valid. Present means every
+    entry is well-formed, every typed coverage name resolves against the
+    registry, and an enabled channel has something to arm.
+    """
+    registry = cfg.get("ppe_types")
+    if registry is not None and not isinstance(registry, dict):
+        report.error(_CONFIG_YAML, "CONFIG", "ppe_types must be a mapping")
+        return
+    registry = registry or {}
+    for type_id, entry in registry.items():
+        if not isinstance(entry, dict):
+            report.error(_CONFIG_YAML, "CONFIG",
+                         f"ppe_types.{type_id} must be a mapping")
+            continue
+        for key in ("fatigue_rate_per_epoch", "heat_load",
+                    "dexterity_impairment"):
+            v = entry.get(key)
+            if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+                report.error(_CONFIG_YAML, "MATH_BOUND",
+                             f"ppe_types.{type_id}.{key} = {v!r} "
+                             "must be finite and non-negative")
+        conds = entry.get("fatigue_conditions", [])
+        if conds is None:
+            conds = []
+        if not isinstance(conds, list):
+            report.error(_CONFIG_YAML, "CONFIG",
+                         f"ppe_types.{type_id}.fatigue_conditions must be a list")
+            continue
+        for cond in conds:
+            if not isinstance(cond, dict):
+                report.error(_CONFIG_YAML, "CONFIG",
+                             f"ppe_types.{type_id} condition must be a mapping")
+                continue
+            if not str(cond.get("condition_id") or "").strip():
+                report.error(_CONFIG_YAML, "CONFIG",
+                             f"ppe_types.{type_id} condition missing "
+                             "condition_id")
+            rate = cond.get("rate_per_wear_hour")
+            if (not isinstance(rate, (int, float)) or not math.isfinite(rate)
+                    or rate < 0):
+                report.error(_CONFIG_YAML, "MATH_BOUND",
+                             f"ppe_types.{type_id} condition rate_per_wear_hour "
+                             f"= {rate!r} must be finite and non-negative")
+
+    pf = cfg.get("ppe_fatigue")
+    if pf is None:
+        return
+    if not isinstance(pf, dict):
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "ppe_fatigue must be a mapping")
+        return
+    for key in ("fatigue_refusal_threshold",):
+        v = pf.get(key)
+        if not isinstance(v, (int, float)) or not math.isfinite(v) or v < 0:
+            report.error(_CONFIG_YAML, "MATH_BOUND",
+                         f"ppe_fatigue.{key} = {v!r} must be finite "
+                         "and non-negative")
+    prob = pf.get("fatigue_refusal_probability_per_epoch")
+    if (not isinstance(prob, (int, float)) or not math.isfinite(prob)
+            or not 0.0 <= prob <= 1.0):
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"ppe_fatigue.fatigue_refusal_probability_per_epoch = "
+                     f"{prob!r} must lie in [0, 1]")
+    default = pf.get("default_ppe_type", "surgical_mask")
+    if registry and default not in registry:
+        report.error(_CONFIG_YAML, "CONFIG",
+                     f"ppe_fatigue.default_ppe_type {default!r} names no "
+                     "ppe_types entry")
+    if pf.get("enabled", False) and not registry:
+        report.error(_CONFIG_YAML, "CONFIG",
+                     "ppe_fatigue.enabled is true but ppe_types declares "
+                     "no types")
+
+    # Cross-reference: every ppe_type an NPI coverage map names must exist.
+    npi = cfg.get("non_pharmaceutical_interventions")
+    if isinstance(npi, dict):
+        for name, measure in npi.items():
+            coverage = (measure or {}).get("coverage_by_role")
+            if not isinstance(coverage, dict):
+                continue
+            for role, entry in coverage.items():
+                if isinstance(entry, dict):
+                    types = entry.get("ppe_type")
+                    names = types if isinstance(types, list) else [types]
+                    for t in names:
+                        if t is not None and t not in registry:
+                            report.error(
+                                _CONFIG_YAML, "CONFIG",
+                                f"npi.{name}.coverage_by_role.{role} names "
+                                f"ppe_type {t!r}, which has no ppe_types "
+                                "entry",
+                            )
 
 
 def _check_fomite_representation(cfg: dict[str, Any], report: Report) -> None:

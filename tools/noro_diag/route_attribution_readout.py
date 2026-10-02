@@ -24,7 +24,6 @@ The verdict is a finding, not a failure: exit is 0.
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import math
 import os
@@ -42,6 +41,10 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.diag.readout_common import (  # noqa: E402
+    load_arm_cells,
+    wilson_centered,
+)
 
 DOMINANT_KEYS = (
     "fomite",
@@ -55,14 +58,7 @@ DOMINANT_KEYS = (
 
 def load_arm(directory: Path, tag: str) -> dict[int, dict[str, Any]]:
     """The per-seed cells one arm wrote, keyed by seed."""
-    cells = {}
-    for path in sorted(
-        directory.glob(f"per_host_dose_challenge_{tag}_seed*.json.gz"),
-    ):
-        with gzip.open(path, "rt", encoding="utf-8") as handle:
-            cell = json.load(handle)
-        cells[int(cell["seed"])] = cell
-    return cells
+    return load_arm_cells(directory, tag)
 
 
 def _acquisitions(cell: dict[str, Any]) -> list[dict[str, Any]]:
@@ -96,17 +92,8 @@ def wilson_interval(k: int, n: int, z: float = 1.959964) -> dict[str, float]:
     """Wilson 95% interval for a binomial proportion."""
     if n <= 0:
         return {"p": 0.0, "lo": 0.0, "hi": 0.0, "n": 0, "k": 0}
-    p = k / n
-    denom = 1.0 + z * z / n
-    centre = (p + z * z / (2 * n)) / denom
-    half = (z / denom) * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
-    return {
-        "p": p,
-        "lo": max(0.0, centre - half),
-        "hi": min(1.0, centre + half),
-        "n": n,
-        "k": k,
-    }
+    p, lo, hi = wilson_centered(k, n, z)
+    return {"p": p, "lo": lo, "hi": hi, "n": n, "k": k}
 
 
 def _log_binom(n: int, k: int) -> float:

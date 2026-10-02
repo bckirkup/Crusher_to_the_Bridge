@@ -536,9 +536,11 @@ def print_executive_summary(
         return f"║ {stripped}{' ' * pad}  ║"
 
     lines: list[str] = []
-    lines.append(border)
-    lines.append(row("CRUSHER TO THE BRIDGE  ─  EXECUTIVE SUMMARY"))
-    lines.append(divider)
+    lines.extend([
+        border,
+        row("CRUSHER TO THE BRIDGE  ─  EXECUTIVE SUMMARY"),
+        divider,
+    ])
     lines.extend(_executive_epidemiology_rows(
         row, thin_div, num_agents=num_agents,
         engine_summary=engine_summary, trigger_status=trigger_status,

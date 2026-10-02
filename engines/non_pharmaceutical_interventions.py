@@ -101,7 +101,49 @@ def _compliance(value: object, name: str) -> float:
     return number
 
 
-def _coverage_by_role(raw: object, name: str) -> dict[str, float]:
+def _ppe_type_names(raw: object, name: str) -> tuple[str, ...] | None:
+    """Read an optional ``ppe_type`` key: one name or a list of them.
+
+    ``None`` means the coverage entry declares no type, which the consumer
+    resolves to the platform default (spec §7.1: legacy measures resolve a
+    platform-default type so existing campaigns are unaffected).
+    """
+    if raw is None:
+        return None
+    if isinstance(raw, str):
+        names = (raw,)
+    elif isinstance(raw, (list, tuple)):
+        names = tuple(str(t) for t in raw)
+    else:
+        raise ValueError(f"{name} must be a string or list of strings, got {raw!r}")
+    for type_id in names:
+        if not type_id.strip():
+            raise ValueError(f"{name} names an empty PPE type")
+    return names
+
+
+def _coverage_entry(
+    value: object, name: str,
+) -> tuple[float, tuple[str, ...] | None]:
+    """Read one coverage value: a bare probability, or a typed object.
+
+    The object form ``{"coverage": 0.9, "ppe_type": "n95"}`` (or a list of
+    type names) keys a covered class/role to the PPE it wears
+    (ship_function_capacity_spec §7.1). Unknown keys are refused: a
+    misspelled ``ppe_type`` would otherwise silence the wear channel.
+    """
+    if not isinstance(value, Mapping):
+        return _bounded_coverage(value, name), None
+    unknown = sorted(set(map(str, value)) - {"coverage", "ppe_type"})
+    if unknown:
+        raise ValueError(f"{name} carries unknown keys {unknown}")
+    coverage = _bounded_coverage(value.get("coverage"), f"{name}.coverage")
+    return coverage, _ppe_type_names(value.get("ppe_type"), f"{name}.ppe_type")
+
+
+def _coverage_by_role(
+    raw: object, name: str,
+) -> tuple[dict[str, float], dict[str, tuple[str, ...] | None]]:
     """Read a role-keyed coverage map, e.g. ``{"passenger": 0.8}``.
 
     A role absent from the map is uncovered. An empty or missing map is
@@ -111,10 +153,13 @@ def _coverage_by_role(raw: object, name: str) -> dict[str, float]:
     """
     if not isinstance(raw, Mapping) or not raw:
         raise ValueError(f"{name} must be a non-empty mapping of role to coverage")
-    return {
-        str(role): _bounded_coverage(value, f"{name}.{role}")
-        for role, value in raw.items()
-    }
+    coverage: dict[str, float] = {}
+    ppe_types: dict[str, tuple[str, ...] | None] = {}
+    for role, value in raw.items():
+        probability, types = _coverage_entry(value, f"{name}.{role}")
+        coverage[str(role)] = probability
+        ppe_types[str(role)] = types
+    return coverage, ppe_types
 
 
 def _bounded_coverage(value: object, name: str) -> float:
@@ -171,6 +216,12 @@ class NpiMeasure:
     coverage_by_role: Mapping[str, float]
     reference_multipliers: Mapping[str, float]
     compliance: float = 1.0
+    # Per-role declared PPE wear (spec §7.1): the registry types each covered
+    # role wears under this measure, or None where the entry declared none —
+    # the consumer resolves that to the platform-default type.
+    ppe_types_by_role: Mapping[str, tuple[str, ...] | None] = field(
+        default_factory=dict,
+    )
 
     @classmethod
     def from_config(cls, name: str, raw: Mapping[str, object]) -> NpiMeasure:
@@ -180,12 +231,14 @@ class NpiMeasure:
                 f"npi.{name}.source is required: an NPI multiplier with no "
                 "source is an unsourced constant",
             )
+        coverage, ppe_types_by_role = _coverage_by_role(
+            raw.get("coverage_by_role"), f"npi.{name}.coverage_by_role",
+        )
         return cls(
             name=str(name),
             source=source,
-            coverage_by_role=_coverage_by_role(
-                raw.get("coverage_by_role"), f"npi.{name}.coverage_by_role",
-            ),
+            coverage_by_role=coverage,
+            ppe_types_by_role=ppe_types_by_role,
             reference_multipliers=_reference_multipliers(
                 raw.get("reference_multipliers"),
                 f"npi.{name}.reference_multipliers",

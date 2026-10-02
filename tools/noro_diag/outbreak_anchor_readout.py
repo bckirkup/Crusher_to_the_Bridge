@@ -32,12 +32,10 @@ acquired counts, infection AR and reported AR.
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import statistics
 import struct
 import sys
-import zipfile
 import zlib
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
@@ -50,8 +48,6 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "tools" / "noro_diag") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "tools" / "noro_diag"))
 
-from rhythm_ab_readout import _wilson  # noqa: E402
-
 from simulation_utils.paths import validated_open  # noqa: E402
 from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
     A9_POSTING_THRESHOLD,
@@ -61,6 +57,12 @@ from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
 )
 from telemetry_buffer.observation_model.vsp_class_era_scoring import (  # noqa: E402
     vsp_attack_rate_targets,
+)
+from tools.diag.readout_common import (  # noqa: E402
+    iter_tier_zips,
+    load_zip_json,
+    rate_summary,
+    seed_from_params,
 )
 
 _MEMBER = "summary.json"
@@ -81,14 +83,7 @@ _RUNG_LABEL = {
 
 
 def _load_member(zip_path: Path, member: str, *, gunzipped: bool = False) -> dict | None:
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            blob = zf.read(member)
-        if gunzipped:
-            blob = gzip.decompress(blob)
-        return json.loads(blob)
-    except (KeyError, zipfile.BadZipFile, json.JSONDecodeError, OSError):
-        return None
+    return load_zip_json(zip_path, member, gunzipped=gunzipped)
 
 
 def _s3_client():
@@ -153,51 +148,8 @@ def _s3_member_blob(client, bucket: str, key: str, member: str) -> bytes | None:
     return None
 
 
-def _row_from_summary(summary: dict, fallback_name: str) -> dict[str, Any] | None:
-    params = summary.get("parameters", {})
-    census_block = summary.get("census", {})
-    run = {
-        "run_id": summary.get("run_id", fallback_name),
-        "cell_key": _cell_key(params),
-        "seed": _seed_of(params),
-        "anchor_row": row_from_summary(summary, fallback_name),
-        "n_imports": int(census_block.get("n_imports", 0) or 0),
-        "n_acquired": int(census_block.get("n_acquired", 0) or 0),
-        "ignited": bool(census_block.get("ignited", False)),
-    }
-    run.update(_progression(summary))
-    return run
-
-
-def _collect_s3(s3_uri: str) -> list[dict]:
-    """Stream summary.json rows for every zip under an S3 prefix."""
-    client = _s3_client()
-    bucket, prefix = _s3_parse_uri(s3_uri)
-    keys = [
-        obj["Key"]
-        for page in client.get_paginator("list_objects_v2").paginate(
-            Bucket=bucket, Prefix=prefix
-        )
-        for obj in page.get("Contents", [])
-        if obj["Key"].endswith(".zip")
-    ]
-
-    def one(key: str) -> dict | None:
-        try:
-            blob = _s3_member_blob(client, bucket, key, _MEMBER)
-            if blob is None:
-                return None
-            summary = json.loads(blob)
-            return _row_from_summary(summary, key.rsplit("/", 1)[-1])
-        except (json.JSONDecodeError, KeyError, OSError, zlib.error):
-            return None
-
-    with ThreadPoolExecutor(max_workers=32) as pool:
-        return [r for r in pool.map(one, keys) if r is not None]
-
-
 def _seed_of(params: dict) -> int:
-    return int(params.get("seed", -1))
+    return seed_from_params(params)
 
 
 def _cell_key(params: dict) -> tuple:
@@ -257,6 +209,22 @@ def _progression(summary: dict[str, Any]) -> dict[str, Any]:
     return out
 
 
+def _row_from_summary(summary: dict, fallback_name: str) -> dict[str, Any]:
+    params = summary.get("parameters", {})
+    census_block = summary.get("census", {})
+    run = {
+        "run_id": summary.get("run_id", fallback_name),
+        "cell_key": _cell_key(params),
+        "seed": _seed_of(params),
+        "anchor_row": row_from_summary(summary, fallback_name),
+        "n_imports": int(census_block.get("n_imports", 0) or 0),
+        "n_acquired": int(census_block.get("n_acquired", 0) or 0),
+        "ignited": bool(census_block.get("ignited", False)),
+    }
+    run.update(_progression(summary))
+    return run
+
+
 def collect_run(zip_path: Path) -> dict[str, Any] | None:
     """One voyage's scoring row + census counters + trajectory descriptors."""
     summary = _load_member(zip_path, _MEMBER)
@@ -272,20 +240,43 @@ def _group_cells(rows: list[dict]) -> dict[tuple, list[dict]]:
     return dict(cells)
 
 
+def _collect_s3(s3_uri: str) -> list[dict]:
+    """Stream summary.json rows for every zip under an S3 prefix."""
+    client = _s3_client()
+    bucket, prefix = _s3_parse_uri(s3_uri)
+    keys = [
+        obj["Key"]
+        for page in client.get_paginator("list_objects_v2").paginate(
+            Bucket=bucket, Prefix=prefix
+        )
+        for obj in page.get("Contents", [])
+        if obj["Key"].endswith(".zip")
+    ]
+
+    def one(key: str) -> dict | None:
+        try:
+            blob = _s3_member_blob(client, bucket, key, _MEMBER)
+            if blob is None:
+                return None
+            summary = json.loads(blob)
+            return _row_from_summary(summary, key.rsplit("/", 1)[-1])
+        except (json.JSONDecodeError, KeyError, OSError, zlib.error):
+            return None
+
+    with ThreadPoolExecutor(max_workers=32) as pool:
+        return [r for r in pool.map(one, keys) if r is not None]
+
+
 def collect(root, tiers: list[str] | None = None) -> dict[tuple, list[dict]]:
     root_s = str(root)
     if root_s.startswith("s3:/"):
         # argparse Path collapses s3:// to s3:/ — restore the scheme.
         return _group_cells(_collect_s3("s3://" + root_s[4:].lstrip("/")))
     cells: dict[tuple, list[dict]] = defaultdict(list)
-    allowed = set(tiers) if tiers else None
-    for tier_dir in sorted(Path(root).iterdir()):
-        if not tier_dir.is_dir() or (allowed is not None and tier_dir.name not in allowed):
-            continue
-        for zip_path in sorted(tier_dir.glob("*.zip")):
-            run = collect_run(zip_path)
-            if run is not None:
-                cells[run["cell_key"]].append(run)
+    for _tier, zip_path in iter_tier_zips(Path(root_s), tiers):
+        run = collect_run(zip_path)
+        if run is not None:
+            cells[run["cell_key"]].append(run)
     return dict(cells)
 
 
@@ -307,8 +298,7 @@ def _quantiles(values: list[float]) -> dict[str, Any]:
 
 
 def _rate(x: int, n: int) -> dict[str, float]:
-    low, high = _wilson(x, n)
-    return {"x": x, "n": n, "rate": x / n if n else 0.0, "lo": low, "hi": high}
+    return rate_summary(x, n)
 
 
 def _frequency(runs: list[dict]) -> dict[str, Any]:
@@ -431,42 +421,53 @@ def _paired_delta(cells: dict[tuple, list[dict]], import_root: Path) -> dict[str
     old_cells = collect(import_root)
     out: dict[str, Any] = {}
     for key, runs in cells.items():
-        label = _cell_label(key)
-        old_pool: dict[int, dict] = {}
-        for old_key, old_runs in old_cells.items():
-            # Pair on hull x length x rung x prevalence, ignoring nsf level
-            # only when it already matches; the old cells carry the same
-            # coordinate family at several nsf values.
-            if old_key[:5] == key[:5] and old_key[5] == key[5]:
-                for r in old_runs:
-                    old_pool[r["seed"]] = r
-        if not old_pool:
+        pairs = _paired_runs(key, runs, old_cells)
+        if not pairs:
             continue
-        pairs = [(r, old_pool[r["seed"]]) for r in runs if r["seed"] in old_pool]
-        entry = {"n_pairs": len(pairs)}
-        for name, extract in (
-            ("established", lambda r: r["n_acquired"] > 0),
-            ("takeoff", lambda r: r["anchor_row"]["took_off"]),
-            ("posted", lambda r: _posted(r["anchor_row"])),
-        ):
-            discordant = sum(
-                extract(new) != extract(old) for new, old in pairs
-            )
-            gained = sum(extract(new) and not extract(old) for new, old in pairs)
-            lost = sum(not extract(new) and extract(old) for new, old in pairs)
-            entry[name] = {"discordant": discordant, "gained": gained, "lost": lost}
-        for name, extract in (
-            ("n_acquired", lambda r: float(r["n_acquired"])),
-            ("peak_prevalence", lambda r: float(r["peak_prevalence"])),
-            (
-                "reported_ar_pax",
-                lambda r: r["anchor_row"]["reported_case_attack_rate_passenger"],
-            ),
-        ):
-            diffs = [extract(new) - extract(old) for new, old in pairs]
-            entry[f"delta_{name}"] = _quantiles(diffs)
-        out[label] = entry
+        out[_cell_label(key)] = _paired_entry(pairs)
     return out
+
+
+def _paired_runs(
+    key: tuple,
+    runs: list[dict],
+    old_cells: dict,
+) -> list[tuple[dict, dict]]:
+    # Pair on hull x length x rung x prevalence, ignoring nsf level
+    # only when it already matches; the old cells carry the same
+    # coordinate family at several nsf values.
+    old_pool: dict[int, dict] = {}
+    for old_key, old_runs in old_cells.items():
+        if old_key[:5] == key[:5] and old_key[5] == key[5]:
+            for r in old_runs:
+                old_pool[r["seed"]] = r
+    return [(r, old_pool[r["seed"]]) for r in runs if r["seed"] in old_pool]
+
+
+def _paired_entry(pairs: list[tuple[dict, dict]]) -> dict[str, Any]:
+    entry: dict[str, Any] = {"n_pairs": len(pairs)}
+    for name, extract in (
+        ("established", lambda r: r["n_acquired"] > 0),
+        ("takeoff", lambda r: r["anchor_row"]["took_off"]),
+        ("posted", lambda r: _posted(r["anchor_row"])),
+    ):
+        discordant = sum(
+            extract(new) != extract(old) for new, old in pairs
+        )
+        gained = sum(extract(new) and not extract(old) for new, old in pairs)
+        lost = sum(not extract(new) and extract(old) for new, old in pairs)
+        entry[name] = {"discordant": discordant, "gained": gained, "lost": lost}
+    for name, extract in (
+        ("n_acquired", lambda r: float(r["n_acquired"])),
+        ("peak_prevalence", lambda r: float(r["peak_prevalence"])),
+        (
+            "reported_ar_pax",
+            lambda r: r["anchor_row"]["reported_case_attack_rate_passenger"],
+        ),
+    ):
+        diffs = [extract(new) - extract(old) for new, old in pairs]
+        entry[f"delta_{name}"] = _quantiles(diffs)
+    return entry
 
 
 def _pct(x: dict[str, float]) -> str:

@@ -7,6 +7,8 @@ that carry the deliverable's semantics — without running a voyage.
 
 from __future__ import annotations
 
+import argparse
+
 import pytest
 
 from tools.noro_diag.venue_placement_census import (
@@ -229,7 +231,7 @@ class TestFirstEmitJoin:
 class TestHelpers:
     def test_seed_list(self) -> None:
         assert _seed_list("8105, 8114,,8159") == [8105, 8114, 8159]
-        with pytest.raises(Exception):
+        with pytest.raises(argparse.ArgumentTypeError):
             _seed_list("not-a-seed")
 
     def test_wilson_bounds(self) -> None:

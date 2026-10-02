@@ -103,31 +103,39 @@ def _audit_immune_echo(payload: dict, declared: dict) -> list[str]:
                 f"{res.get(resolved_key)} != declared {declared[key]}",
             )
     realized = block.get("realized") or {}
-    by_role = realized.get("by_role") or {}
-    complement = realized.get("complement_by_role") or {}
-    crew_split = declared["crew_immune_fraction"] is not None
-    if crew_split:
+    failures.extend(_audit_realized(
+        realized.get("by_role") or {},
+        realized.get("complement_by_role") or {},
+        declared,
+    ))
+    return failures
+
+
+def _audit_realized(
+    by_role: dict, complement: dict, declared: dict,
+) -> list[str]:
+    """Realized draw counts must match the declared pool share."""
+    if declared["crew_immune_fraction"] is not None:
         expected = {
             "passenger": int(complement.get("passenger", 0)
                              * declared["immune_fraction"]),
             "crew": int(complement.get("crew", 0)
                         * declared["crew_immune_fraction"]),
         }
-        for role, want in expected.items():
-            if by_role.get(role, 0) != want:
-                failures.append(
-                    f"ship_graph_immune.realized.by_role.{role} "
-                    f"{by_role.get(role, 0)} != pool share {want}",
-                )
-    else:
-        total = sum(by_role.values())
-        want = int(sum(complement.values()) * declared["immune_fraction"])
-        if total != want:
-            failures.append(
-                f"ship_graph_immune realized total {total} "
-                f"!= pool share {want}",
-            )
-    return failures
+        return [
+            f"ship_graph_immune.realized.by_role.{role} "
+            f"{by_role.get(role, 0)} != pool share {want}"
+            for role, want in expected.items()
+            if by_role.get(role, 0) != want
+        ]
+    total = sum(by_role.values())
+    want = int(sum(complement.values()) * declared["immune_fraction"])
+    if total != want:
+        return [
+            f"ship_graph_immune realized total {total} "
+            f"!= pool share {want}",
+        ]
+    return []
 
 
 def _audit_frailty_echo(
@@ -150,7 +158,7 @@ def _audit_frailty_echo(
             f"dose_response.beta {dr.get('beta')} != declared {beta}",
         )
     scale = float(dr.get("susceptibility_scale", -1.0))
-    if not scale > 0 or abs(scale - want_scale) / want_scale > 1e-6:
+    if scale <= 0 or abs(scale - want_scale) / want_scale > 1e-6:
         failures.append(
             f"dose_response.susceptibility_scale {scale} "
             f"!= theta-preserved {want_scale:.4g}",

@@ -95,7 +95,6 @@ import gzip
 import json
 import sys
 import time
-import zipfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -115,12 +114,20 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     IllnessStatus,
     resolve_dining_service_type,
 )
-from simulation_utils.paths import (  # noqa: E402
-    prepare_output_directory,
-    resolve_child_path,
-    resolve_repo_path,
-    validated_open,
+from simulation_utils.paths import prepare_output_directory  # noqa: E402
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    mark_epoch0_imports,
+    wrap_emit_emesis,
 )
+from tools.diag.json_io import validated_json_load  # noqa: E402
+from tools.diag.manifest_args import (  # noqa: E402
+    add_manifest_args,
+    filter_runs_by_seeds,
+    index_run,
+    seed_list,
+)
+from tools.diag.readout_common import write_run_zip  # noqa: E402
 from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
     _attach_voyage_blocks,
 )
@@ -265,6 +272,41 @@ def classify_site(
     ztype = str(rec.get("type") or "")
     deck = str(rec.get("deck") or "")
     crew_deck = _deck_is_crew(deck)
+    typed = _typed_site(rec, ztype, deck, crew_deck)
+    if typed is not None:
+        return typed
+    if crew_deck or _zone_has_nonleisure_token(zone_name):
+        return {
+            "site_class": "crew_only",
+            "site_group": "crew_zone",
+            "site_detail": f"{ztype}:{deck}",
+        }
+    if ztype == "Cabin_Corridor":
+        # A corridor key reaching an emit row means the compartment split
+        # did not apply; classify by prefix as the block's cabins.
+        group = (
+            "stateroom_crew" if zone_name.upper().startswith("CC_")
+            else "stateroom_pax"
+        )
+        return {
+            "site_class": "own_stateroom",
+            "site_group": group,
+            "site_detail": f"corridor:{zone_name}",
+        }
+    return {
+        "site_class": "shared_venue",
+        "site_group": f"venue_{ztype.lower() or 'other'}",
+        "site_detail": f"{ztype}:{deck}",
+    }
+
+
+def _typed_site(
+    rec: dict[str, Any],
+    ztype: str,
+    deck: str,
+    crew_deck: bool,
+) -> dict[str, str] | None:
+    """The site triple for types with their own taxonomy branch."""
     if ztype == "Dining":
         service = resolve_dining_service_type(rec)
         if service in ("crew_mess", "galley") or crew_deck:
@@ -292,29 +334,7 @@ def classify_site(
             "site_group": "medical",
             "site_detail": f"medical:{deck}",
         }
-    if crew_deck or _zone_has_nonleisure_token(zone_name):
-        return {
-            "site_class": "crew_only",
-            "site_group": "crew_zone",
-            "site_detail": f"{ztype}:{deck}",
-        }
-    if ztype == "Cabin_Corridor":
-        # A corridor key reaching an emit row means the compartment split
-        # did not apply; classify by prefix as the block's cabins.
-        group = (
-            "stateroom_crew" if zone_name.upper().startswith("CC_")
-            else "stateroom_pax"
-        )
-        return {
-            "site_class": "own_stateroom",
-            "site_group": group,
-            "site_detail": f"corridor:{zone_name}",
-        }
-    return {
-        "site_class": "shared_venue",
-        "site_group": f"venue_{ztype.lower() or 'other'}",
-        "site_detail": f"{ztype}:{deck}",
-    }
+    return None
 
 
 def _zone_parent(zone_name: str) -> str:
@@ -326,60 +346,64 @@ def _zone_parent(zone_name: str) -> str:
 
 def _wrap_emit_emesis(core_cls: type, rec: VenueRecorder) -> Any:
     """Per-bolus landing record plus the depositor's confinement state."""
-    original = core_cls._emit_emesis
+    def _on_emit(
+        self: Any, agent: Any, pathogen_id: str, zone_name: str,
+        epoch: int, pool_gain: float, before: int, ctx: Any,
+    ) -> None:
+        if pathogen_id == rec.pathogen_id:
+            _record_emesis(
+                rec, self, agent, pathogen_id, zone_name, epoch,
+                pool_gain, before,
+            )
 
-    def wrapper(
-        self: Any, agent: Any, pathogen_id: str, profile: dict,
-        zone_name: str, epoch: int,
-    ) -> float:
-        before = len(
-            agent.emesis_deposition_records_by_pathogen.get(
-                pathogen_id, [],
+    return wrap_emit_emesis(core_cls, _on_emit)
+
+
+def _record_emesis(
+    rec: VenueRecorder,
+    core: Any,
+    agent: Any,
+    pathogen_id: str,
+    zone_name: str,
+    epoch: int,
+    pool_gain: float,
+    before: int,
+) -> None:
+    rec.emit_invocations += 1
+    records = agent.emesis_deposition_records_by_pathogen.get(
+        pathogen_id, [],
+    )[before:]
+    if not records:
+        rec.emit_idle_invocations += 1
+        return
+    if pool_gain > 0:
+        rec.ignited = True
+    aid = int(agent.agent_id)
+    occupancy = _occupancy_snapshot(rec, zone_name)
+    inf = agent.infections.get(pathogen_id) or {}
+    confined = aid in core._quarantined_ids
+    for record in records:
+        rec.emesis_rows.append({
+            "epoch": int(epoch),
+            "agent_id": aid,
+            "role": str(getattr(agent, "role", "")),
+            "gen": rec.gen_of(aid),
+            "gen_class": rec.gen_class_of(aid),
+            "zone": zone_name,
+            "zone_type": str(core.zone_types.get(zone_name) or ""),
+            "location": str(agent.current_location),
+            "confined_at_emit": bool(confined),
+            "symptomatic_at_emit": bool(agent.is_symptomatic),
+            "noro_will_present": inf.get("will_present"),
+            "episode_load": float(record.get("episode_load", 0.0)),
+            "surface_load": float(record.get("surface_load", 0.0)),
+            "aerosol_load": float(record.get("aerosol_load", 0.0)),
+            "pool_gain": float(record.get("pool_gain", 0.0)),
+            "censored_below_lod": bool(
+                record.get("censored_below_lod", False),
             ),
-        )
-        pool_gain = original(
-            self, agent, pathogen_id, profile, zone_name, epoch,
-        )
-        if pathogen_id != rec.pathogen_id:
-            return pool_gain
-        rec.emit_invocations += 1
-        records = agent.emesis_deposition_records_by_pathogen.get(
-            pathogen_id, [],
-        )[before:]
-        if not records:
-            rec.emit_idle_invocations += 1
-            return pool_gain
-        if pool_gain > 0:
-            rec.ignited = True
-        aid = int(agent.agent_id)
-        occupancy = _occupancy_snapshot(rec, self, zone_name)
-        inf = agent.infections.get(pathogen_id) or {}
-        confined = aid in self._quarantined_ids
-        for record in records:
-            rec.emesis_rows.append({
-                "epoch": int(epoch),
-                "agent_id": aid,
-                "role": str(getattr(agent, "role", "")),
-                "gen": rec.gen_of(aid),
-                "gen_class": rec.gen_class_of(aid),
-                "zone": zone_name,
-                "zone_type": str(self.zone_types.get(zone_name) or ""),
-                "location": str(agent.current_location),
-                "confined_at_emit": bool(confined),
-                "symptomatic_at_emit": bool(agent.is_symptomatic),
-                "noro_will_present": inf.get("will_present"),
-                "episode_load": float(record.get("episode_load", 0.0)),
-                "surface_load": float(record.get("surface_load", 0.0)),
-                "aerosol_load": float(record.get("aerosol_load", 0.0)),
-                "pool_gain": float(record.get("pool_gain", 0.0)),
-                "censored_below_lod": bool(
-                    record.get("censored_below_lod", False),
-                ),
-                **occupancy,
-            })
-        return pool_gain
-
-    return wrapper
+            **occupancy,
+        })
 
 
 _WRAPPED_CORE_METHODS = (
@@ -394,18 +418,23 @@ _WRAPPED_CORE_METHODS = (
 def instrumented(rec: VenueRecorder) -> Any:
     """Install every wrapper for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved = {
-        name: getattr(core_cls, name) for name in _WRAPPED_CORE_METHODS
-    }
-    core_cls._epoch_zone_occupants = _wrap_zone_occupants(core_cls, rec)
-    core_cls._emit_emesis = _wrap_emit_emesis(core_cls, rec)
-    core_cls._resolve_pathogen_challenge = _wrap_challenge(core_cls, rec)
-    core_cls._cabin_compartments = _wrap_cabin_compartments(core_cls, rec)
-    try:
+    with attr_patches() as patches:
+        patches.swap(
+            core_cls, "_epoch_zone_occupants",
+            _wrap_zone_occupants(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_emit_emesis", _wrap_emit_emesis(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_resolve_pathogen_challenge",
+            _wrap_challenge(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_cabin_compartments",
+            _wrap_cabin_compartments(core_cls, rec),
+        )
         yield
-    finally:
-        for name, fn in saved.items():
-            setattr(core_cls, name, fn)
 
 
 # ── Epoch observer ────────────────────────────────────────────────────
@@ -516,14 +545,7 @@ def _epoch_observer(rec: VenueRecorder) -> Any:
                 if a.is_infected_with(rec.pathogen_id)
             ),
         })
-        if not rec.epoch0_done:
-            rec.epoch0_done = True
-            for agent in engine.agents:
-                if agent.is_infected_with(rec.pathogen_id):
-                    aid = int(agent.agent_id)
-                    if aid not in rec.acquired_ids:
-                        rec.import_ids.add(aid)
-                        rec.host_gen.setdefault(aid, 0)
+        mark_epoch0_imports(rec, engine)
 
     return observe
 
@@ -854,29 +876,12 @@ def run_spec(
 # ── CLI / campaign-cell plumbing ──────────────────────────────────────
 
 
-def _seed_list(value: str) -> list[int]:
-    try:
-        return [int(v) for v in value.split(",") if v.strip()]
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError(
-            f"invalid --seeds list: {value!r}",
-        ) from exc
+_seed_list = seed_list
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--manifest", type=Path, default=None,
-        help="campaign manifest JSON (tier specs verbatim)",
-    )
-    parser.add_argument(
-        "--tier", type=_identifier, default=None,
-        help="tier inside --manifest; required with --manifest",
-    )
-    parser.add_argument(
-        "--index", type=int, default=None,
-        help="run only the tier's runs[index] (Batch array child / canary)",
-    )
+    add_manifest_args(parser, tier_type=_identifier)
     parser.add_argument(
         "--seeds", type=_seed_list, default=None,
         help="restrict the manifest tier to these run.random_seed values",
@@ -921,15 +926,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="zip filename stem under <out>/<tier>/ (spec-json mode)",
     )
     args = parser.parse_args(argv)
+    _validate_args(parser, args)
+    return args
+
+
+def _validate_args(
+    parser: argparse.ArgumentParser, args: argparse.Namespace,
+) -> None:
     manifest_mode = args.manifest is not None
     if manifest_mode:
-        for problem in (
-            "--manifest requires --tier" if args.tier is None else None,
-            "--manifest and --spec-json are exclusive"
-            if args.spec_json is not None else None,
-        ):
-            if problem:
-                parser.error(problem)
+        if args.tier is None:
+            parser.error("--manifest requires --tier")
+        if args.spec_json is not None:
+            parser.error("--manifest and --spec-json are exclusive")
     elif args.tier is not None or args.index is not None:
         parser.error("--tier/--index require --manifest")
     for label, value, floor in (
@@ -942,7 +951,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             parser.error(f"{label} must be >= {floor}")
     if args.seeds is not None and not manifest_mode:
         parser.error("--seeds requires --manifest")
-    return args
 
 
 def _apply_overrides(spec: dict[str, Any], args: argparse.Namespace) -> None:
@@ -987,38 +995,22 @@ def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
 ) -> Path:
     """``summary.json`` (campaign layout) + ``venue.json.gz`` payload."""
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {"run_id": run_id}
     anchor.update({key: payload[key] for key in _ANCHOR_KEYS})
-    census_blob = gzip.compress(
-        json.dumps(payload["venue"]).encode(),
-    )
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr("venue.json.gz", census_blob)
-    return zip_path
+    return write_run_zip(out_dir, tier, run_id, anchor, {
+        "venue.json.gz": gzip.compress(
+            json.dumps(payload["venue"]).encode(),
+        ),
+    })
 
 
 def _select_runs(
     manifest: dict[str, Any], tier: str, args: argparse.Namespace,
 ) -> list[tuple[str, dict[str, Any]]]:
-    runs = list(generate_tier_runs(manifest, tier))
-    if args.seeds is not None:
-        wanted = set(args.seeds)
-        runs = [
-            pair for pair in runs
-            if int(pair[1]["run"]["random_seed"]) in wanted
-        ]
-    if args.index is not None:
-        if args.index >= len(runs):
-            raise SystemExit(
-                f"--index {args.index} outside tier {tier} "
-                f"({len(runs)} runs)",
-            )
-        runs = [runs[args.index]]
-    return runs
+    runs = filter_runs_by_seeds(
+        list(generate_tier_runs(manifest, tier)), args.seeds,
+    )
+    return index_run(runs, args.index, tier)
 
 
 def _run_one(
@@ -1058,13 +1050,7 @@ def _main_manifest(args: argparse.Namespace) -> None:
 
 
 def _main_spec_json(args: argparse.Namespace) -> None:
-    safe = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.spec_json)),
-    )
-    with validated_open(
-        safe, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        spec = json.load(handle)
+    spec = validated_json_load(REPO_ROOT, args.spec_json)
     if args.epochs_override is not None:
         spec["run"]["num_epochs"] = int(args.epochs_override)
     _apply_overrides(spec, args)

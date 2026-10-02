@@ -23,9 +23,14 @@ import argparse
 import gzip
 import json
 import sys
-import zipfile
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.diag.readout_common import read_zip_member  # noqa: E402
 
 # Fields compared verbatim per seed. Emit-row identity covers epoch,
 # zone, and joining class; confinement events cover the order stream.
@@ -45,10 +50,8 @@ _SCALAR_FIELDS = (
 
 
 def _load_venue(zip_path: Path) -> dict[str, Any] | None:
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            raw = zf.read("venue.json.gz")
-    except (KeyError, zipfile.BadZipFile, OSError):
+    raw = read_zip_member(zip_path, "venue.json.gz")
+    if raw is None:
         return None
     return json.loads(gzip.decompress(raw))
 
@@ -69,6 +72,15 @@ def compare_seed(base: dict[str, Any], arm: dict[str, Any]) -> list[str]:
     diffs: list[str] = []
     for field in _SCALAR_FIELDS:
         _diff_field(field, base.get(field), arm.get(field), diffs)
+    _diff_emit_rows(base, arm, diffs)
+    _diff_events(base, arm, diffs)
+    _diff_hosts(base, arm, diffs)
+    return diffs
+
+
+def _diff_emit_rows(
+    base: dict[str, Any], arm: dict[str, Any], diffs: list[str],
+) -> None:
     base_emits = sorted(
         (tuple(r.get(f) for f in _EMIT_FIELDS) for r in base["emit_rows"]),
     )
@@ -84,6 +96,11 @@ def compare_seed(base: dict[str, Any], arm: dict[str, Any]) -> list[str]:
             if br != ar:
                 diffs.append(f"  first emit diff @{i}: base={br} arm={ar}")
                 break
+
+
+def _diff_events(
+    base: dict[str, Any], arm: dict[str, Any], diffs: list[str],
+) -> None:
     base_events = [tuple(e.get(f) for f in _EVENT_FIELDS)
                    for e in base["confinement_events"]]
     arm_events = [tuple(e.get(f) for f in _EVENT_FIELDS)
@@ -99,6 +116,11 @@ def compare_seed(base: dict[str, Any], arm: dict[str, Any]) -> list[str]:
                     f"  first event diff @{i}: base={be} arm={ae}",
                 )
                 break
+
+
+def _diff_hosts(
+    base: dict[str, Any], arm: dict[str, Any], diffs: list[str],
+) -> None:
     base_hosts = {int(h["agent_id"]): h for h in base["host_rows"]}
     arm_hosts = {int(h["agent_id"]): h for h in arm["host_rows"]}
     for aid in sorted(set(base_hosts) | set(arm_hosts)):
@@ -110,7 +132,6 @@ def compare_seed(base: dict[str, Any], arm: dict[str, Any]) -> list[str]:
             _diff_field(
                 f"host {aid}.{field}", bh.get(field), ah.get(field), diffs,
             )
-    return diffs
 
 
 def main(argv: list[str] | None = None) -> int:

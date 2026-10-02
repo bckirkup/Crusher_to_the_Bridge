@@ -718,28 +718,39 @@ def point_factors(
             preboarding_crew_reportable,
         )
     if mechanism_rung is not None:
-        rung = MECHANISM_RUNGS[mechanism_rung]
-        factors[FACTOR_MECHANISM_RUNG] = mechanism_rung
-        # ``default`` writes nothing downstream, but the run still records
-        # the reference coordinates the profile resolves to.
-        effective = rung or MECHANISM_RUNGS["reportable"]
-        factors[FACTOR_RATE_MODE] = effective["rate_mode"]
-        factors[FACTOR_AGE_DRAW] = effective["age_draw"]
-        factors[FACTOR_ILLNESS_DRAW] = effective["illness_duration_draw"]
-        factors[FACTOR_SYM_STREAM] = bool(
-            effective["symptomatic_stream"]["enabled"],
+        factors.update(
+            _mechanism_rung_factors(mechanism_rung, prevalence_swept),
         )
-        prevalence = effective.get("prevalence") or {}
-        for factor, key in (
-            (FACTOR_PASSENGER_PREVALENCE, "passenger"),
-            (FACTOR_CREW_PREVALENCE, "crew"),
-        ):
-            # An explicit prevalence sweep is the coordinate: the rung's own
-            # prevalence only records the resolved reference when the tier
-            # did not sweep one, otherwise it would clobber the swept point
-            # for both the label and the engine-facing initiation block.
-            if key in prevalence and not prevalence_swept:
-                factors[factor] = prevalence[key]
+    return factors
+
+
+def _mechanism_rung_factors(
+    mechanism_rung: str,
+    prevalence_swept: bool,
+) -> dict[str, Any]:
+    """Factor labels stamped for one mechanism rung."""
+    rung = MECHANISM_RUNGS[mechanism_rung]
+    factors: dict[str, Any] = {FACTOR_MECHANISM_RUNG: mechanism_rung}
+    # ``default`` writes nothing downstream, but the run still records
+    # the reference coordinates the profile resolves to.
+    effective = rung or MECHANISM_RUNGS["reportable"]
+    factors[FACTOR_RATE_MODE] = effective["rate_mode"]
+    factors[FACTOR_AGE_DRAW] = effective["age_draw"]
+    factors[FACTOR_ILLNESS_DRAW] = effective["illness_duration_draw"]
+    factors[FACTOR_SYM_STREAM] = bool(
+        effective["symptomatic_stream"]["enabled"],
+    )
+    prevalence = effective.get("prevalence") or {}
+    for factor, key in (
+        (FACTOR_PASSENGER_PREVALENCE, "passenger"),
+        (FACTOR_CREW_PREVALENCE, "crew"),
+    ):
+        # An explicit prevalence sweep is the coordinate: the rung's own
+        # prevalence only records the resolved reference when the tier
+        # did not sweep one, otherwise it would clobber the swept point
+        # for both the label and the engine-facing initiation block.
+        if key in prevalence and not prevalence_swept:
+            factors[factor] = prevalence[key]
     return factors
 
 

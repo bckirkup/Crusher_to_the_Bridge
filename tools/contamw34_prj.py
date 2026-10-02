@@ -1134,87 +1134,77 @@ def _append_prj_header(lines: list[str], ctx: dict[str, Any]) -> None:
     cols = max(40, n_zones + 20)
     ctx["rows"] = rows
     ctx["cols"] = cols
-    lines.append(PRJ_SIGNATURE_34)
-    lines.append("")
-    lines.append("! rows cols ud uf    T   uT     N     wH  u  Ao    a")
-    lines.append(
+    lines.extend([
+        PRJ_SIGNATURE_34,
+        "",
+        "! rows cols ud uf    T   uT     N     wH  u  Ao    a",
         f"   {rows:3d}  {cols:3d}  0  0 {_DEFAULT_ZONE_TEMP_K:.3f} 2    "
-        f"0.00 10.00 0 0.600 0.280"
-    )
-    lines.append("!  scale     us  orgRow  orgCol  invYaxis showGeom")
-    lines.append("  1.000e+00   0       1       1     0        0")
-    lines.append("! Ta       Pb      Ws    Wd    rh  day u..")
-    lines.append(
+        f"0.00 10.00 0 0.600 0.280",
+        "!  scale     us  orgRow  orgCol  invYaxis showGeom",
+        "  1.000e+00   0       1       1     0        0",
+        "! Ta       Pb      Ws    Wd    rh  day u..",
         f"{_DEFAULT_ZONE_TEMP_K:.3f} 101325.0  0.000   0.0 0.000 1 2 0 0 1 "
-        f"! steady simulation"
-    )
-    lines.append(
+        f"! steady simulation",
         f"{_DEFAULT_ZONE_TEMP_K:.3f} 101325.0  1.000 270.0 0.000 1 2 0 0 1 "
-        f"! wind pressure test"
-    )
-    lines.append("null ! no weather file")
-    lines.append("null ! no contaminant file")
-    lines.append("null ! no continuous values file")
-    lines.append("null ! no discrete values file")
-    lines.append("null ! no WPC file")
-    lines.append("null ! no EWC file")
+        f"! wind pressure test",
+        "null ! no weather file",
+        "null ! no contaminant file",
+        "null ! no continuous values file",
+        "null ! no discrete values file",
+        "null ! no WPC file",
+        "null ! no EWC file",
+    ])
     mode = "hobbyist" if hobbyist else "skeleton"
-    lines.append(f"Crusher platform {platform} ({mode})")
-    lines.append("!  Xref    Yref    Zref   angle u")
-    lines.append("   0.000   0.000   0.000   0.00 0")
-    lines.append("! epsP epsS  tShift  dStart dEnd wp mf wpctrig")
-    lines.append("  0.01 0.01 00:00:00   1/1   1/1  0  0  0")
-    lines.append("! latd  longtd   tznr  altd  Tgrnd u..")
-    lines.append(" 40.00  -90.00  -6.00     0 283.15 2 0")
-    lines.append("!sim_af afcalc afmaxi afrcnvg afacnvg afrelax uac Pbldg uPb")
-    lines.append("     1      1     30   1e-05   1e-06    0.75   0 50.00   0")
-    lines.append("!   slae rs aflmaxi aflcnvg aflinit Tadj")
-    lines.append("      0   1    100   1e-06      1    0")
-    lines.append("!sim_mf slae rs maxi   relcnvg   abscnvg relax gamma ucc")
-    lines.append(
-        "    2             30  1.00e-04  1.00e-15 1.250         0 ! (cyclic)"
-    )
-    lines.append(
-        "          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (non-trace)"
-    )
-    lines.append(
-        "          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (trace)"
-    )
-    lines.append(
-        "          0   1  100  1.00e-06  1.00e-15 1.100         0 ! (cvode)"
-    )
-    lines.append("!mf_solver sim_1dz sim_1dd   celldx  sim_vjt udx")
-    lines.append("     0        1       0     1.00e-01    0     0")
-    lines.append("!cvode    rcnvg     acnvg    dtmax")
-    lines.append("   0     1.00e-06  1.00e-13   0.00")
-    lines.append("!tsdens relax tsmaxi cnvgSS densZP stackD dodMdt")
+    lines.extend([
+        f"Crusher platform {platform} ({mode})",
+        "!  Xref    Yref    Zref   angle u",
+        "   0.000   0.000   0.000   0.00 0",
+        "! epsP epsS  tShift  dStart dEnd wp mf wpctrig",
+        "  0.01 0.01 00:00:00   1/1   1/1  0  0  0",
+        "! latd  longtd   tznr  altd  Tgrnd u..",
+        " 40.00  -90.00  -6.00     0 283.15 2 0",
+        "!sim_af afcalc afmaxi afrcnvg afacnvg afrelax uac Pbldg uPb",
+        "     1      1     30   1e-05   1e-06    0.75   0 50.00   0",
+        "!   slae rs aflmaxi aflcnvg aflinit Tadj",
+        "      0   1    100   1e-06      1    0",
+        "!sim_mf slae rs maxi   relcnvg   abscnvg relax gamma ucc",
+        "    2             30  1.00e-04  1.00e-15 1.250         0 ! (cyclic)",
+        "          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (non-trace)",
+        "          0   1  100  1.00e-06  1.00e-15 1.100 1.000   0 ! (trace)",
+        "          0   1  100  1.00e-06  1.00e-15 1.100         0 ! (cvode)",
+        "!mf_solver sim_1dz sim_1dd   celldx  sim_vjt udx",
+        "     0        1       0     1.00e-01    0     0",
+        "!cvode    rcnvg     acnvg    dtmax",
+        "   0     1.00e-06  1.00e-13   0.00",
+        "!tsdens relax tsmaxi cnvgSS densZP stackD dodMdt",
+    ])
     # Enable stack effect when hobbyist deck temps differ
     stack = 1 if hobbyist else 0
-    lines.append(f"   0    0.75    20     1      0      {stack}      0")
-    lines.append("!date_st time_st  date_0 time_0   date_1 time_1    t_step   t_list   t_scrn")
-    lines.append(
-        "  Jan01 00:00:00  Jan01 00:00:00  Jan01 01:00:00  00:01:00 00:01:00 01:00:00"
-    )
-    lines.append("!restart  date  time")
-    lines.append("    0    Jan01 00:00:00")
-    lines.append("!list doDlg pfsave zfsave zcsave")
-    lines.append("   1     0      1      1      1")
-    lines.append("!vol ach -bw cbw exp -bw age -bw")
-    lines.append("  0   0   0   0   0   0   0   0")
-    lines.append("!rzf rzm rz1 csm srf log")
-    lines.append("  0   0   0   1   1   1")
-    lines.append("!bcx dcx pfq zfq zcq")
-    lines.append("  0   0   0   0   0")
-    lines.append("!dens   grav")
-    lines.append(f" {_DEFAULT_AIR_DENSITY} 9.8055")
-    lines.append("! 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 <- extra[]")
-    lines.append("  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0")
-    lines.append("0 ! rvals:")
-    lines.append("!valZ valD valC")
-    lines.append("   0    0    0")
-    lines.append("!cfd   cfdcnvg  var zref maxi dtcmo solv smooth   cnvgUVW     cnvgT")
-    lines.append("   0  1.00e-02    0    0 1000     1    1      1  1.00e-03  1.00e-03")
-    lines.append(_SENTINEL)
+    lines.extend([
+        f"   0    0.75    20     1      0      {stack}      0",
+        "!date_st time_st  date_0 time_0   date_1 time_1    t_step   t_list   t_scrn",
+        "  Jan01 00:00:00  Jan01 00:00:00  Jan01 01:00:00  00:01:00 00:01:00 01:00:00",
+        "!restart  date  time",
+        "    0    Jan01 00:00:00",
+        "!list doDlg pfsave zfsave zcsave",
+        "   1     0      1      1      1",
+        "!vol ach -bw cbw exp -bw age -bw",
+        "  0   0   0   0   0   0   0   0",
+        "!rzf rzm rz1 csm srf log",
+        "  0   0   0   1   1   1",
+        "!bcx dcx pfq zfq zcq",
+        "  0   0   0   0   0",
+        "!dens   grav",
+        f" {_DEFAULT_AIR_DENSITY} 9.8055",
+        "! 0  1  2  3  4  5  6  7  8  9  10 11 12 13 14 15 <- extra[]",
+        "  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0  0",
+        "0 ! rvals:",
+        "!valZ valD valC",
+        "   0    0    0",
+        "!cfd   cfdcnvg  var zref maxi dtcmo solv smooth   cnvgUVW     cnvgT",
+        "   0  1.00e-02    0    0 1000     1    1      1  1.00e-03  1.00e-03",
+        _SENTINEL,
+    ])
 
 
 
@@ -1230,13 +1220,13 @@ def _append_species_section(lines: list[str], ctx: dict[str, Any]) -> None:
             "CCdef": 0.0, "Cp": 1000.0, "Kuv": 0.0, "description": "default",
         }]
         cidxs = [1]
-    lines.append(f"{len(cidxs)} ! contaminants:")
-    lines.append("   " + " ".join(str(i) for i in cidxs))
-    lines.append(f"{len(species)} ! species:")
-    lines.append(
+    lines.extend([
+        f"{len(cidxs)} ! contaminants:",
+        "   " + " ".join(str(i) for i in cidxs),
+        f"{len(species)} ! species:",
         "! # s t   molwt    mdiam       edens       decay         Dm         "
-        "CCdef        Cp          Kuv     u[5]      name"
-    )
+        "CCdef        Cp          Kuv     u[5]      name",
+    ])
     for i, sp in enumerate(species, start=1):
         lines.append(
             f"  {i} {int(sp['sflag'])} {int(sp['ntflag'])}  "
@@ -1352,10 +1342,11 @@ def _append_wind_filter_sections(lines: list[str], ctx: dict[str, Any]) -> None:
         lines.append(str(wp.get("description", "")))
         for azm, coef in pts:
             lines.append(f" {float(azm):6.1f}  {float(coef):6.2f}")
-    lines.append(_SENTINEL)
-
-    lines.append("0 ! kinetic reactions:")
-    lines.append(_SENTINEL)
+    lines.extend([
+        _SENTINEL,
+        "0 ! kinetic reactions:",
+        _SENTINEL,
+    ])
 
     # Filters
     filter_elements = net.get("filter_elements") or []
@@ -1378,10 +1369,11 @@ def _append_wind_filter_sections(lines: list[str], ctx: dict[str, Any]) -> None:
     for flt in filters:
         lines.append(f"{flt['nr']} {flt['fe']} {flt['nsub']}")
         lines.append("0 0")
-    lines.append(_SENTINEL)
-
-    lines.append("0 ! source/sink elements:")
-    lines.append(_SENTINEL)
+    lines.extend([
+        _SENTINEL,
+        "0 ! source/sink elements:",
+        _SENTINEL,
+    ])
 
 
 
@@ -1393,9 +1385,11 @@ def _append_flow_and_duct_elements(lines: list[str], ctx: dict[str, Any]) -> Non
     lines.append(f"{len(elements)} ! flow elements:")
     for el in elements:
         el_name = _unique_contam_name(el["name"], used_names)
-        lines.append(f"{el['nr']} {el['type']} {el['symbol']} {el_name}")
-        lines.append("")
-        lines.append(f" {el['params']}")
+        lines.extend([
+            f"{el['nr']} {el['type']} {el['symbol']} {el_name}",
+            "",
+            f" {el['params']}",
+        ])
     lines.append(_SENTINEL)
 
     # Duct elements (nr icon dtype_symbol name)
@@ -1403,17 +1397,18 @@ def _append_flow_and_duct_elements(lines: list[str], ctx: dict[str, Any]) -> Non
     lines.append(f"{len(duct_elements)} ! duct elements:")
     for de in duct_elements:
         de_name = _unique_contam_name(de["name"], used_names)
-        lines.append(f"{de['nr']} {de['icon']} {de['symbol']} {de_name}")
-        lines.append(str(de.get("desc", "")))
-        lines.append(f" {de['rough']} {de['lam']} 3")
-        lines.append(
-            f" {de['hdia']} {de['perim']} {de['area']} 0 0 0 {de['qr']} {de['pr']}"
-        )
-        lines.append(" 0 3 3 3 3 3 4 0")
-    lines.append(_SENTINEL)
-
-    lines.append("0 ! control super elements:")
-    lines.append(_SENTINEL)
+        lines.extend([
+            f"{de['nr']} {de['icon']} {de['symbol']} {de_name}",
+            str(de.get("desc", "")),
+            f" {de['rough']} {de['lam']} 3",
+            f" {de['hdia']} {de['perim']} {de['area']} 0 0 0 {de['qr']} {de['pr']}",
+            " 0 3 3 3 3 3 4 0",
+        ])
+    lines.extend([
+        _SENTINEL,
+        "0 ! control super elements:",
+        _SENTINEL,
+    ])
 
     control_nodes = net.get("control_nodes") or []
     lines.append(f"{len(control_nodes)} ! control nodes:")
@@ -1448,14 +1443,12 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
             f"{ahs['pr']}   {ahs['ps']}   {ahs['px']} -1 {ahs['name']}"
         )
         lines.append(f"Crusher HVAC {ahs['hvac_id']} ach={ahs['ach']}")
-    lines.append(_SENTINEL)
-
-    # Zones
-    lines.append(f"{len(zone_records)} ! zones:")
-    lines.append(
+    lines.extend([
+        _SENTINEL,
+        f"{len(zone_records)} ! zones:",
         "! Z#  f  s#  c#  k#  l#  relHt    Vol  T0  P0  name  clr uH uT uP uV "
-        "axs cdvf <cdvfName> cfd <cfdName> <1dData:>"
-    )
+        "axs cdvf <cdvfName> cfd <cfdName> <1dData:>",
+    ])
     for z in zone_records:
         lines.append(
             f"   {z['nr']}  {z['flag']}   0   0   0   {z['level']}   "
@@ -1475,15 +1468,13 @@ def _append_ahs_zones_and_paths(lines: list[str], ctx: dict[str, Any]) -> None:
     zeros = "  ".join(_ZERO_CONC for _ in range(n_ctm))
     for z in zone_records:
         lines.append(f"   {z['nr']}  {zeros}")
-    lines.append(_SENTINEL)
-
-    # Flow paths
-    lines.append(f"{len(paths)} ! flow paths:")
-    lines.append(
+    lines.extend([
+        _SENTINEL,
+        f"{len(paths)} ! flow paths:",
         "! P#    f  n#  m#  e#  f#  w#  a#  s#  c#  l#    X       Y      "
         "relHt  mult wPset wPmod wazm Fahs Xmax Xmin icn dir u[4] cdvf "
-        "<cdvfName> cfd <cfdData[4]>"
-    )
+        "<cdvfName> cfd <cfdData[4]>",
+    ])
     for p in paths:
         wazm = p.get("wazm", -1.0)
         wazm_s = f"{wazm:g}" if wazm != -1.0 else "-1"
@@ -1563,21 +1554,24 @@ def _append_duct_network_and_footer(lines: list[str], ctx: dict[str, Any]) -> No
     path_map = ctx["path_map"]
     _append_duct_junctions_and_segments(lines, net, zeros, n_ctm)
 
-    lines.append("0 ! source/sinks:")
-    lines.append(_SENTINEL)
-    lines.append("0 ! occupancy schedules:")
-    lines.append(_SENTINEL)
-    lines.append("0 ! exposures:")
-    lines.append(_SENTINEL)
+    lines.extend([
+        "0 ! source/sinks:",
+        _SENTINEL,
+        "0 ! occupancy schedules:",
+        _SENTINEL,
+        "0 ! exposures:",
+        _SENTINEL,
+    ])
 
     annotations = net.get("annotations") or []
     lines.append(f"{len(annotations)} ! annotations:")
     for i, ann in enumerate(annotations, start=1):
         lines.append(f"{i} {int(ann.get('color', -1))} {ann['note']}")
-    lines.append(_SENTINEL)
-
-    lines.append("* end project file.")
-    lines.append("")
+    lines.extend([
+        _SENTINEL,
+        "* end project file.",
+        "",
+    ])
     n_real = sum(1 for z in zone_records if not z["is_phantom"])
     n_phantom = sum(1 for z in zone_records if z["is_phantom"])
     lines.append(

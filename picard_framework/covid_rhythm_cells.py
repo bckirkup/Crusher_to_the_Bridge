@@ -578,37 +578,7 @@ def sync_end_epoch_mask(
     catalog = _catalog_for(platform_id, repo_root=repo_root)
     if catalog is None:
         return mask
-    template = (catalog.get("baseline_day_templates") or {}).get("sea_day") or {}
-    end_minutes: list[int] = []
-    for event in template.get("events", []):
-        role_groups = set(
-            (event.get("eligible") or {}).get("role_groups") or []
-        )
-        if role_groups and "passenger" not in role_groups:
-            continue
-        if str(event.get("egress_mode")) != "synchronized_end":
-            continue
-        window = event.get("window") or []
-        try:
-            start = _hhmm_to_min(str(window[0]))
-            end = _hhmm_to_min(str(window[1]))
-        except (IndexError, TypeError, ValueError):
-            continue
-        if end <= start:
-            # Window wraps midnight (e.g. a 22:00-01:00 lounge set).
-            end += 24 * 60  # clock-exempt: minutes-per-day wrap, not a unit conversion
-        seatings = 1
-        if str(event.get("event_class")) == "meal_seating":
-            seatings = _max_meal_seatings(
-                event, catalog, platform_id, repo_root=repo_root,
-            )
-        # The engine deals one occurrence per event absent a SOP frequency
-        # multiplier; multi-seating events pour out once per seat turn.
-        turn = max((end - start) // seatings, 1)
-        for seat in range(seatings):
-            end_minutes.append(
-                (start + (seat + 1) * turn) % (24 * 60),  # clock-exempt: minute-of-day wrap
-            )
+    end_minutes = _sync_end_minutes(catalog, platform_id, repo_root)
     if not end_minutes:
         return mask
     for epoch in range(int(total_epochs)):
@@ -620,6 +590,58 @@ def sync_end_epoch_mask(
         if any(lo < m <= hi for m in end_minutes):
             mask[epoch] = True
     return mask
+
+
+def _sync_end_minutes(
+    catalog: dict[str, Any],
+    platform_id: str,
+    repo_root: str,
+) -> list[int]:
+    """Minute-of-day marks where synchronized-end egresses land."""
+    template = (catalog.get("baseline_day_templates") or {}).get("sea_day") or {}
+    end_minutes: list[int] = []
+    for event in template.get("events", []):
+        end_minutes.extend(
+            _event_end_minutes(event, catalog, platform_id, repo_root),
+        )
+    return end_minutes
+
+
+def _event_end_minutes(
+    event: dict[str, Any],
+    catalog: dict[str, Any],
+    platform_id: str,
+    repo_root: str,
+) -> list[int]:
+    """End marks for one catalog event ([] when it pours no front)."""
+    role_groups = set(
+        (event.get("eligible") or {}).get("role_groups") or []
+    )
+    if role_groups and "passenger" not in role_groups:
+        return []
+    if str(event.get("egress_mode")) != "synchronized_end":
+        return []
+    window = event.get("window") or []
+    try:
+        start = _hhmm_to_min(str(window[0]))
+        end = _hhmm_to_min(str(window[1]))
+    except (IndexError, TypeError, ValueError):
+        return []
+    if end <= start:
+        # Window wraps midnight (e.g. a 22:00-01:00 lounge set).
+        end += 24 * 60  # clock-exempt: minutes-per-day wrap, not a unit conversion
+    seatings = 1
+    if str(event.get("event_class")) == "meal_seating":
+        seatings = _max_meal_seatings(
+            event, catalog, platform_id, repo_root=repo_root,
+        )
+    # The engine deals one occurrence per event absent a SOP frequency
+    # multiplier; multi-seating events pour out once per seat turn.
+    turn = max((end - start) // seatings, 1)
+    return [
+        (start + (seat + 1) * turn) % (24 * 60)  # clock-exempt: minute-of-day wrap
+        for seat in range(seatings)
+    ]
 
 
 def _hhmm_to_min(hhmm: str) -> int:

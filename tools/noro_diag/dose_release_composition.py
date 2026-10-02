@@ -65,22 +65,16 @@ from engines.transmission_core import (  # noqa: E402
     EMESIS_VOLUME_ML_RANGE,
     emesis_episode_weights,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+from tools.diag.json_io import validated_json_load  # noqa: E402
 
 PATHOGEN_ID = "norwalk_gi"
 
 
 def _load_profile(bundle: str) -> dict[str, Any]:
     """The norwalk_gi profile dict from a pathogen bundle JSON."""
-    path = Path(
-        resolve_repo_path(
-            str(REPO_ROOT), f"data/pathogens/{bundle}.json",
-        ),
+    bundle_doc = validated_json_load(
+        REPO_ROOT, f"data/pathogens/{bundle}.json",
     )
-    with validated_open(
-        path, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        bundle_doc = json.load(handle)
     for entry in bundle_doc["pathogens"]:
         if entry.get("pathogen_id") == PATHOGEN_ID:
             return entry
@@ -92,7 +86,7 @@ def _loguniform_mean(low: float, high: float) -> float:
     return (high - low) / (math.log(high) - math.log(low))
 
 
-def _illness_acute_share(profile: dict[str, Any]) -> float:
+def _illness_acute_share(profile: dict[str, Any]) -> tuple[float, float, float]:
     """Fraction of a symptomatic illness spent at the diarrhoeal rate.
 
     The survival table gives P(illness lasts >= day); E[days ill] is its
@@ -124,7 +118,7 @@ def _illness_acute_share(profile: dict[str, Any]) -> float:
     )
 
 
-def _emesis_expectation(profile: dict[str, Any]) -> dict[str, float]:
+def _emesis_expectation() -> dict[str, float]:
     """E[emesis mass per vomiting illness] in GEC and stool-equivalent g."""
     low, high = EMESIS_EPISODES_RANGE
     weights = emesis_episode_weights(int(low), int(high))
@@ -187,7 +181,7 @@ def main(argv: list[str] | None = None) -> int:
     events = profile["stool_events_per_day"]
     baseline_rate = float(events["baseline"])
     diarrhoeal_rate = float(events["diarrhoeal"])
-    acute_days, mean_illness_days, acute_share = _illness_acute_share(
+    acute_days, mean_illness_days, _ = _illness_acute_share(
         profile,
     )
     shedding_days = float(profile.get("shedding_duration_days", 15))
@@ -232,7 +226,7 @@ def main(argv: list[str] | None = None) -> int:
                 "p95_propensity": release_g_per_day(propensity_p95),
             },
         },
-        "emesis_chain_separate_emitter": _emesis_expectation(profile),
+        "emesis_chain_separate_emitter": _emesis_expectation(),
         "derived_dose_adjustment": {
             "window_mean": -math.log10(central),
             "acute_day": -math.log10(symptomatic_day),

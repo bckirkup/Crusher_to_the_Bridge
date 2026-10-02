@@ -92,9 +92,7 @@ import gzip
 import inspect
 import json
 import sys
-import tempfile
 import time
-import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -108,14 +106,24 @@ if str(REPO_ROOT) not in sys.path:
 from engines import initiation as initiation_module  # noqa: E402
 from engines import natural_history as natural_history_module  # noqa: E402
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
-    resolve_repo_path,
-    validated_open,
 )
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    emesis_records,
+    materialized_picard_spec,
+    wrap_emit_emesis,
+)
+from tools.diag.json_io import validated_json_load  # noqa: E402
+from tools.diag.manifest_args import (  # noqa: E402
+    add_manifest_args,
+    filter_runs_by_seeds,
+    index_run,
+)
+from tools.diag.readout_common import write_run_zip  # noqa: E402
 
 _CAMPAIGN_DIR = (
     REPO_ROOT / "picard_framework" / "runs" / "mega_cruise_campaign"
@@ -489,34 +497,24 @@ def _tag_new_patches(
 
 
 def _wrap_emit_emesis(core_cls: type, rec: CensusRecorder) -> Any:
-    original = core_cls._emit_emesis
-
-    def wrapper(
-        self: Any, agent: Any, pathogen_id: str, profile: dict,
+    def _pre(
+        self: Any, agent: Any, pathogen_id: str,
         zone_name: str, epoch: int,
-    ) -> float:
-        # NB: the engine creates this list via setdefault *inside* the call,
-        # so it must be re-fetched afterwards — a pre-call .get() misses the
-        # host's first emit entirely.
-        before = len(
-            agent.emesis_deposition_records_by_pathogen.get(
-                pathogen_id, [],
-            ),
-        )
-        patch_before = len(
+    ) -> int:
+        return len(
             self.emesis_patch_pools_by_pathogen.get(pathogen_id, {})
             .get(zone_name, []),
         )
-        pool_gain = original(
-            self, agent, pathogen_id, profile, zone_name, epoch,
-        )
-        _tag_new_patches(self, pathogen_id, zone_name, patch_before, agent)
+
+    def _on_emit(
+        self: Any, agent: Any, pathogen_id: str, zone_name: str,
+        epoch: int, pool_gain: float, before: int, ctx: int,
+    ) -> None:
+        _tag_new_patches(self, pathogen_id, zone_name, ctx, agent)
         if pathogen_id != rec.pathogen_id:
-            return pool_gain
+            return
         row = rec.host_row(agent)
-        for record in agent.emesis_deposition_records_by_pathogen.get(
-            pathogen_id, [],
-        )[before:]:
+        for record in emesis_records(agent, pathogen_id)[before:]:
             row["emesis_emitted"] += 1
             row["emesis_surface_gec"] += float(record.get("surface_load", 0.0))
             row["emesis_aerosol_gec"] += float(record.get("aerosol_load", 0.0))
@@ -539,9 +537,8 @@ def _wrap_emit_emesis(core_cls: type, rec: CensusRecorder) -> Any:
                 ),
             })
         row["emesis_patch_gec"] += float(pool_gain)
-        return pool_gain
 
-    return wrapper
+    return wrap_emit_emesis(core_cls, _on_emit, pre=_pre)
 
 
 def _patch_gen(rec: CensusRecorder, patch: Any) -> str:
@@ -1377,40 +1374,30 @@ def _install_wrappers(core_cls: type, rec: CensusRecorder) -> dict[str, Any]:
 def instrumented(rec: CensusRecorder) -> Any:
     """Install the read-only census wrappers for one run."""
     core_cls = tc.TransmissionCore
-    saved = {name: getattr(core_cls, name) for name in _WRAPPED_METHODS}
-    saved_gate = tc.pickup_gate_open
-    schedule_saved = (
-        tc.draw_emesis_schedule,
-        initiation_module.draw_emesis_schedule,
-        natural_history_module.draw_emesis_schedule,
-    )
-    for name, wrapped in _install_wrappers(core_cls, rec).items():
-        setattr(core_cls, name, wrapped)
-    if rec.occupancy is not None:
-        # Installed last so the occupancy wrappers call the census wrappers
-        # on shared methods; every census counter still sees every call.
-        occ_saved = hand_occupancy.install(core_cls, rec.occupancy)
-        for name, method in occ_saved.items():
-            saved.setdefault(name, method)
-    tc.pickup_gate_open = _wrap_pickup_gate(rec)
-    tc.draw_emesis_schedule = _wrap_schedule_module(tc, rec)
-    initiation_module.draw_emesis_schedule = _wrap_schedule_module(
-        initiation_module, rec,
-    )
-    natural_history_module.draw_emesis_schedule = _wrap_schedule_module(
-        natural_history_module, rec,
-    )
-    try:
+    with attr_patches() as patches:
+        for name, wrapped in _install_wrappers(core_cls, rec).items():
+            patches.swap(core_cls, name, wrapped)
+        if rec.occupancy is not None:
+            # Installed last so the occupancy wrappers call the census
+            # wrappers on shared methods; every census counter still sees
+            # every call.
+            patches.note(
+                core_cls,
+                hand_occupancy.install(core_cls, rec.occupancy),
+            )
+        patches.swap(tc, "pickup_gate_open", _wrap_pickup_gate(rec))
+        patches.swap(
+            tc, "draw_emesis_schedule", _wrap_schedule_module(tc, rec),
+        )
+        patches.swap(
+            initiation_module, "draw_emesis_schedule",
+            _wrap_schedule_module(initiation_module, rec),
+        )
+        patches.swap(
+            natural_history_module, "draw_emesis_schedule",
+            _wrap_schedule_module(natural_history_module, rec),
+        )
         yield
-    finally:
-        for name, method in saved.items():
-            setattr(core_cls, name, method)
-        tc.pickup_gate_open = saved_gate
-        (
-            tc.draw_emesis_schedule,
-            initiation_module.draw_emesis_schedule,
-            natural_history_module.draw_emesis_schedule,
-        ) = schedule_saved
 
 
 def _count_by(rows: list[dict[str, Any]], key: str) -> dict[str, int]:
@@ -1510,14 +1497,7 @@ def _summarise_run(
 
 
 def _load_manifest(manifest_path: Path) -> dict[str, Any]:
-    safe_manifest = Path(
-        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
-    )
-    with validated_open(
-        str(safe_manifest), "r",
-        allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        return json.load(handle)
+    return validated_json_load(REPO_ROOT, manifest_path)
 
 
 def run_seed(
@@ -1528,15 +1508,7 @@ def run_seed(
     blocks + the initiation witness."""
     rec = CensusRecorder(pathogen_id=pathogen_id)
     rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         rec.profile = dict(
             picard_spec.pathogen_profiles.get(pathogen_id) or {},
         )
@@ -1587,15 +1559,7 @@ def _control_voyage(
     spec_dict: dict[str, Any], natural_history_clock: str | None,
 ) -> dict[str, Any]:
     """The same spec run with no wrappers -- the draw-neutrality control."""
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         result = ShipSimulation(picard_spec, display=False).run()
     num_agents = int(
         (spec_dict.get("config_overrides") or {})
@@ -1640,9 +1604,6 @@ def _write_run_zip(
 ) -> Path:
     """``summary.json`` (campaign layout + census + initiation witness)
     plus the ``growth_census.json.gz`` link payload."""
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {
         "run_id": run_id,
         "parameters": voyage["parameters"],
@@ -1660,20 +1621,16 @@ def _write_run_zip(
         },
         "initiation": initiation,
     }
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr(
-            "growth_census.json.gz",
-            gzip.compress(json.dumps(payload).encode("utf-8")),
-        )
-    return zip_path
+    return write_run_zip(out_dir, tier, run_id, anchor, {
+        "growth_census.json.gz": gzip.compress(
+            json.dumps(payload).encode("utf-8"),
+        ),
+    })
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--manifest", type=Path, required=True)
-    parser.add_argument("--tier", type=str, required=True)
-    parser.add_argument("--index", type=int, default=None)
+    add_manifest_args(parser, required=True)
     parser.add_argument(
         "--seeds", type=int, nargs="*", default=None,
         help="restrict to these seeds after any --index slice",
@@ -1715,19 +1672,8 @@ def main(argv: list[str] | None = None) -> int:
         num_agents_override=args.num_agents_override,
         natural_history_clock=str(clock) if clock is not None else None,
     ))
-    if args.index is not None:
-        if args.index >= len(runs):
-            raise SystemExit(
-                f"--index {args.index} outside tier {args.tier} "
-                f"({len(runs)} runs)",
-            )
-        runs = [runs[args.index]]
-    if args.seeds:
-        wanted = set(args.seeds)
-        runs = [
-            pair for pair in runs
-            if int(pair[1]["run"]["random_seed"]) in wanted
-        ]
+    runs = index_run(runs, args.index, args.tier)
+    runs = filter_runs_by_seeds(runs, args.seeds or None)
     if args.exposure_cap is not None:
         enabled = args.exposure_cap == "on"
         for _run_id, spec in runs:

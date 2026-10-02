@@ -38,11 +38,9 @@ rescored 2b):
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import math
 import os
-import re
 import statistics
 import sys
 from pathlib import Path
@@ -56,6 +54,9 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.diag.json_io import gz_json_load  # noqa: E402
+from tools.diag.manifest_args import identifier  # noqa: E402
+from tools.diag.readout_common import load_arm_cells  # noqa: E402
 
 BASELINE_DIR = (
     REPO_ROOT / "docs" / "norovirus" / "noro_transfer_product_01"
@@ -68,17 +69,11 @@ SECONDARIES_RESOLVABLE_AT = 20
 
 
 def _load(path: Path) -> dict[str, Any]:
-    with gzip.open(path, "rt", encoding="utf-8") as handle:
-        return json.load(handle)
+    return gz_json_load(path)
 
 
 def load_arm(directory: Path, tag: str | None) -> dict[int, dict[str, Any]]:
-    stem = "per_host_dose_challenge_" + (f"{tag}_" if tag else "")
-    cells = {}
-    for path in sorted(directory.glob(f"{stem}seed*.json.gz")):
-        cell = _load(path)
-        cells[int(cell["seed"])] = cell
-    return cells
+    return load_arm_cells(directory, tag)
 
 
 SOURCES = ("pool", "patch")
@@ -522,10 +517,7 @@ def _print(r: dict[str, Any]) -> None:
         print(f"criterion 4, {label}: {s['secondaries_total']} secondaries over {s['seeds']} seeds -> {s['verdict']}")
 
 
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
+_identifier = identifier
 
 
 def _json_object(value: str) -> dict[str, Any]:

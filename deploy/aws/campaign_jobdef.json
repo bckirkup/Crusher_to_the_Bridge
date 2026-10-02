@@ -1,0 +1,51 @@
+{
+  "jobDefinitionName": "<JOBDEF_NAME>",
+  "type": "container",
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:<IMAGE_TAG>",
+    "command": [
+      "deploy/aws/campaign_entrypoint.py",
+      "--campaign",
+      "Ref::campaign",
+      "--block",
+      "Ref::block",
+      "--seeds",
+      "Ref::seeds",
+      "--s3-prefix",
+      "Ref::s3_prefix"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      {
+        "type": "VCPU",
+        "value": "<VCPU>"
+      },
+      {
+        "type": "MEMORY",
+        "value": "<MEMORY>"
+      }
+    ],
+    "linuxParameters": {
+      "sharedMemorySize": 512
+    },
+    "environment": [
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      },
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-campaign",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "<LOG_PREFIX>"
+      }
+    }
+  }
+}

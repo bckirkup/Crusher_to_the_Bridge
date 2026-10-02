@@ -547,32 +547,43 @@ def run_covid_point(
 def enumerate_runs(design: dict[str, Any]) -> list[dict[str, Any]]:
     """Every (axis, endpoint, seed[, hull]) point the design declares."""
     runs: list[dict[str, Any]] = []
-    noro_seeds = design["channels"]["noro"]["seeds"]
-    hulls = design["channels"]["covid"]["hulls"]
     cells = [{"axis_id": BASELINE_AXIS, "endpoints": [None], "channel": "noro"}]
     cells += [{"axis_id": BASELINE_AXIS, "endpoints": [None], "channel": "covid"}]
     cells += design["axes"]
     for cell in cells:
-        for endpoint in cell["endpoints"]:
-            if cell["channel"] == "noro":
-                for seed in noro_seeds:
-                    runs.append({
-                        "channel": "noro",
-                        "axis_id": cell["axis_id"],
-                        "endpoint": endpoint,
-                        "seed": seed,
-                    })
-            elif cell["channel"] == "covid":
-                for hull, hull_cfg in hulls.items():
-                    for seed in hull_cfg["seeds"]:
-                        runs.append({
-                            "channel": "covid",
-                            "axis_id": cell["axis_id"],
-                            "endpoint": endpoint,
-                            "hull": hull,
-                            "seed": seed,
-                        })
+        runs.extend(_cell_runs(cell, design["channels"]))
     return runs
+
+
+def _cell_runs(
+    cell: dict[str, Any],
+    channels: dict[str, Any],
+) -> list[dict[str, Any]]:
+    if cell["channel"] == "noro":
+        return [
+            {
+                "channel": "noro",
+                "axis_id": cell["axis_id"],
+                "endpoint": endpoint,
+                "seed": seed,
+            }
+            for endpoint in cell["endpoints"]
+            for seed in channels["noro"]["seeds"]
+        ]
+    if cell["channel"] == "covid":
+        return [
+            {
+                "channel": "covid",
+                "axis_id": cell["axis_id"],
+                "endpoint": endpoint,
+                "hull": hull,
+                "seed": seed,
+            }
+            for endpoint in cell["endpoints"]
+            for hull, hull_cfg in channels["covid"]["hulls"].items()
+            for seed in hull_cfg["seeds"]
+        ]
+    return []
 
 
 def run_one(design: dict[str, Any], ref: dict[str, Any]) -> dict[str, Any]:
@@ -699,48 +710,81 @@ def _classify_covid_cell(
     h3_quartile = float(targets.by_id("covid.H3").values["iqr_attack_rate"][1])
     hulls = sorted(design["channels"]["covid"]["hulls"])
 
-    def score(runs: list[dict[str, Any]]) -> dict[str, Any]:
-        out: dict[str, Any] = {}
-        gm = [
-            r for r in runs if r["hull"] == hulls[-1]
-        ]
-        dp = [
-            r for r in runs if r["hull"] == hulls[0]
-        ]
-        out["h1_verdicts"] = [
-            abs(r["observables"]["positive_share"] - h1) <= 0.1
-            if r["observables"]["positive_share"] is not None else None
-            for r in gm
-        ]
-        out["h2_verdicts"] = [
-            abs(r["observables"]["asymptomatic_share"] - h2) <= 0.1
-            if r["observables"]["asymptomatic_share"] is not None else None
-            for r in gm
-        ]
-        out["h3_verdicts"] = [
-            min(
-                g["observables"]["positive_share"] or 0.0,
-                d["observables"]["positive_share"] or 0.0,
-            ) > h3_quartile
-            for g, d in zip(gm, dp)
-        ]
-        out["positive_share"] = {
-            hulls[-1]: [x["observables"]["positive_share"] for x in gm],
-            hulls[0]: [x["observables"]["positive_share"] for x in dp],
-        }
-        return out
+    baseline = _score_covid_runs(baseline_runs, hulls, h1, h2, h3_quartile)
+    endpoint = _score_covid_runs(endpoint_runs, hulls, h1, h2, h3_quartile)
+    flips = _covid_verdict_flips(baseline, endpoint)
+    moved = _covid_moved_quantities(
+        baseline, endpoint, baseline_runs, endpoint_runs, hulls,
+    )
+    return {
+        "baseline_verdicts": baseline,
+        "endpoint_verdicts": endpoint,
+        "verdict_flips": flips,
+        "moved_quantities": moved,
+    }
 
-    baseline = score(baseline_runs)
-    endpoint = score(endpoint_runs)
+
+def _score_covid_runs(
+    runs: list[dict[str, Any]],
+    hulls: list[str],
+    h1: float,
+    h2: float,
+    h3_quartile: float,
+) -> dict[str, Any]:
+    out: dict[str, Any] = {}
+    gm = [
+        r for r in runs if r["hull"] == hulls[-1]
+    ]
+    dp = [
+        r for r in runs if r["hull"] == hulls[0]
+    ]
+    out["h1_verdicts"] = [
+        abs(r["observables"]["positive_share"] - h1) <= 0.1
+        if r["observables"]["positive_share"] is not None else None
+        for r in gm
+    ]
+    out["h2_verdicts"] = [
+        abs(r["observables"]["asymptomatic_share"] - h2) <= 0.1
+        if r["observables"]["asymptomatic_share"] is not None else None
+        for r in gm
+    ]
+    out["h3_verdicts"] = [
+        min(
+            g["observables"]["positive_share"] or 0.0,
+            d["observables"]["positive_share"] or 0.0,
+        ) > h3_quartile
+        for g, d in zip(gm, dp)
+    ]
+    out["positive_share"] = {
+        hulls[-1]: [x["observables"]["positive_share"] for x in gm],
+        hulls[0]: [x["observables"]["positive_share"] for x in dp],
+    }
+    return out
+
+
+def _covid_verdict_flips(
+    baseline: dict[str, Any],
+    endpoint: dict[str, Any],
+) -> list[str]:
     flips: list[str] = []
     for anchor in ("h1_verdicts", "h2_verdicts", "h3_verdicts"):
         b, e = baseline[anchor], endpoint[anchor]
         if b == e:
             continue
-        if all(v is True for v in b) and all(v is False for v in e):
+        if (all(v is True for v in b) and all(v is False for v in e)) or (
+            all(v is False for v in b) and all(v is True for v in e)
+        ):
             flips.append(anchor)
-        elif all(v is False for v in b) and all(v is True for v in e):
-            flips.append(anchor)
+    return flips
+
+
+def _covid_moved_quantities(
+    baseline: dict[str, Any],
+    endpoint: dict[str, Any],
+    baseline_runs: list[dict[str, Any]],
+    endpoint_runs: list[dict[str, Any]],
+    hulls: list[str],
+) -> list[str]:
     moved: list[str] = []
     for hull in hulls:
         b = baseline["positive_share"].get(hull, [])
@@ -763,12 +807,7 @@ def _classify_covid_cell(
     ]
     if _paired_gate(gm_base, gm_end):
         moved.append(f"asymptomatic_share:{hulls[-1]}")
-    return {
-        "baseline_verdicts": baseline,
-        "endpoint_verdicts": endpoint,
-        "verdict_flips": flips,
-        "moved_quantities": moved,
-    }
+    return moved
 
 
 def classify(
@@ -784,66 +823,17 @@ def classify(
     noro_raw = [r for r in records if r["channel"] == "noro"]
     axes_out: list[dict[str, Any]] = []
     for axis in design["axes"]:
-        channel = axis["channel"]
-        per_endpoint: list[dict[str, Any]] = []
-        for endpoint in axis["endpoints"]:
-            if channel == "noro":
-                rows_b = [
-                    r for r, raw in zip(noro_records, noro_raw)
-                    if raw["axis_id"] == BASELINE_AXIS
-                ]
-                rows_e = [
-                    r for r, raw in zip(noro_records, noro_raw)
-                    if raw["axis_id"] == axis["axis_id"]
-                    and raw["endpoint"] == endpoint
-                ]
-                if not rows_b or not rows_e:
-                    per_endpoint.append({
-                        "endpoint": endpoint,
-                        "status": "missing",
-                        "verdict_flips": [],
-                        "moved_quantities": [],
-                    })
-                    continue
-                per_endpoint.append({
-                    "endpoint": endpoint,
-                    **_classify_noro_cell(rows_b, rows_e),
-                })
-            else:
-                runs_e = [
-                    r for r in records
-                    if r["channel"] == "covid"
-                    and r["axis_id"] == axis["axis_id"]
-                    and r["endpoint"] == endpoint
-                ]
-                runs_b = [
-                    r for r in records
-                    if r["channel"] == "covid" and r["axis_id"] == BASELINE_AXIS
-                ]
-                if not runs_b or not runs_e:
-                    per_endpoint.append({
-                        "endpoint": endpoint,
-                        "status": "missing",
-                        "verdict_flips": [],
-                        "moved_quantities": [],
-                    })
-                    continue
-                per_endpoint.append({
-                    "endpoint": endpoint,
-                    **_classify_covid_cell(design, runs_b, runs_e),
-                })
-        lev = "L0"
-        if any(e.get("status") == "missing" for e in per_endpoint):
-            lev = "incomplete"
-        elif any(e["verdict_flips"] for e in per_endpoint):
-            lev = "L2"
-        elif any(e["moved_quantities"] for e in per_endpoint):
-            lev = "L1"
+        per_endpoint = [
+            _classify_endpoint(
+                axis, endpoint, design, records, noro_records, noro_raw,
+            )
+            for endpoint in axis["endpoints"]
+        ]
         axes_out.append({
             "axis_id": axis["axis_id"],
             "register_rows": axis["register_rows"],
             "rank_note": axis.get("rank_note"),
-            "lev": lev,
+            "lev": _axis_lev(per_endpoint),
             "endpoints": per_endpoint,
         })
     return {
@@ -852,6 +842,85 @@ def classify(
         "campaign_label": design.get("campaign_label"),
         "baseline_sha": design.get("baseline_sha"),
     }
+
+
+def _missing_endpoint(endpoint: Any) -> dict[str, Any]:
+    return {
+        "endpoint": endpoint,
+        "status": "missing",
+        "verdict_flips": [],
+        "moved_quantities": [],
+    }
+
+
+def _classify_endpoint(
+    axis: dict[str, Any],
+    endpoint: Any,
+    design: dict[str, Any],
+    records: list[dict[str, Any]],
+    noro_records: list[dict[str, Any]],
+    noro_raw: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if axis["channel"] == "noro":
+        return _noro_endpoint(axis, endpoint, noro_records, noro_raw)
+    return _covid_endpoint(axis, endpoint, design, records)
+
+
+def _noro_endpoint(
+    axis: dict[str, Any],
+    endpoint: Any,
+    noro_records: list[dict[str, Any]],
+    noro_raw: list[dict[str, Any]],
+) -> dict[str, Any]:
+    rows_b = [
+        r for r, raw in zip(noro_records, noro_raw)
+        if raw["axis_id"] == BASELINE_AXIS
+    ]
+    rows_e = [
+        r for r, raw in zip(noro_records, noro_raw)
+        if raw["axis_id"] == axis["axis_id"]
+        and raw["endpoint"] == endpoint
+    ]
+    if not rows_b or not rows_e:
+        return _missing_endpoint(endpoint)
+    return {
+        "endpoint": endpoint,
+        **_classify_noro_cell(rows_b, rows_e),
+    }
+
+
+def _covid_endpoint(
+    axis: dict[str, Any],
+    endpoint: Any,
+    design: dict[str, Any],
+    records: list[dict[str, Any]],
+) -> dict[str, Any]:
+    runs_e = [
+        r for r in records
+        if r["channel"] == "covid"
+        and r["axis_id"] == axis["axis_id"]
+        and r["endpoint"] == endpoint
+    ]
+    runs_b = [
+        r for r in records
+        if r["channel"] == "covid" and r["axis_id"] == BASELINE_AXIS
+    ]
+    if not runs_b or not runs_e:
+        return _missing_endpoint(endpoint)
+    return {
+        "endpoint": endpoint,
+        **_classify_covid_cell(design, runs_b, runs_e),
+    }
+
+
+def _axis_lev(per_endpoint: list[dict[str, Any]]) -> str:
+    if any(e.get("status") == "missing" for e in per_endpoint):
+        return "incomplete"
+    if any(e["verdict_flips"] for e in per_endpoint):
+        return "L2"
+    if any(e["moved_quantities"] for e in per_endpoint):
+        return "L1"
+    return "L0"
 
 
 _LEV_RANK = {"L0": 0, "L1": 1, "L2": 2}
@@ -960,45 +1029,49 @@ def _write_record(out: Path, record: dict[str, Any]) -> Path:
     )
     path = Path(resolve_child_path(safe_out, name))
     with validated_open(
-        path, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(path), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         json.dump(record, handle, indent=2)
     return path
 
 
-def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
-    design = load_design(args.design)
-    if args.list_cells:
-        runs = enumerate_runs(design)
-        noro = sum(1 for r in runs if r["channel"] == "noro")
-        covid = sum(1 for r in runs if r["channel"] == "covid")
-        print(f"{len(runs)} runs ({noro} noro + {covid} covid)")
-        return 0
-    if args.classify is not None:
-        records = collect_records(args.classify)
-        report = classify(design, records)
-        raw_out = args.out or args.classify / "leverage01_classification.json"
-        out = Path(resolve_repo_path(str(REPO_ROOT), str(raw_out)))
-        with validated_open(
-            out, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-        ) as handle:
-            json.dump(report, handle, indent=2)
-        counts = {}
-        for axis in report["axes"]:
-            counts[axis["lev"]] = counts.get(axis["lev"], 0) + 1
-        print(f"classified {len(report['axes'])} axes: {counts}")
-        return 0
-    if args.write_lev:
-        if not args.classification:
-            raise SystemExit("--classification is required for --write-lev")
-        report = json.loads(args.classification.read_text(encoding="utf-8"))
-        levs = write_lev(report)
-        counts: dict[str, int] = {}
-        for lev in levs.values():
-            counts[lev] = counts.get(lev, 0) + 1
-        print(f"wrote {len(levs)} rows: {counts}")
-        return 0
+def _cmd_list(design: dict[str, Any]) -> int:
+    runs = enumerate_runs(design)
+    noro = sum(1 for r in runs if r["channel"] == "noro")
+    covid = sum(1 for r in runs if r["channel"] == "covid")
+    print(f"{len(runs)} runs ({noro} noro + {covid} covid)")
+    return 0
+
+
+def _cmd_classify(design: dict[str, Any], args: argparse.Namespace) -> int:
+    records = collect_records(args.classify)
+    report = classify(design, records)
+    raw_out = args.out or args.classify / "leverage01_classification.json"
+    out = Path(resolve_repo_path(str(REPO_ROOT), str(raw_out)))
+    with validated_open(
+        str(out), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        json.dump(report, handle, indent=2)
+    counts = {}
+    for axis in report["axes"]:
+        counts[axis["lev"]] = counts.get(axis["lev"], 0) + 1
+    print(f"classified {len(report['axes'])} axes: {counts}")
+    return 0
+
+
+def _cmd_write_lev(args: argparse.Namespace) -> int:
+    if not args.classification:
+        raise SystemExit("--classification is required for --write-lev")
+    report = json.loads(args.classification.read_text(encoding="utf-8"))
+    levs = write_lev(report)
+    counts: dict[str, int] = {}
+    for lev in levs.values():
+        counts[lev] = counts.get(lev, 0) + 1
+    print(f"wrote {len(levs)} rows: {counts}")
+    return 0
+
+
+def _cmd_run(design: dict[str, Any], args: argparse.Namespace) -> int:
     if not (args.axis and args.seed is not None and args.out):
         raise SystemExit("--axis, --seed and --out are required for a run")
     axis = axis_by_id(design, args.axis)
@@ -1019,6 +1092,18 @@ def main(argv: list[str] | None = None) -> int:
     path = _write_record(args.out, record)
     print(f"wrote {path}")
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    design = load_design(args.design)
+    if args.list_cells:
+        return _cmd_list(design)
+    if args.classify is not None:
+        return _cmd_classify(design, args)
+    if args.write_lev:
+        return _cmd_write_lev(args)
+    return _cmd_run(design, args)
 
 
 if __name__ == "__main__":

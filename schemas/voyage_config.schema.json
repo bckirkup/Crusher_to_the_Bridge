@@ -84,9 +84,157 @@
         "dinner": { "$ref": "#/$defs/meal_weights" }
       }
     },
-    "medical_response": { "$ref": "#/$defs/medical_response" }
+    "medical_response": { "$ref": "#/$defs/medical_response" },
+    "ship_functions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Ship-function capacity declarations (docs/proposals/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "symptomatic_effectiveness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Fraction of a watch a symptomatic-but-present crew member delivers. Null-sourced declared arm; never anchor-fitted."
+        },
+        "functions": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/ship_function" }
+        }
+      }
+    },
+    "ship_systems": {
+      "type": "array",
+      "description": "Named ship systems with health state, degradation, and repair labor (spec §5).",
+      "items": { "$ref": "#/$defs/ship_system" }
+    }
   },
   "$defs": {
+    "ship_function": {
+      "type": "object",
+      "required": ["function_id", "serves"],
+      "additionalProperties": true,
+      "properties": {
+        "function_id": { "type": "string" },
+        "serves": {
+          "type": "string",
+          "enum": ["passengers", "crew", "both", "mission"]
+        },
+        "staffing": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/watch_demand" },
+          "description": "Agent-class staffing requirements. Exclusive with staffing_by_duty_zone."
+        },
+        "staffing_by_duty_zone": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/watch_demand" },
+          "description": "Duty-zone staffing for legacy binary platforms. Exclusive with staffing."
+        },
+        "required_zone_types": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "required_zone_ids": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "required_systems": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "capacity_model": {
+          "type": "string",
+          "enum": ["staffing_fraction", "bottleneck_min"],
+          "default": "staffing_fraction"
+        },
+        "capacity_schedule": {
+          "type": "object",
+          "additionalProperties": { "type": "number", "minimum": 0 },
+          "description": "Hour-of-day demand multipliers (0-23 keys)."
+        },
+        "feedback": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "kind": {
+              "type": "string",
+              "enum": [
+                "cleaning_coverage_scale",
+                "dining_weights",
+                "zone_modifiers",
+                "route_scalar_scale",
+                "readout_only"
+              ]
+            },
+            "enabled": { "type": "boolean", "default": true },
+            "threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+            "sustained_hours": { "type": "number", "exclusiveMinimum": 0 },
+            "crew_sustenance": { "type": "boolean", "default": false },
+            "zone_close_on_loss": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "scalar_name": {
+              "type": "string",
+              "enum": [
+                "direct_contact_scalar",
+                "droplet_scalar",
+                "hvac_airborne_scalar",
+                "fomite_scalar"
+              ]
+            },
+            "floor": { "type": "number", "minimum": 0, "maximum": 1 }
+          }
+        }
+      }
+    },
+    "watch_demand": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "required_on_watch": { "type": "integer", "minimum": 0 },
+        "minimum_on_watch": { "type": "integer", "minimum": 0 },
+        "symptomatic_effectiveness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "ship_system": {
+      "type": "object",
+      "required": ["system_id"],
+      "additionalProperties": true,
+      "properties": {
+        "system_id": { "type": "string" },
+        "health_start": { "type": "number", "minimum": 0, "maximum": 1 },
+        "degradation": {
+          "type": "object",
+          "properties": {
+            "rate_per_day": { "type": "number", "minimum": 0 },
+            "model": { "type": "string", "enum": ["linear"] }
+          }
+        },
+        "repair": {
+          "type": "object",
+          "properties": {
+            "labor_class": { "type": "string" },
+            "rate_per_person_hour": { "type": "number", "minimum": 0 }
+          }
+        },
+        "failure_threshold": { "type": "number", "minimum": 0, "maximum": 1 },
+        "effects": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "capacity_multiplier_at_failure": { "type": "number" }
+            }
+          }
+        },
+        "repair_priority": { "type": "integer" }
+      }
+    },
     "medical_response": {
       "type": "object",
       "additionalProperties": false,

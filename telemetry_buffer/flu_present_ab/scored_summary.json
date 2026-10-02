@@ -1,0 +1,84 @@
+{
+  "modes": {
+    "daily_hazard": {
+      "band_e_sar": [
+        0.04914802641255888,
+        0.12191675238109859
+      ],
+      "confined_sar": 0.06451612903225806,
+      "confined_secondaries": 2,
+      "confined_slots": 31,
+      "dosed_rows": 31,
+      "e_sar_k_ship": 0.09698603677398313,
+      "ever_ill_pax": 14,
+      "ever_infected_pax": 45,
+      "f1_overlap": true,
+      "reported_pax": 8,
+      "wilson_95": [
+        0.017874407775063144,
+        0.20718988318746434
+      ]
+    },
+    "once_per_course": {
+      "band_e_sar": [
+        0.04914802641255888,
+        0.12191675238109859
+      ],
+      "confined_sar": 0.06451612903225806,
+      "confined_secondaries": 2,
+      "confined_slots": 31,
+      "dosed_rows": 31,
+      "e_sar_k_ship": 0.09698603677398313,
+      "ever_ill_pax": 14,
+      "ever_infected_pax": 45,
+      "f1_overlap": true,
+      "reported_pax": 8,
+      "wilson_95": [
+        0.017874407775063144,
+        0.20718988318746434
+      ]
+    }
+  },
+  "paired": {
+    "s8105": {
+      "daily_hazard": [
+        1,
+        11
+      ],
+      "once_per_course": [
+        1,
+        11
+      ]
+    },
+    "s8106": {
+      "daily_hazard": [
+        1,
+        5
+      ],
+      "once_per_course": [
+        1,
+        5
+      ]
+    },
+    "s8107": {
+      "daily_hazard": [
+        0,
+        9
+      ],
+      "once_per_course": [
+        0,
+        9
+      ]
+    },
+    "s8108": {
+      "daily_hazard": [
+        0,
+        6
+      ],
+      "once_per_course": [
+        0,
+        6
+      ]
+    }
+  }
+}

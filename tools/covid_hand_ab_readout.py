@@ -118,31 +118,9 @@ def _paired_rows(
         for arm_id, cells in arms.items():
             if arm_id == baseline_arm_id:
                 continue
-            deltas_rec: list[float] = []
-            deltas_inf: list[float] = []
-            deltas_share: list[float] = []
-            flips = 0
-            for seed, b in base.items():
-                a = cells.get(seed)
-                if a is None:
-                    continue
-                b_rec = float(b["observables"]["recorded_onsets"])
-                a_rec = float(a["observables"]["recorded_onsets"])
-                deltas_rec.append(b_rec - a_rec)
-                b_inf = b.get("infections_total")
-                a_inf = a.get("infections_total")
-                if b_inf is not None and a_inf is not None:
-                    deltas_inf.append(float(b_inf) - float(a_inf))
-                if b_rec > 0 and a_rec > 0:
-                    deltas_share.append(
-                        float(b["observables"]["onsets_before_split_day"])
-                        / b_rec
-                        - float(a["observables"]["onsets_before_split_day"])
-                        / a_rec,
-                    )
-                flips += int(
-                    (b_rec >= 10.0) != (a_rec >= 10.0),
-                )
+            deltas_rec, deltas_inf, deltas_share, flips = _arm_deltas(
+                base, cells,
+            )
             key = f"theta={theta:.4g}|{arm_id}_minus_{baseline_arm_id}"
             out[key] = {
                 "paired_seeds": len(deltas_rec),
@@ -164,6 +142,38 @@ def _paired_rows(
                 "takeoff_class_flips": flips,
             }
     return out
+
+
+def _arm_deltas(
+    base: dict[int, dict],
+    cells: dict[int, dict],
+) -> tuple[list[float], list[float], list[float], int]:
+    deltas_rec: list[float] = []
+    deltas_inf: list[float] = []
+    deltas_share: list[float] = []
+    flips = 0
+    for seed, b in base.items():
+        a = cells.get(seed)
+        if a is None:
+            continue
+        b_rec = float(b["observables"]["recorded_onsets"])
+        a_rec = float(a["observables"]["recorded_onsets"])
+        deltas_rec.append(b_rec - a_rec)
+        b_inf = b.get("infections_total")
+        a_inf = a.get("infections_total")
+        if b_inf is not None and a_inf is not None:
+            deltas_inf.append(float(b_inf) - float(a_inf))
+        if b_rec > 0 and a_rec > 0:
+            deltas_share.append(
+                float(b["observables"]["onsets_before_split_day"])
+                / b_rec
+                - float(a["observables"]["onsets_before_split_day"])
+                / a_rec,
+            )
+        flips += int(
+            (b_rec >= 10.0) != (a_rec >= 10.0),
+        )
+    return deltas_rec, deltas_inf, deltas_share, flips
 
 
 def main(argv: list[str] | None = None) -> int:

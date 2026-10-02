@@ -56,6 +56,9 @@ Or use the launcher scripts:
 ```bash
 ./scripts/run_dashboard.sh
 ```
+Note the launcher reruns `orchestrator.py` and OVERWRITES
+`telemetry_buffer/simulation_history.json`; do not use it when you must
+preserve a specific run's telemetry.
 
 ### 5. Verify pathway aggregation logic
 ```bash
@@ -79,6 +82,31 @@ print('Pathways:', sorted(totals.keys()))
 | Standing Orders & Threat Profiles | SOP cards with `exempt_classes`, pathogen dossiers |
 | Fleet Operations | Presidio multi-cruise comparison, per-cruise drill-down |
 
+## Swapping telemetry for a test (live data switch)
+
+The sidebar "Telemetry directory" text input hot-swaps the loaded
+`simulation_history.json` + `artificial_lab_notebook.json` — no restart needed.
+Both files must exist in the target dir.
+
+- `default_telemetry_dir()` resolves `<repo>/telemetry_buffer` unless the
+  `CTTB_TELEMETRY_DIR` env var is set at launch.
+- `resolve_repo_path`/`resolve_child_path` restrict reads to inside the repo
+  root — put test fixture dirs under `telemetry_buffer/<name>/`, not /tmp.
+
+### Negative-test pattern (proving a "silent when absent" guard)
+
+To prove a panel hides without its data (e.g. `function_capacity`,
+`cost_accounting.operational_impact_*`, `crusher_ops`):
+1. `mkdir telemetry_buffer/no_<field>_test`
+2. Copy `simulation_history.json`, strip the key from every record with a
+   short Python one-liner; copy `artificial_lab_notebook.json` alongside.
+3. Enter the new dir path in the sidebar input; the app reruns and the panel
+   should be gone while the rest of the tab renders unchanged.
+4. Restore the original dir afterwards and delete the fixture.
+
+This distinguishes a genuinely data-driven panel from a static placeholder and
+verifies the guard clause in one pass.
+
 ## Telemetry Fields the Dashboard Expects
 
 | Field | Used For |
@@ -92,6 +120,7 @@ print('Pathways:', sorted(totals.keys()))
 | `contact_tracing.transmission_events[].pathway_breakdown` | Transmission vector pie chart |
 | `agents[].agent_class` | Crew Manifest by Division table |
 | `agents[].infection_state`, `symptom_presentation`, `compliance_status` | Orthogonal agent axes |
+| `function_capacity` | Ship Function Capacity panel on Bridge Status: per-instance capacity traces, binding constraint, crew pools, `ship_systems` health — silent when no records carry the block |
 
 ## CI Coverage
 
@@ -103,3 +132,10 @@ GitHub Actions runs a lightweight dashboard import check after pytest (see `.git
 - **Missing deck photo plate**: Run `python3 scripts/precompute_deck_assets.py` for the active platform
 - **Plotly import errors**: `pip install plotly streamlit pandas`
 - **Wrong zone positions**: Verify `display` coordinates in `spatial_layout.json`
+- **Scroll not registering**: move cursor over the main content column first;
+  scrolling over the sidebar scrolls the sidebar
+- **Legend overlaps x-axis title**: `apply_lcars_layout` places horizontal
+  legends at y≈-0.2…-0.25 which collides with the x-axis title on crowded
+  charts — known cosmetic issue, not a failure
+- **Deprecation noise**: streamlit ≥1.58 logs `use_container_width` warnings;
+  harmless for now but the arg is past its removal date
