@@ -1703,6 +1703,23 @@ upstream: crew infection rate, crew-versus-passenger reporting, and the
 [`dutyexcl_matched_37.md`](dutyexcl_matched_37.md). No constant moved, and no
 compliance value was chosen to move an anchor.
 
+**NORO-OUTBREAK-01 (measured `bc4de6f5`, 12,000 voyages, small hulls):** on
+the post-hand/post-presentation stack the import side now works — takeoff
+runs 53-95% (expedition 7d), 79-98% (expedition 12d), 78-100% (classic 12d)
+across the declared prevalence diagonal, posting is non-null (8 postings,
+0.1-0.2% vs A9's 0.42-0.56%), and the seed-paired delta vs IMPORT-01 shows
+establishment gained on 855-901/1000 expedition screening seeds — but
+**every scored anchor still fails, and the deficit has moved**: A1 ever-ill
+0.0-2.0% vs (10%, 22%), A2 ill/infected 6-17% vs (59%, 81%), A4 reported pax
+AR ~0 vs class IQRs 4.0-10.4%, while A8 acquisition incidence runs 2.4-9.5×
+*above* its end-of-period reference. Infections arrive and outbreaks reach
+VSP-class sizes; the miss sits in infection→illness→report conversion, not
+transmission. The binding open question is which link of that conversion
+carries the gap — instruments record the gap, not the link. Canonical
+tables: [`noro_outbreak_01_readout.md`](noro_outbreak_01_readout.md);
+ledger `docs/ledger/NORO-OUTBREAK-01.md`. Spirit/mega classes unmeasured on
+this stack.
+
 ## 3. Out-of-sample checks
 
 **Park et al. (2015)** — surface swabs during a shipboard outbreak; nothing was

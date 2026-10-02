@@ -35,9 +35,12 @@ import argparse
 import gzip
 import json
 import statistics
+import struct
 import sys
 import zipfile
+import zlib
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -86,6 +89,111 @@ def _load_member(zip_path: Path, member: str, *, gunzipped: bool = False) -> dic
         return json.loads(blob)
     except (KeyError, zipfile.BadZipFile, json.JSONDecodeError, OSError):
         return None
+
+
+def _s3_client():
+    import boto3
+
+    return boto3.client("s3")
+
+
+def _s3_parse_uri(s3_uri: str) -> tuple[str, str]:
+    rest = s3_uri[len("s3://"):]
+    bucket, _, prefix = rest.partition("/")
+    return bucket, prefix.rstrip("/") + "/"
+
+
+def _s3_range_get(client, bucket: str, key: str, start: int, end: int) -> bytes:
+    resp = client.get_object(Bucket=bucket, Key=key, Range=f"bytes={start}-{end}")
+    return resp["Body"].read()
+
+
+def _s3_member_blob(client, bucket: str, key: str, member: str) -> bytes | None:
+    """Fetch one zip member via S3 range reads (EOCD -> CD -> local blob).
+
+    Run zips grow to ~45 MB on the big hulls while summary.json stays
+    ~20 KB compressed; ranged reads keep a 12k-run readout off disk.
+    """
+    size = client.head_object(Bucket=bucket, Key=key)["ContentLength"]
+    tail_len = min(1 << 16, size)
+    tail = _s3_range_get(client, bucket, key, size - tail_len, size - 1)
+    eocd_off = tail.rfind(b"PK\x05\x06")
+    if eocd_off < 0:
+        return None
+    cd_size = struct.unpack_from("<I", tail, eocd_off + 12)[0]
+    cd_off = struct.unpack_from("<I", tail, eocd_off + 16)[0]
+    cd = _s3_range_get(client, bucket, key, cd_off, cd_off + cd_size - 1)
+    pos = 0
+    while pos + 46 <= len(cd):
+        if cd[pos : pos + 4] != b"PK\x01\x02":
+            break
+        method = struct.unpack_from("<H", cd, pos + 10)[0]
+        comp_size = struct.unpack_from("<I", cd, pos + 20)[0]
+        name_len = struct.unpack_from("<H", cd, pos + 28)[0]
+        extra_len = struct.unpack_from("<H", cd, pos + 30)[0]
+        comment_len = struct.unpack_from("<H", cd, pos + 32)[0]
+        lh_off = struct.unpack_from("<I", cd, pos + 42)[0]
+        name = cd[pos + 46 : pos + 46 + name_len].decode("utf-8", "replace")
+        if name == member:
+            lh = _s3_range_get(client, bucket, key, lh_off, lh_off + 30)
+            if lh[:4] != b"PK\x03\x04":
+                return None
+            l_name_len = struct.unpack_from("<H", lh, 26)[0]
+            l_extra_len = struct.unpack_from("<H", lh, 28)[0]
+            data_start = lh_off + 30 + l_name_len + l_extra_len
+            blob = _s3_range_get(
+                client, bucket, key, data_start, data_start + comp_size - 1
+            )
+            if method == 0:
+                return blob
+            if method == 8:
+                return zlib.decompressobj(-15).decompress(blob)
+            return None
+        pos += 46 + name_len + extra_len + comment_len
+    return None
+
+
+def _row_from_summary(summary: dict, fallback_name: str) -> dict[str, Any] | None:
+    params = summary.get("parameters", {})
+    census_block = summary.get("census", {})
+    run = {
+        "run_id": summary.get("run_id", fallback_name),
+        "cell_key": _cell_key(params),
+        "seed": _seed_of(params),
+        "anchor_row": row_from_summary(summary, fallback_name),
+        "n_imports": int(census_block.get("n_imports", 0) or 0),
+        "n_acquired": int(census_block.get("n_acquired", 0) or 0),
+        "ignited": bool(census_block.get("ignited", False)),
+    }
+    run.update(_progression(summary))
+    return run
+
+
+def _collect_s3(s3_uri: str) -> list[dict]:
+    """Stream summary.json rows for every zip under an S3 prefix."""
+    client = _s3_client()
+    bucket, prefix = _s3_parse_uri(s3_uri)
+    keys = [
+        obj["Key"]
+        for page in client.get_paginator("list_objects_v2").paginate(
+            Bucket=bucket, Prefix=prefix
+        )
+        for obj in page.get("Contents", [])
+        if obj["Key"].endswith(".zip")
+    ]
+
+    def one(key: str) -> dict | None:
+        try:
+            blob = _s3_member_blob(client, bucket, key, _MEMBER)
+            if blob is None:
+                return None
+            summary = json.loads(blob)
+            return _row_from_summary(summary, key.rsplit("/", 1)[-1])
+        except (json.JSONDecodeError, KeyError, OSError, zlib.error):
+            return None
+
+    with ThreadPoolExecutor(max_workers=32) as pool:
+        return [r for r in pool.map(one, keys) if r is not None]
 
 
 def _seed_of(params: dict) -> int:
@@ -154,25 +262,24 @@ def collect_run(zip_path: Path) -> dict[str, Any] | None:
     summary = _load_member(zip_path, _MEMBER)
     if summary is None:
         return None
-    params = summary.get("parameters", {})
-    census_block = summary.get("census", {})
-    run = {
-        "run_id": summary.get("run_id", zip_path.stem),
-        "cell_key": _cell_key(params),
-        "seed": _seed_of(params),
-        "anchor_row": row_from_summary(summary, str(zip_path)),
-        "n_imports": int(census_block.get("n_imports", 0) or 0),
-        "n_acquired": int(census_block.get("n_acquired", 0) or 0),
-        "ignited": bool(census_block.get("ignited", False)),
-    }
-    run.update(_progression(summary))
-    return run
+    return _row_from_summary(summary, zip_path.stem)
 
 
-def collect(root: Path, tiers: list[str] | None = None) -> dict[tuple, list[dict]]:
+def _group_cells(rows: list[dict]) -> dict[tuple, list[dict]]:
+    cells: dict[tuple, list[dict]] = defaultdict(list)
+    for run in rows:
+        cells[tuple(run["cell_key"])].append(run)
+    return dict(cells)
+
+
+def collect(root, tiers: list[str] | None = None) -> dict[tuple, list[dict]]:
+    root_s = str(root)
+    if root_s.startswith("s3:/"):
+        # argparse Path collapses s3:// to s3:/ — restore the scheme.
+        return _group_cells(_collect_s3("s3://" + root_s[4:].lstrip("/")))
     cells: dict[tuple, list[dict]] = defaultdict(list)
     allowed = set(tiers) if tiers else None
-    for tier_dir in sorted(root.iterdir()):
+    for tier_dir in sorted(Path(root).iterdir()):
         if not tier_dir.is_dir() or (allowed is not None and tier_dir.name not in allowed):
             continue
         for zip_path in sorted(tier_dir.glob("*.zip")):
