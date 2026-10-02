@@ -1496,6 +1496,16 @@ applies the VSP 3% passenger-or-crew rule to eligible voyages and reports
 ineligible runs separately. A truth-only arm emits an explicit no-reporting
 sentinel rather than a false zero.
 
+**A8 and A9 are declared mixture-level anchors (`ANCHOR-MIXTURE-01`,
+2026-10-02).** They score reported-case incidence and posting probability
+over a heterogeneous voyage ensemble — the fleet's observed quiet/loud
+composition — and never a cell of i.i.d. voyages at one parameter point,
+where conditioning on posting removes the mass A8's unconditional rate
+counts. The 17–23× A4/A8 separations measured below are that same
+arithmetic, not a defect; a take-off-1.0 cell's A8/A9 miss is a floor, not
+a verdict, and the anchors become evidence only for an ensemble that
+contains the observed quiet/outbreak mixture.
+
 The only published MIDRS incidence analysis is MMWR Surveill Summ 2021;70(6),
 covering 2006-2019; a search of CDC's VSP data pages, MMWR and the
 peer-reviewed literature found nothing after it. So the post-2020
@@ -1657,7 +1667,12 @@ measurement, and four things change:
   134, so five reported crew cases (3.73%) post a voyage; the passenger channel
   alone posts on 2.228%, still 4.0x A9's ceiling. The in-sim `vsp_trigger_epoch`
   fires only on the passenger channel while A9 scores both — a definitional gap
-  in the trigger, not a parameter, recorded as outstanding.
+  in the trigger, not a parameter. **Repaired by `VSP-EITHER-CHANNEL-01`
+  (2026-10-02):** the crew reported-case counter now carries the same 0.03
+  threshold and confine action as the passenger channel, and
+  `vsp_trigger_epoch` stamps the first epoch either channel is exceeded —
+  declared caveat: the fix amplifies the crew-channel over-firing this 51.5%
+  measures.
 
 **A9's numerator is passenger-channel, measured, 2026-09-05:** the reporting
 rule is 3% of passengers *or* 3% of crew, so both of A9's numerators are sets of

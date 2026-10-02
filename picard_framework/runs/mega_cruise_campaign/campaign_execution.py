@@ -48,6 +48,7 @@ from simulation_utils.paths import (
 from telemetry_buffer.fields import (  # noqa: E402
     COST_OPERATIONAL_IMPACT_CUMULATIVE,
     COST_TOTAL_FINANCIAL_USD,
+    COUNTER_CREW_REPORTED_CASE_RATE,
     COUNTER_EXCEEDED,
     COUNTER_NEWLY_CONFINED,
     COUNTER_PASSENGER_REPORTED_CASE_RATE,
@@ -470,6 +471,10 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             record_block(rec, RECORD_INFECTION_COUNTERS),
             COUNTER_PASSENGER_REPORTED_CASE_RATE,
         )
+        crew_reported_counter = record_block(
+            record_block(rec, RECORD_INFECTION_COUNTERS),
+            COUNTER_CREW_REPORTED_CASE_RATE,
+        )
 
         infected = int(s.get(SUMMARY_INFECTED, 0) or 0)
         recovered = int(s.get(SUMMARY_RECOVERED, 0) or 0)
@@ -546,6 +551,12 @@ def extract_timeseries(history: list[dict[str, Any]]) -> list[dict[str, Any]]:
             "passenger_reported_case_rate_exceeded": bool(
                 reported_case_counter.get(COUNTER_EXCEEDED, False),
             ),
+            "crew_reported_case_rate_newly_confined": crew_reported_counter.get(
+                COUNTER_NEWLY_CONFINED, 0,
+            ),
+            "crew_reported_case_rate_exceeded": bool(
+                crew_reported_counter.get(COUNTER_EXCEEDED, False),
+            ),
             "ever_ill_rate_passenger": s.get(SUMMARY_EVER_ILL_RATE_PASSENGER, 0.0),
             "ever_ill_rate_crew": s.get(SUMMARY_EVER_ILL_RATE_CREW, 0.0),
             "sanitary_activity": dict(s.get(SUMMARY_SANITARY_ACTIVITY) or {}),
@@ -569,12 +580,24 @@ def _detection_epochs(
 
 
 def _reported_case_counter_exceeded(epoch: dict[str, Any]) -> bool:
-    """Return the emitted passenger reported-case threshold state."""
+    """Return the emitted either-channel reported-case threshold state.
+
+    The published VSP rule posts at 3% of passengers *or* 3% of crew, so the
+    trigger stamps the first epoch either channel's counter is exceeded
+    (VSP-EITHER-CHANNEL-01).
+    """
     if epoch.get("passenger_reported_case_rate_exceeded", False):
         return True
+    if epoch.get("crew_reported_case_rate_exceeded", False):
+        return True
     counters = epoch.get("infection_counters") or {}
-    counter = counters.get("passenger_reported_case_rate") or {}
-    return bool(counter.get("exceeded", False))
+    return any(
+        bool((counters.get(cid) or {}).get(COUNTER_EXCEEDED, False))
+        for cid in (
+            COUNTER_PASSENGER_REPORTED_CASE_RATE,
+            COUNTER_CREW_REPORTED_CASE_RATE,
+        )
+    )
 
 
 def _validate_role_complements(

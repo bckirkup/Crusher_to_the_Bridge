@@ -77,10 +77,13 @@ reservoir. For norovirus, the important point is that \(w_{p,r}\), \(s_i\), cont
 compensate in aggregate outcomes unless some of them are externally fixed.
 
 \section{The VSP threshold as observation rule and intervention trigger}
-The VSP threshold operates on reported acute-gastroenteritis burden. Let \(G_P(t)\) be cumulative passenger cases
-meeting the reporting definition and \(N_P\) the passenger population. A thresholded response is triggered when
+The VSP threshold operates on reported acute-gastroenteritis burden. Let \(G_P(t)\) and \(G_C(t)\) be cumulative
+passenger and crew cases meeting the reporting definition and \(N_P\), \(N_C\) the two complements. A thresholded
+response is triggered when
 \begin{equation}
-  \frac{G_P(t)}{N_P}\ge \theta_{\mathrm{VSP}}.
+  \frac{G_P(t)}{N_P}\ge \theta_{\mathrm{VSP}}
+  \quad\text{or}\quad
+  \frac{G_C(t)}{N_C}\ge \theta_{\mathrm{VSP}}.
   \label{eq:vsp-trigger}
 \end{equation}
 Equation~\ref{eq:vsp-trigger} is simultaneously a measurement rule and an intervention rule. Before the threshold,

@@ -96,6 +96,14 @@ than ten postings in the scored era carries no A4 anchor at all —
 A4 remains conditional on VSP posting the voyage, as A7 is: VSP publishes
 nothing about voyages it never posted. A8 and A9 now put implemented
 unconditional channels alongside it. A10 remains Proposed.
+
+**A8 and A9 are mixture-level anchors (`ANCHOR-MIXTURE-01`).** They score
+the unconditional incidence and posting probability of a *voyage ensemble*
+that contains the observed quiet/outbreak composition — never a cell of
+i.i.d. voyages at one parameter point, where conditioning on posting
+removes the mass A8 counts (the ~17–23× A4/A8 separation measured on
+identically distributed cells is that arithmetic, not a defect). A
+take-off-1.0 cell's A8/A9 miss is a floor, not a verdict.
 A10 adds the only trajectory evidence norovirus offers: duration gradients
 recovered across voyages, since no within-voyage norovirus time series
 exists. Voyage length and ship size are confounded in the published
