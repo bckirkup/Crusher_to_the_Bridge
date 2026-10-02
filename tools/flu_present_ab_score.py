@@ -34,7 +34,7 @@ def _e_sar(doses: list[float], k: float) -> float:
     )
 
 
-def main() -> None:
+def main() -> int:
     out: dict = {"modes": {}, "paired": {}}
     cells: dict[tuple[str, int], dict] = {}
     for path in sorted(RUNS.glob("classic_cruise_1900_s*.json")):
@@ -122,6 +122,7 @@ def main() -> None:
         )
 
     SUMMARY_OUT.write_text(json.dumps(out, indent=2, sort_keys=True) + "\n")
+    return 0
 
 
 if __name__ == "__main__":
