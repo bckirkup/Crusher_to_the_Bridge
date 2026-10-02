@@ -203,8 +203,9 @@ class StageRecorder:
                     shedder_ids: list, mass_in_target: float, occupants: list,
                     agent_doses: dict, matrix: Any, agent_pathway_doses: Any,
                     pathogen_id: str, source_attribution: Any = None,
-                    air_unit: Any = None, epoch: int = 0,
-                    shedder_ctx: Any = None) -> None:
+                    **kwargs: Any) -> None:
+            air_unit = kwargs.get("air_unit")
+            epoch = int(kwargs.get("epoch", 0))
             watched = (
                 pathogen_id == self.pathogen_id and air_unit is not None
             )
@@ -213,7 +214,7 @@ class StageRecorder:
                 core, target_zone, source_zones, shedder_ids, mass_in_target,
                 occupants, agent_doses, matrix, agent_pathway_doses,
                 pathogen_id, source_attribution=source_attribution,
-                air_unit=air_unit, epoch=epoch, shedder_ctx=shedder_ctx,
+                **kwargs,
             )
             if watched:
                 self.hvac_rows.append({
