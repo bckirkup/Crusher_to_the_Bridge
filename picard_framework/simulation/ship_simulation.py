@@ -418,8 +418,33 @@ class ShipSimulation:
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
         # block (e.g. the bridge head) serves as "any".
         sanitary_zone_map = _sanitary_zone_map(platform_layout)
+        self.tx_core = self._build_transmission_core(
+            platform_layout,
+            zone_types=zone_types,
+            zone_ventilation=zone_ventilation,
+            zone_floor_areas=zone_floor_areas,
+            sanitary_zone_map=sanitary_zone_map,
+            food_zone_multipliers=food_zone_multipliers,
+        )
+        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
+        self.tx_core.initialize_zones(self.zone_names)
+        self.engine.enable_external_transmission()
+        if self.display:
+            from orchestrator_display import print_transmission_core
+            print_transmission_core(self.hvac_downstream, self.pathogen_profiles)
+
+    def _build_transmission_core(
+        self,
+        platform_layout: dict[str, Any],
+        *,
+        zone_types: dict[str, str],
+        zone_ventilation: dict[str, float],
+        zone_floor_areas: dict[str, float],
+        sanitary_zone_map: dict[str, Any],
+        food_zone_multipliers: dict[str, float],
+    ) -> TransmissionCore:
         tx_overrides = self.cfg.get("transmission", {}) or {}
-        self.tx_core = TransmissionCore(
+        return TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
             pathogen_profiles=self.pathogen_profiles,
@@ -450,12 +475,6 @@ class ShipSimulation:
             clock=self.clock,
             hazard_model=self.hazard_model,
         )
-        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
-        self.tx_core.initialize_zones(self.zone_names)
-        self.engine.enable_external_transmission()
-        if self.display:
-            from orchestrator_display import print_transmission_core
-            print_transmission_core(self.hvac_downstream, self.pathogen_profiles)
 
     def initialize(self) -> WorldState:
         if self._initialized:
