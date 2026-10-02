@@ -926,3 +926,27 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   transmission-size defect. Standing residual order: (a) asymptomatic
   composition vs 0.81 (~10×, largest); (b) the imports/early-contact
   fizzle tail; (c) ignited-seed count dispersion (~35–131 interior).
+- **`PRESENT-SHARE-01` repairs the share→hazard defect the GM H2
+  decomposition surfaced** (`docs/ledger/PRESENT-SHARE-01.md`): the
+  declared presentation probability (`symptomatic_fraction`, or the
+  `illness_probability` Hill pair) is a share of courses, but
+  `_advance_one_infection` re-rolled it once per day of natural history
+  while `NOT_ILL` — ~15 draws to shedding clearance — so P(never
+  present) ≈ (1−p)^15 ≈ 0 and effectively every infection presented
+  within ~1.4 days of incubation. The schema already stated "drawn once
+  past incubation"; the mechanism now matches it:
+  `presentation_draw_mode: once_per_course` ships **default-ON** (one
+  draw at the epoch crossing the host's drawn incubation; a failed draw
+  is a never-presenting course), `daily_hazard` keeps the labelled
+  pre-change baseline bit-identical — live-verified on the GM detector
+  cell, which reproduces (2, 1, 217, 3, 0) exactly under the flag while
+  the default moves it to (2, 2, 217, 4, 1) with
+  campaign_asymptomatic_positives 0 → 1, the intended direction.
+  Engine-wide: sars_cov2_resp (0.69) and influenza_a (0.669) shares void
+  entirely under the hazard; the Hill arms carry the same defect
+  attenuated to the low-dose tail. `will_present` forced courses are
+  untouched in both modes (the flag short-circuits inside the draw).
+  Every pre-change anchored score carries the defect — most directly the
+  DP recorded-share residual (~10–18× vs 0.173): a channel that every
+  infection reaches looks different once ~31% of courses never present.
+  Re-scores ride the merged image; no constant, Θ, or anchor moved.

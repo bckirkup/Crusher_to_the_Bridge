@@ -556,6 +556,7 @@ class PathogenProfile(BaseModel):
     dose_response: DoseResponse | None = None
     illness_probability: dict[str, float] = {}
     symptomatic_fraction: float | None = None
+    presentation_draw_mode: str | None = None
     airborne_emission_mode: str | None = None
     severity_model: SeverityModel | None = None
     observation_model: ObservationModel | None = None
@@ -709,6 +710,16 @@ class PathogenProfile(BaseModel):
             raise ValueError(
                 "symptomatic_fraction must be within [0.0, 1.0], got "
                 f"{v}",
+            )
+        return v
+
+    @field_validator("presentation_draw_mode")
+    @classmethod
+    def presentation_draw_mode_enum(cls, v: str | None) -> str | None:
+        if v is not None and v not in {"once_per_course", "daily_hazard"}:
+            raise ValueError(
+                "presentation_draw_mode must be 'once_per_course' or "
+                f"'daily_hazard', got {v!r}",
             )
         return v
 
