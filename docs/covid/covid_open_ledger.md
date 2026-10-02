@@ -146,6 +146,26 @@ admitted and the residual remains mechanism-shaped**
 (`docs/ledger/THETA-SCREEN-V13.md`,
 `docs/covid/covid_theta_screen_v13_readout.md`).*
 
+*Update (2026-10-02, `6efec855`, `COVID-THETA-V15`): the same lattice
+and the declared replay re-ran under the repaired presentation spend
+(PRESENT-SHARE-01 `once_per_course` shipped default-ON, PR #825 —
+the v14 stage-2 enumeration never executed, so this is the first
+post-repair replay surface; it pairs against v13's `edb7fc41` cells).
+**The fleet-shape admissible set reverts to the v13 coordinates —
+{1.78e11, 2.37e11, 3.16e11, 4.22e11, 5.62e11}** — 1.33e11 falls back
+under the floor (0.00040) and 5.62e11 clears the ceiling again
+(0.00687): with ~31% of courses never presenting, recorded counts sit
+lower at fixed Θ so the floor needs one notch more transmission. The
+conditional clause still fails at every admissible Θ in the same mass
+class: takeoff-seed q05 floors 1,444–1,743 recorded onsets (7–9× the
+record's 197), before_share medians 0.73–0.96 rising with Θ; the only
+pass is the Θ1e9 boundary anchor. **Seed-paired vs v13, the repair
+removed ~750–940 median recorded onsets per ignited seed — the largest
+mechanism-level move the replay surface has registered — and the
+failure still stands by ~10×: the presentation channel was a real
+defect and is not the DP residual** (`docs/ledger/COVID-THETA-V15.md`,
+`docs/covid/covid_theta_screen_v15_readout.md`).*
+
 *Update (2026-09-28, declared): two mechanism assays on the v13 residual
 are declared — **COVID-RINGCAP-V1** (`transmission.exposure_cap.
 include_fixed_rings`: the cabin-mate and same-table rings spend the
@@ -959,3 +979,8 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   DP recorded-share residual (~10–18× vs 0.173): a channel that every
   infection reaches looks different once ~31% of courses never present.
   Re-scores ride the merged image; no constant, Θ, or anchor moved.
+  *The Θ/DP re-score is measured (`COVID-THETA-V15`, `6efec855`): the
+  band reverts to {1.78e11…5.62e11} and the clause still fails at every
+  admissible Θ — the repair removed ~750–940 median recorded onsets
+  per ignited seed but the ~10× residual survives intact
+  (`docs/ledger/COVID-THETA-V15.md`).*

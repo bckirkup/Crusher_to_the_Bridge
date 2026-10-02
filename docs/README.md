@@ -22,7 +22,7 @@ links to, and several heavily-linked files describe work that is finished.
 | [`reports/`](reports/) | Manuscripts, monographs, submission artifacts | Writing or revising a paper |
 | [`ledger/`](ledger/) | Repository-wide defect and measurement entries — one file per `<ID>` (see [`ledger/README.md`](ledger/README.md) for the format); new entries are never numbered | Checking whether a number or defect is of record |
 | [`rhythm/`](rhythm/) | The SHIP-RHYTHM schedule layer spec (companion data: `data/rhythm/event_catalogs.json`) | Working on `engines/rhythm_layer.py` |
-| [`ship_functions/`](ship_functions/) | Parameter sourcing for the ship-function capacity layer ([`proposals/ship_function_capacity_spec.md`](proposals/ship_function_capacity_spec.md)) | Touching any ship-function/systems/fatigue constant |
+| [`ship_functions/`](ship_functions/) | The ship-function capacity layer — spec + parameter sourcing | Declaring `ship_functions`/`ship_systems`/`ppe_types`, or touching any ship-function/systems/fatigue constant |
 | [`audits/`](audits/) | Fresh-repository assessment artifacts | Auditing overall repo state |
 | [`examples/`](examples/) | Contract/config examples | Looking for a canonical example file |
 
@@ -169,7 +169,8 @@ longer justifications.
 | [sonar_sweep_handoff_2026_09_26.md](sonar_sweep_handoff_2026_09_26.md) | Handoff record (2026-09-26) — maintenance sweep, no model numbers: the Sonar backlog state (246 → 106 open), landed/queued S3776 batches, running child sessions, and the Sonar new-code gate gotchas (moved lines need coverage; extraction-induced S2583 FPs) |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
-| [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md) | Sourcing record (SHIP-FUNC-01) — every tunable in `proposals/ship_function_capacity_spec.md` with interval, grade and origin, or an explicit NULL-SOURCE; adopts nothing |
+| [ship_functions/ship_function_capacity_spec.md](ship_functions/ship_function_capacity_spec.md) | Implemented (§3–§8) — the function registry, availability read, systems/maintenance engine, feedback writers, PPE wear-fatigue channel, and the environmental/chemical hazard arm (ENV-HAZARD-01) |
+| [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md) | Sourcing record (SHIP-FUNC-01) — every tunable in `ship_functions/ship_function_capacity_spec.md` with interval, grade and origin, or an explicit NULL-SOURCE; adopts nothing |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |
 | [norovirus/introduction_mechanism_ab.md](norovirus/introduction_mechanism_ab.md) | Implemented — the boarding-prevalence vs fiat-index-case A/B: posting frequency, reported incidence against A8, per-import secondary yield, and the prevalence-denominator unit question |
@@ -203,6 +204,8 @@ longer justifications.
 | [norovirus/sanitary_structure_v1_readout.md](norovirus/sanitary_structure_v1_readout.md) | Generated measurement — the structure-only shared-heads matched arm (`dwell_weighted` visits vs `none`, no flush term): visit rates, stool/recipient voyages, fomite share |
 | [norovirus/posting_tail_sensitivity_v1.md](norovirus/posting_tail_sensitivity_v1.md) | Generated measurement — posting tail-probability estimators on the realism-ladder arms: direct binomial vs GPD-modelled |
 | [norovirus/noro_import_01_design.md](norovirus/noro_import_01_design.md) | Frozen design — NORO-IMPORT-01: the import-region axes (which axis carries establishment), declared before any cell ran; measured state recorded in `docs/ledger/NORO-IMPORT-01.md` |
+| [norovirus/noro_outbreak_01_design.md](norovirus/noro_outbreak_01_design.md) | Frozen design — NORO-OUTBREAK-01: small-hull outbreak frequency/progression/attack-rate vs anchors on the post-hand/post-presentation stack; measured state recorded in `docs/ledger/NORO-OUTBREAK-01.md` |
+| [norovirus/noro_outbreak_01_readout.md](norovirus/noro_outbreak_01_readout.md) | Generated measurement of record — NORO-OUTBREAK-01 (12 cells × 1,000 seeds at `bc4de6f5`): per-cell frequency with Wilson intervals, A1–A9 anchor table, takeoff-conditional progression, paired delta vs NORO-IMPORT-01 |
 | [literature/consensus_tranche_42_boarding_prevalence_renewal_check.md](literature/consensus_tranche_42_boarding_prevalence_renewal_check.md) | Evidence assembled — boarding-prevalence renewal-identity check; both repairs are now the default mechanism for `norwalk_gi` (historical arm selectable as the `shipped` rung) |
 | [literature/consensus_tranche_43_illness_duration_harris_2019.md](literature/consensus_tranche_43_illness_duration_harris_2019.md) | Implemented, default-on where a survival table exists — Harris 2019 Fig 4C illness-duration survival table; the `illness_duration` dispersed arm on `norwalk_gi` |
 | [literature/consensus_tranche_44_transfer_product.md](literature/consensus_tranche_44_transfer_product.md) | Living — per-touch transfer chain vs literature; feeds NORO-TRANSFER-PRODUCT-01 |

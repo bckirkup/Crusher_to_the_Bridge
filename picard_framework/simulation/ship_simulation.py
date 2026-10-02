@@ -40,6 +40,9 @@ from engines.crew_duty_exclusion import (
 from engines.crew_duty_exclusion import (
     build_tracker as build_crew_duty_exclusion_tracker,
 )
+from engines.environmental_hazards import (
+    merge_environmental_hazard_profiles,
+)
 from engines.hazard_sources import (
     HazardSourceModel,
     merge_hazard_source_blocks,
@@ -501,6 +504,12 @@ class ShipSimulation:
         self.clock = SimClock.for_run(cfg, voyage_cfg)
         self.scenario_schedule = resolve_scenario_schedule(cfg)
         self.pathogen_profiles = load_pathogen_profiles(cfg)
+        # Environmental/chemical hazards (ship_function_capacity_spec §8):
+        # merged only when the voyage block enables them, so a
+        # declared-disabled run is bit-identical to never declaring it.
+        self.pathogen_profiles = merge_environmental_hazard_profiles(
+            self.pathogen_profiles, voyage_cfg,
+        )
         # ENV-SOURCE-01: source declarations merge profiles-file < platform
         # voyage < run config; an armed model registers its substance
         # profiles here so initiation, transports, and the dose ledger all
@@ -595,6 +604,12 @@ class ShipSimulation:
             self.seed,
             pathogen_profiles=self.pathogen_profiles,
             clock=self.clock,
+        )
+        from crusher_labs.modalities.chemical_sensor import (
+            build_chemical_sensors,
+        )
+        self.obs.chemical_sensors = build_chemical_sensors(
+            self.pathogen_profiles, seed=self.seed + 11,
         )
         # Compact retention skips lab-notebook accumulation (campaign never finalizes it).
         if self.run_spec.history_retention == "compact":

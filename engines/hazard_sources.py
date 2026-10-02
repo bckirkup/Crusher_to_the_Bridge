@@ -1,5 +1,5 @@
 """Hazard source model: emitters, standing/dynamic fields, and the
-penetration-source adapter seam (``docs/proposals/ship_function_capacity_spec.md``
+penetration-source adapter seam (``docs/ship_functions/ship_function_capacity_spec.md``
 §8 companion; ENV-SOURCE-01).
 
 A ``hazard_sources`` declaration block names *substances* (non-pathogen

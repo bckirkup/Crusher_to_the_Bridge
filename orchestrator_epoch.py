@@ -1215,6 +1215,48 @@ def _run_holding_tank_assay(
     )
 
 
+def _run_chemical_sensors(
+    obs: ObservationEngine,
+    engine: KorkinShipEngine,
+    tx_core: TransmissionCore | None,
+    zones: ZoneContext,
+) -> dict[str, dict[str, Any]]:
+    """Read declared chemical sensors against the substance pools (spec §8b).
+
+    Air reads summed substance mass across the environmental reservoir,
+    aerosol pools and the shared zone mass; surface reads the surface
+    pool's mass per cm² of high-touch area. Read-only — sampling moves
+    no mass.
+    """
+    sensors = getattr(obs, "chemical_sensors", None) or {}
+    if not sensors or tx_core is None:
+        return {}
+    from engines.environmental_hazards import (
+        hazard_air_zone_masses,
+        hazard_surface_densities,
+    )
+
+    out: dict[str, dict[str, Any]] = {}
+    for pid, modality in sensors.items():
+        entry: dict[str, Any] = {}
+        air = modality.get("air")
+        if air is not None:
+            entry["air"] = air.sample_all_zones(
+                hazard_air_zone_masses(
+                    tx_core, engine, pid, zones.zone_names,
+                ),
+                zones.zone_volumes,
+            )
+        surface = modality.get("surface")
+        if surface is not None:
+            entry["surface"] = surface.sample_all_zones(
+                hazard_surface_densities(tx_core, pid, zones.zone_names),
+            )
+        if entry:
+            out[pid] = entry
+    return out
+
+
 def _log_observation_epoch(
     obs: ObservationEngine,
     epoch: int,
@@ -1224,6 +1266,8 @@ def _log_observation_epoch(
     """Write one epoch's instrument results to the lab notebook."""
     if not obs.lab_notebook_enabled:
         return
+    if results.chemical:
+        obs.notebook.log_chemical_sensor(epoch, results.chemical)
     obs.notebook.log_air_sniffer(epoch, results.air)
     obs.notebook.log_surface_swab(epoch, results.swab)
     obs.notebook.log_wastewater_seq(epoch, results.ww)
@@ -1281,6 +1325,7 @@ def run_observation_sampling(
         obs, cfg, zones, zone_surface, engine, pathogen_profiles,
     )
     wastewater_ht_result = _run_holding_tank_assay(obs, cfg, tx_core)
+    chemical_results = _run_chemical_sensors(obs, engine, tx_core, zones)
 
     sick_call_agents = [
         a for a in agents
@@ -1332,6 +1377,7 @@ def run_observation_sampling(
         long_read=long_read_results,
         long_read_ordered_count=long_read_ordered_count,
         wastewater_ht=wastewater_ht_result,
+        chemical=chemical_results,
     )
     _log_observation_epoch(obs, epoch, results, agents)
     return results

@@ -289,6 +289,9 @@ def render_bridge_status(
     # ── Operational Impact Score ──────────────────────────────────
     _render_operational_impact(history)
 
+    # ── Ship Function Capacity ────────────────────────────────────
+    _render_function_capacity(history)
+
     # ── Crusher Lab Operations ────────────────────────────────────
     _render_crusher_ops(last)
 
@@ -711,6 +714,93 @@ def _render_operational_impact(history: list[dict[str, Any]]) -> None:
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
         st.plotly_chart(fig, use_container_width=True)
+
+
+def _render_function_capacity(history: list[dict[str, Any]]) -> None:
+    """Ship-function capacity: per-instance capacity, staffing pools, systems health."""
+    if not any(rec.get("function_capacity") for rec in history):
+        return
+
+    st.subheader("Ship Function Capacity")
+
+    # Capacity traces over the voyage, one line per function instance.
+    traces: dict[str, tuple[list[int], list[float]]] = {}
+    for rec in history:
+        funcs = (rec.get("function_capacity") or {}).get("functions", {})
+        for key, fn in funcs.items():
+            epochs, values = traces.setdefault(key, ([], []))
+            epochs.append(rec["epoch"])
+            values.append(float(fn.get("capacity", 0.0)))
+    if traces:
+        colors = [LCARS_GOLD, LCARS_BLUE, LCARS_PURPLE, LCARS_GREEN,
+                  LCARS_AMBER, LCARS_PEACH, LCARS_TAN]
+        fig = go.Figure()
+        for i, (key, (epochs, values)) in enumerate(sorted(traces.items())):
+            fig.add_trace(go.Scatter(
+                x=epochs, y=values, mode=PLOT_MODE_LINES_MARKERS,
+                name=key,
+                line={"color": colors[i % len(colors)], "width": 2},
+            ))
+        apply_lcars_layout(
+            fig,
+            height=300,
+            title="Function Capacity Over Time",
+            xaxis_title=time_xaxis_title(history),
+            yaxis_title="capacity (0–1)",
+            margin={"t": 50, "b": 40, "l": 50, "r": 20},
+            legend={"orientation": "h", "y": -0.25, "x": 0.5, "xanchor": "center"},
+            yaxis={"range": [0, 1.05]},
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+    last_fc = (history[-1].get("function_capacity") or {})
+    funcs = last_fc.get("functions", {})
+    if funcs:
+        rows = [
+            {
+                "Function": key,
+                "Capacity": f"{fn.get('capacity', 0.0):.0%}",
+                "Binding": fn.get("binding") or "—",
+                "On Watch": (
+                    f"{fn.get('available_on_watch', 0):.0f} / "
+                    f"{fn.get('required_on_watch', 0):.0f}"
+                ),
+            }
+            for key, fn in sorted(funcs.items())
+        ]
+        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+
+    c1, c2 = st.columns(2)
+    pools = last_fc.get("staffing_pools", {})
+    if pools:
+        with c1:
+            pool_rows = [
+                {
+                    "Staffing Pool": key,
+                    "Fit": pool.get("fit", 0),
+                    "Impaired": pool.get("impaired", 0),
+                }
+                for key, pool in sorted(pools.items())
+            ]
+            st.caption("Crew pools on watch")
+            st.dataframe(
+                pd.DataFrame(pool_rows), use_container_width=True, hide_index=True,
+            )
+    systems = last_fc.get("ship_systems", {})
+    if systems:
+        with c2:
+            sys_rows = [
+                {
+                    "System": key,
+                    "Health": f"{sys.get('health', 0.0):.0%}",
+                    "Failed": "YES" if sys.get("failed") else "—",
+                }
+                for key, sys in sorted(systems.items())
+            ]
+            st.caption("Ship systems")
+            st.dataframe(
+                pd.DataFrame(sys_rows), use_container_width=True, hide_index=True,
+            )
 
 
 def _render_crusher_ops(record: dict[str, Any]) -> None:

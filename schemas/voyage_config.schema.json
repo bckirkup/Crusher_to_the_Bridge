@@ -88,7 +88,7 @@
     "ship_functions": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Ship-function capacity declarations (docs/proposals/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
+      "description": "Ship-function capacity declarations (docs/ship_functions/ship_function_capacity_spec.md §3): function instances keyed by (function_id, serves), scored each epoch from crew availability. enabled: false by default; absent = bit-identical.",
       "properties": {
         "enabled": { "type": "boolean", "default": false },
         "symptomatic_effectiveness": {
@@ -111,7 +111,7 @@
     "hazard_sources": {
       "type": "object",
       "additionalProperties": true,
-      "description": "Hazard source-model declarations (docs/proposals/ship_function_capacity_spec.md §8, ENV-SOURCE-01): substances riding the environmental reservoirs, emitters writing into env_contamination zone pools, and off-ship field penetrations resolved through named adapters. enabled: false by default; absent = bit-identical. All rates are *_per_hour / *_hours and carry source+grade (NULL-SOURCE for declared arms).",
+      "description": "Hazard source-model declarations (docs/ship_functions/ship_function_capacity_spec.md §8, ENV-SOURCE-01): substances riding the environmental reservoirs, emitters writing into env_contamination zone pools, and off-ship field penetrations resolved through named adapters. enabled: false by default; absent = bit-identical. All rates are *_per_hour / *_hours and carry source+grade (NULL-SOURCE for declared arms).",
       "properties": {
         "enabled": { "type": "boolean", "default": false },
         "substances": {
@@ -125,6 +125,19 @@
         "penetrations": {
           "type": "array",
           "items": { "$ref": "#/$defs/hazard_penetration" }
+        }
+      }
+    },
+    "environmental_hazards": {
+      "type": "object",
+      "description": "Chemical/environmental hazard arm (docs/ship_functions/ship_function_capacity_spec.md §8): chemical substances declared as pathogen-schema profiles (category 'chemical', dose_response.model 'cumulative_toxicity'). enabled: false by default; absent or disabled = bit-identical — the merge into pathogen_profiles is the only enablement gate.",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "hazards": {
+          "type": "array",
+          "description": "Hazard profiles; each is a pathogen-schema profile carrying category 'chemical' and a cumulative_toxicity dose_response with haber_ct_threshold.",
+          "items": { "type": "object", "required": ["pathogen_id", "name", "category", "dose_response"] }
         }
       }
     }

@@ -1,7 +1,7 @@
 # Hazard source model: emitters, fields, and the penetration adapter seam
 
 > **Status:** Implemented, off by default — `ENV-SOURCE-01` (companion to
-> `proposals/ship_function_capacity_spec.md` §8). Declaration parsing lives in
+> `ship_functions/ship_function_capacity_spec.md` §8). Declaration parsing lives in
 > `engines/hazard_sources.py`; deposition into `env_contamination` zone pools
 > in `engines/transmission_core.py` (`_deposit_hazard_sources`); transport in
 > `picard_framework/simulation/ship_simulation.py`
