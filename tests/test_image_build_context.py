@@ -46,6 +46,7 @@ NON_INPUTS: tuple[tuple[str, str], ...] = (
     ("telemetry_buffer/postfix_pilot/**", "pilot run output"),
     ("telemetry_buffer/v4_results/**", "campaign v4 run output"),
     ("telemetry_buffer/flu_rhythm_ab/**", "FLU-RHYTHM-01 witness + canary evidence"),
+    ("telemetry_buffer/flu_present_ab/**", "FLU-PRESENT-RESCORE-01 scored result artifact"),
     ("telemetry_buffer/info_suppress_probe.py", "local recognition-timing probe, not a campaign input"),
     ("telemetry_buffer/info_suppress_probe_20200205.json", "probe output record"),
     ("data/platforms/*/deck_blueprint_bg.png", "dashboard deck art"),
