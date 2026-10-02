@@ -41,6 +41,7 @@ from engines.crew_duty_exclusion import (
     build_tracker as build_crew_duty_exclusion_tracker,
 )
 from engines.initiation import preboarding_reportable_ids
+from engines.ppe_fatigue import build_ppe_fatigue_tracker
 from engines.py_contam_bridge import (
     DEFAULT_PATHOGEN_POOL_TRANSPORT,
     build_transport_engine,
@@ -88,6 +89,7 @@ from orchestrator_epoch import (
     step_long_read_cost_accounting,
     step_mid_cruise_introductions,
     step_operational_impact_accounting,
+    step_ppe_fatigue,
     step_presenting_sign_detection,
     step_quarantine_confinement,
     step_self_isolation,
@@ -96,6 +98,7 @@ from orchestrator_epoch import (
     surveillance_is_active,
 )
 from orchestrator_init import (
+    _ppe_fatigue_rng,
     apply_voyage_dining_meal_weights,
     apply_voyage_medical_response,
     assign_cabin_mates,
@@ -330,6 +333,7 @@ class ShipSimulation:
         self.outdoor_air_fraction_override: float | None = None
         self.tx_core = None
         self.crew_exclusion: CrewDutyExclusionTracker | None = None
+        self.ppe_fatigue = None
         self.obs = None
         self.proto_ctx = None
         self.pathogen_profiles: dict[str, dict[str, Any]] = {}
@@ -586,6 +590,16 @@ class ShipSimulation:
             self.engine.agents,
             self.tx_core.service_zones if self.tx_core is not None else (),
             rng=self.rng,
+        )
+        # PPE wear-fatigue channel (ship_function_capacity_spec §7): the
+        # dedicated stream spawns only when the channel arms, so a run that
+        # never enables it keeps every draw where it was.
+        ppe_fatigue_enabled = bool(
+            (cfg.get("ppe_fatigue") or {}).get("enabled", False),
+        )
+        self.ppe_fatigue = build_ppe_fatigue_tracker(
+            cfg,
+            rng=_ppe_fatigue_rng(self.rng, cfg) if ppe_fatigue_enabled else None,
         )
         self._init_sentinel_ledger(voyage_cfg)
         self._init_wastewater_ops(voyage_cfg)
@@ -1583,6 +1597,12 @@ class ShipSimulation:
         )
         step_crew_duty_exclusion(
             work.epoch, work.agents, work.state, self.clock, self.crew_exclusion,
+        )
+        # Wear fatigue accrues on the engine's live agents, not the exported
+        # dicts — it writes the agent-level fields the dicts are built from.
+        step_ppe_fatigue(
+            work.epoch, self.engine.agents, work.state, self.clock,
+            self.ppe_fatigue,
         )
         # Presenting-sign detection (NORO-DETECT-01): emeses land earlier
         # this epoch in _step_biology, so the sign scan sees this epoch's

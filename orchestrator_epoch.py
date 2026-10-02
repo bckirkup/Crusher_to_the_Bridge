@@ -1671,6 +1671,38 @@ def _release_cleared_crew(
         })
 
 
+def step_ppe_fatigue(
+    epoch: int,
+    agents: list[Any],
+    state: SimulationState,
+    clock: SimClock,
+    tracker: Any | None,
+) -> None:
+    """PPE wear-fatigue epoch step (ship_function_capacity_spec §7).
+
+    Accrues per-type wear-hours and the declared-source ``fatigue_score`` on
+    covered hosts, draws sticky refusal above the declared threshold — a
+    refuser's host-level NPI reductions drop out for the rest of the voyage —
+    and draws the type-keyed endogenous conditions, whose symptomatic onsets
+    land in the exported presentation axis so sick-call, duty exclusion and
+    the VSP counters see them with no new machinery.
+
+    With the channel disabled or the registry absent the tracker is inactive
+    and this returns before touching a host or consuming a draw.
+    """
+    if tracker is None or not tracker.active:
+        return
+    refused, _onsets = tracker.step_epoch(
+        epoch, agents, clock.hours_per_epoch,
+    )
+    for aid in refused:
+        state.compliance_log.append({
+            "epoch": epoch, "agent_id": aid,
+            "action": "refused_ppe_fatigue",
+            "compliance_class": None,
+        })
+
+
 def apply_zone_closures(
     engine: KorkinShipEngine,
     closed_zones: list[str],
