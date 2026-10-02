@@ -1,0 +1,27 @@
+# NORO-CHANNEL-03 worker — thin overlay on the NORO-OUTBREAK-01 campaign
+# image: the observation-channel funnel driver in its manifest-mode cell
+# resolution + takeoff-capture form, its Batch entrypoint, and the
+# outbreak manifest carrying the spirit tiers (so a single manifest is the
+# spec source for both campaigns on this image).
+#
+# Build (from the repository root; the base must exist in ECR):
+#   docker build -f deploy/aws/Dockerfile.noro_channel_03 \
+#     --build-arg BASE_IMAGE=<acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:noro-outbreak-01-<sha> \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:noro-channel-03-<sha> .
+ARG BASE_IMAGE=picard-campaign:noro-outbreak-01-bc4de6f5
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign tools/noro_diag/observation_channel_funnel.py \
+    ./tools/noro_diag/observation_channel_funnel.py
+COPY --chown=campaign:campaign deploy/aws/noro_channel_03_entrypoint.py \
+    ./deploy/aws/noro_channel_03_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
+    ./deploy/aws/dose_challenge_entrypoint.py
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]
