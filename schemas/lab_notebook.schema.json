@@ -67,7 +67,9 @@
             "clinical_microbiology",
             "host_biomarker",
             "trigger_event",
-            "system_escalation"
+            "system_escalation",
+            "chemical_air_monitor",
+            "chemical_surface_monitor"
           ]
         },
         "collection_zone": {"type": "string"},
@@ -81,7 +83,8 @@
             "patient_qpcr",
             "culture_and_staining",
             "microflora_disruption_status",
-            "trigger_transition"
+            "trigger_transition",
+            "chemical_detector"
           ]
         },
         "fidelity_tier": {
@@ -138,6 +141,30 @@
         "patient_id": {
           "type": "integer",
           "description": "Agent ID for clinical instruments"
+        },
+        "substance_id": {
+          "type": "string",
+          "description": "Chemical-hazard profile id (chemical_detector records)"
+        },
+        "measured_concentration_per_m3": {
+          "type": "number",
+          "description": "Chemical air monitor reading after instrument noise"
+        },
+        "measured_density_mass_per_cm2": {
+          "type": "number",
+          "description": "Chemical surface monitor reading after instrument noise"
+        },
+        "surface_density_mass_per_cm2": {
+          "type": "number",
+          "description": "True surface mass density the surface monitor sampled"
+        },
+        "lod_mass_per_m3": {
+          "type": "number",
+          "description": "Declared air-monitor limit of detection"
+        },
+        "lod_mass_per_cm2": {
+          "type": "number",
+          "description": "Declared surface-monitor limit of detection"
         }
       }
     },

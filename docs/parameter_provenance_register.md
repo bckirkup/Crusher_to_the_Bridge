@@ -694,7 +694,7 @@ engine efficacy draws from the lab soap/water families only.
 ### 3.10 Ship-function capacity constants (SHIP-FUNC-01)
 
 The tunables declared by
-[`proposals/ship_function_capacity_spec.md`](proposals/ship_function_capacity_spec.md);
+[`ship_functions/ship_function_capacity_spec.md`](ship_functions/ship_function_capacity_spec.md);
 sourcing record with verbatim locators:
 [`ship_functions/parameter_sources.md`](ship_functions/parameter_sources.md).
 **No `ship_functions`/`ship_systems`/fatigue field exists in-tree yet** — every

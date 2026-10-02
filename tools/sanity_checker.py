@@ -354,6 +354,8 @@ class DoseResponse(BaseModel):
     susceptibility_scale: float | None = None
     k: float | None = None
     frailty: HazardFrailty | None = None
+    haber_ct_threshold: float | None = None
+    symptomatic: bool | None = None
 
     @model_validator(mode="after")
     def check_model_params(self) -> "DoseResponse":
@@ -361,9 +363,25 @@ class DoseResponse(BaseModel):
             self._check_beta_poisson_params()
         elif self.model == "exponential":
             self._check_exponential_params()
+        elif self.model == "cumulative_toxicity":
+            self._check_cumulative_toxicity_params()
         else:
             raise ValueError(f"Unknown dose-response model: {self.model}")
         return self
+
+    def _check_cumulative_toxicity_params(self) -> None:
+        if self.haber_ct_threshold is None:
+            raise ValueError(
+                "cumulative_toxicity model requires 'haber_ct_threshold'",
+            )
+        if (
+            not math.isfinite(self.haber_ct_threshold)
+            or self.haber_ct_threshold <= 0
+        ):
+            raise ValueError(
+                "haber_ct_threshold must be finite and positive, got "
+                f"{self.haber_ct_threshold}",
+            )
 
     def _check_beta_poisson_params(self) -> None:
         if self.alpha is None:

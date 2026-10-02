@@ -1,7 +1,7 @@
 # Ship-function capacity: parameter sources
 
 > **Status:** Proposed — sourcing record for
-> [`proposals/ship_function_capacity_spec.md`](../proposals/ship_function_capacity_spec.md)
+> [`ship_function_capacity_spec.md`](ship_function_capacity_spec.md)
 > (sourcing task SHIP-FUNC-01). Adopts no value, authorises no fit. Every row
 > here is a spec-stage declaration: no `ship_functions`/`ship_systems`/fatigue
 > field exists in-tree yet, so nothing in this document describes current
@@ -281,7 +281,35 @@ times — `?nr`); per-wear-hour condition hazards for every
 `?nr`); acute missed-meal performance decrements aboard ships (`?nr`);
 PAPR weight/bulk quantified as manual dexterity loss (`?nr`).
 
-## 9. What the sibling sessions should take from this
+## 9. `environmental_hazards` constants (spec §8 — ENV-HAZARD-01)
+
+The chemical-hazard arm declares a VOC refrigerant leak in
+`Engine_Room_Aft` on `mega_cruise_5000` (`enabled: false`). Every number
+in it is a NULL-SOURCE declared arm: the literature was not searched for
+this arm because the spec itself prescribes the mechanism shape (Haber
+c·t threshold crossing, continuous-concentration sensors), and a declared
+VOC leak's dose bookkeeping is in *model* mass units — a rescaling the
+declaration owns, so no physical constant is being asserted.
+
+| Parameter | Kind | Shipped value | Grade | Origin | Basis |
+|---|---|---|---|---|---|
+| `haber_ct_threshold` | arm (cumulative dose-units × epochs) | 400.0 | **C** | ?nr | NULL-SOURCE. Haber's law is a model *shape* (onset at a declared c·t product), not a fitted constant; the unit is the declaration's own mass unit, so the value scales the worked example, nothing more. Refrigerant-VOC incapacitation thresholds in these units do not exist in the literature. |
+| `base_emission_rate_per_day` | arm (mass-units/day) | 240.0 | **C** | ?nr | NULL-SOURCE declared leak rate; chosen so the reservoir crosses the sensor LOD inside the 168-epoch example voyage. Sweeps, never tunes. |
+| `exposure_probability_per_day` | arm (fraction/day) | 0.6 | **C** | ?nr | NULL-SOURCE; occupancy-conditioned contact with the source zone, matching the declared-arm convention the environmental-reservoir machinery already uses. |
+| `spore_decay_rate_per_day` | arm (fraction/day) | 0.5 | **C** | ?nr | NULL-SOURCE declared substance decay (the field name is the machinery's; for a chemical it is first-order loss of the declared mass unit). |
+| `colonization_rate_per_day` | arm (growth/day) | 0.0 | **C** | X | A chemical does not grow; declared 0 to keep the reservoir emission-only. |
+| `lod_mass_per_m3` (air sensor) | arm (mass-units/m³) | 0.01 | **C** | ?nr | NULL-SOURCE declared detector LOD. Real PID detector LODs exist (ppm-class) but the model mass unit is declared, so a physical LOD would be a category error. |
+| `lod_mass_per_cm2` (surface sensor) | arm (mass-units/cm²) | 0.001 | **C** | ?nr | NULL-SOURCE declared wipe/monitor LOD, same unit reasoning. |
+| `noise_sigma_log` (both sensors) | arm (log-space σ) | 0.1 | **C** | ?nr | NULL-SOURCE declared measurement dispersion on the continuous monitors, matching the lognormal-noise convention the air sniffer uses. |
+
+Deliberate absences, recorded so nobody re-spends the reasoning: no
+incubation, no shedding curve, no `severity_model`/`observation_model`
+(the presentation flag lands on the §7 seam directly), no
+`transmission_route_weights` scaling beyond the declared `hvac_airborne`
+route tag, and no per-host susceptibility draw — the threshold is
+deterministic, so the arm consumes no RNG at all.
+
+## 10. What the sibling sessions should take from this
 
 1. `symptomatic_effectiveness` is **sourced**, B grade, [0.55, 0.85] U — the
    spec text's "no source exists" is stale (§1).

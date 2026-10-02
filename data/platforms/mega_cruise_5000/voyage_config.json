@@ -1,53 +1,111 @@
 {
-  "schema_version": "1.0",
-  "platform_class": "mega",
-  "description": "Mega / iconic cruise voyage defaults. effects_enabled=false keeps campaigns identical to pre-voyage baseline.",
-  "voyage": {
-    "effects_enabled": false,
-    "total_epochs": 168,
-    "epoch_duration_hours": 1,
-    "itinerary": [],
-    "defaults": {
-      "sea_day": {
-        "onboard_passenger_fraction": 1.0,
-        "contact_rate_multiplier": 1.0,
-        "dining_demand_multiplier": 1.0
-      },
-      "port_day": {
-        "onboard_passenger_fraction": 0.30,
-        "contact_rate_multiplier": 0.40,
-        "dining_demand_multiplier": {
-          "breakfast": 0.80,
-          "lunch": 0.30,
-          "dinner": 0.90
-        }
-      },
-      "embarkation": {
-        "onboard_passenger_fraction": 1.0,
-        "embarkation_buffet_surge": true,
-        "contact_rate_multiplier": 1.2
-      },
-      "disembarkation": {
-        "onboard_passenger_fraction": 0.0,
-        "contact_rate_multiplier": 0.2,
-        "dining_demand_multiplier": {
-          "breakfast": 0.5,
-          "lunch": 0.1,
-          "dinner": 0.1
-        }
-      }
+ "schema_version": "1.0",
+ "platform_class": "mega",
+ "description": "Mega / iconic cruise voyage defaults. effects_enabled=false keeps campaigns identical to pre-voyage baseline.",
+ "voyage": {
+  "effects_enabled": false,
+  "total_epochs": 168,
+  "epoch_duration_hours": 1,
+  "itinerary": [],
+  "defaults": {
+   "sea_day": {
+    "onboard_passenger_fraction": 1.0,
+    "contact_rate_multiplier": 1.0,
+    "dining_demand_multiplier": 1.0
+   },
+   "port_day": {
+    "onboard_passenger_fraction": 0.3,
+    "contact_rate_multiplier": 0.4,
+    "dining_demand_multiplier": {
+     "breakfast": 0.8,
+     "lunch": 0.3,
+     "dinner": 0.9
     }
-  },
-  "dining_meal_weights": {
-    "breakfast": {"buffet": 0.70, "mdr": 0.15, "specialty": 0.15},
-    "lunch": {"buffet": 0.50, "mdr": 0.20, "specialty": 0.30},
-    "dinner": {"buffet": 0.20, "mdr": 0.45, "specialty": 0.35}
-  },
-  "medical_response": {
-    "sick_call_probability": 0.70,
-    "isolation_compliance": 0.85,
-    "detection_delay_hours": 0,
-    "crew_screening_interval_hours": null,
-    "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
+   },
+   "embarkation": {
+    "onboard_passenger_fraction": 1.0,
+    "embarkation_buffet_surge": true,
+    "contact_rate_multiplier": 1.2
+   },
+   "disembarkation": {
+    "onboard_passenger_fraction": 0.0,
+    "contact_rate_multiplier": 0.2,
+    "dining_demand_multiplier": {
+     "breakfast": 0.5,
+     "lunch": 0.1,
+     "dinner": 0.1
+    }
+   }
   }
+ },
+ "dining_meal_weights": {
+  "breakfast": {
+   "buffet": 0.7,
+   "mdr": 0.15,
+   "specialty": 0.15
+  },
+  "lunch": {
+   "buffet": 0.5,
+   "mdr": 0.2,
+   "specialty": 0.3
+  },
+  "dinner": {
+   "buffet": 0.2,
+   "mdr": 0.45,
+   "specialty": 0.35
+  }
+ },
+ "medical_response": {
+  "sick_call_probability": 0.7,
+  "isolation_compliance": 0.85,
+  "detection_delay_hours": 0,
+  "crew_screening_interval_hours": null,
+  "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
+ },
+ "environmental_hazards": {
+  "enabled": false,
+  "description": "ENV-HAZARD-01 (docs/ship_functions/ship_function_capacity_spec.md \u00a78): a declared VOC refrigerant leak in Engine_Room_Aft. Chemical, not a pathogen \u2014 cumulative-exposure toxicity (Haber c\u00b7t threshold) producing a symptomatic presentation with zero shedding and no incubation; continuous chemical sensors read air concentration and surface density against declared LODs. All constants NULL-SOURCE declared arms (docs/ship_functions/parameter_sources.md \u00a79).",
+  "parameters_provenance": "null_source: all values are declared operational arms; see docs/ship_functions/parameter_sources.md \u00a79",
+  "hazards": [
+   {
+    "pathogen_id": "voc_refrigerant_leak",
+    "name": "VOC refrigerant leak (declared)",
+    "category": "chemical",
+    "transmission_routes": [
+     "hvac_airborne"
+    ],
+    "initial_infected": 0,
+    "introduction_epoch": 0,
+    "dose_response": {
+     "model": "cumulative_toxicity",
+     "haber_ct_threshold": 400.0,
+     "symptomatic": true
+    },
+    "environmental_contamination": {
+     "enabled": true,
+     "source_type": "machinery_space_leak",
+     "source_zones": [
+      "Engine_Room_Aft"
+     ],
+     "baseline_environmental_load": 4.0,
+     "base_emission_rate_per_day": 240.0,
+     "exposure_probability_per_day": 0.6,
+     "spore_decay_rate_per_day": 0.0,
+     "colonization_rate_per_day": 0.0,
+     "person_to_person": false
+    },
+    "chemical_sensor": {
+     "enabled": true,
+     "air": {
+      "lod_mass_per_m3": 0.01,
+      "noise_sigma_log": 0.1
+     },
+     "surface": {
+      "lod_mass_per_cm2": 0.001,
+      "noise_sigma_log": 0.1
+     }
+    }
+   }
+  ]
+ }
 }
