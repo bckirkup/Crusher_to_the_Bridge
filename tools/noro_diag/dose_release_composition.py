@@ -65,20 +65,16 @@ from engines.transmission_core import (  # noqa: E402
     EMESIS_VOLUME_ML_RANGE,
     emesis_episode_weights,
 )
-from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
+from tools.diag.json_io import validated_json_load  # noqa: E402
 
 PATHOGEN_ID = "norwalk_gi"
 
 
 def _load_profile(bundle: str) -> dict[str, Any]:
     """The norwalk_gi profile dict from a pathogen bundle JSON."""
-    path = resolve_repo_path(
-        str(REPO_ROOT), f"data/pathogens/{bundle}.json",
+    bundle_doc = validated_json_load(
+        REPO_ROOT, f"data/pathogens/{bundle}.json",
     )
-    with validated_open(
-        str(path), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        bundle_doc = json.load(handle)
     for entry in bundle_doc["pathogens"]:
         if entry.get("pathogen_id") == PATHOGEN_ID:
             return entry

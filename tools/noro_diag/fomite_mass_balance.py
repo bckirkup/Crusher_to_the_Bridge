@@ -67,9 +67,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
-import re
 import sys
-import tempfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -81,15 +79,19 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.run_spec import CRUSHER_CONFIG_REL, PicardRunSpec  # noqa: E402
+from picard_framework.run_spec import CRUSHER_CONFIG_REL  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
-    validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    materialized_picard_spec,
+)
+from tools.diag.manifest_args import identifier  # noqa: E402
 from tools.noro_diag import hand_occupancy  # noqa: E402
 
 # Relative tolerances for the conservation criterion, declared in the ledger
@@ -429,25 +431,20 @@ def _wrap_epochs(core_cls: type, rec: Recorder) -> dict[str, Any]:
 def instrumented(rec: Recorder) -> Any:
     """Install the read-only wrappers for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved: dict[str, Any] = {}
-    saved.update(_wrap_surface_mass(core_cls, rec))
-    saved.update(_wrap_delivery(core_cls, rec))
-    saved.update(_wrap_hand_and_phase(core_cls, rec))
-    saved.update(_wrap_epochs(core_cls, rec))
-    if rec.occupancy is not None:
-        # Installed last so these wrappers call the ones above: the hand
-        # witness counters still see every call. ``setdefault`` keeps the
-        # pre-wrap originals on shared names so the restore loop unwraps
-        # the whole chain, not just this layer.
-        for name, method in hand_occupancy.install(
-            core_cls, rec.occupancy,
-        ).items():
-            saved.setdefault(name, method)
-    try:
+    with attr_patches() as patches:
+        patches.note_all(core_cls, _wrap_surface_mass(core_cls, rec))
+        patches.note_all(core_cls, _wrap_delivery(core_cls, rec))
+        patches.note_all(core_cls, _wrap_hand_and_phase(core_cls, rec))
+        patches.note_all(core_cls, _wrap_epochs(core_cls, rec))
+        if rec.occupancy is not None:
+            # Installed last so these wrappers call the ones above: the
+            # hand witness counters still see every call. ``note`` keeps
+            # the pre-wrap originals on shared names so the restore loop
+            # unwraps the whole chain, not just this layer.
+            patches.note(
+                core_cls, hand_occupancy.install(core_cls, rec.occupancy),
+            )
         yield
-    finally:
-        for name, method in saved.items():
-            setattr(core_cls, name, method)
 
 
 def build_spec(
@@ -585,13 +582,7 @@ def _run_voyage(
     # The spec path lives under the repository root, not /tmp, because
     # validated_open refuses publicly writable targets; the directory is
     # still a fresh private TemporaryDirectory.
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), spec_path)
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         if rec is None:
             return ShipSimulation(picard_spec, display=False).run()
         with instrumented(rec):
@@ -709,10 +700,7 @@ def print_summary(summary: dict[str, Any]) -> None:
               f"rel err {row['balance_error_relative']:.3g}")
 
 
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
+_identifier = identifier
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:

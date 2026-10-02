@@ -23,9 +23,14 @@ import argparse
 import gzip
 import json
 import sys
-import zipfile
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.diag.readout_common import read_zip_member  # noqa: E402
 
 # Fields compared verbatim per seed. Emit-row identity covers epoch,
 # zone, and joining class; confinement events cover the order stream.
@@ -45,10 +50,8 @@ _SCALAR_FIELDS = (
 
 
 def _load_venue(zip_path: Path) -> dict[str, Any] | None:
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            raw = zf.read("venue.json.gz")
-    except (KeyError, zipfile.BadZipFile, OSError):
+    raw = read_zip_member(zip_path, "venue.json.gz")
+    if raw is None:
         return None
     return json.loads(gzip.decompress(raw))
 

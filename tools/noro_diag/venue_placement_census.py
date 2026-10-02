@@ -95,7 +95,6 @@ import gzip
 import json
 import sys
 import time
-import zipfile
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -115,12 +114,20 @@ from engines.infection_dynamics_bridge import (  # noqa: E402
     IllnessStatus,
     resolve_dining_service_type,
 )
-from simulation_utils.paths import (  # noqa: E402
-    prepare_output_directory,
-    resolve_child_path,
-    resolve_repo_path,
-    validated_open,
+from simulation_utils.paths import prepare_output_directory  # noqa: E402
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    mark_epoch0_imports,
+    wrap_emit_emesis,
 )
+from tools.diag.json_io import validated_json_load  # noqa: E402
+from tools.diag.manifest_args import (  # noqa: E402
+    add_manifest_args,
+    filter_runs_by_seeds,
+    index_run,
+    seed_list,
+)
+from tools.diag.readout_common import write_run_zip  # noqa: E402
 from tools.noro_diag.per_host_dose_challenge import (  # noqa: E402
     _attach_voyage_blocks,
 )
@@ -339,28 +346,17 @@ def _zone_parent(zone_name: str) -> str:
 
 def _wrap_emit_emesis(core_cls: type, rec: VenueRecorder) -> Any:
     """Per-bolus landing record plus the depositor's confinement state."""
-    original = core_cls._emit_emesis
-
-    def wrapper(
-        self: Any, agent: Any, pathogen_id: str, profile: dict,
-        zone_name: str, epoch: int,
-    ) -> float:
-        before = len(
-            agent.emesis_deposition_records_by_pathogen.get(
-                pathogen_id, [],
-            ),
-        )
-        pool_gain = original(
-            self, agent, pathogen_id, profile, zone_name, epoch,
-        )
+    def _on_emit(
+        self: Any, agent: Any, pathogen_id: str, zone_name: str,
+        epoch: int, pool_gain: float, before: int, ctx: Any,
+    ) -> None:
         if pathogen_id == rec.pathogen_id:
             _record_emesis(
                 rec, self, agent, pathogen_id, zone_name, epoch,
                 pool_gain, before,
             )
-        return pool_gain
 
-    return wrapper
+    return wrap_emit_emesis(core_cls, _on_emit)
 
 
 def _record_emesis(
@@ -422,18 +418,23 @@ _WRAPPED_CORE_METHODS = (
 def instrumented(rec: VenueRecorder) -> Any:
     """Install every wrapper for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved = {
-        name: getattr(core_cls, name) for name in _WRAPPED_CORE_METHODS
-    }
-    core_cls._epoch_zone_occupants = _wrap_zone_occupants(core_cls, rec)
-    core_cls._emit_emesis = _wrap_emit_emesis(core_cls, rec)
-    core_cls._resolve_pathogen_challenge = _wrap_challenge(core_cls, rec)
-    core_cls._cabin_compartments = _wrap_cabin_compartments(core_cls, rec)
-    try:
+    with attr_patches() as patches:
+        patches.swap(
+            core_cls, "_epoch_zone_occupants",
+            _wrap_zone_occupants(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_emit_emesis", _wrap_emit_emesis(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_resolve_pathogen_challenge",
+            _wrap_challenge(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_cabin_compartments",
+            _wrap_cabin_compartments(core_cls, rec),
+        )
         yield
-    finally:
-        for name, fn in saved.items():
-            setattr(core_cls, name, fn)
 
 
 # ── Epoch observer ────────────────────────────────────────────────────
@@ -544,14 +545,7 @@ def _epoch_observer(rec: VenueRecorder) -> Any:
                 if a.is_infected_with(rec.pathogen_id)
             ),
         })
-        if not rec.epoch0_done:
-            rec.epoch0_done = True
-            for agent in engine.agents:
-                if agent.is_infected_with(rec.pathogen_id):
-                    aid = int(agent.agent_id)
-                    if aid not in rec.acquired_ids:
-                        rec.import_ids.add(aid)
-                        rec.host_gen.setdefault(aid, 0)
+        mark_epoch0_imports(rec, engine)
 
     return observe
 
@@ -882,29 +876,12 @@ def run_spec(
 # ── CLI / campaign-cell plumbing ──────────────────────────────────────
 
 
-def _seed_list(value: str) -> list[int]:
-    try:
-        return [int(v) for v in value.split(",") if v.strip()]
-    except ValueError as exc:
-        raise argparse.ArgumentTypeError(
-            f"invalid --seeds list: {value!r}",
-        ) from exc
+_seed_list = seed_list
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--manifest", type=Path, default=None,
-        help="campaign manifest JSON (tier specs verbatim)",
-    )
-    parser.add_argument(
-        "--tier", type=_identifier, default=None,
-        help="tier inside --manifest; required with --manifest",
-    )
-    parser.add_argument(
-        "--index", type=int, default=None,
-        help="run only the tier's runs[index] (Batch array child / canary)",
-    )
+    add_manifest_args(parser, tier_type=_identifier)
     parser.add_argument(
         "--seeds", type=_seed_list, default=None,
         help="restrict the manifest tier to these run.random_seed values",
@@ -1018,38 +995,22 @@ def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
 ) -> Path:
     """``summary.json`` (campaign layout) + ``venue.json.gz`` payload."""
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {"run_id": run_id}
     anchor.update({key: payload[key] for key in _ANCHOR_KEYS})
-    census_blob = gzip.compress(
-        json.dumps(payload["venue"]).encode(),
-    )
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr("venue.json.gz", census_blob)
-    return zip_path
+    return write_run_zip(out_dir, tier, run_id, anchor, {
+        "venue.json.gz": gzip.compress(
+            json.dumps(payload["venue"]).encode(),
+        ),
+    })
 
 
 def _select_runs(
     manifest: dict[str, Any], tier: str, args: argparse.Namespace,
 ) -> list[tuple[str, dict[str, Any]]]:
-    runs = list(generate_tier_runs(manifest, tier))
-    if args.seeds is not None:
-        wanted = set(args.seeds)
-        runs = [
-            pair for pair in runs
-            if int(pair[1]["run"]["random_seed"]) in wanted
-        ]
-    if args.index is not None:
-        if args.index >= len(runs):
-            raise SystemExit(
-                f"--index {args.index} outside tier {tier} "
-                f"({len(runs)} runs)",
-            )
-        runs = [runs[args.index]]
-    return runs
+    runs = filter_runs_by_seeds(
+        list(generate_tier_runs(manifest, tier)), args.seeds,
+    )
+    return index_run(runs, args.index, tier)
 
 
 def _run_one(
@@ -1089,13 +1050,7 @@ def _main_manifest(args: argparse.Namespace) -> None:
 
 
 def _main_spec_json(args: argparse.Namespace) -> None:
-    safe = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.spec_json)),
-    )
-    with validated_open(
-        str(safe), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        spec = json.load(handle)
+    spec = validated_json_load(REPO_ROOT, args.spec_json)
     if args.epochs_override is not None:
         spec["run"]["num_epochs"] = int(args.epochs_override)
     _apply_overrides(spec, args)

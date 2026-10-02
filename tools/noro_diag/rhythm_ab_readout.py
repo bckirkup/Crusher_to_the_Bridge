@@ -45,21 +45,13 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     validated_open,
 )
+from tools.diag.readout_common import wilson_interval  # noqa: E402
 
 TAKEOFF_PEAK_PREVALENCE = 10
 _ARMS = ("off", "on")
 _CABIN_ZONE_TYPES = ("Cabin", "Cabin_Corridor")
 
-
-def _wilson(count: int, n: int) -> tuple[float, float]:
-    if n <= 0:
-        return (0.0, 0.0)
-    z = 1.959963984540054
-    p = count / n
-    denom = 1.0 + z * z / n
-    center = (p + z * z / (2 * n)) / denom
-    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / denom
-    return (max(0.0, center - half), min(1.0, center + half))
+_wilson = wilson_interval
 
 
 def _rate_row(count: int, n: int) -> dict[str, Any]:

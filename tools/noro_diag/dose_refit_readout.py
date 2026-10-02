@@ -24,23 +24,23 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
+import sys
 import zipfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.diag.readout_common import wilson_centered  # noqa: E402
+
 EPOCHS_PER_DAY = 24  # natural_history_clock "hours"
 
 
 def _wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float, float]:
-    if n == 0:
-        return (0.0, 0.0, 0.0)
-    p = k / n
-    denom = 1.0 + z * z / n
-    centre = (p + z * z / (2 * n)) / denom
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (p, max(0.0, centre - half), min(1.0, centre + half))
+    return wilson_centered(k, n, z)
 
 
 def _rows(zip_dir: Path) -> list[dict[str, Any]]:

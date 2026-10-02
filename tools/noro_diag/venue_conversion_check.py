@@ -24,19 +24,25 @@ import argparse
 import gzip
 import json
 import sys
-import zipfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.diag.readout_common import (  # noqa: E402
+    iter_tier_zips,
+    read_zip_member,
+)
 
 _SHARED_SITE = "shared_venue"
 
 
 def _load_venue(zip_path: Path) -> dict[str, Any] | None:
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            raw = zf.read("venue.json.gz")
-    except (KeyError, zipfile.BadZipFile, OSError):
+    raw = read_zip_member(zip_path, "venue.json.gz")
+    if raw is None:
         return None
     return json.loads(gzip.decompress(raw))
 
@@ -98,12 +104,12 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     cells: dict[str, list[dict[str, Any]]] = defaultdict(list)
-    for zpath in sorted(args.runs.glob("*/*.zip")):
+    for cell_name, zpath in iter_tier_zips(args.runs):
         v = _load_venue(zpath)
         if v is None:
             print(f"WARN unreadable {zpath}", file=sys.stderr)
             continue
-        cells[zpath.parent.name].append(analyze_payload(v))
+        cells[cell_name].append(analyze_payload(v))
 
     report: dict[str, Any] = {}
     for cell in sorted(cells):

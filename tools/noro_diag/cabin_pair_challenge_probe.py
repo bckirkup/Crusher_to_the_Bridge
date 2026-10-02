@@ -20,7 +20,6 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +27,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
@@ -37,23 +35,14 @@ from tools.covid_route_attribution import (  # noqa: E402
     CabinPairChallengeLedger,
     cabin_pair_challenge_table,
 )
+from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
 
 
 def instrumented_voyage(spec_dict: dict[str, Any]) -> tuple[Any, dict[str, Any]]:
     """Run one voyage under the cabin-pair ledger; returns ``(sim, table)``."""
-    # validated_open refuses publicly writable roots; keep the spec file in
-    # a private dir under the repository, as per_host_dose_challenge does.
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = Path(tmp) / "run_spec.json"
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), str(spec_path),
-        )
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         sim = ShipSimulation(picard_spec, display=False)
         ledger = CabinPairChallengeLedger()
         sim.epoch_observer = ledger.observe

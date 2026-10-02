@@ -30,7 +30,6 @@ Usage::
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import sys
 from collections import defaultdict
@@ -42,6 +41,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from engines.transmission_core import TransmissionCore  # noqa: E402
+from tools.diag.readout_common import iter_tier_zips, load_zip_json  # noqa: E402
 
 _is_cabin = TransmissionCore._is_cabin_compartment
 
@@ -57,15 +57,11 @@ ACQUIRED_SHARE_MIN = 0.5
 
 def _load_payloads(runs_dir: Path, tier: str) -> list[dict[str, Any]]:
     """Read every growth_census payload under ``<runs_dir>/<tier>/*.zip``."""
-    import zipfile
-
     payloads: list[dict[str, Any]] = []
-    for zip_path in sorted(Path(runs_dir).rglob(f"{tier}/*.zip")):
-        with zipfile.ZipFile(zip_path) as archive:
-            payload = json.loads(
-                gzip.decompress(archive.read("growth_census.json.gz")),
-            )
-        payloads.append(payload)
+    for _tier, zip_path in iter_tier_zips(Path(runs_dir), [tier]):
+        payloads.append(
+            load_zip_json(zip_path, "growth_census.json.gz", gunzipped=True),
+        )
     return payloads
 
 
