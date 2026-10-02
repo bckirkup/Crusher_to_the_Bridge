@@ -118,17 +118,19 @@ def _iter_zip_dir_summaries(zips_dir: str) -> Iterable[dict[str, Any]]:
 
 
 def _iter_tar_summaries(tar_path: str) -> Iterable[dict[str, Any]]:
-    with validated_open(tar_path, "rb", allowed_roots=allowed_roots()) as tar_fh:
-        with tarfile.open(fileobj=tar_fh, mode="r") as tf:
-            for m in tf.getmembers():
-                if not m.isfile() or not m.name.endswith(".zip"):
-                    continue
-                f = tf.extractfile(m)
-                if f is None:
-                    continue
-                row = _summary_from_zip_bytes(f.read(), os.path.basename(m.name))
-                if row:
-                    yield row
+    with (
+        validated_open(tar_path, "rb", allowed_roots=allowed_roots()) as tar_fh,
+        tarfile.open(fileobj=tar_fh, mode="r") as tf,
+    ):
+        for m in tf.getmembers():
+            if not m.isfile() or not m.name.endswith(".zip"):
+                continue
+            f = tf.extractfile(m)
+            if f is None:
+                continue
+            row = _summary_from_zip_bytes(f.read(), os.path.basename(m.name))
+            if row:
+                yield row
 
 
 def iter_summaries(source: str) -> Iterable[dict[str, Any]]:

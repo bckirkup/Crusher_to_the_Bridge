@@ -86,15 +86,17 @@ def write_csv_gz(
     # gzip.open is not Path.write_text; contain path then open via validated binary handle.
     import io
 
-    with validated_open(path, "wb", allowed_roots=allowed_roots()) as raw:
-        with gzip.GzipFile(fileobj=raw, mode="wb") as gz:
-            buf = io.TextIOWrapper(gz, encoding="utf-8", newline="")
-            writer = csv.DictWriter(buf, fieldnames=list(columns), extrasaction="ignore")
-            writer.writeheader()
-            for row in rows:
-                writer.writerow({c: row.get(c) for c in columns})
-            buf.flush()
-            buf.detach()
+    with (
+        validated_open(path, "wb", allowed_roots=allowed_roots()) as raw,
+        gzip.GzipFile(fileobj=raw, mode="wb") as gz,
+    ):
+        buf = io.TextIOWrapper(gz, encoding="utf-8", newline="")
+        writer = csv.DictWriter(buf, fieldnames=list(columns), extrasaction="ignore")
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({c: row.get(c) for c in columns})
+        buf.flush()
+        buf.detach()
 
 
 def write_timeseries_table(

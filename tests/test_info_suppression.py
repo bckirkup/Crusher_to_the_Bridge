@@ -82,16 +82,14 @@ class TestSpecParsing:
         assert spec.trigger_rank == expected[status]
 
     def test_unknown_trigger_status_rejected(self) -> None:
+        block = _spec_block(trigger_status="quarantine")
         with pytest.raises(ValueError, match="trigger_status"):
-            InfoSuppressionSpec.from_config(_spec_block(
-                trigger_status="quarantine",
-            ))
+            InfoSuppressionSpec.from_config(block)
 
     def test_unknown_scope_rejected(self) -> None:
+        block = _spec_block(self_isolation_scope="galley")
         with pytest.raises(ValueError, match="self_isolation_scope"):
-            InfoSuppressionSpec.from_config(_spec_block(
-                self_isolation_scope="galley",
-            ))
+            InfoSuppressionSpec.from_config(block)
 
     @pytest.mark.parametrize("scope, role", [
         ("passengers", "passenger"), ("crew", "crew"), ("all", "all"),
@@ -103,23 +101,20 @@ class TestSpecParsing:
         assert spec.scope_role == role
 
     def test_unknown_scalar_channel_rejected(self) -> None:
+        block = _spec_block(route_scalars={"aerosol_scalar": 0.5})
         with pytest.raises(ValueError, match="route_scalars"):
-            InfoSuppressionSpec.from_config(_spec_block(
-                route_scalars={"aerosol_scalar": 0.5},
-            ))
+            InfoSuppressionSpec.from_config(block)
 
     @pytest.mark.parametrize("value", [0.0, -0.1, 1.5])
     def test_scalar_out_of_unit_range_rejected(self, value: float) -> None:
+        block = _spec_block(route_scalars={"fomite_scalar": value})
         with pytest.raises(ValueError, match="route_scalars"):
-            InfoSuppressionSpec.from_config(_spec_block(
-                route_scalars={"fomite_scalar": value},
-            ))
+            InfoSuppressionSpec.from_config(block)
 
     def test_negative_delay_rejected(self) -> None:
+        block = _spec_block(response_delay_hours=-2.0)
         with pytest.raises(ValueError, match="response_delay"):
-            InfoSuppressionSpec.from_config(_spec_block(
-                response_delay_hours=-2.0,
-            ))
+            InfoSuppressionSpec.from_config(block)
 
 
 def _agent(agent_id: int, role: str = "passenger", **kw: object) -> dict:

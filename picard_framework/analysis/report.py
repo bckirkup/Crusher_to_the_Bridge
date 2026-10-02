@@ -114,13 +114,11 @@ def _posterior_sections(
                 continue
             posterior_bits.append(f"<h3>{html.escape(name)}</h3>")
             posterior_bits.append(_table_html(rows, limit=30))
-            md_posterior.append(f"### {name}\n")
-            md_posterior.append(
-                "| " + " | ".join(rows[0].keys()) + " |\n"
-            )
-            md_posterior.append(
-                "| " + " | ".join("---" for _ in rows[0]) + " |\n"
-            )
+            md_posterior.extend([
+                f"### {name}\n",
+                "| " + " | ".join(rows[0].keys()) + " |\n",
+                "| " + " | ".join("---" for _ in rows[0]) + " |\n",
+            ])
             for row in rows[:20]:
                 md_posterior.append(
                     "| " + " | ".join(str(row.get(c, "")) for c in row) + " |\n"

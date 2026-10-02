@@ -42,9 +42,11 @@ def read_epoch_table(analysis_dir: str) -> list[dict[str, Any]]:
             pass
 
     if os.path.isfile(gz_path):
-        with validated_open(gz_path, "rb", allowed_roots=allowed_roots()) as raw:
-            with gzip.GzipFile(fileobj=raw, mode="rb") as gz:
-                text = gz.read().decode("utf-8").splitlines()
+        with (
+            validated_open(gz_path, "rb", allowed_roots=allowed_roots()) as raw,
+            gzip.GzipFile(fileobj=raw, mode="rb") as gz,
+        ):
+            text = gz.read().decode("utf-8").splitlines()
         return list(csv.DictReader(text))
 
     if os.path.isfile(csv_path):

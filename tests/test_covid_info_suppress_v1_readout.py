@@ -167,7 +167,8 @@ def test_row_stats_legs_and_witnesses():
         for i in range(14)
     ]
     stats = mod._row_stats(row)
-    assert stats["n"] == 14 and stats["takeoff_n"] == 14
+    assert stats["n"] == 14
+    assert stats["takeoff_n"] == 14
     assert stats["truth_leg_in_band"] is True
     assert stats["timing_leg_in_band"] is True
     assert stats["both_legs"] is True

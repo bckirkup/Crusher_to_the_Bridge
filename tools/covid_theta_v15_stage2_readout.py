@@ -120,7 +120,7 @@ def _row_roles(
     triggers: list[dict[str, str]] = []
     admissible = sorted(stage1.get("admissible_thetas") or [])
     if admissible:
-        roles.update({t: "selected" for t in admissible})
+        roles.update(dict.fromkeys(admissible, "selected"))
         below = [t for t in lattice if t < min(admissible)]
         above = [t for t in lattice if t > max(admissible)]
         if below:
@@ -223,10 +223,10 @@ def _print_rows(summaries: dict[float, dict[str, Any]]) -> None:
             if rec["q05"] is not None else "unscored"
         )
         med = share["median"]
-        verdict = (
-            "unscored" if not clause["scored"]
-            else "PASS" if clause["clause_ok"] else "FAIL"
-        )
+        if not clause["scored"]:
+            verdict = "unscored"
+        else:
+            verdict = "PASS" if clause["clause_ok"] else "FAIL"
         print(
             f"theta {theta:g} [{s['role']}] takeoff {s['takeoff_n']} "
             f"rec band {band} share {med if med is not None else float('nan'):.3f} "

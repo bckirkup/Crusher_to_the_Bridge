@@ -55,8 +55,9 @@ def test_inject_arm_preserves_existing_rhythm_keys() -> None:
 
 
 def test_inject_arm_rejects_unknown_arm() -> None:
+    spec = _spec()
     with pytest.raises(ValueError):
-        probe._inject_arm(_spec(), "sideways")
+        probe._inject_arm(spec, "sideways")
 
 
 def test_wilson_zero_of_zero_is_empty() -> None:
