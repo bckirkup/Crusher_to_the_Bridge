@@ -1,0 +1,6 @@
+# Thin campaign image: repo contents at the build SHA plus a python3
+# entrypoint so jobdef argv[0] is the entrypoint script. Derived from the
+# root Dockerfile's runtime stage; every campaigns/<p>/<n> uses this —
+# there are no per-campaign Dockerfiles.
+FROM picard-campaign AS base
+ENTRYPOINT ["python3"]
