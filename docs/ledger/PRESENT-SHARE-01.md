@@ -3,7 +3,7 @@
 **Commit:** #825
 **Pathogens:** all
 **Status:** measured
-**Measured at:** a3c76061
+**Measured at:** 890bfce3
 
 The declared presentation probability — `symptomatic_fraction` on the
 fixed-share profiles, the `illness_probability` Hill pair on the
@@ -63,8 +63,14 @@ roll) and live-verified on the GM detector cell below.
   `(2, 1, 217, 3, 0)` exactly on the same tree — the move is fully
   attributed to the share semantics. The 3.11 entry carries the same
   tuple pending its CI read, as prior near-extinct repins did.
-- DP detector cell (same Θ/seed, slow tier): repinned in-file with the
-  3.12 local read.
+- DP detector cell (same Θ/seed, slow tier): `(2968, 298, 3063, 627,
+  215)` → `(2575, 2131, 2617, 688, 618)` on CPython 3.12 — recorded
+  onsets −13%, asymptomatic campaign positives ~3× (215→618), onsets
+  cluster earlier as silent shedders circulate. The `daily_hazard` cell
+  reproduces `(2968, 298, 3063, 627, 215)` exactly on the merged tree —
+  fully attributed. This cell is the live DP-leg read of the defect at
+  campaign scale: the recorded channel shrank and the asymptomatic class
+  tripled, in the direction the ~10–18× recorded-share residual needs.
 
 ## Consequences (measured/inferred)
 

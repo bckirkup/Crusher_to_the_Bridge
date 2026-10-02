@@ -214,9 +214,10 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (2, 1, 217, 3, 0) exactly on this branch, so the move is fully
         # attributed to the share semantics — including
         # campaign_asymptomatic_positives 0 -> 1, the intended direction.
-        # Read in the local venv on CPython 3.12; the 3.11 entry carries
-        # the same tuple pending its CI read, as on prior near-extinct
-        # repins.
+        # Read in the local venv on CPython 3.12; the 3.11 entry carried
+        # the same tuple pending its CI read, and PR #825's CI confirmed
+        # it on the 3.11 shard — both interpreters agree, as before on
+        # this near-extinct cell.
         (3, 11): (2, 2, 217, 4, 1),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
@@ -416,6 +417,9 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # circulate), and campaign_asymptomatic_positives triples —
         # (2968, 298, 3063, 627, 215) -> (2575, 2131, 2617, 688, 618),
         # measured in the local venv on CPython 3.12 on this branch.
+        # The daily_hazard baseline cell reproduces
+        # (2968, 298, 3063, 627, 215) exactly on the merged tree, so the
+        # move is fully attributed to the share semantics.
         (3, 12): (2575, 2131, 2617, 688, 618),
     },
 }
