@@ -142,9 +142,34 @@ solved; §8 specifies only what remains.
 A new `ship_functions` block, declared per platform — in
 `data/platforms/<platform>/voyage_config.json` beside `medical_response`,
 deep-mergeable via `config_overrides` like `voyage`. Function IDs are
-free-form; the registry is platform-agnostic by construction. The same
-engine reads `food_service` on a cruise ship and `fishing_ops` on a fishing
-vessel.
+free-form; the registry is platform-agnostic by construction.
+
+Function *vocabulary* is shared across vessel classes — what differs is
+which *instances* of each kind a vessel carries and who they serve.
+`(function_id, serves)` is the instance key, not `function_id` alone: a
+cruise ship carries `food_service` **twice** — `serves: passengers`
+(thousands of covers across venue tiers) and `serves: crew` (the crew
+mess, feeding the staff themselves) — while a fishing boat carries only
+the `crew` instance. What reads as a cruise-unique function is not a
+different kind: `entertainment`, `cabin_housekeeping`,
+`passenger_food_service` are instances whose `serves` population the
+vessel lacks, so a platform with no passengers simply declares no
+passenger-serving instances. `serves` takes `passengers` | `crew` |
+`both` | `mission` (mission = the vessel's work itself: engineering watch,
+fishing ops, flight ops — operational readout and inter-function
+dependency, not population behaviour).
+
+Two consequences. Instances of one kind need not share parameters: the
+cruise `food_service:serves=passengers` instance needs galley crew across
+venue tiers and Dining zones; the `food_service:serves=crew` instance
+needs the same `crew_galley` class at mess scale — and that is a **shared
+staffing pool**: two instances drawing on `crew_galley` compete for the
+same watches, so capacity is scored against summed demand across all
+instances a class staffs, never each instance against the pool in
+isolation (§4). And `crew`-served functions are the subtle ones: the crew
+they feed is also the crew that staffs every other function, so a dead
+crew mess on a fishing boat degrades `fishing_ops` one step removed (§6.2
+second-order channel) — the crew has nowhere else to eat.
 
 ```json
 "ship_functions": {
@@ -152,6 +177,7 @@ vessel.
   "functions": [
     {
       "function_id": "food_service",
+      "serves": "passengers",
       "staffing": {
         "crew_galley": {"required_on_watch": 6, "minimum_on_watch": 2}
       },
@@ -165,8 +191,21 @@ vessel.
       }
     },
     {
+      "function_id": "food_service",
+      "serves": "crew",
+      "staffing": {
+        "crew_galley": {"required_on_watch": 1, "minimum_on_watch": 1}
+      },
+      "required_zone_types": ["Mess", "Dining"],
+      "required_systems": ["refrigeration"],
+      "capacity_model": "bottleneck_min",
+      "feedback": {"kind": "readout_only"}
+    },
+    {
       "function_id": "housekeeping",
+      "serves": "passengers",
       "staffing": {"crew_general": {"required_on_watch": 8}},
+      "required_zone_types": ["Cabin_Corridor"],
       "required_systems": [],
       "capacity_model": "staffing_fraction",
       "feedback": {
@@ -174,9 +213,28 @@ vessel.
       }
     },
     {
+      "function_id": "entertainment",
+      "serves": "passengers",
+      "staffing": {"crew_general": {"required_on_watch": 4}},
+      "required_zone_types": ["Theater", "Pool_Deck"],
+      "required_systems": [],
+      "capacity_model": "staffing_fraction",
+      "feedback": {"kind": "readout_only"}
+    },
+    {
       "function_id": "engineering_watch",
+      "serves": "mission",
       "staffing": {"crew_engineering": {"required_on_watch": 3, "minimum_on_watch": 1}},
       "required_zone_types": ["Engine"],
+      "required_systems": ["propulsion"],
+      "capacity_model": "bottleneck_min",
+      "feedback": {"kind": "readout_only"}
+    },
+    {
+      "function_id": "navigation",
+      "serves": "mission",
+      "staffing": {"crew_deck": {"required_on_watch": 3, "minimum_on_watch": 1}},
+      "required_zone_types": ["Bridge"],
       "required_systems": ["propulsion"],
       "capacity_model": "bottleneck_min",
       "feedback": {"kind": "readout_only"}
@@ -185,12 +243,42 @@ vessel.
 }
 ```
 
-A fishing platform declares instead:
+A fishing platform declares the same vocabulary — `food_service` in its
+only instance, crew-served and non-optional — and its own mission
+functions alongside the universal navigation/engineering core:
 
 ```json
 "functions": [
   {
+    "function_id": "food_service",
+    "serves": "crew",
+    "staffing": {"crew_galley": {"required_on_watch": 1, "minimum_on_watch": 1}},
+    "required_zone_types": ["Galley", "Mess"],
+    "required_systems": ["refrigeration"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
+    "function_id": "navigation",
+    "serves": "mission",
+    "staffing": {"crew_deck": {"required_on_watch": 2, "minimum_on_watch": 1}},
+    "required_zone_types": ["Bridge"],
+    "required_systems": ["propulsion"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
+    "function_id": "engineering_watch",
+    "serves": "mission",
+    "staffing": {"crew_engineering": {"required_on_watch": 1, "minimum_on_watch": 1}},
+    "required_zone_types": ["Engine"],
+    "required_systems": ["propulsion"],
+    "capacity_model": "bottleneck_min",
+    "feedback": {"kind": "readout_only"}
+  },
+  {
     "function_id": "fishing_ops",
+    "serves": "mission",
     "staffing": {"crew_deck": {"required_on_watch": 4, "minimum_on_watch": 2}},
     "required_zone_types": ["Fishing_Deck"],
     "required_systems": ["winch", "fish_hold_refrigeration"],
@@ -199,6 +287,7 @@ A fishing platform declares instead:
   },
   {
     "function_id": "catch_processing",
+    "serves": "mission",
     "staffing": {"crew_processing": {"required_on_watch": 3}},
     "required_zone_types": ["Factory_Deck"],
     "required_systems": ["processing_line"],
@@ -210,6 +299,22 @@ A fishing platform declares instead:
 
 Rules:
 
+- **`serves`** takes `passengers` | `crew` | `both` | `mission`: which
+  population draws on the function. The axis resolves the vessel-class
+  question into three layers: **`mission` is the universal core** —
+  navigation and engineering exist on every powered vessel, whatever else
+  it carries; **`crew` is the universal sustenance layer** — every crewed
+  vessel feeds and berths its own; **`passengers`/`both` appear only where
+  a passenger population exists**, so `entertainment` and cruise dining
+  are cruise instances of kinds, not cruise kinds. A vessel's function set
+  is thus completely described by `serves` coverage — no new
+  function-specific code between platform families. `mission` marks
+  functions whose output is the vessel's work itself — their degraded
+  feedback is operational readout and inter-function dependency, not
+  population behaviour. `crew`-served functions are the subtle ones: the
+  crew they feed is also the crew that staffs every other function, so a
+  dead galley on a fishing boat degrades `fishing_ops` one step removed
+  (§6.2 second-order channel).
 - **Staffing resolution.** A function names the `agent_class` IDs that staff
   it — resolved against the platform's own `agent_classes` block, not a
   built-in list. Legacy binary platforms (passenger/crew only) may instead
@@ -266,6 +371,15 @@ not reimplement it. Functions that need "on watch *and* at a duty zone" use
 the class's `duty_zone`; generic watch functions use the schedule token
 alone (a galley worker off shift in the crew mess is not staffing the
 galley).
+
+Because `(function_id, serves)` instances share crew classes, the read
+computes class pools once per epoch — `fit_in_pool[class]`,
+`impaired_in_pool[class]` — then scores each instance against the *summed*
+`required_on_watch` of every instance that draws that class. The cruise
+example's two `food_service` instances both draw `crew_galley`: passenger
+dining and the crew mess compete for the same galley watches, so a galley
+shortfall hits both capacities jointly rather than each reading the pool as
+if it were private.
 
 ## 5. Ship systems and maintenance
 
@@ -360,6 +474,19 @@ Writer rules, because this is where the loop can go wrong:
   convention of discrete operational states; continuous modulation stays on
   `cleaning_coverage_scale`/`route_scalar_scale` where the consumer is
   already a smooth input.
+- **`crew`-served functions get a second-order staffing channel.** When a
+  crew-served function degrades (galley down, mess closed), its consumers
+  *are the staff*: missed or degraded meals accumulate on the serving crew
+  as a `sustenance_deficit` — a declared input to the fatigue accumulator
+  in §7 (the same write any other fatigue source makes) and, if the
+  platform declares it, to `symptomatic_effectiveness`-style impairment in
+  §4. This is how a fishing boat's dead galley propagates into
+  `fishing_ops` without any function named "morale". The channel is
+  declared per function (`feedback.crew_sustenance: true`) and defaults
+  off — a cruise ship's passengers are not a staffing input, and enabling
+  it there would silently couple the passenger outbreak into crew
+  performance, which is exactly the kind of unscoped widening the registry
+  exists to prevent.
 - **Feedback is optional per function and off with the block.** A platform
   with `ship_functions.enabled: false` is the labelled baseline; each
   function's `feedback` may additionally be disabled to run
@@ -371,20 +498,71 @@ Writer rules, because this is where the loop can go wrong:
 Sustained PPE use degrades the wearer: fatigue, reduced compliance, and —
 the user's specific mechanism — elevated risk of secondary conditions
 (mask/respirator microclimate → sinonasal complaints; occlusion/friction →
-skin barrier damage and infection). The channel is three additive pieces,
-each riding an existing pattern:
+skin barrier damage and infection). The channel is additive pieces, each
+riding an existing pattern.
 
-### 7.1 The accumulator
+### 7.1 The PPE type registry
 
-`KorkinAgent.ppe_wear_hours`: incremented each epoch the agent is under an
-active PPE protocol (`ppe_transmission_reduction` in `merged_modifiers`,
-SOP-004/005 precedent) **and** covered by it — NPI measures already carry a
-role coverage map, so coverage is read not assumed. Each PPE-bearing
-protocol may declare `ppe_fatigue_rate_per_epoch` (N95 > surgical is a
-declared ordering, not a shipped number); absent key = zero fatigue, so
-legacy protocols are unaffected.
+PPE is not one object. Surgical masks, N95/FFP respirators, powered
+air-purifying respirators (PAPR), latex/nitrile gloves, and chemical gloves
+differ on every axis the model cares about, so the unit of declaration is
+a `ppe_types` registry in the protocol/NPI config:
 
-### 7.2 Fatigue → compliance decay
+```json
+"ppe_types": {
+  "surgical_mask": {"fatigue_rate_per_epoch": 0.2, "heat_load": 0.1,
+                    "dexterity_impairment": 0.0},
+  "n95":            {"fatigue_rate_per_epoch": 0.5, "heat_load": 0.3,
+                    "dexterity_impairment": 0.0},
+  "papr":           {"fatigue_rate_per_epoch": 0.8, "heat_load": 0.6,
+                    "dexterity_impairment": 0.15},
+  "latex_gloves":   {"fatigue_rate_per_epoch": 0.1, "heat_load": 0.0,
+                    "dexterity_impairment": 0.1},
+  "chemical_gloves":{"fatigue_rate_per_epoch": 0.3, "heat_load": 0.2,
+                    "dexterity_impairment": 0.3}
+}
+```
+
+- **Protection stays where it is.** Efficacy remains on the protocol —
+  SOP-004/005's `ppe_transmission_reduction` and route scalars — but the
+  NPI measure's coverage map keys each covered class/role to a `ppe_type`
+  (medical staff → `n95` + `latex_gloves`; cleanup detail →
+  `chemical_gloves`; a chemical-release SOP would draw from the same
+  registry for PAPR/respirator, §8). Legacy measures with no type declare
+  a platform-default type so existing campaigns are unaffected.
+- **Fatigue is per-type.** `fatigue_rate_per_epoch` replaces the per-
+  protocol `ppe_fatigue_rate_per_epoch` shorthand from v1 of this spec —
+  the registry is where the ordering (PAPR > N95 > surgical is a declared
+  ordering, not a shipped number) lives, and an agent covered by several
+  types at once accumulates their sum.
+- **`dexterity_impairment` feeds back into §4/§5 capacity** — it scales the
+  effective watch-hours an impaired wearer delivers to functions needing
+  manual work (repair labor in §5 most directly): an engineer in PAPR and
+  chemical gloves repairs slower. This is the loop the fatigue channel
+  otherwise misses: stricter PPE during an outbreak *itself* degrades
+  maintenance capacity, which degrades systems, which degrades functions.
+- **Secondary conditions are type-keyed** (§7.4): each type may declare
+  its own `fatigue_conditions` profile — occlusion dermatitis on gloves,
+  sinonasal complaints on respirators, heat stress on PAPR — rather than
+  one pooled risk.
+
+### 7.2 The accumulator
+
+`KorkinAgent.ppe_wear_hours` becomes `ppe_wear_hours_by_type`: incremented
+each epoch the agent is under an active PPE protocol **and** covered by
+it — NPI measures already carry the coverage map (now typed), so coverage
+is read not assumed. The accumulator contribution is Σ hours × type
+`fatigue_rate_per_epoch`; absent type = zero fatigue, so legacy protocols
+are unaffected.
+
+Wear-hours is one *input* to fatigue, not fatigue itself. The accumulator
+is `fatigue_score`, fed by declared sources: PPE wear (this section) and
+the `sustenance_deficit` a degraded crew-served function writes (§6.2).
+Keeping the accumulator a sum of declared contributions — rather than a
+PPE-specific counter — is what lets the same downstream consumers
+(§7.3 compliance, §7.4 conditions) read one number whatever produced it.
+
+### 7.3 Fatigue → compliance decay
 
 The refuser/compliance pattern already exists
 (`CrewDutyExclusionTracker.complies()` sticky draws,
@@ -395,9 +573,11 @@ fatigue modulates *effective coverage*: above a declared
 reductions drop out for subsequent epochs. The sticky-draw convention and
 the compliance log give the audit trail for free.
 
-### 7.3 Fatigue → secondary conditions
+### 7.4 Fatigue → secondary conditions
 
-Two honest variants, picked per condition by mechanism:
+Type-keyed, as §7.1 declares — a type's `fatigue_conditions` block names
+only the sequelae it plausibly induces. Two honest variants, picked per
+condition by mechanism:
 
 - **Endogenous (non-transmissible) condition.** Sinonasal symptoms or skin
   barrier damage that is not infectious: wear-hours drive a per-epoch
