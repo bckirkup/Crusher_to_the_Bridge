@@ -250,15 +250,7 @@ def _growth_depth(
         max(row.get("infected", 0) for row in r["epoch_rows"])
         for _, r in ignited
     ]
-    gen_hist: dict[int, int] = defaultdict(int)
-    unresolved = 0
-    for _, r in ignited:
-        for acq in r.get("acquisition_rows") or []:
-            gen = acq.get("gen")
-            if isinstance(gen, int):
-                gen_hist[gen] += 1
-            else:
-                unresolved += 1
+    gen_hist, unresolved = _gen_histogram(ignited)
     per_gen_r: dict[str, float] = {}
     for gen in sorted(gen_hist):
         if gen <= 0 or gen_hist.get(gen - 1, 0) <= 0:
@@ -276,6 +268,21 @@ def _growth_depth(
         "per_generation_reproduction": per_gen_r,
         "max_generation": max(gen_hist) if gen_hist else None,
     }
+
+
+def _gen_histogram(
+    ignited: list[tuple[dict[str, Any], dict[str, Any]]],
+) -> tuple[dict[int, int], int]:
+    gen_hist: dict[int, int] = defaultdict(int)
+    unresolved = 0
+    for _, r in ignited:
+        for acq in r.get("acquisition_rows") or []:
+            gen = acq.get("gen")
+            if isinstance(gen, int):
+                gen_hist[gen] += 1
+            else:
+                unresolved += 1
+    return gen_hist, unresolved
 
 
 def _zone_types(platform_id: Any) -> dict[str, str]:
@@ -298,65 +305,91 @@ def _zone_types(platform_id: Any) -> dict[str, str]:
 def _clock_correlation(
     runs: list[tuple[Path, dict[str, Any], dict[str, Any]]],
 ) -> dict[str, Any]:
-    emit_calls: dict[str, int] = defaultdict(int)
-    corridor_at_egress: list[int] = []
-    corridor_at_non_egress: list[int] = []
-    dining_at_egress: list[int] = []
-    dining_at_non_egress: list[int] = []
-    emesis_minute_hist_pp: dict[int, int] = defaultdict(int)
-    emesis_minute_hist_other: dict[int, int] = defaultdict(int)
-    zone_types: dict[str, str] | None = None
+    acc: dict[str, Any] = {
+        "emit_calls": defaultdict(int),
+        "corridor_at_egress": [],
+        "corridor_at_non_egress": [],
+        "dining_at_egress": [],
+        "dining_at_non_egress": [],
+        "emesis_minute_hist_pp": defaultdict(int),
+        "emesis_minute_hist_other": defaultdict(int),
+        "zone_types": None,
+    }
     for _, s, r in runs:
         if not r.get("rhythm_attached"):
             continue
-        if zone_types is None:
-            zone_types = _zone_types(
+        if acc["zone_types"] is None:
+            acc["zone_types"] = _zone_types(
                 (s.get("parameters") or {}).get("platform_id")
             )
         for state, n in (r.get("emit_calls") or {}).items():
-            emit_calls[state] += int(n)
-        egress_epochs: set[int] = set()
-        for day in r.get("dealt_days") or []:
-            for ev in day.get("events") or []:
-                if ev.get("egress_min") is not None:
-                    voyage_minute = (
-                        int(day["voyage_day"]) * 1440 + int(ev["egress_min"])
-                    )
-                    egress_epochs.add(voyage_minute // 60)
-        for row in r.get("emesis_rows") or []:
-            minute = int(row.get("epoch", 0)) * 60 % 1440
-            hour_bin = minute // 60
-            if row.get("post_prandial") is True:
-                emesis_minute_hist_pp[hour_bin] += 1
-            else:
-                emesis_minute_hist_other[hour_bin] += 1
-        for erow in r.get("epoch_rows") or []:
-            epoch = int(erow.get("epoch", 0))
-            corridor = dining = 0
-            for zone, count in (erow.get("zones") or {}).items():
-                ztype = zone_types.get(str(zone), "")
-                if ztype == "Cabin_Corridor":
-                    corridor += int(count)
-                elif ztype == "Dining":
-                    dining += int(count)
-            if epoch in egress_epochs:
-                corridor_at_egress.append(corridor)
-                dining_at_egress.append(dining)
-            else:
-                corridor_at_non_egress.append(corridor)
-                dining_at_non_egress.append(dining)
+            acc["emit_calls"][state] += int(n)
+        _accumulate_emesis_hist(acc, r)
+        _accumulate_occupancy(acc, r)
+    return _clock_summary(acc)
+
+
+def _accumulate_emesis_hist(
+    acc: dict[str, Any], r: dict[str, Any],
+) -> None:
+    for row in r.get("emesis_rows") or []:
+        minute = int(row.get("epoch", 0)) * 60 % 1440
+        hour_bin = minute // 60
+        if row.get("post_prandial") is True:
+            acc["emesis_minute_hist_pp"][hour_bin] += 1
+        else:
+            acc["emesis_minute_hist_other"][hour_bin] += 1
+
+
+def _accumulate_occupancy(
+    acc: dict[str, Any], r: dict[str, Any],
+) -> None:
+    egress_epochs: set[int] = set()
+    for day in r.get("dealt_days") or []:
+        for ev in day.get("events") or []:
+            if ev.get("egress_min") is not None:
+                voyage_minute = (
+                    int(day["voyage_day"]) * 1440 + int(ev["egress_min"])
+                )
+                egress_epochs.add(voyage_minute // 60)
+    zone_types = acc["zone_types"]
+    for erow in r.get("epoch_rows") or []:
+        epoch = int(erow.get("epoch", 0))
+        corridor = dining = 0
+        for zone, count in (erow.get("zones") or {}).items():
+            ztype = zone_types.get(str(zone), "")
+            if ztype == "Cabin_Corridor":
+                corridor += int(count)
+            elif ztype == "Dining":
+                dining += int(count)
+        if epoch in egress_epochs:
+            acc["corridor_at_egress"].append(corridor)
+            acc["dining_at_egress"].append(dining)
+        else:
+            acc["corridor_at_non_egress"].append(corridor)
+            acc["dining_at_non_egress"].append(dining)
+
+
+def _clock_summary(acc: dict[str, Any]) -> dict[str, Any]:
+    emit_calls = acc["emit_calls"]
     pp = emit_calls.get("post_prandial", 0)
     non_pp = emit_calls.get("outside_window", 0) + emit_calls.get("off", 0)
+    corridor_at_egress = acc["corridor_at_egress"]
+    corridor_at_non_egress = acc["corridor_at_non_egress"]
+    dining_at_egress = acc["dining_at_egress"]
+    dining_at_non_egress = acc["dining_at_non_egress"]
+    hist_pp = acc["emesis_minute_hist_pp"]
+    hist_other = acc["emesis_minute_hist_other"]
     return {
         "emit_calls": dict(emit_calls),
         "emesis_post_prandial": pp,
         "emesis_non_post_prandial": non_pp,
         "post_prandial_share": (pp / (pp + non_pp)) if pp + non_pp else None,
         "emesis_hour_hist_post_prandial": {
-            str(h): emesis_minute_hist_pp[h] for h in sorted(emesis_minute_hist_pp)
+            str(h): hist_pp[h] for h in sorted(hist_pp)
         },
         "emesis_hour_hist_other": {
-            str(h): emesis_minute_hist_other[h] for h in sorted(emesis_minute_hist_other)
+            str(h): hist_other[h] for h in sorted(hist_other)
         },
         "corridor_occupancy_at_egress_mean": (
             sum(corridor_at_egress) / len(corridor_at_egress)
@@ -490,9 +523,11 @@ def _fmt_ci(row: dict[str, Any]) -> str:
 def render_markdown(readout: dict[str, Any]) -> str:
     lines: list[str] = []
     for tier, arms in readout["takeoff"].items():
-        lines.append(f"#### {tier}")
-        lines.append("| arm | ignited | takeoff | posted | median acquired |")
-        lines.append("|---|---|---|---|---|")
+        lines.extend((
+            f"#### {tier}",
+            "| arm | ignited | takeoff | posted | median acquired |",
+            "|---|---|---|---|---|",
+        ))
         for arm in _ARMS:
             t = arms[arm]
             lines.append(
@@ -573,12 +608,12 @@ def render_markdown(readout: dict[str, Any]) -> str:
             )
         a = readout["anchors"][tier]
         if a.get("off") or a.get("on"):
-            lines.append("")
-            lines.append(
+            lines.extend((
+                "",
                 "| arm | A8 pax | A8 crew | A9 posting | pax infection AR"
                 " | pax reported AR | crew infection AR |",
-            )
-            lines.append("|---|---|---|---|---|---|---|")
+                "|---|---|---|---|---|---|---|",
+            ))
             for arm in _ARMS:
                 cell = a.get(arm)
                 if not cell:

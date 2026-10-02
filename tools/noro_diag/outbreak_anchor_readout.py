@@ -324,42 +324,53 @@ def _paired_delta(cells: dict[tuple, list[dict]], import_root: Path) -> dict[str
     old_cells = collect(import_root)
     out: dict[str, Any] = {}
     for key, runs in cells.items():
-        label = _cell_label(key)
-        old_pool: dict[int, dict] = {}
-        for old_key, old_runs in old_cells.items():
-            # Pair on hull x length x rung x prevalence, ignoring nsf level
-            # only when it already matches; the old cells carry the same
-            # coordinate family at several nsf values.
-            if old_key[:5] == key[:5] and old_key[5] == key[5]:
-                for r in old_runs:
-                    old_pool[r["seed"]] = r
-        if not old_pool:
+        pairs = _paired_runs(key, runs, old_cells)
+        if not pairs:
             continue
-        pairs = [(r, old_pool[r["seed"]]) for r in runs if r["seed"] in old_pool]
-        entry = {"n_pairs": len(pairs)}
-        for name, extract in (
-            ("established", lambda r: r["n_acquired"] > 0),
-            ("takeoff", lambda r: r["anchor_row"]["took_off"]),
-            ("posted", lambda r: _posted(r["anchor_row"])),
-        ):
-            discordant = sum(
-                extract(new) != extract(old) for new, old in pairs
-            )
-            gained = sum(extract(new) and not extract(old) for new, old in pairs)
-            lost = sum(not extract(new) and extract(old) for new, old in pairs)
-            entry[name] = {"discordant": discordant, "gained": gained, "lost": lost}
-        for name, extract in (
-            ("n_acquired", lambda r: float(r["n_acquired"])),
-            ("peak_prevalence", lambda r: float(r["peak_prevalence"])),
-            (
-                "reported_ar_pax",
-                lambda r: r["anchor_row"]["reported_case_attack_rate_passenger"],
-            ),
-        ):
-            diffs = [extract(new) - extract(old) for new, old in pairs]
-            entry[f"delta_{name}"] = _quantiles(diffs)
-        out[label] = entry
+        out[_cell_label(key)] = _paired_entry(pairs)
     return out
+
+
+def _paired_runs(
+    key: tuple,
+    runs: list[dict],
+    old_cells: dict,
+) -> list[tuple[dict, dict]]:
+    # Pair on hull x length x rung x prevalence, ignoring nsf level
+    # only when it already matches; the old cells carry the same
+    # coordinate family at several nsf values.
+    old_pool: dict[int, dict] = {}
+    for old_key, old_runs in old_cells.items():
+        if old_key[:5] == key[:5] and old_key[5] == key[5]:
+            for r in old_runs:
+                old_pool[r["seed"]] = r
+    return [(r, old_pool[r["seed"]]) for r in runs if r["seed"] in old_pool]
+
+
+def _paired_entry(pairs: list[tuple[dict, dict]]) -> dict[str, Any]:
+    entry: dict[str, Any] = {"n_pairs": len(pairs)}
+    for name, extract in (
+        ("established", lambda r: r["n_acquired"] > 0),
+        ("takeoff", lambda r: r["anchor_row"]["took_off"]),
+        ("posted", lambda r: _posted(r["anchor_row"])),
+    ):
+        discordant = sum(
+            extract(new) != extract(old) for new, old in pairs
+        )
+        gained = sum(extract(new) and not extract(old) for new, old in pairs)
+        lost = sum(not extract(new) and extract(old) for new, old in pairs)
+        entry[name] = {"discordant": discordant, "gained": gained, "lost": lost}
+    for name, extract in (
+        ("n_acquired", lambda r: float(r["n_acquired"])),
+        ("peak_prevalence", lambda r: float(r["peak_prevalence"])),
+        (
+            "reported_ar_pax",
+            lambda r: r["anchor_row"]["reported_case_attack_rate_passenger"],
+        ),
+    ):
+        diffs = [extract(new) - extract(old) for new, old in pairs]
+        entry[f"delta_{name}"] = _quantiles(diffs)
+    return entry
 
 
 def _pct(x: dict[str, float]) -> str:

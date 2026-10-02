@@ -76,7 +76,7 @@ def _load_profile(bundle: str) -> dict[str, Any]:
         str(REPO_ROOT), f"data/pathogens/{bundle}.json",
     )
     with validated_open(
-        path, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(path), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         bundle_doc = json.load(handle)
     for entry in bundle_doc["pathogens"]:

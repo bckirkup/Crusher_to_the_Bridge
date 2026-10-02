@@ -440,30 +440,7 @@ def _epoch_observer(rec: Recorder, pathogen_id: str) -> Any:
         for vclass, mass in pools.items():
             row[f"pool_{vclass}"] = mass
         row["pool_patches"] = rec.patch_pool_total()
-        agents = sim.engine.agents
-        infected_now: set[int] = set()
-        hand_positive = 0
-        hand_max = 0.0
-        confined = 0
-        for agent in agents:
-            if agent.is_infected_with(pathogen_id):
-                infected_now.add(int(agent.agent_id))
-            if float(agent.hand_load_by_pathogen.get(pathogen_id, 0.0)) > 0.0:
-                hand_positive += 1
-                hand_max = max(
-                    hand_max,
-                    float(agent.hand_load_by_pathogen.get(pathogen_id, 0.0)),
-                )
-            if core._cabin_confinement_active(agent):
-                confined += 1
-        row["infected_total"] = len(infected_now)
-        row["new_infections"] = len(
-            (infected_now - rec._seen_infected) - rec._seed_ids,
-        )
-        rec._seen_infected |= infected_now
-        row["hand_positive_agents"] = hand_positive
-        row["hand_load_max"] = hand_max
-        row["confined_agents"] = confined
+        _agent_census(rec, sim, core, pathogen_id, row)
         row.update(
             {key: float(value) for key, value in rec.epoch_acc.items()},
         )
@@ -471,6 +448,38 @@ def _epoch_observer(rec: Recorder, pathogen_id: str) -> Any:
         rec.epoch_acc.clear()
 
     return observe
+
+
+def _agent_census(
+    rec: Recorder,
+    sim: Any,
+    core: Any,
+    pathogen_id: str,
+    row: dict[str, Any],
+) -> None:
+    infected_now: set[int] = set()
+    hand_positive = 0
+    hand_max = 0.0
+    confined = 0
+    for agent in sim.engine.agents:
+        if agent.is_infected_with(pathogen_id):
+            infected_now.add(int(agent.agent_id))
+        if float(agent.hand_load_by_pathogen.get(pathogen_id, 0.0)) > 0.0:
+            hand_positive += 1
+            hand_max = max(
+                hand_max,
+                float(agent.hand_load_by_pathogen.get(pathogen_id, 0.0)),
+            )
+        if core._cabin_confinement_active(agent):
+            confined += 1
+    row["infected_total"] = len(infected_now)
+    row["new_infections"] = len(
+        (infected_now - rec._seen_infected) - rec._seed_ids,
+    )
+    rec._seen_infected |= infected_now
+    row["hand_positive_agents"] = hand_positive
+    row["hand_load_max"] = hand_max
+    row["confined_agents"] = confined
 
 
 @contextmanager
@@ -577,7 +586,7 @@ def _tier_specs(
         resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
     )
     with validated_open(
-        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         manifest = json.load(handle)
     specs = {}

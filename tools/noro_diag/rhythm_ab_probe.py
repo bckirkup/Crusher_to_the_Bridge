@@ -211,7 +211,7 @@ def _pp_state(agent: Any) -> str:
 
 
 def _occupancy_snapshot(
-    rec: RhythmRecorder, core: Any, zone_name: str,
+    rec: RhythmRecorder, zone_name: str,
 ) -> dict[str, int]:
     occupants = (
         rec.compartment_occupants.get(zone_name)
@@ -249,44 +249,60 @@ def _wrap_emit_emesis(core_cls: type, rec: RhythmRecorder) -> Any:
         pool_gain = original(
             self, agent, pathogen_id, profile, zone_name, epoch,
         )
-        if pathogen_id != rec.pathogen_id:
-            return pool_gain
-        state = _pp_state(agent)
-        rec.emit_calls[state] += 1
-        records = agent.emesis_deposition_records_by_pathogen.get(
-            pathogen_id, [],
-        )[before:]
-        if not records:
-            if schedule_len:
-                rec.emits_deferred[state] += 1
-            return pool_gain
-        if pool_gain > 0:
-            rec.ignited = True
-        aid = int(agent.agent_id)
-        occupancy = _occupancy_snapshot(rec, self, zone_name)
-        for record in records:
-            rec.emesis_rows.append({
-                "epoch": int(epoch),
-                "agent_id": aid,
-                "gen": rec.gen_of(aid),
-                "gen_class": rec.gen_class_of(aid),
-                "zone": zone_name,
-                "zone_type": str(self.zone_types.get(zone_name) or ""),
-                "post_prandial": getattr(
-                    agent, "_rhythm_post_prandial", None,
-                ),
-                "episode_load": float(record.get("episode_load", 0.0)),
-                "surface_load": float(record.get("surface_load", 0.0)),
-                "aerosol_load": float(record.get("aerosol_load", 0.0)),
-                "pool_gain": float(record.get("pool_gain", 0.0)),
-                "censored_below_lod": bool(
-                    record.get("censored_below_lod", False),
-                ),
-                **occupancy,
-            })
+        if pathogen_id == rec.pathogen_id:
+            _record_emesis(
+                rec, self, agent, pathogen_id, zone_name, epoch,
+                pool_gain, before, schedule_len,
+            )
         return pool_gain
 
     return wrapper
+
+
+def _record_emesis(
+    rec: RhythmRecorder,
+    core: Any,
+    agent: Any,
+    pathogen_id: str,
+    zone_name: str,
+    epoch: int,
+    pool_gain: float,
+    before: int,
+    schedule_len: int,
+) -> None:
+    state = _pp_state(agent)
+    rec.emit_calls[state] += 1
+    records = agent.emesis_deposition_records_by_pathogen.get(
+        pathogen_id, [],
+    )[before:]
+    if not records:
+        if schedule_len:
+            rec.emits_deferred[state] += 1
+        return
+    if pool_gain > 0:
+        rec.ignited = True
+    aid = int(agent.agent_id)
+    occupancy = _occupancy_snapshot(rec, zone_name)
+    for record in records:
+        rec.emesis_rows.append({
+            "epoch": int(epoch),
+            "agent_id": aid,
+            "gen": rec.gen_of(aid),
+            "gen_class": rec.gen_class_of(aid),
+            "zone": zone_name,
+            "zone_type": str(core.zone_types.get(zone_name) or ""),
+            "post_prandial": getattr(
+                agent, "_rhythm_post_prandial", None,
+            ),
+            "episode_load": float(record.get("episode_load", 0.0)),
+            "surface_load": float(record.get("surface_load", 0.0)),
+            "aerosol_load": float(record.get("aerosol_load", 0.0)),
+            "pool_gain": float(record.get("pool_gain", 0.0)),
+            "censored_below_lod": bool(
+                record.get("censored_below_lod", False),
+            ),
+            **occupancy,
+        })
 
 
 def _record_acquisition(
@@ -455,7 +471,7 @@ def instrumented(rec: RhythmRecorder) -> Any:
 # ── Epoch observer ────────────────────────────────────────────────────
 
 
-def _agent_state_row(agent: Any, pathogen_id: str) -> str:
+def _agent_state_row(agent: Any) -> str:
     infections = getattr(agent, "infections", {}) or {}
     infected = ",".join(sorted(str(p) for p in infections))
     symptomatic = bool(
@@ -480,30 +496,17 @@ def _epoch_observer(rec: RhythmRecorder) -> Any:
         engine = sim.engine
         if getattr(engine, "_rhythm", None) is not None:
             rec.rhythm_attached = True
-        zones: dict[str, int] = defaultdict(int)
-        ashore = confined = infected = 0
-        hasher = hashlib.sha256()
-        for agent in sorted(engine.agents, key=lambda a: a.agent_id):
-            hasher.update(
-                _agent_state_row(agent, rec.pathogen_id).encode(),
-            )
-            if getattr(agent, "ashore", False):
-                ashore += 1
-            elif agent.current_location == _ISOLATED_LOCATION:
-                confined += 1
-            if agent.is_infected_with(rec.pathogen_id):
-                infected += 1
-            zones[str(agent.current_location)] += 1
-        rec.epoch_state_digests.append(hasher.hexdigest())
+        digest, zones, counts = _epoch_state(engine, rec.pathogen_id)
+        rec.epoch_state_digests.append(digest)
         rec.epoch_rows.append({
             "epoch": epoch,
             "minute_of_day": int(
                 epoch * hours_per_epoch * 60 % MINUTES_PER_DAY,
             ),
-            "ashore": ashore,
-            "confined": confined,
-            "infected": infected,
-            "zones": dict(zones),
+            "ashore": counts[0],
+            "confined": counts[1],
+            "infected": counts[2],
+            "zones": zones,
         })
         if not rec.epoch0_done:
             rec.epoch0_done = True
@@ -515,6 +518,26 @@ def _epoch_observer(rec: RhythmRecorder) -> Any:
                         rec.host_gen.setdefault(aid, 0)
 
     return observe
+
+
+def _epoch_state(
+    engine: Any, pathogen_id: str,
+) -> tuple[str, dict[str, int], tuple[int, int, int]]:
+    zones: dict[str, int] = defaultdict(int)
+    ashore = confined = infected = 0
+    hasher = hashlib.sha256()
+    for agent in sorted(engine.agents, key=lambda a: a.agent_id):
+        hasher.update(
+            _agent_state_row(agent).encode(),
+        )
+        if getattr(agent, "ashore", False):
+            ashore += 1
+        elif agent.current_location == _ISOLATED_LOCATION:
+            confined += 1
+        if agent.is_infected_with(pathogen_id):
+            infected += 1
+        zones[str(agent.current_location)] += 1
+    return hasher.hexdigest(), dict(zones), (ashore, confined, infected)
 
 
 # ── Run driver ────────────────────────────────────────────────────────
@@ -690,7 +713,7 @@ def _load_manifest(manifest_path: Path) -> dict[str, Any]:
         resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
     )
     with validated_open(
-        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         return json.load(handle)
 
@@ -757,7 +780,7 @@ def _main_spec_json(args: argparse.Namespace) -> None:
         resolve_repo_path(str(REPO_ROOT), str(args.spec_json)),
     )
     with validated_open(
-        safe, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(safe), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         spec = json.load(handle)
     if args.epochs_override is not None:
