@@ -1555,6 +1555,12 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # the payload alone (COVID-HAND-AB-01: None only on payloads
         # written before the reservoir machinery shipped).
         "hand_reservoir_mode": getattr(tx_core, "hand_reservoir_mode", None),
+        # The resolved presentation-draw arm the same way (PRESENT-SHARE-01:
+        # the profile key is absent on the shipped default, so an unstated
+        # mode resolves to once_per_course; a pathogen_overrides
+        # presentation_draw_mode arm echoes its declared value).
+        "presentation_draw_mode": profile.get("presentation_draw_mode")
+        or "once_per_course",
         "activity_contacts": resolved_contacts,
     }
 
