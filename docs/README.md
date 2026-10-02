@@ -22,6 +22,7 @@ links to, and several heavily-linked files describe work that is finished.
 | [`reports/`](reports/) | Manuscripts, monographs, submission artifacts | Writing or revising a paper |
 | [`ledger/`](ledger/) | Repository-wide defect and measurement entries — one file per `<ID>` (see [`ledger/README.md`](ledger/README.md) for the format); new entries are never numbered | Checking whether a number or defect is of record |
 | [`rhythm/`](rhythm/) | The SHIP-RHYTHM schedule layer spec (companion data: `data/rhythm/event_catalogs.json`) | Working on `engines/rhythm_layer.py` |
+| [`ship_functions/`](ship_functions/) | Parameter sourcing for the ship-function capacity layer ([`proposals/ship_function_capacity_spec.md`](proposals/ship_function_capacity_spec.md)) | Touching any ship-function/systems/fatigue constant |
 | [`audits/`](audits/) | Fresh-repository assessment artifacts | Auditing overall repo state |
 | [`examples/`](examples/) | Contract/config examples | Looking for a canonical example file |
 
@@ -166,6 +167,7 @@ longer justifications.
 | [sonar_sweep_handoff_2026_09_26.md](sonar_sweep_handoff_2026_09_26.md) | Handoff record (2026-09-26) — maintenance sweep, no model numbers: the Sonar backlog state (246 → 106 open), landed/queued S3776 batches, running child sessions, and the Sonar new-code gate gotchas (moved lines need coverage; extraction-induced S2583 FPs) |
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
+| [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md) | Sourcing record (SHIP-FUNC-01) — every tunable in `proposals/ship_function_capacity_spec.md` with interval, grade and origin, or an explicit NULL-SOURCE; adopts nothing |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |
 | [norovirus/introduction_mechanism_ab.md](norovirus/introduction_mechanism_ab.md) | Implemented — the boarding-prevalence vs fiat-index-case A/B: posting frequency, reported incidence against A8, per-import secondary yield, and the prevalence-denominator unit question |
