@@ -41,6 +41,24 @@ echo "  prefix      : $S3_PREFIX"
 echo "  queue       : $JOB_QUEUE"
 echo "  jobdef      : $JOB_DEFINITION"
 
+# --parameters shorthand splits comma lists into typed arrays; the JSON
+# form keeps comma-joined match/seeds values as single strings.
+if [ "$SIZE" -le 1 ]; then
+  INDEX="${INDEX:-0}"
+else
+  INDEX="${INDEX:--1}"
+fi
+
+PARAMS="$(python3 -c '
+import json, sys
+print(json.dumps({
+    "s3_prefix": sys.argv[1], "manifest": sys.argv[2],
+    "pathogen_id": sys.argv[3], "tier": sys.argv[4],
+    "match": sys.argv[5], "seeds": sys.argv[6],
+    "index": sys.argv[7], "index_offset": sys.argv[8],
+}))
+' "$S3_PREFIX" "$MANIFEST" "$PATHOGEN_ID" "$TIER" "$MATCH" "$SEEDS" "$INDEX" "${INDEX_OFFSET:-0}")"
+
 if [ "$SIZE" -le 1 ]; then
   # Non-array job: the array-index env var is reserved on Batch, so the
   # run index travels as a parameter the entrypoint reads via --index.
@@ -49,7 +67,7 @@ if [ "$SIZE" -le 1 ]; then
     --job-name "$JOB_NAME" \
     --job-queue "$JOB_QUEUE" \
     --job-definition "$JOB_DEFINITION" \
-    --parameters "s3_prefix=$S3_PREFIX,manifest=$MANIFEST,pathogen_id=$PATHOGEN_ID,tier=$TIER,match=$MATCH,seeds=$SEEDS,index=0"
+    --parameters "$PARAMS"
 else
   aws batch submit-job \
     --region "$AWS_REGION" \
@@ -57,5 +75,5 @@ else
     --job-queue "$JOB_QUEUE" \
     --job-definition "$JOB_DEFINITION" \
     --array-properties "{\"size\": $SIZE}" \
-    --parameters "s3_prefix=$S3_PREFIX,manifest=$MANIFEST,pathogen_id=$PATHOGEN_ID,tier=$TIER,match=$MATCH,seeds=$SEEDS,index_offset=0"
+    --parameters "$PARAMS"
 fi

@@ -11,6 +11,13 @@
 ARG BASE_IMAGE=picard-campaign:flu-rhythm-02-1ab8dd98
 FROM ${BASE_IMAGE}
 
+# Restamp the engine revision: the base image's ENGINE_GIT_SHA names ITS
+# build SHA; runs from this overlay must record THIS layer's source SHA
+# (pass --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD)).
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
 USER root
 COPY --chown=campaign:campaign engines/natural_history.py \
     ./engines/natural_history.py
