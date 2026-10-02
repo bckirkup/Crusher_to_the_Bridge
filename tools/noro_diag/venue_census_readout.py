@@ -309,14 +309,24 @@ def _aggregate_hosts(agg: dict[str, Any], venue: dict[str, Any]) -> None:
             ] += 1
         if onset is None:
             continue
-        if reported is not None:
-            agg["latency"]["detect_reported"].append(reported - onset)
-        if ordered is not None:
-            agg["latency"]["onset_to_order"].append(ordered - onset)
-        if confined is not None:
-            agg["latency"]["onset_to_confined"].append(confined - onset)
-        if ordered is not None and confined is not None:
-            agg["latency"]["order_to_confined"].append(confined - ordered)
+        _host_latency(agg, onset, reported, ordered, confined)
+
+
+def _host_latency(
+    agg: dict[str, Any],
+    onset: Any,
+    reported: Any,
+    ordered: Any,
+    confined: Any,
+) -> None:
+    if reported is not None:
+        agg["latency"]["detect_reported"].append(reported - onset)
+    if ordered is not None:
+        agg["latency"]["onset_to_order"].append(ordered - onset)
+    if confined is not None:
+        agg["latency"]["onset_to_confined"].append(confined - onset)
+    if ordered is not None and confined is not None:
+        agg["latency"]["order_to_confined"].append(confined - ordered)
 
 
 # ── Rendering ─────────────────────────────────────────────────────────
@@ -468,7 +478,7 @@ def _conversion_block(cell: str, agg: dict[str, Any]) -> list[str]:
         f"Conversion for `{cell}` (ignited runs only):",
         "",
         "| metric | value |",
-        "|---|---|",
+        _SEP2,
         f"| ignited runs | {len(ignited)} / {agg['n_runs']} |",
         "| acquisitions, mean per ignited run | "
         + (f"{mean_acquired:.2f}" if mean_acquired is not None else "-")
@@ -483,6 +493,8 @@ def _conversion_block(cell: str, agg: dict[str, Any]) -> list[str]:
         )
     return lines + [""]
 
+
+_SEP2 = "|---|---|"
 
 _ATTACK_RATE_KEYS = (
     "infection_attack_rate",
@@ -531,13 +543,13 @@ def _actions_table(agg: dict[str, Any]) -> list[str]:
     actions = agg["confinement_actions"]
     if not actions:
         return []
-    lines = ["| action | count |", "|---|---|"]
+    lines = ["| action | count |", _SEP2]
     for action, count in sorted(actions.items(), key=lambda kv: -kv[1]):
         lines.append(f"| {action} | {count} |")
     channels = agg.get("detection_channels") or {}
     if channels:
         lines.append("")
-        lines += ["| detection channel | orders+refusals |", "|---|---|"]
+        lines += ["| detection channel | orders+refusals |", _SEP2]
         for channel, count in sorted(channels.items()):
             lines.append(f"| {channel} | {count} |")
     return lines + [""]
@@ -564,7 +576,7 @@ def main(argv: list[str] | None = None) -> None:
     if args.json is not None:
         out = Path(resolve_repo_path(str(REPO_ROOT), str(args.json)))
         with validated_open(
-            out, "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+            str(out), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
         ) as handle:
             json.dump(cells, handle, indent=2, default=str)
 

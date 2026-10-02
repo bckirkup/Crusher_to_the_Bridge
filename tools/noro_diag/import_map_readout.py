@@ -201,61 +201,73 @@ def collect(root: Path, tiers: list[str] | None = None) -> dict:
             continue
         cells: dict[tuple, dict] = {}
         for zip_path in sorted(tier_dir.glob("*.zip")):
-            summary = _load_summary(zip_path)
-            if summary is None:
-                continue
-            params = summary.get("parameters") or {}
-            key = _cell_key(params)
-            entry = cells.setdefault(key, {
-                "params": params, "rows": [], "by_seed": {},
-                "witness": [],
-                "emit_counts": defaultdict(int),
-            })
-            row = {"seed": _seed_of(params), **_outcomes(summary)}
-            entry["rows"].append(row)
-            entry["by_seed"][row["seed"]] = row
-            block = summary.get("initiation") or {}
-            comp = ((block.get("manifest") or {}).get("boarding")
-                    or {}).get("norwalk_gi") or {}
-            entry["witness"].append({
-                "resolved": block.get("resolved") or {},
-                "symptomatic": int(
-                    (comp.get("composition") or {}).get("symptomatic")
-                    or 0
-                ),
-            })
-            if row["ignited"]:
-                census = _load_census(zip_path)
-                if census:
-                    entry.setdefault("peaks", []).append(
-                        _concurrent_peak(census),
-                    )
-                    for zone, n_emits in _emit_counts(census).items():
-                        entry["emit_counts"][zone] += n_emits
-        table = []
-        witness = []
-        for key, entry in sorted(
-            cells.items(), key=lambda kv: str(kv[0]),
-        ):
-            metrics = _cell_metrics(entry["rows"])
-            metrics["label"] = _cell_label(entry["params"])
-            metrics["params"] = entry["params"]
-            peaks = sorted(entry.get("peaks") or [])
-            metrics["depth_median"] = (
-                peaks[len(peaks) // 2] if peaks else 0
-            )
-            metrics["depth_max"] = peaks[-1] if peaks else 0
-            metrics["placement"] = _placement(entry["emit_counts"])
-            table.append(metrics)
-            witness.append({
-                "label": metrics["label"],
-                **_stream_witness(
-                    entry["witness"],
-                    float(entry["params"].get("num_agents") or 0),
-                ),
-            })
+            _accumulate_zip(cells, zip_path)
+        table, witness = _tier_table(cells)
         out[tier] = {"cells": cells, "table": table, "witness": witness}
     return out
+
+
+def _accumulate_zip(cells: dict[tuple, dict], zip_path: Path) -> None:
+    summary = _load_summary(zip_path)
+    if summary is None:
+        return
+    params = summary.get("parameters") or {}
+    key = _cell_key(params)
+    entry = cells.setdefault(key, {
+        "params": params, "rows": [], "by_seed": {},
+        "witness": [],
+        "emit_counts": defaultdict(int),
+    })
+    row = {"seed": _seed_of(params), **_outcomes(summary)}
+    entry["rows"].append(row)
+    entry["by_seed"][row["seed"]] = row
+    block = summary.get("initiation") or {}
+    comp = ((block.get("manifest") or {}).get("boarding")
+            or {}).get("norwalk_gi") or {}
+    entry["witness"].append({
+        "resolved": block.get("resolved") or {},
+        "symptomatic": int(
+            (comp.get("composition") or {}).get("symptomatic")
+            or 0
+        ),
+    })
+    if not row["ignited"]:
+        return
+    census = _load_census(zip_path)
+    if census:
+        entry.setdefault("peaks", []).append(
+            _concurrent_peak(census),
+        )
+        for zone, n_emits in _emit_counts(census).items():
+            entry["emit_counts"][zone] += n_emits
+
+
+def _tier_table(
+    cells: dict[tuple, dict],
+) -> tuple[list[dict], list[dict]]:
+    table = []
+    witness = []
+    for key, entry in sorted(
+        cells.items(), key=lambda kv: str(kv[0]),
+    ):
+        metrics = _cell_metrics(entry["rows"])
+        metrics["label"] = _cell_label(entry["params"])
+        metrics["params"] = entry["params"]
+        peaks = sorted(entry.get("peaks") or [])
+        metrics["depth_median"] = (
+            peaks[len(peaks) // 2] if peaks else 0
+        )
+        metrics["depth_max"] = peaks[-1] if peaks else 0
+        metrics["placement"] = _placement(entry["emit_counts"])
+        table.append(metrics)
+        witness.append({
+            "label": metrics["label"],
+            **_stream_witness(
+                entry["witness"],
+                float(entry["params"].get("num_agents") or 0),
+            ),
+        })
+    return table, witness
 
 
 def _discordance(collected: dict) -> list[dict]:
@@ -273,20 +285,34 @@ def _discordance(collected: dict) -> list[dict]:
                     shared = set(arms[a]) & set(arms[b])
                     if not shared:
                         continue
-                    a_only = sum(
-                        arms[a][s]["ignited"] and not arms[b][s]["ignited"]
-                        for s in shared
+                    rows.append(
+                        _discord_row(tier, nsf, a, b, arms[a], arms[b], shared),
                     )
-                    b_only = sum(
-                        arms[b][s]["ignited"] and not arms[a][s]["ignited"]
-                        for s in shared
-                    )
-                    rows.append({
-                        "tier": tier, "nsf": nsf,
-                        "arm_a": a, "arm_b": b, "shared": len(shared),
-                        "a_only": a_only, "b_only": b_only,
-                    })
     return rows
+
+
+def _discord_row(
+    tier: str,
+    nsf: float,
+    a: str,
+    b: str,
+    a_by_seed: dict,
+    b_by_seed: dict,
+    shared: set,
+) -> dict:
+    a_only = sum(
+        a_by_seed[s]["ignited"] and not b_by_seed[s]["ignited"]
+        for s in shared
+    )
+    b_only = sum(
+        b_by_seed[s]["ignited"] and not a_by_seed[s]["ignited"]
+        for s in shared
+    )
+    return {
+        "tier": tier, "nsf": nsf,
+        "arm_a": a, "arm_b": b, "shared": len(shared),
+        "a_only": a_only, "b_only": b_only,
+    }
 
 
 def build_report(root: Path, tiers: list[str] | None = None) -> dict:

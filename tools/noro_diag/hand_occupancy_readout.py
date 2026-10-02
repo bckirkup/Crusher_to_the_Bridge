@@ -252,6 +252,14 @@ class _Fold:
         self.n_rows += 1
         end = row.get("load_end_epoch_gec")
         positive = end is not None and float(end) >= LIU_LOD_GEC
+        self._add_end(row, end, positive)
+        self._add_stool(row, end, positive)
+        self._add_flags(row)
+        self._add_factors(row, positive)
+
+    def _add_end(
+        self, row: dict[str, Any], end: Any, positive: bool,
+    ) -> None:
         if end is not None:
             self.end_rows += 1
             if float(end) > 0.0:
@@ -267,6 +275,10 @@ class _Fold:
                 self.symp_end_rows += 1
             if positive:
                 self.symp_pos_logs.append(_log10_of(float(end)))
+
+    def _add_stool(
+        self, row: dict[str, Any], end: Any, positive: bool,
+    ) -> None:
         if row.get("stool_event"):
             self.event_rows += 1
             post = row.get("load_post_replenish_gec")
@@ -282,6 +294,8 @@ class _Fold:
                 self.routine_end_rows += 1
             if positive:
                 self.routine_end_pos_logs.append(_log10_of(float(end)))
+
+    def _add_flags(self, row: dict[str, Any]) -> None:
         if row.get("at_target"):
             self.at_target += 1
         if row.get("underflowed"):
@@ -290,6 +304,8 @@ class _Fold:
             self.first_seen += 1
         if not row.get("event_path"):
             self.continuous_path += 1
+
+    def _add_factors(self, row: dict[str, Any], positive: bool) -> None:
         factor = row.get("hand_wet_transfer")
         if factor is not None:
             self.wet_n += 1

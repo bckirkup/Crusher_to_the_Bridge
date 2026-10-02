@@ -2313,6 +2313,26 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="run only the tier's runs[index] (Batch array child)",
     )
     args = parser.parse_args(argv)
+    _validate_manifest_mode(parser, args)
+    _validate_touch_share(parser, args)
+    if args.fomite_touch_share_table is not None:
+        try:
+            args.fomite_touch_share_table = _safe_path(
+                str(args.fomite_touch_share_table),
+            )
+        except ValueError as exc:
+            parser.error(str(exc))
+    if args.alpha is not None and not 0.072 <= args.alpha <= 0.161:
+        parser.error(
+            f"--alpha {args.alpha} is outside the frozen interval "
+            "[0.072, 0.161]",
+        )
+    return args
+
+
+def _validate_manifest_mode(
+    parser: argparse.ArgumentParser, args: argparse.Namespace,
+) -> None:
     if args.manifest is not None:
         if args.tier is None:
             parser.error("--manifest requires --tier")
@@ -2345,6 +2365,11 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             parser.error("--index must be non-negative")
     elif args.tier is not None or args.index is not None:
         parser.error("--tier/--index require --manifest")
+
+
+def _validate_touch_share(
+    parser: argparse.ArgumentParser, args: argparse.Namespace,
+) -> None:
     if (
         args.fomite_touch_share is not None
         or args.fomite_touch_share_table is not None
@@ -2359,19 +2384,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         parser.error(
             "--fomite-touch-share declared requires --fomite-touch-share-table",
         )
-    if args.fomite_touch_share_table is not None:
-        try:
-            args.fomite_touch_share_table = _safe_path(
-                str(args.fomite_touch_share_table),
-            )
-        except ValueError as exc:
-            parser.error(str(exc))
-    if args.alpha is not None and not 0.072 <= args.alpha <= 0.161:
-        parser.error(
-            f"--alpha {args.alpha} is outside the frozen interval "
-            "[0.072, 0.161]",
-        )
-    return args
 
 
 def _tier_run_list(
@@ -2388,7 +2400,7 @@ def _load_manifest(manifest_path: Path) -> dict[str, Any]:
         resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
     )
     with validated_open(
-        safe_manifest, "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
     ) as handle:
         return json.load(handle)
 

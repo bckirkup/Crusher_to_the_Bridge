@@ -109,6 +109,108 @@ def _stamp_epoch(core_cls: type, rec: OccupancyRecorder) -> dict[str, Any]:
     return originals
 
 
+def _replenish_wrapped(
+    rec: OccupancyRecorder,
+    orig_replenish: Any,
+    self: Any,
+    agent: Any,
+    pathogen_id: str,
+    profile: dict | None,
+    zone_name: str | None = None,
+) -> None:
+    if pathogen_id != rec.pathogen_id:
+        orig_replenish(self, agent, pathogen_id, profile, zone_name)
+        return
+    rec.counters["replenish_calls"] += 1
+    present = pathogen_id in (agent.hand_load_by_pathogen or {})
+    load_entry = float(
+        agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+    )
+    rec._current = {
+        "agent_id": int(agent.agent_id),
+        "epoch": rec.epoch,
+        "call_site": _call_site(),
+        "zone_name": zone_name,
+        "first_seen": not present,
+        "load_entry_gec": load_entry,
+    }
+    rec._stool_outcome = None
+    rec._events_per_day = None
+    rec._stationary = None
+    rec._propensity = None
+    try:
+        orig_replenish(self, agent, pathogen_id, profile, zone_name)
+    finally:
+        row = rec._current
+        rec._current = None
+    if row is None:
+        return
+    _replenish_row(
+        rec, self, agent, pathogen_id, profile, row, present, load_entry,
+    )
+
+
+def _replenish_row(
+    rec: OccupancyRecorder,
+    self: Any,
+    agent: Any,
+    pathogen_id: str,
+    profile: dict | None,
+    row: dict[str, Any],
+    present: bool,
+    load_entry: float,
+) -> None:
+    target = float(
+        agent.get_pathogen_hand_target(pathogen_id, profile or {})
+    )
+    load_post = float(
+        agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+    )
+    # Keep the row only when the reservoir did work this call: the host
+    # is shedding (target > 0), carried load in, or already had a record.
+    if not (target > 0.0 or load_entry > 0.0 or present):
+        return
+    row.update({
+        "target_gec": target,
+        "shedding": target > 0.0,
+        "symptomatic": _symptomatic(agent, pathogen_id),
+        "confined": bool(self._cabin_confinement_active(agent)),
+        "load_post_replenish_gec": load_post,
+        "at_target": target > 0.0 and load_post >= target,
+        "underflowed": target > 0.0 and load_post <= target * 1e-6,
+        "stool_event": rec._stool_outcome,
+        "events_per_day_thinned": rec._events_per_day,
+        "event_path": rec._stool_outcome is not None,
+        "stationary_init_gec": rec._stationary,
+        "propensity": rec._propensity,
+        "inactivation_rate_per_hour": (
+            agent.hand_inactivation_rate_by_pathogen.get(pathogen_id)
+        ),
+        # NORO-HAND-PRACTICE-01 witness: the epoch's deposit-side
+        # drying blend under hygiene_cycle (None on every other arm).
+        "hand_wet_transfer": (
+            agent.hand_wet_transfer_by_pathogen.get(pathogen_id)
+        ),
+        # NORO-HAND-CARRIAGE-01 witnesses: the wash-resistant
+        # compartment and the host's own-environment pool (None
+        # where the arm never allocates them).
+        "hand_protected_gec": (
+            agent.hand_protected_load_by_pathogen.get(pathogen_id)
+        ),
+        "hand_self_pool_gec": (
+            agent.hand_self_pool_by_pathogen.get(pathogen_id)
+        ),
+        "hygiene_calls": 0,
+        "load_end_epoch_gec": None,
+    })
+    key = (row["epoch"], row["agent_id"])
+    rec.row_index[key] = len(rec.rows)
+    rec.rows.append(row)
+    rec.counters["rows_recorded"] += 1
+    if rec._stool_outcome is None:
+        rec.counters["continuous_path_calls"] += 1
+
+
 def _wrap_replenish(core_cls: type, rec: OccupancyRecorder) -> dict[str, Any]:
     """One occupancy row per replenish call that involves the reservoir."""
     originals = {
@@ -162,86 +264,10 @@ def _wrap_replenish(core_cls: type, rec: OccupancyRecorder) -> dict[str, Any]:
         profile: dict | None,
         zone_name: str | None = None,
     ) -> None:
-        if pathogen_id != rec.pathogen_id:
-            originals["_replenish_hand"](
-                self, agent, pathogen_id, profile, zone_name,
-            )
-            return
-        rec.counters["replenish_calls"] += 1
-        present = pathogen_id in (agent.hand_load_by_pathogen or {})
-        load_entry = float(
-            agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        return _replenish_wrapped(
+            rec, originals["_replenish_hand"],
+            self, agent, pathogen_id, profile, zone_name,
         )
-        rec._current = {
-            "agent_id": int(agent.agent_id),
-            "epoch": rec.epoch,
-            "call_site": _call_site(),
-            "zone_name": zone_name,
-            "first_seen": not present,
-            "load_entry_gec": load_entry,
-        }
-        rec._stool_outcome = None
-        rec._events_per_day = None
-        rec._stationary = None
-        rec._propensity = None
-        try:
-            originals["_replenish_hand"](
-                self, agent, pathogen_id, profile, zone_name,
-            )
-        finally:
-            row = rec._current
-            rec._current = None
-        if row is None:
-            return
-        target = float(
-            agent.get_pathogen_hand_target(pathogen_id, profile or {})
-        )
-        load_post = float(
-            agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
-        )
-        # Keep the row only when the reservoir did work this call: the host
-        # is shedding (target > 0), carried load in, or already had a record.
-        if not (target > 0.0 or load_entry > 0.0 or present):
-            return
-        row.update({
-            "target_gec": target,
-            "shedding": target > 0.0,
-            "symptomatic": _symptomatic(agent, pathogen_id),
-            "confined": bool(self._cabin_confinement_active(agent)),
-            "load_post_replenish_gec": load_post,
-            "at_target": target > 0.0 and load_post >= target,
-            "underflowed": target > 0.0 and load_post <= target * 1e-6,
-            "stool_event": rec._stool_outcome,
-            "events_per_day_thinned": rec._events_per_day,
-            "event_path": rec._stool_outcome is not None,
-            "stationary_init_gec": rec._stationary,
-            "propensity": rec._propensity,
-            "inactivation_rate_per_hour": (
-                agent.hand_inactivation_rate_by_pathogen.get(pathogen_id)
-            ),
-            # NORO-HAND-PRACTICE-01 witness: the epoch's deposit-side
-            # drying blend under hygiene_cycle (None on every other arm).
-            "hand_wet_transfer": (
-                agent.hand_wet_transfer_by_pathogen.get(pathogen_id)
-            ),
-            # NORO-HAND-CARRIAGE-01 witnesses: the wash-resistant
-            # compartment and the host's own-environment pool (None
-            # where the arm never allocates them).
-            "hand_protected_gec": (
-                agent.hand_protected_load_by_pathogen.get(pathogen_id)
-            ),
-            "hand_self_pool_gec": (
-                agent.hand_self_pool_by_pathogen.get(pathogen_id)
-            ),
-            "hygiene_calls": 0,
-            "load_end_epoch_gec": None,
-        })
-        key = (row["epoch"], row["agent_id"])
-        rec.row_index[key] = len(rec.rows)
-        rec.rows.append(row)
-        rec.counters["rows_recorded"] += 1
-        if rec._stool_outcome is None:
-            rec.counters["continuous_path_calls"] += 1
 
     def apply_hygiene(
         self: Any, agent: Any, pathogen_id: str, profile: dict | None,
