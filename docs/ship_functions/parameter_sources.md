@@ -1,11 +1,11 @@
 # Ship-function capacity: parameter sources
 
-> **Status:** Proposed — sourcing record for
-> [`ship_function_capacity_spec.md`](ship_function_capacity_spec.md)
-> (sourcing task SHIP-FUNC-01). Adopts no value, authorises no fit. Every row
-> here is a spec-stage declaration: no `ship_functions`/`ship_systems`/fatigue
-> field exists in-tree yet, so nothing in this document describes current
-> behaviour.
+> **Status:** Implemented — sourcing record for
+> [`ship_functions/ship_function_capacity_spec.md`](ship_function_capacity_spec.md)
+> (sourcing task SHIP-FUNC-01). The machinery it sources now exists in-tree
+> (PRs #839–#841); this document remains the register of record — new
+> constants enter here with interval + grade, or an explicit NULL-SOURCE,
+> before engine defaults move.
 
 ## 0. Scope and reading rules
 

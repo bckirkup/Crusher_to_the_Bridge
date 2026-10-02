@@ -697,15 +697,15 @@ The tunables declared by
 [`ship_functions/ship_function_capacity_spec.md`](ship_functions/ship_function_capacity_spec.md);
 sourcing record with verbatim locators:
 [`ship_functions/parameter_sources.md`](ship_functions/parameter_sources.md).
-**No `ship_functions`/`ship_systems`/fatigue field exists in-tree yet** — every
-row is at proposal stage: sourced rows carry `⊘ field` until the stage-1
-registry lands, and the `Lev` column stays `L?` because there is nothing to
-perturb. Intervals below are the spans to ship when the fields land; nothing
-here is adopted.
+The machinery these rows feed now exists in-tree (§3–§7, PRs #839–#841 —
+`ship_functions`/`ship_systems`/`ppe_types` blocks landed `enabled: false`).
+Sourced rows keep their register intervals; `symptomatic_effectiveness`
+shipped at the 0.7 arm of its [0.55, 0.85] interval. Nothing here was
+fitted; unsourced rows remain NULL-SOURCE declarations.
 
 | Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
 |---|---|---|---|---|---|---|---|---|---|
-| `symptomatic_effectiveness` (fraction of a watch an IMPAIRED crew member delivers, §4) | spec only | B | ILI presenteeism self-rated effectiveness 0.70–0.75 (Nichol et al., n=497 working adults 50–64, read via Frimpter 2022 SLR PharmacoEconomics 10.1007/s40273-022-01224-9); corroborator ~2.5 h/8 h reduced productivity ≈ 0.69 — the spec text's "no source exists" is stale | Sec | [0.55, 0.85] declared widen of measured [0.70, 0.75] | U | L? | ✓ sourced interval, ⊘ field until registry lands | SHIP-FUNC-01 |
+| `symptomatic_effectiveness` (fraction of a watch an IMPAIRED crew member delivers, §4) | spec only | B | ILI presenteeism self-rated effectiveness 0.70–0.75 (Nichol et al., n=497 working adults 50–64, read via Frimpter 2022 SLR PharmacoEconomics 10.1007/s40273-022-01224-9); corroborator ~2.5 h/8 h reduced productivity ≈ 0.69 — the spec text's "no source exists" is stale | Sec | [0.55, 0.85] declared widen of measured [0.70, 0.75] | U | L? | ✓ sourced interval; shipped at 0.7 (PR #841) | SHIP-FUNC-01 |
 | `ppe_types.<type>.fatigue_rate_per_epoch` (surgical_mask, n95, papr, latex_gloves, chemical_gloves) | spec examples 0.1–0.8 | C | No per-wear-hour fatigue rate is measured anywhere — ordering evidence only: N95 > surgical on discomfort/fatigue symptoms (Su 2021 RCT; Scarano 2020; Li 2005); PAPR ≈ N95 respirator-alone (Powell 2017) but PAPR-level ensemble severe (Herstein 2021); gloves negligible | R/Ab | declared [0.0, 0.9] per type | U | L? | ∅lit — declared | SHIP-FUNC-01 |
 | `ppe_types.<type>.heat_load` | spec examples 0.0–0.6 | C (ordering B) | surgical < N95 measured (Li 2005 microclimate/HR; Scarano 2020 facial T/adherence; Gu 2023; Cates 2023 rest-state mild+reversible); **PAPR is two regimes** — loose-fitting PAPR ≤ N95 respirator-alone (Powell 2017), PAPR-level ensemble 3/6 >38.5 °C core in 4 h (Herstein 2021) | R/Ab | declared [0.0, 0.7] | U | L? | ∅lit — declared; ordering anchored | SHIP-FUNC-01 |
 | `ppe_types.<type>.dexterity_impairment` | spec examples 0.0–0.3 | B gloves / C rest | Sawyer 2005 latex ~8.6% better fine dexterity than nitrile; Bensel 1993 task time ∝ thickness 0.18–0.64 mm; Khanlari 2023 structural ≫ general gloves; Heydarnia 2025 all cut-resistant sig. reduced; no fine-motor channel for masks; PAPR bulk unmeasured | Ab/R | latex [0.0, 0.15]; chemical [0.10, 0.50]; masks 0.0; papr [0.0, 0.25] declared | U | L? | ✓ gloves sourced band; rest ∅lit-declared | SHIP-FUNC-01 |
