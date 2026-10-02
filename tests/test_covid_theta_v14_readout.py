@@ -112,7 +112,7 @@ def test_evaluate_reads_interior_admissible_and_triggers():
         _entry(7.5e11, median=0.014, mean=0.045, ok=False),
         _entry(1e12, median=0.018, mean=0.052, ok=False),
     ]
-    out = mod._evaluate(rows, interior, boundary)
+    out = mod._evaluate(rows, interior, boundary, "hygiene_cycle")
     assert out["admissible_thetas"] == [1.78e11, 2.37e11]
     assert not out["report_immediately"]
 
@@ -121,7 +121,7 @@ def test_evaluate_reads_interior_admissible_and_triggers():
         _entry(t, median=0.02, mean=0.04, ok=False, takeoff=0.5)
         for t in thetas
     ]
-    out = mod._evaluate(rows, interior, boundary)
+    out = mod._evaluate(rows, interior, boundary, "hygiene_cycle")
     assert out["admissible_thetas"] == []
     triggers = {t["trigger"] for t in out["report_immediately"]}
     assert "window_illusory" in triggers
@@ -135,7 +135,7 @@ def test_evaluate_reads_interior_admissible_and_triggers():
         ),
         _entry(1e12, median=0.02, mean=0.04, ok=False, takeoff=0.5),
     ]
-    out = mod._evaluate(rows, interior, boundary)
+    out = mod._evaluate(rows, interior, boundary, "hygiene_cycle")
     triggers = {t["trigger"] for t in out["report_immediately"]}
     assert "boundary_only_admissible" in triggers
 

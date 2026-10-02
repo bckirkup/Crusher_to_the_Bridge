@@ -166,21 +166,30 @@ def _audit_cell(
     expected_arm: str,
     expected_thetas: set[float],
     expected_design: str,
+    delivery_echoes: dict[str, Any] | None = None,
 ) -> list[str]:
     """Per-cell audit of the stage-1 generic-voyage contract.
 
     Lattice cells carry no declared replay geometry — index_onset_day /
     index_shedding_at_day0 are stage-2 fields. What a stage-1 cell must
-    echo instead: the resolved hand mode and arm, the lattice theta, a
-    drawn infection age, and a scoreable recorded_onsets channel.
+    echo instead: the resolved delivery echoes declared by the screen
+    (the hand mode for v14; presentation_draw_mode + hand_reservoir_mode
+    for v15), the lattice theta, the arm, a drawn infection age, and a
+    scoreable recorded_onsets channel.
     """
+    echoes = (
+        {"hand_reservoir_mode": expected_arm}
+        if delivery_echoes is None
+        else dict(delivery_echoes)
+    )
     failures: list[str] = []
     delivery = payload.get("delivery") or {}
-    mode = delivery.get("hand_reservoir_mode")
-    if mode != expected_arm:
-        failures.append(
-            f"delivery.hand_reservoir_mode {mode!r} != {expected_arm!r}",
-        )
+    for field, want in echoes.items():
+        got = delivery.get(field)
+        if got != want:
+            failures.append(
+                f"delivery.{field} {got!r} != {want!r}",
+            )
     cell = payload.get("cell") or {}
     if cell.get("arm_id") != expected_arm:
         failures.append(
@@ -284,21 +293,31 @@ def _write_pairs_csv(paired: dict[tuple[float, int], dict[str, Any]], out: str) 
     return len(rows)
 
 
-def _fail_sides(surface: Iterable[dict[str, Any]], interior: set[float]) -> list[str]:
+def _fail_sides(
+    surface: Iterable[dict[str, Any]],
+    interior: set[float],
+    screen_arm: str | None,
+) -> list[str]:
     return [
         side
         for side in (
             _row_side(e)
             for e in surface
-            if e.get("theta") in interior and e.get("arm_id") != "spike_decay"
+            if e.get("theta") in interior
+            and e.get("arm_id") in (screen_arm, None)
         )
         if side is not None
     ]
 
 
-def _evaluate(surface: list[dict[str, Any]], interior: set[float], boundary: set[float]) -> dict[str, Any]:
+def _evaluate(
+    surface: list[dict[str, Any]],
+    interior: set[float],
+    boundary: set[float],
+    screen_arm: str | None,
+) -> dict[str, Any]:
     """Apply the frozen selector and the report-immediately triggers."""
-    rows = [e for e in surface if e.get("arm_id") != "spike_decay"]
+    rows = [e for e in surface if e.get("arm_id") in (screen_arm, None)]
     admissible = sorted(
         e["theta"] for e in rows
         if e.get("theta") in interior and e.get("fleet_shape_ok")
@@ -307,7 +326,7 @@ def _evaluate(surface: list[dict[str, Any]], interior: set[float], boundary: set
         e["theta"] for e in rows
         if e.get("theta") in boundary and e.get("fleet_shape_ok")
     )
-    sides = _fail_sides(surface, interior)
+    sides = _fail_sides(surface, interior, screen_arm)
     takeoff = {
         e["theta"]: e.get("takeoff_probability") for e in rows
     }
@@ -362,15 +381,29 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", default=None)
     parser.add_argument("--surface-out", default=None)
     parser.add_argument("--pairs-out", default=None)
+    parser.add_argument(
+        "--audit-echo",
+        action="append",
+        metavar="KEY=VALUE",
+        default=None,
+        help=(
+            "Delivery-echo invariant the cell audit enforces, repeatable; "
+            "defaults to delivery.hand_reservoir_mode == the screen arm."
+        ),
+    )
     parser.add_argument("--expected-cells", type=int, default=1800)
     parser.add_argument("--allow-partial", action="store_true")
     args = parser.parse_args(argv)
 
     design_path = resolve_repo_path(REPO_ROOT, args.design)
     design = load_design(design_path, repo_root=REPO_ROOT)
+    screen_arm = design.baseline_arm_id
     expected_cells = {
-        c.key for c in enumerate_cells(design) if c.arm_id == "hygiene_cycle"
+        c.key for c in enumerate_cells(design) if c.arm_id == screen_arm
     }
+    delivery_echoes = {
+        k: v for k, v in (e.split("=", 1) for e in args.audit_echo or ())
+    } or None
 
     client = _s3_client()
     bucket, prefix = _s3_uri(args.s3_prefix)
@@ -390,7 +423,8 @@ def main(argv: list[str] | None = None) -> int:
     expected_thetas = set(design.thetas)
     for key, payload in payloads.items():
         failures = _audit_cell(
-            payload, "hygiene_cycle", expected_thetas, design.design_id,
+            payload, screen_arm, expected_thetas, design.design_id,
+            delivery_echoes=delivery_echoes,
         )
         if failures:
             audit_failures[key] = failures
@@ -409,7 +443,7 @@ def main(argv: list[str] | None = None) -> int:
     thetas = sorted(design.thetas)
     interior = set(thetas[1:-1])
     boundary = {thetas[0], thetas[-1]}
-    verdict = _evaluate(surface["surface"], interior, boundary)
+    verdict = _evaluate(surface["surface"], interior, boundary, screen_arm)
 
     paired = _pairs(payloads, parent_cells) if parent_cells else {}
     pair_stats = _pair_row_stats(paired) if paired else {}
@@ -420,7 +454,7 @@ def main(argv: list[str] | None = None) -> int:
         if med is not None:
             entry = next(
                 (e for e in surface["surface"] if e.get("theta") == theta
-                 and e.get("arm_id") == "hygiene_cycle"),
+                 and e.get("arm_id") in (screen_arm, None)),
                 None,
             )
             p_med = None
@@ -444,6 +478,11 @@ def main(argv: list[str] | None = None) -> int:
                     ),
                 })
 
+    parent_tag = (
+        parent_design.design_id.split("covid_theta_screen_", 1)[-1]
+        if parent_cells
+        else ""
+    )
     report = {
         "cells_found": len(payloads),
         "cells_expected": args.expected_cells,
@@ -452,7 +491,7 @@ def main(argv: list[str] | None = None) -> int:
         "admissible_thetas": verdict["admissible_thetas"],
         "boundary_passing": verdict["boundary_passing"],
         "interior_fail_sides": verdict["interior_fail_sides"],
-        "paired_vs_v13": pair_stats,
+        f"paired_vs_{parent_tag}": pair_stats,
         "report_immediately": verdict["report_immediately"],
         "coverage": surface["coverage"],
         "sanitary_witness": surface["sanitary_witness"],
