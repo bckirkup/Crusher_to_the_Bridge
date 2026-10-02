@@ -826,6 +826,7 @@ class KorkinAgent:
         "hand_carriage_propensity_by_pathogen",
         "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
         "hand_protected_load_by_pathogen", "hand_self_pool_by_pathogen",
+        "hand_protected_pending_by_pathogen",
         "emesis_episode_schedule_by_pathogen",
         "emesis_titre_gec_per_ml_by_pathogen",
         "emesis_censored_below_lod_by_pathogen",
@@ -951,6 +952,10 @@ class KorkinAgent:
         # in sites washes cannot reach (subungual folds, creases). The
         # recorded hand_load is accessible + protected.
         self.hand_protected_load_by_pathogen: dict[str, float] = {}
+        # Queued sequester draws settling into the protected compartment
+        # over the per-infection timescale (McNeil 2001 day-scale
+        # accretion); not yet rinse-visible.
+        self.hand_protected_pending_by_pathogen: dict[str, float] = {}
         # Mass this host deposited on its own environment (own cabin
         # compartment / home zone), feeding the routine self-contact ticks.
         self.hand_self_pool_by_pathogen: dict[str, float] = {}
@@ -1284,6 +1289,7 @@ class KorkinAgent:
         self.hand_practice_by_pathogen.pop(pathogen_id, None)
         self.hand_wet_transfer_by_pathogen.pop(pathogen_id, None)
         self.hand_protected_load_by_pathogen.pop(pathogen_id, None)
+        self.hand_protected_pending_by_pathogen.pop(pathogen_id, None)
         self.hand_self_pool_by_pathogen.pop(pathogen_id, None)
         shedding_mult = (
             draw_shedding_multiplier(rng, profile or {})
@@ -2622,6 +2628,7 @@ class KorkinShipEngine:
                 agent.illness_status = IllnessStatus.RECOVERED
                 agent.hand_load_by_pathogen.clear()
                 agent.hand_protected_load_by_pathogen.clear()
+                agent.hand_protected_pending_by_pathogen.clear()
                 agent.hand_self_pool_by_pathogen.clear()
 
     def _draw_fallback_onset(self, agent: KorkinAgent) -> None:

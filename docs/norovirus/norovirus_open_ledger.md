@@ -4311,11 +4311,19 @@ post-wash load and the `event_end` arm is the post-visit post-wash
 sample — event post-wash positivity 35.3% vs routine post-wash 17.6%
 (`event_higher` ~2×, both blocks), while Liu reads post-bathroom 12.4%
 *below* routine 37.5%. The wash is near-inert on the event arm because
-the protected sequestration draws at the event instant — the open
-mechanism-scope decision is whether sequestration should be delayed
-(accessible→protected over contact-time) so the post-visit wash can
-strip the fresh load first (hypothesis recorded in
-`docs/ledger/NORO-HAND-CARRIAGE-01.md`). Design +
+the protected sequestration draws at the event instant. **Benjamin
+approved the delayed-sequestration rebuild 2026-10-01**: the sequester
+draw is unchanged (Liu-bounded logU(50,3200)) but now lands in a
+`hand_protected_pending` queue and settles into protected at a
+per-infection τ ∈ U(24,72) h — order-days, declared Grade C on McNeil
+2001 (nail colonization 21% day-1 → 71% day-15) + McGinley 1988 standing
+subungual reservoir; no mass-accretion-rate series exists (`?nr`). The
+per-event draw count is unchanged — the same logU(50,3200) draw, now
+queued — plus one per-infection uniform for τ; only *when* the mass
+becomes rinse-visible moves, and the post-visit wash now acts on the
+fresh accessible load first, which is the honest shape of the Liu
+ordering.
+Re-census verdict pending on the frozen 42 cells. Design +
 criteria + full verdict: `docs/ledger/NORO-HAND-CARRIAGE-01.md`;
 sources: `docs/literature/consensus_tranche_52_hand_carriage.md`;
 merged cell table

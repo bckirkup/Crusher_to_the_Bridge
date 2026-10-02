@@ -224,13 +224,15 @@ HAND_DRY_TRANSFER_MULTIPLIER_RANGE = (0.005, 0.08)
 # Infect, DOI 10.1016/j.jhin.2018.06.023) nail colonization after hand
 # disinfection. Grade B for the mechanism.
 #
-# GEC sequestered per propensity-fired contaminating event: bounded by
-# Liu's own post-bathroom arm -- after a bathroom visit + wash, 12.4% of
-# the rinses still read >= 2.30 log10 and the positive band runs ~2.3-4
-# log10, i.e. the surviving mass is the protected compartment measured
-# directly. Two-order span, so the draw is log-uniform. Grade B
-# (magnitude), the band is the same Liu 2013 dataset the hand target
-# comes from. Origin: T.
+# GEC queued for the protected sites per propensity-fired contaminating
+# event: bounded by Liu's own post-bathroom arm -- after a bathroom visit
+# + wash, 12.4% of the rinses still read >= 2.30 log10 and the positive
+# band runs ~2.3-4 log10, i.e. the surviving mass is the protected
+# compartment measured directly. Two-order span, so the draw is
+# log-uniform; it lands in hand_protected_pending_by_pathogen and settles
+# over HAND_PROTECTED_SEQUESTER_HOURS_RANGE rather than at the visit
+# instant. Grade B (magnitude), the band is the same Liu 2013 dataset
+# the hand target comes from. Origin: T.
 HAND_PROTECTED_SEQUESTER_GEC_RANGE = (50.0, 3200.0)
 # Per-hour inactivation of the protected compartment, drawn once per
 # infection: sheltered sites lose virus at a fraction of the fingertip-pad
@@ -239,6 +241,18 @@ HAND_PROTECTED_SEQUESTER_GEC_RANGE = (50.0, 3200.0)
 # inactivation. No dedicated under-nail survival series retrieved, so the
 # interval is declared an order below the pad rate. Grade C. Origin: Ab.
 HAND_PROTECTED_INACTIVATION_PER_HOUR_RANGE = (0.01, 0.06)
+# NORO-HAND-CARRIAGE-01: the protected sites are not filled at the
+# contaminating instant -- fresh material works into subungual folds and
+# creases through handling over days, so the measured sequester draw is
+# queued and settles at this per-infection timescale. McNeil et al. 2001
+# (Clin Infect Dis 32:367, DOI 10.1086/318488): potential-pathogen
+# colonization beneath artificial nails rose from 21% positive on day 1
+# to 71% on day 15; McGinley 1988 (J Clin Microbiol, DOI
+# 10.1128/jcm.26.5.950-953.1988) the subungual space holds a standing
+# ~10^5-CFU reservoir. No series measures a mass-accretion rate (?nr),
+# so the settling time is declared order-days, centred on 48 h. Grade C.
+# Origin: Ab (McNeil positivity series).
+HAND_PROTECTED_SEQUESTER_HOURS_RANGE = (24.0, 72.0)
 # Defecation events per day: the frequency at which a faecally shedding host
 # recontaminates its own hands, and so the only quantity through which symptom
 # status reaches the faecal-hand-fomite-food chain. Two arms, because that is
@@ -7607,6 +7621,12 @@ class TransmissionCore:
                     *HAND_PROTECTED_INACTIVATION_PER_HOUR_RANGE,
                 ),
             ),
+            # Settling rate at which a contaminating event's queued
+            # sequester draw reaches the protected sites (iii).
+            "protected_sequester_per_hour": 1.0
+            / float(
+                self.rng.uniform(*HAND_PROTECTED_SEQUESTER_HOURS_RANGE),
+            ),
         }
         agent.hand_practice_by_pathogen[pathogen_id] = practice
         return practice
@@ -7643,7 +7663,10 @@ class TransmissionCore:
         the total, so the protected share is clamped to what remains;
         everything above it is the compartment washes can reach. Sheltered
         material decays at its own per-infection rate, an order below the
-        fingertip-pad inactivation the accessible part sees.
+        fingertip-pad inactivation the accessible part sees, and gains the
+        epoch's settled share of the queued sequester draws -- fresh
+        event contamination takes days to become wash-proof, so until it
+        settles it is neither accessible nor counted in the rinse.
         """
         protected = min(
             agent.hand_protected_load_by_pathogen.get(pathogen_id, 0.0),
@@ -7653,7 +7676,23 @@ class TransmissionCore:
             -practice["protected_inactivation_per_hour"]
             * self.clock.hours_per_epoch
         )
-        return protected, max(0.0, current - protected)
+        accessible = max(0.0, current - protected)
+        pending = agent.hand_protected_pending_by_pathogen.get(
+            pathogen_id, 0.0,
+        )
+        if pending > 0.0:
+            settle = pending * (
+                1.0
+                - math.exp(
+                    -practice["protected_sequester_per_hour"]
+                    * self.clock.hours_per_epoch
+                )
+            )
+            protected += settle
+            agent.hand_protected_pending_by_pathogen[pathogen_id] = (
+                pending - settle
+            )
+        return protected, accessible
 
     def _hand_practice_epoch(
         self,
@@ -7814,15 +7853,27 @@ class TransmissionCore:
         if self._stool_event_occurs(events_per_day):
             if self.rng.random() < propensity:
                 accessible = max(accessible, target)
-                # A contaminating visit presses material into the
-                # protected sites at the measured post-bathroom magnitude
-                # (NORO-HAND-CARRIAGE-01 i).
-                protected += math.pow(
-                    10.0,
-                    self.rng.uniform(
-                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[0]),
-                        math.log10(HAND_PROTECTED_SEQUESTER_GEC_RANGE[1]),
-                    ),
+                # A contaminating visit queues material for the protected
+                # sites at the measured post-bathroom magnitude, but it
+                # settles over days -- the post-visit wash still acts on
+                # the fresh accessible load first (NORO-HAND-CARRIAGE-01
+                # iii, McNeil 2001).
+                pending = agent.hand_protected_pending_by_pathogen.get(
+                    pathogen_id, 0.0,
+                )
+                agent.hand_protected_pending_by_pathogen[pathogen_id] = (
+                    pending
+                    + math.pow(
+                        10.0,
+                        self.rng.uniform(
+                            math.log10(
+                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[0],
+                            ),
+                            math.log10(
+                                HAND_PROTECTED_SEQUESTER_GEC_RANGE[1],
+                            ),
+                        ),
+                    )
                 )
             if self.rng.random() < practice["wash_compliance"]:
                 efficacy, wet = self._hand_wash_act()
