@@ -283,11 +283,20 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   on the stool-event path the COVID arm never exercises), every arm
   delta sits inside the stream-reorder band, and pooled
   during-quarantine routes show fomite = 0 on all 60 cells — the hand
-  reservoir is not the during-quarantine carrier on this hull. Open
-  decision for stage 1: run v14 verbatim (3,600 cells, pairing kept
-  for bit-comparable contrast vs v13), single-arm hygiene_cycle
-  (1,800 cells), or skip the re-screen — the measured neutrality
-  argues the pairing sees nothing at these coordinates.
+  reservoir is not the during-quarantine carrier on this hull. Stage-1
+  decision resolved to **single-arm `hygiene_cycle`, 1,800 cells** —
+  the measured neutrality says the spike_decay pairing sees nothing at
+  these coordinates, so the v14 stage-1 lattice ran the hygiene_cycle
+  half only. **v14 stage 1 is measured (1,800/1,800 cells at
+  `02740187`, zero audit/child failures): the admissible band slides
+  one lattice notch down to {1.33e11 … 4.22e11}** — 1.33e11 lifts off
+  the floor (0.00054 vs v13 0.00027), 5.62e11 tips over the ceiling
+  (0.00808 vs 0.00781); seed-paired medians vs v13 sit at 0.0 delta
+  everywhere with takeoff flips 17–30/200 — no suppression shape, no
+  frozen trigger fired (`docs/ledger/COVID-THETA-V14.md`,
+  `docs/covid/covid_theta_screen_v14_readout.md`). Stage 2 (declared
+  replay at the admissible set + flanks {1e11, 5.62e11} + Θ1e9 anchor)
+  is eligible under the frozen rule, gated on this verdict.
   **Execution state:** the array was held on the prior mechanism after
   the PRACTICE-01 `still_starved` census, then resumed on the
   `1c94de2d` image under a fresh prefix —
