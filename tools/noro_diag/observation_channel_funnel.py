@@ -110,6 +110,9 @@ from simulation_utils.platform_complement import declared_total  # noqa: E402
 from telemetry_buffer.agent_axes import (  # noqa: E402
     agent_is_isolated,
 )
+from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
+    TAKEOFF_PEAK_PREVALENCE,
+)
 from tools.covid_route_attribution import ascertainment_funnel  # noqa: E402
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.noro_diag import per_host_dose_challenge as _pdc  # noqa: E402
@@ -148,6 +151,7 @@ class ChannelCapture:
         self.noise_report_count = 0
         self.exposure: dict[int, HostExposure] = {}
         self.beliefs_nonempty_epochs = 0
+        self.peak_infected = 0
 
     def observe(self, _sim: Any, work: Any) -> None:
         epoch = int(work.epoch)
@@ -162,8 +166,17 @@ class ChannelCapture:
         beliefs = _beliefs_from_information(work.information_state or {})
         if beliefs:
             self.beliefs_nonempty_epochs += 1
+        infected_now = 0
         for agent in work.agents or []:
+            infection = (agent.get("pathogen_infections") or {}).get(
+                self.pathogen_id,
+            )
+            if infection is not None and str(
+                infection.get("status"),
+            ) == "INFECTED":
+                infected_now += 1
             self._exposure(agent, epoch, beliefs)
+        self.peak_infected = max(self.peak_infected, infected_now)
 
     def _exposure(
         self,
@@ -649,23 +662,13 @@ def funnel_ratios(funnel: dict[str, Any]) -> dict[str, float | None]:
     }
 
 
-def run_seed(
+def run_spec_voyage(
     *,
-    seed: int,
-    platform: str,
-    bundle: str,
-    epochs: int,
+    spec_dict: dict[str, Any],
     pathogen_id: str,
 ) -> dict[str, Any]:
-    """Run one unmodified voyage and read its observation funnel."""
+    """Run one voyage from an explicit spec and read its funnel."""
     started = time.perf_counter()
-    num_agents = declared_total(platform)
-    _alpha, beta = load_dose_response(pathogen_id, bundle)
-    spec_dict = _pdc.build_spec(
-        seed=seed, platform=platform, bundle=bundle,
-        epochs=epochs, num_agents=num_agents,
-        pathogen_id=pathogen_id, alpha=None, beta=beta,
-    )
     with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         sim = ShipSimulation(picard_spec, display=False)
         capture = ChannelCapture(pathogen_id)
@@ -695,13 +698,20 @@ def run_seed(
         dated=dated,
         ever_reported_ids=ever_reported,
     )
+    platform_id = str(spec_dict["catalog"]["platform_id"])
     return {
-        "seed": int(seed),
-        "platform": platform,
-        "bundle": bundle,
+        "seed": int(spec_dict["run"]["random_seed"]),
+        "platform": platform_id,
+        "bundle": str(spec_dict["catalog"]["pathogen_bundle_id"]),
         "pathogen_id": pathogen_id,
-        "num_epochs": int(epochs),
-        "num_agents": num_agents,
+        "num_epochs": int(spec_dict["run"]["num_epochs"]),
+        "num_agents": int(
+            spec_dict.get("config_overrides", {}).get("ship_graph", {}).get(
+                "num_agents", declared_total(platform_id),
+            ),
+        ),
+        "peak_infected": int(capture.peak_infected),
+        "took_off": int(capture.peak_infected) >= TAKEOFF_PEAK_PREVALENCE,
         "rungs": funnel["rungs"],
         "severity_tables": funnel["severity_tables"],
         "recognition": funnel["recognition"],
@@ -714,6 +724,59 @@ def run_seed(
         "shared_rungs": ascertainment_funnel(sim, pathogen_id=pathogen_id),
         "wall_clock_seconds_run": time.perf_counter() - started,
     }
+
+
+def run_seed(
+    *,
+    seed: int,
+    platform: str,
+    bundle: str,
+    epochs: int,
+    pathogen_id: str,
+) -> dict[str, Any]:
+    """Run one unmodified voyage and read its observation funnel."""
+    num_agents = declared_total(platform)
+    _alpha, beta = load_dose_response(pathogen_id, bundle)
+    spec_dict = _pdc.build_spec(
+        seed=seed, platform=platform, bundle=bundle,
+        epochs=epochs, num_agents=num_agents,
+        pathogen_id=pathogen_id, alpha=None, beta=beta,
+    )
+    summary = run_spec_voyage(spec_dict=spec_dict, pathogen_id=pathogen_id)
+    summary["platform"] = platform
+    summary["bundle"] = bundle
+    summary["num_epochs"] = int(epochs)
+    summary["num_agents"] = num_agents
+    return summary
+
+
+def campaign_cell_spec(
+    manifest_path: Path, tier: str, seed: int, match: list[str],
+) -> tuple[str, dict[str, Any]]:
+    """The (run_id, spec) for one NORO-OUTBREAK-01 cell at one seed.
+
+    ``match`` is a list of run_id substrings (the run id encodes every
+    swept axis: ``rung-``, ``nsf``, ``bp``, ``dose``, ``ep``,
+    surveillance, seed) that must all appear in the run's id. Exactly one
+    spec must match.
+    """
+    from picard_framework.runs.mega_cruise_campaign.campaign_runner import (
+        generate_tier_runs,
+    )
+
+    manifest = json.loads(Path(manifest_path).read_text(encoding="utf-8"))
+    found = [
+        (run_id, spec)
+        for run_id, spec in generate_tier_runs(manifest, tier)
+        if int(spec["run"]["random_seed"]) == int(seed)
+        and all(tag in run_id for tag in match)
+    ]
+    if len(found) != 1:
+        raise SystemExit(
+            f"tier {tier} seed {seed} match {match}: "
+            f"{len(found)} specs (need exactly 1)",
+        )
+    return found[0]
 
 
 def _quantiles(values: list[float]) -> dict[str, float | None]:
@@ -874,6 +937,19 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument(
         "--arm-tag", type=_identifier, default="pooled_default")
+    parser.add_argument(
+        "--manifest", type=Path, default=None,
+        help="NORO-CHANNEL-03 mode: pull each voyage spec verbatim from "
+        "generate_tier_runs(manifest, --tier) instead of building the "
+        "pooled default spec.",
+    )
+    parser.add_argument("--tier", type=_identifier, default=None)
+    parser.add_argument(
+        "--match", type=str, nargs="*", default=[],
+        help="run_id substrings selecting the cell inside --tier "
+        "(e.g. rung-shipped bp32p5c18p5); must resolve to exactly one spec "
+        "per seed.",
+    )
     return parser.parse_args(argv)
 
 
@@ -884,13 +960,29 @@ def main(argv: list[str] | None = None) -> int:
     )
     per_seed = []
     for seed in args.seeds:
-        summary = run_seed(
-            seed=seed,
-            platform=args.platform,
-            bundle=args.bundle,
-            epochs=args.epochs,
-            pathogen_id=args.pathogen_id,
-        )
+        if args.manifest is not None:
+            if args.tier is None:
+                raise SystemExit("--manifest requires --tier")
+            run_id, spec_dict = campaign_cell_spec(
+                args.manifest, args.tier, seed, list(args.match),
+            )
+            summary = run_spec_voyage(
+                spec_dict=spec_dict, pathogen_id=args.pathogen_id,
+            )
+            summary["run_id"] = run_id
+            summary["cell"] = {
+                "manifest": Path(args.manifest).name,
+                "tier": args.tier,
+                "match": list(args.match),
+            }
+        else:
+            summary = run_seed(
+                seed=seed,
+                platform=args.platform,
+                bundle=args.bundle,
+                epochs=args.epochs,
+                pathogen_id=args.pathogen_id,
+            )
         per_seed.append(summary)
         filename = (
             f"observation_channel_funnel_{args.arm_tag}_seed{seed}.json.gz"
@@ -901,6 +993,8 @@ def main(argv: list[str] | None = None) -> int:
         ratios = summary["ratios"]
         print(
             f"seed {seed}: infected={ratios['infected']} "
+            f"peak={summary.get('peak_infected')} "
+            f"takeoff={summary.get('took_off')} "
             f"symp={_fmt(ratios['symptomatic_per_infected'])} "
             f"rep/elig={_fmt(ratios['reported_per_eligible'])} "
             f"conf/rep={_fmt(ratios['confirmed_per_reported'])} "
