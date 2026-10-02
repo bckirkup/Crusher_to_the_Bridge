@@ -256,6 +256,16 @@ def _merge_applied(current: dict[str, Any], extra: dict[str, Any]) -> dict[str, 
     return extra if not current else {**current, **extra}
 
 
+def _override_factor(
+    tx_overrides: dict[str, Any],
+    platform_layout: dict[str, Any],
+    key: str,
+    default: float,
+) -> float:
+    """transmission.<key> override, else the platform declaration, else the code default."""
+    return float(tx_overrides.get(key, platform_layout.get(key, default)))
+
+
 def _beliefs_from_information(information_state: dict[str, Any]) -> dict[int, dict[str, float]]:
     beliefs: dict[int, dict[str, float]] = {}
     agent_inf = information_state.get("agents", information_state)
@@ -455,23 +465,17 @@ class ShipSimulation:
             zone_ventilation=zone_ventilation,
             zone_floor_areas=zone_floor_areas,
             sanitary_zone_map=sanitary_zone_map,
-            confinement_isolation_factor=float(
-                tx_overrides.get(
-                    "confinement_isolation_factor",
-                    platform_layout.get(
-                        "confinement_isolation_factor",
-                        DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
-                    ),
-                )
+            confinement_isolation_factor=_override_factor(
+                tx_overrides,
+                platform_layout,
+                "confinement_isolation_factor",
+                DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
             ),
-            corridor_direct_contact_factor=float(
-                tx_overrides.get(
-                    "corridor_direct_contact_factor",
-                    platform_layout.get(
-                        "corridor_direct_contact_factor",
-                        DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
-                    ),
-                )
+            corridor_direct_contact_factor=_override_factor(
+                tx_overrides,
+                platform_layout,
+                "corridor_direct_contact_factor",
+                DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
             ),
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
