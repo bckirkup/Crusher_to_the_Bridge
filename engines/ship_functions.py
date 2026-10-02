@@ -1,5 +1,5 @@
 """Ship-function capacity: the availability read, the registry, and the
-feedback writers (``docs/proposals/ship_function_capacity_spec.md`` §3–§6).
+feedback writers (``docs/ship_functions/ship_function_capacity_spec.md`` §3–§6).
 
 A *function* is a declared ship capability — ``food_service``, ``housekeeping``,
 ``navigation``, ``fishing_ops`` — scored each epoch from state the sim already

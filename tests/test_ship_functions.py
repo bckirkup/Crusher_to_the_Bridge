@@ -1,5 +1,5 @@
 """Ship-function capacity: the availability read, pooled demand, and the
-feedback writers (``docs/proposals/ship_function_capacity_spec.md`` §3–§6).
+feedback writers (``docs/ship_functions/ship_function_capacity_spec.md`` §3–§6).
 
 Every constant under test is a declared operational parameter, so these
 tests pin arithmetic and wiring — pool sharing, thresholded writers,

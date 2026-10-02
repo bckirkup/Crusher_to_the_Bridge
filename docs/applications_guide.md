@@ -278,7 +278,7 @@ The repo treats "is this twin believable" as an explicit, auditable contract:
   with an experience store (`presidio/data/`) — the twin as a fleet asset that
   accumulates operational history.
 - **Degradation realism:** the emerging ship-function layer
-  ([proposals/ship_function_capacity_spec.md](proposals/ship_function_capacity_spec.md),
+  ([ship_functions/ship_function_capacity_spec.md](ship_functions/ship_function_capacity_spec.md),
   sources in [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md);
   `engines/ppe_fatigue.py` landed §7) asks what crew illness does to ship
   *functions* — galley, engineering watch — which is the operational question a

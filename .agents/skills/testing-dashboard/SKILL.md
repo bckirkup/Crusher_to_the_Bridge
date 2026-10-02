@@ -92,6 +92,7 @@ print('Pathways:', sorted(totals.keys()))
 | `contact_tracing.transmission_events[].pathway_breakdown` | Transmission vector pie chart |
 | `agents[].agent_class` | Crew Manifest by Division table |
 | `agents[].infection_state`, `symptom_presentation`, `compliance_status` | Orthogonal agent axes |
+| `function_capacity` | Ship Function Capacity panel on Bridge Status: per-instance capacity traces, binding constraint, crew pools, `ship_systems` health — silent when no records carry the block |
 
 ## CI Coverage
 
