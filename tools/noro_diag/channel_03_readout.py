@@ -86,7 +86,7 @@ def collect(root: str) -> list[dict]:
     root = root.rstrip("/")
     dumps = []
     if root.startswith("s3://"):
-        for key, _rel in _s3_list_dumps(root):
+        for key in _s3_list_dumps(root):
             d = _s3_fetch_json(key, root)
             d["_cell_dir"] = key.rsplit("/", 2)[-2] if "/" in key else "cell"
             dumps.append(d)
