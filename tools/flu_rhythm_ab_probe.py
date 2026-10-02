@@ -90,6 +90,7 @@ def _wrap_dosed_set(core_cls: type, mech: FluMechanism) -> Any:
         self: Any, epoch: int, agent: Any, pathogen_id: str,
         agent_pathogen_doses: dict, agent_pathway_doses: Any,
         matrix: Any, events: list,
+        agent_coop_doses: Any = None,
     ) -> None:
         if pathogen_id == mech.pathogen_id:
             aid = int(agent.agent_id)
@@ -102,6 +103,7 @@ def _wrap_dosed_set(core_cls: type, mech: FluMechanism) -> Any:
         return original(
             self, epoch, agent, pathogen_id, agent_pathogen_doses,
             agent_pathway_doses, matrix, events,
+            agent_coop_doses=agent_coop_doses,
         )
 
     return wrapper

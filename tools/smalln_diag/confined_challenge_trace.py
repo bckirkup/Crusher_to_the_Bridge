@@ -131,6 +131,7 @@ def _install_recorder(recorder: ChallengeRecorder) -> Any:
         agent_pathway_doses: dict[int, dict[str, float]],
         matrix: Any,
         events: list[Any],
+        agent_coop_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         p_dose = agent_pathogen_doses.get(agent.agent_id, {}).get(pathogen_id, 0.0)
         watched = pathogen_id == pid_under_test and p_dose > 0.0
@@ -151,6 +152,7 @@ def _install_recorder(recorder: ChallengeRecorder) -> Any:
         original(
             self, epoch, agent, pathogen_id, agent_pathogen_doses,
             agent_pathway_doses, matrix, events,
+            agent_coop_doses=agent_coop_doses,
         )
         if watched:
             recorder.record(
