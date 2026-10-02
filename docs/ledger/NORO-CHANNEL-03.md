@@ -2,7 +2,8 @@
 **Date:** 2026-10-02
 **Commit:** #848
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** d6c51c14
 
 ## Question
 
@@ -31,6 +32,12 @@ Cells: per hull {scr-mid, scr-hi, ren} at 12 d, 20 seeds each —
   scaling, severity) under outbreak conditions; fits nothing.
 - Takeoff-conditional pooling is declared pre-run.
 
-## Pending
+## Measured
 
-Measured state and rung table at array completion.
+180/180 runs succeeded; zero takeoff join violations against the scored
+map voyages. Canonical table:
+`docs/norovirus/noro_channel_03_readout.md`. The gap is **shared** —
+the symptom-course draw is the first broken link on all 9 cells
+(symp/infected 0.170-0.413 vs 0.6) and the report hazard also
+under-fires on 8/9 (rep/elig 0.168-0.321 vs 0.4); no severity wall
+(elig/symp = 1.000 everywhere).
