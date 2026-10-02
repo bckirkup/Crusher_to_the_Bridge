@@ -71,7 +71,6 @@ import argparse
 import gzip
 import json
 import sys
-import tempfile
 import time
 from collections import Counter
 from pathlib import Path
@@ -81,7 +80,6 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
@@ -89,6 +87,7 @@ from simulation_utils.paths import (  # noqa: E402
     validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.noro_diag import per_host_dose_challenge as _pdc  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 from tools.readout_stats import quantiles  # noqa: E402
@@ -209,15 +208,7 @@ def run_seed(
         arm=arm, seed_role=seed_role,
         onset_day=onset_day, age_days=age_days,
     )
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         sim = ShipSimulation(picard_spec, display=False)
         sim.run()
 

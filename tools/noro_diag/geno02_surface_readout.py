@@ -23,12 +23,17 @@ from __future__ import annotations
 
 import argparse
 import json
-import math
 import sys
 import zipfile
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
+
+REPO_ROOT = Path(__file__).resolve().parents[2]
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+from tools.diag.readout_common import wilson_centered  # noqa: E402
 
 SHARD_SUFFIX = ".zip"
 POWERED_MIN_ABOARD = 40
@@ -72,11 +77,7 @@ def wilson(k: int, n: int, z: float = 1.959964) -> tuple[float, float, float]:
     """Wilson score interval; returns (center, lo, hi)."""
     if n <= 0:
         return float("nan"), float("nan"), float("nan")
-    p = k / n
-    denom = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / denom
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return p, max(0.0, centre - half), min(1.0, centre + half)
+    return wilson_centered(k, n, z)
 
 
 def prevalence_label(rung: str, pax_prev: float | None) -> str:

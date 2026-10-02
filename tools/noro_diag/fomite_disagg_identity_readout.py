@@ -26,7 +26,6 @@ in-engine run wall clock, against the 1.5-4x envelope of the proposal §4.
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import math
 import os
@@ -43,6 +42,8 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.diag.json_io import gz_json_load  # noqa: E402
+from tools.diag.readout_common import load_arm_cells  # noqa: E402
 
 RELATIVE_TOLERANCE = 1.0e-9
 RUNTIME_ENVELOPE = (1.5, 4.0)
@@ -71,18 +72,12 @@ STATISTICS: tuple[tuple[str, bool], ...] = (
 
 
 def _load(path: Path) -> dict[str, Any]:
-    with gzip.open(path, "rt", encoding="utf-8") as handle:
-        return json.load(handle)
+    return gz_json_load(path)
 
 
 def load_arm(directory: Path, tag: str) -> dict[int, dict[str, Any]]:
     """The per-seed cells one arm wrote, keyed by seed."""
-    stem = f"per_host_dose_challenge_{tag}_"
-    cells = {}
-    for path in sorted(directory.glob(f"{stem}seed*.json.gz")):
-        cell = _load(path)
-        cells[int(cell["seed"])] = cell
-    return cells
+    return load_arm_cells(directory, tag)
 
 
 def _dig(cell: dict[str, Any], dotted: str) -> float | None:

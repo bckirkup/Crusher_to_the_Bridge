@@ -73,11 +73,8 @@ import copy
 import gzip
 import hashlib
 import json
-import re
 import sys
-import tempfile
 import time
-import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -94,14 +91,21 @@ if str(_CAMPAIGN_DIR) not in sys.path:
 from campaign_runner import generate_tier_runs  # noqa: E402
 
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-from simulation_utils.paths import (  # noqa: E402
-    prepare_output_directory,
-    resolve_child_path,
-    resolve_repo_path,
-    validated_open,
+from simulation_utils.paths import prepare_output_directory  # noqa: E402
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    mark_epoch0_imports,
+    materialized_picard_spec,
+    wrap_emit_emesis,
 )
+from tools.diag.json_io import validated_json_load  # noqa: E402
+from tools.diag.manifest_args import (  # noqa: E402
+    add_manifest_args,
+    identifier,
+    index_run,
+)
+from tools.diag.readout_common import write_run_zip  # noqa: E402
 from tools.noro_diag.growth_chain_census import (  # noqa: E402
     GEN_UNRESOLVED,
     _acquired_gen,
@@ -230,33 +234,27 @@ def _occupancy_snapshot(
 
 def _wrap_emit_emesis(core_cls: type, rec: RhythmRecorder) -> Any:
     """Per-bolus landing record: zone, occupants, depositor, sentinel."""
-    original = core_cls._emit_emesis
-
-    def wrapper(
-        self: Any, agent: Any, pathogen_id: str, profile: dict,
+    def _pre(
+        self: Any, agent: Any, pathogen_id: str,
         zone_name: str, epoch: int,
-    ) -> float:
-        before = len(
-            agent.emesis_deposition_records_by_pathogen.get(
-                pathogen_id, [],
-            ),
-        )
-        schedule_len = len(
+    ) -> int:
+        return len(
             agent.emesis_episode_schedule_by_pathogen.get(
                 pathogen_id, [],
             ),
         )
-        pool_gain = original(
-            self, agent, pathogen_id, profile, zone_name, epoch,
-        )
+
+    def _on_emit(
+        self: Any, agent: Any, pathogen_id: str, zone_name: str,
+        epoch: int, pool_gain: float, before: int, ctx: Any,
+    ) -> None:
         if pathogen_id == rec.pathogen_id:
             _record_emesis(
                 rec, self, agent, pathogen_id, zone_name, epoch,
-                pool_gain, before, schedule_len,
+                pool_gain, before, ctx,
             )
-        return pool_gain
 
-    return wrapper
+    return wrap_emit_emesis(core_cls, _on_emit, pre=_pre)
 
 
 def _record_emesis(
@@ -445,27 +443,25 @@ def _wrap_deal_day(rec: RhythmRecorder) -> Any:
 def instrumented(rec: RhythmRecorder) -> Any:
     """Install every wrapper for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved = {
-        "_epoch_zone_occupants": core_cls._epoch_zone_occupants,
-        "_emit_emesis": core_cls._emit_emesis,
-        "_resolve_pathogen_challenge": core_cls._resolve_pathogen_challenge,
-        "_cabin_compartments": core_cls._cabin_compartments,
-    }
-    core_cls._epoch_zone_occupants = _wrap_zone_occupants(core_cls, rec)
-    core_cls._emit_emesis = _wrap_emit_emesis(core_cls, rec)
-    core_cls._resolve_pathogen_challenge = _wrap_challenge(core_cls, rec)
-    core_cls._cabin_compartments = _wrap_cabin_compartments(core_cls, rec)
-    deal_day_saved = None
-    if RhythmLayer is not None:
-        deal_day_saved = RhythmLayer.deal_day
-        RhythmLayer.deal_day = _wrap_deal_day(rec)
-    try:
+    with attr_patches() as patches:
+        patches.swap(
+            core_cls, "_epoch_zone_occupants",
+            _wrap_zone_occupants(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_emit_emesis", _wrap_emit_emesis(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_resolve_pathogen_challenge",
+            _wrap_challenge(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_cabin_compartments",
+            _wrap_cabin_compartments(core_cls, rec),
+        )
+        if RhythmLayer is not None:
+            patches.swap(RhythmLayer, "deal_day", _wrap_deal_day(rec))
         yield
-    finally:
-        for name, fn in saved.items():
-            setattr(core_cls, name, fn)
-        if deal_day_saved is not None:
-            RhythmLayer.deal_day = deal_day_saved
 
 
 # ── Epoch observer ────────────────────────────────────────────────────
@@ -508,14 +504,7 @@ def _epoch_observer(rec: RhythmRecorder) -> Any:
             "infected": counts[2],
             "zones": zones,
         })
-        if not rec.epoch0_done:
-            rec.epoch0_done = True
-            for agent in engine.agents:
-                if agent.is_infected_with(rec.pathogen_id):
-                    aid = int(agent.agent_id)
-                    if aid not in rec.acquired_ids:
-                        rec.import_ids.add(aid)
-                        rec.host_gen.setdefault(aid, 0)
+        mark_epoch0_imports(rec, engine)
 
     return observe
 
@@ -599,15 +588,7 @@ def _rhythm_payload(
 @contextmanager
 def _sim_for_spec(spec: dict[str, Any]) -> Any:
     """Materialise one spec dict into a loaded (unrun) ShipSimulation."""
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
+    with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
         yield ShipSimulation(picard_spec, display=False)
 
 
@@ -652,26 +633,12 @@ def run_spec(
 # ── CLI / campaign-cell plumbing ──────────────────────────────────────
 
 
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
+_identifier = identifier
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--manifest", type=Path, default=None,
-        help="campaign manifest JSON (tier specs verbatim)",
-    )
-    parser.add_argument(
-        "--tier", type=_identifier, default=None,
-        help="tier inside --manifest; required with --manifest",
-    )
-    parser.add_argument(
-        "--index", type=int, default=None,
-        help="run only the tier's runs[index] (Batch array child / canary)",
-    )
+    add_manifest_args(parser, tier_type=identifier)
     parser.add_argument(
         "--arm", choices=("off", "on"), default=None,
         help="rhythm.enabled arm; required with --manifest, optional "
@@ -709,22 +676,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def _load_manifest(manifest_path: Path) -> dict[str, Any]:
-    safe_manifest = Path(
-        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
-    )
-    with validated_open(
-        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        return json.load(handle)
+    return validated_json_load(REPO_ROOT, manifest_path)
 
 
 def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
 ) -> Path:
     """``summary.json`` (campaign layout) + ``rhythm.json.gz`` payload."""
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {
         "run_id": run_id,
         "parameters": payload["parameters"],
@@ -734,26 +692,20 @@ def _write_run_zip(
         "cost_accounting": payload["cost_accounting"],
         "derived": payload["derived"],
     }
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr(
-            "rhythm.json.gz",
-            gzip.compress(json.dumps(payload["rhythm"]).encode()),
-        )
-    return zip_path
+    return write_run_zip(out_dir, tier, run_id, anchor, {
+        "rhythm.json.gz": gzip.compress(
+            json.dumps(payload["rhythm"]).encode(),
+        ),
+    })
 
 
 def _main_manifest(args: argparse.Namespace) -> None:
     manifest = _load_manifest(args.manifest)
     manifest_clock = manifest.get("natural_history_clock")
-    runs = list(generate_tier_runs(manifest, args.tier))
-    if args.index is not None:
-        if args.index >= len(runs):
-            raise SystemExit(
-                f"--index {args.index} outside tier {args.tier} "
-                f"({len(runs)} runs)",
-            )
-        runs = [runs[args.index]]
+    runs = index_run(
+        list(generate_tier_runs(manifest, args.tier)),
+        args.index, args.tier,
+    )
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )
@@ -776,13 +728,7 @@ def _main_manifest(args: argparse.Namespace) -> None:
 
 
 def _main_spec_json(args: argparse.Namespace) -> None:
-    safe = Path(
-        resolve_repo_path(str(REPO_ROOT), str(args.spec_json)),
-    )
-    with validated_open(
-        str(safe), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        spec = json.load(handle)
+    spec = validated_json_load(REPO_ROOT, args.spec_json)
     if args.epochs_override is not None:
         spec["run"]["num_epochs"] = int(args.epochs_override)
     payload = run_spec(

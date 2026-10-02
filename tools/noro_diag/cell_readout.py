@@ -10,13 +10,14 @@ print a labelled JSON block — so they live here rather than once per study.
 
 from __future__ import annotations
 
-import gzip
 import json
 import math
 import re
 import statistics
 from pathlib import Path
 from typing import Any
+
+from tools.diag.json_io import gz_json_load
 
 CELL_RE = re.compile(r"per_host_dose_challenge_seed(?P<seed>\d+)\.json\.gz")
 PATHOGEN_ID = "norwalk_gi"
@@ -52,8 +53,7 @@ def load_cells(raw_dir: Path) -> list[dict[str, Any]]:
     for path in sorted(raw_dir.glob("per_host_dose_challenge_seed*.json.gz")):
         if CELL_RE.fullmatch(path.name) is None:
             continue
-        with gzip.open(path, "rt", encoding="utf-8") as handle:
-            cells.append(json.load(handle))
+        cells.append(gz_json_load(path))
     return sorted(cells, key=lambda s: s["seed"])
 
 

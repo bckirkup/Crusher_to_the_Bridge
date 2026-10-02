@@ -79,10 +79,8 @@ from __future__ import annotations
 import argparse
 import json
 import os
-import re
 import subprocess
 import sys
-import tempfile
 from collections import Counter, defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -100,11 +98,12 @@ from engines.fomite_surfaces import (  # noqa: E402
     PerSurfaceFomiteState,
     load_declared_share_table,
 )
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 from simulation_utils.platform_complement import declared_total  # noqa: E402
+from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
+from tools.diag.manifest_args import identifier  # noqa: E402
 from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
 
 PATHOGEN_ID = "norwalk_gi"
@@ -1348,16 +1347,8 @@ def _ordering_witness(
 
 def _build_sim(spec_dict: dict[str, Any]) -> ShipSimulation:
     """Build and initialize one arm's sim from a spec dict."""
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = Path(tmp) / "run_spec.json"
-        with validated_open(
-            str(spec_path), "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), str(spec_path),
-        )
-    sim = ShipSimulation(picard_spec, display=False)
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
+        sim = ShipSimulation(picard_spec, display=False)
     sim.initialize()
     return sim
 
@@ -1691,10 +1682,7 @@ def _safe_path(path: str) -> str:
     return resolved
 
 
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
+_identifier = identifier
 
 
 def _git_sha() -> str:

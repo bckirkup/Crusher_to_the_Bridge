@@ -32,11 +32,9 @@ acquired counts, infection AR and reported AR.
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import statistics
 import sys
-import zipfile
 from collections import defaultdict
 from pathlib import Path
 from typing import Any
@@ -47,8 +45,6 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "tools" / "noro_diag") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "tools" / "noro_diag"))
 
-from rhythm_ab_readout import _wilson  # noqa: E402
-
 from simulation_utils.paths import validated_open  # noqa: E402
 from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
     A9_POSTING_THRESHOLD,
@@ -58,6 +54,12 @@ from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
 )
 from telemetry_buffer.observation_model.vsp_class_era_scoring import (  # noqa: E402
     vsp_attack_rate_targets,
+)
+from tools.diag.readout_common import (  # noqa: E402
+    iter_tier_zips,
+    load_zip_json,
+    rate_summary,
+    seed_from_params,
 )
 
 _MEMBER = "summary.json"
@@ -78,18 +80,11 @@ _RUNG_LABEL = {
 
 
 def _load_member(zip_path: Path, member: str, *, gunzipped: bool = False) -> dict | None:
-    try:
-        with zipfile.ZipFile(zip_path) as zf:
-            blob = zf.read(member)
-        if gunzipped:
-            blob = gzip.decompress(blob)
-        return json.loads(blob)
-    except (KeyError, zipfile.BadZipFile, json.JSONDecodeError, OSError):
-        return None
+    return load_zip_json(zip_path, member, gunzipped=gunzipped)
 
 
 def _seed_of(params: dict) -> int:
-    return int(params.get("seed", -1))
+    return seed_from_params(params)
 
 
 def _cell_key(params: dict) -> tuple:
@@ -171,14 +166,10 @@ def collect_run(zip_path: Path) -> dict[str, Any] | None:
 
 def collect(root: Path, tiers: list[str] | None = None) -> dict[tuple, list[dict]]:
     cells: dict[tuple, list[dict]] = defaultdict(list)
-    allowed = set(tiers) if tiers else None
-    for tier_dir in sorted(root.iterdir()):
-        if not tier_dir.is_dir() or (allowed is not None and tier_dir.name not in allowed):
-            continue
-        for zip_path in sorted(tier_dir.glob("*.zip")):
-            run = collect_run(zip_path)
-            if run is not None:
-                cells[run["cell_key"]].append(run)
+    for _tier, zip_path in iter_tier_zips(root, tiers):
+        run = collect_run(zip_path)
+        if run is not None:
+            cells[run["cell_key"]].append(run)
     return dict(cells)
 
 
@@ -200,8 +191,7 @@ def _quantiles(values: list[float]) -> dict[str, Any]:
 
 
 def _rate(x: int, n: int) -> dict[str, float]:
-    low, high = _wilson(x, n)
-    return {"x": x, "n": n, "rate": x / n if n else 0.0, "lo": low, "hi": high}
+    return rate_summary(x, n)
 
 
 def _frequency(runs: list[dict]) -> dict[str, Any]:

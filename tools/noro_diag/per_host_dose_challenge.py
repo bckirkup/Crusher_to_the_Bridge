@@ -102,11 +102,8 @@ import hashlib
 import json
 import math
 import os
-import re
 import sys
-import tempfile
 import time
-import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -125,14 +122,12 @@ from engines import transmission_core as tc  # noqa: E402
 from engines.fomite_surfaces import (  # noqa: E402
     load_declared_share_table,
 )
-from picard_framework.run_spec import CRUSHER_CONFIG_REL, PicardRunSpec  # noqa: E402
+from picard_framework.run_spec import CRUSHER_CONFIG_REL  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils import asset_defaults  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
-    resolve_repo_path,
-    validated_open,
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
 from telemetry_buffer.fields import (  # noqa: E402
@@ -140,6 +135,17 @@ from telemetry_buffer.fields import (  # noqa: E402
     RECORD_SUMMARY,
     record_block,
 )
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    materialized_picard_spec,
+)
+from tools.diag.json_io import validated_json_load  # noqa: E402
+from tools.diag.manifest_args import (  # noqa: E402
+    add_manifest_args,
+    identifier,
+    index_run,
+)
+from tools.diag.readout_common import write_run_zip  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
 
 _CAMPAIGN_DIR = (
@@ -1440,45 +1446,46 @@ def _record_matched_units(
 def instrumented(rec: Recorder, top_ids: set[int]) -> Any:
     """Install the read-only wrappers for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved = {
-        "_accumulate": core_cls._accumulate,
-        "_execute_pathogen_pathways": core_cls._execute_pathogen_pathways,
-        "_merge_pathogen_doses": core_cls._merge_pathogen_doses,
-        "_dose_response_hazard": core_cls._dose_response_hazard,
-        "_resolve_pathogen_challenge": core_cls._resolve_pathogen_challenge,
-    }
-    core_cls._accumulate = _wrap_accumulate(core_cls, rec)
-    core_cls._execute_pathogen_pathways = _wrap_execute_pathways(core_cls, rec)
-    core_cls._merge_pathogen_doses = _wrap_merge(core_cls, rec)
-    core_cls._dose_response_hazard = _wrap_hazard(core_cls, rec)
-    core_cls._resolve_pathogen_challenge = _wrap_challenge(
-        core_cls, rec, top_ids,
-    )
-    emesis_saved = _wrap_emesis(core_cls, rec)
-    fomite_saved = _wrap_fomite(core_cls, rec)
-    mass_saved = _wrap_mass_books(core_cls, rec)
-    try:
+    with attr_patches() as patches:
+        patches.swap(core_cls, "_accumulate", _wrap_accumulate(core_cls, rec))
+        patches.swap(
+            core_cls, "_execute_pathogen_pathways",
+            _wrap_execute_pathways(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_merge_pathogen_doses", _wrap_merge(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_dose_response_hazard", _wrap_hazard(core_cls, rec),
+        )
+        patches.swap(
+            core_cls, "_resolve_pathogen_challenge",
+            _wrap_challenge(core_cls, rec, top_ids),
+        )
+        emesis_saved = _wrap_emesis(core_cls, rec)
+        # The helpers' restore dicts apply in install order —
+        # _wrap_fomite and _wrap_mass_books both swap
+        # _deposit_surface_mass, and the later group's captured value
+        # lands last, exactly as the old sequential restore did.
+        patches.note_all(core_cls, _wrap_fomite(core_cls, rec))
+        patches.note_all(core_cls, _wrap_mass_books(core_cls, rec))
+        patches.note_all(
+            core_cls,
+            {k: v for k, v in emesis_saved.items() if k.startswith("_")},
+        )
+        patches.note_all(
+            tc,
+            {"draw_emesis_schedule": emesis_saved["draw_emesis_schedule"]},
+        )
+        patches.note_all(
+            initiation_module,
+            {"draw_emesis_schedule": emesis_saved["draw_emesis_schedule"]},
+        )
+        patches.note_all(
+            natural_history_module,
+            {"draw_emesis_schedule": emesis_saved["draw_emesis_schedule"]},
+        )
         yield
-    finally:
-        for name, method in saved.items():
-            setattr(core_cls, name, method)
-        for name, method in fomite_saved.items():
-            setattr(core_cls, name, method)
-        for name, method in mass_saved.items():
-            setattr(core_cls, name, method)
-        core_cls._emesis_phase = emesis_saved["_emesis_phase"]
-        core_cls._emit_emesis = emesis_saved["_emit_emesis"]
-        core_cls._emesis_patch_pickup = emesis_saved["_emesis_patch_pickup"]
-        core_cls._emesis_patch_pickup_one = emesis_saved[
-            "_emesis_patch_pickup_one"
-        ]
-        tc.draw_emesis_schedule = emesis_saved["draw_emesis_schedule"]
-        initiation_module.draw_emesis_schedule = emesis_saved[
-            "draw_emesis_schedule"
-        ]
-        natural_history_module.draw_emesis_schedule = emesis_saved[
-            "draw_emesis_schedule"
-        ]
 
 
 def build_spec(
@@ -2080,15 +2087,7 @@ def _run_instrumented_voyage(
     # The spec path lives under the repository root, not /tmp, because
     # validated_open refuses publicly writable targets; the directory is
     # still a fresh private TemporaryDirectory.
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(
-            str(REPO_ROOT), spec_path,
-        )
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         resolved = picard_spec.pathogen_profiles[pathogen_id]["dose_response"]
         alpha_resolved = float(resolved["alpha"])
         if abs(alpha_resolved - alpha) > 1e-12:
@@ -2227,10 +2226,7 @@ def _safe_path(path: str) -> str:
     return resolved
 
 
-def _identifier(value: str) -> str:
-    if not re.fullmatch(r"[A-Za-z0-9_-]+", value):
-        raise argparse.ArgumentTypeError(f"invalid identifier: {value!r}")
-    return value
+_identifier = identifier
 
 
 def _json_object(value: str) -> dict[str, Any]:
@@ -2299,18 +2295,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--arm-tag", type=_identifier, default=None,
         help="arm label stamped into the output filename and summary",
     )
-    parser.add_argument(
-        "--manifest", type=Path, default=None,
-        help="campaign manifest JSON; runs the tier's verbatim specs "
-             "(NORO-DOSE-REFIT-01 canary mode) instead of build_spec",
-    )
-    parser.add_argument(
-        "--tier", type=_identifier, default=None,
-        help="tier inside --manifest; required with --manifest",
-    )
-    parser.add_argument(
-        "--index", type=int, default=None,
-        help="run only the tier's runs[index] (Batch array child)",
+    add_manifest_args(
+        parser, tier_type=identifier,
+        manifest_help="campaign manifest JSON; runs the tier's verbatim "
+                      "specs (NORO-DOSE-REFIT-01 canary mode) instead of "
+                      "build_spec",
+        index_help="run only the tier's runs[index] (Batch array child)",
     )
     args = parser.parse_args(argv)
     _validate_manifest_mode(parser, args)
@@ -2396,13 +2386,7 @@ def _tier_run_list(
 
 def _load_manifest(manifest_path: Path) -> dict[str, Any]:
     """Read the campaign manifest under the repository root."""
-    safe_manifest = Path(
-        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
-    )
-    with validated_open(
-        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        return json.load(handle)
+    return validated_json_load(REPO_ROOT, manifest_path)
 
 
 def _write_run_zip(
@@ -2415,9 +2399,6 @@ def _write_run_zip(
     probe output directly; ``refit.json`` carries the full probe payload
     (per-host dose table, emesis-by-host, release composition).
     """
-    cell_dir = Path(resolve_child_path(str(out_dir), tier))
-    cell_dir.mkdir(parents=True, exist_ok=True)
-    zip_path = Path(resolve_child_path(str(cell_dir), f"{run_id}.zip"))
     anchor = {
         "run_id": run_id,
         "parameters": payload["parameters"],
@@ -2427,10 +2408,9 @@ def _write_run_zip(
         "cost_accounting": payload["cost_accounting"],
         "derived": payload["derived"],
     }
-    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as archive:
-        archive.writestr("summary.json", json.dumps(anchor))
-        archive.writestr("refit.json", json.dumps(payload))
-    return zip_path
+    return write_run_zip(
+        out_dir, tier, run_id, anchor, {"refit.json": json.dumps(payload)},
+    )
 
 
 def _main_manifest(args: argparse.Namespace) -> int:
@@ -2446,13 +2426,7 @@ def _main_manifest(args: argparse.Namespace) -> int:
             )
         manifest_clock = declared
     runs = _tier_run_list(args.manifest, args.tier)
-    if args.index is not None:
-        if args.index >= len(runs):
-            raise SystemExit(
-                f"--index {args.index} outside tier {args.tier} "
-                f"({len(runs)} runs)",
-            )
-        runs = [runs[args.index]]
+    runs = index_run(runs, args.index, args.tier)
     out_dir = Path(
         prepare_output_directory(str(args.out), allowed_roots=(str(REPO_ROOT),)),
     )

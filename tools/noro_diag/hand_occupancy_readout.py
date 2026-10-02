@@ -40,6 +40,7 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.diag.readout_common import seed_from_cell  # noqa: E402
 from tools.noro_diag.cell_readout import print_block, spread  # noqa: E402
 from tools.noro_diag.hand_occupancy import LIU_LOD_GEC  # noqa: E402
 
@@ -135,7 +136,7 @@ def _load_cell(path: Path) -> dict[str, Any]:
 
 
 def _seed_of(cell: dict[str, Any]) -> int:
-    return int(cell.get("meta", {}).get("seed", cell.get("seed", -1)))
+    return seed_from_cell(cell)
 
 
 def _is_admissible(cell: dict[str, Any]) -> bool:

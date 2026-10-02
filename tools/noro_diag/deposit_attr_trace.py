@@ -68,7 +68,6 @@ import gzip
 import json
 import re
 import sys
-import tempfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -87,14 +86,16 @@ from campaign_runner import generate_tier_runs  # noqa: E402
 
 from engines import fomite_surfaces  # noqa: E402
 from engines import transmission_core as tc  # noqa: E402
-from picard_framework.run_spec import PicardRunSpec  # noqa: E402
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
 from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
-    resolve_repo_path,
-    validated_open,
 )
+from tools.diag.instrument_common import (  # noqa: E402
+    attr_patches,
+    materialized_picard_spec,
+)
+from tools.diag.json_io import validated_json_load  # noqa: E402
 
 DEFAULT_MANIFEST = (
     _CAMPAIGN_DIR / "noro_rebase_01_manifest.json"
@@ -486,15 +487,11 @@ def _agent_census(
 def instrumented(rec: Recorder) -> Any:
     """Install the read-only wrappers for the duration of one run."""
     core_cls = tc.TransmissionCore
-    saved: dict[str, Any] = {}
-    saved.update(_wrap_mass_books(core_cls, rec))
-    saved.update(_wrap_events(core_cls, rec))
-    saved.update(_wrap_epoch_marks(core_cls, rec))
-    try:
+    with attr_patches() as patches:
+        patches.note_all(core_cls, _wrap_mass_books(core_cls, rec))
+        patches.note_all(core_cls, _wrap_events(core_cls, rec))
+        patches.note_all(core_cls, _wrap_epoch_marks(core_cls, rec))
         yield
-    finally:
-        for name, method in saved.items():
-            setattr(core_cls, name, method)
 
 
 def _fomite_area_as_floor(self: Any, zone_name: str) -> float:
@@ -542,53 +539,29 @@ def _zonepool_emitter(saved_emit: Any) -> Any:
 @contextmanager
 def arm_patches(arm: str) -> Any:
     """In-process arms: gate floor at zero, pre-#604 emesis filing, both."""
-    if arm == "gate_off":
-        saved = fomite_surfaces.SURFACE_PICKUP_MIN_GEC
-        fomite_surfaces.SURFACE_PICKUP_MIN_GEC = 0.0
-        try:
-            yield
-        finally:
-            fomite_surfaces.SURFACE_PICKUP_MIN_GEC = saved
+    if arm not in ("gate_off", "emesis_zonepool", "pre_all"):
+        yield
         return
-    if arm == "emesis_zonepool":
-        saved_emit = tc.TransmissionCore._emit_emesis
-        saved_floor = tc.TransmissionCore._zone_floor_area_m2
-        tc.TransmissionCore._emit_emesis = _zonepool_emitter(saved_emit)
-        tc.TransmissionCore._zone_floor_area_m2 = _fomite_area_as_floor
-        try:
-            yield
-        finally:
-            tc.TransmissionCore._emit_emesis = saved_emit
-            tc.TransmissionCore._zone_floor_area_m2 = saved_floor
-        return
-    if arm == "pre_all":
-        saved_gate = fomite_surfaces.SURFACE_PICKUP_MIN_GEC
-        saved_emit = tc.TransmissionCore._emit_emesis
-        saved_floor = tc.TransmissionCore._zone_floor_area_m2
-        fomite_surfaces.SURFACE_PICKUP_MIN_GEC = 0.0
-        tc.TransmissionCore._emit_emesis = _zonepool_emitter(saved_emit)
-        tc.TransmissionCore._zone_floor_area_m2 = _fomite_area_as_floor
-        try:
-            yield
-        finally:
-            fomite_surfaces.SURFACE_PICKUP_MIN_GEC = saved_gate
-            tc.TransmissionCore._emit_emesis = saved_emit
-            tc.TransmissionCore._zone_floor_area_m2 = saved_floor
-        return
-    yield
+    core_cls = tc.TransmissionCore
+    with attr_patches() as patches:
+        if arm in ("gate_off", "pre_all"):
+            patches.swap(fomite_surfaces, "SURFACE_PICKUP_MIN_GEC", 0.0)
+        if arm in ("emesis_zonepool", "pre_all"):
+            patches.swap(
+                core_cls, "_emit_emesis",
+                _zonepool_emitter(core_cls._emit_emesis),
+            )
+            patches.swap(
+                core_cls, "_zone_floor_area_m2", _fomite_area_as_floor,
+            )
+        yield
 
 
 def _tier_specs(
     manifest_path: Path, tier: str, epochs_override: int | None = None,
 ) -> dict[int, dict[str, Any]]:
     """seed -> verbatim campaign spec dict for the tier."""
-    safe_manifest = Path(
-        resolve_repo_path(str(REPO_ROOT), str(manifest_path)),
-    )
-    with validated_open(
-        str(safe_manifest), "r", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
-    ) as handle:
-        manifest = json.load(handle)
+    manifest = validated_json_load(REPO_ROOT, manifest_path)
     specs = {}
     for _rid, spec in generate_tier_runs(
         manifest, tier, epochs_override=epochs_override,
@@ -615,15 +588,9 @@ def run_seed(
 ) -> dict[str, Any]:
     """Run one instrumented arm voyage and return its measurement."""
     rec = Recorder(pathogen_id=PATHOGEN_ID)
-    with tempfile.TemporaryDirectory(dir=REPO_ROOT) as tmp:
-        spec_path = resolve_child_path(tmp, "run_spec.json")
-        with validated_open(
-            spec_path, "w", allowed_roots=(tmp,), encoding="utf-8",
-        ) as handle:
-            handle.write(json.dumps(spec_dict))
-        picard_spec = PicardRunSpec.from_picard_json(str(REPO_ROOT), spec_path)
-        # arm_patches first: the recording wrappers then capture the patched
-        # functions as their originals, so the patched arms are still traced.
+    # arm_patches first: the recording wrappers then capture the patched
+    # functions as their originals, so the patched arms are still traced.
+    with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         with arm_patches(arm), instrumented(rec):
             sim = ShipSimulation(picard_spec, display=False)
             sim.epoch_observer = _epoch_observer(rec, PATHOGEN_ID)

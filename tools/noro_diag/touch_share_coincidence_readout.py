@@ -27,7 +27,6 @@ credited host sets are identical on every seed; otherwise
 from __future__ import annotations
 
 import argparse
-import gzip
 import json
 import math
 import os
@@ -44,6 +43,8 @@ from simulation_utils.paths import (  # noqa: E402
     prepare_output_directory,
     resolve_child_path,
 )
+from tools.diag.json_io import gz_json_load  # noqa: E402
+from tools.diag.readout_common import load_arm_cells  # noqa: E402
 
 JACCARD_THRESHOLD = 0.90
 FOCUS_SHARE_GAIN = 0.10
@@ -52,18 +53,12 @@ CAPPED_SHARE_FLAG = 0.10
 
 
 def _load(path: Path) -> dict[str, Any]:
-    with gzip.open(path, "rt", encoding="utf-8") as handle:
-        return json.load(handle)
+    return gz_json_load(path)
 
 
 def load_arm(directory: Path, tag: str) -> dict[int, dict[str, Any]]:
     """The per-seed cells one arm wrote, keyed by seed."""
-    stem = f"per_host_dose_challenge_{tag}_"
-    cells = {}
-    for path in sorted(directory.glob(f"{stem}seed*.json.gz")):
-        cell = _load(path)
-        cells[int(cell["seed"])] = cell
-    return cells
+    return load_arm_cells(directory, tag)
 
 
 def _host_delivered(cell: dict[str, Any]) -> dict[int, float]:
