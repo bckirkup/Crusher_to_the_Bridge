@@ -1303,11 +1303,11 @@ def _secretor_negative_block(raw: dict[str, Any], sim: Any) -> dict[str, Any]:
     profile = sim.pathogen_profiles.get(PATHOGEN_ID) or {}
     drawn = sum(
         1 for a in sim.engine.agents
-        if a.secretor_negative_by_pathogen.get(PATHOGEN_ID)
+        if getattr(a, "secretor_negative_by_pathogen", {}).get(PATHOGEN_ID)
     )
     zero_susc = sum(
         1 for a in sim.engine.agents
-        if a.susceptibility_multiplier.get(PATHOGEN_ID) == 0.0
+        if getattr(a, "susceptibility_multiplier", {}).get(PATHOGEN_ID) == 0.0
     )
     n_agents = len(sim.engine.agents)
     return {
