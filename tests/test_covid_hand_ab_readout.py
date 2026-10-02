@@ -73,7 +73,8 @@ def test_audit_cell_flags_a_mode_mismatch():
         "transmission_overrides": {"hand_reservoir_mode": "spike_decay"},
     })
     fails = mod.audit_cell(_payload(mode="hygiene_cycle"), declared, THETA)
-    assert fails and "hand_reservoir_mode" in fails[0]
+    assert fails
+    assert "hand_reservoir_mode" in fails[0]
 
 
 def test_audit_cell_flags_index_geometry_breaks():
@@ -81,16 +82,19 @@ def test_audit_cell_flags_index_geometry_breaks():
     fails = mod.audit_cell(
         _payload(index_onset_day=1.0), declared, THETA,
     )
-    assert fails and "index_onset_day" in fails[0]
+    assert fails
+    assert "index_onset_day" in fails[0]
     fails = mod.audit_cell(
         _payload(index_shedding=False), declared, THETA,
     )
-    assert fails and "index_shedding_at_day0" in fails[0]
+    assert fails
+    assert "index_shedding_at_day0" in fails[0]
     fails = mod.audit_cell(
         _payload(spec={"count": 2, "onset_day": -1.0, "role": "passenger"}),
         declared, THETA,
     )
-    assert fails and "seed_spec.count" in fails[0]
+    assert fails
+    assert "seed_spec.count" in fails[0]
 
 
 def test_audit_cell_skips_the_spec_when_none_is_emitted():

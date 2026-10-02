@@ -284,8 +284,7 @@ def _load_overlay_polys(
         svg_hashes[os.path.basename(svg_path)] = hashlib.sha256(
             text.encode("utf-8")
         ).hexdigest()
-        for poly in read_overlay_svg(text, page=page_num):
-            polys.append(poly)
+        polys.extend(read_overlay_svg(text, page=page_num))
     return polys, svg_hashes
 
 

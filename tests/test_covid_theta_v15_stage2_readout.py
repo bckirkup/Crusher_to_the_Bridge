@@ -135,14 +135,17 @@ def test_clause_legs_verbatim():
     }
     stats["takeoff_recorded_onsets"]["q05"] = 200.0
     out = mod._clause(stats)
-    assert out["count_leg"] is False and out["clause_ok"] is False
+    assert out["count_leg"] is False
+    assert out["clause_ok"] is False
     stats["takeoff_recorded_onsets"]["q05"] = 180.0
     stats["takeoff_before_share"]["median"] = 0.4
     out = mod._clause(stats)
-    assert out["timing_leg"] is False and out["clause_ok"] is False
+    assert out["timing_leg"] is False
+    assert out["clause_ok"] is False
     stats["takeoff_n"] = 4
     out = mod._clause(stats)
-    assert out["scored"] is False and out["clause_ok"] is False
+    assert out["scored"] is False
+    assert out["clause_ok"] is False
 
 
 def _write_cells(cells_dir: Path, payloads: list[dict]) -> None:

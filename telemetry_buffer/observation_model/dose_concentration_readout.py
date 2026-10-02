@@ -306,17 +306,15 @@ def report(events: list[dict[str, object]], pathogen_id: str) -> list[str]:
     if not subset:
         return lines
     curv = curvature_utilisation(subset)
-    lines.append(
+    lines.extend([
         "curvature: sum(1-exp(-sD))/sum(sD) = "
         f"{curv['utilisation']:.6f}  (1.0 = linear, dispersion inert)",
-    )
-    lines.append(
         f"  sD: median={curv['median_sD']:.4g} max={curv['max_sD']:.4g} "
         f"share>=1: {curv['share_sD_above_1']:.4f} "
         f"share in [0.01, 10]: {curv['share_sD_informative']:.4f} "
         f"hazard from sD>=1: {curv['hazard_share_from_sD_above_1']:.4f}",
-    )
-    lines.append("\nconcentration of effective dose:")
+        "\nconcentration of effective dose:",
+    ])
     lines.extend(_concentration_lines(
         "all host-epochs", concentration([float(e["dose"]) for e in subset]),
     ))

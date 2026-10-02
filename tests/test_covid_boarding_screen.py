@@ -1249,10 +1249,11 @@ def test_dose_response_frailty_needs_the_cell_theta():
         sanitary_visit_mode="dwell_weighted",
         voyage_mode="declared", incubation_profile=load_covid_profile(),
     )
+    profile = load_covid_profile()
     with pytest.raises(ValueError, match="dose_response_frailty"):
         apply_arm_overrides(
             raw, {"dose_response_frailty": {"alpha": 0.05}},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 

@@ -108,7 +108,7 @@ def _landing_audit(
     return {
         "n_cells": len(cells),
         "declared_alpha": declared_alpha,
-        "resolved_alpha_values": sorted(set(round(a, 9) for a in alphas)),
+        "resolved_alpha_values": sorted({round(a, 9) for a in alphas}),
         "mismatched_cells": mismatched,
         "landed": not mismatched,
     }
@@ -255,14 +255,13 @@ def pool(
     for class_id in sorted({k[0] for k in groups}):
         arms = {
             arm: _arm_pool(
-                groups[(class_id, arm)], takeoff_min,
+                pool, takeoff_min,
                 (arm_alphas or {}).get(arm),
                 (arm_scales or {}).get(arm),
                 beta,
             )
-            for arm in sorted(
-                a for (cid, a) in groups if cid == class_id
-            )
+            for (cid, arm), pool in sorted(groups.items())
+            if cid == class_id
         }
         entry: dict[str, Any] = {"arms": arms}
         if "alpha_lo" in arms and "alpha_hi" in arms:

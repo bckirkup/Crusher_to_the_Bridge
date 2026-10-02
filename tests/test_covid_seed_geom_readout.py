@@ -82,8 +82,10 @@ def test_declared_defaults_and_corners():
                                "onset_recording": {"report_probability": 0.56},
                                "syndrome_case_eligibility_by_severity":
                                    [0, 0, 0, 1, 1]}}}})
-    assert d["onset_day"] == 6.0 and d["count"] == 8
-    assert d["role_removed"] is True and d["include_fixed_rings"] is True
+    assert d["onset_day"] == 6.0
+    assert d["count"] == 8
+    assert d["role_removed"] is True
+    assert d["include_fixed_rings"] is True
     assert d["onset_recording"] == {"report_probability": 0.56}
     assert d["eligibility"] == [0, 0, 0, 1, 1]
 
@@ -111,9 +113,11 @@ def test_audit_cell_clean_and_each_failure():
     fails = mod.audit_cell(_payload(onset=None), declared)
     assert fails == ["index_onset_day null on a presenting index"]
     fails = mod.audit_cell(_payload(onset=-2.5), declared)
-    assert fails and "index_onset_day" in fails[0]
+    assert fails
+    assert "index_onset_day" in fails[0]
     fails = mod.audit_cell(_payload(expo_flag=True), declared)
-    assert fails and "exposure_cap_include_fixed_rings" in fails[0]
+    assert fails
+    assert "exposure_cap_include_fixed_rings" in fails[0]
 
 
 def test_audit_cell_role_removed_and_ref_echoes():
