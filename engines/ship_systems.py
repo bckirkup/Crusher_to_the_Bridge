@@ -1,4 +1,4 @@
-"""Ship systems health and repair labor (``docs/proposals/ship_function_capacity_spec.md`` §5).
+"""Ship systems health and repair labor (``docs/ship_functions/ship_function_capacity_spec.md`` §5).
 
 A small registry of named systems with a health state, beside
 ``crew_duty_exclusion.py`` in ownership style: data and transitions, no
