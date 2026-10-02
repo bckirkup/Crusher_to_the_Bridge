@@ -1,0 +1,24 @@
+{
+  "name": "noro_hand_stationary_01",
+  "pathogen": "norovirus",
+  "manifest": "picard_framework/runs/mega_cruise_campaign/noro_dose_refit_01_manifest.json",
+  "pathogen_id": "norwalk_gi",
+  "epochs": 288,
+  "s3_prefix": "campaign/noro_hand_stationary_01/",
+  "queue": "picard-campaign-queue",
+  "image_tag": "noro-hand-stat01",
+  "resources": {"vcpu": "1", "memory": "4096", "shm": 512},
+  "blocks": {
+    "fl_spr_12d": {
+      "worker": "tools/noro_diag/growth_chain_census.py",
+      "tier": "fl_spr_12d",
+      "seeds": [8105, 8107, 8110, 8112, 8113, 8114, 8115, 8117, 8121, 8123, 8124, 8129, 8132, 8135, 8137, 8148, 8149, 8156, 8158, 8159, 8162, 8163]
+    },
+    "classic_cruise_1900": {
+      "worker": "tools/noro_diag/fomite_mass_balance.py",
+      "artifact": "fomite_mass_balance_{platform}_seed{seed}.json.gz",
+      "seeds": [8105, 8107, 8110, 8112, 8113, 8114, 8115, 8117, 8121, 8123, 8124, 8129, 8132, 8135, 8137, 8148, 8149, 8156, 8158, 8159, 8162, 8163]
+    }
+  },
+  "readout": "tools/noro_diag/hand_occupancy_readout.py"
+}

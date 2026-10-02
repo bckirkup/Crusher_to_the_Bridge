@@ -1,0 +1,332 @@
+#!/usr/bin/env python3
+"""campaign — the single entry point for running campaigns/ specs.
+
+Non-developers use ONLY this CLI; it resolves ``campaigns/<p>/<n>/``,
+validates the spec, and drives local runs, Batch submits, and readouts:
+
+  scripts/campaign list
+  scripts/campaign describe noro/hand_occupancy
+  scripts/campaign run     noro/hand_occupancy --block fl_spr_12d --index 0
+  scripts/campaign submit  noro/hand_occupancy --block fl_spr_12d \\
+      --bucket crusherbucket-... [--canary] [--queue Q] [--register-only]
+  scripts/campaign readout noro/hand_occupancy [-- <readout args>]
+
+``submit`` replaces every per-campaign ``deploy/aws/submit_*.sh``: the
+jobdef is rendered from ``deploy/aws/campaign_jobdef.json`` and the cell
+argv is always passed as a literal ``--container-overrides`` command
+(``Ref::`` parameter shorthand is never used — comma lists split and
+empty values are rejected server-side).
+"""
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import subprocess  # noqa: S404 - fixed argv, no shell
+import sys
+from datetime import datetime, timezone
+from pathlib import Path
+
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_CAMPAIGNS = _REPO_ROOT / "campaigns"
+_ENTRYPOINT = "deploy/aws/campaign_entrypoint.py"
+_JOBDEF_TEMPLATE = _REPO_ROOT / "deploy" / "aws" / "campaign_jobdef.json"
+
+_DEFAULT_REGION = "us-east-1"
+_DEFAULT_QUEUE = "picard-campaign-queue"
+_DEFAULT_PROFILE = "picard"
+
+
+def _die(msg: str) -> "SystemExit":
+    return SystemExit(f"error: {msg}")
+
+
+def _campaign_dir(name: str) -> Path:
+    directory = (_CAMPAIGNS / name).resolve()
+    if not directory.is_relative_to(_CAMPAIGNS) or not directory.is_dir():
+        raise _die(f"campaign not found: {name} (expected under campaigns/)")
+    return directory
+
+
+def _load_spec(name: str) -> tuple[Path, dict]:
+    directory = _campaign_dir(name)
+    spec_path = directory / "campaign.json"
+    if not spec_path.is_file():
+        raise _die(f"missing {spec_path}")
+    try:
+        spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    except json.JSONDecodeError as exc:
+        raise _die(f"{spec_path}: invalid JSON — {exc}") from exc
+    for field in ("name", "manifest", "pathogen_id", "blocks"):
+        if field not in spec:
+            raise _die(f"{spec_path}: missing required field {field!r}")
+    return directory, spec
+
+
+def _block(spec: dict, name: str) -> dict:
+    block = spec["blocks"].get(name)
+    if block is None:
+        raise _die(
+            f"block {name!r} not in campaign.json "
+            f"(have: {', '.join(spec['blocks'])})",
+        )
+    if not block.get("worker") or not block.get("seeds"):
+        raise _die(f"block {name!r} needs 'worker' and 'seeds'")
+    if not block.get("tier") and not block.get("artifact"):
+        raise _die(
+            f"block {name!r} needs 'tier' (manifest worker) or "
+            f"'artifact' (seeds worker) for done-detection",
+        )
+    return block
+
+
+def _jobdef_name(spec: dict) -> str:
+    return f"picard-{spec['name'].replace('_', '-')}"
+
+
+def _s3_prefix(spec: dict, bucket: str) -> str:
+    prefix = spec.get("s3_prefix") or f"campaign/{spec['name']}/"
+    return f"s3://{bucket}/{prefix.lstrip('/')}"
+
+
+def cmd_list(_args: argparse.Namespace) -> int:
+    rows = []
+    for spec_path in sorted(_CAMPAIGNS.glob("*/*/campaign.json")):
+        name = spec_path.parent.relative_to(_CAMPAIGNS)
+        try:
+            spec = json.loads(spec_path.read_text(encoding="utf-8"))
+            cells = sum(len(b.get("seeds", [])) for b in spec["blocks"].values())
+            rows.append((str(name), spec["name"], len(spec["blocks"]), cells))
+        except (json.JSONDecodeError, KeyError) as exc:
+            rows.append((str(name), f"INVALID SPEC ({exc})", "-", "-"))
+    if not rows:
+        print("no campaigns under campaigns/<pathogen>/<name>/")
+        return 0
+    for name, campaign, blocks, cells in rows:
+        print(f"{name:<40} {campaign:<28} {blocks} block(s), {cells} cells")
+    return 0
+
+
+def cmd_describe(args: argparse.Namespace) -> int:
+    directory, spec = _load_spec(args.campaign)
+    print(f"campaign  : {args.campaign}")
+    print(f"directory : {directory.relative_to(_REPO_ROOT)}")
+    print(f"name      : {spec['name']}")
+    print(f"manifest  : {spec['manifest']}")
+    print(f"pathogen  : {spec['pathogen_id']}")
+    print(f"epochs    : {spec.get('epochs', 288)}")
+    print(f"jobdef    : {_jobdef_name(spec)}")
+    print(f"image tag : {spec.get('image_tag', 'campaign')}")
+    print(f"queue     : {spec.get('queue', _DEFAULT_QUEUE)}")
+    print(f"readout   : {spec.get('readout', '(none)')}")
+    for block_name, block in spec["blocks"].items():
+        seeds = block.get("seeds", [])
+        kind = "tier" if block.get("tier") else "seeds"
+        print(
+            f"block {block_name:<22} {kind}-driven  "
+            f"array={len(seeds)}  worker={block['worker']}",
+        )
+    return 0
+
+
+def cmd_run(args: argparse.Namespace) -> int:
+    directory, spec = _load_spec(args.campaign)
+    block = _block(spec, args.block)
+    out_dir = args.out or f"out/{args.campaign}"
+    command = [
+        sys.executable, str(_REPO_ROOT / _ENTRYPOINT),
+        "--campaign", args.campaign,
+        "--block", args.block,
+        "--seeds", ",".join(str(s) for s in block["seeds"]),
+        "--index", str(args.index),
+        "--local",
+        "--out", out_dir,
+    ]
+    print(f"+ {' '.join(command)}")
+    return subprocess.run(command, cwd=_REPO_ROOT).returncode
+
+
+def _render_jobdef(spec: dict, account: str, region: str) -> dict:
+    template = _JOBDEF_TEMPLATE.read_text(encoding="utf-8")
+    resources = spec.get("resources") or {}
+    rendered = (
+        template
+        .replace("<JOBDEF_NAME>", _jobdef_name(spec))
+        .replace("<ACCOUNT_ID>", account)
+        .replace("<REGION>", region)
+        .replace("<IMAGE_TAG>", spec.get("image_tag", "campaign"))
+        .replace("<VCPU>", str(resources.get("vcpu", "1")))
+        .replace("<MEMORY>", str(resources.get("memory", "4096")))
+        .replace("<LOG_PREFIX>", spec["name"].replace("_", "-"))
+    )
+    if "<" in rendered:
+        raise _die(f"jobdef template still has unsubstituted fields: {rendered[:400]}")
+    return json.loads(rendered)
+
+
+def cmd_submit(args: argparse.Namespace) -> int:
+    directory, spec = _load_spec(args.campaign)
+    block = _block(spec, args.block)
+    bucket = args.bucket or os.environ.get("CAMPAIGN_BUCKET")
+    if not bucket:
+        raise _die("--bucket (or CAMPAIGN_BUCKET) is required")
+    region = args.region
+    queue = args.queue or spec.get("queue", _DEFAULT_QUEUE)
+    seeds = ",".join(str(s) for s in block["seeds"])
+    s3_prefix = _s3_prefix(spec, bucket)
+    jobdef = _jobdef_name(spec)
+
+    aws_env = dict(os.environ)
+    aws_env["AWS_PROFILE"] = args.profile
+
+    account = args.account
+    if not account:
+        whoami = subprocess.run(
+            ["aws", "sts", "get-caller-identity",
+             "--query", "Account", "--output", "text"],
+            env=aws_env, capture_output=True, text=True,
+        )
+        if whoami.returncode != 0:
+            raise _die(
+                "could not resolve AWS account id "
+                "(sts get-caller-identity failed); pass --account",
+            )
+        account = whoami.stdout.strip()
+
+    jobdef_json = _render_jobdef(spec, account, region)
+    rendered_path = (
+        _REPO_ROOT / "deploy" / "aws" / f"jobdef_{_jobdef_name(spec)}.rendered.json"
+    )
+    rendered_path.write_text(
+        json.dumps(jobdef_json, indent=2) + "\n", encoding="utf-8",
+    )
+    print(f"wrote {rendered_path.relative_to(_REPO_ROOT)}")
+
+    if not args.dry_run:
+        register = subprocess.run(
+            ["aws", "batch", "register-job-definition",
+             "--region", region,
+             "--cli-input-json", rendered_path.read_text(encoding="utf-8")],
+            env=aws_env, capture_output=True, text=True,
+        )
+        if register.returncode != 0:
+            raise _die(f"register-job-definition failed:\n{register.stderr}")
+        revision = json.loads(register.stdout)["revision"]
+        print(f"registered {jobdef}:{revision}")
+    else:
+        print("dry run — jobdef rendered but not registered")
+        revision = None
+
+    if args.register_only:
+        return 0
+
+    job_name = (
+        f"{jobdef}-{args.block}-"
+        f"{datetime.now(timezone.utc).strftime('%Y%m%d-%H%M%S')}"
+    )
+    command = [
+        _ENTRYPOINT,
+        "--campaign", args.campaign,
+        "--s3-prefix", s3_prefix,
+        "--block", args.block,
+        "--seeds", seeds,
+    ]
+    if spec.get("manifest"):
+        command += ["--manifest", spec["manifest"]]
+    if spec.get("pathogen_id"):
+        command += ["--pathogen-id", spec["pathogen_id"]]
+    if spec.get("epochs"):
+        command += ["--epochs", str(spec["epochs"])]
+
+    submit_json = {
+        "jobName": job_name,
+        "jobQueue": queue,
+        "jobDefinition": jobdef if revision is None else f"{jobdef}:{revision}",
+        "containerOverrides": {"command": command},
+    }
+    if args.canary:
+        command += ["--index", str(args.index)]
+        submit_json["jobName"] += "-canary"
+    else:
+        submit_json["arrayProperties"] = {"size": len(block["seeds"])}
+
+    print(json.dumps(submit_json, indent=2))
+    if args.dry_run:
+        print("dry run — not submitted")
+        return 0
+
+    submit = subprocess.run(
+        ["aws", "batch", "submit-job", "--region", region,
+         "--cli-input-json", json.dumps(submit_json)],
+        env=aws_env, capture_output=True, text=True,
+    )
+    if submit.returncode != 0:
+        raise _die(f"submit-job failed:\n{submit.stderr}")
+    job_id = json.loads(submit.stdout)["jobId"]
+    print(f"submitted {job_name} -> {job_id}")
+    return 0
+
+
+def cmd_readout(args: argparse.Namespace) -> int:
+    _, spec = _load_spec(args.campaign)
+    readout = spec.get("readout")
+    if not readout:
+        raise _die("campaign.json has no 'readout' module")
+    command = [sys.executable, str(_REPO_ROOT / readout), *args.readout_args]
+    print(f"+ {' '.join(command)}")
+    return subprocess.run(command, cwd=_REPO_ROOT).returncode
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__,
+                                   prog="scripts/campaign")
+    sub = parser.add_subparsers(dest="command", required=True)
+
+    sub.add_parser("list")
+
+    describe = sub.add_parser("describe")
+    describe.add_argument("campaign")
+
+    run = sub.add_parser("run")
+    run.add_argument("campaign")
+    run.add_argument("--block", required=True)
+    run.add_argument("--index", type=int, default=0)
+    run.add_argument("--out", default=None)
+
+    submit = sub.add_parser("submit")
+    submit.add_argument("campaign")
+    submit.add_argument("--block", required=True)
+    submit.add_argument("--bucket", default=None)
+    submit.add_argument("--account", default=None,
+                        help="AWS account id; registers the jobdef when given")
+    submit.add_argument("--region", default=_DEFAULT_REGION)
+    submit.add_argument("--queue", default=None)
+    submit.add_argument("--profile", default=_DEFAULT_PROFILE)
+    submit.add_argument("--canary", action="store_true",
+                        help="single job with --index instead of the array")
+    submit.add_argument("--index", type=int, default=0)
+    submit.add_argument("--register-only", action="store_true")
+    submit.add_argument("--dry-run", action="store_true")
+
+    readout = sub.add_parser("readout")
+    readout.add_argument("campaign")
+    readout.add_argument("readout_args", nargs=argparse.REMAINDER)
+
+    args = parser.parse_args(argv)
+    return args
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = parse_args(argv)
+    handlers = {
+        "list": cmd_list,
+        "describe": cmd_describe,
+        "run": cmd_run,
+        "submit": cmd_submit,
+        "readout": cmd_readout,
+    }
+    return handlers[args.command](args)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
