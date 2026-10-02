@@ -215,6 +215,7 @@ def merge_voyage_overrides(
         or "medical_response" in overrides
         or "ship_functions" in overrides
         or "ship_systems" in overrides
+        or "hazard_sources" in overrides
     ):
         return deep_merge_dict(platform_cfg, overrides)
     return deep_merge_dict(platform_cfg, {"voyage": overrides})

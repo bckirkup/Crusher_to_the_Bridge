@@ -776,6 +776,20 @@ ppe_fatigue:
   fatigue_refusal_threshold: 50.0
   fatigue_refusal_probability_per_epoch: 0.1
 
+# ── Hazard source model (ship_function_capacity_spec §8, ENV-SOURCE-01) ──
+# Emitters, standing/dynamic fields, and penetration adapters writing into
+# env_contamination zone pools. Declarations may also live in a platform
+# voyage_config.json or the pathogen-profiles file; this layer wins on
+# conflicts (same-id entries merge key-by-key). All rates are *_per_hour /
+# *_hours and carry source+grade; NULL-SOURCE marks declared arms.
+hazard_sources:
+  # ``enabled`` is deliberately undeclared here: absent/disabled =
+  # bit-identical, and leaving it unset lets a platform or profiles-file
+  # block arm itself; ``enabled: false`` here would disarm them.
+  substances: []   # non-pathogen hazards riding the environmental reservoirs
+  emitters: []     # scheduled mass sources -> env_contamination[pid][zone]
+  penetrations: [] # off-ship field couplings resolved into emitters
+
 # ── Variant Surveillance (heritable strain tracking) ─────────
 # Off by default: with enabled=false no strain is minted and no RNG draw
 # changes, so legacy runs and campaign goldens stay bit-identical.

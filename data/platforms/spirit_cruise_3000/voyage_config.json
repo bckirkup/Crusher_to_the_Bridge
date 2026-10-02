@@ -140,5 +140,71 @@
         "feedback": {"kind": "readout_only"}
       }
     ]
+  },
+  "hazard_sources": {
+    "enabled": false,
+    "description": "ENV-SOURCE-01 worked example (docs/hazard_sources.md): a point/dynamic engine-room VOC spill plus a uniform-outdoor penetration. Arm with hazard_sources.enabled=true via config_overrides; every rate is NULL-SOURCE pending the hazard parameter register.",
+    "substances": [
+      {
+        "substance_id": "voc_spill",
+        "label": "Engine-room volatile organic compound spill",
+        "transport": "armed",
+        "environmental_contamination": {
+          "source_zones": ["Engine_Room"],
+          "baseline_environmental_load": 0.0,
+          "base_emission_rate_per_day": 1.0,
+          "exposure_probability_per_day": 0.5,
+          "spore_decay_rate_per_day": 2.0,
+          "colonization_rate_per_day": 0.0
+        },
+        "parameters_provenance": "NULL-SOURCE: declared spill-scenario arm (spec §8). Emission 1.0/day keeps dose in declared mass units; exposure 0.5/day is a declared occupancy-contact share; decay 2.0/day is a declared volatile dissipation arm — none fitted."
+      },
+      {
+        "substance_id": "harbor_plume",
+        "label": "Harbor industrial plume intrusion",
+        "transport": "armed",
+        "environmental_contamination": {
+          "baseline_environmental_load": 0.0,
+          "base_emission_rate_per_day": 1.0,
+          "exposure_probability_per_day": 0.5,
+          "spore_decay_rate_per_day": 1.0,
+          "colonization_rate_per_day": 0.0
+        },
+        "parameters_provenance": "NULL-SOURCE: declared plume arm (spec §8). Same null-sourced defaults as voc_spill; the penetration factor on the adapter is the sourced side of the coupling."
+      }
+    ],
+    "emitters": [
+      {
+        "emitter_id": "engine_room_voc_release",
+        "substance_id": "voc_spill",
+        "kind": {"placement": "point", "field": "dynamic"},
+        "zones": ["Engine_Room"],
+        "schedule": {"start_epoch": 6, "duration_hours": 6},
+        "rate": {
+          "kind": "functional",
+          "functional_form": "exponential_decay",
+          "mass_per_hour": 2500.0,
+          "decay_rate_per_hour": 0.7,
+          "source": "NULL-SOURCE: declared six-hour evaporating-spill arm, exponential source depletion 0.7/h; epoch mass integrates the rate analytically.",
+          "grade": "C"
+        }
+      }
+    ],
+    "penetrations": [
+      {
+        "penetration_id": "harbor_plume_promenade",
+        "substance_id": "harbor_plume",
+        "adapter": "uniform_outdoor",
+        "zones": ["Promenade", "LidoBuffet"],
+        "penetration_factor": 0.3,
+        "outdoor_field": {
+          "kind": "uniform",
+          "concentration_per_hour": 40.0
+        },
+        "schedule": {"start_epoch": 0, "duration_hours": 12},
+        "source": "NULL-SOURCE: declared harbor-plume coupling — uniform outdoor concentration times a declared 0.3 shell-penetration factor; the adapter seam a QUIC plume solve would feed is PENETRATION_ADAPTERS in engines/hazard_sources.py.",
+        "grade": "C"
+      }
+    ]
   }
 }

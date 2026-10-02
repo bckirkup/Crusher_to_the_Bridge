@@ -20,6 +20,16 @@
       "items": {
         "$ref": "#/$defs/PathogenProfile"
       }
+    },
+    "hazard_sources": {
+      "type": "object",
+      "description": "Hazard source-model declarations shared across platforms (docs/proposals/ship_function_capacity_spec.md §8, ENV-SOURCE-01): substances riding the environmental reservoirs, emitters writing into env_contamination zone pools, and off-ship field penetrations resolved through named adapters. Merged below platform voyage and run-config layers (same-id entries merge key-by-key); enabled resolves to the last layer that declares it, default false. The declaration shape is documented on the voyage_config schema's hazard_sources property.",
+      "properties": {
+        "enabled": {"type": "boolean", "default": false},
+        "substances": {"type": "array", "items": {"type": "object"}},
+        "emitters": {"type": "array", "items": {"type": "object"}},
+        "penetrations": {"type": "array", "items": {"type": "object"}}
+      }
     }
   },
   "$defs": {

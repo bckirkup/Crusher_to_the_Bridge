@@ -107,6 +107,26 @@
       "type": "array",
       "description": "Named ship systems with health state, degradation, and repair labor (spec §5).",
       "items": { "$ref": "#/$defs/ship_system" }
+    },
+    "hazard_sources": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Hazard source-model declarations (docs/proposals/ship_function_capacity_spec.md §8, ENV-SOURCE-01): substances riding the environmental reservoirs, emitters writing into env_contamination zone pools, and off-ship field penetrations resolved through named adapters. enabled: false by default; absent = bit-identical. All rates are *_per_hour / *_hours and carry source+grade (NULL-SOURCE for declared arms).",
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "substances": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hazard_substance" }
+        },
+        "emitters": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hazard_emitter" }
+        },
+        "penetrations": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/hazard_penetration" }
+        }
+      }
     }
   },
   "$defs": {
@@ -199,6 +219,176 @@
           "minimum": 0,
           "maximum": 1
         }
+      }
+    },
+    "hazard_substance": {
+      "type": "object",
+      "required": ["substance_id", "parameters_provenance"],
+      "additionalProperties": true,
+      "properties": {
+        "substance_id": { "type": "string" },
+        "enabled": { "type": "boolean", "default": true },
+        "transport": {
+          "type": "string",
+          "enum": ["armed", "none"],
+          "default": "armed",
+          "description": "Whether the zone pool rides the armed transport (native airflow network or CONTAM); 'none' keeps a standing field."
+        },
+        "environmental_contamination": {
+          "type": "object",
+          "additionalProperties": true,
+          "description": "Reservoir-arm scalars (baseline_environmental_load, base_emission_rate_per_day, exposure_probability_per_day, spore_decay_rate_per_day, colonization_rate_per_day, source_zones). 'enabled' and 'person_to_person' are owned by the machinery and refused.",
+          "properties": {
+            "source_zones": { "type": "array", "items": { "type": "string" } },
+            "baseline_environmental_load": { "type": "number", "minimum": 0 },
+            "base_emission_rate_per_day": { "type": "number", "minimum": 0 },
+            "exposure_probability_per_day": {
+              "type": "number", "minimum": 0, "maximum": 1
+            },
+            "spore_decay_rate_per_day": { "type": "number", "minimum": 0 },
+            "colonization_rate_per_day": { "type": "number" }
+          }
+        },
+        "parameters_provenance": {
+          "type": "string",
+          "description": "Provenance note for every rate on the entry; NULL-SOURCE arms state it here."
+        }
+      }
+    },
+    "hazard_emitter": {
+      "type": "object",
+      "required": ["emitter_id", "substance_id", "kind", "zones", "rate"],
+      "additionalProperties": true,
+      "properties": {
+        "emitter_id": { "type": "string" },
+        "substance_id": {
+          "type": "string",
+          "description": "A declared hazard_sources substance_id or an existing pathogen profile id."
+        },
+        "enabled": { "type": "boolean", "default": true },
+        "kind": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["placement", "field"],
+          "properties": {
+            "placement": { "type": "string", "enum": ["point", "multipoint"] },
+            "field": { "type": "string", "enum": ["standing", "dynamic"] }
+          },
+          "description": "kind is the placement x field pair: point = one zone; multipoint = the full declared rate replicated into every zone. standing = constant rate; dynamic = series or functional schedule recomputed per epoch."
+        },
+        "zones": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Zone ids on this platform; exactly one for placement 'point'."
+        },
+        "schedule": { "$ref": "#/$defs/hazard_schedule" },
+        "rate": { "$ref": "#/$defs/hazard_rate" }
+      }
+    },
+    "hazard_penetration": {
+      "type": "object",
+      "required": [
+        "penetration_id", "substance_id", "adapter", "zones",
+        "penetration_factor", "outdoor_field", "source", "grade"
+      ],
+      "additionalProperties": true,
+      "properties": {
+        "penetration_id": { "type": "string" },
+        "substance_id": { "type": "string" },
+        "enabled": { "type": "boolean", "default": true },
+        "adapter": {
+          "type": "string",
+          "enum": ["uniform_outdoor"],
+          "description": "Registered penetration adapter name; a QUIC or other CFD adapter registers under its own name at this seam (PENETRATION_ADAPTERS in engines/hazard_sources.py)."
+        },
+        "zones": {
+          "type": "array",
+          "items": { "type": "string" },
+          "minItems": 1,
+          "description": "Penetration points as zone ids on this platform."
+        },
+        "penetration_factor": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Declared multiplier from outdoor concentration rate to indoor emission rate."
+        },
+        "outdoor_field": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": ["kind"],
+          "properties": {
+            "kind": { "type": "string", "enum": ["uniform", "series"] },
+            "concentration_per_hour": { "type": "number", "minimum": 0 },
+            "series_per_hour": {
+              "type": "array",
+              "items": { "type": "number", "minimum": 0 },
+              "minItems": 1
+            }
+          }
+        },
+        "schedule": { "$ref": "#/$defs/hazard_schedule" },
+        "source": { "type": "string" },
+        "grade": { "type": "string" }
+      }
+    },
+    "hazard_schedule": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "start_epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "First live epoch (introduction_epoch-style onset)."
+        },
+        "duration_hours": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Release window on a physical clock; the last covered epoch may be partial."
+        }
+      }
+    },
+    "hazard_rate": {
+      "type": "object",
+      "required": ["kind", "source", "grade"],
+      "additionalProperties": true,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["constant", "series", "functional"],
+          "description": "constant pairs with field 'standing'; series or functional pairs with 'dynamic'."
+        },
+        "mass_per_hour": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Constant, initial, or plateau rate in declared mass units per hour."
+        },
+        "series_per_hour": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0 },
+          "minItems": 1,
+          "description": "One per-hour rate per epoch from the schedule onset."
+        },
+        "functional_form": {
+          "type": "string",
+          "enum": ["exponential_decay", "linear_ramp"],
+          "description": "Closed form integrated over each epoch; nothing compounds by hand."
+        },
+        "decay_rate_per_hour": {
+          "type": "number",
+          "minimum": 0,
+          "description": "exponential_decay parameter."
+        },
+        "ramp_up_hours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "linear_ramp time to plateau."
+        },
+        "source": {
+          "type": "string",
+          "description": "Citation or 'NULL-SOURCE' for a declared arm."
+        },
+        "grade": { "type": "string" }
       }
     },
     "ship_system": {

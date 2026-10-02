@@ -99,6 +99,7 @@ python3 presidio_runner.py \
 | [density_contact_spec.md](density_contact_spec.md) | Implemented — `per_partner_contact` is the default; the zone-average mode it replaced was superseded by #329 |
 | [contact_architecture_spec.md](contact_architecture_spec.md) | Implemented, on by default — `transmission.activity_contacts` derives the contact draw from schedule, zone type, mixing unit and duty state; CONTACT-ARCH-01 rates adopted as cruise-platform defaults |
 | [multi_pathogen_model_changes_spec.md](multi_pathogen_model_changes_spec.md) | Implemented (Phase A route weights / dose / FUT2; Phase B dining, food, source zones) |
+| [hazard_sources.md](hazard_sources.md) | Implemented, off by default — `ENV-SOURCE-01`: hazard emitters (point/multipoint × standing/dynamic) and penetration adapters writing into `env_contamination` zone pools; worked example on `spirit_cruise_3000` |
 | [tiered_escalation_spec.md](tiered_escalation_spec.md) | Implemented — SOP policy, decision latency, bimodal compliance |
 | [ship_operations_spec.md](ship_operations_spec.md) | Implemented — data model and config hooks; `effects_enabled` flag-gated |
 | [rhythm/rhythm_spec.md](rhythm/rhythm_spec.md) | Implemented, on by default — SHIP-RHYTHM-01 schedule-conditioned co-presence + `data/rhythm/event_catalogs.json` (transcribed daily programs); `rhythm.enabled: false` is the labelled baseline, catalogued cruise platforms only |

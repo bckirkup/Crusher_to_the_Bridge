@@ -1304,6 +1304,26 @@ def load_pathogen_profiles(
     return _normalize_profile_units(profiles)
 
 
+def load_hazard_source_declarations(cfg: dict[str, Any]) -> dict[str, Any]:
+    """The profiles file's top-level ``hazard_sources`` block, if present.
+
+    Follows ``load_pathogen_profiles``' resolution exactly: nothing is read
+    when ``multi_pathogen.resolved_profiles`` already supplied the profiles
+    (that caller owns declarations through ``cfg["hazard_sources"]``), and a
+    file without the block yields the empty identity.
+    """
+    mp_cfg = cfg.get("multi_pathogen", {})
+    resolved = mp_cfg.get("resolved_profiles")
+    if isinstance(resolved, dict) and resolved:
+        return {}
+    profiles_path = mp_cfg.get("profiles_path", asset_defaults.DEFAULT_PATHOGEN_PROFILES)
+    full_path = resolve_repo_path(REPO_ROOT, profiles_path)
+    if not os.path.isfile(full_path):
+        return {}
+    data = load_validated_json(full_path, "pathogen_profiles.schema.json", allowed_roots=(REPO_ROOT,))
+    return data.get("hazard_sources") or {}
+
+
 # Per-route clearance parameterises route efficiency, which
 # route_efficiency_multipliers owns: the two are not separately identifiable,
 # so a profile declaring either of these is refused rather than silently
