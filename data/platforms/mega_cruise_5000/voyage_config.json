@@ -49,5 +49,47 @@
     "detection_delay_hours": 0,
     "crew_screening_interval_hours": null,
     "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
+  },
+  "environmental_hazards": {
+    "enabled": false,
+    "parameters_provenance": "docs/ship_functions/parameter_sources.md §9 — every hazard constant below is a NULL-SOURCE Grade C declared operational arm; nothing is fitted.",
+    "hazards": [
+      {
+        "pathogen_id": "voc_refrigerant_leak",
+        "name": "VOC refrigerant leak (declared)",
+        "category": "chemical",
+        "description": "ENV-HAZARD-01 (docs/ship_functions/ship_function_capacity_spec.md §8): a declared VOC refrigerant leak in Engine_Room_Aft. Chemical, not a pathogen — cumulative-exposure toxicity (Haber c·t threshold) producing a symptomatic presentation with zero shedding and no incubation; continuous chemical sensors read air concentration and surface density against declared LODs. baseline_environmental_load is the equilibrium pool a persistent leak holds (decay folded in); base_emission_rate_per_day is the exposure-dose pickup multiplier, not reservoir growth.",
+        "transmission_routes": ["hvac_airborne"],
+        "initial_infected": 0,
+        "introduction_epoch": 0,
+        "dose_response": {
+          "model": "cumulative_toxicity",
+          "haber_ct_threshold": 400.0,
+          "symptomatic": true
+        },
+        "environmental_contamination": {
+          "enabled": true,
+          "source_type": "machinery_space_leak",
+          "source_zones": ["Engine_Room_Aft"],
+          "baseline_environmental_load": 4.0,
+          "base_emission_rate_per_day": 240.0,
+          "exposure_probability_per_day": 0.6,
+          "spore_decay_rate_per_day": 0.0,
+          "colonization_rate_per_day": 0.0,
+          "person_to_person": false
+        },
+        "chemical_sensor": {
+          "enabled": true,
+          "air": {
+            "lod_mass_per_m3": 0.01,
+            "noise_sigma_log": 0.1
+          },
+          "surface": {
+            "lod_mass_per_cm2": 0.001,
+            "noise_sigma_log": 0.1
+          }
+        }
+      }
+    ]
   }
 }
