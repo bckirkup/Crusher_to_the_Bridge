@@ -764,9 +764,10 @@ def campaign_cell_spec(
         generate_tier_runs,
     )
 
-    manifest = json.loads(  # NOSONAR -- operator-specified manifest path in a local diagnostic tool
-        Path(manifest_path).read_text(encoding="utf-8"),
+    manifest_text = Path(manifest_path).read_text(  # NOSONAR -- operator-specified manifest path in a local diagnostic tool
+        encoding="utf-8",
     )
+    manifest = json.loads(manifest_text)
     found = [
         (run_id, spec)
         for run_id, spec in generate_tier_runs(manifest, tier)
