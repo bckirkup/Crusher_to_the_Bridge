@@ -240,3 +240,30 @@ mass is not rinse-visible until it settles; the practice dict carries
 one extra per-infection uniform (τ). Whether routine-row occupancy
 holds the R = 0.737 band — and whether ordering flips — is the frozen
 42-cell re-census, pending at merge.
+
+**Re-census — measured (2026-10-02, `a3c76061`, rev 7 digest-pinned).**
+All 42 frozen cells re-censused on the delayed-sequestration arm
+(`campaign/noro_hand_carriage02/`, jobdef `picard-hand-occupancy:7`,
+canary seed 8105 inspected clean before the arrays). One void
+(classic seed 8004, zero fomite deliveries — the declared rule).
+Verdict stays **`partial`**, and the ordering miss narrowed ~40%:
+
+- Occupancy 18.91% vs Liu 25.35% → **R = 0.746**, inside the restored
+  [1/3, 3] band (was 0.737). The starvation repair held.
+- Ordering still `event_higher`: post-defecation 26.96% vs routine-end
+  18.46% pooled (was 35.9% vs ~17.6% — the event arm dropped ~8pp
+  while routine held; the queued sequester no longer outruns the
+  post-visit wash). Both blocks agree (fl_spr 26.7/18.5;
+  classic 27.5/18.4).
+- Positive-mean 2.59 log10 and never-positive 0.576 both in-window.
+- The residual ordering miss is the event-deposit magnitude question:
+  the fresh accessible event deposit keeps event rows above routine
+  for the epoch it is sampled in, before any sequester settles — a
+  different knob from sequestration timing and the next declared-scope
+  decision, recorded in `norovirus_open_ledger.md`.
+
+Process: `tools/noro_diag/hand_occupancy_readout.py` was OOM-killed on
+this box while materializing ~13M shedding-row dicts; its pooled and
+per-block aggregation is now a one-pass streaming fold (validated
+bit-exact against the previous helpers on a full cell — positivity,
+mean, sd, never-positive, all three ordering arms, wet window).

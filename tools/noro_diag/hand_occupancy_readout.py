@@ -111,29 +111,27 @@ def _project(payload: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def _spirit_cells(raw_dir: Path) -> list[dict[str, Any]]:
-    """Projected cells, parsed one at a time -- payloads are ~300MB each."""
-    cell_dir = raw_dir / SPIRIT_TIER
-    cells = []
-    for path in sorted(cell_dir.glob("*.zip")):
+def _spirit_cell_paths(raw_dir: Path) -> list[Path]:
+    return sorted((raw_dir / SPIRIT_TIER).glob("*.zip"))
+
+
+def _classic_cell_paths(raw_dir: Path) -> list[Path]:
+    return sorted((raw_dir / CLASSIC_CELL).glob("*.json.gz"))
+
+
+def _load_cell(path: Path) -> dict[str, Any]:
+    """One projected cell; the caller drops it before loading the next."""
+    if path.suffix == ".zip":
         with zipfile.ZipFile(path) as archive:
             payload = json.loads(
                 gzip.decompress(
                     archive.read("growth_census.json.gz"),
                 ).decode("utf-8"),
             )
-        cells.append(_project(payload))
-        del payload
-    return sorted(cells, key=lambda c: c["seed"])
-
-
-def _classic_cells(raw_dir: Path) -> list[dict[str, Any]]:
-    cell_dir = raw_dir / CLASSIC_CELL
-    cells = []
-    for path in sorted(cell_dir.glob("*.json.gz")):
+    else:
         with gzip.open(path, "rt", encoding="utf-8") as handle:
-            cells.append(_project(json.load(handle)))
-    return sorted(cells, key=lambda c: c["seed"])
+            payload = json.load(handle)
+    return _project(payload)
 
 
 def _seed_of(cell: dict[str, Any]) -> int:
@@ -201,33 +199,6 @@ def _never_positive(rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def _ordering(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """Event vs routine ordering inside the model, both samplings."""
-    event = [r for r in rows if r.get("stool_event")]
-    routine = [r for r in rows if r.get("stool_event") is False]
-    post_event = [
-        (r, float(r["load_post_replenish_gec"])) for r in event
-    ]
-    end_routine = _end_loads(routine)
-    end_event = _end_loads(event)
-    return {
-        "post_defecation": _positivity(post_event),
-        "routine_end": _positivity(end_routine),
-        "event_end": _positivity(end_event),
-        "event_rows": len(event),
-        "routine_rows": len(routine),
-        "model_ordering_post_vs_routine": _sign(
-            _positivity(post_event).get("positive_share"),
-            _positivity(end_routine).get("positive_share"),
-        ),
-        "model_ordering_end_vs_end": _sign(
-            _positivity(end_event).get("positive_share"),
-            _positivity(end_routine).get("positive_share"),
-        ),
-        "liu_ordering": "post_bathroom_lower",
-    }
-
-
 def _sign(a: float | None, b: float | None) -> str | None:
     if a is None or b is None:
         return None
@@ -238,71 +209,299 @@ def _sign(a: float | None, b: float | None) -> str | None:
     return "equal"
 
 
+class _Fold:
+    """Streaming equivalent of the list-based helpers, one pass per row.
+
+    Every aggregate the readout publishes is a count, a sum, a per-agent
+    peak, or a mean/stdev over the *positive* loads -- so the only lists
+    kept are positive log10 loads (~20% of rows), never the row dicts.
+    The output shape is identical to the list-based helpers'.
+    """
+
+    def __init__(self) -> None:
+        self.n_rows = 0
+        self.end_rows = 0
+        self.end_nonzero_logs: list[float] = []
+        self.pos_logs: list[float] = []
+        self.symp_rows = 0
+        self.symp_pos_logs: list[float] = []
+        self.event_rows = 0
+        self.routine_rows = 0
+        self.event_end_rows = 0
+        self.routine_end_rows = 0
+        self.symp_end_rows = 0
+        self.post_event_pos_logs: list[float] = []
+        self.event_end_pos_logs: list[float] = []
+        self.routine_end_pos_logs: list[float] = []
+        self.agent_peaks: dict[int, float] = {}
+        self.at_target = 0
+        self.underflowed = 0
+        self.first_seen = 0
+        self.continuous_path = 0
+        self.wet_n = 0
+        self.wet_open = 0
+        self.wet_sum = 0.0
+        self.prot_n = 0
+        self.prot_sum = 0.0
+        self.pos_prot_n = 0
+        self.pos_prot_sum = 0.0
+        self.pool_n = 0
+        self.pool_sum = 0.0
+
+    def add(self, row: dict[str, Any]) -> None:
+        self.n_rows += 1
+        end = row.get("load_end_epoch_gec")
+        positive = end is not None and float(end) >= LIU_LOD_GEC
+        if end is not None:
+            self.end_rows += 1
+            if float(end) > 0.0:
+                self.end_nonzero_logs.append(_log10_of(float(end)))
+            if positive:
+                self.pos_logs.append(_log10_of(float(end)))
+            aid = int(row["agent_id"])
+            if float(end) > self.agent_peaks.get(aid, 0.0):
+                self.agent_peaks[aid] = float(end)
+        if row.get("symptomatic"):
+            self.symp_rows += 1
+            if end is not None:
+                self.symp_end_rows += 1
+            if positive:
+                self.symp_pos_logs.append(_log10_of(float(end)))
+        if row.get("stool_event"):
+            self.event_rows += 1
+            post = row.get("load_post_replenish_gec")
+            if post is not None and float(post) >= LIU_LOD_GEC:
+                self.post_event_pos_logs.append(_log10_of(float(post)))
+            if end is not None:
+                self.event_end_rows += 1
+            if positive:
+                self.event_end_pos_logs.append(_log10_of(float(end)))
+        elif row.get("stool_event") is False:
+            self.routine_rows += 1
+            if end is not None:
+                self.routine_end_rows += 1
+            if positive:
+                self.routine_end_pos_logs.append(_log10_of(float(end)))
+        if row.get("at_target"):
+            self.at_target += 1
+        if row.get("underflowed"):
+            self.underflowed += 1
+        if row.get("first_seen"):
+            self.first_seen += 1
+        if not row.get("event_path"):
+            self.continuous_path += 1
+        factor = row.get("hand_wet_transfer")
+        if factor is not None:
+            self.wet_n += 1
+            self.wet_sum += float(factor)
+            if factor > 0.08:
+                self.wet_open += 1
+        protected = row.get("hand_protected_gec")
+        if protected is not None:
+            self.prot_n += 1
+            self.prot_sum += float(protected)
+            if positive:
+                self.pos_prot_n += 1
+                self.pos_prot_sum += float(protected)
+        pool = row.get("hand_self_pool_gec")
+        if pool is not None:
+            self.pool_n += 1
+            self.pool_sum += float(pool)
+
+    def merge(self, other: "_Fold") -> None:
+        """Fold another cell block's accumulator into this one."""
+        self.n_rows += other.n_rows
+        self.end_rows += other.end_rows
+        self.end_nonzero_logs.extend(other.end_nonzero_logs)
+        self.pos_logs.extend(other.pos_logs)
+        self.symp_rows += other.symp_rows
+        self.symp_pos_logs.extend(other.symp_pos_logs)
+        self.event_rows += other.event_rows
+        self.routine_rows += other.routine_rows
+        self.event_end_rows += other.event_end_rows
+        self.routine_end_rows += other.routine_end_rows
+        self.symp_end_rows += other.symp_end_rows
+        self.post_event_pos_logs.extend(other.post_event_pos_logs)
+        self.event_end_pos_logs.extend(other.event_end_pos_logs)
+        self.routine_end_pos_logs.extend(other.routine_end_pos_logs)
+        for aid, peak in other.agent_peaks.items():
+            if peak > self.agent_peaks.get(aid, 0.0):
+                self.agent_peaks[aid] = peak
+        self.at_target += other.at_target
+        self.underflowed += other.underflowed
+        self.first_seen += other.first_seen
+        self.continuous_path += other.continuous_path
+        self.wet_n += other.wet_n
+        self.wet_open += other.wet_open
+        self.wet_sum += other.wet_sum
+        self.prot_n += other.prot_n
+        self.prot_sum += other.prot_sum
+        self.pos_prot_n += other.pos_prot_n
+        self.pos_prot_sum += other.pos_prot_sum
+        self.pool_n += other.pool_n
+        self.pool_sum += other.pool_sum
+
+    def _positivity(self, n: int, pos_logs: list[float]) -> dict[str, Any]:
+        out: dict[str, Any] = {
+            "samples": n,
+            "positive_samples": len(pos_logs),
+            "positive_share": len(pos_logs) / n if n else None,
+        }
+        if pos_logs:
+            out["positive_mean_log10"] = statistics.fmean(pos_logs)
+            out["positive_sd_log10"] = (
+                statistics.stdev(pos_logs) if len(pos_logs) > 1 else 0.0
+            )
+            out["positive_mean_gec"] = 10.0 ** out["positive_mean_log10"]
+        return out
+
+    def positivity(self) -> dict[str, Any]:
+        return self._positivity(self.end_rows, self.pos_logs)
+
+    def positivity_symptomatic_only(self) -> dict[str, Any]:
+        return self._positivity(self.symp_end_rows, self.symp_pos_logs)
+
+    def never_positive(self) -> dict[str, Any]:
+        peaks = self.agent_peaks
+        if not peaks:
+            return {"hosts": 0}
+        never = sum(1 for load in peaks.values() if load < LIU_LOD_GEC)
+        return {
+            "hosts": len(peaks),
+            "never_positive_hosts": never,
+            "never_positive_share": never / len(peaks),
+        }
+
+    def ordering(self) -> dict[str, Any]:
+        post_event = self._positivity(
+            self.event_rows, self.post_event_pos_logs,
+        )
+        routine_end = self._positivity(
+            self.routine_end_rows, self.routine_end_pos_logs,
+        )
+        event_end = self._positivity(
+            self.event_end_rows, self.event_end_pos_logs,
+        )
+        return {
+            "post_defecation": post_event,
+            "routine_end": routine_end,
+            "event_end": event_end,
+            "event_rows": self.event_rows,
+            "routine_rows": self.routine_rows,
+            "model_ordering_post_vs_routine": _sign(
+                post_event.get("positive_share"),
+                routine_end.get("positive_share"),
+            ),
+            "model_ordering_end_vs_end": _sign(
+                event_end.get("positive_share"),
+                routine_end.get("positive_share"),
+            ),
+            "liu_ordering": "post_bathroom_lower",
+        }
+
+    def wet_window_witness(self) -> dict[str, Any]:
+        return {
+            "rows_with_factor": self.wet_n,
+            "wet_window_open_rows": self.wet_open,
+            "wet_window_open_share": (
+                self.wet_open / self.wet_n if self.wet_n else None
+            ),
+            "mean_transfer_factor": (
+                self.wet_sum / self.wet_n if self.wet_n else None
+            ),
+        }
+
+    def carriage_witness(self) -> dict[str, Any]:
+        return {
+            "rows_with_protected": self.prot_n,
+            "mean_protected_gec": (
+                self.prot_sum / self.prot_n if self.prot_n else None
+            ),
+            "mean_protected_on_positive_gec": (
+                self.pos_prot_sum / self.pos_prot_n
+                if self.pos_prot_n else None
+            ),
+            "rows_with_pool": self.pool_n,
+            "mean_self_pool_gec": (
+                self.pool_sum / self.pool_n if self.pool_n else None
+            ),
+        }
+
+
+def _fold_cell(cell: dict[str, Any], fold: _Fold) -> None:
+    for row in cell["rows"]:
+        if row.get("shedding"):
+            fold.add(row)
+
+
 def _cell_readout(
-    cells: list[dict[str, Any]], expected_seeds: list[int],
-) -> dict[str, Any]:
-    """One cell block: per-seed rows plus the pooled reading."""
-    admissible = [c for c in cells if _is_admissible(c)]
-    void = [_seed_of(c) for c in cells if not _is_admissible(c)]
-    seen = {_seed_of(c) for c in cells}
+    paths: list[Path], expected_seeds: list[int],
+) -> tuple[dict[str, Any], _Fold]:
+    """One cell block: per-seed rows plus the pooled reading.
+
+    Cells are parsed one at a time and dropped after their rows are
+    folded -- the block's rows never coexist in memory.
+    """
+    fold = _Fold()
+    seen: set[int] = set()
+    void: list[int] = []
+    admissible = 0
+    reservoir_delivered = 0.0
+    pickup_delivered = 0.0
+    per_seed: list[dict[str, Any]] = []
+    for path in paths:
+        cell = _load_cell(path)
+        seed = _seed_of(cell)
+        seen.add(seed)
+        if not _is_admissible(cell):
+            void.append(seed)
+            del cell
+            continue
+        admissible += 1
+        reservoir_delivered += cell["reservoir_delivered_gec"]
+        pickup_delivered += cell["pickup_delivered_gec"]
+        shedding = _shedding_rows(cell)
+        per_seed.append({
+            "seed": seed,
+            "shedding_rows": len(shedding),
+            "positive_share": _positivity(
+                _end_loads(shedding),
+            ).get("positive_share"),
+            "never_positive_share": (
+                _never_positive(shedding).get("never_positive_share")
+            ),
+        })
+        for row in shedding:
+            fold.add(row)
+        del cell
+        del shedding
     missing = [s for s in expected_seeds if s not in seen]
-    all_rows = [row for c in admissible for row in _shedding_rows(c)]
-    end_pairs = _end_loads(all_rows)
-    symptomatic_rows = [r for r in all_rows if r.get("symptomatic")]
     return {
-        "cells_loaded": len(cells),
+        "cells_loaded": len(paths),
         "seeds_missing": missing,
         "void_seeds": void,
-        "admissible_cells": len(admissible),
-        "shedding_host_epoch_rows": len(all_rows),
-        "end_load_missing_rows": len(all_rows) - len(end_pairs),
-        "positivity": _positivity(end_pairs),
-        "positivity_symptomatic_only": _positivity(
-            _end_loads(symptomatic_rows),
-        ),
-        "never_positive": _never_positive(all_rows),
-        "ordering": _ordering(all_rows),
+        "admissible_cells": admissible,
+        "shedding_host_epoch_rows": fold.n_rows,
+        "end_load_missing_rows": fold.n_rows - fold.end_rows,
+        "positivity": fold.positivity(),
+        "positivity_symptomatic_only": fold.positivity_symptomatic_only(),
+        "never_positive": fold.never_positive(),
+        "ordering": fold.ordering(),
         "reservoir_witness": {
-            "reservoir_delivered_gec": sum(
-                c["reservoir_delivered_gec"] for c in admissible
-            ),
-            "pickup_delivered_gec": sum(
-                c["pickup_delivered_gec"] for c in admissible
-            ),
+            "reservoir_delivered_gec": reservoir_delivered,
+            "pickup_delivered_gec": pickup_delivered,
         },
-        "wet_window_witness": _wet_window_witness(all_rows),
-        "carriage_witness": _carriage_witness(all_rows),
+        "wet_window_witness": fold.wet_window_witness(),
+        "carriage_witness": fold.carriage_witness(),
         "occupancy": {
-            "at_target_rows": sum(1 for r in all_rows if r.get("at_target")),
-            "underflowed_rows": sum(
-                1 for r in all_rows if r.get("underflowed")
-            ),
-            "first_seen_rows": sum(
-                1 for r in all_rows if r.get("first_seen")
-            ),
-            "event_rows": sum(
-                1 for r in all_rows if r.get("stool_event")
-            ),
-            "continuous_path_rows": sum(
-                1 for r in all_rows if not r.get("event_path")
-            ),
+            "at_target_rows": fold.at_target,
+            "underflowed_rows": fold.underflowed,
+            "first_seen_rows": fold.first_seen,
+            "event_rows": fold.event_rows,
+            "continuous_path_rows": fold.continuous_path,
         },
-        "per_seed": [
-            {
-                "seed": _seed_of(c),
-                "shedding_rows": len(_shedding_rows(c)),
-                "positive_share": _positivity(
-                    _end_loads(_shedding_rows(c)),
-                ).get("positive_share"),
-                "never_positive_share": (
-                    _never_positive(_shedding_rows(c)).get(
-                        "never_positive_share",
-                    )
-                ),
-            }
-            for c in admissible
-        ],
-    }
+        "per_seed": per_seed,
+    }, fold
 
 
 def _evaluate(positivity: dict[str, Any]) -> dict[str, Any]:
@@ -324,72 +523,6 @@ def _evaluate(positivity: dict[str, Any]) -> dict[str, Any]:
     )
     checks["primary_positivity_miss"] = primary_miss
     return checks
-
-
-def _wet_window_witness(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """NORO-HAND-PRACTICE-01 witness: the deposit-side drying blend.
-
-    ``hand_wet_transfer`` is recorded per row only under the
-    ``hygiene_cycle`` arm; rows from every other arm carry ``None`` and
-    count as unmeasured, not dry. A row counts as wet-window-open when
-    its blend factor exceeds the dry ceiling of the declared interval
-    (0.08).
-    """
-    factors = [
-        row["hand_wet_transfer"] for row in rows
-        if row.get("hand_wet_transfer") is not None
-    ]
-    wet_open = [f for f in factors if f > 0.08]
-    return {
-        "rows_with_factor": len(factors),
-        "wet_window_open_rows": len(wet_open),
-        "wet_window_open_share": (
-            len(wet_open) / len(factors) if factors else None
-        ),
-        "mean_transfer_factor": (
-            statistics.fmean(factors) if factors else None
-        ),
-    }
-
-
-def _carriage_witness(rows: list[dict[str, Any]]) -> dict[str, Any]:
-    """NORO-HAND-CARRIAGE-01 witness: the protected compartment and the
-    host's own-environment pool.
-
-    Both columns carry ``None`` under arms that never allocate them, so
-    their row counts themselves distinguish the arm under test. The
-    protected share of a positive row is what the sequester design
-    predicts dominates routine positivity; the pool level is the mass
-    the own-environment reservoir holds.
-    """
-    protected = [
-        row["hand_protected_gec"] for row in rows
-        if row.get("hand_protected_gec") is not None
-    ]
-    pool = [
-        row["hand_self_pool_gec"] for row in rows
-        if row.get("hand_self_pool_gec") is not None
-    ]
-    positive_protected = [
-        row["hand_protected_gec"] for row in rows
-        if row.get("hand_protected_gec") is not None
-        and row.get("load_end_epoch_gec") is not None
-        and row["load_end_epoch_gec"] >= LIU_LOD_GEC
-    ]
-    return {
-        "rows_with_protected": len(protected),
-        "mean_protected_gec": (
-            statistics.fmean(protected) if protected else None
-        ),
-        "mean_protected_on_positive_gec": (
-            statistics.fmean(positive_protected)
-            if positive_protected else None
-        ),
-        "rows_with_pool": len(pool),
-        "mean_self_pool_gec": (
-            statistics.fmean(pool) if pool else None
-        ),
-    }
 
 
 def _verdict(
@@ -509,30 +642,28 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 def main(argv: list[str] | None = None) -> int:
     args = parse_args(argv)
-    spirit_cells = _spirit_cells(args.raw_dir)
-    classic_cells = _classic_cells(args.raw_dir)
-    spirit = _cell_readout(spirit_cells, IGNITED_SEEDS)
-    classic = _cell_readout(classic_cells, CLASSIC_SEEDS)
-    all_rows = [
-        row
-        for cell in spirit_cells + classic_cells
-        if _is_admissible(cell)
-        for row in _shedding_rows(cell)
-    ]
-    end_pairs = _end_loads(all_rows)
-    pooled_pos = _positivity(end_pairs)
-    pooled_pos["ordering_sign"] = _ordering(all_rows)[
+    spirit, spirit_fold = _cell_readout(
+        _spirit_cell_paths(args.raw_dir), IGNITED_SEEDS,
+    )
+    classic, classic_fold = _cell_readout(
+        _classic_cell_paths(args.raw_dir), CLASSIC_SEEDS,
+    )
+    pooled_fold = _Fold()
+    pooled_fold.merge(spirit_fold)
+    pooled_fold.merge(classic_fold)
+    pooled_pos = pooled_fold.positivity()
+    pooled_pos["ordering_sign"] = pooled_fold.ordering()[
         "model_ordering_post_vs_routine"
     ]
-    pooled_never = _never_positive(all_rows)
+    pooled_never = pooled_fold.never_positive()
     reservoir_witness = {
-        "reservoir_delivered_gec": sum(
-            c["reservoir_delivered_gec"]
-            for c in spirit_cells + classic_cells if _is_admissible(c)
+        "reservoir_delivered_gec": (
+            spirit["reservoir_witness"]["reservoir_delivered_gec"]
+            + classic["reservoir_witness"]["reservoir_delivered_gec"]
         ),
-        "pickup_delivered_gec": sum(
-            c["pickup_delivered_gec"]
-            for c in spirit_cells + classic_cells if _is_admissible(c)
+        "pickup_delivered_gec": (
+            spirit["reservoir_witness"]["pickup_delivered_gec"]
+            + classic["reservoir_witness"]["pickup_delivered_gec"]
         ),
     }
     payload = {
@@ -549,16 +680,13 @@ def main(argv: list[str] | None = None) -> int:
             CLASSIC_CELL: classic,
         },
         "pooled": {
-            "shedding_host_epoch_rows": len(all_rows),
+            "shedding_host_epoch_rows": pooled_fold.n_rows,
             "positivity": pooled_pos,
             "never_positive": pooled_never,
-            "ordering": _ordering(all_rows),
+            "ordering": pooled_fold.ordering(),
         },
         "end_load_spread_log10": spread(
-            [
-                _log10_of(load) for _row, load in end_pairs
-                if load > 0.0
-            ],
+            pooled_fold.end_nonzero_logs,
             quartiles=True,
         ),
     }
@@ -568,7 +696,8 @@ def main(argv: list[str] | None = None) -> int:
     payload["reservoir_verdict"] = _reservoir_verdict(
         pooled_pos, pooled_never, pooled_pos["ordering_sign"],
     )
-    payload["wet_window_witness"] = _wet_window_witness(all_rows)
+    payload["wet_window_witness"] = pooled_fold.wet_window_witness()
+    payload["carriage_witness"] = pooled_fold.carriage_witness()
     for key in ("cells", "pooled", "verdict", "reservoir_verdict",
                 "reservoir_witness", "wet_window_witness"):
         print_block(key, payload[key])
