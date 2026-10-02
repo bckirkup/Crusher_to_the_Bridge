@@ -4328,15 +4328,32 @@ cells (2026-10-02, digest-pinned rev 7, 1 void): `partial`** —
 occupancy 18.91% (R = 0.746, band held), positive-mean 2.59 and
 never-positive 0.576 in-window, ordering still `event_higher` but the
 gap narrowed ~40% (post-defecation 26.96% vs routine 18.46%; was
-35.9% vs 17.6%). The event arm gave back ~8pp to the wash; the
-residual miss is the event-deposit magnitude question — the fresh
-accessible deposit keeps event rows elevated for the epoch they are
-sampled in, before sequester settles — which is the next declared-scope
-decision, not sequestration timing. Design + criteria + full verdict:
+35.9% vs 17.6%). The event arm gave back ~8pp to the wash.
+**Event-deposit magnitude question — measured and closed 2026-10-02:
+unreachable at any value.** A paired counterfactual sweep scaled the
+event deposit ×{1, 0.1, 0.01, 0.001, 10⁻⁴} (identical draw streams)
+and ordering stayed `event_higher` at every setting — including
+deposit ≈ 0.7 GEC, ~4 orders below the sourced bound floor
+(~10⁻⁶·⁹ g-equiv/event; the declared 10⁻⁷·¹⁴ sits at the floor's
+bottom edge, so there was never within-bounds room downward anyway).
+Event-row positivity is protected-compartment carryover (95–100% of
+event-positive rows), not the fresh deposit (~1pp); the arm gap is
+compositional — the event arm over-samples symptomatic epochs 2–3×
+via the tranche-32 symptom-conditioned defecation rate, with the arms
+at parity within strata — plus propensity-correlated carryover on
+repeated-event hosts. The earlier "cause = deposit magnitude"
+attribution is superseded. **Next declared-scope decision (Benjamin's
+call):** the frozen ordering compares a symptom-biased event arm to an
+unconditioned routine arm while Liu's post-bathroom arm was not
+symptom-stratified — options are a composition-matched readout arm,
+revisiting the sourced event-rate symptom gradient, or accepting
+`event_higher` as the honest reading. Design + criteria + full verdict:
 `docs/ledger/NORO-HAND-CARRIAGE-01.md`;
 sources: `docs/literature/consensus_tranche_52_hand_carriage.md`;
 merged cell table
 `docs/norovirus/noro_hand_carriage01/hand_occupancy_cells.json`;
+sweep folds + census decomposition
+`docs/norovirus/noro_hand_carriage02/event_deposit_sweep.json`;
 records S3 `campaign/noro_hand_carriage01/` (prior census) and
 `campaign/noro_hand_carriage02/` (this re-census).
 
