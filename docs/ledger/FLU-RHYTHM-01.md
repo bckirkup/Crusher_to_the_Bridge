@@ -182,3 +182,67 @@ not fixed. **Resolved by `CABIN-FLOOR-03` / `docs/confined_attack_floor_spec.md`
 the 15–25% band is withdrawn (it was the norovirus Wikswo/Chimonas pair,
 not a flu quantity); the corrected band is the declared-k expected SAR,
 3.7–12.1% pooled, and both arms sit inside it.**
+
+## Measured verdict — 800-cell re-census at `1ab8dd98`
+
+Measured at `1ab8dd98` (merge of #823 — flu/noro/smalln probe wrappers
+forwarded for the revised engine call signatures: `shedder_ctx` +
+`agent_coop_doses`) on the **same frozen 800 cells** — same manifest
+(`flu_rhythm_01_manifest.json`, seeds 8105–8204, declared SOP-017, 288
+epochs, isolated `influenza_a`, k=0.0006), read-only census into the
+fresh prefix `s3://crusherbucket-994254241749-us-east-1-an/campaign/flu_rhythm_02/`.
+
+**Execution:** image `picard-campaign@sha256:f13ef26a4a68a68b051c2db3469331fc3c97c1911f9f618b5a99cbbae41a74ae`
+(tag `flu-rhythm-02-1ab8dd98`, ENGINE_GIT_SHA `1ab8dd98`), jobdef
+`picard-flu-rhythm-ab:3`. Canary index 0 both arms inspected clean
+(contract intact; off commitments 0/attached false, on 1654/true).
+Arrays on `picard-campaign-queue` (Spot — capacity held throughout, ~50
+min wall): off `feef57be-931d-470e-ab18-8dab6d829e73`, on
+`e8655f68-53e9-402b-9d70-9d1135c0ca45` — **800/800 SUCCEEDED, 0 FAILED**.
+Readout `tools/flu_rhythm_ab_readout.py --root telemetry_buffer/flu_rhythm_ab/runs_02`
+(full JSON `telemetry_buffer/flu_rhythm_ab/readout_02_full.json`, local).
+
+### Re-censused confined cabinmate floor (n=100/class/arm; prior at `07d9856c`)
+
+| class | off attack [Wilson] | on attack [Wilson] | paired Δ mean | floor |
+|---|---|---|---|---|
+| classic_cruise_1900 | 63/854 = **7.4%** [5.8–9.3] (was 12.5%) | 64/853 = **7.5%** [5.9–9.5] (was 13.6%) | +0.2 pp | both in |
+| expedition_cruise_450 | 37/314 = **11.8%** [8.7–15.8] (was 12.0%) | 39/311 = **12.5%** [9.3–16.7] (was 11.3%) | +1.4 pp | both in |
+| mega_cruise_5000 | 143/2612 = **5.5%** [4.7–6.4] (was 10.5%) | 146/2602 = **5.6%** [4.8–6.6] (was 12.8%) | +0.0 pp | both in |
+| spirit_cruise_3000 | 93/1204 = **7.7%** [6.3–9.4] (was 14.6%) | 87/1207 = **7.2%** [5.9–8.8] (was 14.3%) | −0.2 pp | both in |
+
+**The level changed — dose-shaped, not conversion-shaped.** Between
+`07d9856c` and `1ab8dd98` the model revisions (hand-carriage rebuild,
+cabin compartment, near-field two-box, droplet field split,
+per-partner contact, coop dosing — per-component attribution not run,
+inference pending on the diff) cut **per-slot delivered confined dose
+~5–8×** on the three larger hulls (p50: cls 14.9→2.6, spr 17.8→2.1,
+mega 6.6→1.5 copies; expedition held 11.9→13.3) and shrank the confined
+slot count ~2× (cls 1575→854, mega 4575→2612, spr 2529→1204; exp
+368→314). Attack tracked dose down through implied SAR (p50 cls
+0.011→0.0014, mega 0.005→0.0008, spr 0.015→0.0010; exp 0.009→0.0070).
+Measured attack now reads ~1.2–1.4× the declared-k expected SAR pooled
+(e.g. mega 5.5% vs E[SAR] 4.0%) — every class still inside the
+CABIN-FLOOR-03 band on the Wilson-overlap rule.
+
+**Rhythm is now a pure scheduling effect — the dose amplification is
+gone.** Paired Δ median 0.000 on every class (was +0.3–1.6 pp); on-arm
+delivered confined dose ≈ off (+16% cls, ≈flat elsewhere — was +24–66%);
+per-slot dose p50 slightly *lower* on (sleep-window mates share the same
+slot pool). Wiring unchanged: attached 100/100 cells on, commitments
+1.7k–29k medians, challenged share 0.35–0.39 (was ~0.80 — the dosed-set
+medians also fell, cls 1130→5, spr 1842→7, mega 4934→15, exp 188→2 —
+the per-partner contact mode draws partner-bounded sets, not zone
+pools). `hvac_dose_copies = 0` to confined slots in both arms — the
+delivered confined dose is entirely contact/plume/droplet-stage now.
+Capture ratio holds ~6–11e-6 both arms.
+
+**Verdict: the clean arm stays clean; the floor statement needs
+re-reading against the new level.** Confined flu cabinmate SAR at
+`1ab8dd98` is **5.5–12.5%** pooled across classes both arms (was
+10.5–14.6%), expedition unchanged — the revisions moved the big-hull
+cabin dose structure, not the small-hull one. The prior section-4
+verdict ("residual is floor-shaped") is superseded on level but
+unchanged in kind: no band exit, no mechanism-shaped move, rhythm
+inert on this arm. No anchor fit, no retune; the per-revision dose
+attribution is the open question, filed for a follow-up session.
