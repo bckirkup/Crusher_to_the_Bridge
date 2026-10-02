@@ -383,7 +383,7 @@ def _record_emesis(
     if pool_gain > 0:
         rec.ignited = True
     aid = int(agent.agent_id)
-    occupancy = _occupancy_snapshot(rec, core, zone_name)
+    occupancy = _occupancy_snapshot(rec, zone_name)
     inf = agent.infections.get(pathogen_id) or {}
     confined = aid in core._quarantined_ids
     for record in records:
@@ -958,13 +958,10 @@ def _validate_args(
 ) -> None:
     manifest_mode = args.manifest is not None
     if manifest_mode:
-        for problem in (
-            "--manifest requires --tier" if args.tier is None else None,
-            "--manifest and --spec-json are exclusive"
-            if args.spec_json is not None else None,
-        ):
-            if problem:
-                parser.error(problem)
+        if args.tier is None:
+            parser.error("--manifest requires --tier")
+        if args.spec_json is not None:
+            parser.error("--manifest and --spec-json are exclusive")
     elif args.tier is not None or args.index is not None:
         parser.error("--tier/--index require --manifest")
     for label, value, floor in (

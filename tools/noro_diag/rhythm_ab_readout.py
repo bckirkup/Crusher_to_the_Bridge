@@ -344,6 +344,20 @@ def _accumulate_emesis_hist(
 def _accumulate_occupancy(
     acc: dict[str, Any], r: dict[str, Any],
 ) -> None:
+    egress_epochs = _egress_epochs(r)
+    zone_types = acc["zone_types"]
+    for erow in r.get("epoch_rows") or []:
+        epoch = int(erow.get("epoch", 0))
+        corridor, dining = _corridor_dining(erow, zone_types)
+        if epoch in egress_epochs:
+            acc["corridor_at_egress"].append(corridor)
+            acc["dining_at_egress"].append(dining)
+        else:
+            acc["corridor_at_non_egress"].append(corridor)
+            acc["dining_at_non_egress"].append(dining)
+
+
+def _egress_epochs(r: dict[str, Any]) -> set[int]:
     egress_epochs: set[int] = set()
     for day in r.get("dealt_days") or []:
         for ev in day.get("events") or []:
@@ -352,22 +366,20 @@ def _accumulate_occupancy(
                     int(day["voyage_day"]) * 1440 + int(ev["egress_min"])
                 )
                 egress_epochs.add(voyage_minute // 60)
-    zone_types = acc["zone_types"]
-    for erow in r.get("epoch_rows") or []:
-        epoch = int(erow.get("epoch", 0))
-        corridor = dining = 0
-        for zone, count in (erow.get("zones") or {}).items():
-            ztype = zone_types.get(str(zone), "")
-            if ztype == "Cabin_Corridor":
-                corridor += int(count)
-            elif ztype == "Dining":
-                dining += int(count)
-        if epoch in egress_epochs:
-            acc["corridor_at_egress"].append(corridor)
-            acc["dining_at_egress"].append(dining)
-        else:
-            acc["corridor_at_non_egress"].append(corridor)
-            acc["dining_at_non_egress"].append(dining)
+    return egress_epochs
+
+
+def _corridor_dining(
+    erow: dict[str, Any], zone_types: dict[str, str],
+) -> tuple[int, int]:
+    corridor = dining = 0
+    for zone, count in (erow.get("zones") or {}).items():
+        ztype = zone_types.get(str(zone), "")
+        if ztype == "Cabin_Corridor":
+            corridor += int(count)
+        elif ztype == "Dining":
+            dining += int(count)
+    return corridor, dining
 
 
 def _clock_summary(acc: dict[str, Any]) -> dict[str, Any]:
