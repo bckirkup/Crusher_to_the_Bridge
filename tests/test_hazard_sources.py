@@ -178,8 +178,9 @@ class TestValidation:
         assert _model(_block(enabled=False)) is None
 
     def test_malformed_still_raises_when_disabled(self) -> None:
+        block = _block(enabled=False, emitters=[_emitter(zones=["Nowhere"])])
         with pytest.raises(ValueError, match="unknown zones"):
-            _model(_block(enabled=False, emitters=[_emitter(zones=["Nowhere"])]))
+            _model(block)
 
     @pytest.mark.parametrize("mut, match", [
         ({"emitter_id": ""}, "emitter_id"),
@@ -232,30 +233,38 @@ class TestValidation:
         ),
     ])
     def test_emitter_errors(self, mut, match) -> None:
+        block = self._bad(**mut)
         with pytest.raises(ValueError, match=match):
-            _model(self._bad(**mut))
+            _model(block)
 
     def test_duplicate_emitter_id(self) -> None:
+        block = _block(emitters=[_emitter(), _emitter()])
         with pytest.raises(ValueError, match="duplicate emitter_id"):
-            _model(_block(emitters=[_emitter(), _emitter()]))
+            _model(block)
 
     def test_substance_id_colliding_with_pathogen(self) -> None:
+        block = _block(substances=[_substance("norwalk_gi")])
         with pytest.raises(ValueError, match="duplicate substance_id"):
-            _model(_block(substances=[_substance("norwalk_gi")]))
+            _model(block)
 
-    def test_substance_env_forbidden_and_unknown_keys(self) -> None:
+    def test_substance_env_forbidden_person_to_person(self) -> None:
+        block = _block(substances=[_substance(
+            environmental_contamination={"person_to_person": True},
+        )])
         with pytest.raises(ValueError, match="person_to_person"):
-            _model(_block(substances=[_substance(
-                environmental_contamination={"person_to_person": True},
-            )]))
+            _model(block)
+
+    def test_substance_env_unknown_keys(self) -> None:
+        block = _block(substances=[_substance(
+            environmental_contamination={"infection_rate": 1.0},
+        )])
         with pytest.raises(ValueError, match="unknown keys"):
-            _model(_block(substances=[_substance(
-                environmental_contamination={"infection_rate": 1.0},
-            )]))
+            _model(block)
 
     def test_substance_requires_provenance(self) -> None:
+        block = _block(substances=[_substance(parameters_provenance="")])
         with pytest.raises(ValueError, match="parameters_provenance"):
-            _model(_block(substances=[_substance(parameters_provenance="")]))
+            _model(block)
 
     def test_per_entry_kill_switch(self) -> None:
         model = _model(_block(
@@ -343,23 +352,26 @@ class TestPenetrationAdapter:
         assert emitter.rate.series_per_hour == (3.0, 6.0)
 
     def test_unknown_adapter_raises(self) -> None:
+        block = _block(emitters=[], penetrations=[_penetration(
+            adapter="quic_direct",
+        )])
         with pytest.raises(ValueError, match="not a registered"):
-            _model(_block(emitters=[], penetrations=[_penetration(
-                adapter="quic_direct",
-            )]))
+            _model(block)
 
     def test_series_field_requires_series(self) -> None:
+        block = _block(emitters=[], penetrations=[_penetration(
+            outdoor_field={"kind": "series"},
+        )])
         with pytest.raises(ValueError, match="series_per_hour"):
-            _model(_block(emitters=[], penetrations=[_penetration(
-                outdoor_field={"kind": "series"},
-            )]))
+            _model(block)
 
     def test_penetration_ids_share_the_emitter_namespace(self) -> None:
+        block = _block(
+            emitters=[_emitter(eid="pen0")],
+            penetrations=[_penetration()],
+        )
         with pytest.raises(ValueError, match="duplicate emitter_id"):
-            _model(_block(
-                emitters=[_emitter(eid="pen0")],
-                penetrations=[_penetration()],
-            ))
+            _model(block)
 
 
 # ── merge semantics ─────────────────────────────────────────────────────

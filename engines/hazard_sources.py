@@ -678,6 +678,70 @@ class HazardSourceModel:
         return out
 
 
+def _entry_disabled(entry: Any) -> bool:
+    """Per-entry kill-switch: an overriding layer's ``enabled: false`` skips
+    the entry entirely."""
+    return isinstance(entry, dict) and entry.get("enabled") is False
+
+
+def _parse_substance_list(
+    raw: dict[str, Any],
+    known_zones: frozenset[str],
+    known_profile_ids: frozenset[str] | set[str],
+) -> dict[str, SubstanceSpec]:
+    substances: dict[str, SubstanceSpec] = {}
+    for index, entry in enumerate(raw.get("substances") or []):
+        if _entry_disabled(entry):
+            continue
+        spec = _parse_substance(entry, index, known_zones)
+        if spec.substance_id in substances or spec.substance_id in known_profile_ids:
+            raise ValueError(
+                f"hazard_sources: duplicate substance_id "
+                f"{spec.substance_id!r}"
+            )
+        substances[spec.substance_id] = spec
+    return substances
+
+
+def _parse_emitter_list(
+    raw: dict[str, Any],
+    known_zones: frozenset[str],
+    known_ids: frozenset[str],
+) -> list[EmitterSpec]:
+    """Declared emitters plus each penetration's adapter-resolved emitter;
+    both share one emitter_id namespace."""
+    emitters: list[EmitterSpec] = []
+    seen_ids: set[str] = set()
+    for index, entry in enumerate(raw.get("emitters") or []):
+        if _entry_disabled(entry):
+            continue
+        emitters.append(_parse_emitter(entry, index, known_zones, known_ids))
+    for index, entry in enumerate(raw.get("penetrations") or []):
+        if _entry_disabled(entry):
+            continue
+        pen = _parse_penetration(entry, index, known_zones, known_ids)
+        emitters.append(PENETRATION_ADAPTERS[pen.adapter](pen))
+    for emitter in emitters:
+        if emitter.emitter_id in seen_ids:
+            raise ValueError(
+                f"hazard_sources: duplicate emitter_id {emitter.emitter_id!r}"
+            )
+        seen_ids.add(emitter.emitter_id)
+    return emitters
+
+
+def _emitter_zone_index(
+    emitters: list[EmitterSpec],
+) -> dict[str, frozenset[str]]:
+    emitter_zones: dict[str, frozenset[str]] = {}
+    for emitter in emitters:
+        emitter_zones[emitter.substance_id] = (
+            emitter_zones.get(emitter.substance_id, frozenset())
+            | frozenset(emitter.zones)
+        )
+    return emitter_zones
+
+
 def parse_hazard_sources(
     block: Any,
     *,
@@ -696,53 +760,14 @@ def parse_hazard_sources(
         return None
     raw = _require_mapping(block, "hazard_sources")
     known_zones = frozenset(zone_names)
-    substances: dict[str, SubstanceSpec] = {}
-    for index, entry in enumerate(raw.get("substances") or []):
-        if isinstance(entry, dict) and entry.get("enabled") is False:
-            continue  # per-entry kill-switch for an overriding layer
-        spec = _parse_substance(entry, index, known_zones)
-        if spec.substance_id in substances or spec.substance_id in known_profile_ids:
-            raise ValueError(
-                f"hazard_sources: duplicate substance_id "
-                f"{spec.substance_id!r}"
-            )
-        substances[spec.substance_id] = spec
+    substances = _parse_substance_list(raw, known_zones, known_profile_ids)
     known_ids = frozenset(known_profile_ids) | frozenset(substances)
-    emitters: list[EmitterSpec] = []
-    seen_ids: set[str] = set()
-    for index, entry in enumerate(raw.get("emitters") or []):
-        if isinstance(entry, dict) and entry.get("enabled") is False:
-            continue
-        emitter = _parse_emitter(entry, index, known_zones, known_ids)
-        if emitter.emitter_id in seen_ids:
-            raise ValueError(
-                f"hazard_sources: duplicate emitter_id {emitter.emitter_id!r}"
-            )
-        seen_ids.add(emitter.emitter_id)
-        emitters.append(emitter)
-    for index, entry in enumerate(raw.get("penetrations") or []):
-        if isinstance(entry, dict) and entry.get("enabled") is False:
-            continue
-        pen = _parse_penetration(entry, index, known_zones, known_ids)
-        resolved = PENETRATION_ADAPTERS[pen.adapter](pen)
-        if resolved.emitter_id in seen_ids:
-            raise ValueError(
-                f"hazard_sources: duplicate emitter_id {resolved.emitter_id!r} "
-                "(from a penetration adapter)"
-            )
-        seen_ids.add(resolved.emitter_id)
-        emitters.append(resolved)
+    emitters = _parse_emitter_list(raw, known_zones, known_ids)
     if not raw.get("enabled", False):
         return None
-    emitter_zones: dict[str, frozenset[str]] = {}
-    for emitter in emitters:
-        emitter_zones.setdefault(emitter.substance_id, frozenset())
-        emitter_zones[emitter.substance_id] = (
-            emitter_zones[emitter.substance_id] | frozenset(emitter.zones)
-        )
     return HazardSourceModel(
         clock=clock,
         substances=substances,
         emitters=tuple(emitters),
-        _emitter_zones=emitter_zones,
+        _emitter_zones=_emitter_zone_index(emitters),
     )

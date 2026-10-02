@@ -440,6 +440,9 @@ class ShipSimulation:
             food_zone_multipliers=food_zone_multipliers,
         )
         self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
+        # ENV-SOURCE-01 emitter model parsed from the merged hazard_sources
+        # declaration (None on the labelled baseline).
+        self.tx_core.hazard_model = self.hazard_model
         self.tx_core.initialize_zones(self.zone_names)
         self.engine.enable_external_transmission()
         if self.display:
@@ -480,7 +483,6 @@ class ShipSimulation:
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
-            hazard_model=self.hazard_model,
         )
 
     def initialize(self) -> WorldState:
@@ -1200,7 +1202,7 @@ class ShipSimulation:
         model = self.hazard_model
         if model is None or self.contam_engine is None or self.tx_core is None:
             return
-        for pid, pool in list(self.tx_core.env_contamination.items()):
+        for pid, pool in self.tx_core.env_contamination.items():
             if not model.transport_armed(pid) or not pool:
                 continue
             self.tx_core.env_contamination[pid] = dict(

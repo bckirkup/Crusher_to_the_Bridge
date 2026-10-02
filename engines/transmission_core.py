@@ -2373,12 +2373,14 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
-        hazard_model: HazardSourceModel | None = None,
     ) -> None:
         self.rng = rng
         tx = (cfg or {}).get("transmission", {}) or {}
         self._init_clock_and_kinetics(clock, cfg)
-        self._hazard_model = hazard_model
+        # ENV-SOURCE-01 emitter model, or None on the labelled baseline.
+        # ShipSimulation populates it post-construction from the merged
+        # hazard_sources declaration (same seam as zone_air_exchange).
+        self.hazard_model: HazardSourceModel | None = None
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
@@ -10316,7 +10318,7 @@ class TransmissionCore:
         holding pool mass (transported fields reach zones no emitter named).
         """
         patterns = [str(p) for p in (declared or [])]
-        model = self._hazard_model
+        model = self.hazard_model
         if model is None:
             return patterns
         extra = set(model.emitter_zones_for(pathogen_id))
@@ -10330,7 +10332,7 @@ class TransmissionCore:
 
     def _deposit_hazard_sources(self, epoch: int) -> None:
         """Add each armed emitter's epoch output to its zone pool."""
-        model = self._hazard_model
+        model = self.hazard_model
         if model is None:
             return
         for pid, deposits in model.epoch_deposits(epoch).items():
@@ -10427,7 +10429,7 @@ class TransmissionCore:
         not anyone occupies it this epoch.
         """
         zone_names: Iterable[str] = zone_occupants
-        model = self._hazard_model
+        model = self.hazard_model
         if model is not None and model.is_substance(pathogen_id):
             zone_names = set(zone_occupants) | set(reservoirs)
         for zone_name in zone_names:
