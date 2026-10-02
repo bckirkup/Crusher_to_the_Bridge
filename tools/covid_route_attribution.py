@@ -294,28 +294,40 @@ class CabinPairChallengeLedger:
         seen_shared: set[tuple[int, ...]] = set()
         for rows, channel, unit_field in records:
             for rec in rows:
-                unit = rec.get(unit_field)
-                members = unit_members.get(unit) if unit else None
-                if members is None:
-                    continue
-                target = int(rec["target_id"])
-                if target not in members:
-                    continue
-                dose = float(rec.get("dose") or 0.0)
-                if dose <= 0.0:
-                    continue
-                key = tuple(sorted(members))
-                by_pathogen = self.directed_dose.setdefault(
-                    (key, target), {},
-                ).setdefault(str(rec.get("pathogen_id") or ""), Counter())
-                if channel == "pool":
-                    plume = float(rec.get("near_field_dose") or 0.0)
-                    by_pathogen["plume"] += plume
-                    dose -= plume
-                by_pathogen[channel] += dose
-                seen_shared.add(key)
+                self._tally_record(
+                    rec, channel, unit_field, unit_members, seen_shared,
+                )
         for key in seen_shared:
             self.shared_epochs[key] += 1
+
+    def _tally_record(
+        self,
+        rec: dict[str, Any],
+        channel: str,
+        unit_field: str,
+        unit_members: dict[str, frozenset[int]],
+        seen_shared: set[tuple[int, ...]],
+    ) -> None:
+        unit = rec.get(unit_field)
+        members = unit_members.get(unit) if unit else None
+        if members is None:
+            return
+        target = int(rec["target_id"])
+        if target not in members:
+            return
+        dose = float(rec.get("dose") or 0.0)
+        if dose <= 0.0:
+            return
+        key = tuple(sorted(members))
+        by_pathogen = self.directed_dose.setdefault(
+            (key, target), {},
+        ).setdefault(str(rec.get("pathogen_id") or ""), Counter())
+        if channel == "pool":
+            plume = float(rec.get("near_field_dose") or 0.0)
+            by_pathogen["plume"] += plume
+            dose -= plume
+        by_pathogen[channel] += dose
+        seen_shared.add(key)
 
 
 def cabin_pair_challenge_table(
@@ -494,16 +506,7 @@ def _mate_attack_counts(
     """Household-SAR analogue: (infected - 1)/(members - 1) per pair with a
     member infected with a pair pathogen. A converted mate stays inside
     infected_ids, so members-minus-infected denominators read 0 — unused."""
-    pairs_infected: dict[tuple[int, ...], set[int]] = {}
-    pair_pathogens: dict[tuple[int, ...], set[str]] = {}
-    for (members, _t), by_pathogen in ledger.directed_dose.items():
-        pairs_infected.setdefault(members, set())
-        pair_pathogens.setdefault(members, set()).update(by_pathogen)
-    for members in pairs_infected:
-        for aid in members:
-            agent = agents.get(aid)
-            if agent is not None and agent.infections:
-                pairs_infected[members].add(aid)
+    pairs_infected, pair_pathogens = _pairs_infected(ledger, agents)
     mate_index_pairs = mate_secondaries = mate_slots = 0
     confined_index_pairs = confined_secondaries = confined_slots = 0
     for members, infected_ids in pairs_infected.items():
@@ -539,6 +542,23 @@ def _mate_attack_counts(
             confined_secondaries / confined_slots if confined_slots else None
         ),
     }
+
+
+def _pairs_infected(
+    ledger: CabinPairChallengeLedger,
+    agents: dict[int, Any],
+) -> tuple[dict[tuple[int, ...], set[int]], dict[tuple[int, ...], set[str]]]:
+    pairs_infected: dict[tuple[int, ...], set[int]] = {}
+    pair_pathogens: dict[tuple[int, ...], set[str]] = {}
+    for (members, _t), by_pathogen in ledger.directed_dose.items():
+        pairs_infected.setdefault(members, set())
+        pair_pathogens.setdefault(members, set()).update(by_pathogen)
+    for members in pairs_infected:
+        for aid in members:
+            agent = agents.get(aid)
+            if agent is not None and agent.infections:
+                pairs_infected[members].add(aid)
+    return pairs_infected, pair_pathogens
 
 
 def window_of(day: int, start: int, end: int | None) -> str:

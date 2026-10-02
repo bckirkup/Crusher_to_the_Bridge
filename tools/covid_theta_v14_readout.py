@@ -372,7 +372,7 @@ def _evaluate(
     }
 
 
-def main(argv: list[str] | None = None) -> int:
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--design", required=True)
     parser.add_argument("--s3-prefix", required=True)
@@ -393,7 +393,103 @@ def main(argv: list[str] | None = None) -> int:
     )
     parser.add_argument("--expected-cells", type=int, default=1800)
     parser.add_argument("--allow-partial", action="store_true")
-    args = parser.parse_args(argv)
+    return parser.parse_args(argv)
+
+
+def _audit_payloads(
+    payloads: dict[str, dict],
+    screen_arm: str,
+    design: Any,
+    delivery_echoes: dict[str, str] | None,
+) -> dict[str, list[str]]:
+    audit_failures: dict[str, list[str]] = {}
+    expected_thetas = set(design.thetas)
+    for key, payload in payloads.items():
+        failures = _audit_cell(
+            payload, screen_arm, expected_thetas, design.design_id,
+            delivery_echoes=delivery_echoes,
+        )
+        if failures:
+            audit_failures[key] = failures
+    return audit_failures
+
+
+def _flag_suppression_candidates(
+    pair_stats: dict[str, Any],
+    parent_surface: dict[str, Any],
+    verdict: dict[str, Any],
+) -> None:
+    for theta, stats in pair_stats.items():
+        med = stats["delta_recorded_onsets_median"]
+        flips = stats["takeoff_class_flips"]
+        n = stats["n_paired"] or 1
+        if med is None:
+            continue
+        p_med = None
+        for p_entry in (parent_surface.get("surface") or []):
+            if p_entry.get("theta") == theta:
+                p_med = ((p_entry.get("recorded_onsets") or {}).get("median"))
+        suppression = (
+            p_med is not None and p_med > 0
+            and med / p_med <= -SUPPRESSION_RATIO
+        )
+        stats["suppression_candidate"] = bool(
+            suppression and flips > TAKEOFF_COUNT_DRIFT_BAND * n / 200.0,
+        )
+        if stats["suppression_candidate"]:
+            verdict["report_immediately"].append({
+                "trigger": "suppression_shaped_delta",
+                "theta": theta,
+                "detail": (
+                    f"paired median recorded_onsets {med:g} vs parent "
+                    f"median {p_med:g}; takeoff flips {flips}"
+                ),
+            })
+
+
+def _write_outputs(
+    args: argparse.Namespace,
+    report: dict[str, Any],
+    surface: dict[str, Any],
+    paired: dict[str, Any],
+) -> None:
+    if args.out:
+        out_path = resolve_repo_path(REPO_ROOT, args.out)
+        prepare_output_directory(
+            os.path.dirname(out_path) or REPO_ROOT,
+            allowed_roots=(REPO_ROOT,),
+        )
+        with validated_open(out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
+            json.dump(report, fh, indent=2, sort_keys=True)
+    if args.surface_out:
+        write_surface_csv(surface, resolve_repo_path(REPO_ROOT, args.surface_out))
+    if args.pairs_out:
+        _write_pairs_csv(paired, resolve_repo_path(REPO_ROOT, args.pairs_out))
+
+
+def _print_summary(
+    report: dict[str, Any],
+    surface: dict[str, Any],
+    verdict: dict[str, Any],
+) -> None:
+    print(
+        f"{report['cells_found']}/{report['cells_expected']} cells; "
+        f"{len(report['audit_failures'])} audit failures",
+    )
+    for entry in surface["surface"]:
+        attack = entry.get("recorded_attack_rate") or {}
+        print(
+            f"theta={entry.get('theta'):.4g} arm={entry.get('arm_id')} "
+            f"median={attack.get('median')} mean={attack.get('mean')} "
+            f"fleet_shape_ok={entry.get('fleet_shape_ok')}",
+        )
+    print("admissible:", verdict["admissible_thetas"])
+    if verdict["report_immediately"]:
+        print("REPORT_IMMEDIATELY:", json.dumps(verdict["report_immediately"], indent=1))
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
 
     design_path = resolve_repo_path(REPO_ROOT, args.design)
     design = load_design(design_path, repo_root=REPO_ROOT)
@@ -401,9 +497,9 @@ def main(argv: list[str] | None = None) -> int:
     expected_cells = {
         c.key for c in enumerate_cells(design) if c.arm_id == screen_arm
     }
-    delivery_echoes = {
-        k: v for k, v in (e.split("=", 1) for e in args.audit_echo or ())
-    } or None
+    delivery_echoes = dict(
+        e.split("=", 1) for e in args.audit_echo or ()
+    ) or None
 
     client = _s3_client()
     bucket, prefix = _s3_uri(args.s3_prefix)
@@ -419,18 +515,13 @@ def main(argv: list[str] | None = None) -> int:
         )
         return 2
 
-    audit_failures: dict[str, list[str]] = {}
-    expected_thetas = set(design.thetas)
-    for key, payload in payloads.items():
-        failures = _audit_cell(
-            payload, screen_arm, expected_thetas, design.design_id,
-            delivery_echoes=delivery_echoes,
-        )
-        if failures:
-            audit_failures[key] = failures
+    audit_failures = _audit_payloads(
+        payloads, screen_arm, design, delivery_echoes,
+    )
 
     parent_cells: dict[str, dict] = {}
     parent_surface: dict[str, Any] = {}
+    parent_design = None
     if args.parent_s3_prefix and args.parent_design:
         p_bucket, p_prefix = _s3_uri(args.parent_s3_prefix)
         parent_cells = stream_cells(client, p_bucket, p_prefix)
@@ -447,36 +538,7 @@ def main(argv: list[str] | None = None) -> int:
 
     paired = _pairs(payloads, parent_cells) if parent_cells else {}
     pair_stats = _pair_row_stats(paired) if paired else {}
-    for theta, stats in pair_stats.items():
-        med = stats["delta_recorded_onsets_median"]
-        flips = stats["takeoff_class_flips"]
-        n = stats["n_paired"] or 1
-        if med is not None:
-            entry = next(
-                (e for e in surface["surface"] if e.get("theta") == theta
-                 and e.get("arm_id") in (screen_arm, None)),
-                None,
-            )
-            p_med = None
-            for p_entry in (parent_surface.get("surface") or []):
-                if p_entry.get("theta") == theta:
-                    p_med = ((p_entry.get("recorded_onsets") or {}).get("median"))
-            suppression = (
-                p_med is not None and p_med > 0
-                and med / p_med <= -SUPPRESSION_RATIO
-            )
-            stats["suppression_candidate"] = bool(
-                suppression and flips > TAKEOFF_COUNT_DRIFT_BAND * n / 200.0,
-            )
-            if stats["suppression_candidate"]:
-                verdict["report_immediately"].append({
-                    "trigger": "suppression_shaped_delta",
-                    "theta": theta,
-                    "detail": (
-                        f"paired median recorded_onsets {med:g} vs parent "
-                        f"median {p_med:g}; takeoff flips {flips}"
-                    ),
-                })
+    _flag_suppression_candidates(pair_stats, parent_surface, verdict)
 
     parent_tag = (
         parent_design.design_id.split("covid_theta_screen_", 1)[-1]
@@ -497,33 +559,8 @@ def main(argv: list[str] | None = None) -> int:
         "sanitary_witness": surface["sanitary_witness"],
     }
 
-    if args.out:
-        out_path = resolve_repo_path(REPO_ROOT, args.out)
-        prepare_output_directory(
-            os.path.dirname(out_path) or REPO_ROOT,
-            allowed_roots=(REPO_ROOT,),
-        )
-        with validated_open(out_path, "w", allowed_roots=(REPO_ROOT,), encoding="utf-8") as fh:
-            json.dump(report, fh, indent=2, sort_keys=True)
-    if args.surface_out:
-        write_surface_csv(surface, resolve_repo_path(REPO_ROOT, args.surface_out))
-    if args.pairs_out:
-        _write_pairs_csv(paired, resolve_repo_path(REPO_ROOT, args.pairs_out))
-
-    print(
-        f"{report['cells_found']}/{args.expected_cells} cells; "
-        f"{len(audit_failures)} audit failures",
-    )
-    for entry in surface["surface"]:
-        attack = entry.get("recorded_attack_rate") or {}
-        print(
-            f"theta={entry.get('theta'):.4g} arm={entry.get('arm_id')} "
-            f"median={attack.get('median')} mean={attack.get('mean')} "
-            f"fleet_shape_ok={entry.get('fleet_shape_ok')}",
-        )
-    print("admissible:", verdict["admissible_thetas"])
-    if verdict["report_immediately"]:
-        print("REPORT_IMMEDIATELY:", json.dumps(verdict["report_immediately"], indent=1))
+    _write_outputs(args, report, surface, paired)
+    _print_summary(report, surface, verdict)
     return 0
 
 

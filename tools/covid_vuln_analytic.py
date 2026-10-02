@@ -212,48 +212,71 @@ def _cross_check(preds: list[dict[str, Any]]) -> list[dict[str, Any]]:
     checks = []
     for (class_id, seed, arm), p in sorted(by_key.items()):
         alpha = p["alpha"] if p["alpha"] is not None else math.inf
-        for other, mate in by_key.items():
-            if mate["class_id"] != class_id or mate["seed"] != seed:
-                continue
-            mate_alpha = (
-                mate["alpha"] if mate["alpha"] is not None else math.inf
-            )
-            if not alpha < mate_alpha:
-                continue
+        for mate in _sharper_mates(by_key, class_id, seed, alpha):
             key = "inf" if mate["alpha"] is None else f"{mate['alpha']:g}"
             predicted = p["predicted_mass"].get(key)
             if predicted is None:
                 continue
-            own = p["infections_total"] - p["seeded_count"]
-            realized = mate["infections_total"] - mate["seeded_count"]
-            delta = realized - own
-            applicable = (
-                own > 0.0
-                and p["n_challenged_pairs"] > 0
-                and own >= 0.5 * realized
-                and delta > 0.0
+            checks.append(
+                _pair_check(class_id, seed, arm, p, mate, predicted),
             )
-            ratio = (
-                predicted / delta if applicable and predicted > 0.0
-                else None
-            )
-            checks.append({
-                "class_id": class_id,
-                "seed": seed,
-                "field_basis_arm": arm,
-                "target_arm": mate["arm_id"],
-                "predicted_tail_move": predicted,
-                "measured_tail_move": delta,
-                "own_secondaries": own,
-                "mate_secondaries": realized,
-                "applicable": applicable,
-                "ratio": ratio,
-                "exceeds_2x": bool(
-                    applicable and ratio is not None
-                    and (ratio > 2.0 or ratio < 0.5)
-                ),
-            })
     return checks
+
+
+def _sharper_mates(
+    by_key: dict[tuple, dict[str, Any]],
+    class_id: str,
+    seed: Any,
+    alpha: float,
+) -> list[dict[str, Any]]:
+    """Same (class, seed) cells whose alpha is sharper than the basis."""
+    return [
+        mate for mate in by_key.values()
+        if mate["class_id"] == class_id
+        and mate["seed"] == seed
+        and alpha < (
+            mate["alpha"] if mate["alpha"] is not None else math.inf
+        )
+    ]
+
+
+def _pair_check(
+    class_id: str,
+    seed: Any,
+    arm: str,
+    p: dict[str, Any],
+    mate: dict[str, Any],
+    predicted: float,
+) -> dict[str, Any]:
+    own = p["infections_total"] - p["seeded_count"]
+    realized = mate["infections_total"] - mate["seeded_count"]
+    delta = realized - own
+    applicable = (
+        own > 0.0
+        and p["n_challenged_pairs"] > 0
+        and own >= 0.5 * realized
+        and delta > 0.0
+    )
+    ratio = (
+        predicted / delta if applicable and predicted > 0.0
+        else None
+    )
+    return {
+        "class_id": class_id,
+        "seed": seed,
+        "field_basis_arm": arm,
+        "target_arm": mate["arm_id"],
+        "predicted_tail_move": predicted,
+        "measured_tail_move": delta,
+        "own_secondaries": own,
+        "mate_secondaries": realized,
+        "applicable": applicable,
+        "ratio": ratio,
+        "exceeds_2x": bool(
+            applicable and ratio is not None
+            and (ratio > 2.0 or ratio < 0.5)
+        ),
+    }
 
 
 def pool_predictions(preds: list[dict[str, Any]]) -> dict[str, Any]:
