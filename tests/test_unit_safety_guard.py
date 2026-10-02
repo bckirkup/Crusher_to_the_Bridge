@@ -44,6 +44,8 @@ ALLOWED_EPOCH_KEYS = (
     ("campaign_summary.json", "timeseries.n_epochs"),  # output bookkeeping
     ("crusher_labs/config.yaml", "num_epochs"),  # run-length bookkeeping
     ("crusher_labs/config.yaml", "sampling_interval_epochs"),  # Sentinel wastewater consumer; defer to separate unit pass required by AGENTS.md
+    ("crusher_labs/config.yaml", "fatigue_rate_per_epoch"),  # §7 epoch-native wear-fatigue contract: accrued once per epoch worn, never time-scaled
+    ("crusher_labs/config.yaml", "fatigue_refusal_probability_per_epoch"),  # §7 epoch-native draw: refusal probability sampled once per epoch
     ("data/config/instrument_turnaround.json", "delay_epochs"),  # grid-native same-epoch queue sentinel
     ("data/config/protocols.json", "costs_per_epoch"),  # active protocol maintenance debit per simulation epoch
     ("data/platforms/*/voyage_config.json", "total_epochs"),  # run-length bookkeeping

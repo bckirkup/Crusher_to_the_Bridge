@@ -1718,6 +1718,10 @@ _PHARMACOLOGY_SEED_OFFSET = 6133
 # And again for who a non-pharmaceutical measure reaches.
 _NPI_SEED_OFFSET = 6141
 
+# PPE wear-fatigue draws (refusal + endogenous onset) spawn their own stream
+# so enabling the channel does not reseat the shared draw order.
+_PPE_FATIGUE_SEED_OFFSET = 7741
+
 # Rejection budget for the truncated chronic-duration draw before clipping.
 _CHRONIC_DURATION_MAX_DRAWS = 32
 
@@ -1792,6 +1796,24 @@ def _npi_rng(
         return np.random.default_rng(seed_seq.spawn(1)[0])
     return np.random.default_rng(
         int(cfg.get("random_seed", 0) or 0) + _NPI_SEED_OFFSET,
+    )
+
+
+def _ppe_fatigue_rng(
+    rng: np.random.Generator, cfg: dict[str, Any],
+) -> np.random.Generator:
+    """Return an independent stream for the PPE wear-fatigue draws.
+
+    The fourth sibling stream, for the same reason: enabling the channel
+    must move fatigue outcomes only, never reseat the run's other draws.
+    Spawned only when ``ppe_fatigue.enabled`` is set, so a run that never
+    arms the channel keeps every downstream stream where it was.
+    """
+    seed_seq = getattr(rng.bit_generator, "seed_seq", None)
+    if seed_seq is not None:
+        return np.random.default_rng(seed_seq.spawn(1)[0])
+    return np.random.default_rng(
+        int(cfg.get("random_seed", 0) or 0) + _PPE_FATIGUE_SEED_OFFSET,
     )
 
 

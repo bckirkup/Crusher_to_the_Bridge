@@ -699,6 +699,82 @@ multi_pathogen:
 #     coverage_by_role: {passenger: XXX, crew: XXX}
 #     compliance: XXX
 #     reference_multipliers: {fomite: XXX}
+#
+# A coverage entry may also carry an optional ``ppe_type`` key naming the
+# registry type(s) a covered role wears — a bare probability stays legal and
+# resolves to ``ppe_fatigue.default_ppe_type``:
+#   coverage_by_role: {medical_staff: {coverage: 0.9, ppe_type: [n95, latex_gloves]}}
+
+# ── PPE wear-fatigue channel (ship_function_capacity_spec §7) ────
+# The ppe_types registry is where the ordering lives (papr > n95 >
+# surgical_mask on fatigue and heat is a declared ordering, not a fitted
+# one). Every value below is an operational declaration: NULL-SOURCE
+# weak-range placeholders pending the literature-sourcing follow-up, whose
+# data PR edits values only.
+ppe_types:
+  surgical_mask:
+    fatigue_rate_per_epoch: 0.2   # NULL-SOURCE: weak declared range
+    heat_load: 0.1                # NULL-SOURCE: weak declared range
+    dexterity_impairment: 0.0     # NULL-SOURCE: masks do not impair manual work
+    fatigue_conditions:
+      - condition_id: sinonasal_complaints
+        rate_per_wear_hour: 0.001   # NULL-SOURCE: weak declared range
+        symptomatic: true
+      - condition_id: mask_occlusion_dermatitis
+        rate_per_wear_hour: 0.0005  # NULL-SOURCE: weak declared range
+        symptomatic: true
+  n95:
+    fatigue_rate_per_epoch: 0.5   # NULL-SOURCE: weak declared range
+    heat_load: 0.3                # NULL-SOURCE: weak declared range
+    dexterity_impairment: 0.0     # NULL-SOURCE: weak declared range
+    fatigue_conditions:
+      - condition_id: sinonasal_complaints
+        rate_per_wear_hour: 0.002   # NULL-SOURCE: weak declared range
+        symptomatic: true
+      - condition_id: mask_occlusion_dermatitis
+        rate_per_wear_hour: 0.001   # NULL-SOURCE: weak declared range
+        symptomatic: true
+  papr:
+    fatigue_rate_per_epoch: 0.8   # NULL-SOURCE: weak declared range
+    # NULL-SOURCE weak declaration, ensemble reading: the literature splits
+    # two regimes — respirator-only PAPR wears at or below N95 burden
+    # (Powell 2017), but full-ensemble PAPR is severe heat stress
+    # (Herstein 2021: 3/6 subjects >38.5 °C within 4h). The fatigue channel
+    # takes the ensemble reading: PAPR under an NPI deployment is the full
+    # protective ensemble, not the bare blower unit.
+    heat_load: 0.6
+    dexterity_impairment: 0.15    # NULL-SOURCE: weak declared range
+    fatigue_conditions:
+      - condition_id: heat_stress
+        rate_per_wear_hour: 0.003   # NULL-SOURCE: weak declared range
+        symptomatic: true
+  latex_gloves:
+    fatigue_rate_per_epoch: 0.1   # NULL-SOURCE: weak declared range
+    heat_load: 0.0                # NULL-SOURCE: weak declared range
+    dexterity_impairment: 0.1     # NULL-SOURCE: weak declared range
+    fatigue_conditions:
+      - condition_id: occlusion_dermatitis
+        rate_per_wear_hour: 0.001   # NULL-SOURCE: weak declared range
+        symptomatic: true
+  chemical_gloves:
+    fatigue_rate_per_epoch: 0.3   # NULL-SOURCE: weak declared range
+    heat_load: 0.2                # NULL-SOURCE: weak declared range
+    dexterity_impairment: 0.3     # NULL-SOURCE: weak declared range
+    fatigue_conditions:
+      - condition_id: occlusion_dermatitis
+        rate_per_wear_hour: 0.002   # NULL-SOURCE: weak declared range
+        symptomatic: true
+
+ppe_fatigue:
+  enabled: false   # absent/disabled = bit-identical: no wear, no draws
+  # Type a coverage entry resolves to when it declares none (spec §7.1:
+  # legacy measures resolve the platform default).
+  default_ppe_type: surgical_mask
+  # NULL-SOURCE weak declarations (operational arms, may be swept, may not
+  # be tuned to anchors): the fatigue score at which covered hosts start
+  # drawing refusal, and the per-epoch refusal draw's probability.
+  fatigue_refusal_threshold: 50.0
+  fatigue_refusal_probability_per_epoch: 0.1
 
 # ── Variant Surveillance (heritable strain tracking) ─────────
 # Off by default: with enabled=false no strain is minted and no RNG draw

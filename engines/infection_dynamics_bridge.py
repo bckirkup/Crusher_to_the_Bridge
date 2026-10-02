@@ -854,6 +854,11 @@ class KorkinAgent:
         # SHIP-RHYTHM-02: None = rhythm layer off (baseline emesis path);
         # bool = post-prandial hazard-window flag for the current epoch.
         "_rhythm_post_prandial",
+        # PPE wear-fatigue channel (ship_function_capacity_spec §7): wear
+        # hours per declared type, the declared-source fatigue accumulator,
+        # the §5 repair-labor hook, and the endogenous-condition record.
+        "ppe_wear_hours_by_type", "fatigue_score", "ppe_dexterity_impairment",
+        "ppe_condition_ids", "ppe_fatigue_refused", "ppe_symptomatic_active",
     )
 
     def __init__(
@@ -1016,6 +1021,27 @@ class KorkinAgent:
         # SHIP-RHYTHM-02: set each epoch by the rhythm layer when enabled;
         # left None under the labelled baseline so the emesis gate is inert.
         self._rhythm_post_prandial: bool | None = None
+
+        # PPE wear-fatigue channel (ship_function_capacity_spec §7), all
+        # inert while ``ppe_fatigue.enabled`` is false: wear-hours accrue per
+        # declared registry type only for covered hosts, ``fatigue_score``
+        # sums declared per-epoch contributions (PPE wear here, the
+        # crew-sustenance deficit when its writer lands — read
+        # presence-guarded there, never defined here),
+        # ``ppe_dexterity_impairment`` is the share of effective watch-hours
+        # lost to manual-work impairment for §5's repair-labor read, and
+        # ``ppe_condition_ids`` holds endogenous sequelae already onset.
+        self.ppe_wear_hours_by_type: dict[str, float] = {}
+        self.fatigue_score: float = 0.0
+        self.ppe_dexterity_impairment: float = 0.0
+        self.ppe_condition_ids: set[str] = set()
+        self.ppe_fatigue_refused: bool = False
+        # Endogenous (non-infectious) symptomatic state — an occlusion
+        # dermatitis or sinonasal complaint the infection records cannot
+        # own. Read alongside illness_status at export only, so the natural
+        # history loops can never clear it and the shedding path never
+        # mistakes it for a symptomatic infection.
+        self.ppe_symptomatic_active: bool = False
 
         # {pathogen_id: genotype} the agent's pre-existing immunity was raised
         # against; empty unless variant surveillance is on
@@ -1885,22 +1911,23 @@ class KorkinAgent:
             PRESENTATION_SYMPTOMATIC,
         )
 
+        # ``ppe_symptomatic_active`` is an endogenous presentation — the host
+        # presents symptomatic without carrying an infection, so sick-call,
+        # duty exclusion and the VSP counters see it through the same axis
+        # (ship_function_capacity_spec §7.4). It cannot move any existing
+        # read: nothing sets it unless the fatigue channel is enabled.
+        presenting = self.is_symptomatic or self.ppe_symptomatic_active
+        symptom_presentation = (
+            PRESENTATION_SYMPTOMATIC if presenting else PRESENTATION_ASYMPTOMATIC
+        )
         if self.infection_status == InfectionStatus.INFECTED:
             infection_state = INFECTION_INFECTED
-            symptom_presentation = (
-                PRESENTATION_SYMPTOMATIC
-                if self.is_symptomatic
-                else PRESENTATION_ASYMPTOMATIC
-            )
         elif self.is_recovered:
             infection_state = INFECTION_RECOVERED
-            symptom_presentation = PRESENTATION_ASYMPTOMATIC
         elif self.immune:
             infection_state = INFECTION_IMMUNE
-            symptom_presentation = PRESENTATION_ASYMPTOMATIC
         else:
             infection_state = INFECTION_SUSCEPTIBLE
-            symptom_presentation = PRESENTATION_ASYMPTOMATIC
 
         # Multi-pathogen infection summary
         pathogen_states = {}
