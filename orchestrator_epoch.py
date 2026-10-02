@@ -592,8 +592,15 @@ def _shore_pathogen_id(
 ) -> str | None:
     requested = str(getattr(epoch_state, "shore_pathogen", "") or "")
     if requested:
-        return requested if requested in pathogen_profiles else None
-    return min(pathogen_profiles) if pathogen_profiles else None
+        profile = pathogen_profiles.get(requested)
+        if profile is None or profile.get("hazard_substance"):
+            return None
+        return requested
+    candidates = [
+        pid for pid, prof in pathogen_profiles.items()
+        if not (prof or {}).get("hazard_substance")
+    ]
+    return min(candidates) if candidates else None
 
 
 def _shore_draw_eligible(agent: Any, pid: str) -> bool:

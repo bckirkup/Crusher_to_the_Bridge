@@ -43,6 +43,11 @@ from engines.crew_duty_exclusion import (
 from engines.environmental_hazards import (
     merge_environmental_hazard_profiles,
 )
+from engines.hazard_sources import (
+    HazardSourceModel,
+    merge_hazard_source_blocks,
+    parse_hazard_sources,
+)
 from engines.initiation import preboarding_reportable_ids
 from engines.ppe_fatigue import build_ppe_fatigue_tracker
 from engines.py_contam_bridge import (
@@ -125,6 +130,7 @@ from orchestrator_init import (
     initialize_grumb_seeding,
     initialize_ship_graph,
     load_and_merge_voyage_config,
+    load_hazard_source_declarations,
     load_isolation_unit_capacity,
     load_pathogen_profiles,
     pathogen_profiles_are_respiratory,
@@ -250,6 +256,16 @@ def _merge_applied(current: dict[str, Any], extra: dict[str, Any]) -> dict[str, 
     return extra if not current else {**current, **extra}
 
 
+def _override_factor(
+    tx_overrides: dict[str, Any],
+    platform_layout: dict[str, Any],
+    key: str,
+    default: float,
+) -> float:
+    """transmission.<key> override, else the platform declaration, else the code default."""
+    return float(tx_overrides.get(key, platform_layout.get(key, default)))
+
+
 def _beliefs_from_information(information_state: dict[str, Any]) -> dict[int, dict[str, float]]:
     beliefs: dict[int, dict[str, float]] = {}
     agent_inf = information_state.get("agents", information_state)
@@ -348,6 +364,7 @@ class ShipSimulation:
         self.crew_exclusion: CrewDutyExclusionTracker | None = None
         self._ship_functions: FunctionCapacityRunner | None = None
         self.ppe_fatigue = None
+        self.hazard_model: HazardSourceModel | None = None
         self.obs = None
         self.proto_ctx = None
         self.pathogen_profiles: dict[str, dict[str, Any]] = {}
@@ -414,8 +431,36 @@ class ShipSimulation:
         # ``serves`` list. Head ids carry a _M/_F suffix; a single-fixture
         # block (e.g. the bridge head) serves as "any".
         sanitary_zone_map = _sanitary_zone_map(platform_layout)
+        self.tx_core = self._build_transmission_core(
+            platform_layout,
+            zone_types=zone_types,
+            zone_ventilation=zone_ventilation,
+            zone_floor_areas=zone_floor_areas,
+            sanitary_zone_map=sanitary_zone_map,
+            food_zone_multipliers=food_zone_multipliers,
+        )
+        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
+        # ENV-SOURCE-01 emitter model parsed from the merged hazard_sources
+        # declaration (None on the labelled baseline).
+        self.tx_core.hazard_model = self.hazard_model
+        self.tx_core.initialize_zones(self.zone_names)
+        self.engine.enable_external_transmission()
+        if self.display:
+            from orchestrator_display import print_transmission_core
+            print_transmission_core(self.hvac_downstream, self.pathogen_profiles)
+
+    def _build_transmission_core(
+        self,
+        platform_layout: dict[str, Any],
+        *,
+        zone_types: dict[str, str],
+        zone_ventilation: dict[str, float],
+        zone_floor_areas: dict[str, float],
+        sanitary_zone_map: dict[str, Any],
+        food_zone_multipliers: dict[str, float],
+    ) -> TransmissionCore:
         tx_overrides = self.cfg.get("transmission", {}) or {}
-        self.tx_core = TransmissionCore(
+        return TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
             pathogen_profiles=self.pathogen_profiles,
@@ -423,34 +468,22 @@ class ShipSimulation:
             zone_ventilation=zone_ventilation,
             zone_floor_areas=zone_floor_areas,
             sanitary_zone_map=sanitary_zone_map,
-            confinement_isolation_factor=float(
-                tx_overrides.get(
-                    "confinement_isolation_factor",
-                    platform_layout.get(
-                        "confinement_isolation_factor",
-                        DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
-                    ),
-                )
+            confinement_isolation_factor=_override_factor(
+                tx_overrides,
+                platform_layout,
+                "confinement_isolation_factor",
+                DEFAULT_CONFINEMENT_ISOLATION_FACTOR,
             ),
-            corridor_direct_contact_factor=float(
-                tx_overrides.get(
-                    "corridor_direct_contact_factor",
-                    platform_layout.get(
-                        "corridor_direct_contact_factor",
-                        DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
-                    ),
-                )
+            corridor_direct_contact_factor=_override_factor(
+                tx_overrides,
+                platform_layout,
+                "corridor_direct_contact_factor",
+                DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR,
             ),
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
         )
-        self.tx_core.zone_air_exchange_per_hour = zone_air_exchange
-        self.tx_core.initialize_zones(self.zone_names)
-        self.engine.enable_external_transmission()
-        if self.display:
-            from orchestrator_display import print_transmission_core
-            print_transmission_core(self.hvac_downstream, self.pathogen_profiles)
 
     def initialize(self) -> WorldState:
         if self._initialized:
@@ -483,6 +516,22 @@ class ShipSimulation:
         self.pathogen_profiles = merge_environmental_hazard_profiles(
             self.pathogen_profiles, voyage_cfg,
         )
+        # ENV-SOURCE-01: source declarations merge profiles-file < platform
+        # voyage < run config; an armed model registers its substance
+        # profiles here so initiation, transports, and the dose ledger all
+        # see them through the ordinary profile machinery.
+        self.hazard_model = parse_hazard_sources(
+            merge_hazard_source_blocks(
+                load_hazard_source_declarations(cfg),
+                voyage_cfg.get("hazard_sources"),
+                cfg.get("hazard_sources"),
+            ),
+            zone_names=self.zone_names,
+            known_profile_ids=set(self.pathogen_profiles),
+            clock=self.clock,
+        )
+        if self.hazard_model is not None:
+            self.pathogen_profiles.update(self.hazard_model.profile_fragments())
         self.pathogen_pool_transport = parse_pathogen_pool_transport(
             cfg.get("hvac", {}),
         )
@@ -1102,6 +1151,7 @@ class ShipSimulation:
         # multi-epoch run reports the same totals the core holds.
         state.sanitary_activity = dict(self.tx_core.sanitary_telemetry)
         self._transport_airborne_pools()
+        self._transport_hazard_source_pools()
         if self.pathogen_profiles and self.enable_dual_signal:
             work.zone_microflora_shifts = compute_zone_microflora_shifts(
                 self.engine.agents, self.pathogen_profiles, work.cfg,
@@ -1140,6 +1190,26 @@ class ShipSimulation:
         self.engine.zone_pathogen_mass = self.contam_engine.transport_step(
             self.engine.zone_pathogen_mass,
         )
+
+    def _transport_hazard_source_pools(self) -> None:
+        """Step armed substances' env pools through the armed transport.
+
+        The declaration layer is transport-agnostic: whichever engine
+        ``build_transport_engine`` resolved (native airflow or ContamX)
+        carries the pool, identically to pathogen airborne mass. A
+        substance declaring ``transport: "none"`` keeps a standing field.
+        """
+        model = self.hazard_model
+        if model is None or self.contam_engine is None or self.tx_core is None:
+            return
+        for pid, pool in self.tx_core.env_contamination.items():
+            if not model.transport_armed(pid) or not pool:
+                continue
+            self.tx_core.env_contamination[pid] = dict(
+                self.contam_engine.transport_step(
+                    dict(pool), natural_decay_rate=0.0,
+                ),
+            )
 
     def _step_export_truth(self, work: _EpochWork) -> None:
         assert self.engine is not None

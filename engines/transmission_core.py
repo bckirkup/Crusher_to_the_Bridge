@@ -64,6 +64,7 @@ from engines.fomite_surfaces import (
     parse_per_surface_config,
     pickup_gate_open,
 )
+from engines.hazard_sources import HazardSourceModel
 from engines.infection_dynamics_bridge import (
     ALPHA,
     BETA,
@@ -2376,6 +2377,10 @@ class TransmissionCore:
         self.rng = rng
         tx = (cfg or {}).get("transmission", {}) or {}
         self._init_clock_and_kinetics(clock, cfg)
+        # ENV-SOURCE-01 emitter model, or None on the labelled baseline.
+        # ShipSimulation populates it post-construction from the merged
+        # hazard_sources declaration (same seam as zone_air_exchange).
+        self.hazard_model: HazardSourceModel | None = None
         self.zone_volumes = zone_volumes or {}
         self.pathogen_profiles = pathogen_profiles or {}
         self.zone_types = zone_types or {}
@@ -5186,7 +5191,7 @@ class TransmissionCore:
             return
         baseline = float(ec.get("baseline_environmental_load", 0.0))
         self.environmental_load[pid] = baseline
-        source_zones = ec.get("source_zones")
+        source_zones = self._env_source_zone_patterns(pid, ec.get("source_zones"))
         if not source_zones:
             return
         self.env_contamination.setdefault(pid, {})
@@ -5237,6 +5242,12 @@ class TransmissionCore:
 
         # Build zone occupancy maps
         zone_occupants = self._epoch_zone_occupants(agents, epoch)
+
+        # Emitters deposit their epoch output into the zone pools first, so
+        # the growth pass and exposure read the same level the scalar arm
+        # would have carried. The write is deterministic — zero RNG draws —
+        # which is what keeps an unarmed run bit-identical.
+        self._deposit_hazard_sources(epoch)
 
         # Per-agent accumulated dose across all pathways (aggregate)
         agent_doses: dict[int, float] = {}
@@ -10241,10 +10252,13 @@ class TransmissionCore:
         if not ec.get("enabled", False):
             return
 
-        source_zones = ec.get("source_zones")
+        source_zones = self._env_source_zone_patterns(
+            pathogen_id, ec.get("source_zones"),
+        )
         if source_zones:
             self._pathway_environmental_zone_scoped(
                 zone_occupants, agent_doses, matrix, agent_pathway_doses,
+                source_zones=source_zones,
                 pathogen_id=pathogen_id, profile=profile or {}, ledger=ledger,
             )
             return
@@ -10294,6 +10308,38 @@ class TransmissionCore:
                     "dose": round(dose, 4),
                 })
 
+    def _env_source_zone_patterns(
+        self,
+        pathogen_id: str,
+        declared: Any,
+    ) -> list[str]:
+        """Declared source patterns plus every zone a hazard emitter covers
+        targeting this id, and — for armed substances — every zone already
+        holding pool mass (transported fields reach zones no emitter named).
+        """
+        patterns = [str(p) for p in (declared or [])]
+        model = self.hazard_model
+        if model is None:
+            return patterns
+        extra = set(model.emitter_zones_for(pathogen_id))
+        if model.is_substance(pathogen_id):
+            # A substance's transported pool reaches zones no emitter named.
+            extra |= set(self.env_contamination.get(pathogen_id) or {})
+        for zone in sorted(extra):
+            if not self._zone_matches(zone, patterns):
+                patterns.append(zone)
+        return patterns
+
+    def _deposit_hazard_sources(self, epoch: int) -> None:
+        """Add each armed emitter's epoch output to its zone pool."""
+        model = self.hazard_model
+        if model is None:
+            return
+        for pid, deposits in model.epoch_deposits(epoch).items():
+            pool = self.env_contamination.setdefault(pid, {})
+            for zone_name, mass in deposits.items():
+                pool[zone_name] = pool.get(zone_name, 0.0) + mass
+
     def _pathway_environmental_zone_scoped(
         self,
         zone_occupants: dict[str, list[KorkinAgent]],
@@ -10301,13 +10347,13 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         agent_pathway_doses: dict[int, dict[str, float]] | None,
         *,
+        source_zones: list[str],
         pathogen_id: str,
         profile: dict[str, Any],
         ledger: StrainDoseLedger | None = None,
     ) -> None:
         """Per-zone environmental reservoirs (Legionella spa / C.diff spores)."""
         ec = profile.get("environmental_contamination", {})
-        source_zones = list(ec.get("source_zones") or [])
         emission, p_expose, spore_decay, col_factor = self._env_zone_rates(ec)
         reservoirs = self.env_contamination.setdefault(pathogen_id, {})
 
@@ -10376,8 +10422,17 @@ class TransmissionCore:
         pathogen_id: str,
         profile: dict[str, Any],
     ) -> None:
-        """Grow/decay each matching zone's reservoir by its factor."""
-        for zone_name in zone_occupants:
+        """Grow/decay each matching zone's reservoir by its factor.
+
+        Armed hazard substances also iterate zones that already carry pool
+        mass — an emitter's or a transported field's zone decays whether or
+        not anyone occupies it this epoch.
+        """
+        zone_names: Iterable[str] = zone_occupants
+        model = self.hazard_model
+        if model is not None and model.is_substance(pathogen_id):
+            zone_names = set(zone_occupants) | set(reservoirs)
+        for zone_name in zone_names:
             if not self._zone_matches(zone_name, source_zones):
                 continue
             level = float(reservoirs.get(zone_name, 0.0))
@@ -10385,7 +10440,7 @@ class TransmissionCore:
                 level = float(ec.get("baseline_environmental_load", 0.0))
             deposited = self._update_env_reservoir_strains(
                 pathogen_id, zone_name, level, factor,
-                zone_occupants[zone_name], profile,
+                zone_occupants.get(zone_name, []), profile,
             )
             reservoirs[zone_name] = max(level * factor + deposited, 0.0)
 
