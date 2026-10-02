@@ -498,27 +498,71 @@ Writer rules, because this is where the loop can go wrong:
 Sustained PPE use degrades the wearer: fatigue, reduced compliance, and —
 the user's specific mechanism — elevated risk of secondary conditions
 (mask/respirator microclimate → sinonasal complaints; occlusion/friction →
-skin barrier damage and infection). The channel is three additive pieces,
-each riding an existing pattern:
+skin barrier damage and infection). The channel is additive pieces, each
+riding an existing pattern.
 
-### 7.1 The accumulator
+### 7.1 The PPE type registry
 
-`KorkinAgent.ppe_wear_hours`: incremented each epoch the agent is under an
-active PPE protocol (`ppe_transmission_reduction` in `merged_modifiers`,
-SOP-004/005 precedent) **and** covered by it — NPI measures already carry a
-role coverage map, so coverage is read not assumed. Each PPE-bearing
-protocol may declare `ppe_fatigue_rate_per_epoch` (N95 > surgical is a
-declared ordering, not a shipped number); absent key = zero fatigue, so
-legacy protocols are unaffected.
+PPE is not one object. Surgical masks, N95/FFP respirators, powered
+air-purifying respirators (PAPR), latex/nitrile gloves, and chemical gloves
+differ on every axis the model cares about, so the unit of declaration is
+a `ppe_types` registry in the protocol/NPI config:
+
+```json
+"ppe_types": {
+  "surgical_mask": {"fatigue_rate_per_epoch": 0.2, "heat_load": 0.1,
+                    "dexterity_impairment": 0.0},
+  "n95":            {"fatigue_rate_per_epoch": 0.5, "heat_load": 0.3,
+                    "dexterity_impairment": 0.0},
+  "papr":           {"fatigue_rate_per_epoch": 0.8, "heat_load": 0.6,
+                    "dexterity_impairment": 0.15},
+  "latex_gloves":   {"fatigue_rate_per_epoch": 0.1, "heat_load": 0.0,
+                    "dexterity_impairment": 0.1},
+  "chemical_gloves":{"fatigue_rate_per_epoch": 0.3, "heat_load": 0.2,
+                    "dexterity_impairment": 0.3}
+}
+```
+
+- **Protection stays where it is.** Efficacy remains on the protocol —
+  SOP-004/005's `ppe_transmission_reduction` and route scalars — but the
+  NPI measure's coverage map keys each covered class/role to a `ppe_type`
+  (medical staff → `n95` + `latex_gloves`; cleanup detail →
+  `chemical_gloves`; a chemical-release SOP would draw from the same
+  registry for PAPR/respirator, §8). Legacy measures with no type declare
+  a platform-default type so existing campaigns are unaffected.
+- **Fatigue is per-type.** `fatigue_rate_per_epoch` replaces the per-
+  protocol `ppe_fatigue_rate_per_epoch` shorthand from v1 of this spec —
+  the registry is where the ordering (PAPR > N95 > surgical is a declared
+  ordering, not a shipped number) lives, and an agent covered by several
+  types at once accumulates their sum.
+- **`dexterity_impairment` feeds back into §4/§5 capacity** — it scales the
+  effective watch-hours an impaired wearer delivers to functions needing
+  manual work (repair labor in §5 most directly): an engineer in PAPR and
+  chemical gloves repairs slower. This is the loop the fatigue channel
+  otherwise misses: stricter PPE during an outbreak *itself* degrades
+  maintenance capacity, which degrades systems, which degrades functions.
+- **Secondary conditions are type-keyed** (§7.4): each type may declare
+  its own `fatigue_conditions` profile — occlusion dermatitis on gloves,
+  sinonasal complaints on respirators, heat stress on PAPR — rather than
+  one pooled risk.
+
+### 7.2 The accumulator
+
+`KorkinAgent.ppe_wear_hours` becomes `ppe_wear_hours_by_type`: incremented
+each epoch the agent is under an active PPE protocol **and** covered by
+it — NPI measures already carry the coverage map (now typed), so coverage
+is read not assumed. The accumulator contribution is Σ hours × type
+`fatigue_rate_per_epoch`; absent type = zero fatigue, so legacy protocols
+are unaffected.
 
 Wear-hours is one *input* to fatigue, not fatigue itself. The accumulator
 is `fatigue_score`, fed by declared sources: PPE wear (this section) and
 the `sustenance_deficit` a degraded crew-served function writes (§6.2).
 Keeping the accumulator a sum of declared contributions — rather than a
 PPE-specific counter — is what lets the same downstream consumers
-(§7.2 compliance, §7.3 conditions) read one number whatever produced it.
+(§7.3 compliance, §7.4 conditions) read one number whatever produced it.
 
-### 7.2 Fatigue → compliance decay
+### 7.3 Fatigue → compliance decay
 
 The refuser/compliance pattern already exists
 (`CrewDutyExclusionTracker.complies()` sticky draws,
@@ -529,9 +573,11 @@ fatigue modulates *effective coverage*: above a declared
 reductions drop out for subsequent epochs. The sticky-draw convention and
 the compliance log give the audit trail for free.
 
-### 7.3 Fatigue → secondary conditions
+### 7.4 Fatigue → secondary conditions
 
-Two honest variants, picked per condition by mechanism:
+Type-keyed, as §7.1 declares — a type's `fatigue_conditions` block names
+only the sequelae it plausibly induces. Two honest variants, picked per
+condition by mechanism:
 
 - **Endogenous (non-transmissible) condition.** Sinonasal symptoms or skin
   barrier damage that is not infectious: wear-hours drive a per-epoch
