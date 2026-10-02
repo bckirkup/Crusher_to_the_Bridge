@@ -70,6 +70,7 @@ python3 presidio_runner.py \
 
 | Doc | Status | Role |
 |-----|--------|------|
+| [applications_guide.md](applications_guide.md) | Living | Four application modes mapped to in-tree machinery: observational-study design for parametrization, operational digital twin, prevention-science sandbox, retrospective outbreak investigation |
 | [OPERATORS_MANUAL_SHIP.md](OPERATORS_MANUAL_SHIP.md) | Living | Ship manual: run specs, API, outputs |
 | [OPERATORS_MANUAL_GAME_THEORY.md](OPERATORS_MANUAL_GAME_THEORY.md) | Living | Fleet, Stackelberg, OIS, utility export/import |
 | [simulation_step_order.md](simulation_step_order.md) | Living | Epoch phase order |
