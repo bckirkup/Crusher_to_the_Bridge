@@ -335,11 +335,13 @@ def _wrap_challenge(core_cls: type, rec: RhythmRecorder) -> Any:
         self: Any, epoch: int, agent: Any, pathogen_id: str,
         agent_pathogen_doses: dict, agent_pathway_doses: Any,
         matrix: Any, events: list,
+        agent_coop_doses: dict | None = None,
     ) -> None:
         if pathogen_id != rec.pathogen_id:
             original(
                 self, epoch, agent, pathogen_id, agent_pathogen_doses,
                 agent_pathway_doses, matrix, events,
+                agent_coop_doses=agent_coop_doses,
             )
             return
         aid = int(agent.agent_id)
@@ -361,6 +363,7 @@ def _wrap_challenge(core_cls: type, rec: RhythmRecorder) -> Any:
         original(
             self, epoch, agent, pathogen_id, agent_pathogen_doses,
             agent_pathway_doses, matrix, events,
+            agent_coop_doses=agent_coop_doses,
         )
         if not was_infected and agent.is_infected_with(pathogen_id):
             _record_acquisition(
