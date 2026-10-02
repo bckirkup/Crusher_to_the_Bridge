@@ -372,9 +372,13 @@ class FunctionCapacityRunner:
         excluded_ids: Iterable[int],
         quarantined_ids: Iterable[int],
         isolated_ids: Iterable[int],
-    ) -> dict[str, dict[str, int]]:
-        """fit/impaired counts per staffing pool key this epoch."""
+    ) -> tuple[
+        dict[str, dict[str, int]],
+        dict[str, list[tuple[Any, DutyState]]],
+    ]:
+        """fit/impaired counts (and members) per staffing pool key this epoch."""
         pools: dict[str, dict[str, int]] = {}
+        members: dict[str, list[tuple[Any, DutyState]]] = {}
         for agent in agents:
             if str(getattr(agent, "role", "")) != "crew":
                 continue
@@ -394,7 +398,8 @@ class FunctionCapacityRunner:
             for key in keys:
                 bucket = pools.setdefault(key, {"fit": 0, "impaired": 0})
                 bucket["impaired" if state is DutyState.IMPAIRED else "fit"] += 1
-        return pools
+                members.setdefault(key, []).append((agent, state))
+        return pools, members
 
     def _demand_by_pool(self, hour: int) -> dict[str, float]:
         """Summed watch demand per pool across every instance drawing it."""
@@ -530,7 +535,7 @@ class FunctionCapacityRunner:
         closed = set((merged_mods or {}).get("close_zones") or [])
         closed.update(getattr(state, "info_suppression_closed_zones", ()) or ())
         excluded = getattr(tracker, "excluded_ids", frozenset()) if tracker else ()
-        pools = self._pools(
+        pools, members = self._pools(
             agents, hour, symptomatic_ids,
             excluded, state.quarantined_ids, state.isolated_ids,
         )
@@ -581,7 +586,7 @@ class FunctionCapacityRunner:
             },
         }
         if self.systems is not None:
-            self._step_systems(clock, pools, demand)
+            self._step_systems(clock, members, demand)
             record["ship_systems"] = self.systems.snapshot()
         return record
 
@@ -725,7 +730,7 @@ class FunctionCapacityRunner:
     def _step_systems(
         self,
         clock: Any,
-        pools: dict[str, dict[str, int]],
+        members: dict[str, list[tuple[Any, DutyState]]],
         demand: dict[str, float],
     ) -> None:
         """Degrade every system, then spend residual watch-hours on repair."""
@@ -737,8 +742,25 @@ class FunctionCapacityRunner:
             if spec.repair_labor_class
         }
         for cls in labor_classes:
-            pool = pools.get(cls) or {"fit": 0, "impaired": 0}
-            delivered = pool["fit"] + pool["impaired"] * self.default_effectiveness
+            # PPE dexterity impairment scales the watch-hours a worker can
+            # still deliver to repair; the fatigue channel writes it,
+            # presence-guarded so an unarmed run is untouched.
+            delivered = sum(
+                (
+                    1.0 if state is DutyState.FIT
+                    else self.default_effectiveness
+                ) * (
+                    1.0
+                    - min(
+                        1.0,
+                        max(
+                            0.0,
+                            float(getattr(agent, "ppe_dexterity_impairment", 0.0) or 0.0),
+                        ),
+                    )
+                )
+                for agent, state in members.get(cls, [])
+            )
             residual = max(0.0, delivered - demand.get(cls, 0.0))
             residual_hours[cls] = residual * clock.hours_per_epoch
         self.systems.step(clock.day_fraction_per_epoch, residual_hours)

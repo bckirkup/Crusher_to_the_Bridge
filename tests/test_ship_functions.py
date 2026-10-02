@@ -430,6 +430,37 @@ def test_ship_systems_rejects_duplicate_ids() -> None:
         build_ship_systems([{"system_id": "x"}, {"system_id": "x"}])
 
 
+def test_dexterity_impairment_scales_repair_labor() -> None:
+    """PPE dexterity loss cuts the residual hours a pool can spend on repair."""
+    systems = build_ship_systems([
+        {"system_id": "plant", "health_start": 0.5,
+         "degradation": {"rate_per_day": 0.0},
+         "repair": {"labor_class": "eng", "rate_per_person_hour": 0.1},
+         "repair_priority": 0},
+    ])
+    runner = _runner([_fn(
+        staffing={"crew_galley": {"required_on_watch": 2}},
+    )], systems)
+    # 4 eng on watch, demand 0 for eng -> 4 residual person-hours before
+    # dexterity; two workers at 50% impairment deliver only 3.
+    eng = _crew(4, cls="eng")
+    eng[0].ppe_dexterity_impairment = 0.5
+    eng[1].ppe_dexterity_impairment = 0.5
+    _step(runner, eng)
+    assert systems.health["plant"] == pytest.approx(0.8)  # 0.5 + 3 h x 0.1
+    systems_2 = build_ship_systems([
+        {"system_id": "plant", "health_start": 0.5,
+         "degradation": {"rate_per_day": 0.0},
+         "repair": {"labor_class": "eng", "rate_per_person_hour": 0.1},
+         "repair_priority": 0},
+    ])
+    runner_2 = _runner([_fn(
+        staffing={"crew_galley": {"required_on_watch": 2}},
+    )], systems_2)
+    _step(runner_2, _crew(4, cls="eng"))  # no field: full 4 hours
+    assert systems_2.health["plant"] == pytest.approx(0.9)  # 0.5 + 4 h x 0.1
+
+
 # ── wired into the epoch ─────────────────────────────────────────────────
 
 
