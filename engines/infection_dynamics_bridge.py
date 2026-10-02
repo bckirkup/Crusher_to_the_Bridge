@@ -816,6 +816,9 @@ class KorkinAgent:
         "home_zone", "dining_zone", "work_zone", "free_zone",
         "current_location", "current_activity", "dwell_epochs", "schedule",
         "phase_jitter", "watch_section", "night_watch", "berth_group",
+        # Ship-function crew-sustenance channel: accumulated deficit from
+        # degraded crew-served functions, read by the wear-fatigue arm.
+        "sustenance_deficit",
         # Multi-pathogen extensions
         "infections", "susceptibility_multiplier",
         "secretor_negative_by_pathogen",
@@ -914,6 +917,10 @@ class KorkinAgent:
         # Which berthing pool this agent draws cabin-mates from; defaults to
         # its own class, so undeclared groups behave exactly as before.
         self.berth_group: str = ""
+        # Accumulated hunger/dehydration from degraded crew-served functions
+        # (ship_functions crew_sustenance feedback): an input register the
+        # wear-fatigue accumulator reads. Untouched at 0.0.
+        self.sustenance_deficit: float = 0.0
 
         # Multi-pathogen co-infection tracking:
         # {pathogen_id: {"status": InfectionStatus, "illness": IllnessStatus,

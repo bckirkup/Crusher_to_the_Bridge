@@ -49,5 +49,96 @@
     "detection_delay_hours": 0,
     "crew_screening_interval_hours": null,
     "notes": "Stock defaults (= current global behavior). Class gradient available via campaign overrides."
+  },
+  "ship_systems": [
+    {
+      "system_id": "hvac_plant",
+      "health_start": 1.0,
+      "degradation": {"rate_per_day": 0.01, "model": "linear"},
+      "repair": {"labor_class": "crew_engineering", "rate_per_person_hour": 0.05},
+      "failure_threshold": 0.3,
+      "effects": {
+        "food_service": {"capacity_multiplier_at_failure": 0.6},
+        "housekeeping": {"capacity_multiplier_at_failure": 0.8}
+      },
+      "repair_priority": 0,
+      "parameters_provenance": "null_source: declared weak range pending the ship-function parameter register"
+    },
+    {
+      "system_id": "propulsion",
+      "health_start": 1.0,
+      "degradation": {"rate_per_day": 0.005, "model": "linear"},
+      "repair": {"labor_class": "crew_engineering", "rate_per_person_hour": 0.02},
+      "failure_threshold": 0.4,
+      "effects": {
+        "engineering_watch": {"capacity_multiplier_at_failure": 0.0}
+      },
+      "repair_priority": 1,
+      "parameters_provenance": "null_source: declared weak range pending the ship-function parameter register"
+    }
+  ],
+  "ship_functions": {
+    "enabled": false,
+    "symptomatic_effectiveness": 0.7,
+    "parameters_provenance": "null_source: declared weak ranges pending the ship-function parameter register (docs/ship_functions/parameter_sources.md)",
+    "functions": [
+      {
+        "function_id": "food_service",
+        "serves": "passengers",
+        "staffing": {"crew_galley": {"required_on_watch": 24, "minimum_on_watch": 8}},
+        "required_zone_types": ["Dining"],
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "dining_weights",
+          "threshold": 0.5,
+          "sustained_hours": 4.0,
+          "degraded_weights": {"buffet": 0.0, "mdr": 0.0, "specialty": 0.0}
+        }
+      },
+      {
+        "function_id": "food_service",
+        "serves": "crew",
+        "staffing": {"crew_galley": {"required_on_watch": 6, "minimum_on_watch": 2}},
+        "capacity_model": "staffing_fraction",
+        "feedback": {"kind": "readout_only", "crew_sustenance": true, "sustenance_threshold": 1.0}
+      },
+      {
+        "function_id": "housekeeping",
+        "serves": "both",
+        "staffing": {"crew_general": {"required_on_watch": 40}},
+        "required_zone_types": ["Cabin_Corridor"],
+        "capacity_model": "staffing_fraction",
+        "feedback": {"kind": "cleaning_coverage_scale", "floor": 0.0}
+      },
+      {
+        "function_id": "entertainment",
+        "serves": "passengers",
+        "staffing": {"crew_general": {"required_on_watch": 10}},
+        "required_zone_types": ["Free"],
+        "capacity_model": "staffing_fraction",
+        "feedback": {
+          "kind": "zone_modifiers",
+          "threshold": 0.3,
+          "sustained_hours": 24.0,
+          "zone_close_on_loss": ["MainTheater"]
+        }
+      },
+      {
+        "function_id": "engineering_watch",
+        "serves": "mission",
+        "staffing": {"crew_engineering": {"required_on_watch": 3, "minimum_on_watch": 1}},
+        "required_systems": ["propulsion", "hvac_plant"],
+        "capacity_model": "bottleneck_min",
+        "feedback": {"kind": "readout_only"}
+      },
+      {
+        "function_id": "medical_bay",
+        "serves": "mission",
+        "staffing": {"crew_medical": {"required_on_watch": 2, "minimum_on_watch": 1}},
+        "required_zone_ids": ["MedCenter"],
+        "capacity_model": "bottleneck_min",
+        "feedback": {"kind": "readout_only"}
+      }
+    ]
   }
 }
