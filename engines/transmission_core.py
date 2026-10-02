@@ -2671,6 +2671,10 @@ class TransmissionCore:
         self.routine_cleaning_by_zone_class: dict[str, dict[str, float]] = (
             cleaning_cfg["routine_by_zone_class"]
         )
+        # Ship-function capacity arm (ship_functions.cleaning_coverage_scale
+        # feedback): degraded housekeeping multiplies every zone's routine
+        # coverage by this. Identity at 1.0 — written inputs, never physics.
+        self.cleaning_coverage_scale = 1.0
         self.outbreak_cleaning_coverage = float(
             cleaning_cfg["outbreak_coverage"],
         )
@@ -7165,13 +7169,14 @@ class TransmissionCore:
         """Return routine coverage and frequency for a zone."""
         zone_class = self._fomite_zone_class(zone_name)
         schedule = self.routine_cleaning_by_zone_class.get(zone_class)
+        scale = self.cleaning_coverage_scale
         if schedule is None:
             return (
-                self._bounded_fraction(self.routine_cleaning_coverage),
+                self._bounded_fraction(self.routine_cleaning_coverage * scale),
                 self.routine_cleaning_events_per_day,
             )
         return (
-            self._bounded_fraction(schedule["coverage"]),
+            self._bounded_fraction(schedule["coverage"] * scale),
             schedule["events_per_day"],
         )
 

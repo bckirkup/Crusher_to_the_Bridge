@@ -53,6 +53,14 @@ from engines.py_contam_bridge import (
     load_spatial_layout as load_platform_layout,
 )
 from engines.scenario_schedule import ScenarioSchedule, resolve_scenario_schedule
+from engines.ship_functions import (
+    DEFAULT_SYMPTOMATIC_EFFECTIVENESS,
+    FunctionCapacityRunner,
+    merge_capacity_modifiers,
+    parse_ship_functions,
+    validate_ship_function_refs,
+)
+from engines.ship_systems import build_ship_systems
 from engines.sim_clock import SimClock
 from engines.stateroom_air import fold_stateroom_mass, partition_block_air
 from engines.transmission_core import (
@@ -141,6 +149,7 @@ from picard_framework.simulation.action_applier import apply_action_envelope
 from picard_framework.simulation.info_suppression import InfoSuppressionSpec
 from picard_framework.simulation.step_result import StepResult
 from picard_framework.world_state import WorldState
+from telemetry_buffer.agent_axes import agent_has_symptomatic_presentation
 from telemetry_buffer.schema import make_ground_truth, read_ground_truth, write_ground_truth
 
 # Keeps wastewater read draws from consuming the transmission stream, so turning
@@ -227,6 +236,7 @@ class _EpochWork:
     active_mods: Any = None
     merged_mods: Any = None
     counter_results: Any = None
+    function_capacity: dict[str, Any] | None = None
     epoch_record: dict[str, Any] = field(default_factory=dict)
     tx_events: list[Any] = field(default_factory=list)
 
@@ -333,6 +343,7 @@ class ShipSimulation:
         self.outdoor_air_fraction_override: float | None = None
         self.tx_core = None
         self.crew_exclusion: CrewDutyExclusionTracker | None = None
+        self._ship_functions: FunctionCapacityRunner | None = None
         self.ppe_fatigue = None
         self.obs = None
         self.proto_ctx = None
@@ -591,6 +602,7 @@ class ShipSimulation:
             self.tx_core.service_zones if self.tx_core is not None else (),
             rng=self.rng,
         )
+        self._ship_functions = self._build_ship_function_runner(voyage_cfg, ship)
         # PPE wear-fatigue channel (ship_function_capacity_spec §7): the
         # dedicated stream spawns only when the channel arms, so a run that
         # never enables it keeps every draw where it was.
@@ -622,6 +634,52 @@ class ShipSimulation:
             self.decision_experience.load()
         self._initialized = True
         return self.world
+
+    def _build_ship_function_runner(
+        self,
+        voyage_cfg: dict[str, Any] | None,
+        ship: dict[str, Any],
+    ) -> FunctionCapacityRunner | None:
+        """Assemble the capacity runner from the declared blocks (spec §3).
+
+        ``ship_functions`` lives beside ``medical_response`` in the platform's
+        voyage_config, overridable through the same voyage merge. An absent
+        block (or ``enabled: false``) means no runner at all — the identity
+        arm, bit-identical. Referential failures are load errors, not
+        partial functions.
+        """
+        voyage_cfg = voyage_cfg or {}
+        systems = build_ship_systems(voyage_cfg.get("ship_systems"))
+        enabled, specs = parse_ship_functions(voyage_cfg.get("ship_functions"))
+        if not specs:
+            return None
+        class_ids = {
+            str(cls.get("class_id"))
+            for cls in self.graph_cfg.get("agent_classes") or []
+        }
+        zone_ids = {
+            str(z.get("id", z["name"])) for z in ship.get("zones", [])
+        } | set(self.zone_types)
+        validate_ship_function_refs(
+            specs,
+            class_ids=class_ids,
+            zone_names=zone_ids,
+            zone_types={t for t in self.zone_types.values() if t},
+            system_ids=set(systems.system_ids) if systems else set(),
+        )
+        if not enabled:
+            return None
+        block = voyage_cfg.get("ship_functions") or {}
+        return FunctionCapacityRunner(
+            specs,
+            systems,
+            default_symptomatic_effectiveness=float(
+                block.get(
+                    "symptomatic_effectiveness",
+                    DEFAULT_SYMPTOMATIC_EFFECTIVENESS,
+                ),
+            ),
+        )
 
     def _init_sentinel_ledger(self, voyage_cfg: dict[str, Any] | None) -> None:
         """Arm the sentinel ledger when a line-list output path is configured.
@@ -1478,6 +1536,15 @@ class ShipSimulation:
         work.merged_mods = self.proto_ctx.protocol_engine.get_merged_modifiers(
             work.active_mods,
         )
+        if self._ship_functions is not None:
+            # Capacity writers contribute through the same merge an SOP does:
+            # a lost-galley zone close and a protocol zone close compose with
+            # identical semantics. Emitted last epoch, consumed this epoch.
+            work.merged_mods = merge_capacity_modifiers(
+                work.merged_mods,
+                self._ship_functions.pending_modifiers,
+                self.proto_ctx.protocol_engine._merge_modifier_value,
+            )
         if self.tx_core is not None:
             # Armed or cleared every epoch, merged or not -- the meter must
             # see the falling edge to release the in-force reduction.
@@ -1491,6 +1558,39 @@ class ShipSimulation:
         apply_transmission_modifiers(self.tx_core, work.merged_mods)
         if "close_zones" in work.merged_mods:
             apply_zone_closures(self.engine, work.merged_mods["close_zones"])
+
+    def _step_ship_function_capacity(
+        self,
+        work: _EpochWork,
+    ) -> dict[str, Any] | None:
+        """Score declared ship functions on this epoch's settled crew state.
+
+        Runs after confinement and the VSP duty exclusion have written the
+        epoch's absent sets, so the read sees post-policy crew — the same
+        state the OIS ledger above it consumes (spec §6). Writers land on
+        slots engines already read; the modifier contributions merge at the
+        top of the next epoch's protocol pass.
+        """
+        runner = self._ship_functions
+        if runner is None or self.engine is None:
+            return None
+        symptomatic_ids = {
+            int(a["agent_id"])
+            for a in work.agents
+            if agent_has_symptomatic_presentation(a)
+        }
+        return runner.step(
+            hour=self.clock.hour_of_day(work.epoch),
+            agents=self.engine.agents,
+            symptomatic_ids=symptomatic_ids,
+            state=work.state,
+            tracker=self.crew_exclusion,
+            merged_mods=work.merged_mods,
+            engine=self.engine,
+            tx_core=self.tx_core,
+            clock=self.clock,
+            zone_type_by_id=self.zone_types,
+        )
 
     def _attach_strain_census(self, work: _EpochWork) -> None:
         """Record this epoch's lineage census, once per tracked pathogen.
@@ -1632,6 +1732,7 @@ class ShipSimulation:
             work.epoch, work.state, work.agents, work.merged_mods, self.proto_ctx,
             zone_type_by_id=self.zone_types,
         )
+        work.function_capacity = self._step_ship_function_capacity(work)
         work.state.agent_behavioral_overrides.clear()
         work.epoch_record = record_epoch(
             EpochRecordRequest(
@@ -1665,6 +1766,8 @@ class ShipSimulation:
         )
         if work.applied and self.run_spec.history_retention != "compact":
             work.epoch_record["decisions"] = work.applied
+        if work.function_capacity is not None:
+            work.epoch_record["function_capacity"] = work.function_capacity
         if work.state.epoch_voyage is not None:
             work.epoch_record["voyage_epoch"] = work.state.epoch_voyage.to_telemetry()
         self._attach_decision_telemetry(work)
