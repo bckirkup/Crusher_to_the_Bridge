@@ -119,6 +119,7 @@ from orchestrator_init import (
     apply_voyage_medical_response,
     assign_cabin_mates,
     assign_dining_parties,
+    assign_parties,
     build_engine,
     check_escalation,
     compute_group_rates_for_ids,
@@ -551,6 +552,7 @@ class ShipSimulation:
             print_korkin_engine(self.engine)
 
         assign_cabin_mates(self.engine.agents, ship["zones"])
+        assign_parties(self.engine.agents, self.graph_cfg)
         assign_dining_parties(self.engine.agents, ship["zones"])
 
         self.contam_engine = build_transport_engine(
@@ -1301,6 +1303,7 @@ class ShipSimulation:
                     >= STATUS_RANK[STATUS_SUSPECTED]
                 ),
             )
+            self._consume_caregiver_stamps(work.syn_result["sick_call_agents"])
             work.cascade_result = step_diagnostic_cascade(
                 work.epoch, work.state, work.agents, work.syn_result,
                 work.wearable_result, self.obs,
@@ -1320,6 +1323,7 @@ class ShipSimulation:
             work.cfg.get("fred_behavior", {}).get("healthy_noise_categories"),
         )
         step_cascade_cost_accounting(work.epoch, self.proto_ctx, work.cascade_result)
+
         work.rdt_result = work.rdt.query_ground_truth(
             work.truth, sick_call_ids=work.syn_result["sick_call_agents"],
         )
@@ -1342,6 +1346,21 @@ class ShipSimulation:
             work.agents, work.state.ever_reported_ids,
         )
         work.state.vsp_reported_case_fraction = reported_rates["passenger"]
+
+    def _consume_caregiver_stamps(self, sick_call_ids: list[int]) -> None:
+        """Clear a caregiver stamp once the episode that prompted it ends.
+
+        NORO-CAREGIVER-01: the stamp persists across epochs until the
+        host reports through any channel or stops being symptomatic;
+        a fresh emesis episode re-stamps it. Leftover stamps cannot
+        leak into a later illness.
+        """
+        reported = set(sick_call_ids or ())
+        for agent in self.engine.agents:
+            if agent.caregiver_report_due_epoch is None:
+                continue
+            if agent.agent_id in reported or not agent.is_symptomatic:
+                agent.caregiver_report_due_epoch = None
 
     def _query_pcr_seq(self, work: _EpochWork) -> None:
         overrides = work.cfg.get("_picard_epoch_overrides", {})
