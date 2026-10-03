@@ -38,6 +38,7 @@ from pathlib import Path
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(_REPO_ROOT))
 
+from simulation_utils.paths import validated_open  # noqa: E402
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
     _collect_s3,
 )
@@ -284,9 +285,17 @@ def main(argv=None) -> int:
     md, out = render(cells, args.map_root)
     print(md)
     if args.md_out:
-        args.md_out.write_text(md, encoding="utf-8")
+        allowed = (str(args.md_out.parent.resolve()),)
+        with validated_open(
+            str(args.md_out), "w", allowed_roots=allowed, encoding="utf-8",
+        ) as fh:
+            fh.write(md)
     if args.json_out:
-        args.json_out.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+        allowed = (str(args.json_out.parent.resolve()),)
+        with validated_open(
+            str(args.json_out), "w", allowed_roots=allowed, encoding="utf-8",
+        ) as fh:
+            fh.write(json.dumps(out, indent=1) + "\n")
     return 0
 
 
