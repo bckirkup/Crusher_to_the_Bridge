@@ -457,7 +457,17 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # The daily_hazard baseline cell reproduces
         # (2968, 298, 3063, 627, 215) exactly on the merged tree, so the
         # move is fully attributed to the share semantics.
-        (3, 12): (2575, 2131, 2617, 688, 618),
+        # CAREGIVER-V1 + PROPENSITY-V1 (#859 + #860): this cell moves
+        # again under both mechanisms. On the merged tree at 57033bf5
+        # (=#860 content; #861/#862 touch deploy and probe wrappers only),
+        # the propensity mode: off arm reads (2485, 2251, 2832, 545, 488)
+        # — the caregiver ring contacts, tending upgrade, and confined
+        # meals_to_cabin service already shift the cell — and the
+        # shipped-default arm reads (2480, 2215, 2827, 595, 542), so the
+        # propensity multiplier's residual move is the difference. Both
+        # arms measured in the local venv on CPython 3.12 on the repin
+        # branch; the move is fully attributed.
+        (3, 12): (2480, 2215, 2827, 595, 542),
     },
 }
 
