@@ -1,0 +1,101 @@
+{
+  "jobDefinitionName": "picard-noro-channel-04",
+  "type": "container",
+  "platformCapabilities": [
+    "EC2"
+  ],
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:noro-channel-04-<SHA>",
+    "command": [
+      "deploy/aws/noro_channel_03_entrypoint.py",
+      "--s3-prefix",
+      "Ref::s3_prefix",
+      "--manifest",
+      "Ref::manifest",
+      "--pathogen-id",
+      "Ref::pathogen_id",
+      "--tier",
+      "Ref::tier",
+      "--match",
+      "Ref::match",
+      "--seeds",
+      "Ref::seeds",
+      "--index",
+      "Ref::index",
+      "--index-offset",
+      "Ref::index_offset"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "resourceRequirements": [
+      {
+        "type": "VCPU",
+        "value": "1"
+      },
+      {
+        "type": "MEMORY",
+        "value": "4096"
+      }
+    ],
+    "linuxParameters": {
+      "sharedMemorySize": 512
+    },
+    "environment": [
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      },
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-campaign",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "noro-channel-04"
+      }
+    }
+  },
+  "parameters": {
+    "s3_prefix": "s3://<BUCKET>/campaign/noro_channel_04/",
+    "manifest": "picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json",
+    "pathogen_id": "norwalk_gi",
+    "tier": "fl_exp_12d_scr",
+    "match": "rung-shipped,bp32p5c18p5",
+    "seeds": "8000",
+    "index": "-1",
+    "index_offset": "0"
+  },
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
+    ]
+  },
+  "propagateTags": true,
+  "timeout": {
+    "attemptDurationSeconds": 14400
+  }
+}

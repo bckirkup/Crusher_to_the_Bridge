@@ -901,6 +901,7 @@ def _copy_optional_agent_fields(
         "watch_section",
         "night_watch",
         "role",
+        "caregiver_report_due_epoch",
     ):
         if key in a:
             agent_dict[key] = a[key]

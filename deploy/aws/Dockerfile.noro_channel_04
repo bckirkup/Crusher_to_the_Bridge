@@ -1,0 +1,77 @@
+# NORO-CHANNEL-04 worker — thin overlay on the NORO-CHANNEL-03 campaign
+# image at d6c51c14: the NORO-CAREGIVER-01 mechanism stack merged at
+# a78c942e (parties, caregiver response/exposure/discovery stamp) plus
+# the funnel driver's caregiver-attribution capture for this campaign.
+# Everything unchanged since d6c51c14 stays in the layers below.
+#
+# Build (from the repository root; the base must exist in ECR):
+#   docker build -f deploy/aws/Dockerfile.noro_channel_04 \
+#     --build-arg BASE_IMAGE=<acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:noro-channel-03-d6c51c14 \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:noro-channel-04-<sha> .
+ARG BASE_IMAGE=picard-campaign:noro-channel-03-d6c51c14
+FROM ${BASE_IMAGE}
+
+# Restamp the engine revision: the base image's ENGINE_GIT_SHA names ITS
+# build SHA; runs from this overlay must record THIS layer's source SHA
+# (pass --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD)).
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+USER root
+# The NORO-CAREGIVER-01 mechanism stack and the files that changed with it
+# (d6c51c14..a78c942e, image-visible paths only).
+COPY --chown=campaign:campaign crusher_labs/config.yaml \
+    ./crusher_labs/config.yaml
+COPY --chown=campaign:campaign crusher_labs/modalities/syndromic.py \
+    ./crusher_labs/modalities/syndromic.py
+COPY --chown=campaign:campaign engines/infection_dynamics_bridge.py \
+    ./engines/infection_dynamics_bridge.py
+COPY --chown=campaign:campaign engines/transmission_core.py \
+    ./engines/transmission_core.py
+COPY --chown=campaign:campaign orchestrator_init.py \
+    ./orchestrator_init.py
+COPY --chown=campaign:campaign \
+    picard_framework/simulation/ship_simulation.py \
+    ./picard_framework/simulation/ship_simulation.py
+COPY --chown=campaign:campaign picard_framework/covid_boarding_screen.py \
+    ./picard_framework/covid_boarding_screen.py
+COPY --chown=campaign:campaign \
+    picard_framework/runs/covid_ring_cap_v1_design.json \
+    ./picard_framework/runs/covid_ring_cap_v1_design.json
+COPY --chown=campaign:campaign \
+    picard_framework/runs/covid_ring_cap_v1_fleet_design.json \
+    ./picard_framework/runs/covid_ring_cap_v1_fleet_design.json
+COPY --chown=campaign:campaign \
+    picard_framework/runs/covid_susc_pool_v1_design.json \
+    ./picard_framework/runs/covid_susc_pool_v1_design.json
+COPY --chown=campaign:campaign \
+    picard_framework/runs/covid_susc_pool_v1_fleet_design.json \
+    ./picard_framework/runs/covid_susc_pool_v1_fleet_design.json
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/campaign_execution.py \
+    ./picard_framework/runs/mega_cruise_campaign/campaign_execution.py
+COPY --chown=campaign:campaign telemetry_buffer/fields.py \
+    ./telemetry_buffer/fields.py
+COPY --chown=campaign:campaign \
+    telemetry_buffer/observation_model/score_anchors.py \
+    ./telemetry_buffer/observation_model/score_anchors.py
+COPY --chown=campaign:campaign \
+    telemetry_buffer/observation_model/anchor_measurement_spec.md \
+    ./telemetry_buffer/observation_model/anchor_measurement_spec.md
+# tools/ wholesale (same pattern as the outbreak-01 overlay): the funnel
+# driver with caregiver capture, the channel_03 readout with the split
+# rendering, per_host_dose_challenge and any sibling tool changes.
+COPY --chown=campaign:campaign tools/ ./tools/
+# The worker pair the entrypoint/driver contract needs.
+COPY --chown=campaign:campaign deploy/aws/noro_channel_03_entrypoint.py \
+    ./deploy/aws/noro_channel_03_entrypoint.py
+COPY --chown=campaign:campaign deploy/aws/dose_challenge_entrypoint.py \
+    ./deploy/aws/dose_challenge_entrypoint.py
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json
+USER campaign
+
+# The job definition supplies the worker script as argv[0].
+ENTRYPOINT ["python3"]

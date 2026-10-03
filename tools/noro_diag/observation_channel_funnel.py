@@ -152,6 +152,13 @@ class ChannelCapture:
         self.exposure: dict[int, HostExposure] = {}
         self.beliefs_nonempty_epochs = 0
         self.peak_infected = 0
+        # NORO-CAREGIVER-01 attribution reads: the syndromic pass lists the
+        # emitters it reported through the caregiver channel per epoch, and
+        # an emitter's report stamp persists on the agent snapshot until it
+        # reports or the course ends.
+        self.caregiver_report_ids: set[int] = set()
+        self.caregiver_first_report_epoch: dict[int, int] = {}
+        self.caregiver_stamped_ids: set[int] = set()
 
     def observe(self, _sim: Any, work: Any) -> None:
         epoch = int(work.epoch)
@@ -163,6 +170,10 @@ class ChannelCapture:
             aid = int(aid)
             self.reported_symptomatic_ids.add(aid)
             self.first_report_epoch.setdefault(aid, epoch)
+        for aid in syn.get("caregiver_report_ids") or []:
+            aid = int(aid)
+            self.caregiver_report_ids.add(aid)
+            self.caregiver_first_report_epoch.setdefault(aid, epoch)
         beliefs = _beliefs_from_information(work.information_state or {})
         if beliefs:
             self.beliefs_nonempty_epochs += 1
@@ -175,6 +186,8 @@ class ChannelCapture:
                 infection.get("status"),
             ) == "INFECTED":
                 infected_now += 1
+            if agent.get("caregiver_report_due_epoch") is not None:
+                self.caregiver_stamped_ids.add(int(agent["agent_id"]))
             self._exposure(agent, epoch, beliefs)
         self.peak_infected = max(self.peak_infected, infected_now)
 
@@ -246,6 +259,13 @@ def _infection_record(agent: Any, inf: dict[str, Any]) -> dict[str, Any]:
     onset_offset = inf.get("onset_time_infected")
     axes = inf.get("symptom_axes") or {}
     boarding_state = inf.get("boarding_state")
+    routes = {
+        str(route): float(dose)
+        for route, dose in (
+            inf.get("acquired_particles_by_route") or {}
+        ).items()
+        if float(dose) > 0.0
+    }
     return {
         "agent_id": int(agent.agent_id),
         "role": _role_group(getattr(agent, "role", None)),
@@ -267,6 +287,10 @@ def _infection_record(agent: Any, inf: dict[str, Any]) -> dict[str, Any]:
         "axes_drawn": bool(axes),
         "illness_end": _enum_name(inf.get("illness")),
         "status_end": _enum_name(inf.get("status")),
+        "routes": routes,
+        "dominant_route": (
+            max(routes, key=routes.get) if routes else None
+        ),
     }
 
 
@@ -573,6 +597,12 @@ def build_funnel(
     rungs["reported_infirmary"]["post_recognition"] = (
         len(reported) - len(reported_pre)
     )
+    # Channel split of the reported rung (NORO-CAREGIVER-01): reports the
+    # syndromic pass attributed to a caregiver discovery stamp rather than
+    # the self-report hazard.
+    rungs["reported_infirmary"]["via_caregiver"] = _split(
+        records, reported & capture.caregiver_report_ids,
+    )
     severity_tables = {
         "symptomatic": _severity_split(records, symptomatic_ids),
         "eligible": _severity_split(records, eligible_ids),
@@ -599,6 +629,7 @@ def build_funnel(
             "beliefs_nonempty_epochs": capture.beliefs_nonempty_epochs,
             "trust_medical_seen": trust_seen,
         },
+        "caregiver": _caregiver_block(records, capture),
         "non_report_decomposition": _non_report_reasons(
             [r for r in symptomatic if r["agent_id"] in eligible_ids],
             reported,
@@ -609,6 +640,54 @@ def build_funnel(
             records, confirmed, dated_ids, capture, confirmed_epoch_of,
         ),
         "declared": declared_channel_table(profile),
+    }
+
+
+def _caregiver_block(
+    records: list[dict[str, Any]],
+    capture: ChannelCapture,
+) -> dict[str, Any]:
+    """The caregiver channel's own ledger for one voyage (NORO-CAREGIVER-01).
+
+    Joins the capture's stamped/reported sets to the infection records'
+    per-host route ledgers so the campaign can (a) split the reported rung
+    by discovery channel, (b) measure the caregiver route's share of
+    aboard transmissions, and (c) evaluate the design's report-immediately
+    triggers (share > 10% of transmissions, a report on a non-emetic
+    course, stamped hosts never reported).
+    """
+    by_id = {record["agent_id"]: record for record in records}
+    aboard = [
+        record for record in records
+        if not record["imported"] and record["routes"]
+    ]
+    dominant = [
+        record for record in aboard
+        if record["dominant_route"] == "caregiver"
+    ]
+    any_dose = [record for record in aboard if "caregiver" in record["routes"]]
+    reported = capture.caregiver_report_ids & set(by_id)
+    return {
+        "stamped_hosts": len(capture.caregiver_stamped_ids),
+        "stamped_not_reported": len(
+            capture.caregiver_stamped_ids - capture.caregiver_report_ids
+        ),
+        "reports_via_caregiver": len(reported),
+        "reports_on_nonemetic_course": sorted(
+            aid for aid in reported if not by_id[aid]["vomiting"]
+        ),
+        "reports_without_infection_record": sorted(
+            capture.caregiver_report_ids - set(by_id)
+        ),
+        "transmissions_dominant_caregiver": len(dominant),
+        "transmissions_any_caregiver_dose": len(any_dose),
+        "transmissions_attributed": len(aboard),
+        "share_dominant_caregiver": (
+            len(dominant) / len(aboard) if aboard else None
+        ),
+        "vomiting_course_hosts": sum(
+            1 for record in records if record["vomiting"]
+        ),
     }
 
 
@@ -698,6 +777,14 @@ def run_spec_voyage(
         dated=dated,
         ever_reported_ids=ever_reported,
     )
+    tx_core = getattr(sim, "tx_core", None)
+    caregiver = dict(funnel["caregiver"])
+    caregiver["engine_counters"] = {
+        key: float(value)
+        for key, value in (
+            getattr(tx_core, "caregiver_telemetry", None) or {}
+        ).items()
+    }
     platform_id = str(spec_dict["catalog"]["platform_id"])
     return {
         "seed": int(spec_dict["run"]["random_seed"]),
@@ -720,6 +807,7 @@ def run_spec_voyage(
         "dating_fidelity": funnel["dating_fidelity"],
         "confirmed_never_dated": funnel["confirmed_never_dated"],
         "declared": funnel["declared"],
+        "caregiver": caregiver,
         "ratios": funnel_ratios(funnel),
         "shared_rungs": ascertainment_funnel(sim, pathogen_id=pathogen_id),
         "wall_clock_seconds_run": time.perf_counter() - started,
@@ -916,6 +1004,58 @@ def build_readout(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
             for row in per_seed
             for reason in row["non_report_decomposition"]
         },
+        "caregiver": _pooled_caregiver(per_seed),
+    }
+
+
+def _pooled_caregiver(per_seed: list[dict[str, Any]]) -> dict[str, Any]:
+    """Pool per-seed caregiver blocks; shares recompute on summed counts."""
+    blocks = [row.get("caregiver") or {} for row in per_seed]
+    counters = [block.get("engine_counters") or {} for block in blocks]
+    dominant = sum(
+        int(block.get("transmissions_dominant_caregiver") or 0)
+        for block in blocks
+    )
+    any_dose = sum(
+        int(block.get("transmissions_any_caregiver_dose") or 0)
+        for block in blocks
+    )
+    attributed = sum(
+        int(block.get("transmissions_attributed") or 0) for block in blocks
+    )
+    zero_response_voyages = 0
+    for block in blocks:
+        engine = block.get("engine_counters") or {}
+        responses = float(engine.get("caregiver_responses") or 0) + float(
+            engine.get("steward_responses") or 0,
+        )
+        if block.get("vomiting_course_hosts") and not responses:
+            zero_response_voyages += 1
+    return {
+        "engine_counters_total": {
+            key: sum(float(counter.get(key) or 0.0) for counter in counters)
+            for key in {k for counter in counters for k in counter}
+        },
+        "stamped_hosts": sum(
+            int(block.get("stamped_hosts") or 0) for block in blocks
+        ),
+        "stamped_not_reported": sum(
+            int(block.get("stamped_not_reported") or 0) for block in blocks
+        ),
+        "reports_via_caregiver": sum(
+            int(block.get("reports_via_caregiver") or 0) for block in blocks
+        ),
+        "transmissions_dominant_caregiver": dominant,
+        "transmissions_any_caregiver_dose": any_dose,
+        "transmissions_attributed": attributed,
+        "share_dominant_caregiver": (
+            dominant / attributed if attributed else None
+        ),
+        "reports_on_nonemetic_course": sum(
+            len(block.get("reports_on_nonemetic_course") or [])
+            for block in blocks
+        ),
+        "voyages_zero_responses_with_vomiting": zero_response_voyages,
     }
 
 

@@ -226,6 +226,23 @@ class TestEnginePayloadBoundary:
         agents, _ = engine_payload_to_schema(payload, set(), set(), set())
         assert agents[0]["microflora_disruption"] == pytest.approx(0.75)
 
+    def test_caregiver_report_stamp_survives_boundary(self) -> None:
+        """NORO-CAREGIVER-01: the discovery stamp set on the live agent must
+        reach the serialized agent dict the syndromic pass reads. The stamp
+        was emitted by ``to_schema_dict`` but dropped at the fixed
+        ``_copy_optional_agent_fields`` key list, leaving the caregiver
+        report channel unreachable in production."""
+        payload = {
+            "agents": [
+                {"agent_id": 0, **_SYMPTOMATIC_AXES,
+                 "shedding_rate": 1.0, "location": "Cabin",
+                 "caregiver_report_due_epoch": 3},
+            ],
+            "spaces": {},
+        }
+        agents, _ = engine_payload_to_schema(payload, set(), set(), set())
+        assert agents[0]["caregiver_report_due_epoch"] == 3
+
 
 # ── record_epoch boundary guards ────────────────────────────────────────
 
