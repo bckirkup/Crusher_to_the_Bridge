@@ -470,6 +470,30 @@ EMESIS_AEROSOL_FRACTION_RANGE = (7.2e-7, 2.67e-4)
 # measured geometry, evidence grade B.
 EMESIS_DEPOSITION_AREA_M2 = 7.8
 
+# ── Caregiver response (NORO-CAREGIVER-01) ───────────────────────────────
+# The family member, spouse or steward who rushes towards an emesis event
+# to clean it up: a discrete high-dose exposure plus the discovery moment
+# the case enters the report channel.
+# P(party/cabin responder answers an event): uniform per-episode draw.
+# Origin D, grade C — no published cleanup-response propensity (empty
+# literature, two Consensus phrasings, 2026-10-02); declared.
+CAREGIVER_RESPONSE_PROBABILITY = (0.40, 0.90)
+# P(crew fallback answers when no party responder does): uniform.
+# Origin D, grade C — the VSP operations manual requires immediate
+# cleanup and disinfection of vomiting incidents (VSP 2018), but field
+# compliance rates are unmeasured; declared.
+CAREGIVER_STEWARD_RESPONSE_PROBABILITY = (0.60, 0.95)
+# Surface→hand contacts during one cleanup event: integer uniform [9, 34].
+# Origin R, grade B — Overbey et al. 2021, J Hosp Infect
+# (doi:10.1016/j.jhin.2021.08.006): observed fomite contacts per entry
+# into a soiled patient room by environmental service workers.
+CAREGIVER_CLEANUP_CONTACTS = (9, 34)
+# P(the responder carries the case to medical attention on first
+# contact): uniform. Origin D, grade C — bounded below by community AGI
+# care-seeking fractions (US 19-20%, France 33%, China 50%) and capped
+# near Wikswo 2011's realised capture of ~0.60.
+CAREGIVER_REPORT_PROBABILITY = (0.20, 0.70)
+
 # Deck-to-deck height, used only to convert a zone's declared air volume into
 # a deck area. 2.8 m is the deck height assumed throughout a statistical
 # preliminary-design study of 21 parent cruise ships (Bruce, "Cruise Ship
@@ -2423,7 +2447,38 @@ class TransmissionCore:
             1.0,
         )
         self._init_exposure_cap(cfg, tx)
+        self._init_caregiver(tx)
         self._init_hazard_frailty()
+
+    def _init_caregiver(self, tx: dict[str, Any]) -> None:
+        """NORO-CAREGIVER-01: party/steward response to emesis events."""
+        cg = tx.get("caregiver") or {}
+        mode = str(cg.get("mode", "on")).strip().lower()
+        self.caregiver_mode = mode if mode in {"on", "off"} else "on"
+        self._cg_response = tuple(
+            cg.get("response_probability", CAREGIVER_RESPONSE_PROBABILITY)
+        )
+        self._cg_steward = tuple(
+            cg.get(
+                "steward_response_probability",
+                CAREGIVER_STEWARD_RESPONSE_PROBABILITY,
+            )
+        )
+        self._cg_contacts = tuple(
+            cg.get("cleanup_contacts", CAREGIVER_CLEANUP_CONTACTS)
+        )
+        self._cg_report = tuple(
+            cg.get("report_probability", CAREGIVER_REPORT_PROBABILITY)
+        )
+        self._cg_steward_enabled = bool(cg.get("steward_fallback", True))
+        self.caregiver_telemetry: dict[str, float] = {
+            "caregiver_responses": 0,
+            "steward_responses": 0,
+            "caregiver_dose_delivered": 0.0,
+            "caregiver_dose_credited": 0.0,
+            "caregiver_reports": 0,
+        }
+        self._agents_by_id: dict[int, KorkinAgent] = {}
 
     def _init_hazard_frailty(self) -> None:
         """FRAILTY-V1 — the declared continuous per-host frailty surface.
@@ -5236,6 +5291,7 @@ class TransmissionCore:
         matrix = ContactTracingMatrix(epoch=epoch)
         events: list[TransmissionEvent] = []
         self._quarantined_ids = set(quarantined_ids or ())
+        self._agents_by_id = {a.agent_id: a for a in agents}
         self.apply_within_host_mutations(agents)
         self.apply_recombination(agents)
         self._age_aerosol_pools()
@@ -8223,6 +8279,8 @@ class TransmissionCore:
         profile: dict,
         zone_name: str,
         epoch: int,
+        agent_doses: dict[int, float] | None = None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
     ) -> float:
         post_prandial = getattr(agent, "_rhythm_post_prandial", None)
         schedule = agent.emesis_episode_schedule_by_pathogen.get(
@@ -8293,7 +8351,19 @@ class TransmissionCore:
                 pathogen_id, {},
             )
             emitted.setdefault(zone_name, []).append((agent, aerosol_load))
-            pool_gain = surface_load * touchable_fraction
+            caregiver_contacted = self._caregiver_response(
+                agent,
+                pathogen_id,
+                epoch,
+                surface_load,
+                area,
+                agent_doses,
+                agent_pathway_doses,
+            )
+            pool_gain = max(
+                0.0,
+                surface_load * touchable_fraction - caregiver_contacted,
+            )
             records.append({
                 "epoch": int(epoch),
                 "zone": zone_name,
@@ -8309,6 +8379,7 @@ class TransmissionCore:
                 "pool_gain": pool_gain,
                 "non_touchable": surface_load - pool_gain,
                 "touchable_fraction": touchable_fraction,
+                "caregiver_contacted": caregiver_contacted,
             })
             if pool_gain > 0.0:
                 patch_pools = self.emesis_patch_pools_by_pathogen.setdefault(
@@ -8755,6 +8826,123 @@ class TransmissionCore:
             self.sanitary_telemetry["flush_recipients"] += 1
             self.sanitary_telemetry["flush_dose_delivered"] += dose
 
+    def _responder_available(self, agent: KorkinAgent, epoch: int) -> bool:
+        """Aboard, unconfined, and able to physically reach the emitter."""
+        return (
+            agent.agent_id not in self._quarantined_ids
+            and not agent.has_departed(epoch)
+            and not getattr(agent, "ashore", False)
+            and agent.current_location
+            not in ("Isolated_In_Quarters", "Departed")
+        )
+
+    def _draw_caregiver_responder(
+        self,
+        emitter: KorkinAgent,
+        epoch: int,
+    ) -> KorkinAgent | None:
+        """Pick the responder: party/cabin member first, steward fallback."""
+        by_id = self._agents_by_id
+        candidates = [
+            by_id[i]
+            for i in set(emitter.party_member_ids) | set(emitter.cabin_mate_ids)
+            if i in by_id and self._responder_available(by_id[i], epoch)
+        ]
+        if candidates and self.rng.random() < self.rng.uniform(
+            *self._cg_response
+        ):
+            self.caregiver_telemetry["caregiver_responses"] += 1
+            return candidates[int(self.rng.integers(len(candidates)))]
+        if not self._cg_steward_enabled:
+            return None
+        if self.rng.random() >= self.rng.uniform(*self._cg_steward):
+            return None
+        stewards = [
+            a
+            for a in by_id.values()
+            if a.role == "crew" and self._responder_available(a, epoch)
+        ]
+        if not stewards:
+            return None
+        self.caregiver_telemetry["steward_responses"] += 1
+        return stewards[int(self.rng.integers(len(stewards)))]
+
+    def _caregiver_response(
+        self,
+        emitter: KorkinAgent,
+        pathogen_id: str,
+        epoch: int,
+        surface_load: float,
+        deposition_area_m2: float,
+        agent_doses: dict[int, float] | None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+    ) -> float:
+        """One party member or steward answering an emesis event.
+
+        NORO-CAREGIVER-01. The responder's hand takes ``cleanup_contacts``
+        touches off the bolus footprint at the episode's own areal
+        density; the delivered mass leaves the surface (returned so the
+        caller nets it from the patch deposit), the usual hand→mouth
+        chain doses the responder, and the dose is credited through the
+        standard accumulators under route ``caregiver`` — the epoch's
+        challenge then resolves infection and strain/route attribution
+        like any other pathway. The responder's discovery may stamp
+        ``caregiver_report_due_epoch`` on the emitter, which the
+        syndromic pass reads as a report event.
+        """
+        if (
+            self.caregiver_mode != "on"
+            or surface_load <= 0.0
+            or agent_doses is None
+            or not self._agents_by_id
+        ):
+            return 0.0
+        responder = self._draw_caregiver_responder(emitter, epoch)
+        if responder is None:
+            return 0.0
+        hand_area, used_fraction, transfer_efficiency = (
+            self._draw_surface_to_hand(self.rng)
+        )
+        contacts = int(
+            self.rng.integers(self._cg_contacts[0], self._cg_contacts[1] + 1)
+        )
+        contacted = min(
+            surface_load,
+            contacts
+            * surface_load
+            * used_fraction
+            * hand_area
+            / max(deposition_area_m2, 1e-9)
+            * transfer_efficiency,
+        )
+        if contacted <= 0.0:
+            return 0.0
+        hand = responder.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        dose = self._hand_to_mouth_dose(responder, epoch, hand + contacted)
+        responder.hand_load_by_pathogen[pathogen_id] = (
+            hand + contacted - dose
+        )
+        self.caregiver_telemetry["caregiver_dose_delivered"] += dose
+        if dose > 0.0 and responder in self._get_susceptible(
+            [responder], pathogen_id
+        ):
+            self.caregiver_telemetry["caregiver_dose_credited"] += (
+                self._accumulate(
+                    responder.agent_id,
+                    "caregiver",
+                    dose,
+                    agent_doses,
+                    agent_pathway_doses,
+                )
+            )
+        if (
+            emitter.caregiver_report_due_epoch is None
+            and self.rng.random() < self.rng.uniform(*self._cg_report)
+        ):
+            emitter.caregiver_report_due_epoch = int(epoch)
+            self.caregiver_telemetry["caregiver_reports"] += 1
+        return contacted
+
     def _deposit_emesis(
         self,
         agent: KorkinAgent,
@@ -8762,9 +8950,17 @@ class TransmissionCore:
         zone_name: str,
         epoch: int,
         profile: dict,
+        agent_doses: dict[int, float] | None = None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
     ) -> float:
         pool_gain = self._emit_emesis(
-            agent, pathogen_id, profile, zone_name, epoch,
+            agent,
+            pathogen_id,
+            profile,
+            zone_name,
+            epoch,
+            agent_doses,
+            agent_pathway_doses,
         )
         if pool_gain <= 0.0:
             return 0.0
@@ -9730,7 +9926,10 @@ class TransmissionCore:
         zone_occupants = self._cabin_compartments(zone_occupants)
         pickup_units.update(zone_occupants)
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
-        self._fomite_hand_deposits(epoch, zone_occupants, pathogen_id, profile)
+        self._fomite_hand_deposits(
+            epoch, zone_occupants, pathogen_id, profile,
+            agent_doses, agent_pathway_doses,
+        )
 
         # b) Fomite trailing detection + pickup
         for zone_name, occupants in pickup_units.items():
@@ -9764,6 +9963,8 @@ class TransmissionCore:
         zone_occupants: dict[str, list[KorkinAgent]],
         pathogen_id: str,
         profile: dict | None,
+        agent_doses: dict[int, float] | None = None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
     ) -> None:
         """Hand maintenance, emesis, and hand-to-surface deposit per unit."""
         for zone_name, occupants in zone_occupants.items():
@@ -9771,6 +9972,7 @@ class TransmissionCore:
                 self._replenish_hand(agent, pathogen_id, profile, zone_name)
                 self._deposit_emesis(
                     agent, pathogen_id, zone_name, epoch, profile or {},
+                    agent_doses, agent_pathway_doses,
                 )
             shedders = self._get_shedders(occupants, pathogen_id, profile)
             deposits = self._shedder_surface_deposits(

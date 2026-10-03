@@ -399,7 +399,13 @@ def seated_diners_in_booking_order(
     for agent in sorted(diners, key=lambda a: a.agent_id):
         if agent.agent_id in seen:
             continue
-        booking = [agent.agent_id, *sorted(agent.cabin_mate_ids)]
+        # One booking is a travelling party where parties exist
+        # (a multi-cabin family still dines together); cabin-mates remain
+        # the grouping for crews and runs without the party deal.
+        booking = [
+            agent.agent_id,
+            *sorted(agent.party_member_ids or agent.cabin_mate_ids),
+        ]
         for member_id in booking:
             member = by_id.get(member_id)
             if member is not None and member_id not in seen:
@@ -848,6 +854,7 @@ class KorkinAgent:
         "dose_reduction_multipliers", "npi_measures",
         "shedding_multiplier", "cabin_mate_ids", "ashore", "meal_seating",
         "dining_party_ids", "dining_table_index", "departure_epoch",
+        "party_id", "party_member_ids", "caregiver_report_due_epoch",
         # Variant surveillance: genotype standing immunity was raised against
         "prior_genotypes", "immune_history",
         # Host biology read by the incubation distribution
@@ -1023,6 +1030,15 @@ class KorkinAgent:
         # Declared adjacency, not a distance: consecutive indices are the
         # neighbouring tables the dining record's second ring is measured over.
         self.dining_table_index: int = -1
+        # Travelling-party identity: one booking, which may span several
+        # contiguous staterooms (multi-cabin families). -1 / empty for crew,
+        # who berth as colleagues rather than as a travelling party.
+        self.party_id: int = -1
+        self.party_member_ids: frozenset[int] = frozenset()
+        # NORO-CAREGIVER-01: epoch a caregiver response first drew the
+        # report propensity for this illness, else None. Read once by the
+        # syndromic pass and cleared.
+        self.caregiver_report_due_epoch: int | None = None
         # Voyage layer: passenger ashore during port/disembark windows
         self.ashore: bool = False
         # Epoch the host leaves the ship for the rest of the run; ``None``
@@ -2003,6 +2019,12 @@ class KorkinAgent:
             result["dining_party_ids"] = sorted(self.dining_party_ids)
         if self.dining_table_index >= 0:
             result["dining_table_index"] = self.dining_table_index
+        if self.party_id >= 0:
+            result["party_id"] = self.party_id
+        if self.caregiver_report_due_epoch is not None:
+            result["caregiver_report_due_epoch"] = (
+                self.caregiver_report_due_epoch
+            )
 
 
 # ── Ship simulation engine ──────────────────────────────────────────────

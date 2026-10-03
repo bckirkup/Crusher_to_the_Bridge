@@ -246,6 +246,128 @@ def _group_cabin_size(
     return cabin_size * max(int(meta.get("hot_bunk_ratio") or 1), 1)
 
 
+# Cabins per travelling party (NORO-CAREGIVER-01). No published cruise
+# party-size distribution exists (empty literature, two Consensus
+# phrasings, 2026-10-02). Grade C declared. Bounded by occupancy
+# arithmetic: lower-berth occupancy 105-108.5% (CCL/RCL FY2024 filings,
+# register §3.1) implies ~5-17% of cabins hold 3+ occupants, so
+# multi-person parties are real but their cabin count is a declaration,
+# not a measurement.
+DEFAULT_PARTY_CABINS_DISTRIBUTION = {1: 0.75, 2: 0.18, 3: 0.05, 4: 0.02}
+
+
+def _party_dist_by_class(graph_cfg: dict[str, Any]) -> dict[str, dict[int, float]]:
+    """Per-class cabins-per-party overrides from ``graph_cfg['agent_classes']``."""
+    out: dict[str, dict[int, float]] = {}
+    for cls in graph_cfg.get("agent_classes") or []:
+        dist = cls.get("party_cabins_distribution")
+        if isinstance(dist, dict):
+            out[str(cls.get("class_id"))] = {
+                int(k): float(v) for k, v in dist.items()
+            }
+    return out
+
+
+def _cabin_cliques(ordered: list[KorkinAgent]) -> list[list[KorkinAgent]]:
+    """Partition an ordered berthing pool into its dealt cabins.
+
+    Cabins fill contiguously, so each clique of ``cabin_mate_ids`` is one
+    chunk; agents with no cabin-mates form singleton cliques.
+    """
+    cabins: list[list[KorkinAgent]] = []
+    current: list[KorkinAgent] = []
+    member_ids: set[int] = set()
+    for agent in ordered:
+        if current and agent.agent_id not in member_ids:
+            cabins.append(current)
+            current = []
+        current.append(agent)
+        if len(current) == 1:
+            member_ids = {agent.agent_id, *agent.cabin_mate_ids}
+    if current:
+        cabins.append(current)
+    return cabins
+
+
+def _party_cabin_counts(n_cabins: int, dist: dict[int, float]) -> list[int]:
+    """Deterministic multiset of cabins-per-party matching ``dist``.
+
+    Deals without RNG: party counts are the distribution's quotas rounded
+    to fill the pool, multi-cabin parties interleaved evenly among the
+    single-cabin ones.
+    """
+    sizes = sorted(s for s in dist if s > 0)
+    total_w = sum(dist.values())
+    if n_cabins <= 0 or not sizes or total_w <= 0.0:
+        return []
+    mean = sum(s * dist[s] for s in sizes) / total_w
+    n_parties = max(1, round(n_cabins / mean))
+    counts = {s: int(round(n_parties * dist[s] / total_w)) for s in sizes}
+    consumed = sum(s * c for s, c in counts.items())
+    for s in sorted(sizes, reverse=True):
+        while consumed > n_cabins and counts[s] > 0:
+            counts[s] -= 1
+            consumed -= s
+    counts[1] = counts.get(1, 0)
+    while consumed < n_cabins:
+        counts[1] += 1
+        consumed += 1
+    seq = [1] * counts[1]
+    multis = sorted(
+        (s for s in sizes if s != 1 for _ in range(counts[s])),
+        reverse=True,
+    )
+    if multis:
+        step = (len(seq) + 1) / (len(multis) + 1)
+        for k, m in enumerate(multis):
+            seq.insert(min(len(seq), round((k + 1) * step)), m)
+    return seq
+
+
+def assign_parties(
+    agents: list[KorkinAgent],
+    graph_cfg: dict[str, Any] | None = None,
+) -> None:
+    """Deal contiguous staterooms into travelling parties per berthing pool.
+
+    A party is one booking: 1-4 adjacent cabins inside a single
+    ``(home_zone, berth_group)`` pool, the way multi-cabin families book.
+    Sets ``party_id`` (unique across pools) and ``party_member_ids`` on
+    passenger agents; crew pools are skipped — crew berth as colleagues,
+    so their responder set stays their cabin-mates. Must run after
+    ``assign_cabin_mates``: cabin cliques are recovered from
+    ``cabin_mate_ids`` over the same interleaved order the cabins were
+    dealt in. Deterministic: no RNG draws, so the arm does not perturb
+    the engine RNG stream.
+    """
+    dist_by_class = _party_dist_by_class(graph_cfg or {})
+    pools: dict[tuple[str, str], list[KorkinAgent]] = defaultdict(list)
+    for agent in agents:
+        group = (
+            agent.home_zone,
+            getattr(agent, "berth_group", "") or agent.agent_class,
+        )
+        pools[group].append(agent)
+
+    party_seq = 0
+    for (_zone_name, berth_group), pool in pools.items():
+        if getattr(pool[0], "role", "") != "passenger":
+            continue
+        cabins = _cabin_cliques(_interleave_watch_buckets(pool))
+        dist = dist_by_class.get(berth_group, DEFAULT_PARTY_CABINS_DISTRIBUTION)
+        pos = 0
+        for size in _party_cabin_counts(len(cabins), dist):
+            members = [
+                a for cabin in cabins[pos : pos + size] for a in cabin
+            ]
+            pos += size
+            ids = {a.agent_id for a in members}
+            for a in members:
+                a.party_id = party_seq
+                a.party_member_ids = frozenset(ids - {a.agent_id})
+            party_seq += 1
+
+
 def _table_size_by_zone(zones: list[dict[str, Any]]) -> dict[str, int]:
     """Table size of each table-service Dining zone, by zone name."""
     sizes: dict[str, int] = {}

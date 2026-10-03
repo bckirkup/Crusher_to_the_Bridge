@@ -166,6 +166,7 @@ class _SickCallRoster:
         self.noise_ids: list[int] = []
         self.noise_reasons: list[dict[str, Any]] = []
         self.crew_screening_ids: list[int] = []
+        self.caregiver_report_ids: list[int] = []
         self.severity_hazards: dict[int, float] = {}
         # Hazards drawn from a declared realized-reporting vector: the
         # trust multiplier is already inside the vector and must not be
@@ -470,6 +471,7 @@ class SyndromicSurveillance:
             "noise_ids": roster.noise_ids,
             "noise_reasons": roster.noise_reasons,
             "crew_screening_ids": roster.crew_screening_ids,
+            "caregiver_report_ids": roster.caregiver_report_ids,
             "sick_call_count": len(roster.sick_call_ids),
             "total_agents": len(agents),
             "first_detection_events": detection_events,
@@ -499,6 +501,15 @@ class SyndromicSurveillance:
                     agent, epoch,
                 )
             if is_isolated:
+                continue
+            if presenting and agent.get("caregiver_report_due_epoch") is not None:
+                # NORO-CAREGIVER-01: a party member or steward has seen
+                # this illness and carries the case to medical — the
+                # report arrives through the attendant channel, not the
+                # host's own sick-call hazard or detection delay.
+                roster.sick_call_ids.append(aid)
+                roster.true_positive_ids.append(aid)
+                roster.caregiver_report_ids.append(aid)
                 continue
             if presenting:
                 self._process_presenting_agent(aid, agent, epoch, roster)
