@@ -1022,3 +1022,21 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   admissible Θ — the repair removed ~750–940 median recorded onsets
   per ignited seed but the ~10× residual survives intact
   (`docs/ledger/COVID-THETA-V15.md`).*
+- **`CAREGIVER-V1` declares the cross-pathogen caregiver grammar**
+  (`docs/proposals/caregiver_v1_spec.md`, `docs/ledger/CAREGIVER-V1.md`) —
+  three roles on the `party_id`/`transmission.caregiver` tree NORO-CAREGIVER-01
+  shipped: R1 `cleanup` (episode mode; noro instantiation shipped), R2
+  `tending` (course mode: one designated cabin/party caregiver binds to a
+  symptomatic host for the illness window — declared for sars_cov2_resp and
+  influenza_a), R3 `service` (crew meal-delivery contact to confined cabins,
+  the channel `meals_to_cabin` re-routes tokens without creating; all
+  pathogens). Reallocation semantics: tending hours come out of the
+  responder's non-ring contact budget, so the channel concentrates the
+  caregiver's exposure instead of adding ship-level contact — its declared
+  prediction is cabin-clustered (and crew-service) secondaries, not a
+  uniform attack-rate lift. For DP this is the mechanism class that moves
+  the *shape* leg (cabin clustering, crew split) without touching Θ —
+  the leg every measured candidate so far has failed to move. Respiratory
+  factors are Grade C declarations bounded above by the Kordsmeyer 2022
+  cabin-mate aOR 3.27 check; noro cells stay provisional pending the funnel
+  campaign. Spec only — no engine code; implementation arm is a later stage.
