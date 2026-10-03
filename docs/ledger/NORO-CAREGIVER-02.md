@@ -1,6 +1,6 @@
 # NORO-CAREGIVER-02
 **Date:** 2026-10-03
-**Commit:** pending merge of the fixing PR
+**Commit:** #856
 **Pathogens:** norwalk_gi
 **Status:** measured
 

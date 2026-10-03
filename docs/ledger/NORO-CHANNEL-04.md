@@ -1,6 +1,6 @@
 # NORO-CHANNEL-04
 **Date:** 2026-10-03
-**Commit:** pending merge of the declaring PR
+**Commit:** #856
 **Pathogens:** norwalk_gi
 **Status:** declared
 
