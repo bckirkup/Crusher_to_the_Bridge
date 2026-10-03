@@ -162,16 +162,21 @@ def _delta_stats(deltas: list[float]) -> dict[str, Any]:
     }
 
 
-def _seed_paired_attack(
-    payloads: dict[str, dict],
+def _reference_index(
     reference: dict[str, dict],
-) -> dict[float, dict[str, Any]]:
-    """Per-seed attack-rate deltas payload - reference at same theta+seed."""
+) -> dict[tuple[float, int], dict]:
     ref_by_ts: dict[tuple[float, int], dict] = {}
     for ref in reference.values():
         cell = ref.get("cell") or {}
         if cell.get("theta") is not None and cell.get("seed") is not None:
             ref_by_ts[(float(cell["theta"]), int(cell["seed"]))] = ref
+    return ref_by_ts
+
+
+def _pair_deltas(
+    payloads: dict[str, dict],
+    ref_by_ts: dict[tuple[float, int], dict],
+) -> tuple[dict[float, list[float]], dict[float, int]]:
     by_theta: dict[float, list[float]] = {}
     takeoff_flips: dict[float, int] = {}
     for payload in payloads.values():
@@ -196,12 +201,83 @@ def _seed_paired_attack(
             (p_rec >= 10) != (r_rec >= 10)
         ):
             takeoff_flips[th] = takeoff_flips.get(th, 0) + 1
+    return by_theta, takeoff_flips
+
+
+def _seed_paired_attack(
+    payloads: dict[str, dict],
+    reference: dict[str, dict],
+) -> dict[float, dict[str, Any]]:
+    """Per-seed attack-rate deltas payload - reference at same theta+seed."""
+    by_theta, takeoff_flips = _pair_deltas(
+        payloads, _reference_index(reference),
+    )
     return {
         th: {
             **_delta_stats(deltas),
             "takeoff_class_flips": takeoff_flips.get(th, 0),
         }
         for th, deltas in by_theta.items()
+    }
+
+
+def _v15_comparator(parent: dict[str, Any] | None) -> dict[str, Any]:
+    return {
+        "median_attack": _median_attack(parent),
+        "mean_attack": (
+            (parent.get("recorded_attack_rate") or {}).get("mean")
+            if parent else None
+        ),
+        "takeoff_probability": (
+            parent.get("takeoff_probability") if parent else None
+        ),
+        "fleet_shape_ok": (
+            parent.get("fleet_shape_ok") if parent else None
+        ),
+    }
+
+
+def _surface_row(
+    entry: dict[str, Any],
+    arm: str,
+    parent: dict[str, Any] | None,
+    offset: int | None,
+) -> dict[str, Any]:
+    return {
+        "theta": float(entry["theta"]),
+        "arm_id": arm,
+        "n_seeds": len(entry.get("seeds") or []),
+        "takeoff_probability": entry.get("takeoff_probability"),
+        "recorded_attack_rate": entry.get("recorded_attack_rate"),
+        "attack_rate_quantiles": entry.get(
+            "recorded_attack_rate_quantiles",
+        ),
+        "p_recorded_ge_0p015": entry.get("p_recorded_ge_0p015"),
+        "p_recorded_ge_0p10": entry.get("p_recorded_ge_0p10"),
+        "p_recorded_le_0p01": entry.get("p_recorded_le_0p01"),
+        "fleet_shape_ok": entry.get("fleet_shape_ok"),
+        "delta_vs_baseline": entry.get("delta_vs_baseline"),
+        "v15_comparator": _v15_comparator(parent),
+        "lattice_notches_up": offset,
+    }
+
+
+def _notch_trigger(
+    arm: str,
+    theta: float,
+    median: float,
+    offset: int,
+) -> dict[str, Any]:
+    return {
+        "trigger": "upward_lattice_notch",
+        "theta": theta,
+        "arm_id": arm,
+        "detail": (
+            f"arm median {median:.5g} sits {offset} notch(es) "
+            "above its same-theta v15 comparator -- fewer "
+            "susceptibles cannot raise the attack; a sign flip "
+            "is a mechanism defect, not a result"
+        ),
     }
 
 
@@ -222,54 +298,21 @@ def _fleet_rows(
         if arm_filter and arm not in arm_filter:
             continue
         theta = float(entry["theta"])
-        parent = parent_by_theta.get(theta)
         median = _median_attack(entry)
         offset = None
         if median is not None and theta in parent_by_theta:
             offset = _lattice_offset(
                 median, thetas.index(theta), thetas, parent_by_theta,
             )
-        rows.append({
-            "theta": theta,
-            "arm_id": arm,
-            "n_seeds": len(entry.get("seeds") or []),
-            "takeoff_probability": entry.get("takeoff_probability"),
-            "recorded_attack_rate": entry.get("recorded_attack_rate"),
-            "attack_rate_quantiles": entry.get(
-                "recorded_attack_rate_quantiles",
-            ),
-            "p_recorded_ge_0p015": entry.get("p_recorded_ge_0p015"),
-            "p_recorded_ge_0p10": entry.get("p_recorded_ge_0p10"),
-            "p_recorded_le_0p01": entry.get("p_recorded_le_0p01"),
-            "fleet_shape_ok": entry.get("fleet_shape_ok"),
-            "delta_vs_baseline": entry.get("delta_vs_baseline"),
-            "v15_comparator": {
-                "median_attack": _median_attack(parent),
-                "mean_attack": (
-                    (parent.get("recorded_attack_rate") or {}).get("mean")
-                    if parent else None
-                ),
-                "takeoff_probability": (
-                    parent.get("takeoff_probability") if parent else None
-                ),
-                "fleet_shape_ok": (
-                    parent.get("fleet_shape_ok") if parent else None
-                ),
-            },
-            "lattice_notches_up": offset,
-        })
-        if offset is not None and offset >= 1 and arm != design.baseline_arm_id:
-            triggers.append({
-                "trigger": "upward_lattice_notch",
-                "theta": theta,
-                "arm_id": arm,
-                "detail": (
-                    f"arm median {median:.5g} sits {offset} notch(es) "
-                    "above its same-theta v15 comparator -- fewer "
-                    "susceptibles cannot raise the attack; a sign flip "
-                    "is a mechanism defect, not a result"
-                ),
-            })
+        rows.append(
+            _surface_row(entry, arm, parent_by_theta.get(theta), offset),
+        )
+        if (
+            offset is not None
+            and offset >= 1
+            and arm != design.baseline_arm_id
+        ):
+            triggers.append(_notch_trigger(arm, theta, median, offset))
     return rows, triggers
 
 
@@ -285,28 +328,10 @@ def _missing_cells(
     return sorted(expected - set(payloads))
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--cells", required=True)
-    parser.add_argument("--design", required=True)
-    parser.add_argument("--parent-design", default=None)
-    parser.add_argument("--parent-cells", default=None)
-    parser.add_argument("--arms", nargs="*", default=None)
-    parser.add_argument("--expect-complete", action="store_true")
-    parser.add_argument("--out", default=None)
-    args = parser.parse_args(argv)
-
-    design = load_design(
-        resolve_repo_path(REPO_ROOT, args.design), repo_root=REPO_ROOT,
-    )
-    arm_filter = set(args.arms) if args.arms else None
-    loaded = load_cell_payloads(args.cells)
-    payloads = {
-        n: p for n, p in loaded.items()
-        if p.get("design_id") == design.design_id
-    }
-    foreign = len(loaded) - len(payloads)
-
+def _audit_cells(
+    payloads: dict[str, dict],
+    design: Any,
+) -> dict[str, list[str]]:
     expected_by_arm = {
         a["arm_id"]: _arm_expectations(a) for a in design.arms
     }
@@ -318,66 +343,71 @@ def main(argv: list[str] | None = None) -> int:
         )
         if failures:
             audit_failures[name] = failures
+    return audit_failures
 
-    missing = _missing_cells(design, payloads, arm_filter)
-    if args.expect_complete and missing:
-        audit_failures["_missing"] = missing
 
-    parent_surface: dict[str, Any] = {}
-    parents: dict[str, dict] = {}
-    parent_payloads: dict[str, dict] = {}
-    if args.parent_cells and args.parent_design:
-        parent_design = load_design(
-            resolve_repo_path(REPO_ROOT, args.parent_design),
-            repo_root=REPO_ROOT,
-        )
-        parents = load_cell_payloads(args.parent_cells)
-        parents = {
-            n: p for n, p in parents.items()
-            if p.get("design_id") == parent_design.design_id
-        }
-        # The fleet design pairs against the FIRST seeds of the v15
-        # block by declaration, so the comparator rows must pool the
-        # same seed subset -- a 200-seed v15 row against a 50-seed arm
-        # row is apples/oranges.
-        fleet_seeds = {
-            c.seed for c in enumerate_cells(design)
-        }
-        parent_payloads = {
-            n: p for n, p in parents.items()
-            if (p.get("cell") or {}).get("seed") in fleet_seeds
-        }
-        parent_surface = merge_screen(
-            parent_design, parent_payloads, allow_partial=True,
-        )
+def _load_parent_cells(
+    args: argparse.Namespace,
+    design: Any,
+) -> tuple[dict[str, dict], dict[str, Any]]:
+    """v15 stage-1 cells restricted to the fleet design's seed subset.
 
-    rows, triggers = _fleet_rows(design, payloads, parent_surface, arm_filter)
+    The fleet design pairs against the FIRST seeds of the v15 block by
+    declaration, so the comparator rows must pool the same seed subset
+    -- a 200-seed v15 row against a 50-seed arm row is apples/oranges.
+    """
+    if not (args.parent_cells and args.parent_design):
+        return {}, {}
+    parent_design = load_design(
+        resolve_repo_path(REPO_ROOT, args.parent_design),
+        repo_root=REPO_ROOT,
+    )
+    parents = {
+        n: p for n, p in load_cell_payloads(args.parent_cells).items()
+        if p.get("design_id") == parent_design.design_id
+    }
+    fleet_seeds = {c.seed for c in enumerate_cells(design)}
+    parent_payloads = {
+        n: p for n, p in parents.items()
+        if (p.get("cell") or {}).get("seed") in fleet_seeds
+    }
+    parent_surface = merge_screen(
+        parent_design, parent_payloads, allow_partial=True,
+    )
+    return parent_payloads, parent_surface
 
-    by_arm: dict[str, dict[str, dict]] = {}
-    for name, payload in payloads.items():
-        arm = (payload.get("cell") or {}).get("arm_id")
-        by_arm.setdefault(arm, {})[name] = payload
 
-    baseline_arm = design.baseline_arm_id
-    baseline_payloads = by_arm.get(baseline_arm, {})
+def _build_pairing(
+    design: Any,
+    by_arm: dict[str, dict[str, dict]],
+    parent_payloads: dict[str, dict],
+) -> dict[str, Any]:
+    baseline = design.baseline_arm_id
+    baseline_payloads = by_arm.get(baseline, {})
     pairing: dict[str, Any] = {}
-    parent_ref = parent_payloads if parents else {}
-    if parent_ref:
+    if parent_payloads:
         pairing["baseline_vs_v15"] = _seed_paired_attack(
-            baseline_payloads, parent_ref,
+            baseline_payloads, parent_payloads,
         )
     pairing["arm_vs_baseline"] = {
         arm: _seed_paired_attack(arm_payloads, baseline_payloads)
         for arm, arm_payloads in by_arm.items()
-        if arm != baseline_arm
+        if arm != baseline
     }
-    if parent_ref:
+    if parent_payloads:
         pairing["arm_vs_v15"] = {
-            arm: _seed_paired_attack(arm_payloads, parent_ref)
+            arm: _seed_paired_attack(arm_payloads, parent_payloads)
             for arm, arm_payloads in by_arm.items()
-            if arm != baseline_arm
+            if arm != baseline
         }
+    return pairing
 
+
+def _drift_triggers(
+    pairing: dict[str, Any],
+    audit_failures: dict[str, list[str]],
+) -> list[dict[str, Any]]:
+    triggers: list[dict[str, Any]] = []
     drift = pairing.get("baseline_vs_v15") or {}
     drifted = [
         th for th, s in drift.items()
@@ -387,8 +417,8 @@ def main(argv: list[str] | None = None) -> int:
         triggers.append({
             "trigger": "baseline_drift_vs_v15",
             "detail": (
-                f"baseline arm does not reproduce the v15 stage-1 parent "
-                f"seed-for-seed at thetas {drifted}"
+                "baseline arm does not reproduce the v15 stage-1 "
+                f"parent seed-for-seed at thetas {drifted}"
             ),
         })
     if audit_failures:
@@ -396,9 +426,68 @@ def main(argv: list[str] | None = None) -> int:
             "trigger": "audit_failures",
             "n_cells": len(audit_failures),
             "detail": json.dumps(
-                {k: v for k, v in list(audit_failures.items())[:5]},
+                dict(list(audit_failures.items())[:5]),
             ),
         })
+    return triggers
+
+
+def _print_rows(rows: list[dict[str, Any]]) -> None:
+    for row in rows:
+        attack = row.get("recorded_attack_rate") or {}
+        print(
+            f"theta={row['theta']:.4g} arm={row['arm_id']} "
+            f"median={attack.get('median')} mean={attack.get('mean')} "
+            f"takeoff={row.get('takeoff_probability')} "
+            f"v15_median={row['v15_comparator']['median_attack']} "
+            f"notches_up={row['lattice_notches_up']} "
+            f"fleet_shape_ok={row['fleet_shape_ok']}",
+        )
+
+
+def _parse_args(argv: list[str] | None) -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--cells", required=True)
+    parser.add_argument("--design", required=True)
+    parser.add_argument("--parent-design", default=None)
+    parser.add_argument("--parent-cells", default=None)
+    parser.add_argument("--arms", nargs="*", default=None)
+    parser.add_argument("--expect-complete", action="store_true")
+    parser.add_argument("--out", default=None)
+    return parser.parse_args(argv)
+
+
+def main(argv: list[str] | None = None) -> int:
+    args = _parse_args(argv)
+    design = load_design(
+        resolve_repo_path(REPO_ROOT, args.design), repo_root=REPO_ROOT,
+    )
+    arm_filter = set(args.arms) if args.arms else None
+    loaded = load_cell_payloads(args.cells)
+    payloads = {
+        n: p for n, p in loaded.items()
+        if p.get("design_id") == design.design_id
+    }
+    foreign = len(loaded) - len(payloads)
+
+    audit_failures = _audit_cells(payloads, design)
+    missing = _missing_cells(design, payloads, arm_filter)
+    if args.expect_complete and missing:
+        audit_failures["_missing"] = missing
+
+    parent_payloads, parent_surface = _load_parent_cells(args, design)
+
+    rows, triggers = _fleet_rows(
+        design, payloads, parent_surface, arm_filter,
+    )
+
+    by_arm: dict[str, dict[str, dict]] = {}
+    for name, payload in payloads.items():
+        arm = (payload.get("cell") or {}).get("arm_id")
+        by_arm.setdefault(arm, {})[name] = payload
+    pairing = _build_pairing(design, by_arm, parent_payloads)
+
+    triggers += _drift_triggers(pairing, audit_failures)
 
     report = {
         "design_id": design.design_id,
@@ -413,16 +502,7 @@ def main(argv: list[str] | None = None) -> int:
         f"{len(payloads)} cells; {len(audit_failures)} audit failures; "
         f"{len(triggers)} triggers",
     )
-    for row in rows:
-        attack = row.get("recorded_attack_rate") or {}
-        print(
-            f"theta={row['theta']:.4g} arm={row['arm_id']} "
-            f"median={attack.get('median')} mean={attack.get('mean')} "
-            f"takeoff={row.get('takeoff_probability')} "
-            f"v15_median={row['v15_comparator']['median_attack']} "
-            f"notches_up={row['lattice_notches_up']} "
-            f"fleet_shape_ok={row['fleet_shape_ok']}",
-        )
+    _print_rows(rows)
     if triggers:
         print("REPORT_IMMEDIATELY:", json.dumps(triggers, indent=1))
 
