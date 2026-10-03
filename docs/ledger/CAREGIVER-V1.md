@@ -1,6 +1,6 @@
 # CAREGIVER-V1
 **Date:** 2026-10-02
-**Commit:** TBD (spec PR)
+**Commit:** `a8effdb2` (spec PR)
 **Pathogens:** norwalk_gi, sars_cov2_resp, influenza_a
 **Status:** declared — spec only, no engine code
 
