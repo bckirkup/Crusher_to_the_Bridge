@@ -3,7 +3,7 @@
 **Commit:** 63f4f3a9
 **Pathogens:** all
 **Status:** measured
-**Measured at:** `e0d43979`
+**Measured at:** e0d43979
 
 ## Question
 
