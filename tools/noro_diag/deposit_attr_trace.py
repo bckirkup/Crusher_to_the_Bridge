@@ -350,10 +350,11 @@ def _wrap_events(core_cls: type, rec: Recorder) -> dict[str, Any]:
 
     def emit_emesis(
         self: Any, agent: Any, pathogen_id: str, profile: dict,
-        zone_name: str, epoch: int,
+        zone_name: str, epoch: int, *args: Any, **kwargs: Any,
     ) -> float:
         gained = originals["_emit_emesis"](
             self, agent, pathogen_id, profile, zone_name, epoch,
+            *args, **kwargs,
         )
         if pathogen_id == rec.pathogen_id and gained > 0.0:
             vclass = _venue_class(self, zone_name)

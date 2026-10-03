@@ -153,6 +153,10 @@ def wrap_emit_emesis(
 
     ``on_emit(self, agent, pathogen_id, zone_name, epoch, pool_gain,
     before, ctx)`` — the pathogen filter lives in the callback.
+
+    The wrapper tail-forwards ``*args``/``**kwargs`` so a growing
+    ``_emit_emesis`` signature (e.g. the accumulator args added under
+    CAREGIVER-V1) passes through untouched.
     """
     original = core_cls._emit_emesis
 
@@ -163,6 +167,8 @@ def wrap_emit_emesis(
         profile: dict,
         zone_name: str,
         epoch: int,
+        *args: Any,
+        **kwargs: Any,
     ) -> float:
         ctx = (
             pre(self, agent, pathogen_id, zone_name, epoch)
@@ -174,6 +180,7 @@ def wrap_emit_emesis(
         before = len(emesis_records(agent, pathogen_id))
         pool_gain = original(
             self, agent, pathogen_id, profile, zone_name, epoch,
+            *args, **kwargs,
         )
         on_emit(
             self, agent, pathogen_id, zone_name, epoch,
