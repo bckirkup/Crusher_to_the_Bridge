@@ -2,7 +2,7 @@
 **Date:** 2026-10-02
 **Commit:** a8effdb2
 **Pathogens:** norwalk_gi, sars_cov2_resp, influenza_a
-**Status:** declared — spec only, no engine code
+**Status:** declared
 
 ## Question
 
