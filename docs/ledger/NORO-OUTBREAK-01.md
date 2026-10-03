@@ -75,6 +75,31 @@ The hand-reservoir + presentation stack is a large amplification:
 - Posting: 8 gained, 0 lost. Median acquired +5 to +19 on exp scr,
   +45 cls ren; delta reported pax AR +0.0032-0.0075.
 
+## Measured — spirit-class extension (d6c51c14)
+
+Per `noro_outbreak_01_spirit_design.md`: 4 more cells x 1,000 seeds
+(spirit_cruise_3000 @12d, scr lo/mid/hi + ren, seeds 8105-9104) ran at
+`d6c51c14` (jobdef `picard-noro-outbreak-01:5`, image
+`noro-outbreak-01-d6c51c14`), all SUCCEEDED — 16 cells, 16,000 voyages
+total in the canonical readout. Between the two stamps, #846 added the
+ENV-HAZARD arm + source-model hooks (additive, orthogonal to pathogen
+transmission); the CHANNEL-03 funnel at `d6c51c14` reproduced scored
+voyages seed-for-seed, so the stamps measure the same dynamics.
+
+- Takeoff 91.4% on ren, 100% on all three scr cells; median acquired
+  89 (ren) to 175-199 (scr) — outbreaks get bigger with hull size, and
+  spirit scr cells saturate as classic's did.
+- **Zero postings on all 4,000 spirit voyages** — the larger hull does
+  not rescue the reporting channel.
+- Anchors: same all-FAIL shape (A1 0.01-0.02, A2 0.15-0.18, A4 ~0, A9
+  0/4000) with two isolated passes that pass nowhere else: A5 pax/crew
+  2.70 PASS on scr-bp25c7 (still FAIL at 1.31-1.96 on the other spirit
+  cells) and A8 pax incidence PASS on ren (17.91) while scr runs
+  ~66-77x over reference.
+- Paired vs IMPORT-01 (200 shared seeds): establishment gained 93-168,
+  +93 to +199 median acquisitions on scr cells — the hands+presentation
+  amplification scales with hull size.
+
 ## Interpretation
 
 Measured: onboard establishment/progression under the shipped stack is
@@ -82,11 +107,15 @@ materially stronger than at IMPORT-01, outbreaks reach VSP-class sizes on
 the small hulls, and posting is non-null. The anchor miss is no longer
 transmission-side: it sits in infection->illness->report conversion
 (A1/A2/A4 under by ~4-10x while A8 acquisition incidence over-delivers).
-Hypothesis (unproven): the ever-ill coupling or symptom-probability path
-expresses illness too weakly for the anchor bands, or reporting
-(sick-call x comp65) censors too deeply — the instruments measure the
-gap, not which link carries it. That attribution is the open next
-question; the readout cannot separate them at summary level.
+The spirit extension extends the same shape to the 3000-agent class:
+bigger outbreaks, still essentially zero reporting. Link attribution is
+now measured, not hypothesised — NORO-CHANNEL-03 (180 funnel voyages on
+the exact scored cells, `d6c51c14`) finds the gap **shared**: the
+symptom-course draw is the first broken link on all 9 cells
+(symp/infected 0.170-0.413 vs the 0.6 declared threshold) AND the
+infirmary report hazard under-fires on 8/9 (rep/elig 0.168-0.321 vs
+0.4), with no severity/eligibility wall anywhere. Both links must move;
+neither alone reaches the anchors.
 
 ## Harness note
 

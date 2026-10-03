@@ -1,3 +1,24 @@
+# NORO-OUTBREAK-01 readout — 16 cells (expedition_450, classic_1900, spirit_cruise_3000)
+
+Measured over 16,000 voyages, zero child failures: 12,000 small-hull runs at
+`bc4de6f5` (image `noro-outbreak-01-bc4de6f5`, PR #844) and the 4,000-run
+spirit extension at `d6c51c14` (image `noro-outbreak-01-d6c51c14`, tiers
+added in PR #848). Between the two stamps, #846 landed the ENV-HAZARD
+environmental/chemical hazard arm + source-model hooks (additive config,
+orthogonal to the pathogen transmission chain); comparability rests on the
+CHANNEL-03 evidence — the funnel driver at `d6c51c14` reproduced scored
+voyages 1:1 at seed level (s8000 smoke: identical infected/peak/takeoff)
+and posted zero takeoff join violations across 180 shared seeds. Jobdef
+`picard-noro-outbreak-01:5`, prefix
+`s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_outbreak_01/`.
+
+Spirit findings headline: takeoff 91.4% (ren) - 100% (all scr), median
+acquired 89-199, **zero postings on all 4,000 voyages**; A1 0.01-0.02,
+A2 0.15-0.18 — the conversion-gap shape of the smaller hulls at larger
+magnitude. Two anchors pass on spirit cells that pass nowhere else:
+A5 pax/crew 2.70 PASS at scr-bp25c7 (fails 1.31-1.96 elsewhere), A8 pax
+incidence PASS on ren (17.91) while scr runs ~66-77x over.
+
 # NORO-OUTBREAK-01 readout
 
 ## Frequency (rates % with Wilson 95% intervals)
@@ -16,6 +37,10 @@
 | exp 7d scr bp25c7 nsf29 | 1000 |  31.40  [28.60,34.34] |  99.80  [99.27,99.95] |  90.70  [88.74,92.35] |  53.30  [50.20,56.37] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 5 |
 | exp 7d scr bp32.5c18.5 nsf29 | 1000 |  44.40  [41.35,47.50] | 100.00  [99.62,100.00] |  96.60  [95.29,97.56] |  80.60  [78.03,82.93] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 7 |
 | exp 7d scr bp40c30 nsf29 | 1000 |  50.70  [47.60,53.79] | 100.00  [99.62,100.00] |  99.00  [98.17,99.46] |  94.70  [93.13,95.93] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 8 |
+| spr 12d ren bp0c0 nsf29 | 1000 |  88.50  [86.37,90.33] |  99.90  [99.44,99.98] |  95.60  [94.14,96.71] |  91.40  [89.50,92.98] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 89 |
+| spr 12d scr bp25c7 nsf29 | 1000 | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 175 |
+| spr 12d scr bp32.5c18.5 nsf29 | 1000 | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 191 |
+| spr 12d scr bp40c30 nsf29 | 1000 | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] | 100.00  [99.62,100.00] |   0.00  [ 0.00, 0.38] |   0.00  [ 0.00, 0.38] | 199 |
 
 ## Anchors (era=pre, takeoff-conditional unless noted)
 
@@ -33,6 +58,10 @@
 | exp 7d scr bp25c7 nsf29 | 0.00 | 0.06 | 0.34 |   -- vs [0.04-0.10] | 0.00 | 12.85 | 4.28 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=FAIL, A9=FAIL |
 | exp 7d scr bp32.5c18.5 nsf29 | 0.00 | 0.06 | 0.34 |   -- vs [0.04-0.10] | 0.00 | 18.56 | 7.60 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=FAIL, A9=FAIL |
 | exp 7d scr bp40c30 nsf29 | 0.00 | 0.06 | 0.34 |   -- vs [0.04-0.10] | 0.00 | 22.03 | 12.31 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=FAIL, A9=FAIL |
+| spr 12d ren bp0c0 nsf29 | 0.01 | 0.15 | 0.38 |   -- vs [0.04-0.07] | 1.31 | 17.91 | 7.19 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=PASS, A9=FAIL |
+| spr 12d scr bp25c7 nsf29 | 0.02 | 0.18 | 0.50 |   -- vs [0.04-0.07] | 2.70 | 66.51 | 23.91 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=PASS, A8=FAIL, A9=FAIL |
+| spr 12d scr bp32.5c18.5 nsf29 | 0.02 | 0.17 | 0.50 |   -- vs [0.04-0.07] | 1.96 | 70.57 | 37.38 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=FAIL, A9=FAIL |
+| spr 12d scr bp40c30 nsf29 | 0.02 | 0.16 | 0.52 |   -- vs [0.04-0.07] | 1.66 | 77.26 | 46.76 | 0.00% (0/1000) | A1=FAIL, A2=FAIL, A4=FAIL, A5=FAIL, A8=FAIL, A9=FAIL |
 
 ## Progression (takeoff voyages only)
 
@@ -50,6 +79,10 @@
 | exp 7d scr bp25c7 nsf29 | 533 | 0 [0-0] | 157 [138-163] | 163 [163-163] | -- | 161 [155-164] | 13 [11-16] | 0 | -- |
 | exp 7d scr bp32.5c18.5 nsf29 | 806 | 0 [0-0] | 155 [106-162] | 152 [147-157] | -- | 159 [154-164] | 15 [12-18] | 0 | -- |
 | exp 7d scr bp40c30 nsf29 | 947 | 0 [0-0] | 143 [0-161] | 130 [99-137] | -- | 161 [155-164] | 17 [14-21] | 0 | -- |
+| spr 12d ren bp0c0 nsf29 | 914 | 0 [0-0] | 286 [285-287] | 282 [282-282] | -- | 286 [285-287] | 96 [61-123] | 0 | -- |
+| spr 12d scr bp25c7 nsf29 | 1000 | 0 [0-0] | 286 [285-287] | 271 [259-279] | -- | 286 [285-287] | 187 [174-202] | 0 | -- |
+| spr 12d scr bp32.5c18.5 nsf29 | 1000 | 0 [0-0] | 286 [284-287] | 276 [266-282] | -- | 286 [285-287] | 207 [194-221] | 0 | -- |
+| spr 12d scr bp40c30 nsf29 | 1000 | 0 [0-0] | 285 [283-287] | 271 [260-280] | -- | 286 [285-287] | 219 [207-231] | 0 | -- |
 
 ## Paired delta vs NORO-IMPORT-01 (same seeds)
 
@@ -67,3 +100,7 @@
 | exp 7d scr bp25c7 nsf29 | 1000 | 855/1 | 350/1 | 0/0 | 5.0 | 2.0 | 0.0000 |
 | exp 7d scr bp32.5c18.5 nsf29 | 1000 | 883/0 | 221/1 | 0/0 | 7.0 | 3.0 | 0.0000 |
 | exp 7d scr bp40c30 nsf29 | 1000 | 901/1 | 75/1 | 0/0 | 8.0 | 3.0 | 0.0000 |
+| spr 12d ren bp0c0 nsf29 | 200 | 168/0 | 164/0 | 0/0 | 93.0 | 89.0 | 0.0019 |
+| spr 12d scr bp25c7 nsf29 | 200 | 133/0 | 0/0 | 0/0 | 178.0 | 144.0 | 0.0072 |
+| spr 12d scr bp32.5c18.5 nsf29 | 200 | 106/0 | 0/0 | 0/0 | 188.0 | 139.0 | 0.0076 |
+| spr 12d scr bp40c30 nsf29 | 200 | 93/0 | 0/0 | 0/0 | 199.0 | 132.0 | 0.0081 |
