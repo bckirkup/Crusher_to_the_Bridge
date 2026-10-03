@@ -1,0 +1,103 @@
+{
+  "jobDefinitionName": "picard-noro-outbreak-02",
+  "type": "container",
+  "parameters": {
+    "tier": "fl_exp_12d_scr",
+    "index_offset": "0",
+    "manifest": "picard_framework/runs/mega_cruise_campaign/noro_outbreak_01_manifest.json",
+    "index": "-1",
+    "pathogen_id": "norwalk_gi",
+    "s3_prefix": "s3://<BUCKET>/campaign/noro_outbreak_02/"
+  },
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
+    ]
+  },
+  "containerProperties": {
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign@sha256:017a0db816da98a8a9cbf2fe6ca864a4a9e1e061d876216ef9439fc2cbc76202",
+    "command": [
+      "deploy/aws/import_map_entrypoint.py",
+      "--s3-prefix",
+      "Ref::s3_prefix",
+      "--manifest",
+      "Ref::manifest",
+      "--pathogen-id",
+      "Ref::pathogen_id",
+      "--tier",
+      "Ref::tier",
+      "--index",
+      "Ref::index",
+      "--index-offset",
+      "Ref::index_offset"
+    ],
+    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+    "volumes": [],
+    "environment": [
+      {
+        "name": "PYTHONPATH",
+        "value": "/app"
+      },
+      {
+        "name": "PYTHONUTF8",
+        "value": "1"
+      }
+    ],
+    "mountPoints": [],
+    "ulimits": [],
+    "resourceRequirements": [
+      {
+        "value": "1",
+        "type": "VCPU"
+      },
+      {
+        "value": "4096",
+        "type": "MEMORY"
+      }
+    ],
+    "linuxParameters": {
+      "devices": [],
+      "sharedMemorySize": 512,
+      "tmpfs": []
+    },
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "/aws/batch/picard-campaign",
+        "awslogs-region": "<REGION>",
+        "awslogs-stream-prefix": "noro-outbreak-02"
+      },
+      "secretOptions": []
+    },
+    "secrets": []
+  },
+  "timeout": {
+    "attemptDurationSeconds": 14400
+  },
+  "tags": {},
+  "propagateTags": true,
+  "platformCapabilities": [
+    "EC2"
+  ]
+}
