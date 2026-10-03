@@ -5,7 +5,7 @@
     "EC2"
   ],
   "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:noro-channel-04-<SHA>",
+    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:campaign-<SHA>",
     "command": [
       "deploy/aws/noro_channel_03_entrypoint.py",
       "--s3-prefix",
