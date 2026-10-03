@@ -185,6 +185,11 @@ not a flu quantity); the corrected band is the declared-k expected SAR,
 
 ## Measured verdict — 800-cell re-census at `1ab8dd98`
 
+> **Pre-social-mechanics engine — superseded as a measurement of current
+> behaviour by the `FLU-SOCIAL-01` re-census at `8c03e9d7`**
+> (`docs/ledger/FLU-SOCIAL-01.md`). The numbers below remain of record at
+> `1ab8dd98`.
+
 Measured at `1ab8dd98` (merge of #823 — flu/noro/smalln probe wrappers
 forwarded for the revised engine call signatures: `shedder_ctx` +
 `agent_coop_doses`) on the **same frozen 800 cells** — same manifest
