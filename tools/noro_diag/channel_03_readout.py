@@ -313,6 +313,78 @@ def _trigger_lines(name: str, agg: dict) -> list[str]:
     return fired
 
 
+def _cell_row(
+    name: str, dumps: list[dict], lookup: dict[str, bool],
+) -> tuple[str, dict, list[dict]]:
+    """One cell's table row + aggregate payload + join disagreements."""
+    allagg = _agg_cell(dumps, takeoff_only=False)
+    tkagg = _agg_cell(dumps, takeoff_only=True)
+    verdict = _link_verdict(tkagg if tkagg["n"] else allagg)
+    cgagg = tkagg if tkagg["n"] else allagg
+    r = cgagg["ratios"]
+    cg = cgagg["caregiver"]
+
+    def f(x):
+        return "-" if x is None else f"{x:.3f}"
+
+    via_cg = f(cg["share_of_reported"]) if cg["voyages_with_block"] else "-"
+    cg_tx = (
+        f(cg["share_of_transmissions"]) if cg["voyages_with_block"] else "-"
+    )
+    row = (
+        f"| {name} | {allagg['n']} ({allagg['takeoff']}) | "
+        f"{f(r['symptomatic_per_infected'])} | "
+        f"{f(r['eligible_per_symptomatic'])} | "
+        f"{f(r['reported_per_eligible'])} | "
+        f"{via_cg} | {cg_tx} | "
+        f"{f(r['confirmed_per_reported'])} | "
+        f"{f(r['dated_per_confirmed'])} | {verdict} |"
+    )
+    payload = {
+        "all": allagg,
+        "takeoff_only": tkagg,
+        "verdict": verdict,
+        "trigger_lines": _trigger_lines(name, cgagg),
+    }
+    violations = [
+        {"cell": name, "run_id": rid,
+         "funnel_took_off": bool(d.get("took_off")),
+         "map_took_off": lookup[rid]}
+        for d in dumps
+        if (rid := d.get("run_id")) in lookup
+        and lookup[rid] != bool(d.get("took_off"))
+    ]
+    return row, payload, violations
+
+
+def _join_banner_lines(violations: list[dict], join_witness: bool) -> list[str]:
+    if not violations:
+        return []
+    if join_witness:
+        lines = [
+            "",
+            f"**Join witness**: {len(violations)} seeds "
+            "disagree between funnel `took_off` and the map's "
+            "`peak_prevalence >= 10` — a measured change in outbreak "
+            "frequency (the mechanism is the difference between the "
+            "two stacks); per the frozen design this is a treatment "
+            "effect, not a join violation, and attribution stands.",
+        ]
+        lines.extend(
+            f"- {v['cell']}: {v['run_id']} "
+            f"funnel_took_off={v['funnel_took_off']} "
+            f"map_took_off={v['map_took_off']}"
+            for v in violations
+        )
+        return lines
+    return [
+        "",
+        f"**JOIN VOID**: {len(violations)} seeds disagree "
+        "between funnel `took_off` and the map's `peak_prevalence >= 10` — "
+        "the funnel voyage is not its scored twin; all attributions above are void.",
+    ]
+
+
 def render(
     cells: dict[tuple[str, str], list[dict]],
     map_root: str | None,
@@ -334,67 +406,12 @@ def render(
         lookup = _map_takeoff_lookup(map_root, needed)
     for (tier, match), dumps in sorted(cells.items()):
         name = f"{tier}/{match}"
-        allagg = _agg_cell(dumps, takeoff_only=False)
-        tkagg = _agg_cell(dumps, takeoff_only=True)
-        verdict = _link_verdict(tkagg if tkagg["n"] else allagg)
-        r = tkagg["ratios"] if tkagg["n"] else allagg["ratios"]
-        cgagg = tkagg if tkagg["n"] else allagg
-        cg = cgagg["caregiver"]
-        out["triggers"].extend(_trigger_lines(name, cgagg))
-
-        def f(x):
-            return "-" if x is None else f"{x:.3f}"
-
-        via_cg = (
-            f(cg["share_of_reported"]) if cg["voyages_with_block"] else "-"
-        )
-        cg_tx = (
-            f(cg["share_of_transmissions"]) if cg["voyages_with_block"]
-            else "-"
-        )
-        lines.append(
-            f"| {name} | {allagg['n']} ({allagg['takeoff']}) | "
-            f"{f(r['symptomatic_per_infected'])} | "
-            f"{f(r['eligible_per_symptomatic'])} | "
-            f"{f(r['reported_per_eligible'])} | "
-            f"{via_cg} | {cg_tx} | "
-            f"{f(r['confirmed_per_reported'])} | "
-            f"{f(r['dated_per_confirmed'])} | {verdict} |"
-        )
-        out["cells"][name] = {
-            "all": allagg,
-            "takeoff_only": tkagg,
-            "verdict": verdict,
-        }
-        if map_root:
-            for d in dumps:
-                rid = d.get("run_id")
-                if rid in lookup and lookup[rid] != bool(d.get("took_off")):
-                    out["join_violations"].append(
-                        {"cell": name, "run_id": rid,
-                         "funnel_took_off": bool(d.get("took_off")),
-                         "map_took_off": lookup[rid]})
-    if out["join_violations"]:
-        lines.append("")
-        if join_witness:
-            lines.append(
-                f"**Join witness**: {len(out['join_violations'])} seeds "
-                "disagree between funnel `took_off` and the map's "
-                "`peak_prevalence >= 10` — a measured change in outbreak "
-                "frequency (the mechanism is the difference between the "
-                "two stacks); per the frozen design this is a treatment "
-                "effect, not a join violation, and attribution stands.")
-            lines.extend(
-                f"- {v['cell']}: {v['run_id']} "
-                f"funnel_took_off={v['funnel_took_off']} "
-                f"map_took_off={v['map_took_off']}"
-                for v in out["join_violations"]
-            )
-        else:
-            lines.append(
-                f"**JOIN VOID**: {len(out['join_violations'])} seeds disagree "
-                "between funnel `took_off` and the map's `peak_prevalence >= 10` — "
-                "the funnel voyage is not its scored twin; all attributions above are void.")
+        row, payload, violations = _cell_row(name, dumps, lookup)
+        lines.append(row)
+        out["triggers"].extend(payload.pop("trigger_lines"))
+        out["join_violations"].extend(violations)
+        out["cells"][name] = payload
+    lines.extend(_join_banner_lines(out["join_violations"], join_witness))
     if out["triggers"]:
         lines.append("")
         lines.append("**Report-immediately triggers fired**:")
