@@ -23,6 +23,7 @@ at the epoch containing them — the epoch covering a front is the front epoch.
 from __future__ import annotations
 
 import json
+import math
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -103,6 +104,35 @@ DEFAULT_PORT_RETURN_FRONT_CONCENTRATION = 0.5
 _CREW_SERVED_CAPACITY = 0.5
 # ``essential_only`` cleaning under confinement keeps half the passes.
 _ESSENTIAL_ONLY_SHARE = 0.5
+
+# PROPENSITY-V1 (docs/propensity_v1_spec.md): persistent
+# contact-propensity heterogeneity. The participation Bernoulli below is
+# otherwise i.i.d. per agent per event per day — nobody carries an
+# activity trait, so over a cruise-length window every susceptible is the
+# same attendee in expectation. A mean-pinned per-unit multiplier makes
+# attendance a persistent property of the travelling unit and leaves a
+# low-propensity tail an epidemic cannot reach through venue mixing.
+_PROPENSITY_STREAM_KEY = 0x50524F50
+_PROPENSITY_MODES = frozenset({"party", "agent", "off"})
+_PROPENSITY_DISTRIBUTIONS = frozenset({"lognormal", "gamma"})
+_PROPENSITY_DISCRETIONARY = frozenset({
+    "open_venue",
+    "show_performance",
+    "scheduled_activity",
+    "meal_seating",
+    "port_call",
+})
+# Grade C declaration: elderly guests attend fewer public venues,
+# mid-adults peak; unlisted bands read 1.0 (spec §4).
+_DEFAULT_AGE_BAND_MEAN = {
+    "0-4": 0.5,
+    "5-17": 0.9,
+    "18-34": 1.05,
+    "35-49": 1.1,
+    "50-64": 1.05,
+    "65-74": 0.95,
+    "75+": 0.8,
+}
 
 
 def _parse_minutes(hhmm: str) -> int:
@@ -193,6 +223,47 @@ class RhythmLayer:
         self.sop_capacity_multiplier = (
             float(sop_cap) if sop_cap is not None else None
         )
+
+        # PROPENSITY-V1: the persistent contact-propensity block. The draw
+        # lives on a dedicated spawn-keyed stream and is lazy — one draw
+        # per unit the first time a discretionary event deals it — so the
+        # ``off`` arm consumes nothing on any stream.
+        prop = dict(cfg.get("participation_propensity") or {})
+        self._propensity_mode = str(prop.get("mode", "party"))
+        if self._propensity_mode not in _PROPENSITY_MODES:
+            raise ValueError(
+                "rhythm.participation_propensity.mode must be one of "
+                f"{sorted(_PROPENSITY_MODES)}, got {self._propensity_mode!r}"
+            )
+        self._propensity_cv = float(prop.get("cv", 0.8))
+        if self._propensity_cv < 0:
+            raise ValueError(
+                "rhythm.participation_propensity.cv must be >= 0"
+            )
+        self._propensity_dist = str(prop.get("distribution", "lognormal"))
+        if self._propensity_dist not in _PROPENSITY_DISTRIBUTIONS:
+            raise ValueError(
+                "rhythm.participation_propensity.distribution must be one of "
+                f"{sorted(_PROPENSITY_DISTRIBUTIONS)}, got {self._propensity_dist!r}"
+            )
+        classes = prop.get("applies_to_event_classes")
+        self._propensity_classes = (
+            frozenset(str(c) for c in classes)
+            if classes is not None
+            else _PROPENSITY_DISCRETIONARY
+        )
+        means = prop.get("age_band_mean")
+        self._propensity_age_mean = {
+            str(k): float(v)
+            for k, v in dict(
+                means if means is not None else _DEFAULT_AGE_BAND_MEAN
+            ).items()
+        }
+        self._propensity_rng = np.random.default_rng(
+            np.random.SeedSequence([int(seed) & 0xFFFFFFFF, _PROPENSITY_STREAM_KEY])
+        )
+        self._propensity_cache: dict[int, float] = {}
+        self._propensity_drawn: list[float] = []
 
         self._zone_by_name = {str(z["name"]): z for z in zones}
         self._zone_capacity = {
@@ -497,7 +568,17 @@ class RhythmLayer:
         seatings: int,
         eclass: str,
     ) -> None:
-        draws = self.rng.random(len(eligible)) < p
+        if (
+            eclass in self._propensity_classes
+            and self._propensity_mode != "off"
+        ):
+            probs = np.minimum(
+                1.0,
+                p * np.array([self._propensity_of(a) for a in eligible]),
+            )
+            draws = self.rng.random(len(eligible)) < probs
+        else:
+            draws = self.rng.random(len(eligible)) < p
         participants = [a for a, hit in zip(eligible, draws, strict=True) if hit]
         if len(participants) > capacity:
             idx = self.rng.choice(
@@ -513,6 +594,69 @@ class RhythmLayer:
                 agent, event, zones, zone_weights, start, end,
                 share, egress_mode, seatings, eclass,
             )
+
+    def _propensity_draw(self) -> float:
+        """One persistent unit multiplier, mean-pinned at 1.0."""
+        cv = self._propensity_cv
+        if cv <= 0.0:
+            return 1.0
+        if self._propensity_dist == "gamma":
+            return float(
+                self._propensity_rng.gamma(1.0 / (cv * cv), cv * cv)
+            )
+        sigma2 = math.log1p(cv * cv)
+        return float(
+            self._propensity_rng.lognormal(-0.5 * sigma2, math.sqrt(sigma2))
+        )
+
+    def _propensity_of(self, agent: Any) -> float:
+        """The unit draw times the agent's age-band tilt.
+
+        ``party`` mode keys the cache on ``party_id`` so a travelling group
+        shares its activity level; non-party agents (id < 0) and ``agent``
+        mode key on ``agent_id``. The cache holds the raw draw; the
+        ``age_band_mean`` tilt applies per-agent at read.
+        """
+        if self._propensity_mode == "party":
+            party = getattr(agent, "party_id", -1)
+            party = -1 if party is None else int(party)
+            key = party if party >= 0 else ~int(agent.agent_id)
+        else:
+            key = int(agent.agent_id)
+        draw = self._propensity_cache.get(key)
+        if draw is None:
+            draw = self._propensity_draw()
+            self._propensity_cache[key] = draw
+            self._propensity_drawn.append(draw)
+        band = str(getattr(agent, "age_band", "") or "")
+        return draw * self._propensity_age_mean.get(band, 1.0)
+
+    @property
+    def propensity_resolved(self) -> dict[str, Any]:
+        """The resolved propensity block for the config echo."""
+        return {
+            "mode": self._propensity_mode,
+            "distribution": self._propensity_dist,
+            "cv": self._propensity_cv,
+            "applies_to_event_classes": sorted(self._propensity_classes),
+            "age_band_mean": dict(self._propensity_age_mean),
+        }
+
+    @property
+    def propensity_telemetry(self) -> dict[str, Any]:
+        """Draw-side summary for readout pairing audits."""
+        drawn = self._propensity_drawn
+        if drawn:
+            q = np.quantile(drawn, [0.05, 0.5, 0.95])
+            q05, q50, q95 = (float(v) for v in q)
+        else:
+            q05 = q50 = q95 = 1.0
+        return {
+            "units_drawn": len(drawn),
+            "multiplier_q05": q05,
+            "multiplier_median": q50,
+            "multiplier_q95": q95,
+        }
 
     def _commit_agent(
         self,

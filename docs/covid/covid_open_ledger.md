@@ -1044,3 +1044,24 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (children + elderly), adult-weighted responder draw; crew matrix — R1
   steward channel at `responder_protection_factor` (gloved < napkin), none
   in R2, R3 crew-only; R1 trigger location-agnostic (public emesis counts).*
+
+- **`PROPENSITY-V1` declares the missing persistent-propensity term.**
+  Three of the four early-COVID model failure modes are already in-tree —
+  infectiousness dispersion (`shedding_variance_log10` + FRAILTY-V1
+  hazard frailty), voluntary avoidance (INFO-SUPPRESS-V1, measured −8%
+  paired but armed ~day 9.6, too late for the ~18× residual). The fourth
+  — per-agent attendance heterogeneity — was absent: the rhythm layer
+  deals a fresh i.i.d. Bernoulli on `participation_fraction` per agent per
+  event per day, so every passenger converges to the same venue exposure
+  over the 17-day pre-quarantine window. The Britton/Ball–Trapman term
+  (epidemic burns the high-propensity tail, stalls in low-propensity
+  survivors) is exactly the shape the dead candidates could not produce.
+  Declared as `rhythm.participation_propensity`: a mean-pinned lognormal
+  unit draw (cv 0.8 declared, Grade C) keyed per party under the shipped
+  `party_id` structure, times a per-agent `age_band_mean` tilt, consumed
+  as `min(1, p × propensity)` on discretionary event classes only —
+  orthogonal to SUSCPOOL (binary susceptibility gate) and FRAILTY-V1
+  (per-challenge hazard) because it moves exposure *frequency*, not dose.
+  `mode: off` is the labelled bit-identical baseline; implemented on the
+  declaration branch with the `delivery` payload echo; canary + band
+  array are the measurement stage, not run there.
