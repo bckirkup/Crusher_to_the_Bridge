@@ -14,7 +14,12 @@ unmeasured cell in this spec"). How does the DP anchor's verdict respond
 as that dispersion traverses its declared cell? If the mechanism's
 prediction is *shape*, the response curve over cv — which legs move, in
 which direction, and where the curve bends — is the measurement that
-precedes any band-array decision.
+precedes any band-array decision. The `covid_propensity_v1` canary has
+since measured the shipped 0.8 dead at this anchor (merged #868:
+clause FAIL on both arms, seed-paired footprint noise, and the v15
+anchor pass historical at its own SHA) — so the screen's question
+sharpens to whether *any* point in the declared cv range is live where
+the clause is scored, not whether the default is right.
 
 ## Declaration
 

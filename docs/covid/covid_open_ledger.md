@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `a2586422` (fill with the
+> **Status:** Living. Head commit of record: `e0d43979` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -1070,9 +1070,22 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   orthogonal to SUSCPOOL (binary susceptibility gate) and FRAILTY-V1
   (per-challenge hazard) because it moves exposure *frequency*, not dose.
   `mode: off` is the labelled bit-identical baseline; implemented on the
-  declaration branch with the `delivery` payload echo. Measurement
-  stages declared 2026-10-03: the `covid_propensity_v1` canary
-  (clause-on-delivery at the Θ 1e9 anchor, PR #865) and `PROPENSITY-CV-01`
-  — a single-axis cv screen {0.2, 0.4, 0.8, 1.2, 2.0} + `PROP_OFF`
-  baseline on the frozen DP replay contract, delivering the seed-paired
-  cv-response curve before any band-array decision.
+  declaration branch with the `delivery` payload echo; canary + band
+  array are the measurement stage, not run there.
+  *Measured 2026-10-03 (`e0d43979`, canary `covid_propensity_v1`,
+  40/40 cells, 0 audit failures): **clause FAIL on both arms at the Θ1e9
+  anchor** — D0 takeoff 19/20, recorded q05–q95 [1,518, 2,445],
+  before_share med 0.452; PROP_OFF 20/20, [1,190, 2,443], 0.397. The
+  mechanism exercised (≈2,089 party units/cell, off arm drew 0 — the
+  bit-identity witness) but its seed-paired footprint is noise (Δ med
+  +12 onsets, −0.047 share). The anchor row itself drifted vs v15
+  (`6efec855`): PROP_OFF − v15 = +1,634 med onsets, takeoff 10→20 — the
+  low tail that carried v15's clause pass is gone on the merged tree, so
+  the v15 anchor pass is historical at its own SHA
+  (`docs/covid/covid_propensity_v1_readout.md`). The band array is the
+  open decision.* `PROPENSITY-CV-01` declares the measurement that
+  decision takes first: a single-axis cv screen {0.2, 0.4, 0.8, 1.2,
+  2.0} + `PROP_OFF` baseline on the same frozen replay contract,
+  delivering the seed-paired cv-response curve — with the shipped 0.8
+  measured dead, the screen answers whether any point in the declared
+  range is live at the anchor before a band array is committed.

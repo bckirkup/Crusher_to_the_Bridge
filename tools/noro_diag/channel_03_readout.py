@@ -32,7 +32,9 @@ import gzip
 import json
 import re
 import sys
+import zlib
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -40,7 +42,11 @@ sys.path.insert(0, str(_REPO_ROOT))
 
 from simulation_utils.paths import validated_open  # noqa: E402
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
-    _collect_s3,
+    _MEMBER,
+    _row_from_summary,
+    _s3_client,
+    _s3_member_blob,
+    _s3_parse_uri,
 )
 
 TAKEOFF_PEAK_PREVALENCE = 10  # score_anchors.TAKEOFF_PEAK_PREVALENCE
@@ -242,17 +248,44 @@ def _link_verdict(agg: dict) -> str:
     return "no single link under its declared threshold"
 
 
-def _map_takeoff_lookup(map_root: str) -> dict[str, bool]:
+def _map_takeoff_lookup(
+    map_root: str, needed: set[tuple[str, str]],
+) -> dict[str, bool]:
     """run_id -> took_off under the map's scoring (peak_prevalence >= 10).
 
-    ``_collect_s3`` reads the map run zips' ``summary.json`` members via
-    ranged S3 GETs — the same streaming path the anchor readout uses.
+    Targeted ranged reads on ``<map>/<tier>/<run_id>.zip`` — the map
+    prefix holds ~16k run zips versus the ~180 run ids a channel
+    re-measurement actually joins, so the full-prefix scan is skipped.
     """
-    rows = _collect_s3(map_root)
-    return {
-        row["run_id"]: int(row.get("peak_prevalence") or 0) >= TAKEOFF_PEAK_PREVALENCE
-        for row in rows
-    }
+    from botocore.exceptions import ClientError
+
+    bucket, prefix = _s3_parse_uri(map_root)
+    client = _s3_client()
+
+    def one(tier: str, run_id: str) -> tuple[str, bool] | None:
+        key = f"{prefix}{tier}/{run_id}.zip"
+        try:
+            blob = _s3_member_blob(client, bucket, key, _MEMBER)
+        except (ClientError, KeyError, OSError, zlib.error):
+            return None
+        if blob is None:
+            return None
+        try:
+            summary = json.loads(blob)
+        except json.JSONDecodeError:
+            return None
+        row = _row_from_summary(summary, run_id)
+        return (
+            run_id,
+            int(row.get("peak_prevalence") or 0) >= TAKEOFF_PEAK_PREVALENCE,
+        )
+
+    found: dict[str, bool] = {}
+    with ThreadPoolExecutor(max_workers=16) as pool:
+        for res in pool.map(lambda t: one(*t), needed):
+            if res is not None:
+                found[res[0]] = res[1]
+    return found
 
 
 def _trigger_lines(name: str, agg: dict) -> list[str]:
@@ -272,7 +305,7 @@ def _trigger_lines(name: str, agg: dict) -> list[str]:
             f"{name}: {int(cg['nonemetic'])} caregiver report(s) on "
             "non-emetic courses"
         )
-    if cg["zero_response_voyages"]:
+    if cg.get("zero_response_voyages"):
         fired.append(
             f"{name}: {int(cg['zero_response_voyages'])} voyage(s) with "
             "vomiting courses but zero caregiver/steward responses"
@@ -280,61 +313,105 @@ def _trigger_lines(name: str, agg: dict) -> list[str]:
     return fired
 
 
-def render(cells: dict[tuple[str, str], list[dict]], map_root: str | None) -> tuple[str, dict]:
+def _cell_row(
+    name: str, dumps: list[dict], lookup: dict[str, bool],
+) -> tuple[str, dict, list[dict]]:
+    """One cell's table row + aggregate payload + join disagreements."""
+    allagg = _agg_cell(dumps, takeoff_only=False)
+    tkagg = _agg_cell(dumps, takeoff_only=True)
+    verdict = _link_verdict(tkagg if tkagg["n"] else allagg)
+    cgagg = tkagg if tkagg["n"] else allagg
+    r = cgagg["ratios"]
+    cg = cgagg["caregiver"]
+
+    def f(x):
+        return "-" if x is None else f"{x:.3f}"
+
+    via_cg = f(cg["share_of_reported"]) if cg["voyages_with_block"] else "-"
+    cg_tx = (
+        f(cg["share_of_transmissions"]) if cg["voyages_with_block"] else "-"
+    )
+    row = (
+        f"| {name} | {allagg['n']} ({allagg['takeoff']}) | "
+        f"{f(r['symptomatic_per_infected'])} | "
+        f"{f(r['eligible_per_symptomatic'])} | "
+        f"{f(r['reported_per_eligible'])} | "
+        f"{via_cg} | {cg_tx} | "
+        f"{f(r['confirmed_per_reported'])} | "
+        f"{f(r['dated_per_confirmed'])} | {verdict} |"
+    )
+    payload = {
+        "all": allagg,
+        "takeoff_only": tkagg,
+        "verdict": verdict,
+        "trigger_lines": _trigger_lines(name, cgagg),
+    }
+    violations = [
+        {"cell": name, "run_id": rid,
+         "funnel_took_off": bool(d.get("took_off")),
+         "map_took_off": lookup[rid]}
+        for d in dumps
+        if (rid := d.get("run_id")) in lookup
+        and lookup[rid] != bool(d.get("took_off"))
+    ]
+    return row, payload, violations
+
+
+def _join_banner_lines(violations: list[dict], join_witness: bool) -> list[str]:
+    if not violations:
+        return []
+    if join_witness:
+        lines = [
+            "",
+            f"**Join witness**: {len(violations)} seeds "
+            "disagree between funnel `took_off` and the map's "
+            "`peak_prevalence >= 10` — a measured change in outbreak "
+            "frequency (the mechanism is the difference between the "
+            "two stacks); per the frozen design this is a treatment "
+            "effect, not a join violation, and attribution stands.",
+        ]
+        lines.extend(
+            f"- {v['cell']}: {v['run_id']} "
+            f"funnel_took_off={v['funnel_took_off']} "
+            f"map_took_off={v['map_took_off']}"
+            for v in violations
+        )
+        return lines
+    return [
+        "",
+        f"**JOIN VOID**: {len(violations)} seeds disagree "
+        "between funnel `took_off` and the map's `peak_prevalence >= 10` — "
+        "the funnel voyage is not its scored twin; all attributions above are void.",
+    ]
+
+
+def render(
+    cells: dict[tuple[str, str], list[dict]],
+    map_root: str | None,
+    join_witness: bool = False,
+) -> tuple[str, dict]:
     lines = [
         "| cell | n (tookoff) | symp/infected | elig/symp | rep/elig | viaCG | CGtx | conf/rep | dated/conf | verdict |",
         "|---|---|---|---|---|---|---|---|---|---|",
     ]
     out = {"cells": {}, "join_violations": [], "triggers": []}
+    lookup: dict[str, bool] = {}
+    if map_root:
+        needed = {
+            (str((d.get("cell") or {}).get("tier") or ""), str(d["run_id"]))
+            for ds in cells.values()
+            for d in ds
+            if d.get("run_id")
+        }
+        lookup = _map_takeoff_lookup(map_root, needed)
     for (tier, match), dumps in sorted(cells.items()):
         name = f"{tier}/{match}"
-        allagg = _agg_cell(dumps, takeoff_only=False)
-        tkagg = _agg_cell(dumps, takeoff_only=True)
-        verdict = _link_verdict(tkagg if tkagg["n"] else allagg)
-        r = tkagg["ratios"] if tkagg["n"] else allagg["ratios"]
-        cgagg = tkagg if tkagg["n"] else allagg
-        cg = cgagg["caregiver"]
-        out["triggers"].extend(_trigger_lines(name, cgagg))
-
-        def f(x):
-            return "-" if x is None else f"{x:.3f}"
-
-        via_cg = (
-            f(cg["share_of_reported"]) if cg["voyages_with_block"] else "-"
-        )
-        cg_tx = (
-            f(cg["share_of_transmissions"]) if cg["voyages_with_block"]
-            else "-"
-        )
-        lines.append(
-            f"| {name} | {allagg['n']} ({allagg['takeoff']}) | "
-            f"{f(r['symptomatic_per_infected'])} | "
-            f"{f(r['eligible_per_symptomatic'])} | "
-            f"{f(r['reported_per_eligible'])} | "
-            f"{via_cg} | {cg_tx} | "
-            f"{f(r['confirmed_per_reported'])} | "
-            f"{f(r['dated_per_confirmed'])} | {verdict} |"
-        )
-        out["cells"][name] = {
-            "all": allagg,
-            "takeoff_only": tkagg,
-            "verdict": verdict,
-        }
-        if map_root:
-            lookup = _map_takeoff_lookup(map_root)
-            for d in dumps:
-                rid = d.get("run_id")
-                if rid in lookup and lookup[rid] != bool(d.get("took_off")):
-                    out["join_violations"].append(
-                        {"cell": name, "run_id": rid,
-                         "funnel_took_off": bool(d.get("took_off")),
-                         "map_took_off": lookup[rid]})
-    if out["join_violations"]:
-        lines.append("")
-        lines.append(
-            f"**JOIN VOID**: {len(out['join_violations'])} seeds disagree "
-            "between funnel `took_off` and the map's `peak_prevalence >= 10` — "
-            "the funnel voyage is not its scored twin; all attributions above are void.")
+        row, payload, violations = _cell_row(name, dumps, lookup)
+        lines.append(row)
+        out["triggers"].extend(payload.pop("trigger_lines"))
+        out["join_violations"].extend(violations)
+        out["cells"][name] = payload
+    lines.extend(_join_banner_lines(out["join_violations"], join_witness))
     if out["triggers"]:
         lines.append("")
         lines.append("**Report-immediately triggers fired**:")
@@ -349,6 +426,10 @@ def parse_args(argv=None):
     p.add_argument("--map-root", default=None,
                    help="optional campaign run root (dir or s3://) to verify "
                         "the per-seed takeoff join against the scored map")
+    p.add_argument("--join-witness", action="store_true",
+                   help="report takeoff disagreements as a mechanism-effect "
+                        "witness (CHANNEL-04 semantics) instead of voiding "
+                        "the join (CHANNEL-03 determinism premise)")
     p.add_argument("--md-out", type=Path, default=None)
     p.add_argument("--json-out", type=Path, default=None)
     return p.parse_args(argv)
@@ -362,7 +443,7 @@ def main(argv=None) -> int:
     cells = defaultdict(list)
     for d in dumps:
         cells[_bucket(d)].append(d)
-    md, out = render(cells, args.map_root)
+    md, out = render(cells, args.map_root, join_witness=args.join_witness)
     print(md)
     if args.md_out:
         allowed = (str(args.md_out.parent.resolve()),)
