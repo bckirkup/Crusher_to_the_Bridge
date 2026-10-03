@@ -2171,6 +2171,11 @@ class KorkinShipEngine:
         self.vsp_triggered: bool = False
         self.isolated_ids: set[int] = set()
         self.quarantined_ids: set[int] = set()
+        # CAREGIVER-V1 reallocate arm: caregiver_id -> host cabin zone,
+        # pushed each epoch by ShipSimulation from tx_core's designation
+        # state. A tending caregiver's schedule draw is replaced by the
+        # host's cabin — the tending hours are the venue hours forgone.
+        self.caregiver_tending_zones: dict[int, str] = {}
 
         self._zone_pathogen_mass: dict[str, float] = {z["name"]: 0.0 for z in self.zones}
         # Multi-pathogen mass pools: {pathogen_id: {zone_name: float}}
@@ -2900,6 +2905,13 @@ class KorkinShipEngine:
             return
         if agent.agent_id in self.quarantined_ids:
             agent.current_location = agent.home_zone
+            return
+        tending_zone = self.caregiver_tending_zones.get(agent.agent_id)
+        if tending_zone is not None:
+            # CAREGIVER-V1: a designated caregiver's tending epoch
+            # relocates them to the host's cabin (reallocate arm — the
+            # confinement checks above still win over tending).
+            agent.current_location = tending_zone
             return
         # The per-agent phase jitter drawn at spawn — Java's ``randomness``
         # field — applies under every clock mode.

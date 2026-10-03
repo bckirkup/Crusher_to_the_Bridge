@@ -1612,6 +1612,7 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
     resolved_contacts = (
         getattr(tx_core, "activity_contacts", None) if tx_core is not None else None
     )
+    caregiver_resolved = getattr(tx_core, "caregiver_resolved_block", None)
     return {
         "airborne_half_life_hours": profile.get("airborne_half_life_hours"),
         "route_efficiency_multipliers": dict(
@@ -1640,6 +1641,12 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # presentation_draw_mode arm echoes its declared value).
         "presentation_draw_mode": profile.get("presentation_draw_mode")
         or "once_per_course",
+        # CAREGIVER-V1 conformance echo: the resolved role tree (mode,
+        # budget_mode, per-role enabled + draws) so an arm's declared
+        # caregiver block is auditable against what the engine parsed.
+        "caregiver": (
+            caregiver_resolved() if caregiver_resolved is not None else None
+        ),
         "activity_contacts": resolved_contacts,
     }
 
