@@ -50,6 +50,10 @@ THRESH_SYMPTOMATIC = 0.6    # infected -> symptomatic course
 THRESH_ELIGIBLE = 0.7       # symptomatic -> syndrome-eligible
 THRESH_REPORTED = 0.4       # eligible -> reported (hazard exposure present)
 
+# NORO-CAREGIVER-01 report-immediately triggers (frozen in the
+# caregiver design doc; evaluated on the re-measurement cells).
+TRIGGER_CAREGIVER_TX_SHARE = 0.10  # caregiver share of transmissions
+
 _SEED_ART = re.compile(r"observation_channel_funnel_(?P<arm>.+)_seed(?P<seed>\d+)\.json\.gz$")
 
 
@@ -133,6 +137,8 @@ def _agg_cell(dumps: list[dict], takeoff_only: bool) -> dict:
     nonrep = defaultdict(int)
     hazard_epochs = 0
     seeds = []
+    cg = defaultdict(float)
+    cg_voyages = 0
     for d in sel:
         seeds.append(int(d["seed"]))
         for r in rung_names:
@@ -149,6 +155,29 @@ def _agg_cell(dumps: list[dict], takeoff_only: bool) -> dict:
             nonrep[k] += int(v)
         if (d.get("channel_totals") or {}).get("beliefs_nonempty_epochs"):
             hazard_epochs += 1
+        block = d.get("caregiver") or {}
+        if not block:
+            continue
+        cg_voyages += 1
+        engine = block.get("engine_counters") or {}
+        cg["responses"] += float(engine.get("caregiver_responses") or 0)
+        cg["steward_responses"] += float(engine.get("steward_responses") or 0)
+        cg["reports"] += float(engine.get("caregiver_reports") or 0)
+        cg["dose_credited"] += float(engine.get("caregiver_dose_credited") or 0)
+        via = (_rung(d, "reported_infirmary").get("via_caregiver") or {})
+        cg["reported_via"] += int(via.get("total") or 0)
+        cg["dominant_tx"] += int(block.get("transmissions_dominant_caregiver") or 0)
+        cg["any_dose_tx"] += int(block.get("transmissions_any_caregiver_dose") or 0)
+        cg["attributed_tx"] += int(block.get("transmissions_attributed") or 0)
+        cg["stamped"] += int(block.get("stamped_hosts") or 0)
+        cg["stamped_not_reported"] += int(block.get("stamped_not_reported") or 0)
+        cg["nonemetic"] += len(block.get("reports_on_nonemetic_course") or [])
+        responses = (
+            float(engine.get("caregiver_responses") or 0)
+            + float(engine.get("steward_responses") or 0)
+        )
+        if block.get("vomiting_course_hosts") and not responses:
+            cg["zero_response_voyages"] += 1
     inf = pooled["infected"]["total"]
     sym = pooled["symptomatic_course"]["total"]
     eli = pooled["syndrome_eligible"]["total"]
@@ -160,6 +189,17 @@ def _agg_cell(dumps: list[dict], takeoff_only: bool) -> dict:
         "n": len(sel),
         "takeoff": sum(1 for d in sel if d.get("took_off")),
         "pooled": pooled,
+        "caregiver": {
+            "voyages_with_block": cg_voyages,
+            **{k: (int(v) if v == int(v) else v) for k, v in cg.items()},
+            "share_of_reported": (
+                cg["reported_via"] / rep if rep else None
+            ),
+            "share_of_transmissions": (
+                cg["dominant_tx"] / cg["attributed_tx"]
+                if cg["attributed_tx"] else None
+            ),
+        },
         "ratios": {
             "symptomatic_per_infected": sym / inf if inf else None,
             "eligible_per_symptomatic": eli / sym if sym else None,
@@ -215,27 +255,63 @@ def _map_takeoff_lookup(map_root: str) -> dict[str, bool]:
     }
 
 
+def _trigger_lines(name: str, agg: dict) -> list[str]:
+    """Frozen report-immediately triggers evaluated on a cell's pool."""
+    cg = agg["caregiver"]
+    if not cg["voyages_with_block"]:
+        return []
+    fired = []
+    share = cg["share_of_transmissions"]
+    if share is not None and share > TRIGGER_CAREGIVER_TX_SHARE:
+        fired.append(
+            f"{name}: caregiver share of transmissions {share:.3f} "
+            f"> {TRIGGER_CAREGIVER_TX_SHARE}"
+        )
+    if cg["nonemetic"]:
+        fired.append(
+            f"{name}: {int(cg['nonemetic'])} caregiver report(s) on "
+            "non-emetic courses"
+        )
+    if cg["zero_response_voyages"]:
+        fired.append(
+            f"{name}: {int(cg['zero_response_voyages'])} voyage(s) with "
+            "vomiting courses but zero caregiver/steward responses"
+        )
+    return fired
+
+
 def render(cells: dict[tuple[str, str], list[dict]], map_root: str | None) -> tuple[str, dict]:
     lines = [
-        "| cell | n (tookoff) | symp/infected | elig/symp | rep/elig | conf/rep | dated/conf | verdict |",
-        "|---|---|---|---|---|---|---|---|",
+        "| cell | n (tookoff) | symp/infected | elig/symp | rep/elig | viaCG | CGtx | conf/rep | dated/conf | verdict |",
+        "|---|---|---|---|---|---|---|---|---|---|",
     ]
-    out = {"cells": {}, "join_violations": []}
+    out = {"cells": {}, "join_violations": [], "triggers": []}
     for (tier, match), dumps in sorted(cells.items()):
         name = f"{tier}/{match}"
         allagg = _agg_cell(dumps, takeoff_only=False)
         tkagg = _agg_cell(dumps, takeoff_only=True)
         verdict = _link_verdict(tkagg if tkagg["n"] else allagg)
         r = tkagg["ratios"] if tkagg["n"] else allagg["ratios"]
+        cgagg = tkagg if tkagg["n"] else allagg
+        cg = cgagg["caregiver"]
+        out["triggers"].extend(_trigger_lines(name, cgagg))
 
         def f(x):
             return "-" if x is None else f"{x:.3f}"
 
+        via_cg = (
+            f(cg["share_of_reported"]) if cg["voyages_with_block"] else "-"
+        )
+        cg_tx = (
+            f(cg["share_of_transmissions"]) if cg["voyages_with_block"]
+            else "-"
+        )
         lines.append(
             f"| {name} | {allagg['n']} ({allagg['takeoff']}) | "
             f"{f(r['symptomatic_per_infected'])} | "
             f"{f(r['eligible_per_symptomatic'])} | "
             f"{f(r['reported_per_eligible'])} | "
+            f"{via_cg} | {cg_tx} | "
             f"{f(r['confirmed_per_reported'])} | "
             f"{f(r['dated_per_confirmed'])} | {verdict} |"
         )
@@ -259,6 +335,10 @@ def render(cells: dict[tuple[str, str], list[dict]], map_root: str | None) -> tu
             f"**JOIN VOID**: {len(out['join_violations'])} seeds disagree "
             "between funnel `took_off` and the map's `peak_prevalence >= 10` — "
             "the funnel voyage is not its scored twin; all attributions above are void.")
+    if out["triggers"]:
+        lines.append("")
+        lines.append("**Report-immediately triggers fired**:")
+        lines.extend(f"- {line}" for line in out["triggers"])
     return "\n".join(lines) + "\n", out
 
 

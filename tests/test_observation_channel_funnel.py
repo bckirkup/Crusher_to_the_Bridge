@@ -47,8 +47,10 @@ def _record(
     diarrhoea=False,
     imported=False,
     onset_offset=24,
+    routes=None,
 ):
     axes = {"vomiting": vomiting, "diarrhoea": diarrhoea} if presented else {}
+    routes = dict(routes or {})
     return {
         "agent_id": aid,
         "role": role,
@@ -64,6 +66,8 @@ def _record(
         "axes_drawn": bool(axes),
         "illness_end": "RECOVERED",
         "status_end": "INFECTED",
+        "routes": routes,
+        "dominant_route": max(routes, key=routes.get) if routes else None,
     }
 
 
@@ -77,7 +81,8 @@ def _work(epoch, status=STATUS_BASELINE, syn=None, agents=None):
     )
 
 
-def _agent_dict(aid, pid_illness=None, compliance="compliant"):
+def _agent_dict(aid, pid_illness=None, compliance="compliant",
+                caregiver_stamp=None):
     pinfs = (
         {PID: {"illness": pid_illness, "epochs_since_symptom_onset": 3}}
         if pid_illness is not None
@@ -91,6 +96,7 @@ def _agent_dict(aid, pid_illness=None, compliance="compliant"):
         ),
         "compliance_status": compliance,
         "location": "zCabin",
+        "caregiver_report_due_epoch": caregiver_stamp,
     }
 
 
@@ -132,6 +138,23 @@ def test_capture_tracks_status_and_reports():
     # Empty syn_result is safe.
     cap.observe(None, _work(3, STATUS_SUSPECTED, syn=None))
     assert cap.status_by_epoch[3] == STATUS_SUSPECTED
+
+
+def test_capture_tracks_caregiver_reports_and_stamps():
+    cap = ChannelCapture(PID)
+    cap.observe(None, _work(1, syn={
+        "true_positive_ids": [7],
+        "caregiver_report_ids": [7],
+    }, agents=[_agent_dict(7, "SYMPTOMATIC", caregiver_stamp=1)]))
+    cap.observe(None, _work(2, syn={"caregiver_report_ids": [9]}, agents=[
+        _agent_dict(7, "SYMPTOMATIC"),
+        _agent_dict(9, "SYMPTOMATIC", caregiver_stamp=2),
+    ]))
+    assert cap.caregiver_report_ids == {7, 9}
+    assert cap.caregiver_first_report_epoch[7] == 1
+    assert cap.caregiver_first_report_epoch[9] == 2
+    # host 7's stamp cleared at its epoch-1 report; host 9 still stamped.
+    assert cap.caregiver_stamped_ids == {7, 9}
 
 
 def test_capture_exposure_splits_visibility():
@@ -263,6 +286,46 @@ def test_build_funnel_rungs_and_splits():
     assert fidelity["compared"] == 1
 
 
+def test_build_funnel_caregiver_block():
+    records = [
+        _record(1, severity="mild", routes={"caregiver": 4.0}),
+        _record(2, severity="moderate", routes={"fomite": 2.0,
+                                                "caregiver": 1.0}),
+        _record(3, severity="mild", routes={"fomite": 1.0}),
+        _record(4, severity="mild", presented=False, vomiting=False,
+                routes={"caregiver": 3.0}),
+        _record(5, severity="mild", imported=True),
+    ]
+    cap = ChannelCapture(PID)
+    # host 1 reported through the caregiver channel; host 4's caregiver
+    # report lands on a non-emetic (asymptomatic) course -> trigger row.
+    cap.caregiver_report_ids.update({1, 4})
+    cap.caregiver_stamped_ids.update({1, 4})
+    cap.reported_symptomatic_ids.update({1, 4})
+    cap.first_report_epoch.update({1: 6, 4: 7})
+    out = build_funnel(
+        records, cap, PROFILE,
+        lab_sampled=set(), lab_confirmed=set(), confirmed_epoch_of={},
+        dated={}, ever_reported_ids={1, 4},
+    )
+    reported = out["rungs"]["reported_infirmary"]
+    # host 4's course never presented, so only host 1 sits in the
+    # reported rung; both ids stay visible in the caregiver block.
+    assert reported["total"] == 1
+    assert reported["via_caregiver"]["total"] == 1
+    block = out["caregiver"]
+    assert block["reports_via_caregiver"] == 2
+    # aboard-attributed: hosts 1-4 (imported host 5 excluded, no routes)
+    assert block["transmissions_attributed"] == 4
+    assert block["transmissions_dominant_caregiver"] == 2
+    assert block["transmissions_any_caregiver_dose"] == 3
+    assert block["share_dominant_caregiver"] == pytest.approx(0.5)
+    assert block["reports_on_nonemetic_course"] == [4]
+    assert block["reports_without_infection_record"] == []
+    assert block["stamped_not_reported"] == 0
+    assert block["vomiting_course_hosts"] == 4
+
+
 def test_build_funnel_empty_is_safe():
     out = build_funnel(
         [], ChannelCapture(PID), PROFILE,
@@ -376,3 +439,50 @@ def test_build_readout_pooled_crew_share():
     out = build_readout([row])
     assert out["pooled_ratios"]["reported_crew_share"] == pytest.approx(1.0)
     assert out["pooled_ratios"]["dated_per_confirmed"] == pytest.approx(1.0)
+
+
+def test_build_readout_pools_caregiver_block():
+    row = {
+        "seed": 1,
+        "ratios": {"infected": 4.0},
+        "rungs": {"infected": {"total": 4}},
+        "dating_fidelity": {"dated_hosts": 0, "exact_share": None,
+                            "max_abs_error": None},
+        "confirmed_never_dated": {}, "non_report_decomposition": {},
+        "caregiver": {
+            "stamped_hosts": 2,
+            "stamped_not_reported": 1,
+            "reports_via_caregiver": 1,
+            "reports_on_nonemetic_course": [4],
+            "transmissions_dominant_caregiver": 1,
+            "transmissions_any_caregiver_dose": 2,
+            "transmissions_attributed": 4,
+            "vomiting_course_hosts": 3,
+            "engine_counters": {
+                "caregiver_responses": 2, "steward_responses": 1,
+                "caregiver_reports": 2, "caregiver_dose_credited": 5.5,
+            },
+        },
+    }
+    out = build_readout([row])
+    cg = out["caregiver"]
+    assert cg["reports_via_caregiver"] == 1
+    assert cg["transmissions_attributed"] == 4
+    assert cg["share_dominant_caregiver"] == pytest.approx(0.25)
+    assert cg["reports_on_nonemetic_course"] == 1
+    assert cg["engine_counters_total"]["caregiver_responses"] == 2
+    assert cg["voyages_zero_responses_with_vomiting"] == 0
+
+
+def test_build_readout_caregiver_absent_is_safe():
+    row = {
+        "seed": 1,
+        "ratios": {"infected": 1.0},
+        "rungs": {"infected": {"total": 1}},
+        "dating_fidelity": {"dated_hosts": 0, "exact_share": None,
+                            "max_abs_error": None},
+        "confirmed_never_dated": {}, "non_report_decomposition": {},
+    }
+    out = build_readout([row])
+    assert out["caregiver"]["transmissions_attributed"] == 0
+    assert out["caregiver"]["share_dominant_caregiver"] is None
