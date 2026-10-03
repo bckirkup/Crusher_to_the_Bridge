@@ -2,8 +2,8 @@
 **Date:** 2026-09-28
 **Commit:** 6085e726
 **Pathogens:** sars_cov2_resp
-**Status:** measured
-**Measured at:** 472cdf13
+**Status:** closed
+**Measured at:** def39066
 
 Declared before any cell ran. Mechanism candidate 1 of the THETA-SCREEN-V13
 residual hunt: the fixed rings (cabin-mate ring, same-table dining party)
@@ -65,10 +65,21 @@ zero on an arm row (flag did not reach the engine); child failures >5%.
 
 ## Result
 
-Canary measured 2026-09-28 (readout:
-`docs/covid/covid_mech_v1_canary_readout.md`). Full replay array (240
-cells) and fleet design (500 cells) not yet submitted — paused after the
-declared canary.
+Canary measured 2026-09-28 at `472cdf13` (readout:
+`docs/covid/covid_mech_v1_canary_readout.md`) — those readings are STALE:
+they predate the PRESENT-SHARE-01 presentation repair
+(`presentation_draw_mode = once_per_course`, PR #825).
+
+Re-measured 2026-10-02 at `def39066` on the v15-paired design (PR #850;
+image `picard-campaign@sha256:516b0b57…`, jobdef
+`picard-covid-boarding-screen:46`, 40/40 anchor cells): under
+once_per_course the premise **collapses** — rings_first fails the anchor
+clause on both legs (takeoff n 11, q05–q95 405–2460 does not contain
+197, before_share 0.343 vs 0.173±0.10) while cap_on anchors cleanly
+(n 10, 153–2438 ∋ 197, 0.090). The stale rings_first PASS does not
+survive the repaired draw, so the band rows never ran.
+Readout: `docs/covid/covid_mech_v2_canary_readout.md`; band context
+`docs/covid/covid_mech_v2_band_readout.md`.
 
 Execution: image `covid-mech-v1-472cdf13` (engine `472cdf13`, PR #767;
 digest `sha256:10902239ff…`), jobdef `picard-covid-boarding-screen:31`,
