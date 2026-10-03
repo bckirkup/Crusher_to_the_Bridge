@@ -1,0 +1,36 @@
+# Shared campaign worker — one image serving every campaign entrypoint.
+#
+# The per-campaign overlays (Dockerfile.<campaign>) each copy only their
+# own driver + entrypoint pair, so a jobdef can only run on its own
+# image. This overlay layers on the base campaign image (root
+# Dockerfile at the same SHA) and adds the two trees jobdefs invoke
+# but the root scope omits: deploy/aws/ (every *_entrypoint.py plus the
+# submit/monitor helpers) and tools/ (the diag drivers the entrypoints
+# call). One tag then serves covid hull/DP reads, the noro funnel
+# campaigns, and the flu arrays alike — the jobdef's command picks the
+# worker, not the image.
+#
+# Build (from the repository root; the base must exist locally or in ECR):
+#   docker build -f deploy/aws/Dockerfile.campaign_stack \
+#     --build-arg BASE_IMAGE=picard-campaign:base-<sha> \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:campaign-<sha> .
+ARG BASE_IMAGE=picard-campaign:base-1e158d47
+FROM ${BASE_IMAGE}
+
+# Restamp the engine revision: the base image's ENGINE_GIT_SHA names ITS
+# build SHA; runs from this overlay must record THIS layer's source SHA
+# (pass --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD)).
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+USER root
+# Every campaign entrypoint + submit/monitor helper, and the diag tools
+# they drive (observation_channel_funnel, per_host_dose_challenge, the
+# channel readouts, growth census, ...).
+COPY --chown=campaign:campaign deploy/aws/ ./deploy/aws/
+COPY --chown=campaign:campaign tools/ ./tools/
+USER campaign
+
+# Job definitions supply the worker script as argv[0].
+ENTRYPOINT ["python3"]
