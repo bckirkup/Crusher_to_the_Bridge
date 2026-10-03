@@ -1,0 +1,86 @@
+{
+  "design_id": "covid_propensity_v1",
+  "task_id": "PROPENSITY-V1",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_screen_v15_stage2",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it is the PROPENSITY-V1 measurement stage declared in docs/propensity_v1_spec.md and the PROPENSITY-V1 ledger entry — the clause canary at the Theta 1e9 anchor, run ahead of any admissible-band array decision.",
+  "description": "PROPENSITY-V1 clause canary: does the shipped persistent per-party contact-propensity multiplier (rhythm.participation_propensity, mode party, mean-pinned lognormal cv 0.8 on discretionary event classes) move the Theta 1e9 anchor's clause verdict? The anchor is historically the ONLY clause-passing row on the DP replay (v15 stage 2: takeoff 10/20, recorded q05-q95 153-2,438 contains 197, before_share median 0.090 within 0.10 of 0.173) and is fleet-shape-inadmissible, so a pass here is not an admission — it is the mechanism's first DP-scale read. Two arms at the one anchor cell, the same declared replay the v11->v15 stage-2 lineage froze: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (measured null axis under a declared onset_day, carried for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). D0_declared carries the shipped default verbatim (mode party); PROP_OFF carries participation_propensity {mode: off} — the labelled bit-identical baseline, zero draws on the propensity stream — so the seed-paired delta isolates the mechanism under the current engine (post-CAREGIVER-V1, post-PRESENT-SHARE-01).",
+  "prerequisites": [
+    "PROPENSITY-V1 shipped default-ON (PR #860, merged 1e158d47): rhythm.participation_propensity {mode: party, distribution: lognormal, cv: 0.8, applies_to_event_classes: discretionary, age_band_mean: declared table}; mode off consumes zero draws on any stream (bit-identical baseline claim under test); resolved block echoes at delivery.participation_propensity; draw telemetry at propensity_telemetry (units_drawn, multiplier q05/median/q95).",
+    "THETA-SCREEN-V15 stage 2 measured (image 6efec855, s3 prefix campaign/covid_theta_screen_v15_stage2/6efec855/cells/): the clause passes ONLY at the Theta 1e9 anchor (10/20 takeoff seeds, recorded q05-q95 [153, 2,438] contains 197, takeoff median before_share 0.090 within 0.10 of 0.173); fails at every admissible interior Theta {1.78e11, 2.37e11, 3.16e11, 4.22e11, 5.62e11} (q05 floors 1,444-1,743 vs 197, shares 0.735-0.957 vs 0.173).",
+    "Every declared mechanism candidate on the admissible band is measured dead: RING-CAP-V1 premise collapsed (fixed rings bypass the cap budget but the pooled routes they do not touch carry ~2% of infected dose), SUSCPOOL-V1 moved the f050 boundary only, FRAILTY-V1 conditioned the per-challenge hazard, COOP arms declared but the residual is measured exposure-frequency-shaped.",
+    "QUAR-ATTR-V2 anchor record on the post-721 base: Theta 1e9 (3,365 infections / 0.9068 attack) — boundary anchor, never a candidate; this canary's D0 row is the next re-measurement of that cell family, two engine generations later (once_per_course presentation, CAREGIVER-V1, PROPENSITY-V1 armed).",
+    "diamond_princess_2020 hull golden repinned under CAREGIVER-V1 + PROPENSITY-V1 (b3b75363, PR #864): the shipped default the D0 arm reproduces is the post-repin tree."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_theta_screen_v15_stage2 (the frozen cell family carried since v11): index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared value, measured null axis under a declared onset_day, carried for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    1000000000.0
+  ],
+  "thetas_note": "The Theta 1e9 replay-canary anchor only — verbatim from the v11->v15 stage-2 lineage, the boundary row that is the only clause-passing row ever measured on this replay and is fleet-shape-inadmissible under every engine generation. The five admissible-band Thetas are explicitly NOT in this design: whether the band array runs is a decision taken after this canary's readout, per the campaign gate.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as v10/v11/rebase_01/v13/v15 stage 2 — every PROP_OFF/D0 cell pairs seed-for-seed with the v15 stage-2 anchor row (indices 0-19, s3 prefix campaign/covid_theta_screen_v15_stage2/6efec855/cells/) and with its sibling arm.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim: rhythm.participation_propensity resolves mode party, lognormal cv 0.8, discretionary classes, declared age-band tilt. First arm so empty overrides per the arm grammar; also the drift read against the v15 stage-2 anchor row (two intervening engine generations: the presentation-draw repair was already in for v15; CAREGIVER-V1 and PROPENSITY-V1's own stream are the delta)."
+    },
+    {
+      "arm_id": "PROP_OFF",
+      "overrides": {
+        "participation_propensity": {
+          "mode": "off"
+        }
+      },
+      "note": "The labelled bit-identical baseline: mode off consumes zero draws on the propensity stream, so this arm is the pre-PROPENSITY engine under rhythm — the read of what the mechanism did is the seed-paired D0-vs-PROP_OFF delta, and propensity_draw.units_drawn == 0 is its landing witness."
+    }
+  ],
+  "cells_note": "1 point x 2 arms x 20 seeds = 40 declared-replay cells (~30 min each). Cell order is point x arm x seed: D0_declared occupies indices 0-19, PROP_OFF indices 20-39 — the whole design IS the canary; INDEX_OFFSET 0 + ARRAY_SIZE 40 submits it whole.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_theta_screen_v15_stage2 (the v11 lineage); the verdict grammar is a canary assay's, not a screen's — the anchor is reported beside the clause, never selected.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v15 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when the row has >= 5 takeoff seeds, else reported as 'insufficient takeoff mass'.",
+      "note": "Scored per arm at the one anchor cell. The deliverable beside it: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, per-seed recorded_onsets/infections_total/before_share vectors for both arms, and the seed-paired delta distribution D0 - PROP_OFF. A clause PASS on either arm at the fleet-shape-inadmissible anchor is reported immediately; it is not an admission and selects nothing."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "audit_invariants": {
+      "participation_propensity": "delivery.participation_propensity.mode resolves 'party' on every D0_declared cell and 'off' on every PROP_OFF cell — a missing or mismatched echo is a design defect, not a sim result, and halts the campaign before readout.",
+      "propensity_draw": "propensity_draw.units_drawn > 0 on every D0_declared cell and == 0 on every PROP_OFF cell — the draw-landing witness and the off-arm bit-identity witness.",
+      "presentation_draw_mode": "delivery.presentation_draw_mode == 'once_per_course' on every cell — the resolved draw must be the repaired spend.",
+      "hand_reservoir_mode": "delivery.hand_reservoir_mode == 'hygiene_cycle' on every cell — the shipped hand line; any other resolution means the image is not the merged default."
+    },
+    "verdict_grammar": "Canary verdict, frozen: (a) the clause outcome class per arm — PASS / FAIL / insufficient-mass; (b) the seed-paired D0-vs-PROP_OFF delta distribution on recorded_onsets, before_share, infections_total — the mechanism's footprint at the anchor; (c) the propensity-draw echo (units_drawn, multiplier q05/median/q95 per cell) as the pairing audit. A PROP_OFF FAIL beside a D0 PASS is mechanism-credited suppression; identical verdicts both ways is a mechanism-inert-at-anchor measurement. Neither arm is admissible — the anchor is a boundary row and stays one."
+  },
+  "diagnostics": {
+    "paired_vs_v15_anchor": "Every cell pairs seed-for-seed with the v15 stage-2 Theta 1e9 anchor row (cells 0-19 at campaign/covid_theta_screen_v15_stage2/6efec855/cells/, image built pre-CAREGIVER-V1 and pre-PROPENSITY-V1): per-seed recorded_onsets / before_share / infections_total deltas reported as the cross-generation drift read, never selected on.",
+    "propensity_telemetry": "propensity_draw per cell: units_drawn (propensity units dealt), multiplier q05/median/q95 — the spec's pairing audit (a party-mode draw population of ~1,000+ units should read q05 ~0.3 / q95 ~3 under cv 0.8 lognormal); degenerate reads (units 0 on D0, or q05 >= q95) mark the draw never landed.",
+    "fleet_shape_indicator": "Reported, never thresholded: attack-rate quantiles and takeoff fraction per arm — the anchor's burn rate under each arm read against the record's 712."
+  },
+  "execution": {
+    "platform": "AWS Batch, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_propensity_v1. Convention: submit to the On-Demand queue picard-analysis-queue (CE picard-analysis-compute-ondemand, max 256 vCPU) — us-east-1 Spot droughts park arrays >1h at RUNNABLE and are not job errors. Image is the shared campaign worker layer deploy/aws/Dockerfile.campaign_stack (FROM picard-campaign:base-<sha> + ENTRYPOINT [\"python3\"]) built on the base image at the merged design-PR SHA containing the participation_propensity arm key and this design file; job-definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_cells": 40,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_propensity_v1/<sha>/cells/",
+    "canary": "This whole design is the canary — the two arms x 20 seeds at the one Theta 1e9 cell. Before the array: a local echo/initialize audit (echo_screen_cell) must resolve mode party on D0_declared and mode off on PROP_OFF. On AWS, inspect one child per arm first (cells 0 and 20) before releasing — no: the campaign gate for a 40-cell design is the single submit; the array IS the canary, so submit all 40, then STOP and report. The admissible-band array is a separate later decision.",
+    "report_immediately_if": "either arm produces a clause pass (takeoff-band contains 197 AND before_share median in range) — the first DP-scale pass at anchor under this mechanism; the propensity echo fails to resolve on any canary cell (delivery.participation_propensity missing or mode mismatched — a design defect, not a sim result); any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; any cell echoes presentation_draw_mode != once_per_course or hand_reservoir_mode != hygiene_cycle; propensity_draw.units_drawn > 0 on any PROP_OFF cell or == 0 on any D0_declared cell; or child failure rate exceeds 5%."
+  }
+}

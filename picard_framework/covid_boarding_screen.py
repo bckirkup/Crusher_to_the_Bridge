@@ -89,6 +89,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "dose_response_frailty",
     "hazard_frailty",
     "info_suppression",
+    "participation_propensity",
 })
 # The embarkation-immunity structure an arm may write onto
 # ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
@@ -899,6 +900,10 @@ def apply_arm_overrides(
         _apply_seed_patch(raw, overrides["seed_patch"])
     if "info_suppression" in overrides:
         _apply_info_suppression(raw, overrides["info_suppression"])
+    if "participation_propensity" in overrides:
+        _apply_participation_propensity(
+            raw, overrides["participation_propensity"],
+        )
     return raw
 
 
@@ -948,6 +953,30 @@ def _apply_info_suppression(
             "info_suppression arm override must be a mapping or null",
         )
     raw["config_overrides"]["info_suppression"] = dict(block)
+
+
+def _apply_participation_propensity(
+    raw: dict[str, Any],
+    block: Any,
+) -> None:
+    """Write a PROPENSITY-V1 arm's block onto config_overrides.rhythm.
+
+    The whole declared block lands verbatim at
+    ``config_overrides.rhythm.participation_propensity`` — resolution and
+    validation happen in ``RhythmLayer`` at ``initialize()``, so an invalid
+    arm raises at cell build, not silently mid-voyage. ``None`` removes the
+    sub-block, restoring the shipped default (``mode: party``).
+    """
+    rhythm = raw.setdefault("config_overrides", {}).setdefault("rhythm", {})
+    if block is None:
+        rhythm.pop("participation_propensity", None)
+        return
+    if not isinstance(block, Mapping):
+        raise ValueError(
+            "participation_propensity arm override must be a mapping or "
+            "null",
+        )
+    rhythm["participation_propensity"] = dict(block)
 
 
 class QuarantineAttributionLedger:
@@ -1407,6 +1436,19 @@ def _frailty_draw_stats(sim: Any) -> dict[str, Any]:
     return _host_draw_stats(sim, "frailty_multiplier")
 
 
+def _propensity_draw_stats(sim: Any) -> dict[str, Any]:
+    """The realized propensity-unit draws (landing proof, PROPENSITY-V1).
+
+    ``{"units_drawn": 0}`` on the off arm and on hulls with no rhythm
+    catalog — the payload witness that the baseline consumed nothing on
+    the propensity stream.
+    """
+    rhythm = getattr(getattr(sim, "engine", None), "_rhythm", None)
+    if rhythm is None:
+        return {"units_drawn": 0}
+    return dict(rhythm.propensity_telemetry)
+
+
 def prepare_cell_run_spec(
     design: BoardingScreenDesign,
     cell: ScreenCell,
@@ -1557,6 +1599,11 @@ def cell_payload(
             # auditable against the draw that actually landed on the
             # boarding population (SUSCPOOL-V1).
             "secretor_negative": _secretor_negative_block(raw, sim),
+            # The realized propensity-unit draw tally, echoed so a
+            # participation_propensity arm is auditable against what the
+            # rhythm layer actually dealt — {"units_drawn": 0} on the
+            # off arm is the bit-identity witness (PROPENSITY-V1).
+            "propensity_draw": _propensity_draw_stats(sim),
             **_attribution_block(sim, ledger, raw),
             # The resolved pooled-route delivery constants, echoed so a
             # delivery-machinery arm's declared values are auditable from
