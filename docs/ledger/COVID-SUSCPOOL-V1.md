@@ -2,8 +2,8 @@
 **Date:** 2026-09-28
 **Commit:** 6085e726
 **Pathogens:** sars_cov2_resp
-**Status:** measured
-**Measured at:** 472cdf13
+**Status:** closed
+**Measured at:** def39066
 
 Declared before any cell ran. Mechanism candidate 3 of the
 THETA-SCREEN-V13 residual hunt, shape (a) per the user's pick: a hard
@@ -55,10 +55,27 @@ non-monotone response in fraction at two consecutive admissible Thetas
 
 ## Result
 
-Canary measured 2026-09-28 (readout:
-`docs/covid/covid_mech_v1_canary_readout.md`). Full replay array (480
-cells) and fleet design (1000 cells) not yet submitted — paused after
-the declared canary.
+Canary measured 2026-09-28 at `472cdf13` (readout:
+`docs/covid/covid_mech_v1_canary_readout.md`) — STALE, predates the
+PRESENT-SHARE-01 presentation repair (`once_per_course`, PR #825).
+
+Re-measured 2026-10-02 at `def39066` on the v15-paired designs (PR #850;
+image `picard-campaign@sha256:516b0b57…`, jobdef
+`picard-covid-boarding-screen:46`; 120/120 canary + 200/200 band + 500/500
+fleet cells, 0% failures, 0 audit failures). Under once_per_course
+f050 **keeps** its anchor PASS (n 6, 169–1193 ∋ 197, share 0.150) but
+fails the clause at every admissible θ (q05 floors 411–1329 vs 197;
+before_share 0.69–0.90 vs 0.173±0.10) — the anchor PASS was a
+boundary-endpoint phenomenon. f025/f075 band rows unrun by scope
+decision after their stale-canary FAILs. Drift audit clean: declared
+reproduces the v15 stage-2 parent seed-for-seed at all six θs.
+The declared fleet-shape check measured a real H3 response: at the
+same-50-seed v15 comparator the band interior runs hot (declared above
+the 0.008 median ceiling at 4/5 θs) while f050 lands inside the
+Willebrand window at all θ ≥ 2.37e11 and below its floor at 1.78e11 —
+monotone downward, no sign flips. The replay leg is dead by ~5× even
+where the fleet shape is right; the assay is closed.
+Readout: `docs/covid/covid_mech_v2_band_readout.md`.
 
 Execution: image `covid-mech-v1-472cdf13` (engine `472cdf13`, PR #767;
 digest `sha256:10902239ff…`), jobdef `picard-covid-boarding-screen:31`,

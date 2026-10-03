@@ -210,6 +210,22 @@ so these are measured deltas, not dead wiring — the payload now carries
 overrides landed. Whether f050 survives the admissible band awaits the
 full-array decision (`docs/covid/covid_mech_v2_canary_readout.md`).*
 
+*Update (2026-10-02, `def39066`, full arrays measured — both assays
+DEAD): per the user's surviving-arms decision, SUSCPOOL replay
+{declared, f050} × 5 admissible θ × 20 seeds (200 cells) and fleet
+{declared, f050} × 5 θ × 50 seeds (500 cells) ran on jobdef rev 46 —
+700/700 SUCCEEDED, 0 audit failures, declared reproduces v15 stage-2
+seed-for-seed at all six θs. **f050 fails the clause at every
+admissible θ** (takeoff q05 floors 411–1329 vs 197; before_share
+0.69–0.90 vs 0.173±0.10) — its anchor PASS was a boundary-endpoint
+phenomenon, so SUSCPOOL-V1 is dead under the current engine, and
+RING-CAP-V1 was already dead by premise collapse. The fleet check is
+the interesting survivor: f050 sags the cross-ship surface INTO the
+covid.H3 window at 4/5 admissible θs where the declared band runs hot
+— a real fleet-shape response mapped for any successor pool-fraction
+design, but unreachable for the replay leg. Readout:
+`docs/covid/covid_mech_v2_band_readout.md`.*
+
 **The declared index case is repaired — earlier text here was stale.**
 The record's index boarded 20 Jan already symptomatic (onset 19 Jan) and left
 at Hong Kong on 25 Jan (Yamagishi 2020). Declared per-agent departure exists
