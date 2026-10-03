@@ -1684,3 +1684,99 @@ def test_hazard_frailty_draws_are_deterministic_per_seed():
     assert first["frailty_draw"] == second["frailty_draw"]
     assert first["infections_total"] == second["infections_total"]
 
+
+
+# ── PROPENSITY-V1: the participation-propensity arm + clause canary ─────
+
+PROPENSITY_V1_DESIGN = (
+    REPO_ROOT
+    / "picard_framework"
+    / "runs"
+    / "covid_propensity_v1_design.json"
+)
+
+
+def test_propensity_v1_design_is_the_declared_40_cell_canary():
+    design = load_design(str(PROPENSITY_V1_DESIGN))
+    cells = enumerate_cells(design)
+    assert len(cells) == 40
+    assert design.arm_ids == ("D0_declared", "PROP_OFF")
+    # One anchor point, arm-major then seed-innermost.
+    assert all(c.theta == pytest.approx(1e9) for c in cells)
+    assert cells[0].arm_id == "D0_declared"
+    assert cells[0].seed == 20200205
+    assert cells[19].seed == 20200224
+    assert cells[20].arm_id == "PROP_OFF"
+    assert cells[20].seed == 20200205
+    assert cells[39].arm_id == "PROP_OFF"
+    assert len({c.key for c in cells}) == 40
+
+
+def test_participation_propensity_arm_writes_the_rhythm_block():
+    design = load_design(str(PROPENSITY_V1_DESIGN))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "D0_declared")
+    off = next(c for c in cells if c.arm_id == "PROP_OFF")
+    base_raw = prepare_cell_run_spec(design, base)
+    off_raw = prepare_cell_run_spec(design, off)
+    assert (
+        off_raw["config_overrides"]["rhythm"]["participation_propensity"]
+        == {"mode": "off"}
+    )
+    assert "participation_propensity" not in (
+        base_raw["config_overrides"].get("rhythm") or {}
+    )
+
+
+def test_participation_propensity_rejects_a_non_mapping_block():
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {
+            "arm_id": "B1_bad",
+            "overrides": {"participation_propensity": "off"},
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad"
+    )
+    with pytest.raises(ValueError, match="participation_propensity"):
+        prepare_cell_run_spec(design, cell)
+
+
+def test_participation_propensity_bad_mode_fails_at_cell_build():
+    """An out-of-grammar mode surfaces at initialize() — the arm block
+    lands verbatim and the rhythm layer validates it."""
+    design = _arm_design([
+        {"arm_id": "B0_declared", "overrides": {}},
+        {
+            "arm_id": "B1_bad_mode",
+            "overrides": {
+                "participation_propensity": {"mode": "bogus"},
+            },
+        },
+    ])
+    cell = next(
+        c for c in enumerate_cells(design) if c.arm_id == "B1_bad_mode"
+    )
+    with pytest.raises(ValueError, match="participation_propensity.mode"):
+        echo_screen_cell(design, cell)
+
+
+def test_participation_propensity_echo_resolves_both_arms():
+    """Echo readout at initialize() on the real canary design — the audit
+    the campaign gate runs before any cell submits: D0 resolves the
+    shipped party mode, PROP_OFF resolves off."""
+    design = load_design(str(PROPENSITY_V1_DESIGN))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "D0_declared")
+    off = next(c for c in cells if c.arm_id == "PROP_OFF")
+    base_payload = echo_screen_cell(design, base)
+    off_payload = echo_screen_cell(design, off)
+    base_prop = base_payload["delivery"]["participation_propensity"]
+    off_prop = off_payload["delivery"]["participation_propensity"]
+    assert base_prop["mode"] == "party"
+    assert base_prop["cv"] == pytest.approx(0.8)
+    assert off_prop["mode"] == "off"
+    # At initialize() no event has dealt yet: both arms echo zero draws.
+    assert base_payload["propensity_draw"]["units_drawn"] == 0
+    assert off_payload["propensity_draw"]["units_drawn"] == 0
