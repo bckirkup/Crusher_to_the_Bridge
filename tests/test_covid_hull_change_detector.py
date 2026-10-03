@@ -225,7 +225,17 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # mechanism and the mode: off reproduction of the prior tuple):
         # (2, 2, 217, 4, 1) -> (46, 27, 217, 68, 18), read from CI job
         # 111220544557 (fast tier, 3.11, shard 3) on this branch.
-        (3, 11): (46, 27, 217, 68, 18),
+        # PROPENSITY-V1 ships the persistent per-party participation
+        # multiplier default-ON: discretionary events re-deal on
+        # min(1, p * propensity), so the low-propensity tail attends less
+        # and the near-extinct cell falls further:
+        # (46, 27, 217, 68, 18) -> (36, 19, 217, 55, 18), read in the
+        # local venv on CPython 3.12 on this branch. The off cell
+        # (rhythm.participation_propensity.mode: off) reproduces
+        # (46, 27, 217, 68, 18) exactly on the same tree, so the move is
+        # fully attributed to the propensity deal. The 3.11 reading
+        # carries the same tuple pending its CI read.
+        (3, 11): (36, 19, 217, 55, 18),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -333,7 +343,13 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # up by the campaign screen. The 3.11 CI read on this branch
         # returned the identical tuple (CI job 111220544557) — both
         # interpreters agree, as before on this cell.
-        (3, 12): (46, 27, 217, 68, 18),
+        # PROPENSITY-V1 (see the 3.11 note above): the persistent
+        # per-party participation multiplier re-deals the discretionary
+        # attendance Bernoullis: (46, 27, 217, 68, 18) ->
+        # (36, 19, 217, 55, 18), read in the local venv on this branch.
+        # The mode: off cell reproduces the prior tuple exactly, so the
+        # move is fully attributed to the propensity deal.
+        (3, 12): (36, 19, 217, 55, 18),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the

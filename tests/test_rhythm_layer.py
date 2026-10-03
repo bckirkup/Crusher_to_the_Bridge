@@ -371,3 +371,91 @@ def test_sop_capacity_multiplier_overrides_parsed_effect() -> None:
     assert p == pytest.approx(0.2)
     assert m == pytest.approx(0.5)
     assert occ == 1
+
+
+def _propensity_agents(zones: list[dict], n: int = 400) -> list:
+    """Agents carrying the party/age attributes the propensity deal reads."""
+    agents = [_agent(i, zones=zones) for i in range(n)]
+    for i, a in enumerate(agents):
+        a.party_id = i // 4          # 4-berth travelling parties
+        a.age_band = "65-74" if i % 3 else "35-49"
+    return agents
+
+
+def test_propensity_off_arm_draws_nothing() -> None:
+    """mode off is the labelled baseline: the participation deal runs
+    exactly as before — no unit is keyed, no draw is consumed."""
+    zones = _load_zones("spirit_cruise_3000")
+    layer = _layer("spirit_cruise_3000", zones,
+                   participation_propensity={"mode": "off"})
+    assert layer is not None
+    layer.deal_day(_propensity_agents(zones), "sea_day", set(), 1)
+    assert layer.propensity_resolved["mode"] == "off"
+    assert layer.propensity_telemetry["units_drawn"] == 0
+
+
+def test_propensity_party_mode_shares_the_unit_draw() -> None:
+    """Party members read one shared multiplier; a solo agent is its own
+    unit; the age-band tilt applies per agent on top of the draw."""
+    zones = _load_zones("spirit_cruise_3000")
+    layer = _layer("spirit_cruise_3000", zones)
+    assert layer is not None
+    family = []
+    for i in range(4):
+        a = _agent(i, zones=zones)
+        a.party_id = 7
+        family.append(a)
+    draws = {layer._propensity_of(a) for a in family}
+    assert len(draws) == 1
+    elder = _agent(10, zones=zones)
+    elder.party_id = 7
+    elder.age_band = "75+"
+    assert layer._propensity_of(elder) < next(iter(draws))
+    solo = _agent(11, zones=zones)
+    solo.party_id = -1
+    layer._propensity_of(solo)
+    assert layer.propensity_telemetry["units_drawn"] == 2
+
+
+def test_propensity_agent_mode_keys_per_agent() -> None:
+    zones = _load_zones("spirit_cruise_3000")
+    layer = _layer("spirit_cruise_3000", zones,
+                   participation_propensity={"mode": "agent",
+                                             "age_band_mean": {}})
+    assert layer is not None
+    pair = []
+    for i in range(2):
+        a = _agent(i, zones=zones)
+        a.party_id = 3
+        pair.append(a)
+    layer._propensity_of(pair[0])
+    layer._propensity_of(pair[1])
+    assert layer.propensity_telemetry["units_drawn"] == 2
+
+
+def test_propensity_arm_shifts_the_deal() -> None:
+    """Same-seed deal under the propensity arm re-deals commitments — the
+    mechanism is exercised, not inert."""
+    zones = _load_zones("spirit_cruise_3000")
+    agents = _propensity_agents(zones)
+    off = _layer("spirit_cruise_3000", zones,
+                 participation_propensity={"mode": "off"})
+    on = _layer("spirit_cruise_3000", zones)
+    assert off is not None
+    assert on is not None
+    off.deal_day(agents, "sea_day", set(), 1)
+    on.deal_day(agents, "sea_day", set(), 1)
+    off_map = {aid: tuple(c.event_id for c in cs)
+               for aid, cs in off._commitments.items()}
+    on_map = {aid: tuple(c.event_id for c in cs)
+              for aid, cs in on._commitments.items()}
+    assert off_map != on_map
+    tel = on.propensity_telemetry
+    assert tel["units_drawn"] > 0
+    assert tel["multiplier_q05"] < tel["multiplier_q95"]
+
+
+def test_propensity_rejects_unknown_mode() -> None:
+    with pytest.raises(ValueError):
+        _layer("spirit_cruise_3000",
+               participation_propensity={"mode": "bogus"})

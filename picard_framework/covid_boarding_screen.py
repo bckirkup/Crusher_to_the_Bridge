@@ -1648,6 +1648,13 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
             caregiver_resolved() if caregiver_resolved is not None else None
         ),
         "activity_contacts": resolved_contacts,
+        # PROPENSITY-V1: the resolved participation-propensity arm, echoed
+        # so a conditioned array can audit mode/cv/band table from the
+        # payload alone. None on hulls with no rhythm catalog or payloads
+        # written before the mechanism shipped.
+        "participation_propensity": (
+            lambda _rh: _rh.propensity_resolved if _rh is not None else None
+        )(getattr(getattr(sim, "engine", None), "_rhythm", None)),
     }
 
 

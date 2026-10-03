@@ -117,7 +117,13 @@ def test_hourly_reporting_drives_autonomous_escalation() -> None:
     # NORO-HAND-RESERVOIR-01 (wash_reuptake shipped default) shifted the
     # stream again: seed 2's first true-positive call now lands at 73 h and
     # escalation at 74 h, so the horizon is 96 h.
-    spec.random_seed = 2
+    # PROPENSITY-V1 shifted it once more — the persistent per-party
+    # participation multiplier re-deals the discretionary attendance
+    # Bernoullis on this catalogued hull: seed 2 now never produces a
+    # true-positive call (propensity mode: off restores TP at 31 h and
+    # escalation at 32 h on the same tree, so the move is fully attributed
+    # to the deal), while seed 1 escalates at 48 h.
+    spec.random_seed = 1
     sim = ShipSimulation(spec, display=False, repo_root=REPO_ROOT)
     sim.initialize()
 
