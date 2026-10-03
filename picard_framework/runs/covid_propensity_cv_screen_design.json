@@ -1,0 +1,123 @@
+{
+  "design_id": "covid_propensity_cv_screen",
+  "task_id": "PROPENSITY-CV-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_propensity_v1",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it is the cv-sensitivity stage declared in docs/propensity_v1_spec.md §7 and the PROPENSITY-CV-01 ledger entry — a response-surface measurement over the declared cv range, run after the clause canary and ahead of any admissible-band array decision.",
+  "description": "PROPENSITY-CV-01 cv sensitivity screen: how does the DP anchor's clause verdict and the scored observables respond as the participation-propensity dispersion traverses its declared cell? cv is the spec's own widest unmeasured cell (Grade C declaration, docs/propensity_v1_spec.md §4): the mechanism's prediction is shape, so the deliverable is the cv-response curve, not a selected point. Five cv arms at the one Theta 1e9 anchor cell {0.2, 0.4, 0.8 (shipped default), 1.2, 2.0} plus the PROP_OFF labelled baseline, all on lognormal mode party with the shipped discretionary classes and age-band tilt — every cv arm overrides only the cv key, so the resolved block differs from the shipped default in exactly the swept quantity. The declared replay is the same frozen contract the v11->v15 stage-2 lineage froze and covid_propensity_v1 reused: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared null axis, carried for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "prerequisites": [
+    "PROPENSITY-V1 shipped default-ON (PR #860, merged 1e158d47): rhythm.participation_propensity resolves per-key against shipped defaults, so an arm overriding only {cv} keeps mode party, distribution lognormal, the discretionary classes, and the declared age_band_mean — the swept axis is the block's only delta. cv <= 0 returns multiplier 1.0 lazily but still consumes the stream; PROP_OFF is the only zero-draw baseline.",
+    "covid_propensity_v1 clause canary measured (merged #868, e0d43979): the same 20-seed replay contract at the same Theta 1e9 anchor scored the clause FAIL on both arms under the current engine — D0_declared 19/20 takeoff, recorded q05-q95 [1,518, 2,445], before_share median 0.452; PROP_OFF 20/20, [1,190, 2,443], 0.397. The mechanism exercised (~2,089 party units/cell, off arm drew 0 — the bit-identity witness) but its seed-paired footprint is noise (delta median +12 onsets, -0.047 share), and the v15 anchor pass is historical at its own SHA: the low tail that carried it is gone on the merged tree. This screen's D0_declared arm reproduces the canary's same-named arm seed-for-seed (same empty overrides, same seeds) as the cross-run replication row.",
+    "THETA-SCREEN-V15 stage 2 measured (image 6efec855): the clause passes only at the Theta 1e9 anchor (10/20 takeoff, recorded q05-q95 [153, 2,438] contains 197, before_share median 0.090); the five admissible-band Thetas are explicitly NOT in this design — a band sweep is a later decision taken after the anchor curve.",
+    "FRAILTY-V1 precedent (measured, c950e57): a cv x distribution screen is mechanically proven on this lattice — 7 arms x 20 seeds resolved, echoed, and audited cleanly, including the mean-pinned draw witness and the finite-sample scatter read.",
+    "diamond_princess_2020 hull golden repinned under CAREGIVER-V1 + PROPENSITY-V1 (b3b75363, PR #864): the shipped default the D0_declared arm reproduces is the post-repin tree."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_propensity_v1 (the frozen cell family carried since v11): index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    1000000000.0
+  ],
+  "thetas_note": "The Theta 1e9 replay-canary anchor only, as in the parent design — the boundary row whose clause pass is measured only at its own historical SHA (image 6efec855) and is dead at the merged generation (the #868 canary readout: clause FAIL on both arms; the low tail that carried the v15 pass is gone). The anchor cell is where the mechanism's response is read, not a currently-passing row. The admissible-band Thetas are explicitly NOT in this design: whether a band sweep runs is a decision taken after the anchor curve's readout.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as v15 stage 2 and the covid_propensity_v1 canary — every cell pairs seed-for-seed with the PROP_OFF baseline inside the run, with the canary's same-named arms, and with the v15 stage-2 anchor row (cells 0-19 at campaign/covid_theta_screen_v15_stage2/6efec855/cells/).",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim: mode party, lognormal cv 0.8 — the canary arm reproduced seed-for-seed (cross-run replication) and the cv grid's declared centre. First arm so empty overrides per the arm grammar."
+    },
+    {
+      "arm_id": "CV020",
+      "overrides": {
+        "participation_propensity": {
+          "cv": 0.2
+        }
+      },
+      "note": "Thin-tail arm: cv 0.2 (lognormal sigma^2 ~= 0.04; 5th-95th multiplier ~= 0.71-1.4 under the shipped draw) — participation is still persistent per party but nearly homogeneous; tests whether a whisper of heterogeneity already moves the anchor."
+    },
+    {
+      "arm_id": "CV040",
+      "overrides": {
+        "participation_propensity": {
+          "cv": 0.4
+        }
+      },
+      "note": "cv 0.4 (sigma^2 ~= 0.15; 5th-95th ~= 0.49-1.8) — the quarter-step between thin and declared."
+    },
+    {
+      "arm_id": "CV120",
+      "overrides": {
+        "participation_propensity": {
+          "cv": 1.2
+        }
+      },
+      "note": "cv 1.2 (sigma^2 ~= 0.89; 5th-95th ~= 0.14-3.0) — the heavy-tail world the Britton/Ball-Trapman argument needs."
+    },
+    {
+      "arm_id": "CV200",
+      "overrides": {
+        "participation_propensity": {
+          "cv": 2.0
+        }
+      },
+      "note": "cv 2.0 (sigma^2 ~= 1.61; 5th-95th ~= 0.06-3.6) — the declared box's high corner: most units near-stay-at-home, the high-propensity tail carries the exposure. The FRAILTY-V1 screen's high corner for comparability."
+    },
+    {
+      "arm_id": "PROP_OFF",
+      "overrides": {
+        "participation_propensity": {
+          "mode": "off"
+        }
+      },
+      "note": "The labelled bit-identical baseline: mode off consumes zero draws on the propensity stream — the pre-PROPENSITY tree under rhythm, and the seed-paired reference for the cv-response curve (propensity_draw.units_drawn == 0 is its landing witness)."
+    }
+  ],
+  "cells_note": "1 point x 6 arms x 20 seeds = 120 declared-replay cells (~30 min each). Cell order is point x arm x seed: D0_declared occupies indices 0-19 (same indices as the canary's D0 row), CV020 20-39, CV040 40-59, CV120 60-79, CV200 80-99, PROP_OFF 100-119. INDEX_OFFSET 0 + ARRAY_SIZE 120 submits it whole.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_propensity_v1 (the v11 lineage). This is a screen, not an assay: the clause is SCORED per arm beside the cv point, but no cv is selected — the mechanism's declared range is traversed, and fitting cv to the anchor is barred by the same no-fit rule that froze the constants table. The cv-response curve is the deliverable; a band-array decision is out of scope for this design.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v15 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when the row has >= 5 takeoff seeds, else reported as 'insufficient takeoff mass'.",
+      "note": "Scored per arm at the one anchor cell. The deliverable beside it: per-arm takeoff count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, per-seed vectors, and the seed-paired (arm - PROP_OFF) delta distribution on recorded_onsets / before_share / infections_total — the cv-response curve. A clause PASS on ANY arm is reported immediately; it is a measurement of where the anchor's verdict is sensitive to the declared dispersion, never an admission and never a selection."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "audit_invariants": {
+      "participation_propensity": "delivery.participation_propensity resolves on every cell with mode 'party' and the arm's declared cv (0.8 on D0_declared, else the arm's override: 0.2/0.4/1.2/2.0; mode 'off' on PROP_OFF) — a missing or mismatched echo is a design defect, not a sim result, and halts the campaign before readout.",
+      "propensity_draw": "propensity_draw.units_drawn > 0 on every armed cell and == 0 on every PROP_OFF cell — the draw-landing witness and the off-arm bit-identity witness. The multiplier q05/median/q95 per cell is the pairing audit: the spread must widen monotonically in cv (a q95 ~3.6 cell at cv 0.2, or q95 ~1.4 at cv 2.0, means the arm's declared cv never reached the deal).",
+      "presentation_draw_mode": "delivery.presentation_draw_mode == 'once_per_course' on every cell — the resolved draw must be the repaired spend.",
+      "hand_reservoir_mode": "delivery.hand_reservoir_mode == 'hygiene_cycle' on every cell — the shipped hand line; any other resolution means the image is not the merged default."
+    },
+    "verdict_grammar": "Screen verdict, frozen: (a) the clause outcome class per cv point — PASS / FAIL / insufficient-mass; (b) the cv-response curve: seed-paired (arm - PROP_OFF) delta medians on recorded_onsets, before_share, infections_total ordered by declared cv — the measurement of which legs the dispersion moves and in which direction; (c) the propensity-draw echoes as the pairing audit. The curve's SHAPE is the answer: monotone suppression toward the record means the mechanism family is live somewhere in its declared range and a band sweep is warranted; a flat curve at every cv is a mechanism-inert-at-anchor measurement as strong as the canary's. No cv is selected; no admission is made at this boundary row."
+  },
+  "diagnostics": {
+    "paired_vs_canary": "D0_declared pairs seed-for-seed with the covid_propensity_v1 canary's same arm (cells 0-19 under its S3 prefix): per-seed recorded_onsets / before_share / infections_total deltas reported as the cross-run replication read — a non-zero-median drift on identical cells is an engine drift between the two submissions, not a mechanism effect.",
+    "paired_vs_v15_anchor": "Every cell also pairs seed-for-seed with the v15 stage-2 Theta 1e9 anchor row (cells 0-19 at campaign/covid_theta_screen_v15_stage2/6efec855/cells/, image built pre-CAREGIVER-V1 and pre-PROPENSITY-V1): the cross-generation drift read, reported never selected on.",
+    "propensity_telemetry": "propensity_draw per cell: units_drawn plus multiplier q05/median/q95 — the curve's pairing audit (per-arm multiplier q95 should read ~1.4 / ~1.8 / ~2.5 / ~3.0 / ~3.6 at cv 0.2/0.4/0.8/1.2/2.0 under ~1,000 units; degenerate reads mark the draw never landed or the wrong cv resolved).",
+    "fleet_shape_indicator": "Reported, never thresholded: attack-rate quantiles and takeoff fraction per arm — the anchor's burn rate under each dispersion read against the record's 712."
+  },
+  "execution": {
+    "platform": "AWS Batch, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_propensity_cv_screen. Convention: submit to the On-Demand queue picard-analysis-queue (CE picard-analysis-compute-ondemand, max 256 vCPU) — us-east-1 Spot droughts park arrays >1h at RUNNABLE and are not job errors. Image is the shared campaign worker layer deploy/aws/Dockerfile.campaign_stack (FROM picard-campaign:base-<sha> + ENTRYPOINT [\"python3\"]) built on the base image at the merged design-PR SHA containing the participation_propensity arm key and this design file; job-definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_cells": 120,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_propensity_cv_screen/<sha>/cells/",
+    "canary": "The whole design is the screen — 6 arms x 20 seeds at the one anchor cell. Before the array: a local echo/initialize audit (echo_screen_cell) must resolve cv 0.8 on D0_declared, each declared cv on its arm, and mode off on PROP_OFF. On AWS, submit all 120, then STOP and report — the band sweep is a separate later decision.",
+    "report_immediately_if": "any arm produces a clause pass (takeoff-band contains 197 AND before_share median in range) — the first DP-scale pass at anchor under a declared cv; the cv-response curve is non-monotone in a way that splits the clause legs (e.g. the count leg moves but the timing leg does not); the propensity echo fails to resolve on any cell (delivery.participation_propensity missing, or resolved cv != declared); any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; any cell echoes presentation_draw_mode != once_per_course or hand_reservoir_mode != hygiene_cycle; propensity_draw.units_drawn > 0 on any PROP_OFF cell or == 0 on any armed cell; a per-arm multiplier q95 inconsistent with its declared cv (the wrong dispersion landed); or child failure rate exceeds 5%."
+  }
+}

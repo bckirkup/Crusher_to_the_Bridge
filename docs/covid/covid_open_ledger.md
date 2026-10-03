@@ -1083,4 +1083,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   low tail that carried v15's clause pass is gone on the merged tree, so
   the v15 anchor pass is historical at its own SHA
   (`docs/covid/covid_propensity_v1_readout.md`). The band array is the
-  open decision.*
+  open decision.* `PROPENSITY-CV-01` declares the measurement that
+  decision takes first: a single-axis cv screen {0.2, 0.4, 0.8, 1.2,
+  2.0} + `PROP_OFF` baseline on the same frozen replay contract,
+  delivering the seed-paired cv-response curve — with the shipped 0.8
+  measured dead, the screen answers whether any point in the declared
+  range is live at the anchor before a band array is committed.
