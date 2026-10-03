@@ -240,14 +240,23 @@ def _group_cells(rows: list[dict]) -> dict[tuple, list[dict]]:
     return dict(cells)
 
 
-def _collect_s3(s3_uri: str) -> list[dict]:
-    """Stream summary.json rows for every zip under an S3 prefix."""
+def _collect_s3(s3_uri: str, tiers: list[str] | None = None) -> list[dict]:
+    """Stream summary.json rows for every zip under an S3 prefix.
+
+    ``tiers`` scopes the listing to ``<prefix>/<tier>/`` sub-prefixes —
+    mandatory on multi-campaign buckets where a bare-prefix scan would
+    walk tens of thousands of zips.
+    """
     client = _s3_client()
     bucket, prefix = _s3_parse_uri(s3_uri)
+    sub_prefixes = (
+        [f"{prefix}{tier}/" for tier in tiers] if tiers else [prefix]
+    )
     keys = [
         obj["Key"]
+        for sub in sub_prefixes
         for page in client.get_paginator("list_objects_v2").paginate(
-            Bucket=bucket, Prefix=prefix
+            Bucket=bucket, Prefix=sub
         )
         for obj in page.get("Contents", [])
         if obj["Key"].endswith(".zip")
@@ -271,7 +280,9 @@ def collect(root, tiers: list[str] | None = None) -> dict[tuple, list[dict]]:
     root_s = str(root)
     if root_s.startswith("s3:/"):
         # argparse Path collapses s3:// to s3:/ — restore the scheme.
-        return _group_cells(_collect_s3("s3://" + root_s[4:].lstrip("/")))
+        return _group_cells(
+            _collect_s3("s3://" + root_s[4:].lstrip("/"), tiers)
+        )
     cells: dict[tuple, list[dict]] = defaultdict(list)
     for _tier, zip_path in iter_tier_zips(Path(root_s), tiers):
         run = collect_run(zip_path)
@@ -396,9 +407,15 @@ def build_report(
     tiers: list[str] | None = None,
     era: str = "pre",
     import_root: Path | None = None,
+    title: str = "NORO-OUTBREAK-01 readout",
+    paired_label: str = "NORO-IMPORT-01",
 ) -> dict[str, Any]:
     cells = collect(root, tiers)
-    report: dict[str, Any] = {"cells": {}}
+    report: dict[str, Any] = {
+        "cells": {},
+        "title": title,
+        "paired_label": paired_label,
+    }
     for key, runs in sorted(cells.items(), key=lambda kv: _cell_label(kv[0])):
         label = _cell_label(key)
         report["cells"][label] = {
@@ -407,25 +424,80 @@ def build_report(
             "scored": _scored_cell(runs, era),
         }
     if import_root is not None:
-        report["paired"] = _paired_delta(cells, import_root)
+        report["paired"] = _paired_delta(cells, import_root, tiers, era)
     return report
 
 
-def _paired_delta(cells: dict[tuple, list[dict]], import_root: Path) -> dict[str, Any]:
+def _paired_delta(
+    cells: dict[tuple, list[dict]],
+    import_root: Path,
+    tiers: list[str] | None = None,
+    era: str = "pre",
+) -> dict[str, Any]:
     """Seed-paired contrasts vs the pre-hand/presentation-merge zips.
 
     IMPORT-01 ran the same arm coordinates on the same seeds at three
     nsf levels; the pairing restricts its rows to the nsf coordinate this
     campaign declares, then joins on (cell, seed).
     """
-    old_cells = collect(import_root)
+    old_cells = collect(import_root, tiers)
     out: dict[str, Any] = {}
     for key, runs in cells.items():
         pairs = _paired_runs(key, runs, old_cells)
         if not pairs:
             continue
-        out[_cell_label(key)] = _paired_entry(pairs)
+        entry = _paired_entry(pairs)
+        old_runs = old_cells.get(key) or [old for _, old in pairs]
+        entry["cell_delta"] = _cell_delta(runs, old_runs, era)
+        out[_cell_label(key)] = entry
     return out
+
+
+def _d(new: float | None, old: float | None) -> float | None:
+    return None if new is None or old is None else new - old
+
+
+def _cell_delta(
+    new_runs: list[dict],
+    old_runs: list[dict],
+    era: str,
+) -> dict[str, Any]:
+    """Cell-level deltas (new - old) on the anchors the readout reports."""
+    f_n, f_o = _frequency(new_runs), _frequency(old_runs)
+    p_n, p_o = _progression_block(new_runs), _progression_block(old_runs)
+    s_n, s_o = _scored_cell(new_runs, era), _scored_cell(old_runs, era)
+
+    def med(block: dict[str, Any], field: str) -> float | None:
+        return (block.get(field) or {}).get("median")
+
+    return {
+        "takeoff_pp": 100.0 * (f_n["takeoff"]["rate"] - f_o["takeoff"]["rate"]),
+        "posted_pp": 100.0 * (f_n["posted"]["rate"] - f_o["posted"]["rate"]),
+        "acquired_med": _d(f_n["median_acquired"], f_o["median_acquired"]),
+        "onset_ep_med": _d(med(p_n, "onset_epoch"), med(p_o, "onset_epoch")),
+        "peak_ep_med": _d(med(p_n, "peak_epoch"), med(p_o, "peak_epoch")),
+        "detect_ep_med": _d(
+            med(p_n, "detection_epoch"), med(p_o, "detection_epoch"),
+        ),
+        "vsp_ep_med": _d(
+            med(p_n, "vsp_trigger_epoch"), med(p_o, "vsp_trigger_epoch"),
+        ),
+        "peak_prev_med": _d(
+            med(p_n, "peak_prevalence"), med(p_o, "peak_prevalence"),
+        ),
+        "A1": _d(s_n.get("A1"), s_o.get("A1")),
+        "A2": _d(
+            s_n.get("A2_per_seed_median"), s_o.get("A2_per_seed_median"),
+        ),
+        "A3": _d(
+            s_n.get("A3_per_seed_median"), s_o.get("A3_per_seed_median"),
+        ),
+        "A5": _d(
+            s_n.get("A5_per_seed_median"), s_o.get("A5_per_seed_median"),
+        ),
+        "A8_pax": _d(s_n.get("A8_pax"), s_o.get("A8_pax")),
+        "A8_crew": _d(s_n.get("A8_crew"), s_o.get("A8_crew")),
+    }
 
 
 def _paired_runs(
@@ -478,6 +550,12 @@ def _fmt(value: Any, digits: int = 2) -> str:
     if value is None or not isinstance(value, (int, float)):
         return "  --"
     return f"{value:.{digits}f}"
+
+
+def _fmt_signed(value: Any, digits: int = 1) -> str:
+    if value is None or not isinstance(value, (int, float)):
+        return "  --"
+    return f"{value:+.{digits}f}"
 
 
 def _quant_cell(q: dict[str, Any], digits: int = 1) -> str:
@@ -577,9 +655,42 @@ def _paired_lines(report: dict) -> list[str]:
     return lines
 
 
+def _cell_delta_lines(report: dict) -> list[str]:
+    paired = report.get("paired") or {}
+    rows = [
+        (label, entry["cell_delta"])
+        for label, entry in paired.items()
+        if entry.get("cell_delta")
+    ]
+    if not rows:
+        return []
+    lines = [
+        "| cell | \u0394takeoff pp | \u0394posted pp | \u0394acq med | \u0394peak prev | \u0394onset ep | \u0394peak ep | \u0394detect ep | \u0394vsp ep | \u0394A1 | \u0394A2 | \u0394A3 | \u0394A5 | \u0394A8 pax | \u0394A8 crew |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for label, d in rows:
+        lines.append(
+            f"| {label} | {_fmt_signed(d['takeoff_pp'])}"
+            f" | {_fmt_signed(d['posted_pp'])}"
+            f" | {_fmt_signed(d['acquired_med'])}"
+            f" | {_fmt_signed(d['peak_prev_med'])}"
+            f" | {_fmt_signed(d['onset_ep_med'])}"
+            f" | {_fmt_signed(d['peak_ep_med'])}"
+            f" | {_fmt_signed(d['detect_ep_med'])}"
+            f" | {_fmt_signed(d['vsp_ep_med'])}"
+            f" | {_fmt_signed(d['A1'], 3)}"
+            f" | {_fmt_signed(d['A2'], 3)}"
+            f" | {_fmt_signed(d['A3'], 3)}"
+            f" | {_fmt_signed(d['A5'], 2)}"
+            f" | {_fmt_signed(d['A8_pax'], 1)}"
+            f" | {_fmt_signed(d['A8_crew'], 1)} |"
+        )
+    return lines
+
+
 def render_markdown(report: dict) -> str:
     """Canonical NORO-OUTBREAK-01 markdown."""
-    out = ["# NORO-OUTBREAK-01 readout", ""]
+    out = [f"# {report.get('title') or 'NORO-OUTBREAK-01 readout'}", ""]
     out += ["## Frequency (rates % with Wilson 95% intervals)", ""]
     out += _frequency_lines(report)
     out += ["", "## Anchors (era=pre, takeoff-conditional unless noted)", ""]
@@ -587,8 +698,15 @@ def render_markdown(report: dict) -> str:
     out += ["", "## Progression (takeoff voyages only)", ""]
     out += _progression_lines(report)
     if report.get("paired"):
-        out += ["", "## Paired delta vs NORO-IMPORT-01 (same seeds)", ""]
+        label = report.get("paired_label") or "NORO-IMPORT-01"
+        out += ["", f"## Paired delta vs {label} (same seeds)", ""]
         out += _paired_lines(report)
+        out += [
+            "",
+            f"## Cell-level deltas vs {label} (new \u2212 old; pp = percentage points)",
+            "",
+        ]
+        out += _cell_delta_lines(report)
     out += [""]
     return "\n".join(out)
 
@@ -601,12 +719,16 @@ def main() -> None:
     parser.add_argument("--md-out", type=Path, default=None)
     parser.add_argument("--tiers", nargs="*", default=None)
     parser.add_argument("--era", default="pre")
+    parser.add_argument("--title", default="NORO-OUTBREAK-01 readout")
+    parser.add_argument("--paired-label", default="NORO-IMPORT-01")
     args = parser.parse_args()
     report = build_report(
         args.runs_dir,
         args.tiers,
         era=args.era,
         import_root=args.import_root,
+        title=args.title,
+        paired_label=args.paired_label,
     )
     if args.md_out:
         allowed = (str(args.md_out.parent.resolve()),)
