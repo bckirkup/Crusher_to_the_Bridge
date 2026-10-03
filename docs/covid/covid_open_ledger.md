@@ -1070,5 +1070,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   orthogonal to SUSCPOOL (binary susceptibility gate) and FRAILTY-V1
   (per-challenge hazard) because it moves exposure *frequency*, not dose.
   `mode: off` is the labelled bit-identical baseline; implemented on the
-  declaration branch with the `delivery` payload echo; canary + band
-  array are the measurement stage, not run there.
+  declaration branch with the `delivery` payload echo. Measurement
+  stages declared 2026-10-03: the `covid_propensity_v1` canary
+  (clause-on-delivery at the Θ 1e9 anchor, PR #865) and `PROPENSITY-CV-01`
+  — a single-axis cv screen {0.2, 0.4, 0.8, 1.2, 2.0} + `PROP_OFF`
+  baseline on the frozen DP replay contract, delivering the seed-paired
+  cv-response curve before any band-array decision.
