@@ -98,4 +98,56 @@ python ≥3.12 venv (numpy 2.5.0) realize different voyages for the same
 seed — measured identical on run_id `…s8016` (batch/image 25 infected,
 venv 26; image-on-local reproduces batch exactly). Cell-level ratios are
 self-consistent within the image; do not re-derive a batch seed's
-counters locally. Remaining 8 cells pending campaign gate.
+counters locally.
+
+## Campaign readout — 2026-10-03, all 9 cells, 180 runs
+
+8 remaining arrays submitted (20-child arrays on
+`picard-campaign-queue`, same digest-pinned image `campaign-1e158d47`):
+exp scr-hi `c0942c77`, exp ren `531acccf`, cls scr-mid `61d8627b`,
+cls scr-hi `57e4a538`, cls ren `cd9748f3`, spr scr-mid `817c0941`,
+spr scr-hi `aebb3997`, spr ren `6b3197a5`. 160/160 children SUCCEEDED,
+zero failures; 180 dumps under `campaign/noro_channel_04/`. Full
+measured readout: `docs/norovirus/noro_channel_04_readout.md`.
+
+| cell | n (tk) | symp/inf | rep/elig | viaCG | CGtx |
+|---|---|---|---|---|---|
+| cls ren | 20 (17) | 0.206 (0.222) | 0.390 (0.321) | 0.512 | 0.019 |
+| cls scr-mid | 20 (20) | 0.345 (0.363) | 0.345 (0.242) | 0.516 | 0.034 |
+| cls scr-hi | 20 (20) | 0.359 (0.371) | 0.315 (0.239) | 0.545 | 0.037 |
+| exp ren | 20 (2) | 0.333 (0.280) | 0.286 (0.429) | 0.250 | 0.000 |
+| exp scr-mid | 20 (17) | 0.389 (0.413) | 0.224 (0.172) | 0.512 | 0.022 |
+| exp scr-hi | 20 (19) | 0.393 (0.390) | 0.249 (0.168) | 0.476 | 0.025 |
+| spr ren | 20 (19) | 0.217 (0.170) | 0.451 (0.316) | 0.598 | 0.025 |
+| spr scr-mid | 20 (20) | 0.333 (0.333) | 0.331 (0.238) | 0.571 | 0.031 |
+| spr scr-hi | 20 (20) | 0.365 (0.368) | 0.318 (0.267) | 0.614 | 0.040 |
+
+(parenthetical = CHANNEL-03 baseline at the same cell)
+
+- **A2 link untouched on all 9 cells** — Δsymp/inf −0.024..+0.053;
+  the illness draw is outside the mechanism's reach by construction.
+- **rep/elig systematically lifted** — +0.051..+0.135 on 8/9 cells;
+  paired-seed attribution 14-18/20 up per cell (18/18 spr ren).
+  exp_ren's −0.143 is a 2-takeoff cell (thin).
+- **viaCG 0.476-0.614; stamped→reported 100%** on every cell
+  (stamped_not_reported = 0 in all 180 voyages).
+- **CGtx ≤ 0.040 everywhere** — 10% amplifier trigger not fired.
+  Steward responses dominate party ~10:1 (public emesis ≫ in-cabin).
+- **Join witness**: 13/180 takeoff disagreements vs the OUTBREAK-01
+  map (7 funnel-ON, 6 funnel-OFF, ren-cell concentrated) — treatment
+  effect per the design, not a void.
+- **Triggers**: non-emetic stamped reports on 7/9 cells (38 voyages,
+  tending-arm working as designed); zero-response vomiting voyages 4
+  (3 canary seeds decomposed + 1 cls_ren) — same accounting quirk:
+  `vomiting_course_hosts` counts declared courses, not fired episodes.
+- **Residual**: rep/elig still <0.4 on shipped cells except spr_ren
+  (0.451); residual decomposes to `course_not_symptomatic_onboard`
+  (599-1182/cell censored presence) over `visible_whole_course_draw_missed`
+  (154-313). The mechanism stamps what surfaces; the censoring pool is
+  outside its reach.
+
+Readout tooling fixed en route: `_trigger_lines` KeyError on
+`zero_response_voyages` (absent key when no voyage hits the condition),
+and the OUTBREAK-01 map join now does targeted `<tier>/<run_id>.zip`
+ranged reads instead of scanning all ~16k map zips; `--join-witness`
+renders disagreements per the channel_04 semantics.
