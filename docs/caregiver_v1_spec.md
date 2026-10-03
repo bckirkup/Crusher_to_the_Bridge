@@ -1,9 +1,11 @@
 # CAREGIVER-V1 — cross-pathogen caregiver mechanism spec
 
-**Status:** Declared. **Nothing in this document describes current behaviour.**
+**Status:** Implemented (2026-10-03). The grammar is current behaviour on the
+enabled cells — see §12 for the shipped conformance mapping; cells a pathogen
+disables remain declaration-only for that pathogen.
 It fixes the grammar — trigger modes, responder pools, route couplings,
 reallocation semantics — and the per-pathogen factor table that every
-caregiver implementation must conform to. No engine code is written here.
+caregiver implementation must conform to.
 
 NORO-CAREGIVER-01 (#855, `docs/norovirus/noro_caregiver_01_design.md`) is the
 norovirus instantiation of the `episode` role, already shipped default-ON.
@@ -254,3 +256,32 @@ don't take the cleanup role — declared out of scope for V1, candidate for
 a follow-on if the funnel campaign under-delivers; (b) the elderly end of
 the age-band table is the weakest provenance cell — a dedicated
 caregiving-by-age source would tighten it.
+
+## 12. Shipped conformance (implemented 2026-10-03)
+
+The grammar now describes live behaviour in `engines/transmission_core.py`.
+Frozen per-pathogen enablement and constants:
+
+| Role | Enabled cells (shipped default) | Implementation |
+|---|---|---|
+| R1 `cleanup` | `norwalk_gi` (flat NORO-CAREGIVER-01 keys parse as this role's shorthand, spec §7) | Presence-gated family responder (ring member must share the event compartment: same stateroom for a cabin emesis, same zone otherwise — §11.3), else steward; host-age multiplier `care_response_by_host_age_band` on both draws (cap 1.0); adult-weighted pick `responder_draw_weight_by_band` — a child-only ring cannot answer and falls to the steward channel; steward pickup discounted by `responder_protection_factor.steward` U[0.3,0.7] (family improvises at 1.0) |
+| R2 `tending` | `sars_cov2_resp`, `influenza_a` only — inert on `norwalk_gi` by declaration | One-time designation draw at the first symptomatic epoch of a presenting course; family-only adult-weighted pool; refused draws hold for the whole course; retirement on recovery/departure or caregiver symptomatic/unavailable; per-epoch tending draw `hours/(awake_epochs × hours_per_epoch)`; pair dose = compartment pool + withheld-emission addback at `min(1, copresence×mult)` plus near-field plume at `min(1, awake_plume_share×mult)`; `budget_mode: reallocate` (shipped) relocates the tending caregiver into `host.home_zone` for the epoch and absorbs them out of the standard occupancy pools — their dose arrives under route `caregiver`, no double-count; `additive` is the labelled arm; report stamp once per designation at U[0.30,0.70] |
+| R3 `service` | all pathogens (`{"*": True}`) | One delivery per Meal token on the confined host's raw schedule (the rhythm re-route creates no crew contact — this role closes it); cabin-service function classes first, uniform-crew fallback; respiratory dose is the pair dose at a 5-minute epoch share; emetic dose is U-int[1,3] bounded touches off the cabin's `emesis_patch_pools`; stamp per delivery at U[0.10,0.40] on a presenting case |
+
+- All constants frozen in `docs/parameter_provenance_register.md` §3.11 —
+  Grade C declarations, none fitted to an anchor.
+- `transmission.caregiver.mode: off` reproduces the pre-V1 draw stream as the
+  labelled baseline (zero extra `engine.rng` consumption).
+- Resolved-config echo: `delivery.caregiver` in the hull payload
+  (`covid_boarding_screen._delivery_block`) and `caregiver.resolved` in the
+  funnel payload (`observation_channel_funnel`) satisfy §8.2's echo
+  requirement without a config-file diff.
+- Conformance tests: `tests/test_caregiver_mechanism.py::TestCaregiverV1`
+  (grammar resolution, shorthand, presence gate, protection discount,
+  relocation/absorption, additive, refusal memory, retirement, service
+  gating, emetic patch drain, off-arm zero-RNG).
+- Measured smoke (48-epoch `expedition_cruise_450` scr-mid spec, seed 8000):
+  R1 1 family + 12 steward responses, R3 27 deliveries, R2 silent on noro
+  by design — see `docs/ledger/CAREGIVER-V1.md` for the implementation
+  record and `docs/norovirus/noro_channel_04_design.md` for the frozen
+  re-measurement campaign.

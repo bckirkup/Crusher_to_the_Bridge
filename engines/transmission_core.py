@@ -494,6 +494,70 @@ CAREGIVER_CLEANUP_CONTACTS = (9, 34)
 # near Wikswo 2011's realised capture of ~0.60.
 CAREGIVER_REPORT_PROBABILITY = (0.20, 0.70)
 
+# ── CAREGIVER-V1 additions (docs/proposals/caregiver_v1_spec.md §5) ───────
+# Every cell below is a Grade C declaration — intervals are boxes, not fits.
+#
+# U-shaped care-eligibility on host age: children and the elderly draw care,
+# the working-age adult draws least. Direction supported for the child end
+# by Balachandran 2023 (household AGE analysis, n=570 primary cases):
+# secondary transmission aOR 2.2 when the case was <5y, aOR 3.3 at 5-17y —
+# Grade B direction, Origin T; the elderly end is inferred from
+# frailty/dependency and flagged as the weaker half.
+CAREGIVER_AGE_BAND_MULTIPLIERS = {
+    "child": 1.5,
+    "adult": 1.0,
+    "elderly": 1.25,
+}
+# Responder-side draw weights: within a family party the capable adult
+# tends, a child cannot respond, and the elderly spouse answers at reduced
+# weight — still nonzero, so an elderly-only pair still draws care.
+# Grade C declared (spec §11.6; no measured responder-age table exists).
+CAREGIVER_RESPONDER_AGE_WEIGHTS = {
+    "child": 0.0,
+    "adult": 1.0,
+    "elderly": 0.5,
+}
+# Steward cleanup discount on the responder's own exposure: gloves and the
+# documented vomitus-cleanup procedure attenuate both fomite pickup and the
+# hand→mouth term on the steward's visit; the family responder improvises
+# at 1.0. The duty exists (VSP vomitus-cleanup SOP); the dose discount it
+# produces is unmeasured — Grade C declared. Origin: Tr.
+CAREGIVER_STEWARD_PROTECTION_FACTOR = (0.3, 0.7)  # central 0.5
+# R2 `tending` — the course-bound family caregiver (respiratory pathogens).
+# P(a primary caregiver is designated at symptom onset), age-banded.
+# Grade C — admits "no one steps up".
+CAREGIVER_TENDING_RESPONSE_PROBABILITY = (0.50, 0.90)
+# Co-presence share upgrade on the designated pair: the share a bedside
+# attendant reaches vs an ordinary berth-mate. Bounded ABOVE by the check,
+# not fitted to it — Kordsmeyer 2022 infected cabin-mate aOR 3.27
+# [0.97-11.07] (Grade B, Tr) is the total cabin-mate risk the repaired
+# structure must reproduce. Grade C declared, central 2.0.
+CAREGIVER_TENDING_COPRESENCE_MULTIPLIER = (1.5, 3.0)
+# Tending hours per symptomatic day. Grade C — no shipboard tending-time
+# measurement exists; a declared field gap, not an invented number.
+CAREGIVER_TENDING_HOURS_PER_DAY = (2.0, 6.0)
+# P(the attendant's evidence reaches medical attention), per designation.
+# Grade C — DP passengers reached the medical centre through attendants and
+# companions, not only self-assessment; the interval centres "a tended case
+# reports more readily than a self-assessed one", consistent with the
+# shipboard-capture bound used for noro's ceiling.
+CAREGIVER_TENDING_REPORT_PROBABILITY = (0.30, 0.70)
+# R3 `service` — crew deliveries to a confined host.
+# One near-field/droplet contact of 5 minutes per delivery; the ~3/day cadence
+# comes from the host's Meal tokens rather than a declared count — the SOP
+# re-routes those tokens to the cabin and R3 attaches the crew contact the
+# re-route never created. Grade C — nobody has timed a cabin meal drop; a
+# declared field gap (the HIGH_TOUCH_AREA_M2 sense).
+CAREGIVER_SERVICE_EPISODE_MINUTES = 5.0
+# P(the steward's delivery reports the case), per delivery. Grade C — a
+# door-drop is weaker discovery than tending; strictly below R2's floor.
+CAREGIVER_SERVICE_REPORT_PROBABILITY = (0.10, 0.40)
+# Emetic-side service pickup: the surface contacts the steward takes off
+# the host's cabin emesis deposits during the drop — the emetic-pathogen
+# equivalent of the near-field episode (noro has no continuous emission to
+# stand in). Grade C declared, same field gap.
+CAREGIVER_SERVICE_TOUCHES = (1, 3)
+
 # Deck-to-deck height, used only to convert a zone's declared air volume into
 # a deck area. 2.8 m is the deck height assumed throughout a statistical
 # preliminary-design study of 21 parent cruise ships (Bruce, "Cruise Ship
@@ -2451,34 +2515,179 @@ class TransmissionCore:
         self._init_hazard_frailty()
 
     def _init_caregiver(self, tx: dict[str, Any]) -> None:
-        """NORO-CAREGIVER-01: party/steward response to emesis events."""
+        """CAREGIVER-V1 role grammar over the NORO-CAREGIVER-01 channel.
+
+        ``transmission.caregiver`` owns the three role blocks
+        (``cleanup``/``tending``/``service``); NORO-CAREGIVER-01's flat
+        keys remain as the cleanup role's shorthand (spec §7 — the
+        shipped tree predates the role layout and converges on it
+        here). Each role's ``enabled`` is a bool or a per-pathogen map
+        (``{pathogen_id: bool}``, ``"*"`` as the default key) because
+        the transmission block is shared across pathogens.
+        """
         cg = tx.get("caregiver") or {}
         mode = str(cg.get("mode", "on")).strip().lower()
         self.caregiver_mode = mode if mode in {"on", "off"} else "on"
-        self._cg_response = tuple(
-            cg.get("response_probability", CAREGIVER_RESPONSE_PROBABILITY)
+        budget = str(cg.get("budget_mode", "reallocate")).strip().lower()
+        self.caregiver_budget_mode = (
+            budget if budget in {"reallocate", "additive"} else "reallocate"
         )
-        self._cg_steward = tuple(
-            cg.get(
-                "steward_response_probability",
-                CAREGIVER_STEWARD_RESPONSE_PROBABILITY,
-            )
+        self._cg_age_mult = {
+            str(k): float(v)
+            for k, v in (
+                cg.get("care_response_by_host_age_band")
+                or CAREGIVER_AGE_BAND_MULTIPLIERS
+            ).items()
+        }
+        self._cg_draw_wt = {
+            str(k): float(v)
+            for k, v in (
+                cg.get("responder_draw_weight_by_band")
+                or CAREGIVER_RESPONDER_AGE_WEIGHTS
+            ).items()
+        }
+        pf = cg.get("responder_protection_factor") or {}
+        self._cg_protect_family = float(pf.get("family", 1.0))
+        self._cg_protect_steward = tuple(
+            pf.get("steward", CAREGIVER_STEWARD_PROTECTION_FACTOR)
         )
-        self._cg_contacts = tuple(
-            cg.get("cleanup_contacts", CAREGIVER_CLEANUP_CONTACTS)
+        self._cg_cleanup = self._parse_caregiver_role(
+            cg,
+            "cleanup",
+            {
+                "response_probability": CAREGIVER_RESPONSE_PROBABILITY,
+                "steward_response_probability":
+                    CAREGIVER_STEWARD_RESPONSE_PROBABILITY,
+                "cleanup_contacts": CAREGIVER_CLEANUP_CONTACTS,
+                "report_probability": CAREGIVER_REPORT_PROBABILITY,
+                "steward_fallback": True,
+            },
+            {"norwalk_gi": True},
         )
-        self._cg_report = tuple(
-            cg.get("report_probability", CAREGIVER_REPORT_PROBABILITY)
+        self._cg_tending = self._parse_caregiver_role(
+            cg,
+            "tending",
+            {
+                "response_probability":
+                    CAREGIVER_TENDING_RESPONSE_PROBABILITY,
+                "tending_copresence_multiplier":
+                    CAREGIVER_TENDING_COPRESENCE_MULTIPLIER,
+                "tending_hours_per_day": CAREGIVER_TENDING_HOURS_PER_DAY,
+                "report_probability":
+                    CAREGIVER_TENDING_REPORT_PROBABILITY,
+            },
+            {"sars_cov2_resp": True, "influenza_a": True},
         )
-        self._cg_steward_enabled = bool(cg.get("steward_fallback", True))
+        self._cg_service = self._parse_caregiver_role(
+            cg,
+            "service",
+            {
+                "service_episode_minutes": CAREGIVER_SERVICE_EPISODE_MINUTES,
+                "report_probability":
+                    CAREGIVER_SERVICE_REPORT_PROBABILITY,
+                "service_touches": CAREGIVER_SERVICE_TOUCHES,
+                "service_function_classes": [],
+            },
+            {"*": True},
+        )
+        # R2 designation state: (host_id, pathogen_id) -> designation
+        # record; ``refused`` marks the failed one-time onset draw.
+        self._cg_designations: dict[tuple[int, str], dict[str, Any]] = {}
+        # cg_id -> (host_id, mult): the pairs tending THIS epoch.
+        self._cg_tending_epoch: dict[int, tuple[int, float]] = {}
+        # Caregivers absorbed into the cabin this epoch (reallocate arm):
+        # removed from standard occupancy so their venue draw is what the
+        # reallocated hours cost, and their dose arrives via the caregiver
+        # channel instead of double-counting through the unit pools.
+        self._cg_absorbed_ids: set[int] = set()
         self.caregiver_telemetry: dict[str, float] = {
+            # NORO-CAREGIVER-01 legacy keys (cleanup aliases, kept for
+            # existing readouts).
             "caregiver_responses": 0,
             "steward_responses": 0,
             "caregiver_dose_delivered": 0.0,
             "caregiver_dose_credited": 0.0,
             "caregiver_reports": 0,
+            # Per-role conformance counters (V1 §8.4).
+            "cleanup_responses": 0,
+            "cleanup_steward_responses": 0,
+            "cleanup_dose_delivered": 0.0,
+            "cleanup_dose_credited": 0.0,
+            "cleanup_reports": 0,
+            "tending_designations": 0,
+            "tending_refusals": 0,
+            "tending_epochs": 0,
+            "tending_dose_delivered": 0.0,
+            "tending_dose_credited": 0.0,
+            "tending_reports": 0,
+            "service_deliveries": 0,
+            "service_dose_delivered": 0.0,
+            "service_dose_credited": 0.0,
+            "service_reports": 0,
         }
         self._agents_by_id: dict[int, KorkinAgent] = {}
+
+    @staticmethod
+    def _parse_caregiver_role(
+        cg: dict[str, Any],
+        role: str,
+        defaults: dict[str, Any],
+        enabled_default: Any,
+    ) -> dict[str, Any]:
+        """One role block: defaults, flat-key shorthand (cleanup only),
+        then the role's own ``transmission.caregiver.<role>`` overrides."""
+        merged = dict(defaults)
+        if role == "cleanup":
+            # NORO-CAREGIVER-01's flat keys are this role's shorthand.
+            for key in defaults:
+                if key in cg:
+                    merged[key] = cg[key]
+        merged.update(cg.get(role) or {})
+        enabled = merged.pop("enabled", enabled_default)
+        out = dict(merged)
+        out["enabled"] = enabled
+        return out
+
+    def _cg_role_enabled(self, role_cfg: dict[str, Any], pathogen_id: str) -> bool:
+        """Per-pathogen enablement inside the shared caregiver tree."""
+        enabled = role_cfg.get("enabled", False)
+        if isinstance(enabled, dict):
+            return bool(enabled.get(pathogen_id, enabled.get("*", False)))
+        return bool(enabled)
+
+    @staticmethod
+    def _cg_age_key(agent: KorkinAgent) -> str:
+        """The spec's {child, adult, elderly} key for a roster age band."""
+        band = str(getattr(agent, "age_band", "") or "")
+        if band == "child":
+            return "child"
+        if band == "senior":
+            return "elderly"
+        return "adult"
+
+    def caregiver_resolved_block(self) -> dict[str, Any]:
+        """The resolved caregiver config for payload echoes (V1 §8.2)."""
+        def _role_view(role_cfg: dict[str, Any]) -> dict[str, Any]:
+            return {
+                k: (list(v) if isinstance(v, tuple) else v)
+                for k, v in sorted(role_cfg.items())
+            }
+
+        return {
+            "mode": self.caregiver_mode,
+            "budget_mode": self.caregiver_budget_mode,
+            "roles": {
+                "cleanup": _role_view(self._cg_cleanup),
+                "tending": _role_view(self._cg_tending),
+                "service": _role_view(self._cg_service),
+            },
+            "care_response_by_host_age_band": dict(self._cg_age_mult),
+            "responder_draw_weight_by_band": dict(self._cg_draw_wt),
+            "responder_protection_factor": {
+                "family": self._cg_protect_family,
+                "steward": list(self._cg_protect_steward),
+            },
+        }
 
     def _init_hazard_frailty(self) -> None:
         """FRAILTY-V1 — the declared continuous per-host frailty surface.
@@ -5374,6 +5583,12 @@ class TransmissionCore:
                 continue
             if getattr(agent, "ashore", False) or agent.has_departed(epoch):
                 continue
+            if agent.agent_id in self._cg_absorbed_ids:
+                # CAREGIVER-V1 reallocate arm: the tending caregiver's
+                # hours are in the host's cabin, so the venue pools are
+                # what they left — their dose arrives through the
+                # caregiver channel instead.
+                continue
             zone_occupants.setdefault(loc, []).append(agent)
         for zone_name, occupants in zone_occupants.items():
             if self.zone_types.get(zone_name) == "Dining":
@@ -5713,6 +5928,19 @@ class TransmissionCore:
                 zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
+            )
+
+        # CAREGIVER-V1: course-bound tending (R2) and cabin service (R3)
+        # credit their dose inside this pathogen's accumulators so route
+        # efficiencies, NPI multipliers and the susceptibility merge treat
+        # it like every other pathway — labelled `caregiver`.
+        if self.caregiver_mode == "on":
+            self._caregiver_pathogen_epoch(
+                epoch,
+                pathogen_id,
+                profile,
+                p_agent_doses,
+                p_agent_pw,
             )
 
         self._apply_route_efficiencies(profile, p_agent_doses, p_agent_pw)
@@ -8355,6 +8583,7 @@ class TransmissionCore:
                 agent,
                 pathogen_id,
                 epoch,
+                zone_name,
                 surface_load,
                 area,
                 agent_doses,
@@ -8836,26 +9065,71 @@ class TransmissionCore:
             not in ("Isolated_In_Quarters", "Departed")
         )
 
+    def _caregiver_ring_member_present(
+        self,
+        emitter: KorkinAgent,
+        candidate: KorkinAgent,
+        zone_name: str,
+    ) -> bool:
+        """Whether the ring member was physically at the emitted event.
+
+        CAREGIVER-V1 §11.3: the family draw requires a ring member
+        *present* at the episode — same stateroom when the bolus lands in
+        a cabin block, same zone anywhere else. A member elsewhere on the
+        ship cannot respond; the steward channel answers instead.
+        """
+        if candidate.current_location != zone_name:
+            return False
+        if self.zone_types.get(zone_name) != "Cabin_Corridor":
+            return True
+        return self._cabin_compartment_key(
+            zone_name, candidate
+        ) == self._cabin_compartment_key(zone_name, emitter)
+
     def _draw_caregiver_responder(
         self,
         emitter: KorkinAgent,
         epoch: int,
+        zone_name: str,
     ) -> KorkinAgent | None:
-        """Pick the responder: party/cabin member first, steward fallback."""
+        """Pick the responder: present ring member first, steward fallback.
+
+        The host-age multiplier skews the response draw U-shaped (§11.6
+        host side); the member draw itself is adult-weighted (§11.6
+        caregiver side); the steward draw answers wherever the family
+        draw did not.
+        """
         by_id = self._agents_by_id
+        mult = self._cg_age_mult.get(self._cg_age_key(emitter), 1.0)
         candidates = [
             by_id[i]
             for i in set(emitter.party_member_ids) | set(emitter.cabin_mate_ids)
-            if i in by_id and self._responder_available(by_id[i], epoch)
+            if i in by_id
+            and self._responder_available(by_id[i], epoch)
+            and self._caregiver_ring_member_present(
+                emitter, by_id[i], zone_name
+            )
         ]
-        if candidates and self.rng.random() < self.rng.uniform(
-            *self._cg_response
+        if candidates and self.rng.random() < min(
+            1.0, self.rng.uniform(*self._cg_cleanup["response_probability"])
+            * mult,
         ):
-            self.caregiver_telemetry["caregiver_responses"] += 1
-            return candidates[int(self.rng.integers(len(candidates)))]
-        if not self._cg_steward_enabled:
+            pick = self._weighted_caregiver_pick(candidates)
+            if pick is not None:
+                self.caregiver_telemetry["caregiver_responses"] += 1
+                self.caregiver_telemetry["cleanup_responses"] += 1
+                return pick
+            # A ring with no capable responder (e.g. only children) does
+            # not answer — the steward channel below does.
+        if not self._cg_cleanup["steward_fallback"]:
             return None
-        if self.rng.random() >= self.rng.uniform(*self._cg_steward):
+        if self.rng.random() >= min(
+            1.0,
+            self.rng.uniform(
+                *self._cg_cleanup["steward_response_probability"]
+            )
+            * mult,
+        ):
             return None
         stewards = [
             a
@@ -8865,6 +9139,7 @@ class TransmissionCore:
         if not stewards:
             return None
         self.caregiver_telemetry["steward_responses"] += 1
+        self.caregiver_telemetry["cleanup_steward_responses"] += 1
         return stewards[int(self.rng.integers(len(stewards)))]
 
     def _caregiver_response(
@@ -8872,6 +9147,7 @@ class TransmissionCore:
         emitter: KorkinAgent,
         pathogen_id: str,
         epoch: int,
+        zone_name: str,
         surface_load: float,
         deposition_area_m2: float,
         agent_doses: dict[int, float] | None,
@@ -8879,14 +9155,17 @@ class TransmissionCore:
     ) -> float:
         """One party member or steward answering an emesis event.
 
-        NORO-CAREGIVER-01. The responder's hand takes ``cleanup_contacts``
-        touches off the bolus footprint at the episode's own areal
-        density; the delivered mass leaves the surface (returned so the
-        caller nets it from the patch deposit), the usual hand→mouth
-        chain doses the responder, and the dose is credited through the
-        standard accumulators under route ``caregiver`` — the epoch's
-        challenge then resolves infection and strain/route attribution
-        like any other pathway. The responder's discovery may stamp
+        NORO-CAREGIVER-01 / CAREGIVER-V1 R1. The responder's hand takes
+        ``cleanup_contacts`` touches off the bolus footprint at the
+        episode's own areal density; the delivered mass leaves the surface
+        (returned so the caller nets it from the patch deposit), the usual
+        hand→mouth chain doses the responder — discounted by the
+        responder class's ``responder_protection_factor`` (the steward's
+        gloves and procedure attenuate pickup where the family napkin
+        does not) — and the dose is credited through the standard
+        accumulators under route ``caregiver`` — the epoch's challenge
+        then resolves infection and strain/route attribution like any
+        other pathway. The responder's discovery may stamp
         ``caregiver_report_due_epoch`` on the emitter, which the
         syndromic pass reads as a report event.
         """
@@ -8897,14 +9176,17 @@ class TransmissionCore:
             or not self._agents_by_id
         ):
             return 0.0
-        responder = self._draw_caregiver_responder(emitter, epoch)
+        responder = self._draw_caregiver_responder(emitter, epoch, zone_name)
         if responder is None:
             return 0.0
         hand_area, used_fraction, transfer_efficiency = (
             self._draw_surface_to_hand(self.rng)
         )
         contacts = int(
-            self.rng.integers(self._cg_contacts[0], self._cg_contacts[1] + 1)
+            self.rng.integers(
+                self._cg_cleanup["cleanup_contacts"][0],
+                self._cg_cleanup["cleanup_contacts"][1] + 1,
+            )
         )
         contacted = min(
             surface_load,
@@ -8917,31 +9199,582 @@ class TransmissionCore:
         )
         if contacted <= 0.0:
             return 0.0
+        # The surface loses what the responder picked up regardless of
+        # class; the responder's own pickup is what the protection factor
+        # discounts — the gloved steward keeps less of the touched mass
+        # on their hand.
+        protection = (
+            self.rng.uniform(*self._cg_protect_steward)
+            if responder.role == "crew"
+            else self._cg_protect_family
+        )
+        picked = contacted * protection
         hand = responder.hand_load_by_pathogen.get(pathogen_id, 0.0)
-        dose = self._hand_to_mouth_dose(responder, epoch, hand + contacted)
+        dose = self._hand_to_mouth_dose(responder, epoch, hand + picked)
         responder.hand_load_by_pathogen[pathogen_id] = (
-            hand + contacted - dose
+            hand + picked - dose
         )
         self.caregiver_telemetry["caregiver_dose_delivered"] += dose
+        self.caregiver_telemetry["cleanup_dose_delivered"] += dose
         if dose > 0.0 and responder in self._get_susceptible(
             [responder], pathogen_id
         ):
-            self.caregiver_telemetry["caregiver_dose_credited"] += (
-                self._accumulate(
-                    responder.agent_id,
-                    "caregiver",
-                    dose,
-                    agent_doses,
-                    agent_pathway_doses,
-                )
+            credited = self._accumulate(
+                responder.agent_id,
+                "caregiver",
+                dose,
+                agent_doses,
+                agent_pathway_doses,
             )
+            self.caregiver_telemetry["caregiver_dose_credited"] += credited
+            self.caregiver_telemetry["cleanup_dose_credited"] += credited
         if (
             emitter.caregiver_report_due_epoch is None
-            and self.rng.random() < self.rng.uniform(*self._cg_report)
+            and self.rng.random() < self.rng.uniform(
+                *self._cg_cleanup["report_probability"]
+            )
         ):
             emitter.caregiver_report_due_epoch = int(epoch)
             self.caregiver_telemetry["caregiver_reports"] += 1
+            self.caregiver_telemetry["cleanup_reports"] += 1
         return contacted
+
+    # ── CAREGIVER-V1: course-bound tending (R2) and cabin service (R3) ────
+
+    def caregiver_epoch_setup(
+        self,
+        epoch: int,
+        agents: list[KorkinAgent],
+    ) -> dict[int, str]:
+        """Refresh designations and return this epoch's tending moves.
+
+        Runs before the engine resolves this epoch's locations. Under
+        ``budget_mode=reallocate`` the designated caregiver's schedule
+        draw is replaced by the host's cabin — the tending hours are the
+        hours not spent in the venue draws (§6) — and the absorbed-id set
+        keeps them out of the standard occupancy pools so their dose
+        arrives only through the caregiver channel rather than
+        double-counting through the unit pools. ``additive`` is the
+        labelled alternative arm: no move, no removal, the tending dose
+        layers on top.
+        """
+        self._cg_tending_epoch = {}
+        self._cg_absorbed_ids = set()
+        if self.caregiver_mode != "on" or not agents:
+            return {}
+        by_id = {a.agent_id: a for a in agents}
+        self._retire_designations(by_id, epoch)
+        for host in agents:
+            self._maybe_designate(host, by_id, epoch)
+        relocations: dict[int, str] = {}
+        for (host_id, _pid), des in sorted(self._cg_designations.items()):
+            if des["refused"]:
+                continue
+            host = by_id.get(host_id)
+            if host is None or host.current_location != host.home_zone:
+                # The ward and the shore end the visit: tending only
+                # exists where the pair can share the cabin's air.
+                continue
+            awake = self._awake_epochs_per_day(host)
+            span = max(awake * self.clock.hours_per_epoch, 1e-9)
+            des["tending_epoch"] = self.rng.random() < min(
+                1.0, des["hours"] / span
+            )
+            if not des["tending_epoch"]:
+                continue
+            cg_id = des["caregiver_id"]
+            if cg_id in self._cg_tending_epoch:
+                continue  # one person, one bedside this epoch
+            self._cg_tending_epoch[cg_id] = (host_id, des["mult"])
+            self.caregiver_telemetry["tending_epochs"] += 1
+            if self.caregiver_budget_mode == "reallocate":
+                relocations[cg_id] = host.home_zone
+                self._cg_absorbed_ids.add(cg_id)
+        return relocations
+
+    @staticmethod
+    def _care_eligible_course(inf: dict[str, Any]) -> bool:
+        """§11.2 trigger floor: any symptomatic presenting course."""
+        return (
+            inf.get("status") == InfectionStatus.INFECTED
+            and inf.get("will_present") is True
+            and inf.get("illness") == IllnessStatus.SYMPTOMATIC
+        )
+
+    def _retire_designations(
+        self,
+        by_id: dict[int, KorkinAgent],
+        epoch: int,
+    ) -> None:
+        """End designations: host recovery/departure, the caregiver's own
+        symptomatic onset, or any state that makes the responder
+        unreachable. A refused draw holds for the host's whole course —
+        the skew lives in the one-time draw, not retries."""
+        drop = []
+        for key, des in self._cg_designations.items():
+            host_id, pid = key
+            host = by_id.get(host_id)
+            inf = (host.infections or {}).get(pid) if host else None
+            host_active = (
+                host is not None
+                and inf is not None
+                and self._care_eligible_course(inf)
+                and not host.has_departed(epoch)
+            )
+            if not host_active:
+                drop.append(key)
+                continue
+            if des["refused"]:
+                continue
+            cg = by_id.get(des["caregiver_id"])
+            if (
+                cg is None
+                or cg.is_symptomatic
+                or not self._responder_available(cg, epoch)
+            ):
+                drop.append(key)
+        for key in drop:
+            self._cg_designations.pop(key, None)
+
+    def _maybe_designate(
+        self,
+        host: KorkinAgent,
+        by_id: dict[int, KorkinAgent],
+        epoch: int,
+    ) -> None:
+        """First symptomatic epoch of a care-eligible course: draw once."""
+        for pid, inf in (host.infections or {}).items():
+            if not self._cg_role_enabled(self._cg_tending, pid):
+                continue
+            if not self._care_eligible_course(inf):
+                continue
+            key = (host.agent_id, pid)
+            if key in self._cg_designations:
+                continue
+            self._cg_designations[key] = self._draw_designation(
+                host, pid, by_id, epoch,
+            )
+
+    def _draw_designation(
+        self,
+        host: KorkinAgent,
+        pid: str,
+        by_id: dict[int, KorkinAgent],
+        epoch: int,
+    ) -> dict[str, Any]:
+        """The one-time responder draw at symptom onset (§11.1–11.2).
+
+        Family-only pool (§11.2 — crew does not respond to a coughing
+        person), susceptible members only, adult-weighted. On success the
+        per-designation report draw may stamp the host immediately: the
+        attendant's evidence reaches medical attention once, at
+        designation, or not at all this course.
+        """
+        mult_age = self._cg_age_mult.get(self._cg_age_key(host), 1.0)
+        p = self.rng.uniform(*self._cg_tending["response_probability"])
+        if self.rng.random() >= min(1.0, p * mult_age):
+            self.caregiver_telemetry["tending_refusals"] += 1
+            return {"refused": True}
+        ring = [
+            by_id[i]
+            for i in set(host.party_member_ids) | set(host.cabin_mate_ids)
+            if i in by_id
+            and by_id[i].role != "crew"
+            and self._responder_available(by_id[i], epoch)
+            and not by_id[i].is_symptomatic
+        ]
+        pool = self._get_susceptible(ring, pid)
+        caregiver = self._weighted_caregiver_pick(pool) if pool else None
+        if caregiver is None:
+            # Nobody susceptible, or nobody capable (the adult-weighted
+            # draw weights children at zero) — the steward does not tend.
+            self.caregiver_telemetry["tending_refusals"] += 1
+            return {"refused": True}
+        if (
+            host.caregiver_report_due_epoch is None
+            and self.rng.random() < self.rng.uniform(
+                *self._cg_tending["report_probability"]
+            )
+        ):
+            host.caregiver_report_due_epoch = int(epoch)
+            self.caregiver_telemetry["tending_reports"] += 1
+            self.caregiver_telemetry["caregiver_reports"] += 1
+        self.caregiver_telemetry["tending_designations"] += 1
+        return {
+            "refused": False,
+            "caregiver_id": caregiver.agent_id,
+            "mult": float(
+                self.rng.uniform(
+                    *self._cg_tending["tending_copresence_multiplier"]
+                )
+            ),
+            "hours": float(
+                self.rng.uniform(*self._cg_tending["tending_hours_per_day"])
+            ),
+            "tending_epoch": False,
+        }
+
+    def _weighted_caregiver_pick(
+        self,
+        pool: list[KorkinAgent],
+    ) -> KorkinAgent | None:
+        """Adult-weighted responder draw (§11.6 caregiver side).
+
+        ``None`` when the pool is empty or no member carries draw weight —
+        a child-only ring cannot answer a call for care.
+        """
+        weights = [
+            self._cg_draw_wt.get(self._cg_age_key(a), 1.0) for a in pool
+        ]
+        total = sum(weights)
+        if not pool or total <= 0.0:
+            return None
+        roll = self.rng.random() * total
+        for agent, weight in zip(pool, weights):
+            roll -= weight
+            if roll <= 0.0:
+                return agent
+        return pool[-1]
+
+    def _caregiver_pair_dose(
+        self,
+        host: KorkinAgent,
+        target: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        *,
+        presence: float,
+        plume_weight: float,
+    ) -> float:
+        """The R2/R3 pair dose — the cabin-mate channel math computed
+        explicitly for one visitor so the credit lands under route
+        ``caregiver``.
+
+        Same terms ``_droplet_target_dose`` assembles for an occupant of
+        the host's unit: the compartment-pool term and the withheld-
+        emission restore at ``presence`` (the share of the epoch the
+        visitor breathes the cabin air — for R2 the pair's co-presence
+        share upgraded by the tending multiplier, for R3 the 5-minute
+        service share), and the near-field plume at ``plume_weight``
+        (R2: ``min(1, awake_plume_share × mult)`` — the multiplier
+        saturates the attenuated sub-1.0 share toward the full-presence
+        ceiling, which is what "bounded above by the check" means at the
+        dose end; R3: the service share itself). The plume un-attenuates
+        the host's emitted mass like a cabin mate's does: a bedside
+        visitor stands in the breathing zone the withheld share came
+        from.
+        """
+        emitted = self._get_shedders([host], pathogen_id, profile)
+        if not emitted:
+            return 0.0
+        if presence <= 0.0 and plume_weight <= 0.0:
+            return 0.0
+        zone_name = host.home_zone
+        unit_name = self._cabin_compartment_key(zone_name, host)
+        volume = self._air_unit_volume(unit_name)
+        vent = self._aerosol_ventilation_factor(zone_name)
+        residence = self._room_air_residence_factor(unit_name)
+        emission_fraction = self._droplet_emission_fraction(profile)
+        target_factor = self._confinement_factor(target)
+        partition = self.droplet_field_split.active and self.near_field_air.active
+        pool_share = (
+            self.droplet_field_split.far_field_share if partition else 1.0
+        )
+        inhaled = self.inhaled_air_volume_m3_per_epoch
+        concentration = (
+            sum(sv * emission_fraction for _, sv in emitted)
+            * pool_share
+            / max(volume, 1.0)
+        )
+        pool_term = (
+            concentration
+            * inhaled
+            * self.droplet_scalar
+            * vent
+            * residence
+            * target_factor
+            * presence
+        )
+        addback = 0.0
+        for shedder, shedding in emitted:
+            unattenuated = (
+                shedding
+                * emission_fraction
+                * pool_share
+                / max(volume, 1.0)
+                * inhaled
+                * self.droplet_scalar
+                * vent
+                * residence
+                * presence
+            )
+            addback += unattenuated * (
+                1.0
+                - self.confinement_emission_factor(shedder)
+                * target_factor
+            )
+        near = 0.0
+        near_field = self.near_field_air
+        if near_field.active and plume_weight > 0.0:
+            if partition:
+                gain = self.droplet_field_split.near_field_share / max(
+                    self.near_field_flushed_volume_m3_per_epoch, 1.0
+                )
+            else:
+                gain = (
+                    1.0
+                    / max(self.near_field_flushed_volume_m3_per_epoch, 1.0)
+                    - 1.0 / max(volume, 1.0)
+                )
+            if gain > 0.0:
+                for shedder, shedding in emitted:
+                    shedder_factor = self.confinement_emission_factor(
+                        shedder
+                    )
+                    if shedder_factor > 0.0:
+                        shedding /= shedder_factor
+                    near += (
+                        plume_weight
+                        * shedding
+                        * emission_fraction
+                        * gain
+                        * inhaled
+                        * self.droplet_scalar
+                    )
+        return pool_term + addback + near
+
+    def _caregiver_service_share(self) -> float:
+        """The 5-minute delivery as a fraction of the epoch."""
+        epoch_minutes = self.clock.hours_per_epoch * 60.0
+        return min(
+            1.0,
+            float(self._cg_service["service_episode_minutes"])
+            / max(epoch_minutes, 1e-9),
+        )
+
+    def _draw_service_responder(self, epoch: int) -> KorkinAgent | None:
+        """Cabin-service crew first, uniform-crew fallback (§11.4).
+
+        The declared ``service_function_classes`` names the cabin-service
+        roster when a population carries one; none of the shipped
+        populations declares a steward class today, so the uniform crew
+        draw is what fires — the function-first arm is the grammar, not
+        a currently-populated pool.
+        """
+        pool = [
+            a
+            for a in self._agents_by_id.values()
+            if a.role == "crew" and self._responder_available(a, epoch)
+        ]
+        classes = set(self._cg_service.get("service_function_classes") or ())
+        if classes:
+            preferred = [a for a in pool if a.agent_class in classes]
+            pool = preferred or pool
+        if not pool:
+            return None
+        return pool[int(self.rng.integers(len(pool)))]
+
+    def _caregiver_service_dose(
+        self,
+        host: KorkinAgent,
+        steward: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> float:
+        """One delivery's dose under the pathogen's own channels.
+
+        Respiratory pathogens: the 5-minute near-field/droplet share of
+        the pair dose. Emetic pathogens (no continuous emission to stand
+        in): a bounded surface pickup off the host's cabin emesis
+        deposits — the emetic equivalent of the declared near-field
+        episode.
+        """
+        if (
+            str((profile or {}).get("airborne_emission_mode"))
+            == "emesis_conditioned"
+        ):
+            return self._caregiver_service_surface_dose(
+                host, steward, epoch, pathogen_id
+            )
+        share = self._caregiver_service_share()
+        return self._caregiver_pair_dose(
+            host,
+            steward,
+            epoch,
+            pathogen_id,
+            profile,
+            presence=share,
+            plume_weight=share,
+        )
+
+    def _caregiver_service_surface_dose(
+        self,
+        host: KorkinAgent,
+        steward: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+    ) -> float:
+        """Noro-side service pickup: bounded touches off cabin deposits."""
+        # Patches are filed under the zone the bolus landed in — the
+        # confined host's cabin zone is where the steward would clean.
+        pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
+        patches = list(pools.get(host.home_zone, ()))
+        if not patches:
+            return 0.0
+        hand_area, used_fraction, transfer_efficiency = (
+            self._draw_surface_to_hand(self.rng)
+        )
+        lo, hi = self._cg_service["service_touches"]
+        touches = int(self.rng.integers(lo, hi + 1))
+        picked = 0.0
+        for patch in patches:
+            take = min(
+                patch.mass,
+                touches
+                * patch.mass
+                * used_fraction
+                * hand_area
+                / max(patch.high_touch_area_m2, 1e-9)
+                * transfer_efficiency,
+            )
+            patch.mass = max(0.0, patch.mass - take)
+            picked += take
+        if picked <= 0.0:
+            return 0.0
+        hand = steward.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        dose = self._hand_to_mouth_dose(steward, epoch, hand + picked)
+        steward.hand_load_by_pathogen[pathogen_id] = hand + picked - dose
+        return dose
+
+    def _caregiver_service_epoch(
+        self,
+        epoch: int,
+        agents: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """R3: a crew delivery per Meal token to each confined host.
+
+        The rhythm layer re-routes a confined host's Meal tokens to the
+        cabin and creates no crew contact — this is the role that closes
+        that gap (§2): one delivery per such token, the steward at the
+        door, the dose through the pathogen's own channels, the stamp at
+        the service report probability on a presenting case.
+        """
+        hour = self.clock.hour_of_day(epoch)
+        for host in agents:
+            confined = (
+                host.agent_id in self._quarantined_ids
+                or host.current_location == "Isolated_In_Quarters"
+            )
+            # Confined hosts hold no ``current_activity`` — the placement
+            # branches return before the token is recorded — so the meal
+            # the SOP would re-route is read off the raw schedule.
+            if (
+                not confined
+                or host.has_departed(epoch)
+                or not host.scheduled_token(hour, host.phase_jitter)
+                .startswith("Meal")
+            ):
+                continue
+            steward = self._draw_service_responder(epoch)
+            if steward is None:
+                continue
+            self.caregiver_telemetry["service_deliveries"] += 1
+            dose = self._caregiver_service_dose(
+                host, steward, epoch, pathogen_id, profile
+            )
+            self.caregiver_telemetry["service_dose_delivered"] += dose
+            if dose > 0.0 and steward in self._get_susceptible(
+                [steward], pathogen_id
+            ):
+                self.caregiver_telemetry["service_dose_credited"] += (
+                    self._accumulate(
+                        steward.agent_id,
+                        "caregiver",
+                        dose,
+                        agent_doses,
+                        agent_pathway_doses,
+                    )
+                )
+            inf = (host.infections or {}).get(pathogen_id) or {}
+            if (
+                self._care_eligible_course(inf)
+                and host.caregiver_report_due_epoch is None
+                and self.rng.random() < self.rng.uniform(
+                    *self._cg_service["report_probability"]
+                )
+            ):
+                host.caregiver_report_due_epoch = int(epoch)
+                self.caregiver_telemetry["service_reports"] += 1
+                self.caregiver_telemetry["caregiver_reports"] += 1
+
+    def _caregiver_pathogen_epoch(
+        self,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+    ) -> None:
+        """Caregiver dose for one pathogen this epoch (R2 + R3)."""
+        if self._cg_role_enabled(self._cg_tending, pathogen_id):
+            for (host_id, pid), des in self._cg_designations.items():
+                if (
+                    pid != pathogen_id
+                    or des["refused"]
+                    or not des["tending_epoch"]
+                ):
+                    continue
+                host = self._agents_by_id.get(host_id)
+                cg = self._agents_by_id.get(des["caregiver_id"])
+                if host is None or cg is None:
+                    continue
+                # R2 (§5/§11): the pair's copresence share upgraded by the
+                # declared tending multiplier toward the full-presence
+                # ceiling; the plume weight saturates the cabin-mate
+                # awake-plume share the same way.
+                copresence = self._cabin_pair_copresence(host, cg, epoch)
+                plume_base = (
+                    self.cabin_cooccupancy.awake_plume_share
+                    if self.cabin_cooccupancy.active
+                    else 1.0
+                )
+                dose = self._caregiver_pair_dose(
+                    host,
+                    cg,
+                    epoch,
+                    pathogen_id,
+                    profile,
+                    presence=min(1.0, copresence * des["mult"]),
+                    plume_weight=min(1.0, plume_base * des["mult"]),
+                )
+                self.caregiver_telemetry["tending_dose_delivered"] += dose
+                if dose > 0.0 and cg in self._get_susceptible(
+                    [cg], pathogen_id
+                ):
+                    self.caregiver_telemetry["tending_dose_credited"] += (
+                        self._accumulate(
+                            cg.agent_id,
+                            "caregiver",
+                            dose,
+                            agent_doses,
+                            agent_pathway_doses,
+                        )
+                    )
+        if self._cg_role_enabled(self._cg_service, pathogen_id):
+            self._caregiver_service_epoch(
+                epoch,
+                list(self._agents_by_id.values()),
+                pathogen_id,
+                profile,
+                agent_doses,
+                agent_pathway_doses,
+            )
 
     def _deposit_emesis(
         self,

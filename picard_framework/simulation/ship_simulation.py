@@ -1101,6 +1101,12 @@ class ShipSimulation:
         state = work.state
         self.engine.isolated_ids = set(state.isolated_ids)
         self.engine.quarantined_ids = set(state.quarantined_ids)
+        # CAREGIVER-V1: designations refresh and the tending epoch's
+        # relocations must exist before agent movement resolves this
+        # epoch's locations (reallocate arm; additive returns {}).
+        self.engine.caregiver_tending_zones = self.tx_core.caregiver_epoch_setup(
+            work.epoch, self.engine.agents
+        )
         self.engine.vsp_reported_case_fraction = state.vsp_reported_case_fraction
         self.engine.vsp_reported_case_fraction_max = max(
             self.engine.vsp_reported_case_fraction_max,

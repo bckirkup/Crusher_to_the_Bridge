@@ -785,6 +785,12 @@ def run_spec_voyage(
             getattr(tx_core, "caregiver_telemetry", None) or {}
         ).items()
     }
+    # CAREGIVER-V1 conformance echo: the resolved role tree the voyage ran
+    # with — mode, budget_mode, per-role enabled flags and declared draws.
+    caregiver_resolved = getattr(tx_core, "caregiver_resolved_block", None)
+    caregiver["resolved"] = (
+        caregiver_resolved() if caregiver_resolved is not None else None
+    )
     platform_id = str(spec_dict["catalog"]["platform_id"])
     return {
         "seed": int(spec_dict["run"]["random_seed"]),

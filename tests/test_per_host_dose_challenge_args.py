@@ -117,6 +117,11 @@ def test_run_seed_resolves_the_fomite_arm_and_witnesses_delivery(arm):
     spec["config_overrides"].setdefault(
         "transmission", {},
     )["hand_reservoir_mode"] = "spike_decay"
+    # CAREGIVER-V1: same pin for the shipped caregiver roles — their
+    # cleanup/service draws re-roll the shared stream and the authored
+    # delivery window goes sterile (mode: off reproduces the authored
+    # fomite_witness counters on this seed).
+    spec["config_overrides"]["transmission"]["caregiver"] = {"mode": "off"}
     summary = pdc.run_seed(
         seed=9000, platform="classic_cruise_1900",
         bundle="active_profiles", epochs=20, pathogen_id="norwalk_gi",

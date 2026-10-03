@@ -1,8 +1,12 @@
-# NORO-CHANNEL-04 worker — thin overlay on the NORO-CHANNEL-03 campaign
-# image at d6c51c14: the NORO-CAREGIVER-01 mechanism stack merged at
-# a78c942e (parties, caregiver response/exposure/discovery stamp) plus
-# the funnel driver's caregiver-attribution capture for this campaign.
-# Everything unchanged since d6c51c14 stays in the layers below.
+# NORO-CHANNEL-04 worker — overlay on the NORO-CHANNEL-03 campaign image.
+# The base layers' engines tree sits at bc4de6f5 (the channel-03 overlay
+# copied only its own driver+entrypoints), so copying only files changed
+# since d6c51c14 would mix two engine vintages — ENV-HAZARD-01's
+# engines/environmental_hazards.py, added before d6c51c14, was already
+# missing from the base and the first build of this overlay failed on
+# exactly that import. This overlay therefore copies the full root
+# Dockerfile scope: the image then equals the merge-SHA tree for every
+# image-visible path regardless of which campaign layered what below.
 #
 # Build (from the repository root; the base must exist in ECR):
 #   docker build -f deploy/aws/Dockerfile.noro_channel_04 \
@@ -19,46 +23,21 @@ LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
 ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
 
 USER root
-# The NORO-CAREGIVER-01 mechanism stack and the files that changed with it
-# (d6c51c14..a78c942e, image-visible paths only).
-COPY --chown=campaign:campaign crusher_labs/config.yaml \
-    ./crusher_labs/config.yaml
-COPY --chown=campaign:campaign crusher_labs/modalities/syndromic.py \
-    ./crusher_labs/modalities/syndromic.py
-COPY --chown=campaign:campaign engines/infection_dynamics_bridge.py \
-    ./engines/infection_dynamics_bridge.py
-COPY --chown=campaign:campaign engines/transmission_core.py \
-    ./engines/transmission_core.py
+# Full root-Dockerfile COPY scope at the merge SHA.
+COPY --chown=campaign:campaign picard_framework/ ./picard_framework/
+COPY --chown=campaign:campaign crusher_labs/ ./crusher_labs/
+COPY --chown=campaign:campaign engines/ ./engines/
+COPY --chown=campaign:campaign decision_engine/ ./decision_engine/
+COPY --chown=campaign:campaign simulation_utils/ ./simulation_utils/
+COPY --chown=campaign:campaign telemetry_buffer/ ./telemetry_buffer/
+COPY --chown=campaign:campaign data/ ./data/
+COPY --chown=campaign:campaign schemas/ ./schemas/
+COPY --chown=campaign:campaign presidio/data/ ./presidio/data/
+COPY --chown=campaign:campaign orchestrator.py ./
+COPY --chown=campaign:campaign orchestrator_chronic.py \
+    orchestrator_display.py orchestrator_epoch.py ./
 COPY --chown=campaign:campaign orchestrator_init.py \
-    ./orchestrator_init.py
-COPY --chown=campaign:campaign \
-    picard_framework/simulation/ship_simulation.py \
-    ./picard_framework/simulation/ship_simulation.py
-COPY --chown=campaign:campaign picard_framework/covid_boarding_screen.py \
-    ./picard_framework/covid_boarding_screen.py
-COPY --chown=campaign:campaign \
-    picard_framework/runs/covid_ring_cap_v1_design.json \
-    ./picard_framework/runs/covid_ring_cap_v1_design.json
-COPY --chown=campaign:campaign \
-    picard_framework/runs/covid_ring_cap_v1_fleet_design.json \
-    ./picard_framework/runs/covid_ring_cap_v1_fleet_design.json
-COPY --chown=campaign:campaign \
-    picard_framework/runs/covid_susc_pool_v1_design.json \
-    ./picard_framework/runs/covid_susc_pool_v1_design.json
-COPY --chown=campaign:campaign \
-    picard_framework/runs/covid_susc_pool_v1_fleet_design.json \
-    ./picard_framework/runs/covid_susc_pool_v1_fleet_design.json
-COPY --chown=campaign:campaign \
-    picard_framework/runs/mega_cruise_campaign/campaign_execution.py \
-    ./picard_framework/runs/mega_cruise_campaign/campaign_execution.py
-COPY --chown=campaign:campaign telemetry_buffer/fields.py \
-    ./telemetry_buffer/fields.py
-COPY --chown=campaign:campaign \
-    telemetry_buffer/observation_model/score_anchors.py \
-    ./telemetry_buffer/observation_model/score_anchors.py
-COPY --chown=campaign:campaign \
-    telemetry_buffer/observation_model/anchor_measurement_spec.md \
-    ./telemetry_buffer/observation_model/anchor_measurement_spec.md
+    orchestrator_record.py orchestrator_types.py ./
 # tools/ wholesale (same pattern as the outbreak-01 overlay): the funnel
 # driver with caregiver capture, the channel_03 readout with the split
 # rendering, per_host_dose_challenge and any sibling tool changes.

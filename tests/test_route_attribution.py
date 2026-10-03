@@ -99,6 +99,12 @@ class TestRouteAttribution:
         spec.legacy_cfg.setdefault("transmission", {})[
             "hand_reservoir_mode"
         ] = "spike_decay"
+        # CAREGIVER-V1: the shipped caregiver roles fire in this window
+        # (a steward cleanup response plus meal-token service deliveries
+        # to confined hosts), re-rolling the shared stream and leaving the
+        # fixture sterile. The mode: off baseline is the pre-V1 tree this
+        # fixture is authored on; it reproduces the one fomite event.
+        spec.legacy_cfg["transmission"]["caregiver"] = {"mode": "off"}
         first = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         monkeypatch.setattr(
             ship_simulation_module,

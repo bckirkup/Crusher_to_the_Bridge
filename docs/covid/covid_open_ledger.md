@@ -1023,7 +1023,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   per ignited seed but the ~10× residual survives intact
   (`docs/ledger/COVID-THETA-V15.md`).*
 - **`CAREGIVER-V1` declares the cross-pathogen caregiver grammar**
-  (`docs/proposals/caregiver_v1_spec.md`, `docs/ledger/CAREGIVER-V1.md`) —
+  (`docs/caregiver_v1_spec.md`, `docs/ledger/CAREGIVER-V1.md`) —
   three roles on the `party_id`/`transmission.caregiver` tree NORO-CAREGIVER-01
   shipped: R1 `cleanup` (episode mode; noro instantiation shipped), R2
   `tending` (course mode: one designated cabin/party caregiver binds to a
@@ -1039,11 +1039,18 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   the leg every measured candidate so far has failed to move. Respiratory
   factors are Grade C declarations bounded above by the Kordsmeyer 2022
   cabin-mate aOR 3.27 check; noro cells stay provisional pending the funnel
-  campaign. Spec only — no engine code; implementation arm is a later stage.
-  *Revised 2026-10-03: age axis decided — U-shaped host response bands
-  (children + elderly), adult-weighted responder draw; crew matrix — R1
-  steward channel at `responder_protection_factor` (gloved < napkin), none
-  in R2, R3 crew-only; R1 trigger location-agnostic (public emesis counts).*
+  campaign. *Revised 2026-10-03: age axis decided — U-shaped host response
+  bands (children + elderly), adult-weighted responder draw; crew matrix —
+  R1 steward channel at `responder_protection_factor` (gloved < napkin),
+  none in R2, R3 crew-only; R1 trigger location-agnostic (public emesis
+  counts). Implemented 2026-10-03 — all three roles live in
+  `engines/transmission_core.py` on the `caregiver.{cleanup,tending,service}`
+  grammar (flat NORO-CAREGIVER-01 keys = cleanup shorthand), default-ON with
+  `mode: off` the labelled baseline; R2 enabled for sars_cov2_resp +
+  influenza_a only, R3 for all pathogens. The greg_mortimer_2020 hull
+  golden moved as the intended mechanism — attribution via the off arm in
+  `test_covid_hull_change_detector`'s pin comment. Frozen constants:
+  register §3.11.*
 
 - **`PROPENSITY-V1` declares the missing persistent-propensity term.**
   Three of the four early-COVID model failure modes are already in-tree —
