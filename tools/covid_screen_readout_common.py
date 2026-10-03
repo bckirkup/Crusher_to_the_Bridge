@@ -683,9 +683,9 @@ def propensity_row_stats(payloads: list[dict]) -> dict:
     ]
     stats.update(propensity_row_echo(takeoff))
     clause = stats["clause"]
-    verdict = "unscored" if not clause["scored"] else (
-        "PASS" if clause["clause_ok"] else "FAIL"
-    )
+    verdict = "unscored"
+    if clause["scored"]:
+        verdict = "PASS" if clause["clause_ok"] else "FAIL"
     stats["row_extra"] = (
         f"clause {verdict} "
         f"units {fmt3g(stats['propensity_units_drawn']['median'])}"
