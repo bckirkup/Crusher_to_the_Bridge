@@ -1040,3 +1040,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   factors are Grade C declarations bounded above by the Kordsmeyer 2022
   cabin-mate aOR 3.27 check; noro cells stay provisional pending the funnel
   campaign. Spec only — no engine code; implementation arm is a later stage.
+  *Revised 2026-10-03: age axis decided — U-shaped host response bands
+  (children + elderly), adult-weighted responder draw; crew matrix — R1
+  steward channel at `responder_protection_factor` (gloved < napkin), none
+  in R2, R3 crew-only; R1 trigger location-agnostic (public emesis counts).*

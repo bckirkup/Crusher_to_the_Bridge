@@ -32,6 +32,14 @@ non-ring contact budget (`budget_mode: reallocate` default; `additive` is
 the labelled attribution arm), so the mechanism concentrates the caregiver's
 exposure rather than adding ship-level contact.
 
+Decisions taken 2026-10-03 (Benjamin): one designated caregiver; U-shaped
+host-age response bands (children + elderly elevated); adult-weighted
+responder draw; crew participation matrix — R1 steward channel with
+`responder_protection_factor` (gloved cleanup < family napkin bolus), no
+crew in R2, R3 crew-only; R1 episode trigger is location-agnostic (public
+emesis included); R3 confined-only, cabin-service function first, stamps
+the host. Remaining opens live in spec §11.
+
 ## Factor table
 
 Per-pathogen intervals and grades are frozen in the spec's §5. Noro cells are
