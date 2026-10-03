@@ -312,7 +312,20 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (2, 1, 217, 3, 0) -> (2, 2, 217, 4, 1), read in the local venv on
         # this branch; the daily_hazard baseline reproduces the prior tuple
         # exactly on this branch.
-        (3, 12): (2, 2, 217, 4, 1),
+        # CAREGIVER-V1 enables the tending and service roles by default for
+        # sars_cov2_resp (and service for every pathogen): tending
+        # designations bind family caregivers to symptomatic hosts for the
+        # course, meal-token service deliveries add crew contact to confined
+        # cabins, and their stamps feed the report channel — the near-extinct
+        # cell ignites: (2, 2, 217, 4, 1) -> (46, 27, 217, 68, 18). The
+        # transmission.caregiver.mode: off arm reproduces the prior tuple
+        # exactly on this branch (local venv, CPython 3.12), so the move is
+        # fully attributed to the mechanism's enablement, including
+        # campaign_asymptomatic_positives 1 -> 18 — tending caregivers who
+        # catch the host's emission present asymptomatically and are picked
+        # up by the campaign screen. The 3.11 entry is carried at the old
+        # value pending its CI read on this branch.
+        (3, 12): (46, 27, 217, 68, 18),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the

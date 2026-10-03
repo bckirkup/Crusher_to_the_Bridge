@@ -180,6 +180,10 @@ class TestCaregiverEvent:
         responder.party_id = 0
         emitter.party_member_ids = frozenset({2})
         responder.party_member_ids = frozenset({1})
+        # CAREGIVER-V1 presence gate: the ring member must be in the
+        # event's compartment — same stateroom for a cabin emesis.
+        emitter.cabin_mate_ids = frozenset({2})
+        responder.cabin_mate_ids = frozenset({1})
         core._agents_by_id = {1: emitter, 2: responder}
         return core, emitter, responder
 
@@ -192,7 +196,7 @@ class TestCaregiverEvent:
         doses: dict[int, float] = {}
         pw: dict[int, dict[str, float]] = {}
         contacted = core._caregiver_response(
-            emitter, PATHOGEN, 1, 1.0e6, 7.8, doses, pw,
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, doses, pw,
         )
         assert contacted > 0.0
         assert contacted <= 1.0e6
@@ -212,7 +216,7 @@ class TestCaregiverEvent:
         doses: dict[int, float] = {}
         pw: dict[int, dict[str, float]] = {}
         contacted = core._caregiver_response(
-            emitter, PATHOGEN, 1, 1.0e6, 7.8, doses, pw,
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, doses, pw,
         )
         assert contacted > 0.0
         assert core.caregiver_telemetry["steward_responses"] == 1
@@ -220,7 +224,7 @@ class TestCaregiverEvent:
     def test_off_mode_is_silent(self) -> None:
         core, emitter, responder = self._scene(mode="off")
         contacted = core._caregiver_response(
-            emitter, PATHOGEN, 1, 1.0e6, 7.8, {}, {},
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, {}, {},
         )
         assert contacted == pytest.approx(0.0)
         assert emitter.caregiver_report_due_epoch is None
@@ -230,7 +234,7 @@ class TestCaregiverEvent:
         core, emitter, responder = self._scene(mode="off")
         state = core.rng.bit_generator.state
         core._caregiver_response(
-            emitter, PATHOGEN, 1, 1.0e6, 7.8, {}, {},
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, {}, {},
         )
         assert core.rng.bit_generator.state == state
 
@@ -245,7 +249,7 @@ class TestCaregiverEvent:
         mate.current_location = "Isolated_In_Quarters"
         core._agents_by_id = {1: emitter, 2: mate}
         assert core._caregiver_response(
-            emitter, PATHOGEN, 1, 1.0e6, 7.8, {}, {},
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, {}, {},
         ) == pytest.approx(0.0)
 
     def test_cleanup_mass_is_netted_out_of_the_patch(self) -> None:
@@ -337,3 +341,237 @@ class TestCaregiverDiscovery:
         out = syn.query_ground_truth({"epoch": 3, "agents": [agent]})
         assert out["sick_call_agents"] == []
         assert out["caregiver_report_ids"] == []
+
+
+class TestCaregiverV1:
+    """CAREGIVER-V1: role grammar, presence gate, R2 tending, R3 service.
+
+    Invariants and graded sensitivity only: the grammar resolves to the
+    declared role tree, a ring member answers only when physically at the
+    event, the designation lifecycle is once-per-course and retires on
+    recovery, and a Meal token at a confined host produces exactly one
+    service delivery whose dose lands under route ``caregiver``.
+    """
+
+    @staticmethod
+    def _symptomatic_host(aid: int = 1) -> KorkinAgent:
+        host = _emitting(aid, _profile(), np.random.default_rng(3))
+        host.infections[PATHOGEN]["will_present"] = True
+        return host
+
+    @staticmethod
+    def _family_pair() -> tuple:
+        """Host + capable adult ring member sharing a stateroom."""
+        host = TestCaregiverV1._symptomatic_host(1)
+        cg = _agent(2)
+        cg.age_band = "adult"
+        host.party_member_ids = frozenset({2})
+        cg.party_member_ids = frozenset({1})
+        host.cabin_mate_ids = frozenset({2})
+        cg.cabin_mate_ids = frozenset({1})
+        return host, cg
+
+    def test_role_grammar_resolves_to_the_declared_tree(self) -> None:
+        core = _core(caregiver={
+            "budget_mode": "additive",
+            "care_response_by_host_age_band": {
+                "child": 2.0, "adult": 1.0, "elderly": 1.1,
+            },
+            "responder_protection_factor": {"steward": (0.1, 0.2)},
+            "tending": {
+                "enabled": {"*": True},
+                "response_probability": (0.7, 0.7),
+            },
+        })
+        block = core.caregiver_resolved_block()
+        assert block["mode"] == "on"
+        assert block["budget_mode"] == "additive"
+        assert block["roles"]["tending"]["enabled"] == {"*": True}
+        assert block["roles"]["tending"]["response_probability"] == [0.7, 0.7]
+        assert block["responder_protection_factor"]["steward"] == [0.1, 0.2]
+        assert block["care_response_by_host_age_band"]["child"] == 2.0
+
+    def test_flat_keys_parse_as_cleanup_shorthand(self) -> None:
+        core = _core(caregiver={"response_probability": (0.5, 0.5)})
+        assert core._cg_cleanup["response_probability"] == (0.5, 0.5)
+        assert core._cg_cleanup["steward_fallback"] is True
+        # The shipped V1 defaults: tending respiratory-only, service on.
+        assert not core._cg_role_enabled(core._cg_tending, "norwalk_gi")
+        assert core._cg_role_enabled(core._cg_service, "norwalk_gi")
+
+    def test_presence_gate_sends_absent_ring_to_the_steward(self) -> None:
+        core = _core(caregiver={
+            "response_probability": (1.0, 1.0),
+            "steward_response_probability": (1.0, 1.0),
+            "report_probability": (0.0, 0.0),
+        })
+        emitter = self._symptomatic_host(1)
+        mate, _cg = self._family_pair()
+        mate.agent_id = 2
+        emitter.party_member_ids = frozenset({2})
+        emitter.cabin_mate_ids = frozenset({2})
+        mate.cabin_mate_ids = frozenset({1})
+        mate.current_location = "Main_Pool_Deck"  # aboard, not at the event
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: emitter, 2: mate, 9: steward}
+        contacted = core._caregiver_response(
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, {}, {},
+        )
+        assert contacted > 0.0
+        assert core.caregiver_telemetry["caregiver_responses"] == 0
+        assert core.caregiver_telemetry["steward_responses"] == 1
+
+    def test_steward_protection_discounts_the_steward_own_dose(self) -> None:
+        core = _core(caregiver={
+            "response_probability": (0.0, 0.0),
+            "steward_response_probability": (1.0, 1.0),
+            "report_probability": (0.0, 0.0),
+            "responder_protection_factor": {"steward": (0.0, 0.0)},
+        })
+        emitter = self._symptomatic_host(1)
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: emitter, 9: steward}
+        contacted = core._caregiver_response(
+            emitter, PATHOGEN, 1, ZONE, 1.0e6, 7.8, {}, {},
+        )
+        # The surface still loses what the cleanup touched; the gloved
+        # steward keeps none of it on their own hand.
+        assert contacted > 0.0
+        assert (
+            core.caregiver_telemetry["caregiver_dose_delivered"]
+            == pytest.approx(0.0)
+        )
+
+    def test_designation_relocates_under_reallocate(self) -> None:
+        core = _core(caregiver={
+            "tending": {
+                "enabled": {"*": True},
+                "response_probability": (1.0, 1.0),
+                "report_probability": (1.0, 1.0),
+                "tending_hours_per_day": (24.0, 24.0),
+            },
+        })
+        host, cg = self._family_pair()
+        core._agents_by_id = {1: host, 2: cg}
+        moves = core.caregiver_epoch_setup(1, [host, cg])
+        assert moves == {2: ZONE}
+        assert 2 in core._cg_absorbed_ids
+        assert core.caregiver_telemetry["tending_designations"] == 1
+        assert host.caregiver_report_due_epoch == 1
+        occupants = core._epoch_zone_occupants([host, cg], 1)
+        assert cg not in occupants.get(ZONE, [])
+        assert host in occupants.get(ZONE, [])
+
+    def test_additive_keeps_the_caregiver_in_the_pools(self) -> None:
+        core = _core(caregiver={
+            "budget_mode": "additive",
+            "tending": {
+                "enabled": {"*": True},
+                "response_probability": (1.0, 1.0),
+                "report_probability": (0.0, 0.0),
+                "tending_hours_per_day": (24.0, 24.0),
+            },
+        })
+        host, cg = self._family_pair()
+        core._agents_by_id = {1: host, 2: cg}
+        moves = core.caregiver_epoch_setup(1, [host, cg])
+        assert moves == {}
+        assert core._cg_absorbed_ids == set()
+
+    def test_refusal_is_once_per_course(self) -> None:
+        core = _core(caregiver={
+            "tending": {
+                "enabled": {"*": True},
+                "response_probability": (0.0, 0.0),
+            },
+        })
+        host, cg = self._family_pair()
+        core._agents_by_id = {1: host, 2: cg}
+        for epoch in range(1, 4):
+            assert core.caregiver_epoch_setup(epoch, [host, cg]) == {}
+        # The failed onset draw holds for the course — one refusal, not
+        # one per symptomatic epoch.
+        assert core.caregiver_telemetry["tending_refusals"] == 1
+
+    def test_designation_retires_on_host_recovery(self) -> None:
+        core = _core(caregiver={
+            "tending": {
+                "enabled": {"*": True},
+                "response_probability": (1.0, 1.0),
+                "report_probability": (0.0, 0.0),
+                "tending_hours_per_day": (24.0, 24.0),
+            },
+        })
+        host, cg = self._family_pair()
+        core._agents_by_id = {1: host, 2: cg}
+        assert core.caregiver_epoch_setup(1, [host, cg]) == {2: ZONE}
+        host.infections[PATHOGEN]["illness"] = IllnessStatus.RECOVERED
+        assert core.caregiver_epoch_setup(2, [host, cg]) == {}
+        assert core._cg_designations == {}
+
+    def test_service_delivery_on_a_confined_hosts_meal_token(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "report_probability": (1.0, 1.0),
+            },
+        })
+        host = self._symptomatic_host(1)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        pw: dict[int, dict[str, float]] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, pw)
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry["service_reports"] == 1
+        assert host.caregiver_report_due_epoch == 1
+        assert core.caregiver_telemetry["service_dose_credited"] > 0.0
+        assert doses.get(9, 0.0) > 0.0
+
+    def test_service_skips_an_unconfined_host(self) -> None:
+        core = _core(caregiver={"service": {"enabled": {"*": True}}})
+        host = self._symptomatic_host(1)  # aboard, free
+        host.schedule = ["Meal:Main"] * 24
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), {}, {})
+        assert core.caregiver_telemetry["service_deliveries"] == 0
+
+    def test_service_emetic_pickup_drains_the_patch(self) -> None:
+        from engines.transmission_core import EmesisPatch
+
+        profile = _profile()
+        profile["airborne_emission_mode"] = "emesis_conditioned"
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "report_probability": (0.0, 0.0),
+                "service_touches": (3, 3),
+            },
+        })
+        host = self._symptomatic_host(1)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        patch = EmesisPatch(
+            mass=1.0e6,
+            high_touch_area_m2=2.0,
+            occupant_share=1.0,
+            epoch=0,
+        )
+        core.emesis_patch_pools_by_pathogen.setdefault(
+            PATHOGEN, {},
+        )[ZONE] = [patch]
+        core._caregiver_pathogen_epoch(1, PATHOGEN, profile, {}, {})
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert patch.mass < 1.0e6
+
+    def test_epoch_setup_mode_off_draws_no_rng(self) -> None:
+        core = _core(caregiver={"mode": "off"})
+        host, cg = self._family_pair()
+        state = core.rng.bit_generator.state
+        assert core.caregiver_epoch_setup(1, [host, cg]) == {}
+        assert core.rng.bit_generator.state == state

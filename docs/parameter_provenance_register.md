@@ -721,6 +721,29 @@ fitted; unsourced rows remain NULL-SOURCE declarations.
 | `ship_systems` construction fields: `health_start`, `degradation.model`, `repair.labor_class`, `repair_priority`, `effects.*.capacity_multiplier_at_failure`, `failure_threshold`, `fatigue_susceptibility` | spec only | X | Construction and policy fields, not measurable quantities — `failure_threshold` additionally declared [0.1, 0.5] as an operational trip point | declared | — | — | L? | ∅def — construction | SHIP-FUNC-01 |
 | `fatigue_refusal_threshold` + `fatigue_refusal_probability_per_epoch` (§7.3) | spec only | C | Direction evidence only, no threshold or hazard: discomfort drives removal (Rebmann 2013 — 22% of removals for discomfort, adjustments increased over time; Scarano 2020 lower N95 adherence; Timbadia 2025 authors' discomfort→non-compliance claim) and adherence decays on institutional timescales (Schrank 2024 agreement 84→55%; When-Risk-Persists PPE replacement 58.4→50.9%) | R/Ab | declared | — | L? | ∅lit — declared | SHIP-FUNC-01 |
 
+### 3.11 Caregiver role constants (CAREGIVER-V1)
+
+The three-role grammar's new quantities
+([`caregiver_v1_spec.md`](caregiver_v1_spec.md) §5,
+implemented under `transmission.caregiver.<role>`). The R1 `cleanup`
+quantities themselves keep their NORO-CAREGIVER-01 rows in §3.1 — the
+shipped flat keys are that role's shorthand. Every interval below is a
+Grade C declaration: a box, not a fit; none was chosen to move a scored
+anchor.
+
+| Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
+|---|---|---|---|---|---|---|---|---|---|
+| `care_response_by_host_age_band` (U-shaped care-eligibility on host age: {child, adult, elderly}) | {child: 1.5, adult: 1.0, elderly: 1.25} | C, declared | Child end supported directionally by Balachandran 2023 household AGE analysis (n=570 primary cases): secondary-transmission aOR 2.2 at <5 y, 3.3 at 5–17 y — Grade B direction, not a multiplier; elderly end inferred from frailty/dependency and flagged the weaker half (spec §11.6) | T (direction) + D | multipliers [1.0, 2.0] declared per band; shipped {1.5, 1.0, 1.25} | point map | L? | ✓ shipped default-ON (CAREGIVER-V1) | CAREGIVER-V1 |
+| `responder_draw_weight_by_band` (adult-weighted caregiver pick within a ring) | {child: 0.0, adult: 1.0, elderly: 0.5} | C, declared | No measured responder-age table exists; spec §11.6 decision — the capable adult tends, a child cannot respond, elderly answers at reduced weight so an elderly-only pair still draws care | D | weights [0.0, 1.0] declared | point map | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `responder_protection_factor.steward` (dose-side cleanup discount on the steward's own exposure) | U(0.3, 0.7) | C, declared | The duty exists (VSP vomitus-cleanup SOP, Tr); the dose discount gloves+procedure produce is unmeasured; family improvises at 1.0 | Tr (duty) + D (discount) | [0.3, 0.7], central 0.5 | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `tending.response_probability` (P(a primary caregiver is designated at symptom onset), per course, age-banded) | U(0.50, 0.90) | C, declared | No designation-propensity measurement exists; admits "no one steps up" | D | [0.50, 0.90] | U | L? | ✓ shipped default-ON (respiratory role) | CAREGIVER-V1 |
+| `tending.tending_copresence_multiplier` (pair co-presence share upgrade) | U(1.5, 3.0) | C, declared | Bounded ABOVE by the check, never fitted to it: Kordsmeyer 2022 infected cabin-mate aOR 3.27 [0.97–11.07] (Grade B, Tr) is the total cabin-mate risk the repaired structure must reproduce; saturates sub-1.0 presence shares toward the full-presence ceiling | Tr (bound) + D | [1.5, 3.0], central 2.0 | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `tending.tending_hours_per_day` | U(2.0, 6.0) | C, declared | No shipboard tending-time measurement exists — a declared field gap, not an invented number | D | [2.0, 6.0] h | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `tending.report_probability` (P(the attendant's evidence reaches medical attention), per designation) | U(0.30, 0.70) | C, declared | DP passengers reached medical through attendants and companions, not only self-assessment; centred above the self-report floor, consistent with the shipboard-capture bound used for noro's ceiling | D | [0.30, 0.70] | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `service.service_episode_minutes` (near-field/droplet contact per delivery) | 5.0 | C, declared | Nobody has timed a cabin meal drop — a declared field gap; the ~3/day cadence is read off the host's own Meal tokens (the SOP re-routes them to the cabin and R3 attaches the crew contact), not a declared count | D | [1, 15] min declared | point | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `service.report_probability` (P(the steward's delivery reports the case), per delivery) | U(0.10, 0.40) | C, declared | A door-drop is weaker discovery than tending; strictly below R2's floor | D | [0.10, 0.40] | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+| `service.service_touches` (emetic-side pickup contacts off the cabin deposit during the drop) | U-int [1, 3] | C, declared | The emetic-pathogen equivalent of the near-field episode (noro has no continuous emission to stand in); same field gap | D | [1, 3] | U-int | L? | ✓ shipped default-ON | CAREGIVER-V1 |
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and

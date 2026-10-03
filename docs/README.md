@@ -172,6 +172,7 @@ longer justifications.
 | [instrument_parameterization_v2.md](instrument_parameterization_v2.md) | Living — feeds `data/config/clinical_instrument_params.json`. v1 is in `history/` |
 | [pricing_notes.md](pricing_notes.md) | Living — assay/labour cost assumptions for `resource_costs.json` |
 | [ship_functions/ship_function_capacity_spec.md](ship_functions/ship_function_capacity_spec.md) | Implemented (§3–§8) — the function registry, availability read, systems/maintenance engine, feedback writers, PPE wear-fatigue channel, and the environmental/chemical hazard arm (ENV-HAZARD-01) |
+| [caregiver_v1_spec.md](caregiver_v1_spec.md) | Implemented (2026-10-03) — the three-role cross-pathogen caregiver grammar (cleanup / tending / service) on `transmission.caregiver.<role>`, default-ON; shipped conformance mapping in §12, frozen constants in `parameter_provenance_register.md` §3.11 |
 | [ship_functions/parameter_sources.md](ship_functions/parameter_sources.md) | Sourcing record (SHIP-FUNC-01) — every tunable in `ship_functions/ship_function_capacity_spec.md` with interval, grade and origin, or an explicit NULL-SOURCE; adopts nothing |
 | [norovirus/](norovirus/) | The norovirus thread — start at the ledger |
 | [norovirus/vsp_ship_class_denominators.md](norovirus/vsp_ship_class_denominators.md) | Implemented — current record of class denominators, the Jenkins/project “Mega” label collision, and the unmapped-band decision |

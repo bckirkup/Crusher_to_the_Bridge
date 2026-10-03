@@ -1398,6 +1398,22 @@ satisfiable subregion still empties the joint. What is withdrawn is every
 specific per-anchor "cannot hit target X" measured on the old structure. See
 `high_touch_area_handoff_2026_09_22.md` §7.
 
+**`CAREGIVER-V1` (ledger entry): every caregiver-adjacent noro reading — the
+CHANNEL-03 funnel rungs (`d6c51c14`) and the NORO-CAREGIVER-01 smoke/attribution
+figures — becomes the labelled pre-V1 baseline at this change's merge SHA.**
+The V1 implementation moves observable noro behaviour on four axes: the R1
+family response is now presence-gated (a ring member must be at the event
+compartment, else the steward channel answers — public emesis counts), both
+response draws carry the host-age-band multiplier and an adult-weighted member
+pick (child-only rings cannot answer), the steward's own pickup is discounted
+by `responder_protection_factor` U[0.3,0.7], and R3 `service` adds meal-drop
+crew contact and emetic patch pickup to confined cabins — all default-ON for
+`norwalk_gi`. R2 `tending` is enabled only for `sars_cov2_resp`/`influenza_a`
+and is inert on noro by declaration. `transmission.caregiver.mode: off`
+reproduces the pre-mechanism stream bit-identically; flat NORO-CAREGIVER-01
+keys parse as cleanup shorthand. The NORO-CHANNEL-04 canary re-measures the
+two broken rungs on the new stack.
+
 ## 2. Anchors
 
 Targets, from `telemetry_buffer/observation_model/anchor_measurement_spec.md`:
