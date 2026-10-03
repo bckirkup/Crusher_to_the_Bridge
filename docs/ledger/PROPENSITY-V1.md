@@ -2,7 +2,8 @@
 **Date:** 2026-10-02
 **Commit:** 63f4f3a9
 **Pathogens:** all
-**Status:** declared
+**Status:** measured
+**Measured at:** e0d43979
 
 ## Question
 
@@ -44,3 +45,23 @@ none touched who shows up.
 Declared and implemented on the same branch (rhythm layer + delivery echo +
 witnesses); no campaign, no refit. The clause canary at the Θ1e9 anchor and
 the admissible-band array are the measurement stage and are not run here.
+
+## Measurement (DP-replay clause canary, `e0d43979`)
+
+`covid_propensity_v1` (40 cells: `{D0_declared party mode, PROP_OFF} ×
+Θ1e9 × 20 seeds` at the v15 stage-2 replay contract; readout
+`docs/covid/covid_propensity_v1_readout.md`). **The clause fails on both
+arms at the anchor**: D0 takeoff 19/20, recorded q05–q95 [1,518, 2,445]
+∌ 197 and takeoff before_share median 0.452 ∉ 0.173±0.10; PROP_OFF
+takeoff 20/20, [1,190, 2,443], share 0.397 — likewise dead. The
+mechanism exercised cleanly (≈2,089 party units per voyage, multiplier
+q05–q95 ≈ 0.24–2.4; the off arm drew zero units on every cell — the
+bit-identity witness) but its seed-paired footprint is seed noise:
+PROP_OFF − D0 deltas med +12 recorded onsets [−923, +657], −0.047
+before_share [−0.49, +0.17]. Pairing against the recorded v15 anchor row
+(`6efec855`) also shows the anchor itself drifted ~+1,600 median
+recorded onsets / 10→20 takeoff seeds under engine merges since then —
+independent of propensity — so the v15 anchor clause pass is historical
+at its own SHA. The fourth early-COVID failure mode joins the dead
+candidates; whether the admissible-band array still runs is the user's
+open decision.
