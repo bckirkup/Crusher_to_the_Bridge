@@ -1196,6 +1196,8 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
         profile: dict,
         zone_name: str,
         epoch: int,
+        *args: Any,
+        **kwargs: Any,
     ) -> float:
         before = len(
             getattr(agent, "emesis_deposition_records_by_pathogen", {}).get(
@@ -1203,7 +1205,7 @@ def _wrap_emesis(core_cls: type, rec: Recorder) -> dict[str, Any]:
             ),
         )
         pool_gain = originals["_emit_emesis"](
-            self, agent, pathogen_id, profile, zone_name, epoch,
+            self, agent, pathogen_id, profile, zone_name, epoch, *args, **kwargs,
         )
         if pathogen_id == rec.pathogen_id:
             _record_emit(
