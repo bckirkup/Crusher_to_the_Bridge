@@ -218,7 +218,14 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # the same tuple pending its CI read, and PR #825's CI confirmed
         # it on the 3.11 shard — both interpreters agree, as before on
         # this near-extinct cell.
-        (3, 11): (2, 2, 217, 4, 1),
+        # CAREGIVER-V1 enables the tending and service roles by default for
+        # sars_cov2_resp (and service for every pathogen): the tending/
+        # service channels and their report stamps ignite the near-extinct
+        # cell the same way on both interpreters (see the 3.12 note for the
+        # mechanism and the mode: off reproduction of the prior tuple):
+        # (2, 2, 217, 4, 1) -> (46, 27, 217, 68, 18), read from CI job
+        # 111220544557 (fast tier, 3.11, shard 3) on this branch.
+        (3, 11): (46, 27, 217, 68, 18),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -323,8 +330,9 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # fully attributed to the mechanism's enablement, including
         # campaign_asymptomatic_positives 1 -> 18 — tending caregivers who
         # catch the host's emission present asymptomatically and are picked
-        # up by the campaign screen. The 3.11 entry is carried at the old
-        # value pending its CI read on this branch.
+        # up by the campaign screen. The 3.11 CI read on this branch
+        # returned the identical tuple (CI job 111220544557) — both
+        # interpreters agree, as before on this cell.
         (3, 12): (46, 27, 217, 68, 18),
     },
     "diamond_princess_2020": {
