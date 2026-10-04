@@ -48,6 +48,8 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "tools" / "noro_diag") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "tools" / "noro_diag"))
 
+from botocore.exceptions import ClientError  # noqa: E402
+
 from simulation_utils.paths import validated_open  # noqa: E402
 from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
     A9_POSTING_THRESHOLD,
@@ -270,6 +272,10 @@ def _collect_s3(s3_uri: str, tiers: list[str] | None = None) -> list[dict]:
             summary = json.loads(blob)
             return _row_from_summary(summary, key.rsplit("/", 1)[-1])
         except (json.JSONDecodeError, KeyError, OSError, zlib.error):
+            return None
+        except ClientError:
+            # DEEP_ARCHIVE objects mid-restore raise InvalidObjectState on
+            # GET — skip so partial-restore readouts can still run.
             return None
 
     with ThreadPoolExecutor(max_workers=32) as pool:
