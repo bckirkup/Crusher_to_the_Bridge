@@ -80,6 +80,28 @@
       },
       "additionalProperties": false
     },
+    "CommonSourceEvents": {
+      "type": "object",
+      "description": "FOOD-COMMON-SOURCE-01 per-pathogen arming: synchronized common-source foodborne events (one contaminated pan at one Dining zone in one meal window). Absent or enabled:false leaves the pathogen a strict no-op. Optional overrides replace constants per-pathogen so a later pathogen's literature replaces constants, not the mechanism.",
+      "properties": {
+        "enabled": {"type": "boolean"},
+        "item_take_share": {
+          "description": "Per-event item-exposure share among the meal cohort: scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
+          ]
+        },
+        "lot_titre_gec_per_g": {
+          "description": "Contaminated-lot titre range, GEC/g: scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0},
+            {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
     "EnvironmentalContamination": {
       "type": "object",
       "properties": {
@@ -1002,6 +1024,9 @@
         },
         "food_contamination": {
           "$ref": "#/$defs/FoodContamination"
+        },
+        "common_source_events": {
+          "$ref": "#/$defs/CommonSourceEvents"
         },
         "environmental_contamination": {
           "$ref": "#/$defs/EnvironmentalContamination"
