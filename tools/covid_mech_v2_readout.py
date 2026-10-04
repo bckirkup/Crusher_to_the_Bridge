@@ -75,6 +75,10 @@ from tools.covid_theta_v15_stage2_readout import (  # noqa: E402
 # loose enough that only a wiring failure can trip it.
 SECRETOR_DRAW_TOL = 0.08
 CHILD_FAILURE_TRIGGER = 0.05
+# Declared/realized echo values compare as exact zero in intent; 1e-9
+# keeps the checks off literal float equality (S1244), the same epsilon
+# the shared readout audit helpers use (CV_ECHO_TOL).
+ECHO_TOL = 1e-9
 
 # The arms whose stale-canary (472cdf13) anchor PASSes made them the
 # assay premise; a scored anchor FAIL on any of them is the declared
@@ -169,7 +173,22 @@ def _audit_secretor_echo(
             f"secretor_negative resolved {resolved_frac} != declared "
             f"{want_frac}",
         )
-    realized = block.get("realized") or {}
+    _audit_secretor_realized(
+        block.get("realized") or {},
+        want_frac,
+        float(want["secretor_rel_susc"] or 0.0),
+        failures,
+    )
+    return failures
+
+
+def _audit_secretor_realized(
+    realized: dict[str, Any],
+    want_frac: float,
+    rel_susc: float,
+    failures: list[str],
+) -> None:
+    """Realized draw + zero-susceptibility count against the declared arm."""
     drawn = float(realized.get("drawn_fraction") or 0.0)
     if want_frac > 0.0:
         if abs(drawn - want_frac) > SECRETOR_DRAW_TOL:
@@ -177,16 +196,15 @@ def _audit_secretor_echo(
                 f"realized draw {drawn:.4f} outside +-{SECRETOR_DRAW_TOL} "
                 f"of declared {want_frac}",
             )
-        if float(want["secretor_rel_susc"] or 0.0) == 0.0 and (
+        if abs(rel_susc) <= ECHO_TOL and (
             realized.get("zero_susceptibility")
             != realized.get("secretor_negative_drawn")
         ):
             failures.append(
                 "rel_susc 0.0 but zero-susceptibility count != drawn count",
             )
-    elif drawn != 0.0:
+    elif abs(drawn) > ECHO_TOL:
         failures.append(f"baseline arm drew {drawn:.4f} secretor-negative")
-    return failures
 
 
 def _audit_cell(
@@ -353,6 +371,125 @@ def _print_rows(rows: dict[tuple, dict[str, Any]]) -> None:
         )
 
 
+def _audit_payloads(
+    payloads: dict[str, Any],
+    lattice: dict[tuple, Any],
+    declared: dict[str, Any],
+    design_id: str,
+) -> tuple[dict[str, list[str]], dict[tuple, list[dict]]]:
+    """Per-cell audit failures + payloads grouped to (theta, arm) rows."""
+    audit_failures: dict[str, list[str]] = {}
+    rows: dict[tuple, list[dict]] = {}
+    for name, payload in sorted(payloads.items()):
+        cell = payload.get("cell") or {}
+        key = (
+            float(cell.get("theta") or -1.0),
+            cell.get("arm_id"),
+            int(cell.get("seed") or -1),
+        )
+        expected = declared.get(key[1])
+        failures = _audit_cell(payload, design_id, expected or {})
+        if key not in lattice:
+            failures.append("cell key not in the declared lattice")
+        elif expected is None:
+            failures.append(f"unknown arm {key[1]!r}")
+        if failures:
+            audit_failures[name] = failures
+        rows.setdefault((key[0], key[1]), []).append(payload)
+    return audit_failures, rows
+
+
+def _summarize_rows(
+    rows: dict[tuple, list[dict]],
+    design: Any,
+    baseline: str,
+    anchor: float,
+    admissible: set[float],
+) -> tuple[dict[tuple, dict[str, Any]], list[dict[str, Any]]]:
+    """standard_row_stats + clause + trigger entries per (theta, arm)."""
+    row_summaries: dict[tuple, dict[str, Any]] = {}
+    triggers: list[dict[str, Any]] = []
+    for key, row in sorted(rows.items()):
+        stats = standard_row_stats(row, extra_fields=_mass_in_band)
+        stats["n_cells"] = len(row)
+        stats["seeds_declared"] = design.seeds
+        stats["clause"] = _clause(stats)
+        row_summaries[key] = stats
+        triggers += _row_trigger_entries(
+            key[0], key[1], stats, baseline, anchor, admissible,
+            design.design_id,
+        )
+        missing_seeds = design.seeds - len(row)
+        if missing_seeds / design.seeds > CHILD_FAILURE_TRIGGER:
+            triggers.append({
+                "theta": key[0], "arm_id": key[1],
+                "trigger": "partial_row",
+                "detail": f"{len(row)}/{design.seeds} seeds landed",
+            })
+    return row_summaries, triggers
+
+
+def _paired_sections(
+    args: Any,
+    payloads: dict[str, Any],
+    baseline: str,
+) -> tuple[dict[str, Any] | None, dict[str, Any] | None, list[dict[str, Any]]]:
+    """Paired stats vs the parent cells and vs the baseline arm."""
+    baseline_payloads = {
+        n: p for n, p in payloads.items()
+        if (p.get("cell") or {}).get("arm_id") == baseline
+    }
+    paired_vs_parent = None
+    triggers: list[dict[str, Any]] = []
+    if args.parent_cells:
+        parents = load_cell_payloads(args.parent_cells)
+        paired_vs_parent = {
+            f"theta={t:g}|arm={a}": s
+            for (t, a), s in sorted(
+                _pair_stats(_pair_map(payloads, parents)).items(),
+            )
+        }
+        triggers += _baseline_drift_triggers(baseline_payloads, parents)
+    armed = {
+        n: p for n, p in payloads.items()
+        if (p.get("cell") or {}).get("arm_id") != baseline
+    }
+    paired_vs_baseline = None
+    if armed and baseline_payloads:
+        paired_vs_baseline = {
+            f"theta={t:g}|arm={a}": s
+            for (t, a), s in sorted(
+                _pair_stats(_pair_map(armed, baseline_payloads)).items(),
+            )
+        }
+    return paired_vs_parent, paired_vs_baseline, triggers
+
+
+def _baseline_drift_triggers(
+    baseline_payloads: dict[str, Any],
+    parents: dict[str, Any],
+) -> list[dict[str, Any]]:
+    """One trigger per row whose baseline drifts from the v15 parent."""
+    triggers: list[dict[str, Any]] = []
+    for (theta, arm_id), stats in _pair_stats(
+        _pair_map(baseline_payloads, parents),
+    ).items():
+        drift = (
+            abs(stats["delta_recorded_onsets_median"] or 0.0) > ECHO_TOL
+            or stats["takeoff_class_flips"] > 0
+        )
+        if drift:
+            triggers.append({
+                "theta": theta, "arm_id": arm_id,
+                "trigger": "baseline_drift_vs_v15",
+                "detail": (
+                    "baseline arm does not reproduce the v15 parent "
+                    f"row: {stats}"
+                ),
+            })
+    return triggers
+
+
 def main(argv: list[str] | None = None) -> int:
     """Read out a MECH-V2 assay surface against the frozen clause."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -389,98 +526,24 @@ def main(argv: list[str] | None = None) -> int:
         if p.get("design_id") == design.design_id
     }
     foreign_design_cells = len(loaded) - len(payloads)
-    audit_failures: dict[str, list[str]] = {}
-    rows: dict[tuple, list[dict]] = {}
-    for name, payload in sorted(payloads.items()):
-        cell = payload.get("cell") or {}
-        key = (
-            float(cell.get("theta") or -1.0),
-            cell.get("arm_id"),
-            int(cell.get("seed") or -1),
-        )
-        expected = declared.get(key[1])
-        failures = _audit_cell(
-            payload, design.design_id, expected or {},
-        )
-        if key not in lattice:
-            failures.append("cell key not in the declared lattice")
-        elif expected is None:
-            failures.append(f"unknown arm {key[1]!r}")
-        if failures:
-            audit_failures[name] = failures
-        rows.setdefault((key[0], key[1]), []).append(payload)
-
-    submitted = set(rows)
-    unsubmitted = sorted(
-        {(c.theta, c.arm_id) for c in lattice.values()} - submitted,
+    audit_failures, rows = _audit_payloads(
+        payloads, lattice, declared, design.design_id,
     )
-    row_summaries: dict[tuple, dict[str, Any]] = {}
-    triggers: list[dict[str, Any]] = []
-    for key, row in sorted(rows.items()):
-        stats = standard_row_stats(row, extra_fields=_mass_in_band)
-        stats["n_cells"] = len(row)
-        stats["seeds_declared"] = design.seeds
-        stats["clause"] = _clause(stats)
-        row_summaries[key] = stats
-        triggers += _row_trigger_entries(
-            key[0], key[1], stats, baseline, anchor, admissible,
-            design.design_id,
-        )
-        missing_seeds = design.seeds - len(row)
-        if missing_seeds / design.seeds > CHILD_FAILURE_TRIGGER:
-            triggers.append({
-                "theta": key[0], "arm_id": key[1],
-                "trigger": "partial_row",
-                "detail": f"{len(row)}/{design.seeds} seeds landed",
-            })
+    unsubmitted = sorted(
+        {(c.theta, c.arm_id) for c in lattice.values()} - set(rows),
+    )
+    row_summaries, triggers = _summarize_rows(
+        rows, design, baseline, anchor, admissible,
+    )
     if args.expect_complete:
-        for theta, arm_id in unsubmitted:
-            triggers.append({
-                "theta": theta, "arm_id": arm_id,
-                "trigger": "row_never_landed",
-            })
-
-    paired_vs_parent: dict[str, Any] | None = None
-    paired_vs_baseline: dict[str, Any] | None = None
-    baseline_payloads = {
-        n: p for n, p in payloads.items()
-        if (p.get("cell") or {}).get("arm_id") == baseline
-    }
-    if args.parent_cells:
-        parents = load_cell_payloads(args.parent_cells)
-        paired_vs_parent = {
-            f"theta={t:g}|arm={a}": s
-            for (t, a), s in sorted(
-                _pair_stats(_pair_map(payloads, parents)).items(),
-            )
-        }
-        for (theta, arm_id), stats in _pair_stats(
-            _pair_map(baseline_payloads, parents),
-        ).items():
-            drift = (
-                stats["delta_recorded_onsets_median"] != 0.0
-                or stats["takeoff_class_flips"] > 0
-            )
-            if drift:
-                triggers.append({
-                    "theta": theta, "arm_id": arm_id,
-                    "trigger": "baseline_drift_vs_v15",
-                    "detail": (
-                        "baseline arm does not reproduce the v15 parent "
-                        f"row: {stats}"
-                    ),
-                })
-    armed = {
-        n: p for n, p in payloads.items()
-        if (p.get("cell") or {}).get("arm_id") != baseline
-    }
-    if armed and baseline_payloads:
-        paired_vs_baseline = {
-            f"theta={t:g}|arm={a}": s
-            for (t, a), s in sorted(
-                _pair_stats(_pair_map(armed, baseline_payloads)).items(),
-            )
-        }
+        triggers += [
+            {"theta": t, "arm_id": a, "trigger": "row_never_landed"}
+            for t, a in unsubmitted
+        ]
+    paired_vs_parent, paired_vs_baseline, pair_triggers = _paired_sections(
+        args, payloads, baseline,
+    )
+    triggers += pair_triggers
     if audit_failures:
         triggers.append({
             "trigger": "audit_failures",
