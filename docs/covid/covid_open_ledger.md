@@ -290,6 +290,13 @@ defaults (15 measured rows, ~3 decades). The residual is refined to
 **clause-shaped**: the two legs demand mutually exclusive transmission
 rates, and the open question is the anchor itself under CAREGIVER-V1
 (the 197 figure, the 0.173 share, the takeoff-conditional scoring).
+*Resolved by `ANCHOR-DERIVE-01` (2026-10-04, `04d6ef18`,
+`docs/covid/covid_anchor_derivation_v1.md`): both targets are
+measured-direct record quantities — mechanism-independent — so the
+clause legitimately fails and the suspect moves to CAREGIVER-V1's
+pre-quarantine delivery strength (pooled aboard-window 105–248
+monotone in Θ, during-quarantine 0). Proposed bounded probe:
+CG-FLOOR-01 at the declared R2 factor floor.*
 
 Before that — `THETA-REFIT-01` lattice, measured at `78f52a58`
 (`docs/ledger/THETA-REFIT-01.md`,
@@ -1145,4 +1152,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   anchor effect is *correct* is the open follow-up. *THETA-REFIT-01
   sharpened it (§2): no Θ on [1e7, 1e9] restores the clause under
   shipped defaults — the residual is mechanism-shaped, so the follow-up
-  is the clause/anchor itself, not the lattice.*
+  is the clause/anchor itself, not the lattice.* *`ANCHOR-DERIVE-01`
+  answered it (2026-10-04): both targets are mechanism-independent
+  measured-direct record quantities — the clause legitimately fails and
+  the open defect is the CAREGIVER-V1 pre-quarantine delivery strength
+  (pooled aboard-window 105–248 vs the record's 34 pre-6-Feb dated
+  onsets). Next: CG-FLOOR-01, the declared R2 factor-floor probe —
+  proposed, not yet run.*
