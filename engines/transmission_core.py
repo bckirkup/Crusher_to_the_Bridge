@@ -2884,6 +2884,9 @@ class TransmissionCore:
         self._cs_members_epoch = -1
         self._cs_members: dict[str, list[KorkinAgent]] = {}
         self._cs_event_counter = 0
+        # Permanent event witness — window states expire with their meal
+        # window, so the voyage record accumulates here instead.
+        self._cs_event_log: list[dict[str, Any]] = []
         armed = self.common_source_mode == "on" and any(
             (p or {}).get("common_source_events", {}).get("enabled", False)
             for p in (self.pathogen_profiles or {}).values()
@@ -12015,6 +12018,7 @@ class TransmissionCore:
         if lot_titre is not None:
             event["lot_titre_gec_per_g"] = round(lot_titre, 6)
         matrix.common_source_events.append(event)
+        self._cs_event_log.append(event)
         state["event"] = event
         state["pending"] = {a.agent_id for a in takers}
         state["mix"] = mix

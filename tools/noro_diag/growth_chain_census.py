@@ -1577,19 +1577,15 @@ def _common_source_block(core: Any) -> dict[str, Any]:
     """FOOD-COMMON-SOURCE-01 witness: per-voyage event records plus the
     engine's counters.
 
-    Event rows accumulate on the window states (each fired window keeps
-    its ``event`` dict: zone, meal token, source kind, cohort, takers,
-    per-serving dose), so the block needs no history walk and no matrix
-    member — taker_ids + per_serving_dose already carry the exposure
-    side of the record.
+    Event rows accumulate on the core's permanent ``_cs_event_log`` —
+    window states keep ``state["event"]`` only until their meal window
+    expires, so reading the windows here would lose every event fired
+    before voyage end. Each row carries zone, meal token, source kind,
+    cohort, takers, per-serving dose — taker_ids + per_serving_dose
+    already carry the exposure side of the record.
     """
-    windows = getattr(core, "_cs_windows", None) or {}
     events = sorted(
-        (
-            state["event"]
-            for state in windows.values()
-            if state.get("event")
-        ),
+        getattr(core, "_cs_event_log", None) or (),
         key=lambda e: (e["start_epoch"], e["zone"], e["meal"]),
     )
     return {
