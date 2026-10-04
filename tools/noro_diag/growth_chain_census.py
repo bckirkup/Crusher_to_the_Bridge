@@ -75,12 +75,26 @@ it (NORO-DOSE-REFIT-01's ``fl_spr_12d`` cell is the canary target). Ignition
 is *measured*, not assumed -- the output rows let the readout condition on
 the emesis emit record rather than the seed.
 
+``--payload lean`` swaps the twelve per-event row streams (emits, deposits,
+pickups, doses, hazards, contacts, stool/gate rows, unit_epochs, patch rows,
+food venue rows) for per-stream counts -- the mega-cell memory lever:
+NORO-MEGA-01 showed the event streams, not the voyage, are what push a
+7000-agent child past 4 GB at census-finalize (the emits log alone is
+~1.5 GB of text on mega). Every aggregate a consumer reads -- ignited,
+emitting_hosts, acquisitions_by_gen, hosts[].dominant_pathway, census
+epochs, occupancy summary, mechanism counters -- is identical across
+profiles; the payload keys stay present as empty lists plus
+``meta.row_stream_counts`` and ``meta.payload_profile``.
+
 Outputs
 -------
 One ``<run_id>.zip`` per run in campaign layout: ``summary.json`` (small)
-and ``growth_census.json.gz`` (the full per-link payload, gzipped because
+and ``growth_census.json.gz`` (the per-link payload, gzipped because
 the per-epoch tables carry keys the repository's unit-safety guard reads as
-undeclared time units in plain ``.json``).
+undeclared time units in plain ``.json``), plus ``rss_samples.json`` —
+the child's wall-clock RSS curve and post-serialize VmHWM peak, written
+after the census member so the jobdef memory sizing measures the true
+whole-child peak.
 
 Nothing here fits or selects a parameter value.
 """
@@ -92,7 +106,9 @@ import gzip
 import inspect
 import json
 import sys
+import threading
 import time
+import zipfile
 from collections import defaultdict
 from contextlib import contextmanager
 from dataclasses import dataclass, field
@@ -260,6 +276,18 @@ class CensusRecorder:
 
     pathogen_id: str
     profile: dict[str, Any] = field(default_factory=dict)
+    # ``full`` keeps every per-event row stream; ``lean`` replaces the
+    # streams below with per-stream counts (NORO-MEGA-01 showed the event
+    # rows, not the voyage, are what push mega cells past 4 GB at
+    # census-finalize — the emits log alone is ~1.5 GB of text on mega).
+    payload_profile: str = "full"
+    # Agent ids behind every emit row, kept in both profiles so
+    # ignited/emitting_hosts/emitting_imports derive identically.
+    emit_host_ids: set[int] = field(default_factory=set)
+    # Per-stream count of rows the lean profile dropped instead of held.
+    dropped_counts: dict[str, int] = field(
+        default_factory=lambda: defaultdict(int),
+    )
     # host -> generation (0 = import); filled lazily as hosts appear.
     host_gen: dict[int, int] = field(default_factory=dict)
     # strain_id -> first host carrying it; resolves source-less pedigrees.
@@ -306,6 +334,32 @@ class CensusRecorder:
     hazard_witness: tuple[int, str, float, float, float] | None = None
     # NORO-HAND-STATIONARY-01: per host-epoch hand-load occupancy rows.
     occupancy: hand_occupancy.OccupancyRecorder | None = None
+    # VmHWM sampled right after sim.run() — the live-voyage share of the
+    # child footprint, before census fold/serialize adds the spike.
+    voyage_rss_mb: float = 0.0
+
+    # Row streams the lean profile counts instead of retaining.
+    LEAN_DROPPED_STREAMS = frozenset({
+        "emit", "deposit", "stool", "gate", "unit_epoch", "pickup",
+        "dose", "hazard", "contact", "food", "patch", "patch_sweep",
+    })
+
+    def record_row(self, stream: str, record: dict[str, Any]) -> None:
+        """Append one census row, or count-and-drop under ``lean``.
+
+        Aggregates downstream of the row tables (ignited, emitting_hosts,
+        acquisitions_by_gen) must not notice a lean voyage, so the emit
+        host-id set is maintained in either profile.
+        """
+        if stream == "emit":
+            self.emit_host_ids.add(int(record["agent_id"]))
+        if (
+            self.payload_profile == "lean"
+            and stream in self.LEAN_DROPPED_STREAMS
+        ):
+            self.dropped_counts[stream] += 1
+            return
+        getattr(self, stream + "_rows").append(record)
 
     def gen_of(self, agent_id: int | None) -> int:
         if agent_id is None:
@@ -518,7 +572,7 @@ def _wrap_emit_emesis(core_cls: type, rec: CensusRecorder) -> Any:
             row["emesis_emitted"] += 1
             row["emesis_surface_gec"] += float(record.get("surface_load", 0.0))
             row["emesis_aerosol_gec"] += float(record.get("aerosol_load", 0.0))
-            rec.emit_rows.append({
+            rec.record_row("emit", {
                 "epoch": int(epoch),
                 "agent_id": int(agent.agent_id),
                 "gen": rec.gen_of(int(agent.agent_id)),
@@ -562,7 +616,7 @@ def _wrap_deposit_surface_mass(core_cls: type, rec: CensusRecorder) -> Any:
         _mix_add(rec.unit_mix, zone_name, gen_class, mass)
         if agent is not None:
             rec.host_row(agent)["deposit_gec"] += float(mass)
-        rec.deposit_rows.append({
+        rec.record_row("deposit", {
             "epoch": probe["epoch"],
             "unit": zone_name,
             "depositor": (
@@ -647,7 +701,7 @@ def _wrap_stool_venue(core_cls: type, rec: CensusRecorder) -> Any:
             else None
         )
         rec.host_row(agent)["stool_events"] += 1
-        rec.stool_rows.append({
+        rec.record_row("stool", {
             "epoch": _frame_probe()["epoch"],
             "agent_id": int(agent.agent_id),
             "gen": rec.gen_of(int(agent.agent_id)),
@@ -670,7 +724,7 @@ def _wrap_pickup_gate(rec: CensusRecorder) -> Any:
         if open_:
             rec.gate_open_by_caller[probe["callsite"]] += 1
         else:
-            rec.gate_rows.append({
+            rec.record_row("gate", {
                 "epoch": probe["epoch"],
                 "caller": probe["callsite"],
                 "unit": probe["unit"],
@@ -694,7 +748,7 @@ def _record_pickup(
         source_share = {_patch_gen(rec, rec.patch_ctx["patch"]): 1.0}
     else:
         source_share = _mix_fractions(rec.unit_mix, unit)
-    rec.pickup_rows.append({
+    rec.record_row("pickup", {
         "epoch": _frame_probe()["epoch"],
         "target": int(target.agent_id),
         "unit": unit,
@@ -728,7 +782,7 @@ def _wrap_fomite_zone_pickup(core_cls: type, rec: CensusRecorder) -> Any:
         )
         if surface_mass > 0.0:
             susceptible = self._get_susceptible(occupants, pathogen_id)
-            rec.unit_epoch_rows.append({
+            rec.record_row("unit_epoch", {
                 "epoch": int(epoch),
                 "unit": zone_name,
                 "surface_mass": float(surface_mass),
@@ -771,7 +825,7 @@ def _wrap_patch_sweep(core_cls: type, rec: CensusRecorder) -> Any:
                 susceptible = self._get_susceptible(
                     occupants, pathogen_id,
                 )
-                rec.patch_sweep_rows.append({
+                rec.record_row("patch_sweep", {
                     "epoch": int(epoch),
                     "unit": unit_name,
                     "n_patches": len(patches),
@@ -831,7 +885,7 @@ def _wrap_patch_pickup_one(core_cls: type, rec: CensusRecorder) -> Any:
         rec.removal_totals["patch_pickup"][_patch_gen(rec, patch)] += float(
             delivered,
         )
-        rec.patch_rows.append({
+        rec.record_row("patch", {
             "epoch": int(epoch),
             "unit": unit_name,
             "depositor": rec.patch_ctx["depositor"],
@@ -951,7 +1005,7 @@ def _wrap_hand_to_mouth(core_cls: type, rec: CensusRecorder) -> Any:
             row["source_acquired_share"] = _mix_fractions(
                 rec.unit_mix, venue,
             ).get(GEN_ACQUIRED, 0.0)
-        rec.dose_rows.append(row)
+        rec.record_row("dose", row)
         return dose
 
     return wrapper
@@ -974,7 +1028,7 @@ def _wrap_partner_contact(core_cls: type, rec: CensusRecorder) -> Any:
             rec.channel_stack.pop()
         if pathogen_id == rec.pathogen_id and moved:
             for donor, amount in moved:
-                rec.contact_rows.append({
+                rec.record_row("contact", {
                     "epoch": int(epoch),
                     "target": int(target.agent_id),
                     "donor": int(donor.agent_id),
@@ -1022,7 +1076,7 @@ def _wrap_food_ingestion(core_cls: type, rec: CensusRecorder) -> Any:
         susceptible = self._get_susceptible(occupants, pathogen_id)
         fractions = _mix_fractions(rec.food_mix, zone_name)
         if pool_before > 0.0 and susceptible:
-            rec.food_rows.append({
+            rec.record_row("food", {
                 "epoch": int(_frame_probe()["epoch"] or 0),
                 "zone": zone_name,
                 "pool_before": pool_before,
@@ -1078,7 +1132,7 @@ def _wrap_hazard(core_cls: type, rec: CensusRecorder) -> Any:
             float(effective_dose), frailty, float(hazard),
         )
         if pathogen_id == rec.pathogen_id:
-            rec.hazard_rows.append({
+            rec.record_row("hazard", {
                 "epoch": _frame_probe()["epoch"],
                 "agent_id": int(agent.agent_id),
                 "effective_dose": float(effective_dose),
@@ -1445,9 +1499,9 @@ def _summarise_run(
     classes = _unit_classes(core)
     for row in host_rows:
         row["gen"] = rec.gen_of(row["agent_id"])
-    emit_hosts = {row["agent_id"] for row in rec.emit_rows}
+    emit_hosts = set(rec.emit_host_ids)
     return {
-        "ignited": bool(rec.emit_rows),
+        "ignited": bool(rec.emit_host_ids),
         "emitting_hosts": sorted(emit_hosts),
         "emitting_imports": sorted(
             aid for aid in emit_hosts if rec.gen_of(aid) == 0
@@ -1481,6 +1535,13 @@ def _summarise_run(
             cause: dict(by_gen)
             for cause, by_gen in rec.removal_totals.items()
         },
+        # Mechanism counters + the FOOD-COMMON-SOURCE-01 witness rows —
+        # tiny next to any dropped stream, kept in both profiles so the
+        # MEGA-IMPACT arms score without a second observer.
+        "caregiver_telemetry": dict(
+            getattr(core, "caregiver_telemetry", {}) or {},
+        ),
+        "common_source": _common_source_block(core),
         "census_epochs": rec.census_rows,
         "meta": {
             "zone_classes": classes,
@@ -1492,8 +1553,110 @@ def _summarise_run(
             "platform": spec_dict["catalog"]["platform_id"],
             "pathogen_id": rec.pathogen_id,
             "wall_clock_s": round(wall_clock_s, 1),
+            "payload_profile": rec.payload_profile,
+            "row_stream_counts": _row_stream_counts(rec),
+            "voyage_rss_mb": rec.voyage_rss_mb,
+            "fold_rss_mb": _proc_rss_mb()[1],
         },
     }
+
+
+def _row_stream_counts(rec: CensusRecorder) -> dict[str, int]:
+    """Rows retained + rows dropped, per stream — observability in both
+    profiles (full: dropped_counts is empty; lean: lists are empty)."""
+    counts = {
+        name: len(getattr(rec, name + "_rows"))
+        for name in sorted(CensusRecorder.LEAN_DROPPED_STREAMS)
+    }
+    for name, n in rec.dropped_counts.items():
+        counts[name] = counts.get(name, 0) + n
+    return counts
+
+
+def _common_source_block(core: Any) -> dict[str, Any]:
+    """FOOD-COMMON-SOURCE-01 witness: per-voyage event records plus the
+    engine's counters.
+
+    Event rows accumulate on the window states (each fired window keeps
+    its ``event`` dict: zone, meal token, source kind, cohort, takers,
+    per-serving dose), so the block needs no history walk and no matrix
+    member — taker_ids + per_serving_dose already carry the exposure
+    side of the record.
+    """
+    windows = getattr(core, "_cs_windows", None) or {}
+    events = sorted(
+        (
+            state["event"]
+            for state in windows.values()
+            if state.get("event")
+        ),
+        key=lambda e: (e["start_epoch"], e["zone"], e["meal"]),
+    )
+    return {
+        "telemetry": dict(
+            getattr(core, "common_source_telemetry", {}) or {},
+        ),
+        "events": events,
+    }
+
+
+def _proc_rss_mb() -> tuple[float, float]:
+    """(current RSS, high-water RSS) in MiB — /proc first, rusage last.
+
+    VmHWM is monotonic, so the second return is the child's true peak
+    whenever it is read — including after the census-finalize serialize
+    spike that sized NORO-MEGA-01's 16 GB jobdef blind.
+    """
+    try:
+        fields: dict[str, int] = {}
+        for line in Path("/proc/self/status").read_text().splitlines():
+            if line.startswith(("VmRSS:", "VmHWM:")):
+                fields[line.split(":", 1)[0]] = int(line.split()[1])
+        if fields:
+            return (
+                round(fields.get("VmRSS", 0) / 1024.0, 1),
+                round(fields.get("VmHWM", 0) / 1024.0, 1),
+            )
+    except OSError:
+        pass  # no /proc (non-Linux or restricted container): rusage below
+    import resource  # stdlib fallback when /proc is absent
+
+    kb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+    mb = round(kb / 1024.0, 1)
+    return mb, mb
+
+
+class _RssSampler:
+    """Wall-clock RSS curve for one child voyage.
+
+    Samples on a daemon thread until ``__exit__``; when the cap is hit
+    the buffer halves itself (keeping the old half-resolution points)
+    so a long voyage's finalize spike still lands on the curve.
+    """
+
+    def __init__(self, interval_s: float = 2.0, max_samples: int = 600) -> None:
+        self.interval_s = interval_s
+        self.max_samples = max_samples
+        self.samples: list[list[float]] = []
+        self._stop = threading.Event()
+        self._thread = threading.Thread(target=self._run, daemon=True)
+
+    def _run(self) -> None:
+        t0 = time.monotonic()
+        while not self._stop.is_set():
+            rss, _hwm = _proc_rss_mb()
+            if len(self.samples) >= self.max_samples:
+                self.samples = self.samples[::2]
+            self.samples.append([round(time.monotonic() - t0, 1), rss])
+            self._stop.wait(self.interval_s)
+
+    def __enter__(self) -> "_RssSampler":
+        self._thread.start()
+        return self
+
+    def __exit__(self, *exc: Any) -> None:
+        self._stop.set()
+        self._thread.join(timeout=5.0)
 
 
 def _load_manifest(manifest_path: Path) -> dict[str, Any]:
@@ -1503,10 +1666,18 @@ def _load_manifest(manifest_path: Path) -> dict[str, Any]:
 def run_seed(
     *, pathogen_id: str, spec_dict: dict[str, Any],
     natural_history_clock: str | None = None,
+    payload_profile: str = "full",
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """Run one voyage under the census wrappers; fold summary + voyage
-    blocks + the initiation witness."""
-    rec = CensusRecorder(pathogen_id=pathogen_id)
+    blocks + the initiation witness.
+
+    ``payload_profile`` selects the census-member diet: ``full`` is the
+    historical per-event payload; ``lean`` keeps every aggregate and
+    host/epoch table but counts the twelve event row streams instead of
+    retaining them (the mega-cell memory lever)."""
+    rec = CensusRecorder(
+        pathogen_id=pathogen_id, payload_profile=payload_profile,
+    )
     rec.occupancy = hand_occupancy.OccupancyRecorder(pathogen_id)
     with materialized_picard_spec(spec_dict, REPO_ROOT) as picard_spec:
         rec.profile = dict(
@@ -1535,6 +1706,7 @@ def run_seed(
             started = time.perf_counter()
             result = sim.run()
             wall_clock_s = time.perf_counter() - started
+            rec.voyage_rss_mb = _proc_rss_mb()[1]
         rec.seed_ids = set(
             getattr(sim.engine, "explicit_seed_agent_ids", None) or (),
         )
@@ -1598,6 +1770,22 @@ def verify_draws(
     }
 
 
+def _append_rss_member(zip_path: Path, sampler: _RssSampler) -> None:
+    """Third zip member: the child's RSS curve plus post-serialize
+    VmHWM — read AFTER the census member's serialize spike, so
+    ``peak_rss_mb`` is the true whole-child peak the jobdef memory
+    sizing needs (the number NORO-MEGA-01 never had)."""
+    _rss, hwm = _proc_rss_mb()
+    with zipfile.ZipFile(zip_path, "a", zipfile.ZIP_DEFLATED) as archive:
+        archive.writestr(
+            "rss_samples.json",
+            json.dumps({
+                "peak_rss_mb": hwm,
+                "samples": sampler.samples,
+            }),
+        )
+
+
 def _write_run_zip(
     out_dir: Path, tier: str, run_id: str, payload: dict[str, Any],
     voyage: dict[str, Any], initiation: dict[str, Any],
@@ -1618,6 +1806,34 @@ def _write_run_zip(
             "n_imports": payload["n_imports"],
             "n_acquired": payload["n_acquired"],
             "acquisitions_by_gen": payload["acquisitions_by_gen"],
+        },
+        # Compact mechanism + memory counters, readable by ranged
+        # summary.json pulls (no census-member decompress): the MEGA-IMPACT
+        # canary scores the exercise gate and the child peak from these.
+        "mechanisms": {
+            "payload_profile": payload["meta"]["payload_profile"],
+            "common_source_events": len(
+                payload["common_source"]["events"]
+            ),
+            "common_source_takers": int(
+                payload["common_source"]["telemetry"].get(
+                    "takers_served", 0,
+                ),
+            ),
+            "caregiver_responses": int(
+                payload["caregiver_telemetry"].get(
+                    "caregiver_responses", 0,
+                ),
+            ),
+            "caregiver_reports": int(
+                payload["caregiver_telemetry"].get(
+                    "caregiver_reports", 0,
+                ),
+            ),
+        },
+        "rss_mb": {
+            "voyage": payload["meta"]["voyage_rss_mb"],
+            "fold": payload["meta"]["fold_rss_mb"],
         },
         "initiation": initiation,
     }
@@ -1653,6 +1869,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="smoke-only: override the declared complement",
     )
     parser.add_argument("--out", type=Path, required=True)
+    parser.add_argument(
+        "--payload", choices=("full", "lean"), default="full",
+        help="census-member diet: 'full' keeps every per-event row stream; "
+             "'lean' keeps all aggregates/host tables but counts the "
+             "twelve event streams (mega-cell memory lever)",
+    )
     parser.add_argument(
         "--verify-draws", action="store_true",
         help="run each selected seed twice (instrumented vs control) and "
@@ -1703,14 +1925,17 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if ok else 1
     for run_id, spec in runs:
         seed = int(spec["run"]["random_seed"])
-        payload, voyage, initiation = run_seed(
-            pathogen_id=args.pathogen_id, spec_dict=spec,
-            natural_history_clock=clock,
-        )
-        payload["run_id"] = run_id
-        zip_path = _write_run_zip(
-            out_dir, args.tier, run_id, payload, voyage, initiation,
-        )
+        with _RssSampler() as sampler:
+            payload, voyage, initiation = run_seed(
+                pathogen_id=args.pathogen_id, spec_dict=spec,
+                natural_history_clock=clock,
+                payload_profile=args.payload,
+            )
+            payload["run_id"] = run_id
+            zip_path = _write_run_zip(
+                out_dir, args.tier, run_id, payload, voyage, initiation,
+            )
+        _append_rss_member(zip_path, sampler)
         print(
             f"seed {seed}: ignited={payload['ignited']} "
             f"imports={payload['n_imports']} "
