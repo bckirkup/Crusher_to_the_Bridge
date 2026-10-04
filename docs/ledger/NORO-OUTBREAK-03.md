@@ -34,11 +34,13 @@ observational and does not affect voyage dynamics; engine SHA is
 unchanged.
 
 Baseline caveat (provenance): the whole `campaign/noro_outbreak_01/`
-prefix was lifecycle-swept to DEEP_ARCHIVE, so the paired-seed gained/
-lost table required a restore (Standard, Days=7) initiated from the
-user's credentials — `picard-deploy-role` lacks `s3:RestoreObject`.
-Cell-level deltas in the readout are computed against the committed
-OUTBREAK-01 tables and are unaffected.
+prefix was lifecycle-swept to DEEP_ARCHIVE, so per-seed pairing required
+a restore initiated from the user's credentials — `picard-deploy-role`
+lacks `s3:RestoreObject`. The ren tier (1,000 keys) was restored and
+paired; the scr restore was abandoned before its ~2,700 keys were
+submitted, so scr paired-seed rows are permanently absent. Cell-level
+deltas in the readout are computed against the committed OUTBREAK-01
+tables and are unaffected.
 
 ## Measured — frequency (noro_outbreak_03 vs noro_outbreak_01)
 
@@ -78,8 +80,13 @@ OUTBREAK-01 tables and are unaffected.
   (A1 0.00–0.02, A2 0.15–0.17) — matching OUTBREAK-02's conclusion at
   the next hull class up.
 
-## Pending
+## Measured — paired delta vs NORO-OUTBREAK-01 (ren only)
 
-- Paired-seed gained/lost postings + per-seed Δ table vs NORO-OUTBREAK-01
-  — fills in once the DEEP_ARCHIVE restore of `campaign/noro_outbreak_01/`
-  completes (in flight at write time).
+- `fl_cls_12d_ren` fully paired (1,000 seed-pairs): established 68/76,
+  takeoff 95/136 (net −41 takeoff voyages), posted 0/0 — ren stays
+  non-posting under the caregiver stack. Δ acquired/peak/rep-AR medians
+  all 0: reporting shifts, trajectory doesn't.
+- scr paired-seed table **dropped** — the scr baseline keys were never
+  submitted for restore before the effort was abandoned; posting
+  gained/lost per-seed on scr is unknown, and the cell-level posting
+  rates above are the measurement of record.

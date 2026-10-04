@@ -76,11 +76,12 @@ posting is a crew-channel post (tool:
 ## Cell-level deltas vs NORO-OUTBREAK-01 (new − old; pp = percentage points)
 
 Baseline column read from the committed OUTBREAK-01 tables
-(`docs/norovirus/noro_outbreak_01_readout.md`); the paired-seed
-gained/lost rows follow once the DEEP_ARCHIVE restore of
-`campaign/noro_outbreak_01/` completes (restore in flight at write time —
-the whole prefix was lifecycle-swept, so per-seed pairing requires the
-restore; cell-level numbers below are unaffected).
+(`docs/norovirus/noro_outbreak_01_readout.md`); the whole
+`campaign/noro_outbreak_01/` prefix was lifecycle-swept to DEEP_ARCHIVE,
+so per-seed pairing required a restore. The ren tier was restored and is
+paired below; the scr restore was abandoned before its keys were
+submitted, so scr paired-seed rows are permanently absent — cell-level
+numbers are unaffected.
 
 | cell | Δtakeoff pp | Δposted pp | Δacq med | ΔA1 | ΔA2 | ΔA3 | ΔA5 | ΔA8 pax | ΔA8 crew |
 |---|---|---|---|---|---|---|---|---|---|
@@ -91,10 +92,20 @@ restore; cell-level numbers below are unaffected).
 
 ## Paired delta vs NORO-OUTBREAK-01 (same seeds)
 
-_Pending — restore of `campaign/noro_outbreak_01/` (DEEP_ARCHIVE →
-Standard, Days=7) in flight; this section fills in with the extended
-readout's paired gained/lost and per-seed Δ tables once the baseline
-zips are hot._
+ren tier only — the `fl_cls_12d_ren` baseline zips were restored and all
+1,000 seed-pairs resolved before the restore effort was abandoned
+(scr tiers' ~2,700 keys were never submitted; see the baseline caveat
+above). Posted gained/lost on scr is therefore unknown per-seed, but the
+cell-level rates in the frequency table stand on their own.
+
+| cell | n pairs | estab gained/lost | takeoff gained/lost | posted gained/lost | Δ acquired med | Δ peak med | Δ rep AR med |
+|---|---|---|---|---|---|---|---|
+| cls 12d ren bp0c0 nsf29 | 1000 | 68/76 | 95/136 | 0/0 | 0.0 | 0.0 | 0.0000 |
+
+The paired ren numbers say the same thing the unpaired rates did at a
+per-voyage level: slightly more established voyages peter out before
+takeoff under the caregiver stack (−8 net), while acquired/peak/report
+medians are unmoved — the mechanism shifts reporting, not trajectory.
 
 ## Interpretation
 
