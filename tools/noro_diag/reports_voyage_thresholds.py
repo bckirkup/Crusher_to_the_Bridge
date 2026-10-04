@@ -4,14 +4,15 @@
 The outbreak-anchor readout scores posting (A9: reported attack rate >= 3%
 on either channel) but does not show how the underlying report counts sit
 against the absolute thresholds a posting implies (~3% of complement on
-each channel). This tool streams ``summary.json`` from campaign-layout run
-zips (``<root>/<tier>/<run_id>.zip``, S3 ranged GETs only) and emits, per
-cell:
+each channel). This tool reuses that readout's collection layer
+(``outbreak_anchor_readout.collect``: ranged-GET ``summary.json`` reads
+from campaign-layout run zips under ``<root>/<tier>/<run_id>.zip``) and
+emits, per cell:
 
 - passenger/crew complements and the implied report thresholds
   (``ceil(3% * complement)`` per channel);
-- the distribution of ``cumulative_reported_cases_{passenger,crew}``
-  (median / p90 / max), over all runs and takeoff voyages only;
+- the distribution of reported passenger/crew counts (median / p90 /
+  max), over all runs and takeoff voyages only;
 - per-channel threshold crossings and the posted count, so the gap
   between "reports/voyage" and "posts/voyage" is explicit.
 """
@@ -21,8 +22,6 @@ import argparse
 import json
 import math
 import sys
-from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Any
 
@@ -36,96 +35,39 @@ from simulation_utils.paths import validated_open  # noqa: E402
 from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
     A9_POSTING_THRESHOLD,
 )
-from tools.diag.readout_common import (  # noqa: E402
-    iter_tier_zips,
-    load_zip_json,
-    seed_from_params,
-)
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
-    _cell_key,
     _cell_label,
-    _s3_client,
-    _s3_member_blob,
-    _s3_parse_uri,
+    _posted,
+    collect,
 )
 
-_MEMBER = "summary.json"
 
+def _report_row(run: dict[str, Any]) -> dict[str, Any]:
+    """Project one collected run onto report counts + posting flags.
 
-def _row_from_summary(summary: dict, fallback_name: str) -> dict[str, Any]:
-    params = summary.get("parameters", {})
-    summ = summary.get("summary", {})
-    derived = summary.get("derived", {})
-    pax_comp = int(summ.get("passenger_complement", 0) or 0)
-    crew_comp = int(summ.get("crew_complement", 0) or 0)
-    rep_pax = int(summ.get("cumulative_reported_cases_passenger", 0) or 0)
-    rep_crew = int(summ.get("cumulative_reported_cases_crew", 0) or 0)
+    Report counts are recovered as ``round(reported_AR * complement)``:
+    the scorer stores the AR as ``count / complement``, so the product
+    returns the integer count without a second zip read.
+    """
+    anchor = run["anchor_row"]
+    pax_comp = int(anchor["passenger_complement"])
+    crew_comp = int(anchor["crew_complement"])
+    rep_pax = round(
+        float(anchor["reported_case_attack_rate_passenger"]) * pax_comp
+    )
+    rep_crew = round(
+        float(anchor["reported_case_attack_rate_crew"]) * crew_comp
+    )
     return {
-        "run_id": summary.get("run_id", fallback_name),
-        "cell_key": _cell_key(params),
-        "seed": seed_from_params(params),
+        "run_id": run["run_id"],
+        "seed": run["seed"],
         "pax_comp": pax_comp,
         "crew_comp": crew_comp,
         "rep_pax": rep_pax,
         "rep_crew": rep_crew,
-        "rep_pax_ar": rep_pax / pax_comp if pax_comp else 0.0,
-        "rep_crew_ar": rep_crew / crew_comp if crew_comp else 0.0,
-        "takeoff": int(derived.get("peak_prevalence", 0) or 0) >= 10,
-        "posted": bool(derived.get("vsp_trigger_epoch") is not None),
+        "takeoff": bool(anchor["took_off"]),
+        "posted": _posted(anchor),
     }
-
-
-def _list_keys(client, bucket: str, prefix: str, tiers: list[str] | None) -> list[str]:
-    subs = [f"{prefix}{tier}/" for tier in tiers] if tiers else [prefix]
-    return [
-        obj["Key"]
-        for sub in subs
-        for page in client.get_paginator("list_objects_v2").paginate(
-            Bucket=bucket, Prefix=sub
-        )
-        for obj in page.get("Contents", [])
-        if obj["Key"].endswith(".zip")
-    ]
-
-
-def _collect_s3(s3_uri: str, tiers: list[str] | None) -> list[dict]:
-    client = _s3_client()
-    bucket, prefix = _s3_parse_uri(s3_uri)
-    keys = _list_keys(client, bucket, prefix, tiers)
-
-    def one(key: str) -> dict | None:
-        try:
-            blob = _s3_member_blob(client, bucket, key, _MEMBER)
-            if blob is None:
-                return None
-            return _row_from_summary(
-                json.loads(blob), key.rsplit("/", 1)[-1]
-            )
-        except (json.JSONDecodeError, KeyError, OSError):
-            return None
-
-    with ThreadPoolExecutor(max_workers=32) as pool:
-        return [r for r in pool.map(one, keys) if r is not None]
-
-
-def _collect_local(root: Path, tiers: list[str] | None) -> list[dict]:
-    rows = []
-    for _tier, zip_path in iter_tier_zips(root, tiers):
-        summary = load_zip_json(zip_path, _MEMBER)
-        if summary is not None:
-            rows.append(_row_from_summary(summary, zip_path.stem))
-    return rows
-
-
-def collect(runs_dir: str, tiers: list[str] | None) -> dict[tuple, list[dict]]:
-    if runs_dir.startswith("s3://"):
-        rows = _collect_s3(runs_dir, tiers)
-    else:
-        rows = _collect_local(Path(runs_dir), tiers)
-    cells: dict[tuple, list[dict]] = defaultdict(list)
-    for row in rows:
-        cells[tuple(row["cell_key"])].append(row)
-    return dict(cells)
 
 
 def _q(values: list[float], frac: float) -> float | None:
@@ -213,9 +155,12 @@ def main() -> int:
     ap.add_argument("--json-out", type=Path)
     args = ap.parse_args()
 
+    collected = collect(args.runs_dir, args.tiers)
     cells = {
-        key: summarise_cell(rows)
-        for key, rows in collect(args.runs_dir, args.tiers).items()
+        key: summarise_cell(
+            [_report_row(run) for run in rows]
+        )
+        for key, rows in collected.items()
     }
     payload = {
         "label": args.label,
