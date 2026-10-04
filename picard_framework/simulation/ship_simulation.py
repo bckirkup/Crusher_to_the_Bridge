@@ -461,6 +461,24 @@ class ShipSimulation:
         food_zone_multipliers: dict[str, float],
     ) -> TransmissionCore:
         tx_overrides = self.cfg.get("transmission", {}) or {}
+        # FOOD-COMMON-SOURCE-01: the platform layout's VSP-conditioned
+        # posture is the default the core reads; a transmission block
+        # override keeps precedence (cfg > platform > 1.0).
+        if (
+            "food_safety_posture" in platform_layout
+            and "food_safety_posture"
+            not in (tx_overrides.get("common_source") or {})
+        ):
+            self.cfg["transmission"] = {
+                **tx_overrides,
+                "common_source": {
+                    **(tx_overrides.get("common_source") or {}),
+                    "food_safety_posture": float(
+                        platform_layout["food_safety_posture"],
+                    ),
+                },
+            }
+            tx_overrides = self.cfg["transmission"]
         return TransmissionCore(
             rng=np.random.default_rng(self.seed),
             zone_volumes=self.zone_volumes,
@@ -484,12 +502,6 @@ class ShipSimulation:
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
-            # FOOD-COMMON-SOURCE-01: the platform's VSP-conditioned rate
-            # scalar; a transmission.common_source override wins inside
-            # the core, so here we pass only the platform field.
-            food_safety_posture=float(
-                platform_layout.get("food_safety_posture", 1.0),
-            ),
         )
 
     def initialize(self) -> WorldState:

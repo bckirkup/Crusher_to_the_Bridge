@@ -98,15 +98,17 @@ def _core(
     profile: dict | None = None,
     zone: str = ZONE,
     seed: int = 7,
-    food_safety_posture: float = 1.0,
+    food_safety_posture: float | None = None,
 ) -> TransmissionCore:
+    cs = dict(cfg_cs or {"mode": "on"})
+    if food_safety_posture is not None:
+        cs["food_safety_posture"] = food_safety_posture
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={zone: 50.0},
         pathogen_profiles={PATHOGEN: profile or _profile()},
         zone_types={zone: "Dining"},
-        cfg={"transmission": {"common_source": cfg_cs or {"mode": "on"}}},
-        food_safety_posture=food_safety_posture,
+        cfg={"transmission": {"common_source": cs}},
         clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
     )
     core.initialize_zones([zone])

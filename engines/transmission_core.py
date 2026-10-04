@@ -2564,7 +2564,6 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
-        food_safety_posture: float = 1.0,
     ) -> None:
         self.rng = rng
         tx = (cfg or {}).get("transmission", {}) or {}
@@ -2617,7 +2616,7 @@ class TransmissionCore:
         self._init_exposure_cap(cfg, tx)
         self._init_caregiver(tx)
         self._init_hazard_frailty()
-        self._init_common_source(tx, food_safety_posture)
+        self._init_common_source(tx)
 
     def _init_caregiver(self, tx: dict[str, Any]) -> None:
         """CAREGIVER-V1 role grammar over the NORO-CAREGIVER-01 channel.
@@ -2834,7 +2833,6 @@ class TransmissionCore:
     def _init_common_source(
         self,
         tx: dict[str, Any],
-        platform_posture: float,
     ) -> None:
         """FOOD-COMMON-SOURCE-01 — synchronized common-source food events.
 
@@ -2858,13 +2856,14 @@ class TransmissionCore:
             cs.get("mode", "on"),
         ).strip().lower()
         self._cs_cfg = cs
-        # per-platform VSP-conditioned rate scalar: the constructor kwarg
-        # carries the platform layout's posture; a transmission block
-        # override wins. The score→multiplier map is the declared linear
-        # identity in v1 (the score IS the multiplier), swept in the canary.
-        self._cs_posture = max(0.0, float(cs.get(
-            "food_safety_posture", platform_posture,
-        )))
+        # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
+        # platform layout's posture into this block when the config does
+        # not already carry one (cfg > platform > 1.0). The score→multiplier
+        # map is the declared linear identity in v1 (the score IS the
+        # multiplier), swept in the canary.
+        self._cs_posture = max(0.0, float(
+            cs.get("food_safety_posture", 1.0),
+        ))
         self._cs_lot_posture_coupling = bool(
             cs.get("lot_posture_coupling", False),
         )
@@ -11525,7 +11524,7 @@ class TransmissionCore:
         cs = (profile or {}).get("common_source_events", {})
         if not cs.get("enabled", False) or self._cs_rng is None:
             return
-        self._cs_plan_lots(pathogen_id)
+        self._cs_plan_lots()
         self._cs_expire_windows(epoch, pathogen_id)
         day = self.clock.day_index(epoch)
         members_by_zone = self._cs_zone_members(epoch)
@@ -11533,29 +11532,51 @@ class TransmissionCore:
             members = members_by_zone.get(zone_name, [])
             occupants = zone_occupants.get(zone_name, [])
             for token in self._cs_window_tokens(members, epoch):
-                key = (pathogen_id, zone_name, token, day)
-                state = self._cs_windows.get(key)
-                if state is not None and state.get("event") is not None:
-                    self._cs_credit_pending(
-                        state, occupants, agent_doses,
-                        agent_pathway_doses, matrix, pathogen_id, ledger,
-                    )
-                    continue
-                if state is None:
-                    state = self._cs_open_window(key, epoch, day, members)
-                    self._cs_windows[key] = state
-                source = self._cs_draw_source(
-                    key, state, epoch, zone_name, token,
-                    occupants, pathogen_id, profile,
+                self._cs_window_step(
+                    epoch, day, zone_name, token, members, occupants,
+                    pathogen_id, profile, agent_doses,
+                    agent_pathway_doses, matrix, ledger,
                 )
-                if source is not None:
-                    self._cs_fire(
-                        source, state, epoch, zone_name, token,
-                        members, occupants, pathogen_id, profile,
-                        agent_doses, agent_pathway_doses, matrix, ledger,
-                    )
 
-    def _cs_plan_lots(self, pathogen_id: str) -> None:
+    def _cs_window_step(
+        self,
+        epoch: int,
+        day: int,
+        zone_name: str,
+        token: str,
+        members: list[KorkinAgent],
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]] | None,
+        matrix: ContactTracingMatrix,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Advance one (zone, meal token, day) window this epoch."""
+        key = (pathogen_id, zone_name, token, day)
+        state = self._cs_windows.get(key)
+        if state is not None and state.get("event") is not None:
+            self._cs_credit_pending(
+                state, occupants, agent_doses,
+                agent_pathway_doses, matrix, pathogen_id, ledger,
+            )
+            return
+        if state is None:
+            state = self._cs_open_window(key, epoch, day, members)
+            self._cs_windows[key] = state
+        source = self._cs_draw_source(
+            key, state, epoch, zone_name, token,
+            occupants, pathogen_id, profile,
+        )
+        if source is not None:
+            self._cs_fire(
+                source, state, epoch, zone_name, token,
+                members, occupants, pathogen_id, profile,
+                agent_doses, agent_pathway_doses, matrix, ledger,
+            )
+
+    def _cs_plan_lots(self) -> None:
         """Draw this voyage's lot plan once the roster exists.
 
         Runs at the first armed epoch — agents are registered by then, so
@@ -11606,7 +11627,7 @@ class TransmissionCore:
             if not zone or zone not in self._cs_dining_zones:
                 continue
             schedule = getattr(agent, "schedule", ()) or ()
-            for token in set(str(t) for t in schedule):
+            for token in {str(t) for t in schedule}:
                 if token.startswith(MEAL_PREFIX):
                     tokens_by_zone.setdefault(zone, set()).add(token)
         return [
