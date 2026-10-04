@@ -274,7 +274,25 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`CG-FLOOR-01`, measured at `3eae8a2f` (`docs/ledger/CG-FLOOR-01.md`,
+`DP-BELIEF-01`, measured at `78f52a58`/`8f49652f`/`8f926382`/`3eae8a2f`/`b932d0e9`
+(`docs/ledger/DP-BELIEF-01.md`,
+`docs/covid/covid_believability_map_v1.md`): the Diamond Princess
+believability map — every checkable record feature scored on the 420
+synced cells of record, no new cells. **BELIEVABILITY-DIVERGENT — three
+orthogonal divergences, none θ-shaped.** Mass is reachable
+(`infections_total` in the serology band [712,960] at *both* clause-leg
+crossings); the timing is inverted (infections-before-quarantine share
+0.08–0.25 vs the record's majority — onset peak day 21–27 vs ~18,
+during-quarantine dated mass ~95% crew vs the record's 29%); and the
+dating channel overshares ~3× flat (`recorded/lab` 0.79–0.87 on every
+row vs the record's 0.277 — θ- and mechanism-independent). The
+clause-passing CG_OFF surface is itself unbelievable (2,342 infections,
+2.8× the band). Head-of-record for the DP believability question; the
+needs-cells legs (route-tagged dated onsets D1, cabin-cluster tallies
+D2, acquisition-date scoring D3, quarantine-phase suppression arm D4)
+are designed in the map §4.
+
+Before that — `CG-FLOOR-01`, measured at `3eae8a2f` (`docs/ledger/CG-FLOOR-01.md`,
 `docs/covid/covid_cg_floor_v1_readout.md`): the R2 factor-box corner
 probe — {Θ1e6, Θ7.9e6} × {`D0_declared`, `CG_LOW`} × 20 seeds, 80/80
 cells, 0 audit failures, D0 rows bit-identical to the floor/bracket
