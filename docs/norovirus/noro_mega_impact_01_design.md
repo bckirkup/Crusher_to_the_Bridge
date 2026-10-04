@@ -1,7 +1,13 @@
 # MEGA-IMPACT-01 — mechanism-attribution factorial on mega_cruise_5000
 
-Status: designed — 2026-10-04. Manifest and jobdef landed, no array
-submitted. Baseline evidence: `noro_mega_01_baseline_reanalysis.md`
+Status: canary submitted — 2026-10-04. Canary arrays on
+`picard-campaign-queue` (Spot): a0id bit-identity
+`96afc3ce-cf73-4e08-a8ea-1f546a3b7ac5` (n=10, tier
+`fl_mega_impact_a0id` — caregiver on / food off, seeds 8000-8009) and
+a1 `13334983-6807-42b8-b0f5-763d4a159c2e` (n=20, seeds 8000-8019).
+jobdef `picard-noro-mega-impact-01:2`, image
+`campaign-f31de83a` (sha256:9ac735da…, `--payload lean`, 16 GB/child).
+Baseline evidence: `noro_mega_01_baseline_reanalysis.md`
 (committed, measured). Driver: `tools/noro_diag/growth_chain_census.py`
 with `--payload lean` (PR #888).
 

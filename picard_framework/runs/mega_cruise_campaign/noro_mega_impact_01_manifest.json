@@ -758,6 +758,62 @@
     8148,
     8149
    ]
+  },
+  "fl_mega_impact_a0id": {
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 7000,
+   "description": "A0-identity canary: caregiver ON + food OFF, seeds 8000-8009 (10 cells). Bit-identity gate vs the A0 zips at campaign/noro_mega_01/fl_mega_12d_scr/ same run_ids \u2014 summary.json voyage fingerprints (parameters/timeseries/derived) must match bit-for-bit at the new image.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "caregiver": {
+      "mode": "on"
+     },
+     "common_source": {
+      "mode": "off"
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.007
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    8000,
+    8001,
+    8002,
+    8003,
+    8004,
+    8005,
+    8006,
+    8007,
+    8008,
+    8009
+   ]
   }
  }
 }
