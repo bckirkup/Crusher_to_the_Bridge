@@ -65,6 +65,10 @@ VOYAGE_MODE_DECLARED = "declared"
 VOYAGE_MODE_GENERIC = "generic"
 VOYAGE_MODES = (VOYAGE_MODE_DECLARED, VOYAGE_MODE_GENERIC)
 GENERIC_VOYAGE_DAYS = 7.0
+# Realized echo: susceptibility multipliers land as exact floats, so 1e-9
+# keeps the zero check off literal float equality (S1244) — the same
+# epsilon the readout tools use for declared/realized echoes.
+ZERO_SUSCEPTIBILITY_TOL = 1e-9
 # covid.H3's recorded attack-rate window (Willebrand 2022, 104 voyages on 79
 # ships): the stage-1 selector of covid_theta_screen_v11. The numerator is
 # the RECORDED channel — recorded_onsets / aboard_total per voyage — not the
@@ -1336,7 +1340,11 @@ def _secretor_negative_block(raw: dict[str, Any], sim: Any) -> dict[str, Any]:
     )
     zero_susc = sum(
         1 for a in sim.engine.agents
-        if getattr(a, "susceptibility_multiplier", {}).get(PATHOGEN_ID) == 0.0
+        if abs(
+            getattr(a, "susceptibility_multiplier", {}).get(
+                PATHOGEN_ID, 1.0,
+            )
+        ) <= ZERO_SUSCEPTIBILITY_TOL
     )
     n_agents = len(sim.engine.agents)
     return {
