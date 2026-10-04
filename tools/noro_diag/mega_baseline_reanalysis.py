@@ -142,7 +142,7 @@ def _quantiles(values: list[float]) -> dict[str, float | None]:
 def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     active = [r for r in rows if r["n_acquired"] > 0]
     detected = [r for r in rows if r["detection_epoch"] is not None]
-    near = {b: 0 for b in (0.80, 0.90, 0.95, 1.0)}
+    near = dict.fromkeys((0.80, 0.90, 0.95, 1.0), 0)
     for r in rows:
         gap = max(r["pax_ratio"], r["crew_ratio"])
         for b in near:
