@@ -149,6 +149,23 @@ The realized source mix is a *measurement*, not a parameter: Clough 2018
 systematic review) is the sanity prior the witness telemetry is compared
 against — not fitted to.
 
+**`food_safety_posture` — the VSP-conditioned rate modifier.** The
+per-shedder event probabilities above are not flat across the fleet: a
+per-platform scalar `food_safety_posture` multiplies the handler and
+diner event probabilities (the arms whose firing depends on the ship's
+own hygiene practice). It is sourced, not declared: the public VSP
+inspection database scores every ship twice yearly and itemizes
+violations in the food-handling categories — a measured per-ship posture
+distribution, and precisely the covariate that explains why Mouchtouri's
+45 outbreaks over 26 ships are not uniform (outbreak-prone ships exist).
+v1 default is 1.0 for platforms without a posture entry; the
+score→multiplier functional form is a declared linear map (Grade C,
+swept in the canary) over a measured input — never fitted to outbreak
+anchors. Application to `lot_event_probability` is a declared switch,
+default off: a provisioned lot boards contaminated upstream of the
+ship's galley practice, and only storage/handling-on-board arguments
+couple it to the platform score.
+
 ### 4. Exposed cohort and serving dose
 
 - Cohort = agents assigned to the zone (`dining_zone == zone`) who are
@@ -209,6 +226,7 @@ bit-identical by construction.
 | `serving_mass_g` | U[50, 250] | C declared | Documentary portion sizes. |
 | `lot_titre_gec_per_g` | log-U[1e1, 1e4] | B | Contaminated-item titres from outbreak investigations: Flannery 2013 oyster lots >1e3 copies/g digestive tissue; produce/RTE items sit lower. Interval spans the reported range; log-uniform draw because the underlying distribution is multiplicative and heavy-tailed. |
 | `diner_contacts_per_event` | U-int[1, 5] | C declared | A diner contacts shared utensils and the pan's edge a handful of times per pass; no literature measurement. |
+| `food_safety_posture` | per-platform scalar ≥0; v1 default 1.0 | input **B**, map C declared | Public VSP inspection database — per-ship inspection scores and itemized food-handling violations (twice-yearly, every cruise vessel in US trade). The posture input is measured; the score→rate-multiplier map is a declared linear form, swept in the canary — the distinction matters: we measure which ships are sloppy, we declare how much sloppiness buys. |
 | pan→serving retention | 1.0 (lossless) | C declared bound | Deposited mass distributes across servings unattenuated — the conservative direction; no retention constant invented (∅). |
 
 Derived, not new: handler contacts per service =
@@ -231,9 +249,9 @@ within `on`; both gates must pass for an event to exist.
 
 - Witness records (`matrix.common_source_events`): `event_id`, window
   epoch range, `zone`, `service_type`, `source_kind` ∈ {provisioned_lot,
-  ill_handler, ill_diner}, `source_agent_id` (null for lot), `pan_mass`
-  or `lot_titre`, `cohort_size`, `servings_taken`, per-serving dose,
-  taker ids.
+  ill_handler, ill_diner}, `source_agent_id` (null for lot),
+  `food_safety_posture` applied, `pan_mass` or `lot_titre`,
+  `cohort_size`, `servings_taken`, per-serving dose, taker ids.
 - Per-taker records on `matrix.common_source_exposures` mirroring
   `food_contamination_exposures`.
 - Counters (`core.common_source_telemetry`): events fired by source kind,
@@ -270,6 +288,10 @@ within `on`; both gates must pass for an event to exist.
 7. Determinism: identical seed + config ⇒ identical event set.
 8. Cohort integrity: every dosed agent was present in the event zone
    during the event window; no agent dosed twice for one event.
+9. `food_safety_posture` enters only the event-rate draws: a posture
+   sweep moves event frequency, never dose size, and a platform at
+   posture 1.0 (or no posture entry) is bit-identical to the
+   unconditioned arm.
 
 ## Non-goals
 
