@@ -38,6 +38,9 @@ from tools.diag.readout_common import rate_summary  # noqa: E402
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
     A9_POSTING_THRESHOLD,
     _cell_label,
+    _fmt,
+    _pct,
+    _quant_cell,
     _quantiles,
     collect,
 )
@@ -87,32 +90,14 @@ def _cell_block(runs: list[dict]) -> dict[str, Any]:
     }
 
 
-def _quant_cell(q: dict[str, Any], digits: int = 1) -> str:
-    if not q or q.get("n", 0) == 0:
-        return "--"
-    return (
-        f"{q['median']:.{digits}f} [{q['q1']:.{digits}f}-{q['q3']:.{digits}f}]"
-    )
-
-
-def _pct(x: dict[str, float]) -> str:
-    return f"{100 * x['rate']:6.2f}  [{100 * x['lo']:5.2f},{100 * x['hi']:5.2f}]"
-
-
-def _fmt(value: Any, digits: int = 1) -> str:
-    if value is None or not isinstance(value, (int, float)):
-        return "  --"
-    return f"{value:.{digits}f}"
-
-
 def render_markdown(report: dict) -> str:
     out = [f"# {report.get('title') or 'Posting-threshold readout'}", ""]
     out += [
         "Reported cases per voyage vs the VSP posting cutoffs "
         "(>= 3% of channel complement).",
         "",
-        "| cell | n | pax reports med [IQR] | pax max | >=63 pax | "
-        "crew reports med [IQR] | crew max | >=27 crew | posted (either) |",
+        "| cell | n | pax reports med [IQR] | pax max | pax over wire | "
+        "crew reports med [IQR] | crew max | crew over wire | posted (either) |",
         "|---|---|---|---|---|---|---|---|---|",
     ]
     for label, block in report["cells"].items():
@@ -121,10 +106,10 @@ def render_markdown(report: dict) -> str:
             f"| {label} | {block['n']}"
             f" | {_quant_cell(p['quantiles'])}"
             f" | {_fmt(p['max'], 0)}"
-            f" | {p['n_over']} ({_pct(p['rate'])})"
+            f" | {p['n_over']} of >={_fmt(p['cutoff'], 0)} ({_pct(p['rate'])})"
             f" | {_quant_cell(c['quantiles'])}"
             f" | {_fmt(c['max'], 0)}"
-            f" | {c['n_over']} ({_pct(c['rate'])})"
+            f" | {c['n_over']} of >={_fmt(c['cutoff'], 0)} ({_pct(c['rate'])})"
             f" | {block['n_posted']} ({_pct(block['posted_rate'])}) |"
         )
     out += [""]
