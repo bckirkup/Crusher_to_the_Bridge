@@ -46,11 +46,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from simulation_utils.paths import repo_root  # noqa: E402
 from tools.covid_screen_readout_common import (  # noqa: E402
     DP_RECORD_SEED_SPEC,
+    audit_caregiver_echo,
     audit_fixed_delivery_echoes,
     audit_index_geometry,
     audit_propensity_echo,
+    caregiver_route_witness,
     clause_row_triggers,
-    declared_propensity_block,
+    declared_propensity_caregiver_block,
     design_readout_main,
     paired_rows_against_baseline,
     propensity_row_stats,
@@ -62,41 +64,12 @@ BASELINE_ARM = "D0_declared"
 OFF_ARM = "CG_OFF"
 
 
-def _declared(arm: dict) -> dict:
-    """The arm's declared propensity block + resolved caregiver mode."""
-    declared = declared_propensity_block(arm)
-    caregiver = (
-        (arm.get("overrides") or {}).get("transmission_overrides") or {}
-    ).get("caregiver") or {}
-    declared["caregiver_mode"] = str(caregiver.get("mode", "on"))
-    return declared
-
-
-def _audit_caregiver_echo(
-    failures: list[str], delivery: dict, declared: dict,
-) -> None:
-    """delivery.caregiver.mode echoes the arm's resolved caregiver arm."""
-    block = delivery.get("caregiver")
-    if not isinstance(block, dict):
-        failures.append(
-            "delivery.caregiver missing — the arm key did not resolve "
-            "(design defect)",
-        )
-        return
-    want = declared["caregiver_mode"]
-    if block.get("mode") != want:
-        failures.append(
-            f"caregiver.mode resolved {block.get('mode')!r}, "
-            f"declared {want!r}",
-        )
-
-
 def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
     """Return the audit violations for one cell payload."""
     failures: list[str] = []
     delivery = payload.get("delivery") or {}
     audit_propensity_echo(failures, payload, delivery, declared)
-    _audit_caregiver_echo(failures, delivery, declared)
+    audit_caregiver_echo(failures, delivery, declared)
     audit_fixed_delivery_echoes(failures, delivery)
     audit_index_geometry(failures, payload, DP_RECORD_SEED_SPEC)
     if payload.get("design_id") != "covid_caregiver_off_v1":
@@ -110,12 +83,7 @@ def audit_cell(payload: dict, declared: dict, theta: float) -> list[str]:
 def _row_stats(payloads: list[dict]) -> dict:
     """Takeoff-conditional stats + clause + both mechanisms' echoes."""
     stats = propensity_row_stats(payloads)
-    aboard = stats.get("aboard_window_by_route_pooled") or {}
-    during = stats.get("during_quarantine_by_route_pooled") or {}
-    stats["caregiver_route_pooled"] = {
-        "aboard_window": aboard.get("caregiver", 0),
-        "during_quarantine": during.get("caregiver", 0),
-    }
+    stats["caregiver_route_pooled"] = caregiver_route_witness(stats)
     return stats
 
 
@@ -135,7 +103,7 @@ def _row_triggers(theta: float, arm_id: str, stats: dict) -> dict | None:
 def main(argv: list[str] | None = None) -> int:
     spec = {
         "repo_root": REPO_ROOT,
-        "declared_fn": _declared,
+        "declared_fn": declared_propensity_caregiver_block,
         "audit_cell": audit_cell,
         "row_stats": _row_stats,
         "report_key": "triggered_rows",

@@ -80,7 +80,9 @@ def _payload(
 
 
 def _declared(arm_id: str = "D0_declared") -> dict:
-    return mod._declared({"arm_id": arm_id, "overrides": {}})
+    return mod.declared_propensity_caregiver_block(
+        {"arm_id": arm_id, "overrides": {}},
+    )
 
 
 def test_declared_resolution_is_the_shipped_default():

@@ -800,6 +800,56 @@ def clause_row_triggers(
     )
 
 
+# --- Caregiver-family helpers ------------------------------------------
+# Shared by the CAREGIVER-ATTR-01 attribution canary and the THETA-REFIT-01
+# anchor-refit sweep: both resolve the arm's caregiver mode against the
+# shipped default, audit the delivery.caregiver echo, and carry the pooled
+# caregiver-route tally as the mechanism's exercise witness.
+
+SHIPPED_CAREGIVER_MODE = "on"
+
+
+def declared_propensity_caregiver_block(arm: dict) -> dict:
+    """Propensity mode/cv + the resolved caregiver mode for one arm."""
+    declared = declared_propensity_block(arm)
+    caregiver = (
+        (arm.get("overrides") or {}).get("transmission_overrides") or {}
+    ).get("caregiver") or {}
+    declared["caregiver_mode"] = str(
+        caregiver.get("mode", SHIPPED_CAREGIVER_MODE),
+    )
+    return declared
+
+
+def audit_caregiver_echo(
+    failures: list[str], delivery: dict, declared: dict,
+) -> None:
+    """delivery.caregiver.mode echoes the arm's resolved caregiver mode."""
+    block = delivery.get("caregiver")
+    if not isinstance(block, dict):
+        failures.append(
+            "delivery.caregiver missing — the arm key did not resolve "
+            "(design defect)",
+        )
+        return
+    want = declared["caregiver_mode"]
+    if block.get("mode") != want:
+        failures.append(
+            f"caregiver.mode resolved {block.get('mode')!r}, "
+            f"declared {want!r}",
+        )
+
+
+def caregiver_route_witness(stats: dict) -> dict:
+    """The pooled caregiver-route tally under one row's stats dict."""
+    aboard = stats.get("aboard_window_by_route_pooled") or {}
+    during = stats.get("during_quarantine_by_route_pooled") or {}
+    return {
+        "aboard_window": aboard.get("caregiver", 0),
+        "during_quarantine": during.get("caregiver", 0),
+    }
+
+
 def design_readout_main(
     argv: list[str] | None,
     *,
