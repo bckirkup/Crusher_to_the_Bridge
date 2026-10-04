@@ -1,0 +1,40 @@
+# NORO-FOOD-01 campaign worker — the campaign_stack layering plus the
+# campaign manifest baked in (the pinned base image predates the file).
+#
+# `picard-campaign:campaign-8e8ebc79` is the root-Dockerfile build at the
+# FOOD-COMMON-SOURCE-01 merge SHA: it carries the mechanism but its
+# `ENTRYPOINT ["python3","-m",...campaign_runner]` eats the jobdef argv
+# (every child fast-fails exit 2), and its COPY scope omits both
+# `deploy/aws/` and `tools/`. This overlay supplies exactly what the
+# `import_map_entrypoint.py` jobdef shape needs — the same role
+# `Dockerfile.campaign_stack` plays, plus the manifest file so the
+# jobdef command can be the plain `entrypoint.py --arg Ref::` form used
+# by NORO-OUTBREAK-02/03/04 (no `-c` bootstrap).
+#
+# Build (from the repository root):
+#   docker build -f deploy/aws/Dockerfile.noro_food_01 \
+#     --build-arg BASE_IMAGE=<acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign@sha256:46a46aa02002e056c9ba8e5528040b353a4887b7908c866c87fc4efe38972cc6 \
+#     --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:campaign-8e8ebc79-food01 .
+ARG BASE_IMAGE=picard-campaign:campaign-8e8ebc79
+FROM ${BASE_IMAGE}
+
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+USER root
+# Campaign entrypoints + submit/monitor helpers, and the diag drivers the
+# entrypoints run (growth_chain_census carries the common-source witness
+# harvest this campaign's readout needs).
+COPY --chown=campaign:campaign deploy/aws/ ./deploy/aws/
+COPY --chown=campaign:campaign tools/ ./tools/
+# The campaign manifest — written into the in-image manifest directory
+# the entrypoint resolves `--manifest` against.
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/noro_food_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/noro_food_01_manifest.json
+USER campaign
+
+# Job definitions supply the worker script as argv[0].
+ENTRYPOINT ["python3"]
