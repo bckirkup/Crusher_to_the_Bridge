@@ -1,0 +1,97 @@
+{
+  "design_id": "covid_theta_refit_floor_v1",
+  "task_id": "THETA-REFIT-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_refit_v1",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "Nothing. THETA-REFIT-01 measured NO-ADMISSIBLE on [1e7, 1e9] (PRs #876/#881, 78f52a58) \u2014 every row fails the count leg on the same overshoot side with the recorded-onset floor ~700-930 at the lattice floor. This design is NOT a lattice extension: the refit grammar declared monotone overshoot through 1e7 closes the lattice ('not a reason to extend downward'). It is the cheap falsifier of that extrapolation \u2014 one row one decade below the floor, certifying empirically that the floor is mechanism-set rather than projected.",
+  "description": "THETA-REFIT-01 floor falsifier: one 20-seed row at Theta 1e6, one decade below the lattice floor, on the verbatim v11-lineage replay contract under shipped defaults (caregiver on, propensity party). The refit measured the count-leg failure as one-sided overshoot with a ~700-930 recorded-median plateau across 1e7-5.62e7 and the timing leg already at its lower edge (before_share 0.097 vs the 0.073 floor). The projected reads at 1e6: q05 ~450-550 (still above 197 \u2014 count leg still overshooting), before_share ~0.05-0.08 (at/below the timing floor \u2014 failing the other way), takeoff 19/20 or drifting toward fizzle. Any of those is the mechanism-shaped floor certified; a clause pass or a below-side count-leg reading (q95 < 197) reopens the lattice between 1e6 and 1e7.",
+  "prerequisites": [
+    "CAREGIVER-ATTR-01 measured (PR #873, b932d0e9; image picard-campaign@sha256:ee917b9b / tag campaign-e0d43979-cgoff; prefix campaign/covid_caregiver_off_v1/b932d0e9/cells/): RESTORATION \u2014 the +1,634 median-onset drift vs v15 at the Theta 1e9 anchor is the CAREGIVER-V1 channel. CG_OFF clause-passes (11/20 takeoff, q05 10, band contains 197, share 0.200); D0_declared stays drifted (19/20, q05 1,518). The clause's only passing cell on the shipped-default tree exists on the caregiver-off tree \u2014 the premise this design refits under.",
+    "PROPENSITY-V1 + PROPENSITY-CV-01 measured (PRs #868/#870, e0d43979): propensity party-mode is exercised (~2,089 units/voyage) but its seed-paired footprint is noise and its cv-response is flat across the declared range; it ships default-ON and rides this design's baseline arm.",
+    "THETA-SCREEN-V15 measured (PRs #828/#847, image 6efec855, prefixes campaign/covid_theta_screen_v15*/6efec855/cells/): stage-1 admissible band {1.78e11..5.62e11}, clause fails at every admissible Theta, anchor row at Theta 1e9 passes under once_per_course (10/20 takeoff, q05 153, band contains 197, share 0.090). The surface of record this sweep's 1e9 row pairs against.",
+    "Engine identity across the image window measured twice: e0d43979..b932d0e9 touched no engine code (D0_declared replicated the e0d43979 canary bit-identically, max |delta| = 0 on 20 seeds), and b932d0e9..this branch touches no engine code (docs/, tools/, deploy/aws/, noro manifests only \u2014 verified by git diff --stat). The 1e9 row is therefore a replication row: it must reproduce the attribution run's D0_declared row bit-identically, and any divergence is an image/drift defect, not a sim result.",
+    "QUAR-ATTR-V2 on the post-721 base measured Theta 1e9 (3,365 / 0.9068) \u2014 the working anchor this design refits; it stays a boundary row, reported beside the clause, never selected."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from the v11->v15 stage-2 lineage and covid_caregiver_off_v1: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). The clause is a replay-contract criterion; the generic-voyage fleet stage is not in this design.",
+  "thetas": [
+    1000000.0
+  ],
+  "thetas_note": "Single row at 1e6 \u2014 one decade below the measured floor. Deliberately not deeper: two decades below (1e5) risks pure fizzle (takeoff < 5 unscored), which reads ignition mechanics rather than the residual; 1e6 stays inside the igniting regime the 1e7 row showed (19/20 takeoff) while being far enough below that a density-scaled response would have to show it. If q05 lands above 197 again, the clause band was never reachable by detuning; if it lands below, the floor read was wrong and the bracket reopens.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "The declared value, carried for cell-key bookkeeping only: under a declared onset_day the infection age is a measured null axis (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as every stage-2 surface since v11 and both attribution canaries \u2014 every cell pairs seed-for-seed with the v15 anchor row (campaign/covid_theta_screen_v15_stage2/6efec855/cells/), the PROPENSITY-V1 canary (campaign/covid_propensity_v1/e0d43979/cells/), and the CAREGIVER-ATTR-01 arms (campaign/covid_caregiver_off_v1/b932d0e9/cells/).",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim: caregiver on (cleanup + tending + service), propensity party cv 0.8, presentation once_per_course, hand hygiene_cycle \u2014 first arm so empty overrides per the arm grammar, and the same arm_id the PROPENSITY-V1 canary and CAREGIVER-ATTR-01 ran, so this sweep's rows are the mechanism surface of record at each Theta."
+    }
+  ],
+  "cells": 20,
+  "cells_note": "1 Theta x 1 arm x 20 seeds = 20 declared-replay cells (~30 min each). Indices 0-19 = the single Theta 1e6 row. Submitted as one 20-cell array, INDEX_OFFSET 0.",
+  "cell_payload_additions": [
+    "note",
+    "index_onset_day",
+    "index_shedding_at_day0",
+    "index_departed_epoch",
+    "infections_total",
+    "aboard_total",
+    "attack_rate",
+    "vsp_reported_case_fraction_max"
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from the v11 lineage / covid_theta_refit_v1; the verdict grammar below is the falsifier grammar \u2014 this is a one-row boundary certification, not a candidate row.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v11: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when the row has >= 5 takeoff seeds, else reported as 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per row on every submitted Theta \u2014 the design's whole point is the row-resolved clause map on the shipped-default tree. Reported beside it, never thresholded: takeoff-seed count per row, fraction of takeoff seeds with recorded_onsets in [98.5, 394] (mass-near-197), the per-seed recorded_onsets and before_share vectors, takeoff infections_total, and the pooled caregiver-route dose tallies per row (the mechanism's own scaling signature in Theta)."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "audit_invariants": {
+      "caregiver": "delivery.caregiver.mode resolves 'on' on every cell \u2014 the mechanism under test is the shipped default; a missing or mismatched echo is a design defect, not a sim result, and halts the campaign before readout. Reported beside it, never gated: the caregiver-route dose tally (aboard_window_by_route/during_quarantine_by_route 'caregiver' key), expected >0 on takeoff cells and reported per row as the dose-scaling witness.",
+      "participation_propensity": "delivery.participation_propensity.mode resolves 'party' on every cell \u2014 the shipped default; a missing or mismatched echo is a design defect.",
+      "propensity_draw": "propensity_draw.units_drawn > 0 on every cell \u2014 the draw-landing witness.",
+      "presentation_draw_mode": "delivery.presentation_draw_mode == 'once_per_course' on every cell.",
+      "hand_reservoir_mode": "delivery.hand_reservoir_mode == 'hygiene_cycle' on every cell."
+    },
+    "verdict_grammar": "Falsifier verdict, frozen before any cell runs: (a) FLOOR-CERTIFIED \u2014 the count leg fails on the overshoot side again (takeoff q05 > 197): the mechanism-shaped floor is confirmed empirically two decades below the stale anchor and the NO-ADMISSIBLE verdict becomes a measurement, not a projection; (b) FLOOR-CROSSED \u2014 the clause passes, or the count leg reads below-side (q95 < 197) while takeoff holds: the boundary extrapolation was wrong and the bracket between 1e6 and 1e7 reopens for a refine pass; (c) SUB-IGNITION \u2014 takeoff < 5 unscored: the clause dies of fizzle below the floor \u2014 record which side the igniting seeds' distributions sat on; overshoot verdict stands by the seeds that fired. On every verdict the seed-paired deltas against the refit 1e7 row, the v15 anchor row, and both attribution arms are reported beside it."
+  },
+  "diagnostics": {
+    "floor_row": "The single Theta 1e6 row pairs seed-for-seed against the refit lattice's 1e7 row (campaign/covid_theta_refit_v1/78f52a58/cells/ indices 0-19) \u2014 the same-tree boundary cell this probe falsifies or certifies.",
+    "paired_vs_v15_anchor": "The row pairs seed-for-seed with the v15 stage-2 anchor row (campaign/covid_theta_screen_v15_stage2/6efec855/cells/ cells 0-19) and both CAREGIVER-ATTR-01 arms (campaign/covid_caregiver_off_v1/b932d0e9/cells/) \u2014 the pre-caregiver reference and the off-tree pass region.",
+    "caregiver_route_witness": "aboard_window_by_route / during_quarantine_by_route 'caregiver' tallies pooled for the row \u2014 expected to persist (~100-140 aboard-window by extrapolation of the 141-at-1e7 floor) as the mechanism-set floor's signature; a collapse toward 0 alongside a count-leg pass would mean the floor was dose-scaled after all.",
+    "mass_near_197": "fraction of takeoff seeds recording in [98.5, 394] \u2014 0 on all nine refit rows; a nonzero value here is the first sign the band is reachable."
+  },
+  "execution": {
+    "platform": "AWS Batch via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_theta_refit_floor_v1, INDEX_OFFSET 0, ARRAY_SIZE 20, STRIDE 1 on the On-Demand queue picard-analysis-queue (Fargate fallback picard-covid-boarding-screen-fargate on picard-analysis-fargate-queue). Image is a thin overlay deploy/aws/Dockerfile.covid_theta_refit_floor FROM picard-campaign:campaign-e0d43979-refit + COPY of this design file \u2014 engine-identical to the refit generation by construction (same base image digest, only the design JSON added).",
+    "stage_cells": 180,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_theta_refit_v1/<sha>/cells/",
+    "canary": "The Theta 1e9 row (INDEX_OFFSET 160, ARRAY_SIZE 20) submits first: it is simultaneously the pipeline canary, the bracket's upper boundary row, and the replication row against the attribution run's D0_declared cells. Inspect one child before releasing; the row's readout must show max |delta| = 0 vs campaign/covid_caregiver_off_v1/b932d0e9/cells/ indices 0-19 before the remaining 160 cells submit at INDEX_OFFSET 0 ARRAY_SIZE 160.",
+    "report_immediately_if": "the canary row does not replicate the attribution D0_declared row bit-identically (image/drift defect \u2014 stop the array); verdict (c) NO-ADMISSIBLE lands (monotone overshoot through 1e7 \u2014 the caregiver structure cannot be Theta-detuned); verdict (d) BOUNDARY-HIT (the only pass is a bracket edge); the caregiver or propensity echo fails to resolve on any cell (delivery.caregiver or delivery.participation_propensity missing or mode mismatched \u2014 a design defect, not a sim result); any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; propensity_draw.units_drawn <= 0 on any cell; or the child failure rate exceeds 5%."
+  },
+  "rejected_alternatives": {
+    "lattice_extension_downward": "REJECTED by the refit grammar itself: monotone overshoot through the 1e7 floor was declared to close the lattice, not extend it. This row exists only to certify that closure empirically \u2014 it is a falsifier of the projection, not a candidate theta.",
+    "theta_1e5_or_lower": "REJECTED for the falsifier: two decades below the floor risks sub-ignition (takeoff < 5 unscored), which reads ignition mechanics, not the residual. 1e6 is the strongest single probe: inside the igniting regime, far enough below that a density-scaled response must show.",
+    "eighth_decade_refine_at_boundary": "REJECTED: refine grammar applies inside a straddling cell; there is no straddle \u2014 all nine refit rows fail the same side, so there is nothing to refine within."
+  }
+}
