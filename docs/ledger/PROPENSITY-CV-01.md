@@ -1,9 +1,9 @@
 # PROPENSITY-CV-01
 **Date:** 2026-10-03
 **Commit:** 1d51a01c
-**Measured at:** e0d43979
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** e0d43979
 
 ## Question
 
