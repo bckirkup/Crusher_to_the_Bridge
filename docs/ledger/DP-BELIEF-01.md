@@ -81,3 +81,22 @@ delivery + flat observation-channel overshare.** The caregiver
 designation is a contributor to the pre-quarantine term (5–13 attributed
 acquisitions/takeoff seed inside days 0–4, settled), not the whole of
 the divergence. No constants changed; no cells ran.
+
+## Addendum — D3 measured (2026-10-04)
+
+Scored the acquisition-date distribution (map §4-D3): the phase fix is
+**not a global shift**. At the timing-leg Θ7.9e6 the event curve already
+carries the record's *shape* (peaks ~day 15, declines during quarantine)
+but splits mass ~25/75 instead of ~65/35 — because days 0–8 are nearly
+empty (event share <day 9 = 0.011–0.019 at θ≤7.9e6 vs 0.10+ at ≥1e8)
+while the day-16+ tail is fat. At Θ1e6 the curve is fully inverted
+(peaks day 21, still rising through the boundary). θ stretches the same
+wrong-phase curve monotonically (0.08→0.90 certified <d16) — the
+residual is shape-structured, not amplitude-structured. Conforming needs
+both halves: front-load days ~5–12 (open-phase under-delivery; the
+window the caregiver/co-presence channels own — CG_OFF at 1e9 removes
+the early hump, <d16 share 0.902→0.579, shape-level confirmation that
+the designation is an early-window deliverer) AND harder quarantine
+suppression (the tail; D4's measurement). Day-5–6 event dip at low θ
+flagged as a scheduled-structure artifact to verify under the D4 arm.
+Cells of record only; no new runs.

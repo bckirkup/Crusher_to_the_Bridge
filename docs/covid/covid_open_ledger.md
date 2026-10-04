@@ -290,7 +290,14 @@ clause-passing CG_OFF surface is itself unbelievable (2,342 infections,
 2.8× the band). Head-of-record for the DP believability question; the
 needs-cells legs (route-tagged dated onsets D1, cabin-cluster tallies
 D2, acquisition-date scoring D3, quarantine-phase suppression arm D4)
-are designed in the map §4.
+are designed in the map §4. **D3 measured (addendum
+2026-10-04):** the phase fix is not a global shift — at Θ7.9e6 the
+acquisition curve already has the record's *shape* (peaks ~day 15,
+declines during quarantine) but splits mass ~25/75 instead of ~65/35
+because days 0–8 are nearly empty while the day-16+ tail is fat;
+conforming needs BOTH early front-loading (days ~5–12 — the
+caregiver/co-presence window; CG_OFF at 1e9 removes the early hump,
+0.902→0.579) AND harder quarantine-tail suppression (D4's read).
 
 Before that — `CG-FLOOR-01`, measured at `3eae8a2f` (`docs/ledger/CG-FLOOR-01.md`,
 `docs/covid/covid_cg_floor_v1_readout.md`): the R2 factor-box corner

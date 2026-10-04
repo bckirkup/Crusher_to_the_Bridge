@@ -141,14 +141,16 @@ boarding-screen readout, no constants, no mechanism change:
   gradient), and cabin-ring size of each dated case. Same 40-cell grid.
   Resolves F13/F14: whether the confined-passenger deficit is channel
   strength or phase.
-- **D3 — readout-only (no cells).** Score the existing
-  `infections_before/during/after_quarantine` and
+- **D3 — readout-only (no cells). MEASURED, see §4-D3 addendum below.**
+  Score the existing `infections_before/during/after_quarantine` and
   `acquisition_curve.total_by_day` against Emery 2020's back-calculated
   infection-date distribution — the sharpest available timing test.
   Caveat declared: `acquisition_curve` counts ledger events (includes
   repeat episodes), the certified distinct-host windows are the
   `infections_*` fields; use the curve for shape and the fields for
-  mass.
+  mass. (Emery 2020 is barred as a parameter source — tranche 3 — and
+  is used here only in its sanctioned role as comparator for what our
+  own fit recovers.)
 - **D4 — quarantine-phase suppression arm at clause θ** (needs cells).
   {Θ1e6, Θ7.9e6} × {D0_declared, QUAR-ATTR-V2's crew-confinement arm
   grammar} × 20 seeds = 40 cells. Discriminates F8's two readings: if
@@ -156,6 +158,58 @@ boarding-screen readout, no constants, no mechanism change:
   band while pre-quarantine mass is unmoved, the inversion is
   confinement-channel over-delivery; if unmoved, it is open-phase
   under-delivery — different mechanisms, different fixes.
+
+### 4-D3. D3 measured addendum (2026-10-04)
+
+Scored on the 300 shipped-D0 cells of `78f52a58`/`8f49652f`/`8f926382`
+plus the arm rows of `3eae8a2f` (CG_LOW) and `b932d0e9` (CG_OFF) —
+34 of 40 CG_OFF cells and 76 of 80 cg_floor cells carry the fields
+(the rest are no-takeoff short cells). Comparator: Emery 2020's
+back-calculated DP infection-date distribution — barred as a parameter
+source (tranche 3), used here only in its sanctioned comparator role.
+
+Pooled event-curve shape (takeoff seeds, `acquisition_curve` =
+event counts, shape only):
+
+| θ / arm | inf med | <d16 share (certified) | event peak day | event median day | shape |
+|---|---|---|---|---|---|
+| record | ~840 | majority (~0.6–0.75, record-informed) | ~day 14–15 | — | declining into quarantine |
+| 1e6 D0 | 771 | 0.079 | 21 | 23 | **inverted** — still rising through day 16, no boundary signature |
+| 1e6 CG_LOW | 770 | 0.093 | 23 | 23 | unmoved vs D0 (DELIVERY-STRUCTURAL confirmed at shape level) |
+| 7.9e6 D0 | 938 | 0.251 | 15 | 18 | right *shape* — peaks at the boundary and declines — wrong *split* (~25/75) |
+| 7.9e6 CG_LOW | 946 | 0.236 | 18 | 18 | unmoved |
+| 1e9 D0 | 3,249 | 0.902 | 13 | 12 | clean pre-quarantine spike, cliff at day 16, ~3× over mass |
+| 1e9 CG_OFF | 2,342 | 0.579 | 15 | 15 | **caregiver-off drops the early hump** — mass slides into the quarantine window |
+
+- **The phase fix is not a global shift.** At the timing-leg θ
+  (7.9e6) the curve already has the record's *shape* (peak ~day 15,
+  declining during quarantine) but puts ~25% of mass before the
+  boundary instead of ~65/35. The empty region is days 0–8:
+  event share <day 9 is 0.011–0.019 at θ≤7.9e6 (the index's ring
+  produces almost nothing while the voyage is still open), vs
+  0.10+ at ≥1e8. Conforming therefore needs BOTH (a) front-loading
+  of days ~5–12 — open-phase under-delivery — and (b) a harder
+  quarantine suppression to cut the day-16+ tail — confinement
+  over-delivery. D4 reads (b); (a) has no designed leg yet.
+- **θ moves the split monotonically** (certified <d16 share
+  0.08 → 0.90 across the lattice) but only by stretching the same
+  wrong-phase curve earlier — no θ produces the record's
+  front-loaded shape; at every θ the early window stays empty.
+  The residual is shape-structured, not amplitude-structured.
+- Artifact flagged for D4 design: a day-5–6 event dip at low θ
+  (pooled 50 → 1–8 events at 1e6) that is absent at 1e9 — looks
+  scheduled/structural (a transition the exposure kernel rides
+  over), not record physics; verify it survives the
+  quarantine-phase arm before scoring off it.
+
+**D3 discriminates the fix family:** the missing mass is specifically
+days 5–12 aboard-window delivery — the exact window the caregiver
+designation and early co-presence channels own (F15: aboard-window
+acquisitions run mean ~10–64/seed across θ, caregiver-attributed
+5–11/takeoff seed) — plus the quarantine-phase tail suppression D4
+will measure. A mechanism that front-loads days 5–12 without touching
+the during-quarantine channel leaves the tail wrong; D4 establishes
+whether suppressing the confinement channel alone recovers the split.
 
 ## 5. Verdict
 
