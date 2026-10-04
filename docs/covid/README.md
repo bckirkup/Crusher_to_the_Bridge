@@ -40,6 +40,7 @@ dose-response α/β are not, and the emission magnitude is dimensionally wrong.
 | [covid_mech_v2_canary_readout.md](covid_mech_v2_canary_readout.md) | Canary measured | Anchor row re-measured under `once_per_course` at `def39066`: rings_first premise collapsed, f050 premise survived |
 | [covid_mech_v2_band_readout.md](covid_mech_v2_band_readout.md) | Findings | Full arrays measured at `def39066`: f050 fails the clause at every admissible Θ — both assays dead; f050's fleet response lands inside the covid.H3 window at 4/5 θs |
 | [covid_propensity_v1_readout.md](covid_propensity_v1_readout.md) | Canary measured | PROPENSITY-V1 clause canary at the Θ1e9 anchor (`e0d43979`): clause fails on both arms; propensity footprint is seed noise; v15 anchor pass void on engine drift |
+| [covid_caregiver_off_v1_readout.md](covid_caregiver_off_v1_readout.md) | Canary measured | CAREGIVER-ATTR-01 at `b932d0e9`: caregiver-off restores the v15 clause pass at Θ1e9 (11/20 takeoff, band ∋197, share 0.200) — CAREGIVER-V1 measured as the anchor-drift mover |
 | [covid_dp_ventilation_sourcing.md](covid_dp_ventilation_sourcing.md) | Sourcing note | Diamond Princess ventilation and the confinement leak; no constant adopted |
 | [covid_droplet_split_options_memo.md](covid_droplet_split_options_memo.md) | Decided | Option 1 (emission partition at source) implemented as AERO-SPLIT-01 |
 | [covid_theta_handoff_2026_09_19.md](covid_theta_handoff_2026_09_19.md) | Handoff record | Where the Θ calibration stood at v9 → v10 |
