@@ -19,7 +19,6 @@ emits, per cell:
 from __future__ import annotations
 
 import argparse
-import json
 import math
 import sys
 from pathlib import Path
@@ -31,10 +30,10 @@ if str(_REPO_ROOT) not in sys.path:
 if str(_REPO_ROOT / "tools" / "noro_diag") not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT / "tools" / "noro_diag"))
 
-from simulation_utils.paths import validated_open  # noqa: E402
 from telemetry_buffer.observation_model.score_anchors import (  # noqa: E402
     A9_POSTING_THRESHOLD,
 )
+from tools.diag.readout_common import emit_report_outputs  # noqa: E402
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
     _cell_label,
     _posted,
@@ -166,21 +165,9 @@ def main() -> int:
         "label": args.label,
         "cells": {_cell_label(k): v for k, v in cells.items()},
     }
-    md = render_md(cells, args.label)
-    if args.md_out:
-        allowed = (str(args.md_out.parent.resolve()),)
-        with validated_open(
-            str(args.md_out), "w", allowed_roots=allowed, encoding="utf-8"
-        ) as fh:
-            fh.write(md)
-    else:
-        sys.stdout.write(md)
-    if args.json_out:
-        allowed = (str(args.json_out.parent.resolve()),)
-        with validated_open(
-            str(args.json_out), "w", allowed_roots=allowed, encoding="utf-8"
-        ) as fh:
-            json.dump(payload, fh, indent=1)
+    emit_report_outputs(
+        payload, render_md(cells, args.label), args.md_out, args.json_out
+    )
     return 0
 
 

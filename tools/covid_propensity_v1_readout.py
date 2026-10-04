@@ -48,8 +48,8 @@ from tools.covid_screen_readout_common import (  # noqa: E402
     clause_row_triggers,
     declared_propensity_block,
     design_readout_main,
+    paired_rows_against_baseline,
     propensity_row_stats,
-    seed_paired_deltas,
 )
 
 REPO_ROOT = repo_root()
@@ -83,39 +83,15 @@ def _row_stats(payloads: list[dict]) -> dict:
     return propensity_row_stats(payloads)
 
 
-def _paired_off_vs_declared(
-    theta: float, row: list[dict], base: list[dict],
-) -> dict:
-    """Seed-paired (PROP_OFF - D0_declared) deltas on the scored legs.
+def _paired_rows(design: Any) -> Any:
+    """Bind the D0 baseline for the PROP_OFF delta pairing.
 
     The delta direction is off minus declared: what removing the
     mechanism changes. Both arms' takeoff cells pair; a seed where
     either arm fizzled drops out (the fizzle margin itself is reported
     per row).
     """
-    return {
-        "theta": theta,
-        "arm_id": OFF_ARM,
-        "baseline": BASELINE_ARM,
-        **seed_paired_deltas(row, base),
-    }
-
-
-def _paired_rows(design: Any) -> Any:
-    """Bind the D0 baseline for the PROP_OFF delta pairing."""
-
-    def _pair(rows: dict[tuple, list[dict]]) -> dict:
-        out: dict[str, Any] = {}
-        for (theta, arm_id), row in sorted(rows.items()):
-            if arm_id != OFF_ARM:
-                continue
-            base = rows.get((theta, BASELINE_ARM)) or []
-            out[f"theta={theta:.4g}|arm={arm_id}"] = (
-                _paired_off_vs_declared(theta, row, base)
-            )
-        return out
-
-    return _pair
+    return paired_rows_against_baseline(OFF_ARM, BASELINE_ARM)
 
 
 def _row_triggers(

@@ -1780,3 +1780,66 @@ def test_participation_propensity_echo_resolves_both_arms():
     # At initialize() no event has dealt yet: both arms echo zero draws.
     assert base_payload["propensity_draw"]["units_drawn"] == 0
     assert off_payload["propensity_draw"]["units_drawn"] == 0
+
+
+CAREGIVER_OFF_DESIGN = (
+    REPO_ROOT
+    / "picard_framework"
+    / "runs"
+    / "covid_caregiver_off_v1_design.json"
+)
+
+
+def test_caregiver_off_design_is_the_declared_40_cell_canary():
+    design = load_design(str(CAREGIVER_OFF_DESIGN))
+    cells = enumerate_cells(design)
+    assert len(cells) == 40
+    assert design.arm_ids == ("D0_declared", "CG_OFF")
+    # One anchor point, arm-major then seed-innermost.
+    assert all(c.theta == pytest.approx(1e9) for c in cells)
+    assert cells[0].arm_id == "D0_declared"
+    assert cells[0].seed == 20200205
+    assert cells[19].seed == 20200224
+    assert cells[20].arm_id == "CG_OFF"
+    assert cells[20].seed == 20200205
+    assert cells[39].arm_id == "CG_OFF"
+    assert len({c.key for c in cells}) == 40
+
+
+def test_caregiver_off_arm_writes_the_transmission_block():
+    design = load_design(str(CAREGIVER_OFF_DESIGN))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "D0_declared")
+    off = next(c for c in cells if c.arm_id == "CG_OFF")
+    base_raw = prepare_cell_run_spec(design, base)
+    off_raw = prepare_cell_run_spec(design, off)
+    assert (
+        off_raw["config_overrides"]["transmission"]["caregiver"]
+        == {"mode": "off"}
+    )
+    assert (
+        off_raw["config_overrides"]["rhythm"]["participation_propensity"]
+        == {"mode": "off"}
+    )
+    assert "caregiver" not in (
+        base_raw["config_overrides"].get("transmission") or {}
+    )
+
+
+def test_caregiver_off_echo_resolves_both_arms():
+    """Echo readout at initialize() on the real canary design — the audit
+    the campaign gate runs before any cell submits: D0 resolves the
+    shipped caregiver + party modes, CG_OFF resolves both off."""
+    design = load_design(str(CAREGIVER_OFF_DESIGN))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "D0_declared")
+    off = next(c for c in cells if c.arm_id == "CG_OFF")
+    base_payload = echo_screen_cell(design, base)
+    off_payload = echo_screen_cell(design, off)
+    assert base_payload["delivery"]["caregiver"]["mode"] == "on"
+    assert off_payload["delivery"]["caregiver"]["mode"] == "off"
+    base_prop = base_payload["delivery"]["participation_propensity"]
+    off_prop = off_payload["delivery"]["participation_propensity"]
+    assert base_prop["mode"] == "party"
+    assert off_prop["mode"] == "off"
+    assert off_payload["propensity_draw"]["units_drawn"] == 0

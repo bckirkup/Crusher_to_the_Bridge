@@ -1,0 +1,23 @@
+# CAREGIVER-ATTR-01 worker — the e0d43979 campaign-stack image with the
+# covid_caregiver_off_v1 design file layered on.
+#
+# The merged tree between e0d43979 (the PROPENSITY-V1 canary's image SHA)
+# and the build SHA differs only in docs/, tests/, tools/, deploy/aws/,
+# *runs/*_design.json and a noro manifest — no engine, spec, or
+# worker-path change — so the cells this image runs are bit-identical in
+# engine semantics to the canary generation, and the design's
+# replication_row diagnostic (D0_declared vs the canary's same-named arm)
+# stays valid. ENGINE_GIT_SHA inherited from the base stays e0d43979,
+# which is what run_spec.json records.
+#
+# Build (from the repository root at a SHA containing the design file):
+#   docker build -f deploy/aws/Dockerfile.covid_caregiver_off \
+#     -t 994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-e0d43979-cgoff .
+ARG BASE_IMAGE=994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-e0d43979
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign picard_framework/runs/covid_caregiver_off_v1_design.json ./picard_framework/runs/covid_caregiver_off_v1_design.json
+USER campaign
+
+ENTRYPOINT ["python3"]

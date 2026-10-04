@@ -1083,9 +1083,14 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   low tail that carried v15's clause pass is gone on the merged tree, so
   the v15 anchor pass is historical at its own SHA
   (`docs/covid/covid_propensity_v1_readout.md`). The band array is the
-  open decision.* `PROPENSITY-CV-01` declares the measurement that
-  decision takes first: a single-axis cv screen {0.2, 0.4, 0.8, 1.2,
-  2.0} + `PROP_OFF` baseline on the same frozen replay contract,
-  delivering the seed-paired cv-response curve — with the shipped 0.8
-  measured dead, the screen answers whether any point in the declared
-  range is live at the anchor before a band array is committed.
+  open decision.* `PROPENSITY-CV-01` answered it: *measured 2026-10-03
+  (`e0d43979`, screen `covid_propensity_cv_screen`, 120/120 cells, 0
+  audit failures) — the cv-response curve is FLAT at every declared
+  dispersion*. Clause FAIL on both legs on all six arms; seed-paired
+  (arm − PROP_OFF) medians +58/+15/−12/0/+31 recorded onsets across cv
+  0.2→2.0 with every interval straddling zero; multiplier q95 widened
+  1.35→3.53 on the declared grid, so the dispersion reached the deal and
+  the anchor did not respond. The 40 shared-arm cells replicate the
+  canary bit-identically (max |Δ| = 0). The propensity family is dead at
+  anchor across its entire declared range — retired on its declared
+  test; the band array is moot (`docs/covid/covid_propensity_cv_screen_readout.md`).

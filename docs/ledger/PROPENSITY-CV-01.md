@@ -2,7 +2,8 @@
 **Date:** 2026-10-03
 **Commit:** 1d51a01c
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** e0d43979
 
 ## Question
 
@@ -77,3 +78,21 @@ the anchor is a boundary row.
   the dispersion moves incidence shape but not detection timing —
   directs the next instrument toward the report channel, not the
   exposure channel.
+
+## Measured (e0d43979, 120/120 cells, array `0a938afd`)
+
+The second bullet landed: the curve is **flat at every cv**. All audits
+passed — mode/cv echo correct per arm, units_drawn 2,091 armed / 0 off,
+multiplier q95 widening 1.35 → 1.74 → 2.46 → 2.98 → 3.53 exactly on the
+declared grid — so the dispersion reached the deal and the anchor did
+not respond. Clause FAIL on both legs on all six arms (takeoff
+19–20/20; rec med 2,231–2,385 with q05 ≥ 1,005 vs 197; before_share med
+0.377–0.452 vs 0.173±0.10; `mass_near_t1` = 0). The seed-paired
+(arm − PROP_OFF) medians are +58 / +15 / −12 / 0 / +31 recorded onsets
+for cv 0.2 → 2.0 — no monotone ordering, every interval straddling
+zero. `paired_vs_canary`: all 40 shared-arm cells bit-identical to the
+covid_propensity_v1 canary's (max |Δ| = 0). Canonical readout:
+`docs/covid/covid_propensity_cv_screen_readout.md`. The
+propensity-family heterogeneity axis is measured dead at anchor across
+its whole declared range — the mechanism family is retired on its
+declared test.
