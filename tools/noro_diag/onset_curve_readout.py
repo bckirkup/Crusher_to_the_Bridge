@@ -28,6 +28,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from outbreak_anchor_readout import _s3_client, _s3_member_blob, _s3_parse_uri  # noqa: E402
 
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from simulation_utils.paths import validated_open  # noqa: E402
+
 _BUCKET_DEFAULT = "crusherbucket-994254241749-us-east-1-an"
 _PREFIXES_DEFAULT = [
     "campaign/noro_outbreak_02/",
@@ -403,10 +406,19 @@ def main() -> None:
     print(f"voyages to read: {len(picked)} (+{len(extra)} posted/forced)",
           file=sys.stderr)
 
+    json_allowed = (str(Path(args.json_out).parent.resolve()),) \
+        if args.json_out else ()
+
+    def _json_open(mode: str):
+        return validated_open(
+            str(args.json_out), mode, allowed_roots=json_allowed,
+            encoding="utf-8")
+
     rows: list[dict] = []
     done_keys: set[str] = set()
     if args.resume and args.json_out and Path(args.json_out).exists():
-        rows = json.loads(Path(args.json_out).read_text())
+        with _json_open("r") as fh:
+            rows = json.load(fh)
         done_keys = {r["key"] for r in rows}
         print(f"resume: {len(rows)} rows already read", file=sys.stderr)
     picked = [m for m in picked if m["key"] not in done_keys]
@@ -416,9 +428,8 @@ def main() -> None:
 
     def _ckpt() -> None:
         if args.resume and args.json_out:
-            tmp = Path(args.json_out + ".tmp")
-            tmp.write_text(json.dumps(rows, indent=1))
-            tmp.replace(args.json_out)
+            with _json_open("w") as fh:
+                json.dump(rows, fh, indent=1)
 
     with ThreadPoolExecutor(args.workers) as pool:
         futs = [pool.submit(_fetch_one, client, args.bucket, m, posted)
@@ -443,12 +454,18 @@ def main() -> None:
     posted = [r for r in rows if r.get("posted")]
     md = render(cell_agg, posted)
     if args.out:
-        Path(args.out).write_text(md)
+        with validated_open(
+            str(args.out), "w",
+            allowed_roots=(str(Path(args.out).parent.resolve()),),
+            encoding="utf-8",
+        ) as fh:
+            fh.write(md)
         print(f"wrote {args.out}", file=sys.stderr)
     else:
         print(md)
     if args.json_out:
-        Path(args.json_out).write_text(json.dumps(rows, indent=1))
+        with _json_open("w") as fh:
+            json.dump(rows, fh, indent=1)
     print(f"done: {len(rows)} voyages, {errors} errors", file=sys.stderr)
 
 
