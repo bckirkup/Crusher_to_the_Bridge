@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `78f52a58` (fill with the
+> **Status:** Living. Head commit of record: `98d25f5c` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -274,13 +274,32 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`THETA-REFIT-01`, measured at `78f52a58` (`docs/ledger/THETA-REFIT-01.md`,
+`THETA-REFIT-01` floor falsifier + bracket refine, measured at `8f49652f`
+/`8f926382` (`docs/ledger/THETA-REFIT-01.md` addendum,
+`docs/covid/covid_theta_refit_floor_v1_readout.md`,
+`docs/covid/covid_theta_refit_bracket_v1_readout.md`): the downward closure
+of the shipped-default Θ lattice — 120/120 cells, 0 audit failures. The
+Θ1e6 floor row **falsified the projected mechanism-shaped count floor**:
+the count leg passes there ([149, 760] ∋ 197, `mass_near_197` 0.474)
+while the timing leg fails below-side (before_share 0.051 < 0.073).
+The five interior rows then certified **WINDOW-EMPTY-ORDERED**: the
+count-leg crossing θ_c ∈ (1e6, 1.4e6) sits *below* the timing-leg
+crossing θ_t ∈ (5.62e6, 7.9e6) — the legs' admissible half-planes are
+disjoint, so the v11 clause passes nowhere on [1e6, 1e9] under shipped
+defaults (15 measured rows, ~3 decades). The residual is refined to
+**clause-shaped**: the two legs demand mutually exclusive transmission
+rates, and the open question is the anchor itself under CAREGIVER-V1
+(the 197 figure, the 0.173 share, the takeoff-conditional scoring).
+
+Before that — `THETA-REFIT-01` lattice, measured at `78f52a58`
+(`docs/ledger/THETA-REFIT-01.md`,
 `docs/covid/covid_theta_refit_v1_readout.md`): the shipped-default Θ refit
 — 9-row quarter-decade lattice on [1e7, 1e9] × 20 seeds, 180/180 cells, 0
 audit failures. **NO-ADMISSIBLE**: every row fails the count leg on the
 same side (takeoff q05 ≥ 523 > 197 at every Θ, recorded medians floored
-at ~700 even at 1e7) — the residual is mechanism-shaped, not Θ-shaped;
-no admissible Θ exists for the v11 clause under CAREGIVER-V1. The Θ1e9
+at ~700 even at 1e7) — the boundary projection read mechanism-shaped;
+the floor falsifier above refined it to clause-shaped. No admissible Θ
+exists for the v11 clause under CAREGIVER-V1. The Θ1e9
 row is bit-identical to the attribution D0 row and vs CG_OFF reproduces
 the +698/+0.329 fill-in exactly. The open follow-up moves off Θ onto the
 clause/anchor itself under the mechanism.
