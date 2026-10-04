@@ -52,3 +52,37 @@ The open follow-up is the clause/anchor itself under the mechanism —
 whether the 197 figure needs re-derivation under CAREGIVER-V1 or the
 mechanism's pre-quarantine delivery is over-strong. No constants
 changed.
+
+## Addendum (2026-10-04, floor falsifier + bracket refine)
+
+Two bounded follow-on campaigns closed the lattice downward, measured at
+design SHAs `8f49652f` (floor) and `8f926382` (bracket):
+`docs/covid/covid_theta_refit_floor_v1_readout.md` and
+`docs/covid/covid_theta_refit_bracket_v1_readout.md`.
+
+**Floor falsifier (`covid_theta_refit_floor_v1`, 20 cells):** Θ1e6, one
+decade below the floor — the projection of a mechanism-shaped count
+floor was **falsified**: the count leg PASSES ([149, 760] ∋ 197, med
+331, 19/20 takeoff, `mass_near_197` = 0.474) while the timing leg fails
+below-side (before_share med 0.051 < the 0.073 floor). Caregiver
+aboard-window pooled 105 — the mechanism is exercised; the band reaches
+197 because it is wide, not because the route went quiet.
+
+**Bracket refine (`covid_theta_refit_bracket_v1`, 100 cells):** five
+interior rows {1.4e6, 2e6, 3.16e6, 5.62e6, 7.9e6} — every row fails at
+least one leg. **WINDOW-EMPTY-ORDERED, certified:** the count leg fails
+on all five interior rows (θ_c ∈ (1e6, 1.4e6) — q05 climbs 149 → 366
+immediately) and the timing leg recovers only at 7.9e6 (θ_t ∈ (5.62e6,
+7.9e6)). Since θ_c < θ_t, the legs' admissible half-planes are disjoint
+— no θ in (1e6, 1e7) can satisfy both.
+
+**Amended verdict:** the v11 clause passes nowhere on [1e6, 1e9] under
+shipped defaults — 15 measured rows across ~3 decades, every one
+failing at least one leg, with the two legs demanding mutually
+exclusive transmission rates (count wants θ ≲ 1.4e6, timing wants
+θ ≳ 5.6e6). Below 1e6 the timing leg only worsens toward fizzle. The
+residual is **clause-shaped**, not θ-shaped — refined from the
+boundary projection (mechanism-shaped) rather than confirmed by it. The
+open question stays on the anchor itself under CAREGIVER-V1: the 197
+count figure, the 0.173 before-split share, and the takeoff-conditional
+scoring. No constants changed.
