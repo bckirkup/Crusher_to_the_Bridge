@@ -92,7 +92,9 @@ def _declared_for(
         overrides["transmission_overrides"] = {
             "caregiver": {"mode": caregiver_mode},
         }
-    return mod._declared({"arm_id": arm_id, "overrides": overrides})
+    return mod.declared_propensity_caregiver_block(
+        {"arm_id": arm_id, "overrides": overrides},
+    )
 
 
 def test_declared_resolution():
