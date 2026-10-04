@@ -35,13 +35,13 @@ unchanged.
 
 Baseline-access note: the `campaign/noro_outbreak_01/` zip payloads are
 lifecycle-archived in S3 Deep Archive, so the `--import-root` per-seed
-join cannot read them directly. A Standard-tier restore of the two
-`fl_spr_*` tiers was requested 2026-10-04 (~12 h); the full
-established/takeoff seed-pairing can be backfilled once objects are hot.
-The posting pairing is unaffected and exact — the baseline posted count
-is committed zero for all four cells
-(`docs/norovirus/noro_outbreak_01_readout.md`), so every 04 posting is a
-gain and none can be lost.
+join cannot read them directly, and `picard-deploy-role` lacks
+`s3:RestoreObject` — restoring the two `fl_spr_*` tiers (Standard tier,
+~12 h once issued) needs an admin profile. The full established/takeoff
+seed-pairing is backfillable once objects are hot. The posting pairing
+is unaffected and exact — the baseline posted count is committed zero
+for all four cells (`docs/norovirus/noro_outbreak_01_readout.md`), so
+every 04 posting is a gain and none can be lost.
 
 ## Measured — frequency (noro_outbreak_04 vs noro_outbreak_01)
 
@@ -88,6 +88,11 @@ gain and none can be lost.
 - `detection_epoch` is null on every ren takeoff voyage (baseline
   282 [282-282]); scr detection unchanged (~ep 273). Recorded here as an
   observed change, not yet attributed.
+
+Open thread: per-seed established/takeoff pairing vs 01 awaits an
+admin-issued Deep Archive restore of `campaign/noro_outbreak_01/
+fl_spr_12d_{scr,ren}/` (7-day Standard restore); then re-run
+`outbreak_anchor_readout.py --import-root` and amend this entry.
 
 ## Interpretation
 

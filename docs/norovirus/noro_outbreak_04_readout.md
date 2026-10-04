@@ -97,11 +97,11 @@ with max 28 crossing; passenger reports sit at ~30–40% of their wire
 
 Baseline values are the committed `noro_outbreak_01_readout.md` cell
 statistics (the 01 zip payloads are lifecycle-archived in S3 Deep
-Archive; a Standard-tier restore of the two spirit tiers was requested
-2026-10-04 and the full per-seed established/takeoff pairing can be
-backfilled from `--import-root` once objects are hot — the posting
-contrast above is already exact, since the baseline posted count is
-committed zero).
+Archive and `picard-deploy-role` lacks `s3:RestoreObject`; the full
+per-seed established/takeoff pairing can be backfilled from
+`--import-root` once an admin restores the two spirit tiers — the
+posting contrast above is already exact, since the baseline posted
+count is committed zero).
 
 | cell | Δtakeoff pp | Δposted pp | Δacq med | Δpeak prev | Δdetect ep | ΔA1 | ΔA2 | ΔA3 | ΔA5 | ΔA8 pax | ΔA8 crew |
 |---|---|---|---|---|---|---|---|---|---|---|---|
