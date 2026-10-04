@@ -62,6 +62,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--tier", required=True)
     parser.add_argument("--index", type=int, default=None)
     parser.add_argument("--index-offset", type=int, default=0)
+    parser.add_argument(
+        "--payload", choices=("full", "lean"), default="full",
+        help="census-member diet passed through to the driver; 'lean' "
+             "counts the per-event row streams instead of retaining "
+             "them (mega-cell memory lever)",
+    )
     return parser.parse_args(argv)
 
 
@@ -98,6 +104,7 @@ def main(argv: list[str] | None = None) -> None:
         "--tier", args.tier,
         "--index", str(index),
         "--pathogen-id", args.pathogen_id,
+        "--payload", args.payload,
         "--out", str(out_dir),
     ]
     print(" ".join(command), flush=True)
