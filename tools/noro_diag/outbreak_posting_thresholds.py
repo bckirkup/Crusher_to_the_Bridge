@@ -24,7 +24,6 @@ Usage (mirrors outbreak_anchor_readout.py)::
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -33,8 +32,10 @@ _REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
-from simulation_utils.paths import validated_open  # noqa: E402
-from tools.diag.readout_common import rate_summary  # noqa: E402
+from tools.diag.readout_common import (  # noqa: E402
+    emit_report_outputs,
+    rate_summary,
+)
 from tools.noro_diag.outbreak_anchor_readout import (  # noqa: E402
     A9_POSTING_THRESHOLD,
     _cell_label,
@@ -135,20 +136,9 @@ def main() -> None:
     parser.add_argument("--md-out", type=Path, default=None)
     args = parser.parse_args()
     report = build_report(args.runs_dir, args.tiers, title=args.title)
-    if args.md_out:
-        allowed = (str(args.md_out.parent.resolve()),)
-        with validated_open(
-            str(args.md_out), "w", allowed_roots=allowed, encoding="utf-8",
-        ) as fh:
-            fh.write(render_markdown(report))
-    if args.json_out:
-        allowed = (str(args.json_out.parent.resolve()),)
-        with validated_open(
-            str(args.json_out), "w", allowed_roots=allowed, encoding="utf-8",
-        ) as fh:
-            json.dump(report, fh, indent=1, default=str)
-    if not args.md_out and not args.json_out:
-        print(render_markdown(report))
+    emit_report_outputs(
+        report, render_markdown(report), args.md_out, args.json_out,
+    )
 
 
 if __name__ == "__main__":

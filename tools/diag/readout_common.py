@@ -170,3 +170,29 @@ def rate_ci_str(x: int, n: int, z: float = Z95) -> str:
         return "-"
     lo, hi = wilson_interval(x, n, z)
     return f"{x}/{n} ({100 * x / n:.2f}% [{100 * lo:.2f},{100 * hi:.2f}])"
+
+
+def emit_report_outputs(
+    report: dict[str, Any],
+    markdown: str,
+    md_out: Path | None,
+    json_out: Path | None,
+) -> None:
+    """Write the rendered markdown and/or the JSON report beside each
+    other, or print the markdown when no output path was given."""
+    from simulation_utils.paths import validated_open
+
+    if md_out:
+        allowed = (str(md_out.parent.resolve()),)
+        with validated_open(
+            str(md_out), "w", allowed_roots=allowed, encoding="utf-8",
+        ) as fh:
+            fh.write(markdown)
+    if json_out:
+        allowed = (str(json_out.parent.resolve()),)
+        with validated_open(
+            str(json_out), "w", allowed_roots=allowed, encoding="utf-8",
+        ) as fh:
+            json.dump(report, fh, indent=1, default=str)
+    if not md_out and not json_out:
+        print(markdown)
