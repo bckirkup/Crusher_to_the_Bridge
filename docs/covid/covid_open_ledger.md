@@ -274,7 +274,31 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`THETA-REFIT-01` floor falsifier + bracket refine, measured at `8f49652f`
+`CG-FLOOR-01`, measured at `3eae8a2f` (`docs/ledger/CG-FLOOR-01.md`,
+`docs/covid/covid_cg_floor_v1_readout.md`): the R2 factor-box corner
+probe — {Θ1e6, Θ7.9e6} × {`D0_declared`, `CG_LOW`} × 20 seeds, 80/80
+cells, 0 audit failures, D0 rows bit-identical to the floor/bracket
+cells. **DELIVERY-STRUCTURAL**: seed-paired deltas at the declared dose
+floor (`tending_copresence_multiplier` 1.5, `tending_hours_per_day`
+2.0) are median-zero on every scored leg, and the caregiver
+aboard-window tally is unmoved (105→104, 138→135). The clause's
+disjoint leg map is not reachable by detuning the declared dose
+constants — the suspect narrows to the mechanism's
+designation/discovery shape (`tending_response_probability`,
+`tending_report_probability`, the existence of a days-0–4 designation)
+or to where the clause is scored. The chain is now θ-shaped? no →
+anchor-shaped? no → factor-shaped? no → **structure-shaped**.
+
+Before that — `ANCHOR-DERIVE-01`, closed at `ed7925f3`
+(`docs/ledger/ANCHOR-DERIVE-01.md`,
+`docs/covid/covid_anchor_derivation_v1.md`): verdict (b) — the 197/0.173
+clause targets are measured-direct record quantities
+(mechanism-independent), so the clause legitimately fails under shipped
+defaults; suspect moved to the mechanism's pre-quarantine delivery
+strength (pooled aboard-window 105–248 monotone in Θ,
+during-quarantine 0 structural).
+
+Before that — `THETA-REFIT-01` floor falsifier + bracket refine, measured at `8f49652f`
 /`8f926382` (`docs/ledger/THETA-REFIT-01.md` addendum,
 `docs/covid/covid_theta_refit_floor_v1_readout.md`,
 `docs/covid/covid_theta_refit_bracket_v1_readout.md`): the downward closure
@@ -290,13 +314,6 @@ defaults (15 measured rows, ~3 decades). The residual is refined to
 **clause-shaped**: the two legs demand mutually exclusive transmission
 rates, and the open question is the anchor itself under CAREGIVER-V1
 (the 197 figure, the 0.173 share, the takeoff-conditional scoring).
-*Resolved by `ANCHOR-DERIVE-01` (2026-10-04, `04d6ef18`,
-`docs/covid/covid_anchor_derivation_v1.md`): both targets are
-measured-direct record quantities — mechanism-independent — so the
-clause legitimately fails and the suspect moves to CAREGIVER-V1's
-pre-quarantine delivery strength (pooled aboard-window 105–248
-monotone in Θ, during-quarantine 0). Proposed bounded probe:
-CG-FLOOR-01 at the declared R2 factor floor.*
 
 Before that — `THETA-REFIT-01` lattice, measured at `78f52a58`
 (`docs/ledger/THETA-REFIT-01.md`,
