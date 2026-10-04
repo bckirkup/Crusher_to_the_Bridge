@@ -1,0 +1,21 @@
+# THETA-REFIT-01 bracket refine — the floor image with the
+# covid_theta_refit_bracket_v1 design file layered on.
+#
+# FROM the covid_theta_refit_floor image, so the base already carries the
+# refit and floor designs and every entrypoint; this layer adds only the
+# bracket design JSON. Engine semantics are bit-identical to the
+# refit/attribution generation by construction (same base image digest,
+# no code changes); ENGINE_GIT_SHA stays e0d43979, which is what
+# run_spec.json records.
+#
+# Build (from the repository root at a SHA containing the design file):
+#   docker build -f deploy/aws/Dockerfile.covid_theta_refit_bracket \
+#     -t 994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-e0d43979-refit-bracket .
+ARG BASE_IMAGE=994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-e0d43979-refit-floor
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign picard_framework/runs/covid_theta_refit_bracket_v1_design.json ./picard_framework/runs/covid_theta_refit_bracket_v1_design.json
+USER campaign
+
+ENTRYPOINT ["python3"]
