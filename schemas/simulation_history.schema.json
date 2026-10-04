@@ -259,6 +259,16 @@
           "type": "array",
           "items": {"type": "object"}
         },
+        "common_source_events": {
+          "type": "array",
+          "items": {"type": "object"},
+          "description": "FOOD-COMMON-SOURCE-01 witness records — one row per fired common-source event (one contaminated pan at one Dining zone in one meal window)."
+        },
+        "common_source_exposures": {
+          "type": "array",
+          "items": {"type": "object"},
+          "description": "FOOD-COMMON-SOURCE-01 per-taker exposure rows, mirroring food_contamination_exposures."
+        },
         "environmental_exposures": {
           "type": "array",
           "items": {"type": "object"}

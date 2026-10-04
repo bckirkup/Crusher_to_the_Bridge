@@ -744,6 +744,32 @@ anchor.
 | `service.report_probability` (P(the steward's delivery reports the case), per delivery) | U(0.10, 0.40) | C, declared | A door-drop is weaker discovery than tending; strictly below R2's floor | D | [0.10, 0.40] | U | L? | ✓ shipped default-ON | CAREGIVER-V1 |
 | `service.service_touches` (emetic-side pickup contacts off the cabin deposit during the drop) | U-int [1, 3] | C, declared | The emetic-pathogen equivalent of the near-field episode (noro has no continuous emission to stand in); same field gap | D | [1, 3] | U-int | L? | ✓ shipped default-ON | CAREGIVER-V1 |
 
+### 3.12 Food common-source event constants (FOOD-COMMON-SOURCE-01)
+
+The quantities declared by the frozen design
+[`food_common_source_01_design.md`](food_common_source_01_design.md):
+synchronized common-source foodborne events — one contaminated pan at
+one Dining zone in one meal window — that recover the spiky-outbreak
+tail NORO-ONSET-CURVE-01 showed structurally absent. `norwalk_gi` is
+armed in `active_profiles.json`/`norwalk_only.json`; every other profile
+is zero-rate by construction. Constants ship as the module ranges in
+`engines/transmission_core.py`; a pathogen's `common_source_events`
+block or `transmission.common_source.<name>` overrides each per its own
+literature (literature replaces constants, not the mechanism).
+
+| Quantity | Shipped | Class | Evidence / interval | Origin | Interval | Shape | Lev | State | Task |
+|---|---|---|---|---|---|---|---|---|---|
+| `COMMON_SOURCE_LOT_EVENT_PROBABILITY_RANGE` — per-voyage probability a contaminated provisioned item reaches service | U(0.02, 0.15) | C | Bounded below by posted-outbreak incidence: Mouchtouri 2024 (Eurosurveillance) counted 45 cruise outbreaks over 26 ships with foodborne vehicles the minority share; NEARS retail data (Moritz 2023, MMWR) ~0.3 reported foodborne outbreaks per establishment-year. Bounded above by contaminated-lot prevalence (Dirks 2025: 44% sequence-positive market-ready oysters) netting out sub-outbreak events that never surface. ∅lit per-voyage measurement — declared sweep axis | D | [0.02, 0.15] | U | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_HANDLER_EVENT_PROBABILITY_RANGE` — per (shedding handler, service window) event probability | U(0.005, 0.10) | C | ∅ direct per-shift measurement; bounded by NEARS (~40% of outbreaks with identified contributing factors implicate an ill worker, Moritz 2023; only 16.1% of establishments had all four ill-worker policy components) with the Sabrià 2016 (J Clin Virol) asymptomatic-shedding precondition — 59.1% of exposed workers NoV+, >70% asymptomatic at comparable titres | D | [0.005, 0.10] | U | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_DINER_EVENT_PROBABILITY_RANGE` — per (shedding diner, meal) event probability | U(0.001, 0.05) | C | ∅ — no study reports a per-meal contamination probability for an infectious self-serve diner; shared-service events documented (Papafragkou 2024 wedding buffet) but rarer than handler events in the investigation record, so the interval sits strictly below the handler arm's | D | [0.001, 0.05] | U | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_EMBARKATION_LOT_WINDOW_DAYS_RANGE` — voyage-day span fresh provisioned lots surface in | U-int [1, 3] | C | Perishables turn over within days — documentary provisioning practice; no literature measurement | D | [1, 3] | U-int | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_ITEM_TAKE_SHARE_RANGE` — item-exposure share among the meal cohort | U(0.10, 0.60) | C | Buffet investigations span ~a tenth to a majority of the meal cohort: Papafragkou 2024, 41% of interviewed guests ate the implicated fruit salad | D | [0.10, 0.60] | U | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_PAN_SERVINGS_RANGE` — servings per pan | U-int [20, 80] | C | Hotel-pan/buffet service practice; the pan as the bounded exposure unit matches the retained-sample practice in the design's grounding. Documentary | D | [20, 80] | U-int | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_SERVING_MASS_G_RANGE` — portion mass (g) | U(50, 250) | C | Documentary portion sizes | D | [50, 250] | U | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE` — contaminated-lot titre, GEC/g | logU(1e1, 1e4) | B | Outbreak-investigation item titres: Flannery 2013 oyster lots >1e3 copies/g digestive tissue; produce/RTE items sit lower. Log-uniform — the underlying distribution is multiplicative and heavy-tailed | Ab | [1e1, 1e4] | logU | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE` — shared-utensil/pan-edge contacts per diner pass | U-int [1, 5] | C | A handful of touches; no literature measurement | D | [1, 5] | U-int | L? | ✓ shipped | FOOD-COMMON-SOURCE-01 |
+| `transmission.common_source.food_safety_posture` — platform's VSP-conditioned rate scalar multiplying handler/diner event probabilities | 1.0 default | C | VSP publishes per-ship inspection scores and itemized food-handling violations — a measured moderator that avoids "they aren't all 100%"; the score→multiplier map is the declared linear identity in v1, swept in the canary | Tr (scores exist) + D (identity map) | [0, ∞) declared; shipped 1.0 | point | L? | ✓ shipped v1 default | FOOD-COMMON-SOURCE-01 |
+
 ## 4. The five blocked and one resolved, and the change each needs
 
 This is the actionable core of the register. In every case the paper exists and

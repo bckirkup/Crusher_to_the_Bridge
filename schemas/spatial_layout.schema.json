@@ -37,6 +37,11 @@
       "maximum": 1,
       "description": "Base direct-contact multiplier for Cabin_Corridor zones (hallway vs ward)"
     },
+    "food_safety_posture": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Per-platform food-safety posture scalar multiplying FOOD-COMMON-SOURCE-01 ill_handler/ill_diner event probabilities — the VSP-conditioned covariate (per-ship inspection scores and itemized food-handling violations). v1 default 1.0 for platforms without an entry; transmission.common_source.food_safety_posture overrides."
+    },
     "graywater_zones": {
       "type": "array",
       "minItems": 1,

@@ -72,6 +72,7 @@ from engines.infection_dynamics_bridge import (
     DEFAULT_DINING_TABLE_SIZE,
     DEPARTMENT_TABLE_DINING_SERVICE_TYPES,
     HAND_CARRIAGE_PROPENSITY_BETA,
+    MEAL_PREFIX,
     PER_MEAL_TABLE_DINING_SERVICE_TYPES,
     SURFACE_DEPOSITION_FRACTION,
     IllnessStatus,
@@ -86,6 +87,7 @@ from engines.rhythm_layer import (
 )
 from engines.sim_clock import HOURS_PER_DAY, LEGACY_EPOCH_DAY, SimClock
 from engines.strain_dose_ledger import (
+    NO_SOURCE_AGENT,
     UNRESOLVED_STRAIN,
     Contributor,
     DoseAttribution,
@@ -96,6 +98,7 @@ from engines.strain_dose_ledger import (
     attribution,
     build_emission_mix,
     draw_contributor,
+    single_strain_mix,
 )
 from engines.strain_mutation import MutationOperator
 from engines.strain_state import (
@@ -956,6 +959,9 @@ PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
     "flush_aerosol": "flush_aerosol",
     "fomite": "fomite",
     "food": "food_contamination",
+    # FOOD-COMMON-SOURCE-01: servings ride the food portal's route
+    # efficiency exactly as grazed pool shares do — same portal.
+    "common_source_food": "food_contamination",
     "environmental": "environmental_source",
 }
 # Deprecated alias, kept for external readers.
@@ -1089,6 +1095,11 @@ class ContactTracingMatrix:
     # Pathway 5: Food contamination — ingestion dose from contaminated
     # food in Dining-type zones
     food_contamination_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 5b: Common-source events — one contaminated pan at one Dining
+    # zone in one meal window (FOOD-COMMON-SOURCE-01). Witness records per
+    # event plus per-taker exposure rows mirroring food_contamination_exposures.
+    common_source_events: list[dict[str, Any]] = field(default_factory=list)
+    common_source_exposures: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 6: Environmental source — dose from HVAC-colonized pathogen
     # (e.g. Legionella biofilm) independent of infected agents
     environmental_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -1107,6 +1118,8 @@ class ContactTracingMatrix:
             "flush_aerosol_exposures": self.flush_aerosol_exposures,
             "fomite_trailing_exposures": self.fomite_trailing_exposures,
             "food_contamination_exposures": self.food_contamination_exposures,
+            "common_source_events": self.common_source_events,
+            "common_source_exposures": self.common_source_exposures,
             "environmental_exposures": self.environmental_exposures,
             "transmission_events": self.transmission_events,
             "zone_contact_summary": self.zone_contact_summary,
@@ -1350,6 +1363,96 @@ FOOD_HANDLER_CONTACT_MULTIPLIER = 12.7
 # override it (``food_contamination.ingestion_fraction_per_day``) and sweep it.
 # No source: declared assumption, swept. Grade C. Origin: n/a.
 FOOD_INGESTION_FRACTION_PER_DAY = 0.05
+
+# ── FOOD-COMMON-SOURCE-01: synchronized common-source foodborne events ──
+# One contaminated pan at one Dining zone during one meal window — the
+# bounded cohort-exposure draw NORO-ONSET-CURVE-01 showed structurally
+# absent (docs/food_common_source_01_design.md, frozen). Intervals below
+# are the design's frozen constant table; per-pathogen profiles arm the
+# mechanism through a ``common_source_events`` block and
+# ``transmission.common_source.mode`` gates it globally.
+#
+# Per-voyage probability a contaminated provisioned item reaches service.
+# Bounded below by posted-outbreak incidence: Mouchtouri 2024
+# (Eurosurveillance) counted 45 cruise outbreaks over 26 ships with
+# foodborne vehicles the minority share, and NEARS retail data (Moritz
+# 2023, MMWR) give ~0.3 reported foodborne outbreaks per
+# establishment-year. Bounded above by contaminated-lot prevalence
+# (Dirks 2025: 44% sequence-positive market-ready oysters) netting out
+# sub-outbreak events that never surface. ∅lit per-voyage measurement —
+# declared sweep axis, Grade C. Origin: declared.
+COMMON_SOURCE_LOT_EVENT_PROBABILITY_RANGE = (0.02, 0.15)
+# Per (shedding food-handler, service window) event probability. ∅ direct
+# per-shift measurement; bounded by NEARS (~40% of outbreaks with
+# identified contributing factors implicate an ill worker, Moritz 2023;
+# only 16.1% of establishments had all four ill-worker policy components)
+# with the Sabrià 2016 (J Clin Virol) asymptomatic-shedding precondition —
+# 59.1% of exposed workers NoV+, >70% asymptomatic at comparable titres.
+# Grade C declared-bounded. Origin: declared.
+COMMON_SOURCE_HANDLER_EVENT_PROBABILITY_RANGE = (0.005, 0.10)
+# Per (shedding diner, meal) event probability. ∅ — no study reports a
+# per-meal contamination probability for an infectious self-serve diner;
+# shared-service events are documented (Papafragkou 2024 wedding buffet)
+# but rarer than handler events in the investigation record, so the
+# interval sits strictly below the handler arm's. Grade C. Origin: declared.
+COMMON_SOURCE_DINER_EVENT_PROBABILITY_RANGE = (0.001, 0.05)
+# Voyage-day span fresh provisioned lots surface in — perishables turn
+# over within days. Documentary provisioning practice; no literature
+# measurement. Grade C. Origin: declared.
+COMMON_SOURCE_EMBARKATION_LOT_WINDOW_DAYS_RANGE = (1, 3)
+# Item-exposure share among the meal cohort: buffet investigations span
+# roughly a tenth to a majority of the meal cohort (Papafragkou 2024: 41%
+# of interviewed guests ate the implicated fruit salad). Grade C.
+# Origin: declared.
+COMMON_SOURCE_ITEM_TAKE_SHARE_RANGE = (0.10, 0.60)
+# Servings per pan — hotel-pan/buffet service practice; the pan as the
+# bounded exposure unit matches the retained-sample practice in the
+# design's grounding. Documentary, Grade C. Origin: declared.
+COMMON_SOURCE_PAN_SERVINGS_RANGE = (20, 80)
+# Portion mass in grams — documentary portion sizes. Grade C.
+# Origin: declared.
+COMMON_SOURCE_SERVING_MASS_G_RANGE = (50.0, 250.0)
+# Contaminated-lot titre, GEC/g. Outbreak-investigation item titres:
+# Flannery 2013 oyster lots >1e3 copies/g digestive tissue; produce/RTE
+# items sit lower. Log-uniform draw — the underlying distribution is
+# multiplicative and heavy-tailed. Grade B. Origin: analogous.
+COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE = (1.0e1, 1.0e4)
+# Shared-utensil/pan-edge contacts per diner pass — a handful of touches;
+# no literature measurement. Grade C. Origin: declared.
+COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE = (1, 5)
+# Spawn-tree address of the common-source stream, same convention as
+# _FRAILTY_STREAM_KEY: every mechanism draw (voyage rates, lot plan,
+# per-window Bernoulli, cohort take-share, titres) runs on it, so
+# ``mode: off`` draws nothing anywhere and stays bit-identical.
+_COMMON_SOURCE_STREAM_KEY = 0xF00D
+_COMMON_SOURCE_MEAL_TOKENS = ("Meal:Breakfast", "Meal:Lunch", "Meal:Dinner")
+# constant name → (default interval, draw kind). The interval part of each
+# spec is the shipped range above; a ``transmission.common_source.<name>``
+# scalar or [lo, hi] overrides it fleet-wide, and a pathogen's
+# ``common_source_events.<name>`` overrides it for that pathogen only
+# (per-pathogen literature replaces constants, not the mechanism).
+_COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
+    "lot_event_probability": (
+        COMMON_SOURCE_LOT_EVENT_PROBABILITY_RANGE, "uniform"),
+    "handler_event_probability": (
+        COMMON_SOURCE_HANDLER_EVENT_PROBABILITY_RANGE, "uniform"),
+    "diner_event_probability": (
+        COMMON_SOURCE_DINER_EVENT_PROBABILITY_RANGE, "uniform"),
+    "embarkation_lot_window_days": (
+        COMMON_SOURCE_EMBARKATION_LOT_WINDOW_DAYS_RANGE, "int"),
+    "item_take_share": (COMMON_SOURCE_ITEM_TAKE_SHARE_RANGE, "uniform"),
+    "pan_servings": (COMMON_SOURCE_PAN_SERVINGS_RANGE, "int"),
+    "serving_mass_g": (COMMON_SOURCE_SERVING_MASS_G_RANGE, "uniform"),
+    "lot_titre_gec_per_g": (
+        COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE, "loguniform"),
+    "diner_contacts_per_event": (
+        COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE, "int"),
+}
+_COMMON_SOURCE_VOYAGE_RATES = (
+    "lot_event_probability",
+    "handler_event_probability",
+    "diner_event_probability",
+)
 
 # Fraction of the standing environmental load delivered to a zone per day.
 # Delivery does not deplete the load, so a day's flux divides linearly across
@@ -2461,6 +2564,7 @@ class TransmissionCore:
         food_zone_multipliers: dict[str, float] | None = None,
         strain_registry: StrainRegistry | None = None,
         clock: SimClock | None = None,
+        food_safety_posture: float = 1.0,
     ) -> None:
         self.rng = rng
         tx = (cfg or {}).get("transmission", {}) or {}
@@ -2513,6 +2617,7 @@ class TransmissionCore:
         self._init_exposure_cap(cfg, tx)
         self._init_caregiver(tx)
         self._init_hazard_frailty()
+        self._init_common_source(tx, food_safety_posture)
 
     def _init_caregiver(self, tx: dict[str, Any]) -> None:
         """CAREGIVER-V1 role grammar over the NORO-CAREGIVER-01 channel.
@@ -2723,6 +2828,141 @@ class TransmissionCore:
             if entropy is not None
             else self.rng
         )
+
+    # ── FOOD-COMMON-SOURCE-01: config and dedicated stream ───────────
+
+    def _init_common_source(
+        self,
+        tx: dict[str, Any],
+        platform_posture: float,
+    ) -> None:
+        """FOOD-COMMON-SOURCE-01 — synchronized common-source food events.
+
+        ``transmission.common_source`` owns the global gate: ``mode: on``
+        (shipped default — the better physics ships on) or ``off`` (the
+        labelled pre-mechanism baseline). Within ``on``, a pathogen still
+        needs its own ``common_source_events.enabled`` — both gates must
+        pass for an event to exist, and every unarmed profile is a strict
+        no-op by construction.
+
+        Every draw the mechanism makes — the per-voyage rate draws, the
+        lot plan, the per-window Bernoulli, cohort take-share, titres —
+        runs on a dedicated stream keyed at ``_COMMON_SOURCE_STREAM_KEY``,
+        spawned only when at least one profile is armed. ``mode: off``
+        (or no armed profile) spawns nothing, so the baseline is
+        bit-identical: no draws anywhere, and no code path reaches the
+        shared stream.
+        """
+        cs = tx.get("common_source") or {}
+        self.common_source_mode = str(
+            cs.get("mode", "on"),
+        ).strip().lower()
+        self._cs_cfg = cs
+        # per-platform VSP-conditioned rate scalar: the constructor kwarg
+        # carries the platform layout's posture; a transmission block
+        # override wins. The score→multiplier map is the declared linear
+        # identity in v1 (the score IS the multiplier), swept in the canary.
+        self._cs_posture = max(0.0, float(cs.get(
+            "food_safety_posture", platform_posture,
+        )))
+        self._cs_lot_posture_coupling = bool(
+            cs.get("lot_posture_coupling", False),
+        )
+        self.common_source_telemetry: dict[str, float] = {
+            "events_provisioned_lot": 0,
+            "events_ill_handler": 0,
+            "events_ill_diner": 0,
+            "takers_served": 0,
+            "dose_credited": 0.0,
+        }
+        self._cs_dining_zones = [
+            z for z, t in (self.zone_types or {}).items() if t == "Dining"
+        ]
+        self._cs_rates: dict[str, dict[str, float]] = {}
+        self._cs_lot_plan: dict[str, tuple[str, str, int]] = {}
+        self._cs_lot_plan_done = False
+        self._cs_windows: dict[tuple[str, str, str, int], dict[str, Any]] = {}
+        self._cs_members_epoch = -1
+        self._cs_members: dict[str, list[KorkinAgent]] = {}
+        self._cs_event_counter = 0
+        armed = self.common_source_mode == "on" and any(
+            (p or {}).get("common_source_events", {}).get("enabled", False)
+            for p in (self.pathogen_profiles or {}).values()
+        )
+        self._cs_rng = None
+        if not armed:
+            return
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._cs_rng = (
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    entropy, spawn_key=(_COMMON_SOURCE_STREAM_KEY,),
+                ),
+            )
+            if entropy is not None
+            else self.rng
+        )
+        # Per-voyage rate draws: each armed pathogen gets one realisation
+        # of its declared intervals for the whole voyage — the rates are
+        # the sweep axis, so between-voyage dispersion is where the tail
+        # lives. Drawn in profile order, before any window logic runs.
+        self._cs_draw_voyage_rates()
+
+    def _cs_draw_voyage_rates(self) -> None:
+        for pid, profile in (self.pathogen_profiles or {}).items():
+            if not (profile or {}).get(
+                "common_source_events", {},
+            ).get("enabled", False):
+                continue
+            self._cs_rates[str(pid)] = {
+                name: self._cs_draw(name, pid)
+                for name in _COMMON_SOURCE_VOYAGE_RATES
+            }
+
+    def _cs_spec_range(
+        self,
+        name: str,
+        pathogen_id: str,
+        cs_block: dict[str, Any] | None = None,
+    ) -> tuple[float, float]:
+        """Resolve a constant's (lo, hi): profile block > tx cfg > frozen."""
+        default_range, _kind = _COMMON_SOURCE_SPECS[name]
+        value = self._cs_cfg.get(name)
+        block = (self.pathogen_profiles.get(pathogen_id) or {}).get(
+            "common_source_events", {},
+        ) if cs_block is None else cs_block
+        if isinstance(block, dict) and name in block:
+            value = block[name]
+        if value is None:
+            return float(default_range[0]), float(default_range[1])
+        if isinstance(value, (list, tuple)) and len(value) == 2:
+            return float(value[0]), float(value[1])
+        return float(value), float(value)
+
+    def _cs_draw(
+        self,
+        name: str,
+        pathogen_id: str,
+        cs_block: dict[str, Any] | None = None,
+    ) -> float:
+        """One draw of a named constant on the dedicated stream."""
+        lo, hi = self._cs_spec_range(name, pathogen_id, cs_block)
+        lo = max(0.0, lo)
+        hi = max(lo, hi)
+        if lo == hi:
+            return lo
+        _range, kind = _COMMON_SOURCE_SPECS[name]
+        rng = self._cs_rng
+        if kind == "int":
+            return float(rng.integers(int(lo), int(hi) + 1))
+        if kind == "loguniform":
+            return float(10.0 ** rng.uniform(
+                math.log10(lo), math.log10(hi),
+            ))
+        return float(rng.uniform(lo, hi))
 
     def _init_exposure_cap(
         self,
@@ -5918,6 +6158,15 @@ class TransmissionCore:
         fc = profile.get("food_contamination", {})
         if fc.get("enabled", False):
             self._pathway_food_contamination(
+                epoch, zone_occupants, p_agent_doses, matrix,
+                p_agent_pw, pathogen_id=pathogen_id, profile=profile,
+                ledger=ledger,
+            )
+
+        # FOOD-COMMON-SOURCE-01: the synchronized pan event rides the same
+        # route-efficiency/NPI/susceptibility merge as every other pathway.
+        if profile.get("common_source_events", {}).get("enabled", False):
+            self._pathway_common_source(
                 epoch, zone_occupants, p_agent_doses, matrix,
                 p_agent_pw, pathogen_id=pathogen_id, profile=profile,
                 ledger=ledger,
@@ -11250,6 +11499,559 @@ class TransmissionCore:
         growth_factor = self.clock.growth_factor_per_epoch(1.0 + float(growth))
         decay_factor = 1.0 - self.clock.decay_per_epoch(float(decay))
         return growth_factor, decay_factor
+
+    # ── Pathway 5b: Common-source foodborne events ───────────────────
+    # FOOD-COMMON-SOURCE-01: one contaminated pan at one Dining zone in
+    # one meal window. The event is the missing cohort-exposure draw —
+    # how many hosts ate the same pan at the same service — which no
+    # per-host draw or standing pool can express. Per-pathogen
+    # ``common_source_events`` arms it; ``transmission.common_source.mode``
+    # gates it. The window/cohort/witness scaffolding is generic so the
+    # declared non-goal sibling (shared-air mass-gathering events) can
+    # attach later without reshaping it.
+
+    def _pathway_common_source(
+        self,
+        epoch: int,
+        zone_occupants: dict[str, list[KorkinAgent]],
+        agent_doses: dict[int, float],
+        matrix: ContactTracingMatrix,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+        pathogen_id: str = "_default",
+        profile: dict | None = None,
+        ledger: StrainDoseLedger | None = None,
+    ) -> None:
+        """Run the common-source event logic for one pathogen epoch."""
+        cs = (profile or {}).get("common_source_events", {})
+        if not cs.get("enabled", False) or self._cs_rng is None:
+            return
+        self._cs_plan_lots(pathogen_id)
+        self._cs_expire_windows(epoch, pathogen_id)
+        day = self.clock.day_index(epoch)
+        members_by_zone = self._cs_zone_members(epoch)
+        for zone_name in self._cs_dining_zones:
+            members = members_by_zone.get(zone_name, [])
+            occupants = zone_occupants.get(zone_name, [])
+            for token in self._cs_window_tokens(members, epoch):
+                key = (pathogen_id, zone_name, token, day)
+                state = self._cs_windows.get(key)
+                if state is not None and state.get("event") is not None:
+                    self._cs_credit_pending(
+                        state, occupants, agent_doses,
+                        agent_pathway_doses, matrix, pathogen_id, ledger,
+                    )
+                    continue
+                if state is None:
+                    state = self._cs_open_window(key, epoch, day, members)
+                    self._cs_windows[key] = state
+                source = self._cs_draw_source(
+                    key, state, epoch, zone_name, token,
+                    occupants, pathogen_id, profile,
+                )
+                if source is not None:
+                    self._cs_fire(
+                        source, state, epoch, zone_name, token,
+                        members, occupants, pathogen_id, profile,
+                        agent_doses, agent_pathway_doses, matrix, ledger,
+                    )
+
+    def _cs_plan_lots(self, pathogen_id: str) -> None:
+        """Draw this voyage's lot plan once the roster exists.
+
+        Runs at the first armed epoch — agents are registered by then, so
+        the meal windows each Dining zone actually serves are enumerable
+        and the two-stage draw (uniform Dining zone with a served window,
+        then uniform (meal token, day) inside the embarkation span) never
+        schedules a pan where no meal is ever served.
+        """
+        if self._cs_lot_plan_done:
+            return
+        self._cs_lot_plan_done = True
+        served = self._cs_served_windows()
+        lot_factor = (
+            self._cs_posture if self._cs_lot_posture_coupling else 1.0
+        )
+        for pid, rates in self._cs_rates.items():
+            if self._cs_rng.random() >= rates[
+                "lot_event_probability"
+            ] * lot_factor:
+                continue
+            days = int(round(self._cs_draw(
+                "embarkation_lot_window_days", pid,
+            )))
+            windows = [
+                w for w in served
+                if w[0] in self._cs_dining_zones and w[2] < days
+            ]
+            if not windows:
+                continue
+            pick = self._cs_rng.integers(len(windows))
+            zone, token, day = windows[int(pick)]
+            self._cs_lot_plan[pid] = (zone, token, day)
+
+    def _cs_served_windows(self) -> list[tuple[str, str, int]]:
+        """(zone, meal token, day) cells a venue's cohort serves.
+
+        A venue serves the meal tokens its assigned diners' schedules
+        contain, so galley blocks with cooks but no dining cohort never
+        enter the lot draw. Days need only span the longest embarkation
+        window the spec can draw.
+        """
+        days = int(round(
+            _COMMON_SOURCE_SPECS["embarkation_lot_window_days"][0][1],
+        ))
+        tokens_by_zone: dict[str, set[str]] = {}
+        for agent in self._agents_by_id.values():
+            zone = getattr(agent, "dining_zone", "")
+            if not zone or zone not in self._cs_dining_zones:
+                continue
+            schedule = getattr(agent, "schedule", ()) or ()
+            for token in set(str(t) for t in schedule):
+                if token.startswith(MEAL_PREFIX):
+                    tokens_by_zone.setdefault(zone, set()).add(token)
+        return [
+            (zone, token, day)
+            for zone in self._cs_dining_zones
+            for token in sorted(tokens_by_zone.get(zone, ()))
+            for day in range(days)
+        ]
+
+    def _cs_zone_members(
+        self,
+        epoch: int,
+    ) -> dict[str, list[KorkinAgent]]:
+        """Dining-zone → assigned agents, rebuilt once per epoch."""
+        if self._cs_members_epoch == epoch:
+            return self._cs_members
+        members: dict[str, list[KorkinAgent]] = {}
+        for agent in self._agents_by_id.values():
+            zone = getattr(agent, "dining_zone", "")
+            if zone:
+                members.setdefault(zone, []).append(agent)
+        self._cs_members_epoch = epoch
+        self._cs_members = members
+        return members
+
+    def _cs_window_tokens(
+        self,
+        members: list[KorkinAgent] | None,
+        epoch: int,
+    ) -> set[str]:
+        """Meal tokens the zone's assigned cohort is dining on this epoch."""
+        tokens: set[str] = set()
+        for agent in members or ():
+            activity = self._scheduled_activity(agent, epoch)
+            if activity.startswith(MEAL_PREFIX):
+                tokens.add(activity)
+        return tokens
+
+    def _cs_open_window(
+        self,
+        key: tuple[str, str, str, int],
+        epoch: int,
+        day: int,
+        members: list[KorkinAgent],
+    ) -> dict[str, Any]:
+        """Open a window's state: draw ledgers plus the fired event slot."""
+        return {
+            "key": key,
+            "start_epoch": epoch,
+            "end_epoch": self._cs_window_end_epoch(
+                key[2], epoch, day, members,
+            ),
+            "handlers_drawn": set(),
+            "diners_drawn": set(),
+            "event": None,
+            "pending": {},
+        }
+
+    def _cs_window_end_epoch(
+        self,
+        token: str,
+        epoch: int,
+        day: int,
+        members: list[KorkinAgent],
+    ) -> int:
+        """Last epoch the window's contiguous Meal token can still run.
+
+        The window is the contiguous block of that meal token the zone's
+        cohort carries; a later seating with the same token extends it.
+        """
+        hours_per_epoch = self.clock.epochs_per_day / HOURS_PER_DAY
+        hour = self.clock.hour_of_day(epoch)
+        max_end_hour = hour + 1
+        for agent in members:
+            schedule = getattr(agent, "schedule", ()) or ()
+            if not schedule:
+                continue
+            if schedule[hour % len(schedule)] != token:
+                continue
+            h = hour + 1
+            while h < 24 and schedule[h % len(schedule)] == token:
+                h += 1
+            max_end_hour = max(max_end_hour, h)
+        start_epoch = day * int(round(self.clock.epochs_per_day))
+        return int(round(start_epoch + max_end_hour * hours_per_epoch)) - 1
+
+    def _cs_expire_windows(self, epoch: int, pathogen_id: str) -> None:
+        """Close windows whose last epoch has passed."""
+        dead = [
+            key for key, state in self._cs_windows.items()
+            if key[0] == pathogen_id and epoch > state["end_epoch"]
+        ]
+        for key in dead:
+            del self._cs_windows[key]
+
+    def _cs_draw_source(
+        self,
+        key: tuple[str, str, str, int],
+        state: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> tuple[str, KorkinAgent | None] | None:
+        """The per-window source draw — first fired source wins.
+
+        Order is the design's: a provisioned lot scheduled for this window
+        fires deterministically (its Bernoulli was the voyage draw), then
+        each shedding on-duty handler present draws once per window, then
+        each shedding self-serve diner present draws once per window. A
+        scheduled lot still lets the other arms draw: the pan is theirs
+        only if the lot did not take it.
+        """
+        if self._cs_lot_plan.get(pathogen_id) == (
+            zone_name, token, key[3],
+        ):
+            return ("provisioned_lot", None)
+        rates = self._cs_rates.get(pathogen_id, {})
+        source = self._cs_draw_handler_source(
+            state, epoch, zone_name, occupants,
+            pathogen_id, profile, rates.get("handler_event_probability", 0.0),
+        )
+        if source is None:
+            source = self._cs_draw_diner_source(
+                state, epoch, zone_name, token, occupants,
+                pathogen_id, profile,
+                rates.get("diner_event_probability", 0.0),
+            )
+        return source
+
+    def _cs_draw_handler_source(
+        self,
+        state: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        rate: float,
+    ) -> tuple[str, KorkinAgent | None] | None:
+        """One Bernoulli per (shedding on-duty handler, window)."""
+        if rate <= 0.0:
+            return None
+        for agent in occupants:
+            if agent.agent_id in state["handlers_drawn"]:
+                continue
+            if not self._on_service_duty(agent, zone_name, epoch):
+                continue
+            if not self._cs_source_eligible(agent, pathogen_id, profile):
+                continue
+            state["handlers_drawn"].add(agent.agent_id)
+            if self._cs_rng.random() < rate * self._cs_posture:
+                return ("ill_handler", agent)
+        return None
+
+    def _cs_draw_diner_source(
+        self,
+        state: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        rate: float,
+    ) -> tuple[str, KorkinAgent | None] | None:
+        """One Bernoulli per (shedding diner, self-serve meal window)."""
+        if rate <= 0.0:
+            return None
+        if (
+            resolve_dining_service_type({"name": zone_name})
+            not in PER_MEAL_TABLE_DINING_SERVICE_TYPES
+        ):
+            return None
+        for agent in occupants:
+            if agent.agent_id in state["diners_drawn"]:
+                continue
+            if self._scheduled_activity(agent, epoch) != token:
+                continue
+            if not self._cs_source_eligible(agent, pathogen_id, profile):
+                continue
+            state["diners_drawn"].add(agent.agent_id)
+            if self._cs_rng.random() < rate * self._cs_posture:
+                return ("ill_diner", agent)
+        return None
+
+    def _cs_source_eligible(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> bool:
+        """True when the agent can source an event this epoch.
+
+        The eligibility is shedding-now and not already excluded: a
+        reported symptomatic handler or diner sits in ``quarantined_ids``
+        under the shipped duty-exclusion policy and never sources (the
+        residual source pool is asymptomatic, pre-symptomatic and
+        unreported shedders — the documented hole, not a defect).
+        """
+        if agent.agent_id in self._quarantined_ids:
+            return False
+        if self._cabin_confinement_active(agent):
+            return False
+        return bool(
+            agent.get_pathogen_shedding(pathogen_id, profile or {}) > 0.0,
+        )
+
+    def _cs_cohort(
+        self,
+        members: list[KorkinAgent],
+        token: str,
+        epoch: int,
+    ) -> list[KorkinAgent]:
+        """The window's dining cohort: assigned, dining, aboard."""
+        return [
+            agent for agent in members
+            if self._scheduled_activity(agent, epoch) == token
+            and agent.agent_id not in self._quarantined_ids
+            and not getattr(agent, "ashore", False)
+            and not agent.has_departed(epoch)
+        ]
+
+    def _cs_lot_mix(self, pathogen_id: str) -> EmissionMix | None:
+        """Mint the lot's imported lineage; the provisioning supply
+        carries its own genotype, tagged ``imported:lot``."""
+        if self.strain_registry is None or pathogen_id == "_default":
+            return None
+        config = self.strain_configs.get(pathogen_id)
+        genotype = ""
+        if config is not None and config.prior_genotype_distribution:
+            genotypes = tuple(config.prior_genotype_distribution)
+            probs = [
+                config.prior_genotype_distribution[g] for g in genotypes
+            ]
+            genotype = str(self._cs_rng.choice(genotypes, p=probs))
+        strain = self.strain_registry.mint(
+            pathogen_id,
+            genotype=genotype,
+            origin="imported:lot",
+            phenotype=self._founder_phenotype(pathogen_id, genotype),
+        )
+        return single_strain_mix(
+            strain.strain_id,
+            source_agent_id=NO_SOURCE_AGENT,
+            transmissibility=strain.transmissibility_multiplier,
+        )
+
+    def _cs_pan_deposit(
+        self,
+        source: tuple[str, KorkinAgent | None],
+        state: dict[str, Any],
+        pathogen_id: str,
+        pan_servings: int,
+        cs_block: dict[str, Any] | None,
+    ) -> tuple[float, float, float | None, EmissionMix | None]:
+        """(per-serving dose, pan mass, lot titre, strain mix).
+
+        Lot pans carry the drawn item titre times a drawn serving mass;
+        handler/diner pans carry the shedder's deposit composed exactly
+        as ``_food_deposits`` composes it — contacts x per-contact
+        transfer x hand load, depleting the hand. Pan→serving transfer
+        is lossless (the declared conservative bound), so Σ credited can
+        never exceed the pan mass either way. The titre slot is ``None``
+        for shedder-sourced pans.
+        """
+        kind, agent = source
+        if kind == "provisioned_lot":
+            titre = self._cs_draw(
+                "lot_titre_gec_per_g", pathogen_id, cs_block,
+            )
+            serving_mass = self._cs_draw(
+                "serving_mass_g", pathogen_id, cs_block,
+            )
+            per_serving = titre * serving_mass
+            return per_serving, per_serving * pan_servings, titre, (
+                self._cs_lot_mix(pathogen_id)
+            )
+        hand = agent.hand_load_by_pathogen.get(pathogen_id, 0.0)
+        transfer = float(self._cs_rng.uniform(
+            *HAND_TO_FOOD_TRANSFER_FRACTION_RANGE,
+        )) * self._hand_deposit_factor(agent, pathogen_id)
+        contacts = self._cs_source_contacts(
+            kind, state, pathogen_id, cs_block,
+        )
+        deposit = min(hand, max(0.0, contacts * transfer * hand))
+        if deposit > 0.0:
+            agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
+        mix = (
+            build_emission_mix(
+                self._emissions([(agent, deposit)], pathogen_id),
+            )
+            if self.strain_registry is not None
+            else None
+        )
+        return deposit / max(pan_servings, 1), deposit, None, mix
+
+    def _cs_source_contacts(
+        self,
+        kind: str,
+        state: dict[str, Any],
+        pathogen_id: str,
+        cs_block: dict[str, Any] | None,
+    ) -> float:
+        """Contacts that formed the pan deposit, pro-rated to the window."""
+        if kind == "ill_diner":
+            return float(int(round(self._cs_draw(
+                "diner_contacts_per_event", pathogen_id, cs_block,
+            ))))
+        window_epochs = state["end_epoch"] - state["start_epoch"] + 1.0
+        day_share = window_epochs / max(self.clock.epochs_per_day, 1e-9)
+        return (
+            FOOD_HAND_CONTACTS_PER_DAY
+            * FOOD_HANDLER_CONTACT_MULTIPLIER
+            * day_share
+        )
+
+    def _cs_fire(
+        self,
+        source: tuple[str, KorkinAgent | None],
+        state: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        members: list[KorkinAgent],
+        occupants: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        ledger: StrainDoseLedger | None,
+    ) -> None:
+        """Serve the pan: draw takers, fix the witness, queue the doses.
+
+        The take-share draw decides who took a serving of this pan — a
+        property of the item, drawn once per event — and the crowded-
+        service bound caps servings at the pan's size. Every taker is
+        then credited the first epoch they stand in the zone inside the
+        window, which is also the honesty this mechanism needs: a dose
+        only exists where the diner actually ate.
+        """
+        kind, source_agent = source
+        cs_block = (profile or {}).get("common_source_events", {})
+        take_share = self._cs_draw("item_take_share", pathogen_id, cs_block)
+        pan_servings = max(1, int(round(self._cs_draw(
+            "pan_servings", pathogen_id, cs_block,
+        ))))
+        cohort = self._cs_cohort(members, token, epoch)
+        takers = [
+            a for a in cohort if self._cs_rng.random() < take_share
+        ]
+        if len(takers) > pan_servings:
+            idx = self._cs_rng.choice(
+                len(takers), size=pan_servings, replace=False,
+            )
+            takers = [takers[int(i)] for i in idx]
+        per_serving, pan_mass, lot_titre, mix = self._cs_pan_deposit(
+            source, state, pathogen_id, pan_servings, cs_block,
+        )
+        self._cs_event_counter += 1
+        event = {
+            "event_id": f"cs-{pathogen_id}-{self._cs_event_counter}",
+            "pathogen_id": pathogen_id,
+            "zone": zone_name,
+            "meal": token,
+            "service_type": resolve_dining_service_type(
+                {"name": zone_name},
+            ),
+            "source_kind": kind,
+            "source_agent_id": (
+                source_agent.agent_id if source_agent is not None else None
+            ),
+            "food_safety_posture": self._cs_posture,
+            "start_epoch": epoch,
+            "end_epoch": state["end_epoch"],
+            "pan_mass": round(pan_mass, 6),
+            "per_serving_dose": round(per_serving, 6),
+            "cohort_size": len(cohort),
+            "servings_taken": len(takers),
+            "taker_ids": sorted(a.agent_id for a in takers),
+        }
+        if lot_titre is not None:
+            event["lot_titre_gec_per_g"] = round(lot_titre, 6)
+        matrix.common_source_events.append(event)
+        state["event"] = event
+        state["pending"] = {a.agent_id for a in takers}
+        state["mix"] = mix
+        state["per_serving"] = per_serving
+        self.common_source_telemetry[f"events_{kind}"] += 1
+        # Takers already in the room are served in this same epoch.
+        self._cs_credit_pending(
+            state, occupants, agent_doses, agent_pathway_doses,
+            matrix, pathogen_id, ledger,
+        )
+
+    def _cs_credit_pending(
+        self,
+        state: dict[str, Any],
+        occupants: list[KorkinAgent],
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+        matrix: ContactTracingMatrix,
+        pathogen_id: str,
+        ledger: StrainDoseLedger | None = None,
+    ) -> None:
+        """Credit each pending taker the epoch it appears in the zone.
+
+        A meal's seating stagger means a taker may not stand in the zone
+        at the epoch the pan fires; the serving is credited on first
+        presence inside the window and each taker is dosed at most once.
+        """
+        event = state.get("event")
+        if event is None:
+            return
+        present = {a.agent_id for a in occupants}
+        due = sorted(
+            aid for aid in state.get("pending", ())
+            if aid in present
+        )
+        if not due:
+            return
+        dose = state["per_serving"]
+        mix = state.get("mix")
+        for aid in due:
+            credited_dose = self._accumulate(
+                aid, "common_source_food", dose,
+                agent_doses, agent_pathway_doses,
+                attribution(ledger, mix),
+            )
+            matrix.common_source_exposures.append({
+                "target_id": aid,
+                "zone": event["zone"],
+                "pathogen_id": pathogen_id,
+                "event_id": event["event_id"],
+                "source_kind": event["source_kind"],
+                "dose": round(credited_dose, 6),
+            })
+            self.common_source_telemetry["takers_served"] += 1
+            self.common_source_telemetry[
+                "dose_credited"
+            ] += credited_dose
+            state["pending"].discard(aid)
 
     # ── Pathway 6: Environmental Source ─────────────────────────────
 

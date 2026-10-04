@@ -484,6 +484,12 @@ class ShipSimulation:
             cfg=self.cfg,
             food_zone_multipliers=food_zone_multipliers,
             clock=self.clock,
+            # FOOD-COMMON-SOURCE-01: the platform's VSP-conditioned rate
+            # scalar; a transmission.common_source override wins inside
+            # the core, so here we pass only the platform field.
+            food_safety_posture=float(
+                platform_layout.get("food_safety_posture", 1.0),
+            ),
         )
 
     def initialize(self) -> WorldState:

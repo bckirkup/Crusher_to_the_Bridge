@@ -294,6 +294,9 @@
         "growth_rate_per_day": 0.0,
         "decay_rate_per_day": 0.1
       },
+      "common_source_events": {
+        "enabled": true
+      },
       "introduction_epoch": 0,
       "initial_infected": null,
       "boarding": {
