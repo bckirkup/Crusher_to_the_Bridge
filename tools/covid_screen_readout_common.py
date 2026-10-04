@@ -366,6 +366,7 @@ def run_readout(
     report_key: str,
     row_triggers: Callable[[float, str, dict], dict | None],
     paired_rows: Callable[[dict[tuple, list[dict]]], dict] | None = None,
+    post_report: Callable[[dict, str], None] | None = None,
 ) -> int:
     """The readout CLI skeleton every conditioned array shares.
 
@@ -376,6 +377,10 @@ def run_readout(
     the whole (theta, arm) -> payloads map once every row is scored and
     returns the cross-row block stored under ``report["paired_rows"]``
     (seed-paired deltas against the baseline arm and the like).
+    ``post_report``, when given, runs after the rows and pairing are
+    scored but before the report is written/printed; it receives the
+    report dict (which it may extend) and the resolved cells dir —
+    campaigns use it for cross-campaign replication checks.
     """
     parser = argparse.ArgumentParser()
     parser.add_argument("--cells", required=True)
@@ -415,6 +420,8 @@ def run_readout(
             report[report_key].append(trigger)
     if paired_rows is not None:
         report["paired_rows"] = paired_rows(rows)
+    if post_report is not None:
+        post_report(report, str(cells_dir))
 
     if args.out:
         out_path = resolve_repo_path(repo_root, args.out)
@@ -866,6 +873,7 @@ def design_readout_main(
         ]
         | None
     ) = None,
+    post_report: Callable[[dict, str], None] | None = None,
 ) -> int:
     """The shared main: design load -> enumerate_cells -> run_readout.
 
@@ -891,4 +899,5 @@ def design_readout_main(
         paired_rows=(
             paired_rows_of(design) if paired_rows_of is not None else None
         ),
+        post_report=post_report,
     )

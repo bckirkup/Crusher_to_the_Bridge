@@ -1,0 +1,121 @@
+{
+  "design_id": "covid_cg_floor_v1",
+  "task_id": "CG-FLOOR-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_theta_refit_bracket_v1",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "Nothing. THETA-REFIT-01 certified WINDOW-EMPTY-ORDERED (PRs #876/#881/#886, merged through 04d6ef18): the clause is unreachable on [1e6, 1e9] under shipped defaults because the count-leg admissible half-plane (theta below ~1.4e6) is disjoint from the timing-leg admissible half-plane (theta above ~5.6e6). ANCHOR-DERIVE-01 (PR #887, ed7925f3) then certified the targets mechanism-independent — 197 is dated onsets on the NIID/MHLW epi curve and 0.173 is 34/197 pre-6-Feb, both record quantities — and named the suspect: the caregiver route's pre-quarantine delivery, ~5-13 attributed acquisitions per takeoff seed inside the index's days-0-4 window against a record whose entire pre-6-Feb dated mass is 34 onsets. This design is the bounded probe the derivation declared in its §5: delivery strength at the frozen R2 factor box's low corner.",
+  "description": "CG-FLOOR-01: seed-paired corner probe at the two measured leg-crossing rows (Theta 1e6, where the count leg passes and timing fails below-side; Theta 7.9e6, where the timing passes and the count leg fails overshoot-side), 20 seeds, under the verbatim v11-lineage replay contract. The probe arm pins the R2 tending dose factors at the bottom of their declared intervals — tending_copresence_multiplier [1.5,1.5] (declared U[1.5,3.0]) and tending_hours_per_day [2.0,2.0] (declared U[2.0,6.0]) — while the designation and discovery channels (response_probability U[0.5,0.9], report_probability U[0.3,0.7]) stay at their shipped ranges by declaration. That is the experiment's whole point: the dose factors go to the declared floor while the designation/discovery shape is held constant, so a leg that moves is dose-driven and a leg that does not is structure-driven. The D0_declared arm re-runs in-design as the pairing base and as a replication row: its cells must bit-match the already-measured floor (1e6) and bracket (7.9e6) D0 cells, and any divergence is an image/drift defect, not a sim result.",
+  "prerequisites": [
+    "ANCHOR-DERIVE-01 measured (PR #887, ed7925f3; docs/covid/covid_anchor_derivation_v1.md): verdict (b) — the clause targets are mechanism-independent record quantities and the clause legitimately fails under shipped defaults; during_quarantine caregiver = 0 is structural (confined responders cannot be drawn), not calibrated. Its §5 declares this probe's cells, corner, reads, and verdict grammar.",
+    "THETA-REFIT-01 chain measured (PRs #876/#881/#886, merged through 04d6ef18): 15 rows on [1e6, 1e9], clause unreachable everywhere; count-leg crossing theta_c in (1e6, 1.4e6), timing-leg crossing theta_t in (5.62e6, 7.9e6), theta_c < theta_t so the admissible half-planes are provably disjoint. The two rows this probe re-runs are the measured crossings: 1e6 (floor, count PASS / timing FAIL, pooled caregiver aboard-window tally 105) and 7.9e6 (bracket, count FAIL / timing PASS, tally 138).",
+    "CAREGIVER-ATTR-01 measured (PR #873, b932d0e9): RESTORATION — the +1,634 median-onset drift at the Theta 1e9 anchor is the CAREGIVER-V1 channel; CG_OFF clause-passes. The clause's only passing cell exists on the off-tree.",
+    "The corner constants are shipped declarations, not new constants: CAREGIVER_TENDING_COPRESENCE_MULTIPLIER = (1.5, 3.0) and CAREGIVER_TENDING_HOURS_PER_DAY = (2.0, 6.0) in engines/transmission_core.py (Grade C declared; bounded above by the Kordsmeyer 2022 aOR 3.27 reproduction check, never fitted). The corner selects values already inside the declared intervals — no new sourcing is required to run them, and the derivation doc rules a below-floor arm out of scope.",
+    "Engine identity across the image window is by construction: the overlay image is FROM picard-campaign:campaign-e0d43979-refit-bracket plus a COPY of this design file — same base image digest, no engine change. The in-design D0_declared rows are the live check: they must bit-match campaign/covid_theta_refit_floor_v1/8f49652f/cells/ (1e6) and campaign/covid_theta_refit_bracket_v1/8f926382/cells/ indices 80-99 (7.9e6) modulo cell.index/design_id bookkeeping."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from the v11->v15 stage-2 lineage and the whole refit chain: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). The clause is a replay-contract criterion; the generic-voyage fleet stage is not in this design.",
+  "thetas": [
+    1000000.0,
+    7900000.0
+  ],
+  "thetas_note": "The two measured leg-crossing rows and no others: 1e6 is the only count-leg pass on the shipped-default tree (band [149,760] contains 197; timing fails 0.051 < 0.073); 7.9e6 is the first timing-leg pass inside the bracket (0.0754 > 0.073; count fails q05 496 > 197). Elasticity read at the crossings is where the disjoint map's sensitivity lives — interior rows add cells without adding information about whether the corner moves the legs.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "The declared value, carried for cell-key bookkeeping only: under a declared onset_day the infection age is a measured null axis (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as every stage-2 surface since v11 — every CG_LOW cell pairs seed-for-seed with its in-design D0_declared cell, and every D0 cell pairs seed-for-seed with the measured floor/bracket cells it must replicate.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim: caregiver on, propensity party cv 0.8 — first arm so empty overrides per the arm grammar. Doubles as the pairing base for the corner arm and as a replication row against the measured floor (1e6) and bracket (7.9e6) cells: bit-identity expected modulo cell.index/design_id, any divergence an image/drift defect."
+    },
+    {
+      "arm_id": "CG_LOW",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {
+            "tending": {
+              "tending_copresence_multiplier": [
+                1.5,
+                1.5
+              ],
+              "tending_hours_per_day": [
+                2.0,
+                2.0
+              ]
+            }
+          }
+        }
+      },
+      "note": "The frozen R2 factor box's low corner, pinned degenerate ranges so every designation draws the declared floor: copresence multiplier 1.5 (of U[1.5,3.0]) and tending hours 2.0 (of U[2.0,6.0]). response_probability U[0.5,0.9], report_probability U[0.3,0.7], designation grammar, budget_mode reallocate, and every other mechanism constant stay shipped — the designation/discovery shape is the held-constant half of the experiment, so dose-bound and structural failure separate cleanly."
+    }
+  ],
+  "cells": 80,
+  "cells_note": "2 Theta x 2 arms x 20 seeds = 80 declared-replay cells (~30 min each). Order is theta-major then arm then seed: indices 0-19 = 1e6/D0_declared, 20-39 = 1e6/CG_LOW, 40-59 = 7.9e6/D0_declared, 60-79 = 7.9e6/CG_LOW. Submitted as one 80-cell array, INDEX_OFFSET 0.",
+  "cell_payload_additions": [
+    "note",
+    "index_onset_day",
+    "index_shedding_at_day0",
+    "index_departed_epoch",
+    "infections_total",
+    "aboard_total",
+    "attack_rate",
+    "vsp_reported_case_fraction_max"
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from the v11 lineage / covid_theta_refit_v1; the verdict grammar below is the derivation doc's §5 grammar operationalized on the two corner rows — this is a probe of the mechanism suspect, not a theta candidate search.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v11: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when the row has >= 5 takeoff seeds, else reported as 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored per row on all four (theta, arm) pairs. Reported beside it, never thresholded: takeoff-seed count per row, mass-near-197, the per-seed recorded_onsets and before_share vectors, takeoff infections_total, and the pooled caregiver-route dose tallies per row."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "audit_invariants": {
+      "caregiver": "delivery.caregiver.mode resolves 'on' on every cell. On CG_LOW cells delivery.caregiver.roles.tending.tending_copresence_multiplier must echo [1.5,1.5] and tending_hours_per_day [2.0,2.0]; on D0_declared cells they must echo the shipped [1.5,3.0] and [2.0,6.0]. A missing or mismatched echo means the corner never reached the engine — a design defect, not a sim result, and halts the campaign before readout.",
+      "participation_propensity": "delivery.participation_propensity.mode resolves 'party' on every cell — the shipped default; a missing or mismatched echo is a design defect.",
+      "propensity_draw": "propensity_draw.units_drawn > 0 on every cell — the draw-landing witness.",
+      "presentation_draw_mode": "delivery.presentation_draw_mode == 'once_per_course' on every cell.",
+      "hand_reservoir_mode": "delivery.hand_reservoir_mode == 'hygiene_cycle' on every cell."
+    },
+    "verdict_grammar": "Delivery probe verdict, frozen before any cell runs: (a) DELIVERY-BOUNDED — the disjoint half-planes move toward each other at the declared floor: either row clause-passes on CG_LOW (strong form), or both failing legs move measurably in the converging direction seed-paired — at 7.9e6 the takeoff count band drops toward 197 while the timing leg stays >= 0.073, and at 1e6 the before_share median rises toward 0.073 while the count band keeps containing 197. The disjointness is then factor-driven and the next stage is a factor re-sourcing task on the R2 box. (b) DELIVERY-STRUCTURAL — the failing legs do not converge at the declared floor: each row's failing leg is unmoved within seed-paired noise or moves away. The disjointness is then not reachable by detuning the declared dose factors, and the defect is the mechanism's designation/discovery shape itself — a mechanism-redesign question, not a factor question. (c) SUB-IGNITION — a CG_LOW row scores < 5 takeoff seeds: the corner kills ignition on that row — record which side the firing seeds' distributions sat on; the verdict reads on the seeds that fired. On every verdict: seed-paired deltas CG_LOW vs D0_declared per theta (recorded_onsets, before_share, aboard-window caregiver tally), the tally's ratio corner-vs-declared (the dose-elasticity witness), and the replication check on the D0 rows are all reported beside it."
+  },
+  "diagnostics": {
+    "paired_vs_in_design_d0": "Each CG_LOW row pairs seed-for-seed with its in-design D0_declared row at the same theta — the primary elasticity read: Delta recorded_onsets, Delta before_share, and the ratio of pooled aboard-window caregiver tallies.",
+    "paired_vs_shipped_rows": "Each D0_declared row pairs seed-for-seed with the measured shipped-default cells at the same theta (floor 1e6: campaign/covid_theta_refit_floor_v1/8f49652f/cells/; bracket 7.9e6: campaign/covid_theta_refit_bracket_v1/8f926382/cells/ indices 80-99) — the replication/engine-identity check.",
+    "caregiver_route_witness": "aboard_window_by_route / during_quarantine_by_route 'caregiver' tallies pooled per row. Expected on CG_LOW: still > 0 (designations still fire — response probability unchanged) but the credited dose drops toward the floor; a tally collapse to ~0 would mean the corner silently disabled the route (an audit read, not a leg result).",
+    "dated_onset_route_share": "The derivation doc asks for caregiver-route share of dated onsets per takeoff seed. Cell payloads carry route tallies on acquisitions (aboard_window_by_route, during_quarantine_by_route) but NOT route-tagged dated onsets (onset_curve resolves crew/passenger only). The reported proxy is the caregiver share of pooled aboard-window acquisitions per row; a route-tagged onset curve needs an engine emit change and is out of scope here — stated limitation, not hidden.",
+    "mass_near_197": "fraction of takeoff seeds recording in [98.5, 394] per row — 0.474 at shipped 1e6, 0 at shipped 7.9e6; the corner's effect on where the band mass sits."
+  },
+  "execution": {
+    "platform": "AWS Batch via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_cg_floor_v1, INDEX_OFFSET 0, ARRAY_SIZE 80, STRIDE 1 on the On-Demand queue picard-analysis-queue (Fargate fallback picard-covid-boarding-screen-fargate on picard-analysis-fargate-queue). Image is a thin overlay deploy/aws/Dockerfile.covid_cg_floor FROM picard-campaign:campaign-e0d43979-refit-bracket + COPY of this design file — engine-identical to the refit-chain generation by construction.",
+    "stage_cells": 80,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_cg_floor_v1/<sha>/cells/",
+    "canary": "The in-design D0_declared rows are the live canary: on completion they must bit-match the measured floor (1e6) and bracket (7.9e6) cells modulo cell.index/design_id before the verdict is read; divergence is an image/drift defect and invalidates the run.",
+    "report_immediately_if": "either CG_LOW row clause-passes (strong DELIVERY-BOUNDED — report now); the D0 rows fail bit-identity vs their measured floor/bracket pairing cells (image/drift defect); the caregiver audit echo fails on any cell (delivery.caregiver.roles.tending missing or not echoing the corner on CG_LOW / the shipped range on D0 — the override never reached the engine); any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; propensity_draw.units_drawn <= 0 on any cell; a CG_LOW row scores < 5 takeoff seeds; or the child failure rate exceeds 5%."
+  },
+  "rejected_alternatives": {
+    "cornering_designation_or_report_probabilities": "REJECTED: response_probability and report_probability are the designation/discovery shape — the held-constant half of the experiment. Pinning them too would merge dose-driven and structure-driven movement into one unreadable delta and blur the BOUNDED/STRUCTURAL verdict the probe exists to give.",
+    "below_floor_dose": "REJECTED per the derivation doc: values outside the declared intervals are a new declaration requiring new sourcing — 'a designation-without-dose arm would be a new declaration and is out of scope for the corner probe.'",
+    "additional_theta_rows": "REJECTED: elasticity information lives at the two measured leg crossings; interior rows (1.4e6-5.62e6, where both legs already fail) add cost without a leg boundary to move.",
+    "dropping_the_d0_reruns": "REJECTED by the arm grammar (arms[0] must carry empty overrides) and by the replication check: the in-design D0 rows are the free engine-identity witness against the measured floor/bracket cells.",
+    "route_tagged_onset_curve": "REJECTED as an engine change: the dated-onset-route witness the derivation doc asks for is not in the payload contract; adding a route-tagged onset emit is engine work, outside a bounded probe, and is recorded as a stated limitation instead."
+  }
+}
