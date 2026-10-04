@@ -1843,3 +1843,49 @@ def test_caregiver_off_echo_resolves_both_arms():
     assert base_prop["mode"] == "party"
     assert off_prop["mode"] == "off"
     assert off_payload["propensity_draw"]["units_drawn"] == 0
+
+
+THETA_REFIT_DESIGN = (
+    REPO_ROOT
+    / "picard_framework"
+    / "runs"
+    / "covid_theta_refit_v1_design.json"
+)
+
+
+def test_theta_refit_design_is_the_declared_180_cell_sweep():
+    design = load_design(str(THETA_REFIT_DESIGN))
+    cells = enumerate_cells(design)
+    assert len(cells) == 180
+    assert design.arm_ids == ("D0_declared",)
+    # Nine quarter-decade rows on [1e7, 1e9], point-major then
+    # seed-innermost: row r occupies indices r*20..r*20+19.
+    expected_thetas = [
+        1e7, 1.78e7, 3.16e7, 5.62e7, 1e8, 1.78e8, 3.16e8, 5.62e8, 1e9,
+    ]
+    for row, theta in enumerate(expected_thetas):
+        block = cells[row * 20 : row * 20 + 20]
+        assert all(c.theta == pytest.approx(theta) for c in block)
+        assert [c.seed for c in block] == list(range(20200205, 20200225))
+        assert all(c.arm_id == "D0_declared" for c in block)
+    # The 1e9 replication/boundary row is the last block (indices
+    # 160-179): the design's declared canary slice.
+    assert all(c.theta == pytest.approx(1e9) for c in cells[160:])
+    assert len({c.key for c in cells}) == 180
+
+
+def test_theta_refit_echo_resolves_shipped_defaults():
+    """Echo readout at initialize() on the real design — the audit the
+    campaign gate runs before any cell submits: the shipped-default arm
+    resolves caregiver on, propensity party, once_per_course, and the
+    hygiene_cycle hand line."""
+    design = load_design(str(THETA_REFIT_DESIGN))
+    cells = enumerate_cells(design)
+    cell = next(c for c in cells if c.theta == pytest.approx(1e8))
+    payload = echo_screen_cell(design, cell)
+    assert payload["delivery"]["caregiver"]["mode"] == "on"
+    assert payload["delivery"]["participation_propensity"]["mode"] == "party"
+    assert (
+        payload["delivery"]["presentation_draw_mode"] == "once_per_course"
+    )
+    assert payload["delivery"]["hand_reservoir_mode"] == "hygiene_cycle"
