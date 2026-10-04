@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `e0d43979` (fill with the
+> **Status:** Living. Head commit of record: `78f52a58` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -274,7 +274,18 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`CAREGIVER-ATTR-01`, measured at `b932d0e9` (`docs/ledger/CAREGIVER-ATTR-01.md`,
+`THETA-REFIT-01`, measured at `78f52a58` (`docs/ledger/THETA-REFIT-01.md`,
+`docs/covid/covid_theta_refit_v1_readout.md`): the shipped-default Θ refit
+— 9-row quarter-decade lattice on [1e7, 1e9] × 20 seeds, 180/180 cells, 0
+audit failures. **NO-ADMISSIBLE**: every row fails the count leg on the
+same side (takeoff q05 ≥ 523 > 197 at every Θ, recorded medians floored
+at ~700 even at 1e7) — the residual is mechanism-shaped, not Θ-shaped;
+no admissible Θ exists for the v11 clause under CAREGIVER-V1. The Θ1e9
+row is bit-identical to the attribution D0 row and vs CG_OFF reproduces
+the +698/+0.329 fill-in exactly. The open follow-up moves off Θ onto the
+clause/anchor itself under the mechanism.
+
+Before that — `CAREGIVER-ATTR-01`, measured at `b932d0e9` (`docs/ledger/CAREGIVER-ATTR-01.md`,
 `docs/covid/covid_caregiver_off_v1_readout.md`): the Θ1e9 anchor-drift
 attribution — 40/40 cells, 0 audit failures. `caregiver.mode: off` on the
 propensity-off tree restores the v15 clause pass (takeoff 11/20, q05 10,
@@ -1112,4 +1123,7 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   the +1,634 fill-in is the CAREGIVER-V1 channel (default-ON since
   #859). The clause's only passing cell on the shipped-default tree
   exists on the `caregiver.mode: off` tree; whether the mechanism's
-  anchor effect is *correct* is the open follow-up.
+  anchor effect is *correct* is the open follow-up. *THETA-REFIT-01
+  sharpened it (§2): no Θ on [1e7, 1e9] restores the clause under
+  shipped defaults — the residual is mechanism-shaped, so the follow-up
+  is the clause/anchor itself, not the lattice.*
