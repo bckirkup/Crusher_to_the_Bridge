@@ -1,6 +1,6 @@
 # NORO-ONSET-CURVE-01 — acquisition/onset clustering instrument
 
-Status: proposed — 2026-10-03. Instrument-only readout on existing campaign zips; no campaign, no engine change in v1.
+Status: measured — 2026-10-04, readout `noro_onset_curve_01_readout.md`, ledger `docs/ledger/NORO-ONSET-CURVE-01.md`. Instrument `tools/noro_diag/onset_curve_readout.py` on existing campaign zips; no campaign, no engine change in v1.
 
 ## Question
 
