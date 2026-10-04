@@ -744,6 +744,34 @@ def seed_paired_deltas(row: list[dict], base: list[dict]) -> dict:
     }
 
 
+def paired_rows_against_baseline(
+    off_arm: str, baseline_arm: str,
+) -> Callable[[dict[tuple, list[dict]]], dict]:
+    """Bind the baseline arm for an off-vs-declared delta pairing.
+
+    The whole ``paired_rows`` callable a two-arm clause canary hands to
+    ``run_readout``: the off arm's row pairs seed-for-seed against the
+    baseline arm's row on the scored legs (``seed_paired_deltas``).
+    Campaigns bind their own arm ids; the returned callable is what
+    ``design_readout_main``'s ``paired_rows_of`` produces.
+    """
+    def _pair(rows: dict[tuple, list[dict]]) -> dict:
+        out: dict[str, Any] = {}
+        for (theta, arm_id), row in sorted(rows.items()):
+            if arm_id != off_arm:
+                continue
+            base = rows.get((theta, baseline_arm)) or []
+            out[f"theta={theta:.4g}|arm={arm_id}"] = {
+                "theta": theta,
+                "arm_id": arm_id,
+                "baseline": baseline_arm,
+                **seed_paired_deltas(row, base),
+            }
+        return out
+
+    return _pair
+
+
 def clause_row_triggers(
     theta: float, arm_id: str, stats: dict,
 ) -> dict | None:

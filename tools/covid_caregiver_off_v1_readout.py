@@ -40,7 +40,6 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -53,8 +52,8 @@ from tools.covid_screen_readout_common import (  # noqa: E402
     clause_row_triggers,
     declared_propensity_block,
     design_readout_main,
+    paired_rows_against_baseline,
     propensity_row_stats,
-    seed_paired_deltas,
 )
 
 REPO_ROOT = repo_root()
@@ -120,59 +119,30 @@ def _row_stats(payloads: list[dict]) -> dict:
     return stats
 
 
-def _paired_off_vs_declared(
-    theta: float, row: list[dict], base: list[dict],
-) -> dict:
-    """Seed-paired (CG_OFF - D0_declared) deltas on the scored legs.
-
-    The delta direction is off minus declared: what removing the
-    caregiver pathway (on the already-off propensity tree) changes
-    against the shipped default. Both arms' takeoff cells pair; a seed
-    where either arm fizzled drops out.
-    """
-    return {
-        "theta": theta,
-        "arm_id": OFF_ARM,
-        "baseline": BASELINE_ARM,
-        **seed_paired_deltas(row, base),
-    }
+# CG_OFF - D0_declared seed-paired deltas on the scored legs. The delta
+# direction is off minus declared: what removing the caregiver pathway
+# (on the already-off propensity tree) changes against the shipped
+# default. Both arms' takeoff cells pair; a seed where either arm
+# fizzled drops out.
+PAIR_VS_D0 = paired_rows_against_baseline(OFF_ARM, BASELINE_ARM)
 
 
-def _paired_rows(design: Any) -> Any:
-    """Bind the D0 baseline for the CG_OFF delta pairing."""
-
-    def _pair(rows: dict[tuple, list[dict]]) -> dict:
-        out: dict[str, Any] = {}
-        for (theta, arm_id), row in sorted(rows.items()):
-            if arm_id != OFF_ARM:
-                continue
-            base = rows.get((theta, BASELINE_ARM)) or []
-            out[f"theta={theta:.4g}|arm={arm_id}"] = (
-                _paired_off_vs_declared(theta, row, base)
-            )
-        return out
-
-    return _pair
-
-
-def _row_triggers(
-    theta: float, arm_id: str, stats: dict,
-) -> dict | None:
+def _row_triggers(theta: float, arm_id: str, stats: dict) -> dict | None:
     """Report-immediately rows: a clause pass on either arm."""
     return clause_row_triggers(theta, arm_id, stats)
 
 
 def main(argv: list[str] | None = None) -> int:
-    return design_readout_main(
-        argv,
-        repo_root=REPO_ROOT,
-        declared_fn=_declared,
-        audit_cell=audit_cell,
-        row_stats=_row_stats,
-        report_key="triggered_rows",
-        row_triggers=_row_triggers,
-        paired_rows_of=_paired_rows,
-    )
+    spec = {
+        "repo_root": REPO_ROOT,
+        "declared_fn": _declared,
+        "audit_cell": audit_cell,
+        "row_stats": _row_stats,
+        "report_key": "triggered_rows",
+        "row_triggers": _row_triggers,
+        "paired_rows_of": lambda _design: PAIR_VS_D0,
+    }
+    return design_readout_main(argv, **spec)
 
 
 if __name__ == "__main__":

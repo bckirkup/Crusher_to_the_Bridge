@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from tools import covid_caregiver_off_v1_readout as mod
 
 THETA = 1e9
@@ -179,6 +181,30 @@ def test_row_stats_caregiver_route_witness():
     off_stats = mod._row_stats([off])
     assert off_stats["caregiver_route_pooled"]["aboard_window"] == 0
     assert off_stats["caregiver_route_pooled"]["during_quarantine"] == 0
+
+
+def test_paired_rows_off_vs_declared():
+    rows = {
+        (THETA, "D0_declared"): [
+            _payload(seed=SEED + i, rec=200, before=34, inf=800.0)
+            for i in range(14)
+        ],
+        (THETA, "CG_OFF"): [
+            _payload(
+                arm="CG_OFF", seed=SEED + i, rec=150, before=20,
+                inf=700.0, mode="off", units=0, caregiver_mode="off",
+            )
+            for i in range(14)
+        ],
+    }
+    out = mod.PAIR_VS_D0(rows)[f"theta={THETA:.4g}|arm=CG_OFF"]
+    assert out["n_paired"] == 14
+    assert out["baseline"] == "D0_declared"
+    assert out["delta_recorded_onsets"]["median"] == pytest.approx(-50.0)
+    assert out["delta_infections_total"]["median"] == pytest.approx(-100.0)
+    assert out["delta_before_share"]["median"] == pytest.approx(
+        20 / 150 - 34 / 200, abs=1e-9,
+    )
 
 
 def test_row_triggers_fires_on_clause_pass():
