@@ -274,7 +274,16 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`QUAR-ATTR-V2`, measured at `d62f10d` (`docs/ledger/QUAR-ATTR-V2.md`,
+`CAREGIVER-ATTR-01`, measured at `b932d0e9` (`docs/ledger/CAREGIVER-ATTR-01.md`,
+`docs/covid/covid_caregiver_off_v1_readout.md`): the Θ1e9 anchor-drift
+attribution — 40/40 cells, 0 audit failures. `caregiver.mode: off` on the
+propensity-off tree restores the v15 clause pass (takeoff 11/20, q05 10,
+band ∋197, before_share 0.200); seed-paired CG_OFF − v15 = −46 median
+onsets, so the drift measured at PROP_OFF in #868 (+1,634 median, takeoff
+10→20) is the CAREGIVER-V1 channel. The D0_declared replication arm is
+bit-identical to the `e0d43979` canary on all 20 seeds.
+
+Before that — `QUAR-ATTR-V2`, measured at `d62f10d` (`docs/ledger/QUAR-ATTR-V2.md`,
 `docs/covid/covid_quarantine_attribution_v2_readout.md`): the same 240 cells
 re-run post-REINFECT-01. On the now-valid frozen criterion at Θ 1e9, crew
 confinement (−74%, n = 12) and pool-transport removal (−66%, n = 8) are each
@@ -1094,3 +1103,13 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   canary bit-identically (max |Δ| = 0). The propensity family is dead at
   anchor across its entire declared range — retired on its declared
   test; the band array is moot (`docs/covid/covid_propensity_cv_screen_readout.md`).
+  *The anchor drift itself is now attributed* (`CAREGIVER-ATTR-01`,
+  measured 2026-10-04 at `b932d0e9`,
+  `docs/covid/covid_caregiver_off_v1_readout.md`): CG_OFF — caregiver
+  `mode: off` on the propensity-off tree — clause-passes both legs at
+  Θ1e9 (takeoff 11/20, q05 10, band ∋197, before_share 0.200) and pairs
+  to within −46 median onsets of the v15 anchor row seed-for-seed, so
+  the +1,634 fill-in is the CAREGIVER-V1 channel (default-ON since
+  #859). The clause's only passing cell on the shipped-default tree
+  exists on the `caregiver.mode: off` tree; whether the mechanism's
+  anchor effect is *correct* is the open follow-up.
