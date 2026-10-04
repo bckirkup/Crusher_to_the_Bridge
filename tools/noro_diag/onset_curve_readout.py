@@ -39,10 +39,10 @@ _PREFIXES_DEFAULT = [
     "campaign/noro_mega_01/",
 ]
 
-_KEY_RE = re.compile(
-    r"rung-(.+?)_nsf(\d+)(?:_bp(.+?))?_n(\d+)_ep(\d+)_(.+?)_s(\d+)\.zip$"
-)
-_HOST_RE = re.compile(r"\{[^{}]*\"agent_id\": \d+[^{}]*\}")
+# The rung/surveillance fields may carry underscores, so the old lazy-group
+# key/host regexes were rewritten as plain string scans: linear, and free of
+# the super-linear backtracking Sonar flags.
+_AGENT_ID_RE = re.compile(r'"agent_id": \d+')
 _SYMP_RE = re.compile(r'"symptomatic_epochs": (\d+)')
 _ACQ_RE = re.compile(r'"epoch_acquired": (-?\d+)')
 _IGN_RE = re.compile(r'"ignited": (true|false)')
@@ -65,11 +65,97 @@ def _list_zip_keys(client, bucket: str, prefix: str) -> list[str]:
     return keys
 
 
-def _parse_key(key: str) -> dict | None:
-    m = _KEY_RE.search(key)
-    if not m:
+def _leading_digits(text: str) -> str:
+    """The digit run at the head of ``text`` (possibly empty)."""
+    i = 0
+    while i < len(text) and text[i].isdigit():
+        i += 1
+    return text[:i]
+
+
+def _partition_tagged(
+    text: str, tag: str, start: int = 0
+) -> tuple[str, str] | None:
+    """(before, after) at the first ``tag`` occurrence followed by a digit."""
+    while True:
+        idx = text.find(tag, start)
+        if idx < 0:
+            return None
+        after = idx + len(tag)
+        if after < len(text) and text[after].isdigit():
+            return text[:idx], text[after:]
+        start = after
+
+
+def _tail_fields(rest: str) -> tuple | None:
+    """``<nsf>[_bp<bp>]_n<n>_ep<e>_<surv>`` — fields after the ``_nsf`` tag."""
+    nsf = _leading_digits(rest)
+    if not nsf:
         return None
-    rung, nsf, bp, n_agents, n_ep, surv, seed = m.groups()
+    rest = rest[len(nsf):]
+    bp = None
+    if rest.startswith("_bp"):
+        pair = _partition_tagged(rest[len("_bp"):], "_n")
+        if pair is None or not pair[0]:
+            return None
+        bp, rest = pair
+        rest = "_n" + rest
+    pair = _partition_tagged(rest, "_n")
+    if pair is None or pair[0]:
+        return None
+    rest = pair[1]
+    n_agents = _leading_digits(rest)
+    if not n_agents:
+        return None
+    pair = _partition_tagged(rest[len(n_agents):], "_ep")
+    if pair is None or pair[0]:
+        return None
+    rest = pair[1]
+    n_ep = _leading_digits(rest)
+    surv = rest[len(n_ep):]
+    if not n_ep or not surv.startswith("_") or len(surv) < 2:
+        return None
+    return nsf, bp, n_agents, n_ep, surv[1:]
+
+
+def _parse_key_fields(stem: str) -> tuple | None:
+    """``<rung>_nsf<n>[_bp<bp>]_n<n>_ep<e>_<surv>_s<seed>`` — linear parse.
+
+    A failed tail retries at the next ``_nsf`` boundary (lazy-group semantics),
+    so a rung name may itself contain ``_nsf<digits>``.
+    """
+    head, sep, seed = stem.rpartition("_s")
+    if not sep or not seed.isdigit():
+        return None
+    pos = 0
+    while True:
+        pair = _partition_tagged(head, "_nsf", pos)
+        if pair is None:
+            return None
+        rung, rest = pair
+        pos = len(rung) + len("_nsf")
+        if not rung:
+            continue
+        tail = _tail_fields(rest)
+        if tail is not None:
+            return (rung,) + tail + (seed,)
+
+
+def _parse_key(key: str) -> dict | None:
+    """Parse a ``rung-`` run-zip key; first ``rung-`` whose tail parses wins."""
+    if not key.endswith(".zip"):
+        return None
+    stem = key[:-len(".zip")]
+    start = 0
+    while True:
+        idx = stem.find("rung-", start)
+        if idx < 0:
+            return None
+        parsed = _parse_key_fields(stem[idx + len("rung-"):])
+        if parsed is not None:
+            break
+        start = idx + 1
+    rung, nsf, bp, n_agents, n_ep, surv, seed = parsed
     tier = key.split("/")[-2] if "/" in key else ""
     return {
         "key": key,
@@ -80,6 +166,16 @@ def _parse_key(key: str) -> dict | None:
         "num_agents": int(n_agents),
         "surveillance": surv,
     }
+
+
+def _host_records(hosts: str) -> list[str]:
+    """The ``{...}`` host records carrying an ``"agent_id": <int>`` field."""
+    records = []
+    for chunk in hosts.split("{"):
+        rec, sep, _ = chunk.partition("}")
+        if sep and _AGENT_ID_RE.search(rec):
+            records.append("{" + rec + "}")
+    return records
 
 
 def _host_field(rec: str, rx: re.Pattern) -> int | None:
@@ -163,9 +259,8 @@ def _census_epochs(client, bucket: str, key: str) -> dict | None:
     acquired_all: list[int] = []
     acquired_symp: list[int] = []
     n_records = 0
-    for m in _HOST_RE.finditer(hosts):
+    for rec in _host_records(hosts):
         n_records += 1
-        rec = m.group(0)
         acq = _host_field(rec, _ACQ_RE)
         if acq is None:
             continue
