@@ -1,0 +1,95 @@
+{
+  "design_id": "covid_caregiver_off_v1",
+  "task_id": "CAREGIVER-ATTR-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_propensity_v1",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "supersedes": "nothing: it is the anchor-drift attribution measurement declared in the PROPENSITY-V1 readout (docs/covid/covid_propensity_v1_readout.md) and open-ledger §3 — one caregiver-off arm at the Theta 1e9 anchor, run ahead of any further bisection decision.",
+  "description": "CAREGIVER-ATTR-01 anchor-drift attribution canary: is CAREGIVER-V1 (PR #859, shipped default-ON) the mover that voided the v15 anchor pass? The drift finding is measured: at the Theta 1e9 anchor the current-main PROP_OFF surface (propensity never dealt) reads recorded q05/med/q95 = 1,190/2,343/2,443 with takeoff 20/20, vs the v15 stage-2 anchor row at 6efec855 which read q05 = 153 with takeoff 10/20 and a clause PASS. PROPENSITY-V1 is NOT the mover — its off arm shows the same rise. The moving merge is between 6efec855 and current main; CAREGIVER-V1 is the largest engine-semantics change in that window and the prompt's prime suspect. Two arms at the one anchor cell on the same frozen replay the v11->v15 stage-2 lineage froze and covid_propensity_v1 reused: index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8 (declared null axis, carried for cell-key bookkeeping), 20 matched seeds at base 20200205, full 32-day voyage (768 epochs). D0_declared carries the shipped default verbatim (caregiver on, propensity party) — the cross-run replication row against the covid_propensity_v1 canary's same-named arm (bit-identity witness of the e0d43979-generation image). CG_OFF carries transmission.caregiver.mode: off AND participation_propensity.mode: off — the PROP_OFF tree with the caregiver pathway additionally removed, the seed-paired read of what CAREGIVER-V1 alone did to the anchor.",
+  "prerequisites": [
+    "DRIFT FINDING measured (PR #868, e0d43979 + open-ledger §3): current-main PROP_OFF cells at the Theta 1e9 anchor read recorded q05/med/q95 = 1,190/2,343/2,443 and takeoff 20/20 — vs the v15 anchor row at 6efec855 (q05 = 153, takeoff 10/20, clause PASS). Seed-paired PROP_OFF - v15 delta med +1,634 recorded onsets; the low tail (ten fizzled/half-fizzled seeds) that carried the v15 pass is gone on the merged tree. The drift is not propensity: PROP_OFF still rises. Suspect set is the merge window 6efec855..main over engines/ — CAREGIVER-V1 (#859) plus the sibling NORO-CAREGIVER-01 party-mediated caregiver merge (#855), VSP-EITHER-CHANNEL-01, ENV-SOURCE/HAZARD-01, ship-function capacity and PPE fatigue merges.",
+    "CAREGIVER-V1 shipped default-ON (PR #859): transmission.caregiver {mode: on, budget_mode, roles cleanup/tending/service} on the NORO-CAREGIVER-01 party-mediated grammar; mode off skips the caregiver pathogen epoch, the R1 emesis responder, and the tending/service setup — the labelled pre-change baseline. Resolved block echoes at delivery.caregiver (mode, budget_mode, per-role enabled + draws); credited dose lands in the route tallies under route 'caregiver' (aboard_window_by_route / during_quarantine_by_route), the per-cell exercise witness.",
+    "covid_propensity_v1 clause canary measured (merged #868, e0d43979): the same 20-seed replay contract at the same anchor — D0_declared 19/20 takeoff, [1,518, 2,445], before_share med 0.452; PROP_OFF 20/20, [1,190, 2,443], 0.397. This design's D0_declared re-runs the canary's same-named arm seed-for-seed (same empty overrides, same seeds) as the cross-run replication row; the PROP_OFF surface is the within-window control this attribution pairs against.",
+    "THETA-SCREEN-V15 stage 2 measured (image 6efec855, s3 prefix campaign/covid_theta_screen_v15_stage2/6efec855/cells/, arm once_per_course): the clause passes ONLY at the Theta 1e9 anchor (10/20 takeoff, recorded q05-q95 [153, 2,438] contains 197, takeoff median before_share 0.090 within 0.10 of 0.173). CG_OFF's seed-paired delta against this row is the attribution read: restoration of the pass region credits the mover.",
+    "diamond_princess_2020 hull golden repinned under CAREGIVER-V1 + PROPENSITY-V1 (b3b75363, PR #864): the shipped default the D0 arm reproduces is the post-repin tree."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "voyage_mode_note": "Declared replay, verbatim from covid_propensity_v1 (the frozen cell family carried since v11): index onset_day -1.0, departure_day 5.0, dwell_weighted sanitary visits, imports 1, infection_age_days 6.8, 20 matched seeds at base 20200205, full 32-day voyage (768 epochs).",
+  "thetas": [
+    1000000000.0
+  ],
+  "thetas_note": "The Theta 1e9 replay-canary anchor only — the boundary row whose v15 pass is void on the merged tree and whose drift this design attributes. The admissible-band Thetas are explicitly NOT in this design; a band question is a separate later decision.",
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The same 20 matched seeds at the same base as v15 stage 2 and the covid_propensity_v1 canary — every CG_OFF cell pairs seed-for-seed with the canary's PROP_OFF row (isolating the caregiver delta), with its D0_declared sibling arm (the combined-mechanism delta), and with the v15 stage-2 anchor row (cells 0-19 at campaign/covid_theta_screen_v15_stage2/6efec855/cells/).",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "points": [],
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim: caregiver on, propensity party cv 0.8 — first arm so empty overrides per the arm grammar, and the cross-run replication row against the covid_propensity_v1 canary's same-named arm (max |delta| = 0 expected seed-for-seed — the image-generation bit-identity witness)."
+    },
+    {
+      "arm_id": "CG_OFF",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {
+            "mode": "off"
+          }
+        },
+        "participation_propensity": {
+          "mode": "off"
+        }
+      },
+      "note": "The PROP_OFF tree with the caregiver pathway removed: transmission.caregiver.mode off (skips the caregiver pathogen epoch, the R1 emesis responder, and the tending/service setup) AND rhythm.participation_propensity.mode off (zero draws on the propensity stream). Seed-paired against the canary's PROP_OFF row this isolates CAREGIVER-V1's contribution to the +1,634 median drift; seed-paired against v15 it reads whether the pre-caregiver pass region is restored."
+    }
+  ],
+  "cells_note": "1 point x 2 arms x 20 seeds = 40 declared-replay cells (~30 min each). Cell order is point x arm x seed: D0_declared occupies indices 0-19, CG_OFF indices 20-39 — the whole design IS the canary; INDEX_OFFSET 0 + ARRAY_SIZE 40 submits it whole.",
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant are carried verbatim from covid_propensity_v1 (the v11 lineage); the verdict grammar is an attribution assay's — the clause is scored beside the drift read, never selected on.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v15 stage 2 (v11 lineage): among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173 (34/197 onsets before day 17, 6 February); scored only when the row has >= 5 takeoff seeds, else reported as 'insufficient takeoff mass'.",
+      "note": "Scored per arm at the one anchor cell. The deliverable beside it: takeoff-seed count, fraction of takeoff seeds with recorded_onsets in [98.5, 394], median and q05-q95 before_share, per-seed recorded_onsets/infections_total/before_share vectors for both arms, the seed-paired delta distribution CG_OFF - D0_declared within the run, and the cross-run pairings CG_OFF - PROP_OFF (the e0d43979 canary row) and CG_OFF - v15 (the 6efec855 anchor row)."
+    },
+    "index_geometry": {
+      "criterion": "AUDIT INVARIANT verbatim: index_onset_day == -1.0 and index_shedding_at_day0 true in 100% of every cell's seeds; deviation invalidates the cell.",
+      "reads": "the seeded host's own onset and shedding record"
+    },
+    "audit_invariants": {
+      "caregiver": "delivery.caregiver.mode resolves 'on' on every D0_declared cell and 'off' on every CG_OFF cell — a missing or mismatched echo is a design defect, not a sim result, and halts the campaign before readout. Reported beside it, never gated: the caregiver-route dose tally (aboard_window_by_route/during_quarantine_by_route 'caregiver' key) — expected >0 on D0 takeoff cells where the mechanism delivered dose, absent or 0 on every CG_OFF cell.",
+      "participation_propensity": "delivery.participation_propensity.mode resolves 'party' on every D0_declared cell and 'off' on every CG_OFF cell — a missing or mismatched echo is a design defect, not a sim result, and halts the campaign before readout.",
+      "propensity_draw": "propensity_draw.units_drawn > 0 on every D0_declared cell and == 0 on every CG_OFF cell — the draw-landing witness and the off-arm bit-identity witness.",
+      "presentation_draw_mode": "delivery.presentation_draw_mode == 'once_per_course' on every cell — the resolved draw must be the repaired spend.",
+      "hand_reservoir_mode": "delivery.hand_reservoir_mode == 'hygiene_cycle' on every cell — the shipped hand line; any other resolution means the image is not the merged default."
+    },
+    "verdict_grammar": "Attribution verdict, frozen: (a) RESTORATION — CG_OFF reproduces the v15 pass region (clause PASS, or the v15-shape row: takeoff materially below 20/20 and recorded q05 near the v15 tail ~153 rather than the ~1,190+ floor the merged tree produces) is reported immediately as 'CAREGIVER-V1 is the mover' — attribution complete, the bisection stops; (b) EXONERATION — CG_OFF still reads the merged-tree surface (~2,300 median onsets, takeoff ~20/20, q05 ~1,000+) is reported immediately as 'caregiver exonerated' — the mover is elsewhere in the 6efec855..main window and the bisection continues to the next suspect (NORO-CAREGIVER-01's own merge, VSP-EITHER-CHANNEL-01, the env-hazard and ship-function merges); (c) the clause outcome class per arm and the seed-paired CG_OFF - PROP_OFF / CG_OFF - v15 delta distributions as the supporting evidence. Neither verdict selects an arm for admission — the anchor is a boundary row and stays one."
+  },
+  "diagnostics": {
+    "paired_vs_prop_off": "Every CG_OFF cell pairs seed-for-seed with the covid_propensity_v1 PROP_OFF row (cells 20-39 at campaign/covid_propensity_v1/e0d43979/cells/): per-seed recorded_onsets / before_share / infections_total deltas — the caregiver-only delta at the anchor.",
+    "paired_vs_v15_anchor": "Every CG_OFF cell pairs seed-for-seed with the v15 stage-2 Theta 1e9 anchor row (cells 0-19 at campaign/covid_theta_screen_v15_stage2/6efec855/cells/, image built pre-CAREGIVER-V1 and pre-PROPENSITY-V1): per-seed deltas — the restoration read.",
+    "paired_within_run": "CG_OFF - D0_declared seed-paired deltas inside this run — the combined caregiver+propensity footprint at the anchor.",
+    "replication_row": "D0_declared vs the canary's same-named arm (campaign/covid_propensity_v1/e0d43979/cells/ indices 0-19): max |delta| = 0 on every seed confirms the overlay image is engine-bit-identical to the e0d43979 generation.",
+    "caregiver_route_witness": "aboard_window_by_route / during_quarantine_by_route 'caregiver' tallies pooled per row — the mechanism-fired witness on D0 and the zero-dose witness on CG_OFF; reported, never thresholded.",
+    "fleet_shape_indicator": "Reported, never thresholded: attack-rate quantiles and takeoff fraction per arm — the anchor's burn rate under each arm read against the record's 712."
+  },
+  "execution": {
+    "platform": "AWS Batch, per .agents/skills/aws-batch-campaign/SKILL.md, via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_caregiver_off_v1. Convention: submit to the On-Demand queue picard-analysis-queue (CE picard-analysis-compute-ondemand, max 256 vCPU) — us-east-1 Spot droughts park arrays >1h at RUNNABLE and are not job errors. Image is a thin per-campaign overlay deploy/aws/Dockerfile.covid_caregiver_off FROM picard-campaign:campaign-e0d43979 + COPY of this design file — the merged tree between e0d43979 and the build SHA differs only in docs/, tests/, tools/, deploy/aws/ and *_design.json, so the cells are bit-identical in engine semantics to the canary generation (the D0 replication row verifies it). Job-definition revision and image digest pinned per campaign-preflight step 3, never a bare tag.",
+    "stage_cells": 40,
+    "stride": 1,
+    "expected_cell_minutes": 30,
+    "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_caregiver_off_v1/<sha>/cells/",
+    "canary": "This whole design is the canary — the two arms x 20 seeds at the one Theta 1e9 cell. Before the array: a local echo/initialize audit (echo_screen_cell) must resolve caregiver mode off + propensity mode off on CG_OFF and the shipped defaults on D0_declared. On AWS, inspect one child per arm first (cells 0 and 20) before releasing — no: the campaign gate for a 40-cell design is the single submit; the array IS the canary, so submit all 40, then STOP and report.",
+    "report_immediately_if": "CG_OFF restores the v15 pass region (clause pass, or takeoff materially below 20/20 with recorded q05 near the ~153 v15 tail — attribution verdict (a), CAREGIVER-V1 is the mover); CG_OFF still reads the merged-tree surface ~2,300 median / ~20/20 takeoff (verdict (b), caregiver exonerated — bisection continues); the caregiver or propensity echo fails to resolve on any canary cell (delivery.caregiver or delivery.participation_propensity missing or mode mismatched — a design defect, not a sim result); any cell's index_onset_day or index_shedding_at_day0 fails the audit invariant; any cell echoes presentation_draw_mode != once_per_course or hand_reservoir_mode != hygiene_cycle; propensity_draw.units_drawn > 0 on any CG_OFF cell or == 0 on any D0_declared cell; or child failure rate exceeds 5%."
+  }
+}
