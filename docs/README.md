@@ -112,6 +112,7 @@ python3 presidio_runner.py \
 | [PLATFORM_CABIN_REVISION.md](PLATFORM_CABIN_REVISION.md) | Implemented — cabin-level spatial resolution |
 | [ENTERPRISE_CABIN_REVISION.md](ENTERPRISE_CABIN_REVISION.md) | Implemented — Constitution + Galaxy rebuilt to cruise-class |
 | [shared_sanitary_zones.md](shared_sanitary_zones.md) | Implemented — `Sanitary` head zones on all 12 platforms with exhaust-only one-way air wiring; `transmission.sanitary_visit_mode` (`none` default / `dwell_weighted`); flush emission is a separate change |
+| [food_common_source_01_design.md](food_common_source_01_design.md) | Frozen design — `FOOD-COMMON-SOURCE-01`: synchronized common-source foodborne events (one contaminated pan at one zone's meal window; source drawn — provisioned lot / shedding handler on duty / shedding diner at self-serve); generic per-pathogen `common_source_events` block, `norwalk_gi` armed, all other profiles zero-rate; motivated by NORO-ONSET-CURVE-01's absent point-source signature |
 | [MATHEMATICAL_FIDELITY_AUDIT.md](MATHEMATICAL_FIDELITY_AUDIT.md) | Living audit — records what is *not* implemented (stratified SEIQR, crew schedule) |
 
 ## Contam / HVAC
