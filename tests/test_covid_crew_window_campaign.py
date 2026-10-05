@@ -79,7 +79,7 @@ def test_entry_build_argv_maps_block_args_and_seed(spec):
     assert "--arm CREWDUTY" in text
     assert "--seed 20200211" in text
     assert Path(argv[1]).name == "cell.py"
-    assert artifact.name == "cell_seed20200211.json"
+    assert artifact.name == "cell_20200211.json"
 
 
 def test_cell_match_resolves_one_cell_per_block(spec, design):

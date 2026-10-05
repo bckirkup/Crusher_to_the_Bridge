@@ -13,7 +13,7 @@
   "blocks": {
     "t1e6_d0": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "D0_declared"
@@ -43,7 +43,7 @@
     },
     "t1e6_crewduty": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "CREWDUTY"
@@ -73,7 +73,7 @@
     },
     "t1e6_exempt_engmed": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "EXEMPT_ENGMED"
@@ -103,7 +103,7 @@
     },
     "t1e6_exempt_essential": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "EXEMPT_ESSENTIAL"
@@ -133,7 +133,7 @@
     },
     "t1e6_mess_0p5": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "MESS_0P5"
@@ -163,7 +163,7 @@
     },
     "t1e6_mess_0p25": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 1000000,
         "arm_id": "MESS_0P25"
@@ -193,7 +193,7 @@
     },
     "t7p9e6_d0": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "D0_declared"
@@ -223,7 +223,7 @@
     },
     "t7p9e6_crewduty": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "CREWDUTY"
@@ -253,7 +253,7 @@
     },
     "t7p9e6_exempt_engmed": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "EXEMPT_ENGMED"
@@ -283,7 +283,7 @@
     },
     "t7p9e6_exempt_essential": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "EXEMPT_ESSENTIAL"
@@ -313,7 +313,7 @@
     },
     "t7p9e6_mess_0p5": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "MESS_0P5"
@@ -343,7 +343,7 @@
     },
     "t7p9e6_mess_0p25": {
       "worker": "campaigns/covid/crew_window_01/cell.py",
-      "artifact": "cell_seed{seed}.json",
+      "artifact": "cell_{seed}.json",
       "args": {
         "theta": 7900000,
         "arm_id": "MESS_0P25"
