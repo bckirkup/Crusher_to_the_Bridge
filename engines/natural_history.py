@@ -349,9 +349,21 @@ def host_age_band(agent: Any) -> str:
     return str(band or "")
 
 
+def _flat_severity(profile: dict[str, Any]) -> bool:
+    """Whether the profile disables the severity draw's age term.
+
+    ``severity_age_mode: "flat"`` is the labelled baseline: every host reads
+    the pooled ``base_probabilities`` vector — the behaviour before
+    ``base_probabilities_by_age_band`` shipped. The default ``"by_age_band"``
+    (and any unstated mode) applies the declared map.
+    """
+    return str(profile.get("severity_age_mode") or "") == "flat"
+
+
 def severity_probabilities(
     severity: dict[str, Any],
     age_band: str = "",
+    profile: dict[str, Any] | None = None,
 ) -> list[float]:
     """The five-state distribution one host's age band reads.
 
@@ -360,10 +372,12 @@ def severity_probabilities(
     reference vector a band the profile does not name reads: severity that
     spans orders of magnitude across age cannot be interpolated between two
     labels whose numeric spans the population configs never state.
+    ``severity_age_mode: "flat"`` on the profile skips the lookup, so a band
+    reads the reference vector even where the map names it.
     """
     by_band = severity.get("base_probabilities_by_age_band") or {}
     vector = by_band.get(age_band) if age_band else None
-    if vector is None:
+    if vector is None or _flat_severity(profile or {}):
         vector = severity.get("base_probabilities") or []
     return [float(value) for value in vector]
 
@@ -383,10 +397,12 @@ def draw_symptom_severity(
     conditioned on the host's band; the renormalisation over the four
     symptomatic states is unchanged, so what the band moves is the case mix
     within presentation and not the probability of presenting.
+    ``severity_age_mode: "flat"`` is the labelled baseline that reads the
+    reference vector for every band.
     """
     severity = profile.get("severity_model", {})
     states = severity.get("states", [])
-    probabilities = severity_probabilities(severity, age_band)
+    probabilities = severity_probabilities(severity, age_band, profile)
     if len(states) != 5 or len(probabilities) != 5:
         return ""
     symptomatic_states = [str(state) for state in states[1:]]

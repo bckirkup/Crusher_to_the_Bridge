@@ -1637,6 +1637,12 @@ def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> Non
             f"{pathogen_id}.presentation_age_mode must be 'by_age_band' "
             f"or 'flat', not {mode!r}",
         )
+    mode = profile.get("severity_age_mode")
+    if mode is not None and str(mode) not in ("by_age_band", "flat"):
+        raise ValueError(
+            f"{pathogen_id}.severity_age_mode must be 'by_age_band' "
+            f"or 'flat', not {mode!r}",
+        )
 
 
 def _validate_symptom_severity_profiles(

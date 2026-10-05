@@ -453,3 +453,82 @@ class TestFlatPresentationBaseline:
         assert natural_history.presentation_probability(
             inf, profile, "5-17",
         ) == pytest.approx(0.64)
+
+
+_SEVERITY_STATES = [
+    "asymptomatic",
+    "subclinical",
+    "mild",
+    "moderate",
+    "severe_critical",
+]
+
+
+class TestFlatSeverityBaseline:
+    """``severity_age_mode: "flat"`` is the labelled severity baseline.
+
+    Every band reads the pooled ``base_probabilities`` vector — the behaviour
+    before ``base_probabilities_by_age_band`` shipped. An unstated mode (or
+    ``"by_age_band"``) applies the declared map, and a band the map does not
+    name always reads the reference vector.
+    """
+
+    def _severity_profile(self, **overrides: Any) -> dict[str, Any]:
+        return _profile(
+            severity_model={
+                "states": _SEVERITY_STATES,
+                "base_probabilities": [0.2, 0.1, 0.5, 0.19, 0.01],
+                "base_probabilities_by_age_band": {
+                    "senior": [0.2, 0.1, 0.3, 0.3, 0.1],
+                },
+            },
+            **overrides,
+        )
+
+    def test_named_band_reads_its_own_vector(self) -> None:
+        profile = self._severity_profile()
+        severity = profile["severity_model"]
+        assert natural_history.severity_probabilities(
+            severity, "senior", profile,
+        ) == pytest.approx([0.2, 0.1, 0.3, 0.3, 0.1])
+
+    def test_unnamed_band_reads_the_reference_vector(self) -> None:
+        profile = self._severity_profile()
+        severity = profile["severity_model"]
+        assert natural_history.severity_probabilities(
+            severity, "child", profile,
+        ) == pytest.approx([0.2, 0.1, 0.5, 0.19, 0.01])
+        assert natural_history.severity_probabilities(
+            severity, "", profile,
+        ) == pytest.approx([0.2, 0.1, 0.5, 0.19, 0.01])
+
+    def test_flat_mode_reads_the_reference_for_a_named_band(self) -> None:
+        profile = self._severity_profile(severity_age_mode="flat")
+        severity = profile["severity_model"]
+        assert natural_history.severity_probabilities(
+            severity, "senior", profile,
+        ) == pytest.approx([0.2, 0.1, 0.5, 0.19, 0.01])
+
+    def test_the_draw_honours_the_flat_mode(self) -> None:
+        rng = np.random.default_rng(7)
+        profile = _profile(
+            severity_model={
+                "states": _SEVERITY_STATES,
+                "base_probabilities": [0.2, 0.0, 0.8, 0.0, 0.0],
+                "base_probabilities_by_age_band": {
+                    "senior": [0.2, 0.0, 0.0, 0.0, 0.8],
+                },
+            },
+        )
+        drawn = {
+            natural_history.draw_symptom_severity(profile, rng, "senior")
+            for _ in range(20)
+        }
+        assert drawn == {"severe_critical"}
+
+        flat = dict(profile, severity_age_mode="flat")
+        drawn = {
+            natural_history.draw_symptom_severity(flat, rng, "senior")
+            for _ in range(20)
+        }
+        assert drawn == {"mild"}
