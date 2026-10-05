@@ -264,3 +264,31 @@ outbreak-response (escalation / compliance) wiring, or the default platform
 changes; update `tests/test_golden_orchestrator.py` and `tests/test_golden_picard.py`
 after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`
 and `docs/tiered_escalation_spec.md`.
+
+## Per-interpreter golden pins
+
+`tests/test_covid_hull_change_detector.py` keys change-detector expectations
+by interpreter: `GOLDEN_BY_HULL_AND_MINOR[(major, minor)]`, read on both
+3.11 and 3.12 CI legs. The two interpreters agreed on every reading while the
+cells sat in the near-extinct regime — HOST-AGE-01's armed maps lifted the GM
+cell out of that regime and the reads diverged ((34,17,217,56,22) on 3.12 vs
+(43,25,217,60,19) on 3.11, compensated `sum()` association order). So: never
+copy one interpreter's local read into the other's entry "pending CI". Take
+the missing interpreter's tuple from the CI job's assert output, record the
+job id in the comment, and expect divergence once a change moves a pinned
+cell out of a regime where the two agreed.
+
+## Stale pins while nightly is red
+
+Slow-tier change-detector pins go silently stale while the nightly job is red:
+a pin can drift under an earlier merge and read as your diff's move. Before
+attributing a pin move, check the last nightly failure's assert tuple — if it
+already equals your flag-off read, repin on top and attribute by mechanism +
+nightly run id, not to your diff.
+
+## CI infrastructure flakes
+
+The `astral-sh/setup-uv` step occasionally dies at "Activating python
+venv..." with exit 1 before repo code runs — an infra hiccup that kills whole
+jobs (smoke, schema validation, shards) indiscriminately. Re-run or push; it
+is not a code defect.

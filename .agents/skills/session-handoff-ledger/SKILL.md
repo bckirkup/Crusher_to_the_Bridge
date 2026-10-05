@@ -49,7 +49,15 @@ this order:
 6. **Running jobs.** For each: parent AWS Batch array job ID, queue, job
    definition **revision**, image tag *and* digest, the S3 prefix results land
    under, cell count, and expected completion. A running job whose prefix is
-   not written down is unrecoverable work.
+   not written down is unrecoverable work. For a multi-wave array that must
+   outlive the session, a `schedule:recurring` + `message_session` Devin
+   automation is an alternative to keeping a session alive to poll: bind it
+   with a finite `UNTIL`, have its prompt count landed artifacts at the S3
+   prefixes against the wave targets, and name the session it should hand the
+   next wave's submit instruction to once a wave is substantially down (worked
+   example: `auto-57f93a00...` "NORO-AGE-FOOD-01 fleet progress checks").
+   Record the automation id here alongside the job ids so a successor knows
+   what is still watching the fleet.
 7. **What is now void.** Every previously reported result invalidated by this
    session's changes, and why — with the same entry/SHA discipline. Update
    `docs/norovirus/norovirus_open_ledger.md` §1 or

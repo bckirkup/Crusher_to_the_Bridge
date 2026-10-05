@@ -84,6 +84,15 @@ Expected: All tests pass (~875). Agent-class behavior is covered in `test_orches
 
 - `simulation_history.json` is a **list** of epoch records (not a dict with an `epochs` key)
 - Agent class fractions are in `crusher_labs/config.yaml` under `ship_graph.agent_classes`
+- **Bundle trap:** a campaign agent-profile bundle's `class_templates` must
+  declare all 7 classes (passenger_general/family/elderly +
+  crew_general/medical/engineering/galley) — any class absent falls back to
+  `default_template` (adult) and the band mix drifts silently.
+  `config_overrides.ship_graph.agent_classes` replaces the whole list
+  shallowly, so always ship the full 7-entry list summing to 1.0. Verify the
+  resolved mix in the canary's `parameters.agent_class_fractions` stamp —
+  which only echoes a *tier-declared* override (see campaign-preflight step 5:
+  declare the shipped list verbatim when you want the stamp on every arm).
 - Remainder from fraction rounding is assigned to the first class
 - In legacy mode (no agent_classes config), `agent_class` defaults to `passenger_general`/`crew_general`
 - `_resolve_zone()` uses **substring matching** (case-insensitive) against available zone names
