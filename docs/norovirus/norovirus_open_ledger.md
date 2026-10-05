@@ -4405,6 +4405,23 @@ sweep folds + census decomposition
 records S3 `campaign/noro_hand_carriage01/` (prior census) and
 `campaign/noro_hand_carriage02/` (this re-census).
 
+**`HOST-AGE-02` arms the presentation draw's age term on this arm —
+child-vs-adult, the coarsest sourced partition, shipped default-ON**
+(`docs/ledger/HOST-AGE-02.md`, design `docs/host_age_02_design.md`).
+`illness_probability.age_factor_by_age_band` multiplies the Teunis Hill
+per band — the pair is the register's class-M dose-conditional
+measurement, so age scales it rather than replacing it. `child`/`5-17`/
+`0-4` carry **0.51**, the ratio of the `never_symptomatic` row's two
+unpooled regimes (community cohorts sf ≈ 0.365 / adult challenge sf
+≈ 0.71); every other band multiplies 1.0 because no admissible design
+measures p(sym|infection) in ≥65 — the same null that row records.
+`presentation_age_mode: "flat"` is the labelled baseline ignoring the
+term. Consequence, recorded: on a senior-skewed hull the pooled draw is
+essentially unmoved (all non-child bands sit at ×1.0); the structure
+matters where children board. Open edges for a later stage: a 5–17 or
+≥65 infection-denominator design would support a finer partition; the
+0.51 under-reads the `child` band's older half by construction.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

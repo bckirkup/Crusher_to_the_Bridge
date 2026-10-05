@@ -60,7 +60,13 @@
       },
       "illness_probability": {
         "eta": 0.508,
-        "gamma": 0.095
+        "gamma": 0.095,
+        "age_factor_by_age_band": {
+          "0-4": 0.51,
+          "5-17": 0.51,
+          "child": 0.51
+        },
+        "age_factor_by_age_band_notes": "Per-band multiplier on the dose-conditional Hill (the Teunis 2008 pair is the measured, dose-conditional quantity for this arm — provenance register class M — so age conditions it as a factor, not a replacement share). Sourced partition is child-vs-adult, the coarsest the literature defends: child factor 0.51 is the ratio of two kept-unpooled register regimes — pediatric community cohorts' symptomatic share of PCR-confirmed infections (Baker 2026 PREVAIL, Clin Infect Dis DOI 10.1093/cid/ciag033, ~one-third of 402 GI+GII infections in children <3 symptomatic; El-Heneidy 2022 ORChID, Pediatr Infect Dis J DOI 10.1097/inf.0000000000003667, 82/209 = 39.2%; Cannon 2026, Pediatrics DOI 10.1542/peds.2025-072461, ~two-thirds asymptomatic across enteric viruses on the same PREVAIL cohort — Grade B, community regime midpoint 0.365) over adult challenge cohorts' symptomatic share (Gray 1994 9/14, Atmar 2014 14/21, Newman 2016 19/26, Frenck 2012 GII.4 12/16, Rouphael 2022 GII.2 ~17/24 — challenge regime midpoint 0.71, interval [0.64, 0.78]). Ratio 0.365/0.71 = 0.51, Grade C as a cross-design adaptation — the register keeps the two regimes unpooled for the boarding split and this factor is their ratio, not a pooled value. Three declared caveats, not softened: (1) the child sources are 0-2y cohorts while the 'child'/'5-17' labels read 5-17 under the severity model's band convention — the fraction demonstrably RISES through childhood (never-symptomatic 71.1% in year 1 to 61.2% in year 2), so 0.51 likely understates presentation in the older half of the band; (2) no admissible design measures p(symptomatic|infection) in 65+, the register's own never_symptomatic row states so — senior, middle_aged, adult and young_adult therefore multiply 1.0 (unnamed bands) rather than reading an invented elderly split, and on a senior-skewed hull (Pavli mean 72.6) the pooled draw sits at the adult reference; (3) LTCF outbreak series (Parron 2021, Cardemil 2021, Inns 2019) report resident attack rates, not per-infection symptomatic shares — different denominator, not usable here. Not chosen against VSP, Park, or any scored anchor. HOST-AGE-02."
       },
       "severity_model": {
         "states": [
@@ -888,6 +894,26 @@
         "notes": "Sourced bound converted to the engine's per-copy unit, not a fit: Alford 1966 aerosol ID50 0.6-3 TCID50 (grade Ab/R) implies k 0.23-1.16 per TCID50, divided by Van Wesenbeeck 2015's paired NP-swab >=1e3 genome copies per TCID50 gives k ~= 2e-4-1e-3 per copy (N50 ~= 693-3,466). Ships at the interval's arithmetic midpoint per register convention; the pre-conversion 0.18 applied a per-TCID50 rate to per-copy doses. FLU-DELIVERY-01."
       },
       "symptomatic_fraction": 0.669,
+      "symptomatic_fraction_by_age_band": {
+        "0-4": 0.965,
+        "5-17": 0.909,
+        "child": 0.909,
+        "18-24": 0.734,
+        "18-34": 0.734,
+        "young_adult": 0.734,
+        "25-34": 0.734,
+        "35-44": 0.734,
+        "35-49": 0.734,
+        "adult": 0.734,
+        "45-54": 0.734,
+        "50-64": 0.734,
+        "middle_aged": 0.734,
+        "55+": 0.734,
+        "65-74": 0.734,
+        "senior": 0.734,
+        "75+": 0.734
+      },
+      "symptomatic_fraction_by_age_band_notes": "Age-graded presentation share from one commensurable design: Hoy 2022 'The Spectrum of Influenza in Children' (Clin Infect Dis, DOI 10.1093/cid/ciac734), Managua Nicaragua household cohorts 2011-2020 — PCR/HAI-confirmed influenza infections, asymptomatic fraction by age (Figure 2 / Results): children 0-14y 6.6% asymptomatic of 1272 infections, stratified 1.7% (0-1y), 3.5% (2-4y), 9.1% (5-14y); >=15y 26.6% asymptomatic of 662 infections with NO further trend by age within >=15 (P=.596, no deviation between age groups P=.816). Declared as symptomatic = 1 - asymptomatic: child-family bands read the 5-14 stratum (0.909), every >=15 label reads the pooled 0.734, '0-4' reads the 2-4y stratum at its 2y midpoint (0.965) under the severity model's band->midpoint convention (child/young_adult/adult/middle_aged/senior read as 5-17/18-34/35-49/50-64/65+). Grade B: a community household cohort is an analogous setting to a ship, but it is the direct measurement of the same screened-denominator quantity symptomatic_fraction reads from Carrat 2008 — and the adult map value (0.734) therefore differs deliberately from the pooled Carrat 0.669, which stays as the fallback for a band the map does not name; the two are different studies of the same quantity, recorded not averaged. Corroborating direction, not used numerically: PHIRST (Cohen 2021, Lancet Glob Health DOI 10.1016/s2214-109x(21)00141-8) — twice-weekly PCR cohort, 56% of 478 infections symptomatic, higher in children <5, reduced with increasing age; Flu Watch (Hayward 2014, Lancet Respir Med DOI 10.1016/s2213-2600(14)70034-7) underpowered for an age effect but consistent. On a child-light hull the pooled presentation rises toward the adult value — recorded, not softened. severity_model.base_probabilities keeps its flat asymptomatic 0.20 entry, renormalised away for presenters — same consistency debt as covid's ladder. Not chosen against Ward 2010, Millman 2015, or any scored anchor. HOST-AGE-02.",
       "severity_model": {
         "states": [
           "asymptomatic",

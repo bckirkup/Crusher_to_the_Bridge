@@ -572,8 +572,12 @@ class PathogenProfile(BaseModel):
     asymptomatic_shedding_log10: list[float] = []
     dose_adjustment: float = 1.0
     dose_response: DoseResponse | None = None
-    illness_probability: dict[str, float] = {}
+    # Hill parameters (eta, gamma) plus the HOST-AGE-02 per-band factor
+    # map and its provenance notes string.
+    illness_probability: dict[str, float | dict[str, float] | str] = {}
     symptomatic_fraction: float | None = None
+    symptomatic_fraction_by_age_band: dict[str, float] | None = None
+    presentation_age_mode: str | None = None
     presentation_draw_mode: str | None = None
     airborne_emission_mode: str | None = None
     severity_model: SeverityModel | None = None
@@ -942,6 +946,14 @@ def _check_pathogen_probability_bounds(
                 f"{p.pathogen_id}.symptomatic_fraction = {val} "
                 f"is outside [0.0, 1.0]",
             )
+        for label, val in (p.symptomatic_fraction_by_age_band or {}).items():
+            if val < 0 or val > 1:
+                report.error(
+                    _ACTIVE_PROFILES_JSON,
+                    "MATH_BOUND",
+                    f"{p.pathogen_id}.symptomatic_fraction_by_age_band."
+                    f"{label} = {val} is outside [0.0, 1.0]",
+                )
 
 
 def _check_mathematical_bounds(

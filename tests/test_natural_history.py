@@ -346,3 +346,110 @@ class TestAgeGradedPresentation:
         inf = agent.infections[PATHOGEN]
         natural_history.draw_symptom_onset(agent, PATHOGEN, inf, profile, rng)
         assert inf["presented"] is True
+
+
+class TestAgeFactoredHill:
+    """``illness_probability.age_factor_by_age_band`` scales the Hill per band.
+
+    The dose-conditional pair is the measured quantity, so a named band's
+    factor multiplies its output rather than replacing it; a band the map
+    does not name multiplies 1.0 and reads the reference.
+    """
+
+    def test_named_band_scales_the_dose_conditional_share(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=None,
+            illness_probability={
+                "eta": 0.508,
+                "gamma": 0.095,
+                "age_factor_by_age_band": {"child": 0.5},
+            },
+        )
+        inf: dict[str, Any] = {"acquired_particles": 100.0}
+        reference = 1.0 - (1.0 + 0.508 * 100.0) ** -0.095
+        assert natural_history.presentation_probability(
+            inf, profile, "child",
+        ) == pytest.approx(0.5 * reference)
+
+    def test_an_unnamed_band_reads_the_hill_unscaled(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=None,
+            illness_probability={
+                "eta": 0.508,
+                "gamma": 0.095,
+                "age_factor_by_age_band": {"child": 0.5},
+            },
+        )
+        inf: dict[str, Any] = {"acquired_particles": 100.0}
+        reference = 1.0 - (1.0 + 0.508 * 100.0) ** -0.095
+        assert natural_history.presentation_probability(
+            inf, profile, "senior",
+        ) == pytest.approx(reference)
+        assert natural_history.presentation_probability(
+            inf, profile, "",
+        ) == pytest.approx(reference)
+
+    def test_the_draw_honours_the_factor(self) -> None:
+        clock = SimClock(epoch_duration_hours=6.0, mode=HOURS)
+        agent = _agent(clock)
+        agent.age_band = "child"
+        profile = _profile(
+            symptomatic_fraction=None,
+            illness_probability={
+                "eta": 0.508,
+                "gamma": 0.095,
+                "age_factor_by_age_band": {"child": 0.0},
+            },
+        )
+        rng = np.random.default_rng(5)
+        inf = agent.infections[PATHOGEN]
+        natural_history.draw_symptom_onset(agent, PATHOGEN, inf, profile, rng)
+        assert inf["symptom_severity"] == "asymptomatic"
+        assert inf.get("presented") is None
+
+
+class TestFlatPresentationBaseline:
+    """``presentation_age_mode: "flat"`` is the labelled baseline.
+
+    Every host reads the pooled share — both age terms are ignored, which is
+    the behaviour before age structure shipped. ``"by_age_band"`` is the
+    default, so the mode only ever names the baseline.
+    """
+
+    def test_flat_mode_ignores_the_band_map(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=0.69,
+            symptomatic_fraction_by_age_band={"5-17": 0.64},
+            presentation_age_mode="flat",
+        )
+        inf: dict[str, Any] = {"acquired_particles": 1.0}
+        assert natural_history.presentation_probability(
+            inf, profile, "5-17",
+        ) == pytest.approx(0.69)
+
+    def test_flat_mode_ignores_the_factor_map(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=None,
+            illness_probability={
+                "eta": 0.508,
+                "gamma": 0.095,
+                "age_factor_by_age_band": {"child": 0.5},
+            },
+            presentation_age_mode="flat",
+        )
+        inf: dict[str, Any] = {"acquired_particles": 100.0}
+        reference = 1.0 - (1.0 + 0.508 * 100.0) ** -0.095
+        assert natural_history.presentation_probability(
+            inf, profile, "child",
+        ) == pytest.approx(reference)
+
+    def test_by_age_band_is_the_unstated_default(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=0.69,
+            symptomatic_fraction_by_age_band={"5-17": 0.64},
+            presentation_age_mode="by_age_band",
+        )
+        inf: dict[str, Any] = {"acquired_particles": 1.0}
+        assert natural_history.presentation_probability(
+            inf, profile, "5-17",
+        ) == pytest.approx(0.64)

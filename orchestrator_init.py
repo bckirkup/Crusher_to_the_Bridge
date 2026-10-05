@@ -1618,6 +1618,25 @@ def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> Non
                 raise ValueError(
                     f"{label}.{band} must be a finite probability",
                 )
+    factors = (
+        profile.get("illness_probability", {}) or {}
+    ).get("age_factor_by_age_band")
+    if factors is not None:
+        label = f"{pathogen_id}.illness_probability.age_factor_by_age_band"
+        if not isinstance(factors, dict) or not factors:
+            raise ValueError(f"{label} must be a non-empty object")
+        for band, value in factors.items():
+            number = float(value)
+            if not np.isfinite(number) or number < 0.0:
+                raise ValueError(
+                    f"{label}.{band} must be a finite, non-negative multiplier",
+                )
+    mode = profile.get("presentation_age_mode")
+    if mode is not None and str(mode) not in ("by_age_band", "flat"):
+        raise ValueError(
+            f"{pathogen_id}.presentation_age_mode must be 'by_age_band' "
+            f"or 'flat', not {mode!r}",
+        )
 
 
 def _validate_symptom_severity_profiles(
