@@ -114,6 +114,43 @@ def _json_member(client, bucket: str, key: str, member: str) -> Any:
         return None
 
 
+def _int_field(body: dict[str, Any], name: str) -> int:
+    return int(body.get(name, 0) or 0)
+
+
+def _float_field(body: dict[str, Any], name: str) -> float:
+    return float(body.get(name, 0.0) or 0.0)
+
+
+def _voyage_counters(
+    body: dict[str, Any], mech: dict[str, Any], has_mech: bool,
+) -> dict[str, Any]:
+    fields = {
+        "ever_infected_pax": _int_field(
+            body, "cumulative_ever_infected_passenger"
+        ),
+        "ever_infected_crew": _int_field(
+            body, "cumulative_ever_infected_crew"
+        ),
+        "ever_ill_pax": _int_field(body, "cumulative_ever_ill_passenger"),
+        "ever_ill_crew": _int_field(body, "cumulative_ever_ill_crew"),
+        "symptomatic_final": _int_field(body, "symptomatic"),
+        "sick_call_count": _int_field(body, "sick_call_count"),
+        "quarantined_final": _int_field(body, "quarantined"),
+        "quarantine_refusers": _int_field(body, "quarantine_refusers"),
+        "inf_ar_pax": _float_field(body, "infection_attack_rate_passenger"),
+        "inf_ar_crew": _float_field(body, "infection_attack_rate_crew"),
+    }
+    for key, src in (
+        ("cs_events_summary", "common_source_events"),
+        ("cs_takers_summary", "common_source_takers"),
+        ("cg_responses", "caregiver_responses"),
+        ("cg_reports", "caregiver_reports"),
+    ):
+        fields[key] = int(mech.get(src) or 0) if has_mech else None
+    return fields
+
+
 def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
     """One voyage's readout row from its summary.json."""
     row = _row_from_summary(summary, key.rsplit("/", 1)[-1])
@@ -142,7 +179,7 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
     # Pre-mechanisms images (the a0 baseline) carry no `mechanisms`
     # block — keep those counters None so they render absent, not zero.
     has_mech = summary.get("mechanisms") is not None
-    return {
+    out = {
         "run_id": row["run_id"],
         "seed": _seed_of_key(key) or row["seed"],
         "ignited": row["ignited"],
@@ -171,47 +208,17 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
         "outbreak_occurred": bool(
             (summary.get("derived") or {}).get("outbreak_occurred")
         ),
-        "ever_infected_pax": int(
-            body.get("cumulative_ever_infected_passenger", 0) or 0
-        ),
-        "ever_infected_crew": int(
-            body.get("cumulative_ever_infected_crew", 0) or 0
-        ),
-        "ever_ill_pax": int(body.get("cumulative_ever_ill_passenger", 0) or 0),
-        "ever_ill_crew": int(body.get("cumulative_ever_ill_crew", 0) or 0),
-        "symptomatic_final": int(body.get("symptomatic", 0) or 0),
-        "sick_call_count": int(body.get("sick_call_count", 0) or 0),
-        "quarantined_final": int(body.get("quarantined", 0) or 0),
-        "quarantine_refusers": int(
-            body.get("quarantine_refusers", 0) or 0
-        ),
-        "inf_ar_pax": float(
-            body.get("infection_attack_rate_passenger", 0.0) or 0.0
-        ),
-        "inf_ar_crew": float(
-            body.get("infection_attack_rate_crew", 0.0) or 0.0
-        ),
         "routes": {k: int(v) for k, v in routes.items()},
         "dose_shares": {k: float(v) for k, v in shares.items()},
         "cs_food_infections": int(routes.get("common_source_food", 0) or 0),
         "cs_food_dose_share": float(
             shares.get("common_source_food", 0.0) or 0.0
         ),
-        "cs_events_summary": (
-            int(mech.get("common_source_events") or 0) if has_mech else None
-        ),
-        "cs_takers_summary": (
-            int(mech.get("common_source_takers") or 0) if has_mech else None
-        ),
-        "cg_responses": (
-            int(mech.get("caregiver_responses") or 0) if has_mech else None
-        ),
-        "cg_reports": (
-            int(mech.get("caregiver_reports") or 0) if has_mech else None
-        ),
         "payload_profile": mech.get("payload_profile"),
         "rss_mb": summary.get("rss_mb") or {},
     }
+    out.update(_voyage_counters(body, mech, has_mech))
+    return out
 
 
 def _reach_counts(rows: list[dict[str, Any]]) -> dict[float, int]:
@@ -637,6 +644,92 @@ def _arm_mech_table(aggregates: dict[str, dict]) -> list[str]:
     return lines
 
 
+def _paired_section(paired: dict[str, Any]) -> list[str]:
+    if not paired.get("n_pairs"):
+        return []
+    lines = [
+        "",
+        "## Paired A1-vs-A0 deltas (food mechanism)",
+        "",
+        f"Paired seeds: {paired['n_pairs']}.",
+        "",
+        "| field | median delta | p90 delta | share >0 |",
+        "|---|---|---|---|",
+    ]
+    for f, q in paired.items():
+        if f in ("n_pairs", "transitions") or not isinstance(q, dict):
+            continue
+        lines.append(
+            f"| {f} | {_fmt(q.get('median_delta', q.get('median')))}"
+            f" | {_fmt(q.get('p90_delta', q.get('p90')))}"
+            f" | {_fmt(q.get('share_positive'))} |"
+        )
+    t = paired["transitions"]
+    lines += [
+        "",
+        f"Posting transitions: +{t['gained']} / -{t['lost']}"
+        f" / {t['same']} unchanged.",
+    ]
+    return lines
+
+
+def _census_section(census_aggs: dict[str, Any]) -> list[str]:
+    if not census_aggs:
+        return []
+    lines = [
+        "",
+        "## Food mechanism (census witness)",
+        "",
+        "| arm | zips read | events | ev/voy med | arm L/H/D % |"
+        " takers | zero-dose | dose credited | max cohort | lot-positive |",
+        "|---|---|---|---|---|---|---|---|---|---|",
+    ]
+    for arm, c in census_aggs.items():
+        lines.append(
+            f"| {arm} | {c['n']} | {c['events']}"
+            f" | {_fmt_num(c['events_per_voyage_med'])}"
+            f" | {_arm_cell(c['arms'])}"
+            f" | {c['takers']} | {c['zero_dose']}"
+            f" | {c['dose_credited']:.3g} | {c['max_cohort']}"
+            f" | {c['lot_positive_voyages']} |"
+        )
+    return lines
+
+
+def _excursion_section(splits: dict[str, Any]) -> list[str]:
+    if not splits:
+        return []
+    lines = [
+        "",
+        "## Excursion-voyage split (cs_food infection > 0)",
+        "",
+        "| arm | set | n | rep pax med | rep crew med | max ratio |"
+        " burst12 med | acquired med | cs_food inf med |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for arm, s in splits.items():
+        for label, side in (("excursion", s["excursion"]), ("rest", s["rest"])):
+            lines.append(
+                f"| {arm} | {label} | {side['n']}"
+                f" | {_fmt_num(side['rep_pax_med'])}"
+                f" | {_fmt_num(side['rep_crew_med'])}"
+                f" | {_fmt(side['best_ratio_max'])}"
+                f" | {_fmt(side['burst12_med'])}"
+                f" | {_fmt_num(side['acquired_med'])}"
+                f" | {_fmt(side['cs_food_inf_med'], 1)} |"
+            )
+    lines += [
+        "",
+        "Lot-positive voyages (telemetry events_provisioned_lot > 0): "
+        + ", ".join(
+            f"{arm} {s['lot_positive']}/{s['n_census']}"
+            for arm, s in splits.items()
+        )
+        + ".",
+    ]
+    return lines
+
+
 def _render(report: dict[str, Any]) -> str:
     lines = [
         "# MEGA-IMPACT-01 fleet readout",
@@ -657,76 +750,9 @@ def _render(report: dict[str, Any]) -> str:
     lines += _arm_route_table(report["aggregates"])
     lines += [""]
     lines += _arm_mech_table(report["aggregates"])
-    paired = report.get("paired") or {}
-    if paired.get("n_pairs"):
-        lines += ["", "## Paired A1-vs-A0 deltas (food mechanism)", ""]
-        lines.append(f"Paired seeds: {paired['n_pairs']}.")
-        lines.append("")
-        lines.append("| field | median delta | p90 delta | share >0 |")
-        lines.append("|---|---|---|---|")
-        for f, q in paired.items():
-            if f in ("n_pairs", "transitions") or not isinstance(q, dict):
-                continue
-            share = q.get("share_positive")
-            med = q.get("median_delta", q.get("median"))
-            lines.append(
-                f"| {f} | {_fmt(med)} | {_fmt(q.get('p90_delta', q.get('p90')))}"
-                f" | {_fmt(share)} |"
-            )
-        t = paired["transitions"]
-        lines += [
-            "",
-            f"Posting transitions: +{t['gained']} / -{t['lost']}"
-            f" / {t['same']} unchanged.",
-        ]
-    census_aggs = report.get("census_aggregates") or {}
-    if census_aggs:
-        lines += ["", "## Food mechanism (census witness)", ""]
-        lines.append(
-            "| arm | zips read | events | ev/voy med | arm L/H/D % |"
-            " takers | zero-dose | dose credited | max cohort |"
-            " lot-positive |"
-        )
-        lines.append("|---|---|---|---|---|---|---|---|---|---|")
-        for arm, c in census_aggs.items():
-            lines.append(
-                f"| {arm} | {c['n']} | {c['events']}"
-                f" | {_fmt_num(c['events_per_voyage_med'])}"
-                f" | {_arm_cell(c['arms'])}"
-                f" | {c['takers']} | {c['zero_dose']}"
-                f" | {c['dose_credited']:.3g} | {c['max_cohort']}"
-                f" | {c['lot_positive_voyages']} |"
-            )
-    splits = report.get("excursion_splits") or {}
-    if splits:
-        lines += ["", "## Excursion-voyage split (cs_food infection > 0)", ""]
-        lines.append(
-            "| arm | set | n | rep pax med | rep crew med | max ratio |"
-            " burst12 med | acquired med | cs_food inf med |"
-        )
-        lines.append("|---|---|---|---|---|---|---|---|---|")
-        for arm, s in splits.items():
-            for label, side in (
-                ("excursion", s["excursion"]), ("rest", s["rest"]),
-            ):
-                lines.append(
-                    f"| {arm} | {label} | {side['n']}"
-                    f" | {_fmt_num(side['rep_pax_med'])}"
-                    f" | {_fmt_num(side['rep_crew_med'])}"
-                    f" | {_fmt(side['best_ratio_max'])}"
-                    f" | {_fmt(side['burst12_med'])}"
-                    f" | {_fmt_num(side['acquired_med'])}"
-                    f" | {_fmt(side['cs_food_inf_med'], 1)} |"
-                )
-        lines.append("")
-        lines.append(
-            "Lot-positive voyages (telemetry events_provisioned_lot > 0): "
-            + ", ".join(
-                f"{arm} {s['lot_positive']}/{s['n_census']}"
-                for arm, s in splits.items()
-            )
-            + "."
-        )
+    lines += _paired_section(report.get("paired") or {})
+    lines += _census_section(report.get("census_aggregates") or {})
+    lines += _excursion_section(report.get("excursion_splits") or {})
     lines += [
         "",
         "Measured at the fleet image SHA; no parameters were fitted.",
