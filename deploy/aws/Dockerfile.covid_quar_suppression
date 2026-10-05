@@ -1,0 +1,27 @@
+# DP-BELIEF-01-D4 quarantine-suppression probe — the f31de83a
+# campaign-stack image with the covid_quar_suppression_v1 design file
+# layered on.
+#
+# FROM campaign-f31de83a (the campaign_stack image built for
+# MEGA-IMPACT-01 at merge f31de83a), so the base already carries
+# deploy/aws/ and tools/ wholesale plus every design file at that SHA.
+# The refit-generation image (campaign-e0d43979-*) is deliberately NOT
+# the base: the engine tree moved since e0d43979 (FOOD-COMMON-SOURCE-01
+# merged at 8e8ebc79, lean census payload at 5eb42b5d), and the
+# campaign rule is to build at current main once the engine moves.
+# The f31de83a..HEAD diff is docs/manifests only, so this layer is
+# engine-identical to current main; the in-design D0_declared rows are
+# the live drift witness against the e0d43979-generation cells of
+# record.
+#
+# Build (from the repository root at a SHA containing the design file):
+#   docker build -f deploy/aws/Dockerfile.covid_quar_suppression \
+#     -t 994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-f31de83a-quarsuppress .
+ARG BASE_IMAGE=994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign:campaign-f31de83a
+FROM ${BASE_IMAGE}
+
+USER root
+COPY --chown=campaign:campaign picard_framework/runs/covid_quar_suppression_v1_design.json ./picard_framework/runs/covid_quar_suppression_v1_design.json
+USER campaign
+
+ENTRYPOINT ["python3"]
