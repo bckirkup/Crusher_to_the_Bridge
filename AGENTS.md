@@ -70,11 +70,20 @@ docker run --rm picard-campaign --smoke
   a numeric expectation, attribute the move to a specific part of your diff
   before updating it; an unattributed baseline move is a possible defect.
 - Do not fit a physical constant to an anchor the model is scored against.
-- Update the relevant open ledger (`docs/norovirus/norovirus_open_ledger.md` or
-  `docs/covid/covid_open_ledger.md`) in the same change as anything that
+- Update the relevant open ledger — one per pathogen home:
+  `docs/norovirus/norovirus_open_ledger.md`, `docs/covid/covid_open_ledger.md`,
+  `docs/flu/flu_open_ledger.md` — in the same change as anything that
   invalidates a measurement recorded there; new defect/measurement entries are
   one file each under `docs/ledger/<ID>.md` (see its README) with Pathogens and
-  Commit SHA.
+  Commit SHA. Every pathogen arm, including fictional bundles, gets a docs home
+  (`docs/<name>/` plus `<name>_open_ledger.md`) in the change the arm lands;
+  register it in `docs/README.md` and `docs/ledger/README.md`.
+- New campaigns register under `campaigns/<pathogen>/<name>/` and submit
+  through `scripts/campaign`; the bespoke `deploy/aws/*_entrypoint.py`,
+  `submit_*.sh`, `batch_job_definition_*.json` and `Dockerfile.*` files are the
+  frozen legacy layout — do not add new ones, and migrate a legacy campaign's
+  spec the next time it is touched. A file named in a registered jobdef's
+  argv[0] stays put until that campaign's array work is done.
 - Preserve the locked `uv sync` installation (`--locked --no-build`, wheels only
   from `uv.lock`) and both CI workflows. Regenerate `uv.lock` only with
   `uv lock` after changing `pyproject.toml`.

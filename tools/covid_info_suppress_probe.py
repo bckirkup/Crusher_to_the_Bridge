@@ -7,8 +7,9 @@ and when, vs the record's day-12-14 news window.
 """
 import json
 import sys
+from pathlib import Path
 
-REPO = "/home/ubuntu/repos/Crusher-to-the-Bridge"
+REPO = str(Path(__file__).resolve().parents[1])
 sys.path.insert(0, REPO)
 
 from picard_framework.covid_theta_fit import build_fit_run_spec, build_fit_sim  # noqa: E402

@@ -667,7 +667,11 @@ VOMITING_AXIS = "vomiting"
 DIARRHOEA_AXIS = "diarrhoea"
 
 
-def _age_band_multiplier(dose_response: dict[str, Any], agent: Any) -> float:
+def _age_band_multiplier(
+    dose_response: dict[str, Any],
+    agent: Any,
+    profile: dict[str, Any] | None = None,
+) -> float:
     """The host's age-graded susceptibility multiplier; exactly 1.0 unarmed.
 
     ``dose_response.susceptibility_by_age_band`` is an exact-label lookup, as
@@ -676,7 +680,14 @@ def _age_band_multiplier(dose_response: dict[str, Any], agent: Any) -> float:
     multiplies by 1.0 rather than reading a pooled value, because no
     population config in this repository states a numeric span for its named
     bands that a pooled fallback could be justified from.
+    ``susceptibility_age_mode: "flat"`` on the profile is the labelled
+    baseline: the map is ignored and every host multiplies 1.0 — the
+    behaviour before age structure shipped, matching the
+    ``presentation_age_mode``/``severity_age_mode`` convention. The default
+    ``"by_age_band"`` (and any unstated mode) applies the declared map.
     """
+    if str((profile or {}).get("susceptibility_age_mode") or "") == "flat":
+        return 1.0
     by_band = dose_response.get("susceptibility_by_age_band") or {}
     if not by_band:
         return 1.0
@@ -4649,12 +4660,14 @@ class TransmissionCore:
         ladder, where a band the profile does not name multiplies by 1.0. The
         multiplier is deterministic, so the beta draw's position in the RNG
         stream is unchanged; what moves is the value each challenged host
-        carries.
+        carries. ``susceptibility_age_mode: "flat"`` on the profile skips the
+        lookup — the labelled pre-age baseline.
         """
         existing = agent.dose_response_susceptibility.get(pathogen_id)
         if existing is not None:
             return existing
-        dr = self.pathogen_profiles.get(pathogen_id, {}).get("dose_response", {})
+        profile = self.pathogen_profiles.get(pathogen_id, {})
+        dr = profile.get("dose_response", {})
         if self._dose_response_model(pathogen_id) == "exponential":
             susceptibility = float(dr.get("k", 0.01))
         else:
@@ -4664,7 +4677,7 @@ class TransmissionCore:
             susceptibility = (
                 draw * self._beta_poisson_susceptibility_scale(pathogen_id, dr)
             )
-        susceptibility *= _age_band_multiplier(dr, agent)
+        susceptibility *= _age_band_multiplier(dr, agent, profile)
         agent.dose_response_susceptibility[pathogen_id] = susceptibility
         return susceptibility
 

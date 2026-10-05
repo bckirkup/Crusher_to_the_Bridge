@@ -60,7 +60,13 @@
       },
       "illness_probability": {
         "eta": 0.508,
-        "gamma": 0.095
+        "gamma": 0.095,
+        "age_factor_by_age_band": {
+          "0-4": 0.51,
+          "5-17": 0.51,
+          "child": 0.51
+        },
+        "age_factor_by_age_band_notes": "Per-band multiplier on the dose-conditional Hill (the Teunis 2008 pair is the measured, dose-conditional quantity for this arm — provenance register class M — so age conditions it as a factor, not a replacement share). Sourced partition is child-vs-adult, the coarsest the literature defends: child factor 0.51 is the ratio of two kept-unpooled register regimes — pediatric community cohorts' symptomatic share of PCR-confirmed infections (Baker 2026 PREVAIL, Clin Infect Dis DOI 10.1093/cid/ciag033, ~one-third of 402 GI+GII infections in children <3 symptomatic; El-Heneidy 2022 ORChID, Pediatr Infect Dis J DOI 10.1097/inf.0000000000003667, 82/209 = 39.2%; Cannon 2026, Pediatrics DOI 10.1542/peds.2025-072461, ~two-thirds asymptomatic across enteric viruses on the same PREVAIL cohort — Grade B, community regime midpoint 0.365) over adult challenge cohorts' symptomatic share (Gray 1994 9/14, Atmar 2014 14/21, Newman 2016 19/26, Frenck 2012 GII.4 12/16, Rouphael 2022 GII.2 ~17/24 — challenge regime midpoint 0.71, interval [0.64, 0.78]). Ratio 0.365/0.71 = 0.51, Grade C as a cross-design adaptation — the register keeps the two regimes unpooled for the boarding split and this factor is their ratio, not a pooled value. Three declared caveats, not softened: (1) the child sources are 0-2y cohorts while the 'child'/'5-17' labels read 5-17 under the severity model's band convention — the fraction demonstrably RISES through childhood (never-symptomatic 71.1% in year 1 to 61.2% in year 2), so 0.51 likely understates presentation in the older half of the band; (2) no admissible design measures p(symptomatic|infection) in 65+, the register's own never_symptomatic row states so — senior, middle_aged, adult and young_adult therefore multiply 1.0 (unnamed bands) rather than reading an invented elderly split, and on a senior-skewed hull (Pavli mean 72.6) the pooled draw sits at the adult reference; (3) LTCF outbreak series (Parron 2021, Cardemil 2021, Inns 2019) report resident attack rates, not per-infection symptomatic shares — different denominator, not usable here. Not chosen against VSP, Park, or any scored anchor. HOST-AGE-02."
       },
       "severity_model": {
         "states": [
@@ -77,6 +83,12 @@
           0.009,
           0.001
         ],
+        "base_probabilities_by_age_band": {
+          "senior": [0.25, 0.55, 0.17384, 0.008235, 0.017925],
+          "65-74": [0.25, 0.55, 0.17384, 0.008235, 0.017925],
+          "75+": [0.25, 0.55, 0.17384, 0.008235, 0.017925]
+        },
+        "base_probabilities_by_age_band_notes": "Senior-vs-everything-else is the coarsest sourced partition of p(severe|symptomatic case): Calderwood 2021 (Clin Infect Dis, DOI 10.1093/cid/ciab808), the decade of US NORS LTCF outbreaks 2009-2018 (13,092 outbreaks, 416,284 outbreak-associated cases), reports 21.6 hospitalizations and 2.3 deaths per 1000 cases -> severe share 0.0239 among cases, and the model's severe rung folds hospitalization and death together (fatality_probability_by_severity is null on every arm, so both endpoints enter severe_critical, same convention the covid ladder's notes state). severe_critical = 0.0239 x the non-asymptomatic mass (0.75) = 0.017925; mild+moderate are resplit at the pooled 0.19:0.009 ratio with asymptomatic and subclinical held at the reference 0.25/0.55 (the validator requires every band to keep the reference asymptomatic share). Every band not named reads the pooled vector — no per-case severe-outcome design exists for non-institutional age groups at publishable grade, so no split is invented there. Caveats recorded, not softened: the source population is institutionalized elderly (residents AND staff cases are pooled in NORS — resident-only rates run slightly higher), institutional care differs from shipboard infirmary care, GII.4 dominates the LTCF outbreak record while this profile is GI-analog in part (the same genogroup caveat the illness_probability row carries), and on a senior-heavy hull the pooled severe share rises well above the declared 0.001 reference — measured consequence, not a defect. Trivedi 2012 (JAMA, DOI 10.1001/jama.2012.14023) corroborates the direction (all-cause mortality RR 1.11 during LTCF outbreaks), implying ~9-11% of the Calderwood rate is background rather than outbreak-attributable.",
         "prior": {
           "type": "dirichlet",
           "parameters": {

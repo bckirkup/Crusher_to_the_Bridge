@@ -2,7 +2,7 @@
   "meta": {
     "description": "Multi-pathogen profile definitions for shipboard outbreak simulation",
     "version": "2.0",
-    "notes": "10 pathogen profiles covering enteric viral, respiratory viral, bacterial waterborne, enteric bacterial, and filovirus categories. Parameters grounded in published dose-response models (Teunis, Watanabe, Alford) and shedding kinetics literature.",
+    "notes": "10 pathogen profiles covering enteric viral, respiratory viral, bacterial waterborne, enteric bacterial, and filovirus categories. Parameters grounded in published dose-response models (Teunis, Watanabe, Alford) and shedding kinetics literature. No *_by_age_band keys: the HOST-AGE-01..03 age maps live only in active_profiles.json, so sars_cov2_resp and influenza_a here read the flat reference draws — mirror deliberately if Edison cells should see age structure, not by drift.",
     "pathogens_count": 10
   },
   "pathogens": [

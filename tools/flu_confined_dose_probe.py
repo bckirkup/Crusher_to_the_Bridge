@@ -29,7 +29,7 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 from simulation_utils import asset_defaults  # noqa: E402
-from tools.cabin_floor_probe import EDISON  # noqa: E402
+from tools.diag.conditioned_cell import EDISON  # noqa: E402
 
 ACTIVE = asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID
 

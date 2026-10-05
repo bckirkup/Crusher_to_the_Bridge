@@ -845,6 +845,10 @@ def build_engine(
         ),
         zones=engine_zones,
         seed=seed,
+        # Inert by construction: the engine's default is ``True`` but every
+        # in-tree construction pins the VSP self-quarantine channel off, and
+        # ``orchestrator_epoch.sync_vsp_isolation`` has no non-test caller —
+        # a real removal candidate if the policy channel is retired.
         vsp_isolation=False,
         vsp_trigger_rule=load_vsp_trigger_rule(cfg),
         agent_classes=agent_classes,
@@ -1641,6 +1645,12 @@ def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> Non
     if mode is not None and str(mode) not in ("by_age_band", "flat"):
         raise ValueError(
             f"{pathogen_id}.severity_age_mode must be 'by_age_band' "
+            f"or 'flat', not {mode!r}",
+        )
+    mode = profile.get("susceptibility_age_mode")
+    if mode is not None and str(mode) not in ("by_age_band", "flat"):
+        raise ValueError(
+            f"{pathogen_id}.susceptibility_age_mode must be 'by_age_band' "
             f"or 'flat', not {mode!r}",
         )
 

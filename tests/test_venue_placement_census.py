@@ -22,7 +22,7 @@ from tools.noro_diag.venue_placement_census import (
     _seed_list,
     classify_site,
 )
-from tools.readout_stats import wilson_interval
+from tools.diag.readout_common import wilson_interval
 
 
 def _zone(ztype: str, deck: str = "4_Pax", service: str = "") -> dict:

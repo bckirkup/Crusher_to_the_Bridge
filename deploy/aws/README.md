@@ -1,5 +1,15 @@
 # AWS Batch (EC2 Spot) deployment — mega cruise campaign
 
+> **Convention boundary (2026-10-05):** this file documents the original
+> mega-cruise deployment and the per-campaign bespoke layout that grew out of
+> it (`*_entrypoint.py`, `submit_*.sh`, `batch_job_definition_*.json`,
+> `Dockerfile.*`). That layout is **frozen**: new campaigns register under
+> `campaigns/<pathogen>/<name>/` and submit through `scripts/campaign`
+> (declared in `AGENTS.md` scope rules). Migrate a legacy campaign's spec the
+> next time it is touched; files named in a registered jobdef's argv[0] —
+> e.g. `import_map_entrypoint.py`, which is the noro fleet worker, not an
+> import-map tool — stay put until that campaign's array work is done.
+
 Package the ~17,780-run mega cruise campaign
 (`picard_framework/runs/mega_cruise_campaign/campaign_runner.py`) as a Docker
 image in Amazon ECR and run it as a single **AWS Batch array job** across many

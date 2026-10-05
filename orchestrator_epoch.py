@@ -436,6 +436,11 @@ def sync_vsp_isolation(
 ) -> None:
     """Sync VSP-triggered quarantine from the engine back to SimulationState.
 
+    Dead path in-tree: no non-test call site invokes this — every engine is
+    constructed with ``vsp_isolation=False`` (see ``orchestrator_init``), so
+    ``engine.step()`` never self-quarantines. Kept as the labelled pair of
+    that dormant policy channel; removal candidate alongside it.
+
     The Korkin engine's ``step()`` may independently quarantine agents via the
     VSP 3% threshold.  Those IDs must be merged into SimulationState so that
     downstream functions (telemetry, confinement, recording) see a consistent

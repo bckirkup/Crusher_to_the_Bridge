@@ -167,6 +167,25 @@ Valid routes (used by `engines/transmission_core.py`):
 
 Pathways 5–6 are enabled per-profile via `food_contamination` and `environmental_contamination` blocks, not via `transmission_routes` alone.
 
+### 4c. Register the arm's home surfaces
+
+Every pathogen arm — including fictional bundles — gets the same home surfaces
+in the change it lands (AGENTS.md scope rules):
+
+- `docs/<name>/` — the arm's docs home (see `docs/flu/` for the minimal shape:
+  a `README.md` with a status line and doc table, plus `<name>_open_ledger.md`).
+- `docs/<name>/<name>_open_ledger.md` — the arm's "currently withdrawn" page;
+  add it to the withdrawn-pages list in `docs/ledger/README.md` and to the
+  AGENTS.md scope-rule ledger list.
+- `docs/README.md` — a row for the new dir plus the open-ledger row, and a
+  column (or row) in the "Pathogen arm naming" table covering the arm's
+  `pathogen_id`, docs dir, ledger prefix (`<PREFIX>-*`), tool/campaign
+  prefix, and anchor registry.
+- `data/observation/<name>_fit_targets.json` — when the arm has scored
+  observables, register them at definition site with source + evidence grade
+  (flu/covid idiom), add a matching `schemas/<name>_fit_targets.schema.json`,
+  and list it in `tests/test_json_schema_validation.py`.
+
 ### 5. Validate the new profile
 
 ```bash

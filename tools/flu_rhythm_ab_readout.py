@@ -25,20 +25,18 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from tools.diag.readout_common import wilson_interval  # noqa: E402
+from tools.flu_anchors import (  # noqa: E402
+    K_DECLARED,
+    K_SOURCED_INTERVAL,
+)
 from tools.noro_diag.rhythm_ab_readout import (  # noqa: E402
     _clock_correlation,
-    _wilson,
     load_cells,
 )
 
 _ARMS = ("off", "on")
-# Declared sourced interval of influenza_a ``dose_response.k`` (per copy):
-# Alford 1966 aerosol ID50 0.6–3 TCID50 ÷ Van Wesenbeeck 2015 ≥1e3
-# copies/TCID50, shipped midpoint 6e-4 (profile ``dose_response.notes``,
-# FLU-DELIVERY-01). The floor band is [E[SAR](k_lo), E[SAR](k_hi)] on the
-# cell's pooled slot doses — docs/confined_attack_floor_spec.md.
-K_SOURCED_INTERVAL = (2e-4, 1e-3)
-K_DECLARED = 6e-4
+_wilson = wilson_interval
 
 
 def _expected_sar(doses: list[float], k: float) -> float:

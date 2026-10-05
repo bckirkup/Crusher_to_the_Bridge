@@ -361,3 +361,28 @@ class TestAgeGradedSusceptibility:
         core = self._make_core(profiles={"covid": {"dose_response": dr}})
         susc = core._dose_response_susceptibility(self._agent("75+"), "covid")
         assert susc == pytest.approx(0.02 * 0.88)
+
+    def test_flat_mode_is_the_labelled_baseline(self) -> None:
+        """``susceptibility_age_mode: "flat"`` skips the band lookup."""
+        armed = dict(self._BASE_DR)
+        armed["susceptibility_by_age_band"] = {"5-17": 0.06}
+        flat = self._make_core(
+            seed=42,
+            profiles={
+                "covid": {
+                    "dose_response": armed,
+                    "susceptibility_age_mode": "flat",
+                },
+            },
+        )
+        plain = self._make_core(
+            seed=42,
+            profiles={"covid": {"dose_response": dict(self._BASE_DR)}},
+        )
+        susc_flat = flat._dose_response_susceptibility(
+            self._agent("5-17"), "covid",
+        )
+        susc_plain = plain._dose_response_susceptibility(
+            self._agent("5-17"), "covid",
+        )
+        assert susc_flat == pytest.approx(susc_plain)

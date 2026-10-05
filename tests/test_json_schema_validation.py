@@ -58,6 +58,7 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
         "data/pathogens/edison_10pathogen_profiles.json",
         "data/pathogens/enterprise_tng_profiles.json",
         "data/pathogens/enterprise_tos_profiles.json",
+        "data/pathogens/norwalk_only.json",
     ],
     "testing_campaigns.schema.json": [
         "data/observation/covid_testing_campaigns.json",
@@ -67,6 +68,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     ],
     "covid_fit_targets.schema.json": [
         "data/observation/covid_fit_targets.json",
+    ],
+    "flu_fit_targets.schema.json": [
+        "data/observation/flu_fit_targets.json",
     ],
     "spatial_layout.schema.json": [],
     "air_flow_paths.schema.json": [],

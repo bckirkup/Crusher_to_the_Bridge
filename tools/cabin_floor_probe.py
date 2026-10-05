@@ -52,22 +52,17 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from picard_framework.pathogen_overrides import (  # noqa: E402
-    isolate_arm_overrides,
-    load_pathogen_bundle,
-)
-from simulation_utils import asset_defaults  # noqa: E402
-from simulation_utils.paths import resolve_repo_path  # noqa: E402
-from simulation_utils.platform_complement import declared_total  # noqa: E402
 from tools.covid_route_attribution import CabinPairChallengeLedger  # noqa: E402
+from tools.diag.conditioned_cell import (  # noqa: E402
+    ACTIVE,
+    EDISON,
+    conditioned_spec,
+    party_size,
+)
 from tools.noro_diag.cabin_pair_challenge_probe import (  # noqa: E402
     instrumented_voyage,
     write_results,
 )
-from tools.noro_diag.per_host_dose_challenge import build_spec  # noqa: E402
-
-EDISON = "edison_10pathogen_profiles"
-ACTIVE = asset_defaults.DEFAULT_PATHOGEN_BUNDLE_ID
 
 # Every real pathogen profile in the Edison roster plus the active bundle;
 # each is (bundle_id, pathogen_id). The two bundles share sars_cov2_resp and
@@ -93,68 +88,6 @@ ROSTER: tuple[tuple[str, str], ...] = (
 )
 
 DEFAULT_SEEDS = (8105, 8106)
-
-# Replay calendar confinement: SOP-017 confines every passenger while all
-# crew classes stay working, held from the first full simulated day (after
-# embarkation churn settles) through voyage end.
-DECLARED_CONFINEMENT = {
-    "protocol_id": "SOP-017",
-    "start_day": 1,
-    "end_day": None,
-}
-
-
-def _party_size(profile: dict[str, Any]) -> int:
-    """The declared party size when the profile imports as a party, else 2."""
-    party = (profile.get("boarding") or {}).get("party") or {}
-    return int(party.get("size") or 0) or 2
-
-
-def conditioned_spec(
-    *,
-    bundle: str,
-    pathogen_id: str,
-    seed: int,
-    platform: str,
-    epochs: int,
-    confinement: str = "organic",
-) -> tuple[dict[str, Any], dict[str, Any]]:
-    """The conditioned spec shared by the confined-window probes.
-
-    Isolated arm (every other bundle pathogen removed, own
-    ``initial_infected`` nulled), a passenger seed party at epoch 0 via
-    ``initiation.explicit_seeds``, and — under ``declared`` — SOP-017 held
-    by the replay calendar from day 1 to voyage end. Returns the spec and
-    the pathogen's bundle profile.
-    """
-    profiles = load_pathogen_bundle(
-        resolve_repo_path(str(REPO_ROOT), asset_defaults.pathogen_bundle_rel(bundle)),
-    )
-    profile = profiles[pathogen_id]
-    spec_dict = build_spec(
-        seed=seed, platform=platform, bundle=bundle,
-        epochs=epochs, num_agents=declared_total(platform),
-        pathogen_id=pathogen_id, alpha=None, beta=0.0,
-        high_touch_area_scale=None, high_touch_area_scale_by_zone_class=None,
-        fomite_representation=None, fomite_touch_share=None,
-        fomite_touch_share_table=None,
-    )
-    spec_dict["pathogen_overrides"] = isolate_arm_overrides(
-        bundle, pathogen_id, {pathogen_id: {"initial_infected": None}},
-    )
-    spec_dict["config_overrides"]["initiation"] = {
-        "explicit_seeds": [{
-            "pathogen": pathogen_id,
-            "count": _party_size(profile),
-            "role": "passenger",
-            "epoch": 0,
-        }],
-    }
-    if confinement == "declared":
-        spec_dict["config_overrides"]["scenario_schedule"] = {
-            "protocols": [DECLARED_CONFINEMENT],
-        }
-    return spec_dict, profile
 
 
 def run_arm(
@@ -191,7 +124,7 @@ def run_arm(
         "platform": platform,
         "confinement": confinement,
         "num_epoch_steps": epochs,
-        "explicit_seed_count": _party_size(profile),
+        "explicit_seed_count": party_size(profile),
         "infections_total": infected,
         "dose_response": profile.get("dose_response"),
         "pairs_observed": table["pairs_observed"],

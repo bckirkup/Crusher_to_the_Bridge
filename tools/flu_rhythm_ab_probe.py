@@ -42,11 +42,11 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
-from tools.cabin_floor_probe import conditioned_spec  # noqa: E402
 from tools.covid_route_attribution import (  # noqa: E402
     CabinPairChallengeLedger,
     cabin_pair_challenge_table,
 )
+from tools.diag.conditioned_cell import conditioned_spec  # noqa: E402
 from tools.flu_confined_dose_probe import _confined_row_doses  # noqa: E402
 from tools.flu_delivery_stages_probe import (  # noqa: E402
     StageRecorder,

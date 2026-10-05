@@ -2,7 +2,14 @@
 **Date:** 2026-10-05
 **Commit:** 50bc52ab
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** superseded
+
+Superseded by HOST-AGE-02 before any cell ran: the by-band presentation draw
+(`illness_probability.age_factor_by_age_band`) shipped default-ON on
+`norwalk_gi`, so the "shipped Hill" arm this design froze as its baseline no
+longer exists on any armed profile — `presentation_age_mode: "flat"` is the
+labelled baseline a revival must name explicitly, and a revival re-scopes
+around HOST-AGE-02 rather than running this spec.
 
 ## Question
 

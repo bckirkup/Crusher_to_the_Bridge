@@ -43,8 +43,7 @@ if str(REPO_ROOT) not in sys.path:
 from engines.transmission_core import TransmissionCore  # noqa: E402
 from simulation_utils.paths import validated_open  # noqa: E402
 from tools import cabin_floor_probe  # noqa: E402
-
-EDISON = "edison_10pathogen_profiles"
+from tools.diag.conditioned_cell import EDISON  # noqa: E402
 
 
 class ChallengeRecorder:
