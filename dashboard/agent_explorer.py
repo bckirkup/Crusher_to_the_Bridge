@@ -27,11 +27,20 @@ from telemetry_buffer.agent_axes import (
     resolve_agent_axes,
 )
 from telemetry_buffer.fields import (
+    AGENT_AGE_BAND,
     AGENT_CABIN_MATE_IDS,
     AGENT_CLASS,
+    AGENT_DAYS_POST_INFECTION,
+    AGENT_DAYS_SINCE_SYMPTOM_ONSET,
+    AGENT_DINING_TABLE_INDEX,
     AGENT_GENDER,
     AGENT_ID,
+    AGENT_NIGHT_WATCH,
+    AGENT_PARTY_ID,
     AGENT_PATHOGEN_INFECTIONS,
+    AGENT_PROFILE_ID,
+    AGENT_ROLE,
+    AGENT_WATCH_SECTION,
     RECORD_VOYAGE_EPOCH,
     VOYAGE_DAY,
     VOYAGE_PORT,
@@ -73,6 +82,46 @@ def _agent_ids(history: list[dict[str, Any]]) -> list[int]:
         for ag in record_agents(rec):
             ids.add(int(ag[AGENT_ID]))
     return sorted(ids)
+
+
+def _render_mechanism_chips(ag: dict[str, Any]) -> None:
+    """Ship-rhythm / host-age / dining-group chips when telemetry carries them."""
+    role = ag.get(AGENT_ROLE)
+    band = ag.get(AGENT_AGE_BAND)
+    watch = ag.get(AGENT_WATCH_SECTION)
+    night = ag.get(AGENT_NIGHT_WATCH)
+    table = ag.get(AGENT_DINING_TABLE_INDEX)
+    party = ag.get(AGENT_PARTY_ID)
+    if all(v is None for v in (role, band, watch, table, party)):
+        return
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Role", role or "—")
+    c2.metric("Age band", str(band).replace("_", " ").title() if band else "—")
+    watch_label = "—"
+    if watch is not None:
+        watch_label = f"Section {watch}" + (" (night)" if night else "")
+    c3.metric("Watch", watch_label)
+    dining = []
+    if table is not None:
+        dining.append(f"table {table}")
+    if party is not None:
+        dining.append(f"party {party}")
+    c4.metric("Dining", ", ".join(dining) if dining else "—")
+
+    chips: list[tuple[str, Any]] = []
+    dpi = ag.get(AGENT_DAYS_POST_INFECTION)
+    dso = ag.get(AGENT_DAYS_SINCE_SYMPTOM_ONSET)
+    profile = ag.get(AGENT_PROFILE_ID)
+    if dpi is not None:
+        chips.append(("Days post-infection", dpi))
+    if dso is not None:
+        chips.append(("Days since onset", dso))
+    if profile:
+        chips.append(("Cohort", profile))
+    if chips:
+        cols = st.columns(len(chips))
+        for col, (label, value) in zip(cols, chips):
+            col.metric(label, value)
 
 
 def _agent_record_at(history: list[dict[str, Any]], agent_id: int, epoch: int) -> dict[str, Any] | None:
@@ -239,6 +288,7 @@ def render_agent_explorer(
         c3.metric("Cabin mates", ", ".join(map(str, ag0.get(AGENT_CABIN_MATE_IDS, []))) or "—")
         path_inf = ag0.get(AGENT_PATHOGEN_INFECTIONS) or {}
         c4.metric("Pathogens tracked", len(path_inf) if path_inf else 0)
+        _render_mechanism_chips(ag0)
 
     fig = _build_agent_timeline(history, int(agent_id))
     if fig:

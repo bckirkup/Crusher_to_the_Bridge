@@ -7,6 +7,14 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
+from dashboard.mechanisms import (
+    pathway_label,
+    render_age_band_breakdown,
+    render_information_environment,
+    render_passenger_crew_rates,
+    render_route_attribution,
+    render_sanitary_activity,
+)
 from dashboard.theme import (
     ALERT_COLORS,
     ALERT_LABELS,
@@ -286,6 +294,12 @@ def render_bridge_status(
     # ── Transmission Pathway Analysis ─────────────────────────────
     _render_transmission_pathways(history)
 
+    # ── Route Attribution / Role Rates / Sanitary / Age Bands ──────
+    render_route_attribution(history)
+    render_passenger_crew_rates(summary)
+    render_sanitary_activity(history)
+    render_age_band_breakdown(last)
+
     # ── Operational Impact Score ──────────────────────────────────
     _render_operational_impact(history)
 
@@ -294,6 +308,9 @@ def render_bridge_status(
 
     # ── Crusher Lab Operations ────────────────────────────────────
     _render_crusher_ops(last)
+
+    # ── Information Environment & Decisions ───────────────────────
+    render_information_environment(history)
 
     _render_bridge_resource_allocation(notebook)
     _render_bridge_sop_log(notebook)
@@ -876,22 +893,12 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
 
     st.subheader("Transmission Vector Analysis")
 
-    pathway_labels = {
-        "direct_contact": "Direct Contact",
-        "droplet": "Droplet",
-        "hvac_airborne": "HVAC Airborne",
-        "emesis_aerosol": "Emesis Aerosol",
-        "fomite": "Fomite Surface",
-        "food_contamination": "Food Contamination",
-        "environmental": "Environmental (HVAC Colonization)",
-    }
-
     labels = []
     values = []
     colors = [LCARS_BLUE, LCARS_PURPLE, LCARS_GOLD, LCARS_PEACH, LCARS_GREEN, LCARS_RED,
               LCARS_TAN, LCARS_AMBER]
     for pw, count in sorted(pathway_totals.items(), key=lambda x: -x[1]):
-        labels.append(pathway_labels.get(pw, pw.replace("_", " ").title()))
+        labels.append(pathway_label(pw))
         values.append(count)
 
     fig = go.Figure(data=[go.Pie(
@@ -1253,6 +1260,63 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
 # Station 4: Standing Orders & Threat Profiles
 # ══════════════════════════════════════════════════════════════════════════
 
+def _threat_mechanism_lines(p: dict[str, Any]) -> list[str]:
+    """Extra mechanism lines for a threat-profile card."""
+    lines: list[str] = []
+    sev = p.get("severity_model") or {}
+    states = sev.get("states")
+    if states:
+        lines.append(
+            f"**Severity model:** {len(states)} states "
+            f"({' → '.join(str(s) for s in states)})"
+        )
+    by_band = sev.get("base_probabilities_by_age_band")
+    if by_band:
+        lines.append(f"**Severity by age band:** {len(by_band)} bands tuned")
+    sfb = p.get("symptomatic_fraction_by_age_band")
+    if sfb:
+        lines.append(
+            f"**Symptomatic fraction by age band:** {len(sfb)} bands "
+            f"({min(sfb.values()):.0%}–{max(sfb.values()):.0%})"
+        )
+    cse = p.get("common_source_events") or {}
+    if cse.get("enabled"):
+        lines.append("**Common-source food events:** armed")
+    sec_frac = p.get("secretor_negative_fraction")
+    if sec_frac is not None:
+        rel = p.get("secretor_negative_relative_susceptibility")
+        lines.append(
+            f"**Secretor-negative gate:** {sec_frac:.0%} of hosts, "
+            f"relative susceptibility ×{rel}"
+        )
+    emission_mode = p.get("airborne_emission_mode")
+    emission_frac = p.get("airborne_emission_fraction")
+    if emission_mode or emission_frac is not None:
+        parts = []
+        if emission_mode:
+            parts.append(str(emission_mode))
+        if emission_frac is not None:
+            parts.append(f"fraction {emission_frac:g}")
+        lines.append(f"**Airborne emission:** {', '.join(parts)}")
+    mech = p.get("nonsusceptible_mechanism")
+    frac = p.get("innate_nonsusceptible_fraction")
+    if mech and mech != "none":
+        if frac is not None:
+            lines.append(f"**Nonsusceptible mechanism:** {mech} ({frac:.0%} innate)")
+        else:
+            lines.append(f"**Nonsusceptible mechanism:** {mech}")
+    boarding = p.get("boarding") or {}
+    if boarding.get("mode"):
+        lines.append(f"**Boarding intake:** {boarding['mode']}")
+    evo = p.get("strain_evolution") or {}
+    if evo.get("mutation_rate"):
+        lines.append(
+            f"**Strain evolution:** mutation {evo['mutation_rate']}/epoch, "
+            f"recombination {evo.get('recombination_rate_per_day', 0)}/day"
+        )
+    return lines
+
+
 def render_standing_orders(
     pathogen_data: dict[str, Any],
     protocol_data: dict[str, Any],
@@ -1301,6 +1365,9 @@ def render_standing_orders(
                     if disrupt:
                         st.markdown(f"**Microflora Target:** {disrupt.get('target_system', '?')}")
                         st.markdown(f"**Disruption Magnitude:** {disrupt.get('magnitude', '?')}")
+                mech_lines = _threat_mechanism_lines(p)
+                if mech_lines:
+                    st.markdown("  \n".join(mech_lines))
     elif isinstance(pathogens, dict):
         for pid, p in pathogens.items():
             with st.expander(f"{pid} — {p.get('name', '?')}", expanded=True):

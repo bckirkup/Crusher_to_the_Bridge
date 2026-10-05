@@ -46,6 +46,11 @@ RECORD_CRUSHER_OPS: Final = "crusher_ops"
 # Emitted by orchestrator_record but not yet declared in the schema.
 RECORD_INFECTION_COUNTERS: Final = "infection_counters"
 RECORD_VOYAGE_EPOCH: Final = "voyage_epoch"
+# Emitted by ship_simulation / the decision-engine telemetry layer.
+RECORD_DECISIONS: Final = "decisions"
+RECORD_INFORMATION_STATE: Final = "information_state"
+RECORD_FUNCTION_CAPACITY: Final = "function_capacity"
+RECORD_WEARABLE_AGENT_SNAPSHOT: Final = "wearable_agent_snapshot"
 
 RECORD_REQUIRED: Final = (
     RECORD_EPOCH,
@@ -74,6 +79,49 @@ AGENT_ACTIVE_PATHOGEN_IDS: Final = "active_pathogen_ids"
 AGENT_ROLE: Final = "role"
 AGENT_CABIN_MATE_IDS: Final = "cabin_mate_ids"
 AGENT_PATHOGEN_INFECTIONS: Final = "pathogen_infections"
+# Mechanism extras exported by KorkinAgent.to_schema_dict — host-age band
+# (HOST-AGE-01), rhythm-layer crew/dining state (SHIP-RHYTHM), caregiver
+# reporting, onset clocks, clinical presentation detail.  Emitted by
+# orchestrator_record but not yet declared in the schema.
+AGENT_AGE_BAND: Final = "age_band"
+AGENT_DAYS_POST_INFECTION: Final = "days_post_infection"
+AGENT_DAYS_SINCE_SYMPTOM_ONSET: Final = "days_since_symptom_onset"
+AGENT_WATCH_SECTION: Final = "watch_section"
+AGENT_NIGHT_WATCH: Final = "night_watch"
+AGENT_DINING_PARTY_IDS: Final = "dining_party_ids"
+AGENT_DINING_TABLE_INDEX: Final = "dining_table_index"
+AGENT_PARTY_ID: Final = "party_id"
+AGENT_PARTY_MEMBER_IDS: Final = "party_member_ids"
+AGENT_CAREGIVER_REPORT_DUE_EPOCH: Final = "caregiver_report_due_epoch"
+AGENT_OBSERVED_SYNDROMES: Final = "observed_syndromes"
+AGENT_CLINICAL_FEATURES: Final = "clinical_features"
+AGENT_PROFILE_ID: Final = "profile_id"
+AGENT_CHRONIC_DISEASE_IDS: Final = "chronic_disease_ids"
+
+# Optional agent fields the record chain passes through when the engine
+# exports them.  Single source for both the schema-copy stage
+# (``engine_payload_to_schema``) and the record stage (``_agent_record``):
+# every entry is presence-checked, so an unarmed mechanism emits nothing.
+AGENT_OPTIONAL_FIELDS: Final = (
+    AGENT_PATHOGEN_INFECTIONS,
+    "susceptibility_multiplier",
+    "microflora_disruption",
+    AGENT_CHRONIC_DISEASE_IDS,
+    AGENT_OBSERVED_SYNDROMES,
+    AGENT_CLINICAL_FEATURES,
+    AGENT_DAYS_SINCE_SYMPTOM_ONSET,
+    AGENT_CABIN_MATE_IDS,
+    AGENT_WATCH_SECTION,
+    AGENT_NIGHT_WATCH,
+    AGENT_ROLE,
+    AGENT_CAREGIVER_REPORT_DUE_EPOCH,
+    AGENT_AGE_BAND,
+    AGENT_DAYS_POST_INFECTION,
+    AGENT_DINING_PARTY_IDS,
+    AGENT_DINING_TABLE_INDEX,
+    AGENT_PARTY_ID,
+    AGENT_PARTY_MEMBER_IDS,
+)
 
 # ── ZoneState ────────────────────────────────────────────────────────────
 
@@ -202,6 +250,20 @@ class AgentState(TypedDict, total=False):
     role: str
     cabin_mate_ids: list[int]
     pathogen_infections: dict[str, Any]
+    age_band: str
+    days_post_infection: int | None
+    days_since_symptom_onset: int
+    watch_section: int
+    night_watch: bool
+    dining_party_ids: list[int]
+    dining_table_index: int
+    party_id: int
+    party_member_ids: list[int]
+    caregiver_report_due_epoch: int
+    observed_syndromes: list[str]
+    clinical_features: list[str]
+    profile_id: str
+    chronic_disease_ids: list[str]
 
 
 class ZoneState(TypedDict, total=False):
@@ -232,6 +294,10 @@ class EpochRecord(TypedDict, total=False):
     crusher_ops: dict[str, Any]
     infection_counters: dict[str, Any]
     voyage_epoch: dict[str, Any]
+    decisions: dict[str, Any]
+    information_state: dict[str, Any]
+    function_capacity: dict[str, Any]
+    wearable_agent_snapshot: dict[str, Any]
 
 
 class PublicSnapshot(TypedDict, total=False):

@@ -223,6 +223,56 @@
         "active_pathogen_ids": {
           "type": "array",
           "items": {"type": "string"}
+        },
+        "role": {
+          "type": "string",
+          "description": "Agent role label (e.g. passenger, crew_medical)"
+        },
+        "cabin_mate_ids": {
+          "type": "array",
+          "items": {"type": "integer"}
+        },
+        "pathogen_infections": {
+          "type": "object",
+          "description": "Per-pathogen infection detail map"
+        },
+        "age_band": {
+          "type": "string",
+          "description": "Host-age band for age-graded draws (HOST-AGE-01)"
+        },
+        "days_post_infection": {"type": ["integer", "null"]},
+        "days_since_symptom_onset": {"type": ["integer", "null"]},
+        "watch_section": {
+          "type": "integer",
+          "description": "Crew watchbill section (SHIP-RHYTHM)"
+        },
+        "night_watch": {"type": "boolean"},
+        "dining_party_ids": {
+          "type": "array",
+          "items": {"type": "integer"}
+        },
+        "dining_table_index": {"type": "integer"},
+        "party_id": {"type": "integer"},
+        "party_member_ids": {
+          "type": "array",
+          "items": {"type": "integer"}
+        },
+        "caregiver_report_due_epoch": {"type": "integer"},
+        "observed_syndromes": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "clinical_features": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "profile_id": {
+          "type": "string",
+          "description": "Decision-engine profile id attached post-record"
+        },
+        "chronic_disease_ids": {
+          "type": "array",
+          "items": {"type": "string"}
         }
       }
     },
