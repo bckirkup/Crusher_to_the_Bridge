@@ -1,0 +1,139 @@
+{
+    "schema_version": "1.0.0",
+    "description": "Senior-skewed cruise passenger composition for the NORO-AGE-FOOD-01 demographic arms. Every passenger class draws a weighted age-band composition rather than the repository default's uniform bands; crew classes draw the measured Diamond Princess crew composition.",
+    "age_composition_derivation": {
+        "published_inputs": [
+            "diamond_princess_2020.json's whole-ship derivation (NIID Field Briefing 20 Feb 2020 decadal counts; Tsuboi 2020 DOI 10.35772/ghm.2020.01037 per-role means: passengers 66.0, crew 36.6). The passenger_general weights below are that file's derived passenger composition verbatim — the only measured cruise-ship age composition in the repository.",
+            "The 65-74/75+ split inside passenger_elderly reuses the same derived counts (969.0 / 734.5)."
+        ],
+        "steps": [
+            "passenger_general inherits the Diamond Princess passenger band composition unchanged: a senior-market hull is modelled as the measured senior cruise population rather than an invented one.",
+            "passenger_elderly is kept as a class (compliance_by_class still differentiates it) but draws the DP >=65 sub-composition (65-74 vs 75+ at 969:734.5).",
+            "passenger_family on a senior-market hull is declared, not measured: weights carry mostly adults with a small child share (child 0.10). Grade C declared.",
+            "All crew classes draw the DP-derived crew composition (18-34 / 35-49 / 50-64 at 0.50/0.35/0.15, reproducing published crew mean 36.6)."
+        ],
+        "refusals": [
+            "No weight is chosen to move posting, incidence or attack-rate outputs; the only measured input is the DP composition, and every other weight is labelled Grade C declared.",
+            "Composite passenger composition under the shipped class fractions (general 0.50 / family 0.10 / elderly 0.10 of a 0.70 passenger share): ~60% of passengers >=65, ~2% under 18 — versus ~14% and ~5% on the default bundle. The composite is stated, not hidden inside the per-class tables."
+        ]
+    },
+    "default_template": {
+        "age_bands": [
+            "adult"
+        ],
+        "monitored_channels": [
+            "heart_rate",
+            "body_temp",
+            "spo2",
+            "respiratory_rate"
+        ]
+    },
+    "class_templates": {
+        "passenger_general": {
+            "age_bands": [
+                "0-4",
+                "5-17",
+                "18-34",
+                "35-49",
+                "50-64",
+                "65-74",
+                "75+"
+            ],
+            "age_band_weights": [
+                8.0,
+                26.4,
+                43.1,
+                182.25,
+                702.75,
+                969.0,
+                734.5
+            ],
+            "vaccinations": [
+                "routine_childhood"
+            ]
+        },
+        "passenger_family": {
+            "age_bands": [
+                "child",
+                "young_adult",
+                "adult",
+                "middle_aged"
+            ],
+            "age_band_weights": [
+                0.10,
+                0.30,
+                0.35,
+                0.25
+            ]
+        },
+        "passenger_elderly": {
+            "age_bands": [
+                "65-74",
+                "75+"
+            ],
+            "age_band_weights": [
+                969.0,
+                734.5
+            ],
+            "comorbidities": [
+                "hypertension"
+            ],
+            "vaccinations": [
+                "influenza_annual"
+            ]
+        },
+        "crew_medical": {
+            "age_bands": [
+                "18-34",
+                "35-49",
+                "50-64"
+            ],
+            "age_band_weights": [
+                0.50,
+                0.35,
+                0.15
+            ],
+            "device_id": "garmin_watch",
+            "vaccinations": [
+                "occupational_health"
+            ]
+        },
+        "crew_galley": {
+            "age_bands": [
+                "18-34",
+                "35-49",
+                "50-64"
+            ],
+            "age_band_weights": [
+                0.50,
+                0.35,
+                0.15
+            ],
+            "device_id": "garmin_watch"
+        },
+        "crew_engineering": {
+            "age_bands": [
+                "18-34",
+                "35-49",
+                "50-64"
+            ],
+            "age_band_weights": [
+                0.50,
+                0.35,
+                0.15
+            ]
+        },
+        "crew_general": {
+            "age_bands": [
+                "18-34",
+                "35-49",
+                "50-64"
+            ],
+            "age_band_weights": [
+                0.50,
+                0.35,
+                0.15
+            ]
+        }
+    }
+}
