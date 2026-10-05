@@ -34,6 +34,41 @@ HULLS = {
 SENIOR_BUNDLE = "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
 FAMILY_BUNDLE = "data/scenarios/agent_profiles/family_cruise_u18.json"
 
+# Shipped class mix, copied verbatim from crusher_labs/config.yaml
+# ship_graph.agent_classes — fractions sum to 1.0.  gen and snr declare
+# it explicitly so _fill_demographic_params stamps agent_class_fractions
+# into every arm's run parameters (it only echoes a declared override);
+# the resolved config is unchanged, so voyages are bit-identical to the
+# un-declared mix.
+BASE_AGENT_CLASSES = [
+    {"class_id": "passenger_general", "role_group": "passenger",
+     "fraction": 0.50, "home_zone_preference": "PC_",
+     "free_zone_preference": "", "duty_zone": ""},
+    {"class_id": "passenger_family", "role_group": "passenger",
+     "fraction": 0.10, "home_zone_preference": "PC_",
+     "free_zone_preference": "", "duty_zone": ""},
+    {"class_id": "passenger_elderly", "role_group": "passenger",
+     "fraction": 0.10, "home_zone_preference": "PC_",
+     "free_zone_preference": "", "duty_zone": ""},
+    {"class_id": "crew_general", "role_group": "crew",
+     "fraction": 0.10, "home_zone_preference": "CC_",
+     "free_zone_preference": "", "duty_zone": "",
+     "schedule": {"template": "crew_general", "night_watch_fraction": 0.05}},
+    {"class_id": "crew_medical", "role_group": "crew",
+     "fraction": 0.05, "home_zone_preference": "CC_",
+     "free_zone_preference": "Medical", "duty_zone": "Medical_Center",
+     "schedule": {"template": "crew_medical", "night_watch_fraction": 0.05}},
+    {"class_id": "crew_engineering", "role_group": "crew",
+     "fraction": 0.10, "home_zone_preference": "CC_",
+     "free_zone_preference": "Engine", "duty_zone": "Engine",
+     "schedule": {"template": "crew_engineering",
+                  "night_watch_fraction": 0.05}},
+    {"class_id": "crew_galley", "role_group": "crew",
+     "fraction": 0.05, "home_zone_preference": "CC_",
+     "free_zone_preference": "", "duty_zone": "Galley",
+     "schedule": {"template": "crew_galley", "night_watch_fraction": 0.05}},
+]
+
 # Family arm: raise passenger_family to 0.25 so the bundle's 0.56 under-18
 # draw lands ~20% of passengers under 18 (0.25 x 0.56 = 0.14 of all agents
 # over a 0.70 passenger share).  Every other class entry is the shipped
@@ -67,8 +102,9 @@ FAMILY_AGENT_CLASSES = [
 ]
 
 AGE_OVERRIDES = {
-    "gen": {},
-    "snr": {"social": {"agent_profile_bundle": SENIOR_BUNDLE}},
+    "gen": {"ship_graph": {"agent_classes": BASE_AGENT_CLASSES}},
+    "snr": {"social": {"agent_profile_bundle": SENIOR_BUNDLE},
+            "ship_graph": {"agent_classes": BASE_AGENT_CLASSES}},
     "fam": {"social": {"agent_profile_bundle": FAMILY_BUNDLE},
             "ship_graph": {"agent_classes": FAMILY_AGENT_CLASSES}},
 }

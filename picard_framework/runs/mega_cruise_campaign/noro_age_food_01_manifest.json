@@ -59,6 +59,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -1105,6 +1181,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -2151,6 +2303,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -3197,6 +3425,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -4245,6 +4549,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -5293,6 +5673,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -6339,6 +6795,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -7388,6 +7920,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -8437,6 +9045,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -9486,6 +10170,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -10537,6 +11297,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -11588,6 +12424,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -19382,6 +20294,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -20428,6 +21416,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -21474,6 +22538,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -22520,6 +23660,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -23568,6 +24784,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -24616,6 +25908,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -25662,6 +27030,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -26711,6 +28155,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -27760,6 +29280,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -28809,6 +30405,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -29860,6 +31532,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -30911,6 +32659,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -38705,6 +40529,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -39751,6 +41651,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -40797,6 +42773,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -41843,6 +43895,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -42891,6 +45019,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -43939,6 +46143,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -44985,6 +47265,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -46034,6 +48390,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -47083,6 +49515,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -48132,6 +50640,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -49183,6 +51767,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -50234,6 +52894,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -58031,6 +60767,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -58365,6 +61177,82 @@
     },
     "hvac": {
      "pathogen_pool_transport": "airflow"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -58702,6 +61590,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [
@@ -59039,6 +62003,82 @@
     },
     "social": {
      "agent_profile_bundle": "data/scenarios/agent_profiles/senior_cruise_dp2020.json"
+    },
+    "ship_graph": {
+     "agent_classes": [
+      {
+       "class_id": "passenger_general",
+       "role_group": "passenger",
+       "fraction": 0.5,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_family",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "passenger_elderly",
+       "role_group": "passenger",
+       "fraction": 0.1,
+       "home_zone_preference": "PC_",
+       "free_zone_preference": "",
+       "duty_zone": ""
+      },
+      {
+       "class_id": "crew_general",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "",
+       "schedule": {
+        "template": "crew_general",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_medical",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Medical",
+       "duty_zone": "Medical_Center",
+       "schedule": {
+        "template": "crew_medical",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_engineering",
+       "role_group": "crew",
+       "fraction": 0.1,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "Engine",
+       "duty_zone": "Engine",
+       "schedule": {
+        "template": "crew_engineering",
+        "night_watch_fraction": 0.05
+       }
+      },
+      {
+       "class_id": "crew_galley",
+       "role_group": "crew",
+       "fraction": 0.05,
+       "home_zone_preference": "CC_",
+       "free_zone_preference": "",
+       "duty_zone": "Galley",
+       "schedule": {
+        "template": "crew_galley",
+        "night_watch_fraction": 0.05
+       }
+      }
+     ]
     }
    },
    "boarding_mechanism_rungs": [

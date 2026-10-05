@@ -1,6 +1,46 @@
-# Thin campaign image: repo contents at the build SHA plus a python3
-# entrypoint so jobdef argv[0] is the entrypoint script. Derived from the
-# root Dockerfile's runtime stage; every campaigns/<p>/<n> uses this —
-# there are no per-campaign Dockerfiles.
-FROM picard-campaign AS base
+# Generic campaign image: repo contents at the build SHA plus a python3
+# entrypoint so jobdef argv[0] is the entrypoint script. One image serves
+# every campaigns/<p>/<n> — there are no per-campaign Dockerfiles.
+#
+# Layering: FROM the base campaign image (root Dockerfile built at the
+# same SHA) which already carries the code, data and locked venv the
+# workers import (picard_framework/, crusher_labs/, engines/,
+# decision_engine/, simulation_utils/, telemetry_buffer/, data/,
+# schemas/, presidio/data/, orchestrator*.py, /app/.venv). This file adds
+# only the three trees the generic worker needs but the root scope omits:
+#
+#   deploy/aws/  — campaign_entrypoint.py itself (jobdef argv[0]) plus
+#                  the submit/monitor helpers
+#   tools/       — worker scripts the entrypoint invokes
+#                  (tools/noro_diag/*, tools/diag/*, ...)
+#   campaigns/   — every campaign.json plus per-campaign entry.py hooks;
+#                  _campaign_dir() resolves the block spec from here
+#
+# (This file subsumes deploy/aws/Dockerfile.campaign_stack, which stops
+# at deploy/aws + tools; campaigns/ was the missing layer that made the
+# first real submit through campaign_jobdef.json fail.)
+#
+# Build (from the repository root; the base image must exist locally or
+# be pullable — pass BASE_IMAGE to pin it):
+#   docker build -f deploy/aws/Dockerfile.campaign \
+#     --build-arg BASE_IMAGE=picard-campaign:<base-tag> \
+#     --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:<tag> .
+ARG BASE_IMAGE=picard-campaign
+FROM ${BASE_IMAGE}
+
+# Restamp the engine revision: the base image's ENGINE_GIT_SHA names ITS
+# build SHA; runs from this overlay must record THIS layer's source SHA
+# (pass --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD)).
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+USER root
+COPY --chown=campaign:campaign deploy/aws/ ./deploy/aws/
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign campaigns/ ./campaigns/
+USER campaign
+
+# Job definitions supply the worker script as argv[0].
 ENTRYPOINT ["python3"]
