@@ -61,6 +61,7 @@ from outbreak_anchor_readout import (  # noqa: E402
     _s3_parse_uri,
 )
 
+from simulation_utils.paths import validated_open  # noqa: E402
 from tools.diag.readout_common import emit_report_outputs  # noqa: E402
 
 _BUCKET = "crusherbucket-994254241749-us-east-1-an"
@@ -83,7 +84,13 @@ _DOSE_FACTOR_HI = 2.5
 
 
 def _profile_incubation(profile_path: Path) -> dict:
-    data = json.loads(Path(profile_path).read_text())
+    resolved = str(Path(profile_path).resolve())
+    with validated_open(
+        resolved, "r",
+        allowed_roots=(str(Path(resolved).parent),),
+        encoding="utf-8",
+    ) as fh:
+        data = json.load(fh)
     prof = next(
         p for p in data["pathogens"] if p["pathogen_id"] == "norwalk_gi"
     )
@@ -140,6 +147,25 @@ def _is_import(rec: str) -> bool:
     return _host_field(rec, _GEN_RE) == 0
 
 
+def _import_marker(rec: str, symp: int) -> bool:
+    """Partial presented marker on a non-ill import row."""
+    if symp > 0:
+        return False
+    return (
+        _VOMIT_RE.search(rec).group(1) == "true"
+        or (_host_field(rec, _EMESIS_RE) or 0) > 0
+    )
+
+
+def _scan_import(rec: str, inf: int, symp: int, row: dict) -> None:
+    row["imp_total"] += 1
+    row["imp_ill"] += 1 if symp > 0 else 0
+    if inf == 0 and symp == 0:
+        row["imp_resolved"] += 1
+        return
+    row["imp_nonill_marker"] += 1 if _import_marker(rec, symp) else 0
+
+
 def _scan_host(rec: str, n_ep: int, min_ep: float, max_ep: float, row: dict) -> None:
     inf = _host_field(rec, _INF_RE) or 0
     acq = _host_field(rec, _ACQ_RE)
@@ -153,19 +179,7 @@ def _scan_host(rec: str, n_ep: int, min_ep: float, max_ep: float, row: dict) -> 
     row["symp_epochs"] += symp
     row["confined_epochs_in_course"] += min(conf, symp)
     if imported or acq is None:
-        row["imp_total"] += 1
-        row["imp_ill"] += 1 if symp > 0 else 0
-        if inf == 0 and symp == 0:
-            row["imp_resolved"] += 1
-        else:
-            marker = (
-                symp == 0
-                and (
-                    _VOMIT_RE.search(rec).group(1) == "true"
-                    or (_host_field(rec, _EMESIS_RE) or 0) > 0
-                )
-            )
-            row["imp_nonill_marker"] += 1 if marker else 0
+        _scan_import(rec, inf, symp, row)
         return
     row["acq_total"] += 1
     row["acq_epochs"].append(acq)
@@ -312,7 +326,7 @@ def _render_mega(lines: list[str], mega: dict) -> None:
         f"{p['confined_epochs_in_course'] / p['symp_epochs']:.3f}"
         if p["symp_epochs"] else "-"
     )
-    lines += [
+    lines.extend([
         "## Mega a1 census leg",
         "",
         f"voyages read: {mega['n_voyages']} (cross-check mismatches: "
@@ -350,7 +364,7 @@ def _render_mega(lines: list[str], mega: dict) -> None:
         f"{int(p['imp_nonill_marker'])}.",
         f"Confined share of symptomatic epochs (report-visibility bound): {conf}.",
         "",
-    ]
+    ])
 
 
 def _render(report: dict) -> str:
