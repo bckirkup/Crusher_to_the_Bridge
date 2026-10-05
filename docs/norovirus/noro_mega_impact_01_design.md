@@ -1,6 +1,8 @@
 # MEGA-IMPACT-01 — mechanism-attribution factorial on mega_cruise_5000
 
-Status: fleet complete — 2026-10-05 (UTC): 618/618 cells
+Status: measured — fleet readout committed at
+`noro_mega_impact_01_readout.md` (2026-10-05); measured state in
+`docs/ledger/NORO-MEGA-IMPACT-01.md`. Fleet record: 618/618 cells
 SUCCEEDED, zero failures, ~4.5 h wall on Spot
 (`picard-campaign-queue`), jobdef `picard-noro-mega-impact-01:6`,
 image `campaign-7e1b54bc` (sha256:60793dd3…, `--payload lean`,
