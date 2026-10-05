@@ -1,6 +1,6 @@
 # SARS-CoV-2 fit: open ledger
 
-> **Status:** Living. Head commit of record: `b4207e5f` (fill with the
+> **Status:** Living. Head commit of record: `ea9550ef` (fill with the
 > `main` SHA this file was authored against). If that is not the current head,
 > treat every number here as unverified.
 
@@ -274,7 +274,22 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`DP-BELIEF-01`, measured at `78f52a58`/`8f49652f`/`8f926382`/`3eae8a2f`/`b932d0e9`
+`CREW-WINDOW-01`, measured at `ea9550ef` (`docs/ledger/CREW-WINDOW-01.md`,
+`docs/covid/covid_crew_window_01_readout.md`): the working-crew-channel
+attenuation screen — {Θ1e6, Θ7.9e6} × {D0_declared, CREWDUTY,
+EXEMPT_ENGMED, EXEMPT_ESSENTIAL, MESS_0P5, MESS_0P25} × 20 seeds,
+240/240 cells, 0 audit failures, first campaign on the `campaigns/`
+harness. **CLIFF-STRUCTURE — no declared arm lands [150,350].**
+CREWDUTY (sourced symptomatic-crew removal) fires ~660 hosts/seed and
+moves nothing (758 vs 739); the exempt-set axis is a binary carried by
+`crew_general` alone (exempt ~740 ↔ confined ~70, and ENGMED/ESSENTIAL
+are bit-identical — galley's exempt status never reaches a draw); MESS
+far-field attenuation is a non-lever. The record band sits inside the
+70↔739 step; the discriminating follow-up is a *fractional*
+general-crew axis, and if that also skips the band the suspect leaves
+this channel for the onset-dating channel (map legs D1–D3).
+
+Before that — `DP-BELIEF-01`, measured at `78f52a58`/`8f49652f`/`8f926382`/`3eae8a2f`/`b932d0e9`
 (`docs/ledger/DP-BELIEF-01.md`,
 `docs/covid/covid_believability_map_v1.md`): the Diamond Princess
 believability map — every checkable record feature scored on the 420
