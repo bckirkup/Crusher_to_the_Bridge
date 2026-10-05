@@ -683,10 +683,11 @@ def test_crew_duty_exclusion_merges_onto_a_declared_block():
 
 def test_crew_duty_exclusion_rejects_a_non_mapping():
     raw = _raw_spec()
+    profile = load_covid_profile()
     with pytest.raises(ValueError):
         apply_arm_overrides(
             raw, {"crew_duty_exclusion": True},
-            profile=load_covid_profile(),
+            profile=profile,
         )
 
 
