@@ -229,6 +229,18 @@ def onset_day(
     return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
 
 
+def _flat_presentation(profile: dict[str, Any]) -> bool:
+    """Whether the profile disables the presentation draw's age terms.
+
+    ``presentation_age_mode: "flat"`` is the labelled baseline: the share
+    constant ignores ``symptomatic_fraction_by_age_band`` and
+    ``illness_probability.age_factor_by_age_band``, so every host reads the
+    pooled value — the behaviour before age structure shipped. The default
+    ``"by_age_band"`` (and any unstated mode) applies the declared maps.
+    """
+    return str(profile.get("presentation_age_mode") or "") == "flat"
+
+
 def presentation_probability(
     inf: dict[str, Any],
     prof: dict[str, Any],
@@ -241,19 +253,33 @@ def presentation_probability(
     ``symptomatic_fraction`` as the reference a band the profile does not name
     reads. Profiles carrying only ``symptomatic_fraction`` present at that
     measured proportion irrespective of acquisition dose; profiles carrying
-    ``illness_probability`` keep the dose-conditional Hill form.
+    ``illness_probability`` keep the dose-conditional Hill form, which
+    ``illness_probability.age_factor_by_age_band`` multiplies per band (a
+    factor, not a replacement share — the Hill stays dose-conditional; a band
+    the map does not name multiplies 1.0). ``presentation_age_mode: "flat"``
+    ignores both maps.
     """
-    by_band = prof.get("symptomatic_fraction_by_age_band") or {}
-    band_value = by_band.get(age_band) if age_band else None
-    if band_value is not None:
-        return float(band_value)
+    flat = _flat_presentation(prof)
+    if not flat:
+        by_band = prof.get("symptomatic_fraction_by_age_band") or {}
+        band_value = by_band.get(age_band) if age_band else None
+        if band_value is not None:
+            return float(band_value)
     fixed = prof.get("symptomatic_fraction")
     if fixed is not None:
         return float(fixed)
     ill_params = prof.get("illness_probability", {})
     eta_p = ill_params.get("eta", 0.508)
     gamma_p = ill_params.get("gamma", 0.095)
-    return 1.0 - math.pow(1.0 + eta_p * inf["acquired_particles"], -gamma_p)
+    probability = 1.0 - math.pow(
+        1.0 + eta_p * inf["acquired_particles"], -gamma_p
+    )
+    if not flat:
+        factors = ill_params.get("age_factor_by_age_band") or {}
+        factor = factors.get(age_band) if age_band else None
+        if factor is not None:
+            probability *= float(factor)
+    return probability
 
 
 def draw_symptom_onset(
