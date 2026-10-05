@@ -3,7 +3,10 @@
 **Commit:** 7e1b54bc
 **Pathogens:** norwalk_gi
 **Status:** measured
-**Measured at:** 7e1b54bc (fleet arms A1/A2/A3/a1_bp40c30); A0 baseline at `1e158d47` (existing NORO-MEGA-01 zips re-read)
+**Measured at:** 7e1b54bc
+
+Fleet arms A1/A2/A3/a1_bp40c30 measured at `7e1b54bc`; the A0
+baseline is the existing NORO-MEGA-01 zips at `1e158d47` re-read.
 
 Fleet readout of the 2×2 caregiver×food mechanism-attribution
 factorial on `fl_mega_12d_scr` (posting wires: 147 pax / 63 crew at
