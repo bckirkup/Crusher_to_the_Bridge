@@ -108,14 +108,16 @@ def _payload(arm: str = "D0_declared", **overrides) -> dict:
         },
         "crew_duty_exclusion": {
             "resolved": {"enabled": False},
-            "realized": {"excluded_hosts": 0},
+            "excluded_hosts": 0,
         },
         "index_onset_day": -1.0,
         "index_shedding_at_day0": True,
         "propensity_draw": {"units_drawn": 12},
-        "delivery": {"caregiver": {"mode": "on"}},
-        "presentation_draw_mode": "once_per_course",
-        "hand_reservoir_mode": "hygiene_cycle",
+        "delivery": {
+            "caregiver": {"mode": "on"},
+            "presentation_draw_mode": "once_per_course",
+            "hand_reservoir_mode": "hygiene_cycle",
+        },
     }
     base.update(overrides)
     return base
@@ -143,6 +145,8 @@ def test_audit_cell_flags_a_mess_split_echo_mismatch():
         "MESS_0P5",
         delivery={
             "caregiver": {"mode": "on"},
+            "presentation_draw_mode": "once_per_course",
+            "hand_reservoir_mode": "hygiene_cycle",
             "droplet_field_split": {
                 "far_field_share": 0.0875,
                 "settled_share": 0.0875,
@@ -155,6 +159,8 @@ def test_audit_cell_flags_a_mess_split_echo_mismatch():
         "MESS_0P5",
         delivery={
             "caregiver": {"mode": "on"},
+            "presentation_draw_mode": "once_per_course",
+            "hand_reservoir_mode": "hygiene_cycle",
             "droplet_field_split": {
                 "far_field_share": 0.175,
                 "settled_share": 0.0,
@@ -173,7 +179,7 @@ def test_audit_cell_flags_crewduty_not_resolved():
         "CREWDUTY",
         crew_duty_exclusion={
             "resolved": {"enabled": False},
-            "realized": {"excluded_hosts": 0},
+            "excluded_hosts": 0,
         },
     )
     assert any(

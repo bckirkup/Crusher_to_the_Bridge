@@ -154,9 +154,9 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
     delivery = payload.get("delivery") or {}
     if (delivery.get("caregiver") or {}).get("mode") != "on":
         violations.append(f"{tag}: caregiver.mode")
-    if payload.get("presentation_draw_mode") != "once_per_course":
+    if delivery.get("presentation_draw_mode") != "once_per_course":
         violations.append(f"{tag}: presentation_draw_mode")
-    if payload.get("hand_reservoir_mode") != "hygiene_cycle":
+    if delivery.get("hand_reservoir_mode") != "hygiene_cycle":
         violations.append(f"{tag}: hand_reservoir_mode")
     if arm in _MESS_SPLITS:
         split = delivery.get("droplet_field_split") or {}
@@ -172,8 +172,7 @@ def _reach_echo(arm: str, payloads: list[dict[str, Any]]) -> dict[str, Any]:
     """Whether the arm's mechanism provably fired, per the design's order."""
     if arm == "CREWDUTY":
         excluded = [
-            int(((p.get("crew_duty_exclusion") or {}).get("realized") or {})
-                .get("excluded_hosts") or 0)
+            int((p.get("crew_duty_exclusion") or {}).get("excluded_hosts") or 0)
             for p in payloads
         ]
         return {
