@@ -77,6 +77,12 @@
           "severe_critical"
         ],
         "base_probabilities": [0.25, 0.55, 0.19, 0.009, 0.001],
+        "base_probabilities_by_age_band": {
+          "senior": [0.25, 0.55, 0.17384, 0.008235, 0.017925],
+          "65-74": [0.25, 0.55, 0.17384, 0.008235, 0.017925],
+          "75+": [0.25, 0.55, 0.17384, 0.008235, 0.017925]
+        },
+        "base_probabilities_by_age_band_notes": "Senior-vs-everything-else is the coarsest sourced partition of p(severe|symptomatic case): Calderwood 2021 (Clin Infect Dis, DOI 10.1093/cid/ciab808), the decade of US NORS LTCF outbreaks 2009-2018 (13,092 outbreaks, 416,284 outbreak-associated cases), reports 21.6 hospitalizations and 2.3 deaths per 1000 cases -> severe share 0.0239 among cases, and the model's severe rung folds hospitalization and death together (fatality_probability_by_severity is null on every arm, so both endpoints enter severe_critical, same convention the covid ladder's notes state). severe_critical = 0.0239 x the non-asymptomatic mass (0.75) = 0.017925; mild+moderate are resplit at the pooled 0.19:0.009 ratio with asymptomatic and subclinical held at the reference 0.25/0.55 (the validator requires every band to keep the reference asymptomatic share). Every band not named reads the pooled vector — no per-case severe-outcome design exists for non-institutional age groups at publishable grade, so no split is invented there. Caveats recorded, not softened: the source population is institutionalized elderly (residents AND staff cases are pooled in NORS — resident-only rates run slightly higher), institutional care differs from shipboard infirmary care, GII.4 dominates the LTCF outbreak record while this profile is GI-analog in part (the same genogroup caveat the illness_probability row carries), and on a senior-heavy hull the pooled severe share rises well above the declared 0.001 reference — measured consequence, not a defect. Trivedi 2012 (JAMA, DOI 10.1001/jama.2012.14023) corroborates the direction (all-cause mortality RR 1.11 during LTCF outbreaks), implying ~9-11% of the Calderwood rate is background rather than outbreak-attributable.",
         "prior": {
           "type": "dirichlet",
           "parameters": {
@@ -923,7 +929,27 @@
           "severe_critical"
         ],
         "base_probabilities": [0.2, 0.131, 0.459, 0.2, 0.01],
-        "evidence_grade": "B for the two rungs Carrat measures, P for the splits inside them",
+        "base_probabilities_by_age_band": {
+          "0-4": [0.2, 0.131, 0.462029, 0.20132, 0.005651],
+          "5-17": [0.2, 0.131, 0.464422, 0.202363, 0.002215],
+          "child": [0.2, 0.131, 0.464422, 0.202363, 0.002215],
+          "young_adult": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "adult": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "18-24": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "18-34": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "25-34": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "35-44": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "35-49": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "45-54": [0.2, 0.131, 0.462745, 0.201632, 0.004623],
+          "middle_aged": [0.2, 0.131, 0.459705, 0.200307, 0.008988],
+          "50-64": [0.2, 0.131, 0.459705, 0.200307, 0.008988],
+          "55+": [0.2, 0.131, 0.459705, 0.200307, 0.008988],
+          "senior": [0.2, 0.131, 0.411245, 0.179192, 0.078563],
+          "65-74": [0.2, 0.131, 0.411245, 0.179192, 0.078563],
+          "75+": [0.2, 0.131, 0.411245, 0.179192, 0.078563]
+        },
+        "base_probabilities_by_age_band_notes": "CDC 2023-24 influenza burden estimates (Rolfes 2018 methodology, DOI 10.1111/irv.12486; table at cdc.gov/flu-burden) give symptomatic illnesses, hospitalizations and deaths by age group — the same per-symptomatic-case denominator the severity draw renormalizes over. severe_critical = (hospitalizations + deaths) / symptomatic illnesses x the non-asymptomatic mass (0.8): 0-4 0.00706, 5-17 0.00277, 18-49 0.00578, 50-64 0.01124, 65+ 0.09820. Mild and moderate are resplit at Carrat's pooled 0.459:0.2 ratio inside the remaining symptomatic mass; asymptomatic and subclinical stay at the Carrat reference shares (the validator requires the reference asymptomatic entry on every band). Band-to-CDC-group mapping under the severity model's band convention: 18-49 covers young_adult AND adult and all 18-54 numeric labels (a sourced same-value declaration, not an invented split, since the source resolves no finer than 18-49); '55+' reads the 50-64 group (declared choice — the label's lower decade dominates its population). The pooled severe reference they replace is 0.01 (1.5% of symptomatic); the ladder's 65+ arm is ~9.8%, so on a senior-skewed hull the pooled severe share rises well above the flat vector — recorded as the licensed direction, not softened. Caveats: 2023-24 is a preliminary single-season estimate (ratios vary by season and by strain mix — this profile is influenza-A-generic), the US surveillance population mixes risk groups, and the 65+ rate includes LTCF deaths, which is also the analog most like a cruise passenger pool.",
+        "evidence_grade": "B for the two rungs Carrat measures and the CDC per-age severe shares, P for the splits inside them",
         "notes": "Carrat 2008 (DOI 10.1093/aje/kwm375) fixes two rungs: any symptoms 66.9% of infections, so asymptomatic + subclinical = 0.331; lower-respiratory symptoms 21.0% of infections, read as moderate or worse. Mild = 0.669 - 0.210 = 0.459 is then implied. The two splits inside those rungs (asymptomatic vs subclinical 0.200/0.131, moderate vs severe_critical 0.200/0.010) are declared, not measured, and are swept. No value here was chosen against Ward 2010 or Millman 2015."
       },
       "observation_model": {

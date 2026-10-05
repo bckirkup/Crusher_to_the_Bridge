@@ -578,6 +578,7 @@ class PathogenProfile(BaseModel):
     symptomatic_fraction: float | None = None
     symptomatic_fraction_by_age_band: dict[str, float] | None = None
     presentation_age_mode: str | None = None
+    severity_age_mode: str | None = None
     presentation_draw_mode: str | None = None
     airborne_emission_mode: str | None = None
     severity_model: SeverityModel | None = None

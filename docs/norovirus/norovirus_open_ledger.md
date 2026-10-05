@@ -4422,6 +4422,26 @@ matters where children board. Open edges for a later stage: a 5–17 or
 ≥65 infection-denominator design would support a finer partition; the
 0.51 under-reads the `child` band's older half by construction.
 
+**`HOST-AGE-03` arms the severity draw's age term on this arm —
+senior-only, the coarsest sourced partition, shipped default-ON**
+(`docs/ledger/HOST-AGE-03.md`, design `docs/host_age_03_design.md`).
+`severity_model.base_probabilities_by_age_band` gives `senior`/`65-74`/
+`75+` a severe-outcome share of **0.0239 among presenters** — Calderwood
+2021's decade of US LTCF norovirus outbreaks (21.6 hospitalisations +
+2.3 deaths per 1000 cases; both endpoints fold into `severe_critical`,
+fatality unmodelled). Every other band reads the pooled vector: no
+per-case severe-outcome design exists for non-institutional ages — a
+*different* null from the ≥65 presentation null the
+`never_symptomatic` row records (p(sym|infection) is unmeasured at ≥65;
+per-case severity in outbreak settings is measured). Caveats: the
+source population is institutional (staff cases pooled in; ~9–11%
+background per Trivedi 2012; GII.4-dominant record on a partly
+GI-analog profile), and on a senior-heavy hull the pooled severe share
+rises well above the declared 0.001 — recorded consequence.
+`severity_age_mode: "flat"` is the labelled baseline. Open edges: a
+non-institutional per-case design would support a finer partition;
+the pooled Dirichlet prior is unchanged.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system

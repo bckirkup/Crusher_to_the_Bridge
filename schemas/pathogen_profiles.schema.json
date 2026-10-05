@@ -562,6 +562,10 @@
         "notes": {
           "type": "string",
           "description": "Provenance prose for the split: what was measured, in what population, and which numbers here are declared rather than measured."
+        },
+        "base_probabilities_by_age_band_notes": {
+          "type": "string",
+          "description": "Provenance prose for the per-band severity vectors: the design and population each band's severe-outcome share was measured on, the band-to-source-group mapping, and which labels are pooled fallbacks."
         }
       },
       "additionalProperties": false
@@ -953,6 +957,16 @@
           "type": "string",
           "enum": ["once_per_course", "daily_hazard"],
           "description": "How the declared presentation probability (symptomatic_fraction or the illness_probability Hill pair) is spent over a course. 'once_per_course' (the default when absent) draws it exactly once, at the epoch crossing the host's drawn incubation, so the share of infections that never present is the constant itself — which is what the cited measurements state. 'daily_hazard' is the labelled baseline the pre-share code ran: the same constant redrawn once per day of natural history while the course has not presented, so only a product of daily failures stays asymptomatic and nearly every infection presents within days."
+        },
+        "presentation_age_mode": {
+          "type": "string",
+          "enum": ["by_age_band", "flat"],
+          "description": "Whether the presentation draw applies its age terms. 'by_age_band' (the default when absent) applies symptomatic_fraction_by_age_band and illness_probability.age_factor_by_age_band. 'flat' is the labelled baseline ignoring both: every host reads the pooled share — the behaviour before age structure shipped (HOST-AGE-02)."
+        },
+        "severity_age_mode": {
+          "type": "string",
+          "enum": ["by_age_band", "flat"],
+          "description": "Whether the severity draw applies its age term. 'by_age_band' (the default when absent) applies severity_model.base_probabilities_by_age_band. 'flat' is the labelled baseline: every band reads the pooled base_probabilities — the behaviour before the severity map was armed (HOST-AGE-03)."
         },
         "severity_model": {"$ref": "#/$defs/SeverityModel"},
         "observation_model": {"$ref": "#/$defs/ObservationModel"},
