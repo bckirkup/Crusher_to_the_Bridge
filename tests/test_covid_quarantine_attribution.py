@@ -653,3 +653,82 @@ def test_entrypoint_children_cover_all_240_cells_once(design):
     for index in range(240):
         seen.extend(c.index for c in entry.child_cells(cells, index, 1))
     assert sorted(seen) == list(range(240))
+
+
+# ── crew_duty_exclusion arm (CREW-WINDOW-01) ──────────────────────────────
+
+
+def test_crew_duty_exclusion_arm_writes_config_overrides():
+    raw = _raw_spec()
+    apply_arm_overrides(
+        raw, {"crew_duty_exclusion": {"enabled": True}},
+        profile=load_covid_profile(),
+    )
+    assert raw["config_overrides"]["crew_duty_exclusion"]["enabled"] is True
+
+
+def test_crew_duty_exclusion_merges_onto_a_declared_block():
+    raw = _raw_spec()
+    raw["config_overrides"]["crew_duty_exclusion"] = {
+        "enabled": False, "compliance_fraction": 1.0,
+    }
+    apply_arm_overrides(
+        raw, {"crew_duty_exclusion": {"enabled": True}},
+        profile=load_covid_profile(),
+    )
+    block = raw["config_overrides"]["crew_duty_exclusion"]
+    assert block["enabled"] is True
+    assert block["compliance_fraction"] == pytest.approx(1.0)
+
+
+def test_crew_duty_exclusion_rejects_a_non_mapping():
+    raw = _raw_spec()
+    with pytest.raises(ValueError):
+        apply_arm_overrides(
+            raw, {"crew_duty_exclusion": True},
+            profile=load_covid_profile(),
+        )
+
+
+def test_crew_duty_block_echoes_declared_resolved_realized():
+    from engines.crew_duty_exclusion import ACTION_EXCLUDED, ACTION_REFUSED
+    from picard_framework.covid_boarding_screen import _crew_duty_block
+
+    agents = [_Agent(7, "crew", "CC_D1_F"), _Agent(11, "crew", "CC_D1_F")]
+    sim = _Sim(agents)
+    sim.state.compliance_log = [
+        {"epoch": 400, "agent_id": 7, "action": ACTION_EXCLUDED},
+        {"epoch": 410, "agent_id": 11, "action": ACTION_EXCLUDED},
+        {"epoch": 411, "agent_id": 7, "action": ACTION_REFUSED},
+    ]
+    sim.crew_exclusion = SimpleNamespace(
+        policy=SimpleNamespace(
+            enabled=True,
+            food_symptom_free_hours=48.0,
+            nonfood_symptom_free_hours=24.0,
+            compliance_fraction=1.0,
+            medical_clearance_delay_hours=0.0,
+        ),
+        excluded_ids={11},
+    )
+    raw = {"config_overrides": {"crew_duty_exclusion": {"enabled": True}}}
+    block = _crew_duty_block(sim, raw)
+    assert block["enabled"] is True
+    assert block["resolved"]["enabled"] is True
+    assert (
+        block["resolved"]["food_employee_symptom_free_hours"]
+        == pytest.approx(48.0)
+    )
+    assert block["excluded_hosts"] == 2  # distinct agents
+    assert block["refused_events"] == 1
+    assert block["off_duty_at_end"] == 1
+
+
+def test_crew_duty_block_is_null_safe_on_a_shipped_default():
+    from picard_framework.covid_boarding_screen import _crew_duty_block
+
+    sim = _Sim([_Agent(1, "crew", "CC_D1_F")])
+    block = _crew_duty_block(sim, {"config_overrides": {}})
+    assert block["resolved"] is None
+    assert block["excluded_hosts"] == 0
+    assert block["refused_events"] == 0

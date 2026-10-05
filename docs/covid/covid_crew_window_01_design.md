@@ -51,24 +51,34 @@ gastroenteritis (AGE) rule; the DP-era practice is the mechanism class
 (symptomatic crew off duty), not the 24/48 h magnitudes, which are
 carried as declared Grade C intervals {24 h, 48 h} by food status.
 
-Model expression — needs a real protocol, not an arm trick:
-`confine_symptomatic_to_quarters` exists as a modifier, but an order's
-single `exempt_classes` governs both its confinement paths
-(`orchestrator_epoch.py`: symptomatic confinement skips exempted
-classes), so folding it into the SOP-017 slot is a no-op on exempt crew.
-The record's two orders are different orders (MHLW passenger-quarantine
-order vs the duty rule), so the honest shape is a **concurrent second
-scheduled entry**:
+Model expression — **the engine already ships the rule**. The drafted
+second-order shape (a `SOP-018` scheduled protocol + a
+`scheduled_protocol_add` arm key) was superseded at implementation:
+`engines/crew_duty_exclusion.py` is the VSP rule as a standing policy —
+no escalation gate (its whole difference from SOP-008), identified-crew
+removal via `ever_reported_ids`, release-to-work after the stated
+symptom-free interval (48 h food / 24 h nonfood plus a medical-clearance
+delay, `medical_clearance_delay_hours` declared 0 as the manual's
+stated minimum), and a declared `compliance_fraction` arm shipped at the
+enforced upper bound 1.0. The block sits top-level in
+`crusher_labs/config.yaml` at `enabled: false`; the arm is therefore
 
-- new protocol `SOP-018` in `data/config/protocols.json`:
-  `confine_symptomatic_to_quarters`, `exempt_classes []`, trigger
-  `scenario_calendar` (unreachable by design, like SOP-017), declared
-  description: replayed crew duty exclusion, days 16–30;
-- new arm key `scheduled_protocol_add` (append a schedule entry;
-  ~25 lines beside `_swap_scheduled_protocol`) — D4's grammar can't
-  express a second order today;
-- the quarantine-witness audit then asserts BOTH orders present:
-  `quarantine_witness.protocol_ids` ⊇ {SOP-017, SOP-018}.
+```json
+"crew_duty_exclusion": {"enabled": true}
+```
+
+a new narrow arm key that merges onto the shipped block through
+`config_overrides` (one-level merge — durations keep their sourced
+defaults). The reach-witness is a new `crew_duty_exclusion` payload
+block: declared block + resolved policy + realized tallies
+(`excluded_hosts`, `refused_events`, `off_duty_at_end`) off the
+compliance log — an enabled arm that excluded nobody is a
+mechanism-didn't-fire witness, since exclusion gates on the crew member
+having been *identified* (sick-call/infirmary reporting) first.
+Exclusion this rule does NOT do the quarantine ledger's job: excluded
+crew join `quarantined_ids` but release back to duty when cleared,
+which is exactly the record's duty-rule shape and different from the
+confinement-order semantics the SOP-018 sketch would have had.
 
 ### B. Exemption scope — `EXEMPT_ESSENTIAL` (declared counterfactual, partially sourced)
 
@@ -100,10 +110,15 @@ split itself is a declared Grade C liability (AERO-SPLIT-01
 `far_field_share` ∈ [0.05, 0.30]). This arm is a **declared attenuation
 ladder on the mess channel's effective reach**, not a refit:
 
-- `MESS_0P5` / `MESS_0P25`: `transmission_overrides` (or
-  `profile_route_efficiency_multipliers` — exact key pinned at preflight
-  against the engine's actual far-field term) scaling the during-window
-  mess delivery to {0.5, 0.25} of declared.
+- `MESS_0P5` / `MESS_0P25`: `transmission_overrides` →
+  `transmission.droplet_field_split` — `far_field_share` scaled to
+  {0.0875, 0.04375} (×0.5, ×0.25 of the shipped 0.175 midpoint) with
+  the removed share diverted to `settled_share`, so `near_field_share`
+  stays 0.825 and the ladder weakens the pooled bath rather than
+  re-injecting it into proximity rings. Ship-wide by construction (no
+  zone-class droplet scalar exists); the before-phase side-effect is
+  reported in the paired delta, and during-window the mess is the
+  dominant far-field consumer.
 - Purpose: read the band's attenuation function — how much the
   mess-channel alone has to weaken to move the tail — as an *inverse*
   read. Whatever lands the band is a magnitude the literature must then
@@ -159,19 +174,24 @@ verbatim. `SOP-017-ALLHANDS` is NOT re-run: its corner is measured.
 
 - `quarantine_witness` echoes on every cell: window `[16,30]`,
   `activated` true; `exempt_classes` equals the arm's declared set
-  (four classes on D0, subset on EXEMPT_*, all four on CREWDUTY/MESS_*
-  — the second order confines symptomatic exempt-class members through
-  its own empty exemption list; CREWDUTY cells must echo both
-  protocol ids in `protocol_ids`).
+  (four classes on D0/CREWDUTY/MESS_*; the declared subset on EXEMPT_*).
+- `crew_duty_exclusion` echo: `resolved.enabled` true on CREWDUTY
+  cells and `excluded_hosts` recorded — 0 means the
+  `ever_reported_ids` identification gate never opened, a
+  mechanism-didn't-fire witness rather than a null result.
 - `index_onset_day == -1.0`, `index_shedding_at_day0` true on every cell.
+- `delivery` echo's resolved `droplet_field_split` shares match the arm
+  values on MESS_* cells.
 - `propensity_draw.units_drawn > 0`; `delivery.caregiver.mode` resolves
   `on`; `presentation_draw_mode == 'once_per_course'`;
   `hand_reservoir_mode == 'hygiene_cycle'`.
 
 ## Report immediately if
 
-Any audit invariant fails; a CREWDUTY cell echoes a missing SOP-018
-order; any non-D0 arm's during-window median lands inside the band with
+Any audit invariant fails; a CREWDUTY cell echoes
+`resolved.enabled == false`, or `excluded_hosts == 0` with no
+ascertainment explanation; any non-D0 arm's during-window median lands
+inside the band with
 before-mass unmoved (a live CHANNEL-LANDED candidate — stop and report);
 or child failure rate exceeds 5%.
 
@@ -188,16 +208,19 @@ or child failure rate exceeds 5%.
 
 ## Required deltas before cells run
 
-1. `data/config/protocols.json`: `SOP-018` (concurrent symptomatic-crew
-   confinement) and `SOP-017-ESSENTIAL` / `SOP-017-ENGMED` (exemption
-   subsets — pick exact ids at write time).
-2. Arm grammar: `scheduled_protocol_add` in `ARM_OVERRIDE_KEYS` +
-   `_apply_*` (appends a `scenario_schedule.protocols` entry);
-   `quarantine_witness` already records `protocol_ids` plural — extend
-   its audit to expect the pair.
-3. The MESS arm's exact override key, pinned at preflight against the
-   shipped far-field term (`transmission_overrides` vs
-   `profile_route_efficiency_multipliers`).
+1. `data/config/protocols.json`: `SOP-017-ENGMED` (engineering+medical)
+   and `SOP-017-ESSENTIAL` (+galley) exemption subsets — the
+   `SOP-018`-style second order is NOT needed (§A: the rule already
+   ships as a standing policy, not a protocol).
+2. Arm grammar: `crew_duty_exclusion` in `ARM_OVERRIDE_KEYS` +
+   `_apply_crew_duty_exclusion` merging onto the shipped block;
+   `scheduled_protocol_add` is NOT needed. Payload: the
+   `crew_duty_exclusion` declared/resolved/realized echo block.
+3. The MESS arm key, pinned: `transmission_overrides` →
+   `transmission.droplet_field_split` — `far_field_share` attenuated
+   with the removed share diverted to `settled_share` so near-field
+   ring delivery is held constant (the ladder weakens the pooled bath
+   instead of re-injecting it into proximity rings).
 4. Design file `picard_framework/runs/covid_crew_window_01_design.json`
    carrying this grid, the arm override blocks, and this verdict
    grammar verbatim in `admissibility`.

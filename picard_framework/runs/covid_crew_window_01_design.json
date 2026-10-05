@@ -1,0 +1,154 @@
+{
+  "design_id": "covid_crew_window_01",
+  "task_id": "CREW-WINDOW-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_quar_suppression_v1",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "design_doc": "docs/covid/covid_crew_window_01_design.md",
+  "supersedes": "Nothing. covid_quar_suppression_v1 (D4, measured 6ea3093d) bracketed the during-quarantine mass: D0_declared median 678 @Theta1e6 / 730 @Theta7.9e6 vs SOP017_ALLHANDS 27 / 105 vs the record-informed band 150-350. The real DP crew kept working essential service but produced ~2-5x less infection than the model's working-crew channel \u2014 the truth sits strictly between the corners. This leg discriminates WHICH sourceable attenuation of the working-crew channel lands the tail in band while the before phase stays seed-paired unmoved.",
+  "description": "CREW-WINDOW-01: seed-paired attenuation probe of the during-quarantine working-crew channel at the two clause-leg thetas ({1e6, 7.9e6}) x 6 arms x 20 seeds = 240 declared-replay cells on the verbatim diamond_princess_2020 contract (infection_age_days 6.8, imports 1, dwell_weighted, SOP-017 days 16-30). Arms: D0_declared (pairing base + HOST-AGE-01 armed-tree drift witness against 6ea3093d), CREWDUTY (engine's shipped crew_duty_exclusion block armed \u2014 VSP 2018 4.4.1.1.1's unconditional symptomatic-crew removal, tranche 33), EXEMPT_ENGMED / EXEMPT_ESSENTIAL (SOP-017 exempt_classes subsets via the scheduled_protocol_id swap \u2014 the narrow and medium readings of the record's 'essential service'), MESS_0P5 / MESS_0P25 (declared far-field attenuation ladder: droplet_field_split far_field_share halved/quartered with the removed share diverted to settled_share so near-field ring delivery is held constant \u2014 reads the attenuation function of the pooled mess bath, 54-58% of during-window acquisitions, without re-injecting it into proximity rings). All non-D0 arms are non-scoring discriminating probes.",
+  "prerequisites": [
+    "DP-BELIEF-01 measured (PRs #891/#892 + addendum): BELIEVABILITY-DIVERGENT \u2014 during-window mass 678-757 vs record-informed 150-350, during dated mass ~95% crew vs record 29%.",
+    "covid_quar_suppression_v1 measured (6ea3093d, 80/80): CONFINEMENT-CHANNEL \u2014 the tail is 92-96% the crew exemption; ALLHANDS overshoots the band (27/105).",
+    "HOST-AGE-01 merged (PR #899): age-graded susceptibility + presentation on sars_cov2_resp; the D0 row re-run in-design doubles as the armed-tree drift witness.",
+    "AGE-WITNESS-01 merged (PR #902): infections/during/dated by age band in the cell payload \u2014 read against the NIID decade curve as shape witness.",
+    "crew_duty_exclusion engine block shipped (engines/crew_duty_exclusion.py; crusher_labs/config.yaml enabled:false): VSP 4.4.1.1.1 durations 48h food / 24h nonfood, compliance_fraction 1.0 upper bound, medical_clearance_delay_hours 0; exclusion gates on ever_reported_ids \u2014 crew must be identified (sick-call/infirmary) before exclusion fires.",
+    "CREW-WINDOW-01 delta PR: crew_duty_exclusion arm key + delivery/attribution echo; protocols SOP-017-ENGMED and SOP-017-ESSENTIAL entries."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    1000000.0,
+    7900000.0
+  ],
+  "thetas_note": "The two clause-leg crossings measured in the refit lineage: Theta1e6 is the count-leg pass (timing fails below-side), Theta7.9e6 the timing-leg pass (count fails overshoot-side). D4's bracket was measured at both; the crew-window question reads at both.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim replay contract; a null axis on explicit seeds (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The matched 20-seed set 20200205-20200224 of the v11 lineage \u2014 identical to D4 so every row pairs seed-for-seed against the recorded cells.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim \u2014 SOP-017 days 16-30, all four crew classes exempt, crew_duty_exclusion off. First arm so empty overrides per the arm grammar. Doubles as the pairing base and as the armed-tree drift witness against 6ea3093d (HOST-AGE-01 + AGE-WITNESS-01 merged since the recorded row)."
+    },
+    {
+      "arm_id": "CREWDUTY",
+      "overrides": {
+        "crew_duty_exclusion": {
+          "enabled": true
+        }
+      },
+      "note": "The shipped crew_duty_exclusion block armed \u2014 VSP 2018 OM 4.4.1.1.1 (tranche 33, Tr): symptomatic crew isolation required/unconditional/immediate, food 48h + nonfood 24h symptom-free + medical clearance, compliance_fraction 1.0 upper bound. Exclusion gates on ever_reported_ids (identified cases only \u2014 the ascertainment dependence is part of the mechanism). Resolved policy + excluded_hosts/refused tallies echo in cell_payload_additions.crew_duty_exclusion."
+    },
+    {
+      "arm_id": "EXEMPT_ENGMED",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-ENGMED"
+      },
+      "note": "SOP-017-ENGMED (protocols.json): identical window and modifiers, exempt_classes narrowed to {crew_engineering, crew_medical} \u2014 the unambiguous reading of the record's 'essential service'. Diagnostic counterfactual; non-scoring."
+    },
+    {
+      "arm_id": "EXEMPT_ESSENTIAL",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-ESSENTIAL"
+      },
+      "note": "SOP-017-ESSENTIAL: exempt_classes {crew_engineering, crew_galley, crew_medical} \u2014 the medium reading (meal delivery to cabins continued). Tests whether the general/steward class carries the mess bath. Diagnostic; non-scoring."
+    },
+    {
+      "arm_id": "MESS_0P5",
+      "overrides": {
+        "transmission_overrides": {
+          "droplet_field_split": {
+            "mode": "partition",
+            "far_field_share": 0.0875,
+            "settled_share": 0.0875
+          }
+        }
+      },
+      "note": "Declared attenuation point: far_field_share 0.175 -> 0.0875 with the removed share diverted to settled_share so near-field ring delivery is held constant (near_field_share stays 0.825) \u2014 half the pooled far-field dose is deposited on surfaces (the fomite channel, measured ~dead on this hull) instead of inhaled from the zone bath. Ship-wide by construction; the before-phase side-effect is reported in the paired delta, and during-window the mess is the dominant far-field consumer."
+    },
+    {
+      "arm_id": "MESS_0P25",
+      "overrides": {
+        "transmission_overrides": {
+          "droplet_field_split": {
+            "mode": "partition",
+            "far_field_share": 0.04375,
+            "settled_share": 0.13125
+          }
+        }
+      },
+      "note": "The quarter point of the same ladder (far_field_share 0.04375, settled_share 0.13125, near-field held at 0.825) \u2014 reads the attenuation-band function's slope. Whatever far-field depth lands the band is a magnitude the literature must then corroborate (mess occupancy, meal staggering), never a constant adopted silently."
+    }
+  ],
+  "cells": 240,
+  "cells_note": "2 Theta x 6 arms x 20 seeds = 240 declared-replay cells (~30 min each on the campaign image). Cell order theta x arm x seed; canary = one arm row (20 cells) read out before the array per the campaign-preflight gate.",
+  "cell_payload_additions": [
+    "note",
+    "index_onset_day",
+    "index_shedding_at_day0",
+    "index_departed_epoch",
+    "infections_total",
+    "aboard_total",
+    "attack_rate",
+    "vsp_reported_case_fraction_max",
+    "infections_by_age_band",
+    "during_window_by_age_band",
+    "during_quarantine_by_age_band",
+    "dated_onsets_by_age_band",
+    "crew_duty_exclusion"
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant carry verbatim from the v11 lineage; the verdict grammar below operationalizes the CREW-WINDOW-01 design doc's grammar. Every non-D0 arm is a discriminating probe, never a score: EXEMPT_* are declared counterfactual protocols, MESS_* a declared attenuation ladder, CREWDUTY a sourced mechanism arm.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v11: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173; scored only when the row has >= 5 takeoff seeds, else 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored on the D0_declared rows only \u2014 every other arm is exempt by construction; arm rows report the same fields as non-scoring context."
+    },
+    "record_informed_during_band": {
+      "criterion": "Takeoff-conditional median infections_during_window (days 16-30) inside [150, 350] on the arm row; before-window mass (infections_before_quarantine) seed-paired unmoved vs the in-design D0 row.",
+      "source": "NIID during-quarantine dated mass scaled to infections (covid_believability_map_v1.md F8/F11 lineage)"
+    },
+    "verdict_grammar": {
+      "CHANNEL-LANDED": "during median inside [150,350] AND before mass seed-paired unmoved AND during_window crew share measurably toward the record's 0.29.",
+      "UNDER-ATTENUATED": "median moves toward but stays above the band; report residual + crew share + band-side miss.",
+      "OVER-ATTENUATED": "median below the band \u2014 joins ALLHANDS on the too-strong side; the bracket narrows but no candidate conforms.",
+      "UNMOVED": "seed-paired delta inside RNG-reorder noise \u2014 the arm never reached the channel; audit the reach echo first (crew_duty_exclusion.excluded_hosts > 0 for CREWDUTY; quarantine_witness.exempt_classes echo for EXEMPT_*; delivery exposure/far-field echo for MESS_*)."
+    },
+    "age_witness": "infections_by_age_band / during_window_by_age_band / dated_onsets_by_age_band read against the NIID confirmed-by-decade curve (~8% -> 24% across working ages) as SHAPE WITNESS only \u2014 the barred training set is never a fit target.",
+    "audit_invariants": [
+      "quarantine_witness.window_days == [16,30] and activated true on every cell",
+      "quarantine_witness.exempt_classes == shipped four crew classes on D0/CREWDUTY/MESS_*; == the declared subset on EXEMPT_*",
+      "crew_duty_exclusion.resolved.enabled true on CREWDUTY cells; excluded_hosts recorded (0 means the identification gate never opened \u2014 a mechanism-didn't-fire witness, not a null)",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "propensity_draw.units_drawn > 0; delivery.caregiver.mode resolves on; presentation_draw_mode == 'once_per_course'; hand_reservoir_mode == 'hygiene_cycle'",
+      "delivery echo far_field_share == arm value on MESS_* cells"
+    ]
+  },
+  "diagnostics": {
+    "paired_vs_in_design_d0": "Each arm row pairs seed-for-seed with its in-design D0_declared row at the same theta: delta infections_during_window, delta during_window_by_role (crew and passenger separately), delta during_window_by_age_band (the NIID-shape witness), delta infections_before_quarantine (expected ~0 modulo RNG reorder for CREWDUTY/EXEMPT_*, which fire only inside the window; MESS_* arms run all voyage so a material pre-window delta is the reported side-effect, not noise), delta recorded_onsets/before_share, and the during-window crew share vs the record's 0.29.",
+    "paired_vs_shipped_rows": "Each D0_declared row pairs against the D4 recorded rows (6ea3093d) \u2014 the HOST-AGE-01/AGE-WITNESS-01 armed-tree drift witness.",
+    "confined_passenger_bound": "confined_passenger_infections_during_quarantine reported vs the >=52 record lower bound (D2's passenger-cabin witness is a separate leg); recorded but not scored here."
+  },
+  "execution": {
+    "platform": "AWS Batch via deploy/aws/submit_covid_boarding_screen.sh with DESIGN=covid_crew_window_01, STRIDE 1, queue picard-analysis-queue (On-Demand; Fargate fallback picard-analysis-fargate-queue), jobdef family picard-covid-boarding-screen. Thin overlay Dockerfile per campaign convention at the current main generation.",
+    "canary": "Per the campaign-preflight gate: local smoke proving each arm override reaches the engine (echo_screen_cell), dry-run count = 240, one canary arm row (20 seeds) read out and reported before the full array.",
+    "stop_rules": "Report immediately if any audit invariant fails; a CREWDUTY cell echoes resolved.enabled false or excluded_hosts 0 without explanation; any non-D0 arm's during median lands inside the band with before mass unmoved (a live CHANNEL-LANDED candidate); or child failure rate exceeds 5%."
+  },
+  "rejected_alternatives": {
+    "concurrent_second_order": "SUPERSEDED at implementation: the design doc sketched a SOP-018 concurrent symptomatic-confinement order + scheduled_protocol_add arm key, but the engine already ships crew_duty_exclusion (engines/crew_duty_exclusion.py, config block off by default) \u2014 the VSP rule as a standing policy with release-to-work semantics. The arm enables the shipped block rather than approximating the rule through the confinement-order machinery (which has no release semantics).",
+    "exempt_classes_on_symptomatic_path": "REJECTED: folding confine_symptomatic_to_quarters into SOP-017 cannot exclude exempted crew \u2014 one order's exempt_classes governs all its confinement paths (orchestrator_epoch.py); a per-path exemption split would be new engine semantics with no record to source it.",
+    "tuned_scalar": "REJECTED: no arm tunes a constant to the band. EXEMPT_* subsets are record-wording readings; MESS_* is a two-point declared ladder measuring the attenuation function; CREWDUTY's durations are the VSP-stated values with the shipped compliance upper bound."
+  }
+}

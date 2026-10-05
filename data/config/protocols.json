@@ -593,6 +593,45 @@
       },
       "category": "intervention",
       "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-ENGMED",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, Engineering+Medical Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-01 (docs/covid/covid_crew_window_01_design.md): SOP-017 with exempt_classes narrowed to engineering and medical only — the unambiguous reading of 'essential service' — differenced against the shipped all-four-crew exemption to read which working-crew classes carry the during-quarantine tail. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_engineering",
+          "crew_medical"
+        ]
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-ESSENTIAL",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, Essential Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-01 (docs/covid/covid_crew_window_01_design.md): SOP-017 with exempt_classes narrowed to engineering, galley and medical — the medium reading of 'essential service', since meal delivery to cabins continued — differenced against the shipped all-four-crew exemption to read which working-crew classes carry the during-quarantine tail. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_engineering",
+          "crew_galley",
+          "crew_medical"
+        ]
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }
