@@ -49,12 +49,15 @@ every profile.
 
 - `tests/test_covid_hull_change_detector.py` GM cell (Θ 1e10, seed
   20200333): `(36, 19, 217, 55, 18)` → `(34, 17, 217, 56, 22)` on
-  CPython 3.12. `campaign_asymptomatic_positives` 18 → 22 is the
+  CPython 3.12 and `(43, 25, 217, 60, 19)` on 3.11 (CI job
+  111755668902) — the interpreters now diverge, the armed arm having
+  lifted the cell out of the near-extinct regime whose reads they
+  used to share. `campaign_asymptomatic_positives` 18 → 22 is the
   intended direction — young-band infections that would once have
   presented now stay silent and are caught by the campaign screen.
   The identical profile minus both maps reproduces the prior tuple
   exactly on the same tree, so the move is fully attributed to the
-  two maps. 3.11 entry carries the same tuple pending its CI read.
+  two maps.
 - `tests/test_covid_hull_change_detector.py` DP cell (Θ 1e10, seed
   20200333, CPython 3.12, slow-marked): `(2480, 2215, 2827, 595, 542)`
   → `(2765, 2587, 2702, 398, 333)`. Composition: the presentation
