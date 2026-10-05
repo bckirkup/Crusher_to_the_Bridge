@@ -1181,7 +1181,36 @@ _TRANSMISSION_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("flush_aerosol_fraction", "flush_aerosol_fraction"),
     ("flush_cabin_emission", "flush_cabin_emission"),
     ("blackwater_plumbing", "blackwater_plumbing"),
+    # FOOD-COMMON-SOURCE-01: the whole armed block (mode, rungs, posture,
+    # coupling) so a run's summary records which food arm it drew. NORO-FOOD-02
+    # stamped this via a jobdef monkey-patch; it belongs in the map.
+    ("common_source", "common_source"),
 )
+_SOCIAL_PARAM_MAP: tuple[tuple[str, str], ...] = (
+    ("agent_profile_bundle", "agent_profile_bundle"),
+)
+
+
+def _fill_demographic_params(
+    params: dict[str, Any], cfg: Mapping[str, Any],
+) -> None:
+    """Record the demographic arm a run carried: bundle path + class mix.
+
+    The bundle path is the arm's identity (the composite it draws is the
+    bundle's own documentation); the class fractions are stamped compactly
+    because the arm that shifts them shifts a physical coordinate, not a
+    label.
+    """
+    social = cfg.get("social") or {}
+    _copy_present(params, social, _SOCIAL_PARAM_MAP)
+    classes = (cfg.get("ship_graph") or {}).get("agent_classes")
+    if isinstance(classes, list) and classes:
+        params["agent_class_fractions"] = {
+            str(entry.get("class_id")): entry.get("fraction")
+            for entry in classes
+            if isinstance(entry, dict) and entry.get("class_id")
+        }
+
 _WEAR_PARAM_MAP: tuple[tuple[str, str], ...] = (
     ("deployment_profile", "wearables"),
     ("detection_sensitivity_scale", "wearable_sensitivity"),
@@ -1289,6 +1318,7 @@ def _fill_override_params(params: dict[str, Any], cfg: Mapping[str, Any]) -> Non
         params, transmission, _TRANSMISSION_PARAM_MAP,
         skip_if_present=frozenset(dest for _, dest in _TRANSMISSION_PARAM_MAP),
     )
+    _fill_demographic_params(params, cfg)
     fred = cfg.get("fred_behavior") or {}
     _copy_present(
         params,
@@ -1433,6 +1463,7 @@ def parameters_from_spec(spec: dict[str, Any]) -> dict[str, Any]:
     _copy_present(params, cfg.get("hvac") or {}, _HVAC_PARAM_MAP)
     _copy_present(params, ship, (("immune_fraction", "immune_fraction"),))
     _copy_present(params, cfg.get("transmission") or {}, _TRANSMISSION_PARAM_MAP)
+    _fill_demographic_params(params, cfg)
     _copy_present(
         params,
         cfg.get("fred_behavior") or {},

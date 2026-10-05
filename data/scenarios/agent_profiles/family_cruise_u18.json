@@ -1,0 +1,93 @@
+{
+    "schema_version": "1.0.0",
+    "description": "Family-skewed cruise passenger composition for the NORO-AGE-FOOD-01 demographic arms. Paired with a ship_graph.agent_classes override that raises the passenger_family share to 0.25, it puts ~20% of passengers under 18 — the child share a family-market hull actually carries (the shipped 0.10 family fraction cannot reach it: 0.10 x 0.56 = 5.6% of passengers at these weights).",
+    "age_composition_derivation": {
+        "published_inputs": [
+            "No measured family-market cruise age composition is in the repository; the under-18 share target (~20% of passengers) is the design's declared arm coordinate, stated here so the weights are transparent."
+        ],
+        "steps": [
+            "passenger_family splits its child draw across the two child bands (0-4 and 5-17) rather than the single 'child' label — a family hull carries infants as well as school-age children; both bands read the same 0.51 presentation factor on norwalk_gi, so the split is honest composition, not a mechanism dodge.",
+            "Weights {0-4: 0.12, 5-17: 0.44, young_adult: 0.20, adult: 0.24} put 0.56 of the family class under 18 and keep the remaining 0.44 in the parent bands (18-34 / 35-49).",
+            "passenger_general, passenger_elderly and all crew classes keep the repository default bundle's band lists verbatim — only the family class's age draw changes; the class-share shift lives in the tier's ship_graph.agent_classes override, not here."
+        ],
+        "refusals": [
+            "All weights in this bundle are Grade C declared — no source measures the age composition of a family-market cruise at publishable grade in-tree, and the arm's purpose is to bracket the demographic axis, not to claim a measured hull.",
+            "Composite passenger composition under the arm's class fractions (general 0.35 / family 0.25 / elderly 0.10 of a 0.70 passenger share): ~20% of passengers under 18, ~14% >=65 — versus ~5% and ~14% on the default bundle."
+        ]
+    },
+    "default_template": {
+        "age_bands": [
+            "adult"
+        ],
+        "monitored_channels": [
+            "heart_rate",
+            "body_temp",
+            "spo2",
+            "respiratory_rate"
+        ]
+    },
+    "class_templates": {
+        "passenger_general": {
+            "age_bands": [
+                "young_adult",
+                "adult",
+                "middle_aged"
+            ],
+            "vaccinations": [
+                "routine_childhood"
+            ]
+        },
+        "passenger_family": {
+            "age_bands": [
+                "0-4",
+                "5-17",
+                "young_adult",
+                "adult"
+            ],
+            "age_band_weights": [
+                0.12,
+                0.44,
+                0.20,
+                0.24
+            ]
+        },
+        "passenger_elderly": {
+            "age_bands": [
+                "senior"
+            ],
+            "comorbidities": [
+                "hypertension"
+            ],
+            "vaccinations": [
+                "influenza_annual"
+            ]
+        },
+        "crew_medical": {
+            "age_bands": [
+                "adult"
+            ],
+            "device_id": "garmin_watch",
+            "vaccinations": [
+                "occupational_health"
+            ]
+        },
+        "crew_galley": {
+            "age_bands": [
+                "adult",
+                "middle_aged"
+            ],
+            "device_id": "garmin_watch"
+        },
+        "crew_engineering": {
+            "age_bands": [
+                "adult"
+            ]
+        },
+        "crew_general": {
+            "age_bands": [
+                "adult",
+                "young_adult"
+            ]
+        }
+    }
+}
