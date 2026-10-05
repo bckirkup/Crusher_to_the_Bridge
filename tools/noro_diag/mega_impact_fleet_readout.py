@@ -52,7 +52,10 @@ from common_source_readout import (  # noqa: E402
     _cs_fields,
     _tail_fields,
 )
-from mega_baseline_reanalysis import _window_share  # noqa: E402
+from mega_baseline_reanalysis import (  # noqa: E402
+    _quantiles,
+    _window_share,
+)
 from outbreak_anchor_readout import (  # noqa: E402
     _posted,
     _row_from_summary,
@@ -211,31 +214,20 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
     }
 
 
-def _quantiles(values: list[float]) -> dict[str, Any]:
-    if not values:
-        return {"n": 0, "median": None, "p90": None, "max": None}
-    ordered = sorted(values)
-    n = len(ordered)
-
-    def q(frac: float) -> float:
-        pos = frac * (n - 1)
-        lo, hi = math.floor(pos), math.ceil(pos)
-        if lo == hi:
-            return ordered[lo]
-        return ordered[lo] + (ordered[hi] - ordered[lo]) * (pos - lo)
-
-    return {"n": n, "median": q(0.5), "p90": q(0.9), "max": ordered[-1]}
+def _reach_counts(rows: list[dict[str, Any]]) -> dict[float, int]:
+    return {
+        bound: sum(
+            1 for r in rows
+            if max(r["pax_ratio"], r["crew_ratio"]) >= bound
+        )
+        for bound in (0.80, 0.90, 0.95, 1.0)
+    }
 
 
 def _aggregate(rows: list[dict[str, Any]]) -> dict[str, Any]:
     active = [r for r in rows if r["n_acquired"] > 0]
     detected = [r for r in rows if r["detection_epoch"] is not None]
-    near = dict.fromkeys((0.80, 0.90, 0.95, 1.0), 0)
-    for r in rows:
-        gap = max(r["pax_ratio"], r["crew_ratio"])
-        for bound in near:
-            if gap >= bound:
-                near[bound] += 1
+    near = _reach_counts(rows)
     routes: Counter = Counter()
     dose: dict[str, float] = defaultdict(float)
     for r in rows:
