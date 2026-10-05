@@ -3,6 +3,7 @@
 **Commit:** 19035a51
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** 2713e566
 
 The genogroup declaration the `dose_response.alpha`/`beta` register row was
 waiting on. Decision record, not a measurement: it settles *how* strain-level

@@ -1048,9 +1048,9 @@ The earlier trace values (zone_pool: 2258 onsets and 1729 HVAC infections;
 cabin_compartment: 3 onsets and 13 HVAC infections; witnesses 68 and 139)
 were produced by the mass-creating frozen-source integrator and are
 superseded. Corrected artifacts are
-[`/home/ubuntu/phase0/pool_transport_logs/zone_pool_new.log`](file:///home/ubuntu/phase0/pool_transport_logs/zone_pool_new.log)
+`/home/ubuntu/phase0/pool_transport_logs/zone_pool_new.log`
 and
-[`/home/ubuntu/phase0/pool_transport_logs/cabin_compartment_new.log`](file:///home/ubuntu/phase0/pool_transport_logs/cabin_compartment_new.log).
+`/home/ubuntu/phase0/pool_transport_logs/cabin_compartment_new.log`.
 
 Θ=3.16e7 belongs to the pooled model, so a refit under the new defaults is
 required before any v5 or v4 number is carried forward. Earlier campaigns are

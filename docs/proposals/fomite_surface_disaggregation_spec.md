@@ -1,5 +1,7 @@
-> **Status:** Proposed — nothing here is implemented, adopted or authorized to
-> run. No constant is changed by this document. It exists so that the choice
+> **Status:** Implemented — option B ships as the labelled default-off
+> `per_surface` representation in `engines/fomite_surfaces.py`
+> (NORO-FOMITE-DISAGG-01); the `pooled` representation is unchanged shipped
+> behaviour. No constant is changed by this document. It exists so that the choice
 > between bounding `HIGH_TOUCH_AREA_M2` and retiring it is made against a
 > specification and a price, rather than against a sketch. Measurements quoted
 > are attributed to their source file; every dose figure in the repository

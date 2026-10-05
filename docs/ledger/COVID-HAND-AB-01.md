@@ -3,6 +3,7 @@
 **Commit:** 1c94de2d
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 1c94de2d
 
 The 60-cell three-arm canary of the rebuilt hand line on the Diamond
 Princess record leg (design

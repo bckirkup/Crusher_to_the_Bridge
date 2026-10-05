@@ -2,7 +2,13 @@
 **Date:** 2026-10-02
 **Commit:** #855
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** superseded
+
+Superseded by NORO-CAREGIVER-02 before any cell ran: the discovery half of
+this design was dead on arrival at `a78c942e` — found by CHANNEL-04's
+pre-campaign smoke on one expedition scr-mid voyage at seed 8000 — so the
+frozen design may not be run as spec'd; a revival re-scopes around
+NORO-CAREGIVER-02's repair.
 
 ## Question
 

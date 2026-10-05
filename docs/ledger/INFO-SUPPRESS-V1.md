@@ -3,6 +3,7 @@
 **Commit:** cbe3b478
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** c79d3ac2
 
 The surviving named class after SUPPRESS-V1's `suppression_incapable`:
 suppression keyed on the outbreak becoming **known** — the escalation

@@ -3,6 +3,7 @@
 **Commit:** fbad8738
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** 1935b5d4
 
 ## Declared design (frozen before any cell ran)
 

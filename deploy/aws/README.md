@@ -602,7 +602,7 @@ aws s3 sync s3://$BUCKET/$PREFIX/_resume/ ./_resume/ && cat ./_resume/completed_
 
 Multi-pathogen k-sweep for pre-boarding decision surfaces (10,000 Tier-1 runs;
 7,600 deferred Tier-2). Full notes:
-[`docs/boundary_aws_pipeline_lessons.md`](../docs/boundary_aws_pipeline_lessons.md).
+[`docs/boundary_aws_pipeline_lessons.md`](../../docs/boundary_aws_pipeline_lessons.md).
 
 **Light validation only** (do not full-matrix dry-run):
 

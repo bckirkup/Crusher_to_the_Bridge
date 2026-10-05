@@ -2,7 +2,8 @@
 **Date:** 2026-10-03
 **Commit:** #856
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
+**Measured at:** 1e158d47
 
 ## Question
 

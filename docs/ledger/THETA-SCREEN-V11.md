@@ -3,6 +3,7 @@
 **Commit:** 7660392
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 7660392
 
 Declared at `32d1842`; stage 1 measured at `7660392`. Section "Declared"
 records the criteria as frozen before any cell ran; section "Result"
