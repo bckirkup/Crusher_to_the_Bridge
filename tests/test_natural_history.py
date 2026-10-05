@@ -532,3 +532,21 @@ class TestFlatSeverityBaseline:
             for _ in range(20)
         }
         assert drawn == {"mild"}
+
+
+class TestAgeModeValidation:
+    """A typo'd age mode is a load error, not a silent default."""
+
+    @pytest.mark.parametrize(
+        "mode_key",
+        [
+            "presentation_age_mode",
+            "severity_age_mode",
+            "susceptibility_age_mode",
+        ],
+    )
+    def test_an_unknown_mode_is_rejected(self, mode_key: str) -> None:
+        from orchestrator_init import _validate_age_graded_terms
+
+        with pytest.raises(ValueError, match=mode_key):
+            _validate_age_graded_terms("norwalk_gi", {mode_key: "bogus"})
