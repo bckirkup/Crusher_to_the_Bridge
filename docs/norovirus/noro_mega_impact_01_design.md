@@ -1,6 +1,7 @@
 # MEGA-IMPACT-01 — mechanism-attribution factorial on mega_cruise_5000
 
-Status: fleet submitted — 2026-10-05 (UTC), Spot
+Status: fleet complete — 2026-10-05 (UTC): 618/618 cells
+SUCCEEDED, zero failures, ~4.5 h wall on Spot
 (`picard-campaign-queue`), jobdef `picard-noro-mega-impact-01:6`,
 image `campaign-7e1b54bc` (sha256:60793dd3…, `--payload lean`,
 6144 MB/child — canary lean peak max 4313 MB). Arrays:
