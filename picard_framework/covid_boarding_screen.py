@@ -95,6 +95,7 @@ ARM_OVERRIDE_KEYS = frozenset({
     "hazard_frailty",
     "info_suppression",
     "participation_propensity",
+    "crew_duty_exclusion",
 })
 # The embarkation-immunity structure an arm may write onto
 # ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
@@ -584,6 +585,21 @@ def _apply_scheduled_window(raw: dict[str, Any], window: Any) -> None:
     _retime_scheduled_protocol(raw, window)
 
 
+def _apply_crew_duty_exclusion(raw: dict[str, Any], block: Any) -> None:
+    """Merge a ``crew_duty_exclusion`` arm block onto the declared config.
+
+    The policy block is a top-level engine config entry (shipped
+    ``enabled: false``) that ``merge_config_overrides`` merges one level
+    deep, so an arm declaring only ``{"enabled": true}" keeps the
+    sourced 48 h/24 h symptom-free durations and compliance arm.
+    """
+    if not isinstance(block, Mapping):
+        raise ValueError("crew_duty_exclusion must be a mapping")
+    raw.setdefault("config_overrides", {}).setdefault(
+        "crew_duty_exclusion", {},
+    ).update(block)
+
+
 def _apply_infection_counters(raw: dict[str, Any], counters: Any) -> None:
     if not isinstance(counters, list):
         raise ValueError("infection_counters must be a list of counter defs")
@@ -879,6 +895,8 @@ def apply_arm_overrides(
         _apply_scheduled_window(raw, overrides["scheduled_protocol_window"])
     if "scheduled_protocol_id" in overrides:
         _swap_scheduled_protocol(raw, str(overrides["scheduled_protocol_id"]))
+    if "crew_duty_exclusion" in overrides:
+        _apply_crew_duty_exclusion(raw, overrides["crew_duty_exclusion"])
     if "infection_counters" in overrides:
         _apply_infection_counters(raw, overrides["infection_counters"])
     if "transmission_overrides" in overrides:
@@ -1312,6 +1330,7 @@ def _attribution_block(
             confined_passengers if activated else None
         ),
         "quarantine_witness": witness,
+        "crew_duty_exclusion": _crew_duty_block(sim, raw),
     }
 
 
@@ -1744,6 +1763,57 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         "participation_propensity": (
             lambda _rh: _rh.propensity_resolved if _rh is not None else None
         )(getattr(getattr(sim, "engine", None), "_rhythm", None)),
+    }
+
+
+def _crew_duty_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
+    """Declared + resolved + realized crew duty-exclusion echo.
+
+    The reach-witness for a ``crew_duty_exclusion`` arm: the declared
+    override block, the engine-resolved policy fields, and the realized
+    exclusion tallies off the compliance log. An enabled arm that
+    excluded nobody is a mechanism-didn't-fire witness — the
+    ``ever_reported_ids`` identification gate never opened.
+    """
+    from engines.crew_duty_exclusion import ACTION_EXCLUDED, ACTION_REFUSED
+
+    declared = (
+        raw.get("config_overrides", {}).get("crew_duty_exclusion") or {}
+    )
+    tracker = getattr(sim, "crew_exclusion", None)
+    policy = getattr(tracker, "policy", None)
+    log = getattr(getattr(sim, "state", None), "compliance_log", ()) or ()
+    excluded = {
+        e.get("agent_id")
+        for e in log
+        if e.get("action") == ACTION_EXCLUDED
+    }
+    excluded.discard(None)
+    return {
+        **declared,
+        "resolved": (
+            {
+                "enabled": policy.enabled,
+                "food_employee_symptom_free_hours": (
+                    policy.food_symptom_free_hours
+                ),
+                "nonfood_crew_symptom_free_hours": (
+                    policy.nonfood_symptom_free_hours
+                ),
+                "compliance_fraction": policy.compliance_fraction,
+                "medical_clearance_delay_hours": (
+                    policy.medical_clearance_delay_hours
+                ),
+            }
+            if policy is not None else None
+        ),
+        "excluded_hosts": len(excluded),
+        "refused_events": sum(
+            1 for e in log if e.get("action") == ACTION_REFUSED
+        ),
+        "off_duty_at_end": len(
+            getattr(tracker, "excluded_ids", ()) or ()
+        ),
     }
 
 
