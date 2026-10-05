@@ -114,6 +114,10 @@ def _json_member(client, bucket: str, key: str, member: str) -> Any:
         return None
 
 
+def _sub(body: dict[str, Any], name: str) -> dict[str, Any]:
+    return body.get(name) or {}
+
+
 def _int_field(body: dict[str, Any], name: str) -> int:
     return int(body.get(name, 0) or 0)
 
@@ -155,9 +159,9 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
     """One voyage's readout row from its summary.json."""
     row = _row_from_summary(summary, key.rsplit("/", 1)[-1])
     anchor = row["anchor_row"]
-    body = summary.get("summary") or {}
-    mech = summary.get("mechanisms") or {}
-    params = summary.get("parameters") or {}
+    body = _sub(summary, "summary")
+    mech = _sub(summary, "mechanisms")
+    params = _sub(summary, "parameters")
     pax_comp = int(anchor["passenger_complement"])
     crew_comp = int(anchor["crew_complement"])
     thr_pax = math.ceil(A9_POSTING_THRESHOLD * pax_comp)
@@ -170,10 +174,10 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
     )
     ts = summary.get("timeseries") or []
     new_infect = [int(e.get("new_infections", 0) or 0) for e in ts]
-    num_epochs = int(params.get("num_epochs") or len(new_infect) or 0)
+    num_epochs = int(params.get("num_epochs") or len(new_infect))
     last_inf = row.get("last_infecting_epoch")
-    routes = body.get("infections_by_dominant_route") or {}
-    shares = body.get("infection_dose_share_by_route") or {}
+    routes = _sub(body, "infections_by_dominant_route")
+    shares = _sub(body, "infection_dose_share_by_route")
     pax_rate = float(anchor["reported_case_attack_rate_passenger"])
     crew_rate = float(anchor["reported_case_attack_rate_crew"])
     # Pre-mechanisms images (the a0 baseline) carry no `mechanisms`
@@ -206,7 +210,7 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
         ),
         "burst12_share": _window_share(new_infect),
         "outbreak_occurred": bool(
-            (summary.get("derived") or {}).get("outbreak_occurred")
+            _sub(summary, "derived").get("outbreak_occurred")
         ),
         "routes": {k: int(v) for k, v in routes.items()},
         "dose_shares": {k: float(v) for k, v in shares.items()},
@@ -215,7 +219,7 @@ def _voyage_row(summary: dict[str, Any], key: str) -> dict[str, Any]:
             shares.get("common_source_food", 0.0) or 0.0
         ),
         "payload_profile": mech.get("payload_profile"),
-        "rss_mb": summary.get("rss_mb") or {},
+        "rss_mb": _sub(summary, "rss_mb"),
     }
     out.update(_voyage_counters(body, mech, has_mech))
     return out
