@@ -203,7 +203,7 @@ def _render_bridge_resource_allocation(notebook: dict[str, Any]) -> None:
             margin={"t": 30, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": 1.1, "x": 0.5, "xanchor": "center"},
         )
-        st.plotly_chart(cost_fig, use_container_width=True)
+        st.plotly_chart(cost_fig, width="stretch")
 
     mat_inv = audit.get("material_inventory", {})
     if mat_inv:
@@ -226,7 +226,7 @@ def _render_bridge_resource_allocation(notebook: dict[str, Any]) -> None:
                 "% Left": f"{pct:.0f}%{warn}",
                 "Cost USD": f"${data.get('total_cost_usd', 0):,.2f}",
             })
-        st.dataframe(pd.DataFrame(mat_rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(mat_rows), width="stretch", hide_index=True)
 
 
 def _render_bridge_sop_log(notebook: dict[str, Any]) -> None:
@@ -245,7 +245,7 @@ def _render_bridge_sop_log(notebook: dict[str, Any]) -> None:
             "Protocol": ev.get("protocol_id", ""),
             "Designation": ev.get("name", ""),
         })
-    st.dataframe(pd.DataFrame(sop_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(sop_rows), width="stretch", hide_index=True)
 
     still_active = proto_summary.get("protocols_still_active", [])
     if still_active:
@@ -278,7 +278,7 @@ def render_bridge_status(
     # ── Contagion Progression ─────────────────────────────────────
     st.subheader("Contagion Progression")
     fig = _build_epidemic_curve(history)
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # ── Multi-Pathogen Breakdown ──────────────────────────────────
     multi_path = last.get("multi_pathogen", {})
@@ -367,7 +367,7 @@ def _render_rate_counter_chart(
         margin={"t": 50, "b": 40, "l": 60, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_count_counter_chart(
@@ -398,7 +398,7 @@ def _render_count_counter_chart(
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_counter_time_series(history: list[dict[str, Any]]) -> None:
@@ -465,7 +465,7 @@ def _render_class_breakdown(last: dict[str, Any]) -> None:
             "Confined": stats["quarantined"],
             "Attack Rate": f"{attack_rate:.1f}%",
         })
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
@@ -504,7 +504,7 @@ def _render_pathogen_curves(history: list[dict[str, Any]]) -> None:
         margin={"t": 50, "b": 40, "l": 50, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_wearable_summary_metrics(wm: dict[str, Any]) -> None:
@@ -587,7 +587,7 @@ def _render_wearable_trends(history: list[dict[str, Any]]) -> None:
         margin={"t": 50, "b": 40, "l": 60, "r": 20},
         legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_wearable_monitoring(history: list[dict[str, Any]]) -> None:
@@ -657,7 +657,7 @@ def _render_diagnostic_cascade(history: list[dict[str, Any]]) -> None:
             margin={"t": 50, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     advancements: list[dict[str, Any]] = []
     for rec in history:
@@ -669,7 +669,7 @@ def _render_diagnostic_cascade(history: list[dict[str, Any]]) -> None:
     if advancements:
         st.dataframe(
             pd.DataFrame(advancements),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
 
@@ -699,7 +699,7 @@ def _render_operational_impact(history: list[dict[str, Any]]) -> None:
             {"Driver": key.replace("_", " ").title(), "Contribution": f"{val:,.2f}"}
             for key, val in sorted(breakdown.items(), key=lambda item: -abs(item[1]))
         ]
-        st.dataframe(pd.DataFrame(bd_rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(bd_rows), width="stretch", hide_index=True)
 
     epochs: list[int] = []
     epoch_ois: list[float] = []
@@ -730,7 +730,7 @@ def _render_operational_impact(history: list[dict[str, Any]]) -> None:
             margin={"t": 50, "b": 40, "l": 50, "r": 20},
             legend={"orientation": "h", "y": -0.2, "x": 0.5, "xanchor": "center"},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 
 def _render_function_capacity(history: list[dict[str, Any]]) -> None:
@@ -768,7 +768,7 @@ def _render_function_capacity(history: list[dict[str, Any]]) -> None:
             legend={"orientation": "h", "y": -0.25, "x": 0.5, "xanchor": "center"},
             yaxis={"range": [0, 1.05]},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     last_fc = (history[-1].get("function_capacity") or {})
     funcs = last_fc.get("functions", {})
@@ -785,7 +785,7 @@ def _render_function_capacity(history: list[dict[str, Any]]) -> None:
             }
             for key, fn in sorted(funcs.items())
         ]
-        st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
     c1, c2 = st.columns(2)
     pools = last_fc.get("staffing_pools", {})
@@ -801,7 +801,7 @@ def _render_function_capacity(history: list[dict[str, Any]]) -> None:
             ]
             st.caption("Crew pools on watch")
             st.dataframe(
-                pd.DataFrame(pool_rows), use_container_width=True, hide_index=True,
+                pd.DataFrame(pool_rows), width="stretch", hide_index=True,
             )
     systems = last_fc.get("ship_systems", {})
     if systems:
@@ -816,7 +816,7 @@ def _render_function_capacity(history: list[dict[str, Any]]) -> None:
             ]
             st.caption("Ship systems")
             st.dataframe(
-                pd.DataFrame(sys_rows), use_container_width=True, hide_index=True,
+                pd.DataFrame(sys_rows), width="stretch", hide_index=True,
             )
 
 
@@ -850,7 +850,7 @@ def _render_crusher_ops(record: dict[str, Any]) -> None:
             }
             for zone, data in sorted(pcr_zones.items())
         ]
-        st.dataframe(pd.DataFrame(pcr_rows), use_container_width=True, hide_index=True)
+        st.dataframe(pd.DataFrame(pcr_rows), width="stretch", hide_index=True)
 
 
 def _accumulate_event_pathways(
@@ -915,11 +915,11 @@ def _render_transmission_pathways(history: list[dict[str, Any]]) -> None:
         margin={"t": 50, "b": 20, "l": 20, "r": 20},
         showlegend=False,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     # Pathway dose table
     pw_rows = [{"Pathway": l, "Total Dose": f"{v:,.1f}"} for l, v in zip(labels, values)]
-    st.dataframe(pd.DataFrame(pw_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(pw_rows), width="stretch", hide_index=True)
 
 
 def _build_epidemic_curve(history: list[dict[str, Any]]) -> go.Figure:
@@ -1076,7 +1076,7 @@ def _render_low_fidelity(
                 rows.append(row)
 
             df = pd.DataFrame(rows)
-            st.dataframe(df, use_container_width=True, hide_index=True)
+            st.dataframe(df, width="stretch", hide_index=True)
 
     detected = sum(1 for r in records if r.get("binary_result") == "DETECTED")
     not_det = sum(1 for r in records if r.get("binary_result") == "NOT DETECTED")
@@ -1110,7 +1110,7 @@ def _render_mid_fidelity(records: list[dict[str, Any]]) -> None:
         rows.append(row)
 
     df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df, width="stretch", hide_index=True)
 
 
 def _render_high_fidelity(records: list[dict[str, Any]]) -> None:
@@ -1134,7 +1134,7 @@ def _render_high_fidelity(records: list[dict[str, Any]]) -> None:
         df = pd.DataFrame(records)
         cols_to_drop = [c for c in df.columns if c == "raw_amplification_curve"]
         display_df = df.drop(columns=cols_to_drop, errors="ignore")
-        st.dataframe(display_df, use_container_width=True, hide_index=True)
+        st.dataframe(display_df, width="stretch", hide_index=True)
 
 
 def _render_amplification_curves(records: list[dict[str, Any]]) -> None:
@@ -1183,7 +1183,7 @@ def _render_amplification_curves(records: list[dict[str, Any]]) -> None:
             margin={"t": 30, "b": 40, "l": 50, "r": 20},
             legend={"font": {"size": 9}},
         )
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
 
 def _render_kingdom_clr_deltas(ww_records: list[dict[str, Any]]) -> None:
@@ -1206,7 +1206,7 @@ def _render_kingdom_clr_deltas(ww_records: list[dict[str, Any]]) -> None:
             "Virus": f"{deltas.get('Virus', 0):+.3f}",
             "Anomaly": f"{r.get('inferred_anomaly_score', 0):.3f}",
         })
-    st.dataframe(pd.DataFrame(clr_rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(clr_rows), width="stretch", hide_index=True)
 
 
 def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
@@ -1252,7 +1252,7 @@ def _render_kingdom_charts(records: list[dict[str, Any]]) -> None:
         margin={"t": 50, "b": 60, "l": 50, "r": 20},
         legend={"orientation": "h", "y": 1.08, "x": 0.5, "xanchor": "center"},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
     _render_kingdom_clr_deltas(ww_records)
 
 

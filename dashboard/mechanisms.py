@@ -287,7 +287,7 @@ def render_route_attribution(history: list[dict[str, Any]]) -> None:
                 margin={"t": 50, "b": 80, "l": 50, "r": 20},
                 showlegend=False,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
     with c2:
         if share:
             labels = [pathway_label(r) for r in sorted(share)]
@@ -304,7 +304,7 @@ def render_route_attribution(history: list[dict[str, Any]]) -> None:
                 margin={"t": 50, "b": 20, "l": 20, "r": 20},
                 showlegend=False,
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
 
 def render_passenger_crew_rates(summary: dict[str, Any]) -> None:
@@ -314,7 +314,7 @@ def render_passenger_crew_rates(summary: dict[str, Any]) -> None:
         return
     st.subheader("Passenger / Crew Rates")
     noise = summary.get("cumulative_reported_noise_cases")
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
     if noise:
         st.caption(
             f"Reported-case rates include {noise} background noise "
@@ -365,7 +365,7 @@ def render_age_band_breakdown(last: dict[str, Any]) -> None:
             "Confined": s["confined"],
             "Attack rate": f"{rate:.1f}%",
         })
-    st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+    st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
 
 def render_exposure_totals(history: list[dict[str, Any]]) -> None:
@@ -387,7 +387,7 @@ def render_exposure_totals(history: list[dict[str, Any]]) -> None:
         margin={"t": 50, "b": 80, "l": 60, "r": 20},
         showlegend=False,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def render_common_source_log(history: list[dict[str, Any]]) -> None:
@@ -398,7 +398,7 @@ def render_common_source_log(history: list[dict[str, Any]]) -> None:
     st.markdown("**Common-source event log**")
     st.dataframe(
         pd.DataFrame(rows),
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -459,7 +459,7 @@ def render_information_environment(history: list[dict[str, Any]]) -> None:
                     "x": 0.5, "xanchor": "center",
                 },
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, width="stretch")
 
         messages = []
         for rec in history:
@@ -478,18 +478,18 @@ def render_information_environment(history: list[dict[str, Any]]) -> None:
             with st.expander("Public messages", expanded=False):
                 st.dataframe(
                     pd.DataFrame(messages).tail(50),
-                    use_container_width=True, hide_index=True,
+                    width="stretch", hide_index=True,
                 )
 
     if decision_rows:
         st.markdown("**Command / medical decisions applied**")
         st.dataframe(
             pd.DataFrame(decision_rows),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )
     if sop_rows:
         st.markdown("**SOP activations**")
         st.dataframe(
             pd.DataFrame(sop_rows),
-            use_container_width=True, hide_index=True,
+            width="stretch", hide_index=True,
         )

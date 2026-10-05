@@ -117,7 +117,7 @@ def _render_overlay_chart(
         fig, height=280, title="Active cases (infected + symptomatic)",
         xaxis_title=time_xaxis_title(hist_a), yaxis_title=axis("active_cases").title,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _render_delta_chart(
@@ -135,7 +135,7 @@ def _render_delta_chart(
         fig, height=260, title="Per-epoch delta (Run B − Run A)",
         xaxis_title=time_xaxis_title(hist_a), yaxis_title=axis("persons").title,
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
 
 def _load_history_for_dir(telemetry_dir: str) -> list[dict[str, Any]]:
@@ -185,10 +185,10 @@ def render_ab_diff(default_dir: str) -> None:
         )
 
     st.markdown("**Run-level delta summary**")
-    st.dataframe(delta_summary_frame(hist_a, hist_b), use_container_width=True, hide_index=True)
+    st.dataframe(delta_summary_frame(hist_a, hist_b), width="stretch", hide_index=True)
 
     with st.expander("Per-epoch deltas", expanded=False):
         st.dataframe(
             delta_df.pivot(index="epoch", columns="metric", values="delta"),
-            use_container_width=True,
+            width="stretch",
         )

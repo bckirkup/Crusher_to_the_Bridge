@@ -292,23 +292,23 @@ def render_agent_explorer(
 
     fig = _build_agent_timeline(history, int(agent_id))
     if fig:
-        st.plotly_chart(fig, use_container_width=True)
+        st.plotly_chart(fig, width="stretch")
 
     with st.expander("Location track", expanded=False):
         loc_df = _location_track(history, int(agent_id))
         if not loc_df.empty:
-            st.dataframe(loc_df, use_container_width=True, hide_index=True)
+            st.dataframe(loc_df, width="stretch", hide_index=True)
 
     with st.expander("Care & diagnostics", expanded=True):
         care_df = _care_events(history, notebook, int(agent_id))
         if not care_df.empty:
-            st.dataframe(care_df.sort_values("epoch"), use_container_width=True, hide_index=True)
+            st.dataframe(care_df.sort_values("epoch"), width="stretch", hide_index=True)
         else:
             st.caption("No care or diagnostic events linked to this agent.")
 
     with st.expander("Transmission role", expanded=False):
         tx_df = _transmission_role(history, int(agent_id))
         if not tx_df.empty:
-            st.dataframe(tx_df, use_container_width=True, hide_index=True)
+            st.dataframe(tx_df, width="stretch", hide_index=True)
         else:
             st.caption("No transmission events involving this agent.")

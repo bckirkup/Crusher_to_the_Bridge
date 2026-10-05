@@ -627,7 +627,7 @@ def render_tactical_grid(
         elev_fig = _build_plotly_elevation(
             record, bundle, color_mode, decks, highlight_deck=deck_filter,
         )
-        st.plotly_chart(elev_fig, use_container_width=True)
+        st.plotly_chart(elev_fig, width="stretch")
         if arch and arch.elevation_credit:
             st.caption(arch.elevation_credit)
 
@@ -644,7 +644,7 @@ def render_tactical_grid(
             agent_color_by=agent_color_by,
             hvac_exposure=hvac_exposure,
         )
-        st.plotly_chart(plan_fig, use_container_width=True)
+        st.plotly_chart(plan_fig, width="stretch")
         if arch and arch.plan_credit:
             st.caption(arch.plan_credit)
 
@@ -658,7 +658,7 @@ def render_tactical_grid(
                 bundle, record, bundle.manifest, color_mode, deck_filter,
             )
             if deck_obj is not None:
-                st.pydeck_chart(deck_obj, use_container_width=True, height=520)
+                st.pydeck_chart(deck_obj, width="stretch", height=520)
 
     stoplights = record_stoplights(record)
     if stoplights:
@@ -688,7 +688,7 @@ def render_tactical_grid(
             extra = [c for c in df.columns if c not in cols]
             st.dataframe(
                 df[cols + extra],
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
         elif retention_mode == "compact":

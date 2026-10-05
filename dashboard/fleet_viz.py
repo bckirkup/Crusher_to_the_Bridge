@@ -116,7 +116,7 @@ def _render_fleet_comparison(
         yaxis_title=axis("persons").title,
         margin={"t": 40, "b": 60},
     )
-    st.plotly_chart(fig, use_container_width=True)
+    st.plotly_chart(fig, width="stretch")
 
     fig2 = go.Figure()
     sample_hist: list = []
@@ -153,7 +153,7 @@ def _render_fleet_comparison(
             xaxis_title=time_xaxis_title(sample_hist),
             yaxis_title=axis("active_cases").title,
         )
-        st.plotly_chart(fig2, use_container_width=True)
+        st.plotly_chart(fig2, width="stretch")
 
 
 def _render_port_voyage_strips(cruise_dirs: list[str], histories: dict[str, list]) -> None:
@@ -165,7 +165,7 @@ def _render_port_voyage_strips(cruise_dirs: list[str], histories: dict[str, list
         itinerary = (load_voyage_config(platform_id).get("voyage") or {}).get("itinerary") or []
         label = os.path.basename(cdir)
         st.markdown(f"**{label}** voyage timeline")
-        st.plotly_chart(_build_voyage_strip(hist, itinerary), use_container_width=True)
+        st.plotly_chart(_build_voyage_strip(hist, itinerary), width="stretch")
 
 
 def render_fleet_operations(
@@ -220,7 +220,7 @@ def render_fleet_operations(
                     "CO reward": rewards.get("commanding_officer", 0),
                     "Seed": rec.get("metadata", {}).get("seed", ""),
                 })
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame(rows), width="stretch", hide_index=True)
 
     cruises = list_cruise_dirs(fleet_root)
     if not cruises:
@@ -231,7 +231,7 @@ def render_fleet_operations(
     matrix = _fleet_metrics_matrix(cruises, histories)
     if not matrix.empty:
         st.markdown("**Fleet overview matrix**")
-        st.dataframe(matrix, use_container_width=True, hide_index=True)
+        st.dataframe(matrix, width="stretch", hide_index=True)
 
     _render_fleet_comparison(cruises, histories, selected_epoch=selected_epoch)
 

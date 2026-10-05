@@ -140,13 +140,13 @@ def main() -> None:
             st.image(
                 arch.elevation_path,
                 caption="Ship elevation (profile)",
-                use_container_width=True,
+                width="stretch",
             )
         if arch and arch.has_plan:
             st.image(
                 arch.plan_overview_path,
                 caption="Ship plan (top-down)",
-                use_container_width=True,
+                width="stretch",
             )
         elif bundle.blueprint_bg_path:
             plate_kind = bundle.manifest.get("background_plate", "deck_plate")
@@ -155,9 +155,9 @@ def main() -> None:
                 if plate_kind == "reference_photo_composite"
                 else "Class blueprint plate"
             )
-            st.image(bundle.blueprint_bg_path, caption=cap, use_container_width=True)
+            st.image(bundle.blueprint_bg_path, caption=cap, width="stretch")
         elif bundle.hull_png_path:
-            st.image(bundle.hull_png_path, use_container_width=True)
+            st.image(bundle.hull_png_path, width="stretch")
 
         if history:
             epoch_idx = get_selected_epoch()
