@@ -1,6 +1,25 @@
 # MEGA-IMPACT-01 — mechanism-attribution factorial on mega_cruise_5000
 
-Status: canary read out — 2026-10-04. All three frozen gates PASS;
+Status: fleet submitted — 2026-10-05 (UTC), Spot
+(`picard-campaign-queue`), jobdef `picard-noro-mega-impact-01:6`,
+image `campaign-7e1b54bc` (sha256:60793dd3…, `--payload lean`,
+6144 MB/child — canary lean peak max 4313 MB). Arrays:
+a1 `3dd8057e-71c8-4dc7-b6da-1a71578b6437` (268 cells, index_offset 20 →
+seeds 8020-8287; canary seeds 8000-8019 already on record),
+a2 `551bb8b7-272f-4567-acf8-0ab5ac954bf0` (150, seeds 8000-8149),
+a3 `a280586c-bce1-4b48-9a98-9589cdbb1d57` (150, seeds 8000-8149),
+a1_bp40c30 `2a1f11f7-41d9-43b5-8851-5c93ed3e2e36` (50, seeds 8000-8049 —
+optional distributional slice; no A0 exists at bp40c30 so no pairing).
+Two burned submissions: rev 4 hit the 8192-char container-override cap
+again at materialization (the cap measures the whole materialized
+overrides object, so a 7,186-char `-c` blob does not fit) and rev 5's
+bootstrap splice dropped a `;` producing `;;`/missing-separator
+SyntaxErrors in every child — terminated within minutes, zero cells
+ran. Rev 6 compresses every tier's consecutive `seeds` list to
+`seed_range` expanded in the bootstrap (-c 4,165 chars, executed
+locally before registering). Canary details below.
+Canary read out — 2026-10-04. All three frozen gates PASS;
+
 readout in `noro_mega_impact_01_canary_readout.md`. Canary ran On-Demand
 (`picard-analysis-queue`) after a Spot drought: a0id
 `d448f12c-420e-4edf-8776-c594d83ab2b9` (n=10, tier

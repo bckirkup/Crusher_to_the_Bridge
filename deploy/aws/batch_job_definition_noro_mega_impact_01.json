@@ -1,99 +1,99 @@
 {
-  "jobDefinitionName": "picard-noro-mega-impact-01",
-  "type": "container",
-  "platformCapabilities": [
-    "EC2"
+ "jobDefinitionName": "picard-noro-mega-impact-01",
+ "type": "container",
+ "platformCapabilities": [
+  "EC2"
+ ],
+ "containerProperties": {
+  "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign@sha256:60793dd3d568426bcdc151416152e8eb102e17d6c23b217c209b738f0d62dd9b",
+  "command": [
+   "-c",
+   "import json,os,runpy,sys;mp='picard_framework/runs/mega_cruise_campaign/noro_mega_impact_01_manifest.json';m=json.loads('''{\"campaign\":\"noro_mega_impact_01\",\"platform\":\"mega_cruise_5000\",\"default_epochs\":288,\"default_num_agents\":7000,\"embarkation_date\":\"2026-01-10\",\"natural_history_clock\":\"hours\",\"pathogen_configs\":{\"norovirus\":{\"bundle\":\"active_profiles\",\"pathogen_id\":\"norwalk_gi\",\"overrides\":{\"remove\":[\"sars_cov2_resp\"]}}},\"surveillance_configs\":{\"syndromic_comp65\":{\"diagnostic_cascade\":{\"enabled\":false},\"fred_behavior\":{\"quarantine_compliance\":0.65,\"compliance_by_class\":{\"crew\":0.65,\"passenger_elderly\":0.54,\"passenger_young\":0.34}}}},\"tiers\":{\"fl_mega_impact_a1\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"on\"},\"common_source\":{\"mode\":\"on\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seed_range\":[8000,8287]},\"fl_mega_impact_a1_bp40c30\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"on\"},\"common_source\":{\"mode\":\"on\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.04,\"crew\":0.03}],\"never_symptomatic_fractions\":[0.29],\"seed_range\":[8000,8049]},\"fl_mega_impact_a2\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"off\"},\"common_source\":{\"mode\":\"off\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seed_range\":[8000,8149]},\"fl_mega_impact_a3\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"off\"},\"common_source\":{\"mode\":\"on\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seed_range\":[8000,8149]},\"fl_mega_impact_a0id\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"on\"},\"common_source\":{\"mode\":\"off\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seed_range\":[8000,8009]}}}''');[t.update(seeds=list(range(t['seed_range'][0],t['seed_range'][1]+1))) or t.pop('seed_range') for t in m['tiers'].values() if 'seed_range' in t];os.makedirs(os.path.dirname('/app/'+mp),exist_ok=True);open('/app/'+mp,'w').write(json.dumps(m));sys.argv[0]='import_map_entrypoint.py';runpy.run_path('/app/deploy/aws/import_map_entrypoint.py',run_name='__main__')",
+   "--s3-prefix",
+   "Ref::s3_prefix",
+   "--manifest",
+   "Ref::manifest",
+   "--pathogen-id",
+   "Ref::pathogen_id",
+   "--tier",
+   "Ref::tier",
+   "--index",
+   "Ref::index",
+   "--index-offset",
+   "Ref::index_offset",
+   "--payload",
+   "Ref::payload"
   ],
-  "containerProperties": {
-    "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign@sha256:9ac735daccc5e10e20f1945cd341f120b876a1efd6520fca2d51f56c77b7502a",
-    "command": [
-      "-c",
-      "import json,os,runpy,sys;mp='picard_framework/runs/mega_cruise_campaign/noro_mega_impact_01_manifest.json';m=json.loads('''{\"campaign\":\"noro_mega_impact_01\",\"platform\":\"mega_cruise_5000\",\"default_epochs\":288,\"default_num_agents\":7000,\"embarkation_date\":\"2026-01-10\",\"natural_history_clock\":\"hours\",\"pathogen_configs\":{\"norovirus\":{\"bundle\":\"active_profiles\",\"pathogen_id\":\"norwalk_gi\",\"overrides\":{\"remove\":[\"sars_cov2_resp\"]}}},\"surveillance_configs\":{\"syndromic_comp65\":{\"diagnostic_cascade\":{\"enabled\":false},\"fred_behavior\":{\"quarantine_compliance\":0.65,\"compliance_by_class\":{\"crew\":0.65,\"passenger_elderly\":0.54,\"passenger_young\":0.34}}}},\"tiers\":{\"fl_mega_impact_a1\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"on\"},\"common_source\":{\"mode\":\"on\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seeds\":[8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011,8012,8013,8014,8015,8016,8017,8018,8019,8020,8021,8022,8023,8024,8025,8026,8027,8028,8029,8030,8031,8032,8033,8034,8035,8036,8037,8038,8039,8040,8041,8042,8043,8044,8045,8046,8047,8048,8049,8050,8051,8052,8053,8054,8055,8056,8057,8058,8059,8060,8061,8062,8063,8064,8065,8066,8067,8068,8069,8070,8071,8072,8073,8074,8075,8076,8077,8078,8079,8080,8081,8082,8083,8084,8085,8086,8087,8088,8089,8090,8091,8092,8093,8094,8095,8096,8097,8098,8099,8100,8101,8102,8103,8104,8105,8106,8107,8108,8109,8110,8111,8112,8113,8114,8115,8116,8117,8118,8119,8120,8121,8122,8123,8124,8125,8126,8127,8128,8129,8130,8131,8132,8133,8134,8135,8136,8137,8138,8139,8140,8141,8142,8143,8144,8145,8146,8147,8148,8149,8150,8151,8152,8153,8154,8155,8156,8157,8158,8159,8160,8161,8162,8163,8164,8165,8166,8167,8168,8169,8170,8171,8172,8173,8174,8175,8176,8177,8178,8179,8180,8181,8182,8183,8184,8185,8186,8187,8188,8189,8190,8191,8192,8193,8194,8195,8196,8197,8198,8199,8200,8201,8202,8203,8204,8205,8206,8207,8208,8209,8210,8211,8212,8213,8214,8215,8216,8217,8218,8219,8220,8221,8222,8223,8224,8225,8226,8227,8228,8229,8230,8231,8232,8233,8234,8235,8236,8237,8238,8239,8240,8241,8242,8243,8244,8245,8246,8247,8248,8249,8250,8251,8252,8253,8254,8255,8256,8257,8258,8259,8260,8261,8262,8263,8264,8265,8266,8267,8268,8269,8270,8271,8272,8273,8274,8275,8276,8277,8278,8279,8280,8281,8282,8283,8284,8285,8286,8287]},\"fl_mega_impact_a2\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"off\"},\"common_source\":{\"mode\":\"off\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seeds\":[8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011,8012,8013,8014,8015,8016,8017,8018,8019,8020,8021,8022,8023,8024,8025,8026,8027,8028,8029,8030,8031,8032,8033,8034,8035,8036,8037,8038,8039,8040,8041,8042,8043,8044,8045,8046,8047,8048,8049,8050,8051,8052,8053,8054,8055,8056,8057,8058,8059,8060,8061,8062,8063,8064,8065,8066,8067,8068,8069,8070,8071,8072,8073,8074,8075,8076,8077,8078,8079,8080,8081,8082,8083,8084,8085,8086,8087,8088,8089,8090,8091,8092,8093,8094,8095,8096,8097,8098,8099,8100,8101,8102,8103,8104,8105,8106,8107,8108,8109,8110,8111,8112,8113,8114,8115,8116,8117,8118,8119,8120,8121,8122,8123,8124,8125,8126,8127,8128,8129,8130,8131,8132,8133,8134,8135,8136,8137,8138,8139,8140,8141,8142,8143,8144,8145,8146,8147,8148,8149]},\"fl_mega_impact_a3\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"off\"},\"common_source\":{\"mode\":\"on\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seeds\":[8000,8001,8002,8003,8004,8005,8006,8007,8008,8009,8010,8011,8012,8013,8014,8015,8016,8017,8018,8019,8020,8021,8022,8023,8024,8025,8026,8027,8028,8029,8030,8031,8032,8033,8034,8035,8036,8037,8038,8039,8040,8041,8042,8043,8044,8045,8046,8047,8048,8049,8050,8051,8052,8053,8054,8055,8056,8057,8058,8059,8060,8061,8062,8063,8064,8065,8066,8067,8068,8069,8070,8071,8072,8073,8074,8075,8076,8077,8078,8079,8080,8081,8082,8083,8084,8085,8086,8087,8088,8089,8090,8091,8092,8093,8094,8095,8096,8097,8098,8099,8100,8101,8102,8103,8104,8105,8106,8107,8108,8109,8110,8111,8112,8113,8114,8115,8116,8117,8118,8119,8120,8121,8122,8123,8124,8125,8126,8127,8128,8129,8130,8131,8132,8133,8134,8135,8136,8137,8138,8139,8140,8141,8142,8143,8144,8145,8146,8147,8148,8149]},\"fl_mega_impact_a0id\":{\"platform\":\"mega_cruise_5000\",\"pathogen\":\"norovirus\",\"dose_adjustments\":[7.57],\"surveillance_strategies\":[\"syndromic_comp65\"],\"epoch_durations\":[288],\"num_agents\":7000,\"config_overrides\":{\"transmission\":{\"sanitary_visit_mode\":\"dwell_weighted\",\"flush_aerosol_fraction\":0.0,\"flush_cabin_emission\":true,\"cabin_air_mode\":\"cabin_compartment\",\"caregiver\":{\"mode\":\"on\"},\"common_source\":{\"mode\":\"off\"}},\"hvac\":{\"pathogen_pool_transport\":\"airflow\"}},\"boarding_mechanism_rungs\":[\"shipped\"],\"boarding_prevalence_points\":[{\"passenger\":0.025,\"crew\":0.007}],\"never_symptomatic_fractions\":[0.29],\"seeds\":[8000,8001,8002,8003,8004,8005,8006,8007,8008,8009]}}}''');os.makedirs(os.path.dirname('/app/'+mp),exist_ok=True);open('/app/'+mp,'w').write(json.dumps(m));sys.argv[0]='import_map_entrypoint.py';runpy.run_path('/app/deploy/aws/import_map_entrypoint.py',run_name='__main__')",
-      "--s3-prefix",
-      "Ref::s3_prefix",
-      "--manifest",
-      "Ref::manifest",
-      "--pathogen-id",
-      "Ref::pathogen_id",
-      "--tier",
-      "Ref::tier",
-      "--index",
-      "Ref::index",
-      "--index-offset",
-      "Ref::index_offset",
-      "--payload",
-      "Ref::payload"
-    ],
-    "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
-    "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
-    "resourceRequirements": [
-      {
-        "type": "VCPU",
-        "value": "1"
-      },
-      {
-        "type": "MEMORY",
-        "value": "16384"
-      }
-    ],
-    "linuxParameters": {
-      "sharedMemorySize": 512
-    },
-    "environment": [
-      {
-        "name": "PYTHONUTF8",
-        "value": "1"
-      },
-      {
-        "name": "PYTHONPATH",
-        "value": "/app"
-      }
-    ],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "/aws/batch/picard-campaign",
-        "awslogs-region": "<REGION>",
-        "awslogs-stream-prefix": "noro-mega-impact-01"
-      }
-    }
+  "jobRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-job-role",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/picard-campaign-execution-role",
+  "resourceRequirements": [
+   {
+    "type": "VCPU",
+    "value": "1"
+   },
+   {
+    "type": "MEMORY",
+    "value": "6144"
+   }
+  ],
+  "linuxParameters": {
+   "sharedMemorySize": 512
   },
-  "parameters": {
-    "s3_prefix": "s3://<BUCKET>/campaign/noro_mega_impact_01/",
-    "manifest": "picard_framework/runs/mega_cruise_campaign/noro_mega_impact_01_manifest.json",
-    "pathogen_id": "norwalk_gi",
-    "tier": "fl_mega_impact_a1",
-    "index": "-1",
-    "index_offset": "0",
-    "payload": "lean"
-  },
-  "retryStrategy": {
-    "attempts": 10,
-    "evaluateOnExit": [
-      {
-        "onStatusReason": "Host EC2*",
-        "action": "retry"
-      },
-      {
-        "onReason": "OutOfMemoryError*",
-        "action": "exit"
-      },
-      {
-        "onExitCode": "137",
-        "action": "exit"
-      },
-      {
-        "onExitCode": "0",
-        "action": "exit"
-      },
-      {
-        "onReason": "*",
-        "action": "retry"
-      }
-    ]
-  },
-  "propagateTags": true,
-  "timeout": {
-    "attemptDurationSeconds": 14400
+  "environment": [
+   {
+    "name": "PYTHONUTF8",
+    "value": "1"
+   },
+   {
+    "name": "PYTHONPATH",
+    "value": "/app"
+   }
+  ],
+  "logConfiguration": {
+   "logDriver": "awslogs",
+   "options": {
+    "awslogs-group": "/aws/batch/picard-campaign",
+    "awslogs-region": "<REGION>",
+    "awslogs-stream-prefix": "noro-mega-impact-01"
+   }
   }
+ },
+ "parameters": {
+  "s3_prefix": "s3://<BUCKET>/campaign/noro_mega_impact_01/",
+  "manifest": "picard_framework/runs/mega_cruise_campaign/noro_mega_impact_01_manifest.json",
+  "pathogen_id": "norwalk_gi",
+  "tier": "fl_mega_impact_a1",
+  "index": "-1",
+  "index_offset": "0",
+  "payload": "lean"
+ },
+ "retryStrategy": {
+  "attempts": 10,
+  "evaluateOnExit": [
+   {
+    "onStatusReason": "Host EC2*",
+    "action": "retry"
+   },
+   {
+    "onReason": "OutOfMemoryError*",
+    "action": "exit"
+   },
+   {
+    "onExitCode": "137",
+    "action": "exit"
+   },
+   {
+    "onExitCode": "0",
+    "action": "exit"
+   },
+   {
+    "onReason": "*",
+    "action": "retry"
+   }
+  ]
+ },
+ "propagateTags": true,
+ "timeout": {
+  "attemptDurationSeconds": 14400
+ }
 }
