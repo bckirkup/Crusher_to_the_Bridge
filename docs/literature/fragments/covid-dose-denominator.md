@@ -13,7 +13,7 @@ and no shipped value changes.
 **State: evidence recorded — the denominator itself stays ∅ null in copies, and
 the conversion that would rescue Killingley is recorded as a Grade B interval
 ~2.7 logs wide.** Source:
-[tranche 15](consensus_tranche_15_covid_dose_denominator.md).
+[tranche 15](../consensus_tranche_15_covid_dose_denominator.md).
 
 | Quantity | Shipped | Class | Evidence / interval | Origin | State | Task |
 |---|---|---|---|---|---|---|

@@ -132,7 +132,7 @@ policy; `derived` area basis.
 Probe `tools/noro_diag/touch_share_lockstep_probe.py`, 288 epochs,
 `classic_cruise_1900` (1910 agents), default bundle (norwalk_gi,
 sars_cov2_resp, influenza_a), A vs D, one process per seed. Raw output:
-`data/NORO-TOUCH-SHARE-02_prefix/NORO-TOUCH-SHARE-02_seed{8001,8000}.json`.
+`docs/ledger/data/NORO-TOUCH-SHARE-02_prefix/NORO-TOUCH-SHARE-02_seed{8001,8000}.json`.
 Masses are GEC, paired and relative; none is a dose.
 
 ### 4.1 First divergence
@@ -271,7 +271,7 @@ the §6.1 exact-empty pattern; it is labelled a default-path change.
 ## 7. Measured — post-floor probe (`29bbd39`, floor commit `40f22ce`)
 
 Same probe, same seeds, epochs, platform, bundle and table; raw output
-`data/NORO-TOUCH-SHARE-02_seed{8001,8000}.json`. The probe script is
+`docs/ledger/data/NORO-TOUCH-SHARE-02_seed{8001,8000}.json`. The probe script is
 unchanged between the two runs.
 
 | | seed 8001 | seed 8000 |

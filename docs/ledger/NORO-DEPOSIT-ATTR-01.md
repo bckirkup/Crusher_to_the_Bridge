@@ -3,6 +3,7 @@
 **Commit:** d0ac415d
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** d0ac415d
 
 Per-change attribution of the post-#724 surface-pool deposit-mass collapse
 (~5 orders of magnitude) measured by NORO-REBASE-01 (`a872367c`) on the

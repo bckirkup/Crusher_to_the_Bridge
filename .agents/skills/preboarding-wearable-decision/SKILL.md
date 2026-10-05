@@ -42,7 +42,7 @@ python3 -m picard_framework.analysis.boundary.run_decision_model \
 |------|------|
 | `picard_framework/analysis/boundary/` | Package (prevalence, screening, costs, lookup, CLI) |
 | `fixtures/outbreak_surface.json` | CI/smoke response surfaces |
-| `data/scenario_matrix.json` | Full campaign axes (4 platforms × **25 log-spaced** `π_inf` × P0–P5) |
+| `picard_framework/analysis/boundary/data/scenario_matrix.json` | Full campaign axes (4 platforms × **25 log-spaced** `π_inf` × P0–P5) |
 | `schemas/preboarding_decision_*.schema.json` | Scenario + summary contracts |
 | `docs/preboarding_wearable_decision_model_spec.md` | Full spec |
 | `tests/test_boundary_decision_model.py` | Golden + sensitivity + CLI smoke |

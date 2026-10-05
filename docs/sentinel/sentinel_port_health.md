@@ -7,7 +7,7 @@ What a port's *own* public health system observes, independently of any ship.
 | Item | Value |
 |---|---|
 | Model | `picard_framework/analysis/sentinel/port_health.py` |
-| Profile libraries | `picard_framework/analysis/sentinel/port_profiles.py` + `data/port_surveillance_<region>.json` |
+| Profile libraries | `picard_framework/analysis/sentinel/port_profiles.py` + `picard_framework/analysis/sentinel/data/port_surveillance_<region>.json` |
 | Ledger generation / ablation / CLI | `picard_framework/analysis/sentinel/port_ledger.py` |
 | Schemas | `schemas/port_surveillance.schema.json` (profiles), `schemas/port_surveillance_ledger.schema.json` (generated data) |
 | Tests | `tests/test_port_health_surveillance.py` |

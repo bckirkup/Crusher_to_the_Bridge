@@ -3,6 +3,7 @@
 **Commit:** #856
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** a78c942e
 
 ## Defect
 

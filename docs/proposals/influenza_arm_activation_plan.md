@@ -1,9 +1,10 @@
 # Activating the influenza arm: what it needs, in what order, and what it must not borrow
 
-> **Status:** Proposed. **Nothing here is implemented.** No profile is added to
-> `data/pathogens/active_profiles.json`, no constant, engine constant, schema,
-> grade, interval or adoption state changes in this document, and no value is
-> adopted. It is the sequencing document for a change not yet made.
+> **Status:** Resolved — the influenza arm is active in-tree: `influenza_a`
+> ships in `data/pathogens/active_profiles.json`, the scored surface lives in
+> `data/observation/flu_fit_targets.json`, and the arm's home is `docs/flu/`
+> with `docs/flu/flu_open_ledger.md`. This file stays as the sequencing
+> record for how the activation was staged.
 
 **Ruling it implements.** Influenza should become an active arm, and before the
 genotype structure people will eventually want, it has to be shown capable of

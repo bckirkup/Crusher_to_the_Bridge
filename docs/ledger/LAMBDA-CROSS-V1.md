@@ -3,6 +3,7 @@
 **Commit:** 8649d31
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 8649d31
 
 Hazard-rate crossing assay on the AERO-SPLIT-01 droplet-partition
 architecture, opened by three measured negatives and one instrument

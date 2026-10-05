@@ -3,6 +3,7 @@
 **Commit:** b88e0ad
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** b88e0ad
 
 Paired-seed sensitivity assay on the declared Diamond Princess replay at
 the v11 admissible-band centre, Θ 4.22e10 — one suppression channel

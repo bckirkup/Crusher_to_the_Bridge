@@ -3,6 +3,7 @@
 **Commit:** 55cb6b61
 **Pathogens:** norwalk_gi
 **Status:** measured
+**Measured at:** d0466064
 
 Repair campaign for the `NORO-HAND-STATIONARY-01` defect_candidate (PR #797):
 the shipped hand reservoir is a spike-and-crash that occupies the Liu 2013
