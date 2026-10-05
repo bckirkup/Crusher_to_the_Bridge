@@ -237,13 +237,14 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # carries the same tuple pending its CI read.
         # HOST-AGE-01 (see the 3.12 note below): the two sourced
         # age-graded maps on sars_cov2_resp re-roll this cell the same
-        # way — (36, 19, 217, 55, 18) -> (34, 17, 217, 56, 22), read in
-        # the local venv on CPython 3.12. The profile minus both maps
-        # reproduces the prior tuple exactly, so the move is fully
-        # attributed to the maps. The 3.11 reading carries the same
-        # tuple pending its CI read, both interpreters having agreed on
-        # every near-extinct reading of this cell.
-        (3, 11): (34, 17, 217, 56, 22),
+        # way — (36, 19, 217, 55, 18) -> (43, 25, 217, 60, 19) on
+        # CPython 3.11, read from CI job 111755668902 (fast tier, 3.11,
+        # shard 3) on this branch. The profile minus both maps
+        # reproduces the prior tuple exactly on 3.12, so the move is
+        # fully attributed to the maps; the interpreters now diverge
+        # because the armed arm lifts the cell out of the near-extinct
+        # regime whose reads they used to share.
+        (3, 11): (43, 25, 217, 60, 19),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -369,9 +370,9 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # The same profile with both maps removed reproduces
         # (36, 19, 217, 55, 18) exactly on this branch, so the move is
         # fully attributed to the two maps. Read in the local venv on
-        # CPython 3.12; the 3.11 entry carries the same tuple pending
-        # its CI read, both interpreters having agreed on every
-        # near-extinct reading of this cell.
+        # CPython 3.12; the 3.11 CI read is (43, 25, 217, 60, 19) — the
+        # interpreters diverge now that the armed arm lifts the cell out
+        # of the near-extinct regime whose reads they used to share.
         (3, 12): (34, 17, 217, 56, 22),
     },
     "diamond_princess_2020": {
