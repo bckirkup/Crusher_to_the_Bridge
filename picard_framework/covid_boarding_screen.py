@@ -1721,6 +1721,7 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         getattr(tx_core, "activity_contacts", None) if tx_core is not None else None
     )
     caregiver_resolved = getattr(tx_core, "caregiver_resolved_block", None)
+    droplet_split = getattr(tx_core, "droplet_field_split", None)
     return {
         "airborne_half_life_hours": profile.get("airborne_half_life_hours"),
         "route_efficiency_multipliers": dict(
@@ -1749,6 +1750,21 @@ def _delivery_block(sim: Any, raw: Mapping[str, Any]) -> dict[str, Any]:
         # presentation_draw_mode arm echoes its declared value).
         "presentation_draw_mode": profile.get("presentation_draw_mode")
         or "once_per_course",
+        # The engine-resolved droplet emission partition (AERO-SPLIT-01),
+        # echoed with the declared arm block so a far-field attenuation
+        # arm (CREW-WINDOW-01 MESS_*) is auditable from the payload alone.
+        "droplet_field_split": (
+            None
+            if droplet_split is None
+            else {
+                "declared": dict(tx_over.get("droplet_field_split") or {}),
+                "mode": droplet_split.mode,
+                "far_field_share": droplet_split.far_field_share,
+                "settled_share": droplet_split.settled_share,
+                "near_field_share": droplet_split.near_field_share,
+                "active": bool(droplet_split.active),
+            }
+        ),
         # CAREGIVER-V1 conformance echo: the resolved role tree (mode,
         # budget_mode, per-role enabled + draws) so an arm's declared
         # caregiver block is auditable against what the engine parsed.

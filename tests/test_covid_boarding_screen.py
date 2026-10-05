@@ -1124,6 +1124,50 @@ def test_a_hand_mode_arm_cell_echoes_the_resolved_hand_mode():
     assert base_delivery["hand_reservoir_mode"] == "hygiene_cycle"
 
 
+def test_a_droplet_split_arm_cell_echoes_the_resolved_split():
+    """Echo readout on far-field attenuation arms (CREW-WINDOW-01): the
+    delivery block echoes the engine-resolved droplet_field_split shares
+    beside the declared arm block, so a MESS_* attenuation arm is
+    auditable from the payload alone."""
+
+    design = _arm_design([
+        {"arm_id": "B0_baseline", "overrides": {}},
+        {
+            "arm_id": "B1_mess",
+            "overrides": {
+                "transmission_overrides": {
+                    "droplet_field_split": {
+                        "mode": "partition",
+                        "far_field_share": 0.0875,
+                        "settled_share": 0.0875,
+                    },
+                },
+            },
+        },
+    ])
+    cells = enumerate_cells(design)
+    arm = next(c for c in cells if c.arm_id == "B1_mess")
+    split = echo_screen_cell(design, arm)["delivery"]["droplet_field_split"]
+    assert split["declared"]["far_field_share"] == pytest.approx(0.0875)
+    assert split["declared"]["settled_share"] == pytest.approx(0.0875)
+    assert split["mode"] == "partition"
+    assert split["far_field_share"] == pytest.approx(0.0875)
+    assert split["settled_share"] == pytest.approx(0.0875)
+    # The removed far-field share went to settled; near-field delivery
+    # is held at the shipped 0.825 by construction.
+    assert split["near_field_share"] == pytest.approx(0.825)
+    assert split["active"] is True
+
+    base = next(c for c in cells if c.arm_id == "B0_baseline")
+    base_split = echo_screen_cell(design, base)["delivery"][
+        "droplet_field_split"
+    ]
+    assert base_split["declared"] == {}
+    assert base_split["far_field_share"] == pytest.approx(0.175)
+    assert base_split["settled_share"] == pytest.approx(0.0)
+    assert base_split["near_field_share"] == pytest.approx(0.825)
+
+
 def test_a_rings_first_cell_echoes_the_engine_cap_flag():
     """Echo readout on a rings-first arm (RING-CAP-V1): the delivery
     block echoes the engine-resolved include_fixed_rings flag beside the
