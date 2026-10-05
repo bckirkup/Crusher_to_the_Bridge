@@ -1,0 +1,46 @@
+# FLU-AGE-01 campaign worker — the flu_rhythm_ab probe stack layered over a
+# recent campaign image, re-basing it onto the host-age engine merge
+# (HOST-AGE-02/03: age-structured presentation + severity draws, default-ON
+# on influenza_a; AGE-WITNESS-01 payload; HEAD = b4207e5f).
+#
+# The base `picard-campaign:campaign-7e1b54bc` predates the host-age merges,
+# so this overlay re-COPYs every runtime dir the probe path can touch — the
+# same role Dockerfile.flu_rhythm_ab plays over the root build — plus the
+# frozen flu_rhythm_01 manifest so the jobdef command stays the plain
+# `entrypoint.py --arg Ref::` form (no `-c` bootstrap).
+#
+# Build (from the repository root):
+#   docker build -f deploy/aws/Dockerfile.flu_age_01 \
+#     --build-arg BASE_IMAGE=<acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:campaign-7e1b54bc \
+#     --build-arg ENGINE_GIT_SHA=$(git rev-parse HEAD) \
+#     -t <acct>.dkr.ecr.<region>.amazonaws.com/picard-campaign:campaign-b4207e5f .
+ARG BASE_IMAGE=picard-campaign:campaign-7e1b54bc
+FROM ${BASE_IMAGE}
+
+ARG ENGINE_GIT_SHA=unknown
+LABEL org.opencontainers.image.revision=${ENGINE_GIT_SHA}
+ENV ENGINE_GIT_SHA=${ENGINE_GIT_SHA}
+
+USER root
+# Engine + data + schema surface (host-age declarations live in
+# data/pathogens/active_profiles.json; the age draws in
+# engines/natural_history.py; the band lookups feed through
+# engines/transmission_core.py), orchestrator validation, and the modality
+# payload AGE-WITNESS-01 extends.
+COPY --chown=campaign:campaign engines/ ./engines/
+COPY --chown=campaign:campaign data/ ./data/
+COPY --chown=campaign:campaign schemas/ ./schemas/
+COPY --chown=campaign:campaign crusher_labs/ ./crusher_labs/
+COPY --chown=campaign:campaign picard_framework/ ./picard_framework/
+COPY --chown=campaign:campaign orchestrator*.py ./
+# Campaign entrypoints + the probe drivers (flu_rhythm_ab_probe and the
+# diag helpers it shares), matching the Dockerfile.flu_rhythm_ab scope.
+COPY --chown=campaign:campaign deploy/aws/ ./deploy/aws/
+COPY --chown=campaign:campaign tools/ ./tools/
+COPY --chown=campaign:campaign \
+    picard_framework/runs/mega_cruise_campaign/flu_rhythm_01_manifest.json \
+    ./picard_framework/runs/mega_cruise_campaign/flu_rhythm_01_manifest.json
+USER campaign
+
+# Job definitions supply the worker script as argv[0].
+ENTRYPOINT ["python3"]
