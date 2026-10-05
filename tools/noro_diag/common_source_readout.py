@@ -44,6 +44,46 @@ _CENSUS_MEMBER = "growth_census.json.gz"
 
 _ARM_ORDER = ("provisioned_lot", "ill_handler", "ill_diner")
 
+# The three witness fields are emitted last in the census payload (insertion
+# order), so on the big-hull zips (census JSON runs 400-800 MB) we decode just
+# those values from the decompressed tail instead of materialising the whole
+# document graph — ~10-20x less CPU and ~4-8x less transient memory per zip.
+# Two census shapes carry the witness: this campaign's image emits the
+# three top-level keys below; mainline census (post-#893 `_cs_event_log`
+# harvest) nests them under `common_source` as {events, telemetry}.
+_TAIL_FIELDS = (
+    b'"common_source_events"',
+    b'"common_source_exposures"',
+    b'"common_source_telemetry"',
+    b'"common_source"',
+)
+
+
+def _decode_value_span(text: bytes, start: int) -> object:
+    dec = json.JSONDecoder()
+    for window in (8 << 20, 64 << 20, 256 << 20, len(text) - start):
+        span = text[start:start + window]
+        try:
+            return dec.raw_decode(span.decode("utf-8"))[0]
+        except (json.JSONDecodeError, UnicodeDecodeError):
+            continue
+    raise ValueError(f"undecodable JSON value at offset {start}")
+
+
+def _tail_fields(text: bytes) -> dict:
+    out: dict[str, object] = {}
+    for field in _TAIL_FIELDS:
+        idx = text.rfind(field)
+        if idx < 0:
+            continue
+        colon = text.find(b":", idx)
+        j = colon + 1
+        while j < len(text) and text[j] in (0x20, 0x09, 0x0A, 0x0D):
+            j += 1
+        name = field.strip(b'"').decode()
+        out[name] = _decode_value_span(text, j)
+    return out
+
 
 def _list_keys(client, bucket: str, prefix: str) -> list[str]:
     keys: list[str] = []
@@ -64,23 +104,43 @@ def _fetch_voyage(client, bucket: str, key: str, prefix: str) -> dict | None:
     raw = _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
     if raw is None:
         return {"key": key, "error": "no census member"}
-    census = json.loads(gzip.decompress(raw))
+    text = gzip.decompress(raw)
+    cs = _tail_fields(text)
+    del text
     sraw = _s3_member_blob(client, bucket, key, _SUMMARY_MEMBER)
     summary = json.loads(sraw) if sraw else {}
     params = summary.get("parameters", {})
     body = summary.get("summary", {})
     routes = body.get("infections_by_dominant_route") or {}
     shares = body.get("infection_dose_share_by_route") or {}
-    telemetry = census.get("common_source_telemetry") or {}
-    events = census.get("common_source_events") or []
-    exposures = census.get("common_source_exposures") or []
+    telemetry = cs.get("common_source_telemetry") or {}
+    events = cs.get("common_source_events") or []
+    exposures = cs.get("common_source_exposures") or []
+    if not events:
+        block = cs.get("common_source") or {}
+        events = block.get("events") or []
+        telemetry = telemetry or (block.get("telemetry") or {})
+    # Aggregate inside the worker: census JSON runs hundreds of MB on the
+    # bigger hulls, so rows must not retain the raw event/exposure lists.
+    arms = {"provisioned_lot": 0, "ill_handler": 0, "ill_diner": 0}
+    takers_sum = 0
+    zero_dose = 0
+    for e in events:
+        kind = e.get("source_kind")
+        if kind in arms:
+            arms[kind] += 1
+        takers_sum += int(e.get("servings_taken", 0) or 0)
+        if not e.get("per_serving_dose"):
+            zero_dose += 1
     return {
         "key": key,
         "tier": _tier_of(key, prefix),
         "cell_key": _cell_key(params),
         "seed": seed_from_params(params),
         "n_events": len(events),
-        "events": events,
+        "arms": arms,
+        "takers_sum": takers_sum,
+        "zero_dose_events": zero_dose,
         "n_exposures": len(exposures),
         "exposure_dose_sum": sum(
             float(e.get("dose", 0.0) or 0.0) for e in exposures
@@ -104,17 +164,15 @@ def _aggregate_cell(rows: list[dict]) -> dict:
     n = len(rows)
     event_counts = [r["n_events"] for r in rows]
     arm = Counter()
-    takers = []
-    dose_events = 0
-    servings_dosed = 0
+    takers_sum = 0
+    n_taken_events = 0
+    zero_dose = 0
     for r in rows:
-        for ev in r["events"]:
-            arm[str(ev.get("source_kind") or "?")] += 1
-            tk = int(ev.get("servings_taken", 0) or 0)
-            takers.append(tk)
-            if float(ev.get("per_serving_dose", 0.0) or 0.0) > 0.0:
-                dose_events += 1
-                servings_dosed += tk
+        for k, v in (r.get("arms") or {}).items():
+            arm[k] += int(v)
+        takers_sum += int(r.get("takers_sum", 0) or 0)
+        n_taken_events += int(r["n_events"])
+        zero_dose += int(r.get("zero_dose_events", 0) or 0)
     cs_inf = sum(r["cs_infections"] for r in rows)
     dose_credited = sum(
         float(r["telemetry"].get("dose_credited", 0.0) or 0.0)
@@ -130,9 +188,8 @@ def _aggregate_cell(rows: list[dict]) -> dict:
         ),
         "events_max": max(event_counts, default=0),
         "arm": dict(arm),
-        "takers_mean": (sum(takers) / len(takers)) if takers else 0.0,
-        "zero_dose_events": sum(arm.values()) - dose_events,
-        "servings_dosed": servings_dosed,
+        "takers_mean": (takers_sum / n_taken_events) if n_taken_events else 0.0,
+        "zero_dose_events": zero_dose,
         "cs_infections": cs_inf,
         "dose_credited": dose_credited,
         "voyages_with_cs_infection": sum(
@@ -185,6 +242,9 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=16)
     ap.add_argument("--out", help="Write the markdown table to this path")
     ap.add_argument("--json-out", help="Dump per-voyage rows JSON")
+    ap.add_argument("--resume", action="store_true",
+                    help="skip keys already in --json-out; checkpoint "
+                         "every 500 rows")
     args = ap.parse_args()
 
     prefixes = [
@@ -194,8 +254,45 @@ def main() -> None:
     ]
     prefixes = [p.rstrip("/") + "/" for p in prefixes]
 
+    json_allowed = (str(Path(args.json_out).parent.resolve()),) \
+        if args.json_out else ()
+
+    def _json_open(mode: str):
+        return validated_open(
+            str(args.json_out), mode, allowed_roots=json_allowed,
+            encoding="utf-8")
+
+    def _ckpt() -> None:
+        if args.resume and args.json_out:
+            with _json_open("w") as fh:
+                json.dump(rows, fh, indent=1)
+
     client = _s3_client()
     rows: list[dict] = []
+    done_keys: set[str] = set()
+    if args.resume and args.json_out and Path(args.json_out).exists():
+        with _json_open("r") as fh:
+            rows = json.load(fh)
+        # Normalize rows written by the pre-aggregation shape (raw event lists).
+        for r in rows:
+            if "arms" not in r and "events" in r:
+                arms = {"provisioned_lot": 0, "ill_handler": 0,
+                        "ill_diner": 0}
+                tk = 0
+                zd = 0
+                for ev in r["events"]:
+                    k = ev.get("source_kind")
+                    if k in arms:
+                        arms[k] += 1
+                    tk += int(ev.get("servings_taken", 0) or 0)
+                    if not ev.get("per_serving_dose"):
+                        zd += 1
+                r["arms"] = arms
+                r["takers_sum"] = tk
+                r["zero_dose_events"] = zd
+                r.pop("events", None)
+        done_keys = {r["key"] for r in rows}
+        print(f"resume: {len(rows)} rows already read", file=sys.stderr)
     errors = 0
     for prefix in prefixes:
         keys = _list_keys(client, args.bucket, prefix)
@@ -207,7 +304,8 @@ def main() -> None:
                 k for tier_keys in by_tier.values()
                 for k in tier_keys[: args.limit]
             )
-        print(f"{prefix}: {len(keys)} zips", file=sys.stderr)
+        keys = [k for k in keys if k not in done_keys]
+        print(f"{prefix}: {len(keys)} zips to read", file=sys.stderr)
         with ThreadPoolExecutor(args.workers) as pool:
             futs = [
                 pool.submit(_fetch_voyage, client, args.bucket, k, prefix)
@@ -217,11 +315,14 @@ def main() -> None:
                 row = fut.result()
                 if row and "error" not in row:
                     rows.append(row)
+                    if len(rows) % 500 == 0:
+                        _ckpt()
                 else:
                     errors += 1
                 if i % 500 == 0:
                     print(f"  {i}/{len(keys)} ({errors} errors)",
                           file=sys.stderr)
+        _ckpt()
     print(f"read {len(rows)} voyages, {errors} errors", file=sys.stderr)
 
     cells: dict[tuple, list[dict]] = defaultdict(list)
