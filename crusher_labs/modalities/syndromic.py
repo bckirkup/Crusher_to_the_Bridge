@@ -1136,6 +1136,22 @@ class SyndromicSurveillance:
             day[record["role"]] += 1
         return dict(sorted(curve.items()))
 
+    def onset_observation_agent_records(
+        self,
+        pathogen_id: str,
+    ) -> dict[int, dict[str, Any]]:
+        """Recorded onsets for a pathogen, keyed by agent id.
+
+        Returned per-agent so a caller can group the dated mass by any
+        host attribute the curve does not carry — age band, deck, cabin —
+        without the modality knowing those attributes exist.
+        """
+        return {
+            aid: dict(record)
+            for (pid, aid), record in self._onset_observations.items()
+            if pid == str(pathogen_id)
+        }
+
     def onset_observation_severity_counts(
         self,
         pathogen_id: str,

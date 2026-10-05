@@ -259,11 +259,14 @@ _EPOCHS_PER_DAY = 24  # 1 h epochs
 
 
 class _Agent:
-    def __init__(self, agent_id, role, home_zone, infections=None):
+    def __init__(self, agent_id, role, home_zone, infections=None,
+                 age_band=""):
         self.agent_id = agent_id
         self.role = role
         self.home_zone = home_zone
         self.infections = infections or {}
+        self.age_band = age_band
+        self.departure_epoch = None
 
 
 class _Engine:
@@ -275,6 +278,9 @@ class _Engine:
 
 
 class _Syndromic:
+    def __init__(self, agent_records=None):
+        self._agent_records = agent_records or {}
+
     def onset_observation_curve(self, pathogen_id):
         return {}
 
@@ -286,6 +292,9 @@ class _Syndromic:
 
     def onset_recording_channel(self, pathogen_id):
         return None
+
+    def onset_observation_agent_records(self, pathogen_id):
+        return self._agent_records
 
     def onset_observation_severity_counts(self, pathogen_id):
         return {}
@@ -456,6 +465,62 @@ def test_during_splits_and_confined_count():
     assert witness["window_days"] == [16, 30]
     assert witness["protocol_id"] == "SOP-017"
     assert witness["invalid_reason"] is None
+
+
+def test_age_band_tallies():
+    agents = [
+        _Agent(1, "passenger", "PC_Home",
+               {PATHOGEN_ID: {"infection_epoch": 10 * 24}},
+               age_band="65-74"),
+        _Agent(2, "crew", "Crew_Mess_Main",
+               {PATHOGEN_ID: {"infection_epoch": 20 * 24}},
+               age_band="18-34"),
+        _Agent(3, "crew", "Crew_Mess_Main",
+               {PATHOGEN_ID: {"infection_epoch": 21 * 24}},
+               age_band="35-49"),
+        _Agent(4, "passenger", "PC_Other"),  # never infected
+        _Agent(9, "crew", "CC_9",
+               {PATHOGEN_ID: {"infection_epoch": 18 * 24}},
+               age_band="18-34"),
+    ]
+    sim = _Sim(agents, seeded=(9,))
+    sim.modalities["syndromic"] = _Syndromic(agent_records={
+        2: {"onset_day": 20, "role": "crew"},
+        3: {"onset_day": 21, "role": "crew"},
+    })
+    sim.zone_types = {"Crew_Mess_Main": "Dining"}
+    ledger = QuarantineAttributionLedger()
+    ledger.observe(sim, _work(epoch=16 * 24, active_mods=[_confine_order()]))
+    ledger.observe(sim, _work(epoch=20 * 24, tx_events=[
+        _ev(20 * 24, "Crew_Mess_Main", "droplet", 2),
+        _ev(21 * 24, "Crew_Mess_Main", "droplet", 3),
+    ]))
+    design = BoardingScreenDesign(
+        design_id="x", scenario_id="diamond_princess_2020",
+        thetas=(1e5,), infection_age_days=(3.3,), imports=(1,),
+        sanitary_visit_mode="none", seed_base=1, seeds=1,
+        takeoff_recorded_onsets=10,
+        arms=({"arm_id": "A0", "overrides": {}},),
+    )
+    cell = ScreenCell(
+        index=0, scenario_id="diamond_princess_2020", theta=1e5,
+        infection_age_days=3.3, imports=1, seed=1, arm_id="A0",
+    )
+    payload = cell_payload(design, cell, sim, ledger, _raw_spec())
+    # Whole-voyage truth: the seeded host is excluded; band labels sort.
+    assert payload["infections_by_age_band"] == {
+        "18-34": 1, "35-49": 1, "65-74": 1,
+    }
+    # During-window truth and dated mass carry the same band axis.
+    assert payload["during_window_by_age_band"] == {
+        "18-34": 1, "35-49": 1,
+    }
+    assert payload["during_quarantine_by_age_band"] == {
+        "18-34": 1, "35-49": 1,
+    }
+    assert payload["dated_onsets_by_age_band"] == {
+        "18-34": 1, "35-49": 1,
+    }
 
 
 def test_never_activated_is_an_invalid_marker_not_zeros():

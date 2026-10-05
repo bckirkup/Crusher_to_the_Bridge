@@ -37,6 +37,7 @@ from engines.infection_dynamics_bridge import (
     earliest_shed_epoch,
     ever_presented,
 )
+from engines.natural_history import host_age_band
 from engines.sim_clock import SimClock
 from engines.transmission_core import PATHWAY_EFFICIENCY_KEYS, TransmissionCore
 from picard_framework.covid_fit_targets import load_fit_targets
@@ -1104,17 +1105,27 @@ def _index_geometry(
 
 
 def _truth_counts(engine: Any) -> dict[str, Any]:
-    """Ever-infected host count excluding the seeded hosts, and the aboard."""
+    """Ever-infected host count excluding the seeded hosts, and the aboard.
+
+    ``infections_by_age_band`` is the truth-channel attack surface the
+    DP record's decade table scores against — the NIID field briefing's
+    confirmed-by-age curve — counted on the band label each host carries.
+    """
     seeded = set(getattr(engine, "explicit_seed_agent_ids", ()) or ())
-    infected = sum(
-        1 for a in engine.agents
-        if PATHOGEN_ID in a.infections and a.agent_id not in seeded
-    )
+    infected = 0
+    by_band: dict[str, int] = {}
+    for a in engine.agents:
+        if PATHOGEN_ID not in a.infections or a.agent_id in seeded:
+            continue
+        infected += 1
+        band = host_age_band(a) or "unbanded"
+        by_band[band] = by_band.get(band, 0) + 1
     aboard = len(engine.agents)
     return {
         KEY_INFECTIONS_TOTAL: infected,
         KEY_ABOARD_TOTAL: aboard,
         KEY_ATTACK_RATE: (infected / aboard) if aboard else None,
+        "infections_by_age_band": dict(sorted(by_band.items())),
     }
 
 
@@ -1217,11 +1228,14 @@ def _tally_during_events(
     dining_types: Mapping[str, str],
     start: int,
     end: int | None,
-) -> tuple[dict[str, int], dict[str, int], dict[str, int], int]:
-    """Split the during-window ledger events by role, zone class and route."""
+) -> tuple[
+    dict[str, int], dict[str, int], dict[str, int], dict[str, int], int,
+]:
+    """Split during-window ledger events by role, zone class, route, band."""
     by_role = {"passenger": 0, "crew": 0}
     by_zone = dict.fromkeys(ZONE_CLASSES, 0)
     by_route = {**dict.fromkeys(PATHWAY_EFFICIENCY_KEYS, 0), "unknown": 0}
+    by_age_band: dict[str, int] = {}
     confined_passengers = 0
     for ev in ledger_events:
         day = sim.clock.day_index(int(ev["epoch"]))
@@ -1231,11 +1245,13 @@ def _tally_during_events(
         role = getattr(agent, "role", None)
         if role in by_role:
             by_role[role] += 1
+        band = host_age_band(agent) or "unbanded"
+        by_age_band[band] = by_age_band.get(band, 0) + 1
         by_zone[_during_zone_class(sim, dining_types, agents_by_id, ev)] += 1
         by_route[ev["pathway"] if ev["pathway"] in by_route else "unknown"] += 1
         if role == "passenger" and ev["confined"]:
             confined_passengers += 1
-    return by_role, by_zone, by_route, confined_passengers
+    return by_role, by_zone, by_route, by_age_band, confined_passengers
 
 
 def _attribution_block(
@@ -1250,7 +1266,13 @@ def _attribution_block(
     agents_by_id = {a.agent_id: a for a in sim.engine.agents}
     dining_types = _zone_class_lookup(sim)
 
-    by_role, by_zone, by_route, confined_passengers = _tally_during_events(
+    (
+        by_role,
+        by_zone,
+        by_route,
+        by_age_band,
+        confined_passengers,
+    ) = _tally_during_events(
         sim, ledger.events, agents_by_id, dining_types, start, end,
     )
 
@@ -1273,6 +1295,7 @@ def _attribution_block(
         "during_window_by_role": by_role,
         "during_window_by_zone_class": by_zone,
         "during_window_by_route": by_route,
+        "during_window_by_age_band": dict(sorted(by_age_band.items())),
         "confined_passenger_infections_during_window": confined_passengers,
         "infections_before_quarantine": window_counts["before"],
         "infections_during_quarantine": (
@@ -1282,6 +1305,9 @@ def _attribution_block(
         "during_quarantine_by_role": by_role if activated else None,
         "during_quarantine_by_zone_class": by_zone if activated else None,
         "during_quarantine_by_route": by_route if activated else None,
+        "during_quarantine_by_age_band": (
+            dict(sorted(by_age_band.items())) if activated else None
+        ),
         "confined_passenger_infections_during_quarantine": (
             confined_passengers if activated else None
         ),
@@ -1535,11 +1561,19 @@ def cell_payload(
         turn_day=design.turn_day,
     )
     curve = syndromic.onset_observation_curve(PATHOGEN_ID)
+    agents_by_id = {a.agent_id: a for a in sim.engine.agents}
+    dated_onsets_by_band: dict[str, int] = {}
+    for aid in syndromic.onset_observation_agent_records(PATHOGEN_ID):
+        band = host_age_band(agents_by_id.get(aid)) or "unbanded"
+        dated_onsets_by_band[band] = dated_onsets_by_band.get(band, 0) + 1
     payload = {
         "observables": obs.as_dict(),
         "onset_curve": {
             str(day): dict(roles) for day, roles in sorted(curve.items())
         },
+        # Dated mass on the band axis — the record's symptomatic-confirmed
+        # column of the NIID decade table scored against the replay.
+        "dated_onsets_by_age_band": dict(sorted(dated_onsets_by_band.items())),
         "first_onset_day": _first_onset_day(curve),
         "sanitary_activity": {
             k: float(v) for k, v in dict(sim.tx_core.sanitary_telemetry).items()
