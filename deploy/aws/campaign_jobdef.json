@@ -1,6 +1,31 @@
 {
   "jobDefinitionName": "<JOBDEF_NAME>",
   "type": "container",
+  "retryStrategy": {
+    "attempts": 10,
+    "evaluateOnExit": [
+      {
+        "onStatusReason": "Host EC2*",
+        "action": "retry"
+      },
+      {
+        "onReason": "OutOfMemoryError*",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "137",
+        "action": "exit"
+      },
+      {
+        "onExitCode": "0",
+        "action": "exit"
+      },
+      {
+        "onReason": "*",
+        "action": "retry"
+      }
+    ]
+  },
   "containerProperties": {
     "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/picard-campaign:<IMAGE_TAG>",
     "command": [
