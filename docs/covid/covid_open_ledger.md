@@ -1210,3 +1210,30 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (pooled aboard-window 105–248 vs the record's 34 pre-6-Feb dated
   onsets). Next: CG-FLOOR-01, the declared R2 factor-floor probe —
   proposed, not yet run.*
+
+- **`HOST-AGE-01` arms the two age-structure terms the arm was missing —
+  the DP crew protection the record shows and the model lacked.**
+  (`docs/ledger/HOST-AGE-01.md`) The COVID arm drew susceptibility and
+  presentation flat across age while only severity was conditioned
+  (#31). Both terms are now shipped default-armed on
+  `sars_cov2_resp`, keyed on the agent's `age_band` under the severity
+  model's band→decade convention, sourced not declared:
+  `dose_response.susceptibility_by_age_band` = Ayoub 2020 decade ladder
+  vs 60–69y (Grade B shape, tranche 50's in-register source),
+  `symptomatic_fraction_by_age_band` = Wang 2022 Fig. 2 spline over
+  38 studies / 14,850 pre-vaccine infections — the only age-resolved
+  synthesis of the same screened-denominator quantity the flat field
+  reads (F2dig). Deliberately unrenormalised: on DP's composition it
+  lands E[mult|crew] ≈ 0.53 vs E[mult|pax] ≈ 0.86 — the young-crew
+  protection the record shows (during-window crew share ~29%), and on
+  elder-skewed passengers it raises dated onsets per course, both
+  recorded as consequences. Both detector cells repinned — GM
+  (36,19,217,55,18) → (34,17,217,56,22) and DP (2480,2215,2827,595,542)
+  → (2765,2587,2702,398,333) — with the unarmed profile reproducing
+  each prior tuple exactly, fully attributed (DP composition: elder
+  presentation lift raises onsets, acquisition suppression cuts
+  positives). Declared sweep axes: the contested child end of the
+  ladder (Davies ~0.5 / Viner OR 0.56 vs Ayoub 0.06) and the vestigial
+  flat-0.31 severity asymptomatic entry as consistency debt. *The DP believability consequence is unmeasured —
+  this lands after DP-BELIEF-01's head-of-record, so the map's numbers
+  stand at its SHA; a replay under the armed arm is the open cell.*

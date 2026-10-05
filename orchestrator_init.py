@@ -1588,6 +1588,38 @@ def _validate_severity_observation_pair(
     _validate_observation_scenario_set(pathogen_id, observation)
 
 
+def _validate_age_graded_terms(pathogen_id: str, profile: dict[str, Any]) -> None:
+    """Check a profile's age-banded susceptibility and presentation terms.
+
+    Both maps are exact-label lookups like the severity ladder — validated for
+    shape and bounds only; which bands exist is the profile's declaration.
+    """
+    susceptibility = (
+        profile.get("dose_response", {}) or {}
+    ).get("susceptibility_by_age_band")
+    if susceptibility is not None:
+        label = f"{pathogen_id}.dose_response.susceptibility_by_age_band"
+        if not isinstance(susceptibility, dict) or not susceptibility:
+            raise ValueError(f"{label} must be a non-empty object")
+        for band, value in susceptibility.items():
+            number = float(value)
+            if not np.isfinite(number) or number < 0.0:
+                raise ValueError(
+                    f"{label}.{band} must be a finite, non-negative multiplier",
+                )
+    fractions = profile.get("symptomatic_fraction_by_age_band")
+    if fractions is not None:
+        label = f"{pathogen_id}.symptomatic_fraction_by_age_band"
+        if not isinstance(fractions, dict) or not fractions:
+            raise ValueError(f"{label} must be a non-empty object")
+        for band, value in fractions.items():
+            number = float(value)
+            if not np.isfinite(number) or not 0.0 <= number <= 1.0:
+                raise ValueError(
+                    f"{label}.{band} must be a finite probability",
+                )
+
+
 def _validate_symptom_severity_profiles(
     profiles: dict[str, dict[str, Any]],
 ) -> None:
@@ -1597,6 +1629,7 @@ def _validate_symptom_severity_profiles(
             raise ValueError(
                 f"{pathogen_id}.symptom_severity is retired; use severity_model",
             )
+        _validate_age_graded_terms(pathogen_id, profile)
         severity = profile.get("severity_model")
         observation = profile.get("observation_model")
         if severity is None and observation is None:
