@@ -23,10 +23,13 @@ None.
 | `dashboard/app.py` | Main command deck tabs and layout |
 | `dashboard/theme.py` | LCARS colors, CSS, `apply_lcars_layout()` |
 | `dashboard/charts.py` | Plotly charts, pathway aggregation |
+| `dashboard/mechanisms.py` | Panels for agent/mechanism fields (route attribution, passenger/crew rates, sanitary activity, age-band stats, information environment, decision + SOP logs, exposure totals, common-source log) |
 | `dashboard/spatial_viz.py` | Architectural elevation + per-deck plan overlays |
 | `dashboard/architectural_graphics.py` | User-supplied `graphics/` elevation and plan JPGs |
 | `dashboard/deck_geometry.py` | Hull silhouettes and compartment footprints |
 | `dashboard/loaders.py` | Telemetry and notebook loaders |
+| `dashboard/run_console.py` | Operations Console — ship/fleet launch form + Mechanism overrides expander |
+| `dashboard/agent_explorer.py` | Agent Illness & Care — class/gender/cabin-mate chips + mechanism chips row |
 
 ## Quick Commands
 
@@ -34,7 +37,7 @@ None.
 ```bash
 python3 -m pytest tests/test_dashboard.py -v --tb=short
 ```
-Validates package imports, LCARS constants, `aggregate_transmission_pathway_totals()`, `apply_lcars_layout()`, and `load_history()` when the file is missing.
+Validates package imports, LCARS constants, `aggregate_transmission_pathway_totals()`, `apply_lcars_layout()`, `load_history()` when the file is missing, plus the mechanisms aggregators.
 
 ### 2. Generate telemetry first
 ```bash
@@ -51,6 +54,10 @@ python3 scripts/precompute_deck_assets.py --platform enterprise_galaxy_tng
 ### 4. Launch the dashboard interactively
 ```bash
 python3 -m streamlit run dashboard.py
+```
+Or pin a fixture at launch (skips the sidebar swap):
+```bash
+CTTB_TELEMETRY_DIR=telemetry_buffer/gui_probe python3 -m streamlit run dashboard.py
 ```
 Or use the launcher scripts:
 ```bash
@@ -76,11 +83,14 @@ print('Pathways:', sorted(totals.keys()))
 
 | Tab | Purpose |
 |-----|---------|
-| Bridge Status Display | Ship status, biosensors, epidemic curves, infection counters |
+| Bridge Status Display | Ship status, biosensors, epidemic curves, infection counters, Route Attribution, Passenger/Crew Rates, Sanitary Activity, Age-Band Breakdown, Information Environment (trust/rumor chart, decision log, SOP activations) |
 | Tactical Sensor Grid | Elevation + single-deck plan with contamination overlays (non-overlapping) |
+| Transmission Explorer | Delivered-exposure totals per pathway + common-source event log render even when `transmission_events` is empty |
+| Agent Illness & Care | Agent chips (class/gender/cabin mates), mechanism chips (role/age band/watch/dining), onset clocks (days post-infection / since onset), cohort profile id |
 | Sickbay Diagnostic Console | Lab notebook at LOW/MID/HIGH fidelity |
-| Standing Orders & Threat Profiles | SOP cards with `exempt_classes`, pathogen dossiers |
+| Standing Orders & Threat Profiles | SOP cards with `exempt_classes`; pathogen cards show severity model + age-band variants, symptomatic fraction by age band, common-source events, secretor gate, airborne emission, nonsusceptible mechanism, boarding, strain evolution |
 | Fleet Operations | Presidio multi-cruise comparison, per-cruise drill-down |
+| Operations Console | Ship/fleet launch form + "Mechanism overrides" expander (9 selectboxes + per-pathogen food_contamination/common_source_events checkboxes) |
 
 ## Swapping telemetry for a test (live data switch)
 
@@ -92,17 +102,51 @@ Both files must exist in the target dir.
   `CTTB_TELEMETRY_DIR` env var is set at launch.
 - `resolve_repo_path`/`resolve_child_path` restrict reads to inside the repo
   root — put test fixture dirs under `telemetry_buffer/<name>/`, not /tmp.
+- `load_history_from` does NOT schema-validate — hand-edited fixture JSON loads
+  as long as keys/values are well-formed.
+
+## Where mechanism data actually lives (gotchas)
+
+- SOP events are under **`reactive_protocols.sop_events`**, not a top-level
+  `sop_events` key — a fixture can look empty if you check the wrong level.
+- `decisions` is a dict (`by_actor` → action lists); `"noop"` actions are
+  filtered, so the decision table only appears when a real action fired.
+- The whole "Information Environment" section hides only when information_state,
+  decisions, AND reactive_protocols.sop_events are all absent/empty — stripping
+  just `information_state` still leaves the SOP activations table.
+- The committed `telemetry_buffer/gui_probe/` fixture has agents WITHOUT
+  `cabin_mate_ids`, `watch_section`, `dining_*` — cabin-mates/dining chips show
+  "—" there by design. The default `telemetry_buffer/simulation_history.json`
+  DOES populate `cabin_mate_ids` (e.g. agent 4 → [9]) and `dining_table_index` +
+  `dining_party_ids` (Dining chip "table 0, party 4") — use it to prove the
+  pass-through fix.
+- Route Attribution (`infections_by_dominant_route`/`infection_dose_share_by_route`)
+  and Sanitary Activity are absent on smoke fixtures where nothing fired —
+  absence of the section is the correct guard, not a bug.
 
 ### Negative-test pattern (proving a "silent when absent" guard)
 
 To prove a panel hides without its data (e.g. `function_capacity`,
-`cost_accounting.operational_impact_*`, `crusher_ops`):
+`cost_accounting.operational_impact_*`, `crusher_ops`, `information_state`):
 1. `mkdir telemetry_buffer/no_<field>_test`
 2. Copy `simulation_history.json`, strip the key from every record with a
    short Python one-liner; copy `artificial_lab_notebook.json` alongside.
 3. Enter the new dir path in the sidebar input; the app reruns and the panel
    should be gone while the rest of the tab renders unchanged.
 4. Restore the original dir afterwards and delete the fixture.
+
+### Positive-injection pattern (proving a render path that fixtures lack)
+
+When smoke fixtures carry no data for a panel (e.g. exposure lists,
+common-source events, route attribution), absence alone cannot prove the render
+works. Inject minimal rows into a copied fixture:
+1. `mkdir telemetry_buffer/<name>_xpos`; copy both files from `gui_probe`.
+2. Add e.g. `contact_tracing.droplet_exposures` (list of dicts — fields are
+   only counted) and one `contact_tracing.common_source_events` row with
+   event_id/pathogen_id/zone/meal/source_kind/start_epoch/end_epoch keys.
+3. Swap the sidebar input to the new dir — the "Delivered exposures by pathway"
+   chart and "Common-source event log" should render your injected values.
+4. Delete the fixture when done.
 
 This distinguishes a genuinely data-driven panel from a static placeholder and
 verifies the guard clause in one pass.
@@ -114,12 +158,18 @@ verifies the guard clause in one pass.
 | `summary.quarantined` | Confined to Quarters count |
 | `summary.isolated` | Isolation Ward count |
 | `summary.quarantine_refusers` | FRED non-compliance |
+| `summary.infections_by_dominant_route`, `infection_dose_share_by_route` | Route Attribution charts |
+| `summary.passenger_complement`/`crew_complement` + cumulative rates | Passenger / Crew Rates table |
+| `summary.sanitary_activity` | Sanitary Activity metrics |
 | `infection_counters` | Attack-rate time series, threshold indicators |
 | `wearable_monitoring` | Fever/anomaly rates, visibility breakdown (staff_visible vs wearer_only), device deployment counts |
 | `diagnostic_cascade.new_tier0_agents` | Wearable-alert cascade entries (driven by `infection_score` or fever) |
 | `contact_tracing.transmission_events[].pathway_breakdown` | Transmission vector pie chart |
+| `contact_tracing.*_exposures`, `common_source_events` | Delivered-exposure chart, common-source event log |
+| `information_state`, `decisions`, `reactive_protocols.sop_events` | Information Environment section |
 | `agents[].agent_class` | Crew Manifest by Division table |
 | `agents[].infection_state`, `symptom_presentation`, `compliance_status` | Orthogonal agent axes |
+| `agents[].role`, `age_band`, `party_id`, `cabin_mate_ids`, `watch_section`, `dining_*`, `days_*`, `profile_id` | Agent explorer mechanism chips + onset clocks |
 | `function_capacity` | Ship Function Capacity panel on Bridge Status: per-instance capacity traces, binding constraint, crew pools, `ship_systems` health — silent when no records carry the block |
 
 ## CI Coverage
@@ -134,6 +184,11 @@ GitHub Actions runs a lightweight dashboard import check after pytest (see `.git
 - **Wrong zone positions**: Verify `display` coordinates in `spatial_layout.json`
 - **Scroll not registering**: move cursor over the main content column first;
   scrolling over the sidebar scrolls the sidebar
+- **Tab bar wider than viewport**: use the "Scroll tabs right/left" arrows at the
+  tab bar's ends — rightmost tabs (Operations Console, A/B Run Diff) may need a
+  scroll before they can be clicked
+- **Selectbox options offscreen**: click the selectbox, then TYPE the value and
+  press Enter — streamlit filters the list
 - **Legend overlaps x-axis title**: `apply_lcars_layout` places horizontal
   legends at y≈-0.2…-0.25 which collides with the x-axis title on crowded
   charts — known cosmetic issue, not a failure
