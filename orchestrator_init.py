@@ -104,6 +104,7 @@ from telemetry_buffer.agent_axes import (
     agent_has_symptomatic_presentation,
     resolve_agent_axes,
 )
+from telemetry_buffer.fields import AGENT_OPTIONAL_FIELDS
 from telemetry_buffer.schema import make_agent, make_space
 
 # ── Spatial layout & ship graph ──────────────────────────────────────────
@@ -893,20 +894,7 @@ def _copy_optional_agent_fields(
     agent_dict: dict[str, Any],
     a: dict[str, Any],
 ) -> None:
-    for key in (
-        "pathogen_infections",
-        "susceptibility_multiplier",
-        "microflora_disruption",
-        "chronic_disease_ids",
-        "observed_syndromes",
-        "clinical_features",
-        "days_since_symptom_onset",
-        "cabin_mate_ids",
-        "watch_section",
-        "night_watch",
-        "role",
-        "caregiver_report_due_epoch",
-    ):
+    for key in AGENT_OPTIONAL_FIELDS:
         if key in a:
             agent_dict[key] = a[key]
 

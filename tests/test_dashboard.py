@@ -248,3 +248,268 @@ class TestTransmissionTimeSeries:
         assert len(epochs) == 2
         assert series["droplet"][0] == pytest.approx(1.0)
         assert series["fomite"][1] == pytest.approx(2.0)
+
+
+class TestMechanismAggregators:
+    def test_pathway_label_covers_new_routes(self) -> None:
+        from dashboard.mechanisms import pathway_label
+
+        assert pathway_label("flush_aerosol") == "Flush Aerosol"
+        assert pathway_label("common_source_food") == "Common-Source Food"
+        assert pathway_label("environmental_source") == "Environmental Source"
+        assert pathway_label("droplet") == "Droplet"
+
+    def test_aggregate_exposure_counts(self) -> None:
+        from dashboard.mechanisms import aggregate_exposure_counts
+
+        history = [
+            {
+                "contact_tracing": {
+                    "droplet_exposures": [{"a": 1}, {"b": 2}],
+                    "flush_aerosol_exposures": [{"c": 3}],
+                    "common_source_exposures": [],
+                },
+            },
+            {
+                "contact_tracing": {
+                    "droplet_exposures": [{"d": 4}],
+                },
+            },
+        ]
+        counts = aggregate_exposure_counts(history)
+        assert counts["Droplet"] == 3
+        assert counts["Flush Aerosol"] == 1
+        assert "Common-Source Food" not in counts
+
+    def test_collect_common_source_events(self) -> None:
+        from dashboard.mechanisms import collect_common_source_events
+
+        history = [
+            {
+                "epoch": 4,
+                "contact_tracing": {
+                    "common_source_events": [
+                        {
+                            "event_id": "cs-norwalk_gi-1",
+                            "pathogen_id": "norwalk_gi",
+                            "zone": "Galley",
+                            "meal": "dinner",
+                            "source_kind": "provisioned_lot",
+                            "food_safety_posture": 0.9,
+                            "start_epoch": 4,
+                            "end_epoch": 6,
+                            "cohort_size": 12,
+                            "servings_taken": 7,
+                            "per_serving_dose": 1.5,
+                        },
+                    ],
+                },
+            },
+        ]
+        rows = collect_common_source_events(history)
+        assert len(rows) == 1
+        assert rows[0]["epoch"] == 4
+        assert rows[0]["servings"] == 7
+        assert rows[0]["window"] == "4–6"
+
+    def test_route_attribution_latest_non_empty(self) -> None:
+        from dashboard.mechanisms import route_attribution
+
+        history = [
+            {"summary": {"infections_by_dominant_route": {"droplet": 2}}},
+            {"summary": {
+                "infections_by_dominant_route": {"droplet": 3, "fomite": 1},
+                "infection_dose_share_by_route": {"droplet": 0.6},
+            }},
+        ]
+        counts, share = route_attribution(history)
+        assert counts == {"droplet": 3, "fomite": 1}
+        assert share == {"droplet": 0.6}
+        assert route_attribution([{"summary": {}}]) == ({}, {})
+
+    def test_passenger_crew_rates(self) -> None:
+        from dashboard.mechanisms import passenger_crew_rates
+
+        summary = {
+            "passenger_complement": 14,
+            "crew_complement": 6,
+            "cumulative_ever_infected_passenger": 4,
+            "cumulative_ever_infected_crew": 1,
+            "infection_attack_rate_passenger": 0.286,
+            "reported_case_rate_crew": 0.167,
+        }
+        rows = passenger_crew_rates(summary)
+        assert [r["Group"] for r in rows] == ["Passengers", "Crew"]
+        assert rows[0]["Ever infected"] == 4
+        assert rows[0]["Attack rate"] == "28.6%"
+        assert rows[1]["Illness rate"] == "—"
+        assert passenger_crew_rates({}) == []
+
+    def test_sanitary_activity_totals(self) -> None:
+        from dashboard.mechanisms import sanitary_activity_totals
+
+        empty = {"summary": {"sanitary_activity": {"visits": 0}}}
+        used = {"summary": {"sanitary_activity": {"visits": 5, "flush_events": 1}}}
+        assert sanitary_activity_totals([empty, used])["visits"] == 5
+        assert sanitary_activity_totals([empty]) == {}
+
+    def test_age_band_stats(self) -> None:
+        from dashboard.mechanisms import aggregate_age_band_stats
+
+        agents = [
+            {
+                "agent_id": 1, "age_band": "senior",
+                "infection_state": "infected",
+                "symptom_presentation": "symptomatic",
+                "compliance_status": "compliant",
+            },
+            {
+                "agent_id": 2, "age_band": "adult",
+                "infection_state": "susceptible",
+                "symptom_presentation": "asymptomatic",
+                "compliance_status": "compliant",
+            },
+            {"agent_id": 3, "infection_state": "susceptible"},
+        ]
+        stats = aggregate_age_band_stats(agents)
+        assert stats["senior"]["infected"] == 1
+        assert stats["adult"]["total"] == 1
+        assert len(stats) == 2
+
+    def test_information_series(self) -> None:
+        from dashboard.mechanisms import information_series
+
+        history = [
+            {
+                "epoch": 0,
+                "information_state": {
+                    "reputation": {
+                        "trust_command": 0.7,
+                        "trust_medical": 0.8,
+                        "corporate_reputation_risk": 0.0,
+                    },
+                    "agents": {
+                        "0": {"rumor_exposure": 0.2, "severity_belief": 0.4},
+                        "1": {"rumor_exposure": 0.6, "severity_belief": 0.2},
+                    },
+                    "public_messages": [],
+                },
+            },
+        ]
+        df = information_series(history)
+        assert len(df) == 1
+        assert df.iloc[0]["trust_command"] == pytest.approx(0.7)
+        assert df.iloc[0]["mean_rumor_exposure"] == pytest.approx(0.4)
+        assert df.iloc[0]["max_rumor_exposure"] == pytest.approx(0.6)
+
+    def test_collect_decision_rows_skips_noop(self) -> None:
+        from dashboard.mechanisms import collect_decision_rows
+
+        history = [
+            {
+                "epoch": 2,
+                "decisions": {
+                    "by_actor": {
+                        "command": ["noop", "increase_cleaning"],
+                        "medical": ["open_ward"],
+                    },
+                },
+            },
+        ]
+        rows = collect_decision_rows(history)
+        assert len(rows) == 2
+        assert rows[0]["action"] == "increase_cleaning"
+        assert rows[1]["actor"] == "medical"
+
+    def test_collect_sop_events(self) -> None:
+        from dashboard.mechanisms import collect_sop_events
+
+        history = [
+            {
+                "epoch": 0,
+                "reactive_protocols": {
+                    "sop_events": [
+                        {
+                            "epoch": 0,
+                            "protocol_id": "SOP-014",
+                            "name": "Wearable Fleet Outbreak Response",
+                            "event": "ACTIVATED",
+                            "modifiers": {"ppe_transmission_reduction": 0.5},
+                        },
+                    ],
+                },
+            },
+        ]
+        rows = collect_sop_events(history)
+        assert len(rows) == 1
+        assert rows[0]["protocol"] == "SOP-014"
+        assert rows[0]["modifiers"] == "ppe_transmission_reduction"
+
+
+class TestShipSpecOverrides:
+    def test_mechanism_overrides_merge(self) -> None:
+        from dashboard.run_console import _build_ship_spec
+
+        spec = _build_ship_spec(
+            platform_id="destroyer_baseline",
+            num_epochs=2,
+            seed=1,
+            cascade=False,
+            voyage_effects=False,
+            preset_path=None,
+            config_overrides={
+                "rhythm": {"enabled": False},
+                "transmission": {
+                    "sanitary_visit_mode": "dwell_weighted",
+                    "common_source": {"mode": "off"},
+                },
+            },
+            pathogen_overrides={
+                "norwalk_gi": {"common_source_events": {"enabled": False}},
+            },
+            history_retention="compact",
+        )
+        overrides = spec["config_overrides"]
+        assert overrides["rhythm"]["enabled"] is False
+        assert overrides["transmission"]["sanitary_visit_mode"] == "dwell_weighted"
+        assert overrides["transmission"]["common_source"]["mode"] == "off"
+        assert spec["pathogen_overrides"]["norwalk_gi"][
+            "common_source_events"]["enabled"] is False
+        assert spec["run"]["history_retention"] == "compact"
+
+    def test_preset_overrides_preserved(self) -> None:
+        import json
+        import tempfile
+
+        from dashboard.run_console import _build_ship_spec
+
+        preset = {
+            "catalog": {"platform_id": "destroyer_baseline"},
+            "run": {"num_epochs": 1},
+            "config_overrides": {
+                "transmission": {"contact_mode": "density"},
+            },
+        }
+        with tempfile.NamedTemporaryFile(
+            mode="w", suffix=".json", delete=False, dir=REPO_ROOT,
+        ) as fh:
+            json.dump(preset, fh)
+            path = fh.name
+        try:
+            spec = _build_ship_spec(
+                platform_id="destroyer_baseline",
+                num_epochs=2,
+                seed=1,
+                cascade=True,
+                voyage_effects=False,
+                preset_path=path,
+                config_overrides={
+                    "transmission": {"sanitary_visit_mode": "dwell_weighted"},
+                },
+            )
+        finally:
+            os.unlink(path)
+        tx = spec["config_overrides"]["transmission"]
+        assert tx["contact_mode"] == "density"
+        assert tx["sanitary_visit_mode"] == "dwell_weighted"
+        assert spec["config_overrides"]["diagnostic_cascade"]["enabled"] is True

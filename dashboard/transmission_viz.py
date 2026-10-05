@@ -9,6 +9,12 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from dashboard.charts import aggregate_transmission_pathway_totals
+from dashboard.mechanisms import (
+    PATHWAY_LABELS,
+    aggregate_exposure_counts,
+    render_common_source_log,
+    render_exposure_totals,
+)
 from dashboard.retention import render_retention_banner
 from dashboard.session_state import set_selected_agent, set_selected_epoch
 from dashboard.theme import (
@@ -22,16 +28,6 @@ from dashboard.theme import (
     apply_lcars_layout,
 )
 from dashboard.units import axis, time_x_values
-
-PATHWAY_LABELS = {
-    "direct_contact": "Direct Contact",
-    "droplet": "Droplet",
-    "hvac_airborne": "HVAC Airborne",
-    "emesis_aerosol": "Emesis Aerosol",
-    "fomite": "Fomite Surface",
-    "food_contamination": "Food Contamination",
-    "environmental": "Environmental (HVAC Colonization)",
-}
 
 PATHWAY_COLORS = [
     LCARS_BLUE, LCARS_PURPLE, LCARS_GOLD, LCARS_PEACH, LCARS_GREEN, LCARS_RED, LCARS_TAN,
@@ -143,8 +139,13 @@ def render_transmission_explorer(
         return
 
     totals = aggregate_transmission_pathway_totals(history)
+
+    render_exposure_totals(history)
+    render_common_source_log(history)
+
     if not totals:
-        st.info("No transmission events recorded in telemetry.")
+        if not aggregate_exposure_counts(history):
+            st.info("No transmission events recorded in telemetry.")
         return
 
     area_fig = _build_pathway_stacked_area(history)

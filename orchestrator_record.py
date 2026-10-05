@@ -49,6 +49,7 @@ from telemetry_buffer.agent_axes import (
     agent_is_isolated,
     resolve_agent_axes,
 )
+from telemetry_buffer.fields import AGENT_OPTIONAL_FIELDS
 from telemetry_buffer.schema import (
     default_lab_notebook_path,
     default_simulation_history_path,
@@ -288,8 +289,9 @@ def _agent_record(a: dict[str, Any], pathogen_profiles: dict[str, dict[str, Any]
         agent_record["pathogen_infections"] = a.get("pathogen_infections", {})
         agent_record["susceptibility_multiplier"] = a.get("susceptibility_multiplier", {})
         agent_record["microflora_disruption"] = a.get("microflora_disruption", 0.0)
-    if "chronic_disease_ids" in a:
-        agent_record["chronic_disease_ids"] = a["chronic_disease_ids"]
+    for key in AGENT_OPTIONAL_FIELDS:
+        if key in a and key not in agent_record:
+            agent_record[key] = a[key]
     return agent_record
 
 

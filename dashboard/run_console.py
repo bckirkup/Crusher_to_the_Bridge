@@ -33,6 +33,125 @@ def _load_json(path: str) -> dict[str, Any]:
         return json.load(fh)
 
 
+def _preset_bundle_id(preset_path: str | None) -> str:
+    """Pathogen bundle id the selected preset resolves (default bundle)."""
+    path = preset_path
+    if not path or not os.path.isfile(path):
+        path = os.path.join(REPO_ROOT, "picard_framework", "runs", "smoke_2epoch.json")
+    try:
+        spec = _load_json(path)
+    except Exception:
+        return "active_profiles"
+    return str((spec.get("catalog") or {}).get("pathogen_bundle_id") or "active_profiles")
+
+
+def _pathogen_mechanism_rows(bundle_id: str) -> list[tuple[str, str, bool]]:
+    """(pathogen_id, block, enabled) for per-pathogen mechanism blocks."""
+    bundle_path = os.path.join(REPO_ROOT, "data", "pathogens", f"{bundle_id}.json")
+    if not os.path.isfile(bundle_path):
+        return []
+    try:
+        data = _load_json(bundle_path)
+    except Exception:
+        return []
+    rows: list[tuple[str, str, bool]] = []
+    for profile in data.get("pathogens", []):
+        pid = profile.get("pathogen_id")
+        if not pid:
+            continue
+        for block in ("food_contamination", "common_source_events"):
+            block_data = profile.get(block)
+            if isinstance(block_data, dict):
+                rows.append((str(pid), block, bool(block_data.get("enabled"))))
+    return rows
+
+
+def _mechanism_override_form(
+    preset_path: str | None,
+) -> tuple[dict[str, Any], dict[str, Any], str]:
+    """Mechanism toggles → (config_overrides, pathogen_overrides, retention)."""
+    cfg: dict[str, Any] = {}
+    path_over: dict[str, Any] = {}
+    with st.expander("Mechanism overrides", expanded=False):
+        st.caption(
+            "'default' leaves the preset/config.yaml value untouched; "
+            "anything else is pinned as a config override for this run."
+        )
+        mc1, mc2, mc3 = st.columns(3)
+        rhythm = mc1.selectbox(
+            "Ship rhythm (watches, dining)",
+            ["default", "on", "off"], key="ship_mech_rhythm",
+        )
+        sanitary = mc1.selectbox(
+            "Sanitary visit mode",
+            ["default", "none", "dwell_weighted"], key="ship_mech_sanitary",
+        )
+        cabin_air = mc1.selectbox(
+            "Cabin air",
+            ["default", "cabin_compartment", "zone_pool"],
+            key="ship_mech_cabin_air",
+        )
+        common_src = mc2.selectbox(
+            "Common-source meals",
+            ["default", "on", "off"], key="ship_mech_common_source",
+        )
+        droplet = mc2.selectbox(
+            "Droplet field split",
+            ["default", "partition", "off"], key="ship_mech_droplet",
+        )
+        near_field = mc2.selectbox(
+            "Near-field air",
+            ["default", "two_box", "off"], key="ship_mech_nearfield",
+        )
+        hand = mc3.selectbox(
+            "Hand reservoir",
+            ["default", "hygiene_cycle", "wash_reuptake", "spike_decay"],
+            key="ship_mech_hand",
+        )
+        info = mc3.selectbox(
+            "Info suppression",
+            ["default", "on", "off"], key="ship_mech_info_suppression",
+        )
+        retention = mc3.selectbox(
+            "History retention",
+            ["full", "compact"], key="ship_mech_retention",
+        )
+
+        tx = cfg.setdefault("transmission", {})
+        if rhythm != "default":
+            cfg.setdefault("rhythm", {})["enabled"] = rhythm == "on"
+        if sanitary != "default":
+            tx["sanitary_visit_mode"] = sanitary
+        if cabin_air != "default":
+            tx["cabin_air_mode"] = cabin_air
+        if common_src != "default":
+            tx.setdefault("common_source", {})["mode"] = common_src
+        if droplet != "default":
+            tx.setdefault("droplet_field_split", {})["mode"] = droplet
+        if near_field != "default":
+            tx.setdefault("near_field_air", {})["mode"] = near_field
+        if hand != "default":
+            tx["hand_reservoir_mode"] = hand
+        if info != "default":
+            cfg.setdefault("info_suppression", {})["enabled"] = info == "on"
+        if not tx:
+            cfg.pop("transmission", None)
+
+        rows = _pathogen_mechanism_rows(_preset_bundle_id(preset_path))
+        if rows:
+            st.markdown("**Pathogen mechanisms**")
+            for pid, block, enabled in rows:
+                label = block.replace("_", " ")
+                val = st.checkbox(
+                    f"{label} — {pid}",
+                    value=enabled,
+                    key=f"ship_pathogen_{block}_{pid}",
+                )
+                if val != enabled:
+                    path_over.setdefault(pid, {})[block] = {"enabled": val}
+    return cfg, path_over, retention
+
+
 def _build_ship_spec(
     *,
     platform_id: str,
@@ -41,7 +160,12 @@ def _build_ship_spec(
     cascade: bool,
     voyage_effects: bool,
     preset_path: str | None,
+    config_overrides: dict[str, Any] | None = None,
+    pathogen_overrides: dict[str, Any] | None = None,
+    history_retention: str = "full",
 ) -> dict[str, Any]:
+    from picard_framework.pathogen_overrides import deep_merge_dict
+
     if preset_path and os.path.isfile(preset_path):
         spec = _load_json(preset_path)
     else:
@@ -51,13 +175,20 @@ def _build_ship_spec(
     spec.setdefault("catalog", {})["platform_id"] = platform_id
     spec.setdefault("run", {})["num_epochs"] = num_epochs
     spec.setdefault("run", {})["random_seed"] = seed
-    spec.setdefault("run", {})["history_retention"] = "full"
+    spec.setdefault("run", {})["history_retention"] = history_retention
 
     overrides = spec.setdefault("config_overrides", {})
+    if config_overrides:
+        spec["config_overrides"] = deep_merge_dict(overrides, config_overrides)
+        overrides = spec["config_overrides"]
     if cascade:
         overrides.setdefault("diagnostic_cascade", {})["enabled"] = True
     if voyage_effects:
         overrides.setdefault("voyage", {})["effects_enabled"] = True
+    if pathogen_overrides:
+        spec["pathogen_overrides"] = deep_merge_dict(
+            spec.get("pathogen_overrides") or {}, pathogen_overrides,
+        )
     return spec
 
 
@@ -80,7 +211,7 @@ def _launch_ship(spec_dict: dict[str, Any], telemetry_dir: str) -> str:
     run_block["simulation_history"] = f"{rel_dir}/simulation_history.json"
     run_block["lab_notebook"] = f"{rel_dir}/artificial_lab_notebook.json"
     run_block["ground_truth"] = f"{rel_dir}/ground_truth.json"
-    run_block["history_retention"] = "full"
+    run_block.setdefault("history_retention", "full")
 
     spec = PicardRunSpec.from_picard_dict(REPO_ROOT, spec_dict)
     sim = ShipSimulation(spec, display=False)
@@ -132,6 +263,7 @@ def _render_ship_console() -> None:
     seed = st.number_input("Random seed", min_value=0, value=42, key="ship_seed")
     cascade = st.checkbox("Enable diagnostic cascade", value=False, key="ship_cascade")
     voyage = st.checkbox("Enable voyage port effects", value=False, key="ship_voyage")
+    cfg_overrides, pathogen_overrides, retention = _mechanism_override_form(preset_path)
     telemetry_dir = st.text_input(
         "Output telemetry directory (under repo root)",
         value=os.path.join(REPO_ROOT, "telemetry_buffer"),
@@ -156,6 +288,9 @@ def _render_ship_console() -> None:
             cascade=cascade,
             voyage_effects=voyage,
             preset_path=preset_path,
+            config_overrides=cfg_overrides,
+            pathogen_overrides=pathogen_overrides,
+            history_retention=retention,
         )
         with st.spinner(f"Running {num_epochs}-epoch simulation…"):
             try:
