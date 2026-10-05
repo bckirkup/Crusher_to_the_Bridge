@@ -3,7 +3,7 @@
 **Commit:** 6567f4d0
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** working tree on 6567f4d0
+**Measured at:** 4ed16a12
 
 The COVID arm was age-blind at acquisition and flat at presentation:
 every host drew the same `dose_response` susceptibility and the same
