@@ -667,6 +667,24 @@ VOMITING_AXIS = "vomiting"
 DIARRHOEA_AXIS = "diarrhoea"
 
 
+def _age_band_multiplier(dose_response: dict[str, Any], agent: Any) -> float:
+    """The host's age-graded susceptibility multiplier; exactly 1.0 unarmed.
+
+    ``dose_response.susceptibility_by_age_band`` is an exact-label lookup, as
+    the incubation host factors and the severity ladder are: a host whose band
+    the profile does not name — or a minimal host that carries no band —
+    multiplies by 1.0 rather than reading a pooled value, because no
+    population config in this repository states a numeric span for its named
+    bands that a pooled fallback could be justified from.
+    """
+    by_band = dose_response.get("susceptibility_by_age_band") or {}
+    if not by_band:
+        return 1.0
+    band = str(getattr(agent, "age_band", "") or "")
+    value = by_band.get(band) if band else None
+    return float(value) if value is not None else 1.0
+
+
 def has_symptom_axis(inf: dict[str, Any], axis: str) -> bool:
     """Whether one infection record carries a symptom axis.
 
@@ -4624,7 +4642,15 @@ class TransmissionCore:
         agent: KorkinAgent,
         pathogen_id: str,
     ) -> float:
-        """Return the host's persistent dose-response susceptibility."""
+        """Return the host's persistent dose-response susceptibility.
+
+        ``dose_response.susceptibility_by_age_band`` multiplies the stored
+        value by the host's band — an exact-label lookup like the severity
+        ladder, where a band the profile does not name multiplies by 1.0. The
+        multiplier is deterministic, so the beta draw's position in the RNG
+        stream is unchanged; what moves is the value each challenged host
+        carries.
+        """
         existing = agent.dose_response_susceptibility.get(pathogen_id)
         if existing is not None:
             return existing
@@ -4638,6 +4664,7 @@ class TransmissionCore:
             susceptibility = (
                 draw * self._beta_poisson_susceptibility_scale(pathogen_id, dr)
             )
+        susceptibility *= _age_band_multiplier(dr, agent)
         agent.dose_response_susceptibility[pathogen_id] = susceptibility
         return susceptibility
 

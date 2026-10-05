@@ -295,3 +295,54 @@ class TestSeverityTrajectory:
         assert severity_on_day(profile, "moderate", 1) == "subclinical"
         legacy = _profile(severity_model={"states": _STATES})
         assert severity_on_day(legacy, "moderate", 5) == "moderate"
+
+
+class TestAgeGradedPresentation:
+    """``symptomatic_fraction_by_age_band`` conditions the presentation draw.
+
+    The band map is an exact-label lookup like the severity ladder: a host
+    whose band the profile does not name — or one carrying no band — reads the
+    flat ``symptomatic_fraction``, so unarmed profiles are unchanged.
+    """
+
+    def test_named_band_reads_its_own_fraction(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=0.69,
+            symptomatic_fraction_by_age_band={"5-17": 0.64, "75+": 0.88},
+        )
+        inf: dict[str, Any] = {"acquired_particles": 1.0}
+        assert natural_history.presentation_probability(inf, profile, "5-17") == pytest.approx(0.64)
+        assert natural_history.presentation_probability(inf, profile, "75+") == pytest.approx(0.88)
+
+    def test_unnamed_band_falls_back_to_the_flat_fraction(self) -> None:
+        profile = _profile(
+            symptomatic_fraction=0.69,
+            symptomatic_fraction_by_age_band={"5-17": 0.64},
+        )
+        inf: dict[str, Any] = {"acquired_particles": 1.0}
+        assert natural_history.presentation_probability(inf, profile, "35-49") == pytest.approx(0.69)
+        assert natural_history.presentation_probability(inf, profile, "") == pytest.approx(0.69)
+
+    def test_the_draw_honours_the_host_band(self) -> None:
+        clock = SimClock(epoch_duration_hours=6.0, mode=HOURS)
+        agent = _agent(clock)
+        agent.age_band = "5-17"
+        profile = _profile(
+            symptomatic_fraction=1.0,
+            symptomatic_fraction_by_age_band={"5-17": 0.0},
+        )
+        rng = np.random.default_rng(5)
+        inf = agent.infections[PATHOGEN]
+        natural_history.draw_symptom_onset(agent, PATHOGEN, inf, profile, rng)
+        assert inf["symptom_severity"] == "asymptomatic"
+        assert inf.get("presented") is None
+
+    def test_a_band_free_profile_draws_as_before(self) -> None:
+        clock = SimClock(epoch_duration_hours=6.0, mode=HOURS)
+        agent = _agent(clock)
+        agent.age_band = "65-74"
+        profile = _profile(symptomatic_fraction=1.0)
+        rng = np.random.default_rng(5)
+        inf = agent.infections[PATHOGEN]
+        natural_history.draw_symptom_onset(agent, PATHOGEN, inf, profile, rng)
+        assert inf["presented"] is True

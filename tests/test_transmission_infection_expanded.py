@@ -31,18 +31,15 @@ from engines.infection_dynamics_bridge import (
     ASYMPTOMATIC_SHEDDING,
     BETA,
     DOSE_ADJUSTMENT,
-    ETA,
-    GAMMA,
     SYMPTOMATIC_SHEDDING,
     IllnessStatus,
     InfectionStatus,
     KorkinAgent,
-    infection_probability,
     illness_probability,
+    infection_probability,
     shedding_value,
 )
 from engines.transmission_core import TransmissionCore
-
 
 # ── Dose-response tests ─────────────────────────────────────────────────
 
@@ -292,3 +289,75 @@ class TestTransmissionCoreExpanded:
         core = self._make_core(profiles=profiles)
         core.initialize_zones(["Z1", "Z2", "Z3"])
         assert core.environmental_load["legionella"] == pytest.approx(0.05)
+
+
+class TestAgeGradedSusceptibility:
+    """``dose_response.susceptibility_by_age_band`` scales the persistent draw.
+
+    The multiplier is deterministic, so the beta draw keeps its position in
+    the RNG stream: the same seed gives the same raw draw, and only the value
+    each banded host carries moves.
+    """
+
+    _BASE_DR = {"model": "beta_poisson", "alpha": 0.18, "beta": 58.0}
+
+    def _make_core(
+        self, seed: int = 42, profiles: dict | None = None,
+    ) -> TransmissionCore:
+        return TransmissionCore(
+            rng=np.random.default_rng(seed),
+            zone_volumes={"Z1": 100.0, "Z2": 50.0, "Z3": 75.0},
+            pathogen_profiles=profiles or {},
+            zone_types={"Z1": "Free", "Z2": "Dining", "Z3": "Room"},
+        )
+
+    def _agent(self, band: str) -> KorkinAgent:
+        agent = KorkinAgent(
+            agent_id=1,
+            role="passenger",
+            immune=False,
+            home_zone="Z3",
+            dining_zone="Z2",
+            work_zone="Z1",
+            free_zone="Z1",
+            schedule=["Free"] * 24,
+        )
+        agent.age_band = band
+        return agent
+
+    def test_armed_band_multiplies_the_same_draw(self) -> None:
+        armed = dict(self._BASE_DR)
+        armed["susceptibility_by_age_band"] = {"5-17": 0.06}
+        profiles_armed = {"covid": {"dose_response": armed}}
+        profiles_plain = {"covid": {"dose_response": dict(self._BASE_DR)}}
+        core_armed = self._make_core(seed=42, profiles=profiles_armed)
+        core_plain = self._make_core(seed=42, profiles=profiles_plain)
+        susc_armed = core_armed._dose_response_susceptibility(
+            self._agent("5-17"), "covid",
+        )
+        susc_plain = core_plain._dose_response_susceptibility(
+            self._agent("5-17"), "covid",
+        )
+        assert susc_armed == pytest.approx(susc_plain * 0.06)
+
+    def test_unnamed_band_and_no_band_multiply_one(self) -> None:
+        armed = dict(self._BASE_DR)
+        armed["susceptibility_by_age_band"] = {"5-17": 0.06}
+        core = self._make_core(
+            seed=42, profiles={"covid": {"dose_response": armed}},
+        )
+        plain = self._make_core(
+            seed=42, profiles={"covid": {"dose_response": dict(self._BASE_DR)}},
+        )
+        for band in ("35-49", ""):
+            armed_v = core._dose_response_susceptibility(self._agent(band), "covid")
+            plain_v = plain._dose_response_susceptibility(self._agent(band), "covid")
+            # Each call consumes one beta draw; compare per position.
+            assert armed_v == pytest.approx(plain_v)
+
+    def test_the_exponential_model_is_multiplied_too(self) -> None:
+        dr = {"model": "exponential", "k": 0.02,
+              "susceptibility_by_age_band": {"75+": 0.88}}
+        core = self._make_core(profiles={"covid": {"dose_response": dr}})
+        susc = core._dose_response_susceptibility(self._agent("75+"), "covid")
+        assert susc == pytest.approx(0.02 * 0.88)

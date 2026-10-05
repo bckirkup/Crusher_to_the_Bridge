@@ -431,11 +431,51 @@
       "dose_response": {
         "model": "beta_poisson",
         "alpha": 0.18,
-        "beta": 58.0
+        "beta": 58.0,
+        "susceptibility_by_age_band": {
+          "0-4": 0.06,
+          "5-17": 0.06,
+          "child": 0.06,
+          "18-24": 0.34,
+          "18-34": 0.34,
+          "young_adult": 0.34,
+          "25-34": 0.34,
+          "35-44": 0.57,
+          "35-49": 0.69,
+          "adult": 0.69,
+          "45-54": 0.69,
+          "50-64": 0.79,
+          "middle_aged": 0.79,
+          "55+": 1.0,
+          "65-74": 1.0,
+          "senior": 0.94,
+          "75+": 0.88
+        },
+        "susceptibility_by_age_band_notes": "Relative susceptibility multipliers by age decade, Ayoub 2020 (Global Epidemiology 1:100042, DOI 10.1016/j.gloepi.2020.100042), fitted decade ladder referenced to 60-69y = 1.00: <=19 0.06, 20s 0.34, 30s 0.57, 40s 0.69, 50s 0.79, 60s 1.00, 70s 0.94, 80+ 0.88. Grade B for the ladder's shape and direction; corroborated by Davies 2020 (Nat Med 10.1038/s41591-020-0962-9, under-20 ~0.5 of adult) and Viner 2020 (JAMA Pediatr 10.1001/jamapediatrics.2020.4573, pooled OR 0.56 child vs adult) whose child-end estimates sit ~3-8x above Ayoub's - the child end is the ladder's contested corner and a declared sweep axis, not an average taken across the three. Grade C for the band-to-decade mapping: each band reads the decade containing its midpoint, an open-ended band its lower bound plus five years, and child/young_adult/adult/middle_aged/senior read as 5-17/18-34/35-49/50-64/65+, the same convention severity_model.base_probabilities_by_age_band declares. The multiplier scales this host's persistent dose-response susceptibility and multiplies 1.0 on a band the map does not name. It is deliberately NOT renormalised to a population mean of 1.0: the ladder is an absolute relative scale pinned at the 60-69y reference, and on an elder-skewed hull the licensed direction raises effective susceptibility, which is recorded as a consequence rather than softened. Not chosen against Diamond Princess or any scored anchor."
       },
       "symptomatic_fraction": 0.69,
       "symptomatic_fraction_notes": "0.69 = 1 - 0.31, the asymptomatic share among people found by SCREENING rather than by symptoms, Buitrago-Garcia 2020 (PLoS Med 17(9):e1003346), Grade B. Screened is the right denominator because a symptom-based denominator conditions on the outcome being measured. Sah 2021's 35.1% (PNAS 118(34):e2109229118) is the alternative and is a declared scenario axis, giving 0.649. This replaces illness_probability eta 0.4 / gamma 0.12, deleted as unattributed near-neighbours of norovirus's Korkin pair: the Hill form is strictly increasing in dose and no dose-conditional presentation measurement exists for SARS-CoV-2, so the arm carries a measured proportion instead, as influenza_a does after Carrat.",
-      "severity_model": {
+      "symptomatic_fraction_by_age_band": {
+        "0-4": 0.7,
+        "5-17": 0.64,
+        "child": 0.64,
+        "18-24": 0.68,
+        "18-34": 0.7,
+        "young_adult": 0.7,
+        "25-34": 0.73,
+        "35-44": 0.76,
+        "35-49": 0.76,
+        "adult": 0.76,
+        "45-54": 0.77,
+        "50-64": 0.79,
+        "middle_aged": 0.79,
+        "55+": 0.8,
+        "65-74": 0.83,
+        "senior": 0.85,
+        "75+": 0.88
+      },
+      "symptomatic_fraction_by_age_band_notes": "Age-graded presentation share: symptomatic = 1 - asymptomatic, digitised from Wang 2022 (Pediatr Infect Dis J 42(3):232-238, DOI 10.1097/inf.0000000000003791, PMC9935239) Figure 2 - a restricted cubic spline (knots at 1.4/13.5/33.3/54.5/80.4y) fitted by multilevel mixed-effects logistic regression over 38 studies and 14850 pre-vaccination infections, the share of infections remaining asymptomatic throughout, the same screened-denominator quantity symptomatic_fraction reads from Buitrago-Garcia 2020. Digitised curve: asymptomatic ~30% at 0y, peak ~36% at 13.5y, ~21% at 57y, ~12% at 80y, 8.1% at 90.5y. Grade B for the quantity (the largest age-resolved synthesis of the right denominator in the window); F2dig for the per-age reads, calibrated against the two printed anchors 36.2% and 8.1%; Grade C for the band-to-midpoint mapping, the severity model's own convention. The flat symptomatic_fraction 0.69 this replaces per band sits at the curve's young-adult value, so the change raises presentation for the elderly and lowers it for children - on an elder-skewed hull the net direction is MORE dated onsets per infection, recorded rather than softened. Corroborating direction, incommensurable level and not used numerically: Davies 2020's clinical fraction (21% at 10-19 to 69% >70, Ab endpoints) and Poletti 2021 (JAMA Netw Open 4(3):e203018, respiratory-symptom-or-fever definition, 18.1% <20 to 64.6% >=80, R table) both measure a stricter symptom boundary than any-symptom presentation; Xu 2021 six-city China surveillance (56% asymptomatic 0-9 to 12% >60) matches Wang's level but is one setting. Each band reads the curve at its midpoint; an open-ended band its lower bound plus five years; child/young_adult/adult/middle_aged/senior read as 5-17/18-34/35-49/50-64/65+. A band the map does not name falls back to symptomatic_fraction, not to a pooled value. severity_model.base_probabilities_by_age_band still carries the flat 0.31 asymptomatic entry because the draw renormalises it away for presenters - aligning that vestigial entry to 1 minus these fractions is recorded as consistency debt, not done silently. Not chosen against Diamond Princess or any scored anchor.",
+            "severity_model": {
         "states": [
           "asymptomatic",
           "subclinical",

@@ -235,7 +235,15 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (46, 27, 217, 68, 18) exactly on the same tree, so the move is
         # fully attributed to the propensity deal. The 3.11 reading
         # carries the same tuple pending its CI read.
-        (3, 11): (36, 19, 217, 55, 18),
+        # HOST-AGE-01 (see the 3.12 note below): the two sourced
+        # age-graded maps on sars_cov2_resp re-roll this cell the same
+        # way — (36, 19, 217, 55, 18) -> (34, 17, 217, 56, 22), read in
+        # the local venv on CPython 3.12. The profile minus both maps
+        # reproduces the prior tuple exactly, so the move is fully
+        # attributed to the maps. The 3.11 reading carries the same
+        # tuple pending its CI read, both interpreters having agreed on
+        # every near-extinct reading of this cell.
+        (3, 11): (34, 17, 217, 56, 22),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -349,7 +357,22 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # (36, 19, 217, 55, 18), read in the local venv on this branch.
         # The mode: off cell reproduces the prior tuple exactly, so the
         # move is fully attributed to the propensity deal.
-        (3, 12): (36, 19, 217, 55, 18),
+        # HOST-AGE-01: sars_cov2_resp now carries the two sourced
+        # age-graded terms — dose_response.susceptibility_by_age_band
+        # (Ayoub decade ladder vs 60-69y, folded into the persistent
+        # per-host susceptibility) and symptomatic_fraction_by_age_band
+        # (Wang Fig. 2 digitised, gating the per-course presentation
+        # draw). Younger hosts infect and present less; the cell
+        # re-rolls to (34, 17, 217, 56, 22), with
+        # campaign_asymptomatic_positives 18 -> 22 the intended
+        # direction (infections that once presented now stay silent).
+        # The same profile with both maps removed reproduces
+        # (36, 19, 217, 55, 18) exactly on this branch, so the move is
+        # fully attributed to the two maps. Read in the local venv on
+        # CPython 3.12; the 3.11 entry carries the same tuple pending
+        # its CI read, both interpreters having agreed on every
+        # near-extinct reading of this cell.
+        (3, 12): (34, 17, 217, 56, 22),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
@@ -467,7 +490,21 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # propensity multiplier's residual move is the difference. Both
         # arms measured in the local venv on CPython 3.12 on the repin
         # branch; the move is fully attributed.
-        (3, 12): (2480, 2215, 2827, 595, 542),
+        # HOST-AGE-01: the two sourced age-graded maps on sars_cov2_resp
+        # (dose_response.susceptibility_by_age_band, Ayoub decade ladder;
+        # symptomatic_fraction_by_age_band, Wang Fig. 2) re-read this
+        # cell: (2480, 2215, 2827, 595, 542) -> (2765, 2587, 2702, 398,
+        # 333). The composition is the mechanism's own: the presentation
+        # ladder raises elderly presentation (0.83-0.88 vs flat 0.69) on
+        # an elder-skewed hull, so more surviving courses present and
+        # recorded onsets rise (+285), while the susceptibility ladder
+        # suppresses acquisitions and the campaign finds fewer positives
+        # (595 -> 398) and fewer asymptomatic ones (542 -> 333). The same
+        # profile with both maps removed reproduces the prior tuple
+        # exactly on this branch, so the move is fully attributed to the
+        # two maps. Both reads in the local venv on CPython 3.12 on this
+        # branch.
+        (3, 12): (2765, 2587, 2702, 398, 333),
     },
 }
 

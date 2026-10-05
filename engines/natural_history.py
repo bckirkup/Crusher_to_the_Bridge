@@ -229,13 +229,24 @@ def onset_day(
     return max(0.0, drawn + float(inf.get("strain_incubation_modifier", 0.0)))
 
 
-def presentation_probability(inf: dict[str, Any], prof: dict[str, Any]) -> float:
+def presentation_probability(
+    inf: dict[str, Any],
+    prof: dict[str, Any],
+    age_band: str = "",
+) -> float:
     """Probability of presenting given infection, before the chronic boost.
 
-    A profile carrying ``symptomatic_fraction`` presents at that measured
-    proportion irrespective of acquisition dose; profiles carrying
+    ``symptomatic_fraction_by_age_band`` conditions the measured proportion on
+    the host's band — an exact-label lookup like the severity ladder, with
+    ``symptomatic_fraction`` as the reference a band the profile does not name
+    reads. Profiles carrying only ``symptomatic_fraction`` present at that
+    measured proportion irrespective of acquisition dose; profiles carrying
     ``illness_probability`` keep the dose-conditional Hill form.
     """
+    by_band = prof.get("symptomatic_fraction_by_age_band") or {}
+    band_value = by_band.get(age_band) if age_band else None
+    if band_value is not None:
+        return float(band_value)
     fixed = prof.get("symptomatic_fraction")
     if fixed is not None:
         return float(fixed)
@@ -269,7 +280,9 @@ def draw_symptom_onset(
     """
     forced = inf.get("will_present")
     if forced is None:
-        ill_prob = presentation_probability(inf, prof)
+        ill_prob = presentation_probability(
+            inf, prof, host_age_band(agent),
+        )
         ill_prob = min(1.0, ill_prob + agent.get_chronic_illness_boost(pid))
         ill_prob *= illness_multiplier(agent, pid)
         presents = rng.random() < ill_prob
