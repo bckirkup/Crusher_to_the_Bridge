@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0.0",
+  "notes": "The scored observables of the influenza arm: one row per anchor, plus the confined-SAR floor constants the readouts bound each cell's pooled slot doses against. The arm carries no train/test split — it has too few anchors to spend one on held-out enforcement — so every row is an internal consistency check, never a fit objective, and nothing here is a model parameter the observation surface may be tuned to reproduce. The covid arm's counterpart (data/observation/covid_fit_targets.json) additionally enforces a fixed split; this file drops only that machinery.",
+  "anchors": [
+    {
+      "anchor_id": "flu.F1",
+      "observable": "confined-cabinmate secondary attack rate among exposed mates (PCR-confirmed secondary infection rate spread)",
+      "values": {
+        "sar_spread": [0.03, 0.38]
+      },
+      "source": "Lau 2012 PCR-confirmed secondary-infection-rate spread, filed as the F1 endpoint in docs/ledger/FLU-PRESENT-RESCORE-01.md.",
+      "evidence_grade": "B",
+      "notes": "Scored as Wilson-95% overlap against the cell's pooled confined_secondaries/confined_slots. The endpoint is mate infection, not mate presentation (FLU-PRESENT-RESCORE-01)."
+    },
+    {
+      "anchor_id": "flu.F5",
+      "observable": "medically-attended (reported) fraction of infections on a voyage",
+      "values": {
+        "reported_per_infection": 0.08
+      },
+      "source": "Ward 2010 voyage: 0.7% presenting against 8.9% NAT-confirmed attack (approximately 0.08), per the influenza_a observation_model notes in data/pathogens/active_profiles.json.",
+      "evidence_grade": "C",
+      "notes": "An internal check, not a scored verdict: conditioned-cell surfaces (confined index pair, monitored mates) sit above it by construction. FLU-PRESENT-RESCORE-01 measured reported/infected 0.18 against this check and read the excess as the conditioned surface, recheckable on any open-voyage census."
+    }
+  ],
+  "confined_sar_floor": {
+    "k_sourced_interval": [0.0002, 0.001],
+    "k_ship": 0.0006,
+    "source": "Alford 1966 aerosol ID50 0.6-3 TCID50 divided by Van Wesenbeeck 2015 >=1e3 copies/TCID50; shipped midpoint per the influenza_a dose_response.notes (docs/ledger/FLU-DELIVERY-01.md).",
+    "notes": "The floor band is [E[SAR](k_lo), E[SAR](k_hi)] over the cell's own pooled confined slot doses — a dose-derived expectation bound, not a literature anchor (docs/confined_attack_floor_spec.md). The withdrawn fixed 15-25% band is filed in CABIN-FLOOR-03."
+  }
+}

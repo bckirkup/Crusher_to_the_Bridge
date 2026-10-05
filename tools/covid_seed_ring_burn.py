@@ -85,7 +85,7 @@ from simulation_utils.paths import (  # noqa: E402
 )
 from tools.covid_assay_smoke import load_declared_cells, repo_root_of  # noqa: E402
 from tools.covid_route_attribution import NearFieldShareLedger  # noqa: E402
-from tools.readout_stats import quantiles  # noqa: E402
+from tools.diag.readout_common import quantiles  # noqa: E402
 
 
 def _seed_spec(raw: dict[str, Any]) -> dict[str, Any]:

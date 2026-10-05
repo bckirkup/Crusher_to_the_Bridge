@@ -43,7 +43,7 @@ from simulation_utils.paths import (  # noqa: E402
     resolve_repo_path,
     validated_open,
 )
-from tools.readout_stats import quantiles, wilson_interval  # noqa: E402
+from tools.diag.readout_common import quantiles, wilson_interval  # noqa: E402
 
 CONFINEMENT_CLASSES = (
     "pre_confinement",
@@ -335,7 +335,7 @@ def _host_latency(
 def _pct(k: int, n: int) -> str:
     if n <= 0:
         return "-"
-    lo, hi = wilson_interval(k, n)
+    lo, hi = wilson_interval(k, n, z=1.96)
     flag = " *small*" if n < SMALL_DENOMINATOR else ""
     return f"{k}/{n} ({100 * k / n:.1f}%, CI {100 * lo:.0f}-{100 * hi:.0f}){flag}"
 

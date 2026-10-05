@@ -10,21 +10,27 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tools.diag.readout_common import wilson_interval  # noqa: E402
+from tools.flu_anchors import (  # noqa: E402
+    F1_BAND,
+    F5_REPORTED_PER_INFECTION,
+    K_DECLARED,
+    K_SOURCED_INTERVAL,
+)
+
 RUNS = ROOT / "telemetry_buffer" / "flu_present_ab"
 
-K_LO, K_HI, K_SHIP = 2e-4, 1e-3, 6e-4
-F1 = (0.03, 0.38)
+K_LO, K_HI = K_SOURCED_INTERVAL
+K_SHIP = K_DECLARED
+F1 = F1_BAND
 SUMMARY_OUT = RUNS / "scored_summary.json"
 
 
-def _wilson(k: int, n: int, z: float = 1.96) -> tuple[float, float]:
-    if n == 0:
-        return (0.0, 0.0)
-    p = k / n
-    d = 1 + z * z / n
-    c = p + z * z / (2 * n)
-    m = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n))
-    return ((c - m) / d, (c + m) / d)
+def _wilson(k: int, n: int) -> tuple[float, float]:
+    return wilson_interval(k, n, z=1.96)
 
 
 def _e_sar(doses: list[float], k: float) -> float:
@@ -111,7 +117,8 @@ def _print_mode(mode: str, stats: dict, doses: list[float]) -> None:
     )
     print(
         f"reported/infected pax = {stats['reported_pax']}/{inf} "
-        f"({stats['reported_pax']/inf:.2f}) (F5 ~0.08)"
+        f"({stats['reported_pax']/inf:.2f}) "
+        f"(F5 ~{F5_REPORTED_PER_INFECTION:.2f})"
     )
     print()
 

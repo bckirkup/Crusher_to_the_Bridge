@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "flu_fit_targets.schema.json",
+  "title": "Influenza arm fit targets",
+  "description": "The scored observables of the influenza arm, one row per anchor, plus the confined-SAR floor constants the readouts bound against. Nothing here is a model parameter: a row is a quantity an observer of the real event held or a sourced dose-response interval. Unlike the covid file this arm carries no train/test split — it has too few anchors to spend one.",
+  "type": "object",
+  "required": ["schema_version", "anchors", "confined_sar_floor"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"type": "string"},
+    "notes": {"type": "string"},
+    "anchors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "anchor_id",
+          "observable",
+          "values",
+          "source",
+          "evidence_grade"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "anchor_id": {"type": "string", "pattern": "^flu\\.F[0-9]+$"},
+          "observable": {"type": "string", "minLength": 1},
+          "values": {"type": "object", "minProperties": 1},
+          "source": {"type": "string", "minLength": 10},
+          "evidence_grade": {"type": "string", "minLength": 1},
+          "scorable": {
+            "description": "Absent means scorable; false declares that no instrument in the observation model measures this quantity.",
+            "type": "boolean"
+          },
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "confined_sar_floor": {
+      "type": "object",
+      "description": "The dose-derived confined-SAR floor band: E[1-exp(-k*D_slot)] over the cell's pooled slot doses at the declared k sourced interval (docs/confined_attack_floor_spec.md).",
+      "required": ["k_sourced_interval", "k_ship", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "k_sourced_interval": {
+          "type": "array",
+          "items": {"type": "number", "exclusiveMinimum": 0},
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "k_ship": {"type": "number", "exclusiveMinimum": 0},
+        "source": {"type": "string", "minLength": 10},
+        "notes": {"type": "string"}
+      }
+    }
+  }
+}

@@ -84,6 +84,12 @@ Unarmed profiles are inert by construction: no map and no factor means
 the draw is unchanged; `flat` on a profile with no age terms is a no-op
 that names the baseline.
 
+The same convention now covers every age-graded axis: `severity_age_mode`
+(HOST-AGE-03) on `severity_model.base_probabilities_by_age_band`, and
+`susceptibility_age_mode` on `dose_response.susceptibility_by_age_band`
+(HOST-AGE-01) — each `"flat"` is the labelled pre-map baseline on its own
+axis, applied or not in exactly the way `presentation_age_mode` is.
+
 ## Sourced declarations
 
 ### `norwalk_gi` — `illness_probability.age_factor_by_age_band`: `{"0-4": 0.51, "5-17": 0.51, "child": 0.51}`

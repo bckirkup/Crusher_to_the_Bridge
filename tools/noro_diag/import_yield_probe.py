@@ -88,9 +88,9 @@ from simulation_utils.paths import (  # noqa: E402
 )
 from simulation_utils.platform_complement import declared_total  # noqa: E402
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
+from tools.diag.readout_common import quantiles  # noqa: E402
 from tools.noro_diag import per_host_dose_challenge as _pdc  # noqa: E402
 from tools.noro_diag.dose_response import load_dose_response  # noqa: E402
-from tools.readout_stats import quantiles  # noqa: E402
 
 
 def _role_group(role: Any) -> str:

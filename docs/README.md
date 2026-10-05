@@ -14,6 +14,7 @@ links to, and several heavily-linked files describe work that is finished.
 | `docs/` root | Operator manuals, the governing specs, and mechanism docs for behaviour that is live in-tree | Working on the simulation |
 | [`norovirus/`](norovirus/) | The norovirus calibration thread: ledger, defect history, provenance audit, observation priors | Touching any epidemiological constant or anchor |
 | [`covid/`](covid/) | The SARS-CoV-2 thread: arm execution status, parameter provenance audit | Touching any `sars_cov2_resp` constant or the COVID fit |
+| [`flu/`](flu/) | The influenza-A thread: open ledger, readouts | Touching any `influenza_a` constant or the flu anchors |
 | [`sentinel/`](sentinel/) | Sentinel surveillance, port health, wastewater ops, shore-side, economics | Working on `picard_framework/analysis/sentinel/`, `shore/`, `economics/` |
 | [`paper3/`](paper3/) | Variant surveillance and phylodynamics | Working on strain state, mutation, lineage observables |
 | [`proposals/`](proposals/) | Documents whose primary artifact **does not exist yet** | Deciding what to build; never as a description of current behaviour |
@@ -30,6 +31,22 @@ links to, and several heavily-linked files describe work that is finished.
 specifies exists in-tree; then it moves to its subject directory or to the root.
 When a document is fully superseded or its question is settled, it moves to
 `history/`. Nothing is deleted.
+
+**Pathogen arm naming.** One arm spans several tokens; each has its surface:
+
+| Surface | norovirus | SARS-CoV-2 | influenza-A |
+|---|---|---|---|
+| `pathogen_id` | `norwalk_gi` | `sars_cov2_resp` | `influenza_a` |
+| docs home | `docs/norovirus/` | `docs/covid/` | `docs/flu/` |
+| open ledger | `norovirus_open_ledger.md` | `covid_open_ledger.md` | `flu_open_ledger.md` |
+| ledger prefix | `NORO-*` | topical (`THETA-SCREEN-*`, `COVID-*`, …) | `FLU-*` |
+| tool/campaign prefix | `noro_*`, `tools/noro_diag/` | `covid_*` | `flu_*` |
+| anchor registry | `telemetry_buffer/observation_model/score_anchors.py` | `data/observation/covid_fit_targets.json` | `data/observation/flu_fit_targets.json` |
+
+Every new arm — including fictional bundles — gets this row's worth of
+surfaces in the change it lands: docs home, `<name>_open_ledger.md`, a ledger
+prefix convention, and an anchor registry file under `data/observation/`
+when it has scored observables (AGENTS.md scope rules).
 
 **Status header convention.** Every document under `docs/` should open with one
 line, before the first section:
@@ -147,6 +164,8 @@ longer justifications.
 | [pathogen_notes.md](pathogen_notes.md) | Living — per-pathogen literature justifications |
 | [covid/](covid/) | The SARS-CoV-2 thread — arm status and the parameter provenance audit. Read the audit before quoting any `sars_cov2_resp` constant |
 | [covid/covid_open_ledger.md](covid/covid_open_ledger.md) | Living — current withdrawals and measurement status for the COVID arm |
+| [flu/](flu/) | The influenza-A thread — the scored surface lives in `data/observation/flu_fit_targets.json` |
+| [flu/flu_open_ledger.md](flu/flu_open_ledger.md) | Living — current withdrawals and measurement status for the flu arm |
 | [covid/covid_theta_handoff_2026_09_19.md](covid/covid_theta_handoff_2026_09_19.md) | Handoff record (2026-09-19) — where the Θ calibration stands: the four repairs that landed, what the empty v7 admissible region does and does not mean, the never-run `covid_theta_screen_v8`, and `covid_theta_screen_v9` from declaration to result (§9–10). Numbers live in the ledger entries it cites |
 | [covid/covid_theta_screen_v9_readout.md](covid/covid_theta_screen_v9_readout.md) | Findings (2026-09-19) — the 600-cell recentring screen: invariant holds, infection-age axis inert under a declared onset, sole `covid.T1` pass (Θ 1e9) is an interval-span with zero mass near 197, Θ sets takeoff probability not outbreak size; stage 1b withdrawn, criterion decision open |
 | [covid/covid_theta_handoff_2026_09_21.md](covid/covid_theta_handoff_2026_09_21.md) | Handoff record (2026-09-21) — successor to the 09-19 record: THETA-SCREEN-V10 fully measured, what it does and does not license, terminal AWS job IDs and S3 prefixes, and the single open decision (the v11 admissibility criterion). Numbers live in the ledger entries it cites |
