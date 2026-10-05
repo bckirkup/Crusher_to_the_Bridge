@@ -10,7 +10,14 @@ crew accommodation is documented to be, so the berthing repair the open ledger
 carries as item 8 can be built against evidence rather than assumption.
 
 **Status:** Evidence assembled and interpreted. Nothing implemented in this
-tranche.
+tranche — **but the repair it argues for has since landed**: BERTH-01
+(PR #475, 2026-09-08) made the stateroom the night mixing unit, with
+AERO-CABIN-01 (stateroom air compartment), CABIN-OCC-01
+(time-partitioned co-occupancy), NORO-CABIN-01 (confined fomite scope),
+and SCHED-WATCH-01 (department-filled, watch-interleaved crew cabins)
+as follow-ons; measured on noro, crew barely moved under the
+ward→cabin change — the crew route is the daytime work shift, not the
+night compartment (norovirus open ledger).
 
 **Source discipline.** This tranche is documentary, not a Consensus retrieval.
 The peer-reviewed rows (Wikswo 2011; Kordsmeyer 2022; Huttunen 2023; Crisp

@@ -101,6 +101,17 @@ Declared Grade C; run two variants:
 - `EXEMPT_ENGMED` = {engineering, medical} — the narrow reading;
 - `EXEMPT_ESSENTIAL` = {engineering, medical, galley} — the medium reading.
 
+*Corrected 2026-10-05 (class vocabulary):* the DP replay instantiates
+only `passenger_general` + `crew_general` — `crew_engineering`,
+`crew_galley` and `crew_medical` name empty sets on this hull
+(`data/scenarios/covid_hull_scenarios.json` `role_classes`). Both
+variants therefore confined the entire crew identically
+(ALLHANDS-equivalent → measured bit-identical, 18/70 vs the D4 corner
+27/105). The class-subset reading this section describes was never
+expressible on the training hull; the record's "essential service"
+distinction lives inside `crew_general`'s duty mix and is only
+expressible activity-scoped.
+
 ### C. Crew-mess far-field reach — `MESS_ATTEN` (declared ladder, Grade C — reads the attenuation function, not a fitted point)
 
 54–58% of during-window acquisitions ride the crew_mess zone class
@@ -127,13 +138,27 @@ ladder on the mess channel's effective reach**, not a refit:
 
 ### D. Berth compartment — named, not in this design
 
-Tranche 35's structural suspect: the night compartment is the corridor
-ward (~87 hosts/CC zone on the mega hull) with the cabin inert, and
-roommate draws ignore department/shift correlation. That repair is
-contact-graph restructuring — open-ledger item, too heavy for an arm.
+*Corrected 2026-10-05 (was stale at writing):* the tranche-35 suspect
+as originally recorded — a corridor ward with the cabin inert — is the
+**pre-BERTH-01 engine**. The repair already shipped and is active in
+every cell of this design: BERTH-01 (PR #475) made the stateroom the
+night mixing unit (corridor residual `DEFAULT_CORRIDOR_DIRECT_CONTACT_FACTOR`
+0.15), AERO-CABIN-01 made it the inhalation compartment
+(`transmission.cabin_air_mode: cabin_compartment` default), CABIN-OCC-01
+time-partitions co-occupancy, NORO-CABIN-01 scopes confined fomites to
+the own-cabin pool, and SCHED-WATCH-01 berthed crew by department with
+watch-interleaved cabins (`cabin_size: 2` on all 12 mega-hull CC zones).
+The noro arm measured the repair: dissolving the ward cut passenger AR
+~1/12 while crew barely moved (3.75%→3.59%) — "night mixing was not
+the crew's route; the model's crew route is on the work shift"
+(`docs/norovirus/norovirus_open_ledger.md`). What survives of the
+original suspicion is therefore the *daytime duty contact structure*
+(service-zone partner contact during work hours), which is what the
+exempt-set arms toggle — not the night compartment.
 Recorded here so the residual reads correctly: if A–C land the median
-but not the role split, the berth ward is the next suspect, not another
-attenuation axis.
+but not the role split, the next suspect is the passenger-side
+during-window channel (the map's F13/F14 legs: confined-passenger
+acquisitions 4–19 vs the ≥52 bound), not another attenuation axis.
 
 ## Cells, seeds, pairing
 
