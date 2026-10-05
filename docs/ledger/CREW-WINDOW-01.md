@@ -33,7 +33,16 @@ Measured, not inferred:
 - The exempt-set axis is a cliff carried by `crew_general` alone:
   exempt → ~740, confined → ~70 (near the ALLHANDS bound 27/105).
   EXEMPT_ENGMED and EXEMPT_ESSENTIAL are bit-identical seed-for-seed —
-  `crew_galley`'s exempt status never reaches a draw.
+  `crew_galley`'s exempt status never reaches a draw. *Resolved
+  2026-10-05:* it cannot reach one — the `diamond_princess_2020`
+  replay instantiates only `passenger_general` + `crew_general`
+  (`data/scenarios/covid_hull_scenarios.json` `role_classes`); the
+  other three named classes carry no agents on this hull, so both
+  arms confine the entire crew identically (ALLHANDS-equivalent) and
+  SOP-017's four-class exemption exempts exactly one real class.
+  The "cliff" is the hull's class vocabulary, not an attenuation
+  function; the `exempt_classes` audit invariant checked the
+  declared set, not realised membership.
 - MESS far-field attenuation is a non-lever (729–734 vs 739 @7.9e6);
   near-field ring delivery holds the mass by construction.
 - Onset-based re-read (record counts dated onsets, readout scores
@@ -50,4 +59,9 @@ follow-up axis is fractional general-crew attenuation (reduced-duty or
 mess-access arms interpolating 70↔739); if that axis also skips the
 band, suppression is not in the working-crew channel and the next
 suspect is the onset-dating/ascertainment channel (the map's D1–D3
-legs). Declared before running; nothing retuned.
+legs). Declared before running; nothing retuned. *Post-landing
+refinement:* on this hull the record's "essential service" is
+activity-scoped, not class-scoped — meal delivery, medical and watches
+continued while cabin service stopped, all inside the single
+`crew_general` class — so the follow-up should prefer an
+exempt-by-duty-activity arm over a bare headcount fraction.

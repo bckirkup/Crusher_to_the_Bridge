@@ -47,9 +47,12 @@ the crew share (record 29%), the berth-ward compartment structure
   Configured in `crusher_labs/config.yaml` at `enabled: false`.
 - Berthing is class-level, not DP-unique: MLC 2006 caps passenger-ship
   crew rooms at 4; modern norm 2; the mega hull already declares
-  `cabin_size: 2` on all 12 CC zones. Tranche 35's structural suspect is
-  the corridor ward (~87 hosts/CC zone, cabin inert, roommate draws
-  independent of work zone), not occupancy.
+  `cabin_size: 2` on all 12 CC zones. *Corrected 2026-10-05:* tranche
+  35's suspect is fully shipped — BERTH-01 (PR #475) dissolved the
+  corridor ward into stateroom compartments and roommate draws already
+  fill by department/watch (`assign_cabin_mates`, SCHED-WATCH-01); the
+  noro ledger measured crew barely moving under it. What remains is
+  the daytime duty contact structure, not the night compartment.
   `docs/literature/consensus_tranche_35_crew_berthing.md`.
 - HOST-AGE-01 merged (PR #899): Ayoub decade susceptibility ladder +
   Wang presentation spline on `sars_cov2_resp`, profile-declared;
@@ -76,8 +79,13 @@ the crew share (record 29%), the berth-ward compartment structure
   mechanism-didn't-fire witness, not a null — check the echo first.
 - Seed-level before_share variance on the armed tree is wide
   (0.022–0.152 across two seeds): single-seed reads are uninformative.
-- Berth-ward repair (tranche 35's compartment fix) is contact-graph
-  restructuring — designed but not implemented; named follow-on only.
+- *Corrected 2026-10-05 — this bullet was stale:* the berth-ward
+  repair is implemented and measured (BERTH-01 PR #475 +
+  AERO-CABIN-01/CABIN-OCC-01/NORO-CABIN-01/SCHED-WATCH-01 follow-ons);
+  it is not a follow-on candidate. The unimplemented suspects that
+  remain: the passenger-side during-window channel (map legs F13/F14,
+  the D2 witness) and fractional/activity-scoped crew-duty
+  attenuation.
 
 ## 5. PRs landed this session (dependency order)
 

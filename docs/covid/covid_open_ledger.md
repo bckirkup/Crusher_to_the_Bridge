@@ -283,10 +283,17 @@ harness. **CLIFF-STRUCTURE — no declared arm lands [150,350].**
 CREWDUTY (sourced symptomatic-crew removal) fires ~660 hosts/seed and
 moves nothing (758 vs 739); the exempt-set axis is a binary carried by
 `crew_general` alone (exempt ~740 ↔ confined ~70, and ENGMED/ESSENTIAL
-are bit-identical — galley's exempt status never reaches a draw); MESS
+are bit-identical — galley's exempt status never reaches a draw,
+resolved 2026-10-05: the DP replay instantiates only
+`passenger_general` + `crew_general`, so both arms confine the entire
+crew identically — ALLHANDS-equivalent — and the "cliff" is the hull's
+class vocabulary, not an attenuation function); MESS
 far-field attenuation is a non-lever. The record band sits inside the
 70↔739 step; the discriminating follow-up is a *fractional*
-general-crew axis, and if that also skips the band the suspect leaves
+general-crew axis — on this hull best expressed activity-scoped
+(essential duty activities keep running, cabin service stops), since
+the record's "essential service" distinction lives inside the single
+`crew_general` class — and if that also skips the band the suspect leaves
 this channel for the onset-dating channel (map legs D1–D3).
 
 Before that — `DP-BELIEF-01`, measured at `78f52a58`/`8f49652f`/`8f926382`/`3eae8a2f`/`b932d0e9`

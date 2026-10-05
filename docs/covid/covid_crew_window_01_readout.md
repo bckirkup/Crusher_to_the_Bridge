@@ -58,11 +58,22 @@ measured arm effects (700↔70), so the verdicts stand on the new engine.
   approaching ALLHANDS (27/105). The exempt-set reading that survives
   the record does not exist among discrete class-subsets.
 - **ENGMED and ESSENTIAL are bit-identical seed-for-seed** (same 20
-  values in the same order at both thetas). `crew_galley`'s exempt
-  status never reaches a single draw — either galley crew's during-window
-  infections flow through the pooled mess bath rather than their own
-  duty presence, or the exempt machinery doesn't gate the galley path.
-  (Inferred; a one-line mechanism check can separate the two.)
+  values in the same order at both thetas) — **resolved post-landing:
+  neither arm exempts a living agent.** The `diamond_princess_2020`
+  replay instantiates exactly two classes — `passenger_general` (2,666)
+  and `crew_general` (1,045); `crew_galley`/`crew_engineering`/
+  `crew_medical` exist in the generic `senior_cruise_dp2020` profile
+  and the protocol declarations but no DP agent carries them
+  (`data/scenarios/covid_hull_scenarios.json` `role_classes`,
+  `data/scenarios/agent_profiles/diamond_princess_2020.json`
+  `class_templates`). ENGMED and ESSENTIAL therefore confine the
+  entire crew identically — both are ALLHANDS-equivalent on this hull,
+  and bit-identity is forced, not a mechanism subtlety. Corollary:
+  the exempt-set axis was never a class-subset ladder here — SOP-017's
+  four classes exempt exactly one real class — so the "cliff" is the
+  hull's class vocabulary, and the audit echo's `exempt_classes`
+  invariant checked the *declared* set, not realised membership (a
+  realised-exempt-headcount witness is the tooling gap this exposes).
 - **MESS_0P5/0P25 barely move the median** (739→729/734 @7.9e6,
   601→611/615 @1e6). The far-field leg of the mess bath is not the
   binding route — diverting share to `settled` keeps near-field ring
@@ -76,7 +87,10 @@ measured arm effects (700↔70), so the verdicts stand on the new engine.
   declared set — only 2/80 EXEMPT cells sit in-band (252; 364 just
   above). An onset-based check (the record counts dated onsets, the
   readout scores infections) does not rescue it: EXEMPT window onsets
-  median 112.5, still below 150.
+  median 112.5, still below 150. (Post-landing note: on this hull the
+  "exempt set" has exactly two realisations — all of `crew_general`
+  or none — so the binary is structural; the only interpolations left
+  are fractional, per the follow-up.)
 
 ## Follow-up proposal
 
@@ -90,3 +104,15 @@ If even the fractional axis skips the band (a measured cliff, not a
 sampling artifact), the suppression is not in this channel at all and
 the next suspect is the onset-dating/ascertainment channel again — the
 map's D1–D3 legs already name it.
+
+*Post-landing refinement (2026-10-05):* with the class vocabulary
+resolved above, the record's "essential service" reading is better
+expressed **activity-scoped than count-scoped**: meal delivery to
+cabins, medical and engineering watches continued while cabin service
+stopped — but on this hull both activities live inside the single
+`crew_general` class, so "which classes keep working" cannot express
+the record's distinction; "which duty activities keep running" can.
+The fractional design should therefore prefer an exempt-by-activity
+arm (or a duty-budget attenuation scoped to cabin-service contacts)
+over a bare headcount fraction, because only the activity reading is
+sourceable to the record's own account.
