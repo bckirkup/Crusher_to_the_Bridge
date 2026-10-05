@@ -1,12 +1,16 @@
 # MEGA-IMPACT-01 — mechanism-attribution factorial on mega_cruise_5000
 
-Status: canary submitted — 2026-10-04. Canary arrays on
-`picard-campaign-queue` (Spot): a0id bit-identity
-`96afc3ce-cf73-4e08-a8ea-1f546a3b7ac5` (n=10, tier
+Status: canary read out — 2026-10-04. All three frozen gates PASS;
+readout in `noro_mega_impact_01_canary_readout.md`. Canary ran On-Demand
+(`picard-analysis-queue`) after a Spot drought: a0id
+`d448f12c-420e-4edf-8776-c594d83ab2b9` (n=10, tier
 `fl_mega_impact_a0id` — caregiver on / food off, seeds 8000-8009) and
-a1 `13334983-6807-42b8-b0f5-763d4a159c2e` (n=20, seeds 8000-8019).
-jobdef `picard-noro-mega-impact-01:2`, image
+a1 `23c2b524-0413-4a0f-ab76-ba3102b965e3` (n=20, seeds 8000-8019).
+jobdef `picard-noro-mega-impact-01:3`, image
 `campaign-f31de83a` (sha256:9ac735da…, `--payload lean`, 16 GB/child).
+One witness defect found and fixed (common-source event rows expired
+with their meal windows; permanent `_cs_event_log` added) — fleet image
+should rebuild on this commit.
 Baseline evidence: `noro_mega_01_baseline_reanalysis.md`
 (committed, measured). Driver: `tools/noro_diag/growth_chain_census.py`
 with `--payload lean` (PR #888).

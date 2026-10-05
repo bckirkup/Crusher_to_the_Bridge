@@ -55,20 +55,22 @@ def _core_stub() -> SimpleNamespace:
         zone_types={},
         caregiver_telemetry={"caregiver_responses": 3, "caregiver_reports": 2},
         common_source_telemetry={"events_ill_handler": 1, "takers_served": 5},
-        _cs_windows={
-            ("norwalk_gi", "Windjammer", "Meal:Lunch", 1): {
-                "event": {
-                    "event_id": "cs-norwalk_gi-1",
-                    "zone": "Windjammer",
-                    "meal": "Meal:Lunch",
-                    "source_kind": "ill_handler",
-                    "start_epoch": 25,
-                    "end_epoch": 26,
-                    "servings_taken": 5,
-                    "taker_ids": [1, 2, 3, 4, 5],
-                    "per_serving_dose": 1.5,
-                },
+        # The permanent witness: window states expire with their meal
+        # windows, so the voyage record lives on _cs_event_log.
+        _cs_event_log=[
+            {
+                "event_id": "cs-norwalk_gi-1",
+                "zone": "Windjammer",
+                "meal": "Meal:Lunch",
+                "source_kind": "ill_handler",
+                "start_epoch": 25,
+                "end_epoch": 26,
+                "servings_taken": 5,
+                "taker_ids": [1, 2, 3, 4, 5],
+                "per_serving_dose": 1.5,
             },
+        ],
+        _cs_windows={
             ("norwalk_gi", "CafeBakery", "Meal:Dinner", 2): {},
         },
     )
