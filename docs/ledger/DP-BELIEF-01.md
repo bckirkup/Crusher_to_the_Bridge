@@ -69,11 +69,13 @@ share 0.48–0.58 at clause θ) rather than the record's cabin signature.
 (with/without-prior-confirmed-case dated onsets + cabinmate-conditioned
 attack rate — the 18/63/81% CID gradient); D3 readout-only scoring of
 the acquisition-date histogram vs the back-calculated infection curve;
-D4 quarantine-phase suppression arm at Θ7.9e6 to split "open-phase
-under-delivery" from "confinement-channel over-delivery" (the
-QUAR-ATTR-V2 grammar already exists). D1+D4 is the discriminating pair:
-route-tag the dated curve and suppress the quarantine channel — the
-residual then reads as pure timing.
+D4 quarantine-phase suppression arm at the clause thetas to split
+"open-phase under-delivery" from "confinement-channel over-delivery"
+(the QUAR-ATTR-V2 grammar already exists). D1+D4 is the discriminating
+pair: route-tag the dated curve and suppress the quarantine channel —
+the residual then reads as pure timing. **D4 measured 2026-10-04 —
+CONFINEMENT-CHANNEL: the tail is ~92–96% the crew exemption; see the
+addendum and `docs/covid/covid_quar_suppression_v1_readout.md`.**
 
 Chain of record: θ-shaped? no → anchor-shaped? no → factor-shaped? no →
 structure-shaped (CG-FLOOR-01) → **decomposed here as phase-inverted
@@ -100,3 +102,40 @@ the designation is an early-window deliverer) AND harder quarantine
 suppression (the tail; D4's measurement). Day-5–6 event dip at low θ
 flagged as a scheduled-structure artifact to verify under the D4 arm.
 Cells of record only; no new runs.
+
+## Addendum — D4 measured (2026-10-04)
+
+The quarantine-phase suppression arm ran as one bounded campaign —
+`docs/covid/covid_quar_suppression_v1_readout.md`:
+`picard_framework/runs/covid_quar_suppression_v1_design.json`, {Θ1e6,
+Θ7.9e6} × {`D0_declared`, `SOP017_ALLHANDS`} × 20 seeds = 80 cells
+(design-commit `6ea3093d`, digest-pinned image
+`sha256:2c279aa2…`, jobdef `picard-covid-boarding-screen-fargate:2`
+on `picard-analysis-fargate-queue` after an EC2 capacity drought;
+canary 20 cells reported before the remaining 60 ran). 80/80 cells,
+0 audit failures — the `scheduled_protocol_id` swap reaches the engine
+on every arm cell (`quarantine_witness` echoes `SOP-017-ALLHANDS`,
+`exempt_classes []`, window [16,30], activated).
+
+**Verdict (frozen grammar): CONFINEMENT-CHANNEL over-delivery — and
+stronger than the grammar pre-wrote.** At Θ1e6 the during-window mass
+collapses med 678 [480,821] → 27 [5,154]; at Θ7.9e6 med 730 [398,813]
+→ 105 [36,225] — seed-paired Δduring −602/−624 while
+`infections_before_quarantine` is **bit-identical** (Δ 0 [0,0], pooled
+day-curve identical through day 15 on both rows). The collapse
+overshoots the record-informed band's low edge (150) at both thetas:
+the fat day-16+ tail is ~92–96% *carried by* the crew exemption, not
+merely inflated by it. Δduring-crew ≈ Δduring (−604/−623) — the crew
+channel is the whole delta. The residual under all-hands confinement
+is a confined-cabin channel (1,072/1,074 and 2,466/2,483 pooled events
+in cabins; crew_mess/galley/corridor ~0), still crew-majority
+(52%/61% vs the record's 29% dated-crew share) because crew share
+cabins with crew; `confined_passenger_infections_during_window` is
+unmoved (med 4→2 and 19→18) — the arm does not touch the passenger
+cabin channel the record needs. D0 drift witness: 20/20 per row
+bit-identical modulo bookkeeping plus one additive zero-count
+`common_source_food` route key the f31de83a-generation image emits
+(covid food disabled) — max|delta| 0 on every numeric leaf. D3's
+flagged day-5–6 dip is arm-independent (identical pooled counts under
+both arms at both thetas) — an open-phase contact-calendar artifact,
+not a quarantine interaction.

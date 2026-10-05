@@ -1,0 +1,878 @@
+{
+  "audit_failures": {},
+  "cells_expected": 80,
+  "cells_found": 80,
+  "paired_rows": {
+    "theta=1e+06|arm=SOP017_ALLHANDS": {
+      "arm_id": "SOP017_ALLHANDS",
+      "baseline": "D0_declared",
+      "delta_before_share": {
+        "median": 0.18866517524235643,
+        "q05": 0.0906832298136646,
+        "q95": 0.4018716577540107
+      },
+      "delta_during_crew": {
+        "median": -604.0,
+        "q05": -712.0,
+        "q95": -291.0
+      },
+      "delta_infections_before_quarantine": {
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
+      },
+      "delta_infections_during_quarantine": {
+        "median": -602.0,
+        "q05": -712.0,
+        "q95": -291.0
+      },
+      "delta_infections_total": {
+        "median": -646.0,
+        "q05": -720.0,
+        "q95": -527.0
+      },
+      "delta_recorded_onsets": {
+        "median": -285.0,
+        "q05": -408.0,
+        "q95": -122.0
+      },
+      "n_paired": 19,
+      "theta": 1000000.0
+    },
+    "theta=7.9e+06|arm=SOP017_ALLHANDS": {
+      "arm_id": "SOP017_ALLHANDS",
+      "baseline": "D0_declared",
+      "delta_before_share": {
+        "median": 0.1388094680103117,
+        "q05": 0.03403513972276362,
+        "q95": 0.23040712468193383
+      },
+      "delta_during_crew": {
+        "median": -623.0,
+        "q05": -760.0,
+        "q95": -166.0
+      },
+      "delta_infections_before_quarantine": {
+        "median": 0.0,
+        "q05": 0.0,
+        "q95": 0.0
+      },
+      "delta_infections_during_quarantine": {
+        "median": -624.0,
+        "q05": -760.0,
+        "q95": -166.0
+      },
+      "delta_infections_total": {
+        "median": -642.0,
+        "q05": -768.0,
+        "q95": -174.0
+      },
+      "delta_recorded_onsets": {
+        "median": -417.0,
+        "q05": -466.0,
+        "q95": -131.0
+      },
+      "n_paired": 19,
+      "theta": 7900000.0
+    }
+  },
+  "replication": {
+    "theta=1e+06": {
+      "bit_identical": false,
+      "diff_sample": [
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200205
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200205
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200206
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200206
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200207
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200207
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200208
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200208
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200209
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200209
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200210
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200210
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200211
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200211
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200212
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200212
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200213
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200213
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200214
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200214
+        }
+      ],
+      "max_abs_delta": 0.0,
+      "n_identical": 0,
+      "n_paired": 20,
+      "ref_dir": "campaign_results/covid_theta_refit_floor_v1/cells"
+    },
+    "theta=7.9e+06": {
+      "bit_identical": false,
+      "diff_sample": [
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200205
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200205
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200206
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200206
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200207
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200207
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200208
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200208
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200209
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200209
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200210
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200210
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200211
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200211
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200212
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200212
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200213
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200213
+        },
+        {
+          "got": 0,
+          "path": "during_quarantine_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200214
+        },
+        {
+          "got": 0,
+          "path": "during_window_by_route.common_source_food",
+          "ref": "<missing>",
+          "seed": 20200214
+        }
+      ],
+      "max_abs_delta": 0.0,
+      "n_identical": 0,
+      "n_paired": 20,
+      "ref_dir": "campaign_results/covid_theta_refit_bracket_v1/cells"
+    }
+  },
+  "rows": {
+    "theta=1e+06|arm=D0_declared": {
+      "aboard_window_by_route_pooled": {
+        "caregiver": 105,
+        "droplet": 93
+      },
+      "before_share": {
+        "median": 0.050955414012738856
+      },
+      "both_legs": false,
+      "clause": {
+        "clause_ok": false,
+        "count_leg": true,
+        "scored": true,
+        "timing_leg": false
+      },
+      "confined_passenger_during_window": {
+        "median": 4.0,
+        "q05": 0.0,
+        "q95": 113.0
+      },
+      "during_band": [
+        150.0,
+        350.0
+      ],
+      "during_dominant": true,
+      "during_median_in_band": false,
+      "during_quarantine": {
+        "median": 678.0,
+        "q05": 480.0,
+        "q95": 821.0
+      },
+      "during_quarantine_by_role_pooled": {
+        "crew": 12053,
+        "passenger": 524
+      },
+      "during_quarantine_by_route_pooled": {
+        "common_source_food": 0,
+        "direct_contact": 0,
+        "droplet": 8455,
+        "emesis_aerosol": 0,
+        "environmental": 0,
+        "flush_aerosol": 0,
+        "fomite": 0,
+        "food": 0,
+        "hvac_airborne": 0,
+        "unknown": 4122
+      },
+      "during_quarantine_by_zone_class_pooled": {
+        "cabin": 1056,
+        "corridor": 590,
+        "crew_mess": 6694,
+        "galley": 493,
+        "other": 3744
+      },
+      "during_share": {
+        "median": 0.8566392479435958
+      },
+      "during_window_crew_share": 0.9583366462590442,
+      "fizzle_majority": false,
+      "infections_before_quarantine": {
+        "median": 60.0,
+        "q05": 17.0,
+        "q95": 357.0
+      },
+      "mass_near_t1": 0.47368421052631576,
+      "n": 20,
+      "propensity_multiplier_median": {
+        "median": 0.7758522053034209,
+        "q05": 0.7608696987957465,
+        "q95": 0.7917489551134197
+      },
+      "propensity_multiplier_q95": {
+        "median": 2.468058388347557,
+        "q05": 2.3732877463376525,
+        "q95": 2.645589010078617
+      },
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "recorded_onsets": {
+        "median": 331.0,
+        "q05": 62.0,
+        "q95": 760.0
+      },
+      "row_extra": "during_med=678.0 in_band=False crew_share=0.9583366462590442",
+      "takeoff_before_share": {
+        "median": 0.050955414012738856,
+        "q05": 0.014134275618374558,
+        "q95": 0.125
+      },
+      "takeoff_infections_total": {
+        "median": 771.0,
+        "q05": 560.0,
+        "q95": 1217.0
+      },
+      "takeoff_n": 19,
+      "takeoff_recorded_onsets": {
+        "median": 331.0,
+        "q05": 149.0,
+        "q95": 760.0
+      },
+      "timing_leg_in_band": false,
+      "truth_leg_in_band": true
+    },
+    "theta=1e+06|arm=SOP017_ALLHANDS": {
+      "aboard_window_by_route_pooled": {
+        "caregiver": 105,
+        "droplet": 93
+      },
+      "before_share": {
+        "median": 0.2692307692307692
+      },
+      "both_legs": false,
+      "clause": {
+        "clause_ok": true,
+        "count_leg": true,
+        "scored": true,
+        "timing_leg": true
+      },
+      "confined_passenger_during_window": {
+        "median": 2.0,
+        "q05": 0.0,
+        "q95": 108.0
+      },
+      "during_band": [
+        150.0,
+        350.0
+      ],
+      "during_dominant": false,
+      "during_median_in_band": false,
+      "during_quarantine": {
+        "median": 27.0,
+        "q05": 5.0,
+        "q95": 154.0
+      },
+      "during_quarantine_by_role_pooled": {
+        "crew": 563,
+        "passenger": 511
+      },
+      "during_quarantine_by_route_pooled": {
+        "common_source_food": 0,
+        "direct_contact": 0,
+        "droplet": 1067,
+        "emesis_aerosol": 0,
+        "environmental": 0,
+        "flush_aerosol": 0,
+        "fomite": 0,
+        "food": 0,
+        "hvac_airborne": 0,
+        "unknown": 7
+      },
+      "during_quarantine_by_zone_class_pooled": {
+        "cabin": 1072,
+        "corridor": 0,
+        "crew_mess": 1,
+        "galley": 0,
+        "other": 1
+      },
+      "during_share": {
+        "median": 0.2987012987012987
+      },
+      "during_window_crew_share": 0.5242085661080075,
+      "fizzle_majority": false,
+      "infections_before_quarantine": {
+        "median": 60.0,
+        "q05": 17.0,
+        "q95": 357.0
+      },
+      "mass_near_t1": 0.3684210526315789,
+      "n": 20,
+      "propensity_multiplier_median": {
+        "median": 0.7758522053034209,
+        "q05": 0.7608696987957465,
+        "q95": 0.7917489551134197
+      },
+      "propensity_multiplier_q95": {
+        "median": 2.468058388347557,
+        "q05": 2.3732877463376525,
+        "q95": 2.645589010078617
+      },
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "recorded_onsets": {
+        "median": 60.0,
+        "q05": 11.0,
+        "q95": 352.0
+      },
+      "row_extra": "during_med=27.0 in_band=False crew_share=0.5242085661080075",
+      "takeoff_before_share": {
+        "median": 0.2692307692307692,
+        "q05": 0.1,
+        "q95": 0.45
+      },
+      "takeoff_infections_total": {
+        "median": 87.0,
+        "q05": 22.0,
+        "q95": 513.0
+      },
+      "takeoff_n": 19,
+      "takeoff_recorded_onsets": {
+        "median": 60.0,
+        "q05": 15.0,
+        "q95": 352.0
+      },
+      "timing_leg_in_band": true,
+      "truth_leg_in_band": false
+    },
+    "theta=7.9e+06|arm=D0_declared": {
+      "aboard_window_by_route_pooled": {
+        "caregiver": 138,
+        "droplet": 155
+      },
+      "before_share": {
+        "median": 0.07540983606557378
+      },
+      "both_legs": true,
+      "clause": {
+        "clause_ok": false,
+        "count_leg": false,
+        "scored": true,
+        "timing_leg": true
+      },
+      "confined_passenger_during_window": {
+        "median": 19.0,
+        "q05": 0.0,
+        "q95": 157.0
+      },
+      "during_band": [
+        150.0,
+        350.0
+      ],
+      "during_dominant": true,
+      "during_median_in_band": false,
+      "during_quarantine": {
+        "median": 730.0,
+        "q05": 398.0,
+        "q95": 813.0
+      },
+      "during_quarantine_by_role_pooled": {
+        "crew": 12285,
+        "passenger": 970
+      },
+      "during_quarantine_by_route_pooled": {
+        "common_source_food": 0,
+        "direct_contact": 0,
+        "droplet": 8928,
+        "emesis_aerosol": 0,
+        "environmental": 0,
+        "flush_aerosol": 0,
+        "fomite": 0,
+        "food": 0,
+        "hvac_airborne": 2,
+        "unknown": 4325
+      },
+      "during_quarantine_by_zone_class_pooled": {
+        "cabin": 1610,
+        "corridor": 577,
+        "crew_mess": 6696,
+        "galley": 442,
+        "other": 3930
+      },
+      "during_share": {
+        "median": 0.7459978655282817
+      },
+      "during_window_crew_share": 0.926820067898906,
+      "fizzle_majority": false,
+      "infections_before_quarantine": {
+        "median": 235.0,
+        "q05": 78.0,
+        "q95": 1565.0
+      },
+      "mass_near_t1": 0.0,
+      "n": 20,
+      "propensity_multiplier_median": {
+        "median": 0.7758522053034209,
+        "q05": 0.7608696987957465,
+        "q95": 0.7917489551134197
+      },
+      "propensity_multiplier_q95": {
+        "median": 2.468058388347557,
+        "q05": 2.3732877463376525,
+        "q95": 2.645589010078617
+      },
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "recorded_onsets": {
+        "median": 634.0,
+        "q05": 469.0,
+        "q95": 1540.0
+      },
+      "row_extra": "during_med=730.0 in_band=False crew_share=0.926820067898906",
+      "takeoff_before_share": {
+        "median": 0.07540983606557378,
+        "q05": 0.031982942430703626,
+        "q95": 0.23057644110275688
+      },
+      "takeoff_infections_total": {
+        "median": 938.0,
+        "q05": 866.0,
+        "q95": 2222.0
+      },
+      "takeoff_n": 19,
+      "takeoff_recorded_onsets": {
+        "median": 634.0,
+        "q05": 496.0,
+        "q95": 1540.0
+      },
+      "timing_leg_in_band": true,
+      "truth_leg_in_band": true
+    },
+    "theta=7.9e+06|arm=SOP017_ALLHANDS": {
+      "aboard_window_by_route_pooled": {
+        "caregiver": 138,
+        "droplet": 155
+      },
+      "before_share": {
+        "median": 0.25
+      },
+      "both_legs": false,
+      "clause": {
+        "clause_ok": true,
+        "count_leg": true,
+        "scored": true,
+        "timing_leg": true
+      },
+      "confined_passenger_during_window": {
+        "median": 18.0,
+        "q05": 1.0,
+        "q95": 152.0
+      },
+      "during_band": [
+        150.0,
+        350.0
+      ],
+      "during_dominant": false,
+      "during_median_in_band": false,
+      "during_quarantine": {
+        "median": 105.0,
+        "q05": 36.0,
+        "q95": 225.0
+      },
+      "during_quarantine_by_role_pooled": {
+        "crew": 1510,
+        "passenger": 973
+      },
+      "during_quarantine_by_route_pooled": {
+        "common_source_food": 0,
+        "direct_contact": 0,
+        "droplet": 2451,
+        "emesis_aerosol": 0,
+        "environmental": 0,
+        "flush_aerosol": 0,
+        "fomite": 0,
+        "food": 0,
+        "hvac_airborne": 0,
+        "unknown": 32
+      },
+      "during_quarantine_by_zone_class_pooled": {
+        "cabin": 2466,
+        "corridor": 0,
+        "crew_mess": 1,
+        "galley": 0,
+        "other": 16
+      },
+      "during_share": {
+        "median": 0.325
+      },
+      "during_window_crew_share": 0.608135320177205,
+      "fizzle_majority": false,
+      "infections_before_quarantine": {
+        "median": 235.0,
+        "q05": 78.0,
+        "q95": 1565.0
+      },
+      "mass_near_t1": 0.5263157894736842,
+      "n": 20,
+      "propensity_multiplier_median": {
+        "median": 0.7758522053034209,
+        "q05": 0.7608696987957465,
+        "q95": 0.7917489551134197
+      },
+      "propensity_multiplier_q95": {
+        "median": 2.468058388347557,
+        "q05": 2.3732877463376525,
+        "q95": 2.645589010078617
+      },
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "recorded_onsets": {
+        "median": 231.0,
+        "q05": 70.0,
+        "q95": 1409.0
+      },
+      "row_extra": "during_med=105.0 in_band=False crew_share=0.608135320177205",
+      "takeoff_before_share": {
+        "median": 0.25,
+        "q05": 0.17391304347826086,
+        "q95": 0.3770491803278688
+      },
+      "takeoff_infections_total": {
+        "median": 342.0,
+        "q05": 115.0,
+        "q95": 1988.0
+      },
+      "takeoff_n": 19,
+      "takeoff_recorded_onsets": {
+        "median": 231.0,
+        "q05": 71.0,
+        "q95": 1409.0
+      },
+      "timing_leg_in_band": true,
+      "truth_leg_in_band": false
+    }
+  },
+  "triggered_rows": [
+    {
+      "arm_id": "D0_declared",
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "takeoff_before_share": {
+        "median": 0.050955414012738856,
+        "q05": 0.014134275618374558,
+        "q95": 0.125
+      },
+      "takeoff_infections_total": {
+        "median": 771.0,
+        "q05": 560.0,
+        "q95": 1217.0
+      },
+      "takeoff_recorded_onsets": {
+        "median": 331.0,
+        "q05": 149.0,
+        "q95": 760.0
+      },
+      "theta": 1000000.0,
+      "triggers": [
+        "TRUTH-IN-BAND"
+      ]
+    },
+    {
+      "arm_id": "SOP017_ALLHANDS",
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "takeoff_before_share": {
+        "median": 0.2692307692307692,
+        "q05": 0.1,
+        "q95": 0.45
+      },
+      "takeoff_infections_total": {
+        "median": 87.0,
+        "q05": 22.0,
+        "q95": 513.0
+      },
+      "takeoff_recorded_onsets": {
+        "median": 60.0,
+        "q05": 15.0,
+        "q95": 352.0
+      },
+      "theta": 1000000.0,
+      "triggers": [
+        "CLAUSE-PASS",
+        "TIMING-IN-BAND"
+      ]
+    },
+    {
+      "arm_id": "D0_declared",
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "takeoff_before_share": {
+        "median": 0.07540983606557378,
+        "q05": 0.031982942430703626,
+        "q95": 0.23057644110275688
+      },
+      "takeoff_infections_total": {
+        "median": 938.0,
+        "q05": 866.0,
+        "q95": 2222.0
+      },
+      "takeoff_recorded_onsets": {
+        "median": 634.0,
+        "q05": 496.0,
+        "q95": 1540.0
+      },
+      "theta": 7900000.0,
+      "triggers": [
+        "TRUTH-IN-BAND",
+        "TIMING-IN-BAND"
+      ]
+    },
+    {
+      "arm_id": "SOP017_ALLHANDS",
+      "propensity_units_drawn": {
+        "median": 2089.0,
+        "q05": 2085.0,
+        "q95": 2099.0
+      },
+      "takeoff_before_share": {
+        "median": 0.25,
+        "q05": 0.17391304347826086,
+        "q95": 0.3770491803278688
+      },
+      "takeoff_infections_total": {
+        "median": 342.0,
+        "q05": 115.0,
+        "q95": 1988.0
+      },
+      "takeoff_recorded_onsets": {
+        "median": 231.0,
+        "q05": 71.0,
+        "q95": 1409.0
+      },
+      "theta": 7900000.0,
+      "triggers": [
+        "CLAUSE-PASS",
+        "TIMING-IN-BAND"
+      ]
+    }
+  ]
+}

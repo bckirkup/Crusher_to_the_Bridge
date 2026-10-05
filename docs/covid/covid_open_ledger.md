@@ -298,6 +298,15 @@ because days 0–8 are nearly empty while the day-16+ tail is fat;
 conforming needs BOTH early front-loading (days ~5–12 — the
 caregiver/co-presence window; CG_OFF at 1e9 removes the early hump,
 0.902→0.579) AND harder quarantine-tail suppression (D4's read).
+**D4 measured (addendum 2026-10-04):** the during-quarantine tail is
+~92–96% the crew exemption — SOP017_ALLHANDS collapses
+`infections_during_window` med 678→27 (Θ1e6) and 730→105 (Θ7.9e6),
+overshooting the record-informed band [150,350], while
+`infections_before_quarantine` is bit-identical seed-for-seed; the
+residual is a confined-cabin channel still ~52–61% crew. Verdict
+CONFINEMENT-CHANNEL; the tail fix is channel placement, not amplitude
+(`docs/covid/covid_quar_suppression_v1_readout.md`, 80/80 cells at
+`6ea3093d`).
 
 Before that — `CG-FLOOR-01`, measured at `3eae8a2f` (`docs/ledger/CG-FLOOR-01.md`,
 `docs/covid/covid_cg_floor_v1_readout.md`): the R2 factor-box corner
