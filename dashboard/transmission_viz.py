@@ -150,7 +150,7 @@ def render_transmission_explorer(
 
     area_fig = _build_pathway_stacked_area(history)
     if area_fig:
-        st.plotly_chart(area_fig, use_container_width=True)
+        st.plotly_chart(area_fig, width="stretch")
 
     events = _collect_events(history)
     if events:
@@ -158,7 +158,7 @@ def render_transmission_explorer(
         df = pd.DataFrame(events)
         st.dataframe(
             df.sort_values("epoch"),
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
         )
         event_epochs = sorted({e["epoch"] for e in events})
@@ -187,4 +187,4 @@ def render_transmission_explorer(
     matrix = _zone_pathway_matrix(history, selected_epoch)
     if not matrix.empty:
         st.markdown(f"**Zone × pathway matrix — epoch {selected_epoch}**")
-        st.dataframe(matrix, use_container_width=True)
+        st.dataframe(matrix, width="stretch")

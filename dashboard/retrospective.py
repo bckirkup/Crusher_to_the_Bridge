@@ -172,7 +172,7 @@ def render_voyage_retrospective(
     voyage_cfg = load_voyage_config(platform_id)
     itinerary = (voyage_cfg.get("voyage") or {}).get("itinerary") or []
     if history[0].get("voyage_epoch") or itinerary:
-        st.plotly_chart(_build_voyage_strip(history, itinerary), use_container_width=True)
+        st.plotly_chart(_build_voyage_strip(history, itinerary), width="stretch")
 
     st.markdown("**Quick navigation**")
     c1, c2, c3 = st.columns(3)
@@ -198,6 +198,6 @@ def render_voyage_retrospective(
 
     with st.expander("Run metadata", expanded=False):
         if meta:
-            st.dataframe(pd.DataFrame([meta]), use_container_width=True, hide_index=True)
+            st.dataframe(pd.DataFrame([meta]), width="stretch", hide_index=True)
         else:
             st.caption("No run metadata in lab notebook.")
