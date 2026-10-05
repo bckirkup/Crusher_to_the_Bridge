@@ -367,6 +367,102 @@
     8287
    ]
   },
+  "fl_mega_impact_a1_bp40c30": {
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 7000,
+   "description": "A1 slice at bp40c30 (boarding passenger 4.0% / crew 3.0%), caregiver ON + food ON, seeds 8000-8049 (50 cells). Optional distributional slice from the design's fleet plan \u2014 no A0 exists at this prevalence, so no per-seed pairing.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "caregiver": {
+      "mode": "on"
+     },
+     "common_source": {
+      "mode": "on"
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.04,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    8000,
+    8001,
+    8002,
+    8003,
+    8004,
+    8005,
+    8006,
+    8007,
+    8008,
+    8009,
+    8010,
+    8011,
+    8012,
+    8013,
+    8014,
+    8015,
+    8016,
+    8017,
+    8018,
+    8019,
+    8020,
+    8021,
+    8022,
+    8023,
+    8024,
+    8025,
+    8026,
+    8027,
+    8028,
+    8029,
+    8030,
+    8031,
+    8032,
+    8033,
+    8034,
+    8035,
+    8036,
+    8037,
+    8038,
+    8039,
+    8040,
+    8041,
+    8042,
+    8043,
+    8044,
+    8045,
+    8046,
+    8047,
+    8048,
+    8049
+   ]
+  },
   "fl_mega_impact_a2": {
    "platform": "mega_cruise_5000",
    "pathogen": "norovirus",
