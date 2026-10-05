@@ -20,7 +20,7 @@ directory, validates the spec, runs the preflight gates, and submits.
 
 | file | role |
 |------|------|
-| `entry.py` | `build_argv(args, seed, out_dir) -> (cmd, artifact_path)` — custom per-block argv construction. Required when workers take non-standard arguments (see hand_occupancy). |
+| `entry.py` | `build_argv(args, block, seed, out_dir) -> (cmd, artifact_path)` — custom per-block argv construction. Required when workers take non-standard arguments (see hand_occupancy). |
 | `probe.py` / `readout.py` | Campaign-owned instrumentation / readout when the code graduates out of `tools/`. Filenames are positional — role suffixes (`_probe`, `_census`, ...) are not used inside a campaign directory. |
 | `design/` | Build scripts / notes that produced `campaign.json`'s manifest reference. |
 
@@ -40,7 +40,8 @@ directory, validates the spec, runs the preflight gates, and submits.
   "blocks": {
     "<block_name>": {
       "worker": "tools/noro_diag/growth_chain_census.py",  // argv[0] for the child
-      "tier": "fl_spr_12d",          // manifest tier (when seed->index translation applies)
+      "tier": "fl_spr_12d",          // manifest-tier worker: tier for seed->index translation...
+      "artifact": "cell_seed{seed}.json",  // ...OR seeds worker: filename the worker writes (done-detection)
       "seeds": [8105, ...],          // flat list; array size = len(seeds)
       "args": {"platform": "..."}    // extra fixed worker args (optional)
     }
@@ -68,6 +69,18 @@ index for canaries exactly as before (the Batch env var is reserved).
   derives the jobdef from `deploy/aws/campaign_jobdef.json` and builds the
   thin image from `deploy/aws/Dockerfile.campaign`. Only per-campaign
   overrides (`resources`, `image_tag`, fargate) are spec data.
+- `scripts/campaign submit` registers a **new jobdef revision on every
+  non-dry-run call** (`--register-only` produces `:1`, each subsequent block
+  submit bumps it). Expected, not a bug — record the revision used per array
+  in the campaign LEDGER.
+- The worker owns its artifact filename — `entry.py`'s returned
+  `artifact_path` and any `artifact` template in `campaign.json` must mirror
+  the name the worker actually writes, not the other way around.
+- Before the first submit through a new or touched Dockerfile, build it
+  literally (`docker build -f deploy/aws/Dockerfile.campaign .`) and check
+  inside the container that `deploy/aws/`, `tools/` and `campaigns/` are
+  present — a once-committed recipe COPY'd nothing and produced a hollow
+  image discovered only at submit time (see campaign-preflight step 3).
 
 ## CLI
 

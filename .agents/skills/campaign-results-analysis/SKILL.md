@@ -29,6 +29,36 @@ Path I/O is confined to the process CWD via `simulation_utils.paths`
 AWS_PROFILE=picard aws s3 sync s3://<bucket>/campaign/ ./results/
 ```
 
+### S3 collection pitfalls
+
+- **DEEP_ARCHIVE objects mid-restore raise `InvalidObjectState` on GET.**
+  Lifecycle-archived prefixes that are being restored return errors, not data;
+  collectors must treat that error as "skip this key" so partial-restore
+  readouts still run (pattern: `tools/noro_diag/outbreak_anchor_readout.py`'s
+  `ClientError` catch around `_s3_member_blob`).
+- **Key-addressable reads, never whole-prefix scans.** Run zips land at
+  `<prefix>/<tier>/<run_id>.zip`, so build keys from the dump's `(tier,
+  run_id)` pairs and ranged-read `summary.json` via
+  `outbreak_anchor_readout._s3_member_blob` (16 workers ≈ seconds). A full
+  `_collect_s3` scan over a large prefix (noro_outbreak_01 is ~16k zips ×
+  ~45MB) ran >15 min before being killed.
+- **Never `json.loads` a giant zip member.** A single ~1.5GB member (mega
+  census payload) OOMs `json.loads` at ~6-8GB RSS (exit 137). Regex/str-scan
+  the decompressed text for the fields needed, and bound member parses to
+  early-delimited sections (e.g. stop `hosts[]` at the first `]` after
+  `"hosts": [`) rather than decoding to end.
+- **Optional counters vanish from payloads.** A `defaultdict` accumulated
+  conditionally and emitted as a plain dict loses keys that were never
+  incremented — downstream readers must `.get()` (a `zero_response_voyages`
+  KeyError crashed a readout on cells where every voyage had responses).
+- **`history_retention: compact` drops mechanism telemetry before the zip.**
+  `matrix.<mechanism>` observer rows and `core.<mechanism>_telemetry` never
+  reach the run zip under the campaign default. Mechanism telemetry a readout
+  needs must be harvested into the census payload instead (pattern:
+  `_cs_event_log` rows in `growth_census.json.gz`; check at design time
+  whether a new telemetry key survives compact retention or needs an explicit
+  census emit).
+
 ## Analysis bundle + Stan hurdle (Phase 1b)
 
 Converts zips into `run_summary.csv` + `epoch_timeseries.parquet` (or

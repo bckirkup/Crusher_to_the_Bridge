@@ -101,6 +101,37 @@ boundary cost fields are accepted as intentional: those names are fixed by
 `picard_framework/analysis/boundary/data/*.json`; renaming them would require
 a data migration for a naming nit.
 
+## Coverage-exclusion convention for diag/readout tools
+
+Diagnostic probe and readout tools are exempted from the 80% new-code
+coverage gate via `sonar.coverage.exclusions` in `sonar-project.properties`.
+Add a new tool's exclusion **in the same change that creates it** — a file
+that lands without one fails the gate the first time the next PR touches it
+(this has repeatedly been the only SonarCloud red on a campaign PR). Prefer
+family globs over per-file rows where a convention already exists
+(`tools/flu_*.py`, `tools/smalln_diag/**`, `tools/diag/**`,
+`campaigns/**/*.py`, `scripts/campaign` are already globbed).
+
+Two traps when editing `sonar-project.properties`:
+
+- It is a properties file, not a sectioned config — an edit must rewrite the
+  **whole** file. Writing back only the `sonar.coverage.exclusions=` line
+  drops `sonar.projectKey`/`sonar.organization` and the scan dies with
+  "mandatory properties for 'Unknown'".
+- A typo'd exclusion filename silently covers nothing — the gate still fails
+  on the real file. After adding one, confirm the path exists at the merge
+  SHA.
+
+## Recurring rule hits and their fixes
+
+| Rule | Trigger | Fix |
+|------|---------|-----|
+| S5778 | Multiple throwing calls inside `pytest.raises` | one throwing invocation per `raises` block |
+| S7519 | Dict built by assigning `None`/default per key | `dict.fromkeys` |
+| S8786 | Regex compiled lazily inside a loop/function body | hoist to a module constant |
+| S1244 | `assert x == <float>` in tests (sonar_guard flags test files too) | `pytest.approx` |
+| S9073 | Composite `assert a and b` | split into separate asserts |
+
 ## Supply-Chain Rules
 
 - Dependencies install only from `uv.lock`: `uv sync --locked --all-extras --no-install-project --no-build`.

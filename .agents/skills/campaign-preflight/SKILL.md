@@ -15,6 +15,26 @@ two rules that bracket it.
 Run the steps in order. Do not skip a step because the change looks small —
 every step below exists because skipping it burned a full array.
 
+## Campaigns under `campaigns/` (the current grammar)
+
+Campaigns registered as `campaigns/<pathogen>/<name>/` submit through
+`scripts/campaign` (see `campaigns/README.md`), not through the bespoke
+`deploy/aws/submit_*.sh` scripts — the shell commands in the steps below are
+the legacy layout; the *gates* are the same either way. Mapping:
+
+- steps 1–2 → `scripts/campaign run <pathogen>/<name> --block B --index N`
+  (local canary) and `scripts/campaign describe` (block/seed counts);
+- step 3 → `scripts/campaign submit` renders and registers a **new jobdef
+  revision on every non-dry-run call** (`--register-only` produces `:1`, then
+  each block submit bumps it — expected, not a bug; record the rev per array);
+- step 5 → `scripts/campaign submit <pathogen>/<name> --block B --canary`;
+- step 6 → `scripts/campaign submit` per block.
+
+Under the new grammar the design of record is the committed design doc plus
+the generated manifest (Rule A still applies — freeze criteria in the design
+file before the first cell runs, and check generated artifacts into the image
+build, never hand-edit them).
+
 ## Rule A (before step 1): freeze the criteria in the design file
 
 Every admissibility criterion, threshold, interval and selection rule must be
@@ -112,6 +132,19 @@ confirm the design file and manifest are actually *in* that image — build the
 image from a `main` that contains them (the v8 Theta screen handoff records
 exactly this requirement: "the design must be *inside* the image").
 
+**Verify the literal build, in-container, before the first submit through a
+new Dockerfile.** A committed `deploy/aws/Dockerfile.campaign` once COPY'd
+nothing, so `docker build -f deploy/aws/Dockerfile.campaign .` produced a
+hollow image — no `deploy/aws/`, `tools/`, or `campaigns/` — and the gap was
+only discovered because the first `campaign_jobdef.json` +
+`campaign_entrypoint.py` submit exercised it. For any new or touched image
+recipe: build the literal Dockerfile from the repo root, then inside the
+container check the file layout and `ENGINE_GIT_SHA`, run the manifest
+`seed -> index` translation, and run one full `campaign_entrypoint.py --local`
+voyage (its `--out` must stay under `/app` — `_confine_to_roots` rejects
+`/tmp`). The first submit through a recipe that has never been built is the
+moment to do this, not after the array.
+
 After submission, verify what the running job actually picked up:
 
 ```bash
@@ -145,7 +178,19 @@ Check the same two things as step 1 — swept value resolved, output contract
 intact — plus that the run is not degenerate (non-zero epochs, plausible
 attack rate, the witness counters for whatever mechanism the design is about
 are non-zero; see `.agents/skills/transmission-blocker-cascade/SKILL.md`
-Hard rule 1). A canary costs one child's wall clock. An array costs all of it.
+Hard rule 1).
+
+Check new `parameters` stamps on a **base-mix arm too, not only overridden
+arms.** `_fill_demographic_params` echoes `agent_class_fractions` only when
+the tier itself declares `config_overrides.ship_graph.agent_classes` — an arm
+that inherits the shipped mix resolves the identical config but stamps
+nothing. When a stamp is wanted on every arm, declare the shipped value
+verbatim in `design/build.py` (the `BASE_AGENT_CLASSES` pattern on
+AGE-FOOD-01): resolved config identical, voyages bit-identical to the
+unstamped arm. Inspect one landed zip per arm before the fleet, per the
+AGE-FOOD-01 canary.
+
+A canary costs one child's wall clock. An array costs all of it.
 
 ## Step 6: submit the array, and report the ETA at submission
 

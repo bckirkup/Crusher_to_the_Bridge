@@ -59,6 +59,12 @@ not a general escape hatch: add an entry only for bookkeeping, an active
 epoch-native contract, or a retired compatibility alias that cannot yet be
 removed.
 
+The guard scans **all committed `.json` files**, not just configuration — a
+committed analysis sidecar carrying per-run `num_epochs` fields failed it
+(PR #888). Never `git add` JSON measurement dumps/sidecars; the markdown
+doc is the durable record, and `--json-out` writes are for ad-hoc reruns
+into non-committed paths only.
+
 ## Adding a parameter safely
 
 1. Name the parameter with its physical unit, such as
