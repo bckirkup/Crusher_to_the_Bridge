@@ -268,6 +268,7 @@ class AgentState(TypedDict, total=False):
     clinical_features: list[str]
     profile_id: str
     chronic_disease_ids: list[str]
+    work_zone: str
 
 
 class ZoneState(TypedDict, total=False):
