@@ -519,7 +519,25 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # exactly on this branch, so the move is fully attributed to the
         # two maps. Both reads in the local venv on CPython 3.12 on this
         # branch.
-        (3, 12): (2765, 2587, 2702, 398, 333),
+        # The pin then went stale pre-SVC-01: nightly run 37461678535
+        # (post-CREW-WINDOW main, before #936) already read
+        # (2766, 2587, 2693, 400, 335). The engine merges in that window
+        # — CREW-WINDOW-01 grammar (f8dd6c0a), ALIGNMENT-CLEANUP mode
+        # switches (1d4778f6), CREW-WINDOW-02 fractional crew exemption
+        # gates (e8291a42) — are the mover; the exemption gates are the
+        # plausible semantics on a mass-confinement replay, unattributed
+        # per-merge. CAREGIVER-SVC-01's labelled baseline reproduces the
+        # drift tuple exactly (contact_factor: 1.0 arm reads
+        # (2766, 2587, 2693, 400, 335) on this tree), and the shipped
+        # default U[0.05,0.3] then moves it again —
+        # (2766, 2587, 2693, 400, 335) -> (2794, 2613, 2579, 429, 362) —
+        # the door-drop discount re-rolling this burning-regime cell's
+        # confined-cabin delivery doses (onsets/positives rise a little,
+        # specimens fall). So the repin records drift + factor hop; all
+        # reads in the local venv on CPython 3.12 on the union tree
+        # (SVC-01 + MEAL-SVC-01 defaults: direction responder,
+        # responder_mode uniform — status quo, no new shared draws).
+        (3, 12): (2794, 2613, 2579, 429, 362),
     },
 }
 
