@@ -50,9 +50,9 @@ incidence, not visibility.**
   tail-driven): scale-down adds onboard acquisition on exp/spr
   (+0.15/+1.1–1.3 mean) as predicted; **r200 on exp adds infections
   (+1.56 mean) while quadrupling quarantine — sign reversal vs the
-  declared hypothesis**, mechanism not attributed (candidate: confined
-  cabinmate channel outweighing removed transmitters on the small
-  hull). Visibility is transmission-relevant but not monotone.
+  declared hypothesis**. Attributed (addendum below): the
+  serviced-quarantine crew bridge, not RNG re-realization. Visibility
+  is transmission-relevant but not monotone.
 - Recognition: final ≥ ALERT rates flat vs baseline on every class
   (exp 63–66 %, spr 95–99, cls 96–97, mega 97–100). First-ALERT
   timing is class-dominated — mega epoch 0 (import prevalence), spr 4–5,
@@ -80,3 +80,25 @@ incidence, not visibility.**
 - The `r100_dec` arm row for exp in the readout tables is the n=1
   canary cell (baseline cells shadowed by the arm-suffixed dir); paired
   deltas still compute per-seed vs all 100 OPEN-01 baseline cells.
+
+## Attribution addendum — the exp r200 sign-reversal
+
+Measured at `ca775a0b` (paired local probe on driver seed 8188, +49;
+cross-check on all 100 paired exp seeds; detail in the readout §4):
+
+- Import cohorts identical across arms (`first_infection_epoch` 0 on
+  the same six IDs) — stream intact through init; the divergence is
+  state-mediated through reporting outcomes, not RNG corruption.
+- Cabin-mate co-confinement refuted (2/59 onboard infections while
+  confined). The channel is **service into quarantined cabins**:
+  confined cohort ×5 (77 vs 15) → service deliveries ×2.6 (440 vs
+  167) → crew caregiver infections 14 vs 9 (+6 crew droplet) →
+  exempt crew seed a late passenger droplet wave (ep ~205–283, 38
+  vs 2, nearly all never-confined).
+- Pearson r = 0.81 between Δinfected and Δquarantined over the 100
+  paired seeds, both directions (s8142 is the extreme of both signs).
+- Verdict: real mechanism — quarantine's benefit is partly
+  self-defeating via the crew-service channel on the 450-agent hull
+  (cohort ≈ 17 % of complement); diluted on the big hulls. Not a
+  defect; a measured property of organic confinement under a hot
+  reporting vector.
