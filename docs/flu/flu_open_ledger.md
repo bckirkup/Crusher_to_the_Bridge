@@ -1,6 +1,6 @@
 # Influenza-A fit: open ledger
 
-> **Status:** Living. Head commit of record: `7f4702ef`. If that is not the
+> **Status:** Living. Head commit of record: `ee39d64d`. If that is not the
 > current head, treat every number here as unverified.
 
 What is currently withdrawn on the `influenza_a` arm, what the last
@@ -47,6 +47,7 @@ on the mechanism it measured.
 | FLU-PRESENT-RESCORE-01 | measured | `232292f2` | F1 verdict **IN** at n=4 seeds; F5 check 0.18 vs ~0.08 |
 | FLU-SOCIAL-01 | measured | `8c03e9d7` | social-layer readout |
 | FLU-OPEN-01 | measured | `7f4702ef` | open-voyage census on all four classes; F5 above frame = declared observation vector |
+| FLU-VIS-01 | measured | `ca775a0b` | observation-layer sweep (report scale × eligibility) on the open voyage; reporting saturates — big-hull Ward gap is incidence, not visibility |
 
 Numbers are quoted from the entries above at their `Measured at` SHAs, never
 from this page.
