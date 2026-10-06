@@ -3,12 +3,13 @@
 **Commit:** 2df542ff
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 2df542ff (image `picard-campaign@sha256:2b481866`,
-jobdef `picard-covid-crew-window-02`, prefix
-`campaign/covid_crew_window_02/`)
+**Measured at:** 2df542ff
 
 Interior of the CW-01 crew-duty cliff: fractional and activity-scoped
-crew confinement on the verbatim `diamond_princess_2020` replay. Two new
+crew confinement on the verbatim `diamond_princess_2020` replay (image
+`picard-campaign@sha256:2b481866` / tag `covid-crew-window-02`, jobdef
+`picard-covid-crew-window-02`, prefix
+`campaign/covid_crew_window_02/`). Two new
 confinement-order modifiers — `exempt_work_zones` (postable-zone
 essential lists NARROW 11/34, WIDE 19/34) and `exempt_fraction`
 (sticky exact-count draws, dedicated RNG stream) — on five new
