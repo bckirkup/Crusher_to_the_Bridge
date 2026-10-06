@@ -274,7 +274,27 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`CREW-WINDOW-01`, measured at `ea9550ef` (`docs/ledger/CREW-WINDOW-01.md`,
+`CREW-WINDOW-02`, measured at `2df542ff` (`docs/ledger/CREW-WINDOW-02.md`,
+`docs/covid/covid_crew_window_02_readout.md`): the interior of the CW-01
+crew-duty cliff — fractional/activity-scoped crew confinement via
+`exempt_work_zones` (essential-zone lists NARROW 11/34, WIDE 19/34) and
+`exempt_fraction` (sticky draws 261/523/784 of 1,045), {Θ1e6, Θ7.9e6} ×
+{D0, ZONE_NARROW, ZONE_WIDE, FRAC_25/50/75} × 20 seeds, 240/240 cells.
+**CHANNEL-LANDED — FRAC_25 (during median 301) and ZONE_NARROW (334)
+land [150,350] at Θ7.9e6 with the before phase seed-paired unmoved**;
+all other arms under-attenuated (ZONE_WIDE 504, FRAC_50 482, FRAC_75
+622.5); during medians monotone in realized exempt share (~0.25–0.31
+working-crew share brackets the band's interior). Crew share moves only
+marginally (0.973/0.978 vs D0 0.992, record 0.29) — confined crew are
+fed by R3 steward delivery (no starvation) and residual infections stay
+crew-on-crew, so the channel lands the mass without resolving the
+attribution; at Θ1e6 three arms land the band with share 1.000
+(IN-BAND-INCOMPLETE). CW-01 D0 drift witness pairs at Δ0.0. Next legs:
+source the landing complement (~25–31% essential working share — record
+essential-service complement / VSP manning), and the crew-share gap
+itself is now the open sub-question on this channel.
+
+Prior measurement — `CREW-WINDOW-01`, measured at `ea9550ef` (`docs/ledger/CREW-WINDOW-01.md`,
 `docs/covid/covid_crew_window_01_readout.md`): the working-crew-channel
 attenuation screen — {Θ1e6, Θ7.9e6} × {D0_declared, CREWDUTY,
 EXEMPT_ENGMED, EXEMPT_ESSENTIAL, MESS_0P5, MESS_0P25} × 20 seeds,
