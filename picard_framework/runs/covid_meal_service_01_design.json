@@ -35,7 +35,7 @@
     {
       "arm_id": "D0_declared_svc_base",
       "overrides": {},
-      "note": "Shipped default verbatim - SOP-017 days 16-30, all four crew classes exempt, responder-only dose, uniform draw. First arm so empty overrides per the arm grammar. Doubles as the in-design pairing base and the drift witness against CW-02's t7p9e6_d0 row at 2df542ff (expected bit-identical: every new stream draws nothing under the defaults)."
+      "note": "Shipped default verbatim - SOP-017 days 16-30, all four crew classes exempt, responder-only dose, uniform draw. First arm so empty overrides per the arm grammar. Doubles as the in-design pairing base and the drift witness against CW-02's t7p9e6_d0 row at 2df542ff (NOT expected bit-identical: CAREGIVER-SVC-01 #936 landed the door-drop service.contact_factor (0.05,0.3) per-delivery draw on _SERVICE_CONTACT_STREAM_KEY default-ON between the CW-02 measurement SHA and this campaign's - deliveries parity is the binding comparison; dose-side deltas are the expected contact-factor discount, not drift)."
     },
     {
       "arm_id": "D0_declared_svc_dir",
@@ -159,7 +159,7 @@
   },
   "diagnostics": {
     "paired_vs_in_design_base": "Each *_svc_dir* row pairs seed-for-seed with its *_svc_base row at the same replay arm: delta confined_passenger_infections_during_quarantine, delta during_window_by_role (crew and passenger separately), delta during_window_by_age_band, delta infections_before_quarantine (expected ~0 - every channel arm fires only inside the window), delta recorded_onsets/before_share, and the during-window crew share vs the record's 0.29.",
-    "paired_vs_cw02": "Each *_svc_base row pairs against the CW-02 row at the same replay arm (t7p9e6_d0 / t7p9e6_zone_narrow at 2df542ff) - the armed-tree drift witness since CW-02 ran; expected bit-identical because every new draw runs on the dedicated section stream and direction 'responder' adds no dose terms.",
+    "paired_vs_cw02": "Each *_svc_base row pairs against the CW-02 row at the same replay arm (t7p9e6_d0 / t7p9e6_zone_narrow at 2df542ff) - the armed-tree drift witness since CW-02 ran; NOT expected bit-identical because CAREGIVER-SVC-01's default-ON door-drop contact_factor draws once per delivery on every arm including SVC_BASE, so the pair reports the armed-tree delta with deliveries parity as the binding invariant and dose-side deltas read as the expected discount, not drift.",
     "crew_side_witness": "service_dose_credited (steward-side) and crew during-window acquisitions per arm - the channel is symmetric in the record; both directions reported.",
     "route_attribution": "during_quarantine_by_route.service_to_host on DIR arms (new named key beside the caregiver key, which the steward-side credit also tallies under) - infections whose dominant acquisition route was the reverse-direction credit.",
     "realized_share": "crew_window.working_crew_by_posted_zone and realized_exempt_share vs the ZONE_NARROW lottery expectation (11/34 ~ 0.324) on zone_narrow_* cells; a material departure is reported with the realized distribution."

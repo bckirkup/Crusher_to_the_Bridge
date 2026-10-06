@@ -569,6 +569,102 @@ class TestCaregiverV1:
         assert core.caregiver_telemetry["service_deliveries"] == 1
         assert patch.mass < 1.0e6
 
+    @staticmethod
+    def _service_dose(caregiver: dict, profile: dict | None = None) -> float:
+        core = _core(caregiver={"service": dict(caregiver)})
+        host = TestCaregiverV1._symptomatic_host(1)
+        return core._caregiver_service_dose(
+            host, _agent(9, role="crew"), 1, PATHOGEN,
+            profile if profile is not None else _profile(),
+        )
+
+    def test_service_contact_factor_scales_pair_dose(self) -> None:
+        """A fixed factor multiplies the respiratory pair dose exactly —
+        the dedicated stream never touches the shared draws, so
+        dose(f) == f x dose(1.0) at one seed; a [lo, hi] window lands in
+        [lo x full, hi x full]."""
+        full = self._service_dose({"contact_factor": 1.0})
+        assert full > 0.0
+        assert self._service_dose({"contact_factor": 0.5}) == pytest.approx(
+            0.5 * full
+        )
+        assert self._service_dose({"contact_factor": 0.0}) == pytest.approx(0.0)
+        bounded = self._service_dose({"contact_factor": (0.2, 0.4)})
+        assert 0.2 * full <= bounded <= 0.4 * full
+
+    def test_service_contact_factor_limits_emetic_pickup(self) -> None:
+        """The factor scales the nominal patch take: less mass lifted,
+        less mass removed — dose and drain both halve at 0.5."""
+        from engines.transmission_core import EmesisPatch
+
+        profile = _profile()
+        profile["airborne_emission_mode"] = "emesis_conditioned"
+
+        def run(factor: float) -> tuple[float, float]:
+            core = _core(caregiver={
+                "service": {
+                    "contact_factor": factor,
+                    "service_touches": (3, 3),
+                },
+            })
+            patch = EmesisPatch(
+                mass=1.0e6, high_touch_area_m2=2.0,
+                occupant_share=1.0, epoch=0,
+            )
+            core.emesis_patch_pools_by_pathogen.setdefault(
+                PATHOGEN, {},
+            )[ZONE] = [patch]
+            dose = core._caregiver_service_dose(
+                self._symptomatic_host(1), _agent(9, role="crew"),
+                1, PATHOGEN, profile,
+            )
+            return dose, patch.mass
+
+        full_dose, full_mass = run(1.0)
+        half_dose, half_mass = run(0.5)
+        assert full_dose > 0.0
+        assert half_dose == pytest.approx(0.5 * full_dose)
+        assert half_mass > full_mass
+
+    def test_service_contact_factor_zero_keeps_the_discovery(self) -> None:
+        """f=0 is a dose discount, not a channel removal: the delivery
+        and its report stamp still land — limited contact does not cost
+        the confinement feed."""
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "report_probability": (1.0, 1.0),
+                "contact_factor": 0.0,
+            },
+        })
+        host = self._symptomatic_host(1)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, {})
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry["service_reports"] == 1
+        assert host.caregiver_report_due_epoch == 1
+        assert core.caregiver_telemetry["service_dose_credited"] == pytest.approx(0.0)
+        assert doses.get(9, 0.0) == pytest.approx(0.0)
+
+    def test_service_contact_factor_baseline_spawns_no_stream(self) -> None:
+        """Fixed factors draw nothing — the labelled baseline
+        ``contact_factor: 1.0`` spawns no dedicated stream."""
+        fixed = _core(caregiver={"service": {"contact_factor": 1.0}})
+        assert fixed._service_contact_rng is None
+        assert fixed._cg_service_contact == ("fixed", 1.0)
+        uniform = _core(caregiver={"service": {"contact_factor": (0.1, 0.2)}})
+        assert uniform._cg_service_contact == ("uniform", 0.1, 0.2)
+        assert uniform._service_contact_rng is not None
+
+    def test_service_contact_factor_malformed_fails_at_spec(self) -> None:
+        for bad in ("off", 1.5, -0.1, (0.8, 0.2), (0.1, 0.2, 0.3), True):
+            with pytest.raises(ValueError):
+                _core(caregiver={"service": {"contact_factor": bad}})
+
     def test_epoch_setup_mode_off_draws_no_rng(self) -> None:
         core = _core(caregiver={"mode": "off"})
         host, cg = self._family_pair()

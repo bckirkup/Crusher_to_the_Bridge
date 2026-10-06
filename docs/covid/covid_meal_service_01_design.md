@@ -42,7 +42,10 @@ parsed in `_init_caregiver` and echoed verbatim in the resolved block
   `site=host` pins the contact in the CONFINED host's cabin — the host
   unit carries the volume, ventilation and residence terms; the 5-minute
   episode share (`_caregiver_service_share`) is the same presence/plume
-  factor in both directions. On an `emesis_conditioned` profile the
+  factor in both directions, and the delivery's door-drop
+  `service.contact_factor` (CAREGIVER-SVC-01, #936 — one realized
+  draw per delivery) attenuates both directions identically. On an
+  `emesis_conditioned` profile the
   reverse dose is 0 by construction: an emetic pathogen has no
   continuous emission for the host to inhale, and the surface channel
   is steward-pickup only.
@@ -167,9 +170,15 @@ the per-direction dose tallies, and the structure witness.
   acquisitions, Δ crew share, Δ `infections_before_quarantine` (expected
   ~0 — every channel arm fires only inside the window).
 - `paired_vs_cw02`: `*_svc_base` rows pair against CW-02's `t7p9e6_d0` /
-  `t7p9e6_zone_narrow` rows at `2df542ff` — the armed-tree drift witness
-  (expected Δ0.0; SVC_BASE is the shipped default verbatim and the new
-  streams draw nothing under it).
+  `t7p9e6_zone_narrow` rows at `2df542ff` — the armed-tree drift
+  witness. **Not expected bit-identical**: CAREGIVER-SVC-01 (#936) landed
+  the door-drop `service.contact_factor` — a (0.05, 0.3) per-delivery
+  draw on `_SERVICE_CONTACT_STREAM_KEY`, default-ON — between the CW-02
+  measurement SHA and this campaign's, so every delivery's steward-side
+  dose is discounted and downstream trajectories diverge. The binding
+  CW-02 comparison is deliveries parity (a count the factor does not
+  touch); dose-side deltas are the expected contact-factor discount,
+  reported as the armed-tree delta, not read as drift.
 - `crew_side_witness`: `service_dose_credited` (steward-side) and crew
   acquisitions per arm — the channel is symmetric in the record; both
   directions reported.

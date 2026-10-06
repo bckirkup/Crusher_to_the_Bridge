@@ -37,6 +37,18 @@ age-structured hull; `presentation_age_mode: "flat"` and
 `FLU-PRESENT-RESCORE-01`'s "flag inert on this surface" finding still stands
 on the mechanism it measured.
 
+**CAREGIVER-SVC-01 (landed 2026-10-06): the R3 service channel now carries a
+door-drop contact discount, `transmission.caregiver.service.contact_factor`
+U[0.05,0.3] default-ON — every caregiver dose figure below is historical on
+the un-discounted channel** (`contact_factor: 1.0` is the labelled baseline).
+This is the fix for the serviced-quarantine crew bridge the FLU-VIS-01
+attribution measured (§4 of that readout): on the paired 8-seed probe
+(`ca775a0b`) the factor collapses the bridge sub-channel (median onboard
+36→~7 on exp `r200_dec`), and a second confinement-mediated channel — a
+passenger/droplet wave persisting at f=0 on a subset of seeds, candidate
+confined-cabinmate pooling — is open as a separate attribution. Ledger:
+`docs/ledger/CAREGIVER-SVC-01.md`.
+
 ## 2. Measurement status (pointers, not quotes)
 
 | Entry | Status | Measured at | Surface |
