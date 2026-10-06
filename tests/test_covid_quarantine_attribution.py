@@ -589,6 +589,140 @@ def test_witness_reads_confinement_in_force_during_transmission():
     assert ledger.confined_at_activation == 1  # read from state, not engine
 
 
+# ── CREW-WINDOW-02 realized-share witnesses ────────────────────────────────
+#
+# The CW-01 audit checked the declared exempt set; CW-02 witnesses the
+# realized membership: who is confined, who is still working, by which
+# posted zone, plus the gated-order echoes and the sticky drawn sets.
+
+
+def _crew_agent(agent_id, work_zone=None):
+    agent = _Agent(agent_id, "crew", "CC_1")
+    agent.work_zone = work_zone
+    return agent
+
+
+def _gated_order(protocol_id="SOP-017-NARROW", zones=("Bridge",),
+                 fraction=None):
+    order = _confine_order(protocol_id, exempt=["crew_general"])
+    order["modifiers"]["exempt_work_zones"] = list(zones)
+    if fraction is not None:
+        order["modifiers"]["exempt_fraction"] = dict(fraction)
+    return order
+
+
+def _work_with_draws(epoch, active_mods, quarantined=(), draws=None,
+                     isolated=()):
+    work = _work(epoch, active_mods=active_mods, quarantined=quarantined)
+    work.state.exempt_fraction_draws = draws or {}
+    work.state.isolated_ids = set(isolated)
+    return work
+
+
+def test_crew_window_activation_snapshots_confined_and_working():
+    agents = [
+        _crew_agent(1, "Bridge"),
+        _crew_agent(2, "Casino"),
+        _crew_agent(3, "Main_Galley_Aft"),
+        _Agent(9, "passenger", "PC_9"),
+    ]
+    sim = _Sim(agents)
+    ledger = QuarantineAttributionLedger()
+    ledger.observe(sim, _work_with_draws(
+        epoch=16 * 24,
+        active_mods=[_gated_order(zones=["Bridge", "Main_Galley_Aft"])],
+        quarantined={2, 9},
+    ))
+    snap = ledger.crew_window_activation
+    assert snap["total_crew"] == 3
+    assert snap["confined_crew_count"] == 1
+    assert snap["working_crew_count"] == 2
+    assert snap["realized_exempt_share"] == pytest.approx(2 / 3)
+    assert snap["working_crew_by_posted_zone"] == {
+        "Bridge": 1, "Main_Galley_Aft": 1}
+    assert ledger.exempt_work_zones == ["Bridge", "Main_Galley_Aft"]
+    # A later epoch refreshes the at-end snapshot.
+    ledger.observe(sim, _work_with_draws(
+        epoch=17 * 24, active_mods=[_gated_order()], quarantined={2, 3, 9},
+    ))
+    final = ledger.crew_window_final
+    assert final["confined_crew_count"] == 2
+    assert final["working_crew_count"] == 1
+
+
+def test_crew_window_isolated_counts_as_confined():
+    agents = [_crew_agent(1, "Bridge"), _crew_agent(2, "Casino")]
+    sim = _Sim(agents)
+    ledger = QuarantineAttributionLedger()
+    ledger.observe(sim, _work_with_draws(
+        epoch=16 * 24, active_mods=[_gated_order()], isolated={2},
+    ))
+    snap = ledger.crew_window_activation
+    assert snap["confined_crew_count"] == 1
+    assert snap["working_crew_count"] == 1
+
+
+def test_crew_window_block_echoes_fraction_draws_and_deliveries():
+    agents = [_crew_agent(1, "Casino"), _crew_agent(2, "Bridge")]
+    sim = _Sim(agents)
+    sim.tx_core = SimpleNamespace(
+        sanitary_telemetry={}, caregiver_telemetry={"service_deliveries": 7},
+    )
+    ledger = QuarantineAttributionLedger()
+    draws = {"SOP-017-QUARTER": {"crew_general": [2]}}
+    ledger.observe(sim, _work_with_draws(
+        epoch=16 * 24,
+        active_mods=[_gated_order(
+            "SOP-017-QUARTER", zones=(), fraction={"crew_general": 0.5})],
+        quarantined={1}, draws=draws,
+    ))
+    design = BoardingScreenDesign(
+        design_id="x", scenario_id="diamond_princess_2020",
+        thetas=(1e5,), infection_age_days=(3.3,), imports=(1,),
+        sanitary_visit_mode="none", seed_base=1, seeds=1,
+        takeoff_recorded_onsets=10,
+        arms=({"arm_id": "A0", "overrides": {}},),
+    )
+    cell = ScreenCell(
+        index=0, scenario_id="diamond_princess_2020", theta=1e5,
+        infection_age_days=3.3, imports=1, seed=1, arm_id="A0",
+    )
+    payload = cell_payload(design, cell, sim, ledger, _raw_spec())
+    block = payload["crew_window"]
+    assert block["exempt_fraction"] == {"crew_general": 0.5}
+    assert block["exempt_work_zones"] is None
+    assert block["exempt_fraction_drawn"] == {
+        "SOP-017-QUARTER": {"crew_general": 1}}
+    assert block["exempt_fraction_drawn_ids"] == draws
+    assert block["service_deliveries"] == 7
+    assert block["at_activation"]["working_crew_count"] == 1
+    assert block["at_end"]["working_crew_count"] == 1
+
+
+def test_crew_window_block_is_present_but_empty_without_activation():
+    sim = _Sim([_crew_agent(1, "Bridge")])
+    ledger = QuarantineAttributionLedger()
+    design = BoardingScreenDesign(
+        design_id="x", scenario_id="diamond_princess_2020",
+        thetas=(1e5,), infection_age_days=(3.3,), imports=(1,),
+        sanitary_visit_mode="none", seed_base=1, seeds=1,
+        takeoff_recorded_onsets=10,
+        arms=({"arm_id": "A0", "overrides": {}},),
+    )
+    cell = ScreenCell(
+        index=0, scenario_id="diamond_princess_2020", theta=1e5,
+        infection_age_days=3.3, imports=1, seed=1, arm_id="A0",
+    )
+    payload = cell_payload(design, cell, sim, ledger, _raw_spec())
+    block = payload["crew_window"]
+    assert block["exempt_work_zones"] is None
+    assert block["exempt_fraction"] is None
+    assert block["exempt_fraction_drawn"] is None
+    assert block["at_activation"] is None
+    assert block["at_end"] is None
+    assert block["service_deliveries"] == 0
+
+
 # ── merge ─────────────────────────────────────────────────────────────────
 
 def _stub_payload(cell: ScreenCell, *, visits: float = 100.0) -> dict:
