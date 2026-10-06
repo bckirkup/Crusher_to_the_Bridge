@@ -292,7 +292,11 @@ attribution; at Θ1e6 three arms land the band with share 1.000
 (IN-BAND-INCOMPLETE). CW-01 D0 drift witness pairs at Δ0.0. Next legs:
 source the landing complement (~25–31% essential working share — record
 essential-service complement / VSP manning), and the crew-share gap
-itself is now the open sub-question on this channel.
+itself is now the open sub-question on this channel. **Open item
+(unruled):** the frozen D0 `realized_exempt_share ≈1` invariant flagged
+4 big before-phase seeds (0.68–0.87 — isolation-path confinement, not
+the order gate); whether the expectation is amended or kept strict is
+recorded in `docs/covid/covid_crew_window_handoff_2026_10_06.md` §8.
 
 Prior measurement — `CREW-WINDOW-01`, measured at `ea9550ef` (`docs/ledger/CREW-WINDOW-01.md`,
 `docs/covid/covid_crew_window_01_readout.md`): the working-crew-channel
