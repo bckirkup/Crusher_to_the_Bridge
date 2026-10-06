@@ -46,10 +46,14 @@ Measured, not inferred:
   cell.
 - CW-01 drift witness: in-design D0 pairs seed-for-seed at median
   paired delta **0.0** on both thetas — bit-stable at `2df542ff`.
-- Frozen-invariant departure (reported, not amended): D0's
-  `realized_exempt_share ≈1` flagged on 4 seeds (0.68–0.87) —
-  symptomatic crew confined through the isolation path on big
-  before-phase seeds; the D0 gate itself reached (no gate echo).
+- Frozen-invariant departure (reported, not amended; **OPEN ITEM —
+  unruled**): D0's `realized_exempt_share ≈1` flagged on 4 seeds
+  (0.68–0.87) — symptomatic crew confined through the isolation path
+  on big before-phase seeds; the D0 gate itself reached (no gate
+  echo). Whether the ≈1 expectation was ever physical on big seeds is
+  undecided: amend the frozen expectation or keep it as a strict
+  witness — recorded in
+  `docs/covid/covid_crew_window_handoff_2026_10_06.md` §8.
 - Landing magnitudes to source: ~25–31% of crew continuing essential
   work during quarantine — the candidate sourcing legs are the
   record's essential-service complement and the VSP manning fractions;

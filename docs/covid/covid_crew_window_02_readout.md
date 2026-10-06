@@ -84,6 +84,13 @@ itself provably reached (D0 cells carry no gate echo; CW-01 pairing
 Δ0.0). The frozen "≈1" expectation did not account for isolation-path
 confinement on big seeds; left as flagged rather than edited post-hoc.
 
+**OPEN ITEM (unruled):** whether `≈1` was ever physical on big
+before-phase seeds — the isolation path confines symptomatic crew
+independently of the order gate on every arm, so a D0 realized share
+<1 is expected physics, not a gate failure. Awaiting owner decision:
+amend the frozen expectation (≈1 except where isolation has already
+confined) or keep it as a strict witness.
+
 ## Campaign mechanics
 
 - Design frozen before any cell ran; verdict grammar verbatim from
