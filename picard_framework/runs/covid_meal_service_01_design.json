@@ -1,0 +1,180 @@
+{
+  "design_id": "covid_meal_service_01",
+  "task_id": "MEAL-SVC-01",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_crew_window_02",
+  "design_doc": "docs/covid/covid_meal_service_01_design.md",
+  "supersedes": "Nothing. covid_crew_window_02 (CW-02, measured 2df542ff, 240/240) landed the during-quarantine mass (FRAC_25 301, ZONE_NARROW 334 CHANNEL-LANDED @7.9e6) and measured the surviving crew<->passenger channel hot and under-converting: R3 cabin meal delivery fires 128k-166k service_deliveries per cell while confined passengers acquire ~4-19 during-window vs the >=52 bound and crew share holds ~0.97 vs the record's 0.29. The credit is responder-only - the steward->host direction does not exist. This leg arms that direction (SVC_DIR) and the record's steward-section structure (SVC_DIR_SECT) and reads the passenger side of the share defect.",
+  "description": "MEAL-SVC-01: seed-paired probe of the confinement meal-delivery channel on the verbatim diamond_princess_2020 replay contract (SOP-017 days 16-30, infection_age_days 6.8, imports 1, dwell_weighted) - Theta7.9e6 only x 6 arms x 20 seeds = 120 declared-replay cells. Arm axis = replay arm x channel arm: {D0_declared, ZONE_NARROW} x {SVC_BASE shipped default (responder-only dose, uniform draw), SVC_DIR (direction 'both': the roles-swap pair dose credited to the susceptible host under route service_to_host), SVC_DIR_SECT (direction both + service_responder_mode 'section': each confined host bound to its cabin section's steward, section size drawn per section from the declared [10,15]-cabin interval on the dedicated _SERVICE_SECTION_STREAM_KEY stream)}. All channel arms are discriminating probes, never scores; SVC_BASE rows pair against the CW-02 rows as the engine-delta drift witness.",
+  "prerequisites": [
+    "CREW-WINDOW-02 measured (2df542ff, 240/240): CHANNEL-LANDED on FRAC_25 (301) and ZONE_NARROW (334) @7.9e6; during medians monotone in realized exempt share (0.242->301 ... 0.964->739); crew share ~0.97 vs record 0.29; R3 service_deliveries 128k-166k/cell; D0 drift witness bit-stable vs CW-01 (ea9550ef).",
+    "covid_meal_service_01_design_skeleton.md merged (PR #935): the arm-family survey; owner picked arms A+B (direction + steward sections), Theta7.9e6 only, replay arms {D0_declared, ZONE_NARROW}, during-window total reported beside the band not gating, section interval carried at declared ~10-15 cabins Grade C.",
+    "Engine surface verified: _caregiver_service_epoch credits the pair dose to the steward only; _caregiver_pair_dose is roles-swap-capable; _draw_service_responder is a uniform per-delivery lottery; exempt_fraction's dedicated digest-seeded stream is the precedent for the section draws.",
+    "MEAL-SVC-01 delta PR: direction + service_responder_mode + service_section_cabins on transmission.caregiver.service; the roles-swap credit under route service_to_host; the lazy cabin-section partition and sticky per-section steward binding; per-direction dose tallies + service_stewards_per_confined_host witness in the crew_window block; caregiver + service_to_host named keys in during_quarantine_by_route."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    7900000.0
+  ],
+  "thetas_note": "Theta7.9e6 only - the landed surface. Theta1e6's crew share is pinned ~1.000 (a lower-bound reading that cannot move the verdict); excluded by owner decision.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim replay contract; a null axis on explicit seeds (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The matched 20-seed set 20200205-20200224 - identical to CW-01/CW-02 so every row pairs seed-for-seed against the recorded cells.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "D0_declared_svc_base",
+      "overrides": {},
+      "note": "Shipped default verbatim - SOP-017 days 16-30, all four crew classes exempt, responder-only dose, uniform draw. First arm so empty overrides per the arm grammar. Doubles as the in-design pairing base and the drift witness against CW-02's t7p9e6_d0 row at 2df542ff (expected bit-identical: every new stream draws nothing under the defaults)."
+    },
+    {
+      "arm_id": "D0_declared_svc_dir",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both"
+            }
+          }
+        }
+      },
+      "note": "SVC_DIR on the all-crew-working corner: transmission.caregiver.service.direction 'both' - per delivery, the roles-swap pair dose (_caregiver_pair_dose(steward, host, site=host)) is credited to the susceptible host under route service_to_host beside the steward-side caregiver tally. Declared arm; non-scoring in the fit sense - read against the >=52 bound."
+    },
+    {
+      "arm_id": "D0_declared_svc_dir_sect",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15]
+            }
+          }
+        }
+      },
+      "note": "SVC_DIR + SVC_SECT on D0: direction both plus sticky steward sections - cabin blocks partitioned once into contiguous sections of the declared [10,15]-cabin Grade C interval, one steward drawn per section on the dedicated stream and reused while available (unavailable bound steward -> one sticky re-draw). The record's room-steward structure; concentrates the reverse-direction contact on the section's cabins."
+    },
+    {
+      "arm_id": "zone_narrow_svc_base",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW"
+      },
+      "note": "CW-02's CHANNEL-LANDED essential-service arm verbatim (exempt_work_zones = the 11 postable essential zones, lottery expectation 11/34 ~ 0.324) with the shipped responder-only uniform service draw - the pairing base against CW-02's t7p9e6_zone_narrow row and the in-design baseline for the zone-narrow channel arms."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both"
+            }
+          }
+        }
+      },
+      "note": "SVC_DIR on ZONE_NARROW - the canary arm: the landed crew-window row plus the steward->host direction on a thinned working-crew pool. Read out and reported before the remaining blocks submit."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_sect",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15]
+            }
+          }
+        }
+      },
+      "note": "SVC_DIR + SVC_SECT on ZONE_NARROW: direction + the section structure on the landed replay arm - the record-faithful shape (assigned room stewards, ~10-15 cabins each) on the arm whose during-median already sits in the band."
+    }
+  ],
+  "cells": 120,
+  "cells_note": "1 Theta x 6 arms (2 replay x 3 channel) x 20 seeds = 120 declared-replay cells (~10-25 min each on the campaign image). Cell order arm x seed; canary = zone_narrow_svc_dir (20 seeds) - the arm most likely to show the passenger side moving on the landed row - read out and reported before the array per the campaign-preflight gate.",
+  "cell_payload_additions": [
+    "note",
+    "index_onset_day",
+    "index_shedding_at_day0",
+    "index_departed_epoch",
+    "infections_total",
+    "aboard_total",
+    "attack_rate",
+    "vsp_reported_case_fraction_max",
+    "infections_by_age_band",
+    "during_window_by_age_band",
+    "during_quarantine_by_age_band",
+    "dated_onsets_by_age_band",
+    "crew_window"
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariants carry verbatim from the CW-02 lineage; the verdict grammar below is new for the passenger-side bound. Every channel arm is a declared probe - whichever lands is a magnitude to source afterward, never a constant tuned to the >=52 bound or the 0.29 share.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v11/CW-02: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173; scored only when the row has >= 5 takeoff seeds, else 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored on the D0_declared_svc_base row only - every other arm is a probe of the during-window channel and exempt by construction; all rows report the same fields as non-scoring context."
+    },
+    "passenger_during_bound": {
+      "criterion": "Takeoff-conditional median confined_passenger_infections_during_quarantine vs the >=52 record-implied bound (F13/F14) - the primary surface; during_window_by_role.passenger reported beside it.",
+      "source": "NIID Table 2 dated passenger onsets in cabins without a prior confirmed case, ~52-92 lower bound (covid_believability_map_v1.md F13/F14)"
+    },
+    "during_band_reported_beside": {
+      "criterion": "Takeoff-conditional median infections_during_window reported beside the record-informed [150,350] band - NOT gating (owner decision: the two-sided defect cannot be scored on one total; closing the passenger side on top of ZONE_NARROW's crew-driven 334 legitimately overshoots).",
+      "source": "NIID during-quarantine dated mass scaled to infections (covid_believability_map_v1.md F8/F11 lineage)"
+    },
+    "crew_share_direction": {
+      "criterion": "during_window_by_role crew share reported vs the record's 0.29 as a direction (toward/away), never a threshold.",
+      "source": "NIID crew/passenger case split (CW-01/CW-02 lineage)"
+    },
+    "verdict_grammar": {
+      "CHANNEL-FOUND": "a DIR arm moves the takeoff-conditional passenger during-window median materially toward >=52 with deliveries parity - the channel, armed in both directions, carries the missing mass.",
+      "DOSE-EMPTY": "host-credited dose tally >0 (the direction fired) but passenger acquisitions unmoved - conversion is blocked downstream, a different address.",
+      "MASS-ONLY": "passenger side unmoved AND host-credited dose ~0 (or never reaching susceptible hosts) - the channel's contribution stays crew-side; the missing mass lives elsewhere."
+    },
+    "audit_invariants": [
+      "quarantine_witness.window_days == [16,30] and activated true on every cell",
+      "quarantine_witness.exempt_classes == shipped four crew classes on EVERY arm (carried from CW-02 unchanged)",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "propensity_draw.units_drawn > 0; delivery.caregiver.mode resolves on; presentation_draw_mode == 'once_per_course'; hand_reservoir_mode == 'hygiene_cycle'; delivery echo droplet_field_split matches shipped values on every arm",
+      "crew_window block on every cell: total_crew == 1045; confined_crew_count + working_crew_count == total_crew at activation and at end",
+      "direction echo: delivery.caregiver.roles.service.direction == 'responder' on *_svc_base cells and 'both' on every *_svc_dir* cell, echoed in crew_window.service_direction; service_dose_to_host_credited > 0 iff a DIR arm",
+      "realized structure witness: crew_window.service_stewards_per_confined_host median/max large (dozens) on uniform arms and ~1-2 on *_svc_dir_sect cells; service_section_steward_draws > 0 iff section mode",
+      "deliveries parity: service_deliveries per arm row within noise of the CW-02 row band (128k-166k @7.9e6); a systematic departure is a cadence defect, reported immediately",
+      "crew_window.exempt_work_zones echoes the NARROW list verbatim on zone_narrow_* cells (null on d0_declared_*); realized_exempt_share strictly in (0,1) on zone_narrow_* cells; ~1 on d0_declared_*"
+    ]
+  },
+  "diagnostics": {
+    "paired_vs_in_design_base": "Each *_svc_dir* row pairs seed-for-seed with its *_svc_base row at the same replay arm: delta confined_passenger_infections_during_quarantine, delta during_window_by_role (crew and passenger separately), delta during_window_by_age_band, delta infections_before_quarantine (expected ~0 - every channel arm fires only inside the window), delta recorded_onsets/before_share, and the during-window crew share vs the record's 0.29.",
+    "paired_vs_cw02": "Each *_svc_base row pairs against the CW-02 row at the same replay arm (t7p9e6_d0 / t7p9e6_zone_narrow at 2df542ff) - the armed-tree drift witness since CW-02 ran; expected bit-identical because every new draw runs on the dedicated section stream and direction 'responder' adds no dose terms.",
+    "crew_side_witness": "service_dose_credited (steward-side) and crew during-window acquisitions per arm - the channel is symmetric in the record; both directions reported.",
+    "route_attribution": "during_quarantine_by_route.service_to_host on DIR arms (new named key beside the caregiver key, which the steward-side credit also tallies under) - infections whose dominant acquisition route was the reverse-direction credit.",
+    "realized_share": "crew_window.working_crew_by_posted_zone and realized_exempt_share vs the ZONE_NARROW lottery expectation (11/34 ~ 0.324) on zone_narrow_* cells; a material departure is reported with the realized distribution."
+  },
+  "execution": {
+    "platform": "AWS Batch via campaigns/covid/meal_service_01/ through scripts/campaign (the campaigns/ grammar) - 6 blocks (arm) x 20 seeds; jobdef picard-covid-meal-svc-01, image covid-meal-svc-01 pinned by digest at the merged implementation SHA, S3 prefix campaign/covid_meal_service_01/, queue picard-analysis-queue (On-Demand; Fargate fallback picard-analysis-fargate-queue), 1 vCPU / 2048 MB per cell.",
+    "canary": "Per the campaign-preflight gate: local smoke proving both new arms fire (host-credited dose >0 on DIR; realized steward count collapses on SECT; deliveries parity; resolved-block echoes), dry-run count = 120, pinned image digest + jobdef revision, manifest in S3, then the 20-seed zone_narrow_svc_dir canary read out and reported before the full array.",
+    "stop_rules": "Report immediately if any audit invariant fails; the DIR canary moves passenger acquisitions into the >=52 neighbourhood (CHANNEL-FOUND - stop, report, do not submit the array); host-credited dose >0 but acquisitions unmoved (DOSE-EMPTY); a SECT arm's realized distinct-steward count doesn't collapse; service_deliveries departs the CW-02 rows; or child failure rate exceeds 5%."
+  },
+  "rejected_alternatives": {
+    "sect_only_arm": "EXCLUDED by owner decision: without direction 'both' the host can never receive dose regardless of which steward delivers - a pure-structure arm spends 40 cells proving nothing.",
+    "theta_1e6_slice": "EXCLUDED: the crew share is pinned ~1.000 at Theta1e6; a lower-bound reading that cannot move the verdict.",
+    "caregiver_route_key": "REJECTED in favour of service_to_host: route attribution must survive the cell payload - during_quarantine_by_route carries a named key for the reverse-direction credit; blending it into 'caregiver' loses the direction witness.",
+    "svc_dose_corners": "DEFERRED: service_episode_minutes / deliveries-per-token / steward-protection-factor corners are subordinate probes meaningful only after a DIR arm's verdict - a factor on a missing direction reads zero everywhere (CG-FLOOR's DELIVERY-STRUCTURAL stands on the pre-quarantine surface).",
+    "crew_duty_mix": "DEFERRED: subclassing crew_general into galley/engineering/steward duty mixes is its own stage - it changes the posting lottery itself rather than the service channel, and belongs to its own design.",
+    "tuned_scalar": "REJECTED: no arm tunes a constant to the >=52 bound or the 0.29 share. Direction and responder-mode are declared grammar; the [10,15]-cabin section interval is declared Grade C."
+  }
+}
