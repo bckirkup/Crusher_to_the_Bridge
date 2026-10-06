@@ -1,11 +1,12 @@
 # MEAL-SVC-01 design skeleton — the confinement meal-delivery channel
 
-Status: **draft skeleton for owner review — not a design, not frozen, no
-cells may run against this file.** It exists to put the follow-on arm
-families on paper so the owner can steer the arm definitions before a
-design is written and frozen. `covid_crew_window_02_design_skeleton.md`
-is the format this file imitates; a real MEAL-SVC-01 design lands only
-after the open decisions below are answered.
+Status: **superseded by the frozen design — historical draft.** The
+owner answered the open decisions (arms A+B, Θ7.9e6 only, replay arms
+{D0_declared, ZONE_NARROW}, during-window total reported beside not
+gating, section interval at declared ~10–15 cabins Grade C) and the
+frozen design landed at `covid_meal_service_01_design.md` — all scoring
+surface, verdict grammar and audit invariants live there. This file
+stays as the arm-family survey record; nothing below binds any run.
 
 ## Question
 

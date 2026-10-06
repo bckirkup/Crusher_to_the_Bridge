@@ -1133,10 +1133,17 @@ def _crew_window_snapshot(sim: Any, work: Any) -> dict[str, Any]:
 def _crew_window_block(
     sim: Any, ledger: QuarantineAttributionLedger,
 ) -> dict[str, Any]:
-    """The per-cell crew-window witness payload (CW-02)."""
+    """The per-cell crew-window witness payload (CW-02, MEAL-SVC-01)."""
     tx = getattr(sim, "tx_core", None)
     telemetry = getattr(tx, "caregiver_telemetry", {}) or {}
+    service_cfg = getattr(tx, "_cg_service", None) or {}
     draws = ledger.fraction_draws
+    steward_counts = sorted(
+        len(stewards)
+        for stewards in (
+            getattr(tx, "_service_stewards_by_host", None) or {}
+        ).values()
+    )
     return {
         "exempt_work_zones": ledger.exempt_work_zones,
         "exempt_fraction": ledger.exempt_fraction,
@@ -1151,6 +1158,34 @@ def _crew_window_block(
         "at_activation": ledger.crew_window_activation,
         "at_end": ledger.crew_window_final,
         "service_deliveries": int(telemetry.get("service_deliveries", 0)),
+        # MEAL-SVC-01: the service-channel arm echoes + dose tallies
+        # in both directions + the realized structure witness.
+        "service_direction": service_cfg.get("direction"),
+        "service_responder_mode": service_cfg.get(
+            "service_responder_mode"
+        ),
+        "service_dose_delivered": float(
+            telemetry.get("service_dose_delivered", 0.0)
+        ),
+        "service_dose_credited": float(
+            telemetry.get("service_dose_credited", 0.0)
+        ),
+        "service_dose_to_host_delivered": float(
+            telemetry.get("service_dose_to_host_delivered", 0.0)
+        ),
+        "service_dose_to_host_credited": float(
+            telemetry.get("service_dose_to_host_credited", 0.0)
+        ),
+        "service_section_steward_draws": int(
+            telemetry.get("service_section_steward_draws", 0)
+        ),
+        "service_stewards_per_confined_host": {
+            "n_hosts": len(steward_counts),
+            "median": (
+                _quantile(steward_counts, 0.5) if steward_counts else None
+            ),
+            "max": steward_counts[-1] if steward_counts else None,
+        },
     }
 
 
@@ -1342,7 +1377,16 @@ def _tally_during_events(
     """Split during-window ledger events by role, zone class, route, band."""
     by_role = {"passenger": 0, "crew": 0}
     by_zone = dict.fromkeys(ZONE_CLASSES, 0)
-    by_route = {**dict.fromkeys(PATHWAY_EFFICIENCY_KEYS, 0), "unknown": 0}
+    # ``caregiver`` (steward pickup) and ``service_to_host`` (SVC_DIR
+    # reverse-direction credit, MEAL-SVC-01) are credit routes the
+    # pathway-efficiency table does not carry — named keys keep them
+    # out of the "unknown" bucket.
+    by_route = {
+        **dict.fromkeys(PATHWAY_EFFICIENCY_KEYS, 0),
+        "caregiver": 0,
+        "service_to_host": 0,
+        "unknown": 0,
+    }
     by_age_band: dict[str, int] = {}
     confined_passengers = 0
     for ev in ledger_events:

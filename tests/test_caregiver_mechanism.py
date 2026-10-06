@@ -671,3 +671,214 @@ class TestCaregiverV1:
         state = core.rng.bit_generator.state
         assert core.caregiver_epoch_setup(1, [host, cg]) == {}
         assert core.rng.bit_generator.state == state
+
+
+class TestMealSvc01:
+    """MEAL-SVC-01: the steward->host direction and steward sections.
+
+    Behaviour and invariant tests only: ``direction: "both"`` credits a
+    susceptible confined host the roles-swap dose under route
+    ``service_to_host`` (a non-shedding steward delivers zero), an
+    already-infected host is delivered-not-credited, and
+    ``service_responder_mode: "section"`` binds each cabin block to one
+    steward drawn once on the dedicated stream — leaving the voyage RNG
+    untouched and collapsing the realized distinct-steward count.
+    """
+
+    @staticmethod
+    def _confined_host(aid: int = 1) -> KorkinAgent:
+        host = _agent(aid)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        return host
+
+    @staticmethod
+    def _emitting_steward(aid: int = 9) -> KorkinAgent:
+        steward = TestCaregiverV1._symptomatic_host(aid)
+        steward.role = "crew"
+        steward.party_id = -1
+        return steward
+
+    def test_dir_credits_a_susceptible_confined_host(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "direction": "both",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = self._confined_host(1)
+        steward = self._emitting_steward(9)
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        pw: dict[int, dict[str, float]] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, pw)
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry["service_dose_to_host_delivered"] > 0.0
+        assert core.caregiver_telemetry["service_dose_to_host_credited"] > 0.0
+        assert doses.get(1, 0.0) == pytest.approx(
+            pw.get(1, {}).get("service_to_host", 0.0)
+        )
+        assert doses.get(1, 0.0) > 0.0
+
+    def test_dir_a_non_shedding_steward_delivers_zero(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "direction": "both",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = TestCaregiverV1._symptomatic_host(1)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        pw: dict[int, dict[str, float]] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, pw)
+        # The shipped direction still dosed the steward off the shedding
+        # host; the reverse direction found nothing to inhale.
+        assert core.caregiver_telemetry["service_dose_credited"] > 0.0
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_delivered"
+        ] == pytest.approx(0.0)
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_credited"
+        ] == pytest.approx(0.0)
+        assert doses.get(1, 0.0) == pytest.approx(0.0)
+
+    def test_dir_an_infected_host_is_delivered_not_credited(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "direction": "both",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = TestCaregiverV1._symptomatic_host(1)
+        host.current_location = "Isolated_In_Quarters"
+        host.schedule = ["Meal:Main"] * 24
+        steward = self._emitting_steward(9)
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        pw: dict[int, dict[str, float]] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, pw)
+        assert core.caregiver_telemetry["service_dose_to_host_delivered"] > 0.0
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_credited"
+        ] == pytest.approx(0.0)
+        assert pw.get(1, {}).get("service_to_host", 0.0) == pytest.approx(0.0)
+
+    def test_emetic_profile_has_no_reverse_dose(self) -> None:
+        profile = _profile()
+        profile["airborne_emission_mode"] = "emesis_conditioned"
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "direction": "both",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = self._confined_host(1)
+        steward = self._emitting_steward(9)
+        core._agents_by_id = {1: host, 9: steward}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, profile, {}, {})
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_delivered"
+        ] == pytest.approx(0.0)
+
+    def test_responder_direction_is_the_shipped_status_quo(self) -> None:
+        core = _core(caregiver={
+            "service": {"enabled": {"*": True}},
+        })
+        host = self._confined_host(1)
+        steward = self._emitting_steward(9)
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), doses, {})
+        assert core._cg_service["direction"] == "responder"
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_delivered"
+        ] == pytest.approx(0.0)
+        assert doses.get(1, 0.0) == pytest.approx(0.0)
+
+    def test_section_binds_one_steward_per_host(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "service_responder_mode": "section",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = self._confined_host(1)
+        crew = {aid: _agent(aid, role="crew") for aid in range(9, 14)}
+        core._agents_by_id = {1: host, **crew}
+        for epoch in range(1, 4):
+            core._caregiver_pathogen_epoch(
+                epoch, PATHOGEN, _profile(), {}, {},
+            )
+        stewards = core._service_stewards_by_host[1]
+        assert len(stewards) == 1
+        bound = core._service_section_steward.values()
+        assert stewards == set(bound)
+        assert core.caregiver_telemetry["service_section_steward_draws"] == 1
+        assert core.caregiver_telemetry["service_deliveries"] == 3
+
+    def test_section_neighbour_hosts_share_the_bound_steward(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "service_responder_mode": "section",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host_a = self._confined_host(1)
+        host_b = self._confined_host(2)
+        crew = {aid: _agent(aid, role="crew") for aid in range(9, 14)}
+        core._agents_by_id = {1: host_a, 2: host_b, **crew}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), {}, {})
+        assert core._service_stewards_by_host[1]
+        assert (
+            core._service_stewards_by_host[1]
+            == core._service_stewards_by_host[2]
+        )
+
+    def test_section_draws_leave_the_voyage_stream_untouched(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "service_responder_mode": "section",
+            },
+        })
+        host = self._confined_host(1)
+        crew = {aid: _agent(aid, role="crew") for aid in range(9, 14)}
+        core._agents_by_id = {1: host, **crew}
+        state = core.rng.bit_generator.state
+        first = core._draw_service_responder(1, host)
+        second = core._draw_service_responder(1, host)
+        assert core.rng.bit_generator.state == state
+        assert first is not None
+        assert first is second
+
+    def test_section_rebinds_an_unavailable_steward(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "service_responder_mode": "section",
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        host = self._confined_host(1)
+        crew = {aid: _agent(aid, role="crew") for aid in range(9, 14)}
+        core._agents_by_id = {1: host, **crew}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, _profile(), {}, {})
+        bound_id = next(iter(core._service_stewards_by_host[1]))
+        crew[bound_id].current_location = "Isolated_In_Quarters"
+        core._caregiver_pathogen_epoch(2, PATHOGEN, _profile(), {}, {})
+        stewards = core._service_stewards_by_host[1]
+        assert len(stewards) == 2
+        assert bound_id in stewards
+        assert core.caregiver_telemetry["service_section_steward_draws"] == 2

@@ -1468,6 +1468,12 @@ COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE = (1, 5)
 # per-window Bernoulli, cohort take-share, titres) runs on it, so
 # ``mode: off`` draws nothing anywhere and stays bit-identical.
 _COMMON_SOURCE_STREAM_KEY = 0xF00D
+# Spawn-tree address of the service-section stream, same convention as
+# _COMMON_SOURCE_STREAM_KEY: the section partition sizes and the sticky
+# steward draws of ``service_responder_mode: "section"`` (MEAL-SVC-01)
+# run on it, so ``uniform`` mode draws nothing anywhere and stays
+# bit-identical.
+_SERVICE_SECTION_STREAM_KEY = 0x5EC7
 _COMMON_SOURCE_MEAL_TOKENS = ("Meal:Breakfast", "Meal:Lunch", "Meal:Dinner")
 # constant name → (default interval, draw kind). The interval part of each
 # spec is the shipped range above; a ``transmission.common_source.<name>``
@@ -2734,10 +2740,23 @@ class TransmissionCore:
                     CAREGIVER_SERVICE_REPORT_PROBABILITY,
                 "service_touches": CAREGIVER_SERVICE_TOUCHES,
                 "service_function_classes": [],
+                # MEAL-SVC-01: whether a delivery credits dose to the
+                # steward only ("responder", shipped status quo) or also
+                # to the confined host ("both" — a shedding steward
+                # infects the passengers they serve).
+                "direction": "responder",
+                # "uniform" (shipped status quo) draws any unconfined
+                # crew member per delivery; "section" binds each cabin
+                # block to one steward drawn once and reused — the
+                # record's room-steward section (~10-15 cabins per
+                # steward, declared Grade C interval).
+                "service_responder_mode": "uniform",
+                "service_section_cabins": (10, 15),
                 "contact_factor": CAREGIVER_SERVICE_CONTACT_FACTOR,
             },
             {"*": True},
         )
+        self._normalize_service_arms()
         # The door-drop contact discount on each delivery's dose. A scalar
         # is a fixed factor (``1.0`` is the labelled un-discounted
         # baseline: it draws nothing and multiplies nothing, so that arm
@@ -2801,9 +2820,66 @@ class TransmissionCore:
             "service_deliveries": 0,
             "service_dose_delivered": 0.0,
             "service_dose_credited": 0.0,
+            "service_dose_to_host_delivered": 0.0,
+            "service_dose_to_host_credited": 0.0,
             "service_reports": 0,
+            "service_section_steward_draws": 0,
         }
+        # MEAL-SVC-01 structure witnesses + sticky section state.
+        # ``_service_stewards_by_host`` records every steward that
+        # delivered to each confined host (uniform ~many, section ~1-2);
+        # ``_service_section_*`` is the lazy cabin-block partition and
+        # the per-section steward binding used only in section mode.
+        self._service_stewards_by_host: dict[int, set[int]] = {}
+        self._service_section_built = False
+        self._service_section_by_unit: dict[str, int] = {}
+        self._service_section_steward: dict[int, int] = {}
+        self._service_section_count = 0
+        self._service_section_rng = (
+            self._spawn_service_stream()
+            if self._cg_service["service_responder_mode"] == "section"
+            else None
+        )
         self._agents_by_id: dict[int, KorkinAgent] = {}
+
+    def _normalize_service_arms(self) -> None:
+        """Validate the MEAL-SVC-01 service-role arm grammar in place."""
+        svc = self._cg_service
+        direction = str(svc.get("direction", "responder")).strip().lower()
+        svc["direction"] = (
+            direction if direction in {"responder", "both"} else "responder"
+        )
+        mode = str(
+            svc.get("service_responder_mode", "uniform")
+        ).strip().lower()
+        svc["service_responder_mode"] = (
+            mode if mode in {"uniform", "section"} else "uniform"
+        )
+        lo_hi = svc.get("service_section_cabins") or (10, 15)
+        try:
+            lo, hi = int(lo_hi[0]), int(lo_hi[1])
+        except (TypeError, IndexError, ValueError):
+            lo, hi = 10, 15
+        svc["service_section_cabins"] = (
+            (lo, hi) if lo >= 1 and hi >= lo else (10, 15)
+        )
+
+    def _spawn_service_stream(self) -> np.random.Generator:
+        """The dedicated section stream (same spawn-key convention as
+        frailty/common-source): draws under section mode never consume
+        the voyage stream, so a ``uniform`` cell is bit-identical to the
+        shipped baseline."""
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        if entropy is None:
+            return self.rng
+        return np.random.default_rng(
+            np.random.SeedSequence(
+                entropy, spawn_key=(_SERVICE_SECTION_STREAM_KEY,),
+            ),
+        )
 
     @staticmethod
     def _parse_caregiver_role(
@@ -9816,6 +9892,7 @@ class TransmissionCore:
         *,
         presence: float,
         plume_weight: float,
+        site: KorkinAgent | None = None,
     ) -> float:
         """The R2/R3 pair dose — the cabin-mate channel math computed
         explicitly for one visitor so the credit lands under route
@@ -9840,8 +9917,14 @@ class TransmissionCore:
             return 0.0
         if presence <= 0.0 and plume_weight <= 0.0:
             return 0.0
-        zone_name = host.home_zone
-        unit_name = self._cabin_compartment_key(zone_name, host)
+        # ``site`` is whose cabin the contact happens in — the emitter's
+        # own cabin for the shipped responder pickup, the CONFINED
+        # host's cabin for the SVC_DIR roles-swap (the delivery is at
+        # the host's door, so the host's unit carries the volume,
+        # ventilation and residence terms either way).
+        contact_site = host if site is None else site
+        zone_name = contact_site.home_zone
+        unit_name = self._cabin_compartment_key(zone_name, contact_site)
         volume = self._air_unit_volume(unit_name)
         vent = self._aerosol_ventilation_factor(zone_name)
         residence = self._room_air_residence_factor(unit_name)
@@ -9923,7 +10006,11 @@ class TransmissionCore:
             / max(epoch_minutes, 1e-9),
         )
 
-    def _draw_service_responder(self, epoch: int) -> KorkinAgent | None:
+    def _draw_service_responder(
+        self,
+        epoch: int,
+        host: KorkinAgent | None = None,
+    ) -> KorkinAgent | None:
         """Cabin-service crew first, uniform-crew fallback (§11.4).
 
         The declared ``service_function_classes`` names the cabin-service
@@ -9931,6 +10018,12 @@ class TransmissionCore:
         populations declares a steward class today, so the uniform crew
         draw is what fires — the function-first arm is the grammar, not
         a currently-populated pool.
+
+        Under ``service_responder_mode: "section"`` (MEAL-SVC-01 SVC_SECT)
+        the host's cabin section returns its bound steward instead —
+        drawn once on the dedicated section stream and reused, so the
+        per-delivery lottery never fires and the voyage stream is
+        untouched.
         """
         pool = [
             a
@@ -9941,9 +10034,84 @@ class TransmissionCore:
         if classes:
             preferred = [a for a in pool if a.agent_class in classes]
             pool = preferred or pool
+        if (
+            self._cg_service.get("service_responder_mode") == "section"
+            and host is not None
+        ):
+            return self._service_section_steward_draw(host, epoch, pool)
         if not pool:
             return None
         return pool[int(self.rng.integers(len(pool)))]
+
+    def _build_service_sections(self) -> None:
+        """Partition the cabin deck into steward sections (SVC_SECT).
+
+        Every ``Cabin_Corridor`` unit (stateroom) is enumerated once,
+        sorted so sections are contiguous cabin blocks, and chunked by a
+        per-section size drawn from the declared
+        ``service_section_cabins`` interval on the dedicated stream.
+        Built lazily at the first section-mode delivery —
+        ``_agents_by_id`` only populates inside ``propagate``.
+        """
+        if self._service_section_built:
+            return
+        self._service_section_built = True
+        rng = self._service_section_rng or self.rng
+        units = sorted({
+            self._cabin_compartment_key(a.home_zone, a)
+            for a in self._agents_by_id.values()
+            if self.zone_types.get(getattr(a, "home_zone", None))
+            == "Cabin_Corridor"
+        })
+        lo, hi = self._cg_service["service_section_cabins"]
+        index = 0
+        while index < len(units):
+            size = int(rng.integers(lo, hi + 1))
+            for unit in units[index:index + size]:
+                self._service_section_by_unit[unit] = (
+                    self._service_section_count
+                )
+            index += size
+            self._service_section_count += 1
+
+    def _service_section_steward_draw(
+        self,
+        host: KorkinAgent,
+        epoch: int,
+        pool: list[KorkinAgent],
+    ) -> KorkinAgent | None:
+        """The bound steward for the host's cabin section (SVC_SECT).
+
+        One steward per section, drawn once on the dedicated stream at
+        the section's first delivery and reused while they stay
+        available; an unavailable bound steward (confined, ashore,
+        departed) is replaced by one sticky re-draw, so a confined host
+        sees ~1-2 distinct stewards across the window.
+        """
+        self._build_service_sections()
+        unit = self._cabin_compartment_key(host.home_zone, host)
+        sid = self._service_section_by_unit.get(unit)
+        if sid is None:
+            # A unit absent from the deck partition (unexpected):
+            # deterministic own-section rather than a silent no-op.
+            sid = self._service_section_count
+            self._service_section_by_unit[unit] = sid
+            self._service_section_count += 1
+        bound_id = self._service_section_steward.get(sid)
+        bound = (
+            self._agents_by_id.get(bound_id)
+            if bound_id is not None
+            else None
+        )
+        if bound is not None and self._responder_available(bound, epoch):
+            return bound
+        if not pool:
+            return None
+        rng = self._service_section_rng or self.rng
+        pick = pool[int(rng.integers(len(pool)))]
+        self._service_section_steward[sid] = pick.agent_id
+        self.caregiver_telemetry["service_section_steward_draws"] += 1
+        return pick
 
     def _caregiver_service_dose(
         self,
@@ -9952,6 +10120,7 @@ class TransmissionCore:
         epoch: int,
         pathogen_id: str,
         profile: dict | None,
+        contact_factor: float | None = None,
     ) -> float:
         """One delivery's dose under the pathogen's own channels.
 
@@ -9962,8 +10131,14 @@ class TransmissionCore:
         episode. The delivery is a door-drop, not an entry: the
         ``service.contact_factor`` discount applies to whichever dose the
         channel produces — scaled pair dose here, limited pickup below.
+        The caller may pass the delivery's already-drawn factor so both
+        directions of one door-drop share the same contact realization.
         """
-        factor = self._service_contact_factor()
+        factor = (
+            self._service_contact_factor()
+            if contact_factor is None
+            else contact_factor
+        )
         if (
             str((profile or {}).get("airborne_emission_mode"))
             == "emesis_conditioned"
@@ -10060,12 +10235,19 @@ class TransmissionCore:
                 .startswith("Meal")
             ):
                 continue
-            steward = self._draw_service_responder(epoch)
+            steward = self._draw_service_responder(epoch, host)
             if steward is None:
                 continue
             self.caregiver_telemetry["service_deliveries"] += 1
+            self._service_stewards_by_host.setdefault(
+                host.agent_id, set(),
+            ).add(steward.agent_id)
+            # One door-drop, one realized contact discount — the same
+            # draw attenuates both dose directions of this delivery.
+            factor = self._service_contact_factor()
             dose = self._caregiver_service_dose(
-                host, steward, epoch, pathogen_id, profile
+                host, steward, epoch, pathogen_id, profile,
+                contact_factor=factor,
             )
             self.caregiver_telemetry["service_dose_delivered"] += dose
             if dose > 0.0 and steward in self._get_susceptible(
@@ -10080,6 +10262,11 @@ class TransmissionCore:
                         agent_pathway_doses,
                     )
                 )
+            self._credit_service_to_host(
+                host, steward, epoch, pathogen_id, profile,
+                agent_doses, agent_pathway_doses,
+                contact_factor=factor,
+            )
             inf = (host.infections or {}).get(pathogen_id) or {}
             if (
                 self._care_eligible_course(inf)
@@ -10091,6 +10278,63 @@ class TransmissionCore:
                 host.caregiver_report_due_epoch = int(epoch)
                 self.caregiver_telemetry["service_reports"] += 1
                 self.caregiver_telemetry["caregiver_reports"] += 1
+
+    def _credit_service_to_host(
+        self,
+        host: KorkinAgent,
+        steward: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float],
+        agent_pathway_doses: dict[int, dict[str, float]],
+        contact_factor: float = 1.0,
+    ) -> None:
+        """SVC_DIR: the steward's own emission delivered to the host.
+
+        ``direction: "both"`` adds the missing half of the R3 pair — the
+        roles-swap of the same 5-minute near-field/droplet dose, with
+        the steward emitting and the confined host inhaling at its own
+        cabin door (``site=host`` carries the host unit's volume,
+        ventilation and residence). ``contact_factor`` is this
+        delivery's door-drop discount — the same realization the
+        steward-side dose took, not a second draw. The credit lands
+        under route ``service_to_host`` beside the steward-side
+        ``caregiver`` tally. Emetic profiles have no continuous
+        emission to inhale (the surface channel is steward-pickup
+        only), so the reverse dose is 0 by construction.
+        """
+        if self._cg_service.get("direction") != "both":
+            return
+        dose = 0.0
+        if (
+            str((profile or {}).get("airborne_emission_mode"))
+            != "emesis_conditioned"
+        ):
+            share = self._caregiver_service_share()
+            dose = contact_factor * self._caregiver_pair_dose(
+                steward,
+                host,
+                epoch,
+                pathogen_id,
+                profile,
+                presence=share,
+                plume_weight=share,
+                site=host,
+            )
+        self.caregiver_telemetry["service_dose_to_host_delivered"] += dose
+        if dose > 0.0 and host in self._get_susceptible(
+            [host], pathogen_id
+        ):
+            self.caregiver_telemetry[
+                "service_dose_to_host_credited"
+            ] += self._accumulate(
+                host.agent_id,
+                "service_to_host",
+                dose,
+                agent_doses,
+                agent_pathway_doses,
+            )
 
     def _caregiver_pathogen_epoch(
         self,
