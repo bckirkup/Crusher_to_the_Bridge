@@ -244,7 +244,16 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # fully attributed to the maps; the interpreters now diverge
         # because the armed arm lifts the cell out of the near-extinct
         # regime whose reads they used to share.
-        (3, 11): (43, 25, 217, 60, 19),
+        # CAREGIVER-SVC-01 ships service.contact_factor U[0.05,0.3]
+        # default-ON — the door-drop discount on R3 delivery doses
+        # (armed on sars_cov2_resp via service.enabled {"*": True}).
+        # The discounted channel converts fewer early infections:
+        # (43, 25, 217, 60, 19) -> (32, 13, 217, 47, 21), read from
+        # CI job 112522389407 (fast tier, 3.11, shard 3) on this
+        # branch. The contact_factor: 1.0 baseline cell reproduces
+        # the prior tuple exactly on the same tree, so the move is
+        # fully attributed to the factor.
+        (3, 11): (32, 13, 217, 47, 21),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -373,7 +382,12 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # CPython 3.12; the 3.11 CI read is (43, 25, 217, 60, 19) — the
         # interpreters diverge now that the armed arm lifts the cell out
         # of the near-extinct regime whose reads they used to share.
-        (3, 12): (34, 17, 217, 56, 22),
+        # CAREGIVER-SVC-01: the door-drop contact_factor converges the
+        # interpreters again — both read (32, 13, 217, 47, 21). The
+        # 1.0 baseline cell reproduces (34, 17, 217, 56, 22) exactly on
+        # CPython 3.12 on this branch, so the move is fully attributed
+        # to the factor's service-dose discount.
+        (3, 12): (32, 13, 217, 47, 21),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the

@@ -612,6 +612,12 @@ over-determined *given* these.
   in proportion to coverage — shedders are assumed to touch reached and missed
   objects alike. If soiling concentrates on the objects housekeeping skips, the
   surviving reservoir is larger than modelled.
+- Caregiver service door-drop contact discount
+  (`transmission.caregiver.service.contact_factor` U[0.05,0.3], CAREGIVER-SVC-01):
+  nobody has measured a door-drop dose discount — declared strictly below the
+  R1 gloved-cleanup bound, Grade C. On the emetic arm it scales each cabin
+  emesis patch's nominal take; `contact_factor: 1.0` is the labelled
+  un-discounted baseline.
 
 ## 11. Corrections to claims made during the work
 

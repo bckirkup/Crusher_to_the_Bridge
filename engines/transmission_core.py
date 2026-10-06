@@ -552,6 +552,14 @@ CAREGIVER_TENDING_REPORT_PROBABILITY = (0.30, 0.70)
 # re-route never created. Grade C — nobody has timed a cabin meal drop; a
 # declared field gap (the HIGH_TOUCH_AREA_M2 sense).
 CAREGIVER_SERVICE_EPISODE_MINUTES = 5.0
+# The door-drop contact discount on that episode: the steward is masked,
+# does not enter the cabin, and touches nothing the cleanup role would
+# reach — a posture strictly more protected than R1's gloved hands-on
+# cleanup, so the declared interval sits strictly below
+# ``CAREGIVER_STEWARD_PROTECTION_FACTOR`` (0.3, 0.7). Nobody has measured
+# a door-drop dose discount — Grade C declared, the
+# ``CAREGIVER_SERVICE_EPISODE_MINUTES`` sense. Origin: Tr.
+CAREGIVER_SERVICE_CONTACT_FACTOR = (0.05, 0.3)
 # P(the steward's delivery reports the case), per delivery. Grade C — a
 # door-drop is weaker discovery than tending; strictly below R2's floor.
 CAREGIVER_SERVICE_REPORT_PROBABILITY = (0.10, 0.40)
@@ -978,6 +986,12 @@ HAZARD_FRAILTY_DISTRIBUTIONS = ("gamma", "lognormal")
 # the shared stream's draws nor the parent sequence's spawn counter —
 # a frailty-off run stays bit-identical by construction.
 _FRAILTY_STREAM_KEY = 0x5F1A17
+# Spawn-tree address of the caregiver service-contact stream — same
+# derivation as the frailty key: per-delivery ``contact_factor`` draws run
+# on a dedicated stream so a uniform-drawn factor never reorders the
+# shared stream, and ``contact_factor: 1.0`` (the labelled baseline)
+# spawns nothing and multiplies nothing.
+_SERVICE_CONTACT_STREAM_KEY = 0x5EC7CE
 
 # Internal pathway dose keys → route_efficiency_multipliers keys
 PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
@@ -2720,8 +2734,39 @@ class TransmissionCore:
                     CAREGIVER_SERVICE_REPORT_PROBABILITY,
                 "service_touches": CAREGIVER_SERVICE_TOUCHES,
                 "service_function_classes": [],
+                "contact_factor": CAREGIVER_SERVICE_CONTACT_FACTOR,
             },
             {"*": True},
+        )
+        # The door-drop contact discount on each delivery's dose. A scalar
+        # is a fixed factor (``1.0`` is the labelled un-discounted
+        # baseline: it draws nothing and multiplies nothing, so that arm
+        # is bit-identical to the pre-factor engine); a [lo, hi] pair
+        # draws uniformly per delivery on a dedicated spawned stream.
+        raw_factor = self._cg_service.get(
+            "contact_factor", CAREGIVER_SERVICE_CONTACT_FACTOR
+        )
+        self._cg_service_contact = self._parse_service_contact_factor(
+            raw_factor
+        )
+        self._cg_service["contact_factor"] = (
+            list(raw_factor)
+            if isinstance(raw_factor, (tuple, list))
+            else raw_factor
+        )
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._service_contact_rng = (
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    entropy, spawn_key=(_SERVICE_CONTACT_STREAM_KEY,),
+                ),
+            )
+            if entropy is not None
+            and self._cg_service_contact[0] == "uniform"
+            else None
         )
         # R2 designation state: (host_id, pathogen_id) -> designation
         # record; ``refused`` marks the failed one-time onset draw.
@@ -2787,6 +2832,40 @@ class TransmissionCore:
         if isinstance(enabled, dict):
             return bool(enabled.get(pathogen_id, enabled.get("*", False)))
         return bool(enabled)
+
+    @staticmethod
+    def _parse_service_contact_factor(raw: Any) -> tuple:
+        """Resolve ``service.contact_factor`` to (mode, ...):
+        ``("fixed", value)`` for a scalar or ``("uniform", lo, hi)`` for a
+        2-sequence. Fails at spec-lands on a malformed value."""
+        if isinstance(raw, (int, float)) and not isinstance(raw, bool):
+            value = float(raw)
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(
+                    f"caregiver.service.contact_factor scalar out of "
+                    f"[0,1]: {raw!r}"
+                )
+            return ("fixed", value)
+        if isinstance(raw, (tuple, list)) and len(raw) == 2:
+            lo, hi = float(raw[0]), float(raw[1])
+            if not 0.0 <= lo <= hi <= 1.0:
+                raise ValueError(
+                    f"caregiver.service.contact_factor window out of "
+                    f"[0,1] or inverted: {raw!r}"
+                )
+            return ("uniform", lo, hi)
+        raise ValueError(
+            f"caregiver.service.contact_factor must be a scalar or a "
+            f"[lo, hi] pair, got {raw!r}"
+        )
+
+    def _service_contact_factor(self) -> float:
+        """The contact discount one delivery applies to its dose."""
+        spec = self._cg_service_contact
+        if spec[0] == "fixed":
+            return spec[1]
+        rng = self._service_contact_rng or self.rng
+        return float(rng.uniform(spec[1], spec[2]))
 
     @staticmethod
     def _cg_age_key(agent: KorkinAgent) -> str:
@@ -9880,17 +9959,20 @@ class TransmissionCore:
         the pair dose. Emetic pathogens (no continuous emission to stand
         in): a bounded surface pickup off the host's cabin emesis
         deposits — the emetic equivalent of the declared near-field
-        episode.
+        episode. The delivery is a door-drop, not an entry: the
+        ``service.contact_factor`` discount applies to whichever dose the
+        channel produces — scaled pair dose here, limited pickup below.
         """
+        factor = self._service_contact_factor()
         if (
             str((profile or {}).get("airborne_emission_mode"))
             == "emesis_conditioned"
         ):
             return self._caregiver_service_surface_dose(
-                host, steward, epoch, pathogen_id
+                host, steward, epoch, pathogen_id, contact_factor=factor
             )
         share = self._caregiver_service_share()
-        return self._caregiver_pair_dose(
+        return factor * self._caregiver_pair_dose(
             host,
             steward,
             epoch,
@@ -9906,10 +9988,15 @@ class TransmissionCore:
         steward: KorkinAgent,
         epoch: int,
         pathogen_id: str,
+        contact_factor: float = 1.0,
     ) -> float:
         """Noro-side service pickup: bounded touches off cabin deposits."""
         # Patches are filed under the zone the bolus landed in — the
         # confined host's cabin zone is where the steward would clean.
+        # ``contact_factor`` scales the nominal pickup — limited contact
+        # lifts less mass off the patch, and the patch and hand-load
+        # books stay balanced (the steward does not carry mass the
+        # posture never touched).
         pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
         patches = list(pools.get(host.home_zone, ()))
         if not patches:
@@ -9928,7 +10015,8 @@ class TransmissionCore:
                 * used_fraction
                 * hand_area
                 / max(patch.high_touch_area_m2, 1e-9)
-                * transfer_efficiency,
+                * transfer_efficiency
+                * contact_factor,
             )
             patch.mass = max(0.0, patch.mass - take)
             picked += take
