@@ -16,6 +16,17 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`CAREGIVER-SVC-01` (ledger entry): every caregiver-service dose figure —
+R3 deliveries into confined cabins, including the emetic per-patch pickup —
+is historical on the un-discounted channel.** `transmission.caregiver.service.contact_factor`
+U[0.05,0.3] ships default-ON (the door-drop discount, declared strictly below
+the R1 steward bound; `contact_factor: 1.0` is the labelled baseline). On the
+emetic arm it scales each cabin patch's nominal `take` mass-conservingly —
+CHANNEL-04's "CG-dominant ≤4%" and NORO-MEGA-IMPACT-01's "caregiver carries
+87.9% of reports" stamp-side readings are untouched (deliveries and report
+stamps still fire), but any figure resting on R3 *dose delivered* moves.
+Driver: FLU-VIS-01's serviced-quarantine crew bridge attribution.
+
 **`CABIN-OCC-01` + `ROOM-AIR-01` (ledger entries): every airborne-route
 dose figure on any hull that declares AHU rates, and every confined-
 cabinmate figure, moves at this change's merge SHA.** Room-pool
