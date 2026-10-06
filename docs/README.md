@@ -276,6 +276,7 @@ longer justifications.
 | [literature/consensus_tranche_52_hand_carriage.md](literature/consensus_tranche_52_hand_carriage.md) | Evidence assembled — the carriage compartments for NORO-HAND-CARRIAGE-01: subungual/crease wash-resistance (Lin 2003 FCV; Walaszek 2018), touch-opportunity rates (Alonso 2013 ~7/hr), own-environment recirculation (Zhao 2025); feeds the two new register rows |
 | [literature/](literature/) | Raw search output behind the above |
 | [flu/flu_social_01_readout.md](flu/flu_social_01_readout.md) | Generated measurement of record — `flu_social_01`: the frozen FLU-RHYTHM-01 cells re-censused on the social-mechanics engine (CAREGIVER-V1 + PROPENSITY-V1, `8c03e9d7`, 800/800 cells): confined SAR table vs the `flu_rhythm_02` baseline, challenged-share lift, `caregiver:influenza_a` pathway witness; measured state recorded in `docs/ledger/FLU-SOCIAL-01.md` |
+| [flu/flu_open_voyage_01_readout.md](flu/flu_open_voyage_01_readout.md) | Generated measurement of record — `flu_open_voyage_01`: the first free-running four-class influenza census (`7f4702ef`, 400/400 cells, seeds 8105–8204): reporting-side funnel decomposed by import vs onboard-acquired cohort, declared ~2×-hot reporting vector measured, caregiver at 49–55% of onboard acquisitions, per-band presentation/severity checks, route and outbreak-formation surfaces; measured state recorded in `docs/ledger/FLU-OPEN-01.md` |
 
 ## Where to edit docs
 
