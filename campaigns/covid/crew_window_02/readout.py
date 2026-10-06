@@ -41,7 +41,10 @@ from picard_framework.covid_boarding_screen import (  # noqa: E402
 )
 
 _DESIGN = "picard_framework/runs/covid_crew_window_02_design.json"
-_CW1_PREFIX = "campaign/covid_crew_window_01/"
+_CW1_PREFIX = (
+    "s3://crusherbucket-994254241749-us-east-1-an/"
+    "campaign/covid_crew_window_01/"
+)
 _CW1_D0_BLOCKS = {1000000.0: "t1e6_d0", 7900000.0: "t7p9e6_d0"}
 
 _BAND = (150.0, 350.0)
@@ -168,9 +171,13 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
         violations.append(f"{tag}: hand_reservoir_mode")
     split = delivery.get("droplet_field_split") or {}
     far, settled = _SHIPPED_DROPLET
-    if not math.isclose(float(split.get("far_field_share") or -1), far):
+    # .get(..., -1) not `or -1`: a shipped 0.0 share is falsy but valid.
+    far_got = split.get("far_field_share", -1)
+    settled_got = split.get("settled_share", -1)
+    if not math.isclose(float(far_got if far_got is not None else -1), far):
         violations.append(f"{tag}: droplet far_field_share")
-    if not math.isclose(float(split.get("settled_share") or -1), settled):
+    if not math.isclose(float(settled_got if settled_got is not None else -1),
+                        settled):
         violations.append(f"{tag}: droplet settled_share")
 
     # CREW-WINDOW-02 realized-share witnesses.
@@ -184,8 +191,10 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
         if total != _CREW_N:
             violations.append(f"{tag}: crew_window.{when}.total_crew {total}")
             continue
-        if (int(snap.get("confined_crew_count") or -1)
-                + int(snap.get("working_crew_count") or -1)) != total:
+        confined_n = snap.get("confined_crew_count", -1)
+        working_n = snap.get("working_crew_count", -1)
+        if (int(confined_n if confined_n is not None else -1)
+                + int(working_n if working_n is not None else -1)) != total:
             violations.append(f"{tag}: crew_window.{when} count mismatch")
     snap = _activation_snap(payload)
     share = snap.get("realized_exempt_share")
