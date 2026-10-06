@@ -35,7 +35,9 @@ Reporting saturates — no declared corner reaches Ward's ~0.7 %
 presenting attack on spr/cls/mega (flat 0.13–0.25 % across the 8× span
 including ceiling-saturated r200); exp brackets Ward on every arm. The
 big-hull residual is incidence, not visibility. Feedback is real but
-non-monotone (r200 *adds* infections on exp); strict-mild is live but
+non-monotone (r200 *adds* infections on exp — **attributed**: the
+serviced-quarantine crew bridge, not RNG noise; detail in the readout
+§4 and `docs/ledger/FLU-VIS-01.md` addendum); strict-mild is live but
 second-order.
 
 ## Open decisions

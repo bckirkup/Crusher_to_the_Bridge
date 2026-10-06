@@ -112,11 +112,50 @@ the small/mid hulls (exp +0.15, spr +1.1–1.3 mean) as predicted
 r200 on exp **adds** infections (+1.56 mean, +156 total infections vs
 baseline's 755) while quadrupling quarantine (+1.44 mean) — more
 reporting produced *more* onboard spread on the small hull, opposite
-the predicted direction. Mechanism not attributed here (hypothesis,
-consistent with the data: earlier confinement concentrates cabin-mates
-on the confined-contact channel, which on a 450-agent hull can outweigh
-removed transmitters). Recorded because the sign reversal is exactly
-the kind of surface a sweep exists to catch.
+the predicted direction. Attributed below: it is a real mechanism —
+the serviced-quarantine crew bridge — not RNG-stream re-realization.
+
+#### Attribution of the exp r200 sign-reversal
+
+Attributed at `ca775a0b` by paired local probe re-runs (per-agent
+confinement/cabin-mate/infection records) on the largest driver seed
+(8188, +49) plus a cross-check across all 100 paired exp seeds:
+
+- **RNG stream intact**: import cohorts are identical between arms
+  (same six agent IDs at `first_infection_epoch` 0). The divergence
+  opens only after reporting outcomes differ the state — it is
+  state-mediated through the arm's own causal pathway, not raw stream
+  corruption. (The earlier "divergent import" appearance was a
+  recording artifact: `infection_epoch` shows the *last* episode;
+  the arm's shifted IDs were reinfected imports at `episode` 2+.)
+- **Cabin-mate co-confinement refuted**: only 2 of 59 arm onboard
+  infections occurred while quarantined. The CONFIRMED-time
+  cabin-mate sweep is not the channel.
+- **The channel is the serviced-quarantine crew bridge**: more
+  reported cases → confined cohort ×5 at voyage end (77 vs 15)
+  → steward service deliveries into cabins ×2.6 (440 vs 167)
+  → crew caregiver-route infections ×1.6 (14 vs 9) plus 6 crew
+  droplet acquisitions → exempt crew keep circulating and seed a
+  late passenger droplet wave (epochs ~205–283, 38 vs 2 — nearly
+  all never-confined when infected). Confinement removed free
+  transmitters, but cabin service bypasses the confinement boundary
+  and bridges the outbreak into the still-free pool.
+- **Cross-seed support**: Pearson r = 0.81 between Δinfected and
+  Δquarantined across the 100 paired exp seeds, in both directions
+  (the largest −Δquarantined cell, s8142 at −42, is also the largest
+  −Δinfected at −24).
+- **Why exp only**: on the 450-agent hull the confined cohort reaches
+  ~17 % of complement against a small free pool; on the 1900–5000
+  hulls the same bridge exists but dilutes into a far larger free
+  surface (spr r200 Δ flat at +0.17, consistent with dilution).
+
+Interpretation: on the small hull, quarantine's benefit is partly
+self-defeating through the service channel — physically coherent
+(quarantined passengers still receive cabin service; Diamond Princess
+crews kept delivering), and reporting-driven, not stochastic. What
+remains hypothesis-level: the same decomposition is not yet probed on
+the other driver seeds (8112/8184/8162), though the 100-seed
+correlation supports the same shape.
 
 ### 5 — Recognition timing (`escalation_log`, first epoch at ALERT)
 
@@ -157,9 +196,9 @@ Dominant-route attribution stable across arms, as predicted (routes
 precede the observation funnel): caregiver ≈ 36–56 % of
 onboard-acquired infections everywhere, droplet ≈ 44–50 %,
 hvac_airborne ≤ ~1 %. One visible tail: exp r200 droplet attributions
-rise (271 vs ~175 at other arms) alongside the +Δinfected cells —
-consistent with the tail-driven exp outbreak cells rather than a route
-mechanism shift.
+rise (271 vs ~175 at other arms) alongside the +Δinfected cells — now
+attributed (§4): the late service-bridge wave lands on the droplet
+route among the never-confined pool, not a route-mechanism shift.
 
 ## Verdict
 
@@ -180,4 +219,6 @@ than inside any reachable reporting corner. Whether Ward's 0.7 % is a
 fleet-level expectation or a realized outbreak voyage is the comparator
 question the ledger inherits; the model's answer under shipped
 incidence is "off-distribution on the big hulls, centered at Ward on
-expedition."
+expedition." The exp r200 sign-reversal is separately attributed (§4)
+to the serviced-quarantine crew bridge, so it does not count as an
+incidence-side defect.
