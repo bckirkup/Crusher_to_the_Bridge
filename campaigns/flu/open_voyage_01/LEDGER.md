@@ -1,7 +1,9 @@
 # FLU-OPEN-01 ledger — open-voyage influenza census
 
-> Status: **specced, not yet run**. Design + frozen verdict frames:
-> `DESIGN.md`. Do not alter the frames after any cell has run.
+> Status: **measured** at `7f4702ef` — 400/400 cells, 0 failed.
+> Design + frozen verdict frames: `DESIGN.md`. Frames were not altered.
+> Readout of record: `docs/flu/flu_open_voyage_01_readout.md`;
+> ledger entry: `docs/ledger/FLU-OPEN-01.md`.
 
 ## Intent
 
@@ -28,11 +30,16 @@ spec minus declared SOP-017 — across the four real cruise classes
 | date | step | detail |
 |------|------|--------|
 | 2026-10-05 | spec authored | `campaign.json` (4 blocks × 100 seeds), `cell.py`, `readout.py`, `DESIGN.md`; local short-epoch smoke of `cell.py` on expedition_cruise_450 OK. No AWS submission — pending user approval. |
+| 2026-10-05 | image `flu-open-voy01` | root `Dockerfile` + `deploy/aws/Dockerfile.campaign` at merge SHA `7f4702ef`; in-container `--local` run of the literal entrypoint argv produced valid `cell_8105.json` on expedition AND on mega under a hard 4 GB cap (4096 MB confirmed for all blocks). Pushed `picard-campaign@sha256:bc72e55295de111b3b14a987daad3dd422983d5c922b2604befcd5707d952324`. |
+| 2026-10-05 | Spot drought | canary `5023fe35` parked ~35 min RUNNABLE on `picard-campaign-queue` (0 capacity, CE desired 256 unmet); terminated, resubmitted On-Demand on user decision. |
+| 2026-10-05 | canary + arrays | jobdef `picard-flu-open-voyage-01` revs :1–:2 (canary registers), :3–:6 (blocks); queue `picard-analysis-queue`. Canary `4c84471a` SUCCEEDED + inspected (8 index, organic confinement, ALERT-class). Arrays `18074d2e`/`7224370a`/`bb8fdf0e`/`c86b415f`: **400/400 SUCCEEDED**, ~75 min wall. Prefix `campaign/flu_open_voyage_01/`, 100 `cell_<seed>.json` per block. |
+| 2026-10-05 | readout | `readout.py` over synced cells → `docs/flu/flu_open_voyage_01_readout.md` + `docs/ledger/FLU-OPEN-01.md` + `flu_open_ledger.md` §2 row. |
 
-## Open decisions
+## Open decisions — resolved
 
-- Whether the canary on the exp block (1 child) precedes the four block
-  submits — default yes per `campaign-preflight`.
-- Whether `docs/flu/flu_open_voyage_01_readout.md` gets an
-  `open_voyage` surface row in `flu_open_ledger.md` §2 — yes on first
-  measured readout.
+- Canary precedes blocks: done (`4c84471a`, inspected).
+- `flu_open_ledger.md` §2 row added: `FLU-OPEN-01 | measured | 7f4702ef`.
+- Frozen frames read as written; where a frame breached, the readout
+  decomposes import vs onboard-acquired cohorts rather than re-scoring —
+  the composition failure of the frame is recorded in FLU-OPEN-01, not
+  re-frozen here.
