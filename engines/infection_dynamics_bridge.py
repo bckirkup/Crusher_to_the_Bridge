@@ -2025,6 +2025,8 @@ class KorkinAgent:
             result["caregiver_report_due_epoch"] = (
                 self.caregiver_report_due_epoch
             )
+        if self.work_zone:
+            result["work_zone"] = self.work_zone
 
 
 # ── Ship simulation engine ──────────────────────────────────────────────

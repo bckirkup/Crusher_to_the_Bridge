@@ -1842,6 +1842,7 @@ class ShipSimulation:
         step_quarantine_confinement(
             work.epoch, work.agents, work.merged_mods, work.state.trigger_status,
             work.state, work.syndromic, active_mods=work.active_mods,
+            run_seed=self.seed,
         )
         counter_defs = self.graph_cfg.get("infection_counters", [])
         work.counter_results = compute_infection_counters(

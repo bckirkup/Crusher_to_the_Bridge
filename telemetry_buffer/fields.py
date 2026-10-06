@@ -97,6 +97,9 @@ AGENT_OBSERVED_SYNDROMES: Final = "observed_syndromes"
 AGENT_CLINICAL_FEATURES: Final = "clinical_features"
 AGENT_PROFILE_ID: Final = "profile_id"
 AGENT_CHRONIC_DISEASE_IDS: Final = "chronic_disease_ids"
+# CREW-WINDOW-02: the agent's posted work zone, needed on the confinement
+# dict projection so an order's ``exempt_work_zones`` gate can see it.
+AGENT_WORK_ZONE: Final = "work_zone"
 
 # Optional agent fields the record chain passes through when the engine
 # exports them.  Single source for both the schema-copy stage
@@ -118,6 +121,7 @@ AGENT_OPTIONAL_FIELDS: Final = (
     AGENT_AGE_BAND,
     AGENT_DAYS_POST_INFECTION,
     AGENT_DINING_PARTY_IDS,
+    AGENT_WORK_ZONE,
     AGENT_DINING_TABLE_INDEX,
     AGENT_PARTY_ID,
     AGENT_PARTY_MEMBER_IDS,
@@ -264,6 +268,7 @@ class AgentState(TypedDict, total=False):
     clinical_features: list[str]
     profile_id: str
     chronic_disease_ids: list[str]
+    work_zone: str
 
 
 class ZoneState(TypedDict, total=False):

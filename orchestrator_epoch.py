@@ -84,6 +84,7 @@ from telemetry_buffer.fields import (
     AGENT_ROLE,
     AGENT_SHEDDING_RATE,
     AGENT_SYMPTOM_PRESENTATION,
+    AGENT_WORK_ZONE,
     agent_id,
     zone_pathogen_mass,
 )
@@ -1407,6 +1408,77 @@ def _confinement_orders(
     return [(None, merged_mods)]
 
 
+def _exempt_fraction_draw(
+    agents: list[dict[str, Any]],
+    fractions: dict[str, Any],
+    order_key: str,
+    run_seed: int | None,
+) -> dict[str, list[int]]:
+    """The sticky exempt-subset draw of an ``exempt_fraction`` order (CW-02).
+
+    Exact-count without replacement: ``k = int(f * n_class + 0.5)`` of each
+    listed class's agents. Drawn on a dedicated stream seeded
+    ``[run_seed, digest(order_key)]`` — it consumes nothing on the voyage
+    or host-draw streams, so the draw itself never reorders another arm's
+    RNG. Seedless callers (tests) get a fixed stream.
+    """
+    digest = sum(
+        (i + 1) * ord(ch) for i, ch in enumerate(f"exempt_fraction:{order_key}")
+    )
+    rng = np.random.default_rng([int(run_seed or 0), digest])
+    drawn: dict[str, list[int]] = {}
+    for cls in sorted(fractions):
+        eligible = sorted(
+            agent_id(a) for a in agents if a.get(AGENT_CLASS, "") == cls
+        )
+        k = min(len(eligible), int(float(fractions[cls]) * len(eligible) + 0.5))
+        picked = rng.choice(eligible, size=k, replace=False) if k else []
+        drawn[cls] = sorted(int(a) for a in picked)
+    return drawn
+
+
+def _order_exempt_ids(
+    agents: list[dict[str, Any]],
+    mods: dict[str, Any],
+    state: SimulationState,
+    order_key: str,
+    run_seed: int | None,
+) -> set[int] | None:
+    """Resolved exempt-id set for one confinement order (CW-02).
+
+    Returns ``None`` when the order declares neither ``exempt_work_zones``
+    nor ``exempt_fraction`` — the caller then applies the legacy
+    class-membership gate. Base membership is the order's
+    ``exempt_classes``; ``exempt_work_zones`` keeps only agents posted to
+    a listed zone, and ``exempt_fraction`` keeps only agents drawn into
+    the order's sticky subset (agents in exempt classes the map does not
+    name keep full exemption). The draw is recorded on
+    ``state.exempt_fraction_draws`` so it never re-draws per epoch.
+    """
+    essential = set(mods.get("exempt_work_zones") or ())
+    fractions = mods.get("exempt_fraction") or {}
+    if not essential and not fractions:
+        return None
+    exempt_classes = set(mods.get("exempt_classes", []))
+    classes = {agent_id(a): a.get(AGENT_CLASS, "") for a in agents}
+    ids = {aid for aid, cls in classes.items() if cls in exempt_classes}
+    if essential:
+        zones = {agent_id(a): a.get(AGENT_WORK_ZONE) for a in agents}
+        ids = {aid for aid in ids if zones.get(aid) in essential}
+    if fractions:
+        drawn = state.exempt_fraction_draws.get(order_key)
+        if drawn is None:
+            drawn = _exempt_fraction_draw(agents, fractions, order_key, run_seed)
+            state.exempt_fraction_draws[order_key] = drawn
+        drawn_ids = {aid for picked in drawn.values() for aid in picked}
+        ids = {
+            aid
+            for aid in ids
+            if classes.get(aid, "") not in fractions or aid in drawn_ids
+        }
+    return ids
+
+
 def step_quarantine_confinement(
     epoch: int,
     agents: list[dict[str, Any]],
@@ -1415,6 +1487,7 @@ def step_quarantine_confinement(
     state: SimulationState,
     syndromic: Any,
     active_mods: list[dict[str, Any]] | None = None,
+    run_seed: int | None = None,
 ) -> None:
     """Apply quarantine confinement from escalation level and/or SOP orders.
 
@@ -1439,18 +1512,21 @@ def step_quarantine_confinement(
     # Whole-body orders supersede symptomatic confinement; enforced orders
     # run first so an agent covered by both is admitted under enforcement.
     whole_body = [
-        mods for _pid, mods in orders
+        (pid, mods) for pid, mods in orders
         if mods.get("confine_all_to_quarters", False)
     ]
     if whole_body:
         whole_body.sort(
-            key=lambda m: not m.get("confinement_enforced", False),
+            key=lambda item: not item[1].get("confinement_enforced", False),
         )
-        for mods in whole_body:
+        for pid, mods in whole_body:
             confine_all_agents(
                 epoch, agents, state, syndromic,
                 set(mods.get("exempt_classes", [])),
                 enforced=bool(mods.get("confinement_enforced", False)),
+                exempt_ids=_order_exempt_ids(
+                    agents, mods, state, pid or "<order>", run_seed,
+                ),
             )
         return
 
@@ -1458,6 +1534,9 @@ def step_quarantine_confinement(
         confine_all_agents(
             epoch, agents, state, syndromic, merged_exempt,
             enforced=False,
+            exempt_ids=_order_exempt_ids(
+                agents, merged_mods, state, "<merged>", run_seed,
+            ),
         )
         return
 
@@ -1466,7 +1545,7 @@ def step_quarantine_confinement(
     # no owning protocol and keeps the merged set.
     status_driven = STATUS_RANK.get(trigger_status, 0) >= STATUS_RANK[STATUS_ALERT]
     symptomatic_orders = [
-        mods for _pid, mods in orders
+        (pid, mods) for pid, mods in orders
         if mods.get("confine_symptomatic_to_quarters", False)
     ]
     if not symptomatic_orders and not status_driven:
@@ -1475,7 +1554,7 @@ def step_quarantine_confinement(
         STATUS_SUSPECTED
     ]
     include_contacts = trigger_status == STATUS_CONFIRMED
-    for mods in symptomatic_orders:
+    for pid, mods in symptomatic_orders:
         confine_agents(
             epoch, agents, state, syndromic,
             include_shedding=False,
@@ -1484,6 +1563,9 @@ def step_quarantine_confinement(
                 state.cumulative_confirmed_case_ids if include_confirmed else None
             ),
             include_cabin_contacts=include_contacts,
+            exempt_ids=_order_exempt_ids(
+                agents, mods, state, pid or "<order>", run_seed,
+            ),
         )
     if status_driven:
         confine_agents(
@@ -1494,6 +1576,9 @@ def step_quarantine_confinement(
                 state.cumulative_confirmed_case_ids if include_confirmed else None
             ),
             include_cabin_contacts=include_contacts,
+            exempt_ids=_order_exempt_ids(
+                agents, merged_mods, state, "<merged>", run_seed,
+            ),
         )
 
 
@@ -1562,10 +1647,13 @@ def confine_agents(
     exempt_classes: set[str] | None = None,
     confirmed_ids: set[int] | None = None,
     include_cabin_contacts: bool = False,
+    exempt_ids: set[int] | None = None,
 ) -> None:
     """Confine symptomatic (and optionally confirmed/contact) agents to quarters.
 
-    Agents whose ``agent_class`` is in *exempt_classes* are skipped.
+    Agents whose ``agent_class`` is in *exempt_classes* are skipped. When an
+    order supplies *exempt_ids* (the CW-02 zone/fraction gates) resolved
+    membership replaces the class check entirely.
     """
     _exempt = exempt_classes or set()
     _confirmed = confirmed_ids or set()
@@ -1574,7 +1662,10 @@ def confine_agents(
     )
 
     for agent in agents:
-        if agent.get(AGENT_CLASS, "") in _exempt:
+        if exempt_ids is not None:
+            if agent_id(agent) in exempt_ids:
+                continue
+        elif agent.get(AGENT_CLASS, "") in _exempt:
             continue
         _admit_flagged_to_quarantine(
             epoch, agent, state, syndromic,
@@ -1614,16 +1705,22 @@ def confine_all_agents(
     exempt_classes: set[str] | None = None,
     *,
     enforced: bool = False,
+    exempt_ids: set[int] | None = None,
 ) -> None:
     """Confine ALL non-exempt agents to quarters.
 
-    Agents whose ``agent_class`` is in *exempt_classes* are skipped. Enforced
-    orders bypass the voluntary FRED compliance draw.
+    Agents whose ``agent_class`` is in *exempt_classes* are skipped. When an
+    order supplies *exempt_ids* (the CW-02 zone/fraction gates) resolved
+    membership replaces the class check entirely. Enforced orders bypass
+    the voluntary FRED compliance draw.
     """
     _exempt = exempt_classes or set()
     for agent in agents:
         aid = agent_id(agent)
-        if agent.get(AGENT_CLASS, "") in _exempt:
+        if exempt_ids is not None:
+            if aid in exempt_ids:
+                continue
+        elif agent.get(AGENT_CLASS, "") in _exempt:
             continue
         if enforced:
             _admit_enforced(epoch, aid, state, syndromic)

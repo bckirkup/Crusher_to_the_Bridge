@@ -632,6 +632,154 @@
       },
       "category": "intervention",
       "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-NARROW",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, Essential-Zone Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-02 (docs/covid/covid_crew_window_02_design.md): verbatim SOP-017 plus exempt_work_zones — an exempt-classed agent is confined anyway when its posted work_zone is not on the essential list (the 11 postable essential zones incl. both crew messes; Medical_Center is type Medical and can never be a posting). Lottery expectation 11/34 ~ 0.324 of crew exempt under the uniform posting draw. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ]
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-WIDE",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, Essential+Dining Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-02 (docs/covid/covid_crew_window_02_design.md): verbatim SOP-017 plus exempt_work_zones — the essential-11 plus the 8 dining venues (19 zones), the dining-inclusive reading of 'essential service' (passenger meal service continued). Lottery expectation 19/34 ~ 0.559 of crew exempt under the uniform posting draw. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd",
+          "MainDining_L",
+          "MainDining_U",
+          "Windjammer",
+          "SpecRest_A",
+          "SpecRest_B",
+          "CafeBakery",
+          "Pool_Bar_Grill",
+          "ComedyClub"
+        ]
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-QUARTER",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, 25% of Crew Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-02 (docs/covid/covid_crew_window_02_design.md): verbatim SOP-017 plus exempt_fraction — a sticky exact-count draw (261 of 1045 crew_general) taken once at order activation on a dedicated RNG stream; drawn agents keep working, all others confine. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_fraction": {
+          "crew_general": 0.25
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-HALF",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, 50% of Crew Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-02 (docs/covid/covid_crew_window_02_design.md): verbatim SOP-017 plus exempt_fraction — a sticky exact-count draw (523 of 1045 crew_general) taken once at order activation on a dedicated RNG stream; drawn agents keep working, all others confine. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_fraction": {
+          "crew_general": 0.5
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-THREEQ",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine, 75% of Crew Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-WINDOW-02 (docs/covid/covid_crew_window_02_design.md): verbatim SOP-017 plus exempt_fraction — a sticky exact-count draw (784 of 1045 crew_general) taken once at order activation on a dedicated RNG stream; drawn agents keep working, all others confine. An attribution probe, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_fraction": {
+          "crew_general": 0.75
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }

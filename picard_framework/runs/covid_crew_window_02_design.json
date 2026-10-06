@@ -1,0 +1,142 @@
+{
+  "design_id": "covid_crew_window_02",
+  "task_id": "CREW-WINDOW-02",
+  "schema_version": "1.0.0",
+  "parent_design": "covid_crew_window_01",
+  "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+  "design_doc": "docs/covid/covid_crew_window_02_design.md",
+  "supersedes": "Nothing. covid_crew_window_01 (CW-01, measured ea9550ef, 240/240) returned CLIFF-STRUCTURE: the during-quarantine mass is bracketed by the two realized corners (D0 601/739 vs EXEMPT_*-as-ALLHANDS 18/70 vs band 150-350) because the DP hull instantiates only passenger_general + crew_general and class-subset exemptions are degenerate. This leg probes the interior: which fractional/activity-scoped crew-duty point lands the during-window median in band with the before phase seed-paired unmoved and the crew share moving toward the record's 0.29.",
+  "description": "CREW-WINDOW-02: seed-paired interior probe of the during-quarantine working-crew channel at the two clause-leg thetas ({1e6, 7.9e6}) x 6 arms x 20 seeds = 240 declared-replay cells on the verbatim diamond_princess_2020 contract (infection_age_days 6.8, imports 1, dwell_weighted, SOP-017 days 16-30). Arms: D0_declared (pairing base + drift witness vs ea9550ef), ZONE_NARROW / ZONE_WIDE (SOP-017 variants carrying exempt_work_zones - an exempt-classed agent is confined anyway when its posted work_zone is not on the order's essential list; NARROW = 11 postable essential zones incl. both crew messes (~32% lottery expectation), WIDE adds the 8 dining venues (~56%)), FRAC_25/50/75 (exempt_fraction on crew_general - sticky exact-count draw once at order activation on a dedicated RNG stream, realized exempt share exactly 0.25/0.50/0.75). All non-D0 arms are non-scoring discriminating probes.",
+  "prerequisites": [
+    "CREW-WINDOW-01 measured (ea9550ef, 240/240): CLIFF-STRUCTURE - medians @7.9e6 D0 739, CREWDUTY 758, EXEMPT_* 70, MESS_0P5/0P25 729/734; @1e6 601, 563, 18, 611/615; during crew share ~0.99 vs record 0.29; band [150,350].",
+    "covid_crew_window_02_design_skeleton.md merged (PR #925): the arm-family survey; owner picked families A (zone-essential) + B (headcount-fraction) on one grid.",
+    "Class vocabulary verified: diamond_princess_2020 instantiates only passenger_general (2666) + crew_general (1045); crew postings are a uniform lottery over the hull's 34 Free+Dining zones (no duty_zone on crew_general).",
+    "CREW-WINDOW-02 delta PR: exempt_work_zones + exempt_fraction confinement gates in orchestrator_epoch, work_zone on the confinement dict projection, exempt_fraction_draws on SimulationState, crew_window witness block in the cell payload; protocols SOP-017-NARROW / SOP-017-WIDE / SOP-017-FRAC-{25,50,75}."
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    1000000.0,
+    7900000.0
+  ],
+  "thetas_note": "The two clause-leg crossings measured in the refit lineage: Theta1e6 is the count-leg pass (timing fails below-side), Theta7.9e6 the timing-leg pass (count fails overshoot-side). CW-01's corners were measured at both; the interior question reads at both.",
+  "infection_age_days": [
+    6.8
+  ],
+  "infection_age_note": "Verbatim replay contract; a null axis on explicit seeds (COVID-SEED-GEOM-01).",
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "seeds_note": "The matched 20-seed set 20200205-20200224 - identical to CW-01/D4 so every row pairs seed-for-seed against the recorded cells.",
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "D0_declared",
+      "overrides": {},
+      "note": "The shipped default verbatim - SOP-017 days 16-30, all four crew classes exempt. First arm so empty overrides per the arm grammar. Doubles as the pairing base and as the drift witness against the CW-01 D0 row at ea9550ef."
+    },
+    {
+      "arm_id": "ZONE_NARROW",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW"
+      },
+      "note": "SOP-017-NARROW (protocols.json): verbatim SOP-017 plus exempt_work_zones = the 11 postable essential zones (Main_Galley_Aft, SpecGalley, BuffetGal_U, Engine_Room_Aft, EngControl, Bridge, Central_Stores, Laundry_Main, WasteTreat, Crew_Mess_Main, CrewMess_Fwd). Medical_Center reads essential but is type Medical - never a posting, so absent from the list. Lottery expectation 11/34 ~ 0.324 of crew exempt; realized share witnessed per cell. Declared Grade C; non-scoring."
+    },
+    {
+      "arm_id": "ZONE_WIDE",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-WIDE"
+      },
+      "note": "SOP-017-WIDE: NARROW's 11 + the 8 dining venues (MainDining_L, MainDining_U, Windjammer, SpecRest_A, SpecRest_B, CafeBakery, Pool_Bar_Grill, ComedyClub) = 19 zones; lottery expectation 19/34 ~ 0.559. The dining-inclusive reading of 'essential service' (passenger meal service continued). Declared Grade C; non-scoring. The canary arm - furthest interior point."
+    },
+    {
+      "arm_id": "FRAC_25",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-QUARTER"
+      },
+      "note": "SOP-017-QUARTER: exempt_fraction {crew_general: 0.25} - sticky exact-count draw (261 of 1045) once at order activation on the dedicated [seed, digest] stream; drawn set echoed per cell. Declared Grade C; non-scoring."
+    },
+    {
+      "arm_id": "FRAC_50",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-HALF"
+      },
+      "note": "SOP-017-HALF: exempt_fraction {crew_general: 0.50} - 523 of 1045 drawn once at activation. Declared Grade C; non-scoring."
+    },
+    {
+      "arm_id": "FRAC_75",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-THREEQ"
+      },
+      "note": "SOP-017-THREEQ: exempt_fraction {crew_general: 0.75} - 784 of 1045 drawn once at activation. Declared Grade C; non-scoring."
+    }
+  ],
+  "cells": 240,
+  "cells_note": "2 Theta x 6 arms x 20 seeds = 240 declared-replay cells (~30 min each on the campaign image). Cell order theta x arm x seed; canary = ZONE_WIDE @Theta7.9e6 (20 seeds) - the furthest interior point, reads realized exempt share immediately - read out and reported before the array per the campaign-preflight gate.",
+  "cell_payload_additions": [
+    "note",
+    "index_onset_day",
+    "index_shedding_at_day0",
+    "index_departed_epoch",
+    "infections_total",
+    "aboard_total",
+    "attack_rate",
+    "vsp_reported_case_fraction_max",
+    "infections_by_age_band",
+    "during_window_by_age_band",
+    "during_quarantine_by_age_band",
+    "dated_onsets_by_age_band",
+    "crew_window"
+  ],
+  "admissibility": {
+    "declared_before_running": true,
+    "note": "FROZEN before any cell exists. The conditional_trajectory_clause and index_geometry audit invariant carry verbatim from the v11 lineage; the verdict grammar below carries verbatim from CREW-WINDOW-01. Every non-D0 arm is a discriminating probe, never a score: ZONE_* are declared essential-service readings of the record, FRAC_* a declared headcount ladder - whichever lands the band is a magnitude to source afterward.",
+    "conditional_trajectory_clause": {
+      "criterion": "Verbatim from v11: among takeoff seeds (recorded_onsets >= 10), the q05-q95 interval of recorded_onsets contains 197 AND the takeoff-seed median before_share is within 0.10 of 0.173; scored only when the row has >= 5 takeoff seeds, else 'insufficient takeoff mass'.",
+      "target_source": "covid.T1, data/observation/covid_fit_targets.json",
+      "note": "Scored on the D0_declared rows only - every other arm is exempt by construction; arm rows report the same fields as non-scoring context."
+    },
+    "record_informed_during_band": {
+      "criterion": "Takeoff-conditional median infections_during_window (days 16-30) inside [150, 350] on the arm row; before-window mass (infections_before_quarantine) seed-paired unmoved vs the in-design D0 row.",
+      "source": "NIID during-quarantine dated mass scaled to infections (covid_believability_map_v1.md F8/F11 lineage)"
+    },
+    "verdict_grammar": {
+      "CHANNEL-LANDED": "during median inside [150,350] AND before mass seed-paired unmoved AND during_window crew share measurably toward the record's 0.29.",
+      "UNDER-ATTENUATED": "median moves toward but stays above the band; report residual + crew share + band-side miss.",
+      "OVER-ATTENUATED": "median below the band - joins ALLHANDS on the too-strong side; the bracket narrows but no candidate conforms.",
+      "UNMOVED": "seed-paired delta inside RNG-reorder noise - the arm never reached the channel; audit the crew_window realized-share echo first (a ZONE arm whose exempt_work_zones never bound, or a FRAC arm with no exempt_fraction_drawn echo, is a mechanism-didn't-fire witness)."
+    },
+    "age_witness": "infections_by_age_band / during_window_by_age_band / dated_onsets_by_age_band read against the NIID confirmed-by-decade curve (~8% -> 24% across working ages) as SHAPE WITNESS only - the barred training set is never a fit target.",
+    "audit_invariants": [
+      "quarantine_witness.window_days == [16,30] and activated true on every cell",
+      "quarantine_witness.exempt_classes == shipped four crew classes on EVERY arm (the CW-02 modifiers restrict within the exempt set; the declared class list is unchanged)",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "propensity_draw.units_drawn > 0; delivery.caregiver.mode resolves on; presentation_draw_mode == 'once_per_course'; hand_reservoir_mode == 'hygiene_cycle'; delivery echo droplet_field_split matches shipped values on every arm",
+      "crew_window block on every cell: total_crew == 1045; confined_crew_count + working_crew_count == total_crew at activation and at end",
+      "crew_window.exempt_work_zones echoes the declared list verbatim on ZONE_* cells (null elsewhere); crew_window.exempt_fraction_drawn == {crew_general: k} exactly on FRAC_* cells (k = 261/523/784)",
+      "crew_window.realized_exempt_share strictly in (0,1) on ZONE_*/FRAC_* cells (0 or 1 means the gate never fired); ~1 on D0",
+      "crew_window.service_deliveries recorded on every cell; ~zero on a confining arm is a reported starvation witness, not a silent zero"
+    ]
+  },
+  "diagnostics": {
+    "paired_vs_in_design_d0": "Each arm row pairs seed-for-seed with its in-design D0_declared row at the same theta: delta infections_during_window, delta during_window_by_role (crew and passenger separately), delta during_window_by_age_band (the NIID-shape witness), delta infections_before_quarantine (expected ~0 - every CW-02 arm fires only inside the window), delta recorded_onsets/before_share, and the during-window crew share vs the record's 0.29.",
+    "paired_vs_shipped_rows": "Each D0_declared row pairs against the CW-01 D0 row (ea9550ef) - the armed-tree drift witness since CW-01 ran.",
+    "confined_passenger_bound": "confined_passenger_infections_during_quarantine reported vs the >=52 record lower bound (D2's passenger-cabin witness is a separate leg); recorded but not scored here.",
+    "realized_share": "crew_window.working_crew_by_posted_zone and realized_exempt_share vs the lottery expectation (ZONE_NARROW 11/34 ~ 0.324, ZONE_WIDE 19/34 ~ 0.559); a material departure is reported with the realized distribution."
+  },
+  "execution": {
+    "platform": "AWS Batch via campaigns/covid/crew_window_02/ through scripts/campaign (the campaigns/ grammar) - 12 blocks (theta x arm) x 20 seeds; jobdef picard-covid-crew-window-02, image covid-crew-window-02, S3 prefix campaign/covid_crew_window_02/, queue picard-analysis-queue (On-Demand; Fargate fallback picard-analysis-fargate-queue). Mega cells on Batch only.",
+    "canary": "Per the campaign-preflight gate: local smoke proving each new modifier reaches the confinement path (a confined exempt-classed agent appears in quarantined_ids), dry-run count = 240, pinned image digest + jobdef revision, manifest in S3, then the 20-seed ZONE_WIDE @7.9e6 canary read out and reported before the full array.",
+    "stop_rules": "Report immediately if any audit invariant fails; a ZONE arm's realized exempt share departs materially from the lottery expectation; any arm lands the band with before-mass unmoved (CHANNEL-LANDED); service_deliveries collapses on a confining arm; or child failure rate exceeds 5%."
+  },
+  "rejected_alternatives": {
+    "exempt_classes_subset": "MEASURED-DEGENERATE (CW-01): the DP hull instantiates only passenger_general + crew_general; crew_engineering/crew_galley/crew_medical name empty sets, so every class-subset exemption confines the identical whole crew (ALLHANDS-equivalent). The record's essential-service distinction lives inside crew_general's duty mix - only expressible activity-scoped (this design) or by duty-mix subclassing (family C, later).",
+    "crew_duty_mix": "DEFERRED: subclassing crew_general into galley/engineering/steward duty mixes is a separate stage - it changes the posting lottery itself rather than gating confinement, and belongs to its own design.",
+    "bernoulli_fraction_draw": "REJECTED in favour of exact-count without replacement: a per-agent Bernoulli(f) draw adds avoidable binomial noise to the realized share; exact-count k = round_half_up(f x n) makes the declared arm the realized arm and keeps cross-arm pairing clean. Both are 'sticky per-agent draw once at activation'; the readout sees the same semantics.",
+    "tuned_scalar": "REJECTED: no arm tunes a constant to the band. Zone lists are record-wording readings; fractions are a three-point declared ladder measuring the dose-response of the working-crew channel."
+  }
+}

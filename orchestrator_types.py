@@ -142,6 +142,13 @@ class SimulationState:
     info_suppression_epoch: int | None = None
     info_suppression_closed_zones: list[str] = field(default_factory=list)
     info_suppression_admitted_ids: set[int] = field(default_factory=set)
+    # CREW-WINDOW-02: the sticky exempt-subset draw of each order carrying
+    # ``exempt_fraction`` — order key -> {agent_class: sorted drawn ids}.
+    # Drawn once at the order's first confinement epoch; the exempt set
+    # must not re-draw per epoch.
+    exempt_fraction_draws: dict[str, dict[str, list[int]]] = field(
+        default_factory=dict
+    )
 
 
 # ── Observation engine bundle ────────────────────────────────────────────

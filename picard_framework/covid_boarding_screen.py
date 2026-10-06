@@ -1017,6 +1017,14 @@ class QuarantineAttributionLedger:
         self.exempt_classes: list[str] | None = None
         self.confined_at_activation: int | None = None
         self.protocol_ids: list[str] | None = None
+        # CREW-WINDOW-02 realized-membership witnesses: the declared
+        # within-exempt gates, the sticky fraction draw, and the
+        # confined/working crew snapshot at activation and at end.
+        self.exempt_work_zones: list[str] | None = None
+        self.exempt_fraction: dict[str, Any] | None = None
+        self.fraction_draws: dict[str, dict[str, list[int]]] = {}
+        self.crew_window_activation: dict[str, Any] | None = None
+        self.crew_window_final: dict[str, Any] | None = None
 
     @property
     def activated(self) -> bool:
@@ -1050,6 +1058,12 @@ class QuarantineAttributionLedger:
             e for e in (work.active_mods or [])
             if e.get("modifiers", {}).get("confine_all_to_quarters")
         ]
+        draws = getattr(work.state, "exempt_fraction_draws", None)
+        if draws:
+            self.fraction_draws = {
+                key: {cls: list(ids) for cls, ids in drawn.items()}
+                for key, drawn in draws.items()
+            }
         if self.activation_epoch is None and whole_body:
             self.activation_epoch = work.epoch
             exempt = [
@@ -1062,6 +1076,82 @@ class QuarantineAttributionLedger:
             self.protocol_ids = sorted(
                 e.get("protocol_id") for e in whole_body
             )
+            zone_lists = [
+                e.get("modifiers", {}).get("exempt_work_zones")
+                for e in whole_body
+            ]
+            zone_lists = [zones for zones in zone_lists if zones]
+            self.exempt_work_zones = (
+                sorted({zone for lst in zone_lists for zone in lst})
+                if zone_lists else None
+            )
+            frac_maps = [
+                e.get("modifiers", {}).get("exempt_fraction")
+                for e in whole_body
+            ]
+            frac_maps = [frac for frac in frac_maps if frac]
+            self.exempt_fraction = frac_maps[0] if frac_maps else None
+            self.crew_window_activation = _crew_window_snapshot(sim, work)
+        if self.activation_epoch is not None:
+            self.crew_window_final = _crew_window_snapshot(sim, work)
+
+
+def _crew_window_snapshot(sim: Any, work: Any) -> dict[str, Any]:
+    """Confined/working crew counts + posted-zone decomposition (CW-02).
+
+    The realized-membership witness the CW-01 audit lacked: confined crew
+    count, working crew count, the working share (the realized exempt
+    share), and the working crew's posted-zone histogram — on ZONE arms
+    the histogram is the lottery-realization check against the declared
+    essential list's expectation.
+    """
+    confined = set(getattr(work.state, "quarantined_ids", ()) or ()) | set(
+        getattr(work.state, "isolated_ids", ()) or ()
+    )
+    working_by_zone: dict[str, int] = {}
+    total = 0
+    working = 0
+    for a in sim.engine.agents:
+        if str(getattr(a, "role", "")) != "crew":
+            continue
+        total += 1
+        if a.agent_id in confined:
+            continue
+        working += 1
+        zone = getattr(a, "work_zone", None)
+        if zone:
+            working_by_zone[zone] = working_by_zone.get(zone, 0) + 1
+    return {
+        "total_crew": total,
+        "confined_crew_count": total - working,
+        "working_crew_count": working,
+        "realized_exempt_share": (working / total) if total else None,
+        "working_crew_by_posted_zone": dict(sorted(working_by_zone.items())),
+    }
+
+
+def _crew_window_block(
+    sim: Any, ledger: QuarantineAttributionLedger,
+) -> dict[str, Any]:
+    """The per-cell crew-window witness payload (CW-02)."""
+    tx = getattr(sim, "tx_core", None)
+    telemetry = getattr(tx, "caregiver_telemetry", {}) or {}
+    draws = ledger.fraction_draws
+    return {
+        "exempt_work_zones": ledger.exempt_work_zones,
+        "exempt_fraction": ledger.exempt_fraction,
+        "exempt_fraction_drawn": (
+            {
+                key: {cls: len(ids) for cls, ids in drawn.items()}
+                for key, drawn in draws.items()
+            }
+            if draws else None
+        ),
+        "exempt_fraction_drawn_ids": draws or None,
+        "at_activation": ledger.crew_window_activation,
+        "at_end": ledger.crew_window_final,
+        "service_deliveries": int(telemetry.get("service_deliveries", 0)),
+    }
 
 
 def _index_host(engine: Any) -> Any | None:
@@ -1331,6 +1421,7 @@ def _attribution_block(
         ),
         "quarantine_witness": witness,
         "crew_duty_exclusion": _crew_duty_block(sim, raw),
+        "crew_window": _crew_window_block(sim, ledger),
     }
 
 
