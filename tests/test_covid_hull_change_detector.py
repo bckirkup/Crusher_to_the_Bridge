@@ -253,7 +253,17 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # branch. The contact_factor: 1.0 baseline cell reproduces
         # the prior tuple exactly on the same tree, so the move is
         # fully attributed to the factor.
-        (3, 11): (32, 13, 217, 47, 21),
+        # DEFIANT-ESC-01 (#945): defiant refusers now escalate to
+        # enforced_confinement at the declared 24 h hold-out instead of
+        # staying free forever; a compelled refuser confined with its
+        # cabin-mate pools at mate strength, so the cell gains two
+        # onsets: (32, 13, 217, 47, 21) -> (34, 14, 217, 47, 21). The
+        # never-compel baseline (fred_behavior.defiant_escalation_hours
+        # = 1e9 in config_overrides) reproduces the prior tuple exactly
+        # on the merged tree, so the move is fully attributed to the
+        # escalation. Read from CI job 112578952586 (fast tier, 3.11,
+        # shard 3) on this branch; identical on 3.12 (job 112578952734).
+        (3, 11): (34, 14, 217, 47, 21),
         # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
         # 30, 30) before the same two merged changes: #537's ascertainment
         # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
@@ -387,7 +397,13 @@ GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
         # 1.0 baseline cell reproduces (34, 17, 217, 56, 22) exactly on
         # CPython 3.12 on this branch, so the move is fully attributed
         # to the factor's service-dose discount.
-        (3, 12): (32, 13, 217, 47, 21),
+        # DEFIANT-ESC-01 (#945): same move as the 3.11 entry above —
+        # the escalation compels a defiant refuser at +24 h and the
+        # co-confined mate pool converts two more courses:
+        # (32, 13, 217, 47, 21) -> (34, 14, 217, 47, 21), read from
+        # CI job 112578952734 (fast tier, 3.12, shard 3) on this
+        # branch, identical to the 3.11 reading.
+        (3, 12): (34, 14, 217, 47, 21),
     },
     "diamond_princess_2020": {
         # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
