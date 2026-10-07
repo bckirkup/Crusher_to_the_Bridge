@@ -148,6 +148,20 @@ def _escort_delay_epochs(syndromic: Any) -> int:
     return int(value or 0)
 
 
+def _defiant_escalation_epochs(syndromic: Any) -> int:
+    """Resolved refusal->compelled-confinement hold-out in epochs.
+
+    The shipped bound is 24 h (``fred_behavior.defiant_escalation_hours``).
+    Mocked/stub modalities without the attribute read as never-compelled —
+    the pre-DEFIANT-ESC-01 absorbing-refusal baseline — so legacy fixtures
+    keep their refusal behaviour.
+    """
+    value = getattr(syndromic, "defiant_escalation_epochs", None)
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return 1 << 30
+    return int(value or 0)
+
+
 def step_escort_admissions(epoch: int, state: SimulationState) -> None:
     """Admit hosts whose escorted arrival lands this epoch.
 
@@ -502,6 +516,16 @@ def step_fred_compliance(
                 state.escort_pending[aid] = epoch + escort_delay
             else:
                 state.quarantined_ids.add(aid)
+            continue
+        cls = getattr(syndromic, "_compliance_class", {}).get(aid)
+        if (
+            cls == "defiant"
+            and epochs_since >= _defiant_escalation_epochs(syndromic)
+        ):
+            # DEFIANT-ESC-01: authority compels confinement after the
+            # declared hold-out window — a permanently-free refuser is
+            # untenable aboard a closed hull.
+            _admit_enforced(epoch, aid, state, syndromic)
 
 
 # ── Mid-cruise pathogen introductions ────────────────────────────────────

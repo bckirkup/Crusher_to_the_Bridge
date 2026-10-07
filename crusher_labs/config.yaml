@@ -215,6 +215,20 @@ fred_behavior:
   # ship. NORO-VENUE-02 sweeps 0-3; 0 is the labelled instant-admission
   # baseline.
   escort_delay_hours: 1
+  # Refusal->compelled-confinement hold-out: a host whose sticky
+  # compliance class is "defiant" stays free this many hours after
+  # refusing a confinement order, then is admitted under
+  # authority-compelled confinement (compliance action
+  # "enforced_confinement"). Grade C declared operational assumption:
+  # no refusal->compelled-escort latency measurement exists, but
+  # maritime law compels confinement (the captain holds ultimate
+  # authority over the vessel; security is posted at the stateroom
+  # door; free-pratique denial pressures the line to enforce), so a
+  # permanently-free refuser is not a tenable shipboard state. 24 h is
+  # the declared bound for persuasion attempts (door knocks, PA calls,
+  # medical visits) before compelled escort. DEFIANT-ESC-01 sweeps
+  # the window; 0 is the labelled instant-compulsion baseline.
+  defiant_escalation_hours: 24
   # Detection trigger for symptomatic confinement orders (NORO-DETECT-01).
   # "presenting_sign": a host whose symptomatic infection is on a
   # sign-declaring pathogen (observation_model.presenting_sign in the
