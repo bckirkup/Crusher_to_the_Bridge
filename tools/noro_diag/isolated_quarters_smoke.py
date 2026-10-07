@@ -41,7 +41,10 @@ from picard_framework.runs.mega_cruise_campaign.campaign_runner import (  # noqa
     generate_tier_runs,
 )
 from picard_framework.simulation.ship_simulation import ShipSimulation  # noqa: E402
-from simulation_utils.paths import prepare_output_directory  # noqa: E402
+from simulation_utils.paths import (  # noqa: E402
+    prepare_output_directory,
+    validated_open,
+)
 from tools.diag.instrument_common import materialized_picard_spec  # noqa: E402
 from tools.diag.manifest_args import (  # noqa: E402
     add_manifest_args,
@@ -130,7 +133,7 @@ def _isolate_confined_observer(sim: Any, work: Any) -> None:
 
 
 def _isolated_voyage(
-    spec: dict[str, Any], clock: Any, pathogen_id: str,
+    spec: dict[str, Any], pathogen_id: str,
 ) -> dict[str, Any]:
     """The verbatim cell with confinement routed through the sentinel."""
     with materialized_picard_spec(spec, REPO_ROOT) as picard_spec:
@@ -187,7 +190,7 @@ def main(argv: list[str] | None = None) -> int:
             "seed": int(spec["run"]["random_seed"]),
             "mode": args.mode or "deposits_only",
             "arm": "isolate_confined",
-            **_isolated_voyage(spec, clock, args.pathogen_id),
+            **_isolated_voyage(spec, args.pathogen_id),
         }
     else:
         payload, voyage, _initiation = run_seed(
@@ -211,8 +214,13 @@ def main(argv: list[str] | None = None) -> int:
             },
         }
 
-    path = out_dir / f"iso_quarters_smoke_{args.tier}_{run_id}.json"
-    path.write_text(json.dumps(result, indent=1, sort_keys=True, default=str))
+    path = (out_dir / f"iso_quarters_smoke_{args.tier}_{run_id}.json").resolve()
+    if not path.is_relative_to(REPO_ROOT):
+        path = REPO_ROOT / path.name
+    with validated_open(
+        str(path), "w", allowed_roots=(str(REPO_ROOT),), encoding="utf-8",
+    ) as handle:
+        handle.write(json.dumps(result, indent=1, sort_keys=True, default=str))
     print(json.dumps(result, indent=1, sort_keys=True, default=str))
     print(f"written: {path}")
     return 0
