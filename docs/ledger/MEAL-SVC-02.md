@@ -1,10 +1,9 @@
 # MEAL-SVC-02
 **Date:** 2026-10-07
 **Commit:** 679a6c1b
-**Measured at:** `54086e4ca8e6d9af301b7249707fdab10437b38f`
-(image `covid-meal-svc-02`, ECR `sha256:300b6437…`)
 **Pathogens:** sars_cov2_resp
 **Status:** measured
+**Measured at:** 54086e4ca8e6d9af301b7249707fdab10437b38f
 
 The door-drop attenuation sweep on `service_to_host`, the open decision
 the MEAL-SVC-01 canary left: which factor on the steward→host direction
@@ -33,7 +32,8 @@ image `covid-meal-svc-02`; S3 `campaign/covid_meal_service_02/`; queue
 `picard-analysis-queue`.
 
 **Execution state:** measured — full grid 200/200 cells, 0 failures, on
-`picard-analysis-fargate-queue` (jobdef
+`picard-analysis-fargate-queue` (image `covid-meal-svc-02` @
+`54086e4c` → ECR `sha256:300b6437…`; jobdef
 `picard-covid-meal-service-02-fargate` rev 1; the EC2 queue was flooded
 by sibling arrays and the LEDGER-named fallback carried every cell).
 Canary `zone_narrow_svc_dir_cf_lo` (20/20) read STILL-HIGH; the
