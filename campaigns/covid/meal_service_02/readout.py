@@ -136,6 +136,8 @@ def _iter_s3_payloads(prefix: str) -> Iterable[tuple[str, dict[str, Any]]]:
     for page in paginator.paginate(Bucket=bucket, Prefix=key_prefix):
         for obj in page.get("Contents", []):
             key = obj["Key"]
+            if not key.rsplit("/", 1)[-1].startswith("cell_"):
+                continue
             if not key.endswith(".json") or key.endswith("design.json"):
                 continue
             body = client.get_object(Bucket=bucket, Key=key)["Body"].read()

@@ -1,7 +1,7 @@
 # MEAL-SVC-02 ledger — `contact_factor_to_host` door-drop attenuation sweep
 
-Status: **declared** — implementation + design frozen and merged; Batch
-execution pending (handed to the next session per owner direction).
+Status: **measured** — full grid 200/200 cells on Fargate, 0 failures;
+verdict MAGNITUDE-LANDED on the section-binding arm (see below).
 
 - Design doc: `docs/covid/covid_meal_service_02_design.md` (frozen pre-run)
 - Design JSON: `picard_framework/runs/covid_meal_service_02_design.json`
@@ -55,10 +55,37 @@ execution pending (handed to the next session per owner direction).
 | canary single | `405fdeff-314e-40c9-9bf3-f15a0ee6848b` (Fargate) — `zone_narrow_svc_dir_cf_lo` seed 20200205, SUCCEEDED ~22 min; contract verified (deliveries 170,141 == host-factor draws n; mode `declared` [0.005,0.02]) |
 | canary block | `87ea79e5-44ad-4444-bf26-51fec3618279` — 20-cell array on `picard-analysis-fargate-queue`, 20/20 SUCCEEDED 2026-10-07 ~11:10–11:49Z |
 | canary verdict | **STILL-HIGH** — confined-pax med 289 (>200; band [26,160]), during med 686, crew share 0.536 (record 0.29), deliveries 166,113 parity; 0 audit violations after the crew_window `service_`-prefix readout fix. Factor→~0.0125 moved the median 804→289 (~2.8×), not the naive ~14× linear |
-| stop | HELD per gate — remaining 9 blocks (180 cells) await owner call |
+| stop | HELD per gate — then owner approved the remaining 9 blocks |
+| full grid | 180 cells on `picard-analysis-fargate-queue`, all SUCCEEDED 2026-10-07 — `1ce9fcbb` (d0_declared_svc_base), `f770b94a` (zone_narrow_svc_base), `f21a59d6` (cf_shipped), `bee12b72` (cf_mid), `739d52fc` (cf_floor), `d3e5125f` (cf_off), `38140629` (d0_svc_dir_cf_shipped), `32cde25b` (d0_svc_dir_cf_off), `d8fb95e3` (sect_cf_lo) |
 
 ## Verdict
 
-_(fill in at readout — MAGNITUDE-LANDED / OVER-ATTENUATED / STILL-HIGH /
-NONLINEAR-BREAK per the frozen grammar; record the landing arm and the
-single open decision for the next stage)_
+**MAGNITUDE-LANDED on `zone_narrow_svc_dir_sect_cf_lo`** — confined-pax
+takeoff median **35**, inside the bound region [26,160], at the same
+cf_lo factor that read STILL-HIGH (289) on the uniform ladder.
+Stewards/host 1.0 vs 44 uniform; `service_to_host` acquisitions 490 vs
+5,570; deliveries parity (162,447).
+
+The uniform-draw ladder saturates nowhere near the band: factors
+0.010→0.175 map confined-pax 294→759 (a ~2.6× response over a 17.5×
+range); OFF ≡ BASE bit-identical (factor 0 credits nothing while the
+uniform draw still consumes its voyage-RNG draw). **The bound was never
+a factor-magnitude problem — it is a responder-structure problem**:
+exposure is per-section binary under bound stewards, collective under
+the uniform lottery. NONLINEAR-BREAK flagged on floor→lo (294→289) and
+assessed as draw jitter on the asymptote.
+
+Caveats on record: the section arm is a different voyage realization
+(section draws ride the dedicated spawn stream; uniform draws consume
+the voyage RNG), so the landing is the frozen grammar's within-arm
+takeoff-conditional median, not a seed-paired contrast — takeoff 11/20
+vs 19/20. Crew share on the landed arm is still 0.841 vs the record's
+0.29 (steward pickups only 3.6% of crew acquisitions — the crew-side
+divergence lives off this channel). 9 audit violations, all explained
+(6× D0 exempt-share isolation-path; 3× sect cells with no shedding
+bound steward).
+
+Full readout: `docs/covid/covid_meal_service_02_readout.md`. Open
+decision for the next stage: the crew-share residual (exposure is not
+service-carried) and whether section binding becomes the shipped
+responder structure — owner calls.
