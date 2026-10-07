@@ -16,6 +16,23 @@ Read this before quoting any dose figure or anchor result.
 
 ## 1. Currently withdrawn
 
+**`ISO-QUARTERS-01` (ledger entry): every steward-side service dose
+figure on the emetic channel measured before this change is a gate
+artefact, not mechanism state.** Two legs of one defect: a host at
+`Isolated_In_Quarters` deposited emesis nowhere (the sentinel drops it
+out of every occupancy unit before the deposit pass), and on a
+Cabin_Corridor hull `_caregiver_service_surface_dose` read
+`pools.get(host.home_zone)` — the parent block key no emit ever writes
+to — so a quarantined host's compartment-filed patch was unreachable.
+Defpair measured 22/24 `service_deliveries` > 0 with 0/24
+`service_dose_credited`. The repair
+(`transmission.isolated_quarters_deposits`, `deposits_only` default;
+`off` is the labelled bit-identical baseline) emits the isolated host's
+due emesis into its own quarters pool on a dedicated stream —
+deposit-only, no pickup or contact draws — and resolves the service
+read through the same `_emesis_deposit_unit`. Seed-8105 defpair cell
+re-read: `service_dose_credited` 0 → 5103 at 1304 deliveries.
+
 **`CAREGIVER-SVC-01` (ledger entry): every caregiver-service dose figure —
 R3 deliveries into confined cabins, including the emetic per-patch pickup —
 is historical on the un-discounted channel.** `transmission.caregiver.service.contact_factor`
