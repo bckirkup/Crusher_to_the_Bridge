@@ -250,16 +250,24 @@ def _audit_host_factor(
     violations: list[str] = []
     mode, echo = _expected_host_factor_echo(arm)
     service = _service_block(payload)
-    for label, blk in (("resolved", service), ("crew_window", cw)):
-        if blk.get("contact_factor_to_host_mode") != mode:
+    # The resolved service block echoes the unprefixed names; the
+    # crew_window mirror carries every service field under the
+    # ``service_`` prefix like the rest of that block.
+    for label, blk, mode_key, spec_key in (
+        ("resolved", service, "contact_factor_to_host_mode",
+         "contact_factor_to_host"),
+        ("crew_window", cw, "service_contact_factor_to_host_mode",
+         "service_contact_factor_to_host"),
+    ):
+        if blk.get(mode_key) != mode:
             violations.append(
-                f"{tag}: {label} contact_factor_to_host_mode "
-                f"{blk.get('contact_factor_to_host_mode')!r} != {mode!r}",
+                f"{tag}: {label} {mode_key} "
+                f"{blk.get(mode_key)!r} != {mode!r}",
             )
-        if blk.get("contact_factor_to_host") != echo:
+        if blk.get(spec_key) != echo:
             violations.append(
-                f"{tag}: {label} contact_factor_to_host "
-                f"{blk.get('contact_factor_to_host')!r} != {echo!r}",
+                f"{tag}: {label} {spec_key} "
+                f"{blk.get(spec_key)!r} != {echo!r}",
             )
     draws = cw.get("service_host_factor_draws") or {}
     n = int(draws.get("n") or 0)
