@@ -71,3 +71,17 @@ deliveries parity). Readout: `docs/covid/covid_crew_mess_01_readout.md`.
 | canary array | `3123c6d2-4b95-4b72-b1ba-bb4d9f980617` — 20-cell array on `picard-analysis-fargate-queue`, submitted 2026-10-07 19:15Z, 20/20 SUCCEEDED ~19:15–19:40Z |
 | canary verdict | **STILL-HIGH** — crew share med 0.727 (takeoff-conditioned 0.68), confined-pax med 28 ∈ [26,160], during med 22, mess mass med 0 (135/1,179 pooled residual on posted-staff cells), deliveries 162,184.5 parity, 0 audit violations, 0 flags |
 | stop | HELD per gate — remaining 4 blocks (80 cells) are the owner's call |
+
+## Post-canary analysis
+
+- **Berth attribution** (owner option 1, 2026-10-07): 3 `sect_mess_boxed`
+  seeds re-run locally (20200218/20200223/20200210 — same realizations;
+  crew counts 154/178/68 match the Batch cells). 400 during-window crew
+  events: ~73% occupational (galley 117, mess-posted 65, work zones 64,
+  corridor 47), ~27% berth-zone (107: 59 co-berth / 48 corridor-pool);
+  74 confined crew infected in own berth — 35 carry-home via
+  during-window-infected mate. The 0.29 share is unreachable by dining
+  policy; seam named `CREW-BERTH-01` (cohort separation + galley pods).
+  Readout section: `docs/covid/covid_crew_mess_01_readout.md`
+  §Post-canary; tool `tools/covid_berth_attribution.py`; evidence
+  `reports/crew_mess_berth_attr/`.

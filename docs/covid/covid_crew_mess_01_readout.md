@@ -123,3 +123,49 @@ the (0.2,0.4) band, which boxed alone cannot.
   exempt echo) witnessed the scaffold reproducing on this merge.
 - Passenger-side mess occupancy is ~zero by construction (the redirect
   reads crew placements only); no PAX-COLLATERAL signal appeared.
+
+## Post-canary: berth attribution of the crew-share residual
+
+The cell payloads carry zone-class tallies only (no infector ids), so
+three `sect_mess_boxed` seeds — 20200218 / 20200223 / 20200210, the two
+hot cells plus a galley-heavy one — were re-run locally at the campaign
+SHA with the sim retained (`tools/covid_berth_attribution.py`); the
+crew-event counts reproduce the Batch cells exactly (154/178/68), so
+these are the same voyage realizations. 400 during-window crew
+acquisitions decomposed by venue × confined-at-event × whether a
+`cabin_mate_ids` mate already carried an earlier infection:
+
+| venue | n | share | reading |
+|---|---|---|---|
+| galley | 117 | 29% | boxed production keeps galley staff posted — the single biggest block |
+| crew_mess | 65 | 16% | posted kitchen staff + far-field pool, no diners (redirects held) |
+| other work zones | 64 | 16% | EngControl / stores / waste / dining-corridor placements |
+| corridor | 47 | 12% | working crew in non-home corridors |
+| cabin (own berth zone) | 107 | 27% | 59 with a prior-infected berth-mate, 48 corridor-pool |
+
+Inside the cabin block, **74 of 400 events are confined crew infected
+in their own berth** — 35 after a berth-mate infected *during* the
+window (a working mate carried it home: the quarantine-breaking
+household channel), 8 from a pre-window mate infection, and 31 with no
+infected mate at all (corridor-pool exposure of people nominally
+isolated). The occupational blocks are ~73% of the residual and every
+one is a `working`-status event; the berth block is ~27%.
+
+Reads (all routes: droplet 240 / caregiver 121 / service_to_host 39 —
+the section-bound steward channel still carries ~40% of crew pickups):
+
+- the record's 0.29 crew share is unreachable by dining policy: the
+  residual is mostly occupational exposure the documented DP response
+  never touched;
+- the berth-driven quarter names the cohorting seam — working crew
+  sharing berths with confined crew (35 carry-home events) plus
+  corridor-pool exposure of the confined (31);
+- a `CREW-BERTH-01` arm would test re-berthing working crew so
+  `cabin_mate` pairs never cross confined↔working, plus optionally
+  galley pod/shift separation — the two largest remaining blocks.
+
+Caveat: `co_berth` is a sufficient-cause bound (a prior-infected mate
+existed), not a proven infector — the runs carry no strain tracking;
+and 3 seeds is an orientation sample, not a pooled estimate.
+
+Evidence: `reports/crew_mess_berth_attr/cell_*.json` (per-event rows).
