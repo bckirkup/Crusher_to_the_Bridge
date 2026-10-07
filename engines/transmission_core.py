@@ -1244,6 +1244,27 @@ DEFAULT_CABIN_ASLEEP_CONTACT_SHARE = 0.0
 DEFAULT_CABIN_CONFINED_FOMITE_MODE = "own_cabin"
 CABIN_CONFINED_FOMITE_MODES = {"own_cabin", "off"}
 
+# ── ISO-QUARTERS-01: emesis deposits from hosts held in isolation ─────────
+# ``_epoch_zone_occupants`` drops a host at ``Isolated_In_Quarters`` out of
+# every occupancy unit before the deposit pass — physically the host is
+# still in its stateroom, where the bolus lands, so the deposit vanished
+# and the steward-side service read in ``_caregiver_service_surface_dose``
+# had nothing to pick up. ``deposits_only`` emits the isolated host's
+# emesis into its quarters' own pool (``_emesis_deposit_unit`` — the same
+# key a home emit files under) while the host stays out of every pickup
+# and contact draw; ``off`` is the labelled pre-change baseline. The
+# service read resolves through the same unit key, so a confined host's
+# patch is found where it was filed — on a compartmented hull the
+# parent-zone read it replaces only ever matched a pool no emit wrote to.
+DEFAULT_ISOLATED_QUARTERS_DEPOSITS_MODE = "deposits_only"
+ISOLATED_QUARTERS_DEPOSITS_MODES = {"deposits_only", "off"}
+
+# Spawn-key for the isolated-quarters deposit stream: every draw the pass
+# makes runs on a dedicated stream seeded off the voyage entropy, so the
+# new emits cannot reorder the shared stream and ``off`` — or a voyage
+# with no isolated host — stays bit-identical on matched seeds.
+_ISOLATED_DEPOSIT_STREAM_KEY = 0x150A17
+
 # ── ROOM-AIR-01: first-order ventilation removal on the room pools ────────
 # The shipped pools treated the epoch's emitted mass as standing at full
 # concentration for the whole epoch — a sealed box. The sanitary flush
@@ -2138,6 +2159,26 @@ def _parse_cabin_confined_fomite(tx: dict[str, Any]) -> str:
         raise ValueError(
             "transmission.cabin_confined_fomite.mode must be 'own_cabin' "
             f"or 'off', got {mode!r}",
+        )
+    return mode
+
+
+def _parse_isolated_quarters_deposits(tx: dict[str, Any]) -> str:
+    """Read the ISO-QUARTERS-01 isolated-quarters deposit declaration."""
+    raw = tx.get("isolated_quarters_deposits")
+    if isinstance(raw, str):
+        raw = {"mode": raw}
+    block = raw or {}
+    if not isinstance(block, dict):
+        raise ValueError(
+            "transmission.isolated_quarters_deposits must be a mapping or "
+            "a mode string",
+        )
+    mode = str(block.get("mode", DEFAULT_ISOLATED_QUARTERS_DEPOSITS_MODE))
+    if mode not in ISOLATED_QUARTERS_DEPOSITS_MODES:
+        raise ValueError(
+            "transmission.isolated_quarters_deposits.mode must be "
+            f"'deposits_only' or 'off', got {mode!r}",
         )
     return mode
 
@@ -3349,6 +3390,25 @@ class TransmissionCore:
         self.cabin_cooccupancy = _parse_cabin_cooccupancy(tx)
         self.cabin_confined_fomite = _parse_cabin_confined_fomite(tx)
         self.room_air_removal = _parse_room_air_removal(tx)
+        self.isolated_quarters_deposits = _parse_isolated_quarters_deposits(tx)
+        # The isolated-quarters emit draws run on a dedicated stream spawned
+        # off the voyage entropy — ``off`` spawns nothing, so the labelled
+        # baseline stays bit-identical on matched seeds and the new emits
+        # never reorder the shared stream.
+        seed_seq = getattr(
+            getattr(self.rng, "bit_generator", None), "seed_seq", None,
+        )
+        entropy = getattr(seed_seq, "entropy", None)
+        self._isolated_deposit_rng = (
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    entropy, spawn_key=(_ISOLATED_DEPOSIT_STREAM_KEY,),
+                ),
+            )
+            if entropy is not None
+            and self.isolated_quarters_deposits == "deposits_only"
+            else None
+        )
         # Berths per stateroom and per corridor block, from the cabin roster,
         # so a compartment's share of the block volume is a fixed property of
         # the berthing plan rather than of who happens to be aboard the zone
@@ -5167,6 +5227,22 @@ class TransmissionCore:
         key = f"{zone_name}{CABIN_COMPARTMENT_SEPARATOR}{label}"
         self.zone_types.setdefault(key, "Cabin_Corridor")
         return key
+
+    def _emesis_deposit_unit(self, agent: KorkinAgent) -> str | None:
+        """The pool key an emesis event in the host's own quarters files under.
+
+        A stateroom on a Cabin_Corridor hull: the compartment the berth
+        plan split would file a home emit under — the confined host is
+        physically in that room even while its location sentinel drops it
+        out of every occupancy unit. Any other home zone files under the
+        zone itself. ``None`` when the host has no quarters to file under.
+        """
+        unit = getattr(agent, "home_zone", None)
+        if not unit or self._is_cabin_compartment(unit):
+            return None
+        if self.zone_types.get(unit) == "Cabin_Corridor":
+            return self._cabin_compartment_key(unit, agent)
+        return unit
 
     def airborne_deposit_key(self, agent: KorkinAgent, zone_name: str) -> str:
         """The airborne pool a host's continuous emission enters.
@@ -10252,8 +10328,18 @@ class TransmissionCore:
         # lifts less mass off the patch, and the patch and hand-load
         # books stay balanced (the steward does not carry mass the
         # posture never touched).
+        # The patch is filed where the confined host's quarters emit lands
+        # — a stateroom compartment on a Cabin_Corridor hull, the zone
+        # itself anywhere else. ``_emesis_deposit_unit`` resolves the same
+        # key the emit pass writes; ``off`` keeps the parent-zone read, the
+        # labelled baseline the pools on a compartmented hull never matched.
         pools = self.emesis_patch_pools_by_pathogen.get(pathogen_id) or {}
-        patches = list(pools.get(host.home_zone, ()))
+        unit = (
+            self._emesis_deposit_unit(host)
+            if self.isolated_quarters_deposits == "deposits_only"
+            else host.home_zone
+        )
+        patches = list(pools.get(unit, ())) if unit else []
         if not patches:
             return 0.0
         hand_area, used_fraction, transfer_efficiency = (
@@ -10484,6 +10570,49 @@ class TransmissionCore:
                 agent_doses,
                 agent_pathway_doses,
             )
+
+    def _isolated_quarters_deposits(
+        self,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        agent_doses: dict[int, float] | None = None,
+        agent_pathway_doses: dict[int, dict[str, float]] | None = None,
+    ) -> None:
+        """ISO-QUARTERS-01: emesis from hosts held at Isolated_In_Quarters.
+
+        The sentinel drops the host out of every occupancy unit before
+        the deposit pass, so its emesis landed nowhere — physically it is
+        still in its stateroom, where the bolus lands. ``deposits_only``
+        files the emit into the quarters' own pool
+        (``_emesis_deposit_unit``) while the host stays out of every
+        pickup and contact draw; ``off`` is the labelled pre-change
+        baseline. Draws run on the dedicated spawned stream so the new
+        emits never reorder the shared stream, and a voyage with no
+        isolated host is bit-identical to the baseline.
+        """
+        if self.isolated_quarters_deposits != "deposits_only":
+            return
+        isolated = [
+            agent
+            for agent in (getattr(self, "_agents_by_id", None) or {}).values()
+            if agent.current_location == "Isolated_In_Quarters"
+        ]
+        if not isolated:
+            return
+        rng = self._isolated_deposit_rng or self.rng
+        previous, self.rng = self.rng, rng
+        try:
+            for agent in isolated:
+                unit = self._emesis_deposit_unit(agent)
+                if unit is None:
+                    continue
+                self._deposit_emesis(
+                    agent, pathogen_id, unit, epoch, profile or {},
+                    agent_doses, agent_pathway_doses,
+                )
+        finally:
+            self.rng = previous
 
     def _deposit_emesis(
         self,
@@ -11470,6 +11599,15 @@ class TransmissionCore:
         # a) Deposit new fomite mass from current shedders (not confined to cabin)
         self._fomite_hand_deposits(
             epoch, zone_occupants, pathogen_id, profile,
+            agent_doses, agent_pathway_doses,
+        )
+
+        # a2) Hosts at ``Isolated_In_Quarters`` occupy no unit — physically
+        # they are still in their stateroom, where the bolus lands — so
+        # under ``deposits_only`` their emesis files into the stateroom's
+        # own pool without joining any pickup or contact draw.
+        self._isolated_quarters_deposits(
+            epoch, pathogen_id, profile,
             agent_doses, agent_pathway_doses,
         )
 
