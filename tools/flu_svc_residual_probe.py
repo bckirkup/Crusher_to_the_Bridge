@@ -60,6 +60,7 @@ from __future__ import annotations
 import argparse
 import importlib.util
 import json
+import os
 import sys
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
@@ -74,6 +75,7 @@ from engines.transmission_core import TransmissionCore  # noqa: E402
 from picard_framework.simulation.ship_simulation import (  # noqa: E402
     ShipSimulation,
 )
+from simulation_utils.paths import resolve_repo_path, validated_open  # noqa: E402
 from tools.diag.conditioned_cell import ACTIVE, conditioned_spec  # noqa: E402
 from tools.diag.instrument_common import (  # noqa: E402
     materialized_picard_spec,
@@ -552,14 +554,21 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument(
         "--reuse",
-        help="prior probe JSON: skip re-running cells already inside "
-        "(deterministic seeds — used to keep a paired baseline arm)",
+        help="prior probe JSON (inside the repo): skip re-running cells "
+        "already inside (deterministic seeds — used to keep a paired "
+        "baseline arm)",
     )
     args = parser.parse_args(argv)
 
+    repo_base = os.path.realpath(str(_REPO_ROOT))
     results: dict[tuple[int, str], dict[str, Any]] = {}
     if args.reuse:
-        prior = json.loads(Path(args.reuse).read_text(encoding="utf-8"))
+        with validated_open(
+            resolve_repo_path(repo_base, args.reuse),
+            allowed_roots=(repo_base,),
+            encoding="utf-8",
+        ) as handle:
+            prior = json.load(handle)
         for key, cell in (prior.get("cells") or {}).items():
             seed_s, arm = key.split(":", 1)
             # JSON round-trips dict keys to strings; the live rows are
@@ -601,9 +610,12 @@ def main(argv: list[str] | None = None) -> int:
             for seed in args.seeds for arm in _ARMS
         },
     }
-    out_path = Path(args.out)
+    out_path = Path(resolve_repo_path(repo_base, args.out))
     out_path.parent.mkdir(parents=True, exist_ok=True)
-    out_path.write_text(json.dumps(out, indent=1) + "\n", encoding="utf-8")
+    with validated_open(
+        str(out_path), "w", allowed_roots=(repo_base,), encoding="utf-8"
+    ) as handle:
+        handle.write(json.dumps(out, indent=1) + "\n")
     print(f"WROTE {out_path}")
     return 0
 
