@@ -45,8 +45,13 @@ This is the fix for the serviced-quarantine crew bridge the FLU-VIS-01
 attribution measured (§4 of that readout): on the paired 8-seed probe
 (`ca775a0b`) the factor collapses the bridge sub-channel (median onboard
 36→~7 on exp `r200_dec`), and a second confinement-mediated channel — a
-passenger/droplet wave persisting at f=0 on a subset of seeds, candidate
-confined-cabinmate pooling — is open as a separate attribution. Ledger:
+passenger/droplet wave persisting at f=0 on a subset of seeds — is
+attributed in `docs/ledger/FLU-SVC-RESIDUAL-01.md`: the named
+co-confined cabin-mate pooling is confirmed but ~15% (post-confinement
+tail, epochs ≥194); the dominant term is a free-pool droplet wave in
+dining/social venues sustained by the admission lottery (refused
+founders roam free at full strength; refusal realization scales with
+order volume). Ledger:
 `docs/ledger/CAREGIVER-SVC-01.md`.
 
 ## 2. Measurement status (pointers, not quotes)
@@ -60,6 +65,7 @@ confined-cabinmate pooling — is open as a separate attribution. Ledger:
 | FLU-SOCIAL-01 | measured | `8c03e9d7` | social-layer readout |
 | FLU-OPEN-01 | measured | `7f4702ef` | open-voyage census on all four classes; F5 above frame = declared observation vector |
 | FLU-VIS-01 | measured | `ca775a0b` | observation-layer sweep (report scale × eligibility) on the open voyage; reporting saturates — big-hull Ward gap is incidence, not visibility |
+| FLU-SVC-RESIDUAL-01 | measured | `02ab79b8` | f=0 surplus attribution: admission lottery (refused founders) dominant, co-confined pooling confirmed ~15% |
 
 Numbers are quoted from the entries above at their `Measured at` SHAs, never
 from this page.

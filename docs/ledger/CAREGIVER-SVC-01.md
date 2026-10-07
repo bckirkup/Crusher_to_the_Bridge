@@ -57,9 +57,12 @@ fix for it.
   choice is semantic, and U[0.05,0.3] carries the honest semantics.
 - **The surplus is not unitary.** On 8112/8184/8120 the excess persists at
   f=0 (+23/+40/+9 vs baseline): a second confinement-mediated channel,
-  showing as a passenger/droplet wave, not crew — candidate: confined
-  cabin-mate pooling (CONFIRMED confines mates into shared cabins). Open —
-  a separate attribution, not a defect of this factor.
+  showing as a passenger/droplet wave, not crew — attributed in
+  `docs/ledger/FLU-SVC-RESIDUAL-01.md`: the candidate co-confined pooling
+  is real but ~15% (late tail); the dominant term is a free-pool droplet
+  wave sustained by the admission lottery — refused hosts are permanently
+  free symptomatic shedders, and refusal realization scales with order
+  volume.
 - f=0 verified semantics: deliveries fire, dose_credited=0, report stamps
   still land — the discount keeps the discovery channel intact.
 - 8 seeds is a mechanism probe, not an effect-size run; the fleet-scale
