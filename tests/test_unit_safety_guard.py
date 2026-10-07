@@ -62,6 +62,9 @@ ALLOWED_EPOCH_KEYS = (
     ("presidio/data/experiences/smoke_runs/*.json", "num_epochs"),  # gitignored presidio smoke output; run-length bookkeeping
     ("reports/flu_svc_residual_*.json", "episode_epochs"),  # probe payload: per-agent infection-record epoch indices (unit is the epoch index itself)
     ("reports/flu_svc_residual_*.json", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices
+    ("reports/iso_quarters_smoke*", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices
+    ("reports/iso_quarters_smoke*", "num_epochs"),  # voyage fingerprint: run-length bookkeeping
+    ("reports/iso_quarters_smoke*", "total_quarantine_person_epochs"),  # voyage fingerprint: quarantine bookkeeping
 )
 
 # No current module constant should be incremented or multiplied inside an
