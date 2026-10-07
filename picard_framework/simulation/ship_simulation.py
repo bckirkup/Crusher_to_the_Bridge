@@ -25,6 +25,7 @@ from crusher_labs.modalities.surface_strain_recovery import (
     recover_surface_mixture,
 )
 from crusher_labs.protocol_engine import (
+    apply_crew_meal_service,
     apply_hvac_modifiers,
     apply_transmission_modifiers,
     compute_stoplights,
@@ -1680,6 +1681,10 @@ class ShipSimulation:
                 work.merged_mods.get("surface_disinfection_log10_reduction")
                 if work.merged_mods else None
             )
+        if self.engine is not None:
+            # CREW-MESS-01: same falling-edge contract — the meal-service
+            # directive must clear when the order leaves merged_mods.
+            apply_crew_meal_service(self.engine, work.merged_mods)
         if not work.merged_mods:
             return
         apply_hvac_modifiers(self.contam_engine, work.merged_mods)

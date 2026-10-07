@@ -488,6 +488,23 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`CREW-MESS-01` declared — crew-dining attenuation during the
+  confinement order.** The MEAL-SVC-02 landed row leaves a during-window
+  crew share of 0.841 vs the record's 0.29, carried by the open
+  `crew_mess` zone class (44–59% of during-window mass): ~25–31%
+  exempt crew keep dining in an open mess for the 16-day order while
+  the documented DP response was boxed/staggered crew meals. The
+  design (`docs/covid/covid_crew_mess_01_design.md`,
+  `picard_framework/runs/covid_crew_mess_01_design.json`,
+  `campaigns/covid/crew_mess_01/`) freezes a `crew_meal_service`
+  protocol modifier — modes `boxed` (dine-in redirect to quarters),
+  `capacity` (occupancy cap), `staggered` (seating-split schedule
+  surgery) — as SOP-017-MESSBOX/MESSSTAG/MESSCAP variants of the
+  shipped SOP-017-NARROW, 5 arms × 20 seeds on the verbatim CW-02
+  replay contract, scored on crew share in the declared (0.2,0.4)
+  band with the confined-pax band holding and deliveries parity.
+  Frozen before any cell ran; canary `sect_mess_boxed`, full grid the
+  owner's call.
 - **`MEAL-SVC-02` is measured — §2.** The `contact_factor_to_host`
   sweep ran the full 200-cell grid: MAGNITUDE-LANDED on the
   section-binding arm (confined-pax median 35), STILL-HIGH across the
