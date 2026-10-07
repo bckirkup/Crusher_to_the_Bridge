@@ -274,7 +274,31 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`MEAL-SVC-01` canary, measured at `32b11ccf` (`docs/ledger/MEAL-SVC-01.md`,
+`MEAL-SVC-02` full grid, measured at `54086e4ca8e6d9af301b7249707fdab10437b38f`
+(`docs/ledger/MEAL-SVC-02.md`, `docs/covid/covid_meal_service_02_readout.md`,
+`campaigns/covid/meal_service_02/LEDGER.md`): the `contact_factor_to_host`
+attenuation sweep on the steward→host meal-delivery direction — ZONE_NARROW ×
+{SHIPPED, MID, LO, FLOOR, OFF} + D0 corner pair + SECT sub-arm at LO + two
+`*_svc_base` drift rows, 10 arms × 20 seeds = 200 cells @θ7.9e6, 0 failures
+on `picard-analysis-fargate-queue`. **MAGNITUDE-LANDED on
+`zone_narrow_svc_dir_sect_cf_lo` — confined-pax takeoff median 35 ∈ [26,160]
+at the same cf_lo factor that read STILL-HIGH (289) on the uniform ladder**
+(stewards/host 1.0 vs 44; `service_to_host` acq 490 vs 5,570; deliveries
+parity). The uniform-draw ladder saturates ~289–759 over factor 0.010→0.175
+(OFF ≡ BASE bit-identical), so the confined-pax bound is unreachable on the
+uniform-steward structure at any host-side factor — **a responder-structure
+effect, not a magnitude effect**. NONLINEAR-BREAK on floor→lo (294→289) is
+draw jitter on the asymptote. Residuals: crew share 0.841 vs record 0.29 on
+the landed arm (the service channel carries ~3.6% of crew pickups — the
+crew-side divergence lives off this channel); the sect arm is a different
+voyage realization (section draws ride a dedicated stream, takeoff 11/20),
+so the landing is within-arm-conditional, not seed-paired. Drift witnesses
+clean: cf_shipped 759 beside the svc-01 canary's 804; CW-02 bases pair at
+Δ −27.5/+7 during-median, deliveries parity. 9 audit violations, all
+explained (D0 exempt-share isolation-path ×6; sect cells with no shedding
+bound steward ×3).
+
+Prior measurement — `MEAL-SVC-01` canary, measured at `32b11ccf` (`docs/ledger/MEAL-SVC-01.md`,
 `docs/covid/covid_meal_service_01_readout.md`): the steward→host direction of
 the confinement meal-delivery channel — the direction CW-02 measured absent —
 armed as `transmission.caregiver.service.direction: "both"` on the verbatim
@@ -284,9 +308,9 @@ F13/F14 bound ≥52 (CW-02: ~4–19); crew share 0.379 vs the record's 0.29 (CW-
 ~0.97); deliveries parity holds (166,150 vs 128k–166k).** The channel exists
 and the declared full pair-dose magnitude overcorrects ~15× — signature
 recovered, interval sits high; the frozen stop rule held back the remaining
-100 cells (SECT and both `*_svc_base` rows unmeasured, the CW-02 drift
-witness unpaired). Open decision: which attenuation axis sweeps
-`service_to_host` between 0 and full pair dose.
+100 cells (superseded — MEAL-SVC-02 ran the full grid). Open decision:
+which attenuation axis sweeps `service_to_host` between 0 and full pair dose —
+**resolved**: no factor axis lands the bound; section binding does.
 
 Prior measurement — `CREW-WINDOW-02`, measured at `2df542ff` (`docs/ledger/CREW-WINDOW-02.md`,
 `docs/covid/covid_crew_window_02_readout.md`): the interior of the CW-01
@@ -464,26 +488,14 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
-- **`MEAL-SVC-02` is declared and frozen — the `contact_factor_to_host`
-  door-drop attenuation sweep, answering the open decision MEAL-SVC-01's
-  canary left.** `transmission.caregiver.roles.service
-  .contact_factor_to_host` gives the steward→host direction its own
-  declared corner/interval drawn per delivery on its own spawn
-  (`_SERVICE_HOST_CONTACT_STREAM_KEY`); absent → the shared realized
-  draw (the CF_HOST_SHIPPED control doubling as the MEAL-SVC-01 canary
-  drift witness). Frozen design
-  `docs/covid/covid_meal_service_02_design.md`: ZONE_NARROW ×
-  {SHIPPED, MID (0.02,0.08), LO (0.005,0.02), FLOOR 0.01, OFF 0.0} + D0
-  corner pair + SECT sub-arm at LO + two `*_svc_base` drift rows — 10
-  arms × 20 seeds = 200 cells @θ7.9e6, verbatim CW-02 contract; verdict
-  grammar MAGNITUDE-LANDED / OVER-ATTENUATED / STILL-HIGH /
-  NONLINEAR-BREAK. Campaign `campaigns/covid/meal_service_02/`
-  (jobdef `picard-covid-meal-svc-02`, image `covid-meal-svc-02`, S3
-  `campaign/covid_meal_service_02/`). **No cell has run** — Batch
-  execution is handed to the next session
-  (`docs/covid/covid_meal_service_02_handoff_2026_10_07.md` §7 has the
-  exact gate order: dry-run 200 → smoke → digest-pinned image → jobdef →
-  manifest → canary `zone_narrow_svc_dir_cf_lo` → stop and report).
+- **`MEAL-SVC-02` is measured — §2.** The `contact_factor_to_host`
+  sweep ran the full 200-cell grid: MAGNITUDE-LANDED on the
+  section-binding arm (confined-pax median 35), STILL-HIGH across the
+  whole uniform-draw factor ladder (289–759) — the bound was a
+  responder-structure effect, never a magnitude effect. Open
+  residuals: the crew-share divergence lives off the service channel
+  (~3.6% of crew pickups), and the sect arm is a different voyage
+  realization (takeoff 11/20). See `docs/covid/covid_meal_service_02_readout.md`.
 - **`COVID-HAND-AB-01` (v14) is the declared Diamond Princess re-approach
   under the repaired hand line — three designs, one gate.** The hand
   reservoir gained practice variability + drying under PR #804

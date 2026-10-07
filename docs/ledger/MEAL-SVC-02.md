@@ -1,8 +1,10 @@
 # MEAL-SVC-02
 **Date:** 2026-10-07
 **Commit:** 679a6c1b
+**Measured at:** `54086e4ca8e6d9af301b7249707fdab10437b38f`
+(image `covid-meal-svc-02`, ECR `sha256:300b6437…`)
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
 
 The door-drop attenuation sweep on `service_to_host`, the open decision
 the MEAL-SVC-01 canary left: which factor on the steward→host direction
@@ -30,10 +32,23 @@ cells, verbatim CW-02 replay contract. Campaign
 image `covid-meal-svc-02`; S3 `campaign/covid_meal_service_02/`; queue
 `picard-analysis-queue`.
 
-**Execution state:** declared and frozen pre-run; implementation merged
-to main (grammar + seam + witnesses + campaign registration +
-readout). The Batch legs (image build at the merged SHA, jobdef
-registration, manifest, canary `zone_narrow_svc_dir_cf_lo` 20 seeds →
-STOP and report → remaining 180 cells) are handed to the next session —
-see `docs/covid/covid_meal_service_02_handoff_2026_10_07.md`. No cell
-has run; nothing below is a measurement.
+**Execution state:** measured — full grid 200/200 cells, 0 failures, on
+`picard-analysis-fargate-queue` (jobdef
+`picard-covid-meal-service-02-fargate` rev 1; the EC2 queue was flooded
+by sibling arrays and the LEDGER-named fallback carried every cell).
+Canary `zone_narrow_svc_dir_cf_lo` (20/20) read STILL-HIGH; the
+remaining 9 blocks ran on owner approval. Committed readout:
+`docs/covid/covid_meal_service_02_readout.md`; runs + verdict:
+`campaigns/covid/meal_service_02/LEDGER.md`.
+
+**Verdict:** MAGNITUDE-LANDED on `zone_narrow_svc_dir_sect_cf_lo` —
+confined-pax takeoff median **35** ∈ [26,160] at the same cf_lo factor
+that read STILL-HIGH (289) on the uniform ladder (stewards/host 1.0 vs
+44). The uniform ladder saturates ~289–759 over factor 0.010→0.175;
+OFF ≡ BASE bit-identical. The bound was never a factor-magnitude
+problem — it is a responder-structure problem. NONLINEAR-BREAK on
+floor→lo (294→289) is draw jitter on the asymptote. Residuals: crew
+share 0.841 vs record 0.29 on the landed arm (service channel carries
+only 3.6% of crew pickups); the sect arm is a different voyage
+realization (takeoff 11/20), so the landing is within-arm-conditional,
+not seed-paired.
