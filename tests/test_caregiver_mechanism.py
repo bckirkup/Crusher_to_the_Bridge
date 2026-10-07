@@ -92,9 +92,13 @@ def _profile() -> dict:
 
 
 def _core(
-    caregiver: dict | None = None, seed: int = 7,
+    caregiver: dict | None = None,
+    seed: int = 7,
+    tx_extra: dict | None = None,
 ) -> TransmissionCore:
-    cfg = {"transmission": {"caregiver": caregiver or {}}}
+    tx = {"caregiver": caregiver or {}}
+    tx.update(tx_extra or {})
+    cfg = {"transmission": tx}
     core = TransmissionCore(
         rng=np.random.default_rng(seed),
         zone_volumes={ZONE: 50.0},
@@ -562,9 +566,12 @@ class TestCaregiverV1:
             occupant_share=1.0,
             epoch=0,
         )
+        # A real emit files under the stateroom compartment key — the
+        # parent block key is a pool no emit on this hull ever writes to
+        # (ISO-QUARTERS-01).
         core.emesis_patch_pools_by_pathogen.setdefault(
             PATHOGEN, {},
-        )[ZONE] = [patch]
+        )[core._cabin_compartment_key(ZONE, host)] = [patch]
         core._caregiver_pathogen_epoch(1, PATHOGEN, profile, {}, {})
         assert core.caregiver_telemetry["service_deliveries"] == 1
         assert patch.mass < 1.0e6
@@ -607,15 +614,18 @@ class TestCaregiverV1:
                     "service_touches": (3, 3),
                 },
             })
+            host = self._symptomatic_host(1)
             patch = EmesisPatch(
                 mass=1.0e6, high_touch_area_m2=2.0,
                 occupant_share=1.0, epoch=0,
             )
+            # Filed at the host's stateroom compartment key, where a real
+            # emit would have written it (ISO-QUARTERS-01).
             core.emesis_patch_pools_by_pathogen.setdefault(
                 PATHOGEN, {},
-            )[ZONE] = [patch]
+            )[core._cabin_compartment_key(ZONE, host)] = [patch]
             dose = core._caregiver_service_dose(
-                self._symptomatic_host(1), _agent(9, role="crew"),
+                host, _agent(9, role="crew"),
                 1, PATHOGEN, profile,
             )
             return dose, patch.mass
@@ -997,3 +1007,132 @@ class TestMealSvc02:
         self._deliver(core)
         assert core.caregiver_telemetry["service_deliveries"] == 1
         assert core._service_host_factor_stats["n"] == 0
+
+
+class TestIsolatedQuartersDeposits:
+    """ISO-QUARTERS-01: a confined host's bolus lands in its stateroom.
+
+    Behaviour and invariant tests only: a host at
+    ``Isolated_In_Quarters`` emits its due emesis into the pool its own
+    stateroom compartment files under — never the parent block, and the
+    host joins no pickup or contact draw — with every new draw on the
+    dedicated stream, so the shared voyage stream and the ``off``
+    baseline are untouched; and the steward-side service read resolves
+    the same unit the emit pass wrote.
+    """
+
+    @staticmethod
+    def _isolated_emitter(core: TransmissionCore) -> KorkinAgent:
+        host = _emitting(1, _profile(), np.random.default_rng(3))
+        host.current_location = "Isolated_In_Quarters"
+        host.clock = core.clock
+        host.infections[PATHOGEN]["time_infected"] = 48
+        return host
+
+    def test_isolated_emitter_files_into_its_own_stateroom(self) -> None:
+        core = _core()
+        host = self._isolated_emitter(core)
+        core._agents_by_id = {1: host}
+        core._isolated_quarters_deposits(1, PATHOGEN, _profile())
+        unit = core._cabin_compartment_key(ZONE, host)
+        pools = core.emesis_patch_pools_by_pathogen.get(PATHOGEN, {})
+        assert pools.get(unit), "the bolus files under the stateroom"
+        assert not pools.get(ZONE), "nothing files at the parent block"
+        records = host.emesis_deposition_records_by_pathogen[PATHOGEN]
+        assert records
+        assert {r["zone"] for r in records} == {unit}
+
+    def test_the_pass_never_touches_the_shared_stream(self) -> None:
+        """Every emit draw runs on the dedicated stream — a voyage with an
+        isolated emitter leaves ``self.rng`` bit-identical to one without.
+        """
+        core = _core()
+        host = self._isolated_emitter(core)
+        core._agents_by_id = {1: host}
+        state = core.rng.bit_generator.state
+        core._isolated_quarters_deposits(1, PATHOGEN, _profile())
+        assert core.rng.bit_generator.state == state
+        assert core._isolated_deposit_rng is not None
+
+    def test_off_mode_emits_nothing_and_spawns_no_stream(self) -> None:
+        """The labelled baseline: ``off`` is silent and draws nothing."""
+        core = _core(tx_extra={"isolated_quarters_deposits": "off"})
+        host = self._isolated_emitter(core)
+        core._agents_by_id = {1: host}
+        state = core.rng.bit_generator.state
+        core._isolated_quarters_deposits(1, PATHOGEN, _profile())
+        assert not core.emesis_patch_pools_by_pathogen.get(PATHOGEN)
+        assert core.rng.bit_generator.state == state
+        assert core._isolated_deposit_rng is None
+        assert not host.emesis_deposition_records_by_pathogen.get(PATHOGEN)
+
+    def test_the_pass_doses_and_contacts_nothing_itself(self) -> None:
+        """Deposit-only: the emit adds the isolated host to no pickup unit
+        — it accrues no dose and no pathway entry of its own."""
+        core = _core()
+        host = self._isolated_emitter(core)
+        core._agents_by_id = {1: host}
+        doses: dict[int, float] = {}
+        pw: dict[int, dict[str, float]] = {}
+        core._isolated_quarters_deposits(
+            1, PATHOGEN, _profile(), doses, pw,
+        )
+        assert doses.get(1, 0.0) == pytest.approx(0.0)
+        assert 1 not in pw
+
+    def test_a_home_zone_outside_cabin_files_under_the_zone(self) -> None:
+        """A quarters that is not a Cabin_Corridor compartment files under
+        the zone itself — the same key the home emit path writes."""
+        core = _core()
+        host = self._isolated_emitter(core)
+        host.home_zone = "Medical_Isolation"
+        core.zone_types["Medical_Isolation"] = "Medical"
+        assert core._emesis_deposit_unit(host) == "Medical_Isolation"
+
+    def test_mode_parses_default_string_mapping_and_rejects(self) -> None:
+        assert _core().isolated_quarters_deposits == "deposits_only"
+        assert _core(
+            tx_extra={"isolated_quarters_deposits": "off"},
+        ).isolated_quarters_deposits == "off"
+        assert _core(tx_extra={
+            "isolated_quarters_deposits": {"mode": "deposits_only"},
+        }).isolated_quarters_deposits == "deposits_only"
+        for bad in ({"mode": "bogus"}, 7):
+            with pytest.raises(ValueError):
+                _core(tx_extra={"isolated_quarters_deposits": bad})
+
+    def test_service_read_finds_the_confined_compartment_patch(self) -> None:
+        """The steward-side pickup reads the unit the emit files under —
+        a confined cabin host's patch (filed at ``::cabinN``) reaches the
+        service dose it could never touch through the parent-key read.
+        """
+        from engines.transmission_core import EmesisPatch
+        profile = _profile()
+        profile["airborne_emission_mode"] = "emesis_conditioned"
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "report_probability": (0.0, 0.0),
+                "service_touches": (3, 3),
+            },
+        })
+        host = TestCaregiverV1._symptomatic_host(1)
+        host.schedule = ["Meal:Main"] * 24
+        # The defpair-measured confined population: quarantined in its own
+        # cabin (``current_location`` stays the home zone), not the
+        # sentinel. Steward pickup must find the compartment patch.
+        core._quarantined_ids.add(1)
+        steward = _agent(9, role="crew")
+        core._agents_by_id = {1: host, 9: steward}
+        patch = EmesisPatch(
+            mass=1.0e6, high_touch_area_m2=2.0,
+            occupant_share=1.0, epoch=0,
+        )
+        core.emesis_patch_pools_by_pathogen.setdefault(
+            PATHOGEN, {},
+        )[core._cabin_compartment_key(ZONE, host)] = [patch]
+        doses: dict[int, float] = {}
+        core._caregiver_pathogen_epoch(1, PATHOGEN, profile, doses, {})
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert patch.mass < 1.0e6
+        assert doses.get(9, 0.0) > 0.0

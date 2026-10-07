@@ -1,0 +1,140 @@
+{
+ "arm": "isolate_confined",
+ "caregiver_telemetry": {
+  "caregiver_dose_credited": 60115.135610053265,
+  "caregiver_dose_delivered": 103947.4092530505,
+  "caregiver_reports": 23,
+  "caregiver_responses": 0,
+  "cleanup_dose_credited": 60115.135610053265,
+  "cleanup_dose_delivered": 103947.4092530505,
+  "cleanup_reports": 23,
+  "cleanup_responses": 0,
+  "cleanup_steward_responses": 53,
+  "service_deliveries": 595,
+  "service_dose_credited": 8391.99932758461,
+  "service_dose_delivered": 10912.265949049239,
+  "service_dose_to_host_credited": 0.0,
+  "service_dose_to_host_delivered": 0.0,
+  "service_reports": 0,
+  "service_section_steward_draws": 0,
+  "steward_responses": 53,
+  "tending_designations": 0,
+  "tending_dose_credited": 0.0,
+  "tending_dose_delivered": 0.0,
+  "tending_epochs": 0,
+  "tending_refusals": 0,
+  "tending_reports": 0
+ },
+ "confined_emitters": {
+  "1069": {
+   "emits": 2,
+   "home_zone": "PC_D9_P_A",
+   "location": "Isolated_In_Quarters",
+   "surface_gec": 50512452.446901426,
+   "zones": [
+    "PC_D9_P_A::cabin1069"
+   ]
+  },
+  "1443": {
+   "emits": 3,
+   "home_zone": "CC_D1_A",
+   "location": "Isolated_In_Quarters",
+   "surface_gec": 450627156.8065009,
+   "zones": [
+    "CC_D1_A::cabin1433",
+    "PC_D4_P_A::cabin1433"
+   ]
+  },
+  "1596": {
+   "emits": 2,
+   "home_zone": "CC_D2_A",
+   "location": "Isolated_In_Quarters",
+   "surface_gec": 227707434.24399367,
+   "zones": [
+    "PoolDeck"
+   ]
+  },
+  "1709": {
+   "emits": 1,
+   "home_zone": "CC_D1_F",
+   "location": "Isolated_In_Quarters",
+   "surface_gec": 346300.9911201612,
+   "zones": [
+    "PC_D8_S_F::cabin1708"
+   ]
+  }
+ },
+ "deposit_zone_counts": {
+  "CC_D1_A::cabin1433": 1,
+  "PC_D4_P_A::cabin1433": 2,
+  "PC_D8_S_F::cabin1708": 1,
+  "PC_D9_P_A::cabin1069": 2,
+  "PoolDeck": 2
+ },
+ "isolated_ids_final": [
+  35,
+  54,
+  87,
+  92,
+  157,
+  215,
+  262,
+  375,
+  378,
+  396,
+  401,
+  403,
+  533,
+  584,
+  649,
+  722,
+  741,
+  839,
+  842,
+  885,
+  915,
+  1036,
+  1069,
+  1092,
+  1188,
+  1231,
+  1266,
+  1326,
+  1361,
+  1401,
+  1416,
+  1443,
+  1513,
+  1596,
+  1693,
+  1709,
+  1737,
+  1819
+ ],
+ "mode": "deposits_only",
+ "patch_pool_keys": {
+  "norwalk_gi": [
+   "CC_D1_A::cabin1433",
+   "CC_D3_A::cabin1416",
+   "CC_D3_F::cabin1416",
+   "PC_D4_P_A::cabin1433",
+   "PC_D5_S_A::cabin368",
+   "PC_D6_P_A::cabin1022",
+   "PC_D6_P_A::cabin396",
+   "PC_D6_P_A::cabin54",
+   "PC_D6_S_A::cabin54",
+   "PC_D6_S_F::cabin1266",
+   "PC_D6_S_F::cabin649",
+   "PC_D7_P_M::cabin584",
+   "PC_D7_S_A::cabin377",
+   "PC_D7_S_A::cabin915",
+   "PC_D7_S_F::cabin377",
+   "PC_D8_P_F::cabin157",
+   "PC_D8_S_M::cabin741",
+   "PC_D9_P_A::cabin1069",
+   "PC_D9_P_A::cabin35"
+  ]
+ },
+ "run_id": "fl_norovirus_classic_cruise_1900_dose7p57_rung-shipped_nsf29_bp32p5c18p5_n1910_ep288_syndromic_comp65_s8105",
+ "seed": 8105
+}
