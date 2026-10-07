@@ -1,0 +1,258 @@
+{
+  "design_id": "covid-crew-berth-01",
+  "task_id": "covid-crew-berth-01",
+  "design_doc": "docs/covid/covid_crew_berth_01_design.md",
+  "parent_design": "covid-crew-mess-01",
+  "description": "CREW-BERTH-01: crew berthing/work-cohort arms on the verbatim CW-02 replay contract over the landed sect_mess_boxed base (theta 7.9e6, 6 arms x 20 seeds = 120 declared cells; canary = combined only). Berth attribution on the boxed arm (PR #957) decomposes ~400 during-window crew acquisitions into occupational ~73% (galley 117, crew-mess posted 65, other work zones 64), corridor transit 47, cabin 107 (74 confined-in-berth: 35 carry-home + 8 pre-window mate + 31 corridor-pool). Arms add two new order modifiers: crew_berthing {cohort | rezone into the declared deck-4 essential-crew block} \u2014 a deterministic, anchor-preserving, status-pure cabin re-deal so no stateroom mixes confined and working crew \u2014 and crew_work_cohorts {shift_split, pods: 2} \u2014 rising-edge schedule surgery splitting each essential posting's Work block into two non-overlapping watches, off-shift hours resolving home_zone ('Rest'). Both mechanisms draw nothing on any RNG stream; off/baseline stays bit-identical and the pre-window phase stays seed-paired. mess_boxed_base re-runs in-design as pairing base + drift witness vs the CREW-MESS-01 boxed canary row. Declared arithmetic: berth-only arm caps ~18.5% of crew events, occupational block ~73% \u2014 the combined arm is the family ceiling and may land short of the (0.2,0.4) band; partial verdicts are pre-registered.",
+  "prerequisites": [
+    "CREW-MESS-01 boxed corner measured (merged): sect_mess_boxed lands confined-pax med ~28 in [26,160], deliveries ~162k parity, crew_mess during-mass -> 0; residual during-window crew share 0.727 vs record 0.29",
+    "Berth attribution landed (PR #957, tools/covid_berth_attribution.py): 400 during-window crew acquisitions on 3 boxed reruns = galley 117, crew_mess posted-staff 65, other work zones 64, corridor transit 47, cabin 107 (74 confined-in-berth)",
+    "MEAL-SVC-02 landed corner rides verbatim: direction both, service_responder_mode section, service_section_cabins [10,15], contact_factor_to_host [0.005,0.02]",
+    "Epoch order verified: _step_protocols (modifier application) precedes _step_record->step_quarantine_confinement, so rising-edge partitions read the order's DECLARED exempt set (exempt_classes \u2229 exempt_work_zones), not realized quarantined_ids",
+    "Steward/delivery pool is role==crew \u2229 _responder_available (aboard, unconfined) \u2014 not schedule-gated; shift-split cannot starve service_deliveries; section partition builds lazily post-re-deal on current compartment keys"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [
+    7900000.0
+  ],
+  "infection_age_days": [
+    6.8
+  ],
+  "imports": [
+    1
+  ],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "shipped_baseline",
+      "overrides": {},
+      "note": "Shipped default verbatim - SOP-017 days 16-30, four crew classes exempt posting to every work zone, responder-only direction, uniform stewards, shared (0.05, 0.3) door-drop factor, messes open, crew berth as assigned. First arm so empty overrides per the arm grammar; doubles as the widest crew-share corner."
+    },
+    {
+      "arm_id": "mess_boxed_base",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-MESSBOX",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [
+                10,
+                15
+              ],
+              "contact_factor_to_host": [
+                0.005,
+                0.02
+              ]
+            }
+          }
+        }
+      },
+      "note": "The sect_mess_boxed corner verbatim - boxed meals, no berthing/cohort modifiers. Pairing base + drift witness vs the CREW-MESS-01 boxed canary row (crew share ~0.727 class, confined-pax ~28); NOT expected bit-identical across intervening merges."
+    },
+    {
+      "arm_id": "berth_cohort",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-BERTHCOH",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [
+                10,
+                15
+              ],
+              "contact_factor_to_host": [
+                0.005,
+                0.02
+              ]
+            }
+          }
+        }
+      },
+      "note": "Boxed meals + crew_berthing {mode: cohort}: at the order's rising edge, every (zone, berth_group) crew pool re-deals cabins status-pure on the declared exempt set (working vs confined never share a stateroom), anchor-preserving (min-id stayer keeps the room and its compartment key). Deterministic, draws nothing. Targets the 35 carry-home confined-in-berth events."
+    },
+    {
+      "arm_id": "berth_rezone",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-BERTHRZ",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [
+                10,
+                15
+              ],
+              "contact_factor_to_host": [
+                0.005,
+                0.02
+              ]
+            }
+          }
+        }
+      },
+      "note": "Boxed meals + crew_berthing {mode: rezone, berth_zones: [CC_D4_F, CC_D4_M, CC_D4_A]}: working crew re-home into the declared deck-4 essential-crew block; its confined occupants swap into the vacated berths; cabins re-deal status-pure ship-wide (subsumes cohort). Targets the 31 corridor-pool confined events plus the corridor-transit share; declared deck-4 block is geometry, not a fit."
+    },
+    {
+      "arm_id": "work_pods",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-PODSHFT",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [
+                10,
+                15
+              ],
+              "contact_factor_to_host": [
+                0.005,
+                0.02
+              ]
+            }
+          }
+        }
+      },
+      "note": "Boxed meals + crew_work_cohorts {mode: shift_split, pods: 2}: rising-edge schedule surgery splits each posted crew Work block into two non-overlapping watches (pod = agent_id % 2); off-shift hours read 'Rest' -> home_zone unconditionally (no draws, off-watch, day sanitary rate). Targets the ~73% occupational block (galley/mess-posted/other work zones); steward pool is not schedule-gated so deliveries parity is structurally protected."
+    },
+    {
+      "arm_id": "combined",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-BERTHPODS",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [
+                10,
+                15
+              ],
+              "contact_factor_to_host": [
+                0.005,
+                0.02
+              ]
+            }
+          }
+        }
+      },
+      "note": "CANARY - the family ceiling: boxed meals + berth rezone (subsumes cohort) + shift-split pods. Cheapest falsification first: if the ceiling can't reach (0.2,0.4) the weaker arms are moot; inside the band is a near-landing (stop and report); below is over-closure and the ladder brackets."
+    }
+  ],
+  "cells": 100,
+  "cells_note": "6 arms x 20 seeds. Seeded in-order per arm (20200205..20200224); each cell ~15 epochs/day over ~21 days with the voyage frozen. Canary = the combined block alone (20 cells); the remaining 100 cells run only on the author's go-ahead.",
+  "cell_payload_additions": [
+    "run",
+    "cohort",
+    "quarantine_witness",
+    "board",
+    "crew_window",
+    "guard_windows",
+    "crew_ledger",
+    "infection_log_tail",
+    "through_day14",
+    "takeoff_calibration",
+    "q_zone_reach",
+    "source_channel_during",
+    "during_quarantine_by_route",
+    "sanitary_visits"
+  ],
+  "admissibility": {
+    "conditional_trajectory_clause": "Seeds whose seeded case never completes takeoff produce no during-quarantine onset mass for reasons independent of the arm. The during-window median is computed on seeds that completed takeoff (onboard_infections > 0); takeoff_recorded_onsets remains an audit diagnostic (DP tally ~10), not a gate.",
+    "crew_share_primary": "During-window crew share vs the record 0.29 against the pre-declared target band (0.2, 0.4): inside = the berthing/cohort family reached the band; above = residual elsewhere; below = over-closed. The combined arm is read first (the family ceiling); berth arms alone are bounded (~18.5% of crew events) and their shortfall is a measurement, not a defect.",
+    "confined_pax_guard": "Confined-passenger during-window mass holds the landed band ([26,160] context, boxed-row median ~28) within seed-paired noise on every arm; a passenger-side move is PAX-COLLATERAL, a shared-zone defect, not a finding.",
+    "deliveries_parity": "service_deliveries per cell within 15% of the landed row (~162k) - the berthing/cohort seams must not move the steward channel (structurally protected: responder pool is not schedule-gated).",
+    "verdict_grammar": {
+      "BERTH-CHANNEL-CLOSED": "combined lands crew share inside (0.2, 0.4) with the guards holding - the family ceiling reaches the band",
+      "CEILING-SHORT": "combined moves measurably but lands > 0.4 - berthing+occupational family exhausted; the residual rides a channel outside this family",
+      "OVER-CLOSED": "combined lands crew share < 0.2 - the family over-corrects; the weaker arms bracket the truth",
+      "UNMOVED": "combined within seed-paired noise of mess_boxed_base - the mechanism never reached the venue (audit the echoes first)",
+      "PAX-COLLATERAL": "confined-pax mass departs the landed band beyond seed-paired noise - shared-zone defect",
+      "DRIFT": "mess_boxed_base departs the CREW-MESS-01 boxed row's class beyond seed-paired noise - the merged environment shifted under the arms"
+    },
+    "audit_invariants": [
+      "quarantine window [16, 30] activated on every cell; exempt_classes = 4 crew classes; exempt_work_zones echoed verbatim (11-zone list) on every arm",
+      "crew_window.crew_berthing echoes on every armed cell: applied_epoch at window start, restored_epoch at window end, relocated_* == 0 on cohort and > 0 on rezone/combined; absent or mismatched echo halts the readout",
+      "crew_window.crew_work_cohorts echoes on work_pods/combined: agents_split == realized exempt-set size, work_hours_removed > 0; absent halts",
+      "cross-status cabin pairs == 0 on every armed cell at every inside-window epoch; a mixed cabin is a mechanism defect",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "droplet split (0.175, 0.0) echoes on every cell",
+      "service_deliveries within 15% of the landed row median (~162k)",
+      "diner_redirects > 0 on every cell (boxed rides all arms)",
+      "drift witness: mess_boxed_base reproduces the CREW-MESS-01 boxed canary row's confined-pax band and crew-share class on the current merge"
+    ],
+    "report_immediately": [
+      "the mechanism cannot be expressed without consuming voyage RNG - it is frozen to draw nothing; if implementation forces a draw, stop",
+      "the base arm departs the boxed row's behaviour on the current merge (DRIFT) - stop and report before any array",
+      "PAX-COLLATERAL - berthing moved the passenger side; the mechanisms read/write crew state only, so a passenger move is a defect",
+      "confined-pax guard or deliveries parity breaks on the canary",
+      "the canary lands crew share inside (0.2, 0.4) - near-landing; stop and report before any further cells",
+      "the berth-attribution decomposition fails to reproduce on the canary seeds",
+      "child failure rate > 5%"
+    ]
+  },
+  "diagnostics": [
+    "crew_window.crew_berthing: mode, applied/restored epochs, pools_redealt, cabins_formed, single_occupancy, keys_preserved, relocated counts per cell",
+    "crew_window.crew_work_cohorts: pods, zones, agents_split, work_hours_removed per cell",
+    "during_quarantine_by_zone_class: cabin / corridor / galley / crew_mess / work-zone shares per cell",
+    "during_quarantine_by_route: droplet vs service tallies per cell",
+    "q_zone_reach + source_channel_during + crew_ledger carried from CW-02"
+  ],
+  "execution": {
+    "runner": "simulate_screen_cell",
+    "task": "covid_crew_berth_01",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/crew_berth_01",
+    "s3_prefix": "campaign/covid_crew_berth_01/",
+    "queue": "picard-analysis-queue",
+    "jobdef": "picard-covid-crew-berth-01",
+    "image_tag": "covid-crew-berth-01",
+    "submission_order": [
+      "canary block combined (20 seeds) - read out and STOP; the full grid is the owner's call"
+    ]
+  },
+  "rejected_alternatives": [
+    {
+      "axis": "partition on realized quarantined_ids at the rising edge",
+      "reason": "impossible on the epoch order: _step_protocols precedes step_quarantine_confinement, so realized confinement is not yet readable; the declared exempt set (postings) is deterministic and readable."
+    },
+    {
+      "axis": "RNG-shuffled cabin re-deal on a dedicated digest stream",
+      "reason": "a shuffle buys no physics; the anchor-preserving deterministic deal is the more faithful story (the roommate is re-berthed, the room keeps its staying occupant and its pool history) and keeps off/baseline bit-identical trivially."
+    },
+    {
+      "axis": "re-deal passenger cabins too",
+      "reason": "passengers are all confined under the order; a status-pure split is vacuous."
+    },
+    {
+      "axis": "re-deal without anchor preservation",
+      "reason": "orphans pre-window compartment-pool mass under dead keys and understates residual in-cabin hazard."
+    },
+    {
+      "axis": "rezone into empty corridors",
+      "reason": "the hull has none; the berth-for-berth swap into the declared deck-4 block is the honest expression."
+    },
+    {
+      "axis": "'Sleep' as the off-shift pod token",
+      "reason": "Sleep resolves through the rhythm share draw to free_zone during day hours (the awake minority leaks to public space) and burns a rhythm draw; 'Rest' resolves home_zone unconditionally and draws nothing."
+    },
+    {
+      "axis": "pods as work-zone re-posting (spread galley staff over the three kitchens)",
+      "reason": "changes venue identity and tangles the posted-zone witness; shift-split is the cleaner first read."
+    },
+    {
+      "axis": "submit the full 5-arm grid up front",
+      "reason": "the combined canary answers the ceiling question on 20 cells; the ladder's remaining 80 cells wait on the verdict."
+    }
+  ]
+}

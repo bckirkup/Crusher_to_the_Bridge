@@ -25,7 +25,9 @@ from crusher_labs.modalities.surface_strain_recovery import (
     recover_surface_mixture,
 )
 from crusher_labs.protocol_engine import (
+    apply_crew_berthing,
     apply_crew_meal_service,
+    apply_crew_work_cohorts,
     apply_hvac_modifiers,
     apply_transmission_modifiers,
     compute_stoplights,
@@ -1685,6 +1687,11 @@ class ShipSimulation:
             # CREW-MESS-01: same falling-edge contract — the meal-service
             # directive must clear when the order leaves merged_mods.
             apply_crew_meal_service(self.engine, work.merged_mods)
+            # CREW-BERTH-01: berthing/cohort directives carry the same
+            # contract; berthing rebuilds the core's berth registry when
+            # the roster changes.
+            apply_crew_berthing(self.engine, self.tx_core, work.merged_mods)
+            apply_crew_work_cohorts(self.engine, work.merged_mods)
         if not work.merged_mods:
             return
         apply_hvac_modifiers(self.contam_engine, work.merged_mods)

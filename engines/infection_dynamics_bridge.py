@@ -2087,6 +2087,38 @@ def _dining_catalog_from(zones: list[dict[str, str]]) -> list[dict[str, Any]]:
     return catalog
 
 
+def _berth_pool_cabin_size(
+    zone_name: str,
+    berth_group: str,
+    first_class: str,
+    meta: dict[str, Any],
+) -> int | None:
+    """Occupants per cabin for one berthing pool (CREW-BERTH-01).
+
+    Mirrors ``orchestrator_init._group_cabin_size`` /
+    ``default_cabin_size`` — duplicated here because that module
+    imports this one. ``cabin_size_by_class`` names classes or berth
+    groups; ``hot_bunk_ratio`` multiplies occupancy.
+    """
+    by_class = meta.get("cabin_size_by_class") or {}
+    declared = by_class.get(
+        berth_group, by_class.get(first_class, meta.get("cabin_size")),
+    )
+    if declared is not None:
+        cabin_size = int(declared)
+    elif meta.get("type") != "Cabin_Corridor":
+        return None
+    elif zone_name.startswith(("Crew_", "CC_", "OC_")):
+        cabin_size = 3 if zone_name.startswith(("Crew_", "CC_")) else 1
+    elif zone_name.startswith("FC_"):
+        cabin_size = 4
+    else:
+        cabin_size = 2
+    if cabin_size < 1:
+        return None
+    return cabin_size * max(int(meta.get("hot_bunk_ratio") or 1), 1)
+
+
 class KorkinShipEngine:
     """Python bridge to the Korkin Lab infection-dynamics ABM.
 
@@ -2183,6 +2215,37 @@ class KorkinShipEngine:
         self._crew_meal_staggered_rewrites: int = 0
         self._crew_meal_last_directive: dict[str, Any] | None = None
         self._saved_crew_schedules: dict[int, tuple[list[str], int]] = {}
+        # CREW-BERTH-01: the order-window crew berthing + work-cohort
+        # directives, written by ``apply_crew_berthing`` /
+        # ``apply_crew_work_cohorts`` while a confinement order carries
+        # the ``crew_berthing`` / ``crew_work_cohorts`` modifiers. Both
+        # are declared, fully deterministic mechanisms — they draw no
+        # RNG on any stream.
+        self._crew_berthing_key: tuple[Any, ...] | None = None
+        self._crew_berthing_last_directive: dict[str, Any] | None = None
+        self._saved_crew_berths: dict[int, tuple[Any, frozenset[int]]] = {}
+        self._crew_berth_witness: dict[str, Any] = {
+            "applied_epoch": None,
+            "restored_epoch": None,
+            "working_count": 0,
+            "confined_count": 0,
+            "pools_redealt": 0,
+            "cabins_formed": 0,
+            "single_occupancy": 0,
+            "keys_preserved": 0,
+            "mixed_status_cabins": 0,
+            "relocated_to_work_zones": 0,
+            "relocated_out": 0,
+        }
+        self._crew_cohorts_key: tuple[Any, ...] | None = None
+        self._crew_cohorts_last_directive: dict[str, Any] | None = None
+        self._saved_crew_cohort_schedules: dict[int, list[str]] = {}
+        self._crew_cohort_witness: dict[str, Any] = {
+            "applied_epoch": None,
+            "restored_epoch": None,
+            "agents_split": 0,
+            "work_hours_removed": 0,
+        }
 
         self.agents: list[KorkinAgent] = []
         self.epoch: int = 0
@@ -3103,6 +3166,376 @@ class KorkinShipEngine:
             "staggered_rewrites": int(self._crew_meal_staggered_rewrites),
             "schedules_held": len(self._saved_crew_schedules),
         }
+
+    # ------------------------------------------------------------------
+    # CREW-BERTH-01: crew berthing cohorts + essential-service shift pods
+    # ------------------------------------------------------------------
+
+    def set_crew_berthing(
+        self,
+        block: dict[str, Any] | None,
+        *,
+        exempt_classes: frozenset[str],
+        exempt_work_zones: frozenset[str],
+    ) -> bool:
+        """CREW-BERTH-01: apply or clear the crew berthing directive.
+
+        Called every epoch by ``apply_crew_berthing`` with the merged
+        ``crew_berthing`` block plus the order's *declared* exempt sets
+        (the rising edge precedes realized confinement in the epoch, so
+        the working/confined partition reads the postings the order
+        keeps working, not ``quarantined_ids``). Returns True when the
+        roster's berths changed this call — rising edge, mode swap, or
+        falling-edge restore — so the caller can rebuild the berth
+        registry on the transmission core. Draws no RNG on any stream.
+        """
+        key = (
+            repr(sorted(block.items())) if isinstance(block, dict) else None,
+            frozenset(exempt_classes),
+            frozenset(exempt_work_zones),
+        )
+        if key == self._crew_berthing_key:
+            return False
+        changed = False
+        if self._saved_crew_berths:
+            self._crew_berth_restore()
+            changed = True
+        self._crew_berthing_key = key
+        if not isinstance(block, dict):
+            return changed
+        self._crew_berthing_last_directive = dict(block)
+        self._crew_berth_apply(block, exempt_classes, exempt_work_zones)
+        self._crew_berth_witness["applied_epoch"] = self.epoch
+        self._crew_berth_witness["restored_epoch"] = None
+        return True
+
+    def _crew_berth_apply(
+        self,
+        block: dict[str, Any],
+        exempt_classes: frozenset[str],
+        exempt_work_zones: frozenset[str],
+    ) -> None:
+        """Re-deal crew cabins status-pure on the declared exempt set.
+
+        ``working`` = crew the order's exempt sets keep posted (exempt
+        class ∩ exempt work zone); every other crew member is confined
+        for the partition. ``rezone`` first swaps working crew into the
+        declared ``berth_zones`` and their confined occupants into the
+        vacated berths. Cabins then re-deal within each
+        ``(home_zone, berth_group)`` pool, anchor-preserving: an
+        unchanged pool-side cabin keeps its minimum-id member and so
+        its compartment key (and its accumulated pool history).
+        """
+        crew = [
+            a for a in self.agents if str(getattr(a, "role", "")) == "crew"
+        ]
+        working = {
+            int(a.agent_id)
+            for a in crew
+            if str(getattr(a, "agent_class", "")) in exempt_classes
+            and (
+                not exempt_work_zones
+                or str(getattr(a, "work_zone", "")) in exempt_work_zones
+            )
+        }
+        self._crew_berth_witness["working_count"] = len(working)
+        self._crew_berth_witness["confined_count"] = len(crew) - len(working)
+        moved: set[int] = set()
+        zone_meta = {str(z["name"]): z for z in self.zones}
+        self._saved_crew_berths = {
+            int(a.agent_id): (getattr(a, "home_zone", None), a.cabin_mate_ids)
+            for a in crew
+        }
+        if str(block.get("mode") or "") == "rezone":
+            moved = self._crew_berth_rezone(crew, working, block, zone_meta)
+        pools: dict[tuple[str, str], list[KorkinAgent]] = {}
+        for a in crew:
+            pools.setdefault(
+                (
+                    str(getattr(a, "home_zone", "") or ""),
+                    str(getattr(a, "berth_group", "") or a.agent_class),
+                ),
+                [],
+            ).append(a)
+        for (zone_name, berth_group), members in sorted(pools.items()):
+            cabin_size = _berth_pool_cabin_size(
+                zone_name, berth_group,
+                str(members[0].agent_class), zone_meta.get(zone_name) or {},
+            )
+            if cabin_size is None or cabin_size < 2:
+                continue
+            self._crew_berth_redeal_pool(
+                members, working, moved, cabin_size,
+            )
+
+    def _crew_berth_rezone(
+        self,
+        crew: list[KorkinAgent],
+        working: set[int],
+        block: dict[str, Any],
+        zone_meta: dict[str, Any],
+    ) -> set[int]:
+        """Swap working crew into the declared ``berth_zones`` block.
+
+        Confined occupants of the block take the berths the working
+        crew vacate, dealt round-robin by ascending id over the crew
+        corridors outside the block. Returns the relocated id set.
+        """
+        berth_zones = [
+            str(z) for z in (block.get("berth_zones") or [])
+            if str(z) in zone_meta
+        ]
+        if not berth_zones:
+            return set()
+        dest = set(berth_zones)
+        others = sorted({
+            str(a.home_zone)
+            for a in crew
+            if a.home_zone and str(a.home_zone) not in dest
+        })
+        if not others:
+            return set()
+        moved: set[int] = set()
+        movers_in = sorted(
+            (
+                a for a in crew
+                if int(a.agent_id) in working
+                and str(a.home_zone) not in dest
+            ),
+            key=lambda a: int(a.agent_id),
+        )
+        movers_out = sorted(
+            (
+                a for a in crew
+                if int(a.agent_id) not in working
+                and str(a.home_zone) in dest
+            ),
+            key=lambda a: int(a.agent_id),
+        )
+        for i, a in enumerate(movers_in):
+            a.home_zone = berth_zones[i % len(berth_zones)]
+            moved.add(int(a.agent_id))
+        for i, a in enumerate(movers_out):
+            a.home_zone = others[i % len(others)]
+            moved.add(int(a.agent_id))
+        self._crew_berth_witness["relocated_to_work_zones"] = len(movers_in)
+        self._crew_berth_witness["relocated_out"] = len(movers_out)
+        return moved
+
+    def _crew_berth_redeal_pool(
+        self,
+        members: list[KorkinAgent],
+        working: set[int],
+        moved: set[int],
+        cabin_size: int,
+    ) -> None:
+        """Deal one pool's cabins status-pure, anchors first.
+
+        Each original cabin's minimum-id member that stayed in the pool
+        anchors its stateroom (the ``zone|min`` compartment key — and
+        the pool history filed under it — survives). Original mates of
+        matching status stay put; remaining same-status free members
+        prefer partners above their anchor so the key is preserved;
+        leftovers form new staterooms by ascending id; unmatched
+        anchors hold single occupancy.
+        """
+        orig: dict[frozenset[int], list[KorkinAgent]] = {}
+        for a in members:
+            key = frozenset(set(a.cabin_mate_ids) | {int(a.agent_id)})
+            orig.setdefault(key, []).append(a)
+        anchors: list[KorkinAgent] = []
+        free: list[KorkinAgent] = []
+        for ids, group in orig.items():
+            orig_min = min(ids)
+            for a in group:
+                if (
+                    int(a.agent_id) == orig_min
+                    and int(a.agent_id) not in moved
+                ):
+                    anchors.append(a)
+                else:
+                    free.append(a)
+        anchors.sort(key=lambda a: int(a.agent_id))
+        free.sort(key=lambda a: int(a.agent_id))
+        by_status: dict[bool, tuple[list[KorkinAgent], list[KorkinAgent]]] = {
+            True: ([], []),
+            False: ([], []),
+        }
+        for a in anchors:
+            by_status[int(a.agent_id) in working][0].append(a)
+        for a in free:
+            by_status[int(a.agent_id) in working][1].append(a)
+        new_cabins: list[list[KorkinAgent]] = []
+        anchored_cabins: list[list[KorkinAgent]] = []
+        for status in (True, False):
+            pool_anchors, pool_free = by_status[status]
+            for anch in pool_anchors:
+                cabin = [anch]
+                orig_ids = set(anch.cabin_mate_ids)
+                for f in list(pool_free):
+                    if len(cabin) >= cabin_size:
+                        break
+                    if int(f.agent_id) in orig_ids:
+                        cabin.append(f)
+                        pool_free.remove(f)
+                for f in list(pool_free):
+                    if len(cabin) >= cabin_size:
+                        break
+                    if int(f.agent_id) > int(anch.agent_id):
+                        cabin.append(f)
+                        pool_free.remove(f)
+                for f in list(pool_free):
+                    if len(cabin) >= cabin_size:
+                        break
+                    cabin.append(f)
+                    pool_free.remove(f)
+                new_cabins.append(cabin)
+                anchored_cabins.append(cabin)
+            for i in range(0, len(pool_free), cabin_size):
+                new_cabins.append(pool_free[i : i + cabin_size])
+        wit = self._crew_berth_witness
+        wit["pools_redealt"] += 1
+        wit["cabins_formed"] += len(new_cabins)
+        anchored = {id(c) for c in anchored_cabins}
+        for cabin in new_cabins:
+            ids = {int(a.agent_id) for a in cabin}
+            for a in cabin:
+                a.cabin_mate_ids = frozenset(ids - {int(a.agent_id)})
+            if len(cabin) == 1:
+                wit["single_occupancy"] += 1
+            if (
+                id(cabin) in anchored
+                and min(ids) == int(cabin[0].agent_id)
+            ):
+                wit["keys_preserved"] += 1
+            statuses = {i in working for i in ids}
+            if len(statuses) > 1:
+                wit["mixed_status_cabins"] += 1
+
+    def _crew_berth_restore(self) -> None:
+        """Restore home zones + cabin mates saved at the rising edge."""
+        saved = self._saved_crew_berths
+        for a in self.agents:
+            orig = saved.get(int(a.agent_id))
+            if orig is None:
+                continue
+            a.home_zone = orig[0]
+            a.cabin_mate_ids = orig[1]
+        self._saved_crew_berths = {}
+        self._crew_berth_witness["restored_epoch"] = self.epoch
+
+    def crew_berthing_witness(self) -> dict[str, Any]:
+        """The per-cell berthing-directive echo read into ``crew_window``."""
+        directive = self._crew_berthing_last_directive or {}
+        out = {
+            "mode": directive.get("mode"),
+            "params": {
+                k: v for k, v in directive.items() if k != "mode"
+            },
+            "berths_held": len(self._saved_crew_berths),
+        }
+        out.update(self._crew_berth_witness)
+        return out
+
+    def set_crew_work_cohorts(
+        self,
+        block: dict[str, Any] | None,
+        *,
+        zones: frozenset[str],
+    ) -> bool:
+        """CREW-BERTH-01: apply or clear the work-cohort directive.
+
+        ``shift_split`` performs rising-edge schedule surgery on crew
+        posted to ``zones`` (resolved by ``apply_crew_work_cohorts`` to
+        the order's exempt_work_zones when the block omits them): each
+        contiguous Work block splits into ``pods`` consecutive turns of
+        which an agent keeps only turn ``agent_id % pods``; the rest
+        read ``"Rest"`` — an unrecognized token that resolves to
+        ``home_zone`` unconditionally (off-watch, draws nothing).
+        Schedules restore verbatim at the falling edge. Returns True on
+        a rising or falling edge.
+        """
+        key = (
+            repr(sorted(block.items())) if isinstance(block, dict) else None,
+            frozenset(zones),
+        )
+        if key == self._crew_cohorts_key:
+            return False
+        changed = False
+        if self._saved_crew_cohort_schedules:
+            self._crew_cohorts_restore()
+            changed = True
+        self._crew_cohorts_key = key
+        if not isinstance(block, dict):
+            return changed
+        self._crew_cohorts_last_directive = dict(block)
+        if str(block.get("mode") or "") == "shift_split":
+            self._crew_cohorts_split(
+                max(int(block.get("pods") or 2), 1), set(zones),
+            )
+            self._crew_cohort_witness["applied_epoch"] = self.epoch
+            self._crew_cohort_witness["restored_epoch"] = None
+        return changed or bool(self._saved_crew_cohort_schedules)
+
+    def _crew_cohorts_split(self, pods: int, zones: set[str]) -> None:
+        """Split posted crew Work blocks into ``pods`` pod turns."""
+        wit = self._crew_cohort_witness
+        for agent in self.agents:
+            if (
+                str(getattr(agent, "role", "")) != "crew"
+                or str(getattr(agent, "work_zone", "")) not in zones
+            ):
+                continue
+            sched = list(getattr(agent, "schedule", None) or [])
+            if not sched:
+                continue
+            pod = int(agent.agent_id) % pods
+            new_sched = list(sched)
+            removed = 0
+            i = 0
+            while i < len(sched):
+                if sched[i] != "Work":
+                    i += 1
+                    continue
+                j = i
+                while j < len(sched) and sched[j] == "Work":
+                    j += 1
+                turn = max(1, -(-(j - i) // pods))  # ceil
+                start = i + pod * turn
+                end = min(j, i + (pod + 1) * turn)
+                for k in range(i, j):
+                    if not start <= k < end:
+                        new_sched[k] = "Rest"
+                        removed += 1
+                i = j
+            if removed:
+                self._saved_crew_cohort_schedules[int(agent.agent_id)] = sched
+                agent.schedule = new_sched
+                wit["agents_split"] += 1
+                wit["work_hours_removed"] += removed
+
+    def _crew_cohorts_restore(self) -> None:
+        """Restore crew schedules saved at the cohort rising edge."""
+        saved = self._saved_crew_cohort_schedules
+        for a in self.agents:
+            orig = saved.get(int(a.agent_id))
+            if orig is not None:
+                a.schedule = list(orig)
+        self._saved_crew_cohort_schedules = {}
+        self._crew_cohort_witness["restored_epoch"] = self.epoch
+
+    def crew_work_cohorts_witness(self) -> dict[str, Any]:
+        """The per-cell work-cohort echo read into ``crew_window``."""
+        directive = self._crew_cohorts_last_directive or {}
+        out = {
+            "mode": directive.get("mode"),
+            "params": {
+                k: v for k, v in directive.items() if k != "mode"
+            },
+            "schedules_held": len(self._saved_crew_cohort_schedules),
+        }
+        out.update(self._crew_cohort_witness)
+        return out
 
     def _decay_and_deposit_pathogen_mass(self) -> None:
         """Legacy airborne decay, then shedders' surface/aerosol deposits."""
