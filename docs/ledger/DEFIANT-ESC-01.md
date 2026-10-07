@@ -1,7 +1,7 @@
 # DEFIANT-ESC-01
 **Date:** 2026-10-06
 **Commit:** 19040166
-**Pathogens:** influenza_a (mechanism is generic — applies to all order types)
+**Pathogens:** influenza_a
 **Status:** measured
 **Measured at:** 19040166
 
