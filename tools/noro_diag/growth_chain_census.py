@@ -1588,11 +1588,24 @@ def _common_source_block(core: Any) -> dict[str, Any]:
         getattr(core, "_cs_event_log", None) or (),
         key=lambda e: (e["start_epoch"], e["zone"], e["meal"]),
     )
+    # FOOD-COMMON-SOURCE-02 object witness: one closed row per
+    # contamination object (empty under ``independent`` mode); never-
+    # activated objects sort last on their null seeded_epoch.
+    objects = sorted(
+        getattr(core, "_cs_object_log", None) or (),
+        key=lambda o: (
+            o["seeded_epoch"] is None,
+            o["seeded_epoch"] or 0,
+            o["zone"],
+            o["object_id"],
+        ),
+    )
     return {
         "telemetry": dict(
             getattr(core, "common_source_telemetry", {}) or {},
         ),
         "events": events,
+        "objects": objects,
     }
 
 
