@@ -22,14 +22,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Lint with ruff (closes #89)
         run: |
@@ -78,7 +90,14 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
       - name: Run zizmor
         run: |
           for workflow in .github/workflows/ci.yml .github/workflows/picard-presidio.yml \
@@ -94,14 +113,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Run sanity checker
         run: python3 tools/sanity_checker.py --from-config
@@ -114,14 +145,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Validate JSON schemas (closes #83)
         env:
@@ -149,14 +192,28 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        env:
+          UV_FALLBACK_PYTHON: ${{ matrix.python-version }}
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "$UV_FALLBACK_PYTHON"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Run this shard of the fast test tier with coverage (closes #89)
         env:
@@ -186,14 +243,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.12"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.12"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Download every shard's coverage data
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
@@ -221,14 +290,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Import hygiene (Picard / Presidio / Stackelberg)
         env:
@@ -256,14 +337,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Presidio smoke (1 cruise, 2 epochs)
         env:
@@ -281,14 +374,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Sentinel smoke (bundled fleet, numpy reference walker)
         env:
@@ -320,14 +425,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Verify import hygiene (stoplight deduplication)
         env:
@@ -356,14 +473,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Verify dashboard imports (LCARS command deck)
         env:
@@ -394,14 +523,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: "3.11"
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "3.11"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Run orchestrator (24-epoch smoke test)
         run: python3 orchestrator.py

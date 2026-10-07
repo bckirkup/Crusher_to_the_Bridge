@@ -1,53 +1,62 @@
-"""One end-to-end COVID hull cell as a labelled change detector.
+"""Two end-to-end COVID hull cells as invariant + determinism witnesses.
 
-The composite-Theta campaign (covid_first_look_v1) is distributional, so no
-single cell decides anything there. This module exists for a different reason:
-so that a shared engine change — initiation, boarding, contact structure,
-syndromic onset handling — that moves the COVID arm is *noticed* when it
-lands, rather than a campaign later. Note the limit: a last-bit float change
-anywhere on the transmission path re-rolls the seed's trajectory and moves
-this cell by ~5–13% without changing the engine's scale, so a failure here
-says "attribute the move", not "the scale changed" (see
-docs/covid/covid_first_look_readout.md).
+Each cell is one full simulated voyage run through the campaign observables
+path: Greg Mortimer (the held-out hull) in the fast tier, Diamond Princess
+(the hull theta is fitted on) in the slow tier — ~20 minutes, nightly only.
+Both run at Theta = 1e10, seed 20200333. The Theta = 1e10 point is the
+lowest live, unsaturated corner on current defaults; the old 1e6 cell
+belonged to the pooled-air model.
 
-The cells are Greg Mortimer (the held-out hull, so pinning it leaks nothing
-into the fit) and Diamond Princess (the training hull; INDEX-GEOM-01 added it
-because otherwise no CI reading touches the hull Θ is fitted on, and a change
-to the very mechanics the fit scores would move nothing), Theta = 1e10, seed
-20200333. The old Theta = 1e6 cell belonged to
-the pooled-air model and became all-zero under either default flip, so the
-detector moved to the lowest live, unsaturated point on the new defaults.
-At Theta = 1e6 the prior pooled-air tuple was (6, 0, 217, 6, 3); changing
-either default alone drove that cell to (0, 0, 217, 0, 0).
+This module used to pin each cell's five-field witness tuple and fail on
+any move — a labelled change detector. That contract did not survive the
+merge rate: every mechanism touching the shared RNG stream re-rolled both
+cells (30+ attributed repins are in this file's git history, e.g. 15
+touches in the first week of October 2026), nightly went red for days at a
+stretch, and the per-move attribution cost more than the drift signal was
+worth. The pins are retired. What remains asserted is what a golden tuple
+could never check anyway:
 
-CHANGE DETECTOR, not a correctness check. The pinned values are not
-independently derived; they only pin current behaviour. If a deliberate change
-moves them, attribute the move to a specific part of the diff, then update
-them and say why. Failing means "something moved", not "something broke".
+* structural invariants of the observables — channel ordering
+  (asymptomatic positives <= positives <= specimens <= aboard), onset
+  decomposition conservation (before + after = total; passenger + crew
+  = total on each side of the split day), counts bounded by the hull's
+  aboard complement, share domains in [0, 1];
+* identity echoes — the cell ran the scenario, theta and seed it was
+  asked to run;
+* same-seed determinism on the fast cell — a second Greg Mortimer run
+  must reproduce the first witness tuple exactly. This is the part of
+  the old pin that was worth keeping: it catches unseeded draws,
+  iteration-order nondeterminism and uninitialized state, which an
+  invariant cannot see. Diamond Princess is exempt — a second ~20-minute
+  replay per interpreter is not worth the nightly wall time; its cell is
+  covered by the invariants and by the campaign arrays' paired-seed
+  readouts.
 
-The golden is keyed by interpreter minor version because CPython 3.12 changed
-builtin ``sum()`` to compensated (Neumaier) summation for floats. Route-dose
-and shedding totals in engines/transmission_core.py pass through ``sum()``, so
-the same seed follows a different Bernoulli path on 3.12 than on 3.11 — that,
-not an entropy leak, is why the identical cell read 85 onsets locally and 96 on
-Batch. Both interpreters are deterministic on their own; they simply disagree.
-Neither numpy (2.4.6 vs 2.5.0) nor scipy (1.17.1 vs 1.18.1) moves the cell.
+A legitimate mechanism move is therefore free to re-roll these cells; only
+a structurally impossible or nondeterministic reading fails. The pinned
+readings themselves survive as investigation references below — NOT
+asserted — so a future drift question has a starting tuple to compare
+against. The full per-merge attribution history (which mechanism moved
+which cell, by how much, flag-off reproductions) lives in this file's
+git history; see also docs/ledger/INDEX-GEOM-01.md for why two hulls.
+
+Note for determinism context: CPython 3.12 changed builtin ``sum()`` to
+compensated summation, so the same seed can follow a different Bernoulli
+path on 3.12 than on 3.11. Both interpreters are deterministic on their
+own; they need not agree with each other, and they are not asserted to.
 """
 
 from __future__ import annotations
-
-import sys
-from dataclasses import asdict
 
 import pytest
 
 from picard_framework.covid_theta_fit import HullObservables, simulate_hull
 
-HULLS = ("greg_mortimer_2020", "diamond_princess_2020")
+FAST_HULL = "greg_mortimer_2020"
 THETA = 1e10
 SEED = 20200333
 
-PINNED_FIELDS = (
+WITNESS_FIELDS = (
     "recorded_onsets",
     "onsets_before_split_day",
     "campaign_specimens",
@@ -55,549 +64,87 @@ PINNED_FIELDS = (
     "campaign_asymptomatic_positives",
 )
 
-# (onsets, onsets before split day, specimens, positives, asymptomatic positives)
-GOLDEN_BY_HULL_AND_MINOR: dict[str, dict[tuple[int, int], tuple[int, ...]]] = {
-    "greg_mortimer_2020": {
-        # CI and the Batch worker image (picard-campaign, CPython 3.11). The
-        # covid_first_look_v1 cell held_out_greg_mortimer_2020_theta1e6p00_
-        # seed20200333.json read (96, 52, 106, 36, 36) before either of two
-        # merged changes moved it: the molecular ascertainment gate (#537,
-        # scenario field molecular_ascertainment.start_day, closing the
-        # passive swab channel until the day-20 screen) alone moved it to
-        # (68, 20, 217, 104, 59), and the expedition_cruise_450 Bridge zone
-        # (#538, shared_sanitary_zones) re-weights the crew work-zone draws
-        # and alone moved it to (74, 42, 113, 21, 21). The tuple below is the
-        # composition, repinned from CI job test (fast tier, 3.11) on the
-        # merged tree. It read (47, 14, 217, 70, 37) while the COVID hull spec
-        # left the ship-wide boarding channel open for sars_cov2_resp, so every
-        # cell boarded a prevalence-drawn cohort (profile 1% passengers, 0.6%
-        # crew, epoch 6) on top of the declared index case; the opt-out in
-        # HullScenario._initiation_block removes that cohort and alone moved
-        # the cell to (1, 1, 217, 3, 2) (campaign image, CPython 3.11.16).
-        # Two incubation changes then moved it, each measured alone on this
-        # cell: an infection with no inoculum on record (the declared index
-        # case) is drawn at the reference dose instead of the literal-zero
-        # floor (natural_history.incubation_days; median 5.8 d, not 14.5 d),
-        # which alone gives (3, 1, 217, 2, 1); and the composite-Theta arm
-        # re-references the incubation dose term to the N50 of the exponential
-        # model it installs, ln 2 / Theta (covid_theta_fit.theta_profile_
-        # overrides), so secondary cases are no longer all drawn at the
-        # ceiling either, which on top gives the tuple below. Both
-        # interpreters agree on this cell now: it is a near-extinct run with
-        # few Bernoulli draws for the two float-sum paths to disagree on.
-        # That read (5, 0, 217, 6, 4). The sick-call roster then stopped
-        # reading a quarantine refuser as a symptomatic host (syndromic
-        # query_ground_truth: presentation only), so a healthy refuser no
-        # longer draws a passive specimen that retires it from the campaign;
-        # that alone moves the cell to the tuple below (measured with the
-        # coupling restored: the old tuple returns). The declared
-        # retest-after-negative policy shipped in the same change is inert
-        # here because greg_mortimer_2020 does not declare it.
-        # At the old Theta=1e6, each default flip independently moved the prior
-        # (6, 0, 217, 6, 3) reading to (0, 0, 217, 0, 0). The detector moved to
-        # Theta=1e10 because 1e6 belonged to the pooled-air model.
-        # The HVAC confinement repair applies the existing target attenuation
-        # factor on the downstream airborne route and moves the readings from
-        # (144, 64, 217, 157, 30) to (140, 64, 217, 155, 36) on CPython 3.11,
-        # and from (128, 51, 217, 149, 34) to (118, 48, 217, 139, 30) on 3.12.
-        # The exact linear-operator transport repair moves the live cell from
-        # (149, 62, 217, 166, 30) to (144, 64, 217, 157, 30) on CPython 3.11;
-        # the old value returns with the pre-repair frozen-source scheme.
-        # `AERO-CABIN-05` inverts the HVAC-downstream loop so a target zone's
-        # standing mass is inhaled once per epoch instead of once per upstream
-        # zone hosting a shedder, so the dose is no longer multiplied by the
-        # count of those zones: (140, 64, 217, 155, 36) to
-        # (129, 53, 217, 140, 41) on CPython 3.11, and
-        # (118, 48, 217, 139, 30) to (112, 48, 217, 125, 29) on 3.12.
-        # AERO-CABIN-06 moves the live COVID cell because per-stateroom pools
-        # partition cabin airborne mass and exclude a shedder's own stateroom
-        # from the HVAC target set: (129, 53, 217, 140, 41) to
-        # (101, 42, 217, 120, 27) on CPython 3.11.
-        # QUAR-ORDER-01 makes the same move on CPython 3.11:
-        # (101, 42, 217, 120, 27) -> (81, 42, 217, 88, 11).
-        # AERO-NEAR-02 then enables the two-box near field by default and deals
-        # buffet/crew-mess tables per meal, moving the 3.11 reading to
-        # (64, 8, 217, 67, 36). This value was read from the CI job (fast tier,
-        # 3.11) on this branch.
-        # DINE-CREW-01 deals crew-mess tables within department (work zone), which
-        # reorders the per-meal RNG draws and changes the near-field table-mates of
-        # every crew diner; the CI cell follows a different Bernoulli path:
-        # (64, 8, 217, 67, 36) -> (14, 5, 217, 19, 7), read from the CI job (fast
-        # tier, 3.11) on this branch.
-        # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility draw
-        # while scaling its mean to Theta: (14, 5, 217, 19, 7) ->
-        # (1, 1, 217, 4, 0) on CPython 3.11, read from CI job 105760985675
-        # (fast tier, 3.11, shard 3) on this branch.
-        # REINFECT-01 (refractory window after clearance, episode-keeping
-        # records) moves one campaign positive on 3.11 the same as on 3.12:
-        # (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0), read from CI job
-        # 106118699889 (fast tier, 3.11, shard 3) on this branch.
-        # AERO-SPLIT-01 partitions continuous droplet emission into a
-        # partner-bounded near-field plume and a 0.175 far-field pool share;
-        # droplet reach collapses to the proximity ring and the cell goes
-        # extinct: (1, 1, 217, 5, 0) -> (0, 0, 217, 1, 0), read from CI job
-        # 107697563827 (fast tier, 3.11, shard 3) on this branch — both
-        # interpreters agree, as before on near-extinct cells.
-        # NORO-GATE-FLOOR-01 closes the fomite pickup gate on any pool
-        # holding less than one genome copy, so the pickups the engine used
-        # to dispatch against sub-copy residues — and their hand-to-mouth
-        # draws — no longer happen; the shared stream reorders and this
-        # near-extinct cell re-ignites: (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2),
-        # read from CI job 107765635955 (fast tier, 3.11, shard 3) on this
-        # branch — both interpreters agree, as before on this cell.
-        # ROOM-AIR-01 + CABIN-OCC-01: room pools now exchange at the
-        # platform's declared ach*hvac_duty (expedition_cruise_450 cabin
-        # branches declare 6.0 at duty 0.5) and cabin-mate dose gates on
-        # time-partitioned co-presence; pool doses drop under the residence
-        # factor and pickup timing reorders the shared stream, so the
-        # near-extinct cell re-rolls: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0),
-        # read from CI job 108423507137 (fast tier, 3.11, shard 3) on this
-        # branch — identical to the 3.12 reading.
-        # SCHED-WATCH-01 (see the 3.12 note below): spawn-time jitter and
-        # night-watch draws reorder the shared stream:
-        # (1, 1, 217, 2, 0) -> (1, 1, 217, 1, 0) on CPython 3.11, read from
-        # CI job 108452677626 (fast tier, 3.11, shard 3) on this branch —
-        # identical to the 3.12 reading, as before on this near-extinct cell.
-        # SHIP-RHYTHM-02: expedition_cruise_450 now runs the labelled
-        # day-program rhythm layer by default; schedule-conditioned
-        # co-presence reorders the shared stream on this near-extinct cell:
-        # (1, 1, 217, 1, 0) -> (2, 1, 217, 2, 1), read from CI job
-        # 108679167789 (fast tier, 3.11, shard 3) on this branch. The
-        # flag-off cell reproduces (1, 1, 217, 1, 0) exactly on this
-        # branch (rhythm.enabled: false), so the move is fully attributed
-        # to the rhythm layer.
-        # EXPO-CAP-01: the per-shedder exposure cap is now the shipped
-        # default on catalogued cruise platforms; on this near-extinct
-        # cell the budget-bounded reach retires the remaining spread:
-        # (2, 1, 217, 2, 1) -> (0, 0, 217, 0, 0). The flag-off cell
-        # (transmission.exposure_cap.enabled: false) reproduces
-        # (2, 1, 217, 2, 1) exactly on this branch, so the move is fully
-        # attributed to the cap. Read in the local venv on CPython 3.12;
-        # both interpreters have agreed on every near-extinct reading of
-        # this cell, so the 3.11 entry carries the same tuple pending its
-        # CI read.
-        # NORO-HAND-PRACTICE-01: hygiene_cycle ships default-ON; the
-        # continuous COVID arm now draws routine washes plus wet-window
-        # factors per epoch (shared-stream reorder) and its donor-hand
-        # deposits blend wet/dry. The near-extinct cell re-rolls:
-        # (0, 0, 217, 0, 0) -> (2, 1, 217, 2, 0). The wash_reuptake
-        # baseline cell reproduces (0, 0, 217, 0, 0) exactly on this
-        # branch, so the move is fully attributed to the arm. Both
-        # interpreters read the identical tuple: local CPython 3.12 and
-        # CI job 110331284782 (fast tier, 3.11, shard 3).
-        # NORO-HAND-CARRIAGE-01: the arm now draws a per-infection
-        # protected-inactivation trait and per-tick lognormal uptakes
-        # from the new own-environment pool (replacing the deleted
-        # uniform increment), so the shared stream reorders and the
-        # near-extinct cell re-rolls: (2, 1, 217, 2, 0) ->
-        # (1, 1, 217, 2, 1). The wash_reuptake cell reproduces its
-        # PRACTICE-01 reading (0, 0, 217, 0, 0) exactly on this branch,
-        # so the move is fully attributed to the arm's new draws. Both
-        # interpreters read the identical tuple: local CPython 3.12,
-        # CI job 110382436238 (fast tier, 3.11, shard 3) and CI job
-        # 110382436325 (fast tier, 3.12, shard 3).
-        # NORO-HAND-CARRIAGE-01 delayed sequestration: the arm now draws
-        # one extra per-infection uniform for the sequester settling
-        # timescale, so the shared stream reorders and the near-extinct
-        # cell re-rolls: (1, 1, 217, 2, 1) -> (2, 1, 217, 3, 0). The new
-        # draw lives only inside _hand_practice, which only the
-        # hygiene_cycle arm calls, so the wash_reuptake cell cannot reach
-        # it and the move is fully attributed to the arm's new draw. Read
-        # from CI job 110627187029 (fast tier, 3.11, shard 3) on this
-        # branch -- identical to the local 3.12 reading.
-        # PRESENT-SHARE-01: the symptomatic_fraction share is spent once
-        # per course at the incubation crossing instead of being re-rolled
-        # once per day of natural history, so courses that fail the draw
-        # never present — the near-extinct cell re-rolls:
-        # (2, 1, 217, 3, 0) -> (2, 2, 217, 4, 1). The
-        # presentation_draw_mode: daily_hazard baseline cell reproduces
-        # (2, 1, 217, 3, 0) exactly on this branch, so the move is fully
-        # attributed to the share semantics — including
-        # campaign_asymptomatic_positives 0 -> 1, the intended direction.
-        # Read in the local venv on CPython 3.12; the 3.11 entry carried
-        # the same tuple pending its CI read, and PR #825's CI confirmed
-        # it on the 3.11 shard — both interpreters agree, as before on
-        # this near-extinct cell.
-        # CAREGIVER-V1 enables the tending and service roles by default for
-        # sars_cov2_resp (and service for every pathogen): the tending/
-        # service channels and their report stamps ignite the near-extinct
-        # cell the same way on both interpreters (see the 3.12 note for the
-        # mechanism and the mode: off reproduction of the prior tuple):
-        # (2, 2, 217, 4, 1) -> (46, 27, 217, 68, 18), read from CI job
-        # 111220544557 (fast tier, 3.11, shard 3) on this branch.
-        # PROPENSITY-V1 ships the persistent per-party participation
-        # multiplier default-ON: discretionary events re-deal on
-        # min(1, p * propensity), so the low-propensity tail attends less
-        # and the near-extinct cell falls further:
-        # (46, 27, 217, 68, 18) -> (36, 19, 217, 55, 18), read in the
-        # local venv on CPython 3.12 on this branch. The off cell
-        # (rhythm.participation_propensity.mode: off) reproduces
-        # (46, 27, 217, 68, 18) exactly on the same tree, so the move is
-        # fully attributed to the propensity deal. The 3.11 reading
-        # carries the same tuple pending its CI read.
-        # HOST-AGE-01 (see the 3.12 note below): the two sourced
-        # age-graded maps on sars_cov2_resp re-roll this cell the same
-        # way — (36, 19, 217, 55, 18) -> (43, 25, 217, 60, 19) on
-        # CPython 3.11, read from CI job 111755668902 (fast tier, 3.11,
-        # shard 3) on this branch. The profile minus both maps
-        # reproduces the prior tuple exactly on 3.12, so the move is
-        # fully attributed to the maps; the interpreters now diverge
-        # because the armed arm lifts the cell out of the near-extinct
-        # regime whose reads they used to share.
-        # CAREGIVER-SVC-01 ships service.contact_factor U[0.05,0.3]
-        # default-ON — the door-drop discount on R3 delivery doses
-        # (armed on sars_cov2_resp via service.enabled {"*": True}).
-        # The discounted channel converts fewer early infections:
-        # (43, 25, 217, 60, 19) -> (32, 13, 217, 47, 21), read from
-        # CI job 112522389407 (fast tier, 3.11, shard 3) on this
-        # branch. The contact_factor: 1.0 baseline cell reproduces
-        # the prior tuple exactly on the same tree, so the move is
-        # fully attributed to the factor.
-        # DEFIANT-ESC-01 (#945): defiant refusers now escalate to
-        # enforced_confinement at the declared 24 h hold-out instead of
-        # staying free forever; a compelled refuser confined with its
-        # cabin-mate pools at mate strength, so the cell gains two
-        # onsets: (32, 13, 217, 47, 21) -> (34, 14, 217, 47, 21). The
-        # never-compel baseline (fred_behavior.defiant_escalation_hours
-        # = 1e9 in config_overrides) reproduces the prior tuple exactly
-        # on the merged tree, so the move is fully attributed to the
-        # escalation. Read from CI job 112578952586 (fast tier, 3.11,
-        # shard 3) on this branch; identical on 3.12 (job 112578952734).
-        (3, 11): (34, 14, 217, 47, 21),
-        # Local CPython 3.12 venv (compensated float sum). Was (85, 51, 102,
-        # 30, 30) before the same two merged changes: #537's ascertainment
-        # gate alone moved it to (58, 14, 217, 93, 52) and the #538 Bridge
-        # zone alone moved it to (82, 46, 113, 25, 24); the tuple below is
-        # the composition, measured on the merged tree, and read (53, 15, 217,
-        # 74, 39) with the boarding cohort; the same opt-out alone moved it to
-        # (1, 1, 217, 3, 2). The two incubation changes above then moved it
-        # to (3, 1, 217, 2, 1) (reference-dose draw for the index case alone)
-        # and to (5, 0, 217, 6, 4) (with the Theta-arm re-reference). The
-        # new-default Theta=1e10 reading is live but unsaturated on both
-        # interpreters.
-        # AERO-CABIN-06 makes the same attributed move on CPython 3.12:
-        # (112, 48, 217, 125, 29) to (105, 51, 217, 118, 20).
-        # QUAR-ORDER-01: scheduled SOP-017 now admits every non-exempt passenger
-        # instead of applying the voluntary FRED draw: (105, 51, 217, 118, 20)
-        # -> (81, 42, 217, 88, 11).
-        # AERO-NEAR-02: default β near-field dose plus per-meal buffet/mess table
-        # dealing moves this local CPython 3.12 reading to (51, 8, 217, 51, 32).
-        # DINE-CREW-01 deals crew-mess tables within department (work zone), which
-        # reorders the per-meal RNG draws and changes the near-field table-mates of
-        # every crew diner; the cell follows a different Bernoulli path:
-        # (51, 8, 217, 51, 32) -> (14, 3, 217, 18, 10) on CPython 3.12. The 3.11
-        # reading is taken from the CI job on this branch.
-        # DOSE-FRAIL-01 restores the beta-Poisson per-host susceptibility draw
-        # while scaling its mean to Theta, moving the cell
-        # (14, 3, 217, 18, 10) -> (1, 1, 217, 4, 0) on CPython 3.12 and
-        # (14, 5, 217, 19, 7) -> (1, 1, 217, 4, 0) on CPython 3.11 (read from CI
-        # job 105760985675 on this branch). The interpreters now agree because
-        # the move is not RNG-stream divergence: the cell's hosts are no longer
-        # identically susceptible, and a concave marginal response over a
-        # right-skewed frailty distribution yields fewer infections than the
-        # same mean applied to identical hosts.
-        # REINFECT-01 gives a cleared host the declared refractory window and
-        # keeps first-episode records, which changes the trajectory and moves
-        # one campaign positive: (1, 1, 217, 4, 0) -> (1, 1, 217, 5, 0)
-        # on CPython 3.12, read in the local venv on this branch.
-        # AERO-SPLIT-01 partitions continuous droplet emission into a
-        # partner-bounded near-field plume and a 0.175 far-field pool share:
-        # the cell's droplet reach collapses to the proximity ring and the
-        # replay goes extinct, (1, 1, 217, 5, 0) -> (0, 0, 217, 1, 0) on
-        # CPython 3.12, read in the local venv on this branch. The partition
-        # also draws proximity partners on the shared stream, so this is the
-        # intended physics plus the stream reorder the labelled off baseline
-        # exists to isolate.
-        # NORO-GATE-FLOOR-01 (see the 3.11 note above) moves the cell
-        # (0, 0, 217, 1, 0) -> (4, 2, 217, 5, 2) on CPython 3.12, read in
-        # the local venv on this branch.
-        # ROOM-AIR-01 + CABIN-OCC-01 move it again on CPython 3.12: every
-        # room-pool inhalation route now doses the epoch-mean of a pool
-        # exchanging at the hull's declared AHU ach x hvac_duty (plus the
-        # stateroom bathroom-exhaust adder), and the cabin-mate channels
-        # are gated on time-partitioned co-presence — intended physics, no
-        # new shared-stream draws. The near-extinct cell loses two campaign
-        # positives: (4, 2, 217, 5, 2) -> (1, 1, 217, 2, 0), read in the
-        # local venv on this branch. The 3.11 pin is stale pending a CI
-        # reading on this branch, as earlier entries were.
-        # SCHED-WATCH-01 activates per-agent phase jitter (±2 h passengers,
-        # ±1 h crew) and the StrucCrew night-watch lottery at spawn; the
-        # draws reorder the shared stream and the near-extinct cell drops
-        # one campaign positive: (1, 1, 217, 2, 0) -> (1, 1, 217, 1, 0) on
-        # CPython 3.12, read in the local venv on this branch. The 3.11 CI
-        # shard reads the same tuple (see above).
-        # SHIP-RHYTHM-02 (see the 3.11 note above): the rhythm layer moves
-        # the cell the same way on CPython 3.12:
-        # (1, 1, 217, 1, 0) -> (2, 1, 217, 2, 1), read from CI job
-        # 108679167822 (fast tier, 3.12, shard 3) on this branch.
-        # EXPO-CAP-01 (see the 3.11 note above): the cap retires the
-        # remaining spread on this near-extinct cell:
-        # (2, 1, 217, 2, 1) -> (0, 0, 217, 0, 0), read in the local venv
-        # on this branch; flag-off reproduces the prior tuple exactly.
-        # NORO-HAND-PRACTICE-01 (see the 3.11 note above): the practice
-        # cycle's extra draws and wet/dry deposit blend re-roll the
-        # extinct cell: (0, 0, 217, 0, 0) -> (2, 1, 217, 2, 0); the
-        # wash_reuptake cell reproduces the prior tuple exactly on this
-        # branch. Identical to the 3.11 CI reading, as before on this
-        # cell.
-        # NORO-HAND-CARRIAGE-01 (see the 3.11 note above): the arm's new
-        # draws reorder the shared stream and the cell re-rolls:
-        # (2, 1, 217, 2, 0) -> (1, 1, 217, 2, 1); wash_reuptake
-        # reproduces its PRACTICE-01 reading exactly on this branch,
-        # so the move is fully attributed to the arm. Identical to the
-        # 3.11 CI reading, as before on this cell.
-        # NORO-HAND-CARRIAGE-01 delayed sequestration (see the 3.11 note
-        # above): the per-infection settling-timescale draw, reachable
-        # only through the hygiene_cycle arm's _hand_practice, reorders
-        # the shared stream and the cell re-rolls: (1, 1, 217, 2, 1) ->
-        # (2, 1, 217, 3, 0), read in the local venv on CPython 3.12 on
-        # this branch. Identical to the 3.11 CI reading, as before.
-        # PRESENT-SHARE-01 (see the 3.11 note above): the once-per-course
-        # presentation draw re-rolls the cell the same way on CPython 3.12:
-        # (2, 1, 217, 3, 0) -> (2, 2, 217, 4, 1), read in the local venv on
-        # this branch; the daily_hazard baseline reproduces the prior tuple
-        # exactly on this branch.
-        # CAREGIVER-V1 enables the tending and service roles by default for
-        # sars_cov2_resp (and service for every pathogen): tending
-        # designations bind family caregivers to symptomatic hosts for the
-        # course, meal-token service deliveries add crew contact to confined
-        # cabins, and their stamps feed the report channel — the near-extinct
-        # cell ignites: (2, 2, 217, 4, 1) -> (46, 27, 217, 68, 18). The
-        # transmission.caregiver.mode: off arm reproduces the prior tuple
-        # exactly on this branch (local venv, CPython 3.12), so the move is
-        # fully attributed to the mechanism's enablement, including
-        # campaign_asymptomatic_positives 1 -> 18 — tending caregivers who
-        # catch the host's emission present asymptomatically and are picked
-        # up by the campaign screen. The 3.11 CI read on this branch
-        # returned the identical tuple (CI job 111220544557) — both
-        # interpreters agree, as before on this cell.
-        # PROPENSITY-V1 (see the 3.11 note above): the persistent
-        # per-party participation multiplier re-deals the discretionary
-        # attendance Bernoullis: (46, 27, 217, 68, 18) ->
-        # (36, 19, 217, 55, 18), read in the local venv on this branch.
-        # The mode: off cell reproduces the prior tuple exactly, so the
-        # move is fully attributed to the propensity deal.
-        # HOST-AGE-01: sars_cov2_resp now carries the two sourced
-        # age-graded terms — dose_response.susceptibility_by_age_band
-        # (Ayoub decade ladder vs 60-69y, folded into the persistent
-        # per-host susceptibility) and symptomatic_fraction_by_age_band
-        # (Wang Fig. 2 digitised, gating the per-course presentation
-        # draw). Younger hosts infect and present less; the cell
-        # re-rolls to (34, 17, 217, 56, 22), with
-        # campaign_asymptomatic_positives 18 -> 22 the intended
-        # direction (infections that once presented now stay silent).
-        # The same profile with both maps removed reproduces
-        # (36, 19, 217, 55, 18) exactly on this branch, so the move is
-        # fully attributed to the two maps. Read in the local venv on
-        # CPython 3.12; the 3.11 CI read is (43, 25, 217, 60, 19) — the
-        # interpreters diverge now that the armed arm lifts the cell out
-        # of the near-extinct regime whose reads they used to share.
-        # CAREGIVER-SVC-01: the door-drop contact_factor converges the
-        # interpreters again — both read (32, 13, 217, 47, 21). The
-        # 1.0 baseline cell reproduces (34, 17, 217, 56, 22) exactly on
-        # CPython 3.12 on this branch, so the move is fully attributed
-        # to the factor's service-dose discount.
-        # DEFIANT-ESC-01 (#945): same move as the 3.11 entry above —
-        # the escalation compels a defiant refuser at +24 h and the
-        # co-confined mate pool converts two more courses:
-        # (32, 13, 217, 47, 21) -> (34, 14, 217, 47, 21), read from
-        # CI job 112578952734 (fast tier, 3.12, shard 3) on this
-        # branch, identical to the 3.11 reading.
-        (3, 12): (34, 14, 217, 47, 21),
-    },
-    "diamond_princess_2020": {
-        # INDEX-GEOM-01 adds this cell. Until it did, no CI reading looked at the
-        # training hull at all: the only pinned cell was the held-out Greg
-        # Mortimer, which declares no departure and cannot move under a fit-facing
-        # mechanic. The two cells hold every knob identical — Theta, seed, epochs,
-        # the five pinned fields — so they are directly comparable and differ only
-        # in hull.
-        #
-        # CHANGE DETECTOR, not an anchor comparison — the distinction is
-        # load-bearing on this hull specifically. These numbers are whatever the
-        # current mechanics produce; they are NOT the Diamond Princess observables
-        # of data/observation/covid_fit_targets.json, and covid.T1 / covid.T3 are
-        # real scored anchors on this same scenario. A move here is a signal to
-        # attribute a diff, never a fit residual to minimise, and nothing in this
-        # file may be quoted as a result.
-        #
-        # First reading, measured locally on CPython 3.12 on this branch: taken
-        # with the declared index case departing on day 5 (departure_day 5.0,
-        # Yamagishi 2020). The CPython 3.11 entry is pending a CI reading, as the
-        # Greg Mortimer 3.11 reads above were.
-        # This cell is marked `slow`: a full Diamond Princess replay is ~20
-        # minutes, so it lands on the nightly tier while the Greg Mortimer
-        # cell keeps a fast-tier reading on every push. That first reading was
-        # (3522, 2934, 1706, 252, 73); the 3.12 nightly at a44d4c4 (#632) was
-        # the last to pass at it. Two merges then moved the cell, read locally
-        # on CPython 3.12 (numpy 2.5.0) at each merge commit:
-        #   QUAR-EXEMPT-01 (#633, 861a0b9): confinement now applies each
-        #   order's own exempt_classes, changing whom the SOP-017 scenario
-        #   quarantine confines on this hull,
-        #   (3522, 2934, 1706, 252, 73) -> (3464, 2982, 1847, 232, 68);
-        #   REINFECT-01 (#636, d62f10d): cleared hosts get the declared 90-day
-        #   refractory window and episode-keeping records, so the late-replay
-        #   reinfections the old engine counted no longer occur,
-        #   (3464, 2982, 1847, 232, 68) -> (3418, 2942, 1894, 209, 68).
-        # The pin is the post-REINFECT-01 reading; #637/#638 touch no engine
-        # code. The local CPython 3.11 reading at the same commit is
-        # (3399, 2963, 1987, 195, 64) (numpy 2.4.6) and stays unpinned
-        # pending a CI reading, as the 3.11 entries above were.
-        # AERO-SPLIT-01 (#669) partitions continuous droplet emission into a
-        # partner-bounded near-field plume and a 0.175 far-field pool share:
-        # the cell's droplet reach is bounded by contact rate, and the
-        # proximity draws reorder the shared stream, so this is intended
-        # physics plus the stream reorder the labelled off baseline exists
-        # to isolate. Measured locally on CPython 3.12 on the evidence
-        # branch: (3418, 2942, 1894, 209, 68) -> (3412, 2677, 2002, 199, 81).
-        # The 3.11 reading stays pending a CI run, as above.
-        # ROOM-AIR-01 + CABIN-OCC-01 move the cell on CPython 3.12: every
-        # room-pool dose now reads the epoch-mean of a pool exchanging at
-        # the declared AHU ach x hvac_duty (plus the stateroom bathroom
-        # adder), and cabin-mate channels gate on time-partitioned
-        # co-presence. The confined regime loses 471 onsets before the
-        # split day while campaign positives rise (more of the confined
-        # cohort survives to, and converts by, the day-16 screen):
-        # (3412, 2677, 2002, 199, 81) -> (3400, 2206, 2090, 274, 120),
-        # read in the local venv on this branch. Intended physics; no new
-        # shared-stream draws.
-        # That pin went stale under SCHED-WATCH-01's spawn-time draws —
-        # the same shared-stream reorder that moved the greg_mortimer
-        # cell — but the cell is slow-tier, so the move surfaced only in
-        # nightly run 36313479313 (2026-09-27, pre-rhythm main) reading
-        # (3371, 2099, 2178, 252, 100) and was never repinned.
-        # SHIP-RHYTHM-02: mega_cruise_5000 now runs the labelled
-        # day-program rhythm layer by default; schedule-conditioned
-        # co-presence reorders the shared stream:
-        # (3371, 2099, 2178, 252, 100) -> (3373, 2005, 2139, 306, 113),
-        # measured in the local venv on this branch — the flag-off cell
-        # (rhythm.enabled: false) reproduces the nightly pre-rhythm
-        # reading exactly, so the second hop is fully attributed to the
-        # rhythm layer.
-        # EXPO-CAP-01: the per-shedder per-epoch contact budget ships
-        # on for catalogued cruise platforms; the cell goes extinct —
-        # the index's bounded reach never converts a secondary:
-        # (3373, 2005, 2139, 306, 113) -> (0, 0, 3047, 0, 0), measured
-        # in the local venv on this branch. Flag-off is byte-identical
-        # to the pre-change tree (per-epoch state digests match on the
-        # spec-json replay, seeds 20200205/20200206), so the move is
-        # fully attributed to the cap.
-        # NORO-HAND-CARRIAGE-01: the shipped hygiene_cycle arm draws a
-        # per-infection protected-inactivation trait and per-tick
-        # lognormal uptakes from the new own-environment pool, so the
-        # shared stream reorders and the extinct cell reignites:
-        # (0, 0, 3047, 0, 0) -> (2, 2, 3048, 2, 0), measured in the
-        # local venv on CPython 3.12 on the merged tree. The
-        # wash_reuptake baseline cell reproduces (0, 0, 3047, 0, 0)
-        # exactly on the same tree, so the move is fully attributed
-        # to the arm's new draws.
-        # NORO-HAND-CARRIAGE-01 delayed sequestration: the arm now draws
-        # one more per-infection uniform for the sequester settling
-        # timescale inside _hand_practice, so the shared stream reorders
-        # again and the cell follows a different Bernoulli path into the
-        # burning regime: (2, 2, 3048, 2, 0) -> (2968, 298, 3063, 627,
-        # 215), measured in the local venv on CPython 3.12 on this
-        # branch. The draw is reachable only through the hygiene_cycle
-        # arm, so the move is fully attributed to it.
-        # PRESENT-SHARE-01: the symptomatic_fraction share is spent once
-        # per course at the incubation crossing instead of being
-        # re-rolled once per day of natural history, so ~31% of courses
-        # now never present. The burning-regime cell re-reads the
-        # mechanism at campaign scale: recorded onsets fall (courses
-        # stay silent), onsets cluster earlier (silent shedders
-        # circulate), and campaign_asymptomatic_positives triples —
-        # (2968, 298, 3063, 627, 215) -> (2575, 2131, 2617, 688, 618),
-        # measured in the local venv on CPython 3.12 on this branch.
-        # The daily_hazard baseline cell reproduces
-        # (2968, 298, 3063, 627, 215) exactly on the merged tree, so the
-        # move is fully attributed to the share semantics.
-        # CAREGIVER-V1 + PROPENSITY-V1 (#859 + #860): this cell moves
-        # again under both mechanisms. On the merged tree at 57033bf5
-        # (=#860 content; #861/#862 touch deploy and probe wrappers only),
-        # the propensity mode: off arm reads (2485, 2251, 2832, 545, 488)
-        # — the caregiver ring contacts, tending upgrade, and confined
-        # meals_to_cabin service already shift the cell — and the
-        # shipped-default arm reads (2480, 2215, 2827, 595, 542), so the
-        # propensity multiplier's residual move is the difference. Both
-        # arms measured in the local venv on CPython 3.12 on the repin
-        # branch; the move is fully attributed.
-        # HOST-AGE-01: the two sourced age-graded maps on sars_cov2_resp
-        # (dose_response.susceptibility_by_age_band, Ayoub decade ladder;
-        # symptomatic_fraction_by_age_band, Wang Fig. 2) re-read this
-        # cell: (2480, 2215, 2827, 595, 542) -> (2765, 2587, 2702, 398,
-        # 333). The composition is the mechanism's own: the presentation
-        # ladder raises elderly presentation (0.83-0.88 vs flat 0.69) on
-        # an elder-skewed hull, so more surviving courses present and
-        # recorded onsets rise (+285), while the susceptibility ladder
-        # suppresses acquisitions and the campaign finds fewer positives
-        # (595 -> 398) and fewer asymptomatic ones (542 -> 333). The same
-        # profile with both maps removed reproduces the prior tuple
-        # exactly on this branch, so the move is fully attributed to the
-        # two maps. Both reads in the local venv on CPython 3.12 on this
-        # branch.
-        # The pin then went stale pre-SVC-01: nightly run 37461678535
-        # (post-CREW-WINDOW main, before #936) already read
-        # (2766, 2587, 2693, 400, 335). The engine merges in that window
-        # — CREW-WINDOW-01 grammar (f8dd6c0a), ALIGNMENT-CLEANUP mode
-        # switches (1d4778f6), CREW-WINDOW-02 fractional crew exemption
-        # gates (e8291a42) — are the mover; the exemption gates are the
-        # plausible semantics on a mass-confinement replay, unattributed
-        # per-merge. CAREGIVER-SVC-01's labelled baseline reproduces the
-        # drift tuple exactly (contact_factor: 1.0 arm reads
-        # (2766, 2587, 2693, 400, 335) on this tree), and the shipped
-        # default U[0.05,0.3] then moves it again —
-        # (2766, 2587, 2693, 400, 335) -> (2794, 2613, 2579, 429, 362) —
-        # the door-drop discount re-rolling this burning-regime cell's
-        # confined-cabin delivery doses (onsets/positives rise a little,
-        # specimens fall). So the repin records drift + factor hop; all
-        # reads in the local venv on CPython 3.12 on the union tree
-        # (SVC-01 + MEAL-SVC-01 defaults: direction responder,
-        # responder_mode uniform — status quo, no new shared draws).
-        (3, 12): (2794, 2613, 2579, 429, 362),
-    },
+# Souls aboard each scenario hull (see data/scenarios/covid_hull_scenarios.json
+# platform notes): Greg Mortimer 223 on expedition_cruise_450, Diamond
+# Princess 3711 on mega_cruise_5000. Counts above the complement are
+# structurally impossible — that is the bound these tests assert.
+ABOARD_COMPLEMENT = {"greg_mortimer_2020": 223, "diamond_princess_2020": 3711}
+
+# Informational only — the last witness tuples read before the pins were
+# retired (fields = WITNESS_FIELDS). Use these when investigating a drift
+# question, not as expectations. diamond_princess_2020 is the Oct 6 nightly
+# reading on CPython 3.12; greg_mortimer_2020 agreed across 3.11 and 3.12
+# at PR #946 (DEFIANT-ESC-01 attribution).
+LAST_KNOWN_READINGS: dict[str, tuple[int, ...]] = {
+    "greg_mortimer_2020": (34, 14, 217, 47, 21),
+    "diamond_princess_2020": (2766, 2587, 2693, 400, 335),
 }
 
 
+def _witness(obs: HullObservables) -> tuple[int, ...]:
+    return tuple(getattr(obs, f) for f in WITNESS_FIELDS)
+
+
 @pytest.fixture(
-    scope="module",
-    params=[
+    params=(
         "greg_mortimer_2020",
         pytest.param("diamond_princess_2020", marks=pytest.mark.slow),
-    ],
-    ids=HULLS,
+    ),
+    scope="module",
 )
 def cell(request) -> tuple[str, HullObservables]:
     return request.param, simulate_hull(request.param, THETA, SEED)
 
 
-def _pinned(obs: HullObservables) -> tuple[int, ...]:
-    d = asdict(obs)
-    return tuple(int(d[k]) for k in PINNED_FIELDS)
-
-
-def test_the_cell_recorded_its_index_case_and_stays_in_bounds(cell):
-    _hull, obs = cell
-    # AERO-SPLIT-01: the partition reorders the shared stream, and on the
-    # held-out hull the replay is extinct — 0 recorded onsets is a valid
-    # reading of this detector cell, so only the bounds relation survives.
-    assert obs.recorded_onsets >= 0
-    assert 0 <= obs.onsets_before_split_day <= obs.recorded_onsets
-    assert (
-        obs.onsets_before_split_day + obs.onsets_on_or_after_split_day
-        == obs.recorded_onsets
-    )
-    assert 0 <= obs.campaign_asymptomatic_positives <= obs.campaign_positives
-    assert obs.campaign_positives <= obs.campaign_specimens
-
-
-def test_the_cell_matches_its_pinned_reading(cell):
-    """Seed reproducibility is asserted here too: the tuple was read in another process."""
+def test_the_cell_echoes_the_scenario_it_was_given(cell):
+    """A miswired scenario read is a harness failure, not a model move."""
     hull, obs = cell
-    golden = GOLDEN_BY_HULL_AND_MINOR[hull]
-    key = (sys.version_info.major, sys.version_info.minor)
-    if key not in golden:
-        pytest.skip(f"no pinned {hull} reading for CPython {key[0]}.{key[1]}")
-    assert _pinned(obs) == golden[key], (
-        f"COVID hull cell moved for {hull}; attribute the move before "
-        f"repinning (fields {PINNED_FIELDS})"
+    assert obs.scenario_id == hull
+    assert obs.theta == THETA
+    assert obs.seed == SEED
+
+
+def test_the_cell_stays_within_structural_bounds(cell):
+    """Channel ordering and population bounds: impossible readings fail.
+
+    0 recorded onsets remains a valid reading (an extinct replay is legal);
+    what cannot be legal is a positive specimen count without specimens, an
+    onset count above the souls aboard, or a role decomposition that does
+    not re-sum to the split totals.
+    """
+    hull, obs = cell
+    aboard = ABOARD_COMPLEMENT[hull]
+
+    assert 0 <= obs.recorded_onsets <= aboard
+    assert 0 <= obs.onsets_before_split_day <= obs.recorded_onsets
+    assert 0 <= obs.onsets_on_or_after_split_day <= obs.recorded_onsets
+    # split_day is a true partition of the onset curve.
+    assert obs.onsets_before_split_day + obs.onsets_on_or_after_split_day == obs.recorded_onsets
+    # The passenger/crew fields are windowed counts around turn_day
+    # (±window_days), not a decomposition of the split sides — the window
+    # straddles split_day when turn_day < split_day, so they cannot sum to
+    # the split totals. What must hold: the two window halves are disjoint,
+    # so their sum is bounded by the curve total; and the pre-turn window
+    # lies inside the pre-split region for the harness defaults
+    # (turn_day=16 < split_day=17), so it cannot exceed it.
+    window_total = (
+        obs.passenger_onsets_before + obs.crew_onsets_before + obs.passenger_onsets_after + obs.crew_onsets_after
+    )
+    assert 0 <= window_total <= obs.recorded_onsets
+    assert obs.passenger_onsets_before + obs.crew_onsets_before <= obs.onsets_before_split_day
+    assert 0 <= obs.campaign_asymptomatic_positives <= obs.campaign_positives <= obs.campaign_specimens <= aboard
+    if obs.campaign_positives:
+        assert 0.0 <= obs.asymptomatic_share <= 1.0
+    if obs.campaign_specimens:
+        assert 0.0 <= obs.positive_share <= 1.0
+
+
+def test_the_fast_cell_is_deterministic(cell):
+    """Same seed, same interpreter: the witness tuple reproduces exactly."""
+    hull, obs = cell
+    if hull != FAST_HULL:
+        pytest.skip("determinism witness runs on the fast hull cell only")
+    rerun = simulate_hull(hull, THETA, SEED)
+    assert _witness(rerun) == _witness(obs), (
+        f"{hull} cell is nondeterministic: {_witness(obs)} vs {_witness(rerun)} on {WITNESS_FIELDS}"
     )

@@ -20,14 +20,26 @@ jobs:
         with:
           persist-credentials: false
       - name: Set up uv
+        id: setup_uv
+        continue-on-error: true
         uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v6
         with:
           version: "0.7.9"
           python-version: ${{ matrix.python-version }}
           enable-cache: true
+      - name: Set up uv (fallback installer)
+        if: steps.setup_uv.outcome == 'failure'
+        run: |
+          curl -LsSf https://astral.sh/uv/0.7.9/install.sh | env UV_NO_MODIFY_PATH=1 sh
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          uv python install "${{ matrix.python-version }}"
       - name: Install dependencies
         run: |
-          uv sync --locked --all-extras --no-install-project --no-build
+          uv sync --locked --all-extras --no-install-project --no-build || {
+            echo 'dependency sync failed once; retrying in 10s'
+            sleep 10
+            uv sync --locked --all-extras --no-install-project --no-build
+          }
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
       - name: Sanity checker (ship + fleet libraries)
         run: python tools/sanity_checker.py --from-config

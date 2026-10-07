@@ -265,30 +265,46 @@ changes; update `tests/test_golden_orchestrator.py` and `tests/test_golden_picar
 after intentional epidemiological changes. See `docs/SHEDDING_AND_CABINMATES.md`
 and `docs/tiered_escalation_spec.md`.
 
-## Per-interpreter golden pins
+## Hull cells: invariants + determinism, not pins
 
-`tests/test_covid_hull_change_detector.py` keys change-detector expectations
-by interpreter: `GOLDEN_BY_HULL_AND_MINOR[(major, minor)]`, read on both
-3.11 and 3.12 CI legs. The two interpreters agreed on every reading while the
-cells sat in the near-extinct regime — HOST-AGE-01's armed maps lifted the GM
-cell out of that regime and the reads diverged ((34,17,217,56,22) on 3.12 vs
-(43,25,217,60,19) on 3.11, compensated `sum()` association order). So: never
-copy one interpreter's local read into the other's entry "pending CI". Take
-the missing interpreter's tuple from the CI job's assert output, record the
-job id in the comment, and expect divergence once a change moves a pinned
-cell out of a regime where the two agreed.
+`tests/test_covid_hull_change_detector.py` used to pin each hull cell's
+five-field witness tuple per interpreter and fail on any move. At the merge
+rate of late 2026 (~8 PRs/day) every mechanism touching the shared RNG
+stream re-rolled both cells, nightly went red for days at a stretch, and
+the repin/attribution loop cost more than the drift signal was worth. The
+pins are retired. The module now asserts:
 
-## Stale pins while nightly is red
+* structural invariants — channel ordering, split-day partition
+  conservation, counts bounded by aboard complement, share domains;
+* identity echoes (scenario/theta/seed it was asked to run);
+* same-seed determinism on the fast Greg Mortimer cell — a second run
+  must reproduce the first witness tuple exactly. This is the part of the
+  old pin worth keeping: it still catches unseeded draws and stream
+  nondeterminism. Diamond Princess is exempt (a second ~20-minute replay
+  per interpreter is not worth the nightly wall time).
 
-Slow-tier change-detector pins go silently stale while the nightly job is red:
-a pin can drift under an earlier merge and read as your diff's move. Before
-attributing a pin move, check the last nightly failure's assert tuple — if it
-already equals your flag-off read, repin on top and attribute by mechanism +
-nightly run id, not to your diff.
+A legitimate mechanism move is free to re-roll these cells; only a
+structurally impossible or nondeterministic reading fails. The last pinned
+tuples live in `LAST_KNOWN_READINGS` in the test file as investigation
+references (NOT asserted); the per-merge attribution history is in the
+file's git history. If the determinism test fails, that is a real finding —
+unseeded draw or iteration-order dependence — not a pin to bump.
+
+Historical context on interpreter divergence: CPython 3.12's compensated
+`sum()` association order means the same seed can follow a different
+Bernoulli path on 3.12 than on 3.11 — e.g. HOST-AGE-01 moved the GM cell
+to (34,17,217,56,22) on 3.12 vs (43,25,217,60,19) on 3.11. Both
+interpreters are deterministic on their own; never expect cross-interpreter
+equality of exact counts, and never copy one leg's reading into the
+other's notes as "the" value.
 
 ## CI infrastructure flakes
 
 The `astral-sh/setup-uv` step occasionally dies at "Activating python
-venv..." with exit 1 before repo code runs — an infra hiccup that kills whole
-jobs (smoke, schema validation, shards) indiscriminately. Re-run or push; it
-is not a code defect.
+venv..." with exit 1 before repo code runs — an infra hiccup that killed
+whole jobs (smoke, schema validation, shards) indiscriminately. Every
+`Set up uv` step is now `continue-on-error` with an `id`, and a
+`Set up uv (fallback installer)` step runs only when the action's outcome
+is `failure` (direct `install.sh` fetch + `uv python install`, pinned to
+the same 0.7.9); `uv sync` retries once after 10s. If jobs still die
+before repo code runs, look at the fallback step's log, not the code.
