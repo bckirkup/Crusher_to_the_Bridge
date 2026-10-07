@@ -293,8 +293,12 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
             f"{cw.get('service_direction')!r} != {expected_direction!r}",
         )
     host_credited = float(cw.get("service_dose_to_host_credited") or 0.0)
+    # No-takeoff cells carry no shedding steward by construction, so the
+    # host-credit tally is legitimately 0 there — the iff-DIR check is
+    # takeoff-conditional.
+    took_off = int(payload.get("infections_total") or 0) > 0
     if _is_dir(arm):
-        if host_credited <= 0.0:
+        if took_off and host_credited <= 0.0:
             violations.append(
                 f"{tag}: service_dose_to_host_credited 0 on a DIR arm",
             )
