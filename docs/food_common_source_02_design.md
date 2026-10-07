@@ -7,6 +7,12 @@ revised after it lands. Implementation splits into two legs: **leg 1**
 conditioning). This document is the spec for both legs. The scoring
 campaign is a later stage with its own frozen admissibility.
 
+> **Status (2026-10-07):** Leg 1 implemented (a3acb043) — provisioned-lot
+> contamination objects ship default-ON under `lot_mode: "object"`;
+> `"independent"` is the verified bit-identical v1 baseline. Leg 2
+> (handler/diner conditioning) remains design-only: both arms still run
+> v1 `independent` semantics under their own mode keys.
+
 ## Grounding
 
 Benjamin's redesign direction (2026-10-07, verbatim intent):

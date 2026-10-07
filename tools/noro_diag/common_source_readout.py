@@ -100,15 +100,17 @@ def _tier_of(key: str, prefix: str) -> str:
     return rest.split("/", 1)[0]
 
 
-def _cs_fields(cs: dict) -> tuple[dict, list, list]:
+def _cs_fields(cs: dict) -> tuple[dict, list, list, list]:
     telemetry = cs.get("common_source_telemetry") or {}
     events = cs.get("common_source_events") or []
     exposures = cs.get("common_source_exposures") or []
+    objects = []
     if not events:
         block = cs.get("common_source") or {}
         events = block.get("events") or []
+        objects = block.get("objects") or []
         telemetry = telemetry or (block.get("telemetry") or {})
-    return telemetry, events, exposures
+    return telemetry, events, exposures, objects
 
 
 def _event_aggregates(events: list) -> tuple[dict, int, int]:
@@ -140,8 +142,14 @@ def _fetch_voyage(client, bucket: str, key: str, prefix: str) -> dict | None:
     body = summary.get("summary", {})
     routes = body.get("infections_by_dominant_route") or {}
     shares = body.get("infection_dose_share_by_route") or {}
-    telemetry, events, exposures = _cs_fields(cs)
+    telemetry, events, exposures, objects = _cs_fields(cs)
     arms, takers_sum, zero_dose = _event_aggregates(events)
+    obj_arms = Counter(
+        o.get("source_kind") or "?" for o in objects
+    )
+    end_reasons = Counter(
+        o.get("end_reason") or "?" for o in objects
+    )
     return {
         "key": key,
         "tier": _tier_of(key, prefix),
@@ -154,6 +162,15 @@ def _fetch_voyage(client, bucket: str, key: str, prefix: str) -> dict | None:
         "n_exposures": len(exposures),
         "exposure_dose_sum": sum(
             float(e.get("dose", 0.0) or 0.0) for e in exposures
+        ),
+        "n_objects": len(objects),
+        "obj_arms": dict(obj_arms),
+        "end_reasons": dict(end_reasons),
+        "obj_pans_sum": sum(
+            int(o.get("pans_emitted", 0) or 0) for o in objects
+        ),
+        "obj_windows_sum": sum(
+            int(o.get("windows_covered", 0) or 0) for o in objects
         ),
         "telemetry": telemetry,
         "cs_infections": int(routes.get("common_source_food", 0) or 0),
@@ -170,9 +187,7 @@ def _median_or(xs: list[float], default: float = 0.0) -> float:
     return stats.median(xs) if xs else default
 
 
-def _aggregate_cell(rows: list[dict]) -> dict:
-    n = len(rows)
-    event_counts = [r["n_events"] for r in rows]
+def _accumulate_events(rows: list[dict]) -> dict:
     arm = Counter()
     takers_sum = 0
     n_taken_events = 0
@@ -183,11 +198,44 @@ def _aggregate_cell(rows: list[dict]) -> dict:
         takers_sum += int(r.get("takers_sum", 0) or 0)
         n_taken_events += int(r["n_events"])
         zero_dose += int(r.get("zero_dose_events", 0) or 0)
+    return {
+        "arm": arm,
+        "takers_sum": takers_sum,
+        "n_taken_events": n_taken_events,
+        "zero_dose": zero_dose,
+    }
+
+
+def _accumulate_objects(rows: list[dict]) -> dict:
+    end_reasons = Counter()
+    obj_pans = 0
+    obj_windows = 0
+    for r in rows:
+        for k, v in (r.get("end_reasons") or {}).items():
+            end_reasons[k] += int(v)
+        obj_pans += int(r.get("obj_pans_sum", 0) or 0)
+        obj_windows += int(r.get("obj_windows_sum", 0) or 0)
+    return {
+        "end_reasons": end_reasons,
+        "obj_pans": obj_pans,
+        "obj_windows": obj_windows,
+    }
+
+
+def _aggregate_cell(rows: list[dict]) -> dict:
+    n = len(rows)
+    event_counts = [r["n_events"] for r in rows]
+    ev = _accumulate_events(rows)
+    obj_counts = [r["n_objects"] for r in rows]
+    ob = _accumulate_objects(rows)
+    n_objects = sum(obj_counts)
     cs_inf = sum(r["cs_infections"] for r in rows)
     dose_credited = sum(
         float(r["telemetry"].get("dose_credited", 0.0) or 0.0)
         for r in rows
     )
+    takers_sum = ev["takers_sum"]
+    n_taken_events = ev["n_taken_events"]
     return {
         "voyages": n,
         "with_event": sum(1 for c in event_counts if c > 0),
@@ -197,11 +245,18 @@ def _aggregate_cell(rows: list[dict]) -> dict:
             sorted(event_counts)[int(0.9 * (n - 1))] if n else 0
         ),
         "events_max": max(event_counts, default=0),
-        "arm": dict(arm),
+        "arm": dict(ev["arm"]),
         "takers_mean": (takers_sum / n_taken_events) if n_taken_events else 0.0,
-        "zero_dose_events": zero_dose,
+        "zero_dose_events": ev["zero_dose"],
         "cs_infections": cs_inf,
         "dose_credited": dose_credited,
+        "objects_total": n_objects,
+        "objects_median": _median_or([float(c) for c in obj_counts]),
+        "pans_per_object": (ob["obj_pans"] / n_objects) if n_objects else 0.0,
+        "windows_per_object": (
+            ob["obj_windows"] / n_objects if n_objects else 0.0
+        ),
+        "end_reasons": dict(ob["end_reasons"]),
         "voyages_with_cs_infection": sum(
             1 for r in rows if r["cs_infections"] > 0
         ),
@@ -222,8 +277,9 @@ def _arm_cell(arm: dict) -> str:
 def render(cells: dict[tuple, dict]) -> str:
     lines = [
         "| cell | voyages | w/event | ev/voy med (p90,max) | arm L/H/D % |"
-        " takers/ev | zero-dose ev | cs_food inf | dose credited |",
-        "|---|---|---|---|---|---|---|---|---|",
+        " takers/ev | zero-dose ev | cs_food inf | dose credited |"
+        " obj/voy med | pans/obj | win/obj | end X/P/V |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for key in sorted(cells):
         c = cells[key]
@@ -237,7 +293,13 @@ def render(cells: dict[tuple, dict]) -> str:
             f" | {c['zero_dose_events']}"
             f" | {c['cs_infections']}"
             f" ({c['voyages_with_cs_infection']} voy)"
-            f" | {c['dose_credited']:.3g} |"
+            f" | {c['dose_credited']:.3g}"
+            f" | {c['objects_median']:g}"
+            f" | {c['pans_per_object']:.1f}"
+            f" | {c['windows_per_object']:.1f}"
+            f" | {c['end_reasons'].get('exhausted', 0)}/"
+            f"{c['end_reasons'].get('perished', 0)}/"
+            f"{c['end_reasons'].get('voyage_end', 0)} |"
         )
     return "\n".join(lines) + "\n"
 

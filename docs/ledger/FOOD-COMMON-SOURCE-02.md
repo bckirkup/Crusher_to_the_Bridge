@@ -1,15 +1,15 @@
 # FOOD-COMMON-SOURCE-02
 **Date:** 2026-10-07
-**Commit:** 4d41be11
+**Commit:** a3acb043
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** open
 
 Frozen design of the coupled contamination-object redesign of the
 common-source food mechanism —
 [`docs/food_common_source_02_design.md`](../food_common_source_02_design.md).
-Per the ledger README a `declared` entry is the campaign-design
-declaration: it carries no numbers and nothing in it may be quoted as a
-result.
+The design was `declared` at 4d41be11; **leg 1 is implemented** at
+a3acb043 (status `open` — the entry reports no numbers and nothing in
+it may be quoted as a result until the scoring canary reads out).
 
 **What it replaces.** FOOD-COMMON-SOURCE-01's per-window iid event draws
 — one Bernoulli per voyage producing at most one contaminated pan, and
@@ -45,3 +45,19 @@ distribution-level contrast, not per-seed pairing.
 spec). Leg 2: handler/diner conditioning on the realized infectious
 course. Scoring campaign is a later stage with its own frozen
 admissibility.
+
+**Leg 1 landed (a3acb043).** `lot_mode: "object"` is the shipped
+default: the voyage plan is a count draw (`lot_object_probability` +
+geometric `extra_lot_probability` tail), each provisioned lot is one
+realized contamination state (titre, strain mix, take-share) shared by
+every pan it emits, and pan count emerges from lot extent, cohort
+demand and window cadence. Objects bind one (zone, item-line) station,
+serve each covered window once, and close exhausted, perished, or at
+voyage end — witnessed on `matrix.common_source_objects` with
+`object_id`/`pan_serial` threaded through the pan and exposure rows.
+`"independent"` is the labelled v1 baseline, verified bit-identical to
+the pre-change tree on forced lot + handler/diner rates (same events,
+exposures, doses, stream positions); `mode: off` still draws nothing.
+Handler/diner arms still run v1 semantics under their own mode keys.
+The v1-era readings above remain the measurements the object physics
+must explain — the scoring readout is a later stage.

@@ -98,6 +98,20 @@
             {"type": "number", "minimum": 0},
             {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
           ]
+        },
+        "lot_object_probability": {
+          "description": "FOOD-COMMON-SOURCE-02 per-voyage >=1 contaminated-lot probability (object mode): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
+          ]
+        },
+        "extra_lot_probability": {
+          "description": "FOOD-COMMON-SOURCE-02 per-extra-lot Bernoulli — the geometric object-count tail (object mode): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
+          ]
         }
       },
       "additionalProperties": false

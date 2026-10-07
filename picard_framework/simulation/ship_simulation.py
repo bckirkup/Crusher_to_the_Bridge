@@ -1868,6 +1868,11 @@ class ShipSimulation:
         )
         work.function_capacity = self._step_ship_function_capacity(work)
         work.state.agent_behavioral_overrides.clear()
+        if work.epoch + 1 >= self.num_epochs and self.tx_core is not None:
+            # FOOD-COMMON-SOURCE-02: provisioned-lot objects still alive
+            # at voyage end close on the final epoch's matrix as
+            # ``end_reason: voyage_end``.
+            self.tx_core._cs_close_voyage(work.epoch, work.tracing_matrix)
         work.epoch_record = record_epoch(
             EpochRecordRequest(
                 epoch=work.epoch,

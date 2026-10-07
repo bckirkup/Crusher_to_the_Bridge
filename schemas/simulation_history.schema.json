@@ -317,7 +317,12 @@
         "common_source_exposures": {
           "type": "array",
           "items": {"type": "object"},
-          "description": "FOOD-COMMON-SOURCE-01 per-taker exposure rows, mirroring food_contamination_exposures."
+          "description": "FOOD-COMMON-SOURCE-01 per-taker exposure rows, mirroring food_contamination_exposures; FOOD-COMMON-SOURCE-02 rows additionally carry the emitting object's object_id."
+        },
+        "common_source_objects": {
+          "type": "array",
+          "items": {"type": "object"},
+          "description": "FOOD-COMMON-SOURCE-02 contamination-object witness records — one row per provisioned lot / handler / diner contamination object, appended on the epoch it closes ({object_id, pathogen_id, source_kind, source_agent_id, zone, item_label, seeded_epoch, exhausted_epoch, end_reason, windows_covered, pans_emitted, servings_served, dose_credited, lot_servings, lot_titre_gec_per_g, strain_id}). Empty under \"independent\" mode."
         },
         "environmental_exposures": {
           "type": "array",

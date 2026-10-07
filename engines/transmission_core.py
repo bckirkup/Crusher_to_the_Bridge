@@ -1152,6 +1152,11 @@ class ContactTracingMatrix:
     # event plus per-taker exposure rows mirroring food_contamination_exposures.
     common_source_events: list[dict[str, Any]] = field(default_factory=list)
     common_source_exposures: list[dict[str, Any]] = field(default_factory=list)
+    # Pathway 5b object records (FOOD-COMMON-SOURCE-02): one row per
+    # contamination object, appended to the matrix of the epoch the
+    # object closes — or of the voyage's final epoch for survivors
+    # (``end_reason: voyage_end``).
+    common_source_objects: list[dict[str, Any]] = field(default_factory=list)
     # Pathway 6: Environmental source — dose from HVAC-colonized pathogen
     # (e.g. Legionella biofilm) independent of infected agents
     environmental_exposures: list[dict[str, Any]] = field(default_factory=list)
@@ -1172,6 +1177,7 @@ class ContactTracingMatrix:
             "food_contamination_exposures": self.food_contamination_exposures,
             "common_source_events": self.common_source_events,
             "common_source_exposures": self.common_source_exposures,
+            "common_source_objects": self.common_source_objects,
             "environmental_exposures": self.environmental_exposures,
             "transmission_events": self.transmission_events,
             "zone_contact_summary": self.zone_contact_summary,
@@ -1493,6 +1499,55 @@ COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE = (1.0e1, 1.0e4)
 # Shared-utensil/pan-edge contacts per diner pass — a handful of touches;
 # no literature measurement. Grade C. Origin: declared.
 COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE = (1, 5)
+
+# ── FOOD-COMMON-SOURCE-02 leg 1: provisioned-lot contamination objects ──
+# The voyage's contaminated-lot plan becomes a count over persistent
+# objects (docs/food_common_source_02_design.md, frozen): a Bernoulli on
+# ``lot_object_probability`` gates the voyage, then each extra object is
+# an independent Bernoulli on ``extra_lot_probability`` — a geometric
+# tail where one object is rare and several are very very rare. Each
+# object carries ONE realized contamination state — titre, strain mix,
+# take-share — shared by every pan it emits (the draw discipline's
+# one-realized-draw-per-physical-event).
+#
+# Per-voyage probability the voyage carries >=1 contaminated provisioned
+# lot. Composed bound: posted-outbreak incidence ~0.3-0.5%/voyage
+# (VSP/Mouchtouri — the measured anchor) divided by the measured
+# excursion→posting conversion ~0.43 (NORO-FOOD-01 readout) ≈ 0.7-1.2%
+# required object frequency; the interval brackets the composed point and
+# sits below the contaminated-lot prevalence ceiling (Dirks 2025
+# market-ready lots) netting sub-outbreak events. Supersedes
+# ``lot_event_probability`` under object mode — the superseded name stays
+# only inside the ``"independent"`` baseline. Declared sweep axis — not
+# a fit. Grade C. Origin: declared.
+COMMON_SOURCE_LOT_OBJECT_PROBABILITY_RANGE = (0.001, 0.02)
+# Per extra object: P(K >= k+1 | K >= k). Co-contaminated provisioning
+# receipt — one supplier batch spanning several item lines in a single
+# load. ∅ direct per-receipt measurement; the multi-vehicle share in
+# investigation records (Clough 2018: outbreaks with several implicated
+# items are the minority tail) bounds the shape, not the value. Grade C.
+# Origin: declared.
+COMMON_SOURCE_EXTRA_LOT_PROBABILITY_RANGE = (0.02, 0.25)
+# The lot's edible extent in servings — documentary provisioning units:
+# a shellfish sack ~100-200 pieces, produce cases tens of portions.
+# Log-uniform because provisioning sizes are multiplicative. ∅ per-lot
+# shipboard measurement. Grade C. Origin: declared.
+COMMON_SOURCE_LOT_SERVINGS_RANGE = (30.0, 600.0)
+# The object's maximum live span in voyage days — fresh perishables hold
+# ~1-3 days refrigerated. Documentary; bounds the interval half of
+# (station, interval). Grade C. Origin: declared.
+COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE = (1, 4)
+# Nominal item-line labels — a traceability label on the object witness,
+# no rate effect.
+COMMON_SOURCE_LOT_ITEM_LINES = (
+    "shellfish",
+    "salad_leaf",
+    "fresh_produce",
+    "deli",
+    "bakery",
+    "dairy",
+    "garnish",
+)
 # Spawn-tree address of the common-source stream, same convention as
 # _FRAILTY_STREAM_KEY: every mechanism draw (voyage rates, lot plan,
 # per-window Bernoulli, cohort take-share, titres) runs on it, so
@@ -1526,9 +1581,26 @@ _COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
         COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE, "loguniform"),
     "diner_contacts_per_event": (
         COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE, "int"),
+    # FOOD-COMMON-SOURCE-02 leg 1 — drawn only under ``lot_mode: object``.
+    "lot_object_probability": (
+        COMMON_SOURCE_LOT_OBJECT_PROBABILITY_RANGE, "uniform"),
+    "extra_lot_probability": (
+        COMMON_SOURCE_EXTRA_LOT_PROBABILITY_RANGE, "uniform"),
+    "lot_servings": (COMMON_SOURCE_LOT_SERVINGS_RANGE, "loguniform"),
+    "lot_shelf_life_days": (
+        COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE, "int"),
 }
 _COMMON_SOURCE_VOYAGE_RATES = (
     "lot_event_probability",
+    "handler_event_probability",
+    "diner_event_probability",
+)
+# Object-mode voyage rates: the lot arm's two count knobs replace
+# ``lot_event_probability`` in its draw slot; the handler/diner rates
+# keep the same trailing positions so the v1 arms keep firing.
+_COMMON_SOURCE_OBJECT_VOYAGE_RATES = (
+    "lot_object_probability",
+    "extra_lot_probability",
     "handler_event_probability",
     "diner_event_probability",
 )
@@ -3160,6 +3232,25 @@ class TransmissionCore:
         self.common_source_mode = str(
             cs.get("mode", "on"),
         ).strip().lower()
+        # FOOD-COMMON-SOURCE-02 per-arm modes: ``lot_mode: "object"`` is
+        # the shipped default (the better physics ships on) and
+        # ``"independent"`` the labelled v1 baseline — the v1 lot path
+        # preserved, consuming the identical draws it consumed before.
+        # ``handler_mode``/``diner_mode`` are leg 2: parsed now so the
+        # arm keys exist, but both spellings run the v1 path until that
+        # leg lands and flips their default to ``"object"``.
+        self._cs_lot_mode = (
+            "independent"
+            if str(cs.get("lot_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
+        self._cs_handler_mode = str(
+            cs.get("handler_mode", "independent"),
+        ).strip().lower()
+        self._cs_diner_mode = str(
+            cs.get("diner_mode", "independent"),
+        ).strip().lower()
         self._cs_cfg = cs
         # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
         # platform layout's posture into this block when the config does
@@ -3178,6 +3269,16 @@ class TransmissionCore:
             "events_ill_diner": 0,
             "takers_served": 0,
             "dose_credited": 0.0,
+            # FOOD-COMMON-SOURCE-02 counters: events_* keep counting pan
+            # rows; the object fields are the new diagnostics of record.
+            "objects_provisioned_lot": 0,
+            "objects_ill_handler": 0,
+            "objects_ill_diner": 0,
+            "pans_emitted": 0,
+            "object_windows": 0,
+            "multi_pan_windows": 0,
+            "objects_exhausted": 0,
+            "objects_perished": 0,
         }
         self._cs_dining_zones = [
             z for z, t in (self.zone_types or {}).items() if t == "Dining"
@@ -3189,6 +3290,15 @@ class TransmissionCore:
         self._cs_members_epoch = -1
         self._cs_members: dict[str, list[KorkinAgent]] = {}
         self._cs_event_counter = 0
+        # FOOD-COMMON-SOURCE-02 object state: per-pathogen creation-ordered
+        # live list plus the permanent object witness (window states
+        # expire with their meal window, so the voyage record accumulates
+        # on ``_cs_object_log`` the way events accumulate on
+        # ``_cs_event_log``).
+        self._cs_objects: dict[str, list[dict[str, Any]]] = {}
+        self._cs_object_log: list[dict[str, Any]] = []
+        self._cs_object_counter = 0
+        self._cs_voyage_closed = False
         # Permanent event witness — window states expire with their meal
         # window, so the voyage record accumulates here instead.
         self._cs_event_log: list[dict[str, Any]] = []
@@ -3219,6 +3329,14 @@ class TransmissionCore:
         self._cs_draw_voyage_rates()
 
     def _cs_draw_voyage_rates(self) -> None:
+        # The lot mode picks the rate tuple: ``"independent"`` draws the
+        # v1 triple verbatim (bit-identical to the pre-change tree);
+        # ``"object"`` draws the two count knobs in its slot.
+        rate_names = (
+            _COMMON_SOURCE_VOYAGE_RATES
+            if self._cs_lot_mode == "independent"
+            else _COMMON_SOURCE_OBJECT_VOYAGE_RATES
+        )
         for pid, profile in (self.pathogen_profiles or {}).items():
             if not (profile or {}).get(
                 "common_source_events", {},
@@ -3226,7 +3344,7 @@ class TransmissionCore:
                 continue
             self._cs_rates[str(pid)] = {
                 name: self._cs_draw(name, pid)
-                for name in _COMMON_SOURCE_VOYAGE_RATES
+                for name in rate_names
             }
 
     def _cs_spec_range(
@@ -12123,7 +12241,10 @@ class TransmissionCore:
         cs = (profile or {}).get("common_source_events", {})
         if not cs.get("enabled", False) or self._cs_rng is None:
             return
-        self._cs_plan_lots()
+        if self._cs_lot_mode == "independent":
+            self._cs_plan_lots()
+        else:
+            self._cs_plan_objects()
         self._cs_expire_windows(epoch, pathogen_id)
         day = self.clock.day_index(epoch)
         members_by_zone = self._cs_zone_members(epoch)
@@ -12152,28 +12273,40 @@ class TransmissionCore:
         matrix: ContactTracingMatrix,
         ledger: StrainDoseLedger | None,
     ) -> None:
-        """Advance one (zone, meal token, day) window this epoch."""
+        """Advance one (zone, meal token, day) window this epoch.
+
+        Order inside a window: live provisioned-lot objects bound to this
+        zone serve once each (object mode only), then the v1 arms draw —
+        a scheduled ``"independent"`` lot, then handler, then diner — at
+        most one first-fired v1 event per window, then every pending pan
+        credits its takers on presence. The v1 "first fired source wins"
+        exclusivity never extended to objects: several pans may land in
+        one (zone, window) under object semantics.
+        """
         key = (pathogen_id, zone_name, token, day)
         state = self._cs_windows.get(key)
-        if state is not None and state.get("event") is not None:
-            self._cs_credit_pending(
-                state, occupants, agent_doses,
-                agent_pathway_doses, matrix, pathogen_id, ledger,
-            )
-            return
         if state is None:
             state = self._cs_open_window(key, epoch, day, members)
             self._cs_windows[key] = state
-        source = self._cs_draw_source(
-            key, state, epoch, zone_name, token,
-            occupants, pathogen_id, profile,
-        )
-        if source is not None:
-            self._cs_fire(
-                source, state, epoch, zone_name, token,
-                members, occupants, pathogen_id, profile,
-                agent_doses, agent_pathway_doses, matrix, ledger,
+        if self._cs_lot_mode == "object":
+            self._cs_objects_serve_window(
+                state, epoch, day, zone_name, token,
+                members, pathogen_id, profile, matrix,
             )
+        if state.get("event") is None:
+            source = self._cs_draw_source(
+                key, state, epoch, zone_name, token,
+                occupants, pathogen_id, profile,
+            )
+            if source is not None:
+                self._cs_fire(
+                    source, state, epoch, zone_name, token,
+                    members, pathogen_id, profile, matrix,
+                )
+        self._cs_credit_pending(
+            state, occupants, agent_doses,
+            agent_pathway_doses, matrix, pathogen_id, ledger,
+        )
 
     def _cs_plan_lots(self) -> None:
         """Draw this voyage's lot plan once the roster exists.
@@ -12208,6 +12341,125 @@ class TransmissionCore:
             pick = self._cs_rng.integers(len(windows))
             zone, token, day = windows[int(pick)]
             self._cs_lot_plan[pid] = (zone, token, day)
+
+    def _cs_plan_objects(self) -> None:
+        """Draw this voyage's provisioned-lot objects once the roster
+        exists — the ``lot_mode: "object"`` counterpart of
+        ``_cs_plan_lots``, run at the same scheduling point (the first
+        armed epoch, when every served window is enumerable).
+
+        One Bernoulli on ``lot_object_probability`` gates the voyage —
+        decoupled from ``food_safety_posture`` unless
+        ``lot_posture_coupling`` is on, since the lot boards contaminated
+        upstream of galley practice. Conditional on >=1, the count
+        K = 1 + extra with each extra object an independent Bernoulli on
+        ``extra_lot_probability`` — the geometric tail the design asks
+        for: one object rare, several very very rare.
+        """
+        if self._cs_lot_plan_done:
+            return
+        self._cs_lot_plan_done = True
+        cells = self._cs_served_windows()
+        zones = [
+            zone for zone in self._cs_dining_zones
+            if any(cell[0] == zone for cell in cells)
+        ]
+        if not zones:
+            return
+        lot_factor = (
+            self._cs_posture if self._cs_lot_posture_coupling else 1.0
+        )
+        # Degenerate-config bound on the geometric tail: a forced
+        # extra_lot_probability of 1 must still terminate, and a voyage
+        # cannot carry more distinct provisioned lots than (zone,
+        # item-line) stations exist to bind them.
+        max_objects = len(zones) * len(COMMON_SOURCE_LOT_ITEM_LINES)
+        for pid, rates in self._cs_rates.items():
+            if self._cs_rng.random() >= rates[
+                "lot_object_probability"
+            ] * lot_factor:
+                continue
+            count = 1
+            while (
+                count < max_objects
+                and self._cs_rng.random()
+                < rates["extra_lot_probability"]
+            ):
+                count += 1
+            for _ in range(count):
+                self._cs_realize_lot_object(pid, cells, zones)
+
+    def _cs_realize_lot_object(
+        self,
+        pathogen_id: str,
+        cells: list[tuple[str, str, int]],
+        zones: list[str],
+    ) -> None:
+        """Draw one lot object's single realized contamination state.
+
+        Everything an object is — its (zone, item-line) station, its
+        start window, its extent, titre, take-share and strain mix — is
+        drawn here, once, and shared by every pan the object emits.
+        """
+        cs_block = (self.pathogen_profiles or {}).get(
+            pathogen_id, {},
+        ).get("common_source_events", {})
+        zone = zones[int(self._cs_rng.integers(len(zones)))]
+        item = COMMON_SOURCE_LOT_ITEM_LINES[
+            int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
+        ]
+        days = int(round(self._cs_draw(
+            "embarkation_lot_window_days", pathogen_id,
+        )))
+        zone_cells = [
+            cell for cell in cells
+            if cell[0] == zone and cell[2] < days
+        ]
+        if not zone_cells:
+            # The lot provisioned to a venue that never serves it inside
+            # the embarkation span — it never enters service.
+            return
+        _zone, token, start_day = zone_cells[
+            int(self._cs_rng.integers(len(zone_cells)))
+        ]
+        servings = max(1, int(round(self._cs_draw(
+            "lot_servings", pathogen_id, cs_block,
+        ))))
+        mix = self._cs_lot_mix(pathogen_id)
+        self._cs_object_counter += 1
+        self._cs_objects.setdefault(pathogen_id, []).append({
+            "object_id": f"cso-{pathogen_id}-{self._cs_object_counter}",
+            "pathogen_id": pathogen_id,
+            "source_kind": "provisioned_lot",
+            "zone": zone,
+            "item_label": item,
+            "start_token": token,
+            "start_day": start_day,
+            "seeded_epoch": None,
+            "active": False,
+            "closed": False,
+            "lot_servings": servings,
+            "servings_remaining": servings,
+            "lot_titre_gec_per_g": self._cs_draw(
+                "lot_titre_gec_per_g", pathogen_id, cs_block,
+            ),
+            "take_share": self._cs_draw(
+                "item_take_share", pathogen_id, cs_block,
+            ),
+            "shelf_life_days": int(round(self._cs_draw(
+                "lot_shelf_life_days", pathogen_id, cs_block,
+            ))),
+            "mix": mix,
+            "strain_id": (
+                mix.contributors[0][0] if mix is not None else None
+            ),
+            "windows_covered": 0,
+            "pans_emitted": 0,
+            "pan_serial": 0,
+            "servings_served": 0,
+            "dose_credited": 0.0,
+        })
+        self.common_source_telemetry["objects_provisioned_lot"] += 1
 
     def _cs_served_windows(self) -> list[tuple[str, str, int]]:
         """(zone, meal token, day) cells a venue's cohort serves.
@@ -12272,7 +12524,14 @@ class TransmissionCore:
         day: int,
         members: list[KorkinAgent],
     ) -> dict[str, Any]:
-        """Open a window's state: draw ledgers plus the fired event slot."""
+        """Open a window's state: draw ledgers plus the fired pan slots.
+
+        ``event`` is the v1 exclusivity slot — at most one first-fired
+        independent-lot/handler/diner event per window. ``pans`` holds
+        every emitted pan's pending credit (object pans and the v1 event
+        pan alike): v1's "first fired source wins" exclusivity was a
+        single-pan construction and does not extend to objects.
+        """
         return {
             "key": key,
             "start_epoch": epoch,
@@ -12282,7 +12541,9 @@ class TransmissionCore:
             "handlers_drawn": set(),
             "diners_drawn": set(),
             "event": None,
-            "pending": {},
+            "pans": [],
+            "pan_count": 0,
+            "objects_served": set(),
         }
 
     def _cs_window_end_epoch(
@@ -12321,6 +12582,228 @@ class TransmissionCore:
         ]
         for key in dead:
             del self._cs_windows[key]
+
+    def _cs_objects_serve_window(
+        self,
+        state: dict[str, Any],
+        epoch: int,
+        day: int,
+        zone_name: str,
+        token: str,
+        members: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Each live provisioned-lot object bound to this zone serves
+        this window once — the space-time autocorrelation the redesign
+        asks for: contiguous windows, one station, one contamination
+        state."""
+        for obj in self._cs_objects.get(pathogen_id, ()):
+            if (
+                obj["closed"]
+                or obj["zone"] != zone_name
+                or obj["object_id"] in state["objects_served"]
+            ):
+                continue
+            if day > obj["start_day"] + obj["shelf_life_days"]:
+                # Perishability: residual servings are discarded and no
+                # pan lands after start_day + lot_shelf_life_days.
+                self._cs_close_object(obj, epoch, "perished", matrix)
+                continue
+            if not obj["active"]:
+                if (token, day) != (obj["start_token"], obj["start_day"]):
+                    continue
+                obj["active"] = True
+                obj["seeded_epoch"] = state["start_epoch"]
+            state["objects_served"].add(obj["object_id"])
+            self._cs_object_serve(
+                state, obj, epoch, zone_name, token,
+                members, pathogen_id, profile, matrix,
+            )
+
+    def _cs_object_serve(
+        self,
+        state: dict[str, Any],
+        obj: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        members: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """One live lot object serves this window.
+
+        Demand is the same cohort/take-share machinery as v1 — a
+        Binomial over the present cohort at the object's take-share —
+        and the pan count EMERGES from lot extent, cohort demand and
+        window cadence; it is never drawn. Demand zero leaves the lot
+        intact to wait for the next service.
+        """
+        cs_block = (profile or {}).get("common_source_events", {})
+        cohort = self._cs_cohort(members, token, epoch)
+        demand = int(self._cs_rng.binomial(len(cohort), obj["take_share"]))
+        pan_servings = max(1, int(round(self._cs_draw(
+            "pan_servings", pathogen_id, cs_block,
+        ))))
+        servings_served = min(demand, obj["servings_remaining"])
+        if servings_served > 0:
+            self._cs_object_emit_pans(
+                state, obj, epoch, zone_name, token, cohort,
+                servings_served, pan_servings, pathogen_id, cs_block,
+                matrix,
+            )
+            obj["servings_served"] += servings_served
+            obj["servings_remaining"] -= servings_served
+        obj["windows_covered"] += 1
+        self.common_source_telemetry["object_windows"] += 1
+        if obj["servings_remaining"] <= 0:
+            self._cs_close_object(obj, epoch, "exhausted", matrix)
+
+    def _cs_object_emit_pans(
+        self,
+        state: dict[str, Any],
+        obj: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        cohort: list[KorkinAgent],
+        servings_served: int,
+        pan_servings: int,
+        pathogen_id: str,
+        cs_block: dict[str, Any],
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Emit ceil(servings/pan) pans for one object's window service.
+
+        Takers are a uniform subset of the cohort sized by the demand
+        draw; each pan's takers are a disjoint chunk of it, so an agent
+        holds at most one serving per pan (two different pans of the
+        same object in two windows may still dose the same agent twice —
+        they ate the item twice, which is physically right). Every pan
+        is one witness row crediting its takers through the presence-
+        staggered path; per-serving dose is the object's titre times a
+        per-pan serving mass, as v1 drew per event.
+        """
+        if servings_served >= len(cohort):
+            takers = list(cohort)
+        else:
+            picks = self._cs_rng.choice(
+                len(cohort), size=servings_served, replace=False,
+            )
+            takers = [cohort[int(i)] for i in picks]
+        titre = obj["lot_titre_gec_per_g"]
+        n_pans = -(-servings_served // pan_servings)
+        for pan_idx in range(n_pans):
+            pan_takers = takers[
+                pan_idx * pan_servings:(pan_idx + 1) * pan_servings
+            ]
+            serving_mass = self._cs_draw(
+                "serving_mass_g", pathogen_id, cs_block,
+            )
+            per_serving = titre * serving_mass
+            obj["pan_serial"] += 1
+            self._cs_event_counter += 1
+            event = {
+                "event_id": f"cs-{pathogen_id}-{self._cs_event_counter}",
+                "pathogen_id": pathogen_id,
+                "zone": zone_name,
+                "meal": token,
+                "service_type": resolve_dining_service_type(
+                    {"name": zone_name},
+                ),
+                "source_kind": "provisioned_lot",
+                "source_agent_id": None,
+                "object_id": obj["object_id"],
+                "pan_serial": obj["pan_serial"],
+                "food_safety_posture": self._cs_posture,
+                "start_epoch": epoch,
+                "end_epoch": state["end_epoch"],
+                "pan_mass": round(per_serving * pan_servings, 6),
+                "per_serving_dose": round(per_serving, 6),
+                "cohort_size": len(cohort),
+                "servings_taken": len(pan_takers),
+                "taker_ids": sorted(a.agent_id for a in pan_takers),
+                "lot_titre_gec_per_g": round(titre, 6),
+            }
+            matrix.common_source_events.append(event)
+            self._cs_event_log.append(event)
+            state["pans"].append({
+                "event": event,
+                "pending": {a.agent_id for a in pan_takers},
+                "mix": obj["mix"],
+                "per_serving": per_serving,
+                "object": obj,
+            })
+            obj["pans_emitted"] += 1
+            self.common_source_telemetry["events_provisioned_lot"] += 1
+            self._cs_count_pan(state)
+
+    def _cs_count_pan(self, state: dict[str, Any]) -> None:
+        """Count one emitted pan row; flag the window's second pan."""
+        state["pan_count"] += 1
+        self.common_source_telemetry["pans_emitted"] += 1
+        if state["pan_count"] == 2:
+            self.common_source_telemetry["multi_pan_windows"] += 1
+
+    def _cs_close_object(
+        self,
+        obj: dict[str, Any],
+        epoch: int,
+        reason: str,
+        matrix: ContactTracingMatrix | None,
+    ) -> None:
+        """Finalize the object's witness row onto the epoch matrix and
+        the permanent voyage log."""
+        if obj["closed"]:
+            return
+        obj["closed"] = True
+        row = {
+            "object_id": obj["object_id"],
+            "pathogen_id": obj["pathogen_id"],
+            "source_kind": obj["source_kind"],
+            "source_agent_id": None,
+            "zone": obj["zone"],
+            "item_label": obj["item_label"],
+            "seeded_epoch": obj["seeded_epoch"],
+            "exhausted_epoch": None if reason == "voyage_end" else epoch,
+            "end_reason": reason,
+            "windows_covered": obj["windows_covered"],
+            "pans_emitted": obj["pans_emitted"],
+            "servings_served": obj["servings_served"],
+            "dose_credited": round(obj["dose_credited"], 6),
+            "lot_servings": obj["lot_servings"],
+            "lot_titre_gec_per_g": round(obj["lot_titre_gec_per_g"], 6),
+            "strain_id": obj["strain_id"],
+        }
+        if matrix is not None:
+            matrix.common_source_objects.append(row)
+        self._cs_object_log.append(row)
+        if reason == "exhausted":
+            self.common_source_telemetry["objects_exhausted"] += 1
+        elif reason == "perished":
+            self.common_source_telemetry["objects_perished"] += 1
+
+    def _cs_close_voyage(
+        self,
+        epoch: int,
+        matrix: ContactTracingMatrix | None,
+    ) -> None:
+        """Close every surviving object at voyage end.
+
+        Called once on the voyage's final-epoch matrix: objects still
+        alive when the voyage ends record ``end_reason: voyage_end``
+        (and a null ``exhausted_epoch``). A no-op for ``mode: off`` or
+        unarmed profiles — they hold no objects.
+        """
+        if self._cs_voyage_closed:
+            return
+        self._cs_voyage_closed = True
+        for objects in self._cs_objects.values():
+            for obj in objects:
+                self._cs_close_object(obj, epoch, "voyage_end", matrix)
 
     def _cs_draw_source(
         self,
@@ -12554,13 +13037,9 @@ class TransmissionCore:
         zone_name: str,
         token: str,
         members: list[KorkinAgent],
-        occupants: list[KorkinAgent],
         pathogen_id: str,
         profile: dict | None,
-        agent_doses: dict[int, float],
-        agent_pathway_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
-        ledger: StrainDoseLedger | None,
     ) -> None:
         """Serve the pan: draw takers, fix the witness, queue the doses.
 
@@ -12602,6 +13081,8 @@ class TransmissionCore:
             "source_agent_id": (
                 source_agent.agent_id if source_agent is not None else None
             ),
+            "object_id": None,
+            "pan_serial": None,
             "food_safety_posture": self._cs_posture,
             "start_epoch": epoch,
             "end_epoch": state["end_epoch"],
@@ -12616,15 +13097,15 @@ class TransmissionCore:
         matrix.common_source_events.append(event)
         self._cs_event_log.append(event)
         state["event"] = event
-        state["pending"] = {a.agent_id for a in takers}
-        state["mix"] = mix
-        state["per_serving"] = per_serving
+        state["pans"].append({
+            "event": event,
+            "pending": {a.agent_id for a in takers},
+            "mix": mix,
+            "per_serving": per_serving,
+            "object": None,
+        })
         self.common_source_telemetry[f"events_{kind}"] += 1
-        # Takers already in the room are served in this same epoch.
-        self._cs_credit_pending(
-            state, occupants, agent_doses, agent_pathway_doses,
-            matrix, pathogen_id, ledger,
-        )
+        self._cs_count_pan(state)
 
     def _cs_credit_pending(
         self,
@@ -12636,43 +13117,52 @@ class TransmissionCore:
         pathogen_id: str,
         ledger: StrainDoseLedger | None = None,
     ) -> None:
-        """Credit each pending taker the epoch it appears in the zone.
+        """Credit every pan's pending takers the epoch they appear in
+        the zone.
 
         A meal's seating stagger means a taker may not stand in the zone
-        at the epoch the pan fires; the serving is credited on first
-        presence inside the window and each taker is dosed at most once.
+        at the epoch the pan is emitted; the serving is credited on
+        first presence inside the window and each taker is dosed at most
+        once PER PAN — a window now holds one pending set per pan, since
+        a provisioned-lot object emits several pans into the same zone
+        over its life (and several may share a window).
         """
-        event = state.get("event")
-        if event is None:
+        pans = state.get("pans")
+        if not pans:
             return
         present = {a.agent_id for a in occupants}
-        due = sorted(
-            aid for aid in state.get("pending", ())
-            if aid in present
-        )
-        if not due:
-            return
-        dose = state["per_serving"]
-        mix = state.get("mix")
-        for aid in due:
-            credited_dose = self._accumulate(
-                aid, "common_source_food", dose,
-                agent_doses, agent_pathway_doses,
-                attribution(ledger, mix),
+        for pan in pans:
+            due = sorted(
+                aid for aid in pan["pending"] if aid in present
             )
-            matrix.common_source_exposures.append({
-                "target_id": aid,
-                "zone": event["zone"],
-                "pathogen_id": pathogen_id,
-                "event_id": event["event_id"],
-                "source_kind": event["source_kind"],
-                "dose": round(credited_dose, 6),
-            })
-            self.common_source_telemetry["takers_served"] += 1
-            self.common_source_telemetry[
-                "dose_credited"
-            ] += credited_dose
-            state["pending"].discard(aid)
+            if not due:
+                continue
+            dose = pan["per_serving"]
+            mix = pan["mix"]
+            event = pan["event"]
+            obj = pan.get("object")
+            for aid in due:
+                credited_dose = self._accumulate(
+                    aid, "common_source_food", dose,
+                    agent_doses, agent_pathway_doses,
+                    attribution(ledger, mix),
+                )
+                matrix.common_source_exposures.append({
+                    "target_id": aid,
+                    "zone": event["zone"],
+                    "pathogen_id": pathogen_id,
+                    "event_id": event["event_id"],
+                    "object_id": event.get("object_id"),
+                    "source_kind": event["source_kind"],
+                    "dose": round(credited_dose, 6),
+                })
+                self.common_source_telemetry["takers_served"] += 1
+                self.common_source_telemetry[
+                    "dose_credited"
+                ] += credited_dose
+                if obj is not None:
+                    obj["dose_credited"] += credited_dose
+                pan["pending"].discard(aid)
 
     # ── Pathway 6: Environmental Source ─────────────────────────────
 
