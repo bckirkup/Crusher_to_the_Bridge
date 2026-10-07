@@ -2,14 +2,14 @@
 **Date:** 2026-10-07
 **Commit:** a3acb043
 **Pathogens:** norwalk_gi
-**Status:** implemented (leg 1)
+**Status:** open
 
 Frozen design of the coupled contamination-object redesign of the
 common-source food mechanism —
 [`docs/food_common_source_02_design.md`](../food_common_source_02_design.md).
-Per the ledger README a `declared` entry is the campaign-design
-declaration: it carries no numbers and nothing in it may be quoted as a
-result.
+The design was `declared` at 4d41be11; **leg 1 is implemented** at
+a3acb043 (status `open` — the entry reports no numbers and nothing in
+it may be quoted as a result until the scoring canary reads out).
 
 **What it replaces.** FOOD-COMMON-SOURCE-01's per-window iid event draws
 — one Bernoulli per voyage producing at most one contaminated pan, and
