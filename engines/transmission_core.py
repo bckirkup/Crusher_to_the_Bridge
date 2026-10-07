@@ -992,6 +992,15 @@ _FRAILTY_STREAM_KEY = 0x5F1A17
 # shared stream, and ``contact_factor: 1.0`` (the labelled baseline)
 # spawns nothing and multiplies nothing.
 _SERVICE_CONTACT_STREAM_KEY = 0x5EC7CE
+# Spawn-tree address of the host-direction contact stream (MEAL-SVC-02):
+# a declared ``contact_factor_to_host`` interval draws per delivery on
+# its own spawn of the dedicated stream family, so the shared door-drop
+# realization — and the steward-side dose — is untouched.
+_SERVICE_HOST_CONTACT_STREAM_KEY = 0x5EC7CF
+# Bounded reservoir of realized host-direction factors kept per cell —
+# enough for the median/quantile lottery witness without carrying
+# ~160k draws in the payload.
+_SERVICE_HOST_FACTOR_SAMPLE_CAP = 4096
 
 # Internal pathway dose keys → route_efficiency_multipliers keys
 PATHWAY_EFFICIENCY_KEYS: dict[str, str] = {
@@ -2787,6 +2796,49 @@ class TransmissionCore:
             and self._cg_service_contact[0] == "uniform"
             else None
         )
+        # MEAL-SVC-02: ``contact_factor_to_host`` gives the steward->host
+        # direction its own declared door-drop factor. Absent -> the host
+        # side takes the delivery's shared realized draw (status quo); a
+        # scalar or [lo, hi] pair resolves the host direction's own
+        # corner/interval, drawn per delivery on its own spawn of the
+        # dedicated stream family so the shared realization — and the
+        # steward-side dose — is untouched. The resolved block echoes the
+        # effective spec either way, so every cell's factor is auditable.
+        raw_host_factor = self._cg_service.get("contact_factor_to_host")
+        self._cg_service_to_host_contact = (
+            None
+            if raw_host_factor is None
+            else self._parse_service_contact_factor(
+                raw_host_factor, field="contact_factor_to_host"
+            )
+        )
+        self._service_host_contact_rng = (
+            np.random.default_rng(
+                np.random.SeedSequence(
+                    entropy,
+                    spawn_key=(_SERVICE_HOST_CONTACT_STREAM_KEY,),
+                ),
+            )
+            if entropy is not None
+            and self._cg_service_to_host_contact is not None
+            and self._cg_service_to_host_contact[0] == "uniform"
+            else None
+        )
+        effective_host_factor = (
+            raw_factor if raw_host_factor is None else raw_host_factor
+        )
+        self._cg_service["contact_factor_to_host_mode"] = (
+            "shared" if raw_host_factor is None else "declared"
+        )
+        self._cg_service["contact_factor_to_host"] = (
+            list(effective_host_factor)
+            if isinstance(effective_host_factor, (tuple, list))
+            else effective_host_factor
+        )
+        # Realized host-factor witness (the lottery check): aggregate
+        # stats plus a bounded reservoir for the median/quantile echo.
+        self._service_host_factor_stats = {"n": 0, "sum": 0.0}
+        self._service_host_factor_sample: list[float] = []
         # R2 designation state: (host_id, pathogen_id) -> designation
         # record; ``refused`` marks the failed one-time onset draw.
         self._cg_designations: dict[tuple[int, str], dict[str, Any]] = {}
@@ -2910,7 +2962,9 @@ class TransmissionCore:
         return bool(enabled)
 
     @staticmethod
-    def _parse_service_contact_factor(raw: Any) -> tuple:
+    def _parse_service_contact_factor(
+        raw: Any, field: str = "contact_factor",
+    ) -> tuple:
         """Resolve ``service.contact_factor`` to (mode, ...):
         ``("fixed", value)`` for a scalar or ``("uniform", lo, hi)`` for a
         2-sequence. Fails at spec-lands on a malformed value."""
@@ -2918,7 +2972,7 @@ class TransmissionCore:
             value = float(raw)
             if not 0.0 <= value <= 1.0:
                 raise ValueError(
-                    f"caregiver.service.contact_factor scalar out of "
+                    f"caregiver.service.{field} scalar out of "
                     f"[0,1]: {raw!r}"
                 )
             return ("fixed", value)
@@ -2926,12 +2980,12 @@ class TransmissionCore:
             lo, hi = float(raw[0]), float(raw[1])
             if not 0.0 <= lo <= hi <= 1.0:
                 raise ValueError(
-                    f"caregiver.service.contact_factor window out of "
+                    f"caregiver.service.{field} window out of "
                     f"[0,1] or inverted: {raw!r}"
                 )
             return ("uniform", lo, hi)
         raise ValueError(
-            f"caregiver.service.contact_factor must be a scalar or a "
+            f"caregiver.service.{field} must be a scalar or a "
             f"[lo, hi] pair, got {raw!r}"
         )
 
@@ -2942,6 +2996,32 @@ class TransmissionCore:
             return spec[1]
         rng = self._service_contact_rng or self.rng
         return float(rng.uniform(spec[1], spec[2]))
+
+    def _service_host_contact_factor(self, shared_factor: float) -> float:
+        """The steward->host direction's contact discount (MEAL-SVC-02).
+
+        ``contact_factor_to_host`` absent -> the delivery's shared
+        realized draw (status quo). A declared scalar/interval resolves
+        on the host direction's own spawn of the dedicated stream
+        family, so the shared realization — and the steward-side dose —
+        is untouched. Every realized factor is recorded for the
+        per-cell lottery witness.
+        """
+        spec = self._cg_service_to_host_contact
+        if spec is None:
+            factor = shared_factor
+        elif spec[0] == "fixed":
+            factor = spec[1]
+        else:
+            rng = self._service_host_contact_rng or self.rng
+            factor = float(rng.uniform(spec[1], spec[2]))
+        stats = self._service_host_factor_stats
+        stats["n"] += 1
+        stats["sum"] += factor
+        sample = self._service_host_factor_sample
+        if len(sample) < _SERVICE_HOST_FACTOR_SAMPLE_CAP:
+            sample.append(factor)
+        return factor
 
     @staticmethod
     def _cg_age_key(agent: KorkinAgent) -> str:
@@ -10243,7 +10323,9 @@ class TransmissionCore:
                 host.agent_id, set(),
             ).add(steward.agent_id)
             # One door-drop, one realized contact discount — the same
-            # draw attenuates both dose directions of this delivery.
+            # draw attenuates both dose directions of this delivery
+            # unless the host direction declares its own factor
+            # (MEAL-SVC-02), resolved inside ``_credit_service_to_host``.
             factor = self._service_contact_factor()
             dose = self._caregiver_service_dose(
                 host, steward, epoch, pathogen_id, profile,
@@ -10297,8 +10379,11 @@ class TransmissionCore:
         the steward emitting and the confined host inhaling at its own
         cabin door (``site=host`` carries the host unit's volume,
         ventilation and residence). ``contact_factor`` is this
-        delivery's door-drop discount — the same realization the
-        steward-side dose took, not a second draw. The credit lands
+        delivery's shared door-drop discount — the same realization the
+        steward-side dose took, not a second draw — unless
+        ``contact_factor_to_host`` declares the host direction its own
+        corner/interval (MEAL-SVC-02), resolved here on the dedicated
+        host-factor spawn. The credit lands
         under route ``service_to_host`` beside the steward-side
         ``caregiver`` tally. Emetic profiles have no continuous
         emission to inhale (the surface channel is steward-pickup
@@ -10306,13 +10391,14 @@ class TransmissionCore:
         """
         if self._cg_service.get("direction") != "both":
             return
+        host_factor = self._service_host_contact_factor(contact_factor)
         dose = 0.0
         if (
             str((profile or {}).get("airborne_emission_mode"))
             != "emesis_conditioned"
         ):
             share = self._caregiver_service_share()
-            dose = contact_factor * self._caregiver_pair_dose(
+            dose = host_factor * self._caregiver_pair_dose(
                 steward,
                 host,
                 epoch,

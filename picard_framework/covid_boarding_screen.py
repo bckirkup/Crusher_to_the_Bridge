@@ -1179,6 +1179,17 @@ def _crew_window_block(
         "service_section_steward_draws": int(
             telemetry.get("service_section_steward_draws", 0)
         ),
+        # MEAL-SVC-02: the host direction's effective declared factor
+        # (shared draw echo vs declared corner/interval) plus the
+        # realized-draw lottery witness.
+        "service_contact_factor": service_cfg.get("contact_factor"),
+        "service_contact_factor_to_host": service_cfg.get(
+            "contact_factor_to_host"
+        ),
+        "service_contact_factor_to_host_mode": service_cfg.get(
+            "contact_factor_to_host_mode"
+        ),
+        "service_host_factor_draws": _host_factor_draws(tx),
         "service_stewards_per_confined_host": {
             "n_hosts": len(steward_counts),
             "median": (
@@ -1186,6 +1197,32 @@ def _crew_window_block(
             ),
             "max": steward_counts[-1] if steward_counts else None,
         },
+    }
+
+
+def _host_factor_draws(tx: Any) -> dict[str, Any]:
+    """The realized host-factor lottery witness (MEAL-SVC-02).
+
+    Aggregate stats (``n``/``mean`` over every draw) plus the bounded
+    first-N reservoir kept on the core for the quantile echo — unbiased
+    for i.i.d. factor draws; ``None`` fields on a responder-direction
+    cell (no host direction, no draws). ``getattr``-guarded for
+    duck-typed tx cores.
+    """
+    stats = getattr(tx, "_service_host_factor_stats", None) or {}
+    n = int(stats.get("n") or 0)
+    sample = sorted(
+        float(v)
+        for v in (getattr(tx, "_service_host_factor_sample", None) or ())
+    )
+    return {
+        "n": n,
+        "mean": (float(stats["sum"]) / n) if n else None,
+        "median": _quantile(sample, 0.5) if sample else None,
+        "q05": _quantile(sample, 0.05) if sample else None,
+        "q95": _quantile(sample, 0.95) if sample else None,
+        "min": sample[0] if sample else None,
+        "max": sample[-1] if sample else None,
     }
 
 
