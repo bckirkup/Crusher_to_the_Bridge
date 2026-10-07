@@ -274,7 +274,21 @@ norovirus at `dose_adjustment` 10.6, not a COVID fit.
 
 ## 2. Last measurement of record
 
-`CREW-WINDOW-02`, measured at `2df542ff` (`docs/ledger/CREW-WINDOW-02.md`,
+`MEAL-SVC-01` canary, measured at `32b11ccf` (`docs/ledger/MEAL-SVC-01.md`,
+`docs/covid/covid_meal_service_01_readout.md`): the steward→host direction of
+the confinement meal-delivery channel — the direction CW-02 measured absent —
+armed as `transmission.caregiver.service.direction: "both"` on the verbatim
+DP replay @θ7.9e6. Canary `zone_narrow_svc_dir` (20/20 seeds, 0 failures):
+**CHANNEL-FOUND — confined-passenger takeoff-conditional median 804 vs the
+F13/F14 bound ≥52 (CW-02: ~4–19); crew share 0.379 vs the record's 0.29 (CW-02
+~0.97); deliveries parity holds (166,150 vs 128k–166k).** The channel exists
+and the declared full pair-dose magnitude overcorrects ~15× — signature
+recovered, interval sits high; the frozen stop rule held back the remaining
+100 cells (SECT and both `*_svc_base` rows unmeasured, the CW-02 drift
+witness unpaired). Open decision: which attenuation axis sweeps
+`service_to_host` between 0 and full pair dose.
+
+Prior measurement — `CREW-WINDOW-02`, measured at `2df542ff` (`docs/ledger/CREW-WINDOW-02.md`,
 `docs/covid/covid_crew_window_02_readout.md`): the interior of the CW-01
 crew-duty cliff — fractional/activity-scoped crew confinement via
 `exempt_work_zones` (essential-zone lists NARROW 11/34, WIDE 19/34) and
