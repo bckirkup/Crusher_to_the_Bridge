@@ -179,7 +179,7 @@ def test_object_rows_carry_the_frozen_schema() -> None:
             "exhausted", "perished", "source_excluded",
             "shedding_ended", "voyage_end",
         }
-        assert row["strain_id"] == row["strain_id"]  # present
+        assert "strain_id" in row
         assert row["servings_served"] <= row["lot_servings"]
 
 
@@ -323,7 +323,8 @@ def test_credited_dose_never_exceeds_the_lot_mass() -> None:
     events, exposures, objects, _ = _step_objects(
         core, [_diner(i) for i in range(1, 60)], epochs=72,
     )
-    assert events and objects
+    assert events
+    assert objects
     for event in events:
         credited = sum(
             e["dose"] for e in exposures
@@ -440,7 +441,9 @@ def test_the_same_seed_reproduces_the_same_objects_and_pans() -> None:
             core, [_diner(i) for i in range(1, 60)], epochs=72,
         )[:3]
 
-    assert run() == run()
+    first = run()
+    second = run()
+    assert first == second
 
 
 # ── Gate 11: the labelled baseline still spells v1 ────────────────────

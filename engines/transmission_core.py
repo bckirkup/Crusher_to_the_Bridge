@@ -12291,8 +12291,7 @@ class TransmissionCore:
         if self._cs_lot_mode == "object":
             self._cs_objects_serve_window(
                 state, epoch, day, zone_name, token,
-                members, occupants, pathogen_id, profile,
-                agent_doses, agent_pathway_doses, matrix, ledger,
+                members, pathogen_id, profile, matrix,
             )
         if state.get("event") is None:
             source = self._cs_draw_source(
@@ -12302,8 +12301,7 @@ class TransmissionCore:
             if source is not None:
                 self._cs_fire(
                     source, state, epoch, zone_name, token,
-                    members, occupants, pathogen_id, profile,
-                    agent_doses, agent_pathway_doses, matrix, ledger,
+                    members, pathogen_id, profile, matrix,
                 )
         self._cs_credit_pending(
             state, occupants, agent_doses,
@@ -12593,13 +12591,9 @@ class TransmissionCore:
         zone_name: str,
         token: str,
         members: list[KorkinAgent],
-        occupants: list[KorkinAgent],
         pathogen_id: str,
         profile: dict | None,
-        agent_doses: dict[int, float],
-        agent_pathway_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
-        ledger: StrainDoseLedger | None,
     ) -> None:
         """Each live provisioned-lot object bound to this zone serves
         this window once — the space-time autocorrelation the redesign
@@ -12625,8 +12619,7 @@ class TransmissionCore:
             state["objects_served"].add(obj["object_id"])
             self._cs_object_serve(
                 state, obj, epoch, zone_name, token,
-                members, occupants, pathogen_id, profile,
-                agent_doses, agent_pathway_doses, matrix, ledger,
+                members, pathogen_id, profile, matrix,
             )
 
     def _cs_object_serve(
@@ -12637,13 +12630,9 @@ class TransmissionCore:
         zone_name: str,
         token: str,
         members: list[KorkinAgent],
-        occupants: list[KorkinAgent],
         pathogen_id: str,
         profile: dict | None,
-        agent_doses: dict[int, float],
-        agent_pathway_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
-        ledger: StrainDoseLedger | None,
     ) -> None:
         """One live lot object serves this window.
 
@@ -13048,13 +13037,9 @@ class TransmissionCore:
         zone_name: str,
         token: str,
         members: list[KorkinAgent],
-        occupants: list[KorkinAgent],
         pathogen_id: str,
         profile: dict | None,
-        agent_doses: dict[int, float],
-        agent_pathway_doses: dict[int, dict[str, float]],
         matrix: ContactTracingMatrix,
-        ledger: StrainDoseLedger | None,
     ) -> None:
         """Serve the pan: draw takers, fix the witness, queue the doses.
 

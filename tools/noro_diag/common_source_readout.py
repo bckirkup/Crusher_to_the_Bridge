@@ -187,9 +187,7 @@ def _median_or(xs: list[float], default: float = 0.0) -> float:
     return stats.median(xs) if xs else default
 
 
-def _aggregate_cell(rows: list[dict]) -> dict:
-    n = len(rows)
-    event_counts = [r["n_events"] for r in rows]
+def _accumulate_events(rows: list[dict]) -> dict:
     arm = Counter()
     takers_sum = 0
     n_taken_events = 0
@@ -200,7 +198,15 @@ def _aggregate_cell(rows: list[dict]) -> dict:
         takers_sum += int(r.get("takers_sum", 0) or 0)
         n_taken_events += int(r["n_events"])
         zero_dose += int(r.get("zero_dose_events", 0) or 0)
-    obj_counts = [r["n_objects"] for r in rows]
+    return {
+        "arm": arm,
+        "takers_sum": takers_sum,
+        "n_taken_events": n_taken_events,
+        "zero_dose": zero_dose,
+    }
+
+
+def _accumulate_objects(rows: list[dict]) -> dict:
     end_reasons = Counter()
     obj_pans = 0
     obj_windows = 0
@@ -209,12 +215,27 @@ def _aggregate_cell(rows: list[dict]) -> dict:
             end_reasons[k] += int(v)
         obj_pans += int(r.get("obj_pans_sum", 0) or 0)
         obj_windows += int(r.get("obj_windows_sum", 0) or 0)
+    return {
+        "end_reasons": end_reasons,
+        "obj_pans": obj_pans,
+        "obj_windows": obj_windows,
+    }
+
+
+def _aggregate_cell(rows: list[dict]) -> dict:
+    n = len(rows)
+    event_counts = [r["n_events"] for r in rows]
+    ev = _accumulate_events(rows)
+    obj_counts = [r["n_objects"] for r in rows]
+    ob = _accumulate_objects(rows)
     n_objects = sum(obj_counts)
     cs_inf = sum(r["cs_infections"] for r in rows)
     dose_credited = sum(
         float(r["telemetry"].get("dose_credited", 0.0) or 0.0)
         for r in rows
     )
+    takers_sum = ev["takers_sum"]
+    n_taken_events = ev["n_taken_events"]
     return {
         "voyages": n,
         "with_event": sum(1 for c in event_counts if c > 0),
@@ -224,18 +245,18 @@ def _aggregate_cell(rows: list[dict]) -> dict:
             sorted(event_counts)[int(0.9 * (n - 1))] if n else 0
         ),
         "events_max": max(event_counts, default=0),
-        "arm": dict(arm),
+        "arm": dict(ev["arm"]),
         "takers_mean": (takers_sum / n_taken_events) if n_taken_events else 0.0,
-        "zero_dose_events": zero_dose,
+        "zero_dose_events": ev["zero_dose"],
         "cs_infections": cs_inf,
         "dose_credited": dose_credited,
         "objects_total": n_objects,
         "objects_median": _median_or([float(c) for c in obj_counts]),
-        "pans_per_object": (obj_pans / n_objects) if n_objects else 0.0,
+        "pans_per_object": (ob["obj_pans"] / n_objects) if n_objects else 0.0,
         "windows_per_object": (
-            obj_windows / n_objects if n_objects else 0.0
+            ob["obj_windows"] / n_objects if n_objects else 0.0
         ),
-        "end_reasons": dict(end_reasons),
+        "end_reasons": dict(ob["end_reasons"]),
         "voyages_with_cs_infection": sum(
             1 for r in rows if r["cs_infections"] > 0
         ),
