@@ -1356,3 +1356,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   flat-0.31 severity asymptomatic entry as consistency debt. *The DP believability consequence is unmeasured —
   this lands after DP-BELIEF-01's head-of-record, so the map's numbers
   stand at its SHA; a replay under the armed arm is the open cell.*
+
+- **Berth attribution on `sect_mess_boxed` (post-canary local readout): the crew-share residual is ~73% occupational, ~27% berth-zone — and 74/400 are confined crew infected in their own berth.**
+  Three canary seeds re-run locally at the campaign SHA with the sim
+  retained (`tools/covid_berth_attribution.py`; crew-event counts
+  reproduce the Batch cells exactly, so same realizations). Galley 117 /
+  mess-posted-staff 65 / other work zones 64 / corridor 47 are all
+  `working`-status events; the cabin block's 107 splits 59
+  co-berth-plausible (35 a berth-mate infected during the window — the
+  carry-home channel to a confined mate) vs 48 corridor-pool. Routes:
+  droplet 240 / caregiver 121 / service_to_host 39. Consequence for the
+  record: the 0.29 crew share is unreachable by dining policy — the
+  residual rides work-zone + berthing structure (cohorting working crew
+  away from confined crew, galley pods) the documented DP response
+  never touched; named seam `CREW-BERTH-01`. Evidence
+  `reports/crew_mess_berth_attr/cell_*.json`; caveat — `co_berth` is a
+  sufficient-cause bound (no strain tracking), 3-seed orientation sample.
