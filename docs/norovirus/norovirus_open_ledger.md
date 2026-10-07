@@ -4492,7 +4492,14 @@ baseline; `mode: off` unchanged. Every FOOD-01/02-era figure remains a
 measurement of the v1 machinery — not void, but the mechanism they
 describe is superseded-in-design: nothing here may be quoted as the
 v2 object's behaviour until its own canary reads out. Two
-implementation legs are specified, no cells run.
+implementation legs are specified; **leg 1 landed** (a3acb043) — the
+provisioned-lot contamination object ships default-ON as
+`lot_mode: "object"` (voyage count draw + geometric tail, one realized
+contamination state per object shared across its pans, pan count
+emerging from extent/demand/cadence, objects witnessed on
+`common_source_objects`), with `"independent"` the verified bit-
+identical v1 baseline and `mode: off` still a strict no-op. Leg 2
+(handler/diner conditioning) is design-only and no cells have run.
 
 ## 5. Held fixed by assumption
 
