@@ -5,6 +5,14 @@ gates below are frozen before implementation; nothing here may be revised
 after it lands. The scoring campaign (canary + onset-curve re-readout) is a
 later stage with its own frozen admissibility.
 
+> **Status (2026-10-07):** Implemented — the shipped v1 mechanism and the
+> `"independent"` labelled baseline of record. The mechanism contract going
+> forward is `FOOD-COMMON-SOURCE-02`
+> ([food_common_source_02_design.md](food_common_source_02_design.md)):
+> contamination objects persistent in (station/zone, interval) replace the
+> per-window iid draws. This file remains the record of what shipped and was
+> measured (NORO-FOOD-01/02, AGE-FOOD-01).
+
 ## Grounding
 
 Benjamin's grounding statements (this campaign line, 2026-10-04):

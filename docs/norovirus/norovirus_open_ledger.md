@@ -4470,6 +4470,30 @@ rises well above the declared 0.001 — recorded consequence.
 non-institutional per-case design would support a finer partition;
 the pooled Dirichlet prior is unchanged.
 
+**`FOOD-COMMON-SOURCE-02` (ledger entry): the coupled contamination-object
+redesign of the common-source food mechanism is frozen as a design**
+(`docs/food_common_source_02_design.md`,
+`docs/ledger/FOOD-COMMON-SOURCE-02.md`). The measurements that motivate
+it stand as the v1-era readings the redesign must explain: the lot
+interval sits ~10–20× above the posting anchor (declared, unfitted —
+NORO-FOOD-02 measured the anchor at E ≲ 0.4–0.9%/voyage on the
+`lot_event_probability` ladder); posted-conditional reported pax AR is
+thin (0.019–0.032 vs class IQRs ~0.04–0.10) because one-pan clusters are
+too small; the posting ceiling compresses to ~1.7–1.9% on the
+3,000-agent hull; and iid per-window contamination cannot express the
+space-time autocorrelation of a real lot/handler/diner stream. The
+redesign replaces per-window draws with **contamination objects**
+persistent in (station/zone, interval) — a lot contaminates the pan
+stream it feeds until exhausted (pan count emerges from extent, not a
+drawn count), and leg-2 handler/diner objects are seeded per realized
+infectious-course span at the agent's station. Per-arm `*_mode:
+"object"` ships default-ON with `"independent"` the labelled v1
+baseline; `mode: off` unchanged. Every FOOD-01/02-era figure remains a
+measurement of the v1 machinery — not void, but the mechanism they
+describe is superseded-in-design: nothing here may be quoted as the
+v2 object's behaviour until its own canary reads out. Two
+implementation legs are specified, no cells run.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
