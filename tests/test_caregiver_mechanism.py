@@ -882,3 +882,118 @@ class TestMealSvc01:
         assert len(stewards) == 2
         assert bound_id in stewards
         assert core.caregiver_telemetry["service_section_steward_draws"] == 2
+
+
+class TestMealSvc02:
+    """MEAL-SVC-02: ``contact_factor_to_host`` on the host direction.
+
+    Behaviour and invariant tests only: the declared scalar/interval
+    attenuates the steward->host credit alone — the steward-side dose
+    keeps the shared realized draw, the shared stream's realization is
+    untouched, and every realized host factor is recorded for the
+    lottery witness. Absent means the shared draw (status quo).
+    """
+
+    @staticmethod
+    def _host_credit_core(service: dict) -> TransmissionCore:
+        return _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "direction": "both",
+                "report_probability": (0.0, 0.0),
+                **service,
+            },
+        })
+
+    def _deliver(self, core: TransmissionCore) -> dict[int, float]:
+        host = TestMealSvc01._confined_host(1)
+        steward = TestMealSvc01._emitting_steward(9)
+        core._agents_by_id = {1: host, 9: steward}
+        doses: dict[int, float] = {}
+        core._caregiver_pathogen_epoch(
+            1, PATHOGEN, _profile(), doses, {},
+        )
+        return doses
+
+    def test_scalar_scales_the_host_dose_only(self) -> None:
+        """A declared scalar multiplies the roles-swap pair dose exactly
+        while the steward-side tally keeps the shared draw."""
+        full = self._host_credit_core({"contact_factor_to_host": 1.0})
+        self._deliver(full)
+        half = self._host_credit_core({"contact_factor_to_host": 0.5})
+        self._deliver(half)
+        full_dose = full.caregiver_telemetry[
+            "service_dose_to_host_delivered"
+        ]
+        half_dose = half.caregiver_telemetry[
+            "service_dose_to_host_delivered"
+        ]
+        assert full_dose > 0.0
+        assert half_dose == pytest.approx(0.5 * full_dose)
+        # The steward side takes the same shared draw on both cores.
+        assert half.caregiver_telemetry[
+            "service_dose_delivered"
+        ] == pytest.approx(full.caregiver_telemetry[
+            "service_dose_delivered"
+        ])
+
+    def test_off_credits_zero_but_the_delivery_fires(self) -> None:
+        core = self._host_credit_core({"contact_factor_to_host": 0.0})
+        self._deliver(core)
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core.caregiver_telemetry[
+            "service_dose_to_host_credited"
+        ] == pytest.approx(0.0)
+        assert core._service_host_factor_stats["n"] == 1
+        assert core._service_host_factor_stats["sum"] == pytest.approx(0.0)
+
+    def test_absent_uses_the_shared_draw(self) -> None:
+        core = self._host_credit_core({})
+        self._deliver(core)
+        assert core._cg_service_to_host_contact is None
+        assert core._cg_service["contact_factor_to_host_mode"] == "shared"
+        factor = core._service_host_factor_sample[0]
+        lo, hi = 0.05, 0.3  # shipped CAREGIVER_SERVICE_CONTACT_FACTOR
+        assert lo <= factor <= hi
+        # The resolved block echoes the effective spec (the shared
+        # tuple) even though nothing was declared.
+        assert core._cg_service["contact_factor_to_host"] == [0.05, 0.3]
+
+    def test_uniform_draws_on_its_own_stream(self) -> None:
+        core = self._host_credit_core(
+            {"contact_factor_to_host": (0.005, 0.02)},
+        )
+        assert core._service_host_contact_rng is not None
+        voyage_state = core.rng.bit_generator.state
+        shared_state = core._service_contact_rng.bit_generator.state
+        factor = core._service_host_contact_factor(0.5)
+        assert 0.005 <= factor <= 0.02
+        assert core.rng.bit_generator.state == voyage_state
+        assert (
+            core._service_contact_rng.bit_generator.state == shared_state
+        )
+
+    def test_fixed_and_shared_spawn_no_host_stream(self) -> None:
+        fixed = self._host_credit_core({"contact_factor_to_host": 0.01})
+        assert fixed._service_host_contact_rng is None
+        shared = self._host_credit_core({})
+        assert shared._service_host_contact_rng is None
+
+    def test_malformed_fails_at_spec(self) -> None:
+        for bad in ("off", 1.5, -0.1, (0.8, 0.2), (0.1, 0.2, 0.3), True):
+            with pytest.raises(ValueError):
+                self._host_credit_core({"contact_factor_to_host": bad})
+        with pytest.raises(ValueError, match="contact_factor_to_host"):
+            self._host_credit_core({"contact_factor_to_host": 1.5})
+
+    def test_responder_direction_draws_no_host_factor(self) -> None:
+        core = _core(caregiver={
+            "service": {
+                "enabled": {"*": True},
+                "contact_factor_to_host": (0.005, 0.02),
+                "report_probability": (0.0, 0.0),
+            },
+        })
+        self._deliver(core)
+        assert core.caregiver_telemetry["service_deliveries"] == 1
+        assert core._service_host_factor_stats["n"] == 0

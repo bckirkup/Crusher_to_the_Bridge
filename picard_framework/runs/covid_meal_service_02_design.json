@@ -1,0 +1,236 @@
+{
+  "design_id": "covid-meal-svc-02",
+  "task_id": "covid-meal-svc-02",
+  "design_doc": "docs/covid/covid_meal_service_02_design.md",
+  "parent_design": "covid-crew-window-02",
+  "supersedes": "covid-meal-svc-01",
+  "prerequisites": [
+    "CW-02 verdict measured (merged at 2df542ff): FRAC_25 (301) + ZONE_NARROW (334) CHANNEL-LANDED @theta7.9e6; crew share ~0.97; R3 service_deliveries 128k-166k/cell",
+    "MEAL-SVC-01 canary measured (20/20 at 32b11ccf): zone_narrow_svc_dir confined-pax median 804 vs bound >=52; during-total 1267; crew share 0.379 vs record 0.29; CHANNEL-FOUND - ~15x overcorrection at the declared full pair dose; signature recovered, interval sits high",
+    "MEAL-SVC-02 owner decisions settled (all five adopted): independent per-direction interval `contact_factor_to_host` (steward side pinned at the shipped shared factor); all five host-factor arms; D0 corner pair rides; SECT sub-arm rides once at CF_HOST_LO; crew-side co-surface reported"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "d0_declared_svc_base",
+      "overrides": {},
+      "note": "Shipped default verbatim - SOP-017 days 16-30, four crew classes exempt, responder-only direction, shared (0.05, 0.3) door-drop factor. First arm so empty overrides per the arm grammar. Doubles as the in-design pairing base and the drift witness vs CW-02's t7p9e6_d0 row at 2df542ff and the MEAL-SVC-01 svc_base row at 32b11ccf (NOT expected bit-identical across intervening merges - deliveries parity is the binding comparison)."
+    },
+    {
+      "arm_id": "zone_narrow_svc_base",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW"
+      },
+      "note": "SVC_BASE drift witness on ZONE_NARROW (the geometry that CHANNEL-LANDED at CW-02). Responder-only shipped default; parity vs the CW-02 `t7p9e6_zone_narrow` row."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_cf_shipped",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {"service": {"direction": "both"}}
+        }
+      },
+      "note": "CF_HOST_SHIPPED control: `contact_factor_to_host` absent -> the host direction takes the shared realized draw (shipped (0.05, 0.3)); doubles as the drift witness vs the MEAL-SVC-01 canary row at 32b11ccf - report its confined-pax median beside 804 without requiring bit-identity across intervening merges."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_cf_mid",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "contact_factor_to_host": [0.02, 0.08]
+            }
+          }
+        }
+      },
+      "note": "CF_HOST_MID: host direction draws its own U(0.02, 0.08) per delivery on the dedicated host-factor spawn; steward side stays on the shared factor."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_cf_lo",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "CF_HOST_LO (CANARY): host direction draws U(0.005, 0.02) per delivery. If the door-drop interval's low end lands the passenger mass near the bound, this is the arm that shows it; first submitted, read out alone."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_cf_floor",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "contact_factor_to_host": 0.01
+            }
+          }
+        }
+      },
+      "note": "CF_HOST_FLOOR: a declared scalar corner at 0.01 (no draw). If a scalar lands the bound exactly, the factor's floor is the answer - a source tranche, not more cells."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_cf_off",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "contact_factor_to_host": 0.0
+            }
+          }
+        }
+      },
+      "note": "CF_HOST_OFF: scalar 0.0 - the responder-only corner reached through the host-direction seam rather than the direction arm. Host-credited tally must be 0 by construction (audit invariant); pax median should fall to the zone_narrow_svc_base level while deliveries stay up."
+    },
+    {
+      "arm_id": "d0_svc_dir_cf_shipped",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {"service": {"direction": "both"}}
+        }
+      },
+      "note": "D0 x CF_HOST_SHIPPED corner: the full steward pool serving an unmodified lockdown at the shared factor - the complement of the OFF corner below."
+    },
+    {
+      "arm_id": "d0_svc_dir_cf_off",
+      "overrides": {
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "contact_factor_to_host": 0.0
+            }
+          }
+        }
+      },
+      "note": "D0 x CF_HOST_OFF corner: full pool, host direction silenced. The two D0 corners bound the host-channel contribution under the widest delivery envelope."
+    },
+    {
+      "arm_id": "zone_narrow_svc_dir_sect_cf_lo",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15],
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "SECT sub-arm at CF_HOST_LO: structure x magnitude interaction at the bound-corner factor - section-bound stewards (~10-15 cabins, distinct-steward witness ~1-2 vs ~44 uniform) under the low host factor."
+    }
+  ],
+  "cells": 200,
+  "cells_note": "10 arms x 20 seeds. Seeded in-order per arm (20200205..20200224); each cell ~15 epochs/day over ~21 days with the voyage frozen.",
+  "cell_payload_additions": [
+    "run",
+    "cohort",
+    "quarantine_witness",
+    "board",
+    "crew_window",
+    "guard_windows",
+    "crew_ledger",
+    "infection_log_tail",
+    "through_day14",
+    "takeoff_calibration",
+    "q_zone_reach",
+    "source_channel_during",
+    "during_quarantine_by_route",
+    "sanitary_visits"
+  ],
+  "admissibility": {
+    "conditional_trajectory_clause": "Seeds whose seeded case never completes takeoff produce no during-quarantine onset mass for reasons independent of the arm (their onset timelines cannot reach the window). On arms where the takeoff carve-out is binding - the two D0_declared/d0 rows - the during-window median is computed on seeds that completed takeoff (onboard_infections > 0) and the conditional share is reported alongside. takeoff_recorded_onsets remains an audit diagnostic (DP tally ~10), not a gate.",
+    "passenger_during_bound": "Passenger-class during-quarantine acquisitions by onboard takeoff: all-classes tally, confined-only tally, and onboard share of the confined tally are all reported side by side per arm. The scoring surface is the confined-pax tally (the channel the meal-service mechanism can reach) against the bound region (~52 from the frozen CW-02 design; record-implied pax mass ~45-160 stated as context, not threshold).",
+    "during_band_reported_beside": "During-quarantine total is reported beside the [150, 350] band - not gating (it mixes crew and pax); the pass/fail surfaces are confined-pax mass and crew share.",
+    "crew_share_direction": "Crew share of during-quarantine acquisitions is reported against the record 0.29 as a direction, not a threshold (MEAL-SVC-01 measured 0.379 at the full shared factor).",
+    "crew_side_co_surface": "Steward share of during-window crew acquisitions per arm (the host factor leaves the steward side on the shared draw - the co-surface verifies the co-traveller dose was untouched).",
+    "verdict_grammar": {
+      "MAGNITUDE-LANDED": "an arm lands confined-pax median in the bound region (~52) with crew share moving record-ward",
+      "OVER-ATTENUATED": "armed pax collapses toward the responder-only floor (the svc_base level)",
+      "STILL-HIGH": "confined-pax median above ~200 even at the lowest declared factor",
+      "NONLINEAR-BREAK": "the response departs monotone in the declared factor - flag for attribution, not failure"
+    },
+    "audit_invariants": [
+      "quarantine window [16, 30], exempt-classes = 4 crew classes",
+      "index onset day -1.0",
+      "propensity_draw + presentation_draw_mode witnessed on every takeoff",
+      "hand_reservoir_mode guard labelled",
+      "droplet split (0.175, 0.0) echoes on every cell",
+      "crew_window block echoes service_direction on every DIR/base cell",
+      "host-factor echo: every cell echoes contact_factor_to_host + contact_factor_to_host_mode in crew_window AND delivery.caregiver.roles.service; missing/mismatched echo halts the readout",
+      "realized host-factor distribution: service_host_factor_draws median ~ declared arm mean (lottery check; OFF arm median == 0.0)",
+      "service host-credited dose tally > 0 exactly when the arm both declared direction both and a nonzero host factor; CF_HOST_OFF host-credited tally = 0 by construction (takeoff-conditional: a no-takeoff cell legitimately reads 0)",
+      "service_deliveries per cell within 15% of the MEAL-SVC-01 canary row median (~166k) - the door-drop cadence must not move with the factor",
+      "service responder mode echoed; stewards/host median ~44 uniform vs ~1-2 on the SECT sub-arm (max <= 6)",
+      "Q-zone reach tally reported",
+      "drift witness: the two *_svc_base rows are the carried-open CW-02 pairing under today's merged tree - deliveries parity is the binding comparison"
+    ],
+    "report_immediately": [
+      "canary lands confined pax near the bound with crew share <= ~0.5 moving record-ward (near-landing - stop, report before the array)",
+      "a scalar corner lands the bound exactly (the factor's floor is the answer - a source tranche, not more cells)",
+      "the response departs monotone in the factor (NONLINEAR-BREAK)",
+      "deliveries parity fails or the host-credit witness contradicts the declared factor",
+      "child failure rate > 5%"
+    ]
+  },
+  "diagnostics": [
+    "crew_window: deliveries, steward/host dose tallies, distinct stewards per confined host, host-factor echo + realized stats",
+    "during_quarantine_by_route: caregiver vs service_to_host route tallies per cell",
+    "q_zone_reach + source_channel_during + crew_ledger carried from CW-02"
+  ],
+  "execution": {
+    "runner": "simulate_screen_cell",
+    "task": "covid_meal_service_02",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/meal_service_02",
+    "s3_prefix": "campaign/covid_meal_service_02/",
+    "queue": "picard-analysis-queue",
+    "jobdef": "picard-covid-meal-svc-02",
+    "image_tag": "covid-meal-svc-02",
+    "submission_order": [
+      "canary block zone_narrow_svc_dir_cf_lo (20 seeds) - read out and STOP before the array",
+      "remaining 9 arm blocks (180 cells)"
+    ]
+  },
+  "rejected_alternatives": [
+    {
+      "axis": "shared factor re-declaration on service.contact_factor",
+      "reason": "attenuating the shared factor moves BOTH directions - the steward-side dose (already near the crew-share record direction) would attenuate too; the leg isolates the host direction."
+    },
+    {
+      "axis": "host-direction efficiency constant (the route_kernels roles-swap efficiency)",
+      "reason": "frozen as a rejected axis by the owner - the door-drop contact factor is the seam under test; efficiency constants stay parked."
+    },
+    {
+      "axis": "episode share / delivery cadence",
+      "reason": "rejected axes - deliveries parity is an audit invariant, not a tuning surface."
+    },
+    {
+      "axis": "re-running the CW-02 ladder",
+      "reason": "frozen by the settled input; ZONE_NARROW is the fixed geometry."
+    }
+  ]
+}

@@ -464,6 +464,26 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`MEAL-SVC-02` is declared and frozen — the `contact_factor_to_host`
+  door-drop attenuation sweep, answering the open decision MEAL-SVC-01's
+  canary left.** `transmission.caregiver.roles.service
+  .contact_factor_to_host` gives the steward→host direction its own
+  declared corner/interval drawn per delivery on its own spawn
+  (`_SERVICE_HOST_CONTACT_STREAM_KEY`); absent → the shared realized
+  draw (the CF_HOST_SHIPPED control doubling as the MEAL-SVC-01 canary
+  drift witness). Frozen design
+  `docs/covid/covid_meal_service_02_design.md`: ZONE_NARROW ×
+  {SHIPPED, MID (0.02,0.08), LO (0.005,0.02), FLOOR 0.01, OFF 0.0} + D0
+  corner pair + SECT sub-arm at LO + two `*_svc_base` drift rows — 10
+  arms × 20 seeds = 200 cells @θ7.9e6, verbatim CW-02 contract; verdict
+  grammar MAGNITUDE-LANDED / OVER-ATTENUATED / STILL-HIGH /
+  NONLINEAR-BREAK. Campaign `campaigns/covid/meal_service_02/`
+  (jobdef `picard-covid-meal-svc-02`, image `covid-meal-svc-02`, S3
+  `campaign/covid_meal_service_02/`). **No cell has run** — Batch
+  execution is handed to the next session
+  (`docs/covid/covid_meal_service_02_handoff_2026_10_07.md` §7 has the
+  exact gate order: dry-run 200 → smoke → digest-pinned image → jobdef →
+  manifest → canary `zone_narrow_svc_dir_cf_lo` → stop and report).
 - **`COVID-HAND-AB-01` (v14) is the declared Diamond Princess re-approach
   under the repaired hand line — three designs, one gate.** The hand
   reservoir gained practice variability + drying under PR #804
