@@ -3340,6 +3340,12 @@ def _check_fred_behavior(cfg: dict[str, Any], report: Report) -> None:
     if rd is not None and isinstance(rd, (int, float)) and rd < 0:
         report.error(_CONFIG_YAML, "MATH_BOUND",
                      f"fred_behavior.reluctant_delay_hours = {rd} is negative")
+    de = _config_value_with_retired_alias(
+        fred, "defiant_escalation_hours", "defiant_escalation_epochs",
+    )
+    if de is not None and isinstance(de, (int, float)) and de < 0:
+        report.error(_CONFIG_YAML, "MATH_BOUND",
+                     f"fred_behavior.defiant_escalation_hours = {de} is negative")
     _check_fred_compliance_by_class(fred, report)
     _check_fred_healthy_noise(fred, report)
 

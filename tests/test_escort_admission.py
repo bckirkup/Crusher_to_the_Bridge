@@ -167,3 +167,94 @@ class TestDelayedComplianceEscort:
         step_fred_compliance(14, state, syn)
         assert 7 in state.quarantined_ids
         assert 7 not in state.escort_pending
+
+
+class TestDefiantEscalation:
+    """DEFIANT-ESC-01: a defiant refuser is compelled after the hold-out."""
+
+    def _defiant_syn(
+        self, escalation_epochs: int,
+    ) -> SyndromicSurveillance:
+        return SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=0.0,
+            defiant_escalation_epochs=escalation_epochs,
+            rng=np.random.default_rng(0),
+        )
+
+    def _order_refused(self, state: SimulationState, syn: SyndromicSurveillance) -> None:
+        assert try_admit_to_quarantine(
+            10, 7, state, syn,
+            action_ok="ok", action_refuse="refused_quarantine",
+        ) is False
+        assert 7 in state.quarantine_refusers
+        assert state.quarantine_order_epoch[7] == 10
+
+    def test_resolution_defaults(self) -> None:
+        from orchestrator_epoch import _defiant_escalation_epochs
+        assert _defiant_escalation_epochs(_BareModality()) == 1 << 30
+        assert _defiant_escalation_epochs(self._defiant_syn(24)) == 24
+        from engines.sim_clock import SimClock
+        clock = SimClock()
+        syn_h = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=0.0,
+            defiant_escalation_hours=12,
+            clock=clock,
+            rng=np.random.default_rng(0),
+        )
+        assert syn_h.defiant_escalation_epochs == clock.epochs_for_hours(12)
+
+    def test_stays_refused_inside_window(self) -> None:
+        state = SimulationState()
+        syn = self._defiant_syn(24)
+        self._order_refused(state, syn)
+        step_fred_compliance(33, state, syn)
+        assert 7 in state.quarantine_refusers
+        assert 7 not in state.quarantined_ids
+
+    def test_compelled_at_window(self) -> None:
+        state = SimulationState()
+        syn = self._defiant_syn(24)
+        self._order_refused(state, syn)
+        step_fred_compliance(34, state, syn)
+        assert 7 not in state.quarantine_refusers
+        assert 7 in state.quarantined_ids
+        entry = state.compliance_log[-1]
+        assert entry["action"] == "enforced_confinement"
+        assert entry["compliance_class"] == "defiant"
+        assert entry["epoch"] == 34
+        assert 7 not in state.quarantine_order_epoch
+
+    def test_zero_window_compels_at_first_recheck(self) -> None:
+        state = SimulationState()
+        syn = self._defiant_syn(0)
+        self._order_refused(state, syn)
+        step_fred_compliance(10, state, syn)
+        assert 7 in state.quarantined_ids
+        assert state.compliance_log[-1]["action"] == "enforced_confinement"
+
+    def test_reluctant_refuser_waits_own_delay(self) -> None:
+        state = SimulationState()
+        syn = SyndromicSurveillance(
+            quarantine_compliance=0.0,
+            reluctant_fraction=1.0,
+            reluctant_delay_epochs=48,
+            defiant_escalation_epochs=24,
+            rng=np.random.default_rng(0),
+        )
+        assert try_admit_to_quarantine(
+            10, 7, state, syn,
+            action_ok="ok", action_refuse="refused_quarantine",
+        ) is False
+        # Past the defiant window but inside the reluctant delay: no
+        # escalation and no delayed admission.
+        step_fred_compliance(40, state, syn)
+        assert 7 in state.quarantine_refusers
+        assert 7 not in state.quarantined_ids
+        # At the reluctant delay the host admits via delayed_compliance,
+        # never via enforced_confinement.
+        step_fred_compliance(58, state, syn)
+        assert 7 not in state.quarantine_refusers
+        actions = [e["action"] for e in state.compliance_log]
+        assert "enforced_confinement" not in actions

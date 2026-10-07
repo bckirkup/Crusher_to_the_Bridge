@@ -51,7 +51,11 @@ co-confined cabin-mate pooling is confirmed but ~15% (post-confinement
 tail, epochs ≥194); the dominant term is a free-pool droplet wave in
 dining/social venues sustained by the admission lottery (refused
 founders roam free at full strength; refusal realization scales with
-order volume). Ledger:
+order volume). The absorbing refusal behind the lottery is now
+escalated — `docs/ledger/DEFIANT-ESC-01.md`: defiant refusers are
+compelled after a declared 24 h hold-out (`enforced_confinement`), and
+the probe re-run shows the 89-infection f=0 surplus gone on all three
+seeds. Ledger:
 `docs/ledger/CAREGIVER-SVC-01.md`.
 
 ## 2. Measurement status (pointers, not quotes)
@@ -66,6 +70,7 @@ order volume). Ledger:
 | FLU-OPEN-01 | measured | `7f4702ef` | open-voyage census on all four classes; F5 above frame = declared observation vector |
 | FLU-VIS-01 | measured | `ca775a0b` | observation-layer sweep (report scale × eligibility) on the open voyage; reporting saturates — big-hull Ward gap is incidence, not visibility |
 | FLU-SVC-RESIDUAL-01 | measured | `02ab79b8` | f=0 surplus attribution: admission lottery (refused founders) dominant, co-confined pooling confirmed ~15% |
+| DEFIANT-ESC-01 | measured | `19040166` | defiant→enforced escalation at declared 24 h; f=0 surplus 89→-25 pooled on 8112/8184/8120 |
 
 Numbers are quoted from the entries above at their `Measured at` SHAs, never
 from this page.

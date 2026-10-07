@@ -129,6 +129,12 @@ class SyndromicParams:
     # admission lands. 0 restores the instant-admission baseline.
     escort_delay_epochs: int = 0
     escort_delay_hours: float | None = None
+    # Refusal->compelled-confinement hold-out for the "defiant" class:
+    # the refuser stays free this many epochs, then is admitted under
+    # authority-compelled confinement (maritime compulsion; see
+    # fred_behavior.defiant_escalation_hours). 0 compels instantly.
+    defiant_escalation_epochs: int = 24
+    defiant_escalation_hours: float | None = None
     # Detection trigger for symptomatic confinement orders
     # (NORO-DETECT-01). "presenting_sign" gates the order on the first
     # observed declared sign per pathogen profile
@@ -291,6 +297,11 @@ class SyndromicSurveillance:
             self.clock.epochs_for_hours(p.escort_delay_hours)
             if p.escort_delay_hours is not None
             else int(p.escort_delay_epochs)
+        )
+        self.defiant_escalation_epochs = (
+            self.clock.epochs_for_hours(p.defiant_escalation_hours)
+            if p.defiant_escalation_hours is not None
+            else int(p.defiant_escalation_epochs)
         )
         self.detection_delay_epochs = (
             self.clock.epochs_for_hours(p.detection_delay_hours)

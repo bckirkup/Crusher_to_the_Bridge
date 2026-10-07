@@ -252,6 +252,13 @@ def build_modalities(
         fred_cfg, "escort_delay_hours", "escort_delay_epochs",
         run_clock, default=1,
     )
+    # Refusal->compelled-confinement hold-out for "defiant" refusers
+    # (DEFIANT-ESC-01): authority compels admission after the declared
+    # window — maritime law makes a permanently-free refuser untenable.
+    defiant_escalation = config_epochs_for_hours(
+        fred_cfg, "defiant_escalation_hours", "defiant_escalation_epochs",
+        run_clock, default=24,
+    )
     # Presenting-sign detection (NORO-DETECT-01): shipped ON — the
     # confinement order waits for the pathogen's declared observable
     # presenting sign plus the clinic wait; "onset" is the labelled
@@ -285,6 +292,7 @@ def build_modalities(
             reluctant_fraction=fred_cfg.get("reluctant_fraction", 0.75),
             reluctant_delay_epochs=reluctant_delay or 0,
             escort_delay_epochs=escort_delay or 0,
+            defiant_escalation_epochs=defiant_escalation or 0,
             symptomatic_order_trigger=order_trigger,
             clinic_wait_epochs=clinic_wait or 0,
             compliance_by_class=fred_cfg.get("compliance_by_class"),
