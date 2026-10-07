@@ -1,0 +1,181 @@
+{
+  "design_id": "covid-crew-mess-01",
+  "task_id": "covid-crew-mess-01",
+  "design_doc": "docs/covid/covid_crew_mess_01_design.md",
+  "parent_design": "covid-meal-svc-02",
+  "prerequisites": [
+    "MEAL-SVC-02 measured (merged): zone_narrow_svc_dir_sect_cf_lo lands the confined-pax bound (median 35 in [26,160], takeoff 11/20); residual during-window crew share 0.841 vs record 0.29",
+    "Attribution on the landed cells: crew_mess zone class carries 44-59% of during-window mass, galley ~10-19%, droplet ~80-85% of routes, service channel ~3.6% of crew pickups",
+    "CW-02 verdict measured (merged at 2df542ff): ZONE_NARROW CHANNEL-LANDED @theta7.9e6; section geometry and exempt_work_zones machinery settled"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "arms": [
+    {
+      "arm_id": "d0_svc_base",
+      "overrides": {},
+      "note": "Shipped default verbatim - SOP-017 days 16-30, four crew classes exempt, responder-only direction, uniform stewards, shared (0.05, 0.3) door-drop factor, messes open. First arm so empty overrides per the arm grammar; doubles as the widest crew-share corner (shipped baseline row)."
+    },
+    {
+      "arm_id": "sect_mess_open",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-NARROW",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15],
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "The landed MEAL-SVC-02 corner verbatim: SOP-017-NARROW (messes open) + direction both + section stewards + CF_HOST_LO. Pairing base and drift witness vs the MEAL-SVC-02 landed row (confined-pax 35, crew share 0.841, deliveries ~162k) - NOT expected bit-identical across intervening merges; deliveries parity and the confined-pax band are the binding comparisons."
+    },
+    {
+      "arm_id": "sect_mess_boxed",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-MESSBOX",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15],
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "CANARY. Boxed crew meals for the order window: every crew placement into a crew-mess zone resolves to home_zone while the order is active (mess-posted staff exempt). Documented DP response; the strongest intervention and the loudest shared-zone-defect test."
+    },
+    {
+      "arm_id": "sect_mess_stag4",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-MESSSTAG",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15],
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "Staggered crew service: rising-edge schedule surgery spreads each crew agent's Meal tokens over 4 seatings (agent_id % 4), restored at the falling edge. Documented DP-style stagger; occupancy per meal hour ~1/4."
+    },
+    {
+      "arm_id": "sect_mess_cap10",
+      "overrides": {
+        "scheduled_protocol_id": "SOP-017-MESSCAP",
+        "transmission_overrides": {
+          "caregiver": {
+            "service": {
+              "direction": "both",
+              "service_responder_mode": "section",
+              "service_section_cabins": [10, 15],
+              "contact_factor_to_host": [0.005, 0.02]
+            }
+          }
+        }
+      },
+      "note": "Mess capacity limits: per-(zone, epoch) diner cap at 10% of rated occupancy (105 seats across both messes vs ~260-330 exempt crew); overflow eats boxed in cabin."
+    }
+  ],
+  "cells": 100,
+  "cells_note": "5 arms x 20 seeds. Seeded in-order per arm (20200205..20200224); each cell ~15 epochs/day over ~21 days with the voyage frozen.",
+  "cell_payload_additions": [
+    "run",
+    "cohort",
+    "quarantine_witness",
+    "board",
+    "crew_window",
+    "guard_windows",
+    "crew_ledger",
+    "infection_log_tail",
+    "through_day14",
+    "takeoff_calibration",
+    "q_zone_reach",
+    "source_channel_during",
+    "during_quarantine_by_route",
+    "sanitary_visits"
+  ],
+  "admissibility": {
+    "conditional_trajectory_clause": "Seeds whose seeded case never completes takeoff produce no during-quarantine onset mass for reasons independent of the arm. The during-window median is computed on seeds that completed takeoff (onboard_infections > 0); takeoff_recorded_onsets remains an audit diagnostic (DP tally ~10), not a gate.",
+    "crew_share_primary": "During-window crew share vs the record 0.29 against the pre-declared target band (0.2, 0.4): inside = the mess channel carried the residual; above = residual elsewhere; below = over-closed.",
+    "confined_pax_guard": "Confined-passenger during-window mass holds the landed band ([26,160] context, landed median 35) within seed-paired noise on every arm; a passenger-side move is PAX-COLLATERAL, a shared-zone defect, not a finding.",
+    "deliveries_parity": "service_deliveries per cell within 15% of the landed row (~162k) - the meal-policy seam must not move the steward channel.",
+    "verdict_grammar": {
+      "MESS-CHANNEL-CLOSED": "armed arm lands crew share inside (0.2, 0.4) with the confined-pax band holding",
+      "STILL-HIGH": "crew share moves measurably but lands > 0.4 - residual rides another venue",
+      "OVER-CLOSED": "crew share < 0.2 - the declared intervention over-corrects",
+      "UNMOVED": "crew share within seed-paired noise of the open arm - the mechanism never reached the mess",
+      "PAX-COLLATERAL": "confined-pax mass departs the landed band beyond seed-paired noise - shared-zone defect"
+    },
+    "audit_invariants": [
+      "quarantine window [16, 30] activated on every cell; exempt_classes = 4 crew classes; exempt_work_zones echoed verbatim (11-zone list) on every arm",
+      "crew_window.crew_meal_service echoes mode + params + active_epochs + diner_redirects on every cell; absent or mismatched echo halts the readout",
+      "diner_redirects == 0 on sect_mess_open; > 0 on every armed cell",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "droplet split (0.175, 0.0) echoes on every cell",
+      "service_deliveries within 15% of the landed row median (~162k)",
+      "during_quarantine_by_zone_class.crew_mess falls on armed cells vs open (mechanism fired)",
+      "drift witness: sect_mess_open reproduces the MEAL-SVC-02 landed row's confined-pax band and crew-share class on the current merge"
+    ],
+    "report_immediately": [
+      "the open arm departs the landed row's behaviour on the current merge (drift) - stop and report before any array",
+      "PAX-COLLATERAL - mess attenuation moved passenger dining (shared-zone defect)",
+      "the canary lands crew share inside (0.2, 0.4) - near-landing; stop and report before any further cells",
+      "diner_redirects reads 0 on an armed cell or the echo is missing",
+      "child failure rate > 5%"
+    ]
+  },
+  "diagnostics": [
+    "crew_window.crew_meal_service: mode, params, active_epochs, diner_redirects per cell",
+    "during_quarantine_by_zone_class: crew_mess / galley shares per cell",
+    "during_quarantine_by_route: droplet vs service tallies per cell",
+    "q_zone_reach + source_channel_during + crew_ledger carried from CW-02"
+  ],
+  "execution": {
+    "runner": "simulate_screen_cell",
+    "task": "covid_crew_mess_01",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/crew_mess_01",
+    "s3_prefix": "campaign/covid_crew_mess_01/",
+    "queue": "picard-analysis-queue",
+    "jobdef": "picard-covid-crew-mess-01",
+    "image_tag": "covid-crew-mess-01",
+    "submission_order": [
+      "canary block sect_mess_boxed (20 seeds) - read out and STOP; the full grid is the owner's call"
+    ]
+  },
+  "rejected_alternatives": [
+    {
+      "axis": "rhythm-catalog SOP effect (meal_seating@crew_mess: delivered_to_cabin / capacity_multiplier)",
+      "reason": "cancels the committed crew_mess event but cannot reach the Meal-token fallback that places non-committed crew in dining_zone; meals_to_cabin re-routes passengers only."
+    },
+    {
+      "axis": "close_zones on the mess zones",
+      "reason": "the order-level closer relocates occupants once at the epoch boundary and never repoints future Meal tokens or rhythm commitments; strands mess-posted staff."
+    },
+    {
+      "axis": "info_suppression venue cancellation",
+      "reason": "permanent and recognition-latched; the intervention must live and die with the order window."
+    },
+    {
+      "axis": "near-field / droplet_field_split scalars scoped to mess zones",
+      "reason": "attenuates dose terms while leaving occupancy unphysical (mess still full); the declared interventions are meal-policy changes acting on placement."
+    }
+  ]
+}

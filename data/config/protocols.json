@@ -780,6 +780,119 @@
       },
       "category": "intervention",
       "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-MESSBOX",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals, Essential-Zone Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-MESS-01 (docs/covid/covid_crew_mess_01_design.md): verbatim SOP-017-NARROW plus crew_meal_service mode boxed — the documented Diamond Princess response of distributing crew meals rather than seating a communal mess. While the order is active every crew placement resolving into a crew-mess zone resolves to home_zone (mess-posted staff keep their posting: the kitchen still produces the boxes). An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-MESSSTAG",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Four-Sitting Crew Meals, Essential-Zone Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-MESS-01 (docs/covid/covid_crew_mess_01_design.md): verbatim SOP-017-NARROW plus crew_meal_service mode staggered seatings 4 — staggered crew meal service, each crew agent's Meal tokens spread across four sittings (agent_id % 4) at the order's rising edge and restored at the falling edge. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "staggered",
+          "seatings": 4
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-MESSCAP",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + 10% Mess Occupancy Cap, Essential-Zone Crew Only Exempt",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-MESS-01 (docs/covid/covid_crew_mess_01_design.md): verbatim SOP-017-NARROW plus crew_meal_service mode capacity occupancy_fraction 0.10 — mess occupancy capped at one tenth of rated seats (~105 across both messes vs ~260-330 exempt crew); diners past the cap take boxed meals in cabin. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "capacity",
+          "occupancy_fraction": 0.10
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }

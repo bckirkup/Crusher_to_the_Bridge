@@ -488,6 +488,33 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
 
 ## 3. Outstanding
 
+- **`CREW-MESS-01` canary measured (20/20 cells at `cca98cdc`,
+  `docs/covid/covid_crew_mess_01_readout.md`,
+  `campaigns/covid/crew_mess_01/LEDGER.md`): crew-dining attenuation
+  during the confinement order —** The MEAL-SVC-02 landed row leaves a during-window
+  crew share of 0.841 vs the record's 0.29, carried by the open
+  `crew_mess` zone class (44–59% of during-window mass): ~25–31%
+  exempt crew keep dining in an open mess for the 16-day order while
+  the documented DP response was boxed/staggered crew meals. The
+  design (`docs/covid/covid_crew_mess_01_design.md`,
+  `picard_framework/runs/covid_crew_mess_01_design.json`,
+  `campaigns/covid/crew_mess_01/`) freezes a `crew_meal_service`
+  protocol modifier — modes `boxed` (dine-in redirect to quarters),
+  `capacity` (occupancy cap), `staggered` (seating-split schedule
+  surgery) — as SOP-017-MESSBOX/MESSSTAG/MESSCAP variants of the
+  shipped SOP-017-NARROW, 5 arms × 20 seeds on the verbatim CW-02
+  replay contract, scored on crew share in the declared (0.2,0.4)
+  band with the confined-pax band holding and deliveries parity.
+  Canary `sect_mess_boxed` (20 seeds): **STILL-HIGH** — the boxed
+  directive fired on every cell (360 active epochs, 11.7k–14.9k
+  diner_redirects), crew_mess during-mass collapsed to median 0
+  (pooled residual 135/1,179 is posted kitchen staff + far-field,
+  not dining), crew share moved 0.841→0.727 median (takeoff-cond.
+  0.68) — above the (0.2,0.4) band: the residual rides
+  cabin/galley/work-zone venues, not the mess. Confined-pax guard
+  28 ∈ [26,160]; deliveries parity 162,184 vs 162,447; during-window
+  total med 22 vs landed 238 (within-arm read — different
+  realization). Remaining 80 cells are the owner's call.
 - **`MEAL-SVC-02` is measured — §2.** The `contact_factor_to_host`
   sweep ran the full 200-cell grid: MAGNITUDE-LANDED on the
   section-binding arm (confined-pax median 35), STILL-HIGH across the

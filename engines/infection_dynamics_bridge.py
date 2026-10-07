@@ -2167,6 +2167,22 @@ class KorkinShipEngine:
         self._passenger_dining_catalog = self._dining_catalog_for(
             PASSENGER_DINING_SERVICE_TYPES,
         )
+        # CREW-MESS-01: the order-window crew meal-service directive,
+        # written by ``apply_crew_meal_service`` while a confinement order
+        # carries the ``crew_meal_service`` modifier. A declared policy
+        # surface — it draws no RNG on any stream.
+        self._crew_meal_directive: dict[str, Any] | None = None
+        self._crew_mess_zone_names: frozenset[str] = frozenset(
+            str(e["name"]) for e in self._crew_dining_catalog
+        )
+        self._crew_mess_zone_caps: dict[str, int] = {}
+        self._crew_meal_zone_counts: dict[str, int] = {}
+        self._crew_meal_count_epoch: int = -1
+        self._crew_meal_diverted: int = 0
+        self._crew_meal_active_epochs: int = 0
+        self._crew_meal_staggered_rewrites: int = 0
+        self._crew_meal_last_directive: dict[str, Any] | None = None
+        self._saved_crew_schedules: dict[int, tuple[list[str], int]] = {}
 
         self.agents: list[KorkinAgent] = []
         self.epoch: int = 0
@@ -2926,16 +2942,167 @@ class KorkinShipEngine:
                 agent, hour, agent.current_activity,
             )
             if location is not None:
-                agent.current_location = location
+                agent.current_location = self._crew_meal_redirect(
+                    agent, location,
+                )
                 return
-        agent.current_location = agent.get_location_for_hour(
-            hour,
-            randomness,
-            rng=self.rng,
-            dining_catalog=self._dining_catalog,
-            free_catalog=self._leisure_catalog,
-            agent_behavior=behavior,
+        agent.current_location = self._crew_meal_redirect(
+            agent,
+            agent.get_location_for_hour(
+                hour,
+                randomness,
+                rng=self.rng,
+                dining_catalog=self._dining_catalog,
+                free_catalog=self._leisure_catalog,
+                agent_behavior=behavior,
+            ),
         )
+
+    def set_crew_meal_directive(self, block: dict[str, Any] | None) -> None:
+        """CREW-MESS-01: apply or clear the crew meal-service directive.
+
+        Called every epoch by ``apply_crew_meal_service`` with the merged
+        ``crew_meal_service`` modifier block (None when no active order
+        carries one). A rising ``staggered`` edge rewrites crew Meal-token
+        positions; the falling edge restores them verbatim. ``boxed`` and
+        ``capacity`` act per placement through ``_crew_meal_redirect``.
+        """
+        prev = self._crew_meal_directive
+        if block == prev:
+            if block is not None:
+                self._crew_meal_active_epochs += 1
+            return
+        if isinstance(prev, dict) and prev.get("mode") == "staggered":
+            self._crew_meal_stagger_restore()
+        self._crew_meal_directive = dict(block) if isinstance(block, dict) else None
+        self._crew_meal_zone_counts = {}
+        if self._crew_meal_directive is None:
+            return
+        self._crew_meal_last_directive = dict(self._crew_meal_directive)
+        self._crew_meal_active_epochs += 1
+        mode = self._crew_meal_directive.get("mode")
+        if mode == "staggered":
+            self._crew_meal_stagger_apply(
+                int(self._crew_meal_directive.get("seatings", 1))
+            )
+        elif mode == "capacity":
+            frac = float(
+                self._crew_meal_directive.get("occupancy_fraction", 1.0)
+            )
+            self._crew_mess_zone_caps = {
+                str(e["name"]): int(
+                    round(frac * float(e.get("max_occupancy") or 0.0))
+                )
+                for e in self._crew_dining_catalog
+            }
+
+    def _crew_meal_redirect(self, agent: KorkinAgent, location: str) -> str:
+        """CREW-MESS-01 order-window diner redirect.
+
+        While the directive rides the order, a crew placement resolving
+        into a crew-mess zone is rerouted to the agent's cabin — boxed is
+        unconditional, capacity admits diners up to the declared fraction
+        of the zone's rated occupancy and boxes the overflow. Mess-posted
+        staff (``work_zone`` == the zone) keep their posting: the kitchen
+        still produces the boxes. ``staggered`` moves the Meal tokens
+        upstream and needs no redirect. Draws no RNG.
+        """
+        directive = self._crew_meal_directive
+        if directive is None:
+            return location
+        if getattr(agent, "role", "") != "crew":
+            return location
+        if location not in self._crew_mess_zone_names:
+            return location
+        if str(getattr(agent, "work_zone", "")) == location:
+            return location
+        self._tick_crew_meal_epoch()
+        mode = str(directive.get("mode") or "")
+        if mode == "capacity":
+            cap = self._crew_mess_zone_caps.get(location, 0)
+            used = self._crew_meal_zone_counts.get(location, 0)
+            if used < cap:
+                self._crew_meal_zone_counts[location] = used + 1
+                return location
+        if mode in ("boxed", "capacity"):
+            self._crew_meal_diverted += 1
+            return agent.home_zone
+        return location
+
+    def _tick_crew_meal_epoch(self) -> None:
+        """Reset the capacity-mode per-(zone, epoch) diner counters."""
+        if self._crew_meal_count_epoch != self.epoch:
+            self._crew_meal_count_epoch = self.epoch
+            self._crew_meal_zone_counts = {}
+
+    def _crew_meal_stagger_apply(self, seatings: int) -> None:
+        """Spread each crew agent's Meal tokens across ``seatings`` sittings.
+
+        Position swaps inside ``agent.schedule``: the token at its dealt
+        position moves to sitting ``agent_id % seatings`` hours past the
+        meal block's base, displacing whatever held that slot. Crew meal
+        blocks sit >=5 h apart so sittings <=4 never collide; agents
+        already on sitting 0 keep their dealt position. Deterministic —
+        draws no RNG. The original schedule and dealt ``meal_seating``
+        are saved for the falling-edge restore.
+        """
+        if self._saved_crew_schedules or seatings < 2:
+            return
+        for agent in self.agents:
+            if str(getattr(agent, "role", "")) != "crew":
+                continue
+            sched = list(getattr(agent, "schedule", None) or [])
+            if not sched:
+                continue
+            offset = int(getattr(agent, "meal_seating", 0) or 0)
+            seat = int(agent.agent_id) % seatings
+            if seat == 0:
+                continue
+            for i, tok in enumerate(sched):
+                if not str(tok).startswith("Meal"):
+                    continue
+                target = i - offset + seat
+                if (
+                    0 <= target < len(sched)
+                    and not str(sched[target]).startswith("Meal")
+                ):
+                    sched[target], sched[i] = sched[i], sched[target]
+            self._saved_crew_schedules[int(agent.agent_id)] = (
+                list(agent.schedule), int(getattr(agent, "meal_seating", 0) or 0),
+            )
+            agent.schedule = sched
+            agent.meal_seating = seat
+            self._crew_meal_staggered_rewrites += 1
+
+    def _crew_meal_stagger_restore(self) -> None:
+        """Restore crew schedules saved at the staggered rising edge."""
+        for agent in self.agents:
+            saved = self._saved_crew_schedules.get(int(agent.agent_id))
+            if saved is None:
+                continue
+            agent.schedule, agent.meal_seating = list(saved[0]), saved[1]
+        self._saved_crew_schedules = {}
+
+    def crew_meal_service_witness(self) -> dict[str, Any]:
+        """The per-cell directive echo read into ``crew_window``.
+
+        Mode/params echo the last directive the order carried — the
+        live directive is None again by readout time on any run that
+        outlasts the order window. ``diner_redirects`` tallies boxed and
+        capacity diversions; ``staggered_rewrites`` tallies the crew
+        schedules the staggered edge moved (both zero on an open cell).
+        """
+        directive = self._crew_meal_last_directive or {}
+        return {
+            "mode": directive.get("mode"),
+            "params": {
+                k: v for k, v in directive.items() if k != "mode"
+            },
+            "active_epochs": int(self._crew_meal_active_epochs),
+            "diner_redirects": int(self._crew_meal_diverted),
+            "staggered_rewrites": int(self._crew_meal_staggered_rewrites),
+            "schedules_held": len(self._saved_crew_schedules),
+        }
 
     def _decay_and_deposit_pathogen_mass(self) -> None:
         """Legacy airborne decay, then shedders' surface/aerosol deposits."""

@@ -563,6 +563,27 @@ def apply_transmission_modifiers(
         transmission_core.fomite_scalar = merged_modifiers["fomite_scalar"]
 
 
+def apply_crew_meal_service(
+    engine: Any,
+    merged_modifiers: dict[str, Any],
+) -> None:
+    """Apply the CREW-MESS-01 crew meal-service directive to the engine.
+
+    The ``crew_meal_service`` modifier is a mapping carried on a
+    confinement order (e.g. ``{"mode": "boxed"}``); it lives and dies with
+    the order window like every other modifier. Called unconditionally —
+    the engine must see the falling edge to release the directive, the
+    same contract ``set_outbreak_disinfection`` documents.
+    """
+    if engine is None:
+        return
+    setter = getattr(engine, "set_crew_meal_directive", None)
+    if setter is None:
+        return
+    block = (merged_modifiers or {}).get("crew_meal_service")
+    setter(block if isinstance(block, dict) else None)
+
+
 def reset_modifiers(
     contam_engine: Any,
     transmission_core: Any,

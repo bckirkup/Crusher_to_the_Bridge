@@ -1197,6 +1197,18 @@ def _crew_window_block(
             ),
             "max": steward_counts[-1] if steward_counts else None,
         },
+        # CREW-MESS-01: the order-window meal-service directive echo —
+        # mode + params + active_epochs + diner_redirects, reading the
+        # engine's own counters (all None/0 when no order carries the
+        # modifier).
+        "crew_meal_service": (
+            sim.engine.crew_meal_service_witness()
+            if getattr(
+                getattr(sim, "engine", None), "crew_meal_service_witness",
+                None,
+            )
+            else None
+        ),
     }
 
 
