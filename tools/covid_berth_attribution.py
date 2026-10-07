@@ -51,6 +51,10 @@ from picard_framework.covid_theta_fit import (  # noqa: E402
     PATHOGEN_ID,
     run_fit_spec,
 )
+from simulation_utils.paths import (  # noqa: E402
+    resolve_repo_path,
+    validated_open,
+)
 
 
 def _match_cell(design: Any, theta: float, arm_id: str, seed: int) -> Any:
@@ -156,16 +160,22 @@ def main(argv: list[str] | None = None) -> int:
         "--seed", required=True, type=int,
         help="one seed per invocation (run seeds as parallel processes)",
     )
-    parser.add_argument("--out", required=True, help="output JSON path")
+    parser.add_argument(
+        "--out", required=True,
+        help="output JSON path, resolved under the repo root",
+    )
     args = parser.parse_args(argv)
 
-    design = load_design(str(_REPO_ROOT / args.design))
-    result = run_seed(design, args.theta, args.arm, args.seed)
-    out = Path(args.out)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(
-        json.dumps(result, indent=2) + "\n", encoding="utf-8",
+    design = load_design(
+        resolve_repo_path(str(_REPO_ROOT), args.design),
     )
+    result = run_seed(design, args.theta, args.arm, args.seed)
+    out = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with validated_open(
+        str(out), "w", allowed_roots=(str(_REPO_ROOT),), encoding="utf-8",
+    ) as fh:
+        fh.write(json.dumps(result, indent=2) + "\n")
     crew = result["crew_during_events"]
     print(
         f"seed {args.seed}: {crew} during-window crew events; "
