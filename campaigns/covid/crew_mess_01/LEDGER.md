@@ -42,10 +42,16 @@ Status: **declared, pre-run** — canary `sect_mess_boxed` pending.
       echoes `SOP-017-MESS*`; `exempt_work_zones` 11 verbatim
 - [x] `--dry-run` count == 100 cells (5 blocks × 20);
       `enumerate_cells` agrees
-- [ ] image `covid-crew-mess-01` built at implementation SHA,
-      digest-pinned (see Canaries / runs)
-- [ ] jobdef `picard-covid-crew-mess-01` registered (+ Fargate variant)
-- [ ] manifest in S3 under `campaign/covid_crew_mess_01/`
+- [x] image `covid-crew-mess-01` built at implementation SHA
+      `cca98cdc` (root Dockerfile + `deploy/aws/Dockerfile.campaign`
+      overlay), ECR digest `sha256:9a3787a7e2cd5b877881ebe03047bf71db5d3a1616f2da98cbcb26fd38d466c2`;
+      ENTRYPOINT `["python3"]` and the design/campaign/entrypoint files
+      verified in-image
+- [x] jobdef `picard-covid-crew-mess-01:1` (EC2, digest-pinned) +
+      `picard-covid-crew-mess-01-fargate:1` (Fargate variant:
+      `platformCapabilities FARGATE`, no `linuxParameters`,
+      `assignPublicIp`, 10800s timeout)
+- [x] manifest in S3 under `campaign/covid_crew_mess_01/`
       (campaign.json + design json + design md)
 - [ ] canary `sect_mess_boxed` (designer's pick, recorded in the
       design) — single cell contract check, then 20-seed array —
@@ -53,4 +59,9 @@ Status: **declared, pre-run** — canary `sect_mess_boxed` pending.
 
 ## Canaries / runs
 
-(pending)
+| run | detail |
+|---|---|
+| image | `covid-crew-mess-01` @ `cca98cdca811676128aeaa54edbcf493f0d369b4` → ECR `sha256:9a3787a7e2cd5b877881ebe03047bf71db5d3a1616f2da98cbcb26fd38d466c2` |
+| jobdefs | `picard-covid-crew-mess-01:1` (digest-pinned); `picard-covid-crew-mess-01-fargate:1` (Fargate variant) |
+| canary single | `4c107699-3335-4a67-a8f5-4aeae75fedc3` (Fargate) — `sect_mess_boxed` seed 20200205, SUCCEEDED ~22 min; contract verified (mode boxed, 360 active epochs, 13,693 diner_redirects, deliveries 162,238 vs landed 162,447, exempt zones 11, section draws 155, stewards/host 1.0/4, crew_mess during-mass 0). The EC2-queue twin `4783eb89` left queued as the dedup'd no-op (queue was still scale-from-zero at +10 min) |
+| canary array | `3123c6d2-4b95-4b72-b1ba-bb4d9f980617` — 20-cell array on `picard-analysis-fargate-queue`, submitted 2026-10-07 19:15Z |
