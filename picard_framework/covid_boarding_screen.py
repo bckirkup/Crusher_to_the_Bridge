@@ -1205,6 +1205,7 @@ def _crew_window_block(
             sim.engine.crew_meal_service_witness()
             if getattr(
                 getattr(sim, "engine", None), "crew_meal_service_witness",
+                None,
             )
             else None
         ),
