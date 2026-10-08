@@ -46,6 +46,9 @@ merge is coordinate-safe.
 | Date | Block | Seeds | Cells | Job | SHA | Digest | Wall | Result |
 |---|---|---|---|---|---|---|---|---|
 | 2026-10-08 | declared | — | 0 | — | — | — | — | design frozen pre-run (v2 lattice + grammar verbatim from RESCORE-01) |
+| 2026-10-08 | gate | — | — | — | 6bb0e996 | sha256:c8325d40 | — | PR #970 merged at 6bb0e996; image built+in-container verified (design/campaign/entrypoint present, one full cell through campaign_entrypoint --local); `picard-covid-gm-rescore-02:1` registered; log group + queue confirmed |
+| 2026-10-08 | canary_t2e11_hygiene (single) | 20200205 | 1 | 143e6ed8-0669-4e0c-8632-0b158b3aca09 (analysis) | 6bb0e996 | sha256:c8325d40 | ~3m | contract PASS: payload bit-identical to dev-venv local cell (58 onsets, 123/217 pos, asym 0.252, 187 inf, witnesses all echoed) |
+| 2026-10-08 | canary_t2e11_hygiene | 20200205–224 | 20 | 2d485e4d-2cf8-4841-b157-aca84709883e (analysis array, rev :2) | 6bb0e996 | sha256:c8325d40 | ~4m | 20/20 SUCCEEDED, 0 audit failures, witness set clean: **P(takeoff) 1.00, positives med 116 [56,133], H1 lands; asym med 0.252 [0.168,0.333], H2 still misses ~3×** — ledger `docs/ledger/COVID-GM-RESCORE-02.md`; STOP per the gate |
 
 ## 4. Notes
 

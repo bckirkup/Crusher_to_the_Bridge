@@ -1209,18 +1209,17 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   transmission-size defect. Standing residual order: (a) asymptomatic
   composition vs 0.81 (~10×, largest); (b) the imports/early-contact
   fizzle tail; (c) ignited-seed count dispersion (~35–131 interior).
-- **`COVID-GM-RESCORE-02` design frozen pre-run (2026-10-08, not yet
-  measured)** — `docs/covid/covid_gm_rescore_v2_design.md`,
-  `picard_framework/runs/covid_gm_rescore_v2{,_imports3}_design.json`,
-  `campaigns/covid/gm_rescore_02/`: the same held-out lattice re-scored
-  under the post-DP-era engine (CAREGIVER R3 door-drops, PROPENSITY-V1,
-  HOST-AGE-01 age bands, PRESENT-SHARE-01 once_per_course, DEFIANT-ESC-01
-  all default-ON since `591d21b1`). Grammar verbatim — θ rows, arms,
-  seeds, H1/H2 reads — so v2 rows sit opposite v1's at identical
-  (theta, arm, seed list); the delta read is distribution-level
-  (per-seed bit-pairing not claimed under drift). Declared probes: H2
-  movement direction vs the ~10× miss, ignition-tail survival, envelope
-  width under PROPENSITY-V1, and whether the ~0 hand-mode delta repeats.
+- **`COVID-GM-RESCORE-02` canary measured (2026-10-08, fleet pending)**
+  — `docs/ledger/COVID-GM-RESCORE-02.md`, design
+  `docs/covid/covid_gm_rescore_v2_design.md`, campaign
+  `campaigns/covid/gm_rescore_02/`: anchor row (θ 2.37e11 ×
+  hygiene_cycle) first 20 seeds at `6bb0e996`, 0 audit failures —
+  **P(takeoff) 1.00** (v1's ~1-in-5 fizzle gone, q05 floor 1 → 56),
+  positives median 116 [56, 133] → **H1 lands tighter**; asym share
+  0.252 [0.168, 0.333] — H2 still misses but moved ~3× from v1's 0.064.
+  `mixed` on the prefix with residual class (a) narrowed and class (b)
+  off the list. Fleet (330 cells incl. spike_decay column + imports:3)
+  is the owner's call.
 - **`PRESENT-SHARE-01` repairs the share→hazard defect the GM H2
   decomposition surfaced** (`docs/ledger/PRESENT-SHARE-01.md`): the
   declared presentation probability (`symptomatic_fraction`, or the
