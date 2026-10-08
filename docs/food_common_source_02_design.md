@@ -7,11 +7,16 @@ revised after it lands. Implementation splits into two legs: **leg 1**
 conditioning). This document is the spec for both legs. The scoring
 campaign is a later stage with its own frozen admissibility.
 
-> **Status (2026-10-07):** Leg 1 implemented (a3acb043) — provisioned-lot
-> contamination objects ship default-ON under `lot_mode: "object"`;
-> `"independent"` is the verified bit-identical v1 baseline. Leg 2
-> (handler/diner conditioning) remains design-only: both arms still run
-> v1 `independent` semantics under their own mode keys.
+> **Status (2026-10-07):** Legs 1+2 implemented — provisioned-lot
+> contamination objects ship default-ON under `lot_mode: "object"`
+> (a3acb043), and handler/diner contamination objects ship default-ON
+> under `handler_mode`/`diner_mode` `"object"`: one seeding draw per
+> (shedding, on-duty, same-station) handler span / per infectious diner
+> course, one pan per covered window while the span holds, and contiguity
+> breaks (duty gap, station change, quarantine/confinement, shedding end)
+> close the object so a later eligible span re-seeds on a fresh draw.
+> `"independent"` remains the verified bit-identical v1 baseline per arm.
+> No cells have run; the scoring campaign is a later stage.
 
 ## Grounding
 

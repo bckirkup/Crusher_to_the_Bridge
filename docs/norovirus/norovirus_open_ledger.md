@@ -4498,8 +4498,17 @@ provisioned-lot contamination object ships default-ON as
 contamination state per object shared across its pans, pan count
 emerging from extent/demand/cadence, objects witnessed on
 `common_source_objects`), with `"independent"` the verified bit-
-identical v1 baseline and `mode: off` still a strict no-op. Leg 2
-(handler/diner conditioning) is design-only and no cells have run.
+identical v1 baseline and `mode: off` still a strict no-op. **Leg 2
+landed** — handler/diner contamination objects ship default-ON as
+`handler_mode`/`diner_mode` `"object"` (one seeding draw per
+shedding-while-on-duty same-station span / per infectious self-serve
+course, one pan per covered window, the strain mix minted once per
+object, and contiguity breaks — duty gap, station change,
+quarantine/confinement, shedding end — closing the object so a later
+eligible span re-seeds on a fresh draw). The labelled `"independent"`
+baseline preserves the v1 per-window Bernoulli arms verbatim, and
+`mode: off`/unarmed profiles draw nothing under any mode. No cells
+have run.
 
 ## 5. Held fixed by assumption
 

@@ -1,15 +1,16 @@
 # FOOD-COMMON-SOURCE-02
 **Date:** 2026-10-07
-**Commit:** a3acb043
+**Commit:** 18994341
 **Pathogens:** norwalk_gi
 **Status:** open
 
 Frozen design of the coupled contamination-object redesign of the
 common-source food mechanism —
 [`docs/food_common_source_02_design.md`](../food_common_source_02_design.md).
-The design was `declared` at 4d41be11; **leg 1 is implemented** at
-a3acb043 (status `open` — the entry reports no numbers and nothing in
-it may be quoted as a result until the scoring canary reads out).
+The design was `declared` at 4d41be11; **legs 1+2 are implemented**
+(leg 1 at a3acb043, leg 2 at 18994341) (status `open` — the entry
+reports no numbers and nothing in it may be quoted as a result until
+the scoring canary reads out).
 
 **What it replaces.** FOOD-COMMON-SOURCE-01's per-window iid event draws
 — one Bernoulli per voyage producing at most one contaminated pan, and
@@ -58,6 +59,28 @@ voyage end — witnessed on `matrix.common_source_objects` with
 `"independent"` is the labelled v1 baseline, verified bit-identical to
 the pre-change tree on forced lot + handler/diner rates (same events,
 exposures, doses, stream positions); `mode: off` still draws nothing.
-Handler/diner arms still run v1 semantics under their own mode keys.
 The v1-era readings above remain the measurements the object physics
 must explain — the scoring readout is a later stage.
+
+**Leg 2 landed (18994341).** `handler_mode`/`diner_mode` `"object"` are
+the shipped defaults: an `ill_handler` object binds the maximal
+contiguous shedding ∧ on-duty ∧ same-station span (one seeding draw on
+`handler_span_contamination_probability` × `food_safety_posture`, one
+pan per covered window, galley-typed stations feeding one drawn Dining
+zone per object — the declared simplification) and an `ill_diner`
+object binds the whole infectious course at its self-serve venue (one
+seeding draw on `diner_course_contamination_probability`, one pan per
+infectious meal pass). The strain mix is minted once per object through
+the resident-strain path, deposits compose exactly as v1 (contacts ×
+transfer × hand load, depleting the hand → intra-object dose decay is
+realized), and contiguity breaks close the object — `source_excluded`
+on exclusion/duty/station change, `shedding_ended` when the course runs
+out — so a later eligible span re-seeds on a fresh draw. v1's
+first-fired exclusivity does not extend to objects: several objects
+share a (zone, window) pan stream. `"independent"` per arm preserves
+the v1 per-window Bernoulli path and its draws verbatim; the voyage
+rate tuple composes per-arm so the all-independent spelling draws the
+v1 triple bit-identically; `mode: off` and unarmed profiles draw
+nothing under any mode. Frozen gates 12–15 are pinned by
+`tests/test_common_source_agent_objects.py`; the pre-leg-1 and leg-1
+suites pin the `"independent"` spelling and pass unchanged.

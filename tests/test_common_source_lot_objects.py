@@ -35,6 +35,11 @@ def _object_cfg(**overrides: object) -> dict:
         "lot_mode": "object",
         "lot_object_probability": 1.0,
         "extra_lot_probability": 0.0,
+        # Leg 1 pins the handler/diner arms on the v1 baseline spelling
+        # — the object defaults would seed agent objects and the span
+        # rates would replace these draws.
+        "handler_mode": "independent",
+        "diner_mode": "independent",
         "handler_event_probability": 0.0,
         "diner_event_probability": 0.0,
     }
@@ -452,6 +457,8 @@ def test_independent_mode_emits_the_v1_witness_shape() -> None:
     core = _core(cfg_cs={
         "mode": "on",
         "lot_mode": "independent",
+        "handler_mode": "independent",
+        "diner_mode": "independent",
         "lot_event_probability": 1.0,
         "handler_event_probability": 0.0,
         "diner_event_probability": 0.0,

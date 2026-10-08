@@ -7,10 +7,10 @@ tests pin the design contract: which draws happen, where they happen,
 who can source an event, and what never changes when the mechanism is
 off or a pathogen is unarmed.
 
-Every cfg here pins ``lot_mode: "independent"`` — the v1 labelled
-baseline FOOD-COMMON-SOURCE-02 keeps for comparison. Under the shipped
-``"object"`` default the ``lot_event_probability`` knob is not drawn
-and a ~1% voyage-level object could still provision, so these v1
+Every cfg here pins all three arm modes to ``"independent"`` — the
+v1 labelled baseline FOOD-COMMON-SOURCE-02 keeps for comparison. Under
+the shipped ``"object"`` defaults the ``*_event_probability`` knobs are
+not drawn and contamination objects could provision, so these v1
 semantics are only stable under the baseline spelling.
 """
 
@@ -124,6 +124,7 @@ def _core(
 
 def _force_lot(cfg_cs: dict | None = None) -> dict:
     cs = {"mode": "on", "lot_mode": "independent",
+          "handler_mode": "independent", "diner_mode": "independent",
           "lot_event_probability": 1.0}
     cs.update(cfg_cs or {})
     return cs
@@ -219,7 +220,10 @@ def test_a_forced_lot_event_has_the_frozen_geometry() -> None:
 
 def test_the_handler_arm_needs_a_shedding_agent_on_service_duty() -> None:
     agents = [_handler(1)] + [_diner(i) for i in range(2, 60)]
-    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                          "handler_event_probability": 1.0})
     events, _, _ = _step(core, agents)
     handler_events = [e for e in events if e["source_kind"] == "ill_handler"]
@@ -230,7 +234,10 @@ def test_the_handler_arm_needs_a_shedding_agent_on_service_duty() -> None:
 def test_a_reported_symptomatic_handler_never_sources_an_event() -> None:
     handler = _handler(1)
     agents = [handler] + [_diner(i) for i in range(2, 60)]
-    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                          "handler_event_probability": 1.0})
     core._quarantined_ids = {1}
     events, _, _ = _step(core, agents)
@@ -240,7 +247,10 @@ def test_a_reported_symptomatic_handler_never_sources_an_event() -> None:
 def test_an_ill_diner_can_only_source_a_self_serve_meal() -> None:
     # Buffet (self-serve) — the diner arm is live.
     agents = [_diner(i, infected=(i == 1)) for i in range(1, 60)]
-    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+    core = _core(cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                          "handler_event_probability": 0.0,
                          "diner_event_probability": 1.0})
     events, _, _ = _step(core, agents)
@@ -255,7 +265,10 @@ def test_a_shedding_diner_never_sources_a_plated_service() -> None:
         for i in range(1, 60)
     ]
     core = _core(
-        cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+        cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                 "handler_event_probability": 0.0,
                 "diner_event_probability": 1.0},
         zone=MDR_ZONE,
@@ -378,10 +391,16 @@ def test_posture_one_is_bit_identical_to_no_posture() -> None:
 def test_posture_changes_event_frequency_not_dose_mass() -> None:
     """Posture multiplies handler/diner probabilities — never titre."""
     agents = [_handler(1)] + [_diner(i) for i in range(2, 60)]
-    low = _core(cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+    low = _core(cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                         "handler_event_probability": 0.05},
                 food_safety_posture=0.1, seed=41)
-    high = _core(cfg_cs={"mode": "on", "lot_mode": "independent", "lot_event_probability": 0.0,
+    high = _core(cfg_cs={"mode": "on", "lot_mode": "independent",
+                         "handler_mode": "independent",
+                         "diner_mode": "independent",
+                         "lot_event_probability": 0.0,
                          "handler_event_probability": 0.05},
                  food_safety_posture=5.0, seed=41)
     events_low, _, _ = _step(low, agents)
