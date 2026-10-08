@@ -13,6 +13,7 @@
 |-----|--------|------|
 | [flu_open_ledger.md](flu_open_ledger.md) | Living | Current withdrawals and measurement status for the influenza arm |
 | [flu_social_01_readout.md](flu_social_01_readout.md) | Findings | FLU-SOCIAL-01 readout (ledger `FLU-SOCIAL-01`) |
+| [flu_reassess_01_readout.md](flu_reassess_01_readout.md) | Measurement of record | FLU-REASSESS-01 post-enhancement re-census (ledger `campaigns/flu/reassess_01/LEDGER.md`) |
 
 Flu ledger entries live at `docs/ledger/FLU-*.md`. Campaign drivers and
 readouts are `tools/flu_*.py`; the confined-cell spec machinery they share
