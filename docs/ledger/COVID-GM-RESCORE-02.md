@@ -3,8 +3,10 @@
 **Commit:** 6bb0e996
 **Pathogens:** sars_cov2_resp
 **Status:** measured
-**Measured at:** 6bb0e996 (canary only — 20 of 300 scoring cells + 0 of 50
-diagnostic; the fleet runs only on the author's go-ahead)
+**Measured at:** 6bb0e996
+
+Canary scope only — 20 of 300 scoring cells + 0 of 50 diagnostic; the
+fleet runs only on the author's go-ahead.
 
 Re-score of `greg_mortimer_2020` (held out) under the post-DP-era engine —
 image built at merge commit `6bb0e996` (design PR #970), against the same
