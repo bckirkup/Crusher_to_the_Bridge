@@ -1345,7 +1345,8 @@ def _lab_confirmed_role_counts(
 ) -> dict[str, int]:
     """Lab confirmations for PATHOGEN_ID, split passenger/crew."""
     counts: dict[str, int] = {"passenger": 0, "crew": 0}
-    for pid, aid in syndromic._lab_confirmed:
+    confirmed = getattr(syndromic, "_lab_confirmed", None) or {}
+    for pid, aid in confirmed:
         if pid != PATHOGEN_ID:
             continue
         role = getattr(agents_by_id.get(aid), "role", None) or "passenger"
