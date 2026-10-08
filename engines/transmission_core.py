@@ -1548,6 +1548,39 @@ COMMON_SOURCE_LOT_ITEM_LINES = (
     "dairy",
     "garnish",
 )
+
+# ── FOOD-COMMON-SOURCE-02 leg 2: handler/diner contamination objects ──
+# One seeding draw per contamination-relevant span of the agent's
+# infectious course replaces the per-window iid Bernoulli (spec §Leg 2):
+# an ``ill_handler`` object binds a contiguous shedding ∧ on-duty ∧
+# same-station span and emits the pan the handler works in each covered
+# window; an ``ill_diner`` object binds the whole infectious course at
+# the agent's self-serve venue and emits one pan per infectious meal
+# pass. ``crew_duty_exclusion``/quarantine/confinement terminates the
+# object; a later eligible span re-seeds on a fresh draw.
+#
+# Per (shedding, on-duty, same-station) span seeding probability. ∅
+# per-shift contamination measurement — unchanged from v1's null.
+# Declared via v1-equivalence arithmetic: v1's per-window expectation
+# (~0.05 x ~1-2 service windows per duty span ≈ 0.05-0.10 per span)
+# brackets the interval's lower half and the tail leaves headroom for
+# multi-shift spans — same bounds argument as v1 (NEARS ~40% ill-worker
+# implication, Sabrià 2016 asymptomatic pool), re-denominatored from
+# per-window to per-span. Supersedes ``handler_event_probability`` under
+# object mode — the superseded name stays only inside the
+# ``"independent"`` baseline. Declared sweep axis — not a fit.
+# Grade C. Origin: declared.
+COMMON_SOURCE_HANDLER_SPAN_CONTAMINATION_PROBABILITY_RANGE = (0.01, 0.30)
+# Per infectious course seeding probability. ∅ per-meal contamination
+# measurement — unchanged from v1's null. v1-equivalence arithmetic:
+# per-meal expectation ~0.025 x ~10 infectious meal passes ≈ 0.25
+# expected events per infectious diner course; the per-course interval
+# sits below that, trading raw event count for the clustered shape (each
+# seeded course emits a pan at every infectious pass). Supersedes
+# ``diner_event_probability`` under object mode — the superseded name
+# stays only inside the ``"independent"`` baseline. Declared sweep axis
+# — not a fit. Grade C. Origin: declared.
+COMMON_SOURCE_DINER_COURSE_CONTAMINATION_PROBABILITY_RANGE = (0.005, 0.15)
 # Spawn-tree address of the common-source stream, same convention as
 # _FRAILTY_STREAM_KEY: every mechanism draw (voyage rates, lot plan,
 # per-window Bernoulli, cohort take-share, titres) runs on it, so
@@ -1589,21 +1622,42 @@ _COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
     "lot_servings": (COMMON_SOURCE_LOT_SERVINGS_RANGE, "loguniform"),
     "lot_shelf_life_days": (
         COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE, "int"),
+    # FOOD-COMMON-SOURCE-02 leg 2 — drawn only under the arm's
+    # ``"object"`` mode.
+    "handler_span_contamination_probability": (
+        COMMON_SOURCE_HANDLER_SPAN_CONTAMINATION_PROBABILITY_RANGE, "uniform"),
+    "diner_course_contamination_probability": (
+        COMMON_SOURCE_DINER_COURSE_CONTAMINATION_PROBABILITY_RANGE, "uniform"),
 }
-_COMMON_SOURCE_VOYAGE_RATES = (
-    "lot_event_probability",
-    "handler_event_probability",
-    "diner_event_probability",
-)
-# Object-mode voyage rates: the lot arm's two count knobs replace
-# ``lot_event_probability`` in its draw slot; the handler/diner rates
-# keep the same trailing positions so the v1 arms keep firing.
-_COMMON_SOURCE_OBJECT_VOYAGE_RATES = (
-    "lot_object_probability",
-    "extra_lot_probability",
-    "handler_event_probability",
-    "diner_event_probability",
-)
+# Per-arm voyage-rate draw order, composed by the arm modes: each arm's
+# mode picks its own names, so any per-arm mix of ``"object"`` /
+# ``"independent"`` is expressible and the all-independent composition
+# is the v1 triple verbatim. Draw order is lot → handler → diner.
+_COMMON_SOURCE_LOT_VOYAGE_RATES = {
+    "independent": ("lot_event_probability",),
+    "object": ("lot_object_probability", "extra_lot_probability"),
+}
+_COMMON_SOURCE_ARM_VOYAGE_RATES = {
+    "ill_handler": {
+        "independent": ("handler_event_probability",),
+        "object": ("handler_span_contamination_probability",),
+    },
+    "ill_diner": {
+        "independent": ("diner_event_probability",),
+        "object": ("diner_course_contamination_probability",),
+    },
+}
+# Object-mode span-seeding rate name per source kind — the seeding draw
+# a span start takes when the span's arm runs object semantics.
+_COMMON_SOURCE_SPAN_RATES = {
+    "ill_handler": "handler_span_contamination_probability",
+    "ill_diner": "diner_course_contamination_probability",
+}
+# Sentinel for ``_cs_pan_deposit``: a mix argument of ``_MIX_UNSET``
+# means "build the pan mix fresh" (the v1 path); an object always passes
+# the mix minted at object creation — possibly ``None`` — so the strain
+# is taken once per object and never re-derived mid-span.
+_MIX_UNSET: Any = object()
 
 # Fraction of the standing environmental load delivered to a zone per day.
 # Delivery does not deplete the load, so a day's flux divides linearly across
@@ -3232,25 +3286,30 @@ class TransmissionCore:
         self.common_source_mode = str(
             cs.get("mode", "on"),
         ).strip().lower()
-        # FOOD-COMMON-SOURCE-02 per-arm modes: ``lot_mode: "object"`` is
-        # the shipped default (the better physics ships on) and
-        # ``"independent"`` the labelled v1 baseline — the v1 lot path
+        # FOOD-COMMON-SOURCE-02 per-arm modes: each arm's ``"object"``
+        # is the shipped default (the better physics ships on) and
+        # ``"independent"`` the labelled v1 baseline — the v1 arm path
         # preserved, consuming the identical draws it consumed before.
-        # ``handler_mode``/``diner_mode`` are leg 2: parsed now so the
-        # arm keys exist, but both spellings run the v1 path until that
-        # leg lands and flips their default to ``"object"``.
+        # Leg 1 shipped the lot arm; leg 2 ships the handler/diner
+        # object arms, so all three default ``"object"`` now.
         self._cs_lot_mode = (
             "independent"
             if str(cs.get("lot_mode", "object")).strip().lower()
             == "independent"
             else "object"
         )
-        self._cs_handler_mode = str(
-            cs.get("handler_mode", "independent"),
-        ).strip().lower()
-        self._cs_diner_mode = str(
-            cs.get("diner_mode", "independent"),
-        ).strip().lower()
+        self._cs_handler_mode = (
+            "independent"
+            if str(cs.get("handler_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
+        self._cs_diner_mode = (
+            "independent"
+            if str(cs.get("diner_mode", "object")).strip().lower()
+            == "independent"
+            else "object"
+        )
         self._cs_cfg = cs
         # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
         # platform layout's posture into this block when the config does
@@ -3299,6 +3358,13 @@ class TransmissionCore:
         self._cs_object_log: list[dict[str, Any]] = []
         self._cs_object_counter = 0
         self._cs_voyage_closed = False
+        # Leg-2 agent spans: (pathogen_id, agent_id, kind) → the open
+        # span record ``{"station": str, "object": dict|None}`` — a
+        # span is the maximal contiguous run the arm's eligibility holds
+        # (§Leg 2); ``_cs_venue_selfserve`` caches the diner venue gate
+        # per venue name.
+        self._cs_spans: dict[tuple[str, int, str], dict[str, Any]] = {}
+        self._cs_venue_selfserve: dict[str, bool] = {}
         # Permanent event witness — window states expire with their meal
         # window, so the voyage record accumulates here instead.
         self._cs_event_log: list[dict[str, Any]] = []
@@ -3329,13 +3395,16 @@ class TransmissionCore:
         self._cs_draw_voyage_rates()
 
     def _cs_draw_voyage_rates(self) -> None:
-        # The lot mode picks the rate tuple: ``"independent"`` draws the
-        # v1 triple verbatim (bit-identical to the pre-change tree);
-        # ``"object"`` draws the two count knobs in its slot.
+        # Each arm's mode picks that arm's rate names; the composition
+        # keeps the v1 draw order lot → handler → diner, so the
+        # all-independent mix draws the v1 triple verbatim
+        # (bit-identical to the pre-change tree).
         rate_names = (
-            _COMMON_SOURCE_VOYAGE_RATES
-            if self._cs_lot_mode == "independent"
-            else _COMMON_SOURCE_OBJECT_VOYAGE_RATES
+            _COMMON_SOURCE_LOT_VOYAGE_RATES[self._cs_lot_mode]
+            + _COMMON_SOURCE_ARM_VOYAGE_RATES["ill_handler"][
+                self._cs_handler_mode]
+            + _COMMON_SOURCE_ARM_VOYAGE_RATES["ill_diner"][
+                self._cs_diner_mode]
         )
         for pid, profile in (self.pathogen_profiles or {}).items():
             if not (profile or {}).get(
@@ -12247,6 +12316,13 @@ class TransmissionCore:
             self._cs_plan_objects()
         self._cs_expire_windows(epoch, pathogen_id)
         day = self.clock.day_index(epoch)
+        if (
+            self._cs_handler_mode == "object"
+            or self._cs_diner_mode == "object"
+        ):
+            self._cs_update_agent_spans(
+                epoch, pathogen_id, profile, matrix,
+            )
         members_by_zone = self._cs_zone_members(epoch)
         for zone_name in self._cs_dining_zones:
             members = members_by_zone.get(zone_name, [])
@@ -12275,24 +12351,25 @@ class TransmissionCore:
     ) -> None:
         """Advance one (zone, meal token, day) window this epoch.
 
-        Order inside a window: live provisioned-lot objects bound to this
-        zone serve once each (object mode only), then the v1 arms draw —
-        a scheduled ``"independent"`` lot, then handler, then diner — at
-        most one first-fired v1 event per window, then every pending pan
-        credits its takers on presence. The v1 "first fired source wins"
-        exclusivity never extended to objects: several pans may land in
-        one (zone, window) under object semantics.
+        Order inside a window: every live contamination object bound
+        to this zone serves once (lot objects demand-gated, handler/
+        diner objects emitting their one pan when the source agent
+        works or passes the window), then the ``"independent"``-armed
+        v1 arms draw — a scheduled lot, then handler, then diner — at
+        most one first-fired v1 event per window, then every pending
+        pan credits its takers on presence. The v1 "first fired source
+        wins" exclusivity never extended to objects: several pans may
+        land in one (zone, window) under object semantics.
         """
         key = (pathogen_id, zone_name, token, day)
         state = self._cs_windows.get(key)
         if state is None:
             state = self._cs_open_window(key, epoch, day, members)
             self._cs_windows[key] = state
-        if self._cs_lot_mode == "object":
-            self._cs_objects_serve_window(
-                state, epoch, day, zone_name, token,
-                members, pathogen_id, profile, matrix,
-            )
+        self._cs_objects_serve_window(
+            state, epoch, day, zone_name, token,
+            members, occupants, pathogen_id, profile, matrix,
+        )
         if state.get("event") is None:
             source = self._cs_draw_source(
                 key, state, epoch, zone_name, token,
@@ -12591,20 +12668,35 @@ class TransmissionCore:
         zone_name: str,
         token: str,
         members: list[KorkinAgent],
+        occupants: list[KorkinAgent],
         pathogen_id: str,
         profile: dict | None,
         matrix: ContactTracingMatrix,
     ) -> None:
-        """Each live provisioned-lot object bound to this zone serves
+        """Each live contamination object bound to this zone serves
         this window once — the space-time autocorrelation the redesign
         asks for: contiguous windows, one station, one contamination
-        state."""
+        state. A lot object serves demand-gated; a handler/diner object
+        emits its one pan when the source agent works or passes this
+        window (the pan they work / the pan they take, spec §Leg 2)."""
+        occupant_ids = {a.agent_id for a in occupants}
         for obj in self._cs_objects.get(pathogen_id, ()):
             if (
                 obj["closed"]
                 or obj["zone"] != zone_name
                 or obj["object_id"] in state["objects_served"]
             ):
+                continue
+            if obj["source_kind"] != "provisioned_lot":
+                if self._cs_agent_passes(
+                    obj, epoch, token, occupant_ids,
+                ):
+                    state["objects_served"].add(obj["object_id"])
+                    self._cs_fire(
+                        (obj["source_kind"], obj["agent"]), state,
+                        epoch, zone_name, token, members,
+                        pathogen_id, profile, matrix, obj=obj,
+                    )
                 continue
             if day > obj["start_day"] + obj["shelf_life_days"]:
                 # Perishability: residual servings are discarded and no
@@ -12764,7 +12856,7 @@ class TransmissionCore:
             "object_id": obj["object_id"],
             "pathogen_id": obj["pathogen_id"],
             "source_kind": obj["source_kind"],
-            "source_agent_id": None,
+            "source_agent_id": obj.get("source_agent_id"),
             "zone": obj["zone"],
             "item_label": obj["item_label"],
             "seeded_epoch": obj["seeded_epoch"],
@@ -12775,7 +12867,10 @@ class TransmissionCore:
             "servings_served": obj["servings_served"],
             "dose_credited": round(obj["dose_credited"], 6),
             "lot_servings": obj["lot_servings"],
-            "lot_titre_gec_per_g": round(obj["lot_titre_gec_per_g"], 6),
+            "lot_titre_gec_per_g": (
+                round(obj["lot_titre_gec_per_g"], 6)
+                if obj["lot_titre_gec_per_g"] is not None else None
+            ),
             "strain_id": obj["strain_id"],
         }
         if matrix is not None:
@@ -12805,6 +12900,254 @@ class TransmissionCore:
             for obj in objects:
                 self._cs_close_object(obj, epoch, "voyage_end", matrix)
 
+    def _cs_update_agent_spans(
+        self,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Advance every agent's handler/diner spans one epoch — the
+        leg-2 seeding scan, run once per armed epoch (the same
+        scheduling point as ``_cs_zone_members``). A span that newly
+        holds takes its ONE seeding draw; a span that broke closes its
+        object before the span record drops."""
+        for agent in self._agents_by_id.values():
+            self._cs_agent_span_epoch(
+                agent, epoch, pathogen_id, profile, matrix,
+            )
+
+    def _cs_agent_span_epoch(
+        self,
+        agent: KorkinAgent,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """Advance one agent's object-mode span kinds one epoch."""
+        if self._cs_handler_mode == "object":
+            self._cs_span_step(
+                agent, "ill_handler", epoch,
+                pathogen_id, profile, matrix,
+            )
+        if self._cs_diner_mode == "object":
+            self._cs_span_step(
+                agent, "ill_diner", epoch,
+                pathogen_id, profile, matrix,
+            )
+
+    def _cs_span_step(
+        self,
+        agent: KorkinAgent,
+        kind: str,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """One (agent, kind) span transition for this epoch.
+
+        A span is the maximal contiguous run the arm's eligibility
+        holds — the v1 eligibility (shedding now, not quarantined, not
+        confined) plus the arm's station test: on-duty at one work zone
+        for a handler, the assigned self-serve venue for a diner. The
+        span start takes the ONE seeding draw the span is allowed; a
+        break (eligibility lost or station change) closes the object,
+        and a later eligible span re-seeds on a fresh draw. One
+        physical event = one realized draw: the draw lands once per
+        span, not per window.
+        """
+        station, eligible = self._cs_span_eligibility(
+            agent, kind, epoch, pathogen_id, profile,
+        )
+        key = (pathogen_id, agent.agent_id, kind)
+        span = self._cs_spans.get(key)
+        if span is not None and (
+            not eligible or span["station"] != station
+        ):
+            obj = span["object"]
+            if obj is not None:
+                self._cs_close_object(
+                    obj, epoch,
+                    self._cs_span_end_reason(
+                        agent, pathogen_id, profile,
+                    ),
+                    matrix,
+                )
+            del self._cs_spans[key]
+            span = None
+        if not eligible or span is not None:
+            return
+        span = {"station": station, "object": None}
+        self._cs_spans[key] = span
+        rate = self._cs_rates.get(pathogen_id, {}).get(
+            _COMMON_SOURCE_SPAN_RATES[kind], 0.0,
+        )
+        if rate > 0.0 and self._cs_rng.random() < rate * self._cs_posture:
+            span["object"] = self._cs_realize_agent_object(
+                agent, kind, station, epoch, pathogen_id, profile,
+            )
+
+    def _cs_span_eligibility(
+        self,
+        agent: KorkinAgent,
+        kind: str,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> tuple[str, bool]:
+        """(station, eligible) — the span's bound station and whether
+        the arm's criteria hold this epoch. The cheap structural test
+        runs first so the shedding query is paid only for agents that
+        can sit at a contamination-relevant station."""
+        if kind == "ill_handler":
+            station = str(getattr(agent, "work_zone", "") or "")
+            return station, (
+                self._on_service_duty(agent, station, epoch)
+                and self._cs_source_eligible(agent, pathogen_id, profile)
+            )
+        station = str(getattr(agent, "dining_zone", "") or "")
+        return station, (
+            self._cs_venue_self_serve(station)
+            and self._cs_source_eligible(agent, pathogen_id, profile)
+        )
+
+    def _cs_venue_self_serve(self, zone_name: str) -> bool:
+        """The diner venue gate — the agent's ``dining_zone`` resolves
+        to a per-meal-table self-serve service type — cached per venue
+        name (the same resolution v1 ran on the window zone)."""
+        cached = self._cs_venue_selfserve.get(zone_name)
+        if cached is None:
+            cached = (
+                resolve_dining_service_type({"name": zone_name})
+                in PER_MEAL_TABLE_DINING_SERVICE_TYPES
+            )
+            self._cs_venue_selfserve[zone_name] = cached
+        return cached
+
+    def _cs_span_end_reason(
+        self,
+        agent: KorkinAgent,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> str:
+        """Why the just-broken span ended — exclusion (quarantine,
+        confinement, off-duty, station/venue change) vs the shedding
+        course running out — evaluated before the span record drops."""
+        if (
+            agent.agent_id in self._quarantined_ids
+            or self._cabin_confinement_active(agent)
+        ):
+            return "source_excluded"
+        if agent.get_pathogen_shedding(pathogen_id, profile or {}) <= 0.0:
+            return "shedding_ended"
+        return "source_excluded"
+
+    def _cs_realize_agent_object(
+        self,
+        agent: KorkinAgent,
+        kind: str,
+        station: str,
+        epoch: int,
+        pathogen_id: str,
+        profile: dict | None,
+    ) -> dict[str, Any]:
+        """Mint one seeded handler/diner contamination object.
+
+        The object's ONE realized state is fixed here: the emit zone
+        its pan stream lands at (the handler's Dining work zone, or one
+        Dining zone drawn once for a galley-typed station — the
+        declared galley→venue simplification) and the strain mix taken
+        once through the resident-strain ``_emissions`` path — the
+        shedder's strain does not change inside a span, so the mix is
+        minted once and every pan shares it. Everything else stays a
+        per-window draw — take-share, pan size, contacts, transfer are
+        service and shedder-hand properties per the draw discipline.
+        """
+        emit_zone = (
+            self._cs_handler_emit_zone(station)
+            if kind == "ill_handler" else station
+        )
+        mix = (
+            build_emission_mix(
+                self._emissions([(agent, 1.0)], pathogen_id),
+            )
+            if self.strain_registry is not None else None
+        )
+        self._cs_object_counter += 1
+        obj = {
+            "object_id": f"cso-{pathogen_id}-{self._cs_object_counter}",
+            "pathogen_id": pathogen_id,
+            "source_kind": kind,
+            "source_agent_id": agent.agent_id,
+            "agent": agent,
+            "zone": emit_zone,
+            "item_label": station,
+            "station": station,
+            "start_token": None,
+            "start_day": None,
+            "seeded_epoch": epoch,
+            "active": True,
+            "closed": False,
+            "lot_servings": None,
+            "servings_remaining": 0,
+            "lot_titre_gec_per_g": None,
+            "take_share": None,
+            "shelf_life_days": None,
+            "mix": mix,
+            "strain_id": (
+                mix.contributors[0][0] if mix is not None else None
+            ),
+            "windows_covered": 0,
+            "pans_emitted": 0,
+            "pan_serial": 0,
+            "servings_served": 0,
+            "dose_credited": 0.0,
+        }
+        self._cs_objects.setdefault(pathogen_id, []).append(obj)
+        self.common_source_telemetry[f"objects_{kind}"] += 1
+        return obj
+
+    def _cs_handler_emit_zone(self, station: str) -> str | None:
+        """Where a handler object's pans land.
+
+        A Dining work zone IS the pan's station (the v1 scope); a
+        galley-typed station feeds one Dining zone's pan stream, drawn
+        once per object — the declared simplification (no galley→venue
+        wiring exists in the platform model). The ``None`` return is
+        unreachable: ``_on_service_duty`` already confines stations to
+        service zones, which are exactly Dining ∪ Galley-typed.
+        """
+        if station in self._cs_dining_zones:
+            return station
+        if "Galley" in station and self._cs_dining_zones:
+            pick = int(
+                self._cs_rng.integers(len(self._cs_dining_zones)),
+            )
+            return self._cs_dining_zones[pick]
+        return None
+
+    def _cs_agent_passes(
+        self,
+        obj: dict[str, Any],
+        epoch: int,
+        token: str,
+        occupant_ids: set[int],
+    ) -> bool:
+        """Whether the object's source agent works/passes this window
+        NOW — the emission-time test: a handler emits the pan while on
+        duty at the span's station inside the window; a diner emits
+        while their meal pass at the venue is in progress (they are
+        dining on this token and standing in the zone)."""
+        agent = obj["agent"]
+        if obj["source_kind"] == "ill_handler":
+            return self._on_service_duty(agent, obj["station"], epoch)
+        return (
+            self._scheduled_activity(agent, epoch) == token
+            and agent.agent_id in occupant_ids
+        )
+
     def _cs_draw_source(
         self,
         key: tuple[str, str, str, int],
@@ -12830,11 +13173,14 @@ class TransmissionCore:
         ):
             return ("provisioned_lot", None)
         rates = self._cs_rates.get(pathogen_id, {})
-        source = self._cs_draw_handler_source(
-            state, epoch, zone_name, occupants,
-            pathogen_id, profile, rates.get("handler_event_probability", 0.0),
-        )
-        if source is None:
+        source = None
+        if self._cs_handler_mode == "independent":
+            source = self._cs_draw_handler_source(
+                state, epoch, zone_name, occupants,
+                pathogen_id, profile,
+                rates.get("handler_event_probability", 0.0),
+            )
+        if source is None and self._cs_diner_mode == "independent":
             source = self._cs_draw_diner_source(
                 state, epoch, zone_name, token, occupants,
                 pathogen_id, profile,
@@ -12967,6 +13313,7 @@ class TransmissionCore:
         pathogen_id: str,
         pan_servings: int,
         cs_block: dict[str, Any] | None,
+        mix: EmissionMix | None | object = _MIX_UNSET,
     ) -> tuple[float, float, float | None, EmissionMix | None]:
         """(per-serving dose, pan mass, lot titre, strain mix).
 
@@ -12977,6 +13324,11 @@ class TransmissionCore:
         is lossless (the declared conservative bound), so Σ credited can
         never exceed the pan mass either way. The titre slot is ``None``
         for shedder-sourced pans.
+
+        ``mix`` is ``_MIX_UNSET`` for the v1 path (the pan's mix is built
+        fresh from this pan's deposit); a contamination object passes
+        the mix minted at its creation — possibly ``None`` — so the
+        object's strain is taken once and never re-derived mid-span.
         """
         kind, agent = source
         if kind == "provisioned_lot":
@@ -13000,13 +13352,14 @@ class TransmissionCore:
         deposit = min(hand, max(0.0, contacts * transfer * hand))
         if deposit > 0.0:
             agent.hand_load_by_pathogen[pathogen_id] = hand - deposit
-        mix = (
-            build_emission_mix(
-                self._emissions([(agent, deposit)], pathogen_id),
+        if mix is _MIX_UNSET:
+            mix = (
+                build_emission_mix(
+                    self._emissions([(agent, deposit)], pathogen_id),
+                )
+                if self.strain_registry is not None
+                else None
             )
-            if self.strain_registry is not None
-            else None
-        )
         return deposit / max(pan_servings, 1), deposit, None, mix
 
     def _cs_source_contacts(
@@ -13040,6 +13393,7 @@ class TransmissionCore:
         pathogen_id: str,
         profile: dict | None,
         matrix: ContactTracingMatrix,
+        obj: dict[str, Any] | None = None,
     ) -> None:
         """Serve the pan: draw takers, fix the witness, queue the doses.
 
@@ -13049,6 +13403,15 @@ class TransmissionCore:
         then credited the first epoch they stand in the zone inside the
         window, which is also the honesty this mechanism needs: a dose
         only exists where the diner actually ate.
+
+        ``obj`` is the contamination object emitting this pan when the
+        emission is object-sourced (leg 2): the pan carries the object's
+        id and serial, its mix is the object's single realized
+        contamination state, and the v1 "first fired source wins"
+        exclusivity slot is not taken — several objects may emit into
+        the same (zone, window). Per-pan draws (take-share, pan size,
+        contacts, transfer) stay per-window draws — service and
+        shedder-hand properties, not the contamination event.
         """
         kind, source_agent = source
         cs_block = (profile or {}).get("common_source_events", {})
@@ -13067,7 +13430,10 @@ class TransmissionCore:
             takers = [takers[int(i)] for i in idx]
         per_serving, pan_mass, lot_titre, mix = self._cs_pan_deposit(
             source, state, pathogen_id, pan_servings, cs_block,
+            mix=_MIX_UNSET if obj is None else obj["mix"],
         )
+        if obj is not None:
+            obj["pan_serial"] += 1
         self._cs_event_counter += 1
         event = {
             "event_id": f"cs-{pathogen_id}-{self._cs_event_counter}",
@@ -13081,8 +13447,8 @@ class TransmissionCore:
             "source_agent_id": (
                 source_agent.agent_id if source_agent is not None else None
             ),
-            "object_id": None,
-            "pan_serial": None,
+            "object_id": obj["object_id"] if obj is not None else None,
+            "pan_serial": obj["pan_serial"] if obj is not None else None,
             "food_safety_posture": self._cs_posture,
             "start_epoch": epoch,
             "end_epoch": state["end_epoch"],
@@ -13096,14 +13462,20 @@ class TransmissionCore:
             event["lot_titre_gec_per_g"] = round(lot_titre, 6)
         matrix.common_source_events.append(event)
         self._cs_event_log.append(event)
-        state["event"] = event
+        if obj is None:
+            state["event"] = event
         state["pans"].append({
             "event": event,
             "pending": {a.agent_id for a in takers},
             "mix": mix,
             "per_serving": per_serving,
-            "object": None,
+            "object": obj,
         })
+        if obj is not None:
+            obj["pans_emitted"] += 1
+            obj["windows_covered"] += 1
+            obj["servings_served"] += len(takers)
+            self.common_source_telemetry["object_windows"] += 1
         self.common_source_telemetry[f"events_{kind}"] += 1
         self._cs_count_pan(state)
 

@@ -112,6 +112,20 @@
             {"type": "number", "minimum": 0, "maximum": 1},
             {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
           ]
+        },
+        "handler_span_contamination_probability": {
+          "description": "FOOD-COMMON-SOURCE-02 leg 2 per-(shedding, on-duty, same-station)-span seeding probability (object mode): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
+          ]
+        },
+        "diner_course_contamination_probability": {
+          "description": "FOOD-COMMON-SOURCE-02 leg 2 per-infectious-course seeding probability (object mode): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
+          ]
         }
       },
       "additionalProperties": false
