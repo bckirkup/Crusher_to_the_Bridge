@@ -1,0 +1,164 @@
+{
+ "cells": [
+  {
+   "seed": 20200218,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 183,
+     "passenger": 286
+    },
+    "during_window": {
+     "crew": 154,
+     "passenger": 131
+    }
+   },
+   "lab_confirmed": {
+    "crew": 62,
+    "passenger": 231,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 57,
+    "passenger": 191,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 56,
+    "passenger": 166,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 57,
+    "passenger": 191,
+    "other": 0
+   },
+   "lab_confirmed_total": 293,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200223,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 227,
+     "passenger": 169
+    },
+    "during_window": {
+     "crew": 178,
+     "passenger": 87
+    }
+   },
+   "lab_confirmed": {
+    "crew": 85,
+    "passenger": 124,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 79,
+    "passenger": 107,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 74,
+    "passenger": 95,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 78,
+    "passenger": 107,
+    "other": 0
+   },
+   "lab_confirmed_total": 209,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200210,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 73,
+     "passenger": 56
+    },
+    "during_window": {
+     "crew": 68,
+     "passenger": 28
+    }
+   },
+   "lab_confirmed": {
+    "crew": 39,
+    "passenger": 37,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 30,
+    "passenger": 30,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 28,
+    "passenger": 28,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 29,
+    "passenger": 30,
+    "other": 0
+   },
+   "lab_confirmed_total": 76,
+   "onset_recording_channel": null
+  }
+ ],
+ "pooled": {
+  "lab_confirmed": {
+   "crew": 186,
+   "passenger": 392,
+   "other": 0
+  },
+  "confirmed_and_presented": {
+   "crew": 166,
+   "passenger": 328,
+   "other": 0
+  },
+  "gate_pass_symptomatic_at_specimen": {
+   "crew": 158,
+   "passenger": 289,
+   "other": 0
+  },
+  "recorded_onsets": {
+   "crew": 164,
+   "passenger": 328,
+   "other": 0
+  },
+  "infected_total": {
+   "crew": 483,
+   "passenger": 511
+  },
+  "infected_during_window": {
+   "crew": 400,
+   "passenger": 246
+  }
+ },
+ "shares": {
+  "infected_total_crew_share": 0.4859154929577465,
+  "infected_during_crew_share": 0.6191950464396285,
+  "lab_confirmed_crew_share": 0.3217993079584775,
+  "presented_crew_share": 0.3360323886639676,
+  "gate_pass_crew_share": 0.3534675615212528,
+  "recorded_onset_crew_share": 0.3333333333333333,
+  "dated_share_of_confirmed": 0.8512110726643599,
+  "gated_share_of_confirmed": 0.773356401384083
+ }
+}
