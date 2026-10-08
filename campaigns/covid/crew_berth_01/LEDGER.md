@@ -36,6 +36,9 @@ ceiling falsifies cheapest; the ladder only runs on the owner's go-ahead.
 | Date | Block | Seeds | Cells | Job | SHA | Digest | Wall | Result |
 |---|---|---|---|---|---|---|---|---|
 | 2026-10-07 | declared | — | 0 | — | a1961d17 | — | — | design frozen pre-run |
+| 2026-10-07 | gate | — | — | — | 2d70237c | sha256:02d47fae | — | smoke PASS: combined fires (12 pools, 404 cabins, mixed 0, 275+150 relocated, 333 split); mess_boxed_base bit-identical to clean tree; pytest 7200 pass; dry-run 20-cell array; image at 2d70237c verified in-image; jobdefs picard-covid-crew-berth-01:1 + -fargate:1; manifest in S3 |
+| 2026-10-07 | combined (canary single) | 20200205 | 1 | fe02c441-5f5e-48e7-b232-fcae1a749122 (Fargate) | 2d70237c | sha256:02d47fae | ~9m | contract PASS: applied 385 restored 745, mixed 0, 12 pools/404 cabins, 333 split/2339h |
+| 2026-10-07 | combined | 20200205-224 | 20 | b80eac09-6da2-4a11-aa16-8f6f181505d1 (Fargate array) | 2d70237c | sha256:02d47fae | ~25m | 20/20 SUCCEEDED — readout `docs/covid/covid_crew_berth_01_readout.md`: crew share med 0.662, confined-pax med 32.5, deliveries med 162,182.5, 0 audit violations — **CEILING-SHORT** |
 
 ## 4. Notes
 
