@@ -1,0 +1,132 @@
+{
+  "design_id": "covid_onset_rec_01",
+  "task_id": "covid-onset-rec-01",
+  "design_doc": "docs/covid/covid_onset_rec_01_design.md",
+  "parent_design": "covid-crew-mess-01",
+  "description": "ONSET-REC-01: the frozen onset-recording channel armed on the landed boxed-crew-mess configuration. The observation-funnel attribution on sect_mess_boxed (reports/funnel_attr/boxed20.json, 20 seeds) measured the crew-share comparator resolved on the record's own metric at DP outbreak scale (lab_confirmed crew share 0.293 vs record 0.29) but left the dating overshare standing: dated share of confirmed 0.839 vs the record's 197/712 = 0.277, role-flat. SERO-CHANNEL-V1's period channel (symptomatic_at_confirmation gate + 0.56 recall draw) landed dated share ~0.43-0.53 on the lambda-cross hull surface — short of the record. This design runs the channel on the boxed DP configuration at theta 7.9e6 to measure the dated share the channel produces on the configuration whose crew composition already lands. The channel is additive and default-off (observation_model.onset_recording on sars_cov2_resp, reached through the existing pathogen_overrides deep-merge; enforced in SyndromicSurveillance._onset_observation with a once-per-case memoized recall draw on a dedicated onset RNG stream); no new arm grammar, no engine change.",
+  "prerequisites": [
+    "FUNNEL-ATTR all-20 pooled measured (merged): sect_mess_boxed pooled lab_confirmed crew share 0.435 unconditional / 0.293 conditioned on DP-scale cells (n_confirmed >= 100); dated share of confirmed 0.839 vs the record's 0.277 (reports/funnel_attr/boxed20.json; docs/covid/covid_open_ledger.md)",
+    "SERO-CHANNEL-V1 measured (docs/ledger/SERO-CHANNEL-V1.md): the onset_recording channel is additive, default-off, and arm-expressible through pathogen_overrides deep-merge; on the lambda-cross surface its canary + full rows landed dated share ~0.43-0.53 of lab-confirmed — the channel alone did NOT reach the record's dating share",
+    "report_probability 0.56 is record-derivable arithmetic (197/712 dated / ~0.49 symptomatic-at-specimen), declared once — never retuned to the 0.277 anchor",
+    "Channel mechanics verified in the tree before freeze: the onset draw lives on a dedicated child stream derived from the parent SeedSequence entropy without consuming parent state, so the undeclared arm draws nothing anywhere and boxed_declared is expected bit-identical to the parent's sect_mess_boxed arm on a matched seed"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [10, 15],
+          "contact_factor_to_host": [0.005, 0.02]
+        }
+      }
+    }
+  },
+  "base_overrides_note": "The boxed crew-mess configuration, verbatim from the parent's sect_mess_boxed arm (covid_crew_mess_01_design.json). The boarding-screen arm grammar has no design-level base block and _validate_arms requires the first arm to carry empty overrides, so this design declares the shared base here and the campaign worker (campaigns/covid/onset_rec_01/cell.py) applies it to every cell's run spec via apply_arm_overrides after prepare_cell_run_spec — disjoint from the arm overrides (the channel touches pathogen_overrides only), so the resolved spec is order-independent. On boxed_declared (empty overrides) the resolved spec is exactly the spec sect_mess_boxed ran; on boxed_period it is boxed + the declared channel. Contract tests pin base_overrides == sect_mess_boxed.overrides verbatim and spec-level equality of the two prepared specs.",
+  "arms": [
+    {
+      "arm_id": "boxed_declared",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar; the shared base_overrides make its resolved spec identical to the parent's sect_mess_boxed arm — boxed crew meals on the shipped (declared) observation channel: every confirmed symptomatic onset dated. This arm is the in-image bit-identity control: at matched seeds its voyage event counts must reproduce the landed sect_mess_boxed cells' counts."
+    },
+    {
+      "arm_id": "boxed_period",
+      "role": "period_channel",
+      "overrides": {
+        "pathogen_overrides": {
+          "sars_cov2_resp": {
+            "observation_model": {
+              "onset_recording": {
+                "symptomatic_at_confirmation_required": true,
+                "report_probability": 0.56
+              }
+            }
+          }
+        }
+      },
+      "note": "The boxed configuration under the record's own onset-recording channel: an onset is dated only when the host had presented on or before the epoch of the specimen that confirmed it (the record's symptomatic_at_specimen field — ~51% of DP positives contributed no onset date), times a once-per-case recall draw at 0.56 = (197 dated / 712 confirmed) / ~0.49 symptomatic-at-specimen, record-derived arithmetic, declared — not tuned to any model output."
+    }
+  ],
+  "cells": 40,
+  "cells_note": "2 arms x 20 seeds (20200205..20200224) = 40 cells; each cell ~15 epochs/day over ~21 days with the voyage frozen. The whole design is the canary-scale run; there is no larger array behind it.",
+  "cell_payload_additions": [
+    "run", "cohort", "quarantine_witness", "board", "crew_window",
+    "guard_windows", "crew_ledger", "infection_log_tail", "through_day14",
+    "takeoff_calibration", "q_zone_reach", "source_channel_during",
+    "during_quarantine_by_route", "sanitary_visits",
+    "lab_confirmed_total", "lab_confirmed_by_role", "onset_recording"
+  ],
+  "cell_payload_additions_note": "The crew-mess-01 payload set plus the channel witnesses: lab_confirmed_total (every specimen channel pooled — the denominator of the record's 197/712 dating share) and onset_recording (the resolved channel block echoed back — null on boxed_declared, the declared block on boxed_period) were already emitted by cell_payload; lab_confirmed_by_role (the lab confirmations split passenger/crew — the denominator of the record's crew-share metric on the same ascertainment) is added in this change, an additive payload echo only. The contract test + readout audit sweep verify they emit.",
+  "scoring": {
+    "declared_before_running": true,
+    "primary": {
+      "metric": "dated share of lab_confirmed = recorded_onsets / lab_confirmed_total, pooled over the arm's cells AND per-cell median",
+      "record": "197/712 = 0.277",
+      "declared_expectation_band": [0.43, 0.55],
+      "expectation_source": "SERO-CHANNEL-V1 canary + full surface on the lambda-cross grid landed dated share ~0.43-0.53 of lab-confirmed; the funnel attribution on these boxed cells measures gate-only share ~0.77, so the recall draw is expected to do the remaining work to ~0.43-0.55",
+      "verdict_grammar": {
+        "RECORD-MATCHED": "pooled dated share inside [0.227, 0.327] (0.277 +/- 0.05) — the channel alone reproduces the record's dating share on the boxed configuration (report immediately)",
+        "CHANNEL-INSUFFICIENT": "pooled dated share above 0.327 — the channel moves dating but does not reach the record's share; the residual is observational-channel or truth-level, scored honestly rather than forced through a pass",
+        "OVER-CLOSED": "pooled dated share below 0.227 — the channel over-closes on this configuration (report immediately)"
+      },
+      "note": "The band is an expectation, not a gate: any landing reports honestly under the grammar. CHANNEL-INSUFFICIENT is the predicted and fully admissible outcome — this design measures the channel, it does not certify it."
+    },
+    "secondary_reported_never_thresholded": [
+      "lab_confirmed_total per cell and pooled vs the record's 712 — the under-confirmation scale noted in the funnel ledger (~193/cell median) is expected to persist; the channel gates dating, not ascertainment",
+      "crew share of lab_confirmed — pooled and conditioned on DP-scale cells (n_confirmed >= 100): the channel is role-flat so ~unchanged 0.435 / ~0.29-scale is expected; a share move is a signal to investigate, not a defect by default",
+      "confined-pax during-window mass, takeoff-conditional median vs the guard band [26, 160] (landed median 35)",
+      "service_deliveries per cell within 15% of the landed row (~162k) — cadence parity"
+    ],
+    "bit_identity_clause": "boxed_declared must reproduce the parent's sect_mess_boxed arm bit-identically at matched seeds: the resolved run spec is equal by construction (base_overrides == sect_mess_boxed.overrides, pinned by contract test) and the voyage event counts (infections_total, lab_confirmed_total, recorded_onsets, during-window tallies, service_deliveries) must equal the same-realization rerun and, absent engine drift since the landed cells' image, the landed S3 cell payloads. A deviation is a defect in the base composition, not a finding — report immediately.",
+    "conditional_trajectory_clause": "Seeds whose seeded case never completes takeoff produce no recorded mass for reasons independent of the channel. The dated-share and share reads pool over cells that produced lab confirmations; takeoff mass is reported per arm as context."
+  },
+  "admissibility": {
+    "audit_invariants": [
+      "quarantine_witness.protocol_id == SOP-017-MESSBOX on every cell (proves base_overrides resolved) with window_days [16, 30] activated and exempt_classes = 4 crew classes",
+      "crew_window.crew_meal_service.mode == 'boxed' and diner_redirects > 0 on every cell",
+      "onset_recording echo: null on every boxed_declared cell; == the declared block {symptomatic_at_confirmation_required: true, report_probability: 0.56} on every boxed_period cell",
+      "lab_confirmed_total present on every cell",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "droplet split (0.175, 0.0) echoes on every cell",
+      "service_deliveries within 15% of the landed row median (~162k)"
+    ],
+    "report_immediately": [
+      "the period arm's dated share lands materially different from the declared expectation band [0.43, 0.55] in either direction — including a RECORD-MATCHED landing",
+      "boxed_declared fails bit-identity vs sect_mess_boxed (spec or event counts)",
+      "the onset_recording echo is null on a boxed_period cell or non-null on a boxed_declared cell",
+      "quarantine_witness.protocol_id is not SOP-017-MESSBOX on any cell — the base did not resolve",
+      "any arm-grammar obstruction forces an engine change — stop and relay",
+      "child failure rate > 5%"
+    ]
+  },
+  "what_this_cannot_settle": [
+    "report_probability 0.56 is record-derivable ((197/712) / ~0.49), declared once and not swept; a different declared value is a different design, not a cell of this one",
+    "the channel gates dating, not ascertainment: lab_confirmed_total staying below 712 is a separate, expected shortfall the funnel ledger already records",
+    "the dated share on this configuration does not transfer by itself to other hulls/configurations — SERO-CHANNEL-V1's landing was a different hull surface and this canary does not reconcile the two"
+  ],
+  "execution": {
+    "runner": "campaigns/covid/onset_rec_01/cell.py via deploy/aws/campaign_entrypoint.py",
+    "task": "covid_onset_rec_01",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/onset_rec_01",
+    "s3_prefix": "campaign/covid_onset_rec_01/",
+    "queue": "picard-analysis-fargate-queue",
+    "jobdef": "picard-covid-onset-rec-01-fargate",
+    "image_tag": "covid-onset-rec-01",
+    "submission_order": [
+      "both arms x 20 seeds = 40 cells, submitted together — the whole design IS the canary; read out and STOP"
+    ]
+  }
+}
