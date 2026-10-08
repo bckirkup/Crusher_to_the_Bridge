@@ -1340,6 +1340,19 @@ def _truth_counts(engine: Any) -> dict[str, Any]:
     }
 
 
+def _lab_confirmed_role_counts(
+    syndromic: Any, agents_by_id: dict[int, Any],
+) -> dict[str, int]:
+    """Lab confirmations for PATHOGEN_ID, split passenger/crew."""
+    counts: dict[str, int] = {"passenger": 0, "crew": 0}
+    for pid, aid in syndromic._lab_confirmed:
+        if pid != PATHOGEN_ID:
+            continue
+        role = getattr(agents_by_id.get(aid), "role", None) or "passenger"
+        counts[role] = counts.get(role, 0) + 1
+    return counts
+
+
 def _first_onset_day(curve: dict[int, dict[str, int]]) -> int | None:
     days = [
         int(day) for day, roles in curve.items()
@@ -1806,6 +1819,12 @@ def cell_payload(
         ),
         **_truth_counts(sim.engine),
         "lab_confirmed_total": syndromic.lab_confirmed_count(PATHOGEN_ID),
+        # The lab confirmations split passenger/crew — the denominator of
+        # the record's crew-share metric on the same ascertainment the
+        # dated share is scored against.
+        "lab_confirmed_by_role": _lab_confirmed_role_counts(
+            syndromic, agents_by_id,
+        ),
         # The resolved onset-recording channel, echoed back so a cell's
         # channel arm is auditable from the payload alone: the declared arm
         # carries null, a period arm carries its declared block.
