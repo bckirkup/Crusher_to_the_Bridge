@@ -15,7 +15,7 @@ against the spec's frozen measurement plan. Design:
 | image build | done | `picard-campaign:noro-food-score01` built at merged design SHA `40862b8c` (root `Dockerfile` + literal `Dockerfile.campaign` overlay), digest `sha256:29ea170eaede08d02566910967bfbda879a3656ceb3a40cf3ef45201fc5d9599`; verified in-container (deploy/aws + tools + campaigns trees, `ENGINE_GIT_SHA` = `40862b8c…`, one real cell ran a full voyage in-image and self-uploaded under the canary prefix — the ship array's index-0 dedup-skipped it) |
 | canary | done | 44/44 SUCCEEDED on `picard-campaign-queue` (Spot); all frozen gates green — see Canary readout |
 | wave 1 | landed | exp + cls 12,000/12,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_{exp,cls}_*/`; see Wave 1 submission |
-| wave 2 | submitted | spr tiers (6,000 voyages) — in flight on `picard-campaign-queue` (Spot); see Wave 2 submission |
+| wave 2 | in flight | spr tiers (6,000 voyages) on `picard-campaign-queue` (Spot) — off arm landed, 0 FAILED at ~85 min; see Wave 2 submission |
 | readout | pending | `outbreak_anchor_readout.py` + `common_source_readout.py` + `onset_curve_readout.py` per the design |
 
 ## Canary readout (2026-10-08, all at `40862b8c`)
@@ -115,6 +115,30 @@ clean, FIFO in submit order. Zips landing under
 if the Spot capacity holds; drought playbook (resubmit to
 `picard-analysis-queue`, `_already_uploaded` dedup covers) applies if
 arrays park >1 h.
+
+**Health ~85 min in (18:00 UTC):** 1,008 SUCCEEDED / 119 RUNNING /
+4,873 RUNNABLE / **0 FAILED** — no materialization or app failures,
+dispatching ~12 cells/min. Per array: off 1000/1000 SUCCEEDED (parent
+SUCCEEDED, ~85 min wall); ind 8/127/873; ol1/ol2/ol3/ship all-RUNNABLE
+behind ind (FIFO). Spot is holding — no drought trigger; arrays are
+dispatching, not parked. Manifest key verified present
+(`campaign/noro_food_score_01/manifest.json`, 237,087 B, uploaded
+10:38 UTC — record only; cells read the manifest in-image).
+
+Spot-checks on landed zips (both seeds s8105): off — 3-member contract
+(`summary.json`, `growth_census.json.gz`, `rss_samples.json`), echo
+`common_source={mode:"off"}`, `agent_class_fractions` stamped,
+non-degenerate 288-epoch voyage (215 acquired / 64 imports, peak
+prevalence 232 ep 282, `common_source_events=0` as armed); ind — same
+contract, echo `{lot_mode,handler_mode,diner_mode:"independent"}`,
+243 acquired, peak 258, `common_source_events=62` / `takers=1217`
+(independent-mode firing, v1-style rows per canary shape). Ship-arm
+object-witness fields (`object_id`/`pan_serial`/close fields) can't be
+re-checked until ship zips land — ship is last in FIFO order; canary
+on the same digest already verified them (84 objects, all close fields).
+Deferred to readout stage, which inspects ship cells anyway.
+
+No report-immediately trigger fired.
 
 ## Grid
 
