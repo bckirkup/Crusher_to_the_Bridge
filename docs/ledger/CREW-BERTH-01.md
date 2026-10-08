@@ -1,8 +1,10 @@
 # CREW-BERTH-01
 **Date:** 2026-10-07
-**Commit:** a1961d17 (declared); 2d70237c (canary measured)
+**Commit:** 2d70237c
 **Pathogens:** sars_cov2_resp
 **Status:** measured — canary verdict CEILING-SHORT (2026-10-08)
+
+*(design frozen pre-run at a1961d17; canary measured at 2d70237c)*
 
 Crew berthing and work-cohort confinement arms on the verbatim
 `diamond_princess_2020` replay — the seam named by the CREW-MESS-01
