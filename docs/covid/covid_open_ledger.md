@@ -1372,3 +1372,9 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   never touched; named seam `CREW-BERTH-01`. Evidence
   `reports/crew_mess_berth_attr/cell_*.json`; caveat — `co_berth` is a
   sufficient-cause bound (no strain tracking), 3-seed orientation sample.
+  *CREW-BERTH-01 is declared (design frozen pre-run
+  2026-10-07, `docs/covid/covid_crew_berth_01_design.md`,
+  `docs/ledger/CREW-BERTH-01.md`): deterministic `crew_berthing`
+  cabin re-deal + `crew_work_cohorts` shift-split modifiers, six
+  arms (shipped corner + five SOP-017-* boxed); canary = `combined`
+  20-seed block, then the family reports before the ladder runs.*

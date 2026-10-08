@@ -1209,6 +1209,25 @@ def _crew_window_block(
             )
             else None
         ),
+        # CREW-BERTH-01: berthing + work-cohort directive echoes —
+        # applied/restored epochs, re-deal tallies, split tallies
+        # (all None/0 when no order carries the modifiers).
+        "crew_berthing": (
+            sim.engine.crew_berthing_witness()
+            if getattr(
+                getattr(sim, "engine", None), "crew_berthing_witness",
+                None,
+            )
+            else None
+        ),
+        "crew_work_cohorts": (
+            sim.engine.crew_work_cohorts_witness()
+            if getattr(
+                getattr(sim, "engine", None),
+                "crew_work_cohorts_witness", None,
+            )
+            else None
+        ),
     }
 
 

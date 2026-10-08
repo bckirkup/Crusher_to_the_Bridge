@@ -584,6 +584,71 @@ def apply_crew_meal_service(
     setter(block if isinstance(block, dict) else None)
 
 
+def apply_crew_berthing(
+    engine: Any,
+    transmission_core: Any,
+    merged_modifiers: dict[str, Any],
+) -> None:
+    """Apply the CREW-BERTH-01 crew berthing directive to the engine.
+
+    The ``crew_berthing`` modifier is a mapping carried on a
+    confinement order (e.g. ``{"mode": "cohort"}``); it lives and dies
+    with the order window like every other modifier. Called
+    unconditionally — the engine must see the falling edge to release
+    the directive and restore the roster, the same contract
+    ``apply_crew_meal_service`` documents. When the engine reports the
+    roster's berths changed (rising edge or restore), the transmission
+    core's berth registry is rebuilt so stateroom air shares and
+    occupancy denominators reflect the new pairing.
+    """
+    if engine is None:
+        return
+    setter = getattr(engine, "set_crew_berthing", None)
+    if setter is None:
+        return
+    mods = merged_modifiers or {}
+    block = mods.get("crew_berthing")
+    changed = setter(
+        block if isinstance(block, dict) else None,
+        exempt_classes=frozenset(mods.get("exempt_classes") or ()),
+        exempt_work_zones=frozenset(mods.get("exempt_work_zones") or ()),
+    )
+    if not changed or transmission_core is None:
+        return
+    register = getattr(transmission_core, "register_cabin_berths", None)
+    if register is not None:
+        register(getattr(engine, "agents", ()) or ())
+
+
+def apply_crew_work_cohorts(
+    engine: Any,
+    merged_modifiers: dict[str, Any],
+) -> None:
+    """Apply the CREW-BERTH-01 work-cohort directive to the engine.
+
+    The ``crew_work_cohorts`` modifier is a mapping carried on a
+    confinement order (e.g. ``{"mode": "shift_split", "pods": 2}``).
+    ``zones`` absent in the block resolves to the order's merged
+    ``exempt_work_zones`` — the essential-service roster by posting.
+    Same unconditional/falling-edge contract as
+    ``apply_crew_meal_service``.
+    """
+    if engine is None:
+        return
+    setter = getattr(engine, "set_crew_work_cohorts", None)
+    if setter is None:
+        return
+    mods = merged_modifiers or {}
+    block = mods.get("crew_work_cohorts")
+    zones = block.get("zones") if isinstance(block, dict) else None
+    if zones is None:
+        zones = mods.get("exempt_work_zones") or ()
+    setter(
+        block if isinstance(block, dict) else None,
+        zones=frozenset(zones),
+    )
+
+
 def reset_modifiers(
     contam_engine: Any,
     transmission_core: Any,

@@ -893,6 +893,181 @@
       },
       "category": "intervention",
       "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-BERTHCOH",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals + Status-Pure Crew Berthing",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-BERTH-01 (docs/covid/covid_crew_berth_01_design.md): verbatim SOP-017-MESSBOX plus crew_berthing mode cohort — at the order's rising edge every crew (home_zone, berth_group) pool re-deals cabins status-pure on the order's declared exempt set, so no stateroom mixes confined and working crew; the re-deal is anchor-preserving (a stayer's compartment key survives) and deterministic (draws no RNG). An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        },
+        "crew_berthing": {
+          "mode": "cohort"
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-BERTHRZ",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals + Essential-Crew Berthing Block",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-BERTH-01 (docs/covid/covid_crew_berth_01_design.md): verbatim SOP-017-MESSBOX plus crew_berthing mode rezone berth_zones CC_D4_F/CC_D4_M/CC_D4_A — working crew re-home into the declared deck-4 essential-crew berthing block and its confined occupants swap into the vacated berths, then cabins re-deal status-pure ship-wide. Deterministic, draws no RNG. The deck-4 block is declared geometry, not a fit. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        },
+        "crew_berthing": {
+          "mode": "rezone",
+          "berth_zones": [
+            "CC_D4_F",
+            "CC_D4_M",
+            "CC_D4_A"
+          ]
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-PODSHFT",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals + Split-Shift Essential Pods",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-BERTH-01 (docs/covid/covid_crew_berth_01_design.md): verbatim SOP-017-MESSBOX plus crew_work_cohorts mode shift_split pods 2 — rising-edge schedule surgery splits each posted crew Work block into two non-overlapping watches (pod = agent_id % 2); off-shift hours read Rest and resolve to home_zone unconditionally. zones absent resolves to the order's exempt_work_zones — the essential-service roster. Deterministic, draws no RNG. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        },
+        "crew_work_cohorts": {
+          "mode": "shift_split",
+          "pods": 2
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
+    },
+    {
+      "protocol_id": "SOP-017-BERTHPODS",
+      "name": "DIAGNOSTIC COUNTERFACTUAL: Cabin Quarantine + Boxed Crew Meals + Berthing Block + Shift Pods",
+      "description": "DIAGNOSTIC COUNTERFACTUAL for CREW-BERTH-01 (docs/covid/covid_crew_berth_01_design.md): verbatim SOP-017-MESSBOX plus crew_berthing mode rezone (deck-4 essential-crew block) and crew_work_cohorts shift_split pods 2 — the family-ceiling arm: status-separated berthing ship-wide and split watches at every essential posting. Deterministic, draws no RNG. An intervention arm, not a candidate configuration: it may never score covid.T1/T3/H3 or any other anchor. Trigger unreachable by design; activates only when a scenario schedule names it.",
+      "trigger": {
+        "instrument_class": "scenario_calendar",
+        "stoplight_level": "RED"
+      },
+      "modifiers": {
+        "confine_all_to_quarters": true,
+        "confinement_enforced": true,
+        "exempt_classes": [
+          "crew_general",
+          "crew_medical",
+          "crew_engineering",
+          "crew_galley"
+        ],
+        "exempt_work_zones": [
+          "Main_Galley_Aft",
+          "SpecGalley",
+          "BuffetGal_U",
+          "Engine_Room_Aft",
+          "EngControl",
+          "Bridge",
+          "Central_Stores",
+          "Laundry_Main",
+          "WasteTreat",
+          "Crew_Mess_Main",
+          "CrewMess_Fwd"
+        ],
+        "crew_meal_service": {
+          "mode": "boxed"
+        },
+        "crew_berthing": {
+          "mode": "rezone",
+          "berth_zones": [
+            "CC_D4_F",
+            "CC_D4_M",
+            "CC_D4_A"
+          ]
+        },
+        "crew_work_cohorts": {
+          "mode": "shift_split",
+          "pods": 2
+        }
+      },
+      "category": "intervention",
+      "required_cascade_tier": null
     }
   ]
 }
