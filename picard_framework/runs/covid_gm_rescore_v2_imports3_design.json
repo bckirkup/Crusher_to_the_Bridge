@@ -1,0 +1,68 @@
+{
+ "design_id": "covid_gm_rescore_v2_imports3",
+ "task_id": "COVID-GM-RESCORE-02",
+ "schema_version": "1.0.0",
+ "description": "COVID-GM-RESCORE-02 imports:3 diagnostic -- the labelled non-scoring probe paired with covid_gm_rescore_v2, verbatim from the v1 diagnostic design. RESCORE-01 measured that tripling imports lifts P(takeoff) from 0.80 to 1.0 and lands H1 with a tight envelope: ignition, not transmission size, is the dominant residual on the held-out leg. Under the post-DP-era engine (service-door-drop, propensity, defiant-escalation machinery all shipped since) this probe re-measures whether the ignition tail is still the residual class.",
+ "fit_spec": "docs/proposals/covid_trajectory_fit_spec.md",
+ "scenario_id": "greg_mortimer_2020",
+ "split_role": "held_out",
+ "split_role_note": "Same declaration as the scoring design: this file scores nothing -- it is a labelled diagnostic on the split's held-out hull, declared here and verified against the split at load.",
+ "cell_conditioning": {
+  "note": "Identical to covid_gm_rescore_v2 except the imports axis: 3 explicit passenger seeds at epoch 0, infection_age_days 0.0 each (the probe's one deviation from the record, declared in the imports field). All other conditioning verbatim from the scoring design.",
+  "theta": "2.37e11 -- the anchor theta only",
+  "imports": 3,
+  "infection_age_days": 0.0,
+  "sanitary_visit_mode": "dwell_weighted",
+  "voyage_mode": "declared",
+  "split_day": 20,
+  "turn_day": 8
+ },
+ "thetas": [237000000000.0],
+ "infection_age_days": [0.0],
+ "imports": [3],
+ "sanitary_visit_mode": "dwell_weighted",
+ "seed_base": 20200205,
+ "seeds": 50,
+ "takeoff_recorded_onsets": 10,
+ "voyage_mode": "declared",
+ "split_day": 20,
+ "turn_day": 8,
+ "seed_ring_readout": true,
+ "arms": [
+  {
+   "arm_id": "hygiene_cycle",
+   "overrides": {},
+   "note": "Baseline arm only (empty overrides; the shipped hand line). The probe is an import-count question, not a hand-arm question."
+  }
+ ],
+ "cells": 50,
+ "cells_note": "1 Theta x 1 arm x 50 seeds = 50 cells; seeds identical to the scoring design's anchor row so the delta pairs on (theta, seed).",
+ "freeze": {
+  "declared_before_running": true,
+  "metrics": [
+   "P(takeoff >=10 recorded onsets) at 3 imports vs the scoring design's 1-import anchor row",
+   "campaign_positives median + q05-q95 vs H1's 128, takeoff-conditional positives, asymptomatic_share -- same reads as the scoring readout",
+   "seed-paired delta vs the scoring row on (theta 2.37e11, seed): does tripling imports move P(takeoff) materially, and does the conditional count move with it",
+   "v2-vs-v1 on the probe itself: whether the v1 rescue (P(takeoff) 1.0, positives median 113 [89, 129]) still holds under drift"
+  ],
+  "verdict_grammar": "Diagnostic readout only -- no verdict class. 'imports rescue' = P(takeoff) lifts materially AND the takeoff-conditional campaign_positives median moves toward 128; 'ignition fixed, size still wrong' = takeoff up but positives stay low; 'regime dead' = P(takeoff) ~ 0 even at 3 imports."
+ },
+ "admissibility": {
+  "declared_before_running": true,
+  "note": "Labelled diagnostic, not a scoring row: GM's record declares one import and the as-declared cell is the scoring row; this cell measures the import-count sensitivity around it.",
+  "audit_invariants": [
+   "delivery.hand_reservoir_mode echoes hygiene_cycle on every payload.",
+   "delivery.presentation_draw_mode echoes 'once_per_course' on every payload.",
+   "delivery.caregiver resolved block present on every payload.",
+   "seed_ring.seed_spec.count == 3 (the probe) with infection_age_days 0.0 and role passenger; seeded_count == 3.",
+   "cell pairing to the scoring rows keyed on (theta, seed) -- the same seeds in both files."
+  ],
+  "report_immediately_if": "P(takeoff) does not lift materially vs the scoring anchor row (the v1 import-rescue died under drift -- the ignition defect moved mechanism class) or the positives median lands outside the v1 envelope [89, 129] in the downward direction."
+ },
+ "execution": {
+  "platform": "Same campaigns/ path as the scoring design -- the imports3_hygiene block of campaigns/covid/gm_rescore_02/ -- submitted only on the author's go-ahead after the scoring canary, per the campaign gate.",
+  "expected_cell_minutes": "~5",
+  "s3_prefix": "s3://crusherbucket-994254241749-us-east-1-an/campaign/covid_gm_rescore_02/<sha>/imports3_hygiene/",
+  "readout": "tools/covid_gm_rescore_readout.py --cells campaign_results/covid_gm_rescore_v2_imports3/cells --design picard_framework/runs/covid_gm_rescore_v2_imports3_design.json --pair-cells campaign_results/covid_gm_rescore_v2/cells"
+ }
+}
