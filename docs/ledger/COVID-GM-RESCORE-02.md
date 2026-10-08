@@ -5,8 +5,8 @@
 **Status:** measured
 **Measured at:** 6bb0e996
 
-Canary scope only — 20 of 300 scoring cells + 0 of 50 diagnostic; the
-fleet runs only on the author's go-ahead.
+Full fleet measured — all 300 scoring cells + 50 imports:3 diagnostic
+cells, 0 audit failures (canary block landed first, see below).
 
 Re-score of `greg_mortimer_2020` (held out) under the post-DP-era engine —
 image built at merge commit `6bb0e996` (design PR #970), against the same
@@ -65,10 +65,52 @@ The single-cell Batch↔dev-venv check is bit-identical (seed 20200205:
   `mixed` on the 20-seed prefix, same class as v1 with the residual order
   re-sorted (composition now dominates; ignition no longer on the list).
 
+## Fleet: all 6 θ × arm rows × 50 seeds (300/300, 0 audit failures)
+
+| row (θ × arm) | P(takeoff) | positives med [q05–q95] | H1 | asym med [q05–q95] | H2 |
+|---|---|---|---|---|---|
+| 1e11 × hygiene_cycle | 0.96 | 87 [15, 128] | **lands** | 0.260 [0.179, 0.561] | — |
+| 1e11 × spike_decay | 0.96 | 93 [23, 132] | **lands** | 0.268 [0.181, 0.696] | — |
+| 2.37e11 × hygiene_cycle (anchor) | 0.94 | 108 [13, 133] | **lands** | 0.250 [0.168, 0.538] | — |
+| 2.37e11 × spike_decay | 0.96 | 107 [20, 132] | **lands** | 0.258 [0.189, 0.640] | — |
+| 1e12 × hygiene_cycle | 0.96 | 118 [22, 138] | **lands** | 0.233 [0.168, 0.556] | — |
+| 1e12 × spike_decay | 0.96 | 117 [28, 135] | **lands** | 0.241 [0.145, 0.545] | — |
+
+imports:3 diagnostic (θ 2.37e11 × hygiene_cycle, 50/50): P(takeoff)
+**1.00**, positives median 117 [95, 132], asym 0.232 — the import
+rescue still holds, and at v2 ignition rates it only needs to cover the
+residual ~5% fizzle.
+
+## Read (fleet-grade)
+
+- **Ignition tail mostly closed, not gone.** P(takeoff) 0.94–0.96 across
+  rows vs v1's ~0.76–0.86 — the 20-seed canary's 1.00 was the lucky
+  prefix; ~2-3 seeds per 50 still fizzle (anchor row takeoff_n 47/50).
+  Residual class (b) shrinks to a thin tail rather than disappearing.
+  imports:3 covers it exactly (P 0.94 → 1.00), so the mechanism is
+  import-count sensitivity, as v1 framed it.
+- **H1 lands on all six rows** — medians 87–118, every q05–q95 interval
+  contains 128. v1 landed some rows envelope-only through the fizzle
+  tail; v2 lands them all with medians inside the record's reach.
+- **Hand physics still not load-bearing on GM.** Paired
+  hygiene−spike deltas are ~0 at every θ (positives median Δ −1..0,
+  intervals straddle zero; 0–1 takeoff-class flips per 50) — the
+  post-drift hand stack does not change the v1 finding that the
+  spike/hygiene distinction is noise-level on this hull.
+- **H2 still the dominant residual, now ~3× out not ~10×.** Asym
+  medians 0.233–0.268 vs the 0.71–0.91 band (v1: 0.064). once_per_course
+  + HOST-AGE-01 moved composition a third of the way; the q95 tails
+  (0.54–0.70) touch the band's edge but no seed lands. Composition is
+  now the only standing residual class on the lattice.
+- **Verdict class: `mixed`** — same grammar class as v1 (H1 lands while
+  H2 misses), but the residual order re-sorts to (a) composition ~3×,
+  (b) thin fizzle tail ~5%, (c) dispersion (q05 floors 13–28 still
+  dragged by the fizzle cells).
+
 ## Open
 
-Fleet = 330 cells (6 scoring blocks' remaining seeds + imports3) —
-author's call per the campaign gate. The spike_decay column will say
-whether hand physics became load-bearing on GM (v1 measured ~0 deltas);
-imports3 says whether the import-rescue still holds now that ignition is
-not the binding constraint.
+- Whether the asym q95 tail seeds are a distinct composition regime or
+  the same distribution's upper arm — worth a witness read if the next
+  campaign arms a composition lever.
+- No θ row separates H1 from H2 better than another — the lattice is
+  flat on composition; a refit cannot move H2 through θ.

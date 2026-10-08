@@ -67,3 +67,10 @@ merge is coordinate-safe.
 - Report-immediately triggers carried from the design: anchor row loses
   H1 vs v1, P(takeoff)≈0, asym share lands H2, or spike−hygiene deltas
   go materially nonzero.
+| 2026-10-08 | t1e11_hygiene | 20200205–254 | 50 | 11186f0d-f042-4be1-bc8d-a87115ef4955 (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | t1e11_spike | 20200205–254 | 50 | 8cb37209-0633-4404-88b1-033991a333d6 (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | t2e11_hygiene | 20200225–254 | 30 | 038ebb72-c52e-47c9-a1c2-3e4026238984 (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | t2e11_spike | 20200205–254 | 50 | 9fd773ff-4627-4396-847c-17f0b64283a3 (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | t1e12_hygiene | 20200205–254 | 50 | 22862b22-2f79-4a47-a535-fb3c37c74a7e (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | t1e12_spike | 20200205–254 | 50 | 73b05b46-75ef-42a4-bc99-98e6bddc5b86 (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
+| 2026-10-08 | imports3_hygiene | 20200205–254 | 50 | fa3c4e74-c41b-4ec3-94f5-5162e739237c (analysis array, rev :3 digest-pinned) | 6bb0e996 | sha256:c8325d40 | ~10m fleet wall | SUCCEEDED, cells landed |
