@@ -1364,7 +1364,10 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   mess-posted-staff 65 / other work zones 64 / corridor 47 are all
   `working`-status events; the cabin block's 107 splits 59
   co-berth-plausible (35 a berth-mate infected during the window — the
-  carry-home channel to a confined mate) vs 48 corridor-pool. Routes:
+  carry-home channel to a confined mate) vs 48 with no prior mate —
+  30 `service_to_host` door-drops, 17 `caregiver` steward pickups
+  during deliveries, 1 `droplet` (pathway-corrected 2026-10-08, was
+  misread as corridor-pool). Routes:
   droplet 240 / caregiver 121 / service_to_host 39. Consequence for the
   record: the 0.29 crew share is unreachable by dining policy — the
   residual rides work-zone + berthing structure (cohorting working crew
@@ -1383,6 +1386,43 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   (`reports/crew_berth_attr/cell_*.json`, 3 seeds, event counts
   reproduce the Batch cells): corridor-venue occupational 45% +
   cabin 19% (36/362 confined-in-berth, 33 with no prior-infected
-  mate — corridor-pool leakage) + galley 19% — the re-deal closed
+  mate — 17 door-drops + 15 droplet on the declared 0.05 confinement
+  leak, pathway-corrected 2026-10-08) + galley 19% — the re-deal closed
   the carry-home channel (3 events) but confined berths still take
   compartment/pool dose.*
+
+- **Recorded-onset share by role (ascertainment cross-check on the boxed canary cells): ~2/3 of the crew-share gap is an acquisition-vs-confirmed comparison mismatch.**
+  `onset_curve` already carries per-day role tags, so no campaign was
+  needed: share of crew among onsets dated inside the window (days
+  16–30) reads **0.475 pooled (n=558) vs 0.683 pooled on acquisitions
+  (n=1179)** — per-cell medians 0.636 vs 0.727. The funnel's correction
+  is strongest where the mass is: the largest cell (seed 20200218)
+  lands **0.244 inside the declared (0.2, 0.4) band**. Residual excess
+  ~0.08–0.15 above band-top on pooled cells — the scale of the
+  door-drop service to confined crew plus the declared 5% confinement
+  leak and unmodelled crew evacuation/test-cadence asymmetry, not a
+  ~0.4 physics hole.
+  Consequence: crew-share bands should be declared on recorded-onset
+  share (the two metrics differ ~0.2 pooled); "the literature
+  overestimates COVID" survives only as a crew-structure statement —
+  theta is role-blind and absorbs any globally hot constant. Detail:
+  `docs/covid/covid_crew_mess_01_readout.md` §Post-canary onset share.
+
+- **Confinement-fidelity audit (corridor suspect): NO DEFECT — the "corridor-pool" label was a misread; the residual is declared physics.**
+  Splitting confined-in-berth no-mate events by `pathway` (same
+  committed `reports/` JSONs): boxed cells 30 `service_to_host` + 1
+  `droplet`; combined cells 17 `service_to_host` + 15 `droplet` + 1
+  `caregiver`. Two declared channels, both intended: (a) the door-drop
+  is the armed meal-delivery channel reaching a confined host —
+  `_credit_service_to_host` deliberately does not apply
+  `_confinement_factor` because deliveries exist *because* the host is
+  confined; `contact_factor_to_host` [0.005,0.02] already discounts
+  it. (b) The droplet remainder rides the declared
+  `confinement_isolation_factor` = 0.05 platform parameter — every
+  shared-space path (contact, fomite, droplet pool, HVAC, compartment
+  pool) and confined emission all scale by it. Its zero-bound was
+  already measured: SENS-ASSAY-V1's `A9_perfect_confinement`
+  (factor→0) was inert on mass (~−1.3%). Verdict: no plumbing defect —
+  the crew-share residual is real occupational + steward-service
+  structure, which sharpens the open question to whether the record's
+  0.29 is reachable under truthful DP mechanisms at all.

@@ -141,14 +141,16 @@ acquisitions decomposed by venue × confined-at-event × whether a
 | crew_mess | 65 | 16% | posted kitchen staff + far-field pool, no diners (redirects held) |
 | other work zones | 64 | 16% | EngControl / stores / waste / dining-corridor placements |
 | corridor | 47 | 12% | working crew in non-home corridors |
-| cabin (own berth zone) | 107 | 27% | 59 with a prior-infected berth-mate, 48 corridor-pool |
+| cabin (own berth zone) | 107 | 27% | 59 with a prior-infected berth-mate; 48 with none — 30 `service_to_host` door-drops, 17 `caregiver` steward pickups during deliveries, 1 `droplet` |
 
 Inside the cabin block, **74 of 400 events are confined crew infected
 in their own berth** — 35 after a berth-mate infected *during* the
 window (a working mate carried it home: the quarantine-breaking
 household channel), 8 from a pre-window mate infection, and 31 with no
-infected mate at all (corridor-pool exposure of people nominally
-isolated). The occupational blocks are ~73% of the residual and every
+infected mate at all — 30 of those 31 are `service_to_host` door-drops
+(the delivery channel reaching a confined host; pathway-corrected
+2026-10-08, was misread as corridor-pool), 1 droplet on the declared
+0.05 confinement leak). The occupational blocks are ~73% of the residual and every
 one is a `working`-status event; the berth block is ~27%.
 
 Reads (all routes: droplet 240 / caregiver 121 / service_to_host 39 —
@@ -158,8 +160,9 @@ the section-bound steward channel still carries ~40% of crew pickups):
   residual is mostly occupational exposure the documented DP response
   never touched;
 - the berth-driven quarter names the cohorting seam — working crew
-  sharing berths with confined crew (35 carry-home events) plus
-  corridor-pool exposure of the confined (31);
+  sharing berths with confined crew (35 carry-home events) plus the
+  steward door-drop channel reaching the confined (30 of 31 no-mate
+  berth events);
 - a `CREW-BERTH-01` arm would test re-berthing working crew so
   `cabin_mate` pairs never cross confined↔working, plus optionally
   galley pod/shift separation — the two largest remaining blocks.
@@ -169,3 +172,42 @@ existed), not a proven infector — the runs carry no strain tracking;
 and 3 seeds is an orientation sample, not a pooled estimate.
 
 Evidence: `reports/crew_mess_berth_attr/cell_*.json` (per-event rows).
+
+## Post-canary: recorded-onset share by role (ascertainment cross-check)
+
+Every cell payload already carries `onset_curve` — dated onsets split
+per role — so the apples-to-apples comparison against the record's
+confirmed-case share needs no campaign: share of crew among onsets
+dated inside the quarantine window (days 16–30), pooled and per-cell,
+on all 20 `sect_mess_boxed` canary cells:
+
+| metric | crew share | n |
+|---|---|---|
+| acquisition share, pooled | 0.683 | 1179 |
+| **recorded-onset share, pooled** | **0.475** | 558 |
+| acquisition share, per-cell median | 0.727 | 16 cells |
+| recorded-onset share, per-cell median | 0.636 | 16 cells |
+
+The funnel de-rates crew by ~0.2 — about two-thirds of the distance to
+the declared (0.2, 0.4) band is an acquisition-vs-confirmed comparison
+mismatch, not physics. The correction is strongest where the mass is:
+on the two largest-outbreak cells the recorded share lands in or near
+the band (seed 20200218: **0.244**, n=201; seed 20200223: 0.479,
+n=140) while small cells are noisy.
+
+Reads:
+
+- the composition hotness survives but shrinks — the residual excess is
+  ~0.08–0.15 above band-top on pooled cells, the scale of the remaining
+  suspects (door-drop service to confined crew, the declared 5%
+  confinement leak, unmodelled crew evacuation/test-cadence
+  asymmetry), not ~0.4;
+- "the model overestimates COVID" is only defensible as a
+  crew-structure statement: theta is a role-blind scale, so a globally
+  hot literature gets absorbed into theta and cannot produce a
+  composition gap — the excess must live in crew-specific exposure or
+  in the ascertainment comparison;
+- the record's 0.29 is a confirmed-case share; scoring it against
+  acquisition share overstated the defect. Any future crew-share band
+  should be declared on recorded-onset share — the two metrics differ
+  by ~0.2 pooled on this hull.
