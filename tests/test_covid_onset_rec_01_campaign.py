@@ -310,3 +310,36 @@ def test_row_metrics_pooled_dated_share(
     assert m["pooled_dated_share"] == pytest.approx(150 / 500)
     assert m["lab_confirmed_crew_share_median"] == pytest.approx(0.4)
     assert m["symptomatic_at_specimen_median"] == pytest.approx(0.5)
+
+
+def test_lab_confirmed_role_counts_splits_roles() -> None:
+    """The payload witness counts lab confirmations per host role."""
+    from picard_framework.covid_boarding_screen import (
+        _lab_confirmed_role_counts,
+    )
+
+    syndromic = MagicMock()
+    syndromic._lab_confirmed = {
+        ("sars_cov2_resp", 1): 100,
+        ("sars_cov2_resp", 2): 110,
+        ("sars_cov2_resp", 3): 120,
+        ("other_pathogen", 4): 130,
+    }
+    agents = {
+        1: MagicMock(role="crew"),
+        2: MagicMock(role="passenger"),
+        3: MagicMock(role="crew"),
+        4: MagicMock(role="passenger"),
+    }
+    counts = _lab_confirmed_role_counts(syndromic, agents)
+    assert counts == {"passenger": 1, "crew": 2}
+
+
+def test_lab_confirmed_role_counts_tolerates_stub() -> None:
+    from picard_framework.covid_boarding_screen import (
+        _lab_confirmed_role_counts,
+    )
+
+    assert _lab_confirmed_role_counts(object(), {}) == {
+        "passenger": 0, "crew": 0,
+    }
