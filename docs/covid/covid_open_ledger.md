@@ -1426,3 +1426,42 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   the crew-share residual is real occupational + steward-service
   structure, which sharpens the open question to whether the record's
   0.29 is reachable under truthful DP mechanisms at all.
+
+- **Observation-funnel attribution (2026-10-08, `tools/covid_funnel_attribution.py`, 3 same-realization `sect_mess_boxed` seeds — orientation sample): the crew fraction is ~resolved on the record's own metric; the gap was a comparator artifact.**
+  The record's 0.29 is the crew share of *all confirmed cases*
+  (712 total). Scoring the funnel stage-by-stage pooled over seeds
+  20200210/20200218/20200223:
+
+  | stage | crew share | n |
+  |---|---|---|
+  | infections, total voyage | 0.486 | 994 |
+  | infections, during-window only | 0.619 | 646 |
+  | lab_confirmed, total voyage | **0.322** | 578 |
+  | confirmed + ever presented | 0.336 | 494 |
+  | symptomatic-at-specimen gate pass | 0.353 | 447 |
+  | recorded (dated) onsets | 0.333 | 492 |
+
+  The specimen channel (crew-last eligibility ladder + young-crew
+  symptomatic de-rating) carries 0.49 → 0.32 — and 0.322 vs the
+  record's 0.29 sits inside the declared (0.2,0.4) band; the largest
+  cell alone reads 0.212 (onset share 0.230). The hot readings all
+  came from during-window subsets, where crew concentration is the
+  record's own documented feature (`covid_fit_targets.json`:
+  "crew onsets persist" past the quarantine date) — comparing a
+  window slice against the whole-voyage record share overstated the
+  gap in every prior scoring.
+
+  What the funnel does NOT fix (separate, real):
+  - **dating overshare is role-flat**: dated/confirmed 0.851 vs the
+    record's 0.277 (crew 0.88, pax 0.84) — a magnitude problem, not a
+    composition one. Arming only SERO-CHANNEL-V1's
+    `symptomatic_at_specimen` gate takes it to 0.773 on these cells;
+    the recall draw is the rest of the designed channel, unrun.
+  - **under-confirmation**: ~193 lab-confirmed/cell vs 712 — the F6
+    territory, shape-right / scale-low.
+
+  Evidence `reports/funnel_attr/boxed3.json`. Consequence: the DP
+  crew-share line should be rescored on **total-voyage lab-confirmed
+  share vs 0.29** (band declared (0.2,0.4)); the residual believability
+  tension is the dating overshare + confirmed-count scale, both
+  observation-channel, neither a contact-structure defect.
