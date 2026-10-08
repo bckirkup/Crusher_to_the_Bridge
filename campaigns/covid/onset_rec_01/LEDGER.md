@@ -22,4 +22,4 @@ confined-pax [26,160], deliveries parity ~162k.
 
 | leg | array / image / jobdef | cells | status |
 |-----|----------------------|-------|--------|
-| canary (all 40) | _pending_ | 2 x 20 | _pending_ |
+| canary (all 40) | image `picard-campaign:covid-onset-rec-01` @ `sha256:812b02bb` (built at `bccc9daa` — Docker Hub 429'd the root `python:3.11-slim`, overlay on in-ECR base `covid-gm-rescore-02` + all source trees); jobdef `picard-covid-onset-rec-01-fargate:2` on `picard-analysis-fargate-queue` | 2 x 20 | submitted 2026-10-08 ~15:0xZ: boxed_declared `0b49e3f6-4f4e-461e-9edd-f5af5d1d8083`, boxed_period `3391150c-b556-4168-9e8e-8afab55e8566` |
