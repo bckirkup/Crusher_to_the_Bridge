@@ -151,10 +151,10 @@ def _audit_cell(payload: dict[str, Any]) -> list[str]:
         problems.append("retest_negatives_on_sweep echo mismatches arm")
     if list(channel.get("campaign_waves") or []) != expected["waves"]:
         problems.append("campaign_waves echo mismatches arm")
-    if not expected["sweep"] and int(
-        channel.get("campaign_specimen_retests") or 0
-    ):
-        problems.append("retests on an unarmed arm — specimen-bar breach")
+    # No specimen-count bar on retests: campaign_specimen_retests unions
+    # indication retests (pre-existing channel), declared retest_tiers
+    # (scenario data — fires on every arm by design), and S1 sweep
+    # re-nominations; arm identity lives in the echo flags above.
     wave_spec = (channel.get("campaign_specimens_by_wave") or {})
     if not expected["waves"] and wave_spec:
         problems.append("wave specimens on an unarmed arm")
@@ -211,9 +211,13 @@ def _arm_rows(
         for p in payloads
     )
     deliveries = [
-        float((p.get("attribution") or {}).get("service_deliveries")
-              or p.get("service_deliveries") or 0)
+        float((p.get("crew_window") or {}).get("service_deliveries") or 0)
         for p in payloads
+    ]
+    confined = [
+        float(p.get("confined_passenger_infections_during_quarantine") or 0)
+        for p in payloads
+        if _confirmed(p) >= _DP_SCALE_MIN
     ]
     return {
         "n_cells": len(payloads),
@@ -240,6 +244,7 @@ def _arm_rows(
         "wave_specimens": wave_spec,
         "wave_confirmed": wave_conf,
         "deliveries_median": _median(deliveries),
+        "confined_pax_takeoff_median": _median(confined),
     }
 
 
@@ -261,6 +266,7 @@ def _render(
     rows: dict[str, dict[str, Any]],
     problems: dict[str, list[str]],
     identity: list[str],
+    parent_pooled: float | None = None,
 ) -> str:
     base = rows.get("boxed_declared") or {}
     lines = [
@@ -270,18 +276,33 @@ def _render(
         f"{_RECORD_CREW_SHARE}; asymptomatic-at-specimen ~"
         f"{_RECORD_ASYM_SHARE} (honest bound ~{_ASYM_HONEST_BOUND}).",
         "",
-        "| arm | cells | pooled lab_conf | Δ vs declared | DP-scale seeds "
+    ]
+    if parent_pooled is not None:
+        lines += [
+            f"Parent boxed (labelled pre-change baseline): pooled "
+            f"lab_confirmed {parent_pooled}.",
+            "",
+        ]
+    lines += [
+        "| arm | cells | pooled lab_conf | Δ vs declared | Δ vs parent "
+        "| DP-scale seeds "
         "| crew share pooled | crew share DP-scale | asym share | dated share "
-        "| retest spec/conf | wave spec/conf | verdict |",
-        "|---|---|---|---|---|---|---|---|---|---|---|---|",
+        "| retest spec/conf | wave spec/conf | deliv med | "
+        "conf-pax takeoff med | verdict |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for arm, row in rows.items():
         delta = row["lab_confirmed_pooled"] - base.get(
             "lab_confirmed_pooled", 0,
         )
+        dpar = (
+            row["lab_confirmed_pooled"] - parent_pooled
+            if parent_pooled is not None else None
+        )
         lines.append(
             f"| {arm} | {row['n_cells']} | {row['lab_confirmed_pooled']} "
             f"| {'+' if delta >= 0 else ''}{delta} "
+            f"| {_fmt(float(dpar), 0) if dpar is not None else '—'} "
             f"| {row['dp_scale_cells']} "
             f"| {_fmt(row['crew_share_pooled'])} "
             f"| {_fmt(row['crew_share_dp_scale'])} "
@@ -289,6 +310,8 @@ def _render(
             f"| {_fmt(row['dated_share_pooled'])} "
             f"| {row['retest_specimens']}/{row['retest_confirmed']} "
             f"| {row['wave_specimens']}/{row['wave_confirmed']} "
+            f"| {_fmt(row['deliveries_median'], 0)} "
+            f"| {_fmt(row['confined_pax_takeoff_median'], 0)} "
             f"| {_verdict(base, arm, row)} |"
         )
     lines += ["", "## Audit", ""]
@@ -347,11 +370,13 @@ def main(argv: list[str] | None = None) -> int:
     rows = {arm: _arm_rows(ps) for arm, ps in sorted(by_arm.items())}
 
     identity: list[str] = []
+    parent_pooled: float | None = None
     if args.parent_prefix:
         parent = {
             int((p.get("cell") or {}).get("seed") or 0): p
             for _k, p in _iter_s3_payloads(args.parent_prefix)
         }
+        parent_pooled = float(sum(_confirmed(p) for p in parent.values()))
         for p in by_arm.get("boxed_declared", []):
             seed = int((p.get("cell") or {}).get("seed") or 0)
             ref = parent.get(seed)
@@ -366,7 +391,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"seed {seed}: {'MATCH' if not diffs else 'DIFF ' + str(diffs)}",
             )
 
-    report = _render(rows, problems, identity)
+    report = _render(rows, problems, identity, parent_pooled)
     if args.out:
         Path(args.out).write_text(report, encoding="utf-8")
     print(report)
