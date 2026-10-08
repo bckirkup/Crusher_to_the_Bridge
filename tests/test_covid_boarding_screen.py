@@ -1552,6 +1552,66 @@ def test_gm_cell_echoes_the_declared_hand_mode_and_seed_ring():
         assert payload["aboard_total"] == 223
 
 
+# ---------------------------------------------------------------------------
+# COVID-GM-RESCORE-02: the held-out re-score under post-DP-era physics rides
+# the same harness — same 300-cell lattice and arms as v1 so the two rescores
+# read row-for-row; the imports:3 diagnostic mirrors its v1 sibling.
+# ---------------------------------------------------------------------------
+
+GM_RESCORE_V2_DESIGN_REL = Path(
+    "picard_framework/runs/covid_gm_rescore_v2_design.json",
+)
+GM_IMPORTS3_V2_DESIGN_REL = Path(
+    "picard_framework/runs/covid_gm_rescore_v2_imports3_design.json",
+)
+
+
+def test_gm_rescore_v2_design_is_the_declared_300_cell_scoring():
+    design = load_design(str(GM_RESCORE_V2_DESIGN_REL))
+    assert design.scenario_id == "greg_mortimer_2020"
+    assert design.split_role == "held_out"
+    assert design.split_day == 20
+    assert design.turn_day == 8
+    cells = enumerate_cells(design)
+    assert len(cells) == 300
+    # Same enumeration grammar as v1: theta-outer, arm-major, seed-inner,
+    # so v2's cell 100 sits opposite v1's at identical (theta, arm, seed).
+    assert cells[100].theta == pytest.approx(2.37e11)
+    assert cells[100].arm_id == "hygiene_cycle"
+    assert cells[100].seed == 20200205
+    assert cells[149].seed == 20200254
+    assert cells[150].arm_id == "spike_decay"
+    assert cells[150].seed == 20200205
+
+
+def test_imports3_v2_diagnostic_design_is_50_labelled_cells():
+    design = load_design(str(GM_IMPORTS3_V2_DESIGN_REL))
+    assert design.imports == (3,)
+    cells = enumerate_cells(design)
+    assert len(cells) == 50
+    assert all(c.imports == 3 for c in cells)
+    assert {c.arm_id for c in cells} == {"hygiene_cycle"}
+
+
+def test_gm_v2_cell_echoes_the_declared_hand_mode_and_seed_ring():
+    design = load_design(str(GM_RESCORE_V2_DESIGN_REL))
+    cells = enumerate_cells(design)
+    base = next(c for c in cells if c.arm_id == "hygiene_cycle")
+    arm = next(c for c in cells if c.arm_id == "spike_decay")
+    base_payload = echo_screen_cell(design, base)
+    arm_payload = echo_screen_cell(design, arm)
+    assert (
+        base_payload["delivery"]["hand_reservoir_mode"] == "hygiene_cycle"
+    )
+    assert arm_payload["delivery"]["hand_reservoir_mode"] == "spike_decay"
+    for payload in (base_payload, arm_payload):
+        spec = payload["seed_ring"]["seed_spec"]
+        assert spec["count"] == 1
+        assert spec["infection_age_days"] == pytest.approx(0.0)
+        assert spec["role"] == "passenger"
+        assert payload["aboard_total"] == 223
+
+
 # ── FRAILTY-V1: continuous per-host frailty on the infection hazard ────────
 
 FRAILTY_V1_DESIGN = (
