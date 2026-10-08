@@ -43,8 +43,11 @@ acquisitions decomposed by venue × confined-at-event × co-berth:
 Inside the cabin block, **36 of 362 are confined crew infected in
 their own berth** — but only 3 via a berth-mate infected during the
 window (the carry-home channel the re-deal targets); **33 arrive with
-no prior-infected mate at all** — corridor-pool / compartment dose
-reaching nominally isolated berths. Routes pooled: droplet 200 /
+no prior-infected mate at all** — pathway split: 17 `service_to_host`
+door-drops (the delivery channel reaching a confined host), 15
+`droplet` on the declared 0.05 confinement leak, 1 `caregiver`
+(pathway-corrected 2026-10-08, was misread as corridor-pool). Routes
+pooled: droplet 200 /
 caregiver 138 / service_to_host 24 — the section-bound steward share
 fell to ~7% of pickups (was ~10%).
 
@@ -52,7 +55,8 @@ Reads: the mechanism did what it was declared to do (status-pure
 cabins, off-watch pods, galley share halved) and the residual still
 sits at 0.662 because it was never primarily berth-mate-borne — it is
 **corridor-venue occupational exposure of the working roster** plus
-corridor-pool leakage into confined berths, channels this arm family
-leaves structurally untouched. Reaching (0.2,0.4) would need a
+the steward door-drop channel and the declared 5% confinement leak
+reaching confined berths, channels this arm family leaves
+structurally untouched. Reaching (0.2,0.4) would need a
 mechanism outside berthing+occupational placement — and the record
 shows the documented DP response deployed neither.

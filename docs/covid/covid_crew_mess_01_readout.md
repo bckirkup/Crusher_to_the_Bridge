@@ -141,14 +141,16 @@ acquisitions decomposed by venue × confined-at-event × whether a
 | crew_mess | 65 | 16% | posted kitchen staff + far-field pool, no diners (redirects held) |
 | other work zones | 64 | 16% | EngControl / stores / waste / dining-corridor placements |
 | corridor | 47 | 12% | working crew in non-home corridors |
-| cabin (own berth zone) | 107 | 27% | 59 with a prior-infected berth-mate, 48 corridor-pool |
+| cabin (own berth zone) | 107 | 27% | 59 with a prior-infected berth-mate; 48 with none — 30 `service_to_host` door-drops, 17 `caregiver` steward pickups during deliveries, 1 `droplet` |
 
 Inside the cabin block, **74 of 400 events are confined crew infected
 in their own berth** — 35 after a berth-mate infected *during* the
 window (a working mate carried it home: the quarantine-breaking
 household channel), 8 from a pre-window mate infection, and 31 with no
-infected mate at all (corridor-pool exposure of people nominally
-isolated). The occupational blocks are ~73% of the residual and every
+infected mate at all — 30 of those 31 are `service_to_host` door-drops
+(the delivery channel reaching a confined host; pathway-corrected
+2026-10-08, was misread as corridor-pool), 1 droplet on the declared
+0.05 confinement leak). The occupational blocks are ~73% of the residual and every
 one is a `working`-status event; the berth block is ~27%.
 
 Reads (all routes: droplet 240 / caregiver 121 / service_to_host 39 —
@@ -158,8 +160,9 @@ the section-bound steward channel still carries ~40% of crew pickups):
   residual is mostly occupational exposure the documented DP response
   never touched;
 - the berth-driven quarter names the cohorting seam — working crew
-  sharing berths with confined crew (35 carry-home events) plus
-  corridor-pool exposure of the confined (31);
+  sharing berths with confined crew (35 carry-home events) plus the
+  steward door-drop channel reaching the confined (30 of 31 no-mate
+  berth events);
 - a `CREW-BERTH-01` arm would test re-berthing working crew so
   `cabin_mate` pairs never cross confined↔working, plus optionally
   galley pod/shift separation — the two largest remaining blocks.
@@ -196,8 +199,9 @@ Reads:
 
 - the composition hotness survives but shrinks — the residual excess is
   ~0.08–0.15 above band-top on pooled cells, the scale of the remaining
-  suspects (corridor-pool leakage on confined agents, unmodelled crew
-  evacuation/test-cadence asymmetry), not ~0.4;
+  suspects (door-drop service to confined crew, the declared 5%
+  confinement leak, unmodelled crew evacuation/test-cadence
+  asymmetry), not ~0.4;
 - "the model overestimates COVID" is only defensible as a
   crew-structure statement: theta is a role-blind scale, so a globally
   hot literature gets absorbed into theta and cannot produce a
