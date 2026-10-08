@@ -1,6 +1,6 @@
 # FLU-REASSESS-01 ledger
 
-> Status: **spec** — not yet measured. Design and frozen predictions in
+> Status: **measured** — readout `docs/flu/flu_reassess_01_readout.md`. Design and frozen predictions in
 > `DESIGN.md` beside this file. Baselines of record: FLU-OPEN-01
 > `7f4702ef`, FLU-VIS-01 `ca775a0b`.
 
