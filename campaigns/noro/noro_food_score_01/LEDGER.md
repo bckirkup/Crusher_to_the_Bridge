@@ -14,8 +14,8 @@ against the spec's frozen measurement plan. Design:
 | local smoke | done | `fl_exp_12d_scr_ship` index 0: voyage clean, 3-member zip, ship-rung echo, 1 ill_handler object (4 pans / 4 windows) |
 | image build | done | `picard-campaign:noro-food-score01` built at merged design SHA `40862b8c` (root `Dockerfile` + literal `Dockerfile.campaign` overlay), digest `sha256:29ea170eaede08d02566910967bfbda879a3656ceb3a40cf3ef45201fc5d9599`; verified in-container (deploy/aws + tools + campaigns trees, `ENGINE_GIT_SHA` = `40862b8c…`, one real cell ran a full voyage in-image and self-uploaded under the canary prefix — the ship array's index-0 dedup-skipped it) |
 | canary | done | 44/44 SUCCEEDED on `picard-campaign-queue` (Spot); all frozen gates green — see Canary readout |
-| wave 1 | submitted | exp + cls tiers (12,000 voyages) — in flight on `picard-campaign-queue` (Spot); see Wave 1 submission |
-| wave 2 | gated | spr tiers (6,000 voyages) — user decides |
+| wave 1 | landed | exp + cls 12,000/12,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_{exp,cls}_*/`; see Wave 1 submission |
+| wave 2 | submitted | spr tiers (6,000 voyages) — in flight on `picard-campaign-queue` (Spot); see Wave 2 submission |
 | readout | pending | `outbreak_anchor_readout.py` + `common_source_readout.py` + `onset_curve_readout.py` per the design |
 
 ## Canary readout (2026-10-08, all at `40862b8c`)
@@ -90,6 +90,31 @@ No report-immediately trigger fired. Recovery if Spot reclaims bite:
 `Host EC2*` retries self-heal (×10); any seeds still missing post-drain
 backfill via filtered `--seeds` resubmit per the AGE-FOOD-01 playbook —
 `_already_uploaded` dedup-skips landed cells.
+
+**Wave 1 landed (2026-10-08 ~15:30 UTC):** 12,000/12,000 zips across the
+12 `fl_{exp,cls}` prefixes — 0 FAILED, zero Spot reclaims surfaced all
+wave (retry×10 may have absorbed any silently). ~4.9 h wall on Spot.
+
+## Wave 2 submission (2026-10-08, at `e74a2fcb`)
+
+spr fleet wave — 6 blocks × 1,000 seeds = 6,000 voyages on
+`picard-campaign-queue` (Spot FIFO), approved by user after wave-1
+preview. Same image `picard-campaign@sha256:29ea170e…` (still the
+design SHA build; spec/manifest unchanged). Jobdef
+`picard-noro-food-score-01` revs :14–:19, digest-pinned, retry×10 —
+same wrapper submit as wave 1.
+
+spr arrays (seeds 8105–9104): off `0ac9325a` (:14), ind `77310507`
+(:15), ol1 `fe259f44` (:16), ol2 `98c4c1ff` (:17), ol3 `78c7006e`
+(:18), ship `7426dd03` (:19). Submitted 16:32 UTC.
+
+Health ~5 min in: 120 RUNNING / 5,880 RUNNABLE / 0 FAILED — dispatching
+clean, FIFO in submit order. Zips landing under
+`campaign/noro_food_score_01/fl_spr_*/`. spr cells run ~4× classic cost
+(AGE-FOOD-01 calibration ~12 min/cell at ~118 concurrent) → ETA ~8–9 h
+if the Spot capacity holds; drought playbook (resubmit to
+`picard-analysis-queue`, `_already_uploaded` dedup covers) applies if
+arrays park >1 h.
 
 ## Grid
 
