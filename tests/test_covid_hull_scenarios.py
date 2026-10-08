@@ -204,7 +204,9 @@ class TestDurationAndClock:
             )
 
     def test_shipped_durations_are_the_recorded_events(self, scenarios):
-        assert scenarios[DIAMOND].duration_days == 32
+        # 35 days since CREW-REACH-01: the documented campaign runs to
+        # 23 Feb (Yamahata Table 1), so the voyage must contain day 34.
+        assert scenarios[DIAMOND].duration_days == 35
         assert scenarios[MORTIMER].duration_days == 28
 
     def test_non_positive_duration_and_epoch_length_are_refused(self):

@@ -85,6 +85,15 @@
           "minItems": 1,
           "items": {"type": "string", "minLength": 1},
           "description": "Eligibility tiers in force, in the order the campaign reached them."
+        },
+        "retest_tiers": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1},
+          "description": "Tiers (from this day's tier list) whose published volume includes re-swabs of hosts already holding a negative specimen - the record's serial-testing days."
+        },
+        "wave": {
+          "type": "string",
+          "description": "Named record phase this day belongs to (e.g. a late crew mass-testing wave); the day only runs while the scenario arms that wave's name."
         }
       }
     }

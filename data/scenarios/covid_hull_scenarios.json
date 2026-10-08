@@ -22,7 +22,7 @@
         "epoch_duration_hours": 1,
         "natural_history_clock": "hours"
       },
-      "duration_days": 32,
+      "duration_days": 35,
       "day_zero": "2020-01-20",
       "population": {
         "total": 3711,
@@ -65,7 +65,7 @@
       "testing_campaign": {
         "campaign_id": "diamond_princess_2020",
         "start_day": 16,
-        "calendar": "5–20 February 2020"
+        "calendar": "5–23 February 2020"
       },
       "molecular_ascertainment": {
         "start_day": 14,
@@ -81,10 +81,10 @@
         },
         {
           "field": "duration_days / day_zero",
-          "value": "32 days from 20 January 2020, the departure date the outbreak's earliest onsets are counted from",
+          "value": "35 days from 20 January 2020, the departure date the outbreak's earliest onsets are counted from",
           "source": "Yamagishi 2020, Eurosurveillance, DOI 10.2807/1560-7917.es.2020.25.23.2000272 (earliest confirmed onset 22 January, 'two days after the cruise ship left port'); Tsuboi 2020 (febrile cases counted 20 January – 22 February)",
           "grade": "A",
-          "note": "The window runs to 20 February so it contains the whole published testing campaign; the fit spec calls this a ~4-week confined event."
+          "note": "The window runs to 23 February so it contains the whole published testing campaign - previously 32 days ending 20 Feb, extended 3 days because Yamahata & Shibata 2020 Table 1 documents the campaign running to 23 Feb (the 831-test crew wave, day 34); the quarantine-era calendar is unchanged."
         },
         {
           "field": "scheduled_protocols[SOP-017] window",

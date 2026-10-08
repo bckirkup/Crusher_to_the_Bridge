@@ -45,7 +45,10 @@ RULE_EVERYONE = "everyone"
 #: Tiers a host with an earlier negative specimen may re-enter: the record's
 #: step 1 is an indication (symptoms, or a confirmed cabin mate), and an
 #: indication arising after a negative is a new reason to swab. The
-#: population tiers are a sweep, and a sweep does not return to a host.
+#: population tiers are a sweep, and a sweep does not return to a host -
+#: unless the day itself declares serial testing (``retest_tiers``), the
+#: record's re-screening days where the published volume includes re-swabs
+#: of hosts already holding a negative.
 INDICATION_RULES = frozenset({RULE_SYMPTOMATIC_OR_CONTACT})
 
 RULES = (
@@ -93,12 +96,23 @@ class EligibilityTier:
 
 @dataclass(frozen=True)
 class CampaignDay:
-    """A day of the event record: how many specimens, in which order."""
+    """A day of the event record: how many specimens, in which order.
+
+    ``retest_tiers`` names the day's tiers whose published volume includes
+    re-swabs of hosts already holding a negative specimen - the record's
+    serial-testing days (Diamond Princess's mass re-screen and exit swabs).
+    ``wave`` tags a day with a named record phase (e.g. the late crew
+    mass-testing wave); a wave-tagged day only runs when the scenario arms
+    that wave's name, so the declaration sits in the record while the
+    arming is the replica's.
+    """
 
     day_offset: int
     tests: int | None
     tiers: tuple[str, ...]
     date: str = ""
+    retest_tiers: tuple[str, ...] = ()
+    wave: str = ""
 
     @property
     def unreported(self) -> bool:
@@ -165,6 +179,7 @@ class TestingCampaign:
         *,
         start_day: int = 0,
         notes: str = "",
+        waves: Iterable[str] = (),
     ) -> None:
         if not campaign_id or not pathogen_id:
             raise ValueError("campaign_id and pathogen_id are required")
@@ -182,6 +197,7 @@ class TestingCampaign:
         self.notes = str(notes)
         self.start_day = int(start_day)
         self.tiers = dict(tiers)
+        self._waves = {str(wave) for wave in waves}
         self._days: dict[int, CampaignDay] = {}
         for day in days:
             self._validate_day(day)
@@ -204,6 +220,12 @@ class TestingCampaign:
                 f"campaign {self.campaign_id}: day {day.day_offset} names "
                 f"undeclared tiers {unknown}",
             )
+        stray = [tier for tier in day.retest_tiers if tier not in day.tiers]
+        if stray:
+            raise ValueError(
+                f"campaign {self.campaign_id}: day {day.day_offset} declares "
+                f"retest_tiers {stray} not in the day's tier list",
+            )
 
     # ── construction ──────────────────────────────────────────────────────
 
@@ -213,6 +235,7 @@ class TestingCampaign:
         payload: Mapping[str, Any],
         *,
         start_day: int = 0,
+        waves: Iterable[str] = (),
     ) -> "TestingCampaign":
         """Build one campaign from its entry in the campaign data file."""
         tiers = {
@@ -230,6 +253,10 @@ class TestingCampaign:
                 tests=None if entry.get("tests") is None else int(entry["tests"]),
                 tiers=tuple(str(tier) for tier in (entry.get("tiers") or ())),
                 date=str(entry.get("date") or ""),
+                retest_tiers=tuple(
+                    str(tier) for tier in (entry.get("retest_tiers") or ())
+                ),
+                wave=str(entry.get("wave") or ""),
             )
             for entry in (payload.get("days") or [])
         ]
@@ -242,6 +269,7 @@ class TestingCampaign:
             days=days,
             start_day=start_day,
             notes=str(payload.get("notes") or ""),
+            waves=waves,
         )
 
     @classmethod
@@ -251,12 +279,13 @@ class TestingCampaign:
         campaign_id: str,
         *,
         start_day: int = 0,
+        waves: Iterable[str] = (),
     ) -> "TestingCampaign":
         """Load one named campaign from a campaign data file."""
         payload = _load_campaign_payload(path)
         for entry in payload.get("campaigns") or []:
             if str(entry.get("campaign_id")) == str(campaign_id):
-                return cls.from_dict(entry, start_day=start_day)
+                return cls.from_dict(entry, start_day=start_day, waves=waves)
         raise KeyError(f"campaign {campaign_id!r} not found in {path}")
 
     # ── schedule ──────────────────────────────────────────────────────────
@@ -266,13 +295,28 @@ class TestingCampaign:
         return tuple(self._days[key] for key in sorted(self._days))
 
     @property
+    def declared_waves(self) -> frozenset[str]:
+        """Wave names any of the campaign's days carries."""
+        return frozenset(
+            day.wave for day in self._days.values() if day.wave
+        )
+
+    @property
     def total_scheduled_tests(self) -> int:
         """Specimens the record reports across the whole campaign."""
         return sum(day.capacity for day in self._days.values())
 
     def day_for(self, day_index: int) -> CampaignDay | None:
-        """The campaign day active on simulated day *day_index*, if any."""
-        return self._days.get(int(day_index) - self.start_day)
+        """The campaign day active on simulated day *day_index*, if any.
+
+        A wave-tagged day exists only when its wave is armed: the record
+        phase is declared in the file, whether the replica ran it is the
+        scenario's statement.
+        """
+        day = self._days.get(int(day_index) - self.start_day)
+        if day is None or (day.wave and day.wave not in self._waves):
+            return None
+        return day
 
     def capacity_for_day(self, day_index: int) -> int:
         day = self.day_for(day_index)
@@ -325,6 +369,7 @@ class TestingCampaign:
         confirmed_ids: Iterable[int] = (),
         already_sampled: Iterable[int] = (),
         retest_on_indication: Iterable[int] = (),
+        retest_on_sweep: Iterable[int] = (),
         rng: np.random.Generator,
     ) -> list[int]:
         """Hosts this campaign takes a specimen from on *day_index*.
@@ -341,7 +386,10 @@ class TestingCampaign:
         number. Hosts already swabbed for this pathogen are skipped, so the
         roster is without replacement across days - except the hosts in
         ``retest_on_indication`` (an earlier specimen came back negative),
-        which an indication tier may reach again and a sweep tier may not.
+        which an indication tier may reach again, and the hosts in
+        ``retest_on_sweep``, reachable again by any tier the day declares
+        in ``retest_tiers``: the record's serial-testing days re-sweep
+        hosts whose earlier specimen was negative.
         """
         day = self.day_for(day_index)
         if day is None or day.capacity <= 0:
@@ -349,13 +397,18 @@ class TestingCampaign:
         confirmed = {int(aid) for aid in confirmed_ids}
         taken = {int(aid) for aid in already_sampled}
         retestable = {int(aid) for aid in retest_on_indication}
+        sweep_retests = {int(aid) for aid in retest_on_sweep}
         roster: list[int] = []
         remaining = day.capacity
         for tier_id in day.tiers:
             if remaining <= 0:
                 break
             tier = self.tiers[tier_id]
-            reopened = retestable if tier.rule in INDICATION_RULES else frozenset()
+            reopened = set()
+            if tier.rule in INDICATION_RULES:
+                reopened |= retestable
+            if tier_id in day.retest_tiers:
+                reopened |= sweep_retests
             members = [
                 aid
                 for aid in self._tier_members(tier, agents, confirmed)
@@ -377,14 +430,18 @@ def load_campaigns(
     *,
     start_days: Mapping[str, int] | None = None,
     campaign_ids: Iterable[str] | None = None,
+    waves: Iterable[str] | None = None,
 ) -> dict[str, TestingCampaign]:
     """Load campaigns from *path*, keyed by ``campaign_id``.
 
     ``start_days`` aligns each campaign's first recorded day with a simulated
-    day index. A campaign with no entry starts on simulated day 0.
+    day index. A campaign with no entry starts on simulated day 0. ``waves``
+    arms the record phases the scenario ran; a wave name no loaded campaign
+    declares is a configuration error, not a silent no-op.
     """
     payload = _load_campaign_payload(path)
     wanted = None if campaign_ids is None else {str(cid) for cid in campaign_ids}
+    armed_waves = [str(wave) for wave in (waves or ())]
     offsets = dict(start_days or {})
     campaigns: dict[str, TestingCampaign] = {}
     for entry in payload.get("campaigns") or []:
@@ -392,10 +449,21 @@ def load_campaigns(
         if wanted is not None and campaign_id not in wanted:
             continue
         campaigns[campaign_id] = TestingCampaign.from_dict(
-            entry, start_day=int(offsets.get(campaign_id, 0)),
+            entry,
+            start_day=int(offsets.get(campaign_id, 0)),
+            waves=armed_waves,
         )
     if wanted is not None:
         missing = sorted(wanted - set(campaigns))
         if missing:
             raise KeyError(f"campaigns {missing} not found in {path}")
+    declared = set().union(
+        *(c.declared_waves for c in campaigns.values())
+    ) if campaigns else set()
+    undeclared = sorted(set(armed_waves) - declared)
+    if undeclared:
+        raise ValueError(
+            f"waves {undeclared} armed but no loaded campaign in {path} "
+            "declares them",
+        )
     return campaigns
