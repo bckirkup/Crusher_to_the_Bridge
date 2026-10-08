@@ -825,6 +825,151 @@ class TestRetestAfterANegative:
         assert not default["syndromic"].retest_negatives_on_indication
         assert declared["syndromic"].retest_negatives_on_indication
 
+    def test_the_sweep_policy_is_off_unless_the_scenario_declares_it(
+        self,
+    ) -> None:
+        from crusher_labs import build_modalities
+
+        default = build_modalities({}, rng=np.random.default_rng(1))
+        declared = build_modalities(
+            {"syndromic": {"retest_negatives_on_sweep": True}},
+            rng=np.random.default_rng(1),
+        )
+
+        assert not default["syndromic"].retest_negatives_on_sweep
+        assert declared["syndromic"].retest_negatives_on_sweep
+
+
+# ── sweep retests and waves inside the modality (CREW-REACH-01) ─────────────
+
+
+class TestSweepRetestsInsideTheModality:
+    """The serial-testing arm: retest_tiers-declared days may renominate
+    hosts holding an earlier-day negative when the modality arms
+    retest_negatives_on_sweep — new specimens, confirmed hosts never
+    re-swabbed, the same-day bar intact."""
+
+    @staticmethod
+    def _sweep_campaign() -> TestingCampaign:
+        return TestingCampaign(
+            campaign_id="unit",
+            pathogen_id=PATHOGEN,
+            source="unit fixture",
+            evidence_grade="n/a",
+            tiers=_ladder(),
+            days=[
+                CampaignDay(day_offset=0, tests=20, tiers=_FULL_LADDER),
+                CampaignDay(
+                    day_offset=1, tests=20, tiers=_FULL_LADDER,
+                    retest_tiers=_FULL_LADDER,
+                ),
+            ],
+            start_day=0,
+        )
+
+    def test_retests_renominate_negatives_and_mark_the_log(self) -> None:
+        curve = [0.0]  # every assay draw is negative — day 0 burns 20
+        surveillance = _surveillance(self._sweep_campaign(), curve=curve)
+        surveillance.retest_negatives_on_sweep = True
+        ship = _ship(200, 0)
+        surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        first = {
+            e["agent_id"] for e in surveillance.campaign_specimen_log(PATHOGEN)
+        }
+        second = surveillance.query_ground_truth(
+            {"agents": ship, "epoch": 4},
+        )["campaign_specimens_by_pathogen"][PATHOGEN]
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+        retests = [e["agent_id"] for e in log if e["retest"]]
+
+        # Reopened negatives compete with unsampled hosts for the day's
+        # capacity — some retests land, all inside the second roster.
+        assert len(second) == 20
+        assert retests
+        assert set(retests) <= first & set(second)
+        assert all(not e["positive"] for e in log)
+        assert all(e["wave"] == "" for e in log)
+
+    def test_unarmed_sweeps_still_bar_the_negative_holder(self) -> None:
+        surveillance = _surveillance(self._sweep_campaign(), curve=[0.0])
+        ship = _ship(200, 0)
+        surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        first = {
+            e["agent_id"] for e in surveillance.campaign_specimen_log(PATHOGEN)
+        }
+        second = surveillance.query_ground_truth(
+            {"agents": ship, "epoch": 4},
+        )["campaign_specimens_by_pathogen"][PATHOGEN]
+
+        assert len(second) == 20
+        assert not (set(second) & first)
+        assert not any(
+            e["retest"] for e in surveillance.campaign_specimen_log(PATHOGEN)
+        )
+
+    def test_a_confirmed_host_is_never_re_swabbed(self) -> None:
+        surveillance = _surveillance(self._sweep_campaign(), curve=[1.0])
+        surveillance.retest_negatives_on_sweep = True
+        ship = _ship(200, 0, infected=200)
+        surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        first_confirmed = {
+            e["agent_id"]
+            for e in surveillance.campaign_specimen_log(PATHOGEN)
+            if e["positive"]
+        }
+        second = surveillance.query_ground_truth(
+            {"agents": ship, "epoch": 4},
+        )["campaign_specimens_by_pathogen"][PATHOGEN]
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+
+        assert not (set(second) & first_confirmed)
+        assert not any(e["retest"] for e in log)
+
+    def test_the_same_day_never_swabs_twice(self) -> None:
+        surveillance = _surveillance(self._sweep_campaign(), curve=[0.0])
+        surveillance.retest_negatives_on_sweep = True
+        ship = _ship(200, 0)
+        surveillance.query_ground_truth({"agents": ship, "epoch": 0})
+        surveillance.query_ground_truth({"agents": ship, "epoch": 1})
+        surveillance.query_ground_truth({"agents": ship, "epoch": 2})
+        log = surveillance.campaign_specimen_log(PATHOGEN)
+
+        # One day-0 roster spent on epoch 0; epochs 1-2 add nothing, and
+        # no host ever appears twice in the ship's specimen log.
+        assert len(log) == 20
+        assert len({e["agent_id"] for e in log}) == len(log)
+
+    def test_a_wave_day_fires_only_while_armed(self) -> None:
+        wave_day = CampaignDay(
+            day_offset=1, tests=10, tiers=("crew",), wave="crew_wave",
+        )
+        base = dict(
+            campaign_id="unit", pathogen_id=PATHOGEN, source="unit fixture",
+            evidence_grade="n/a", tiers=_ladder(), start_day=0,
+            days=[CampaignDay(day_offset=0, tests=10, tiers=_FULL_LADDER),
+                  wave_day],
+        )
+        ship = _ship(200, 30)
+
+        unarmed = _surveillance(TestingCampaign(**base))
+        for epoch in range(8):
+            result = unarmed.query_ground_truth(
+                {"agents": ship, "epoch": epoch},
+            )
+        unarmed_log = unarmed.campaign_specimen_log(PATHOGEN)
+        assert len(unarmed_log) == 10
+        assert not any(e["wave"] for e in unarmed_log)
+
+        armed = _surveillance(TestingCampaign(**base, waves=("crew_wave",)))
+        for epoch in range(8):
+            result = armed.query_ground_truth(
+                {"agents": ship, "epoch": epoch},
+            )
+        armed_log = armed.campaign_specimen_log(PATHOGEN)
+        wave_rows = [e for e in armed_log if e["wave"] == "crew_wave"]
+        assert len(armed_log) == 20
+        assert len(wave_rows) == 10
+
 
 # ── the shipped records ───────────────────────────────────────────────────
 

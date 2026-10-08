@@ -98,6 +98,11 @@ class TestDesign:
     def test_funnel_echo_flag_on(self, design_raw: dict) -> None:
         assert design_raw["funnel_echo"] is True
 
+    def test_funnel_echo_parses(self) -> None:
+        from picard_framework.covid_boarding_screen import load_design
+
+        assert load_design(str(DESIGN_PATH)).funnel_echo is True
+
     def test_design_loads_and_enumerates_80_cells(
         self, design_raw: dict,
     ) -> None:
@@ -372,3 +377,91 @@ class TestShippedDeclaration:
         )
         assert len(gm["days"]) == 1
         assert "wave" not in gm["days"][0]
+
+
+# ------------------------------------------------------------- funnel echoes
+
+
+class TestFunnelEchoBlocks:
+    def test_specimen_channel_tallies_retests_and_waves(self) -> None:
+        from types import SimpleNamespace
+
+        from picard_framework.covid_boarding_screen import (
+            _specimen_channel_block,
+        )
+
+        log = [
+            {"positive": True, "retest": False, "wave": ""},
+            {"positive": False, "retest": True, "wave": ""},
+            {"positive": True, "retest": True, "wave": "crew_wave"},
+            {"positive": False, "retest": False, "wave": "crew_wave"},
+        ]
+        syndromic = SimpleNamespace(
+            retest_negatives_on_indication=True,
+            retest_negatives_on_sweep=True,
+            campaign_specimen_log=lambda _pid: log,
+        )
+        raw = {
+            "config_overrides": {
+                "syndromic": {
+                    "testing_campaigns": {"waves": ["crew_wave"]},
+                },
+            },
+        }
+        block = _specimen_channel_block(syndromic, raw)
+
+        assert block["retest_negatives_on_sweep"] is True
+        assert block["campaign_waves"] == ["crew_wave"]
+        assert block["campaign_specimens"] == 4
+        assert block["campaign_specimen_retests"] == 2
+        assert block["campaign_specimens_by_wave"] == {"crew_wave": 2}
+        assert block["campaign_confirmed"] == 2
+        assert block["campaign_confirmed_retests"] == 1
+        assert block["campaign_confirmed_by_wave"] == {"crew_wave": 1}
+
+    def test_funnel_hosts_rolls_up_per_host_days(self) -> None:
+        from types import SimpleNamespace
+
+        from engines.sim_clock import SimClock
+        from picard_framework.covid_boarding_screen import (
+            PATHOGEN_ID,
+            _funnel_hosts,
+        )
+
+        clock = SimClock(epoch_duration_hours=6.0, mode="hours")
+        infected = SimpleNamespace(
+            agent_id=1, role="crew",
+            infections={PATHOGEN_ID: {"infection_epoch": 4}},
+        )
+        healthy = SimpleNamespace(agent_id=2, role="passenger", infections={})
+        sim = SimpleNamespace(
+            engine=SimpleNamespace(agents=[infected, healthy]),
+        )
+        syndromic = SimpleNamespace(
+            clock=clock,
+            _lab_confirmed={(PATHOGEN_ID, 1): 12},
+            _lab_sampled={(PATHOGEN_ID, 1): 8, (PATHOGEN_ID, 2): 8},
+            _presentation_onset_epoch={1: 16},
+        )
+        hosts = _funnel_hosts(
+            sim, syndromic, {1: infected, 2: healthy},
+        )
+
+        assert hosts["1"] == {
+            "role": "crew",
+            "infection_day": 1,
+            "presented_day": 4,
+            "specimen_day": 2,
+            "confirmed_day": 3,
+        }
+        # Swabbed but never infected and never presented: a lean row.
+        assert hosts["2"]["infection_day"] is None
+        assert hosts["2"]["presented_day"] is None
+        assert hosts["2"]["specimen_day"] == 2
+        assert hosts["2"]["confirmed_day"] is None
+
+    def test_funnel_echo_flag_parses_from_the_design(self) -> None:
+        from picard_framework.covid_boarding_screen import load_design
+
+        design = load_design(str(DESIGN_PATH))
+        assert design.funnel_echo is True
