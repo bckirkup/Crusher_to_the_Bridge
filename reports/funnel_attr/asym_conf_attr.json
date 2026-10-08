@@ -1,0 +1,1811 @@
+{
+ "design": "covid_crew_mess_01_design",
+ "arm": "sect_mess_boxed",
+ "theta": 7900000,
+ "note": "same-realization rerun decomposition; asymptomatic = not presented (onset) by specimen epoch, matching the record definition",
+ "cells": [
+  {
+   "seed": 20200208,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infections_total": 81,
+   "lab_confirmed_total": 33,
+   "confirmed_by_channel_status": {
+    "campaign_symptomatic": {
+     "crew": 10,
+     "passenger": 7
+    },
+    "passive_symptomatic": {
+     "crew": 4,
+     "passenger": 2
+    },
+    "passive_asymptomatic": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "campaign_asymptomatic": {
+     "crew": 2,
+     "passenger": 7
+    }
+   },
+   "asymptomatic_share_of_confirmed": 0.303,
+   "campaign_days": [
+    {
+     "day": 16,
+     "specimens": 31,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 29,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 2,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 31
+    },
+    {
+     "day": 17,
+     "specimens": 71,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 69,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 2,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "16": 1,
+      "17": 1
+     },
+     "capacity": 71
+    },
+    {
+     "day": 18,
+     "specimens": 171,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 169,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 5,
+     "infected_negative": 4,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "-1": 2,
+      "18": 1
+     },
+     "capacity": 171
+    },
+    {
+     "day": 19,
+     "specimens": 6,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 5,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 2,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "19": 1
+     },
+     "capacity": 6
+    },
+    {
+     "day": 20,
+     "specimens": 57,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 56,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 2,
+     "infected_negative": 1,
+     "negative_dpi_hist": {
+      "-1": 1
+     },
+     "capacity": 57
+    },
+    {
+     "day": 21,
+     "specimens": 103,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 101,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 4,
+     "infected_swabbed": 4,
+     "infected_negative": 4,
+     "negative_dpi_hist": {
+      "0": 1,
+      "3": 2,
+      "4": 1
+     },
+     "capacity": 103
+    },
+    {
+     "day": 23,
+     "specimens": 53,
+     "to_symptomatic": 3,
+     "to_asymptomatic": 50,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 4,
+     "infected_swabbed": 4,
+     "infected_negative": 3,
+     "negative_dpi_hist": {
+      "2": 1,
+      "5": 1,
+      "6": 1
+     },
+     "capacity": 53
+    },
+    {
+     "day": 24,
+     "specimens": 221,
+     "to_symptomatic": 4,
+     "to_asymptomatic": 217,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 4,
+     "infected_swabbed": 7,
+     "infected_negative": 6,
+     "negative_dpi_hist": {
+      "3": 1,
+      "4": 1,
+      "5": 2,
+      "6": 1,
+      "7": 1
+     },
+     "capacity": 221
+    },
+    {
+     "day": 26,
+     "specimens": 217,
+     "to_symptomatic": 5,
+     "to_asymptomatic": 212,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 6,
+     "infected_swabbed": 10,
+     "infected_negative": 6,
+     "negative_dpi_hist": {
+      "1": 1,
+      "5": 2,
+      "6": 1,
+      "7": 1,
+      "9": 1
+     },
+     "capacity": 217
+    },
+    {
+     "day": 27,
+     "specimens": 289,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 283,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 7,
+     "infected_swabbed": 11,
+     "infected_negative": 5,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "0": 1,
+      "2": 1,
+      "9": 1,
+      "10": 1
+     },
+     "capacity": 289
+    },
+    {
+     "day": 28,
+     "specimens": 504,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 502,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 4,
+     "infected_swabbed": 7,
+     "infected_negative": 3,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "1": 1,
+      "3": 1
+     },
+     "capacity": 504
+    },
+    {
+     "day": 29,
+     "specimens": 681,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 680,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 5,
+     "infected_swabbed": 5,
+     "infected_negative": 4,
+     "negative_dpi_hist": {
+      "-1": 1,
+      "2": 1,
+      "4": 1,
+      "9": 1
+     },
+     "capacity": 681
+    },
+    {
+     "day": 30,
+     "specimens": 607,
+     "to_symptomatic": 4,
+     "to_asymptomatic": 603,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 400,
+     "infected_swabbed": 23,
+     "infected_negative": 22,
+     "negative_dpi_hist": {
+      "-1": 2,
+      "0": 3,
+      "1": 3,
+      "2": 3,
+      "3": 6,
+      "4": 1,
+      "5": 1,
+      "8": 1,
+      "10": 2
+     },
+     "capacity": 607
+    },
+    {
+     "day": 31,
+     "specimens": 52,
+     "to_symptomatic": 5,
+     "to_asymptomatic": 47,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 45,
+     "infected_swabbed": 9,
+     "infected_negative": 5,
+     "negative_dpi_hist": {
+      "0": 1,
+      "1": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1
+     },
+     "capacity": 52
+    }
+   ],
+   "unconfirmed_infected": {
+    "swabbed_while_infected_negative_presented": {
+     "crew": 9,
+     "passenger": 1
+    },
+    "never_swabbed_presented": {
+     "crew": 1,
+     "passenger": 1
+    },
+    "swabbed_while_infected_negative_never_presented": {
+     "crew": 12,
+     "passenger": 1
+    },
+    "never_swabbed_never_presented": {
+     "crew": 18,
+     "passenger": 0
+    },
+    "swabbed_only_pre_infection_never_presented": {
+     "crew": 5,
+     "passenger": 0
+    },
+    "swabbed_only_pre_infection_presented": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "counterfactual_end_voyage": {
+    "expected_positives": {
+     "swabbed_while_infected_negative_presented": 3.8,
+     "never_swabbed_presented": 0.7,
+     "swabbed_while_infected_negative_never_presented": 2.5,
+     "never_swabbed_never_presented": 3.5,
+     "swabbed_only_pre_infection_never_presented": 0.1
+    },
+    "hosts": {
+     "swabbed_while_infected_negative_presented": 10,
+     "never_swabbed_presented": 2,
+     "swabbed_while_infected_negative_never_presented": 13,
+     "never_swabbed_never_presented": 18,
+     "swabbed_only_pre_infection_never_presented": 5
+    }
+   }
+  },
+  {
+   "seed": 20200210,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infections_total": 129,
+   "lab_confirmed_total": 76,
+   "confirmed_by_channel_status": {
+    "passive_symptomatic": {
+     "crew": 9,
+     "passenger": 3
+    },
+    "campaign_symptomatic": {
+     "crew": 19,
+     "passenger": 25
+    },
+    "campaign_asymptomatic": {
+     "crew": 11,
+     "passenger": 9
+    },
+    "passive_asymptomatic": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "asymptomatic_share_of_confirmed": 0.2632,
+   "campaign_days": [
+    {
+     "day": 16,
+     "specimens": 31,
+     "to_symptomatic": 8,
+     "to_asymptomatic": 23,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 9,
+     "infected_negative": 5,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "5": 1,
+      "6": 3
+     },
+     "capacity": 31
+    },
+    {
+     "day": 17,
+     "specimens": 71,
+     "to_symptomatic": 7,
+     "to_asymptomatic": 64,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 12,
+     "infected_negative": 8,
+     "negative_dpi_hist": {
+      "-7": 1,
+      "-2": 1,
+      "-1": 1,
+      "1": 1,
+      "2": 1,
+      "6": 1,
+      "7": 2
+     },
+     "capacity": 71
+    },
+    {
+     "day": 18,
+     "specimens": 171,
+     "to_symptomatic": 4,
+     "to_asymptomatic": 167,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 10,
+     "infected_negative": 6,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "-1": 2,
+      "0": 1,
+      "2": 1,
+      "3": 1
+     },
+     "capacity": 171
+    },
+    {
+     "day": 19,
+     "specimens": 6,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 5,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 3,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "0": 1,
+      "3": 1
+     },
+     "capacity": 6
+    },
+    {
+     "day": 20,
+     "specimens": 57,
+     "to_symptomatic": 7,
+     "to_asymptomatic": 50,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 3,
+     "infected_swabbed": 11,
+     "infected_negative": 9,
+     "negative_dpi_hist": {
+      "1": 3,
+      "2": 1,
+      "4": 2,
+      "5": 1,
+      "9": 1,
+      "10": 1
+     },
+     "capacity": 57
+    },
+    {
+     "day": 21,
+     "specimens": 103,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 97,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 3,
+     "infected_swabbed": 11,
+     "infected_negative": 8,
+     "negative_dpi_hist": {
+      "2": 3,
+      "3": 1,
+      "5": 2,
+      "10": 1,
+      "11": 1
+     },
+     "capacity": 103
+    },
+    {
+     "day": 23,
+     "specimens": 53,
+     "to_symptomatic": 7,
+     "to_asymptomatic": 46,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 6,
+     "infected_swabbed": 14,
+     "infected_negative": 10,
+     "negative_dpi_hist": {
+      "0": 1,
+      "2": 1,
+      "3": 1,
+      "4": 4,
+      "5": 1,
+      "8": 1,
+      "12": 1
+     },
+     "capacity": 53
+    },
+    {
+     "day": 24,
+     "specimens": 221,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 215,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 7,
+     "infected_swabbed": 15,
+     "infected_negative": 13,
+     "negative_dpi_hist": {
+      "-7": 1,
+      "-5": 1,
+      "1": 2,
+      "3": 1,
+      "4": 2,
+      "5": 5,
+      "13": 1
+     },
+     "capacity": 221
+    },
+    {
+     "day": 26,
+     "specimens": 217,
+     "to_symptomatic": 10,
+     "to_asymptomatic": 207,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 4,
+     "crew_specimens": 9,
+     "infected_swabbed": 19,
+     "infected_negative": 11,
+     "negative_dpi_hist": {
+      "-4": 1,
+      "-3": 1,
+      "2": 1,
+      "3": 2,
+      "5": 1,
+      "7": 3,
+      "15": 1,
+      "16": 1
+     },
+     "capacity": 217
+    },
+    {
+     "day": 27,
+     "specimens": 289,
+     "to_symptomatic": 8,
+     "to_asymptomatic": 281,
+     "positive_symptomatic": 5,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 10,
+     "infected_swabbed": 12,
+     "infected_negative": 6,
+     "negative_dpi_hist": {
+      "-1": 1,
+      "3": 1,
+      "4": 4
+     },
+     "capacity": 289
+    },
+    {
+     "day": 28,
+     "specimens": 504,
+     "to_symptomatic": 7,
+     "to_asymptomatic": 497,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 13,
+     "infected_swabbed": 15,
+     "infected_negative": 13,
+     "negative_dpi_hist": {
+      "1": 2,
+      "2": 1,
+      "3": 1,
+      "4": 4,
+      "5": 4,
+      "18": 1
+     },
+     "capacity": 504
+    },
+    {
+     "day": 29,
+     "specimens": 681,
+     "to_symptomatic": 8,
+     "to_asymptomatic": 673,
+     "positive_symptomatic": 6,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 16,
+     "infected_swabbed": 18,
+     "infected_negative": 11,
+     "negative_dpi_hist": {
+      "-1": 3,
+      "1": 1,
+      "2": 2,
+      "4": 2,
+      "5": 2,
+      "19": 1
+     },
+     "capacity": 681
+    },
+    {
+     "day": 30,
+     "specimens": 607,
+     "to_symptomatic": 5,
+     "to_asymptomatic": 602,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 8,
+     "crew_specimens": 243,
+     "infected_swabbed": 27,
+     "infected_negative": 16,
+     "negative_dpi_hist": {
+      "-1": 1,
+      "0": 2,
+      "1": 3,
+      "2": 2,
+      "3": 3,
+      "6": 2,
+      "7": 1,
+      "20": 1,
+      "29": 1
+     },
+     "capacity": 607
+    },
+    {
+     "day": 31,
+     "specimens": 52,
+     "to_symptomatic": 4,
+     "to_asymptomatic": 48,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 4,
+     "crew_specimens": 33,
+     "infected_swabbed": 15,
+     "infected_negative": 9,
+     "negative_dpi_hist": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "4": 4,
+      "5": 1,
+      "21": 1
+     },
+     "capacity": 52
+    }
+   ],
+   "unconfirmed_infected": {
+    "swabbed_only_pre_infection_never_presented": {
+     "crew": 1,
+     "passenger": 8
+    },
+    "swabbed_while_infected_negative_never_presented": {
+     "crew": 10,
+     "passenger": 10
+    },
+    "never_swabbed_presented": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "never_swabbed_never_presented": {
+     "crew": 21,
+     "passenger": 0
+    },
+    "swabbed_while_infected_negative_presented": {
+     "crew": 2,
+     "passenger": 0
+    },
+    "swabbed_only_pre_infection_presented": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "counterfactual_end_voyage": {
+    "expected_positives": {
+     "swabbed_only_pre_infection_never_presented": 0.6,
+     "swabbed_while_infected_negative_never_presented": 6.4,
+     "never_swabbed_presented": 0.3,
+     "never_swabbed_never_presented": 6.7,
+     "swabbed_while_infected_negative_presented": 0.7
+    },
+    "hosts": {
+     "swabbed_only_pre_infection_never_presented": 9,
+     "swabbed_while_infected_negative_never_presented": 20,
+     "never_swabbed_presented": 1,
+     "never_swabbed_never_presented": 21,
+     "swabbed_while_infected_negative_presented": 2
+    }
+   }
+  },
+  {
+   "seed": 20200211,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infections_total": 42,
+   "lab_confirmed_total": 14,
+   "confirmed_by_channel_status": {
+    "campaign_symptomatic": {
+     "crew": 6,
+     "passenger": 0
+    },
+    "campaign_asymptomatic": {
+     "crew": 7,
+     "passenger": 0
+    },
+    "passive_symptomatic": {
+     "crew": 1,
+     "passenger": 0
+    },
+    "passive_asymptomatic": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "asymptomatic_share_of_confirmed": 0.5,
+   "campaign_days": [
+    {
+     "day": 16,
+     "specimens": 31,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 31,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 0,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 31
+    },
+    {
+     "day": 17,
+     "specimens": 71,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 70,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 1,
+     "infected_negative": 1,
+     "negative_dpi_hist": {
+      "6": 1
+     },
+     "capacity": 71
+    },
+    {
+     "day": 18,
+     "specimens": 171,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 170,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 1,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 171
+    },
+    {
+     "day": 19,
+     "specimens": 6,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 6,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 0,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 6
+    },
+    {
+     "day": 20,
+     "specimens": 57,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 57,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 0,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 57
+    },
+    {
+     "day": 21,
+     "specimens": 103,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 103,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 1,
+     "infected_swabbed": 0,
+     "infected_negative": 0,
+     "negative_dpi_hist": {},
+     "capacity": 103
+    },
+    {
+     "day": 23,
+     "specimens": 53,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 52,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 2,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "4": 1
+     },
+     "capacity": 53
+    },
+    {
+     "day": 24,
+     "specimens": 221,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 220,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 3,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "-3": 2
+     },
+     "capacity": 221
+    },
+    {
+     "day": 26,
+     "specimens": 217,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 217,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 2,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "1": 1
+     },
+     "capacity": 217
+    },
+    {
+     "day": 27,
+     "specimens": 289,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 289,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 1,
+     "infected_negative": 1,
+     "negative_dpi_hist": {
+      "2": 1
+     },
+     "capacity": 289
+    },
+    {
+     "day": 28,
+     "specimens": 504,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 502,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 4,
+     "infected_negative": 4,
+     "negative_dpi_hist": {
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "28": 1
+     },
+     "capacity": 504
+    },
+    {
+     "day": 29,
+     "specimens": 681,
+     "to_symptomatic": 2,
+     "to_asymptomatic": 679,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 3,
+     "infected_swabbed": 5,
+     "infected_negative": 4,
+     "negative_dpi_hist": {
+      "2": 1,
+      "3": 3
+     },
+     "capacity": 681
+    },
+    {
+     "day": 30,
+     "specimens": 607,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 601,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 6,
+     "crew_specimens": 430,
+     "infected_swabbed": 16,
+     "infected_negative": 9,
+     "negative_dpi_hist": {
+      "3": 3,
+      "4": 5,
+      "6": 1
+     },
+     "capacity": 607
+    },
+    {
+     "day": 31,
+     "specimens": 52,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 46,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 51,
+     "infected_swabbed": 6,
+     "infected_negative": 3,
+     "negative_dpi_hist": {
+      "4": 1,
+      "5": 2
+     },
+     "capacity": 52
+    }
+   ],
+   "unconfirmed_infected": {
+    "swabbed_while_infected_negative_never_presented": {
+     "crew": 2,
+     "passenger": 3
+    },
+    "never_swabbed_presented": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "swabbed_while_infected_negative_presented": {
+     "crew": 3,
+     "passenger": 2
+    },
+    "swabbed_only_pre_infection_never_presented": {
+     "crew": 2,
+     "passenger": 4
+    },
+    "never_swabbed_never_presented": {
+     "crew": 11,
+     "passenger": 0
+    },
+    "swabbed_only_pre_infection_presented": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "counterfactual_end_voyage": {
+    "expected_positives": {
+     "swabbed_while_infected_negative_never_presented": 2.5,
+     "never_swabbed_presented": 0.3,
+     "swabbed_while_infected_negative_presented": 2.2,
+     "swabbed_only_pre_infection_never_presented": 1.7,
+     "never_swabbed_never_presented": 3.9
+    },
+    "hosts": {
+     "swabbed_while_infected_negative_never_presented": 5,
+     "never_swabbed_presented": 1,
+     "swabbed_while_infected_negative_presented": 5,
+     "swabbed_only_pre_infection_never_presented": 6,
+     "never_swabbed_never_presented": 11
+    }
+   }
+  },
+  {
+   "seed": 20200218,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infections_total": 469,
+   "lab_confirmed_total": 293,
+   "confirmed_by_channel_status": {
+    "passive_symptomatic": {
+     "crew": 32,
+     "passenger": 83
+    },
+    "campaign_symptomatic": {
+     "crew": 24,
+     "passenger": 83
+    },
+    "campaign_asymptomatic": {
+     "crew": 6,
+     "passenger": 65
+    },
+    "passive_asymptomatic": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "asymptomatic_share_of_confirmed": 0.2423,
+   "campaign_days": [
+    {
+     "day": 16,
+     "specimens": 31,
+     "to_symptomatic": 27,
+     "to_asymptomatic": 4,
+     "positive_symptomatic": 14,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 31,
+     "infected_negative": 17,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "-2": 2,
+      "-1": 1,
+      "3": 1,
+      "4": 5,
+      "5": 5,
+      "6": 2
+     },
+     "capacity": 31
+    },
+    {
+     "day": 17,
+     "specimens": 71,
+     "to_symptomatic": 32,
+     "to_asymptomatic": 39,
+     "positive_symptomatic": 18,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 1,
+     "infected_swabbed": 47,
+     "infected_negative": 28,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "-2": 2,
+      "-1": 7,
+      "0": 2,
+      "1": 1,
+      "3": 1,
+      "4": 7,
+      "5": 4,
+      "6": 3
+     },
+     "capacity": 71
+    },
+    {
+     "day": 18,
+     "specimens": 171,
+     "to_symptomatic": 24,
+     "to_asymptomatic": 147,
+     "positive_symptomatic": 11,
+     "positive_asymptomatic": 3,
+     "crew_specimens": 1,
+     "infected_swabbed": 64,
+     "infected_negative": 50,
+     "negative_dpi_hist": {
+      "-12": 2,
+      "-5": 1,
+      "-4": 1,
+      "-2": 5,
+      "-1": 6,
+      "0": 12,
+      "1": 3,
+      "2": 2,
+      "3": 1,
+      "4": 4,
+      "5": 7,
+      "6": 4,
+      "7": 2
+     },
+     "capacity": 171
+    },
+    {
+     "day": 19,
+     "specimens": 6,
+     "to_symptomatic": 1,
+     "to_asymptomatic": 5,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 5,
+     "infected_negative": 5,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "0": 1,
+      "1": 1,
+      "3": 1,
+      "5": 1
+     },
+     "capacity": 6
+    },
+    {
+     "day": 20,
+     "specimens": 57,
+     "to_symptomatic": 9,
+     "to_asymptomatic": 48,
+     "positive_symptomatic": 7,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 2,
+     "infected_swabbed": 43,
+     "infected_negative": 36,
+     "negative_dpi_hist": {
+      "-2": 7,
+      "-1": 5,
+      "0": 8,
+      "1": 3,
+      "2": 8,
+      "3": 2,
+      "4": 1,
+      "5": 1,
+      "6": 1
+     },
+     "capacity": 57
+    },
+    {
+     "day": 21,
+     "specimens": 103,
+     "to_symptomatic": 14,
+     "to_asymptomatic": 89,
+     "positive_symptomatic": 8,
+     "positive_asymptomatic": 4,
+     "crew_specimens": 3,
+     "infected_swabbed": 73,
+     "infected_negative": 61,
+     "negative_dpi_hist": {
+      "-2": 4,
+      "-1": 10,
+      "0": 7,
+      "1": 12,
+      "2": 8,
+      "3": 15,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "9": 1
+     },
+     "capacity": 103
+    },
+    {
+     "day": 23,
+     "specimens": 53,
+     "to_symptomatic": 5,
+     "to_asymptomatic": 48,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 5,
+     "infected_swabbed": 37,
+     "infected_negative": 34,
+     "negative_dpi_hist": {
+      "0": 3,
+      "1": 7,
+      "2": 6,
+      "3": 8,
+      "4": 2,
+      "5": 7,
+      "8": 1
+     },
+     "capacity": 53
+    },
+    {
+     "day": 24,
+     "specimens": 221,
+     "to_symptomatic": 19,
+     "to_asymptomatic": 202,
+     "positive_symptomatic": 10,
+     "positive_asymptomatic": 12,
+     "crew_specimens": 15,
+     "infected_swabbed": 79,
+     "infected_negative": 57,
+     "negative_dpi_hist": {
+      "-4": 1,
+      "-3": 1,
+      "-2": 1,
+      "-1": 1,
+      "0": 4,
+      "1": 8,
+      "2": 10,
+      "3": 9,
+      "4": 10,
+      "5": 7,
+      "6": 3,
+      "9": 1,
+      "13": 1
+     },
+     "capacity": 221
+    },
+    {
+     "day": 26,
+     "specimens": 217,
+     "to_symptomatic": 17,
+     "to_asymptomatic": 200,
+     "positive_symptomatic": 12,
+     "positive_asymptomatic": 10,
+     "crew_specimens": 23,
+     "infected_swabbed": 69,
+     "infected_negative": 47,
+     "negative_dpi_hist": {
+      "-4": 1,
+      "-3": 1,
+      "-2": 2,
+      "-1": 3,
+      "0": 6,
+      "1": 3,
+      "2": 5,
+      "3": 7,
+      "4": 9,
+      "5": 6,
+      "6": 3,
+      "7": 1
+     },
+     "capacity": 217
+    },
+    {
+     "day": 27,
+     "specimens": 289,
+     "to_symptomatic": 11,
+     "to_asymptomatic": 278,
+     "positive_symptomatic": 5,
+     "positive_asymptomatic": 9,
+     "crew_specimens": 26,
+     "infected_swabbed": 59,
+     "infected_negative": 45,
+     "negative_dpi_hist": {
+      "-3": 2,
+      "-2": 2,
+      "-1": 3,
+      "0": 3,
+      "1": 9,
+      "2": 3,
+      "3": 6,
+      "4": 8,
+      "5": 6,
+      "6": 1,
+      "7": 1,
+      "17": 1
+     },
+     "capacity": 289
+    },
+    {
+     "day": 28,
+     "specimens": 504,
+     "to_symptomatic": 14,
+     "to_asymptomatic": 490,
+     "positive_symptomatic": 9,
+     "positive_asymptomatic": 12,
+     "crew_specimens": 31,
+     "infected_swabbed": 56,
+     "infected_negative": 35,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "-2": 1,
+      "-1": 2,
+      "0": 1,
+      "1": 4,
+      "2": 9,
+      "3": 4,
+      "4": 4,
+      "5": 5,
+      "14": 1,
+      "15": 1,
+      "18": 1,
+      "27": 1
+     },
+     "capacity": 504
+    },
+    {
+     "day": 29,
+     "specimens": 681,
+     "to_symptomatic": 10,
+     "to_asymptomatic": 671,
+     "positive_symptomatic": 6,
+     "positive_asymptomatic": 8,
+     "crew_specimens": 37,
+     "infected_swabbed": 52,
+     "infected_negative": 38,
+     "negative_dpi_hist": {
+      "-2": 2,
+      "-1": 5,
+      "0": 6,
+      "1": 2,
+      "2": 6,
+      "3": 9,
+      "4": 2,
+      "5": 3,
+      "6": 2,
+      "19": 1
+     },
+     "capacity": 681
+    },
+    {
+     "day": 30,
+     "specimens": 607,
+     "to_symptomatic": 13,
+     "to_asymptomatic": 594,
+     "positive_symptomatic": 2,
+     "positive_asymptomatic": 7,
+     "crew_specimens": 42,
+     "infected_swabbed": 49,
+     "infected_negative": 40,
+     "negative_dpi_hist": {
+      "-1": 3,
+      "0": 5,
+      "1": 7,
+      "2": 3,
+      "3": 6,
+      "4": 8,
+      "5": 5,
+      "6": 2,
+      "20": 1
+     },
+     "capacity": 607
+    },
+    {
+     "day": 31,
+     "specimens": 52,
+     "to_symptomatic": 13,
+     "to_asymptomatic": 39,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 3,
+     "crew_specimens": 22,
+     "infected_swabbed": 21,
+     "infected_negative": 14,
+     "negative_dpi_hist": {
+      "0": 1,
+      "3": 4,
+      "4": 3,
+      "5": 5,
+      "6": 1
+     },
+     "capacity": 52
+    }
+   ],
+   "unconfirmed_infected": {
+    "never_swabbed_never_presented": {
+     "crew": 91,
+     "passenger": 8
+    },
+    "swabbed_while_infected_negative_never_presented": {
+     "crew": 6,
+     "passenger": 23
+    },
+    "swabbed_while_infected_negative_presented": {
+     "crew": 21,
+     "passenger": 6
+    },
+    "swabbed_only_pre_infection_never_presented": {
+     "crew": 3,
+     "passenger": 17
+    },
+    "never_swabbed_presented": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "swabbed_only_pre_infection_presented": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "counterfactual_end_voyage": {
+    "expected_positives": {
+     "never_swabbed_never_presented": 23.2,
+     "swabbed_while_infected_negative_never_presented": 5.6,
+     "swabbed_while_infected_negative_presented": 10.4,
+     "swabbed_only_pre_infection_never_presented": 1.2,
+     "never_swabbed_presented": 0.3
+    },
+    "hosts": {
+     "never_swabbed_never_presented": 99,
+     "swabbed_while_infected_negative_never_presented": 29,
+     "swabbed_while_infected_negative_presented": 27,
+     "swabbed_only_pre_infection_never_presented": 20,
+     "never_swabbed_presented": 1
+    }
+   }
+  },
+  {
+   "seed": 20200223,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infections_total": 396,
+   "lab_confirmed_total": 209,
+   "confirmed_by_channel_status": {
+    "passive_symptomatic": {
+     "crew": 28,
+     "passenger": 57
+    },
+    "campaign_symptomatic": {
+     "crew": 46,
+     "passenger": 38
+    },
+    "passive_asymptomatic": {
+     "crew": 2,
+     "passenger": 0
+    },
+    "campaign_asymptomatic": {
+     "crew": 9,
+     "passenger": 29
+    }
+   },
+   "asymptomatic_share_of_confirmed": 0.1914,
+   "campaign_days": [
+    {
+     "day": 16,
+     "specimens": 31,
+     "to_symptomatic": 12,
+     "to_asymptomatic": 19,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 5,
+     "infected_swabbed": 21,
+     "infected_negative": 17,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "-2": 1,
+      "-1": 3,
+      "0": 4,
+      "5": 2,
+      "6": 2,
+      "7": 4
+     },
+     "capacity": 31
+    },
+    {
+     "day": 17,
+     "specimens": 71,
+     "to_symptomatic": 11,
+     "to_asymptomatic": 60,
+     "positive_symptomatic": 9,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 8,
+     "infected_swabbed": 24,
+     "infected_negative": 15,
+     "negative_dpi_hist": {
+      "-5": 1,
+      "-2": 2,
+      "-1": 2,
+      "0": 3,
+      "1": 5,
+      "6": 2
+     },
+     "capacity": 71
+    },
+    {
+     "day": 18,
+     "specimens": 171,
+     "to_symptomatic": 5,
+     "to_asymptomatic": 166,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 9,
+     "infected_swabbed": 30,
+     "infected_negative": 25,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "-1": 3,
+      "0": 2,
+      "1": 6,
+      "2": 7,
+      "3": 3,
+      "7": 1,
+      "8": 1,
+      "10": 1
+     },
+     "capacity": 171
+    },
+    {
+     "day": 19,
+     "specimens": 6,
+     "to_symptomatic": 0,
+     "to_asymptomatic": 6,
+     "positive_symptomatic": 0,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 0,
+     "infected_swabbed": 2,
+     "infected_negative": 2,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "3": 1
+     },
+     "capacity": 6
+    },
+    {
+     "day": 20,
+     "specimens": 57,
+     "to_symptomatic": 8,
+     "to_asymptomatic": 49,
+     "positive_symptomatic": 3,
+     "positive_asymptomatic": 3,
+     "crew_specimens": 9,
+     "infected_swabbed": 29,
+     "infected_negative": 23,
+     "negative_dpi_hist": {
+      "-4": 1,
+      "-2": 2,
+      "-1": 2,
+      "0": 1,
+      "1": 5,
+      "2": 2,
+      "3": 5,
+      "4": 3,
+      "5": 1,
+      "9": 1
+     },
+     "capacity": 57
+    },
+    {
+     "day": 21,
+     "specimens": 103,
+     "to_symptomatic": 13,
+     "to_asymptomatic": 90,
+     "positive_symptomatic": 7,
+     "positive_asymptomatic": 2,
+     "crew_specimens": 10,
+     "infected_swabbed": 34,
+     "infected_negative": 25,
+     "negative_dpi_hist": {
+      "-6": 1,
+      "-4": 1,
+      "-3": 2,
+      "-2": 1,
+      "-1": 3,
+      "0": 3,
+      "1": 1,
+      "2": 5,
+      "3": 2,
+      "4": 2,
+      "5": 3,
+      "10": 1
+     },
+     "capacity": 103
+    },
+    {
+     "day": 23,
+     "specimens": 53,
+     "to_symptomatic": 8,
+     "to_asymptomatic": 45,
+     "positive_symptomatic": 5,
+     "positive_asymptomatic": 0,
+     "crew_specimens": 13,
+     "infected_swabbed": 27,
+     "infected_negative": 22,
+     "negative_dpi_hist": {
+      "-3": 1,
+      "-2": 2,
+      "-1": 4,
+      "0": 1,
+      "1": 2,
+      "2": 3,
+      "3": 2,
+      "4": 4,
+      "5": 2,
+      "14": 1
+     },
+     "capacity": 53
+    },
+    {
+     "day": 24,
+     "specimens": 221,
+     "to_symptomatic": 6,
+     "to_asymptomatic": 215,
+     "positive_symptomatic": 1,
+     "positive_asymptomatic": 3,
+     "crew_specimens": 14,
+     "infected_swabbed": 41,
+     "infected_negative": 37,
+     "negative_dpi_hist": {
+      "-5": 3,
+      "-2": 3,
+      "-1": 5,
+      "0": 6,
+      "1": 1,
+      "2": 6,
+      "3": 3,
+      "4": 2,
+      "5": 7,
+      "6": 1
+     },
+     "capacity": 221
+    },
+    {
+     "day": 26,
+     "specimens": 217,
+     "to_symptomatic": 13,
+     "to_asymptomatic": 204,
+     "positive_symptomatic": 5,
+     "positive_asymptomatic": 6,
+     "crew_specimens": 21,
+     "infected_swabbed": 46,
+     "infected_negative": 35,
+     "negative_dpi_hist": {
+      "-1": 4,
+      "0": 6,
+      "1": 5,
+      "2": 5,
+      "3": 4,
+      "4": 6,
+      "5": 1,
+      "6": 1,
+      "7": 2,
+      "11": 1
+     },
+     "capacity": 217
+    },
+    {
+     "day": 27,
+     "specimens": 289,
+     "to_symptomatic": 22,
+     "to_asymptomatic": 267,
+     "positive_symptomatic": 8,
+     "positive_asymptomatic": 3,
+     "crew_specimens": 32,
+     "infected_swabbed": 51,
+     "infected_negative": 40,
+     "negative_dpi_hist": {
+      "-2": 1,
+      "0": 5,
+      "1": 5,
+      "2": 5,
+      "3": 7,
+      "4": 6,
+      "5": 8,
+      "6": 1,
+      "12": 1,
+      "18": 1
+     },
+     "capacity": 289
+    },
+    {
+     "day": 28,
+     "specimens": 504,
+     "to_symptomatic": 29,
+     "to_asymptomatic": 475,
+     "positive_symptomatic": 8,
+     "positive_asymptomatic": 1,
+     "crew_specimens": 45,
+     "infected_swabbed": 56,
+     "infected_negative": 47,
+     "negative_dpi_hist": {
+      "-2": 2,
+      "-1": 2,
+      "1": 6,
+      "2": 5,
+      "3": 6,
+      "4": 11,
+      "5": 8,
+      "6": 5,
+      "17": 2
+     },
+     "capacity": 504
+    },
+    {
+     "day": 29,
+     "specimens": 681,
+     "to_symptomatic": 29,
+     "to_asymptomatic": 652,
+     "positive_symptomatic": 12,
+     "positive_asymptomatic": 5,
+     "crew_specimens": 52,
+     "infected_swabbed": 69,
+     "infected_negative": 52,
+     "negative_dpi_hist": {
+      "-2": 2,
+      "-1": 5,
+      "0": 2,
+      "1": 5,
+      "2": 6,
+      "3": 6,
+      "4": 5,
+      "5": 13,
+      "6": 4,
+      "7": 2,
+      "18": 1,
+      "28": 1
+     },
+     "capacity": 681
+    },
+    {
+     "day": 30,
+     "specimens": 607,
+     "to_symptomatic": 22,
+     "to_asymptomatic": 585,
+     "positive_symptomatic": 15,
+     "positive_asymptomatic": 9,
+     "crew_specimens": 54,
+     "infected_swabbed": 64,
+     "infected_negative": 40,
+     "negative_dpi_hist": {
+      "0": 7,
+      "1": 4,
+      "2": 6,
+      "3": 6,
+      "4": 2,
+      "5": 4,
+      "6": 7,
+      "8": 1,
+      "15": 1,
+      "19": 1,
+      "21": 1
+     },
+     "capacity": 607
+    },
+    {
+     "day": 31,
+     "specimens": 52,
+     "to_symptomatic": 7,
+     "to_asymptomatic": 45,
+     "positive_symptomatic": 4,
+     "positive_asymptomatic": 4,
+     "crew_specimens": 28,
+     "infected_swabbed": 22,
+     "infected_negative": 14,
+     "negative_dpi_hist": {
+      "1": 3,
+      "2": 3,
+      "3": 3,
+      "4": 1,
+      "5": 1,
+      "7": 1,
+      "10": 1,
+      "20": 1
+     },
+     "capacity": 52
+    }
+   ],
+   "unconfirmed_infected": {
+    "swabbed_while_infected_negative_never_presented": {
+     "crew": 16,
+     "passenger": 21
+    },
+    "swabbed_while_infected_negative_presented": {
+     "crew": 10,
+     "passenger": 6
+    },
+    "swabbed_only_pre_infection_never_presented": {
+     "crew": 3,
+     "passenger": 15
+    },
+    "never_swabbed_never_presented": {
+     "crew": 113,
+     "passenger": 2
+    },
+    "never_swabbed_presented": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "swabbed_only_pre_infection_presented": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "counterfactual_end_voyage": {
+    "expected_positives": {
+     "swabbed_while_infected_negative_never_presented": 11.6,
+     "swabbed_while_infected_negative_presented": 7.6,
+     "swabbed_only_pre_infection_never_presented": 3.4,
+     "never_swabbed_never_presented": 30.5,
+     "never_swabbed_presented": 0.3
+    },
+    "hosts": {
+     "swabbed_while_infected_negative_never_presented": 37,
+     "swabbed_while_infected_negative_presented": 16,
+     "swabbed_only_pre_infection_never_presented": 18,
+     "never_swabbed_never_presented": 115,
+     "never_swabbed_presented": 1
+    }
+   }
+  }
+ ],
+ "pooled": {
+  "lab_confirmed_total": 625,
+  "confirmed_by_channel_status": {
+   "campaign_symptomatic": {
+    "crew": 105,
+    "passenger": 153
+   },
+   "passive_symptomatic": {
+    "crew": 74,
+    "passenger": 145
+   },
+   "passive_asymptomatic": {
+    "crew": 2,
+    "passenger": 1
+   },
+   "campaign_asymptomatic": {
+    "crew": 35,
+    "passenger": 110
+   }
+  },
+  "asymptomatic_share_of_confirmed": 0.2368,
+  "unconfirmed_infected": {
+   "swabbed_while_infected_negative_presented": {
+    "crew": 45,
+    "passenger": 15
+   },
+   "never_swabbed_presented": {
+    "crew": 1,
+    "passenger": 5
+   },
+   "swabbed_while_infected_negative_never_presented": {
+    "crew": 46,
+    "passenger": 58
+   },
+   "never_swabbed_never_presented": {
+    "crew": 254,
+    "passenger": 10
+   },
+   "swabbed_only_pre_infection_never_presented": {
+    "crew": 14,
+    "passenger": 44
+   },
+   "swabbed_only_pre_infection_presented": {
+    "crew": 0,
+    "passenger": 0
+   }
+  },
+  "counterfactual_end_voyage_expected_positives": {
+   "swabbed_while_infected_negative_presented": 24.7,
+   "never_swabbed_presented": 1.9,
+   "swabbed_while_infected_negative_never_presented": 28.6,
+   "never_swabbed_never_presented": 67.8,
+   "swabbed_only_pre_infection_never_presented": 7.0
+  }
+ }
+}
