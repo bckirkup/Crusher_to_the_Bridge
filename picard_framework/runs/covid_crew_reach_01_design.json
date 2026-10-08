@@ -1,0 +1,167 @@
+{
+  "design_id": "covid_crew_reach_01",
+  "task_id": "covid-crew-reach-01",
+  "design_doc": "docs/covid/covid_crew_reach_01_design.md",
+  "parent_design": "covid-crew-mess-01",
+  "description": "CREW-REACH-01: the record's serial-testing + crew-reach observation structure armed on the boxed Diamond Princess configuration — the honesty test for the crew-share landing. ASYM-CONF-01's funnel measured the unconfirmed drains on sect_mess_boxed (pooled lab_confirmed 819 vs record 712; crew share resolved at 0.293 conditioned on DP-scale cells vs record 0.29; asymptomatic-at-specimen share 0.237 vs ~0.49 with honest bound ~0.4): 264 never-swabbed-never-presented (254 crew — the crew-last ladder starves), 164 infected-negative swabs burned in the dpi 0–6 low-sensitivity window, 58 pre-infection swabs, 6 sick-call misses. Two record structures were unexpressible through the arm grammar: S1 retest-negative sweep tiers (the record ran serial testing — Yamahata & Shibata 2020 Table 1: cumulative 3,894 tests vs 3,711 aboard, footnote b) and S2 the crew mass-testing wave (831 tests / 57 positives on 23 Feb, the six-step ladder's step 6 realized after passenger disembarkation). This design arms both via observation_overrides on the boxed configuration: S1 honors each campaign day's declared retest_tiers (a retest is a NEW specimen — the specimen-bar invariant semantics are preserved by construction: a confirmed host is never re-swabbed, and a negative specimen on the same day never re-opens); S2 arms the wave-tagged crew day (23 Feb = day_offset 18 = sim day 34) — the scenario's duration extends to 35 days because the documented campaign runs to 23 Feb.",
+  "prerequisites": [
+    "ASYM-CONF-01 measured (docs/ledger/ASYM-CONF-01.md): the unconfirmed drains on the boxed configuration and the S1/S2 seam spec this leg implements",
+    "ONSET-REC-01 measured: the boxed_declared/bit-identity composition pattern (design-level base_overrides applied after prepare_cell_run_spec; arm 0 empty overrides)",
+    "Yamahata & Shibata 2020 Table 1 sourced: 831 tests / 57 positives on 23 Feb 2020, cumulative 3,894 > 3,711 aboard with the retest footnote; six-step order ends 'all crew members' (crew wave is step 6 realized in the evacuation phase)",
+    "Record-derivable cadence: retest_tiers declared on 15–20 Feb (mass re-screen + exit swabs — the days whose published volumes include re-swabs of earlier-negative hosts) and on the 23 Feb crew wave; the per-day placement is Grade C (the record documents that retests happened, not their schedule)"
+  ],
+  "scenario_id": "diamond_princess_2020",
+  "voyage_mode": "declared",
+  "thetas": [7900000.0],
+  "infection_age_days": [6.8],
+  "imports": [1],
+  "sanitary_visit_mode": "dwell_weighted",
+  "seed_base": 20200205,
+  "seeds": 20,
+  "takeoff_recorded_onsets": 10,
+  "seed_ring_readout": true,
+  "funnel_echo": true,
+  "base_overrides": {
+    "scheduled_protocol_id": "SOP-017-MESSBOX",
+    "transmission_overrides": {
+      "caregiver": {
+        "service": {
+          "direction": "both",
+          "service_responder_mode": "section",
+          "service_section_cabins": [10, 15],
+          "contact_factor_to_host": [0.005, 0.02]
+        }
+      }
+    }
+  },
+  "base_overrides_note": "The boxed crew-mess configuration, verbatim from the parent's sect_mess_boxed arm (covid_crew_mess_01_design.json), applied by campaigns/covid/crew_reach_01/cell.py after prepare_cell_run_spec. The observation_overrides arm key touches only config_overrides.syndromic — disjoint from the boxed transmission overrides — so composition is order-independent.",
+  "arms": [
+    {
+      "arm_id": "boxed_declared",
+      "role": "baseline",
+      "overrides": {},
+      "note": "First arm so empty overrides per the arm grammar. The labelled pre-change observation structure: no sweep retests, no crew wave. Because the voyage now contains days 32–34 (21–23 Feb), this arm's bit-identity vs the landed sect_mess_boxed cells is declared at the through-day-31 slice plus spec-level equality modulo num_epochs — the mechanism it tests is arming, not voyage length."
+    },
+    {
+      "arm_id": "boxed_s1",
+      "role": "sweep_retest",
+      "overrides": {
+        "observation_overrides": {
+          "retest_negative_sweeps": true
+        }
+      },
+      "note": "Serial testing only: sweep tiers on retest_tiers-declared days (15–20 Feb) may renominate hosts holding an earlier-day negative. Recovers the infected-negative drain (~164 pooled) at mid-dpi sensitivity rather than the low-window one-shot draw."
+    },
+    {
+      "arm_id": "boxed_s2",
+      "role": "crew_reach",
+      "overrides": {
+        "observation_overrides": {
+          "campaign_waves": ["crew_wave"]
+        }
+      },
+      "note": "Crew reach only: the 23 Feb wave day (831 tests, tiers [crew]) runs at sim day 34. Directly probes the never-swabbed-never-presented crew drain (~254 pooled) — the arm whose crew-share read is the honesty test's sharpest edge."
+    },
+    {
+      "arm_id": "boxed_s1s2",
+      "role": "sweep_retest_and_crew_reach",
+      "overrides": {
+        "observation_overrides": {
+          "retest_negative_sweeps": true,
+          "campaign_waves": ["crew_wave"]
+        }
+      },
+      "note": "The record's full observation structure: serial testing plus the crew wave. The headline arm — what the record's own ascertainment produces on the configuration whose crew share landed."
+    }
+  ],
+  "cells": 80,
+  "cells_note": "4 arms x 20 seeds (20200205..20200224) = 80 cells on the boxed configuration; the whole design is the canary-scale run. The S2-alone arm is declared up-front (cheap, and it isolates the crew wave from the retest effect the combined arm would entangle).",
+  "cell_payload_additions": [
+    "run", "cohort", "quarantine_witness", "board", "crew_window",
+    "guard_windows", "crew_ledger", "infection_log_tail", "through_day14",
+    "takeoff_calibration", "q_zone_reach", "source_channel_during",
+    "during_quarantine_by_route", "sanitary_visits",
+    "lab_confirmed_total", "lab_confirmed_by_role", "onset_recording",
+    "specimen_channel", "campaign_specimen_log", "funnel_hosts"
+  ],
+  "cell_payload_additions_note": "The crew-mess-01 payload set plus the onset-recording witnesses, plus this leg's echoes (funnel_echo design flag): specimen_channel (resolved retest flags + armed waves + realized campaign tallies — the per-arm witness), campaign_specimen_log (the ship's own testing log rows with retest/wave marks), funnel_hosts (per-host infection/presented/specimen/confirmed days — the drain reconstruction without a rerun).",
+  "scoring": {
+    "declared_before_running": true,
+    "primary": {
+      "metric": "lab_confirmed_total per arm, pooled over 20 seeds AND per-cell, with DP-scale cells (n_confirmed >= 100) read per-cell vs the record",
+      "record": "712 (cumulative confirmed through the record's campaign, per voyage)",
+      "baseline_landing": "pooled 819 over 20 seeds; DP-scale cells 293 (20200218) and 209 (20200223)",
+      "declared_expectation": "UPWARD: the mechanisms recapture unconfirmed infected hosts — pooled total rises from ~819 by a rough ~250–400 pooled (the drain arithmetic: ~164 infected-negative one-shot drain + ~58 pre-infection swabs reachability via retests; ~254 never-swabbed crew partially via the 831-test wave at end-of-voyage sensitivity). On DP-scale cells the per-cell count moves toward 712 without reaching it; pooled crossing ~1200 means the mechanisms recaptured beyond the drains — over-ascertainment, still reportable.",
+      "verdict_grammar": {
+        "MOVES-TOWARD-RECORD": "pooled lab_confirmed rises materially (>= ~50) — direction correct, partial closure expected",
+        "NO-MOVE": "pooled lab_confirmed fails to rise materially (< ~50 pooled) despite witness echoes showing the mechanisms fired — the retest/crew channels didn't reach the drains; investigate per-day rosters",
+        "OVERSHOOT": "DP-scale per-cell counts at/above ~712 — mechanisms over-ascertain; report immediately"
+      }
+    },
+    "crew_share_clause": {
+      "metric": "crew share of lab_confirmed, pooled AND conditioned on DP-scale cells (n_confirmed >= 100)",
+      "record": "0.29",
+      "boxed_landing": "0.435 pooled / 0.293 conditioned (ASYM-CONF-01, resolved at record scale)",
+      "declared_reading_rule": "holding ≈0.29–0.4 conditioned means the landing was physics — the crew wave reveals infections the simulation genuinely seeded in crew, and the resolved share survives honest ascertainment; a material rise past ~0.5 conditioned means crew infections are genuinely hot once ascertainment stops shading them — the boxed crew-share landing was ascertainment artifact. Both are reportable outcomes; NEITHER is a fail state. The readout reports pooled + conditioned shares per arm side by side.",
+      "report_immediately": "conditioned crew share materially above ~0.5 on boxed_s2 or boxed_s1s2"
+    },
+    "asym_share_clause": {
+      "metric": "asymptomatic-at-specimen share of lab_confirmed (confirmed hosts whose first presenting onset postdates the confirming specimen)",
+      "record": "~0.49",
+      "honest_bound": "~0.4 (38% never-presented share caps it)",
+      "declared_expectation": "rise from 0.237 toward the ~0.4 bound — retests and the crew wave specifically capture never-presented/asymptomatic infections. In-band [0.30, 0.50] is consistent; above ~0.55 overshoots the honest bound (report immediately); a move in the wrong direction is a mechanism defect signal"
+    },
+    "dated_share_clause": {
+      "metric": "recorded_onsets / lab_confirmed_total under the shipped onset channel (every confirmed symptomatic onset dated)",
+      "record": "0.277",
+      "declared_expectation": "the boxed landing was 0.416 under the period channel and ~0.84 shipped; new confirmations from retests/crew wave skew asymptomatic-at-specimen, so the shipped share should FALL toward the record — the direction is the signal (SERO-CHANNEL-V1's period channel composition is out of scope here; it was already measured at 0.416 on this configuration)"
+    },
+    "guards": [
+      "confined-pax during-window mass within [26, 160] on every cell (takeoff-conditional median)",
+      "service_deliveries within 15% of the landed row median (~162k)",
+      "witness echoes: specimen_channel + campaign_specimen_log + funnel_hosts + lab_confirmed_by_role + onset_recording keys present on every cell",
+      "zero audit violations"
+    ],
+    "bit_identity_clause": "boxed_declared reconciles with the landed sect_mess_boxed cells on the through-day-31 slice: resolved run spec equal modulo num_epochs/voyage.total_epochs (840 vs 768 — the voyage extension is the declared record correction) and through-day-31 event counts (infections_total, lab_confirmed specimens+confirmed on day <= 31, recorded_onsets days <= 31, deliveries) equal on a matched-seed local rerun. The unarmed mechanisms are inert by construction (no retest set is computed; the wave day is filtered). A deviation on the day<=31 slice is a defect in the mechanism arming, not a finding — report immediately.",
+    "conditional_trajectory_clause": "Seeds whose seeded case never completes takeoff produce no recorded mass for reasons independent of the observation channels. Shares pool over cells that produced lab confirmations; takeoff mass is reported per arm as context."
+  },
+  "admissibility": {
+    "audit_invariants": [
+      "quarantine_witness.protocol_id == SOP-017-MESSBOX on every cell with window_days [16, 30]",
+      "specimen_channel.retest_negatives_on_sweep == false on boxed_declared/boxed_s2 and == true on boxed_s1/boxed_s1s2",
+      "specimen_channel.campaign_waves == [] on boxed_declared/boxed_s1 and == ['crew_wave'] on boxed_s2/boxed_s1s2",
+      "specimen_channel.campaign_specimen_retests == 0 on boxed_declared/boxed_s2; > 0 expected on boxed_s1/boxed_s1s2 (zero retests on an armed arm = the mechanism never fired — report immediately)",
+      "specimen_channel.campaign_specimens_by_wave.crew_wave == 0/absent on unarmed arms; ~up to 831 on armed arms (roster-capped by crew pool and already-sampled)",
+      "lab_confirmed_total + lab_confirmed_by_role + onset_recording (null on all arms — no channel arm here) present on every cell",
+      "index_onset_day == -1.0 and index_shedding_at_day0 true on every cell",
+      "droplet split (0.175, 0.0) echoes on every cell"
+    ],
+    "report_immediately": [
+      "conditioned crew share of lab_confirmed materially above ~0.5 on boxed_s2 or boxed_s1s2 — the honesty-test positive: crew infections are genuinely hot once ascertainment stops shading them",
+      "the retest mechanism cannot be expressed without breaking the specimen-bar invariant (a confirmed host re-swabbed, or a same-day double specimen, on any cell)",
+      "the crew wave produces zero specimens on an armed arm — the reach declaration never fired",
+      "asymptomatic share of confirmed moves opposite to the declared direction, or exceeds ~0.55",
+      "boxed_declared fails the day<=31-slice reconciliation vs the landed cells",
+      "child failure rate > 5%"
+    ]
+  },
+  "what_this_cannot_settle": [
+    "the retest cadence placement (which days carry retest_tiers) is Grade C — the record documents that serial testing happened, not its per-host schedule; the magnitudes are declared, not fitted",
+    "the crew wave is declared crew-only at the documented 831-test volume; the record does not break the day's roster down by role and passengers had disembarked — the composition is a declared Grade C assumption",
+    "the 35-day voyage's tail days (21–23 Feb) run the ship's passive channels under post-quarantine conditions the record does not detail — a shared, uniform extension across all arms, netted out of cross-arm deltas",
+    "dated share under the period channel is not re-measured here — ONSET-REC-01 already landed it at 0.416 on this configuration; this leg's dating clause reads the shipped channel only"
+  ],
+  "execution": {
+    "runner": "campaigns/covid/crew_reach_01/cell.py via deploy/aws/campaign_entrypoint.py",
+    "task": "covid_crew_reach_01",
+    "voyage": "diamond_princess_2020",
+    "campaign_dir": "campaigns/covid/crew_reach_01",
+    "s3_prefix": "campaign/covid_crew_reach_01/",
+    "queue": "picard-analysis-fargate-queue",
+    "jobdef": "picard-covid-crew-reach-01-fargate",
+    "image_tag": "covid-crew-reach-01",
+    "submission_order": [
+      "all 4 arms x 20 seeds = 80 cells, submitted together — the whole design IS the canary; read out and STOP"
+    ]
+  }
+}

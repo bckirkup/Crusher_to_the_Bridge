@@ -151,6 +151,11 @@ class SyndromicParams:
     testing_campaigns: Iterable[TestingCampaign] | None = None
     molecular_ascertainment_start_day: int | None = None
     retest_negatives_on_indication: bool = False
+    # Serial-testing days: tiers the day's ``retest_tiers`` names may
+    # renominate hosts holding a negative specimen (the record's mass
+    # re-screen / exit swabs / crew wave). Off, a negative bars a host
+    # from any tier - the labelled one-specimen baseline.
+    retest_negatives_on_sweep: bool = False
 
 
 class _SickCallRoster:
@@ -200,6 +205,9 @@ class SyndromicSurveillance:
         self.retest_negatives_on_indication = bool(
             p.retest_negatives_on_indication,
         )
+        self.retest_negatives_on_sweep = bool(
+            p.retest_negatives_on_sweep,
+        )
         self.sick_call_severity_mode = p.sick_call_severity_mode
         self.symptom_severity_profiles = dict(p.symptom_severity_profiles or {})
         # Presenting-sign detection: which observation a symptomatic
@@ -246,6 +254,9 @@ class SyndromicSurveillance:
         self._campaign_rng = _molecular_stream(self.rng, _CAMPAIGN_SPAWN_KEY)
         self._campaigns = self._index_campaigns(p.testing_campaigns)
         self._campaign_days_run: set[tuple[str, int]] = set()
+        # Roster members whose specimen is a re-swab of an earlier negative,
+        # keyed (pathogen_id, day_index) - the record's repeat-specimen rows.
+        self._campaign_retests: dict[tuple[str, int], set[int]] = {}
         # One entry per specimen the campaign took, in the order taken: what
         # the ship's own testing log held at the end of the voyage.
         self._campaign_specimen_log: list[dict[str, Any]] = []
@@ -688,7 +699,10 @@ class SyndromicSurveillance:
             aid = int(agent["agent_id"])
             if self._specimen_barred(
                 pathogen_id, aid, epoch,
-                indicated=aid in presenting or aid in scheduled,
+                indicated=(
+                    aid in scheduled
+                    or (self.retest_negatives_on_indication and aid in presenting)
+                ),
             ):
                 continue
             infection = (agent.get("pathogen_infections") or {}).get(
@@ -718,10 +732,11 @@ class SyndromicSurveillance:
         """Whether an earlier specimen rules this host out today.
 
         A confirmed host is never swabbed again. A host with a negative on
-        record is barred unless the run declares indicated retesting, the
-        host is indicated today, and the earlier specimen was taken on an
-        earlier simulated day - a case swabbed on day two is still one case
-        on day three, so the same day never yields two.
+        record is barred unless a declared retest channel reaches it today -
+        a campaign roster that renominated it (indication or declared sweep
+        retest; ``indicated`` carries that) - and the earlier specimen was
+        taken on an earlier simulated day: a case swabbed on day two is
+        still one case on day three, so the same day never yields two.
         """
         key = (pathogen_id, aid)
         if key in self._lab_confirmed:
@@ -729,21 +744,31 @@ class SyndromicSurveillance:
         sampled_epoch = self._lab_sampled.get(key)
         if sampled_epoch is None:
             return False
-        if not (self.retest_negatives_on_indication and indicated):
+        if not indicated:
             return True
         return self.clock.day_index(int(epoch)) <= self.clock.day_index(
             int(sampled_epoch),
         )
 
+    def _negative_retestable(self, pathogen_id: str, epoch: int) -> set[int]:
+        """Hosts holding a negative specimen from an earlier simulated day.
+
+        The channel-neutral pool every retest declaration draws from: a
+        confirmed host and a same-day specimen are never retestable.
+        """
+        day = self.clock.day_index(int(epoch))
+        return {
+            aid for (pid, aid), sampled_epoch in self._lab_sampled.items()
+            if pid == pathogen_id
+            and (pid, aid) not in self._lab_confirmed
+            and self.clock.day_index(int(sampled_epoch)) < day
+        }
+
     def _retestable_negatives(self, pathogen_id: str, epoch: int) -> set[int]:
         """Hosts a campaign indication tier may reach again this day."""
         if not self.retest_negatives_on_indication:
             return set()
-        return {
-            aid for (pid, aid) in self._lab_sampled
-            if pid == pathogen_id
-            and not self._specimen_barred(pid, aid, epoch, indicated=True)
-        }
+        return self._negative_retestable(pathogen_id, epoch)
 
     def _specimen_probability(
         self,
@@ -914,13 +939,21 @@ class SyndromicSurveillance:
         sampled = {
             aid for (pid, aid) in self._lab_sampled if pid == pathogen_id
         }
-        return campaign.specimen_roster(
+        negatives = self._negative_retestable(pathogen_id, epoch)
+        roster = campaign.specimen_roster(
             agents, day_index,
             confirmed_ids=confirmed,
             already_sampled=sampled,
-            retest_on_indication=self._retestable_negatives(pathogen_id, epoch),
+            retest_on_indication=(
+                negatives if self.retest_negatives_on_indication else ()
+            ),
+            retest_on_sweep=(
+                negatives if self.retest_negatives_on_sweep else ()
+            ),
             rng=self._campaign_rng,
         )
+        self._campaign_retests[key] = set(roster) & negatives
+        return roster
 
     def campaign_for(self, pathogen_id: str) -> TestingCampaign | None:
         return self._campaigns.get(str(pathogen_id))
@@ -1107,6 +1140,10 @@ class SyndromicSurveillance:
         """
         by_id = {int(a["agent_id"]): a for a in agents}
         day = self.clock.day_index(int(epoch))
+        campaign = self._campaigns.get(pathogen_id)
+        campaign_day = campaign.day_for(day) if campaign is not None else None
+        wave = campaign_day.wave if campaign_day is not None else ""
+        retests = self._campaign_retests.get((pathogen_id, day)) or set()
         for aid in roster:
             agent = by_id.get(int(aid), {})
             onset_epoch = self._presentation_onset_epoch.get(int(aid))
@@ -1120,6 +1157,8 @@ class SyndromicSurveillance:
                     onset_epoch is not None and int(onset_epoch) <= int(epoch)
                 ),
                 "role": "crew" if _agent_is_crew(agent) else "passenger",
+                "retest": int(aid) in retests,
+                "wave": wave,
             })
 
     def campaign_specimen_log(

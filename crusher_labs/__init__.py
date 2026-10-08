@@ -194,7 +194,10 @@ def testing_campaigns_from_config(
               start_day: 16
 
     The alignment is the scenario's statement; the volumes and the ladder are
-    the record's.
+    the record's. ``waves`` arms the record phases the scenario ran (a
+    wave-tagged campaign day exists only while its wave is armed), and a
+    wave name no loaded campaign declares raises rather than silently
+    doing nothing.
     """
     block = syn_cfg.get("testing_campaigns")
     if not block:
@@ -206,7 +209,10 @@ def testing_campaigns_from_config(
         for entry in entries
     }
     loaded = load_campaigns(
-        path, start_days=start_days, campaign_ids=list(start_days),
+        path,
+        start_days=start_days,
+        campaign_ids=list(start_days),
+        waves=block.get("waves") or (),
     )
     return [loaded[campaign_id] for campaign_id in start_days]
 
@@ -310,6 +316,9 @@ def build_modalities(
             ),
             retest_negatives_on_indication=syn_cfg.get(
                 "retest_negatives_on_indication", False,
+            ),
+            retest_negatives_on_sweep=syn_cfg.get(
+                "retest_negatives_on_sweep", False,
             ),
         ),
         "clinical_rdt": ClinicalRDT(

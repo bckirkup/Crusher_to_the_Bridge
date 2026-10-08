@@ -96,6 +96,15 @@ ARM_OVERRIDE_KEYS = frozenset({
     "info_suppression",
     "participation_propensity",
     "crew_duty_exclusion",
+    "observation_overrides",
+})
+# Fields an observation_overrides arm may write onto
+# ``config_overrides.syndromic``: the record-structure channels that are
+# observation process, not biology (CREW-REACH-01). ``retest_negative_sweeps``
+# arms the campaign's declared serial-testing tiers; ``campaign_waves``
+# arms wave-tagged campaign days by name (e.g. the crew mass-testing wave).
+OBSERVATION_OVERRIDE_KEYS = frozenset({
+    "retest_negative_sweeps", "campaign_waves",
 })
 # The embarkation-immunity structure an arm may write onto
 # ``config_overrides.ship_graph``: the pooled depth (``immune_fraction``)
@@ -192,6 +201,10 @@ class BoardingScreenDesign:
     arms: tuple[Mapping[str, Any], ...] = ()
     voyage_mode: str = VOYAGE_MODE_DECLARED
     seed_ring_readout: bool = False
+    # CREW-REACH-01: emit the per-host specimen/infection echo the funnel
+    # attribution needs at readout time (specimen, confirmation, onset,
+    # infection days per host plus the campaign testing log).
+    funnel_echo: bool = False
     split_role: str | None = None
     split_day: int = SPLIT_DAY
     turn_day: int = TURN_DAY
@@ -279,6 +292,7 @@ class BoardingScreenDesign:
             "arms": [dict(a) for a in self.arms],
             "voyage_mode": self.voyage_mode,
             "seed_ring_readout": self.seed_ring_readout,
+            "funnel_echo": self.funnel_echo,
             "split_role": self.split_role,
             "split_day": self.split_day,
             "turn_day": self.turn_day,
@@ -316,6 +330,7 @@ def load_design(
         arms=tuple(dict(a) for a in raw.get("arms", [])),
         voyage_mode=str(raw.get("voyage_mode", VOYAGE_MODE_DECLARED)),
         seed_ring_readout=bool(raw.get("seed_ring_readout", False)),
+        funnel_echo=bool(raw.get("funnel_echo", False)),
         split_role=(
             None if raw.get("split_role") is None
             else str(raw["split_role"])
@@ -927,7 +942,52 @@ def apply_arm_overrides(
         _apply_participation_propensity(
             raw, overrides["participation_propensity"],
         )
+    if "observation_overrides" in overrides:
+        _apply_observation_overrides(raw, overrides["observation_overrides"])
     return raw
+
+
+def _apply_observation_overrides(
+    raw: dict[str, Any],
+    block: Any,
+) -> None:
+    """Write an observation-structure arm's block onto config_overrides.
+
+    Two sub-keys only: ``retest_negative_sweeps`` (bool) lands at
+    ``syndromic.retest_negatives_on_sweep`` and ``campaign_waves``
+    (list of wave names) lands at ``syndromic.testing_campaigns.waves``,
+    where the modality's campaign loader arms the record's declared
+    wave-tagged days. Anything else raises at cell build.
+    """
+    if not isinstance(block, Mapping):
+        raise ValueError(
+            "observation_overrides arm override must be a mapping",
+        )
+    unknown = set(block) - OBSERVATION_OVERRIDE_KEYS
+    if unknown:
+        raise ValueError(
+            f"observation_overrides declares unknown keys {sorted(unknown)}; "
+            f"allowed: {sorted(OBSERVATION_OVERRIDE_KEYS)}",
+        )
+    syndromic = raw.setdefault("config_overrides", {}).setdefault(
+        "syndromic", {},
+    )
+    if "retest_negative_sweeps" in block:
+        syndromic["retest_negatives_on_sweep"] = bool(
+            block["retest_negative_sweeps"],
+        )
+    if "campaign_waves" in block:
+        waves = block["campaign_waves"]
+        if not isinstance(waves, list) or not all(
+            isinstance(w, str) and w for w in waves
+        ):
+            raise ValueError(
+                "observation_overrides.campaign_waves must be a list of "
+                "non-empty wave names",
+            )
+        syndromic.setdefault("testing_campaigns", {})["waves"] = [
+            str(w) for w in waves
+        ]
 
 
 def _apply_near_field_air_mode(raw: dict[str, Any], mode: Any) -> None:
@@ -1352,6 +1412,96 @@ def _lab_confirmed_role_counts(
         role = getattr(agents_by_id.get(aid), "role", None) or "passenger"
         counts[role] = counts.get(role, 0) + 1
     return counts
+
+
+def _specimen_channel_block(
+    syndromic: Any, raw: dict[str, Any],
+) -> dict[str, Any]:
+    """The resolved observation-structure echo (CREW-REACH-01).
+
+    The retest flags and armed campaign waves that ran, plus the realized
+    tallies the campaign's own testing log held — a cell's serial-testing /
+    crew-wave arm is auditable from the payload alone.
+    """
+    syn_cfg = (raw.get("config_overrides") or {}).get("syndromic") or {}
+    log = syndromic.campaign_specimen_log(PATHOGEN_ID)
+    positive = [entry for entry in log if entry["positive"]]
+    by_wave: dict[str, int] = {}
+    by_wave_positive: dict[str, int] = {}
+    for entry in log:
+        wave = entry.get("wave") or ""
+        if wave:
+            by_wave[wave] = by_wave.get(wave, 0) + 1
+            if entry["positive"]:
+                by_wave_positive[wave] = by_wave_positive.get(wave, 0) + 1
+    return {
+        "retest_negatives_on_indication": bool(
+            getattr(syndromic, "retest_negatives_on_indication", False),
+        ),
+        "retest_negatives_on_sweep": bool(
+            getattr(syndromic, "retest_negatives_on_sweep", False),
+        ),
+        "campaign_waves": list(
+            (syn_cfg.get("testing_campaigns") or {}).get("waves") or [],
+        ),
+        "campaign_specimens": len(log),
+        "campaign_specimen_retests": sum(
+            1 for entry in log if entry["retest"]
+        ),
+        "campaign_specimens_by_wave": by_wave,
+        "campaign_confirmed": len(positive),
+        "campaign_confirmed_retests": sum(
+            1 for entry in positive if entry["retest"]
+        ),
+        "campaign_confirmed_by_wave": by_wave_positive,
+    }
+
+
+def _funnel_hosts(
+    sim: Any,
+    syndromic: Any,
+    agents_by_id: dict[int, Any],
+) -> dict[str, dict[str, Any]]:
+    """Per-host observation days for the funnel attribution.
+
+    Every host that was infected, swabbed, or presented gets a row:
+    infection day, first presenting day, last specimen day, confirmation
+    day (all null where the channel never reached it). Day indices keep the
+    echo compact; the readout reconstructs the drain table boxed20 measured.
+    """
+    clock = syndromic.clock
+    day_of = lambda e: clock.day_index(int(e))  # noqa: E731
+    infection_day = {
+        a.agent_id: day_of(a.infections[PATHOGEN_ID]["infection_epoch"])
+        for a in sim.engine.agents
+        if PATHOGEN_ID in a.infections
+    }
+    confirmed = {
+        aid: day_of(ep) for (pid, aid), ep
+        in syndromic._lab_confirmed.items() if pid == PATHOGEN_ID
+    }
+    sampled = {
+        aid: day_of(ep) for (pid, aid), ep
+        in syndromic._lab_sampled.items() if pid == PATHOGEN_ID
+    }
+    presented = {
+        int(aid): day_of(ep)
+        for aid, ep in syndromic._presentation_onset_epoch.items()
+    }
+    hosts: dict[str, dict[str, Any]] = {}
+    for aid in (
+        set(infection_day) | set(sampled) | set(presented)
+    ):
+        hosts[str(aid)] = {
+            "role": (
+                getattr(agents_by_id.get(aid), "role", None) or "passenger"
+            ),
+            "infection_day": infection_day.get(aid),
+            "presented_day": presented.get(aid),
+            "specimen_day": sampled.get(aid),
+            "confirmed_day": confirmed.get(aid),
+        }
+    return hosts
 
 
 def _first_onset_day(curve: dict[int, dict[str, int]]) -> int | None:
@@ -1845,6 +1995,12 @@ def cell_payload(
     }
     if design.seed_ring_readout:
         payload["seed_ring"] = _seed_ring_block(sim, ledger, raw)
+    if design.funnel_echo:
+        payload["specimen_channel"] = _specimen_channel_block(syndromic, raw)
+        payload["campaign_specimen_log"] = syndromic.campaign_specimen_log(
+            PATHOGEN_ID,
+        )
+        payload["funnel_hosts"] = _funnel_hosts(sim, syndromic, agents_by_id)
     if design.arms:
         payload.update({
             "arm_id": cell.arm_id,

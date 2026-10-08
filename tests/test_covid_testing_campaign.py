@@ -38,10 +38,14 @@ _STATES = [
 ]
 
 # Diamond Princess, NIID/JMIR daily test counts, 5-20 Feb 2020; the two
-# ``None`` entries are the dates the record does not report.
+# ``None`` entries are the dates the record does not report. CREW-REACH-01
+# appends the evacuation-phase tail: 21-22 Feb unreported (``None``) and
+# 23 Feb = 831 tests / 57 positives, the crew mass-test wave in Yamahata &
+# Shibata 2020 (JMIR PHS 6(2):e18821) Table 1. The declared total then
+# lands on Yamahata's documented cumulative 3,894 tests vs 3,711 aboard.
 _PUBLISHED_DP_TESTS = [
     31, 71, 171, 6, 57, 103, None, 53, 221, None,
-    217, 289, 504, 681, 607, 52,
+    217, 289, 504, 681, 607, 52, None, None, 831,
 ]
 
 
@@ -832,9 +836,14 @@ class TestShippedCampaignRecords:
         ]
 
         assert [day.tests for day in campaign.days] == _PUBLISHED_DP_TESTS
-        assert campaign.total_scheduled_tests == 3063
+        assert campaign.total_scheduled_tests == 3894
         assert campaign.pathogen_id == PATHOGEN
         for day in campaign.days:
+            if day.wave == "crew_wave":
+                # 23 Feb: the crew mass-test wave is crew-only (the
+                # ladder's step 6 after passenger disembarkation).
+                assert day.tiers == ("crew",)
+                continue
             assert day.tiers[0] == "symptomatic_or_contact"
             assert (day.tiers[-1] == "crew") == (day.date >= "2020-02-11")
 
