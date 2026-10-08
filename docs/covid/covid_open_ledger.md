@@ -1209,17 +1209,16 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   transmission-size defect. Standing residual order: (a) asymptomatic
   composition vs 0.81 (~10×, largest); (b) the imports/early-contact
   fizzle tail; (c) ignited-seed count dispersion (~35–131 interior).
-- **`COVID-GM-RESCORE-02` canary measured (2026-10-08, fleet pending)**
-  — `docs/ledger/COVID-GM-RESCORE-02.md`, design
-  `docs/covid/covid_gm_rescore_v2_design.md`, campaign
-  `campaigns/covid/gm_rescore_02/`: anchor row (θ 2.37e11 ×
-  hygiene_cycle) first 20 seeds at `6bb0e996`, 0 audit failures —
-  **P(takeoff) 1.00** (v1's ~1-in-5 fizzle gone, q05 floor 1 → 56),
-  positives median 116 [56, 133] → **H1 lands tighter**; asym share
-  0.252 [0.168, 0.333] — H2 still misses but moved ~3× from v1's 0.064.
-  `mixed` on the prefix with residual class (a) narrowed and class (b)
-  off the list. Fleet (330 cells incl. spike_decay column + imports:3)
-  is the owner's call.
+- **`COVID-GM-RESCORE-02` fleet measured (2026-10-08)** —
+  `docs/ledger/COVID-GM-RESCORE-02.md`: all 300 scoring cells + 50
+  imports:3 at `6bb0e996`, 0 audit failures. **H1 lands on all six
+  θ × arm rows** (medians 87–118, every interval ∋ 128); P(takeoff)
+  0.94–0.96 (v1 ~0.76–0.86 — fizzle shrinks to a thin tail, imports:3
+  covers it to 1.00); **H2 still the dominant residual, ~3× out not
+  ~10×** (asym medians 0.233–0.268 vs band 0.71–0.91); hand physics
+  still not load-bearing (hygiene−spike Δ ~0, same as v1). Verdict
+  `mixed`, residual order re-sorted: composition, thin fizzle tail,
+  dispersion.
 - **`PRESENT-SHARE-01` repairs the share→hazard defect the GM H2
   decomposition surfaced** (`docs/ledger/PRESENT-SHARE-01.md`): the
   declared presentation probability (`symptomatic_fraction`, or the
