@@ -1372,9 +1372,17 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   never touched; named seam `CREW-BERTH-01`. Evidence
   `reports/crew_mess_berth_attr/cell_*.json`; caveat — `co_berth` is a
   sufficient-cause bound (no strain tracking), 3-seed orientation sample.
-  *CREW-BERTH-01 is declared (design frozen pre-run
-  2026-10-07, `docs/covid/covid_crew_berth_01_design.md`,
-  `docs/ledger/CREW-BERTH-01.md`): deterministic `crew_berthing`
-  cabin re-deal + `crew_work_cohorts` shift-split modifiers, six
-  arms (shipped corner + five SOP-017-* boxed); canary = `combined`
-  20-seed block, then the family reports before the ladder runs.*
+  *CREW-BERTH-01 canary measured (2026-10-08,
+  `docs/covid/covid_crew_berth_01_readout.md`,
+  `docs/ledger/CREW-BERTH-01.md`): the maximal `combined` arm
+  (rezone + 2-pod shifts + status-pure re-deal, 20/20 cells) moves
+  crew share 0.727 → 0.662 — **CEILING-SHORT** vs the declared
+  (0.2,0.4) band; confined-pax guard and deliveries parity hold.
+  The crew-share residual is not a dining/berthing/occupational
+  composite — the family ceiling is exhausted. Hot-seed attribution
+  (`reports/crew_berth_attr/cell_*.json`, 3 seeds, event counts
+  reproduce the Batch cells): corridor-venue occupational 45% +
+  cabin 19% (36/362 confined-in-berth, 33 with no prior-infected
+  mate — corridor-pool leakage) + galley 19% — the re-deal closed
+  the carry-home channel (3 events) but confined berths still take
+  compartment/pool dose.*

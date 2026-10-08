@@ -2,7 +2,8 @@
 **Date:** 2026-10-07
 **Commit:** a1961d17
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** 2d70237c
 
 Crew berthing and work-cohort confinement arms on the verbatim
 `diamond_princess_2020` replay — the seam named by the CREW-MESS-01
@@ -44,3 +45,17 @@ grammar BERTH-CHANNEL-CLOSED / CEILING-SHORT / OVER-CLOSED / UNMOVED /
 PAX-COLLATERAL / DRIFT. Execution: one 20-seed `combined` canary block,
 then stop and report — the full ladder runs only on the owner's
 go-ahead.
+
+**Canary readout (2026-10-08, Fargate array
+`b80eac09-6da2-4a11-aa16-8f6f181505d1`, 20/20 cells at digest-pinned
+`sha256:02d47fae`, image SHA 2d70237c):** `combined` — crew share
+median **0.662** vs the boxed base 0.727, well above the (0.2,0.4)
+band → **CEILING-SHORT**: the family ceiling moved −0.065 and the
+residual rides a channel outside berthing+occupational. Guards all
+held: confined-pax median 32.5 ∈ [26,160]; deliveries 162,182.5 vs
+162,184.5 parity; 0 audit-invariant violations (status-pure re-deal,
+verbatim falling-edge restore at epoch 745, galley share 0.000,
+cabin share 0.435). Readout:
+`docs/covid/covid_crew_berth_01_readout.md`. The DRIFT witness is
+unmeasurable on the canary alone (`mess_boxed_base` has no cells —
+first ladder block).
