@@ -1,6 +1,6 @@
 # ASYM-CONF-01
 **Date:** 2026-10-08
-**Commit:** #974
+**Commit:** #976
 **Pathogens:** sars_cov2_resp
 **Status:** measured
 **Measured at:** 29f5e8d1
