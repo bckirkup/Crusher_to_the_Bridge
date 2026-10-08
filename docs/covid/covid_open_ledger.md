@@ -1465,3 +1465,35 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   share vs 0.29** (band declared (0.2,0.4)); the residual believability
   tension is the dating overshare + confirmed-count scale, both
   observation-channel, neither a contact-structure defect.
+
+  **All-20-seed addendum (2026-10-08, all `sect_mess_boxed` seeds
+  20200205–20200224, `reports/funnel_attr/boxed20.json`):** the
+  orientation sample flattered the verdict — it was the three largest
+  cells. Full-grid pooled reads hotter and the resolution is
+  **conditional on outbreak scale**:
+
+  | stage | crew share | n |
+  |---|---|---|
+  | infections, total voyage | 0.614 | 1810 |
+  | infections, during-window only | 0.683 | 1179 |
+  | lab_confirmed, total voyage | **0.435** | 819 |
+  | confirmed + ever presented | 0.440 | 694 |
+  | symptomatic-at-specimen gate pass | 0.462 | 624 |
+  | recorded (dated) onsets | 0.440 | 687 |
+
+  Crew share falls monotonically with realized outbreak size: pooled
+  over cells with n_confirmed ≥ 50 → 0.370 (4 cells, n=649); over the
+  two **DP-scale** cells (20200218 n=293, 20200223 n=209; record = 712)
+  → **0.293 ≈ record 0.29**. Small-outbreak realizations stay
+  crew-dominated (share ~0.6–0.9) — outbreaks too small to sweep the
+  passenger mass are not the record world. Per-cell median 0.600
+  (17 cells with any confirmations; 4 cells have zero) is the same
+  scale-mixing artefact: it weights a 2-confirmation fizzle equal to a
+  293-confirmation voyage. Verdict amended: on the record's own metric
+  **and** at the record's own outbreak scale, the model reads the
+  record's composition nearly exactly (0.293 vs 0.29, in-band);
+  unconditionally pooled it is ~0.04 over band-top. The honest scoring
+  rule for crew share is therefore *condition on comparable realized
+  outbreak scale*, not pooled-over-all-cells. The dating overshare is
+  unchanged and still role-flat (dated/confirmed pooled 0.839 vs record
+  0.277; crew 0.848, pax 0.832).

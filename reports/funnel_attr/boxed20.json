@@ -1,0 +1,874 @@
+{
+ "cells": [
+  {
+   "seed": 20200205,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 9,
+     "passenger": 3
+    },
+    "during_window": {
+     "crew": 5,
+     "passenger": 1
+    }
+   },
+   "lab_confirmed": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 4,
+    "passenger": 1,
+    "other": 0
+   },
+   "lab_confirmed_total": 6,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200206,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 4,
+     "passenger": 1
+    },
+    "during_window": {
+     "crew": 2,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 2,
+    "passenger": 0,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 2,
+    "passenger": 0,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 2,
+    "passenger": 0,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 2,
+    "passenger": 0,
+    "other": 0
+   },
+   "lab_confirmed_total": 2,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200207,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 0,
+     "passenger": 4
+    },
+    "during_window": {
+     "crew": 0,
+     "passenger": 1
+    }
+   },
+   "lab_confirmed": {
+    "crew": 0,
+    "passenger": 3,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 0,
+    "passenger": 3,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 0,
+    "passenger": 2,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 0,
+    "passenger": 2,
+    "other": 0
+   },
+   "lab_confirmed_total": 3,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200208,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 61,
+     "passenger": 20
+    },
+    "during_window": {
+     "crew": 47,
+     "passenger": 16
+    }
+   },
+   "lab_confirmed": {
+    "crew": 16,
+    "passenger": 17,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 14,
+    "passenger": 12,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 14,
+    "passenger": 9,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 14,
+    "passenger": 11,
+    "other": 0
+   },
+   "lab_confirmed_total": 33,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200209,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 0,
+     "passenger": 2
+    },
+    "during_window": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "lab_confirmed_total": 0,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200210,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 73,
+     "passenger": 56
+    },
+    "during_window": {
+     "crew": 68,
+     "passenger": 28
+    }
+   },
+   "lab_confirmed": {
+    "crew": 39,
+    "passenger": 37,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 30,
+    "passenger": 30,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 28,
+    "passenger": 28,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 29,
+    "passenger": 30,
+    "other": 0
+   },
+   "lab_confirmed_total": 76,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200211,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 32,
+     "passenger": 10
+    },
+    "during_window": {
+     "crew": 27,
+     "passenger": 8
+    }
+   },
+   "lab_confirmed": {
+    "crew": 14,
+    "passenger": 0,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 12,
+    "passenger": 0,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 7,
+    "passenger": 0,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 12,
+    "passenger": 0,
+    "other": 0
+   },
+   "lab_confirmed_total": 14,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200212,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 15,
+     "passenger": 7
+    },
+    "during_window": {
+     "crew": 4,
+     "passenger": 5
+    }
+   },
+   "lab_confirmed": {
+    "crew": 3,
+    "passenger": 2,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 2,
+    "passenger": 2,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 2,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 2,
+    "passenger": 2,
+    "other": 0
+   },
+   "lab_confirmed_total": 5,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200213,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "during_window": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "lab_confirmed_total": 0,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200214,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 2,
+     "passenger": 4
+    },
+    "during_window": {
+     "crew": 1,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 1,
+    "passenger": 1,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 1,
+    "passenger": 1,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 1,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 1,
+    "passenger": 1,
+    "other": 0
+   },
+   "lab_confirmed_total": 2,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200215,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 114,
+     "passenger": 6
+    },
+    "during_window": {
+     "crew": 87,
+     "passenger": 4
+    }
+   },
+   "lab_confirmed": {
+    "crew": 27,
+    "passenger": 4,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 21,
+    "passenger": 3,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 20,
+    "passenger": 3,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 21,
+    "passenger": 3,
+    "other": 0
+   },
+   "lab_confirmed_total": 31,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200216,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 13,
+     "passenger": 2
+    },
+    "during_window": {
+     "crew": 8,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 5,
+    "passenger": 1,
+    "other": 0
+   },
+   "lab_confirmed_total": 6,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200217,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 0,
+     "passenger": 1
+    },
+    "during_window": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 0,
+    "passenger": 0,
+    "other": 0
+   },
+   "lab_confirmed_total": 0,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200218,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 183,
+     "passenger": 286
+    },
+    "during_window": {
+     "crew": 154,
+     "passenger": 131
+    }
+   },
+   "lab_confirmed": {
+    "crew": 62,
+    "passenger": 231,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 57,
+    "passenger": 191,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 56,
+    "passenger": 166,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 57,
+    "passenger": 191,
+    "other": 0
+   },
+   "lab_confirmed_total": 293,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200219,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 203,
+     "passenger": 37
+    },
+    "during_window": {
+     "crew": 130,
+     "passenger": 30
+    }
+   },
+   "lab_confirmed": {
+    "crew": 54,
+    "passenger": 17,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 43,
+    "passenger": 15,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 42,
+    "passenger": 13,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 43,
+    "passenger": 14,
+    "other": 0
+   },
+   "lab_confirmed_total": 71,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200220,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 88,
+     "passenger": 37
+    },
+    "during_window": {
+     "crew": 42,
+     "passenger": 29
+    }
+   },
+   "lab_confirmed": {
+    "crew": 28,
+    "passenger": 12,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 25,
+    "passenger": 11,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 24,
+    "passenger": 6,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 25,
+    "passenger": 11,
+    "other": 0
+   },
+   "lab_confirmed_total": 40,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200221,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 48,
+     "passenger": 33
+    },
+    "during_window": {
+     "crew": 25,
+     "passenger": 20
+    }
+   },
+   "lab_confirmed": {
+    "crew": 6,
+    "passenger": 10,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 4,
+    "passenger": 9,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 4,
+    "passenger": 8,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 4,
+    "passenger": 8,
+    "other": 0
+   },
+   "lab_confirmed_total": 16,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200222,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 40,
+     "passenger": 17
+    },
+    "during_window": {
+     "crew": 27,
+     "passenger": 14
+    }
+   },
+   "lab_confirmed": {
+    "crew": 9,
+    "passenger": 2,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 5,
+    "passenger": 2,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 4,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 5,
+    "passenger": 2,
+    "other": 0
+   },
+   "lab_confirmed_total": 11,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200223,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 227,
+     "passenger": 169
+    },
+    "during_window": {
+     "crew": 178,
+     "passenger": 87
+    }
+   },
+   "lab_confirmed": {
+    "crew": 85,
+    "passenger": 124,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 79,
+    "passenger": 107,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 74,
+    "passenger": 95,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 78,
+    "passenger": 107,
+    "other": 0
+   },
+   "lab_confirmed_total": 209,
+   "onset_recording_channel": null
+  },
+  {
+   "seed": 20200224,
+   "arm_id": "sect_mess_boxed",
+   "window_days": [
+    16,
+    30
+   ],
+   "infected": {
+    "total": {
+     "crew": 0,
+     "passenger": 2
+    },
+    "during_window": {
+     "crew": 0,
+     "passenger": 0
+    }
+   },
+   "lab_confirmed": {
+    "crew": 0,
+    "passenger": 1,
+    "other": 0
+   },
+   "confirmed_and_presented": {
+    "crew": 0,
+    "passenger": 1,
+    "other": 0
+   },
+   "gate_pass_symptomatic_at_specimen": {
+    "crew": 0,
+    "passenger": 1,
+    "other": 0
+   },
+   "recorded_onsets": {
+    "crew": 0,
+    "passenger": 1,
+    "other": 0
+   },
+   "lab_confirmed_total": 1,
+   "onset_recording_channel": null
+  }
+ ],
+ "pooled": {
+  "infections_total": {
+   "crew": 1112,
+   "passenger": 698,
+   "other": 0,
+   "n": 1810,
+   "crew_share": 0.6144
+  },
+  "infections_during_window": {
+   "crew": 805,
+   "passenger": 374,
+   "other": 0,
+   "n": 1179,
+   "crew_share": 0.6828
+  },
+  "lab_confirmed": {
+   "crew": 356,
+   "passenger": 463,
+   "other": 0,
+   "n": 819,
+   "crew_share": 0.4347
+  },
+  "confirmed_and_presented": {
+   "crew": 305,
+   "passenger": 389,
+   "other": 0,
+   "n": 694,
+   "crew_share": 0.4395
+  },
+  "gate_pass_symptomatic_at_specimen": {
+   "crew": 288,
+   "passenger": 336,
+   "other": 0,
+   "n": 624,
+   "crew_share": 0.4615
+  },
+  "recorded_onsets": {
+   "crew": 302,
+   "passenger": 385,
+   "other": 0,
+   "n": 687,
+   "crew_share": 0.4396
+  }
+ },
+ "conditioned_lab_confirmed_share": {
+  "all_cells_n819": {
+   "crew": 356,
+   "n": 819,
+   "share": 0.4347
+  },
+  "n_conf_ge_50": {
+   "crew": 240,
+   "n": 649,
+   "share": 0.3698
+  },
+  "n_conf_ge_100": {
+   "crew": 147,
+   "n": 502,
+   "share": 0.2928,
+   "cells": [
+    20200218,
+    20200223
+   ]
+  }
+ },
+ "dated_share_of_confirmed": {
+  "pooled": 0.8388,
+  "crew": 0.8483,
+  "passenger": 0.8315
+ }
+}
