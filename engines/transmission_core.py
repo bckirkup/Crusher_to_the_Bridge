@@ -12688,15 +12688,10 @@ class TransmissionCore:
             ):
                 continue
             if obj["source_kind"] != "provisioned_lot":
-                if self._cs_agent_passes(
-                    obj, epoch, token, occupant_ids,
-                ):
-                    state["objects_served"].add(obj["object_id"])
-                    self._cs_fire(
-                        (obj["source_kind"], obj["agent"]), state,
-                        epoch, zone_name, token, members,
-                        pathogen_id, profile, matrix, obj=obj,
-                    )
+                self._cs_agent_object_serve(
+                    obj, state, epoch, zone_name, token, occupant_ids,
+                    members, pathogen_id, profile, matrix,
+                )
                 continue
             if day > obj["start_day"] + obj["shelf_life_days"]:
                 # Perishability: residual servings are discarded and no
@@ -12713,6 +12708,31 @@ class TransmissionCore:
                 state, obj, epoch, zone_name, token,
                 members, pathogen_id, profile, matrix,
             )
+
+    def _cs_agent_object_serve(
+        self,
+        obj: dict[str, Any],
+        state: dict[str, Any],
+        epoch: int,
+        zone_name: str,
+        token: str,
+        occupant_ids: set,
+        members: list[KorkinAgent],
+        pathogen_id: str,
+        profile: dict | None,
+        matrix: ContactTracingMatrix,
+    ) -> None:
+        """One live handler/diner object emits its one pan for this
+        window when the source agent works or passes it (the pan they
+        work / the pan they take, spec §Leg 2)."""
+        if not self._cs_agent_passes(obj, epoch, token, occupant_ids):
+            return
+        state["objects_served"].add(obj["object_id"])
+        self._cs_fire(
+            (obj["source_kind"], obj["agent"]), state,
+            epoch, zone_name, token, members,
+            pathogen_id, profile, matrix, obj=obj,
+        )
 
     def _cs_object_serve(
         self,
@@ -12986,7 +13006,7 @@ class TransmissionCore:
         )
         if rate > 0.0 and self._cs_rng.random() < rate * self._cs_posture:
             span["object"] = self._cs_realize_agent_object(
-                agent, kind, station, epoch, pathogen_id, profile,
+                agent, kind, station, epoch, pathogen_id,
             )
 
     def _cs_span_eligibility(
@@ -13051,7 +13071,6 @@ class TransmissionCore:
         station: str,
         epoch: int,
         pathogen_id: str,
-        profile: dict | None,
     ) -> dict[str, Any]:
         """Mint one seeded handler/diner contamination object.
 

@@ -512,7 +512,8 @@ def test_mode_off_and_unarmed_draw_nothing_under_object_defaults() -> None:
     events, objects = _step_epochs(
         core_off, agents, {ZONE: agents}, epochs=30,
     )
-    assert events == [] and objects == []
+    assert events == []
+    assert objects == []
     assert core_off._cs_rng is None
     assert all(
         v == 0 for v in core_off.common_source_telemetry.values()
