@@ -169,3 +169,41 @@ existed), not a proven infector — the runs carry no strain tracking;
 and 3 seeds is an orientation sample, not a pooled estimate.
 
 Evidence: `reports/crew_mess_berth_attr/cell_*.json` (per-event rows).
+
+## Post-canary: recorded-onset share by role (ascertainment cross-check)
+
+Every cell payload already carries `onset_curve` — dated onsets split
+per role — so the apples-to-apples comparison against the record's
+confirmed-case share needs no campaign: share of crew among onsets
+dated inside the quarantine window (days 16–30), pooled and per-cell,
+on all 20 `sect_mess_boxed` canary cells:
+
+| metric | crew share | n |
+|---|---|---|
+| acquisition share, pooled | 0.683 | 1179 |
+| **recorded-onset share, pooled** | **0.475** | 558 |
+| acquisition share, per-cell median | 0.727 | 16 cells |
+| recorded-onset share, per-cell median | 0.636 | 16 cells |
+
+The funnel de-rates crew by ~0.2 — about two-thirds of the distance to
+the declared (0.2, 0.4) band is an acquisition-vs-confirmed comparison
+mismatch, not physics. The correction is strongest where the mass is:
+on the two largest-outbreak cells the recorded share lands in or near
+the band (seed 20200218: **0.244**, n=201; seed 20200223: 0.479,
+n=140) while small cells are noisy.
+
+Reads:
+
+- the composition hotness survives but shrinks — the residual excess is
+  ~0.08–0.15 above band-top on pooled cells, the scale of the remaining
+  suspects (corridor-pool leakage on confined agents, unmodelled crew
+  evacuation/test-cadence asymmetry), not ~0.4;
+- "the model overestimates COVID" is only defensible as a
+  crew-structure statement: theta is a role-blind scale, so a globally
+  hot literature gets absorbed into theta and cannot produce a
+  composition gap — the excess must live in crew-specific exposure or
+  in the ascertainment comparison;
+- the record's 0.29 is a confirmed-case share; scoring it against
+  acquisition share overstated the defect. Any future crew-share band
+  should be declared on recorded-onset share — the two metrics differ
+  by ~0.2 pooled on this hull.

@@ -1386,3 +1386,19 @@ before `AERO-CABIN-04`). Six-seed probe at the same Θ: 3, 2,759, 2,011, 1, 4,
   mate — corridor-pool leakage) + galley 19% — the re-deal closed
   the carry-home channel (3 events) but confined berths still take
   compartment/pool dose.*
+
+- **Recorded-onset share by role (ascertainment cross-check on the boxed canary cells): ~2/3 of the crew-share gap is an acquisition-vs-confirmed comparison mismatch.**
+  `onset_curve` already carries per-day role tags, so no campaign was
+  needed: share of crew among onsets dated inside the window (days
+  16–30) reads **0.475 pooled (n=558) vs 0.683 pooled on acquisitions
+  (n=1179)** — per-cell medians 0.636 vs 0.727. The funnel's correction
+  is strongest where the mass is: the largest cell (seed 20200218)
+  lands **0.244 inside the declared (0.2, 0.4) band**. Residual excess
+  ~0.08–0.15 above band-top on pooled cells — the scale of the
+  corridor-pool leakage suspect plus unmodelled crew
+  evacuation/test-cadence asymmetry, not a ~0.4 physics hole.
+  Consequence: crew-share bands should be declared on recorded-onset
+  share (the two metrics differ ~0.2 pooled); "the literature
+  overestimates COVID" survives only as a crew-structure statement —
+  theta is role-blind and absorbs any globally hot constant. Detail:
+  `docs/covid/covid_crew_mess_01_readout.md` §Post-canary onset share.
