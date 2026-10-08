@@ -309,7 +309,23 @@ def test_row_metrics_pooled_dated_share(
     m = readout_mod._row_metrics(payloads, 10)
     assert m["pooled_dated_share"] == pytest.approx(150 / 500)
     assert m["lab_confirmed_crew_share_median"] == pytest.approx(0.4)
+    assert m["lab_confirmed_crew_share_pooled"] == pytest.approx(0.4)
     assert m["symptomatic_at_specimen_median"] == pytest.approx(0.5)
+
+
+def test_row_metrics_pooled_crew_share_dp_scale(
+    readout_mod: types.ModuleType,
+) -> None:
+    payloads = [
+        _payload("boxed_period", 20200205, 10, 50),
+        _payload("boxed_period", 20200206, 40, 150),
+    ]
+    m = readout_mod._row_metrics(payloads, 10)
+    # pooled: crew = 20+60, total = 200 -> 0.4; dp-scale: only the
+    # n_conf >= 100 cell counts -> 60/150
+    assert m["lab_confirmed_crew_share_pooled"] == pytest.approx(0.4)
+    assert m["dp_scale_n"] == 1
+    assert m["dp_scale_crew_share_pooled"] == pytest.approx(0.4)
 
 
 def test_lab_confirmed_role_counts_splits_roles() -> None:

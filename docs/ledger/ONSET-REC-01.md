@@ -2,7 +2,8 @@
 **Date:** 2026-10-08
 **Commit:** #972
 **Pathogens:** sars_cov2_resp
-**Status:** declared
+**Status:** measured
+**Measured at:** bccc9daa
 
 The onset-recording channel (`observation_model.onset_recording` on
 `sars_cov2_resp`, frozen from SERO-CHANNEL-V1:
@@ -46,4 +47,40 @@ retuned to the 0.277 anchor.
 
 ## Readout
 
-_pending — canary submitted; fills when the 40 cells land._
+Measured at `bccc9daa` — 40/40 cells landed on
+`picard-analysis-fargate-queue` (arrays `0b49e3f6` boxed_declared,
+`3391150c` boxed_period; image digest `sha256:812b02bb`), zero child
+failures, zero audit-invariant violations. Readout artifact:
+`reports/covid_onset_rec_01_readout.md`
+(`campaigns/covid/onset_rec_01/readout.py`).
+
+| arm | dated share (pooled / med) | pooled lab_conf | pooled recorded | lab_conf crew share (pooled / DP-scale) | verdict |
+|---|---|---|---|---|---|
+| boxed_declared | 0.839 / 0.833 | 819 | 687 | 0.435 / 0.293 (n=2) | BASELINE — bit-identity control |
+| boxed_period | **0.416 / 0.323** | 819 | 341 | 0.435 / 0.293 (n=2) | **CHANNEL-INSUFFICIENT** |
+
+- **Primary:** pooled dated share 0.416 vs the record's 0.277 — above
+  the record band top 0.327 → CHANNEL-INSUFFICIENT, the declared
+  admissible outcome. It lands ~0.014 under the declared expectation
+  band [0.43, 0.55] (SERO-CHANNEL-V1's ~0.43–0.53 range was on a
+  different hull/config; the median 0.323 reads lower because the
+  channel removes the most dated mass on the largest cells, so pooling
+  is pulled up by takeoff cells).
+- **Bit-identity clause:** all 20 `boxed_declared` seeds are
+  IDENTICAL to the landed `sect_mess_boxed` cells on every
+  voyage-derived field (infections_total, aboard_total,
+  lab_confirmed_total, infections_during_window,
+  confined_passenger_infections_during_quarantine, recorded_onsets,
+  service_deliveries). The campaign-composed `base_overrides` is
+  verified in place.
+- **Secondaries (reported, never thresholded):** pooled
+  lab_confirmed_total 819 vs record 712 — unchanged between arms
+  (bit-identical lab confirmations); lab_confirmed crew share
+  identical on both arms at 0.435 pooled / 0.293 DP-scale — the
+  role-flat channel produced no share move; symptomatic-at-specimen
+  median 0.688 both arms; confined-pax takeoff median 28/29 inside
+  the [26, 160] guard; deliveries parity 162,184 med vs ~162k.
+- **Consequence:** the full declared channel removes ~half the dated
+  mass (687 → 341 pooled) and still leaves ~0.14 of confirmed dated
+  above the record — the residual is an observation-channel gap, not
+  a transmission one.

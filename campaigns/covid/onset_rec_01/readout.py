@@ -32,8 +32,8 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from picard_framework.covid_boarding_screen import (  # noqa: E402
+    enumerate_cells,
     load_design,
-    merge_screen,
 )
 
 _DESIGN = "picard_framework/runs/covid_onset_rec_01_design.json"
@@ -270,11 +270,27 @@ def _row_metrics(payloads: list[dict[str, Any]], takeoff_min: int) -> dict:
         s for s in (_lab_confirmed_crew_share(p) for p in payloads)
         if s is not None
     ]
+    crew = sum(
+        float((p.get("lab_confirmed_by_role") or {}).get("crew") or 0)
+        for p in payloads
+    )
+    pax = sum(
+        float((p.get("lab_confirmed_by_role") or {}).get("passenger") or 0)
+        for p in payloads
+    )
+    pooled_crew_share = crew / (crew + pax) if crew + pax else None
     dp_cells = [p for p in payloads if _confirmed(p) >= _DP_SCALE_MIN]
-    dp_rec_shares = [
-        s for s in (_lab_confirmed_crew_share(p) for p in dp_cells)
-        if s is not None
-    ]
+    dp_crew = sum(
+        float((p.get("lab_confirmed_by_role") or {}).get("crew") or 0)
+        for p in dp_cells
+    )
+    dp_pax = sum(
+        float((p.get("lab_confirmed_by_role") or {}).get("passenger") or 0)
+        for p in dp_cells
+    )
+    dp_pooled_crew_share = (
+        dp_crew / (dp_crew + dp_pax) if dp_crew + dp_pax else None
+    )
     symp = [
         s for s in (_symptomatic_at_specimen(p) for p in payloads)
         if s is not None
@@ -293,8 +309,9 @@ def _row_metrics(payloads: list[dict[str, Any]], takeoff_min: int) -> dict:
         "dated_share_median": _median(shares),
         "lab_confirmed_median": _median(conf),
         "lab_confirmed_crew_share_median": _median(rec_shares),
+        "lab_confirmed_crew_share_pooled": pooled_crew_share,
         "dp_scale_n": len(dp_cells),
-        "dp_scale_crew_share_median": _median(dp_rec_shares),
+        "dp_scale_crew_share_pooled": dp_pooled_crew_share,
         "confined_pax_median_takeoff": _median(confined),
         "deliveries_median": _median(deliveries),
         "symptomatic_at_specimen_median": _median(symp),
@@ -351,8 +368,8 @@ def _render(
 ) -> str:
     rows = _rows(payloads)
     violations = [v for p in payloads.values() for v in _audit_cell(p)]
-    surface = merge_screen(design, payloads, allow_partial=True)
-    coverage = surface["coverage"]
+    expected = len(enumerate_cells(design))
+    found = len(payloads)
     takeoff_min = design.takeoff_recorded_onsets
 
     lines = [
@@ -360,13 +377,13 @@ def _render(
         "",
         f"- source: `{source}`",
         f"- design: `{_DESIGN}`",
-        f"- coverage: {coverage['found']}/{coverage['expected']} cells "
-        f"(partial: {coverage['partial']})",
+        f"- coverage: {found}/{expected} cells "
+        f"(partial: {found < expected})",
         f"- audit invariants: {len(violations)} violation(s)",
         "",
         "| arm | n | takeoff | lab_conf med | pooled conf | pooled rec | "
-        "dated share (pooled / med) | lab_conf crew share (pooled-med / "
-        "DP-scale med) | symp@specimen med | confined-pax med | "
+        "dated share (pooled / med) | lab_conf crew share (pooled / "
+        "DP-scale pooled) | symp@specimen med | confined-pax med | "
         "deliveries med | verdict |",
         "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
@@ -378,8 +395,9 @@ def _render(
             f"{_fmt(m['lab_confirmed_median'])} | {m['pooled_conf']:g} | "
             f"{m['pooled_rec']:g} | {_fmt(m['pooled_dated_share'])} / "
             f"{_fmt(m['dated_share_median'])} | "
-            f"{_fmt(m['lab_confirmed_crew_share_median'])} / "
-            f"{_fmt(m['dp_scale_crew_share_median'])} (n={m['dp_scale_n']}) | "
+            f"{_fmt(m['lab_confirmed_crew_share_pooled'])} / "
+            f"{_fmt(m['dp_scale_crew_share_pooled'])} "
+            f"(n={m['dp_scale_n']}) | "
             f"{_fmt(m['symptomatic_at_specimen_median'])} | "
             f"{_fmt(m['confined_pax_median_takeoff'])} | "
             f"{_fmt(m['deliveries_median'])} | {verdict} |",
