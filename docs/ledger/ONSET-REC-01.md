@@ -1,6 +1,6 @@
 # ONSET-REC-01
 **Date:** 2026-10-08
-**Commit:** _fills at merge — authored on the onset-rec-01 campaign branch_
+**Commit:** #972
 **Pathogens:** sars_cov2_resp
 **Status:** declared
 
