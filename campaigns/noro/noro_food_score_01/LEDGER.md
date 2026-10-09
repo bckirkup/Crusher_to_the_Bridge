@@ -15,7 +15,7 @@ against the spec's frozen measurement plan. Design:
 | image build | done | `picard-campaign:noro-food-score01` built at merged design SHA `40862b8c` (root `Dockerfile` + literal `Dockerfile.campaign` overlay), digest `sha256:29ea170eaede08d02566910967bfbda879a3656ceb3a40cf3ef45201fc5d9599`; verified in-container (deploy/aws + tools + campaigns trees, `ENGINE_GIT_SHA` = `40862b8c…`, one real cell ran a full voyage in-image and self-uploaded under the canary prefix — the ship array's index-0 dedup-skipped it) |
 | canary | done | 44/44 SUCCEEDED on `picard-campaign-queue` (Spot); all frozen gates green — see Canary readout |
 | wave 1 | landed | exp + cls 12,000/12,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_{exp,cls}_*/`; see Wave 1 submission |
-| wave 2 | in flight | spr tiers (6,000 voyages) on `picard-campaign-queue` (Spot) — off arm landed, 0 FAILED at ~85 min; see Wave 2 submission |
+| wave 2 | landed | spr 6,000/6,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_spr_*/`; see Wave 2 submission |
 | readout | pending | `outbreak_anchor_readout.py` + `common_source_readout.py` + `onset_curve_readout.py` per the design |
 
 ## Canary readout (2026-10-08, all at `40862b8c`)
@@ -139,6 +139,23 @@ on the same digest already verified them (84 objects, all close fields).
 Deferred to readout stage, which inspects ship cells anyway.
 
 No report-immediately trigger fired.
+
+**Ship-arm witness check (2026-10-09, landed s8105):** echo verbatim
+`{lot,handler,diner:"object", lot_object_probability:[0.001,0.02]}`;
+`common_source.events` 153/153 rows carry `object_id` + `pan_serial`;
+`common_source.objects` 66/66 rows carry close fields (`end_reason`:
+source_excluded/exhausted, seeded/exhausted epochs, windows, pans,
+dose_credited). Telemetry 147 ill_handler + 6 ill_diner events, 0
+provisioned_lot (ungated), 66 objects, 153 pans / 153 windows, 1,237
+takers — same shape as canary. Non-degenerate 288-epoch voyage (230
+infected, peak 232, outbreak). Deferred gate now verified on fleet
+cells.
+
+**Wave 2 landed (2026-10-09 ~01:20 UTC):** ship parent SUCCEEDED —
+6,000/6,000 SUCCEEDED across the 6 `fl_spr` prefixes, **0 FAILED** all
+wave (retry×10 never surfaced a reclaim), ~8.9 h wall on Spot at a
+steady ~12 cells/min. All 18,000 scored cells (exp + cls + spr) now
+landed; no resubmit needed anywhere.
 
 ## Grid
 
