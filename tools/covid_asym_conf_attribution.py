@@ -38,6 +38,7 @@ import argparse
 import json
 import sys
 from collections import Counter
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
@@ -332,8 +333,21 @@ def _bump_series(
         table[key][role] += n
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
+def run_cell_probe_cli(
+    argv: list[str] | None,
+    decompose: Callable[[Any, float, str, int], dict[str, Any]],
+    build_output: Callable[[list[dict[str, Any]]], dict[str, Any]],
+    stdout_summary: Callable[[dict[str, Any]], dict[str, Any]],
+    *,
+    description: str | None = None,
+) -> int:
+    """Shared CLI driver for the per-cell decomposition probes.
+
+    `--design/--theta/--arm/--seed` (repeat)/`--out`: rerun each seed
+    via `decompose(design, theta, arm, seed)`, write
+    `build_output(cells)` to --out, print `stdout_summary(out)`.
+    """
+    parser = argparse.ArgumentParser(description=description)
     parser.add_argument("--design", required=True)
     parser.add_argument("--theta", type=float, required=True)
     parser.add_argument("--arm", required=True)
@@ -342,23 +356,34 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     design = load_design(resolve_repo_path(str(_REPO_ROOT), args.design))
-    cells = [
-        decompose_cell(design, args.theta, args.arm, s) for s in args.seed
-    ]
-    out = {"cells": cells, "pooled": _pool_cells(cells)}
+    cells = [decompose(design, args.theta, args.arm, s) for s in args.seed]
+    out = build_output(cells)
     out_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     with validated_open(
         str(out_path), "w", allowed_roots=(str(_REPO_ROOT),)
     ) as fh:
         fh.write(json.dumps(out, indent=1) + "\n")
-    pooled = out["pooled"]
-    print(json.dumps({
-        "lab_confirmed_total": pooled["lab_confirmed_total"],
-        "asymptomatic_share": pooled["asymptomatic_share_of_confirmed"],
-        "confirmed_by_channel_status": pooled["confirmed_by_channel_status"],
-    }, indent=1))
+    print(json.dumps(stdout_summary(out), indent=1))
     return 0
+
+
+def main(argv: list[str] | None = None) -> int:
+    return run_cell_probe_cli(
+        argv,
+        decompose_cell,
+        lambda cells: {"cells": cells, "pooled": _pool_cells(cells)},
+        lambda out: {
+            "lab_confirmed_total": out["pooled"]["lab_confirmed_total"],
+            "asymptomatic_share": out["pooled"][
+                "asymptomatic_share_of_confirmed"
+            ],
+            "confirmed_by_channel_status": out["pooled"][
+                "confirmed_by_channel_status"
+            ],
+        },
+        description=__doc__,
+    )
 
 
 if __name__ == "__main__":

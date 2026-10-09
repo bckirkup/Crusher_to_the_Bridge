@@ -32,8 +32,6 @@ inside the pre-onset window, or structural volume.
 
 from __future__ import annotations
 
-import argparse
-import json
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -44,16 +42,12 @@ if str(_REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(_REPO_ROOT))
 
 from picard_framework.covid_boarding_screen import (  # noqa: E402
-    load_design,
     prepare_cell_run_spec,
 )
 from picard_framework.covid_theta_fit import run_fit_spec  # noqa: E402
-from simulation_utils.paths import (  # noqa: E402
-    resolve_repo_path,
-    validated_open,
-)
 from tools.covid_asym_conf_attribution import (  # noqa: E402
     _host_pools,
+    run_cell_probe_cli,
 )
 from tools.covid_funnel_attribution import _match_cell  # noqa: E402
 
@@ -271,27 +265,13 @@ def _pool_cells(cells: list[dict[str, Any]]) -> dict[str, Any]:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--design", required=True)
-    parser.add_argument("--theta", type=float, required=True)
-    parser.add_argument("--arm", required=True)
-    parser.add_argument("--seed", type=int, action="append", required=True)
-    parser.add_argument("--out", required=True)
-    args = parser.parse_args(argv)
-
-    design = load_design(resolve_repo_path(str(_REPO_ROOT), args.design))
-    cells = [
-        decompose_cell(design, args.theta, args.arm, s) for s in args.seed
-    ]
-    out = {"cells": cells, "pooled": _pool_cells(cells)}
-    out_path = Path(resolve_repo_path(str(_REPO_ROOT), args.out))
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with validated_open(
-        str(out_path), "w", allowed_roots=(str(_REPO_ROOT),)
-    ) as fh:
-        fh.write(json.dumps(out, indent=1) + "\n")
-    print(json.dumps(out["pooled"], indent=1))
-    return 0
+    return run_cell_probe_cli(
+        argv,
+        decompose_cell,
+        lambda cells: {"cells": cells, "pooled": _pool_cells(cells)},
+        lambda out: out["pooled"],
+        description=__doc__,
+    )
 
 
 if __name__ == "__main__":
