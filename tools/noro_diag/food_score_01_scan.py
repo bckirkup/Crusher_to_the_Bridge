@@ -59,9 +59,26 @@ _PREFIX_DEFAULT = "campaign/noro_food_score_01/"
 _SUMMARY_MEMBER = "summary.json"
 _CENSUS_MEMBER = "growth_census.json.gz"
 _CS_PATHWAY_PREFIX = "common_source_food"
-_ACQ_PATH_RE = re.compile(
-    rb'"epoch_acquired": (-?\d+)[^}]*?"dominant_pathway":\s*"([^"]+)"'
-)
+# Two-phase acquisition scan: find the epoch, then bound the pathway
+# search at the record's closing `}` — the same "same-object" semantics as
+# a `[^}]*` bridge but with no lazy-bridge backtracking (Sonar S8786).
+_ACQ_EPOCH_RE = re.compile(rb'"epoch_acquired":\s*(-?\d+)')
+_ACQ_PATH_RE = re.compile(rb'"dominant_pathway":\s*"([^"]+)"')
+
+
+def _acq_epochs(buf: bytes, acq_all: list[int], cs_acq: list[int]) -> None:
+    for m in _ACQ_EPOCH_RE.finditer(buf):
+        epoch = int(m.group(1))
+        if epoch <= 0:
+            continue
+        end = buf.find(b"}", m.end())
+        window = buf[m.end() : end if end > 0 else len(buf)]
+        pm = _ACQ_PATH_RE.search(window)
+        acq_all.append(epoch)
+        if pm and pm.group(1).startswith(_CS_PATHWAY_PREFIX.encode()):
+            cs_acq.append(epoch)
+
+
 _ARM_KEYS = ("provisioned_lot", "ill_handler", "ill_diner")
 
 
@@ -149,13 +166,7 @@ def _acquisition_scan(
         part = dec.decompress(blob[i : i + _CHUNK])
         buf = prev + part
         saw_marker = saw_marker or marker in buf
-        for m in _ACQ_PATH_RE.finditer(buf):
-            epoch = int(m.group(1))
-            if epoch <= 0:
-                continue
-            acq_all.append(epoch)
-            if m.group(2).startswith(_CS_PATHWAY_PREFIX.encode()):
-                cs_acq.append(epoch)
+        _acq_epochs(buf, acq_all, cs_acq)
         prev = buf[-_ACQ_OVERLAP:]
         tail = (tail + part)[-_TAIL_WINDOW:]
     tail = (tail + dec.flush())[-_TAIL_WINDOW:]
@@ -173,13 +184,7 @@ def _head_side(client, bucket: str, key: str) -> dict:
     text = text.encode("utf-8")
     acq_all: list[int] = []
     cs_acq: list[int] = []
-    for m in _ACQ_PATH_RE.finditer(text):
-        epoch = int(m.group(1))
-        if epoch <= 0:
-            continue
-        acq_all.append(epoch)
-        if m.group(2).startswith(_CS_PATHWAY_PREFIX.encode()):
-            cs_acq.append(epoch)
+    _acq_epochs(text, acq_all, cs_acq)
     out = {
         "head_only": True,
         "n_acq": len(acq_all),
@@ -201,7 +206,7 @@ def _census_side(blob: bytes, num_epochs: int) -> dict:
         # (huge exposure lists) — full-decode fallback for this zip.
         cs_fields = _tail_fields(gzip.decompress(blob))
     telemetry, events, exposures, objects = _cs_fields(cs_fields)
-    arms = {k: 0 for k in _ARM_KEYS}
+    arms = dict.fromkeys(_ARM_KEYS, 0)
     takers_sum = 0
     zero_dose = 0
     for e in events:
@@ -314,13 +319,31 @@ def _fetch(client, bucket: str, key: str, census: str) -> dict | None:
     return row
 
 
-def _run_tier(
-    client, bucket: str, prefix: str, args, done: set[str], fh,
-) -> tuple[int, int]:
+def _tier_keys(
+    client, bucket: str, prefix: str, args, done: set[str],
+) -> list[str]:
     keys = _list_keys(client, bucket, prefix)
     if args.keys_set is not None:
         keys = [k for k in keys if k in args.keys_set]
-    keys = [k for k in keys if k not in done]
+    return [k for k in keys if k not in done]
+
+
+def _mode_fn(args, census_keys: set[str]):
+    def _mode(k: str) -> str:
+        if args.head_set is not None or args.full_set is not None:
+            if args.full_set and k in args.full_set:
+                return "full"
+            if args.head_set and k in args.head_set:
+                return "head"
+            return "none"
+        return "full" if k in census_keys else "none"
+    return _mode
+
+
+def _run_tier(
+    client, bucket: str, prefix: str, args, done: set[str], fh,
+) -> tuple[int, int]:
+    keys = _tier_keys(client, bucket, prefix, args, done)
     if not keys:
         return 0, 0
     if args.no_census:
@@ -330,21 +353,13 @@ def _run_tier(
             args.census_limit, len(keys)
         )
         census_keys = set(keys[:n_census])
+    mode = _mode_fn(args, census_keys)
     n_rows = 0
     n_err = 0
 
-    def _mode(k: str) -> str:
-        if args.head_set is not None or args.full_set is not None:
-            if args.full_set and k in args.full_set:
-                return "full"
-            if args.head_set and k in args.head_set:
-                return "head"
-            return "none"
-        return "full" if k in census_keys else "none"
-
     with ThreadPoolExecutor(args.workers) as pool:
         futs = {
-            pool.submit(_fetch, client, bucket, k, _mode(k)): k
+            pool.submit(_fetch, client, bucket, k, mode(k)): k
             for k in keys
         }
         for i, fut in enumerate(as_completed(futs), 1):

@@ -163,6 +163,32 @@ def _ar_tables(cells: dict) -> list[str]:
     return lines
 
 
+def _conversion_row(hull: str, arm: str, rows: list[dict]) -> str:
+    # excursion voyage = >=1 infection dominant-routed
+    # common_source_food (FOOD-01/02 "cs voy"); the summary's
+    # common_source_events is a per-delivery counter and is
+    # near-universal on big hulls — not the excursion marker.
+    exc = [
+        r for r in rows
+        if (r.get("routes") or {}).get("common_source_food", 0) > 0
+    ]
+    exc_post = sum(1 for r in exc if r["posted"])
+    crows = [
+        r for r in rows
+        if r.get("census") and not r["census"].get("head_only")
+    ]
+    obj = [r for r in crows if r["census"].get("n_objects", 0) > 0]
+    obj_post = sum(1 for r in obj if r["posted"])
+    k = sum(1 for r in rows if r["posted"])
+    conv_e = 100.0 * exc_post / len(exc) if exc else 0.0
+    conv_o = 100.0 * obj_post / len(obj) if obj else 0.0
+    return (
+        f"| {hull} | {arm} | {len(exc)} | {exc_post} | {conv_e:.1f}"
+        f" | {len(obj)}/{len(crows)} | {obj_post} | {conv_o:.1f}"
+        f" | {100.0*k/len(rows):.2f} |"
+    )
+
+
 def _conversion_table(cells: dict) -> list[str]:
     lines = [
         "| hull | arm | exc voy (cs_food>0) | posted | conv % | obj voy"
@@ -170,38 +196,40 @@ def _conversion_table(cells: dict) -> list[str]:
         "|---|---|---|---|---|---|---|---|---|",
     ]
     for hull in _HULL_ORDER:
-        arms = cells.get(hull, {})
         for arm in _ARM_ORDER:
             if arm == "off":
                 continue
-            rows = arms.get(arm, [])
-            if not rows:
-                continue
-            # excursion voyage = >=1 infection dominant-routed
-            # common_source_food (FOOD-01/02 "cs voy"); the summary's
-            # common_source_events is a per-delivery counter and is
-            # near-universal on big hulls — not the excursion marker.
-            exc = [
-                r for r in rows
-                if (r.get("routes") or {}).get("common_source_food", 0) > 0
-            ]
-            exc_post = sum(1 for r in exc if r["posted"])
-            crows = [
-                r for r in rows
-                if r.get("census") and not r["census"].get("head_only")
-            ]
-            obj = [r for r in crows if r["census"].get("n_objects", 0) > 0]
-            obj_post = sum(1 for r in obj if r["posted"])
-            n = len(rows)
-            k = sum(1 for r in rows if r["posted"])
-            conv_e = 100.0 * exc_post / len(exc) if exc else 0.0
-            conv_o = 100.0 * obj_post / len(obj) if obj else 0.0
-            lines.append(
-                f"| {hull} | {arm} | {len(exc)} | {exc_post} | {conv_e:.1f}"
-                f" | {len(obj)}/{len(crows)} | {obj_post} | {conv_o:.1f}"
-                f" | {100.0*k/n:.2f} |"
-            )
+            rows = cells.get(hull, {}).get(arm, [])
+            if rows:
+                lines.append(_conversion_row(hull, arm, rows))
     return lines
+
+
+def _route_totals(rows: list[dict]) -> tuple[Counter, int]:
+    counts = Counter()
+    total = 0
+    for r in rows:
+        counts.update(r["routes"])
+        total += sum(r["routes"].values())
+    return counts, total
+
+
+def _worst_shift(
+    counts: Counter, total: int, base: Counter, base_total: int,
+) -> tuple[float, str]:
+    worst = 0.0
+    worst_route = "-"
+    for route in set(counts) | set(base):
+        if route == _ROUTE_ALARM:
+            continue
+        shift = (
+            counts.get(route, 0) / total
+            - (base.get(route, 0) / base_total if base_total else 0)
+        ) * 100
+        if abs(shift) > abs(worst):
+            worst = shift
+            worst_route = route
+    return worst, worst_route
 
 
 def _must_not_move(cells: dict) -> list[str]:
@@ -214,11 +242,7 @@ def _must_not_move(cells: dict) -> list[str]:
         arms = cells.get(hull, {})
         off = arms.get("off", [])
         off_by_seed = {r["seed"]: r["inf_ar_pax"] for r in off}
-        off_routes = Counter()
-        off_total = 0
-        for r in off:
-            off_routes.update(r["routes"])
-            off_total += sum(r["routes"].values())
+        off_routes, off_total = _route_totals(off)
         for arm in _ARM_ORDER:
             rows = arms.get(arm, [])
             if not rows:
@@ -230,33 +254,44 @@ def _must_not_move(cells: dict) -> list[str]:
                 if r["seed"] in off_by_seed
             ]
             d_med = stats.median(deltas) if deltas else 0.0
-            route_counts = Counter()
-            total = 0
-            for r in rows:
-                route_counts.update(r["routes"])
-                total += sum(r["routes"].values())
+            route_counts, total = _route_totals(rows)
             cs_share = (
                 100.0 * route_counts.get(_ROUTE_ALARM, 0) / total
                 if total
                 else 0.0
             )
-            worst = 0.0
-            worst_route = "-"
-            for route in set(route_counts) | set(off_routes):
-                if route == _ROUTE_ALARM:
-                    continue
-                shift = (
-                    route_counts.get(route, 0) / total
-                    - (off_routes.get(route, 0) / off_total if off_total else 0)
-                ) * 100
-                if abs(shift) > abs(worst):
-                    worst = shift
-                    worst_route = route
+            worst, worst_route = _worst_shift(
+                route_counts, total, off_routes, off_total
+            )
             lines.append(
                 f"| {hull} | {arm} | {med:.4f} | {d_med:+.4f}"
                 f" | {cs_share:.2f} | {worst:+.2f} ({worst_route}) |"
             )
     return lines
+
+
+def _burst_split(rows: list[dict]) -> tuple[list, list, list, list]:
+    exc_b48, exc_b12, rest_b48, rest_b12 = [], [], [], []
+    for r in rows:
+        c = r.get("census") or {}
+        if c.get("n_acq", 0) < 10:
+            continue
+        if r["routes"].get(_ROUTE_ALARM, 0) > 0:
+            exc_b48.append(c["burst48"])
+            exc_b12.append(c["burst12"])
+        else:
+            rest_b48.append(c["burst48"])
+            rest_b12.append(c["burst12"])
+    return exc_b48, exc_b12, rest_b48, rest_b12
+
+
+def _burst_line(hull: str, label: str, b48: list, b12: list) -> str:
+    if not b48:
+        return f"| {hull} | {label} | 0 | - | - |"
+    return (
+        f"| {hull} | {label} | {len(b48)}"
+        f" | {stats.median(b48):.3f} | {stats.median(b12):.3f} |"
+    )
 
 
 def _burst_tables(cells: dict) -> list[str]:
@@ -265,32 +300,48 @@ def _burst_tables(cells: dict) -> list[str]:
         "|---|---|---|---|---|",
     ]
     for hull in _HULL_ORDER:
-        exc_b48, exc_b12, rest_b48, rest_b12 = [], [], [], []
-        for arm in ("ol1", "ol2", "ol3", "ship"):
-            for r in cells.get(hull, {}).get(arm, []):
-                c = r.get("census") or {}
-                if c.get("n_acq", 0) < 10:
-                    continue
-                if r["routes"].get(_ROUTE_ALARM, 0) > 0:
-                    exc_b48.append(c["burst48"])
-                    exc_b12.append(c["burst12"])
-                else:
-                    rest_b48.append(c["burst48"])
-                    rest_b12.append(c["burst12"])
-        med = stats.median
-        lines.append(
-            f"| {hull} | excursion | {len(exc_b48)}"
-            f" | {med(exc_b48):.3f} | {med(exc_b12):.3f} |"
-            if exc_b48
-            else f"| {hull} | excursion | 0 | - | - |"
-        )
-        lines.append(
-            f"| {hull} | rest | {len(rest_b48)}"
-            f" | {med(rest_b48):.3f} | {med(rest_b12):.3f} |"
-            if rest_b48
-            else f"| {hull} | rest | 0 | - | - |"
-        )
+        obj_rows = [
+            r
+            for arm in ("ol1", "ol2", "ol3", "ship")
+            for r in cells.get(hull, {}).get(arm, [])
+        ]
+        exc_b48, exc_b12, rest_b48, rest_b12 = _burst_split(obj_rows)
+        lines.append(_burst_line(hull, "excursion", exc_b48, exc_b12))
+        lines.append(_burst_line(hull, "rest", rest_b48, rest_b12))
     return lines
+
+
+def _witness_row(hull: str, arm: str, rows: list[dict]) -> str:
+    n = len(rows)
+    cen = [r["census"] for r in rows]
+    ev_rows = sum(1 for c in cen if c["n_events"] > 0)
+    lot = sum(1 for c in cen if c["lot_obj_voyage"])
+    n_obj = sum(c["n_objects"] for c in cen)
+    pans = sum(c["obj_pans_sum"] for c in cen)
+    wins = sum(c["obj_windows_sum"] for c in cen)
+    n_ev = sum(c["n_events"] for c in cen)
+    zd = sum(c["zero_dose_events"] for c in cen)
+    tk = sum(c["takers_sum"] for c in cen)
+    armc = Counter()
+    for c in cen:
+        armc.update(c["arms"])
+    tot = sum(armc.values())
+    mix = "/".join(
+        f"{100.0*armc.get(k, 0)/tot:.0f}" if tot else "-"
+        for k in ("provisioned_lot", "ill_handler", "ill_diner")
+    )
+    obj_voy = sum(1 for c in cen if c["n_objects"] > 0)
+    base = (
+        f"| {hull} | {arm} | {n} | {100.0*ev_rows/n:.1f}"
+        f" | {stats.median(c['n_events'] for c in cen):g}"
+        f" | {lot} | {obj_voy}"
+    )
+    base += f" | {pans/n_obj:.1f} | {wins/n_obj:.1f}" if n_obj else " | - | -"
+    if n_ev:
+        base += f" | {100.0*zd/n_ev:.1f} | {mix} | {tk/n_ev:.1f} |"
+    else:
+        base += " | - | - | - |"
+    return base
 
 
 def _witness_table(cells: dict) -> list[str]:
@@ -300,51 +351,13 @@ def _witness_table(cells: dict) -> list[str]:
         "|---|---|---|---|---|---|---|---|---|---|---|---|",
     ]
     for hull in _HULL_ORDER:
-        arms = cells.get(hull, {})
         for arm in _ARM_ORDER:
             rows = [
-                r for r in arms.get(arm, [])
+                r for r in cells.get(hull, {}).get(arm, [])
                 if r.get("census") and not r["census"].get("head_only")
             ]
-            if not rows:
-                continue
-            n = len(rows)
-            ev_rows = [r for r in rows if r["census"]["n_events"] > 0]
-            lot = sum(1 for r in rows if r["census"]["lot_obj_voyage"])
-            n_obj = sum(r["census"]["n_objects"] for r in rows)
-            pans = sum(r["census"]["obj_pans_sum"] for r in rows)
-            wins = sum(r["census"]["obj_windows_sum"] for r in rows)
-            n_ev = sum(r["census"]["n_events"] for r in rows)
-            zd = sum(r["census"]["zero_dose_events"] for r in rows)
-            tk = sum(r["census"]["takers_sum"] for r in rows)
-            armc = Counter()
-            for r in rows:
-                armc.update(r["census"]["arms"])
-            tot = sum(armc.values())
-            mix = "/".join(
-                f"{100.0*armc.get(k, 0)/tot:.0f}" if tot else "-"
-                for k in ("provisioned_lot", "ill_handler", "ill_diner")
-            )
-            evs = [r["census"]["n_events"] for r in rows]
-            objs = [r["census"]["n_objects"] for r in rows]
-            obj_voy = sum(1 for o in objs if o > 0)
-            base = (
-                f"| {hull} | {arm} | {n} | {100.0*len(ev_rows)/n:.1f}"
-                f" | {stats.median(evs):g} | {lot} | {obj_voy}"
-            )
-            if n_obj:
-                base += (
-                    f" | {pans/n_obj:.1f} | {wins/n_obj:.1f}"
-                )
-            else:
-                base += " | - | -"
-            if n_ev:
-                base += (
-                    f" | {100.0*zd/n_ev:.1f} | {mix} | {tk/n_ev:.1f} |"
-                )
-            else:
-                base += " | - | - | - |"
-            lines.append(base)
+            if rows:
+                lines.append(_witness_row(hull, arm, rows))
     return lines
 
 
