@@ -79,7 +79,7 @@ def load_rows(paths: list[str]) -> dict[str, dict[str, list[dict]]]:
     )
     seen: dict[str, dict] = {}
     for path in paths:
-        with open(path, encoding="utf-8") as fh:
+        with open(path, encoding="utf-8") as fh:  # NOSONAR -- operator-specified row files in a local diagnostic tool
             for line in fh:
                 row = json.loads(line)
                 if row.get("error"):

@@ -399,14 +399,20 @@ def main() -> None:
     ):
         setattr(args, attr, None)
         if flag:
-            with open(flag, encoding="utf-8") as kf:
+            with validated_open(
+                str(flag), encoding="utf-8",
+                allowed_roots=(str(Path(flag).resolve().parent),),
+            ) as kf:
                 setattr(args, attr, {
                     ln.strip() for ln in kf if ln.strip().endswith(".zip")
                 })
     done: set[str] = set()
     out_path = Path(args.out)
     if args.resume and out_path.exists():
-        with open(out_path, encoding="utf-8") as fh:
+        with validated_open(
+            str(out_path), encoding="utf-8",
+            allowed_roots=(str(out_path.parent.resolve()),),
+        ) as fh:
             for line in fh:
                 try:
                     done.add(json.loads(line)["key"])
