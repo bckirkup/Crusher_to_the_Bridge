@@ -1,15 +1,15 @@
 # DATING-RES-01
 **Date:** 2026-10-09
-**Commit:** this PR
+**Commit:** #979
 **Pathogens:** sars_cov2_resp
-**Status:** measured (2 DP-realization cells, same-realization rerun)
+**Status:** measured
 
 The dating residual after ONSET-REC-01 decomposed end-to-end on the
 record-truth replica (`boxed_s1s2` arm of the CREW-REACH-01 design —
-retest tiers + crew wave, the record's full observation structure).
+retest tiers + crew wave, the record's full observation structure), two
+DP-realization cells by same-realization rerun (local, not a campaign).
 Tool `tools/covid_specimen_timing_probe.py`; evidence
-`reports/specimen_timing/smoke_{20200218,20200223}.json`. Local rerun,
-not a campaign.
+`reports/specimen_timing/smoke_{20200218,20200223}.json`.
 
 ## The arithmetic chain (all verified)
 
