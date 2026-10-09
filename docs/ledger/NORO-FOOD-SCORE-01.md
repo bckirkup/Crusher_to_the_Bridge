@@ -2,7 +2,7 @@
 **Date:** 2026-10-08
 **Commit:** 420e0326
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
 
 Scores the shipped FOOD-COMMON-SOURCE-02 contamination objects
 (default-ON `lot_mode`/`handler_mode`/`diner_mode: "object"`,
