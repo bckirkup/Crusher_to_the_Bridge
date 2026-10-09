@@ -16,7 +16,7 @@ against the spec's frozen measurement plan. Design:
 | canary | done | 44/44 SUCCEEDED on `picard-campaign-queue` (Spot); all frozen gates green — see Canary readout |
 | wave 1 | landed | exp + cls 12,000/12,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_{exp,cls}_*/`; see Wave 1 submission |
 | wave 2 | landed | spr 6,000/6,000 SUCCEEDED, 0 FAILED — zips under `campaign/noro_food_score_01/fl_spr_*/`; see Wave 2 submission |
-| readout | pending | `outbreak_anchor_readout.py` + `common_source_readout.py` + `onset_curve_readout.py` per the design |
+| readout | done | scored D1–D4 + must-not-move on all 18,000 summaries + targeted census (posted/excursion/full samples): `docs/norovirus/noro_food_score_01_readout.md` |
 
 ## Canary readout (2026-10-08, all at `40862b8c`)
 

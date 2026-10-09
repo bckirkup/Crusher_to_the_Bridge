@@ -4507,8 +4507,17 @@ object, and contiguity breaks — duty gap, station change,
 quarantine/confinement, shedding end — closing the object so a later
 eligible span re-seeds on a fresh draw). The labelled `"independent"`
 baseline preserves the v1 per-window Bernoulli arms verbatim, and
-`mode: off`/unarmed profiles draw nothing under any mode. No cells
-have run.
+`mode: off`/unarmed profiles draw nothing under any mode.
+**Measured (NORO-FOOD-SCORE-01, 18,000 cells at `40862b8c`)** —
+`docs/norovirus/noro_food_score_01_readout.md`: the shipped object
+interval produces an honest posting signature (monotone lot-rung
+dose-response, ship marginal +0.6/+0.2/+0.1pp vs `off`, channel-clean
+gained postings) and burst48 excursion-vs-rest separation on exp, but
+the thin posted-conditional pax-AR signature persists (pooled med
+0.014–0.021 < the 0.04 recovery edge) and cls/spr excursions
+under-convert to posting (~0–6% vs `ind`'s 13–43%); all must-not-move
+invariants held, `ind` reproduces v1's ceilings/conversion/event
+distribution. v2 object numbers are now of record for that grid.
 
 ## 5. Held fixed by assumption
 
