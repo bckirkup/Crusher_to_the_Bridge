@@ -4519,6 +4519,30 @@ under-convert to posting (~0–6% vs `ind`'s 13–43%); all must-not-move
 invariants held, `ind` reproduces v1's ceilings/conversion/event
 distribution. v2 object numbers are now of record for that grid.
 
+**`NORO-ENTRAIN-01` (declared — design frozen, nothing submitted):**
+the next measurement stage on the SCORE-01 frame, two levers aimed at
+raising VSP posting appropriately per hull. Lever A (event shape)
+sweeps the config-expressible extent axes of the shipped lot object
+(`a_ext` shelf-life (4,7)d, `a_thin` take-share (0.04,0.20)) and
+specs the `cs_extent` contract — a forced-extent draw for the
+iso-dose isolation and a per-window titre/take-share re-mint for the
+seeded-draw-cadence isolation, the two arms config cannot express.
+Lever B (arriving-shedder proxy) approximates one voyage of
+entrainment with `bc40`/`bc80` crew boarding prevalence 0.040/0.080,
+`bi50` crew-only embarkation immunity 0.5 and the net-sign `bmix`
+cell; the clean class-weighted mid-shedding channel is spec'd as the
+`arriving_shedder` contract (collision check: no existing
+initial-condition mechanism gives a crew-class-weighted
+shedder-conditioned fraction — `explicit_seeds` is fiat counts,
+boarding prevalence is role-level). Full chained-cruise entrainment
+is a design note only, scored later by the proxy's effect size.
+Grid: 3 hulls (mega excluded — objects never armed there, v1
+saturates short of its wire) × 9 arms × 1,000 seeds on SCORE-01 seed
+lists and fixed coordinates; frozen admissibility, must-not-move
+list and canary-then-STOP in
+`docs/norovirus/noro_entrain_01_sweep_design.md`; package
+`campaigns/noro/noro_entrain_01/`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
