@@ -10,7 +10,7 @@ Design-of-record: `docs/norovirus/noro_entrain_01_sweep_design.md`
 | local smoke | done | `fl_exp_12d_scr_bc80` index 0 (seed 8000): crew prevalence echo 0.08, `agent_class_fractions` stamp, 3-member zip, `drawn_by_role`/`composition` present under `summary.json.initiation.manifest.boarding` |
 | image | done | `picard-campaign:noro-entrain01` built at merge SHA `dbbd5395` (root Dockerfile + literal `Dockerfile.campaign` overlay), digest `sha256:c57df157ec9d97f75bf7b465482dc035302308aec589fb778017f6345db8b896`; verified in-container (deploy/aws + tools + campaigns trees, `ENGINE_GIT_SHA` = `dbbd5395…`, 27-tier manifest, one real cell ran a full voyage in-image bit-identical to local smoke) |
 | canary | done | 48/48 SUCCEEDED on `picard-campaign-queue` (Spot); all frozen gates green — see Canary readout |
-| waves | pending | exp all arms → cls/spr ship/bc80/a_ext → remainder; user gates each |
+| waves | submitted | all 27 fleet blocks (27,000 cells) submitted in frozen order on user go 2026-10-10; see Wave submissions |
 
 ## Grid
 
@@ -109,7 +109,59 @@ canary is down and clean — the user reads it before any wave.
 
 ## Wave submissions
 
-(to be filled per wave — job ids, s3 prefixes, seed gates)
+User go for the full campaign received 2026-10-10; all 27 fleet blocks
+(27,000 cells) submitted in one pass 18:57 UTC in the design's frozen
+order — exp all arms → cls/spr `ship`,`bc80`,`a_ext` → remainder — so
+the FIFO queue drains exp first. Jobdef `picard-noro-entrain-01:1`
+(digest-pinned `c57df157…`, retry ×10); every array is
+`arrayProperties.size=1000` with literal container-overrides argv
+(--campaign/--block/--seeds/--manifest/--pathogen-id/--epochs 288).
+Manifest uploaded to `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_entrain_01/manifest.json`
+for record parity (cells read it in-image).
+
+Canary-seed overlap: the 48 canary seeds are inside the fleet exp
+ranges (8000–8999) and re-fly — deterministic, ~48 cells of duplicate
+work, keeps the grid whole.
+
+First-landing health check at +5 min: `fl_exp_12d_scr_off` 230
+SUCCEEDED / 115 RUNNING, zips already landing under
+`campaign/noro_entrain_01/fl_exp_12d_scr_off/` (~10 MB each,
+`…_s<seed>.zip`). No FAILED children.
+
+| # | Block | n | Array job ID |
+|---|---|---|---|
+| 1 | fl_exp_12d_scr_off | 1000 | 1adf326b-6e16-4e4f-b598-a4bdb18b98fe |
+| 2 | fl_exp_12d_scr_ind | 1000 | 5836af31-10a4-45d2-bff3-cd6c7df23ad8 |
+| 3 | fl_exp_12d_scr_ship | 1000 | 1c3220b4-67e2-4b8c-8bf1-ba37bab22f3d |
+| 4 | fl_exp_12d_scr_a_ext | 1000 | 045538f2-4738-4b91-8756-f750abd5974e |
+| 5 | fl_exp_12d_scr_a_thin | 1000 | 29b94717-0d7d-4f5e-8a10-7f734fe673c2 |
+| 6 | fl_exp_12d_scr_bc40 | 1000 | a7044a77-7b62-4181-ac5e-48d1df85b19d |
+| 7 | fl_exp_12d_scr_bc80 | 1000 | 983c2b7a-7ecd-4f11-a4d5-c0e1c7b7554b |
+| 8 | fl_exp_12d_scr_bi50 | 1000 | 355c1b55-5ec8-48bd-9911-720175bb4b3d |
+| 9 | fl_exp_12d_scr_bmix | 1000 | 4bb35915-3082-49e7-9c80-ec96706e3221 |
+| 10 | fl_cls_12d_scr_ship | 1000 | ba38165c-60d9-46c2-8f07-239853eb3c0a |
+| 11 | fl_spr_12d_scr_ship | 1000 | e67293e2-7f9b-4bba-944c-c1d41d7961a2 |
+| 12 | fl_cls_12d_scr_bc80 | 1000 | cd7b9ee2-c61b-47ce-a6d1-59a95255f12b |
+| 13 | fl_spr_12d_scr_bc80 | 1000 | 05a314b8-e788-492e-8b5c-e103fc1dc0e9 |
+| 14 | fl_cls_12d_scr_a_ext | 1000 | 50c17417-de17-4aa6-9498-c8eb2bd23978 |
+| 15 | fl_spr_12d_scr_a_ext | 1000 | 5c271d41-2c6e-4607-8ed5-0f120a4e9fcc |
+| 16 | fl_cls_12d_scr_off | 1000 | 15d2a915-30aa-42c1-a3f4-abca32b348dc |
+| 17 | fl_spr_12d_scr_off | 1000 | fffdd2f5-8544-43e9-9ccb-3a587c4e3f77 |
+| 18 | fl_cls_12d_scr_ind | 1000 | a9952c26-ed4f-4731-a807-139684b50ad1 |
+| 19 | fl_spr_12d_scr_ind | 1000 | e72ff3bd-1690-4a45-916c-89e8d947fb21 |
+| 20 | fl_cls_12d_scr_a_thin | 1000 | 486651cb-a277-489b-a73d-55c566bce1ac |
+| 21 | fl_spr_12d_scr_a_thin | 1000 | aa9fd4cf-7f84-4d91-a6d1-933b1ba7ab6a |
+| 22 | fl_cls_12d_scr_bc40 | 1000 | ce2c7229-c5c0-4152-9a9b-e7327028605c |
+| 23 | fl_spr_12d_scr_bc40 | 1000 | 9fd52fbd-cd0d-4552-afb1-ee0f7343863a |
+| 24 | fl_cls_12d_scr_bi50 | 1000 | 00310d06-3865-4651-b0e3-7dc148dc15d2 |
+| 25 | fl_spr_12d_scr_bi50 | 1000 | b6a3c48b-0e28-498c-8ac7-e62f290ee9fd |
+| 26 | fl_cls_12d_scr_bmix | 1000 | 85bfdb8f-d92c-4c38-af6c-398a36672260 |
+| 27 | fl_spr_12d_scr_bmix | 1000 | d840a4d8-b381-4e74-862a-f4d747b3c8e2 |
+
+Drain expectation for planning: exp ≈50–200 cells/min at 256 concurrent
+(canary measured ~12 cells/min ramping cold); cls ~2–3× and spr ~6×
+slower per SCORE-01 conventions — the grid is hours-to-a-day of Spot
+time, not minutes.
 
 ## Findings
 
