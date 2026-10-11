@@ -26,20 +26,22 @@ An early event is a contamination object with ``seeded_epoch <= 48``
 (object arms) or a pan-window serving event with ``start_epoch <= 48``
 (the v1 ``ind`` arm) — the SCORE-01 convention verbatim.
 
-Reads local JSONL only; no AWS access needed.
+All inputs are local JSONL row files — no AWS access required.
 """
 
 from __future__ import annotations
 
 import argparse
-import json
 import statistics as stats
 import sys
 from collections import Counter, defaultdict
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from early_event_report import _load_rows  # noqa: E402
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
-from simulation_utils.paths import validated_open  # noqa: E402
+from tools.diag.readout_common import wilson_interval  # noqa: E402
 
 _ARMS = ("off", "ind", "ship", "ext", "thin",
          "bc40", "bc80", "bi50", "bmix")
@@ -52,17 +54,6 @@ _ARM_LABEL = {"ext": "a_ext", "thin": "a_thin"}
 # Declared anchors (design §6).
 _POSTING_BAND = (0.004, 0.009)
 _AR_BAND = (0.04, 0.10)
-
-
-def _wilson(k: int, n: int) -> tuple[float, float]:
-    if n == 0:
-        return 0.0, 0.0
-    z = 1.959964
-    p = k / n
-    den = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / den
-    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / den
-    return centre - half, centre + half
 
 
 def _pct(num: int | float, den: int | float) -> str:
@@ -80,38 +71,11 @@ def _q(xs: list[float], p: float) -> float | None:
     return xs[min(len(xs) - 1, int(p * len(xs)))]
 
 
-def _load_rows(paths: list[str]) -> dict[str, dict]:
-    """Join scan rows on key; census-bearing rows win field-wise."""
-    rows: dict[str, dict] = {}
-    for path in paths:
-        with validated_open(
-            str(path),
-            encoding="utf-8",
-            allowed_roots=(str(Path(path).resolve().parent),),
-        ) as fh:
-            for line in fh:
-                try:
-                    row = json.loads(line)
-                except json.JSONDecodeError:
-                    continue
-                key = row.get("key")
-                if not key:
-                    continue
-                rows.setdefault(key, {}).update(
-                    {k: v for k, v in row.items() if v is not None}
-                )
-    return rows
-
-
 def _cell_of(row: dict) -> tuple[str, str]:
     tier = row["key"].rsplit("/", 2)[-2]
     parts = tier.split("_")
     hull = parts[1] if len(parts) >= 2 else tier
     arm = parts[-1] if len(parts) >= 2 else tier
-    if arm in ("ext",):
-        arm = "ext"
-    if arm == "thin":
-        arm = "thin"
     return hull, arm
 
 
@@ -146,7 +110,7 @@ def _posting_table(cells: dict[tuple[str, str], list[dict]]) -> list[str]:
             if not n:
                 continue
             k = sum(1 for r in rows if r["posted"])
-            lo, hi = _wilson(k, n)
+            lo, hi = wilson_interval(k, n)
             rate = k / n
             band = (
                 "in" if _POSTING_BAND[0] <= rate <= _POSTING_BAND[1]
@@ -212,7 +176,7 @@ def _conversion_table(
             unp_cen = [r for r in cen if not r["posted"]]
             unp_early = sum(1 for r in unp_cen if _has_early(r))
             n_unp = len(unp_cen)
-            lo, hi = _wilson(unp_early, n_unp)
+            lo, hi = wilson_interval(unp_early, n_unp)
             p_early = unp_early / n_unp if n_unp else None
             posted = [r for r in rows if r["posted"]]
             post_early = sum(1 for r in posted if _has_early(r))

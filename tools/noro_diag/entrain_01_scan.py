@@ -19,13 +19,12 @@ needs:
   shared-dose event rows (the §4.1 discriminator measure), emesis
   emitters, and the object-integrity tallies of design §6.3.
 
-Mode is chosen per key, like ``food_score_01_scan``:
-``--full-keys`` file → full census member (streams the whole member
-once); ``--head-keys`` file → head-only census (bursts + import roll
-from the ``hosts[]`` prefix); everything else → summary only.
-
-Reads only; no engine involvement. Resume-safe: ``--resume`` skips keys
-already present in the JSONL output.
+Per-key read depth follows the SCORE-01 scan pattern: keys listed in
+the ``--full-keys`` file get the whole census member streamed once;
+keys in ``--head-keys`` get the head-only pass (burst vectors plus the
+``hosts[]`` import roll); anything else is summary.json only. All reads
+are read-only S3 gets with ranged fetches — nothing touches the engine.
+``--resume`` makes a re-run skip keys already written to the JSONL out.
 """
 
 from __future__ import annotations
@@ -40,15 +39,10 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from common_source_readout import _cs_fields, _tail_fields  # noqa: E402
+from common_source_readout import _cs_fields, _list_keys, _tail_fields  # noqa: E402
 from food_score_01_scan import _acq_epochs, _integrity  # noqa: E402
 from onset_curve_readout import _burst, _census_prefix  # noqa: E402
-from outbreak_anchor_readout import (  # noqa: E402
-    _posted,
-    _row_from_summary,
-    _s3_client,
-    _s3_member_blob,
-)
+from outbreak_anchor_readout import _posted, _row_from_summary, _s3_client, _s3_member_blob  # noqa: E402
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from simulation_utils.paths import validated_open  # noqa: E402
@@ -81,16 +75,6 @@ def _tier_arm(tier: str) -> tuple[str, str]:
     hull = parts[1] if len(parts) > 1 else "?"
     arm = parts[-1] if parts else "?"
     return hull, arm
-
-
-def _list_keys(client, bucket: str, prefix: str) -> list[str]:
-    keys: list[str] = []
-    paginator = client.get_paginator("list_objects_v2")
-    for page in paginator.paginate(Bucket=bucket, Prefix=prefix):
-        for obj in page.get("Contents", []):
-            if obj["Key"].endswith(".zip"):
-                keys.append(obj["Key"])
-    return sorted(keys)
 
 
 def _boarding(summary: dict) -> dict:
@@ -278,19 +262,20 @@ def _head_side(client, bucket: str, key: str) -> dict:
     cs_acq: list[int] = []
     _acq_epochs(blob, acq_all, cs_acq)
     import_ids = {int(m.group(1)) for m in _IMPORT_HOST_RE.finditer(blob)}
-    out = {
+    bursts = {}
+    for w in (48, 24, 12, 6):
+        share, centre = _burst(acq_all, w)
+        bursts[f"burst{w}"] = round(share, 4)
+        if w == 48:
+            bursts["burst48_centre"] = centre
+    return {
         "head_only": True,
         "n_acq": len(acq_all),
         "cs_acq_n": len(cs_acq),
         "n_import_hosts": len(import_ids),
         "n_emesis_emitters": len(_EMESIS_EMITTED_RE.findall(blob)),
+        **bursts,
     }
-    for w in (48, 24, 12, 6):
-        share, centre = _burst(acq_all, w)
-        out[f"burst{w}"] = round(share, 4)
-        if w == 48:
-            out["burst48_centre"] = centre
-    return out
 
 
 def _summary_side(summary: dict, key: str, tier: str) -> dict:
@@ -359,47 +344,57 @@ def _fetch(client, bucket: str, key: str, mode: str) -> dict:
         return {"key": key, "tier": tier, "error": f"summary: {exc}"}
     if mode == "none":
         row["census"] = None
-        return row
-    if mode == "head":
-        try:
-            row["census"] = _head_side(client, bucket, key)
-        except Exception as exc:  # noqa: BLE001 — per-voyage isolation
-            row["census"] = {"error": str(exc)}
-        return row
-    try:
-        blob = _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
-        if blob is None:
-            row["census"] = {"error": "no census member"}
-            return row
-        row["census"] = _census_side(blob, row["num_epochs"])
-    except Exception as exc:  # noqa: BLE001 — per-voyage isolation
-        row["census"] = {"error": str(exc)}
+    elif mode == "head":
+        row["census"] = _try(lambda: _head_side(client, bucket, key))
+    else:
+        blob = _try(
+            lambda: _s3_member_blob(client, bucket, key, _CENSUS_MEMBER)
+        )
+        row["census"] = (
+            blob if isinstance(blob, dict)
+            else _try(lambda: _census_side(blob, row["num_epochs"]))
+            if blob is not None
+            else {"error": "no census member"}
+        )
     return row
 
 
-def _load_key_set(flag: str | None) -> set[str] | None:
+def _try(fn):
+    try:
+        return fn()
+    except Exception as exc:  # noqa: BLE001 — per-voyage isolation
+        return {"error": str(exc)}
+
+
+def _key_set_file(flag: str | None) -> set[str] | None:
+    """A ``--*-keys`` file -> the set of zip keys it names."""
     if not flag:
         return None
-    with validated_open(
-        str(flag), encoding="utf-8",
-        allowed_roots=(str(Path(flag).resolve().parent),),
-    ) as fh:
-        return {ln.strip() for ln in fh if ln.strip().endswith(".zip")}
+    root = str(Path(flag).resolve().parent)
+    with validated_open(str(flag), encoding="utf-8",
+                        allowed_roots=(root,)) as fh:
+        return {t for ln in fh if (t := ln.strip()).endswith(".zip")}
 
 
-def _load_done(out_path: Path, resume: bool) -> set[str]:
-    done: set[str] = set()
-    if resume and out_path.exists():
-        with validated_open(
-            str(out_path), encoding="utf-8",
-            allowed_roots=(str(out_path.parent.resolve()),),
-        ) as fh:
-            for line in fh:
-                try:
-                    done.add(json.loads(line)["key"])
-                except (json.JSONDecodeError, KeyError):
-                    continue
-    return done
+def _already_scanned(out_path: Path, resume: bool) -> set[str]:
+    """Keys with a row already in the JSONL out (``--resume``)."""
+    if not (resume and out_path.exists()):
+        return set()
+    root = str(out_path.parent.resolve())
+    with validated_open(str(out_path), encoding="utf-8",
+                        allowed_roots=(root,)) as fh:
+        return {
+            row["key"]
+            for ln in fh
+            if (row := _parse_row(ln)) is not None and "key" in row
+        }
+
+
+def _parse_row(line: str) -> dict | None:
+    try:
+        return json.loads(line)
+    except json.JSONDecodeError:
+        return None
 
 
 def _run_prefix(
@@ -421,21 +416,22 @@ def _run_prefix(
             "none" if args.no_census else "full"
         )
 
-    n_rows = 0
-    n_err = 0
+    n_rows, n_err, done_i = 0, 0, 0
     with ThreadPoolExecutor(args.workers) as pool:
-        futs = {pool.submit(_fetch, client, bucket, k, mode(k)): k for k in keys}
-        for i, fut in enumerate(as_completed(futs), 1):
+        futs = [
+            pool.submit(_fetch, client, bucket, k, mode(k)) for k in keys
+        ]
+        for fut in as_completed(futs):
+            done_i += 1
             row = fut.result()
             if row is None:
                 continue
             fh.write(json.dumps(row) + "\n")
             n_rows += 1
-            if row.get("error"):
-                n_err += 1
-            if i % 200 == 0:
+            n_err += bool(row.get("error"))
+            if done_i % 200 == 0:
                 fh.flush()
-                print(f"  {prefix}: {i}/{len(keys)} ({n_err} errors)",
+                print(f"  {prefix}: {done_i}/{len(keys)} ({n_err} errors)",
                       file=sys.stderr)
     fh.flush()
     return n_rows, n_err
@@ -443,39 +439,35 @@ def _run_prefix(
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
-    ap.add_argument("--bucket", default=_BUCKET_DEFAULT)
+    ap.add_argument("--out", required=True, help="JSONL rows output")
     ap.add_argument("--prefix", action="append", dest="prefixes",
                     help="s3:// URI or bucket-relative prefix; repeatable")
-    ap.add_argument("--no-census", action="store_true",
-                    help="summary.json only — no census member reads")
-    ap.add_argument("--head-keys", metavar="FILE",
-                    help="file of keys to head-census (bursts + import roll)")
+    ap.add_argument("--bucket", default=_BUCKET_DEFAULT)
     ap.add_argument("--full-keys", metavar="FILE",
                     help="file of keys to full-census (witness + bursts)")
-    ap.add_argument("--workers", type=int, default=16)
-    ap.add_argument("--out", required=True, help="JSONL rows output")
+    ap.add_argument("--head-keys", metavar="FILE",
+                    help="file of keys to head-census (bursts + import roll)")
+    ap.add_argument("--no-census", action="store_true",
+                    help="summary.json only — no census member reads")
     ap.add_argument("--resume", action="store_true")
+    ap.add_argument("--workers", type=int, default=16)
     args = ap.parse_args()
-    args.head_set = _load_key_set(args.head_keys)
-    args.full_set = _load_key_set(args.full_keys)
+    args.head_set = _key_set_file(args.head_keys)
+    args.full_set = _key_set_file(args.full_keys)
     prefixes = [
-        p[len("s3://") + len(args.bucket) + 1:] if p.startswith("s3://")
-        else p
+        p.split("/", 3)[-1] if p.startswith("s3://") else p
         for p in (args.prefixes or [_PREFIX_DEFAULT])
     ]
-    done = _load_done(Path(args.out), args.resume)
+    done = _already_scanned(Path(args.out), args.resume)
     client = _s3_client()
+    out_root = str(Path(args.out).parent.resolve())
     with validated_open(
-        str(args.out), "a",
-        allowed_roots=(str(Path(args.out).parent.resolve()),),
-        encoding="utf-8",
+        str(args.out), "a", allowed_roots=(out_root,), encoding="utf-8",
     ) as fh:
         for p in prefixes:
-            tier_prefix = p.rstrip("/") + "/"
-            rows, errs = _run_prefix(client, args.bucket, tier_prefix,
-                                     args, done, fh)
-            print(f"{tier_prefix}: {rows} rows, {errs} errors",
-                  file=sys.stderr)
+            tier = p.rstrip("/") + "/"
+            n, e = _run_prefix(client, args.bucket, tier, args, done, fh)
+            print(f"{tier}: {n} rows, {e} errors", file=sys.stderr)
 
 
 if __name__ == "__main__":
