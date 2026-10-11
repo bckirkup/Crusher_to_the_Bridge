@@ -165,4 +165,33 @@ time, not minutes.
 
 ## Findings
 
-(to be filled at readout — `docs/norovirus/noro_entrain_01_readout.md`)
+Readout of record: `docs/norovirus/noro_entrain_01_readout.md` (engine
+`dbbd5395`, all 27,000 cells + 1,480 censused voyages + 1,350 exp head).
+
+- **Lever A (event shape): no movement.** `a_ext`/`a_thin` are
+  posting-identical to `ship` on paired seeds (posted sets ⊂ ship's on all
+  hulls); conversion stays 0.1–0.2% cls/spr vs `ind` 4.4/1.7%. The
+  opposite-direction contrast is null — extent is not the discriminating
+  axis. `a_ext` realized ~2.3× events/takers at unchanged per-window mass;
+  `a_thin` realized ~3× thinner windows. Neither moved posting.
+- **Lever B (arriving shedders): rate in band, shape wrong.** bc40/bc80
+  lift posting into band on spr (0.4/0.5%) and cls bc40 (0.8%), above band
+  on cls bc80 (1.9%) and exp (2.3/3.7%) — bought by arriving-shedder mass:
+  P(early) → 97–100%, ~95% of early objects sourced to gen-0 imports,
+  posted voyages mostly new (bc80 exp 5/37 ∩ ship), conversion near `ship`
+  rates (denominator-driven), no burst signature (exp posted 0.375 vs rest
+  0.400). Posted-conditional pax AR still thin (0.012–0.017 < 0.04).
+- **`bmix` net-sign: immunity dominates.** At equal crew prevalence, crew
+  0.5 + pax 0.2 immune pools collapse posting to `bi50`/`ship` level
+  (0.1% cls/spr) — the bc* gain is import mass, not mechanism.
+- **Posted-AR band below 0.04–0.10 on every arm including `ind`** — the
+  thin-signature gap is upstream of the cs mechanism entirely.
+- **§6.4 mega gate not met:** spr bc80 rate leg in band but burst leg flat
+  (0.276 ≈ rest 0.264) — mega stays excluded.
+- **Must-not-move clean everywhere:** off zero-witness (0 obj/ev/takers),
+  composition == drawn on 27,000 rows, route shares within ~1pp of ship,
+  0 integrity violations in 41,732 object rows, immune echo exact
+  (130/553/870 vs declared pools).
+- Next declared tests: `cs_extent` redraw arm (cadence-vs-extent
+  discrimination); `arriving_shedder` contract reparameterization; the
+  posted-AR gap is upstream (reporting/case-def), unprobed by this sweep.
