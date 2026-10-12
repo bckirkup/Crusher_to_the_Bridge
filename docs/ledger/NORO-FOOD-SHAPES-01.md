@@ -1,6 +1,6 @@
 # NORO-FOOD-SHAPES-01
 **Date:** 2026-10-12
-**Commit:** declared on this PR (tree branched from `36ce23c8`)
+**Commit:** #993
 **Pathogens:** norwalk_gi
 **Status:** declared
 
