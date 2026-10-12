@@ -50,8 +50,8 @@ across windows, partition draws leaving the shared stream
 untouched, seeded determinism, default-vs-explicit-baseline
 bit-identity.
 
-**Collision note.** Lands alongside in-flight PR #990's
+**Collision note.** Landed alongside PR #990's
 `lot_titre_gec_per_g` two-mode conditioning (orthogonal): the
 per-window titre re-mint draws the same spec name the mint site
-draws, so #990's conditioned bands apply to re-mints unchanged when
-it merges.
+draws, so the conditioned bands apply to re-mints unchanged —
+pinned in `NORO-CS-EXTENT-02.md`.

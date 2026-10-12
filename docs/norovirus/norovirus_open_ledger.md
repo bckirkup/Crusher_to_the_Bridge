@@ -4576,7 +4576,9 @@ per window, leftover to the last, `extent_met` close reason) and
 and take-share re-mint per served window on a per-object stream
 partition, shipped pair bit-identical). Arm knobs per the contract
 — no default-ON flip. Ledger entry `docs/ledger/NORO-CS-EXTENT-01.md`;
-the `fx_wide`/`fx_narrow`/`redraw` arms append to this campaign as
+per-window re-mints resolve the two-mode titre band like the mint
+(`docs/ledger/NORO-CS-EXTENT-02.md`, pinned). The
+`fx_wide`/`fx_narrow`/`redraw` arms append to this campaign as
 new blocks on the same seed lists per §4.3's extension rule.
 
 ## 5. Held fixed by assumption
