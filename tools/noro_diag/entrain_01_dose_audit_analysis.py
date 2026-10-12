@@ -16,7 +16,6 @@ prints the tables the audit doc quotes:
 from __future__ import annotations
 
 import json
-import sys
 from collections import Counter
 from pathlib import Path
 from statistics import mean, median
@@ -252,4 +251,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()
