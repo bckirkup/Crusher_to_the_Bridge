@@ -1566,6 +1566,16 @@ COMMON_SOURCE_LOT_SERVINGS_RANGE = (30.0, 600.0)
 # ~1-3 days refrigerated. Documentary; bounds the interval half of
 # (station, interval). Grade C. Origin: declared.
 COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE = (1, 4)
+# NORO-CS-EXTENT (NORO-ENTRAIN-01 design §4.3): the number of served
+# meal windows a provisioned lot spans when ``lot_extent_mode:
+# "declared"`` meters ``lot_servings`` uniformly per window (per-window
+# serving cap, leftover to the last window). A campaign-arm
+# discriminator — the iso-dose isolation (fx_wide (12,24) / fx_narrow
+# (2,4) are config overrides, declared there) — not a physical fit.
+# The shipped interval brackets the shelf-life span in services
+# (~3 meal windows per day x the (1,4)-day shelf-life band).
+# Grade C. Origin: declared.
+COMMON_SOURCE_LOT_EXTENT_WINDOWS_RANGE = (3, 12)
 # Nominal item-line labels — a traceability label on the object witness,
 # no rate effect.
 COMMON_SOURCE_LOT_ITEM_LINES = (
@@ -1658,6 +1668,9 @@ _COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
     "lot_servings": (COMMON_SOURCE_LOT_SERVINGS_RANGE, "loguniform"),
     "lot_shelf_life_days": (
         COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE, "int"),
+    # NORO-CS-EXTENT — drawn only under ``lot_extent_mode: "declared"``.
+    "lot_extent_windows": (
+        COMMON_SOURCE_LOT_EXTENT_WINDOWS_RANGE, "int"),
     # FOOD-COMMON-SOURCE-02 leg 2 — drawn only under the arm's
     # ``"object"`` mode.
     "handler_span_contamination_probability": (
@@ -3365,6 +3378,24 @@ class TransmissionCore:
             == "background"
             else "two_mode"
         )
+        # NORO-CS-EXTENT (NORO-ENTRAIN-01 design §4.3): the lot extent
+        # and state-cadence arm knobs — config, not defaults. The
+        # shipped pair ``"emergent"`` / ``"per_object"`` is the labelled
+        # baseline; the contract waives the default-ON rule (these arms
+        # isolate dose-vs-extent and state-vs-cadence, not better
+        # physics).
+        self._cs_lot_extent_mode = (
+            "declared"
+            if str(cs.get("lot_extent_mode", "emergent")).strip().lower()
+            == "declared"
+            else "emergent"
+        )
+        self._cs_lot_state_redraw = (
+            "per_window"
+            if str(cs.get("lot_state_redraw", "per_object"))
+            .strip().lower() == "per_window"
+            else "per_object"
+        )
         self._cs_cfg = cs
         # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
         # platform layout's posture into this block when the config does
@@ -3428,19 +3459,27 @@ class TransmissionCore:
             for p in (self.pathogen_profiles or {}).values()
         )
         self._cs_rng = None
+        # Kept alongside the generator: ``lot_state_redraw:
+        # "per_window"`` spawns each lot object its own stream partition
+        # off it, so per-window re-mints never touch the shared stream
+        # and the shipped ``"per_object"`` baseline stays bit-identical.
+        self._cs_seed_seq = None
         if not armed:
             return
         seed_seq = getattr(
             getattr(self.rng, "bit_generator", None), "seed_seq", None,
         )
         entropy = getattr(seed_seq, "entropy", None)
-        self._cs_rng = (
-            np.random.default_rng(
-                np.random.SeedSequence(
-                    entropy, spawn_key=(_COMMON_SOURCE_STREAM_KEY,),
-                ),
+        self._cs_seed_seq = (
+            np.random.SeedSequence(
+                entropy, spawn_key=(_COMMON_SOURCE_STREAM_KEY,),
             )
             if entropy is not None
+            else None
+        )
+        self._cs_rng = (
+            np.random.default_rng(self._cs_seed_seq)
+            if self._cs_seed_seq is not None
             else self.rng
         )
         # Per-voyage rate draws: each armed pathogen gets one realisation
@@ -3514,22 +3553,26 @@ class TransmissionCore:
         name: str,
         pathogen_id: str,
         cs_block: dict[str, Any] | None = None,
+        rng: np.random.Generator | None = None,
     ) -> float:
-        """One draw of a named constant on the dedicated stream."""
+        """One draw of a named constant on the dedicated stream — or on
+        a caller-supplied partition (a lot object's own stream under
+        ``lot_state_redraw: "per_window"``), which the shared stream
+        then never sees."""
         lo, hi = self._cs_spec_range(name, pathogen_id, cs_block)
         lo = max(0.0, lo)
         hi = max(lo, hi)
         if lo == hi:
             return lo
         _range, kind = _COMMON_SOURCE_SPECS[name]
-        rng = self._cs_rng
+        stream = self._cs_rng if rng is None else rng
         if kind == "int":
-            return float(rng.integers(int(lo), int(hi) + 1))
+            return float(stream.integers(int(lo), int(hi) + 1))
         if kind == "loguniform":
-            return float(10.0 ** rng.uniform(
+            return float(10.0 ** stream.uniform(
                 math.log10(lo), math.log10(hi),
             ))
-        return float(rng.uniform(lo, hi))
+        return float(stream.uniform(lo, hi))
 
     def _init_exposure_cap(
         self,
@@ -12575,6 +12618,33 @@ class TransmissionCore:
         servings = max(1, int(round(self._cs_draw(
             "lot_servings", pathogen_id, cs_block,
         ))))
+        extent_windows: int | None = None
+        window_serving_cap: int | None = None
+        if self._cs_lot_extent_mode == "declared":
+            # NORO-CS-EXTENT declared arm: the served-window count is
+            # minted from a declared interval and the minted servings
+            # are distributed uniformly over it — a per-window serving
+            # cap, the integer-division leftover folded into the last
+            # window's allotment. Titre and take-share mint exactly as
+            # emergent, so expected titre x servings dose is unchanged.
+            extent_windows = max(1, int(round(self._cs_draw(
+                "lot_extent_windows", pathogen_id, cs_block,
+            ))))
+            window_serving_cap = servings // extent_windows
+        redraw_rng: np.random.Generator | None = None
+        if self._cs_lot_state_redraw == "per_window":
+            # NORO-CS-EXTENT redraw arm: the object's own stream
+            # partition — per-window re-mints draw here, never on the
+            # shared stream, so ``"per_object"`` stays bit-identical at
+            # shared seeds and the re-mint cadence is the object's, not
+            # the interleaving's. With no seed sequence to spawn from
+            # (entropy-less parent rng) it falls back to the shared
+            # stream — bit-identity is already unavailable there.
+            redraw_rng = (
+                np.random.default_rng(self._cs_seed_seq.spawn(1)[0])
+                if self._cs_seed_seq is not None
+                else self._cs_rng
+            )
         mix = self._cs_lot_mix(pathogen_id)
         self._cs_object_counter += 1
         self._cs_objects.setdefault(pathogen_id, []).append({
@@ -12604,6 +12674,11 @@ class TransmissionCore:
             "strain_id": (
                 mix.contributors[0][0] if mix is not None else None
             ),
+            "extent_mode": self._cs_lot_extent_mode,
+            "redraw": self._cs_lot_state_redraw,
+            "extent_windows": extent_windows,
+            "window_serving_cap": window_serving_cap,
+            "redraw_rng": redraw_rng,
             "windows_covered": 0,
             "pans_emitted": 0,
             "pan_serial": 0,
@@ -12829,12 +12904,41 @@ class TransmissionCore:
         intact to wait for the next service.
         """
         cs_block = (profile or {}).get("common_source_events", {})
+        if obj.get("redraw_rng") is not None:
+            # ``lot_state_redraw: "per_window"`` — the lot's
+            # contamination state re-mints at each served window off
+            # the object's own partition, in the mint's draw order
+            # (titre, then take-share); extent is untouched. The titre
+            # re-mint resolves through the same ``_cs_titre_spec`` site
+            # rule as the mint — a ``provisioned_lot`` object is the
+            # implicated denominator under ``two_mode``. The shared
+            # stream consumes no draw here.
+            obj["lot_titre_gec_per_g"] = self._cs_draw(
+                self._cs_titre_spec("provisioned_lot"),
+                pathogen_id, cs_block,
+                rng=obj["redraw_rng"],
+            )
+            obj["take_share"] = self._cs_draw(
+                "item_take_share", pathogen_id, cs_block,
+                rng=obj["redraw_rng"],
+            )
         cohort = self._cs_cohort(members, token, epoch)
         demand = int(self._cs_rng.binomial(len(cohort), obj["take_share"]))
         pan_servings = max(1, int(round(self._cs_draw(
             "pan_servings", pathogen_id, cs_block,
         ))))
-        servings_served = min(demand, obj["servings_remaining"])
+        serving_cap = obj["servings_remaining"]
+        extent_windows = obj.get("extent_windows")
+        if (
+            extent_windows is not None
+            and obj["windows_covered"] + 1 < extent_windows
+        ):
+            # Declared extent: uniform per-window serving cap until the
+            # last declared window, which may serve the leftover.
+            serving_cap = min(
+                serving_cap, obj["window_serving_cap"],
+            )
+        servings_served = min(demand, serving_cap)
         if servings_served > 0:
             self._cs_object_emit_pans(
                 state, obj, epoch, zone_name, token, cohort,
@@ -12847,6 +12951,13 @@ class TransmissionCore:
         self.common_source_telemetry["object_windows"] += 1
         if obj["servings_remaining"] <= 0:
             self._cs_close_object(obj, epoch, "exhausted", matrix)
+        elif (
+            obj.get("extent_windows") is not None
+            and obj["windows_covered"] >= obj["extent_windows"]
+        ):
+            # The declared span is spent: the lot leaves the line with
+            # whatever servings remain — the extent arm's signature.
+            self._cs_close_object(obj, epoch, "extent_met", matrix)
 
     def _cs_object_emit_pans(
         self,
@@ -12966,6 +13077,11 @@ class TransmissionCore:
                 if obj["lot_titre_gec_per_g"] is not None else None
             ),
             "strain_id": obj["strain_id"],
+            # NORO-CS-EXTENT witnesses: the configured arm knobs and the
+            # minted declared extent (None on agent objects / emergent).
+            "extent_mode": obj.get("extent_mode"),
+            "redraw": obj.get("redraw"),
+            "extent_windows": obj.get("extent_windows"),
         }
         if matrix is not None:
             matrix.common_source_objects.append(row)
@@ -13192,6 +13308,13 @@ class TransmissionCore:
             "strain_id": (
                 mix.contributors[0][0] if mix is not None else None
             ),
+            # The lot-only NORO-CS-EXTENT knobs do not apply to agent
+            # objects — their rows witness them as None.
+            "extent_mode": None,
+            "redraw": None,
+            "extent_windows": None,
+            "window_serving_cap": None,
+            "redraw_rng": None,
             "windows_covered": 0,
             "pans_emitted": 0,
             "pan_serial": 0,

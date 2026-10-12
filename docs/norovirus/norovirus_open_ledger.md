@@ -4567,6 +4567,18 @@ list and canary-then-STOP in
 `docs/norovirus/noro_entrain_01_sweep_design.md`; package
 `campaigns/noro/noro_entrain_01/`.
 
+**`NORO-CS-EXTENT-01` (open — mechanism landed, no numbers):** the
+§4.3 `cs_extent` contract is implemented —
+`transmission.common_source.lot_extent_mode` (`"emergent"` shipped
+| `"declared"`: minted `extent_windows`, servings metered uniformly
+per window, leftover to the last, `extent_met` close reason) and
+`lot_state_redraw` (`"per_object"` shipped | `"per_window"`: titre
+and take-share re-mint per served window on a per-object stream
+partition, shipped pair bit-identical). Arm knobs per the contract
+— no default-ON flip. Ledger entry `docs/ledger/NORO-CS-EXTENT-01.md`;
+the `fx_wide`/`fx_narrow`/`redraw` arms append to this campaign as
+new blocks on the same seed lists per §4.3's extension rule.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
