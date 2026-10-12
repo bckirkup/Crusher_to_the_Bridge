@@ -16,7 +16,7 @@ stays in band and D4 keeps?
 | image built | done | `picard-campaign:noro-food-shapes01` @ `45b2bf18` → `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:bb962a4282accd9ca848c32465e861314f9ddf798dec6d63353c17791427a981`; jobdef `picard-noro-food-shapes-01:1` (digest-pinned, ACTIVE, retry ×10 `Host EC2*`) |
 | local smoke | done | `fl_exp_12d_scr_redraw_mint` index 0 (seed 8000) on the eval image: 3-member zip contract + armed override echo (`lot_object_probability [0.02,0.15]`, `lot_state_redraw "per_window"`, object modes) + `redraw`/`extent_mode`/`extent_windows` witness fields on object rows; voyage minted 1 `ill_handler`, 0 `provisioned_lot` (expected at ~8.5%/voyage — the 48-cell block carries the lot gate) |
 | canary (108 cells, exp) | done — **all §8 gates PASS** | 108/108 children SUCCEEDED, 0 failures, 108/108 zips; see Canary readout below |
-| wave 1 — exp, all 11 arms | — | 11,000 cells; user go required |
+| wave 1 — exp, all 11 arms | submitted, in flight | 11,000 cells (11×1,000) on `picard-campaign-queue`; job IDs + early spot-check below |
 | wave 2 — cls/spr factorial core | — | 8 arms × 2 hulls × 1,000; user go required |
 | wave 3 — cls/spr remainder | — | `redraw`, `fx_wide`, `fx_narrow` × 2 hulls; user go required |
 | readout + findings | — | `docs/norovirus/noro_food_shapes_01_readout.md` |
@@ -118,7 +118,55 @@ failure class observed.
 
 ## Wave submissions
 
-Pending — image digest, jobdef revisions, array job IDs, submit SHAs.
+### Wave 1 — exp, all 11 arms (11,000 cells)
+
+Submitted 2026-10-12 ~19:59 UTC on `picard-campaign-queue` (Spot FIFO,
+strict submit order) under jobdef `picard-noro-food-shapes-01:1`
+(digest-pinned `picard-campaign@sha256:bb962a4282accd9ca848c32465e861314f9ddf798dec6d63353c17791427a981`
+@ `45b2bf18`, retry ×10 `Host EC2*`). One array per block, literal
+`containerOverrides` argv identical in shape to the canary submit
+(`campaign_entrypoint.py --campaign noro/food_shapes_01 --block
+<block> --seeds 8000…8999 --manifest … --pathogen-id norwalk_gi
+--epochs 288`), `arrayProperties.size: 1000`. Manifest mirrored at
+`s3://…/campaign/noro_food_shapes_01/manifest.json`; all 11 fleet
+prefixes were empty at submit (canary zips live under distinct
+`canary_exp_*` prefixes — no key collisions).
+
+| block | cells | array job ID |
+|-------|-------|--------------|
+| `fl_exp_12d_scr_off` | 1,000 (8000–8999) | `8728fa4c-f398-40c9-a5ac-9e26a945549c` |
+| `fl_exp_12d_scr_ind` | 1,000 (8000–8999) | `e94b2ef8-26b0-4b40-8d57-5beaf9b180dc` |
+| `fl_exp_12d_scr_ind_bg` | 1,000 (8000–8999) | `a694abaa-2e0a-4beb-b021-e43e59e87a01` |
+| `fl_exp_12d_scr_ship` | 1,000 (8000–8999) | `fb63c8b1-8aeb-4f23-8fb0-730343a11655` |
+| `fl_exp_12d_scr_bg` | 1,000 (8000–8999) | `2775e75f-44e1-4d7e-b139-55af2464cc22` |
+| `fl_exp_12d_scr_mint` | 1,000 (8000–8999) | `67f6966f-d6ff-4311-bb38-68f684417f68` |
+| `fl_exp_12d_scr_bg_mint` | 1,000 (8000–8999) | `9962142b-404b-4232-b4c7-0bc3e82b74cc` |
+| `fl_exp_12d_scr_redraw` | 1,000 (8000–8999) | `9bdbb1f0-6478-41ce-9b58-c986e7d33e0d` |
+| `fl_exp_12d_scr_redraw_mint` | 1,000 (8000–8999) | `e226fc04-dded-45a2-9be9-15f58ac5a39d` |
+| `fl_exp_12d_scr_fx_wide` | 1,000 (8000–8999) | `363c1a40-21ba-4e6b-af90-7633cec22ebd` |
+| `fl_exp_12d_scr_fx_narrow` | 1,000 (8000–8999) | `fd390b53-4bad-43ce-9e6d-5735aee23eaa` |
+
+Dispatch health: `off` completed 1000/1000 SUCCEEDED, 0 FAILED in
+~35 min (~45 cells/min observed). `ind` landing next; armed
+object-mode arms (`ship` onward) drain FIFO after `ind`/`ind_bg`.
+Wave ETA ~4 h at the observed rate.
+
+Early-landing spot-check — 5 `off` zips (seeds 8000–8004) + 3 `ind`
+zips (first landed): 3-member zip contract on all (`summary.json`,
+`growth_census.json.gz`, `rss_samples.json`). `off`: override echo
+`parameters.common_source {"mode": "off"}` verbatim; zero-witness
+holds — 0 `objects`, 0 `events`, `telemetry.dose_credited 0.0` on
+every sampled cell. `ind`: armed override echo `{"lot_mode":
+"independent", "handler_mode": "independent", "diner_mode":
+"independent"}` verbatim on all 3; v1 event rows present on 2/3
+(`source_kind: ill_diner`, `object_id: null` throughout — the §8
+"zero `object_id` witness rows" expectation for independent-mode
+cells; a zero-event `ind` cell is within per-voyage mint
+expectation). Object-row witness fields (`extent_mode`/`redraw`/
+titre) verified on this same image by the canary at identical seeds
+and re-verify at readout as the `ship`-family blocks land. No
+non-Spot-reclaim failure class observed; no zero-witness violations
+on landed cells.
 
 ## Findings
 
