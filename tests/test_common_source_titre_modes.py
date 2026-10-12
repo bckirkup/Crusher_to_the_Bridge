@@ -218,7 +218,8 @@ def test_the_same_seed_reproduces_the_same_titres() -> None:
         _step_objects(core, [_diner(i) for i in range(1, 60)], epochs=72)
         return _titres(core)
 
-    assert run() == run()
+    first = run()
+    assert first == run()
 
 
 def test_unarmed_profiles_draw_nothing_under_either_titre_mode() -> None:
