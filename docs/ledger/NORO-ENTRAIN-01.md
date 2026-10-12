@@ -37,3 +37,7 @@ exp, then STOP), wave order and report-immediately triggers:
 `noro_entrain_01_manifest.json` (27 tiers, 27,000 cells). No engine
 changes; nothing submitted under this design until the user gates
 image build, canary and each wave.
+
+Mechanism legs landing under this design are recorded in their own
+entries: `NORO-CS-EXTENT-01` (the §4.3 `cs_extent` contract —
+`lot_extent_mode` + `lot_state_redraw`, shipped as arm knobs).

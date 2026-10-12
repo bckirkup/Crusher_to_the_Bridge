@@ -140,6 +140,13 @@
             {"type": "number", "minimum": 0, "maximum": 1},
             {"type": "array", "items": {"type": "number", "minimum": 0, "maximum": 1}, "minItems": 2, "maxItems": 2}
           ]
+        },
+        "lot_extent_windows": {
+          "description": "NORO-CS-EXTENT declared-extent arm: served-window count range a provisioned lot spans under transmission.common_source.lot_extent_mode 'declared' (servings metered uniformly per window, leftover to the last): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0},
+            {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
+          ]
         }
       },
       "additionalProperties": false

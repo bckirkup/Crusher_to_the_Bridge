@@ -277,7 +277,7 @@ is precisely the gap §4.3 fills, and it is declared rather than
 worked around because a config-only "normalization" would be a fitted
 couple, not a declared arm.
 
-### 4.3 Mechanism contract — `cs_extent` (spec only, no engine work here)
+### 4.3 Mechanism contract — `cs_extent` (landed — ledger NORO-CS-EXTENT-01)
 
 The iso-dose isolation and the cadence isolation both need one small
 change each inside `_cs_realize_lot_object` / `_cs_object_serve`. If
