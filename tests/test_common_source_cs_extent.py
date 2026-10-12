@@ -27,6 +27,11 @@ from tests.test_common_source_lot_objects import (
     _object_cfg,
     _step_objects,
 )
+from tests.test_common_source_titre_modes import (
+    IMPLICATION,
+    LEGACY_BAND,
+    _u,
+)
 
 
 def _extent_cfg(**overrides: object) -> dict:
@@ -217,6 +222,70 @@ def test_per_window_reproduces_at_shared_seed() -> None:
     first = run()
     second = run()
     assert first == second
+
+
+# ── Per-window redraw × titre_draw_mode: re-mints resolve the band ───
+
+def test_per_window_remints_draw_the_resolved_spec() -> None:
+    # Pinning a spec name proves WHICH spec the re-mint resolves: under
+    # the shipped ``two_mode`` a ``provisioned_lot`` re-mint draws
+    # ``lot_titre_implicated_gec_per_g`` — the same denominator the
+    # mint resolves — so every re-minted window titre lands the pin;
+    # under ``"background"`` it draws the single-mode spec. A re-mint
+    # that bypassed the resolver would leave these unpinned.
+    for mode, spec in (
+        ("two_mode", "lot_titre_implicated_gec_per_g"),
+        ("background", "lot_titre_gec_per_g"),
+    ):
+        core = _core(cfg_cs=_extent_cfg(**{
+            "titre_draw_mode": mode,
+            "lot_state_redraw": "per_window",
+            spec: 4.0e3,
+            "lot_servings": 600.0,
+            "item_take_share": [0.3, 0.7],
+            "pan_servings": 80,
+            "embarkation_lot_window_days": 1,
+            "lot_shelf_life_days": 4,
+        }))
+        events, _, _, _ = _step_objects(
+            core, [_diner(i) for i in range(1, 40)], epochs=120,
+        )
+        titres = _lot_titres(events)
+        assert len(titres) > 1
+        for titre in titres:
+            assert titre == pytest.approx(4.0e3)
+
+
+def test_per_window_remints_follow_the_resolved_band() -> None:
+    # Every served window's re-minted titre sits in the band the mode
+    # resolves — implicated under shipped ``two_mode``, single-mode
+    # under the labelled baseline. The object partition consumes the
+    # same uniforms either way, so same-seed re-mints pair at equal
+    # log-uniform quantiles across the bands.
+    def run(mode: str) -> list[float]:
+        core = _core(cfg_cs=_extent_cfg(**{
+            "titre_draw_mode": mode,
+            "lot_state_redraw": "per_window",
+            "lot_servings": 600.0,
+            "item_take_share": [0.3, 0.7],
+            "pan_servings": 80,
+            "embarkation_lot_window_days": 1,
+            "lot_shelf_life_days": 4,
+        }), seed=23)
+        events, _, _, _ = _step_objects(
+            core, [_diner(i) for i in range(1, 40)], epochs=120,
+        )
+        return _lot_titres(events)
+
+    implicated = run("two_mode")
+    legacy = run("background")
+    assert len(implicated) == len(legacy) > 1
+    for im, bg in zip(implicated, legacy, strict=True):
+        assert IMPLICATION[0] <= im <= IMPLICATION[1]
+        assert LEGACY_BAND[0] <= bg <= LEGACY_BAND[1]
+        assert _u(im, *IMPLICATION) == pytest.approx(
+            _u(bg, *LEGACY_BAND), abs=1e-6,
+        )
 
 
 # ── The baseline pair stays bit-identical ────────────────────────────
