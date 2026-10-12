@@ -4579,6 +4579,31 @@ partition, shipped pair bit-identical). Arm knobs per the contract
 the `fx_wide`/`fx_narrow`/`redraw` arms append to this campaign as
 new blocks on the same seed lists per §4.3's extension rule.
 
+**`NORO-FOOD-SHAPES-01` (declared — design frozen, nothing
+submitted):** the next measurement stage on the SCORE-01/
+ENTRAIN-01 frame, crossing the three axes the measured baselines
+point at — all config-expressible on the current engine. The
+**implicated titre denominator** axis (`titre_draw_mode` two_mode
+vs `"background"`, which is also the bit-identity bridge back to
+the `dbbd5395` grid); the **cadence dose-shape** axis
+(`lot_state_redraw: "per_window"` — re-mints provably resolve the
+implicated band under two_mode, pinned by NORO-CS-EXTENT-02 — and
+`lot_extent_mode: "declared"` at (12,24)/(2,4); the §4.3 contract
+arms land here rather than appending to ENTRAIN-01, since the
+cadence pairing surface must be the two_mode image); and the
+**mint-rate** axis (`lot_object_probability` (0.02,0.15) — the v1
+lot_event voyage-gate interval re-expressed on the object
+grammar; channel absence is measured: 2/1,620 unposted object
+cells minted a lot). Arm set (11): `off`/`ind`/`ind_bg`/`ship`/
+`bg` baselines and bridges; `mint`/`bg_mint`, `redraw`/
+`redraw_mint` the powered factorial corners and conjunction;
+`fx_wide`/`fx_narrow` iso-dose. 3 hulls × 1,000 seeds = 33,000
+voyages on the SCORE-01 seed lists; mega excluded. Frozen
+admissibility (D1–D4), integrity gates and canary-then-STOP in
+`docs/norovirus/noro_food_shapes_01_sweep_design.md`; package
+`campaigns/noro/food_shapes_01/`; entry
+`docs/ledger/NORO-FOOD-SHAPES-01.md`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
