@@ -1495,7 +1495,36 @@ COMMON_SOURCE_SERVING_MASS_G_RANGE = (50.0, 250.0)
 # Flannery 2013 oyster lots >1e3 copies/g digestive tissue; produce/RTE
 # items sit lower. Log-uniform draw — the underlying distribution is
 # multiplicative and heavy-tailed. Grade B. Origin: analogous.
+# NORO-IMPLICATED-TITRE-01 (review §8, applied): this single-mode
+# interval is, shape-for-shape, the BACKGROUND distribution — market and
+# production stock on the non-implicated denominator. Under the shipped
+# ``titre_draw_mode: "two_mode"`` it is drawn only by the labelled
+# baseline: a fired ``provisioned_lot`` object IS the implicated
+# denominator and draws the implicated band below instead.
+# ``titre_draw_mode: "background"`` restores this draw verbatim — the
+# pre-change single-mode behaviour, one log-uniform per titre at the
+# same stream position.
 COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE = (1.0e1, 1.0e4)
+# Implicated-item titre band, GEC/g — every quantitative outbreak-
+# implicated measurement in the NORO-IMPLICATED-TITRE-01 census
+# (docs/norovirus/noro_implicated_titre_review.md §2, §8): floor from
+# the smallest implicated quantification (Lowther 2012 outbreak minimum
+# 152 copies/g; Polo 2016's 43-1,170 copies/oyster sits at comparable
+# per-gram scale), ceiling from Rexin 2024's implicated 4,630 GC/g —
+# the largest implicated quantification found. Grade B for shellfish
+# item lines (direct implicated measurements); Grade C for produce/RTE
+# lines — no quantitative implicated RTE titre exists, so the shellfish
+# band is carried as analogous (§2's honest gap). Origin: Ab (census).
+COMMON_SOURCE_LOT_TITRE_IMPLICATED_GEC_PER_G_RANGE = (1.5e2, 5.0e3)
+# Background-stock titre band, GEC/g — market/production stock on the
+# non-implicated denominator: EFSA BIOHAZ dispatch means 168-337 cpg,
+# Dirks 2021 ready-for-sale 1.76-2.04 log10 gc/g, Lowther 2012
+# non-outbreak GM 121 (review §3, §8). The band a titre draw site takes
+# when it is NOT the implicated mint event — no such site is modelled
+# yet (every current titre draw is a fired ``provisioned_lot``), so the
+# resolver below only reaches it for a future background-stock use or a
+# direct spec draw. Grade B. Origin: Ab.
+COMMON_SOURCE_LOT_TITRE_BACKGROUND_GEC_PER_G_RANGE = (1.0e1, 1.0e3)
 # Shared-utensil/pan-edge contacts per diner pass — a handful of touches;
 # no literature measurement. Grade C. Origin: declared.
 COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE = (1, 5)
@@ -1612,6 +1641,13 @@ _COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
     "serving_mass_g": (COMMON_SOURCE_SERVING_MASS_G_RANGE, "uniform"),
     "lot_titre_gec_per_g": (
         COMMON_SOURCE_LOT_TITRE_GEC_PER_G_RANGE, "loguniform"),
+    # NORO-TWO-MODE-TITRE — the two-mode bands resolved per draw site
+    # under ``titre_draw_mode: "two_mode"``; ``"background"`` resolves
+    # every site to ``lot_titre_gec_per_g`` above (the pre-change draw).
+    "lot_titre_implicated_gec_per_g": (
+        COMMON_SOURCE_LOT_TITRE_IMPLICATED_GEC_PER_G_RANGE, "loguniform"),
+    "lot_titre_background_gec_per_g": (
+        COMMON_SOURCE_LOT_TITRE_BACKGROUND_GEC_PER_G_RANGE, "loguniform"),
     "diner_contacts_per_event": (
         COMMON_SOURCE_DINER_CONTACTS_PER_EVENT_RANGE, "int"),
     # FOOD-COMMON-SOURCE-02 leg 1 — drawn only under ``lot_mode: object``.
@@ -3310,6 +3346,25 @@ class TransmissionCore:
             == "independent"
             else "object"
         )
+        # NORO-TWO-MODE-TITRE (NORO-IMPLICATED-TITRE-01 §8, applied): the
+        # mint-time lot-titre draw is conditioned on the object's
+        # denominator. ``"two_mode"`` — the shipped default, the better
+        # physics ships on — resolves each titre draw site by the mint
+        # event itself: a fired ``provisioned_lot`` object only mints
+        # conditional on the voyage carrying a contaminated lot, so it
+        # IS the implicated denominator and draws the implicated band;
+        # a background-stock site (none modelled) would draw the
+        # background band. ``"background"`` is the labelled pre-change
+        # baseline: every site resolves to the single-mode
+        # ``lot_titre_gec_per_g`` spec — the draw the review identified
+        # as the background distribution — restoring the prior
+        # behaviour verbatim at the same stream position.
+        self._cs_titre_mode = (
+            "background"
+            if str(cs.get("titre_draw_mode", "two_mode")).strip().lower()
+            == "background"
+            else "two_mode"
+        )
         self._cs_cfg = cs
         # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
         # platform layout's posture into this block when the config does
@@ -3435,6 +3490,24 @@ class TransmissionCore:
         if isinstance(value, (list, tuple)) and len(value) == 2:
             return float(value[0]), float(value[1])
         return float(value), float(value)
+
+    def _cs_titre_spec(self, source_kind: str) -> str:
+        """The titre spec a draw site resolves under ``_cs_titre_mode``.
+
+        ``two_mode``: a ``provisioned_lot`` site IS the implicated
+        denominator — the object only mints conditional on the voyage
+        carrying a contaminated lot — so it draws the implicated band;
+        any other titre site is background stock and draws the
+        background band. ``"background"`` baseline: every site resolves
+        to the single-mode ``lot_titre_gec_per_g`` spec. Either way the
+        draw below consumes exactly one uniform, so the modes share one
+        stream position per titre.
+        """
+        if self._cs_titre_mode != "two_mode":
+            return "lot_titre_gec_per_g"
+        if source_kind == "provisioned_lot":
+            return "lot_titre_implicated_gec_per_g"
+        return "lot_titre_background_gec_per_g"
 
     def _cs_draw(
         self,
@@ -12518,7 +12591,8 @@ class TransmissionCore:
             "lot_servings": servings,
             "servings_remaining": servings,
             "lot_titre_gec_per_g": self._cs_draw(
-                "lot_titre_gec_per_g", pathogen_id, cs_block,
+                self._cs_titre_spec("provisioned_lot"),
+                pathogen_id, cs_block,
             ),
             "take_share": self._cs_draw(
                 "item_take_share", pathogen_id, cs_block,
@@ -13352,7 +13426,7 @@ class TransmissionCore:
         kind, agent = source
         if kind == "provisioned_lot":
             titre = self._cs_draw(
-                "lot_titre_gec_per_g", pathogen_id, cs_block,
+                self._cs_titre_spec(kind), pathogen_id, cs_block,
             )
             serving_mass = self._cs_draw(
                 "serving_mass_g", pathogen_id, cs_block,

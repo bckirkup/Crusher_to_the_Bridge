@@ -93,7 +93,21 @@
           ]
         },
         "lot_titre_gec_per_g": {
-          "description": "Contaminated-lot titre range, GEC/g: scalar or [lo, hi].",
+          "description": "Contaminated-lot titre range, GEC/g (the pre-change single-mode draw; resolved by titre draw sites only under transmission.common_source.titre_draw_mode 'background'): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0},
+            {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
+          ]
+        },
+        "lot_titre_implicated_gec_per_g": {
+          "description": "Implicated-denominator contaminated-lot titre range, GEC/g — the band a fired provisioned_lot draws under titre_draw_mode 'two_mode' (NORO-IMPLICATED-TITRE-01): scalar or [lo, hi].",
+          "oneOf": [
+            {"type": "number", "minimum": 0},
+            {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
+          ]
+        },
+        "lot_titre_background_gec_per_g": {
+          "description": "Background-stock contaminated-lot titre range, GEC/g — the band a non-implicated titre draw site resolves under titre_draw_mode 'two_mode' (NORO-IMPLICATED-TITRE-01): scalar or [lo, hi].",
           "oneOf": [
             {"type": "number", "minimum": 0},
             {"type": "array", "items": {"type": "number", "minimum": 0}, "minItems": 2, "maxItems": 2}
