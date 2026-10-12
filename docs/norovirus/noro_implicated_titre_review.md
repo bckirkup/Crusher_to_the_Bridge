@@ -1,8 +1,10 @@
 # NORO-IMPLICATED-TITRE-01 — outbreak-implicated food-item titre review
 
 > **Status:** Findings — sourced census of outbreak-implicated food-item titres,
-> the shipped-draw reading, and a concrete (unapplied) proposal for a conditioned
-> two-mode lot-titre draw. No engine change; nothing fitted to anchors.
+> the shipped-draw reading, and a concrete proposal for a conditioned
+> two-mode lot-titre draw, **applied** at `56762131`
+> (`transmission.common_source.titre_draw_mode`, `"two_mode"` default,
+> `"background"` the labelled baseline). Nothing fitted to anchors.
 > Ledger: [`docs/ledger/NORO-IMPLICATED-TITRE-01.md`](../ledger/NORO-IMPLICATED-TITRE-01.md).
 
 ## 1. Question and denominator

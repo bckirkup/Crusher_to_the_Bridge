@@ -39,10 +39,18 @@ recovery under-reads true in-item load ~5–50× (ISO 15216-2 oyster recovery
 handler-arm transfer range `U(0.003, 0.46)` already brackets the literature
 (Duret 2017 hand→food median 0.05; Rönnqvist 2014 glove→cucumber 1.5%).
 
-**Proposal recorded, not applied** — option (a), conditioned two-mode draw
-inside the shipped interval: background mode logU(1e1, ~1e3) Grade B;
-implicated mode logU(1.5e2, 5e3) Grade B (shellfish) / C (produce-RTE —
-no quantitative implicated titre exists), selected by the object-mint
-event itself. Options (b) attenuation re-sourcing and (c) units/ledger
-framing assessed in the document; (c) remains the residual framing for
-the challenge-dose gap.
+**Proposal recorded and APPLIED** (NORO-TWO-MODE-TITRE, `56762131`) —
+option (a), conditioned two-mode draw inside the shipped interval, now
+ships default-ON: `transmission.common_source.titre_draw_mode`
+`"two_mode"` resolves a fired `provisioned_lot` object — the implicated
+denominator — to the implicated band `lot_titre_implicated_gec_per_g`
+logU(1.5e2, 5e3) Grade B (shellfish) / C (produce-RTE — no quantitative
+implicated titre exists); a background-stock titre site (none modelled)
+resolves to `lot_titre_background_gec_per_g` logU(1e1, 1e3) Grade B.
+`"background"` is the labelled pre-change baseline restoring the
+single-mode `lot_titre_gec_per_g` draw — identical uniform at the same
+stream position. Mint-time titre values re-map, so prior campaign cells
+are not bit-identical on titre/dose fields (declared, not a defect);
+the stream consumes the same one uniform per titre either way. Options
+(b) attenuation re-sourcing and (c) units/ledger framing assessed in the
+document; (c) remains the residual framing for the challenge-dose gap.

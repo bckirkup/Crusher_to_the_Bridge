@@ -4519,6 +4519,30 @@ under-convert to posting (~0–6% vs `ind`'s 13–43%); all must-not-move
 invariants held, `ind` reproduces v1's ceilings/conversion/event
 distribution. v2 object numbers are now of record for that grid.
 
+**`NORO-TWO-MODE-TITRE` (applied at `56762131`):** the
+NORO-IMPLICATED-TITRE-01 §8 proposal is now the shipped draw — the
+review's "recorded, not applied" line is applied.
+`transmission.common_source.titre_draw_mode` `"two_mode"` (default-ON)
+conditions the mint-time lot-titre draw on the object's denominator: a
+fired `provisioned_lot` object only mints conditional on the voyage
+carrying a contaminated lot — it IS the implicated denominator — so its
+titre draws `lot_titre_implicated_gec_per_g` logU(1.5e2, 5e3) (the
+census band: Lowther 152 floor, Rexin 4,630 ceiling; Grade B shellfish /
+C produce-RTE), and a background-stock titre site (none modelled) draws
+`lot_titre_background_gec_per_g` logU(1e1, 1e3) (EFSA dispatch
+168–337 cpg, Dirks ~57–110, Lowther background GM 121; Grade B).
+`"background"` is the labelled pre-change baseline restoring the
+single-mode `lot_titre_gec_per_g` logU(1e1, 1e4) draw — one uniform at
+the same stream position either way, so the baseline reproduces the
+prior draw verbatim; titre values re-map under `two_mode`, so prior
+campaign cells are not bit-identical on titre/dose fields (declared,
+not a defect). Nothing fitted — both bands are bounded by the census
+floor/ceiling and the background surveys, independent of any model
+outcome. Handler/diner objects mint no titre (shedder-sourced pans are
+hand-load deposits), so no second object kind needed a mode. The v1
+`"independent"` lot event is an implicated mint too — it draws the
+implicated band under `two_mode`.
+
 **`NORO-ENTRAIN-01` (declared — design frozen, nothing submitted):**
 the next measurement stage on the SCORE-01 frame, two levers aimed at
 raising VSP posting appropriately per hull. Lever A (event shape)
