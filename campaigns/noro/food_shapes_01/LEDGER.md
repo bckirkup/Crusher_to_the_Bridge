@@ -17,8 +17,8 @@ stays in band and D4 keeps?
 | local smoke | done | `fl_exp_12d_scr_redraw_mint` index 0 (seed 8000) on the eval image: 3-member zip contract + armed override echo (`lot_object_probability [0.02,0.15]`, `lot_state_redraw "per_window"`, object modes) + `redraw`/`extent_mode`/`extent_windows` witness fields on object rows; voyage minted 1 `ill_handler`, 0 `provisioned_lot` (expected at ~8.5%/voyage — the 48-cell block carries the lot gate) |
 | canary (108 cells, exp) | done — **all §8 gates PASS** | 108/108 children SUCCEEDED, 0 failures, 108/108 zips; see Canary readout below |
 | wave 1 — exp, all 11 arms | done | 11,000 cells (11×1,000) on `picard-campaign-queue`, 0 FAILED; job IDs + early spot-check below |
-| wave 2 — cls/spr factorial core | — | 8 arms × 2 hulls × 1,000; user go required |
-| wave 3 — cls/spr remainder | — | `redraw`, `fx_wide`, `fx_narrow` × 2 hulls; user go required |
+| wave 2 — cls/spr factorial core | done — submitted | **PRUNED**: 7 arms × 2 hulls × 1,000 = 14,000 cells (`redraw_mint` dropped by amendment); job IDs + probe spot-check below |
+| wave 3 — cls/spr remainder | **dropped** | `redraw`, `fx_wide`, `fx_narrow` × 2 hulls (6,000 cells) — dropped by the same user-approved amendment; cadence and extent margins measured null on exp (wave-1 readout) |
 | wave-1 readout (exp) | done — measured | `docs/norovirus/noro_food_shapes_01_wave1_readout.md`; tools `tools/noro_diag/food_shapes_01_{scan,report,bridge}.py` |
 
 ## Grid
@@ -167,6 +167,81 @@ titre) verified on this same image by the canary at identical seeds
 and re-verify at readout as the `ship`-family blocks land. No
 non-Spot-reclaim failure class observed; no zero-witness violations
 on landed cells.
+
+### Wave 2 — cls + spr factorial core (14,000 cells)
+
+**User-approved amendment to the frozen wave order (design §8), recorded
+2026-10-13:** wave 3 (`redraw`, `fx_wide`, `fx_narrow` on cls + spr —
+6,000 cells) is **dropped**, and `redraw_mint` is dropped from wave 2 —
+the cadence and extent margins were measured null on exp (wave-1
+readout: `mint − redraw_mint` Δposted +0.00 pp) and the conjunction
+cell is answered (`redraw_mint` ≈ `mint` on every D-metric). Wave 2
+runs the remaining 7 factorial-core arms on cls + spr:
+`ship`, `mint`, `bg_mint`, `ind_bg`, `ind`, `off`, `bg` — 7 arms ×
+2 hulls × 1,000 seeds = **14,000 cells**. Total campaign spend under
+the amendment: 25,000 of the frozen 33,000 voyages (11,000 exp wave-1
++ 14,000 wave-2; 8,000 pruned cells never submitted).
+
+Submitted 2026-10-13 ~15:56–16:08 UTC on `picard-campaign-queue` (Spot
+FIFO, strict submit order; queue empty at submit — wave-1 fully
+drained) under jobdef `picard-noro-food-shapes-01:1` (digest-pinned
+`picard-campaign@sha256:bb962a4282accd9ca848c32465e861314f9ddf798dec6d63353c17791427a981`
+@ `45b2bf18`, retry ×10 `Host EC2*` — verified ACTIVE and the only
+revision in the family; every array's `jobDefinition` resolved to
+that pinned rev at submit). One array per block, literal
+`containerOverrides` argv identical in shape to wave-1
+(`campaign_entrypoint.py --campaign noro/food_shapes_01 --s3-prefix
+s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_food_shapes_01/
+--block <block> --seeds 8105…9104 --manifest
+picard_framework/runs/mega_cruise_campaign/noro_food_shapes_01_manifest.json
+--pathogen-id norwalk_gi --epochs 288`), `arrayProperties.size: 1000`.
+Manifest mirrored at `s3://…/campaign/noro_food_shapes_01/manifest.json`
+(byte-identical to the frozen local file, verified by `cmp`); all 14
+fleet prefixes were empty at submit. §3.4 bridge condition re-checked:
+between `dbbd5395` and eval image `45b2bf18` the only mechanism merges
+are this campaign's declared machinery (#990 `two_mode`, #991
+extent/redraw, #992 pin) — no foreign default-ON mechanism; the
+bit-identity bridge declarations stand as frozen.
+
+`fl_cls_12d_scr_ship` went first as the probe array (armed override
+echo + object witnesses on the new hull); the remaining 13 followed
+after its early zips verified clean.
+
+| block | cells | array job ID |
+|-------|-------|--------------|
+| `fl_cls_12d_scr_ship` | 1,000 (8105–9104) | `c3249f6b-59e1-4789-b4eb-170d34e63d84` |
+| `fl_cls_12d_scr_off` | 1,000 (8105–9104) | `75189ff8-b0b5-492f-b11a-353b92e6e151` |
+| `fl_cls_12d_scr_ind` | 1,000 (8105–9104) | `299e1b19-8642-47c5-a9cc-99d331b1e127` |
+| `fl_cls_12d_scr_ind_bg` | 1,000 (8105–9104) | `95130826-6cc1-4a13-beab-511621bae4be` |
+| `fl_cls_12d_scr_bg` | 1,000 (8105–9104) | `8318d90d-cb7f-4bcf-a238-f0172ec5e863` |
+| `fl_cls_12d_scr_mint` | 1,000 (8105–9104) | `3e792ba8-9145-4135-a552-bcd36c757456` |
+| `fl_cls_12d_scr_bg_mint` | 1,000 (8105–9104) | `7e1cc94f-d1a8-4af7-86fe-f728402bade8` |
+| `fl_spr_12d_scr_off` | 1,000 (8105–9104) | `843041ef-bd05-473a-af7e-f425843be2a3` |
+| `fl_spr_12d_scr_ind` | 1,000 (8105–9104) | `9eabbe4e-1e74-499d-952c-2a455fab89a9` |
+| `fl_spr_12d_scr_ind_bg` | 1,000 (8105–9104) | `28f70ff9-e140-41a3-9f97-be10726075f1` |
+| `fl_spr_12d_scr_ship` | 1,000 (8105–9104) | `86ed82ff-1aa7-4470-b235-5700226458a7` |
+| `fl_spr_12d_scr_bg` | 1,000 (8105–9104) | `97bec759-d26e-427e-959a-fe8daf165c91` |
+| `fl_spr_12d_scr_mint` | 1,000 (8105–9104) | `f7bd9231-ff35-440d-ab5e-dab2d3880e8f` |
+| `fl_spr_12d_scr_bg_mint` | 1,000 (8105–9104) | `1efecf41-a7fc-4d99-84d2-7e08d144f8e5` |
+
+Probe spot-check — 4 `fl_cls_12d_scr_ship` zips (seeds 8105–8108,
+first landed): 3-member zip contract on all (`summary.json`,
+`growth_census.json.gz`, `rss_samples.json`). Armed override echo
+`parameters.common_source {"lot_mode": "object", "handler_mode":
+"object", "diner_mode": "object", "lot_object_probability":
+[0.001, 0.02]}` verbatim on all 4; `titre_draw_mode` absent → shipped
+`two_mode` (the `ship` contract). Object witness rows carry the
+canary-verified schema (`extent_mode`/`redraw`/`extent_windows`/
+`lot_titre_gec_per_g` present, null on non-lot rows); handler/diner
+objects mint on every sampled cell (7–35/voyage: `ill_handler` +
+`ill_diner`, `object_id` + `seeded_epoch` populated); 0
+`provisioned_lot` — expected at shipped mint (~1%/voyage). Voyages
+non-degenerate: `cumulative_ever_infected` 141–196 on
+`classic_cruise_1900` (n1910), 288 epochs. Dispatch health at
+spot-check: 117 zips landed / 103 RUNNING / 0 FAILED within ~10 min
+of the first dispatch (~12 cells/min — the measured spr/cls drain
+rate; full-wave ETA ~19 h at that rate across 14,000 cells).
+No non-Spot-reclaim failure class observed on landed cells.
 
 ## Findings
 
