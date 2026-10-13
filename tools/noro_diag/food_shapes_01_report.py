@@ -111,11 +111,9 @@ def load_rows(paths: list[str]) -> dict[str, list[dict]]:
                 row = json.loads(line)
                 if row.get("error"):
                     continue
-                prev = seen.get(row["key"])
-                if (
-                    prev is not None
-                    and prev.get("census")
-                    and not row.get("census")
+                # resume races can re-emit a key; prefer the census row
+                if seen.get(row["key"], {}).get("census") and not row.get(
+                    "census"
                 ):
                     continue
                 seen[row["key"]] = row

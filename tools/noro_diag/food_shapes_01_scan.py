@@ -236,9 +236,22 @@ def _census_side(blob: bytes, num_epochs: int) -> dict:
     out = {
         "n_events": len(events),
         **_event_tally(events),
+        "integrity": _integrity(events, objects),
+        "n_acq": len(acq_all),
+        "cs_acq_n": len(cs_acq),
+        "cs_acq_in_span": in_span,
+        "saw_cs": saw_marker,
         "n_exposures": len(exposures),
         "telemetry": telemetry,
         "n_objects": len(objects),
+        "lot_obj_voyage": any(
+            o.get("source_kind") == "provisioned_lot" for o in objects
+        ),
+        "lot_event_voyage": any(
+            e.get("lot_titre_gec_per_g") is not None
+            and e.get("object_id") is None
+            for e in events
+        ),
         "obj_arms": dict(
             Counter(o.get("source_kind") or "?" for o in objects)
         ),
@@ -251,19 +264,6 @@ def _census_side(blob: bytes, num_epochs: int) -> dict:
         "obj_windows_sum": sum(
             int(o.get("windows_covered", 0) or 0) for o in objects
         ),
-        "lot_obj_voyage": any(
-            o.get("source_kind") == "provisioned_lot" for o in objects
-        ),
-        "lot_event_voyage": any(
-            e.get("lot_titre_gec_per_g") is not None
-            and e.get("object_id") is None
-            for e in events
-        ),
-        "integrity": _integrity(events, objects),
-        "n_acq": len(acq_all),
-        "cs_acq_n": len(cs_acq),
-        "cs_acq_in_span": in_span,
-        "saw_cs": saw_marker,
         "early": early_obj + early_ev,
         "n_early_obj": len(early_obj),
         "n_early_ev": len(early_ev),
@@ -298,8 +298,8 @@ def _fetch(client, bucket: str, key: str, census: bool) -> dict | None:
     body = summary.get("summary", {})
     mech = summary.get("mechanisms", {})
     cs_echo = (
-        (params.get("transmission") or {}).get("common_source")
-        or params.get("common_source")
+        params.get("common_source")
+        or (params.get("transmission") or {}).get("common_source")
         or {}
     )
     anchor = base["anchor_row"]
@@ -309,6 +309,8 @@ def _fetch(client, bucket: str, key: str, census: bool) -> dict | None:
         "cell": _cell_label(tuple(base["cell_key"])),
         "hull": anchor["hull"],
         "posted": _posted(anchor),
+        "pax_comp": anchor["passenger_complement"],
+        "crew_comp": anchor["crew_complement"],
         "rep_pax_ar": anchor["reported_case_attack_rate_passenger"],
         "rep_crew_ar": anchor["reported_case_attack_rate_crew"],
         "inf_ar_pax": anchor["infection_attack_rate_passenger"],
@@ -316,8 +318,6 @@ def _fetch(client, bucket: str, key: str, census: bool) -> dict | None:
         "ever_ill_pax": anchor["A1_ever_ill_passenger"],
         "rep_pax_n": body.get("cumulative_reported_cases_passenger"),
         "rep_crew_n": body.get("cumulative_reported_cases_crew"),
-        "pax_comp": anchor["passenger_complement"],
-        "crew_comp": anchor["crew_complement"],
         "n_acquired": base["n_acquired"],
         "n_imports": base["n_imports"],
         "ignited": base["ignited"],
