@@ -2,7 +2,7 @@
 **Date:** 2026-10-12
 **Commit:** #993
 **Pathogens:** norwalk_gi
-**Status:** declared
+**Status:** measured
 
 Frozen evaluation design — the next measurement stage on the
 SCORE-01/ENTRAIN-01 frame, crossing the three axes the measured
@@ -45,3 +45,27 @@ canary-then-STOP (108 cells on exp) in
 `noro_food_shapes_01_manifest.json`, 33 tiers). Carries no numbers;
 nothing submitted under this design until the user gates image
 build, canary and each wave.
+
+**Measured at `45b2bf18` (wave 1, exp hull, 11,000/11,000 cells, 0
+FAILED, census re-parse — no new voyages):**
+`docs/norovirus/noro_food_shapes_01_wave1_readout.md`. The mint gate
+is the posting-rate control — 82/1,000 mint-family voyages mint a
+`provisioned_lot` (8.2%, inside the declared (0.02,0.15) interval) and
+~93% post, so posting lands `ind`-like (8.2–8.6%), over the D1 band;
+thin arms hold D1 (+0.3–0.6 pp marginal). Titre denominator is the
+material margin on the v1 draw path (`ind − ind_bg` +13.8 pp
+excursion conversion) but modest on objects (`mint − bg_mint` +4.9 pp);
+cadence (`per_window` re-mint) and `declared` extent are measured
+nulls on every D-metric. D3 recovered at/above `ind` (mint family
+87.8–93.9% excursion conversion, n=82; thin arms n=6, pooled read);
+D4 recovered with mint-family postings themselves bursting
+(0.70–0.75 vs `ind` 0.538). D2 met on `mint` only (0.0411; `ind`
+0.0380). `redraw_mint` is the closest object-grammar reproduction of
+`ind` measured (8.6% posting, 93.9% conversion, 0.748 posted burst48,
+posted-AR 0.0379 vs `ind` 0.0380). All six §7.4 integrity gates pass;
+bridge minted-voyage parity exact (34/34 `ind_bg`, 78/78 `bg`),
+non-object voyages bit-identical; no vacuity, no corruption class.
+Wave-2/3 decision is the user's.
+
+Tools: `tools/noro_diag/food_shapes_01_{scan,report,bridge}.py` +
+`entrain_01_dose_audit.py` re-run on the six dose-relevant arms.

@@ -16,10 +16,10 @@ stays in band and D4 keeps?
 | image built | done | `picard-campaign:noro-food-shapes01` @ `45b2bf18` → `994254241749.dkr.ecr.us-east-1.amazonaws.com/picard-campaign@sha256:bb962a4282accd9ca848c32465e861314f9ddf798dec6d63353c17791427a981`; jobdef `picard-noro-food-shapes-01:1` (digest-pinned, ACTIVE, retry ×10 `Host EC2*`) |
 | local smoke | done | `fl_exp_12d_scr_redraw_mint` index 0 (seed 8000) on the eval image: 3-member zip contract + armed override echo (`lot_object_probability [0.02,0.15]`, `lot_state_redraw "per_window"`, object modes) + `redraw`/`extent_mode`/`extent_windows` witness fields on object rows; voyage minted 1 `ill_handler`, 0 `provisioned_lot` (expected at ~8.5%/voyage — the 48-cell block carries the lot gate) |
 | canary (108 cells, exp) | done — **all §8 gates PASS** | 108/108 children SUCCEEDED, 0 failures, 108/108 zips; see Canary readout below |
-| wave 1 — exp, all 11 arms | submitted, in flight | 11,000 cells (11×1,000) on `picard-campaign-queue`; job IDs + early spot-check below |
+| wave 1 — exp, all 11 arms | done | 11,000 cells (11×1,000) on `picard-campaign-queue`, 0 FAILED; job IDs + early spot-check below |
 | wave 2 — cls/spr factorial core | — | 8 arms × 2 hulls × 1,000; user go required |
 | wave 3 — cls/spr remainder | — | `redraw`, `fx_wide`, `fx_narrow` × 2 hulls; user go required |
-| readout + findings | — | `docs/norovirus/noro_food_shapes_01_readout.md` |
+| wave-1 readout (exp) | done — measured | `docs/norovirus/noro_food_shapes_01_wave1_readout.md`; tools `tools/noro_diag/food_shapes_01_{scan,report,bridge}.py` |
 
 ## Grid
 
@@ -170,7 +170,35 @@ on landed cells.
 
 ## Findings
 
-Pending readout. Margin map (design §7.2): titre denominator →
+Wave-1 exp readout (11,000 cells, 0 errors, at `45b2bf18`):
+`docs/norovirus/noro_food_shapes_01_wave1_readout.md`. Headlines:
+
+- **Mint rate is the posting-rate control**: 82/1,000 mint-family
+  voyages mint a `provisioned_lot` object and ~93% of those post →
+  posting lands at `ind`-like 8.2–8.6%, over the D1 band. Thin arms
+  hold D1 (+0.3–0.6 pp marginal; `fx_narrow` borderline under).
+- **Titre denominator**: material on the v1 draw path
+  (`ind − ind_bg` +1.3 pp posting, +13.8 pp excursion conversion),
+  modest on the object path (`mint − bg_mint` +0.4 pp / +4.9 pp conv —
+  background titres still convert).
+- **Cadence (`per_window` re-mint) and extent are measured nulls** on
+  every D-metric (`mint − redraw_mint` Δposted +0.00 pp).
+- **D3 recovered**: excursion→posting conversion at/above `ind`
+  (77.7%) on every armed arm — mint family 87.8–93.9% (n=82, powered);
+  thin arms 66.7–100% on n=6 (thin-cell pooled read).
+- **D4 recovered**: excursion burst48 0.49–0.79 vs rest 0.41 on every
+  armed arm; mint-family postings themselves burst (0.70–0.75).
+- **D2**: met on `mint` only (0.0411); `ind` itself sits just under
+  (0.0380). Thin posted-AR signature persists on thin arms.
+- **`redraw_mint` conjunction**: posting 8.6% vs `ind` 8.2%, conv
+  93.9% vs 77.7%, posted burst48 0.748 vs 0.538 — the closest
+  object-grammar reproduction of `ind` measured.
+- **Bridges**: non-object voyages bit-identical; object-voyage
+  interiors carry the declared #990/#991 machinery delta with exact
+  minted-voyage parity (34/34 `ind_bg`, 78/78 `bg`) — not an RNG break.
+- All six §7.4 integrity gates PASS; no vacuity; no corruption class.
+
+Margin map (design §7.2): titre denominator →
 `mint − bg_mint`, `ind − ind_bg` (powered), `ship − bg` (thin);
 cadence → `redraw_mint − mint` (powered), `ship − redraw`,
 `fx_wide − ship − fx_narrow` (iso-dose); mint → `mint − ship`,
