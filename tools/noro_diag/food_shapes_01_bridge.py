@@ -30,6 +30,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+import math
 import re
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -37,6 +38,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from outbreak_anchor_readout import _s3_client, _s3_member_blob  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+from simulation_utils.paths import validated_open  # noqa: E402
 
 _BUCKET_DEFAULT = "crusherbucket-994254241749-us-east-1-an"
 _SUMMARY_MEMBER = "summary.json"
@@ -56,14 +60,10 @@ _BRIDGES = (
      "campaign/noro_entrain_01/fl_exp_12d_scr_off"),
 )
 
-_NUM_RE = re.compile(r"\d+\.\d+(?:[eE][+-]?\d+)?")
-
-
-def _norm_numbers(text: str) -> str:
-    """Round every decimal literal to 12 significant digits."""
-    def _r(m: re.Match) -> str:
-        return f"{float(m.group(0)):.12g}"
-    return _NUM_RE.sub(_r, text)
+# Census floats drift by ~1 ULP across the two engine images' serializers
+# (mass-balance accumulators); the tolerant leaf compare below holds that
+# same bar (~12 significant digits) without regex normalization.
+_CENSUS_TOL = 1e-12
 
 
 def _index_prefix(client, bucket: str, prefix: str) -> dict[int, str]:
@@ -91,29 +91,55 @@ def _summary_norm(summary: dict) -> dict:
     return s
 
 
-def _diff_keys(a: dict, b: dict, path: str = "") -> list[str]:
-    """Paths where the two parsed summaries differ (first-divergence
-    keys for the report, not an exhaustive walk)."""
-    diffs: list[str] = []
+def _is_num(x) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def _leaf_diff(a, b, path: str, diffs: list[str], tol: float) -> None:
+    if _is_num(a) and _is_num(b):
+        if a != b and not math.isclose(a, b, rel_tol=tol):
+            diffs.append(f"{path or '<root>'} ({a} vs {b})")
+    elif a != b:
+        diffs.append(path or "<root>")
+
+
+def _diff_key(a: dict, b: dict, k, path: str, diffs: list[str],
+              tol: float, cap: int) -> None:
+    if k not in a:
+        diffs.append(f"{path}.{k} (only in B)")
+    elif k not in b:
+        diffs.append(f"{path}.{k} (only in A)")
+    else:
+        _diff_keys(a[k], b[k], f"{path}.{k}", diffs, tol, cap)
+
+
+def _diff_keys(a, b, path: str = "", diffs: list[str] | None = None,
+               tol: float = 0.0, cap: int = 40) -> list[str]:
+    """Paths where the two parsed structures differ (capped first-
+    divergence walk, not exhaustive). `tol` is the relative tolerance
+    for numeric leaves (0 = exact)."""
+    if diffs is None:
+        diffs = []
+    if len(diffs) >= cap:
+        return diffs
     if type(a) is not type(b):
-        return [path or "<root>"]
-    if isinstance(a, dict):
+        diffs.append(path or "<root>")
+    elif isinstance(a, dict):
         for k in sorted(set(a) | set(b)):
-            if k not in a:
-                diffs.append(f"{path}.{k} (only in B)")
-            elif k not in b:
-                diffs.append(f"{path}.{k} (only in A)")
-            else:
-                diffs.extend(_diff_keys(a[k], b[k], f"{path}.{k}"))
+            if len(diffs) >= cap:
+                break
+            _diff_key(a, b, k, path, diffs, tol, cap)
     elif isinstance(a, list):
         if len(a) != len(b):
             diffs.append(f"{path} (len {len(a)} vs {len(b)})")
         else:
             for i, (x, y) in enumerate(zip(a, b)):
+                if len(diffs) >= cap:
+                    break
                 if x != y:
-                    diffs.extend(_diff_keys(x, y, f"{path}[{i}]"))
-    elif a != b:
-        diffs.append(path or "<root>")
+                    _diff_keys(x, y, f"{path}[{i}]", diffs, tol, cap)
+    else:
+        _leaf_diff(a, b, path, diffs, tol)
     return diffs
 
 
@@ -140,14 +166,18 @@ def _check_seed(
         if ca is None or cb is None:
             row["census"] = "missing_member"
         else:
-            ta = _norm_numbers(gzip.decompress(ca).decode())
-            tb = _norm_numbers(gzip.decompress(cb).decode())
-            row["census"] = "identical" if ta == tb else "diverged"
-            if ta != tb:
-                i = next(
-                    i for i, (x, y) in enumerate(zip(ta, tb)) if x != y
+            try:
+                da = json.loads(gzip.decompress(ca))
+                db = json.loads(gzip.decompress(cb))
+            except (OSError, ValueError) as exc:
+                row["census"] = f"parse: {exc}"
+            else:
+                cdiffs = _diff_keys(da, db, tol=_CENSUS_TOL)
+                row["census"] = (
+                    "identical" if not cdiffs else "diverged"
                 )
-                row["census_first_diff"] = ta[max(0, i - 80):i + 80]
+                if cdiffs:
+                    row["census_first_diff"] = cdiffs[:5]
     return row
 
 
@@ -199,7 +229,13 @@ def main() -> None:
                 "arm": arm, "verdict": "key_missing",
                 "missing_w1": missing_w1, "missing_old": missing_old,
             })
-    with open(args.out, "w", encoding="utf-8") as fh:
+    out_path = Path(args.out)
+    with validated_open(
+        str(out_path),
+        "w",
+        encoding="utf-8",
+        allowed_roots=(str(out_path.parent.resolve()),),
+    ) as fh:
         for r in sorted(rows, key=lambda r: (r["arm"], r.get("seed", 0))):
             fh.write(json.dumps(r) + "\n")
     print("\n| arm | paired | identical | diverged | census n |"

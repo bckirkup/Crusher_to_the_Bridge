@@ -34,7 +34,12 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from collections import Counter, defaultdict
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from food_score_01_report import _quant, _wilson  # noqa: E402
 
 _ARM_ORDER = (
     "off", "ind", "ind_bg", "ship", "bg", "mint", "bg_mint",
@@ -60,26 +65,15 @@ def _arm_of(tier: str) -> str:
     return tier.split("scr_", 1)[-1] if "scr_" in tier else tier
 
 
-def _wilson(k: int, n: int) -> tuple[float, float]:
-    if n == 0:
-        return 0.0, 0.0
-    z = 1.959964
-    p = k / n
-    den = 1 + z * z / n
-    centre = (p + z * z / (2 * n)) / den
-    half = z * ((p * (1 - p) / n + z * z / (4 * n * n)) ** 0.5) / den
-    return centre - half, centre + half
 
 
-def _quant(xs: list[float], q: float) -> float | None:
-    if not xs:
-        return None
-    xs = sorted(xs)
-    i = q * (len(xs) - 1)
-    lo = int(i)
-    if lo + 1 >= len(xs):
-        return xs[lo]
-    return xs[lo] + (xs[lo + 1] - xs[lo]) * (i - lo)
+_SEP3 = "|---|---|---|"
+_SEP5 = "|---|---|---|---|---|"
+_SEP6 = "|---|---|---|---|---|---|"
+_SEP7 = "|---|---|---|---|---|---|---|"
+_SEP8 = "|---|---|---|---|---|---|---|---|"
+_SEP9 = "|---|---|---|---|---|---|---|---|---|"
+_SEP10 = "|---|---|---|---|---|---|---|---|---|---|"
 
 
 def _iqr_med(xs: list[float]) -> str:
@@ -134,7 +128,7 @@ def load_rows(paths: list[str]) -> dict[str, list[dict]]:
 def _coverage(cells: dict[str, list[dict]]) -> list[str]:
     lines = [
         "| arm | rows | censused | posted | posted rate | errors |",
-        "|---|---|---|---|---|---|",
+        _SEP6,
     ]
     for arm in _ARM_ORDER:
         rows = cells.get(arm, [])
@@ -152,42 +146,53 @@ def _posting_table(cells: dict) -> list[str]:
     lines = [
         "| arm | n | posted | Wilson 95% | paired gained/lost vs off"
         " | marginal pp | in 0.4-0.9% band |",
-        "|---|---|---|---|---|---|---|",
+        _SEP7,
     ]
     off_by_seed = {r["seed"]: r["posted"] for r in cells.get("off", [])}
+    off_posted = sum(1 for b in off_by_seed.values() if b)
     for arm in _ARM_ORDER:
         rows = cells.get(arm, [])
         if not rows:
             continue
-        n = len(rows)
-        k = sum(1 for r in rows if r["posted"])
-        lo, hi = _wilson(k, n)
-        gained = lost = 0
-        for r in rows:
-            base = off_by_seed.get(r["seed"])
-            if base is None:
-                continue
-            if r["posted"] and not base:
-                gained += 1
-            elif base and not r["posted"]:
-                lost += 1
-        marg = 100.0 * (k - sum(1 for b in off_by_seed.values() if b)) / n
-        in_band = ""
-        if arm not in ("off",):
-            in_band = "yes" if _POST_BAND[0] * 100 <= marg <= _POST_BAND[1] * 100 else "no"
-        lines.append(
-            f"| {arm} | {n} | {k} ({_pct(k, n)})"
-            f" | [{100*lo:.2f}%,{100*hi:.2f}%]"
-            f" | +{gained}/-{lost} | {marg:+.2f} | {in_band} |"
-        )
+        lines.append(_posting_row(arm, rows, off_by_seed, off_posted))
     return lines
+
+
+def _posting_row(
+    arm: str, rows: list[dict], off_by_seed: dict, off_posted: int
+) -> str:
+    n = len(rows)
+    k = sum(1 for r in rows if r["posted"])
+    lo, hi = _wilson(k, n)
+    gained = lost = 0
+    for r in rows:
+        base = off_by_seed.get(r["seed"])
+        if base is None:
+            continue
+        if r["posted"] and not base:
+            gained += 1
+        elif base and not r["posted"]:
+            lost += 1
+    marg = 100.0 * (k - off_posted) / n
+    in_band = ""
+    if arm not in ("off",):
+        in_band = (
+            "yes"
+            if _POST_BAND[0] * 100 <= marg <= _POST_BAND[1] * 100
+            else "no"
+        )
+    return (
+        f"| {arm} | {n} | {k} ({_pct(k, n)})"
+        f" | [{100*lo:.2f}%,{100*hi:.2f}%]"
+        f" | +{gained}/-{lost} | {marg:+.2f} | {in_band} |"
+    )
 
 
 def _ar_table(cells: dict) -> list[str]:
     lines = [
         "| arm | n_posted | posted pax-AR med [IQR] | p90"
         " | >=0.04 edge |",
-        "|---|---|---|---|---|",
+        _SEP5,
     ]
     pooled: list[float] = []
     for arm in _ARM_ORDER:
@@ -217,7 +222,7 @@ def _conversion_table(cells: dict) -> list[str]:
     lines = [
         "| arm | exc voy (cs_food>0) | posted | conv % | vs ind"
         " | obj voy | posted | conv % |",
-        "|---|---|---|---|---|---|---|---|",
+        _SEP8,
     ]
     ind_exc = [_excursion(r) for r in cells.get("ind", [])]
     ind_post_exc = sum(
@@ -253,7 +258,7 @@ def _burst_table(cells: dict) -> list[str]:
     lines = [
         "| arm | exc b48 med [IQR] | rest b48 med [IQR]"
         " | posted b48 med | exc n |",
-        "|---|---|---|---|---|",
+        _SEP5,
     ]
     for arm in _ARM_ORDER:
         cen = _ok(cells.get(arm, []))
@@ -284,7 +289,7 @@ def _mint_census(cells: dict) -> list[str]:
     lines = [
         "| arm | cells | lot-obj cells | frac | lot objects"
         " | windows | pans | titre draws | in-band | draw min-max |",
-        "|---|---|---|---|---|---|---|---|---|---|",
+        _SEP10,
     ]
     for arm in _ARM_ORDER:
         cen = _ok(cells.get(arm, []))
@@ -323,7 +328,7 @@ def _remint_table(cells: dict) -> list[str]:
     lines = [
         "| arm | lot objs w/ pans | multi-window | varying titre"
         " | constant titre |",
-        "|---|---|---|---|---|",
+        _SEP5,
     ]
     for arm in _ARM_ORDER:
         cen = _ok(cells.get(arm, []))
@@ -347,7 +352,7 @@ def _extent_table(cells: dict) -> list[str]:
     lines = [
         "| arm | declared objects | extent_windows draws"
         " | cap violations | extent_met | other closes |",
-        "|---|---|---|---|---|---|",
+        _SEP6,
     ]
     for arm in ("fx_wide", "fx_narrow"):
         cen = _ok(cells.get(arm, []))
@@ -369,7 +374,7 @@ def _witness_table(cells: dict) -> list[str]:
     lines = [
         "| arm | objects n | ill_handler | ill_diner | lot"
         " | events n | lot-event voyages | zero-dose ev |",
-        "|---|---|---|---|---|---|---|---|",
+        _SEP8,
     ]
     for arm in _ARM_ORDER:
         cen = _ok(cells.get(arm, []))
@@ -407,21 +412,41 @@ def _route_totals(rows: list[dict]) -> tuple[Counter, int]:
     return counts, total
 
 
+_SHIP_BG_FIELDS = (
+    "n_objects", "n_events", "takers_sum", "obj_pans_sum",
+    "obj_windows_sum", "n_acq", "cs_acq_n",
+)
+
+
 def _must_not_move(cells: dict) -> list[str]:
-    lines = []
     off = cells.get("off", [])
+    lines = [_off_witness_line(off)]
+    lines += _ind_witness_lines(cells)
+    lines += _inf_ar_drift_lines(cells, off)
+    lines.append(_route_drift_line(cells, off))
+    lines.append(_ship_bg_identity_line(cells))
+    return lines
+
+
+def _off_witness_line(off: list[dict]) -> str:
     off_cen = _ok(off)
-    wit = sum(_cen(r).get("n_objects", 0) + _cen(r).get("n_events", 0)
-              for r in off_cen)
+    wit = sum(
+        _cen(r).get("n_objects", 0) + _cen(r).get("n_events", 0)
+        for r in off_cen
+    )
     dose = sum(
         float((_cen(r).get("telemetry") or {}).get("dose_credited") or 0)
         for r in off_cen
     )
-    lines.append(
+    return (
         f"- `off` zero-witness: {len(off_cen)} censused cells,"
         f" {wit} object+event rows, dose_credited sum {dose:.6f}"
         f" — {'PASS' if wit == 0 and dose == 0 else 'FAIL'}"
     )
+
+
+def _ind_witness_lines(cells: dict) -> list[str]:
+    lines = []
     for arm in ("ind", "ind_bg"):
         cen = _ok(cells.get(arm, []))
         obj_ev = sum(_cen(r).get("n_obj_events", 0) for r in cen)
@@ -431,6 +456,11 @@ def _must_not_move(cells: dict) -> list[str]:
             f" rows, {n_obj} object rows over {len(cen)} cells"
             f" — {'PASS' if obj_ev == 0 and n_obj == 0 else 'FAIL'}"
         )
+    return lines
+
+
+def _inf_ar_drift_lines(cells: dict, off: list[dict]) -> list[str]:
+    lines = []
     off_inf = {r["seed"]: r["inf_ar_pax"] for r in off}
     for arm in _ARM_ORDER:
         if arm == "off":
@@ -448,6 +478,10 @@ def _must_not_move(cells: dict) -> list[str]:
             f"- `{arm}` median paired Δinf-AR vs off: {med:+.4f}"
             f" (p90 |Δ| {p90:.4f}, n={len(deltas)})"
         )
+    return lines
+
+
+def _route_drift_line(cells: dict, off: list[dict]) -> str:
     base_counts, base_total = _route_totals(off)
     worst_overall = (0.0, "-", "-")
     for arm in _ARM_ORDER:
@@ -464,11 +498,14 @@ def _must_not_move(cells: dict) -> list[str]:
             ) * 100
             if abs(shift) > abs(worst_overall[0]):
                 worst_overall = (shift, route, arm)
-    lines.append(
+    return (
         f"- worst non-cs route-share drift vs `off` (pooled):"
         f" {worst_overall[0]:+.2f}pp ({worst_overall[1]} on"
         f" `{worst_overall[2]}`)"
     )
+
+
+def _ship_bg_identity_line(cells: dict) -> str:
     # ship vs bg non-titre-realized field identity (paired seeds)
     bg_by_seed = {r["seed"]: r for r in _ok(cells.get("bg", []))}
     n_pair = n_id = 0
@@ -478,12 +515,8 @@ def _must_not_move(cells: dict) -> list[str]:
         if o is None:
             continue
         n_pair += 1
-        fields = (
-            ("n_objects", "n_events", "takers_sum", "obj_pans_sum",
-             "obj_windows_sum", "n_acq", "cs_acq_n"),
-        )
         same = True
-        for f in fields[0]:
+        for f in _SHIP_BG_FIELDS:
             if _cen(r).get(f) != _cen(o).get(f):
                 same = False
                 diffs[f] += 1
@@ -495,20 +528,19 @@ def _must_not_move(cells: dict) -> list[str]:
             diffs["end_reasons"] += 1
         if same:
             n_id += 1
-    lines.append(
+    return (
         f"- `ship` vs `bg` witness identity (paired seeds): {n_id}/{n_pair}"
         f" identical on object/event counts, takers, pans, windows,"
         f" acquisition counts, obj_arms, end_reasons"
         + (f"; diffs {dict(diffs)}" if diffs else "")
     )
-    return lines
 
 
 def _margins_table(cells: dict) -> list[str]:
     lines = [
         "| margin pair | paired n | A posted | B posted | gained/lost"
         " | Δposted pp | A exc conv | B exc conv |",
-        "|---|---|---|---|---|---|---|---|",
+        _SEP8,
     ]
     for a, b in _MARGIN_PAIRS:
         ra = {r["seed"]: r for r in cells.get(a, [])}
@@ -541,7 +573,7 @@ def _integrity_table(cells: dict) -> list[str]:
     lines = [
         "| arm | ev rows | missing oid | unresolved oid | missing serial"
         " | open objs | srv>lot | non-noro |",
-        "|---|---|---|---|---|---|---|---|",
+        _SEP8,
     ]
     for arm in _ARM_ORDER:
         tot = Counter()
@@ -603,7 +635,7 @@ def _echo_table(cells: dict) -> list[str]:
                       "lot_extent_mode": "declared",
                       "lot_extent_windows": [2, 4]},
     }
-    lines = ["| arm | echo matches | mismatched |", "|---|---|---|"]
+    lines = ["| arm | echo matches | mismatched |", _SEP3]
     for arm in _ARM_ORDER:
         rows = cells.get(arm, [])
         want = expect.get(arm)
@@ -619,7 +651,7 @@ def _dose_position_table(paths: list[str] | None) -> list[str]:
     lines = [
         "| arm | set | acq n | cum med | p med | frac p<0.10"
         " | frac p>0.50 | realized frac |",
-        "|---|---|---|---|---|---|---|---|",
+        _SEP8,
     ]
     if not paths:
         return lines
@@ -636,24 +668,25 @@ def _dose_position_table(paths: list[str] | None) -> list[str]:
                     by_arm[r.get("arm") or "?"].append(a)
     for arm in _ARM_ORDER:
         acqs = by_arm.get(arm, [])
-        if not acqs:
-            continue
         for posted in (False, True):
             sel = [a for a in acqs if a["posted"] == posted]
-            if not sel:
-                continue
-            cums = [a["cum"] for a in sel]
-            ps = [a["p"] for a in sel]
-            prs = [bool(a["pr"]) for a in sel]
-            lines.append(
-                f"| {arm} | {'posted' if posted else 'unposted'}"
-                f" | {len(sel)} | {_quant(cums, 0.5):.1f}"
-                f" | {_quant(ps, 0.5):.3f}"
-                f" | {sum(1 for p in ps if p < 0.10) / len(ps):.3f}"
-                f" | {sum(1 for p in ps if p > 0.50) / len(ps):.3f}"
-                f" | {sum(prs) / len(prs):.3f} |"
-            )
+            if sel:
+                lines.append(_dose_line(arm, sel, posted))
     return lines
+
+
+def _dose_line(arm: str, sel: list[dict], posted: bool) -> str:
+    cums = [a["cum"] for a in sel]
+    ps = [a["p"] for a in sel]
+    prs = [bool(a["pr"]) for a in sel]
+    return (
+        f"| {arm} | {'posted' if posted else 'unposted'}"
+        f" | {len(sel)} | {_quant(cums, 0.5):.1f}"
+        f" | {_quant(ps, 0.5):.3f}"
+        f" | {sum(1 for p in ps if p < 0.10) / len(ps):.3f}"
+        f" | {sum(1 for p in ps if p > 0.50) / len(ps):.3f}"
+        f" | {sum(prs) / len(prs):.3f} |"
+    )
 
 
 def main() -> None:
