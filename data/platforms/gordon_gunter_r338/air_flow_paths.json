@@ -11,10 +11,6 @@
         "Scientist_SR",
         "Crew_SR_Foc",
         "Crew_SR_Main",
-        "HD_Bridge",
-        "HD_Upper",
-        "HD_Focsle",
-        "HD_Main",
         "Crew_Lounge",
         "Recreation",
         "Ships_Store",
@@ -62,6 +58,46 @@
       ],
       "ach": 10.0,
       "description": "machinery ventilation (trunked supply/natural exhaust)"
+    },
+    {
+      "id": "AHU_HD_HD_Bridge",
+      "rooms": [
+        "HD_Bridge"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Bridge, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper",
+      "rooms": [
+        "HD_Upper"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Focsle",
+      "rooms": [
+        "HD_Focsle"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Focsle, 7 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Main",
+      "rooms": [
+        "HD_Main"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Main, 6 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -88,6 +124,38 @@
       "path": "ladder_well_3",
       "is_hvac_ducted": false,
       "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "VENT_Machinery",
+      "to": "AHU_HD_HD_Bridge",
+      "flow_rate_m3h": 951.2,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Bridge; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Hotel",
+      "to": "AHU_HD_HD_Upper",
+      "flow_rate_m3h": 832.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Hotel",
+      "to": "AHU_HD_HD_Focsle",
+      "flow_rate_m3h": 832.3,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Focsle; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Hotel",
+      "to": "AHU_HD_HD_Main",
+      "flow_rate_m3h": 713.4,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Main; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [
@@ -178,16 +246,6 @@
     },
     {
       "from": "Officer_SR",
-      "to": "HD_Upper",
-      "type": "passageway"
-    },
-    {
-      "from": "Officer_SR",
-      "to": "Ships_Office",
-      "type": "passageway"
-    },
-    {
-      "from": "HD_Upper",
       "to": "Ships_Office",
       "type": "passageway"
     },
@@ -202,11 +260,6 @@
       "type": "passageway"
     },
     {
-      "from": "Scientist_SR",
-      "to": "HD_Focsle",
-      "type": "passageway"
-    },
-    {
       "from": "Crew_SR_Foc",
       "to": "Emer_Gen_Rm",
       "type": "passageway"
@@ -214,11 +267,6 @@
     {
       "from": "Crew_SR_Main",
       "to": "Passage_Main",
-      "type": "passageway"
-    },
-    {
-      "from": "Crew_SR_Main",
-      "to": "HD_Main",
       "type": "passageway"
     },
     {

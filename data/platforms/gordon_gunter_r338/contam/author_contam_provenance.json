@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-15T22:19:39.149392+00:00",
+  "created_utc": "2026-10-15T22:32:14.227897+00:00",
   "platform_id": "gordon_gunter_r338",
   "target": "B_contam_starter",
   "hobbyist": true,
-  "openings_count": 43,
+  "openings_count": 39,
   "skip_duct_spines": true,
   "offline_gate": {
     "ok": true,
     "zone_count": 35,
-    "path_map_entries": 226,
-    "hvac_zones": 4,
+    "path_map_entries": 268,
+    "hvac_zones": 8,
     "simplify_warnings": [
       "Dropped Contam section on simplify: day-schedules",
       "Dropped Contam section on simplify: week-schedules",

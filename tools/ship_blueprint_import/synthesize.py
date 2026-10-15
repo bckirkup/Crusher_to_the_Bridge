@@ -25,6 +25,16 @@ from tools.ship_blueprint_import.svg_io import (
 DEFAULT_CROSS_FLOW = 50.0
 APPROVED_OVERLAY_SUFFIX = "_approved.svg"
 
+# Sanitary hardware constants mirror engines/transmission_core.py (and
+# scripts/derive_sanitary_provisioning.py): test_shared_sanitary_zones pins
+# these values against the engine's derived ratio on every platform.
+SANITARY_AREA_M2_PER_WC = 2.7
+SANITARY_CEILING_M = 2.3
+SANITARY_EXHAUST_M3H_PER_WC = 118.9
+SANITARY_ACH = SANITARY_EXHAUST_M3H_PER_WC / (
+    SANITARY_AREA_M2_PER_WC * SANITARY_CEILING_M
+)
+
 
 def _sha256_file(path: str, *, allowed_roots: tuple[str, ...]) -> str:
     h = hashlib.sha256()
@@ -202,11 +212,13 @@ def _auto_hvac(
     digest: ShipDigest,
     zone_ids: list[str],
     zone_meta: dict[str, ZoneDigest],
+    head_ids: set[str],
 ) -> list[dict[str, Any]]:
+    ducted = [z for z in zone_ids if z not in head_ids]
     if digest.hvac_hints:
         out = []
         for hint in digest.hvac_hints:
-            rooms = [r for r in hint.rooms if r in zone_ids]
+            rooms = [r for r in hint.rooms if r in ducted]
             if not rooms:
                 continue
             out.append(
@@ -222,7 +234,7 @@ def _auto_hvac(
 
     # Group by deck
     by_deck: dict[str, list[str]] = {}
-    for zid in zone_ids:
+    for zid in ducted:
         deck = zone_meta[zid].deck if zid in zone_meta else "main"
         by_deck.setdefault(deck, []).append(zid)
 
@@ -245,6 +257,97 @@ def _auto_hvac(
     return hvac
 
 
+def _head_branch_groups(
+    head_ids: list[str],
+    zones_out: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One exhaust-only AHU per head; makeup air comes from the served branch."""
+    by_id = {z["id"]: z for z in zones_out}
+    groups: list[dict[str, Any]] = []
+    for zid in head_ids:
+        wc = max(
+            1,
+            round(by_id[zid]["floor_area_m2"] / SANITARY_AREA_M2_PER_WC),
+        )
+        groups.append(
+            {
+                "id": f"AHU_HD_{zid}",
+                "rooms": [zid],
+                "ach": round(SANITARY_ACH, 1),
+                "oa_fraction": 1.0,
+                "hvac_duty": 0.0,
+                "description": (
+                    f"Exhaust-only sanitary branch ({zid}, {wc} WC); makeup "
+                    "air enters from the served space's branch and leaves "
+                    "overboard."
+                ),
+            }
+        )
+    return groups
+
+
+def _head_makeup_links(
+    head_ids: list[str],
+    zones_out: list[dict[str, Any]],
+    hvac_zones: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One directional Sanitary_Makeup link into each head's branch.
+
+    The source is the non-head group covering the most of the head's served
+    zones, else the group covering most same-deck rooms, else the first
+    sorted branch — heads never source air themselves.
+    """
+    zones_by_id = {z["id"]: z for z in zones_out}
+    branches = [
+        g for g in hvac_zones if not str(g["id"]).startswith("AHU_HD_")
+    ]
+    links: list[dict[str, Any]] = []
+    if not branches:
+        return links
+    for zid in head_ids:
+        head = zones_by_id[zid]
+        serves = set(head.get("serves", []))
+        scored = sorted(
+            branches,
+            key=lambda g: (-len(serves & set(g.get("rooms", []))), str(g["id"])),
+        )
+        if serves & set(scored[0].get("rooms", [])):
+            source = str(scored[0]["id"])
+        else:
+            deck_no = str(head.get("deck", "")).split("_")[0]
+            same_deck = {
+                z["id"]
+                for z in zones_out
+                if str(z.get("deck", "")).split("_")[0] == deck_no
+            }
+            scored = sorted(
+                branches,
+                key=lambda g: (
+                    -len(same_deck & set(g.get("rooms", []))),
+                    str(g["id"]),
+                ),
+            )
+            source = str(scored[0]["id"])
+        wc = max(
+            1,
+            round(head["floor_area_m2"] / SANITARY_AREA_M2_PER_WC),
+        )
+        links.append(
+            {
+                "from": source,
+                "to": f"AHU_HD_{zid}",
+                "flow_rate_m3h": round(wc * SANITARY_EXHAUST_M3H_PER_WC, 1),
+                "is_hvac_ducted": False,
+                "path": "Sanitary_Makeup",
+                "description": (
+                    f"Transfer air into {zid}; the head exhausts overboard, "
+                    "never back to the served space."
+                ),
+            }
+        )
+    return links
+
+
 def _cross_zone_links(
     digest: ShipDigest,
     hvac_zones: list[dict[str, Any]],
@@ -264,7 +367,11 @@ def _cross_zone_links(
         ]
 
     links: list[dict[str, Any]] = []
-    ids = [z["id"] for z in hvac_zones]
+    # Exhaust-only head branches carry no ladder-well chain: a head never
+    # sources air and its only inbound edge is a Sanitary_Makeup link.
+    ids = [
+        z["id"] for z in hvac_zones if not str(z["id"]).startswith("AHU_HD_")
+    ]
     for i in range(len(ids) - 1):
         links.append(
             {
@@ -397,6 +504,18 @@ def _zone_entry(
         entry["serves"] = list(meta.serves)
     if meta and meta.notes:
         entry["description"] = meta.notes
+    if ztype == "Sanitary":
+        # Heads carry fixture-geometry: the ceiling is the MLC headroom
+        # figure, volume follows floor area, and the exhaust ACH is the
+        # hardware-derived constant — test_shared_sanitary_zones enforces
+        # the wiring on every platform.
+        wc = max(1, round(entry["floor_area_m2"] / SANITARY_AREA_M2_PER_WC))
+        entry["ceiling_height_m"] = SANITARY_CEILING_M
+        entry["volume_m3"] = round(
+            entry["floor_area_m2"] * SANITARY_CEILING_M, 2
+        )
+        entry["base_ach"] = round(SANITARY_ACH, 1)
+        entry["max_occupancy"] = wc
     return entry
 
 
@@ -505,7 +624,12 @@ def synthesize(
     zones_out = _zones_from_polys(ordered, zone_meta, digest, pages)
 
     zone_ids = [z["id"] for z in zones_out]
-    graywater = _graywater_zones(digest, zones_out, zone_ids)
+    head_ids = [z["id"] for z in zones_out if z["type"] == "Sanitary"]
+    head_set = set(head_ids)
+    graywater = [
+        g for g in _graywater_zones(digest, zones_out, zone_ids)
+        if g not in head_set
+    ]
 
     spatial: dict[str, Any] = {
         "platform": pid,
@@ -533,15 +657,23 @@ def synthesize(
             "crew": int(digest.complement.crew),
         }
 
-    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta)
+    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta, head_set)
+    hvac_zones += _head_branch_groups(head_ids, zones_out)
     airflow: dict[str, Any] = {
         "platform": pid,
         "description": f"HVAC network synthesized for {pid}",
         "oa_fraction": 0.2,
         "hvac_duty": 0.5,
         "hvac_zones": hvac_zones,
-        "cross_zone_links": _cross_zone_links(digest, hvac_zones),
-        "adjacency": _adjacency_from_polygons(ordered, digest),
+        "cross_zone_links": _cross_zone_links(digest, hvac_zones)
+        + _head_makeup_links(head_ids, zones_out, hvac_zones),
+        # Heads never leak back into the served space: no adjacency edge may
+        # touch a Sanitary zone (the invariants test enforces it).
+        "adjacency": [
+            e
+            for e in _adjacency_from_polygons(ordered, digest)
+            if e["from"] not in head_set and e["to"] not in head_set
+        ],
     }
 
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)

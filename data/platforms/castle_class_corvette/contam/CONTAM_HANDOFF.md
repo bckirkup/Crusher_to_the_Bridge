@@ -11,9 +11,9 @@ GA drawings**.
 
 - Contam **levels / zones** with volume, floor area, ceiling height, elevation
 - SketchPad-ish display coordinates from zone overlays
-- **19** typed `plr_orfc` openings (doors / hatches / ladders) —
+- **18** typed `plr_orfc` openings (doors / hatches / ladders) —
   see `openings_draft.json`
-- **2** starter **AHS** branches from HVAC hints (ACH → Fahs)
+- **4** starter **AHS** branches from HVAC hints (ACH → Fahs)
 - Cross-zone ladder/fan links from the synthesized airflow graph
 - `path_map.json` for ContamX ↔ Crusher alignment
 

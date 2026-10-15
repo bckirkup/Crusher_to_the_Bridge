@@ -10,8 +10,6 @@
         "Galley",
         "Foc_Cabins",
         "Officer_Cabins",
-        "HD_Foc",
-        "HD_Upper",
         "Mess_Mid",
         "Seamen_Mess",
         "Sick_Bay",
@@ -34,6 +32,26 @@
       ],
       "ach": 10.0,
       "description": "engine/boiler room ventilation"
+    },
+    {
+      "id": "AHU_HD_HD_Foc",
+      "rooms": [
+        "HD_Foc"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Foc, 8 WC); makeup air enters from the served space's branch and leaves overboard."
+    },
+    {
+      "id": "AHU_HD_HD_Upper",
+      "rooms": [
+        "HD_Upper"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Upper, 9 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -44,6 +62,22 @@
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
       "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Foc",
+      "flow_rate_m3h": 951.2,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Foc; the head exhausts overboard, never back to the served space."
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Upper",
+      "flow_rate_m3h": 1070.1,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Upper; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [
@@ -114,11 +148,6 @@
     },
     {
       "from": "Officer_Cabins",
-      "to": "Foc_Deck_Open",
-      "type": "passageway"
-    },
-    {
-      "from": "HD_Foc",
       "to": "Foc_Deck_Open",
       "type": "passageway"
     },

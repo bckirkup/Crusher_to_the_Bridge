@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "platform_id": "castle_class_corvette",
-  "created_utc": "2026-10-15T22:27:18.229531+00:00",
+  "created_utc": "2026-10-15T22:32:14.471777+00:00",
   "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
   "openings": [
     {
@@ -149,17 +149,6 @@
     },
     {
       "from": "Officer_Cabins",
-      "to": "Foc_Deck_Open",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "HD_Foc",
       "to": "Foc_Deck_Open",
       "type": "passageway",
       "area_m2": 2.0,

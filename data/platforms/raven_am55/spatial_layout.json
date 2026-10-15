@@ -306,9 +306,9 @@
       "id": "HD_Main",
       "type": "Sanitary",
       "traffic": "low",
-      "volume_m3": 26.52,
+      "volume_m3": 25.41,
       "floor_area_m2": 11.05,
-      "ceiling_height_m": 2.4,
+      "ceiling_height_m": 2.3,
       "elevation_m": 2.5,
       "deck": "main_deck",
       "display": {
@@ -320,7 +320,9 @@
         "Officers_Country",
         "Crew_Quarters"
       ],
-      "description": "crew's WC & lav + CPO head"
+      "description": "crew's WC & lav + CPO head",
+      "base_ach": 19.1,
+      "max_occupancy": 4
     },
     {
       "id": "Fwd_Stores",

@@ -12,7 +12,6 @@
         "Wardroom",
         "Officers_Country",
         "Sick_Bay",
-        "HD_Main",
         "Passage_Main",
         "Crew_Quarters",
         "CPO_Quarters",
@@ -33,6 +32,16 @@
       ],
       "ach": 10.0,
       "description": "machinery ventilation"
+    },
+    {
+      "id": "AHU_HD_HD_Main",
+      "rooms": [
+        "HD_Main"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Main, 4 WC); makeup air enters from the served space's branch and leaves overboard."
     }
   ],
   "cross_zone_links": [
@@ -43,6 +52,14 @@
       "path": "ladder_well_1",
       "is_hvac_ducted": false,
       "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Main",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Main; the head exhausts overboard, never back to the served space."
     }
   ],
   "adjacency": [
@@ -129,11 +146,6 @@
     {
       "from": "Officers_Country",
       "to": "Wardroom",
-      "type": "passageway"
-    },
-    {
-      "from": "Sick_Bay",
-      "to": "HD_Main",
       "type": "passageway"
     }
   ]

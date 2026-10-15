@@ -105,7 +105,9 @@
         "Officer_Cabins",
         "Foc_Cabins"
       ],
-      "description": "WC/urinal block fwd"
+      "description": "WC/urinal block fwd",
+      "base_ach": 19.1,
+      "max_occupancy": 8
     },
     {
       "id": "Foc_Deck_Open",
@@ -186,7 +188,9 @@
         "Seamen_Mess",
         "Mess_Mid"
       ],
-      "description": "washroom/heads fwd"
+      "description": "washroom/heads fwd",
+      "base_ach": 19.1,
+      "max_occupancy": 9
     },
     {
       "id": "Sick_Bay",

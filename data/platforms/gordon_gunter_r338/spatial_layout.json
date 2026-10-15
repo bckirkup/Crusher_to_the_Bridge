@@ -29,9 +29,9 @@
       "id": "HD_Bridge",
       "type": "Sanitary",
       "traffic": "low",
-      "volume_m3": 56.95,
+      "volume_m3": 50.39,
       "floor_area_m2": 21.91,
-      "ceiling_height_m": 2.6,
+      "ceiling_height_m": 2.3,
       "elevation_m": 11.13,
       "deck": "bridge_deck",
       "display": {
@@ -41,7 +41,9 @@
       "serves": [
         "Pilot_House"
       ],
-      "description": "WR/WC 03-26-1-L serving bridge"
+      "description": "WR/WC 03-26-1-L serving bridge",
+      "base_ach": 19.1,
+      "max_occupancy": 8
     },
     {
       "id": "Officer_SR",
@@ -63,9 +65,9 @@
       "id": "HD_Upper",
       "type": "Sanitary",
       "traffic": "low",
-      "volume_m3": 49.92,
+      "volume_m3": 44.16,
       "floor_area_m2": 19.2,
-      "ceiling_height_m": 2.6,
+      "ceiling_height_m": 2.3,
       "elevation_m": 8.64,
       "deck": "upper_deck",
       "display": {
@@ -75,7 +77,9 @@
       "serves": [
         "Officer_SR"
       ],
-      "description": "T/SH 02-18/26/27 heads inside stateroom passage"
+      "description": "T/SH 02-18/26/27 heads inside stateroom passage",
+      "base_ach": 19.1,
+      "max_occupancy": 7
     },
     {
       "id": "Ships_Office",
@@ -173,9 +177,9 @@
       "id": "HD_Focsle",
       "type": "Sanitary",
       "traffic": "low",
-      "volume_m3": 46.56,
+      "volume_m3": 41.19,
       "floor_area_m2": 17.91,
-      "ceiling_height_m": 2.6,
+      "ceiling_height_m": 2.3,
       "elevation_m": 6.05,
       "deck": "forecastle_deck",
       "display": {
@@ -187,7 +191,9 @@
         "Crew_SR_Foc",
         "Science_Labs"
       ],
-      "description": "T/SH 01-38/25 heads"
+      "description": "T/SH 01-38/25 heads",
+      "base_ach": 19.1,
+      "max_occupancy": 7
     },
     {
       "id": "Shelter_Deck",
@@ -394,9 +400,9 @@
       "id": "HD_Main",
       "type": "Sanitary",
       "traffic": "low",
-      "volume_m3": 41.63,
+      "volume_m3": 36.82,
       "floor_area_m2": 16.01,
-      "ceiling_height_m": 2.6,
+      "ceiling_height_m": 2.3,
       "elevation_m": 3.35,
       "deck": "main_deck",
       "display": {
@@ -408,7 +414,9 @@
         "Genl_Mess",
         "Recreation"
       ],
-      "description": "T/SH 1-65/55/45/31 heads in SR row"
+      "description": "T/SH 1-65/55/45/31 heads in SR row",
+      "base_ach": 19.1,
+      "max_occupancy": 6
     },
     {
       "id": "Aft_Working_Deck",

@@ -1,16 +1,16 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-15T22:27:17.953267+00:00",
+  "created_utc": "2026-10-15T22:32:14.711260+00:00",
   "platform_id": "raven_am55",
   "target": "B_contam_starter",
   "hobbyist": true,
-  "openings_count": 18,
+  "openings_count": 17,
   "skip_duct_spines": true,
   "offline_gate": {
     "ok": true,
     "zone_count": 21,
-    "path_map_entries": 137,
-    "hvac_zones": 2,
+    "path_map_entries": 142,
+    "hvac_zones": 3,
     "simplify_warnings": [
       "Dropped Contam section on simplify: day-schedules",
       "Dropped Contam section on simplify: week-schedules",

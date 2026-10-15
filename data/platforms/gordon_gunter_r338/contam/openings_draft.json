@@ -1,7 +1,7 @@
 {
   "schema_version": "1.0",
   "platform_id": "gordon_gunter_r338",
-  "created_utc": "2026-10-15T22:19:39.141647+00:00",
+  "created_utc": "2026-10-15T22:32:14.220422+00:00",
   "description": "Draft Contam orifice checklist from naval GA import. Engineers confirm areas/schedules in ContamW; as-built ducts are out of scope here.",
   "openings": [
     {
@@ -193,28 +193,6 @@
     },
     {
       "from": "Officer_SR",
-      "to": "HD_Upper",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Officer_SR",
-      "to": "Ships_Office",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "HD_Upper",
       "to": "Ships_Office",
       "type": "passageway",
       "area_m2": 2.0,
@@ -247,17 +225,6 @@
       "contam_element": "plr_orfc"
     },
     {
-      "from": "Scientist_SR",
-      "to": "HD_Focsle",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
       "from": "Crew_SR_Foc",
       "to": "Emer_Gen_Rm",
       "type": "passageway",
@@ -271,17 +238,6 @@
     {
       "from": "Crew_SR_Main",
       "to": "Passage_Main",
-      "type": "passageway",
-      "area_m2": 2.0,
-      "area_source": "hobbyist_orifice_catalog",
-      "schedule": null,
-      "status": "draft",
-      "notes": "Starter opening from GA adjacency — confirm clear area in ContamW",
-      "contam_element": "plr_orfc"
-    },
-    {
-      "from": "Crew_SR_Main",
-      "to": "HD_Main",
       "type": "passageway",
       "area_m2": 2.0,
       "area_source": "hobbyist_orifice_catalog",
