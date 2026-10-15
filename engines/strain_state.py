@@ -26,7 +26,16 @@ from typing import Any, cast
 # Origins a strain can be minted from. ``shore_import`` covers strains that
 # entered the ship already formed (embarkation, port reservoir, shore model).
 STRAIN_ORIGINS = frozenset(
-    {"founder", "transmission", "within_host", "recombination", "shore_import"},
+    {
+        "founder",
+        "transmission",
+        "within_host",
+        "recombination",
+        "shore_import",
+        # Supply-chain import: a provisioned lot mints its own imported
+        # lineage (FOOD-COMMON-SOURCE-02 / PROVISIONED-SOURCE-01).
+        "imported:lot",
+    },
 )
 
 SHIP_LOCATION = "ship"

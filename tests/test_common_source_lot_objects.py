@@ -12,8 +12,10 @@ pin the frozen spec's leg-1 invariants; v1 semantics under
 
 from __future__ import annotations
 
+import numpy as np
 import pytest
 
+from engines.sim_clock import HOURS, SimClock
 from engines.transmission_core import (
     ContactTracingMatrix,
     TransmissionCore,
@@ -493,3 +495,77 @@ def test_handler_and_diner_arms_still_fire_under_object_mode() -> None:
         assert "provisioned_lot" in kinds
         assert kind in kinds
         assert objects
+
+
+# ── Ledger LOT-ORIGIN-01 / issue #1003: strain-armed composition ──────
+
+def _strain_core(
+    *, cs_overrides: dict | None = None, strain_evolution: dict | None = None,
+) -> TransmissionCore:
+    """Object-mode cfg with ``variant_surveillance`` armed — the
+    composition no earlier test covered: a minted provisioned_lot calls
+    ``_cs_lot_mix`` → ``mint(origin=\"imported:lot\")``, which raised
+    ``StrainConfigError`` until the origin was registered."""
+    profile = _profile() if strain_evolution is None else _profile(
+        strain_evolution=strain_evolution,
+    )
+    core = TransmissionCore(
+        rng=np.random.default_rng(7),
+        zone_volumes={ZONE: 50.0},
+        pathogen_profiles={PATHOGEN: profile},
+        zone_types={ZONE: "Dining"},
+        cfg={
+            "transmission": {
+                "common_source": _object_cfg(**(cs_overrides or {})),
+            },
+            "variant_surveillance": {"enabled": True},
+        },
+        clock=SimClock(epoch_duration_hours=1.0, mode=HOURS),
+    )
+    core.initialize_zones([ZONE])
+    core._quarantined_ids = set()
+    return core
+
+
+def test_lot_objects_mint_imported_lot_strains_under_variant_surveillance(
+) -> None:
+    """Registry armed, no strain_evolution block: the mint must not need
+    a genotype prior — every closed lot row carries an imported:lot
+    founder."""
+    core = _strain_core()
+    _, _, objects, _ = _step_objects(
+        core, [_diner(i) for i in range(1, 40)],
+    )
+    lots = [o for o in objects if o["source_kind"] == "provisioned_lot"]
+    assert lots, "expected at least one provisioned_lot object"
+    assert core.strain_registry is not None
+    for row in lots:
+        strain = core.strain_registry.get(row["strain_id"])
+        assert strain.origin == "imported:lot"
+        assert strain.genotype == ""
+
+
+def test_independent_lot_pans_mint_imported_lot_strains() -> None:
+    """v1 semantics: each fired provisioned_lot pan mints its own
+    imported:lot strain, genotype drawn from the declared prior."""
+    core = _strain_core(
+        cs_overrides={
+            "lot_mode": "independent",
+            "lot_event_probability": 1.0,
+        },
+        strain_evolution={
+            "genotypes": ["GII.4", "GII.2"],
+            "prior_genotype_distribution": {"GII.4": 0.7, "GII.2": 0.3},
+        },
+    )
+    events, _, _, _ = _step_objects(
+        core, [_diner(i) for i in range(1, 40)],
+    )
+    assert any(
+        e["source_kind"] == "provisioned_lot" for e in events
+    ), "expected at least one provisioned_lot pan"
+    founders = core.strain_registry.founders(PATHOGEN)
+    assert founders, "pans minted no strains"
+    for strain in founders:
+        assert strain.origin == "imported:lot"
+        assert strain.genotype in {"GII.4", "GII.2"}
