@@ -1,0 +1,97 @@
+{
+ "campaign": "noro_hull_scale_01",
+ "description": "NORO-HULL-SCALE-01 mega arming smoke: shipped-rung mega tier + forced lot mint (lot_object_probability 0.95) to verify the common-source object machinery mints and serves on mega_cruise_5000.",
+ "platform": "mega_cruise_5000",
+ "default_num_agents": 7000,
+ "embarkation_date": "2026-01-10",
+ "natural_history_clock": "hours",
+ "pathogen_configs": {
+  "norovirus": {
+   "bundle": "active_profiles",
+   "pathogen_id": "norwalk_gi",
+   "overrides": {
+    "remove": [
+     "sars_cov2_resp"
+    ]
+   }
+  }
+ },
+ "surveillance_configs": {
+  "syndromic_comp65": {
+   "diagnostic_cascade": {
+    "enabled": false
+   },
+   "fred_behavior": {
+    "quarantine_compliance": 0.65,
+    "compliance_by_class": {
+     "crew": 0.65,
+     "passenger_elderly": 0.54,
+     "passenger_young": 0.34
+    }
+   }
+  }
+ },
+ "tiers": {
+  "fl_mega_12d_scr_forced_mint": {
+   "platform": "mega_cruise_5000",
+   "pathogen": "norovirus",
+   "dose_adjustments": [
+    7.57
+   ],
+   "surveillance_strategies": [
+    "syndromic_comp65"
+   ],
+   "epoch_durations": [
+    288
+   ],
+   "num_agents": 7000,
+   "description": "NORO-HULL-SCALE-01 mega arming smoke: shipped-rung mega tier + forced lot mint (lot_object_probability 0.95) to verify the common-source object machinery mints and serves on mega_cruise_5000.",
+   "config_overrides": {
+    "transmission": {
+     "sanitary_visit_mode": "dwell_weighted",
+     "flush_aerosol_fraction": 0.0,
+     "flush_cabin_emission": true,
+     "cabin_air_mode": "cabin_compartment",
+     "common_source": {
+      "lot_mode": "object",
+      "handler_mode": "object",
+      "diner_mode": "object",
+      "lot_object_probability": [
+       0.95,
+       0.95
+      ]
+     }
+    },
+    "hvac": {
+     "pathogen_pool_transport": "airflow"
+    }
+   },
+   "boarding_mechanism_rungs": [
+    "shipped"
+   ],
+   "boarding_prevalence_points": [
+    {
+     "passenger": 0.025,
+     "crew": 0.007
+    },
+    {
+     "passenger": 0.0325,
+     "crew": 0.0185
+    },
+    {
+     "passenger": 0.04,
+     "crew": 0.03
+    }
+   ],
+   "never_symptomatic_fractions": [
+    0.29
+   ],
+   "seeds": [
+    8000,
+    8001,
+    8002
+   ]
+  }
+ },
+ "epochs": 288
+}
