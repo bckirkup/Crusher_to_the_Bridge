@@ -1111,6 +1111,10 @@ class TransmissionEvent:
     dose: float
     source_strain_id: str | None = None
     acquired_particles_by_route: dict[str, float] = field(default_factory=dict)
+    # Effective dose at establishment credited by supply-chain
+    # common-source pans (subset of acquired_particles_by_route's mass);
+    # ``reported_cases_by_channel``'s supply_chain channel reads this.
+    acquired_supply_chain_dose: float = 0.0
 
 
 @dataclass
@@ -1702,6 +1706,13 @@ _COMMON_SOURCE_SPAN_RATES = {
     "ill_handler": "handler_span_contamination_probability",
     "ill_diner": "diner_course_contamination_probability",
 }
+# Common-source arms whose pan doses are supply-chain sourced — the
+# food arrived contaminated (the v1 ``"independent"`` fiat arm and
+# ``"provisioned_lot"`` objects) — vs aboard-sourced arms
+# (``"ill_handler"`` / ``"ill_diner"``: an aboard shedder contaminated
+# the serving). ``reported_cases_by_channel`` buckets the first set
+# under "supply_chain"; a contract-added arm kind joins one side here.
+_CS_SUPPLY_SOURCE_KINDS = frozenset({"independent", "provisioned_lot"})
 # Sentinel for ``_cs_pan_deposit``: a mix argument of ``_MIX_UNSET``
 # means "build the pan mix fresh" (the v1 path); an object always passes
 # the mix minted at object creation — possibly ``None`` — so the strain
@@ -3931,6 +3942,11 @@ class TransmissionCore:
         self._last_pathogen_route_doses: dict[
             str, dict[int, dict[str, float]]
         ] = {}
+        # Raw dose credited this epoch by supply-chain common-source
+        # pans ({pathogen: {agent: dose}}) — the supply subset of
+        # ``_last_pathogen_route_doses``'s ``common_source_food`` rows,
+        # split by pan ``source_kind`` at credit time.
+        self._cs_supply_doses: dict[str, dict[int, float]] = {}
 
     def _strain_config_for_profile(
         self,
@@ -6426,6 +6442,7 @@ class TransmissionCore:
         self._strain_doses = {}
         self._last_pathogen_doses = agent_pathogen_doses
         self._last_pathogen_route_doses = {}
+        self._cs_supply_doses = {}
 
         # Determine which pathogens are active this epoch
         active_pathogens = list(self.pathogen_profiles.keys()) if self.pathogen_profiles else ["_default"]
@@ -6540,6 +6557,12 @@ class TransmissionCore:
         )
         for route, route_dose in route_doses.items():
             route_ledger[route] = route_ledger.get(route, 0.0) + route_dose
+        agent.cumulative_supply_exposure[pathogen_id] = (
+            agent.cumulative_supply_exposure.get(pathogen_id, 0.0)
+            + self._effective_supply_dose(
+                agent.agent_id, pathogen_id, effective_dose,
+            )
+        )
         if model == CUMULATIVE_TOXICITY_MODEL:
             self._resolve_toxicity_challenge(
                 agent, pathogen_id, cumulative_dose, epoch,
@@ -6567,11 +6590,15 @@ class TransmissionCore:
             acquired_particles_by_route=dict(route_ledger),
         ):
             return
+        supply_dose = agent.cumulative_supply_exposure.pop(
+            pathogen_id, 0.0,
+        )
         agent.cumulative_exposure[pathogen_id] = 0.0
         agent.cumulative_exposure_by_route.pop(pathogen_id, None)
         self._record_transmission_event(
             epoch, agent, pathogen_id, p_dose, resident,
             parent_strain_id, source_agent_id, dict(route_ledger),
+            supply_dose,
             agent_pathway_doses.get(agent.agent_id, {}),
             matrix, events,
         )
@@ -6653,6 +6680,7 @@ class TransmissionCore:
         parent_strain_id: str,
         source_agent_id: int | None,
         route_ledger: dict[str, float],
+        supply_dose: float,
         pw_doses: dict[str, float],
         matrix: ContactTracingMatrix,
         events: list[TransmissionEvent],
@@ -6668,6 +6696,7 @@ class TransmissionCore:
             dose=p_dose,
             source_strain_id=parent_strain_id or None,
             acquired_particles_by_route=route_ledger,
+            acquired_supply_chain_dose=supply_dose,
         ))
         matrix.transmission_events.append({
             "target_id": agent.agent_id,
@@ -6740,6 +6769,29 @@ class TransmissionCore:
         dominant = max(route_doses, key=route_doses.get)
         route_doses[dominant] += effective_dose - sum(route_doses.values())
         return route_doses
+
+    def _effective_supply_dose(
+        self,
+        agent_id: int,
+        pathogen_id: str,
+        effective_dose: float,
+    ) -> float:
+        """Supply-chain share of this epoch's effective dose.
+
+        The supply subset of the raw credited dose (``_cs_supply_doses``)
+        scaled by the same share rule ``_effective_route_doses`` applies,
+        so supply + aboard exactly covers ``effective_dose``.
+        """
+        raw = self._last_pathogen_route_doses.get(pathogen_id, {}).get(
+            agent_id, {},
+        )
+        raw_total = sum(raw.values())
+        if raw_total <= 0.0:
+            return 0.0
+        supply_raw = self._cs_supply_doses.get(pathogen_id, {}).get(
+            agent_id, 0.0,
+        )
+        return effective_dose * supply_raw / raw_total
 
     def _execute_pathogen_pathways(
         self,
@@ -13735,6 +13787,11 @@ class TransmissionCore:
                     agent_doses, agent_pathway_doses,
                     attribution(ledger, mix),
                 )
+                if event["source_kind"] in _CS_SUPPLY_SOURCE_KINDS:
+                    supply = self._cs_supply_doses.setdefault(
+                        pathogen_id, {},
+                    )
+                    supply[aid] = supply.get(aid, 0.0) + credited_dose
                 matrix.common_source_exposures.append({
                     "target_id": aid,
                     "zone": event["zone"],

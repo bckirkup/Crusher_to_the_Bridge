@@ -606,6 +606,7 @@ def _advance_one_infection(
         inf["illness"] = IllnessStatus.RECOVERED
         agent.cumulative_exposure.pop(pid, None)
         agent.cumulative_exposure_by_route.pop(pid, None)
+        agent.cumulative_supply_exposure.pop(pid, None)
         agent.hand_load_by_pathogen.pop(pid, None)
         agent.hand_protected_load_by_pathogen.pop(pid, None)
         agent.hand_protected_pending_by_pathogen.pop(pid, None)

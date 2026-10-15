@@ -1176,6 +1176,7 @@ class ShipSimulation:
             state.infections_by_dominant_route,
             state.infection_dose_share_by_route,
             state.infection_route_ledger_by_agent,
+            state.infection_supply_dose_by_agent,
         )
         # Cumulative totals, not deltas: copy the core's running counters so a
         # multi-epoch run reports the same totals the core holds.

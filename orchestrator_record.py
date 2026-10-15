@@ -149,6 +149,17 @@ def _summary_counts(
     # establishing events); an agent with no establishing event is a
     # boarding import and buckets under "imported".
     reported_by_route = {"passenger": {}, "crew": {}}
+    # reported_cases_by_channel (issue #1008 decision): the import
+    # channel the case arrived by — "boarding_import" when the agent has
+    # no establishing event (the "imported" bucket of the route split),
+    # "supply_chain" when supply-chain-sourced pan dose strictly exceeds
+    # the aboard dose in their acquired ledger, else "aboard". All three
+    # keys emit unconditionally so the block's shape is stable; each
+    # role's counts sum to cumulative_reported_cases_{role}.
+    reported_by_channel = {
+        group: {"boarding_import": 0, "supply_chain": 0, "aboard": 0}
+        for group in ("passenger", "crew")
+    }
     ill_counts = {"passenger": 0, "crew": 0}
     infected_counts = {"passenger": 0, "crew": 0}
     group_totals = {"passenger": 0, "crew": 0}
@@ -166,6 +177,18 @@ def _summary_counts(
             )
             cell = reported_by_route[group]
             cell[dominant] = cell.get(dominant, 0) + 1
+            supply = state.infection_supply_dose_by_agent.get(aid, 0.0)
+            aboard_dose = (
+                sum(agent_ledger.values()) - supply if agent_ledger else 0.0
+            )
+            channel = (
+                "boarding_import"
+                if not agent_ledger
+                else "supply_chain"
+                if supply > aboard_dose
+                else "aboard"
+            )
+            reported_by_channel[group][channel] += 1
         if aid in state.ever_ill_ids:
             ill_counts[group] += 1
         if aid in state.ever_infected_ids:
@@ -201,6 +224,7 @@ def _summary_counts(
             group: dict(sorted(cell.items()))
             for group, cell in reported_by_route.items()
         },
+        "reported_cases_by_channel": reported_by_channel,
         "cumulative_reported_noise_cases": len(state.ever_reported_noise_ids),
         "cumulative_ever_infected": len(state.ever_infected_ids),
         "cumulative_ever_infected_passenger": infected_counts["passenger"],

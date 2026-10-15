@@ -304,6 +304,34 @@ def test_credited_dose_never_exceeds_the_pan_mass() -> None:
         )
 
 
+# ── Gate 6b: the supply-chain channel ledger tracks pan source kind ───
+
+def test_supply_channel_credited_dose_mirrors_all_independent_pans() -> None:
+    agents = [_diner(i) for i in range(1, 60)]
+    core = _core(cfg_cs=_force_lot())
+    _, _, doses = _step(core, agents)
+    supply = core._cs_supply_doses[PATHOGEN]
+    assert supply
+    # An all-independent voyage's pans are all supply-chain sourced:
+    # the supply ledger covers the pathway's whole credited mass.
+    assert sum(supply.values()) == pytest.approx(sum(doses.values()))
+    assert set(supply) <= set(doses)
+
+
+def test_effective_supply_dose_shares_like_the_route_split() -> None:
+    core = _core(cfg_cs=_force_lot())
+    core._last_pathogen_route_doses = {
+        PATHOGEN: {7: {"common_source_food": 4.0, "fomite": 4.0}},
+    }
+    core._cs_supply_doses = {PATHOGEN: {7: 3.0}}
+    assert core._effective_supply_dose(
+        7, PATHOGEN, 2.0,
+    ) == pytest.approx(0.75)
+    assert core._effective_supply_dose(9, PATHOGEN, 2.0) == 0.0
+    core._last_pathogen_route_doses = {}
+    assert core._effective_supply_dose(7, PATHOGEN, 2.0) == 0.0
+
+
 # ── Gate 6: the delivered dose lands on the declared pathway ──────────
 
 def test_takers_are_dosed_under_the_common_source_food_key() -> None:
