@@ -4613,6 +4613,28 @@ on every hull; every exp-calibrated absolute band compresses
 (D2 ≥0.04 met only on exp; `ind` excursion conversion 77.7→50.0→
 26.3%). Verdict: exp admissible, cls/spr admissible-with-caveat.
 
+**`NORO-MINT-RATE-01` (declared — design frozen at `9039e234`, no
+cells submitted):** the bracket on the mint-rate axis SHAPES-01
+identified as the operative margin — the provisioned_lot voyage gate
+`lot_object_probability` between the shipped U(0.001, 0.02)
+(in-band but vacuous: ~6 minted voyages/1,000) and the powered
+U(0.02, 0.15) (over-posting at `ind` level, full signature). Arm set
+(9): `off`/`ind` baselines; `ship`/`mint` bracket anchors and
+SHAPES-01 bridges; scalar rungs `p005`/`p008`/`p012`/`p017`/`p024`
+— the margin is linear in E[presence] (posture-free gate,
+`extra_lot` only a ×1.163 object multiplicity), so rungs are declared
+points, not intervals, and minted sets nest by gate value per seed.
+3 hulls × 1,000 seeds = 27,000 voyages on the SCORE-01 seed lists;
+mega excluded. Expected per-hull in-band windows (design §3.3): exp
+≈[0.004, 0.010], cls ≈[0.007, 0.015], spr ≈[0.011, 0.025] — no single
+gate lands in-band on all three hulls; `p012` is the closest. Frozen
+admissibility (D1–D4 read mint-vs-`ind` per hull), integrity gates
+(nested-mint-sets stream check), vacuity rule (<20 minted voyages
+→ thin-flagged), canary-then-STOP in
+`docs/norovirus/noro_mint_rate_01_sweep_design.md`; package
+`campaigns/noro/mint_rate_01/`; entry
+`docs/ledger/NORO-MINT-RATE-01.md`.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
