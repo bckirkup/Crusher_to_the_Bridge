@@ -32,6 +32,19 @@
       "description": "Person-hours ashore per port_id — the hazard denominator. Observed from the run rather than inferred from itinerary fractions.",
       "additionalProperties": { "$ref": "#/$defs/exposure_total" }
     },
+    "provisioning": {
+      "type": "object",
+      "description": "Provisioned servings consumed per source_id — the provisioning-channel exposure (servings x per-serving hazard). A source_id is a supply-chain entity, not a port call; docs/sentinel/sentinel_source_market_revision.md.",
+      "additionalProperties": { "$ref": "#/$defs/provisioning_source" }
+    },
+    "embarkation": {
+      "$ref": "#/$defs/embarkation"
+    },
+    "covariates": {
+      "type": "object",
+      "description": "Voyage-level covariates (market structure) multiplying the fleet model's import channels; a name absent from another voyage's covariates reads as 0.",
+      "additionalProperties": { "type": "number" }
+    },
     "truth_introductions": {
       "type": "array",
       "description": "Simulated ground truth: which person acquired at which port. Present only for synthetic voyages (no field dataset has it); used to score hazard recovery, never as model input.",
@@ -62,6 +75,75 @@
         "person_hours_crew": { "type": "number", "minimum": 0 },
         "n_passengers_ashore": { "type": "integer", "minimum": 0 },
         "n_crew_ashore": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "strata_counts": {
+      "type": "object",
+      "description": "Counts keyed by stratum (passenger and/or crew).",
+      "additionalProperties": false,
+      "properties": {
+        "passenger": { "type": "number", "minimum": 0 },
+        "crew": { "type": "number", "minimum": 0 }
+      }
+    },
+    "strata_series": {
+      "type": "object",
+      "description": "Per-epoch counts keyed by stratum.",
+      "additionalProperties": false,
+      "properties": {
+        "passenger": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0 }
+        },
+        "crew": {
+          "type": "array",
+          "items": { "type": "number", "minimum": 0 }
+        }
+      }
+    },
+    "strata_markets": {
+      "type": "object",
+      "description": "Market id per stratum — a line's consumer market and crew labour market are different pools.",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "passenger": { "type": "string", "minLength": 1 },
+        "crew": { "type": "string", "minLength": 1 }
+      }
+    },
+    "provisioning_source": {
+      "type": "object",
+      "additionalProperties": false,
+      "anyOf": [
+        { "required": ["servings_per_epoch"] },
+        { "required": ["servings_total", "service_window_epochs"] }
+      ],
+      "properties": {
+        "servings_per_epoch": { "$ref": "#/$defs/strata_series" },
+        "servings_total": { "$ref": "#/$defs/strata_counts" },
+        "service_window_epochs": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "integer", "minimum": 1 },
+          "description": "[first, last] service epochs; a servings_total is spread uniformly over the window."
+        }
+      }
+    },
+    "embarkation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["markets"],
+      "properties": {
+        "markets": { "$ref": "#/$defs/strata_markets" },
+        "n_boarded": {
+          "$ref": "#/$defs/strata_counts",
+          "description": "Headcount boarding per stratum; defaults to n_passengers/n_crew when absent."
+        },
+        "embark_epoch": {
+          "oneOf": [{ "type": "null" }, { "type": "integer", "minimum": 1 }],
+          "description": "Epoch imports count at; defaults to the embarkation day's first epoch."
+        }
       }
     },
     "clinical_case": {
