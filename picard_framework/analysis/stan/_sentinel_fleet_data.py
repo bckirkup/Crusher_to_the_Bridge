@@ -1017,63 +1017,67 @@ def fleet_forward_incidence(
     f_inc = f_inc / f_inc.sum()
     w_gen = np.asarray(data["w_gen_raw"], dtype=float)
     w_gen = w_gen / w_gen.sum()
-    lambda_visit = np.asarray(list(rates.lambda_visit), dtype=float)
-    lambda_aboard = np.asarray(list(rates.lambda_aboard), dtype=float)
-    r_onboard = np.asarray(list(rates.r_onboard), dtype=float)
-    kappa = np.asarray(list(rates.kappa), dtype=float)
-    epsilon = np.asarray(list(rates.epsilon), dtype=float)
     n_voyages = int(data["V"])
-    susceptibility = (
-        np.asarray(list(rates.susceptibility), dtype=float)
-        if len(rates.susceptibility) == n_voyages
-        else np.ones(n_voyages, dtype=float)
+    terms = _ForwardTerms(
+        f_inc=f_inc,
+        w_gen=w_gen,
+        lambda_visit=np.asarray(list(rates.lambda_visit), dtype=float),
+        lambda_aboard=np.asarray(list(rates.lambda_aboard), dtype=float),
+        r_onboard=np.asarray(list(rates.r_onboard), dtype=float),
+        kappa=np.asarray(list(rates.kappa), dtype=float),
+        epsilon=np.asarray(list(rates.epsilon), dtype=float),
+        susceptibility=(
+            np.asarray(list(rates.susceptibility), dtype=float)
+            if len(rates.susceptibility) == n_voyages
+            else np.ones(n_voyages, dtype=float)
+        ),
+        is_crew=np.asarray(data["is_crew"], dtype=float),
+        crew_repeat=np.asarray(data["crew_repeat"], dtype=float),
+        visit_idx=np.asarray(data["visit_idx"], dtype=int),
     )
-    is_crew = np.asarray(data["is_crew"], dtype=float)
-    crew_repeat = np.asarray(data["crew_repeat"], dtype=float)
-    visit_idx = np.asarray(data["visit_idx"], dtype=int)
     ascertainment = list(data["ascertainment"])
 
     incidences: list[np.ndarray] = []
     onset_means: list[np.ndarray] = []
-    for v in range(int(data["V"])):
-        incidence, mu = _voyage_forward_incidence(
-            data,
-            v,
-            w_gen=w_gen,
-            f_inc=f_inc,
-            lambda_visit=lambda_visit,
-            lambda_aboard=lambda_aboard,
-            r_onboard=r_onboard,
-            kappa=kappa,
-            epsilon=epsilon,
-            susceptibility=susceptibility,
-            is_crew=is_crew,
-            crew_repeat=crew_repeat,
-            visit_idx=visit_idx,
-            rates=rates,
-        )
+    for v in range(n_voyages):
+        incidence, mu = _voyage_forward_incidence(data, v, terms, rates)
         incidences.append(incidence)
         onset_means.append(float(ascertainment[v]) * mu)
     return incidences, onset_means
+
+
+@dataclass(frozen=True)
+class _ForwardTerms:
+    """The normalized rate/exposure arrays one forward pass shares."""
+
+    f_inc: np.ndarray
+    w_gen: np.ndarray
+    lambda_visit: np.ndarray
+    lambda_aboard: np.ndarray
+    r_onboard: np.ndarray
+    kappa: np.ndarray
+    epsilon: np.ndarray
+    susceptibility: np.ndarray
+    is_crew: np.ndarray
+    crew_repeat: np.ndarray
+    visit_idx: np.ndarray
 
 
 def _voyage_import_injections(
     data: Mapping[str, Any],
     v: int,
     horizon: int,
-    *,
     susc: float,
-    kappa: np.ndarray,
-    epsilon: np.ndarray,
+    terms: _ForwardTerms,
 ) -> np.ndarray:
     """Provisioned-serving and embarkation-market injections for one voyage."""
     injected = np.zeros((int(data["G"]), horizon), dtype=float)
-    if kappa.size and int(data.get("NS", 0)) > 0:
+    if terms.kappa.size and int(data.get("NS", 0)) > 0:
         prov = np.asarray(data["prov_servings"][v], dtype=float)[
             :, :horizon, :
         ]
-        injected += susc * np.einsum("gts,s->gt", prov, kappa)
-    if epsilon.size and int(data.get("NM", 0)) > 0:
+        injected += susc * np.einsum("gts,s->gt", prov, terms.kappa)
+    if terms.epsilon.size and int(data.get("NM", 0)) > 0:
         market_row = np.asarray(data["market_idx"][v], dtype=int) - 1
         persons_row = np.asarray(data["embark_persons"][v], dtype=float)
         embark_t = int(data["embark_epoch"][v]) - 1
@@ -1081,7 +1085,7 @@ def _voyage_import_injections(
             m = int(market_row[g])
             if m >= 0 and 0 <= embark_t < horizon:
                 injected[g, embark_t] += (
-                    susc * float(epsilon[m]) * float(persons_row[g])
+                    susc * float(terms.epsilon[m]) * float(persons_row[g])
                 )
     return injected
 
@@ -1089,18 +1093,7 @@ def _voyage_import_injections(
 def _voyage_forward_incidence(
     data: Mapping[str, Any],
     v: int,
-    *,
-    w_gen: np.ndarray,
-    f_inc: np.ndarray,
-    lambda_visit: np.ndarray,
-    lambda_aboard: np.ndarray,
-    r_onboard: np.ndarray,
-    kappa: np.ndarray,
-    epsilon: np.ndarray,
-    susceptibility: np.ndarray,
-    is_crew: np.ndarray,
-    crew_repeat: np.ndarray,
-    visit_idx: np.ndarray,
+    terms: _ForwardTerms,
     rates: FleetRates,
 ) -> tuple[np.ndarray, np.ndarray]:
     """``(incidence, mu_onset)`` for voyage ``v`` — the Stan recursion verbatim."""
@@ -1110,17 +1103,17 @@ def _voyage_forward_incidence(
     share = np.asarray(data["secondary_share_raw"][v], dtype=float)
     share = share / share.sum()
     s = int(data["ship"][v]) - 1
-    susc = float(susceptibility[v])
+    susc = float(terms.susceptibility[v])
 
     # (group, port) rate: crew carry the ratio and the repeat slope.
     crew_mult = float(rates.crew_ratio) * np.exp(
-        rates.beta_repeat * crew_repeat[v],
+        rates.beta_repeat * terms.crew_repeat[v],
     )
     rate = np.where(
-        is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
+        terms.is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
     ) * np.where(
-        visit_idx[v][None, :] > 0,
-        lambda_visit[np.clip(visit_idx[v] - 1, 0, None)][None, :],
+        terms.visit_idx[v][None, :] > 0,
+        terms.lambda_visit[np.clip(terms.visit_idx[v] - 1, 0, None)][None, :],
         0.0,
     )
 
@@ -1128,20 +1121,18 @@ def _voyage_forward_incidence(
     # only the secondary lag sum has to stay in a python loop.
     primary = (
         susc * np.einsum("gtp,gp->gt", ashore, rate)
-        + float(lambda_aboard[s]) * aboard
-        + _voyage_import_injections(
-            data, v, horizon, susc=susc, kappa=kappa, epsilon=epsilon,
-        )
+        + float(terms.lambda_aboard[s]) * aboard
+        + _voyage_import_injections(data, v, horizon, susc, terms)
     )
     primary_total = primary.sum(axis=0)
     incidence = primary.copy()
     total = np.zeros(horizon, dtype=float)
     for t in range(horizon):
-        lags = min(t, w_gen.size)
+        lags = min(t, terms.w_gen.size)
         secondary = 0.0
         if lags:
-            secondary = float(r_onboard[s]) * float(
-                w_gen[:lags] @ total[t - lags : t][::-1],
+            secondary = float(terms.r_onboard[s]) * float(
+                terms.w_gen[:lags] @ total[t - lags : t][::-1],
             )
         if secondary:
             incidence[:, t] += secondary * share
@@ -1149,7 +1140,7 @@ def _voyage_forward_incidence(
 
     mu = np.zeros_like(incidence)
     for g in range(len(GROUPS)):
-        mu[g] = np.convolve(incidence[g], f_inc)[:horizon]
+        mu[g] = np.convolve(incidence[g], terms.f_inc)[:horizon]
     return incidence, mu
 
 
