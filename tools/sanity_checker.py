@@ -2304,14 +2304,14 @@ def _check_common_source(
     """Validate ``transmission.common_source`` — PROVISIONED-SOURCE-01
     (issue #1006).
 
-    ``lot_mint_model`` must be ``"fiat"`` or ``"provisioned_source"``;
+    ``lot_mint_model`` must be ``"fiat"`` or ``"provisioned_source"``
+    (absent resolves ``"provisioned_source"``, the shipped default);
     ``provisioned_source.source_id`` resolves against
     ``data/config/provisioning_sources.json`` (falling back to the
     registry's ``default_source``); ``q_source`` follows the
     scalar|[lo,hi] probability grammar. A ``provisioned_source`` arm
     on a platform with no Dining zones warns — the station census
-    resolves N_lots == 0 and no lot object ever mints. Absent block
-    (the shipped defaults) is always valid.
+    resolves N_lots == 0 and no lot object ever mints.
     """
     tx = cfg.get("transmission")
     if not isinstance(tx, dict):
@@ -2325,7 +2325,7 @@ def _check_common_source(
             "transmission.common_source must be a mapping",
         )
         return
-    mint = str(cs.get("lot_mint_model", "fiat"))
+    mint = str(cs.get("lot_mint_model", "provisioned_source"))
     if mint not in ("fiat", "provisioned_source"):
         report.error(
             _CONFIG_YAML, "CONFIG",

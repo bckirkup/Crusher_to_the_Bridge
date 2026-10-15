@@ -9,9 +9,10 @@ order, and each contaminated station mints exactly one lot object.
 
 The §4 integrity gates pinned here:
 
-* fiat bit-identity — absent ``lot_mint_model`` and explicit
-  ``"fiat"`` resolve the fiat grammar, whose voyage-rate draws replay
-  verbatim on a twin stream;
+* fiat bit-identity — explicit ``"fiat"`` resolves the fiat grammar,
+  whose voyage-rate draws replay verbatim on a twin stream; absent
+  ``lot_mint_model`` resolves ``"provisioned_source"``, the shipped
+  default;
 * nested contaminated-station sets across scalar q rungs;
 * objects per voyage ~ Binomial(N_lots, q_source);
 * the station witness — object (zone, item) pairs are the census and
@@ -95,28 +96,36 @@ def _plan(core: TransmissionCore, agents: list) -> None:
 
 # ── Gate: absent resolves fiat; fiat grammar draws verbatim ─────────
 
-def test_absent_lot_mint_model_resolves_fiat() -> None:
-    """An unmarked config keeps the pre-mechanism draw sequence — the
-    engine resolves absent to the labelled fiat grammar."""
+def test_absent_lot_mint_model_resolves_provisioned_source() -> None:
+    """An unmarked config takes the shipped default — absent resolves
+    ``"provisioned_source"``; only a spelled ``"fiat"`` keeps the v1
+    grammar."""
     cfg = _object_cfg()
     cfg.pop("lot_mint_model", None)
     core = _core(cfg_cs=cfg)
-    assert core._cs_lot_mint_model == "fiat"
+    assert core._cs_lot_mint_model == "provisioned_source"
 
 
-def test_absent_cfg_mints_fiat_draws() -> None:
-    """Absent and explicit "fiat" produce identical objects — both run
-    the same grammar at the same stream positions."""
+def test_absent_cfg_runs_the_provisioned_grammar() -> None:
+    """Absent and explicit "provisioned_source" produce identical
+    objects — the unmarked config runs the census grammar with the
+    registry default source and interval."""
     cfg_absent = _object_cfg()
     cfg_absent.pop("lot_mint_model", None)
+    cfg_absent.pop("lot_object_probability", None)
+    cfg_absent.pop("extra_lot_probability", None)
     core_absent = _core(cfg_cs=cfg_absent)
-    core_fiat = _core(cfg_cs=_object_cfg())
+    core_ps = _core(cfg_cs=_ps_cfg(None))
+    assert core_absent._cs_ps_source_id == SOURCE_ID
+    assert core_absent._cs_rates[PATHOGEN]["q_source"] == (
+        core_ps._cs_rates[PATHOGEN]["q_source"])
     _, _, obj_absent, _ = _step_objects(
         core_absent, [_diner(i) for i in range(1, 40)])
-    _, _, obj_fiat, _ = _step_objects(
-        core_fiat, [_diner(i) for i in range(1, 40)])
-    assert obj_absent == obj_fiat
-    assert {r["provisioned_source_id"] for r in obj_fiat} == {None}
+    _, _, obj_ps, _ = _step_objects(
+        core_ps, [_diner(i) for i in range(1, 40)])
+    assert obj_absent == obj_ps
+    for row in obj_ps:
+        assert row["provisioned_source_id"] == SOURCE_ID
 
 
 def test_fiat_voyage_rates_replay_the_shipped_sequence() -> None:

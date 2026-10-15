@@ -2289,6 +2289,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -3411,6 +3412,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -4533,6 +4535,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.005
@@ -5652,6 +5655,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.008
@@ -6771,6 +6775,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.012
@@ -7890,6 +7895,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.017
@@ -9009,6 +9015,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.024
@@ -12362,6 +12369,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -13484,6 +13492,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -14606,6 +14615,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.005
@@ -15725,6 +15735,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.008
@@ -16844,6 +16855,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.012
@@ -17963,6 +17975,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.017
@@ -19082,6 +19095,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.024
@@ -22435,6 +22449,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -23557,6 +23572,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
@@ -24679,6 +24695,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.005
@@ -25798,6 +25815,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.008
@@ -26917,6 +26935,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.012
@@ -28036,6 +28055,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.017
@@ -29155,6 +29175,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": 0.024
