@@ -367,6 +367,17 @@ def test_onsets_past_the_window_are_dropped_not_clamped() -> None:
     assert onsets_per_epoch(cases, 0) == ()
 
 
+def test_pre_boarding_onsets_belong_to_the_import_channel() -> None:
+    """``onset_epoch <= 0`` declares a pre-boarding onset: the schema
+    admits it but it must not enter the aboard per-epoch onset series —
+    it is an import, not aboard transmission."""
+    cases = bundle(
+        [case("P1", -2), case("P2", 0), case("P3", 2)],
+    ).clinical_cases
+    assert [c.onset_epoch for c in cases] == [-2, 0, 2]
+    assert onsets_per_epoch(cases, 4) == (0, 1, 0, 0)
+
+
 def test_repeat_calls_to_one_port_pool_into_a_single_cell() -> None:
     cfg = voyage_config()
     cfg["voyage"]["itinerary"][3]["port_id"] = "MXCZM"  # second call, same port

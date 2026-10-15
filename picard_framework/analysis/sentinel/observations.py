@@ -29,7 +29,16 @@ REPORTING_CHANNELS = frozenset(
 
 @dataclass(frozen=True)
 class ClinicalCase:
-    """One observed symptomatic case with its ashore exposure history."""
+    """One observed symptomatic case with its ashore exposure history.
+
+    ``onset_epoch`` is on the voyage clock (epoch 1 = first aboard
+    epoch); a value <= 0 declares onset before boarding — the ship
+    records negative pre-boarding onsets in ``hazard_onset_epochs`` and
+    the sentinel feed must admit them. Pre-boarding onsets are excluded
+    from the per-epoch aboard onset series (``onsets_per_epoch``,
+    ``group_onsets``) by construction: they belong to the import
+    channel, not aboard transmission.
+    """
 
     person_id: str
     onset_epoch: int
@@ -156,9 +165,10 @@ def _case_from_dict(raw: dict[str, Any]) -> ClinicalCase:
         if hours_val < 0.0:
             raise ValueError(f"Negative hours_ashore for port {port_id!r}")
         hours[str(port_id)] = hours_val
+    # No floor on onset_epoch: <= 0 is a declared pre-boarding onset
+    # (ship records negative ``hazard_onset_epochs``); consumers that
+    # index the aboard onset series guard the 1-indexed range.
     onset = int(raw["onset_epoch"])
-    if onset < 1:
-        raise ValueError("onset_epoch must be >= 1")
     report_epoch = raw.get("report_epoch")
     return ClinicalCase(
         person_id=str(raw["person_id"]),
