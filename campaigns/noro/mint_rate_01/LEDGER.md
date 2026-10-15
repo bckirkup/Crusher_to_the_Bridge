@@ -17,8 +17,8 @@ burst48) survive at that rate?
 | image built | done | `picard-campaign:noro-mint-rate01` @ `49e1993b` → digest `sha256:05cba8f22b747ca47c13a1e885581263e51b5320ab931250767a33b82bac38ea`; jobdef `picard-noro-mint-rate-01:1` (digest-pinned, ACTIVE, retry ×10 `Host EC2*`); manifest mirrored to `s3://crusherbucket-994254241749-us-east-1-an/campaign/noro_mint_rate_01/manifest.json` |
 | local smoke | done | `fl_exp_12d_scr_p012` index 0: 3-member zip contract + scalar echo `"lot_object_probability": 0.012` + object modes; 31 infected, 0 cs objects at E≈0.012 — passed |
 | canary (116 cells, exp) | done — 5/6 gates green; `off` bit-identity FAILED (see Findings: host-level nondeterminism) | arrays `42a34b4d` mint 48, `08a78c9c` p024 24, `745b3af6` p005 24, `6304cc2f` ind 8, `30229fac` ship 8, `4a7bff20` off 4 — 116/116 SUCCEEDED, 0 retries |
-| wave 1 — exp, all 9 arms | pending | 9,000 cells; `fl_exp_12d_scr_mint` first as the probe array |
-| wave 2 — cls + spr, all 9 arms | pending | 18,000 cells |
+| wave 1 — exp, all 9 arms | done | 9,000/9,000 cells SUCCEEDED; readout below (D1 bracket ≈[0.005, 0.0105]) |
+| wave 2 — cls + spr, all 9 arms | submitted — in flight | 18,000 cells on `picard-noro-mint-rate-01:1`; probe `fl_cls_12d_scr_mint` 1,000/1,000 SUCCEEDED |
 
 ## Grid
 
@@ -94,7 +94,53 @@ determinism, F0). Submitted 2026-10-15 on `picard-noro-mint-rate-01:1`
 ETA ~2.2h at the measured exp drain (~68 cells/min @ desired 256),
 prefix `campaign/noro_mint_rate_01/fl_exp_12d_scr_*/`.
 
-Wave 2 (cls + spr, 18,000 cells) NOT submitted — user gates it.
+Wave 2 (cls + spr, all 9 arms) submitted 2026-10-15 on
+`picard-noro-mint-rate-01:1` (digest `sha256:05cba8f22b…`), FIFO
+order — cls mint probe first, then remaining cls arms, then spr
+(same arm order per hull as wave 1):
+
+| block | cells | array job |
+|-------|------:|-----------|
+| `fl_cls_12d_scr_mint` | 1,000 | `2e292b39-02b2-494b-9f8d-29831095937a` |
+| `fl_cls_12d_scr_off` | 1,000 | `c3f68d36-2ee0-4343-8f4a-5bbd8b909168` |
+| `fl_cls_12d_scr_ind` | 1,000 | `53fe3989-310d-47d7-ba4c-bb797f386964` |
+| `fl_cls_12d_scr_ship` | 1,000 | `abadcae7-468b-4b1f-bf23-51ab96a42432` |
+| `fl_cls_12d_scr_p005` | 1,000 | `4712edcd-5332-4558-b773-012d08ec96fa` |
+| `fl_cls_12d_scr_p008` | 1,000 | `49c09e3b-50bb-4800-b316-e7d177516876` |
+| `fl_cls_12d_scr_p012` | 1,000 | `ae85814d-72e5-4629-b603-89dff86f95b0` |
+| `fl_cls_12d_scr_p017` | 1,000 | `024ebb59-1370-4ebe-a5cb-c743609af980` |
+| `fl_cls_12d_scr_p024` | 1,000 | `373ec4ce-98b8-493f-b30d-6d05b86c853b` |
+| `fl_spr_12d_scr_mint` | 1,000 | `d5f1b1a2-66c7-4794-bb2d-37e022075f32` |
+| `fl_spr_12d_scr_off` | 1,000 | `da590afb-b5e8-4c76-87cf-260b1ac1130a` |
+| `fl_spr_12d_scr_ind` | 1,000 | `5098156f-1afc-42ab-9df7-376e2457853b` |
+| `fl_spr_12d_scr_ship` | 1,000 | `dafbf8bf-0155-4fed-8561-55acef6fadee` |
+| `fl_spr_12d_scr_p005` | 1,000 | `634ce6c3-4ebe-4eeb-9faa-4128ec65fe27` |
+| `fl_spr_12d_scr_p008` | 1,000 | `7a6a1995-f269-47a7-92db-0aa883e80e80` |
+| `fl_spr_12d_scr_p012` | 1,000 | `83707c35-57f5-4abe-b29b-8ddfccaf31c0` |
+| `fl_spr_12d_scr_p017` | 1,000 | `e4ca2515-52af-43ea-bdea-20960c93e3d4` |
+| `fl_spr_12d_scr_p024` | 1,000 | `e3e2af64-4dc5-4c6d-978a-50d7f0f66c16` |
+
+First-landing spot-check (cls probe `mint` + `off`):
+
+- 3-member zip contract (`summary.json` + `growth_census.json.gz` +
+  `rss_samples.json`) clean on 25 mint + 3 off cells.
+- `parameters.common_source` echo verbatim: mint `{lot_mode/handler_mode/
+  diner_mode: object, lot_object_probability: [0.02, 0.15]}` on 60
+  cells; off `{"mode": "off"}` on 3 cells.
+- Armed-arm witnesses: 5/60 cls-mint voyages minted provisioned_lot
+  objects — E ≈ 5.1 at the U(0.02,0.15) gate (wave-1 exp minted
+  82/1,000); every minted object single-titre, titres in the
+  (1.5e2, 5e3) band.
+- `off` zero-witness on all 3 cells: 0 events, 0 objects,
+  `dose_credited` 0.0; voyages non-degenerate (122–174 infected).
+- No non-Spot-reclaim failures on early cells (0 FAILED fleet-wide at
+  probe completion). Echo coverage of the remaining arms is a readout
+  check, per-arm as their first cells land.
+
+Probe drain: `fl_cls_12d_scr_mint` 1,000 cells landed 15:30→16:16 UTC
+= ~46 min ≈ 21.5 cells/min at desired 256 (cls ≈ 11–12 min wall/cell
+vs ~3 on exp — heavier hull than wave-1's ~68 cells/min). cls fleet
+ETA ≈ 7–8 h if the drain holds; spr cells heavier still.
 
 ## Findings
 
