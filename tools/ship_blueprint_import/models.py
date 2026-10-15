@@ -6,9 +6,10 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, Field, field_validator
 
-ZoneType = Literal["Free", "Dining", "Room", "Medical", "Engineering"]
+ZoneType = Literal["Free", "Dining", "Room", "Medical", "Engineering", "Sanitary"]
 TrafficLevel = Literal["low", "medium", "high"]
 OpeningStatus = Literal["draft", "confirmed", "engineer_review"]
+RoleGroup = Literal["crew", "passenger"]
 
 
 class DeckInfo(BaseModel):
@@ -19,6 +20,38 @@ class DeckInfo(BaseModel):
         default=None,
         description="Relative Contam level elevation (m); auto-stacked if omitted",
     )
+    plan_bbox_norm: list[float] | None = Field(
+        default=None,
+        description=(
+            "Normalized [x0, y0, x1, y1] page-image box of the drawn deck plan "
+            "view. Sheets carry title blocks and margins; when omitted the whole "
+            "page is treated as the plan (legacy behaviour)."
+        ),
+    )
+    hull_x_span_m: list[float] | None = Field(
+        default=None,
+        description=(
+            "[x_start, x_end] metres of hull length covered by plan_bbox_norm "
+            "(bow datum at length_m, stern at 0 — same axis as zone display.x). "
+            "Defaults to [0, length_m]."
+        ),
+    )
+    hull_y_span_m: list[float] | None = Field(
+        default=None,
+        description=(
+            "[y_start, y_end] metres of beam covered by plan_bbox_norm. "
+            "Defaults to [0, beam_m]."
+        ),
+    )
+
+    @field_validator("plan_bbox_norm", "hull_x_span_m", "hull_y_span_m")
+    @classmethod
+    def _span_lengths(cls, value: list[float] | None) -> list[float] | None:
+        if value is None:
+            return value
+        if len(value) not in (2, 4):
+            raise ValueError("span/bbox lists must have 2 or 4 entries")
+        return [float(v) for v in value]
 
 
 class ZoneDigest(BaseModel):
@@ -35,6 +68,13 @@ class ZoneDigest(BaseModel):
     floor_area_m2_est: float | None = Field(default=None, gt=0)
     elevation_m: float | None = None
     traffic: TrafficLevel = "medium"
+    serves: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Zone ids this block serves (e.g. a Sanitary head block's served "
+            "deck cluster), matching spatial_layout.schema.json `serves`"
+        ),
+    )
     notes: str = ""
 
     @field_validator("id")
@@ -106,6 +146,30 @@ class CrossZoneHint(BaseModel):
     description: str = ""
 
 
+class CrewClassBlock(BaseModel):
+    """One row of a proposed crew manifest (agent-class level)."""
+
+    class_id: str
+    role_group: RoleGroup = "crew"
+    count: int = Field(ge=1)
+    berth_zone: str | None = Field(
+        default=None, description="Zone id where the class sleeps"
+    )
+    duty_zone: str | None = Field(
+        default=None, description="Zone id where the class works"
+    )
+    notes: str = ""
+
+
+class ComplementProposal(BaseModel):
+    """Proposed nominal complement + class manifest for the platform."""
+
+    passengers: int = Field(default=0, ge=0)
+    crew: int = Field(default=0, ge=0)
+    source: str = ""
+    manifest: list[CrewClassBlock] = Field(default_factory=list)
+
+
 class ContamHints(BaseModel):
     """Starter ContamW authoring hints for Path A side-chain (Target B)."""
 
@@ -153,6 +217,14 @@ class ShipDigest(BaseModel):
     graywater_zones: list[str] = Field(default_factory=list)
     uncertainties: list[str] = Field(default_factory=list)
     isolation_unit_capacity: int = Field(default=0, ge=0)
+    complement: ComplementProposal | None = Field(
+        default=None,
+        description=(
+            "Proposed nominal complement + crew manifest; synthesize emits "
+            "nominal_complement into spatial_layout.json and a "
+            "crew_manifest.json proposal"
+        ),
+    )
 
     @field_validator("platform_id")
     @classmethod

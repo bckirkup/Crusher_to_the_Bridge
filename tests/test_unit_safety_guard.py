@@ -34,6 +34,8 @@ ALLOWED_EPOCH_KEYS = (
     ("schemas/sentinel_recovery_design.schema.json", "embarkation_window_epochs"),  # Sentinel itinerary alias
     ("schemas/sentinel_recovery_design.schema.json", "reembark_window_epochs"),  # Sentinel itinerary alias
     ("schemas/sentinel_recovery_design.schema.json", "sampling_interval_epochs"),  # Sentinel wastewater cadence
+    ("schemas/sentinel_observations.schema.json", "servings_per_epoch"),  # Sentinel provisioning cadence
+    ("schemas/sentinel_observations.schema.json", "service_window_epochs"),  # Sentinel provisioning service window
     ("schemas/voyage_config.schema.json", "total_epochs"),  # run-length bookkeeping
     ("_epoch_timing/*.json", "mean_seconds_per_epoch"),  # benchmark output rate
     ("campaign_summary.json", "total_quarantine_person_epochs"),  # output bookkeeping
@@ -59,6 +61,7 @@ ALLOWED_EPOCH_KEYS = (
     ("picard_framework/analysis/sentinel/data/*.json", "disembark_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/analysis/sentinel/data/*.json", "embarkation_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
     ("picard_framework/analysis/sentinel/data/*.json", "reembark_window_epochs"),  # Sentinel itinerary consumer; defer to separate unit pass required by AGENTS.md
+    ("picard_framework/analysis/sentinel/data/*.json", "service_window_epochs"),  # Sentinel provisioning consumer; defer to separate unit pass required by AGENTS.md
     ("presidio/data/experiences/smoke_runs/*.json", "num_epochs"),  # gitignored presidio smoke output; run-length bookkeeping
     ("reports/flu_svc_residual_*.json", "episode_epochs"),  # probe payload: per-agent infection-record epoch indices (unit is the epoch index itself)
     ("reports/flu_svc_residual_*.json", "tending_epochs"),  # probe payload: per-agent quarantine interval epoch indices

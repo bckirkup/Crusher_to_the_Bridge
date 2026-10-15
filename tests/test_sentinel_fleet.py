@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import os
 import sys
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 import pytest
@@ -47,11 +47,23 @@ def fleet_voyage(
     crew_onset_epochs: Sequence[int] = (),
     crew_fraction: float = 0.2,
     wastewater_samples: Sequence[dict[str, Any]] = (),
+    provisioning: Mapping[str, Any] | None = None,
+    embarkation: Mapping[str, Any] | None = None,
+    covariates: Mapping[str, float] | None = None,
+    embark_window: Sequence[int] | None = None,
+    disembark_window: Sequence[int] | None = None,
+    home_port_id: str = "USMIA",
 ) -> FleetVoyage:
     """One voyage of the fleet: ``ports`` as ``(voyage_day, port_id)`` pairs."""
-    itinerary: list[dict[str, Any]] = [
-        {"day": 1, "type": "embarkation", "port": "Miami", "port_id": "USMIA"},
-    ]
+    embark_day: dict[str, Any] = {
+        "day": 1,
+        "type": "embarkation",
+        "port": "Homeport",
+        "port_id": home_port_id,
+    }
+    if embark_window is not None:
+        embark_day["embarkation_window_epochs"] = list(embark_window)
+    itinerary: list[dict[str, Any]] = [embark_day]
     n_days = total_epochs // 24
     called = dict(ports)
     for day in range(2, n_days):
@@ -71,9 +83,15 @@ def fleet_voyage(
                 "reembark_window_epochs": [12, 14],
             },
         )
-    itinerary.append(
-        {"day": n_days, "type": "disembarkation", "port": "Miami", "port_id": "USMIA"},
-    )
+    disembark_day: dict[str, Any] = {
+        "day": n_days,
+        "type": "disembarkation",
+        "port": "Homeport",
+        "port_id": home_port_id,
+    }
+    if disembark_window is not None:
+        disembark_day["disembark_window_epochs"] = list(disembark_window)
+    itinerary.append(disembark_day)
     config = {
         "voyage": {
             "effects_enabled": True,
@@ -123,6 +141,9 @@ def fleet_voyage(
             "observation_end_epoch": end,
             "clinical_cases": cases,
             "wastewater_samples": [dict(s) for s in wastewater_samples],
+            "provisioning": provisioning,
+            "embarkation": embarkation,
+            "covariates": covariates,
         },
     )
     design = build_exposure_design(voyage, bundle, INCUBATION)

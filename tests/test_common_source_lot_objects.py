@@ -31,10 +31,14 @@ from tests.test_common_source_events import (
 
 
 def _object_cfg(**overrides: object) -> dict:
-    """Armed object-mode cfg with the voyage gated on."""
+    """Armed object-mode cfg on the fiat mint grammar with the voyage
+    gated on. ``lot_mint_model: "fiat"`` is spelled out — these tests
+    pin the v1 Bernoulli-gate + geometric-tail draw sequence, which the
+    shipped provisioned_source default deliberately does not consume."""
     cs: dict[str, object] = {
         "mode": "on",
         "lot_mode": "object",
+        "lot_mint_model": "fiat",
         "lot_object_probability": 1.0,
         "extra_lot_probability": 0.0,
         # Leg 1 pins the handler/diner arms on the v1 baseline spelling

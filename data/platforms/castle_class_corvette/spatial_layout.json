@@ -1,0 +1,318 @@
+{
+  "platform": "castle_class_corvette",
+  "description": "252ft convoy-escort corvette, single screw triple-expansion, Squid ASW mortar. Zones read from maritime.org castle-class GA sheet (single-page multi-view).",
+  "isolation_unit_capacity": 1,
+  "deck_dimensions": {
+    "length_m": 76.8,
+    "beam_m": 11.1
+  },
+  "graywater_zones": [
+    "Shaft_Stores"
+  ],
+  "zones": [
+    {
+      "id": "Compass_Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 542.02,
+      "floor_area_m2": 235.66,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 9.5,
+      "deck": "compass_platform",
+      "display": {
+        "x": 55.33,
+        "y": 4.78
+      },
+      "description": "compass platform + pilot position over bridge"
+    },
+    {
+      "id": "Bridge_House",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 301.34,
+      "floor_area_m2": 131.02,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 7.8,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 53.87,
+        "y": 4.74
+      },
+      "description": "bridge deck house: chart room, W/T office, ASDIC"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 106.56,
+      "floor_area_m2": 46.33,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 32.72,
+        "y": 5.09
+      },
+      "max_occupancy": 4,
+      "description": "GALLEY amidships"
+    },
+    {
+      "id": "Foc_Cabins",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 246.27,
+      "floor_area_m2": 107.07,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 42.52,
+        "y": 4.81
+      },
+      "max_occupancy": 14,
+      "description": "CPO/PO cabins row forward of galley"
+    },
+    {
+      "id": "Officer_Cabins",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 170.5,
+      "floor_area_m2": 74.13,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 55.21,
+        "y": 4.81
+      },
+      "max_occupancy": 6,
+      "description": "officer cabins fwd on forecastle deck"
+    },
+    {
+      "id": "HD_Foc",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 47.36,
+      "floor_area_m2": 20.59,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 68.56,
+        "y": 6.47
+      },
+      "serves": [
+        "Officer_Cabins",
+        "Foc_Cabins"
+      ],
+      "description": "WC/urinal block fwd",
+      "base_ach": 19.1,
+      "max_occupancy": 8
+    },
+    {
+      "id": "Foc_Deck_Open",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 307.84,
+      "floor_area_m2": 133.84,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 67.01,
+        "y": 4.62
+      },
+      "description": "open forecastle/gun deck fwd incl 4in gun"
+    },
+    {
+      "id": "Quarterdeck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 575.42,
+      "floor_area_m2": 250.18,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 5.2,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 12.02,
+        "y": 4.25
+      },
+      "description": "open quarterdeck aft: depth charge stowage + Squid mortar"
+    },
+    {
+      "id": "Mess_Mid",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 189.44,
+      "floor_area_m2": 82.37,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "upper_deck",
+      "display": {
+        "x": 43.41,
+        "y": 3.7
+      },
+      "max_occupancy": 20,
+      "description": "PO/stokers mess amidships"
+    },
+    {
+      "id": "Seamen_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 340.99,
+      "floor_area_m2": 148.26,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "upper_deck",
+      "display": {
+        "x": 56.77,
+        "y": 4.29
+      },
+      "max_occupancy": 45,
+      "description": "seamen messdeck fwd"
+    },
+    {
+      "id": "HD_Upper",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 56.83,
+      "floor_area_m2": 24.71,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "upper_deck",
+      "display": {
+        "x": 70.12,
+        "y": 6.96
+      },
+      "serves": [
+        "Seamen_Mess",
+        "Mess_Mid"
+      ],
+      "description": "washroom/heads fwd",
+      "base_ach": 19.1,
+      "max_occupancy": 9
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 34.1,
+      "floor_area_m2": 14.83,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "upper_deck",
+      "display": {
+        "x": 38.07,
+        "y": 6.96
+      },
+      "max_occupancy": 2,
+      "description": "sick bay"
+    },
+    {
+      "id": "Upper_Deck_Aft",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 395.93,
+      "floor_area_m2": 172.14,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "upper_deck",
+      "display": {
+        "x": 9.57,
+        "y": 4.74
+      },
+      "description": "aft enclosed region: provision rooms + access"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 165.33,
+      "floor_area_m2": 71.88,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 4.67,
+        "y": 5.25
+      },
+      "description": "steering gear + aft peak"
+    },
+    {
+      "id": "Shaft_Stores",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 227.33,
+      "floor_area_m2": 98.84,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 14.91,
+        "y": 5.25
+      },
+      "description": "shaft alley + provision stores"
+    },
+    {
+      "id": "Boiler_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 325.49,
+      "floor_area_m2": 141.52,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 28.49,
+        "y": 4.64
+      },
+      "description": "Admiralty 3-drum boiler room"
+    },
+    {
+      "id": "Engine_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 255.74,
+      "floor_area_m2": 111.19,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 42.74,
+        "y": 4.64
+      },
+      "description": "triple-expansion engine room"
+    },
+    {
+      "id": "Stokers_Mess",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 186.0,
+      "floor_area_m2": 80.87,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 53.65,
+        "y": 4.64
+      },
+      "max_occupancy": 18,
+      "description": "stokers mess fwd lower deck"
+    },
+    {
+      "id": "Fwd_Magazines",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 348.74,
+      "floor_area_m2": 151.63,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 0.0,
+      "deck": "lower_deck",
+      "display": {
+        "x": 65.67,
+        "y": 4.64
+      },
+      "description": "shell rooms/magazines/cordite fwd"
+    }
+  ]
+}

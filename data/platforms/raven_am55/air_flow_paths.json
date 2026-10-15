@@ -1,0 +1,152 @@
+{
+  "platform": "raven_am55",
+  "description": "HVAC network synthesized for raven_am55",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Mess_Tables",
+        "Galley",
+        "Wardroom",
+        "Officers_Country",
+        "Sick_Bay",
+        "Passage_Main",
+        "Crew_Quarters",
+        "CPO_Quarters",
+        "Nav_Bridge"
+      ],
+      "ach": 6.0,
+      "description": "accommodation ventilation"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Engine_Rm",
+        "Gen_Rm",
+        "Steering_Gear",
+        "Steering_Gen",
+        "Clipping_Rm",
+        "Fwd_Magazines"
+      ],
+      "ach": 10.0,
+      "description": "machinery ventilation"
+    },
+    {
+      "id": "AHU_HD_HD_Main",
+      "rooms": [
+        "HD_Main"
+      ],
+      "ach": 19.1,
+      "oa_fraction": 1.0,
+      "hvac_duty": 0.0,
+      "description": "Exhaust-only sanitary branch (HD_Main, 4 WC); makeup air enters from the served space's branch and leaves overboard."
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Accom",
+      "to": "AHU_HD_HD_Main",
+      "flow_rate_m3h": 475.6,
+      "is_hvac_ducted": false,
+      "path": "Sanitary_Makeup",
+      "description": "Transfer air into HD_Main; the head exhausts overboard, never back to the served space."
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Nav_Bridge",
+      "to": "Clipping_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Clipping_Rm",
+      "to": "Passage_Main",
+      "type": "ladder"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Wardroom",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Mess_Tables",
+      "type": "passageway"
+    },
+    {
+      "from": "Sweep_Deck",
+      "to": "Steering_Gen",
+      "type": "door"
+    },
+    {
+      "from": "Sweep_Deck",
+      "to": "Foc_Deck_Open",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Crew_Quarters",
+      "type": "ladder"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Steering_Gen",
+      "to": "Gen_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "CPO_Quarters",
+      "to": "Fwd_Magazines",
+      "type": "passageway"
+    },
+    {
+      "from": "Gen_Rm",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Gen_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_Quarters",
+      "to": "CPO_Quarters",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Tables",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Officers_Country",
+      "to": "Wardroom",
+      "type": "passageway"
+    }
+  ]
+}

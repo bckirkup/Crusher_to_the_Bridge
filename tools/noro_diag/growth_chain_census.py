@@ -1604,6 +1604,12 @@ def _common_source_block(core: Any) -> dict[str, Any]:
         "telemetry": dict(
             getattr(core, "common_source_telemetry", {}) or {},
         ),
+        # PROVISIONED-SOURCE-01 voyage witness (contract §3): per armed
+        # pathogen {source_id, q_source_drawn, n_stations,
+        # n_contaminated} — empty under fiat / independent / off.
+        "provisioned_source": dict(
+            getattr(core, "_cs_provisioned_source", None) or {},
+        ),
         "events": events,
         "objects": objects,
     }

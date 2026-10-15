@@ -29,6 +29,28 @@
 // epochs are never in the likelihood, so a short voyage cannot contribute
 // phantom zero-onset epochs that would drag every rate down.
 //
+// Two more import channels ride the same recursion (the source+market
+// revision, docs/sentinel/sentinel_source_market_revision.md):
+//
+//   provisioning. log kappa[s] = mu_log_prov + sigma_source * z_source[s],
+//     a per-serving hazard pooled per source_id across the fleet. Source
+//     exposure is servings consumed per (voyage, group, epoch), so a
+//     provisioned lot's cases land on the epochs it was served, not in
+//     lambda_aboard or the home-port visit hazard. There is deliberately no
+//     per-receiving week level: supply-side shocks are source-level.
+//   embarkation market. epsilon[m] = inv_logit(mu_logit_market
+//     + sigma_market * z_market[m]), a per-capita boarding prevalence pooled
+//     per market_id — a probability on the logit scale, not a rate, because
+//     a boarded carrier is an import with offset log(persons), not
+//     log(person-hours). markets are declared per stratum: a line's consumer
+//     market and its crew labour market are different pools.
+//   voyage covariates. susc[v] = exp(X[v] . beta_x) multiplies the three
+//     import channels — the market-structure surface (e.g. demographic mix)
+//     that changes per-exposure risk without inventing named effects.
+//
+// Embarked imports count as infection at embark_epoch with the voyage's full
+// incubation pmf (declared approximation: no boarding-time infection-age
+// distribution exists to do better).
 // Wastewater (spec 1.3) is a second observation of the *same* latent incidence,
 // not a second hazard: a ship's greywater is a closed integrating system, so it
 // measures the prevalence of shedders aboard whatever port infected them.
@@ -83,7 +105,11 @@ functions {
      secondaries shared out by group. Epochs past Tv stay zero. */
   matrix voyage_incidence(int Tv, vector w_gen, array[] matrix ashore,
                           matrix aboard, matrix rate, vector share,
-                          real lambda_aboard, real r_onboard) {
+                          real lambda_aboard, real r_onboard,
+                          array[] matrix prov, vector kappa,
+                          vector epsilon, array[] int market_row,
+                          vector embark_persons, int embark_epoch,
+                          real susc) {
     int G = rows(aboard);
     int L_gen = num_elements(w_gen);
     matrix[G, cols(aboard)] incidence = rep_matrix(0.0, G, cols(aboard));
@@ -96,8 +122,15 @@ functions {
       secondary *= r_onboard;
       for (g in 1 : G) {
         incidence[g, t] = lambda_aboard * aboard[g, t]
-                          + row(ashore[g], t) * rate[g]'
+                          + susc * row(ashore[g], t) * rate[g]'
                           + secondary * share[g];
+        if (size(kappa) > 0) {
+          incidence[g, t] += susc * (row(prov[g], t) * kappa);
+        }
+        if (t == embark_epoch && market_row[g] > 0) {
+          incidence[g, t] += susc * epsilon[market_row[g]]
+                             * embark_persons[g];
+        }
       }
       total[t] = sum(col(incidence, t));
     }
@@ -167,6 +200,17 @@ data {
   array[V] matrix<lower=0>[G, Tmax] aboard_hours;
   array[V] vector<lower=0>[G] secondary_share_raw;
   array[V] real<lower=0, upper=1> ascertainment;
+  // Provisioning-source channel: servings per (voyage, group, epoch, source).
+  int<lower=0> NS;                         // provisioning sources in the fleet
+  array[V, G] matrix<lower=0>[Tmax, NS] prov_servings;
+  // Embarkation-market channel: per-capita boarding prevalence.
+  int<lower=0> NM;                         // embarkation markets
+  array[V, G] int<lower=0, upper=NM> market_idx;  // 0 = stratum has no market
+  array[V, G] real<lower=0> embark_persons;    // headcount boarding per stratum
+  array[V] int<lower=1, upper=Tmax> embark_epoch;  // boarding epoch
+  // Voyage covariates multiplying all import channels (market structure).
+  int<lower=0> K;
+  array[V] vector[K] X;
   real hazard_log_prior_mean;              // log rate per person-hour ashore
   real<lower=0> hazard_log_prior_sd;
   real baseline_log_prior_mean;            // log rate per person-hour aboard
@@ -180,6 +224,13 @@ data {
   real<lower=0> r_sd_prior_scale;
   real<lower=0> crew_ratio_prior_sd;
   real<lower=0> repeat_prior_sd;
+  real prov_log_prior_mean;                // log per-serving source hazard
+  real<lower=0> prov_log_prior_sd;
+  real<lower=0> prov_sd_prior_scale;
+  real market_logit_prior_mean;            // boarding prevalence, logit
+  real<lower=0> market_logit_prior_sd;
+  real<lower=0> market_sd_prior_scale;
+  real<lower=0> x_prior_sd;
   // Wastewater channel. NW = 0 is a valid, fully clinical fit.
   int<lower=0> NW;                         // pooled samples (one per voyage-epoch)
   array[NW] int<lower=1, upper=V> ww_voyage;
@@ -237,6 +288,13 @@ parameters {
   vector[S] z_r;
   real log_crew_ratio;                     // crew:passenger ashore hazard ratio
   real beta_repeat;                        // per earlier call at the same port
+  real mu_log_prov;                        // fleet mean log per-serving hazard
+  real<lower=0> sigma_source;              // between-source spread
+  vector[NS] z_source;
+  real mu_logit_market;                    // fleet mean boarding prevalence, logit
+  real<lower=0> sigma_market;              // between-market spread
+  vector[NM] z_market;
+  vector[K] beta_x;                        // voyage covariates on susceptibility
   real ww_logit_base;                      // background read fraction, logit scale
   real<lower=0> ww_slope;                  // elasticity in shedder prevalence
   real<lower=0> ww_conc;                   // beta-binomial concentration
@@ -254,6 +312,10 @@ transformed parameters {
   vector[NV] log_lambda_visit;
   vector[S] lambda_aboard = exp(mu_log_aboard + sigma_ship * z_ship);
   vector[S] R_onboard = exp(mu_log_r + sigma_r * z_r);
+  vector[NS] log_kappa = mu_log_prov + sigma_source * z_source;
+  vector[NS] kappa = exp(log_kappa);
+  vector[NM] logit_epsilon = mu_logit_market + sigma_market * z_market;
+  vector[NM] epsilon = inv_logit(logit_epsilon);
 
   for (i in 1 : NV) {
     log_lambda_visit[i] = log_lambda_port[visit_port[i]]
@@ -278,6 +340,13 @@ model {
   z_r ~ std_normal();
   log_crew_ratio ~ normal(0, crew_ratio_prior_sd);
   beta_repeat ~ normal(0, repeat_prior_sd);
+  mu_log_prov ~ normal(prov_log_prior_mean, prov_log_prior_sd);
+  sigma_source ~ normal(0, prov_sd_prior_scale);
+  z_source ~ std_normal();
+  mu_logit_market ~ normal(market_logit_prior_mean, market_logit_prior_sd);
+  sigma_market ~ normal(0, market_sd_prior_scale);
+  z_market ~ std_normal();
+  beta_x ~ normal(0, x_prior_sd);
   ww_logit_base ~ normal(ww_base_prior_mean, ww_base_prior_sd);
   ww_slope ~ normal(ww_slope_prior_mean, ww_slope_prior_sd);
   ww_conc ~ lognormal(ww_conc_prior_log_mean, ww_conc_prior_log_sd);
@@ -291,11 +360,14 @@ model {
        recomputing the incidence recursion a second time. */
     array[V] vector[Tmax] share;
     for (v in 1 : V) {
+      real susc = K > 0 ? exp(dot_product(X[v], beta_x)) : 1.0;
       matrix[G, Tmax] incidence = voyage_incidence(
         T[v], w_gen, ashore_hours[v], aboard_hours[v],
         voyage_rate(visit_idx[v], is_crew, crew_repeat[v], lambda_visit,
                     log_crew_ratio, beta_repeat),
-        secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]]);
+        secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]],
+        prov_servings[v], kappa, epsilon, market_idx[v], embark_persons[v],
+        embark_epoch[v], susc);
       matrix[G, Tmax] mu_onset = voyage_onsets(T[v], f_inc, incidence,
                                                ascertainment[v]);
       for (g in 1 : G) {
@@ -337,6 +409,10 @@ generated quantities {
   vector[NV] imported_cases_visit;
   vector[P] imported_cases;
   vector[P] attribution_share;
+  vector[NS] imported_cases_source;
+  vector[NM] imported_cases_market;
+  vector[NS] attribution_share_source;
+  vector[NM] attribution_share_market;
   real aboard_cases = 0;
   real secondary_cases;
   real total_incidence = 0;
@@ -351,12 +427,17 @@ generated quantities {
 
   imported_cases_visit = rep_vector(0.0, NV);
   imported_cases = rep_vector(0.0, P);
+  imported_cases_source = rep_vector(0.0, NS);
+  imported_cases_market = rep_vector(0.0, NM);
   for (v in 1 : V) {
+    real susc = K > 0 ? exp(dot_product(X[v], beta_x)) : 1.0;
     matrix[G, P] rate = voyage_rate(visit_idx[v], is_crew, crew_repeat[v],
                                     lambda_visit, log_crew_ratio, beta_repeat);
     matrix[G, Tmax] incidence = voyage_incidence(
       T[v], w_gen, ashore_hours[v], aboard_hours[v], rate,
-      secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]]);
+      secondary_share[v], lambda_aboard[ship[v]], R_onboard[ship[v]],
+      prov_servings[v], kappa, epsilon, market_idx[v], embark_persons[v],
+      embark_epoch[v], susc);
     matrix[G, Tmax] mu_onset = voyage_onsets(T[v], f_inc, incidence,
                                              ascertainment[v]);
     total_incidence += sum(block(incidence, 1, 1, G, T[v]));
@@ -370,10 +451,22 @@ generated quantities {
       // Hours x the rate that group actually faced, so the crew ratio and the
       // repeat slope are inside the attributed count rather than averaged away.
       for (g in 1 : G) {
-        cases += rate[g, p] * sum(sub_col(ashore_hours[v, g], 1, p, T[v]));
+        cases += susc * rate[g, p] * sum(sub_col(ashore_hours[v, g], 1, p, T[v]));
       }
       imported_cases_visit[visit_idx[v, p]] += cases;
       imported_cases[p] += cases;
+    }
+    // Provisioned-source cases: servings x per-serving hazard, summed over the
+    // epochs each source was served.
+    for (g in 1 : G) {
+      for (s in 1 : NS) {
+        imported_cases_source[s] += susc * kappa[s]
+                                    * sum(col(prov_servings[v, g], s)[1 : T[v]]);
+      }
+      if (market_idx[v, g] > 0) {
+        imported_cases_market[market_idx[v, g]] += susc
+            * epsilon[market_idx[v, g]] * embark_persons[v, g];
+      }
     }
     for (g in 1 : G) {
       loglik_clinical += poisson_lpmf(onsets[v, g, 1 : T[v]]
@@ -407,9 +500,16 @@ generated quantities {
       }
     }
   }
-  secondary_cases = fmax(0.0, total_incidence - sum(imported_cases) - aboard_cases);
-  import_share = sum(imported_cases) / fmax(total_incidence, 1e-12);
+  secondary_cases = fmax(0.0, total_incidence - sum(imported_cases)
+                         - sum(imported_cases_source)
+                         - sum(imported_cases_market) - aboard_cases);
+  // import_share is every import channel's share of fleet incidence — ports,
+  // provisioned sources, and boarded carriers are all imports.
+  import_share = (sum(imported_cases) + sum(imported_cases_source)
+                  + sum(imported_cases_market)) / fmax(total_incidence, 1e-12);
   // Share of *all* fleet incidence attributed to each port: the fleet quantity
   // the single-ship model could not report (spec 2, PortHazardEstimate).
   attribution_share = imported_cases / fmax(total_incidence, 1e-12);
+  attribution_share_source = imported_cases_source / fmax(total_incidence, 1e-12);
+  attribution_share_market = imported_cases_market / fmax(total_incidence, 1e-12);
 }

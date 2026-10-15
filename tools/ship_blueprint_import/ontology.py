@@ -48,6 +48,7 @@ def ach_for_zone_type(zone_type: str) -> float:
         "Room": 7.0,
         "Medical": 8.0,
         "Engineering": 10.0,
+        "Sanitary": 8.0,
     }
     return float(defaults.get(zone_type, 6.0))
 

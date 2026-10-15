@@ -104,6 +104,21 @@ DEFAULT_R_LOG_PRIOR_MEDIAN = 0.6
 DEFAULT_R_LOG_PRIOR_SD = 0.6
 DEFAULT_CREW_RATIO_PRIOR_SD = 0.5
 DEFAULT_REPEAT_PRIOR_SD = 0.3
+# Provisioning-source hazards get the port-hazard prior shape by default: a
+# voyage serves O(1e3-1e4) provisioned servings, so the shared median puts a
+# handful of food-channel cases on it. Source-level spread gets the week-level
+# scale — supply-side shocks are absorbed by sigma_source, and no separate
+# per-receiving level exists (docs/sentinel/sentinel_source_market_revision.md).
+DEFAULT_PROV_SD_PRIOR_SCALE = 0.75
+# Boarding prevalence is a probability, so its mean sits on the logit scale.
+# 2e-3 central with logit-sd 1.5 spans roughly 4e-5 to 4e-2 at two sd —
+# declared, not fit; a wide enough band to leave the data the deciding vote.
+DEFAULT_MARKET_PRIOR_MEDIAN = 2e-3
+DEFAULT_MARKET_LOGIT_PRIOR_SD = 1.5
+DEFAULT_MARKET_SD_PRIOR_SCALE = 0.75
+# Voyage covariates multiply per-exposure risk; 0.5 sd keeps a coefficient
+# centred on no-effect with room for a ~2.7x fold change at 1 sd.
+DEFAULT_X_PRIOR_SD = 0.5
 
 
 @dataclass(frozen=True)
@@ -128,6 +143,11 @@ class FleetPriors:
     r_prior_log_sd: float = DEFAULT_R_LOG_PRIOR_SD
     crew_ratio_prior_sd: float = DEFAULT_CREW_RATIO_PRIOR_SD
     repeat_prior_sd: float = DEFAULT_REPEAT_PRIOR_SD
+    prov_sd_prior_scale: float = DEFAULT_PROV_SD_PRIOR_SCALE
+    market_prior_median: float = DEFAULT_MARKET_PRIOR_MEDIAN
+    market_logit_prior_sd: float = DEFAULT_MARKET_LOGIT_PRIOR_SD
+    market_sd_prior_scale: float = DEFAULT_MARKET_SD_PRIOR_SCALE
+    x_prior_sd: float = DEFAULT_X_PRIOR_SD
 
     def __post_init__(self) -> None:
         medians = (
@@ -137,6 +157,8 @@ class FleetPriors:
         )
         if any(m <= 0.0 for m in medians):
             raise ValueError("prior medians must be positive")
+        if not 0.0 < self.market_prior_median < 1.0:
+            raise ValueError("market_prior_median is a probability, in (0, 1)")
 
     def stan_fields(self) -> dict[str, float]:
         """The prior block of the Stan data dictionary."""
@@ -159,7 +181,20 @@ class FleetPriors:
             "r_sd_prior_scale": float(self.r_sd_prior_scale),
             "crew_ratio_prior_sd": float(self.crew_ratio_prior_sd),
             "repeat_prior_sd": float(self.repeat_prior_sd),
+            # The provisioning channel borrows the port-hazard log prior:
+            # per-serving and per-person-hour hazards live on the same scale.
+            "prov_log_prior_mean": math.log(float(self.hazard_prior_median)),
+            "prov_log_prior_sd": float(self.prior_log_sd),
+            "prov_sd_prior_scale": float(self.prov_sd_prior_scale),
+            "market_logit_prior_mean": _logit(float(self.market_prior_median)),
+            "market_logit_prior_sd": float(self.market_logit_prior_sd),
+            "market_sd_prior_scale": float(self.market_sd_prior_scale),
+            "x_prior_sd": float(self.x_prior_sd),
         }
+
+
+def _logit(p: float) -> float:
+    return math.log(p / (1.0 - p))
 
 
 @dataclass(frozen=True)
@@ -287,6 +322,125 @@ def _crew_repeat_counts(
     return counts
 
 
+def _source_ids(voyages: Sequence[FleetVoyage]) -> list[str]:
+    """Sorted provisioning-source ids declared across the fleet's bundles."""
+    return sorted(
+        {src.source_id for fv in voyages for src in fv.bundle.provisioning},
+    )
+
+
+def _market_ids(voyages: Sequence[FleetVoyage]) -> list[str]:
+    """Sorted embarkation-market ids the fleet's boarding pools were drawn from."""
+    return sorted(
+        {
+            market_id
+            for fv in voyages
+            if fv.bundle.embarkation is not None
+            for market_id in fv.bundle.embarkation.markets.values()
+        },
+    )
+
+
+def _covariate_names(voyages: Sequence[FleetVoyage]) -> list[str]:
+    """Sorted voyage-covariate names; a missing key reads as 0, not absent."""
+    return sorted({name for fv in voyages for name in fv.bundle.covariates})
+
+
+def _prov_matrix(
+    fv: FleetVoyage,
+    source_index: Mapping[str, int],
+    t_max: int,
+) -> np.ndarray:
+    """``(group, epoch, source)`` servings for one voyage.
+
+    Per-epoch rows are taken as declared; a ``servings_total`` is spread
+    uniformly over its service window, the same no-invented-profile rule the
+    ashore-hours builder uses for call windows.
+    """
+    prov = np.zeros((len(GROUPS), t_max, len(source_index)), dtype=float)
+    horizon = int(fv.design.observation_end_epoch)
+    for src in fv.bundle.provisioning:
+        s = source_index[src.source_id]
+        if src.servings_per_epoch:
+            for stratum, row in src.servings_per_epoch.items():
+                g = GROUPS.index(stratum)
+                n = min(len(row), horizon)
+                prov[g, :n, s] += np.asarray(row[:n], dtype=float)
+            continue
+        if not src.servings_total or src.service_window_epochs is None:
+            continue
+        first, last = src.service_window_epochs
+        start = max(first - 1, 0)
+        end = min(last, horizon)
+        span = end - start
+        if span <= 0:
+            continue
+        for stratum, total in src.servings_total.items():
+            g = GROUPS.index(stratum)
+            prov[g, start:end, s] += float(total) / float(span)
+    return prov
+
+
+def _embark_row(
+    fv: FleetVoyage,
+    market_index: Mapping[str, int],
+) -> tuple[list[int], list[float], int]:
+    """``(market_idx[G], embark_persons[G], embark_epoch)`` for one voyage.
+
+    ``embark_persons`` defaults to the complement the bundle declares
+    (``n_passengers``/``n_crew``); ``embark_epoch`` defaults to the first
+    home-port call's arrival — the embarkation day's first epoch.
+    """
+    market_row = [0] * len(GROUPS)
+    persons_row = [0.0] * len(GROUPS)
+    embark = fv.bundle.embarkation
+    embark_epoch = _embark_epoch_default(fv)
+    if embark is None:
+        return market_row, persons_row, embark_epoch
+    complements = {
+        "passenger": float(fv.bundle.n_passengers),
+        "crew": float(fv.bundle.n_crew),
+    }
+    for g, stratum in enumerate(GROUPS):
+        market_id = embark.markets.get(stratum)
+        if market_id is None:
+            continue
+        market_row[g] = market_index[market_id] + 1
+        persons_row[g] = float(embark.n_boarded.get(stratum, complements[stratum]))
+    if embark.embark_epoch is not None:
+        embark_epoch = int(embark.embark_epoch)
+    horizon = int(fv.design.observation_end_epoch)
+    return market_row, persons_row, min(max(embark_epoch, 1), horizon)
+
+
+def _embark_epoch_default(fv: FleetVoyage) -> int:
+    """First epoch of the embarkation home-port call (day 1's start)."""
+    home = [c for c in fv.voyage.port_calls if c.is_home_port]
+    if not home:
+        return 1
+    return int(min(c.arrival_epoch for c in home))
+
+
+def _embark_call(fv: FleetVoyage) -> Any:
+    """The day-1 home-port call — the embarkation leg — or ``None``."""
+    home = sorted(
+        (c for c in fv.voyage.port_calls if c.is_home_port),
+        key=lambda c: (c.voyage_day, c.arrival_epoch),
+    )
+    return home[0] if home else None
+
+
+def _voyage_source(
+    fv: FleetVoyage,
+    source_id: str,
+) -> Any:
+    """The voyage's provisioning record for ``source_id``, or ``None``."""
+    return next(
+        (src for src in fv.bundle.provisioning if src.source_id == source_id),
+        None,
+    )
+
+
 def _visit_index_row(
     fv: FleetVoyage,
     ports: Sequence[str],
@@ -384,6 +538,11 @@ def build_sentinel_fleet_data(
     ports = sorted({p for fv in voyages for p in attribution_ports(fv.design)})
     if not ports:
         raise ValueError("no voyage has a port with positive ashore exposure")
+    sources = _source_ids(voyages)
+    markets = _market_ids(voyages)
+    covariate_names = _covariate_names(voyages)
+    source_index = {s: i for i, s in enumerate(sources)}
+    market_index = {m: i for i, m in enumerate(markets)}
 
     visit_keys, week_keys, visit_index, week_index = _visit_layout(voyages, ports)
     crew_repeat = _crew_repeat_counts(voyages, ports)
@@ -404,6 +563,15 @@ def build_sentinel_fleet_data(
         visit_week=visit_week,
         hours_by_visit=hours_by_visit,
     )
+    prov_all = [_prov_matrix(fv, source_index, t_max).tolist() for fv in voyages]
+    market_rows: list[list[int]] = []
+    embark_persons: list[list[float]] = []
+    embark_epochs: list[int] = []
+    for fv in voyages:
+        market_row, persons_row, embark_epoch = _embark_row(fv, market_index)
+        market_rows.append(market_row)
+        embark_persons.append(persons_row)
+        embark_epochs.append(embark_epoch)
 
     lagged = generation.strictly_lagged().weights[1:]
     ww = _wastewater_block(
@@ -422,6 +590,17 @@ def build_sentinel_fleet_data(
         "W": len(week_keys),
         "Tmax": int(t_max),
         "T": horizons,
+        "NS": len(sources),
+        "NM": len(markets),
+        "K": len(covariate_names),
+        "prov_servings": prov_all,
+        "market_idx": market_rows,
+        "embark_persons": embark_persons,
+        "embark_epoch": embark_epochs,
+        "X": [
+            [float(fv.bundle.covariates.get(name, 0.0)) for name in covariate_names]
+            for fv in voyages
+        ],
         "ship": [ships.index(fv.ship_id) + 1 for fv in voyages],
         "is_crew": [1 if g == CREW else 0 for g in GROUPS],
         "visit_idx": visit_idx,
@@ -451,9 +630,27 @@ def build_sentinel_fleet_data(
         hours_by_visit=hours_by_visit,
         crew_repeat=crew_repeat,
         incubation=incubation,
+        channels=_MetaChannels(
+            sources=sources,
+            markets=markets,
+            covariate_names=covariate_names,
+            prov_all=prov_all,
+            embark_epochs=embark_epochs,
+        ),
     )
     meta["wastewater"] = ww["meta"]
     return data, meta
+
+
+@dataclass(frozen=True)
+class _MetaChannels:
+    """The optional reverse-inference channels a fleet may declare."""
+
+    sources: Sequence[str] = ()
+    markets: Sequence[str] = ()
+    covariate_names: Sequence[str] = ()
+    prov_all: Sequence[Any] = ()
+    embark_epochs: Sequence[int] = ()
 
 
 def _fleet_meta(
@@ -468,7 +665,13 @@ def _fleet_meta(
     hours_by_visit: Mapping[str, float],
     crew_repeat: np.ndarray,
     incubation: DelayDistribution,
+    channels: _MetaChannels = _MetaChannels(),
 ) -> dict[str, Any]:
+    sources = channels.sources
+    markets = channels.markets
+    covariate_names = channels.covariate_names
+    prov_all = channels.prov_all
+    embark_epochs = channels.embark_epochs
     resolutions = {
         fv.voyage_id: port_resolution_adequate(
             incubation, min_inter_port_hours(fv.voyage),
@@ -504,9 +707,84 @@ def _fleet_meta(
                     if crew_repeat[i, p] > 0.0
                 },
                 "port_resolution_adequate": resolutions[fv.voyage_id],
+                "home_port": (
+                    None
+                    if _embark_call(fv) is None
+                    else str(_embark_call(fv).port_id)
+                ),
+                "embark_window": (
+                    None
+                    if _embark_call(fv) is None
+                    else [
+                        int(_embark_call(fv).arrival_epoch),
+                        int(_embark_call(fv).departure_epoch),
+                    ]
+                ),
+                "home_port_has_ashore": bool(
+                    _embark_call(fv) is not None
+                    and any(
+                        c.carries_ashore_exposure
+                        for c in fv.voyage.port_calls
+                        if c.is_home_port
+                    )
+                ),
+                "markets": (
+                    dict(fv.bundle.embarkation.markets)
+                    if fv.bundle.embarkation is not None
+                    else {}
+                ),
+                "sources": [src.source_id for src in fv.bundle.provisioning],
+                "embark_epoch": int(embark_epochs[i]) if i < len(embark_epochs) else 1,
             }
             for i, fv in enumerate(voyages)
         ],
+        "sources": [
+            {
+                "source_id": source_id,
+                "voyages": [
+                    fv.voyage_id
+                    for fv in voyages
+                    if _voyage_source(fv, source_id) is not None
+                ],
+                "total_servings": round(
+                    sum(
+                        float(np.asarray(prov_all[i], dtype=float)[:, :, s].sum())
+                        for i, fv in enumerate(voyages)
+                        if i < len(prov_all)
+                        and _voyage_source(fv, source_id) is not None
+                    ),
+                    6,
+                ),
+                "first_service_epoch": {
+                    fv.voyage_id: _voyage_source(fv, source_id).first_service_epoch
+                    for fv in voyages
+                    if _voyage_source(fv, source_id) is not None
+                },
+            }
+            for s, source_id in enumerate(sources)
+        ],
+        "markets": [
+            {
+                "market_id": market_id,
+                "voyages": [
+                    fv.voyage_id
+                    for i, fv in enumerate(voyages)
+                    if fv.bundle.embarkation is not None
+                    and market_id in fv.bundle.embarkation.markets.values()
+                ],
+                "strata": sorted(
+                    {
+                        stratum
+                        for fv in voyages
+                        if fv.bundle.embarkation is not None
+                        for stratum, market in fv.bundle.embarkation.markets.items()
+                        if market == market_id
+                    },
+                ),
+            }
+            for market_id in markets
+        ],
+        "covariate_names": list(covariate_names),
         "epoch_duration_hours": float(voyages[0].voyage.epoch_duration_hours),
         "person_hours_ashore": {
             key: round(float(hours), 6) for key, hours in hours_by_visit.items()
@@ -719,6 +997,9 @@ class FleetRates:
     r_onboard: Sequence[float]        # per ship
     crew_ratio: float = 1.0
     beta_repeat: float = 0.0
+    kappa: Sequence[float] = ()       # per provisioning source (per serving)
+    epsilon: Sequence[float] = ()     # per embarkation market (per capita)
+    susceptibility: Sequence[float] = ()  # per voyage multiplier, empty = 1.0
 
 
 def fleet_forward_incidence(
@@ -736,61 +1017,131 @@ def fleet_forward_incidence(
     f_inc = f_inc / f_inc.sum()
     w_gen = np.asarray(data["w_gen_raw"], dtype=float)
     w_gen = w_gen / w_gen.sum()
-    lambda_visit = np.asarray(list(rates.lambda_visit), dtype=float)
-    lambda_aboard = np.asarray(list(rates.lambda_aboard), dtype=float)
-    r_onboard = np.asarray(list(rates.r_onboard), dtype=float)
-    is_crew = np.asarray(data["is_crew"], dtype=float)
-    crew_repeat = np.asarray(data["crew_repeat"], dtype=float)
-    visit_idx = np.asarray(data["visit_idx"], dtype=int)
+    n_voyages = int(data["V"])
+    terms = _ForwardTerms(
+        f_inc=f_inc,
+        w_gen=w_gen,
+        lambda_visit=np.asarray(list(rates.lambda_visit), dtype=float),
+        lambda_aboard=np.asarray(list(rates.lambda_aboard), dtype=float),
+        r_onboard=np.asarray(list(rates.r_onboard), dtype=float),
+        kappa=np.asarray(list(rates.kappa), dtype=float),
+        epsilon=np.asarray(list(rates.epsilon), dtype=float),
+        susceptibility=(
+            np.asarray(list(rates.susceptibility), dtype=float)
+            if len(rates.susceptibility) == n_voyages
+            else np.ones(n_voyages, dtype=float)
+        ),
+        is_crew=np.asarray(data["is_crew"], dtype=float),
+        crew_repeat=np.asarray(data["crew_repeat"], dtype=float),
+        visit_idx=np.asarray(data["visit_idx"], dtype=int),
+    )
     ascertainment = list(data["ascertainment"])
 
     incidences: list[np.ndarray] = []
     onset_means: list[np.ndarray] = []
-    for v in range(int(data["V"])):
-        horizon = int(data["T"][v])
-        ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
-        aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
-        share = np.asarray(data["secondary_share_raw"][v], dtype=float)
-        share = share / share.sum()
-        s = int(data["ship"][v]) - 1
-
-        # (group, port) rate: crew carry the ratio and the repeat slope.
-        crew_mult = float(rates.crew_ratio) * np.exp(
-            rates.beta_repeat * crew_repeat[v],
-        )
-        rate = np.where(
-            is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
-        ) * np.where(
-            visit_idx[v][None, :] > 0,
-            lambda_visit[np.clip(visit_idx[v] - 1, 0, None)][None, :],
-            0.0,
-        )
-
-        # Everything but the renewal term is a function of the epoch alone, so
-        # only the secondary lag sum has to stay in a python loop.
-        primary = (
-            np.einsum("gtp,gp->gt", ashore, rate) + float(lambda_aboard[s]) * aboard
-        )
-        primary_total = primary.sum(axis=0)
-        incidence = primary.copy()
-        total = np.zeros(horizon, dtype=float)
-        for t in range(horizon):
-            lags = min(t, w_gen.size)
-            secondary = 0.0
-            if lags:
-                secondary = float(r_onboard[s]) * float(
-                    w_gen[:lags] @ total[t - lags : t][::-1],
-                )
-            if secondary:
-                incidence[:, t] += secondary * share
-            total[t] = primary_total[t] + secondary
-
-        mu = np.zeros_like(incidence)
-        for g in range(len(GROUPS)):
-            mu[g] = np.convolve(incidence[g], f_inc)[:horizon]
+    for v in range(n_voyages):
+        incidence, mu = _voyage_forward_incidence(data, v, terms, rates)
         incidences.append(incidence)
         onset_means.append(float(ascertainment[v]) * mu)
     return incidences, onset_means
+
+
+@dataclass(frozen=True)
+class _ForwardTerms:
+    """The normalized rate/exposure arrays one forward pass shares."""
+
+    f_inc: np.ndarray
+    w_gen: np.ndarray
+    lambda_visit: np.ndarray
+    lambda_aboard: np.ndarray
+    r_onboard: np.ndarray
+    kappa: np.ndarray
+    epsilon: np.ndarray
+    susceptibility: np.ndarray
+    is_crew: np.ndarray
+    crew_repeat: np.ndarray
+    visit_idx: np.ndarray
+
+
+def _voyage_import_injections(
+    data: Mapping[str, Any],
+    v: int,
+    horizon: int,
+    susc: float,
+    terms: _ForwardTerms,
+) -> np.ndarray:
+    """Provisioned-serving and embarkation-market injections for one voyage."""
+    injected = np.zeros((int(data["G"]), horizon), dtype=float)
+    if terms.kappa.size and int(data.get("NS", 0)) > 0:
+        prov = np.asarray(data["prov_servings"][v], dtype=float)[
+            :, :horizon, :
+        ]
+        injected += susc * np.einsum("gts,s->gt", prov, terms.kappa)
+    if terms.epsilon.size and int(data.get("NM", 0)) > 0:
+        market_row = np.asarray(data["market_idx"][v], dtype=int) - 1
+        persons_row = np.asarray(data["embark_persons"][v], dtype=float)
+        embark_t = int(data["embark_epoch"][v]) - 1
+        for g in range(int(data["G"])):
+            m = int(market_row[g])
+            if m >= 0 and 0 <= embark_t < horizon:
+                injected[g, embark_t] += (
+                    susc * float(terms.epsilon[m]) * float(persons_row[g])
+                )
+    return injected
+
+
+def _voyage_forward_incidence(
+    data: Mapping[str, Any],
+    v: int,
+    terms: _ForwardTerms,
+    rates: FleetRates,
+) -> tuple[np.ndarray, np.ndarray]:
+    """``(incidence, mu_onset)`` for voyage ``v`` — the Stan recursion verbatim."""
+    horizon = int(data["T"][v])
+    ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
+    aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
+    share = np.asarray(data["secondary_share_raw"][v], dtype=float)
+    share = share / share.sum()
+    s = int(data["ship"][v]) - 1
+    susc = float(terms.susceptibility[v])
+
+    # (group, port) rate: crew carry the ratio and the repeat slope.
+    crew_mult = float(rates.crew_ratio) * np.exp(
+        rates.beta_repeat * terms.crew_repeat[v],
+    )
+    rate = np.where(
+        terms.is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
+    ) * np.where(
+        terms.visit_idx[v][None, :] > 0,
+        terms.lambda_visit[np.clip(terms.visit_idx[v] - 1, 0, None)][None, :],
+        0.0,
+    )
+
+    # Everything but the renewal term is a function of the epoch alone, so
+    # only the secondary lag sum has to stay in a python loop.
+    primary = (
+        susc * np.einsum("gtp,gp->gt", ashore, rate)
+        + float(terms.lambda_aboard[s]) * aboard
+        + _voyage_import_injections(data, v, horizon, susc, terms)
+    )
+    primary_total = primary.sum(axis=0)
+    incidence = primary.copy()
+    total = np.zeros(horizon, dtype=float)
+    for t in range(horizon):
+        lags = min(t, terms.w_gen.size)
+        secondary = 0.0
+        if lags:
+            secondary = float(terms.r_onboard[s]) * float(
+                terms.w_gen[:lags] @ total[t - lags : t][::-1],
+            )
+        if secondary:
+            incidence[:, t] += secondary * share
+        total[t] = primary_total[t] + secondary
+
+    mu = np.zeros_like(incidence)
+    for g in range(len(GROUPS)):
+        mu[g] = np.convolve(incidence[g], terms.f_inc)[:horizon]
+    return incidence, mu
 
 
 def expected_onsets_fleet(

@@ -180,6 +180,9 @@ data/
 │   ├── mega_cruise_5000/
 │   ├── messy_cruise_500/        (legacy archived berthing model)
 │   ├── san_antonio_class_lpd/
+│   ├── gordon_gunter_r338/         (maritime.org GA import)
+│   ├── castle_class_corvette/      (maritime.org GA import)
+│   ├── raven_am55/                 (maritime.org GA import)
 │   ├── enterprise_constitution_tos/
 │   └── enterprise_galaxy_tng/
 │   (plus committed architectural deck plates — class_photo_catalog.json,
@@ -539,7 +542,7 @@ grumb_seeding:
 
 ## Platforms
 
-Twelve ship platforms are included, each with spatial layout and HVAC
+Fifteen ship platforms are included, each with spatial layout and HVAC
 airflow definitions:
 
 | Platform | Description |
@@ -556,6 +559,9 @@ airflow definitions:
 | `mega_cruise_5000` | 5000-passenger mega cruise ship (default; Oasis-class; 129 zones, cabin-corridor berthing + cabin-mate pairing — see `docs/PLATFORM_CABIN_REVISION.md`, `docs/SHEDDING_AND_CABINMATES.md`) |
 | `messy_cruise_500` | **Legacy** archived berthing model (67 zones): 27 passenger blocks of ~200 pax each modeled as well-mixed spaces, which frustrated quarantine/confinement simulation |
 | `san_antonio_class_lpd` | USN San Antonio-class LPD |
+| `gordon_gunter_r338` | NOAA Gordon Gunter T-AGOS research vessel (maritime.org R-338 import, 35 zones, 20 crew + 15 scientists) |
+| `castle_class_corvette` | HMS Castle-class WWII corvette (maritime.org GA import, 19 zones, 99 crew) |
+| `raven_am55` | USS Raven-class AM-55 fleet minesweeper (maritime.org GA import, 21 zones, 105 crew) |
 
 Fiction-adapted Star Trek scenario bundles (platform paths, agent classes,
 pathogen profiles) live under `data/templates/enterprise_constitution_tos.json`
