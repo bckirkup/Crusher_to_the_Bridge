@@ -794,7 +794,7 @@ def _imported_by_source(data: Mapping[str, Any], rates: FleetRates) -> np.ndarra
     """Cases attributed to each provisioning source — servings x per-serving hazard."""
     n_sources = int(data.get("NS", 0))
     imported = np.zeros(n_sources, dtype=float)
-    if not rates.kappa:
+    if len(rates.kappa) == 0:
         return imported
     kappa = np.asarray(list(rates.kappa), dtype=float)
     susc = np.asarray(list(rates.susceptibility), dtype=float)
@@ -810,7 +810,7 @@ def _imported_by_market(data: Mapping[str, Any], rates: FleetRates) -> np.ndarra
     """Cases attributed to each embarkation market — boarded persons x prevalence."""
     n_markets = int(data.get("NM", 0))
     imported = np.zeros(n_markets, dtype=float)
-    if not rates.epsilon:
+    if len(rates.epsilon) == 0:
         return imported
     epsilon = np.asarray(list(rates.epsilon), dtype=float)
     susc = np.asarray(list(rates.susceptibility), dtype=float)
