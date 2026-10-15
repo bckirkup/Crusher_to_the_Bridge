@@ -4635,6 +4635,36 @@ admissibility (D1–D4 read mint-vs-`ind` per hull), integrity gates
 `campaigns/noro/mint_rate_01/`; entry
 `docs/ledger/NORO-MINT-RATE-01.md`.
 
+**`PROVISIONED-SOURCE-01` (declared — mechanism + eval designs
+frozen, no cells submitted):** the supply-side replacement for the
+fiat mint gate MINT-RATE-01 brackets — provisioned_lot mints become a
+derived draw, objects-per-voyage = Binomial(N_lots, q_source) with
+N_lots the served-venue × item-line station census (21/35/63/70 on
+exp/cls/spr/mega — derived from the platform venue tree, not
+configured) and q_source a hull-invariant upstream contamination
+prevalence resolved through the `provisioned_source` block's
+`source_id` port covariate. Ships default-ON; `lot_mint_model:
+"fiat"` is the labelled bit-identical baseline. The headline test is
+the hull-free-q claim: station-N scales like the measured
+required-object scale, so one q (~3e-4, frozen prediction
++0.59/+0.61/+0.68 pp) puts all three small hulls in-band — the fiat
+p*(hull) ladder as `p* ≈ N·q`. Mega joins the hull set: ~0.02
+objects/voyage at common q (near-absent); its own window
+extrapolates to q ≈ [1.5e-3, 4.1e-3] with the multi-lot lift as the
+second headline. Arm set: scalar rungs `q01`–`q30` (1e-4–3e-3) +
+`ps_ship` + `off`/`ind` + `ship`/`mint` fiat bridges (small hulls);
+3×12 + mega×10 arms × 1,000 seeds = 46,000 cells + ~128 canary.
+Contaminated-station sets nest by q per seed (scalar zero-draw
+rungs); E[objects] = N·q declared per hull; new witnesses spec'd —
+voyage `provisioned_source` block, `provisioned_source_id` on object
+rows, `reported_cases_by_dominant_route` (the HULL-SCALE-01 named
+gap). Frozen contract `docs/provisioned_source_01_design.md`; frozen
+eval `docs/norovirus/noro_provisioned_source_01_sweep_design.md`;
+package `campaigns/noro/provisioned_source_01/` (+ `_mega` memory
+split); entry `docs/ledger/PROVISIONED-SOURCE-01.md`. Does not
+submit until the implementation leg lands the mechanism + witnesses
+and the image pins a SHA containing them.
+
 ## 5. Held fixed by assumption
 
 Live Grade C liabilities. Any of these could move the reported rate; the system
