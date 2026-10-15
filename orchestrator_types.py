@@ -128,6 +128,12 @@ class SimulationState:
     infection_route_ledger_by_agent: dict[int, dict[str, float]] = field(
         default_factory=dict,
     )
+    # agent_id -> supply-chain-sourced dose at establishment (subset of
+    # the route ledger's mass, recorded alongside it); drives the
+    # supply_chain vs aboard split of reported_cases_by_channel.
+    infection_supply_dose_by_agent: dict[int, float] = field(
+        default_factory=dict,
+    )
     infection_dose_share_by_route: dict[str, float] = field(default_factory=dict)
     # Cumulative sanitary-mechanism counters copied from
     # TransmissionCore.sanitary_telemetry each epoch (all zeros when

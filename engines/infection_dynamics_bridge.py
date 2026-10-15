@@ -830,7 +830,7 @@ class KorkinAgent:
         "secretor_negative_by_pathogen",
         "dose_response_susceptibility",
         "frailty_multiplier", "cumulative_exposure",
-        "cumulative_exposure_by_route",
+        "cumulative_exposure_by_route", "cumulative_supply_exposure",
         "hand_load_by_pathogen", "hand_inactivation_rate_by_pathogen",
         "hand_carriage_propensity_by_pathogen",
         "hand_practice_by_pathogen", "hand_wet_transfer_by_pathogen",
@@ -958,6 +958,10 @@ class KorkinAgent:
         self.cumulative_exposure: dict[str, float] = {}
         # Effective dose accumulated by route during the current challenge.
         self.cumulative_exposure_by_route: dict[str, dict[str, float]] = {}
+        # Effective dose credited by supply-chain common-source pans
+        # during the current challenge (a subset of cumulative_exposure;
+        # feeds the "supply_chain" channel of reported_cases_by_channel).
+        self.cumulative_supply_exposure: dict[str, float] = {}
         # Copies carried on each hand, keyed by pathogen.
         self.hand_load_by_pathogen: dict[str, float] = {}
         # Per-host/pathogen hand inactivation draws, sampled lazily.

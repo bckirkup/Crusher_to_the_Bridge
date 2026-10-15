@@ -96,6 +96,27 @@ class TestRouteAttribution:
         }
         assert ledgers[9] == {"food_contamination": 2.0}
 
+    def test_supply_doses_snapshot_per_agent_for_the_channel_block(self) -> None:
+        supply: dict[int, float] = {}
+        update_route_attribution(
+            [
+                SimpleNamespace(
+                    acquired_particles_by_route={"common_source_food": 2.0},
+                    pathway=None,
+                    target_agent_id=7,
+                    acquired_supply_chain_dose=2.0,
+                ),
+                SimpleNamespace(
+                    acquired_particles_by_route={"fomite": 1.0},
+                    pathway=None,
+                    target_agent_id=9,
+                    acquired_supply_chain_dose=0.0,
+                ),
+            ],
+            {}, {}, {}, supply,
+        )
+        assert supply == {7: 2.0, 9: 0.0}
+
     def test_short_run_summary_contains_attribution_without_moving_metrics(
         self,
         monkeypatch: pytest.MonkeyPatch,
@@ -138,7 +159,7 @@ class TestRouteAttribution:
         monkeypatch.setattr(
             ship_simulation_module,
             "update_route_attribution",
-            lambda events, dominant, shares, agent_ledgers=None: None,
+            lambda events, dominant, shares, agent_ledgers=None, agent_supply_doses=None: None,
         )
         second = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         first_summary = first.history[-1]["summary"]
@@ -152,6 +173,19 @@ class TestRouteAttribution:
             assert sum(block[group].values()) == first_summary[
                 f"cumulative_reported_cases_{group}"
             ], f"{group} route split must sum to its reported count"
+        channel = first_summary["reported_cases_by_channel"]
+        for group in ("passenger", "crew"):
+            assert set(channel[group]) == {
+                "boarding_import", "supply_chain", "aboard",
+            }
+            assert sum(channel[group].values()) == first_summary[
+                f"cumulative_reported_cases_{group}"
+            ], f"{group} channel split must sum to its reported count"
+        second_channel = second_summary["reported_cases_by_channel"]
+        for group in ("passenger", "crew"):
+            assert sum(second_channel[group].values()) == first_summary[
+                f"cumulative_reported_cases_{group}"
+            ]
         assert first_summary["infections_by_dominant_route"], (
             "fixture should establish at least one transmission event"
         )

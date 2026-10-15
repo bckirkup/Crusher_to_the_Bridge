@@ -356,18 +356,20 @@ def test_record_transmission_event_dominant_and_breakdown_filter() -> None:
     agent = _sanitary_agent(7, "TheaterLng")
     pw = {"noro:fomite": 0.2, "noro:droplet": 0.7, "flu:droplet": 5.0}
     TransmissionCore._record_transmission_event(
-        3, agent, "noro", 0.9, False, "", None, {"droplet": 0.9}, pw, matrix, events,
+        3, agent, "noro", 0.9, False, "", None, {"droplet": 0.9}, 0.4, pw,
+        matrix, events,
     )
     assert len(events) == 1
     assert len(matrix.transmission_events) == 1
     assert events[0].pathway == "flu:droplet"
     assert events[0].source_strain_id is None
+    assert events[0].acquired_supply_chain_dose == pytest.approx(0.4)
     rec = matrix.transmission_events[0]
     assert set(rec["pathway_breakdown"]) == {"noro:fomite", "noro:droplet"}
     assert rec["total_dose"] == pytest.approx(0.9)
 
     TransmissionCore._record_transmission_event(
-        3, agent, "noro", 0.1, True, "s1", 2, {}, {}, matrix, events,
+        3, agent, "noro", 0.1, True, "s1", 2, {}, 0.0, {}, matrix, events,
     )
     assert events[1].pathway == "unknown"
     assert events[1].source_strain_id == "s1"

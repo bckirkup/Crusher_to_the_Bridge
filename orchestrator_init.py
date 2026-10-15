@@ -1020,18 +1020,25 @@ def update_route_attribution(
     dominant_counts: dict[str, int],
     dose_shares: dict[str, float],
     agent_ledgers: dict[int, dict[str, float]] | None = None,
+    agent_supply_doses: dict[int, float] | None = None,
 ) -> None:
     """Accumulate established-infection route attribution in place.
 
     ``agent_ledgers`` additionally records each target's acquired route
     doses at establishment — the per-agent view
     ``reported_cases_by_dominant_route`` buckets by (an agent absent
-    from it had no establishing event: imported).
+    from it had no establishing event: imported). ``agent_supply_doses``
+    records each target's supply-chain-sourced dose the same way —
+    ``reported_cases_by_channel``'s supply_chain bucket reads it.
     """
     for event in events:
         ledger = event.acquired_particles_by_route or {}
         total = sum(ledger.values())
         agent_id = getattr(event, "target_agent_id", None)
+        if agent_supply_doses is not None and agent_id is not None:
+            agent_supply_doses[int(agent_id)] = float(
+                getattr(event, "acquired_supply_chain_dose", 0.0),
+            )
         if agent_ledgers is not None and agent_id is not None:
             agent_ledger = agent_ledgers.setdefault(int(agent_id), {})
         else:
