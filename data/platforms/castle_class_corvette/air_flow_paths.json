@@ -1,0 +1,146 @@
+{
+  "platform": "castle_class_corvette",
+  "description": "HVAC network synthesized for castle_class_corvette",
+  "oa_fraction": 0.3,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Accom",
+      "rooms": [
+        "Galley",
+        "Foc_Cabins",
+        "Officer_Cabins",
+        "HD_Foc",
+        "HD_Upper",
+        "Mess_Mid",
+        "Seamen_Mess",
+        "Sick_Bay",
+        "Stokers_Mess",
+        "Upper_Deck_Aft",
+        "Compass_Bridge",
+        "Bridge_House"
+      ],
+      "ach": 5.0,
+      "description": "minimal mechanical ventilation, mostly natural"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Boiler_Rm",
+        "Engine_Rm",
+        "Shaft_Stores",
+        "Steering_Gear",
+        "Fwd_Magazines"
+      ],
+      "ach": 10.0,
+      "description": "engine/boiler room ventilation"
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Accom",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Compass_Bridge",
+      "to": "Bridge_House",
+      "type": "ladder"
+    },
+    {
+      "from": "Bridge_House",
+      "to": "Officer_Cabins",
+      "type": "ladder"
+    },
+    {
+      "from": "Officer_Cabins",
+      "to": "Seamen_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Quarterdeck",
+      "to": "Upper_Deck_Aft",
+      "type": "door"
+    },
+    {
+      "from": "Upper_Deck_Aft",
+      "to": "Mess_Mid",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Mid",
+      "to": "Sick_Bay",
+      "type": "passageway"
+    },
+    {
+      "from": "Seamen_Mess",
+      "to": "Stokers_Mess",
+      "type": "ladder"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Engine_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Shaft_Stores",
+      "to": "Boiler_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Foc_Deck_Open",
+      "to": "Quarterdeck",
+      "type": "deck_walkway"
+    },
+    {
+      "from": "Galley",
+      "to": "Foc_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Quarterdeck",
+      "type": "passageway"
+    },
+    {
+      "from": "Foc_Cabins",
+      "to": "Officer_Cabins",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_Cabins",
+      "to": "Foc_Deck_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Foc",
+      "to": "Foc_Deck_Open",
+      "type": "passageway"
+    },
+    {
+      "from": "Mess_Mid",
+      "to": "Seamen_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Shaft_Stores",
+      "type": "passageway"
+    },
+    {
+      "from": "Boiler_Rm",
+      "to": "Engine_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Stokers_Mess",
+      "to": "Fwd_Magazines",
+      "type": "passageway"
+    }
+  ]
+}

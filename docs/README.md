@@ -144,6 +144,7 @@ python3 presidio_runner.py \
 | [CONTAM_INTEROP.md](CONTAM_INTEROP.md) | Living — Path A ContamX interop, SIM reader, compare tools |
 | [CONTAM_PRJ_AUDIT.md](CONTAM_PRJ_AUDIT.md) | Living audit — fiction PRJ realism |
 | [SHIP_BLUEPRINT_IMPORT.md](SHIP_BLUEPRINT_IMPORT.md) | Implemented (`tools/ship_blueprint_import/`) |
+| [GA_IMPORT_APPROACH.md](GA_IMPORT_APPROACH.md) | Proposal + first proof — agent-driven GA digest; R-338 + Castle corvette imported with crew manifests |
 
 ## Campaign analysis & calibration tooling
 

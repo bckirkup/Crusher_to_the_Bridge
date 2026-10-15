@@ -1,0 +1,310 @@
+{
+  "platform": "gordon_gunter_r338",
+  "description": "HVAC network synthesized for gordon_gunter_r338",
+  "oa_fraction": 0.2,
+  "hvac_duty": 0.5,
+  "hvac_zones": [
+    {
+      "id": "HVAC_Hotel",
+      "rooms": [
+        "Officer_SR",
+        "Scientist_SR",
+        "Crew_SR_Foc",
+        "Crew_SR_Main",
+        "HD_Bridge",
+        "HD_Upper",
+        "HD_Focsle",
+        "HD_Main",
+        "Crew_Lounge",
+        "Recreation",
+        "Ships_Store",
+        "Ships_Office",
+        "Exercise_Rm",
+        "Laundry",
+        "Med_Trtmt",
+        "Passage_Main"
+      ],
+      "ach": 6.0,
+      "description": "accommodation AHU"
+    },
+    {
+      "id": "HVAC_Mess_Galley",
+      "rooms": [
+        "Genl_Mess",
+        "Galley",
+        "Prov_Reefers"
+      ],
+      "ach": 8.0,
+      "description": "galley/mess AHU"
+    },
+    {
+      "id": "HVAC_Labs",
+      "rooms": [
+        "Science_Labs",
+        "Wet_Lab"
+      ],
+      "ach": 8.0,
+      "description": "lab AHU"
+    },
+    {
+      "id": "VENT_Machinery",
+      "rooms": [
+        "Steering_Gear",
+        "Shaft_Alley",
+        "Prpln_Motor",
+        "Main_Gen_Rm",
+        "AC_Mchry",
+        "Sewage_Mchry",
+        "Genl_Workshop",
+        "Bosn_Workshop",
+        "Emer_Gen_Rm",
+        "Pilot_House"
+      ],
+      "ach": 10.0,
+      "description": "machinery ventilation (trunked supply/natural exhaust)"
+    }
+  ],
+  "cross_zone_links": [
+    {
+      "from": "HVAC_Hotel",
+      "to": "HVAC_Mess_Galley",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_1",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Mess_Galley",
+      "to": "HVAC_Labs",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_2",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    },
+    {
+      "from": "HVAC_Labs",
+      "to": "VENT_Machinery",
+      "flow_rate_m3h": 50.0,
+      "path": "ladder_well_3",
+      "is_hvac_ducted": false,
+      "description": "Auto ladder-well coupling between adjacent AHU branches"
+    }
+  ],
+  "adjacency": [
+    {
+      "from": "Pilot_House",
+      "to": "Officer_SR",
+      "type": "ladder"
+    },
+    {
+      "from": "Officer_SR",
+      "to": "Scientist_SR",
+      "type": "ladder"
+    },
+    {
+      "from": "Officer_SR",
+      "to": "Boat_Deck",
+      "type": "door"
+    },
+    {
+      "from": "Scientist_SR",
+      "to": "Passage_Main",
+      "type": "ladder"
+    },
+    {
+      "from": "Scientist_SR",
+      "to": "Science_Labs",
+      "type": "passageway"
+    },
+    {
+      "from": "Science_Labs",
+      "to": "Shelter_Deck",
+      "type": "door"
+    },
+    {
+      "from": "Shelter_Deck",
+      "to": "Boat_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Shelter_Deck",
+      "to": "Mission_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Mission_Deck",
+      "to": "Aft_Working_Deck",
+      "type": "ladder"
+    },
+    {
+      "from": "Aft_Working_Deck",
+      "to": "Bosn_Workshop",
+      "type": "door"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Main_Gen_Rm",
+      "type": "ladder"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Recreation",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Prov_Reefers",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Prov_Reefers",
+      "type": "passageway"
+    },
+    {
+      "from": "Med_Trtmt",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "Emer_Gen_Rm",
+      "to": "Scientist_SR",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_SR",
+      "to": "HD_Upper",
+      "type": "passageway"
+    },
+    {
+      "from": "Officer_SR",
+      "to": "Ships_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "HD_Upper",
+      "to": "Ships_Office",
+      "type": "passageway"
+    },
+    {
+      "from": "Science_Labs",
+      "to": "Wet_Lab",
+      "type": "passageway"
+    },
+    {
+      "from": "Scientist_SR",
+      "to": "Crew_SR_Foc",
+      "type": "passageway"
+    },
+    {
+      "from": "Scientist_SR",
+      "to": "HD_Focsle",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_SR_Foc",
+      "to": "Emer_Gen_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_SR_Main",
+      "to": "Passage_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Crew_SR_Main",
+      "to": "HD_Main",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Genl_Mess",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Ships_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Genl_Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "Passage_Main",
+      "to": "Bosn_Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "Genl_Mess",
+      "to": "Galley",
+      "type": "passageway"
+    },
+    {
+      "from": "Galley",
+      "to": "Crew_Lounge",
+      "type": "passageway"
+    },
+    {
+      "from": "Recreation",
+      "to": "Ships_Store",
+      "type": "passageway"
+    },
+    {
+      "from": "Ships_Store",
+      "to": "Prov_Reefers",
+      "type": "passageway"
+    },
+    {
+      "from": "Genl_Workshop",
+      "to": "Bosn_Workshop",
+      "type": "passageway"
+    },
+    {
+      "from": "Steering_Gear",
+      "to": "Shaft_Alley",
+      "type": "passageway"
+    },
+    {
+      "from": "Shaft_Alley",
+      "to": "Prpln_Motor",
+      "type": "passageway"
+    },
+    {
+      "from": "Prpln_Motor",
+      "to": "Main_Gen_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Gen_Rm",
+      "to": "AC_Mchry",
+      "type": "passageway"
+    },
+    {
+      "from": "Main_Gen_Rm",
+      "to": "Laundry",
+      "type": "passageway"
+    },
+    {
+      "from": "AC_Mchry",
+      "to": "Exercise_Rm",
+      "type": "passageway"
+    },
+    {
+      "from": "Laundry",
+      "to": "Sewage_Mchry",
+      "type": "passageway"
+    }
+  ]
+}

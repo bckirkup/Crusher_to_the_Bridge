@@ -101,6 +101,30 @@ engineers author real ducts from HVAC drawings — those details are not on GAs.
 - Contam starter is **PRJ-primary Path A ready**, not as-built HVAC.
 - Agent skill: `.agents/skills/importing-naval-blueprint/SKILL.md`.
 
+## Digest fields for real GA sheets (2026-10 additions)
+
+- `decks[].plan_bbox_norm` — normalized `[x0,y0,x1,y1]` box of the drawn
+  deck-plan view inside a sheet. Real GA sheets carry title blocks, margins,
+  and stacked views (R-338 sheet 9 draws Mission Platform above Main Deck;
+  the Castle-class sheet packs five deck views on one page). With
+  `hull_x_span_m` / `hull_y_span_m` (which metres of hull that box covers,
+  stern datum at x=0) each zone is mapped through *its own deck's* box, so
+  several decks may share one sheet. Omit all three to keep the legacy
+  whole-page = whole-hull mapping.
+- `zones[].type` now admits `Sanitary` (matching `spatial_layout.schema.json`)
+  and `zones[].serves` lists the zones a head block provisions — the
+  `HD_*` pattern used by the other naval platforms.
+- `complement` — proposed `{passengers, crew}` written into
+  `spatial_layout.json` as `nominal_complement`, plus a class-level manifest
+  (`class_id`, `role_group`, `count`, `berth_zone`, `duty_zone`) emitted as
+  `crew_manifest.json` with a declared-vs-listed consistency check. This is
+  how a sheet's "20 officers/crew + 15 scientists" becomes a proposed crew
+  manifest for the `agent_classes` machinery.
+- Agent-authored digests: an agent can read rasterized sheets directly and
+  write `ship_digest.json` + `page_NN_approved.svg` programmatically (the
+  GIMP loop stays available for engineer refinement). Worked imports and the
+  roadmap live in `GA_IMPORT_APPROACH.md`.
+
 ## PDF raster extras
 
 ```bash

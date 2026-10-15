@@ -1,0 +1,59 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-15T22:23:56.616928+00:00",
+  "platform": "castle_class_corvette",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 0,
+    "crew": 99
+  },
+  "manifest": [
+    {
+      "class_id": "officers",
+      "role_group": "crew",
+      "count": 5,
+      "berth_zone": "Officer_Cabins",
+      "duty_zone": "Compass_Bridge",
+      "notes": "CO + sub-lieutenants + engineer officer"
+    },
+    {
+      "class_id": "senior_rates",
+      "role_group": "crew",
+      "count": 14,
+      "berth_zone": "Foc_Cabins",
+      "duty_zone": "Bridge_House",
+      "notes": "CPO/PO incl. asdic, W/T, gunnery rates"
+    },
+    {
+      "class_id": "stokers",
+      "role_group": "crew",
+      "count": 18,
+      "berth_zone": "Stokers_Mess",
+      "duty_zone": "Engine_Rm",
+      "notes": "engine-room branch"
+    },
+    {
+      "class_id": "seamen",
+      "role_group": "crew",
+      "count": 56,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Foc_Deck_Open",
+      "notes": "deck division, ASW ops"
+    },
+    {
+      "class_id": "cooks_stewards",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Seamen_Mess",
+      "duty_zone": "Galley",
+      "notes": "pay/cook/steward branch"
+    }
+  ],
+  "source": "Castle-class corvette typical complement ~99 (5 officers + senior rates + stokers + seamen); class split proposed from mess deck labels",
+  "consistency": {
+    "declared_total": 99,
+    "manifest_total": 99,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

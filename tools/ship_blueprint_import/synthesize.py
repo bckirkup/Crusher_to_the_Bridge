@@ -81,14 +81,23 @@ def discover_approved_overlays(overlays_dir: str) -> list[tuple[int, str]]:
     return approved if approved else drafts
 
 
-def _meters_per_pixel(
+def _plan_maps(
     digest: ShipDigest,
-    page_meta: dict[str, Any],
-) -> tuple[float, float]:
-    """Map image width→length_m, height→beam_m (plan-view assumption)."""
-    w = max(int(page_meta["width"]), 1)
-    h = max(int(page_meta["height"]), 1)
-    return digest.length_m / w, digest.beam_m / h
+) -> dict[str, tuple[int, list[float], list[float], list[float]]]:
+    """deck id → (page, plan_bbox_norm, hull_x_span_m, hull_y_span_m).
+
+    DeckInfo.plan_bbox_norm marks the drawn deck-plan region inside a sheet
+    (pages carry title blocks/margins and can stack several deck views);
+    hull spans say which metres of hull that region covers. Absent fields
+    mean "the whole page is the whole hull" — the legacy mapping.
+    """
+    out: dict[str, tuple[int, list[float], list[float], list[float]]] = {}
+    for deck in digest.decks:
+        bbox = deck.plan_bbox_norm or [0.0, 0.0, 1.0, 1.0]
+        x_span = deck.hull_x_span_m or [0.0, digest.length_m]
+        y_span = deck.hull_y_span_m or [0.0, digest.beam_m]
+        out[deck.id] = (int(deck.page), bbox, x_span, y_span)
+    return out
 
 
 def _zone_geometry(
@@ -96,8 +105,30 @@ def _zone_geometry(
     zone_meta: ZoneDigest | None,
     digest: ShipDigest,
     page_meta: dict[str, Any],
+    plan_map: tuple[list[float], list[float], list[float]] | None,
 ) -> dict[str, Any]:
-    mx, my = _meters_per_pixel(digest, page_meta)
+    w = max(int(page_meta["width"]), 1)
+    h = max(int(page_meta["height"]), 1)
+    if plan_map is None:
+        # Fall back to the map of the first deck drawn on this page, else the
+        # full page (legacy behaviour).
+        bbox, x_span, y_span = (
+            [0.0, 0.0, 1.0, 1.0],
+            [0.0, digest.length_m],
+            [0.0, digest.beam_m],
+        )
+        for deck in digest.decks:
+            if int(deck.page) == poly.page:
+                bbox = deck.plan_bbox_norm or bbox
+                x_span = deck.hull_x_span_m or x_span
+                y_span = deck.hull_y_span_m or y_span
+                break
+    else:
+        _page, bbox, x_span, y_span = plan_map
+    bw = max((bbox[2] - bbox[0]) * w, 1e-6)
+    bh = max((bbox[3] - bbox[1]) * h, 1e-6)
+    mx = max(x_span[1] - x_span[0], 1e-6) / bw
+    my = max(y_span[1] - y_span[0], 1e-6) / bh
     area_m2 = abs(poly.area_px()) * mx * my
     ceiling = digest.ceiling_height_m
     if zone_meta and zone_meta.volume_m3_est and zone_meta.volume_m3_est > 0:
@@ -110,8 +141,10 @@ def _zone_geometry(
     volume = max(volume, 1.0)
     area_m2 = max(area_m2, volume / max(ceiling, 1e-6))
     cx, cy = poly.centroid()
-    display_x = (cx / max(int(page_meta["width"]), 1)) * digest.length_m
-    display_y = (cy / max(int(page_meta["height"]), 1)) * digest.beam_m
+    rel_x = (cx - bbox[0] * w) / bw
+    rel_y = (cy - bbox[1] * h) / bh
+    display_x = x_span[0] + rel_x * (x_span[1] - x_span[0])
+    display_y = y_span[0] + rel_y * (y_span[1] - y_span[0])
     return {
         "floor_area_m2": round(area_m2, 2),
         "ceiling_height_m": ceiling,
@@ -327,15 +360,18 @@ def _zone_entry(
     pages: dict[int, dict[str, Any]],
     deck_elev: dict[str, float],
     deck_order: list[str],
+    plan_maps: dict[str, tuple[int, list[float], list[float], list[float]]],
 ) -> dict[str, Any]:
     meta = zone_meta.get(poly.zone_id)
-    page_meta = pages.get(poly.page or 1) or next(iter(pages.values()))
-    geom = _zone_geometry(poly, meta, digest, page_meta)
+    page_num = poly.page or 1
+    page_meta = pages.get(page_num) or next(iter(pages.values()))
+    plan_map = plan_maps.get(meta.deck) if meta else None
+    geom = _zone_geometry(poly, meta, digest, page_meta, plan_map)
     if geom["volume_m3"] <= 0:
         raise RuntimeError(f"zone {poly.zone_id} has non-positive volume")
     ztype = meta.type if meta else "Free"
     traffic = meta.traffic if meta else "medium"
-    deck = meta.deck if meta else f"page_{poly.page or 1}"
+    deck = meta.deck if meta else f"page_{page_num}"
     if deck not in deck_order:
         deck_order.append(deck)
         deck_elev.setdefault(
@@ -357,6 +393,8 @@ def _zone_entry(
     }
     if meta and meta.max_occupancy:
         entry["max_occupancy"] = int(meta.max_occupancy)
+    if meta and meta.serves:
+        entry["serves"] = list(meta.serves)
     if meta and meta.notes:
         entry["description"] = meta.notes
     return entry
@@ -377,8 +415,11 @@ def _zones_from_polys(
             deck_elev[deck_info.id] = float(i) * float(digest.ceiling_height_m)
     deck_order: list[str] = []
 
+    plan_maps = _plan_maps(digest)
     return [
-        _zone_entry(poly, zone_meta, digest, pages, deck_elev, deck_order)
+        _zone_entry(
+            poly, zone_meta, digest, pages, deck_elev, deck_order, plan_maps
+        )
         for poly in ordered
     ]
 
@@ -479,6 +520,11 @@ def synthesize(
         "graywater_zones": graywater,
         "zones": zones_out,
     }
+    if digest.complement:
+        spatial["nominal_complement"] = {
+            "passengers": int(digest.complement.passengers),
+            "crew": int(digest.complement.crew),
+        }
 
     hvac_zones = _auto_hvac(digest, zone_ids, zone_meta)
     airflow: dict[str, Any] = {
@@ -528,11 +574,74 @@ def synthesize(
     if copy_graphics and pages:
         _copy_plan_graphics(workdir, output_dir, pages, allowed_roots)
 
+    crew_manifest_path: str | None = None
+    if digest.complement:
+        crew_manifest_path = _write_crew_manifest(
+            digest, output_dir, allowed_roots
+        )
+
     return {
         "platform_id": pid,
         "output_dir": output_dir,
         "spatial_layout": spatial_path,
         "air_flow_paths": airflow_path,
+        "crew_manifest": crew_manifest_path,
         "zone_count": len(zones_out),
         "provenance": provenance,
     }
+
+
+def _write_crew_manifest(
+    digest: ShipDigest,
+    output_dir: str,
+    allowed_roots: tuple[str, ...],
+) -> str:
+    """Emit crew_manifest.json — the proposed class-level complement."""
+    assert digest.complement is not None  # guarded by caller
+    comp = digest.complement
+    zone_ids = {z.id for z in digest.zones}
+    manifest_rows = []
+    for row in comp.manifest:
+        notes = list(filter(None, [row.notes]))
+        if row.berth_zone and row.berth_zone not in zone_ids:
+            notes.append(f"berth_zone '{row.berth_zone}' not a digest zone")
+        if row.duty_zone and row.duty_zone not in zone_ids:
+            notes.append(f"duty_zone '{row.duty_zone}' not a digest zone")
+        manifest_rows.append(
+            {
+                "class_id": row.class_id,
+                "role_group": row.role_group,
+                "count": int(row.count),
+                "berth_zone": row.berth_zone,
+                "duty_zone": row.duty_zone,
+                "notes": "; ".join(notes),
+            }
+        )
+    declared = comp.passengers + comp.crew
+    listed = sum(int(r.count) for r in comp.manifest)
+    payload = {
+        "schema_version": "1.0",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "platform": digest.platform_id,
+        "description": (
+            "Proposed crew manifest from GA import — class-level complement "
+            "split with berth/duty zones. Engineers adjust before run configs "
+            "consume it; nominal_complement in spatial_layout.json is the "
+            "machine-read summary."
+        ),
+        "nominal_complement": {
+            "passengers": int(comp.passengers),
+            "crew": int(comp.crew),
+        },
+        "manifest": manifest_rows,
+        "source": comp.source,
+        "consistency": {
+            "declared_total": declared,
+            "manifest_total": listed,
+            "matches": declared == listed,
+        },
+        "generated_by": "tools.ship_blueprint_import.synthesize",
+    }
+    path = resolve_child_path(output_dir, "crew_manifest.json")
+    _write_json(path, payload, allowed_roots=allowed_roots)
+    return path
