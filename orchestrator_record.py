@@ -142,6 +142,13 @@ def _summary_counts(
     syn_result: dict[str, Any],
 ) -> dict[str, Any]:
     reported_counts = {"passenger": 0, "crew": 0}
+    # reported_cases_by_dominant_route (PROVISIONED-SOURCE-01 §3): each
+    # reported agent buckets by the dominant route of their established
+    # infection (argmax over the per-agent acquired ledger — the same
+    # rule infections_by_dominant_route applies — over all of their
+    # establishing events); an agent with no establishing event is a
+    # boarding import and buckets under "imported".
+    reported_by_route = {"passenger": {}, "crew": {}}
     ill_counts = {"passenger": 0, "crew": 0}
     infected_counts = {"passenger": 0, "crew": 0}
     group_totals = {"passenger": 0, "crew": 0}
@@ -151,6 +158,14 @@ def _summary_counts(
         group_totals[group] += 1
         if aid in state.ever_reported_ids:
             reported_counts[group] += 1
+            agent_ledger = state.infection_route_ledger_by_agent.get(aid)
+            dominant = (
+                max(agent_ledger, key=agent_ledger.get)
+                if agent_ledger
+                else "imported"
+            )
+            cell = reported_by_route[group]
+            cell[dominant] = cell.get(dominant, 0) + 1
         if aid in state.ever_ill_ids:
             ill_counts[group] += 1
         if aid in state.ever_infected_ids:
@@ -182,6 +197,10 @@ def _summary_counts(
         "cumulative_reported_cases": len(state.ever_reported_ids),
         "cumulative_reported_cases_passenger": reported_counts["passenger"],
         "cumulative_reported_cases_crew": reported_counts["crew"],
+        "reported_cases_by_dominant_route": {
+            group: dict(sorted(cell.items()))
+            for group, cell in reported_by_route.items()
+        },
         "cumulative_reported_noise_cases": len(state.ever_reported_noise_ids),
         "cumulative_ever_infected": len(state.ever_infected_ids),
         "cumulative_ever_infected_passenger": infected_counts["passenger"],

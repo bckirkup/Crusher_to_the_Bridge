@@ -121,6 +121,13 @@ class SimulationState:
     ever_reported_ids: set[int] = field(default_factory=set)
     ever_reported_noise_ids: set[int] = field(default_factory=set)
     infections_by_dominant_route: dict[str, int] = field(default_factory=dict)
+    # agent_id -> per-agent acquired route ledger at establishment
+    # (accumulated alongside infections_by_dominant_route by
+    # update_route_attribution); agents absent here had no establishing
+    # event — the "imported" bucket of reported_cases_by_dominant_route.
+    infection_route_ledger_by_agent: dict[int, dict[str, float]] = field(
+        default_factory=dict,
+    )
     infection_dose_share_by_route: dict[str, float] = field(default_factory=dict)
     # Cumulative sanitary-mechanism counters copied from
     # TransmissionCore.sanitary_telemetry each epoch (all zeros when

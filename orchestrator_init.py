@@ -1019,20 +1019,36 @@ def update_route_attribution(
     events: list[Any],
     dominant_counts: dict[str, int],
     dose_shares: dict[str, float],
+    agent_ledgers: dict[int, dict[str, float]] | None = None,
 ) -> None:
-    """Accumulate established-infection route attribution in place."""
+    """Accumulate established-infection route attribution in place.
+
+    ``agent_ledgers`` additionally records each target's acquired route
+    doses at establishment — the per-agent view
+    ``reported_cases_by_dominant_route`` buckets by (an agent absent
+    from it had no establishing event: imported).
+    """
     for event in events:
         ledger = event.acquired_particles_by_route or {}
         total = sum(ledger.values())
+        agent_id = getattr(event, "target_agent_id", None)
+        if agent_ledgers is not None and agent_id is not None:
+            agent_ledger = agent_ledgers.setdefault(int(agent_id), {})
+        else:
+            agent_ledger = None
         if total > 0.0:
             dominant = max(ledger, key=ledger.get)
             dominant_counts[dominant] = dominant_counts.get(dominant, 0) + 1
             for route, dose in ledger.items():
                 dose_shares[route] = dose_shares.get(route, 0.0) + dose / total
+                if agent_ledger is not None:
+                    agent_ledger[route] = agent_ledger.get(route, 0.0) + dose
             continue
         fallback = event.pathway or "unknown"
         dominant_counts[fallback] = dominant_counts.get(fallback, 0) + 1
         dose_shares[fallback] = dose_shares.get(fallback, 0.0) + 1.0
+        if agent_ledger is not None:
+            agent_ledger[fallback] = agent_ledger.get(fallback, 0.0) + 1.0
 
 
 def update_ever_reported_ids(

@@ -67,6 +67,35 @@ class TestRouteAttribution:
         assert dominant == {"food_contamination": 1, "unknown": 1}
         assert shares == {"food_contamination": 1.0, "unknown": 1.0}
 
+    def test_per_agent_ledgers_feed_the_reported_route_block(self) -> None:
+        ledgers: dict[int, dict[str, float]] = {}
+        update_route_attribution(
+            [
+                SimpleNamespace(
+                    acquired_particles_by_route={
+                        "fomite": 1.0, "direct_contact": 3.0,
+                    },
+                    pathway=None,
+                    target_agent_id=7,
+                ),
+                SimpleNamespace(
+                    acquired_particles_by_route={},
+                    pathway="hvac_airborne",
+                    target_agent_id=7,
+                ),
+                SimpleNamespace(
+                    acquired_particles_by_route={"food_contamination": 2.0},
+                    pathway=None,
+                    target_agent_id=9,
+                ),
+            ],
+            {}, {}, ledgers,
+        )
+        assert ledgers[7] == {
+            "fomite": 1.0, "direct_contact": 3.0, "hvac_airborne": 1.0,
+        }
+        assert ledgers[9] == {"food_contamination": 2.0}
+
     def test_short_run_summary_contains_attribution_without_moving_metrics(
         self,
         monkeypatch: pytest.MonkeyPatch,
@@ -109,7 +138,7 @@ class TestRouteAttribution:
         monkeypatch.setattr(
             ship_simulation_module,
             "update_route_attribution",
-            lambda events, dominant, shares: None,
+            lambda events, dominant, shares, agent_ledgers=None: None,
         )
         second = ShipSimulation(spec, display=False, repo_root=REPO_ROOT).run(72)
         first_summary = first.history[-1]["summary"]
@@ -117,6 +146,12 @@ class TestRouteAttribution:
 
         assert "infections_by_dominant_route" in first_summary
         assert "infection_dose_share_by_route" in first_summary
+        assert "reported_cases_by_dominant_route" in first_summary
+        block = first_summary["reported_cases_by_dominant_route"]
+        for group in ("passenger", "crew"):
+            assert sum(block[group].values()) == first_summary[
+                f"cumulative_reported_cases_{group}"
+            ], f"{group} route split must sum to its reported count"
         assert first_summary["infections_by_dominant_route"], (
             "fixture should establish at least one transmission event"
         )
