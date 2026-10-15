@@ -75,7 +75,26 @@ verbatim in every cell.
 
 ## Wave submissions
 
-(Not yet submitted.)
+User go for wave 1 with bridges read statistically (host-level
+determinism, F0). Submitted 2026-10-15 on `picard-noro-mint-rate-01:1`
+(digest `sha256:05cba8f22b…`), FIFO order — `mint` probe first:
+
+| block | cells | array job |
+|-------|------:|-----------|
+| `fl_exp_12d_scr_mint` | 1,000 | `9624d755-f6c5-4a26-b75b-ae1598874ac9` |
+| `fl_exp_12d_scr_off` | 1,000 | `e8880a23-dc31-4d1d-b190-38c5cdc6c30e` |
+| `fl_exp_12d_scr_ind` | 1,000 | `969edcdd-5c9e-4ecc-8031-8de14a62b4a7` |
+| `fl_exp_12d_scr_ship` | 1,000 | `880f3367-0fac-48c2-b994-efc1b33141dc` |
+| `fl_exp_12d_scr_p005` | 1,000 | `f084d87f-124d-4ceb-b49f-6178fa70328f` |
+| `fl_exp_12d_scr_p008` | 1,000 | `5115cca1-847e-4321-9603-c5a1b75a6897` |
+| `fl_exp_12d_scr_p012` | 1,000 | `6afc1691-4ded-4e2d-97dc-a9bdd943cae4` |
+| `fl_exp_12d_scr_p017` | 1,000 | `002cf1d6-9e56-41d9-9149-befa48855a47` |
+| `fl_exp_12d_scr_p024` | 1,000 | `f39ade53-79aa-4fef-8247-af5b1bae3132` |
+
+ETA ~2.2h at the measured exp drain (~68 cells/min @ desired 256),
+prefix `campaign/noro_mint_rate_01/fl_exp_12d_scr_*/`.
+
+Wave 2 (cls + spr, 18,000 cells) NOT submitted — user gates it.
 
 ## Findings
 
