@@ -1747,13 +1747,13 @@ _CS_SUPPLY_SOURCE_KINDS = frozenset({"independent", "provisioned_lot"})
 # ``"fiat"`` keeps the v1 Bernoulli gate + geometric tail verbatim;
 # ``"provisioned_source"`` mints each contaminated (zone, item-line)
 # station off the derived census, per upstream prevalence q_source.
-# An absent ``lot_mint_model`` resolves ``"fiat"`` — the unmarked config
-# keeps the pre-mechanism draw sequence bit-identical — while the shipped
-# config (crusher_labs/config.yaml) and the eval arms name
-# ``"provisioned_source"`` explicitly, shipping the mechanism ON for
-# shipped runs. Mint model is only meaningful under object-mode lot mints.
+# An absent ``lot_mint_model`` resolves ``"provisioned_source"`` — the
+# shipped default: the better mechanism is ON for every config that does
+# not opt out. ``"fiat"`` is the labelled baseline mode; spelling it keeps
+# the pre-mechanism draw sequence verbatim. Mint model is only meaningful
+# under object-mode lot mints.
 COMMON_SOURCE_LOT_MINT_MODELS = frozenset({"fiat", "provisioned_source"})
-COMMON_SOURCE_LOT_MINT_MODEL_ABSENT = "fiat"
+COMMON_SOURCE_LOT_MINT_MODEL_ABSENT = "provisioned_source"
 
 _PROVISIONING_SOURCES_REGISTRY_PATH = os.path.join(
     REPO_ROOT, "data", "config", "provisioning_sources.json")
@@ -3417,22 +3417,21 @@ class TransmissionCore:
             else "object"
         )
         # PROVISIONED-SOURCE-01 (contract §1.1): the lot mint model.
-        # ``"fiat"`` is the absent/spelled-out-baseline resolution —
-        # it reproduces the v1 Bernoulli-gate + geometric-tail grammar
-        # verbatim, so every config that does not name the key keeps
-        # the pre-mechanism draw sequence bit-identical.
-        # ``"provisioned_source"`` — what the shipped config and the
-        # eval arms spell — is the better physics: every (zone,
-        # item-line) station in the derived census mints its lot iff a
-        # per-station Bernoulli lands under the drawn upstream
-        # prevalence q_source. Only meaningful under object-mode lot
-        # mints; ``lot_mode: "independent"`` ignores it.
+        # Absent resolves ``"provisioned_source"`` — the mechanism
+        # ships ON for every config that does not opt out. ``"fiat"``
+        # is the labelled baseline: spelling it reproduces the v1
+        # Bernoulli-gate + geometric-tail grammar verbatim. Under
+        # ``"provisioned_source"`` every (zone, item-line) station in
+        # the derived census mints its lot iff a per-station Bernoulli
+        # lands under the drawn upstream prevalence q_source. Only
+        # meaningful under object-mode lot mints;
+        # ``lot_mode: "independent"`` ignores it.
         self._cs_lot_mint_model = (
-            "provisioned_source"
+            "fiat"
             if str(
                 cs.get("lot_mint_model", COMMON_SOURCE_LOT_MINT_MODEL_ABSENT),
-            ).strip().lower() == "provisioned_source"
-            else "fiat"
+            ).strip().lower() == "fiat"
+            else "provisioned_source"
         )
         # The provisioning-source covariate (contract §1.3):
         # ``provisioned_source`` is a platform-level block naming the

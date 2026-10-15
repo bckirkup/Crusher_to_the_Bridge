@@ -59,12 +59,15 @@ one census; this contract changes only the provisioned_lot mint.
 
 - `lot_mint_model` — `"provisioned_source"` is the shipped **default
   once the mechanism lands** (standing rule: the better mechanism
-  ships default-ON); `"fiat"` is the labelled baseline mode and draws
-  the shipped `lot_object_probability` + `extra_lot_probability`
-  sequence verbatim — bit-identical to pre-mechanism main and to every
-  landed object-arm cell (`ship`/`mint`/rung arms of SHAPES-01 and
-  MINT-RATE-01). Only meaningful under `lot_mode: "object"`; the
-  `"independent"` and `"off"` modes ignore it.
+  ships default-ON) — an absent key resolves it, so every unmarked
+  config takes the census grammar. `"fiat"` is the labelled baseline
+  mode: spelling it draws the shipped `lot_object_probability` +
+  `extra_lot_probability` sequence verbatim — bit-identical to
+  pre-mechanism main and to every landed object-arm cell
+  (`ship`/`mint`/rung arms of SHAPES-01 and MINT-RATE-01, which are
+  pinned `"fiat"` in their manifests and build files). Only meaningful
+  under `lot_mode: "object"`; the `"independent"` and `"off"` modes
+  ignore it.
 - `q_source` — upstream contamination prevalence at the provisioning
   source, drawn once per voyage on the common-source stream at the
   lot-rate draw position (scalar or `[lo, hi]` spec, same grammar as

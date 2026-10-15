@@ -18,13 +18,17 @@ What landed:
 
 - `transmission.common_source.lot_mint_model` —
   `"provisioned_source"` (per-station Bernoulli census mint) |
-  `"fiat"` (labelled baseline). Absent resolves `"fiat"` — every
-  unmarked config and frozen manifest keeps the pre-mechanism draw
-  sequence bit-identical. The shipped config
-  (`crusher_labs/config.yaml`) arms `"provisioned_source"`, so the
-  mechanism ships ON for shipped runs — the standing default-ON rule
-  realized at the config layer, the same explicit-key pattern the
-  eval arms use.
+  `"fiat"` (labelled baseline). **Absent resolves
+  `"provisioned_source"`** — the shipped default per contract §1.1
+  and the standing default-ON rule: every unmarked config takes the
+  census grammar. `"fiat"` spelled out keeps the pre-mechanism draw
+  sequence bit-identical; the measured object-arm cells are pinned
+  `"fiat"` in the frozen manifests
+  (`noro_{mint_rate_01,food_score_01,food_shapes_01,entrain_01}`,
+  `mega_smoke_manifest`), their `design/build.py` `_OBJECT_MODES`,
+  and `tools/noro_diag/food_shapes_01_report.py`. The shipped config
+  (`crusher_labs/config.yaml`) spells `"provisioned_source"` — the
+  same explicit-key pattern the eval arms use.
 - `transmission.common_source.provisioned_source.{source_id,
   q_source}` — the platform-level covariate block. `source_id`
   resolves through the new registry
@@ -56,8 +60,9 @@ What landed:
   ordered grammar, warning when `provisioned_source` is armed on a
   platform with no Dining zones (census resolves N_lots = 0).
 - §4 integrity gates pinned in
-  `tests/test_common_source_provisioned_source.py`: absent→fiat and
-  explicit-fiat identical objects; fiat voyage rates replay verbatim
+  `tests/test_common_source_provisioned_source.py`: absent→
+  provisioned_source and absent≡explicit-provisioned identical
+  objects; fiat voyage rates replay verbatim
   on a twin stream; `q_source` at the first lot-rate slot; nested
   contaminated sets across scalar rungs (with the exact
   station-uniform sequence replayed); Binomial(N,q) mean over 120
@@ -77,7 +82,9 @@ NORO-PROVISIONED-SOURCE-01 eval array itself.
 
 The contract/prompt wording note: §1.1 calls `"provisioned_source"`
 "the shipped default once the mechanism lands" while the leg brief
-requires the fiat sequence bit-identical when `lot_mint_model` is
-absent. Both hold under absent→`"fiat"` engine resolution +
-explicit arming in the shipped config; this file records that
-resolution so a later reader does not re-litigate it.
+asked the fiat sequence to stay bit-identical for unmarked configs.
+The first implementation resolved absent→`"fiat"` and armed the
+shipped config explicitly; the user then settled it the other way —
+absent→`"provisioned_source"`, with `"fiat"` pinned on every
+artifact whose measured cells ran the fiat grammar. This file
+records that resolution so a later reader does not re-litigate it.

@@ -71,6 +71,9 @@ BASE_AGENT_CLASSES = [
 # the scored configuration every lever arm modifies.
 _OBJECT_MODES = {
     "lot_mode": "object",
+    # The measured cells ran the fiat grammar — pin it so a rebuild
+    # reproduces them under the shipped default.
+    "lot_mint_model": "fiat",
     "handler_mode": "object",
     "diner_mode": "object",
 }

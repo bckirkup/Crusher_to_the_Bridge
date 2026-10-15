@@ -387,9 +387,9 @@ transmission:
   # replacing the per-hull fiat rate ladder. source_id names the
   # provisioning-source covariate; q_source falls back to the registry
   # entry's declared interval (an explicit scalar|[lo,hi] would win).
-  # lot_mint_model: "fiat" is the labelled bit-identical baseline — and
-  # also what an unmarked config resolves engine-side, so pre-existing
-  # run configs keep their v1 draw sequence.
+  # "provisioned_source" is also what an unmarked config resolves
+  # engine-side (the shipped default); lot_mint_model: "fiat" is the
+  # labelled baseline mode preserving the v1 draw sequence.
   common_source:
     lot_mint_model: "provisioned_source"
     provisioned_source:

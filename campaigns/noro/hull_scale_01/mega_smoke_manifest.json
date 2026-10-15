@@ -54,6 +54,7 @@
      "cabin_air_mode": "cabin_compartment",
      "common_source": {
       "lot_mode": "object",
+      "lot_mint_model": "fiat",
       "handler_mode": "object",
       "diner_mode": "object",
       "lot_object_probability": [
