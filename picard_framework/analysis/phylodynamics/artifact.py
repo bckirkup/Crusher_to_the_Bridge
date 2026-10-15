@@ -85,6 +85,12 @@ class CensusArtifact:
         meta = self.strains.get(strain_id)
         return "" if meta is None else meta.genotype
 
+    def origin_of(self, strain_id: str) -> str:
+        """Registry origin of a lineage, or ``""`` when the registry
+        forgot it — same collection caveat as ``genotype_of``."""
+        meta = self.strains.get(strain_id)
+        return "" if meta is None else meta.origin
+
 
 def _require_float(raw: Mapping[str, Any], key: str, default: float) -> float:
     value = raw.get(key, default)

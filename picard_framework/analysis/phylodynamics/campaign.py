@@ -63,6 +63,9 @@ RUN_COLUMNS = (
     "final_mean_mutations",
     "final_recombinant_fraction",
     "genotypes_emerged",
+    "genotypes_emerged_aboard",
+    "genotypes_imported_boarding",
+    "genotypes_imported_supply_chain",
     "genotypes_detected",
     "detected_fraction",
     "median_detection_lag_hours",
@@ -148,6 +151,11 @@ def run_row(
         "observed": report["arm"]["observed"],
         "pathogen_id": pathogen_id,
         "genotypes_emerged": detection["genotypes_emerged"],
+        "genotypes_emerged_aboard": detection["genotypes_emerged_aboard"],
+        "genotypes_imported_boarding": detection["genotypes_imported_boarding"],
+        "genotypes_imported_supply_chain": detection[
+            "genotypes_imported_supply_chain"
+        ],
         "genotypes_detected": detection["genotypes_detected"],
         "detected_fraction": detection["detected_fraction"],
         "median_detection_lag_hours": detection["median_detection_lag_hours"],

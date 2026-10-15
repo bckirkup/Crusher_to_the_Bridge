@@ -354,6 +354,36 @@ def test_emergence_is_the_first_hour_a_genotype_is_carried() -> None:
     assert emergence[(PATHOGEN, "GII.17")] == pytest.approx(2.0)
 
 
+def test_emergence_origin_splits_supply_chain_from_aboard_mints() -> None:
+    """A genotype that arrived on a provisioned lot must not read as an
+    aboard-minted variant (issue #1007)."""
+    census = _census(
+        [
+            _snapshot(0, {"s0": 3}),
+            _snapshot(5, {"s0": 3, "lot1": 2}),
+            _snapshot(9, {"s0": 3, "lot1": 2, "mut1": 1}),
+        ],
+        strains=[
+            _strain("s0", "GII.4"),
+            _strain("lot1", "GII.6", origin="imported:lot"),
+            _strain(
+                "mut1", "GII.4.P16",
+                generation=1, n_mutations=1, origin="transmission",
+            ),
+        ],
+    )
+    rows = detection_rows(census, None)
+    by_genotype = {row.genotype: row for row in rows}
+    assert by_genotype["GII.4"].emergence_origin == "founder"
+    assert by_genotype["GII.6"].emergence_origin == "imported:lot"
+    assert by_genotype["GII.4.P16"].emergence_origin == "transmission"
+    summary = detection_summary(rows)
+    assert summary["genotypes_emerged"] == 3
+    assert summary["genotypes_emerged_aboard"] == 1
+    assert summary["genotypes_imported_boarding"] == 1
+    assert summary["genotypes_imported_supply_chain"] == 1
+
+
 def test_a_never_typed_genotype_is_censored_not_dropped() -> None:
     """Censoring is evidence; discarding it would flatter every arm."""
     rows = detection_rows(_census(THREE_LINEAGES), _bundle())
