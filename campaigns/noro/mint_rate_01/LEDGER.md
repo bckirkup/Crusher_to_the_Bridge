@@ -132,3 +132,76 @@ Implication for readout: cross-campaign pairing must be statistical
 (distributional), not bitwise. A fix for true bit-identity would need
 CPU-independent float behaviour or a pinned instance type — an
 engineering change, not config; report to user before any wave.
+
+## Wave-1 readout (exp, 9,000 cells — all 9 arms, 0 failures)
+
+Scanned with `tools/noro_diag/food_shapes_01_scan.py` (two members per
+zip, 0 errors). Off floor 0.70% posted; `ind` reference: 93
+`common_source_food`-dominant excursions, 78.5% convert, posted-AR
+median 0.0380.
+
+### D1 ladder (posting marginal vs `off`, band +0.4–0.9 pp)
+
+| arm | posted | marginal | minted | lot obj | verdict |
+|-----|-------:|---------:|-------:|--------:|---------|
+| ship | 12 | **+0.50 — in band** | 6 | 7 | thin (<20) |
+| p005 | 16 | **+0.90 — in band, edge** | 9 | 11 | thin |
+| p008 | 18 | +1.10 over | 11 | 13 | thin |
+| p012 | 19 | +1.20 over | 13 | 15 | thin |
+| p017 | 22 | +1.50 over | 17 | 19 | thin |
+| p024 | 25 | +1.80 over | 20 | 25 | — |
+| mint | 87 | +8.00 over | 82 | 93 | over |
+| ind  | 80 | +7.30 over | 0 | 0 | over |
+
+In-band gate window on exp ≈ p ∈ [0.005, ~0.0105] (design predicted
+[0.004, 0.010]). The ladder is the margin: marginal ≈ minted count
+(posted ≈ off + minted on every rung).
+
+### Signature at rate (D2/D3/D4)
+
+| arm | postAR med | conv(exc) | vs ind | b48 exc vs rest |
+|-----|-----------:|----------:|-------:|----------------:|
+| ind | 0.0380 | 0.785 | 1.00× | 0.526 vs 0.409 |
+| ship | 0.0254 | 0.714 | 0.91× | 0.660 vs 0.409 |
+| p005 | 0.0316 | 1.000 | 1.27× | 0.784 vs 0.409 |
+| p008 | 0.0316 | 1.000 | 1.27× | 0.784 vs 0.409 |
+| p012 | 0.0316 | 0.923 | 1.18× | 0.780 vs 0.409 |
+| p017 | 0.0316 | 0.882 | 1.12× | 0.707 vs 0.409 |
+| p024 | 0.0411 | 0.900 | 1.15× | 0.716 vs 0.409 |
+| mint | 0.0411 | 0.976 | 1.24× | 0.712 vs 0.409 |
+
+Pooled in-band (ship+p005, 28 posted cells) postAR median 0.0301 <
+ind 0.0380 — **the posted-AR signature does NOT survive at in-band
+rate on exp**; conversion (≥ind on every rung bar thin-cell ship) and
+burst48 (0.66–0.78 vs 0.409 everywhere) DO survive at every rung.
+
+### Integrity
+
+- Nested mint sets perfect: p005 ⊆ p008 ⊆ p012 ⊆ p017 ⊆ p024
+  (9 ⊆ 11 ⊆ 13 ⊆ 17 ⊆ 20 seeds).
+- Minted census vs E: ship 6 (E 10.5), p005 9 (5.0), p008 11 (8.0),
+  p012 13 (12.0), p017 17 (17.0), p024 20 (24.0), mint 82 (85.0) —
+  all within binomial noise. `mint` 82 = SHAPES-01's 82: the
+  seed-paired mint draw is a discrete RNG gate, float-path
+  independent — minted SETS are bit-stable across fleet-days even
+  where trajectories are not (F0 corollary).
+- All lot-pan titres in band (oob = 0); every object single-titre
+  (`titre_n` = 1, no remint); zero zero-serve objects; `off`
+  zero-witness.
+- Same-day float path confirmed: wave `fl_exp_12d_scr_mint` s8000 vs
+  canary mint s8000 — 2 non-noise diffs, both 1-ulp accumulator dust
+  in `removal_totals`.
+
+### Bridges vs SHAPES-01 (statistical, per F0)
+
+`ind` postAR med 0.0380 = 0.0380; `mint` postAR med 0.0411 = 0.0411;
+ind excursions 93 vs 94; mint minted 82 = 82; off floor 0.70% vs
+1.0%; mint marginal +8.0 vs +7.6 — all statistically consistent.
+
+### Wave-1 verdict (exp only)
+
+D1 lands in-band between gate ≈0.005 and ≈0.0105 — the bracket is
+located. At in-band rate: conversion ≥ind and burst48 separation
+survive; the posted-AR median does not (0.030 < 0.038) — D2's
+signature needs the powered rate on exp. No §9 trigger beyond F0
+(already reported).
