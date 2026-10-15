@@ -58,7 +58,7 @@ _CENSUS_MEMBER = "growth_census.json.gz"
 def _load_done(out_path: Path) -> set[str]:
     done: set[str] = set()
     if out_path.exists():
-        with open(out_path) as f:
+        with open(out_path) as f:  # NOSONAR -- operator-specified resume path in a local diagnostic tool
             for line in f:
                 try:
                     done.add(json.loads(line)["key"])
@@ -215,7 +215,7 @@ def main() -> int:
         keys.extend(k for k in ks if k not in done)
     print(f"{len(keys)} cells to scan", flush=True)
     n = 0
-    with open(out, "a") as fh, ThreadPoolExecutor(
+    with open(out, "a") as fh, ThreadPoolExecutor(  # NOSONAR -- operator-specified output path in a local diagnostic tool
             max_workers=args.workers) as ex:
         futs = {ex.submit(_fetch, client, args.bucket, k): k for k in keys}
         for fut in as_completed(futs):
