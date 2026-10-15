@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "provisioning_sources.schema.json",
+  "title": "Provisioning Sources",
+  "description": "PROVISIONED-SOURCE-01 contract §1.3: the upstream provisioning-source covariate registry. Each named source carries a declared contaminated-lot prevalence interval q_source (per-station Bernoulli probability that a provisioned lot boards contaminated) and the platform types it provisions. Voyages under lot_mint_model \"provisioned_source\" resolve their source_id against this registry; an explicit provisioned_source.q_source in the run config outranks the registry entry, which outranks the module default.",
+  "type": "object",
+  "required": ["sources"],
+  "properties": {
+    "default_source": {
+      "type": "string",
+      "description": "Source id used when a run config's provisioned_source block names no source_id. Must resolve to a key of sources."
+    },
+    "sources": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/ProvisioningSource"
+      }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "ProvisioningSource": {
+      "type": "object",
+      "required": ["q_source"],
+      "properties": {
+        "q_source": {
+          "description": "Per-station contaminated-lot prevalence: a scalar rung or a [lo, hi] interval drawn once per voyage. Values in [0, 1]; an interval must be ordered lo <= hi.",
+          "oneOf": [
+            {"type": "number", "minimum": 0, "maximum": 1},
+            {
+              "type": "array",
+              "items": {"type": "number", "minimum": 0, "maximum": 1},
+              "minItems": 2,
+              "maxItems": 2
+            }
+          ]
+        },
+        "platform_types": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Platform types this source provisions (e.g. \"cruise\"). Informational; the run config's source_id binding decides resolution."
+        },
+        "evidence": {
+          "type": "string",
+          "description": "Evidence grade and provenance of the declared interval."
+        },
+        "notes": {"type": "string"}
+      },
+      "additionalProperties": false
+    }
+  }
+}
