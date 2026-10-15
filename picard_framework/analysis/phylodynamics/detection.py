@@ -35,7 +35,16 @@ DETECTION_COLUMNS = (
     "wastewater_lag_hours",
     "first_detection_lag_hours",
     "detected",
+    "emergence_origin",
 )
+
+# Origin vocabulary for the emergence split — mirrors STRAIN_ORIGINS in
+# engines/strain_state.py. ABOARD_MINT: a variant that arose underway;
+# BOARDING_IMPORT: entered already formed at embarkation or a port;
+# SUPPLY_CHAIN: minted on a provisioned lot.
+ABOARD_MINT_ORIGINS = frozenset({"transmission", "within_host", "recombination"})
+BOARDING_IMPORT_ORIGINS = frozenset({"founder", "shore_import"})
+SUPPLY_CHAIN_ORIGIN = "imported:lot"
 
 
 @dataclass(frozen=True)
@@ -52,19 +61,29 @@ class DetectionRow:
     wastewater_lag_hours: float | None
     first_detection_lag_hours: float | None
     detected: bool
+    # Registry origin of the strain whose first host carry established
+    # ``emergence_hours`` — "founder"/"shore_import" for boarding
+    # imports, "imported:lot" for supply-chain imports, the aboard-mint
+    # origins for variants that arose underway. "" when the strain id
+    # is not in the registry meta.
+    emergence_origin: str = ""
 
     def as_dict(self) -> dict[str, Any]:
         """Row form for CSV / JSON writers."""
         return asdict(self)
 
 
-def genotype_emergence_hours(census: CensusArtifact) -> dict[tuple[str, str], float]:
-    """First voyage hour each ``(pathogen, genotype)`` is carried by a host.
+def _genotype_first_carry(
+    census: CensusArtifact,
+) -> dict[tuple[str, str], tuple[float, str]]:
+    """First host-carry (hour, origin) per ``(pathogen, genotype)``.
 
-    Lineages the registry has collected are skipped rather than guessed at: an
-    unknown genotype would otherwise become a spurious empty-string variant.
+    The origin is the registry origin of the strain id that established
+    the first carry — how the genotype entered the observable pool —
+    which is what lets emergence splits separate supply-chain imports
+    (``imported:lot``) from aboard-minted variants.
     """
-    out: dict[tuple[str, str], float] = {}
+    out: dict[tuple[str, str], tuple[float, str]] = {}
     for row in sorted(census.epochs, key=lambda entry: entry.epoch):
         hours = census.hours(row.epoch)
         for strain_id, count in row.lineage_counts.items():
@@ -73,8 +92,23 @@ def genotype_emergence_hours(census: CensusArtifact) -> dict[tuple[str, str], fl
             genotype = census.genotype_of(strain_id)
             if not genotype:
                 continue
-            out.setdefault((row.pathogen_id, genotype), hours)
+            out.setdefault(
+                (row.pathogen_id, genotype),
+                (hours, census.origin_of(strain_id)),
+            )
     return out
+
+
+def genotype_emergence_hours(census: CensusArtifact) -> dict[tuple[str, str], float]:
+    """First voyage hour each ``(pathogen, genotype)`` is carried by a host.
+
+    Lineages the registry has collected are skipped rather than guessed at: an
+    unknown genotype would otherwise become a spurious empty-string variant.
+    """
+    return {
+        key: hours
+        for key, (hours, _origin) in _genotype_first_carry(census).items()
+    }
 
 
 def clinical_detection_hours(
@@ -149,8 +183,8 @@ def detection_rows(
         {} if bundle is None else wastewater_detection_hours(bundle, hours_per_epoch)
     )
     rows: list[DetectionRow] = []
-    for (pathogen_id, genotype), emergence in sorted(
-        genotype_emergence_hours(census).items(),
+    for (pathogen_id, genotype), (emergence, origin) in sorted(
+        _genotype_first_carry(census).items(),
     ):
         clin = clinical.get((pathogen_id, genotype))
         waste = wastewater.get((pathogen_id, genotype))
@@ -167,6 +201,7 @@ def detection_rows(
                 wastewater_lag_hours=_lag(waste, emergence),
                 first_detection_lag_hours=_lag(first, emergence),
                 detected=first is not None,
+                emergence_origin=origin,
             ),
         )
     return tuple(rows)
@@ -204,7 +239,13 @@ def detection_speed_curve(
 
 
 def detection_summary(rows: tuple[DetectionRow, ...]) -> dict[str, Any]:
-    """Voyage-level detection summary, censoring kept explicit."""
+    """Voyage-level detection summary, censoring kept explicit.
+
+    ``genotypes_emerged`` stays the total (back-compat). The origin
+    split reports how genotypes entered the pool — a supply-chain lot
+    import must not masquerade as an aboard-minted variant in the
+    detection-lag denominators of variant campaigns.
+    """
     lags = [
         row.first_detection_lag_hours
         for row in rows
@@ -212,6 +253,15 @@ def detection_summary(rows: tuple[DetectionRow, ...]) -> dict[str, Any]:
     ]
     return {
         "genotypes_emerged": len(rows),
+        "genotypes_emerged_aboard": sum(
+            1 for row in rows if row.emergence_origin in ABOARD_MINT_ORIGINS
+        ),
+        "genotypes_imported_boarding": sum(
+            1 for row in rows if row.emergence_origin in BOARDING_IMPORT_ORIGINS
+        ),
+        "genotypes_imported_supply_chain": sum(
+            1 for row in rows if row.emergence_origin == SUPPLY_CHAIN_ORIGIN
+        ),
         "genotypes_detected": len(lags),
         "detected_fraction": (len(lags) / len(rows)) if rows else 0.0,
         "median_detection_lag_hours": _median(lags),
