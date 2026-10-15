@@ -3454,6 +3454,15 @@ its stable ID; pull requests must not append numbered items.
     list (`picard_framework/analysis/sentinel/line_list.py` ~line 166)
     has the same first-seen stamp, but its schema pins `onset_epoch`
     `minimum: 1`, so the fix belongs to a Sentinel change, not this one.
+    **Closed (issue #1009):** the admission pin is lifted —
+    `schemas/sentinel_observations.schema.json` drops the `minimum: 1`
+    and `_case_from_dict` admits `onset_epoch <= 0` as a declared
+    pre-boarding onset on the voyage clock. Pre-boarding onsets are
+    excluded from the aboard per-epoch onset series by construction
+    (`onsets_per_epoch`, `group_onsets` guard the 1-indexed range);
+    they belong to the import channel — how the sentinel names them is
+    the vocabulary question of issue #1008. The ship-side
+    `line_list.py` first-seen stamp stays ≥1 by construction.
 
 37. **The VSP §4.1.1.2 pre-boarding assessment exists, default-off and
     unmeasured — reportability and denial of boarding are separately

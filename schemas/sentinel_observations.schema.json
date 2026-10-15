@@ -72,8 +72,7 @@
         "person_id": { "type": "string", "minLength": 1 },
         "onset_epoch": {
           "type": "integer",
-          "minimum": 1,
-          "description": "1-indexed epoch of symptom onset (not of report)."
+          "description": "Epoch of symptom onset on the voyage clock (epoch 1 = first aboard epoch; not of report). Values <= 0 declare onset before boarding — the ship records negative pre-boarding onsets — and belong to the import channel, not the aboard onset series."
         },
         "crew": { "type": "boolean" },
         "pathogen": {

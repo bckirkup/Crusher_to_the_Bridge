@@ -425,6 +425,20 @@ def test_onset_past_observation_end_reported(
     assert any("observation_end_epoch" in p for p in problems)
 
 
+def test_pre_boarding_onset_is_admitted(
+    voyage,
+    observations_payload: dict[str, Any],
+) -> None:
+    """The ship records negative ``hazard_onset_epochs`` for onsets
+    before boarding; the sentinel feed must admit them (issue #1009)."""
+    payload = copy.deepcopy(observations_payload)
+    payload["clinical_cases"][0]["onset_epoch"] = -3
+    bundle = bundle_from_dict(payload)
+    assert bundle.clinical_cases[0].onset_epoch == -3
+    problems = validate_against_voyage(bundle, voyage)
+    assert not any("onset_epoch" in p for p in problems)
+
+
 def test_hours_ashore_beyond_dwell_reported(
     voyage,
     observations_payload: dict[str, Any],
