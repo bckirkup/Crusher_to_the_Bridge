@@ -8,6 +8,8 @@ compliance**, **EMOD-style clinical progression**, and **GRUMB
 multi-kingdom microbiome** seeding into a unified digital twin for
 maritime disease outbreaks.
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/bckirkup/Crusher_to_the_Bridge)
+
 ## Quick Start
 
 ```bash
