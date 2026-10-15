@@ -2,7 +2,6 @@
  "campaign": "noro_hull_scale_01",
  "description": "NORO-HULL-SCALE-01 mega arming smoke: shipped-rung mega tier + forced lot mint (lot_object_probability 0.95) to verify the common-source object machinery mints and serves on mega_cruise_5000.",
  "platform": "mega_cruise_5000",
- "default_epochs": 288,
  "default_num_agents": 7000,
  "embarkation_date": "2026-01-10",
  "natural_history_clock": "hours",
@@ -93,5 +92,6 @@
     8002
    ]
   }
- }
+ },
+ "epochs": 288
 }
