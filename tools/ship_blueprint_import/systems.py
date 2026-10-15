@@ -172,17 +172,13 @@ def _marker_zone_mode(
     if kind in ("funnel", "uptake", "fan_room", "air_shaft"):
         return "mech_supply_exhaust"
     if direction == "supply":
-        return (
-            "mech_supply_exhaust"
-            if zone_type == "Engineering"
-            else "nat_supply"
-        )
+        if zone_type == "Engineering":
+            return "mech_supply_exhaust"
+        return "nat_supply"
     if direction == "exhaust":
-        return (
-            "mech_supply_exhaust"
-            if zone_type == "Engineering"
-            else "mech_exhaust"
-        )
+        if zone_type == "Engineering":
+            return "mech_supply_exhaust"
+        return "mech_exhaust"
     return era_mode
 
 
@@ -323,21 +319,72 @@ def _enrich_groups(
         pool = sheet or [m for m, _ in members]
         mode = min(
             set(pool),
-            key=lambda m: (pool.count(m) * -1, _MODE_PRIORITY.index(m)),
+            key=lambda m, p=pool: (p.count(m) * -1, _MODE_PRIORITY.index(m)),
         )
         group["vent_mode"] = mode
         seen = {
             zone_modes[r]["evidence"] for r in group.get("rooms", [])
             if r in zone_modes
         }
-        group["evidence"] = (
-            "sheet_read" if "sheet_read" in seen
-            else "era_plausible" if "era_plausible" in seen
-            else "era_rule"
-        )
+        if "sheet_read" in seen:
+            group["evidence"] = "sheet_read"
+        elif "era_plausible" in seen:
+            group["evidence"] = "era_plausible"
+        else:
+            group["evidence"] = "era_rule"
         # A hint that declares its own oa_fraction wins over the era prior.
         if group["id"] not in declared_oa_ids and "oa_fraction" not in group:
             group["oa_fraction"] = MODE_OA_FRACTION.get(mode, 0.2)
+
+
+def _tank_kind(label: str) -> str:
+    low = label.lower()
+    if any(k in low for k in _SEWAGE_TOKENS):
+        return "sewage"
+    if any(k in low for k in _FRESHWATER_TOKENS):
+        return "freshwater"
+    if any(k in low for k in _FUEL_TOKENS):
+        return "fuel"
+    return "unknown"
+
+
+def _tank_entry(
+    t: TankMarker, digest: ShipDigest, zones_out: list[dict[str, Any]]
+) -> tuple[dict[str, Any], str | None]:
+    disp = _tank_display(t, digest)
+    near = (
+        _nearest_zone(disp[0], disp[1], zones_out, t.deck)
+        if disp is not None else None
+    )
+    entry = {
+        "label": t.label,
+        "kind": _tank_kind(t.label),
+        "nearest_zone": near,
+        "display": (
+            None if disp is None else [round(disp[0], 2), round(disp[1], 2)]
+        ),
+        "deck": t.deck,
+        "notes": t.notes,
+    }
+    return entry, near
+
+
+def _drain_note(
+    z: dict[str, Any],
+    zones_out: list[dict[str, Any]],
+    sewage_ids: list[str],
+) -> str:
+    pool = [t for t in zones_out if t["id"] in sewage_ids] or zones_out
+    near = _nearest_zone(
+        z.get("display", {}).get("x", 0.0),
+        z.get("display", {}).get("y", 0.0),
+        pool,
+        None,
+    )
+    return (
+        f"{z['id']} ({z['type']}) drains soil/gray water to the "
+        "collection/sea-discharge system; nearest marked tank: " + str(near)
+    )
 
 
 def _plumbing_notes(
@@ -349,37 +396,11 @@ def _plumbing_notes(
     tanks: list[dict[str, Any]] = []
     sewage_zone_ids: list[str] = []
     for t in digest.systems.tanks:
-        label_l = t.label.lower()
-        kind = (
-            "sewage" if any(k in label_l for k in _SEWAGE_TOKENS)
-            else "freshwater" if any(k in label_l for k in _FRESHWATER_TOKENS)
-            else "fuel" if any(k in label_l for k in _FUEL_TOKENS)
-            else "unknown"
-        )
-        disp = _tank_display(t, digest)
-        near = (
-            _nearest_zone(disp[0], disp[1], zones_out, t.deck)
-            if disp is not None else None
-        )
-        if kind == "sewage" and near in zone_ids:
+        entry, near = _tank_entry(t, digest, zones_out)
+        if entry["kind"] == "sewage" and near in zone_ids:
             sewage_zone_ids.append(near)
-        tanks.append(
-            {"label": t.label, "kind": kind, "nearest_zone": near,
-             "display": None if disp is None else [round(disp[0], 2), round(disp[1], 2)],
-             "deck": t.deck, "notes": t.notes}
-        )
-    drains: list[str] = []
-    for z in headish:
-        drains.append(
-            f"{z['id']} ({z['type']}) drains soil/gray water to the "
-            "collection/sea-discharge system; nearest marked tank: "
-            + str(_nearest_zone(
-                z.get("display", {}).get("x", 0.0),
-                z.get("display", {}).get("y", 0.0),
-                [t for t in zones_out if t['id'] in sewage_zone_ids] or zones_out,
-                None,
-            ))
-        )
+        tanks.append(entry)
+    drains = [_drain_note(z, zones_out, sewage_zone_ids) for z in headish]
     return tanks, drains, sewage_zone_ids
 
 

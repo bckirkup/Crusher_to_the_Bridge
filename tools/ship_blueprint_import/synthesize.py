@@ -14,7 +14,11 @@ from simulation_utils.paths import (
     resolve_child_path,
     validated_open,
 )
-from tools.ship_blueprint_import.models import ShipDigest, ZoneDigest
+from tools.ship_blueprint_import.models import (
+    HvacHint,
+    ShipDigest,
+    ZoneDigest,
+)
 from tools.ship_blueprint_import.ontology import ach_for_zone_type
 from tools.ship_blueprint_import.svg_io import (
     OverlayPolygon,
@@ -209,6 +213,31 @@ def _adjacency_from_polygons(
     return edges
 
 
+def _hint_group(hint: HvacHint, rooms: list[str]) -> dict[str, Any]:
+    group: dict[str, Any] = {
+        "id": hint.id,
+        "rooms": rooms,
+        "ach": float(hint.ach),
+        "description": hint.description or f"AHU branch {hint.id}",
+    }
+    if hint.oa_fraction is not None:
+        group["oa_fraction"] = float(hint.oa_fraction)
+    if hint.filter_preset is not None:
+        group["filter_preset"] = hint.filter_preset
+    return group
+
+
+def _hvac_from_hints(
+    digest: ShipDigest, ducted: list[str]
+) -> list[dict[str, Any]]:
+    out: list[dict[str, Any]] = []
+    for hint in digest.hvac_hints:
+        rooms = [r for r in hint.rooms if r in ducted]
+        if rooms:
+            out.append(_hint_group(hint, rooms))
+    return out
+
+
 def _auto_hvac(
     digest: ShipDigest,
     zone_ids: list[str],
@@ -217,24 +246,9 @@ def _auto_hvac(
 ) -> list[dict[str, Any]]:
     ducted = [z for z in zone_ids if z not in head_ids]
     if digest.hvac_hints:
-        out = []
-        for hint in digest.hvac_hints:
-            rooms = [r for r in hint.rooms if r in ducted]
-            if not rooms:
-                continue
-            group = {
-                "id": hint.id,
-                "rooms": rooms,
-                "ach": float(hint.ach),
-                "description": hint.description or f"AHU branch {hint.id}",
-            }
-            if hint.oa_fraction is not None:
-                group["oa_fraction"] = float(hint.oa_fraction)
-            if hint.filter_preset is not None:
-                group["filter_preset"] = hint.filter_preset
-            out.append(group)
-        if out:
-            return out
+        hinted = _hvac_from_hints(digest, ducted)
+        if hinted:
+            return hinted
 
     # Group by deck
     by_deck: dict[str, list[str]] = {}
