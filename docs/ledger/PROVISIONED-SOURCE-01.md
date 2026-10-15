@@ -1,7 +1,7 @@
 # PROVISIONED-SOURCE-01
 **Date:** 2026-10-15
-**Commit:** (implementation leg — this change)
-**Pathogens:** all armed `common_source_events.enabled` profiles (norwalk_gi ships armed)
+**Commit:** #1019
+**Pathogens:** all
 **Status:** open
 
 The fiat `lot_mode: "object"` voyage gate — one Bernoulli on
