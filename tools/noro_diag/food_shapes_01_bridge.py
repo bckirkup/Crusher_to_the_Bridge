@@ -51,14 +51,23 @@ _CENSUS_MEMBER = "growth_census.json.gz"
 _DROP_PARAM_KEYS = ("common_source", "engine_git_sha", "tier_id")
 _DROP_TOP_KEYS = ("rss_mb",)
 
-_BRIDGES = (
-    ("ind_bg", "campaign/noro_food_shapes_01/fl_exp_12d_scr_ind_bg",
-     "campaign/noro_entrain_01/fl_exp_12d_scr_ind"),
-    ("bg", "campaign/noro_food_shapes_01/fl_exp_12d_scr_bg",
-     "campaign/noro_entrain_01/fl_exp_12d_scr_ship"),
-    ("off", "campaign/noro_food_shapes_01/fl_exp_12d_scr_off",
-     "campaign/noro_entrain_01/fl_exp_12d_scr_off"),
+# (shapes arm, entrain arm) — the frozen §7.4 gate-5 pairs; the hull
+# tier prefix is templated per --hull so the same check runs on every
+# fleet hull without a code edit.
+_BRIDGE_PAIRS = (
+    ("ind_bg", "ind"),
+    ("bg", "ship"),
+    ("off", "off"),
 )
+
+
+def _bridges(hull: str) -> tuple:
+    return tuple(
+        (f"{hull}:{a}",
+         f"campaign/noro_food_shapes_01/fl_{hull}_12d_scr_{a}",
+         f"campaign/noro_entrain_01/fl_{hull}_12d_scr_{b}")
+        for a, b in _BRIDGE_PAIRS
+    )
 
 # Census floats drift by ~1 ULP across the two engine images' serializers
 # (mass-balance accumulators); the tolerant leaf compare below holds that
@@ -190,58 +199,70 @@ def main() -> None:
         help="also compare decompressed census members on N seeds",
     )
     ap.add_argument("--workers", type=int, default=16)
+    ap.add_argument(
+        "--hull", action="append", dest="hulls",
+        help="fleet hull tier prefix (exp/cls/spr); repeatable,"
+        " default exp",
+    )
     args = ap.parse_args()
     client = _s3_client()
     rows: list[dict] = []
-    for arm, p_w1, p_old in _BRIDGES:
-        idx_w1 = _index_prefix(client, args.bucket, p_w1 + "/")
-        idx_old = _index_prefix(client, args.bucket, p_old + "/")
-        seeds = sorted(set(idx_w1) & set(idx_old))
-        missing_w1 = sorted(set(idx_old) - set(idx_w1))
-        missing_old = sorted(set(idx_w1) - set(idx_old))
-        census_seeds = set()
-        if args.census_sample:
-            step = max(1, len(seeds) // args.census_sample)
-            census_seeds = set(seeds[::step])
-        with ThreadPoolExecutor(args.workers) as pool:
-            futs = {
-                pool.submit(
-                    _check_seed, client, args.bucket,
-                    idx_w1[s], idx_old[s], s in census_seeds,
-                ): s
-                for s in seeds
-            }
-            for fut in as_completed(futs):
-                s = futs[fut]
-                row = fut.result()
-                row["arm"] = arm
-                row["seed"] = s
-                rows.append(row)
-        n_div = sum(1 for r in rows if r["arm"] == arm
-                    and r["verdict"] == "diverged")
-        print(
-            f"{arm}: {len(seeds)} paired seeds, {n_div} diverged "
-            f"(missing w1:{len(missing_w1)} old:{len(missing_old)})",
-            file=sys.stderr,
-        )
-        if missing_w1 or missing_old:
-            rows.append({
-                "arm": arm, "verdict": "key_missing",
-                "missing_w1": missing_w1, "missing_old": missing_old,
-            })
+    bridges = tuple(
+        b for h in (args.hulls or ["exp"]) for b in _bridges(h)
+    )
     out_path = Path(args.out)
-    with validated_open(
+    fh = validated_open(
         str(out_path),
         "w",
         encoding="utf-8",
         allowed_roots=(str(out_path.parent.resolve()),),
-    ) as fh:
-        for r in sorted(rows, key=lambda r: (r["arm"], r.get("seed", 0))):
-            fh.write(json.dumps(r) + "\n")
+    )
+    with fh:
+        for arm, p_w1, p_old in bridges:
+            idx_w1 = _index_prefix(client, args.bucket, p_w1 + "/")
+            idx_old = _index_prefix(client, args.bucket, p_old + "/")
+            seeds = sorted(set(idx_w1) & set(idx_old))
+            missing_w1 = sorted(set(idx_old) - set(idx_w1))
+            missing_old = sorted(set(idx_w1) - set(idx_old))
+            census_seeds = set()
+            if args.census_sample:
+                step = max(1, len(seeds) // args.census_sample)
+                census_seeds = set(seeds[::step])
+            arm_rows: list[dict] = []
+            with ThreadPoolExecutor(args.workers) as pool:
+                futs = {
+                    pool.submit(
+                        _check_seed, client, args.bucket,
+                        idx_w1[s], idx_old[s], s in census_seeds,
+                    ): s
+                    for s in seeds
+                }
+                for fut in as_completed(futs):
+                    s = futs[fut]
+                    row = fut.result()
+                    row["arm"] = arm
+                    row["seed"] = s
+                    arm_rows.append(row)
+            n_div = sum(1 for r in arm_rows if r["verdict"] == "diverged")
+            print(
+                f"{arm}: {len(seeds)} paired seeds, {n_div} diverged "
+                f"(missing w1:{len(missing_w1)} old:{len(missing_old)})",
+                file=sys.stderr,
+            )
+            if missing_w1 or missing_old:
+                arm_rows.append({
+                    "arm": arm, "verdict": "key_missing",
+                    "missing_w1": missing_w1, "missing_old": missing_old,
+                })
+            # Flush per arm so a killed run keeps its completed pairs.
+            for r in sorted(arm_rows, key=lambda r: r.get("seed", 0)):
+                fh.write(json.dumps(r) + "\n")
+            fh.flush()
+            rows.extend(arm_rows)
     print("\n| arm | paired | identical | diverged | census n |"
           " census identical |")
     print("|---|---|---|---|---|---|")
-    for arm, _, _ in _BRIDGES:
+    for arm, _, _ in bridges:
         ar = [r for r in rows if r["arm"] == arm and r.get("seed")]
         cen = [r for r in ar if r.get("census")]
         print(
