@@ -1,0 +1,236 @@
+{
+  "platform": "gordon_gunter_r338",
+  "era": "noaa_research",
+  "era_label": "NOAA / research vessel practice",
+  "era_note": "Hotel spaces AC; laboratories fume-biased exhaust; machinery forced draft.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "lower_platform",
+      "serves_zone": "Main_Gen_Rm",
+      "display": [
+        38.53,
+        -7.37
+      ],
+      "evidence": "sheet_read",
+      "notes": "Stack drawn on profile over main generator room"
+    },
+    {
+      "id": "AC_Mchry_Intake",
+      "kind": "fan_room",
+      "facing": "unknown",
+      "direction": "supply",
+      "deck": "lower_platform",
+      "serves_zone": "AC_Mchry",
+      "display": [
+        31.52,
+        13.1
+      ],
+      "evidence": "sheet_read",
+      "notes": "AC MCHRY compartment labeled on lower platform plan — the ship's conditioning plant"
+    },
+    {
+      "id": "Vent_Sewage",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "lower_platform",
+      "serves_zone": "Sewage_Mchry",
+      "display": [
+        47.28,
+        13.1
+      ],
+      "evidence": "era_plausible",
+      "notes": "Sewage machinery vents overboard per marine practice"
+    }
+  ],
+  "zone_modes": {
+    "Pilot_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "HD_Bridge": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Officer_SR": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Upper": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Ships_Office": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Boat_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Science_Labs": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wet_Lab": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Scientist_SR": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Crew_SR_Foc": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "HD_Focsle": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Shelter_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Emer_Gen_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_SR_Main": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Passage_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Genl_Mess": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Crew_Lounge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Med_Trtmt": {
+      "mode": "mech_ac",
+      "evidence": "era_rule"
+    },
+    "Recreation": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Ships_Store": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Prov_Reefers": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Genl_Workshop": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bosn_Workshop": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Aft_Working_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mission_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Alley": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Prpln_Motor": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Main_Gen_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "AC_Mchry": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Laundry": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sewage_Mchry": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Exercise_Rm": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Shaft_Alley",
+      "display": [
+        21.02,
+        12.28
+      ],
+      "deck": "lower_platform",
+      "notes": "Fresh-water tankage in machinery flat"
+    },
+    {
+      "label": "SEWAGE HOLDING",
+      "kind": "sewage",
+      "nearest_zone": "Main_Gen_Rm",
+      "display": [
+        47.28,
+        14.33
+      ],
+      "deck": "lower_platform",
+      "notes": "Sewage holding alongside Sewage Mchry — collection target"
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "Main_Gen_Rm",
+      "display": [
+        40.28,
+        12.28
+      ],
+      "deck": "lower_platform",
+      "notes": "Fuel-oil tankage adjacent to generator room"
+    }
+  ],
+  "plumbing_drains": [
+    "HD_Bridge (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "HD_Upper (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "HD_Focsle (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "Genl_Mess (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "Med_Trtmt (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm",
+    "HD_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Main_Gen_Rm"
+  ]
+}

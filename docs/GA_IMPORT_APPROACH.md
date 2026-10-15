@@ -15,6 +15,21 @@ Status: proposal + first proof (2026-10-15). Two maritime.org general arrangemen
 
 ## What maritime.org GAs actually give — and what they don't
 
+Addendum (2026-10-15): the "systems they don't give" line needed a split.
+Ventilation *terminations* are drawn on these sheets — mushroom cowls and
+ventilators on weather decks, `VENT`/`VENT TRUNK`/`AIR SHAFT` labels, fan
+rooms, skylights, air ports, the funnel over the machinery space — along
+with plumbing anchors: heads/galleys/sculleries and named tanks (`F.W.`,
+`F.O.`, `SEWAGE`). What they do NOT draw is the ductwork and pipework
+between terminations. The digest's `systems` block records what the sheet
+shows (`vent_markers` + `tanks`, each graded `sheet_read` vs
+`era_plausible`); `tools/ship_blueprint_import/systems.py` maps it through
+per-era practice tables (`usn_ww2`, `rn_ww2`, `usn_coldwar`, `usn_modern`,
+`noaa_research`, `merchant_ww2`) into `vent_mode`/`oa_fraction`/
+`evidence` on every HVAC group plus `systems_notes.{json,md}` — the
+evidence-graded ledger that is the engineering starting point for the duct
+and plumbing handwork. See `SHIP_BLUEPRINT_IMPORT.md` §Digest fields.
+
 Measured on R-338 (13 sheets) and the Castle-class single-sheet GA:
 
 - **Given:** compartment directory with Navy designations (deck + frame range + type), deck heights in feet above baseline, hull dims/speed, accommodation counts (R-338 sheet 2: "20 officers/crew + 15 scientists"), frame-stationed deck plans per level.
@@ -43,13 +58,15 @@ The GIMP loop is the bottleneck: a human traces ~20 polygons per sheet. The appr
 | `castle_class_corvette` | Castle-class GA, single-sheet multi-view | 19 | 99 crew, 5 classes | `.prj` 138 paths, 2 HVAC groups |
 | `raven_am55` | AM-55 Raven minesweeper (sheets 3-5; platform deck zoned on the inboard profile with explicit ests) | 21 | 105 crew, 6 classes | `.prj` 137 paths, 2 HVAC groups |
 
-Both pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
+All three carry a `systems` block (era + sheet-read vent markers + tank labels); inference emits `systems_notes.md` per platform — e.g. R-338's `SEWAGE HOLDING` tank joins `graywater_zones` automatically, Castle's forecastle cowls tag the accommodation branch `nat_supply`/`sheet_read`. All pass `validate --contam-gate` (schema + sanity + offline PRJ parse). Intermediates (rasters, digests, overlays) stay in gitignored `work/blueprints/`; digest JSONs are regenerable via the author scripts there — a follow-up could commit them under `tests/fixtures/` if replay value is wanted.
 
 ## Roadmap
 
 1. **Now (this PR):** schema + model + synthesize changes above; two imported platforms; this doc.
 2. **Next ship batch:** AM-55 Raven, APD-89 Ruchamkin, ARS-38 Bolster are already rasterized in `work/blueprints/` — same recipe, ~30–60 min of sheet reading each.
-3. **Vision-LLM digest parity:** the `--provider gemini|openai_compat|anthropic` digest path should emit `plan_bbox_norm` + `complement`; update `DIGEST_SYSTEM_PROMPT` and the providers' JSON schema so a real LLM can produce the same fields the agent authored by hand.
-4. **Auto-bbox detection:** detect the plan-view frame lines on each sheet to propose `plan_bbox_norm` automatically; agent/LLM only confirms.
-5. **Manifest → run config:** a `scripts/` helper that expands `crew_manifest.json` classes into `config.yaml agent_classes` entries (fractions from counts, `home_zone_preference` from `berth_zone`, `duty_zone` direct) so manifests become runnable without hand YAML.
-6. **Multi-frame fidelity:** when a sheet's plan view shows partial hull coverage, hull spans already handle it — but bow/stern overhang beyond frame 0/105 needs the same care on each new ship.
+3. **Vision-LLM digest parity:** the `--provider gemini|openai_compat|anthropic` digest path should emit `plan_bbox_norm` + `complement` + `systems`; update `DIGEST_SYSTEM_PROMPT` and the providers' JSON schema so a real LLM can produce the same fields the agent authored by hand.
+4. **Era-table provenance:** the `ERA_RULES` mode/oa priors are engineering priors, not sourced constants — a provenance pass should attach a naval-ventilation reference (e.g. BUSHIPS/NAVSHIPS ventilation standard practice) to each era row before the modes inform any fitted parameter.
+5. **Auto-bbox detection:** detect the plan-view frame lines on each sheet to propose `plan_bbox_norm` automatically; agent/LLM only confirms.
+6. **Manifest → run config:** a `scripts/` helper that expands `crew_manifest.json` classes into `config.yaml agent_classes` entries (fractions from counts, `home_zone_preference` from `berth_zone`, `duty_zone` direct) so manifests become runnable without hand YAML.
+7. **Multi-frame fidelity:** when a sheet's plan view shows partial hull coverage, hull spans already handle it — but bow/stern overhang beyond frame 0/105 needs the same care on each new ship.
+8. **Marker direction from geometry:** cowl facing is currently authored per marker; the SVG symbol's orientation could be read automatically (cowl mouth direction) when overlays carry marker glyphs.

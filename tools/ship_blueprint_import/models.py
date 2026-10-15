@@ -170,6 +170,79 @@ class ComplementProposal(BaseModel):
     manifest: list[CrewClassBlock] = Field(default_factory=list)
 
 
+VentKind = Literal[
+    "cowl", "mushroom", "gooseneck", "skylight", "air_port",
+    "vent_trunk", "air_shaft", "fan_room", "uptake", "funnel",
+]
+VentFacing = Literal[
+    "fore", "aft", "port", "starboard", "up", "down", "unknown"
+]
+VentDirection = Literal["supply", "exhaust", "unknown"]
+ShipEra = Literal[
+    "usn_ww2", "usn_coldwar", "usn_modern", "rn_ww2",
+    "noaa_research", "merchant_ww2", "generic",
+]
+
+
+class VentMarker(BaseModel):
+    """A ventilation termination read off a GA sheet.
+
+    `evidence` separates sheet reads (the marker is drawn/labeled at this
+    position) from era-typical placements the digest records as priors.
+    """
+
+    id: str
+    page: int = Field(ge=1)
+    position_norm: list[float] = Field(
+        description="Normalized [x, y] sheet position of the marker"
+    )
+    deck: str | None = Field(
+        default=None,
+        description="Deck id the marker feeds/extracts (its termination)",
+    )
+    kind: VentKind = "cowl"
+    facing: VentFacing = "unknown"
+    direction: VentDirection = "unknown"
+    serves_zone: str | None = Field(
+        default=None,
+        description="Zone id the marker clearly terminates in, when legible",
+    )
+    evidence: Literal["sheet_read", "era_plausible"] = "sheet_read"
+    notes: str = ""
+
+    @field_validator("position_norm")
+    @classmethod
+    def _pos_pair(cls, value: list[float]) -> list[float]:
+        if len(value) != 2:
+            raise ValueError("position_norm must be [x, y]")
+        return [max(0.0, min(1.0, float(v))) for v in value]
+
+
+class TankMarker(BaseModel):
+    """A named tank/compartment label read off the sheet (plumbing anchor)."""
+
+    label: str = Field(description="Label as drawn, e.g. 'F.W. TANK A-101-F'")
+    page: int = Field(ge=1)
+    position_norm: list[float]
+    deck: str | None = None
+    notes: str = ""
+
+    @field_validator("position_norm")
+    @classmethod
+    def _tank_pos(cls, value: list[float]) -> list[float]:
+        if len(value) != 2:
+            raise ValueError("position_norm must be [x, y]")
+        return [max(0.0, min(1.0, float(v))) for v in value]
+
+
+class SystemsDigest(BaseModel):
+    """Ventilation/plumbing evidence read from the sheet + era typing."""
+
+    era: ShipEra = "generic"
+    vent_markers: list[VentMarker] = Field(default_factory=list)
+    tanks: list[TankMarker] = Field(default_factory=list)
+
+
 class ContamHints(BaseModel):
     """Starter ContamW authoring hints for Path A side-chain (Target B)."""
 
@@ -223,6 +296,14 @@ class ShipDigest(BaseModel):
             "Proposed nominal complement + crew manifest; synthesize emits "
             "nominal_complement into spatial_layout.json and a "
             "crew_manifest.json proposal"
+        ),
+    )
+    systems: SystemsDigest | None = Field(
+        default=None,
+        description=(
+            "Ventilation/plumbing evidence read from the sheet (vent markers, "
+            "tank labels) plus the ship's era type; synthesize maps it through "
+            "era rules into HVAC group enrichment and a systems notes ledger"
         ),
     )
 

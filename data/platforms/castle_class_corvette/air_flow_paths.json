@@ -19,7 +19,10 @@
         "Bridge_House"
       ],
       "ach": 5.0,
-      "description": "minimal mechanical ventilation, mostly natural"
+      "description": "minimal mechanical ventilation, mostly natural",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "sheet_read"
     },
     {
       "id": "VENT_Machinery",
@@ -31,7 +34,10 @@
         "Fwd_Magazines"
       ],
       "ach": 10.0,
-      "description": "engine/boiler room ventilation"
+      "description": "engine/boiler room ventilation",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
     },
     {
       "id": "AHU_HD_HD_Foc",

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "created_utc": "2026-10-15T22:32:14.212825+00:00",
+  "created_utc": "2026-10-15T23:14:18.258429+00:00",
   "platform": "gordon_gunter_r338",
   "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
   "nominal_complement": {

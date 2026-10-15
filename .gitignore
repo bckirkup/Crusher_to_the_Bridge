@@ -1,8 +1,9 @@
 # Downloaded Wikimedia sources (re-fetch via precompute_deck_assets.py)
 data/platforms/*/reference_photo.jpg
 
-# Naval blueprint import working directories (rasters / drafts)
+# Naval blueprint import working directories (rasters / drafts / source scans)
 work/blueprints/
+work/pdfs/
 
 # Runtime artifacts
 telemetry_buffer/ground_truth.json

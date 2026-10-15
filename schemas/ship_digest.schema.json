@@ -267,6 +267,140 @@
      }
     }
    }
+  },
+  "systems": {
+   "type": "object",
+   "description": "Ventilation/plumbing evidence read from the sheet plus era typing; drives systems inference (airflow enrichment + systems_notes ledger).",
+   "properties": {
+    "era": {
+     "type": "string",
+     "enum": [
+      "usn_ww2",
+      "usn_coldwar",
+      "usn_modern",
+      "rn_ww2",
+      "noaa_research",
+      "merchant_ww2",
+      "generic"
+     ]
+    },
+    "vent_markers": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "id",
+       "page",
+       "position_norm"
+      ],
+      "properties": {
+       "id": {
+        "type": "string"
+       },
+       "page": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "position_norm": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2
+       },
+       "deck": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "kind": {
+        "type": "string",
+        "enum": [
+         "cowl",
+         "mushroom",
+         "gooseneck",
+         "skylight",
+         "air_port",
+         "vent_trunk",
+         "air_shaft",
+         "fan_room",
+         "uptake",
+         "funnel"
+        ]
+       },
+       "facing": {
+        "type": "string",
+        "enum": [
+         "fore",
+         "aft",
+         "port",
+         "starboard",
+         "up",
+         "down",
+         "unknown"
+        ]
+       },
+       "direction": {
+        "type": "string",
+        "enum": [
+         "supply",
+         "exhaust",
+         "unknown"
+        ]
+       },
+       "serves_zone": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "evidence": {
+        "type": "string",
+        "enum": [
+         "sheet_read",
+         "era_plausible"
+        ]
+       },
+       "notes": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "tanks": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "label",
+       "page",
+       "position_norm"
+      ],
+      "properties": {
+       "label": {
+        "type": "string"
+       },
+       "page": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "position_norm": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2
+       },
+       "deck": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "notes": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
   }
  },
  "$defs": {

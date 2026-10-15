@@ -18,7 +18,10 @@
         "Nav_Bridge"
       ],
       "ach": 6.0,
-      "description": "accommodation ventilation"
+      "description": "accommodation ventilation",
+      "oa_fraction": 0.3,
+      "vent_mode": "nat_supply",
+      "evidence": "era_plausible"
     },
     {
       "id": "VENT_Machinery",
@@ -31,7 +34,10 @@
         "Fwd_Magazines"
       ],
       "ach": 10.0,
-      "description": "machinery ventilation"
+      "description": "machinery ventilation",
+      "oa_fraction": 0.9,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
     },
     {
       "id": "AHU_HD_HD_Main",

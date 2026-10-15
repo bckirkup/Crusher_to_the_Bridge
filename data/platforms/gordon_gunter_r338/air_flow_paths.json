@@ -21,7 +21,10 @@
         "Passage_Main"
       ],
       "ach": 6.0,
-      "description": "accommodation AHU"
+      "description": "accommodation AHU",
+      "oa_fraction": 0.2,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
     },
     {
       "id": "HVAC_Mess_Galley",
@@ -31,7 +34,10 @@
         "Prov_Reefers"
       ],
       "ach": 8.0,
-      "description": "galley/mess AHU"
+      "description": "galley/mess AHU",
+      "oa_fraction": 0.3,
+      "vent_mode": "mech_exhaust",
+      "evidence": "era_rule"
     },
     {
       "id": "HVAC_Labs",
@@ -40,7 +46,10 @@
         "Wet_Lab"
       ],
       "ach": 8.0,
-      "description": "lab AHU"
+      "description": "lab AHU",
+      "oa_fraction": 0.5,
+      "vent_mode": "nat_supply",
+      "evidence": "era_rule"
     },
     {
       "id": "VENT_Machinery",
@@ -57,7 +66,10 @@
         "Pilot_House"
       ],
       "ach": 10.0,
-      "description": "machinery ventilation (trunked supply/natural exhaust)"
+      "description": "machinery ventilation (trunked supply/natural exhaust)",
+      "oa_fraction": 0.8,
+      "vent_mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
     },
     {
       "id": "AHU_HD_HD_Bridge",

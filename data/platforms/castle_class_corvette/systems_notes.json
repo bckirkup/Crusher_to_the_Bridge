@@ -1,0 +1,189 @@
+{
+  "platform": "castle_class_corvette",
+  "era": "rn_ww2",
+  "era_label": "Royal Navy WW2 practice",
+  "era_note": "Mushroom/cowl natural supply; mech exhaust galley/heads/engines; magazines sprinkled + vented.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "lower_deck",
+      "serves_zone": "Boiler_Rm",
+      "display": [
+        37.84,
+        -62.56
+      ],
+      "evidence": "sheet_read",
+      "notes": "Funnel drawn on profile strip over boiler room"
+    },
+    {
+      "id": "Cowl_Foc_Bow",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Officer_Cabins",
+      "display": [
+        5.57,
+        -12.02
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowl drawn on forecastle plan bow edge"
+    },
+    {
+      "id": "Cowl_Foc_Mid",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Foc_Cabins",
+      "display": [
+        55.65,
+        -12.02
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowl symbols along forecastle deck edge"
+    },
+    {
+      "id": "Skylight_Mess",
+      "kind": "skylight",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "upper_deck",
+      "serves_zone": "Seamen_Mess",
+      "display": [
+        27.83,
+        0.0
+      ],
+      "evidence": "sheet_read",
+      "notes": "Skylight drawn over seamen's mess"
+    },
+    {
+      "id": "Gooseneck_Eng",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "lower_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        44.52,
+        -42.38
+      ],
+      "evidence": "era_plausible",
+      "notes": "Era-typical forced-draft supply to engine room"
+    },
+    {
+      "id": "Vent_Mag",
+      "kind": "vent_trunk",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "lower_deck",
+      "serves_zone": "Fwd_Magazines",
+      "display": [
+        -2.23,
+        10.09
+      ],
+      "evidence": "era_plausible",
+      "notes": "Magazine exhaust vent + flooding per RN practice"
+    }
+  ],
+  "zone_modes": {
+    "Compass_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Bridge_House": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Foc_Cabins": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Officer_Cabins": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "HD_Foc": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Foc_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Quarterdeck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Mess_Mid": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Seamen_Mess": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "HD_Upper": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Upper_Deck_Aft": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Shaft_Stores": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Boiler_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_plausible"
+    },
+    "Stokers_Mess": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Magazines": {
+      "mode": "mech_exhaust",
+      "evidence": "era_plausible"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Shaft_Stores",
+      "display": [
+        22.26,
+        18.16
+      ],
+      "deck": "lower_deck",
+      "notes": "Fresh-water in double bottom"
+    }
+  ],
+  "plumbing_drains": [
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "HD_Foc (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Foc",
+    "HD_Upper (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Upper",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay"
+  ]
+}

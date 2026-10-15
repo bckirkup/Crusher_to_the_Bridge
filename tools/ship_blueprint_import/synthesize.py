@@ -21,6 +21,7 @@ from tools.ship_blueprint_import.svg_io import (
     polygons_touch,
     read_overlay_svg,
 )
+from tools.ship_blueprint_import.systems import infer_systems, write_systems_notes
 
 DEFAULT_CROSS_FLOW = 50.0
 APPROVED_OVERLAY_SUFFIX = "_approved.svg"
@@ -221,14 +222,17 @@ def _auto_hvac(
             rooms = [r for r in hint.rooms if r in ducted]
             if not rooms:
                 continue
-            out.append(
-                {
-                    "id": hint.id,
-                    "rooms": rooms,
-                    "ach": float(hint.ach),
-                    "description": hint.description or f"AHU branch {hint.id}",
-                }
-            )
+            group = {
+                "id": hint.id,
+                "rooms": rooms,
+                "ach": float(hint.ach),
+                "description": hint.description or f"AHU branch {hint.id}",
+            }
+            if hint.oa_fraction is not None:
+                group["oa_fraction"] = float(hint.oa_fraction)
+            if hint.filter_preset is not None:
+                group["filter_preset"] = hint.filter_preset
+            out.append(group)
         if out:
             return out
 
@@ -676,6 +680,24 @@ def synthesize(
         ],
     }
 
+    systems_notes_path: str | None = None
+    if digest.systems is not None:
+        # Era-typed systems inference: sheet-read vent markers and tank labels
+        # enrich the airflow groups (vent_mode/evidence/oa_fraction) and record
+        # every step in systems_notes.{json,md} with its evidence grade.
+        declared_oa = {
+            h.id for h in digest.hvac_hints if h.oa_fraction is not None
+        }
+        airflow, systems_notes, sewage_ids = infer_systems(
+            digest, zones_out, airflow, declared_oa
+        )
+        sewage_ids = [s for s in sewage_ids if s not in head_set]
+        if sewage_ids:
+            graywater += [s for s in sewage_ids if s not in graywater]
+            spatial["graywater_zones"] = graywater
+        write_systems_notes(output_dir, systems_notes, allowed_roots=allowed_roots)
+        systems_notes_path = resolve_child_path(output_dir, "systems_notes.json")
+
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)
     spatial_path = resolve_child_path(output_dir, "spatial_layout.json")
     airflow_path = resolve_child_path(output_dir, "air_flow_paths.json")
@@ -698,6 +720,8 @@ def synthesize(
         "zone_count": len(zones_out),
         "berthing_zones": berthing,
     }
+    if digest.systems is not None:
+        provenance["systems_era"] = digest.systems.era
     meta_file = os.path.join(workdir, "digest_meta.json")
     if os.path.isfile(meta_file):
         with validated_open(
@@ -725,6 +749,7 @@ def synthesize(
         "spatial_layout": spatial_path,
         "air_flow_paths": airflow_path,
         "crew_manifest": crew_manifest_path,
+        "systems_notes": systems_notes_path,
         "zone_count": len(zones_out),
         "provenance": provenance,
     }

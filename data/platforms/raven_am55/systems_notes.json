@@ -1,0 +1,195 @@
+{
+  "platform": "raven_am55",
+  "era": "usn_ww2",
+  "era_label": "USN WW2 fleet practice",
+  "era_note": "Cowled natural supply to accommodation; mechanical exhaust for galley, heads, machinery; magazines exhaust + flooding.",
+  "vent_markers": [
+    {
+      "id": "Funnel",
+      "kind": "funnel",
+      "facing": "up",
+      "direction": "exhaust",
+      "deck": "platform_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        42.44,
+        -2.09
+      ],
+      "evidence": "sheet_read",
+      "notes": "Stack drawn on outboard profile over engine room"
+    },
+    {
+      "id": "Cowl_Fwd",
+      "kind": "cowl",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "forecastle_deck",
+      "serves_zone": "Foc_Deck_Fwd",
+      "display": [
+        7.79,
+        -3.34
+      ],
+      "evidence": "sheet_read",
+      "notes": "Cowled mushroom on foc'sle bow edge"
+    },
+    {
+      "id": "Vent_Stern",
+      "kind": "vent_trunk",
+      "facing": "unknown",
+      "direction": "unknown",
+      "deck": "main_deck",
+      "serves_zone": "Steering_Gen",
+      "display": [
+        3.95,
+        5.6
+      ],
+      "evidence": "sheet_read",
+      "notes": "'VENT.' label at stern on profile, terminates at steering flat"
+    },
+    {
+      "id": "Gooseneck_Eng",
+      "kind": "gooseneck",
+      "facing": "down",
+      "direction": "supply",
+      "deck": "platform_deck",
+      "serves_zone": "Engine_Rm",
+      "display": [
+        46.89,
+        -5.84
+      ],
+      "evidence": "era_plausible",
+      "notes": "Era-typical forced-draft supply gooseneck to engine room"
+    },
+    {
+      "id": "Cowl_Mess",
+      "kind": "mushroom",
+      "facing": "fore",
+      "direction": "supply",
+      "deck": "main_deck",
+      "serves_zone": "Mess_Tables",
+      "display": [
+        25.26,
+        -3.73
+      ],
+      "evidence": "era_plausible",
+      "notes": "Mushroom supply typical over mess deck"
+    }
+  ],
+  "zone_modes": {
+    "Steering_Gear": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Gen_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Engine_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Crew_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "CPO_Quarters": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Fwd_Magazines": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Nav_Bridge": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Clipping_Rm": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "Bosn_Gear": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Foc_Deck_Fwd": {
+      "mode": "nat_supply",
+      "evidence": "sheet_read"
+    },
+    "Foc_Deck_Open": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Sweep_Deck": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Steering_Gen": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "sheet_read"
+    },
+    "Mess_Tables": {
+      "mode": "nat_supply",
+      "evidence": "era_plausible"
+    },
+    "Galley": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Passage_Main": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Officers_Country": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    },
+    "Wardroom": {
+      "mode": "mech_exhaust",
+      "evidence": "era_rule"
+    },
+    "Sick_Bay": {
+      "mode": "mech_supply_exhaust",
+      "evidence": "era_rule"
+    },
+    "HD_Main": {
+      "mode": "exhaust_only",
+      "evidence": "era_rule"
+    },
+    "Fwd_Stores": {
+      "mode": "nat_supply",
+      "evidence": "era_rule"
+    }
+  },
+  "tanks": [
+    {
+      "label": "F.W. TANK",
+      "kind": "freshwater",
+      "nearest_zone": "Fwd_Magazines",
+      "display": [
+        56.59,
+        3.54
+      ],
+      "deck": "platform_deck",
+      "notes": "Fresh-water tank labeled in platform/hold view"
+    },
+    {
+      "label": "F.O. TANK",
+      "kind": "fuel",
+      "nearest_zone": "Engine_Rm",
+      "display": [
+        34.76,
+        4.59
+      ],
+      "deck": "platform_deck",
+      "notes": "Fuel-oil tankage flanking engine room"
+    }
+  ],
+  "plumbing_drains": [
+    "Mess_Tables (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Mess_Tables",
+    "Galley (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Galley",
+    "Wardroom (Dining) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Wardroom",
+    "Sick_Bay (Medical) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: Sick_Bay",
+    "HD_Main (Sanitary) drains soil/gray water to the collection/sea-discharge system; nearest marked tank: HD_Main"
+  ]
+}
