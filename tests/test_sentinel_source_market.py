@@ -6,13 +6,17 @@ a per-serving hazard channel pooled per source_id, boarded carriers are a
 per-capita prevalence pooled per embarkation market, and voyage covariates
 multiply all import channels. These tests cover the contract — schema parsing,
 Stan data assembly, forward-incidence sensitivity, and the design-only confound
-flags — without sampling (the slow recovery suite covers the walk).
+flags. One short reference-walk chain covers the posterior-column contract;
+identification itself stays with the slow recovery suite.
 """
 
 from __future__ import annotations
 
+import csv
 import os
+import shutil
 import sys
+from typing import Iterator
 
 import numpy as np
 import pytest
@@ -30,8 +34,15 @@ from picard_framework.analysis.sentinel.observations import (  # noqa: E402
     bundle_from_dict,
 )
 from picard_framework.analysis.stan._sentinel_fleet_data import (  # noqa: E402
+    FleetPriors,
     FleetRates,
     fleet_forward_incidence,
+)
+from picard_framework.analysis.stan._sentinel_fleet_reference import (  # noqa: E402
+    fleet_reference_posterior,
+)
+from picard_framework.analysis.stan.fit_sentinel_fleet import (  # noqa: E402
+    write_fleet_outputs,
 )
 from tests.test_sentinel_fleet import fleet_data, fleet_voyage  # noqa: E402
 
@@ -98,7 +109,7 @@ def test_bundle_parses_provisioning_embarkation_and_covariates() -> None:
         },
     )
     assert bundle.provisioning[0].source_id == "SRC"
-    assert bundle.provisioning[0].servings_total["passenger"] == 10.0
+    assert bundle.provisioning[0].servings_total["passenger"] == pytest.approx(10.0)
     assert bundle.provisioning[0].service_window_epochs == (5, 9)
     assert bundle.provisioning[0].first_service_epoch == 5
     assert bundle.embarkation.markets["crew"] == "MKT-C"
@@ -149,7 +160,8 @@ def test_data_builder_lays_out_the_new_channels() -> None:
     # 63-epoch window: total spread uniformly, groups on their own rows.
     assert prov[0, 0, :, 0].sum() == pytest.approx(12000)
     assert prov[0, 1, :, 0].sum() == pytest.approx(3000)
-    assert prov[0, 0, 9, 0] > 0 and prov[0, 0, 8, 0] == 0
+    assert prov[0, 0, 9, 0] > 0
+    assert prov[0, 0, 8, 0] == 0
     assert meta["sources"][0]["source_id"] == "MIA-PROV-01"
     assert meta["sources"][0]["voyages"] == ["A1", "B1"]
     assert meta["sources"][0]["total_servings"] == pytest.approx(30000)
@@ -165,7 +177,7 @@ def test_per_epoch_servings_form_is_taken_as_declared() -> None:
     prov = np.asarray(data["prov_servings"])
     assert prov[0, 0, :3, 0].tolist() == [5.0, 5.0, 5.0]
     assert prov[0, 1, :3, 0].tolist() == [1.0, 1.0, 1.0]
-    assert prov[0, 0, 3, 0] == 0.0
+    assert prov[0, 0, 3, 0] == pytest.approx(0.0)
 
 
 def test_covariates_line_up_across_the_fleet() -> None:
@@ -296,8 +308,11 @@ def test_confound_flags_clear_when_home_ports_differ() -> None:
 
 def test_empty_channels_keep_the_old_data_shape() -> None:
     data, meta = fleet_data(_fleet())
-    assert data["NS"] == 0 and data["NM"] == 0 and data["K"] == 0
-    assert meta["sources"] == [] and meta["markets"] == []
+    assert data["NS"] == 0
+    assert data["NM"] == 0
+    assert data["K"] == 0
+    assert meta["sources"] == []
+    assert meta["markets"] == []
     # and the forward path is unchanged
     inc = fleet_forward_incidence(data, _rates(data))[0]
     assert float(inc[0].sum()) > 0.0
@@ -328,3 +343,227 @@ def test_summaries_read_the_new_columns() -> None:
     assert {m.market_id for m in markets} == {"LATAM-CREW", "NA-CARIB"}
     assert markets[0].prevalence_mean == pytest.approx(0.05)
     assert all(m.home_confounded for m in markets)
+
+
+def test_summaries_skip_channels_the_posterior_did_not_fit() -> None:
+    """A meta that declares channels the fit skipped yields no rows, not an error."""
+    _, meta = fleet_data(_fleet(provisioning=_provisioning(),
+                                embarkation=_embarkation()))
+    assert summarize_source_hazards({"aboard_cases": [1.0]}, meta) == ()
+    assert summarize_market_hazards({"aboard_cases": [1.0]}, meta) == ()
+
+
+def test_reference_posterior_carries_the_new_channels() -> None:
+    """The numpy reference walk emits every new-channel column.
+
+    A short chain — this is contract coverage, not a recovery claim (the slow
+    suite owns identification), so a handful of draws is enough.
+    """
+    fleet = _fleet(
+        provisioning=_provisioning(),
+        embarkation=_embarkation(),
+        covariates={"child_fraction": 0.08},
+    )
+    data, _ = fleet_data(fleet)
+    posterior = fleet_reference_posterior(data, draws=24, warmup=90, thin=1, seed=7)
+    for name in (
+        "mu_log_prov",
+        "sigma_source",
+        "mu_logit_market",
+        "sigma_market",
+        "kappa[1]",
+        "epsilon[1]",
+        "epsilon[2]",
+        "susceptibility[1]",
+        "susceptibility[2]",
+        "beta_x[1]",
+        "imported_cases_source[1]",
+        "imported_cases_market[1]",
+        "imported_cases_market[2]",
+        "attribution_share_source[1]",
+        "attribution_share_market[1]",
+        "attribution_share_market[2]",
+    ):
+        draws = posterior[name]
+        assert len(draws) == 24
+        assert np.isfinite(np.asarray(draws)).all()
+    assert min(posterior["kappa[1]"]) > 0.0
+    assert all(0.0 < e < 1.0 for e in posterior["epsilon[1]"])
+    assert min(posterior["susceptibility[1]"]) > 0.0
+
+
+@pytest.fixture
+def scratch() -> Iterator[str]:
+    base = os.path.join(REPO_ROOT, "out_test_source_market")
+    shutil.rmtree(base, ignore_errors=True)
+    os.makedirs(base)
+    try:
+        yield base
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
+
+
+def _full_posterior(data: dict, meta: dict, draws: int = 3) -> dict:
+    posterior: dict = {}
+    for i in range(1, len(meta["ports"]) + 1):
+        posterior[f"lambda_port[{i}]"] = [1.0e-4] * draws
+        posterior[f"imported_cases[{i}]"] = [1.0] * draws
+        posterior[f"attribution_share[{i}]"] = [0.2] * draws
+    for i in range(1, int(data["NV"]) + 1):
+        posterior[f"lambda_visit[{i}]"] = [1.0e-4] * draws
+        posterior[f"imported_cases_visit[{i}]"] = [1.0] * draws
+    for i in range(1, int(data["W"]) + 1):
+        posterior[f"fleet_time[{i}]"] = [0.0] * draws
+    for i in range(1, int(data["S"]) + 1):
+        posterior[f"lambda_aboard[{i}]"] = [1.0e-6] * draws
+        posterior[f"R_onboard[{i}]"] = [0.5] * draws
+    posterior["aboard_cases"] = [1.0] * draws
+    posterior["secondary_cases"] = [0.5] * draws
+    posterior["import_share"] = [0.5] * draws
+    posterior["crew_hazard_ratio"] = [1.0] * draws
+    posterior["repeat_hazard_ratio"] = [1.0] * draws
+    posterior["loglik_clinical"] = [-60.0] * draws
+    for i in range(1, int(data["NS"]) + 1):
+        posterior[f"kappa[{i}]"] = [1.0e-3] * draws
+        posterior[f"imported_cases_source[{i}]"] = [15.0] * draws
+        posterior[f"attribution_share_source[{i}]"] = [0.2] * draws
+    for i in range(1, int(data["NM"]) + 1):
+        posterior[f"epsilon[{i}]"] = [0.05] * draws
+        posterior[f"imported_cases_market[{i}]"] = [20.0] * draws
+        posterior[f"attribution_share_market[{i}]"] = [0.1] * draws
+    return posterior
+
+
+def test_write_fleet_outputs_emits_source_and_market_csvs(scratch: str) -> None:
+    data, meta = fleet_data(_fleet(provisioning=_provisioning(),
+                                   embarkation=_embarkation()))
+    posterior = _full_posterior(data, meta)
+    write_fleet_outputs(scratch, posterior, meta, "norovirus")
+
+    with open(os.path.join(scratch, "source_hazards.csv"), encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    assert [r["source_id"] for r in rows] == ["MIA-PROV-01"]
+    assert rows[0]["total_servings"] != ""
+
+    with open(os.path.join(scratch, "market_hazards.csv"), encoding="utf-8") as fh:
+        rows = list(csv.DictReader(fh))
+    assert {r["market_id"] for r in rows} == {"LATAM-CREW", "NA-CARIB"}
+
+
+def test_confound_flags_skip_sources_and_markets_without_full_meta() -> None:
+    """Missing voyage ids or mixed home ports turn the flags off, not crash."""
+    _, meta = fleet_data(_fleet(provisioning=_provisioning(),
+                                embarkation=_embarkation()))
+    broken = dict(meta)
+    broken["sources"] = [{"source_id": "X", "voyages": ["NOPE"]}]
+    broken["markets"] = [{"market_id": "Y", "voyages": ["NOPE"]}]
+    assert source_home_confounded(broken) == frozenset()
+    assert market_home_confounded(broken) == frozenset()
+
+
+def test_market_prior_median_must_be_a_probability() -> None:
+    with pytest.raises(ValueError, match="market_prior_median"):
+        FleetPriors(market_prior_median=1.5)
+
+
+def test_provisioning_window_beyond_horizon_serves_nothing() -> None:
+    data, _ = fleet_data(_fleet(provisioning=_provisioning(window=(500, 600))))
+    prov = np.asarray(data["prov_servings"])
+    assert float(prov.sum()) == pytest.approx(0.0)
+
+
+def test_embarkation_allows_partial_market_coverage() -> None:
+    """A stratum without a market simply buys no imported carriers."""
+    data, meta = fleet_data(
+        _fleet(embarkation={"markets": {"passenger": "NA-CARIB"}}),
+    )
+    assert data["NM"] == 1
+    assert np.asarray(data["market_idx"])[:, 1].tolist() == [0, 0]
+    assert meta["markets"][0]["strata"] == ["passenger"]
+
+
+def test_embark_epoch_override_is_clamped_to_the_horizon() -> None:
+    data, _ = fleet_data(
+        _fleet(embarkation={**_embarkation(), "embark_epoch": 10**9}),
+    )
+    assert max(data["embark_epoch"]) <= max(data["T"])
+
+
+def test_parse_rejects_the_remaining_bad_shapes() -> None:
+    base = {"voyage_id": "V1", "ship_id": "s", "clinical_cases": []}
+    with pytest.raises(ValueError, match="must be an object"):
+        bundle_from_dict({**base, "provisioning": {"SRC": "x"}})
+    with pytest.raises(ValueError, match="servings_per_epoch must be an object"):
+        bundle_from_dict(
+            {**base, "provisioning": {"SRC": {"servings_per_epoch": [1]}}},
+        )
+    with pytest.raises(ValueError, match="servings_total must be an object"):
+        bundle_from_dict(
+            {
+                **base,
+                "provisioning": {
+                    "SRC": {
+                        "servings_total": [1],
+                        "service_window_epochs": [1, 3],
+                    },
+                },
+            },
+        )
+    with pytest.raises(ValueError, match="service_window_epochs"):
+        bundle_from_dict(
+            {
+                **base,
+                "provisioning": {
+                    "SRC": {
+                        "servings_total": {"passenger": 1},
+                        "service_window_epochs": [4, 3],
+                    },
+                },
+            },
+        )
+    with pytest.raises(ValueError, match="names no servings"):
+        bundle_from_dict({**base, "provisioning": {"SRC": {}}})
+    with pytest.raises(ValueError, match="embarkation must be an object"):
+        bundle_from_dict({**base, "embarkation": "x"})
+    with pytest.raises(ValueError, match="keyed by stratum"):
+        bundle_from_dict(
+            {**base, "embarkation": {"markets": {"passenger": "M"},
+                                     "n_boarded": [1]}},
+        )
+    with pytest.raises(ValueError, match="non-negative"):
+        bundle_from_dict(
+            {**base, "embarkation": {"markets": {"passenger": "M"},
+                                     "n_boarded": {"crew": -1}}},
+        )
+    with pytest.raises(ValueError, match="keyed by name"):
+        bundle_from_dict({**base, "covariates": [1.0]})
+    with pytest.raises(ValueError, match="not a finite number"):
+        bundle_from_dict({**base, "covariates": {"x": float("nan")}})
+
+
+def test_first_service_epoch_handles_every_shape() -> None:
+    per_epoch = bundle_from_dict(
+        {
+            "voyage_id": "V1",
+            "ship_id": "s",
+            "clinical_cases": [],
+            "provisioning": {
+                "SRC": {"servings_per_epoch": {"passenger": [0, 0, 5]}},
+            },
+        },
+    ).provisioning[0]
+    assert per_epoch.first_service_epoch == 3
+    totals = bundle_from_dict(
+        {
+            "voyage_id": "V1",
+            "ship_id": "s",
+            "clinical_cases": [],
+            "provisioning": {
+                "SRC": {
+                    "servings_total": {"passenger": 10},
+                    "service_window_epochs": [5, 9],
+                },
+            },
+        },
+    ).provisioning[0]
+    assert totals.first_service_epoch == 5

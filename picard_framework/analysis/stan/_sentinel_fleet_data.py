@@ -630,15 +630,27 @@ def build_sentinel_fleet_data(
         hours_by_visit=hours_by_visit,
         crew_repeat=crew_repeat,
         incubation=incubation,
-        sources=sources,
-        markets=markets,
-        covariate_names=covariate_names,
-        prov_all=prov_all,
-        market_rows=market_rows,
-        embark_epochs=embark_epochs,
+        channels=_MetaChannels(
+            sources=sources,
+            markets=markets,
+            covariate_names=covariate_names,
+            prov_all=prov_all,
+            embark_epochs=embark_epochs,
+        ),
     )
     meta["wastewater"] = ww["meta"]
     return data, meta
+
+
+@dataclass(frozen=True)
+class _MetaChannels:
+    """The optional reverse-inference channels a fleet may declare."""
+
+    sources: Sequence[str] = ()
+    markets: Sequence[str] = ()
+    covariate_names: Sequence[str] = ()
+    prov_all: Sequence[Any] = ()
+    embark_epochs: Sequence[int] = ()
 
 
 def _fleet_meta(
@@ -653,13 +665,13 @@ def _fleet_meta(
     hours_by_visit: Mapping[str, float],
     crew_repeat: np.ndarray,
     incubation: DelayDistribution,
-    sources: Sequence[str] = (),
-    markets: Sequence[str] = (),
-    covariate_names: Sequence[str] = (),
-    prov_all: Sequence[Any] = (),
-    market_rows: Sequence[Sequence[int]] = (),
-    embark_epochs: Sequence[int] = (),
+    channels: _MetaChannels = _MetaChannels(),
 ) -> dict[str, Any]:
+    sources = channels.sources
+    markets = channels.markets
+    covariate_names = channels.covariate_names
+    prov_all = channels.prov_all
+    embark_epochs = channels.embark_epochs
     resolutions = {
         fv.voyage_id: port_resolution_adequate(
             incubation, min_inter_port_hours(fv.voyage),
@@ -1024,67 +1036,121 @@ def fleet_forward_incidence(
     incidences: list[np.ndarray] = []
     onset_means: list[np.ndarray] = []
     for v in range(int(data["V"])):
-        horizon = int(data["T"][v])
-        ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
-        aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
-        share = np.asarray(data["secondary_share_raw"][v], dtype=float)
-        share = share / share.sum()
-        s = int(data["ship"][v]) - 1
-        susc = float(susceptibility[v])
-
-        # (group, port) rate: crew carry the ratio and the repeat slope.
-        crew_mult = float(rates.crew_ratio) * np.exp(
-            rates.beta_repeat * crew_repeat[v],
+        incidence, mu = _voyage_forward_incidence(
+            data,
+            v,
+            w_gen=w_gen,
+            f_inc=f_inc,
+            lambda_visit=lambda_visit,
+            lambda_aboard=lambda_aboard,
+            r_onboard=r_onboard,
+            kappa=kappa,
+            epsilon=epsilon,
+            susceptibility=susceptibility,
+            is_crew=is_crew,
+            crew_repeat=crew_repeat,
+            visit_idx=visit_idx,
+            rates=rates,
         )
-        rate = np.where(
-            is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
-        ) * np.where(
-            visit_idx[v][None, :] > 0,
-            lambda_visit[np.clip(visit_idx[v] - 1, 0, None)][None, :],
-            0.0,
-        )
-
-        # Everything but the renewal term is a function of the epoch alone, so
-        # only the secondary lag sum has to stay in a python loop.
-        primary = (
-            susc * np.einsum("gtp,gp->gt", ashore, rate)
-            + float(lambda_aboard[s]) * aboard
-        )
-        if kappa.size and int(data.get("NS", 0)) > 0:
-            prov = np.asarray(data["prov_servings"][v], dtype=float)[
-                :, :horizon, :
-            ]
-            primary += susc * np.einsum("gts,s->gt", prov, kappa)
-        if epsilon.size and int(data.get("NM", 0)) > 0:
-            market_row = np.asarray(data["market_idx"][v], dtype=int) - 1
-            persons_row = np.asarray(data["embark_persons"][v], dtype=float)
-            embark_t = int(data["embark_epoch"][v]) - 1
-            for g in range(int(data["G"])):
-                m = int(market_row[g])
-                if m >= 0 and 0 <= embark_t < horizon:
-                    primary[g, embark_t] += (
-                        susc * float(epsilon[m]) * float(persons_row[g])
-                    )
-        primary_total = primary.sum(axis=0)
-        incidence = primary.copy()
-        total = np.zeros(horizon, dtype=float)
-        for t in range(horizon):
-            lags = min(t, w_gen.size)
-            secondary = 0.0
-            if lags:
-                secondary = float(r_onboard[s]) * float(
-                    w_gen[:lags] @ total[t - lags : t][::-1],
-                )
-            if secondary:
-                incidence[:, t] += secondary * share
-            total[t] = primary_total[t] + secondary
-
-        mu = np.zeros_like(incidence)
-        for g in range(len(GROUPS)):
-            mu[g] = np.convolve(incidence[g], f_inc)[:horizon]
         incidences.append(incidence)
         onset_means.append(float(ascertainment[v]) * mu)
     return incidences, onset_means
+
+
+def _voyage_import_injections(
+    data: Mapping[str, Any],
+    v: int,
+    horizon: int,
+    *,
+    susc: float,
+    kappa: np.ndarray,
+    epsilon: np.ndarray,
+) -> np.ndarray:
+    """Provisioned-serving and embarkation-market injections for one voyage."""
+    injected = np.zeros((int(data["G"]), horizon), dtype=float)
+    if kappa.size and int(data.get("NS", 0)) > 0:
+        prov = np.asarray(data["prov_servings"][v], dtype=float)[
+            :, :horizon, :
+        ]
+        injected += susc * np.einsum("gts,s->gt", prov, kappa)
+    if epsilon.size and int(data.get("NM", 0)) > 0:
+        market_row = np.asarray(data["market_idx"][v], dtype=int) - 1
+        persons_row = np.asarray(data["embark_persons"][v], dtype=float)
+        embark_t = int(data["embark_epoch"][v]) - 1
+        for g in range(int(data["G"])):
+            m = int(market_row[g])
+            if m >= 0 and 0 <= embark_t < horizon:
+                injected[g, embark_t] += (
+                    susc * float(epsilon[m]) * float(persons_row[g])
+                )
+    return injected
+
+
+def _voyage_forward_incidence(
+    data: Mapping[str, Any],
+    v: int,
+    *,
+    w_gen: np.ndarray,
+    f_inc: np.ndarray,
+    lambda_visit: np.ndarray,
+    lambda_aboard: np.ndarray,
+    r_onboard: np.ndarray,
+    kappa: np.ndarray,
+    epsilon: np.ndarray,
+    susceptibility: np.ndarray,
+    is_crew: np.ndarray,
+    crew_repeat: np.ndarray,
+    visit_idx: np.ndarray,
+    rates: FleetRates,
+) -> tuple[np.ndarray, np.ndarray]:
+    """``(incidence, mu_onset)`` for voyage ``v`` — the Stan recursion verbatim."""
+    horizon = int(data["T"][v])
+    ashore = np.asarray(data["ashore_hours"][v], dtype=float)[:, :horizon, :]
+    aboard = np.asarray(data["aboard_hours"][v], dtype=float)[:, :horizon]
+    share = np.asarray(data["secondary_share_raw"][v], dtype=float)
+    share = share / share.sum()
+    s = int(data["ship"][v]) - 1
+    susc = float(susceptibility[v])
+
+    # (group, port) rate: crew carry the ratio and the repeat slope.
+    crew_mult = float(rates.crew_ratio) * np.exp(
+        rates.beta_repeat * crew_repeat[v],
+    )
+    rate = np.where(
+        is_crew[:, None] > 0.0, crew_mult[None, :], 1.0,
+    ) * np.where(
+        visit_idx[v][None, :] > 0,
+        lambda_visit[np.clip(visit_idx[v] - 1, 0, None)][None, :],
+        0.0,
+    )
+
+    # Everything but the renewal term is a function of the epoch alone, so
+    # only the secondary lag sum has to stay in a python loop.
+    primary = (
+        susc * np.einsum("gtp,gp->gt", ashore, rate)
+        + float(lambda_aboard[s]) * aboard
+        + _voyage_import_injections(
+            data, v, horizon, susc=susc, kappa=kappa, epsilon=epsilon,
+        )
+    )
+    primary_total = primary.sum(axis=0)
+    incidence = primary.copy()
+    total = np.zeros(horizon, dtype=float)
+    for t in range(horizon):
+        lags = min(t, w_gen.size)
+        secondary = 0.0
+        if lags:
+            secondary = float(r_onboard[s]) * float(
+                w_gen[:lags] @ total[t - lags : t][::-1],
+            )
+        if secondary:
+            incidence[:, t] += secondary * share
+        total[t] = primary_total[t] + secondary
+
+    mu = np.zeros_like(incidence)
+    for g in range(len(GROUPS)):
+        mu[g] = np.convolve(incidence[g], f_inc)[:horizon]
+    return incidence, mu
 
 
 def expected_onsets_fleet(
