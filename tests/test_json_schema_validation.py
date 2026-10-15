@@ -46,6 +46,9 @@ SCHEMA_DATA_MAP: dict[str, list[str]] = {
     "fomite_touch_share_declared.schema.json": [
         "data/config/fomite_touch_share_declared.json",
     ],
+    "provisioning_sources.schema.json": [
+        "data/config/provisioning_sources.json",
+    ],
     "picard_run_spec.schema.json": [
         "picard_framework/runs/destroyer_baseline_default.json",
         "picard_framework/runs/smoke_2epoch.json",

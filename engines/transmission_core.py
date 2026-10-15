@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import fnmatch
 import math
+import os
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field, replace
 from functools import lru_cache
@@ -104,6 +105,7 @@ from engines.strain_mutation import MutationOperator
 from engines.strain_state import (
     IMMUNITY_AT_EMBARKATION,
     IMMUNITY_FROM_INFECTION,
+    SHIP_LOCATION,
     ImmuneRecord,
     Phenotype,
     StrainEvolutionConfig,
@@ -116,6 +118,7 @@ from engines.wastewater_plumbing import (
     EMESIS_DRAIN_CAPTURE_FRACTION,
     BlackwaterHoldingTank,
 )
+from simulation_utils.paths import REPO_ROOT, load_validated_json
 
 # ── Pathway-specific parameters ──────────────────────────────────────────
 
@@ -1557,6 +1560,15 @@ COMMON_SOURCE_LOT_OBJECT_PROBABILITY_RANGE = (0.001, 0.02)
 # items are the minority tail) bounds the shape, not the value. Grade C.
 # Origin: declared.
 COMMON_SOURCE_EXTRA_LOT_PROBABILITY_RANGE = (0.02, 0.25)
+# PROVISIONED-SOURCE-01 — declared upstream contaminated-lot prevalence
+# interval: one hull-invariant q_source the provisioned_source mint model
+# draws against per station. Grade C pending the sourcing leg; the shipped
+# default carries the generic cruise embarkation-port provisioning-source
+# entry from data/config/provisioning_sources.json.
+COMMON_SOURCE_Q_SOURCE_RANGE = (0.0002, 0.0005)
+# Registry entry id used when ``provisioned_source.source_id`` is absent and
+# the registry declares no ``default_source``.
+_PROVISIONED_SOURCE_FALLBACK_ID = "generic_cruise_port"
 # The lot's edible extent in servings — documentary provisioning units:
 # a shellfish sack ~100-200 pieces, produce cases tens of portions.
 # Log-uniform because provisioning sizes are multiplicative. ∅ per-lot
@@ -1665,6 +1677,10 @@ _COMMON_SOURCE_SPECS: dict[str, tuple[tuple[float, float], str]] = {
         COMMON_SOURCE_LOT_OBJECT_PROBABILITY_RANGE, "uniform"),
     "extra_lot_probability": (
         COMMON_SOURCE_EXTRA_LOT_PROBABILITY_RANGE, "uniform"),
+    # PROVISIONED-SOURCE-01 — per-station contaminated-lot prevalence under
+    # ``lot_mint_model: "provisioned_source"``; drawn once per voyage at the
+    # first lot-rate slot (the q_source contract position).
+    "q_source": (COMMON_SOURCE_Q_SOURCE_RANGE, "uniform"),
     "lot_servings": (COMMON_SOURCE_LOT_SERVINGS_RANGE, "loguniform"),
     "lot_shelf_life_days": (
         COMMON_SOURCE_LOT_SHELF_LIFE_DAYS_RANGE, "int"),
@@ -1686,6 +1702,19 @@ _COMMON_SOURCE_LOT_VOYAGE_RATES = {
     "independent": ("lot_event_probability",),
     "object": ("lot_object_probability", "extra_lot_probability"),
 }
+
+# Lot voyage-rate names under each ``lot_mint_model`` (PROVISIONED-SOURCE-01
+# contract §2.1). ``fiat`` reproduces the v1 grammar verbatim — the
+# Bernoulli gate and geometric tail positions in the stream are unchanged.
+# ``provisioned_source`` replaces the object-mode gate with one q_source draw
+# at the first lot-rate slot; ``off``/``independent`` ignore the mint model.
+_COMMON_SOURCE_LOT_MINT_VOYAGE_RATES = {
+    "fiat": _COMMON_SOURCE_LOT_VOYAGE_RATES,
+    "provisioned_source": {
+        "independent": ("lot_event_probability",),
+        "object": ("q_source",),
+    },
+}
 _COMMON_SOURCE_ARM_VOYAGE_RATES = {
     "ill_handler": {
         "independent": ("handler_event_probability",),
@@ -1702,6 +1731,34 @@ _COMMON_SOURCE_SPAN_RATES = {
     "ill_handler": "handler_span_contamination_probability",
     "ill_diner": "diner_course_contamination_probability",
 }
+
+# PROVISIONED-SOURCE-01 (contract §1.1/§1.3): the lot mint-model grammar —
+# ``"fiat"`` keeps the v1 Bernoulli gate + geometric tail verbatim;
+# ``"provisioned_source"`` mints each contaminated (zone, item-line)
+# station off the derived census, per upstream prevalence q_source.
+# An absent ``lot_mint_model`` resolves ``"fiat"`` — the unmarked config
+# keeps the pre-mechanism draw sequence bit-identical — while the shipped
+# config (crusher_labs/config.yaml) and the eval arms name
+# ``"provisioned_source"`` explicitly, shipping the mechanism ON for
+# shipped runs. Mint model is only meaningful under object-mode lot mints.
+COMMON_SOURCE_LOT_MINT_MODELS = frozenset({"fiat", "provisioned_source"})
+COMMON_SOURCE_LOT_MINT_MODEL_ABSENT = "fiat"
+
+_PROVISIONING_SOURCES_REGISTRY_PATH = os.path.join(
+    REPO_ROOT, "data", "config", "provisioning_sources.json")
+
+
+@lru_cache(maxsize=None)
+def _provisioning_source_registry() -> dict:
+    """The ``data/config/provisioning_sources.json`` source registry
+    (PROVISIONED-SOURCE-01 contract §1.3), validated against its schema
+    and cached for the process lifetime."""
+    raw = load_validated_json(
+        _PROVISIONING_SOURCES_REGISTRY_PATH,
+        "provisioning_sources.schema.json",
+        allowed_roots=(REPO_ROOT,),
+    )
+    return raw if isinstance(raw, dict) else {}
 # Sentinel for ``_cs_pan_deposit``: a mix argument of ``_MIX_UNSET``
 # means "build the pan mix fresh" (the v1 path); an object always passes
 # the mix minted at object creation — possibly ``None`` — so the strain
@@ -3347,6 +3404,58 @@ class TransmissionCore:
             == "independent"
             else "object"
         )
+        # PROVISIONED-SOURCE-01 (contract §1.1): the lot mint model.
+        # ``"fiat"`` is the absent/spelled-out-baseline resolution —
+        # it reproduces the v1 Bernoulli-gate + geometric-tail grammar
+        # verbatim, so every config that does not name the key keeps
+        # the pre-mechanism draw sequence bit-identical.
+        # ``"provisioned_source"`` — what the shipped config and the
+        # eval arms spell — is the better physics: every (zone,
+        # item-line) station in the derived census mints its lot iff a
+        # per-station Bernoulli lands under the drawn upstream
+        # prevalence q_source. Only meaningful under object-mode lot
+        # mints; ``lot_mode: "independent"`` ignores it.
+        self._cs_lot_mint_model = (
+            "provisioned_source"
+            if str(
+                cs.get("lot_mint_model", COMMON_SOURCE_LOT_MINT_MODEL_ABSENT),
+            ).strip().lower() == "provisioned_source"
+            else "fiat"
+        )
+        # The provisioning-source covariate (contract §1.3):
+        # ``provisioned_source`` is a platform-level block naming the
+        # upstream source the voyage provisions from; the id falls back
+        # to the registry's ``default_source``, then the declared
+        # fallback entry. ``q_source`` may be a scalar rung (consumes
+        # no uniform at draw time) or a [lo, hi] interval drawn once
+        # per voyage at the first lot-rate slot; absent it resolves
+        # from the named registry entry's declared interval.
+        ps = cs.get("provisioned_source")
+        if not isinstance(ps, dict):
+            ps = {}
+        self._cs_ps_source_id: str | None = None
+        ps_q = None
+        if self._cs_lot_mint_model == "provisioned_source":
+            registry = _provisioning_source_registry()
+            self._cs_ps_source_id = str(
+                ps.get("source_id")
+                or registry.get("default_source")
+                or _PROVISIONED_SOURCE_FALLBACK_ID
+            )
+            ps_q = ps.get("q_source")
+            if ps_q is None:
+                ps_q = (
+                    (registry.get("sources") or {}).get(self._cs_ps_source_id)
+                    or {}
+                ).get("q_source")
+        self._cs_cfg = dict(cs)
+        if ps_q is not None:
+            # Inject through the normal cfg layer so the resolved spec
+            # rides the unchanged profile-block > tx-cfg > module
+            # precedence in _cs_spec_range; the explicit
+            # ``provisioned_source.q_source`` (or the registry entry's)
+            # outranks a bare ``common_source.q_source``.
+            self._cs_cfg["q_source"] = ps_q
         self._cs_handler_mode = (
             "independent"
             if str(cs.get("handler_mode", "object")).strip().lower()
@@ -3396,7 +3505,6 @@ class TransmissionCore:
             .strip().lower() == "per_window"
             else "per_object"
         )
-        self._cs_cfg = cs
         # Per-platform VSP-conditioned rate scalar. Ship wiring merges the
         # platform layout's posture into this block when the config does
         # not already carry one (cfg > platform > 1.0). The score→multiplier
@@ -3431,6 +3539,14 @@ class TransmissionCore:
         self._cs_rates: dict[str, dict[str, float]] = {}
         self._cs_lot_plan: dict[str, tuple[str, str, int]] = {}
         self._cs_lot_plan_done = False
+        # PROVISIONED-SOURCE-01 voyage witness (contract §3): per armed
+        # pathogen the drawn q_source, the census size and the
+        # contaminated-station count; the contaminated (zone, item)
+        # set itself is retained for the station-witness readout.
+        self._cs_provisioned_source: dict[str, dict[str, Any]] = {}
+        self._cs_contaminated_stations: dict[
+            str, set[tuple[str, str]],
+        ] = {}
         self._cs_windows: dict[tuple[str, str, str, int], dict[str, Any]] = {}
         self._cs_members_epoch = -1
         self._cs_members: dict[str, list[KorkinAgent]] = {}
@@ -3494,7 +3610,8 @@ class TransmissionCore:
         # all-independent mix draws the v1 triple verbatim
         # (bit-identical to the pre-change tree).
         rate_names = (
-            _COMMON_SOURCE_LOT_VOYAGE_RATES[self._cs_lot_mode]
+            _COMMON_SOURCE_LOT_MINT_VOYAGE_RATES[self._cs_lot_mint_model][
+                self._cs_lot_mode]
             + _COMMON_SOURCE_ARM_VOYAGE_RATES["ill_handler"][
                 self._cs_handler_mode]
             + _COMMON_SOURCE_ARM_VOYAGE_RATES["ill_diner"][
@@ -12559,6 +12676,13 @@ class TransmissionCore:
         ]
         if not zones:
             return
+        if self._cs_lot_mint_model == "provisioned_source":
+            # PROVISIONED-SOURCE-01: the derived census replaces the
+            # fiat gate — each (zone, item-line) station mints its lot
+            # iff its Bernoulli lands under q_source, so objects per
+            # voyage are Binomial(N_lots, q_source) by construction.
+            self._cs_plan_provisioned_objects(zones, cells)
+            return
         lot_factor = (
             self._cs_posture if self._cs_lot_posture_coupling else 1.0
         )
@@ -12582,11 +12706,62 @@ class TransmissionCore:
             for _ in range(count):
                 self._cs_realize_lot_object(pid, cells, zones)
 
+    def _cs_station_census(
+        self,
+        zones: list[str],
+    ) -> list[tuple[str, str]]:
+        """The PROVISIONED-SOURCE-01 station census (contract §1.2/§2).
+
+        Served Dining venues in ``_cs_dining_zones`` order x
+        ``COMMON_SOURCE_LOT_ITEM_LINES`` in declaration order — the
+        canonical order the per-station Bernoulli uniforms are
+        consumed in, so shared seeds put the same uniform on the same
+        station and contaminated-station sets nest across q rungs.
+        """
+        return [
+            (zone, item)
+            for zone in zones
+            for item in COMMON_SOURCE_LOT_ITEM_LINES
+        ]
+
+    def _cs_plan_provisioned_objects(
+        self,
+        zones: list[str],
+        cells: list[tuple[str, str, int]],
+    ) -> None:
+        """Mint every contaminated station's lot object once
+        (PROVISIONED-SOURCE-01 contract §2.2/§2.4).
+
+        One Bernoulli ``u_s < q_source`` per station on the shared
+        ``_cs_rng`` stream, in canonical census order; every
+        contaminated station mints exactly one object bound to that
+        (zone, item) pair — the zone/item uniforms the fiat grammar
+        consumes are never drawn."""
+        stations = self._cs_station_census(zones)
+        for pid, rates in self._cs_rates.items():
+            q = rates["q_source"]
+            contaminated = [
+                station for station in stations
+                if self._cs_rng.random() < q
+            ]
+            self._cs_contaminated_stations[pid] = set(contaminated)
+            self._cs_provisioned_source[pid] = {
+                "source_id": self._cs_ps_source_id,
+                "q_source_drawn": q,
+                "n_stations": len(stations),
+                "n_contaminated": len(contaminated),
+            }
+            for station in contaminated:
+                self._cs_realize_lot_object(
+                    pid, cells, zones, station=station,
+                )
+
     def _cs_realize_lot_object(
         self,
         pathogen_id: str,
         cells: list[tuple[str, str, int]],
         zones: list[str],
+        station: tuple[str, str] | None = None,
     ) -> None:
         """Draw one lot object's single realized contamination state.
 
@@ -12597,10 +12772,19 @@ class TransmissionCore:
         cs_block = (self.pathogen_profiles or {}).get(
             pathogen_id, {},
         ).get("common_source_events", {})
-        zone = zones[int(self._cs_rng.integers(len(zones)))]
-        item = COMMON_SOURCE_LOT_ITEM_LINES[
-            int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
-        ]
+        if station is None:
+            # Fiat grammar — zone then item, each a uniform pick: the
+            # first two draws the v1 object consumed, positions
+            # preserved verbatim.
+            zone = zones[int(self._cs_rng.integers(len(zones)))]
+            item = COMMON_SOURCE_LOT_ITEM_LINES[
+                int(self._cs_rng.integers(len(COMMON_SOURCE_LOT_ITEM_LINES)))
+            ]
+        else:
+            # Provisioned-source grammar — the station bound at the
+            # census draw carries (zone, item) directly; no zone/item
+            # uniforms are consumed.
+            zone, item = station
         days = int(round(self._cs_draw(
             "embarkation_lot_window_days", pathogen_id,
         )))
@@ -12645,12 +12829,25 @@ class TransmissionCore:
                 if self._cs_seed_seq is not None
                 else self._cs_rng
             )
-        mix = self._cs_lot_mix(pathogen_id)
+        mix = self._cs_lot_mix(
+            pathogen_id,
+            source_location=(
+                self._cs_ps_source_id
+                if self._cs_lot_mint_model == "provisioned_source"
+                else SHIP_LOCATION
+            ),
+        )
         self._cs_object_counter += 1
         self._cs_objects.setdefault(pathogen_id, []).append({
             "object_id": f"cso-{pathogen_id}-{self._cs_object_counter}",
             "pathogen_id": pathogen_id,
             "source_kind": "provisioned_lot",
+            # PROVISIONED-SOURCE-01 object witness (contract §3): the
+            # provisioning-source id the station minted under; None on
+            # fiat-minted and agent objects.
+            "provisioned_source_id": (
+                self._cs_ps_source_id if station is not None else None
+            ),
             "zone": zone,
             "item_label": item,
             "start_token": token,
@@ -13062,6 +13259,7 @@ class TransmissionCore:
             "pathogen_id": obj["pathogen_id"],
             "source_kind": obj["source_kind"],
             "source_agent_id": obj.get("source_agent_id"),
+            "provisioned_source_id": obj.get("provisioned_source_id"),
             "zone": obj["zone"],
             "item_label": obj["item_label"],
             "seeded_epoch": obj["seeded_epoch"],
@@ -13497,9 +13695,18 @@ class TransmissionCore:
             and not agent.has_departed(epoch)
         ]
 
-    def _cs_lot_mix(self, pathogen_id: str) -> EmissionMix | None:
+    def _cs_lot_mix(
+        self,
+        pathogen_id: str,
+        *,
+        source_location: str = SHIP_LOCATION,
+    ) -> EmissionMix | None:
         """Mint the lot's imported lineage; the provisioning supply
-        carries its own genotype, tagged ``imported:lot``."""
+        carries its own genotype, tagged ``imported:lot``. The
+        ``source_location`` records which upstream provisioning source
+        the lot boarded from — the resolved source id under
+        ``lot_mint_model: "provisioned_source"``, ``SHIP_LOCATION`` on
+        the fiat grammar (issue #1004)."""
         if self.strain_registry is None or pathogen_id == "_default":
             return None
         config = self.strain_configs.get(pathogen_id)
@@ -13514,6 +13721,7 @@ class TransmissionCore:
             pathogen_id,
             genotype=genotype,
             origin="imported:lot",
+            source_location=source_location,
             phenotype=self._founder_phenotype(pathogen_id, genotype),
         )
         return single_strain_mix(

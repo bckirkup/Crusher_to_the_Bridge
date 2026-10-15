@@ -1,0 +1,11 @@
+{
+  "default_source": "generic_cruise_port",
+  "sources": {
+    "generic_cruise_port": {
+      "q_source": [0.0002, 0.0005],
+      "platform_types": ["cruise"],
+      "evidence": "Grade C, declared — PROVISIONED-SOURCE-01 contract §1.3",
+      "notes": "Generic cruise embarkation-port provisioning source — the shipped default covariate. The interval is the declared upstream contaminated-lot prevalence pending the sourcing leg (FDA/state facility inspections, MMWR foodborne surveillance, VSP supplier posture, EU RASFF); it was not fitted to any scored anchor. Cruises are the first consumer of the registry; other platform types declare their own entries."
+    }
+  }
+}

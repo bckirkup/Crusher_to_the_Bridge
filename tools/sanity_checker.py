@@ -2239,6 +2239,7 @@ def _check_config_yaml(
     cfg: dict[str, Any],
     report: Report,
     zone_ids: set[str] | None = None,
+    layout: "SpatialLayout | None" = None,
 ) -> None:
     """Validate config.yaml values: bounds, fractions, cross-references."""
     _check_agent_classes(cfg, report, zone_ids)
@@ -2262,6 +2263,131 @@ def _check_config_yaml(
     _check_high_touch_area_scale(cfg, report)
     _check_fomite_representation(cfg, report)
     _check_ppe_fatigue(cfg, report)
+    _check_common_source(cfg, report, layout)
+
+
+def _check_q_source_spec(spec: Any, field: str, report: Report) -> None:
+    """The PROVISIONED-SOURCE-01 q_source grammar (contract §1.1): a
+    scalar rung or an ordered [lo, hi] pair, every value in [0, 1]."""
+    if isinstance(spec, bool):
+        spec = None
+    if isinstance(spec, (int, float)):
+        vals = [float(spec)]
+    elif isinstance(spec, list) and len(spec) == 2 and all(
+        isinstance(v, (int, float)) and not isinstance(v, bool)
+        for v in spec
+    ):
+        vals = [float(v) for v in spec]
+    else:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"{field} = {spec!r} must be a scalar or a [lo, hi] pair",
+        )
+        return
+    if any(not math.isfinite(v) or v < 0.0 or v > 1.0 for v in vals):
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"{field} = {spec!r} must lie in [0, 1]",
+        )
+    elif len(vals) == 2 and vals[0] > vals[1]:
+        report.error(
+            _CONFIG_YAML, "MATH_BOUND",
+            f"{field} = {spec!r} must be ordered lo <= hi",
+        )
+
+
+def _check_common_source(
+    cfg: dict[str, Any],
+    report: Report,
+    layout: "SpatialLayout | None" = None,
+) -> None:
+    """Validate ``transmission.common_source`` — PROVISIONED-SOURCE-01
+    (issue #1006).
+
+    ``lot_mint_model`` must be ``"fiat"`` or ``"provisioned_source"``;
+    ``provisioned_source.source_id`` resolves against
+    ``data/config/provisioning_sources.json`` (falling back to the
+    registry's ``default_source``); ``q_source`` follows the
+    scalar|[lo,hi] probability grammar. A ``provisioned_source`` arm
+    on a platform with no Dining zones warns — the station census
+    resolves N_lots == 0 and no lot object ever mints. Absent block
+    (the shipped defaults) is always valid.
+    """
+    tx = cfg.get("transmission")
+    if not isinstance(tx, dict):
+        return
+    cs = tx.get("common_source")
+    if cs is None:
+        cs = {}
+    if not isinstance(cs, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "transmission.common_source must be a mapping",
+        )
+        return
+    mint = str(cs.get("lot_mint_model", "fiat"))
+    if mint not in ("fiat", "provisioned_source"):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"common_source.lot_mint_model {mint!r} must be one of "
+            "['fiat', 'provisioned_source']",
+        )
+    ps = cs.get("provisioned_source")
+    if ps is None:
+        ps = {}
+    if not isinstance(ps, dict):
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            "common_source.provisioned_source must be a mapping",
+        )
+        return
+    if mint != "provisioned_source":
+        return
+    registry = _load_json(
+        os.path.join(
+            _REPO_ROOT, "data", "config", "provisioning_sources.json"))
+    sources = (
+        registry.get("sources") if isinstance(registry, dict) else None
+    )
+    if not isinstance(sources, dict) or not sources:
+        report.error(
+            "provisioning_sources.json", "SCHEMA",
+            "provisioning_sources.json declares no sources — the "
+            "provisioned_source mint model has nothing to resolve "
+            "source_id against",
+        )
+        return
+    default_source = (
+        registry.get("default_source")
+        if isinstance(registry, dict) else None
+    )
+    source_id = ps.get("source_id") or default_source
+    if source_id is not None and source_id not in sources:
+        report.error(
+            _CONFIG_YAML, "CONFIG",
+            f"provisioned_source.source_id {source_id!r} names no "
+            "provisioning_sources.json entry",
+        )
+    if default_source is not None and default_source not in sources:
+        report.error(
+            "provisioning_sources.json", "CONFIG",
+            f"default_source {default_source!r} names no sources entry",
+        )
+    spec = ps.get("q_source")
+    if spec is None and isinstance(source_id, str):
+        spec = (sources.get(source_id) or {}).get("q_source")
+    if spec is not None:
+        _check_q_source_spec(
+            spec, "provisioned_source.q_source", report)
+    if layout is not None and not any(
+        z.type == "Dining" for z in layout.zones
+    ):
+        report.warn(
+            _CONFIG_YAML, "CONFIG",
+            "lot_mint_model 'provisioned_source' is armed but the "
+            "platform declares no Dining zones — the station census "
+            "resolves N_lots == 0 and no lot object ever mints",
+        )
 
 
 def _check_ppe_fatigue(cfg: dict[str, Any], report: Report) -> None:
@@ -3781,7 +3907,7 @@ def _run_config_yaml_phase(
     zone_ids = {z.id for z in layout.zones} if layout else None
     print(f"\n  {_CYAN}Running config.yaml validation checks...{_RESET}")
     pre = len(report.findings)
-    _check_config_yaml(cfg, report, zone_ids)
+    _check_config_yaml(cfg, report, zone_ids, layout)
     added = len(report.findings) - pre
     if added:
         errs = sum(1 for f in report.findings[pre:] if f.severity == Severity.ERROR)

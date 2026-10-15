@@ -379,6 +379,21 @@ transmission:
   # stateroom. zone_pool is the labelled pre-change baseline for paired
   # measurement.
   cabin_air_mode: "cabin_compartment"
+  # PROVISIONED-SOURCE-01, shipped ON: contaminated provisioned lots mint
+  # off the derived station census (served Dining venues x the 7 item
+  # lines), one Bernoulli per station against the drawn upstream
+  # prevalence q_source resolved through
+  # data/config/provisioning_sources.json — one hull-invariant prevalence
+  # replacing the per-hull fiat rate ladder. source_id names the
+  # provisioning-source covariate; q_source falls back to the registry
+  # entry's declared interval (an explicit scalar|[lo,hi] would win).
+  # lot_mint_model: "fiat" is the labelled bit-identical baseline — and
+  # also what an unmarked config resolves engine-side, so pre-existing
+  # run configs keep their v1 draw sequence.
+  common_source:
+    lot_mint_model: "provisioned_source"
+    provisioned_source:
+      source_id: "generic_cruise_port"
   contact_mode: "per_partner_contact"   # "legacy" | "density_dependent" | "heterogeneous_zone_dose" | "per_partner_contact"
   # Shared-head visit mechanism: "none" (default, bit-identical) or
   # "dwell_weighted" (Poisson visits resolved to the serving head, exposure
