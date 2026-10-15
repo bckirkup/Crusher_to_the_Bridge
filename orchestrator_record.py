@@ -135,6 +135,26 @@ def _campaign_count(syn_result: dict[str, Any], key: str) -> int:
     return sum(len(ids) for ids in by_pathogen.values())
 
 
+def _reported_route_and_channel(
+    agent_ledger: dict[str, float] | None,
+    supply: float,
+) -> tuple[str, str]:
+    """Dominant route + import channel for one reported agent.
+
+    ``agent_ledger`` is the agent's acquired route ledger at
+    establishment (absent = no establishing event: a boarding import).
+    ``supply`` is the supply-chain-sourced share of that ledger's mass;
+    the agent's channel is ``supply_chain`` only when it strictly
+    exceeds the aboard dose.
+    """
+    if not agent_ledger:
+        return "imported", "boarding_import"
+    dominant = max(agent_ledger, key=agent_ledger.get)
+    aboard_dose = sum(agent_ledger.values()) - supply
+    channel = "supply_chain" if supply > aboard_dose else "aboard"
+    return dominant, channel
+
+
 def _summary_counts(
     agents: list[dict[str, Any]],
     engine: KorkinShipEngine,
@@ -169,25 +189,12 @@ def _summary_counts(
         group_totals[group] += 1
         if aid in state.ever_reported_ids:
             reported_counts[group] += 1
-            agent_ledger = state.infection_route_ledger_by_agent.get(aid)
-            dominant = (
-                max(agent_ledger, key=agent_ledger.get)
-                if agent_ledger
-                else "imported"
+            dominant, channel = _reported_route_and_channel(
+                state.infection_route_ledger_by_agent.get(aid),
+                state.infection_supply_dose_by_agent.get(aid, 0.0),
             )
             cell = reported_by_route[group]
             cell[dominant] = cell.get(dominant, 0) + 1
-            supply = state.infection_supply_dose_by_agent.get(aid, 0.0)
-            aboard_dose = (
-                sum(agent_ledger.values()) - supply if agent_ledger else 0.0
-            )
-            channel = (
-                "boarding_import"
-                if not agent_ledger
-                else "supply_chain"
-                if supply > aboard_dose
-                else "aboard"
-            )
             reported_by_channel[group][channel] += 1
         if aid in state.ever_ill_ids:
             ill_counts[group] += 1
