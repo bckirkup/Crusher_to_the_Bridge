@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-15T22:32:14.456478+00:00",
+  "platform_id": "castle_class_corvette",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/castle_corvette",
+  "digest_sha256": "e2ecef1803c2a3ba5d1de417aa6979b98f785f9891cf110e9ed09991b3e04470",
+  "svg_sha256": {
+    "page_01_approved.svg": "80c8a0c7da4d18d429c4db9945bb44507ac2a2ac4670d053e99e7ed1f3a36c4b"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 19,
+  "berthing_zones": [
+    "Foc_Cabins",
+    "Officer_Cabins",
+    "Quarterdeck",
+    "Mess_Mid",
+    "Seamen_Mess",
+    "Stokers_Mess"
+  ]
+}

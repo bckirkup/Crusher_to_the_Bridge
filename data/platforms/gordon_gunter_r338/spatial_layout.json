@@ -1,0 +1,577 @@
+{
+  "platform": "gordon_gunter_r338",
+  "description": "T-AGOS oceanographic research vessel, 224 ft LOA, SWATH-derived small-waterplane hull; 20 officers/crew + 15 scientists. Zones read from booklet R-338 sheets 6-10 (maritime.org Booklet of General Plans).",
+  "isolation_unit_capacity": 1,
+  "deck_dimensions": {
+    "length_m": 68.3,
+    "beam_m": 13.1
+  },
+  "graywater_zones": [
+    "Sewage_Mchry"
+  ],
+  "zones": [
+    {
+      "id": "Pilot_House",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 463.76,
+      "floor_area_m2": 178.37,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 11.13,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 55.46,
+        "y": 5.64
+      },
+      "description": "03-15-0-C pilothouse incl. chart space + propulsion control console"
+    },
+    {
+      "id": "HD_Bridge",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 50.39,
+      "floor_area_m2": 21.91,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 11.13,
+      "deck": "bridge_deck",
+      "display": {
+        "x": 42.84,
+        "y": 10.48
+      },
+      "serves": [
+        "Pilot_House"
+      ],
+      "description": "WR/WC 03-26-1-L serving bridge",
+      "base_ach": 19.1,
+      "max_occupancy": 8
+    },
+    {
+      "id": "Officer_SR",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 686.43,
+      "floor_area_m2": 264.01,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 8.64,
+      "deck": "upper_deck",
+      "display": {
+        "x": 50.71,
+        "y": 5.99
+      },
+      "max_occupancy": 10,
+      "description": "CO/XO/OPS/CH ENG/ASST ENGR/JR OFF staterooms 02-14/23/28/34 blk"
+    },
+    {
+      "id": "HD_Upper",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 44.16,
+      "floor_area_m2": 19.2,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 8.64,
+      "deck": "upper_deck",
+      "display": {
+        "x": 47.19,
+        "y": 9.73
+      },
+      "serves": [
+        "Officer_SR"
+      ],
+      "description": "T/SH 02-18/26/27 heads inside stateroom passage",
+      "base_ach": 19.1,
+      "max_occupancy": 7
+    },
+    {
+      "id": "Ships_Office",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 31.2,
+      "floor_area_m2": 12.0,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 8.64,
+      "deck": "upper_deck",
+      "display": {
+        "x": 52.18,
+        "y": 9.73
+      },
+      "description": "SHIP'S OFFICE 02-23-1-Q"
+    },
+    {
+      "id": "Boat_Deck",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 663.25,
+      "floor_area_m2": 255.1,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 8.64,
+      "deck": "upper_deck",
+      "display": {
+        "x": 26.82,
+        "y": 5.43
+      },
+      "description": "open weather deck aft w/ mission launch + rescue RHIB + aft steering ctrl 02-68-0-C"
+    },
+    {
+      "id": "Science_Labs",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 271.57,
+      "floor_area_m2": 104.45,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 39.77,
+        "y": 5.24
+      },
+      "description": "HYDRO/CHEM 01-67-0-Q + DRY LAB 01-59-0-Q + COMPUTER LAB 01-52-2-Q"
+    },
+    {
+      "id": "Wet_Lab",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 62.07,
+      "floor_area_m2": 23.87,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 39.43,
+        "y": 11.88
+      },
+      "description": "WET LAB 01-52-3-Q + ELECTRONICS SHOP 01-52-1-Q"
+    },
+    {
+      "id": "Scientist_SR",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 557.69,
+      "floor_area_m2": 214.5,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 54.8,
+        "y": 6.11
+      },
+      "max_occupancy": 15,
+      "description": "SCI SR 2-man 01-42/39/34/28/20 + CHIEF SCI 01-20-1-L blk"
+    },
+    {
+      "id": "Crew_SR_Foc",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 67.89,
+      "floor_area_m2": 26.11,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 63.0,
+        "y": 10.04
+      },
+      "max_occupancy": 6,
+      "description": "crew SRs fwd 01-24-2-L area"
+    },
+    {
+      "id": "HD_Focsle",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 41.19,
+      "floor_area_m2": 17.91,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 53.09,
+        "y": 11.53
+      },
+      "serves": [
+        "Scientist_SR",
+        "Crew_SR_Foc",
+        "Science_Labs"
+      ],
+      "description": "T/SH 01-38/25 heads",
+      "base_ach": 19.1,
+      "max_occupancy": 7
+    },
+    {
+      "id": "Shelter_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 605.22,
+      "floor_area_m2": 232.78,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 21.66,
+        "y": 5.07
+      },
+      "description": "open shelter/trawl deck aft w/ winches + sorting table"
+    },
+    {
+      "id": "Emer_Gen_Rm",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 19.4,
+      "floor_area_m2": 7.46,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 6.05,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 67.27,
+        "y": 7.86
+      },
+      "description": "EMER GEN RM 01-6-0-E fwd"
+    },
+    {
+      "id": "Crew_SR_Main",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 234.19,
+      "floor_area_m2": 90.07,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 42.63,
+        "y": 2.4
+      },
+      "max_occupancy": 12,
+      "description": "CREW SR row 1-67/62/57/52/47/42/37/27/23 blk"
+    },
+    {
+      "id": "Passage_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 166.54,
+      "floor_area_m2": 64.05,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 38.23,
+        "y": 4.95
+      },
+      "description": "longitudinal passages 1-72-2-L/1-52-2-L/1-45-1-L"
+    },
+    {
+      "id": "Genl_Mess",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 86.74,
+      "floor_area_m2": 33.36,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 33.46,
+        "y": 7.28
+      },
+      "max_occupancy": 24,
+      "description": "GENL MESS 1-52-0-L"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 52.04,
+      "floor_area_m2": 20.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 41.16,
+        "y": 7.28
+      },
+      "max_occupancy": 4,
+      "description": "GALLEY 1-42-0-Q + PANTRY 1-37-3-A"
+    },
+    {
+      "id": "Crew_Lounge",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 31.23,
+      "floor_area_m2": 12.01,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 45.75,
+        "y": 10.33
+      },
+      "max_occupancy": 8,
+      "description": "CREW LOUNGE 1-34-0-L"
+    },
+    {
+      "id": "Med_Trtmt",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 34.69,
+      "floor_area_m2": 13.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 51.8,
+        "y": 10.63
+      },
+      "max_occupancy": 2,
+      "description": "MED TRTMNT RM 1-29-0-L"
+    },
+    {
+      "id": "Recreation",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 41.63,
+      "floor_area_m2": 16.01,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 63.17,
+        "y": 1.16
+      },
+      "max_occupancy": 10,
+      "description": "RECREATION RM 1-14-2-L"
+    },
+    {
+      "id": "Ships_Store",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 43.37,
+      "floor_area_m2": 16.68,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 64.63,
+        "y": 4.37
+      },
+      "description": "SHIP'S STORE 1-6-4-Q + DRY PROV 1-6 blk"
+    },
+    {
+      "id": "Prov_Reefers",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 60.72,
+      "floor_area_m2": 23.35,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 59.87,
+        "y": 8.01
+      },
+      "description": "FREEZE 1-18/CHILL 1-17/THAW 1-23-1 reefer + stores blk"
+    },
+    {
+      "id": "Genl_Workshop",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 48.57,
+      "floor_area_m2": 18.68,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 23.19,
+        "y": 6.99
+      },
+      "description": "GENL WORKSHOP 1-62-0-Q"
+    },
+    {
+      "id": "Bosn_Workshop",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 62.45,
+      "floor_area_m2": 24.02,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 17.33,
+        "y": 6.11
+      },
+      "description": "BOS'N WORKSHOP 1-75-0-Q + FAN RM 1-75-2-Q + DIVE LKR 1-72-1-A"
+    },
+    {
+      "id": "HD_Main",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 36.82,
+      "floor_area_m2": 16.01,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 51.06,
+        "y": 1.96
+      },
+      "serves": [
+        "Crew_SR_Main",
+        "Genl_Mess",
+        "Recreation"
+      ],
+      "description": "T/SH 1-65/55/45/31 heads in SR row",
+      "base_ach": 19.1,
+      "max_occupancy": 6
+    },
+    {
+      "id": "Aft_Working_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 333.07,
+      "floor_area_m2": 128.1,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 3.35,
+      "deck": "main_deck",
+      "display": {
+        "x": 6.33,
+        "y": 4.22
+      },
+      "description": "open fantail aft: winch controllers, pot hauler, dive ops"
+    },
+    {
+      "id": "Mission_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 550.11,
+      "floor_area_m2": 211.58,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 4.27,
+      "deck": "mission_platform",
+      "display": {
+        "x": 8.45,
+        "y": 5.64
+      },
+      "description": "open trawl deck: A-frame, stern roller, trawlway"
+    },
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 134.21,
+      "floor_area_m2": 51.62,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 3.68,
+        "y": 6.22
+      },
+      "description": "STEERING GEAR ROOM 2-94-0-Q"
+    },
+    {
+      "id": "Shaft_Alley",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 279.6,
+      "floor_area_m2": 107.54,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 16.64,
+        "y": 7.7
+      },
+      "description": "tunnel/QAWT/HPU rm 2-77-2-Q + SCI STOREROOM 2-77-3-A"
+    },
+    {
+      "id": "Prpln_Motor",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 205.04,
+      "floor_area_m2": 78.86,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 33.27,
+        "y": 6.06
+      },
+      "description": "PRPLN MOTOR RM 3-60-0-E"
+    },
+    {
+      "id": "Main_Gen_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 410.08,
+      "floor_area_m2": 157.72,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 45.53,
+        "y": 6.06
+      },
+      "description": "MAIN GENERATOR RM 3-34-0-E (3 diesels) + MAIN CONTROL STATION 2-52-0-E"
+    },
+    {
+      "id": "AC_Mchry",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 55.92,
+      "floor_area_m2": 21.51,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 58.14,
+        "y": 3.27
+      },
+      "description": "AIR COND MCHRY RM 2-23-2-Q + AC/CHW plants + REFR plant"
+    },
+    {
+      "id": "Laundry",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 46.6,
+      "floor_area_m2": 17.92,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 57.79,
+        "y": 9.01
+      },
+      "description": "LAUNDRY RM 2-23-3-Q + passage 2-23-1-L"
+    },
+    {
+      "id": "Sewage_Mchry",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 37.28,
+      "floor_area_m2": 14.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 62.17,
+        "y": 10.32
+      },
+      "description": "SEWAGE MCHRY RM 2-28-3-Q (MAR SAN DWC)"
+    },
+    {
+      "id": "Exercise_Rm",
+      "type": "Free",
+      "traffic": "medium",
+      "volume_m3": 37.28,
+      "floor_area_m2": 14.34,
+      "ceiling_height_m": 2.6,
+      "elevation_m": 0.0,
+      "deck": "lower_platform",
+      "display": {
+        "x": 62.7,
+        "y": 5.73
+      },
+      "max_occupancy": 6,
+      "description": "EXERCISE RM 2-14-0-L"
+    }
+  ],
+  "nominal_complement": {
+    "passengers": 15,
+    "crew": 20
+  }
+}

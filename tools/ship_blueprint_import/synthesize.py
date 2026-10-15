@@ -25,6 +25,16 @@ from tools.ship_blueprint_import.svg_io import (
 DEFAULT_CROSS_FLOW = 50.0
 APPROVED_OVERLAY_SUFFIX = "_approved.svg"
 
+# Sanitary hardware constants mirror engines/transmission_core.py (and
+# scripts/derive_sanitary_provisioning.py): test_shared_sanitary_zones pins
+# these values against the engine's derived ratio on every platform.
+SANITARY_AREA_M2_PER_WC = 2.7
+SANITARY_CEILING_M = 2.3
+SANITARY_EXHAUST_M3H_PER_WC = 118.9
+SANITARY_ACH = SANITARY_EXHAUST_M3H_PER_WC / (
+    SANITARY_AREA_M2_PER_WC * SANITARY_CEILING_M
+)
+
 
 def _sha256_file(path: str, *, allowed_roots: tuple[str, ...]) -> str:
     h = hashlib.sha256()
@@ -81,14 +91,23 @@ def discover_approved_overlays(overlays_dir: str) -> list[tuple[int, str]]:
     return approved if approved else drafts
 
 
-def _meters_per_pixel(
+def _plan_maps(
     digest: ShipDigest,
-    page_meta: dict[str, Any],
-) -> tuple[float, float]:
-    """Map image width→length_m, height→beam_m (plan-view assumption)."""
-    w = max(int(page_meta["width"]), 1)
-    h = max(int(page_meta["height"]), 1)
-    return digest.length_m / w, digest.beam_m / h
+) -> dict[str, tuple[int, list[float], list[float], list[float]]]:
+    """deck id → (page, plan_bbox_norm, hull_x_span_m, hull_y_span_m).
+
+    DeckInfo.plan_bbox_norm marks the drawn deck-plan region inside a sheet
+    (pages carry title blocks/margins and can stack several deck views);
+    hull spans say which metres of hull that region covers. Absent fields
+    mean "the whole page is the whole hull" — the legacy mapping.
+    """
+    out: dict[str, tuple[int, list[float], list[float], list[float]]] = {}
+    for deck in digest.decks:
+        bbox = deck.plan_bbox_norm or [0.0, 0.0, 1.0, 1.0]
+        x_span = deck.hull_x_span_m or [0.0, digest.length_m]
+        y_span = deck.hull_y_span_m or [0.0, digest.beam_m]
+        out[deck.id] = (int(deck.page), bbox, x_span, y_span)
+    return out
 
 
 def _zone_geometry(
@@ -96,8 +115,30 @@ def _zone_geometry(
     zone_meta: ZoneDigest | None,
     digest: ShipDigest,
     page_meta: dict[str, Any],
+    plan_map: tuple[list[float], list[float], list[float]] | None,
 ) -> dict[str, Any]:
-    mx, my = _meters_per_pixel(digest, page_meta)
+    w = max(int(page_meta["width"]), 1)
+    h = max(int(page_meta["height"]), 1)
+    if plan_map is None:
+        # Fall back to the map of the first deck drawn on this page, else the
+        # full page (legacy behaviour).
+        bbox, x_span, y_span = (
+            [0.0, 0.0, 1.0, 1.0],
+            [0.0, digest.length_m],
+            [0.0, digest.beam_m],
+        )
+        for deck in digest.decks:
+            if int(deck.page) == poly.page:
+                bbox = deck.plan_bbox_norm or bbox
+                x_span = deck.hull_x_span_m or x_span
+                y_span = deck.hull_y_span_m or y_span
+                break
+    else:
+        _page, bbox, x_span, y_span = plan_map
+    bw = max((bbox[2] - bbox[0]) * w, 1e-6)
+    bh = max((bbox[3] - bbox[1]) * h, 1e-6)
+    mx = max(x_span[1] - x_span[0], 1e-6) / bw
+    my = max(y_span[1] - y_span[0], 1e-6) / bh
     area_m2 = abs(poly.area_px()) * mx * my
     ceiling = digest.ceiling_height_m
     if zone_meta and zone_meta.volume_m3_est and zone_meta.volume_m3_est > 0:
@@ -110,8 +151,10 @@ def _zone_geometry(
     volume = max(volume, 1.0)
     area_m2 = max(area_m2, volume / max(ceiling, 1e-6))
     cx, cy = poly.centroid()
-    display_x = (cx / max(int(page_meta["width"]), 1)) * digest.length_m
-    display_y = (cy / max(int(page_meta["height"]), 1)) * digest.beam_m
+    rel_x = (cx - bbox[0] * w) / bw
+    rel_y = (cy - bbox[1] * h) / bh
+    display_x = x_span[0] + rel_x * (x_span[1] - x_span[0])
+    display_y = y_span[0] + rel_y * (y_span[1] - y_span[0])
     return {
         "floor_area_m2": round(area_m2, 2),
         "ceiling_height_m": ceiling,
@@ -169,11 +212,13 @@ def _auto_hvac(
     digest: ShipDigest,
     zone_ids: list[str],
     zone_meta: dict[str, ZoneDigest],
+    head_ids: set[str],
 ) -> list[dict[str, Any]]:
+    ducted = [z for z in zone_ids if z not in head_ids]
     if digest.hvac_hints:
         out = []
         for hint in digest.hvac_hints:
-            rooms = [r for r in hint.rooms if r in zone_ids]
+            rooms = [r for r in hint.rooms if r in ducted]
             if not rooms:
                 continue
             out.append(
@@ -189,7 +234,7 @@ def _auto_hvac(
 
     # Group by deck
     by_deck: dict[str, list[str]] = {}
-    for zid in zone_ids:
+    for zid in ducted:
         deck = zone_meta[zid].deck if zid in zone_meta else "main"
         by_deck.setdefault(deck, []).append(zid)
 
@@ -212,6 +257,97 @@ def _auto_hvac(
     return hvac
 
 
+def _head_branch_groups(
+    head_ids: list[str],
+    zones_out: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One exhaust-only AHU per head; makeup air comes from the served branch."""
+    by_id = {z["id"]: z for z in zones_out}
+    groups: list[dict[str, Any]] = []
+    for zid in head_ids:
+        wc = max(
+            1,
+            round(by_id[zid]["floor_area_m2"] / SANITARY_AREA_M2_PER_WC),
+        )
+        groups.append(
+            {
+                "id": f"AHU_HD_{zid}",
+                "rooms": [zid],
+                "ach": round(SANITARY_ACH, 1),
+                "oa_fraction": 1.0,
+                "hvac_duty": 0.0,
+                "description": (
+                    f"Exhaust-only sanitary branch ({zid}, {wc} WC); makeup "
+                    "air enters from the served space's branch and leaves "
+                    "overboard."
+                ),
+            }
+        )
+    return groups
+
+
+def _head_makeup_links(
+    head_ids: list[str],
+    zones_out: list[dict[str, Any]],
+    hvac_zones: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """One directional Sanitary_Makeup link into each head's branch.
+
+    The source is the non-head group covering the most of the head's served
+    zones, else the group covering most same-deck rooms, else the first
+    sorted branch — heads never source air themselves.
+    """
+    zones_by_id = {z["id"]: z for z in zones_out}
+    branches = [
+        g for g in hvac_zones if not str(g["id"]).startswith("AHU_HD_")
+    ]
+    links: list[dict[str, Any]] = []
+    if not branches:
+        return links
+    for zid in head_ids:
+        head = zones_by_id[zid]
+        serves = set(head.get("serves", []))
+        scored = sorted(
+            branches,
+            key=lambda g: (-len(serves & set(g.get("rooms", []))), str(g["id"])),
+        )
+        if serves & set(scored[0].get("rooms", [])):
+            source = str(scored[0]["id"])
+        else:
+            deck_no = str(head.get("deck", "")).split("_")[0]
+            same_deck = {
+                z["id"]
+                for z in zones_out
+                if str(z.get("deck", "")).split("_")[0] == deck_no
+            }
+            scored = sorted(
+                branches,
+                key=lambda g: (
+                    -len(same_deck & set(g.get("rooms", []))),
+                    str(g["id"]),
+                ),
+            )
+            source = str(scored[0]["id"])
+        wc = max(
+            1,
+            round(head["floor_area_m2"] / SANITARY_AREA_M2_PER_WC),
+        )
+        links.append(
+            {
+                "from": source,
+                "to": f"AHU_HD_{zid}",
+                "flow_rate_m3h": round(wc * SANITARY_EXHAUST_M3H_PER_WC, 1),
+                "is_hvac_ducted": False,
+                "path": "Sanitary_Makeup",
+                "description": (
+                    f"Transfer air into {zid}; the head exhausts overboard, "
+                    "never back to the served space."
+                ),
+            }
+        )
+    return links
+
+
 def _cross_zone_links(
     digest: ShipDigest,
     hvac_zones: list[dict[str, Any]],
@@ -231,7 +367,11 @@ def _cross_zone_links(
         ]
 
     links: list[dict[str, Any]] = []
-    ids = [z["id"] for z in hvac_zones]
+    # Exhaust-only head branches carry no ladder-well chain: a head never
+    # sources air and its only inbound edge is a Sanitary_Makeup link.
+    ids = [
+        z["id"] for z in hvac_zones if not str(z["id"]).startswith("AHU_HD_")
+    ]
     for i in range(len(ids) - 1):
         links.append(
             {
@@ -327,15 +467,18 @@ def _zone_entry(
     pages: dict[int, dict[str, Any]],
     deck_elev: dict[str, float],
     deck_order: list[str],
+    plan_maps: dict[str, tuple[int, list[float], list[float], list[float]]],
 ) -> dict[str, Any]:
     meta = zone_meta.get(poly.zone_id)
-    page_meta = pages.get(poly.page or 1) or next(iter(pages.values()))
-    geom = _zone_geometry(poly, meta, digest, page_meta)
+    page_num = poly.page or 1
+    page_meta = pages.get(page_num) or next(iter(pages.values()))
+    plan_map = plan_maps.get(meta.deck) if meta else None
+    geom = _zone_geometry(poly, meta, digest, page_meta, plan_map)
     if geom["volume_m3"] <= 0:
         raise RuntimeError(f"zone {poly.zone_id} has non-positive volume")
     ztype = meta.type if meta else "Free"
     traffic = meta.traffic if meta else "medium"
-    deck = meta.deck if meta else f"page_{poly.page or 1}"
+    deck = meta.deck if meta else f"page_{page_num}"
     if deck not in deck_order:
         deck_order.append(deck)
         deck_elev.setdefault(
@@ -357,8 +500,22 @@ def _zone_entry(
     }
     if meta and meta.max_occupancy:
         entry["max_occupancy"] = int(meta.max_occupancy)
+    if meta and meta.serves:
+        entry["serves"] = list(meta.serves)
     if meta and meta.notes:
         entry["description"] = meta.notes
+    if ztype == "Sanitary":
+        # Heads carry fixture-geometry: the ceiling is the MLC headroom
+        # figure, volume follows floor area, and the exhaust ACH is the
+        # hardware-derived constant — test_shared_sanitary_zones enforces
+        # the wiring on every platform.
+        wc = max(1, round(entry["floor_area_m2"] / SANITARY_AREA_M2_PER_WC))
+        entry["ceiling_height_m"] = SANITARY_CEILING_M
+        entry["volume_m3"] = round(
+            entry["floor_area_m2"] * SANITARY_CEILING_M, 2
+        )
+        entry["base_ach"] = round(SANITARY_ACH, 1)
+        entry["max_occupancy"] = wc
     return entry
 
 
@@ -377,8 +534,11 @@ def _zones_from_polys(
             deck_elev[deck_info.id] = float(i) * float(digest.ceiling_height_m)
     deck_order: list[str] = []
 
+    plan_maps = _plan_maps(digest)
     return [
-        _zone_entry(poly, zone_meta, digest, pages, deck_elev, deck_order)
+        _zone_entry(
+            poly, zone_meta, digest, pages, deck_elev, deck_order, plan_maps
+        )
         for poly in ordered
     ]
 
@@ -464,7 +624,12 @@ def synthesize(
     zones_out = _zones_from_polys(ordered, zone_meta, digest, pages)
 
     zone_ids = [z["id"] for z in zones_out]
-    graywater = _graywater_zones(digest, zones_out, zone_ids)
+    head_ids = [z["id"] for z in zones_out if z["type"] == "Sanitary"]
+    head_set = set(head_ids)
+    graywater = [
+        g for g in _graywater_zones(digest, zones_out, zone_ids)
+        if g not in head_set
+    ]
 
     spatial: dict[str, Any] = {
         "platform": pid,
@@ -479,16 +644,36 @@ def synthesize(
         "graywater_zones": graywater,
         "zones": zones_out,
     }
+    if (
+        digest.complement
+        and digest.complement.passengers > 0
+        and digest.complement.crew > 0
+    ):
+        # nominal_complement is the run-scored declaration: it is only written
+        # when both groups are nonzero — an all-crew hull keeps its complement
+        # in crew_manifest.json and sources it, like the other naval platforms.
+        spatial["nominal_complement"] = {
+            "passengers": int(digest.complement.passengers),
+            "crew": int(digest.complement.crew),
+        }
 
-    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta)
+    hvac_zones = _auto_hvac(digest, zone_ids, zone_meta, head_set)
+    hvac_zones += _head_branch_groups(head_ids, zones_out)
     airflow: dict[str, Any] = {
         "platform": pid,
         "description": f"HVAC network synthesized for {pid}",
         "oa_fraction": 0.2,
         "hvac_duty": 0.5,
         "hvac_zones": hvac_zones,
-        "cross_zone_links": _cross_zone_links(digest, hvac_zones),
-        "adjacency": _adjacency_from_polygons(ordered, digest),
+        "cross_zone_links": _cross_zone_links(digest, hvac_zones)
+        + _head_makeup_links(head_ids, zones_out, hvac_zones),
+        # Heads never leak back into the served space: no adjacency edge may
+        # touch a Sanitary zone (the invariants test enforces it).
+        "adjacency": [
+            e
+            for e in _adjacency_from_polygons(ordered, digest)
+            if e["from"] not in head_set and e["to"] not in head_set
+        ],
     }
 
     prepare_output_directory(output_dir, allowed_roots=allowed_roots)
@@ -528,11 +713,74 @@ def synthesize(
     if copy_graphics and pages:
         _copy_plan_graphics(workdir, output_dir, pages, allowed_roots)
 
+    crew_manifest_path: str | None = None
+    if digest.complement:
+        crew_manifest_path = _write_crew_manifest(
+            digest, output_dir, allowed_roots
+        )
+
     return {
         "platform_id": pid,
         "output_dir": output_dir,
         "spatial_layout": spatial_path,
         "air_flow_paths": airflow_path,
+        "crew_manifest": crew_manifest_path,
         "zone_count": len(zones_out),
         "provenance": provenance,
     }
+
+
+def _write_crew_manifest(
+    digest: ShipDigest,
+    output_dir: str,
+    allowed_roots: tuple[str, ...],
+) -> str:
+    """Emit crew_manifest.json — the proposed class-level complement."""
+    assert digest.complement is not None  # guarded by caller
+    comp = digest.complement
+    zone_ids = {z.id for z in digest.zones}
+    manifest_rows = []
+    for row in comp.manifest:
+        notes = list(filter(None, [row.notes]))
+        if row.berth_zone and row.berth_zone not in zone_ids:
+            notes.append(f"berth_zone '{row.berth_zone}' not a digest zone")
+        if row.duty_zone and row.duty_zone not in zone_ids:
+            notes.append(f"duty_zone '{row.duty_zone}' not a digest zone")
+        manifest_rows.append(
+            {
+                "class_id": row.class_id,
+                "role_group": row.role_group,
+                "count": int(row.count),
+                "berth_zone": row.berth_zone,
+                "duty_zone": row.duty_zone,
+                "notes": "; ".join(notes),
+            }
+        )
+    declared = comp.passengers + comp.crew
+    listed = sum(int(r.count) for r in comp.manifest)
+    payload = {
+        "schema_version": "1.0",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "platform": digest.platform_id,
+        "description": (
+            "Proposed crew manifest from GA import — class-level complement "
+            "split with berth/duty zones. Engineers adjust before run configs "
+            "consume it; nominal_complement in spatial_layout.json is the "
+            "machine-read summary."
+        ),
+        "nominal_complement": {
+            "passengers": int(comp.passengers),
+            "crew": int(comp.crew),
+        },
+        "manifest": manifest_rows,
+        "source": comp.source,
+        "consistency": {
+            "declared_total": declared,
+            "manifest_total": listed,
+            "matches": declared == listed,
+        },
+        "generated_by": "tools.ship_blueprint_import.synthesize",
+    }
+    path = resolve_child_path(output_dir, "crew_manifest.json")
+    _write_json(path, payload, allowed_roots=allowed_roots)
+    return path

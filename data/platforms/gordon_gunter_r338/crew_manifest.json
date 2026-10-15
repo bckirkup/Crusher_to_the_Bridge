@@ -1,0 +1,67 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-15T22:32:14.212825+00:00",
+  "platform": "gordon_gunter_r338",
+  "description": "Proposed crew manifest from GA import — class-level complement split with berth/duty zones. Engineers adjust before run configs consume it; nominal_complement in spatial_layout.json is the machine-read summary.",
+  "nominal_complement": {
+    "passengers": 15,
+    "crew": 20
+  },
+  "manifest": [
+    {
+      "class_id": "deck_officers",
+      "role_group": "crew",
+      "count": 3,
+      "berth_zone": "Officer_SR",
+      "duty_zone": "Pilot_House",
+      "notes": "CO, XO, OPS officer"
+    },
+    {
+      "class_id": "engineers",
+      "role_group": "crew",
+      "count": 6,
+      "berth_zone": "Officer_SR",
+      "duty_zone": "Main_Gen_Rm",
+      "notes": "CH ENG + 1st/2nd asst + oilers"
+    },
+    {
+      "class_id": "deck_crew",
+      "role_group": "crew",
+      "count": 8,
+      "berth_zone": "Crew_SR_Main",
+      "duty_zone": "Shelter_Deck",
+      "notes": "bosun/ABs, trawl deck ops"
+    },
+    {
+      "class_id": "galley_stewards",
+      "role_group": "crew",
+      "count": 2,
+      "berth_zone": "Crew_SR_Main",
+      "duty_zone": "Galley",
+      "notes": "cook + steward"
+    },
+    {
+      "class_id": "medical_officer",
+      "role_group": "crew",
+      "count": 1,
+      "berth_zone": "Officer_SR",
+      "duty_zone": "Med_Trtmt",
+      "notes": "ship's medic"
+    },
+    {
+      "class_id": "scientists",
+      "role_group": "passenger",
+      "count": 15,
+      "berth_zone": "Scientist_SR",
+      "duty_zone": "Science_Labs",
+      "notes": "embarked science party"
+    }
+  ],
+  "source": "R-338 sheet 2 data block: 'accommodations 20 officers/crew + 15 scientists'; class split proposed from compartment directory roles",
+  "consistency": {
+    "declared_total": 35,
+    "manifest_total": 35,
+    "matches": true
+  },
+  "generated_by": "tools.ship_blueprint_import.synthesize"
+}

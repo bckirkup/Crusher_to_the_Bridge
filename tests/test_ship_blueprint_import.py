@@ -314,6 +314,242 @@ class TestMockDigestAndSynthesize:
         assert v_high > v_low * 1.5
 
 
+def _mutated_platform(
+    tmp_path: Path,
+    roots: tuple[str, ...],
+    name: str,
+    mutate,
+) -> tuple[dict, dict, Path]:
+    """Seed the toy workdir, mutate its digest, synthesize, load output."""
+    from tools.ship_blueprint_import.digest import draft_svgs_from_digest
+    from tools.ship_blueprint_import.models import ShipDigest
+    from tools.ship_blueprint_import.synthesize import synthesize
+
+    workdir = tmp_path / f"wd_{name}"
+    _seed_workdir(workdir)
+    data = json.loads((workdir / "ship_digest.json").read_text(encoding="utf-8"))
+    mutate(data)
+    (workdir / "ship_digest.json").write_text(
+        json.dumps(data, indent=2) + "\n", encoding="utf-8"
+    )
+    digest = ShipDigest.model_validate(data)
+    manifest = json.loads(
+        (workdir / "pages_manifest.json").read_text(encoding="utf-8")
+    )
+    draft_svgs_from_digest(
+        digest,
+        manifest,
+        str(workdir / "overlays"),
+        allowed_roots=roots,
+        suffix="approved",
+    )
+    out = tmp_path / name
+    synthesize(
+        workdir=str(workdir),
+        output_dir=str(out),
+        platform_id=f"toy_{name}",
+        allowed_roots=roots,
+        require_approved=True,
+        copy_graphics=False,
+    )
+    spatial = json.loads((out / "spatial_layout.json").read_text(encoding="utf-8"))
+    airflow = json.loads((out / "air_flow_paths.json").read_text(encoding="utf-8"))
+    return spatial, airflow, out
+
+
+def _add_head(data: dict) -> None:
+    data["zones"].append(
+        {
+            "id": "Head_Main",
+            "type": "Sanitary",
+            "deck": "main_deck",
+            "page": 1,
+            "traffic": "low",
+            "serves": ["Mess_Hall", "Galley"],
+            "polygon_norm": [
+                [0.02, 0.02],
+                [0.10, 0.02],
+                [0.10, 0.16],
+                [0.02, 0.16],
+            ],
+        }
+    )
+
+
+class TestSanitaryAndComplement:
+    def test_sanitary_wiring_contract(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        """Authored heads get the shared-head wiring the invariants test pins."""
+        spatial, airflow, _ = _mutated_platform(
+            tmp_path, roots, "heady", _add_head
+        )
+        head = next(z for z in spatial["zones"] if z["id"] == "Head_Main")
+        assert head["type"] == "Sanitary"
+        assert head["base_ach"] == pytest.approx(19.15, abs=0.1)
+        assert head["ceiling_height_m"] == pytest.approx(2.3)
+        assert head["volume_m3"] == pytest.approx(
+            head["floor_area_m2"] * 2.3, rel=1e-3
+        )
+        assert head["max_occupancy"] == max(
+            1, round(head["floor_area_m2"] / 2.7)
+        )
+        # Exhaust-only one-room branch per head.
+        head_groups = [
+            g for g in airflow["hvac_zones"] if g["id"] == "AHU_HD_Head_Main"
+        ]
+        assert len(head_groups) == 1
+        group = head_groups[0]
+        assert group["rooms"] == ["Head_Main"]
+        assert group["ach"] == pytest.approx(19.15, abs=0.1)
+        assert group["oa_fraction"] == 1.0
+        assert group["hvac_duty"] == 0.0
+        # The head sits in no other group and sources nothing.
+        assert sum(
+            "Head_Main" in g["rooms"] for g in airflow["hvac_zones"]
+        ) == 1
+        makeup = [
+            link
+            for link in airflow["cross_zone_links"]
+            if link["to"] == "AHU_HD_Head_Main"
+        ]
+        assert len(makeup) == 1
+        assert makeup[0]["path"] == "Sanitary_Makeup"
+        assert makeup[0]["is_hvac_ducted"] is False
+        assert makeup[0]["from"] == "zone_main"
+        assert all(
+            not link["from"].startswith("AHU_HD_")
+            for link in airflow["cross_zone_links"]
+        )
+        # One-way rule: no adjacency edge touches the head.
+        assert all(
+            "Head_Main" not in (e["from"], e["to"])
+            for e in airflow["adjacency"]
+        )
+        assert "Head_Main" not in spatial["graywater_zones"]
+
+    def test_complement_declares_and_writes_manifest(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        def _mut(data: dict) -> None:
+            data["complement"] = {
+                "passengers": 15,
+                "crew": 20,
+                "source": "toy manifest",
+                "manifest": [
+                    {
+                        "class_id": "officers",
+                        "role_group": "crew",
+                        "count": 4,
+                        "berth_zone": "Berthing",
+                        "duty_zone": "Bridge",
+                    },
+                    {
+                        "class_id": "deck_crew",
+                        "role_group": "crew",
+                        "count": 16,
+                        "berth_zone": "Berthing",
+                        "duty_zone": "Engine_Room",
+                    },
+                    {
+                        "class_id": "scientists",
+                        "role_group": "passenger",
+                        "count": 15,
+                        "berth_zone": "Mess_Hall",
+                        "duty_zone": "Mess_Hall",
+                    },
+                ],
+            }
+
+        spatial, _, out = _mutated_platform(
+            tmp_path, roots, "manned", _mut
+        )
+        assert spatial["nominal_complement"] == {
+            "passengers": 15,
+            "crew": 20,
+        }
+        manifest = json.loads(
+            (out / "crew_manifest.json").read_text(encoding="utf-8")
+        )
+        assert manifest["consistency"] == {
+            "declared_total": 35,
+            "manifest_total": 35,
+            "matches": True,
+        }
+        blocks = {b["class_id"]: b for b in manifest["manifest"]}
+        assert blocks["officers"]["berth_zone"] == "Berthing"
+        assert blocks["scientists"]["role_group"] == "passenger"
+
+    def test_all_crew_complement_stays_manifest_only(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        """An all-crew hull does not declare nominal_complement — the
+        declaration is run-scored and refuses non-positive counts."""
+        def _mut(data: dict) -> None:
+            data["complement"] = {
+                "passengers": 0,
+                "crew": 99,
+                "source": "wartime fit",
+                "manifest": [
+                    {
+                        "class_id": "seamen",
+                        "role_group": "crew",
+                        "count": 99,
+                        "berth_zone": "Berthing",
+                        "duty_zone": "Bridge",
+                    }
+                ],
+            }
+
+        spatial, _, out = _mutated_platform(
+            tmp_path, roots, "allcrew", _mut
+        )
+        assert "nominal_complement" not in spatial
+        manifest = json.loads(
+            (out / "crew_manifest.json").read_text(encoding="utf-8")
+        )
+        assert manifest["consistency"]["manifest_total"] == 99
+
+    def test_plan_bbox_maps_display_into_span(
+        self, tmp_path: Path, roots: tuple[str, ...]
+    ) -> None:
+        """A deck plan_bbox re-maps that deck's zones into the hull span.
+
+        The box [0.35, 0.05, 0.70, 0.90] is declared to cover the hull
+        band x∈[10,40] m, y∈[1,5] m — e.g. a superstructure block on a
+        multi-view sheet. Zones inside it land proportionally inside the
+        span; zones outside it map beyond the span (they lie off the
+        drawn block), and other decks keep the legacy full-page map.
+        """
+
+        def _mut(data: dict) -> None:
+            for deck in data["decks"]:
+                if deck["id"] == "main_deck":
+                    deck["plan_bbox_norm"] = [0.35, 0.05, 0.70, 0.90]
+                    deck["hull_x_span_m"] = [10.0, 40.0]
+                    deck["hull_y_span_m"] = [1.0, 5.0]
+
+        spatial, _, _ = _mutated_platform(tmp_path, roots, "bbox", _mut)
+        by_id = {z["id"]: z for z in spatial["zones"]}
+        # SVG paths close with a duplicate first vertex, so the vertex-mean
+        # centroids sit slightly left/below the rect centre: Mess_Hall's
+        # effective norm centroid is (0.50, 0.37) -> rel (0.43, 0.38).
+        mess = by_id["Mess_Hall"]["display"]
+        assert mess["x"] == pytest.approx(22.9, abs=0.5)
+        assert mess["y"] == pytest.approx(2.5, abs=0.3)
+        # Galley sits inside the box in x (rel ~0.51).
+        galley = by_id["Galley"]["display"]
+        assert galley["x"] == pytest.approx(25.4, abs=0.5)
+        # Bridge (effective centroid x ~0.80 > 0.70) lands beyond the
+        # declared span — and nowhere near the legacy full-page ~80 m.
+        bridge = by_id["Bridge"]["display"]
+        assert 40.0 < bridge["x"] < 82.0
+        # lower_deck has no bbox: Berthing keeps the legacy whole-page map.
+        berth = by_id["Berthing"]["display"]
+        assert berth["x"] == pytest.approx(20.0, abs=0.5)
+        assert berth["y"] == pytest.approx(5.2, abs=0.3)
+
+
 class TestProviders:
     def test_get_provider_names(self) -> None:
         from tools.ship_blueprint_import.providers import get_provider

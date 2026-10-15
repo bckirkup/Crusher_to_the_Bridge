@@ -1,0 +1,79 @@
+{
+  "description": "Naval GA Contam starter for raven_am55 (Target B — openings/AHS drafted; ducts are engineer handwork)",
+  "orifice_type_map": {
+    "ladder_well": "ladder_well",
+    "ladder": "ladder",
+    "passageway": "passageway",
+    "service_hatch": "hatch",
+    "hatch": "hatch",
+    "doorway": "doorway",
+    "stairwell": "stairwell"
+  },
+  "wind_profile": "ship_hull",
+  "filter_preset": "MERV13",
+  "hvac_filter": {
+    "HVAC_Accom": "HEPA",
+    "VENT_Machinery": "HEPA"
+  },
+  "deck_temp_offset_K": {
+    "platform_deck": 4.0,
+    "forecastle_deck": 4.0,
+    "main_deck": 4.0
+  },
+  "zone_annotations": {
+    "Steering_Gear": "steering gear flat, aft",
+    "Gen_Rm": "250kW generator room aft",
+    "Engine_Rm": "main engine room (2 diesels) amidships",
+    "Crew_Quarters": "crew's quarters, main berthing",
+    "CPO_Quarters": "CPO quarters fwd of crew berthing",
+    "Fwd_Magazines": "magazines + stores fwd",
+    "Nav_Bridge": "navigation bridge + chart room",
+    "Clipping_Rm": "clipping room + steering conn",
+    "Bosn_Gear": "bos'n gear/sweep stores amidships",
+    "Foc_Deck_Fwd": "open forecastle fwd: windlass, anchor gear",
+    "Foc_Deck_Open": "open weather deck aft w/ 40mm gun tubs",
+    "Sweep_Deck": "stern working deck: depth-charge racks, sweep wi",
+    "Steering_Gen": "steering gear + 250kW generator rm aft",
+    "Mess_Tables": "crew's & CPO mess tables amidships",
+    "Galley": "galley + scullery",
+    "Passage_Main": "central passage + engine throttle access",
+    "Officers_Country": "wardroom + officers' quarters + CO cabin",
+    "Wardroom": "officers' wardroom mess",
+    "Sick_Bay": "sick bay fwd of mess",
+    "HD_Main": "crew's WC & lav + CPO head",
+    "Fwd_Stores": "paint & oil rm, chain locker fwd"
+  },
+  "wall_azimuth_deg": {
+    "Steering_Gear": 180.0,
+    "Gen_Rm": 180.0,
+    "Engine_Rm": 90.0,
+    "Crew_Quarters": 90.0,
+    "CPO_Quarters": 0.0,
+    "Fwd_Magazines": 0.0,
+    "Nav_Bridge": 90.0,
+    "Clipping_Rm": 90.0,
+    "Bosn_Gear": 90.0,
+    "Foc_Deck_Fwd": 0.0,
+    "Foc_Deck_Open": 90.0,
+    "Sweep_Deck": 180.0,
+    "Steering_Gen": 180.0,
+    "Mess_Tables": 90.0,
+    "Galley": 270.0,
+    "Passage_Main": 90.0,
+    "Officers_Country": 270.0,
+    "Wardroom": 90.0,
+    "Sick_Bay": 180.0,
+    "HD_Main": 180.0,
+    "Fwd_Stores": 0.0
+  },
+  "night_setback": true,
+  "duct_hvac_ids": [],
+  "skip_duct_spines": true,
+  "naval_ga_import": true,
+  "handoff_notes": [
+    "Confirm orifice clear areas against watertight door / hatch schedules",
+    "Author real duct networks in ContamW (fiction Darcy spines omitted by default)",
+    "Replace starter MERV/HEPA filters with ship NBC / HVAC design data",
+    "Calibrate AHS Fahs / OAFrac against design ACH and TAB where available"
+  ]
+}

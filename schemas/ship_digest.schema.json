@@ -1,164 +1,439 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "ship_digest.schema.json",
-  "title": "ShipDigest",
-  "description": "Intermediate naval general-arrangement digest for Crusher platform synthesis and ContamW starter authoring. Coarse simulation-scale zones only.",
-  "type": "object",
-  "required": ["platform_id", "zones"],
-  "properties": {
-    "platform_id": {
-      "type": "string",
-      "pattern": "^[a-z][a-z0-9_]*$",
-      "description": "snake_case platform directory id"
-    },
-    "class_name": {"type": "string"},
-    "description": {"type": "string"},
-    "length_m": {"type": "number", "exclusiveMinimum": 0},
-    "beam_m": {"type": "number", "exclusiveMinimum": 0},
-    "crew_estimate": {"type": "integer", "minimum": 1},
-    "ceiling_height_m": {"type": "number", "exclusiveMinimum": 0},
-    "isolation_unit_capacity": {"type": "integer", "minimum": 0},
-    "decks": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "page"],
-        "properties": {
-          "id": {"type": "string"},
-          "page": {"type": "integer", "minimum": 1},
-          "role": {"type": "string"},
-          "elevation_m": {"type": "number"}
-        }
-      }
-    },
-    "zones": {
-      "type": "array",
-      "minItems": 1,
-      "items": {"$ref": "#/$defs/ZoneDigest"}
-    },
-    "hvac_hints": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["id", "rooms"],
-        "properties": {
-          "id": {"type": "string"},
-          "rooms": {"type": "array", "items": {"type": "string"}},
-          "ach": {"type": "number", "minimum": 0},
-          "oa_fraction": {"type": "number", "minimum": 0, "maximum": 1},
-          "filter_preset": {"type": "string"},
-          "description": {"type": "string"}
-        }
-      }
-    },
-    "adjacency_hints": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["from", "to"],
-        "properties": {
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "type": {"type": "string"}
-        }
-      }
-    },
-    "opening_hints": {
-      "type": "array",
-      "description": "Contam orifice drafts between spatial zones (engineer-editable)",
-      "items": {"$ref": "#/$defs/OpeningHint"}
-    },
-    "cross_zone_hints": {
-      "type": "array",
-      "items": {
-        "type": "object",
-        "required": ["from", "to", "flow_rate_m3h"],
-        "properties": {
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "flow_rate_m3h": {"type": "number", "minimum": 0},
-          "path": {"type": "string"},
-          "is_hvac_ducted": {"type": "boolean"},
-          "description": {"type": "string"}
-        }
-      }
-    },
-    "contam_hints": {"$ref": "#/$defs/ContamHints"},
-    "graywater_zones": {
-      "type": "array",
-      "items": {"type": "string"}
-    },
-    "uncertainties": {
-      "type": "array",
-      "items": {"type": "string"}
-    }
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "ship_digest.schema.json",
+ "title": "ShipDigest",
+ "description": "Intermediate naval general-arrangement digest for Crusher platform synthesis and ContamW starter authoring. Coarse simulation-scale zones only.",
+ "type": "object",
+ "required": [
+  "platform_id",
+  "zones"
+ ],
+ "properties": {
+  "platform_id": {
+   "type": "string",
+   "pattern": "^[a-z][a-z0-9_]*$",
+   "description": "snake_case platform directory id"
   },
-  "$defs": {
-    "ZoneDigest": {
-      "type": "object",
-      "required": ["id", "type", "deck", "page"],
-      "properties": {
-        "id": {"type": "string", "minLength": 1},
-        "type": {
-          "type": "string",
-          "enum": ["Free", "Dining", "Room", "Medical", "Engineering"]
-        },
-        "deck": {"type": "string"},
-        "page": {"type": "integer", "minimum": 1},
-        "polygon_norm": {
-          "type": "array",
-          "minItems": 3,
-          "items": {
-            "type": "array",
-            "minItems": 2,
-            "maxItems": 2,
-            "items": {"type": "number"}
-          }
-        },
-        "max_occupancy": {"type": "integer", "minimum": 1},
-        "volume_m3_est": {"type": "number", "exclusiveMinimum": 0},
-        "floor_area_m2_est": {"type": "number", "exclusiveMinimum": 0},
-        "elevation_m": {"type": "number"},
-        "traffic": {"type": "string", "enum": ["low", "medium", "high"]},
-        "notes": {"type": "string"}
-      }
-    },
-    "OpeningHint": {
-      "type": "object",
-      "required": ["from", "to"],
-      "properties": {
-        "from": {"type": "string"},
-        "to": {"type": "string"},
-        "type": {"type": "string"},
-        "area_m2": {"type": "number", "exclusiveMinimum": 0},
-        "schedule": {"type": "string"},
-        "status": {
-          "type": "string",
-          "enum": ["draft", "confirmed", "engineer_review"]
-        },
-        "notes": {"type": "string"}
-      }
-    },
-    "ContamHints": {
-      "type": "object",
-      "properties": {
-        "filter_preset": {"type": "string"},
-        "wind_profile": {"type": "string"},
-        "oa_fraction": {"type": "number", "minimum": 0, "maximum": 1},
-        "hvac_duty": {"type": "number", "minimum": 0},
-        "envelope_leak_m2": {"type": "number", "exclusiveMinimum": 0},
-        "duct_hvac_ids": {"type": "array", "items": {"type": "string"}},
-        "deck_temp_offset_K": {
-          "type": "object",
-          "additionalProperties": {"type": "number"}
-        },
-        "orifice_type_map": {
-          "type": "object",
-          "additionalProperties": {"type": "string"}
-        },
-        "handoff_notes": {"type": "array", "items": {"type": "string"}},
-        "skip_duct_spines": {"type": "boolean"}
-      }
+  "class_name": {
+   "type": "string"
+  },
+  "description": {
+   "type": "string"
+  },
+  "length_m": {
+   "type": "number",
+   "exclusiveMinimum": 0
+  },
+  "beam_m": {
+   "type": "number",
+   "exclusiveMinimum": 0
+  },
+  "crew_estimate": {
+   "type": "integer",
+   "minimum": 1
+  },
+  "ceiling_height_m": {
+   "type": "number",
+   "exclusiveMinimum": 0
+  },
+  "isolation_unit_capacity": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "decks": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "page"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "page": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "role": {
+      "type": "string"
+     },
+     "elevation_m": {
+      "type": "number"
+     },
+     "plan_bbox_norm": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 4,
+      "maxItems": 4,
+      "description": "Normalized [x0,y0,x1,y1] page-image box of the drawn plan view"
+     },
+     "hull_x_span_m": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Hull metres [x_start,x_end] covered by plan_bbox_norm; default [0,length_m]"
+     },
+     "hull_y_span_m": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "description": "Beam metres [y_start,y_end] covered by plan_bbox_norm; default [0,beam_m]"
+     }
     }
+   }
+  },
+  "zones": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "$ref": "#/$defs/ZoneDigest"
+   }
+  },
+  "hvac_hints": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "rooms"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "rooms": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "ach": {
+      "type": "number",
+      "minimum": 0
+     },
+     "oa_fraction": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+     },
+     "filter_preset": {
+      "type": "string"
+     },
+     "description": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "adjacency_hints": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "from",
+     "to"
+    ],
+    "properties": {
+     "from": {
+      "type": "string"
+     },
+     "to": {
+      "type": "string"
+     },
+     "type": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "opening_hints": {
+   "type": "array",
+   "description": "Contam orifice drafts between spatial zones (engineer-editable)",
+   "items": {
+    "$ref": "#/$defs/OpeningHint"
+   }
+  },
+  "cross_zone_hints": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "from",
+     "to",
+     "flow_rate_m3h"
+    ],
+    "properties": {
+     "from": {
+      "type": "string"
+     },
+     "to": {
+      "type": "string"
+     },
+     "flow_rate_m3h": {
+      "type": "number",
+      "minimum": 0
+     },
+     "path": {
+      "type": "string"
+     },
+     "is_hvac_ducted": {
+      "type": "boolean"
+     },
+     "description": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "contam_hints": {
+   "$ref": "#/$defs/ContamHints"
+  },
+  "graywater_zones": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "uncertainties": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "complement": {
+   "type": "object",
+   "description": "Proposed nominal complement + class-level crew manifest",
+   "properties": {
+    "passengers": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "crew": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "source": {
+     "type": "string"
+    },
+    "manifest": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "class_id",
+       "count"
+      ],
+      "properties": {
+       "class_id": {
+        "type": "string"
+       },
+       "role_group": {
+        "type": "string",
+        "enum": [
+         "crew",
+         "passenger"
+        ]
+       },
+       "count": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "berth_zone": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "duty_zone": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "notes": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
   }
+ },
+ "$defs": {
+  "ZoneDigest": {
+   "type": "object",
+   "required": [
+    "id",
+    "type",
+    "deck",
+    "page"
+   ],
+   "properties": {
+    "id": {
+     "type": "string",
+     "minLength": 1
+    },
+    "type": {
+     "type": "string",
+     "enum": [
+      "Free",
+      "Dining",
+      "Room",
+      "Medical",
+      "Engineering",
+      "Sanitary"
+     ]
+    },
+    "deck": {
+     "type": "string"
+    },
+    "page": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "polygon_norm": {
+     "type": "array",
+     "minItems": 3,
+     "items": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+       "type": "number"
+      }
+     }
+    },
+    "max_occupancy": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "volume_m3_est": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "floor_area_m2_est": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "elevation_m": {
+     "type": "number"
+    },
+    "traffic": {
+     "type": "string",
+     "enum": [
+      "low",
+      "medium",
+      "high"
+     ]
+    },
+    "notes": {
+     "type": "string"
+    },
+    "serves": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     },
+     "description": "Zone ids this block serves (Sanitary provisioning map)"
+    }
+   }
+  },
+  "OpeningHint": {
+   "type": "object",
+   "required": [
+    "from",
+    "to"
+   ],
+   "properties": {
+    "from": {
+     "type": "string"
+    },
+    "to": {
+     "type": "string"
+    },
+    "type": {
+     "type": "string"
+    },
+    "area_m2": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "schedule": {
+     "type": "string"
+    },
+    "status": {
+     "type": "string",
+     "enum": [
+      "draft",
+      "confirmed",
+      "engineer_review"
+     ]
+    },
+    "notes": {
+     "type": "string"
+    }
+   }
+  },
+  "ContamHints": {
+   "type": "object",
+   "properties": {
+    "filter_preset": {
+     "type": "string"
+    },
+    "wind_profile": {
+     "type": "string"
+    },
+    "oa_fraction": {
+     "type": "number",
+     "minimum": 0,
+     "maximum": 1
+    },
+    "hvac_duty": {
+     "type": "number",
+     "minimum": 0
+    },
+    "envelope_leak_m2": {
+     "type": "number",
+     "exclusiveMinimum": 0
+    },
+    "duct_hvac_ids": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "deck_temp_offset_K": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "number"
+     }
+    },
+    "orifice_type_map": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
+    "handoff_notes": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "skip_duct_spines": {
+     "type": "boolean"
+    }
+   }
+  }
+ }
 }

@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "created_utc": "2026-10-15T22:32:14.211412+00:00",
+  "platform_id": "gordon_gunter_r338",
+  "workdir": "/home/ubuntu/repos/Crusher-to-the-Bridge/work/blueprints/r338_gordon_gunter",
+  "digest_sha256": "1673a042256c80e635de51cfaea0dbddb6d1188eb9362cd75bd3d428cdc47788",
+  "svg_sha256": {
+    "page_06_approved.svg": "fe44966ada2aa381a6d41cadf7ece3748f9bdfd051496d4507e0dc4b61731d90",
+    "page_07_approved.svg": "e0a1552d15514fdaf2b9222c9f41bd06b9b79f890875892596991acaafcabb63",
+    "page_08_approved.svg": "0b47b05f0d2ad0473a4913257d42023866d820a9ed4b1b83680e072b33d7b52f",
+    "page_09_approved.svg": "4522e00bd321dd6dc6dea4fd8da4f4b73213ddaec1fefc43713fc38434d00580",
+    "page_10_approved.svg": "57b5e35774940b2ad3f09862db7067c789cf234abe47f940f7603b435bca2255"
+  },
+  "overlay_mode": "approved",
+  "zone_count": 35,
+  "berthing_zones": [
+    "Officer_SR",
+    "Scientist_SR",
+    "Crew_SR_Foc",
+    "Crew_SR_Main"
+  ]
+}

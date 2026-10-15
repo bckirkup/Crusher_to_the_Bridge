@@ -1,0 +1,343 @@
+{
+  "platform": "raven_am55",
+  "description": "Auk/Raven-class fleet minesweeper, 220 ft, twin diesel, ~105 crew. Zones read from maritime.org AM-55 sheets 3-5.",
+  "isolation_unit_capacity": 1,
+  "deck_dimensions": {
+    "length_m": 67.1,
+    "beam_m": 9.8
+  },
+  "graywater_zones": [
+    "Gen_Rm"
+  ],
+  "zones": [
+    {
+      "id": "Steering_Gear",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 60.0,
+      "floor_area_m2": 25.0,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 4.04,
+        "y": 4.63
+      },
+      "description": "steering gear flat, aft"
+    },
+    {
+      "id": "Gen_Rm",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 180.0,
+      "floor_area_m2": 75.0,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 9.7,
+        "y": 4.63
+      },
+      "description": "250kW generator room aft"
+    },
+    {
+      "id": "Engine_Rm",
+      "type": "Engineering",
+      "traffic": "medium",
+      "volume_m3": 800.0,
+      "floor_area_m2": 333.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 26.52,
+        "y": 5.59
+      },
+      "description": "main engine room (2 diesels) amidships"
+    },
+    {
+      "id": "Crew_Quarters",
+      "type": "Room",
+      "traffic": "high",
+      "volume_m3": 420.0,
+      "floor_area_m2": 175.0,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 43.66,
+        "y": 5.34
+      },
+      "max_occupancy": 60,
+      "description": "crew's quarters, main berthing"
+    },
+    {
+      "id": "CPO_Quarters",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 140.0,
+      "floor_area_m2": 58.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 50.45,
+        "y": 4.8
+      },
+      "max_occupancy": 12,
+      "description": "CPO quarters fwd of crew berthing"
+    },
+    {
+      "id": "Fwd_Magazines",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 200.0,
+      "floor_area_m2": 83.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 0.0,
+      "deck": "platform_deck",
+      "display": {
+        "x": 58.85,
+        "y": 5.63
+      },
+      "description": "magazines + stores fwd"
+    },
+    {
+      "id": "Nav_Bridge",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 572.59,
+      "floor_area_m2": 238.58,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 7.2,
+      "deck": "navigation_bridge",
+      "display": {
+        "x": 33.34,
+        "y": 11.69
+      },
+      "description": "navigation bridge + chart room"
+    },
+    {
+      "id": "Clipping_Rm",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 58.4,
+      "floor_area_m2": 24.33,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 21.61,
+        "y": 10.69
+      },
+      "description": "clipping room + steering conn"
+    },
+    {
+      "id": "Bosn_Gear",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 97.33,
+      "floor_area_m2": 40.55,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 36.98,
+        "y": 9.14
+      },
+      "description": "bos'n gear/sweep stores amidships"
+    },
+    {
+      "id": "Foc_Deck_Fwd",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 312.85,
+      "floor_area_m2": 130.35,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 47.57,
+        "y": 9.29
+      },
+      "description": "open forecastle fwd: windlass, anchor gear"
+    },
+    {
+      "id": "Foc_Deck_Open",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 198.14,
+      "floor_area_m2": 82.56,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 5.0,
+      "deck": "forecastle_deck",
+      "display": {
+        "x": 21.76,
+        "y": 17.45
+      },
+      "description": "open weather deck aft w/ 40mm gun tubs"
+    },
+    {
+      "id": "Sweep_Deck",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 111.4,
+      "floor_area_m2": 46.42,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 2.21,
+        "y": 3.83
+      },
+      "description": "stern working deck: depth-charge racks, sweep winch, mine track"
+    },
+    {
+      "id": "Steering_Gen",
+      "type": "Engineering",
+      "traffic": "low",
+      "volume_m3": 83.55,
+      "floor_area_m2": 34.81,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 7.74,
+        "y": 4.15
+      },
+      "description": "steering gear + 250kW generator rm aft"
+    },
+    {
+      "id": "Mess_Tables",
+      "type": "Dining",
+      "traffic": "high",
+      "volume_m3": 53.05,
+      "floor_area_m2": 22.1,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 24.47,
+        "y": 5.32
+      },
+      "max_occupancy": 30,
+      "description": "crew's & CPO mess tables amidships"
+    },
+    {
+      "id": "Galley",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 18.57,
+      "floor_area_m2": 7.74,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 25.89,
+        "y": 3.36
+      },
+      "max_occupancy": 4,
+      "description": "galley + scullery"
+    },
+    {
+      "id": "Passage_Main",
+      "type": "Free",
+      "traffic": "high",
+      "volume_m3": 53.05,
+      "floor_area_m2": 22.1,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 33.0,
+        "y": 5.13
+      },
+      "description": "central passage + engine throttle access"
+    },
+    {
+      "id": "Officers_Country",
+      "type": "Room",
+      "traffic": "low",
+      "volume_m3": 61.89,
+      "floor_area_m2": 25.79,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 41.84,
+        "y": 2.24
+      },
+      "max_occupancy": 8,
+      "description": "wardroom + officers' quarters + CO cabin"
+    },
+    {
+      "id": "Wardroom",
+      "type": "Dining",
+      "traffic": "medium",
+      "volume_m3": 21.22,
+      "floor_area_m2": 8.84,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 40.58,
+        "y": 4.95
+      },
+      "max_occupancy": 8,
+      "description": "officers' wardroom mess"
+    },
+    {
+      "id": "Sick_Bay",
+      "type": "Medical",
+      "traffic": "low",
+      "volume_m3": 17.68,
+      "floor_area_m2": 7.37,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 17.84,
+        "y": 3.73
+      },
+      "max_occupancy": 1,
+      "description": "sick bay fwd of mess"
+    },
+    {
+      "id": "HD_Main",
+      "type": "Sanitary",
+      "traffic": "low",
+      "volume_m3": 25.41,
+      "floor_area_m2": 11.05,
+      "ceiling_height_m": 2.3,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 17.68,
+        "y": 6.07
+      },
+      "serves": [
+        "Mess_Tables",
+        "Officers_Country",
+        "Crew_Quarters"
+      ],
+      "description": "crew's WC & lav + CPO head",
+      "base_ach": 19.1,
+      "max_occupancy": 4
+    },
+    {
+      "id": "Fwd_Stores",
+      "type": "Free",
+      "traffic": "low",
+      "volume_m3": 61.89,
+      "floor_area_m2": 25.79,
+      "ceiling_height_m": 2.4,
+      "elevation_m": 2.5,
+      "deck": "main_deck",
+      "display": {
+        "x": 63.0,
+        "y": 4.67
+      },
+      "description": "paint & oil rm, chain locker fwd"
+    }
+  ]
+}
